@@ -27,7 +27,10 @@ const { source, removed } = syncFragmentRegistry(
 );
 
 fs.writeFileSync(registryFile, source);
-fs.writeFileSync(
-  snapshotFile,
-  pruneFragmentSnapshots(fs.readFileSync(snapshotFile, 'utf8'), removed)
-);
+// The snapshot file exists only while some fragment is registered.
+if (fs.existsSync(snapshotFile)) {
+  fs.writeFileSync(
+    snapshotFile,
+    pruneFragmentSnapshots(fs.readFileSync(snapshotFile, 'utf8'), removed)
+  );
+}

@@ -14,20 +14,38 @@ import type {
   PipelineSteps,
   WaitStep as SdkWaitStep,
 } from '@buildkite/buildkite-sdk';
+import type { MachineType } from './presets.ts';
 
 // Static assertion for assignability back to the SDK types.
 type AssignableTo<T extends U, U> = T;
 
-// Return type for the `spotAgent` preset. Used as a step's `agents`.
-export type AgentConfig = AssignableTo<
-  Readonly<Record<string, string | number | boolean>>,
-  AgentsObject
->;
+// The agent attributes the library uses, so a misspelled key or value fails to compile. Add a key
+// here when a step first uses it. The SDK's own `agents` is `Record<string, any>`.
+interface AgentAttributes {
+  readonly provider?: 'gcp' | 'k8s';
+  readonly image?: string;
+  readonly imageProject?: string;
+  readonly imageUID?: number;
+  readonly machineType?: MachineType;
+  readonly preemptible?: boolean;
+  readonly spotZones?: string;
+  readonly zones?: string;
+  readonly diskType?: 'hyperdisk-balanced' | 'pd-balanced';
+  readonly diskSizeGb?: number;
+  readonly enableNestedVirtualization?: boolean;
+  readonly buildDirectory?: string;
+}
+
+export type AgentConfig = AssignableTo<AgentAttributes, AgentsObject>;
 
 export type Retry = NonNullable<SdkCommandStep['retry']>;
 
 // The SDK lists `key`, `label`, and `agents` as optional, but we require them.
-export type CommandStep = SdkCommandStep & { key: string; label: string; agents: AgentsObject };
+export type CommandStep = Omit<SdkCommandStep, 'agents'> & {
+  key: string;
+  label: string;
+  agents: AgentConfig;
+};
 export type GroupStep = SdkGroupStep & { key: string };
 
 // Buildkite's schema allows `wait: null` (documented as `wait: ~`), but the

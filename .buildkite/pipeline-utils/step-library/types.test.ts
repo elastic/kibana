@@ -13,7 +13,8 @@
 import { parse } from 'yaml';
 import { commandStep, genericStep, groupStep, waitStep } from './helpers.ts';
 import { renderSteps } from './render.ts';
-import type { CommandStep, GroupStep, Step, WaitStep } from './types.ts';
+import type { MachineType } from './presets.ts';
+import type { AgentConfig, CommandStep, GroupStep, Step, WaitStep } from './types.ts';
 
 // Type-level assertions, with no suppression comments. `Record<never, never>` is an empty object
 // type: it is assignable to `Pick<T, K>` only when K is optional. An alias that resolves to `false`
@@ -35,6 +36,16 @@ describe('SDK-based step types', () => {
   it('does not accept a machineType step field (it belongs in agents)', () => {
     const assertion: HasNoKey<CommandStep, 'machineType'> = true;
     expect(assertion).toBe(true);
+  });
+
+  it('types agent keys and values, so a typo fails to compile', () => {
+    const assertions: [
+      HasNoKey<AgentConfig, 'diskTpye'>,
+      'n2-standard-5' extends MachineType ? false : true,
+      'hyperdisk-extreme' extends NonNullable<AgentConfig['diskType']> ? false : true,
+      CommandStep['agents'] extends AgentConfig ? true : false
+    ] = [true, true, true, true];
+    expect(assertions.every(Boolean)).toBe(true);
   });
 
   it('types wait as null, as the fragments write it', () => {

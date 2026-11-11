@@ -8,17 +8,14 @@
  */
 
 import { commandStep } from '../helpers.ts';
-import { hyperdiskBalanced, retry, spotAgent } from '../presets.ts';
+import { withHyperdisk, retry, spotAgent } from '../presets.ts';
 import type { Step } from '../types.ts';
 
 export const apiContracts = (): readonly Step[] => [
   commandStep({
     command: '.buildkite/scripts/steps/checks/api_contracts.sh',
     label: 'Check API Contracts',
-    agents: {
-      ...spotAgent('c4d-standard-2', ['us-central1-c', 'us-central1-a']),
-      ...hyperdiskBalanced,
-    },
+    agents: withHyperdisk(spotAgent('c4d-standard-2', ['us-central1-c', 'us-central1-a'])),
     key: 'check_api_contracts',
     depends_on: 'check_oas_snapshot',
     timeout_in_minutes: 30,

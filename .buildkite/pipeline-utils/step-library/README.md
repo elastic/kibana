@@ -17,7 +17,9 @@ Buildkite does not, e.g., a `key`, a `label`, and an `agents` definition.
 
 New steps are written as exported fragments in `steps/<name>.ts`. Group
 fragments that belong to one product area in a subfolder named for it, e.g.,
-`steps/security_solution/<name>.ts`, rather than prefixing their filenames:
+`steps/security_solution/<name>.ts`, rather than prefixing their filenames.
+Fragments that share a step, e.g., a build step and the deploy step that reuses
+it, are exported from one file (see `steps/cloud.ts`):
 
 ```ts
 // Individual functions describe the CI intent and produce an array of Steps
@@ -40,6 +42,27 @@ This step would then be wired into the pipeline producer as:
 ```ts
 renderSteps(cpsTests(), { cancelOnGateFailure: true });
 ```
+
+### Adding a cancelable step to the pull request pipeline
+
+1. Write the step function in `steps/<name>.ts` and export it from `index.ts`.
+2. In `scripts/pipelines/pull_request/pipeline.ts`, add an `if` block at the
+   position the step should have in the pipeline. It pushes
+   `renderSteps(cpsTests(), cancelOnGate)`, where `cancelOnGate` is
+   `{ cancelOnGateFailure: true }`. A failing gate step then cancels the step.
+   Leave the option off for a step that must run regardless, like
+   `postBuildSteps()`.
+3. Decide in the `if` when the step runs, from the PR's labels
+   (`GITHUB_PR_LABELS`), the target branch, or its changed paths.
+   `doAnySuiteRelevantChangesMatch` ignores Scout test files, which share a
+   plugin's path prefix; `doAnyChangesMatch` counts them. Include the path of
+   the file that defines the step, so that editing it runs it.
+4. Add a scenario that selects the step to `pipeline.scenarios.test.ts`, and
+   update its snapshot deliberately.
+
+A new step needs no entry in `FRAGMENTS`. That registry holds steps ported from
+a YAML fragment, so that their rendered output is compared with the YAML's
+snapshot. It is empty now and stays available for the next migration.
 
 General rules and paradigms:
 
@@ -65,7 +88,7 @@ using `options`.
 | Option                      | Effect                                                                                                               |
 | --------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | none                        | Produce a continuation chunk. The leading `steps:` line is stripped.                                                 |
-| `header: true`              | Produce a standalone document. Keep the `steps:` line. Used for compatibility with existing YAML fragments.          |
+| `header: true`              | Produce a standalone document. Keep `steps:`; allow a top-level `env`. Used for the pipeline's first chunk.          |
 | `cancelOnGateFailure: true` | Register all command steps' `key`s and groups' child `key`s (but not the groups' own `key`s) to be canceled-on-gate. |
 
 > [!NOTE]
@@ -80,10 +103,11 @@ using `options`.
 - Tests resolve paths through `getKibanaDir()` or `__dirname`, never the working
   directory, because CI (`npm test --prefix .buildkite`) and moon (from the repo
   root) run them differently.
-- `render.fixtures.test.ts` runs the renderer over every YAML fragment that
-  still exists.
-- `fragments.test.ts` snapshots every fragment (from its YAML, or from its
-  TypeScript function once ported) after a semantic normalization. The
+- `render.fixtures.test.ts` runs the renderer over any YAML fragment still on
+  disk. None remain; it is kept for the next YAML migration.
+- `fragments.test.ts` snapshots every fragment in `FRAGMENTS` (from its
+  TypeScript function, or from its YAML while it is unported) after a semantic
+  normalization. With no fragments registered it has no snapshot file. The
   `sync_pull_request_fragments.sh` quick check registers new `pull_request/*.yml`
   files in `FRAGMENTS` (and drops deleted unported ones with their snapshots),
   regenerates the snapshots of unported fragments and the scenario snapshots,

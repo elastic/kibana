@@ -8,7 +8,7 @@
  */
 
 import { commandStep } from '../helpers.ts';
-import { agentZones, hyperdiskBalanced, onDemandAgent } from '../presets.ts';
+import { agentZones, withHyperdisk, onDemandAgent } from '../presets.ts';
 import type { Step } from '../types.ts';
 
 const benchmarkZones = [
@@ -29,8 +29,7 @@ export const jestBenchSteps = (): readonly Step[] => [
     label: 'Jest Bench',
     key: 'jest_bench',
     agents: {
-      ...onDemandAgent('c4d-standard-16'),
-      ...hyperdiskBalanced,
+      ...withHyperdisk(onDemandAgent('c4d-standard-16')),
       ...agentZones(benchmarkZones),
     },
     timeout_in_minutes: 60,
@@ -44,8 +43,7 @@ export const ftrBenchSteps = (): readonly Step[] => [
     label: 'FTR Bench',
     key: 'ftr_bench',
     agents: {
-      ...onDemandAgent('c4d-standard-16'),
-      ...hyperdiskBalanced,
+      ...withHyperdisk(onDemandAgent('c4d-standard-16')),
       ...agentZones(smallerBenchmarkZones),
       diskSizeGb: 200,
     },
@@ -60,8 +58,7 @@ export const pageLoadBenchSteps = (): readonly Step[] => [
     label: 'Page Load Bench',
     key: 'page_load_bench',
     agents: {
-      ...onDemandAgent('c4d-standard-16'),
-      ...hyperdiskBalanced,
+      ...withHyperdisk(onDemandAgent('c4d-standard-16')),
       ...agentZones(smallerBenchmarkZones),
       diskSizeGb: 200,
     },
@@ -77,8 +74,7 @@ export const warmStartMemoryBenchSteps = (): readonly Step[] => [
     key: 'warm_start_memory_bench',
     depends_on: 'build',
     agents: {
-      ...onDemandAgent('c4d-standard-16'),
-      ...hyperdiskBalanced,
+      ...withHyperdisk(onDemandAgent('c4d-standard-16')),
       ...agentZones(benchmarkZones),
     },
     timeout_in_minutes: 90,

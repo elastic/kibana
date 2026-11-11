@@ -8,17 +8,15 @@
  */
 
 import { commandStep } from '../helpers.ts';
-import { pdBalanced, retry, spotAgent, spotZones } from '../presets.ts';
+import { testDefaults } from '../presets.ts';
 import type { Step } from '../types.ts';
 
 export const workflowsOomTestingSteps = (): readonly Step[] => [
   commandStep({
+    ...testDefaults,
     command: '.buildkite/scripts/steps/test/scout/workflows_oom_testing.sh',
     label: 'Workflow Schema OOM Prevention',
     key: 'workflows-oom-testing',
-    agents: { ...spotAgent('n2-standard-4', spotZones.n2), ...pdBalanced },
-    depends_on: ['build'],
     timeout_in_minutes: 30,
-    retry: retry.agentLossOrAnyOnce,
   }),
 ];

@@ -8,12 +8,12 @@
  */
 
 import { commandStep } from '../../helpers.ts';
-import { mainTargetBranchOnly, securitySolutionCypressDefaults } from '../../presets.ts';
+import { mainTargetBranchOnly, testDefaults } from '../../presets.ts';
 import type { Step } from '../../types.ts';
 
 export const detectionEngineSteps = (): readonly Step[] => [
   commandStep({
-    ...securitySolutionCypressDefaults,
+    ...testDefaults,
     command: '.buildkite/scripts/steps/functional/security_serverless_detection_engine.sh',
     label: 'Serverless Detection Engine - Security Solution Cypress Tests',
     key: 'security-serverless-detection-engine',
@@ -21,7 +21,7 @@ export const detectionEngineSteps = (): readonly Step[] => [
     parallelism: 8,
   }),
   commandStep({
-    ...securitySolutionCypressDefaults,
+    ...testDefaults,
     command:
       '.buildkite/scripts/steps/functional/security_serverless_detection_engine_exceptions.sh',
     label: 'Serverless Detection Engine - Exceptions - Security Solution Cypress Tests',
@@ -30,14 +30,14 @@ export const detectionEngineSteps = (): readonly Step[] => [
     parallelism: 3,
   }),
   commandStep({
-    ...securitySolutionCypressDefaults,
+    ...testDefaults,
     command: '.buildkite/scripts/steps/functional/security_solution_detection_engine.sh',
     label: 'Detection Engine - Security Solution Cypress Tests',
     key: 'security-detection-engine',
     parallelism: 7,
   }),
   commandStep({
-    ...securitySolutionCypressDefaults,
+    ...testDefaults,
     command: '.buildkite/scripts/steps/functional/security_solution_detection_engine_exceptions.sh',
     label: 'Detection Engine - Exceptions - Security Solution Cypress Tests',
     key: 'security-detection-engine-exceptions',

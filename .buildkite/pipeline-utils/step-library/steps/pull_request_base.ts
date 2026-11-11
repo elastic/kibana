@@ -10,7 +10,7 @@
 import { commandStep, gateStep } from '../helpers.ts';
 import {
   agentZones,
-  hyperdiskBalanced,
+  withHyperdisk,
   onDemandAgent,
   retry,
   spotAgent,
@@ -61,10 +61,7 @@ export const prBaseSteps = (): readonly Step[] => [
   gateStep({
     command: '.buildkite/scripts/steps/lint.sh',
     label: 'Linting',
-    agents: {
-      ...spotAgent('n4-standard-16', spotZones.n4),
-      ...hyperdiskBalanced,
-    },
+    agents: withHyperdisk(spotAgent('n4-standard-16', spotZones.n4)),
     key: 'linting',
     timeout_in_minutes: 60,
     retry: retry.agentLoss,
@@ -72,10 +69,7 @@ export const prBaseSteps = (): readonly Step[] => [
   gateStep({
     command: '.buildkite/scripts/steps/lint_with_types.sh',
     label: 'Linting (with types)',
-    agents: {
-      ...spotAgent('n4-standard-32', spotZones.n4),
-      ...hyperdiskBalanced,
-    },
+    agents: withHyperdisk(spotAgent('n4-standard-32', spotZones.n4)),
     key: 'linting_with_types',
     timeout_in_minutes: 60,
     retry: retry.agentLoss,
@@ -83,10 +77,7 @@ export const prBaseSteps = (): readonly Step[] => [
   gateStep({
     command: '.buildkite/scripts/steps/typecheck/check_types.sh',
     label: 'Check Types',
-    agents: {
-      ...spotAgent('n4-highcpu-32', spotZones.allUS),
-      ...hyperdiskBalanced,
-    },
+    agents: withHyperdisk(spotAgent('n4-highcpu-32', spotZones.allUS)),
     key: 'check_types',
     timeout_in_minutes: 60,
     env: {

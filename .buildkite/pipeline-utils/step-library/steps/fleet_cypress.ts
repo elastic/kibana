@@ -8,18 +8,16 @@
  */
 
 import { commandStep } from '../helpers.ts';
-import { pdBalanced, retry, spotAgent, spotZones } from '../presets.ts';
+import { testDefaults } from '../presets.ts';
 import type { Step } from '../types.ts';
 
 export const fleetCypressSteps = (): readonly Step[] => [
   commandStep({
+    ...testDefaults,
     command: '.buildkite/scripts/steps/functional/fleet_cypress.sh',
     label: 'Fleet Cypress Tests',
     key: 'fleet-cypress',
-    agents: { ...spotAgent('n2-standard-4', spotZones.n2), ...pdBalanced },
-    depends_on: ['build'],
     timeout_in_minutes: 50,
     parallelism: 6,
-    retry: retry.agentLossOrAnyOnce,
   }),
 ];

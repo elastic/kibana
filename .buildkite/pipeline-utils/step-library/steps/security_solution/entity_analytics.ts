@@ -8,12 +8,12 @@
  */
 
 import { commandStep } from '../../helpers.ts';
-import { mainTargetBranchOnly, securitySolutionCypressDefaults } from '../../presets.ts';
+import { mainTargetBranchOnly, testDefaults } from '../../presets.ts';
 import type { Step } from '../../types.ts';
 
 export const entityAnalyticsSteps = (): readonly Step[] => [
   commandStep({
-    ...securitySolutionCypressDefaults,
+    ...testDefaults,
     command: '.buildkite/scripts/steps/functional/security_serverless_entity_analytics.sh',
     label: 'Serverless Entity Analytics - Security Cypress Tests',
     key: 'security-serverless-entity-analytics',
@@ -21,7 +21,7 @@ export const entityAnalyticsSteps = (): readonly Step[] => [
     parallelism: 2,
   }),
   commandStep({
-    ...securitySolutionCypressDefaults,
+    ...testDefaults,
     command: '.buildkite/scripts/steps/functional/security_solution_entity_analytics.sh',
     label: 'Entity Analytics - Security Solution Cypress Tests',
     key: 'security-entity-analytics',

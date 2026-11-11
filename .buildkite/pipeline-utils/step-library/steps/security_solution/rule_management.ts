@@ -8,12 +8,12 @@
  */
 
 import { commandStep } from '../../helpers.ts';
-import { mainTargetBranchOnly, securitySolutionCypressDefaults } from '../../presets.ts';
+import { mainTargetBranchOnly, testDefaults } from '../../presets.ts';
 import type { Step } from '../../types.ts';
 
 export const ruleManagementSteps = (): readonly Step[] => [
   commandStep({
-    ...securitySolutionCypressDefaults,
+    ...testDefaults,
     command: '.buildkite/scripts/steps/functional/security_serverless_rule_management.sh',
     label: 'Serverless Rule Management - Security Solution Cypress Tests',
     key: 'security-serverless-rule-management',
@@ -21,7 +21,7 @@ export const ruleManagementSteps = (): readonly Step[] => [
     parallelism: 8,
   }),
   commandStep({
-    ...securitySolutionCypressDefaults,
+    ...testDefaults,
     command:
       '.buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_customization.sh',
     label:
@@ -31,7 +31,7 @@ export const ruleManagementSteps = (): readonly Step[] => [
     parallelism: 1,
   }),
   commandStep({
-    ...securitySolutionCypressDefaults,
+    ...testDefaults,
     command:
       '.buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_installation.sh',
     label:
@@ -41,7 +41,7 @@ export const ruleManagementSteps = (): readonly Step[] => [
     parallelism: 2,
   }),
   commandStep({
-    ...securitySolutionCypressDefaults,
+    ...testDefaults,
     command:
       '.buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_management.sh',
     label:
@@ -51,7 +51,7 @@ export const ruleManagementSteps = (): readonly Step[] => [
     parallelism: 1,
   }),
   commandStep({
-    ...securitySolutionCypressDefaults,
+    ...testDefaults,
     command:
       '.buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_upgrade.sh',
     label: 'Serverless Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests',
@@ -60,14 +60,14 @@ export const ruleManagementSteps = (): readonly Step[] => [
     parallelism: 2,
   }),
   commandStep({
-    ...securitySolutionCypressDefaults,
+    ...testDefaults,
     command: '.buildkite/scripts/steps/functional/security_solution_rule_management.sh',
     label: 'Rule Management - Security Solution Cypress Tests',
     key: 'security-rule-management',
     parallelism: 6,
   }),
   commandStep({
-    ...securitySolutionCypressDefaults,
+    ...testDefaults,
     command:
       '.buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_customization.sh',
     label: 'Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests',
@@ -75,7 +75,7 @@ export const ruleManagementSteps = (): readonly Step[] => [
     parallelism: 1,
   }),
   commandStep({
-    ...securitySolutionCypressDefaults,
+    ...testDefaults,
     command:
       '.buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_installation.sh',
     label: 'Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests',
@@ -83,7 +83,7 @@ export const ruleManagementSteps = (): readonly Step[] => [
     parallelism: 1,
   }),
   commandStep({
-    ...securitySolutionCypressDefaults,
+    ...testDefaults,
     command:
       '.buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_management.sh',
     label: 'Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests',
@@ -91,7 +91,7 @@ export const ruleManagementSteps = (): readonly Step[] => [
     parallelism: 1,
   }),
   commandStep({
-    ...securitySolutionCypressDefaults,
+    ...testDefaults,
     command:
       '.buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_upgrade.sh',
     label: 'Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests',

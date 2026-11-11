@@ -8,17 +8,14 @@
  */
 
 import { commandStep } from '../helpers.ts';
-import { pdBalanced, retry, spotAgent, spotZones } from '../presets.ts';
+import { testDefaults } from '../presets.ts';
 import type { Step } from '../types.ts';
 
 export const responseOpsCasesSteps = (): readonly Step[] => [
   commandStep({
+    ...testDefaults,
     command: '.buildkite/scripts/steps/functional/response_ops_cases.sh',
     label: 'Cases Cypress Tests on Security Solution',
     key: 'response-ops-cases',
-    agents: { ...spotAgent('n2-standard-4', spotZones.n2), ...pdBalanced },
-    depends_on: ['build'],
-    timeout_in_minutes: 60,
-    retry: retry.agentLossOrAnyOnce,
   }),
 ];

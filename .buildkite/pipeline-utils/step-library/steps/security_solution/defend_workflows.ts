@@ -8,12 +8,12 @@
  */
 
 import { commandStep, withAgentOverrides } from '../../helpers.ts';
-import { mainTargetBranchOnly, securitySolutionCypressDefaults } from '../../presets.ts';
+import { mainTargetBranchOnly, testDefaults } from '../../presets.ts';
 import type { Step } from '../../types.ts';
 
 export const defendWorkflowsSteps = (): readonly Step[] => [
   commandStep({
-    ...withAgentOverrides(securitySolutionCypressDefaults, {
+    ...withAgentOverrides(testDefaults, {
       enableNestedVirtualization: true,
     }),
     command: '.buildkite/scripts/steps/functional/defend_workflows.sh',
@@ -22,7 +22,7 @@ export const defendWorkflowsSteps = (): readonly Step[] => [
     parallelism: 24,
   }),
   commandStep({
-    ...withAgentOverrides(securitySolutionCypressDefaults, {
+    ...withAgentOverrides(testDefaults, {
       enableNestedVirtualization: true,
     }),
     command: '.buildkite/scripts/steps/functional/defend_workflows_serverless.sh',

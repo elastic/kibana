@@ -8,19 +8,19 @@
  */
 
 import { commandStep } from '../../helpers.ts';
-import { mainTargetBranchOnly, securitySolutionCypressDefaults } from '../../presets.ts';
+import { mainTargetBranchOnly, testDefaults } from '../../presets.ts';
 import type { Step } from '../../types.ts';
 
 export const cloudSecurityPostureSteps = (): readonly Step[] => [
   commandStep({
-    ...securitySolutionCypressDefaults,
+    ...testDefaults,
     command: '.buildkite/scripts/steps/functional/cloud_security_posture.sh',
     label: 'Cloud Security Posture Cypress Tests',
     key: 'cloud-security-posture',
     parallelism: 1,
   }),
   commandStep({
-    ...securitySolutionCypressDefaults,
+    ...testDefaults,
     command: '.buildkite/scripts/steps/functional/cloud_security_posture_serverless.sh',
     label: 'Cloud Security Posture Cypress Tests on Serverless',
     key: 'cloud-security-posture-serverless',

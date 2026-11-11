@@ -8,12 +8,12 @@
  */
 
 import { commandStep } from '../../helpers.ts';
-import { mainTargetBranchOnly, securitySolutionCypressDefaults } from '../../presets.ts';
+import { mainTargetBranchOnly, testDefaults } from '../../presets.ts';
 import type { Step } from '../../types.ts';
 
 export const aiAssistantSteps = (): readonly Step[] => [
   commandStep({
-    ...securitySolutionCypressDefaults,
+    ...testDefaults,
     command: '.buildkite/scripts/steps/functional/security_serverless_ai_assistant.sh',
     label: 'Serverless AI Assistant - Security Solution Cypress Tests',
     key: 'security-serverless-ai-assistant',
@@ -21,7 +21,7 @@ export const aiAssistantSteps = (): readonly Step[] => [
     parallelism: 1,
   }),
   commandStep({
-    ...securitySolutionCypressDefaults,
+    ...testDefaults,
     command: '.buildkite/scripts/steps/functional/security_solution_ai_assistant.sh',
     label: 'AI Assistant - Security Solution Cypress Tests',
     key: 'security-ai-assistant',
