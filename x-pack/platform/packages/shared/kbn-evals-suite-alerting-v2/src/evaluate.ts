@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { evaluate as evalsBase } from '@kbn/evals';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
-import type { CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { CreateRuleData, PutRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
 import {
   ALERTING_V2_ACTION_POLICY_API_PATH,
   ALERTING_V2_RULE_API_PATH,
@@ -19,6 +19,18 @@ import {
   type HostMetricsDataStream,
 } from './data_stream_data';
 import { createEvaluateDataset } from './evaluate_dataset';
+import {
+  hasAllFailureRules,
+  type SeededFailureRule,
+  type SeededFailureRules,
+} from './failure_diagnosis';
+import {
+  FAILURE_SCENARIOS,
+  installDiagnosisData,
+  isFailureScenarioKey,
+  removeDiagnosisData,
+  type FailureScenarioKey,
+} from './failure_diagnosis_data';
 import type { EvaluateDataset } from './types';
 import {
   ADMIN_CONSOLE_INDEX,
@@ -68,6 +80,11 @@ export const evaluate = evalsBase.extend<{
   existingRule: SeededEntity;
   /** Saves an action policy with a unique name before the test and deletes it afterwards. */
   existingActionPolicy: SeededEntity;
+  /**
+   * Creates the diagnosis index and saves one disabled rule per failure scenario
+   * (see `failure_diagnosis_data.ts`), then deletes them afterwards.
+   */
+  failureDiagnosisRules: SeededFailureRules;
 }>({
   evaluateDataset: [
     ({ agentBuilderClient, evaluators, executorClient, log }, use, testInfo) => {
@@ -210,6 +227,50 @@ export const evaluate = evalsBase.extend<{
           ignoreErrors: [404],
         });
         log.info(`Deleted eval action policy ${data.id}`);
+      }
+    },
+    { scope: 'test' },
+  ],
+  failureDiagnosisRules: [
+    async ({ esClient, kbnClient, log }, use) => {
+      await installDiagnosisData(esClient, log);
+      const ruleIds: string[] = [];
+      try {
+        const seeded: Partial<Record<FailureScenarioKey, SeededFailureRule>> = {};
+        await Promise.all(
+          Object.entries(FAILURE_SCENARIOS).map(async ([key, scenario]) => {
+            if (!isFailureScenarioKey(key)) {
+              return;
+            }
+            const id = uuidv4();
+            ruleIds.push(id);
+            const body: PutRuleData = { ...scenario.rule, enabled: false };
+            const { data } = await kbnClient.request<RuleResponse>({
+              method: 'PUT',
+              path: `${ALERTING_V2_RULE_API_PATH}/${encodeURIComponent(id)}`,
+              headers: COMMON_HEADERS,
+              body,
+            });
+            seeded[key] = { id: data.id, name: data.metadata.name, rule: data, scenario };
+          })
+        );
+        if (!hasAllFailureRules(seeded)) {
+          throw new Error('Not every diagnosis scenario rule was created');
+        }
+        log.info(`Created ${ruleIds.length} disabled diagnosis eval rules`);
+        await use(seeded);
+      } finally {
+        await Promise.all(
+          ruleIds.map((id) =>
+            kbnClient.request({
+              method: 'DELETE',
+              path: `${ALERTING_V2_RULE_API_PATH}/${encodeURIComponent(id)}`,
+              headers: COMMON_HEADERS,
+              ignoreErrors: [404],
+            })
+          )
+        );
+        await removeDiagnosisData(esClient, log);
       }
     },
     { scope: 'test' },

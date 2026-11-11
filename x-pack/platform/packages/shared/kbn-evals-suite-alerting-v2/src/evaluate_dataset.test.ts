@@ -82,7 +82,7 @@ const makeClient = ({
 
 const runTask = async (
   client: AgentBuilderClient,
-  input: { turns: string[] }
+  input: Parameters<ReturnType<typeof createTask>>[0]['input']
 ): Promise<TaskOutput> => {
   const task = createTask(client, agentBuilderDefaultAgentId);
   return task({ input, metadata: null } as Parameters<typeof task>[0]);
@@ -209,6 +209,26 @@ describe('createTask', () => {
     })) as TaskOutput & { prompts: unknown[] };
 
     expect(output.prompts).toEqual([firstPrompt, laterPrompt]);
+  });
+
+  it('sends example attachments with the first turn only', async () => {
+    const attachments = [{ id: 'rule:r1', type: RULE_ATTACHMENT_TYPE, origin: 'r1', data: {} }];
+    const { client, calls } = makeClient({
+      responses: [converseResult(), converseResult()],
+    });
+
+    await runTask(client, { turns: ['first', 'second'], attachments });
+
+    expect(calls[0].attachments).toEqual(attachments);
+    expect(calls[1]).not.toHaveProperty('attachments');
+  });
+
+  it('omits attachments when the example has none', async () => {
+    const { client, calls } = makeClient({ responses: [converseResult()] });
+
+    await runTask(client, { turns: ['hello'] });
+
+    expect(calls[0]).not.toHaveProperty('attachments');
   });
 
   it('threads the conversationId returned from the first turn into subsequent turns', async () => {

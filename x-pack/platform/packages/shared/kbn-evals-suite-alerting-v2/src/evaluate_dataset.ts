@@ -8,6 +8,7 @@
 import {
   selectEvaluators,
   type AgentBuilderClient,
+  type AgentBuilderConverseAttachment,
   type DefaultEvaluators,
   type EvalsExecutorClient,
   type EvaluationDataset,
@@ -28,6 +29,7 @@ import { createExpectedSkillEvaluator } from './evaluators/expected_skill';
 import {
   createExpectedAnyOfToolIdsEvaluator,
   createExpectedToolCalledEvaluator,
+  createNotExpectedToolIdsEvaluator,
 } from './evaluators/expected_tool_called';
 import {
   collectAttachmentDataCheckNames,
@@ -102,12 +104,14 @@ export const buildPromptResponses = (
 
 /**
  * Sends each scripted user turn over the same conversation, answering any pending
- * prompts from the previous turn so multi-turn flows can continue.
+ * prompts from the previous turn so multi-turn flows can continue. `attachments`
+ * are sent with the first turn only.
  */
 export const runConversationTurns = async (
   client: AgentBuilderClient,
   agentId: string,
-  turns: string[]
+  turns: string[],
+  attachments?: AgentBuilderConverseAttachment[]
 ): Promise<ConversationTurnResult> => {
   let conversationId: string | undefined;
   const steps: unknown[] = [];
@@ -126,6 +130,7 @@ export const runConversationTurns = async (
       input: turnText,
       conversationId,
       promptResponses,
+      ...(conversationId === undefined && attachments?.length ? { attachments } : {}),
     });
     conversationId = response.conversationId ?? conversationId;
     steps.push(...response.steps);
@@ -163,7 +168,7 @@ export const createTask = (
   agentId: string
 ): ExperimentTask<RuleManagementExample, TaskOutput> => {
   return async ({ input }) => {
-    const turnResult = await runConversationTurns(client, agentId, input.turns);
+    const turnResult = await runConversationTurns(client, agentId, input.turns, input.attachments);
     const { rounds, attachments } = await loadConversationState(client, turnResult.conversationId);
 
     return {
@@ -198,6 +203,7 @@ export const createEvaluateDataset = ({
         createExpectedSkillEvaluator(),
         createExpectedToolCalledEvaluator(),
         createExpectedAnyOfToolIdsEvaluator(),
+        createNotExpectedToolIdsEvaluator(),
         createExpectedRenderAttachmentEvaluator(),
         createExpectedAttachmentDataEvaluator(),
         ...collectAttachmentDataCheckNames(examples).map(createAttachmentDataCheckEvaluator),

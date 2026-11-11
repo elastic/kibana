@@ -13,6 +13,8 @@ export {
   CREATE_WITH_AGENT_INITIAL_PROMPT,
   RULE_AUTHORING_SKILL_ID,
   RUNBOOK_ARTIFACT_TYPE,
+  UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID,
+  getUniversalAlertingFailureDiagnosisSkillBadge,
 } from '@kbn/alerting-v2-constants';
 
 /** Attachment type for workflow YAML drafts produced by `generate_workflow`. */

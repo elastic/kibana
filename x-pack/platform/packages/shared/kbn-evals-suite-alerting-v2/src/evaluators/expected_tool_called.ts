@@ -67,3 +67,30 @@ export const createExpectedAnyOfToolIdsEvaluator = (): Evaluator<
     };
   },
 });
+
+export const createNotExpectedToolIdsEvaluator = (): Evaluator<
+  RuleManagementExample,
+  TaskOutput
+> => ({
+  name: 'NotExpectedToolIds',
+  kind: 'CODE',
+  direction: 'maximize',
+  evaluate: async ({ output, expected }) => {
+    const forbiddenToolIds = requireNonEmptyStringList(
+      expected?.notExpectedToolIds,
+      'notExpectedToolIds',
+      'tool-ids'
+    );
+    if (forbiddenToolIds.length === 0) {
+      return skippedResult('No forbidden-tool expectation for this example');
+    }
+
+    const usedToolIds = getUsedToolIds(output);
+    const unexpectedToolIds = forbiddenToolIds.filter((id) => usedToolIds.includes(id));
+
+    return {
+      score: unexpectedToolIds.length === 0 ? 1 : 0,
+      metadata: { notExpectedToolIds: forbiddenToolIds, unexpectedToolIds, usedToolIds },
+    };
+  },
+});

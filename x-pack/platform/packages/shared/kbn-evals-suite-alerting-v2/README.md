@@ -99,6 +99,15 @@ node scripts/jest x-pack/platform/packages/shared/kbn-evals-suite-alerting-v2
 
 - `evals/rule_authoring/rule_authoring.spec.ts` — skill routing + rule composition
 - `evals/rule_authoring/action_policy.spec.ts` — notification / action-policy flow
+- `evals/universal_alerting_failure_diagnosis/` — the `universal-alerting-failure-diagnosis`
+  skill: routing, covered failure types, honesty and verification, missing rule context, and
+  failures the skill does not list
+
+The failure diagnosis specs hand over each failed execution the way the execution history
+"Diagnose with AI" action does: the saved rule by reference plus the recorded error as text
+attachments. The `failureDiagnosisRules` fixture saves one disabled rule per scenario, so the
+error text recorded in `src/failure_diagnosis_data.ts` is the only failure signal and no
+server settings are needed.
 
 Example ground truth lives entirely under `output` (skills, tools, attachments, criteria).
 Evaluators receive that object as `expected`. Omit a field to skip the matching scorer.

@@ -47,6 +47,10 @@ export interface AgentBuilderConverseAttachment {
   data: Record<string, unknown>;
   /** Attachment id; lets the caller find the attachment on the conversation afterwards. */
   id?: string;
+  /** Origin (for example a saved object id) for by-reference attachments. */
+  origin?: string;
+  /** Short description shown to the agent alongside the attachment. */
+  description?: string;
 }
 
 export interface AgentBuilderClientResponse {

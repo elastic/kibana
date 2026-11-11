@@ -9,6 +9,7 @@ import type { TaskOutput } from '@kbn/evals';
 import {
   createExpectedAnyOfToolIdsEvaluator,
   createExpectedToolCalledEvaluator,
+  createNotExpectedToolIdsEvaluator,
 } from './expected_tool_called';
 
 const MANAGE_RULE = 'platform.alerting.manage_rule';
@@ -124,6 +125,49 @@ describe('createExpectedAnyOfToolIdsEvaluator', () => {
         expectedAnyOfToolIds: DISCOVERY_ALTERNATIVES,
         matchedToolIds: [],
         usedToolIds: [MANAGE_RULE],
+      })
+    );
+  });
+});
+
+describe('createNotExpectedToolIdsEvaluator', () => {
+  const run = (output: TaskOutput, expected: Record<string, unknown> | null) =>
+    createNotExpectedToolIdsEvaluator().evaluate({
+      input: { turns: [] },
+      output,
+      expected: expected ?? {},
+      metadata: null,
+    });
+
+  it('skips when there is no forbidden-tool expectation', async () => {
+    const result = await run(outputWithToolCalls([MANAGE_RULE]), {});
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('skipped');
+  });
+
+  it('throws when notExpectedToolIds is an empty array', async () => {
+    await expect(
+      run(outputWithToolCalls([MANAGE_RULE]), { notExpectedToolIds: [] })
+    ).rejects.toThrow(/non-empty array of tool-ids/i);
+  });
+
+  it('scores 1 when no forbidden tool was called', async () => {
+    const result = await run(outputWithToolCalls([LIST_INDICES]), {
+      notExpectedToolIds: [MANAGE_RULE],
+    });
+    expect(result.score).toBe(1);
+  });
+
+  it('scores 0 and reports the forbidden tools that were called', async () => {
+    const result = await run(outputWithToolCalls([LIST_INDICES, MANAGE_RULE]), {
+      notExpectedToolIds: [MANAGE_RULE, MANAGE_ACTION_POLICY],
+    });
+    expect(result.score).toBe(0);
+    expect(result.metadata).toEqual(
+      expect.objectContaining({
+        notExpectedToolIds: [MANAGE_RULE, MANAGE_ACTION_POLICY],
+        unexpectedToolIds: [MANAGE_RULE],
+        usedToolIds: [LIST_INDICES, MANAGE_RULE],
       })
     );
   });

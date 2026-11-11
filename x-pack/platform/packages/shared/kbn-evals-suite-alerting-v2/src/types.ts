@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Example } from '@kbn/evals';
+import type { AgentBuilderConverseAttachment, Example } from '@kbn/evals';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
@@ -21,6 +21,8 @@ export type AttachmentDataChecks = Readonly<Record<string, ExpectAttachmentDataF
 export interface RuleManagementExample extends Example {
   input: {
     turns: string[];
+    /** Attachments sent with the first turn, e.g. a saved rule and a failed execution. */
+    attachments?: AgentBuilderConverseAttachment[];
   };
   output: {
     /** Free-form qualitative criteria scored by the LLM Criteria judge. */
@@ -28,6 +30,7 @@ export interface RuleManagementExample extends Example {
     /** Deterministic tool, attachment, or skill expectations. */
     expectedToolIds?: readonly string[];
     expectedAnyOfToolIds?: readonly string[];
+    notExpectedToolIds?: readonly string[];
     expectRenderAttachment?: ExpectRenderAttachment;
     expectAttachmentData?: ExpectAttachmentDataFn | AttachmentDataChecks;
     expectedSkills?: readonly string[];
