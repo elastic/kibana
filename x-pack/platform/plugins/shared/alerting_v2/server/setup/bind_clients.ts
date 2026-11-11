@@ -12,8 +12,7 @@ import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ActionPolicyNamespaceToken } from '../lib/action_policy_client/tokens';
 import { ActionPolicyExecutionHistoryClient } from '../lib/action_policy_execution_history_client';
 import { ActionPolicyTestService } from '../lib/action_policy_test/action_policy_test_service';
-import { AlertActionsClient } from '../lib/alert_actions_client';
-import { alertActionsAuthPolicies } from '../lib/alert_actions_client/authorization';
+import { AlertActionsClient, onAlertActionsClientActivation } from '../lib/alert_actions_client';
 import { AlertEventsClient } from '../lib/alert_events_client';
 import { EpisodesClient } from '../lib/episodes_client';
 import { EventOriginActorToken } from '../lib/event_origin/token';
@@ -33,7 +32,6 @@ import {
 import { RulesClient } from '../lib/rules_client';
 import { RulesClientEventOriginToken, RulesClientOptionsToken } from '../lib/rules_client/tokens';
 import { RuleTemplatesClient } from '../lib/rule_templates_client';
-import { authorizedActivation } from '../lib/services/auth_service/method_authorization';
 import { SpacesService } from '../lib/services/spaces_service/spaces_service';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
 
@@ -43,10 +41,7 @@ import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
  * client options, space id/namespace).
  */
 export function bindClients({ bind }: ContainerModuleLoadOptions) {
-  bind(AlertActionsClient)
-    .toSelf()
-    .inRequestScope()
-    .onActivation(authorizedActivation(alertActionsAuthPolicies));
+  bind(AlertActionsClient).toSelf().inRequestScope().onActivation(onAlertActionsClientActivation);
   bind(AlertEventsClient).toSelf().inRequestScope();
   bind(EpisodesClient).toSelf().inRequestScope();
   bind(RulesClient).toSelf().inRequestScope();
