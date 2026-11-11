@@ -126,6 +126,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(result.case.observables).to.have.length(1);
       expect(result.case.observables[0].value).to.be(SOURCE_IP);
       expect(result.case.observables[0].typeKey).to.be(OBSERVABLE_TYPE_IPV4.key);
+      expect(result.case.totalAlerts).to.be(1);
 
       const { observables } = await getCase({ supertest, caseId: postedCase.id });
       expect(observables).to.have.length(1);

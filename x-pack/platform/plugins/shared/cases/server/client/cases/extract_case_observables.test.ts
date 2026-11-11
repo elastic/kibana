@@ -52,12 +52,15 @@ const documents = [
 describe('extractCaseObservables', () => {
   const casesClient = createCasesClientMock();
   const clientArgs = createCasesClientMockArgs();
-  const { licensingService, caseService } = clientArgs.services;
+  const { attachmentService, licensingService, caseService } = clientArgs.services;
 
   beforeEach(() => {
     jest.clearAllMocks();
     licensingService.isAtLeastPlatinum.mockResolvedValue(true);
     caseService.getCase.mockResolvedValue(caseWithExtractionOn);
+    attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+      new Map([[caseWithExtractionOn.id, { alerts: 2, events: 1, userComments: 3 }]])
+    );
     clientArgs.authorization.ensureAuthorized.mockResolvedValue(undefined);
     casesClient.attachments.getAllDocumentsAttachedToCase.mockResolvedValue(documents);
   });
@@ -214,6 +217,23 @@ describe('extractCaseObservables', () => {
       expect(clientArgs.casesEventBus.emitObservablesAdded).not.toHaveBeenCalled();
     }
   );
+
+  it('returns the case with its attachment totals', async () => {
+    extractObservablesFromAlertsMock.mockResolvedValue({
+      status: 'no_new_observables',
+      alertsRequested: 2,
+      alertsFound: 2,
+    });
+
+    const res = await extractCaseObservables('case-id', clientArgs, casesClient);
+
+    expect(attachmentService.getter.getCaseAttatchmentStats).toHaveBeenCalledWith({
+      caseIds: [caseWithExtractionOn.id],
+    });
+    expect(res.case).toEqual(
+      expect.objectContaining({ totalAlerts: 2, totalEvents: 1, totalComment: 3 })
+    );
+  });
 
   it('throws when the extraction core fails, so the caller can tell a failure from no result', async () => {
     extractObservablesFromAlertsMock.mockRejectedValue(new Error('mget failed'));
