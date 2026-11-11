@@ -31,14 +31,36 @@ export const extractTemplateVariableNames = (url: string): string[] => {
   return Array.from(uniqueVariableNames);
 };
 
+/**
+ * Checks if a value is a valid HTTP or HTTPS URL.
+ * Only URLs with http:// or https:// protocols are considered valid.
+ * Other protocols (ftp://, file://, etc.) will return false.
+ *
+ * @param value - The string value to check
+ * @returns true if the value is a valid http/https URL, false otherwise
+ */
+function isValidUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    // Only consider http and https URLs as valid URLs that shouldn't be encoded
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 export function getEncodedCustomLinkUrl(url: string, transaction?: Transaction) {
   try {
     const templateVariables = extractTemplateVariableNames(url);
-    const encodedTemplateVariables = {};
+    const encodedTemplateVariables: Record<string, any> = {};
     templateVariables.forEach((name) => {
       const value = get(transaction, name);
       if (value) {
-        const encodedValue = encodeURIComponent(value);
+        const stringValue = String(value);
+        // Don't encode if the value is a valid URL (http:// or https://)
+        const encodedValue = isValidUrl(stringValue)
+          ? stringValue
+          : encodeURIComponent(stringValue);
         set(encodedTemplateVariables, name, encodedValue);
       }
     });
