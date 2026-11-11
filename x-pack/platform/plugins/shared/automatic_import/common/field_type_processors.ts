@@ -374,15 +374,20 @@ export const readBackFieldTypeProcessors = (
   );
   const invalidNames = new Set(errors.map(({ name }) => name));
   const changes = fieldTypes.flatMap(({ name, type, original_type: originalType }) => {
+    if (invalidNames.has(name)) return [];
     const expectedConvertType = getConvertType(originalType, type);
-    if (!expectedConvertType || invalidNames.has(name)) return [];
-
     const [processor] = generated.get(name) ?? [];
-    if (!processor) return [{ name, type: originalType }];
+    if (!processor) return expectedConvertType ? [{ name, type: originalType }] : [];
 
     const convertType = findConvertConfig(processor)?.type;
     if (convertType === expectedConvertType || !isConvertType(convertType)) return [];
-    return [{ name, type: CONVERT_TYPE_TO_FIELD_TYPE[convertType] }];
+    const processorType = CONVERT_TYPE_TO_FIELD_TYPE[convertType];
+    // A processor added by hand to a field whose edit needs none has to convert from the original type.
+    if (!expectedConvertType && getConvertType(originalType, processorType) !== convertType) {
+      errors.push({ name, issue: 'unsupported_generated_processor' });
+      return [];
+    }
+    return [{ name, type: processorType }];
   });
   if (!added) return { changes, errors };
 

@@ -50,6 +50,17 @@ describe('field type overrides', () => {
         { name: 'rules.id', issue: 'not_numeric', failing_documents: 2, total_documents: 2 },
       ]);
     });
+
+    it('checks booleans against the generated convert processor', () => {
+      expect(
+        collectRuleErrors(
+          [{ name: 'enabled', type: 'boolean', original_type: 'keyword' }],
+          [{ enabled: 'True' }, { enabled: '' }]
+        )
+      ).toEqual([
+        { name: 'enabled', issue: 'not_boolean', failing_documents: 1, total_documents: 2 },
+      ]);
+    });
   });
 
   describe('refreshFieldTypeOverrides', () => {

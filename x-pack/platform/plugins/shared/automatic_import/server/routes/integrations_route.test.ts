@@ -6,6 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AutomaticImportPluginRequestHandlerContext } from '../types';
@@ -95,6 +96,18 @@ describe('approveIntegrationRoute telemetry', () => {
       body: { message: 'Integration approved successfully' },
     });
     expect(reportTelemetryEvent).not.toHaveBeenCalled();
+  });
+
+  it('returns 409 when a data stream changed during approval', async () => {
+    approveIntegration.mockRejectedValue(
+      SavedObjectsErrorHelpers.createConflictError('data_stream-config', 'ds_1')
+    );
+
+    const handler = getVersionedRouteHandler(router, 'post', APPROVE_PATH);
+    const response = makeResponse();
+    await handler(makeContext(), makeRequest(), response);
+
+    expect(response.custom).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 409 }));
   });
 
   it('returns 500 when approveIntegration fails', async () => {

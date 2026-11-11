@@ -104,7 +104,16 @@ const toNumber = (value: unknown): number | undefined => {
   return Number.isFinite(parsed) ? parsed : undefined;
 };
 
-const findValueIssue = (type: string, value: unknown): ValueIssue => {
+const BOOLEAN_CONVERT_PATTERN = /^(true|false)$/i;
+
+const isBooleanValue = (value: unknown, isConverted: boolean): boolean => {
+  if (typeof value === 'boolean') return true;
+  // The `convert` processor ignores case but rejects an empty string. The mapping is the reverse.
+  if (isConverted) return typeof value === 'string' && BOOLEAN_CONVERT_PATTERN.test(value);
+  return value === 'true' || value === 'false' || value === '';
+};
+
+const findValueIssue = (type: string, value: unknown, isConverted: boolean): ValueIssue => {
   if (isPlainObject(value)) return 'object_value';
 
   if (type in INTEGER_RANGES || type === 'unsigned_long' || type in FLOAT_MAXIMUMS) {
@@ -130,9 +139,7 @@ const findValueIssue = (type: string, value: unknown): ValueIssue => {
   }
 
   if (type === 'boolean') {
-    const isBoolean =
-      typeof value === 'boolean' || value === 'true' || value === 'false' || value === '';
-    return isBoolean ? undefined : 'not_boolean';
+    return isBooleanValue(value, isConverted) ? undefined : 'not_boolean';
   }
 
   if (type === 'ip') {
@@ -155,10 +162,12 @@ const getPopulatedValues = (documentValue: unknown): unknown[] => {
  * Predicts whether sample values will definitely fail to index as the given field type. Only
  * clear failures (objects, out-of-range numbers, a non-constant `constant_keyword`) are reported.
  * `documentValues` holds one entry per sample document (a value, an array of values, or undefined).
+ * Set `isConverted` when a generated `convert` processor changes the values before indexing.
  */
 export const getFieldTypeCompatibility = (
   type: string,
-  documentValues: readonly unknown[]
+  documentValues: readonly unknown[],
+  { isConverted = false }: { isConverted?: boolean } = {}
 ): FieldTypeCompatibility => {
   const populatedDocuments = documentValues
     .map(getPopulatedValues)
@@ -167,7 +176,7 @@ export const getFieldTypeCompatibility = (
 
   const documentIssues = populatedDocuments.map((values) => {
     for (const value of values) {
-      const issue = findValueIssue(type, value);
+      const issue = findValueIssue(type, value, isConverted);
       if (issue) return issue;
     }
     return undefined;

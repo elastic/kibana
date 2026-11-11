@@ -237,6 +237,27 @@ describe('AutomaticImportService data stream edits', () => {
       );
     });
 
+    it('treats every data stream of an integration approved before the ids were stored as approved', async () => {
+      integrationAttributes = { integration_id: 'int_1', status: 'approved', metadata: {} };
+
+      expect(await service.getDataStreamResults('int_1', 'ds_1')).toEqual(
+        expect.objectContaining({ data_stream_approved: true })
+      );
+    });
+
+    it('treats no data stream as approved once such an integration is sent back', async () => {
+      integrationAttributes = {
+        integration_id: 'int_1',
+        status: 'completed',
+        metadata: {},
+        changelog: [{ version: '1.1.0', changes: [] }],
+      };
+
+      expect(await service.getDataStreamResults('int_1', 'ds_1')).toEqual(
+        expect.objectContaining({ data_stream_approved: false })
+      );
+    });
+
     it('rejects field type changes, including for fields added since approval', async () => {
       approve([{ name: 'code', type: 'long' }]);
 
@@ -486,7 +507,8 @@ describe('AutomaticImportService data stream edits', () => {
           { name: 'gone', type: 'long' },
           { name: 'bytes', type: 'keyword' },
           { name: '@timestamp', type: 'date' },
-        ]
+        ],
+        VERSION
       );
     });
 
@@ -970,6 +992,31 @@ describe('AutomaticImportService data stream edits', () => {
     });
   });
 
+  it('saves nothing and keeps approval when nothing changed', async () => {
+    await applyEdits();
+    const saved = getSaved();
+    dataStreamAttributes.field_type_overrides = saved.fieldTypeOverrides;
+    dataStreamAttributes.result = {
+      ingest_pipeline: saved.ingestPipeline,
+      field_mapping: saved.fieldMapping,
+      pipeline_docs: saved.pipelineDocs,
+    };
+    integrationAttributes = {
+      integration_id: 'int_1',
+      status: 'approved',
+      metadata: { version: '1.0.0', last_approved_data_stream_ids: ['ds_1'] },
+    };
+    savedObjectService.updateDataStreamSavedObjectAttributes.mockClear();
+    reportEvent.mockClear();
+
+    const result = await applyEdits();
+
+    expect(result).toEqual(expect.objectContaining({ status: 'saved', version: VERSION }));
+    expect(savedObjectService.updateDataStreamSavedObjectAttributes).not.toHaveBeenCalled();
+    expect(savedObjectService.updateIntegration).not.toHaveBeenCalled();
+    expect(getReportedEdits()).toEqual(expect.objectContaining({ outcome: 'saved' }));
+  });
+
   it('blocks invalid generated mappings', async () => {
     jest.mocked(validateFieldMappings).mockResolvedValue({
       valid: false,
@@ -980,5 +1027,34 @@ describe('AutomaticImportService data stream edits', () => {
       'Invalid field mappings'
     );
     expect(savedObjectService.updateDataStreamSavedObjectAttributes).not.toHaveBeenCalled();
+  });
+
+  describe('missing Elasticsearch privileges', () => {
+    const securityException = () =>
+      Object.assign(new Error('security_exception'), {
+        meta: { body: { error: { type: 'security_exception' } } },
+      });
+
+    it('rethrows the error from mapping validation instead of reporting invalid mappings', async () => {
+      const error = securityException();
+      jest.mocked(validateFieldMappings).mockResolvedValue({
+        valid: false,
+        errors: ['security_exception'],
+        cause: error,
+      });
+
+      await expect(applyEdits({ changes: [{ name: 'code', type: 'keyword' }] })).rejects.toBe(
+        error
+      );
+      expect(savedObjectService.updateDataStreamSavedObjectAttributes).not.toHaveBeenCalled();
+    });
+
+    it('rethrows the error from pipeline simulation instead of reporting an invalid pipeline', async () => {
+      const error = securityException();
+      esClient.ingest.simulate.mockRejectedValue(error);
+
+      await expect(applyEdits()).rejects.toBe(error);
+      expect(savedObjectService.updateDataStreamSavedObjectAttributes).not.toHaveBeenCalled();
+    });
   });
 });

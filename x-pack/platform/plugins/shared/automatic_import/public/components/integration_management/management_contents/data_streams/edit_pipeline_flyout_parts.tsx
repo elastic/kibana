@@ -144,11 +144,7 @@ export const BreakingChangesConfirmModal = ({
     buttonColor="warning"
     data-test-subj="editPipelineFlyoutBreakingChangesModal"
   >
-    <p>
-      {i18n.EDIT_PIPELINE_FLYOUT.breakingChangesDescription(
-        i18n.EDIT_PIPELINE_FLYOUT.breakingChangesFieldList(fieldNames)
-      )}
-    </p>
+    <p>{i18n.EDIT_PIPELINE_FLYOUT.breakingChangesDescription(fieldNames)}</p>
   </EuiConfirmModal>
 );
 
@@ -207,9 +203,7 @@ export const TablePanel = ({
           size="s"
           data-test-subj="editPipelineFlyoutDroppedFieldTypes"
         >
-          <p>
-            {i18n.EDIT_PIPELINE_FLYOUT.droppedFieldTypesDescription(droppedFieldTypes.join(', '))}
-          </p>
+          <p>{i18n.EDIT_PIPELINE_FLYOUT.droppedFieldTypesDescription(droppedFieldTypes)}</p>
         </KbnWarningCallout>
         <EuiSpacer size="m" />
       </>
@@ -364,21 +358,23 @@ const PipelineProblemCallouts = ({
 
   return (
     <>
-      {isChecking && (
-        <>
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="s" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued" data-test-subj="editPipelineFlyoutChecking">
-                {i18n.EDIT_PIPELINE_FLYOUT.checkingPipeline}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-        </>
-      )}
+      <div role="status">
+        {isChecking && (
+          <>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="s" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued" data-test-subj="editPipelineFlyoutChecking">
+                  {i18n.EDIT_PIPELINE_FLYOUT.checkingPipeline}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+          </>
+        )}
+      </div>
       {pipelineError && (
         <>
           <KbnDangerCallout
@@ -420,11 +416,7 @@ const PipelineProblemCallouts = ({
             title={i18n.EDIT_PIPELINE_FLYOUT.breakingChangesTitle}
             data-test-subj="editPipelineFlyoutBreakingChanges"
           >
-            <p>
-              {i18n.EDIT_PIPELINE_FLYOUT.breakingChangesDescription(
-                i18n.EDIT_PIPELINE_FLYOUT.breakingChangesFieldList(removedApprovedFields)
-              )}
-            </p>
+            <p>{i18n.EDIT_PIPELINE_FLYOUT.breakingChangesDescription(removedApprovedFields)}</p>
           </KbnWarningCallout>
           <EuiSpacer size="m" />
         </>

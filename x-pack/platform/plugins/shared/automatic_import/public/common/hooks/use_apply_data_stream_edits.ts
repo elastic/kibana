@@ -16,12 +16,34 @@ interface HttpErrorLike {
   message?: string;
   body?: {
     message?: string;
+    status_code?: number;
+  };
+  response?: {
+    status?: number;
   };
 }
 
-const getErrorMessage = (error: unknown): string => {
+/** An edits request error that keeps the HTTP status code of the response. */
+export class DataStreamEditsError extends Error {
+  public readonly statusCode?: number;
+
+  constructor(message: string, statusCode?: number) {
+    super(message);
+    this.name = 'DataStreamEditsError';
+    this.statusCode = statusCode;
+  }
+}
+
+/** Whether a save was rejected because the data stream changed after the draft was opened. */
+export const isDataStreamEditsConflict = (error: unknown): boolean =>
+  error instanceof DataStreamEditsError && error.statusCode === 409;
+
+const toDataStreamEditsError = (error: unknown): DataStreamEditsError => {
   const errorLike = error as HttpErrorLike;
-  return errorLike.body?.message ?? errorLike.message ?? i18n.SAVE_EDITS_ERROR;
+  return new DataStreamEditsError(
+    errorLike.body?.message ?? errorLike.message ?? i18n.SAVE_EDITS_ERROR,
+    errorLike.response?.status ?? errorLike.body?.status_code
+  );
 };
 
 export interface UseApplyDataStreamEditsResult {
@@ -43,7 +65,7 @@ export function useApplyDataStreamEdits(): UseApplyDataStreamEditsResult {
       try {
         return await applyDataStreamEdits({ http, ...request });
       } catch (error) {
-        throw new Error(getErrorMessage(error));
+        throw toDataStreamEditsError(error);
       }
     },
     onSuccess: (data, variables) => {
@@ -59,9 +81,14 @@ export function useApplyDataStreamEdits(): UseApplyDataStreamEditsResult {
     onError: (error, variables) => {
       if (variables.dryRun) return;
       queryClient.invalidateQueries({ queryKey: ['integration', variables.integrationId] });
+      if (isDataStreamEditsConflict(error)) {
+        queryClient.invalidateQueries({
+          queryKey: ['dataStreamResults', variables.integrationId, variables.dataStreamId],
+        });
+      }
       notifications.toasts.addDanger({
         title: i18n.SAVE_EDITS_ERROR,
-        text: getErrorMessage(error),
+        text: error.message,
       });
     },
   });

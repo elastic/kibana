@@ -89,6 +89,7 @@ import {
 import { groupErrors, processSimulationResults } from '../agents/tools/pipeline_utils';
 import { MAX_TELEMETRY_FIELD_ERROR_ISSUES, MAX_TELEMETRY_TYPE_CHANGES } from '../telemetry/events';
 import { describeTypeChanges } from '../telemetry/describe_type_changes';
+import { isSecurityExceptionError } from '../routes/utils';
 
 const MAX_PERSISTED_PREVIEW_DOCUMENTS = 100;
 const MAX_INGEST_PIPELINE_PROCESSORS = 10_000;
@@ -194,13 +195,11 @@ const getLastApprovedDataStreamIdsFromMetadata = (
     return stamped.filter((id): id is string => typeof id === 'string' && id.length > 0);
   }
 
-  const wasApproved =
-    integration.status === TASK_STATUSES.approved || (integration.changelog?.length ?? 0) > 0;
-  if (!wasApproved) {
+  // Integrations approved before these ids were stored treat every data stream as approved while
+  // they stay approved. Once one is sent back, its data streams may include ones added since.
+  if (integration.status !== TASK_STATUSES.approved) {
     return undefined;
   }
-
-  // Integrations approved before these ids were stored treat every data stream as approved.
   return dataStreams.map((dataStream) => dataStream.data_stream_id);
 };
 
@@ -505,17 +504,24 @@ export class AutomaticImportService {
       changelog: [changelogEntry, ...(existing.changelog ?? [])],
     };
 
-    await this.savedObjectService.updateIntegration(updateData, version);
-    for (const dataStream of dataStreams) {
+    // Stamp the data streams first, so a failed or conflicting stamp leaves the integration
+    // unapproved. Each stamp is checked against the version it was read at, so an edit saved in
+    // between causes a conflict instead of approving stale field types.
+    for (const { data_stream_id: dataStreamId } of dataStreams) {
+      const { attributes, version: dataStreamVersion } =
+        await this.savedObjectService.getDataStream(dataStreamId, integrationId);
+      assert(dataStreamVersion, `Data stream ${dataStreamId} is missing its saved object version.`);
       await this.savedObjectService.updateDataStreamApprovedFieldTypes(
-        dataStream.data_stream_id,
+        dataStreamId,
         integrationId,
         mergeApprovedFieldTypes(
-          dataStream.approved_field_types ?? [],
-          dataStream.result?.field_mapping ?? []
-        )
+          attributes.approved_field_types ?? [],
+          attributes.result?.field_mapping ?? []
+        ),
+        dataStreamVersion
       );
     }
+    await this.savedObjectService.updateIntegration(updateData, version);
   }
 
   public async buildIntegrationPackage(
@@ -978,6 +984,20 @@ export class AutomaticImportService {
         version: dataStreamSO.version,
       };
     }
+    // Saving nothing would still send an approved integration back for approval.
+    if (
+      isEqual(finalPipeline, result.ingest_pipeline) &&
+      isEqual(overrides, savedOverrides) &&
+      isEqual(fieldMapping, result.field_mapping)
+    ) {
+      report('saved');
+      return {
+        status: 'saved',
+        ...(await this.getDataStreamResults(integrationId, dataStreamId)),
+        dropped_field_types: droppedFieldTypes,
+        removed_approved_fields: removedApprovedFields,
+      };
+    }
     const typeChanges = describeTypeChanges(savedOverrides, overrides, droppedFieldTypes);
     const saveDetails = {
       fieldTypeChangeCount: typeChanges.length,
@@ -1156,6 +1176,7 @@ export class AutomaticImportService {
         })),
       });
     } catch (e) {
+      if (isSecurityExceptionError(e)) throw e;
       throw new Error(
         `Invalid ingest pipeline: ${getElasticsearchErrorReason(
           e as Error | ElasticsearchErrorLike
@@ -1169,12 +1190,17 @@ export class AutomaticImportService {
     fieldMapping: FieldMappingEntry[],
     dataStreamId: string
   ): Promise<void> {
-    const validationResult = await validateFieldMappings(esClient, fieldMapping, this.logger);
-    if (!validationResult.valid) {
-      throw new InvalidFieldTypeChangeError(
-        `Invalid field mappings for ${dataStreamId}: ${validationResult.errors.join(', ')}`
-      );
-    }
+    const { valid, errors, cause } = await validateFieldMappings(
+      esClient,
+      fieldMapping,
+      this.logger
+    );
+    if (valid) return;
+    // A missing privilege isn't a problem with the mappings, so the route can report it as a 403.
+    if (isSecurityExceptionError(cause)) throw cause;
+    throw new InvalidFieldTypeChangeError(
+      `Invalid field mappings for ${dataStreamId}: ${errors.join(', ')}`
+    );
   }
 
   /** Resolves to true when an approved integration was sent back for approval. */

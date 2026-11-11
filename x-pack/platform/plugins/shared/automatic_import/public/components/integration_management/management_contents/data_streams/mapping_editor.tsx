@@ -35,6 +35,7 @@ import type {
 } from '../../../../../common';
 import {
   SUPPORTED_FIELD_TYPES,
+  getConvertType,
   getFieldTypeCompatibility,
   getFieldValue,
   isSupportedFieldType,
@@ -335,10 +336,12 @@ export const useMappingEditor = ({
   const rows = useMemo<MappingRow[]>(() => {
     return sourceMappings.map((mapping) => {
       const pendingType = pendingTypes[mapping.name];
+      const inferredType = originalTypes.get(mapping.name) ?? mapping.type;
       const compatibility = pendingType
         ? getFieldTypeCompatibility(
             pendingType,
-            unwrappedDocuments.map((document) => getFieldValue(document, mapping.name))
+            unwrappedDocuments.map((document) => getFieldValue(document, mapping.name)),
+            { isConverted: getConvertType(inferredType, pendingType) !== undefined }
           )
         : undefined;
       const serverError = serverErrors[mapping.name];
@@ -415,10 +418,14 @@ export const MappingEditor = ({
   const [{ pageIndex, pageSize }, setPage] = useState({ pageIndex: 0, pageSize: 10 });
   const [searchQuery, setSearchQuery] = useState('');
   const skipPageResetRef = useRef(false);
+  const previousErrorNamesRef = useRef<ReadonlySet<string>>(new Set());
   const lastPageIndex = Math.max(0, Math.ceil(rows.length / pageSize) - 1);
 
   useEffect(() => {
-    if (serverErrorNames.length === 0) return;
+    const previousErrorNames = previousErrorNamesRef.current;
+    previousErrorNamesRef.current = new Set(serverErrorNames);
+    // Only newly reported errors move the table, so editing other fields keeps the search and page.
+    if (serverErrorNames.every((name) => previousErrorNames.has(name))) return;
     // Clearing search makes EuiInMemoryTable report page 0. Ignore that reset so we can
     // keep the page that contains the first failing row.
     skipPageResetRef.current = true;
@@ -433,7 +440,10 @@ export const MappingEditor = ({
     const timeoutId = window.setTimeout(() => {
       skipPageResetRef.current = false;
     }, 0);
-    return () => window.clearTimeout(timeoutId);
+    return () => {
+      window.clearTimeout(timeoutId);
+      skipPageResetRef.current = false;
+    };
   }, [serverErrorNames, rows]);
 
   const onTableChange = ({ page }: Criteria<MappingRow>) => {
@@ -456,10 +466,13 @@ export const MappingEditor = ({
       >
         <EuiButtonIcon
           iconType="pencil"
-          aria-label={i18n.translate('xpack.automaticImport.mappingEditor.editTypeAriaLabel', {
-            defaultMessage: 'Select a type for {fieldName}',
-            values: { fieldName: row.name },
-          })}
+          aria-label={i18n.translate(
+            'xpack.automaticImport.mappingEditor.editTypeButtonAriaLabel',
+            {
+              defaultMessage: 'Edit the type of {fieldName}',
+              values: { fieldName: row.name },
+            }
+          )}
           onClick={() => setInlineEditingField(row.name)}
           data-test-subj={`mappingEditorEditType-${row.name}`}
         />

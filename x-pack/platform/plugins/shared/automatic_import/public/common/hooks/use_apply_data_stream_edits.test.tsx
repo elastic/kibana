@@ -8,7 +8,7 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { useApplyDataStreamEdits } from './use_apply_data_stream_edits';
+import { isDataStreamEditsConflict, useApplyDataStreamEdits } from './use_apply_data_stream_edits';
 import * as api from '../lib/api';
 
 jest.mock('../lib/api');
@@ -130,5 +130,28 @@ describe('useApplyDataStreamEdits', () => {
       expect.objectContaining({ text: 'Invalid ingest pipeline' })
     );
     expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['integration', 'int-1'] });
+  });
+
+  it('refetches the data stream results and asks to reload when a save conflicts', async () => {
+    mockApplyDataStreamEdits.mockRejectedValue({
+      body: { message: 'The data stream changed after it was opened.' },
+      response: { status: 409 },
+    });
+    const { result } = renderHook(() => useApplyDataStreamEdits(), { wrapper: createWrapper() });
+
+    let caught: unknown;
+    await act(async () => {
+      caught = await result.current.applyDataStreamEditsMutation
+        .mutateAsync({ ...REQUEST, dryRun: false })
+        .catch((error: unknown) => error);
+    });
+
+    expect(isDataStreamEditsConflict(caught)).toBe(true);
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({
+      queryKey: ['dataStreamResults', 'int-1', 'ds-1'],
+    });
+    expect(mockToastsAddDanger).toHaveBeenCalledWith(
+      expect.objectContaining({ text: 'The data stream changed after it was opened.' })
+    );
   });
 });

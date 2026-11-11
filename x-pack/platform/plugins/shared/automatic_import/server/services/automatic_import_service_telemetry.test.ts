@@ -8,6 +8,7 @@
 import expect from 'expect';
 import type { ReplaySubject } from 'rxjs';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
@@ -192,6 +193,12 @@ describe('AutomaticImportSetupService', () => {
   });
 
   describe('approveIntegration', () => {
+    const mockGetDataStream = () =>
+      jest.fn().mockImplementation(async (dataStreamId: string) => ({
+        attributes: { data_stream_id: dataStreamId, job_info: { status: 'completed' } },
+        version: `version-${dataStreamId}`,
+      }));
+
     it('should update integration status to approved and bump version (expectedVersion from request)', async () => {
       const mockGetIntegration = jest.fn().mockResolvedValue({
         integration_id: 'integration-123',
@@ -209,6 +216,7 @@ describe('AutomaticImportSetupService', () => {
       asPrivate(service).savedObjectService = {
         getIntegration: mockGetIntegration,
         getAllDataStreams: mockGetAllDataStreams,
+        getDataStream: mockGetDataStream(),
         updateIntegration: mockUpdateIntegration,
         updateDataStreamApprovedFieldTypes: mockUpdateApprovedFieldTypes,
       } as unknown as AutomaticImportSavedObjectService;
@@ -246,8 +254,55 @@ describe('AutomaticImportSetupService', () => {
       ]);
 
       expect(mockUpdateIntegration.mock.calls[0]).toHaveLength(2);
-      expect(mockUpdateApprovedFieldTypes).toHaveBeenCalledWith('ds-1', 'integration-123', []);
-      expect(mockUpdateApprovedFieldTypes).toHaveBeenCalledWith('ds-2', 'integration-123', []);
+      expect(mockUpdateApprovedFieldTypes).toHaveBeenCalledWith(
+        'ds-1',
+        'integration-123',
+        [],
+        'version-ds-1'
+      );
+      expect(mockUpdateApprovedFieldTypes).toHaveBeenCalledWith(
+        'ds-2',
+        'integration-123',
+        [],
+        'version-ds-2'
+      );
+      expect(mockUpdateApprovedFieldTypes.mock.invocationCallOrder[1]).toBeLessThan(
+        mockUpdateIntegration.mock.invocationCallOrder[0]
+      );
+    });
+
+    it('leaves the integration unapproved when a data stream changed since it was read', async () => {
+      const conflict = SavedObjectsErrorHelpers.createConflictError('data_stream-config', 'ds-2');
+      const mockUpdateIntegration = jest.fn().mockResolvedValue({});
+      const mockUpdateApprovedFieldTypes = jest
+        .fn()
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(conflict);
+
+      asPrivate(service).savedObjectService = {
+        getIntegration: jest.fn().mockResolvedValue({
+          integration_id: 'integration-123',
+          status: 'completed',
+          metadata: { title: 't', version: '0.0.1' },
+        }),
+        getAllDataStreams: jest.fn().mockResolvedValue([
+          { data_stream_id: 'ds-1', job_info: { status: 'completed' } },
+          { data_stream_id: 'ds-2', job_info: { status: 'completed' } },
+        ]),
+        getDataStream: mockGetDataStream(),
+        updateIntegration: mockUpdateIntegration,
+        updateDataStreamApprovedFieldTypes: mockUpdateApprovedFieldTypes,
+      } as unknown as AutomaticImportSavedObjectService;
+
+      await expect(
+        service.approveIntegration({
+          integrationId: 'integration-123',
+          authenticatedUser: { username: 'approver-user' } as AuthenticatedUser,
+          version: '1.0.0',
+          categories: [],
+        })
+      ).rejects.toBe(conflict);
+      expect(mockUpdateIntegration).not.toHaveBeenCalled();
     });
 
     it('should prepend changelog entry on subsequent approvals', async () => {
@@ -274,6 +329,7 @@ describe('AutomaticImportSetupService', () => {
       asPrivate(service).savedObjectService = {
         getIntegration: mockGetIntegration,
         getAllDataStreams: mockGetAllDataStreams,
+        getDataStream: mockGetDataStream(),
         updateIntegration: mockUpdateIntegration,
         updateDataStreamApprovedFieldTypes: mockUpdateApprovedFieldTypes,
       } as unknown as AutomaticImportSavedObjectService;
@@ -369,7 +425,7 @@ describe('AutomaticImportSetupService', () => {
       });
       const mockGetAllDataStreams = jest
         .fn()
-        .mockResolvedValue([{ job_info: { status: 'completed' } }]);
+        .mockResolvedValue([{ data_stream_id: 'ds-1', job_info: { status: 'completed' } }]);
       const mockUpdateIntegration = jest
         .fn()
         .mockRejectedValue(new Error('Failed to update integration'));
@@ -377,7 +433,9 @@ describe('AutomaticImportSetupService', () => {
       asPrivate(service).savedObjectService = {
         getIntegration: mockGetIntegration,
         getAllDataStreams: mockGetAllDataStreams,
+        getDataStream: mockGetDataStream(),
         updateIntegration: mockUpdateIntegration,
+        updateDataStreamApprovedFieldTypes: jest.fn().mockResolvedValue(undefined),
       } as unknown as AutomaticImportSavedObjectService;
 
       await expect(

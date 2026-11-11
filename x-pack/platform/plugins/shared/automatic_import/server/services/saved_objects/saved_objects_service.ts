@@ -572,7 +572,8 @@ export class AutomaticImportSavedObjectService {
   public async updateDataStreamApprovedFieldTypes(
     dataStreamId: string,
     integrationId: string,
-    approvedFieldTypes: ApprovedFieldType[]
+    approvedFieldTypes: ApprovedFieldType[],
+    expectedVersion: string
   ): Promise<void> {
     const compositeId = this.getDataStreamCompositeId(integrationId, dataStreamId);
     const updatedAttributes: Partial<DataStreamAttributes> = {
@@ -581,7 +582,8 @@ export class AutomaticImportSavedObjectService {
     await this.savedObjectsClient.update(
       DATA_STREAM_SAVED_OBJECT_TYPE,
       compositeId,
-      updatedAttributes
+      updatedAttributes,
+      { version: expectedVersion }
     );
   }
 

@@ -8,6 +8,7 @@
 import type { FieldTypeChange, FieldTypeError } from '../../../common';
 import {
   MAX_FIELD_TYPE_OVERRIDES,
+  getConvertType,
   getFieldTypeCompatibility,
   getFieldValue,
   isSupportedFieldType,
@@ -26,10 +27,11 @@ export const collectRuleErrors = (
   overrides: FieldTypeOverride[],
   baseDocuments: SampleDocument[]
 ): FieldTypeError[] =>
-  overrides.flatMap(({ name, type }) => {
+  overrides.flatMap(({ name, type, original_type: originalType }) => {
     const { status, issue, failingDocuments, totalDocuments } = getFieldTypeCompatibility(
       type,
-      getDocumentValues(baseDocuments, name)
+      getDocumentValues(baseDocuments, name),
+      { isConverted: getConvertType(originalType, type) !== undefined }
     );
     if (status !== 'certain_failure') return [];
     return [

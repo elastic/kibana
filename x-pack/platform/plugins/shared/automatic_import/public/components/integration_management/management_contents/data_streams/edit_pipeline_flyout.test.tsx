@@ -633,6 +633,33 @@ describe('EditPipelineFlyout', () => {
       ).toBeInTheDocument();
     });
 
+    it('keeps the search when staging other fields after a failed save', async () => {
+      mockApplyEdits.mockResolvedValue({
+        status: 'failure',
+        field_errors: [
+          {
+            name: 'test.number',
+            issue: 'out_of_range',
+            failing_documents: 1,
+            total_documents: 1,
+          },
+        ],
+      });
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      await stageType('test.number', 'integer');
+      await userEvent.click(screen.getByTestId('mappingEditorApplyButton'));
+      expect(await screen.findByTestId('mappingEditorServerErrors')).toHaveTextContent(
+        'test.number'
+      );
+
+      const searchBox = screen.getByPlaceholderText('Filter by field, type, value');
+      await userEvent.type(searchBox, 'test.field');
+      await stageType('test.field', 'text');
+
+      expect(searchBox).toHaveValue('test.field');
+    });
+
     it('keeps the select open without blocking save when sample values are certain to fail', async () => {
       render(<EditPipelineFlyout {...defaultProps} />);
 
@@ -942,9 +969,7 @@ describe('EditPipelineFlyout', () => {
     it('adds a generated convert processor when switching to the pipeline tab', async () => {
       const { rerender } = render(<EditPipelineFlyout {...defaultProps} />);
 
-      await userEvent.click(screen.getByTestId('mappingEditorEditType-test.number'));
-      await userEvent.click(screen.getByTestId('mappingEditorInlineTypeSelect-test.number'));
-      await userEvent.click(screen.getByTestId('mappingEditorTypeOption-keyword'));
+      await stageType('test.number', 'keyword');
       await userEvent.click(screen.getByRole('tab', { name: 'Ingest pipeline' }));
 
       expect(mockSelectPipelineTab).toHaveBeenCalledWith('pipeline');
@@ -1331,7 +1356,9 @@ describe('EditPipelineFlyout', () => {
 
         const callout = screen.getByTestId('editPipelineFlyoutBreakingChanges');
         expect(callout).toHaveTextContent('This could introduce breaking changes');
-        expect(callout).toHaveTextContent('test.number were in an approved version');
+        expect(callout).toHaveTextContent(
+          'test.number was in an approved version, and the ingest pipeline no longer produces it'
+        );
       });
 
       it('asks for confirmation before saving and resends with the acknowledgement', async () => {
@@ -1410,9 +1437,7 @@ describe('EditPipelineFlyout', () => {
     it('keeps staged mapping changes when switching documents', async () => {
       render(<EditPipelineFlyout {...defaultProps} />);
 
-      await userEvent.click(screen.getByTestId('mappingEditorEditType-test.number'));
-      await userEvent.click(screen.getByTestId('mappingEditorInlineTypeSelect-test.number'));
-      await userEvent.click(screen.getByTestId('mappingEditorTypeOption-integer'));
+      await stageType('test.number', 'integer');
 
       const paginationNav = screen.getByRole('navigation', { name: /edit pipeline pagination/i });
       await userEvent.click(within(paginationNav).getByTestId('pagination-button-next'));
@@ -1484,9 +1509,7 @@ describe('EditPipelineFlyout', () => {
       const onClose = jest.fn();
       render(<EditPipelineFlyout {...defaultProps} onClose={onClose} />);
 
-      await userEvent.click(screen.getByTestId('mappingEditorEditType-test.number'));
-      await userEvent.click(screen.getByTestId('mappingEditorInlineTypeSelect-test.number'));
-      await userEvent.click(screen.getByTestId('mappingEditorTypeOption-integer'));
+      await stageType('test.number', 'integer');
       await userEvent.click(screen.getByRole('button', { name: /close/i }));
 
       expect(screen.getByText('You have unsaved changes in this editor.')).toBeInTheDocument();

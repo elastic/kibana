@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { dataStreamSchemaV1, dataStreamSchemaV2 } from './data_stream_schema';
+import {
+  dataStreamForwardCompatibilitySchemaV2,
+  dataStreamSchemaV1,
+  dataStreamSchemaV2,
+} from './data_stream_schema';
 
 const attributes = {
   integration_id: 'integration',
@@ -42,5 +46,22 @@ describe('data stream saved object schemas', () => {
     expect(v2ForwardCompatibility.validate(attributes).field_type_overrides).toEqual(
       attributes.field_type_overrides
     );
+  });
+
+  it('reads field types from newer versions that this version cannot create', () => {
+    const newerAttributes = {
+      ...attributes,
+      field_type_overrides: [
+        { name: 'field', type: 'a_newer_type', original_type: 'keyword', newer_setting: true },
+      ],
+      newer_field: 'value',
+    };
+
+    expect(() => dataStreamSchemaV2.validate(newerAttributes)).toThrow(/field_type_overrides/);
+    const read = dataStreamForwardCompatibilitySchemaV2.validate(newerAttributes);
+    expect(read.field_type_overrides).toEqual([
+      { name: 'field', type: 'a_newer_type', original_type: 'keyword' },
+    ]);
+    expect(read).not.toHaveProperty('newer_field');
   });
 });

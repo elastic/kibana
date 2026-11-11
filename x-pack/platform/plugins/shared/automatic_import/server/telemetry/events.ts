@@ -113,7 +113,7 @@ export const telemetryEventsSchemas: Partial<
     },
   },
 
-  // A save (not a preview) of field type and pipeline edits, whatever its outcome
+  // A save (not a preview) of field type and pipeline edits that got a response or a version conflict
   [AutomaticImportTelemetryEventType.DataStreamEditsSubmitted]: {
     eventType: AutomaticImportTelemetryEventType.DataStreamEditsSubmitted,
     schema: {

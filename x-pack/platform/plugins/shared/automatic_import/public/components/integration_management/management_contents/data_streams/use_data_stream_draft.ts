@@ -255,7 +255,11 @@ export const useDataStreamDraft = ({
 
   const stageType = useCallback(
     (fieldName: string, nextType: string) => {
-      setFieldErrors(({ [fieldName]: _cleared, ...remaining }) => remaining);
+      setFieldErrors((current) => {
+        if (!Object.prototype.hasOwnProperty.call(current, fieldName)) return current;
+        const { [fieldName]: _cleared, ...remaining } = current;
+        return remaining;
+      });
       const savedType = data?.field_mapping.find(({ name }) => name === fieldName)?.type;
       const baseType =
         preview?.field_mapping.find(({ name }) => name === fieldName)?.type ?? savedType;
@@ -281,9 +285,11 @@ export const useDataStreamDraft = ({
         JSON.stringify(response.ingest_pipeline) === JSON.stringify(sentPipeline)
           ? sentText
           : stringifyPipeline(response.ingest_pipeline);
+      // Set before the text: these updates aren't batched after an await, and the baseline sync
+      // effect would replace a changed text while there's no preview.
+      setPreview(response);
       syncedTextRef.current = text;
       setPipelineText(text);
-      setPreview(response);
       setPendingTypes(getPendingFromPreview(response, savedOverrides));
       setFieldErrors({});
       setDroppedFieldTypes(response.dropped_field_types);

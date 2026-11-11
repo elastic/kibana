@@ -280,6 +280,26 @@ describe('readBackFieldTypeProcessors', () => {
     ).toEqual({ changes: [], errors: [] });
   });
 
+  it('reads a hand-added processor for an edit that needs none as a type change', () => {
+    const noConvertEdit = [{ name: 'source.bytes', type: 'date', original_type: 'keyword' }];
+
+    expect(readBackFieldTypeProcessors({ processors: [convert('long')] }, noConvertEdit)).toEqual({
+      changes: [{ name: 'source.bytes', type: 'long' }],
+      errors: [],
+    });
+  });
+
+  it('rejects a hand-added processor that cannot convert from the original type', () => {
+    expect(
+      readBackFieldTypeProcessors({ processors: [convert('integer')] }, [
+        { name: 'source.bytes', type: 'double', original_type: 'long' },
+      ])
+    ).toEqual({
+      changes: [],
+      errors: [{ name: 'source.bytes', issue: 'unsupported_generated_processor' }],
+    });
+  });
+
   it('maps a changed convert type back to a field type', () => {
     expect(readBackFieldTypeProcessors({ processors: [convert('double')] }, fieldTypes)).toEqual({
       changes: [{ name: 'source.bytes', type: 'double' }],

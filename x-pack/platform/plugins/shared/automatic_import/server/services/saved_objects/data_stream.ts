@@ -6,7 +6,11 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
-import { dataStreamSchemaV1, dataStreamSchemaV2 } from './schemas/data_stream_schema';
+import {
+  dataStreamForwardCompatibilitySchemaV2,
+  dataStreamSchemaV1,
+  dataStreamSchemaV2,
+} from './schemas/data_stream_schema';
 import { DATA_STREAM_SAVED_OBJECT_TYPE } from './constants';
 
 export const dataStreamSavedObjectType: SavedObjectsType = {
@@ -110,7 +114,7 @@ export const dataStreamSavedObjectType: SavedObjectsType = {
     4: {
       changes: [],
       schemas: {
-        forwardCompatibility: dataStreamSchemaV2.extends({}, { unknowns: 'ignore' }),
+        forwardCompatibility: dataStreamForwardCompatibilitySchemaV2,
         create: dataStreamSchemaV2,
       },
     },

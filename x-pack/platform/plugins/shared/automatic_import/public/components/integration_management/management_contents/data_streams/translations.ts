@@ -365,13 +365,16 @@ export const EDIT_PIPELINE_FLYOUT = Object.freeze({
       defaultMessage: 'Some field type changes were removed',
     }
   ),
-  droppedFieldTypesDescription: (fieldNames: string) =>
+  droppedFieldTypesDescription: (fieldNames: string[]) =>
     i18n.translate(
       'xpack.automaticImport.dataStreams.editPipelineFlyout.droppedFieldTypesDescription',
       {
         defaultMessage:
-          'The ingest pipeline no longer produces {fieldNames}, so their field type changes will be removed when you save.',
-        values: { fieldNames },
+          '{count, plural, one {The ingest pipeline no longer produces {fieldNames}, so its field type change will be removed when you save.} other {The ingest pipeline no longer produces {fieldNames}, so their field type changes will be removed when you save.}}',
+        values: {
+          fieldNames: i18n.formatList('conjunction', fieldNames),
+          count: fieldNames.length,
+        },
       }
     ),
   checkingPipeline: i18n.translate(
@@ -391,28 +394,30 @@ export const EDIT_PIPELINE_FLYOUT = Object.freeze({
       defaultMessage: 'This could introduce breaking changes',
     }
   ),
-  breakingChangesDescription: (fieldNames: string) =>
+  breakingChangesDescription: (fieldNames: string[]) =>
     i18n.translate(
       'xpack.automaticImport.dataStreams.editPipelineFlyout.breakingChangesDescription',
       {
         defaultMessage:
-          '{fieldNames} were in an approved version, and the ingest pipeline no longer produces them for the sample documents. Searches, dashboards, and rules that use them may stop finding new data.',
-        values: { fieldNames },
+          '{count, plural, one {{fieldNames} was in an approved version, and the ingest pipeline no longer produces it for the sample documents. Searches, dashboards, and rules that use it may stop finding new data.} other {{fieldNames} were in an approved version, and the ingest pipeline no longer produces them for the sample documents. Searches, dashboards, and rules that use them may stop finding new data.}}',
+        values: {
+          fieldNames:
+            fieldNames.length <= MAX_LISTED_FIELDS
+              ? i18n.formatList('conjunction', fieldNames)
+              : i18n.translate(
+                  'xpack.automaticImport.dataStreams.editPipelineFlyout.breakingChangesFieldList',
+                  {
+                    defaultMessage: '{fieldNames}, and {count} more',
+                    values: {
+                      fieldNames: i18n.formatList('unit', fieldNames.slice(0, MAX_LISTED_FIELDS)),
+                      count: fieldNames.length - MAX_LISTED_FIELDS,
+                    },
+                  }
+                ),
+          count: fieldNames.length,
+        },
       }
     ),
-  breakingChangesFieldList: (fieldNames: string[]) =>
-    fieldNames.length <= MAX_LISTED_FIELDS
-      ? fieldNames.join(', ')
-      : i18n.translate(
-          'xpack.automaticImport.dataStreams.editPipelineFlyout.breakingChangesFieldList',
-          {
-            defaultMessage: '{fieldNames}, and {count} more',
-            values: {
-              fieldNames: fieldNames.slice(0, MAX_LISTED_FIELDS).join(', '),
-              count: fieldNames.length - MAX_LISTED_FIELDS,
-            },
-          }
-        ),
   breakingChangesConfirmTitle: i18n.translate(
     'xpack.automaticImport.dataStreams.editPipelineFlyout.breakingChangesConfirmTitle',
     {

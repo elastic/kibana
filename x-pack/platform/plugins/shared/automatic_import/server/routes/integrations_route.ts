@@ -315,6 +315,12 @@ const approveIntegrationRoute = (
               body: 'Integration not found',
             });
           }
+          if (SavedObjectsErrorHelpers.isConflictError(err)) {
+            return automaticImportResponse.error({
+              statusCode: 409,
+              body: 'A data stream changed during approval. Reload and try again.',
+            });
+          }
           const rawMessage = err instanceof Error ? err.message : String(err);
           if (rawMessage.includes('no data streams')) {
             return automaticImportResponse.error({

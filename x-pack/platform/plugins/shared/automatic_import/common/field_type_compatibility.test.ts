@@ -38,6 +38,16 @@ describe('getFieldTypeCompatibility', () => {
     expect(getFieldTypeCompatibility('float', ['1.5', 2]).status).toBe('compatible');
   });
 
+  it('checks booleans the way the convert processor reads them when values are converted', () => {
+    expect(getFieldTypeCompatibility('boolean', ['True']).issue).toBe('not_boolean');
+    expect(
+      getFieldTypeCompatibility('boolean', [true, 'True', 'FALSE'], { isConverted: true }).status
+    ).toBe('compatible');
+    expect(getFieldTypeCompatibility('boolean', [''], { isConverted: true }).issue).toBe(
+      'not_boolean'
+    );
+  });
+
   it('accepts dates in the default strict_date_optional_time or epoch_millis format', () => {
     expect(
       getFieldTypeCompatibility('date', [

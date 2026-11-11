@@ -17,6 +17,7 @@ export interface AutoImportSamlAuthFixture extends SamlAuth {
   asAutoImportNoAccess: () => Promise<RoleSessionCredentials>;
   asAutoImportBaseAll: () => Promise<RoleSessionCredentials>;
   asAutoImportBaseRead: () => Promise<RoleSessionCredentials>;
+  asAutoImportPipelineEditor: () => Promise<RoleSessionCredentials>;
 }
 
 export interface AutoImportApiServicesFixture extends ApiServicesFixture {
@@ -35,6 +36,8 @@ export const autoImportApiTest = apiTest.extend<{
       asAutoImportNoAccess: () => samlAuth.asInteractiveUser(AUTO_IMPORT_USERS.autoImportNoAccess),
       asAutoImportBaseAll: () => samlAuth.asInteractiveUser(AUTO_IMPORT_USERS.autoImportBaseAll),
       asAutoImportBaseRead: () => samlAuth.asInteractiveUser(AUTO_IMPORT_USERS.autoImportBaseRead),
+      asAutoImportPipelineEditor: () =>
+        samlAuth.asInteractiveUser(AUTO_IMPORT_USERS.autoImportPipelineEditor),
     };
     await use(extendedSamlAuth);
   },

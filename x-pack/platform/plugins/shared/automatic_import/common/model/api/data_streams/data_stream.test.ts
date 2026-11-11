@@ -535,10 +535,13 @@ describe('data stream schemas', () => {
         ingest_pipeline: {
           processors: Array.from({ length: 10001 }, () => ({})),
         },
+        version: 'WzEsMV0=',
       };
 
       const result = ApplyDataStreamEditsRequestBody.safeParse(payload);
       expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toMatch(/processors/);
     });
 
     it('accepts object ingest_pipeline with exactly 10000 processors', () => {
@@ -556,6 +559,7 @@ describe('data stream schemas', () => {
     it('rejects unknown top-level properties (strict schema)', () => {
       const payload = {
         ingest_pipeline: '{}',
+        version: 'WzEsMV0=',
         extra: true,
       };
 

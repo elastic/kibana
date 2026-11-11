@@ -19,6 +19,11 @@ export const MANAGER_DS_FLOW_INTEGRATION_ID = 'scout_ds_manager_flow';
 
 export const MANAGER_DS_FLOW_DATA_STREAM_ID = 'scout_ds_manager_flow_ds';
 
+/** Integration with a seeded, completed data stream for saving field type and pipeline edits. */
+export const EDITS_INTEGRATION_ID = 'scout_ds_edits';
+
+export const EDITS_DATA_STREAM_ID = 'scout_ds_edits_ds';
+
 export const dataStreamsApiBasePath = (integrationId: string): string =>
   `api/automatic_import/integrations/${integrationId}/data_streams`;
 

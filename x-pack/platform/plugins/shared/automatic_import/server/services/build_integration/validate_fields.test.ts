@@ -116,15 +116,15 @@ describe('validateFieldMappings', () => {
     it('returns errors when ES simulation fails', async () => {
       const fields: FieldMappingEntry[] = [{ name: 'my_app.data', type: 'keyword', is_ecs: false }];
 
-      esClient.indices.simulateTemplate.mockRejectedValueOnce(
-        new Error('mapper_parsing_exception: failed to parse field')
-      );
+      const error = new Error('mapper_parsing_exception: failed to parse field');
+      esClient.indices.simulateTemplate.mockRejectedValueOnce(error);
 
       const result = await validateFieldMappings(esClient, fields, logger);
 
       expect(result.valid).toBe(false);
       expect(result.errors).toHaveLength(1);
       expect(result.errors[0]).toContain('mapper_parsing_exception');
+      expect(result.cause).toBe(error);
       expect(logger.warn).toHaveBeenCalled();
     });
 

@@ -106,9 +106,32 @@ export const approvedFieldTypeSchema = schema.object({
   type: schema.string({ minLength: 1, maxLength: MAX_FIELD_TYPE_LENGTH }),
 });
 
+const MAX_APPROVED_FIELD_TYPES = 10_000;
+
 export const dataStreamSchemaV2 = dataStreamSchemaV1.extends({
   field_type_overrides: schema.maybe(
     schema.arrayOf(fieldTypeOverrideSchema, { maxSize: MAX_FIELD_TYPE_OVERRIDES })
   ),
-  approved_field_types: schema.maybe(schema.arrayOf(approvedFieldTypeSchema, { maxSize: 10000 })),
+  approved_field_types: schema.maybe(
+    schema.arrayOf(approvedFieldTypeSchema, { maxSize: MAX_APPROVED_FIELD_TYPES })
+  ),
 });
+
+/**
+ * Reads documents written by newer versions, which may store field types this version doesn't
+ * support yet.
+ */
+export const dataStreamForwardCompatibilitySchemaV2 = dataStreamSchemaV2.extends(
+  {
+    field_type_overrides: schema.maybe(
+      schema.arrayOf(
+        fieldTypeOverrideSchema.extends(
+          { type: schema.string({ minLength: 1, maxLength: MAX_FIELD_TYPE_LENGTH }) },
+          { unknowns: 'ignore' }
+        ),
+        { maxSize: MAX_FIELD_TYPE_OVERRIDES }
+      )
+    ),
+  },
+  { unknowns: 'ignore' }
+);
