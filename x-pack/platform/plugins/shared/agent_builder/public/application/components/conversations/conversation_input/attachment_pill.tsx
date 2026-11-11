@@ -18,11 +18,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { AttachmentType, type Attachment } from '@kbn/agent-builder-common/attachments';
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
-import { getTextFileName } from './file_type';
+import { getFileAttachmentInfo } from './file_type';
 import { FileAttachmentPill } from './file_attachment_pill';
 import { ThumbnailAttachmentPill } from './thumbnail_attachment_pill';
 
@@ -66,13 +66,13 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
     );
   }
 
-  const textFileName = getTextFileName(attachment);
-  if (attachment.type === AttachmentType.binary || textFileName) {
+  const fileInfo = getFileAttachmentInfo(attachment);
+  if (fileInfo) {
     return (
       <FileAttachmentPill
         attachmentId={attachment.id}
-        name={textFileName ?? label}
-        mimeType={(attachment.data as { mime_type?: string } | undefined)?.mime_type}
+        name={fileInfo.name}
+        mimeType={fileInfo.mimeType}
         isLoading={isLoading}
         onRemoveAttachment={onRemoveAttachment}
         isHighlighted={isHighlighted}

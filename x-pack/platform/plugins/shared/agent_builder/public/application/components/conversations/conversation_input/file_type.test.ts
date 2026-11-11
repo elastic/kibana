@@ -6,6 +6,7 @@
  */
 
 import {
+  getFileAttachmentInfo,
   getFileAttachmentKind,
   getFileMimeType,
   getFileName,
@@ -101,5 +102,39 @@ describe('getFileAttachmentKind', () => {
     ['text/csv', 'text'],
   ] as const)('maps %s to %s', (mimeType, kind) => {
     expect(getFileAttachmentKind(mimeType)).toBe(kind);
+  });
+});
+
+describe('getFileAttachmentInfo', () => {
+  it('reads the name and MIME type of a stored PDF', () => {
+    expect(
+      getFileAttachmentInfo({
+        type: 'binary',
+        data: { name: 'a.pdf', mime_type: 'application/pdf' },
+        description: 'other.pdf',
+      })
+    ).toEqual({ name: 'a.pdf', mimeType: 'application/pdf' });
+  });
+
+  it('falls back to the description for a PDF that has no data yet', () => {
+    expect(getFileAttachmentInfo({ type: 'binary', description: 'a.pdf' })).toEqual({
+      name: 'a.pdf',
+      mimeType: undefined,
+    });
+  });
+
+  it('reads the name of a text file', () => {
+    expect(getFileAttachmentInfo({ type: 'text', data: { content: 'x', name: 'a.md' } })).toEqual({
+      name: 'a.md',
+      mimeType: undefined,
+    });
+  });
+
+  it.each([
+    ['a text attachment without a name', { type: 'text', data: { content: 'x' } }],
+    ['a PDF without a name', { type: 'binary' }],
+    ['an image', { type: 'image', data: { name: 'a.png' }, description: 'a.png' }],
+  ])('returns undefined for %s', (_, attachment) => {
+    expect(getFileAttachmentInfo(attachment)).toBeUndefined();
   });
 });

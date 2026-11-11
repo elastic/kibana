@@ -7,6 +7,7 @@
 
 import {
   AttachmentType,
+  type BinaryAttachmentData,
   isSupportedBinaryMimeType,
   MAX_BINARY_TEXT_LENGTH,
   type SupportedBinaryMimeType,
@@ -91,3 +92,23 @@ export const getTextFileName = (attachment: { type: string; data?: unknown }): s
   attachment.type === AttachmentType.text
     ? (attachment.data as Partial<TextAttachmentData> | undefined)?.name
     : undefined;
+
+export interface FileAttachmentInfo {
+  name: string;
+  mimeType?: string;
+}
+
+/** The name and MIME type of a PDF or a text file attachment, otherwise undefined. */
+export const getFileAttachmentInfo = (attachment: {
+  type: string;
+  data?: unknown;
+  description?: string;
+}): FileAttachmentInfo | undefined => {
+  const { type, data, description } = attachment;
+  const name =
+    type === AttachmentType.binary
+      ? (data as Partial<BinaryAttachmentData> | undefined)?.name ?? description
+      : getTextFileName(attachment);
+  if (!name) return undefined;
+  return { name, mimeType: (data as { mime_type?: string } | undefined)?.mime_type };
+};

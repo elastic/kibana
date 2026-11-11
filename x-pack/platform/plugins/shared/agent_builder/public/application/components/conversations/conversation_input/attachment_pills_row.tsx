@@ -13,7 +13,7 @@ import type { ConversationAttachment } from '@kbn/agent-builder-common/attachmen
 import { AttachmentType, isAttachmentGroup } from '@kbn/agent-builder-common/attachments';
 import { AttachmentPill } from './attachment_pill';
 import { AttachmentGroupPill } from './attachment_group_pill';
-import { getTextFileName } from './file_type';
+import { getFileAttachmentInfo } from './file_type';
 import type { LoadingFile } from './use_attachment_uploads';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import {
@@ -130,9 +130,9 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
 
         const attachmentId = attachment.id ?? `${attachment.type}-${index}`;
         const fileName =
-          attachment.type === AttachmentType.image || attachment.type === AttachmentType.binary
+          attachment.type === AttachmentType.image
             ? (attachment.data as { name?: string } | undefined)?.name ?? attachment.description
-            : getTextFileName(attachment);
+            : getFileAttachmentInfo(attachment)?.name;
         return (
           <EuiFlexItem key={attachmentId} grow={false} role="listitem">
             <AttachmentPill

@@ -14,6 +14,7 @@ import {
 } from '@kbn/agent-builder-common/attachments';
 import type { MessageEditorController } from './message_editor/use_message_editor';
 import {
+  getFileAttachmentInfo,
   getFileMimeType,
   getFileName,
   getTextFileName,
@@ -43,11 +44,8 @@ export interface LoadingFile {
 const getAddedFileNames = (attachments: readonly ConversationAttachment[] = []): string[] =>
   attachments.flatMap((attachment) => {
     if ('items' in attachment) return [];
-    if (attachment.type === AttachmentType.binary && attachment.description) {
-      return [attachment.description];
-    }
-    const textFileName = getTextFileName(attachment);
-    return textFileName ? [textFileName] : [];
+    const fileInfo = getFileAttachmentInfo(attachment);
+    return fileInfo ? [fileInfo.name] : [];
   });
 
 /** Puts the image, PDF and text file uploads behind one set of handlers for the message editor and the pills. */
