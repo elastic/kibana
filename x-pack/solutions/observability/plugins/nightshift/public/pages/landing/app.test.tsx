@@ -257,6 +257,17 @@ describe('NightshiftApp', () => {
     expect(screen.getByText('6 investigations need you')).toBeInTheDocument();
   });
 
+  it('shows nothing-urgent copy when the finished open backlog is empty', () => {
+    setSections({
+      sections: defaultSections(),
+    });
+
+    renderApp();
+
+    expect(screen.getByText('Nothing urgent so far')).toBeInTheDocument();
+    expect(screen.queryByText('0 investigations need you')).not.toBeInTheDocument();
+  });
+
   it('keeps the loading hero title until severity counts arrive when idle', () => {
     setSections({
       sections: defaultSections(),

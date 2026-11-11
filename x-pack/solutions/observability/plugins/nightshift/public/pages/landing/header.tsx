@@ -87,6 +87,12 @@ const getHeroTitle = ({
     });
   }
 
+  if (needsYouCount === 0) {
+    return i18n.translate('xpack.nightshift.hero.allClearTitle', {
+      defaultMessage: 'Nothing urgent so far',
+    });
+  }
+
   return i18n.translate('xpack.nightshift.hero.needsYouTitle', {
     defaultMessage:
       '{needsYouCount, plural, one {# investigation needs you} other {# investigations need you}}',
