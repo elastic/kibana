@@ -79,10 +79,11 @@ export const SUMMARY_ALERT_FIELDS = [
 const getMaxRows = (detail?: AlertDetail): number =>
   detail === 'summary' ? MAX_SUMMARY_ALERT_ROWS : MAX_FULL_ALERT_ROWS;
 
-// One row more than the most rows shown. The query generator writes `LIMIT <this>` when the user gives
-// no number, so getting this many rows back shows that more rows exist. With a limit equal to the most
-// rows shown, a full page would look the same as "exactly this many rows exist".
-const getQueryRowLimit = (detail?: AlertDetail): number => getMaxRows(detail) + 1;
+// One row more than the most rows shown for any detail level. The query generator writes `LIMIT <this>`
+// when the user gives no number, for raw rows and for grouped (STATS) results alike. Getting this many
+// rows back shows that more rows exist. It is the same for both detail levels, so that a grouped query
+// keeps a limit of 101 groups, and capAlertRows then cuts raw rows to the maximum for the detail level.
+const QUERY_ROW_LIMIT = MAX_SUMMARY_ALERT_ROWS + 1;
 
 // `_id` duplicates `kibana.alert.uuid`, and `_index` is a metadata field that fails ES|QL validation in KEEP.
 const KEEP_EXCLUDED_METADATA_FIELDS = new Set(['_id', '_index']);
@@ -157,7 +158,7 @@ const capAlertRows = (results: ToolHandlerResult[], detail?: AlertDetail): ToolH
     const { query, values } = result.data;
     if (isAggregation(query)) {
       // At the default limit, the generator may have cut the groups. Say so, and do not cut more.
-      return values.length === getQueryRowLimit(detail)
+      return values.length === QUERY_ROW_LIMIT
         ? [
             result,
             buildNote(
@@ -253,7 +254,7 @@ export const alertsTool = (
         events,
         logger,
         timeRange,
-        rowLimit: getQueryRowLimit(detail),
+        rowLimit: QUERY_ROW_LIMIT,
       });
 
       return { results: capAlertRows(results, detail) };
