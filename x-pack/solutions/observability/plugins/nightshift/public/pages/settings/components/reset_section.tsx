@@ -59,7 +59,7 @@ export function ResetSection({ canManage, canRestore }: IResetSectionProps) {
           content={
             !canManage
               ? i18n.translate('xpack.nightshift.settings.reset.privilegeTooltip', {
-                  defaultMessage: 'Reset requires the Nightshift Manage engines privilege.',
+                  defaultMessage: 'Reset requires the nightshift Manage engines privilege.',
                 })
               : !canRestore
               ? i18n.translate('xpack.nightshift.settings.reset.securityPrivilegeTooltip', {

@@ -122,14 +122,14 @@ export const NightshiftSetupPrompt = ({
     <p data-test-subj="nightshiftSetupAskAdmin">
       {i18n.translate('xpack.nightshift.setup.askEnginesAdminBody', {
         defaultMessage:
-          'A space administrator with the Nightshift Manage engines privilege has to enable Elastic nightshift once for this space. Ask them to turn it on.',
+          'A space administrator with the nightshift Manage engines privilege has to enable Elastic nightshift once for this space. Ask them to turn it on.',
       })}
     </p>
   ) : canManage ? (
     <p data-test-subj="nightshiftSetupAskAdmin">
       <FormattedMessage
         id="xpack.nightshift.setup.askEnginesAndSecurityAdminBody"
-        defaultMessage="A space administrator with the Nightshift Manage engines privilege and the {privilege} privilege has to enable Elastic nightshift once for this space. Ask them to turn it on."
+        defaultMessage="A space administrator with the nightshift Manage engines privilege and the {privilege} privilege has to enable Elastic nightshift once for this space. Ask them to turn it on."
         values={{ privilege: <EuiCode>manage_security</EuiCode> }}
       />
     </p>
@@ -137,7 +137,7 @@ export const NightshiftSetupPrompt = ({
     <p data-test-subj="nightshiftSetupAskAdmin">
       {i18n.translate('xpack.nightshift.setup.askNightshiftAdminBody', {
         defaultMessage:
-          'A Nightshift administrator has to enable Elastic nightshift once for this space. Ask them to turn it on.',
+          'A nightshift administrator has to enable Elastic nightshift once for this space. Ask them to turn it on.',
       })}
     </p>
   );

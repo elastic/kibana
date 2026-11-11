@@ -118,7 +118,7 @@ export const InvestigationIdentitySection = () => {
             <EuiText size="xs" color="subdued" data-test-subj="nightshiftServiceAccountOthers">
               <FormattedMessage
                 id="xpack.nightshift.settings.serviceAccount.otherAccounts"
-                defaultMessage="Other Nightshift accounts: {accounts}"
+                defaultMessage="Other nightshift accounts: {accounts}"
                 values={{
                   accounts: [
                     ...otherAccounts,

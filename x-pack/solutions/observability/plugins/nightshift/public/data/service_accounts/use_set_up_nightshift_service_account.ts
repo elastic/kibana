@@ -30,7 +30,7 @@ const toError = (error: unknown, { isServerless }: { isServerless: boolean }): E
       return new Error(
         i18n.translate('xpack.nightshift.serviceAccount.roleMismatchError', {
           defaultMessage:
-            'The service account {name} exists, but does not hold the {role} role Nightshift needs. Give it that role, or delete it and set Nightshift up again.',
+            'The service account {name} exists, but does not hold the {role} role nightshift needs. Give it that role, or delete it and set nightshift up again.',
           values: { name, role },
         })
       );
@@ -39,7 +39,7 @@ const toError = (error: unknown, { isServerless }: { isServerless: boolean }): E
       return new Error(
         i18n.translate('xpack.nightshift.serviceAccount.accountUnusableError', {
           defaultMessage:
-            'The service account {name} exists, but Kibana cannot run as it. Delete it, then set Nightshift up again.',
+            'The service account {name} exists, but Kibana cannot run as it. Delete it, then set nightshift up again.',
           values: { name },
         })
       );
@@ -53,7 +53,7 @@ const toError = (error: unknown, { isServerless }: { isServerless: boolean }): E
           })
         : i18n.translate('xpack.nightshift.serviceAccount.roleMissingError', {
             defaultMessage:
-              'The role {role} that the service account {name} needs does not exist. Create the Nightshift roles first (see the Nightshift investigations README), then set Nightshift up again.',
+              'The role {role} that the service account {name} needs does not exist. Create the nightshift roles first (see the nightshift investigations README), then set nightshift up again.',
             values: { name, role },
           })
     );
@@ -88,7 +88,7 @@ const warnAboutUnboundAutomations = (
     }),
     text: i18n.translate('xpack.nightshift.serviceAccount.unboundAutomationsToastText', {
       defaultMessage:
-        'Nightshift is set up, but {listed}{remaining, plural, =0 {} one { and # more} other { and # more}} could not be moved to the Nightshift automations account. Open each automation and save it, or enable Nightshift again.',
+        'Nightshift is set up, but {listed}{remaining, plural, =0 {} one { and # more} other { and # more}} could not be moved to the nightshift automations account. Open each automation and save it, or enable nightshift again.',
       values: { listed, remaining: Math.max(remaining, 0) },
     }),
   });

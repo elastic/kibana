@@ -59,7 +59,7 @@ export function createFeatureKnowledgeIndicatorTool({
     id: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
-      Create a feature Knowledge Indicator (KI) for a Nightshift source and persist it to
+      Create a feature Knowledge Indicator (KI) for a nightshift source and persist it to
       significant events feature storage.
 
       Use this tool when the conversation discovers a new source behavior pattern and it should be

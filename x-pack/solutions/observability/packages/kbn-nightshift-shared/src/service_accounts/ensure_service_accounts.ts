@@ -114,7 +114,7 @@ export class NightshiftServiceAccountSetupError extends Error {
   ) {
     super(
       {
-        role_missing: `The role [${details.role}] for the Nightshift service account [${details.name}] does not exist.`,
+        role_missing: `The role [${details.role}] for the nightshift service account [${details.name}] does not exist.`,
         role_mismatch: `The service account [${details.name}] exists, but does not hold the role [${details.role}].`,
         account_unusable: `The service account [${details.name}] exists, but Kibana cannot run as it.`,
       }[code]
@@ -126,9 +126,9 @@ export class NightshiftServiceAccountSetupError extends Error {
 const LIST_PAGE_SIZE = 100;
 
 const DESCRIPTION: Record<NightshiftServiceAccountKind, string> = {
-  agent: 'Runs Nightshift investigations, their sandbox tools and learning hooks.',
-  automations: 'Runs Nightshift automations, which start investigations.',
-  detection: 'Runs the Nightshift detection engine.',
+  agent: 'Runs nightshift investigations, their sandbox tools and learning hooks.',
+  automations: 'Runs nightshift automations, which start investigations.',
+  detection: 'Runs the nightshift detection engine.',
 };
 
 const listAll = async (api: NightshiftServiceAccountsApi): Promise<ListedServiceAccount[]> => {
