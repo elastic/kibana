@@ -17,7 +17,7 @@ import type {
   UserEntity,
   ServiceEntity,
 } from '../../../../../common/api/entity_analytics';
-import type { HostItem, UserItem } from '../../../../../common/search_strategy';
+import type { HostItem, ServiceItem, UserItem } from '../../../../../common/search_strategy';
 import {
   buildAliasesFilter,
   buildEntityIdFilter,
@@ -183,9 +183,9 @@ export interface EntityFromStoreResult<T> {
   refetch: () => void;
 }
 
-export function useEntityFromStore(
-  params: UseEntityFromStoreParams
-): EntityFromStoreResult<HostItem | UserItem> {
+export function useEntityFromStore<
+  T extends HostItem | UserItem | ServiceItem = HostItem | UserItem
+>(params: UseEntityFromStoreParams): EntityFromStoreResult<T> {
   const { entityId, mode = 'single', identityFields, entityType, skip, executionContext } = params;
   const euidApi = useEntityStoreEuidApi();
   const { fetchEntitiesListV2 } = useEntityAnalyticsRoutes();
@@ -339,15 +339,15 @@ export function useEntityFromStore(
   const lastSeen =
     entityField?.lifecycle?.last_activity ?? entityField?.lifecycle?.last_seen ?? null;
 
-  const mappedDetails = useMemo((): HostItem | UserItem | null => {
+  const mappedDetails = useMemo((): T | null => {
     if (!record) {
       return null;
     }
     if (entityType === 'host' && 'host' in record) {
-      return mapHostEntityToHostItem(record);
+      return mapHostEntityToHostItem(record) as T;
     }
     if (entityType === 'user' && 'user' in record) {
-      return mapUserEntityToUserItem(record);
+      return mapUserEntityToUserItem(record) as T;
     }
     return null;
   }, [record, entityType]);

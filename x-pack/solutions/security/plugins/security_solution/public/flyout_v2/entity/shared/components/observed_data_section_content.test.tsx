@@ -37,7 +37,14 @@ jest.mock('../../host/main/hooks/use_observed_host_fields', () => ({
 jest.mock('../../user/main/hooks/use_observed_user_fields', () => ({
   useObservedUserFields: () => [],
 }));
-jest.mock('./observed_entity', () => ({ ObservedEntity: () => null }));
+const mockServiceFields = [{ label: 'Service name', field: 'service.name' }];
+jest.mock('../../service/main/hooks/use_observed_service_items', () => ({
+  useObservedServiceItems: () => mockServiceFields,
+}));
+const mockObservedEntity = jest.fn((_props: { observedFields?: unknown }) => null);
+jest.mock('./observed_entity', () => ({
+  ObservedEntity: (props: { observedFields?: unknown }) => mockObservedEntity(props),
+}));
 
 const mockUseAnomaliesTableData = jest.mocked(useAnomaliesTableData);
 const mockUseGlobalTime = jest.mocked(useGlobalTime);
@@ -104,6 +111,37 @@ describe('ObservedDataSectionContent anomalies time range', () => {
 
     expect(mockUseAnomaliesTableData).toHaveBeenLastCalledWith(
       expect.objectContaining({ startDate: GLOBAL_FROM, endDate: GLOBAL_TO })
+    );
+  });
+});
+
+describe('ObservedDataSectionContent service entity', () => {
+  beforeEach(() => {
+    mockUseGlobalTime.mockReturnValue({
+      from: GLOBAL_FROM,
+      to: GLOBAL_TO,
+      isInitializing: false,
+    } as ReturnType<typeof useGlobalTime>);
+    mockUseAnomaliesTableData.mockReturnValue([false, null]);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('renders the service fields', () => {
+    renderContent({ entityType: EntityType.service });
+
+    expect(mockObservedEntity).toHaveBeenLastCalledWith(
+      expect.objectContaining({ observedFields: mockServiceFields })
+    );
+  });
+
+  it('never fetches anomalies for a service', () => {
+    renderContent({ entityType: EntityType.service, hideAnomalies: false });
+
+    expect(mockUseAnomaliesTableData).toHaveBeenLastCalledWith(
+      expect.objectContaining({ skip: true, filterQuery: undefined })
     );
   });
 });
