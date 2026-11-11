@@ -67,6 +67,13 @@ const otelHostColumns = [
   { name: 'clusters', type: 'keyword' },
 ];
 
+const serviceColumns = [
+  { name: 'service.name', type: 'keyword' },
+  { name: 'environments', type: 'keyword' },
+  { name: 'last_seen', type: 'date' },
+  { name: 'docs', type: 'long' },
+];
+
 const sourceEsql =
   'FROM metrics-gcp-us-central1:metrics-kubernetes.*,-metrics-gcp-us-central1:metrics-kubernetes.apiserver-* | WHERE orchestrator.cluster.name == "cluster-a"';
 
@@ -236,6 +243,11 @@ describe('Kubernetes entity derivation', () => {
     expect(workloadQuery).toContain('clusters = VALUES(orchestrator.cluster.name)');
     expect(workloadQuery).toContain('| SORT replicas DESC, kubernetes.namespace, workload');
     expect(workloadQuery).toMatch(/\| LIMIT 501$/);
+    ENTITY_KEY_TABLE.forEach(({ buildQuery }) => {
+      const query = buildQuery('SET unmapped_fields = "NULLIFY"; FROM metrics-*');
+      expect(query).toMatch(/^SET unmapped_fields = "NULLIFY"; FROM/);
+      expect(query).toMatch(/\| SORT[\s\S]*\| LIMIT 501$/);
+    });
 
     const nodeFeatures = foldNodeRows([
       {
@@ -403,24 +415,8 @@ describe('identifyMetricsEntities', () => {
           ['cluster-a', 'cluster-b'],
           0,
         ],
-        [
-          'payments',
-          'daemonset',
-          'checkout',
-          4,
-          '2026-11-10T12:03:00.000Z',
-          ['cluster-a'],
-          0,
-        ],
-        [
-          'payments',
-          'deployment',
-          'unknown-cluster',
-          1,
-          '2026-11-10T12:04:00.000Z',
-          null,
-          0,
-        ],
+        ['payments', 'daemonset', 'checkout', 4, '2026-11-10T12:03:00.000Z', ['cluster-a'], 0],
+        ['payments', 'deployment', 'unknown-cluster', 1, '2026-11-10T12:04:00.000Z', null, 0],
         ['payments', null, null, 0, '2026-11-10T12:02:00.000Z', ['cluster-a'], 0],
         [null, 'deployment', 'missing-namespace', 1, '2026-11-10T12:00:00.000Z', ['cluster-a'], 0],
       ],
@@ -601,41 +597,27 @@ describe('identifyMetricsEntities', () => {
     expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('<null>'));
   });
 
-  it('handles Kubernetes pod and OTel host datasets', async () => {
+  it('handles Kubernetes, OTel host, and generic OTel service datasets', async () => {
     const harness = createHarness([
       {
         columns: datasetColumns,
-        values: datasetRows('kubernetes.pod', 'hostmetricsreceiver.otel'),
+        values: datasetRows('kubernetes.pod', 'hostmetricsreceiver.otel', 'generic.otel'),
       },
       {
         columns: workloadColumns,
         values: [
-          [
-            'payments',
-            'deployment',
-            'checkout',
-            3,
-            '2026-11-10T12:00:00.000Z',
-            ['cluster-a'],
-            0,
-          ],
+          ['payments', 'deployment', 'checkout', 3, '2026-11-10T12:00:00.000Z', ['cluster-a'], 0],
         ],
       },
       { columns: namespaceColumns, values: [] },
       { columns: clusterColumns, values: [] },
       {
         columns: otelHostColumns,
-        values: [
-          [
-            'router-1',
-            null,
-            '2026-11-10T12:00:00.000Z',
-            ['Linux'],
-            [],
-            [],
-            null,
-          ],
-        ],
+        values: [['router-1', null, '2026-11-10T12:00:00.000Z', ['Linux'], [], [], null]],
+      },
+      {
+        columns: serviceColumns,
+        values: [['checkout', ['production', 'staging'], '2026-11-10T12:00:00.000Z', 42]],
       },
     ]);
 
@@ -650,8 +632,8 @@ describe('identifyMetricsEntities', () => {
     expect(result).toEqual(
       expect.objectContaining({
         handled: true,
-        metricsEntitiesCount: 2,
-        matchedEntityKeyRowsCount: 4,
+        metricsEntitiesCount: 3,
+        matchedEntityKeyRowsCount: 5,
         uncoveredDatasetsCount: 0,
       })
     );
@@ -660,7 +642,13 @@ describe('identifyMetricsEntities', () => {
       harness.bulk.mock.calls[0][1].map(
         ({ index }: { index: { feature: { id: string } } }) => index.feature.id
       )
-    ).toEqual(['host:router-1', 'k8s.deployment:payments/checkout']);
+    ).toEqual(['host:router-1', 'service:checkout', 'k8s.deployment:payments/checkout']);
+    expect(
+      harness.bulk.mock.calls[0][1].find(
+        ({ index }: { index: { feature: { id: string } } }) =>
+          index.feature.id === 'service:checkout'
+      )?.index.feature.properties.environments
+    ).toEqual(['production', 'staging']);
     expect(harness.info).not.toHaveBeenCalled();
   });
 

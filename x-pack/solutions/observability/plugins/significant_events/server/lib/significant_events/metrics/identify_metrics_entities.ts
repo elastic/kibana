@@ -25,7 +25,9 @@ import {
 
 const MAX_ENTITIES = 500;
 const DATASET_QUERY_TIMEOUT_MS = 30_000;
-const COVERED_DATASET_FAMILIES = new Set(ENTITY_KEY_TABLE.map(({ family }) => family));
+const COVERED_DATASET_FAMILIES = new Set(
+  ENTITY_KEY_TABLE.flatMap(({ family, coveredFamilies = [] }) => [family, ...coveredFamilies])
+);
 
 export interface IdentifyMetricsEntitiesOptions {
   esClient: ElasticsearchClient;
@@ -148,7 +150,7 @@ const entityPriority = (feature: FeatureUpsert): number => {
   }
 };
 
-/** Lists a metrics source's datasets and writes its Kubernetes workload and node entities. */
+/** Lists a metrics source's datasets and writes its deterministic entities. */
 export const identifyMetricsEntities = async ({
   esClient,
   esql,

@@ -36,9 +36,10 @@ export interface EntityFoldResult {
 export interface EntityKeyRow {
   id: string;
   family: string;
+  coveredFamilies?: readonly string[];
   datasets: readonly string[];
   datasetPrefixes?: readonly string[];
-  subtype: 'k8s_workload' | 'k8s_node' | 'k8s_namespace' | 'k8s_cluster' | 'host';
+  subtype: 'k8s_workload' | 'k8s_node' | 'k8s_namespace' | 'k8s_cluster' | 'host' | 'service';
   buildQuery: (tsPrefix: string) => string;
   foldRows: (rows: EsqlRow[]) => EntityFoldResult;
 }
@@ -509,9 +510,7 @@ const foldHostRows = ({
     const nodeName = row[nodeField];
     const isNode = typeof nodeName === 'string';
     const name = isNode ? nodeName : hostName;
-    const id = isNode
-      ? buildKubernetesEntityId({ kind: 'node', name })
-      : `host:${hostName}`;
+    const id = isNode ? buildKubernetesEntityId({ kind: 'node', name }) : `host:${hostName}`;
     if (id.length > MAX_ID_LENGTH || name.length > MAX_TITLE_LENGTH) {
       droppedRows.idTooLong += 1;
       return [];
@@ -536,9 +535,7 @@ const foldHostRows = ({
           ? { field: 'kubernetes.node.name', eq: name }
           : { field: 'host.name', eq: name },
         properties: {
-          identity: isNode
-            ? { 'kubernetes.node.name': name }
-            : { 'host.name': name },
+          identity: isNode ? { 'kubernetes.node.name': name } : { 'host.name': name },
           breakdown: ['orchestrator.cluster.name'],
           entity_store_type: isNode ? KUBERNETES_ENTITY_STORE_TYPES.node : 'host',
           clusters,
@@ -580,7 +577,11 @@ export const mergeHostFeatures = (features: FeatureUpsert[]): FeatureUpsert[] =>
     const currentIsNodeInventory = current.properties.key_row === 'ecs.k8s_node';
     const featureIsNodeInventory = feature.properties.key_row === 'ecs.k8s_node';
     if (current.subtype === 'k8s_node' && feature.subtype === 'k8s_node') {
-      const nodeFeature = currentIsNodeInventory ? current : featureIsNodeInventory ? feature : current;
+      const nodeFeature = currentIsNodeInventory
+        ? current
+        : featureIsNodeInventory
+        ? feature
+        : current;
       const hostFeature = feature.properties.host !== undefined ? feature : current;
       const lastSeen =
         featureLastSeen(current) > featureLastSeen(feature)
@@ -607,6 +608,59 @@ export const mergeHostFeatures = (features: FeatureUpsert[]): FeatureUpsert[] =>
     }
   }
   return [...featuresById.values()];
+};
+
+const buildServiceQuery = (sourceQuery: string): string => `${sourceQuery}
+| WHERE @timestamp > NOW() - 1 hour
+    AND data_stream.dataset IN ("apm.service_summary.1m",
+                                "apm.service_summary.1m.otel",
+                                "generic.otel")
+    AND service.name IS NOT NULL
+| STATS last_seen = MAX(@timestamp), environments = VALUES(service.environment),
+        docs = COUNT(*)
+  BY service.name
+| SORT docs DESC, service.name
+| LIMIT ${ENTITY_QUERY_LIMIT}`;
+
+export const foldServiceRows = (rows: EsqlRow[]): EntityFoldResult => {
+  const droppedRows = createDroppedRows();
+  const features = rows.flatMap((row): FeatureUpsert[] => {
+    const name = row['service.name'];
+    if (typeof name !== 'string') {
+      droppedRows.ownerless += 1;
+      return [];
+    }
+    const id = `service:${name}`;
+    if (id.length > MAX_ID_LENGTH || name.length > MAX_TITLE_LENGTH) {
+      droppedRows.idTooLong += 1;
+      return [];
+    }
+    return [
+      {
+        type: 'entity',
+        subtype: 'service',
+        id,
+        title: name,
+        description: `Service ${name}.`,
+        filter: { field: 'service.name', eq: name },
+        properties: {
+          identity: { 'service.name': name },
+          environments: stringsOf(row.environments),
+          entity_store_type: 'service',
+          last_seen: lastSeenOf(row),
+          origin: 'metrics',
+          key_row: 'apm.service',
+        },
+        confidence: 100,
+      },
+    ];
+  });
+  return {
+    features,
+    droppedIncompleteRowsCount: droppedRowsCount(droppedRows),
+    droppedRows,
+    unknownClusterRows: 0,
+  };
 };
 
 export const ENTITY_KEY_TABLE: readonly EntityKeyRow[] = [
@@ -658,5 +712,14 @@ export const ENTITY_KEY_TABLE: readonly EntityKeyRow[] = [
     subtype: 'host',
     buildQuery: buildOtelHostQuery,
     foldRows: foldOtelHostRows,
+  },
+  {
+    id: 'apm.service',
+    family: 'apm',
+    coveredFamilies: ['generic'],
+    datasets: ['apm.service_summary.1m', 'apm.service_summary.1m.otel', 'generic.otel'],
+    subtype: 'service',
+    buildQuery: buildServiceQuery,
+    foldRows: foldServiceRows,
   },
 ];
