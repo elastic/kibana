@@ -16,6 +16,7 @@ import type {
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
   DetectionScanProps,
   DiscoveryTriggeredProps,
+  EventStatusChangedProps,
   KnowledgeIndicatorFeaturesIdentifiedProps,
   KnowledgeIndicatorQueriesGeneratedProps,
   KnowledgeIndicatorOnboardingScheduledProps,
@@ -483,6 +484,106 @@ const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdatePro
   },
 };
 
+const eventStatusChangedSchema: RootSchema<EventStatusChangedProps> = {
+  ...existingAlertIdentitySchema,
+  entity_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The kind of entity whose status changed; always `significant_event` here',
+    },
+  },
+  previous_status: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Status of the stored version before this write (active, recovering or inactive); absent when this write created the event',
+      optional: true,
+    },
+  },
+  status: {
+    type: 'keyword',
+    _meta: {
+      description: 'Status stored on the written version (active, recovering or inactive)',
+    },
+  },
+  actor: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The entry point that wrote the version: `agent_tool` (an Agent Builder tool, in discovery or chat), `rest_api` (the event update route, which the UI calls) or `stale_event_cleanup` (the cleanup that closes events whose rule was deleted). It names the code path, not whether a person was behind it',
+    },
+  },
+  change_kind: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'How the status was decided: `operator` (a status chosen through the update route or a chat tool), `assessment` (discovery re-checked the member signals) or `rule_deleted`. Absent when the writer supplied the status itself, as `event_create` does. An `operator` deactivation is a manual close; `close_reason` says why when the caller stated it',
+      optional: true,
+    },
+  },
+  assessment_outcome: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'For `change_kind: assessment`, what the member signals said: `breached`, `recovered` or `no_data`',
+      optional: true,
+    },
+  },
+  close_reason: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Why an operator set the event inactive: `resolved` (a real problem that is over) or `dismissed` (noise, not worth surfacing). Absent when the caller did not state it and on every other change',
+      optional: true,
+    },
+  },
+  severity: {
+    type: 'keyword',
+    _meta: {
+      description: 'Severity tier stored on the written version',
+    },
+  },
+  confidence: {
+    type: 'float',
+    _meta: {
+      description: 'Confidence stored on the written version, between 0 and 1',
+    },
+  },
+  signal_count: {
+    type: 'long',
+    _meta: {
+      description:
+        'Correlation fan-in: the number of signals stored on the written version, one per member rule',
+    },
+  },
+  confirmed_signal_count: {
+    type: 'long',
+    _meta: {
+      description: 'The number of stored signals whose verdict confirms the event',
+    },
+  },
+  source_ids: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: {
+        description: 'A Nightshift source id',
+      },
+    },
+    _meta: {
+      description: 'The Nightshift source ids the event covers',
+    },
+  },
+  workflow_execution_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The workflow execution stored on the written version, when a workflow wrote it; joins the discovery run and the workflow engine events',
+      optional: true,
+    },
+  },
+};
+
 const discoveryTriggeredSchema: RootSchema<DiscoveryTriggeredProps> = {
   ...workflowExecutionTelemetrySchema,
   execution_id: {
@@ -799,6 +900,7 @@ export {
   agentToolKnowledgeIndicatorIdentificationStartedSchema,
   detectionScanSchema,
   discoveryTriggeredSchema,
+  eventStatusChangedSchema,
   knowledgeIndicatorFeaturesIdentifiedSchema,
   knowledgeIndicatorQueriesGeneratedSchema,
   onboardingScheduledSchema,
