@@ -31,6 +31,9 @@ const KIBANA_DEFINITIONS_ROOT = mergeKibanaBuiltinWorkflowInputDefinitionsIntoRo
 
 const PAYLOAD_INPUT_NAME = 'payload';
 
+/** A Liquid output tag that renders a payload alert's `alert_url` (not the ingest `data.alert_url`). */
+const ALERT_URL_OUTPUT_PATTERN = /\{\{-?[^}]*(?<!data\.)\balert_url\b[^}]*-?\}\}/;
+
 /** Known top-level property names on the `alertingV2NotificationGroup` payload schema. */
 const PAYLOAD_TOP_LEVEL_FIELDS = new Set(
   Object.keys(ALERTING_V2_NOTIFICATION_GROUP_SCHEMA?.properties ?? {})
@@ -437,6 +440,33 @@ export class DestinationValidator {
   }
 
   /**
+   * Checks that the workflow renders each alert's details link (`alert_url`).
+   * Copying an alert through a `data.set` step and reading an invented field
+   * such as `.url` off the copy passes variable validation, because the copy
+   * is untyped, but renders an empty link at dispatch time.
+   *
+   * Skipped when the YAML has no Liquid or never reads `inputs.payload`;
+   * {@link validatePayloadLiquidPresence} reports the latter.
+   */
+  validateAlertDetailsLink(destinationId: string, yaml: string): void {
+    if (!/\{\{|\{%/.test(yaml) || !/inputs\.payload/.test(yaml)) return;
+    if (ALERT_URL_OUTPUT_PATTERN.test(yaml)) return;
+
+    this.push(
+      destinationId,
+      'warning',
+      'structural',
+      `Workflow "${destinationId}" does not render an alert details link. Each alert in ` +
+        `\`inputs.payload.alerts\` carries an absolute \`alert_url\`; read it directly from the ` +
+        `alert (e.g. \`{{ alert.alert_url }}\` inside \`{% for alert in inputs.payload.alerts %}\`, ` +
+        `or \`{{ foreach.item.alert_url }}\` in a foreach step). Do not copy alerts into ` +
+        `\`data.set\` variables or use invented fields like \`url\`. ` +
+        `Fix: re-call \`platform.core.generate_workflow\` and render \`alert_url\` in the message. ` +
+        `Referenced content: ${WORKFLOW_DISPATCH_PAYLOAD_SKILL_REF}`
+    );
+  }
+
+  /**
    * Validates that `inputs.payload.*` references use known top-level fields
    * from the `alertingV2NotificationGroup` schema. Catches common mistakes
    * like `inputs.payload.rule.name` (should be `inputs.payload.rules[...]`)
@@ -482,6 +512,7 @@ export class DestinationValidator {
     this.validateNoAlertTrigger(destinationId, triggers!);
     this.validatePayloadLiquidPresence(destinationId, yaml);
     this.validatePayloadFieldPaths(destinationId, yaml);
+    this.validateAlertDetailsLink(destinationId, yaml);
     await this.validateWorkflowRefs(destinationId, yaml);
   }
 
