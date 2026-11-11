@@ -45,17 +45,22 @@ describe('riskEngineCleanupRoute', () => {
       version_conflicts: 0,
     });
     clients.core.elasticsearch.client.asCurrentUser.indices.delete.mockImplementation(
-      async ({ index }: { index: string }) => {
+      async (params) => {
+        const index = Array.isArray(params.index) ? params.index[0] : params.index;
         if (index !== 'risk-score.risk-score-default') {
-          return;
+          return { acknowledged: true };
         }
         const dataStreamDeleted =
           clients.core.elasticsearch.client.asCurrentUser.indices.deleteDataStream.mock.calls.some(
-            (call: [{ name?: string }]) => call[0]?.name === index
+            ([request]) => {
+              const name = Array.isArray(request.name) ? request.name[0] : request.name;
+              return name === index;
+            }
           );
         if (!dataStreamDeleted) {
           throw Object.assign(new Error('matches a data stream'), { meta: { statusCode: 400 } });
         }
+        return { acknowledged: true };
       }
     );
     removeIfExists = jest.fn().mockResolvedValue(undefined);
