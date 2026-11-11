@@ -64,7 +64,9 @@ const createMockDataViewLazy = ({
     getAsSavedObjectBody: jest.fn().mockReturnValue(savedObjectBody ?? spec),
   } as unknown as DataViewLazy);
 
-const createService = () => {
+const createService = ({
+  scriptedFieldsEnabled = true,
+}: { scriptedFieldsEnabled?: boolean } = {}) => {
   dataViewsService.clearInstanceCache = jest.fn();
   const mockSavedObjectsClient = savedObjectsClientMock.create();
   const mockFieldFormats = {
@@ -73,7 +75,8 @@ const createService = () => {
   const service = new DataViewsAsCodeService(
     dataViewsService,
     mockSavedObjectsClient,
-    mockFieldFormats
+    mockFieldFormats,
+    scriptedFieldsEnabled
   );
   return {
     service,
@@ -342,6 +345,22 @@ describe('DataViewsAsCodeService', () => {
           },
         },
       });
+    });
+
+    it('should not include scripted fields when scripted fields are disabled', async () => {
+      const { service, mockDataViewsService } = createService({ scriptedFieldsEnabled: false });
+      const dataView = createMockDataViewLazy({
+        spec: { title: 'logs-*' },
+        scriptedFields: {
+          double_bytes: { type: 'number', lang: 'painless', script: "doc['bytes'].value * 2" },
+        },
+      });
+      mockDataViewsService.getDataViewLazy = jest.fn().mockResolvedValue(dataView);
+
+      const result = await service.get('test-id');
+
+      expect(result.data).toEqual({ index_pattern: 'logs-*' });
+      expect(dataView.getScriptedFields).not.toHaveBeenCalled();
     });
 
     it('should restore fieldAttrs from getFieldAttrs so popularity is mapped', async () => {

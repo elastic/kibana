@@ -45,7 +45,8 @@ export async function getDataViewsAsCodeService(
   return new DataViewsAsCodeService(
     dataViewsService,
     core.savedObjects.getClient(),
-    fieldFormatsRegistry
+    fieldFormatsRegistry,
+    dataViews.getScriptedFieldsEnabled()
   );
 }
 
