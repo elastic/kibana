@@ -20,6 +20,7 @@ import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
+import { isBreakpointSupportedStepType } from './decorations/use_breakpoint_decorations';
 import { RunStepButton } from './run_step_button';
 import {
   CopyDevToolsOption,
@@ -43,8 +44,9 @@ export const StepActions = React.memo<StepActionsProps>(({ onStepRun }) => {
   const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
   const isExecutionsTab = useSelector(selectIsExecutionsTab);
   const breakpoints = useSelector(selectBreakpoints);
+  const canSetBreakpoint = isBreakpointSupportedStepType(focusedStepInfo?.stepType);
   const hasBreakpoint = Boolean(
-    focusedStepInfo?.stepId && breakpoints.includes(focusedStepInfo.stepId)
+    canSetBreakpoint && focusedStepInfo?.stepId && breakpoints.includes(focusedStepInfo.stepId)
   );
 
   const togglePopover = useCallback(() => {
@@ -117,25 +119,10 @@ export const StepActions = React.memo<StepActionsProps>(({ onStepRun }) => {
               }
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={
-                hasBreakpoint
-                  ? i18n.translate('workflows.stepActions.removeBreakpoint', {
-                      defaultMessage: 'Remove breakpoint',
-                    })
-                  : i18n.translate('workflows.stepActions.addBreakpoint', {
-                      defaultMessage: 'Add breakpoint',
-                    })
-              }
-              disableScreenReaderOutput
-            >
-              <EuiButtonIcon
-                iconType="dot"
-                color={hasBreakpoint ? 'danger' : 'text'}
-                iconSize="s"
-                aria-pressed={hasBreakpoint}
-                aria-label={
+          {canSetBreakpoint && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={
                   hasBreakpoint
                     ? i18n.translate('workflows.stepActions.removeBreakpoint', {
                         defaultMessage: 'Remove breakpoint',
@@ -144,11 +131,28 @@ export const StepActions = React.memo<StepActionsProps>(({ onStepRun }) => {
                         defaultMessage: 'Add breakpoint',
                       })
                 }
-                data-test-subj="workflowToggleBreakpoint"
-                onClick={() => dispatch(toggleBreakpoint(focusedStepInfo.stepId as string))}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  iconType="dot"
+                  color={hasBreakpoint ? 'danger' : 'text'}
+                  iconSize="s"
+                  aria-pressed={hasBreakpoint}
+                  aria-label={
+                    hasBreakpoint
+                      ? i18n.translate('workflows.stepActions.removeBreakpoint', {
+                          defaultMessage: 'Remove breakpoint',
+                        })
+                      : i18n.translate('workflows.stepActions.addBreakpoint', {
+                          defaultMessage: 'Add breakpoint',
+                        })
+                  }
+                  data-test-subj="workflowToggleBreakpoint"
+                  onClick={() => dispatch(toggleBreakpoint(focusedStepInfo.stepId as string))}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
         </>
       )}
       {!!items.length && (

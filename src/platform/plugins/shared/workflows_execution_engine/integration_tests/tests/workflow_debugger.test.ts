@@ -257,4 +257,85 @@ steps:
     expect(stepExecsFinal[1].status).toBe(ExecutionStatus.COMPLETED);
     expect(stepExecsFinal[1].output).toBe('Item 1: beta');
   });
+
+  it('pauses on a step nested inside an if branch and inside an on-failure.fallback block', async () => {
+    await workflowRunFixture.runWorkflow({
+      isTestRun: true,
+      inputs: { flag: 'yes' },
+      debug: {
+        enabled: true,
+        breakpoints: ['nested_in_if', 'nested_in_fallback'],
+      },
+      workflowYaml: `
+steps:
+  - name: setup_flag
+    type: console
+    with:
+      message: "ok"
+  - name: check_branch
+    type: if
+    condition: steps.setup_flag.output:"ok"
+    steps:
+      - name: nested_in_if
+        type: slack
+        connector-id: ${FakeConnectors.slack1.name}
+        with:
+          message: "Inside if"
+        on-failure:
+          continue: true
+          fallback:
+            - name: nested_in_fallback
+              type: console
+              with:
+                message: "Inside fallback"
+        mock:
+          error:
+            type: "SimulatedError"
+            message: "Boom"
+`,
+    });
+
+    // 1. Paused at nested_in_if inside the if step
+    const pausedAtIfChild =
+      workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        'fake_workflow_execution_id'
+      );
+    expect(pausedAtIfChild?.status).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+
+    const ifChildExec = Array.from(
+      workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+    ).find((s) => s.stepId === 'nested_in_if' && s.stepType === 'slack');
+    expect(ifChildExec?.status).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+    expect(ifChildExec?.state).toMatchObject({ breakpointPaused: true, breakpointHit: true });
+
+    // Resume from nested_in_if -> it fails via mock.error -> enters fallback -> pauses at nested_in_fallback
+    if (pausedAtIfChild) {
+      pausedAtIfChild.context = { ...pausedAtIfChild.context, resumeInput: {} };
+    }
+    await workflowRunFixture.resumeWorkflow();
+
+    const pausedAtFallbackChild =
+      workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        'fake_workflow_execution_id'
+      );
+    expect(pausedAtFallbackChild?.status).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+
+    const fallbackChildExec = Array.from(
+      workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+    ).find((s) => s.stepId === 'nested_in_fallback');
+    expect(fallbackChildExec?.status).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+    expect(fallbackChildExec?.state).toMatchObject({ breakpointPaused: true, breakpointHit: true });
+
+    // Resume from nested_in_fallback -> completes workflow
+    if (pausedAtFallbackChild) {
+      pausedAtFallbackChild.context = { ...pausedAtFallbackChild.context, resumeInput: {} };
+    }
+    await workflowRunFixture.resumeWorkflow();
+
+    const completedExecution =
+      workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        'fake_workflow_execution_id'
+      );
+    expect(completedExecution?.status).toBe(ExecutionStatus.COMPLETED);
+  });
 });

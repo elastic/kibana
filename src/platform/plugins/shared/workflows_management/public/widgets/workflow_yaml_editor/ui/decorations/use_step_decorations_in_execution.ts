@@ -67,21 +67,23 @@ export const useStepDecorationsInExecution = (
         options: { glyphMarginClassName: glyphClassNames.join(' ') },
       };
 
-      // Only apply background decoration if the step is not nested
-      // This prevents overlapped backgrounds (double transparency) when parent and child are both decorated
+      // Only apply background decoration if the step is not nested, UNLESS it is actively
+      // paused at a breakpoint (in which case its header line gets the red breakpoint highlight).
+      // This prevents overlapped backgrounds (double transparency) when parent and child are both decorated.
       const isNested =
         stepInfo.parentStepId &&
         stepExecutions.some((otherStepExecution) => {
           return otherStepExecution.stepId === stepInfo.parentStepId;
         });
-      if (isNested) {
+      if (isNested && !isBreakpointPaused) {
         // For nested steps, only show the glyph decoration
         return [glyphDecoration];
       }
 
       // Background decoration for execution status - from dash line to end of step
+      const backgroundEndLine = isBreakpointPaused ? stepInfo.lineStart : stepInfo.lineEnd;
       const backgroundDecoration: monaco.editor.IModelDeltaDecoration = {
-        range: new monaco.Range(stepInfo.lineStart, 1, stepInfo.lineEnd, 0),
+        range: new monaco.Range(stepInfo.lineStart, 1, backgroundEndLine, 0),
         options: {
           className: bgClassNames.join(' '),
           marginClassName: bgClassNames.join(' '),
