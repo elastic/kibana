@@ -68,9 +68,15 @@ describe('installStaticWorkflows', () => {
       ],
     });
 
-    await expect(
-      installStaticWorkflows({ client, wikiOrMemoryEnabled: false, decisionTreesEnabled: false })
-    ).rejects.toThrow(`"${NIGHTSHIFT_ONLINE_EVALS_WORKFLOW_ID}": write failed`);
+    const rejection = await installStaticWorkflows({
+      client,
+      wikiOrMemoryEnabled: false,
+      decisionTreesEnabled: false,
+    }).catch((error) => error);
+
+    expect(rejection).toBeInstanceOf(AggregateError);
+    expect(rejection.message).toBe(`"${NIGHTSHIFT_ONLINE_EVALS_WORKFLOW_ID}": write failed`);
+    expect(rejection.errors).toEqual([expect.objectContaining({ message: 'write failed' })]);
     expect(ready).not.toHaveBeenCalled();
   });
 });

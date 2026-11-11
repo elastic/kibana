@@ -52,7 +52,10 @@ export const installStaticWorkflows = async ({
     ids.map((id) => ({ id, spaceId: GLOBAL_WORKFLOW_SPACE_ID }))
   );
   if (failed.length > 0) {
-    throw new Error(failed.map(({ id, error }) => `"${id}": ${error.message}`).join('; '));
+    throw new AggregateError(
+      failed.map(({ error }) => error),
+      failed.map(({ id, error }) => `"${id}": ${error.message}`).join('; ')
+    );
   }
 
   await client.ready();
