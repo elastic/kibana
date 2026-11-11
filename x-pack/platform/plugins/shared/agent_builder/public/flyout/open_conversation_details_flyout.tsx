@@ -35,6 +35,7 @@ export interface OpenConversationDetailsFlyoutOptions {
   conversationTemplatesService: ConversationTemplatesService;
   conversationId: string;
   onClose?: () => void;
+  onConversationUpdated?: () => void;
   trailingActions?: EuiFlyoutMenuAction[];
 }
 
@@ -44,10 +45,18 @@ export const openConversationDetailsFlyout = async ({
   conversationTemplatesService,
   conversationId,
   onClose,
+  onConversationUpdated,
   trailingActions,
 }: OpenConversationDetailsFlyoutOptions): Promise<() => void> => {
   const titleId = generateTitleId();
   const queryClient = new QueryClient();
+  const unsubscribeFromMutations = queryClient
+    .getMutationCache()
+    .subscribe(({ type, mutation }) => {
+      if (type === 'updated' && mutation.state.status === 'success') {
+        onConversationUpdated?.();
+      }
+    });
 
   const onNotFound = () => {
     flyoutRef.close();
@@ -82,6 +91,7 @@ export const openConversationDetailsFlyout = async ({
   );
 
   flyoutRef.onClose.then(() => {
+    unsubscribeFromMutations();
     onClose?.();
   });
 

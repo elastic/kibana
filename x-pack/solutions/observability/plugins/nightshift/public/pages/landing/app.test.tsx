@@ -466,10 +466,11 @@ describe('NightshiftApp', () => {
       )
     );
 
-    const [{ onClose }] = openConversationDetails.mock.calls[0];
+    const [{ onClose, onConversationUpdated }] = openConversationDetails.mock.calls[0];
     refetchAll.mockClear();
-    onClose();
+    onConversationUpdated();
     expect(refetchAll).toHaveBeenCalledTimes(1);
+    onClose();
     await waitFor(() => expect(screen.getByTestId('locationProbe')).toHaveTextContent(''));
   });
 
