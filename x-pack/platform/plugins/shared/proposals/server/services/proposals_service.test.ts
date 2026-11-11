@@ -1515,7 +1515,7 @@ describe('ProposalsService', () => {
     });
 
     describe('decision telemetry', () => {
-      it('reports a recorded decision without its rationale or category', async () => {
+      it('reports a recorded decision without its reason, rationale or category', async () => {
         const storage = createStorage(baseDocument());
         const { service, analytics } = createService(storage);
 
@@ -1541,13 +1541,12 @@ describe('ProposalsService', () => {
           gate: undefined,
           origin: 'alertzero',
           conversation_id: 'conv-1',
-          dismiss_reason: 'duplicate',
           confidence: 'medium',
           impact: 'low',
         });
-        expect(JSON.stringify(analytics.reportEvent.mock.calls)).not.toContain(
-          'customer secret text'
-        );
+        const reported = JSON.stringify(analytics.reportEvent.mock.calls);
+        expect(reported).not.toContain('customer secret text');
+        expect(reported).not.toContain('duplicate');
       });
 
       it('reports an auto approval as auto', async () => {

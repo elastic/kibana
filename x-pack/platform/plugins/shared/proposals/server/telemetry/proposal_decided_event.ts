@@ -19,7 +19,6 @@ interface ProposalDecidedEventProps {
   gate?: string;
   origin?: string;
   conversation_id: string;
-  dismiss_reason?: string;
   confidence?: string;
   impact?: string;
 }
@@ -102,10 +101,6 @@ export const registerProposalsEbtEvents = (analytics: AnalyticsServiceSetup): vo
         type: 'keyword',
         _meta: { description: 'Conversation the proposal was created in.' },
       },
-      dismiss_reason: {
-        type: 'keyword',
-        _meta: { description: 'Reason picked when dismissing.', optional: true },
-      },
       confidence: {
         type: 'keyword',
         _meta: { description: 'Confidence the proposer gave the proposal.', optional: true },
@@ -119,8 +114,8 @@ export const registerProposalsEbtEvents = (analytics: AnalyticsServiceSetup): vo
 };
 
 /**
- * Reports a decision the service has just written. The decision rationale and the free-form
- * category are customer-authored text and are never reported. Telemetry must not fail a decision
+ * Reports a decision the service has just written. The dismiss reason, the decision rationale and
+ * the free-form category can carry text users have not agreed to share, and are never reported. Telemetry must not fail a decision
  * that already landed, so a throwing reporter is logged and swallowed.
  */
 export const reportProposalDecided = (
@@ -135,7 +130,6 @@ export const reportProposalDecided = (
     | 'gate'
     | 'origin'
     | 'conversationId'
-    | 'dismissReason'
     | 'confidence'
     | 'impact'
   >
@@ -150,7 +144,6 @@ export const reportProposalDecided = (
       gate: proposal.gate,
       origin: proposal.origin,
       conversation_id: proposal.conversationId,
-      dismiss_reason: proposal.dismissReason,
       confidence: proposal.confidence,
       impact: proposal.impact,
     });
