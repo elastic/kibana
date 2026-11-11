@@ -511,11 +511,9 @@ await managed.install(HEALTH_CHECK_WORKFLOW_ID, {
 });
 ```
 
-### `yamlTemplate` — install-time parameterization
+### `yamlTemplate(values)` — install-time parameterization
 
-Use when some values are only known at install time (entity id, connector id, rule id, etc.). `yamlTemplate.render(values)` runs at install/update time, install values are persisted alongside the document, and re-installs are idempotent on `(definition hash, definition version, persisted values)`.
-
-`yamlTemplate.hashValues` are fixed values the platform renders the template with to compute the definition hash. The hash therefore covers everything that shapes the output for those values — imported YAML files, render helpers, defaults — so such changes roll out without a `version` bump. Write them in code, never from runtime or instance data, so the hash is identical on every instance. Choose values that reach as many branches of `render` as one set of values can, including YAML sections it includes only for some values. One set cannot take both sides of a branch, such as a value being present or absent, so a change only on a branch or section `hashValues` never reach does not change the hash and needs a `version` bump (see [When to bump `version`](#version--definition-versioning)).
+Use when some values are only known at install time (entity id, connector id, rule id, etc.). The template renders at install/update time, install values are persisted alongside the document, and re-installs are idempotent on `(definition version, persisted values)`.
 
 ```ts
 import type { ManagedWorkflowDefinition } from '@kbn/workflows/managed';
@@ -531,9 +529,7 @@ export const MY_TEMPLATE_WORKFLOW = {
   pluginId: 'myPlugin',
   version: 1,
   billable: false,
-  yamlTemplate: {
-    hashValues: { entityId: 'host-example' },
-    render: ({ entityId }) => `name: Monitor ${entityId}
+  yamlTemplate: ({ entityId }) => `name: Monitor ${entityId}
 enabled: true
 triggers:
   - type: scheduled
@@ -544,7 +540,6 @@ steps:
     type: console
     with:
       message: "Checking ${entityId}"`,
-  },
   management: {
     lifecycle: 'dynamic',
     versionStrategy: 'auto',
@@ -560,7 +555,7 @@ await managed.install(MY_TEMPLATE_WORKFLOW_ID, {
 });
 ```
 
-**Why `satisfies` for templates?** `as const satisfies ManagedWorkflowDefinition<MyTemplateValues>` validates the object against the type while preserving the literal `id` and `yamlTemplate.render` signature for downstream type inference. This allows the platform to infer `TValues` at call sites — `values` is type-checked for this workflow id (`entityId` typo/wrong type fails at compile time).
+**Why `satisfies` for templates?** `as const satisfies ManagedWorkflowDefinition<MyTemplateValues>` validates the object against the type while preserving the literal `id` and `yamlTemplate` signature for downstream type inference. This allows the platform to infer `TValues` at call sites — `values` is type-checked for this workflow id (`entityId` typo/wrong type fails at compile time).
 
 For `yaml`-based definitions (no template values), a direct annotation (`: ManagedWorkflowDefinition`) is sufficient since there is no `values` type to infer.
 
@@ -568,7 +563,7 @@ For `yaml`-based definitions (no template values), a direct annotation (`: Manag
 
 Every managed definition declares a `version: number` (positive integer, starting at 1).
 
-- **`version` participates in reconciliation.** An install is skipped only when both the `definitionHash` (SHA-256 of the YAML content, or of `yamlTemplate.render(hashValues)` for templates) and the stored `managedVersion` match the definition's current values. A version bump alone (without YAML changes) is enough to trigger a managed update — this is how non-YAML config changes (e.g. `billable`) are propagated.
+- **`version` participates in reconciliation.** An install is skipped only when both the `definitionHash` (SHA-256 of the YAML content) and the stored `managedVersion` match the definition's current values. A version bump alone (without YAML changes) is enough to trigger a managed update — this is how non-YAML config changes (e.g. `billable`) are propagated.
 - `version` is not auto-derived from the hash — it is an explicit declaration that the owner controls.
 
 The definition's `version` is persisted as `managedVersion` on the workflow document. It serves three main purposes:
@@ -581,10 +576,7 @@ The definition's `version` is persisted as `managedVersion` on the workflow docu
 
 - **Bump** when the change involves non-YAML config (e.g. `billable`, `management` policy changes), or when it is a YAML change you want explicit visibility/auditability for.
 - **Optional** for YAML-only changes on a fixed `yaml` definition because its content hash triggers the upgrade.
-- **Optional** for `yamlTemplate` changes that alter the output for `hashValues`, including edits to imported YAML, render helpers and defaults, because the hash moves. `managed_workflow_version_pins.test.ts` still requires a bump when the change also alters the lines its `BLIND_SPOTS` values render differently from `hashValues`.
-- **Required** for `yamlTemplate` changes that `hashValues` do not reach, such as a branch or YAML section rendered only for other values, or a default `render` applies only when a value is missing. The rendered output for `hashValues` is unchanged, so the hash is too.
-
-`src/platform/packages/shared/kbn-workflows/managed/managed_workflow_version_pins.test.ts` catches a missing bump for the **Required** case on the branches its `BLIND_SPOTS` values take. Each template whose `render` branches on its values has a `BLIND_SPOTS` entry: values that take the branches `hashValues` skip, and a pin of its `version` with a fingerprint of the lines those values render differently from `hashValues`. A change to those lines at the same `version` fails with the bump to make and the new pin; a bumped `version` fails until its pin is updated. A new `yamlTemplate` definition needs an entry, `null` when `render` does not branch on its values. Nothing checks non-YAML config: bump `version` yourself when you change it.
+- **Required** when a `yamlTemplate` closes over imported YAML or another external constant. The template hash covers the function source, not closed-over content, so changing only the imported content does not change the hash.
 
 ### `billable` — execution metering
 
@@ -730,7 +722,7 @@ Because there is a **single persisted document** for a global workflow, any edit
 10. Use `yamlTemplate` only when install-time values are required.
 11. Ask the Workflows team if you are unsure whether the workflow should be billable.
 12. Add `visibility` only when the workflow should appear in a specific selector or product surface.
-13. Bump `version` on the definition when changing non-YAML config or when you want explicit visibility for a YAML change. For minor YAML-only fixes, bumping is optional (the content hash triggers the upgrade). For a `yamlTemplate` definition with a `BLIND_SPOTS` pin in `managed_workflow_version_pins.test.ts`, update the pin whenever `version` moves.
+13. Bump `version` on the definition when changing non-YAML config or when you want explicit visibility for a YAML change. For minor YAML-only fixes, bumping is optional (the content hash triggers the upgrade).
 14. Use `managed.getWorkflowStatus(...)` for read-only pre-flight checks before execution.
 15. Execute via `managed.execute(request, ...)`; for dynamic instances, pass the deterministic `workflowId`.
 16. Prefix every raw request path (`kibana.request`, `with.request`, `with.form_data`) with the executing space — see [Scoping raw request paths at runtime](#scoping-raw-request-paths-at-runtime). A cluster-level route is the deliberate exception.

@@ -76,7 +76,7 @@ for (const catalog of SYSTEM_SECURITY_WORKER_CATALOG) {
   if (!managedWorkflow) {
     throw new Error(`Worker "${catalog.id}" has no managed workflow definition`);
   }
-  if (!('yamlTemplate' in managedWorkflow) || !managedWorkflow.yamlTemplate) {
+  if (!('yamlTemplate' in managedWorkflow) || typeof managedWorkflow.yamlTemplate !== 'function') {
     throw new Error(`Worker "${catalog.id}" must use a managed YAML template`);
   }
   const settings = workerSettingsById[catalog.id];

@@ -15,7 +15,6 @@ import { requiresDelegatedIdentity, toWorkflowExecutionEngineModel } from '@kbn/
 import {
   getManagedWorkflowDefinition,
   getManagedWorkflowDefinitions,
-  getManagedWorkflowHashedYaml,
   getManagedWorkflowVisibilityContexts,
   type ManagedWorkflowDefinition,
   type ManagedWorkflowId,
@@ -971,7 +970,7 @@ export class ManagedWorkflowsService {
           `Managed workflow '${definition.id}' uses yamlTemplate but no template values were provided and none are persisted`
         );
       }
-      const yaml = definition.yamlTemplate.render(templateValues);
+      const yaml = definition.yamlTemplate(templateValues);
       return {
         yaml,
         managedTemplateValues: templateValues,
@@ -996,7 +995,15 @@ export class ManagedWorkflowsService {
   }
 
   private computeManagedDefinitionHash(definition: ManagedWorkflowDefinition): string {
-    return computeDefinitionHash(getManagedWorkflowHashedYaml(definition));
+    if (definition.yamlTemplate) {
+      return computeDefinitionHash(definition.yamlTemplate.toString());
+    }
+    if (!definition.yaml) {
+      throw new Error(
+        `Managed workflow '${definition.id}' must define either yaml or yamlTemplate`
+      );
+    }
+    return computeDefinitionHash(definition.yaml);
   }
 
   private areTemplateValuesEqual(

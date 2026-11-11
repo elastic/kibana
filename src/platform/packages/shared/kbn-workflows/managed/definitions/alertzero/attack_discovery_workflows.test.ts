@@ -127,7 +127,7 @@ const forensicsMetadata = (forensicsAction.consts?.actionMetadata ?? {}) as {
 
 // The Watch Floor worker is a template, so it has to be rendered before parsing.
 const floor = parse(
-  ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW.yamlTemplate.render({
+  ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW.yamlTemplate({
     autonomyLevel: 'manual',
     scheduleInterval: '24h',
     settingsVersion: 1,
@@ -218,7 +218,7 @@ describe('Attack Discovery worker chain', () => {
     ['forensics handoff', ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW.yaml],
     [
       'floor worker',
-      ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW.yamlTemplate.render({
+      ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW.yamlTemplate({
         autonomyLevel: 'manual',
         scheduleInterval: '24h',
         settingsVersion: 1,

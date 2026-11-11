@@ -59,7 +59,7 @@ describe('Continuous Threat Hunt close reports', () => {
 describe('Continuous Threat Hunt outcome reports', () => {
   describe('the Worker (hunt_continuous_threat_hunt.yaml)', () => {
     const steps = topLevelSteps(
-      ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW.yamlTemplate.render({
+      ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW.yamlTemplate({
         autonomyLevel: 'assisted',
         scheduleInterval: '4h',
         settingsVersion: 1,

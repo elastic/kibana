@@ -12,7 +12,6 @@ import FLOOR_ALERT_TRIAGE_YAML from './floor_alert_triage.yaml';
 import {
   ALERT_TRIAGE_WORKER_SETTINGS_DEFAULTS,
   upgradeStoredWorkerSettings,
-  workerHashValues,
 } from './worker_settings_defaults';
 import {
   type AlertTriageWorkerTemplateValues,
@@ -28,16 +27,9 @@ export const ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW = {
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 18,
-  yamlTemplate: {
-    hashValues: workerHashValues({
-      settingsVersion: 2,
-      scheduleInterval: ALERT_TRIAGE_WORKER_SETTINGS_DEFAULTS.scheduleInterval.defaultValue,
-      extras: ALERT_TRIAGE_WORKER_SETTINGS_DEFAULTS.extras.defaultValue,
-    }),
-    render: (values: AlertTriageWorkerTemplateValues): string =>
-      renderAlertTriageWorkerYaml(
-        FLOOR_ALERT_TRIAGE_YAML,
-        upgradeStoredWorkerSettings(ALERT_TRIAGE_WORKER_SETTINGS_DEFAULTS, values)
-      ),
-  },
+  yamlTemplate: (values: AlertTriageWorkerTemplateValues): string =>
+    renderAlertTriageWorkerYaml(
+      FLOOR_ALERT_TRIAGE_YAML,
+      upgradeStoredWorkerSettings(ALERT_TRIAGE_WORKER_SETTINGS_DEFAULTS, values)
+    ),
 } as const satisfies ManagedWorkflowDefinition<AlertTriageWorkerTemplateValues>;

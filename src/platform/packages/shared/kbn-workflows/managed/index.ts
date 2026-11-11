@@ -18,7 +18,6 @@ import type {
   ManagedWorkflowTemplateValues,
   ManagedWorkflowVisibility,
   ManagedWorkflowVisibilityContext,
-  ManagedYamlTemplate,
 } from './types';
 
 export type {
@@ -31,9 +30,7 @@ export type {
   ManagedWorkflowTemplateValues,
   ManagedWorkflowVisibility,
   ManagedWorkflowVisibilityContext,
-  ManagedYamlTemplate,
 };
-export { getManagedWorkflowHashedYaml } from './hashed_yaml';
 export {
   getManagedWorkflowSelectorVisibilityContext,
   getManagedWorkflowSolutionVisibilityContext,
@@ -67,7 +64,7 @@ export type ManagedWorkflowId = keyof ManagedWorkflowDefinitionById;
 type ManagedWorkflowDefinitionEntry = ManagedWorkflowDefinitionById[ManagedWorkflowId];
 
 type ManagedWorkflowTemplateValuesForDefinition<TDefinition> = TDefinition extends {
-  yamlTemplate: { render: (values: infer TValues) => string };
+  yamlTemplate: (values: infer TValues) => string;
 }
   ? TValues
   : never;

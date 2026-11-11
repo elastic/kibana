@@ -63,8 +63,8 @@ See [MANAGED_WORKFLOWS.md](../../dev_docs/MANAGED_WORKFLOWS.md) for rationale an
 | `pluginId`              | Same id in definition, `registerManagedWorkflowOwner`, and client init                  |
 | Registry                | Definition in `managedWorkflowDefinitions` + id re-exported from `definitions/index.ts` |
 | `management`            | Explicit `lifecycle`, `versionStrategy`, `enablement` — no runtime default              |
-| `yaml` / `yamlTemplate` | Exactly one. A YAML change alone already triggers rollout via `definitionHash`; for templates it hashes `render(hashValues)` |
-| `version`               | Bump for non-YAML config, template changes `hashValues` do not reach, or a deliberate signal |
+| `yaml` / `yamlTemplate` | Exactly one. A YAML change alone already triggers rollout via `definitionHash`          |
+| `version`               | Bump for non-YAML config, `yamlTemplate` closing over imports, or a deliberate signal   |
 | `setup()`               | `registerManagedWorkflowOwner` only — never `install`                                   |
 | `start()`               | `initManagedWorkflowsClient` → static `install`s → `ready()`                            |
 | `spaceId`               | Required on every operation; use `GLOBAL_WORKFLOW_SPACE_ID` explicitly for global       |
@@ -72,7 +72,7 @@ See [MANAGED_WORKFLOWS.md](../../dev_docs/MANAGED_WORKFLOWS.md) for rationale an
 | Multi-instance          | Use `workflowIdSuffix` or full `workflowId` — bare id overwrites                        |
 | `execute`               | Real request + requesting user's space in options (not `'*'`)                           |
 | `disable`               | Requestless switch-off of the plugin's own workflow, bound ones included; enabling still needs a `manage_security` user. With `enablement: 'enforced'` the next managed update switches it back on — use `restorable` to keep it off |
-| Templates               | Set `yamlTemplate.hashValues`; the registry tests render and validate with them         |
+| Templates               | Add representative `values` to `templateRepresentativeValuesById` in registry tests     |
 
 ## Space scoping
 
@@ -155,8 +155,6 @@ When adding a managed workflow:
    - [ ] Exactly one of `yaml` or `yamlTemplate`
    - [ ] Explicit `management` policy chosen intentionally
    - [ ] Template defs use `as const satisfies ManagedWorkflowDefinition<TValues>`
-   - [ ] Template defs set `yamlTemplate.hashValues` in code, reaching as many branches of `render` as one set of values can; edits to branches they skip need a `version` bump
-   - [ ] Template defs have a `BLIND_SPOTS` entry in `managed_workflow_version_pins.test.ts`: values covering the branches `hashValues` skip plus the pin the test failure prints, or `null` when `render` does not branch; update the pin whenever `version` moves
    - [ ] Added to `managedWorkflowDefinitions` in `definitions/index.ts`
    - [ ] Id re-exported from `definitions/index.ts`
    - [ ] Every raw request path (top-level `path` on `kibana.request`, `with.request.path`,
@@ -169,7 +167,7 @@ When adding a managed workflow:
 
 3. **Tests** (`managed_workflow_definitions.test.ts`)
 
-   - [ ] `hashValues` render as many YAML sections of a new `yamlTemplate` definition as one set of values can; sections they skip are covered by tests with other values
+   - [ ] Representative `values` added for new `yamlTemplate` definitions
 
 4. **Owner plugin** — see [§1–§3 in MANAGED_WORKFLOWS.md](../../dev_docs/MANAGED_WORKFLOWS.md)
 
@@ -199,7 +197,7 @@ When reviewing a PR that adds or modifies managed workflows:
 - [ ] Multi-instance installs use suffix or full `workflowId` — not bare definition id repeated for different entities
 - [ ] `spaceId` explicit everywhere; global installs use `GLOBAL_WORKFLOW_SPACE_ID`, not omitted
 - [ ] `execute` passes request and requesting space (not `'*'` for execution stamping)
-- [ ] Template definitions set `hashValues` that render a valid workflow (the registry tests render with them)
+- [ ] Template definitions updated in `templateRepresentativeValuesById` when added/changed
 - [ ] YAML references triggers/steps the owning plugin (or dependencies) actually register
 - [ ] Every raw request path carries `/s/<executing space>/` (usually `{{ workflow.spaceId }}`) across `kibana.request`, `with.request`, `with.form_data`, or the exception is justified in the PR
 

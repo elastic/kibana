@@ -42,13 +42,10 @@ export const CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW = {
   pluginId: 'contextEngine',
   version: 1,
   billable: false,
-  yamlTemplate: {
-    hashValues: { aiIndexId: 'my-ai-index', intervalMinutes: 1440 },
-    render: ({ aiIndexId, intervalMinutes }) =>
-      renderTemplate(FEEDBACK_ANALYSIS_YAML, {
-        __AI_INDEX_ID__: aiIndexId,
-        __INTERVAL_MINUTES__: intervalMinutes,
-      }),
-  },
+  yamlTemplate: ({ aiIndexId, intervalMinutes }) =>
+    renderTemplate(FEEDBACK_ANALYSIS_YAML, {
+      __AI_INDEX_ID__: aiIndexId,
+      __INTERVAL_MINUTES__: intervalMinutes,
+    }),
   management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition<ContextEngineFeedbackAnalysisWorkflowTemplateValues>;

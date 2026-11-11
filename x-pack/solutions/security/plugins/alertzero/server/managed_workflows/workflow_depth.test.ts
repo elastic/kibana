@@ -43,9 +43,7 @@ const loadWorkflow = (workflowId: string): WorkflowYaml => {
   }
   const registration = workerRegistry.get(workflowId);
   if ('yamlTemplate' in definition && definition.yamlTemplate && registration) {
-    return parseWorkflow(
-      definition.yamlTemplate.render(registration.settings.createDefaultValues())
-    );
+    return parseWorkflow(definition.yamlTemplate(registration.settings.createDefaultValues()));
   }
   throw new Error(
     `"${workflowId}" is templated but is not a registered Worker, so it cannot render`

@@ -13,10 +13,16 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { WorkflowStep } from '@kbn/workflows';
 import { createWorkflowLiquidEngine, getNestedStepGroups } from '@kbn/workflows';
 import {
+  ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID,
+  ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
+  ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
+  ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
+  ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
+  ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
   getManagedWorkflowDefinition,
   getManagedWorkflowDefinitions,
-  getManagedWorkflowHashedYaml,
 } from '@kbn/workflows/managed';
+import type { ManagedWorkflowTemplateValuesById } from '@kbn/workflows/managed';
 import { ALERTZERO_MANAGED_WORKFLOW_OWNER_ID } from '../../../common/constants';
 import type { REPORT_WORKER_OUTCOME_EVENTS } from '../../../common/step_types';
 import {
@@ -62,13 +68,60 @@ const nestedStepLists = (step: YamlStep): YamlStep[][] =>
 const flatten = (steps: YamlStep[]): YamlStep[] =>
   steps.flatMap((step) => [step, ...nestedStepLists(step).flatMap(flatten)]);
 
-/** A managed workflow's YAML, rendered with its `hashValues` when it is a template. */
+/** Representative values for the Worker definitions rendered from a YAML template. */
+const TEMPLATE_VALUES: Partial<ManagedWorkflowTemplateValuesById> = {
+  [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID]: {
+    autonomyLevel: 'manual',
+    extras: {
+      autoCloseConfidenceScoreMinThreshold: 0.85,
+      budgetPerHour: 1300,
+      lookbackHours: 24,
+      minSeverity: 'low',
+      excludeBuildingBlocks: false,
+      excludedRuleTags: [],
+    },
+    scheduleInterval: '15m',
+    settingsVersion: 1,
+  },
+  [ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID]: {
+    autonomyLevel: 'manual',
+    scheduleInterval: '4h',
+    settingsVersion: 1,
+  },
+  [ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID]: {
+    autonomyLevel: 'manual',
+    settingsVersion: 1,
+  },
+  [ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID]: {
+    autonomyLevel: 'manual',
+    scheduleInterval: '24h',
+    settingsVersion: 1,
+  },
+  [ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID]: {
+    autonomyLevel: 'manual',
+    extras: { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 },
+    scheduleInterval: '2h',
+    settingsVersion: 1,
+  },
+  [ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID]: {
+    autonomyLevel: 'manual',
+    extras: { lookbackDays: 14, maxGapsPerRun: 5 },
+    scheduleInterval: '1h',
+    settingsVersion: 1,
+  },
+};
+
+/** A managed workflow's YAML, rendered with representative values when it is a template. */
 export const getManagedYaml = (workflowId: string): string => {
   const definition = getManagedWorkflowDefinition(workflowId);
-  if (!definition) {
+  if (definition && 'yaml' in definition && definition.yaml) {
+    return definition.yaml;
+  }
+  const values = (TEMPLATE_VALUES as Record<string, unknown>)[workflowId];
+  if (!definition || !definition.yamlTemplate || !values) {
     throw new Error(`Managed workflow "${workflowId}" has no YAML to render`);
   }
-  return getManagedWorkflowHashedYaml(definition);
+  return definition.yamlTemplate(values as never);
 };
 
 /** Every report step of a workflow's YAML, at any depth. */

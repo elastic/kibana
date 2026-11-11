@@ -74,12 +74,12 @@ const ALL_FIXTURES = SYSTEM_SECURITY_WORKER_IDS.flatMap((workerId) => loadFixtur
 const currentFixture = (workerId: RegisteredWorkerId): StoredFixture | undefined =>
   ALL_FIXTURES.find((fixture) => fixture.workerId === workerId && fixture.name === 'current.json');
 
-const getYamlTemplateRender = (workerId: RegisteredWorkerId) => {
+const getYamlTemplate = (workerId: RegisteredWorkerId) => {
   const definition = getManagedWorkflowDefinition(workerId);
   if (!definition || !('yamlTemplate' in definition) || !definition.yamlTemplate) {
     throw new Error(`Worker "${workerId}" is missing a yamlTemplate`);
   }
-  return definition.yamlTemplate.render;
+  return definition.yamlTemplate;
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -195,7 +195,7 @@ describe('stored Worker settings compatibility', () => {
       );
     }
     try {
-      getYamlTemplateRender(workerId)(values);
+      getYamlTemplate(workerId)(values);
     } catch (error) {
       const detail = error instanceof Error ? error.message : String(error);
       throw new Error(
@@ -256,8 +256,8 @@ describe('stored Worker settings compatibility', () => {
         return;
       }
       expect(registration.toSettings(stored).autonomy).toBe(lowered);
-      const render = getYamlTemplateRender(workerId);
-      if (render(stored) !== render(storedLowered)) {
+      const yamlTemplate = getYamlTemplate(workerId);
+      if (yamlTemplate(stored) !== yamlTemplate(storedLowered)) {
         throw new Error(
           `The workflow for "${workerId}" rendered from a stored "${level}" differs from one rendered from "${lowered}", so the settings page and the running workflow disagree.`
         );
@@ -283,9 +283,9 @@ describe('stored Worker settings compatibility', () => {
     '$workerId: a stored document without $key reads and renders its default',
     ({ workerId, key, missing, withDefault }) => {
       const registration = createWorkerSettingsRegistration(workerId);
-      const render = getYamlTemplateRender(workerId);
+      const yamlTemplate = getYamlTemplate(workerId);
       expect(registration.toSettings(missing)).toEqual(registration.toSettings(withDefault));
-      if (render(missing) !== render(withDefault)) {
+      if (yamlTemplate(missing) !== yamlTemplate(withDefault)) {
         throw new Error(
           `The workflow for "${workerId}" rendered from a document without ${key} differs from one that stores the default, so a setting added with a default does not reach configured spaces.`
         );
@@ -298,7 +298,7 @@ describe('stored Worker settings compatibility', () => {
     ({ workerId, values }) => {
       const before = JSON.stringify(values);
       const frozen = deepFreeze(structuredClone(values));
-      getYamlTemplateRender(workerId)(frozen);
+      getYamlTemplate(workerId)(frozen);
       createWorkerSettingsRegistration(workerId).toSettings(frozen);
       expect(JSON.stringify(frozen)).toBe(before);
     }

@@ -20,8 +20,8 @@ function createContentFingerprint(content: string): string {
 }
 
 /**
- * What AlertZero bumps the Hunt Worker's `version` for: the imported YAML and the settings
- * defaults the Hunt renderer fills stored values from.
+ * What the platform's `yamlTemplate` hash cannot see but the render depends on: the imported YAML
+ * and the settings defaults the Hunt renderer fills stored values from.
  */
 const renderInputs = (importedYaml: string, defaults: unknown): string =>
   `${importedYaml}\n${JSON.stringify(defaults)}`;

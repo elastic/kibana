@@ -12,7 +12,6 @@ import DETECTION_RULE_COVERAGE_YAML from './detection_rule_coverage.yaml';
 import {
   RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS,
   upgradeStoredWorkerSettings,
-  workerHashValues,
 } from './worker_settings_defaults';
 import {
   renderRuleCoverageWorkerYaml,
@@ -29,16 +28,9 @@ export const ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW = {
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 5,
-  yamlTemplate: {
-    hashValues: workerHashValues({
-      settingsVersion: 1,
-      scheduleInterval: RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS.scheduleInterval.defaultValue,
-      extras: RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS.extras.defaultValue,
-    }),
-    render: (values: RuleCoverageWorkerTemplateValues): string =>
-      renderRuleCoverageWorkerYaml(
-        DETECTION_RULE_COVERAGE_YAML,
-        upgradeStoredWorkerSettings(RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS, values)
-      ),
-  },
+  yamlTemplate: (values: RuleCoverageWorkerTemplateValues): string =>
+    renderRuleCoverageWorkerYaml(
+      DETECTION_RULE_COVERAGE_YAML,
+      upgradeStoredWorkerSettings(RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS, values)
+    ),
 } as const satisfies ManagedWorkflowDefinition<RuleCoverageWorkerTemplateValues>;

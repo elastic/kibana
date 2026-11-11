@@ -92,12 +92,12 @@ const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSetting
   },
 };
 
-const getYamlTemplateRender = (workerId: RegisteredWorkerId) => {
+const getYamlTemplate = (workerId: RegisteredWorkerId) => {
   const definition = getManagedWorkflowDefinition(workerId);
   if (!definition || !('yamlTemplate' in definition) || !definition.yamlTemplate) {
     throw new Error(`Worker "${workerId}" is missing a yamlTemplate`);
   }
-  return definition.yamlTemplate.render;
+  return definition.yamlTemplate;
 };
 
 describe('workerRegistry', () => {
@@ -116,7 +116,7 @@ describe('workerRegistry', () => {
 
       const expected = EXPECTED_WORKER_SETTINGS[catalog.id];
       const values = registration.settings.createDefaultValues();
-      const yaml = getYamlTemplateRender(catalog.id)(values);
+      const yaml = getYamlTemplate(catalog.id)(values);
       const parsed = parse(yaml) as {
         tags?: string[];
         triggers?: Array<{ type?: string; with?: { every?: string } }>;
@@ -164,7 +164,7 @@ describe('workerRegistry', () => {
       if (!registration) {
         throw new Error(`Worker "${catalog.id}" is not registered`);
       }
-      const yaml = getYamlTemplateRender(catalog.id)(registration.settings.createDefaultValues());
+      const yaml = getYamlTemplate(catalog.id)(registration.settings.createDefaultValues());
 
       expect(await workflowSchemaFailure(yaml)).toBeUndefined();
     }
@@ -177,7 +177,7 @@ describe('workerRegistry', () => {
       if (!registration) {
         throw new Error('Attack Discovery worker is not registered');
       }
-      const yaml = getYamlTemplateRender(SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID)({
+      const yaml = getYamlTemplate(SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID)({
         ...registration.settings.createDefaultValues(),
         scheduleInterval,
       });

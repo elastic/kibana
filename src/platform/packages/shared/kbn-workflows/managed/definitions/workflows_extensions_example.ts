@@ -24,9 +24,7 @@ export const EXAMPLE_MANAGED_WORKFLOW = {
   visibility: {
     selectors: ['rule_action'],
   },
-  yamlTemplate: {
-    hashValues: { recipient: 'World' },
-    render: ({ recipient }) => `name: Example Greeting - ${recipient}
+  yamlTemplate: ({ recipient }) => `name: Example Greeting - ${recipient}
 enabled: true
 triggers:
   - type: workflows.failed
@@ -39,7 +37,6 @@ steps:
     with:
       message: "Hello, ${recipient}! This is a managed workflow example."
 `,
-  },
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',
@@ -66,42 +63,30 @@ export const EXAMPLE_SERVICE_ACCOUNT_WORKFLOW = {
   pluginId: 'workflowsExtensionsExample',
   version: 2,
   billable: false,
-  yamlTemplate: {
-    // Sets every option; edits to the branches these values skip need a `version` bump.
-    hashValues: {
-      serviceAccountId: 'example-account',
-      childWorkflowId: 'example-child',
-      runAsMode: 'inherit',
-      asynchronous: true,
-      waitForInput: true,
-      fallbackChild: true,
-      conditionalChild: true,
-      message: 'Example message',
-    },
-    render: (values) => {
-      const childCall = values.childWorkflowId
-        ? `  - name: child
+  yamlTemplate: (values) => {
+    const childCall = values.childWorkflowId
+      ? `  - name: child
 ${values.conditionalChild ? "    if: '${{ workflow.spaceId != blank }}'\n" : ''}    type: ${
-            values.asynchronous ? 'workflow.executeAsync' : 'workflow.execute'
-          }
+          values.asynchronous ? 'workflow.executeAsync' : 'workflow.execute'
+        }
     with:
       workflow-id: ${JSON.stringify(values.childWorkflowId)}
 ${values.runAsMode !== undefined ? `      run-as-mode: ${values.runAsMode}\n` : ''}`
-        : '';
-      const settings = [
-        values.serviceAccountId ? `  run_as: ${JSON.stringify(values.serviceAccountId)}\n` : '',
-        values.fallbackChild && childCall
-          ? `  on-failure:\n    fallback:\n${childCall
-              .split('\n')
-              .filter(Boolean)
-              .map((line) => `    ${line}`)
-              .join('\n')}\n`
-          : '',
-      ].join('');
-      return `name: Managed ${values.childWorkflowId ? 'parent' : 'child'} identity example
+      : '';
+    const settings = [
+      values.serviceAccountId ? `  run_as: ${JSON.stringify(values.serviceAccountId)}\n` : '',
+      values.fallbackChild && childCall
+        ? `  on-failure:\n    fallback:\n${childCall
+            .split('\n')
+            .filter(Boolean)
+            .map((line) => `    ${line}`)
+            .join('\n')}\n`
+        : '',
+    ].join('');
+    return `name: Managed ${values.childWorkflowId ? 'parent' : 'child'} identity example
 description: ${JSON.stringify(
-        values.message ?? 'Proves the effective identity of a managed parent or child workflow.'
-      )}
+      values.message ?? 'Proves the effective identity of a managed parent or child workflow.'
+    )}
 enabled: true
 ${settings ? `settings:\n${settings}` : ''}triggers:
   - type: manual
@@ -138,7 +123,6 @@ ${
     with:
       message: ${JSON.stringify(values.message ?? 'Managed identity example completed')}
 `;
-    },
   },
   management: {
     lifecycle: 'dynamic',

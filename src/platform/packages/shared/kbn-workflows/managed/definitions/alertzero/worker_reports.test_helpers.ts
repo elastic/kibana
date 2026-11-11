@@ -8,9 +8,17 @@
  */
 
 import { parse } from 'yaml';
+import {
+  ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID,
+  ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
+  ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
+  ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
+  ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
+  ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
+} from '.';
 import { ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID } from './constants';
-import type { ManagedWorkflowDefinition } from '../..';
-import { getManagedWorkflowDefinitions, getManagedWorkflowHashedYaml } from '../..';
+import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValuesById } from '../..';
+import { getManagedWorkflowDefinitions } from '../..';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 import type { WorkflowStep } from '../../../definition';
 import { getNestedStepGroups } from '../../../definition';
@@ -113,9 +121,63 @@ export const describeReportStep = (
   });
 };
 
-/** The top-level steps of a definition, rendering a `yamlTemplate` with its `hashValues`. */
+/** Any valid values will do: where a Worker reports does not depend on them. */
+const WORKER_TEMPLATE_VALUES: Partial<ManagedWorkflowTemplateValuesById> = {
+  [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID]: {
+    autonomyLevel: 'manual',
+    extras: {
+      autoCloseConfidenceScoreMinThreshold: 0.85,
+      budgetPerHour: 1300,
+      lookbackHours: 24,
+      minSeverity: 'low',
+      excludeBuildingBlocks: false,
+      excludedRuleTags: [],
+    },
+    scheduleInterval: '15m',
+    settingsVersion: 1,
+  },
+  [ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID]: {
+    autonomyLevel: 'manual',
+    scheduleInterval: '24h',
+    settingsVersion: 1,
+  },
+  [ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID]: {
+    autonomyLevel: 'manual',
+    settingsVersion: 1,
+  },
+  [ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID]: {
+    autonomyLevel: 'manual',
+    scheduleInterval: '4h',
+    settingsVersion: 1,
+  },
+  [ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID]: {
+    autonomyLevel: 'manual',
+    extras: { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 },
+    scheduleInterval: '2h',
+    settingsVersion: 1,
+  },
+  [ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID]: {
+    autonomyLevel: 'manual',
+    extras: { lookbackDays: 14, maxGapsPerRun: 5 },
+    scheduleInterval: '1h',
+    settingsVersion: 1,
+  },
+};
+
+const renderYaml = (definition: ManagedWorkflowDefinition): string => {
+  if (typeof definition.yaml === 'string') {
+    return definition.yaml;
+  }
+  const values = (WORKER_TEMPLATE_VALUES as Record<string, unknown>)[definition.id];
+  if (!values || !definition.yamlTemplate) {
+    throw new Error(`No template values for ${definition.id}; add them to WORKER_TEMPLATE_VALUES`);
+  }
+  return definition.yamlTemplate(values as never);
+};
+
+/** The top-level steps of a definition, rendering a `yamlTemplate` with representative values. */
 export const stepsOf = (definition: ManagedWorkflowDefinition): YamlStep[] =>
-  topLevelSteps(getManagedWorkflowHashedYaml(definition));
+  topLevelSteps(renderYaml(definition));
 
 /**
  * The step lists nested directly in `step`, as the engine nests them. `YamlStep` is a loose view

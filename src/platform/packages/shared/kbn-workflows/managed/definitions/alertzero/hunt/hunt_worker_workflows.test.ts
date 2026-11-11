@@ -81,7 +81,7 @@ const flatten = (steps: YamlStep[]): YamlStep[] =>
   steps.flatMap((step) => [step, ...flatten(step.steps ?? [])]);
 
 const worker = parse(
-  ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW.yamlTemplate.render({
+  ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW.yamlTemplate({
     settingsVersion: 1,
     autonomyLevel: 'manual',
     scheduleInterval: '4h',
@@ -269,12 +269,11 @@ describe('Hunt Watch worker chain', () => {
   });
 
   describe('the sweep gate', () => {
-    const renderedWorker =
-      ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW.yamlTemplate.render({
-        settingsVersion: 1,
-        autonomyLevel: 'manual',
-        scheduleInterval: '4h',
-      });
+    const renderedWorker = ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW.yamlTemplate({
+      settingsVersion: 1,
+      autonomyLevel: 'manual',
+      scheduleInterval: '4h',
+    });
 
     it('renders with no technology placeholder, const, or child input', () => {
       expect(renderedWorker).not.toMatch(/technolog/i);

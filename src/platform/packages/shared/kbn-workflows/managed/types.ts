@@ -52,12 +52,6 @@ export interface ManagedWorkflowTemplateValues {
   [key: string]: unknown;
 }
 
-export interface ManagedYamlTemplate<TValues extends ManagedWorkflowTemplateValues> {
-  /** Fixed values, written in code, that the hash renders; edits on branches they skip need a version bump. */
-  hashValues: TValues;
-  render(values: TValues): string;
-}
-
 type ManagedWorkflowDefinitionSource<TValues extends ManagedWorkflowTemplateValues> =
   | {
       yaml: string;
@@ -65,7 +59,7 @@ type ManagedWorkflowDefinitionSource<TValues extends ManagedWorkflowTemplateValu
     }
   | {
       yaml?: never;
-      yamlTemplate: ManagedYamlTemplate<TValues>;
+      yamlTemplate(values: TValues): string;
     };
 
 export type ManagedWorkflowDefinition<

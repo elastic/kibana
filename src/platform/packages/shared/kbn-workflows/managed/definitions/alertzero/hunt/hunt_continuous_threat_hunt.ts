@@ -14,7 +14,6 @@ import { ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID, ALERTZERO_WORKER_MANAGEMENT } fro
 import {
   CONTINUOUS_THREAT_HUNT_WORKER_SETTINGS_DEFAULTS,
   upgradeStoredWorkerSettings,
-  workerHashValues,
 } from '../worker_settings_defaults';
 
 export const ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID =
@@ -26,16 +25,9 @@ export const ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW = {
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 8,
-  yamlTemplate: {
-    hashValues: workerHashValues({
-      settingsVersion: 1,
-      scheduleInterval:
-        CONTINUOUS_THREAT_HUNT_WORKER_SETTINGS_DEFAULTS.scheduleInterval.defaultValue,
-    }),
-    render: (values: HuntWorkerTemplateValues): string =>
-      renderHuntWorkerYaml(
-        HUNT_CONTINUOUS_THREAT_HUNT_YAML,
-        upgradeStoredWorkerSettings(CONTINUOUS_THREAT_HUNT_WORKER_SETTINGS_DEFAULTS, values)
-      ),
-  },
+  yamlTemplate: (values: HuntWorkerTemplateValues): string =>
+    renderHuntWorkerYaml(
+      HUNT_CONTINUOUS_THREAT_HUNT_YAML,
+      upgradeStoredWorkerSettings(CONTINUOUS_THREAT_HUNT_WORKER_SETTINGS_DEFAULTS, values)
+    ),
 } as const satisfies ManagedWorkflowDefinition<HuntWorkerTemplateValues>;
