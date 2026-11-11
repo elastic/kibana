@@ -465,6 +465,7 @@ export class ModelsProvider {
     };
     return await this._client.asCurrentUser.ingest.simulate(simulateRequest, {
       maxResponseSize: PIPELINE_SIMULATE_MAX_RESPONSE_BYTES,
+      headers: { 'accept-encoding': 'identity' },
     });
   }
 

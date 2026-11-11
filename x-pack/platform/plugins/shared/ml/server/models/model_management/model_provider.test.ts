@@ -466,7 +466,7 @@ describe('modelsProvider', () => {
     const docs = [{ _source: { message: 'hello' } }];
     const pipeline = { processors: [{ set: { field: 'a', value: 'b' } }] };
 
-    test('passes the 10 MB maxResponseSize option to ingest.simulate', async () => {
+    test('passes the 10 MB maxResponseSize and identity encoding options to ingest.simulate', async () => {
       const simulateResult = {
         docs: [
           {
@@ -486,7 +486,10 @@ describe('modelsProvider', () => {
       expect(result).toEqual(simulateResult);
       expect(mockClient.asCurrentUser.ingest.simulate).toHaveBeenCalledWith(
         { docs, pipeline },
-        { maxResponseSize: 10 * 1024 * 1024 }
+        {
+          maxResponseSize: 10 * 1024 * 1024,
+          headers: { 'accept-encoding': 'identity' },
+        }
       );
     });
 
