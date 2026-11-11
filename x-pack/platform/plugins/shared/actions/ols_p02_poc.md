@@ -132,7 +132,7 @@ Connector tests:
 | Logs and KPIs | `hidden_connectors.test.ts` (more than one page of hidden IDs, lookup failure, nothing hidden); `execution_logs.spec.ts`.                                                             |
 | Workflows     | `resolve_connector_name.test.ts`, `workflow_connectors.test.ts`, `connector_executor.test.ts`; `service_accounts.spec.ts`.                                                            |
 | Search copies | Out of scope (D3).                                                                                                                                                                    |
-| UI            | `connector_access.spec.ts` (Scout UI, 6 tests); Jest tests for the panel, the editor and both flyouts.                                                                                |
+| UI            | `connector_access.spec.ts` (Scout UI, 8 tests); Jest tests for the panel, the editor and both flyouts.                                                                                |
 
 Two choices in the rule paths need review:
 
