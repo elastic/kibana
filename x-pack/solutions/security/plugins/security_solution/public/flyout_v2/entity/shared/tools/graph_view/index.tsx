@@ -16,7 +16,6 @@ import { FlowTargetSourceDest } from '../../../../../../common/search_strategy';
 import { useDefaultDocumentFlyoutProperties } from '../../../../shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../../../../shared/hooks/use_open_flyout';
 import { useGraphTelemetry } from '../../../../shared/hooks/use_graph_telemetry';
-import { getGraphEntryPoint } from '../../../../shared/utils/get_graph_entry_point';
 import { buildFlyoutNavTitle } from '../../../../shared/utils/build_flyout_nav_title';
 import {
   ENTITIES_TITLE,
@@ -53,8 +52,11 @@ export interface GraphViewProps {
   }) => void;
   /** Opens the originating entity flyout as a child (via the header title button). */
   onShowOriginatingEntity?: () => void;
-  /** Where the graph was opened from, for telemetry. Defaults to the entity flyout. */
-  entryPoint?: GraphEntryPoint;
+  /**
+   * Where the user opened the graph from, for telemetry. `undefined` is for a view that was not
+   * opened by a user action in this session (restored from the URL): no telemetry is reported.
+   */
+  entryPoint: GraphEntryPoint | undefined;
 }
 
 /**
@@ -69,13 +71,12 @@ export const GraphView = memo(
     entityName,
     onShowEntity,
     onShowOriginatingEntity,
-    entryPoint: openedFrom,
+    entryPoint,
   }: GraphViewProps) => {
     const open = useOpenFlyout();
     const { historyKey } = useFlyoutSessionContext();
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
     const { openDocumentFlyoutFromIndexAsChild, openNetworkFlyoutAsChild } = useFlyoutApi();
-    const entryPoint = openedFrom ?? getGraphEntryPoint({ mode: 'entity' });
     const { onTelemetryEvent } = useGraphTelemetry(entryPoint);
 
     const onShowDocument = useCallback(

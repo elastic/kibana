@@ -20,6 +20,7 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { buildHostNamesFilter } from '../../../../../common/search_strategy';
 import { useUiSetting, useKibana } from '../../../../common/lib/kibana';
 import { FLYOUT_ORIGIN, FLYOUT_TYPE, type FlyoutOrigin } from '../../../../common/lib/telemetry';
+import { getGraphEntryPoint } from '../../../shared/utils/get_graph_entry_point';
 import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
@@ -401,6 +402,7 @@ export const Host: FC<HostProps> = memo(function Host({
             title: hostName,
             flyoutType: FLYOUT_TYPE.HOST,
             origin: FLYOUT_ORIGIN.VISUALIZATIONS_GRAPH,
+            entryPoint: getGraphEntryPoint({ mode: 'entity' }),
           });
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;

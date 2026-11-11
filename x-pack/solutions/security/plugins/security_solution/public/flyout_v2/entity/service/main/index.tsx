@@ -15,6 +15,7 @@ import type { ESQuery } from '../../../../../common/typed_json';
 import { buildEntityNameFilter } from '../../../../../common/search_strategy';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { FLYOUT_ORIGIN, FLYOUT_TYPE, type FlyoutOrigin } from '../../../../common/lib/telemetry';
+import { getGraphEntryPoint } from '../../../shared/utils/get_graph_entry_point';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
@@ -259,6 +260,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
             title: serviceName,
             flyoutType: FLYOUT_TYPE.SERVICE,
             origin: FLYOUT_ORIGIN.VISUALIZATIONS_GRAPH,
+            entryPoint: getGraphEntryPoint({ mode: 'entity' }),
           });
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;

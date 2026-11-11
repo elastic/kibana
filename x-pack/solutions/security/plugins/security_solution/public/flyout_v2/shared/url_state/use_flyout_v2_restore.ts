@@ -563,6 +563,9 @@ export const openDescriptorAsStart = (
         scopeId: d.scopeId,
         entityName: d.entityName,
         ...originParams,
+        // A view restored from the URL was not opened by the user in this session, so there is no
+        // entry point to report and no telemetry is sent.
+        entryPoint: undefined,
         onShowEntity: noop,
         onShowOriginatingEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,

@@ -52,6 +52,14 @@ describe('<GraphViewTab />', () => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
   });
 
+  it('passes the entity flyout entry point to the graph it renders', () => {
+    render(<GraphViewTab entityId="entity-id" scopeId="some-flyout-scope" />);
+
+    expect(jest.mocked(GraphVisualization).mock.calls[0][0]).toEqual(
+      expect.objectContaining({ mode: 'entity', entryPoint: 'entity_flyout' })
+    );
+  });
+
   it('puts the entity flyout entry point in the grouped panel params', () => {
     openGroupedPanel('some-flyout-scope');
 

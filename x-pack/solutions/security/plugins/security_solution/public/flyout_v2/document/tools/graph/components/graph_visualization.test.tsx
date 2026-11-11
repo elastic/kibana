@@ -107,6 +107,7 @@ const ENTITY_PROPS = {
   mode: 'entity' as const,
   scopeId: 'test-scope',
   entityId: 'entity-1',
+  entryPoint: 'entity_flyout' as const,
   ...callbacks,
 };
 
@@ -169,24 +170,44 @@ describe('GraphVisualization', () => {
       expect(mockUseGraphTelemetry).toHaveBeenCalledWith('event_flyout');
     });
 
-    it('uses the entity_flyout entry point for an entity', () => {
-      render(<GraphVisualization {...ENTITY_PROPS} />);
+    it('passes the entry point of an entity graph to the telemetry hook as is', () => {
+      render(<GraphVisualization {...ENTITY_PROPS} entryPoint="entity_flyout" />);
 
       expect(mockUseGraphTelemetry).toHaveBeenCalledWith('entity_flyout');
     });
 
-    it('keeps the entity_flyout entry point when the scope is the entities table scope', () => {
-      render(<GraphVisualization {...ENTITY_PROPS} scopeId={ENTITY_ANALYTICS_TABLE_ID} />);
-
-      expect(mockUseGraphTelemetry).toHaveBeenCalledWith('entity_flyout');
-      expect(mockUseGraphTelemetry).not.toHaveBeenCalledWith('entity_data_grid');
-    });
-
-    it('uses the entry point the entity graph was opened from when one is given', () => {
-      render(<GraphVisualization {...ENTITY_PROPS} entryPoint="entity_data_grid" />);
+    it('passes the entities grid entry point of an entity graph as is', () => {
+      render(
+        <GraphVisualization
+          {...ENTITY_PROPS}
+          scopeId={ENTITY_ANALYTICS_TABLE_ID}
+          entryPoint="entity_data_grid"
+        />
+      );
 
       expect(mockUseGraphTelemetry).toHaveBeenCalledWith('entity_data_grid');
       expect(mockUseGraphTelemetry).not.toHaveBeenCalledWith('entity_flyout');
+    });
+
+    it('does not fall back to an entry point when an entity graph has none', () => {
+      render(<GraphVisualization {...ENTITY_PROPS} entryPoint={undefined} />);
+
+      expect(mockUseGraphTelemetry).toHaveBeenCalledWith(undefined);
+      expect(mockUseGraphTelemetry).not.toHaveBeenCalledWith('entity_flyout');
+    });
+
+    it('does not fall back to an entry point for the entities table scope either', () => {
+      render(
+        <GraphVisualization
+          {...ENTITY_PROPS}
+          scopeId={ENTITY_ANALYTICS_TABLE_ID}
+          entryPoint={undefined}
+        />
+      );
+
+      expect(mockUseGraphTelemetry).toHaveBeenCalledWith(undefined);
+      expect(mockUseGraphTelemetry).not.toHaveBeenCalledWith('entity_flyout');
+      expect(mockUseGraphTelemetry).not.toHaveBeenCalledWith('entity_data_grid');
     });
   });
 

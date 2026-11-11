@@ -606,6 +606,7 @@ describe('useEntityFlyoutApi', () => {
       scopeId: 'scope-1',
       entityName: 'entity-name',
       onShowEntity: jest.fn(),
+      entryPoint: 'entity_flyout',
     });
 
     expect(mockWriteOnOpen).toHaveBeenCalledWith({
@@ -632,18 +633,19 @@ describe('useEntityFlyoutApi', () => {
     );
   });
 
-  it('openEntityGraphView leaves the entry point unset when none is given', () => {
+  it('openEntityGraphView hands an undefined entry point to the graph view it renders as is', () => {
     const { result } = renderHook(() => useEntityFlyoutApi());
     result.current.openEntityGraphView({
       entityId: 'entity-1',
       scopeId: 'scope-1',
       entityName: 'entity-name',
       onShowEntity: jest.fn(),
+      entryPoint: undefined,
     });
 
     const props = getOpenedContentProps();
     expect(props).toEqual(expect.objectContaining({ entityId: 'entity-1' }));
-    expect(props.entryPoint).toBeUndefined();
+    expect(props).toHaveProperty('entryPoint', undefined);
   });
 
   it('openEntityResolution writes an entityResolution descriptor and clears the param on close', () => {

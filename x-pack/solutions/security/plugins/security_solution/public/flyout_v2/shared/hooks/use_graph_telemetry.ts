@@ -105,13 +105,17 @@ const toEventProperties = (
 /**
  * Maps graph package engagement events to the `entity_graph` EBT event. The legacy flyout and
  * flyout_v2 render the same graph components, so this is the only place that knows how each one
- * becomes an EBT event.
+ * becomes an EBT event. An `undefined` entry point (a graph the user did not open in this session,
+ * e.g. restored from the URL) disables reporting: there is no origin to attribute the events to.
  */
-export const useGraphTelemetry = (entryPoint: GraphEntryPoint): UseGraphTelemetryResult => {
+export const useGraphTelemetry = (
+  entryPoint: GraphEntryPoint | undefined
+): UseGraphTelemetryResult => {
   const { telemetry } = useKibana().services;
 
   const onTelemetryEvent = useCallback<GraphTelemetryHandler>(
     (event) => {
+      if (!entryPoint) return;
       telemetry?.reportEvent(GraphEventTypes.EntityGraph, toEventProperties(event, entryPoint));
     },
     [telemetry, entryPoint]
@@ -119,6 +123,7 @@ export const useGraphTelemetry = (entryPoint: GraphEntryPoint): UseGraphTelemetr
 
   const reportGraphPreviewShown = useCallback(
     (isEmpty: boolean) => {
+      if (!entryPoint) return;
       telemetry?.reportEvent(GraphEventTypes.EntityGraph, {
         id: 'graph_preview_shown',
         entryPoint,
@@ -129,6 +134,7 @@ export const useGraphTelemetry = (entryPoint: GraphEntryPoint): UseGraphTelemetr
   );
 
   const reportGraphPreviewExpanded = useCallback(() => {
+    if (!entryPoint) return;
     telemetry?.reportEvent(GraphEventTypes.EntityGraph, {
       id: 'graph_preview_expanded',
       entryPoint,
@@ -136,11 +142,13 @@ export const useGraphTelemetry = (entryPoint: GraphEntryPoint): UseGraphTelemetr
   }, [telemetry, entryPoint]);
 
   const reportGraphOpened = useCallback(() => {
+    if (!entryPoint) return;
     telemetry?.reportEvent(GraphEventTypes.EntityGraph, { id: 'graph_opened', entryPoint });
   }, [telemetry, entryPoint]);
 
   const reportDrillThrough = useCallback(
     (drillTarget: GraphDrillTarget) => {
+      if (!entryPoint) return;
       telemetry?.reportEvent(GraphEventTypes.EntityGraph, {
         id: 'drill_through',
         entryPoint,

@@ -34,6 +34,19 @@ const mockProps = {
 jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
 
 jest.mock('../../../use_flyout_api');
+
+let mockIsEntityStoreV2Enabled = false;
+jest.mock('../../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../../common/lib/kibana');
+  const { FF_ENABLE_ENTITY_STORE_V2 } = jest.requireActual('@kbn/entity-store/public');
+  return {
+    ...actual,
+    useUiSetting: (key: string, defaultValue?: unknown) => {
+      const value = actual.useUiSetting(key, defaultValue);
+      return key === FF_ENABLE_ENTITY_STORE_V2 && mockIsEntityStoreV2Enabled ? true : value;
+    },
+  };
+});
 const mockFlyoutApi = createFlyoutApiMock();
 
 // Wrap the real content with trigger buttons so `openDetailsPanel` can be exercised for the tools.
@@ -48,6 +61,11 @@ jest.mock('./content', () => {
         type="button"
         data-test-subj="openAnomalyInsights"
         onClick={() => props.openDetailsPanel({ tab: EntityDetailsLeftPanelTab.ANOMALIES })}
+      />
+      <button
+        type="button"
+        data-test-subj="openGraphView"
+        onClick={() => props.openDetailsPanel({ tab: EntityDetailsLeftPanelTab.GRAPH_VIEW })}
       />
       {Object.values(CspInsightLeftPanelSubTab).map((subTab) => (
         <button
@@ -157,6 +175,7 @@ const aliasRecord: UserEntity = {
 describe('<User />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockIsEntityStoreV2Enabled = false;
     (useFlyoutApi as jest.Mock).mockReturnValue(mockFlyoutApi);
     mockedUserRiskScore.mockReturnValue(mockUserRiskScoreState);
     mockedEntityRiskScores.mockReturnValue(mockUserEntityRiskScores);
@@ -522,6 +541,18 @@ describe('<User />', () => {
             entityId: targetEntityId,
             mode: 'resolved',
             scopeId: 'test-scope-id',
+          })
+        );
+      });
+
+      it('opens the graph view from the entity flyout entry point', () => {
+        mockIsEntityStoreV2Enabled = true;
+        fireEvent.click(renderResolved().getByTestId('openGraphView'));
+        expect(mockFlyoutApi.openEntityGraphView).toHaveBeenCalledWith(
+          expect.objectContaining({
+            entityId: targetEntityId,
+            scopeId: 'test-scope-id',
+            entryPoint: 'entity_flyout',
           })
         );
       });

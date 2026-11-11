@@ -17,7 +17,8 @@ export interface GetGraphEntryPointParams {
  * Derives where the user opened the graph from: an alert flyout, an event flyout or, for an entity
  * graph, an entity flyout. The entities grid row action is the one other way into an entity graph;
  * it cannot be told apart from a flyout by scope id, so the code that opens it passes
- * `entity_data_grid` explicitly.
+ * `entity_data_grid` explicitly. A graph restored from the URL was not opened by the user, so it has
+ * no entry point at all: its callers pass `undefined` instead of calling this.
  */
 export const getGraphEntryPoint = ({
   mode,

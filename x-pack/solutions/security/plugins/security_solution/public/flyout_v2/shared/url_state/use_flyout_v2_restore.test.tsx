@@ -440,6 +440,34 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     );
   });
 
+  it('restores an entity graph view without an entry point, so no telemetry is reported', () => {
+    const { history } = renderRestore('/');
+
+    act(() => {
+      history.push(
+        buildUrl([
+          {
+            kind: 'entityGraphView',
+            entityId: 'host:web-01',
+            scopeId: 'some-scope',
+            entityName: 'web-01',
+          },
+        ])
+      );
+    });
+
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(mockFlyoutApi.openEntityGraphView).toHaveBeenCalledTimes(1);
+    const [params] = mockFlyoutApi.openEntityGraphView.mock.calls[0];
+    expect(params).toHaveProperty('entryPoint', undefined);
+    expect(params).toEqual(
+      expect.objectContaining({ entityId: 'host:web-01', entryPoint: undefined })
+    );
+  });
+
   it('opens an entityResolution chain via same-app history navigation', () => {
     const { history } = renderRestore('/');
 

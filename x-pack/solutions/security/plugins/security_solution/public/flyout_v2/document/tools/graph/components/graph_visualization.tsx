@@ -118,8 +118,11 @@ interface EntityGraphVisualizationProps extends GraphNodeCallbacks {
   graphScopeId?: string;
   /** Entity Store v2 entity ID (`entity.id`) to center the graph on */
   entityId: string;
-  /** Where the graph was opened from. Defaults to the entity flyout. */
-  entryPoint?: GraphEntryPoint;
+  /**
+   * Where the user opened the graph from, for telemetry. `undefined` is for a graph that was not
+   * opened by a user action in this session (restored from the URL): no telemetry is reported.
+   */
+  entryPoint: GraphEntryPoint | undefined;
 }
 
 export type GraphVisualizationProps = EventGraphVisualizationProps | EntityGraphVisualizationProps;
@@ -171,11 +174,9 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
 
   const toasts = useToasts();
   const entryPoint =
-    (props.mode === 'entity' ? props.entryPoint : undefined) ??
-    getGraphEntryPoint({
-      mode: props.mode,
-      isAlert: props.mode === 'event' ? props.isAlert : undefined,
-    });
+    props.mode === 'entity'
+      ? props.entryPoint
+      : getGraphEntryPoint({ mode: 'event', isAlert: props.isAlert });
   const { onTelemetryEvent, reportGraphOpened, reportDrillThrough } = useGraphTelemetry(entryPoint);
 
   const hasReportedGraphOpened = useRef(false);

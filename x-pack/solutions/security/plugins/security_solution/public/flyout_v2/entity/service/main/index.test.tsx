@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { ENTITY_PANEL_TABLE_TAB_TEST_ID } from '../../../../flyout/entity_details/shared/components/right/test_ids';
@@ -17,7 +17,10 @@ import {
 import { mockObservedService } from '../../../../flyout/entity_details/service_right/mocks';
 import type { ServiceEntity } from '../../../../../common/api/entity_analytics';
 import { RiskSeverity } from '../../../../../common/search_strategy';
+import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { Service } from '.';
+import { useFlyoutApi } from '../../../use_flyout_api';
+import { createFlyoutApiMock } from '../../../use_flyout_api.mock';
 
 const mockProps = {
   serviceName: 'test',
@@ -27,6 +30,28 @@ const mockProps = {
 };
 
 jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
+
+jest.mock('../../../use_flyout_api');
+const mockFlyoutApi = createFlyoutApiMock();
+
+// Wrap the real content with a trigger button so `openDetailsPanel` can be exercised for the tools.
+jest.mock('../../../../flyout/entity_details/service_right/content', () => {
+  const actual = jest.requireActual('../../../../flyout/entity_details/service_right/content');
+  const { EntityDetailsLeftPanelTab } = jest.requireActual(
+    '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header'
+  );
+  const ServicePanelContent = (props: { openDetailsPanel: (path: EntityDetailsPath) => void }) => (
+    <>
+      <button
+        type="button"
+        data-test-subj="openGraphView"
+        onClick={() => props.openDetailsPanel({ tab: EntityDetailsLeftPanelTab.GRAPH_VIEW })}
+      />
+      <actual.ServicePanelContent {...props} />
+    </>
+  );
+  return { ...actual, ServicePanelContent };
+});
 
 jest.mock('../../../../common/utils/timeline/use_show_timeline', () => ({
   useShowTimeline: jest.fn(() => [true]),
@@ -115,6 +140,7 @@ const aliasRecord: ServiceEntity = {
 describe('<Service />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useFlyoutApi as jest.Mock).mockReturnValue(mockFlyoutApi);
     mockedUseRiskScore.mockReturnValue(mockServiceRiskScoreState);
     mockedEntityRiskScores.mockReturnValue(mockServiceEntityRiskScores);
     mockedUseObservedService.mockReturnValue(mockObservedService);
@@ -404,6 +430,27 @@ describe('<Service />', () => {
 
         expect(getByTestId('risk-summary-table')).toBeInTheDocument();
         expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
+      });
+    });
+
+    describe('detail tools', () => {
+      it('opens the graph view from the entity flyout entry point', () => {
+        withStoreRecords(targetRecord);
+        const { getByTestId } = render(
+          <TestProviders>
+            <Service {...mockProps} />
+          </TestProviders>
+        );
+
+        fireEvent.click(getByTestId('openGraphView'));
+
+        expect(mockFlyoutApi.openEntityGraphView).toHaveBeenCalledWith(
+          expect.objectContaining({
+            entityId: mockProps.entityId,
+            scopeId: 'test-scope-id',
+            entryPoint: 'entity_flyout',
+          })
+        );
       });
     });
   });

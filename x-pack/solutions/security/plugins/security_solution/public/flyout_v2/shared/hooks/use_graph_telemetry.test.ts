@@ -249,6 +249,63 @@ describe('useGraphTelemetry', () => {
     });
   });
 
+  describe('without an entry point', () => {
+    it('does not report a package event', () => {
+      const { result } = renderHook(() => useGraphTelemetry(undefined));
+
+      expect(() =>
+        result.current.onTelemetryEvent({ type: 'filter_changed', change: 'added' })
+      ).not.toThrow();
+
+      expect(mockReportEvent).not.toHaveBeenCalled();
+    });
+
+    it('does not report a node action package event', () => {
+      const { result } = renderHook(() => useGraphTelemetry(undefined));
+
+      result.current.onTelemetryEvent({
+        type: 'node_action',
+        nodeType: 'entity',
+        action: 'show_actions_by',
+        state: 'show',
+      });
+
+      expect(mockReportEvent).not.toHaveBeenCalled();
+    });
+
+    it('does not report the graph preview being shown', () => {
+      const { result } = renderHook(() => useGraphTelemetry(undefined));
+
+      expect(() => result.current.reportGraphPreviewShown(false)).not.toThrow();
+
+      expect(mockReportEvent).not.toHaveBeenCalled();
+    });
+
+    it('does not report the graph preview expand', () => {
+      const { result } = renderHook(() => useGraphTelemetry(undefined));
+
+      expect(() => result.current.reportGraphPreviewExpanded()).not.toThrow();
+
+      expect(mockReportEvent).not.toHaveBeenCalled();
+    });
+
+    it('does not report the graph opening', () => {
+      const { result } = renderHook(() => useGraphTelemetry(undefined));
+
+      expect(() => result.current.reportGraphOpened()).not.toThrow();
+
+      expect(mockReportEvent).not.toHaveBeenCalled();
+    });
+
+    it('does not report a drill-through', () => {
+      const { result } = renderHook(() => useGraphTelemetry(undefined));
+
+      expect(() => result.current.reportDrillThrough('network')).not.toThrow();
+
+      expect(mockReportEvent).not.toHaveBeenCalled();
+    });
+  });
+
   it('does not throw when the telemetry service is unavailable', () => {
     (useKibana as jest.Mock).mockReturnValue({ services: {} });
     const { result } = renderHook(() => useGraphTelemetry(entryPoint));
