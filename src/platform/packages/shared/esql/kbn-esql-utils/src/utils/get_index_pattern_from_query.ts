@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { BasicPrettyPrinter, isSource, isSubQuery, synth } from '@elastic/esql';
-import { esqlCommandRegistry, getIndexFromPromQLParams } from '@kbn/esql-language';
+import {
+  esqlCommandRegistry,
+  getIndexFromPromQLParams,
+  getNamedSubqueries,
+  resolveNamedSubquerySources,
+} from '@kbn/esql-language';
 import type { ESQLSource, ESQLCommand, ESQLAstPromqlCommand } from '@elastic/esql/types';
 import { parseEsqlCached } from './parse_esql_cached';
 
@@ -32,34 +37,6 @@ function getPromQLSources(commands: ESQLCommand[]): string[] {
   return index ? [index] : [];
 }
 
-function getDirectIndexSources(commands: ESQLCommand[]): ESQLSource[] {
-  const sourceCommand = commands.find(({ name }) => INDEX_SOURCE_COMMANDS.has(name.toUpperCase()));
-  if (!sourceCommand) {
-    return [];
-  }
-
-  return (sourceCommand.args as ESQLSource[]).filter(
-    (arg): arg is ESQLSource => arg.sourceType === 'index'
-  );
-}
-
-function getIndexSources(commands: ESQLCommand[]): ESQLSource[] {
-  const sourceCommand = commands.find(({ name }) => INDEX_SOURCE_COMMANDS.has(name.toUpperCase()));
-  if (!sourceCommand) {
-    return [];
-  }
-
-  const directSources = (sourceCommand.args as ESQLSource[]).filter(
-    (arg): arg is ESQLSource => arg.sourceType === 'index'
-  );
-
-  const subquerySources = sourceCommand.args
-    .filter(isSubQuery)
-    .flatMap((subquery) => getDirectIndexSources(subquery.child.commands));
-
-  return [...directSources, ...subquerySources];
-}
-
 function getSourceNameWithoutRemoteClusterPrefix(source: ESQLSource): string {
   if (!source.prefix || !source.index) {
     return source.name;
@@ -76,7 +53,10 @@ export function getIndexPatternsFromESQLQuery(esql?: string): ESQLIndexPatterns 
   }
 
   const { root } = parseEsqlCached(esql);
-  const indexSources = getIndexSources(root.commands);
+  const sourceCommand = root.commands.find(({ name }) =>
+    INDEX_SOURCE_COMMANDS.has(name.toUpperCase())
+  );
+  const indexSources = resolveNamedSubquerySources(sourceCommand, getNamedSubqueries(root.header));
   const promqlSources = getPromQLSources(root.commands);
 
   const indexPattern = [...indexSources.map((source) => source.name), ...promqlSources];

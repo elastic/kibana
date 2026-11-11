@@ -151,6 +151,24 @@ describe('getIndexPatternsFromESQLQuery', () => {
       indexPatternWithoutRemoteClusterPrefix: '',
     });
   });
+
+  it('should resolve LET references to the indices of their bodies', () => {
+    expect(
+      getIndexPatternsFromESQLQuery(
+        'LET base = (FROM logs-*, remote_cluster:metrics-*::data); LET selected = (FROM base | WHERE a > 1); LET unused = (FROM other); FROM selected, (FROM traces), index1'
+      )
+    ).toEqual({
+      indexPattern: 'logs-*,remote_cluster:metrics-*::data,traces,index1',
+      indexPatternWithoutRemoteClusterPrefix: 'logs-*,metrics-*::data,traces,index1',
+    });
+  });
+
+  it('should return no index pattern for a LET without indices', () => {
+    expect(getIndexPatternsFromESQLQuery('LET numbers = (ROW a = 1); FROM numbers')).toEqual({
+      indexPattern: '',
+      indexPatternWithoutRemoteClusterPrefix: '',
+    });
+  });
 });
 
 describe('getSourceCommandQueryFromESQLQuery', () => {
