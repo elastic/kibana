@@ -29,8 +29,8 @@ import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import {
   MANAGED_INSTALL_BULK_MAX_BYTES,
   MANAGED_INSTALL_BULK_MAX_DOCUMENTS,
-  ManagedWorkflowsService,
-} from './managed_workflows_service';
+} from './managed_install_limits';
+import { ManagedWorkflowsService } from './managed_workflows_service';
 import type { VersionedWorkflowDocument, WorkflowCrudService } from './workflow_crud_service';
 import type {
   ReadModifyWriteWorkflowDocumentParams,

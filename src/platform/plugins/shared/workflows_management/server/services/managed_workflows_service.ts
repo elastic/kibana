@@ -35,6 +35,10 @@ import type {
 } from '@kbn/workflows/server/types';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { updateYamlField, WorkflowConflictError } from '@kbn/workflows-yaml';
+import {
+  MANAGED_INSTALL_BULK_MAX_BYTES,
+  MANAGED_INSTALL_BULK_MAX_DOCUMENTS,
+} from './managed_install_limits';
 import type { WorkflowCrudService } from './workflow_crud_service';
 import type {
   ManagedWorkflowOrphan,
@@ -55,12 +59,6 @@ import type { WorkflowProperties } from '../storage/workflow_storage';
 const MANAGED_WORKFLOW_SYSTEM_USER = 'elastic/kibana';
 const MAX_MANAGED_INSTALL_RETRIES = 2;
 const ORPHAN_DELETE_CONCURRENCY = 10;
-/**
- * Bounds of one `_bulk` request in `bulkInstallManagedWorkflows`. Each request goes to the index's one
- * shard and holds one `system_write` thread until its refresh, so a pass never holds more than one.
- */
-export const MANAGED_INSTALL_BULK_MAX_DOCUMENTS = 50;
-export const MANAGED_INSTALL_BULK_MAX_BYTES = 2 * 1024 * 1024;
 
 const computeDefinitionHash = (yaml: string): string => {
   return createHash('sha256').update(yaml.trim()).digest('hex');
