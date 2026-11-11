@@ -37,6 +37,8 @@ import {
   createRuntimePluginContractResolverMock,
 } from './test_helpers';
 
+const initialization = Promise.withResolvers<void>();
+
 function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): PluginManifest {
   return {
     id: 'some-plugin-id',
@@ -117,6 +119,7 @@ describe('createPluginInitializerContext', () => {
         manifest,
         instanceInfo,
         nodeInfo,
+        initialization,
       });
 
       expect(pluginInitializerContext.config.get()).toEqual({
@@ -138,6 +141,7 @@ describe('createPluginInitializerContext', () => {
         manifest,
         instanceInfo,
         nodeInfo,
+        initialization,
       });
 
       expect(pluginInitializerContext.config.legacy.globalConfig$).toBeDefined();
@@ -169,6 +173,7 @@ describe('createPluginInitializerContext', () => {
         manifest,
         instanceInfo,
         nodeInfo,
+        initialization,
       });
       expect(pluginInitializerContext.env.instanceUuid).toBe('kibana-uuid');
     });
@@ -189,6 +194,7 @@ describe('createPluginInitializerContext', () => {
         manifest: createPluginManifest(),
         instanceInfo,
         nodeInfo,
+        initialization,
       });
       expect(pluginInitializerContext.env.configs).toEqual([
         '/home/kibana/config/kibana.yml',
@@ -205,9 +211,45 @@ describe('createPluginInitializerContext', () => {
         manifest: createPluginManifest(),
         instanceInfo,
         nodeInfo: { roles: { backgroundTasks: false, ui: true, migrator: false } },
+        initialization,
       });
       expect(pluginInitializerContext.node.roles.backgroundTasks).toBe(false);
       expect(pluginInitializerContext.node.roles.ui).toBe(true);
+    });
+  });
+
+  describe('context.initialization', () => {
+    const createContext = (pluginInitialization: PromiseWithResolvers<void>) =>
+      createPluginInitializerContext({
+        coreContext,
+        opaqueId,
+        manifest: createPluginManifest(),
+        instanceInfo,
+        nodeInfo,
+        initialization: pluginInitialization,
+      });
+
+    it('waits for the initialization when called before it settles', async () => {
+      const pluginInitialization = Promise.withResolvers<void>();
+      const onSettled = jest.fn();
+      const { initialization: contextInitialization } = createContext(pluginInitialization);
+
+      const waiting = contextInitialization.initialize().then(onSettled);
+      await Promise.resolve();
+      expect(onSettled).not.toHaveBeenCalled();
+
+      pluginInitialization.resolve();
+      await waiting;
+      expect(onSettled).toHaveBeenCalledTimes(1);
+    });
+
+    it('rejects when the initialization fails', async () => {
+      const pluginInitialization = Promise.withResolvers<void>();
+      const { initialization: contextInitialization } = createContext(pluginInitialization);
+
+      pluginInitialization.reject(new Error('boom'));
+
+      await expect(contextInitialization.initialize()).rejects.toThrow('boom');
     });
   });
 });
@@ -243,7 +285,9 @@ describe('createPluginPrebootSetupContext', () => {
           airgapped: false,
         },
         nodeInfo,
+        initialization,
       }),
+      initialization,
     });
 
     const corePreboot = coreInternalLifecycleMock.createInternalPreboot();
@@ -278,7 +322,9 @@ describe('plugin context service accounts', () => {
         manifest,
         instanceInfo: { uuid: 'instance-uuid', airgapped: false },
         nodeInfo: nodeServiceMock.createInternalPrebootContract(),
+        initialization,
       }),
+      initialization,
     });
     runtimeResolver = createRuntimePluginContractResolverMock();
   });

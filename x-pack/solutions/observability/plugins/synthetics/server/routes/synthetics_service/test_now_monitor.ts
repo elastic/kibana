@@ -18,6 +18,7 @@ import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getPrivateLocationsForMonitor } from '../monitor_cruds/add_monitor/utils';
 import { getMonitorNotFoundResponse } from './service_errors';
 import { MONITOR_RUN_MANUALLY_API } from '../../feature';
+import { validatePermissions } from '../monitor_cruds/edit_monitor';
 
 export const testNowMonitorRoute: SyntheticsRestApiRouteFactory<TestNowResponse> = () => ({
   method: 'POST',
@@ -64,6 +65,16 @@ export const triggerTestNow = async (
 
   try {
     const { normalizedMonitor } = await monitorConfigRepository.getDecrypted(monitorId, spaceId);
+
+    // Running on Elastic managed locations requires the same privilege as creating or editing
+    // a monitor there, so `monitor-run-manually` alone cannot bypass it.
+    const permissionError = await validatePermissions(
+      routeContext,
+      normalizedMonitor.attributes.locations
+    );
+    if (permissionError) {
+      return response.forbidden({ body: { message: permissionError } });
+    }
 
     const privateLocations: PrivateLocationAttributes[] = await getPrivateLocationsForMonitor(
       savedObjectsClient,

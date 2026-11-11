@@ -45,7 +45,7 @@ export const DeveloperModeSection = ({
           <EuiSwitch
             data-test-subj="nightshiftDeveloperModeSwitch"
             label={i18n.translate('xpack.nightshift.settings.developerModeToggleSwitch', {
-              defaultMessage: 'Enable Nightshift developer mode',
+              defaultMessage: 'Enable nightshift developer mode',
             })}
             checked={isDeveloperMode}
             onChange={(event) => {
