@@ -16,7 +16,7 @@ import type { LoggerServiceContract } from '../../../lib/services/logger_service
 import { linkRuleAndActionPolicyTool } from './link_rule_and_action_policy';
 
 const RULE_ID = '3f2a9c1b-7d4e-4a55-9c0e-1b2c3d4e5f60';
-const TAG = 'high-cpu-3f2a9c1b';
+const TAG = 'high-cpu-b4a605da';
 
 const ruleData = (metadataExtra: Record<string, unknown> = {}) => ({
   id: RULE_ID,

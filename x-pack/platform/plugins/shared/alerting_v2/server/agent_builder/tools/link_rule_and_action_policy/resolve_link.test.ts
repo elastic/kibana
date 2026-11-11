@@ -13,7 +13,7 @@ import { LinkValidationError } from './link_validation_error';
 import { resolveLink } from './resolve_link';
 
 const RULE_ID = '3f2a9c1b-7d4e-4a55-9c0e-1b2c3d4e5f60';
-const TAG = 'high-cpu-3f2a9c1b';
+const TAG = 'high-cpu-b4a605da';
 
 const ruleDraft = (
   data: Partial<RuleAttachmentData>,

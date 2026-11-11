@@ -13,7 +13,7 @@ const RULE_ID = '3f2a9c1b-7d4e-4a55-9c0e-1b2c3d4e5f60';
 describe('generateRoutingTag', () => {
   it('builds a slug of the rule name plus a suffix of the rule id', () => {
     expect(generateRoutingTag({ ruleName: 'High CPU usage', ruleId: RULE_ID })).toBe(
-      'high-cpu-usage-3f2a9c1b'
+      'high-cpu-usage-b4a605da'
     );
   });
 
@@ -36,7 +36,7 @@ describe('generateRoutingTag', () => {
   it('strips accents, punctuation and surrounding separators', () => {
     expect(
       generateRoutingTag({ ruleName: '  ¡Latencia más alta: API/Pagos!  ', ruleId: RULE_ID })
-    ).toBe('latencia-mas-alta-api-pagos-3f2a9c1b');
+    ).toBe('latencia-mas-alta-api-pagos-b4a605da');
   });
 
   it('truncates long names without leaving a trailing separator', () => {
@@ -45,20 +45,22 @@ describe('generateRoutingTag', () => {
       ruleId: RULE_ID,
     });
 
-    expect(tag).toBe(`${'a'.repeat(39)}-3f2a9c1b`);
+    expect(tag).toBe(`${'a'.repeat(39)}-b4a605da`);
     expect(tag.length).toBeLessThanOrEqual(MAX_TAG_LENGTH);
   });
 
   it.each([undefined, '', '   ', '!!!', '日本語'])(
     'falls back to the "rule" prefix when the name has no usable characters (%p)',
     (ruleName) => {
-      expect(generateRoutingTag({ ruleName, ruleId: RULE_ID })).toBe('rule-3f2a9c1b');
+      expect(generateRoutingTag({ ruleName, ruleId: RULE_ID })).toBe('rule-b4a605da');
     }
   );
 
-  it('ignores non-alphanumeric characters when building the id suffix', () => {
-    expect(generateRoutingTag({ ruleName: 'Errors', ruleId: '--ab-cd_ef!gh12345' })).toBe(
-      'errors-abcdefgh'
-    );
+  it('does not collide for client-supplied ids that share their first characters', () => {
+    const first = generateRoutingTag({ ruleName: 'High CPU', ruleId: 'cpu-alert-01' });
+    const second = generateRoutingTag({ ruleName: 'High CPU', ruleId: 'cpu-alert-02' });
+
+    expect(first).toBe('high-cpu-58f910bd');
+    expect(second).toBe('high-cpu-ce835fbf');
   });
 });
