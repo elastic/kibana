@@ -553,3 +553,43 @@ describe('getWorkflowContextSchema - HITL template context', () => {
     expect(getSchemaAtPath(contextSchema, 'context.hitl.externalRejectLink').schema).toBeDefined();
   });
 });
+
+describe('getWorkflowContextSchema - page inputs', () => {
+  const emptyPageRegistry = createMockWorkflowContextRegistry();
+  const workflowWith = (triggers: WorkflowYaml['triggers']): WorkflowYaml => ({
+    version: '1',
+    name: 'Page workflow',
+    description: undefined,
+    settings: undefined,
+    enabled: true,
+    tags: undefined,
+    triggers,
+    consts: undefined,
+    steps: [{ name: 'step1', type: 'console' }],
+  });
+
+  it('exposes page trigger inputs as page.inputs, not as inputs', () => {
+    const contextSchema = getWorkflowContextSchema(
+      emptyPageRegistry,
+      workflowWith([
+        {
+          type: 'page',
+          title: 'Report',
+          inputs: { type: 'object', properties: { summary: { type: 'string' } } },
+        },
+      ] as WorkflowYaml['triggers'])
+    );
+
+    expect(getSchemaAtPath(contextSchema, 'page.inputs.summary').schema).toBeTruthy();
+    expect(getSchemaAtPath(contextSchema, 'inputs.summary').schema).toBeNull();
+  });
+
+  it('has no page key without a page trigger', () => {
+    const contextSchema = getWorkflowContextSchema(
+      emptyPageRegistry,
+      workflowWith([{ type: 'manual' }])
+    );
+
+    expect(getSchemaAtPath(contextSchema, 'page').schema).toBeNull();
+  });
+});

@@ -235,9 +235,11 @@ export function TriggerConfigPanel({
     onSave(fragment);
   }, [parsed.valid, onSave, fragment]);
 
+  // Steps read page submissions as `page.inputs.*` and manual values as `inputs.*`.
+  const inputsReferencePrefix = triggerType === 'page' ? 'page.inputs' : 'inputs';
   const findReferencingSteps = useCallback(
-    (name: string) => findStepsReferencingInput(workflowYaml, name),
-    [workflowYaml]
+    (name: string) => findStepsReferencingInput(workflowYaml, name, inputsReferencePrefix),
+    [workflowYaml, inputsReferencePrefix]
   );
 
   const setParametersModeAndHydrate = useCallback(
@@ -543,6 +545,7 @@ export function TriggerConfigPanel({
                         properties={manualFields}
                         onChange={syncManualFieldsToFragment}
                         findReferencingSteps={findReferencingSteps}
+                        referencePrefix={inputsReferencePrefix}
                         dataTestSubjPrefix="workflowTriggerConfigInput"
                       />
                     )}

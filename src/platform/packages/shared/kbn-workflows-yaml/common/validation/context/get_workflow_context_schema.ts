@@ -18,6 +18,7 @@ import {
 import { BaseEventSchema } from '@kbn/workflows/spec/schema/common/base_event';
 import { AlertEventSchema } from '@kbn/workflows/spec/schema/triggers/alert_trigger_schema';
 import { isManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
+import { isPageTrigger } from '@kbn/workflows/spec/schema/triggers/page_trigger_schema';
 import { z } from '@kbn/zod/v4';
 import { inferZodType } from '../../zod/infer_zod_type';
 import type { WorkflowContextRegistry } from './registry';
@@ -112,8 +113,14 @@ export function getWorkflowContextSchema(
 
   const eventSchema = buildEventSchemaFromTriggers(registry, triggers ?? [], inputsZodSchema);
 
+  const pageTrigger = (triggers ?? []).find(isPageTrigger);
+
   return DynamicWorkflowContextSchema.extend({
     inputs: inputsZodSchema,
+    // Page submissions are untrusted, so they get their own `page.inputs` key, apart from `inputs`.
+    ...(pageTrigger && {
+      page: z.object({ inputs: buildFieldsZodValidator(pageTrigger.inputs) }),
+    }),
     output: buildFieldsZodValidator(normalizedOutputs),
     consts: z.object({
       ...Object.fromEntries(

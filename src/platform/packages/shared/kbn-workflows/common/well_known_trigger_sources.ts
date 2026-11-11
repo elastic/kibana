@@ -29,6 +29,12 @@ export const WORKFLOW_STEP_TRIGGER_SOURCE: Extract<
  */
 export const AGENT_BUILDER_HOOK_TRIGGER_SOURCE = 'agent-builder-hook';
 
+/**
+ * `triggeredBy` of every execution a workflow page submission starts. The visitor is anonymous,
+ * so its values are data, never expressions.
+ */
+export const PAGE_TRIGGER_SOURCE = 'page';
+
 /** True when a `workflow.execute` or `workflow.executeAsync` step started the execution. */
 export const isWorkflowStepTriggered = (triggeredBy: string | undefined): boolean =>
   triggeredBy === WORKFLOW_STEP_TRIGGER_SOURCE;

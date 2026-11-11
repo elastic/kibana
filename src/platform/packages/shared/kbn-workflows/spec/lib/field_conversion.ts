@@ -25,7 +25,6 @@ import {
   type LegacyWorkflowInput,
   type WorkflowInput,
 } from '../schema/triggers/manual_trigger_schema';
-import { isPageTrigger } from '../schema/triggers/page_trigger_schema';
 
 export type NormalizableFieldSchema =
   | JsonModelSchemaType
@@ -180,11 +179,11 @@ export function normalizeFieldsToJsonSchema(
 export const getInputsFromDefinition = (
   definition: WorkflowYaml | Partial<WorkflowYaml> | undefined | null
 ): JsonModelSchemaType | undefined => {
-  // Both triggers declare the `inputs.*` contract; manual wins when both define inputs.
-  const triggers = definition?.triggers ?? [];
-  let inputsInDefinition =
-    triggers.filter(isManualTrigger).find((trigger) => trigger.inputs)?.inputs ??
-    triggers.filter(isPageTrigger).find((trigger) => trigger.inputs)?.inputs;
+  // `inputs.*` holds manual, API, and child run values only. Page values live under `page.inputs`.
+  const manualTriggerInDefinition = definition?.triggers?.find((trigger) =>
+    isManualTrigger(trigger)
+  );
+  let inputsInDefinition = manualTriggerInDefinition?.inputs;
 
   if (!inputsInDefinition) {
     // Backward compatibility with workflows that still use root-level inputs

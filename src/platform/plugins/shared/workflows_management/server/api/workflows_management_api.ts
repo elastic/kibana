@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import {
   ExecutionStatus,
   getWorkflowJsonSchema,
+  PAGE_TRIGGER_SOURCE,
   requiresDelegatedIdentity,
   toWorkflowExecutionEngineModel,
   transformWorkflowYamlJsontoEsWorkflow,
@@ -854,9 +855,11 @@ export class WorkflowsManagementApi {
     metadata: Record<string, unknown>
   ): Promise<string> {
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    // Steps read the submission as `page.inputs.*`. `inputs` stays empty: it holds only
+    // manual, API, and child run values.
     const { workflowExecutionId } = await workflowsExecutionEngine.executeWorkflowAsServiceAccount(
       workflow,
-      { spaceId, inputs, metadata }
+      { spaceId, inputs: {}, page: { inputs }, triggeredBy: PAGE_TRIGGER_SOURCE, metadata }
     );
     return workflowExecutionId;
   }

@@ -96,4 +96,4 @@ steps:
   - name: log_report
     type: console
     with:
-      message: "CVE report: {{ inputs | json }}"
+      message: "CVE report: {{ page.inputs | json }}"

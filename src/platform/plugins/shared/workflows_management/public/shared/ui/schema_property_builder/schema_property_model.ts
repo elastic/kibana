@@ -366,8 +366,11 @@ export const findStepsReferencingPath = (
 };
 
 /**
- * Find step names that reference `inputs.<name>` (or nested paths under it)
- * in the workflow YAML document.
+ * Find step names that reference `<prefix>.<name>` (or nested paths under it)
+ * in the workflow YAML document. The prefix is `inputs`, or `page.inputs` for a page trigger.
  */
-export const findStepsReferencingInput = (workflowYaml: string, inputName: string): string[] =>
-  findStepsReferencingPath(workflowYaml, 'inputs', inputName);
+export const findStepsReferencingInput = (
+  workflowYaml: string,
+  inputName: string,
+  prefix = 'inputs'
+): string[] => findStepsReferencingPath(workflowYaml, prefix, inputName);

@@ -65,6 +65,8 @@ export function buildInputDefaultRenderContext(
     consts: workflowExecution.workflowDefinition?.consts ?? {},
     event: workflowExecution.context?.event,
     inputs: workflowExecution.context?.inputs as Record<string, unknown> | undefined,
+    // A page run's submitted values. They stay apart from `inputs` because they are untrusted.
+    page: workflowExecution.context?.page as { inputs?: Record<string, unknown> } | undefined,
     output: workflowExecution.context?.output,
     now: new Date(),
     parent:

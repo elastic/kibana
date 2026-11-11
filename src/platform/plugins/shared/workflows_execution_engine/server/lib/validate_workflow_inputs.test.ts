@@ -153,6 +153,25 @@ describe('validateWorkflowInputs', () => {
     expect(result).toBe(true);
   });
 
+  it('should skip manual inputs for a page run, whose values live in page.inputs', async () => {
+    setInputsSchema({
+      properties: {
+        name: { type: 'string' },
+      },
+      required: ['name'],
+    });
+
+    const result = await callValidate(
+      createWorkflowExecution(
+        { inputs: {}, page: { inputs: { summary: 'disk full' } } },
+        { triggeredBy: 'page' }
+      )
+    );
+
+    expect(result).toBe(true);
+    expect(mockRepository.updateWorkflowExecution).not.toHaveBeenCalled();
+  });
+
   it('should return false and mark execution as FAILED when a required input is missing', async () => {
     setInputsSchema({
       properties: {

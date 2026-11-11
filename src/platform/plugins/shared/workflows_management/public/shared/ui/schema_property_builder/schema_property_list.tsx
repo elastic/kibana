@@ -67,6 +67,8 @@ export interface SchemaPropertyListProps {
    * confirms). Only needed at the root inputs list.
    */
   readonly findReferencingSteps?: (name: string) => string[];
+  /** Where steps read these values, for the "Reference as" hint. Defaults to `inputs`. */
+  readonly referencePrefix?: string;
 }
 
 const nameErrorMessage = (
@@ -98,6 +100,7 @@ const PropertyEditor = ({
   onUpdate,
   onRequestDelete,
   dragHandleProps,
+  referencePrefix,
 }: {
   readonly field: SchemaPropertyField;
   readonly siblings: readonly SchemaPropertyField[];
@@ -106,6 +109,7 @@ const PropertyEditor = ({
   readonly onUpdate: (next: SchemaPropertyField) => void;
   readonly onRequestDelete: () => void;
   readonly dragHandleProps?: object;
+  readonly referencePrefix: string;
 }) => {
   const { euiTheme } = useEuiTheme();
   const accordionId = useGeneratedHtmlId({ prefix: `${dataTestSubjPrefix}-acc` });
@@ -207,8 +211,8 @@ const PropertyEditor = ({
               helpText={
                 field.name.trim()
                   ? i18n.translate('workflows.schemaPropertyBuilder.nameHelp', {
-                      defaultMessage: 'Reference as inputs.{name}',
-                      values: { name: field.name.trim() },
+                      defaultMessage: 'Reference as {prefix}.{name}',
+                      values: { prefix: referencePrefix, name: field.name.trim() },
                     })
                   : undefined
               }
@@ -439,6 +443,7 @@ const PropertyEditor = ({
                       properties={field.itemProperties ?? []}
                       onChange={(itemProperties) => onUpdate({ ...field, itemProperties })}
                       depth={depth + 1}
+                      referencePrefix={`${referencePrefix}.${field.name.trim()}[n]`}
                       dataTestSubjPrefix={`${dataTestSubjPrefix}-itemProps`}
                       emptyTitle={i18n.translate(
                         'workflows.schemaPropertyBuilder.noItemPropsTitle',
@@ -474,6 +479,7 @@ const PropertyEditor = ({
                   properties={field.properties ?? []}
                   onChange={(properties) => onUpdate({ ...field, properties })}
                   depth={depth + 1}
+                  referencePrefix={`${referencePrefix}.${field.name.trim()}`}
                   dataTestSubjPrefix={`${dataTestSubjPrefix}-props`}
                   emptyTitle={i18n.translate('workflows.schemaPropertyBuilder.noNestedPropsTitle', {
                     defaultMessage: 'No properties yet',
@@ -508,6 +514,7 @@ export function SchemaPropertyList({
   addButtonLabel,
   dataTestSubjPrefix = 'schemaProperty',
   findReferencingSteps,
+  referencePrefix = 'inputs',
 }: SchemaPropertyListProps) {
   const { euiTheme } = useEuiTheme();
   const droppableId = useGeneratedHtmlId({ prefix: `${dataTestSubjPrefix}-drop` });
@@ -677,6 +684,7 @@ export function SchemaPropertyList({
                   onUpdate={handleUpdate}
                   onRequestDelete={() => requestDelete(field)}
                   dragHandleProps={provided.dragHandleProps ?? undefined}
+                  referencePrefix={referencePrefix}
                 />
               )}
             </EuiDraggable>

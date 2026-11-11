@@ -9,7 +9,7 @@
 
 import { isDeepStrictEqual } from 'node:util';
 import type { CoreStart, Logger } from '@kbn/core/server';
-import { ExecutionStatus, hasUntrustedInputs } from '@kbn/workflows';
+import { ExecutionStatus, hasUntrustedInputs, PAGE_TRIGGER_SOURCE } from '@kbn/workflows';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import {
   applyInputDefaults,
@@ -42,6 +42,11 @@ export const validateWorkflowInputs = async (
   dependencies?: ContextDependencies
 ): Promise<boolean> => {
   if (!workflowExecution.workflowDefinition) {
+    return true;
+  }
+  // A page run provides `page.inputs`, not `inputs`. The page route already checked those
+  // values against the page trigger's schema, so the manual inputs do not apply.
+  if (workflowExecution.triggeredBy === PAGE_TRIGGER_SOURCE) {
     return true;
   }
   const normalizedSchema = getInputsFromDefinition(workflowExecution.workflowDefinition);
