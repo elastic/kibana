@@ -8,9 +8,8 @@
 import { z } from '@kbn/zod/v4';
 import { attachmentTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
-import type { AttachmentToolsOptions } from './types';
 
 const attachmentListSchema = z.object({
   include_deleted: z
@@ -23,16 +22,17 @@ const attachmentListSchema = z.object({
  * Creates the attachment_list tool.
  * Lists all attachments with their metadata.
  */
-export const createAttachmentListTool = ({
-  attachmentManager,
-}: AttachmentToolsOptions): BuiltinToolDefinition<typeof attachmentListSchema> => ({
+export const createAttachmentListTool = (): InternalBuiltinToolDefinition<
+  typeof attachmentListSchema
+> => ({
   id: attachmentTools.list,
   type: ToolType.builtin,
   description:
     'List all attachments in the conversation with their metadata. Use this to see what data is available.',
   schema: attachmentListSchema,
   tags: ['attachment'],
-  handler: async ({ include_deleted: includeDeleted }) => {
+  excludeFromMcp: true,
+  handler: async ({ include_deleted: includeDeleted }, { attachments: attachmentManager }) => {
     const attachments = includeDeleted ? attachmentManager.getAll() : attachmentManager.getActive();
 
     const attachmentList = attachments.map((attachment) => {

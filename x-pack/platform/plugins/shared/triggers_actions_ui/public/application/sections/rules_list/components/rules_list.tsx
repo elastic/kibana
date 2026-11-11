@@ -40,6 +40,7 @@ import {
   getCreateRuleRoute,
   getCreateRuleFromTemplateRoute,
   getEditRuleRoute,
+  getTriggersActionsManagementPath,
 } from '@kbn/rule-data-utils';
 import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import type {
@@ -80,6 +81,7 @@ import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
 import { BulkSnoozeScheduleModalWithApi as BulkSnoozeScheduleModal } from './bulk_snooze_schedule_modal';
 import { ManageLicenseModal } from './manage_license_modal';
 import { RulesListClearRuleFilterBanner } from './rules_list_clear_rule_filter_banner';
+import { RulesListLoadErrorsBanner } from './rules_list_load_errors_banner';
 import { RulesListUiamApiKeyBanner } from './rules_list_uiam_api_key_banner';
 import { RulesListPrompts } from './rules_list_prompts';
 import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
@@ -127,6 +129,7 @@ export interface RulesListProps {
   initialSelectedConsumer?: RuleCreationValidConsumer | null;
   navigateToEditRuleForm?: (ruleId: string) => void;
   navigateToCreateRuleForm?: (ruleTypeId: string) => void;
+  navigateToCreateRuleFromTemplateForm?: (templateId: string) => void;
 }
 
 export const percentileFields = {
@@ -169,6 +172,7 @@ export const RulesList = ({
   onRefresh,
   navigateToEditRuleForm,
   navigateToCreateRuleForm,
+  navigateToCreateRuleFromTemplateForm,
 }: RulesListProps) => {
   const history = useHistory();
   const kibanaServices = useKibana().services;
@@ -314,7 +318,7 @@ export const RulesList = ({
     }
 
     navigateToApp('management', {
-      path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleItem.id)}`,
+      path: getTriggersActionsManagementPath(getEditRuleRoute(ruleItem.id)),
       state: {
         returnApp: 'management',
         returnPath: `insightsAndAlerting/triggersActions/rules`,
@@ -781,6 +785,9 @@ export const RulesList = ({
       {showSearchBar && !isEmpty(filters.ruleParams) ? (
         <RulesListClearRuleFilterBanner onClickClearFilter={handleClearRuleParamFilter} />
       ) : null}
+      {rulesState.errors.length > 0 ? (
+        <RulesListLoadErrorsBanner errors={rulesState.errors} />
+      ) : null}
       <MaintenanceWindowCallout kibanaServices={kibanaServices} categories={allRuleCategories} />
       <EuiSpacer size="s" />
       <RulesListPrompts
@@ -897,6 +904,7 @@ export const RulesList = ({
             <RulesListTable
               items={tableItems}
               isLoading={isRulesTableLoading}
+              ruleDetailsRoute={ruleDetailsRoute}
               rulesState={rulesState}
               ruleTypesState={ruleTypesState}
               ruleTypeRegistry={ruleTypeRegistry}
@@ -1045,24 +1053,27 @@ export const RulesList = ({
                 navigateToCreateRuleForm(ruleTypeId);
               } else {
                 navigateToApp('management', {
-                  path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
+                  path: getTriggersActionsManagementPath(getCreateRuleRoute(ruleTypeId)),
                 });
               }
             }}
             onSelectTemplate={(templateId) => {
-              // For templates, we need to extract the ruleTypeId or handle it differently
-              // For now, fall back to default behavior
-              navigateToApp('management', {
-                path: `insightsAndAlerting/triggersActions/${getCreateRuleFromTemplateRoute(
-                  encodeURIComponent(templateId)
-                )}`,
-              });
+              if (navigateToCreateRuleFromTemplateForm) {
+                navigateToCreateRuleFromTemplateForm(templateId);
+              } else {
+                navigateToApp('management', {
+                  path: getTriggersActionsManagementPath(
+                    getCreateRuleFromTemplateRoute(encodeURIComponent(templateId))
+                  ),
+                });
+              }
             }}
             http={http}
             toasts={toasts}
             registeredRuleTypes={ruleTypeRegistry.list()}
             filteredRuleTypes={filteredRuleTypes}
             cps={cps}
+            showClassicBadge={kibanaServices.showClassicBadge}
           />
         )}
       </EuiPageTemplate.Section>

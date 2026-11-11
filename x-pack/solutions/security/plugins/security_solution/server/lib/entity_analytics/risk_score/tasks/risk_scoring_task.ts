@@ -14,6 +14,7 @@ import type {
   TaskManagerStartContract,
   TaskStatus,
 } from '@kbn/task-manager-plugin/server';
+import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import { getEntityAnalyticsEntityTypes } from '../../../../../common/entity_analytics/utils';
@@ -30,7 +31,8 @@ import {
   type LatestTaskStateSchema as RiskScoringTaskState,
 } from './state';
 import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
-import { buildScopedInternalSavedObjectsClientUnsafe, convertRangeToISO } from './helpers';
+import { buildNamespacedInternalSavedObjectsClientUnsafe } from '../../utils/internal_saved_objects_client';
+import { convertRangeToISO } from './helpers';
 import {
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
@@ -41,6 +43,7 @@ import {
   assetCriticalityServiceFactory,
 } from '../../asset_criticality';
 import type { EntityAnalyticsConfig, EntityAnalyticsRoutesDeps } from '../../types';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../../execution_context';
 
 const logFactory =
   (logger: Logger, taskId: string) =>
@@ -80,7 +83,7 @@ export const registerRiskScoringTask = ({
   const getRiskScoreService: GetRiskScoreService = (namespace) =>
     getStartServices().then(([coreStart, pluginsStart]) => {
       const esClient = coreStart.elasticsearch.client.asInternalUser;
-      const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
+      const soClient = buildNamespacedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
 
       const assetCriticalityDataClient = new AssetCriticalityDataClient({
         esClient,
@@ -134,6 +137,7 @@ export const registerRiskScoringTask = ({
       createTaskRunner: createTaskRunnerFactory({
         logger,
         getRiskScoreService,
+        getStartServices,
         telemetry,
         entityAnalyticsConfig,
         experimentalFeatures,
@@ -398,6 +402,15 @@ export const runTask = async ({
     throw e;
   }
 };
+
+class RiskEngineAlreadyRunningError extends Error {
+  statusCode = 409;
+
+  constructor() {
+    super('The risk engine is already running');
+  }
+}
+
 export const scheduleNow = async ({
   logger,
   namespace,
@@ -415,6 +428,9 @@ export const scheduleNow = async ({
     await taskManager.runSoon(taskId);
   } catch (e) {
     logger.warn(`[task ${taskId}]: error scheduling task now, received ${e.message}`);
+    if (e instanceof TaskAlreadyRunningError) {
+      throw new RiskEngineAlreadyRunningError();
+    }
     throw e;
   }
 };
@@ -423,12 +439,14 @@ const createTaskRunnerFactory =
   ({
     logger,
     getRiskScoreService,
+    getStartServices,
     telemetry,
     entityAnalyticsConfig,
     experimentalFeatures,
   }: {
     logger: Logger;
     getRiskScoreService: GetRiskScoreService;
+    getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
     telemetry: AnalyticsServiceSetup;
     entityAnalyticsConfig: EntityAnalyticsConfig;
     experimentalFeatures: ExperimentalFeatures;
@@ -437,16 +455,22 @@ const createTaskRunnerFactory =
     let cancelled = false;
     const isCancelled = () => cancelled;
     return {
-      run: async () =>
-        runTask({
-          getRiskScoreService,
-          isCancelled,
-          logger,
-          taskInstance,
-          telemetry,
-          entityAnalyticsConfig,
-          experimentalFeatures,
-        }),
+      run: async () => {
+        const [coreStart] = await getStartServices();
+        return coreStart.executionContext.withContext(
+          buildEaExecutionContext(EA_EXECUTION_CONTEXT_NAMES.RISK_SCORING_TASK, taskInstance.id),
+          () =>
+            runTask({
+              getRiskScoreService,
+              isCancelled,
+              logger,
+              taskInstance,
+              telemetry,
+              entityAnalyticsConfig,
+              experimentalFeatures,
+            })
+        );
+      },
       cancel: async () => {
         cancelled = true;
       },

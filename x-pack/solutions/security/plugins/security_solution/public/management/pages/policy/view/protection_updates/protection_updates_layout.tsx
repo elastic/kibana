@@ -40,6 +40,10 @@ import { useUpdateEndpointPolicy } from '../../../../hooks/policy/use_update_end
 import type { PolicyData, MaybeImmutable } from '../../../../../../common/endpoint/types';
 import { ProtectionUpdatesWarningPanel } from './components/protection_updates_warning_panel';
 import { getControlledArtifactCutoffDate } from '../../../../../../common/endpoint/utils/controlled_artifact_rollout';
+import {
+  GLOBAL_MANIFEST_VERSION_OUTDATED_DAYS,
+  getGlobalManifestVersionAgeDays,
+} from '../../../../../../common/endpoint/utils/global_manifest_version';
 
 interface ProtectionUpdatesLayoutProps {
   policy: MaybeImmutable<PolicyData>;
@@ -281,10 +285,9 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
         return null;
       }
 
-      const deployedVersionDate = moment.utc(deployedVersion).format(internalDateFormat);
-      const daysSinceLastUpdate = today.diff(deployedVersionDate, 'days');
+      const daysSinceLastUpdate = getGlobalManifestVersionAgeDays(deployedVersion, today);
 
-      if (daysSinceLastUpdate < 30) {
+      if (daysSinceLastUpdate < GLOBAL_MANIFEST_VERSION_OUTDATED_DAYS) {
         return null;
       }
 
@@ -292,7 +295,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
         <>
           <EuiCallOut
             color={'warning'}
-            iconType={'alert'}
+            iconType={'warning'}
             size="m"
             data-test-subj="protection-updates-manifest-outdated"
             title={i18n.translate(

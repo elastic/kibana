@@ -49,7 +49,7 @@ export const openManageDrilldownsFlyout: ActionDefinition<EmbeddableApiContext> 
   id: OPEN_FLYOUT_EDIT_DRILLDOWN,
   type: OPEN_FLYOUT_EDIT_DRILLDOWN,
   order: 10,
-  getIconType: () => 'list',
+  getIconType: () => 'listBullet',
   grouping: [DRILLDOWN_ACTION_GROUP],
   getDisplayName: () => DISPLAY_NAME,
   MenuItem: ({ context }: { context: EmbeddableApiContext }) => {

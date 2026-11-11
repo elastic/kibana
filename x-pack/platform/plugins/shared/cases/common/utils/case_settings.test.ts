@@ -1,0 +1,105 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  canStoreExtractObservablesTrue,
+  getCaseSettings,
+  resolveExtractObservables,
+} from './case_settings';
+
+describe('getCaseSettings', () => {
+  it('returns Security owner flags from OWNER_INFO', () => {
+    expect(getCaseSettings('securitySolution')).toEqual({
+      syncAlerts: true,
+      extractObservables: true,
+      observablesEnabled: true,
+    });
+  });
+
+  it('returns Stack owner flags from OWNER_INFO', () => {
+    expect(getCaseSettings('cases')).toEqual({
+      syncAlerts: false,
+      extractObservables: false,
+      observablesEnabled: true,
+    });
+  });
+
+  it('returns Observability owner flags from OWNER_INFO', () => {
+    expect(getCaseSettings('observability')).toEqual({
+      syncAlerts: false,
+      extractObservables: false,
+      observablesEnabled: false,
+    });
+  });
+
+  it.each([[''], ['foobar'], ['toString'], ['constructor']])(
+    'defaults every flag off for unknown owner %j',
+    (owner) => {
+      expect(getCaseSettings(owner)).toEqual({
+        syncAlerts: false,
+        extractObservables: false,
+        observablesEnabled: false,
+      });
+    }
+  );
+});
+
+describe('canStoreExtractObservablesTrue', () => {
+  it('returns true for Security (owner that auto-extracts)', () => {
+    expect(canStoreExtractObservablesTrue('securitySolution')).toBe(true);
+  });
+
+  it('returns false for Stack (observables on, auto-extract off)', () => {
+    expect(canStoreExtractObservablesTrue('cases')).toBe(false);
+  });
+
+  it('returns false for Observability (observables off)', () => {
+    expect(canStoreExtractObservablesTrue('observability')).toBe(false);
+  });
+
+  it.each([[''], ['foobar'], ['securitySolutionFixture'], ['toString']])(
+    'returns true for unknown owner %j because it is not guarded',
+    (owner) => {
+      expect(canStoreExtractObservablesTrue(owner)).toBe(true);
+    }
+  );
+});
+
+describe('resolveExtractObservables', () => {
+  it('returns false for Observability regardless of space config', () => {
+    expect(resolveExtractObservables('observability', true)).toBe(false);
+    expect(resolveExtractObservables('observability', false)).toBe(false);
+    expect(resolveExtractObservables('observability', undefined)).toBe(false);
+  });
+
+  it('returns false for Stack regardless of space config', () => {
+    expect(resolveExtractObservables('cases', true)).toBe(false);
+    expect(resolveExtractObservables('cases', false)).toBe(false);
+    expect(resolveExtractObservables('cases', undefined)).toBe(false);
+  });
+
+  it('returns the space config value when present for Security', () => {
+    expect(resolveExtractObservables('securitySolution', true)).toBe(true);
+    expect(resolveExtractObservables('securitySolution', false)).toBe(false);
+  });
+
+  it('falls back to Security autoExtractDefault (true) when no space config exists', () => {
+    expect(resolveExtractObservables('securitySolution', undefined)).toBe(true);
+  });
+
+  it('falls back to Stack autoExtractDefault (false) when no space config exists', () => {
+    expect(resolveExtractObservables('cases', undefined)).toBe(false);
+  });
+
+  it('falls back to false for unknown owners when no space config exists', () => {
+    expect(resolveExtractObservables('unknownOwner', undefined)).toBe(false);
+  });
+
+  it('respects explicit space config for unknown owners', () => {
+    expect(resolveExtractObservables('unknownOwner', true)).toBe(true);
+  });
+});

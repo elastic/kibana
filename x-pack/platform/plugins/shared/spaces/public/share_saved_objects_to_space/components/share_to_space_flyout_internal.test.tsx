@@ -12,6 +12,7 @@ import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import type { SavedObjectReferenceWithContext } from '@kbn/core-saved-objects-api-server';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { AliasTable } from './alias_table';
@@ -96,7 +97,7 @@ const setup = async (opts: SetupOpts = {}) => {
 
   // note: this call is made in the SpacesContext
   mockSpacesManager.getActiveSpace.mockResolvedValue({
-    id: 'my-active-space',
+    id: asSpaceId('my-active-space'),
     name: 'my active space',
     disabledFeatures: [],
   });
@@ -105,22 +106,22 @@ const setup = async (opts: SetupOpts = {}) => {
   mockSpacesManager.getSpaces.mockResolvedValue(
     opts.mockSpaces || [
       {
-        id: 'space-1',
+        id: asSpaceId('space-1'),
         name: 'Space 1',
         disabledFeatures: [],
       },
       {
-        id: 'space-2',
+        id: asSpaceId('space-2'),
         name: 'Space 2',
         disabledFeatures: [],
       },
       {
-        id: 'space-3',
+        id: asSpaceId('space-3'),
         name: 'Space 3',
         disabledFeatures: [],
       },
       {
-        id: 'my-active-space',
+        id: asSpaceId('my-active-space'),
         name: 'my active space',
         disabledFeatures: [],
       },
@@ -133,7 +134,7 @@ const setup = async (opts: SetupOpts = {}) => {
 
   const savedObjectToShare = {
     type: 'dashboard',
-    id: 'my-dash',
+    id: asSpaceId('my-dash'),
     namespaces: opts.namespaces || ['my-active-space', 'space-1'],
     icon: 'dashboard',
     title: 'foo',
@@ -327,7 +328,9 @@ describe('ShareToSpaceFlyout', () => {
   describe('without enableCreateNewSpaceLink', () => {
     it('does not render a NoSpacesAvailable component when no spaces are available', async () => {
       const { onClose } = await setup({
-        mockSpaces: [{ id: 'my-active-space', name: 'my active space', disabledFeatures: [] }],
+        mockSpaces: [
+          { id: asSpaceId('my-active-space'), name: 'my active space', disabledFeatures: [] },
+        ],
       });
 
       expect(screen.getByTestId('share-mode-control-description')).toBeInTheDocument();
@@ -338,7 +341,7 @@ describe('ShareToSpaceFlyout', () => {
 
     it('does not render a NoSpacesAvailable component when only the active space is available', async () => {
       const { onClose } = await setup({
-        mockSpaces: [{ id: 'my-active-space', name: '', disabledFeatures: [] }],
+        mockSpaces: [{ id: asSpaceId('my-active-space'), name: '', disabledFeatures: [] }],
       });
 
       expect(screen.getByTestId('share-mode-control-description')).toBeInTheDocument();
@@ -354,7 +357,9 @@ describe('ShareToSpaceFlyout', () => {
     it('renders a NoSpacesAvailable component when no spaces are available', async () => {
       const { onClose } = await setup({
         enableCreateNewSpaceLink,
-        mockSpaces: [{ id: 'my-active-space', name: 'my active space', disabledFeatures: [] }],
+        mockSpaces: [
+          { id: asSpaceId('my-active-space'), name: 'my active space', disabledFeatures: [] },
+        ],
       });
 
       expect(screen.getByTestId('share-mode-control-description')).toBeInTheDocument();
@@ -366,7 +371,7 @@ describe('ShareToSpaceFlyout', () => {
     it('renders a NoSpacesAvailable component when only the active space is available', async () => {
       const { onClose } = await setup({
         enableCreateNewSpaceLink,
-        mockSpaces: [{ id: 'my-active-space', name: '', disabledFeatures: [] }],
+        mockSpaces: [{ id: asSpaceId('my-active-space'), name: '', disabledFeatures: [] }],
       });
 
       expect(screen.getByTestId('share-mode-control-description')).toBeInTheDocument();
@@ -466,12 +471,12 @@ describe('ShareToSpaceFlyout', () => {
   describe('handles related objects correctly', () => {
     const relatedObject = {
       type: 'index-pattern',
-      id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+      id: asSpaceId('d3d7af60-4c81-11e8-b3d7-01146121b73d'),
       spaces: ['my-active-space', 'space-1'],
       inboundReferences: [
         {
           type: 'dashboard',
-          id: 'my-dash',
+          id: asSpaceId('my-dash'),
           name: 'foo',
         },
       ],
@@ -497,7 +502,7 @@ describe('ShareToSpaceFlyout', () => {
         type,
         id,
       }));
-      expect(mockSpacesManager.updateSavedObjectsSpaces).toBeCalledTimes(1);
+      expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenCalledTimes(1);
       expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenCalledWith(
         expectedObjects,
         ['space-2'],
@@ -522,7 +527,7 @@ describe('ShareToSpaceFlyout', () => {
       changeSpaceSelection([]);
       await clickButton('save');
 
-      expect(mockSpacesManager.updateSavedObjectsSpaces).toBeCalledTimes(1);
+      expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenCalledTimes(1);
       expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenCalledWith(
         [{ type: savedObjectToShare.type, id: savedObjectToShare.id }],
         [],
@@ -547,7 +552,7 @@ describe('ShareToSpaceFlyout', () => {
       changeSpaceSelection(['space-2', 'space-3']);
       await clickButton('save');
 
-      expect(mockSpacesManager.updateSavedObjectsSpaces).toBeCalledTimes(2);
+      expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenCalledTimes(2);
       expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenNthCalledWith(
         1,
         [{ type: savedObjectToShare.type, id: savedObjectToShare.id }],
@@ -636,33 +641,33 @@ describe('ShareToSpaceFlyout', () => {
     const mockSpaces = [
       {
         // normal "fully authorized" space selection option -- not the active space
-        id: 'space-1',
+        id: asSpaceId('space-1'),
         name: 'Space 1',
         disabledFeatures: [],
       },
       {
         // normal "fully authorized" space selection option, with a disabled feature -- not the active space
-        id: 'space-2',
+        id: asSpaceId('space-2'),
         name: 'Space 2',
         disabledFeatures: [mockFeatureId],
       },
       {
         // "partially authorized" space selection option -- not the active space
-        id: 'space-3',
+        id: asSpaceId('space-3'),
         name: 'Space 3',
         disabledFeatures: [],
         authorizedPurposes: { shareSavedObjectsIntoSpace: false },
       },
       {
         // "partially authorized" space selection option, with a disabled feature -- not the active space
-        id: 'space-4',
+        id: asSpaceId('space-4'),
         name: 'Space 4',
         disabledFeatures: [mockFeatureId],
         authorizedPurposes: { shareSavedObjectsIntoSpace: false },
       },
       {
         // "active space" selection option (determined by an ID that matches the result of `getActiveSpace`, mocked at top)
-        id: 'my-active-space',
+        id: asSpaceId('my-active-space'),
         name: 'my active space',
         disabledFeatures: [],
       },
@@ -836,7 +841,7 @@ describe('ShareToSpaceFlyout', () => {
           // it doesn't matter if aliases are for the saved object target or for references; this is easier to mock
           {
             type: 'foo',
-            id: '1',
+            id: asSpaceId('1'),
             spaces: namespaces,
             inboundReferences: [],
             spacesWithMatchingAliases: ['space-1', 'some-space-that-does-not-exist'], // space-1 exists, it is mocked at the top
@@ -870,7 +875,7 @@ describe('ShareToSpaceFlyout', () => {
           // it doesn't matter if aliases are for the saved object target or for references; this is easier to mock
           {
             type: 'foo',
-            id: '1',
+            id: asSpaceId('1'),
             spaces: namespaces,
             inboundReferences: [],
             spacesWithMatchingAliases: ['space-1', 'space-2'], // space-1 and space-2 both exist, they are mocked at the top
@@ -905,9 +910,15 @@ describe('ShareToSpaceFlyout', () => {
         namespaces,
         additionalShareableReferences: [
           // the saved object target is already included in the mock results by default; it will not be counted
-          { type: 'foo', id: '1', spaces: [], inboundReferences: [] }, // this will not be counted because spaces is empty (it may not be a shareable type)
-          { type: 'foo', id: '2', spaces: namespaces, inboundReferences: [], isMissing: true }, // this will not be counted because isMissing === true
-          { type: 'foo', id: '3', spaces: namespaces, inboundReferences: [] }, // this will be counted
+          { type: 'foo', id: asSpaceId('1'), spaces: [], inboundReferences: [] }, // this will not be counted because spaces is empty (it may not be a shareable type)
+          {
+            type: 'foo',
+            id: asSpaceId('2'),
+            spaces: namespaces,
+            inboundReferences: [],
+            isMissing: true,
+          }, // this will not be counted because isMissing === true
+          { type: 'foo', id: asSpaceId('3'), spaces: namespaces, inboundReferences: [] }, // this will be counted
         ],
       });
 
@@ -940,7 +951,7 @@ describe('ShareToSpaceFlyout', () => {
           // it doesn't matter if aliases are for the saved object target or for references; this is easier to mock
           {
             type: 'foo',
-            id: '1',
+            id: asSpaceId('1'),
             spaces: namespaces,
             inboundReferences: [],
             spacesWithMatchingAliases: ['some-space-that-does-not-exist'],
@@ -960,7 +971,7 @@ describe('ShareToSpaceFlyout', () => {
           // it doesn't matter if aliases are for the saved object target or for references; this is easier to mock
           {
             type: 'foo',
-            id: '1',
+            id: asSpaceId('1'),
             spaces: namespaces,
             inboundReferences: [],
             spacesWithMatchingAliases: ['space-1', 'some-space-that-does-not-exist'], // space-1 exists, it is mocked at the top

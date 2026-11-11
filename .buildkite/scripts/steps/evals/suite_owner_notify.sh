@@ -35,13 +35,15 @@ suite_name="${EVAL_SUITE_NAME:-$EVAL_SUITE_ID}"
 
 if [[ "${KBN_EVALS_WEEKLY:-}" =~ ^(1|true)$ ]]; then
   EVAL_NOTIFY_MODE="weekly"
+elif [[ "${KBN_EVALS_DAILY:-}" =~ ^(1|true)$ ]]; then
+  EVAL_NOTIFY_MODE="daily"
 else
   EVAL_NOTIFY_MODE="on-demand"
 fi
 
 # --- Resolve destinations -------------------------------------------------
 # Slack: weekly -> the suite's team channel; otherwise -> EVAL_SLACK_NOTIFICATION_CHANNEL
-# (so on-demand/PR runs never auto-post to a team channel).
+# (so daily/on-demand/PR runs never auto-post to a team channel).
 slack_channel=""
 if [[ "${EVAL_NOTIFY_MODE}" == "weekly" ]]; then
   slack_channel="${EVAL_SUITE_SLACK_CHANNEL:-}"
@@ -76,13 +78,8 @@ if ! node -e "require('yaml')" 2>/dev/null; then
   .buildkite/scripts/bootstrap.sh
 fi
 
-echo "--- Preparing model connector for triage summary"
-if [[ -n "${KBN_EVALS_CONFIG_B64:-}" ]]; then
-  source .buildkite/scripts/steps/evals/setup_connectors.sh || {
-    echo "WARNING: setup_connectors failed; build_suite_owner_slack_message will use vault LiteLLM fallback"
-  }
-else
-  echo "WARNING: KBN_EVALS_CONFIG_B64 is not set; build_suite_owner_slack_message requires vault LiteLLM env vars"
+if [[ -z "${KBN_EVALS_CONFIG_B64:-}" && ( -z "${OPENROUTER_BASE_URL:-}" || -z "${OPENROUTER_API_KEY:-}" ) ]]; then
+  echo "WARNING: KBN_EVALS_CONFIG_B64 and OPENROUTER_* are unset; triage requires vault OpenRouter credentials"
 fi
 
 FAILING_PROJECTS_CSV="$(IFS=,; echo "${failing_projects[*]}")"
@@ -104,6 +101,8 @@ if ! EVAL_SUITE_ID="$EVAL_SUITE_ID" \
   echo "--- build_suite_owner_slack_message crashed; writing static fallback summary"
   if [[ "${EVAL_NOTIFY_MODE}" == "weekly" ]]; then
     header_label="Weekly LLM evals"
+  elif [[ "${EVAL_NOTIFY_MODE}" == "daily" ]]; then
+    header_label="Daily LLM evals"
   else
     header_label="On-demand LLM eval"
   fi
@@ -164,7 +163,7 @@ fi
 # --- Post a PR comment ----------------------------------------------------
 if [[ -n "${pr_number}" && -n "${GITHUB_FILE}" && -f "${GITHUB_FILE}" ]]; then
   echo "--- Posting triage as a PR comment (elastic/kibana#${pr_number})"
-  if ! ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+  if ! node .buildkite/scripts/lifecycle/comment_on_pr.ts \
     --message "$(cat "$GITHUB_FILE")" \
     --context "evals-triage-${suite_key_safe}" \
     --clear-previous \

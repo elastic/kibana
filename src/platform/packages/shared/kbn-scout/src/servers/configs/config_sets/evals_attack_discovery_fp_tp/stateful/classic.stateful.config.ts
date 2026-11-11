@@ -1,0 +1,42 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { ScoutServerConfig } from '../../../../../types';
+import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/classic.stateful.config';
+import { serviceAccountsServerArgs } from '../../service_accounts/shared';
+
+/**
+ * Config set for the attack-discovery-fp-tp eval suite. The analysis workflow's `ai.agent`
+ * step runs the `alertzero-thin-agent` and resolves its connector from the
+ * `alertzero_frontier` inference feature; both exist only when alertzero is enabled. The
+ * step additionally requires the Workflows UI and agent settings.
+ *
+ * `agentBuilder:experimentalFeatures` stays at its product default (off), so the eval runs the
+ * same internal-tool surface production does. Turning it on registers `write_todos` and
+ * `search_relevant_skills`, which an agent with no tools must not call.
+ *
+ * `alertzero`, `agenticInvestigations` and `proposals` are all on by default in stateful.
+ *
+ * Since #295215 alertzero installs no managed workflows unless service accounts are enabled.
+ *
+ * Usage:
+ *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet evals_attack_discovery_fp_tp
+ */
+export const servers: ScoutServerConfig = {
+  ...evalsTracingConfig,
+  kbnTestServer: {
+    ...evalsTracingConfig.kbnTestServer,
+    serverArgs: [
+      ...evalsTracingConfig.kbnTestServer.serverArgs,
+      ...serviceAccountsServerArgs,
+      '--uiSettings.overrides.workflows:ui:enabled=true',
+      '--uiSettings.overrides.workflows:aiAgent:enabled=true',
+    ],
+  },
+};

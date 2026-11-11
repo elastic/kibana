@@ -199,5 +199,44 @@ describe('normalize', () => {
         },
       });
     });
+
+    it('should prune empty plain-object ancestors after unsetting a sole leaf', () => {
+      const result = ignorePaths(
+        {
+          layers: {
+            layer_0: {
+              columns: {
+                terms: {
+                  params: {
+                    orderAgg: {
+                      operationType: 'last_value',
+                      params: { sortField: '@timestamp' },
+                    },
+                    orderBy: { type: 'custom' },
+                  },
+                },
+              },
+            },
+          },
+        },
+        ['layers.*.columns.*.params.orderAgg.params.sortField']
+      );
+      expect(result).toEqual({
+        layers: {
+          layer_0: {
+            columns: {
+              terms: {
+                params: {
+                  orderAgg: {
+                    operationType: 'last_value',
+                  },
+                  orderBy: { type: 'custom' },
+                },
+              },
+            },
+          },
+        },
+      });
+    });
   });
 });

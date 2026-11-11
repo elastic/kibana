@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { expect as expectExpect } from 'expect';
-import { omit, padStart } from 'lodash';
+import { mapValues, omit, padStart } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
@@ -26,6 +26,38 @@ import {
   TaskManagerUtils,
   getEventLog,
 } from '../../../../common/lib';
+
+interface SummarizedAlertHit {
+  kibana: { alert: { instance: { id: string } } };
+}
+
+type SummarizedAlertsMessage =
+  | SummarizedAlertHit[]
+  | Record<string, { count: number; data: SummarizedAlertHit[] }>;
+
+const sortByInstanceId = (hits: SummarizedAlertHit[]): SummarizedAlertHit[] =>
+  [...hits].sort((a, b) => a.kibana.alert.instance.id.localeCompare(b.kibana.alert.instance.id));
+
+// The summarized alerts searches run without a `sort`, so Elasticsearch does not promise a hit order.
+const parseSummarizedAlertsMessage = (message: string) => {
+  const parsed: SummarizedAlertsMessage = JSON.parse(message);
+
+  return Array.isArray(parsed)
+    ? sortByInstanceId(parsed)
+    : mapValues(parsed, (chunk) => ({ ...chunk, data: sortByInstanceId(chunk.data) }));
+};
+
+const sortRenderedInstanceIds = (message: string): string =>
+  message.replace(
+    /IDs:\[([^\]]*)\]/g,
+    (_, ids: string) =>
+      `IDs:[${ids
+        .split(',')
+        .filter(Boolean)
+        .sort()
+        .map((id) => `${id},`)
+        .join('')}]`
+  );
 
 export default function alertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -1289,10 +1321,10 @@ instanceStateValue: true
 
               // @ts-expect-error doesnt handle total: number
               expect(searchResult.body.hits.total.value).to.be.greaterThan(0);
-              // @ts-expect-error _source: unknown
-              expect(searchResult.body.hits.hits[0]._source.params.message).to.eql(
-                'Alerts, all:2, new:2 IDs:[1,2,], ongoing:0 IDs:[], recovered:0 IDs:[]'
-              );
+              expect(
+                // @ts-expect-error _source: unknown
+                sortRenderedInstanceIds(searchResult.body.hits.hits[0]._source.params.message)
+              ).to.eql('Alerts, all:2, new:2 IDs:[1,2,], ongoing:0 IDs:[], recovered:0 IDs:[]');
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -1362,13 +1394,21 @@ instanceStateValue: true
         });
 
         it('should filter alerts by hours', async () => {
-          const now = new Date();
-          now.setHours(now.getHours() + 1);
-          const hour = padStart(now.getUTCHours().toString(), 2, '0');
-          const minutes = padStart(now.getUTCMinutes().toString(), 2, '0');
+          const toUtcHoursMinutes = (date: Date) =>
+            `${padStart(date.getUTCHours().toString(), 2, '0')}:${padStart(
+              date.getUTCMinutes().toString(),
+              2,
+              '0'
+            )}`;
 
-          const start = `${hour}:${minutes}`;
-          const end = `${hour}:${minutes}`;
+          // A real future window that excludes "now"; a zero-width `start === end` is treated by the product as a 24h window and would match.
+          const startDate = new Date();
+          startDate.setHours(startDate.getHours() + 1);
+          const endDate = new Date(startDate);
+          endDate.setHours(endDate.getHours() + 1);
+
+          const start = toUtcHoursMinutes(startDate);
+          const end = toUtcHoursMinutes(endDate);
 
           const reference = alertUtils.generateReference();
           const response = await alertUtils.createAlwaysFiringRuleWithSummaryAction({
@@ -1482,7 +1522,7 @@ instanceStateValue: true
               expectExpect(
                 // Summary action is executed on first rule run then skipped 4 times (throttle is 5s and schedule.interval is 1s)
                 // @ts-expect-error _source: unknown
-                JSON.parse(searchResult.body.hits.hits[0]._source.params.message)
+                parseSummarizedAlertsMessage(searchResult.body.hits.hits[0]._source.params.message)
               ).toEqual(
                 expectExpect.objectContaining({
                   new: {
@@ -1528,6 +1568,7 @@ instanceStateValue: true
                             status: 'active',
                             workflow_status: 'open',
                             flapping: false,
+                            tracked: true,
                           },
                           space_ids: ['space1'],
                           version: expectExpect.any(String),
@@ -1576,6 +1617,7 @@ instanceStateValue: true
                             status: 'active',
                             workflow_status: 'open',
                             flapping: false,
+                            tracked: true,
                           },
                           space_ids: ['space1'],
                           version: expectExpect.any(String),
@@ -1593,7 +1635,7 @@ instanceStateValue: true
               expectExpect(
                 // @ts-expect-error _source: unknown
                 //  Summary action is executed on the fifth rule run. The new alerts in the first execution become ongoing
-                JSON.parse(searchResult.body.hits.hits[1]._source.params.message)
+                parseSummarizedAlertsMessage(searchResult.body.hits.hits[1]._source.params.message)
               ).toEqual(
                 expectExpect.objectContaining({
                   new: { count: 0, data: [] },
@@ -1640,6 +1682,7 @@ instanceStateValue: true
                             status: 'active',
                             workflow_status: 'open',
                             flapping: false,
+                            tracked: true,
                           },
                           space_ids: ['space1'],
                           version: expectExpect.any(String),
@@ -1688,6 +1731,7 @@ instanceStateValue: true
                             status: 'active',
                             workflow_status: 'open',
                             flapping: false,
+                            tracked: true,
                           },
                           space_ids: ['space1'],
                           version: expectExpect.any(String),
@@ -1758,7 +1802,7 @@ instanceStateValue: true
               expect(searchResult.body.hits.total.value).to.be.greaterThan(0);
               expectExpect(
                 // @ts-expect-error _source: unknown
-                JSON.parse(searchResult.body.hits.hits[0]._source.params.message)
+                parseSummarizedAlertsMessage(searchResult.body.hits.hits[0]._source.params.message)
               ).toEqual([
                 expectExpect.objectContaining({
                   _id: expectExpect.any(String),
@@ -1800,6 +1844,7 @@ instanceStateValue: true
                       status: 'active',
                       workflow_status: 'open',
                       flapping: false,
+                      tracked: true,
                     },
                     space_ids: ['space1'],
                     version: expectExpect.any(String),
@@ -1848,6 +1893,7 @@ instanceStateValue: true
                       status: 'active',
                       workflow_status: 'open',
                       flapping: false,
+                      tracked: true,
                     },
                     space_ids: ['space1'],
                     version: expectExpect.any(String),
@@ -1962,8 +2008,8 @@ instanceStateValue: true
          * Creates a rule that always fire with a system action
          * that has configured a connector adapter.
          *
-         * System action: x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/action_types.ts
-         * Adapter: x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/connector_adapters.ts
+         * System action: x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/action_types.ts
+         * Adapter: x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/connector_adapters.ts
          */
         const response = await alertUtils.createAlwaysFiringSystemAction({
           reference,
@@ -2005,7 +2051,7 @@ instanceStateValue: true
           reference: 'alert-utils-ref:1:superuser',
           /**
            * Param was injected by the connector adapter in
-           * x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/connector_adapters.ts
+           * x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/connector_adapters.ts
            */
           injected: 'param from connector adapter',
         });

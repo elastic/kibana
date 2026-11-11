@@ -135,11 +135,39 @@ describe('ViewResultsInLensAction', () => {
           time_range: expect.objectContaining({
             from: '2025-06-15T10:00:00.000Z',
             to: '2025-06-15T11:00:00.000Z',
+            mode: 'absolute',
           }),
           attributes: expect.objectContaining({
             visualizationType: 'lnsPie',
             title: 'Action test-action-123 results',
           }),
+        }),
+        { openInNewTab: true, skipAppLeave: true }
+      );
+    });
+
+    it('should forward mode: relative with an open now end for live windows', () => {
+      render(
+        <TestProvidersWithServices>
+          <ViewResultsInLensAction
+            actionId="test-action-123"
+            buttonType={ViewResultsActionButtonType.button}
+            startDate="2025-06-15T10:00:00.000Z"
+            endDate="now"
+            mode="relative"
+          />
+        </TestProvidersWithServices>
+      );
+
+      fireEvent.click(screen.getByText('View in Lens'));
+
+      expect(mockNavigateToPrefilledEditor).toHaveBeenCalledWith(
+        expect.objectContaining({
+          time_range: {
+            from: '2025-06-15T10:00:00.000Z',
+            to: 'now',
+            mode: 'relative',
+          },
         }),
         { openInNewTab: true, skipAppLeave: true }
       );

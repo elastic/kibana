@@ -34,21 +34,21 @@ export function registerCases(
 ) {
   const ChangePointDetectionComponent = getChangePointDetectionComponent(coreStart, pluginStart);
 
-  cases.attachmentFramework.registerUnified(
+  cases.attachmentFramework.registerAttachment(
     defineAttachment({
       id: AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE,
-      icon: 'machineLearningApp',
-      displayName: i18n.translate('xpack.aiops.changePointDetection.cases.displayName', {
-        defaultMessage: 'Change point charts',
-      }),
-      getAttachmentViewObject: () => ({
+      getIcon: () => 'machineLearningApp',
+      getLabel: () =>
+        i18n.translate('xpack.aiops.changePointDetection.cases.displayName', {
+          defaultMessage: 'Change point charts',
+        }),
+      getCreationActivity: () => ({
         event: (
           <FormattedMessage
             id="xpack.aiops.changePointDetection.cases.attachmentEvent"
             defaultMessage="added change point charts"
           />
         ),
-        timelineAvatar: 'machineLearningApp',
         children: React.lazy(async () => {
           const { initComponent } = await import('./change_point_charts_attachment');
 
@@ -57,7 +57,7 @@ export function registerCases(
           };
         }),
       }),
-      getAttachmentRemovalObject: () => ({
+      getRemovalActivity: () => ({
         event: (
           <FormattedMessage
             id="xpack.aiops.changePointDetection.cases.attachmentRemovalEvent"
@@ -74,21 +74,21 @@ export function registerCases(
 
   const LogPatternAttachmentComponent = getPatternAnalysisComponent(coreStart, pluginStart);
 
-  cases.attachmentFramework.registerUnified(
+  cases.attachmentFramework.registerAttachment(
     defineAttachment({
       id: AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE,
-      icon: 'machineLearningApp',
-      displayName: i18n.translate('xpack.aiops.cases.logPatternAnalysis.displayName', {
-        defaultMessage: 'Log pattern analyses',
-      }),
-      getAttachmentViewObject: () => ({
+      getIcon: () => 'machineLearningApp',
+      getLabel: () =>
+        i18n.translate('xpack.aiops.cases.logPatternAnalysis.displayName', {
+          defaultMessage: 'Log pattern analyses',
+        }),
+      getCreationActivity: () => ({
         event: (
           <FormattedMessage
             id="xpack.aiops.logPatternAnalysis.cases.attachmentEvent"
             defaultMessage="added log pattern analysis"
           />
         ),
-        timelineAvatar: 'machineLearningApp',
         children: React.lazy(async () => {
           const { initComponent } = await import('./log_pattern_attachment');
 
@@ -97,7 +97,7 @@ export function registerCases(
           };
         }),
       }),
-      getAttachmentRemovalObject: () => ({
+      getRemovalActivity: () => ({
         event: (
           <FormattedMessage
             id="xpack.aiops.logPatternAnalysis.cases.attachmentRemovalEvent"
@@ -117,21 +117,21 @@ export function registerCases(
     pluginStart
   );
 
-  cases.attachmentFramework.registerUnified(
+  cases.attachmentFramework.registerAttachment(
     defineAttachment({
       id: AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE,
-      icon: 'machineLearningApp',
-      displayName: i18n.translate('xpack.aiops.cases.logRateAnalysis.displayName', {
-        defaultMessage: 'Log rate analyses',
-      }),
-      getAttachmentViewObject: () => ({
+      getIcon: () => 'machineLearningApp',
+      getLabel: () =>
+        i18n.translate('xpack.aiops.cases.logRateAnalysis.displayName', {
+          defaultMessage: 'Log rate analyses',
+        }),
+      getCreationActivity: () => ({
         event: (
           <FormattedMessage
             id="xpack.aiops.logRateAnalysis.cases.attachmentEvent"
             defaultMessage="added log rate analysis"
           />
         ),
-        timelineAvatar: 'machineLearningApp',
         children: React.lazy(async () => {
           const { initComponent } = await import('./log_rate_analysis_attachment');
 
@@ -143,7 +143,7 @@ export function registerCases(
           };
         }),
       }),
-      getAttachmentRemovalObject: () => ({
+      getRemovalActivity: () => ({
         event: (
           <FormattedMessage
             id="xpack.aiops.logRateAnalysis.cases.attachmentRemovalEvent"

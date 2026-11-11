@@ -114,12 +114,17 @@ describe('AnnouncementBanner', () => {
         <AnnouncementBanner
           {...requiredProps}
           onDismiss={() => {}}
-          dismissButtonProps={{ 'aria-label': 'Close', 'data-test-subj': 'custom-dismiss' }}
+          dismissButtonProps={{
+            'aria-label': 'Close',
+            'data-test-subj': 'custom-dismiss',
+            'data-telemetry-id': 'dismiss-telemetry-id',
+          }}
         />
       );
       const button = getByTestId('custom-dismiss');
 
       expect(button).toHaveAttribute('aria-label', 'Close');
+      expect(button).toHaveAttribute('data-telemetry-id', 'dismiss-telemetry-id');
     });
   });
 

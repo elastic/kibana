@@ -106,6 +106,56 @@ describe('createWorkflowLiquidEngine', () => {
     });
   });
 
+  describe('grouped expressions (groupedExpressions: true)', () => {
+    it('evaluates parenthesised sub-expressions in if conditions', () => {
+      const engine = createWorkflowLiquidEngine();
+      expect(
+        engine.parseAndRenderSync('{% if a and (b or c) %}ok{% endif %}', {
+          a: true,
+          b: false,
+          c: true,
+        })
+      ).toBe('ok');
+    });
+
+    it('evaluates filter results as operands in if conditions', () => {
+      const engine = createWorkflowLiquidEngine();
+      expect(
+        engine.parseAndRenderSync('{% if (name | size) > 3 %}ok{% endif %}', { name: 'hello' })
+      ).toBe('ok');
+    });
+
+    it('evaluates grouped expressions in unless conditions', () => {
+      const engine = createWorkflowLiquidEngine();
+      expect(
+        engine.parseAndRenderSync('{% unless (items | size) == 0 %}has items{% endunless %}', {
+          items: [1, 2],
+        })
+      ).toBe('has items');
+    });
+
+    it('evaluates filter as operand in case/when', () => {
+      const engine = createWorkflowLiquidEngine();
+      expect(
+        engine.parseAndRenderSync(
+          '{% case (status | downcase) %}{% when "active" %}yes{% endcase %}',
+          { status: 'ACTIVE' }
+        )
+      ).toBe('yes');
+    });
+
+    it('does not evaluate grouped expression when condition is false', () => {
+      const engine = createWorkflowLiquidEngine();
+      expect(
+        engine.parseAndRenderSync('{% if a and (b or c) %}ok{% endif %}', {
+          a: true,
+          b: false,
+          c: false,
+        })
+      ).toBe('');
+    });
+  });
+
   describe('LIQUID_ALLOWED_TAGS', () => {
     it('includes expected core tags', () => {
       const allowedTags = ['assign', 'for', 'if', 'capture', 'case', 'comment'];

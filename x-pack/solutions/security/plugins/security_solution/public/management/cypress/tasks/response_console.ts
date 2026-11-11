@@ -56,20 +56,7 @@ export const submitCommand = (): void => {
 };
 
 export const waitForCommandToBeExecuted = (command: ConsoleResponseActionCommands): void => {
-  let actionResultMessage = 'Action completed.';
-
-  if (command === 'execute') {
-    actionResultMessage = 'Command execution was successful';
-  } else if (command === 'get-file') {
-    actionResultMessage = 'File retrieved from the host.';
-  } else if (command === 'scan') {
-    actionResultMessage = 'Scan complete';
-  }
-
-  const actionPendingMessage =
-    command === 'get-file' ? 'Retrieving the file from host.' : 'Action pending.';
-  cy.contains(actionPendingMessage).should('exist');
-  cy.contains(actionResultMessage, { timeout: 120000 }).should('exist');
+  cy.contains(`${command} completed successfully`, { timeout: 120000 }).should('exist');
 };
 
 export const performCommandInputChecks = (command: string) => {

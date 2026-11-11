@@ -20,8 +20,7 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
   const logger = getService('log');
   const findGaps = getFindGaps({ supertest, logger });
 
-  // Failing: See https://github.com/elastic/kibana/issues/275521
-  describe.skip('update gaps', () => {
+  describe('update gaps', () => {
     const objectRemover = new ObjectRemover(supertest);
     const gapStart = moment().subtract(14, 'days').startOf('day').toISOString();
     const gapEnd = moment().subtract(13, 'days').startOf('day').toISOString();
@@ -521,7 +520,7 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
 
       const backfillId = scheduleResponse.body[0].id;
 
-      // Wait for task failure event
+      // 24h backfill range / 12h interval = 2 executions; wait for both to be logged, then assert the failing one.
       await retry.try(async () => {
         const events = await getEventLog({
           getService,
@@ -529,11 +528,10 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
           type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
           id: backfillId,
           provider: 'alerting',
-          actions: new Map([['execute-backfill', { equal: 1 }]]),
+          actions: new Map([['execute-backfill', { gte: 2 }]]),
         });
-        expect(events.length).to.eql(1);
-        expect(events[0]?.event?.outcome).to.eql('failure');
-        expect(events[0]?.error?.message).to.eql('rule executor error');
+        const failure = events.find((e) => e?.event?.outcome === 'failure');
+        expect(failure?.error?.message).to.eql('rule executor error');
       });
 
       await waitForBackfillComplete(backfillId, space.id);

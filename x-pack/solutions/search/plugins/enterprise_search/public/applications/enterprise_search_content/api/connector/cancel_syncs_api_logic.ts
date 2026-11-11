@@ -16,7 +16,9 @@ export interface CancelSyncsApiArgs {
 }
 
 export const cancelSyncs = async ({ connectorId }: CancelSyncsApiArgs) => {
-  const route = `/internal/enterprise_search/connectors/${connectorId}/cancel_syncs`;
+  const route = `/internal/enterprise_search/connectors/${encodeURIComponent(
+    connectorId
+  )}/cancel_syncs`;
   return await HttpLogic.values.http.post(route);
 };
 

@@ -1,0 +1,70 @@
+openapi: 3.0.0
+info:
+  title: Resolve Evaluation Dataset API endpoint
+  version: '1'
+paths:
+  /internal/evals/datasets/_resolve:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: ResolveEvaluationDataset
+      description: >-
+        Look up a dataset by name within the current space. Dataset ids are
+        derived from the owning space, so a caller cannot compute one locally
+        without knowing which space the dataset lives in.
+      summary: Resolve evaluation dataset by name
+      tags:
+        - Evals API
+      parameters:
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  description:
+                    type: string
+                  tags:
+                    $ref: '../common_attributes.schema.yaml#/components/schemas/DatasetTags'
+                  maturity:
+                    $ref: '../common_attributes.schema.yaml#/components/schemas/DatasetMaturity'
+                  space_ids:
+                    $ref: '../common_attributes.schema.yaml#/components/schemas/RedactedSpaceIds'
+                  examples_count:
+                    type: integer
+                  created_at:
+                    type: string
+                  updated_at:
+                    type: string
+                required:
+                  - id
+                  - name
+                  - description
+                  - created_at
+                  - updated_at
+        '404':
+          description: Dataset not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string

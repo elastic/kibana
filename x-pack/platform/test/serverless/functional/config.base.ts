@@ -44,6 +44,8 @@ export function createTestConfig<
         serverArgs: [
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           `--serverless=${options.serverlessProject}`,
+          // Fail fast if CI can't reach Fleet's product versions API (default 60s, retried once).
+          '--xpack.fleet.productVersionsApiTimeoutMs=5000',
           ...(options.kbnServerArgs ?? []),
           ...(enableFleetDockerRegistry && dockerRegistryPort
             ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]

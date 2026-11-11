@@ -71,8 +71,7 @@ test.describe.serial(
     });
 
     test('displays a linked dashboard with a control group', async ({
-      page,
-      pageObjects: { serviceDetailsPage },
+      pageObjects: { serviceDetailsPage, controls },
     }) => {
       await test.step('Navigate to dashboard tab', async () => {
         await serviceDetailsPage.dashboardsTab.goToTab({
@@ -88,7 +87,7 @@ test.describe.serial(
       });
 
       await test.step('Verify the control group has rendered', async () => {
-        await expect(page.getByTestId('controls-group-wrapper')).toBeVisible();
+        await expect(controls.group).toBeVisible();
       });
     });
 

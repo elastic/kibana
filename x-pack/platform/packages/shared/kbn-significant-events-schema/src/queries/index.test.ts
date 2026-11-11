@@ -5,22 +5,8 @@
  * 2.0.
  */
 
-import type { Feature } from '../feature';
-import { isDurable, isExpired } from '.';
-
-function makeFeature(expiresAt: string | undefined): Feature {
-  return { expires_at: expiresAt } as unknown as Feature;
-}
-
-describe('isDurable', () => {
-  it('is true when expires_at is absent', () => {
-    expect(isDurable(makeFeature(undefined))).toBe(true);
-  });
-
-  it('is false when expires_at is set', () => {
-    expect(isDurable(makeFeature('2020-01-01T00:00:00.000Z'))).toBe(false);
-  });
-});
+import { generatedSignificantEventQuerySchema } from '../api/significant_events';
+import { SIGNIFICANT_EVENT_TYPES, isExpired, significantEventTypeSchema } from '.';
 
 describe('isExpired', () => {
   it('is true for a past timestamp', () => {
@@ -29,5 +15,38 @@ describe('isExpired', () => {
 
   it('is false for a future timestamp', () => {
     expect(isExpired('2099-01-01T00:00:00.000Z')).toBe(false);
+  });
+});
+
+describe('significant event query category', () => {
+  it('defines the canonical category values', () => {
+    expect(SIGNIFICANT_EVENT_TYPES).toEqual([
+      'operational',
+      'configuration',
+      'resource_health',
+      'error',
+      'security',
+    ]);
+    expect(significantEventTypeSchema.safeParse('error').success).toBe(true);
+    expect(significantEventTypeSchema.safeParse('unsupported').success).toBe(false);
+  });
+
+  it('keeps category optional on the generated query wire schema', () => {
+    const query = {
+      type: 'match',
+      title: 'Failures',
+      description: 'Detects failures',
+      esql: { query: 'FROM logs | WHERE message == "failure"' },
+      severity_score: 60,
+      features: [],
+    };
+
+    expect(generatedSignificantEventQuerySchema.safeParse(query).success).toBe(true);
+    expect(
+      generatedSignificantEventQuerySchema.safeParse({ ...query, category: 'error' }).success
+    ).toBe(true);
+    expect(
+      generatedSignificantEventQuerySchema.safeParse({ ...query, category: 'unsupported' }).success
+    ).toBe(false);
   });
 });

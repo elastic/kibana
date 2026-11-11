@@ -35,7 +35,7 @@ export function getDiscoverDrilldown(deps: {
     displayName: i18n.translate('xpack.lens.app.exploreDataInDiscoverDrilldown', {
       defaultMessage: 'Open in Discover',
     }),
-    euiIcon: 'discoverApp',
+    euiIcon: 'productDiscover',
     supportedTriggers: DISCOVER_DRILLDOWN_SUPPORTED_TRIGGERS,
     action: {
       execute: async (drilldownState: DiscoverDrilldownState, context: ExecutionContext) => {

@@ -10,6 +10,8 @@ import type {
   ObltTestFixtures,
   ObltWorkerFixtures,
   ObltApiServicesFixture,
+  ObltParallelTestFixtures,
+  ObltParallelWorkerFixtures,
   EsClient,
   KibanaUrl,
   ScoutLogger,
@@ -18,6 +20,7 @@ import type {
 import {
   mergeTests,
   test as base,
+  spaceTest as spaceBase,
   createLazyPageObject,
   globalSetupHook as baseGlobalSetupHook,
   globalTeardownHook as baseGlobalTeardownHook,
@@ -32,6 +35,13 @@ import { HostsPage } from './page_objects/hosts_page';
 import { getInventoryViewsApiService, type InventoryViewApiService } from './apis/inventory_views';
 import { NodeDetailsPage } from './page_objects/node_details/node_details';
 import { SavedViews } from './page_objects/saved_views';
+import { FeatureControlsPage } from './page_objects/feature_controls';
+import { NotFoundPage } from './page_objects/not_found';
+import { MetricsSettingsPage } from './page_objects/metrics_settings';
+import { MetricsExplorerPage } from './page_objects/metrics_explorer';
+import { AnomalyFlyoutPage } from './page_objects/anomaly_flyout';
+import { LogsMlAnomaliesPage } from './page_objects/logs_ml/logs_ml_anomalies_page';
+import { LogsMlCategoriesPage } from './page_objects/logs_ml/logs_ml_categories_page';
 
 export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
   pageObjects: ObltPageObjects & {
@@ -40,6 +50,11 @@ export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
     hostsPage: HostsPage;
     nodeDetailsPage: NodeDetailsPage;
     savedViews: SavedViews;
+    featureControlsPage: FeatureControlsPage;
+    notFoundPage: NotFoundPage;
+    metricsSettingsPage: MetricsSettingsPage;
+    metricsExplorerPage: MetricsExplorerPage;
+    anomalyFlyoutPage: AnomalyFlyoutPage;
   };
 }
 
@@ -69,6 +84,11 @@ export const test = baseWithSynthtrace.extend<
       hostsPage: createLazyPageObject(HostsPage, page, kbnUrl),
       nodeDetailsPage: createLazyPageObject(NodeDetailsPage, page, kbnUrl),
       savedViews,
+      featureControlsPage: createLazyPageObject(FeatureControlsPage, page, kbnUrl),
+      notFoundPage: createLazyPageObject(NotFoundPage, page, kbnUrl),
+      metricsSettingsPage: createLazyPageObject(MetricsSettingsPage, page, kbnUrl),
+      metricsExplorerPage: createLazyPageObject(MetricsExplorerPage, page, kbnUrl),
+      anomalyFlyoutPage: createLazyPageObject(AnomalyFlyoutPage, page),
     };
 
     await use(extendedPageObjects);
@@ -86,6 +106,37 @@ export const test = baseWithSynthtrace.extend<
     };
 
     await use(extendedApiServices);
+  },
+});
+
+export interface InfraParallelTestFixtures extends ObltParallelTestFixtures {
+  pageObjects: ObltParallelTestFixtures['pageObjects'] & {
+    logsMlAnomaliesPage: LogsMlAnomaliesPage;
+    logsMlCategoriesPage: LogsMlCategoriesPage;
+  };
+}
+
+/**
+ * Space-isolated variant of `test` for `parallel_tests/` specs: each worker runs in its own Kibana
+ * space (`scoutSpace`) instead of the default space shared with every other spec and with earlier
+ * configs in the CI lane.
+ *
+ * The Logs ML page specs (`parallel_tests/logs_ml/`) need it: the setup screen they assert only shows
+ * while no Logs ML job exists in the current space (the job IDs include the space ID), and each
+ * spec points the space's `observability:logSources` setting at its own index. Running them in the
+ * default space would make them depend on jobs or settings that other suites may have created,
+ * changed or left behind there.
+ */
+export const spaceTest = spaceBase.extend<InfraParallelTestFixtures, ObltParallelWorkerFixtures>({
+  pageObjects: async (
+    { pageObjects, page },
+    use: (pageObjects: InfraParallelTestFixtures['pageObjects']) => Promise<void>
+  ) => {
+    await use({
+      ...pageObjects,
+      logsMlAnomaliesPage: createLazyPageObject(LogsMlAnomaliesPage, page),
+      logsMlCategoriesPage: createLazyPageObject(LogsMlCategoriesPage, page),
+    });
   },
 });
 

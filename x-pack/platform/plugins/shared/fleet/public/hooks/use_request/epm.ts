@@ -29,6 +29,7 @@ import type {
   GetInputsTemplatesRequest,
   GetInputsTemplatesResponse,
 } from '../../types';
+import type { NamespaceConflictWarning } from '../../../common/types/rest_spec/epm';
 import type {
   BulkUpgradePackagesRequest,
   BulkOperationPackagesResponse,
@@ -44,6 +45,7 @@ import type {
   RollbackAvailableCheckResponse,
   BulkRollbackAvailableCheckResponse,
   GetIlmPoliciesResponse,
+  SimpleSOAssetType,
 } from '../../../common/types';
 import { API_VERSIONS } from '../../../common/constants';
 
@@ -168,6 +170,7 @@ export const useGetPackageInfoByKeyQuery = (
     enabled?: boolean;
     suspense?: boolean;
     refetchOnMount?: boolean | 'always';
+    staleTime?: number;
   } = {
     enabled: true,
   }
@@ -193,6 +196,7 @@ export const useGetPackageInfoByKeyQuery = (
       suspense: queryOptions.suspense,
       enabled: queryOptions.enabled,
       refetchOnMount: queryOptions.refetchOnMount,
+      staleTime: queryOptions.staleTime,
       retry: (_, error) => !isUserError(error) && !isRegistryConnectionError(error),
       refetchOnWindowFocus: false,
     }
@@ -342,8 +346,19 @@ export const sendGetFileByPath = (filePath: string) => {
   });
 };
 
-export const sendInstallPackage = (pkgName: string, pkgVersion: string, force: boolean = false) => {
-  const body = force ? { force } : undefined;
+export const sendInstallPackage = (
+  pkgName: string,
+  pkgVersion: string,
+  force: boolean = false,
+  options?: { acknowledgeBreakingChanges?: boolean }
+) => {
+  const body =
+    force || options?.acknowledgeBreakingChanges
+      ? {
+          ...(force ? { force } : {}),
+          ...(options?.acknowledgeBreakingChanges ? { acknowledge_breaking_changes: true } : {}),
+        }
+      : undefined;
   return sendRequest<InstallPackageResponse, FleetErrorResponse>({
     path: epmRouteService.getInstallPath(pkgName, pkgVersion),
     method: 'post',
@@ -521,6 +536,27 @@ export const useUpdatePackageMutation = () => {
   });
 };
 
+interface NamespacePreflightCheckArgs {
+  pkgName: string;
+  namespaces: string[];
+}
+
+interface NamespacePreflightCheckResponse {
+  warnings: NamespaceConflictWarning[];
+}
+
+export const useNamespacePreflightCheckMutation = () => {
+  return useMutation<NamespacePreflightCheckResponse, RequestError, NamespacePreflightCheckArgs>({
+    mutationFn: ({ pkgName, namespaces }: NamespacePreflightCheckArgs) =>
+      sendRequestForRq<NamespacePreflightCheckResponse>({
+        path: epmRouteService.getNamespacePreflightCheckPath(pkgName),
+        method: 'post',
+        version: API_VERSIONS.internal.v1,
+        body: { namespaces },
+      }),
+  });
+};
+
 interface ReviewUpgradeArgs {
   pkgName: string;
   action: 'accept' | 'decline' | 'pending';
@@ -582,8 +618,10 @@ export const sendUpdatePackage = (
   });
 };
 
-export const sendGetBulkAssets = (body: GetBulkAssetsRequest['body']) => {
-  return sendRequest<GetBulkAssetsResponse>({
+export const sendGetBulkAssets = <TAsset extends SimpleSOAssetType = SimpleSOAssetType>(
+  body: GetBulkAssetsRequest['body']
+) => {
+  return sendRequest<GetBulkAssetsResponse<TAsset>>({
     path: epmRouteService.getBulkAssetsPath(),
     method: 'post',
     version: API_VERSIONS.public.v1,

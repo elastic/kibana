@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 
 import { installationStatuses } from '../../../../../../../common/constants';
 
@@ -65,6 +65,7 @@ export const categoryExists = (category: string, categories: CategoryFacet[]) =>
 };
 
 export const EPMHomePage: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
   const config = useConfig();
   const { application } = useStartServices();
   if (config.integrationsHomeOverride) {
@@ -125,7 +126,7 @@ export const EPMHomePage: React.FC = () => {
   };
 
   if (!shouldFetchPackages) {
-    return <EuiLoadingSpinner />;
+    return <EuiLoadingSpinner css={{ margin: euiTheme.size.m }} />;
   }
 
   return (

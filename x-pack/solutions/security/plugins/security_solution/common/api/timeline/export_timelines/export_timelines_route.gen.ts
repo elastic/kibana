@@ -21,7 +21,7 @@ export const ExportTimelinesRequestQuery = lazySchema(() =>
     /**
      * The name of the file to export
      */
-    file_name: z.string(),
+    file_name: z.string().describe('The name of the file to export'),
   })
 );
 export type ExportTimelinesRequestQuery = z.infer<typeof ExportTimelinesRequestQuery>;

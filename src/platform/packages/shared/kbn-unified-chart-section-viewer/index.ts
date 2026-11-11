@@ -24,6 +24,7 @@ export type {
   MetricsESQLResponse,
   Dimension,
   MetricUnit,
+  MetricsSort,
   UnifiedMetricsGridProps,
 } from './src/types';
 export {

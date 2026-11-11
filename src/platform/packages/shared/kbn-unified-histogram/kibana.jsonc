@@ -1,7 +1,7 @@
 {
   "type": "shared-browser",
   "id": "@kbn/unified-histogram",
-  "owner": "@elastic/kibana-data-discovery",
+  "owner": "@elastic/kibana-discover",
   "group": "platform",
   "visibility": "shared",
   "description": "Components for the Discover histogram chart"

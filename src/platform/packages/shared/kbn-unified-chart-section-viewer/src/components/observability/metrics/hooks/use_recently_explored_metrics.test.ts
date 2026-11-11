@@ -10,11 +10,8 @@
 import { renderHook, act } from '@testing-library/react';
 import { getFetch$Mock, getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import { useRecentlyExploredMetrics } from './use_recently_explored_metrics';
-import {
-  DEFAULT_METRICS_SORT,
-  METRICS_SORT_BY,
-  METRICS_SORT_DIRECTION,
-} from '../../../../common/constants';
+import { METRICS_GRID_SORT_DEFAULTS } from '@kbn/discover-utils';
+import { METRICS_SORT_BY, METRICS_SORT_DIRECTION } from '../../../../common/constants';
 import type { Dimension, MetricsSort } from '../../../../types';
 
 describe('useRecentlyExploredMetrics', () => {
@@ -36,7 +33,7 @@ describe('useRecentlyExploredMetrics', () => {
         }),
       {
         initialProps: {
-          metricsSort: DEFAULT_METRICS_SORT,
+          metricsSort: METRICS_GRID_SORT_DEFAULTS,
           searchTerm: '',
           selectedDimensions: [],
           ...initialProps,
@@ -59,7 +56,10 @@ describe('useRecentlyExploredMetrics', () => {
     stored = ['metrics-*::memory', 'metrics-*::cpu'];
     act(() => {
       rerender({
-        metricsSort: [METRICS_SORT_BY.recency, METRICS_SORT_DIRECTION.desc],
+        metricsSort: {
+          sortField: METRICS_SORT_BY.recency,
+          sortDirection: METRICS_SORT_DIRECTION.desc,
+        },
         searchTerm: '',
         selectedDimensions: [],
       });
@@ -75,7 +75,7 @@ describe('useRecentlyExploredMetrics', () => {
     stored = ['metrics-*::cpu'];
     act(() => {
       rerender({
-        metricsSort: DEFAULT_METRICS_SORT,
+        metricsSort: METRICS_GRID_SORT_DEFAULTS,
         searchTerm: 'cpu',
         selectedDimensions: [],
       });
@@ -91,7 +91,7 @@ describe('useRecentlyExploredMetrics', () => {
     stored = ['metrics-*::cpu'];
     act(() => {
       rerender({
-        metricsSort: DEFAULT_METRICS_SORT,
+        metricsSort: METRICS_GRID_SORT_DEFAULTS,
         searchTerm: '',
         selectedDimensions: [{ name: 'host.name' }],
       });
@@ -119,7 +119,10 @@ describe('useRecentlyExploredMetrics', () => {
 
     act(() => {
       rerender({
-        metricsSort: [METRICS_SORT_BY.recency, METRICS_SORT_DIRECTION.desc],
+        metricsSort: {
+          sortField: METRICS_SORT_BY.recency,
+          sortDirection: METRICS_SORT_DIRECTION.desc,
+        },
         searchTerm: '',
         selectedDimensions: [],
       });

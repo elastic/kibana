@@ -9,6 +9,7 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
+import semverValid from 'semver/functions/valid';
 
 import {
   EuiTitle,
@@ -18,8 +19,8 @@ import {
   EuiSpacer,
   EuiLink,
   EuiPortal,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { i18n } from '@kbn/i18n';
 
@@ -35,8 +36,10 @@ import {
   useUpgradePackagePolicyDryRunQuery,
   useUpgradeAgentlessPoliciesDryRunQuery,
   useUpdatePackageMutation,
+  useNamespacePreflightCheckMutation,
   useAuthz,
 } from '../../../../../hooks';
+import type { NamespaceConflictWarning } from '../../../../../../../../common/types/rest_spec/epm';
 import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   KEEP_POLICIES_UP_TO_DATE_PACKAGES,
@@ -61,6 +64,7 @@ import { ReinstallButton } from './reinstall_button';
 import { UpdateButton } from './update_button';
 import { UninstallButton } from './uninstall_button';
 import { ChangelogModal } from './changelog_modal';
+import { NamespaceConflictModal } from './namespace_conflict_modal';
 import { UpdateAvailableCallout } from './update_available_callout';
 import { BreakingChangesFlyout } from './breaking_changes_flyout';
 import { RollbackButton } from './rollback_button';
@@ -140,10 +144,27 @@ export const SettingsPage: React.FC<Props> = memo(
 
     const {
       changelog,
-      breakingChanges,
       isLoading: isChangelogLoading,
       error: changelogError,
     } = useChangelog(name, latestVersion, version);
+
+    // Package policies can lag behind the installed version, and upgrading them applies the
+    // breaking changes from their own version. The acknowledgement must cover the whole range,
+    // as the policy upgrade APIs check it from each policy version.
+    const breakingChangesFromVersion = useMemo(
+      () =>
+        (packagePoliciesData?.items ?? []).reduce((oldestVersion, packagePolicy) => {
+          const policyVersion = packagePolicy.package?.version;
+          return policyVersion &&
+            semverValid(policyVersion) &&
+            semverValid(oldestVersion) &&
+            semverLt(policyVersion, oldestVersion)
+            ? policyVersion
+            : oldestVersion;
+        }, version),
+      [packagePoliciesData, version]
+    );
+    const { breakingChanges } = useChangelog(name, latestVersion, breakingChangesFromVersion);
 
     // Agentless package policies must upgrade through the agentless API, not the
     // (deprecated-for-agentless) package-policy API. Partition by whether each policy is
@@ -226,6 +247,7 @@ export const SettingsPage: React.FC<Props> = memo(
 
     const updatePackageMutation = useUpdatePackageMutation();
     const updateNamespaceCustomizationMutation = useUpdatePackageMutation();
+    const namespacePreflight = useNamespacePreflightCheckMutation();
 
     const { notifications } = useStartServices();
     const { allowedNamespacePrefixes } = useSpaceSettingsContext();
@@ -240,7 +262,13 @@ export const SettingsPage: React.FC<Props> = memo(
 
     const namespaceCustomizationSettings = installationInfo?.namespace_customization_settings;
 
-    const handleNamespaceCustomizationChange = useCallback(
+    // State for the pre-flight conflict confirmation modal.
+    const [preflightModal, setPreflightModal] = useState<{
+      pendingNamespaces: string[];
+      conflicts: NamespaceConflictWarning[];
+    } | null>(null);
+
+    const saveNamespaceCustomization = useCallback(
       (next: string[]) => {
         updateNamespaceCustomizationMutation.mutate(
           {
@@ -290,6 +318,54 @@ export const SettingsPage: React.FC<Props> = memo(
         updateNamespaceCustomizationMutation,
       ]
     );
+
+    const handleNamespaceCustomizationChange = useCallback(
+      async (next: string[]) => {
+        const addedNamespaces = next.filter((ns) => !namespaceCustomizationEnabledFor.includes(ns));
+        if (addedNamespaces.length > 0) {
+          try {
+            const result = await namespacePreflight.mutateAsync({
+              pkgName: packageInfo.name,
+              namespaces: addedNamespaces,
+            });
+            if (result.warnings.length > 0) {
+              setPreflightModal({ pendingNamespaces: next, conflicts: result.warnings });
+              return;
+            }
+          } catch {
+            // Fail open: if the check itself errors, proceed with the save.
+            notifications.toasts.addWarning(
+              i18n.translate(
+                'xpack.fleet.integrations.namespaceCustomization.conflictCheckFailed',
+                {
+                  defaultMessage:
+                    'Could not check for index template conflicts. Proceeding without the check.',
+                }
+              )
+            );
+          }
+        }
+        saveNamespaceCustomization(next);
+      },
+      [
+        namespaceCustomizationEnabledFor,
+        namespacePreflight,
+        notifications,
+        packageInfo.name,
+        saveNamespaceCustomization,
+      ]
+    );
+
+    const handleConflictConfirm = useCallback(() => {
+      if (preflightModal !== null) {
+        saveNamespaceCustomization(preflightModal.pendingNamespaces);
+      }
+      setPreflightModal(null);
+    }, [preflightModal, saveNamespaceCustomization]);
+
+    const handleConflictCancel = useCallback(() => {
+      setPreflightModal(null);
+    }, []);
 
     const shouldShowKeepPoliciesUpToDateSwitch = useMemo(() => {
       return KEEP_POLICIES_UP_TO_DATE_PACKAGES.some((pkg) => pkg.name === name);
@@ -457,7 +533,10 @@ export const SettingsPage: React.FC<Props> = memo(
                         allowedNamespacePrefixes={allowedNamespacePrefixes}
                         namespaceCustomizationSettings={namespaceCustomizationSettings}
                         disabled={!authz.integrations.writePackageSettings}
-                        isSubmitting={updateNamespaceCustomizationMutation.isLoading}
+                        isSubmitting={
+                          updateNamespaceCustomizationMutation.isLoading ||
+                          namespacePreflight.isLoading
+                        }
                         onSave={handleNamespaceCustomizationChange}
                       />
                       <EuiSpacer size="l" />
@@ -497,6 +576,9 @@ export const SettingsPage: React.FC<Props> = memo(
                           setIsUpgradingPackagePolicies={setIsUpgradingPackagePolicies}
                           startServices={startServices}
                           isDisabled={Boolean(breakingChanges) && !isBreakingChangesUnderstood}
+                          acknowledgeBreakingChanges={
+                            Boolean(breakingChanges) && isBreakingChangesUnderstood
+                          }
                         />
                       </p>
                     </>
@@ -544,10 +626,8 @@ export const SettingsPage: React.FC<Props> = memo(
                           </EuiFlexGroup>
                         </>
                       ) : (
-                        <EuiCallOut
+                        <KbnWarningCallout
                           announceOnMount
-                          color="warning"
-                          iconType="lock"
                           data-test-subj="installPermissionCallout"
                           title={
                             <FormattedMessage
@@ -555,12 +635,13 @@ export const SettingsPage: React.FC<Props> = memo(
                               defaultMessage="Permission required"
                             />
                           }
-                        >
-                          <FormattedMessage
-                            id="xpack.fleet.integrations.settings.installPermissionRequired"
-                            defaultMessage="You do not have permission to install this integration. Contact your administrator."
-                          />
-                        </EuiCallOut>
+                          text={
+                            <FormattedMessage
+                              id="xpack.fleet.integrations.settings.installPermissionRequired"
+                              defaultMessage="You do not have permission to install this integration. Contact your administrator."
+                            />
+                          }
+                        />
                       )}
                     </div>
                   ) : (
@@ -749,6 +830,13 @@ export const SettingsPage: React.FC<Props> = memo(
           <BreakingChangesFlyout
             breakingChanges={breakingChanges}
             onClose={() => setIsBreakingChangesFlyoutOpen(false)}
+          />
+        )}
+        {preflightModal && preflightModal.conflicts.length > 0 && (
+          <NamespaceConflictModal
+            conflicts={preflightModal.conflicts}
+            onConfirm={handleConflictConfirm}
+            onCancel={handleConflictCancel}
           />
         )}
       </>

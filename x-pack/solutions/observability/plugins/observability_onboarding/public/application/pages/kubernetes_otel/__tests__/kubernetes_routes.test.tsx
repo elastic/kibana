@@ -13,7 +13,6 @@ import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
 import type { CoreStart } from '@kbn/core/public';
 import type { ObservabilityOnboardingAppServices } from '../../../..';
 import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../../../../common/feature_flags';
@@ -89,19 +88,17 @@ const renderFlow = (flagEnabled: boolean, path: string) => {
   const coreStart = coreMock.createStart();
   const services = createObservabilityServices(coreStart);
   const featureFlags = services.featureFlags as CoreStart['featureFlags'] & {
-    getBooleanValue: jest.Mock;
+    useBooleanValue: jest.Mock;
   };
-  featureFlags.getBooleanValue.mockImplementation((id: string, fallback: boolean) =>
+  featureFlags.useBooleanValue.mockImplementation((id: string, fallback: boolean) =>
     id === IS_ADD_DATA_PAGE_V2_ENABLED ? flagEnabled : fallback
   );
   return render(
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <MemoryRouter initialEntries={[path]}>
-          <CompatRouter>
-            <ObservabilityOnboardingFlow />
-            <LocationProbe />
-          </CompatRouter>
+          <ObservabilityOnboardingFlow />
+          <LocationProbe />
         </MemoryRouter>
       </KibanaContextProvider>
     </I18nProvider>

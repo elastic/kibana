@@ -99,15 +99,22 @@ describe('EQL Rule - Rule Creation', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/259231
-  describe.skip('EQL query validation', () => {
+  describe('EQL query validation', () => {
     const rule = getEqlRule();
 
     it('validates missing data source', () => {
       visit(CREATE_RULE_URL);
       selectEqlRuleType();
       getIndexPatternClearButton().click();
-      cy.intercept('GET', '/internal/data_views/fields?pattern=endgame-*').as('indexLoaded');
+      // The data views fields request differs by offering: ESS issues a GET to
+      // `/internal/data_views/fields`, while serverless with CPS enabled attaches
+      // project routing and issues a POST to `/internal/data_views/_fields_for_wildcard`.
+      // Match either so the wait below works in both environments.
+      cy.intercept({
+        method: /GET|POST/,
+        pathname: /\/internal\/data_views\/(fields|_fields_for_wildcard)/,
+        query: { pattern: 'endgame-*' },
+      }).as('indexLoaded');
 
       getRuleIndexInput().type('endgame-*{enter}');
 
@@ -120,7 +127,7 @@ describe('EQL Rule - Rule Creation', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
       cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type('any where true');
 
-      const expectedValidationError = `index_not_found_exception\n\tCaused by:\n\t\tverification_exception: Found 1 problem\nline -1:-1: Unknown index [*,-*]\n\tRoot causes:\n\t\tverification_exception: Found 1 problem\nline -1:-1: Unknown index [*,-*]`;
+      const expectedValidationError = `index_not_found_exception\n\tCaused by:\n\t\tverification_exception: Found 1 problem\nline -1:-1: Unknown index [endgame-*]\n\tRoot causes:\n\t\tverification_exception: Found 1 problem\nline -1:-1: Unknown index [endgame-*]`;
       cy.get(EQL_QUERY_VALIDATION_ERROR).should('be.visible');
       cy.get(EQL_QUERY_VALIDATION_ERROR).should('have.text', '1');
       cy.get(EQL_QUERY_VALIDATION_ERROR).click();

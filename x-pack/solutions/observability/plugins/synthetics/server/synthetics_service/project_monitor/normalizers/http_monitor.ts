@@ -6,6 +6,7 @@
  */
 import { get } from 'lodash';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
+import { mergeHttpAuthDefaults } from '../../../../common/utils/merge_http_auth_defaults';
 import type { HTTPFields, TLSVersion } from '../../../../common/runtime_types/monitor_management';
 import {
   CodeEditorMode,
@@ -33,6 +34,7 @@ export const getNormalizeHTTPFields = ({
   projectId,
   namespace,
   version,
+  maintenanceWindows,
 }: NormalizedProjectProps): NormalizerResult<HTTPFields> => {
   const defaultFields = DEFAULT_FIELDS[MonitorTypeEnum.HTTP];
   const errors = [];
@@ -44,6 +46,7 @@ export const getNormalizeHTTPFields = ({
     projectId,
     namespace,
     version,
+    maintenanceWindows,
   });
 
   // Add common errors to errors array
@@ -86,10 +89,10 @@ export const getNormalizeHTTPFields = ({
   };
 
   return {
-    normalizedFields: {
+    normalizedFields: mergeHttpAuthDefaults({
       ...defaultFields,
       ...normalizedFields,
-    },
+    }),
     unsupportedKeys,
     errors,
   };

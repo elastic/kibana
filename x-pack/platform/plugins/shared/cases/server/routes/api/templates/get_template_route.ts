@@ -53,7 +53,16 @@ export const getTemplateRoute = createCasesRoute({
         });
       }
 
-      const parsedTemplate = parseTemplate(template.attributes);
+      let latestVersion = template.attributes.templateVersion;
+      if (template.attributes.isLatest === false) {
+        const latestTemplate = await casesClient.templates.getTemplate(templateId, undefined, {
+          includeDeleted,
+        });
+        latestVersion =
+          latestTemplate?.attributes.templateVersion ?? template.attributes.templateVersion;
+      }
+
+      const parsedTemplate = parseTemplate(template.attributes, { latestVersion });
 
       return response.ok({
         body: parsedTemplate,

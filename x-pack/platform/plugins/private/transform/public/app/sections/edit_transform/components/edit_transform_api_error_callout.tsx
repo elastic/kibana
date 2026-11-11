@@ -7,9 +7,11 @@
 
 import React, { type FC } from 'react';
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { useApiErrorMessage } from '../state_management/selectors/api_error_message';
 
@@ -21,15 +23,12 @@ export const EditTransformApiErrorCallout: FC = () => {
   return (
     <>
       <EuiSpacer size="m" />
-      <EuiCallOut
+      <KbnDangerCallout
         title={i18n.translate('xpack.transform.transformList.editTransformGenericErrorMessage', {
           defaultMessage: 'An error occurred calling the API endpoint to update transforms.',
         })}
-        color="danger"
-        iconType="warning"
-      >
-        <p>{apiErrorMessage}</p>
-      </EuiCallOut>
+        text={apiErrorMessage}
+      />
     </>
   );
 };

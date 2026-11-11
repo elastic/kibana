@@ -25,16 +25,20 @@ import {
   useMultipleAgentPolicies,
   useGetPackagePolicies,
   sendBulkGetAgentPoliciesForRq,
+  useLink,
 } from '../../../hooks';
 import { useGetOnePackagePolicyQuery } from '../../../../integrations/hooks';
 
 import { ExperimentalFeaturesService } from '../../../services';
+
+import { UpgradePackagePolicyPage } from '../upgrade_package_policy_page';
 
 import { EditPackagePolicyPage } from '.';
 
 type MockFn = jest.MockedFunction<any>;
 
 let lastStepConfigureProps: any;
+let lastLayoutProps: any;
 
 jest.mock('../../../../../services/use_yaml', () => ({
   useYaml: () => require('yaml'),
@@ -217,6 +221,20 @@ jest.mock('../create_package_policy_page/components', () => {
   };
 });
 
+jest.mock('../create_package_policy_page/single_page_layout/components', () => {
+  const { createElement } = jest.requireActual('react');
+  const { CreatePackagePolicySinglePageLayout: ActualLayout } = jest.requireActual(
+    '../create_package_policy_page/single_page_layout/components/layout'
+  );
+  return {
+    ...jest.requireActual('../create_package_policy_page/single_page_layout/components'),
+    CreatePackagePolicySinglePageLayout: jest.fn((props) => {
+      lastLayoutProps = props;
+      return createElement(ActualLayout, props);
+    }),
+  };
+});
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useRouteMatch: jest.fn().mockReturnValue({
@@ -291,11 +309,11 @@ describe('edit package policy page', () => {
     (renderResult = testRenderer.render(<EditPackagePolicyPage />, { legacyRoot: true }));
 
   beforeEach(() => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
-      enableVarGroups: true,
-    } as any);
     testRenderer = createFleetTestRendererMock();
     lastStepConfigureProps = undefined;
+    lastLayoutProps = undefined;
+    (useUIExtension as MockFn).mockReset();
+    (useLink as MockFn).mockReturnValue({ getHref: jest.fn().mockReturnValue('/navigate/path') });
 
     (useGetOnePackagePolicyQuery as MockFn).mockReturnValue({
       data: {
@@ -371,6 +389,100 @@ describe('edit package policy page', () => {
     });
   });
 
+  const renderOnboardingManagedPolicy = ({ onboardingEnabled }: { onboardingEnabled: boolean }) => {
+    (sendGetOnePackagePolicy as MockFn).mockResolvedValue({
+      data: { item: { ...mockPackagePolicy, onboarding_deployment_id: 'deploy-1' } },
+    });
+    testRenderer.startServices.application.getUrlForApp.mockImplementation(
+      (appId, { path = '' } = {}) => `/app/${appId}${path}`
+    );
+    testRenderer.startServices.featureFlags.useBooleanValue.mockImplementation(
+      (flag: string, fallback: boolean) =>
+        flag === 'ingestHub.onboardingEnabled' ? onboardingEnabled : fallback
+    );
+    render();
+  };
+
+  it('explains without linking to the onboarding flow while it is turned off', async () => {
+    renderOnboardingManagedPolicy({ onboardingEnabled: false });
+
+    await waitFor(() => {
+      expect(
+        renderResult.getByTestId('editPackagePolicyManagedByOnboardingCallout')
+      ).toHaveTextContent('AWS onboarding is turned off');
+    });
+    expect(
+      renderResult.queryByTestId('editPackagePolicyManageInOnboardingButton')
+    ).not.toBeInTheDocument();
+    expect(renderResult.queryByText('Save integration')).not.toBeInTheDocument();
+  });
+
+  it('shows a callout instead of the form for a policy managed by a cloud onboarding instance', async () => {
+    renderOnboardingManagedPolicy({ onboardingEnabled: true });
+
+    await waitFor(() => {
+      expect(
+        renderResult.getByTestId('editPackagePolicyManagedByOnboardingCallout')
+      ).toBeInTheDocument();
+    });
+    expect(renderResult.getByTestId('editPackagePolicyManageInOnboardingButton')).toHaveAttribute(
+      'href',
+      '/app/onboarding/aws?deploymentId=deploy-1'
+    );
+    expect(renderResult.queryByText('Collect logs from Nginx instances')).not.toBeInTheDocument();
+    expect(renderResult.queryByText('Save integration')).not.toBeInTheDocument();
+  });
+
+  it('shows edit copy from Installed integrations', async () => {
+    testRenderer.history.push('?from=installed-integrations');
+    render();
+
+    await waitFor(() => {
+      expect(renderResult.getByRole('heading', { level: 1 })).toHaveTextContent(
+        'Edit Nginx integration'
+      );
+      expect(
+        renderResult.getByText(
+          'Modify integration settings and deploy changes to the selected agent policies.'
+        )
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('shows upgrade copy and returns to Installed integrations when upgrading from there', async () => {
+    (useLink as MockFn).mockReturnValue({
+      getHref: jest.fn((page: string) => `/${page}`),
+    });
+    (sendUpgradePackagePolicyDryRun as MockFn).mockResolvedValue({
+      data: [{ diff: [mockPackagePolicy, mockPackagePolicyNewVersion] }],
+    });
+    testRenderer.history.push('?from=installed-integrations');
+    renderResult = testRenderer.render(<UpgradePackagePolicyPage />, { legacyRoot: true });
+
+    await waitFor(() => {
+      expect(renderResult.getByRole('heading', { level: 1 })).toHaveTextContent(
+        'Upgrade Nginx integration'
+      );
+      expect(
+        renderResult.getByText(
+          'Upgrade this integration and deploy changes to the selected agent policies.'
+        )
+      ).toBeInTheDocument();
+      expect(renderResult.getByText('Upgrade integration').closest('button')!).not.toBeDisabled();
+    });
+
+    renderResult.getAllByRole('link', { name: 'Cancel' }).forEach((link) => {
+      expect(link).toHaveAttribute('href', '/integrations_installed');
+    });
+    fireEvent.click(renderResult.getByText('Upgrade integration').closest('button')!);
+
+    await waitFor(() => {
+      expect(useStartServices().application.navigateToUrl).toHaveBeenCalledWith(
+        '/integrations_installed'
+      );
+    });
+  });
+
   it('should navigate on submit', async () => {
     render();
 
@@ -384,26 +496,30 @@ describe('edit package policy page', () => {
 
     await waitFor(() => {
       const { id, ...restProps } = mockPackagePolicy;
-      expect(sendUpdatePackagePolicy).toHaveBeenCalledWith('nginx-1', {
-        ...restProps,
-        vars: {},
-        inputs: [
-          {
-            ...mockPackagePolicy.inputs[0],
-            enabled: false,
-            streams: [
-              {
-                ...mockPackagePolicy.inputs[0].streams[0],
-                enabled: false,
-              },
-              {
-                ...mockPackagePolicy.inputs[0].streams[1],
-                enabled: false,
-              },
-            ],
-          },
-        ],
-      });
+      expect(sendUpdatePackagePolicy).toHaveBeenCalledWith(
+        'nginx-1',
+        {
+          ...restProps,
+          vars: {},
+          inputs: [
+            {
+              ...mockPackagePolicy.inputs[0],
+              enabled: false,
+              streams: [
+                {
+                  ...mockPackagePolicy.inputs[0].streams[0],
+                  enabled: false,
+                },
+                {
+                  ...mockPackagePolicy.inputs[0].streams[1],
+                  enabled: false,
+                },
+              ],
+            },
+          ],
+        },
+        expect.objectContaining({ onIacPersistError: expect.any(Function) })
+      );
       expect(useStartServices().application.navigateToUrl).toHaveBeenCalledWith('/navigate/path');
     });
   });
@@ -453,6 +569,25 @@ describe('edit package policy page', () => {
       );
 
       expect(useStartServices().application.navigateToUrl).not.toHaveBeenCalled();
+    });
+  });
+
+  it('passes useWidePageLayout from the replace-define-step extension to the layout', async () => {
+    (useUIExtension as MockFn).mockImplementation((_packageName: string, view: string) => {
+      if (view === 'package-policy-replace-define-step') {
+        return {
+          view,
+          useWidePageLayout: true,
+          Component: React.lazy(TestComponent),
+        };
+      }
+      return undefined;
+    });
+
+    render();
+
+    await waitFor(() => {
+      expect(lastLayoutProps?.useWidePageLayout).toBe(true);
     });
   });
 
@@ -737,7 +872,8 @@ describe('edit package policy page', () => {
           'nginx-1',
           expect.objectContaining({
             policy_ids: ['agent-policy-1', 'agent-policy-2'],
-          })
+          }),
+          expect.objectContaining({ onIacPersistError: expect.any(Function) })
         );
       });
     });
@@ -790,7 +926,8 @@ describe('edit package policy page', () => {
           'nginx-1',
           expect.objectContaining({
             policy_ids: ['agent-policy-1', 'fleet-server-policy'],
-          })
+          }),
+          expect.objectContaining({ onIacPersistError: expect.any(Function) })
         )
       );
     });
@@ -799,7 +936,6 @@ describe('edit package policy page', () => {
   describe('agentless policies UI kill switch', () => {
     it('skips the package-policy read when the isAgentless hint is set and the switch is on', async () => {
       jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
-        enableVarGroups: true,
         enableAgentlessPoliciesUI: true,
       } as any);
       testRenderer.history.push('?isAgentless=true');
@@ -812,7 +948,6 @@ describe('edit package policy page', () => {
 
     it('ignores the isAgentless hint and keeps the package-policy read when the switch is off', async () => {
       jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
-        enableVarGroups: true,
         enableAgentlessPoliciesUI: false,
       } as any);
       testRenderer.history.push('?isAgentless=true');

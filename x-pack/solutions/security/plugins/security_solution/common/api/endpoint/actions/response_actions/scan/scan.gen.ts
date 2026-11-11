@@ -28,7 +28,11 @@ export const ScanRouteRequestBody = lazySchema(() =>
         /**
          * The folder or file's full path (including the file name).
          */
-        path: z.string().min(1).max(4096),
+        path: z
+          .string()
+          .min(1)
+          .max(4096)
+          .describe("The folder or file's full path (including the file name)."),
       }),
     })
   )

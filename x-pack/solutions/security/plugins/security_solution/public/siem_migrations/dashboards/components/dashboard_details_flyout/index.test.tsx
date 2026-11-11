@@ -25,6 +25,14 @@ const getMockUser = () => ({
   data: {},
 });
 
+const getNavigation = (overrides = {}) => ({
+  hasPrevious: true,
+  hasNext: true,
+  goToPrevious: jest.fn(),
+  goToNext: jest.fn(),
+  ...overrides,
+});
+
 describe('DashboardMigrationDetailsFlyout', () => {
   const closeFlyout = jest.fn();
 
@@ -36,12 +44,13 @@ describe('DashboardMigrationDetailsFlyout', () => {
     });
   });
 
-  it('renders the flyout with the dashboard title', () => {
+  it('should render the flyout with the dashboard title', () => {
     const { getByTestId } = render(
       <TestProviders>
         <DashboardMigrationDetailsFlyout
           migrationDashboard={getDashboardMigrationDashboardMock()}
           closeFlyout={closeFlyout}
+          navigation={getNavigation()}
         />
       </TestProviders>
     );
@@ -51,12 +60,13 @@ describe('DashboardMigrationDetailsFlyout', () => {
     );
   });
 
-  it('renders the flyout with the dashboard "updated by" information', () => {
+  it('should render the flyout with the dashboard "updated by" information', () => {
     const { getByTestId } = render(
       <TestProviders>
         <DashboardMigrationDetailsFlyout
           migrationDashboard={getDashboardMigrationDashboardMock()}
           closeFlyout={closeFlyout}
+          navigation={getNavigation()}
         />
       </TestProviders>
     );
@@ -66,16 +76,77 @@ describe('DashboardMigrationDetailsFlyout', () => {
     );
   });
 
-  it('calls closeFlyout when the close button is clicked', () => {
+  it('should call closeFlyout when the close button is clicked', () => {
     const { getByTestId } = render(
       <TestProviders>
         <DashboardMigrationDetailsFlyout
           migrationDashboard={migrationDashboards[0]}
           closeFlyout={closeFlyout}
+          navigation={getNavigation()}
         />
       </TestProviders>
     );
     fireEvent.click(getByTestId('detailsFlyoutCloseButton'));
     expect(closeFlyout).toHaveBeenCalled();
+  });
+
+  describe('dashboard navigation', () => {
+    it('should move the user to the previous dashboard on click', () => {
+      const navigation = getNavigation();
+      const { getByTestId } = render(
+        <TestProviders>
+          <DashboardMigrationDetailsFlyout
+            migrationDashboard={getDashboardMigrationDashboardMock()}
+            closeFlyout={closeFlyout}
+            navigation={navigation}
+          />
+        </TestProviders>
+      );
+      fireEvent.click(getByTestId('flyoutPrevNextNavPreviousButton'));
+      expect(navigation.goToPrevious).toHaveBeenCalled();
+    });
+
+    it('should move the user to the next dashboard on click', () => {
+      const navigation = getNavigation();
+      const { getByTestId } = render(
+        <TestProviders>
+          <DashboardMigrationDetailsFlyout
+            migrationDashboard={getDashboardMigrationDashboardMock()}
+            closeFlyout={closeFlyout}
+            navigation={navigation}
+          />
+        </TestProviders>
+      );
+      fireEvent.click(getByTestId('flyoutPrevNextNavNextButton'));
+      expect(navigation.goToNext).toHaveBeenCalled();
+    });
+
+    it('should prevent moving backward from the first dashboard of the page', () => {
+      const navigation = getNavigation({ hasPrevious: false });
+      const { getByTestId } = render(
+        <TestProviders>
+          <DashboardMigrationDetailsFlyout
+            migrationDashboard={getDashboardMigrationDashboardMock()}
+            closeFlyout={closeFlyout}
+            navigation={navigation}
+          />
+        </TestProviders>
+      );
+      expect(getByTestId('flyoutPrevNextNavPreviousButton')).toBeDisabled();
+    });
+
+    it('should prevent moving forward from the last dashboard of the page', () => {
+      const navigation = getNavigation({ hasNext: false });
+      const { getByTestId } = render(
+        <TestProviders>
+          <DashboardMigrationDetailsFlyout
+            migrationDashboard={getDashboardMigrationDashboardMock()}
+            closeFlyout={closeFlyout}
+            navigation={navigation}
+          />
+        </TestProviders>
+      );
+      expect(getByTestId('flyoutPrevNextNavNextButton')).toBeDisabled();
+    });
   });
 });

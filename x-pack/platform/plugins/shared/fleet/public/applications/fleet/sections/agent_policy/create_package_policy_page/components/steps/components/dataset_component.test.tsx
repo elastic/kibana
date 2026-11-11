@@ -52,7 +52,7 @@ describe('DatasetComponent', () => {
     fireEvent.change(inputEl, { target: { value: 'test' } });
     fireEvent.keyDown(inputEl, { key: 'Enter', code: 'Enter' });
 
-    expect(mockOnChange).toBeCalled();
+    expect(mockOnChange).toHaveBeenCalled();
 
     expect(utils.queryByText('Dataset contains invalid characters')).toBeNull();
   });

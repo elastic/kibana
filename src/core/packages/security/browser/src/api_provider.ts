@@ -8,6 +8,7 @@
  */
 
 import type { CoreAuthenticationService } from './authc';
+import type { CoreServiceAccountsService } from './service_accounts';
 
 /**
  * The contract exposed by the security provider for Core to
@@ -17,9 +18,15 @@ import type { CoreAuthenticationService } from './authc';
  */
 export interface CoreSecurityDelegateContract {
   authc: AuthenticationServiceContract;
+  serviceAccounts: ServiceAccountsServiceContract;
 }
 
 /**
  * @public
  */
 export type AuthenticationServiceContract = CoreAuthenticationService;
+
+/**
+ * @public
+ */
+export type ServiceAccountsServiceContract = CoreServiceAccountsService;

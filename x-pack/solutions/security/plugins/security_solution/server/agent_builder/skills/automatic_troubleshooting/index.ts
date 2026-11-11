@@ -9,6 +9,7 @@ import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 
+import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import {
   getPackageConfigurationsTool,
@@ -32,9 +33,48 @@ export const CHECK_ENDPOINT_PACKAGE_FRESHNESS_TOOL_ID = toolName(
 );
 export const GET_ENDPOINT_ARTIFACTS_TOOL_ID = toolName('get_endpoint_artifacts');
 
+interface CustomYaraSignaturesText {
+  whenToUse: string;
+  artifactType: string;
+  artifactsTrigger: string;
+  artifactsNotes: string;
+  description: string;
+}
+
+const NO_CUSTOM_YARA_SIGNATURES_TEXT: CustomYaraSignaturesText = {
+  whenToUse: '',
+  artifactType: '',
+  artifactsTrigger: '',
+  artifactsNotes: '',
+  description: '',
+};
+
+const CUSTOM_YARA_SIGNATURES_TEXT: CustomYaraSignaturesText = {
+  whenToUse: '- Custom YARA signatures not matching, not alerting, or not reaching endpoints\n',
+  artifactType: ', custom YARA signatures',
+  artifactsTrigger:
+    ', or custom YARA signatures not matching, not alerting, or not reaching an endpoint',
+  artifactsNotes: `
+   - For custom YARA signatures, the artifactType is \`custom_yara_signatures\`. A signature tagged \`disabled\` is not packed into the endpoint artifact and never runs.
+   - Custom YARA signature alerts in \`logs-endpoint.alerts-*\` carry \`rule.custom_yara_signature.entry_id\`, \`rule.custom_yara_signature.entry_name\`, and \`rule.custom_yara_signature.rule_identifier\`. Find the signature by searching for \`entry_name\`, then confirm that its \`id\` equals \`entry_id\`. \`entry_name\` is copied when the signature is packed, so it can be stale after a rename. The \`search\` filter cannot match \`entry_id\`, so if no signature found by \`entry_name\` has an \`id\` equal to \`entry_id\`, page through \`custom_yara_signatures\` for the policy without \`search\` and compare each \`id\` to \`entry_id\`. If none matches, the signature may have been deleted since the alert.
+   - Packed custom YARA signatures reach endpoints in the \`endpoint-yararules-<os>-v1\` user artifact. User artifact download failures, which may affect this artifact, appear in the policy response as \`download_user_artifacts\`. To check whether this artifact reached the target endpoint, retrieve the newest policy response document for that endpoint from \`metrics-endpoint.policy-*\` with ${platformCoreTools.getDocumentById}, and look for \`endpoint-yararules-<os>-v1\` in the \`name\` of the \`{ name, sha256 }\` entries of \`Endpoint.policy.applied.artifacts.user.identifiers\`. That field is nested, so search queries on it can miss the artifact. If it is present, the endpoint applied the artifact, but that does not show that a specific signature is inside it. If it is missing, the endpoint has not applied it, or its Elastic Defend version may not support custom YARA signatures yet.
+   - An enabled, correctly assigned custom YARA signature can still be left out of the packed artifact when it fails validation while the artifact is built. That is only visible in Kibana server logs, which this skill cannot read. Do not claim a signature reached the endpoint based on the artifact list alone.
+   - A \`not_authorized\` result for \`custom_yara_signatures\` can mean the cluster lacks an Enterprise license or the Endpoint Complete add-on, not only that the user lacks the Custom YARA Signatures privilege.
+   - This skill cannot read the \`memory_protection.custom_yara_signatures\` policy setting. A \`memory_protection\` policy response status is not that setting. If the answer depends on whether custom YARA signatures are enabled in the policy, say that this cannot be checked here and ask the user to confirm it in the policy.
+   - The Elastic Defend knowledge base has no custom YARA signatures content yet. Knowledge results for these questions describe user artifacts in general, not custom YARA signatures specifically.
+   - Custom YARA signatures are managed on the Custom YARA signatures tab of the Artifacts page in Security. When pointing the user there, name that page and tab instead of a full menu path, because the navigation menus differ between deployments.
+   - A question about a custom YARA signature alone, without a named host or endpoint, does not involve a specific endpoint.`,
+  description: 'custom YARA signatures, ',
+};
+
 export const createAutomaticTroubleshootingSkill = (
-  endpointAppContextService: EndpointAppContextService
+  endpointAppContextService: EndpointAppContextService,
+  experimentalFeatures: ExperimentalFeatures
 ): SkillDefinition<typeof NAME, typeof BASE_PATH> => {
+  const customYaraSignaturesText = experimentalFeatures.customYaraSignaturesEnabled
+    ? CUSTOM_YARA_SIGNATURES_TEXT
+    : NO_CUSTOM_YARA_SIGNATURES_TEXT;
+
   const systemInstructions = `# Elastic Defend Configuration Troubleshooting
 
 This skill diagnoses and resolves Elastic Defend configuration issues on endpoints.
@@ -42,7 +82,7 @@ This skill diagnoses and resolves Elastic Defend configuration issues on endpoin
 ## When to use this skill (REQUIRED)
 
 You MUST use this skill when the user mentions ANY of these:
-- "Elastic Defend" configuration issues
+- "Elastic Defend" configuration failures, errors, or policy not applying
 - Endpoint troubleshooting or diagnostics
 - Endpoint or Defend hosts that are unhealthy, degraded, warning, failing, or not applying policy
 - Endpoint not showing up, not reporting, or missing from the endpoint list
@@ -52,10 +92,10 @@ You MUST use this skill when the user mentions ANY of these:
 - Agent enrollment or check-in problems related to Elastic Defend
 - Endpoint protection not applying or not updating
 - Protection artifacts, artifact snapshots, global artifacts, manifest versions, or protection updates
-- Elastic Defend package configuration questions
+- Elastic Defend package errors, warnings, or install failures
 - Endpoint isolation, response action, or policy sync issues
 - Endpoint exceptions, trusted apps, trusted devices, event filters, blocklists, or host isolation exceptions not working as expected
-- Security alerts or events still appearing despite a configured endpoint exception or allowlist
+${customYaraSignaturesText.whenToUse}- Security alerts or events still appearing despite a configured endpoint exception or allowlist
 - Unexpected allow or block behavior on endpoints
 - Elastic Defend's own output or event-shipping failures — the endpoint's Logstash, Kafka, or Elasticsearch output dropping or rejecting endpoint events/alerts (for example "message size too large", output connectivity or SSL handshake errors), or an endpoint going degraded because of its output. This covers only Elastic Defend's endpoint output layer, not general-purpose Logstash/Kafka pipeline or cluster troubleshooting.
 
@@ -70,17 +110,17 @@ Reference './available_indices' for the list of indices available for troublesho
 - **${platformCoreTools.search}** - Query raw data from available indices for troubleshooting evidence
 - **${platformCoreTools.getDocumentById}** - Retrieve full document content by ID from query results
 - **${GET_PACKAGE_CONFIGURATIONS_TOOL_ID}** - Inspect Elastic Defend package configuration details
-- **${GET_ENDPOINT_ARTIFACTS_TOOL_ID}** - Query endpoint artifacts (endpoint exceptions, trusted apps, trusted devices, event filters, host isolation exceptions, blocklists)
-- **${GENERATE_INSIGHT_TOOL_ID}** - Persist structured troubleshooting findings (mandatory final step)
+- **${GET_ENDPOINT_ARTIFACTS_TOOL_ID}** - Query endpoint artifacts (endpoint exceptions, trusted apps, trusted devices, event filters, host isolation exceptions, blocklists${customYaraSignaturesText.artifactType})
+- **${GENERATE_INSIGHT_TOOL_ID}** - Persist structured troubleshooting findings for specific endpoints (final step when the findings concern specific endpoints)
 
 ## Troubleshooting Approach
 
 1. **Check package freshness** - Call ${CHECK_ENDPOINT_PACKAGE_FRESHNESS_TOOL_ID} first. If \`stale: true\`, output this exact line before anything else, substituting the version values: "⚠️ ${STALE_ENDPOINT_PACKAGE_MESSAGE}" Do not add to or rephrase this line. Then continue the investigation. If the check fails or the package is fresh, proceed without comment.
 2. **Run the scoped investigation framework** - Complete the framework below before calling ${platformCoreTools.integrationKnowledge}. The goal is to classify the current problem, not to explain every historical warning.
 3. **Gather scenario knowledge when the current scope requires it** - Call ${platformCoreTools.integrationKnowledge} with the user's symptom plus the concrete evidence from the framework only when the classification is a current policy failure, a current non-policy health failure, or another current unexplained issue. Include exact action names, messages, OS, status, HTTP/download errors, artifact names, and other terms that match the example queries below. Do not call ${platformCoreTools.integrationKnowledge} when the endpoint is currently healthy or for a recovered historical warning unless the user explicitly asks about prior failures.
-4. **Investigate with knowledge context** - Use the retrieved Elastic Defend knowledge base context to decide which indices, documents, package configurations, or endpoint artifacts to inspect next. Use ${platformCoreTools.search} to query relevant indices for evidence of errors, warnings, misconfigurations, or incompatibilities. Use ${platformCoreTools.getDocumentById} to retrieve full documents when needed. Use ${GET_PACKAGE_CONFIGURATIONS_TOOL_ID} to inspect Elastic Defend package configuration if relevant. When the issue involves unexpected allow/block/filtering behavior, isolation failures, or missing alerts, use ${GET_ENDPOINT_ARTIFACTS_TOOL_ID} to check if endpoint artifacts could be the cause. Call without artifactType first to see what artifact types exist, then query specific types for details. Use the policyId filter to narrow results to the affected endpoint's policy. Note: endpoint_exceptions can affect both the endpoint agent AND detection engine alerts depending on per-policy opt-in configuration — consider this when investigating missing alerts.
+4. **Investigate with knowledge context** - Use the retrieved Elastic Defend knowledge base context to decide which indices, documents, package configurations, or endpoint artifacts to inspect next. Use ${platformCoreTools.search} to query relevant indices for evidence of errors, warnings, misconfigurations, or incompatibilities. Use ${platformCoreTools.getDocumentById} to retrieve full documents when needed. Use ${GET_PACKAGE_CONFIGURATIONS_TOOL_ID} to inspect Elastic Defend package configuration if relevant. When the issue involves unexpected allow/block/filtering behavior, isolation failures, or missing alerts${customYaraSignaturesText.artifactsTrigger}, use ${GET_ENDPOINT_ARTIFACTS_TOOL_ID} to check if endpoint artifacts could be the cause. Call without artifactType first to see what artifact types exist, then query specific types for details. Use the policyId filter to narrow results to the affected endpoint's policy. Note: endpoint_exceptions can affect both the endpoint agent AND detection engine alerts depending on per-policy opt-in configuration — consider this when investigating missing alerts.${customYaraSignaturesText.artifactsNotes}
 5. **Iterate** - Continue querying and gathering context until the root cause or relevant findings are understood.
-6. **Persist findings** - Call ${GENERATE_INSIGHT_TOOL_ID} with a clear problem description, actionable remediation steps, affected endpoint IDs, and relevant raw documents.
+6. **Persist findings** - When the findings concern one or more specific endpoints, call ${GENERATE_INSIGHT_TOOL_ID} with a clear problem description, actionable remediation steps, the Elastic Agent IDs (\`agent.id\`) of the affected endpoints, and relevant raw documents. Take the agent IDs from \`.fleet-agents*\` or endpoint metadata documents; host names, policy IDs, and artifact IDs are not accepted. Skip this step when no specific endpoint is involved. If ${GENERATE_INSIGHT_TOOL_ID} rejects the endpoint IDs, do not call it again with other guessed IDs. After any other error, call it at most once more; if that also fails, give the answer without persisted findings.
 
 ## Scoped investigation framework
 
@@ -166,12 +206,12 @@ Use exact terms from the user's request and queried endpoint evidence when calli
 - DO keep \`CURRENTLY_HEALTHY\` answers short and limited to current health evidence; do not include non-fatal warning-log findings or remediation unless the user asked about that specific warning or time range.
 - DO use queried current data as evidence for the final diagnosis.
 - DO filter every search and every conclusion to the target endpoint identity from the user's request.
-- DO call ${GENERATE_INSIGHT_TOOL_ID} as the final step to persist structured findings — this is mandatory.
+- DO call ${GENERATE_INSIGHT_TOOL_ID} as the final step to persist structured findings when they concern specific endpoints, passing the Elastic Agent IDs of those endpoints.
 - DO include specific endpoint IDs, policy names, and error messages from queried data.
 - DO provide actionable remediation steps grounded in the evidence.
 - DON'T perform detailed debugging, broad searches, or remediation recommendations before the scoped investigation framework.
 - DON'T provide a final diagnosis or remediation without querying the available indices for evidence.
-- DON'T skip the ${GENERATE_INSIGHT_TOOL_ID} call — every investigation must produce a persisted insight.
+- DON'T call ${GENERATE_INSIGHT_TOOL_ID} when no specific endpoint is involved, DON'T call it again with guessed IDs after it rejects the endpoint IDs, and DON'T retry it more than once after any other error.
 - DON'T speculate on root causes without supporting data from tool results.
 - DON'T summarize general Elastic Defend documentation — focus on the user's specific endpoints and configuration state.
 
@@ -187,13 +227,17 @@ Use exact terms from the user's request and queried endpoint evidence when calli
 - NEVER diagnose a different host, endpoint id, Elastic Agent id, or policy than the target endpoint named by the user.
 - NEVER provide a diagnosis for another endpoint after saying the requested endpoint was not found.
 - NEVER skip tool calls and respond with text-only troubleshooting suggestions.
-- NEVER omit the ${GENERATE_INSIGHT_TOOL_ID} call at the end of the investigation.
+- NEVER omit the ${GENERATE_INSIGHT_TOOL_ID} call at the end of an investigation that identified affected endpoints.
+- NEVER pass host names, policy IDs, or artifact IDs as endpoint IDs to ${GENERATE_INSIGHT_TOOL_ID}.
 
 ## Constraints
 
 - Only query indices listed in './available_indices'
 - Always include document \`_id\` and \`_index\` fields in search queries
 - Keep query result sets small enough to fit within context limits
+- Prefer recent data when querying any index: request the newest matching documents and order results by \`@timestamp DESC\` whenever you apply a result limit
+- When deliberately investigating a specific past event or historical time range, scope the query to that period explicitly instead of relying on recency
+- Include recency in the natural-language query you pass to the search tool — ask for "recent" or "newest" matching documents, not an unqualified request — so the generated query sorts by timestamp rather than returning an arbitrary subset under a limit
 - Base all conclusions on actual queried data, not assumptions`;
 
   return defineSkillType({
@@ -201,7 +245,11 @@ Use exact terms from the user's request and queried endpoint evidence when calli
     name: NAME,
     basePath: BASE_PATH,
     description:
-      "Troubleshoot Elastic Defend endpoint health, degraded hosts, policy response failures, protection updates, artifacts, endpoint exceptions, trusted apps, blocklists, Elastic Defend's own endpoint output/event-shipping failures (endpoint Logstash/Kafka/Elasticsearch output errors or dropped endpoint events), etc.",
+      'Use to diagnose observed Elastic Defend endpoint behavior and operational outcomes: why an endpoint or host is ' +
+      'offline, unhealthy, degraded, missing or not reporting; why a response action such as isolation or release failed; ' +
+      'a policy not taking effect or not being enforced; protection not blocking; unexpected quarantine or allow behavior; ' +
+      'policy response failures; or failures involving protection updates, trusted applications, exceptions, blocklists, ' +
+      `${customYaraSignaturesText.description}antivirus compatibility, and endpoint event output.`,
     content: systemInstructions,
     referencedContent: [
       {
@@ -219,7 +267,7 @@ Use exact terms from the user's request and queried endpoint evidence when calli
       return [
         checkEndpointPackageFreshnessTool(endpointAppContextService),
         getPackageConfigurationsTool(endpointAppContextService),
-        getEndpointArtifactsTool(endpointAppContextService),
+        getEndpointArtifactsTool(endpointAppContextService, experimentalFeatures),
         generateInsightTool(endpointAppContextService),
       ];
     },

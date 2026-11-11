@@ -11,14 +11,19 @@ import { FILE_ATTACHMENT_TYPE } from '../../../../common/constants';
 import {
   FileAttachmentPayloadSchema,
   type FileAttachmentMetadata,
-} from '../../../../common/types/domain_zod/attachment/file/v2';
+} from '../../../../common/types/domain/attachment/file/v2';
 import {
   AttachmentActionType,
   defineAttachment,
   type UnifiedReferenceAttachmentViewProps,
 } from '../../../client/attachment_framework/types';
 import * as i18n from './translations';
-import { getFileFromReferenceMetadata, isImage, isValidFileMetadata } from './utils';
+import {
+  getFileDisplayName,
+  getFileFromReferenceMetadata,
+  isImage,
+  isValidFileMetadata,
+} from './utils';
 
 export type FileViewProps = UnifiedReferenceAttachmentViewProps<FileAttachmentMetadata>;
 
@@ -54,21 +59,44 @@ function getFileDeleteButton(caseId: string, fileId: string) {
   );
 }
 
-const getFileAttachmentActions = ({ caseId, fileId }: { caseId: string; fileId: string }) => [
+const getFileAttachmentActions = ({
+  caseId,
+  fileId,
+  canDelete,
+}: {
+  caseId: string;
+  fileId: string;
+  canDelete: boolean;
+}) => [
   {
     type: AttachmentActionType.CUSTOM as const,
     render: () => getFileDownloadButton(fileId),
     isPrimary: false,
   },
-  {
-    type: AttachmentActionType.CUSTOM as const,
-    render: () => getFileDeleteButton(caseId, fileId),
-    isPrimary: false,
-  },
+  ...(canDelete
+    ? [
+        {
+          type: AttachmentActionType.CUSTOM as const,
+          render: () => getFileDeleteButton(caseId, fileId),
+          isPrimary: false,
+        },
+      ]
+    : []),
 ];
 
-const getFileAttachmentViewObject = (props: FileViewProps) => {
+const getFileAttachmentIcon = (props: FileViewProps) => {
+  if (!isValidFileMetadata(props.metadata)) {
+    return 'document';
+  }
+
+  const fileId = Array.isArray(props.attachmentId) ? props.attachmentId[0] : props.attachmentId;
+  const file = getFileFromReferenceMetadata({ fileId, metadata: props.metadata });
+  return isImage(file) ? 'image' : 'document';
+};
+
+const getFileCreationActivity = (props: FileViewProps) => {
   const caseId = props.caseData.id;
+  const canDelete = props.permissions.delete;
   // The framework view-prop type still allows `string | string[]`; the schema
   // narrows it to `string` for `file`, but the broad output keeps the union.
   const fileId = Array.isArray(props.attachmentId) ? props.attachmentId[0] : props.attachmentId;
@@ -76,14 +104,16 @@ const getFileAttachmentViewObject = (props: FileViewProps) => {
   if (!isValidFileMetadata(props.metadata)) {
     return {
       event: i18n.ADDED_UNKNOWN_FILE,
-      timelineAvatar: 'document',
-      getActions: () => [
-        {
-          type: AttachmentActionType.CUSTOM as const,
-          render: () => getFileDeleteButton(caseId, fileId),
-          isPrimary: false,
-        },
-      ],
+      getActions: () =>
+        canDelete
+          ? [
+              {
+                type: AttachmentActionType.CUSTOM as const,
+                render: () => getFileDeleteButton(caseId, fileId),
+                isPrimary: false,
+              },
+            ]
+          : [],
       hideDefaultActions: true,
     };
   }
@@ -96,24 +126,31 @@ const getFileAttachmentViewObject = (props: FileViewProps) => {
   return {
     event: (
       <Suspense fallback={<EuiLoadingSpinner />}>
-        <FileAttachmentEvent file={file} />
+        <FileAttachmentEvent file={file} isDeleted={props.isDeleted} />
       </Suspense>
     ),
-    timelineAvatar: isImage(file) ? 'image' : 'document',
-    getActions: () => getFileAttachmentActions({ caseId, fileId }),
+    getActions: () => getFileAttachmentActions({ caseId, fileId, canDelete }),
     hideDefaultActions: true,
     children: isImage(file) ? FileThumbnail : undefined,
   };
 };
 
+// The file blob is deleted with the attachment, so the name is plain text.
+const getFileRemovalActivity = ({ metadata }: FileViewProps) => ({
+  event: isValidFileMetadata(metadata)
+    ? i18n.REMOVED_FILE_NAME(getFileDisplayName(metadata.files[0]))
+    : i18n.REMOVED_FILE,
+});
+
 export const getFileAttachmentType = () =>
   defineAttachment({
     id: FILE_ATTACHMENT_TYPE,
-    icon: 'document',
-    displayName: i18n.FILE_DISPLAY_NAME,
-    getAttachmentViewObject: getFileAttachmentViewObject,
-    getAttachmentRemovalObject: () => ({ event: i18n.REMOVED_FILE }),
-    getAttachmentTabViewObject: () => ({ children: CaseViewFiles }),
+    getIcon: getFileAttachmentIcon,
+    getLabel: () => i18n.FILE_DISPLAY_NAME,
+    getCreationActivity: getFileCreationActivity,
+    getRemovalActivity: getFileRemovalActivity,
+    getAttachmentList: () => ({ children: CaseViewFiles }),
+    getCountLabel: ({ count }) => i18n.FILES_COUNT(count),
     schema: FileAttachmentPayloadSchema,
     // File attachments reference uploaded files by id; workflow authors can't
     // produce that id from YAML, so file is excluded from workflow steps.

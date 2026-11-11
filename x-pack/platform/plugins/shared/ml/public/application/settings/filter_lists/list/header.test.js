@@ -30,6 +30,18 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   },
 }));
 
+jest.mock('../../../contexts/kibana', () => ({
+  useMlKibana: () => ({
+    services: {
+      application: {
+        navigateToApp: jest.fn(),
+        getUrlForApp: jest.fn(() => '/app/management/ml/ad_settings/'),
+      },
+    },
+  }),
+  useNavigateToPath: () => jest.fn(),
+}));
+
 import { FilterListsHeader } from './header';
 
 describe('Filter Lists Header', () => {

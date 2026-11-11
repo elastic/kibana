@@ -20,6 +20,7 @@ import { useGetFieldsData } from '../../../../flyout/document_details/shared/hoo
 import { EntitiesDetails } from '../../../../flyout/document_details/left/components/entities_details';
 import type { SearchHit } from '../../../../../common/search_strategy';
 import { ENTITIES_TOOL_TEST_ID } from './test_ids';
+import { isRulePreviewDocument } from '../../../shared/utils/is_rule_preview_document';
 
 export interface EntityDetailsProps {
   /**
@@ -53,6 +54,8 @@ export const EntityDetails = memo(
 
     const dataAsNestedObject = useMemo(() => hit.raw._source as unknown as Ecs, [hit.raw._source]);
 
+    const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
+
     const contextValue = useMemo(
       () => ({
         eventId: hit.id,
@@ -65,10 +68,10 @@ export const EntityDetails = memo(
         investigationFields: [],
         refetchFlyoutData: NOOP_REFETCH,
         getFieldsData,
-        isRulePreview: false,
+        isRulePreview,
         isPreviewMode: false,
       }),
-      [hit.id, hit.raw, scopeId, dataAsNestedObject, getFieldsData]
+      [hit.id, hit.raw, scopeId, dataAsNestedObject, getFieldsData, isRulePreview]
     );
 
     const overrideBuilders = useEntityFlyoutOverrides({ scopeId, hit });

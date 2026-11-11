@@ -1,0 +1,504 @@
+products:
+- product: cloud-serverless
+  target: 2026-09-09
+  lifecycle: ga
+  repo: kibana
+  owner: elastic
+release-date: 2026-09-09
+hide-features:
+- data-federation
+entries:
+- file:
+    name: 287815.yaml
+    checksum: 7f624ddb1d2bb4a826e73cc6434b888adb496604
+  type: bug-fix
+  title: Fix MCP tool arguments defined by `additionalProperties` being stripped
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes MCP tools with dynamic arguments running with empty or incomplete arguments. The JSON Schema to Zod converter now honors `additionalProperties`.
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/287815
+  issues:
+  - https://github.com/elastic/kibana/issues/287769
+- file:
+    name: 288430.yaml
+    checksum: 6681624f4b4cb28797af2010ab4a8796b5196211
+  type: bug-fix
+  title: Fix agents stuck on an outdated policy after a comment-only YAML setting
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes Fleet writing a null value into the deployed agent policy when the advanced YAML settings contain only a comment, which left the agent reporting an outdated policy.
+  prs:
+  - https://github.com/elastic/kibana/pull/288430
+  issues:
+  - https://github.com/elastic/kibana/issues/284644
+- file:
+    name: 288575.yaml
+    checksum: 2b50c9adc6df32b0ff2cc94f40e2b9d7230caae9
+  type: enhancement
+  title: Show "View pack" and "View query" labels for read-only Osquery users
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Relabels the row actions from "Edit pack" and "Edit query" to "View pack" and "View query" when the destination page renders read-only, so the Osquery pack and saved query menus match what the page allows.
+  prs:
+  - https://github.com/elastic/kibana/pull/288575
+- file:
+    name: 284452.yaml
+    checksum: 9719c09806d106286e0f2a75e5f62a93ae35acc8
+  type: bug-fix
+  title: Fix APM service group counts when only trace data is available
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes service group counts and lookups returning no results for a service that has trace data but no aggregated metrics.
+  prs:
+  - https://github.com/elastic/kibana/pull/284452
+- file:
+    name: 287946.yaml
+    checksum: d757dd0bb2de8b35d78ce602528611798ac0cc41
+  type: feature
+  title: Add send and update message actions to the Microsoft Teams connector
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Adds actions to send a new message and to update an existing channel or chat message from the Microsoft Teams connector.
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/287946
+- file:
+    name: 288627.yaml
+    checksum: 6f2598aaf3d5bb9ce11701c825daf03d71fc2049
+  type: bug-fix
+  title: Fix alert analysis crash on tactic-only MITRE threat mappings
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes a crash in the Security alert analysis workflow when analysis runs on an alert from a rule whose MITRE ATT&CK threat mapping has a tactic but no technique. The workflow now skips technique enrichment for those entries.
+  prs:
+  - https://github.com/elastic/kibana/pull/288627
+- file:
+    name: 288451.yaml
+    checksum: 6ceeeeae42e0177cc4ad6e9fba32001d33c7a55c
+  type: bug-fix
+  title: Fix row height in user pickers such as case assignees
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Restores the 48 pixel row height in the shared user picker. This affects menus such as case assignees, Alerting v2 episode assignees, and the "Created by" filter in dashboard and visualization lists.
+  prs:
+  - https://github.com/elastic/kibana/pull/288451
+- file:
+    name: 288902.yaml
+    checksum: 5768bb0b9ebb041f4080857e6664b31457b7ecbc
+  type: bug-fix
+  title: Fix stale endpoint transforms left in Elasticsearch after package upgrades
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes Fleet removing only one stale transform version per package upgrade, and adds a reconciliation step that deletes orphaned endpoint transforms that no saved object references.
+  prs:
+  - https://github.com/elastic/kibana/pull/288902
+  issues:
+  - https://github.com/elastic/kibana/issues/217503
+- file:
+    name: 288939.yaml
+    checksum: 63abdafd215a1827046d195f8a23d3e1fe6eb734
+  type: bug-fix
+  title: Fix panels not blurring during inline edit on dashboards without controls
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/288939
+  issues:
+  - https://github.com/elastic/kibana/issues/286218
+- file:
+    name: 288962.yaml
+    checksum: e06666d704c2f1b6f6e90b3f5fc07560ee9a7fd3
+  type: bug-fix
+  title: Fix tags reappearing after removing all tags from an Alerting v2 rule
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes an Alerting v2 rule keeping its previous tags after you remove all of them. The save reported success, but the tags reappeared when you reopened the rule. Removing only some tags always worked.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/288962
+  issues:
+  - https://github.com/elastic/kibana/issues/288947
+- file:
+    name: 287547.yaml
+    checksum: 9976cb97870c2b35caecce0644e4ed5bff939786
+  type: bug-fix
+  title: Fix Console treating lines in unterminated triple-quoted strings as requests
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Console no longer treats request-like lines inside an unterminated triple-quoted string as standalone requests.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/287547
+  issues:
+  - https://github.com/elastic/kibana/issues/284396
+- file:
+    name: 288379.yaml
+    checksum: 20ce6e6139730c10d6721f3b7bb8ae5ff87f6fbf
+  type: bug-fix
+  title: Fix duplicate endpoint metadata transforms after a stack upgrade
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes Fleet losing its record of installed legacy transforms on a same-version reinstall, which left duplicate `endpoint.metadata_current` and `endpoint.metadata_united` transforms in Elasticsearch after the next upgrade.
+  prs:
+  - https://github.com/elastic/kibana/pull/288379
+- file:
+    name: 276488.yaml
+    checksum: 513cdc07b2fea8adebd27fdd1e65af460701de8a
+  type: bug-fix
+  title: Keep the Agent Builder `security.alerts` tool scoped to the current Kibana space
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/276488
+- file:
+    name: 289163.yaml
+    checksum: b2c276e6c2de50f5a83013cf3a273ba203bfce15
+  type: bug-fix
+  title: Fix the "Update filter" button being unreachable in a tall filter editor
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes the filter editor pushing its footer buttons off screen when its contents are taller than the browser window. The contents now scroll, and the loading state keeps the footer visible.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/289163
+  issues:
+  - https://github.com/elastic/kibana/issues/276158
+- file:
+    name: 280600.yaml
+    checksum: 27057e764be3b20802f26c69fe083d484b3cac98
+  type: enhancement
+  title: Reduce Synthetics agent policy size by omitting default monitor values
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Omits monitor configuration fields whose value already matches the Heartbeat default. This reduces the size of the generated agent policy for every Synthetics monitor.
+  prs:
+  - https://github.com/elastic/kibana/pull/280600
+  issues:
+  - https://github.com/elastic/kibana/issues/241818
+- file:
+    name: 286900.yaml
+    checksum: 2a5ca4a78f573ec0cfd42bf9d17495ef598740ad
+  type: bug-fix
+  title: Fix off-center labels in Security donut charts
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/286900
+  issues:
+  - https://github.com/elastic/kibana/issues/286894
+- file:
+    name: 287214.yaml
+    checksum: 65cae533fca94e74af1babe1715ad6464df67f86
+  type: bug-fix
+  title: Fix document preview for query rule document IDs that contain slashes
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/287214
+- file:
+    name: 289066.yaml
+    checksum: 89c00ea912cb3aa82bed51fa47a970a7d0cb6d4c
+  type: bug-fix
+  title: Fix time range picker labels for custom presets and rounded ranges
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes custom quick ranges showing raw time values instead of their configured label. Rounded relative ranges now end with a "(rounded)" suffix, for example "Last 1 year (rounded)" for `-1y/y`. Also fixes the absolute date format used for display.
+  areas:
+  - Kibana platform
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/289066
+  issues:
+  - https://github.com/elastic/kibana/issues/286115
+- file:
+    name: 288636.yaml
+    checksum: 04e31a4e42c36c58970bd42f671e48618b4676f8
+  type: bug-fix
+  title: Fix case template settings not applied when you change the template
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes "Sync alerts" and "Extract observables" being turned off when you apply a template to an existing case from the "Section settings" popover, even when the template enables them.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/288636
+  issues:
+  - https://github.com/elastic/kibana/issues/284726
+- file:
+    name: 288972.yaml
+    checksum: 82dfd1bc3b59666bd7e30f43d690f8c65144613d
+  type: bug-fix
+  title: Fix field suggestions and control types for `MV_CONTAINS`
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes autocomplete not suggesting fields for the second argument of `MV_CONTAINS` when the first argument is a variable, and enables the multivalue type in the controls flyout.
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/288972
+  issues:
+  - https://github.com/elastic/kibana/issues/288009
+- file:
+    name: 288925.yaml
+    checksum: 79ed38590895079d1ac9c7953d0fb1c0356570d1
+  type: enhancement
+  title: Add OpenTelemetry-first defaults to the Observability "Add Data" page
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Adds OpenTelemetry-first defaults to Observability "Add Data". "Browse all" now opens the integrations catalog with the Observability and OpenTelemetry filters. When a technology supports more than one collection method, the OpenTelemetry variant is listed first and marked "Recommended".
+  prs:
+  - https://github.com/elastic/kibana/pull/288925
+- file:
+    name: 288499.yaml
+    checksum: 6893506aacc9cd7bfd5f0d1051f708c17050bc41
+  type: bug-fix
+  title: Fix "Threat hunting leads" showing no results on serverless
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes "Threat hunting leads" reporting no entities on serverless even when the Entity store contained data. Lead generation ran correctly, but the leads index could not be created because serverless rejects the `index.auto_expand_replicas` setting.
+  prs:
+  - https://github.com/elastic/kibana/pull/288499
+  issues:
+  - https://github.com/elastic/kibana/issues/288351
+- file:
+    name: 287916.yaml
+    checksum: 3a8867c849e21f29bf3a659bf8736b7019f104a5
+  type: bug-fix
+  title: Fix detection rule failures when event searches return oversized responses
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes detection rules failing with a raw transport error when an event search response exceeds `elasticsearch.maxResponseSize`. The rule now halves the search page size and retries.
+  prs:
+  - https://github.com/elastic/kibana/pull/287916
+- file:
+    name: 288529.yaml
+    checksum: b076077602c3e5a362ce01ba19beb6cc4217c874
+  type: enhancement
+  title: Add a vulnerable driver abuse mitigation option to Elastic Defend policies
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Adds the `windows.advanced.kernel.enable_sync_driver_loads` advanced policy option to Elastic Defend. The option enables additional vulnerable driver abuse mitigation and enriches driver load events.
+  prs:
+  - https://github.com/elastic/kibana/pull/288529
+- file:
+    name: 288785.yaml
+    checksum: f64a1d787863865ffb72fe5cc4bca9627348af65
+  type: bug-fix
+  title: Fix ES|QL Identifier Controls dropped from Lens visualizations saved by API
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes Lens ES|QL visualizations losing an Identifier Control (`??field`) after an API round-trip, which dropped the mapped column when the visualization rendered.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/288785
+- file:
+    name: 288290.yaml
+    checksum: 05160f1973e2f354b5b2c9aa6f2f8f06b4e889c1
+  type: enhancement
+  title: Add an "Investigate" action to Observability alerts
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Adds an "Investigate" action to Observability alert rows and to the alert detail action menu. The action appears when investigations and Agent Builder write access are available.
+  prs:
+  - https://github.com/elastic/kibana/pull/288290
+- file:
+    name: 287807.yaml
+    checksum: c7612a646fbbeb0c9402ae6bef96658f8202e5f7
+  type: bug-fix
+  title: Fix filter buttons shown in Discover for values that violate `ignore_above`
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes the Discover data table offering "Filter for" and "Filter out" buttons on a cell whose value was never indexed because it exceeds the `ignore_above` limit. Such a filter can never match a document.
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/287807
+  issues:
+  - https://github.com/elastic/kibana/issues/251014
+- file:
+    name: 288475.yaml
+    checksum: 26577e1cea066de4475d1b7ed2f760eb26d99197
+  type: enhancement
+  title: Add a "Fix with AI Agent" quick fix to workflow validation errors
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Adds a "Fix with AI Agent" action to workflow YAML validation errors, available from the editor quick fix and from the validation error row. The action prefills the chat input instead of sending it.
+  prs:
+  - https://github.com/elastic/kibana/pull/288475
+- file:
+    name: 287796.yaml
+    checksum: 6be38d311a8a0d9ff77622439599513a33204108
+  type: feature
+  title: Add the "Show monitors from" filter to Synthetics TLS Certificates
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Adds the cross-space "Show monitors from" control to the TLS Certificates page. The page shares the space preference used by Overview and Management.
+  prs:
+  - https://github.com/elastic/kibana/pull/287796
+  issues:
+  - https://github.com/elastic/kibana/issues/287785
+- file:
+    name: 288966.yaml
+    checksum: faf8df8ebfa4342ba206b672217c57b9bbbe34b4
+  type: bug-fix
+  title: Fix stale space assignments on package policies after a space move
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes a package policy reporting its previous space after you move the agent policy to another Kibana space. Fleet no longer persists the derived `spaceIds` field as a saved object attribute.
+  prs:
+  - https://github.com/elastic/kibana/pull/288966
+  issues:
+  - https://github.com/elastic/kibana/issues/279342
+- file:
+    name: 288788.yaml
+    checksum: cc702bdceac822543b8db2a08f7f7e6c75a2d3ca
+  type: bug-fix
+  title: Fix stale field overrides left on classic streams after you remove them all
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes a classic stream keeping its Elasticsearch mappings override after you remove the last field override, which pinned the deleted field on every later backing index.
+  prs:
+  - https://github.com/elastic/kibana/pull/288788
+- file:
+    name: 277445.yaml
+    checksum: d42d60cb48d2ff8b457ca0f0edadb05b06a164e2
+  type: feature
+  title: Add a step minimap to the workflow YAML editor
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Adds a scrollable minimap beside the workflow YAML editor. Each step appears as a labeled pill with error and warning indicators, and selecting a pill jumps the editor to that step.
+  prs:
+  - https://github.com/elastic/kibana/pull/277445
+- file:
+    name: 287934.yaml
+    checksum: da8040f2eb76acd8f2e0197fe905576e4f6f389a
+  type: bug-fix
+  title: Fix Analyzer process labels disagreeing with Session View
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes the Analyzer labeling a process node with its newest executable name instead of the name in effect when the analyzed event happened, which made the graph disagree with Session View.
+  prs:
+  - https://github.com/elastic/kibana/pull/287934
+  issues:
+  - https://github.com/elastic/kibana/issues/287889
+- file:
+    name: 288946.yaml
+    checksum: c717f68e5f85796ea3bf15578ca04a0fb0e31b50
+  type: bug-fix
+  title: Fix bulk close of alerts failing when the filter uses a runtime field
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes "Select all" followed by "Close selected" updating no alerts when the filter references a data view runtime field, such as a column produced by an ES|QL detection rule.
+  prs:
+  - https://github.com/elastic/kibana/pull/288946
+- file:
+    name: 288432.yaml
+    checksum: 7f981a6cb5ae80e9b85772bfc0fca9d4396cacbb
+  type: feature
+  title: Add a dashboard screenshot to the "Enhance this dashboard" request
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Adds a screenshot of the dashboard to the chat request when you select "Enhance this dashboard", alongside the existing dashboard attachment. Map panels render blank in the screenshot.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/288432
+- file:
+    name: 287708.yaml
+    checksum: 2d6beb62cb25aa87a74f8b4e5acec26b9057d3a8
+  type: bug-fix
+  title: Fix the alert analysis workflow settings page loading indefinitely
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes the Security alert analysis workflow settings page loading forever for some roles. The page now requires only the Rules and Advanced Settings privileges, and it shows an error with a retry action when the request fails.
+  prs:
+  - https://github.com/elastic/kibana/pull/287708
+- file:
+    name: 287933.yaml
+    checksum: c04e549ca6610050dc0051a6000fb21150eedb90
+  type: bug-fix
+  title: Fix missing warning when Timeline Correlation returns partial EQL results
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes the Correlation tab in Timeline showing a truncated hit list with no warning when Elasticsearch drops shards that fail or time out. A callout now reports the failing index, shard, and reason.
+  prs:
+  - https://github.com/elastic/kibana/pull/287933
+  issues:
+  - https://github.com/elastic/kibana/issues/287888
+- file:
+    name: 288644.yaml
+    checksum: c203453ed3304f3cd76e169cb40c5c77e95fd9b3
+  type: bug-fix
+  title: Fix alerting rules keeping an API key that was queued for invalidation
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes an alerting rule keeping an API key that was already queued for invalidation. API key rotation and rule enabling now replace the stored rule in full, so credentials removed during rotation no longer remain on the rule.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/288644
+- file:
+    name: 288350.yaml
+    checksum: 79cab12db95e07517f3f0b34c1823c60f4377bdd
+  type: bug-fix
+  title: Fix settings pages failing to load when a stored setting has an invalid value
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Kibana now skips a stored UI setting whose value has an unsupported type and renders the remaining settings, instead of failing the whole page.
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/288350
+  issues:
+  - https://github.com/elastic/kibana/issues/283081

@@ -688,17 +688,7 @@ const AlertsTableContent = typedForwardRef(
         )}
         {alertsCount > 0 &&
           (isCasesContextAvailable ? (
-            <CasesContext
-              owner={casesConfiguration?.owner ?? []}
-              permissions={casesPermissions}
-              features={{
-                alerts: { sync: casesConfiguration?.syncAlerts ?? false },
-                observables: {
-                  enabled: true,
-                  autoExtract: casesConfiguration?.extractObservables ?? false,
-                },
-              }}
-            >
+            <CasesContext owner={casesConfiguration?.owner ?? []} permissions={casesPermissions}>
               <AlertsDataGrid {...dataGridProps} />
             </CasesContext>
           ) : (

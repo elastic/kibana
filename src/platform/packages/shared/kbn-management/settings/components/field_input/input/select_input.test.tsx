@@ -75,7 +75,7 @@ describe('SelectInput', () => {
       optionValues: [],
     } as SelectInputProps;
 
-    expect(() => render(wrap(<SelectInput {...props} />))).toThrowError(
+    expect(() => render(wrap(<SelectInput {...props} />))).toThrow(
       'non-empty `optionValues` are required for `SelectInput`.'
     );
     consoleMock.mockRestore();

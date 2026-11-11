@@ -27,5 +27,6 @@ export interface OptionsListValidationAggregationBuilder {
 
 export interface OptionsListSuggestionAggregationBuilder {
   buildAggregation: (req: OptionsListRequestBody) => unknown;
+  buildSearchFilter?: (req: OptionsListRequestBody) => unknown | undefined;
   parse: (response: SearchResponse, req: OptionsListRequestBody) => OptionsListParsedSuggestions;
 }

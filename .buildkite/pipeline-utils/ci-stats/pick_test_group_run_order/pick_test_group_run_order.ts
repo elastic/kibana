@@ -9,27 +9,34 @@
 
 import * as Fs from 'fs';
 
-import { getAffectedPackages, listChangedFiles } from '../../affected-packages';
-import type { BuildkiteStep } from '../../buildkite';
-import { BuildkiteClient } from '../../buildkite';
-import { getTrackedBranch } from '../../utils';
-import { CiStatsClient } from '../client';
+import { minimatch } from 'minimatch';
+import type { BuildkiteStep } from '../../buildkite/index.ts';
+import { BuildkiteClient } from '../../buildkite/index.ts';
+import { getTrackedBranch } from '../../utils.ts';
+import { CiStatsClient } from '../client.ts';
 
-import { buildCiStatsGroups, buildCiStatsSources } from './ci_stats_sources';
-import { AGENT_DISK_GIB, DURATION_PERCENTILE, STEP_KEYS } from './const';
-import { loadRunOrderConfig } from './env_config';
-import { getEnabledFtrConfigs } from './ftr_manifests';
-import { discoverJestIntegrationConfigs, discoverJestUnitConfigs } from './jest_configs';
-import { getRunGroup, getRunGroups, labelJestSubgroups } from './run_groups';
-import { shouldSkipFtrTests } from './selective_ftr';
-import { isScoutPathOnlyDiff } from './selective_scout';
+import { buildCiStatsGroups, buildCiStatsSources } from './ci_stats_sources.ts';
+import { AGENT_DISK_GIB, DURATION_PERCENTILE, JEST_AGENTS, STEP_KEYS } from './const.ts';
+import { loadRunOrderConfig } from './env_config.ts';
+import { ftrManifest } from './ftr_manifests.ts';
+import { discoverJestIntegrationConfigs, discoverJestUnitConfigs } from './jest_configs.ts';
+import { recordOnMergeShadow } from './on_merge_shadow.ts';
+import {
+  queryMoonJestUnitSelection,
+  queryMoonTestSelection,
+} from '../../affected-packages/moon_test_tasks.ts';
+import type { MoonTestSelection } from '../../affected-packages/moon_test_tasks.ts';
+import { getRunGroup, getRunGroups, labelJestSubgroups } from './run_groups.ts';
+import { getFtrSkipModules } from './selective_ftr.ts';
+import { isScoutPathOnlyDiff } from './selective_scout.ts';
+import { resolveSelectiveTestingChanges } from './selective_changes.ts';
 import {
   filterJestIntegrationConfigsByAffected,
   filterJestUnitConfigsByAffected,
   resolveSelectiveTestingContext,
-} from './selective_testing';
-import { buildFunctionalStepGroup, buildJestStep, registerCancelKeys } from './steps';
-import type { FtrRunOrder, FunctionalGroup } from './types';
+} from './selective_testing.ts';
+import { buildFunctionalStepGroup, buildJestStep, registerCancelKeys } from './steps.ts';
+import type { FtrRunOrder, FunctionalGroup } from './types.ts';
 
 /**
  * Orchestrates the per-build test group sizing for Buildkite:
@@ -44,26 +51,21 @@ export async function pickTestGroupRunOrder() {
   const ciStats = new CiStatsClient();
   const config = loadRunOrderConfig();
 
-  const selectiveTestingMergeBase = config.useSelectiveTesting ? config.prMergeBase : undefined;
+  const selectiveChangedFiles = config.useSelectiveTesting
+    ? resolveSelectiveTestingChanges(
+        config.selectionBase,
+        config.isMergeQueue ? 'merge-queue' : 'pr'
+      )
+    : null;
 
-  // Fast path: a PR whose diff is exclusively Scout test files cannot affect
-  // any Jest unit/integration or FTR config — skip emitting them entirely.
-  // The Scout pipeline still runs its own selective testing in parallel.
-  let selectiveChangedFiles: string[] | undefined;
-  if (selectiveTestingMergeBase) {
-    selectiveChangedFiles = listChangedFiles({
-      mergeBase: selectiveTestingMergeBase,
-      commit: 'HEAD',
-    });
-    if (isScoutPathOnlyDiff(selectiveChangedFiles)) {
-      console.log('Scout-test-tree-only diff detected — skipping Jest/FTR test steps');
-      bk.setAnnotation(
-        'selective-testing-scout-tests-only',
-        'info',
-        'Selective testing: Scout-test-tree-only diff — Jest/FTR test steps were skipped.'
-      );
-      return;
-    }
+  if (selectiveChangedFiles !== null && isScoutPathOnlyDiff(selectiveChangedFiles)) {
+    console.log('Scout-test-tree-only diff detected — skipping Jest/FTR test steps');
+    bk.setAnnotation(
+      'selective-testing-scout-tests-only',
+      'info',
+      'Selective testing: Scout-test-tree-only diff — Jest/FTR test steps were skipped.'
+    );
+    return;
   }
 
   const unitIncluded = config.limitConfigType.includes('unit');
@@ -74,26 +76,43 @@ export async function pickTestGroupRunOrder() {
   let jestIntegrationConfigs = integrationIncluded
     ? discoverJestIntegrationConfigs(config.limitSolutions)
     : [];
-  const { defaultQueue, ftrConfigsByQueue } = getEnabledFtrConfigs(
-    config.ftrConfigPatterns,
-    config.limitSolutions
+
+  const ftrManifestEntriesByQueue = Map.groupBy(
+    ftrManifest.entries
+      .enabled()
+      .filter((entry) => {
+        if (config.ftrConfigPatterns === undefined) return true;
+        return config.ftrConfigPatterns.some((pattern) => minimatch(entry.path, pattern));
+      })
+      .filter((entry) => {
+        if (config.limitSolutions === undefined) return true;
+        return ['base', 'platform', ...config.limitSolutions].some(
+          (domain) => entry.domain === domain
+        );
+      })
+      .filter((entry) => entry.testChannels.intersection(config.ftrTestChannels).size > 0),
+    (entry) => entry.queue
   );
-  if (!ftrConfigsIncluded) ftrConfigsByQueue.clear();
 
-  if (selectiveTestingMergeBase && selectiveChangedFiles) {
-    const directlyAffected = await getAffectedPackages(selectiveTestingMergeBase, {
-      strategy: 'git',
-      includeDownstream: false,
-      ignoreUncategorizedChanges: true,
-    }).catch((error) => {
-      console.error('Error getting affected packages for FTR skip check', error);
-      return null;
+  if (!ftrConfigsIncluded) ftrManifestEntriesByQueue.clear();
+
+  if (config.isOnMerge && config.onMergeSelectiveMode === 'shadow') {
+    await recordOnMergeShadow(bk, {
+      jestUnitConfigs,
+      jestIntegrationConfigs,
+      ftrConfigCount: [...ftrManifestEntriesByQueue.values()].reduce(
+        (count, entries) => count + entries.length,
+        0
+      ),
     });
+  }
 
-    if (directlyAffected !== null && shouldSkipFtrTests(directlyAffected, selectiveChangedFiles)) {
+  if (selectiveChangedFiles !== null) {
+    const ftrSkipModules = await getFtrSkipModules(selectiveChangedFiles);
+    if (ftrSkipModules !== null) {
       console.log(
         `Skipping FTR configs — diff cannot affect FTR: ${
-          directlyAffected.size ? [...directlyAffected].join(', ') : '(irrelevant paths only)'
+          ftrSkipModules.length ? ftrSkipModules.join(', ') : '(irrelevant paths only)'
         }`
       );
       bk.setAnnotation(
@@ -101,20 +120,45 @@ export async function pickTestGroupRunOrder() {
         'info',
         'Selective testing: FTR configs skipped (excluded modules / irrelevant paths only).'
       );
-      ftrConfigsByQueue.clear();
+      ftrManifestEntriesByQueue.clear();
     }
 
-    const selectiveCtx = await resolveSelectiveTestingContext(selectiveTestingMergeBase);
+    const selectiveCtx = await resolveSelectiveTestingContext(selectiveChangedFiles);
     if (selectiveCtx !== null) {
-      jestUnitConfigs = filterJestUnitConfigsByAffected(jestUnitConfigs, selectiveCtx);
-      jestIntegrationConfigs = filterJestIntegrationConfigsByAffected(
-        jestIntegrationConfigs,
-        selectiveCtx
-      );
+      if (unitIncluded) {
+        try {
+          const moonSelection = queryMoonJestUnitSelection(selectiveChangedFiles);
+          jestUnitConfigs = filterJestUnitConfigsByAffected(
+            jestUnitConfigs,
+            selectiveCtx,
+            moonSelection
+          );
+        } catch (error) {
+          console.error('Moon Jest unit comparison failed; using package selection', error);
+          jestUnitConfigs = filterJestUnitConfigsByAffected(jestUnitConfigs, selectiveCtx);
+        }
+      }
+      if (integrationIncluded) {
+        let moonSelection: MoonTestSelection | undefined;
+        try {
+          moonSelection = queryMoonTestSelection(selectiveChangedFiles, 'jest-integration-tests');
+        } catch (error) {
+          console.error('Moon Jest integration comparison failed; using package selection', error);
+        }
+        jestIntegrationConfigs = filterJestIntegrationConfigsByAffected(
+          jestIntegrationConfigs,
+          selectiveCtx,
+          moonSelection
+        );
+      }
     }
   }
 
-  if (!ftrConfigsByQueue.size && !jestUnitConfigs.length && !jestIntegrationConfigs.length) {
+  if (
+    !ftrManifestEntriesByQueue.size &&
+    !jestUnitConfigs.length &&
+    !jestIntegrationConfigs.length
+  ) {
     if (config.useSelectiveTesting) {
       console.log('Selective testing: no Jest/FTR configs to run for this diff');
       bk.setAnnotation(
@@ -124,6 +168,14 @@ export async function pickTestGroupRunOrder() {
       );
       return;
     }
+
+    if (config.allowZeroConfigMatches) {
+      const message = "No Jest unit/integration or FTR configs matched this run's criteria.";
+      console.log(message);
+      bk.setAnnotation('no-matching-jest-ftr-test-configs', 'info', message);
+      return;
+    }
+
     throw new Error('unable to find any unit, integration, or FTR configs');
   }
 
@@ -135,12 +187,12 @@ export async function pickTestGroupRunOrder() {
       ownBranch: config.ownBranch,
       pipelineSlug: config.pipelineSlug,
       prNumber: config.prNumber,
-      prMergeBase: config.prMergeBase,
+      timingBase: config.timingBase,
     }),
     groups: buildCiStatsGroups({
       jestUnitConfigs,
       jestIntegrationConfigs,
-      ftrConfigsByQueue,
+      ftrManifestEntriesByQueue,
       config,
     }),
   });
@@ -153,8 +205,11 @@ export async function pickTestGroupRunOrder() {
   labelJestSubgroups(unit, config.unitType);
   labelJestSubgroups(integration, config.integrationType);
 
-  const { functionalGroups, ftrRunOrder } = ftrConfigsByQueue.size
-    ? collectFunctionalGroups(getRunGroups(bk, types, config.functionalType), defaultQueue)
+  const { functionalGroups, ftrRunOrder } = ftrManifestEntriesByQueue.size
+    ? collectFunctionalGroups(
+        getRunGroups(bk, types, config.functionalType),
+        ftrManifest.default.queue
+      )
     : { functionalGroups: [], ftrRunOrder: {} };
 
   Fs.writeFileSync('jest_run_order.json', JSON.stringify({ unit, integration }, null, 2));
@@ -172,6 +227,7 @@ export async function pickTestGroupRunOrder() {
         label: 'Jest Tests',
         parallelism: unit.count,
         key: STEP_KEYS.JEST_UNIT,
+        agent: JEST_AGENTS.UNIT,
         agentDiskSize: AGENT_DISK_GIB.JEST_UNIT,
         envFromLabels: config.envFromLabels,
         dependsOn: config.jestConfigsDeps,
@@ -183,6 +239,7 @@ export async function pickTestGroupRunOrder() {
         label: 'Jest Integration Tests',
         parallelism: integration.count,
         key: STEP_KEYS.JEST_INTEGRATION,
+        agent: JEST_AGENTS.INTEGRATION,
         agentDiskSize: AGENT_DISK_GIB.JEST_INTEGRATION,
         envFromLabels: config.envFromLabels,
         dependsOn: config.jestConfigsDeps,
@@ -192,7 +249,7 @@ export async function pickTestGroupRunOrder() {
       buildFunctionalStepGroup({
         command: requireVariable(config.ftrConfigsScript, 'FTR_CONFIGS_SCRIPT'),
         functionalGroups,
-        defaultQueue,
+        defaultQueue: ftrManifest.default.queue,
         ftrExtraArgs: config.ftrExtraArgs,
         envFromLabels: config.envFromLabels,
         dependsOn: config.ftrConfigsDeps,
@@ -238,7 +295,7 @@ function collectFunctionalGroups(
     for (const group of groups) {
       if (!group.names.length) continue;
 
-      const key = `ftr_configs_${configCounter++}`;
+      const key = `${STEP_KEYS.FTR_CONFIG_PREFIX}${configCounter++}`;
       const isSingle = group.names.length === 1;
       const sortBy = isSingle ? group.names[0] : ++groupCounter;
       const title = isSingle ? group.names[0] : `FTR Configs #${sortBy}`;

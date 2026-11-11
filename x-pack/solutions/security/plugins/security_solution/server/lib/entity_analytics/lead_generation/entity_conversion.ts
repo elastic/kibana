@@ -9,8 +9,64 @@ import type { Logger } from '@kbn/core/server';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import type { Entity } from '@kbn/entity-store/common';
 import type { LeadEntity } from './types';
+import { PRIVILEGED_USER_WATCHLIST_ID } from './observation_modules/utils';
 
-const MAX_CANDIDATE_ENTITIES = 500;
+const CANDIDATE_STRATEGIES = [
+  {
+    id: 'high_risk_score',
+    size: 250,
+    sortField: 'entity.risk.calculated_score_norm',
+  },
+  {
+    id: 'newly_observed',
+    size: 50,
+    sortField: 'entity.lifecycle.first_seen',
+    filter: { range: { 'entity.lifecycle.first_seen': { gte: 'now-7d' } } },
+  },
+  {
+    id: 'ungoverned_privileged',
+    size: 50,
+    sortField: 'entity.risk.calculated_score_norm',
+    filter: {
+      bool: {
+        filter: [
+          {
+            prefix: {
+              'entity.attributes.watchlists': PRIVILEGED_USER_WATCHLIST_ID,
+            },
+          },
+        ],
+        should: [
+          { term: { 'entity.attributes.managed': false } },
+          { term: { 'entity.attributes.mfa_enabled': false } },
+        ],
+        minimum_should_match: 1,
+      },
+    },
+  },
+  {
+    id: 'high_criticality',
+    size: 50,
+    sortField: 'entity.risk.calculated_score_norm',
+    filter: { terms: { 'asset.criticality': ['high_impact', 'extreme_impact'] } },
+  },
+  {
+    id: 'control_relationship',
+    size: 100,
+    sortField: 'entity.risk.calculated_score_norm',
+    filter: {
+      bool: {
+        should: [
+          { exists: { field: 'entity.relationships.administers.ids' } },
+          { exists: { field: 'entity.relationships.owns.ids' } },
+        ],
+        minimum_should_match: 1,
+      },
+    },
+  },
+];
+
+const MAX_CANDIDATE_ENTITIES = CANDIDATE_STRATEGIES.reduce((sum, s) => sum + s.size, 0);
 
 /** Row shape returned by {@link EntityStoreCRUDClient.listEntities}. */
 type EntityStoreEntity = Awaited<
@@ -87,33 +143,53 @@ export const entityRecordToLeadEntity = (record: EntityStoreEntity): LeadEntity 
 };
 
 /**
- * Fetch the top candidate entities from the V2 unified index, sorted by
- * risk score descending and capped at {@link MAX_CANDIDATE_ENTITIES}.
- *
- * Sorting and limiting are pushed to Elasticsearch via the CRUD client's
- * page-mode query so we avoid fetching all entities into Kibana memory.
- * Entities without a risk score sort last (ES `missing` default for desc).
+ * Fetches candidates for lead generation by running every strategy in
+ * {@link CANDIDATE_STRATEGIES} as one `_msearch` request, and dedupes the
+ * results by EUID. Each strategy selects on a different signal (risk,
+ * recency, privilege, criticality, etc.) so the resulting pool covers
+ * entities a single risk-sorted fetch would miss, giving the downstream
+ * observation modules a comprehensive batch to work from.
  */
 export const fetchCandidateEntities = async (
   crudClient: EntityStoreCRUDClient,
   logger?: Logger
 ): Promise<LeadEntity[]> => {
-  const { entities, total } = await crudClient.listEntities({
-    sortField: 'entity.risk.calculated_score_norm',
-    sortOrder: 'desc',
-    perPage: MAX_CANDIDATE_ENTITIES,
-    page: 1,
+  const results = await crudClient.listEntitiesBatch(
+    CANDIDATE_STRATEGIES.map((strategy) => ({
+      entityTypes: [],
+      page: 1,
+      perPage: strategy.size,
+      sortField: strategy.sortField,
+      sortOrder: 'desc',
+      ...(strategy.filter ? { filterQuery: JSON.stringify(strategy.filter) } : {}),
+    }))
+  );
+
+  const byId = new Map<string, LeadEntity>();
+  let skipped = 0;
+  results.forEach((result, i) => {
+    if ('error' in result) {
+      logger?.warn(
+        `[LeadGeneration] Candidate strategy "${CANDIDATE_STRATEGIES[i].id}" failed, continuing with the rest: ${result.error}`
+      );
+      return;
+    }
+    for (const record of result.records) {
+      const lead = entityRecordToLeadEntity(record);
+      if (lead) {
+        byId.set(lead.id, lead);
+      } else {
+        skipped += 1;
+      }
+    }
   });
 
-  const leadEntities = entities
-    .map(entityRecordToLeadEntity)
-    .filter((entity): entity is LeadEntity => entity !== undefined);
-  const skipped = entities.length - leadEntities.length;
+  const leadEntities = [...byId.values()];
 
   logger?.debug(
-    `[LeadGeneration] Entity selection: ${total ?? entities.length} total -> ${
-      leadEntities.length
-    } candidates (cap ${MAX_CANDIDATE_ENTITIES}${
+    `[LeadGeneration] Entity selection: ${results
+      .map((r, i) => `${CANDIDATE_STRATEGIES[i].id}=${'error' in r ? 'error' : r.records.length}`)
+      .join(', ')} -> ${leadEntities.length} unique candidates (cap ${MAX_CANDIDATE_ENTITIES}${
       skipped > 0 ? `, skipped ${skipped} without EUID` : ''
     })`
   );

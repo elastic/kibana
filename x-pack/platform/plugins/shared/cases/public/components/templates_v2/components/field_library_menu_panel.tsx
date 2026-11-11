@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { normalizeFieldDefinitionName } from '../../../../common/utils';
 import { useGetFieldDefinitions } from '../../field_library/hooks/use_get_field_definitions';
 import {
   getDefinedFieldNames,
@@ -49,24 +50,30 @@ export const FieldLibraryMenuPanel: React.FC<FieldLibraryMenuPanelProps> = ({
 }) => {
   const { data, isLoading } = useGetFieldDefinitions({ owner, staleTime: Infinity });
 
+  // Normalized (case-insensitive) so a $ref that differs only in case from the library's
+  // stored name — e.g. after a case-only rename of the definition — still counts as linked.
   const alreadyLinked = useMemo(() => {
     const doc = parseTemplateDocument(existingYaml);
-    return doc ? getDefinedFieldNames(getFieldItemMaps(doc)) : new Set<string>();
+    const names = doc ? getDefinedFieldNames(getFieldItemMaps(doc)) : new Set<string>();
+    return new Set(Array.from(names, normalizeFieldDefinitionName));
   }, [existingYaml]);
 
   const options = useMemo<EuiSelectableOption[]>(
     () =>
-      (data?.fieldDefinitions ?? []).map((field) => ({
-        label: field.name,
-        key: field.fieldDefinitionId,
-        // `checked: 'on'` + disabled communicates "already in this template" without a second column.
-        checked: alreadyLinked.has(field.name) ? 'on' : undefined,
-        disabled: alreadyLinked.has(field.name),
-        append: field.isGlobal ? (
-          <EuiBadge color="hollow">{i18n.ACTIONS_MENU_LIBRARY_GLOBAL_BADGE}</EuiBadge>
-        ) : undefined,
-        data: { name: field.name },
-      })),
+      (data?.fieldDefinitions ?? []).map((field) => {
+        const isLinked = alreadyLinked.has(normalizeFieldDefinitionName(field.name));
+        return {
+          label: field.name,
+          key: field.fieldDefinitionId,
+          // `checked: 'on'` + disabled communicates "already in this template" without a second column.
+          checked: isLinked ? 'on' : undefined,
+          disabled: isLinked,
+          append: field.isGlobal ? (
+            <EuiBadge color="hollow">{i18n.ACTIONS_MENU_LIBRARY_GLOBAL_BADGE}</EuiBadge>
+          ) : undefined,
+          data: { name: field.name },
+        };
+      }),
     [data, alreadyLinked]
   );
 

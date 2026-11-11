@@ -24,8 +24,8 @@ import {
   EuiText,
   EuiToolTip,
   useEuiTheme,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type {
   EuiBasicTableColumn,
   EuiSearchBarProps,
@@ -41,7 +41,7 @@ import { UserAvatar } from '@kbn/user-profile-components';
 import { PackageIcon } from '../../../../../../../components/package_icon';
 
 import { useGetPackagesQuery } from '../../../../../../../hooks/use_request/epm';
-import { useStartServices } from '../../../../../hooks';
+import { useAuthz, useAutomaticImportAuthz, useStartServices } from '../../../../../hooks';
 
 import { ManageIntegrationActions } from './manage_integration_actions';
 import type { ReviewIntegrationDetails } from './manage_integration_actions';
@@ -130,6 +130,8 @@ export const ManageIntegrationsTable: React.FC<{
     notifications,
     userProfile: userProfileService,
   } = useStartServices();
+  const { canCreate, canEdit, canDelete } = useAutomaticImportAuthz();
+  const canUploadPackages = useAuthz().integrations.uploadPackages;
 
   const hasReportedView = useRef(false);
   useEffect(() => {
@@ -470,7 +472,11 @@ export const ManageIntegrationsTable: React.FC<{
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiLink href={getEditIntegrationHref(item.integrationId)}>{title}</EuiLink>
+              {canEdit ? (
+                <EuiLink href={getEditIntegrationHref(item.integrationId)}>{title}</EuiLink>
+              ) : (
+                <EuiText size="s">{title}</EuiText>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
@@ -660,6 +666,7 @@ export const ManageIntegrationsTable: React.FC<{
     ],
     [
       getEditIntegrationHref,
+      canEdit,
       goToEditIntegration,
       deleteIntegration,
       fetchIntegrationReviewDetails,
@@ -746,7 +753,7 @@ export const ManageIntegrationsTable: React.FC<{
             )}
             button={
               <EuiFilterButton
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 data-test-subj="manageIntegrationsActionsFilterBtn"
                 onClick={() => setIsActionsFilterOpen(!isActionsFilterOpen)}
                 isSelected={isActionsFilterOpen}
@@ -777,7 +784,7 @@ export const ManageIntegrationsTable: React.FC<{
             )}
             button={
               <EuiFilterButton
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 data-test-subj="manageIntegrationsStatusFilterBtn"
                 onClick={() => setIsStatusFilterOpen(!isStatusFilterOpen)}
                 isSelected={isStatusFilterOpen}
@@ -799,9 +806,11 @@ export const ManageIntegrationsTable: React.FC<{
           </EuiPopover>
         </EuiFilterGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <CreateNewIntegrationButton />
-      </EuiFlexItem>
+      {(canCreate || canUploadPackages) && (
+        <EuiFlexItem grow={false}>
+          <CreateNewIntegrationButton canCreate={canCreate} canUpload={canUploadPackages} />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 
@@ -828,21 +837,23 @@ export const ManageIntegrationsTable: React.FC<{
               />
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              color="danger"
-              iconType="trash"
-              isLoading={isBulkDeleting}
-              onClick={handleBulkDelete}
-              data-test-subj="manageIntegrationsBulkDeleteBtn"
-            >
-              <FormattedMessage
-                id="xpack.fleet.epmList.manageIntegrations.bulkDelete"
-                defaultMessage="Delete"
-              />
-            </EuiButton>
-          </EuiFlexItem>
+          {canDelete && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                color="danger"
+                iconType="trash"
+                isLoading={isBulkDeleting}
+                onClick={handleBulkDelete}
+                data-test-subj="manageIntegrationsBulkDeleteBtn"
+              >
+                <FormattedMessage
+                  id="xpack.fleet.epmList.manageIntegrations.bulkDelete"
+                  defaultMessage="Delete"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiToolTip
               content={
@@ -860,7 +871,7 @@ export const ManageIntegrationsTable: React.FC<{
               <span tabIndex={0}>
                 <EuiButton
                   size="s"
-                  iconType="exportAction"
+                  iconType="upload"
                   isLoading={isBulkInstalling}
                   isDisabled={!canBulkInstall}
                   onClick={handleBulkInstall}
@@ -894,10 +905,8 @@ export const ManageIntegrationsTable: React.FC<{
 
   if (isError) {
     return (
-      <EuiCallOut
+      <KbnDangerCallout
         announceOnMount
-        color="danger"
-        iconType="error"
         title={
           <FormattedMessage
             id="xpack.fleet.epmList.manageIntegrations.errorTitle"

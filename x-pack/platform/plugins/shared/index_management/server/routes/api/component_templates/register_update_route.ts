@@ -15,7 +15,7 @@ import { addBasePath } from '..';
 import { componentTemplateSchema } from './schema_validation';
 
 const paramsSchema = schema.object({
-  name: schema.string(),
+  name: schema.string({ maxLength: 1000 }),
 });
 
 export const registerUpdateRoute = ({

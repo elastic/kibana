@@ -1,0 +1,110 @@
+{
+  "10.2.0": [
+    {
+      "name": "catch-all-policy",
+      "description": "An action policy with an explicitly null matcher",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-1"
+        }
+      ],
+      "matcher": null,
+      "groupBy": null,
+      "tags": null,
+      "groupingMode": null,
+      "throttle": null,
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "auth": {
+        "owner": "elastic",
+        "createdByUser": true
+      },
+      "createdBy": "elastic",
+      "updatedBy": "elastic",
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "matcher-less-policy",
+      "description": "An action policy without a matcher attribute",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-2"
+        }
+      ],
+      "groupBy": ["host.name"],
+      "tags": ["oncall"],
+      "groupingMode": "per_field",
+      "throttle": {
+        "strategy": "time_interval",
+        "interval": "5m"
+      },
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": false,
+      "createdBy": "elastic",
+      "updatedBy": "elastic",
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    }
+  ],
+  "10.3.0": [
+    {
+      "name": "catch-all-policy",
+      "description": "An action policy with an explicitly null matcher",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-1"
+        }
+      ],
+      "matcher": null,
+      "groupBy": null,
+      "tags": null,
+      "groupingMode": null,
+      "throttle": null,
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "auth": {
+        "owner": "elastic",
+        "createdByUser": true
+      },
+      "createdBy": "elastic",
+      "updatedBy": "elastic",
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "matcher-less-policy",
+      "description": "An action policy without a matcher attribute",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-2"
+        }
+      ],
+      "groupBy": ["host.name"],
+      "tags": ["oncall"],
+      "groupingMode": "per_field",
+      "throttle": {
+        "strategy": "time_interval",
+        "interval": "5m"
+      },
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": false,
+      "createdBy": "elastic",
+      "updatedBy": "elastic",
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    }
+  ]
+}

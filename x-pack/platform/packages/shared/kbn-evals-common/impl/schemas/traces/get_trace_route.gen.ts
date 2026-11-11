@@ -20,7 +20,7 @@ import { TraceSpan } from '../common_attributes.gen';
 
 export const GetTraceRequestParams = lazySchema(() =>
   z.object({
-    traceId: z.string(),
+    traceId: z.string().max(256),
   })
 );
 export type GetTraceRequestParams = z.infer<typeof GetTraceRequestParams>;

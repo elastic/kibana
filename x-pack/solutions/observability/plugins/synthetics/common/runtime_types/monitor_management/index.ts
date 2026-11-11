@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-export * from './state';
+export type * from './state';
 export * from './config_key';
 export * from './monitor_configs';
-export * from './monitor_meta_data';
-export * from './monitor_types';
-export * from './monitor_types_project';
+export type * from './monitor_meta_data';
+export type * from './monitor_types';
+export type * from './monitor_types_project';
 export * from './locations';
-export * from './synthetics_private_locations';
-export * from './synthetics_overview_status';
-export * from './synthetics_params';
-export * from './filters';
+export type * from './synthetics_private_locations';
+export type * from './synthetics_overview_status';
+export type * from './synthetics_params';
+export type * from './filters';

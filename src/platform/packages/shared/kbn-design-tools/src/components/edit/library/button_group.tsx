@@ -18,15 +18,15 @@ const singleOptions = [
 ];
 
 const iconOptions = [
-  { id: 'dt-bg-icon1', label: 'Align left', iconType: 'editorAlignLeft' },
-  { id: 'dt-bg-icon2', label: 'Align center', iconType: 'editorAlignCenter' },
-  { id: 'dt-bg-icon3', label: 'Align right', iconType: 'editorAlignRight' },
+  { id: 'dt-bg-icon1', label: 'Align left', iconType: 'textAlignLeft' },
+  { id: 'dt-bg-icon2', label: 'Align center', iconType: 'textAlignCenter' },
+  { id: 'dt-bg-icon3', label: 'Align right', iconType: 'textAlignRight' },
 ];
 
 const multiOptions = [
-  { id: 'dt-bg-multi1', label: 'Bold', iconType: 'editorBold' },
-  { id: 'dt-bg-multi2', label: 'Italic', iconType: 'editorItalic' },
-  { id: 'dt-bg-multi3', label: 'Underline', iconType: 'editorUnderline' },
+  { id: 'dt-bg-multi1', label: 'Bold', iconType: 'textBold' },
+  { id: 'dt-bg-multi2', label: 'Italic', iconType: 'textItalic' },
+  { id: 'dt-bg-multi3', label: 'Underline', iconType: 'textUnderline' },
 ];
 
 export const ButtonGroupSingle = () => {

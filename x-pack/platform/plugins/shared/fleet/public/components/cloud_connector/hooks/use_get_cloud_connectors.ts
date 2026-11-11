@@ -10,10 +10,7 @@ import type { CoreStart, HttpStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '../../../../common';
-import {
-  getPolicyGroupForIntegration,
-  CLOUD_CONNECTOR_PERMISSION_ALLOWLIST,
-} from '../../../../common/constants/cloud_connector';
+import { getPolicyGroupForIntegration } from '../../../../common/constants/cloud_connector';
 import type { PolicyGroup } from '../../../../common/constants/cloud_connector';
 
 import type {
@@ -33,8 +30,6 @@ export interface CloudConnectorQueryFilterOptions {
   accountType?: AccountType;
   /** Package name of the current integration (e.g. 'cloud_security_posture') */
   packageName?: string;
-  /** Policy template of the current integration (e.g. 'cspm', 'asset_inventory') */
-  policyTemplate?: string;
 }
 
 const fetchCloudConnectors = async (
@@ -76,24 +71,21 @@ const fetchCloudConnectorUsage = async (
 };
 
 /**
- * Returns the set of package names that belong to the same policy group.
- */
-function getCompatiblePackageNames(group: PolicyGroup): Set<string> {
-  const entries = CLOUD_CONNECTOR_PERMISSION_ALLOWLIST[group] ?? [];
-  return new Set(entries.map((e) => e.package));
-}
-
-/**
  * Checks whether a connector's linked package policies are all within the given policy group.
- * Connectors with no linked policies are considered compatible (they can be adopted by anyone).
+ * Each usage resolves to a group (isolated if the package is registered as isolated,
+ * otherwise the provider-default group). Connectors with no linked policies are considered
+ * compatible (they can be adopted by anyone).
  */
 function isConnectorCompatibleWithGroup(
   usageItems: CloudConnectorUsageItem[],
-  compatiblePackages: Set<string>
+  currentPolicyGroup: PolicyGroup,
+  cloudProvider: CloudProvider
 ): boolean {
   if (usageItems.length === 0) return true;
   return usageItems.every(
-    (item) => item.package?.name && compatiblePackages.has(item.package.name)
+    (item) =>
+      item.package?.name &&
+      getPolicyGroupForIntegration(item.package.name, cloudProvider) === currentPolicyGroup
   );
 }
 
@@ -101,7 +93,7 @@ export const useGetCloudConnectors = (filterOptions?: CloudConnectorQueryFilterO
   const CLOUD_CONNECTOR_QUERY_KEY = 'get-cloud-connectors';
   const { http } = useKibana<CoreStart>().services;
 
-  const { packageName, policyTemplate, ...kqlFilterOptions } = filterOptions ?? {};
+  const { packageName, ...kqlFilterOptions } = filterOptions ?? {};
 
   // Construct KQL query from filter options (only cloudProvider and accountType)
   const kuery =
@@ -114,10 +106,14 @@ export const useGetCloudConnectors = (filterOptions?: CloudConnectorQueryFilterO
           .join(' AND ')
       : undefined;
 
-  // Determine the current integration's policy group
+  // Determine the current integration's policy group. Only resolvable when both the
+  // requesting package and provider are known — i.e. in an integration policy form.
+  // Listing contexts (e.g. connector management UI) have no requesting integration
+  // and are intentionally unfiltered.
+  const cloudProvider = filterOptions?.cloudProvider;
   const currentPolicyGroup =
-    packageName && policyTemplate
-      ? getPolicyGroupForIntegration(packageName, policyTemplate)
+    packageName && cloudProvider
+      ? getPolicyGroupForIntegration(packageName, cloudProvider)
       : undefined;
 
   return useQuery(
@@ -126,17 +122,14 @@ export const useGetCloudConnectors = (filterOptions?: CloudConnectorQueryFilterO
       filterOptions?.cloudProvider,
       filterOptions?.accountType,
       packageName,
-      policyTemplate,
     ],
     async () => {
       const connectors = await fetchCloudConnectors(http, { kuery });
 
-      // If no policy group context, return all connectors (no filtering)
-      if (!currentPolicyGroup) {
+      // No requesting integration (listing context): return all connectors unfiltered
+      if (!currentPolicyGroup || !cloudProvider) {
         return connectors;
       }
-
-      const compatiblePackages = getCompatiblePackageNames(currentPolicyGroup);
 
       // For connectors with no linked policies, they're available to any group.
       // For connectors with linked policies, check that all belong to the same group.
@@ -154,7 +147,11 @@ export const useGetCloudConnectors = (filterOptions?: CloudConnectorQueryFilterO
             const usage = await fetchCloudConnectorUsage(http, connector.id);
             usageResultMap.set(connector.id, {
               connector,
-              compatible: isConnectorCompatibleWithGroup(usage.items, compatiblePackages),
+              compatible: isConnectorCompatibleWithGroup(
+                usage.items,
+                currentPolicyGroup,
+                cloudProvider
+              ),
             });
           } catch {
             // On transient errors, treat the connector as compatible so it isn't silently hidden

@@ -115,6 +115,10 @@ spaceTest.describe(
         await metricsExperience.searchMetric('gauge 22');
         await expect(metricsExperience.cards).toHaveCount(1);
         await metricsExperience.waitForFirstCard('gauge_22-0');
+        const highlights = metricsExperience.getCardTitleHighlights(0);
+        await expect(highlights).toHaveCount(2);
+        await expect(metricsExperience.getCardTitleHighlight(0, 'gauge')).toHaveText('gauge');
+        await expect(metricsExperience.getCardTitleHighlight(0, '22')).toHaveText('22');
       });
 
       await spaceTest.step('wildcard search matches metric name pattern', async () => {
@@ -122,6 +126,7 @@ spaceTest.describe(
         await metricsExperience.searchMetric('*_0');
         // Matches counter_0, gauge_0, and histogram_0.
         await expect(metricsExperience.cards).toHaveCount(3);
+        await expect(metricsExperience.getCardTitleHighlights(0)).toHaveText('_0');
       });
 
       await spaceTest.step('typo-tolerant search finds metric', async () => {
@@ -129,6 +134,7 @@ spaceTest.describe(
         await metricsExperience.searchMetric('gauuge_0');
         await expect(metricsExperience.cards).toHaveCount(1);
         await metricsExperience.waitForFirstCard('gauge_0-0');
+        await expect(metricsExperience.getCardTitleHighlights(0)).toHaveText('gauge_0');
       });
     });
 

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { addLayer, removeLayer, replaceLayerList } from './layer_actions';
+import { addLayer, removeLayer, replaceLayerList, setLayerVisibility } from './layer_actions';
 import type { LayerDescriptor } from '../../common/descriptor_types';
 import { LICENSED_FEATURES } from '../licensed_features';
 import { createMapStore } from '../reducers/store';
 import { mapReady } from './map_actions';
 import { LAYER_TYPE, SOURCE_TYPES } from '../../common';
-import { UPDATE_LAYER_PROP } from './map_action_constants';
+import { SET_LAYER_VISIBILITY, UPDATE_LAYER_PROP } from './map_action_constants';
 
 jest.mock('../kibana_services', () => {
   return {
@@ -38,6 +38,10 @@ jest.mock('../kibana_services', () => {
 const getStoreMock = jest.fn();
 const dispatchMock = jest.fn();
 
+// Stubs so existing tests that dispatch thunks through the real Redux store do not
+// break when syncDataForLayerId is replaced inside the setLayerVisibility describe block.
+const noopThunk = () => async () => {};
+
 describe('layer_actions', () => {
   afterEach(() => {
     jest.resetAllMocks();
@@ -53,7 +57,7 @@ describe('layer_actions', () => {
       };
 
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../selectors/map_selectors').getMapReady = () => {
+      require('../reducers/non_serializable_instances').getMapReady = () => {
         return true;
       };
 
@@ -168,6 +172,56 @@ describe('layer_actions', () => {
           "type": "GEOJSON_VECTOR",
         }
       `);
+    });
+  });
+
+  describe('setLayerVisibility', () => {
+    const LAYER_ID = 'layer1';
+    const syncDataForLayerIdMock = jest.fn(noopThunk);
+    let originalGetLayerById: unknown;
+    let originalSyncDataForLayerId: unknown;
+
+    beforeEach(() => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      originalGetLayerById = require('../selectors/map_selectors').getLayerById;
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      originalSyncDataForLayerId = require('./data_request_actions').syncDataForLayerId;
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('./data_request_actions').syncDataForLayerId = syncDataForLayerIdMock;
+    });
+
+    afterEach(() => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('../selectors/map_selectors').getLayerById = originalGetLayerById;
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('./data_request_actions').syncDataForLayerId = originalSyncDataForLayerId;
+      jest.resetAllMocks();
+    });
+
+    it('should dispatch SET_LAYER_VISIBILITY and trigger data sync when making a hidden layer visible', () => {
+      const hiddenLayer = { getId: () => LAYER_ID, isVisible: () => false };
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('../selectors/map_selectors').getLayerById = () => hiddenLayer;
+
+      const action = setLayerVisibility(LAYER_ID, true);
+      action(dispatchMock, getStoreMock);
+
+      expect(dispatchMock.mock.calls[0]).toEqual([
+        { type: SET_LAYER_VISIBILITY, layerId: LAYER_ID, visibility: true },
+      ]);
+      expect(syncDataForLayerIdMock).toHaveBeenCalledWith(LAYER_ID, false);
+      expect(dispatchMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('should not dispatch when layer visibility already matches the desired state', () => {
+      const visibleLayer = { getId: () => LAYER_ID, isVisible: () => true };
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('../selectors/map_selectors').getLayerById = () => visibleLayer;
+
+      const action = setLayerVisibility(LAYER_ID, true);
+      action(dispatchMock, getStoreMock);
+
+      expect(dispatchMock).not.toHaveBeenCalled();
     });
   });
 });

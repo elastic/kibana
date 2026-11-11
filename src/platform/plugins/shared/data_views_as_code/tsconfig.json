@@ -17,7 +17,8 @@
     "@kbn/as-code-utils",
     "@kbn/logging-mocks",
     "@kbn/core-http-server-mocks",
-    "@kbn/field-formats-plugin"
+    "@kbn/field-formats-plugin",
+    "@kbn/zod"
   ],
   "exclude": ["target/**/*"]
 }

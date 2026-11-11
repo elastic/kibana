@@ -14,11 +14,12 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/core-http-server",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-server",
     "@kbn/core-elasticsearch-server",
     "@kbn/inference-plugin",
+    "@kbn/inference-common",
+    "@kbn/inference-langchain",
     "@kbn/zod",
     "@kbn/logging",
     "@kbn/logging-mocks",
@@ -28,6 +29,7 @@
     "@kbn/i18n",
     "@kbn/std",
     "@kbn/esql-server-utils",
+    "@kbn/esql-types",
     "@kbn/esql-utils",
     "@kbn/esql-language",
     "@kbn/datemath",

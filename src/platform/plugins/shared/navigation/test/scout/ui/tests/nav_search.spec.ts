@@ -12,12 +12,8 @@ import { tags } from '@kbn/scout';
 import { test } from '../fixtures';
 
 /**
- * Solution-agnostic nav-search mechanics: reveal, fill, select a result, and
- * conceal. Uses the Dashboards core app so the suite never depends on any
- * solution-owned content.
- *
- * The reveal/conceal buttons only render for the "project" chrome style, so
- * this runs in an es-solution space rather than the default (classic) space.
+ * Solution-agnostic nav-search mechanics. Uses the Dashboards core app so the
+ * suite never depends on any solution-owned content.
  */
 
 const SPACE = {
@@ -45,16 +41,13 @@ test.describe('nav search', { tag: tags.stateful.classic }, () => {
     await apiServices.spaces.delete(SPACE.id).catch(() => {});
   });
 
-  test('reveal, fill, select and conceal', async ({ page, browserAuth, kbnUrl }) => {
+  test('opens search and selects a result', async ({ page, browserAuth, kbnUrl, pageObjects }) => {
     await browserAuth.loginAsViewer();
     await page.goto(kbnUrl.app('home', { space: SPACE.id }));
 
-    await page.testSubj.click('nav-search-reveal');
-    await page.testSubj.fill('nav-search-input', 'dashboards');
-    await page
-      .locator(`[data-test-subj="nav-search-option"][url="/s/${SPACE.id}/app/dashboards"]`)
-      .click();
-    await page.testSubj.click('nav-search-conceal');
+    await pageObjects.chrome.openSearch();
+    await pageObjects.chrome.search('dashboards');
+    await pageObjects.chrome.getSearchOptionByUrl(`/s/${SPACE.id}/app/dashboards`).click();
 
     await page.waitForURL(/app\/dashboards/);
     expect(page.url()).toContain('app/dashboards');

@@ -14,7 +14,7 @@ import type {
 import { TRANSFORM_ACTIONS } from '../../../../common/types/transform';
 import { TRANSFORM_STATE } from '../../../../common/constants';
 
-import { isRequestTimeout, fillResultsWithTimeouts } from '../../utils/error_utils';
+import { isRequestTimeout, fillResultsWithTimeouts, getErrorBody } from '../../utils/error_utils';
 
 export async function stopTransforms(
   transformsInfo: StopTransformsRequestSchema,
@@ -43,7 +43,7 @@ export async function stopTransforms(
           action: TRANSFORM_ACTIONS.STOP,
         });
       }
-      results[transformId] = { success: false, error: e.meta.body.error };
+      results[transformId] = { success: false, error: getErrorBody(e) };
     }
   }
   return results;

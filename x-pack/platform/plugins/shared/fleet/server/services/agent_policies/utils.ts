@@ -24,6 +24,7 @@ export const mapAgentPolicySavedObjectToAgentPolicy = ({
     data_output_id,
     description,
     download_source_id,
+    download_source_ids,
     fleet_server_host_id,
     has_fleet_server,
     inactivity_timeout,
@@ -38,7 +39,6 @@ export const mapAgentPolicySavedObjectToAgentPolicy = ({
   } = attributes || {};
 
   return {
-    id,
     version,
     created_at: created_at ?? undefined,
     space_ids: namespaces,
@@ -53,6 +53,7 @@ export const mapAgentPolicySavedObjectToAgentPolicy = ({
     data_output_id,
     monitoring_output_id,
     download_source_id,
+    download_source_ids,
     fleet_server_host_id,
     schema_version,
     agent_features,
@@ -60,5 +61,7 @@ export const mapAgentPolicySavedObjectToAgentPolicy = ({
     package_policies,
     agents,
     ...attributes,
+    // canonical id placed last so attributes.id cannot shadow it
+    id,
   };
 };

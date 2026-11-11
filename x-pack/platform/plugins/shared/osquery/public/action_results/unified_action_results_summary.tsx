@@ -24,7 +24,7 @@ import { getStatusCellRenderers } from './status_cell_renderers';
 import { euiProgressCss } from '../results/results_table_shared';
 import { useBulkAgentDetails } from './use_bulk_agent_details';
 import { enrichEdgesWithErrors } from './enrich_edges';
-import type { ActionResultsSummaryProps } from './legacy_action_results_summary';
+import type { ActionResultsSummaryProps } from './types';
 
 const DEFAULT_PAGE_SIZE = 20;
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
@@ -55,10 +55,6 @@ const COLUMN_DISPLAY_SETTINGS = {
       }),
     },
   },
-};
-
-const STATUS_COLUMNS_META = {
-  'action_response.osquery.count': { type: 'number' as const },
 };
 
 let storageInstance: Storage;
@@ -269,7 +265,6 @@ const UnifiedActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> 
               totalHits={totalItemCount}
               services={unifiedDataTableServices}
               consumer="osquery"
-              columnsMeta={STATUS_COLUMNS_META}
               showColumnTokens={false}
               settings={COLUMN_DISPLAY_SETTINGS}
               onSetColumns={noop}

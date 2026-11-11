@@ -89,6 +89,7 @@ describe('#toExpression', () => {
           legend: { position: Position.Left, isVisible: true },
           valueLabels: 'hide',
           preferredSeriesType: 'bar',
+          areaFill: 'solid',
           fittingFunction: 'Carry',
           endValue: 'Nearest',
           emphasizeFitting: true,
@@ -445,6 +446,35 @@ describe('#toExpression', () => {
       (expression.chain[0].arguments.legend[0] as Ast).chain[0].arguments.legendSize[0]
     ).toEqual('small');
   });
+
+  it.each([Position.Left, Position.Right])(
+    'should default to auto legend size for %s legend without a size',
+    (position) => {
+      const expression = xyVisualization.toExpression(
+        {
+          legend: { position, isVisible: true },
+          valueLabels: 'show',
+          preferredSeriesType: 'bar',
+          layers: [
+            {
+              layerId: 'first',
+              layerType: LayerTypes.DATA,
+              seriesType: 'area',
+              splitAccessors: ['d'],
+              xAccessor: 'a',
+              accessors: ['b', 'c'],
+            },
+          ],
+        },
+        frame.datasourceLayers,
+        undefined,
+        datasourceExpressionsByLayers
+      ) as Ast;
+      expect(
+        (expression.chain[0].arguments.legend[0] as Ast).chain[0].arguments.legendSize[0]
+      ).toEqual(LegendSize.AUTO);
+    }
+  );
 
   it('should use auto legend size for bottom/top legend', () => {
     const expression = xyVisualization.toExpression(
@@ -1068,5 +1098,56 @@ describe('#toExpression', () => {
       datasourceExpressionsByLayers
     ) as Ast;
     expect(expression.chain[0].arguments.addTimeMarker[0] as Ast).toEqual(false);
+  });
+
+  it('should include areaFill in the expression AST', () => {
+    const ast = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
+        preferredSeriesType: 'area',
+        areaFill: 'solid',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'area',
+            splitAccessors: ['d'],
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+
+    expect(ast.chain[0].arguments.areaFill[0]).toEqual('solid');
+  });
+
+  it('should default areaFill to gradient', () => {
+    const ast = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
+        preferredSeriesType: 'area',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'area',
+            splitAccessors: ['d'],
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+
+    expect(ast.chain[0].arguments.areaFill[0]).toEqual('gradient');
   });
 });

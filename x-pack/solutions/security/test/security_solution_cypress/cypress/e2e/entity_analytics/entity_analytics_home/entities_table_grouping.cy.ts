@@ -7,7 +7,6 @@
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { disableNewFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 import {
   setGrouping,
   waitForGroupingTable,
@@ -30,7 +29,6 @@ import {
   PANEL_ENTITY_TYPE,
   PANEL_RESOLUTION,
   DATAGRID_HEADER,
-  FLYOUT_RIGHT_PANEL,
   FLYOUT_TITLE_TEXT,
   GROUP_HEADER_OPEN_ENTITY_FLYOUT_BUTTON,
 } from '../../../screens/entity_analytics/entity_analytics_home';
@@ -45,10 +43,10 @@ describe(
     env: {
       ftrConfig: {
         kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'entityAnalyticsNewHomePageEnabled',
-          ])}`,
           '--uiSettings.overrides.securitySolution:entityStoreEnableV2=true',
+          // This suite asserts against the legacy home page's `entityAnalyticsHomePage`
+          // test subject; pin the flag until the suite is migrated to the new page.
+          '--feature_flags.overrides.securitySolution.useNewEntityAnalyticsPage=false',
         ],
       },
     },
@@ -65,7 +63,6 @@ describe(
     describe('Group by Resolution', () => {
       beforeEach(() => {
         login();
-        disableNewFlyout();
         interceptEntityStoreStatus('running');
         interceptEntityStoreSearch();
         visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
@@ -133,8 +130,7 @@ describe(
           .closest(GROUPING_ACCORDION)
           .find(GROUP_HEADER_OPEN_ENTITY_FLYOUT_BUTTON)
           .click();
-        cy.get(FLYOUT_RIGHT_PANEL).should('be.visible');
-        cy.get(FLYOUT_TITLE_TEXT).should('contain', 'Dora Resolved');
+        cy.get(FLYOUT_TITLE_TEXT).should('be.visible').and('contain', 'Dora Resolved');
       });
 
       it('solo resolution group shows individual risk score when group resolution risk is missing', () => {

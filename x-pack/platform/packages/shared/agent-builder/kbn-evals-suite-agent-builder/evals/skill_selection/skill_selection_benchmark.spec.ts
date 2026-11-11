@@ -8,12 +8,15 @@
 import { evaluate as evalsBase } from '@kbn/evals';
 import { tags } from '@kbn/scout';
 import { AgentBuilderEvaluationChatClient } from '../../src/chat_client';
-import { skillSelectionEvaluator } from '../../src/skill_selection_evaluators';
+import {
+  preSelectionEvaluator,
+  skillSelectionEvaluator,
+} from '../../src/skill_selection_evaluators';
 import type { BenchmarkExample } from './benchmark_dataset';
 import {
   ALERT_ANALYSIS_EXAMPLES,
   AUTOMATIC_TROUBLESHOOTING_EXAMPLES,
-  DASHBOARD_MANAGEMENT_EXAMPLES,
+  DASHBOARDS_EXAMPLES,
   DETECTION_RULE_EDIT_EXAMPLES,
   ENTITY_ANALYTICS_EXAMPLES,
   FIND_RULES_EXAMPLES,
@@ -22,6 +25,7 @@ import {
   KI_IDENTIFICATION_MANAGEMENT_EXAMPLES,
   KNOWLEDGE_INDICATORS_MANAGEMENT_EXAMPLES,
   OBSERVABILITY_INVESTIGATION_EXAMPLES,
+  POLICY_MANAGEMENT_EXAMPLES,
   SEARCH_CATALOG_ECOMMERCE_EXAMPLES,
   SEARCH_ELASTICSEARCH_ONBOARDING_EXAMPLES,
   SEARCH_ELASTICSEARCH_TUTORIAL_EXAMPLES,
@@ -32,18 +36,20 @@ import {
   SERVICE_MAP_EXAMPLES,
   SIEM_READINESS_EXAMPLES,
   SIG_EVENTS_MANAGEMENT_EXAMPLES,
-  SIG_EVENTS_MEMORY_EXAMPLES,
   SKILL_AUTHORING_EXAMPLES,
   STREAMS_MANAGEMENT_EXAMPLES,
   THREAT_HUNTING_EXAMPLES,
   VISUALIZATION_CREATION_EXAMPLES,
 } from './benchmark_dataset';
 
-// Use the native kbn-evals executor directly — no Phoenix dependency.
 const base = evalsBase.extend<{}, { chatClient: AgentBuilderEvaluationChatClient }>({
   chatClient: [
     async ({ fetch, log, connector }, use) => {
-      await use(new AgentBuilderEvaluationChatClient(fetch, log, connector.id));
+      // Space on the *target* Kibana that agent requests are sent to. Distinct from
+      // `--space-ids` / EVAL_SPACE_IDS, which only scopes where datasets and scores are stored
+      // (possibly on a separate evaluations Kibana). Unset = default space.
+      const targetSpaceId = process.env.EVAL_TARGET_SPACE_ID;
+      await use(new AgentBuilderEvaluationChatClient(fetch, log, connector.id, targetSpaceId));
     },
     { scope: 'worker' },
   ],
@@ -87,7 +93,7 @@ const evaluate = base.extend<{}, { evaluateBenchmark: EvaluateBenchmark }>({
               } satisfies SkillRoutingTaskOutput;
             },
           },
-          [skillSelectionEvaluator]
+          [skillSelectionEvaluator, preSelectionEvaluator]
         );
       });
     },
@@ -116,10 +122,10 @@ evaluate.describe(
       await evaluateBenchmark({ skillId: 'skill-authoring', examples: SKILL_AUTHORING_EXAMPLES });
     });
 
-    evaluate('dashboard-management routing', async ({ evaluateBenchmark }) => {
+    evaluate('dashboards routing', async ({ evaluateBenchmark }) => {
       await evaluateBenchmark({
-        skillId: 'dashboard-management',
-        examples: DASHBOARD_MANAGEMENT_EXAMPLES,
+        skillId: 'dashboards',
+        examples: DASHBOARDS_EXAMPLES,
       });
     });
   }
@@ -131,13 +137,6 @@ evaluate.describe(
   'Skill Selection Benchmark — Streams',
   { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
   () => {
-    evaluate('sig-events-memory routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({
-        skillId: 'significant-events-memory',
-        examples: SIG_EVENTS_MEMORY_EXAMPLES,
-      });
-    });
-
     evaluate('streams-management routing', async ({ evaluateBenchmark }) => {
       await evaluateBenchmark({
         skillId: 'streams-management',
@@ -213,6 +212,13 @@ evaluate.describe(
         });
       }
     );
+
+    evaluate('elastic-defend-policy-management routing', async ({ evaluateBenchmark }) => {
+      await evaluateBenchmark({
+        skillId: 'elastic-defend-policy-management',
+        examples: POLICY_MANAGEMENT_EXAMPLES,
+      });
+    });
 
     evaluate('siem-readiness routing', async ({ evaluateBenchmark }) => {
       await evaluateBenchmark({ skillId: 'siem-readiness', examples: SIEM_READINESS_EXAMPLES });

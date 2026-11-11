@@ -8,11 +8,20 @@
 import type { FunctionComponent } from 'react';
 import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButton, EuiButtonIcon, EuiInMemoryTable, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiInMemoryTable,
+  EuiLink,
+  EuiTextBlockTruncate,
+  EuiToolTip,
+} from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { ALL_DATA_SOURCE_TYPES, type DataSource } from '../common';
 import { getDataSourceTypeVerbose } from './get_data_source_type_label';
 import { mainTranslations } from './main_i18n';
+import type { DataFederationKibanaServices } from './types';
 
 export interface DataSourcesTableProps {
   dataSources: DataSource[];
@@ -35,6 +44,21 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
   onDelete,
   onDeleteSelected,
 }) => {
+  const {
+    services: { docLinks },
+  } = useKibana<DataFederationKibanaServices>();
+
+  const emptyMessage = useMemo(
+    () => (
+      <>
+        {mainTranslations.columns.dataSources.noItems}{' '}
+        <EuiLink href={docLinks.links.dataFederation.dataSources} target="_blank">
+          {mainTranslations.docsLink}
+        </EuiLink>
+      </>
+    ),
+    [docLinks.links.dataFederation.dataSources]
+  );
   const columns = useMemo<Array<EuiBasicTableColumn<DataSource>>>(
     () => [
       {
@@ -61,8 +85,12 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
       {
         field: 'description',
         name: mainTranslations.columns.dataSources.description,
+        render: (description: DataSource['description']) => (
+          <EuiTextBlockTruncate lines={2} title={description}>
+            {description}
+          </EuiTextBlockTruncate>
+        ),
         sortable: true,
-        truncateText: true,
         'data-test-subj': 'dataSetsColDescription',
       },
       {
@@ -89,6 +117,7 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
                     isDisabled={!isSupportedType}
                     onClick={() => onEdit(item)}
                     data-test-subj="dataSetsEditButton"
+                    data-telemetry-id="dataFederation-dataSources-editButton"
                   />
                 </span>
               </EuiToolTip>
@@ -116,6 +145,7 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
                       isDisabled={hasDataSets}
                       onClick={() => onDelete(item)}
                       data-test-subj="dataSetsDeleteIconButton"
+                      data-telemetry-id="dataFederation-dataSources-deleteButton"
                     />
                   </span>
                 </EuiToolTip>
@@ -130,7 +160,6 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
 
   return (
     <>
-      <EuiSpacer size="m" />
       <EuiInMemoryTable<DataSource>
         items={dataSources}
         itemId="name"
@@ -153,6 +182,7 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
               <EuiButton
                 color="danger"
                 data-test-subj="dataSetsDeleteButton"
+                data-telemetry-id="dataFederation-dataSources-bulkDeleteButton"
                 iconType="trash"
                 onClick={() => {
                   onDeleteSelected(selectedDataSources);
@@ -166,6 +196,7 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
               fill
               color="primary"
               data-test-subj="dataSetsCreateButton"
+              data-telemetry-id="dataFederation-dataSources-createButton"
               onClick={onCreate}
             >
               {mainTranslations.actions.addButtonLabel}
@@ -189,7 +220,7 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
         }}
         data-test-subj="dataSetsTable"
         tableCaption={mainTranslations.columns.dataSources.caption}
-        noItemsMessage={mainTranslations.columns.dataSources.noItems}
+        noItemsMessage={emptyMessage}
         tableLayout="auto"
         responsiveBreakpoint={false}
       />

@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import type React from 'react';
-import { render, renderHook } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import {
   useAttackExploreInAttacksContextMenuItems,
   EXPLORE_IN_ATTACKS_TEST_ID,
 } from './use_attack_explore_in_attacks_context_menu_items';
 import { ATTACK_FLYOUT_V2_URL_PARAM } from '../../../../../flyout_v2/attack/main/utils/attack_flyout_v2_url_param';
-import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 
 const mockGetUrlForApp = jest.fn(
   (_appId: string, { path }: { path: string }) => `/app/securitySolutionUI/${path}`
@@ -23,10 +21,6 @@ jest.mock('../../../../../common/lib/kibana', () => ({
   useKibana: jest.fn(() => ({
     services: { application: { getUrlForApp: mockGetUrlForApp } },
   })),
-}));
-
-jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
-  useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
 }));
 
 const createAttack = (overrides: Partial<AttackDiscoveryAlert> = {}): AttackDiscoveryAlert =>
@@ -42,7 +36,6 @@ describe('useAttackExploreInAttacksContextMenuItems', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
     jest.spyOn(window, 'open').mockImplementation(() => null);
   });
 
@@ -68,8 +61,7 @@ describe('useAttackExploreInAttacksContextMenuItems', () => {
     const { result } = renderHook(() =>
       useAttackExploreInAttacksContextMenuItems({ attack: createAttack(), closePopover })
     );
-    const { getByText } = render(result.current.items[0].name as React.ReactElement);
-    expect(getByText('Explore in Attacks')).toBeInTheDocument();
+    expect(result.current.items[0].name).toBe('Explore in Attacks');
   });
 
   describe('onClick', () => {
@@ -113,20 +105,7 @@ describe('useAttackExploreInAttacksContextMenuItems', () => {
       expect(calledUrl).toContain('my-attack-id');
     });
 
-    it('encodes the legacy flyout URL state when v2 is disabled', () => {
-      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
-      const { result } = renderHook(() =>
-        useAttackExploreInAttacksContextMenuItems({ attack: createAttack(), closePopover })
-      );
-      (result.current.items[0].onClick as () => void)();
-      const calledUrl = (window.open as jest.Mock).mock.calls[0][0] as string;
-      const params = new URLSearchParams(calledUrl.split('?')[1]);
-      expect(params.get('flyout')).not.toBeNull();
-      expect(params.get(ATTACK_FLYOUT_V2_URL_PARAM)).toBeNull();
-    });
-
-    it('encodes the v2 attack flyout URL param when v2 is enabled', () => {
-      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+    it('encodes the v2 attack flyout URL param', () => {
       const { result } = renderHook(() =>
         useAttackExploreInAttacksContextMenuItems({ attack: createAttack(), closePopover })
       );

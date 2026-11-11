@@ -13,6 +13,10 @@
  * @returns The formatted duration. e.g. "1m 30s", "1h 30m", "1d 3h", "1w 3d", etc.
  */
 export function formatDuration(durationMs: number): string {
+  if (durationMs < 1) {
+    return '<1ms';
+  }
+
   let weeks = 0;
   let days = 0;
   let hours = 0;

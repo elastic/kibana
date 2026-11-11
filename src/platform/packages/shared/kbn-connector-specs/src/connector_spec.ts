@@ -26,6 +26,9 @@ import type { Logger } from '@kbn/logging';
 import type { CustomHostSettings, ProxySettings, SSLSettings } from '@kbn/actions-utils';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { AxiosHeaderValue, AxiosInstance } from 'axios';
+import type { ConnectorSpecEvents } from './connector_spec_events';
+import type { ClientRegistry, ClientTypeId } from './lib/clients/client_registry';
+import type { RelayActionClient } from './relay_action_client';
 
 export { UISchemas } from './connector_spec_ui';
 
@@ -71,10 +74,10 @@ export interface ConnectorMetadata {
     | 'siem'
     | 'generativeAIForSecurity'
     | 'generativeAIForObservability'
-    | 'generativeAIForSearchPlayground'
     | 'endpointSecurity'
     | 'workflows'
     | 'agentBuilder'
+    | 'contextEngine'
   >;
 }
 
@@ -106,6 +109,18 @@ export interface OAuthClientCredsPrivateKeyJWTGetTokenOpts {
   clientId: string;
 }
 
+export interface OAuthPasswordGetTokenOpts {
+  authType: 'oauth_password';
+  tokenUrl: string;
+  username: string;
+  password: string;
+  clientId?: string;
+  scope?: string;
+  usernameField?: 'username' | 'email';
+  requestBodyFormat?: 'form' | 'json';
+  tokenType?: string;
+}
+
 export interface EarsGetTokenOpts {
   authType: 'ears';
   provider: string;
@@ -114,6 +129,7 @@ export interface EarsGetTokenOpts {
 
 export type GetTokenOpts =
   | OAuthGetTokenOpts
+  | OAuthPasswordGetTokenOpts
   | OAuthClientCredsPrivateKeyJWTGetTokenOpts
   | EarsGetTokenOpts;
 
@@ -123,6 +139,12 @@ export interface AuthContext {
   logger: Logger;
   proxySettings?: ProxySettings;
   sslSettings: SSLSettings;
+  /**
+   * Test-only `fetch` for requests an auth type sends itself rather than through the axios
+   * client, such as token exchanges. Unset in Kibana, which uses the global `fetch`. Never use it
+   * for vendor calls; those go through `client`.
+   */
+  fetchTestOnly?: typeof fetch;
 }
 
 export type AuthMode = 'per-user' | 'shared';
@@ -136,6 +158,14 @@ export interface AuthTypeDefinition {
 
 export interface AuthTypeSpec<T extends Record<string, unknown>> extends AuthTypeDefinition {
   configure: (ctx: AuthContext, axiosInstance: AxiosInstance, secret: T) => Promise<AxiosInstance>;
+  getAuthHeaders?(ctx: AuthContext, secret: T): Promise<Record<string, string>>;
+  /**
+   * Specs using this auth type reach the third party through the Elastic-hosted Relay rather than
+   * authenticating the axios client. Defaults to false.
+   */
+  usesRelayTransport?: boolean;
+  /** Kibana manages these credentials: the UI hides the auth type and create/update rejects it, but connectors Kibana already provisioned keep executing. */
+  isKibanaManaged?: boolean;
 }
 
 export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
@@ -213,6 +243,18 @@ export interface ConnectorPolicies {
 // ACTIONS
 // ============================================================================
 
+/**
+ * Scope of a connector action's side effects. Advisory signal for the LLM and
+ * any orchestration layer — does not enforce access control at runtime.
+ *
+ * - `read`    The action only reads data; no external state is modified.
+ * - `write`   The action creates or appends data but does not overwrite or delete
+ *             existing state (e.g. send a message, create a resource).
+ * - `destroy` The action may overwrite, update, or delete existing data
+ *             (e.g. resolve an issue, delete a resource, patch a record).
+ */
+export type ActionScope = 'read' | 'write' | 'destroy';
+
 export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = unknown> {
   isTool?: boolean;
   input: z.ZodSchema<TInput>;
@@ -228,14 +270,44 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
    * response-size limit is exceeded. Defaults to `content-length`.
    */
   responseSizeHeader?: string;
+  /** Advisory scope hint for the LLM/orchestration layer. See {@link ActionScope}. */
+  scope: ActionScope;
 }
 
 export interface ActionContext {
   client: AxiosInstance;
+  /**
+   * Leases a pooled, ready-to-use client by id. The connection is built on the
+   * first request for a given connector and reused across calls. Building is an
+   * async, side-effecting operation, so this is an explicit call (not a property)
+   * and only the client types a handler actually asks for are ever built.
+   *
+   * Lifetime is governed by the actions plugin's client lease pool, not by the action
+   * stack frame. `ClientTypeId` resolves to a union of every id registered in
+   * `ClientRegistry` (see lib/clients/index.ts) — `never` only if none are registered.
+   */
+  getClient: <K extends ClientTypeId>(id: K) => Promise<ClientRegistry[K]>;
   config?: Record<string, unknown>;
   connectorUsageCollector?: unknown;
   log: Logger;
   secrets?: Record<string, unknown>;
+  /**
+   * Signs claims with the connector's private key and sets `iss` to the connector issuer.
+   * Defined only when the spec declares `signingKey`.
+   */
+  signJwt?: (claims: Record<string, unknown>) => Promise<string>;
+  /**
+   * Reaches the third party through the Elastic-hosted Relay, for specs whose auth type routes that
+   * way. Undefined when the auth type does not use Relay transport or the deployment has no Relay
+   * configured.
+   */
+  relay?: RelayActionClient;
+  /**
+   * Test-only `fetch` for requests a handler sends itself rather than through `client`, such as
+   * token exchanges. Unset in Kibana, which uses the global `fetch`. Never use it for vendor
+   * calls; those go through `client`.
+   */
+  fetchTestOnly?: typeof fetch;
 }
 
 // ============================================================================
@@ -265,16 +337,10 @@ export interface Transformations {
 export const TEST_CONNECTOR_SUB_ACTION = '_test';
 
 /**
- * Success = return data; failure = throw (mapped to error by the executor).
- *
- * Transitional union: new handlers return arbitrary data (`Record<string, unknown>`,
- * use `{}` when there's nothing to report), while not-yet-migrated handlers may still
- * return the legacy `{ ok, message }` shape. Once every handler follows the
- * throw-on-failure contract this can be narrowed to `Record<string, unknown>`.
+ * Success = return data (use `{}` when there's nothing to report); failure = throw.
+ * The `ok?: never` intersection prevents accidentally returning the legacy `{ ok: false }` shape.
  */
-export type ConnectorTestHandlerResult =
-  | Record<string, unknown>
-  | { ok: boolean; message?: string };
+export type ConnectorTestHandlerResult = Record<string, unknown> & { ok?: never };
 
 export interface ConnectorTest {
   /**
@@ -283,8 +349,17 @@ export interface ConnectorTest {
    */
   handler: (ctx: ActionContext) => Promise<ConnectorTestHandlerResult>;
   description?: string;
-  /** Flag to opt-in for testing */
-  enabled?: boolean;
+  /** Must be true for the Test tab to appear and the opted_in_test_handlers suite to run this handler. Events-only specs must keep this false; Test is outbound HTTP. */
+  enabled: boolean;
+}
+
+// ============================================================================
+// SIGNING KEY
+// ============================================================================
+
+export interface ConnectorSigningKey {
+  /** Value of the JWT `typ` header, for example `secevent+jwt`. */
+  jwtType: string;
 }
 
 // ============================================================================
@@ -298,14 +373,23 @@ export interface AuthTypeDef {
   /** When true, excluded from the UI picker but kept in the validation schema for backwards compatibility with existing connectors. */
   isLegacy?: boolean;
   isExperimental?: boolean;
+  /** When true, this auth type may be used with sandbox credential injection. */
+  supportsSandbox?: boolean;
   defaults: Record<string, unknown>;
   overrides?: {
     /** Display name shown in the auth type picker. Defaults to the auth type's built-in label when omitted. */
     label?: string;
     meta?: Record<string, Record<string, unknown>>;
-    // can override other Zod fields here in the future if needed
+    fields?: Record<string, z.ZodType>;
   };
 }
+export interface ConnectorSandbox {
+  /** Fixed hostnames the connector calls, e.g. `api.github.com`: lowercase, no scheme or port. */
+  hosts?: readonly string[];
+  /** Config fields holding a URL; the host of each configured URL is added to `hosts`. */
+  hostsFromConfig?: readonly string[];
+}
+
 export interface ConnectorSpec {
   metadata: ConnectorMetadata;
 
@@ -322,12 +406,26 @@ export interface ConnectorSpec {
     fields?: string[];
   };
 
+  // Hosts a sandbox command may send this connector's auth headers to. Required when an
+  // auth type sets supportsSandbox; a connector that resolves to no hosts cannot be used
+  // from the sandbox.
+  sandbox?: ConnectorSandbox;
+
   policies?: ConnectorPolicies;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- record of actions with different input types (contravariance)
   actions: Record<string, ActionDefinition<any, any, any>>;
 
-  test?: ConnectorTest;
+  test: ConnectorTest;
+
+  // Optional inbound events (`handleEvents` + definitions).
+  // Omit when the connector has no inbound surface. A connector may declare both
+  // `actions` and `events`. Only allowlisted specs may set this (see contract tests).
+  events?: ConnectorSpecEvents;
+
+  // Optional Kibana-managed signing key. When present, creating a connector generates
+  // a key pair, Kibana publishes the public key, and actions get `signJwt`.
+  signingKey?: ConnectorSigningKey;
 
   transformations?: Transformations;
 

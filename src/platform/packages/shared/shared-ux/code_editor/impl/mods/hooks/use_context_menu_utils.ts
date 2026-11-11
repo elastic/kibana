@@ -8,8 +8,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { monaco } from '@kbn/monaco';
-import { copyToClipboard } from '@elastic/eui';
+import { setClipboardContextMenuLabels, type monaco } from '@kbn/monaco';
+
+setClipboardContextMenuLabels({
+  cut: i18n.translate('sharedUXPackages.codeEditor.contextMenuAction.cutActionLabel', {
+    defaultMessage: 'Cut',
+  }),
+  copy: i18n.translate('sharedUXPackages.codeEditor.contextMenuAction.copyActionLabel', {
+    defaultMessage: 'Copy',
+  }),
+  paste: i18n.translate('sharedUXPackages.codeEditor.contextMenuAction.pasteActionLabel', {
+    defaultMessage: 'Paste',
+  }),
+});
 
 interface RegisterContextMenuActionsParams {
   editor: monaco.editor.IStandaloneCodeEditor;
@@ -21,72 +32,6 @@ export interface ContextMenuAction {
   actionDescriptor: monaco.editor.IActionDescriptor;
   writeAction: boolean;
 }
-
-const CUT_ACTION_ID = 'cutAction';
-const COPY_ACTION_ID = 'copyAction';
-const PASTE_ACTION_ID = 'pasteAction';
-
-const DEFAULT_ACTIONS: ContextMenuAction[] = [
-  {
-    actionDescriptor: {
-      id: CUT_ACTION_ID,
-      label: i18n.translate('sharedUXPackages.codeEditor.contextMenuAction.cutActionLabel', {
-        defaultMessage: 'Cut',
-      }),
-      contextMenuGroupId: '9_cutcopypaste',
-      contextMenuOrder: 1,
-      run: async (ed) => {
-        const selection = ed.getSelection();
-        const model = ed.getModel();
-        if (selection && model) {
-          const selectedText = model.getValueInRange(selection);
-          copyToClipboard(selectedText);
-          ed.executeEdits('Cut selection', [{ range: selection, text: '' }]);
-        }
-      },
-    },
-    writeAction: true,
-  },
-  {
-    actionDescriptor: {
-      id: COPY_ACTION_ID,
-      label: i18n.translate('sharedUXPackages.codeEditor.contextMenuAction.copyActionLabel', {
-        defaultMessage: 'Copy',
-      }),
-      contextMenuGroupId: '9_cutcopypaste',
-      contextMenuOrder: 2,
-      run: async (ed) => {
-        const selection = ed.getSelection();
-        const model = ed.getModel();
-        if (selection && model) {
-          const selectedText = model.getValueInRange(selection);
-          copyToClipboard(selectedText);
-        }
-      },
-    },
-    writeAction: false,
-  },
-  {
-    actionDescriptor: {
-      id: PASTE_ACTION_ID,
-      label: i18n.translate('sharedUXPackages.codeEditor.contextMenuAction.pasteActionLabel', {
-        defaultMessage: 'Paste',
-      }),
-      contextMenuGroupId: '9_cutcopypaste',
-      contextMenuOrder: 3,
-      run: async (ed) => {
-        const selection = ed.getSelection();
-        if (selection) {
-          const clipboardText = await navigator.clipboard?.readText();
-          if (clipboardText) {
-            ed.executeEdits('Paste from clipboard', [{ range: selection, text: clipboardText }]);
-          }
-        }
-      },
-    },
-    writeAction: true,
-  },
-];
 
 type RegisteredAction = ContextMenuAction & {
   refObject: { current: monaco.IDisposable | null };
@@ -112,9 +57,7 @@ export const useContextMenuUtils = () => {
   }: RegisterContextMenuActionsParams) => {
     disposeAllActions();
 
-    const allActions = [...DEFAULT_ACTIONS, ...customActions];
-
-    registeredActions = allActions.map(({ actionDescriptor, writeAction }) => {
+    registeredActions = customActions.map(({ actionDescriptor, writeAction }) => {
       const refObject = { current: null as monaco.IDisposable | null };
 
       if (!writeAction || enableWriteActions) {

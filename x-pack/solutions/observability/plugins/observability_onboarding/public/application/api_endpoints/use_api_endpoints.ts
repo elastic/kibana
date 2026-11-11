@@ -8,7 +8,10 @@
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED } from '../../../common/feature_flags';
+import {
+  IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED,
+  IS_VENDOR_ENDPOINTS_ENABLED,
+} from '../../../common/feature_flags';
 import { FETCH_STATUS, isPending, useFetcher } from '../../hooks/use_fetcher';
 import { useManagedOtlpServiceAvailability } from '../shared/use_managed_otlp_service_availability';
 import type { SupportedLogo } from '../shared/logo_icon';
@@ -37,6 +40,7 @@ export function useApiEndpoints(): {
   popoverEndpoints: ResolvedVendorEndpoint[];
   isLoading: boolean;
   isError: boolean;
+  isForbidden: boolean;
 } {
   const {
     services: {
@@ -45,16 +49,18 @@ export function useApiEndpoints(): {
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
   const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
-  const managedOtlpPrwEndpointEnabled = featureFlags.getBooleanValue(
+  const managedOtlpPrwEndpointEnabled = featureFlags.useBooleanValue(
     IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED,
     false
   );
+  const vendorEndpointsEnabled = featureFlags.useBooleanValue(IS_VENDOR_ENDPOINTS_ENABLED, false);
 
-  const { data, status } = useFetcher(
+  const { data, status, error } = useFetcher(
     (callApi) => callApi('GET /internal/observability_onboarding/api_endpoints'),
     [],
     { showToastOnError: false }
   );
+  const isForbidden = error?.response?.status === 403;
 
   const { endpoints, popoverEndpoints } = useMemo(() => {
     const endpointContext: ApiEndpointContext = {
@@ -63,6 +69,7 @@ export function useApiEndpoints(): {
       isManagedOtlpServiceAvailable,
       isServerless,
       managedOtlpPrwEndpointEnabled,
+      vendorEndpointsEnabled,
     };
 
     return {
@@ -83,12 +90,14 @@ export function useApiEndpoints(): {
     isManagedOtlpServiceAvailable,
     isServerless,
     managedOtlpPrwEndpointEnabled,
+    vendorEndpointsEnabled,
   ]);
 
   return {
     endpoints,
     popoverEndpoints,
     isLoading: isPending(status),
-    isError: status === FETCH_STATUS.FAILURE,
+    isError: status === FETCH_STATUS.FAILURE && !isForbidden,
+    isForbidden,
   };
 }

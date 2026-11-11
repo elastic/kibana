@@ -10,6 +10,7 @@ import type {
   SearchHitsMetadata,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, SavedObjectsRawDocSource } from '@kbn/core/server';
+import type { ESFilter } from '@kbn/es-types';
 import type { PrebuiltRuleAssetsSort } from '../../../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
 import { invariant } from '../../../../../../../../common/utils/invariant';
 import { MAX_PREBUILT_RULES_COUNT } from '../../../../../rule_management/logic/search/get_existing_prepackaged_rules';
@@ -54,23 +55,21 @@ export async function fetchLatestVersions(
   // First, fetch the latest version numbers for each rule_id.
   const latestVersionSpecifiers: RuleVersionSpecifier[] = await fetchLatestVersionSpecifiers(
     savedObjectsClient,
-    ruleIds,
-    filter
+    ruleIds
   );
 
   // Then, fetch the rule type for each latest version and sort the result.
   const soIds = latestVersionSpecifiers.map((rule) =>
     getPrebuiltRuleAssetSoId(rule.rule_id, rule.version)
   );
-  const latestVersions = await fetchVersionsBySoIds(savedObjectsClient, soIds, sort);
+  const latestVersions = await fetchVersionsBySoIds(savedObjectsClient, soIds, sort, filter);
 
   return latestVersions;
 }
 
 async function fetchLatestVersionSpecifiers(
   savedObjectsClient: SavedObjectsClientContract,
-  ruleIds?: string[],
-  filter?: string
+  ruleIds?: string[]
 ) {
   /**
    * Fetches deprecated rule assets in order to filter out all versions of the deprecated rules
@@ -99,7 +98,7 @@ async function fetchLatestVersionSpecifiers(
     _source: false,
     size: 0,
     query: {
-      bool: prepareQueryDslFilter({ ruleIds, excludeRuleIds: deprecatedRuleIds, filter }),
+      bool: prepareQueryDslFilter({ ruleIds, excludeRuleIds: deprecatedRuleIds }),
     },
     aggs: {
       rules: {
@@ -153,8 +152,15 @@ async function fetchLatestVersionSpecifiers(
 async function fetchVersionsBySoIds(
   savedObjectsClient: SavedObjectsClientContract,
   soIds: string[],
-  sort?: PrebuiltRuleAssetsSort
+  sort?: PrebuiltRuleAssetsSort,
+  additionalFilter?: string
 ) {
+  const filter: ESFilter[] = [{ terms: { _id: soIds } }];
+
+  if (additionalFilter) {
+    filter.push(...prepareQueryDslFilter({ filter: additionalFilter }).filter);
+  }
+
   const searchResult = await savedObjectsClient.search<
     SavedObjectsRawDocSource & {
       [PREBUILT_RULE_ASSETS_SO_TYPE]: BasicRuleInfo;
@@ -165,8 +171,8 @@ async function fetchVersionsBySoIds(
     size: MAX_PREBUILT_RULES_COUNT,
     runtime_mappings: PREBUILT_RULE_ASSETS_RUNTIME_MAPPINGS,
     query: {
-      terms: {
-        _id: soIds,
+      bool: {
+        filter,
       },
     },
     sort: prepareQueryDslSort(sort),

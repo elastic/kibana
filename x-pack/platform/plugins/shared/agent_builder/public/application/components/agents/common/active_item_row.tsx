@@ -52,7 +52,7 @@ export const ActiveItemRow: React.FC<ActiveItemRowProps> = ({
     block-size: 40px;
     padding: ${euiTheme.size.s} ${euiTheme.size.m};
     cursor: pointer;
-    border-radius: ${euiTheme.border.radius.medium};
+    border-radius: ${euiTheme.border.radius.control};
     background-color: ${isSelected
       ? euiTheme.colors.backgroundBaseInteractiveHover
       : 'transparent'};

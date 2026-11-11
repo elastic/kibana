@@ -12,7 +12,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
-import type { AgentExecutionMode } from '@kbn/agent-builder-common';
+import type { AgentExecutionMode, InteractivityConfig } from '@kbn/agent-builder-common';
 import type { AgentConfiguration } from '@kbn/agent-builder-common';
 import type { ExperimentalFeatures } from '../agents/provider';
 import type {
@@ -169,6 +169,15 @@ export interface ToolHandlerContext {
    * When 'standalone', the execution is non-interactive (HITL disabled).
    */
   executionMode?: AgentExecutionMode;
+  /**
+   * Canonical interactivity config for this run.
+   */
+  interactivity: InteractivityConfig;
+  /**
+   * Id of the parent execution that spawned this one, when applicable.
+   * Undefined for top-level executions or direct tool runs.
+   */
+  parentExecutionId?: string;
   /**
    * The experimental features enabled for the current run.
    */

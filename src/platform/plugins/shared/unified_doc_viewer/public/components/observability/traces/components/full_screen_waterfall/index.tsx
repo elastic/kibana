@@ -170,6 +170,7 @@ export const FullScreenWaterfall = ({
           onCloseFlyout={onCloseFlyout}
           activeSection={activeSection}
           skipNextEventReport={skipNextEventReport}
+          historyKey={historyKey}
         />
       ) : null}
     </EuiFlyout>

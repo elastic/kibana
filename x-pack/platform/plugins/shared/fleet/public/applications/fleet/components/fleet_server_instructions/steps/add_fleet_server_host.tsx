@@ -11,7 +11,6 @@ import { EuiIconTip } from '@elastic/eui';
 import {
   EuiSwitch,
   EuiButton,
-  EuiCallOut,
   EuiCode,
   EuiForm,
   EuiFormErrorText,
@@ -21,6 +20,7 @@ import {
   EuiFormRow,
   EuiFieldText,
 } from '@elastic/eui';
+import { KbnSuccessCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -257,33 +257,32 @@ export const AddFleetServerHostStepContent = ({
       {submittedFleetServerHost && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut
+          <KbnSuccessCallout
             announceOnMount
-            iconType="check"
-            color="success"
             title={
               <FormattedMessage
                 id="xpack.fleet.fleetServerSetup.addFleetServerHostSuccessTitle"
                 defaultMessage="Added Fleet Server host"
               />
             }
-          >
-            <FormattedMessage
-              id="xpack.fleet.fleetServerSetup.addFleetServerHostSuccessText"
-              defaultMessage="Added {host}. You can edit your Fleet Server hosts in {fleetSettingsLink}."
-              values={{
-                host: submittedFleetServerHost.host_urls[0],
-                fleetSettingsLink: (
-                  <EuiLink href={getHref('settings')} onClick={onClose}>
-                    <FormattedMessage
-                      id="xpack.fleet.fleetServerSetup.fleetSettingsLink"
-                      defaultMessage="Fleet Settings"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </EuiCallOut>
+            text={
+              <FormattedMessage
+                id="xpack.fleet.fleetServerSetup.addFleetServerHostSuccessText"
+                defaultMessage="Added {host}. You can edit your Fleet Server hosts in {fleetSettingsLink}."
+                values={{
+                  host: submittedFleetServerHost.host_urls[0],
+                  fleetSettingsLink: (
+                    <EuiLink href={getHref('settings')} onClick={onClose}>
+                      <FormattedMessage
+                        id="xpack.fleet.fleetServerSetup.fleetSettingsLink"
+                        defaultMessage="Fleet Settings"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            }
+          />
         </>
       )}
     </EuiForm>

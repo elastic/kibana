@@ -14,6 +14,7 @@ import type {
   RawAxiosResponseHeaders,
 } from 'axios';
 import type { FetchLike } from '@kbn/mcp-client';
+import { withTimeout } from '@kbn/std';
 
 /**
  * Builds a Fetch API–compatible function that delegates to a preconfigured
@@ -103,19 +104,22 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
       // Race the gate against a timeout and the abort signal so a stuck or
       // out-of-order GET can never cause tool-call POSTs to hang indefinitely.
       // Whichever wins first, execution falls through to the request below.
-      const races: Array<Promise<void>> = [
-        sseChannelGate.open,
-        new Promise<void>((resolve) => setTimeout(resolve, SSE_READY_TIMEOUT_MS)),
-      ];
+      const gateOrTimeout = withTimeout({
+        promise: sseChannelGate.open,
+        timeoutMs: SSE_READY_TIMEOUT_MS,
+      }).then(() => undefined);
       if (init?.signal) {
-        races.push(
+        const signal = init.signal;
+        await Promise.race([
+          gateOrTimeout,
           new Promise<void>((resolve) => {
-            if (init.signal?.aborted) resolve();
-            else init.signal?.addEventListener('abort', () => resolve(), { once: true });
-          })
-        );
+            if (signal.aborted) resolve();
+            else signal.addEventListener('abort', () => resolve(), { once: true });
+          }),
+        ]);
+      } else {
+        await gateOrTimeout;
       }
-      await Promise.race(races);
     }
 
     const res = await axiosInstance.request({

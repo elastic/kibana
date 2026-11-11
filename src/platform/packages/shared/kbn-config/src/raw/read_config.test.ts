@@ -93,7 +93,7 @@ describe('different cwd()', () => {
 
   test('fails to load relative paths, not found because of the cwd', () => {
     const relativePath = relative(resolve(__dirname, '../../'), fixtureFile('/one.yml'));
-    expect(() => getConfigFromFiles([relativePath])).toThrowError(/ENOENT/);
+    expect(() => getConfigFromFiles([relativePath])).toThrow(/ENOENT/);
   });
 });
 

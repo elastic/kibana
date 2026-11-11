@@ -6,20 +6,22 @@
  */
 
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
-import { kibanaSavedObjectPermissions } from '@kbn/agent-builder-sml-plugin/server';
+import {
+  getSmlOriginId,
+  kibanaPermissions,
+  searchSavedObjectsByTitle,
+} from '@kbn/agent-builder-sml-plugin/server';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   dashboardStateToAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
+import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type {
   DashboardPanel,
-  DashboardPluginStart,
   DashboardSection,
   DashboardState,
-} from '@kbn/dashboard-plugin/server';
-
-const DASHBOARD_SML_TYPE = 'dashboard';
-const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
+} from '@kbn/as-code-dashboard-schema';
+import { DASHBOARD_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 
 interface CreateDashboardSmlTypeOptions {
   getDashboardClient: () => Promise<DashboardPluginStart['client']>;
@@ -67,7 +69,8 @@ const toDashboardSearchContent = (state: DashboardState): string => {
 export const createDashboardSmlType = ({
   getDashboardClient,
 }: CreateDashboardSmlTypeOptions): SmlTypeDefinition => ({
-  id: DASHBOARD_SML_TYPE,
+  id: DASHBOARD_KI_TYPE,
+  attachmentType: DASHBOARD_ATTACHMENT_TYPE,
   fetchFrequency: () => '30m',
 
   async *list(context) {
@@ -97,7 +100,7 @@ export const createDashboardSmlType = ({
       const dashboard = await dashboardClient.read(context.savedObjectsClient, originId);
 
       return {
-        type: DASHBOARD_SML_TYPE,
+        type: DASHBOARD_KI_TYPE,
         title: dashboard.data.title ?? originId,
         content: toDashboardSearchContent(dashboard.data),
       };
@@ -109,16 +112,16 @@ export const createDashboardSmlType = ({
     }
   },
 
-  getPermissions: () =>
-    kibanaSavedObjectPermissions({ savedObjectType: DASHBOARD_SAVED_OBJECT_TYPE }),
+  getPermissions: () => kibanaPermissions({ kiType: DASHBOARD_KI_TYPE }),
+
+  searchByTitle: ({ title, size }, { savedObjectsClient }) =>
+    searchSavedObjectsByTitle({ type: 'dashboard', title, size, savedObjectsClient }),
 
   toAttachment: async (item, context) => {
+    const originId = getSmlOriginId(item);
     try {
       const dashboardClient = await getDashboardClient();
-      const dashboard = await dashboardClient.read(
-        context.savedObjectsClient,
-        item.origin_id ?? ''
-      );
+      const dashboard = await dashboardClient.read(context.savedObjectsClient, originId);
 
       return {
         type: DASHBOARD_ATTACHMENT_TYPE,
@@ -127,7 +130,7 @@ export const createDashboardSmlType = ({
       };
     } catch (error) {
       throw new Error(
-        `SML dashboard: failed to get data for '${item.origin_id}': ${(error as Error).message}`
+        `SML dashboard: failed to get data for '${originId}': ${(error as Error).message}`
       );
     }
   },

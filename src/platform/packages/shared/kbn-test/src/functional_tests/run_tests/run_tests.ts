@@ -28,15 +28,12 @@ import type { RunTestsOptions } from './flags';
  */
 export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   if (!process.env.CI) {
-    // [rspack-transition] When the legacy optimizer is removed, keep only the rspack script.
-    const buildScript =
-      process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1'
-        ? 'node scripts/build_rspack_bundles'
-        : 'node scripts/build_kibana_platform_plugins';
     log.warning('❗️❗️❗️');
     log.warning('❗️❗️❗️');
     log.warning('❗️❗️❗️');
-    log.warning(`   Don't forget to use \`${buildScript}\` to build plugins you plan on testing`);
+    log.warning(
+      "   Don't forget to use `node scripts/build_kibana_platform_plugins` to build plugins you plan on testing"
+    );
     log.warning('❗️❗️❗️');
     log.warning('❗️❗️❗️');
     log.warning('❗️❗️❗️');
@@ -115,18 +112,19 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         };
 
         let shutdownEs: (() => Promise<void>) | undefined;
+        let esPromise: Promise<void> | undefined;
 
         try {
-          if (process.env.TEST_ES_DISABLE_STARTUP !== 'true') {
-            shutdownEs = await withSpan('start_elasticsearch', () =>
-              runElasticsearch({ ...options, log, config, onEarlyExit })
-            );
-            if (abortCtrl.signal.aborted) {
-              return;
-            }
-          }
+          esPromise =
+            process.env.TEST_ES_DISABLE_STARTUP !== 'true'
+              ? withSpan('start_elasticsearch', () =>
+                  runElasticsearch({ ...options, log, config, onEarlyExit })
+                ).then((shutdown) => {
+                  shutdownEs = shutdown;
+                })
+              : undefined;
 
-          await withSpan('start_kibana', () =>
+          const kibanaPromise = withSpan('start_kibana', () =>
             runKibanaServer({
               procs,
               config,
@@ -140,6 +138,12 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
               ],
             })
           );
+
+          await Promise.all([esPromise, kibanaPromise]);
+
+          if (abortCtrl.signal.aborted) {
+            return;
+          }
 
           const startRemoteKibana = config.get('kbnTestServer.startRemoteKibana');
 
@@ -205,6 +209,8 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
 
             await withSpan('shutdown_kibana', () => procs.stop('kibana'));
           } finally {
+            await esPromise?.catch(() => {});
+
             if (shutdownEs) {
               await withSpan('shutdown_es', () => shutdownEs!());
             }

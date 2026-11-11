@@ -96,7 +96,12 @@ export class StringFormat extends FieldFormat {
 
   private base64Decode(val: string) {
     try {
-      if (window && window.atob) return window.atob(val);
+      if (typeof window !== 'undefined' && window.atob) {
+        // atob produces a binary (latin1) string; decode its bytes as UTF-8 to handle multi-byte characters
+        return new TextDecoder().decode(
+          Uint8Array.from(window.atob(val), (char) => char.charCodeAt(0))
+        );
+      }
       // referencing from `global` tricks webpack to not include `Buffer` polyfill into this bundle
       return global.Buffer.from(val, 'base64').toString('utf8');
     } catch (e) {

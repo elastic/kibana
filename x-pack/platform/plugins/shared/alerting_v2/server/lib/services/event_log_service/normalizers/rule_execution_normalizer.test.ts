@@ -220,7 +220,7 @@ describe('normalizeRuleExecution', () => {
    * pass `isRuleExecutionOutcome` cannot reach the normalizer in
    * steady state. If they ever do, it means the ES filter and this
    * check have drifted out of sync — the `EventLogService` drop log
-   * (`EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS`) surfaces it. The
+   * (`EXECUTION_HISTORY_NORMALIZER_DEGRADED`) surfaces it. The
    * cases below pin the projection-safe behaviour: drop the row
    * rather than emitting a `RuleExecution` with an out-of-schema
    * outcome.

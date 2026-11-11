@@ -18,6 +18,7 @@ export default createServerlessFeatureFlagTestConfig<typeof services>({
   kbnServerArgs: [
     `--xpack.fleet.experimentalFeatures=${JSON.stringify({
       integrationKnowledge: false,
+      installIntegrationsKnowledge: false,
     })}`,
   ],
 });

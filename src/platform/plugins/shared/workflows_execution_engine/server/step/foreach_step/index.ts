@@ -7,5 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { EnterForeachIterationNodeImpl } from './enter_foreach_iteration_node_impl';
 export { EnterForeachNodeImpl } from './enter_foreach_node_impl';
+export { ExitForeachIterationNodeImpl } from './exit_foreach_iteration_node_impl';
 export { ExitForeachNodeImpl } from './exit_foreach_node_impl';

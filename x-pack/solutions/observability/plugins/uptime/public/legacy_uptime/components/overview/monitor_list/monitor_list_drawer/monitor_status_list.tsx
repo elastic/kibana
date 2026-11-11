@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { LocationLink } from '../../../common/location_link';
 import { MonitorStatusRow } from './monitor_status_row';
 import type { Ping } from '../../../../../../common/runtime_types';
@@ -55,13 +57,19 @@ export const MonitorStatusList = ({ summaryPings }: MonitorStatusListProps) => {
       {(downChecks.has(UNNAMED_LOCATION) || upChecks.has(UNNAMED_LOCATION)) && (
         <>
           <EuiSpacer size="s" />
-          <EuiCallOut announceOnMount color="warning">
-            <FormattedMessage
-              id="xpack.uptime.monitorList.drawer.missingLocation"
-              defaultMessage="Some heartbeat instances do not have a location defined. {link} to your heartbeat configuration."
-              values={{ link: <LocationLink /> }}
-            />
-          </EuiCallOut>
+          <KbnWarningCallout
+            announceOnMount
+            title={i18n.translate('xpack.uptime.monitorList.drawer.missingLocation.title', {
+              defaultMessage: 'Location not configured',
+            })}
+            text={
+              <FormattedMessage
+                id="xpack.uptime.monitorList.drawer.missingLocation"
+                defaultMessage="Some heartbeat instances do not have a location defined. {link} to your heartbeat configuration."
+                values={{ link: <LocationLink /> }}
+              />
+            }
+          />
           <EuiSpacer size="s" />
         </>
       )}

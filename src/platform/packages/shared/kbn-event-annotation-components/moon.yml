@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/event-annotation-components'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-visualizations'
+  defaultOwner: '@elastic/kibana-dashboards'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/event-annotation-components'
   description: Moon project for @kbn/event-annotation-components
   channel: ''
-  owner: '@elastic/kibana-visualizations'
+  owner: '@elastic/kibana-dashboards'
   sourceRoot: src/platform/packages/shared/kbn-event-annotation-components
 dependsOn:
   - '@kbn/i18n'
@@ -29,6 +29,7 @@ dependsOn:
   - '@kbn/saved-objects-finder-plugin'
   - '@kbn/expressions-plugin'
   - '@kbn/field-utils'
+  - '@kbn/chart-icons'
 tags:
   - shared-browser
   - package
@@ -40,6 +41,4 @@ fileGroups:
   src:
     - '**/*'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

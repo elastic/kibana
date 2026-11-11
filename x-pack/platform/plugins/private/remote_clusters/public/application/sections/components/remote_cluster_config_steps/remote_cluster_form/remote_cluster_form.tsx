@@ -13,7 +13,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { EuiSwitchEvent } from '@elastic/eui';
 import {
-  EuiCallOut,
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiForm,
@@ -28,6 +27,7 @@ import {
   useEuiTheme,
   EuiText,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { Cluster, ClusterPayload } from '../../../../../../common/lib';
 import { extractHostAndPort } from '../../../../../../common/lib';
 import { SNIFF_MODE, PROXY_MODE } from '../../../../../../common/constants';
@@ -334,7 +334,7 @@ export const RemoteClusterForm: React.FC<Props> = ({
     );
     return (
       <>
-        <EuiCallOut
+        <KbnDangerCallout
           title={
             <span id={generateId(ERROR_TITLE_ID)}>
               <FormattedMessage
@@ -343,8 +343,6 @@ export const RemoteClusterForm: React.FC<Props> = ({
               />
             </span>
           }
-          color="danger"
-          iconType="error"
         />
         <EuiDelayRender>{messagesToBeRendered}</EuiDelayRender>
         <EuiSpacer size="m" data-test-subj="remoteClusterFormGlobalError" />

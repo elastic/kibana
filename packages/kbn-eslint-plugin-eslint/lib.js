@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+const babelEslint = require('@babel/eslint-parser');
+
 exports.assert = function assert(truth, message) {
   if (truth) {
     return;
@@ -19,6 +21,23 @@ exports.assert = function assert(truth, message) {
 
 exports.normalizeWhitespace = function normalizeWhitespace(string) {
   return string.replace(/\s+/g, ' ');
+};
+
+const parsedLicenses = new Map();
+
+/** Parses a license option once per process; rules run it for every linted file. */
+exports.parseLicense = function parseLicense(license) {
+  let parsed = parsedLicenses.get(license);
+  if (!parsed) {
+    const { body, comments } = babelEslint.parse(license, { requireConfigFile: false });
+    parsed = {
+      hasBody: body.length > 0,
+      commentCount: comments.length,
+      nodeValue: comments.length ? exports.normalizeWhitespace(comments[0].value) : undefined,
+    };
+    parsedLicenses.set(license, parsed);
+  }
+  return parsed;
 };
 
 exports.init = function (context, program, initStep) {

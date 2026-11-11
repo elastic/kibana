@@ -8,7 +8,7 @@
  */
 
 import { useEffect } from 'react';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/app-menu';
 
 export interface AppMenuProps {
   /**
@@ -29,7 +29,7 @@ export interface AppMenuProps {
  * ```tsx
  * import React, { useEffect } from 'react';
  * import { AppMenu } from '@kbn/core-chrome-app-menu';
- * import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+ * import type { AppMenuConfig } from '@kbn/app-menu';
  * import type { CoreStart } from '@kbn/core/public';
  *
  *interface Props {

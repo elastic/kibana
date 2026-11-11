@@ -5,134 +5,136 @@
  * 2.0.
  */
 
+import type { monaco } from '@kbn/code-editor';
+import { createPayloadCompletionProvider } from './payload_completion_provider';
+
 jest.mock('@kbn/code-editor', () => ({
   monaco: {
     languages: {
-      CompletionItemKind: { Variable: 4 },
+      CompletionItemKind: {
+        Variable: 4,
+      },
     },
   },
 }));
 
-import { createPayloadCompletionProvider } from './payload_completion_provider';
-import { DISPATCH_PAYLOAD_VARIABLES, ALERT_EPISODE_FIELDS } from '../registry';
+const getSuggestions = (textUpToCursor: string): monaco.languages.CompletionItem[] => {
+  const model = { getLineContent: () => textUpToCursor };
+  const position = { lineNumber: 1, column: textUpToCursor.length + 1 } as monaco.Position;
+  const { suggestions } = createPayloadCompletionProvider().provideCompletionItems(
+    model as unknown as monaco.editor.ITextModel,
+    position,
+    {} as monaco.languages.CompletionContext,
+    {} as monaco.CancellationToken
+  ) as monaco.languages.CompletionList;
+  return suggestions;
+};
 
-const makeModel = (lineContent: string) => ({
-  getLineContent: () => lineContent,
-});
+const getSuggestionLabels = (textUpToCursor: string): string[] =>
+  getSuggestions(textUpToCursor).map(({ label }) =>
+    typeof label === 'string' ? label : label.label
+  );
 
-const makePosition = (column: number) => ({
-  lineNumber: 1,
-  column,
+const cursorRange = (startColumn: number, endColumn: number): monaco.IRange => ({
+  startLineNumber: 1,
+  endLineNumber: 1,
+  startColumn,
+  endColumn,
 });
 
 describe('createPayloadCompletionProvider', () => {
-  const provider = createPayloadCompletionProvider();
+  it('suggests the dispatcher payload fields under inputs.payload', () => {
+    expect(getSuggestionLabels('message: "{{ inputs.payload.')).toEqual([
+      'id',
+      'policyId',
+      'groupKey',
+      'alerts',
+      'rules',
+    ]);
+  });
 
-  it('returns inputs.payload.-prefixed variables at top level inside an empty template', () => {
-    const line = '{{ ';
-    const result = provider.provideCompletionItems!(
-      makeModel(line) as any,
-      makePosition(line.length + 1) as any,
-      {} as any,
-      {} as any
-    ) as { suggestions: Array<{ label: string; insertText: string }> };
+  it('suggests alert fields inside an inputs.payload.alerts item', () => {
+    const labels = getSuggestionLabels('message: "{{ inputs.payload.alerts[0].');
 
-    expect(result.suggestions).toHaveLength(DISPATCH_PAYLOAD_VARIABLES.length);
-    expect(result.suggestions.map((s) => s.label)).toEqual(
-      DISPATCH_PAYLOAD_VARIABLES.map((v) => `inputs.payload.${v.path}`)
+    expect(labels).toEqual(expect.arrayContaining(['alert_id', 'alert_status', 'rule_id', 'data']));
+    expect(labels).not.toContain('episode_id');
+    expect(labels).not.toContain('episode_status');
+  });
+
+  it('does not suggest alert fields under the removed inputs.payload.episodes path', () => {
+    expect(getSuggestionLabels('message: "{{ inputs.payload.episodes[0].')).toEqual([]);
+  });
+
+  it('suggests the trigger inputs under inputs', () => {
+    expect(getSuggestionLabels('message: "{{ inputs.')).toEqual(['payload']);
+  });
+
+  it('suggests payload fields with their full path before any path is typed', () => {
+    expect(getSuggestionLabels('message: "{{ ')).toEqual([
+      'inputs.payload.id',
+      'inputs.payload.policyId',
+      'inputs.payload.groupKey',
+      'inputs.payload.alerts',
+      'inputs.payload.rules',
+    ]);
+  });
+
+  it('suggests nothing under alert data, which has no declared fields', () => {
+    expect(getSuggestionLabels('message: "{{ inputs.payload.alerts[0].data.')).toEqual([]);
+  });
+
+  it('builds each suggestion from the schema type and description', () => {
+    const text = 'message: "{{ inputs.payload.alerts[0].';
+    const severity = getSuggestions(text).find(({ label }) => label === 'severity');
+
+    expect(severity).toEqual({
+      label: 'severity',
+      kind: 4,
+      detail: "'info' | 'low' | 'medium' | 'high' | 'critical'",
+      documentation: 'Severity of the alert (optional)',
+      insertText: 'severity',
+      range: cursorRange(text.length + 1, text.length + 1),
+    });
+  });
+
+  it('inserts the full path for suggestions offered before any path is typed', () => {
+    const text = 'message: "{{ ';
+    const [first] = getSuggestions(text);
+
+    expect(first).toEqual(
+      expect.objectContaining({
+        label: 'inputs.payload.id',
+        insertText: 'inputs.payload.id',
+        range: cursorRange(text.length + 1, text.length + 1),
+      })
     );
-    // insertText must match the label so accepting a suggestion doesn't double the prefix
-    expect(result.suggestions.map((s) => s.insertText)).toEqual(
-      DISPATCH_PAYLOAD_VARIABLES.map((v) => `inputs.payload.${v.path}`)
+  });
+
+  it('replaces the partially typed segment', () => {
+    const text = 'message: "{{ inputs.payload.pol';
+    const suggestions = getSuggestions(text);
+
+    expect(suggestions.map(({ label }) => label)).toContain('policyId');
+    expect(suggestions.map(({ range }) => range)).toEqual(
+      suggestions.map(() => cursorRange(text.length - 2, text.length + 1))
     );
   });
 
-  it('returns the payload wrapper inside {{ inputs.', () => {
-    const line = '{{ inputs.';
-    const result = provider.provideCompletionItems!(
-      makeModel(line) as any,
-      makePosition(line.length + 1) as any,
-      {} as any,
-      {} as any
-    ) as { suggestions: Array<{ label: string }> };
-
-    expect(result.suggestions.map((s) => s.label)).toEqual(['payload']);
+  it.each([
+    ['the rule id lookup used by the default templates', 'inputs.payload.rules[alert.rule_id].'],
+    ['a literal rule id', 'inputs.payload.rules.rule1.'],
+  ])('suggests rule fields under %s', (_, path) => {
+    expect(getSuggestionLabels(`message: "{{ ${path}`)).toEqual(['name', 'grouping_fields']);
   });
 
-  it('returns bare payload children inside {{ inputs.payload.', () => {
-    const line = '{{ inputs.payload.';
-    const result = provider.provideCompletionItems!(
-      makeModel(line) as any,
-      makePosition(line.length + 1) as any,
-      {} as any,
-      {} as any
-    ) as { suggestions: Array<{ label: string }> };
-
-    expect(result.suggestions).toHaveLength(DISPATCH_PAYLOAD_VARIABLES.length);
-    expect(result.suggestions.map((s) => s.label)).toEqual(
-      DISPATCH_PAYLOAD_VARIABLES.map((v) => v.path)
-    );
+  it('suggests children of the path before an @ trigger', () => {
+    expect(getSuggestionLabels('message: "{{ inputs.@')).toEqual(['payload']);
   });
 
-  it('returns episode fields when cursor is inside inputs.payload.episodes[N].', () => {
-    const line = 'to: "{{ inputs.payload.episodes[0].';
-    const result = provider.provideCompletionItems!(
-      makeModel(line) as any,
-      makePosition(line.length + 1) as any,
-      {} as any,
-      {} as any
-    ) as { suggestions: Array<{ label: string }> };
-
-    expect(result.suggestions).toHaveLength(ALERT_EPISODE_FIELDS.length);
-    expect(result.suggestions.map((s) => s.label)).toEqual(ALERT_EPISODE_FIELDS.map((v) => v.path));
-  });
-
-  it('returns no suggestions outside a Liquid template', () => {
-    const line = 'not a template';
-    const result = provider.provideCompletionItems!(
-      makeModel(line) as any,
-      makePosition(line.length + 1) as any,
-      {} as any,
-      {} as any
-    ) as { suggestions: unknown[] };
-
-    expect(result.suggestions).toHaveLength(0);
-  });
-
-  it('returns no suggestions for an unknown nested path', () => {
-    const line = '{{ foo.bar.';
-    const result = provider.provideCompletionItems!(
-      makeModel(line) as any,
-      makePosition(line.length + 1) as any,
-      {} as any,
-      {} as any
-    ) as { suggestions: unknown[] };
-
-    expect(result.suggestions).toHaveLength(0);
-  });
-
-  it('returns bare payload children for the second template on the same line', () => {
-    const line = '{{ inputs.payload.id }} text {{ inputs.payload.poli';
-    const result = provider.provideCompletionItems!(
-      makeModel(line) as any,
-      makePosition(line.length + 1) as any,
-      {} as any,
-      {} as any
-    ) as { suggestions: Array<{ label: string }> };
-
-    expect(result.suggestions.length).toBeGreaterThan(0);
-    expect(result.suggestions.map((s) => s.label)).toContain('policyId');
-  });
-
-  it('returns no suggestions inside a Liquid filter context', () => {
-    const line = '{{ inputs.payload.id | upc';
-    const result = provider.provideCompletionItems!(
-      makeModel(line) as any,
-      makePosition(line.length + 1) as any,
-      {} as any,
-      {} as any
-    ) as { suggestions: unknown[] };
-
-    expect(result.suggestions).toHaveLength(0);
+  it.each([
+    ['outside a template', 'message: hello'],
+    ['after a Liquid filter pipe', 'message: "{{ inputs.payload.id | '],
+  ])('does not suggest variables %s', (_, text) => {
+    expect(getSuggestions(text)).toEqual([]);
   });
 });

@@ -42,19 +42,23 @@ const makeDeps = (): {
   deps: WorkflowSearchDeps;
   storageClient: { search: jest.Mock };
   esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  workflowExecutionsDataClient: { search: jest.Mock };
   logger: ReturnType<typeof loggerMock.create>;
 } => {
   const storageClient = { search: jest.fn() };
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const workflowExecutionsDataClient = { search: jest.fn() };
   const logger = loggerMock.create();
   return {
     deps: {
       logger,
       workflowStorage: { getClient: () => storageClient } as any,
       esClient,
+      workflowExecutionsDataClient: workflowExecutionsDataClient as any,
     },
     storageClient,
     esClient,
+    workflowExecutionsDataClient,
     logger,
   };
 };
@@ -168,6 +172,35 @@ describe('WorkflowSearchService', () => {
       expect(call.query.bool.must.length).toBeGreaterThanOrEqual(4);
     });
 
+    it('sorts by relevance first when a query is set without a sort field', async () => {
+      const { deps, storageClient } = makeDeps();
+      storageClient.search.mockResolvedValue({ hits: { total: { value: 0 }, hits: [] } });
+
+      const service = new WorkflowSearchService(deps);
+      await service.getWorkflows({ size: 20, page: 1, query: 'orders' }, 'default');
+
+      expect(storageClient.search.mock.calls[0][0].sort).toEqual([
+        '_score',
+        { updated_at: { order: 'desc' } },
+      ]);
+    });
+
+    it('keeps the explicit sort field when a query is set', async () => {
+      const { deps, storageClient } = makeDeps();
+      storageClient.search.mockResolvedValue({ hits: { total: { value: 0 }, hits: [] } });
+
+      const service = new WorkflowSearchService(deps);
+      await service.getWorkflows(
+        { size: 20, page: 1, query: 'orders', sortField: 'name', sortOrder: 'asc' },
+        'default'
+      );
+
+      expect(storageClient.search.mock.calls[0][0].sort).toEqual([
+        { 'name.keyword': { order: 'asc' } },
+        { updated_at: { order: 'desc' } },
+      ]);
+    });
+
     it('keeps unmanaged workflows and filters managed workflows by selector availability', async () => {
       const { deps, storageClient } = makeDeps();
       storageClient.search.mockResolvedValue({ hits: { total: { value: 0 }, hits: [] } });
@@ -237,7 +270,7 @@ describe('WorkflowSearchService', () => {
     });
 
     it('skips execution-history fetch when there are no workflows on the page', async () => {
-      const { deps, storageClient, esClient } = makeDeps();
+      const { deps, storageClient, workflowExecutionsDataClient } = makeDeps();
       storageClient.search.mockResolvedValue({ hits: { total: { value: 0 }, hits: [] } });
 
       const service = new WorkflowSearchService(deps);
@@ -245,18 +278,18 @@ describe('WorkflowSearchService', () => {
         includeExecutionHistory: true,
       });
 
-      expect(esClient.search).not.toHaveBeenCalled();
+      expect(workflowExecutionsDataClient.search).not.toHaveBeenCalled();
     });
 
     it('attaches recent-execution history when includeExecutionHistory is true', async () => {
-      const { deps, storageClient, esClient } = makeDeps();
+      const { deps, storageClient, workflowExecutionsDataClient } = makeDeps();
       storageClient.search.mockResolvedValue({
         hits: {
           total: { value: 1 },
           hits: [{ _id: 'wf-1', _source: makeSource({ name: 'wf-1' }) }],
         },
       });
-      esClient.search.mockResolvedValue({
+      workflowExecutionsDataClient.search.mockResolvedValue({
         aggregations: {
           workflows: {
             buckets: [
@@ -298,7 +331,7 @@ describe('WorkflowSearchService', () => {
     });
 
     it('omits recent-execution history for managed workflows without managed execution access', async () => {
-      const { deps, storageClient, esClient } = makeDeps();
+      const { deps, storageClient, workflowExecutionsDataClient } = makeDeps();
       storageClient.search.mockResolvedValue({
         hits: {
           total: { value: 1 },
@@ -312,7 +345,7 @@ describe('WorkflowSearchService', () => {
         includeManagedExecutionHistory: false,
       });
 
-      expect(esClient.search).not.toHaveBeenCalled();
+      expect(workflowExecutionsDataClient.search).not.toHaveBeenCalled();
       expect(result.results[0].history).toEqual([]);
     });
   });
@@ -335,14 +368,14 @@ describe('WorkflowSearchService', () => {
     });
 
     it('includes execution history stats when includeExecutionStats=true', async () => {
-      const { deps, storageClient, esClient } = makeDeps();
+      const { deps, storageClient, workflowExecutionsDataClient } = makeDeps();
       storageClient.search.mockResolvedValue({
         aggregations: {
           enabled_count: { doc_count: 1 },
           disabled_count: { doc_count: 0 },
         },
       });
-      esClient.search.mockResolvedValue({
+      workflowExecutionsDataClient.search.mockResolvedValue({
         aggregations: {
           daily_stats: {
             buckets: [
@@ -370,7 +403,7 @@ describe('WorkflowSearchService', () => {
           cancelled: 0,
         },
       ]);
-      expect(esClient.search).toHaveBeenCalledWith(
+      expect(workflowExecutionsDataClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
           query: {
             bool: {
@@ -383,14 +416,14 @@ describe('WorkflowSearchService', () => {
     });
 
     it('includes managed executions in history stats when includeManagedExecutionStats=true', async () => {
-      const { deps, storageClient, esClient } = makeDeps();
+      const { deps, storageClient, workflowExecutionsDataClient } = makeDeps();
       storageClient.search.mockResolvedValue({
         aggregations: {
           enabled_count: { doc_count: 1 },
           disabled_count: { doc_count: 0 },
         },
       });
-      esClient.search.mockResolvedValue({
+      workflowExecutionsDataClient.search.mockResolvedValue({
         aggregations: {
           daily_stats: {
             buckets: [],
@@ -404,7 +437,7 @@ describe('WorkflowSearchService', () => {
         includeManagedExecutionStats: true,
       });
 
-      expect(esClient.search).toHaveBeenCalledWith(
+      expect(workflowExecutionsDataClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
           query: {
             bool: {
@@ -413,19 +446,19 @@ describe('WorkflowSearchService', () => {
           },
         })
       );
-      const executionStatsQuery = esClient.search.mock.calls[0]?.[0]?.query;
+      const executionStatsQuery = workflowExecutionsDataClient.search.mock.calls[0]?.[0]?.query;
       expect(executionStatsQuery?.bool?.must_not).toBeUndefined();
     });
 
     it('returns an empty execution-history array when the executions index is missing', async () => {
-      const { deps, storageClient, esClient, logger } = makeDeps();
+      const { deps, storageClient, workflowExecutionsDataClient, logger } = makeDeps();
       storageClient.search.mockResolvedValue({
         aggregations: {
           enabled_count: { doc_count: 0 },
           disabled_count: { doc_count: 0 },
         },
       });
-      esClient.search.mockRejectedValue(
+      workflowExecutionsDataClient.search.mockRejectedValue(
         new errors.ResponseError({
           statusCode: 404,
           body: { error: { type: 'index_not_found_exception', reason: 'missing index' } },

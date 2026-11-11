@@ -5,12 +5,23 @@
  * 2.0.
  */
 
-import { EuiDescribedFormGroup, EuiFormRow, EuiPanel, EuiTitle } from '@elastic/eui';
-import { type FC, useCallback } from 'react';
-import React from 'react';
+import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiDescribedFormGroup,
+  EuiFormRow,
+  EuiPanel,
+  EuiTitle,
+  EuiToolTip,
+  EuiWrappingPopover,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import React, { type FC, useCallback, useMemo, useRef, useState } from 'react';
 
 import type { CPSPluginStart } from '@kbn/cps/public';
-import { ProjectPickerContent, useFetchProjects } from '@kbn/cps-utils';
+import { type HeaderContextMenuItemProps, ProjectPickerContent } from '@kbn/cps-utils';
 import type { ProjectRouting } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -32,6 +43,22 @@ export const CustomizeCps: FC<Props> = ({ space, onChange }) => {
   const {
     services: { cps, application },
   } = useKibana<KibanaServices>();
+  const { euiTheme } = useEuiTheme();
+
+  // EuiFormRow top-aligns its label. Giving the label text the same height as the
+  // (extra small) icon button in `labelAppend` vertically centers the two.
+  const labelStyles = css({ lineHeight: euiTheme.size.l });
+
+  const contextMenuTriggerButtonRef = useRef<HTMLButtonElement>(null);
+  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+
+  const openContextMenu = useCallback(() => {
+    setIsContextMenuOpen(true);
+  }, []);
+
+  const closeContextMenu = useCallback(() => {
+    setIsContextMenuOpen(false);
+  }, []);
 
   const fetchProjects = useCallback(
     (projectRouting?: ProjectRouting) => {
@@ -40,16 +67,29 @@ export const CustomizeCps: FC<Props> = ({ space, onChange }) => {
     [cps?.cpsManager]
   );
 
-  const projects = useFetchProjects(fetchProjects, space.projectRouting);
+  const updateProjectRouting = useCallback(
+    (newRouting: ProjectRouting) => {
+      onChange({
+        ...space,
+        projectRouting: newRouting,
+      });
+    },
+    [onChange, space]
+  );
 
-  const updateProjectRouting = (newRouting: ProjectRouting) => {
-    onChange({
-      ...space,
-      projectRouting: newRouting,
-    });
-  };
+  const canEdit = useCallback(
+    () => application?.capabilities?.project_routing?.manage_space_default === true,
+    [application?.capabilities?.project_routing?.manage_space_default]
+  );
 
-  const canEdit = () => application?.capabilities?.project_routing?.manage_space_default === true;
+  const configurationLinks = useMemo(
+    () =>
+      [cps?.cpsManager?.getConfigurationLinks()?.manageCrossProjectSearch].filter(
+        (item): item is HeaderContextMenuItemProps => Boolean(item)
+      ),
+    [cps?.cpsManager]
+  );
+  const hasConfigurationLinks = configurationLinks.length > 0;
 
   return (
     <SectionPanel dataTestSubj="cpsDefaultScopePanel">
@@ -76,18 +116,74 @@ export const CustomizeCps: FC<Props> = ({ space, onChange }) => {
       >
         <EuiFormRow
           fullWidth
-          label={i18n.translate('xpack.spaces.management.manageSpacePage.cpsDefaultScopeLabel', {
-            defaultMessage: 'Cross-project search default scope',
-          })}
+          label={
+            <span css={hasConfigurationLinks ? labelStyles : undefined}>
+              {i18n.translate('xpack.spaces.management.manageSpacePage.cpsDefaultScopeLabel', {
+                defaultMessage: 'Cross-project search default scope',
+              })}
+            </span>
+          }
+          labelAppend={
+            hasConfigurationLinks ? (
+              <EuiToolTip disableScreenReaderOutput>
+                <EuiButtonIcon
+                  buttonRef={contextMenuTriggerButtonRef}
+                  iconType="ellipsis"
+                  aria-label={i18n.translate(
+                    'xpack.spaces.management.manageSpacePage.cpsDefaultScopeMenuActions',
+                    {
+                      defaultMessage: 'Cross-project search default scope menu actions',
+                    }
+                  )}
+                  color="text"
+                  onClick={openContextMenu}
+                  data-test-subj="cpsDefaultScopeMenuActionsButton"
+                />
+              </EuiToolTip>
+            ) : null
+          }
         >
-          <EuiPanel paddingSize="none" hasShadow={false} hasBorder>
-            <ProjectPickerContent
-              projectRouting={space.projectRouting}
-              onProjectRoutingChange={updateProjectRouting}
-              projects={projects}
-              controlsState={canEdit() ? 'enabled' : 'disabled'}
-            />
-          </EuiPanel>
+          <>
+            {contextMenuTriggerButtonRef.current && (
+              <EuiWrappingPopover
+                button={contextMenuTriggerButtonRef.current}
+                aria-label={i18n.translate(
+                  'xpack.spaces.management.manageSpacePage.cpsDefaultScopeMenuActions',
+                  {
+                    defaultMessage: 'Cross-project search default scope menu actions',
+                  }
+                )}
+                anchorPosition="downRight"
+                isOpen={isContextMenuOpen}
+                closePopover={closeContextMenu}
+                panelPaddingSize="none"
+              >
+                <EuiContextMenuPanel
+                  items={configurationLinks?.map((item) => (
+                    <EuiContextMenuItem
+                      key={item.label}
+                      icon={item.icon}
+                      href={item.href}
+                      external={item.external}
+                      data-test-subj={item.testSubj}
+                      onClick={closeContextMenu}
+                    >
+                      {item.label}
+                    </EuiContextMenuItem>
+                  ))}
+                />
+              </EuiWrappingPopover>
+            )}
+            <EuiPanel paddingSize="none" hasShadow={false} hasBorder>
+              <ProjectPickerContent
+                showHeader={false}
+                projectRouting={space.projectRouting}
+                onProjectRoutingChange={updateProjectRouting}
+                fetchProjectsByRouting={fetchProjects}
+                controlsState={canEdit() ? 'enabled' : 'disabled'}
+              />
+            </EuiPanel>
+          </>
         </EuiFormRow>
       </EuiDescribedFormGroup>
     </SectionPanel>

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs';
 import type {
   AppMountParameters,
   AppUpdater,
@@ -30,7 +30,12 @@ import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import type { TimeRange } from '@kbn/es-query';
-import { DISCOVER_APP_LOCATOR, PLUGIN_ID, type DiscoverAppLocator } from '../common';
+import {
+  CHANGE_POINT_GRID_EMBEDDABLE_TYPE,
+  DISCOVER_APP_LOCATOR,
+  PLUGIN_ID,
+  type DiscoverAppLocator,
+} from '../common';
 import {
   DISCOVER_CONTEXT_APP_LOCATOR,
   type DiscoverContextAppLocator,
@@ -45,6 +50,7 @@ import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 import { defaultCustomizationContext } from './customizations/defaults';
 import {
   ACTION_ADD_DISCOVER_SESSION_PANEL,
+  ACTION_EXPLORE_CHANGE_POINT_GRID_IN_DISCOVER,
   ACTION_VIEW_SAVED_SEARCH,
   LEGACY_LOG_STREAM_EMBEDDABLE,
 } from './embeddable/constants';
@@ -65,7 +71,9 @@ import { registerDiscoverEBTManagerAnalytics } from './ebt_manager/discover_ebt_
 import type { ProfileProviderSharedServices, ProfilesManager } from './context_awareness';
 import { forwardLegacyUrls } from './plugin_imports/forward_legacy_urls';
 import { registerEsqlResultsAttachmentUi } from './agent_builder/register_esql_results_ui';
+import { registerDiscoverSessionAttachmentUi } from './agent_builder/register_discover_session_ui';
 import { getProfilesInspectorView } from './context_awareness/inspector/get_profiles_inspector_view';
+import { getDiscoverRecentlyAccessedService } from './services/discover_recently_accessed_service';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -187,7 +195,9 @@ export class DiscoverPlugin
 
     core.application.register({
       id: PLUGIN_ID,
-      title: 'Discover',
+      title: i18n.translate('discover.discoverTitle', {
+        defaultMessage: 'Discover',
+      }),
       updater$: this.appStateUpdater,
       order: 1000,
       euiIconType: 'logoKibana',
@@ -255,9 +265,41 @@ export class DiscoverPlugin
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
-    if (plugins.agentBuilder) {
-      registerEsqlResultsAttachmentUi(plugins.agentBuilder);
+    const agentBuilder = plugins.agentBuilder;
+    if (agentBuilder) {
+      registerEsqlResultsAttachmentUi(agentBuilder);
+      registerDiscoverSessionAttachmentUi({
+        agentBuilder,
+        unifiedSearch: plugins.unifiedSearch,
+        locator: this.locator,
+        embeddable: plugins.embeddable,
+        application: core.application,
+      });
     }
+
+    plugins.navigation.registerNavigationLinks({
+      id: 'discoverLinks',
+      target: 'discover',
+      lists: [
+        {
+          id: 'recentlyViewed',
+          title: i18n.translate('discover.navigation.recentlyViewedTitle', {
+            defaultMessage: 'Recently viewed',
+          }),
+          items$: getDiscoverRecentlyAccessedService(core.http)
+            .get$()
+            .pipe(
+              map((items) =>
+                items.map((item) => ({
+                  id: item.id,
+                  href: core.http.basePath.prepend(item.link),
+                  label: item.label,
+                }))
+              )
+            ),
+        },
+      ],
+    });
 
     plugins.cps?.cpsManager?.registerAppAccess('discover', () => ProjectRoutingAccess.EDITABLE);
 
@@ -267,6 +309,15 @@ export class DiscoverPlugin
       async () => {
         const { ViewSavedSearchAction } = await getEmbeddableServices();
         return new ViewSavedSearchAction(core.application, this.locator!);
+      }
+    );
+
+    plugins.uiActions.addTriggerActionAsync(
+      ON_OPEN_PANEL_MENU,
+      ACTION_EXPLORE_CHANGE_POINT_GRID_IN_DISCOVER,
+      async () => {
+        const { ExploreChangePointGridInDiscoverAction } = await getEmbeddableServices();
+        return new ExploreChangePointGridInDiscoverAction(core.application, this.locator!);
       }
     );
 
@@ -459,8 +510,20 @@ export class DiscoverPlugin
       savedObjectName: i18n.translate('discover.savedSearch.savedObjectName', {
         defaultMessage: 'Discover session',
       }),
-      getIconForSavedObject: () => 'discoverApp',
+      getIconForSavedObject: () => 'productDiscover',
     });
+
+    plugins.embeddable.registerEmbeddablePublicDefinition(
+      CHANGE_POINT_GRID_EMBEDDABLE_TYPE,
+      async () => {
+        const [discoverServices, { getChangePointGridEmbeddableFactory }] = await Promise.all([
+          getDiscoverServicesForEmbeddable(),
+          getEmbeddableServices(),
+        ]);
+
+        return getChangePointGridEmbeddableFactory({ discoverServices });
+      }
+    );
 
     plugins.embeddable.registerEmbeddablePublicDefinition(SEARCH_EMBEDDABLE_TYPE, async () => {
       const [startServices, discoverServices, { getSearchEmbeddableFactory }] = await Promise.all([
@@ -496,11 +559,8 @@ export class DiscoverPlugin
     plugins.embeddable.registerLegacyURLTransform(
       SEARCH_EMBEDDABLE_TYPE,
       async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
-        const discoverServices = await getDiscoverServicesForEmbeddable();
         const { getTransformOut } = await getEmbeddableServices();
-        return getTransformOut(transformDrilldownsOut, () =>
-          discoverServices.discoverFeatureFlags.getEmbeddableTransformsEnabled()
-        );
+        return getTransformOut(transformDrilldownsOut);
       }
     );
   }

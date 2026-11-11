@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/278195
-type: bug-fix
-products:
-- product: cloud-serverless
-  target: 2026-07-28
-- product: kibana
-title: Fix unauthorized access to other users' draft timelines
-description: Draft timeline list, read, update, delete, and bulk copy or export operations now enforce user-scoped access so one user cannot access another user's drafts.

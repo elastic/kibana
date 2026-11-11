@@ -115,7 +115,7 @@ steps:
       yamlDocument,
       'custom.trigger',
       undefined,
-      defaultCondition
+      { defaultCondition }
     );
 
     expect(generateTriggerSnippetSpy).toHaveBeenCalledWith(
@@ -125,6 +125,29 @@ steps:
         monacoSuggestionFormat: false,
         withTriggersSection: false,
         defaultCondition,
+      })
+    );
+  });
+
+  it('should pass requiresConnectorId to generateTriggerSnippet when provided', () => {
+    const inputYaml = `triggers:\n  - type: alert\n`;
+    const model = createFakeMonacoModel(inputYaml);
+    const yamlDocument = parseDocument(inputYaml);
+    const connectorEventTriggerId = 'example.connector_event';
+
+    insertTriggerSnippet(
+      model as unknown as monaco.editor.ITextModel,
+      yamlDocument,
+      connectorEventTriggerId,
+      undefined,
+      { requiresConnectorId: true }
+    );
+
+    expect(generateTriggerSnippetSpy).toHaveBeenCalledWith(
+      connectorEventTriggerId,
+      expect.objectContaining({
+        full: true,
+        requiresConnectorId: true,
       })
     );
   });

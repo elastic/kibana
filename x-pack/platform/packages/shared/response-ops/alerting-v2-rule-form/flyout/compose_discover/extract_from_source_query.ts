@@ -6,10 +6,15 @@
  */
 
 import { Parser } from '@elastic/esql';
+import { getAnySourceCommandFromESQLQuery } from '@kbn/esql-utils';
 
 /**
- * Returns a FROM-only query (e.g. `FROM logs-*`) extracted from a full ES|QL
- * pipeline. Used for index-level field lookups such as resolving the time field.
+ * Returns the source command (e.g. `FROM logs-*`, `TS metrics-*`, `PROMQL …`)
+ * extracted from a full ES|QL pipeline. Used for index-level field lookups
+ * such as resolving the time field.
+ *
+ * Matches any registered source command so FROM, TS, PROMQL, and future
+ * sources stay in sync with the language registry.
  */
 export function extractFromSourceQuery(query: string): string {
   const trimmed = query.trim();
@@ -18,15 +23,19 @@ export function extractFromSourceQuery(query: string): string {
   }
 
   try {
-    const { root } = Parser.parse(trimmed);
-    const fromCmd = root.commands.find((c) => c.name === 'from' || c.name === 'ts');
-    if (!fromCmd) {
+    const sourceCommandName = getAnySourceCommandFromESQLQuery(trimmed);
+    if (!sourceCommandName) {
       return '';
     }
 
-    return trimmed.slice(fromCmd.location.min, fromCmd.location.max + 1).trim();
+    const { root } = Parser.parse(trimmed);
+    const sourceCmd = root.commands.find((c) => c.name.toUpperCase() === sourceCommandName);
+    if (!sourceCmd) {
+      return '';
+    }
+
+    return trimmed.slice(sourceCmd.location.min, sourceCmd.location.max + 1).trim();
   } catch {
-    const match = trimmed.match(/^\s*(FROM\s+[^|]+)/i);
-    return match ? match[1].trim() : '';
+    return '';
   }
 }

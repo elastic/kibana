@@ -20,10 +20,10 @@ import type {
   ConfigurationAttributes,
 } from '../../../common/types/domain';
 import {
-  CaseRt,
   CaseStatuses,
   UserActionTypes,
   AttachmentType,
+  CaseSchema,
 } from '../../../common/types/domain';
 import {
   CASE_COMMENT_SAVED_OBJECT,
@@ -31,6 +31,7 @@ import {
   CASE_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
   OWNER_FIELD,
+  SECURITY_ATTACK_ATTACHMENT_TYPE,
 } from '../../../common/constants';
 import { UNIFIED_ALERT_TYPES_ARRAY } from '../../../common/utils/attachments';
 
@@ -43,6 +44,7 @@ import {
 import { createCaseError } from '../../common/error';
 import {
   createAlertUpdateStatusRequest,
+  createAttackUpdateStatusRequest,
   flattenCaseSavedObject,
   getAlertInfoFromComments,
 } from '../../common/utils';
@@ -51,7 +53,7 @@ import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
 import { getAlerts } from '../alerts/get';
 import { buildFilter, combineFilters, NodeBuilderOperators } from '../utils';
-import { decodeOrThrow } from '../../common/runtime_types';
+import { decodeOrThrowZod } from '../../common/runtime_types';
 import type { ExternalServiceResponse } from '../../../common/types/api';
 
 /**
@@ -66,22 +68,24 @@ function shouldCloseByPush(
   );
 }
 
+/**
+ * Closes the alert and attack documents attached to a case that was closed by a push.
+ */
 const changeAlertsStatusToClose = async (
   caseId: string,
   caseService: CasesClientArgs['services']['caseService'],
-  alertsService: CasesClientArgs['services']['alertsService'],
-  isCasesAttachmentsEnabled: boolean
+  alertsService: CasesClientArgs['services']['alertsService']
 ) => {
   const legacyAlertFilter = nodeBuilder.is(
     `${CASE_COMMENT_SAVED_OBJECT}.attributes.type`,
     AttachmentType.alert
   );
 
-  const alertFilter = combineFilters(
+  const syncFilter = combineFilters(
     [
       legacyAlertFilter,
       buildFilter({
-        filters: UNIFIED_ALERT_TYPES_ARRAY,
+        filters: [...UNIFIED_ALERT_TYPES_ARRAY, SECURITY_ATTACK_ATTACHMENT_TYPE],
         field: 'type',
         operator: 'or',
         type: CASE_ATTACHMENT_SAVED_OBJECT,
@@ -90,24 +94,25 @@ const changeAlertsStatusToClose = async (
     NodeBuilderOperators.or
   );
 
-  const alertAttachments = await caseService.getAllCaseComments({
+  const syncableAttachments = await caseService.getAllCaseComments({
     id: [caseId],
     options: {
-      filter: alertFilter,
+      filter: syncFilter,
     },
-    mode: isCasesAttachmentsEnabled ? 'unified' : 'legacy',
   });
 
-  const alerts = alertAttachments.saved_objects
-    .map((attachment) =>
-      createAlertUpdateStatusRequest({
-        comment: attachment.attributes,
-        status: CaseStatuses.closed,
-      })
-    )
-    .flat();
+  const documentsToClose = syncableAttachments.saved_objects.flatMap((attachment) => [
+    ...createAlertUpdateStatusRequest({
+      comment: attachment.attributes,
+      status: CaseStatuses.closed,
+    }),
+    ...createAttackUpdateStatusRequest({
+      comment: attachment.attributes,
+      status: CaseStatuses.closed,
+    }),
+  ]);
 
-  await alertsService.updateAlertsStatus(alerts);
+  await alertsService.updateAlertsStatus(documentsToClose);
 };
 
 /**
@@ -155,10 +160,7 @@ export const push = async (
     spaceId,
     publicBaseUrl,
     usageCounter,
-    config,
   } = clientArgs;
-
-  const isCasesAttachmentsEnabled = config.attachments?.enabled === true;
 
   try {
     /* Start of push to external service */
@@ -316,12 +318,7 @@ export const push = async (
       });
 
       if (myCase.attributes.settings.syncAlerts) {
-        await changeAlertsStatusToClose(
-          myCase.id,
-          caseService,
-          alertsService,
-          isCasesAttachmentsEnabled
-        );
+        await changeAlertsStatusToClose(myCase.id, caseService, alertsService);
       }
     }
 
@@ -360,7 +357,7 @@ export const push = async (
       }),
     });
 
-    return decodeOrThrow(CaseRt)(res);
+    return decodeOrThrowZod(CaseSchema)(res);
   } catch (error) {
     throw createCaseError({ message: `Failed to push case: ${error}`, error, logger });
   }

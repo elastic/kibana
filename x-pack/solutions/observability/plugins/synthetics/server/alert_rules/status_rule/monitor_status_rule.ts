@@ -13,6 +13,7 @@ import { observabilityFeatureId, observabilityPaths } from '@kbn/observability-p
 import apm from 'elastic-apm-node';
 import { SYNTHETICS_ALERT_RULE_TYPES } from '@kbn/rule-data-utils';
 import { syntheticsMonitorStatusRuleParamsSchema } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import { PROJECT_ROUTING_ORIGIN } from '@kbn/cps-server-utils';
 import { SyntheticsEsClient } from '../../lib';
 import type { AlertOverviewStatus } from '../../../common/runtime_types/alert_rules/common';
 import type { StatusRuleExecutorOptions } from './types';
@@ -51,7 +52,7 @@ export const registerSyntheticsStatusCheckRule = (
     },
     defaultActionGroupId: MONITOR_STATUS.id,
     actionGroups: [MONITOR_STATUS],
-    actionVariables: getActionVariables({ plugins }),
+    actionVariables: getActionVariables({ plugins, ruleType: 'monitorStatus' }),
     isExportable: true,
     minimumLicenseRequired: 'basic',
     doesSetRecoveryContext: true,
@@ -79,23 +80,27 @@ export const registerSyntheticsStatusCheckRule = (
         {
           heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
           uiSettingsClient,
+          ...(server.isCpsEnabled ? { projectRouting: PROJECT_ROUTING_ORIGIN } : {}),
         }
       );
 
       const statusRule = new StatusRuleExecutor(esClient, server, syntheticsMonitorClient, options);
 
+      const prevDownConfigs = ruleState.meta?.downConfigs as AlertOverviewStatus['downConfigs'];
+      const prevPendingConfigs = ruleState.meta
+        ?.pendingConfigs as AlertOverviewStatus['pendingConfigs'];
+
       const { downConfigs, staleDownConfigs, upConfigs, pendingConfigs, stalePendingConfigs } =
         await statusRule.getConfigs({
-          prevDownConfigs: ruleState.meta?.downConfigs as AlertOverviewStatus['downConfigs'],
-          prevPendingConfigs: ruleState.meta
-            ?.pendingConfigs as AlertOverviewStatus['pendingConfigs'],
+          prevDownConfigs,
+          prevPendingConfigs,
         });
 
       await statusRule.handleDownMonitorThresholdAlert({
         downConfigs,
       });
 
-      await statusRule.handlePendingMonitorAlert({
+      const firingPendingConfigs = await statusRule.handlePendingMonitorAlert({
         pendingConfigs,
       });
 
@@ -109,11 +114,14 @@ export const registerSyntheticsStatusCheckRule = (
         groupByLocation,
         staleDownConfigs,
         stalePendingConfigs,
+        prevDownConfigs,
+        prevPendingConfigs,
+        downConfigs,
         upConfigs,
       });
 
       return {
-        state: updateState(ruleState, !isEmpty(downConfigs) || !isEmpty(pendingConfigs), {
+        state: updateState(ruleState, !isEmpty(downConfigs) || !isEmpty(firingPendingConfigs), {
           downConfigs,
           pendingConfigs,
         }),

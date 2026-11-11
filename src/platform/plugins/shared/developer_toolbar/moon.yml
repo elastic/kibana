@@ -20,15 +20,16 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/core-plugins-browser'
   - '@kbn/developer-toolbar'
-  - '@kbn/ui-chrome-layout'
+  - '@kbn/core-chrome-layout'
   - '@kbn/config-schema'
   - '@kbn/core-chrome-browser-internal-types'
+  - '@kbn/core-feature-flags-browser'
   - '@kbn/core-theme-browser-internal-types'
-  - '@kbn/core-chrome-feature-flags'
   - '@kbn/design-tools'
+  - '@kbn/i18n'
 tags:
   - plugin
-  - prod
+  - dev
   - group-undefined
 fileGroups:
   src:

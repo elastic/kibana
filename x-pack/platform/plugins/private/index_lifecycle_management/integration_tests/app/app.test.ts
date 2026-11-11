@@ -6,6 +6,7 @@
  */
 
 import { screen } from '@testing-library/react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 
 import * as hooks from '../../public/application/lib/use_is_read_only';
 import { getDefaultHotPhasePolicy } from '../edit_policy/constants';
@@ -59,7 +60,9 @@ describe('<App />', () => {
 
       await actions.clickCreatePolicyButton();
 
-      expect(await screen.findByTestId('policyTitle')).toHaveTextContent(createPolicyTitle);
+      expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        createPolicyTitle
+      );
       expect(screen.getByTestId('policyNameField')).toHaveValue('');
     });
 
@@ -69,7 +72,9 @@ describe('<App />', () => {
 
       await actions.clickCreatePolicyButton();
 
-      expect(await screen.findByTestId('policyTitle')).toHaveTextContent(createPolicyTitle);
+      expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        createPolicyTitle
+      );
       expect(screen.getByTestId('policyNameField')).toHaveValue('');
     });
   });
@@ -90,7 +95,7 @@ describe('<App />', () => {
     test('loading edit policy page url works', async () => {
       await setup(httpSetup, [getEncodedPolicyEditPath(SPECIAL_CHARS_NAME)]);
 
-      expect(await screen.findByTestId('policyTitle')).toHaveTextContent(
+      expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
         `${editPolicyTitle} ${SPECIAL_CHARS_NAME}`
       );
     });
@@ -100,7 +105,7 @@ describe('<App />', () => {
     test('loading edit policy page url with double encoding works', async () => {
       await setup(httpSetup, [getDoubleEncodedPolicyEditPath(SPECIAL_CHARS_NAME)]);
 
-      expect(await screen.findByTestId('policyTitle')).toHaveTextContent(
+      expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
         `${editPolicyTitle} ${SPECIAL_CHARS_NAME}`
       );
     });
@@ -114,7 +119,7 @@ describe('<App />', () => {
     test('loading edit policy page url works', async () => {
       await setup(httpSetup, [getEncodedPolicyEditPath(PERCENT_SIGN_NAME)]);
 
-      expect(await screen.findByTestId('policyTitle')).toHaveTextContent(
+      expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
         `${editPolicyTitle} ${PERCENT_SIGN_NAME}`
       );
     });
@@ -122,7 +127,7 @@ describe('<App />', () => {
     test('loading edit policy page url with double encoding works', async () => {
       await setup(httpSetup, [getDoubleEncodedPolicyEditPath(PERCENT_SIGN_NAME)]);
 
-      expect(await screen.findByTestId('policyTitle')).toHaveTextContent(
+      expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
         `${editPolicyTitle} ${PERCENT_SIGN_NAME}`
       );
     });
@@ -149,7 +154,7 @@ describe('<App />', () => {
       await setup(httpSetup, [getEncodedPolicyEditPath(PERCENT_SIGN_WITH_OTHER_CHARS_NAME)]);
 
       // known issue https://github.com/elastic/kibana/issues/82440
-      expect(await screen.findByTestId('policyTitle')).not.toHaveTextContent(
+      expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).not.toHaveTextContent(
         `${editPolicyTitle} ${PERCENT_SIGN_WITH_OTHER_CHARS_NAME}`
       );
     });
@@ -159,7 +164,7 @@ describe('<App />', () => {
     test('loading edit policy page url with double encoding works', async () => {
       await setup(httpSetup, [getDoubleEncodedPolicyEditPath(PERCENT_SIGN_WITH_OTHER_CHARS_NAME)]);
 
-      expect(await screen.findByTestId('policyTitle')).toHaveTextContent(
+      expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
         `${editPolicyTitle} ${PERCENT_SIGN_WITH_OTHER_CHARS_NAME}`
       );
     });
@@ -184,7 +189,7 @@ describe('<App />', () => {
       await setup(httpSetup, [getEncodedPolicyEditPath(PERCENT_SIGN_25_SEQUENCE)]);
 
       // known issue https://github.com/elastic/kibana/issues/82440
-      expect(await screen.findByTestId('policyTitle')).not.toHaveTextContent(
+      expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).not.toHaveTextContent(
         `${editPolicyTitle} ${PERCENT_SIGN_25_SEQUENCE}`
       );
     });
@@ -194,7 +199,7 @@ describe('<App />', () => {
     test('loading edit policy page url with double encoding works', async () => {
       await setup(httpSetup, [getDoubleEncodedPolicyEditPath(PERCENT_SIGN_25_SEQUENCE)]);
 
-      expect(await screen.findByTestId('policyTitle')).toHaveTextContent(
+      expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
         `${editPolicyTitle} ${PERCENT_SIGN_25_SEQUENCE}`
       );
     });

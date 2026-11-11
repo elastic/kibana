@@ -7,14 +7,41 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
+import type { IndexPattern } from '../../types';
 import type { FormulaIndexPatternColumn } from '../operations';
-import type { FormBasedLayer, FormBasedPersistedState, GenericIndexPatternColumn } from '../types';
+import type {
+  FormBasedLayer,
+  FormBasedPersistedState,
+  FormattedIndexPatternColumn,
+  GenericIndexPatternColumn,
+  TextBasedLayerColumn,
+} from '../types';
 
-function isColumnOfType<C extends GenericIndexPatternColumn>(
+export function isColumnOfType<C extends GenericIndexPatternColumn>(
   type: C['operationType'],
   column: GenericIndexPatternColumn
 ): column is C {
   return column.operationType === type;
+}
+
+export function getSafeName(name: string, indexPattern: IndexPattern | undefined): string {
+  const field = indexPattern?.getFieldByName(name);
+  return field
+    ? field.displayName
+    : i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
+        defaultMessage: 'Missing field',
+      });
+}
+
+export function isColumnFormatted(
+  column: GenericIndexPatternColumn | TextBasedLayerColumn
+): column is FormattedIndexPatternColumn | TextBasedLayerColumn {
+  return Boolean(
+    'params' in column &&
+      (column as FormattedIndexPatternColumn).params &&
+      'format' in (column as FormattedIndexPatternColumn).params!
+  );
 }
 
 export function hasStateFormulaColumn(state: FormBasedPersistedState): boolean {

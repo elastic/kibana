@@ -48,7 +48,6 @@ export const userMlCapabilities = {
   canUseMlAlerts: false,
   // Trained models
   canGetTrainedModels: false,
-  canTestTrainedModels: false,
   canGetFieldInfo: false,
   canGetMlInfo: false,
   // AIOps
@@ -91,6 +90,7 @@ export const adminMlCapabilities = {
   canCreateTrainedModels: false,
   canDeleteTrainedModels: false,
   canStartStopTrainedModels: false,
+  canTestTrainedModels: false,
   // Inference models
   canCreateInferenceEndpoint: false,
 };
@@ -157,11 +157,16 @@ export function getPluginPrivileges() {
   return {
     admin: {
       ...privilege,
-      api: ['fileUpload:analyzeFile', ...allMlCapabilitiesKeys.map((k) => `ml:${k}`)],
+      api: [
+        'fileUpload:analyzeFile',
+        'bulkGetUserProfiles',
+        ...allMlCapabilitiesKeys.map((k) => `ml:${k}`),
+      ],
       catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
       ui: allMlCapabilitiesKeys,
       savedObject: {
-        all: savedObjects,
+        // ml-module objects are only installed by Fleet, so they must not be writable by ML users
+        all: savedObjects.filter((type) => type !== ML_MODULE_SAVED_OBJECT_TYPE),
         read: savedObjects,
       },
       alerting: {
@@ -180,6 +185,7 @@ export function getPluginPrivileges() {
       ...privilege,
       api: [
         'fileUpload:analyzeFile',
+        'bulkGetUserProfiles',
         ...[...featureMlCapabilitiesKeys, ...userMlCapabilitiesKeys].map((k) => `ml:${k}`),
       ],
       catalogue: [PLUGIN_ID],

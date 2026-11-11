@@ -1,7 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/observability-ai-server",
-  "owner": "@elastic/nightshift-context-and-research-team",
-  "group": "observability",
-  "visibility": "private"
-}

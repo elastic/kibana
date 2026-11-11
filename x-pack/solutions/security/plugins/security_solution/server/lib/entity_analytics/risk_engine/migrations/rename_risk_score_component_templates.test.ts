@@ -23,8 +23,8 @@ jest.mock('../../risk_score/risk_score_data_client', () => ({
   })),
 }));
 
-jest.mock('../../risk_score/tasks/helpers', () => ({
-  buildScopedInternalSavedObjectsClientUnsafe: () => mockSavedObjectsClient.create(),
+jest.mock('../../utils/internal_saved_objects_client', () => ({
+  buildNamespacedInternalSavedObjectsClientUnsafe: () => mockSavedObjectsClient.create(),
 }));
 
 const buildSavedObjectResponse = (namespaces = ['default']) => ({
@@ -237,5 +237,41 @@ describe('renameRiskScoreComponentTemplate', () => {
       { name: '.risk-score-mappings' },
       { ignore: [404] }
     );
+  });
+
+  describe('with spaceId defined', () => {
+    it('should query only the specified space', async () => {
+      mockEsClient.cluster.existsComponentTemplate.mockResolvedValue(true);
+      mockSoClient.find.mockResolvedValue(buildSavedObjectResponse(['my-space']));
+
+      await renameRiskScoreComponentTemplate({
+        auditLogger: mockAuditLogger,
+        logger: mockLogger,
+        getStartServices: mockGetStartServices,
+        kibanaVersion: '8.0.0',
+        hasEncryptionKey: true,
+        spaceId: 'my-space',
+      });
+
+      expect(mockSoClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ namespaces: ['my-space'] })
+      );
+    });
+
+    it('should not delete the legacy component template even when migration succeeds', async () => {
+      mockEsClient.cluster.existsComponentTemplate.mockResolvedValue(true);
+      mockSoClient.find.mockResolvedValue(buildSavedObjectResponse(['my-space']));
+
+      await renameRiskScoreComponentTemplate({
+        auditLogger: mockAuditLogger,
+        logger: mockLogger,
+        getStartServices: mockGetStartServices,
+        kibanaVersion: '8.0.0',
+        hasEncryptionKey: true,
+        spaceId: 'my-space',
+      });
+
+      expect(mockEsClient.cluster.deleteComponentTemplate).not.toHaveBeenCalled();
+    });
   });
 });

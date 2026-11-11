@@ -355,14 +355,14 @@ describe('Patch rule request schema', () => {
     expect(result.data.interval).toEqual(undefined);
   });
 
-  test('defaults max_signals to 100 when omitted (Zod v4 applies defaults within optional fields)', () => {
+  test('does not default max_signals when omitted', () => {
     const payload: PatchRuleRequestBody = {
       id: 'b8f95e17-681f-407f-8a5e-b832a77d3831',
     };
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data.max_signals).toEqual(100);
+    expect(result.data.max_signals).toEqual(undefined);
   });
 
   test('references cannot be numbers', () => {
@@ -876,7 +876,7 @@ describe('Patch rule request schema', () => {
       const result = PatchRuleRequestBody.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-        `"exceptions_list.0.list_id: Invalid input: expected string, received undefined, exceptions_list.0.type: Invalid option: expected one of \\"detection\\"|\\"rule_default\\"|\\"endpoint\\"|\\"endpoint_trusted_apps\\"|\\"endpoint_trusted_devices\\"|\\"endpoint_events\\"|\\"endpoint_host_isolation_exceptions\\"|\\"endpoint_blocklists\\", exceptions_list.0.namespace_type: Invalid option: expected one of \\"agnostic\\"|\\"single\\", type: Invalid input: expected \\"eql\\", exceptions_list.0.list_id: Invalid input: expected string, received undefined, and 26 more"`
+        `"exceptions_list.0.list_id: Invalid input: expected string, received undefined, exceptions_list.0.type: Invalid option: expected one of \\"detection\\"|\\"rule_default\\"|\\"endpoint\\"|\\"endpoint_trusted_apps\\"|\\"endpoint_trusted_devices\\"|\\"endpoint_events\\"|\\"endpoint_host_isolation_exceptions\\"|\\"endpoint_blocklists\\"|\\"endpoint_custom_yara_signatures\\", exceptions_list.0.namespace_type: Invalid option: expected one of \\"agnostic\\"|\\"single\\", type: Invalid input: expected \\"eql\\", exceptions_list.0.list_id: Invalid input: expected string, received undefined, and 26 more"`
       );
     });
 

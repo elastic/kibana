@@ -22,8 +22,12 @@ const currentAppIdSubject$ = new BehaviorSubject<string>(APP_UI_ID);
 services.application.currentAppId$ = currentAppIdSubject$.asObservable();
 
 const mockDispatch = jest.fn();
+const mockGetState = jest.fn(() => ({
+  timeline: { timelineById: { [TimelineId.active]: { isSuperTimeline: false } } },
+}));
 const store = {
   dispatch: mockDispatch,
+  getState: mockGetState,
 } as unknown as SecurityAppStore;
 
 const value = 'the-value';

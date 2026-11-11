@@ -19,8 +19,6 @@ import type { ConfigType } from '../../config';
 export const CASES_INCREMENTAL_ID_SYNC_TASK_TYPE = 'cases_incremental_id_assignment';
 export const CASES_INCREMENTAL_ID_SYNC_TASK_ID = `cases:${CASES_INCREMENTAL_ID_SYNC_TASK_TYPE}`;
 
-export const CasesIncrementIdTaskVersion = '1.0.0';
-
 export class IncrementalIdTaskManager {
   private config: ConfigType['incrementalId'];
   private logger: Logger;

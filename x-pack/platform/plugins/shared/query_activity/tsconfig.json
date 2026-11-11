@@ -5,8 +5,10 @@
   },
   "include": ["common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/core",
     "@kbn/es-query",
+    "@kbn/flyout-template",
     "@kbn/i18n",
     "@kbn/management-plugin",
     "@kbn/i18n-react",

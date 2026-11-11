@@ -76,7 +76,7 @@ describe('callout', () => {
       </TestProviders>
     );
     wrapper.find('button[data-test-subj="callout-dismiss-btn"]').first().simulate('click');
-    expect(onDismiss).toBeCalledWith(message);
+    expect(onDismiss).toHaveBeenCalledWith(message);
   });
 
   test('dismissButtonText can be set', () => {

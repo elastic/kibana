@@ -23,9 +23,9 @@ export const EmptyPrompt: React.FunctionComponent<EmptyPromptProps> = ({
   readOnly = false,
 }) => (
   <KibanaPageTemplate.EmptyPrompt
-    iconType="managementApp"
+    iconType="gear"
     title={
-      <h1>
+      <h2>
         {readOnly ? (
           <FormattedMessage
             id="xpack.security.management.roleMappings.readOnlyEmptyPromptTitle"
@@ -37,7 +37,7 @@ export const EmptyPrompt: React.FunctionComponent<EmptyPromptProps> = ({
             defaultMessage="Create your first role mapping"
           />
         )}
-      </h1>
+      </h2>
     }
     body={
       <p>

@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { mount, type ComponentType as EnzymeComponentType } from 'enzyme';
 import React from 'react';
+import type { RenderResult } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { AGENT_API_ROUTES, PACKAGE_POLICY_API_ROOT } from '@kbn/fleet-plugin/common';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useLicense as _useLicense } from '../../../../common/hooks/use_license';
@@ -20,11 +23,13 @@ import {
   getEndpointListPath,
   getPoliciesPath,
   getPolicyBlocklistsPath,
+  getPolicyCustomYaraSignaturesPath,
   getPolicyDetailPath,
   getPolicyEndpointExceptionsPath,
   getPolicyEventFiltersPath,
   getPolicyHostIsolationExceptionsPath,
   getPolicyTrustedAppsPath,
+  getPolicyTrustedDevicesPath,
 } from '../../../common/routing';
 import { policyListApiPathHandlers } from '../store/test_mock_utils';
 import { PolicyDetails } from './policy_details';
@@ -32,6 +37,7 @@ import { APP_UI_ID } from '../../../../../common/constants';
 import { createLicenseServiceMock } from '../../../../../common/license/mocks';
 import { licenseService as licenseServiceMocked } from '../../../../common/hooks/__mocks__/use_license';
 import { useHostIsolationExceptionsAccess } from '../../../hooks/artifacts/use_host_isolation_exceptions_access';
+import { getUserPrivilegesMockDefaultValue } from '../../../../common/components/user_privileges/__mocks__';
 
 jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../../common/hooks/use_license');
@@ -46,24 +52,26 @@ describe('Policy Details', () => {
   const policyListPath = getPoliciesPath();
   const sleep = (ms = 100) => new Promise((wakeup) => setTimeout(wakeup, ms));
   const generator = new EndpointDocGenerator();
+  let mockedContext: AppContextTestRender;
   let history: AppContextTestRender['history'];
   let coreStart: AppContextTestRender['coreStart'];
   let middlewareSpy: AppContextTestRender['middlewareSpy'];
   let setExperimentalFlag: AppContextTestRender['setExperimentalFlag'];
   let http: typeof coreStart.http;
-  let render: () => ReturnType<typeof mount>;
+  let render: () => RenderResult;
   let policyPackagePolicy: ReturnType<typeof generator.generatePolicyPackagePolicy>;
-  let policyView: ReturnType<typeof render>;
+  let renderResult: RenderResult;
 
   beforeAll(() => resetReactDomCreatePortalMock());
 
   beforeEach(() => {
-    const appContextMockRenderer = createAppRootMockRenderer();
-    const AppWrapper = appContextMockRenderer.AppWrapper;
+    mockedContext = createAppRootMockRenderer();
 
-    ({ history, coreStart, middlewareSpy, setExperimentalFlag } = appContextMockRenderer);
-    render = () =>
-      mount(<PolicyDetails />, { wrappingComponent: AppWrapper as EnzymeComponentType<{}> });
+    ({ history, coreStart, middlewareSpy, setExperimentalFlag } = mockedContext);
+    render = () => {
+      renderResult = mockedContext.render(<PolicyDetails />);
+      return renderResult;
+    };
     http = coreStart.http;
   });
 
@@ -76,23 +84,27 @@ describe('Policy Details', () => {
           releaseApiFailure = reject.bind(null, new Error('policy not found'));
         });
       });
-      history.push(policyDetailsPathUrl);
-      policyView = render();
+      act(() => {
+        history.push(policyDetailsPathUrl);
+      });
+      renderResult = render();
     });
 
-    it('should NOT display timeline', async () => {
-      expect(policyView.find('timeline-bottom-bar-title-button')).toHaveLength(0);
+    it('should NOT display timeline', () => {
+      expect(
+        renderResult.queryByTestId('timeline-bottom-bar-title-button')
+      ).not.toBeInTheDocument();
     });
 
     it('should show loader followed by error message', async () => {
-      expect(policyView.find('EuiLoadingSpinner').length).toBe(1);
+      expect(renderResult.getByTestId('policyDetailsLoading')).toBeInTheDocument();
+
       releaseApiFailure();
       await middlewareSpy.waitForAction('serverFailedToReturnPolicyDetailsData');
-      policyView.update();
-      const callout = policyView.find('EuiCallOut');
-      expect(callout).toHaveLength(1);
-      expect(callout.prop('color')).toEqual('danger');
-      expect(callout.text()).toEqual('policy not found');
+
+      const errorMessage = await renderResult.findByTestId('policyDetailsIdNotFoundMessage');
+      expect(errorMessage).toHaveTextContent('policy not found');
+      expect(errorMessage.closest('.euiCallOut--danger')).not.toBeNull();
     });
   });
 
@@ -126,7 +138,7 @@ describe('Policy Details', () => {
           if (path === `${AGENT_API_ROUTES.STATUS_PATTERN}`) {
             asyncActions = asyncActions.then(async () => sleep());
             return Promise.resolve({
-              results: { events: 0, active: 5, online: 3, error: 1, offline: 1 },
+              results: { events: 0, active: 7, online: 3, error: 1, offline: 1 },
               success: true,
             });
           }
@@ -141,7 +153,9 @@ describe('Policy Details', () => {
 
         return Promise.reject(new Error(`unknown API call (not MOCKED): ${path}`));
       });
-      history.push(policyDetailsPathUrl);
+      act(() => {
+        history.push(policyDetailsPathUrl);
+      });
     });
 
     it('should NOT display tabs when Host Isolation Exceptions access is loading', async () => {
@@ -149,13 +163,11 @@ describe('Policy Details', () => {
         hasAccessToHostIsolationExceptions: false,
         isHostIsolationExceptionsAccessLoading: true,
       });
-      policyView = render();
+      renderResult = render();
       await asyncActions;
-      policyView.update();
-      const tab = policyView.find('[data-test-subj="policyTabs"]');
-      expect(tab).toHaveLength(0);
-      const loader = policyView.find('span[data-test-subj="privilegesLoading"]');
-      expect(loader).toHaveLength(1);
+
+      expect(renderResult.queryByRole('tablist')).not.toBeInTheDocument();
+      expect(renderResult.getByTestId('privilegesLoading')).toBeInTheDocument();
     });
 
     it('should display tabs when Host Isolation Exceptions access is not loading', async () => {
@@ -163,43 +175,46 @@ describe('Policy Details', () => {
         hasAccessToHostIsolationExceptions: true,
         isHostIsolationExceptionsAccessLoading: false,
       });
-      policyView = render();
+      renderResult = render();
       await asyncActions;
-      policyView.update();
-      const tab = policyView.find('div[data-test-subj="policyTabs"]');
-      expect(tab).toHaveLength(1);
-      const loader = policyView.find('div[data-test-subj="privilegesLoading"]');
-      expect(loader).toHaveLength(0);
+
+      await waitFor(() => {
+        expect(renderResult.getByRole('tablist')).toBeInTheDocument();
+      });
+      expect(renderResult.queryByTestId('privilegesLoading')).not.toBeInTheDocument();
     });
 
     it('should NOT display timeline', async () => {
-      policyView = render();
+      renderResult = render();
       await asyncActions;
-      expect(policyView.find('timeline-bottom-bar-title-button')).toHaveLength(0);
+      expect(
+        renderResult.queryByTestId('timeline-bottom-bar-title-button')
+      ).not.toBeInTheDocument();
     });
 
     it('should display back to policy list button and policy title', async () => {
-      policyView = render();
+      renderResult = render();
       await asyncActions;
-      policyView.update();
 
-      const backToListLink = policyView.find('BackToExternalAppButton');
-      expect(backToListLink.prop('backButtonUrl')).toBe(`/app/security${policyListPath}`);
-      expect(backToListLink.text()).toBe('Back to policy list');
+      const backButton = await renderResult.findByTestId(APP_HEADER_TEST_SUBJECTS.back);
+      expect(backButton).toHaveAttribute('href', `/app/security${policyListPath}`);
+      // Destination-only label ("Policies"); the header renders the "Back to " prefix itself.
+      expect(backButton).toHaveAccessibleName('Back to Policies');
 
-      const pageTitle = policyView.find('span[data-test-subj="header-page-title"]');
-      expect(pageTitle).toHaveLength(1);
-      expect(pageTitle.text()).toEqual(policyPackagePolicy.name);
+      const pageTitle = renderResult.getByTestId(APP_HEADER_TEST_SUBJECTS.title);
+      expect(pageTitle).toHaveTextContent(policyPackagePolicy.name);
     });
 
     it('should navigate to list if back to link is clicked', async () => {
-      policyView = render();
+      const user = userEvent.setup();
+      renderResult = render();
       await asyncActions;
-      policyView.update();
 
-      const backToListLink = policyView.find('a[data-test-subj="policyDetailsBackLink"]');
+      const backButton = await renderResult.findByTestId(APP_HEADER_TEST_SUBJECTS.back);
       expect(history.location.pathname).toEqual(policyDetailsPathUrl);
-      backToListLink.simulate('click', { button: 0 });
+
+      await user.click(backButton);
+
       expect(history.location.pathname).toEqual(policyListPath);
     });
 
@@ -212,47 +227,80 @@ describe('Policy Details', () => {
               path: getEndpointListPath({ name: 'endpointList' }),
             },
           ],
-          label: 'View all endpoints',
+          label: 'Endpoints',
           href: '/app/security/administration/endpoints',
         },
       };
 
-      history.push({ pathname: policyDetailsPathUrl, state: customBackLinkState });
-      policyView = render();
+      act(() => {
+        history.push({ pathname: policyDetailsPathUrl, state: customBackLinkState });
+      });
+      renderResult = render();
       await asyncActions;
-      policyView.update();
 
-      const backToListLink = policyView.find('BackToExternalAppButton');
-      expect(backToListLink.prop('backButtonUrl')).toBe(`/app/security/administration/endpoints`);
-      expect(backToListLink.text()).toBe('View all endpoints');
+      const backButton = await renderResult.findByTestId(APP_HEADER_TEST_SUBJECTS.back);
+      expect(backButton).toHaveAttribute('href', '/app/security/administration/endpoints');
+      expect(backButton).toHaveAccessibleName('Back to Endpoints');
     });
 
-    it('should display agent stats', async () => {
-      policyView = render();
+    it('should reset the back button to Policies when navigating to a route without backLink state', async () => {
+      act(() => {
+        history.push({
+          pathname: policyDetailsPathUrl,
+          state: {
+            backLink: {
+              navigateTo: [APP_UI_ID, { path: getEndpointListPath({ name: 'endpointList' }) }],
+              label: 'Endpoints',
+              href: '/app/security/administration/endpoints',
+            },
+          },
+        });
+      });
+      renderResult = render();
       await asyncActions;
-      policyView.update();
+      expect(await renderResult.findByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAccessibleName(
+        'Back to Endpoints'
+      );
 
-      const agentsSummary = policyView.find('EuiFlexGroup[data-test-subj="policyAgentsSummary"]');
-      expect(agentsSummary).toHaveLength(1);
-      expect(agentsSummary.text()).toBe('Total agents5Healthy3Unhealthy1Offline1');
+      act(() => {
+        history.push({ pathname: policyDetailsPathUrl });
+      });
+
+      const backButton = await renderResult.findByTestId(APP_HEADER_TEST_SUBJECTS.back);
+      expect(backButton).toHaveAccessibleName('Back to Policies');
+      expect(backButton).toHaveAttribute('href', `/app/security${policyListPath}`);
+    });
+
+    it('should display Total, Healthy and Unhealthy agent counts as header metadata', async () => {
+      renderResult = render();
+      await asyncActions;
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('policyAgentsSummary-total')).toHaveTextContent('Total: 7');
+      });
+      expect(renderResult.getByTestId('policyAgentsSummary-healthy')).toHaveTextContent(
+        'Healthy: 3'
+      );
+      expect(renderResult.getByTestId('policyAgentsSummary-unhealthy')).toHaveTextContent(
+        'Unhealthy: 1'
+      );
     });
 
     it('should display event filters tab', async () => {
-      policyView = render();
+      renderResult = render();
       await asyncActions;
-      policyView.update();
 
-      const eventFiltersTab = policyView.find('button#eventFilters');
-      expect(eventFiltersTab).toHaveLength(1);
-      expect(eventFiltersTab.text()).toBe('Event filters');
+      const eventFiltersTab = await renderResult.findByTestId('policyEventFiltersTab');
+      expect(eventFiltersTab).toHaveTextContent('Event filters');
     });
 
     it('should display the host isolation exceptions tab if user have access', async () => {
-      policyView = render();
+      renderResult = render();
       await asyncActions;
-      policyView.update();
-      const tab = policyView.find('button[data-test-subj="policyHostIsolationExceptionsTab"]');
-      expect(tab).toHaveLength(1);
+
+      expect(
+        await renderResult.findByTestId('policyHostIsolationExceptionsTab')
+      ).toBeInTheDocument();
     });
 
     it("shouldn't display the host isolation exceptions tab when user doesn't have access", async () => {
@@ -260,20 +308,144 @@ describe('Policy Details', () => {
         hasAccessToHostIsolationExceptions: false,
         isHostIsolationExceptionsAccessLoading: false,
       });
-      policyView = render();
+      renderResult = render();
       await asyncActions;
-      policyView.update();
-      const tab = policyView.find('button[data-test-subj="policyHostIsolationExceptionsTab"]');
-      expect(tab).toHaveLength(0);
+
+      await waitFor(() => {
+        expect(renderResult.getByRole('tablist')).toBeInTheDocument();
+      });
+      expect(
+        renderResult.queryByTestId('policyHostIsolationExceptionsTab')
+      ).not.toBeInTheDocument();
     });
 
     it('should display the protection updates tab', async () => {
-      policyView = render();
+      renderResult = render();
       await asyncActions;
-      policyView.update();
-      const tab = policyView.find('button#protectionUpdates');
-      expect(tab).toHaveLength(1);
-      expect(tab.text()).toBe('Protection updates');
+
+      const tab = await renderResult.findByTestId('policyProtectionUpdatesTab');
+      expect(tab).toHaveTextContent('Protection updates');
+    });
+
+    describe('trusted devices tab', () => {
+      const renderWithTrustedDevicesPrivilege = async (canReadTrustedDevices: boolean) => {
+        setExperimentalFlag({ trustedDevices: true });
+        useUserPrivilegesMock.mockReturnValue({
+          endpointPrivileges: {
+            loading: false,
+            canReadTrustedDevices,
+          },
+        });
+        renderResult = render();
+        await asyncActions;
+        await waitFor(() => {
+          expect(renderResult.getByRole('tablist')).toBeInTheDocument();
+        });
+      };
+
+      afterEach(() => {
+        useUserPrivilegesMock.mockImplementation(getUserPrivilegesMockDefaultValue);
+      });
+
+      it('should not display the trusted devices tab with no privileges', async () => {
+        await renderWithTrustedDevicesPrivilege(false);
+        expect(renderResult.queryByTestId('policyTrustedDevicesTab')).not.toBeInTheDocument();
+      });
+
+      it('should display the trusted devices tab with the correct privilege', async () => {
+        await renderWithTrustedDevicesPrivilege(true);
+        expect(renderResult.getByTestId('policyTrustedDevicesTab')).toBeInTheDocument();
+      });
+
+      it('should redirect to policy details when no trusted devices required privilege', async () => {
+        act(() => {
+          history.push(getPolicyTrustedDevicesPath('1'));
+        });
+        await renderWithTrustedDevicesPrivilege(false);
+        expect(history.location.pathname).toBe(policyDetailsPathUrl);
+        expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
+        expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
+          'You do not have the required Kibana permissions to use the given artifact.'
+        );
+      });
+
+      it('should not display trusted devices without the feature flag enabled', async () => {
+        setExperimentalFlag({ trustedDevices: false });
+        useUserPrivilegesMock.mockReturnValue({
+          endpointPrivileges: {
+            loading: false,
+            canReadTrustedDevices: true,
+          },
+        });
+        renderResult = render();
+        await asyncActions;
+        await waitFor(() => {
+          expect(renderResult.getByRole('tablist')).toBeInTheDocument();
+        });
+        expect(renderResult.queryByTestId('policyTrustedDevicesTab')).not.toBeInTheDocument();
+      });
+    });
+
+    describe('custom YARA signatures tab', () => {
+      const renderWithCustomYaraPrivilege = async (canReadCustomYaraSignatures: boolean) => {
+        setExperimentalFlag({ customYaraSignaturesEnabled: true });
+        useUserPrivilegesMock.mockReturnValue({
+          endpointPrivileges: {
+            loading: false,
+            canReadCustomYaraSignatures,
+          },
+        });
+        renderResult = render();
+        await asyncActions;
+        await waitFor(() => {
+          expect(renderResult.getByRole('tablist')).toBeInTheDocument();
+        });
+      };
+
+      afterEach(() => {
+        setExperimentalFlag({ customYaraSignaturesEnabled: false });
+        useUserPrivilegesMock.mockImplementation(getUserPrivilegesMockDefaultValue);
+      });
+
+      it('should not display the custom YARA signatures tab with no privileges', async () => {
+        await renderWithCustomYaraPrivilege(false);
+        expect(renderResult.queryByTestId('policyCustomYaraSignaturesTab')).not.toBeInTheDocument();
+      });
+
+      it('should display the custom YARA signatures tab with the correct privilege', async () => {
+        await renderWithCustomYaraPrivilege(true);
+        expect(renderResult.getByTestId('policyCustomYaraSignaturesTab')).toHaveTextContent(
+          'Custom YARA signatures'
+        );
+      });
+
+      it('should redirect to policy details when no custom YARA signatures required privilege', async () => {
+        act(() => {
+          history.push(getPolicyCustomYaraSignaturesPath('1'));
+        });
+        await renderWithCustomYaraPrivilege(false);
+        expect(history.location.pathname).toBe(policyDetailsPathUrl);
+        expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
+        expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
+          'You do not have the required Kibana permissions to use the given artifact.'
+        );
+      });
+
+      it('should not display custom YARA signatures without the feature flag enabled', async () => {
+        setExperimentalFlag({ customYaraSignaturesEnabled: false });
+        useUserPrivilegesMock.mockReturnValue({
+          endpointPrivileges: {
+            loading: false,
+            canReadCustomYaraSignatures: true,
+          },
+        });
+        renderResult = render();
+        await asyncActions;
+        await waitFor(() => {
+          expect(renderResult.getByRole('tablist')).toBeInTheDocument();
+        });
+        expect(renderResult.queryByTestId('policyCustomYaraSignaturesTab')).not.toBeInTheDocument();
+      });
     });
 
     describe('without enterprise license', () => {
@@ -293,11 +465,12 @@ describe('Policy Details', () => {
       });
 
       it('should not display the protection updates tab', async () => {
-        policyView = render();
+        renderResult = render();
         await asyncActions;
-        policyView.update();
-        const tab = policyView.find('button#protectionUpdates');
-        expect(tab).toHaveLength(0);
+        await waitFor(() => {
+          expect(renderResult.getByRole('tablist')).toBeInTheDocument();
+        });
+        expect(renderResult.queryByTestId('policyProtectionUpdatesTab')).not.toBeInTheDocument();
       });
 
       describe('without required permissions', () => {
@@ -308,39 +481,45 @@ describe('Policy Details', () => {
               [privilege]: value,
             },
           });
-          policyView = render();
+          renderResult = render();
           await asyncActions;
-          policyView.update();
+          await waitFor(() => {
+            expect(renderResult.getByRole('tablist')).toBeInTheDocument();
+          });
         };
 
         it.each([
-          ['trusted apps', 'canReadTrustedApplications', 'trustedApps'],
-          ['event filters', 'canReadEventFilters', 'eventFilters'],
-          ['host isolation exeptions', 'canReadHostIsolationExceptions', 'hostIsolationExceptions'],
-          ['blocklist', 'canReadBlocklist', 'blocklists'],
-          ['endpoint exceptions', 'canReadEndpointExceptions', 'endpointExceptions'],
+          ['trusted apps', 'canReadTrustedApplications', 'policyTrustedAppsTab'],
+          ['event filters', 'canReadEventFilters', 'policyEventFiltersTab'],
+          [
+            'host isolation exeptions',
+            'canReadHostIsolationExceptions',
+            'policyHostIsolationExceptionsTab',
+          ],
+          ['blocklist', 'canReadBlocklist', 'policyBlocklistTab'],
+          ['endpoint exceptions', 'canReadEndpointExceptions', 'policyEndpointExceptionsTab'],
         ])(
           'should not display the %s tab with no privileges',
-          async (_: string, privilege: string, selector: string) => {
+          async (_: string, privilege: string, dataTestSubj: string) => {
             setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
 
             await renderWithPrivilege(privilege, false);
-            expect(policyView.find(`button#${selector}`)).toHaveLength(0);
+            expect(renderResult.queryByTestId(dataTestSubj)).not.toBeInTheDocument();
           }
         );
 
         it.each([
-          ['trusted apps', 'canReadTrustedApplications', 'trustedApps'],
-          ['event filters', 'canReadEventFilters', 'eventFilters'],
-          ['blocklist', 'canReadBlocklist', 'blocklists'],
-          ['endpoint exceptions', 'canReadEndpointExceptions', 'endpointExceptions'],
+          ['trusted apps', 'canReadTrustedApplications', 'policyTrustedAppsTab'],
+          ['event filters', 'canReadEventFilters', 'policyEventFiltersTab'],
+          ['blocklist', 'canReadBlocklist', 'policyBlocklistTab'],
+          ['endpoint exceptions', 'canReadEndpointExceptions', 'policyEndpointExceptionsTab'],
         ])(
-          'should display the %s tab with  the correct privilege',
-          async (_: string, privilege: string, selector: string) => {
+          'should display the %s tab with the correct privilege',
+          async (_: string, privilege: string, dataTestSubj: string) => {
             setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
 
             await renderWithPrivilege(privilege, true);
-            expect(policyView.find(`button#${selector}`)).toHaveLength(1);
+            expect(renderResult.getByTestId(dataTestSubj)).toBeInTheDocument();
           }
         );
 
@@ -348,7 +527,7 @@ describe('Policy Details', () => {
           setExperimentalFlag({ endpointExceptionsMovedUnderManagement: false });
 
           await renderWithPrivilege('canReadEndpointExceptions', true);
-          expect(policyView.find('button#endpointExceptions')).toHaveLength(0);
+          expect(renderResult.queryByTestId('policyEndpointExceptionsTab')).not.toBeInTheDocument();
         });
 
         it.each([
@@ -370,7 +549,9 @@ describe('Policy Details', () => {
           async (_: string, privilege: string, path: string) => {
             setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
 
-            history.push(path);
+            act(() => {
+              history.push(path);
+            });
             await renderWithPrivilege(privilege, false);
             expect(history.location.pathname).toBe(policyDetailsPathUrl);
             expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);

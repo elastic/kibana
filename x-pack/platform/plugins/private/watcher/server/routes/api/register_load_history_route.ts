@@ -14,7 +14,7 @@ import type { RouteDependencies } from '../../types';
 import { WatchHistoryItem } from '../../models/watch_history_item';
 
 const paramsSchema = schema.object({
-  id: schema.string(),
+  id: schema.string({ maxLength: 1000 }),
 });
 
 function fetchHistoryItem(dataClient: IScopedClusterClient, watchHistoryItemId: string) {

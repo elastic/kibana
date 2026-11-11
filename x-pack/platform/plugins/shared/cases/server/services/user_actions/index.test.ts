@@ -318,7 +318,7 @@ describe('CaseUserActionService', () => {
             },
           });
 
-          expect(mockAuditLogger.log).toBeCalledTimes(1);
+          expect(mockAuditLogger.log).toHaveBeenCalledTimes(1);
           expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
             Array [
               Object {
@@ -381,7 +381,7 @@ describe('CaseUserActionService', () => {
               },
             });
 
-            expect(mockAuditLogger.log).toBeCalledTimes(1);
+            expect(mockAuditLogger.log).toHaveBeenCalledTimes(1);
             expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
               Array [
                 Object {
@@ -445,7 +445,7 @@ describe('CaseUserActionService', () => {
               },
             });
 
-            expect(mockAuditLogger.log).toBeCalledTimes(1);
+            expect(mockAuditLogger.log).toHaveBeenCalledTimes(1);
             expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
               Array [
                 Object {
@@ -528,7 +528,7 @@ describe('CaseUserActionService', () => {
               },
             });
 
-            expect(mockAuditLogger.log).toBeCalledTimes(1);
+            expect(mockAuditLogger.log).toHaveBeenCalledTimes(1);
             expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
               Array [
                 Object {
@@ -615,7 +615,7 @@ describe('CaseUserActionService', () => {
               },
             });
 
-            expect(mockAuditLogger.log).toBeCalledTimes(1);
+            expect(mockAuditLogger.log).toHaveBeenCalledTimes(1);
             expect(mockAuditLogger.log.mock.calls[0]).toMatchSnapshot();
           });
         });
@@ -955,7 +955,7 @@ describe('CaseUserActionService', () => {
           builtUserActions,
         });
 
-        expect(mockAuditLogger.log).toBeCalledTimes(9);
+        expect(mockAuditLogger.log).toHaveBeenCalledTimes(9);
         expect(mockAuditLogger.log.mock.calls).toMatchInlineSnapshot(`
           Array [
             Array [
@@ -1207,7 +1207,7 @@ describe('CaseUserActionService', () => {
           builtUserActions: assigneesAddedUserActions,
         });
 
-        expect(mockAuditLogger.log).toBeCalledTimes(1);
+        expect(mockAuditLogger.log).toHaveBeenCalledTimes(1);
         expect(mockAuditLogger.log.mock.calls).toMatchInlineSnapshot(`
           Array [
             Array [
@@ -1291,7 +1291,7 @@ describe('CaseUserActionService', () => {
           builtUserActions: assigneesRemovedUserActions,
         });
 
-        expect(mockAuditLogger.log).toBeCalledTimes(1);
+        expect(mockAuditLogger.log).toHaveBeenCalledTimes(1);
         expect(mockAuditLogger.log.mock.calls).toMatchInlineSnapshot(`
           Array [
             Array [
@@ -1405,7 +1405,7 @@ describe('CaseUserActionService', () => {
           builtUserActions: assigneesAddedRemovedUserActions,
         });
 
-        expect(mockAuditLogger.log).toBeCalledTimes(2);
+        expect(mockAuditLogger.log).toHaveBeenCalledTimes(2);
         expect(mockAuditLogger.log.mock.calls).toMatchInlineSnapshot(`
           Array [
             Array [
@@ -1537,7 +1537,7 @@ describe('CaseUserActionService', () => {
           builtUserActions: tagsAddedRemovedUserActions,
         });
 
-        expect(mockAuditLogger.log).toBeCalledTimes(2);
+        expect(mockAuditLogger.log).toHaveBeenCalledTimes(2);
         expect(mockAuditLogger.log.mock.calls).toMatchInlineSnapshot(`
           Array [
             Array [
@@ -1654,7 +1654,7 @@ describe('CaseUserActionService', () => {
           attachments,
         });
 
-        expect(mockAuditLogger.log).toBeCalledTimes(2);
+        expect(mockAuditLogger.log).toHaveBeenCalledTimes(2);
         expect(mockAuditLogger.log.mock.calls).toMatchInlineSnapshot(`
           Array [
             Array [
@@ -1701,6 +1701,81 @@ describe('CaseUserActionService', () => {
             ],
           ]
         `);
+      });
+    });
+
+    describe('bulkCreateAttachmentBulkDeletion', () => {
+      it('creates one user action per attachment type', async () => {
+        await service.creator.bulkCreateAttachmentBulkDeletion({
+          ...commonArgs,
+          deletions: [
+            {
+              attachmentType: 'security.alert',
+              count: 3,
+              attachments: [{ id: 'attachment-1', savedObjectType: 'cases-comments' }],
+            },
+            {
+              attachmentType: 'file',
+              count: 1,
+              attachments: [{ id: 'attachment-2', savedObjectType: 'cases-attachments' }],
+            },
+          ],
+        });
+
+        const [userActions] = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0];
+        expect(userActions.map(({ attributes }) => attributes)).toEqual([
+          expect.objectContaining({
+            action: 'delete',
+            type: 'bulkAttachments',
+            payload: { bulkAttachments: { attachmentType: 'security.alert', count: 3 } },
+          }),
+          expect.objectContaining({
+            action: 'delete',
+            type: 'bulkAttachments',
+            payload: { bulkAttachments: { attachmentType: 'file', count: 1 } },
+          }),
+        ]);
+      });
+
+      it('audits each deleted attachment by its saved object id', async () => {
+        await service.creator.bulkCreateAttachmentBulkDeletion({
+          ...commonArgs,
+          deletions: [
+            {
+              attachmentType: 'file',
+              count: 2,
+              attachments: [
+                { id: 'attachment-1', savedObjectType: 'cases-attachments' },
+                { id: 'attachment-2', savedObjectType: 'cases-attachments' },
+              ],
+            },
+          ],
+        });
+
+        expect(mockAuditLogger.log.mock.calls.map(([event]) => event)).toEqual([
+          expect.objectContaining({
+            event: expect.objectContaining({ action: 'case_user_action_delete_attachments' }),
+            kibana: { saved_object: { id: '123', type: 'cases' } },
+          }),
+          expect.objectContaining({
+            event: expect.objectContaining({ action: 'case_user_action_delete_comment' }),
+            kibana: { saved_object: { id: 'attachment-1', type: 'cases-attachments' } },
+            message: 'User deleted comment id: attachment-1 for case id: 123 - user action id: 0',
+          }),
+          expect.objectContaining({
+            event: expect.objectContaining({ action: 'case_user_action_delete_comment' }),
+            kibana: { saved_object: { id: 'attachment-2', type: 'cases-attachments' } },
+          }),
+        ]);
+      });
+
+      it('skips attachment types with no deletions', async () => {
+        await service.creator.bulkCreateAttachmentBulkDeletion({
+          ...commonArgs,
+          deletions: [{ attachmentType: 'file', count: 0, attachments: [] }],
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
       });
     });
 
@@ -1883,7 +1958,7 @@ describe('CaseUserActionService', () => {
             unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
 
             await expect(service.getAll('1')).rejects.toThrowErrorMatchingInlineSnapshot(
-              `"Invalid value \\"undefined\\" supplied to \\"payload\\""`
+              `"type: Invalid input: expected \\"create_case\\", payload: Invalid input: expected object, received undefined, type: Invalid input: expected \\"connector\\", payload: Invalid input: expected object, received undefined, type: Invalid input: expected \\"pushed\\", and 32 more"`
             );
           });
 
@@ -1956,7 +2031,7 @@ describe('CaseUserActionService', () => {
             soSerializerMock.rawToSavedObject.mockReturnValue(userActionWithOmittedAttribute);
 
             await expect(service.getConnectorFieldsBeforeLatestPush('1', pushes)).rejects.toThrow(
-              `Invalid value "undefined" supplied to "${key}"`
+              `Invalid`
             );
           });
 
@@ -1973,7 +2048,7 @@ describe('CaseUserActionService', () => {
             soSerializerMock.rawToSavedObject.mockReturnValue(userActionWithOmittedAttribute);
 
             await expect(service.getConnectorFieldsBeforeLatestPush('1', pushes)).rejects.toThrow(
-              'Invalid value "undefined" supplied to "payload,title"'
+              'Invalid'
             );
           });
 
@@ -1993,7 +2068,7 @@ describe('CaseUserActionService', () => {
             soSerializerMock.rawToSavedObject.mockReturnValue(userActionWithOmittedAttribute);
 
             await expect(service.getConnectorFieldsBeforeLatestPush('1', pushes)).rejects.toThrow(
-              'Invalid value "undefined" supplied to "payload,connector,fields,issueType",Invalid value "{"priority":"high","parent":"2"}" supplied to "payload,connector,fields"'
+              'Invalid'
             );
           });
 
@@ -2057,9 +2132,7 @@ describe('CaseUserActionService', () => {
             const soFindRes = createSOFindResponse([{ ...userAction, attributes, score: 0 }]);
             unsecuredSavedObjectsClient.find.mockResolvedValue(soFindRes);
 
-            await expect(service.getMostRecentUserAction('123')).rejects.toThrow(
-              `Invalid value "undefined" supplied to "${key}"`
-            );
+            await expect(service.getMostRecentUserAction('123')).rejects.toThrow(`Invalid`);
           });
 
           it('throws if missing attributes from the payload', async () => {
@@ -2068,9 +2141,7 @@ describe('CaseUserActionService', () => {
             const soFindRes = createSOFindResponse([{ ...userAction, attributes, score: 0 }]);
             unsecuredSavedObjectsClient.find.mockResolvedValue(soFindRes);
 
-            await expect(service.getMostRecentUserAction('123')).rejects.toThrow(
-              'Invalid value "undefined" supplied to "payload,title"'
-            );
+            await expect(service.getMostRecentUserAction('123')).rejects.toThrow('Invalid');
           });
 
           it('throws if missing nested attributes from the payload', async () => {
@@ -2082,9 +2153,7 @@ describe('CaseUserActionService', () => {
             const soFindRes = createSOFindResponse([{ ...userAction, attributes, score: 0 }]);
             unsecuredSavedObjectsClient.find.mockResolvedValue(soFindRes);
 
-            await expect(service.getMostRecentUserAction('123')).rejects.toThrow(
-              'Invalid value "undefined" supplied to "payload,connector,fields,issueType",Invalid value "{"priority":"high","parent":"2"}" supplied to "payload,connector,fields"'
-            );
+            await expect(service.getMostRecentUserAction('123')).rejects.toThrow('Invalid');
           });
 
           it('strips out excess attributes', async () => {
@@ -2370,9 +2439,7 @@ describe('CaseUserActionService', () => {
               unsecuredSavedObjectsClient.find.mockResolvedValue({ ...soFindRes, aggregations });
               soSerializerMock.rawToSavedObject.mockReturnValue(userActionWithOmittedAttribute);
 
-              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow(
-                `Invalid value "undefined" supplied to "${key}"`
-              );
+              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow(`Invalid`);
             });
 
             it('throws if missing attributes from the payload', async () => {
@@ -2388,9 +2455,7 @@ describe('CaseUserActionService', () => {
               unsecuredSavedObjectsClient.find.mockResolvedValue({ ...soFindRes, aggregations });
               soSerializerMock.rawToSavedObject.mockReturnValue(userActionWithOmittedAttribute);
 
-              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow(
-                'Invalid value "undefined" supplied to "payload,title"'
-              );
+              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow('Invalid');
             });
 
             it('throws if missing nested attributes from the payload', async () => {
@@ -2409,9 +2474,7 @@ describe('CaseUserActionService', () => {
               unsecuredSavedObjectsClient.find.mockResolvedValue({ ...soFindRes, aggregations });
               soSerializerMock.rawToSavedObject.mockReturnValue(userActionWithOmittedAttribute);
 
-              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow(
-                'Invalid value "undefined" supplied to "payload,connector,fields,issueType",Invalid value "{"priority":"high","parent":"2"}" supplied to "payload,connector,fields"'
-              );
+              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow('Invalid');
             });
 
             it('strips out excess attributes', async () => {
@@ -2543,9 +2606,7 @@ describe('CaseUserActionService', () => {
                 pushActionActionWithOmittedAttribute
               );
 
-              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow(
-                `Invalid value "undefined" supplied to "${key}"`
-              );
+              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow(`Invalid`);
             });
 
             it('throws if missing attributes from the payload', async () => {
@@ -2571,9 +2632,7 @@ describe('CaseUserActionService', () => {
                 pushActionActionWithOmittedAttribute
               );
 
-              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow(
-                'Invalid value "undefined" supplied to "payload,externalService"'
-              );
+              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow('Invalid');
             });
 
             it('throws if missing nested attributes from the payload', async () => {
@@ -2602,9 +2661,7 @@ describe('CaseUserActionService', () => {
                 pushActionActionWithOmittedAttribute
               );
 
-              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow(
-                'Invalid value "undefined" supplied to "payload,externalService,external_id"'
-              );
+              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow('Invalid');
             });
 
             it('strips out excess attributes', async () => {

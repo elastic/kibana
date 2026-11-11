@@ -34,3 +34,4 @@ node_modules
 .eslintrc.json
 
 yarn.lock
+pnpm-lock.yaml

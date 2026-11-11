@@ -9,6 +9,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
   IndicesCreateRequest,
   IndicesCreateResponse,
+  IndicesIndexSettings,
 } from '@elastic/elasticsearch/lib/api/types';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 
@@ -71,8 +72,11 @@ export const createOrUpdateIndex = async ({
 
       await Promise.all([...mappingPromises, ...settingPromises]);
     } else {
+      const { auto_expand_replicas: autoExpandReplicas, ...createSettings } =
+        options.settings ?? {};
+
       try {
-        await esClient.indices.create(options);
+        await esClient.indices.create({ ...options, settings: createSettings });
       } catch (err) {
         // If the index already exists, we can ignore the error
         if (err?.meta?.body?.error?.type === 'resource_already_exists_exception') {
@@ -81,11 +85,42 @@ export const createOrUpdateIndex = async ({
           throw err;
         }
       }
+
+      if (autoExpandReplicas !== undefined) {
+        await applyAutoExpandReplicasSettings(esClient, logger, options.index, autoExpandReplicas);
+      }
     }
   } catch (err) {
     const error = transformError(err);
     const fullErrorMessage = `Failed to create index: ${options.index}: ${error.message}`;
     logger.error(fullErrorMessage);
+    // Rethrow the original error (with an updated message) rather than a new one, so callers
+    // that classify it by type (e.g. `e.meta?.body?.error?.type`, such as an ES
+    // `security_exception`) keep working instead of seeing a plain `Error` with no `.meta`.
+    if (err instanceof Error) {
+      err.message = fullErrorMessage;
+      throw err;
+    }
     throw new Error(fullErrorMessage);
+  }
+};
+
+/**
+ * On serverless, 'auto_expand_replicas' is not allowed. So to prevent crashing the index creations,
+ * we apply the settings as a separate, best-effort update after the index is known to exist.
+ */
+const applyAutoExpandReplicasSettings = async (
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  index: string,
+  autoExpandReplicas: IndicesIndexSettings['auto_expand_replicas']
+): Promise<void> => {
+  try {
+    await esClient.indices.putSettings({
+      index,
+      settings: { auto_expand_replicas: autoExpandReplicas },
+    });
+  } catch (err) {
+    logger.debug(`Could not set auto_expand_replicas for ${index}: ${err.message}`);
   }
 };

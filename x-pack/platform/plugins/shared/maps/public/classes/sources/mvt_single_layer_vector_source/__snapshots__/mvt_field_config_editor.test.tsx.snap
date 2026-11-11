@@ -20,9 +20,6 @@ exports[`should render error for dupes 1`] = `
       <EuiSuperSelect
         aria-label="Field type"
         compressed={true}
-        fullWidth={false}
-        isInvalid={false}
-        isLoading={false}
         onChange={[Function]}
         options={
           Array [
@@ -106,9 +103,6 @@ exports[`should render error for dupes 1`] = `
       <EuiSuperSelect
         aria-label="Field type"
         compressed={true}
-        fullWidth={false}
-        isInvalid={false}
-        isLoading={false}
         onChange={[Function]}
         options={
           Array [
@@ -217,9 +211,6 @@ exports[`should render error for empty name 1`] = `
       <EuiSuperSelect
         aria-label="Field type"
         compressed={true}
-        fullWidth={false}
-        isInvalid={false}
-        isLoading={false}
         onChange={[Function]}
         options={
           Array [
@@ -328,9 +319,6 @@ exports[`should render field editor 1`] = `
       <EuiSuperSelect
         aria-label="Field type"
         compressed={true}
-        fullWidth={false}
-        isInvalid={false}
-        isLoading={false}
         onChange={[Function]}
         options={
           Array [
@@ -414,9 +402,6 @@ exports[`should render field editor 1`] = `
       <EuiSuperSelect
         aria-label="Field type"
         compressed={true}
-        fullWidth={false}
-        isInvalid={false}
-        isLoading={false}
         onChange={[Function]}
         options={
           Array [

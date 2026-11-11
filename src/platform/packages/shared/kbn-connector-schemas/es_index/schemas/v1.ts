@@ -8,6 +8,7 @@
  */
 import { z, lazySchema } from '@kbn/zod/v4';
 import { ALERT_HISTORY_PREFIX } from '../constants';
+import { Coerced } from '../../common/utils';
 
 export const ConfigSchema = lazySchema(() =>
   z
@@ -18,6 +19,7 @@ export const ConfigSchema = lazySchema(() =>
     })
     .strict()
 );
+const documentSchema = lazySchema(() => Coerced(z.record(z.string(), z.any())));
 
 export const SecretsSchema = lazySchema(() => z.object({}).strict().default({}));
 
@@ -27,7 +29,7 @@ export const SecretsSchema = lazySchema(() => z.object({}).strict().default({}))
 export const ParamsSchema = lazySchema(() =>
   z
     .object({
-      documents: z.array(z.record(z.string(), z.any())),
+      documents: z.array(documentSchema),
       indexOverride: z
         .string()
         .nullable()

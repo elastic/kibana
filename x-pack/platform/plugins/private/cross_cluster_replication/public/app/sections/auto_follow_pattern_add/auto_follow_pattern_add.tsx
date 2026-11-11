@@ -7,6 +7,7 @@
 
 import React, { PureComponent } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageSection } from '@elastic/eui';
 
@@ -20,6 +21,20 @@ import {
   RemoteClustersProvider,
 } from '../../components';
 import { SectionLoading } from '../../../shared_imports';
+
+const addAutoFollowPatternTitle = i18n.translate(
+  'xpack.crossClusterReplication.autoFollowPattern.addTitle',
+  {
+    defaultMessage: 'Add auto-follow pattern',
+  }
+);
+
+const ccrHomeTitle = i18n.translate(
+  'xpack.crossClusterReplication.autoFollowPatternList.crossClusterReplicationTitle',
+  {
+    defaultMessage: 'Cross-Cluster Replication',
+  }
+);
 
 export interface AutoFollowPatternAddProps extends RouteComponentProps {
   createAutoFollowPattern: (id: string, autoFollowPattern: AutoFollowPatternCreateConfig) => void;
@@ -42,50 +57,48 @@ export class AutoFollowPatternAdd extends PureComponent<AutoFollowPatternAddProp
       createAutoFollowPattern,
       apiStatus,
       apiError,
+      history,
       match: { url: currentUrl },
     } = this.props;
 
     return (
       <RemoteClustersProvider>
-        {({ isLoading, error, remoteClusters }) => {
-          if (isLoading) {
-            return (
+        {({ isLoading, error, remoteClusters }) => (
+          <>
+            <AutoFollowPatternPageTitle
+              title={addAutoFollowPatternTitle}
+              back={{
+                href: history.createHref({ pathname: '/auto_follow_patterns' }),
+                label: ccrHomeTitle,
+              }}
+            />
+
+            {isLoading ? (
               <SectionLoading>
                 <FormattedMessage
                   id="xpack.crossClusterReplication.autoFollowPatternCreateForm.loadingRemoteClustersMessage"
                   defaultMessage="Loading remote clusters…"
                 />
               </SectionLoading>
-            );
-          }
-
-          return (
-            <EuiPageSection restrictWidth style={{ width: '100%' }}>
-              <AutoFollowPatternPageTitle
-                title={
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPattern.addTitle"
-                    defaultMessage="Add auto-follow pattern"
-                  />
-                }
-              />
-
-              <AutoFollowPatternForm
-                apiStatus={apiStatus}
-                apiError={apiError}
-                currentUrl={currentUrl}
-                remoteClusters={error ? [] : remoteClusters}
-                createAutoFollowPattern={createAutoFollowPattern}
-                saveButtonLabel={
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPatternCreateForm.saveButtonLabel"
-                    defaultMessage="Create"
-                  />
-                }
-              />
-            </EuiPageSection>
-          );
-        }}
+            ) : (
+              <EuiPageSection restrictWidth style={{ width: '100%' }}>
+                <AutoFollowPatternForm
+                  apiStatus={apiStatus}
+                  apiError={apiError}
+                  currentUrl={currentUrl}
+                  remoteClusters={error ? [] : remoteClusters}
+                  createAutoFollowPattern={createAutoFollowPattern}
+                  saveButtonLabel={
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.autoFollowPatternCreateForm.saveButtonLabel"
+                      defaultMessage="Create"
+                    />
+                  }
+                />
+              </EuiPageSection>
+            )}
+          </>
+        )}
       </RemoteClustersProvider>
     );
   }

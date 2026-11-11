@@ -26,8 +26,6 @@ export {
   API_KEY_ATTRIBUTES_TO_STRIP,
   apiKeyAsAlertAttributes,
   apiKeyAsRuleDomainProperties,
-  addMissingUiamKeyTagIfNeeded,
-  shouldAddMissingUiamKeyTag,
 } from './api_key_as_alert_attributes';
 export {
   injectReferencesIntoActions,
@@ -53,4 +51,8 @@ export {
 } from './snooze_utils';
 export { tryToRemoveTasks } from './try_to_remove_tasks';
 export { resolveRuleAPIKey } from './resolve_rule_api_key';
-export type { ResolvedAPIKey, RuleApiKeyOwnership } from './resolve_rule_api_key';
+export type {
+  ResolvedAPIKey,
+  ResolveRuleAPIKeyOptions,
+  RuleApiKeyOwnership,
+} from './resolve_rule_api_key';

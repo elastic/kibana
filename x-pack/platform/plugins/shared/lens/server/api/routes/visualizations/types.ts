@@ -7,7 +7,7 @@
 
 import type { Optional } from 'utility-types';
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 
 import type {
   lensCreateRequestBodySchema,
@@ -23,23 +23,23 @@ import type {
 } from './schema';
 import type { lensResponseItemSchema } from './schema/common';
 
-export type LensResponseItem = TypeOf<typeof lensResponseItemSchema>;
+export type LensResponseItem = z.output<typeof lensResponseItemSchema>;
 
-export type LensCreateRequestBody = TypeOf<typeof lensCreateRequestBodySchema>;
-export type LensCreateResponseBody = TypeOf<typeof lensCreateResponseBodySchema>;
+export type LensCreateRequestBody = z.output<typeof lensCreateRequestBodySchema>;
+export type LensCreateResponseBody = z.output<typeof lensCreateResponseBodySchema>;
 
-export type LensUpdateRequestParams = TypeOf<typeof lensUpdateRequestParamsSchema>;
-export type LensUpdateRequestBody = TypeOf<typeof lensUpdateRequestBodySchema>;
-export type LensUpdateResponseBody = TypeOf<typeof lensUpdateResponseBodySchema>;
+export type LensUpdateRequestParams = z.output<typeof lensUpdateRequestParamsSchema>;
+export type LensUpdateRequestBody = z.output<typeof lensUpdateRequestBodySchema>;
+export type LensUpdateResponseBody = z.output<typeof lensUpdateResponseBodySchema>;
 
-export type LensGetRequestParams = TypeOf<typeof lensGetRequestParamsSchema>;
-export type LensGetResponseBody = TypeOf<typeof lensGetResponseBodySchema>;
+export type LensGetRequestParams = z.output<typeof lensGetRequestParamsSchema>;
+export type LensGetResponseBody = z.output<typeof lensGetResponseBodySchema>;
 
 export type LensSearchRequestQuery = Optional<
   // TODO: find out why default values show as required, adding maybe returns undefined values
-  TypeOf<typeof lensSearchRequestQuerySchema>,
+  z.output<typeof lensSearchRequestQuerySchema>,
   'page' | 'per_page'
 >;
-export type LensSearchResponseBody = TypeOf<typeof lensSearchResponseBodySchema>;
+export type LensSearchResponseBody = z.output<typeof lensSearchResponseBodySchema>;
 
-export type LensDeleteRequestParams = TypeOf<typeof lensDeleteRequestParamsSchema>;
+export type LensDeleteRequestParams = z.output<typeof lensDeleteRequestParamsSchema>;

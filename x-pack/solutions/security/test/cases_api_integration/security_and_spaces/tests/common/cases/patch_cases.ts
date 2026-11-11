@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
+import { MAX_USER_ACTIONS_PER_CASE } from '@kbn/cases-plugin/common/constants';
 import type { CaseCustomFields, Cases } from '@kbn/cases-plugin/common/types/domain';
 import {
   AttachmentType,
@@ -24,6 +25,7 @@ import {
   postCaseReq,
   postCaseResp,
   postCommentUserReq,
+  userActionSourceUser,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -40,6 +42,7 @@ import {
   removeServerGeneratedPropertiesFromUserAction,
   createConfiguration,
   getConfigurationRequest,
+  seedUserActions,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api';
 import {
   globalRead,
@@ -70,8 +73,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const log = getService('log');
 
-  // Failing: See https://github.com/elastic/kibana/issues/238980
-  describe.skip('patch_cases', () => {
+  describe('patch_cases', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });
@@ -157,6 +159,7 @@ export default ({ getService }: FtrProviderContext): void => {
           payload: { status: CaseStatuses.closed },
           comment_id: null,
           owner: 'securitySolutionFixture',
+          source: userActionSourceUser,
         });
       });
 
@@ -193,6 +196,7 @@ export default ({ getService }: FtrProviderContext): void => {
           payload: { status: CaseStatuses['in-progress'] },
           comment_id: null,
           owner: 'securitySolutionFixture',
+          source: userActionSourceUser,
         });
       });
 
@@ -1016,6 +1020,73 @@ export default ({ getService }: FtrProviderContext): void => {
             cases: Array(101).fill({ id: 'foo', version: 'bar', title: 'coolTitle' }),
           },
           expectedHttpCode: 400,
+        });
+      });
+
+      describe('user action limit', () => {
+        const userActionsLimitMessage = `has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`;
+
+        it('closes a case that has reached the user action limit', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await seedUserActions({ es, caseId: postedCase.id, count: MAX_USER_ACTIONS_PER_CASE });
+
+          const [patchedCase] = await updateCase({
+            supertest,
+            params: {
+              cases: [
+                { id: postedCase.id, version: postedCase.version, status: CaseStatuses.closed },
+              ],
+            },
+          });
+
+          expect(patchedCase.status).to.be(CaseStatuses.closed);
+        });
+
+        it('400s when closing a case at the user action limit also changes another field', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await seedUserActions({ es, caseId: postedCase.id, count: MAX_USER_ACTIONS_PER_CASE });
+
+          const response = (await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  status: CaseStatuses.closed,
+                  title: 'new title',
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          })) as unknown as { message: string };
+
+          expect(response.message).to.contain(userActionsLimitMessage);
+        });
+
+        it('400s when reopening a case at the user action limit', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          const [closedCase] = await updateCase({
+            supertest,
+            params: {
+              cases: [
+                { id: postedCase.id, version: postedCase.version, status: CaseStatuses.closed },
+              ],
+            },
+          });
+          await seedUserActions({ es, caseId: postedCase.id, count: MAX_USER_ACTIONS_PER_CASE });
+
+          const response = (await updateCase({
+            supertest,
+            params: {
+              cases: [
+                { id: closedCase.id, version: closedCase.version, status: CaseStatuses.open },
+              ],
+            },
+            expectedHttpCode: 400,
+          })) as unknown as { message: string };
+
+          expect(response.message).to.contain(userActionsLimitMessage);
         });
       });
 

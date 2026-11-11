@@ -231,6 +231,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             data-test-subj="advancedSettings"
             id="advancedSettingsAccordion"
             buttonContent={I18n.ADVANCED_SETTINGS}
+            buttonProps={{ 'data-test-subj': 'advancedSettingsButton' }}
           >
             <EuiSpacer size="l" />
             <UseField

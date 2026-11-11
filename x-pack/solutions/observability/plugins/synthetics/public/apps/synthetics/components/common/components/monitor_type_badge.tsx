@@ -23,22 +23,19 @@ const COMPACT_BADGE_STYLE: CSSProperties = {
 
 export function MonitorTypeBadge({
   monitorType,
-  ariaLabel,
   onClick,
   size = 'm',
 }: {
   monitorType: string;
-  ariaLabel?: string;
   onClick?: () => void;
   size?: 's' | 'm';
 }) {
   const style = size === 's' ? COMPACT_BADGE_STYLE : undefined;
+  const badgeTitle = getMonitorTypeBadgeTitle(monitorType);
   return onClick ? (
     <EuiBadge
       onClick={onClick}
-      onClickAriaLabel={getFilterTitle(monitorType)}
-      title={ariaLabel}
-      aria-label={ariaLabel}
+      onClickAriaLabel={getFilterTitle(badgeTitle)}
       iconType={getMonitorTypeBadgeIcon(monitorType)}
       style={style}
       onMouseDown={(e: MouseEvent) => {
@@ -46,12 +43,10 @@ export function MonitorTypeBadge({
         e.stopPropagation();
       }}
     >
-      {getMonitorTypeBadgeTitle(monitorType)}
+      {badgeTitle}
     </EuiBadge>
   ) : (
     <EuiBadge
-      title={ariaLabel}
-      aria-label={ariaLabel}
       iconType={getMonitorTypeBadgeIcon(monitorType)}
       style={style}
       onMouseDown={(e: MouseEvent) => {
@@ -59,15 +54,17 @@ export function MonitorTypeBadge({
         e.stopPropagation();
       }}
     >
-      {getMonitorTypeBadgeTitle(monitorType)}
+      {badgeTitle}
     </EuiBadge>
   );
 }
 
 const getFilterTitle = (type: string) => {
-  return i18n.translate('xpack.synthetics.management.monitorList.monitorTypeBadge.filter', {
-    defaultMessage: 'Click to filter monitors for type: {type}',
-    values: { type: getMonitorTypeBadgeTitle(type) },
+  return i18n.translate('xpack.synthetics.management.monitorList.monitorTypeBadge.filterByType', {
+    defaultMessage: '{type}. Click to filter monitors for this type',
+    values: {
+      type,
+    },
   });
 };
 
@@ -78,19 +75,44 @@ function getMonitorTypeBadgeTitle(monitorType: string) {
     case FormMonitorType.ICMP:
       return monitorType.toUpperCase();
     case FormMonitorType.SINGLE:
-      return 'Page';
+      return i18n.translate('xpack.synthetics.monitorTypeBadge.page', {
+        defaultMessage: 'Page',
+      });
     case FormMonitorType.MULTISTEP:
-      return 'Journey';
-  }
-
-  switch (monitorType) {
     case MonitorTypeEnum.BROWSER:
-      return 'Journey';
+      return i18n.translate('xpack.synthetics.monitorTypeBadge.browser', {
+        defaultMessage: 'Browser',
+      });
+    case FormMonitorType.API:
+    case MonitorTypeEnum.API:
+      return i18n.translate('xpack.synthetics.monitorTypeBadge.apiJourney', {
+        defaultMessage: 'API Journey',
+      });
     default:
       return monitorType.toUpperCase();
   }
 }
 
 function getMonitorTypeBadgeIcon(monitorType: string) {
-  return monitorType === 'browser' ? 'videoPlayer' : 'online';
+  switch (monitorType) {
+    case MonitorTypeEnum.API:
+    case FormMonitorType.API:
+      return 'inputOutput';
+    case FormMonitorType.SINGLE:
+      return 'inspect';
+    case MonitorTypeEnum.BROWSER:
+    case FormMonitorType.MULTISTEP:
+      return 'display';
+    case FormMonitorType.HTTP:
+    case MonitorTypeEnum.HTTP:
+      return 'globe';
+    case FormMonitorType.TCP:
+    case MonitorTypeEnum.TCP:
+      return 'ip';
+    case FormMonitorType.ICMP:
+    case MonitorTypeEnum.ICMP:
+      return 'bolt';
+    default:
+      return 'wifi';
+  }
 }

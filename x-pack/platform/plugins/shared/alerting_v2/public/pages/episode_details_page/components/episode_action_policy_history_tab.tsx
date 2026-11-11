@@ -6,30 +6,26 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import {
-  EuiPanel,
-  EuiSpacer,
-  logicalCSS,
-  useEuiMaxBreakpoint,
-  useEuiMinBreakpoint,
-  type CriteriaWithPagination,
-} from '@elastic/eui';
+import { EuiPanel, EuiSpacer, useEuiMinBreakpoint } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PolicyExecutionOutcomeFilter } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyDetailsFlyoutContainer } from '../../../components/action_policy/details_flyout/action_policy_details_flyout_container';
 import { useFetchExecutionHistory } from '../../../hooks/use_fetch_execution_history';
-import type { PolicyExecutionHistoryItem } from '../../../services/execution_history_api';
 import {
   ExecutionHistoryErrorState,
   ExecutionHistorySearchBar,
   FilteredEmptyState,
   PoliciesEmptyState,
   PoliciesExecutionHistoryTable,
+  type PolicyOutcomeFilter,
 } from '../../execution_history_page/components';
 
 const DEFAULT_PER_PAGE = 10;
-const DEFAULT_OUTCOME: PolicyExecutionOutcomeFilter = 'all';
+const DEFAULT_OUTCOME: PolicyOutcomeFilter = 'all';
+
+const toOutcomesParam = (filter: PolicyOutcomeFilter): PolicyExecutionOutcomeFilter | undefined =>
+  filter === 'all' ? undefined : [filter];
 
 interface Props {
   episodeId: string;
@@ -43,19 +39,20 @@ export const EpisodeActionPolicyHistoryTab = ({ episodeId, episodeStart }: Props
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
   const [search, setSearch] = useState('');
-  const [outcome, setOutcome] = useState<PolicyExecutionOutcomeFilter>(DEFAULT_OUTCOME);
+  const [outcome, setOutcome] = useState<PolicyOutcomeFilter>(DEFAULT_OUTCOME);
   const [policyToViewId, setPolicyToViewId] = useState<string | null>(null);
 
   const trimmedSearch = search.trim();
   const searchParam = trimmedSearch.length > 0 ? trimmedSearch : undefined;
+  const outcomesParam = toOutcomesParam(outcome);
 
   const { data, isFetching, isError, refetch } = useFetchExecutionHistory({
     page: page + 1,
     perPage,
     search: searchParam,
-    outcome,
+    outcomes: outcomesParam,
     episodeIds: [episodeId],
-    startDate: episodeStart,
+    from: episodeStart,
   });
 
   const onSearchChange = useCallback((value: string) => {
@@ -63,23 +60,19 @@ export const EpisodeActionPolicyHistoryTab = ({ episodeId, episodeStart }: Props
     setPage(0);
   }, []);
 
-  const onOutcomeChange = useCallback((value: PolicyExecutionOutcomeFilter) => {
+  const onOutcomeChange = useCallback((value: PolicyOutcomeFilter) => {
     setOutcome(value);
     setPage(0);
   }, []);
 
-  const onTableChange = useCallback(
-    ({ page: tablePage }: CriteriaWithPagination<PolicyExecutionHistoryItem>) => {
-      if (tablePage) {
-        setPage(tablePage.index);
-        setPerPage(tablePage.size);
-      }
-    },
-    [setPage, setPerPage]
-  );
+  const onChangePage = useCallback((pageIndex: number) => setPage(pageIndex), []);
+  const onChangeItemsPerPage = useCallback((size: number) => {
+    setPerPage(size);
+    setPage(0);
+  }, []);
 
   const items = data?.items ?? [];
-  const totalEvents = data?.totalEvents ?? 0;
+  const total = data?.total ?? 0;
   const isFiltered = searchParam !== undefined || outcome !== DEFAULT_OUTCOME;
 
   return (
@@ -88,14 +81,9 @@ export const EpisodeActionPolicyHistoryTab = ({ episodeId, episodeStart }: Props
       hasShadow={false}
       paddingSize="l"
       css={css`
-        ${useEuiMaxBreakpoint('s')} {
-          ${logicalCSS('padding-horizontal', '0')}
-        }
-
         ${useEuiMinBreakpoint('m')} {
           height: 100%;
           overflow-y: auto;
-          ${logicalCSS('padding-left', '0')}
         }
       `}
       data-test-subj="episodeActionPolicyHistoryTab"
@@ -115,15 +103,16 @@ export const EpisodeActionPolicyHistoryTab = ({ episodeId, episodeStart }: Props
             tableCaption={i18n.translate(
               'xpack.alertingV2.episodeDetails.actionPolicyHistory.tableCaption',
               {
-                defaultMessage: 'Action policy execution history for this episode',
+                defaultMessage: 'Action policy execution history for this alert',
               }
             )}
             items={items}
             loading={isFetching}
-            pageIndex={page}
-            pageSize={perPage}
-            totalItemCount={totalEvents}
-            onChange={onTableChange}
+            page={page}
+            perPage={perPage}
+            total={total}
+            onChangePage={onChangePage}
+            onChangeItemsPerPage={onChangeItemsPerPage}
             onPolicyClick={setPolicyToViewId}
             noItemsMessage={isFiltered ? <FilteredEmptyState /> : <PoliciesEmptyState />}
             showEpisodeColumns={false}

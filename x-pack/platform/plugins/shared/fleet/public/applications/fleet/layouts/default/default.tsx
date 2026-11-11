@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiLink, useIsWithinMinBreakpoint } from '@elastic/eui';
+import { EuiLink, useEuiTheme, useIsWithinMinBreakpoint } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import type { AppHeaderBadge } from '@kbn/app-header';
 import { AppHeader, type AppHeaderTab } from '@kbn/app-header';
@@ -45,6 +46,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
   rightColumn,
 }) => {
   const { getHref } = useLink();
+  const { euiTheme } = useEuiTheme();
   const { agents } = useConfig();
   const authz = useAuthz();
   const { docLinks } = useStartServices();
@@ -138,10 +140,10 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
   return (
     <TourManagerProvider>
       {!authz.fleet.all || granularPrivilegesCallout.isHidden ? null : (
-        <EuiCallOut
+        <KbnInfoCallout
           announceOnMount
           size="s"
-          iconType="popper"
+          css={{ margin: euiTheme.size.s }}
           onDismiss={granularPrivilegesCallout.dismiss}
           title={
             <>

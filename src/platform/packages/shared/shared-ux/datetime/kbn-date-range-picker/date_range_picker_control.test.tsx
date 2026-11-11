@@ -124,6 +124,41 @@ describe('DateRangePickerControl', () => {
       await waitForPopoverClose();
     });
 
+    it('offers deletion for every preset except those marked as not editable', async () => {
+      const onPresetDelete = jest.fn();
+
+      renderWithEuiTheme(
+        <DateRangePicker
+          {...defaultProps}
+          defaultValue="last 20 minutes"
+          onPresetDelete={onPresetDelete}
+          presets={[
+            { start: 'now-1h', end: 'now', label: 'Last 1 hour' },
+            { start: 'now/d', end: 'now/d', label: 'Today', isEditable: false },
+          ]}
+        />
+      );
+
+      const input = openEditing();
+      fireEvent.keyDown(input, { key: 'ArrowDown' });
+
+      const deletable = screen.getByTestId('dateRangePickerPresetItem-Last_1_hour');
+      const locked = screen.getByTestId('dateRangePickerPresetItem-Today');
+
+      expect(
+        within(locked).queryByTestId('dateRangePickerDeletePresetButton')
+      ).not.toBeInTheDocument();
+
+      fireEvent.click(within(deletable).getByTestId('dateRangePickerDeletePresetButton'));
+
+      expect(onPresetDelete).toHaveBeenCalledWith(
+        expect.objectContaining({ start: 'now-1h', end: 'now' })
+      );
+
+      fireEvent.keyDown(input, { key: 'Escape' });
+      await waitForPopoverClose();
+    });
+
     it('derives readable input from bounds when selecting a preset with a display-only label', async () => {
       const expectedInputText = 'May 1, 2026, 00:00:00.000 to May 2, 2026, 23:59:00.000';
 
@@ -149,6 +184,31 @@ describe('DateRangePickerControl', () => {
       const selectedInput = openEditing() as HTMLInputElement;
 
       expect(selectedInput.value).toBe(expectedInputText);
+      fireEvent.keyDown(selectedInput, { key: 'Escape' });
+      await waitForPopoverClose();
+    });
+
+    it('uses a custom preset label in the list, the input, and the button', async () => {
+      const presets = [
+        { start: 'now-3M/y+3M', end: 'now', label: 'Financial Year to Date', isEditable: false },
+      ];
+
+      renderWithEuiTheme(
+        <DateRangePicker {...defaultProps} defaultValue="last 20 minutes" presets={presets} />
+      );
+
+      const input = openEditing();
+      fireEvent.keyDown(input, { key: 'ArrowDown' });
+      const item = screen.getByTestId('dateRangePickerPresetItem-Financial_Year_to_Date');
+      fireEvent.click(within(item).getByRole('button'));
+
+      await waitForPopoverClose();
+      const button = screen.getByTestId('dateRangePickerControlButton');
+      expect(button).toHaveTextContent('Financial Year to Date');
+      expect(button).toHaveAttribute('data-date-range', 'now-3M/y+3M to now');
+
+      const selectedInput = openEditing() as HTMLInputElement;
+      expect(selectedInput.value).toBe('Financial Year to Date');
       fireEvent.keyDown(selectedInput, { key: 'Escape' });
       await waitForPopoverClose();
     });
@@ -400,6 +460,110 @@ describe('DateRangePickerControl', () => {
     });
   });
 
+  describe('rounded suffix', () => {
+    it('shows "(rounded)" next to the label when a relative bound is rounded', () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} defaultValue="-1y/y" />);
+
+      const button = screen.getByTestId('dateRangePickerControlButton');
+      expect(button).toHaveTextContent('Last 1 year (rounded)');
+      expect(screen.getByTestId('dateRangePickerRoundedSuffix')).toBeInTheDocument();
+    });
+
+    it('shows "(rounded)" on presets whose relative bound is rounded', async () => {
+      renderWithEuiTheme(
+        <DateRangePicker
+          {...defaultProps}
+          presets={[
+            { start: 'now-7d/d', end: 'now', label: 'Last 7 days' },
+            { start: 'now-15m', end: 'now', label: 'Last 15 minutes' },
+            { start: 'now/d', end: 'now/d', label: 'Today' },
+            { start: 'now-1d/d', end: 'now-1d/d', label: 'Yesterday' },
+            { start: 'now-1w/w', end: 'now-1w/w', label: 'Last week' },
+          ]}
+        />
+      );
+
+      const input = openEditing();
+      fireEvent.keyDown(input, { key: 'ArrowDown' });
+
+      const rounded = screen.getByTestId('dateRangePickerPresetItem-Last_7_days');
+      const plain = screen.getByTestId('dateRangePickerPresetItem-Last_15_minutes');
+      expect(within(rounded).getByTestId('dateRangePickerPresetRoundedSuffix')).toBeInTheDocument();
+      expect(
+        within(plain).queryByTestId('dateRangePickerPresetRoundedSuffix')
+      ).not.toBeInTheDocument();
+
+      for (const bucket of ['Today', 'Yesterday', 'Last_week']) {
+        expect(
+          within(screen.getByTestId(`dateRangePickerPresetItem-${bucket}`)).queryByTestId(
+            'dateRangePickerPresetRoundedSuffix'
+          )
+        ).not.toBeInTheDocument();
+      }
+
+      fireEvent.keyDown(input, { key: 'Escape' });
+      await waitForPopoverClose();
+    });
+
+    it('shows "(rounded)" when the round relative time setting adds rounding', () => {
+      renderWithEuiTheme(
+        <DateRangePicker
+          {...defaultProps}
+          defaultValue="-1y"
+          settings={{ roundRelativeTime: true }}
+        />
+      );
+
+      expect(screen.getByTestId('dateRangePickerRoundedSuffix')).toBeInTheDocument();
+    });
+
+    it('does not show "(rounded)" without rounding or for named ranges', () => {
+      const { unmount } = renderWithEuiTheme(
+        <DateRangePicker {...defaultProps} defaultValue="-1y" />
+      );
+      expect(screen.queryByTestId('dateRangePickerRoundedSuffix')).not.toBeInTheDocument();
+      unmount();
+
+      for (const named of ['today', 'yesterday', 'last week', 'last year']) {
+        const rendered = renderWithEuiTheme(
+          <DateRangePicker {...defaultProps} defaultValue={named} />
+        );
+        expect(screen.queryByTestId('dateRangePickerRoundedSuffix')).not.toBeInTheDocument();
+        rendered.unmount();
+      }
+    });
+
+    it('keeps "(rounded)" out of the input and the saved preset label', async () => {
+      const onPresetSave = jest.fn();
+
+      renderWithEuiTheme(
+        <DateRangePicker {...defaultProps} defaultValue="-1y/y" onPresetSave={onPresetSave} />
+      );
+
+      const input = openEditing() as HTMLInputElement;
+      expect(input.value).toBe('-1y/y');
+      expect(screen.queryByTestId('dateRangePickerRoundedSuffix')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('dateRangePickerSavePresetButton'));
+      expect(onPresetSave).toHaveBeenCalledWith({
+        start: 'now-1y/y',
+        end: 'now',
+        label: 'Last 1 year',
+      });
+
+      await waitForPopoverClose();
+    });
+
+    it('includes "(rounded)" in the aria-label when collapsed', () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} collapsed defaultValue="-1y/y" />);
+
+      expect(screen.getByTestId('dateRangePickerControlButton')).toHaveAttribute(
+        'aria-label',
+        'Last 1 year (rounded)'
+      );
+    });
+  });
+
   describe('collapsed prop', () => {
     describe('collapsed=false (default)', () => {
       it('shows the text label', () => {
@@ -612,7 +776,7 @@ describe('DateRangePickerControl', () => {
       renderWithEuiTheme(<DateRangePicker {...defaultProps} width="restricted" />);
       const wrapper = screen.getByTestId('dateRangePickerControlWrapper');
       expect(wrapper).toHaveStyle({
-        'inline-size': 'var(--kbnDateRangePickerWidthRestricted, 21.25rem)',
+        'inline-size': 'var(--kbnDateRangePickerWidthRestricted,21.25rem)',
       });
     });
 
@@ -718,6 +882,26 @@ describe('DateRangePickerControl', () => {
       );
 
       expect(screen.queryByTestId('dateRangePickerAutoRefreshButton')).not.toBeInTheDocument();
+      const button = screen.getByTestId('dateRangePickerControlButton');
+      expect(button).not.toHaveAttribute('data-refresh-interval');
+      expect(button).not.toHaveAttribute('data-refresh-interval-unit');
+      expect(button).not.toHaveAttribute('data-refresh-paused');
+    });
+
+    it('exposes `settings.autoRefresh` as concrete DOM attributes on the control button', () => {
+      renderWithEuiTheme(
+        <DateRangePicker
+          {...defaultProps}
+          onRefresh={onRefresh}
+          settings={{ ...autoRefreshSettings }}
+        />
+      );
+
+      const { intervalMs, intervalDisplayUnit, isPaused } = autoRefreshSettings.autoRefresh;
+      const button = screen.getByTestId('dateRangePickerControlButton');
+      expect(button).toHaveAttribute('data-refresh-interval', String(intervalMs));
+      expect(button).toHaveAttribute('data-refresh-interval-unit', intervalDisplayUnit);
+      expect(button).toHaveAttribute('data-refresh-paused', String(isPaused));
     });
 
     it('does not render the auto-refresh append control when `onRefresh` is absent', () => {
@@ -928,6 +1112,189 @@ describe('DateRangePickerControl', () => {
       });
 
       expect(disabledOnRefresh).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('re-resolving relative bounds', () => {
+    const initialNow = new Date('2026-06-04T12:00:00.000Z');
+    // `defaultProps` renders "last 20 minutes": these are its bounds at `initialNow` and after the
+    // clock has moved forward by the given amount.
+    const INITIAL_BOUNDS = 'Jun 4, 2026, 11:40:00.000 → Jun 4, 2026, 12:00:00.000';
+    const BOUNDS_AFTER_1M = 'Jun 4, 2026, 11:41:00.000 → Jun 4, 2026, 12:01:00.000';
+    const BOUNDS_AFTER_5M = 'Jun 4, 2026, 11:45:00.000 → Jun 4, 2026, 12:05:00.000';
+
+    const autoRefreshSettings: DateRangePickerProps['settings'] = {
+      roundRelativeTime: false,
+      autoRefresh: {
+        isEnabled: true,
+        isPaused: false,
+        intervalMs: 60_000,
+        intervalDisplayUnit: 'm',
+      },
+    };
+
+    beforeEach(() => {
+      jest.useFakeTimers().setSystemTime(initialNow);
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    /** Hovers the control, reads the tooltip and leaves again so every read opens a fresh tooltip. */
+    const hoverTooltipText = () => {
+      const button = screen.getByTestId('dateRangePickerControlButton');
+      fireEvent.mouseOver(button);
+      const text = screen.getByRole('tooltip').textContent;
+      fireEvent.mouseOut(button);
+      expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+      return text;
+    };
+
+    const advanceClockBy = (minutes: number) => {
+      jest.setSystemTime(new Date(initialNow.getTime() + minutes * 60_000));
+    };
+
+    const renderPicker = (props: Partial<DateRangePickerProps> = {}) => {
+      const { rerender } = renderWithEuiTheme(<DateRangePicker {...defaultProps} {...props} />);
+      const rerenderPicker = (nextProps: Partial<DateRangePickerProps> = {}) =>
+        rerender(
+          <EuiThemeProvider>
+            <DateRangePicker {...defaultProps} {...nextProps} />
+          </EuiThemeProvider>
+        );
+      return { rerenderPicker };
+    };
+
+    const autoRefreshCountdown = () => screen.getByTestId('dateRangePickerAutoRefreshButton');
+
+    it('keeps the resolved bounds while nothing signals a refresh', () => {
+      const { rerenderPicker } = renderPicker();
+      expect(hoverTooltipText()).toContain(INITIAL_BOUNDS);
+
+      advanceClockBy(5);
+      rerenderPicker();
+
+      expect(hoverTooltipText()).toContain(INITIAL_BOUNDS);
+    });
+
+    it('keeps the resolved bounds when re-rendered with the same epochs', () => {
+      const { rerenderPicker } = renderPicker({ refreshEpoch: 1, resolveEpoch: 1 });
+      expect(hoverTooltipText()).toContain(INITIAL_BOUNDS);
+
+      advanceClockBy(5);
+      rerenderPicker({ refreshEpoch: 1, resolveEpoch: 1 });
+
+      expect(hoverTooltipText()).toContain(INITIAL_BOUNDS);
+    });
+
+    it('re-resolves the bounds when `resolveEpoch` increments', () => {
+      const { rerenderPicker } = renderPicker({ resolveEpoch: 0 });
+      expect(hoverTooltipText()).toContain(INITIAL_BOUNDS);
+
+      advanceClockBy(5);
+      rerenderPicker({ resolveEpoch: 1 });
+
+      expect(hoverTooltipText()).toContain(BOUNDS_AFTER_5M);
+    });
+
+    it('re-resolves the bounds when `refreshEpoch` increments', () => {
+      const { rerenderPicker } = renderPicker({ refreshEpoch: 0 });
+      expect(hoverTooltipText()).toContain(INITIAL_BOUNDS);
+
+      advanceClockBy(5);
+      rerenderPicker({ refreshEpoch: 1 });
+
+      expect(hoverTooltipText()).toContain(BOUNDS_AFTER_5M);
+    });
+
+    it('re-resolves the bounds on the first `refreshEpoch` after mounting without one', () => {
+      // Hosts such as the unified search bar leave `refreshEpoch` undefined until the first
+      // timefilter refresh, so `undefined → 1` must count as a change.
+      const { rerenderPicker } = renderPicker({ refreshEpoch: undefined });
+      expect(hoverTooltipText()).toContain(INITIAL_BOUNDS);
+
+      advanceClockBy(5);
+      rerenderPicker({ refreshEpoch: 1 });
+
+      expect(hoverTooltipText()).toContain(BOUNDS_AFTER_5M);
+    });
+
+    it('keeps the typed text when `resolveEpoch` increments while editing', async () => {
+      const { rerenderPicker } = renderPicker({ resolveEpoch: 0 });
+      expect(hoverTooltipText()).toContain(INITIAL_BOUNDS);
+
+      const input = openEditing();
+      fireEvent.change(input, { target: { value: 'last 15 min' } });
+
+      advanceClockBy(5);
+      rerenderPicker({ resolveEpoch: 1 });
+
+      expect(screen.getByTestId('dateRangePickerInput')).toHaveValue('last 15 min');
+
+      fireEvent.keyDown(screen.getByTestId('dateRangePickerInput'), { key: 'Escape' });
+      await waitForPopoverClose();
+
+      const button = screen.getByTestId('dateRangePickerControlButton');
+      expect(button).toHaveTextContent('Last 20 minutes');
+      // Escape returns focus to the control, and a focused anchor keeps its tooltip open.
+      button.blur();
+      expect(hoverTooltipText()).toContain(BOUNDS_AFTER_5M);
+    });
+
+    it('re-resolves the bounds when the auto-refresh timer fires', () => {
+      const onRefresh = jest.fn();
+      renderPicker({ onRefresh, settings: autoRefreshSettings });
+      expect(hoverTooltipText()).toContain(INITIAL_BOUNDS);
+
+      act(() => {
+        jest.advanceTimersByTime(60_000);
+      });
+
+      expect(onRefresh).toHaveBeenCalledTimes(1);
+      expect(hoverTooltipText()).toContain(BOUNDS_AFTER_1M);
+    });
+
+    it('does not reset the auto-refresh countdown when `resolveEpoch` increments', () => {
+      const onRefresh = jest.fn();
+      const { rerenderPicker } = renderPicker({
+        onRefresh,
+        resolveEpoch: 0,
+        settings: autoRefreshSettings,
+      });
+
+      expect(autoRefreshCountdown()).toHaveTextContent('01:00');
+
+      act(() => {
+        jest.advanceTimersByTime(15_000);
+      });
+      expect(autoRefreshCountdown()).toHaveTextContent('00:45');
+
+      advanceClockBy(5);
+      rerenderPicker({ onRefresh, resolveEpoch: 1, settings: autoRefreshSettings });
+
+      expect(hoverTooltipText()).toContain(BOUNDS_AFTER_5M);
+      expect(autoRefreshCountdown()).toHaveTextContent('00:45');
+    });
+
+    it('resets the auto-refresh countdown when `refreshEpoch` increments', () => {
+      const onRefresh = jest.fn();
+      const { rerenderPicker } = renderPicker({
+        onRefresh,
+        refreshEpoch: 0,
+        settings: autoRefreshSettings,
+      });
+
+      act(() => {
+        jest.advanceTimersByTime(15_000);
+      });
+      expect(autoRefreshCountdown()).toHaveTextContent('00:45');
+
+      advanceClockBy(5);
+      rerenderPicker({ onRefresh, refreshEpoch: 1, settings: autoRefreshSettings });
+
+      expect(hoverTooltipText()).toContain(BOUNDS_AFTER_5M);
+      expect(autoRefreshCountdown()).toHaveTextContent('01:00');
     });
   });
 });

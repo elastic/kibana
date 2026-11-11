@@ -1,0 +1,26 @@
+title: Get case field definitions response
+description: A paginated list of reusable field definitions.
+type: object
+required:
+  - fieldDefinitions
+  - page
+  - perPage
+  - total
+properties:
+  fieldDefinitions:
+    type: array
+    items:
+      $ref: 'field_definition_response.yaml'
+  page:
+    type: integer
+    minimum: 1
+    description: The current page number.
+  perPage:
+    type: integer
+    minimum: 1
+    maximum: 100
+    description: The number of items per page.
+  total:
+    type: integer
+    minimum: 0
+    description: The total number of field definitions matching the query (before pagination).

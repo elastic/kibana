@@ -47,7 +47,8 @@ export default function ({
   // NOTE: Occasionally, you may need to run the test and copy the "session" image file and replace the
   // "baseline" image file to reflect current renderings. The source and destination file paths can be found in
   // the debug logs.
-  describe('Dashboard Reporting Screenshots', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/283879
+  describe.skip('Dashboard Reporting Screenshots', () => {
     before('initialize tests', async () => {
       await loadEcommerce();
       await browser.setWindowSize(1600, 850);

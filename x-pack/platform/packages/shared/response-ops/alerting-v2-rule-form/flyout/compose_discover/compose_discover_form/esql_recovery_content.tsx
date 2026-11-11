@@ -26,8 +26,9 @@ const noRecoveryConditionDefined = i18n.translate(
 
 export const EsqlRecoveryContent: React.FC<CustomRecoveryRenderProps> = ({ state, dispatch }) => {
   const query = useWatch<FormValues, 'query'>({ name: 'query' });
-  const baseQuery = query?.format === 'composed' ? query.base : '';
-  const recoveryBlock = query?.format === 'composed' ? query.recovery?.segment ?? '' : '';
+  const recovery = useWatch<FormValues, 'recovery'>({ name: 'recovery' });
+  const baseQuery = query?.base ?? '';
+  const recoveryBlock = recovery?.segment ?? '';
 
   return (
     <>
@@ -58,7 +59,14 @@ export const EsqlRecoveryContent: React.FC<CustomRecoveryRenderProps> = ({ state
         color="text"
         iconType="chevronLimitLeft"
         isDisabled={state.childOpen}
-        onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert: true })}
+        onClick={() =>
+          dispatch({
+            type: 'OPEN_CHILD_FOR_STEP',
+            step: state.step,
+            isAlert: true,
+            focusedTab: 'recovery',
+          })
+        }
         data-test-subj="composeDiscoverEditRecovery"
       >
         <FormattedMessage

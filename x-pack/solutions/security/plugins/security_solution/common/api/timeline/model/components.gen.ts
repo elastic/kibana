@@ -214,23 +214,31 @@ export const SavedTimeline = lazySchema(() =>
     /**
      * The Timeline's columns
      */
-    columns: z.array(ColumnHeaderResult).nullable().optional(),
+    columns: z.array(ColumnHeaderResult).nullable().optional().describe("The Timeline's columns"),
     /**
      * The time the Timeline was created, using a 13-digit Epoch timestamp.
      */
-    created: z.number().nullable().optional(),
+    created: z
+      .number()
+      .nullable()
+      .optional()
+      .describe('The time the Timeline was created, using a 13-digit Epoch timestamp.'),
     /**
      * The user who created the Timeline.
      */
-    createdBy: z.string().nullable().optional(),
+    createdBy: z.string().nullable().optional().describe('The user who created the Timeline.'),
     /**
      * Object containing query clauses
      */
-    dataProviders: z.array(DataProviderResult).nullable().optional(),
+    dataProviders: z
+      .array(DataProviderResult)
+      .nullable()
+      .optional()
+      .describe('Object containing query clauses'),
     /**
      * ID of the Timeline's Data View
      */
-    dataViewId: z.string().nullable().optional(),
+    dataViewId: z.string().nullable().optional().describe("ID of the Timeline's Data View"),
     /**
      * The Timeline's search period.
      */
@@ -240,11 +248,12 @@ export const SavedTimeline = lazySchema(() =>
         start: z.union([z.string().nullable(), z.number().nullable()]).optional(),
       })
       .nullable()
-      .optional(),
+      .optional()
+      .describe("The Timeline's search period."),
     /**
      * The Timeline's description
      */
-    description: z.string().nullable().optional(),
+    description: z.string().nullable().optional().describe("The Timeline's description"),
     /**
      * EQL query that is used in the correlation tab
      */
@@ -257,62 +266,103 @@ export const SavedTimeline = lazySchema(() =>
         timestampField: z.string().nullable().optional(),
       })
       .nullable()
-      .optional(),
+      .optional()
+      .describe('EQL query that is used in the correlation tab'),
     /**
      * Event types displayed in the Timeline
      */
-    eventType: z.string().nullable().optional(),
+    eventType: z.string().nullable().optional().describe('Event types displayed in the Timeline'),
     /**
      * A list of row renderers that should not be used when in `Event renderers` mode
      */
-    excludedRowRendererIds: z.array(RowRendererId).nullable().optional(),
+    excludedRowRendererIds: z
+      .array(RowRendererId)
+      .nullable()
+      .optional()
+      .describe('A list of row renderers that should not be used when in `Event renderers` mode'),
     favorite: z.array(FavoriteTimelineResult).nullable().optional(),
     /**
      * A list of filters that should be applied to the query
      */
-    filters: z.array(FilterTimelineResult).nullable().optional(),
+    filters: z
+      .array(FilterTimelineResult)
+      .nullable()
+      .optional()
+      .describe('A list of filters that should be applied to the query'),
     /**
      * Indicates whether the KQL bar filters the query results or searches for additional results, where:
      * `filter`: filters query results
      * `search`: displays additional search results
      */
-    kqlMode: z.string().nullable().optional(),
+    kqlMode: z
+      .string()
+      .nullable()
+      .optional()
+      .describe(
+        'Indicates whether the KQL bar filters the query results or searches for additional results, where:\n  * `filter`: filters query results\n  * `search`: displays additional search results'
+      ),
     kqlQuery: SerializedFilterQueryResult.nullable().optional(),
     /**
      * A list of index names to use in the query (e.g. when the default data view has been modified)
      */
-    indexNames: z.array(z.string()).nullable().optional(),
+    indexNames: z
+      .array(z.string())
+      .nullable()
+      .optional()
+      .describe(
+        'A list of index names to use in the query (e.g. when the default data view has been modified)'
+      ),
     /**
      * The ID of the saved search that is used in the ES|QL tab
      */
-    savedSearchId: z.string().nullable().optional(),
+    savedSearchId: z
+      .string()
+      .nullable()
+      .optional()
+      .describe('The ID of the saved search that is used in the ES|QL tab'),
     /**
      * The ID of the saved query that might be used in the Query tab
      */
-    savedQueryId: z.string().nullable().optional(),
+    savedQueryId: z
+      .string()
+      .nullable()
+      .optional()
+      .describe('The ID of the saved query that might be used in the Query tab'),
     sort: Sort.nullable().optional(),
     status: TimelineStatus.nullable().optional(),
     /**
      * The Timeline's title.
      */
-    title: z.string().nullable().optional(),
+    title: z.string().nullable().optional().describe("The Timeline's title."),
     /**
      * A unique ID (UUID) for Timeline templates. For Timelines, the value is `null`.
      */
-    templateTimelineId: z.string().nullable().optional(),
+    templateTimelineId: z
+      .string()
+      .nullable()
+      .optional()
+      .describe('A unique ID (UUID) for Timeline templates. For Timelines, the value is `null`.'),
     /**
      * Timeline template version number. For Timelines, the value is `null`.
      */
-    templateTimelineVersion: z.number().nullable().optional(),
+    templateTimelineVersion: z
+      .number()
+      .nullable()
+      .optional()
+      .describe('Timeline template version number. For Timelines, the value is `null`.'),
     timelineType: TimelineType.nullable().optional(),
     /**
      * The last time the Timeline was updated, using a 13-digit Epoch timestamp
      */
-    updated: z.number().nullable().optional(),
+    updated: z
+      .number()
+      .nullable()
+      .optional()
+      .describe('The last time the Timeline was updated, using a 13-digit Epoch timestamp'),
     /**
      * The user who last updated the Timeline
      */
-    updatedBy: z.string().nullable().optional(),
+    updatedBy: z.string().nullable().optional().describe('The user who last updated the Timeline'),
   })
 );
 export type SavedTimeline = z.infer<typeof SavedTimeline>;
@@ -323,11 +373,13 @@ export const SavedTimelineWithSavedObjectId = lazySchema(() =>
       /**
        * The `savedObjectId` of the Timeline or Timeline template
        */
-      savedObjectId: z.string(),
+      savedObjectId: z
+        .string()
+        .describe('The `savedObjectId` of the Timeline or Timeline template'),
       /**
        * The version of the Timeline or Timeline template
        */
-      version: z.string(),
+      version: z.string().describe('The version of the Timeline or Timeline template'),
     })
   )
 );
@@ -338,19 +390,27 @@ export const NoteCreatedAndUpdatedMetadata = lazySchema(() =>
     /**
      * The time the note was created, using a 13-digit Epoch timestamp.
      */
-    created: z.number().nullable().optional(),
+    created: z
+      .number()
+      .nullable()
+      .optional()
+      .describe('The time the note was created, using a 13-digit Epoch timestamp.'),
     /**
      * The user who created the note.
      */
-    createdBy: z.string().nullable().optional(),
+    createdBy: z.string().nullable().optional().describe('The user who created the note.'),
     /**
      * The last time the note was updated, using a 13-digit Epoch timestamp
      */
-    updated: z.number().nullable().optional(),
+    updated: z
+      .number()
+      .nullable()
+      .optional()
+      .describe('The last time the note was updated, using a 13-digit Epoch timestamp'),
     /**
      * The user who last updated the note
      */
-    updatedBy: z.string().nullable().optional(),
+    updatedBy: z.string().nullable().optional().describe('The user who last updated the note'),
   })
 );
 export type NoteCreatedAndUpdatedMetadata = z.infer<typeof NoteCreatedAndUpdatedMetadata>;
@@ -362,15 +422,25 @@ export const BareNote = lazySchema(() =>
       * Elasticsearch document `_id` for the event or alert this note refers to. Same value as the `documentIds` query parameter when fetching notes via GET /api/note.
 
       */
-      eventId: z.string().nullable().optional(),
+      eventId: z
+        .string()
+        .nullable()
+        .optional()
+        .describe(
+          'Elasticsearch document `_id` for the event or alert this note refers to. Same value as the `documentIds` query parameter when fetching notes via GET /api/note.\n'
+        ),
       /**
        * The text of the note
        */
-      note: z.string().nullable().optional(),
+      note: z.string().nullable().optional().describe('The text of the note'),
       /**
        * The `savedObjectId` of the Timeline this note belongs to (not the note's own ID).
        */
-      timelineId: z.string(),
+      timelineId: z
+        .string()
+        .describe(
+          "The `savedObjectId` of the Timeline this note belongs to (not the note's own ID)."
+        ),
     })
   )
 );
@@ -382,11 +452,11 @@ export const Note = lazySchema(() =>
       /**
        * The `savedObjectId` of the note
        */
-      noteId: z.string(),
+      noteId: z.string().describe('The `savedObjectId` of the note'),
       /**
        * The version of the note
        */
-      version: z.string(),
+      version: z.string().describe('The version of the note'),
     })
   )
 );
@@ -397,19 +467,31 @@ export const PinnedEventCreatedAndUpdatedMetadata = lazySchema(() =>
     /**
      * The time the pinned event was created, using a 13-digit Epoch timestamp.
      */
-    created: z.number().nullable().optional(),
+    created: z
+      .number()
+      .nullable()
+      .optional()
+      .describe('The time the pinned event was created, using a 13-digit Epoch timestamp.'),
     /**
      * The user who created the pinned event.
      */
-    createdBy: z.string().nullable().optional(),
+    createdBy: z.string().nullable().optional().describe('The user who created the pinned event.'),
     /**
      * The last time the pinned event was updated, using a 13-digit Epoch timestamp
      */
-    updated: z.number().nullable().optional(),
+    updated: z
+      .number()
+      .nullable()
+      .optional()
+      .describe('The last time the pinned event was updated, using a 13-digit Epoch timestamp'),
     /**
      * The user who last updated the pinned event
      */
-    updatedBy: z.string().nullable().optional(),
+    updatedBy: z
+      .string()
+      .nullable()
+      .optional()
+      .describe('The user who last updated the pinned event'),
   })
 );
 export type PinnedEventCreatedAndUpdatedMetadata = z.infer<
@@ -422,11 +504,13 @@ export const BarePinnedEvent = lazySchema(() =>
       /**
        * The `_id` of the associated event for this pinned event.
        */
-      eventId: z.string(),
+      eventId: z.string().describe('The `_id` of the associated event for this pinned event.'),
       /**
        * The `savedObjectId` of the timeline that this pinned event is associated with
        */
-      timelineId: z.string(),
+      timelineId: z
+        .string()
+        .describe('The `savedObjectId` of the timeline that this pinned event is associated with'),
     })
   )
 );
@@ -438,11 +522,11 @@ export const PinnedEvent = lazySchema(() =>
       /**
        * The `savedObjectId` of this pinned event
        */
-      pinnedEventId: z.string(),
+      pinnedEventId: z.string().describe('The `savedObjectId` of this pinned event'),
       /**
        * The version of this pinned event
        */
-      version: z.string(),
+      version: z.string().describe('The version of this pinned event'),
     })
   )
 );
@@ -454,23 +538,43 @@ export const TimelineResponse = lazySchema(() =>
       /**
        * A list of all the notes that are associated to this Timeline.
        */
-      eventIdToNoteIds: z.array(Note).nullable().optional(),
+      eventIdToNoteIds: z
+        .array(Note)
+        .nullable()
+        .optional()
+        .describe('A list of all the notes that are associated to this Timeline.'),
       /**
        * A list of all the notes that are associated to this Timeline.
        */
-      notes: z.array(Note).nullable().optional(),
+      notes: z
+        .array(Note)
+        .nullable()
+        .optional()
+        .describe('A list of all the notes that are associated to this Timeline.'),
       /**
        * A list of all the ids of notes that are associated to this Timeline.
        */
-      noteIds: z.array(z.string()).nullable().optional(),
+      noteIds: z
+        .array(z.string())
+        .nullable()
+        .optional()
+        .describe('A list of all the ids of notes that are associated to this Timeline.'),
       /**
        * A list of all the ids of pinned events that are associated to this Timeline.
        */
-      pinnedEventIds: z.array(z.string()).nullable().optional(),
+      pinnedEventIds: z
+        .array(z.string())
+        .nullable()
+        .optional()
+        .describe('A list of all the ids of pinned events that are associated to this Timeline.'),
       /**
        * A list of all the pinned events that are associated to this Timeline.
        */
-      pinnedEventsSaveObject: z.array(PinnedEvent).nullable().optional(),
+      pinnedEventsSaveObject: z
+        .array(PinnedEvent)
+        .nullable()
+        .optional()
+        .describe('A list of all the pinned events that are associated to this Timeline.'),
     })
   )
 );
@@ -537,15 +641,24 @@ export const BareNoteWithoutExternalRefs = lazySchema(() =>
       * Elasticsearch document `_id` for the event or alert this note refers to. Same value as the `documentIds` query parameter when fetching notes via GET /api/note.
 
       */
-      eventId: z.string().nullable().optional(),
+      eventId: z
+        .string()
+        .nullable()
+        .optional()
+        .describe(
+          'Elasticsearch document `_id` for the event or alert this note refers to. Same value as the `documentIds` query parameter when fetching notes via GET /api/note.\n'
+        ),
       /**
        * The text of the note
        */
-      note: z.string().nullable().optional(),
+      note: z.string().nullable().optional().describe('The text of the note'),
       /**
        * The `savedObjectId` of the Timeline that this note is associated with
        */
-      timelineId: z.string().optional(),
+      timelineId: z
+        .string()
+        .optional()
+        .describe('The `savedObjectId` of the Timeline that this note is associated with'),
     })
   )
 );
@@ -584,19 +697,31 @@ export const ImportTimelineResult = lazySchema(() =>
     /**
      * Indicates whether any of the Timelines were successfully imports
      */
-    success: z.boolean().optional(),
+    success: z
+      .boolean()
+      .optional()
+      .describe('Indicates whether any of the Timelines were successfully imports'),
     /**
      * The amount of successfully imported/updated Timelines
      */
-    success_count: z.number().optional(),
+    success_count: z
+      .number()
+      .optional()
+      .describe('The amount of successfully imported/updated Timelines'),
     /**
      * The amount of successfully installed Timelines
      */
-    timelines_installed: z.number().optional(),
+    timelines_installed: z
+      .number()
+      .optional()
+      .describe('The amount of successfully installed Timelines'),
     /**
      * The amount of successfully updated Timelines
      */
-    timelines_updated: z.number().optional(),
+    timelines_updated: z
+      .number()
+      .optional()
+      .describe('The amount of successfully updated Timelines'),
     /**
      * The list of failed Timeline imports
      */
@@ -606,7 +731,7 @@ export const ImportTimelineResult = lazySchema(() =>
           /**
            * The ID of the timeline that failed to import
            */
-          id: z.string().optional(),
+          id: z.string().optional().describe('The ID of the timeline that failed to import'),
           /**
            * The error containing the reason why the timeline could not be imported
            */
@@ -615,16 +740,21 @@ export const ImportTimelineResult = lazySchema(() =>
               /**
                * The reason why the timeline could not be imported
                */
-              message: z.string().optional(),
+              message: z
+                .string()
+                .optional()
+                .describe('The reason why the timeline could not be imported'),
               /**
                * The HTTP status code of the error
                */
-              status_code: z.number().optional(),
+              status_code: z.number().optional().describe('The HTTP status code of the error'),
             })
-            .optional(),
+            .optional()
+            .describe('The error containing the reason why the timeline could not be imported'),
         })
       )
-      .optional(),
+      .optional()
+      .describe('The list of failed Timeline imports'),
   })
 );
 export type ImportTimelineResult = z.infer<typeof ImportTimelineResult>;

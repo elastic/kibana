@@ -100,7 +100,7 @@ describe('convertToLens', () => {
   test('should return null if getColumnsFromVis returns null', async () => {
     mockGetColumnsFromVis.mockReturnValue(null);
     const result = await convertToLens(vis, timefilter);
-    expect(mockGetColumnsFromVis).toBeCalledTimes(1);
+    expect(mockGetColumnsFromVis).toHaveBeenCalledTimes(1);
     expect(result).toBeNull();
   });
 
@@ -112,7 +112,7 @@ describe('convertToLens', () => {
       },
     ]);
     const result = await convertToLens(vis, timefilter);
-    expect(mockGetColumnsFromVis).toBeCalledTimes(1);
+    expect(mockGetColumnsFromVis).toHaveBeenCalledTimes(1);
     expect(result).toBeNull();
   });
   test('should return null if buckets count is more than 1', async () => {
@@ -124,7 +124,7 @@ describe('convertToLens', () => {
       },
     ]);
     const result = await convertToLens(vis, timefilter);
-    expect(mockGetColumnsFromVis).toBeCalledTimes(1);
+    expect(mockGetColumnsFromVis).toHaveBeenCalledTimes(1);
     expect(result).toBeNull();
   });
 
@@ -137,7 +137,7 @@ describe('convertToLens', () => {
       },
     ]);
     const result = await convertToLens(vis, timefilter);
-    expect(mockGetColumnsFromVis).toBeCalledTimes(1);
+    expect(mockGetColumnsFromVis).toHaveBeenCalledTimes(1);
     expect(result).toBeNull();
   });
   test('should return correct state for valid vis', async () => {
@@ -160,9 +160,9 @@ describe('convertToLens', () => {
     mockGetConfiguration.mockReturnValue(config);
 
     const result = await convertToLens(vis, timefilter);
-    expect(mockGetColumnsFromVis).toBeCalledTimes(1);
-    expect(mockGetConfiguration).toBeCalledTimes(1);
-    expect(mockGetPalette).toBeCalledTimes(1);
+    expect(mockGetColumnsFromVis).toHaveBeenCalledTimes(1);
+    expect(mockGetConfiguration).toHaveBeenCalledTimes(1);
+    expect(mockGetPalette).toHaveBeenCalledTimes(1);
     expect(result?.type).toEqual('lnsMetric');
     expect(result?.layers.length).toEqual(1);
     expect(result?.layers[0]).toEqual(

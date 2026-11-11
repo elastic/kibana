@@ -10,5 +10,6 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('environment', () => {
     loadTestFile(require.resolve('./get_environment.spec.ts'));
+    loadTestFile(require.resolve('./get_unified_environments.spec.ts'));
   });
 }

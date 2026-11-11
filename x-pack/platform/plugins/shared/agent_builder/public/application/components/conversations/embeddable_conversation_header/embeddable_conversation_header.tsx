@@ -7,13 +7,14 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ConversationRightActions } from '../conversation_header/conversation_actions_right';
-import { ConversationTitle } from '../conversation_header/conversation_title';
+import { EmbeddableConversationRightActions } from './embeddable_conversation_actions';
+import { EmbeddableConversationTitle } from './embeddable_conversation_title';
 import { EmbeddableMenuButton } from './embeddable_menu_button';
-import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
+import { useResolvedAgent } from '../../../hooks/agents/use_resolved_agent';
 import { useAgentId, useHasActiveConversation } from '../../../hooks/use_conversation';
+import { useConversationTemplateDisplay } from '../../../hooks/use_conversation_template_display';
 
 const newConversationTitleLabel = i18n.translate(
   'xpack.agentBuilder.embeddableHeader.newConversation',
@@ -33,9 +34,11 @@ export const EmbeddableConversationHeader: React.FC<EmbeddableConversationHeader
 }) => {
   const { euiTheme } = useEuiTheme();
   const agentId = useAgentId();
-  const { agents } = useAgentBuilderAgents();
+  const { agent: currentAgent } = useResolvedAgent(agentId ?? undefined);
   const hasActiveConversation = useHasActiveConversation();
-  const currentAgent = agents.find((a) => a.id === agentId);
+  const templateDisplay = useConversationTemplateDisplay();
+  const templateName = templateDisplay?.name;
+  const templateIcon = templateDisplay?.icon;
 
   return (
     <div
@@ -56,7 +59,7 @@ export const EmbeddableConversationHeader: React.FC<EmbeddableConversationHeader
         `}
       >
         {hasActiveConversation ? (
-          <ConversationTitle ariaLabelledBy={ariaLabelledBy} />
+          <EmbeddableConversationTitle ariaLabelledBy={ariaLabelledBy} />
         ) : (
           <h4
             id={ariaLabelledBy}
@@ -75,18 +78,28 @@ export const EmbeddableConversationHeader: React.FC<EmbeddableConversationHeader
             size="xs"
             color="subdued"
             css={css`
+              display: flex;
+              align-items: center;
+              gap: ${euiTheme.size.xs};
               white-space: nowrap;
               overflow: hidden;
               text-overflow: ellipsis;
             `}
           >
             {currentAgent.name}
+            {templateName && (
+              <>
+                {'/'}
+                {templateIcon && <EuiIcon type={templateIcon} size="s" aria-hidden={true} />}
+                {templateName}
+              </>
+            )}
           </EuiText>
         )}
       </div>
 
       {/* Right: kebab menu + close */}
-      <ConversationRightActions onClose={onClose} />
+      <EmbeddableConversationRightActions onClose={onClose} />
     </div>
   );
 };

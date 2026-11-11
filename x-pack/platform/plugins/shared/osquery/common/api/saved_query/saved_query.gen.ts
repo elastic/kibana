@@ -34,7 +34,7 @@ export const OsqueryCopySavedQueryRequestParams = lazySchema(() =>
     /**
      * The ID of the saved query to copy.
      */
-    id: SavedQueryId,
+    id: SavedQueryId.describe('The ID of the saved query to copy.'),
   })
 );
 export type OsqueryCopySavedQueryRequestParams = z.infer<typeof OsqueryCopySavedQueryRequestParams>;
@@ -59,7 +59,7 @@ export const OsqueryDeleteSavedQueryRequestParams = lazySchema(() =>
     /**
      * The saved query ID.
      */
-    id: SavedQueryId,
+    id: SavedQueryId.describe('The saved query ID.'),
   })
 );
 export type OsqueryDeleteSavedQueryRequestParams = z.infer<
@@ -76,19 +76,19 @@ export const OsqueryFindSavedQueriesRequestQuery = lazySchema(() =>
     /**
      * The page number to return.
      */
-    page: PageOrUndefined.optional(),
+    page: PageOrUndefined.optional().describe('The page number to return.'),
     /**
      * The number of results to return per page.
      */
-    pageSize: PageSizeOrUndefined.optional(),
+    pageSize: PageSizeOrUndefined.optional().describe('The number of results to return per page.'),
     /**
      * The field to sort results by.
      */
-    sort: SortOrUndefined.optional(),
+    sort: SortOrUndefined.optional().describe('The field to sort results by.'),
     /**
      * The sort order.
      */
-    sortOrder: SortOrderOrUndefined.optional(),
+    sortOrder: SortOrderOrUndefined.optional().describe('The sort order.'),
   })
 );
 export type OsqueryFindSavedQueriesRequestQuery = z.infer<
@@ -106,7 +106,7 @@ export const OsqueryGetSavedQueryDetailsRequestParams = lazySchema(() =>
     /**
      * The saved query ID.
      */
-    id: SavedQueryId,
+    id: SavedQueryId.describe('The saved query ID.'),
   })
 );
 export type OsqueryGetSavedQueryDetailsRequestParams = z.infer<
@@ -126,7 +126,7 @@ export const OsqueryUpdateSavedQueryRequestParams = lazySchema(() =>
     /**
      * The saved query ID.
      */
-    id: SavedQueryId,
+    id: SavedQueryId.describe('The saved query ID.'),
   })
 );
 export type OsqueryUpdateSavedQueryRequestParams = z.infer<

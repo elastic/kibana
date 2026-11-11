@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { FilterAggConfigEditor } from '../types';
 
 export const FilterEditorForm: FilterAggConfigEditor['aggTypeConfig']['FilterAggFormComponent'] = ({
@@ -41,12 +42,16 @@ export const FilterEditorForm: FilterAggConfigEditor['aggTypeConfig']['FilterAgg
       {isValid === false ? (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut announceOnMount color="danger" iconType="warning" size="s">
-            <FormattedMessage
-              id="xpack.transform.agg.filterEditorForm.jsonInvalidErrorMessage"
-              defaultMessage="JSON is invalid."
-            />
-          </EuiCallOut>
+          <KbnDangerCallout
+            announceOnMount
+            size="s"
+            title={
+              <FormattedMessage
+                id="xpack.transform.agg.filterEditorForm.jsonInvalidErrorMessage"
+                defaultMessage="JSON is invalid."
+              />
+            }
+          />
         </>
       ) : null}
     </>

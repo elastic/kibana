@@ -214,6 +214,7 @@ evaluate.describe(
             {
               name: 'NonEmptyDocuments',
               kind: 'CODE' as const,
+              direction: 'maximize',
               evaluate: async ({ output, metadata }) => {
                 const minDocs = typeof metadata?.minDocs === 'number' ? metadata.minDocs : 1;
                 const count = output?.documents?.length ?? 0;
@@ -223,6 +224,7 @@ evaluate.describe(
             {
               name: 'RequiredTermsInRetrievedContent',
               kind: 'CODE' as const,
+              direction: 'maximize',
               evaluate: async ({ output, metadata }) => {
                 const requiredTerms =
                   Array.isArray(metadata?.requiredTerms) &&
@@ -246,6 +248,7 @@ evaluate.describe(
             {
               name: 'HasElasticDocsUrl',
               kind: 'CODE' as const,
+              direction: 'maximize',
               evaluate: async ({ output }) => {
                 const urls = (output?.documents ?? []).map((d) => d.url);
                 const ok = urls.some((u) => typeof u === 'string' && u.startsWith('https://'));

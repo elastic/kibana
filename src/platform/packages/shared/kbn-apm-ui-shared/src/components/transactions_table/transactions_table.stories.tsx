@@ -275,14 +275,14 @@ const actionsColumn: EuiBasicTableColumn<TransactionGroup> = {
             {
               id: 'createLatencySlo',
               name: 'Create APM latency SLO',
-              icon: 'visGauge',
+              icon: 'chartGauge',
               onClick: () => alert(`Create latency SLO: ${item.name}`),
               ebt: { action: 'createLatencySlo', element: 'transactionsTableRowActions' },
             },
             {
               id: 'createAvailabilitySlo',
               name: 'Create APM availability SLO',
-              icon: 'visGauge',
+              icon: 'chartGauge',
               onClick: () => alert(`Create availability SLO: ${item.name}`),
               ebt: { action: 'createAvailabilitySlo', element: 'transactionsTableRowActions' },
             },
@@ -424,7 +424,7 @@ export const Complete: StoryFn = () => (
       <EuiText size="s" style={{ maxWidth: 448 }}>
         The cardinality of APM data being collected is too high. Please review{' '}
         <EuiLink
-          href="https://www.elastic.co/guide/en/kibana/8.7/troubleshooting.html#troubleshooting-too-many-transactions"
+          href="https://www.elastic.co/docs/troubleshoot/observability/apm/common-problems#troubleshooting-too-many-transactions"
           target="_blank"
         >
           docs

@@ -8,7 +8,7 @@
  */
 
 import fs from 'fs/promises';
-import globby from 'globby';
+import { globby } from 'globby';
 import { resolve } from 'path';
 
 /**

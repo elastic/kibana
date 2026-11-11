@@ -21,7 +21,20 @@ export const RESULTS_DATA_STREAM_INDEX = `logs-${OSQUERY_INTEGRATION_NAME}.resul
 
 export const DEFAULT_PLATFORM = 'linux,windows,darwin';
 
+/** osquery platform ids, as used by saved query and pack `platform`. */
+export const PLATFORM_IDS = ['linux', 'darwin', 'windows'] as const;
+export type PlatformId = (typeof PLATFORM_IDS)[number];
+
 export const OSQUERY_SCHEDULED_INPUT_TYPE = 'osquery_scheduled';
+
+/**
+ * Not part of the public API contract. Workflow steps send this on
+ * `POST /api/osquery/live_queries`; the route then rejects the request when the agents it
+ * actually selects exceed the value, which is the set the fleet-wrapper preflight can
+ * undercount. It can only narrow a request, and is ignored while `workflowsExtensionsEnabled`
+ * is off. It must not start with `x-elastic-internal-`: `callKibanaApi` strips those headers.
+ */
+export const OSQUERY_MAX_AGENTS_HEADER = 'x-osquery-max-agents';
 
 export const API_VERSIONS = {
   public: {
@@ -61,3 +74,20 @@ export const ACTION_EXPIRATION_WEEKS = 2;
 
 export const MAX_TAGS_PER_ACTION = 20;
 export const MAX_TAG_LENGTH = 256;
+
+/**
+ * `precision_threshold` for `cardinality(agent_id)` on the scheduled execution
+ * DETAILS endpoint (single-bucket agg — sketch memory negligible). Exact up to
+ * 40k agents, close approximation beyond, never a rejected request. NOT used on
+ * the History list agg: it fans out over thousands of buckets where per-bucket
+ * sketch memory at max precision could trip the circuit breaker.
+ */
+export const AGENT_CARDINALITY_PRECISION = 40000;
+
+/**
+ * Largest targeted-agent count whose responders are counted with an exact `terms` aggregation
+ * instead of counting response documents. The aggregation returns one bucket per responder and
+ * runs on every poll of the live query details route, so this is kept well below Elasticsearch's
+ * default `search.max_buckets` (65,536) to bound the response size.
+ */
+export const EXACT_RESPONDING_AGENTS_LIMIT = 10000;

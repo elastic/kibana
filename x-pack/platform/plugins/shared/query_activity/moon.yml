@@ -17,8 +17,10 @@ project:
   owner: '@elastic/kibana-management'
   sourceRoot: x-pack/platform/plugins/shared/query_activity
 dependsOn:
+  - '@kbn/app-header'
   - '@kbn/core'
   - '@kbn/es-query'
+  - '@kbn/flyout-template'
   - '@kbn/i18n'
   - '@kbn/management-plugin'
   - '@kbn/i18n-react'
@@ -46,6 +48,4 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

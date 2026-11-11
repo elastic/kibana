@@ -15,19 +15,30 @@ import { useWorkflowsApi } from '../../api/use_workflows_api';
 type HttpError = IHttpFetchError<ResponseErrorBody>;
 
 /**
+ * Where the template to install comes from: a catalog `slug` (the server
+ * re-fetches the trusted template) or raw `yaml` (e.g. an uploaded file the
+ * server parses and renders directly).
+ */
+export type InstallSource = { type: 'catalog'; slug: string } | { type: 'custom'; yaml: string };
+
+/**
  * Installs a Workflow Template Library template: the server renders the
  * template with the submitted install-form values and creates a workflow
  * through the standard create path. Resolves with the new workflow's ID.
  */
 export const useInstallTemplate = (
-  slug: string,
+  source: InstallSource,
   options?: UseMutationOptions<InstallTemplateResponse, HttpError, Record<string, unknown>>
 ) => {
   const api = useWorkflowsApi();
+  const key = source.type === 'catalog' ? source.slug : 'custom';
 
   return useMutation<InstallTemplateResponse, HttpError, Record<string, unknown>>({
-    mutationKey: ['workflows-library', 'install', slug],
-    mutationFn: (values) => api.installTemplate(slug, values),
+    mutationKey: ['workflows-library', 'install', key],
+    mutationFn: (values) =>
+      source.type === 'catalog'
+        ? api.installTemplate(source.slug, values)
+        : api.installTemplateFromYaml(source.yaml, values),
     ...options,
   });
 };

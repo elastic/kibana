@@ -6,9 +6,15 @@
  */
 
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
-import { kibanaSavedObjectPermissions } from '@kbn/agent-builder-sml-plugin/server';
+import {
+  getSmlOriginId,
+  kibanaPermissions,
+  searchSavedObjectsByTitle,
+} from '@kbn/agent-builder-sml-plugin/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
+import { VISUALIZATION_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
+import { VISUALIZATION_ATTACHMENT_TYPE } from '@kbn/agent-builder-visualizations-common';
 import {
   withLensReferences,
   toLensApiConfig,
@@ -16,15 +22,13 @@ import {
   extractEsqlFromLens,
 } from '../lens_reference';
 
-const VISUALIZATION_SML_TYPE = 'visualization';
-const VISUALIZATION_SAVED_OBJECT_TYPE = 'lens';
-
 const getChartType = (attributes: LensAttributes): string => {
   return attributes.visualizationType ?? '';
 };
 
 export const visualizationSmlType: SmlTypeDefinition = {
-  id: VISUALIZATION_SML_TYPE,
+  id: VISUALIZATION_KI_TYPE,
+  attachmentType: VISUALIZATION_ATTACHMENT_TYPE,
   fetchFrequency: () => '1h',
 
   async *list(context) {
@@ -60,7 +64,7 @@ export const visualizationSmlType: SmlTypeDefinition = {
       const contentParts = [title, description, chartType, esql].filter(Boolean);
 
       return {
-        type: VISUALIZATION_SML_TYPE,
+        type: VISUALIZATION_KI_TYPE,
         title,
         content: contentParts.join('\n'),
       };
@@ -72,11 +76,14 @@ export const visualizationSmlType: SmlTypeDefinition = {
     }
   },
 
-  getPermissions: () =>
-    kibanaSavedObjectPermissions({ savedObjectType: VISUALIZATION_SAVED_OBJECT_TYPE }),
+  getPermissions: () => kibanaPermissions({ kiType: VISUALIZATION_KI_TYPE }),
+
+  searchByTitle: ({ title, size }, { savedObjectsClient }) =>
+    searchSavedObjectsByTitle({ type: 'lens', title, size, savedObjectsClient }),
 
   toAttachment: async (item, context) => {
-    const resolveResult = await context.savedObjectsClient.resolve('lens', item.origin_id ?? '');
+    const originId = getSmlOriginId(item);
+    const resolveResult = await context.savedObjectsClient.resolve('lens', originId);
     const savedObject = resolveResult.saved_object;
     if (isSavedObjectErrorResult(savedObject)) {
       return undefined;
@@ -89,9 +96,9 @@ export const visualizationSmlType: SmlTypeDefinition = {
     const lensApiConfig = toLensApiConfig(lensAttributes);
 
     return {
-      type: VISUALIZATION_SML_TYPE,
+      type: VISUALIZATION_KI_TYPE,
       data: {
-        query: lensAttributes.title ?? item.origin_id,
+        query: lensAttributes.title ?? originId,
         visualization: lensApiConfig as unknown as Record<string, unknown>,
         chart_type: toSupportedChartType(lensApiConfig.type),
         esql: extractEsqlFromLens(lensAttributes),

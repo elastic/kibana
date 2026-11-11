@@ -16,7 +16,6 @@ import { lazyObject } from '@kbn/lazy-object';
 const createFeatureFlagsSetup = (): jest.Mocked<FeatureFlagsSetup> => {
   return lazyObject({
     getInitialFeatureFlags: jest.fn().mockImplementation(() => ({})),
-    setProvider: jest.fn(),
     appendContext: jest.fn().mockImplementation(Promise.resolve),
   });
 };
@@ -24,12 +23,12 @@ const createFeatureFlagsSetup = (): jest.Mocked<FeatureFlagsSetup> => {
 const createFeatureFlagsStart = (): jest.Mocked<FeatureFlagsStart> => {
   return lazyObject({
     appendContext: jest.fn().mockImplementation(Promise.resolve),
-    getBooleanValue: jest.fn().mockImplementation((_, fallback) => fallback),
-    getNumberValue: jest.fn().mockImplementation((_, fallback) => fallback),
-    getStringValue: jest.fn().mockImplementation((_, fallback) => fallback),
     getBooleanValue$: jest.fn().mockImplementation((_, fallback) => of(fallback)),
+    useBooleanValue: jest.fn().mockImplementation((_, fallback) => fallback),
     getStringValue$: jest.fn().mockImplementation((_, fallback) => of(fallback)),
+    useStringValue: jest.fn().mockImplementation((_, fallback) => fallback),
     getNumberValue$: jest.fn().mockImplementation((_, fallback) => of(fallback)),
+    useNumberValue: jest.fn().mockImplementation((_, fallback) => fallback),
   });
 };
 
@@ -38,6 +37,9 @@ const createFeatureFlagsServiceMock = (): jest.Mocked<PublicMethodsOf<FeatureFla
     setup: jest.fn().mockImplementation(createFeatureFlagsSetup),
     start: jest.fn().mockImplementation(async () => createFeatureFlagsStart()),
     stop: jest.fn().mockImplementation(Promise.resolve),
+    refresh: jest.fn().mockResolvedValue(undefined),
+    registerHelper: jest.fn(),
+    getEvaluatedFlags: jest.fn().mockReturnValue([]),
   });
 };
 

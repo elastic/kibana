@@ -20,7 +20,6 @@ import {
   TooltipTable,
 } from '@elastic/charts';
 import {
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -29,6 +28,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -36,11 +36,10 @@ import type { GetPreviewDataResponse } from '@kbn/slo-schema';
 import { map, max, min, values } from 'lodash';
 import moment from 'moment';
 import React, { useState } from 'react';
-import { useFormContext } from 'react-hook-form';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useFormValues } from '../../hooks/use_form_values';
 import { useDebouncedGetPreviewData } from '../../hooks/use_preview';
-import { useSectionFormValidation } from '../../hooks/use_section_form_validation';
-import type { CreateSLOForm } from '../../types';
+import { useIndicatorSectionValidity } from '../../context/indicator_section_validity';
 
 interface DataPreviewChartProps {
   formatPattern?: string;
@@ -60,29 +59,32 @@ export function DataPreviewChart({
   thresholdMessage,
   ignoreMoreThan100,
 }: DataPreviewChartProps) {
-  const { watch, getFieldState, formState, getValues } = useFormContext<CreateSLOForm>();
   const { charts, uiSettings } = useKibana().services;
-  const { isIndicatorSectionValid } = useSectionFormValidation({
-    getFieldState,
-    getValues,
-    formState,
-    watch,
-  });
+  const isIndicatorSectionValid = useIndicatorSectionValidity();
 
   const [range, _] = useState({
     from: moment().subtract(1, 'day').toDate(),
     to: new Date(),
   });
 
-  const indicator = watch('indicator');
-  const groupBy = watch('groupBy');
+  const [indicator, groupBy, projectRoutings] = useFormValues([
+    'indicator',
+    'groupBy',
+    'settings.projectRoutings',
+  ]);
 
   const {
     data: previewData,
     isLoading,
     isSuccess,
     isError,
-  } = useDebouncedGetPreviewData(isIndicatorSectionValid, indicator, range, groupBy);
+  } = useDebouncedGetPreviewData({
+    isIndicatorValid: isIndicatorSectionValid,
+    indicator,
+    range,
+    groupBy,
+    projectRoutings,
+  });
 
   const isMoreThan100 =
     !ignoreMoreThan100 &&
@@ -223,15 +225,13 @@ export function DataPreviewChart({
       {isMoreThan100 && (
         <>
           <EuiSpacer size="xs" />
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
             size="s"
-            color="warning"
             title={i18n.translate('xpack.slo.sloEdit.dataPreviewChart.moreThan100', {
               defaultMessage:
                 'Some of the SLI values are more than 100%. That means good query is returning more results than total query.',
             })}
-            iconType="warning"
           />
           <EuiSpacer size="xs" />
         </>

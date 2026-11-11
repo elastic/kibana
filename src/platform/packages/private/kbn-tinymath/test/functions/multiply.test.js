@@ -30,4 +30,10 @@ describe('Multiply', () => {
   it('array length mismatch', () => {
     expect(() => multiply([1, 2], [3])).toThrow('Array length mismatch');
   });
+
+  it('single array argument reduces to the product, like add/max/min', () => {
+    expect(multiply([2, 3, 4])).toEqual(24);
+    expect(multiply([10])).toEqual(10);
+    expect(multiply(10)).toEqual(10);
+  });
 });

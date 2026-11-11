@@ -6,8 +6,24 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import { ToolOrigin, ToolType } from '@kbn/agent-builder-common';
+import type { AgentConfiguration } from '@kbn/agent-builder-common';
+import {
+  attachmentTools,
+  contextEngineAiIndexTools,
+  contextEngineMemoryTools,
+} from '@kbn/agent-builder-common/tools';
 import type { ExecutableTool } from '@kbn/agent-builder-server';
+import { createMockedExecutableTool, createToolProviderMock } from '../../../../test_utils';
+import {
+  createAttachmentStateManagerMock,
+  createAttachmentsService,
+  createScopedRunnerMock,
+  createSkillsServiceMock,
+} from '../../../../test_utils/runner';
+import { createAttachmentTools } from '../../../tools/builtin/attachments';
+import type { ProcessedConversation } from './prepare_conversation';
 import { selectTools } from './select_tools';
 
 jest.mock('../../../tools/builtin/attachments', () => {
@@ -80,6 +96,8 @@ describe('selectTools', () => {
         tools: [{ tool_ids: ['registry.static'] }],
         enable_elastic_capabilities: false,
       } as any,
+      aiIndicesEnabled: false,
+      capabilities: { attachmentTools: true },
       attachmentsService,
       spaceId: 'default',
       runner: {
@@ -141,6 +159,8 @@ describe('selectTools', () => {
       request: {} as any,
       toolProvider: { list: jest.fn().mockResolvedValue([]) } as any,
       agentConfiguration: { tools: [], enable_elastic_capabilities: false } as any,
+      aiIndicesEnabled: false,
+      capabilities: { attachmentTools: true },
       attachmentsService,
       spaceId: 'default',
       runner: {
@@ -152,5 +172,213 @@ describe('selectTools', () => {
     expect(result.staticTools.find((tool) => tool.id === 'attachment.inline')?.origin).toBe(
       ToolOrigin.inline
     );
+  });
+
+  describe('attachment_tools capability', () => {
+    const genericAttachmentToolIds = Object.values(attachmentTools);
+
+    const selectStaticToolIds = async ({
+      attachmentToolsEnabled,
+    }: {
+      attachmentToolsEnabled: boolean;
+    }) => {
+      const typeToolId = 'text.type_tool';
+      const boundTool = { id: 'attachment.bound', type: ToolType.builtin };
+      const attachmentDefinition = {
+        getTools: () => [typeToolId],
+        format: jest.fn().mockResolvedValue({
+          getBoundedTools: jest.fn().mockResolvedValue([boundTool]),
+        }),
+      };
+      const attachmentsService = {
+        getTypeDefinition: jest.fn().mockReturnValue(attachmentDefinition),
+        convertAttachmentTool: jest.fn().mockReturnValue(createExecutableTool('attachment.bound')),
+      } as any;
+
+      const result = await selectTools({
+        conversation: {
+          attachmentTypes: [{ type: 'text' }],
+          attachmentStateManager: {
+            getActive: jest.fn().mockReturnValue([
+              {
+                id: 'a-1',
+                type: 'text',
+                active: true,
+                current_version: 1,
+                versions: [{ version: 1, data: 'hello', created_at: 'now', content_hash: 'h' }],
+              },
+            ]),
+          },
+        } as any,
+        previousDynamicToolIds: [],
+        filteredSkills: [],
+        skills: { convertSkillTool: jest.fn() } as any,
+        request: {} as any,
+        toolProvider: {
+          list: jest.fn().mockResolvedValue([createExecutableTool(typeToolId)]),
+        } as any,
+        agentConfiguration: { tools: [], enable_elastic_capabilities: false } as any,
+        aiIndicesEnabled: false,
+        capabilities: { attachmentTools: attachmentToolsEnabled },
+        attachmentsService,
+        spaceId: 'default',
+        runner: { runInternalTool: jest.fn() } as any,
+      });
+      return result.staticTools.map((tool) => tool.id);
+    };
+
+    beforeEach(() => {
+      jest.mocked(createAttachmentTools).mockClear();
+    });
+
+    it('leaves out the generic attachment tools but keeps type and bound tools when off', async () => {
+      const ids = await selectStaticToolIds({ attachmentToolsEnabled: false });
+
+      expect(createAttachmentTools).not.toHaveBeenCalled();
+      expect(ids.filter((id) => genericAttachmentToolIds.includes(id))).toEqual([]);
+      expect(ids).toEqual(expect.arrayContaining(['text.type_tool', 'attachment.bound']));
+    });
+
+    it('adds the generic attachment tools when on', async () => {
+      const ids = await selectStaticToolIds({ attachmentToolsEnabled: true });
+
+      expect(createAttachmentTools).toHaveBeenCalledTimes(1);
+      expect(ids).toEqual(
+        expect.arrayContaining(['attachments.read', 'text.type_tool', 'attachment.bound'])
+      );
+    });
+  });
+
+  describe('AI-index tools', () => {
+    const memoryToolIds = Object.values(contextEngineMemoryTools);
+    const aiIndexToolIds = [...Object.values(contextEngineAiIndexTools), ...memoryToolIds];
+
+    const selectStaticToolIds = async ({
+      aiIndicesEnabled,
+      aiIndices,
+      aiIndexCatalog,
+    }: {
+      aiIndicesEnabled: boolean;
+      aiIndices?: string[];
+      aiIndexCatalog?: Array<{ id: string; esqlTarget?: string; memoryEnabled?: boolean }>;
+    }) => {
+      const attachmentStateManager = createAttachmentStateManagerMock();
+      attachmentStateManager.getActive.mockReturnValue([]);
+      const toolProvider = createToolProviderMock();
+      toolProvider.list.mockResolvedValue(
+        aiIndexToolIds.map((id) => createMockedExecutableTool({ id }))
+      );
+      const agentConfiguration: AgentConfiguration = {
+        tools: [],
+        enable_elastic_capabilities: false,
+        ai_indices: aiIndices,
+      };
+
+      const result = await selectTools({
+        conversation: {
+          attachmentTypes: [],
+          attachmentStateManager,
+        } as unknown as ProcessedConversation,
+        previousDynamicToolIds: [],
+        filteredSkills: [],
+        skills: createSkillsServiceMock(),
+        request: httpServerMock.createKibanaRequest(),
+        toolProvider,
+        agentConfiguration,
+        aiIndexCatalog,
+        aiIndicesEnabled,
+        capabilities: { attachmentTools: true },
+        attachmentsService: createAttachmentsService(),
+        spaceId: 'default',
+        runner: createScopedRunnerMock(),
+      });
+      return result.staticTools.map((tool) => tool.id).filter((id) => id !== 'attachments.read');
+    };
+
+    it('adds only the memory tools: the read tools come from the `ki-retrieval` skill', async () => {
+      await expect(
+        selectStaticToolIds({
+          aiIndicesEnabled: true,
+          aiIndices: ['memory-index'],
+          aiIndexCatalog: [
+            {
+              id: 'memory-index',
+              esqlTarget: 'ai-index-idx-memory',
+              memoryEnabled: true,
+            },
+          ],
+        })
+      ).resolves.toEqual(memoryToolIds);
+    });
+
+    it('adds nothing when every resolved assigned index disables memory', async () => {
+      await expect(
+        selectStaticToolIds({
+          aiIndicesEnabled: true,
+          aiIndices: ['disabled-index'],
+          aiIndexCatalog: [
+            {
+              id: 'disabled-index',
+              esqlTarget: 'ai-index-idx-disabled',
+              memoryEnabled: false,
+            },
+          ],
+        })
+      ).resolves.toEqual([]);
+    });
+
+    it('adds nothing when assigned indices cannot be resolved or read', async () => {
+      await expect(
+        selectStaticToolIds({
+          aiIndicesEnabled: true,
+          aiIndices: ['missing-index'],
+          aiIndexCatalog: [{ id: 'missing-index' }],
+        })
+      ).resolves.toEqual([]);
+    });
+
+    it('adds the memory tools when any resolved assigned index enables memory', async () => {
+      await expect(
+        selectStaticToolIds({
+          aiIndicesEnabled: true,
+          aiIndices: ['disabled-index', 'memory-index'],
+          aiIndexCatalog: [
+            {
+              id: 'disabled-index',
+              esqlTarget: 'ai-index-idx-disabled',
+              memoryEnabled: false,
+            },
+            {
+              id: 'memory-index',
+              esqlTarget: 'ai-index-idx-memory',
+              memoryEnabled: true,
+            },
+          ],
+        })
+      ).resolves.toEqual(memoryToolIds);
+    });
+
+    it('adds nothing when the agent has no AI Indices', async () => {
+      await expect(selectStaticToolIds({ aiIndicesEnabled: true, aiIndices: [] })).resolves.toEqual(
+        []
+      );
+      await expect(selectStaticToolIds({ aiIndicesEnabled: true })).resolves.toEqual([]);
+    });
+
+    it('adds nothing when the feature is off', async () => {
+      await expect(
+        selectStaticToolIds({
+          aiIndicesEnabled: false,
+          aiIndices: ['memory-index'],
+          aiIndexCatalog: [
+            {
+              id: 'memory-index',
+              esqlTarget: 'ai-index-idx-memory',
+              memoryEnabled: true,
+            },
+          ],
+        })
+      ).resolves.toEqual([]);
+    });
   });
 });

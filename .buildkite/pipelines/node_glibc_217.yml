@@ -5,7 +5,7 @@ steps:
     label: Pre-Build
     timeout_in_minutes: 10
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-minimal-ubuntu-2604
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
@@ -23,6 +23,7 @@ steps:
       provider: gcp
       machineType: n2-standard-16
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     key: build
     timeout_in_minutes: 60
     retry:
@@ -44,6 +45,7 @@ steps:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
+      FTR_TEST_CHANNELS: ci-on-commit
     retry:
       automatic:
         - exit_status: '*'
@@ -75,6 +77,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -92,6 +96,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -108,8 +114,9 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
-      diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -126,8 +133,9 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
-      diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -145,6 +153,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -162,6 +172,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -179,6 +191,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -196,6 +210,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -203,6 +219,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 1
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
@@ -213,6 +231,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -230,6 +250,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -247,6 +269,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -264,6 +288,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -281,6 +307,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -298,6 +326,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -315,6 +345,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -332,6 +364,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -349,6 +383,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -366,6 +402,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -383,6 +421,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -400,6 +440,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -417,6 +459,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -433,8 +477,9 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
-      diskSizeGb: 130
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -450,9 +495,10 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-highmem-4
-      diskSizeGb: 130
+      machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -468,9 +514,10 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-highmem-4
-      diskSizeGb: 130
+      machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -482,15 +529,12 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
     label: 'Defend Workflows Cypress Tests'
-    env:
-      CLEAR_YARN_CACHE: '1'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      machineType: n2-highmem-4
-      diskSizeGb: 130
+      machineType: n2-standard-4
     depends_on:
       - build
     timeout_in_minutes: 75
@@ -502,15 +546,12 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
     label: 'Defend Workflows Cypress Tests on Serverless'
-    env:
-      CLEAR_YARN_CACHE: '1'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      machineType: n2-highmem-4
-      diskSizeGb: 130
+      machineType: n2-standard-4
     depends_on:
       - build
     timeout_in_minutes: 75
@@ -527,7 +568,7 @@ steps:
     label: Post-Build
     timeout_in_minutes: 10
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-minimal-ubuntu-2604
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2

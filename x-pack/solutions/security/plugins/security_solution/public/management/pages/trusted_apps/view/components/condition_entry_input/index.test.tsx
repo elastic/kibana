@@ -138,19 +138,41 @@ describe('Condition entry input', () => {
   });
 
   it.each([
-    { os: OperatingSystem.WINDOWS, expectedLength: 3 },
-    { os: OperatingSystem.LINUX, expectedLength: 2 },
-    { os: OperatingSystem.MAC, expectedLength: 3 },
-  ])(
-    `should be able to select $expectedLength options when OS is $os`,
-    async ({ os, expectedLength }) => {
-      props = { ...props, os };
-      render();
-      await userEvent.click(screen.getByTestId(`${formPrefix}-field`));
-      const options = screen.getAllByRole('option');
-      expect(options).toHaveLength(expectedLength);
+    {
+      os: OperatingSystem.WINDOWS,
+      expectedNames: [
+        'Hash md5, sha1, or sha256',
+        'Path The full path of the application',
+        'Signature The signer of the application',
+      ],
+    },
+    {
+      os: OperatingSystem.LINUX,
+      expectedNames: ['Hash md5, sha1, or sha256', 'Path The full path of the application'],
+    },
+    {
+      os: OperatingSystem.MAC,
+      expectedNames: [
+        'Hash md5, sha1, or sha256',
+        'Path The full path of the application',
+        'Signature The signer of the application',
+      ],
+    },
+  ])('should expose the expected field options when OS is $os', async ({ os, expectedNames }) => {
+    props = { ...props, os };
+    render();
+    await userEvent.click(screen.getByTestId(`${formPrefix}-field`));
+    const options = screen.getAllByRole('option');
+    expect(options).toHaveLength(expectedNames.length);
+    for (const name of expectedNames) {
+      expect(screen.getByRole('option', { name })).toBeInTheDocument();
     }
-  );
+    if (os === OperatingSystem.LINUX) {
+      expect(
+        screen.queryByRole('option', { name: 'Signature The signer of the application' })
+      ).not.toBeInTheDocument();
+    }
+  });
 
   it('should have operator value selected when field is HASH', () => {
     render();

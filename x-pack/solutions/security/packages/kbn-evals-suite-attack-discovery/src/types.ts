@@ -8,7 +8,11 @@
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import type { Example } from '@kbn/evals';
 
-export type AttackDiscoveryInputMode = 'bundledAlerts' | 'searchAlerts' | 'graphState';
+export type AttackDiscoveryInputMode =
+  | 'bundledAlerts'
+  | 'searchAlerts'
+  | 'graphState'
+  | 'generateApi';
 
 export interface AnonymizedAlert {
   pageContent: string;
@@ -18,6 +22,8 @@ export interface AnonymizedAlert {
 export interface AttackDiscoveryBundledAlertsInput extends Record<string, unknown> {
   mode: 'bundledAlerts';
   anonymizedAlerts: ReadonlyArray<AnonymizedAlert>;
+  /** Appended to the prompt as "Additional context", as the product does. */
+  additionalContext?: string;
 }
 
 export interface AttackDiscoverySearchAlertsInput extends Record<string, unknown> {
@@ -44,24 +50,46 @@ export interface AttackDiscoveryGraphStateInput extends Record<string, unknown> 
   combinedMaybePartialResults?: string;
 }
 
+export interface AttackDiscoveryGenerateApiInput extends Record<string, unknown> {
+  mode: 'generateApi';
+  connectorId: string;
+  actionTypeId?: string;
+  modelId?: string;
+  alertsIndexPattern?: string;
+  size?: number;
+  start?: string;
+  end?: string;
+}
+
 export type AttackDiscoveryTaskInput =
   | AttackDiscoveryBundledAlertsInput
   | AttackDiscoverySearchAlertsInput
-  | AttackDiscoveryGraphStateInput;
+  | AttackDiscoveryGraphStateInput
+  | AttackDiscoveryGenerateApiInput;
 
 export interface AttackDiscoveryTaskExpectedOutput {
   attackDiscoveries: AttackDiscovery[];
+  criteria?: string[];
 }
 
+/**
+ * Raw doc from `GET /api/attack_discovery/_find` (snake_case wire format), as returned in
+ * generateApi mode.
+ */
+export type AttackDiscoveryFindDoc = Record<string, unknown>;
+
 export interface AttackDiscoveryTaskOutput {
-  insights: AttackDiscovery[] | null;
+  insights: ReadonlyArray<AttackDiscovery | AttackDiscoveryFindDoc> | null;
   errors?: string[];
   raw?: unknown;
+  traceId?: string;
 }
 
 export type AttackDiscoveryDatasetMetadata = Record<string, unknown> & {
   Title?: string;
   dataset_split?: unknown;
+  is_distractor?: boolean;
+  criteria?: string[];
 };
 
 export type AttackDiscoveryDatasetExample = Example<

@@ -12,7 +12,9 @@ const Path = require('path');
 const { RuleTester } = require('eslint');
 const dedent = require('dedent');
 
-const rule = require('./no_export_all');
+const rule = require('../oxlint_plugin').rules.no_export_all;
+const message =
+  '`export *` is not allowed in the index files of plugins to prevent accidentally exporting too many APIs';
 
 const ruleTester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),
@@ -44,16 +46,8 @@ ruleTester.run('@kbn/eslint/no_export_all', rule, {
       `,
 
       errors: [
-        {
-          line: 1,
-          message:
-            '`export *` is not allowed in the index files of plugins to prevent accidentally exporting too many APIs',
-        },
-        {
-          line: 2,
-          message:
-            '`export *` is not allowed in the index files of plugins to prevent accidentally exporting too many APIs',
-        },
+        { line: 1, message },
+        { line: 2, message },
       ],
 
       output: dedent`
@@ -66,6 +60,35 @@ ruleTester.run('@kbn/eslint/no_export_all', rule, {
         export type { ReexportedClass, SomeInterface, TypeAlias } from "./foo";
         export { someConst, someLet, someFunction, SomeClass, SomeEnum } from "./foo";
       `,
+    },
+    {
+      // follows nested `export *` declarations
+      filename: Path.resolve(__dirname, '../__fixtures__/index.ts'),
+      code: `export * from './top';`,
+      errors: [{ line: 1, message }],
+      output: dedent`
+        export type { ReexportedClass, SomeInterface, TypeAlias } from "./top";
+        export { someConst, someLet, someFunction, SomeClass, SomeEnum } from "./top";
+      `,
+    },
+    {
+      // no fix when a namespace would include types, or the exports cannot be resolved
+      filename: Path.resolve(__dirname, '../__fixtures__/index.ts'),
+      code: dedent`
+        export * as foo from './foo';
+        export type * as baz from './baz';
+        export * from './missing';
+        export * as missing from './missing';
+        export * as pkg from '@kbn/some-package';
+      `,
+      errors: [
+        { line: 1, message },
+        { line: 2, message },
+        { line: 3, message },
+        { line: 4, message },
+        { line: 5, message },
+      ],
+      output: null,
     },
   ],
 });

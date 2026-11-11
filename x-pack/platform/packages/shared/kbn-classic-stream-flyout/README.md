@@ -263,7 +263,7 @@ The package includes comprehensive test coverage:
 
 ```bash
 # Run tests
-yarn jest --config x-pack/platform/packages/shared/kbn-classic-stream-flyout/jest.config.js
+pnpm exec jest --config x-pack/platform/packages/shared/kbn-classic-stream-flyout/jest.config.js
 ```
 
 ### Storybook
@@ -271,5 +271,5 @@ yarn jest --config x-pack/platform/packages/shared/kbn-classic-stream-flyout/jes
 View and develop the component in Storybook:
 
 ```bash
-yarn storybook classic_stream_flyout
+pnpm storybook classic_stream_flyout
 ```

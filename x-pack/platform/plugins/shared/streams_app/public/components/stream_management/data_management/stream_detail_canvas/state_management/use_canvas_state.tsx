@@ -1,0 +1,182 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import React, { useContext, useRef, useMemo } from 'react';
+import { createActorContext } from '@xstate/react';
+import type { XYPosition } from '@xyflow/react';
+import type { Unit } from '../../../../../services/unit_repository';
+import type { RoutingDiagnostic } from '../../../../../services/unit_diagnostics';
+import type { ProcessingNodeRef, UnitLine } from '../../../../../services/unit_graph';
+import type { RoutingFlyoutTarget } from '../../../../stream_routing_flyout/state_management/routing_flyout_machine';
+import type { ProcessingStepPosition } from '../../../../stream_processing_flyout/state_management/processing_flyout_machine';
+import type {
+  CanvasCreateHistoryHandlers,
+  CanvasFlyoutKind,
+  CanvasStateServiceDeps,
+} from './types';
+import { canvasStateMachine, createCanvasMachineImplementations } from './canvas_state_machine';
+
+const CanvasStateContext = createActorContext(canvasStateMachine);
+const CanvasCreateHistoryContext =
+  React.createContext<React.MutableRefObject<CanvasCreateHistoryHandlers> | null>(null);
+
+const noopCreateHistory: CanvasCreateHistoryHandlers = {
+  hold: () => {},
+  reset: () => {},
+  discard: () => {},
+};
+
+const useCanvasStateSelector = CanvasStateContext.useSelector;
+
+export const CanvasStateContextProvider = ({
+  children,
+  ...deps
+}: React.PropsWithChildren<CanvasStateServiceDeps>) => {
+  const createHistoryRef = useRef<CanvasCreateHistoryHandlers>(noopCreateHistory);
+
+  return (
+    <CanvasCreateHistoryContext.Provider value={createHistoryRef}>
+      <CanvasStateContext.Provider
+        logic={canvasStateMachine.provide(
+          createCanvasMachineImplementations({ ...deps, createHistoryRef })
+        )}
+      >
+        {children}
+      </CanvasStateContext.Provider>
+    </CanvasCreateHistoryContext.Provider>
+  );
+};
+
+/** Point the canvas machine's create transitions at the live undo stack. */
+export const useBindCanvasCreateHistory = (handlers: CanvasCreateHistoryHandlers) => {
+  const createHistoryRef = useContext(CanvasCreateHistoryContext);
+  if (!createHistoryRef) {
+    throw new Error('useBindCanvasCreateHistory must be used within CanvasStateContextProvider');
+  }
+  createHistoryRef.current = handlers;
+};
+
+export const useCanvasUrlRef = () => {
+  return useCanvasStateSelector((state) => state.context.urlState);
+};
+
+export const useCanvasUnitDefinition = () => {
+  return useCanvasStateSelector((state) => state.context.nextUnit);
+};
+
+/** The unit as it was last loaded or saved, without unsaved edits. Stats describe this one. */
+export const useCanvasPersistedUnit = () => {
+  return useCanvasStateSelector((state) => state.context.unit);
+};
+
+export const useCanvasHasUnsavedChanges = () => {
+  return useCanvasStateSelector((state) => state.context.unit !== state.context.nextUnit);
+};
+
+export const useCanvasIsSaving = () => {
+  return useCanvasStateSelector(
+    (state) =>
+      state.matches({ ready: { unit: 'validating' } }) ||
+      state.matches({ ready: { unit: 'persisting' } })
+  );
+};
+
+/** True from the moment a processing flyout save is staged until it persists or fails. */
+export const useCanvasIsSavingProcessing = () => {
+  return useCanvasStateSelector((state) => state.context.savingComponentIntent === 'processing');
+};
+
+/** The unit a routing flyout save last staged, if any. */
+export const useCanvasRoutingStagedUnit = () => {
+  return useCanvasStateSelector((state) => state.context.routingStagedUnit);
+};
+
+export const useCanvasIsInitializing = () => {
+  return useCanvasStateSelector(
+    (state) => state.matches('initializingFromUrl') || state.matches({ ready: { unit: 'loading' } })
+  );
+};
+
+export const useCanvasIsUnitUnavailable = () => {
+  return useCanvasStateSelector((state) => state.matches({ ready: { unit: 'loadFailed' } }));
+};
+
+export const useCanvasSourcesRef = () => {
+  return useCanvasStateSelector((state) => state.context.sourcesRef);
+};
+
+export const useCanvasDestinationsRef = () => {
+  return useCanvasStateSelector((state) => state.context.destinationsRef);
+};
+
+export const useCanvasNodePositions = () => {
+  return useCanvasStateSelector((state) => state.context.nodePositions);
+};
+
+export const useCanvasRoutingFlyout = () => {
+  return useCanvasStateSelector((state) => state.context.routingFlyout);
+};
+
+const NO_ROUTING_DIAGNOSTICS: RoutingDiagnostic[] = [];
+
+/** Diagnostics of the last failed save that point at routing nodes. */
+export const useCanvasRoutingDiagnostics = (): RoutingDiagnostic[] =>
+  useCanvasStateSelector((state) => state.context.routingDiagnostics ?? NO_ROUTING_DIAGNOSTICS);
+
+export const useCanvasProcessingFlyout = () => {
+  return useCanvasStateSelector((state) => state.context.processingFlyout);
+};
+
+export const useCanvasEvents = () => {
+  const service = CanvasStateContext.useActorRef();
+
+  return useMemo(
+    () => ({
+      service,
+      openFlyout: (flyoutName: string, flyoutKind?: CanvasFlyoutKind) => {
+        service.send({ type: 'flyout.open', flyoutName, flyoutKind });
+      },
+      closeFlyout: () => {
+        service.send({ type: 'flyout.close' });
+      },
+      selectTab: (flyoutTab: string) => {
+        service.send({ type: 'flyout.tab', flyoutTab });
+      },
+      changeSearchQuery: (query: string) => {
+        service.send({ type: 'search.change', query });
+      },
+      updateNodePositions: (positions: Record<string, XYPosition>) => {
+        service.send({ type: 'nodes.positions.change', positions });
+      },
+      restoreNodePositions: (positions: Record<string, XYPosition>) => {
+        service.send({ type: 'nodes.positions.restore', positions });
+      },
+      saveUnit: () => {
+        service.send({ type: 'unit.save' });
+      },
+      changeUnitConnection: (unitDefinition: Unit) => {
+        service.send({ type: 'unit.stage', unitDefinition });
+      },
+      /** `readOnly` opens the rules without editing, for users who cannot manage the stream. */
+      openRoutingFlyout: (target: RoutingFlyoutTarget, readOnly = false) => {
+        service.send({ type: 'routing.open', target, readOnly });
+      },
+      closeRoutingFlyout: () => {
+        service.send({ type: 'routing.close' });
+      },
+      openProcessingFlyout: (slot: ProcessingNodeRef, position?: ProcessingStepPosition) => {
+        service.send({ type: 'processing.open', slot, position });
+      },
+      openLineProcessingFlyout: (line: UnitLine) => {
+        service.send({ type: 'processing.open', line });
+      },
+      closeProcessingFlyout: () => {
+        service.send({ type: 'processing.close' });
+      },
+    }),
+    [service]
+  );
+};

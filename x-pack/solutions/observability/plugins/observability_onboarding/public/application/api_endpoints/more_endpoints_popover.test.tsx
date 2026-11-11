@@ -22,14 +22,14 @@ const vendors = [
     cardTitle: 'Supabase',
     fieldLabel: 'Supabase logs endpoint',
     logo: 'supabase' as const,
-    url: 'https://otlp.example.com:443/supabase/v1/logs',
+    url: 'https://otlp.example.com:443/inputs/supabase/_default_/v1/logs',
   },
   {
     id: ApiEndpointId.Vercel,
     cardTitle: 'Vercel',
     fieldLabel: 'Vercel endpoint',
     logo: 'vercel_black' as const,
-    url: 'https://otlp.example.com:443/vercel',
+    url: 'https://otlp.example.com:443/inputs/vercel/_default_',
   },
 ];
 

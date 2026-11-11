@@ -30,44 +30,50 @@ export const SentinelWatchlistResource = lazySchema(() =>
     /**
      * The ARM resource identifier
      */
-    id: z.string().optional(),
+    id: z.string().optional().describe('The ARM resource identifier'),
     /**
      * The ARM resource name
      */
-    name: z.string().optional(),
+    name: z.string().optional().describe('The ARM resource name'),
     /**
      * The ARM resource type
      */
-    type: z.string().optional(),
+    type: z.string().optional().describe('The ARM resource type'),
     /**
      * The Sentinel watchlist properties
      */
-    properties: z.object({
-      /**
-       * The Sentinel watchlist alias
-       */
-      watchlistAlias: z.string().min(1),
-      /**
-       * The raw CSV content for the watchlist
-       */
-      rawContent: z.string(),
-      /**
-       * The watchlist search key column name
-       */
-      itemsSearchKey: z.string().optional(),
-      /**
-       * The number of raw content lines to skip
-       */
-      numberOfLinesToSkip: z.number().int().optional(),
-      /**
-       * The source file name
-       */
-      source: z.string().optional(),
-      /**
-       * The source content type
-       */
-      contentType: z.string().optional(),
-    }),
+    properties: z
+      .object({
+        /**
+         * The Sentinel watchlist alias
+         */
+        watchlistAlias: z.string().min(1).describe('The Sentinel watchlist alias'),
+        /**
+         * The raw CSV content for the watchlist
+         */
+        rawContent: z.string().describe('The raw CSV content for the watchlist'),
+        /**
+         * The watchlist search key column name
+         */
+        itemsSearchKey: z.string().optional().describe('The watchlist search key column name'),
+        /**
+         * The number of raw content lines to skip
+         */
+        numberOfLinesToSkip: z
+          .number()
+          .int()
+          .optional()
+          .describe('The number of raw content lines to skip'),
+        /**
+         * The source file name
+         */
+        source: z.string().optional().describe('The source file name'),
+        /**
+         * The source content type
+         */
+        contentType: z.string().optional().describe('The source content type'),
+      })
+      .describe('The Sentinel watchlist properties'),
   })
 );
 export type SentinelWatchlistResource = z.infer<typeof SentinelWatchlistResource>;
@@ -80,15 +86,19 @@ export const SentinelWatchlistTemplate = lazySchema(() =>
     /**
      * The ARM deployment template schema
      */
-    $schema: z.string().optional(),
+    $schema: z.string().optional().describe('The ARM deployment template schema'),
     /**
      * The ARM deployment template content version
      */
-    contentVersion: z.string().optional(),
+    contentVersion: z.string().optional().describe('The ARM deployment template content version'),
     /**
      * The ARM deployment template parameters
      */
-    parameters: z.object({}).catchall(z.unknown()).optional(),
+    parameters: z
+      .object({})
+      .catchall(z.unknown())
+      .optional()
+      .describe('The ARM deployment template parameters'),
     resources: z.array(SentinelWatchlistResource).min(1).max(1),
   })
 );

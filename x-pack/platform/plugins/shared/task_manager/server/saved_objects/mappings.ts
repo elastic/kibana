@@ -97,6 +97,32 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
         // },
       },
     },
+    // Indexed to find tasks by credential type, and the tasks that run as a given workload or
+    // service account
+    credential: {
+      properties: {
+        type: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+        workloadType: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+        workloadId: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+        spaceId: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+        expectedServiceAccountId: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+      },
+    },
   },
 };
 
@@ -122,4 +148,11 @@ export const apiKeyToInvalidateMappings: SavedObjectsTypeMappingDefinition = {
       type: 'date',
     },
   },
+};
+
+// The single execution-control document is always fetched by id, never
+// searched, so none of its attributes need to be indexed.
+export const taskExecutionControlMapping: SavedObjectsTypeMappingDefinition = {
+  dynamic: false,
+  properties: {},
 };

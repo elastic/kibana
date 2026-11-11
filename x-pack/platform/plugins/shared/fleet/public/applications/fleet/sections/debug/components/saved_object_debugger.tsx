@@ -7,15 +7,8 @@
 
 import React, { useState } from 'react';
 import { useQuery } from '@kbn/react-query';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSelect,
-  EuiSpacer,
-  EuiText,
-  EuiCallOut,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -163,12 +156,16 @@ export const SavedObjectDebugger: React.FunctionComponent = () => {
       {savedObjectResult && (status === 'error' || namesStatus === 'error') && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut announceOnMount title="Error" color="danger">
-            <FormattedMessage
-              id="xpack.fleet.debug.savedObjectDebugger.fetchError"
-              defaultMessage="Error fetching Saved Objects"
-            />
-          </EuiCallOut>
+          <KbnDangerCallout
+            announceOnMount
+            title="Error"
+            text={
+              <FormattedMessage
+                id="xpack.fleet.debug.savedObjectDebugger.fetchError"
+                defaultMessage="Error fetching Saved Objects"
+              />
+            }
+          />
         </>
       )}
 

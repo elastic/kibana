@@ -25,6 +25,7 @@ export const createPrivmonIndexService = (dataClient: PrivilegeMonitoringDataCli
         mappings: generateUserIndexMappings(),
         settings: {
           hidden: true,
+          auto_expand_replicas: '0-1',
           mode: 'lookup',
           default_pipeline: PRIVMON_EVENT_INGEST_PIPELINE_ID,
         },

@@ -6,7 +6,7 @@
  */
 
 import { every, isUndefined } from 'lodash';
-import type { LogChangeHistoryOptions } from '@kbn/change-history';
+import type { ChangeHistoryActionId, LogChangeHistoryOptions } from '@kbn/change-history';
 import type { RuleChangeTrackingMetadata } from '@kbn/alerting-types';
 import type { Logger, SavedObjectBulkResult } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
@@ -52,7 +52,7 @@ interface LogRuleChanges {
     /**
      * Action performed on rule, e.g. rule_create or rule_update
      */
-    action: string;
+    action: ChangeHistoryActionId;
     /**
      * Original timestamp of the change. Uses `ruleSO.updated_at` when omitted.
      */
@@ -235,12 +235,16 @@ function transformRuleDomainToRuleChangeHistorySnapshot(
     mapped_params: ruleDomain.mapped_params,
     createdBy: ruleDomain.createdBy,
     updatedBy: ruleDomain.updatedBy,
+    createdByProfileUid: ruleDomain.createdByProfileUid,
+    updatedByProfileUid: ruleDomain.updatedByProfileUid,
     createdAt: normalizeDate(ruleDomain.createdAt, new Date()),
     updatedAt: normalizeDate(ruleDomain.updatedAt, new Date()),
     apiKey: ruleDomain.apiKey,
     apiKeyOwner: ruleDomain.apiKeyOwner,
+    apiKeyOwnerProfileUid: ruleDomain.apiKeyOwnerProfileUid,
     apiKeyCreatedByUser: ruleDomain.apiKeyCreatedByUser,
     uiamApiKey: ruleDomain.uiamApiKey,
+    uiamApiKeyExternal: ruleDomain.uiamApiKeyExternal,
     throttle: ruleDomain.throttle,
     muteAll: ruleDomain.muteAll,
     notifyWhen: ruleDomain.notifyWhen,

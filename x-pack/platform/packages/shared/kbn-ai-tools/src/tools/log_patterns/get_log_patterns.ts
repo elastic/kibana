@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { timeoutSignal } from '@kbn/std';
 import type {
   AggregationsAggregationContainer,
   AggregationsCategorizeTextAggregation,
@@ -26,18 +27,9 @@ import { buildCountQuery } from '../../utils/build_count_query';
 import { getEsqlColumnSchema } from '../../utils/get_esql_column_schema';
 import { DEFAULT_ESQL_QUERY_TIMEOUT_MS } from '../../utils/default_esql_query_timeout';
 import { pValueToLabel } from '../../utils/p_value_to_label';
-import {
-  buildCategorizeWithSampleQuery,
-  parseCategorizeWithSampleRows,
-} from '../../utils/esql_categorize';
+import { categorizeWithNoiseExclusion } from '../../utils/esql_categorize';
 
 const MAX_DOCS_TO_SAMPLE = 100_000;
-
-// SigEvents asks the LLM for a small common/rare pattern summary. Pulling a
-// bounded long tail from one ES|QL categorization query avoids reimplementing
-// the DSL helper's second rare-pattern aggregation, while still giving
-// selectLogPatternsForLlm enough sorted rows to take the head and tail.
-const SIGNIFICANT_EVENTS_PASS1_LIMIT = 1000;
 
 interface FieldPatternResultBase {
   field: string;
@@ -429,73 +421,70 @@ export async function getSigEventsLogPatternsEsql({
   kql,
   fields,
 }: SigEventsLogPatternEsqlOptions): Promise<LogPatternEsqlEntry[]> {
-  const columns = await getEsqlColumnSchema({
-    esClient: esClient.client,
-    index: samplingSource,
-    start,
-    end,
-    signal: AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS),
-  });
-  // ES|QL normalizes the `text` family in `column.type`: both `text` and
-  // `match_only_text` mappings report as `text`.
-  const textColumnNames = new Set(
-    columns.filter((column) => column.type === 'text').map((column) => column.name)
-  );
-  const eligibleFields = fields.filter((field) => textColumnNames.has(field));
+  const signal = timeoutSignal(DEFAULT_ESQL_QUERY_TIMEOUT_MS);
+  try {
+    const columns = await getEsqlColumnSchema({
+      esClient: esClient.client,
+      index: samplingSource,
+      start,
+      end,
+      signal,
+    });
+    // Both `text` and `match_only_text` mappings report as `text` in `column.type`.
+    const textColumnNames = new Set(
+      columns.filter((column) => column.type === 'text').map((column) => column.name)
+    );
+    const eligibleFields = fields.filter((field) => textColumnNames.has(field));
 
-  if (!eligibleFields.length) {
-    return [];
+    if (!eligibleFields.length) {
+      return [];
+    }
+
+    const totalDocs = await runEsqlCountQuery({
+      esClient,
+      samplingSource,
+      start,
+      end,
+      kql,
+    });
+    if (totalDocs === 0) {
+      return [];
+    }
+
+    const samplingProbability =
+      MAX_DOCS_TO_SAMPLE / totalDocs < 0.5 ? MAX_DOCS_TO_SAMPLE / totalDocs : 1;
+
+    const filter = { bool: { filter: [...kqlQuery(kql), ...dateRangeQuery(start, end)] } };
+
+    const perField = await Promise.all(
+      eligibleFields.map(async (field) => {
+        // Metadata-free, so it works on ES|QL views as well as concrete indices.
+        const rows = await categorizeWithNoiseExclusion({
+          esClient,
+          indices: samplingSource,
+          field,
+          total: totalDocs,
+          samplingProbability,
+          filter,
+        });
+
+        return rows.map((row) => ({
+          field,
+          pattern: row.pattern,
+          count: row.count,
+          sample: row.sample,
+        }));
+      })
+    );
+
+    return uniqBy(
+      // Dedupe by sample so `message` and `body.text` don't repeat the same representative line.
+      perField.flat().sort((a, b) => b.count - a.count),
+      (pattern) => pattern.sample
+    );
+  } finally {
+    signal.dispose();
   }
-
-  const totalDocs = await runEsqlCountQuery({
-    esClient,
-    samplingSource,
-    start,
-    end,
-    kql,
-  });
-  if (totalDocs === 0) {
-    return [];
-  }
-
-  const samplingProbability =
-    MAX_DOCS_TO_SAMPLE / totalDocs < 0.5 ? MAX_DOCS_TO_SAMPLE / totalDocs : 1;
-  const perField = await Promise.all(
-    eligibleFields.map(async (field) => {
-      // A single categorization query both groups the patterns and emits a
-      // representative sample value per pattern via `TOP(<field>::keyword, 1)`.
-      // This avoids the `_index`/`_id`/`_source` metadata round-trip, which ES|QL
-      // views (e.g. query streams' `$.<name>` views) do not expose — `FROM <view>
-      // METADATA _index, _id` raises `Unknown column [_index]`.
-      const rows = await runSigEventsCategorize({
-        esClient,
-        samplingSource,
-        start,
-        end,
-        kql,
-        field,
-        samplingProbability,
-        limit: SIGNIFICANT_EVENTS_PASS1_LIMIT,
-      });
-
-      return rows.map((row) => ({
-        field,
-        pattern: row.pattern,
-        // DSL random_sampler returns population-scaled doc_counts. ES|QL
-        // SAMPLE returns sampled counts, so scale back for prompt parity.
-        count: Math.round(row.count / samplingProbability),
-        sample: row.sample,
-      }));
-    })
-  );
-
-  return uniqBy(
-    // Preserve the DSL helper's downstream contract: sorted descending by count
-    // and deduped by sample so `message` and `body.text` do not show the same
-    // representative log line twice.
-    perField.flat().sort((a, b) => b.count - a.count),
-    (pattern) => pattern.sample
-  );
 }
 
 async function runEsqlCountQuery({
@@ -512,45 +501,10 @@ async function runEsqlCountQuery({
   kql?: string;
 }): Promise<number> {
   const response = (await esClient.esql('count_docs_for_sigevents_log_patterns', {
-    query: buildCountQuery({ index: samplingSource, kql }),
-    filter: { bool: { filter: dateRangeQuery(start, end) } },
+    query: buildCountQuery({ index: samplingSource, start, end, kql }),
     drop_null_columns: true,
   })) as unknown as ESQLSearchResponse;
   const total = response.values[0]?.[0];
 
   return typeof total === 'number' ? total : 0;
-}
-
-async function runSigEventsCategorize({
-  esClient,
-  samplingSource,
-  start,
-  end,
-  kql,
-  field,
-  samplingProbability,
-  limit,
-}: {
-  esClient: TracedElasticsearchClient;
-  samplingSource: string;
-  start: number;
-  end: number;
-  kql?: string;
-  field: string;
-  samplingProbability: number;
-  limit: number;
-}): Promise<Array<{ count: number; pattern: string; sample: string }>> {
-  const response = (await esClient.esql('categorize_sigevents_log_patterns', {
-    query: buildCategorizeWithSampleQuery({
-      indices: samplingSource,
-      kql,
-      field,
-      samplingProbability,
-      limit,
-    }),
-    filter: { bool: { filter: dateRangeQuery(start, end) } },
-    drop_null_columns: true,
-  })) as unknown as ESQLSearchResponse;
-
-  return parseCategorizeWithSampleRows(response);
 }

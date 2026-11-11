@@ -15,7 +15,7 @@ steps:
 ## Configuration
 
 - **`type`**: Must be `"wait"`
-- **`with.duration`**: Duration string (required)
+- **`with.duration`**: Duration string, or Liquid that renders to one (required)
 
 ## Duration Format
 
@@ -43,6 +43,28 @@ duration: "1h39s"     # 1 hour 39 seconds
 - `"1s1w"`, `"2h1d"` - Wrong order (must be descending)
 - `"-1s"`, `"0"` - Zero or negative values
 - `"1.5s"`, `"1,000s"` - Decimals or commas
+
+## Templated Duration
+
+`with.duration` accepts Liquid. The template is rendered against the workflow context when the
+step enters the wait, then validated as a duration.
+
+```yaml
+inputs:
+  waitFor:
+    type: string
+    required: false
+
+steps:
+  - name: dynamic-wait
+    type: wait
+    with:
+      duration: "{{ inputs.waitFor | default: '5s' }}"
+```
+
+The rendered value is frozen on step state as `resolvedDuration`, so a resumed wait reports the
+same duration it was scheduled with. A template that renders to a non-duration fails the step with
+`Invalid duration format: <value>`.
 
 ## Execution Modes
 
@@ -148,7 +170,7 @@ steps:
 
 **Threshold:** `SHORT_DURATION_THRESHOLD = 5000ms` (5 seconds)
 
-**Duration Parsing:** [`parse-duration.ts`](../../utils/parse-duration/parse-duration.ts)
+**Duration Parsing:** `parseDuration` from `@kbn/workflows`
 
 **Task Manager:** Long waits use `workflowTaskManager.scheduleResumeTask()` to schedule resume
 

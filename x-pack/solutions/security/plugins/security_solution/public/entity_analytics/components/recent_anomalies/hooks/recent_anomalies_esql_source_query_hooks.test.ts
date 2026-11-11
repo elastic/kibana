@@ -13,8 +13,10 @@ import {
 } from './recent_anomalies_esql_source_query_hooks';
 
 jest.mock('@kbn/entity-store/public', () => ({ useEntityStoreEuidApi: jest.fn() }));
-jest.mock('@kbn/entity-store/common', () => ({
-  getLatestEntitiesIndexName: jest.fn(() => '.entities.v2.latest.security_default'),
+jest.mock('../../../../common/hooks/use_resolved_latest_entities_index_name', () => ({
+  useResolvedLatestEntitiesIndexName: jest.fn(() => ({
+    data: { indexName: '.entities.v2.latest.default' },
+  })),
 }));
 jest.mock('../anomaly_heatmap_interval', () => ({ useIntervalForHeatmap: jest.fn(() => 3) }));
 
@@ -27,12 +29,13 @@ describe('recent anomalies ES|QL sources', () => {
     mockUseEntityStoreEuidApi.mockReturnValue({
       euid: {
         esql: {
-          getFieldEvaluations: (entityType: string) =>
-            `${entityType}_field = TO_STRING(${entityType}.name)`,
-          getEuidEvaluation: (entityType: string, target: string) =>
-            `${target} = CONCAT("${entityType}:", ${entityType}.name)`,
+          getFieldEvaluations: ({ type }: { type: string }) =>
+            `${type}_field = TO_STRING(${type}.name)`,
+          getEuidEvaluation: ({ type }: { type: string }, target: string) =>
+            `${target} = CONCAT("${type}:", ${type}.name)`,
         },
       },
+      getBuiltInEntityDefinition: (type: string) => ({ type }),
     });
   });
 

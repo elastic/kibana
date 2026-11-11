@@ -9,35 +9,10 @@
 
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
-import { ExecutionStatus, type WorkflowExecutionListDto } from '@kbn/workflows';
+import { ExecutionStatus, ExecutionType, type WorkflowExecutionListDto } from '@kbn/workflows';
 import { WorkflowExecutionList, type WorkflowExecutionListProps } from './workflow_execution_list';
-import { TestWrapper } from '../../../shared/test_utils';
-
-jest.mock('./workflow_execution_list_item', () => ({
-  WorkflowExecutionListItem: ({
-    status,
-    startedAt,
-    onClick,
-    selected,
-  }: {
-    status: string;
-    startedAt: Date | null;
-    onClick: () => void;
-    selected: boolean;
-  }) => (
-    <div
-      data-test-subj="workflowExecutionListItem"
-      data-selected={selected}
-      data-started-at={startedAt ? startedAt.toISOString() : 'null'}
-      onClick={onClick}
-      role="button"
-      onKeyDown={() => {}}
-      tabIndex={0}
-    >
-      {status}
-    </div>
-  ),
-}));
+import { createStartServicesMock, type StartServicesMock } from '../../../mocks';
+import { getTestProvider } from '../../../shared/mocks/test_providers';
 
 jest.mock('./workflow_execution_list_filters', () => ({
   ExecutionListFilters: () => <div data-test-subj="executionListFilters">{'Filters'}</div>,
@@ -95,18 +70,21 @@ describe('WorkflowExecutionList', () => {
     error: null,
     onExecutionClick: jest.fn(),
     selectedId: null,
+    lastViewedId: null,
     setPaginationObserver: jest.fn(),
     canCancel: true,
     isCancelInProgress: false,
     onConfirmCancel: jest.fn().mockResolvedValue(undefined),
+    hasNextPage: false,
   };
 
-  const renderComponent = (overrides: Partial<WorkflowExecutionListProps> = {}) => {
-    return render(
-      <TestWrapper>
-        <WorkflowExecutionList {...defaultProps} {...overrides} />
-      </TestWrapper>
-    );
+  const renderComponent = (
+    overrides: Partial<WorkflowExecutionListProps> = {},
+    services: StartServicesMock = createStartServicesMock()
+  ) => {
+    return render(<WorkflowExecutionList {...defaultProps} {...overrides} />, {
+      wrapper: getTestProvider({ services }),
+    });
   };
 
   beforeEach(() => {
@@ -116,6 +94,33 @@ describe('WorkflowExecutionList', () => {
   it('renders the execution history title', () => {
     renderComponent();
     expect(screen.getByText('Execution history')).toBeInTheDocument();
+  });
+
+  it('hides the execution name column when runs do not use execution names', () => {
+    renderComponent();
+    expect(screen.queryByRole('columnheader', { name: 'Execution name' })).not.toBeInTheDocument();
+  });
+
+  it('shows the execution name column when an execution has a name', () => {
+    renderComponent({
+      executions: {
+        ...mockExecutions,
+        hasNamedExecution: true,
+        results: [{ ...mockExecutions.results[0], runName: 'Deploy staging' }],
+      },
+    });
+    expect(screen.getByRole('columnheader', { name: 'Execution name' })).toBeInTheDocument();
+    expect(screen.getByText('Deploy staging')).toBeInTheDocument();
+  });
+
+  it('shows the execution name column when an unloaded run has a name', () => {
+    renderComponent({
+      executions: {
+        ...mockExecutions,
+        hasNamedExecution: true,
+      },
+    });
+    expect(screen.getByRole('columnheader', { name: 'Execution name' })).toBeInTheDocument();
   });
 
   it('renders the container with the data-test-subj attribute', () => {
@@ -156,16 +161,45 @@ describe('WorkflowExecutionList', () => {
       });
       expect(screen.getByText('No executions found')).toBeInTheDocument();
     });
+
+    it.each([
+      { statuses: [ExecutionStatus.FAILED] },
+      { executionTypes: [ExecutionType.TEST] },
+      { runName: 'deploy' },
+    ])('says that no executions match the active filters: %j', (activeFilter) => {
+      renderComponent({
+        executions: { results: [], page: 1, size: 100, total: 0 },
+        filters: { ...defaultFilters, ...activeFilter },
+      });
+      expect(screen.getByText('No executions match the filters.')).toBeInTheDocument();
+      expect(screen.queryByText('Workflow has not been executed yet.')).not.toBeInTheDocument();
+    });
+
+    it('ignores a blank execution name filter', () => {
+      renderComponent({
+        executions: { results: [], page: 1, size: 100, total: 0 },
+        filters: { ...defaultFilters, runName: '   ' },
+      });
+      expect(screen.getByText('Workflow has not been executed yet.')).toBeInTheDocument();
+    });
   });
 
   describe('with execution data', () => {
-    it('renders all execution items', () => {
+    it('renders a non-responsive four-column table of execution rows', () => {
       renderComponent();
-      const items = screen.getAllByTestId('workflowExecutionListItem');
-      expect(items).toHaveLength(2);
+      const table = screen.getByTestId('workflowExecutionListTable');
+      expect(table).toBeInTheDocument();
+      expect(
+        screen.queryByRole('columnheader', { name: 'Execution name' })
+      ).not.toBeInTheDocument();
+      expect(screen.getByText('Status')).toBeInTheDocument();
+      expect(screen.getByText('Started')).toBeInTheDocument();
+      expect(screen.getByText('Triggered by')).toBeInTheDocument();
+      expect(screen.getByText('Duration')).toBeInTheDocument();
+      expect(screen.getAllByTestId('workflowExecutionListItem')).toHaveLength(2);
     });
 
-    it('calls onExecutionClick when an execution item is clicked', () => {
+    it('calls onExecutionClick when an execution row is clicked', () => {
       const onExecutionClick = jest.fn();
       renderComponent({ onExecutionClick });
       const items = screen.getAllByTestId('workflowExecutionListItem');
@@ -178,6 +212,107 @@ describe('WorkflowExecutionList', () => {
       const items = screen.getAllByTestId('workflowExecutionListItem');
       expect(items[0]).toHaveAttribute('data-selected', 'true');
       expect(items[1]).toHaveAttribute('data-selected', 'false');
+    });
+
+    it('shows unresolved executor labels on ESS', () => {
+      const services = createStartServicesMock();
+      services.cloud.isCloudEnabled = true;
+      services.cloud.isServerlessEnabled = false;
+
+      renderComponent({ showExecutor: true }, services);
+
+      expect(screen.getAllByTestId('workflowExecutionListItem')[0]).toHaveAttribute(
+        'data-executed-by-label',
+        'user1'
+      );
+    });
+
+    it('shows the executor name resolved by the server without a client profile lookup', () => {
+      const services = createStartServicesMock();
+      const [first, second] = mockExecutions.results;
+
+      renderComponent(
+        {
+          showExecutor: true,
+          executions: {
+            ...mockExecutions,
+            results: [
+              {
+                ...first,
+                executedByProfile: {
+                  uid: 'user1',
+                  enabled: true,
+                  user: { username: 'jdoe', full_name: 'Jane Doe' },
+                  data: {},
+                },
+              },
+              second,
+            ],
+          },
+        },
+        services
+      );
+
+      expect(
+        within(screen.getAllByTestId('workflowExecutionListItem')[0]).getByText('Jane Doe')
+      ).toBeInTheDocument();
+      expect(services.userProfile.bulkGet).not.toHaveBeenCalled();
+    });
+
+    it('hides unresolved profile UIDs on Serverless', () => {
+      const services = createStartServicesMock();
+      services.cloud.isCloudEnabled = true;
+      services.cloud.isServerlessEnabled = true;
+      const profileUid = 'u_mGBROF_q5bm_A5E_0';
+
+      renderComponent(
+        {
+          showExecutor: true,
+          executions: {
+            ...mockExecutions,
+            results: [
+              { ...mockExecutions.results[0], executedBy: profileUid },
+              mockExecutions.results[1],
+            ],
+          },
+        },
+        services
+      );
+
+      expect(screen.getAllByTestId('workflowExecutionListItem')[0]).not.toHaveAttribute(
+        'data-executed-by-label'
+      );
+    });
+
+    it('shows a service account id on Serverless', () => {
+      const services = createStartServicesMock();
+      services.cloud.isCloudEnabled = true;
+      services.cloud.isServerlessEnabled = true;
+      const serviceAccountId = 'sa-nightshift-relay';
+
+      renderComponent(
+        {
+          showExecutor: true,
+          executions: {
+            ...mockExecutions,
+            results: [
+              { ...mockExecutions.results[0], executedBy: serviceAccountId },
+              mockExecutions.results[1],
+            ],
+          },
+        },
+        services
+      );
+
+      expect(screen.getAllByTestId('workflowExecutionListItem')[0]).toHaveAttribute(
+        'data-executed-by-label',
+        serviceAccountId
+      );
+    });
+
+    it('shows a test-run flask on test executions', () => {
+      renderComponent();
+      expect(screen.getByLabelText('Test run')).toBeInTheDocument();
     });
   });
 
@@ -212,10 +347,10 @@ describe('WorkflowExecutionList', () => {
   });
 
   describe('startedAt date handling', () => {
-    it('passes a valid Date when startedAt is a valid ISO string', () => {
+    it('passes through a valid ISO startedAt string', () => {
       renderComponent();
       const items = screen.getAllByTestId('workflowExecutionListItem');
-      expect(items[0]).toHaveAttribute('data-started-at', '2024-01-01T10:00:00.000Z');
+      expect(items[0]).toHaveAttribute('data-started-at', '2024-01-01T10:00:00Z');
     });
 
     it('passes null when startedAt is an empty string', () => {

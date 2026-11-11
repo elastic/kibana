@@ -89,8 +89,8 @@ describe('Space Selector', () => {
     });
     fireEvent.keyDown(inputEl, { key: 'Enter', code: 'Enter' });
     expect(result.container).toHaveTextContent('invalidSpace is not a valid space.');
-    expect(onChange).not.toBeCalled();
-    expect(setInvalidSpaceError).toBeCalledWith(true);
+    expect(onChange).not.toHaveBeenCalled();
+    expect(setInvalidSpaceError).toHaveBeenCalledWith(true);
   });
 
   it('should clear invalid space errors', () => {
@@ -106,7 +106,7 @@ describe('Space Selector', () => {
     });
     fireEvent.keyDown(inputEl, { key: 'Enter', code: 'Enter' });
     expect(result.container).not.toHaveTextContent('invalidSpace is not a valid space.');
-    expect(setInvalidSpaceError).toBeCalledWith(false);
+    expect(setInvalidSpaceError).toHaveBeenCalledWith(false);
   });
 
   it('should accept valid space', () => {
@@ -117,8 +117,8 @@ describe('Space Selector', () => {
     });
     fireEvent.keyDown(inputEl, { key: 'Enter', code: 'Enter' });
     expect(result.container).not.toHaveTextContent('test is not a valid space.');
-    expect(onChange).toBeCalledWith(['test']);
-    expect(setInvalidSpaceError).not.toBeCalledWith(true);
+    expect(onChange).toHaveBeenCalledWith(['test']);
+    expect(setInvalidSpaceError).not.toHaveBeenCalledWith(true);
   });
 
   it('render spaces with readonly access', async () => {

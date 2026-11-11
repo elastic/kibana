@@ -42,7 +42,7 @@ describe('getAttackDiscoveryScheduleType', () => {
       category: 'securitySolution',
       producer: 'siem',
       solution: 'security',
-      priority: TaskPriority.NormalLongRunning,
+      priority: TaskPriority.Deferrable,
       schemas: {
         params: { type: 'zod', schema: AttackDiscoveryScheduleParams },
       },

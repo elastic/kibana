@@ -184,16 +184,15 @@ export const FieldDescriptionContent: React.FC<
             onClick={() => truncateFieldDescription(false)}
             css={css`
               display: block;
-              padding: 0;
-              margin: 0;
+              padding: ${euiTheme.size.xxs};
+              margin: -${euiTheme.size.xxs};
               color: ${color === 'subdued' ? euiTheme.colors.subduedText : euiTheme.colors.text};
               line-height: inherit;
               font-size: inherit;
 
               &:hover,
-              &:active,
               &:focus {
-                color: ${euiTheme.colors.link};
+                background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
               }
             `}
           >

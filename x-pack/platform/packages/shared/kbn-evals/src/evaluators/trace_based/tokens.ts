@@ -10,6 +10,11 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '../../types';
 import { createTraceBasedEvaluator } from './factory';
 
+// The ES client folds the root-cause reason into `message`. Pinned to this one column: any other
+// unknown column is a query bug and must stay a hard failure.
+const CACHE_READ_COLUMN_MISSING =
+  /Unknown column \[attributes\.gen_ai\.usage\.cache_read\.input_tokens\]/;
+
 export function createOutputTokensEvaluator({
   traceEsClient,
   log,
@@ -22,6 +27,7 @@ export function createOutputTokensEvaluator({
     log,
     config: {
       name: 'Output Tokens',
+      direction: 'minimize',
       // TO_LONG resolves union types (integer vs long across trace index generations).
       buildQuery: (traceId) => `FROM traces-*
         | WHERE trace.id == "${traceId}"
@@ -50,6 +56,7 @@ export function createInputTokensEvaluator({
     log,
     config: {
       name: 'Input Tokens',
+      direction: 'minimize',
       // TO_LONG resolves union types (integer vs long across trace index generations).
       buildQuery: (traceId) => `FROM traces-*
         | WHERE trace.id == "${traceId}"
@@ -78,11 +85,38 @@ export function createCachedTokensEvaluator({
     log,
     config: {
       name: 'Cached Tokens',
-      // TO_LONG resolves union types (integer vs long across trace index generations).
+      direction: 'neutral',
+      // `input_tokens` is a liveness probe: providers that never report caching (most EIS models)
+      // omit cache_read entirely, which otherwise looks like a trace that has not finished indexing.
       buildQuery: (traceId) => `FROM traces-*
         | WHERE trace.id == "${traceId}"
         | STATS 
-        cached_tokens = SUM(TO_LONG(attributes.gen_ai.usage.cache_read.input_tokens))`,
+        cached_tokens = SUM(TO_LONG(attributes.gen_ai.usage.cache_read.input_tokens)),
+        input_tokens = SUM(TO_LONG(attributes.gen_ai.usage.input_tokens))`,
+      // A caching provider reports 0 on a miss, which scores normally. Absent from every span means
+      // no measurement exists, and a 0 would misreport that as a fully missed cache.
+      isNotReported: (response) => {
+        const { columns, values } = response;
+        const row = values[0];
+        const cachedTokens = row[columns.findIndex((col) => col.name === 'cached_tokens')];
+        const inputTokens = row[columns.findIndex((col) => col.name === 'input_tokens')];
+
+        return cachedTokens == null && inputTokens != null;
+      },
+      // Where no span ever reported cache reads the column is unmapped and the query above is
+      // rejected outright, so the same liveness evidence has to be gathered on its own.
+      notReportedProbe: {
+        matchesQueryError: (error) =>
+          error instanceof Error && CACHE_READ_COLUMN_MISSING.test(error.message),
+        buildQuery: (traceId) => `FROM traces-*
+        | WHERE trace.id == "${traceId}"
+        | STATS input_tokens = SUM(TO_LONG(attributes.gen_ai.usage.input_tokens))`,
+        isTraceComplete: (response) => {
+          const { columns, values } = response;
+          const inputTokensIdx = columns.findIndex((col) => col.name === 'input_tokens');
+          return values[0][inputTokensIdx] != null;
+        },
+      },
       extractResult: (response) => {
         const { columns, values } = response;
         const row = values[0];

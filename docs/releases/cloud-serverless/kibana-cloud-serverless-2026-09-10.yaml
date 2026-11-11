@@ -1,0 +1,380 @@
+products:
+- product: cloud-serverless
+  target: 2026-09-10
+  lifecycle: ga
+  repo: kibana
+  owner: elastic
+release-date: 2026-09-10
+hide-features:
+- data-federation
+entries:
+- file:
+    name: 286746.yaml
+    checksum: d271ece768ef73ab7780a1fc5f6f12030542f184
+  type: feature
+  title: Add MISP connector
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/286746
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/18370'
+- file:
+    name: 289596.yaml
+    checksum: 99734188db787553446965276de9f67a4a873ae4
+  type: bug-fix
+  title: Fix Fleet blocking saves when all agents report an incompatible version
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes Fleet so an incompatible-agent-version warning no longer blocks saving a package policy when every enrolled agent is incompatible or reports a pre-release version.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/289596
+  issues:
+  - https://github.com/elastic/kibana/issues/288629
+- file:
+    name: 286858.yaml
+    checksum: b409e89b9631372bb651290bcc50e4b3e51dd5e6
+  type: enhancement
+  title: Turn off time picker when no time field is set in Discover and Dashboards
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Turns off the time picker for KQL and Lucene queries in Discover and Dashboards when no time field is configured.
+  areas:
+  - Discover and ES|QL
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/286858
+  issues:
+  - https://github.com/elastic/kibana/issues/286783
+- file:
+    name: 289778.yaml
+    checksum: a34d30c2c2257272701f4b12db680e3687e22aa3
+  type: bug-fix
+  title: Fix tracking containment rule editor crash when selecting a data view
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes the tracking containment rule editor so it no longer errors when a data view is selected.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/289778
+  issues:
+  - '# PRIVATE: https://github.com/elastic/response-ops-team/issues/762'
+  - https://github.com/elastic/kibana/issues/274991
+- file:
+    name: 289555.yaml
+    checksum: f4ea82ec95a49b462b2e6fa9fdf580d77fccfb40
+  type: bug-fix
+  title: Fix missing collection tiles on Add Data when search is empty
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes Add Data so collection tiles such as Docker appear without typing in the search box.
+  prs:
+  - https://github.com/elastic/kibana/pull/289555
+  issues:
+  - https://github.com/elastic/kibana/issues/289246
+- file:
+    name: 288519.yaml
+    checksum: c3c98dead64b0dd986855b21f21e03c1fbeee807
+  type: feature
+  title: Add fine-grained role privileges for ES|QL data sources in Role Management
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Adds the ability to define ES|QL data source privileges in the Role Management app.
+  areas:
+  - Kibana platform
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/288519
+- file:
+    name: 287472.yaml
+    checksum: 336dd59320822eb52624c0d3a9dd6362208a595a
+  type: enhancement
+  title: Add new modal to promote Elastic CLI during onboarding
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/287472
+- file:
+    name: 288709.yaml
+    checksum: 8677a696130cef8742600a817da119afe075e539
+  type: feature
+  title: Add a badge to dashboard panels when ES|QL approximation is applied
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Adds a badge on Lens, Discover session, Vega, and custom content dashboard panels when ES|QL approximation is applied.
+  areas:
+  - Alerting and reporting
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/288709
+  issues:
+  - https://github.com/elastic/kibana/issues/275335
+- file:
+    name: 286413.yaml
+    checksum: 4d7fc31e814c5cbf2167dfd3baa8797044c1461e
+  type: bug-fix
+  title: Fix Stack Rules privilege label in Search and Vector Database projects
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes role management in Search and Vector Database serverless projects so the Stack Rules privilege is labeled Stack Rules instead of Alerts.
+  prs:
+  - https://github.com/elastic/kibana/pull/286413
+  issues:
+  - https://github.com/elastic/kibana/issues/276519
+- file:
+    name: 287605.yaml
+    checksum: 419a6a39336f405c254c027cbd6daa6bd722259e
+  type: enhancement
+  title: Redesign the Region preferences modal for Search inference endpoints
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Improves the Region preferences modal layout, region selection, and confirmation copy for Search inference endpoints.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/287605
+- file:
+    name: 288071.yaml
+    checksum: 47f5f863a67096fee6d8f2504ccb3a9377366807
+  type: bug-fix
+  title: Fix missing "Expand role members" toggle for ServiceNow connectors in Fleet
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes Fleet so ServiceNow connectors expose the "Expand role members" toggle for compact document-level security.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/288071
+- file:
+    name: 286038.yaml
+    checksum: 8f80dc523cd7a156ef39547123d68f6a806fc444
+  type: bug-fix
+  title: Fix unexpected logouts after an access token is refreshed
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes session handling so searches that refresh an expired access token save the new credentials. Later searches and dashboard refreshes no longer reuse stale credentials and log the user out.
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/286038
+  issues:
+  - https://github.com/elastic/kibana/issues/279975
+- file:
+    name: 289363.yaml
+    checksum: c0831f23c9cd2c6848cf3844b312d117f2677215
+  type: bug-fix
+  title: Fix hanging case attachments for geo anomaly charts
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes Anomaly Explorer so adding a geo job chart to a case no longer stays loading forever.
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/289363
+- file:
+    name: 288952.yaml
+    checksum: 34937d37ab77942637f2b9ae5730c18581d6442b
+  type: bug-fix
+  title: Fix Base64 decoding of binary files in workflows
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes workflow Base64 decoding so binary data such as images and PDFs is not corrupted as UTF-8. Adds the `base64_decode_bytes` filter for `kibana.request` multipart uploads.
+  prs:
+  - https://github.com/elastic/kibana/pull/288952
+- file:
+    name: 286871.yaml
+    checksum: 7ebab2400952304e66b26c0db6dbc04eef5afd2f
+  type: bug-fix
+  title: Fix missing SLO results when summary index mappings are not ready
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes a race that could create the SLO summary temporary index with the wrong `service.name` mapping, so new SLOs were missing from filters.
+  prs:
+  - https://github.com/elastic/kibana/pull/286871
+  issues:
+  - https://github.com/elastic/kibana/issues/286804
+- file:
+    name: 288336.yaml
+    checksum: 1fbe27154c42482f451f9f1089cc9a77b8128682
+  type: bug-fix
+  title: Fix source event links in the alert flyout for remote and custom indices
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes the alert details flyout so clicking "Source event" in Highlighted Fields opens the document when it lives on a cross-cluster remote or outside the Security data view.
+  prs:
+  - https://github.com/elastic/kibana/pull/288336
+  issues:
+  - https://github.com/elastic/kibana/issues/288207
+- file:
+    name: 289623.yaml
+    checksum: bda82dcf1265e91265cc93a3847ffd06ba2bcfdc
+  type: bug-fix
+  title: Fix grouped threshold alerts recovering when "Do nothing" is set for no data
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes Custom threshold and Metric threshold rules so grouped alerts stay active when "If there is no data" is set to "Do nothing".
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/289623
+  issues:
+  - https://github.com/elastic/kibana/issues/289615
+- file:
+    name: 287781.yaml
+    checksum: 8f73cf3dc757a2d1c6a9dd057ee97134536e48f5
+  type: bug-fix
+  title: Fix workflow trigger payloads to report tags and assignees that actually changed
+  products:
+  - product: cloud-serverless
+    lifecycle: preview
+  - product: kibana
+    lifecycle: preview
+  description: Fixes Security workflow (technical preview) triggers so `tagsAdded`, `tagsRemoved`, `assigneesAdded`, and `assigneesRemoved` list values that actually changed, not the requested intent. Replaces the previous field names `tagsToAdd`, `tagsToRemove`, `assigneesToAdd`, and `assigneesToRemove`. Update workflow rules that referenced the old names.
+  prs:
+  - https://github.com/elastic/kibana/pull/287781
+- file:
+    name: 288655.yaml
+    checksum: 973c670027ec007613d21fa8b867d11ae1d4ac9a
+  type: enhancement
+  title: Add CrowdStrike FDR to Entity Analytics access and communication relationships
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Adds CrowdStrike FDR (`logs-crowdstrike.fdr-*`) as a source for `accesses` and `communicates_with` Entity Analytics relationships.
+  prs:
+  - https://github.com/elastic/kibana/pull/288655
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/18962'
+- file:
+    name: 289510.yaml
+    checksum: fbba06d402a6ed7e30e5d5c595276c5118389468
+  type: bug-fix
+  title: Fix the actions menu showing in the read-only workflow editor
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes the workflow editor so the actions menu and editing shortcuts are hidden in read-only mode.
+  prs:
+  - https://github.com/elastic/kibana/pull/289510
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/19217'
+- file:
+    name: 285533.yaml
+    checksum: 891d3501b860f8e1d00f4700d37beb2f0e692b8c
+  type: feature
+  title: Add Google Threat Intelligence connector
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/285533
+- file:
+    name: 289394.yaml
+    checksum: 678dc4f9287122cd5f304ad70bd63ee3c13cf634
+  type: bug-fix
+  title: Fix managed integrations showing in Fleet
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes an issue where managed integrations could appear in the Fleet agents view when they are on a versioned policy. Also fixes an issue where `agent_status_change_task` might not correctly an agent from a managed integration when it was on a versioned policy.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/289394
+- file:
+    name: 289130.yaml
+    checksum: 8d38a367bc0b35c6398c06ad8754e5750d960ca9
+  type: enhancement
+  title: Hide deprecated connectors by default
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Adds a "Display options" control to the Connectors list that hides deprecated connectors by default.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/289130
+- file:
+    name: 287084.yaml
+    checksum: 42acac41f4703ac4adfe1be2230160072125998d
+  type: enhancement
+  title: Stop treating IAM lifecycle events as identity-provider user sources
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: 'Removes IAM lifecycle events as a source of high-confidence users in the Entity Store. Only `event.kind: asset` events create identity-provider (IdP) grade users. Host-local accounts with `user.name` and `host.id` become `local` entities instead. Alerts on users in identity-provider namespaces (Okta, Entra ID, Active Directory) continue to resolve to their stored entity, so risk scores, entity id stamps, and asset-criticality enrichment are unaffected.'
+  prs:
+  - https://github.com/elastic/kibana/pull/287084
+  issues:
+  - https://github.com/elastic/kibana/issues/284894
+  - https://github.com/elastic/kibana/issues/268990
+- file:
+    name: 276414.yaml
+    checksum: 36cfefe21f15a24fe711e5b1630454aa5f4e7bd8
+  type: bug-fix
+  title: Fix unrendered template values in Workflows wait-for-input steps
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes Workflows so `waitForInput` form fields and default values render through the template engine instead of showing raw template text.
+  prs:
+  - https://github.com/elastic/kibana/pull/276414
+- file:
+    name: 288541.yaml
+    checksum: 65a8f622a58ec64df758a979c2b5e7e80f2e0e3e
+  type: bug-fix
+  title: Fix source event links for EQL sequence alerts in the Alert Details flyout
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes the alert details flyout so each Source event in an EQL sequence opens the correct document instead of the wrong index or a "Cannot find document" error.
+  prs:
+  - https://github.com/elastic/kibana/pull/288541
+- file:
+    name: 287733.yaml
+    checksum: 4574ccdd264a6e009ac8adff68ef4beefe4828e5
+  type: enhancement
+  title: Use the shared Kibana app header on Infrastructure Inventory
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Improves Infrastructure Inventory so it uses the shared Kibana app header with no Back control. Saved views and shared actions move into the header menu.
+  prs:
+  - https://github.com/elastic/kibana/pull/287733
+  issues:
+  - https://github.com/elastic/kibana/issues/287799
+- file:
+    name: 289081.yaml
+    checksum: 58d6abe637dd6b83474ec8f6aa93b781bdfed775
+  type: bug-fix
+  title: Fix empty generative AI conversations in the Discover document viewer
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes the Discover document viewer so generative AI input and output messages longer than the keyword limit are recovered from `_source` instead of showing an empty conversation.
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/289081
+  issues:
+  - https://github.com/elastic/kibana/issues/288618

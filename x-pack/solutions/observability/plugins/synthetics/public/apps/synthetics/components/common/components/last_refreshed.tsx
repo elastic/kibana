@@ -42,7 +42,7 @@ export function LastRefreshed() {
     <EuiText
       color={isDanger ? 'danger' : isWarning ? 'warning' : 'subdued'}
       size="s"
-      css={{ lineHeight: '40px', fontWeight: isWarning ? 'bold' : undefined }}
+      css={{ fontWeight: isWarning ? 'bold' : undefined }}
     >
       <FormattedMessage
         id="xpack.synthetics.lastUpdated.label"

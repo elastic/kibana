@@ -7,7 +7,8 @@
 
 import React from 'react';
 
-import { EuiCallOut, EuiSpacer, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiSpacer, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { KbnSuccessCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 
@@ -56,11 +57,10 @@ const getCalloutText = ({
 }: {
   installStatus: EpmPackageInstallStatus | null | undefined;
   isActive?: boolean;
-}) => {
+}): { color: 'success' | 'warning'; title: React.ReactNode } | undefined => {
   if (isActive) {
     return {
-      color: 'success' as const,
-      iconType: 'check',
+      color: 'success',
       title: activeLabel,
     };
   }
@@ -70,8 +70,7 @@ const getCalloutText = ({
     installStatus === installationStatuses.InstallFailed
   ) {
     return {
-      color: 'warning' as const,
-      iconType: 'warning',
+      color: 'warning',
       title: (
         <EuiToolTip
           data-test-subj="installed-tooltip"
@@ -87,7 +86,7 @@ const getCalloutText = ({
       ),
     };
   }
-  return {};
+  return undefined;
 };
 
 const useInstallationStatusStyles = (): InstallationStatusStylesProps &
@@ -180,6 +179,10 @@ export const InstallationStatus: React.FC<InstallationStatusProps> = React.memo(
       return null;
     }
 
+    const calloutData = getCalloutText({ installStatus, isActive });
+    const CalloutComponent =
+      calloutData?.color === 'success' ? KbnSuccessCallout : KbnWarningCallout;
+
     return compressed ? (
       <CompressedInstallationStatus
         installStatus={installStatus}
@@ -195,12 +198,14 @@ export const InstallationStatus: React.FC<InstallationStatusProps> = React.memo(
           size="m"
           className={styles.installedSpacer}
         />
-        <EuiCallOut
-          announceOnMount
-          data-test-subj="installation-status-callout"
-          className={styles.installedCallout}
-          {...getCalloutText({ installStatus, isActive })}
-        />
+        {calloutData && (
+          <CalloutComponent
+            announceOnMount
+            data-test-subj="installation-status-callout"
+            className={styles.installedCallout}
+            title={calloutData.title}
+          />
+        )}
       </div>
     );
   }

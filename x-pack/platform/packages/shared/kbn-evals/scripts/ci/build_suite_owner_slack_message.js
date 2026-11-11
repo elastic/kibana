@@ -8,7 +8,7 @@
 
 const { readFileSync, writeFileSync } = require('fs');
 const { fromRoot } = require('@kbn/repo-info');
-const { resolveTriageModelId } = require('./failure_context_helpers');
+const { TRIAGE_OPENROUTER_CONNECTOR_ID } = require('./failure_context_helpers');
 const { summarizeFailuresWithModel } = require('./summarize_failures_with_model');
 const { collectFailureContext } = require('./collect_failure_context');
 
@@ -23,7 +23,7 @@ const notifyMode = process.env.EVAL_NOTIFY_MODE || '';
 if (!suiteId || !failingProjectsArg || (!slackOutputPath && !githubOutputPath)) {
   console.error(
     'Usage: set EVAL_SUITE_ID, EVAL_FAILING_PROJECTS (comma-separated), and at least one of\n' +
-      '  EVAL_TRIAGE_SLACK_OUT / EVAL_TRIAGE_GITHUB_OUT. Optional: EVAL_NOTIFY_MODE=on-demand|weekly.'
+      '  EVAL_TRIAGE_SLACK_OUT / EVAL_TRIAGE_GITHUB_OUT. Optional: EVAL_NOTIFY_MODE=on-demand|daily|weekly.'
   );
   process.exit(1);
 }
@@ -45,7 +45,8 @@ const suite = suites.find((entry) => entry?.id === suiteId) ?? null;
 const suiteName = suite?.name ?? suiteId;
 const buildUrl = process.env.BUILDKITE_BUILD_URL || '';
 
-const headerLabel = notifyMode === 'on-demand' ? 'On-demand LLM eval' : 'Weekly LLM evals';
+const HEADER_LABELS = { 'on-demand': 'On-demand LLM eval', daily: 'Daily LLM evals' };
+const headerLabel = HEADER_LABELS[notifyMode] ?? 'Weekly LLM evals';
 const headerEmoji = notifyMode === 'on-demand' ? ':test_tube:' : ':rotating_light:';
 const githubHeaderLabel = 'LLM eval (PR)';
 const githubHeaderEmoji = ':test_tube:';
@@ -129,9 +130,7 @@ function formatTriageError(error) {
 }
 
 async function main() {
-  const triageModelId = resolveTriageModelId() || 'unknown';
-
-  let triage = { modelId: triageModelId, groups: [] };
+  let triage = { modelId: TRIAGE_OPENROUTER_CONNECTOR_ID, groups: [] };
   try {
     console.error('--- Collecting failure context for triage summary');
     const context = collectFailureContext({
@@ -142,13 +141,13 @@ async function main() {
       buildUrl,
     });
 
-    console.error(`--- Generating triage summary (model: ${triageModelId})`);
+    console.error(`--- Generating triage summary (model: ${TRIAGE_OPENROUTER_CONNECTOR_ID})`);
     const { groups, modelId } = await summarizeFailuresWithModel(context);
     triage = { modelId, groups };
   } catch (error) {
     const message = formatTriageError(error);
     console.error(`--- Triage summary failed: ${message}`);
-    triage = { modelId: triageModelId, error: message };
+    triage = { modelId: TRIAGE_OPENROUTER_CONNECTOR_ID, error: message };
   }
 
   if (slackOutputPath) {

@@ -46,7 +46,7 @@ export const getColumns = ({
         disableScreenReaderOutput
       >
         <EuiButtonIcon
-          iconType="expand"
+          iconType="maximize"
           data-test-subj={`${dataTestSubj}AlertPreviewButton`}
           onClick={() =>
             onShowAlert(

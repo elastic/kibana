@@ -88,27 +88,38 @@ describe('usePreferredTransactionDataSource', () => {
       expect(result.current.dataSource?.documentType).toBe('transactionEvent');
     });
 
-    it('falls back to transactionMetric/1m when all sources have hasDocs: false', async () => {
+    it('falls back to transactionEvent/none when all sources have hasDocs: false', async () => {
       const { http, start, end } = withSources([
         { documentType: 'transactionMetric', rollupInterval: '1m', hasDocs: false },
+        { documentType: 'transactionEvent', rollupInterval: 'none', hasDocs: false },
       ]);
       const { result } = renderHook(() => usePreferredTransactionDataSource({ http, start, end }));
       await waitFor(() => expect(result.current.dataSource).toBeDefined());
       expect(result.current.dataSource).toEqual({
-        documentType: 'transactionMetric',
-        rollupInterval: '1m',
+        documentType: 'transactionEvent',
+        rollupInterval: 'none',
       });
     });
 
-    it('falls back to transactionMetric/1m when only ineligible document types are present', async () => {
+    it('falls back to transactionEvent/none when the sources list is empty', async () => {
+      const { http, start, end } = withSources([]);
+      const { result } = renderHook(() => usePreferredTransactionDataSource({ http, start, end }));
+      await waitFor(() => expect(result.current.dataSource).toBeDefined());
+      expect(result.current.dataSource).toEqual({
+        documentType: 'transactionEvent',
+        rollupInterval: 'none',
+      });
+    });
+
+    it('falls back to transactionEvent/none when only ineligible document types are present', async () => {
       const { http, start, end } = withSources([
         { documentType: 'serviceTransactionMetric', rollupInterval: '1m', hasDocs: true },
       ]);
       const { result } = renderHook(() => usePreferredTransactionDataSource({ http, start, end }));
       await waitFor(() => expect(result.current.dataSource).toBeDefined());
       expect(result.current.dataSource).toEqual({
-        documentType: 'transactionMetric',
-        rollupInterval: '1m',
+        documentType: 'transactionEvent',
+        rollupInterval: 'none',
       });
     });
 
@@ -143,6 +154,38 @@ describe('usePreferredTransactionDataSource', () => {
         }),
       })
     );
+  });
+
+  it('sends x-project-routing when projectRouting is provided', async () => {
+    const { http, start, end } = withSources([
+      { documentType: 'transactionMetric', rollupInterval: '1m', hasDocs: true },
+    ]);
+
+    renderHook(() =>
+      usePreferredTransactionDataSource({ http, start, end, projectRouting: '_alias:*' })
+    );
+
+    await waitFor(() => expect(http.get).toHaveBeenCalledTimes(1));
+
+    expect(http.get).toHaveBeenCalledWith(
+      '/internal/apm/time_range_metadata',
+      expect.objectContaining({
+        headers: { 'x-project-routing': '_alias:*' },
+      })
+    );
+  });
+
+  it('omits x-project-routing when projectRouting is not provided', async () => {
+    const { http, start, end } = withSources([
+      { documentType: 'transactionMetric', rollupInterval: '1m', hasDocs: true },
+    ]);
+
+    renderHook(() => usePreferredTransactionDataSource({ http, start, end }));
+
+    await waitFor(() => expect(http.get).toHaveBeenCalledTimes(1));
+
+    const options = (http.get as jest.Mock).mock.calls[0][1];
+    expect(options.headers).toBeUndefined();
   });
 
   it('returns undefined dataSource and exposes the error when the metadata call fails', async () => {

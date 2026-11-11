@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/yaml-loader'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/fleet'
+  defaultOwner: '@elastic/streams-ui'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/yaml-loader'
   description: Moon project for @kbn/yaml-loader
   channel: ''
-  owner: '@elastic/fleet'
+  owner: '@elastic/streams-ui'
   sourceRoot: src/platform/packages/shared/kbn-yaml-loader
 dependsOn: []
 tags:

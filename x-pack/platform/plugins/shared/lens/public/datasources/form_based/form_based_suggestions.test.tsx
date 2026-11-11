@@ -1315,6 +1315,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     dataType: 'number',
                     isBucketed: false,
                     label: '',
+                    customLabel: true,
                     scale: 'ratio',
                     isStaticValue: false,
                     hasTimeShift: false,
@@ -1409,6 +1410,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     dataType: 'number',
                     isBucketed: false,
                     label: '',
+                    customLabel: true,
                     scale: 'ratio',
                     isStaticValue: false,
                     hasTimeShift: false,
@@ -2258,6 +2260,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 columnId: 'col1',
                 operation: {
                   label: 'My Op',
+                  customLabel: true,
                   dataType: 'string',
                   isBucketed: true,
                   scale: 'ordinal',
@@ -2284,6 +2287,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 columnId: 'cola',
                 operation: {
                   label: 'My Op 2',
+                  customLabel: true,
                   dataType: 'string',
                   isBucketed: true,
                   scale: 'ordinal',
@@ -2350,6 +2354,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 columnId: 'cola',
                 operation: {
                   label: 'My Op',
+                  customLabel: true,
                   dataType: 'number',
                   isBucketed: false,
                   scale: 'ratio',
@@ -2417,6 +2422,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 columnId: 'cola',
                 operation: {
                   label: 'My Terms',
+                  customLabel: true,
                   dataType: 'string',
                   isBucketed: true,
                   scale: 'ordinal',
@@ -2445,6 +2451,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 columnId: 'colb',
                 operation: {
                   label: 'My Op',
+                  customLabel: true,
                   dataType: 'number',
                   isBucketed: false,
                   scale: 'ratio',
@@ -2533,6 +2540,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 columnId: 'cola',
                 operation: {
                   label: 'My Terms',
+                  customLabel: true,
                   dataType: 'string',
                   isBucketed: true,
                   scale: 'ordinal',
@@ -2561,6 +2569,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 columnId: 'colb',
                 operation: {
                   label: 'My Op',
+                  customLabel: true,
                   dataType: 'number',
                   isBucketed: false,
                   scale: 'ratio',
@@ -2674,6 +2683,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   dataType: 'string',
                   isBucketed: true,
                   label: 'My Custom Range',
+                  customLabel: true,
                   scale: 'ordinal',
                   isStaticValue: false,
                   hasTimeShift: false,
@@ -3214,6 +3224,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   dataType: 'string',
                   isBucketed: true,
                   label: 'My Op',
+                  customLabel: true,
                   scale: 'ordinal',
                   isStaticValue: false,
                   hasTimeShift: false,

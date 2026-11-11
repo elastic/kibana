@@ -8,6 +8,15 @@
  */
 
 import type { IClusterClient, KibanaRequest, SecurityServiceStart } from '@kbn/core/server';
+import type { WorkflowExecutionExecutedByUser } from '@kbn/workflows';
+
+/** Identity of the user who triggered a workflow execution. */
+export interface ResolvedExecutionIdentity {
+  /** Stable identity written to `executedBy`: profile UID when available, otherwise username. */
+  executedBy: string;
+  /** Human-readable identity snapshot persisted to `executedByUser`. */
+  user: WorkflowExecutionExecutedByUser;
+}
 
 /**
  * Gets the authenticated user information from the request.
@@ -16,20 +25,29 @@ import type { IClusterClient, KibanaRequest, SecurityServiceStart } from '@kbn/c
  * @param request - The Kibana request object
  * @param security - Core's security service instance
  * @param clusterClient - Elasticsearch cluster client for fallback authentication with API keys
- * @returns Username when resolvable, otherwise `'unknown'`.
- * @remarks Always **resolves** with a string — does not throw or reject. Failures in auth lookup are
+ * @returns The resolved identity, or `undefined` when no identity can be resolved.
+ * @remarks Always **resolves** — does not throw or reject. Failures in auth lookup are
  *   swallowed so callers (e.g. audit metadata) cannot block core workflow actions.
+ *   `undefined` means no identity was resolved; it is distinct from a real principal
+ *   whose username is the string `'unknown'`.
  */
 export async function getAuthenticatedUser(
   request: KibanaRequest,
   security: SecurityServiceStart,
   clusterClient: IClusterClient
-): Promise<string> {
+): Promise<ResolvedExecutionIdentity | undefined> {
   // Try getCurrentUser first (works for regular authenticated requests)
   try {
     const user = security.authc.getCurrentUser(request);
-    if (user?.username) {
-      return user.username;
+    if (user?.profile_uid || user?.username) {
+      return {
+        executedBy: user.profile_uid ?? user.username,
+        user: {
+          name: user.full_name || user.username,
+          username: user.username,
+          ...(user.profile_uid ? { profileUid: user.profile_uid } : {}),
+        },
+      };
     }
   } catch (error) {
     // Fall through to API key authentication
@@ -42,13 +60,18 @@ export async function getAuthenticatedUser(
       const scopedClient = clusterClient.asScoped(request);
       const authResponse = await scopedClient.asCurrentUser.security.authenticate();
       if (authResponse.username) {
-        return authResponse.username;
+        return {
+          executedBy: authResponse.username,
+          user: {
+            name: authResponse.full_name || authResponse.username,
+            username: authResponse.username,
+          },
+        };
       }
     } catch (error) {
       // Fall through to system user
     }
   }
 
-  // For the time being, this is WTF - should never happen since we don't have "system" execution
-  return 'unknown';
+  return undefined;
 }

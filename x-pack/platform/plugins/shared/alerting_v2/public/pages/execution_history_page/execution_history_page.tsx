@@ -6,13 +6,25 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderTab } from '@kbn/app-header';
+import { ALERTING_V2_EXECUTION_HISTORY_APP_ID } from '@kbn/alerting-v2-constants';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
-import { experimentalBadge } from '../../components/experimental_badge';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  canAccessTriggersActionsRules,
+  ruleLogsRoute,
+  triggersActionsRoute,
+} from '@kbn/rule-data-utils';
+import {
+  UniversalRulesOnlyCallout,
+  universalRulesOnlyBadge,
+} from '../../components/universal_rules_only_notice';
 import { ActionPolicyDetailsFlyoutContainer } from '../../components/action_policy/details_flyout/action_policy_details_flyout_container';
-import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary_flyout_container';
+import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary/rule_summary_flyout_container';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { PoliciesTabContent, RulesTabContent } from './components';
@@ -25,6 +37,15 @@ type TabId = typeof POLICIES_TAB_ID | typeof RULES_TAB_ID;
 const EXECUTION_HISTORY_PAGE_TITLE = i18n.translate('xpack.alertingV2.executionHistory.pageTitle', {
   defaultMessage: 'Execution history',
 });
+
+// Full-height flex column so the selected tab can grow and own its own scroll (the grid scrolls
+// internally) instead of the whole page scrolling.
+const pageCss = css`
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  min-block-size: 0;
+`;
 
 const getExecutionHistoryTabs = ({
   selectedTabId,
@@ -44,8 +65,8 @@ const getExecutionHistoryTabs = ({
   },
   {
     id: POLICIES_TAB_ID,
-    label: i18n.translate('xpack.alertingV2.executionHistory.tabs.policiesLabel', {
-      defaultMessage: 'Policies',
+    label: i18n.translate('xpack.alertingV2.executionHistory.tabs.actionPoliciesLabel', {
+      defaultMessage: 'Action policies',
     }),
     isSelected: selectedTabId === POLICIES_TAB_ID,
     onClick: () => onSelect(POLICIES_TAB_ID),
@@ -53,13 +74,58 @@ const getExecutionHistoryTabs = ({
   },
 ];
 
+const POLICIES_TAB_CALLOUT_BODY = i18n.translate(
+  'xpack.alertingV2.executionHistory.policiesTabCalloutBody',
+  { defaultMessage: 'Review past runs for action policies.' }
+);
+
+const RulesTabCalloutBody = () => {
+  const application = useService(CoreStart('application'));
+  const basePath = useService(CoreStart('http')).basePath;
+
+  if (!canAccessTriggersActionsRules(application.capabilities)) {
+    return (
+      <FormattedMessage
+        id="xpack.alertingV2.executionHistory.rulesTabCalloutBody"
+        defaultMessage="Review past runs for Universal rules."
+      />
+    );
+  }
+
+  return (
+    <FormattedMessage
+      id="xpack.alertingV2.executionHistory.rulesTabCalloutBodyWithClassicLogs"
+      defaultMessage="Review past runs for Universal rules. To check logs from Classic rules, go to {classicLogsLink}."
+      values={{
+        classicLogsLink: (
+          <EuiLink
+            href={basePath.prepend(`${triggersActionsRoute}${ruleLogsRoute}`)}
+            data-test-subj="executionHistoryClassicRuleLogsLink"
+          >
+            <FormattedMessage
+              id="xpack.alertingV2.executionHistory.classicRuleLogsLink"
+              defaultMessage="Classic rule logs"
+            />
+          </EuiLink>
+        ),
+      }}
+    />
+  );
+};
+
 export const ExecutionHistoryPage = () => {
   useBreadcrumbs('execution_history_list');
+  const { links } = useService(CoreStart('docLinks'));
 
   const [selectedTabId, setSelectedTabId] = useState<TabId>(RULES_TAB_ID);
   const [policyToViewId, setPolicyToViewId] = useState<string | null>(null);
   const [ruleToViewId, setRuleToViewId] = useState<string | null>(null);
-  const { flyout: composeFlyout, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
+  const {
+    flyout: composeFlyout,
+    confirmationModal,
+    openEditFlyout,
+    openCloneFlyout,
+  } = useComposeDiscoverFlyout();
 
   const handlePolicyClick = (policyId: string) => {
     setRuleToViewId(null);
@@ -77,15 +143,26 @@ export const ExecutionHistoryPage = () => {
   );
 
   return (
-    <div data-test-subj="executionHistoryPage">
+    <div data-test-subj="executionHistoryPage" css={pageCss}>
       <AppHeader
         sticky={false}
         title={EXECUTION_HISTORY_PAGE_TITLE}
-        badges={[experimentalBadge]}
+        badges={[universalRulesOnlyBadge]}
         spacing="bleed"
         tabs={tabs}
+        docLink={
+          selectedTabId === RULES_TAB_ID
+            ? links.alerting.reviewRuleExecutionHistory
+            : links.alerting.reviewActionPolicyExecutionHistory
+        }
       />
       <EuiSpacer size="m" />
+      <UniversalRulesOnlyCallout
+        appId={ALERTING_V2_EXECUTION_HISTORY_APP_ID}
+        description={
+          selectedTabId === RULES_TAB_ID ? <RulesTabCalloutBody /> : POLICIES_TAB_CALLOUT_BODY
+        }
+      />
       {selectedTabId === RULES_TAB_ID ? (
         <RulesTabContent onRuleClick={handleRuleClick} />
       ) : (
@@ -116,6 +193,7 @@ export const ExecutionHistoryPage = () => {
         />
       )}
       {composeFlyout}
+      {confirmationModal}
     </div>
   );
 };

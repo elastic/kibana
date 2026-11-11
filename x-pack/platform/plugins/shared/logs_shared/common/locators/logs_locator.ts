@@ -6,7 +6,7 @@
  */
 
 import { type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { ALL_LOGS_DATA_VIEW_ID } from '@kbn/discover-utils/src';
+import { getAllLogsDataViewSpec } from '@kbn/discover-utils';
 import type { TimeRange } from '@kbn/es-query';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { LocatorDefinition } from '@kbn/share-plugin/common';
@@ -18,7 +18,7 @@ import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
 export const LOGS_LOCATOR_ID = 'LOGS_LOCATOR';
 
 /**
- * Accepts the same parameters as `DiscoverAppLocatorParams`, but automatically sets the `dataViewId` param to all log sources.
+ * Accepts the same parameters as `DiscoverAppLocatorParams`, but automatically sets the data view to all log sources.
  */
 export type LogsLocatorParams = DiscoverAppLocatorParams;
 
@@ -44,11 +44,15 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
     const discoverAppLocator =
       this.deps.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
 
+    // Respect a caller-provided data view (e.g. onboarding wired streams).
+    if (params.dataViewId || params.dataViewSpec) {
+      return discoverAppLocator.getLocation(params);
+    }
+
     const isEsqlDefault = await this.deps.getIsEsqlDefault();
 
     if (isEsqlDefault && !params.query) {
-      const logSourcesService = await this.deps.getLogSourcesService();
-      const flattenedLogSources = await logSourcesService.getFlattenedLogSources();
+      const flattenedLogSources = await this.getFlattenedLogSources();
 
       return discoverAppLocator.getLocation({
         ...params,
@@ -56,9 +60,16 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
       });
     }
 
+    const flattenedLogSources = await this.getFlattenedLogSources();
+
     return discoverAppLocator.getLocation({
-      dataViewId: ALL_LOGS_DATA_VIEW_ID,
+      dataViewSpec: getAllLogsDataViewSpec({ allLogsIndexPattern: flattenedLogSources }),
       ...params,
     });
   };
+
+  private async getFlattenedLogSources() {
+    const logSourcesService = await this.deps.getLogSourcesService();
+    return logSourcesService.getFlattenedLogSources();
+  }
 }

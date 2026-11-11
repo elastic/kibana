@@ -10,6 +10,7 @@ import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { filter } from 'lodash';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
+import { buildPath } from '@kbn/core-http-browser';
 import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
@@ -33,6 +34,8 @@ export interface PackQueriesQuery {
   saved_query_id?: string;
   expiration?: string;
   timeout?: number;
+  failed?: number;
+  error?: string;
 }
 
 export interface LiveQueryDetailsItem {
@@ -45,6 +48,7 @@ export interface LiveQueryDetailsItem {
   agent_policy_ids: string[];
   agents?: string[];
   user_id?: string;
+  user_profile_uid?: string;
   pack_id?: string;
   pack_name?: string;
   pack_prebuilt?: boolean;
@@ -65,7 +69,10 @@ export const useLiveQueryDetails = ({
 
   return useQuery<{ data: LiveQueryDetailsItem }, Error, LiveQueryDetailsItem>(
     ['liveQueries', { actionId, kuery, queryIds }],
-    () => http.get(`/api/osquery/live_queries/${actionId}`, { version: API_VERSIONS.public.v1 }),
+    () =>
+      http.get(buildPath('/api/osquery/live_queries/{actionId}', { actionId }), {
+        version: API_VERSIONS.public.v1,
+      }),
     {
       enabled: !skip && !!actionId,
       refetchInterval: isLive ? 5000 : false,

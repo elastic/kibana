@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ApiClientFixture } from '@kbn/scout-oblt';
+import type { ApiClientFixture, ApiClientResponse } from '@kbn/scout-oblt';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
 /**
@@ -14,7 +14,8 @@ import type { CreateSLOInput } from '@kbn/slo-schema';
  * For the HTTP call under test (especially RBAC), prefer `apiClient` + scoped credentials from `requestAuth`.
  */
 export interface SloLifecycleApi {
-  create(slo: CreateSLOInput): ReturnType<ApiClientFixture['post']>;
+  create(slo: CreateSLOInput): Promise<ApiClientResponse>;
+  delete(id: string): Promise<void>;
   deleteAllSLOs(): Promise<void>;
 }
 
@@ -24,6 +25,16 @@ export function createSloLifecycleApi(
 ): SloLifecycleApi {
   const jsonHeaders = { ...authHeaders, Accept: 'application/json' };
 
+  const deleteSlo = async (id: string): Promise<void> => {
+    const response = await apiClient.delete(`api/observability/slos/${id}`, {
+      headers: jsonHeaders,
+      responseType: 'json',
+    });
+    if (response.statusCode !== 204) {
+      throw new Error(`delete ${id} failed with ${response.statusCode}`);
+    }
+  };
+
   return {
     create(slo: CreateSLOInput) {
       return apiClient.post('api/observability/slos', {
@@ -32,6 +43,8 @@ export function createSloLifecycleApi(
         responseType: 'json',
       });
     },
+
+    delete: deleteSlo,
 
     async deleteAllSLOs() {
       const response = await apiClient.get('api/observability/slos/_definitions', {
@@ -43,13 +56,7 @@ export function createSloLifecycleApi(
       }
       const results = (response.body as { results?: Array<{ id: string }> }).results ?? [];
       for (const { id } of results) {
-        const del = await apiClient.delete(`api/observability/slos/${id}`, {
-          headers: jsonHeaders,
-          responseType: 'json',
-        });
-        if (del.statusCode !== 204) {
-          throw new Error(`deleteAllSLOs: delete ${id} failed with ${del.statusCode}`);
-        }
+        await deleteSlo(id);
       }
     },
   };

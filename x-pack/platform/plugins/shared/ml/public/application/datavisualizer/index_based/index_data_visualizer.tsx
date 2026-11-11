@@ -22,12 +22,12 @@ import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { MlDataSourcePicker } from '@kbn/aiops-components';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
-import { useMlApi, useMlKibana, useMlLocator } from '../../contexts/kibana';
+import { useMlKibana, useMlLocator } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
 import { isFullLicense } from '../../license';
-import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
+import { mlNodesAvailable } from '../../ml_nodes_check/check_ml_nodes';
 import { checkPermission } from '../../capabilities/check_capabilities';
-import { MlAppHeader } from '../../components/ml_app_header';
+import { MlAppHeader, useDataVisualizerBack } from '../../components/ml_app_header';
 import { useEnabledFeatures } from '../../contexts/ml';
 import { useDataSource } from '../../contexts/ml/data_source_context';
 import { useMlManagementLocator } from '../../contexts/kibana/use_create_url';
@@ -45,16 +45,12 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
       mlApi: { recognizeIndex },
     },
   } = services;
-  const mlApi = useMlApi();
   const { showNodeInfo } = useEnabledFeatures();
-  const { selectedDataView: dataView } = useDataSource();
+  const { selectedDataView: dataView, projectRouting } = useDataSource();
   const mlLocator = useMlLocator()!;
   const mlManagementLocator = useMlManagementLocator();
   const mlFeaturesDisabled = !isFullLicense();
-
-  useEffect(() => {
-    getMlNodeCount(mlApi);
-  }, [mlApi]);
+  const dataVisualizerBack = useDataVisualizerBack();
 
   const [IndexDataVisualizer, setIndexDataVisualizer] = useState<IndexDataVisualizerSpec | null>(
     null
@@ -221,6 +217,7 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
                     defaultMessage: 'Index data visualizer',
                   })
             }
+            back={dataVisualizerBack}
           />
           {!dataView && !esql ? (
             <>
@@ -249,6 +246,7 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
               getAdditionalLinks={getAdditionalLinks}
               showFrozenDataTierChoice={showNodeInfo}
               esql={esql}
+              projectRouting={projectRouting}
             />
           )}
         </>

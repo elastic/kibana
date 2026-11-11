@@ -6,6 +6,7 @@
  */
 
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { UnifiedTraceErrors } from './get_unified_trace_errors';
 import { getErrorsByDocId, getUnifiedTraceItems } from './get_unified_trace_items';
 import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
@@ -81,6 +82,42 @@ describe('getErrorsByDocId', () => {
     });
   });
 
+  it('falls back to transaction.id for APM errors that carry no span.id', () => {
+    // Classic APM errors reference only the transaction they belong to. Without this fallback
+    // the waterfall row for that transaction renders no error badge at all.
+    const unifiedTraceErrors = {
+      apmErrors: [
+        {
+          span: { id: undefined },
+          transaction: { id: 'tx-1' },
+          id: 'error-1',
+          source: 'apm',
+          index: 'logs-apm.error-default',
+        },
+      ],
+      unprocessedOtelErrors: [],
+      totalErrors: 1,
+    } as unknown as UnifiedTraceErrors;
+
+    expect(getErrorsByDocId(unifiedTraceErrors)).toEqual({
+      'tx-1': [{ errorDocId: 'error-1', source: 'apm', errorDocIndex: 'logs-apm.error-default' }],
+    });
+  });
+
+  it('prefers span.id over transaction.id when both are present', () => {
+    const unifiedTraceErrors = {
+      apmErrors: [
+        { span: { id: 'span-1' }, transaction: { id: 'tx-1' }, id: 'error-1', source: 'apm' },
+      ],
+      unprocessedOtelErrors: [],
+      totalErrors: 1,
+    } as unknown as UnifiedTraceErrors;
+
+    expect(getErrorsByDocId(unifiedTraceErrors)).toEqual({
+      'span-1': [{ errorDocId: 'error-1', source: 'apm' }],
+    });
+  });
+
   it('returns an empty object if there are no errors', () => {
     const unifiedTraceErrors = {
       apmErrors: [],
@@ -109,9 +146,12 @@ describe('getUnifiedTraceItems', () => {
 
   const mockLogsClient = {} as LogsClient;
 
+  const mockLogger = loggingSystemMock.createLogger();
+
   const defaultParams = {
     apmEventClient: mockApmEventClient,
     logsClient: mockLogsClient,
+    logger: mockLogger,
     traceId: 'test-trace-id',
     start: 0,
     end: 1000,
@@ -334,6 +374,7 @@ describe('getUnifiedTraceItems', () => {
       expect(getUnifiedTraceErrors).toHaveBeenCalledWith({
         apmEventClient: mockApmEventClient,
         logsClient: mockLogsClient,
+        logger: mockLogger,
         traceId: 'test-trace-id',
         start: 0,
         end: 1000,
@@ -1444,6 +1485,78 @@ describe('getUnifiedTraceItems', () => {
     });
   });
 
+  describe('documents with missing required fields', () => {
+    it('skips a document missing service.name and keeps the valid ones', async () => {
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'malformed-doc',
+              _index: 'traces-generic.otel-default',
+              fields: {
+                [AT_TIMESTAMP]: ['2023-01-01T00:00:00.000Z'],
+                [TRACE_ID]: ['test-trace-id'],
+                [SPAN_ID]: ['span-without-service'],
+                [SPAN_NAME]: ['Malformed Span'],
+                [SPAN_DURATION]: [1000],
+              },
+            },
+            {
+              _id: 'valid-doc',
+              _index: 'traces-apm-default',
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['Test Span'],
+                [SPAN_DURATION]: [1000],
+              },
+            },
+          ],
+          total: { value: 2, relation: 'eq' },
+        },
+      });
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems.map((item) => item.id)).toEqual(['span-1']);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          '[get_unified_trace_items] Skipping document with id [malformed-doc] from index [traces-generic.otel-default]'
+        )
+      );
+    });
+
+    it('skips a document missing @timestamp instead of throwing', async () => {
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'no-timestamp-doc',
+              _index: 'traces-generic.otel-default',
+              fields: {
+                [TRACE_ID]: ['test-trace-id'],
+                [SERVICE_NAME]: ['test-service'],
+                [SPAN_ID]: ['span-without-timestamp'],
+                [SPAN_NAME]: ['Malformed Span'],
+                [SPAN_DURATION]: [1000],
+              },
+            },
+          ],
+          total: { value: 1, relation: 'eq' },
+        },
+      });
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems).toEqual([]);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Skipping document with id [no-timestamp-doc] from index [traces-generic.otel-default]: Missing required fields (@timestamp) in event'
+        )
+      );
+    });
+  });
+
   describe('missingDestination', () => {
     const otelSpanAndChildTransaction = (withDestination: boolean) => ({
       hits: {
@@ -1665,5 +1778,96 @@ describe('getTraceItemIcon', () => {
         })
       ).toBe('merge');
     });
+  });
+});
+
+describe('getUnifiedTraceItems focused document reservation', () => {
+  const mockApmEventClient = {
+    search: jest.fn(),
+  } as unknown as APMEventClient;
+
+  const mockLogsClient = {} as LogsClient;
+
+  const mockLogger = loggingSystemMock.createLogger();
+
+  const defaultParams = {
+    apmEventClient: mockApmEventClient,
+    logsClient: mockLogsClient,
+    logger: mockLogger,
+    traceId: 'test-trace-id',
+    start: 0,
+    end: 1000,
+    maxTraceItems: 1,
+  };
+
+  const defaultSearchFields = {
+    [AT_TIMESTAMP]: ['2023-01-01T00:00:00.000Z'],
+    [TRACE_ID]: ['test-trace-id'],
+    [SERVICE_NAME]: ['test-service'],
+    [TIMESTAMP_US]: [1672531200000000],
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (getUnifiedTraceErrors as jest.Mock).mockResolvedValue({
+      apmErrors: [],
+      unprocessedOtelErrors: [],
+      totalErrors: 0,
+    });
+    (getSpanLinksCountById as jest.Mock).mockResolvedValue({});
+  });
+
+  it('merges a missing focused transaction into truncated ranked hits', async () => {
+    const rankedRoot = {
+      _source: {},
+      fields: {
+        ...defaultSearchFields,
+        [PROCESSOR_EVENT]: ProcessorEvent.transaction,
+        [SPAN_ID]: ['root-1'],
+        [TRANSACTION_ID]: ['root-1'],
+        [TRANSACTION_NAME]: ['long-root'],
+        [TRANSACTION_DURATION]: [1_000_000],
+      },
+    };
+    const focusedChild = {
+      _source: {},
+      fields: {
+        ...defaultSearchFields,
+        [PROCESSOR_EVENT]: ProcessorEvent.transaction,
+        [SPAN_ID]: ['focused-1'],
+        [TRANSACTION_ID]: ['focused-1'],
+        [TRANSACTION_NAME]: ['short-child'],
+        [TRANSACTION_DURATION]: [2000],
+        [PARENT_ID]: ['root-1'],
+      },
+    };
+
+    (mockApmEventClient.search as jest.Mock).mockImplementation((operationName: string) => {
+      if (operationName === 'get_focused_trace_items') {
+        return Promise.resolve({
+          hits: { hits: [focusedChild], total: { value: 1, relation: 'eq' } },
+        });
+      }
+
+      return Promise.resolve({
+        hits: {
+          hits: [rankedRoot],
+          total: { value: 2, relation: 'eq' },
+        },
+      });
+    });
+
+    const result = await getUnifiedTraceItems({
+      ...defaultParams,
+      focusedDocId: 'focused-1',
+    });
+
+    expect(result.traceItems.map((item) => item.id)).toEqual(['focused-1']);
+    expect(result.traceDocsTotal).toBe(2);
+    expect(
+      (mockApmEventClient.search as jest.Mock).mock.calls.some(
+        (call) => call[0] === 'get_focused_trace_items'
+      )
+    ).toBe(true);
   });
 });

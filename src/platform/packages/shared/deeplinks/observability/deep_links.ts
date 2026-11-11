@@ -9,6 +9,7 @@
 
 import type {
   APM_APP_ID,
+  ENTITY_INVENTORY_APP_ID,
   LOGS_APP_ID,
   METRICS_APP_ID,
   OBSERVABILITY_LOGS_EXPLORER_APP_ID,
@@ -20,11 +21,14 @@ import type {
   SLO_APP_ID,
   AI_ASSISTANT_APP_ID,
   OBLT_UX_APP_ID,
+  OBLT_DIGITAL_EXPERIENCE_APP_ID,
   OBLT_PROFILING_APP_ID,
   INVENTORY_APP_ID,
   STREAMS_APP_ID,
   INGEST_HUB_APP_ID,
   ONBOARDING_APP_ID,
+  NIGHTSHIFT_APP_ID,
+  OBSERVABILITY_ALERTING_APP_ID,
 } from './constants';
 
 type LogsApp = typeof LOGS_APP_ID;
@@ -39,11 +43,15 @@ type ObservabilityOnboardingApp = typeof OBSERVABILITY_ONBOARDING_APP_ID;
 type SloApp = typeof SLO_APP_ID;
 type AiAssistantApp = typeof AI_ASSISTANT_APP_ID;
 type ObltUxApp = typeof OBLT_UX_APP_ID;
+type ObltDigitalExperienceApp = typeof OBLT_DIGITAL_EXPERIENCE_APP_ID;
 type ObltProfilingApp = typeof OBLT_PROFILING_APP_ID;
 type InventoryApp = typeof INVENTORY_APP_ID;
 type StreamsApp = typeof STREAMS_APP_ID;
+type EntityInventoryApp = typeof ENTITY_INVENTORY_APP_ID;
 type IngestHubApp = typeof INGEST_HUB_APP_ID;
 type OnboardingApp = typeof ONBOARDING_APP_ID;
+type NightshiftApp = typeof NIGHTSHIFT_APP_ID;
+type ObservabilityAlertingApp = typeof OBSERVABILITY_ALERTING_APP_ID;
 
 export type AppId =
   | LogsApp
@@ -58,11 +66,15 @@ export type AppId =
   | SloApp
   | AiAssistantApp
   | ObltUxApp
+  | ObltDigitalExperienceApp
   | ObltProfilingApp
   | InventoryApp
   | StreamsApp
   | IngestHubApp
-  | OnboardingApp;
+  | OnboardingApp
+  | NightshiftApp
+  | ObservabilityAlertingApp
+  | EntityInventoryApp;
 
 export type LogsLinkId = 'log-categories' | 'settings' | 'anomalies' | 'stream';
 
@@ -73,8 +85,7 @@ export type ObservabilityOverviewLinkId =
   | 'cases'
   | 'cases_configure'
   | 'cases_create'
-  | 'rules'
-  | 'nightshift';
+  | 'rules';
 
 export type MetricsLinkId =
   | 'inventory'
@@ -82,6 +93,8 @@ export type MetricsLinkId =
   | 'hosts'
   | 'settings'
   | 'assetDetails';
+
+export type EntityInventoryAppLinkId = 'allResources' | 'hosts' | 'kubernetes';
 
 export type ApmLinkId =
   | 'services'
@@ -98,16 +111,17 @@ export type UptimeLinkId = 'Certificates';
 
 export type ProfilingLinkId = 'stacktraces' | 'flamegraphs' | 'functions';
 
-export const significantEventsDeepLinkIds = [
-  'significantEventsDiscovery',
-  'significantEventsKnowledgeIndicators',
-  'significantEventsEvents',
-  'significantEventsRules',
-] as const;
+export type StreamsLinkId = 'overview';
 
-export type SigEventsLinkId = (typeof significantEventsDeepLinkIds)[number];
+export type NightshiftLinkId = 'detections' | 'knowledge_indicators' | 'rules' | 'sources';
 
-export type StreamsLinkId = 'overview' | SigEventsLinkId;
+export type ObservabilityAlertingLinkId =
+  | 'alerts'
+  | 'rules-v1'
+  | 'rules-v2'
+  | 'rule-library'
+  | 'action-policies'
+  | 'execution-history';
 
 export type LinkId =
   | LogsLinkId
@@ -129,4 +143,7 @@ export type DeepLinkId =
   | `${UptimeApp}:${UptimeLinkId}`
   | `${ObltProfilingApp}:${ProfilingLinkId}`
   | `${InventoryApp}:${InventoryLinkId}`
-  | `${StreamsApp}:${StreamsLinkId}`;
+  | `${StreamsApp}:${StreamsLinkId}`
+  | `${NightshiftApp}:${NightshiftLinkId}`
+  | `${ObservabilityAlertingApp}:${ObservabilityAlertingLinkId}`
+  | `${EntityInventoryApp}:${EntityInventoryAppLinkId}`;

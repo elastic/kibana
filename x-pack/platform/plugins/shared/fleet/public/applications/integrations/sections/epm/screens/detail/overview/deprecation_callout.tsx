@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiSpacer, EuiLink, EuiAccordion } from '@elastic/eui';
+import { EuiSpacer, EuiLink, EuiAccordion } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -51,7 +52,7 @@ export const DeprecationCallout: React.FC<{
       {' '}
       {deprecated ? (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
             data-test-subj="deprecationCallout"
             title={
@@ -69,39 +70,40 @@ export const DeprecationCallout: React.FC<{
                     defaultMessage: 'This integration is deprecated',
                   })
             }
-            color="warning"
-            iconType="warning"
-          >
-            <p>{deprecated?.description}</p>
-            {deprecated?.since && !isUpcomingDeprecation(packageInfo.version, deprecated) && (
-              <p>
-                <FormattedMessage
-                  id="xpack.fleet.epm.deprecatedSinceVersion"
-                  defaultMessage="Deprecated since version {version}"
-                  values={{ version: deprecated?.since }}
-                />
-              </p>
-            )}
-            {deprecated?.replaced_by?.package && (
-              <p>
-                <FormattedMessage
-                  id="xpack.fleet.epm.replacedByPackage"
-                  defaultMessage="Use {link} instead."
-                  values={{
-                    link: (
-                      <EuiLink
-                        href={getHref('integration_details_overview', {
-                          pkgkey: deprecated.replaced_by.package,
-                        })}
-                      >
-                        {deprecated.replaced_by.package}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
-            )}
-          </EuiCallOut>
+            text={
+              <>
+                <p>{deprecated?.description}</p>
+                {deprecated?.since && !isUpcomingDeprecation(packageInfo.version, deprecated) && (
+                  <p>
+                    <FormattedMessage
+                      id="xpack.fleet.epm.deprecatedSinceVersion"
+                      defaultMessage="Deprecated since version {version}"
+                      values={{ version: deprecated?.since }}
+                    />
+                  </p>
+                )}
+                {deprecated?.replaced_by?.package && (
+                  <p>
+                    <FormattedMessage
+                      id="xpack.fleet.epm.replacedByPackage"
+                      defaultMessage="Use {link} instead."
+                      values={{
+                        link: (
+                          <EuiLink
+                            href={getHref('integration_details_overview', {
+                              pkgkey: deprecated.replaced_by.package,
+                            })}
+                          >
+                            {deprecated.replaced_by.package}
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  </p>
+                )}
+              </>
+            }
+          />
           <EuiSpacer size="m" />
         </>
       ) : null}
@@ -229,16 +231,14 @@ export const DeprecatedFeaturesCallout: React.FC<{ packageInfo: PackageInfo }> =
 
   return (
     <>
-      <EuiCallOut
+      <KbnWarningCallout
         data-test-subj="deprecatedFeaturesCallout"
         title={i18n.translate('xpack.fleet.epm.deprecatedFeaturesTitle', {
           defaultMessage: 'This integration contains deprecated features',
         })}
-        color="warning"
-        iconType="warning"
       >
         <DeprecatedFeaturesList packageInfo={packageInfo} />
-      </EuiCallOut>
+      </KbnWarningCallout>
       <EuiSpacer size="m" />
     </>
   );

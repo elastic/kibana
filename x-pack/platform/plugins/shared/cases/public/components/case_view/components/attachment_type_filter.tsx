@@ -10,8 +10,8 @@ import type { CaseUI } from '../../../../common';
 import { resolveUnifiedAttachmentType } from '../../../../common/utils/attachments/migration_utils';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../../common/use_cases_features';
-import type { MultiSelectFilterOption } from '../../all_cases/multi_select_filter';
-import { MultiSelectFilter } from '../../all_cases/multi_select_filter';
+import type { MultiSelectFilterOption } from '../../all_cases/components/multi_select_filter';
+import { MultiSelectFilter } from '../../all_cases/components/multi_select_filter';
 import { OBSERVABLES_FILTER_ID } from './case_view_observables';
 import * as i18n from './translations';
 
@@ -58,7 +58,7 @@ export const AttachmentTypeFilter = React.memo<AttachmentTypeFilterProps>(
         .list()
         .reduce<Array<MultiSelectFilterOption<string>>>((acc, item) => {
           if (availableTypes.has(item.id) && !excluded.has(item.id)) {
-            acc.push({ key: item.id, label: item.displayName });
+            acc.push({ key: item.id, label: item.getLabel() });
           }
           return acc;
         }, []);

@@ -391,7 +391,6 @@ export class CoreSystem {
         theme,
         userProfile,
         uiSettings,
-        featureFlags,
       });
       const deprecations = this.deprecations.start({ http });
 
@@ -464,6 +463,10 @@ export class CoreSystem {
       this.rootDomElement.appendChild(notificationsTargetDomElement);
       this.rootDomElement.appendChild(overlayTargetDomElement);
 
+      // Mount after the body is cleared above. An earlier mount is removed with the
+      // loading markup while localStorage still says the helper is enabled.
+      this.featureFlags.registerHelper({ http, overlays, rendering });
+
       const coreSystemRootDomElement = css`
         overflow-x: hidden;
         min-width: 100%;
@@ -476,10 +479,10 @@ export class CoreSystem {
           chrome,
           application,
           overlays,
-          featureFlags,
           http,
           docLinks,
           customBranding,
+          notifications,
         },
         coreUiTargetDomElement
       );

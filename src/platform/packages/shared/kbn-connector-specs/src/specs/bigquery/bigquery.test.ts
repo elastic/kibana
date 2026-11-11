@@ -42,9 +42,10 @@ describe('BigQuery', () => {
       expect(BigQuery.auth?.types).toEqual(['gcp_service_account']);
     });
 
-    it('should support workflows and agentBuilder features', () => {
+    it('should support workflows, agentBuilder, and contextEngine features', () => {
       expect(BigQuery.metadata.supportedFeatureIds).toContain('workflows');
       expect(BigQuery.metadata.supportedFeatureIds).toContain('agentBuilder');
+      expect(BigQuery.metadata.supportedFeatureIds).toContain('contextEngine');
     });
   });
 
@@ -61,6 +62,23 @@ describe('BigQuery', () => {
         location: 'US',
       });
     });
+
+    it.each(['runQuery', 'executeQuery'] as const)(
+      '%s should accept queries up to the 1 MB BigQuery limit and reject larger ones',
+      (actionName) => {
+        const { input } = BigQuery.actions[actionName];
+        const prefix = 'SELECT ';
+        const atLimit = prefix + 'a'.repeat(1024 * 1024 - prefix.length);
+
+        expect(input.safeParse({ query: atLimit }).success).toBe(true);
+        expect(input.safeParse({ query: `${atLimit}a` }).success).toBe(false);
+        expect(
+          input.safeParse({
+            query: prefix + 'é'.repeat(Math.ceil((1024 * 1024 - prefix.length) / 2)),
+          }).success
+        ).toBe(false);
+      }
+    );
   });
 
   describe('runQuery', () => {
@@ -157,7 +175,7 @@ describe('BigQuery', () => {
   });
 
   describe('executeQuery', () => {
-    it('should be workflow-only and allow dry runs', async () => {
+    it('should be agent-accessible (HITL recommended before execution) and allow dry runs', async () => {
       mockClient.post.mockResolvedValue({
         data: {
           jobComplete: true,
@@ -165,7 +183,7 @@ describe('BigQuery', () => {
         },
       });
 
-      expect(BigQuery.actions.executeQuery.isTool).toBe(false);
+      expect(BigQuery.actions.executeQuery.isTool).toBe(true);
 
       const result = await BigQuery.actions.executeQuery.handler(mockContext, {
         query: 'CREATE TEMP TABLE t AS SELECT 1',
@@ -265,6 +283,8 @@ describe('BigQuery', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = BigQuery.test;
+
     it('should return success when SELECT 1 succeeds', async () => {
       mockClient.post.mockResolvedValue({
         data: {
@@ -273,11 +293,7 @@ describe('BigQuery', () => {
         },
       });
 
-      if (!BigQuery.test) {
-        throw new Error('BigQuery test handler is missing');
-      }
-
-      const result = await BigQuery.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.post).toHaveBeenCalledWith(
         'https://bigquery.googleapis.com/bigquery/v2/projects/elastic-edm-prod/queries',
@@ -288,10 +304,19 @@ describe('BigQuery', () => {
           maxResults: 1,
         })
       );
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to BigQuery (job job_test)',
-      });
+      expect(result).toEqual({});
+    });
+  });
+
+  describe('runQuery query size', () => {
+    const maxBytes = 1024 * 1024;
+    const isValid = (query: string) => BigQuery.actions.runQuery.input.safeParse({ query }).success;
+
+    it('is bounded at 1 MB of UTF-8', () => {
+      expect(isValid('x'.repeat(maxBytes))).toBe(true);
+      expect(isValid('x'.repeat(maxBytes + 1))).toBe(false);
+      expect(isValid('é'.repeat(maxBytes / 2))).toBe(true);
+      expect(isValid('é'.repeat(maxBytes / 2 + 1))).toBe(false);
     });
   });
 });

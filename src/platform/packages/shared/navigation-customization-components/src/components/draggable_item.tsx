@@ -43,6 +43,7 @@ export const DraggableItem = ({ item, index, toggleItemVisibility }: Props) => (
     customDragHandle
     hasInteractiveChildren
     usePortal
+    spacing="s"
   >
     {(provided) => (
       <EuiPanel
@@ -59,7 +60,7 @@ export const DraggableItem = ({ item, index, toggleItemVisibility }: Props) => (
                 values: { itemTitle: item.title },
               })}
             >
-              <EuiIcon type="grabHorizontal" color="subdued" aria-hidden={true} />
+              <EuiIcon type="dragHorizontal" color="subdued" aria-hidden={true} />
             </div>
           </EuiFlexItem>
           {item.icon && (

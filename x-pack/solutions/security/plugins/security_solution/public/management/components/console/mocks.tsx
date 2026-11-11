@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable @kbn/compat/import-no-extraneous-dependencies */
 
 import React, { memo, useEffect } from 'react';
 import { EuiCode } from '@elastic/eui';
@@ -480,13 +480,13 @@ export const getCommandListMock = (): CommandDefinition[] => {
         foo: {
           about: 'foo stuff',
           required: false,
-          exclusiveOr: true,
+          exclusiveOrGroupId: 'foo1',
           allowMultiples: false,
         },
         bar: {
           about: 'bar stuff',
           required: false,
-          exclusiveOr: true,
+          exclusiveOrGroupId: 'foo1',
           allowMultiples: false,
         },
       },

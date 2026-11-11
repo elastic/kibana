@@ -11,9 +11,7 @@ export {
   containerCss,
   fullWidthContentCss,
   fullWidthFormContentCss,
-  navCss,
+  resultsContentCss,
   wrapperCss,
 } from './default';
-export type { WithHeaderLayoutProps } from './with_header';
-export { WithHeaderLayout } from './with_header';
 export { WithoutHeaderLayout } from './without_header';

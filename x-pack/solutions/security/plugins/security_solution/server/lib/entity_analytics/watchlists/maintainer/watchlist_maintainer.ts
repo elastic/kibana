@@ -11,6 +11,7 @@ import type { RegisterEntityMaintainerConfig } from '@kbn/entity-store/server';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { createEntitySourcesService } from '../entity_sources/entity_sources_service';
 import { watchlistEntitySourceTypeName } from '../entity_sources/infra';
+import { ENTITY_ANALYTICS_SPAN_NAMES, runWithSpan } from '../../telemetry/traces';
 
 export interface WatchlistMaintainerDeps {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
@@ -46,8 +47,7 @@ export const createWatchlistMaintainer = ({
 
     // Use the authenticated fakeRequest from the task manager (created with the
     // credentials of the user who installed the Entity Store) rather than
-    // buildScopedInternalSavedObjectsClientUnsafe, which builds its own fake
-    // request with empty headers and no auth credentials.
+    // buildNamespacedInternalSavedObjectsClientUnsafe, which has no auth credentials.
     const soClient = coreStart.savedObjects.getScopedClient(fakeRequest, {
       excludedExtensions: [SECURITY_EXTENSION_ID],
       includedHiddenTypes: [watchlistEntitySourceTypeName],
@@ -62,7 +62,11 @@ export const createWatchlistMaintainer = ({
       hasEncryptionKey,
     });
 
-    await entitySourcesService.syncAllWatchlists({ abortSignal: signal });
+    await runWithSpan({
+      name: ENTITY_ANALYTICS_SPAN_NAMES.watchlistTaskRun,
+      namespace,
+      cb: () => entitySourcesService.syncAllWatchlists({ abortSignal: signal }),
+    });
 
     return status.state;
   },

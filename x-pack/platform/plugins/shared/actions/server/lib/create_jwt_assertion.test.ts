@@ -64,7 +64,7 @@ describe('createJWTAssertion', () => {
         issuer: 'someappid',
         subject: 'test@gmail.com',
       });
-    expect(fn).toThrowError();
+    expect(fn).toThrow();
 
     expect(mockLogger.warn.mock.calls[0]).toMatchInlineSnapshot(`
       Array [

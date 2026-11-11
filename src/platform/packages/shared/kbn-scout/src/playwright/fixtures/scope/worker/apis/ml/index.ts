@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Client as EsClient, estypes } from '@elastic/elasticsearch';
+import { errors, type Client as EsClient, type estypes } from '@elastic/elasticsearch';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { KbnClient, ScoutLogger } from '../../../../../../common';
 import { measurePerformanceAsync } from '../../../../../../common';
@@ -15,6 +15,7 @@ import { measurePerformanceAsync } from '../../../../../../common';
 // Model IDs that ship with Elasticsearch and must not be deleted during cleanup
 const INTERNAL_MODEL_IDS = ['lang_ident_model_1'];
 const ML_ANNOTATIONS_INDEX_ALIAS_READ = '.ml-annotations-read';
+const ML_NOTIFICATIONS_INDEX_PATTERN = '.ml-notifications*';
 const ML_INTERNAL_HEADERS = { [ELASTIC_HTTP_VERSION_HEADER]: '1' } as const;
 
 export interface Annotation {
@@ -30,9 +31,24 @@ export interface DeleteJobsOptions {
   deleteAlertingRules?: boolean;
 }
 
+export interface MlDatafeedsApi {
+  /** Create an ML datafeed via the Kibana API, optionally in a named space */
+  create: (datafeedConfig: Partial<estypes.MlDatafeed>, spaceId?: string) => Promise<void>;
+  /** Start an ML datafeed via the Elasticsearch API */
+  start: (datafeedId: string, params?: { start?: string; end?: string }) => Promise<void>;
+  /** Poll until a datafeed reaches the given state string (e.g. 'stopped', 'started') */
+  waitForState: (datafeedId: string, state: string, timeout?: number) => Promise<void>;
+}
+
 export interface MlADJobsApi {
-  /** Create an anomaly detection job via the Kibana API (registers in current space) */
-  createViaKibana: (jobConfig: Partial<estypes.MlJob>) => Promise<void>;
+  /** Create an anomaly detection job via the Kibana API, optionally in a named space */
+  createViaKibana: (jobConfig: Partial<estypes.MlJob>, spaceId?: string) => Promise<void>;
+  /** Open an anomaly detection job via the Elasticsearch API */
+  openJob: (jobId: string) => Promise<void>;
+  /** Close an anomaly detection job via the Elasticsearch API */
+  closeJob: (jobId: string) => Promise<void>;
+  /** Poll until the anomaly detection job reaches the given state string (e.g. 'opened', 'closed') */
+  waitForJobState: (jobId: string, state: string, timeout?: number) => Promise<void>;
   /** Delete anomaly detection jobs via the Kibana API */
   delete: (options: DeleteJobsOptions) => Promise<void>;
   /** Get all anomaly detection jobs via the Elasticsearch API */
@@ -41,6 +57,18 @@ export interface MlADJobsApi {
   waitForJobToExist: (jobId: string, timeout?: number) => Promise<void>;
   /** Wait for an anomaly detection job to be deleted by polling the Elasticsearch API */
   waitForJobNotToExist: (jobId: string, timeout?: number) => Promise<void>;
+  /** Wait for a datafeed to reach the expected state via the Elasticsearch API */
+  waitForDatafeedState: (
+    datafeedId: string,
+    expectedState: string,
+    timeout?: number
+  ) => Promise<void>;
+  /** Wait for an anomaly detection job to have a positive processed record count via the Elasticsearch API */
+  waitForJobRecordCountToBePositive: (jobId: string, timeout?: number) => Promise<void>;
+  /** Get the model memory limit for an anomaly detection job via the Elasticsearch API */
+  getJobModelMemoryLimit: (jobId: string) => Promise<string | undefined>;
+  /** Poll until model_forecast results exist for the job in .ml-anomalies-* */
+  waitForForecastResults: (jobId: string, timeout?: number) => Promise<void>;
   /** Delete all anomaly detection jobs via the Elasticsearch API */
   deleteAllJobs: () => Promise<void>;
   /** Delete expired ML data via the Elasticsearch API */
@@ -121,6 +149,31 @@ export interface MlAnnotationsApi {
 }
 
 export interface MlDataFrameAnalyticsApi {
+  /** Create a data frame analytics job via the Kibana API (registers in current space) */
+  createViaKibana: (
+    jobConfig: { id: string; [key: string]: unknown },
+    space?: string
+  ) => Promise<void>;
+  /** Start a data frame analytics job via the Elasticsearch API */
+  start: (analyticsId: string) => Promise<void>;
+  /** Get data frame analytics job runtime stats via the Elasticsearch API */
+  getStats: (
+    analyticsId: string
+  ) => Promise<{ state: string | undefined; hasTrainingDocs: boolean }>;
+  /** Wait for a data frame analytics job to stop by polling the Elasticsearch API */
+  waitForStopped: (analyticsId: string, timeoutMs?: number) => Promise<void>;
+  /** Wait until training has begun so a subsequent waitForStopped does not resolve on the initial stopped state */
+  waitForTrainingDocs: (analyticsId: string, timeoutMs?: number) => Promise<void>;
+  /**
+   * Delete a data frame analytics job if it exists via the Elasticsearch API.
+   * Add space-aware saved object cleanup if this is used in space-scoped tests.
+   */
+  deleteIfExists: (analyticsId: string) => Promise<void>;
+  /** Create and run a data frame analytics job via the Kibana and Elasticsearch APIs */
+  createAndRun: (
+    jobConfig: { id: string; [key: string]: unknown },
+    options?: { timeoutMs?: number; space?: string }
+  ) => Promise<void>;
   /** Get all data frame analytics jobs via the Elasticsearch API */
   getAllJobs: () => Promise<estypes.MlDataframeAnalyticsSummary[]>;
   /** Wait for a data frame analytics job to exist by polling the Elasticsearch API */
@@ -161,9 +214,25 @@ export interface MlIndicesApi {
   cleanAll: () => Promise<void>;
 }
 
+export interface MlNotificationsApi {
+  /**
+   * Poll until at least one notification for the given job ID appears in .ml-notifications*.
+   * Pass `earliestMs` to ignore notifications retained from earlier runs; it must match the
+   * `earliest` value used by the notifications API, which filters with a strict `timestamp > earliest`.
+   */
+  waitForToIndex: (jobId: string, earliestMs?: number, timeout?: number) => Promise<void>;
+  /**
+   * Delete every document in .ml-notifications* via the Elasticsearch API. Deleting ML jobs does
+   * not remove their notifications, so use this to stop retained ones leaking into a later run.
+   */
+  deleteAll: () => Promise<void>;
+}
+
 export interface MlApiService {
   anomalyDetection: MlADJobsApi;
+  datafeeds: MlDatafeedsApi;
   dataFrameAnalytics: MlDataFrameAnalyticsApi;
+  notifications: MlNotificationsApi;
   trainedModels: MlTrainedModelsApi;
   ingestPipelines: MlIngestPipelinesApi;
   savedObjects: MlSavedObjectsApi;
@@ -490,22 +559,97 @@ export const getMlApiHelper = (
     },
   };
 
+  const datafeeds: MlDatafeedsApi = {
+    async create(datafeedConfig: Partial<estypes.MlDatafeed>, spaceId?: string): Promise<void> {
+      const { datafeed_id: datafeedId, ...body } = datafeedConfig;
+      if (!datafeedId) throw new Error('datafeedConfig.datafeed_id is required');
+      const spacePrefix = spaceId ? `/s/${spaceId}` : '';
+      await measurePerformanceAsync(log, `mlApi.datafeeds.create [${datafeedId}]`, async () => {
+        await kbnClient.request({
+          method: 'PUT',
+          path: `${spacePrefix}/internal/ml/datafeeds/${datafeedId}`,
+          headers: ML_INTERNAL_HEADERS,
+          body,
+        });
+      });
+    },
+
+    async start(datafeedId: string, params: { start?: string; end?: string } = {}): Promise<void> {
+      await measurePerformanceAsync(log, `mlApi.datafeeds.start [${datafeedId}]`, async () => {
+        await esClient.ml.startDatafeed({ datafeed_id: datafeedId, ...params });
+      });
+    },
+
+    async waitForState(
+      datafeedId: string,
+      state: string,
+      timeout: number = 120 * 1000
+    ): Promise<void> {
+      await waitForCondition(
+        `datafeed '${datafeedId}' to be in state '${state}'`,
+        async () => {
+          const resp = await esClient.ml.getDatafeedStats({ datafeed_id: datafeedId });
+          const datafeedStats = resp.datafeeds[0];
+          if (!datafeedStats) throw new Error(`Datafeed '${datafeedId}' not found`);
+          if (datafeedStats.state === state) return true;
+          throw new Error(
+            `Datafeed '${datafeedId}' state is '${datafeedStats.state}', expected '${state}'`
+          );
+        },
+        timeout
+      );
+    },
+  };
+
   const anomalyDetection: MlADJobsApi = {
-    async createViaKibana(jobConfig: Partial<estypes.MlJob>): Promise<void> {
+    async createViaKibana(jobConfig: Partial<estypes.MlJob>, spaceId?: string): Promise<void> {
       const { job_id: jobId, ...body } = jobConfig;
       if (!jobId) throw new Error('jobConfig.job_id is required');
+      const spacePrefix = spaceId ? `/s/${spaceId}` : '';
       await measurePerformanceAsync(
         log,
         `mlApi.anomalyDetection.createViaKibana [${jobId}]`,
         async () => {
           await kbnClient.request({
             method: 'PUT',
-            path: `/internal/ml/anomaly_detectors/${jobId}`,
+            path: `${spacePrefix}/internal/ml/anomaly_detectors/${jobId}`,
             headers: ML_INTERNAL_HEADERS,
             body,
           });
           await this.waitForJobToExist(jobId);
         }
+      );
+    },
+
+    async openJob(jobId: string): Promise<void> {
+      await measurePerformanceAsync(log, `mlApi.anomalyDetection.openJob [${jobId}]`, async () => {
+        await esClient.ml.openJob({ job_id: jobId });
+      });
+    },
+
+    async closeJob(jobId: string): Promise<void> {
+      await measurePerformanceAsync(log, `mlApi.anomalyDetection.closeJob [${jobId}]`, async () => {
+        await esClient.ml.closeJob({ job_id: jobId });
+      });
+    },
+
+    async waitForJobState(
+      jobId: string,
+      expectedState: string,
+      timeout: number = 60 * 1000
+    ): Promise<void> {
+      await waitForCondition(
+        `anomaly detection job '${jobId}' to be in state '${expectedState}'`,
+        async () => {
+          const resp = await esClient.ml.getJobStats({ job_id: jobId });
+          const jobStats = resp.jobs[0];
+          if (!jobStats) throw new Error(`Job '${jobId}' not found`);
+          if (jobStats.state === expectedState) return true;
+          throw new Error(
+            `Job '${jobId}' state is '${jobStats.state}', expected '${expectedState}'`
+          );
+        },
+        timeout
       );
     },
 
@@ -566,6 +710,69 @@ export const getMlApiHelper = (
       );
     },
 
+    async waitForForecastResults(jobId: string, timeout = 30 * 1000): Promise<void> {
+      await waitForCondition(
+        `forecast results for job '${jobId}' to exist`,
+        async () => {
+          const body = await esClient.search({
+            index: '.ml-anomalies-*',
+            size: 1,
+            query: {
+              bool: {
+                must: [{ match: { job_id: jobId } }, { match: { result_type: 'model_forecast' } }],
+              },
+            },
+          });
+          if (body.hits.hits.length > 0) return true;
+          throw new Error(`expected forecast results for job '${jobId}' to exist`);
+        },
+        timeout
+      );
+    },
+
+    async waitForDatafeedState(
+      datafeedId: string,
+      expectedState: string,
+      timeout = 2 * 60 * 1000
+    ): Promise<void> {
+      await waitForCondition(
+        `datafeed '${datafeedId}' to be in state '${expectedState}'`,
+        async () => {
+          const { datafeeds: datafeedsList } = await esClient.ml.getDatafeedStats({
+            datafeed_id: datafeedId,
+          });
+          if (datafeedsList[0]?.state === expectedState) return true;
+          throw new Error(
+            `Datafeed '${datafeedId}' is in state '${datafeedsList[0]?.state}', expected '${expectedState}'`
+          );
+        },
+        timeout
+      );
+    },
+
+    async waitForJobRecordCountToBePositive(jobId: string, timeout = 2 * 60 * 1000): Promise<void> {
+      await waitForCondition(
+        `job '${jobId}' to have positive record count`,
+        async () => {
+          const { jobs } = await esClient.ml.getJobStats({ job_id: jobId });
+          if ((jobs[0]?.data_counts?.processed_record_count ?? 0) > 0) return true;
+          throw new Error(`Anomaly detection job '${jobId}' has no processed records yet`);
+        },
+        timeout
+      );
+    },
+
+    async getJobModelMemoryLimit(jobId: string): Promise<string | undefined> {
+      return measurePerformanceAsync(
+        log,
+        `mlApi.anomalyDetection.getJobModelMemoryLimit [${jobId}]`,
+        async () => {
+          const { jobs } = await esClient.ml.getJobs({ job_id: jobId });
+          return jobs[0]?.analysis_limits?.model_memory_limit as string | undefined;
+        }
+      );
+    },
+
     async deleteAllJobs(): Promise<void> {
       await measurePerformanceAsync(log, 'mlApi.anomalyDetection.deleteAllJobs', async () => {
         const adJobs = await this.getAllJobs();
@@ -594,6 +801,123 @@ export const getMlApiHelper = (
   };
 
   const dataFrameAnalytics: MlDataFrameAnalyticsApi = {
+    async createViaKibana(
+      jobConfig: { id: string; [key: string]: unknown },
+      space?: string
+    ): Promise<void> {
+      const { id: analyticsId, ...body } = jobConfig;
+      await measurePerformanceAsync(
+        log,
+        `mlApi.dataFrameAnalytics.createViaKibana [${analyticsId}]`,
+        async () => {
+          await kbnClient.request({
+            method: 'PUT',
+            path: `${space ? `/s/${space}` : ''}/internal/ml/data_frame/analytics/${analyticsId}`,
+            headers: ML_INTERNAL_HEADERS,
+            body,
+          });
+          await this.waitForJobToExist(analyticsId);
+        }
+      );
+    },
+
+    async start(analyticsId: string): Promise<void> {
+      await measurePerformanceAsync(
+        log,
+        `mlApi.dataFrameAnalytics.start [${analyticsId}]`,
+        async () => {
+          await esClient.ml.startDataFrameAnalytics({ id: analyticsId });
+        }
+      );
+    },
+
+    async getStats(
+      analyticsId: string
+    ): Promise<{ state: string | undefined; hasTrainingDocs: boolean }> {
+      return measurePerformanceAsync(
+        log,
+        `mlApi.dataFrameAnalytics.getStats [${analyticsId}]`,
+        async () => {
+          const { data_frame_analytics: statsList } = await esClient.ml.getDataFrameAnalyticsStats({
+            id: analyticsId,
+            allow_no_match: true,
+          });
+          const stats = statsList[0];
+
+          return {
+            state: stats?.state,
+            hasTrainingDocs: (stats?.data_counts.training_docs_count ?? 0) > 0,
+          };
+        }
+      );
+    },
+
+    async waitForStopped(analyticsId: string, timeoutMs = 2 * 60 * 1000): Promise<void> {
+      await waitForCondition(
+        `data frame analytics job '${analyticsId}' to stop`,
+        async () => {
+          if ((await this.getStats(analyticsId)).state === 'stopped') {
+            return true;
+          }
+          throw new Error(
+            `DFA job '${analyticsId}' did not reach 'stopped' state within ${timeoutMs}ms`
+          );
+        },
+        timeoutMs,
+        5_000
+      );
+    },
+
+    async waitForTrainingDocs(analyticsId: string, timeoutMs = 60_000): Promise<void> {
+      await waitForCondition(
+        `data frame analytics job '${analyticsId}' to have training docs`,
+        async () => {
+          if ((await this.getStats(analyticsId)).hasTrainingDocs) {
+            return true;
+          }
+          throw new Error(
+            `DFA job '${analyticsId}' did not report training docs within ${timeoutMs}ms`
+          );
+        },
+        timeoutMs,
+        3_000
+      );
+    },
+
+    async deleteIfExists(analyticsId: string): Promise<void> {
+      await measurePerformanceAsync(
+        log,
+        `mlApi.dataFrameAnalytics.deleteIfExists [${analyticsId}]`,
+        async () => {
+          try {
+            await esClient.ml.deleteDataFrameAnalytics({ id: analyticsId, force: true });
+          } catch (error) {
+            if (!(error instanceof errors.ResponseError && error.statusCode === 404)) {
+              throw error;
+            }
+          }
+        }
+      );
+    },
+
+    async createAndRun(
+      jobConfig: { id: string; [key: string]: unknown },
+      { timeoutMs = 2 * 60 * 1000, space }: { timeoutMs?: number; space?: string } = {}
+    ): Promise<void> {
+      await measurePerformanceAsync(
+        log,
+        `mlApi.dataFrameAnalytics.createAndRun [${jobConfig.id}]`,
+        async () => {
+          await this.createViaKibana(jobConfig, space);
+          await this.start(jobConfig.id);
+          // Avoid resolving waitForStopped on the brief post-start stopped state.
+          await this.waitForTrainingDocs(jobConfig.id);
+          await this.waitForStopped(jobConfig.id, timeoutMs);
+          await savedObjects.sync(false, space);
+        }
+      );
+    },
+
     async getAllJobs(): Promise<estypes.MlDataframeAnalyticsSummary[]> {
       return measurePerformanceAsync(log, 'mlApi.dataFrameAnalytics.getAllJobs', async () => {
         const { data_frame_analytics: dfaJobs } = await esClient.ml.getDataFrameAnalytics({
@@ -701,6 +1025,52 @@ export const getMlApiHelper = (
     },
   };
 
+  const notifications: MlNotificationsApi = {
+    async waitForToIndex(
+      jobId: string,
+      earliestMs?: number,
+      timeout: number = 60 * 1000
+    ): Promise<void> {
+      await waitForCondition(
+        `notifications for '${jobId}' to exist in .ml-notifications*`,
+        async () => {
+          const resp = await esClient.search({
+            index: ML_NOTIFICATIONS_INDEX_PATTERN,
+            size: 1,
+            query: {
+              bool: {
+                filter: [
+                  { term: { job_id: { value: jobId } } },
+                  ...(earliestMs === undefined
+                    ? []
+                    : [{ range: { timestamp: { gt: earliestMs } } }]),
+                ],
+              },
+            },
+          });
+          if (resp.hits.hits.length > 0) return true;
+          throw new Error(`Notifications for '${jobId}' not yet indexed`);
+        },
+        timeout
+      );
+    },
+
+    async deleteAll(): Promise<void> {
+      await measurePerformanceAsync(log, 'mlApi.notifications.deleteAll', async () => {
+        await esClient.deleteByQuery({
+          index: ML_NOTIFICATIONS_INDEX_PATTERN,
+          query: { match_all: {} },
+          ignore_unavailable: true,
+          // notifications can be written while the delete runs; a version conflict on one of
+          // them must not fail the cleanup
+          conflicts: 'proceed',
+          refresh: true,
+          wait_for_completion: true,
+        });
+      });
+    },
+  };
+
   const indices: MlIndicesApi = {
     async cleanAnomalyDetection() {
       await measurePerformanceAsync(log, 'mlApi.indices.cleanAnomalyDetection', async () => {
@@ -709,6 +1079,7 @@ export const getMlApiHelper = (
         await anomalyDetection.filters.deleteAll();
         await anomalyDetection.annotations.deleteAll();
         await anomalyDetection.deleteExpiredData();
+        await notifications.deleteAll();
         await savedObjects.sync();
       });
     },
@@ -739,7 +1110,9 @@ export const getMlApiHelper = (
 
   return {
     anomalyDetection,
+    datafeeds,
     dataFrameAnalytics,
+    notifications,
     trainedModels,
     ingestPipelines,
     savedObjects,

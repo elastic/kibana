@@ -7,29 +7,12 @@
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
-import type { IHttpFetchError, IToasts } from '@kbn/core/public';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { RulesApi, type BulkResponse } from '../services/rules_api';
 import type { BulkSelection } from './use_bulk_select';
+import { addBulkMutationDangerToast } from './bulk_mutation_toasts';
 import { ruleKeys } from './query_key_factory';
-
-const getHttpFetchErrorMessage = (error: unknown): string | undefined => {
-  const httpError = error as IHttpFetchError<{ message?: string }>;
-  return httpError.body?.message;
-};
-
-const addBulkMutationDangerToast = (
-  toasts: Pick<IToasts, 'addDanger'>,
-  title: string,
-  error: unknown
-) => {
-  const serverMessage = getHttpFetchErrorMessage(error);
-  if (serverMessage) {
-    toasts.addDanger({ title, text: serverMessage });
-  } else {
-    toasts.addDanger(title);
-  }
-};
+import { invalidateRulesContentList } from './invalidate_rules_content_list';
 
 /**
  * Dispatches the mutation to the by-ID or by-query endpoint based on the
@@ -70,8 +53,9 @@ export const useBulkDeleteRules = () => {
           })
         );
       }
+      void invalidateRulesContentList();
       queryClient.invalidateQueries(ruleKeys.lists());
-      queryClient.invalidateQueries(ruleKeys.tags());
+      queryClient.invalidateQueries(ruleKeys.allTags());
     },
     onError: (error) => {
       addBulkMutationDangerToast(

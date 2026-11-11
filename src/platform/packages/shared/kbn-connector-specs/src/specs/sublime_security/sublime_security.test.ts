@@ -10,7 +10,7 @@
 import type { AxiosInstance } from 'axios';
 import type { ActionContext } from '../../connector_spec';
 import { SublimeSecurityConnector } from './sublime_security';
-import { SearchMessageGroupsInputSchema } from './types';
+import { GetMessageInputSchema, GetTaskInputSchema, SearchMessageGroupsInputSchema } from './types';
 import type { SublimeMessageGroupSummary } from './types';
 
 const BASE_URL = 'https://platform.sublime.security';
@@ -162,6 +162,27 @@ describe('SublimeSecurityConnector', () => {
           .success
       ).toBe(true);
       expect(SearchMessageGroupsInputSchema.safeParse(base).success).toBe(true);
+    });
+
+    it('requires ISO 8601 created_at bounds', () => {
+      const base = { limit: 20, offset: 0 };
+
+      expect(
+        SearchMessageGroupsInputSchema.safeParse({ ...base, createdAtGte: '2024-01-01T00:00:00Z' })
+          .success
+      ).toBe(true);
+      expect(
+        SearchMessageGroupsInputSchema.safeParse({ ...base, createdAtGte: 'yesterday' }).success
+      ).toBe(false);
+    });
+
+    it('requires UUID message and task ids', () => {
+      const uuid = '5d1b6a2e-1f4c-4a9e-9b1e-0c2a3d4e5f60';
+
+      expect(GetMessageInputSchema.safeParse({ messageId: uuid }).success).toBe(true);
+      expect(GetMessageInputSchema.safeParse({ messageId: 'msg-1' }).success).toBe(false);
+      expect(GetTaskInputSchema.safeParse({ taskId: uuid }).success).toBe(true);
+      expect(GetTaskInputSchema.safeParse({ taskId: 'task-1' }).success).toBe(false);
     });
 
     it('preserves stats_limit_exceeded so callers can page past a lower-bound total', async () => {
@@ -523,21 +544,18 @@ describe('SublimeSecurityConnector', () => {
   });
 
   describe('test handler', () => {
-    const testDef = SublimeSecurityConnector.test;
-    if (!testDef) {
-      throw new Error('expected the Sublime Security spec to define a test handler');
-    }
+    const testSpec = SublimeSecurityConnector.test;
 
     it('is enabled and lists one mailbox on success', async () => {
-      expect(testDef.enabled).toBe(true);
+      expect(testSpec.enabled).toBe(true);
       (mockClient.get as jest.Mock).mockResolvedValue({ data: { mailboxes: [], total: 0 } });
 
-      const result = await testDef.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(`${BASE_URL}/v0/mailboxes`, {
         params: { limit: 1 },
       });
-      expect(result).toEqual(expect.objectContaining({ ok: true, message: expect.any(String) }));
+      expect(result).toEqual({});
     });
 
     it('throws on failure', async () => {
@@ -545,9 +563,23 @@ describe('SublimeSecurityConnector', () => {
         response: { status: 401, data: 'unauthorized', headers: {} },
       });
 
-      await expect(testDef.handler(mockContext)).rejects.toThrow(
+      await expect(testSpec.handler(mockContext)).rejects.toThrow(
         'Sublime Security API error (401): unauthorized'
       );
+    });
+  });
+
+  describe('quarantineMessageGroups input bounds', () => {
+    it.each([
+      [10_000, true],
+      [10_001, false],
+    ])('%d message group IDs valid=%s', (count, expected) => {
+      const messageGroupIds = Array.from({ length: count }, (_, i) => `group-${i}`);
+      expect(
+        SublimeSecurityConnector.actions.quarantineMessageGroups.input.safeParse({
+          messageGroupIds,
+        }).success
+      ).toBe(expected);
     });
   });
 });

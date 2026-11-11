@@ -6,19 +6,23 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import numeral from '@elastic/numeral';
 import fileSaver from 'file-saver';
 
+import { PARSE_CSV_MAX_FILE_BYTES } from '../../../../common/constants';
 import type { Processor } from '../../../../common/types';
 import { FieldCopyAction } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
+import { PipelineAppHeader } from '../../components';
 import { PipelinesCsvUploader } from './pipelines_csv_uploader';
 import { PipelinesPreview } from './pipelines_preview';
 import { Error } from './error_display';
 import { Instructions } from './instructions';
+
+const maxFileSize = numeral(PARSE_CSV_MAX_FILE_BYTES).format('0,0.[0] b');
 
 export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps> = ({
   history,
@@ -62,8 +66,6 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
   };
 
   const processFile = async (csv: File, action: FieldCopyAction) => {
-    const maxBytes = services.fileUpload.getMaxBytes();
-
     if (csv.size === 0) {
       setErrorInfo({
         title: i18n.translate(
@@ -76,7 +78,7 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
           defaultMessage: 'The file provided is empty.',
         }),
       });
-    } else if (csv.size > maxBytes) {
+    } else if (csv.size > PARSE_CSV_MAX_FILE_BYTES) {
       setErrorInfo({
         title: i18n.translate(
           'xpack.ingestPipelines.createFromCsv.processFile.fileTooLargeErrorTitle',
@@ -87,8 +89,8 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
         message: i18n.translate(
           'xpack.ingestPipelines.createFromCsv.processFile.fileTooLargeError',
           {
-            defaultMessage: 'File is greater than allowed size of {maxBytes} bytes.',
-            values: { maxBytes },
+            defaultMessage: 'File is greater than allowed size of {maxFileSize}.',
+            values: { maxFileSize },
           }
         ),
       });
@@ -97,7 +99,7 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
         setIsLoading(true);
         setIsUploaded(false);
 
-        const fileContents = await services.fileReader.readFile(csv, maxBytes);
+        const fileContents = await services.fileReader.readFile(csv, PARSE_CSV_MAX_FILE_BYTES);
         const success = await fetchPipelineFromMapping(fileContents, action);
 
         setIsLoading(false);
@@ -158,34 +160,13 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
 
   return (
     <>
-      <EuiPageHeader
-        bottomBorder
-        pageTitle={
-          <span data-test-subj="pageTitle">
-            <FormattedMessage
-              id="xpack.ingestPipelines.createFromCsv.pageTitle"
-              defaultMessage="Create pipeline from CSV"
-            />
-          </span>
-        }
-        rightSideItems={[
-          <EuiButtonEmpty
-            size="s"
-            flush="right"
-            href={services.documentation.getCreatePipelineCSVUrl()}
-            target="_blank"
-            iconType="question"
-            data-test-subj="documentationLink"
-          >
-            <FormattedMessage
-              id="xpack.ingestPipelines.createFromCSV.docsButtonLabel"
-              defaultMessage="CSV to pipeline docs"
-            />
-          </EuiButtonEmpty>,
-        ]}
+      <PipelineAppHeader
+        title={i18n.translate('xpack.ingestPipelines.createFromCsv.pageTitle', {
+          defaultMessage: 'Create pipeline from CSV',
+        })}
+        history={history}
+        docLink={services.documentation.getCreatePipelineCSVUrl()}
       />
-
-      <EuiSpacer size="xl" />
 
       <Instructions />
 
@@ -202,6 +183,7 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
           isUploaded={isUploaded}
           hasError={hasError}
           hasFile={!!file && file.length > 0}
+          maxFileSize={maxFileSize}
         />
       )}
 

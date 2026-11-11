@@ -9,6 +9,8 @@
 
 import { readFileSync, existsSync } from 'fs';
 import { resolve, dirname } from 'path';
+import { createFailError } from '@kbn/dev-cli-errors';
+import { hasLocationSource } from '../diff/parse_oasdiff';
 
 export interface AllowlistEntry {
   path: string;
@@ -37,6 +39,19 @@ export const loadAllowlist = (allowlistPath?: string): Allowlist => {
 
   const content = readFileSync(filePath, 'utf-8');
   const parsed = JSON.parse(content) as Allowlist;
+
+  const unmatchable = parsed.entries.filter(
+    ({ oasdiffId, source }) => source && oasdiffId && !hasLocationSource(oasdiffId)
+  );
+  if (unmatchable.length > 0) {
+    const list = unmatchable
+      .map(({ method, path, oasdiffId }) => `${method.toUpperCase()} ${path} (${oasdiffId})`)
+      .join(', ');
+    throw createFailError(
+      `Allowlist entries can't scope oasdiff rules by "source", because oasdiff reports the spec file path there. ` +
+        `Remove "source" from: ${list}. "source" only applies to kbn: rules.`
+    );
+  }
 
   const activeEntries = parsed.entries.filter((entry) => {
     if (entry.expiresAt) {

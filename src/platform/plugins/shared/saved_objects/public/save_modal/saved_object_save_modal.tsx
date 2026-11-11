@@ -75,6 +75,15 @@ interface Props<T = void> {
   isValid?: boolean;
   customModalTitle?: string | React.ReactNode;
   theme: WithEuiThemeProps['theme'];
+  /** When true, renders content without wrapping in EuiModal */
+  disableModal?: boolean;
+  /**
+   * The `id` to set on `EuiModalHeaderTitle`. When `disableModal` is true, the caller owns the
+   * `EuiModal` shell and must pass this id so it can set `aria-labelledby` pointing to this title,
+   * satisfying EUI's accessibility requirement. When `disableModal` is false, the id is generated
+   * internally and applied to both the title and the modal.
+   */
+  modalTitleId?: string;
 }
 
 export interface SaveModalState {
@@ -115,7 +124,7 @@ class SavedObjectSaveModalComponent<T = void> extends React.Component<
     const { theme } = this.props;
     const { isTitleDuplicateConfirmed, hasTitleDuplicate, title, hasAttemptedSubmit } = this.state;
     const duplicateWarningId = generateId();
-    const modalTitleId = generateId('saveModal');
+    const modalTitleId = this.props.modalTitleId ?? generateId('saveModal');
     const hasColumns = !!this.props.rightOptions;
 
     const titleInputValid =
@@ -168,13 +177,8 @@ class SavedObjectSaveModalComponent<T = void> extends React.Component<
         : mathWithUnits(theme.euiTheme.size.xxl, (x) => x * 15),
     });
 
-    return (
-      <EuiModal
-        data-test-subj="savedObjectSaveModal"
-        onClose={this.props.onClose}
-        css={styles}
-        aria-labelledby={modalTitleId}
-      >
+    const content = (
+      <>
         <EuiModalHeader>
           <EuiModalHeaderTitle id={modalTitleId}>
             {this.props.customModalTitle ? (
@@ -216,6 +220,26 @@ class SavedObjectSaveModalComponent<T = void> extends React.Component<
             <EuiFlexItem grow={false}>{this.renderConfirmButton()}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiModalFooter>
+      </>
+    );
+
+    return this.props.disableModal ? (
+      // The caller owns the `EuiModal` shell, so this wrapper must be a flex column that can
+      // shrink; otherwise `EuiModalBody` never bounds its height and tall content clips the footer.
+      <div
+        data-test-subj="savedObjectSaveModal"
+        css={[styles, { display: 'flex', flexDirection: 'column', minBlockSize: 0 }]}
+      >
+        {content}
+      </div>
+    ) : (
+      <EuiModal
+        data-test-subj="savedObjectSaveModal"
+        onClose={this.props.onClose}
+        css={styles}
+        aria-labelledby={modalTitleId}
+      >
+        {content}
       </EuiModal>
     );
   }

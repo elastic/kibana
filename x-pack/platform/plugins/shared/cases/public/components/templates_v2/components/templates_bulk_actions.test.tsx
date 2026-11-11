@@ -8,9 +8,12 @@
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen, waitFor } from '@testing-library/react';
+import type { CoreStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { Template } from '../../../../common/types/domain/template/v1';
+import { CASES_TEMPLATE_DELETED_EVENT_TYPE } from '../../../../common/constants';
 import { TemplatesBulkActions } from './templates_bulk_actions';
-import { renderWithTestingProviders } from '../../../common/mock';
+import { mockedTestProvidersOwner, renderWithTestingProviders } from '../../../common/mock';
 import * as api from '../api/api';
 
 jest.mock('../api/api');
@@ -19,6 +22,7 @@ const apiMock = api as jest.Mocked<typeof api>;
 
 describe('TemplatesBulkActions', () => {
   let user: ReturnType<typeof userEvent.setup>;
+  let coreStart: CoreStart;
 
   const mockTemplates: Template[] = [
     {
@@ -64,6 +68,7 @@ describe('TemplatesBulkActions', () => {
   beforeEach(() => {
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime, pointerEventsCheck: 0 });
     jest.clearAllMocks();
+    coreStart = coreMock.createStart() as unknown as CoreStart;
     apiMock.bulkDeleteTemplates.mockResolvedValue({
       success: true,
       deleted: ['template-1', 'template-2'],
@@ -223,6 +228,57 @@ describe('TemplatesBulkActions', () => {
 
     await waitFor(() => {
       expect(onActionSuccess).toHaveBeenCalled();
+    });
+  });
+
+  describe('telemetry', () => {
+    it('reports one deleted event with the bulk scope when the bulk delete succeeds', async () => {
+      renderWithTestingProviders(<TemplatesBulkActions selectedTemplates={mockTemplates} />, {
+        wrapperProps: { coreStart },
+      });
+
+      await user.click(await screen.findByTestId('templates-bulk-actions-link-icon'));
+      await user.click(await screen.findByTestId('templates-bulk-action-delete'));
+
+      expect(await screen.findByText('Delete 2 templates?')).toBeInTheDocument();
+      // Opening the menu and the modal is not a confirmed action.
+      expect(coreStart.analytics.reportEvent).not.toHaveBeenCalled();
+
+      await user.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      // Two selected templates still report a single event for the one confirmed action.
+      await waitFor(() => {
+        expect(coreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      });
+      expect(coreStart.analytics.reportEvent).toHaveBeenCalledWith(
+        CASES_TEMPLATE_DELETED_EVENT_TYPE,
+        {
+          owner: mockedTestProvidersOwner[0],
+          entry_point: 'templates_list',
+          delete_scope: 'bulk',
+        }
+      );
+    });
+
+    it('reports nothing when the bulk delete fails', async () => {
+      apiMock.bulkDeleteTemplates.mockRejectedValue(new Error('Bulk delete failed'));
+
+      renderWithTestingProviders(<TemplatesBulkActions selectedTemplates={mockTemplates} />, {
+        wrapperProps: { coreStart },
+      });
+
+      await user.click(await screen.findByTestId('templates-bulk-actions-link-icon'));
+      await user.click(await screen.findByTestId('templates-bulk-action-delete'));
+
+      expect(await screen.findByText('Delete 2 templates?')).toBeInTheDocument();
+
+      await user.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      await waitFor(() => {
+        expect(apiMock.bulkDeleteTemplates).toHaveBeenCalled();
+      });
+
+      expect(coreStart.analytics.reportEvent).not.toHaveBeenCalled();
     });
   });
 });

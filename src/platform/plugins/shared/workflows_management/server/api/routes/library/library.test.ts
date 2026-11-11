@@ -27,6 +27,7 @@ import type { RouteDependencies } from '../types';
 const TEMPLATES_PATH = '/internal/workflows/library/templates';
 const TEMPLATE_PATH = '/internal/workflows/library/templates/{slug}';
 const INSTALL_PATH = '/internal/workflows/library/templates/{slug}/install';
+const INSTALL_FROM_YAML_PATH = '/internal/workflows/library/templates/install';
 const HEALTH_PATH = '/internal/workflows/library/health';
 
 const INSTALLABLE_TEMPLATE = parseTemplateYaml(`template-metadata:
@@ -417,6 +418,109 @@ describe('Library Routes', () => {
       expect(response.customError).toHaveBeenCalledWith({
         statusCode: 500,
         body: { message: expect.stringContaining('creation boom') },
+      });
+    });
+  });
+
+  describe(`POST ${INSTALL_FROM_YAML_PATH}`, () => {
+    const installFromYamlRequest = (yaml: string, values: Record<string, unknown> = {}) =>
+      httpServerMock.createKibanaRequest({ body: { yaml, values } });
+
+    it('should register the route handler', () => {
+      expect(routeHandlers[`POST:${INSTALL_FROM_YAML_PATH}`]).toBeDefined();
+      expect(routeHandlers[`POST:${INSTALL_FROM_YAML_PATH}`].handler).toEqual(expect.any(Function));
+    });
+
+    it('should parse the supplied YAML, render it, and create a workflow through the shared create path', async () => {
+      setToggle(true);
+      mockApi.createWorkflow.mockResolvedValue({ id: 'wf-2' });
+
+      const response = httpServerMock.createResponseFactory();
+      const request = installFromYamlRequest(INSTALLABLE_TEMPLATE.raw, {
+        'demo-connector': 'my-connector-id',
+      });
+
+      await routeHandlers[`POST:${INSTALL_FROM_YAML_PATH}`].handler(mockContext, request, response);
+
+      expect(mockApi.createWorkflow).toHaveBeenCalledWith(
+        { yaml: expect.stringContaining('connector-id: my-connector-id') },
+        'default',
+        request
+      );
+      const submittedYaml = mockApi.createWorkflow.mock.calls[0][0].yaml;
+      expect(submittedYaml).not.toContain('template-metadata');
+      expect(submittedYaml).not.toContain('__install__');
+      expect(mockAudit.logWorkflowCreated).toHaveBeenCalledWith(request, { id: 'wf-2' });
+      expect(response.ok).toHaveBeenCalledWith({ body: { workflowId: 'wf-2' } });
+    });
+
+    it('should return 400 when the supplied YAML is not a valid template', async () => {
+      setToggle(true);
+
+      const response = httpServerMock.createResponseFactory();
+      const request = installFromYamlRequest('not: a template');
+
+      await routeHandlers[`POST:${INSTALL_FROM_YAML_PATH}`].handler(mockContext, request, response);
+
+      expect(mockApi.createWorkflow).not.toHaveBeenCalled();
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: { message: expect.stringContaining('template-metadata') },
+      });
+    });
+
+    it('should return 400 with field-level details when form values are invalid', async () => {
+      setToggle(true);
+
+      const response = httpServerMock.createResponseFactory();
+      const request = installFromYamlRequest(INSTALLABLE_TEMPLATE.raw);
+
+      await routeHandlers[`POST:${INSTALL_FROM_YAML_PATH}`].handler(mockContext, request, response);
+
+      expect(mockApi.createWorkflow).not.toHaveBeenCalled();
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: {
+          message: expect.stringContaining('demo-connector'),
+          attributes: {
+            errors: [{ field: 'demo-connector', reason: 'A value is required.' }],
+          },
+        },
+      });
+    });
+
+    it('should short-circuit with 503 when the toggle is off and not create anything', async () => {
+      setToggle(false);
+
+      const response = httpServerMock.createResponseFactory();
+      const request = installFromYamlRequest(INSTALLABLE_TEMPLATE.raw, {
+        'demo-connector': 'my-connector-id',
+      });
+
+      await routeHandlers[`POST:${INSTALL_FROM_YAML_PATH}`].handler(mockContext, request, response);
+
+      expect(mockApi.createWorkflow).not.toHaveBeenCalled();
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 503,
+        body: { message: expect.stringMatching(/disabled/i) },
+      });
+    });
+
+    it('should audit the failure and map the error when workflow creation fails', async () => {
+      setToggle(true);
+      const creationError = new Error('yaml creation boom');
+      mockApi.createWorkflow.mockRejectedValue(creationError);
+
+      const response = httpServerMock.createResponseFactory();
+      const request = installFromYamlRequest(INSTALLABLE_TEMPLATE.raw, {
+        'demo-connector': 'my-connector-id',
+      });
+
+      await routeHandlers[`POST:${INSTALL_FROM_YAML_PATH}`].handler(mockContext, request, response);
+
+      expect(mockAudit.logWorkflowCreateFailed).toHaveBeenCalledWith(request, creationError);
+      expect(mockAudit.logWorkflowCreated).not.toHaveBeenCalled();
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: { message: expect.stringContaining('yaml creation boom') },
       });
     });
   });

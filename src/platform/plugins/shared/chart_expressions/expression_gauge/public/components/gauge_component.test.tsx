@@ -558,7 +558,7 @@ describe('GaugeComponent', function () {
 
     it('should use custom metric format params, if provided', () => {
       shallowWithIntl(<GaugeComponent {...baseFormattingProps} />);
-      expect(formatService.deserialize).toBeCalledWith(metricFormat);
+      expect(formatService.deserialize).toHaveBeenCalledWith(metricFormat);
     });
 
     it('should use table metric format params, if provided', () => {
@@ -570,7 +570,7 @@ describe('GaugeComponent', function () {
         },
       };
       shallowWithIntl(<GaugeComponent {...customProps} />);
-      expect(formatService.deserialize).toBeCalledWith(tableFormatParams);
+      expect(formatService.deserialize).toHaveBeenCalledWith(tableFormatParams);
     });
 
     it('should use default metric format params, if no others provided', () => {
@@ -590,7 +590,7 @@ describe('GaugeComponent', function () {
       };
 
       shallowWithIntl(<GaugeComponent {...customProps} />);
-      expect(formatService.deserialize).toBeCalledWith(testParams);
+      expect(formatService.deserialize).toHaveBeenCalledWith(testParams);
     });
 
     it('should use fallback if no default metric format and no others provided', () => {
@@ -607,7 +607,7 @@ describe('GaugeComponent', function () {
       };
 
       shallowWithIntl(<GaugeComponent {...customProps} />);
-      expect(formatService.deserialize).toBeCalledWith({
+      expect(formatService.deserialize).toHaveBeenCalledWith({
         id: 'number',
         params: {
           pattern: '0,0.0',

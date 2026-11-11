@@ -86,6 +86,13 @@ export function createGetLogGroupsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getLogsSchema> = {
     id: OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get Log Groups',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: dedent`
       Returns categorized log messages and exceptions from logs and spans within a specified time range.
       

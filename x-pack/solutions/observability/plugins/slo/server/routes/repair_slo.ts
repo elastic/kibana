@@ -8,9 +8,6 @@ import { repairParamsSchema } from '@kbn/slo-schema';
 import { createSloServerRoute } from './utils/create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
 import { RepairSLO } from '../services/repair_slo';
-import { createTransformGenerators } from '../services/transform_generators';
-import { DefaultSummaryTransformManager, DefaultTransformManager } from '../services';
-import { DefaultSummaryTransformGenerator } from '../services/summary_transform_generator/summary_transform_generator';
 
 export const repairSLORoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos/_repair',
@@ -21,32 +18,14 @@ export const repairSLORoute = createSloServerRoute({
     },
   },
   params: repairParamsSchema,
-  handler: async ({ request, response, params, logger, plugins, getScopedClients, config }) => {
+  handler: async ({ request, response, params, logger, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
 
-    const { dataViewsService, scopedClusterClient, spaceId, repository } = await getScopedClients({
-      request,
-      logger,
-    });
-
-    const transformGenerators = createTransformGenerators(
-      spaceId,
-      dataViewsService,
-      config.isServerless,
-      config.isCpsEnabled
-    );
-
-    const transformManager = new DefaultTransformManager(
-      transformGenerators,
-      scopedClusterClient,
-      logger
-    );
-
-    const summaryTransformManager = new DefaultSummaryTransformManager(
-      new DefaultSummaryTransformGenerator(config.isServerless, config.isCpsEnabled),
-      scopedClusterClient,
-      logger
-    );
+    const { scopedClusterClient, repository, transformManager, summaryTransformManager } =
+      await getScopedClients({
+        request,
+        logger,
+      });
 
     const repairSlo = new RepairSLO(
       logger,

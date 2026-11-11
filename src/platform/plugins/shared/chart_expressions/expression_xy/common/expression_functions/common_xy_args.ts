@@ -9,6 +9,7 @@
 
 import {
   EndValues,
+  AreaFillOptions,
   FittingFunctions,
   LEGEND_CONFIG,
   ValueLabelModes,
@@ -53,6 +54,11 @@ export const commonXYArgs: CommonXYFn['args'] = {
   fillOpacity: {
     types: ['number'],
     help: strings.getFillOpacityHelp(),
+  },
+  areaFill: {
+    types: ['string'],
+    options: [...Object.values(AreaFillOptions)],
+    help: strings.getFillHelp(),
   },
   hideEndzones: {
     types: ['boolean'],

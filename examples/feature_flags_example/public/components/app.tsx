@@ -12,11 +12,7 @@ import { EuiHorizontalRule, EuiPageTemplate, EuiTitle, EuiText, EuiLink } from '
 import type { CoreStart, FeatureFlagsStart } from '@kbn/core/public';
 
 import { PLUGIN_NAME } from '../../common';
-import {
-  FeatureFlagsFullList,
-  FeatureFlagsReactiveList,
-  FeatureFlagsStaticList,
-} from './feature_flags_list';
+import { FeatureFlagsHooksList, FeatureFlagsReactiveList } from './feature_flags_list';
 
 interface FeatureFlagsExampleAppDeps {
   featureFlags: FeatureFlagsStart;
@@ -48,20 +44,20 @@ export const FeatureFlagsExampleApp = ({ featureFlags }: FeatureFlagsExampleAppD
               .
             </p>
             <EuiHorizontalRule />
-            <h3>Rendered separately</h3>
+            <h3>Rendered with observables</h3>
             <p>
-              Each list are 2 different components, so only the reactive one is re-rendered when the
-              feature flag is updated and the static one keeps the value until the next refresh.
+              `getBooleanValue$`, `getStringValue$`, and `getNumberValue$` emit the current value,
+              and again when the flag or the evaluation context changes.
             </p>
-            <FeatureFlagsStaticList featureFlags={featureFlags} />
             <FeatureFlagsReactiveList featureFlags={featureFlags} />
             <EuiHorizontalRule />
-            <h3>Rendered together</h3>
+            <h3>Rendered with the React hooks</h3>
             <p>
-              `useObservable` causes a full re-render of the component, updating the{' '}
-              <i>statically</i> evaluated flags as well.
+              `useBooleanValue`, `useStringValue`, and `useNumberValue` subscribe during render. The
+              first render uses the synchronous evaluation, then the component updates when the flag
+              or the evaluation context changes.
             </p>
-            <FeatureFlagsFullList featureFlags={featureFlags} />
+            <FeatureFlagsHooksList featureFlags={featureFlags} />
           </EuiText>
         </EuiPageTemplate.Section>
       </EuiPageTemplate>

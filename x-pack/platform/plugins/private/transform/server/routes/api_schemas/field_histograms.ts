@@ -18,6 +18,8 @@ export const fieldHistogramsRequestSchema = schema.object({
   fields: schema.arrayOf(schema.any(), { maxSize: 1000 }),
   /** Optional runtime fields */
   runtimeMappings: runtimeMappingsSchema,
+  /** Optional project routing for cross-project search */
+  projectRouting: schema.maybe(schema.string({ maxLength: 1000 })),
   /** Number of documents to be collected in the sample processed on each shard, or -1 for no sampling. */
   samplerShardSize: schema.number(),
 });

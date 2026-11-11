@@ -26,6 +26,7 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
 
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
@@ -52,7 +53,9 @@ export type SelfManagePreference = 'native' | 'selfManaged';
 import { SearchConnectorsPageTemplateWrapper } from '../../shared/page_template';
 import { useBreadcrumbs } from '../../../utils/use_breadcrumbs';
 import { useKibanaContextForPlugin } from '../../../utils/use_kibana';
+import { getContentConnectorsUrl } from '../../../utils/get_content_connectors_url';
 import { connectorsBreadcrumbs } from '../connectors';
+import { CONNECTORS_PATH } from '../../routes';
 const StartStep = lazy(() => import('./start_step'));
 
 export const createConnectorBreadcrumbs: ChromeBreadcrumb[] = [
@@ -214,14 +217,24 @@ const CreateConnector: React.FC = () => {
 
   return (
     <SearchConnectorsPageTemplateWrapper
-      pageHeader={{
-        description: i18n.translate('xpack.contentConnectors.createConnector.description', {
-          defaultMessage: 'Extract, transform, index and sync data from a third-party data source.',
-        }),
-        pageTitle: i18n.translate('xpack.contentConnectors.createConnector..title', {
-          defaultMessage: 'Create a connector',
-        }),
-      }}
+      appHeader={
+        <AppHeader
+          title={i18n.translate('xpack.contentConnectors.createConnector..title', {
+            defaultMessage: 'Create a connector',
+          })}
+          description={i18n.translate('xpack.contentConnectors.createConnector.description', {
+            defaultMessage:
+              'Extract, transform, index and sync data from a third-party data source.',
+          })}
+          back={{
+            href: getContentConnectorsUrl(application?.getUrlForApp, CONNECTORS_PATH),
+            label: i18n.translate('xpack.contentConnectors.content.connectors.breadcrumb', {
+              defaultMessage: 'Content Connectors',
+            }),
+          }}
+          spacing="bleed"
+        />
+      }
     >
       <EuiFlexGroup gutterSize="m">
         {/* Col 1 */}

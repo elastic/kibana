@@ -32,31 +32,39 @@ export const FindAnonymizationFieldsRequestQuery = lazySchema(() =>
     /**
      * Fields to return
      */
-    fields: ArrayFromString(z.string()).optional(),
+    fields: ArrayFromString(z.string()).optional().describe('Fields to return'),
     /**
      * Search query
      */
-    filter: z.string().optional(),
+    filter: z.string().optional().describe('Search query'),
     /**
      * Field to sort by
      */
-    sort_field: FindAnonymizationFieldsSortField.optional(),
+    sort_field: FindAnonymizationFieldsSortField.optional().describe('Field to sort by'),
     /**
      * Sort order
      */
-    sort_order: SortOrder.optional(),
+    sort_order: SortOrder.optional().describe('Sort order'),
     /**
      * Page number
      */
-    page: z.coerce.number().int().min(1).optional().default(1),
+    page: z.coerce.number().int().min(1).optional().default(1).describe('Page number'),
     /**
      * AnonymizationFields per page
      */
-    per_page: z.coerce.number().int().min(0).optional().default(20),
+    per_page: z.coerce
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .default(20)
+      .describe('AnonymizationFields per page'),
     /**
      * If true, additionally fetch all anonymization fields, otherwise fetch only the provided page
      */
-    all_data: BooleanFromString.optional(),
+    all_data: BooleanFromString.optional().describe(
+      'If true, additionally fetch all anonymization fields, otherwise fetch only the provided page'
+    ),
   })
 );
 export type FindAnonymizationFieldsRequestQuery = z.infer<

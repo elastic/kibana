@@ -5,50 +5,25 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
-import {
-  EuiAvatar,
-  EuiComment,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingElastic,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import React, { useEffect, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useDispatch, useSelector } from 'react-redux-v7';
-import { FormattedRelative } from '@kbn/i18n-react';
+import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
-import type { TimelineModel } from '../../../../..';
-import { SaveTimelineCallout } from '../../../notes/save_timeline';
-import { AddNote } from '../../../../../notes/components/add_note';
-import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import {
-  NOTES_LOADING_TEST_ID,
-  TIMELINE_DESCRIPTION_COMMENT_TEST_ID,
-} from '../../../../../notes/components/test_ids';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
-import { ADDED_A_DESCRIPTION } from '../../../open_timeline/note_previews/translations';
-import { defaultToEmptyTag, getEmptyValue } from '../../../../../common/components/empty_value';
-import { selectTimelineById } from '../../../../store/selectors';
+import { selectIsSuperTimeline } from '../../../../store/selectors';
 import {
-  fetchNotesBySavedObjectIds,
-  makeSelectNotesBySavedObjectId,
   ReqStatus,
   selectFetchNotesBySavedObjectIdsError,
   selectFetchNotesBySavedObjectIdsStatus,
 } from '../../../../../notes';
-import type { Note } from '../../../../../../common/api/timeline';
-import { TimelineStatusEnum } from '../../../../../../common/api/timeline';
-import { NotesList } from '../../../../../notes/components/notes_list';
-import { Participants } from '../../../notes/participants';
 import { NOTES } from '../../../notes/translations';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { getScrollToTopSelector } from '../selectors';
 import { useScrollToTop } from '../../../../../common/components/scroll_to_top';
 import type { State } from '../../../../../common/store';
+import { SuperTimelineNotesTab } from './super_timeline_notes_tab';
+import { RegularNotesTab } from './regular_notes_tab';
 
 export const FETCH_NOTES_ERROR = i18n.translate(
   'xpack.securitySolution.notes.fetchNotesErrorLabel',
@@ -69,54 +44,20 @@ interface NotesTabContentProps {
 
 /**
  * Renders the notes tab content.
- * The component fetches the notes for the timeline and renders:
- * - the timeline description
- * - the notes list
- * - the participants list
- * - the markdown to create a new note and the add note button
+ * Dispatches to SuperTimelineNotesTab or RegularNotesTab based on whether
+ * the timeline is a super timeline.
  */
 const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ timelineId }) => {
   const { addError: addErrorToast } = useAppToasts();
-  const dispatch = useDispatch();
-
-  const { notesPrivileges } = useUserPrivileges();
-  const canCreateNotes = notesPrivileges.crud;
 
   const getScrollToTop = useMemo(() => getScrollToTopSelector(), []);
   const scrollToTop = useShallowEqualSelector((state) => getScrollToTop(state, timelineId));
   useScrollToTop('#scrollableNotes', !!scrollToTop);
 
-  const timeline: TimelineModel = useSelector((state: State) =>
-    selectTimelineById(state, timelineId)
-  );
-  const timelineSavedObjectId = useMemo(
-    () => timeline.savedObjectId ?? '',
-    [timeline.savedObjectId]
-  );
-  const isTimelineSaved: boolean = useMemo(
-    () => timeline.status === TimelineStatusEnum.active,
-    [timeline.status]
-  );
-
-  const fetchNotes = useCallback(
-    () => dispatch(fetchNotesBySavedObjectIds({ savedObjectIds: [timelineSavedObjectId] })),
-    [dispatch, timelineSavedObjectId]
-  );
-
-  useEffect(() => {
-    if (isTimelineSaved) {
-      fetchNotes();
-    }
-  }, [fetchNotes, isTimelineSaved]);
-  const selectNotesBySavedObjectId = useMemo(() => makeSelectNotesBySavedObjectId(), []);
-
-  const notes: Note[] = useSelector((state: State) =>
-    selectNotesBySavedObjectId(state, timelineSavedObjectId)
-  );
+  const isSuperTimeline = useSelector((state: State) => selectIsSuperTimeline(state, timelineId));
   const fetchStatus = useSelector((state: State) => selectFetchNotesBySavedObjectIdsStatus(state));
   const fetchError = useSelector((state: State) => selectFetchNotesBySavedObjectIdsError(state));
 
-  // show a toast if the fetch notes call fails
   useEffect(() => {
     if (fetchStatus === ReqStatus.Failed && fetchError) {
       addErrorToast(null, {
@@ -125,83 +66,34 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
     }
   }, [addErrorToast, fetchError, fetchStatus]);
 
-  // if timeline was saved with a description, we show it at the very top of the notes tab
-  const timelineDescription = useMemo(() => {
-    if (!timeline?.description) {
-      return null;
-    }
-
-    return (
-      <>
-        <EuiComment
-          key={'note-preview-description'}
-          username={defaultToEmptyTag(timeline.updatedBy)}
-          timestamp={
-            <>
-              {timeline.updated ? (
-                <FormattedRelative data-test-subj="updated" value={new Date(timeline.updated)} />
-              ) : (
-                getEmptyValue()
-              )}
-            </>
-          }
-          event={ADDED_A_DESCRIPTION}
-          timelineAvatar={<EuiAvatar size="l" name={timeline.updatedBy || '?'} />}
-          data-test-subj={TIMELINE_DESCRIPTION_COMMENT_TEST_ID}
-        >
-          <EuiText size="s">{timeline.description}</EuiText>
-        </EuiComment>
-        <EuiSpacer />
-      </>
-    );
-  }, [timeline.description, timeline.updated, timeline.updatedBy]);
-
   return (
     <EuiPanel
       css={css`
         height: 100%;
         overflow: auto;
+        /* EUI's hasShadow overlays an ::after border; with overflow:auto it cuts through content */
+        &::after {
+          display: none;
+        }
       `}
     >
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup
+        direction="column"
+        css={css`
+          height: 100%;
+        `}
+      >
         <EuiFlexItem grow={false}>
           <EuiTitle>
             <h3>{NOTES}</h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup data-test-subj={'new-notes-screen'}>
-            <EuiFlexItem>
-              {timelineDescription}
-              {fetchStatus === ReqStatus.Loading && (
-                <EuiLoadingElastic data-test-subj={NOTES_LOADING_TEST_ID} size="xxl" />
-              )}
-              {isTimelineSaved && fetchStatus === ReqStatus.Succeeded && notes.length === 0 ? (
-                <EuiFlexGroup justifyContent="center">
-                  <EuiFlexItem grow={false}>
-                    <p>{NO_NOTES}</p>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ) : (
-                <NotesList notes={notes} options={{ hideTimelineIcon: true }} />
-              )}
-              {canCreateNotes && (
-                <>
-                  <EuiSpacer />
-                  <AddNote timelineId={timeline.savedObjectId} disableButton={!isTimelineSaved}>
-                    {!isTimelineSaved && <SaveTimelineCallout />}
-                  </AddNote>
-                </>
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem
-              css={css`
-                max-width: 350px;
-              `}
-            >
-              <Participants notes={notes} timelineCreatedBy={timeline.createdBy} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          {isSuperTimeline ? (
+            <SuperTimelineNotesTab timelineId={timelineId} />
+          ) : (
+            <RegularNotesTab timelineId={timelineId} />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

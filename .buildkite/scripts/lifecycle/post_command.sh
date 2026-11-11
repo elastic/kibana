@@ -2,9 +2,14 @@
 
 set -euo pipefail
 
-echo '--- Log out of gcloud'
-./.buildkite/scripts/common/activate_service_account.sh --unset-impersonation || echo "Failed to unset impersonation"
-./.buildkite/scripts/common/activate_service_account.sh --logout-gcloud || echo "Failed to log out of gcloud"
+# Agents from the gobld queue run a single job on a VM that's deleted afterwards, so logging out of
+# gcloud there only costs time (~3 s). Other agents, such as long-lived bare-metal workers, still
+# log out so the next job doesn't inherit this job's credentials.
+if [[ "${BUILDKITE_AGENT_META_DATA_QUEUE:-}" != "gobld" ]]; then
+  echo '--- Log out of gcloud'
+  ./.buildkite/scripts/common/activate_service_account.sh --unset-impersonation || echo "Failed to unset impersonation"
+  ./.buildkite/scripts/common/activate_service_account.sh --logout-gcloud || echo "Failed to log out of gcloud"
+fi
 
 IS_TEST_EXECUTION_STEP="$(buildkite-agent meta-data get "${BUILDKITE_JOB_ID}_is_test_execution_step" --default '')"
 
@@ -16,8 +21,6 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
     '.scout/reports/scout-playwright-test-failures-*/**/*'
     '.scout/reports/scout-playwright-test-failures-*/scout-failures-*.ndjson'
     'target/junit/**/*'
-    'target/kibana-coverage/jest/**/*'
-    'target/kibana-coverage/functional/**/*'
     'target/kibana-*'
     'target/kibana-security-solution/**/*.png'
     'target/kibana-security-solution/**/management/**/*.mp4'
@@ -26,6 +29,7 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
     'target/kibana-fleet/**/*.png'
     'target/test-metrics/*'
     'target/test-suites-ci-plan.json'
+    'target/cypress-results/**/*.ndjson'
     'test/**/screenshots/diff/*.png'
     'test/**/screenshots/failure/*.png'
     'test/**/screenshots/session/*.png'
@@ -82,7 +86,7 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
 
   if [[ -d 'target/test_failures' ]]; then
     buildkite-agent artifact upload 'target/test_failures/**/*'
-    ts-node .buildkite/scripts/lifecycle/annotate_test_failures.ts
+    node .buildkite/scripts/lifecycle/annotate_test_failures.ts
   fi
 
   if [[ -d 'target/agent_diagnostics' ]]; then

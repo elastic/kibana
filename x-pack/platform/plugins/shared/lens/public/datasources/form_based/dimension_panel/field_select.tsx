@@ -199,20 +199,25 @@ export const FieldSelect: FC<FieldSelectProps> = ({
     showTimeSeriesDimensions,
   ]);
 
+  const selectedFieldLabel = selectedField
+    ? currentIndexPattern.getFieldByName(selectedField)?.displayName ?? selectedField
+    : undefined;
+
+  const activeField: EuiComboBoxOptionOption<FieldChoiceWithOperationType> | undefined =
+    selectedOperationType && selectedField
+      ? {
+          label: selectedFieldLabel ?? selectedField,
+          value: {
+            type: 'field',
+            field: selectedField,
+            operationType: selectedOperationType,
+          },
+        }
+      : undefined;
+
   return (
     <FieldPicker<FieldChoiceWithOperationType>
-      activeField={
-        (selectedOperationType && selectedField
-          ? {
-              label:
-                (selectedOperationType &&
-                  selectedField &&
-                  currentIndexPattern.getFieldByName(selectedField)?.displayName) ??
-                selectedField,
-              value: { type: 'field', field: selectedField },
-            }
-          : undefined) as unknown as VisFieldOption<FieldChoiceWithOperationType>
-      }
+      activeField={activeField}
       options={memoizedFieldOptions as Array<VisFieldOption<FieldChoiceWithOperationType>>}
       onChoose={(choice) => {
         if (choice && choice.field !== selectedField) {
@@ -222,6 +227,9 @@ export const FieldSelect: FC<FieldSelectProps> = ({
       onDelete={onDeleteColumn}
       fieldIsInvalid={Boolean(incompleteOperation || fieldIsInvalid)}
       data-test-subj={dataTestSub ?? 'indexPattern-dimension-field'}
+      // Functional tests wait on the committed combo label, not the input value
+      // (setElement types the filter before the option click lands).
+      data-selected-field={selectedFieldLabel}
       aria-describedby={ariaDescribedby}
       aria-label={ariaLabel}
     />

@@ -8,9 +8,14 @@
  */
 
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import type {
+  IRouter,
+  StartServicesAccessor,
+  SavedObjectsClientContract,
+  ElasticsearchClient,
+} from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import type { DataViewsService } from '../../../common';
+import { hasUserDataView as hasUserDataViewCheck } from '../../has_user_data_view';
 import { handleErrors } from './util/handle_errors';
 import type {
   DataViewsServerPluginStartDependencies,
@@ -19,25 +24,27 @@ import type {
 import { SERVICE_PATH, SERVICE_PATH_LEGACY } from '../../constants';
 
 interface HasUserDataViewArgs {
-  dataViewsService: DataViewsService;
+  soClient: SavedObjectsClientContract;
+  esClient: ElasticsearchClient;
   usageCollection?: UsageCounter;
   counterName: string;
 }
 
 export const hasUserDataView = async ({
-  dataViewsService,
+  soClient,
+  esClient,
   usageCollection,
   counterName,
 }: HasUserDataViewArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  return dataViewsService.hasUserDataView();
+  return hasUserDataViewCheck({ esClient, soClient });
 };
 
 const hasUserDataViewRouteFactory =
   (path: string) =>
   (
     router: IRouter,
-    getStartServices: StartServicesAccessor<
+    _getStartServices: StartServicesAccessor<
       DataViewsServerPluginStartDependencies,
       DataViewsServerPluginStart
     >,
@@ -74,16 +81,10 @@ const hasUserDataViewRouteFactory =
             const core = await ctx.core;
             const savedObjectsClient = core.savedObjects.client;
             const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-            const [, , { dataViewsServiceFactory }] = await getStartServices();
-
-            const dataViewsService = await dataViewsServiceFactory(
-              savedObjectsClient,
-              elasticsearchClient,
-              req
-            );
 
             const result = await hasUserDataView({
-              dataViewsService,
+              soClient: savedObjectsClient,
+              esClient: elasticsearchClient,
               usageCollection,
               counterName: `${req.route.method} ${path}`,
             });

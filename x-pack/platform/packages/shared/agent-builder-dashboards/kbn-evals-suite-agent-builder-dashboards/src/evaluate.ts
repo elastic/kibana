@@ -6,24 +6,29 @@
  */
 
 import { evaluate as evalsBase } from '@kbn/evals';
-import { withPhoenixExecutor } from '@kbn/evals-phoenix-executor';
-import { DashboardAgentEvaluationChatClient } from './chat_client';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import type { EvaluateDataset } from './types';
+import { createEvaluateDataset } from './evaluate_dataset';
 
-const base = withPhoenixExecutor(evalsBase);
-
-export const evaluate = base.extend<
+export const evaluate = evalsBase.extend<
   {},
   {
-    chatClient: DashboardAgentEvaluationChatClient;
+    evaluateDataset: EvaluateDataset;
   }
 >({
-  chatClient: [
-    async ({ fetch, log, connector }, use) => {
-      const chatClient = new DashboardAgentEvaluationChatClient(fetch, log, connector.id);
-      await use(chatClient);
+  evaluateDataset: [
+    async ({ agentBuilderClient, evaluators, executorClient, esClient, log }, use) => {
+      await use(
+        createEvaluateDataset({
+          agentBuilderClient,
+          agentId: agentBuilderDefaultAgentId,
+          evaluators,
+          executorClient,
+          esClient,
+          log,
+        })
+      );
     },
-    {
-      scope: 'worker',
-    },
+    { scope: 'worker' },
   ],
 });

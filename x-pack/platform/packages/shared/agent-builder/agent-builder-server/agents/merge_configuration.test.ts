@@ -21,6 +21,7 @@ describe('mergeAgentConfiguration', () => {
     workflow_ids: ['workflow-a'],
     plugin_ids: ['plugin-a'],
     connector_ids: ['connector-a'],
+    ai_indices: ['ai-index-a'],
   };
 
   describe('identity (empty base)', () => {
@@ -93,15 +94,58 @@ describe('mergeAgentConfiguration', () => {
     });
   });
 
-  describe('id lists (skill_ids / plugin_ids / workflow_ids / connector_ids)', () => {
+  describe('post_execution_workflow_ids', () => {
+    it('unions base-first with deduplication when both sides define ids', () => {
+      const merged = mergeAgentConfiguration(
+        { post_execution_workflow_ids: ['wf-type-1', 'wf-shared'] },
+        { tools: [], post_execution_workflow_ids: ['wf-shared', 'wf-agent-1'] }
+      );
+      expect(merged.post_execution_workflow_ids).toEqual(['wf-type-1', 'wf-shared', 'wf-agent-1']);
+    });
+
+    it('treats an undefined delta as "add nothing" when the base sets ids', () => {
+      const merged = mergeAgentConfiguration(
+        { post_execution_workflow_ids: ['wf-type-1'] },
+        { tools: [] }
+      );
+      expect(merged.post_execution_workflow_ids).toEqual(['wf-type-1']);
+    });
+
+    it('keeps post_execution_workflow_ids undefined when the base leaves them unset', () => {
+      const merged = mergeAgentConfiguration(
+        {},
+        { tools: [], post_execution_workflow_ids: ['wf-agent-1'] }
+      );
+      expect(merged.post_execution_workflow_ids).toEqual(['wf-agent-1']);
+    });
+
+    it('keeps post_execution_workflow_ids undefined when neither side sets them', () => {
+      const merged = mergeAgentConfiguration({ skill_ids: ['s1'] }, { tools: [] });
+      expect(merged.post_execution_workflow_ids).toBeUndefined();
+    });
+  });
+
+  describe('id lists (skill_ids / plugin_ids / workflow_ids / connector_ids / ai_indices)', () => {
     it('unions base-first with deduplication', () => {
       const merged = mergeAgentConfiguration(
-        { skill_ids: ['s1', 's2'], plugin_ids: ['p1'], workflow_ids: ['w1'] },
-        { tools: [], skill_ids: ['s2', 's3'], plugin_ids: ['p2'], workflow_ids: ['w1'] }
+        {
+          skill_ids: ['s1', 's2'],
+          plugin_ids: ['p1'],
+          workflow_ids: ['w1'],
+          ai_indices: ['ai-1', 'ai-2'],
+        },
+        {
+          tools: [],
+          skill_ids: ['s2', 's3'],
+          plugin_ids: ['p2'],
+          workflow_ids: ['w1'],
+          ai_indices: ['ai-2', 'ai-3'],
+        }
       );
       expect(merged.skill_ids).toEqual(['s1', 's2', 's3']);
       expect(merged.plugin_ids).toEqual(['p1', 'p2']);
       expect(merged.workflow_ids).toEqual(['w1']);
+      expect(merged.ai_indices).toEqual(['ai-1', 'ai-2', 'ai-3']);
     });
 
     it('is deterministic across calls', () => {
@@ -141,6 +185,38 @@ describe('mergeAgentConfiguration', () => {
     });
   });
 
+  describe('ai_indices', () => {
+    it('treats an undefined delta as "add nothing" when the base sets ai_indices', () => {
+      const merged = mergeAgentConfiguration({ ai_indices: ['ai-1'] }, { tools: [] });
+      expect(merged.ai_indices).toEqual(['ai-1']);
+    });
+
+    it('base [] with no delta additions yields [], not undefined', () => {
+      const merged = mergeAgentConfiguration({ ai_indices: [] }, { tools: [] });
+      expect(merged.ai_indices).toEqual([]);
+    });
+
+    it("keeps the agent's ai_indices when the base leaves them unset", () => {
+      const merged = mergeAgentConfiguration(
+        { skill_ids: ['s1'], instructions: 'base' },
+        { tools: [], ai_indices: ['ai-index-1'] }
+      );
+      expect(merged.ai_indices).toEqual(['ai-index-1']);
+    });
+
+    it('keeps ai_indices undefined when neither side sets them', () => {
+      expect(
+        mergeAgentConfiguration({ skill_ids: ['s1'] }, { tools: [] }).ai_indices
+      ).toBeUndefined();
+    });
+
+    it('is deterministic across calls', () => {
+      const base: AgentBaseConfiguration = { ai_indices: ['ai-1', 'ai-2'] };
+      const delta: AgentConfiguration = { tools: [], ai_indices: ['ai-3', 'ai-2'] };
+      expect(mergeAgentConfiguration(base, delta)).toEqual(mergeAgentConfiguration(base, delta));
+    });
+  });
+
   describe('enable_elastic_capabilities (scalar override)', () => {
     it('uses the base value when the delta leaves it unset', () => {
       expect(
@@ -174,6 +250,35 @@ describe('mergeAgentConfiguration', () => {
         mergeAgentConfiguration({ enable_elastic_capabilities: false }, deltaWithInjectedDefault)
           .enable_elastic_capabilities
       ).toBe(true);
+    });
+  });
+
+  describe('capabilities (per-key merge)', () => {
+    const off = { attachment_tools: { enabled: false } };
+    const on = { attachment_tools: { enabled: true } };
+
+    it('uses the base value when the agent leaves it unset', () => {
+      expect(mergeAgentConfiguration({ capabilities: off }, { tools: [] }).capabilities).toEqual(
+        off
+      );
+    });
+
+    it("keeps the agent's value when the base leaves it unset", () => {
+      expect(mergeAgentConfiguration({}, { tools: [], capabilities: off }).capabilities).toEqual(
+        off
+      );
+    });
+
+    it("lets the agent's value win for the same key", () => {
+      expect(
+        mergeAgentConfiguration({ capabilities: off }, { tools: [], capabilities: on }).capabilities
+      ).toEqual(on);
+    });
+
+    it('leaves capabilities undefined when neither side sets it', () => {
+      expect(mergeAgentConfiguration({ tools: [] }, { tools: [] })).not.toHaveProperty(
+        'capabilities'
+      );
     });
   });
 

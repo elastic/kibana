@@ -10,7 +10,7 @@ import { EuiAvatar, EuiComment, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserAvatar } from '@kbn/user-profile-components';
-import type { EpisodeActionHistoryEntry } from '../../../queries/episode_actions_history_query';
+import type { EpisodeActionHistoryEntry } from '@kbn/alerting-v2-common-queries';
 import { ACTION_ICON } from './entries';
 import { AlertEpisodeTimelineActionEvent } from './timeline_action_event';
 import { AlertEpisodeTimelineRelativeTimestamp } from './timeline_relative_timestamp';
@@ -25,10 +25,11 @@ export const AlertEpisodeTimelineActionComment = ({
   entry,
   profilesMap,
 }: AlertEpisodeTimelineActionCommentProps) => {
-  const profile = entry.actor ? profilesMap.get(entry.actor) : undefined;
+  const actorUid = entry.actor.profile_uid;
+  const profile = actorUid ? profilesMap.get(actorUid) : undefined;
   const assigneeProfile = entry.assignee_uid ? profilesMap.get(entry.assignee_uid) : undefined;
   const displayName =
-    profile?.user.full_name ?? profile?.user.username ?? entry.actor ?? i18n.SYSTEM_LABEL;
+    profile?.user.full_name ?? profile?.user.username ?? actorUid ?? i18n.SYSTEM_LABEL;
   const username = profile ? (
     <EuiFlexGroup
       gutterSize="xs"

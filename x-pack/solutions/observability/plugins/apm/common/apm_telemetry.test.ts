@@ -48,7 +48,7 @@ describe('APM telemetry helpers', () => {
   describe('mergeApmTelemetryMapping', () => {
     describe('with an invalid mapping', () => {
       it('throws an error', () => {
-        expect(() => mergeApmTelemetryMapping({})).toThrowError();
+        expect(() => mergeApmTelemetryMapping({})).toThrow();
       });
     });
 

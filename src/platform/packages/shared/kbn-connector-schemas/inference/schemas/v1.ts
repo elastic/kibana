@@ -167,6 +167,22 @@ export const UnifiedChatCompleteParamsSchema = lazySchema(() =>
            */
           tools: z.array(AITool).optional(),
           /**
+           * Reasoning configuration for the Elasticsearch unified chat completion API.
+           * Mapped by the inference service to the provider-specific reasoning fields.
+           *
+           * Prefer `effort: 'none'` when function tools are present on OpenAI Chat Completions
+           * reasoning models, which reject tools unless reasoning effort is none.
+           */
+          reasoning: z
+            .object({
+              effort: z.enum(['none', 'minimal', 'low', 'medium', 'high', 'xhigh']).optional(),
+              enabled: z.boolean().optional(),
+              summary: z.enum(['auto', 'concise', 'detailed']).optional(),
+              exclude: z.boolean().optional(),
+            })
+            .strict()
+            .optional(),
+          /**
            * An alternative to sampling with temperature, called nucleus sampling, where the
            * model considers the results of the tokens with top_p probability mass. So 0.1
            * means only the tokens comprising the top 10% probability mass are considered.

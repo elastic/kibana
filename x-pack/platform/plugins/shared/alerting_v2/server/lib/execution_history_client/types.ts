@@ -5,14 +5,34 @@
  * 2.0.
  */
 
-import type { GetRuleExecutionsResponse } from '@kbn/alerting-v2-schemas';
-import type { FindRuleExecutionsQuery } from '../services/event_log_service/types';
+import type {
+  FindRuleExecutionsQuery,
+  PaginatedResult,
+  RuleExecution,
+} from '../services/event_log_service/types';
 
 /**
  * Client-side arguments for {@link ExecutionHistoryClientContract.getRuleExecutions}.
  */
-export type GetRuleExecutionsArgs = Omit<FindRuleExecutionsQuery, 'spaceId'>;
+export type ListRuleExecutionsArgs = Omit<FindRuleExecutionsQuery, 'spaceId'> & {
+  /** Free-text search resolved to rule ids by the client; the event log only ever sees ids. */
+  search?: string;
+};
+
+export interface RuleSearchMatches {
+  ruleCount: number;
+  isTruncated: boolean;
+}
+
+/**
+ * Internal (camelCase) result of a rule-execution read. The route maps it to
+ * the snake_case API contract via `toListRuleExecutionsResponse`.
+ */
+export type ListRuleExecutionsResult = PaginatedResult<RuleExecution> & {
+  /** Match counts for the active search, `null` when no search was provided. */
+  searchMatches: RuleSearchMatches | null;
+};
 
 export interface ExecutionHistoryClientContract {
-  getRuleExecutions(args: GetRuleExecutionsArgs): Promise<GetRuleExecutionsResponse>;
+  listRuleExecutions(args: ListRuleExecutionsArgs): Promise<ListRuleExecutionsResult>;
 }

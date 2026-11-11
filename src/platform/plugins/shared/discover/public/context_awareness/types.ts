@@ -8,6 +8,9 @@
  */
 
 import type { DataView, DataViewField, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataSource } from '@kbn/data-source';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import type {
   CustomCellRenderer,
   DataGridDensity,
@@ -19,7 +22,7 @@ import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { AppMenuRegistry, DataTableRecord } from '@kbn/discover-utils';
 import type { CellAction, CellActionExecutionContext, CellActionsData } from '@kbn/cell-actions';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
 import type { OmitIndexSignature } from 'type-fest';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type {
@@ -107,6 +110,10 @@ export interface OpenInNewTabParams {
    * The time range to open in the new tab
    */
   timeRange?: TimeRange;
+  /**
+   * Whether the new tab should use approximate ES|QL execution
+   */
+  esqlApproximation?: boolean;
 }
 
 /**
@@ -184,6 +191,11 @@ export interface RowIndicatorExtensionParams {
    * The current data view
    */
   dataView: DataView;
+  /**
+   * The current data source. Prefer this over `dataView` for column presence
+   * (ES|QL shims may only expose a time field on the DataView).
+   */
+  dataSource?: DataSource;
 }
 
 /**
@@ -191,7 +203,8 @@ export interface RowIndicatorExtensionParams {
  */
 export interface DefaultAppStateColumn {
   /**
-   * The field name of the column
+   * The field name of the column.
+   * Use `'_source'` for the Summary column - it is always treated as a valid profile column.
    */
   name: string;
   /**
@@ -215,7 +228,9 @@ export interface DefaultAppStateExtensionParams {
  */
 export interface DefaultAppStateExtension {
   /**
-   * The columns to display in the data grid
+   * The columns to display in the data grid.
+   * Include `{ name: '_source' }` (usually last; omit `width` for auto-width) to show Summary
+   * alongside other default fields. Users can still pin or unpin Summary from the Columns popover.
    */
   columns?: DefaultAppStateColumn[];
   /**
@@ -264,6 +279,33 @@ export interface ModifiedVisAttributesExtensionParams {
 }
 
 /**
+ * Grid search result context for cell renderers that issue follow-up searches
+ * (e.g. change-point Summary sparklines). Independent of the Discover chart section.
+ */
+export interface CellRenderersSearchContext {
+  query?: Query | AggregateQuery;
+  /**
+   * Dashboard / parent KQL or lucene query, distinct from the saved ES|QL `query`.
+   */
+  filterQuery?: Query | AggregateQuery;
+  table?: Datatable;
+  filters?: Filter[];
+  timeRange?: TimeRange;
+  esqlVariables?: ESQLControlVariable[];
+  searchSessionId?: string;
+  projectRouting?: ProjectRouting;
+  isApproximate?: boolean;
+  /**
+   * Stable per completed grid-result identity; changes on refresh so series caches invalidate.
+   */
+  requestId?: number;
+  /**
+   * Lifetime of the grid search that produced this context.
+   */
+  abortSignal?: AbortSignal;
+}
+
+/**
  * Parameters passed to the cell renderers extension
  */
 export interface CellRenderersExtensionParams {
@@ -279,6 +321,14 @@ export interface CellRenderersExtensionParams {
    * The current row height mode applied to the data grid component
    */
   rowHeight: number | undefined;
+  /**
+   * Completed (or last) grid search inputs used by follow-up cell fetches.
+   */
+  searchContext?: CellRenderersSearchContext;
+  /**
+   * True while the grid's primary search is in flight.
+   */
+  isDataLoading?: boolean;
 }
 
 /**

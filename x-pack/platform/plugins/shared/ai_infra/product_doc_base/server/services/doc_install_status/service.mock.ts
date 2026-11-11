@@ -12,6 +12,7 @@ export type InstallClientMock = jest.Mocked<ProductDocInstallClient>;
 const createInstallClientMock = (): InstallClientMock => {
   return {
     getInstallationStatus: jest.fn(),
+    getInstallationStatusOrThrow: jest.fn(),
     setInstallationStarted: jest.fn(),
     setInstallationSuccessful: jest.fn(),
     setInstallationFailed: jest.fn(),

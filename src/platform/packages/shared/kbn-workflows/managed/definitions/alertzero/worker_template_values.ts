@@ -1,0 +1,164 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { ManagedWorkflowTemplateValues } from '../../types';
+
+export interface CommonWorkerTemplateValues extends ManagedWorkflowTemplateValues {
+  settingsVersion: number;
+  autonomyLevel: 'manual' | 'assisted' | 'supervised';
+  /** Absent until an admin selects an account. Omitted from YAML rather than written empty. */
+  serviceAccountId?: string;
+}
+
+const RUN_AS_LINE_TOKEN = '  __WORKER_RUN_AS_LINE__:\n';
+
+/**
+ * Workers enabled before a service account was required have no account id stored. Upgrade and
+ * boot re-render their YAML from those stored values, and they must stay valid so they keep
+ * running until an admin selects an account. Alert Triage, Rule Tuning, and Rule Coverage have
+ * no other settings key, so omitting `run_as` would leave a bare `settings:`. That parses as
+ * null and fails workflow validation, which would mark the worker unavailable. `settings: {}`
+ * is valid because every settings field is optional.
+ */
+const EMPTY_ONLY_RUN_AS_SETTINGS = /settings:\n {2}__WORKER_RUN_AS_LINE__:\n(?=\S|$)/g;
+
+const renderRunAs = (yaml: string, serviceAccountId: string | undefined): string => {
+  if (serviceAccountId) {
+    return yaml.replaceAll(RUN_AS_LINE_TOKEN, `  run_as: ${JSON.stringify(serviceAccountId)}\n`);
+  }
+  return yaml
+    .replaceAll(EMPTY_ONLY_RUN_AS_SETTINGS, 'settings: {}\n')
+    .replaceAll(RUN_AS_LINE_TOKEN, '');
+};
+
+export const renderCommonWorkerYaml = (
+  yaml: string,
+  { settingsVersion, autonomyLevel, serviceAccountId }: CommonWorkerTemplateValues
+): string =>
+  renderRunAs(yaml, serviceAccountId)
+    .replaceAll('__WORKER_SETTINGS_VERSION__', String(settingsVersion))
+    .replaceAll('__WORKER_AUTONOMY_LEVEL__', autonomyLevel);
+
+/**
+ * Values for the subset of Workers that own a scheduled trigger. Kept out of
+ * CommonWorkerTemplateValues because alert- and event-driven Workers have no schedule at all.
+ */
+export interface ScheduledWorkerTemplateValues extends CommonWorkerTemplateValues {
+  scheduleInterval: string;
+}
+
+export const renderScheduledWorkerYaml = (
+  yaml: string,
+  values: ScheduledWorkerTemplateValues
+): string =>
+  renderCommonWorkerYaml(yaml, values).replaceAll(
+    '__WORKER_SCHEDULE_INTERVAL__',
+    values.scheduleInterval
+  );
+
+/**
+ * Worker-specific settings are stored under `extras`, mirroring the Worker settings API, so a
+ * settings save re-renders YAML and the per-space Worker can pass them to the sweep. The shape is
+ * declared once, in `RuleTuningWorkerExtras` in `@kbn/alertzero-common`; this mirrors it for typing.
+ */
+export interface RuleTuningWorkerTemplateValues extends ScheduledWorkerTemplateValues {
+  extras: {
+    analysisWindowDays: number;
+    fpCountThreshold: number;
+    fpRateThresholdPct: number;
+  };
+}
+
+export const renderRuleTuningWorkerYaml = (
+  yaml: string,
+  values: RuleTuningWorkerTemplateValues
+): string =>
+  // JSON is a YAML flow mapping, so the whole object lands under consts in one substitution.
+  renderScheduledWorkerYaml(yaml, values).replaceAll(
+    '__WORKER_EXTRAS__',
+    JSON.stringify(values.extras)
+  );
+
+export interface AlertTriageWorkerTemplateValues extends ScheduledWorkerTemplateValues {
+  extras: {
+    autoCloseConfidenceScoreMinThreshold: number;
+    budgetPerHour: number;
+    lookbackHours: number;
+    minSeverity: 'low' | 'medium' | 'high' | 'critical';
+    excludeBuildingBlocks: boolean;
+    excludedRuleTags: readonly string[];
+  };
+}
+
+const SCHEDULE_INTERVAL_PATTERN = /^([1-9][0-9]*)([mhd])$/;
+const MINUTES_PER_UNIT = { m: 1, h: 60, d: 1440 } as const;
+
+/** Minutes in a schedule interval such as `15m`, `2h` or `1d`, the units the settings allow. */
+export const scheduleIntervalToMinutes = (interval: string): number => {
+  const match = SCHEDULE_INTERVAL_PATTERN.exec(interval);
+  if (!match) {
+    throw new Error(`Unsupported schedule interval: ${interval}`);
+  }
+  return Number(match[1]) * MINUTES_PER_UNIT[match[2] as keyof typeof MINUTES_PER_UNIT];
+};
+
+/** One day's retrieval. Also the hard ceiling: a longer interval does not raise it. */
+const ATTACK_DISCOVERY_ALERTS_PER_DAY = 10_000;
+/** One batch. Shorter intervals stay at a single batch rather than a partial one. */
+const ATTACK_DISCOVERY_MIN_ALERTS = 100;
+const MINUTES_PER_DAY = 24 * 60;
+
+/**
+ * Alerts one Attack Discovery run may retrieve, prorated to its schedule interval.
+ * 10,000 per 24h, at least 100, and never more than 10,000.
+ */
+export const attackDiscoveryMaxAlerts = (interval: string): number => {
+  const prorated = Math.floor(
+    (ATTACK_DISCOVERY_ALERTS_PER_DAY * scheduleIntervalToMinutes(interval)) / MINUTES_PER_DAY
+  );
+  return Math.min(ATTACK_DISCOVERY_ALERTS_PER_DAY, Math.max(ATTACK_DISCOVERY_MIN_ALERTS, prorated));
+};
+
+export const renderAttackDiscoveryWorkerYaml = (
+  yaml: string,
+  values: ScheduledWorkerTemplateValues
+): string =>
+  renderScheduledWorkerYaml(yaml, values).replaceAll(
+    '__WORKER_MAX_ALERTS__',
+    String(attackDiscoveryMaxAlerts(values.scheduleInterval))
+  );
+
+export const renderAlertTriageWorkerYaml = (
+  yaml: string,
+  values: AlertTriageWorkerTemplateValues
+): string =>
+  renderScheduledWorkerYaml(yaml, values)
+    // JSON is a YAML flow mapping, so the whole object lands under consts in one substitution. A
+    // function replacement keeps `$` sequences in free-form rule tags (`$$`, `$&`, `$'`) literal.
+    .replaceAll('__WORKER_EXTRAS__', () => JSON.stringify(values.extras))
+    .replaceAll(
+      '__WORKER_SCHEDULE_INTERVAL_MINUTES__',
+      String(scheduleIntervalToMinutes(values.scheduleInterval))
+    );
+
+export interface RuleCoverageWorkerTemplateValues extends ScheduledWorkerTemplateValues {
+  extras: {
+    lookbackDays: number;
+    maxGapsPerRun: number;
+  };
+}
+
+export const renderRuleCoverageWorkerYaml = (
+  yaml: string,
+  values: RuleCoverageWorkerTemplateValues
+): string =>
+  renderScheduledWorkerYaml(yaml, values).replaceAll(
+    '__WORKER_EXTRAS__',
+    JSON.stringify(values.extras)
+  );

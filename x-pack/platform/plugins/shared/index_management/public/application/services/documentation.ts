@@ -21,7 +21,6 @@ class DocumentationService {
   private indexSettings: string = '';
   private indexTemplates: string = '';
   private indexV1: string = '';
-  private inferenceApisConfigureChunking: string = '';
   private mapping: string = '';
   private mappingAnalyzer: string = '';
   private mappingCoerce: string = '';
@@ -86,7 +85,6 @@ class DocumentationService {
     this.indexManagement = links.management.indexManagement;
     this.indexSettings = links.elasticsearch.indexSettings;
     this.indexTemplates = links.elasticsearch.indexTemplates;
-    this.inferenceApisConfigureChunking = links.enterpriseSearch.inferenceApisConfigureChunking;
     this.indexV1 = links.apis.putIndexTemplateV1;
     this.mapping = links.elasticsearch.mapping;
     this.mappingAnalyzer = links.elasticsearch.mappingAnalyzer;
@@ -167,10 +165,6 @@ class DocumentationService {
 
   public getIdxMgmtDocumentationLink() {
     return this.indexManagement;
-  }
-
-  public getConfigureChunkingDocLink() {
-    return this.inferenceApisConfigureChunking;
   }
 
   public getIndicesComponentTemplate() {

@@ -30,14 +30,13 @@ export function useServiceMapFlyoutProps({
             service: {
               name: selectedServiceNodeForFlyout.data.id,
               agentName: selectedServiceNodeForFlyout.data.agentName,
-              sloStatus: selectedServiceNodeForFlyout.data.sloStatus,
-              sloCount: selectedServiceNodeForFlyout.data.sloCount,
             },
             filters: {
               environment,
               rangeFrom: flyoutOptions?.rangeFrom ?? start,
               rangeTo: flyoutOptions?.rangeTo ?? end,
               transactionType: flyoutOptions?.transactionType,
+              latencyAggregationType: flyoutOptions?.latencyAggregationType,
             },
           }
         : null,
@@ -47,6 +46,7 @@ export function useServiceMapFlyoutProps({
       flyoutOptions?.rangeFrom,
       flyoutOptions?.rangeTo,
       flyoutOptions?.transactionType,
+      flyoutOptions?.latencyAggregationType,
       start,
       end,
     ]

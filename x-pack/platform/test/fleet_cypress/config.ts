@@ -44,7 +44,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.experimentalFeatures=${JSON.stringify({
           enableAgentStatusAlerting: false,
           enableSloTemplates: false,
+          installIntegrationsKnowledge: false,
         })}`,
+        `--feature_flags.overrides.fleet.enableSentinelPolicyVersion=true`,
 
         `--logging.loggers=${JSON.stringify([
           ...getKibanaCliLoggers(xpackFunctionalTestsConfig.get('kbnTestServer.serverArgs')),

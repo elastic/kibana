@@ -69,15 +69,16 @@ describe('Workflows Management UI Settings', () => {
     expect(coreSetupMock.uiSettings.registerGlobal).toHaveBeenCalledWith(
       expect.objectContaining({
         [WORKFLOWS_LIBRARY_ENABLED_SETTING_ID]: expect.objectContaining({
-          name: 'Workflow Template Library',
-          value: false,
+          name: 'Workflow Template library',
+          value: true,
           readonly: true,
           readonlyMode: 'ui',
           requiresPageReload: true,
         }),
         [WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID]: expect.objectContaining({
           name: 'Workflow Executions view',
-          value: false,
+          description: expect.stringContaining('execution flyout'),
+          value: true,
           readonly: true,
           readonlyMode: 'ui',
           requiresPageReload: true,

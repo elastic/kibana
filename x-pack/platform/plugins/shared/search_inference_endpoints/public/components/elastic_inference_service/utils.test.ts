@@ -9,13 +9,16 @@ import { EisModelStatus, type EisInferenceEndpoint } from '../../../common/types
 import {
   getModelName,
   getModelCreator,
+  getModelTitle,
   getProviderKeyForCreator,
+  getTaskTypeCategoryLabel,
   groupEndpointsByModel,
   getProviderOptions,
   filterGroupedModels,
+  isTemplateRequiredEisEndpoint,
   TASK_TYPE_CATEGORY,
   TASK_TYPE_DISPLAY_NAME,
-  TASK_TYPE_FILTERS,
+  MODEL_TYPE_FILTERS,
   type GroupedModel,
   type TaskTypeCategory,
 } from '../../utils/eis_utils';
@@ -41,13 +44,26 @@ const makeGroupedModel = (overrides: Partial<GroupedModel> = {}): GroupedModel =
   ...overrides,
 });
 
+describe('isTemplateRequiredEisEndpoint', () => {
+  it('is true only when templates.policy is required', () => {
+    expect(
+      isTemplateRequiredEisEndpoint({
+        metadata: { capabilities: { templates: { policy: 'required' } } },
+      })
+    ).toBe(true);
+    expect(isTemplateRequiredEisEndpoint({ metadata: { capabilities: {} } })).toBe(false);
+    expect(isTemplateRequiredEisEndpoint({})).toBe(false);
+  });
+});
+
 describe('utils', () => {
   describe('TASK_TYPE_CATEGORY', () => {
     it.each([
-      ['chat_completion', 'LLM'],
-      ['completion', 'LLM'],
+      ['chat_completion', 'Generative'],
+      ['completion', 'Generative'],
       ['text_embedding', 'Embedding'],
       ['sparse_embedding', 'Embedding'],
+      ['embedding', 'Embedding'],
       ['rerank', 'Rerank'],
     ] as const)('%s → %s', (taskType, expectedCategory) => {
       expect(TASK_TYPE_CATEGORY[taskType]).toBe(expectedCategory);
@@ -66,9 +82,19 @@ describe('utils', () => {
     });
   });
 
-  describe('TASK_TYPE_FILTERS', () => {
+  describe('MODEL_TYPE_FILTERS', () => {
     it('covers all expected categories in order', () => {
-      expect(TASK_TYPE_FILTERS.map((f) => f.category)).toEqual(['LLM', 'Embedding', 'Rerank']);
+      expect(MODEL_TYPE_FILTERS.map((f) => f.key)).toEqual(['Generative', 'Embedding', 'Rerank']);
+    });
+  });
+
+  describe('getTaskTypeCategoryLabel', () => {
+    it.each([
+      ['Generative', 'Generative'],
+      ['Embedding', 'Embedding'],
+      ['Rerank', 'Rerank'],
+    ] as const)('%s → %s', (category, expectedLabel) => {
+      expect(getTaskTypeCategoryLabel(category)).toBe(expectedLabel);
     });
   });
 
@@ -132,6 +158,20 @@ describe('utils', () => {
     });
   });
 
+  describe('getModelTitle', () => {
+    it('removes the model creator from the start of the model name', () => {
+      expect(getModelTitle('Anthropic Claude Opus 4.5', 'Anthropic')).toBe('Claude Opus 4.5');
+    });
+
+    it('returns the model name unchanged when it does not start with the model creator', () => {
+      expect(getModelTitle('Claude Opus 4.5', 'Anthropic')).toBe('Claude Opus 4.5');
+    });
+
+    it('does not remove a partial word match', () => {
+      expect(getModelTitle('JinaAI Reranker v2', 'Jina')).toBe('JinaAI Reranker v2');
+    });
+  });
+
   describe('getProviderKeyForCreator', () => {
     it.each([
       ['Anthropic', 'anthropic'],
@@ -174,7 +214,7 @@ describe('utils', () => {
         modelName: '.multilingual-e5-small',
         modelCreator: expect.any(String),
         taskTypes: ['text_embedding', 'chat_completion'],
-        categories: ['Embedding', 'LLM'],
+        categories: ['Embedding', 'Generative'],
       });
       expect(result[0].endpoints).toHaveLength(2);
     });
@@ -290,6 +330,33 @@ describe('utils', () => {
       expect(result[0].modelName).toBe('Elastic ELSER v2');
       expect(result[0].modelCreator).toBe('Elastic');
     });
+
+    it('keeps release and end-of-life dates from a later endpoint when the first metadata has none', () => {
+      const withoutDates = {
+        ...makeEndpoint({
+          inference_id: 'eis-model-a',
+          task_type: 'chat_completion' as const,
+          service_settings: { model_id: 'shared-model' },
+        }),
+        metadata: { display: { name: 'Shared model', model_creator: 'Elastic' }, heuristics: {} },
+      } as EisInferenceEndpoint;
+      const withDates = {
+        ...makeEndpoint({
+          inference_id: 'eis-model-b',
+          task_type: 'completion' as const,
+          service_settings: { model_id: 'shared-model' },
+        }),
+        metadata: {
+          heuristics: { release_date: '2024-06-25', end_of_life_date: '2026-01-01' },
+        },
+      } as EisInferenceEndpoint;
+
+      const [grouped] = groupEndpointsByModel([withoutDates, withDates]);
+
+      expect(grouped.modelMetadata?.heuristics?.release_date).toBe('2024-06-25');
+      expect(grouped.modelMetadata?.heuristics?.end_of_life_date).toBe('2026-01-01');
+      expect(grouped.modelName).toBe('Shared model');
+    });
   });
 
   describe('getProviderOptions', () => {
@@ -321,7 +388,7 @@ describe('utils', () => {
       makeGroupedModel({
         modelName: 'rainbow-sprinkle-completion',
         taskTypes: ['chat_completion'],
-        categories: ['LLM'],
+        categories: ['Generative'],
       }),
       makeGroupedModel({
         modelName: 'rerank-v1',
@@ -368,7 +435,7 @@ describe('utils', () => {
           expectedModels: ['.multilingual-e5-small'],
         },
         {
-          categories: ['LLM'] as TaskTypeCategory[],
+          categories: ['Generative'] as TaskTypeCategory[],
           expectedModels: ['rainbow-sprinkle-completion'],
         },
         { categories: ['Rerank'] as TaskTypeCategory[], expectedModels: ['rerank-v1'] },
@@ -377,7 +444,7 @@ describe('utils', () => {
           expectedModels: ['.multilingual-e5-small', 'rerank-v1'],
         },
         {
-          categories: ['LLM', 'Embedding', 'Rerank'] as TaskTypeCategory[],
+          categories: ['Generative', 'Embedding', 'Rerank'] as TaskTypeCategory[],
           expectedModels: ['.multilingual-e5-small', 'rainbow-sprinkle-completion', 'rerank-v1'],
         },
       ])('$categories → $expectedModels', ({ categories, expectedModels }) => {
@@ -408,7 +475,7 @@ describe('utils', () => {
     it('applies all filters together', () => {
       const result = filterGroupedModels(models, {
         searchQuery: 'rainbow',
-        selectedTaskTypes: new Set<TaskTypeCategory>(['LLM']),
+        selectedTaskTypes: new Set<TaskTypeCategory>(['Generative']),
         selectedProviders: ['Elastic'],
       });
       expect(result.map((m) => m.modelName)).toEqual(['rainbow-sprinkle-completion']);
@@ -427,6 +494,234 @@ describe('utils', () => {
         '.multilingual-e5-small',
         'rerank-v1',
       ]);
+    });
+
+    describe('display options', () => {
+      const ga = makeGroupedModel({ modelName: 'ga-model', modelStatus: EisModelStatus.GA });
+      const preview = makeGroupedModel({
+        modelName: 'preview-model',
+        modelStatus: EisModelStatus.Preview,
+      });
+      const deprecated = makeGroupedModel({
+        modelName: 'deprecated-model',
+        modelStatus: EisModelStatus.Deprecated,
+      });
+      const eol = makeGroupedModel({
+        modelName: 'eol-model',
+        modelStatus: EisModelStatus.DeprecatedEOL,
+      });
+      const blocked = makeGroupedModel({
+        modelName: 'blocked-model',
+        endpoints: [
+          {
+            inference_id: 'blocked',
+            task_type: 'chat_completion',
+            service: 'elastic',
+            service_settings: { model_id: 'blocked' },
+            metadata: { denied_by_region_policy: true },
+          },
+        ],
+      });
+      const displayModels = [ga, preview, deprecated, eol, blocked];
+
+      it('hides preview, end-of-life, and region-blocked models by default', () => {
+        const result = filterGroupedModels(displayModels, noFilters);
+        expect(result.map((m) => m.modelName)).toEqual(['deprecated-model', 'ga-model']);
+      });
+
+      it('keeps deprecated models that have not reached end of life visible', () => {
+        const result = filterGroupedModels([deprecated], {
+          ...noFilters,
+          showEndOfLifeModels: false,
+        });
+        expect(result.map((m) => m.modelName)).toEqual(['deprecated-model']);
+      });
+
+      it('shows preview models when showPreviewModels is true', () => {
+        const result = filterGroupedModels(displayModels, {
+          ...noFilters,
+          showPreviewModels: true,
+        });
+        expect(result.map((m) => m.modelName)).toEqual([
+          'deprecated-model',
+          'ga-model',
+          'preview-model',
+        ]);
+      });
+
+      it('shows end-of-life models when showEndOfLifeModels is true', () => {
+        const result = filterGroupedModels(displayModels, {
+          ...noFilters,
+          showEndOfLifeModels: true,
+        });
+        expect(result.map((m) => m.modelName)).toEqual([
+          'deprecated-model',
+          'eol-model',
+          'ga-model',
+        ]);
+      });
+
+      it('shows region-blocked models when showOutsideRegionPreferences is true', () => {
+        const result = filterGroupedModels(displayModels, {
+          ...noFilters,
+          showOutsideRegionPreferences: true,
+        });
+        expect(result.map((m) => m.modelName)).toEqual([
+          'blocked-model',
+          'deprecated-model',
+          'ga-model',
+        ]);
+      });
+
+      it('applies search together with hidden preview models', () => {
+        const hidden = filterGroupedModels(displayModels, {
+          ...noFilters,
+          searchQuery: 'preview',
+        });
+        expect(hidden.map((m) => m.modelName)).toEqual([]);
+
+        const shown = filterGroupedModels(displayModels, {
+          ...noFilters,
+          searchQuery: 'preview',
+          showPreviewModels: true,
+        });
+        expect(shown.map((m) => m.modelName)).toEqual(['preview-model']);
+      });
+    });
+
+    describe('region options', () => {
+      const usModel = makeGroupedModel({
+        modelName: 'us-model',
+        modelCreator: 'Anthropic',
+        taskTypes: ['chat_completion'],
+        categories: ['Generative'],
+        endpoints: [
+          makeEndpoint({
+            inference_id: 'us-model',
+            task_type: 'chat_completion',
+            metadata: {
+              regions: [{ csp: 'aws', region: 'us-east-1', geo: 'us' }],
+            },
+          }),
+        ],
+      });
+      const euModel = makeGroupedModel({
+        modelName: 'eu-model',
+        modelCreator: 'OpenRouter',
+        taskTypes: ['chat_completion'],
+        categories: ['Generative'],
+        endpoints: [
+          makeEndpoint({
+            inference_id: 'eu-model',
+            task_type: 'chat_completion',
+            metadata: { regions: [{ geo: 'eu' }] },
+          }),
+        ],
+      });
+      const plainModel = makeGroupedModel({ modelName: 'plain-model' });
+      const regionModels = [usModel, euModel, plainModel];
+
+      it('keeps every model when no region is selected', () => {
+        expect(filterGroupedModels(regionModels, noFilters).map((m) => m.modelName)).toEqual([
+          'eu-model',
+          'plain-model',
+          'us-model',
+        ]);
+      });
+
+      it('matches a geography for a specific region and for geography-only models', () => {
+        expect(
+          filterGroupedModels(regionModels, {
+            ...noFilters,
+            selectedRegionOptions: ['geo-us'],
+          }).map((m) => m.modelName)
+        ).toEqual(['us-model']);
+
+        expect(
+          filterGroupedModels(regionModels, {
+            ...noFilters,
+            selectedRegionOptions: ['geo-eu'],
+          }).map((m) => m.modelName)
+        ).toEqual(['eu-model']);
+      });
+
+      it('matches a specific region', () => {
+        expect(
+          filterGroupedModels(regionModels, {
+            ...noFilters,
+            selectedRegionOptions: ['region-aws-us-east-1'],
+          }).map((m) => m.modelName)
+        ).toEqual(['us-model']);
+      });
+
+      it('does not match a region the model is not available in', () => {
+        expect(
+          filterGroupedModels(regionModels, {
+            ...noFilters,
+            selectedRegionOptions: ['region-aws-eu-west-1'],
+          })
+        ).toEqual([]);
+      });
+
+      it('matches any selected geography or region', () => {
+        expect(
+          filterGroupedModels(regionModels, {
+            ...noFilters,
+            selectedRegionOptions: ['geo-eu', 'region-aws-us-east-1'],
+          }).map((m) => m.modelName)
+        ).toEqual(['eu-model', 'us-model']);
+      });
+
+      it('combines a region with search, model type, and provider', () => {
+        expect(
+          filterGroupedModels(regionModels, {
+            searchQuery: 'us-model',
+            selectedTaskTypes: new Set<TaskTypeCategory>(['Generative']),
+            selectedProviders: ['Anthropic'],
+            selectedRegionOptions: ['geo-us'],
+          }).map((m) => m.modelName)
+        ).toEqual(['us-model']);
+
+        expect(
+          filterGroupedModels(regionModels, {
+            searchQuery: 'us-model',
+            selectedTaskTypes: new Set<TaskTypeCategory>(['Rerank']),
+            selectedProviders: ['Anthropic'],
+            selectedRegionOptions: ['geo-us'],
+          })
+        ).toEqual([]);
+      });
+
+      it('keeps a region-blocked model hidden unless outside-region models are shown', () => {
+        const blocked = makeGroupedModel({
+          modelName: 'blocked-us',
+          endpoints: [
+            makeEndpoint({
+              inference_id: 'blocked-us',
+              task_type: 'chat_completion',
+              metadata: {
+                denied_by_region_policy: true,
+                regions: [{ csp: 'aws', region: 'us-east-1', geo: 'us' }],
+              },
+            }),
+          ],
+        });
+
+        expect(
+          filterGroupedModels([blocked, usModel], {
+            ...noFilters,
+            selectedRegionOptions: ['region-aws-us-east-1'],
+          }).map((m) => m.modelName)
+        ).toEqual(['us-model']);
+
+        expect(
+          filterGroupedModels([blocked, usModel], {
+            ...noFilters,
+            selectedRegionOptions: ['region-aws-us-east-1'],
+            showOutsideRegionPreferences: true,
+          }).map((m) => m.modelName)
+        ).toEqual(['blocked-us', 'us-model']);
+      });
     });
   });
 });

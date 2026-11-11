@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   htmlIdGenerator,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -35,6 +34,7 @@ import type { TimeBuckets } from '@kbn/ml-time-buckets';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import { ML_ANOMALY_EXPLORER_PANELS } from '@kbn/ml-common-types/storage';
+import { KbnInfoCallout, KbnDangerCallout } from '@kbn/ui-callout';
 import { HelpPopover } from '../components/help_popover';
 // @ts-ignore
 import { AnnotationsTable } from '../components/annotations/annotations_table';
@@ -486,9 +486,9 @@ export const Explorer: FC<ExplorerUIProps> = ({
   const mainPanelContent = (
     <div>
       {stoppedPartitions && (
-        <EuiCallOut
+        <KbnInfoCallout
           announceOnMount
-          size={'s'}
+          size="s"
           title={
             <FormattedMessage
               id="xpack.ml.explorer.stoppedPartitionsExistCallout"
@@ -519,16 +519,13 @@ export const Explorer: FC<ExplorerUIProps> = ({
             </h2>
           </EuiTitle>
           <EuiPanel>
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount
               title={i18n.translate('xpack.ml.explorer.annotationsErrorCallOutTitle', {
                 defaultMessage: 'An error occurred loading annotations:',
               })}
-              color="danger"
-              iconType="warning"
-            >
-              <p>{annotationsError}</p>
-            </EuiCallOut>
+              text={annotationsError}
+            />
           </EuiPanel>
           <EuiSpacer size="m" />
         </>
@@ -639,17 +636,14 @@ export const Explorer: FC<ExplorerUIProps> = ({
         <EuiSpacer size="m" />
 
         {tableError ? (
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
-            color="danger"
-            iconType="warning"
             title={i18n.translate('xpack.ml.explorer.anomaliesTableErrorTitle', {
               defaultMessage: 'An error occurred loading anomalies table data',
             })}
             data-test-subj="mlAnomaliesTableErrorCallout"
-          >
-            {tableError}
-          </EuiCallOut>
+            text={tableError}
+          />
         ) : (
           <EuiSkeletonText lines={8} isLoading={isTableDataLoading}>
             {tableData ? (

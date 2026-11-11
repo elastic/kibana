@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Type } from '@kbn/config-schema';
+import type { z, ZodObjectType } from '@kbn/zod';
 
 import type { LensApiConfigChartType } from '../../../schema';
 import {
@@ -43,9 +43,9 @@ const chartSchemas = {
   pie: pieConfigSchema,
   treemap: treemapConfigSchema,
   waffle: waffleConfigSchema,
-} satisfies Record<LensApiConfigChartType, Type<any>>;
+} satisfies Record<LensApiConfigChartType, ZodObjectType>;
 
-export function getChartSchema(type: string): Type<any> {
+export function getChartSchema(type: string): z.ZodType {
   const chartType = (compatTypeMap as any)[type] ?? type;
   const schema = (chartSchemas as any)[chartType];
 

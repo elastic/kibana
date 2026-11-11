@@ -11,8 +11,8 @@ import { EuiCopy } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 import { ApiStep, type ApiStepTab } from './api_step';
-import { LANGUAGES } from './languages';
-import { API_KEY_PLACEHOLDER, URL_PLACEHOLDER } from './console_snippets';
+import { LANGUAGES } from '../constants/languages';
+import { API_KEY_PLACEHOLDER, URL_PLACEHOLDER } from '../constants/console_snippets';
 import { useOnboardingCredentials } from '../../hooks/use_onboarding_credentials';
 import type { OnboardingServices } from '../../services';
 
@@ -53,15 +53,19 @@ const hybridTab: ApiStepTab = {
   consoleRequest: 'POST my-vectors/_search\n{ "hybrid": true }',
 };
 
-const services = {
-  application: {},
-  share: {},
-  console: {},
-} as unknown as OnboardingServices;
+const isInTrial = jest.fn();
+
+const makeServices = () =>
+  ({
+    application: {},
+    share: {},
+    console: {},
+    cloud: { isInTrial },
+  } as unknown as OnboardingServices);
 
 const renderComponent = (props: Partial<React.ComponentProps<typeof ApiStep>> = {}) =>
   render(
-    <KibanaContextProvider services={services}>
+    <KibanaContextProvider services={makeServices()}>
       <ApiStep
         tabs={[semanticTab, hybridTab]}
         consoleComment="Test console comment"
@@ -85,10 +89,50 @@ const getLastCopyText = (): string =>
 describe('ApiStep', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
     mockUseOnboardingCredentials.mockReturnValue({
       elasticsearchUrl: null,
       apiKey: null,
       isLoading: false,
+    });
+    isInTrial.mockReturnValue(false);
+  });
+
+  describe('pills', () => {
+    const trialPill = {
+      id: 'freeTrialEmbeddings',
+      label: 'Free trial embeddings',
+      content: 'Trial content',
+      trialOnly: true,
+    };
+    const standardPill = {
+      id: 'jinaModels',
+      label: 'Jina embedding models',
+      content: 'Jina content',
+    };
+
+    it('shows trial pills while the project is in trial', () => {
+      isInTrial.mockReturnValue(true);
+
+      renderComponent({ pills: [trialPill, standardPill] });
+
+      expect(screen.getByTestId('vectordbWizardPill-freeTrialEmbeddings')).toBeInTheDocument();
+      expect(screen.getByTestId('vectordbWizardPill-jinaModels')).toBeInTheDocument();
+    });
+
+    it('hides trial pills outside of a trial', () => {
+      renderComponent({ pills: [trialPill, standardPill] });
+
+      expect(
+        screen.queryByTestId('vectordbWizardPill-freeTrialEmbeddings')
+      ).not.toBeInTheDocument();
+      expect(screen.getByTestId('vectordbWizardPill-jinaModels')).toBeInTheDocument();
+    });
+
+    it('hides the pill group when every pill is trial only', () => {
+      renderComponent({ pills: [trialPill] });
+
+      expect(screen.queryByTestId('vectordbWizardPills')).not.toBeInTheDocument();
     });
   });
 
@@ -144,6 +188,24 @@ describe('ApiStep', () => {
       expect(getLastTryInConsoleRequest()).toContain(hybridTab.consoleRequest);
       expect(getLastTryInConsoleRequest()).not.toContain(semanticTab.consoleRequest);
     });
+
+    it('names the example type in the comment when there are several examples', () => {
+      renderComponent();
+
+      expect(getLastTryInConsoleRequest()).toContain('Test console comment (Semantic)');
+
+      fireEvent.click(screen.getByTestId('vectordbWizardSnippetTab-hybrid'));
+
+      expect(getLastTryInConsoleRequest()).toContain('Test console comment (Hybrid)');
+      expect(getLastTryInConsoleRequest()).not.toContain('(Semantic)');
+    });
+
+    it('omits the example type when there is only one example', () => {
+      renderComponent({ tabs: [semanticTab] });
+
+      expect(getLastTryInConsoleRequest()).toContain('Test console comment');
+      expect(getLastTryInConsoleRequest()).not.toContain('(Semantic)');
+    });
   });
 
   describe('Copy', () => {
@@ -186,6 +248,18 @@ describe('ApiStep', () => {
       fireEvent.click(screen.getByTestId('vectordbWizardSnippetTab-hybrid'));
 
       expect(getSnippetText()).toContain('hybrid javascript code');
+      expect(screen.getByTestId('vectordbWizardLanguagePicker')).toHaveTextContent('JavaScript');
+    });
+
+    it('restores the selected language on a later visit', () => {
+      const { unmount } = renderComponent();
+
+      selectJavascript();
+      unmount();
+
+      renderComponent({ tabs: [semanticTab], step: 'ingest' });
+
+      expect(getSnippetText()).toContain('semantic javascript code');
       expect(screen.getByTestId('vectordbWizardLanguagePicker')).toHaveTextContent('JavaScript');
     });
   });

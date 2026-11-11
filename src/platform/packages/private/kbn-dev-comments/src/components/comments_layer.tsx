@@ -1,0 +1,119 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { useEffect, useMemo } from 'react';
+import { Global, css } from '@emotion/react';
+import { transparentize, useEuiTheme } from '@elastic/eui';
+import { LAYER_ATTR, MENU_ATTR } from '../constants';
+import { useComments, useCommentsState } from './comments_context';
+import { CommentModeOverlay } from './comment_mode_overlay';
+import { CommentsPanel } from './comments_panel';
+import { ComposerPopover } from './composer_popover';
+import { GuideOverlay } from './guide_overlay';
+import { NoticeToast } from './notice_toast';
+import { PinsLayer } from './pins_layer';
+import { ResolvedAnchorsProvider } from './resolved_anchors';
+
+/** `⌘⇧K` / `Ctrl+Shift+K` */
+export const isToggleShortcut = (event: KeyboardEvent): boolean =>
+  (event.metaKey || event.ctrlKey) && event.shiftKey && event.key.toLowerCase() === 'k';
+
+/** EUI's `::selection` rule for the layer's color mode: EUI sets it document-wide for the page's, which a nested provider of the other mode (a dark toolbar's) does not override. */
+const SelectionStyles = () => {
+  const { euiTheme, colorMode } = useEuiTheme();
+  const styles = useMemo(
+    () => css`
+      [${LAYER_ATTR}] ::selection {
+        background: ${transparentize(euiTheme.colors.primary, colorMode === 'LIGHT' ? 0.1 : 0.2)};
+      }
+    `,
+    [euiTheme.colors.primary, colorMode]
+  );
+  return <Global styles={styles} />;
+};
+
+export const CommentsLayer = () => {
+  const controller = useComments();
+  const active = useCommentsState((state) => state.active);
+  const pending = useCommentsState((state) => state.pending);
+  const notice = useCommentsState((state) => state.notice);
+  const guided = useCommentsState(({ guide, comments }) =>
+    guide ? comments.find(({ id }) => id === guide.id) ?? null : null
+  );
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (isToggleShortcut(event)) {
+        event.preventDefault();
+        controller.toggleActive();
+        return;
+      }
+      if (event.key !== 'Escape') {
+        return;
+      }
+      const state = controller.store.getState();
+      if (!state.active || state.overlayOpen) {
+        return;
+      }
+      // An open menu of the panel closes itself, and nothing else.
+      if (event.target instanceof Element && event.target.closest(`[${MENU_ATTR}]`)) {
+        return;
+      }
+      if (state.pending) {
+        // A draft being saved cannot be discarded; Escape waits for the save.
+        if (!state.pending.saving) {
+          controller.cancelPending();
+        }
+      } else if (state.guide) {
+        controller.stopGuide();
+      } else if (state.activeThreadId) {
+        controller.openThread(null);
+      } else if (state.panelThreadId) {
+        // As Back does: the panel's list again.
+        controller.showInPanel(null);
+      } else {
+        controller.setActive(false);
+      }
+      // The page's flyouts and popovers keep their state.
+      event.stopPropagation();
+    };
+    document.addEventListener('keydown', onKeyDown, true);
+    return () => document.removeEventListener('keydown', onKeyDown, true);
+  }, [controller]);
+
+  // Comment mode takes the keyboard over; on leaving it, focus returns to where it was.
+  useEffect(() => {
+    if (!active) {
+      return;
+    }
+    const previous = document.activeElement;
+    return () => {
+      if (previous instanceof HTMLElement && previous.isConnected) {
+        previous.focus({ preventScroll: true });
+      }
+    };
+  }, [active]);
+
+  if (!active) {
+    return notice ? <NoticeToast notice={notice} /> : null;
+  }
+
+  // The guide needs the page to be interactable again while it runs.
+  return (
+    <ResolvedAnchorsProvider>
+      <SelectionStyles />
+      {!guided && <CommentModeOverlay />}
+      <PinsLayer />
+      {pending && <ComposerPopover pending={pending} />}
+      {!guided && <CommentsPanel />}
+      {guided && <GuideOverlay comment={guided} />}
+      {notice && <NoticeToast notice={notice} />}
+    </ResolvedAnchorsProvider>
+  );
+};

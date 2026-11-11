@@ -405,7 +405,7 @@ describe('useFindTemplatesQuery', () => {
     });
   });
 
-  it('should use defaultSearchOperator parameter', async () => {
+  it('should pass search parameter', async () => {
     const { rerender } = renderHook(
       () =>
         useFindTemplatesQuery({
@@ -414,7 +414,6 @@ describe('useFindTemplatesQuery', () => {
           enabled: true,
           perPage: 10,
           search: 'template availability',
-          defaultSearchOperator: 'AND',
         }),
       {
         wrapper: Wrapper,
@@ -426,7 +425,6 @@ describe('useFindTemplatesQuery', () => {
       expect(mockFindRuleTemplates).toHaveBeenLastCalledWith(
         expect.objectContaining({
           search: 'template availability',
-          defaultSearchOperator: 'AND',
         })
       );
     });

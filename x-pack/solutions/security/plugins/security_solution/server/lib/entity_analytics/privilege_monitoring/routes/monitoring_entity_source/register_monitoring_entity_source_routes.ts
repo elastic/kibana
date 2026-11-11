@@ -15,11 +15,12 @@ import { deleteMonitoringEntitySourceRoute } from './delete';
 export const registerMonitoringEntitySourceRoutes = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: EntityAnalyticsRoutesDeps['logger'],
-  config: EntityAnalyticsRoutesDeps['config']
+  config: EntityAnalyticsRoutesDeps['config'],
+  docLinks: EntityAnalyticsRoutesDeps['docLinks']
 ) => {
-  createMonitoringEntitySourceRoute(router, logger);
-  getMonitoringEntitySourceRoute(router, logger, config);
-  updateMonitoringEntitySourceRoute(router, logger, config);
-  deleteMonitoringEntitySourceRoute(router, logger, config);
-  listMonitoringEntitySourceRoute(router, logger);
+  createMonitoringEntitySourceRoute(router, logger, config, docLinks);
+  getMonitoringEntitySourceRoute(router, logger, config, docLinks);
+  updateMonitoringEntitySourceRoute(router, logger, config, docLinks);
+  deleteMonitoringEntitySourceRoute(router, logger, config, docLinks);
+  listMonitoringEntitySourceRoute(router, logger, config, docLinks);
 };

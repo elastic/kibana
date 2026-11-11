@@ -11,6 +11,8 @@ import type { RouteComponentProps } from 'react-router-dom';
 import { SECTIONS } from '../../constants';
 import type { CcrState } from '../../store';
 import {
+  getApiError,
+  getApiStatus,
   getListAutoFollowPatterns,
   getListFollowerIndices,
   isApiAuthorized,
@@ -20,8 +22,12 @@ import { CrossClusterReplicationHome as CrossClusterReplicationHomeView } from '
 const mapStateToProps = (state: CcrState) => ({
   autoFollowPatterns: getListAutoFollowPatterns(state),
   isAutoFollowApiAuthorized: isApiAuthorized(SECTIONS.AUTO_FOLLOW_PATTERN)(state),
+  autoFollowApiStatus: getApiStatus(SECTIONS.AUTO_FOLLOW_PATTERN)(state),
+  autoFollowApiError: getApiError(SECTIONS.AUTO_FOLLOW_PATTERN)(state),
   followerIndices: getListFollowerIndices(state),
   isFollowerIndexApiAuthorized: isApiAuthorized(SECTIONS.FOLLOWER_INDEX)(state),
+  followerIndexApiStatus: getApiStatus(SECTIONS.FOLLOWER_INDEX)(state),
+  followerIndexApiError: getApiError(SECTIONS.FOLLOWER_INDEX)(state),
 });
 
 type CrossClusterReplicationHomeOwnProps = RouteComponentProps<{ section: string }>;

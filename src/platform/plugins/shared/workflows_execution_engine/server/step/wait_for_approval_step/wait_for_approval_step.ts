@@ -11,8 +11,8 @@ import {
   DEFAULT_WAIT_FOR_APPROVAL_APPROVE_LABEL,
   DEFAULT_WAIT_FOR_APPROVAL_REJECT_LABEL,
   DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT,
-  HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
-  HITL_TOKEN_HASH_INPUT_FIELD,
+  HITL_EXTERNAL_APPROVE_LINK_CONTEXT_KEY,
+  HITL_EXTERNAL_REJECT_LINK_CONTEXT_KEY,
   isHitlExternalResumeEnabled,
   WAIT_FOR_APPROVAL_RESPONSE_SCHEMA,
 } from '@kbn/workflows';
@@ -33,9 +33,16 @@ import type { CancellableNode, NodeImplementation } from '../node_implementation
 import {
   invalidateHitlExternalResumeTokenIfPresent,
   mintHitlExternalResumeToken,
+  persistHitlExternalResumeToken,
 } from '../wait_for_input_step/hitl_external_resume_helpers';
-import { hasHitlWaitExpired } from '../wait_for_input_step/hitl_timeout_helpers';
 import {
+  getResolvedDynamicTimeout,
+  hasHitlWaitExpired,
+  persistResolvedDynamicTimeout,
+} from '../wait_for_input_step/hitl_timeout_helpers';
+import {
+  emitHitlWaitingAudit,
+  failHitlWaitOnTimeout,
   resumeHitlWaitStep,
   shouldSkipHitlWaitEntry,
   tryEnterHitlWait,
@@ -76,6 +83,11 @@ export class WaitForApprovalStepImpl implements NodeImplementation, CancellableN
   }
 
   private async enterWait(): Promise<void> {
+    const dynamicTimeout = persistResolvedDynamicTimeout(
+      this.stepExecutionRuntime,
+      this.node.configuration.timeout,
+      DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT
+    );
     const withConfig = this.node.configuration?.with;
     const ctx = this.stepExecutionRuntime.contextManager;
     const approveLabel =
@@ -98,6 +110,8 @@ export class WaitForApprovalStepImpl implements NodeImplementation, CancellableN
       schema: WAIT_FOR_APPROVAL_RESPONSE_SCHEMA,
     };
 
+    this.stepExecutionRuntime.setInput(stepInput);
+
     const channels = withConfig?.channels;
     if (
       hasExternalHitlChannels(channels) &&
@@ -109,16 +123,12 @@ export class WaitForApprovalStepImpl implements NodeImplementation, CancellableN
         throw new Error('External approval notifications require a space');
       }
 
-      const timeout = this.node.configuration.timeout ?? DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT;
       const resumeToken = mintHitlExternalResumeToken({
         stepExecutionRuntime: this.stepExecutionRuntime,
         execution,
-        timeout,
+        timeout: dynamicTimeout,
       });
-
-      stepInput[HITL_TOKEN_HASH_INPUT_FIELD] = resumeToken.tokenHash;
-      stepInput[HITL_TOKEN_EXPIRES_AT_INPUT_FIELD] = resumeToken.expiresAt;
-      this.stepExecutionRuntime.setInput(stepInput);
+      persistHitlExternalResumeToken(this.stepExecutionRuntime, resumeToken, stepInput);
 
       await this.sendExternalNotifications({
         channels,
@@ -131,10 +141,13 @@ export class WaitForApprovalStepImpl implements NodeImplementation, CancellableN
       });
     }
 
-    this.stepExecutionRuntime.setInput(stepInput);
-
     this.workflowLogger.logDebug(`Step '${this.node.stepId}' is waiting for approval`, {
       event: { action: 'hitl:waiting' },
+    });
+    emitHitlWaitingAudit({
+      executionId: this.workflowRuntime.getWorkflowExecution().id,
+      stepExecutionId: this.stepExecutionRuntime.stepExecutionId,
+      stepType: this.node.stepType,
     });
   }
 
@@ -171,6 +184,26 @@ export class WaitForApprovalStepImpl implements NodeImplementation, CancellableN
       approveLabel,
       rejectLabel,
       resumeLinks,
+      slackInteractiveResume: {
+        executionId: execution.id,
+        stepId: this.stepExecutionRuntime.stepExecutionId,
+        token,
+        spaceId,
+      },
+      spaceId,
+      workflowId: execution.workflowId,
+      executionId: execution.id,
+      renderTemplate: (template) =>
+        String(
+          this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(template, {
+            context: {
+              hitl: {
+                [HITL_EXTERNAL_APPROVE_LINK_CONTEXT_KEY]: resumeLinks.approveUrl,
+                [HITL_EXTERNAL_REJECT_LINK_CONTEXT_KEY]: resumeLinks.rejectUrl,
+              },
+            },
+          })
+        ),
       connectorExecutor: this.connectorExecutor,
       abortController: this.stepExecutionRuntime.abortController,
     });
@@ -180,17 +213,24 @@ export class WaitForApprovalStepImpl implements NodeImplementation, CancellableN
     const execution = this.workflowRuntime.getWorkflowExecution();
     const resumeInput = execution.context?.resumeInput as Record<string, unknown> | undefined;
 
-    const timeout = this.node.configuration.timeout ?? DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT;
+    const timeout = getResolvedDynamicTimeout(
+      this.stepExecutionRuntime,
+      this.node.configuration.timeout,
+      DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT
+    );
     const startedAt = this.stepExecutionRuntime.stepExecution?.startedAt;
 
     if (resumeInput == null && hasHitlWaitExpired(startedAt, timeout)) {
       invalidateHitlExternalResumeTokenIfPresent(this.stepExecutionRuntime);
-      this.stepExecutionRuntime.failStep(
-        new ExecutionError({
+      failHitlWaitOnTimeout({
+        stepExecutionRuntime: this.stepExecutionRuntime,
+        executionId: execution.id,
+        stepType: this.node.stepType,
+        error: new ExecutionError({
           type: 'TimeoutError',
           message: `Approval wait exceeded the configured timeout of ${timeout}.`,
-        })
-      );
+        }),
+      });
       return;
     }
 

@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/search-inference-endpoints-fixture-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/search-kibana'
+  defaultOwner: '@elastic/search-ml-ux'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/search-inference-endpoints-fixture-plugin'
   description: Moon project for @kbn/search-inference-endpoints-fixture-plugin
   channel: ''
-  owner: '@elastic/search-kibana'
+  owner: '@elastic/search-ml-ux'
   sourceRoot: x-pack/platform/test/search_inference_endpoints/plugins/search_inference_endpoints_fixture
 dependsOn:
   - '@kbn/core'

@@ -6,13 +6,13 @@
  */
 
 import React, { useMemo, useReducer } from 'react';
-import { render, screen, within, waitFor, act } from '@testing-library/react';
+import { render, screen, within, waitFor, act, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { Alert } from '@kbn/alerting-types';
 import { AlertsDataGrid } from '../components/alerts_data_grid';
-import type { BulkActionsConfig, BulkActionsState } from '../types';
+import type { BulkActionGroupId, BulkActionsConfig, BulkActionsState } from '../types';
 import { AlertsField } from '../types';
 import type { RenderContext, AdditionalContext } from '../types';
 import { bulkActionsReducer } from './bulk_actions_reducer';
@@ -231,6 +231,65 @@ describe('AlertsDataGrid bulk actions', () => {
       expect(screen.getByTestId('bulk-actions-header')).toBeInTheDocument();
     });
 
+    it('should render icons and separators between action groups', async () => {
+      render(<TestComponent {...dataGridProps} />);
+
+      await userEvent.click(screen.getByTestId('bulk-actions-header'));
+      await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+      await waitForEuiPopoverOpen();
+
+      const menu = screen.getByTestId('alertsTableBulkActionMenu');
+      const menuItems = within(menu).getAllByRole('menuitem');
+      expect(menuItems.map((item) => item.getAttribute('data-test-subj'))).toEqual([
+        'bulk-mute',
+        'bulk-unmute',
+        'alerts-table-add-to-case',
+      ]);
+      menuItems.forEach((item) => {
+        expect(item.querySelector('[data-euiicon-type]')).not.toBeNull();
+      });
+      expect(within(menu).getAllByTestId('alertsTableBulkActionMenuGroupSeparator')).toHaveLength(
+        1
+      );
+      expect(screen.getByTestId('alerts-table-add-to-case')).toHaveTextContent('Add to case');
+    });
+
+    it('should render case removal actions right after the case actions', async () => {
+      render(
+        <TestComponent
+          {...dataGridProps}
+          additionalBulkActions={[
+            {
+              id: 0,
+              items: [
+                {
+                  label: 'Remove from case',
+                  key: 'removeFromCase',
+                  groupId: 'caseRemoval',
+                  'data-test-subj': 'remove-from-case',
+                  disableOnQuery: true,
+                },
+              ],
+            },
+          ]}
+        />
+      );
+
+      await userEvent.click(screen.getByTestId('bulk-actions-header'));
+      await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+      await waitForEuiPopoverOpen();
+
+      const menu = screen.getByTestId('alertsTableBulkActionMenu');
+      expect(
+        within(menu)
+          .getAllByRole('menuitem')
+          .map((item) => item.getAttribute('data-test-subj'))
+      ).toEqual(['bulk-mute', 'bulk-unmute', 'alerts-table-add-to-case', 'remove-from-case']);
+      expect(within(menu).getAllByTestId('alertsTableBulkActionMenuGroupSeparator')).toHaveLength(
+        1
+      );
+    });
+
     it('should show only mute/unmute actions when user does not have case write access', async () => {
       mockCaseService.helpers.canUseCases.mockReturnValue({ create: false, read: true });
 
@@ -245,8 +304,7 @@ describe('AlertsDataGrid bulk actions', () => {
       // Verify mute/unmute actions are available but case actions are not
       expect(screen.getByTestId('bulk-mute')).toBeInTheDocument();
       expect(screen.getByTestId('bulk-unmute')).toBeInTheDocument();
-      expect(screen.queryByTestId('attach-new-case')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('attach-existing-case')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('alerts-table-add-to-case')).not.toBeInTheDocument();
     });
 
     it('should show only mute/unmute actions when user does not have case read access', async () => {
@@ -263,8 +321,7 @@ describe('AlertsDataGrid bulk actions', () => {
       // Verify mute/unmute actions are available but case actions are not
       expect(screen.getByTestId('bulk-mute')).toBeInTheDocument();
       expect(screen.getByTestId('bulk-unmute')).toBeInTheDocument();
-      expect(screen.queryByTestId('attach-new-case')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('attach-existing-case')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('alerts-table-add-to-case')).not.toBeInTheDocument();
     });
 
     it('should show only mute/unmute actions when the cases context is missing', async () => {
@@ -281,8 +338,7 @@ describe('AlertsDataGrid bulk actions', () => {
       // Verify mute/unmute actions are available but case actions are not
       expect(screen.getByTestId('bulk-mute')).toBeInTheDocument();
       expect(screen.getByTestId('bulk-unmute')).toBeInTheDocument();
-      expect(screen.queryByTestId('attach-new-case')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('attach-existing-case')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('alerts-table-add-to-case')).not.toBeInTheDocument();
     });
 
     it('should pass the case ids when selecting alerts', async () => {
@@ -387,6 +443,34 @@ describe('AlertsDataGrid bulk actions', () => {
     it('should show the bulk actions column', async () => {
       render(<TestComponent {...dataGridPropsWithBulkActions} />);
       expect(await screen.findByTestId('bulk-actions-header')).toBeInTheDocument();
+    });
+
+    it('should render an action with an unsupported runtime group in the custom group', async () => {
+      render(
+        <TestComponent
+          {...dataGridPropsWithBulkActions}
+          additionalBulkActions={[
+            {
+              id: 0,
+              items: [
+                {
+                  label: 'Unsupported group action',
+                  key: 'unsupportedGroupAction',
+                  groupId: 'unsupported' as BulkActionGroupId,
+                  'data-test-subj': 'unsupported-group-action',
+                  disableOnQuery: false,
+                },
+              ],
+            },
+          ]}
+        />
+      );
+
+      await userEvent.click(screen.getByTestId('bulk-actions-header'));
+      await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+      await waitForEuiPopoverOpen();
+
+      expect(screen.getByTestId('unsupported-group-action')).toBeInTheDocument();
     });
 
     describe('and triggering the "select all" action', () => {
@@ -891,6 +975,189 @@ describe('AlertsDataGrid bulk actions', () => {
             ]);
             expect(mockOnClick.mock.calls[0][1]).toEqual(true);
             expect(mockOnClick.mock.calls[0][2]).toBeDefined();
+          });
+
+          describe('and the action caps how many alerts it accepts', () => {
+            const tenAlertLimit = { max: 10, reason: 'Select up to 10 alerts' };
+
+            const renderWithLimitedAction = ({
+              alertsCount = alerts.length,
+              isAllSelected = true,
+              selectionLimit,
+            }: {
+              alertsCount?: number;
+              isAllSelected?: boolean;
+              selectionLimit: BulkActionsConfig['selectionLimit'];
+            }) => {
+              const mockOnClick = jest.fn();
+              render(
+                <TestComponent
+                  {...dataGridPropsWithBulkActions}
+                  initialBulkActionsState={{
+                    ...createDefaultBulkActionsState(),
+                    isAllSelected,
+                    rowSelection: isAllSelected
+                      ? new Map([
+                          [0, { isLoading: false }],
+                          [1, { isLoading: false }],
+                        ])
+                      : new Map(),
+                  }}
+                  renderContext={{ alertsCount }}
+                  additionalBulkActions={[
+                    {
+                      id: 0,
+                      items: [
+                        {
+                          label: 'Limited Bulk Action',
+                          key: 'limitedBulkAction',
+                          'data-test-subj': 'limited-bulk-action',
+                          disableOnQuery: false,
+                          selectionLimit,
+                          onClick: mockOnClick,
+                        },
+                      ],
+                    },
+                  ]}
+                />
+              );
+              return { mockOnClick };
+            };
+
+            it('disables the action and explains why when every matching alert exceeds the cap', async () => {
+              const { mockOnClick } = renderWithLimitedAction({
+                alertsCount: 11,
+                selectionLimit: tenAlertLimit,
+              });
+
+              await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+              await waitForEuiPopoverOpen();
+
+              const action = screen.getByTestId('limited-bulk-action');
+              expect(action).toBeDisabled();
+              await userEvent.click(action);
+              expect(mockOnClick).not.toHaveBeenCalled();
+
+              fireEvent.mouseOver(action);
+              expect(await screen.findByRole('tooltip')).toHaveTextContent(
+                'Select up to 10 alerts'
+              );
+            });
+
+            it('keeps the action enabled when every matching alert fits the cap', async () => {
+              const { mockOnClick } = renderWithLimitedAction({
+                alertsCount: 10,
+                selectionLimit: tenAlertLimit,
+              });
+
+              await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+              await waitForEuiPopoverOpen();
+
+              const action = screen.getByTestId('limited-bulk-action');
+              expect(action).not.toBeDisabled();
+              await userEvent.click(action);
+              expect(mockOnClick).toHaveBeenCalled();
+            });
+
+            it('disables the action when rows selected one by one exceed the cap', async () => {
+              const { mockOnClick } = renderWithLimitedAction({
+                isAllSelected: false,
+                selectionLimit: { max: 1, reason: 'Select up to 1 alert' },
+              });
+
+              const bulkActionsCells = screen.getAllByTestId('bulk-actions-row-cell');
+              await userEvent.click(bulkActionsCells[0]);
+              await userEvent.click(bulkActionsCells[1]);
+
+              await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+              await waitForEuiPopoverOpen();
+
+              const action = screen.getByTestId('limited-bulk-action');
+              expect(action).toBeDisabled();
+              await userEvent.click(action);
+              expect(mockOnClick).not.toHaveBeenCalled();
+
+              fireEvent.mouseOver(action);
+              expect(await screen.findByRole('tooltip')).toHaveTextContent('Select up to 1 alert');
+            });
+
+            it('keeps an action without a cap enabled on a large select all', async () => {
+              const { mockOnClick } = renderWithLimitedAction({
+                alertsCount: 100_000,
+                selectionLimit: undefined,
+              });
+
+              await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+              await waitForEuiPopoverOpen();
+
+              const action = screen.getByTestId('limited-bulk-action');
+              expect(action).not.toBeDisabled();
+              await userEvent.click(action);
+              expect(mockOnClick).toHaveBeenCalled();
+            });
+          });
+
+          describe('and the action is disabled on query', () => {
+            const renderWithQueryDisabledAction = ({ alertsCount }: { alertsCount: number }) => {
+              const mockOnClick = jest.fn();
+              render(
+                <TestComponent
+                  {...dataGridPropsWithBulkActions}
+                  initialBulkActionsState={{
+                    ...createDefaultBulkActionsState(),
+                    isAllSelected: true,
+                    rowSelection: new Map([
+                      [0, { isLoading: false }],
+                      [1, { isLoading: false }],
+                    ]),
+                  }}
+                  renderContext={{ alertsCount }}
+                  additionalBulkActions={[
+                    {
+                      id: 0,
+                      items: [
+                        {
+                          label: 'Query Disabled Bulk Action',
+                          key: 'queryDisabledBulkAction',
+                          'data-test-subj': 'query-disabled-bulk-action',
+                          disableOnQuery: true,
+                          onClick: mockOnClick,
+                        },
+                      ],
+                    },
+                  ]}
+                />
+              );
+              return { mockOnClick };
+            };
+
+            it('disables the action when some matching alerts are not loaded', async () => {
+              const { mockOnClick } = renderWithQueryDisabledAction({
+                alertsCount: alerts.length + 1,
+              });
+
+              await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+              await waitForEuiPopoverOpen();
+
+              const action = screen.getByTestId('query-disabled-bulk-action');
+              expect(action).toBeDisabled();
+              await userEvent.click(action);
+              expect(mockOnClick).not.toHaveBeenCalled();
+            });
+
+            it('keeps the action enabled when every matching alert is loaded', async () => {
+              const { mockOnClick } = renderWithQueryDisabledAction({
+                alertsCount: alerts.length,
+              });
+
+              await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+              await waitForEuiPopoverOpen();
+
+              const action = screen.getByTestId('query-disabled-bulk-action');
+              expect(action).not.toBeDisabled();
+              await userEvent.click(action);
+              expect(mockOnClick.mock.calls[0][0]).toHaveLength(alerts.length);
+            });
           });
 
           it('should first set all to loading, then clears the selection', async () => {

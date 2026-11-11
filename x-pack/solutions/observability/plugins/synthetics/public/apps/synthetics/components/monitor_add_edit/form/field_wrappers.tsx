@@ -44,6 +44,7 @@ import type { SourceFieldProps } from '../fields/source_field';
 import { SourceField } from '../fields/source_field';
 import type { FormattedComboBoxProps as DefaultFormattedComboBoxProps } from '../fields/combo_box';
 import { FormattedComboBox as DefaultFormattedComboBox } from '../fields/combo_box';
+import { MonitorTagsComboBox as DefaultMonitorTagsComboBox } from '../fields/monitor_tags_combo_box';
 import type { CodeEditorProps as DefaultCodeEditorProps } from '../fields/code_editor';
 import { JSONEditor as DefaultJSONEditor } from '../fields/code_editor';
 import type { MonitorTypeRadioGroupProps } from '../fields/monitor_type_radio_group';
@@ -52,6 +53,8 @@ import type { HeaderFieldProps as DefaultHeaderFieldProps } from '../fields/head
 import { HeaderField as DefaultHeaderField } from '../fields/header_field';
 import type { KeyValuePairsFieldProps as DefaultKeyValuePairsFieldProps } from '../fields/key_value_field';
 import { KeyValuePairsField as DefaultKeyValuePairsField } from '../fields/key_value_field';
+import type { ParameterValuesEditorProps } from '../fields/parameter_values';
+import { ParameterValuesEditor as DefaultParameterValuesEditor } from '../fields/parameter_values';
 import type { RequestBodyFieldProps as DefaultRequestBodyFieldProps } from '../fields/request_body_field';
 import { RequestBodyField as DefaultRequestBodyField } from '../fields/request_body_field';
 import type { ResponseBodyIndexFieldProps as DefaultResponseBodyIndexFieldProps } from '../fields/index_response_body_field';
@@ -118,6 +121,10 @@ export const FormattedComboBox = React.forwardRef<unknown, DefaultFormattedCombo
   (props, _ref) => <DefaultFormattedComboBox {...props} />
 );
 
+export const MonitorTagsComboBox = React.forwardRef<unknown, DefaultFormattedComboBoxProps>(
+  (props, _ref) => <DefaultMonitorTagsComboBox {...props} />
+);
+
 export const ComboBox = React.forwardRef<unknown, EuiComboBoxProps<unknown>>((props, _ref) => (
   <EuiComboBox {...omit(props, ['isServiceManaged'])} />
 ));
@@ -166,6 +173,10 @@ export const HeaderField = React.forwardRef<unknown, DefaultHeaderFieldProps>((p
 
 export const KeyValuePairsField = React.forwardRef<unknown, DefaultKeyValuePairsFieldProps>(
   (props, _ref) => <DefaultKeyValuePairsField {...props} />
+);
+
+export const ParameterValuesEditor = React.forwardRef<unknown, ParameterValuesEditorProps>(
+  (props, _ref) => <DefaultParameterValuesEditor {...props} />
 );
 
 export const RequestBodyField = React.forwardRef<unknown, DefaultRequestBodyFieldProps>(

@@ -8,6 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { I18nProvider } from '@kbn/i18n-react';
 import '@kbn/code-editor-mock/jest_helper';
 
@@ -60,7 +61,9 @@ describe('<WatchEditPage />', () => {
 
     describe('on component mount', () => {
       test('should set the correct page title', () => {
-        expect(screen.getByTestId('pageTitle')).toHaveTextContent(`Edit ${WATCH.watch.name}`);
+        expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+          `Edit ${WATCH.watch.name}`
+        );
       });
 
       test('should populate the correct values', () => {
@@ -195,7 +198,9 @@ describe('<WatchEditPage />', () => {
 
     describe('on component mount', () => {
       test('should set the correct page title', () => {
-        expect(screen.getByTestId('pageTitle')).toHaveTextContent(`Edit ${watch.name}`);
+        expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+          `Edit ${watch.name}`
+        );
       });
 
       test('should populate the correct values', async () => {

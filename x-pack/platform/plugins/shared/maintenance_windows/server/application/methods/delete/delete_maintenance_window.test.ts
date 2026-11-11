@@ -52,7 +52,7 @@ describe('MaintenanceWindowClient - delete', () => {
 
     await expect(async () => {
       await deleteMaintenanceWindow(mockContext, { id: 'test-id' });
-    }).rejects.toThrowError();
+    }).rejects.toThrow();
 
     expect(mockContext.logger.error).toHaveBeenLastCalledWith(
       'Failed to delete maintenance window by id: test-id, Error: something went wrong'

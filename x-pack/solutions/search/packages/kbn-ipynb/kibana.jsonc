@@ -2,7 +2,7 @@
   "type": "shared-common",
   "id": "@kbn/ipynb",
   "owner": [
-    "@elastic/search-kibana"
+    "@elastic/search-ml-ux"
   ],
   "group": "search",
   "visibility": "private"

@@ -95,7 +95,7 @@ const getEuiIconType = (suggestionType: QuerySuggestionTypes) => {
     case QuerySuggestionTypes.Value:
       return 'queryValue';
     case QuerySuggestionTypes.RecentSearch:
-      return 'search';
+      return 'magnify';
     case QuerySuggestionTypes.Conjunction:
       return 'querySelector';
     case QuerySuggestionTypes.Operator:

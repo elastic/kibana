@@ -35,7 +35,54 @@
     },
     "source": {
       "properties": {
-        "ip": { "type": "ip" }
+        "ip": { "type": "ip" },
+        "port": { "type": "long" },
+        "nat": {
+          "properties": {
+            "ip": { "type": "ip" }
+          }
+        }
+      }
+    },
+    "destination": {
+      "properties": {
+        "ip": { "type": "ip" },
+        "port": { "type": "long" },
+        "nat": {
+          "properties": {
+            "ip": { "type": "ip" }
+          }
+        }
+      }
+    },
+    "client": {
+      "properties": {
+        "ip": { "type": "ip" },
+        "port": { "type": "long" }
+      }
+    },
+    "server": {
+      "properties": {
+        "ip": { "type": "ip" },
+        "port": { "type": "long" }
+      }
+    },
+    "dns": {
+      "properties": {
+        "question": {
+          "properties": {
+            "name": { "type": "keyword" },
+            "type": { "type": "keyword" }
+          }
+        },
+        "resolved_ip": { "type": "ip" }
+      }
+    },
+    "network": {
+      "properties": {
+        "protocol": { "type": "keyword" },
+        "direction": { "type": "keyword" },
+        "forwarded_ip": { "type": "ip" }
       }
     },
     "cloud": {

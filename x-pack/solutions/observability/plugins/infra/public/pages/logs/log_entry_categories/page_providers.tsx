@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { useLogSourcesContext } from '@kbn/logs-data-access-plugin/public';
 import { logEntryCategoriesJobType } from '../../../../common/log_analysis';
+import { LoadingPrompt } from '../../../components/loading_page';
 import { LogAnalysisSetupFlyoutStateProvider } from '../../../components/logging/log_analysis_setup/setup_flyout';
-import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { LogEntryCategoriesModuleProvider } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
+import { LogsAppHeader, logCategoriesPageTitle } from '../header';
 import { LogSourceErrorPage } from '../shared/page_log_view_error';
 import { useLogMlJobIdFormatsShimContext } from '../shared/use_log_ml_job_id_formats_shim';
+import { CategoriesPageTemplate } from './page_content';
 
 const TIMESTAMP_FIELD = '@timestamp';
 const DEFAULT_MODULE_SOURCE_CONFIGURATION_ID = 'default'; // NOTE: Left in for legacy reasons, this used to refer to a log view ID (legacy).
@@ -35,17 +38,21 @@ export const LogEntryCategoriesPageProviders: FC<PropsWithChildren<unknown>> = (
   // This is a rather crude way of guarding the dependent providers against
   // arguments that are only made available asynchronously. Ideally, we'd use
   // React concurrent mode and Suspense in order to handle that more gracefully.
-  if (space == null) {
-    return null;
-  } else if (hasFailedLoadingLogSources || hasFailedLoadingLogAnalysisIdFormats) {
-    return <LogSourceErrorPage errors={logSourcesError !== undefined ? [logSourcesError] : []} />;
+  if (hasFailedLoadingLogSources || hasFailedLoadingLogAnalysisIdFormats) {
+    return (
+      <LogSourceErrorPage
+        errors={logSourcesError !== undefined ? [logSourcesError] : []}
+        header={<LogsAppHeader title={logCategoriesPageTitle} />}
+      />
+    );
   } else if (
+    space == null ||
     isLoadingLogSources ||
     isUninitialized ||
     isLoadingLogAnalysisIdFormats ||
     !idFormats
   ) {
-    return <SourceLoadingPage />;
+    return <LogEntryCategoriesSourceLoadingPage />;
   } else if (logSources.length > 0) {
     return (
       <LogEntryCategoriesModuleProvider
@@ -60,6 +67,19 @@ export const LogEntryCategoriesPageProviders: FC<PropsWithChildren<unknown>> = (
       </LogEntryCategoriesModuleProvider>
     );
   } else {
-    return null;
+    return <CategoriesPageTemplate hasData={false} isEmptyState />;
   }
 };
+
+const LogEntryCategoriesSourceLoadingPage = () => (
+  <CategoriesPageTemplate isEmptyState>
+    <LoadingPrompt
+      message={
+        <FormattedMessage
+          id="xpack.infra.sourceLoadingPage.loadingDataSourcesMessage"
+          defaultMessage="Loading data sources"
+        />
+      }
+    />
+  </CategoriesPageTemplate>
+);

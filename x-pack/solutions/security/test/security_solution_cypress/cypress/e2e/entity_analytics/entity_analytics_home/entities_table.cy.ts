@@ -7,7 +7,6 @@
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { disableNewFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 import {
   interceptEntityStoreStatus,
   setGrouping,
@@ -23,7 +22,6 @@ import {
   FIELDS_SELECTOR_CLOSE,
   FIELDS_SELECTOR_MODAL,
   FIELDS_SELECTOR_RESET,
-  FLYOUT_RIGHT_PANEL,
   FLYOUT_TITLE_TEXT,
   LAST_UPDATED,
   PAGE_TITLE,
@@ -46,10 +44,10 @@ describe(
     env: {
       ftrConfig: {
         kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'entityAnalyticsNewHomePageEnabled',
-          ])}`,
           '--uiSettings.overrides.securitySolution:entityStoreEnableV2=true',
+          // This suite asserts against the legacy home page's `entityAnalyticsHomePage`
+          // test subject; pin the flag until the suite is migrated to the new page.
+          '--feature_flags.overrides.securitySolution.useNewEntityAnalyticsPage=false',
         ],
       },
     },
@@ -62,7 +60,6 @@ describe(
     beforeEach(() => {
       interceptEntityStoreStatus('running');
       login();
-      disableNewFlyout();
       setGrouping(['none']);
       visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
       cy.wait('@entityStoreStatus', { timeout: 20000 });
@@ -139,8 +136,7 @@ describe(
           .invoke('text')
           .then((entityName) => {
             cy.get(EXPAND_ROW_BUTTON).first().click();
-            cy.get(FLYOUT_RIGHT_PANEL).should('be.visible');
-            cy.get(FLYOUT_TITLE_TEXT).should('contain', entityName.trim());
+            cy.get(FLYOUT_TITLE_TEXT).should('be.visible').and('contain', entityName.trim());
           });
       });
 

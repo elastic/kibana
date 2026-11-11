@@ -27,15 +27,29 @@ import {
 const createAction = (overrides: Partial<AlertAction> = {}): AlertAction => ({
   '@timestamp': '2025-02-02T12:34:56.000Z',
   group_hash: 'group-hash-1',
-  episode_id: 'episode-1',
+  alert_id: 'episode-1',
   rule_id: 'rule-1',
   space_id: 'default',
-  actor: 'actor-uid-1',
+  actor: { type: 'user', profile_uid: 'actor-uid-1' },
   action_type: 'assign',
   assignee_uid: 'user-uid-1',
   last_series_event_timestamp: '2025-01-01T00:00:00.000Z',
   ...overrides,
 });
+
+const UI_HEADERS = {
+  'kbn-version': '9.0.0',
+  referer: 'http://localhost:5601/app/observability',
+  'x-elastic-internal-origin': 'kibana',
+};
+
+const executionContextHeader = (context: object) => encodeURIComponent(JSON.stringify(context));
+
+const createRequest = (
+  headers: Record<string, string> = {},
+  { isFakeRequest = false }: { isFakeRequest?: boolean } = {}
+): KibanaRequest =>
+  Object.assign(httpServerMock.createKibanaRequest({ headers }), { isFakeRequest });
 
 const baseEnvelope = {
   occurredAt: '2025-02-02T12:34:56.000Z',
@@ -77,7 +91,7 @@ describe('AlertActionEventPublisher', () => {
           ...baseEnvelope,
           payload: { assigneeUid: 'user-uid-1' },
         },
-        { request }
+        { request, origin: { actor: 'user', channel: 'api' } }
       );
     });
 
@@ -89,7 +103,7 @@ describe('AlertActionEventPublisher', () => {
       expect(eventBus.publish).toHaveBeenCalledTimes(1);
       expect(eventBus.publish).toHaveBeenCalledWith(
         { type: EPISODE_UNASSIGNED_EVENT_TYPE, ...baseEnvelope, payload: {} },
-        { request }
+        { request, origin: { actor: 'user', channel: 'api' } }
       );
     });
 
@@ -98,7 +112,7 @@ describe('AlertActionEventPublisher', () => {
 
       expect(eventBus.publish).toHaveBeenCalledWith(
         { type: EPISODE_ACKED_EVENT_TYPE, ...baseEnvelope, payload: {} },
-        { request }
+        { request, origin: { actor: 'user', channel: 'api' } }
       );
     });
 
@@ -107,7 +121,7 @@ describe('AlertActionEventPublisher', () => {
 
       expect(eventBus.publish).toHaveBeenCalledWith(
         { type: EPISODE_UNACKED_EVENT_TYPE, ...baseEnvelope, payload: {} },
-        { request }
+        { request, origin: { actor: 'user', channel: 'api' } }
       );
     });
 
@@ -118,7 +132,7 @@ describe('AlertActionEventPublisher', () => {
 
       expect(eventBus.publish).toHaveBeenCalledWith(
         { type: EPISODE_TAGGED_EVENT_TYPE, ...baseEnvelope, payload: { tags: ['a', 'b'] } },
-        { request }
+        { request, origin: { actor: 'user', channel: 'api' } }
       );
     });
 
@@ -127,7 +141,7 @@ describe('AlertActionEventPublisher', () => {
 
       expect(eventBus.publish).toHaveBeenCalledWith(
         expect.objectContaining({ type: EPISODE_TAGGED_EVENT_TYPE, payload: { tags: [] } }),
-        { request }
+        { request, origin: { actor: 'user', channel: 'api' } }
       );
     });
 
@@ -142,7 +156,7 @@ describe('AlertActionEventPublisher', () => {
           ...baseEnvelope,
           payload: { expiry: '2025-03-03T00:00:00.000Z' },
         },
-        { request }
+        { request, origin: { actor: 'user', channel: 'api' } }
       );
     });
 
@@ -151,7 +165,7 @@ describe('AlertActionEventPublisher', () => {
 
       expect(eventBus.publish).toHaveBeenCalledWith(
         expect.objectContaining({ type: EPISODE_SNOOZED_EVENT_TYPE, payload: { expiry: null } }),
-        { request }
+        { request, origin: { actor: 'user', channel: 'api' } }
       );
     });
 
@@ -160,7 +174,7 @@ describe('AlertActionEventPublisher', () => {
 
       expect(eventBus.publish).toHaveBeenCalledWith(
         { type: EPISODE_UNSNOOZED_EVENT_TYPE, ...baseEnvelope, payload: {} },
-        { request }
+        { request, origin: { actor: 'user', channel: 'api' } }
       );
     });
 
@@ -171,7 +185,7 @@ describe('AlertActionEventPublisher', () => {
 
       expect(eventBus.publish).toHaveBeenCalledWith(
         { type: EPISODE_ACTIVATED_EVENT_TYPE, ...baseEnvelope, payload: { reason: 'flapping' } },
-        { request }
+        { request, origin: { actor: 'user', channel: 'api' } }
       );
     });
 
@@ -186,7 +200,7 @@ describe('AlertActionEventPublisher', () => {
           ...baseEnvelope,
           payload: { reason: 'maintenance' },
         },
-        { request }
+        { request, origin: { actor: 'user', channel: 'api' } }
       );
     });
 
@@ -200,13 +214,13 @@ describe('AlertActionEventPublisher', () => {
   describe('emitEpisodeActions batch behaviour', () => {
     it('processes every action in the batch (does not stop after the first)', () => {
       publisher.emitEpisodeActions(request, [
-        createAction({ action_type: 'ack', episode_id: 'episode-1' }),
+        createAction({ action_type: 'ack', alert_id: 'episode-1' }),
         createAction({
           action_type: 'assign',
-          episode_id: 'episode-2',
+          alert_id: 'episode-2',
           assignee_uid: 'user-uid-2',
         }),
-        createAction({ action_type: 'unsnooze', episode_id: 'episode-3' }),
+        createAction({ action_type: 'unsnooze', alert_id: 'episode-3' }),
       ]);
 
       expect(eventBus.publish).toHaveBeenCalledTimes(3);
@@ -224,7 +238,7 @@ describe('AlertActionEventPublisher', () => {
     it('skips actions that do not publish a domain event while still emitting the rest', () => {
       publisher.emitEpisodeActions(request, [
         createAction({ action_type: 'unknown' }),
-        createAction({ action_type: 'ack', episode_id: 'episode-2' }),
+        createAction({ action_type: 'ack', alert_id: 'episode-2' }),
       ]);
 
       expect(eventBus.publish).toHaveBeenCalledTimes(1);
@@ -242,15 +256,40 @@ describe('AlertActionEventPublisher', () => {
 
       expect(eventBus.publish).toHaveBeenCalledWith(
         expect.objectContaining({ occurredAt: '2026-01-01T00:00:00.000Z' }),
-        { request }
+        { request, origin: { actor: 'user', channel: 'api' } }
       );
     });
 
-    it('preserves a null actor on the envelope (internal / system actor case)', () => {
-      publisher.emitEpisodeActions(request, [createAction({ action_type: 'ack', actor: null })]);
+    it('sets a null actorUid on the envelope for an internal actor', () => {
+      publisher.emitEpisodeActions(request, [
+        createAction({ action_type: 'ack', actor: { type: 'internal' } }),
+      ]);
 
       expect(eventBus.publish).toHaveBeenCalledWith(expect.objectContaining({ actorUid: null }), {
         request,
+        origin: { actor: 'user', channel: 'api' },
+      });
+    });
+
+    it('sets a null actorUid on the envelope for a user actor without a profile uid', () => {
+      publisher.emitEpisodeActions(request, [
+        createAction({ action_type: 'ack', actor: { type: 'user' } }),
+      ]);
+
+      expect(eventBus.publish).toHaveBeenCalledWith(expect.objectContaining({ actorUid: null }), {
+        request,
+        origin: { actor: 'user', channel: 'api' },
+      });
+    });
+
+    it('maps a null alert_id to a null episodeId on the envelope (series-level action case)', () => {
+      publisher.emitEpisodeActions(request, [
+        createAction({ action_type: 'snooze', alert_id: null }),
+      ]);
+
+      expect(eventBus.publish).toHaveBeenCalledWith(expect.objectContaining({ episodeId: null }), {
+        request,
+        origin: { actor: 'user', channel: 'api' },
       });
     });
 
@@ -263,6 +302,59 @@ describe('AlertActionEventPublisher', () => {
       expect(eventBus.publish).toHaveBeenCalledTimes(2);
       expect(eventBus.publish.mock.calls[0][1]?.request).toBe(request);
       expect(eventBus.publish.mock.calls[1][1]?.request).toBe(otherRequest);
+    });
+  });
+
+  describe('origin', () => {
+    const publishedOrigin = () => eventBus.publish.mock.calls[0]?.[1]?.origin;
+
+    it('publishes channel api when the request has no UI headers', () => {
+      publisher.emitEpisodeActions(request, [createAction({ action_type: 'ack' })]);
+
+      expect(publishedOrigin()).toEqual({ actor: 'user', channel: 'api' });
+    });
+
+    it('publishes channel ui and the execution-context app for a browser request', () => {
+      const uiRequest = createRequest({
+        ...UI_HEADERS,
+        'x-kbn-context': executionContextHeader({ name: 'observability' }),
+      });
+
+      publisher.emitEpisodeActions(uiRequest, [createAction({ action_type: 'ack' })]);
+
+      expect(publishedOrigin()).toEqual({
+        actor: 'user',
+        channel: 'ui',
+        app: 'observability',
+      });
+    });
+
+    it('omits origin.app when a UI request has no execution context', () => {
+      publisher.emitEpisodeActions(createRequest(UI_HEADERS), [
+        createAction({ action_type: 'ack' }),
+      ]);
+
+      expect(publishedOrigin()).toEqual({ actor: 'user', channel: 'ui' });
+      expect(publishedOrigin()).not.toHaveProperty('app');
+    });
+
+    it('omits origin.app when the execution-context app fails validation', () => {
+      const uiRequest = createRequest({
+        ...UI_HEADERS,
+        'x-kbn-context': executionContextHeader({ name: 'not a valid app' }),
+      });
+
+      publisher.emitEpisodeActions(uiRequest, [createAction({ action_type: 'ack' })]);
+
+      expect(publishedOrigin()).toEqual({ actor: 'user', channel: 'ui' });
+    });
+
+    it('publishes a fake request as the user on the system channel', () => {
+      publisher.emitEpisodeActions(createRequest({}, { isFakeRequest: true }), [
+        createAction({ action_type: 'ack' }),
+      ]);
+
+      expect(publishedOrigin()).toEqual({ actor: 'user', channel: 'system' });
     });
   });
 });

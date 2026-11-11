@@ -59,7 +59,7 @@ describe('rollUsageCountersIndices', () => {
       rollUsageCountersIndices({ logger, getRegisteredUsageCounters, internalRepository })
     ).resolves.toEqual(0);
     expect(internalRepository.find).toHaveBeenCalledTimes(getRegisteredUsageCounters().length);
-    expect(internalRepository.bulkDelete).not.toBeCalled();
+    expect(internalRepository.bulkDelete).not.toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalledTimes(0);
     expect(logger.debug).toHaveBeenCalledTimes(0);
   });
@@ -161,7 +161,7 @@ describe('rollUsageCountersIndices', () => {
     ).resolves.toEqual(0);
     // we abort operation if the find for a given domain fails
     expect(internalRepository.find).toHaveBeenCalledTimes(1);
-    expect(internalRepository.bulkDelete).not.toBeCalled();
+    expect(internalRepository.bulkDelete).not.toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalledTimes(2);
   });
 

@@ -11,6 +11,7 @@ import { createAsyncThunk } from 'redux-toolkit-v1';
 import { i18n } from '@kbn/i18n';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import { addDynamicConnectorsToCache, getWorkflowZodSchema } from '../../../../../../common/schema';
+import { loadInferenceConnectorsForRegisteredSteps } from '../../../../../shared/lib/connectors_utils';
 import { triggerSchemas } from '../../../../../trigger_schemas';
 import type { WorkflowsServices } from '../../../../../types';
 import type { ConnectorsResponse } from '../../../../connectors/model/types';
@@ -32,10 +33,14 @@ export const loadConnectorsThunk = createAsyncThunk<
     const state = getState();
     const lastConnectorTypes = state.detail.connectors?.connectorTypes;
     try {
-      const response = await api.getConnectors();
+      const [response, inferenceConnectorInstances] = await Promise.all([
+        api.getConnectors(),
+        loadInferenceConnectorsForRegisteredSteps(http),
+      ]);
       dispatch(setConnectors(response)); // Set connectors response first
 
       const currentConnectorTypes = response.connectorTypes;
+      addDynamicConnectorsToCache(currentConnectorTypes, inferenceConnectorInstances);
       // Simple check: compare the number of connector types and their keys
       const hasChanged =
         !lastConnectorTypes ||
@@ -43,11 +48,9 @@ export const loadConnectorsThunk = createAsyncThunk<
         !Object.keys(currentConnectorTypes).every((key) => key in lastConnectorTypes);
 
       if (hasChanged) {
-        addDynamicConnectorsToCache(currentConnectorTypes);
-
         const schema = getWorkflowZodSchema(
           currentConnectorTypes,
-          triggerSchemas.getRegisteredIds()
+          triggerSchemas.getRegisteredTriggersForSchema()
         );
         dispatch(_setGeneratedSchemaInternal(schema));
       }

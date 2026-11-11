@@ -14,14 +14,6 @@ export const ADD_DATA_STREAM_BUTTON = i18n.translate(
   }
 );
 
-export const ADD_DATA_STREAM_DISABLED_TOOLTIP = i18n.translate(
-  'xpack.automaticImport.dataStreams.addDataStreamDisabledTooltip',
-  {
-    defaultMessage:
-      'Enter a unique integration name (at least 2 characters) and description before adding a data stream.',
-  }
-);
-
 export const DATA_STREAMS_TITLE = i18n.translate(
   'xpack.automaticImport.dataStreams.dataStreamsTitle',
   {
@@ -133,10 +125,10 @@ export const ANALYZE_LOGS_BUTTON = i18n.translate(
   }
 );
 
-export const ANALYZE_LOGS_DISABLED_LOADING = i18n.translate(
-  'xpack.automaticImport.dataStreams.analyzeLogsDisabledLoading',
+export const INTEGRATION_DETAILS_INVALID_CALLOUT_TITLE = i18n.translate(
+  'xpack.automaticImport.dataStreams.integrationDetailsInvalidCalloutTitle',
   {
-    defaultMessage: 'Please wait for the current operation to finish.',
+    defaultMessage: 'Close this flyout and fix the integration details before analyzing logs',
   }
 );
 
@@ -154,11 +146,14 @@ export const SAMPLES_NORMALIZED_WARNING_TITLE = i18n.translate(
   }
 );
 
-export const SAMPLES_NORMALIZED_WARNING_LINES_OMITTED = (omittedCount: number, maxLines: number) =>
+export const SAMPLES_NORMALIZED_WARNING_LINES_OMITTED = (
+  omittedCount: number,
+  sampleCount: number
+) =>
   i18n.translate('xpack.automaticImport.dataStreams.samplesNormalizedWarningLinesOmitted', {
     defaultMessage:
-      'Only the first {maxLines} non-empty lines are sent. {omittedCount, plural, one {# additional line was not sent.} other {# additional lines were not sent.}}',
-    values: { omittedCount, maxLines },
+      'Only {sampleCount} samples are sent. {omittedCount, plural, one {# additional sample was not sent.} other {# additional samples were not sent.}}',
+    values: { omittedCount, sampleCount },
   });
 
 export const LOG_FILE_ERROR = {

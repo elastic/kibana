@@ -6,12 +6,15 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { SECURITY_TIMELINE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 
 import { CaseViewTimelines } from './case_view_timelines';
 import { useGetTimelinesByIds } from './use_get_timelines_by_ids';
+import { useEditTimelineBatchActions } from '../../../timelines/components/open_timeline/edit_timeline_batch_actions';
+import { TimelinesTable } from '../../../timelines/components/open_timeline/timelines_table';
 import { TestProviders } from '../../../common/mock';
 
 jest.mock('./use_get_timelines_by_ids');
@@ -20,9 +23,26 @@ jest.mock('../../../timelines/components/open_timeline/helpers', () => ({
   useQueryTimelineById: () => jest.fn(),
 }));
 
+jest.mock('../../../timelines/components/open_timeline/timelines_table', () => ({
+  TimelinesTable: jest.fn(() => <div data-test-subj="timelines-table" />),
+}));
+
+const mockGetBatchItemsPopoverContent = jest.fn(() => (
+  <div data-test-subj="batch-popover-content" />
+));
+
+jest.mock('../../../timelines/components/open_timeline/edit_timeline_batch_actions', () => ({
+  useEditTimelineBatchActions: jest.fn(() => ({
+    getBatchItemsPopoverContent: mockGetBatchItemsPopoverContent,
+    onCompleteBatchActions: jest.fn(),
+  })),
+}));
+
 const mockedUseGetTimelinesByIds = useGetTimelinesByIds as jest.MockedFunction<
   typeof useGetTimelinesByIds
 >;
+const mockedTimelinesTable = TimelinesTable as unknown as jest.Mock;
+const mockedUseEditTimelineBatchActions = useEditTimelineBatchActions as jest.Mock;
 
 const buildCaseData = (comments: Array<{ type: string; attachmentId?: string | string[] }>) =>
   ({
@@ -115,5 +135,135 @@ describe('CaseViewTimelines', () => {
 
     const args = mockedUseGetTimelinesByIds.mock.calls[0][0];
     expect(args.search).toBeUndefined();
+  });
+
+  describe('Super Timeline — selection and batch actions', () => {
+    const caseDataWithTimelines = buildCaseData([
+      { type: SECURITY_TIMELINE_ATTACHMENT_TYPE, attachmentId: 'tl-1' },
+      { type: SECURITY_TIMELINE_ATTACHMENT_TYPE, attachmentId: 'tl-2' },
+    ]);
+
+    it('passes selectable to actionTimelineToShow', () => {
+      render(
+        <TestProviders>
+          <CaseViewTimelines caseData={caseDataWithTimelines} />
+        </TestProviders>
+      );
+
+      const props = mockedTimelinesTable.mock.calls.at(-1)[0];
+      expect(props.actionTimelineToShow).toContain('selectable');
+      expect(props.actionTimelineToShow).not.toContain('export');
+    });
+
+    it('wires useEditTimelineBatchActions with TimelineTypeEnum.default', () => {
+      render(
+        <TestProviders>
+          <CaseViewTimelines caseData={caseDataWithTimelines} />
+        </TestProviders>
+      );
+
+      const { timelineType } = mockedUseEditTimelineBatchActions.mock.calls.at(-1)[0];
+      expect(timelineType).toBe('default');
+    });
+
+    it('shows the batch actions button in the utility bar regardless of selection', () => {
+      render(
+        <TestProviders>
+          <CaseViewTimelines caseData={caseDataWithTimelines} />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('case-view-timelines-batch-actions-button')).toBeInTheDocument();
+    });
+
+    it('opens the popover and renders batch content on button click', async () => {
+      const user = userEvent.setup();
+      render(
+        <TestProviders>
+          <CaseViewTimelines caseData={caseDataWithTimelines} />
+        </TestProviders>
+      );
+
+      const { onSelectionChange } = mockedTimelinesTable.mock.calls.at(-1)[0];
+      act(() => onSelectionChange([{ savedObjectId: 'tl-1' }, { savedObjectId: 'tl-2' }]));
+
+      // UtilityBarAction wraps the trigger in a LinkIcon; the clickable element carries
+      // the "-popover" suffix data-test-subj added by the Popover sub-component.
+      await user.click(screen.getByTestId('case-view-timelines-batch-actions-button-popover'));
+
+      expect(mockGetBatchItemsPopoverContent).toHaveBeenCalled();
+      expect(screen.getByTestId('batch-popover-content')).toBeInTheDocument();
+    });
+
+    it('keeps the batch actions button visible after selection is cleared', () => {
+      render(
+        <TestProviders>
+          <CaseViewTimelines caseData={caseDataWithTimelines} />
+        </TestProviders>
+      );
+
+      const { onSelectionChange } = mockedTimelinesTable.mock.calls.at(-1)[0];
+      act(() => onSelectionChange([{ savedObjectId: 'tl-1' }]));
+      act(() => onSelectionChange([]));
+
+      expect(screen.getByTestId('case-view-timelines-batch-actions-button')).toBeInTheDocument();
+    });
+  });
+
+  describe('remove from case', () => {
+    const caseDataWithTimelines = buildCaseData([
+      { type: SECURITY_TIMELINE_ATTACHMENT_TYPE, attachmentId: 'tl-1' },
+      { type: SECURITY_TIMELINE_ATTACHMENT_TYPE, attachmentId: 'tl-2' },
+    ]);
+
+    it('adds no remove actions without onRemove', () => {
+      render(
+        <TestProviders>
+          <CaseViewTimelines caseData={caseDataWithTimelines} />
+        </TestProviders>
+      );
+
+      const tableProps = mockedTimelinesTable.mock.calls.at(-1)[0];
+      expect(tableProps.actionTimelineToShow).not.toContain('removeFromCase');
+      expect(tableProps.onRemoveFromCase).toBeUndefined();
+      expect(
+        mockedUseEditTimelineBatchActions.mock.calls.at(-1)[0].onRemoveSelectedFromCase
+      ).toBeUndefined();
+    });
+
+    it('removes a single timeline from the row actions', () => {
+      const onRemove = jest.fn();
+      render(
+        <TestProviders>
+          <CaseViewTimelines caseData={caseDataWithTimelines} onRemove={onRemove} />
+        </TestProviders>
+      );
+
+      const tableProps = mockedTimelinesTable.mock.calls.at(-1)[0];
+      expect(tableProps.actionTimelineToShow).toContain('removeFromCase');
+
+      tableProps.onRemoveFromCase('tl-1');
+
+      expect(onRemove).toHaveBeenCalledWith({ attachmentIds: ['tl-1'] });
+    });
+
+    it('removes the selected timelines from the batch actions', () => {
+      const onRemove = jest.fn();
+      render(
+        <TestProviders>
+          <CaseViewTimelines caseData={caseDataWithTimelines} onRemove={onRemove} />
+        </TestProviders>
+      );
+
+      const { onSelectionChange } = mockedTimelinesTable.mock.calls.at(-1)[0];
+      act(() => onSelectionChange([{ savedObjectId: 'tl-1' }, { savedObjectId: 'tl-2' }]));
+
+      mockedUseEditTimelineBatchActions.mock.calls.at(-1)[0].onRemoveSelectedFromCase();
+
+      expect(onRemove).toHaveBeenCalledWith(
+        { attachmentIds: ['tl-1', 'tl-2'] },
+        { onSuccess: expect.any(Function) }
+      );
+    });
   });
 });

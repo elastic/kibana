@@ -13,14 +13,10 @@ import { makeTar, type Entry } from './make_tar';
 
 export function generateAgentConfigTar(
   output: Output,
-  installedIntegrations: InstalledIntegration[],
-  writeToLogsStreams: boolean = false
+  installedIntegrations: InstalledIntegration[]
 ) {
   const now = new Date();
   const outputConfig = transformOutputToFullPolicyOutput(output, undefined, true);
-  if (writeToLogsStreams) {
-    outputConfig._write_to_logs_streams = true;
-  }
 
   return makeTar([
     {

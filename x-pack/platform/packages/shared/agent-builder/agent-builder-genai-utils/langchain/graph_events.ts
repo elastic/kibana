@@ -16,9 +16,10 @@ import type {
   BrowserToolCallEvent,
   ToolResultEvent,
   BackgroundAgentCompleteEvent,
+  SubagentRosterUpdatedEvent,
 } from '@kbn/agent-builder-common/chat/events';
 import { ChatEventType, type ToolOrigin, type ToolType } from '@kbn/agent-builder-common';
-import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
+import type { BackgroundExecutionState, SubagentRosterEntry } from '@kbn/agent-builder-common/chat';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { PromptRequestSource, PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 
@@ -53,6 +54,7 @@ export const createToolCallEvent = (data: {
   toolCallGroupId?: string;
   toolOrigin?: ToolOrigin;
   toolType?: ToolType;
+  intent?: string;
 }): ToolCallEvent => {
   return {
     type: ChatEventType.toolCall,
@@ -63,6 +65,7 @@ export const createToolCallEvent = (data: {
       tool_call_group_id: data.toolCallGroupId,
       tool_origin: data.toolOrigin,
       tool_type: data.toolType,
+      ...(data.intent ? { intent: data.intent } : {}),
     },
   };
 };
@@ -174,5 +177,14 @@ export const createBackgroundAgentCompleteEvent = (
   return {
     type: ChatEventType.backgroundAgentComplete,
     data: { execution },
+  };
+};
+
+export const createSubagentRosterUpdatedEvent = (
+  roster: SubagentRosterEntry[]
+): SubagentRosterUpdatedEvent => {
+  return {
+    type: ChatEventType.subagentRosterUpdated,
+    data: { roster },
   };
 };

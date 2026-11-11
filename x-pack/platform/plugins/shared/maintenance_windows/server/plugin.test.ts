@@ -159,5 +159,26 @@ describe('Maintenance Windows Plugin', () => {
       const client = startContract.getMaintenanceWindowClientInternal(fakeRequest);
       expect(client).toBeDefined();
     });
+
+    test(`exposes registerSyncTask()`, async () => {
+      const context = coreMock.createPluginInitializerContext();
+      const plugin = new MaintenanceWindowsPlugin(context);
+
+      plugin.setup(coreMock.createSetup(), {
+        licensing: licensingMock.createSetup(),
+        taskManager: taskManagerMock.createSetup(),
+        features: featuresPluginMock.createSetup(),
+      });
+
+      const taskManagerStart = taskManagerMock.createStart();
+      taskManagerStart.runSoon.mockResolvedValue({} as any);
+      const startContract = plugin.start(coreMock.createStart(), {
+        taskManager: taskManagerStart,
+      });
+
+      const unsubscribe = startContract.registerSyncTask('consumer-sync-task');
+      expect(typeof unsubscribe).toBe('function');
+      unsubscribe();
+    });
   });
 });

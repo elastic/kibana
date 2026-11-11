@@ -13,7 +13,6 @@ import type {
 import type { Logger } from '@kbn/core/server';
 import type { Paginated, Pagination } from '@kbn/slo-schema';
 import { ALL_VALUE, sloDefinitionSchema, storedSloDefinitionSchema } from '@kbn/slo-schema';
-import { isLeft } from 'fp-ts/Either';
 import { merge } from 'lodash';
 import { SLO_MODEL_VERSION } from '../../common/constants';
 import type { SLODefinition, StoredSLODefinition } from '../domain/models';
@@ -159,7 +158,7 @@ export class DefaultSLODefinitionRepository implements SLODefinitionRepository {
       references: storedSLOObject.references,
     });
 
-    const result = sloDefinitionSchema.decode({
+    const result = sloDefinitionSchema.safeParse({
       ...storedSLO,
       // groupBy was added in 8.10.0
       groupBy: storedSLO.groupBy ?? ALL_VALUE,
@@ -168,11 +167,10 @@ export class DefaultSLODefinitionRepository implements SLODefinitionRepository {
       // We would need to call the _reset api on this SLO.
       version: storedSLO.version ?? 1,
       // settings.preventInitialBackfill was added in 8.15.0
-      // settings.preventCrossProjectSearch was added in 9.6.0
+      // never backfill preventCrossProjectSearch or projectRoutings — absence must stay absence
       settings: merge(
         {
           preventInitialBackfill: false,
-          preventCrossProjectSearch: false,
           syncDelay: '1m',
           frequency: '1m',
         },
@@ -183,12 +181,12 @@ export class DefaultSLODefinitionRepository implements SLODefinitionRepository {
       artifacts: { dashboards: dashboardsIds },
     });
 
-    if (isLeft(result)) {
+    if (!result.success) {
       this.logger.debug(`Invalid stored SLO with id [${storedSLO.id}]`);
       return undefined;
     }
 
-    return result.right;
+    return result.data;
   }
 
   private getDashboardsIds({

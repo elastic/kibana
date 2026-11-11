@@ -1,0 +1,21 @@
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          getAttachmentResponseExample:
+            description: "Example response containing a single attachment"
+            value:
+              attachment:
+                id: attachment-1
+                type: text
+                current_version: 1
+                versions:
+                  - version: 1
+                    data: "File content"
+                    created_at: "2025-01-01T10:00:00.000Z"
+                    content_hash: "abc123"
+                    estimated_tokens: 2
+                description: "My text file"
+                active: true

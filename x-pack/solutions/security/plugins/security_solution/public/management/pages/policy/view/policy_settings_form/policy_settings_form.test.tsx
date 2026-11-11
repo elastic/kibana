@@ -39,6 +39,7 @@ describe('Endpoint Policy Settings Form', () => {
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
+    mockedContext.setExperimentalFlag({ perOsPolicySettings: false });
 
     upsellingService = mockedContext.startServices.upselling;
     storageMock = mockedContext.startServices.storage;
@@ -159,7 +160,7 @@ describe('Endpoint Policy Settings Form', () => {
           userEvent.click(renderResult.getByTestId(selector).querySelector('input')!);
 
         expectOnChangeToBeCalledWith = (updatedPolicy) =>
-          expect(formProps.onChange).toBeCalledWith({
+          expect(formProps.onChange).toHaveBeenCalledWith({
             isValid: true,
             updatedPolicy,
           });

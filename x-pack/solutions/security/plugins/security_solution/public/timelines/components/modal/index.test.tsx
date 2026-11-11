@@ -11,8 +11,7 @@ import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
 import { TimelineModal } from '.';
-import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
-import { useTimelinePortalZIndex } from './use_timeline_portal_z_index';
+import { useUnmanagedFlyoutZIndex } from '../../../common/hooks/use_unmanaged_flyout_z_index';
 import { timelineFlyoutHistoryKey } from '../../../flyout_v2/shared/constants/flyout_history';
 
 const mockCapturedFlyoutSessionContext = jest.fn();
@@ -26,8 +25,7 @@ jest.mock('../timeline', () => {
   };
 });
 
-jest.mock('../../../common/hooks/use_is_new_flyout_enabled');
-jest.mock('./use_timeline_portal_z_index');
+jest.mock('../../../common/hooks/use_unmanaged_flyout_z_index');
 
 const mockIsFullScreen = jest.fn(() => false);
 jest.mock('../../../common/store/selectors', () => ({
@@ -48,8 +46,7 @@ const renderTimelineModal = () =>
 describe('TimelineModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
-    jest.mocked(useTimelinePortalZIndex).mockReturnValue(undefined);
+    jest.mocked(useUnmanagedFlyoutZIndex).mockReturnValue(undefined);
   });
 
   it('should render the timeline', async () => {
@@ -78,38 +75,22 @@ describe('TimelineModal', () => {
     );
   });
 
-  it('passes its visibility down to useTimelinePortalZIndex', () => {
+  it('passes its visibility down to useUnmanagedFlyoutZIndex', () => {
     renderTimelineModal();
 
-    expect(useTimelinePortalZIndex).toHaveBeenCalledWith(true);
-  });
-
-  describe('when the new flyout system is enabled', () => {
-    beforeEach(() => {
-      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
-    });
-
-    it('scopes flyouts opened from within Timeline to their own, dedicated history key', () => {
-      renderTimelineModal();
-
-      expect(mockCapturedFlyoutSessionContext).toHaveBeenCalledWith({
-        session: 'start',
-        historyKey: timelineFlyoutHistoryKey,
-      });
+    expect(useUnmanagedFlyoutZIndex).toHaveBeenCalledWith({
+      id: 'security-solution-timeline',
+      active: true,
     });
   });
 
-  describe('when the new flyout system is disabled', () => {
-    beforeEach(() => {
-      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
-    });
+  it('scopes flyouts opened from within Timeline to their own, dedicated history key', () => {
+    renderTimelineModal();
 
-    it('does not scope flyouts opened from within Timeline to a dedicated history key', () => {
-      renderTimelineModal();
-
-      expect(mockCapturedFlyoutSessionContext).toHaveBeenCalledTimes(1);
-      const [context] = mockCapturedFlyoutSessionContext.mock.calls[0];
-      expect(context.historyKey).not.toBe(timelineFlyoutHistoryKey);
+    expect(mockCapturedFlyoutSessionContext).toHaveBeenCalledWith({
+      session: 'start',
+      historyKey: timelineFlyoutHistoryKey,
+      isChildFlyout: false,
     });
   });
 });

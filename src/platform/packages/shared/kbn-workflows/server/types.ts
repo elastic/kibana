@@ -31,13 +31,25 @@ type ManagedWorkflowInstallValuesOption<TId extends ManagedWorkflowId> =
 
 export type ManagedWorkflowOperationOptions = ManagedWorkflowOperationBaseOptions;
 
+/**
+ * When set, install skips the write unless the stored document is still this version.
+ * `null` matches a document that has no version. Omit it to write against the document
+ * install reads. Seq_no concurrency only covers that read-to-write gap, not an earlier list.
+ */
+interface ManagedWorkflowExpectedDocumentVersionOption {
+  expectedDocumentVersion?: number | null;
+}
+
 export type ManagedWorkflowInstallOptions<TId extends ManagedWorkflowId> =
-  ManagedWorkflowOperationBaseOptions & ManagedWorkflowInstallValuesOption<TId>;
+  ManagedWorkflowOperationBaseOptions &
+    ManagedWorkflowInstallValuesOption<TId> &
+    ManagedWorkflowExpectedDocumentVersionOption;
 
 // Service installs can reuse persisted template values during reconciliation.
-export type ManagedWorkflowServiceInstallOptions = ManagedWorkflowOperationBaseOptions & {
-  values?: ManagedWorkflowTemplateValues;
-};
+export type ManagedWorkflowServiceInstallOptions = ManagedWorkflowOperationBaseOptions &
+  ManagedWorkflowExpectedDocumentVersionOption & {
+    values?: ManagedWorkflowTemplateValues;
+  };
 
 export type ExecuteManagedWorkflowOptions = ManagedWorkflowOperationOptions & {
   inputs?: Record<string, unknown>;
@@ -68,7 +80,27 @@ export interface ManagedWorkflowStatusReport {
   registryHash: string;
 }
 
+/** Persisted state exposed only to the plugin that owns the managed workflow. */
+export interface ManagedWorkflowInstanceState {
+  workflowId: string;
+  spaceId: string;
+  definitionId: string | null;
+  templateValues: ManagedWorkflowTemplateValues | null;
+  documentVersion: number | null;
+}
+
 export type GetManagedWorkflowStatusOptions = ManagedWorkflowOperationOptions;
+
+/** Persisted managed-workflow state available only through an owner-bound client. */
+export interface ManagedWorkflowStateApi {
+  /** Read one persisted managed workflow instance owned by this plugin. */
+  getInstalledWorkflowState: (
+    workflowId: string,
+    spaceId: string
+  ) => Promise<ManagedWorkflowInstanceState | null>;
+  /** Read all persisted managed workflow instances owned by this plugin across spaces. */
+  listInstalledWorkflowStates: () => Promise<ManagedWorkflowInstanceState[]>;
+}
 
 /**
  * Requestless lifecycle API returned by the managed workflows system provider
@@ -97,6 +129,15 @@ export interface RegisteredManagedWorkflowsLifecycleApi {
     options: ManagedWorkflowOperationOptions
   ) => Promise<void>;
   /**
+   * Switch off this plugin's managed workflow without a request, including one bound to a
+   * service account. Resolves `false` when nothing was switched off (missing, not managed,
+   * already off, or Workflows unavailable); throws when the caller does not own the workflow.
+   */
+  disable: <TId extends ManagedWorkflowId>(
+    id: TId,
+    options: ManagedWorkflowOperationOptions
+  ) => Promise<boolean>;
+  /**
    * Signal that the plugin has finished installing all its static managed workflows.
    * Triggers per-plugin reconciliation: removes persisted static workflows that were
    * not installed during the startup window (between owner registration and this call).
@@ -120,6 +161,10 @@ export interface RegisteredManagedWorkflowsLifecycleApi {
     options: GetManagedWorkflowStatusOptions
   ) => Promise<ManagedWorkflowStatusReport>;
 }
+
+export interface ManagedWorkflowsSystemApi
+  extends RegisteredManagedWorkflowsLifecycleApi,
+    ManagedWorkflowStateApi {}
 
 /**
  * Plugin-bound API for managed workflow operations that do not require a Kibana request.
@@ -163,7 +208,9 @@ export interface ManagedWorkflowsApi {
 /**
  * Consumer-facing managed workflows client returned by workflows_extensions.
  */
-export interface PluginScopedManagedWorkflowsApi extends RegisteredManagedWorkflowsLifecycleApi {
+export interface PluginScopedManagedWorkflowsApi
+  extends RegisteredManagedWorkflowsLifecycleApi,
+    ManagedWorkflowStateApi {
   execute: (
     request: KibanaRequest,
     id: ManagedWorkflowId,
@@ -176,9 +223,25 @@ export interface PluginScopedManagedWorkflowsApi extends RegisteredManagedWorkfl
  * This is the public interface for workflows operations that can be used by any plugin.
  * It is registered to the `workflows` API request context, and exposed by `workflowsExtensions` plugin in its start contract.
  */
+export interface ResumeExternalHitlParams {
+  token: string;
+  executionId: string;
+  stepId: string;
+  spaceId: string;
+  input: Record<string, unknown>;
+}
+
 export interface WorkflowsClient {
   isWorkflowsAvailable: boolean;
-  emitEvent: (triggerId: string, payload: Record<string, unknown>) => Promise<void>;
+  emitEvent: (
+    triggerId: string,
+    payload: Record<string, unknown>,
+    options?: { authenticatedUser?: string }
+  ) => Promise<void>;
+  /**
+   * Resume a paused HITL wait step using the external resume token (e.g. Slack interactivity).
+   */
+  resumeExternalHitl: (params: ResumeExternalHitlParams) => Promise<void>;
   managedWorkflows: ManagedWorkflowsApi;
 }
 
@@ -192,4 +255,4 @@ export type WorkflowsRequestHandlerContext = CustomRequestHandlerContext<{
 export type WorkflowsClientProvider = (request: KibanaRequest) => Promise<WorkflowsClient>;
 export type ManagedWorkflowsSystemApiProvider = (
   pluginId: string
-) => Promise<RegisteredManagedWorkflowsLifecycleApi>;
+) => Promise<ManagedWorkflowsSystemApi>;

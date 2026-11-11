@@ -8,6 +8,7 @@
 import { intersection } from 'lodash';
 
 import type { Agent, AgentPolicy } from '../../../../types';
+import { removeVersionSuffixFromPolicyId } from '../../../../../../../common/services/version_specific_policies_utils';
 
 export const getCommonTags = (
   agents: string | Agent[],
@@ -15,7 +16,12 @@ export const getCommonTags = (
   agentPolicies: AgentPolicy[]
 ): string[] => {
   const isManagedPolicy = (agent: Agent): boolean => {
-    const policy = agentPolicies.find((pol) => pol.id === agent.policy_id);
+    // Strip the version suffix so agents on a version-specific variant (`my-policy#9.2`) match
+    // the base agent policy saved object.
+    const basePolicyId = agent.policy_id
+      ? removeVersionSuffixFromPolicyId(agent.policy_id)
+      : undefined;
+    const policy = agentPolicies.find((pol) => pol.id === basePolicyId);
     return !!policy && policy.is_managed;
   };
 

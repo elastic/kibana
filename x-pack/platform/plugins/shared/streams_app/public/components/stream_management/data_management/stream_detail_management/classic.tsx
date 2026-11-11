@@ -94,8 +94,7 @@ function ClassicStreamDetailManagementContent({
   const importLifecycleFlyout = useImportLifecycleFlyoutContext();
 
   const {
-    features: { queryStreams, significantEvents },
-    isLoading: isPrivilegesLoading,
+    features: { queryStreams },
   } = useStreamsPrivileges();
 
   const isProcessingEnabled = !definition.replicated;
@@ -224,25 +223,6 @@ function ClassicStreamDetailManagementContent({
   if (tab === 'partitioning' && !queryStreams.enabled) {
     return (
       <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'lifecycle' } }} />
-    );
-  }
-
-  if (tab === 'significantEvents') {
-    if (isPrivilegesLoading) {
-      return null;
-    }
-
-    if (significantEvents?.available) {
-      return (
-        <RedirectTo
-          path="/_discovery/{tab}"
-          params={{ path: { tab: 'knowledge_indicators' }, query: { stream: key } }}
-        />
-      );
-    }
-
-    return (
-      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />
     );
   }
 

@@ -8,11 +8,15 @@
 import { i18n } from '@kbn/i18n';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import React, { useCallback, useMemo } from 'react';
-import { EuiLink, useCurrentEuiBreakpoint } from '@elastic/eui';
+import { EuiLink, EuiPanel, useCurrentEuiBreakpoint } from '@elastic/eui';
 import styled from '@emotion/styled';
-import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import {
+  type DataSchemaFormat,
+  type InventoryItemType,
+} from '@kbn/metrics-data-access-plugin/common';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isSchemaAwareNodeType } from '../../../../../common/inventory/schema_aware_node_types';
 import { SwitchSchemaMessage } from '../../../../components/shared/switch_schema_message';
 import { useTimeRangeMetadataContext } from '../../../../hooks/use_time_range_metadata';
 import type {
@@ -76,7 +80,7 @@ export const NodesOverview = ({
   const { onPageReady } = usePerformanceContext();
   const { jumpToTime } = useWaffleTimeContext();
   const { data: timeRangeMetadata } = useTimeRangeMetadataContext();
-  const { preferredSchema } = useWaffleOptionsContext();
+  const { preferredSchema, changePreferredSchema } = useWaffleOptionsContext();
   const schemas: DataSchemaFormat[] = useMemo(
     () => timeRangeMetadata?.schemas || [],
     [timeRangeMetadata?.schemas]
@@ -107,7 +111,8 @@ export const NodesOverview = ({
   const noData = !loading && nodes && nodes.length === 0;
 
   const hasDataOnAnotherSchema =
-    schemas.length === 1 && preferredSchema !== schemas[0] && nodeType === 'host';
+    schemas.length === 1 && preferredSchema !== schemas[0] && isSchemaAwareNodeType(nodeType);
+
   const refetchProps = hasDataOnAnotherSchema
     ? {}
     : {
@@ -138,8 +143,13 @@ export const NodesOverview = ({
           defaultMessage: 'There is no data to display.',
         })}
         bodyText={
-          hasDataOnAnotherSchema ? (
-            <SwitchSchemaMessage dataTestSubj="infraInventoryViewNoDataInSelectedSchema" />
+          hasDataOnAnotherSchema && isSchemaAwareNodeType(nodeType) ? (
+            <SwitchSchemaMessage
+              dataTestSubj="infraInventoryViewNoDataInSelectedSchema"
+              nodeType={nodeType}
+              targetSchema={schemas[0]}
+              onSwitchSchema={changePreferredSchema}
+            />
           ) : (
             <FormattedMessage
               id="xpack.infra.waffle.noDataSupportedIntegrationDescription"
@@ -176,14 +186,21 @@ export const NodesOverview = ({
   if (view === 'table') {
     return (
       <TableContainer data-test-subj="infraNodesOverviewTable">
-        <TableView
-          nodeType={nodeType}
-          nodes={nodes}
-          options={options}
-          formatter={formatter}
-          currentTime={currentTime}
-          onFilter={handleDrilldown}
-        />
+        <EuiPanel
+          hasShadow={false}
+          borderRadius="m"
+          paddingSize="none"
+          css={{ overflow: 'hidden' }}
+        >
+          <TableView
+            nodeType={nodeType}
+            nodes={nodes}
+            options={options}
+            formatter={formatter}
+            currentTime={currentTime}
+            onFilter={handleDrilldown}
+          />
+        </EuiPanel>
         {nodeType === entityType && detailsItemId && (
           <AssetDetailsFlyout
             entityId={detailsItemId}

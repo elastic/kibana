@@ -17,8 +17,9 @@ import {
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../../tasks/fleet';
 import {
-  checkEndpointListForOnlyIsolatedHosts,
-  checkEndpointListForOnlyUnIsolatedHosts,
+  checkEndpointIsIsolated,
+  checkEndpointIsNotIsolated,
+  releaseHostActionViaAPI,
 } from '../../../tasks/isolate';
 
 import { login } from '../../../tasks/login';
@@ -75,16 +76,23 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
       login();
     });
 
+    // `before()` does not re-run between Cypress retries, so release here to leave the host unisolated for the next attempt.
+    afterEach(() => {
+      if (createdHost) {
+        releaseHostActionViaAPI(createdHost.agentId);
+      }
+    });
+
     it('should isolate a host from response console', () => {
       const command = 'isolate';
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
-      checkEndpointListForOnlyUnIsolatedHosts();
+      checkEndpointIsNotIsolated(createdHost.hostname);
       openResponseConsoleFromEndpointList();
       performCommandInputChecks(command);
       submitCommand();
       waitForCommandToBeExecuted(command);
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
-      checkEndpointListForOnlyIsolatedHosts();
+      checkEndpointIsIsolated(createdHost.hostname);
     });
   });
 });

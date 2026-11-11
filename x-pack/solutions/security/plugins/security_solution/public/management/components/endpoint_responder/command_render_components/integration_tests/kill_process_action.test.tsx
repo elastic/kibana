@@ -186,7 +186,7 @@ describe('When using the kill-process action from response actions console', () 
     await enterConsoleCommand(renderResult, user, 'kill-process --pid 123 --entityId 123wer');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-      'This command supports only one of the following arguments: --entityId, --pid'
+      'This command requires (only) one of the following arguments: --entityId, --pid'
     );
   });
 
@@ -195,7 +195,7 @@ describe('When using the kill-process action from response actions console', () 
     await enterConsoleCommand(renderResult, user, 'kill-process');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-      'This command supports only one of the following arguments: --entityId, --pid'
+      'This command requires (only) one of the following arguments: --entityId, --pid'
     );
   });
 
@@ -271,15 +271,48 @@ describe('When using the kill-process action from response actions console', () 
     });
   });
 
+  it('should show the action results as pending while the action is still running', async () => {
+    const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
+      path: '/api/endpoint/action/a.b.c',
+    });
+    pendingDetailResponse.data.isCompleted = false;
+    pendingDetailResponse.data.wasSuccessful = false;
+    pendingDetailResponse.data.agentState = {
+      'agent-a': {
+        isCompleted: false,
+        wasSuccessful: false,
+        wasCanceled: false,
+        errors: undefined,
+        completedAt: undefined,
+      },
+    };
+    apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
+    await render();
+    await enterConsoleCommand(renderResult, user, 'kill-process --pid 123');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('killProcess-actionResult-hostStatus')).toHaveTextContent(
+        'kill-process is pending'
+      );
+    });
+
+    expect(renderResult.getByTestId('killProcess-pending')).toBeTruthy();
+    expect(
+      renderResult.queryByTestId('killProcess-actionResult-killSuspendProcessResults')
+    ).toBeNull();
+  });
+
   it('should show success when `kill-process` action completes with no errors when using `pid`', async () => {
     await render();
     await enterConsoleCommand(renderResult, user, 'kill-process --pid 123');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('test-commandExecutionResult')).toHaveTextContent(
-        'Action completed.'
-      );
+      expect(renderResult.getByTestId('killProcess-success')).toBeTruthy();
     });
+
+    expect(renderResult.getByTestId('killProcess-actionResult-hostStatus')).toHaveTextContent(
+      'kill-process completed successfully'
+    );
   });
 
   it('should show success when `kill-process` action completes with no errors when using `entityId`', async () => {
@@ -287,27 +320,33 @@ describe('When using the kill-process action from response actions console', () 
     await enterConsoleCommand(renderResult, user, 'kill-process --entityId 123wer');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('test-commandExecutionResult')).toHaveTextContent(
-        'Action completed.'
-      );
+      expect(renderResult.getByTestId('killProcess-success')).toBeTruthy();
     });
+
+    expect(renderResult.getByTestId('killProcess-actionResult-hostStatus')).toHaveTextContent(
+      'kill-process completed successfully'
+    );
   });
   it('should display the process result output content returned by the action', async () => {
     await render();
     await enterConsoleCommand(renderResult, user, 'kill-process --pid 123');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('killProcessResponseOutput')).toBeTruthy();
+      expect(
+        renderResult.getByTestId('killProcess-actionResult-killSuspendProcessResults')
+      ).toBeTruthy();
     });
 
-    const output = renderResult.getByTestId('killProcessResponseOutput').textContent ?? '';
+    const output =
+      renderResult.getByTestId('killProcess-actionResult-killSuspendProcessResults').textContent ??
+      '';
 
     expect(output).toContain('PID 5');
     expect(output).toContain('Name foo');
     expect(output).toContain('Entity ID entity-foo');
   });
 
-  it('should display the response code message as the result title', async () => {
+  it('should display the response code message in the result output', async () => {
     const detailResponse = apiMocks.responseProvider.actionDetails({
       path: '/api/endpoint/action/a.b.c',
     }) as ActionDetailsApiResponse<KillProcessActionOutputContent>;
@@ -331,11 +370,13 @@ describe('When using the kill-process action from response actions console', () 
     await enterConsoleCommand(renderResult, user, 'kill-process --pid 123');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('test-commandExecutionResult')).toHaveTextContent(
-        endpointActionResponseCodes['ra_kill-process_success_done']
-      );
+      expect(
+        renderResult.getByTestId('killProcess-actionResult-killSuspendProcessResults')
+      ).toHaveTextContent(endpointActionResponseCodes['ra_kill-process_success_done']);
     });
-    expect(renderResult.getByTestId('killProcessResponseOutput')).toHaveTextContent('PID 5');
+    expect(
+      renderResult.getByTestId('killProcess-actionResult-killSuspendProcessResults')
+    ).toHaveTextContent('PID 5');
   });
 
   it('should only display output fields that are present in the content', async () => {
@@ -360,10 +401,14 @@ describe('When using the kill-process action from response actions console', () 
     await enterConsoleCommand(renderResult, user, 'kill-process --pid 123');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('killProcessResponseOutput')).toBeTruthy();
+      expect(
+        renderResult.getByTestId('killProcess-actionResult-killSuspendProcessResults')
+      ).toBeTruthy();
     });
 
-    const output = renderResult.getByTestId('killProcessResponseOutput').textContent ?? '';
+    const output =
+      renderResult.getByTestId('killProcess-actionResult-killSuspendProcessResults').textContent ??
+      '';
 
     expect(output).toContain('PID 5');
     expect(output).not.toContain('Name');
@@ -386,14 +431,16 @@ describe('When using the kill-process action from response actions console', () 
         completedAt: new Date().toISOString(),
       },
     };
+    // No output content is returned, so the generic action failure message is shown
+    pendingDetailResponse.data.outputs = {};
     apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
     await render();
     await enterConsoleCommand(renderResult, user, 'kill-process --pid 123');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('killProcess-actionFailure').textContent).toMatch(
-        /error one \| error two/
-      );
+      expect(
+        renderResult.getByTestId('killProcess-actionResult-killSuspendProcessResults').textContent
+      ).toMatch(/error one \| error two/);
     });
   });
 
@@ -428,12 +475,99 @@ describe('When using the kill-process action from response actions console', () 
       await enterConsoleCommand(renderResult, user, 'kill-process --pid 123');
 
       await waitFor(() => {
-        expect(renderResult.getByTestId('killProcess-actionFailure').textContent).toMatch(
-          new RegExp(endpointActionResponseCodes[outputCode])
-        );
+        expect(
+          renderResult.getByTestId('killProcess-actionResult-killSuspendProcessResults').textContent
+        ).toMatch(new RegExp(endpointActionResponseCodes[outputCode]));
       });
     }
   );
+
+  it('should still display the process output content when the action failed (partial descendants)', async () => {
+    const detailResponse = apiMocks.responseProvider.actionDetails({
+      path: '/api/endpoint/action/a.b.c',
+    }) as ActionDetailsApiResponse<KillProcessActionOutputContent>;
+    detailResponse.data.command = 'kill-process';
+    detailResponse.data.isCompleted = true;
+    detailResponse.data.wasSuccessful = false;
+    detailResponse.data.wasCanceled = false;
+    detailResponse.data.agentState = {
+      'agent-a': {
+        isCompleted: true,
+        wasSuccessful: false,
+        wasCanceled: false,
+        errors: undefined,
+        completedAt: new Date().toISOString(),
+      },
+    };
+    detailResponse.data.outputs = {
+      'agent-a': {
+        type: 'json',
+        content: {
+          code: 'ra_kill-process_error_partial-descendants',
+          pid: 5,
+        },
+      },
+    };
+    apiMocks.responseProvider.actionDetails.mockReturnValue(detailResponse);
+
+    await render();
+    await enterConsoleCommand(renderResult, user, 'kill-process --pid 123');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('killProcess-actionFailure')).toBeTruthy();
+    });
+    expect(renderResult.getByTestId('killProcess-actionResult-hostStatus')).toHaveTextContent(
+      'kill-process failed'
+    );
+    expect(
+      renderResult.getByTestId('killProcess-actionResult-killSuspendProcessResults')
+    ).toHaveTextContent('PID 5');
+    expect(
+      renderResult.getByTestId('killProcess-actionResult-killSuspendProcessResults')
+    ).toHaveTextContent(endpointActionResponseCodes['ra_kill-process_error_partial-descendants']);
+  });
+
+  it('should render the canceled result along with the process output when the action was canceled', async () => {
+    const detailResponse = apiMocks.responseProvider.actionDetails({
+      path: '/api/endpoint/action/a.b.c',
+    }) as ActionDetailsApiResponse<KillProcessActionOutputContent>;
+    detailResponse.data.command = 'kill-process';
+    detailResponse.data.isCompleted = true;
+    detailResponse.data.wasSuccessful = false;
+    detailResponse.data.wasCanceled = true;
+    detailResponse.data.agentState = {
+      'agent-a': {
+        isCompleted: true,
+        wasSuccessful: false,
+        wasCanceled: true,
+        errors: undefined,
+        completedAt: new Date().toISOString(),
+      },
+    };
+    detailResponse.data.outputs = {
+      'agent-a': {
+        type: 'json',
+        content: {
+          code: 'ra_kill-process_success_done',
+          pid: 5,
+        },
+      },
+    };
+    apiMocks.responseProvider.actionDetails.mockReturnValue(detailResponse);
+
+    await render();
+    await enterConsoleCommand(renderResult, user, 'kill-process --pid 123');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('killProcess-actionFailure')).toBeTruthy();
+    });
+    expect(renderResult.getByTestId('killProcess-actionResult-hostStatus')).toHaveTextContent(
+      'kill-process was canceled'
+    );
+    expect(
+      renderResult.getByTestId('killProcess-actionResult-killSuspendProcessResults')
+    ).toHaveTextContent('PID 5');
+  });
 
   it('should show error if kill-process API fails', async () => {
     apiMocks.responseProvider.killProcess.mockRejectedValueOnce({
@@ -510,9 +644,9 @@ describe('When using the kill-process action from response actions console', () 
       });
     });
 
-    it('should error if the Endpoint does not support the `kill_process_descendents` capability', async () => {
+    it('should error if the Endpoint does not support the `kill_process_descendants` capability', async () => {
       setConsoleCommands(
-        ENDPOINT_CAPABILITIES.filter((capability) => capability !== 'kill_process_descendents')
+        ENDPOINT_CAPABILITIES.filter((capability) => capability !== 'kill_process_descendants')
       );
       await render();
       await enterConsoleCommand(renderResult, user, 'kill-process --pid 123 --kill-descendants');
@@ -524,6 +658,11 @@ describe('When using the kill-process action from response actions console', () 
   });
 
   describe('and the `--kill-descendants` feature flag is disabled', () => {
+    beforeEach(() => {
+      mockedContext.setExperimentalFlag({ responseActionsEndpointKillProcessDescendants: false });
+      setConsoleCommands();
+    });
+
     it('should treat `--kill-descendants` as an unsupported argument', async () => {
       await render();
       await enterConsoleCommand(renderResult, user, 'kill-process --pid 123 --kill-descendants');

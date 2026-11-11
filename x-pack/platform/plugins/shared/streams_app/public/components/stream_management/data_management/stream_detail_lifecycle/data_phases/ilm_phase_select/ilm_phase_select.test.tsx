@@ -132,10 +132,27 @@ describe('IlmPhaseSelect', () => {
       />
     );
 
-    const button = screen.getByLabelText('Add ILM phase button');
+    const button = screen.getByTestId('ilmPhaseSelectButton');
     fireEvent.click(button);
     expect(onClick).toHaveBeenCalled();
     expect(screen.getByRole('dialog', { name: 'Add ILM phase popover' })).toBeInTheDocument();
+  });
+
+  it('leaves the accessible name of the provided button to its visible label', () => {
+    render(
+      <IlmPhaseSelect
+        renderButton={(props) => (
+          <EuiButtonEmpty {...props}>Add data phase and downsampling</EuiButtonEmpty>
+        )}
+        selectedPhases={[]}
+        onSelect={() => {}}
+      />
+    );
+
+    // WCAG 2.5.3 Label in Name: the accessible name must match the visible text.
+    expect(screen.getByTestId('ilmPhaseSelectButton')).toHaveAccessibleName(
+      'Add data phase and downsampling'
+    );
   });
 
   it('uses a custom aria-label from the provided button', () => {

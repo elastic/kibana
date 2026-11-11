@@ -9,7 +9,7 @@
 
 import { pickBy } from 'lodash';
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type {
   FormBasedLayer,
   GaugeVisualizationState,
@@ -167,7 +167,7 @@ export function processMetricColumnsWithReferences(
   return { metricColumns, referencesColumns };
 }
 
-type LegendTruncateAfterLines = TypeOf<typeof legendTruncateAfterLinesSchema>;
+type LegendTruncateAfterLines = z.output<typeof legendTruncateAfterLinesSchema>;
 
 export function getLegendTruncateAfterLines(
   legend:

@@ -8,15 +8,23 @@
 import type { RuleTagsResponse } from '@kbn/alerting-v2-schemas';
 import { buildOasOperation, invalidResponseExample } from '../oas_utils';
 import type { AlertingOasOperationObject } from '../oas_types';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 
 export const RULE_TAGS_RESPONSE: RuleTagsResponse = {
   tags: ['production', 'infra', 'critical'],
 };
 
 const INVALID_RULE_TAGS_RESPONSE = invalidResponseExample({
-  summary: 'Tags query filter exceeds the maximum length',
-  message: 'filter: String must contain at most 1024 character(s)',
-  details: { errors: { filter: ['String must contain at most 1024 character(s)'] } },
+  summary: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+  message: 'search: Too big: expected string to have <=256 characters',
+  details: {
+    errors: {
+      errors: [],
+      properties: {
+        search: { errors: ['Too big: expected string to have <=256 characters'] },
+      },
+    },
+  },
 });
 
 export const ruleTagsOasExamples = (): AlertingOasOperationObject =>

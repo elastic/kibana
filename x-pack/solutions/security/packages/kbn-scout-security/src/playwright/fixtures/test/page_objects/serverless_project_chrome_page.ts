@@ -15,17 +15,23 @@ import type { Locator, ScoutPage } from '@kbn/scout';
  */
 export class ServerlessProjectChromePage {
   public readonly primaryNav: Locator;
+  /**
+   * The primary nav, but only once `data-overflow-measured` is set. Chrome first renders every
+   * item in the primary menu and measures which ones fit a frame later, so reading placement
+   * before that can catch an item moments before it moves into the "More" overflow. Use this
+   * when an expectation depends on where an item ended up.
+   */
+  public readonly measuredPrimaryNav: Locator;
   public readonly morePopover: Locator;
   public readonly moreMenuTrigger: Locator;
-  public readonly breadcrumbs: Locator;
-  public readonly logo: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.primaryNav = this.page.testSubj.locator('kbnChromeNav-primaryNavigation');
+    this.measuredPrimaryNav = this.primaryNav.and(
+      this.page.locator('[data-overflow-measured="true"]')
+    );
     this.morePopover = this.page.testSubj.locator('side-nav-popover-More');
     this.moreMenuTrigger = this.page.testSubj.locator('kbnChromeNav-moreMenuTrigger');
-    this.breadcrumbs = this.page.testSubj.locator('breadcrumbs');
-    this.logo = this.page.testSubj.locator('nav-header-logo');
   }
 
   async navigateToSecuritySolutionHomeForChromeNav() {
@@ -35,6 +41,9 @@ export class ServerlessProjectChromePage {
       // securitySolutionUI loads the full SIEM shell; first project chrome render can exceed the default action timeout in CI.
       timeout: 35_000,
     });
+    await this.page
+      .locator('#security-solution-app')
+      .waitFor({ state: 'visible', timeout: 35_000 });
   }
 
   /** Primary strip or "More" popover — for overflow-dependent placement (same as ObservabilityNavigation.navItemInBodyById). */
@@ -55,32 +64,6 @@ export class ServerlessProjectChromePage {
     return this.primaryNav.locator(selector).or(this.morePopover.locator(selector));
   }
 
-  /** Breadcrumb matching visible text. */
-  getBreadcrumbByText(text: string): Locator {
-    return this.breadcrumbs.locator('.euiBreadcrumb', { hasText: text });
-  }
-
-  async clickLogo() {
-    await this.logo.click();
-  }
-
-  async openNavSearch() {
-    await this.page.testSubj.click('nav-search-reveal');
-  }
-
-  async searchNav(term: string) {
-    await this.page.testSubj.fill('nav-search-input', term);
-  }
-
-  /** Search-result option whose EUI `url` prop matches `url` exactly. */
-  getNavSearchOptionByUrl(url: string): Locator {
-    return this.page.locator(`[data-test-subj="nav-search-option"][url="${url}"]`);
-  }
-
-  async closeNavSearch() {
-    await this.page.testSubj.click('nav-search-conceal');
-  }
-
   /** Agent Builder nav item when present (deep link id `agent_builder`). */
   getAgentBuilderNavItemInProjectChrome(): Locator {
     return this.navItemInBodyById('agent_builder');
@@ -92,6 +75,10 @@ export class ServerlessProjectChromePage {
   }
 
   private async openMoreMenuIfTriggerVisible(): Promise<void> {
+    // Until the overflow split is measured, the More trigger and its popover can be unmounted and
+    // recreated (every nav-tree change resets measurement), which drops a click's open state. Once
+    // measured, the trigger's presence is final and a click on it sticks.
+    await this.measuredPrimaryNav.waitFor({ state: 'visible' });
     if ((await this.moreMenuTrigger.count()) === 0 || !(await this.moreMenuTrigger.isVisible())) {
       return;
     }

@@ -25,16 +25,18 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
-import { MlAppHeader } from '../../../components/ml_app_header';
+import { MlAppHeader, useAnomalyDetectionSettingsBack } from '../../../components/ml_app_header';
 
 function FilterListsHeaderUI({ totalCount, refreshFilterLists, kibana }) {
   const docsUrl = kibana.services.docLinks.links.ml.customRules;
+  const settingsBack = useAnomalyDetectionSettingsBack();
   return (
     <React.Fragment>
       <MlAppHeader
         title={i18n.translate('xpack.ml.settings.filterLists.listHeader.filterListsTitle', {
           defaultMessage: 'Filter Lists',
         })}
+        back={settingsBack}
       />
 
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">

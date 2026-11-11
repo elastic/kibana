@@ -7,6 +7,7 @@
 
 import type { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { isTemplateRequiredConnector } from '@kbn/inference-common';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { APIRoutes } from '../../common/types';
 import { ROUTE_VERSIONS } from '../../common/constants';
@@ -37,7 +38,8 @@ export const defineInferenceConnectorsRoute = ({
       security: {
         authz: {
           enabled: false,
-          reason: 'This route delegates authorization to the scoped ES client',
+          reason:
+            'This route intentionally lists connectors for LLM features using the Kibana internal ES user',
         },
       },
     })
@@ -46,7 +48,8 @@ export const defineInferenceConnectorsRoute = ({
         security: {
           authz: {
             enabled: false,
-            reason: 'This route delegates authorization to the scoped ES client',
+            reason:
+              'This route intentionally lists connectors for LLM features using the Kibana internal ES user',
           },
         },
         validate: {
@@ -73,9 +76,16 @@ export const defineInferenceConnectorsRoute = ({
           logger,
         });
 
+        // A template feature lists only template endpoints. Every other selector
+        // hides them, because a template-only endpoint fails a messages call.
+        const templateOnly = feature?.allowTemplateRequiredModels === true;
+        const connectors = result.connectors.filter(
+          (connector) => isTemplateRequiredConnector(connector) === templateOnly
+        );
+
         return response.ok({
           body: {
-            connectors: result.connectors,
+            connectors,
             soEntryFound: result.soEntryFound,
           },
         });

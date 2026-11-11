@@ -13,8 +13,9 @@ import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { EVALS_EXPERIMENT_SCORES_URL, API_VERSIONS, SCORES_SORT_ORDER } from '@kbn/evals-common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { registerGetExperimentScoresRoute } from './get_experiment_scores';
+import { registerGetExperimentScoresRoute, UNBOUNDED_SCORE_FIELDS } from './get_experiment_scores';
 
 describe('GET /internal/evals/experiments/{experimentId}/scores', () => {
   const setup = () => {
@@ -24,7 +25,7 @@ describe('GET /internal/evals/experiments/{experimentId}/scores', () => {
       router,
       logger,
       canEncrypt: false,
-      evaluatorRegistry: { list: () => [], get: () => undefined },
+      evaluatorRegistry: createEvaluatorRegistryMock(),
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
@@ -65,6 +66,19 @@ describe('GET /internal/evals/experiments/{experimentId}/scores', () => {
       expect.objectContaining({
         sort: SCORES_SORT_ORDER,
         size: 10000,
+      })
+    );
+  });
+
+  it('always excludes the unbounded task.output/example.input/example.metadata/evaluator.metadata fields', async () => {
+    const { handler, context, evaluationScoreService } = setup();
+    evaluationScoreService.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
+
+    await handler(context, makeRequest(), kibanaResponseFactory);
+
+    expect(evaluationScoreService.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        _source_excludes: UNBOUNDED_SCORE_FIELDS,
       })
     );
   });

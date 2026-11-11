@@ -504,7 +504,7 @@ describe('AlertingAuthorization', () => {
         entity: AlertingAuthorizationEntity.Rule,
       });
 
-      expect(checkPrivileges).toBeCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
       expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -579,7 +579,7 @@ describe('AlertingAuthorization', () => {
         entity: AlertingAuthorizationEntity.Rule,
       });
 
-      expect(checkPrivileges).toBeCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
       expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -614,7 +614,7 @@ describe('AlertingAuthorization', () => {
         entity: AlertingAuthorizationEntity.Rule,
       });
 
-      expect(checkPrivileges).toBeCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
       expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -797,7 +797,7 @@ describe('AlertingAuthorization', () => {
         additionalPrivileges: ['test/create'],
       });
 
-      expect(checkPrivileges).toBeCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
       expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -876,7 +876,7 @@ describe('AlertingAuthorization', () => {
         })
       ).filter;
 
-      expect(checkPrivileges).toBeCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
       expect(atSpacesMock).toHaveBeenCalledWith([spaceId], {
         kibana: [
           'rule-type-id-1/alerts/rule/find',
@@ -1358,7 +1358,7 @@ describe('AlertingAuthorization', () => {
         authorizationEntity: AlertingAuthorizationEntity.Rule,
       });
 
-      expect(checkPrivileges).toBeCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
       expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -1510,7 +1510,7 @@ describe('AlertingAuthorization', () => {
         authorizationEntity: AlertingAuthorizationEntity.Rule,
       });
 
-      expect(checkPrivileges).toBeCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
       expect(checkPrivileges).toHaveBeenCalledWith(requiredPrivileges);
       expect(atSpacesMock).toHaveBeenCalledWith([spaceId], requiredPrivileges);
     });
@@ -2170,7 +2170,7 @@ describe('AlertingAuthorization', () => {
         authorizationEntity: AlertingAuthorizationEntity.Rule,
       });
 
-      expect(checkPrivileges).toBeCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
       expect(checkPrivileges).toHaveBeenCalledWith(requiredPrivileges);
       expect(atSpacesMock).toHaveBeenLastCalledWith([spaceId], requiredPrivileges);
     });
@@ -2194,7 +2194,7 @@ describe('AlertingAuthorization', () => {
         authorizationEntity: AlertingAuthorizationEntity.Rule,
       });
 
-      expect(checkPrivileges).toBeCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
       expect(checkPrivileges).toHaveBeenCalledWith({ kibana: [] });
     });
 
@@ -2217,7 +2217,7 @@ describe('AlertingAuthorization', () => {
         authorizationEntity: AlertingAuthorizationEntity.Rule,
       });
 
-      expect(checkPrivileges).toBeCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
       expect(atSpacesMock).toHaveBeenCalledWith([spaceId], { kibana: [] });
     });
 
@@ -2239,8 +2239,8 @@ describe('AlertingAuthorization', () => {
         namespaces: ['a-random-space'],
       });
 
-      expect(checkPrivileges).toBeCalledTimes(1);
-      expect(checkPrivileges).toBeCalledWith(requiredPrivileges);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledWith(requiredPrivileges);
       expect(atSpacesMock).toHaveBeenCalledWith(['a-random-space'], requiredPrivileges);
     });
 
@@ -2263,8 +2263,8 @@ describe('AlertingAuthorization', () => {
         namespaces: ['default', 'a-random-space'],
       });
 
-      expect(checkPrivileges).toBeCalledTimes(1);
-      expect(checkPrivileges).toBeCalledWith(requiredPrivileges);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledWith(requiredPrivileges);
       expect(atSpacesMock).toHaveBeenCalledWith(['default', 'a-random-space'], requiredPrivileges);
     });
 

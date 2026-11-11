@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 
 import { useKibana } from '../../../../../common/lib/kibana';
-import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { EXPLORE_IN_ATTACKS_ACTION_ID } from '../../../../../common/constants/action_ids';
 import { buildExploreInAttacksUrl } from '../../../../../flyout_v2/attack/main/utils/get_explore_in_attacks_url';
 
 export const EXPLORE_IN_ATTACKS_TEST_ID = 'exploreInAttacksContextMenuItem';
@@ -42,7 +41,6 @@ export const useAttackExploreInAttacksContextMenuItems = ({
   const {
     services: { application },
   } = useKibana();
-  const newFlyoutSystemEnabled = useIsNewFlyoutEnabled();
 
   const url = useMemo(() => {
     const attacksBaseURL = application.getUrlForApp('securitySolutionUI', { path: 'attacks' });
@@ -51,9 +49,8 @@ export const useAttackExploreInAttacksContextMenuItems = ({
       indexName: attack.index ?? '',
       timestamp: attack.timestamp,
       attacksBaseURL,
-      useFlyoutV2: newFlyoutSystemEnabled,
     });
-  }, [application, attack.id, attack.index, attack.timestamp, newFlyoutSystemEnabled]);
+  }, [application, attack.id, attack.index, attack.timestamp]);
 
   const onClick = useCallback(() => {
     closePopover?.();
@@ -64,15 +61,8 @@ export const useAttackExploreInAttacksContextMenuItems = ({
     () => [
       {
         'data-test-subj': EXPLORE_IN_ATTACKS_TEST_ID,
-        key: 'exploreInAttacks',
-        name: (
-          <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="flexStart">
-            <EuiFlexItem grow={false}>{EXPLORE_IN_ATTACKS_LABEL}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="external" size="m" aria-hidden={true} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
+        key: EXPLORE_IN_ATTACKS_ACTION_ID,
+        name: EXPLORE_IN_ATTACKS_LABEL,
         onClick,
       },
     ],

@@ -8,7 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
-import { assertFlyoutChartsRendered } from '../../fixtures/service_flyout_helpers';
+import { assertFlyoutApmChartsRendered } from '../../fixtures/service_flyout_helpers';
 import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 
 const APM_DASHBOARD_DATA_VIEW_TITLE = 'traces-apm*,logs-apm*,metrics-apm*';
@@ -186,32 +186,22 @@ test.describe(
         });
         await expect(pageObjects.serviceFlyoutPage.title).toHaveText(SERVICE_MAP_TEST_SERVICE);
         await expect(pageObjects.serviceFlyoutPage.actions).toBeVisible();
-        await assertFlyoutChartsRendered(pageObjects.serviceFlyoutPage, [
-          'latency',
-          'throughput',
-          'failedTransactionRate',
-        ]);
+        await assertFlyoutApmChartsRendered(pageObjects.serviceFlyoutPage);
 
         await page.keyboard.press('Escape');
         await expect(pageObjects.serviceFlyoutPage.flyout).toBeHidden();
       });
 
-      await test.step('click on a service map edge and verify popover contents', async () => {
-        await pageObjects.serviceMapPage.openEdgePopover(SERVICE_MAP_TEST_POSTGRESQL_EDGE);
+      await test.step('click on a service map edge and verify the request flyout', async () => {
+        await pageObjects.serviceMapPage.openEdgeFlyout(SERVICE_MAP_TEST_POSTGRESQL_EDGE);
 
-        await expect(pageObjects.serviceMapPage.serviceMapPopoverContent).toBeVisible({
-          timeout: EXTENDED_TIMEOUT,
-        });
-        await expect(pageObjects.serviceMapPage.serviceMapPopoverTitle).toHaveText(
-          `${SERVICE_MAP_TEST_SERVICE} → ${SERVICE_MAP_TEST_POSTGRESQL_DEPENDENCY}`
-        );
-        await expect(pageObjects.serviceMapPage.serviceMapEdgeExploreTracesButton).toBeVisible();
-        await expect(pageObjects.serviceMapPage.serviceMapEdgeExploreTracesButton).toHaveText(
-          'Explore traces'
+        await expect(pageObjects.serviceMapPage.requestFlyoutTitle).toHaveText(
+          `${SERVICE_MAP_TEST_SERVICE} → ${SERVICE_MAP_TEST_POSTGRESQL_DEPENDENCY}`,
+          { timeout: EXTENDED_TIMEOUT }
         );
 
         await page.keyboard.press('Escape');
-        await expect(pageObjects.serviceMapPage.serviceMapPopoverTitle).toBeHidden();
+        await expect(pageObjects.serviceMapPage.requestFlyout).toBeHidden();
       });
 
       await test.step('maximize the Service map panel', async () => {

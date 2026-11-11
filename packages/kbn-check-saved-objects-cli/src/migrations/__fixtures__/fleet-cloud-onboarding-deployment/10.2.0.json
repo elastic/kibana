@@ -1,0 +1,64 @@
+{
+  "10.1.0": [
+    {
+      "provider": "aws",
+      "connectorId": "my-cloud-connector-id",
+      "mechanisms": ["managed_integration"],
+      "deploymentId": "deployment-abc-123",
+      "deploymentName": "My AWS Deployment",
+      "services": ["aws.cloudtrail", "aws.vpcflow"],
+      "status": "succeeded",
+      "attemptCount": 1,
+      "serviceVars": {
+        "aws.cloudtrail": { "bucket_arn": "arn:aws:s3:::my-bucket" }
+      },
+      "globalRegion": "us-east-1",
+      "dataFormat": "ecs",
+      "authMethod": "static_keys",
+      "packagePolicyIds": ["pkg-policy-id-1", "pkg-policy-id-2"],
+      "agentPolicyId": "agent-policy-id-1",
+      "apiKeyId": "api-key-id-1"
+    },
+    {
+      "provider": "aws",
+      "mechanisms": ["agent_based"],
+      "services": ["aws.cloudtrail"],
+      "status": "succeeded",
+      "attemptCount": 1,
+      "globalRegion": "us-east-1",
+      "dataFormat": "ecs",
+      "packagePolicyIds": ["pkg-policy-id-3"]
+    }
+  ],
+  "10.2.0": [
+    {
+      "provider": "aws",
+      "connectorId": "my-cloud-connector-id",
+      "mechanisms": ["managed_integration"],
+      "deploymentId": "deployment-abc-123",
+      "deploymentName": "My AWS Deployment",
+      "services": ["aws.cloudtrail", "aws.vpcflow"],
+      "status": "succeeded",
+      "attemptCount": 1,
+      "serviceVars": {
+        "aws.cloudtrail": { "bucket_arn": "arn:aws:s3:::my-bucket" }
+      },
+      "globalRegion": "us-east-1",
+      "dataFormat": "ecs",
+      "authMethod": "static_keys",
+      "packagePolicyIds": ["pkg-policy-id-1", "pkg-policy-id-2"],
+      "agentPolicyId": "agent-policy-id-1",
+      "apiKeyId": "api-key-id-1"
+    },
+    {
+      "provider": "aws",
+      "mechanisms": ["agent_based"],
+      "services": ["aws.cloudtrail"],
+      "status": "succeeded",
+      "attemptCount": 1,
+      "globalRegion": "us-east-1",
+      "dataFormat": "ecs",
+      "packagePolicyIds": ["pkg-policy-id-3"]
+    }
+  ]
+}

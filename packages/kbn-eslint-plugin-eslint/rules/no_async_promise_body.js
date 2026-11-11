@@ -10,7 +10,7 @@
 const { parseExpression } = require('@babel/parser');
 const { default: generate } = require('@babel/generator');
 const tsEstree = require('@typescript-eslint/typescript-estree');
-const traverse = require('eslint-traverse');
+const traverse = require('../helpers/traverse');
 const esTypes = tsEstree.AST_NODE_TYPES;
 const babelTypes = require('@babel/types');
 
@@ -131,7 +131,7 @@ module.exports = {
     fixable: 'code',
     schema: [],
   },
-  create: (context) => ({
+  createOnce: (context) => ({
     NewExpression(_) {
       const node = /** @type {NewExpression} */ (_);
 
@@ -152,7 +152,7 @@ module.exports = {
           message: ERROR_MSG,
           loc: func.loc,
           fix(fixer) {
-            const source = context.getSourceCode();
+            const source = context.sourceCode;
             return fixer.replaceText(func, wrapFunctionInTryCatch(source.getText(func)));
           },
         });

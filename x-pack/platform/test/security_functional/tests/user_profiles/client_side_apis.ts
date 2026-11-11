@@ -7,6 +7,7 @@
 
 import { parse as parseCookie } from 'tough-cookie';
 
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
 
@@ -36,6 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       for (const userPrefix of ['one', 'two', 'three']) {
         const response = await supertestWithoutAuth
           .post('/internal/security/login')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .set('kbn-xsrf', 'xxx')
           .send({
             providerType: 'basic',
@@ -91,7 +93,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const currentUserProfileText = await testSubjects.getVisibleText(
           'testEndpointsUserProfilesAppCurrentUserProfile'
         );
-        expect(currentUserProfileText).to.equal(`${adminTestUser.username}:{}`);
+        expect(currentUserProfileText).to.equal(
+          `${adminTestUser.username}:{"userSettings":{"lastSelectedSpaceId":"default","rememberSelectedSpace":true}}`
+        );
 
         for (const userPrefix of ['one', 'two', 'three']) {
           const userProfileText = await testSubjects.getVisibleText(

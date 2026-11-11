@@ -9,11 +9,11 @@
 
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { logRequest, writeErrorHandler } from '@kbn/as-code-utils';
-import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { CoreSetup, Logger, RequestHandlerContext } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { z } from '@kbn/zod';
 import { getRouteConfig } from './get_route_config';
 import { deleteDiscoverSession } from './session_delete';
 import { trackDiscoverSessionAction } from './user_activity';
@@ -30,21 +30,27 @@ export const registerDeleteRoute = (
     .delete({
       path: `${basePath}/{id}`,
       summary: 'Delete a Discover session',
+      operationId: 'delete-discover-session',
       description: 'Permanently deletes a Discover session by ID.',
       ...routeConfig,
     })
     .addVersion(
       {
         version: routeVersion,
+        options: {
+          oasOperationObject: async () =>
+            (await import('./oas_examples')).deleteDiscoverSessionOASOperationObject,
+        },
         validate: {
           request: {
-            params: schema.object({
-              id: schema.string({
-                meta: {
-                  description: 'The Discover session ID.',
-                },
-              }),
-            }),
+            params: z
+              .object({
+                id: z.string().meta({
+                  description:
+                    'The Discover session ID, as returned by the create or search endpoints.',
+                }),
+              })
+              .strict(),
           },
           response: {
             204: { description: 'Deleted' },

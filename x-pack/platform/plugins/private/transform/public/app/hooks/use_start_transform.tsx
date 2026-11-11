@@ -13,7 +13,6 @@ import type {
   StartTransformsRequestSchema,
   StartTransformsResponseSchema,
 } from '../../../server/routes/api_schemas/start_transforms';
-import { addInternalBasePath } from '../../../common/constants';
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
@@ -29,7 +28,7 @@ export const useStartTransforms = () => {
 
   const mutation = useMutation({
     mutationFn: (reqBody: StartTransformsRequestSchema) =>
-      http.post<StartTransformsResponseSchema>(addInternalBasePath('start_transforms'), {
+      http.post<StartTransformsResponseSchema>('/internal/transform/start_transforms', {
         body: JSON.stringify(reqBody),
         version: '1',
       }),

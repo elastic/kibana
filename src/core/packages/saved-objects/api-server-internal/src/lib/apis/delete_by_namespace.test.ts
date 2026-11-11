@@ -123,7 +123,7 @@ describe('#deleteByNamespace', () => {
       it(`throws when namespace is not a string or is '*'`, async () => {
         const test = async (namespace: unknown) => {
           // @ts-expect-error namespace is unknown
-          await expect(repository.deleteByNamespace(namespace)).rejects.toThrowError(
+          await expect(repository.deleteByNamespace(namespace)).rejects.toThrow(
             `namespace is required, and must be a string`
           );
           expect(client.updateByQuery).not.toHaveBeenCalled();

@@ -106,7 +106,7 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
     public async openDatePickerQuickMenu() {
       log.debug('openDatePickerQuickMenu');
       await retry.try(async () => {
-        if (!(await testSubjects.exists('superDatePickerQuickMenu', { timeout: 1000 }))) {
+        if (!(await testSubjects.exists('superDatePickerQuickMenu'))) {
           const button = await this.findDatePickerQuickMenuButton();
           if (button) {
             await button.click();
@@ -120,7 +120,7 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
       log.debug('clickCommonlyUsedTimeRange', time);
       const testSubj = `superDatePickerCommonlyUsed_${time}`;
       await retry.try(async () => {
-        if (!(await testSubjects.exists(testSubj, { timeout: 1000 }))) {
+        if (!(await testSubjects.exists(testSubj))) {
           await this.openDatePickerQuickMenu();
         }
         await testSubjects.click(testSubj);

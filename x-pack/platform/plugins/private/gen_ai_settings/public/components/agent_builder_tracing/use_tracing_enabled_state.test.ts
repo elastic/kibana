@@ -21,6 +21,7 @@ import {
   AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID,
+  AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID,
 } from '@kbn/management-settings-ids';
 import { useSettingsContext } from '../../contexts/settings_context';
 import { useTracingEnabledState } from './use_tracing_enabled_state';
@@ -40,6 +41,7 @@ const dependentTracingSettingIds = [
   AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID,
+  AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID,
 ] as const;
 
 const createBooleanField = ({
@@ -111,7 +113,6 @@ const setup = ({
     saveAll: jest.fn(),
     isSaving: false,
     cleanUnsavedChanges: jest.fn(),
-    saveSingleSetting: jest.fn(),
     setValidationErrors: jest.fn(),
   });
 

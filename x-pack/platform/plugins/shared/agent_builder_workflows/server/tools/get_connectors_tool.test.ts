@@ -70,6 +70,11 @@ describe('registerGetConnectorsTool', () => {
     expect(data.count).toBe(4);
     expect(data.totalAvailable).toBe(4);
     expect(data.connectors).toHaveLength(4);
+    expect(data.stepTypesByActionType).toEqual({
+      '.slack': ['slack'],
+      '.jira': ['jira'],
+      '.inference': ['inference.completion', 'inference.rerank'],
+    });
   });
 
   it('filters by actionTypeId', async () => {
@@ -77,14 +82,18 @@ describe('registerGetConnectorsTool', () => {
     const data = result.results[0].data as any;
     expect(data.count).toBe(1);
     expect(data.connectors[0].actionTypeId).toBe('.jira');
-    expect(data.connectors[0].stepTypes).toEqual(['jira']);
+    expect(data.stepTypesByActionType['.jira']).toEqual(['jira']);
   });
 
   it('filters by base stepType', async () => {
     const result = await invokeHandler(registeredTool, { stepType: 'slack' }, context);
     const data = result.results[0].data as any;
     expect(data.count).toBe(2);
-    expect(data.connectors.every((c: any) => c.stepTypes.includes('slack'))).toBe(true);
+    expect(
+      data.connectors.every((c: any) =>
+        data.stepTypesByActionType[c.actionTypeId]?.includes('slack')
+      )
+    ).toBe(true);
   });
 
   it('filters by sub-action stepType', async () => {
@@ -96,19 +105,22 @@ describe('registerGetConnectorsTool', () => {
     const data = result.results[0].data as any;
     expect(data.count).toBe(1);
     expect(data.connectors[0].actionTypeId).toBe('.inference');
-    expect(data.connectors[0].stepTypes).toContain('inference.completion');
+    expect(data.stepTypesByActionType['.inference']).toContain('inference.completion');
   });
 
   it('returns stepTypes with sub-actions for V2 connectors', async () => {
     const result = await invokeHandler(registeredTool, { actionTypeId: '.inference' }, context);
     const data = result.results[0].data as any;
-    expect(data.connectors[0].stepTypes).toEqual(['inference.completion', 'inference.rerank']);
+    expect(data.stepTypesByActionType['.inference']).toEqual([
+      'inference.completion',
+      'inference.rerank',
+    ]);
   });
 
   it('returns stepTypes with base type for V1 connectors', async () => {
     const result = await invokeHandler(registeredTool, { actionTypeId: '.slack' }, context);
     const data = result.results[0].data as any;
-    expect(data.connectors[0].stepTypes).toEqual(['slack']);
+    expect(data.stepTypesByActionType['.slack']).toEqual(['slack']);
   });
 
   it('filters by search term', async () => {
@@ -123,11 +135,12 @@ describe('registerGetConnectorsTool', () => {
     expect(result.results).toHaveLength(1);
     expect(result.results[0].type).toBe('other');
     const data = result.results[0].data as any;
+    expect(data).toHaveProperty('stepTypesByActionType');
     for (const connector of data.connectors) {
       expect(connector).toHaveProperty('id');
       expect(connector).toHaveProperty('name');
       expect(connector).toHaveProperty('actionTypeId');
-      expect(connector).toHaveProperty('stepTypes');
+      expect(connector).not.toHaveProperty('stepTypes');
     }
   });
 });

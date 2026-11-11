@@ -87,6 +87,9 @@ const validateFactory = (client: IScopedClusterClient, job: CombinedJob): Valida
           {
             index: job.datafeed_config.indices.join(','),
             fields: uniqueFieldNames,
+            ...(datafeedConfig.project_routing
+              ? { project_routing: datafeedConfig.project_routing }
+              : {}),
           },
           { maxRetries: 0 }
         );

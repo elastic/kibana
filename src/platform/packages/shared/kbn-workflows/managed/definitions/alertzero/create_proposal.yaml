@@ -1,0 +1,170 @@
+version: "1"
+name: Create AlertZero proposal
+description: >
+  AlertZero's only door into the proposal gate. Forwards to
+  `system-create-proposal` and stamps `origin: alertzero` itself, so no caller
+  can attribute a proposal to the wrong feature by forgetting the field — the
+  queue filters on `origin` by exact equality, and a wrong value hides the
+  proposal from the analyst who was meant to see it.
+
+  Deliberately thin for now. It exists so AlertZero has one place to add
+  behaviour that must happen around every proposal it raises, rather than
+  repeating it at each call site.
+enabled: true
+tags:
+  - security
+  - alertzero
+  - proposals
+
+settings:
+  # Wall-clock from `startedAt`, and this run parks in WAITING_FOR_CHILD for as
+  # long as the gate holds the decision — which `expiresIn` lets a caller set,
+  # so no fixed window is safe here. A sentinel for the same reason the gate's
+  # own is one: this workflow has no timeout handler, so a ceiling that fires
+  # first cancels the bridge, orphans the parked gate and strands the proposal
+  # `pending`.
+  #
+  # Strictly longer than the gate's own `52w`, not equal to it: this clock
+  # starts before the gate is launched, so equal ceilings would have the parent
+  # expire first and lose a decision the child had already reached. A test pins
+  # the inequality.
+  timeout: "53w"
+
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        conversationId:
+          type: string
+          description: Conversation this proposal belongs to.
+        title:
+          type: string
+          description: >
+            Short plain-text label naming what is proposed — `comment` is
+            already the markdown body. Optional here, but stored on every
+            proposal: omitting it stores the action workflow's own name, or
+            `Proposed action` when the action has no name either.
+        comment:
+          type: string
+          description: >
+            Explains what is being proposed, rendered as markdown. Required:
+            a proposal a human cannot read is not reviewable.
+        actionWorkflowId:
+          type: string
+          description: >
+            Managed action workflow to execute once approved. Omit for a
+            proposal the analyst carries out themselves.
+        actionInput:
+          type: object
+          additionalProperties: true
+          description: Input for the action workflow.
+        impact:
+          type: string
+          enum: ["low", "medium", "high", "critical", ""]
+          description: Impact snapshotted at creation.
+        category:
+          type: string
+          description: Grouping axis for the decision queue.
+        confidence:
+          type: string
+          enum: ["low", "medium", "high", ""]
+          description: Confidence in the recommendation.
+        expiresIn:
+          type: string
+          description: >
+            How long the analyst has to decide, as a duration like `24h` or
+            `1w2d`. Defaults to 72h when unset, which the gate applies.
+        autoApprove:
+          type: boolean
+          description: >
+            Set by the caller when its autonomy policy already permits this
+            action. Defaults to false so the gate is fail-closed.
+        proposalId:
+          type: string
+          description: >
+            The id to create the proposal under, for a caller that derives it
+            from what it is proposing. An id that already exists fails the run
+            with a conflict before anything is gated. The caller owns the id, so
+            it must include the space and anything else that has to keep two
+            producers apart. Must be a UUID. Omit for a proposal that is always
+            new.
+      # `origin` is absent on purpose: this workflow owns it. The gate closes
+      # its own inputs to additional properties, so accepting one here would
+      # only let a caller pass a value that the forward below has to discard.
+      required:
+        - conversationId
+        - comment
+      additionalProperties: false
+
+# Mirrors the gate's own contract verbatim. Callers read
+# `steps.<step>.output.decision` and friends off this step, so dropping any of
+# these would leave those expressions undefined — falsy, and silently so.
+outputs:
+  - name: proposalId
+    type: string
+  - name: status
+    type: string
+  - name: decision
+    type: string
+
+steps:
+  # Reopen the investigation if it was closed before raising a proposal against
+  # it. A closed Investigation cannot hold a proposal — the analyst cannot see
+  # or act on it — so a caller that triggers a proposal on a closed one would
+  # silently strand it. Reopening first keeps the gate reachable.
+  - name: reopen_investigation
+    type: investigations.reopen
+    with:
+      conversationId: "${{ inputs.conversationId }}"
+
+  # `autoApprove` is forced false whenever the investigation was closed and had
+  # to be reopened, regardless of what the caller requested. A reopened
+  # investigation means a human already saw it once; skipping the gate on a
+  # re-review would bypass that review entirely.
+  #
+  # `inputs.autoApprove == true` guards the undefined case: when the caller
+  # omits `autoApprove`, the expression is `false and ...`, which stays false
+  # rather than coercing undefined to truthy.
+  - name: resolve_auto_approve
+    type: data.set
+    with:
+      value: "${{ inputs.autoApprove == true and steps.reopen_investigation.output.reopened != true }}"
+
+  # Every forward uses `${{ }}` rather than `{{ }}`. `{{ }}` renders through
+  # Liquid and turns an absent input into `''`, which the gate's trigger
+  # rejects for `autoApprove` (boolean) and `actionInput` (object) — the run
+  # would fail on a field the caller simply did not set. `${{ }}` evaluates and
+  # preserves the type, passing `undefined` through for the gate to treat as
+  # unset.
+  #
+  # `autoApprove` is sourced from `resolve_auto_approve` rather than
+  # `inputs.autoApprove` directly: the reopen guard above may have forced it
+  # false, and a simple passthrough would ignore that.
+  - name: create_proposal
+    type: workflow.execute
+    with:
+      workflow-id: system-create-proposal
+      run-as-mode: inherit
+      inputs:
+        conversationId: "${{ inputs.conversationId }}"
+        title: "${{ inputs.title }}"
+        comment: "${{ inputs.comment }}"
+        actionWorkflowId: "${{ inputs.actionWorkflowId }}"
+        actionInput: "${{ inputs.actionInput }}"
+        impact: "${{ inputs.impact }}"
+        category: "${{ inputs.category }}"
+        confidence: "${{ inputs.confidence }}"
+        expiresIn: "${{ inputs.expiresIn }}"
+        autoApprove: "${{ steps.resolve_auto_approve.output.value }}"
+        proposalId: "${{ inputs.proposalId }}"
+        origin: alertzero
+
+  # `{{ }}` here, matching how the gate emits these same three values, so an
+  # unset one reaches the caller as `''` exactly as it does today.
+  - name: output_result
+    type: workflow.output
+    status: completed
+    with:
+      proposalId: "{{ steps.create_proposal.output.proposalId }}"
+      status: "{{ steps.create_proposal.output.status }}"
+      decision: "{{ steps.create_proposal.output.decision }}"

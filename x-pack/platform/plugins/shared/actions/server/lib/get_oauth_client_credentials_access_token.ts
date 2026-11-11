@@ -44,6 +44,7 @@ interface GetOAuthClientCredentialsAccessTokenOpts {
   credentials: GetOAuthClientCredentials;
   connectorTokenClient?: ConnectorTokenClientContract;
   tokenEndpointAuthMethod?: 'client_secret_post' | 'client_secret_basic';
+  tokenType?: string;
 }
 
 export const getOAuthClientCredentialsAccessToken = async ({
@@ -55,6 +56,7 @@ export const getOAuthClientCredentialsAccessToken = async ({
   credentials,
   connectorTokenClient,
   tokenEndpointAuthMethod,
+  tokenType,
 }: GetOAuthClientCredentialsAccessTokenOpts) => {
   const { clientId } = credentials.config;
   const hasCredentials =
@@ -104,7 +106,8 @@ export const getOAuthClientCredentialsAccessToken = async ({
       logger,
       body,
       configurationUtilities,
-      tokenEndpointAuthMethod
+      tokenEndpointAuthMethod,
+      tokenType
     );
     accessToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;
 

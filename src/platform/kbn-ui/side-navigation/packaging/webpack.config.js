@@ -63,14 +63,6 @@ module.exports = {
       '@kbn/i18n/react': path.resolve(__dirname, 'react/services/i18n.tsx'),
       '@kbn/i18n-react': path.resolve(__dirname, 'react/services/i18n.tsx'),
       '@kbn/ui-chrome-layout': path.resolve(__dirname, '../../chrome-layout/target/index.js'),
-      '@kbn/ui-chrome-layout-constants': path.resolve(
-        __dirname,
-        '../../chrome-layout-constants/target/index.js'
-      ),
-      '@kbn/ui-chrome-layout-utils': path.resolve(
-        __dirname,
-        '../../chrome-layout-utils/target/index.js'
-      ),
     },
   },
 

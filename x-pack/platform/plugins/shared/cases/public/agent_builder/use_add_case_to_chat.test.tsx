@@ -8,14 +8,14 @@
 import React from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { act, renderHook } from '@testing-library/react';
-import { ChatEventType, type RoundCompleteEvent } from '@kbn/agent-builder-common';
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import { ChatEventType, type ToolUiEvent } from '@kbn/agent-builder-common';
 import { basicCase } from '../containers/mock';
 import { useCasesConfig, useKibana } from '../common/lib/kibana';
+import { CASE_ATTACHMENT_TYPE } from '../../common/types/agent_builder/attachment_schemas';
 import {
-  CASE_ATTACHMENT_TYPE,
-  type CaseAttachmentData,
-} from '../../common/types/agent_builder/attachment_schemas';
+  CASES_UPDATED_UI_EVENT,
+  type CasesUpdatedUiEventData,
+} from '../../common/types/agent_builder/ui_events';
 import { TestProviders, createTestQueryClient } from '../common/mock';
 import { casesQueriesKeys } from '../containers/constants';
 import { SUMMARIZE_CASE_PROMPT } from './translations';
@@ -29,6 +29,8 @@ const useCasesConfigMock = useCasesConfig as jest.Mock;
 const useKibanaMock = useKibana as jest.Mock;
 const useAgentBuilderAvailabilityMock = useAgentBuilderAvailability as jest.Mock;
 
+type CasesUpdatedUiEvent = ToolUiEvent<typeof CASES_UPDATED_UI_EVENT, CasesUpdatedUiEventData>;
+
 describe('useAddCaseToChat', () => {
   const openChat = jest.fn();
   const getUrlForApp = jest.fn().mockReturnValue('/app/security/cases/basic-case-id');
@@ -38,25 +40,13 @@ describe('useAddCaseToChat', () => {
       wrapper: (props) => <TestProviders {...props} queryClient={queryClient} />,
     });
 
-  const createCaseAttachment = (caseId: string): VersionedAttachment => ({
-    id: `${CASE_ATTACHMENT_TYPE}:${caseId}`,
-    type: CASE_ATTACHMENT_TYPE,
-    current_version: 1,
-    versions: [
-      {
-        version: 1,
-        data: { id: caseId } as CaseAttachmentData,
-        created_at: '2026-07-15T00:00:00.000Z',
-        content_hash: 'hash',
-      },
-    ],
-  });
-
-  const createRoundCompleteEvent = (attachments?: VersionedAttachment[]): RoundCompleteEvent => ({
-    type: ChatEventType.roundComplete,
+  const createCasesUpdatedEvent = (caseIds: string[]): CasesUpdatedUiEvent => ({
+    type: ChatEventType.toolUi,
     data: {
-      round: {} as RoundCompleteEvent['data']['round'],
-      attachments,
+      tool_id: 'platform.core.cases.manage',
+      tool_call_id: 'tool-call-1',
+      custom_event: CASES_UPDATED_UI_EVENT,
+      data: { caseIds },
     },
   });
 
@@ -64,7 +54,7 @@ describe('useAddCaseToChat', () => {
     const activeConversation$ = new BehaviorSubject<{ id?: string } | null>({
       id: 'conversation-1',
     });
-    const chatEvents$ = new Subject<RoundCompleteEvent>();
+    const chatEvents$ = new Subject<CasesUpdatedUiEvent>();
     const getChatEvents$ = jest.fn().mockReturnValue(chatEvents$);
 
     useKibanaMock.mockReturnValue({
@@ -175,7 +165,7 @@ describe('useAddCaseToChat', () => {
     expect(openChat).not.toHaveBeenCalled();
   });
 
-  it('refreshes the current case view when a completed agent round updates the case', () => {
+  it('refreshes the current case view when an agent tool updates the case', () => {
     const queryClient = createTestQueryClient();
     const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
     const { chatEvents$, getChatEvents$ } = mockAgentBuilderEvents();
@@ -185,7 +175,7 @@ describe('useAddCaseToChat', () => {
     expect(getChatEvents$).toHaveBeenCalledWith('conversation-1');
 
     act(() => {
-      chatEvents$.next(createRoundCompleteEvent([createCaseAttachment(basicCase.id)]));
+      chatEvents$.next(createCasesUpdatedEvent([basicCase.id]));
     });
 
     expect(invalidateQueriesSpy).toHaveBeenCalledWith(casesQueriesKeys.case(basicCase.id));
@@ -193,7 +183,7 @@ describe('useAddCaseToChat', () => {
     expect(invalidateQueriesSpy).toHaveBeenCalledWith(casesQueriesKeys.categories());
   });
 
-  it('does not refresh the case view for unrelated completed agent rounds', () => {
+  it('does not refresh the case view when an agent tool updates other cases', () => {
     const queryClient = createTestQueryClient();
     const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
     const { chatEvents$ } = mockAgentBuilderEvents();
@@ -201,7 +191,7 @@ describe('useAddCaseToChat', () => {
     renderUseAddCaseToChat(queryClient);
 
     act(() => {
-      chatEvents$.next(createRoundCompleteEvent([createCaseAttachment('unrelated-case-id')]));
+      chatEvents$.next(createCasesUpdatedEvent(['unrelated-case-id']));
     });
 
     expect(invalidateQueriesSpy).not.toHaveBeenCalled();
@@ -216,7 +206,7 @@ describe('useAddCaseToChat', () => {
     unmount();
 
     act(() => {
-      chatEvents$.next(createRoundCompleteEvent([createCaseAttachment(basicCase.id)]));
+      chatEvents$.next(createCasesUpdatedEvent([basicCase.id]));
     });
 
     expect(invalidateQueriesSpy).not.toHaveBeenCalled();

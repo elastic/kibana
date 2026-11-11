@@ -738,6 +738,49 @@ describe('VirusTotalConnector', () => {
       });
     });
 
+    it('should accept IPv4 and IPv6 and reject invalid addresses at the schema boundary', () => {
+      const { input } = VirusTotalConnector.actions.getIpReport;
+
+      expect(input.safeParse({ ip: '8.8.8.8' }).success).toBe(true);
+      expect(input.safeParse({ ip: '2001:4860:4860::8888' }).success).toBe(true);
+      expect(input.safeParse({ ip: '999.1.1.1' }).success).toBe(false);
+      expect(input.safeParse({ ip: 'example.com' }).success).toBe(false);
+      expect(input.safeParse({ ip: `${'0'.repeat(50)}::1` }).success).toBe(false);
+    });
+
+    it('should retrieve IPv6 address reputation report', async () => {
+      const mockResponse = {
+        data: {
+          data: {
+            id: '2001:4860:4860::8888',
+            attributes: {
+              reputation: 0,
+              country: 'US',
+              asn: 15169,
+              as_owner: 'Google LLC',
+            },
+          },
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await VirusTotalConnector.actions.getIpReport.handler(mockContext, {
+        ip: '2001:4860:4860::8888',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        `https://www.virustotal.com/api/v3/ip_addresses/${encodeURIComponent(
+          '2001:4860:4860::8888'
+        )}`
+      );
+      expect(result).toEqual({
+        id: '2001:4860:4860::8888',
+        attributes: mockResponse.data.data.attributes,
+        reputation: 0,
+        country: 'US',
+      });
+    });
+
     it('should handle malicious IP with negative reputation', async () => {
       const mockResponse = {
         data: {
@@ -814,6 +857,8 @@ describe('VirusTotalConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = VirusTotalConnector.test;
+
     it('should return success when API is accessible', async () => {
       const mockResponse = {
         data: {
@@ -828,30 +873,47 @@ describe('VirusTotalConnector', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!VirusTotalConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await VirusTotalConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://www.virustotal.com/api/v3/ip_addresses/8.8.8.8'
       );
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to VirusTotal API',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return failure when API is not accessible', async () => {
+    it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid API key'));
 
-      if (!VirusTotalConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await VirusTotalConnector.test.handler(mockContext);
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
+    });
+  });
 
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('Failed to connect');
+  describe('submitFile file size', () => {
+    const maxBytes = 32 * 1024 * 1024;
+    const isValid = (bytes: number) =>
+      VirusTotalConnector.actions.submitFile.input.safeParse({
+        file: Buffer.alloc(bytes).toString('base64'),
+      }).success;
+
+    it('is bounded at 32 MB once decoded', () => {
+      expect(isValid(maxBytes)).toBe(true);
+      expect(isValid(maxBytes + 1)).toBe(false);
+    });
+  });
+
+  describe('URL length bounds', () => {
+    const prefix = 'https://example.com/';
+    const url = (length: number) => `${prefix}${'a'.repeat(length - prefix.length)}`;
+
+    it.each([
+      [8192, true],
+      [8193, false],
+    ])('%d characters valid=%s', (length, expected) => {
+      const { scanUrl, getAnalysisResults } = VirusTotalConnector.actions;
+      expect(scanUrl.input.safeParse({ url: url(length) }).success).toBe(expected);
+      expect(
+        getAnalysisResults.input.safeParse({ id: url(length), resourceType: 'url' }).success
+      ).toBe(expected);
     });
   });
 });

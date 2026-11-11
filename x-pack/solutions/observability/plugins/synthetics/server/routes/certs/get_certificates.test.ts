@@ -7,7 +7,7 @@
 
 import * as getAllMonitors from '../../saved_objects/synthetics_monitor/process_monitors';
 import * as getCerts from '../../queries/get_certs';
-import { getSyntheticsCertsRoute } from './get_certificates';
+import { attachCertMonitorSpaces, getSyntheticsCertsRoute } from './get_certificates';
 import { MonitorConfigRepository } from '../../services/monitor_config_repository';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -157,7 +157,101 @@ describe('getSyntheticsCertsRoute', () => {
       remoteNames: ['cluster1', 'cluster2'],
       spaceId: 'default',
       includeBrowserCerts: true,
+      showFromAllSpaces: false,
     });
     expect(result).toEqual({ data: { ...remoteOnlyCerts } });
+  });
+
+  it('forwards showFromAllSpaces to getAll and the certs query', async () => {
+    // @ts-expect-error partial implementation for testing
+    jest.spyOn(getAllMonitors, 'processMonitors').mockReturnValue({
+      enabledMonitorQueryIds: ['other-id'],
+    });
+    const getCertsResult = {
+      total: 1,
+      certs: [
+        {
+          monitors: [
+            {
+              name: 'other-space-monitor',
+              id: 'other-id',
+              configId: 'other-id',
+              url: 'https://example.com',
+            },
+          ],
+          sha256: 'other-hash',
+          configId: 'other-id',
+        },
+      ],
+    };
+    const getSyntheticsCertsSpy = jest
+      .spyOn(getCerts, 'getSyntheticsCerts')
+      // @ts-expect-error partial implementation for testing
+      .mockReturnValue(getCertsResult);
+    const getAll = jest.fn().mockReturnValue([
+      {
+        attributes: { config_id: 'other-id' },
+        namespaces: ['team-a'],
+      },
+    ]);
+    const route = getSyntheticsCertsRoute();
+    const result = await route.handler({
+      // @ts-expect-error partial implementation for testing
+      request: { query: { showFromAllSpaces: true } },
+      // @ts-expect-error partial implementation for testing
+      syntheticsEsClient: jest.fn(),
+      // @ts-expect-error partial implementation for testing
+      monitorConfigRepository: { getAll },
+      server: serverlessServer,
+      spaceId: 'default',
+    });
+
+    expect(getAll).toHaveBeenCalledWith(
+      expect.objectContaining({
+        showFromAllSpaces: true,
+      })
+    );
+    expect(getSyntheticsCertsSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        showFromAllSpaces: true,
+        spaceId: 'default',
+      })
+    );
+    expect(result).toEqual({
+      data: {
+        total: 1,
+        certs: [
+          {
+            ...getCertsResult.certs[0],
+            monitors: [{ ...getCertsResult.certs[0].monitors[0], spaces: ['team-a'] }],
+          },
+        ],
+      },
+    });
+  });
+});
+
+describe('attachCertMonitorSpaces', () => {
+  const certs = {
+    total: 1,
+    certs: [
+      {
+        monitors: [{ name: 'mon', id: 'id-1', configId: 'cfg-1' }],
+        sha256: 'hash',
+        configId: 'cfg-1',
+      },
+    ],
+  } as any;
+
+  it('returns the payload unchanged when no monitor has namespaces', () => {
+    expect(attachCertMonitorSpaces(certs, [{ attributes: { config_id: 'cfg-1' } }])).toBe(certs);
+  });
+
+  it('copies saved-object namespaces onto matching cert monitors', () => {
+    expect(
+      attachCertMonitorSpaces(certs, [
+        { attributes: { config_id: 'cfg-1' }, namespaces: ['team-a'] },
+      ]).certs[0].monitors[0]
+    ).toEqual({ name: 'mon', id: 'id-1', configId: 'cfg-1', spaces: ['team-a'] });
   });
 });

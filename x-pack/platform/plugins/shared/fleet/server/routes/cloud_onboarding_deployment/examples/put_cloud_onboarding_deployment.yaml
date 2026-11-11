@@ -3,7 +3,7 @@ requestBody:
     application/json:
       examples:
         putCloudOnboardingDeploymentRequestExample:
-          description: 'Update a cloud onboarding deployment after the CFN stack has been submitted'
+          description: 'Update a cloud onboarding instance after the CFN stack has been submitted'
           value:
             status: 'deploying'
             deploymentId: 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb-ccc'
@@ -15,14 +15,14 @@ responses:
       application/json:
         examples:
           putCloudOnboardingDeploymentExample:
-            description: 'The updated cloud onboarding deployment'
+            description: 'The updated cloud onboarding instance'
             value:
               item:
                 id: 'onboarding-deployment-id-1'
                 provider: 'aws'
                 connectorId: 'cloud-connector-id-1'
                 mechanisms:
-                  - 'agentless'
+                  - 'managed_integration'
                 deploymentId: 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb-ccc'
                 deploymentName: 'elastic-aws-onboarding'
                 services:
@@ -30,6 +30,8 @@ responses:
                   - 'cloudtrail'
                 status: 'deploying'
                 attemptCount: 1
+                agentPolicyIds:
+                  - 'agent-policy-id-1'
                 packagePolicyIds:
                   - 'package-policy-id-1'
   400:
@@ -43,3 +45,14 @@ responses:
               statusCode: 400
               error: 'Bad Request'
               message: 'An error message describing what went wrong'
+  404:
+    description: 'Not Found'
+    content:
+      application/json:
+        examples:
+          notFoundResponseExample:
+            description: 'The requested cloud onboarding instance does not exist'
+            value:
+              statusCode: 404
+              error: 'Not Found'
+              message: 'Saved object [fleet-cloud-onboarding-deployment/unknown-id] not found'

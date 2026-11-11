@@ -295,9 +295,7 @@ export const regionMapESQLAttributes = {
       regionAccessor: 'a5d68e53-9965-482b-b38e-42aa1bcd3e75',
       valueAccessor: 'e71a4f1b-7cc0-4fcc-8223-a5a2d2a28d52',
     },
-    query: {
-      esql: 'FROM kibana_sample_data_logs | LIMIT 10',
-    },
+    query: { language: 'kuery', query: '' },
     filters: [],
     datasourceStates: {
       textBased: {
@@ -400,9 +398,7 @@ export const regionmapESQLAttributesWithEms = {
       emsLayerId: 'world_countries',
       emsField: 'iso2',
     },
-    query: {
-      esql: 'FROM kibana_sample_data_logs | LIMIT 10',
-    },
+    query: { language: 'kuery', query: '' },
     filters: [],
     datasourceStates: {
       textBased: {

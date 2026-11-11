@@ -19,8 +19,8 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
@@ -102,25 +102,28 @@ export default function QualityIssueFlyout() {
     }
 
     return (
-      <EuiCallOut
+      <KbnInfoCallout
         announceOnMount
-        color="primary"
         data-test-subj="datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist"
-      >
-        <FormattedMessage
-          id="xpack.datasetQuality.details.degradedField.potentialCause.ignoreMalformedWarning"
-          defaultMessage="If you've recently updated your {field_limit} settings, this quality issue may not be relevant. Rollover the data stream to verify."
-          values={{
-            field_limit: (
-              <strong>
-                {i18n.translate('xpack.datasetQuality.degradedFieldFlyout.strong.fieldLimitLabel', {
-                  defaultMessage: 'field limit',
-                })}
-              </strong>
-            ),
-          }}
-        />
-      </EuiCallOut>
+        title={
+          <FormattedMessage
+            id="xpack.datasetQuality.details.degradedField.potentialCause.ignoreMalformedWarning"
+            defaultMessage="If you've recently updated your {field_limit} settings, this quality issue may not be relevant. Rollover the data stream to verify."
+            values={{
+              field_limit: (
+                <strong>
+                  {i18n.translate(
+                    'xpack.datasetQuality.degradedFieldFlyout.strong.fieldLimitLabel',
+                    {
+                      defaultMessage: 'field limit',
+                    }
+                  )}
+                </strong>
+              ),
+            }}
+          />
+        }
+      />
     );
   }, [
     expandedDegradedField?.type,

@@ -45,13 +45,13 @@ import type {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type {
   ScreenshotModePluginSetup,
   ScreenshotModePluginStart,
 } from '@kbn/screenshot-mode-plugin/public';
+import type { SearchSessionsManagementPluginStart } from '@kbn/search-sessions-management-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type {
   ExportShareDerivatives,
@@ -78,11 +78,16 @@ import {
   SEARCH_SESSION_ID,
 } from '../common/page_bundle_constants';
 import { untilPluginStartServicesReady, setKibanaServices } from './services/kibana_services';
+import { dashboardAppClientApi$ } from './services/dashboard_app_client_api';
+import { getDashboardRecentlyAccessedService } from './services/dashboard_recently_accessed_service';
 import { setLogger } from './services/logger';
 import { registerActions } from './dashboard_actions/register_actions';
+import { getDashboardPageTitle } from './dashboard_app/_dashboard_app_strings';
 import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
 import type { FindDashboardsService } from './dashboard_client';
 import { DASHBOARD_DURATION_START_MARK } from './dashboard_api/telemetry/dashboard_duration_start_mark';
+import { dashboardSavedEventSchema } from './dashboard_api/telemetry/report_dashboard_saved';
+import { DASHBOARD_SAVED_EVENT } from './utils/telemetry_constants';
 import type { DashboardApi } from './dashboard_api/types';
 
 export interface DashboardSetupDependencies {
@@ -107,12 +112,12 @@ export interface DashboardStartDependencies {
   fieldFormats: FieldFormatsStart;
   inspector: InspectorStartContract;
   navigation: NavigationPublicPluginStart;
-  presentationUtil: PresentationUtilPluginStart;
   contentManagement: ContentManagementPublicStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   screenshotMode: ScreenshotModePluginStart;
   share?: SharePluginStart;
+  searchSessionsManagement?: SearchSessionsManagementPluginStart;
   spaces?: SpacesPluginStart;
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
@@ -142,6 +147,9 @@ export interface DashboardStart {
    */
   findDashboardsService: () => Promise<FindDashboardsService>;
 
+  /**
+   * The API of the loaded dashboard rendered with `publishAsAppClientApi`, if any.
+   */
   dashboardAppClientApi$: PublishingSubject<DashboardApi | undefined>;
 }
 
@@ -160,7 +168,6 @@ export class DashboardPlugin
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
   private listingViewRegistry: Set<DashboardListingTab> = new Set();
-  private dashboardAppApi$ = new BehaviorSubject<DashboardApi | undefined>(undefined);
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
@@ -170,6 +177,19 @@ export class DashboardPlugin
       eventType: 'dashboard_loaded_with_data',
       schema: {},
     });
+    core.analytics.registerEventType({
+      eventType: DASHBOARD_SAVED_EVENT,
+      schema: dashboardSavedEventSchema,
+    });
+
+    // Lazy-load via @kbn/change-history-ui/telemetry to avoid pulling React UI into page-load bundle.
+    void import('@kbn/change-history-ui/telemetry')
+      .then(({ registerChangeHistoryTelemetryEvents }) => {
+        registerChangeHistoryTelemetryEvents(core.analytics);
+      })
+      .catch(() => {
+        // Telemetry registration must not break plugin setup.
+      });
 
     if (share) {
       share.url.locators.create(
@@ -258,7 +278,7 @@ export class DashboardPlugin
 
     const app: App = {
       id: DASHBOARD_APP_ID,
-      title: 'Dashboards',
+      title: getDashboardPageTitle(),
       order: 2500,
       euiIconType: 'logoKibana',
       defaultPath: `#${LANDING_PAGE_PATH}`,
@@ -293,7 +313,6 @@ export class DashboardPlugin
           appUnMounted,
           element: params.element,
           mountContext,
-          setDashboardAppApi: (api) => this.dashboardAppApi$.next(api),
         });
       },
     };
@@ -342,6 +361,30 @@ export class DashboardPlugin
 
     registerActions(plugins);
 
+    plugins.navigation.registerNavigationLinks({
+      id: 'dashboardLinks',
+      target: 'dashboards',
+      lists: [
+        {
+          id: 'recentlyViewed',
+          title: i18n.translate('dashboard.navigation.recentlyViewedTitle', {
+            defaultMessage: 'Recently viewed',
+          }),
+          items$: getDashboardRecentlyAccessedService()
+            .get$()
+            .pipe(
+              map((items) =>
+                items.map((item) => ({
+                  id: item.id,
+                  href: core.http.basePath.prepend(item.link),
+                  label: item.label,
+                }))
+              )
+            ),
+        },
+      ],
+    });
+
     plugins.uiActions.registerActionAsync('searchDashboardAction', async () => {
       const { searchAction } = await import('./dashboard_client');
       return searchAction;
@@ -373,7 +416,7 @@ export class DashboardPlugin
         const { findService } = await import('./dashboard_client');
         return findService;
       },
-      dashboardAppClientApi$: this.dashboardAppApi$,
+      dashboardAppClientApi$,
     };
   }
 

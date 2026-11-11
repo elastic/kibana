@@ -160,3 +160,31 @@ test(`it throws other errors if there is an error creating the default space`, a
     `"unit test: some other unexpected error"`
   );
 });
+
+test(`it sets solutionSetupRequired when setup is enabled and no solution is configured`, async () => {
+  const deps = createMockDeps({ defaultExists: false });
+
+  await createDefaultSpace({ ...deps, solutionSetupRequired: true });
+
+  const repository = (await deps.getSavedObjects()).createInternalRepository();
+
+  expect(repository.create).toHaveBeenCalledWith(
+    'space',
+    expect.objectContaining({ solutionSetupRequired: true }),
+    { id: 'default' }
+  );
+});
+
+test(`it does not set solutionSetupRequired when a solution is configured`, async () => {
+  const deps = createMockDeps({ defaultExists: false });
+
+  await createDefaultSpace({ ...deps, solution: 'security', solutionSetupRequired: true });
+
+  const repository = (await deps.getSavedObjects()).createInternalRepository();
+
+  expect(repository.create).toHaveBeenCalledWith(
+    'space',
+    expect.not.objectContaining({ solutionSetupRequired: true }),
+    { id: 'default' }
+  );
+});

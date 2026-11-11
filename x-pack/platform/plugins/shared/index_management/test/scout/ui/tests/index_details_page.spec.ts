@@ -5,13 +5,27 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
+import { randomUUID } from 'crypto';
+import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
+import { NOT_SVL_SEARCH } from '../tags';
 
-test.describe('Index details page', { tag: tags.stateful.classic }, () => {
+const testIndexName = `index-details-page-test-${randomUUID()}`;
+
+// The a11y scans below are folded in as test.steps rather than a standalone
+// a11y spec. They never open a modal/flyout/menu, so the app wrapper is the
+// whole surface. (Migrated from x-pack accessibility/apps/group1/management.ts.)
+const A11Y_SELECTORS = ['.kbnAppWrapper'];
+
+// Excludes Search serverless: it has its own `search_indices` app for managing indices.
+test.describe('Index details page', { tag: NOT_SVL_SEARCH }, () => {
   test.beforeEach(async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsIndexManagementUser();
     await pageObjects.indexManagement.goto();
+  });
+
+  test.afterEach(async ({ esClient }) => {
+    await esClient.indices.delete({ index: testIndexName }, { ignore: [404] });
   });
 
   test('Navigates to the index details page from the home page', async ({ pageObjects, log }) => {
@@ -25,5 +39,95 @@ test.describe('Index details page', { tag: tags.stateful.classic }, () => {
 
     // Verify index details page is loaded
     await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
+  });
+
+  test('Shows enabled mappings and settings actions for a fresh index', async ({
+    pageObjects,
+    esClient,
+    page,
+  }) => {
+    const { indexManagement } = pageObjects;
+
+    // A mapped field makes the mappings tab render the populated fields UI
+    // instead of the empty prompt, matching the migrated FTR a11y sweep.
+    await esClient.indices.create({
+      index: testIndexName,
+      mappings: { properties: { '@timestamp': { type: 'date' } } },
+    });
+    await indexManagement.navigateToIndexManagementTab('indices');
+    await expect(indexManagement.indexLink(testIndexName)).toBeVisible({
+      timeout: 30000,
+    });
+
+    await test.step('indices list has no a11y violations', async () => {
+      const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
+      expect(violations).toStrictEqual([]);
+    });
+
+    await indexManagement.indexLink(testIndexName).click();
+    await expect(page.testSubj.locator('indexDetailsContent')).toBeVisible();
+
+    await test.step('overview, mappings, and settings tabs exist', async () => {
+      await expect(page.testSubj.locator('indexDetailsTab-overview')).toBeVisible();
+      await expect(page.testSubj.locator('indexDetailsTab-mappings')).toBeVisible();
+      await expect(page.testSubj.locator('indexDetailsTab-settings')).toBeVisible();
+    });
+
+    await test.step('overview tab has no a11y violations', async () => {
+      const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
+      expect(violations).toStrictEqual([]);
+    });
+
+    await test.step('mappings "Add field" button is enabled', async () => {
+      await indexManagement.indexDetailsPage.changeTab('mappings');
+      await expect(indexManagement.indexDetailsPage.mappingsAddFieldButton()).toBeEnabled();
+    });
+
+    await test.step('mappings tab has no a11y violations', async () => {
+      // Renders only for populated mappings — guards against regressing to the empty prompt.
+      await expect(page.testSubj.locator('indexDetailsMappingsToggleViewButton')).toBeVisible();
+      const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
+      expect(violations).toStrictEqual([]);
+    });
+
+    await test.step('settings "Edit settings" switch is enabled', async () => {
+      await indexManagement.indexDetailsPage.changeTab('settings');
+      await expect(indexManagement.indexDetailsPage.editSettingsSwitch()).toBeEnabled();
+    });
+
+    await test.step('settings tab has no a11y violations', async () => {
+      const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
+      expect(violations).toStrictEqual([]);
+    });
+
+    await test.step('settings tab in edit mode has no a11y violations', async () => {
+      await indexManagement.indexDetailsPage.enableSettingsEditMode();
+      const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
+      expect(violations).toStrictEqual([]);
+    });
+  });
+
+  test('Stats tab has no a11y violations for a fresh index', async ({
+    pageObjects,
+    esClient,
+    page,
+    config,
+  }) => {
+    // The stats tab is gated behind `enableIndexStats`, which is off on
+    // serverless, so it only renders (and can be scanned) on stateful.
+    test.skip(config.serverless, 'The stats tab is disabled on serverless');
+
+    const { indexManagement } = pageObjects;
+
+    await esClient.indices.create({ index: testIndexName });
+    await indexManagement.navigateToIndexManagementTab('indices');
+    await expect(indexManagement.indexLink(testIndexName)).toBeVisible({ timeout: 30000 });
+
+    await indexManagement.indexLink(testIndexName).click();
+    await expect(page.testSubj.locator('indexDetailsContent')).toBeVisible();
+
+    await indexManagement.indexDetailsPage.changeTab('stats');
+    const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
+    expect(violations).toStrictEqual([]);
   });
 });

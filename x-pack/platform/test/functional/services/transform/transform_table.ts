@@ -99,7 +99,7 @@ export function TransformTableProvider({ getPageObject, getService }: FtrProvide
       // should start quickly after the table exists. Sometimes it is even so quick that
       // the loading is already done when we try to check for it, so we're not failing
       // in that case and just move on.
-      await testSubjects.exists(`transformListTable loading`, { timeout: 3 * 1000 });
+      await testSubjects.waitForExists(`transformListTable loading`, { timeout: 3 * 1000 });
     }
 
     public async waitForTransformsTableToLoad() {
@@ -611,19 +611,23 @@ export function TransformTableProvider({ getPageObject, getService }: FtrProvide
     }
 
     public async assertTransformRowNotExists(transformId: string) {
-      await retry.tryForTime(30 * 1000, async () => {
-        // If after deletion, and there's no transform left
-        const noTransformsFoundMessageExists = await testSubjects.exists(
-          'transformNoTransformsFound'
-        );
+      // Deleting the last transform unmounts the table in favour of the empty prompt.
+      const settled = await testSubjects.waitForFirst(
+        ['transformNoTransformsFound', 'transformListTable loaded'],
+        { timeout: 30 * 1000 }
+      );
 
-        if (noTransformsFoundMessageExists) {
-          return true;
-        } else {
-          // Checks that the tranform was deleted
-          await this.filterWithSearchString(transformId, 0);
-        }
-      });
+      if (settled === undefined) {
+        throw new Error(
+          `expected the empty prompt or the loaded transform list after deleting '${transformId}'`
+        );
+      }
+
+      if (settled === 'transformNoTransformsFound') {
+        return;
+      }
+
+      await testSubjects.missingOrFail(this.rowSelector(transformId), { timeout: 30 * 1000 });
     }
 
     public async confirmReauthorizeTransform() {

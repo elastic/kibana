@@ -7,34 +7,33 @@
 
 import type { HeatmapElementEvent } from '@elastic/charts';
 import type { EuiBadgeProps, EuiThemeComputed } from '@elastic/eui';
-import { first, get, includes, isEmpty, isString, lowerCase } from 'lodash';
+import { first, get } from 'lodash';
+import {
+  ALERT_SEVERITY_CRITICAL,
+  ALERT_SEVERITY_HIGH,
+  ALERT_SEVERITY_INFO,
+  ALERT_SEVERITY_LOW,
+  ALERT_SEVERITY_MEDIUM,
+  ALERT_SEVERITY_VALUES,
+  type AlertSeverity,
+} from '@kbn/rule-data-utils';
+import {
+  EpisodeSeverity,
+  EPISODE_SEVERITIES,
+  EPISODE_SEVERITY_CHART_VALUE,
+  EPISODE_SEVERITY_FILTER_NONE,
+  isSupportedEpisodeSeverity,
+  normalizeEpisodeSeverity,
+} from '@kbn/alerting-v2-common-queries';
 import * as i18n from './translations';
 
-export enum EpisodeSeverity {
-  Info = 'info',
-  Low = 'low',
-  Medium = 'medium',
-  High = 'high',
-  Critical = 'critical',
-}
-
-export const EPISODE_SEVERITIES: EpisodeSeverity[] = [
-  EpisodeSeverity.Info,
-  EpisodeSeverity.Low,
-  EpisodeSeverity.Medium,
-  EpisodeSeverity.High,
-  EpisodeSeverity.Critical,
-];
-
-/** Just for the episodes list filters — episodes with no aggregated severity. */
-export const EPISODE_SEVERITY_FILTER_NONE = '__no_severity__';
-
-export const EPISODE_SEVERITY_CHART_VALUE: Record<EpisodeSeverity, number> = {
-  [EpisodeSeverity.Info]: 0,
-  [EpisodeSeverity.Low]: 1,
-  [EpisodeSeverity.Medium]: 2,
-  [EpisodeSeverity.High]: 3,
-  [EpisodeSeverity.Critical]: 4,
+export {
+  EpisodeSeverity,
+  EPISODE_SEVERITIES,
+  EPISODE_SEVERITY_CHART_VALUE,
+  EPISODE_SEVERITY_FILTER_NONE,
+  isSupportedEpisodeSeverity,
+  normalizeEpisodeSeverity,
 };
 
 interface EpisodeSeverityColorBand {
@@ -59,13 +58,31 @@ export const EPISODE_SEVERITY_BADGE_COLORS: Record<
 > = {
   [EpisodeSeverity.Critical]: 'danger',
   [EpisodeSeverity.High]: 'risk',
-  [EpisodeSeverity.Medium]: 'success',
-  [EpisodeSeverity.Low]: 'primary',
+  [EpisodeSeverity.Medium]: 'warning',
+  [EpisodeSeverity.Low]: 'neutral',
   [EpisodeSeverity.Info]: 'default',
 };
 
-/** Heatmap cell fill colors aligned with `EuiBadge` fill backgrounds for each severity. */
-export const getEpisodeSeverityHeatmapColor = (
+/** Ascending sort rank of a severity on the shared highest-to-lowest `ALERT_SEVERITY_VALUES` scale. */
+export const getSeveritySortRank = (severity: AlertSeverity): number =>
+  ALERT_SEVERITY_VALUES.length - 1 - ALERT_SEVERITY_VALUES.indexOf(severity);
+
+/**
+ * Display and table-sort rank, lowest to highest, shared with classic severity
+ * extensions so the merged filter and sort use one scale.
+ * Distinct from {@link EPISODE_SEVERITY_CHART_VALUE}, which stays on the
+ * five-level chart axis.
+ */
+export const EPISODE_SEVERITY_SORT_RANK: Record<EpisodeSeverity, number> = {
+  [EpisodeSeverity.Info]: getSeveritySortRank(ALERT_SEVERITY_INFO),
+  [EpisodeSeverity.Low]: getSeveritySortRank(ALERT_SEVERITY_LOW),
+  [EpisodeSeverity.Medium]: getSeveritySortRank(ALERT_SEVERITY_MEDIUM),
+  [EpisodeSeverity.High]: getSeveritySortRank(ALERT_SEVERITY_HIGH),
+  [EpisodeSeverity.Critical]: getSeveritySortRank(ALERT_SEVERITY_CRITICAL),
+};
+
+/** Heatmap and timeline fills aligned with the same color family as the severity badge. */
+export const getEpisodeSeverityColor = (
   euiTheme: EuiThemeComputed,
   severity: EpisodeSeverity
 ): string => {
@@ -75,28 +92,14 @@ export const getEpisodeSeverityHeatmapColor = (
     case EpisodeSeverity.High:
       return euiTheme.colors.backgroundFilledRisk;
     case EpisodeSeverity.Medium:
-      return euiTheme.colors.backgroundFilledSuccess;
+      return euiTheme.colors.backgroundFilledWarning;
     case EpisodeSeverity.Low:
-      return euiTheme.colors.backgroundFilledPrimary;
+      return euiTheme.colors.backgroundFilledNeutral;
     case EpisodeSeverity.Info:
       return euiTheme.components.badgeBackground;
     default:
       return euiTheme.components.badgeBackground;
   }
-};
-
-export const isSupportedEpisodeSeverity = (
-  severity: string | undefined | null
-): severity is string => {
-  if (!isString(severity) || isEmpty(severity)) {
-    return false;
-  }
-
-  return includes(EPISODE_SEVERITIES, lowerCase(severity));
-};
-
-export const normalizeEpisodeSeverity = (severity: string): EpisodeSeverity => {
-  return lowerCase(severity) as EpisodeSeverity;
 };
 
 export const getEpisodeSeverityLabel = (severity: EpisodeSeverity): string => {

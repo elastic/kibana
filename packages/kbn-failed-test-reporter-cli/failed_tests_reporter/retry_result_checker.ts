@@ -11,7 +11,7 @@ import Path from 'path';
 
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
-import globby from 'globby';
+import { globby } from 'globby';
 import normalize from 'normalize-path';
 
 import { makeTestCaseIter, readTestReport } from './test_report';

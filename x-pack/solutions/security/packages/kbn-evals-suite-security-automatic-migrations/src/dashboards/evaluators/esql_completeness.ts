@@ -16,6 +16,7 @@ export const createEsqlCompletenessEvaluator = (): Evaluator<
 > => ({
   name: 'ES|QL Completeness',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({
     output,
   }: {

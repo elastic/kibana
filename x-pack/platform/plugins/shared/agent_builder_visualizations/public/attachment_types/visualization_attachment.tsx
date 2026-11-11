@@ -42,7 +42,7 @@ export const createVisualizationAttachmentDefinition = (
       const { title } = attachment.data.visualization ?? {};
       return typeof title === 'string' && title.length > 0 ? title : defaultVisualizationLabel;
     },
-    getIcon: () => 'lensApp',
+    getIcon: () => 'productLens',
     getMaxWidth: (attachment) => {
       const { data } = attachment;
       return getVisualizationDimensionsFromLensConfig(data.visualization as Record<string, unknown>)
@@ -56,6 +56,7 @@ export const createVisualizationAttachmentDefinition = (
           services={services}
           renderer={data.renderer}
           visualization={data.visualization}
+          esql={data.esql}
           timeRange={data.time_range ?? screenContext?.time_range}
           registerActionButtons={callbacks?.registerActionButtons}
         />

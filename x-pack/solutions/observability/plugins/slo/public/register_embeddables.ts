@@ -14,6 +14,7 @@ import { SLO_ERROR_BUDGET_ID } from './embeddable/slo/error_budget/constants';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from '../common/embeddables/overview/constants';
 import type { OverviewEmbeddableState } from '../common/embeddables/overview/types';
 import { registerSloUiActions } from './ui_actions/register_ui_actions';
+import { createUnwrappingSloClient } from './utils/unwrap_slo_client';
 import type { SLOPublicPluginsSetup, SLOPublicPluginsStart, SLORepositoryClient } from './types';
 
 export interface RegisterEmbeddablesDeps {
@@ -26,9 +27,14 @@ export interface RegisterEmbeddablesDeps {
 export const registerEmbeddables = ({
   core,
   plugins,
-  sloClient,
+  sloClient: rawSloClient,
   kibanaVersion,
 }: RegisterEmbeddablesDeps) => {
+  // Embeddables and their configuration flyouts don't render the ES query inspect
+  // flyout, so they need the inspection envelope (`_wrapped`/`_inspect`) stripped
+  // from route responses. See createUnwrappingSloClient.
+  const sloClient = createUnwrappingSloClient(rawSloClient);
+
   plugins.embeddable.registerEmbeddablePublicDefinition(SLO_OVERVIEW_EMBEDDABLE_ID, async () => {
     const [{ getOverviewEmbeddableFactory }, [coreStart, pluginsStart]] = await Promise.all([
       import('./embeddable/slo/overview/slo_embeddable_factory'),

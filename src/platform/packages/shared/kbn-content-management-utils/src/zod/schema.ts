@@ -7,15 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, type ZodType } from '@kbn/zod';
-
-/**
- * Some Zod object schema type
- *
- * This enforces only that the **output** of the schema is an object, not that
- * it is of the type `ZodObject`.
- */
-export type ZodObjectType = ZodType<Record<string, unknown>>; // TODO: move this to kbn-zod package
+import { z, type ZodObjectType } from '@kbn/zod';
 
 export const apiError = z.object({
   error: z.string(),
@@ -60,15 +52,9 @@ export const objectTypeToGetResultSchema = <T extends ZodObjectType>(soSchema: T
       item: soSchema,
       meta: z
         .object({
-          outcome: z.union([
-            z.literal('exactMatch'),
-            z.literal('aliasMatch'),
-            z.literal('conflict'),
-          ]),
+          outcome: z.enum(['exactMatch', 'aliasMatch', 'conflict']),
           aliasTargetId: z.string().optional(),
-          aliasPurpose: z
-            .union([z.literal('savedObjectConversion'), z.literal('savedObjectImport')])
-            .optional(),
+          aliasPurpose: z.enum(['savedObjectConversion', 'savedObjectImport']).optional(),
         })
         .strict(),
     })
@@ -84,13 +70,13 @@ export const createOptionsSchema = z.object({
   managed: z.boolean().optional(),
 });
 
-export const schemaAndOr = z.union([z.literal('AND'), z.literal('OR')]);
+export const schemaAndOr = z.enum(['AND', 'OR']);
 
 export const searchOptionsSchema = z.object({
   page: z.number().optional(),
   perPage: z.number().optional(),
   sortField: z.string().optional(),
-  sortOrder: z.union([z.literal('asc'), z.literal('desc')]).optional(),
+  sortOrder: z.enum(['asc', 'desc']).optional(),
   fields: z.array(z.string()).optional(),
   search: z.string().optional(),
   searchFields: z.union([z.string(), z.array(z.string())]).optional(),

@@ -10,7 +10,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ConfigComparison } from '../report/to_config_comparison';
 import type { ConfigSummary } from '../report/to_config_summary';
-import type { ConfigResult } from '../runner/types';
+import type { BenchmarkRunResult, ConfigResult } from '../runner/types';
 
 export type CompareExists = 'lhs' | 'virtual' | 'rhs';
 export type CompareMissing = 'skip' | 'lhs' | 'virtual';
@@ -51,6 +51,42 @@ export interface ScriptBenchmark extends BenchmarkBase {
 
 export type Benchmark = ModuleBenchmark | ScriptBenchmark;
 
+export interface PairedComparisonRun {
+  readonly mode: 'paired';
+  readonly pairs: number;
+  readonly maxAttempts: number;
+}
+
+export interface PairedComparisonStart {
+  readonly attempt: number;
+  readonly pair?: number;
+  readonly side: 'baseline' | 'target';
+  readonly orderPosition: 0 | 1;
+  readonly result: BenchmarkRunResult;
+}
+
+export interface PairedComparisonPair {
+  readonly pair: number;
+  readonly baseline: PairedComparisonStart;
+  readonly target: PairedComparisonStart;
+}
+
+export interface PairedBenchmarkComparison {
+  readonly benchmarkName: string;
+  readonly requestedPairs: number;
+  readonly attemptedPairs: number;
+  readonly validPairs: readonly PairedComparisonPair[];
+  readonly starts: readonly PairedComparisonStart[];
+  readonly order: ReadonlyArray<'baseline-target' | 'target-baseline'>;
+}
+
+export interface PairedComparisonResult {
+  readonly mode: 'paired';
+  readonly baselineIdentity: string;
+  readonly targetIdentity: string;
+  readonly benchmarks: readonly PairedBenchmarkComparison[];
+}
+
 export interface OnCompareContext {
   log: ToolingLog;
   left: ConfigResult;
@@ -58,6 +94,7 @@ export interface OnCompareContext {
   leftSummary: ConfigSummary;
   rightSummary: ConfigSummary;
   comparison: ConfigComparison;
+  pairedComparison?: PairedComparisonResult;
 }
 
 export type OnCompareCallback = (context: OnCompareContext) => void | Promise<void>;
@@ -72,6 +109,7 @@ export interface InitialBenchConfig {
   profile?: boolean;
   openProfile?: boolean;
   onCompare?: OnCompareCallback;
+  comparisonRun?: PairedComparisonRun;
 }
 
 export interface InitialBenchConfigWithPath extends InitialBenchConfig {
@@ -88,6 +126,7 @@ export interface LoadedBenchConfig extends InitialBenchConfigWithPath {
   tracing: boolean;
   grep: string[] | undefined;
   benchmarks: Benchmark[];
+  comparisonRun?: PairedComparisonRun;
 }
 
 export interface GlobalBenchConfig {

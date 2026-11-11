@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { convertValueToString } from './convert_value_to_string';
 import { formatFieldValueText } from './format_value';
@@ -118,6 +119,58 @@ describe('convertValueToString', () => {
           formattedString: `formattedValue`,
           withFormula: false,
         });
+      });
+    });
+
+    describe('when the flattened value is missing', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it.each([
+        ['null', null],
+        ['undefined', undefined],
+        ['a missing bucket', MISSING_TOKEN],
+      ])('should return the dash the grid renders for %s', (_name, flattenedValue) => {
+        const result = convertValueToString({
+          dataView: dataViewComplexMock,
+          dataViewField: mockStringField,
+          flattenedValue,
+          dataTableRecord: {
+            id: '1',
+            raw: {},
+            flattened: { testKey: 'testValue' },
+          },
+          fieldFormats: fieldFormatsMock,
+          options: { compatibleWithCSV: true },
+        });
+
+        // "-" starts a formula, but the dash is our own constant rather than document content,
+        // so it must not come back escaped as "'-" even when the value is CSV compatible.
+        expect(result).toEqual({
+          formattedString: '-',
+          withFormula: false,
+        });
+        expect(mockFormatFieldValueText).not.toHaveBeenCalled();
+      });
+
+      it('should keep populated values alongside a missing one', () => {
+        mockFormatFieldValueText.mockReturnValueOnce('value2');
+
+        const result = convertValueToString({
+          dataView: dataViewComplexMock,
+          dataViewField: mockStringField,
+          flattenedValue: [null, 'value2'],
+          dataTableRecord: {
+            id: '1',
+            raw: {},
+            flattened: { testKey: 'testValue' },
+          },
+          fieldFormats: fieldFormatsMock,
+          options: { compatibleWithCSV: true },
+        });
+
+        expect(result.formattedString).toBe('-, value2');
       });
     });
   });

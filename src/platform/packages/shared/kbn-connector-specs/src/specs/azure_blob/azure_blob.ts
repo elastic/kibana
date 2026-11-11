@@ -22,6 +22,11 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 
 const AZURE_BLOB_API_VERSION = '2021-06-08';
+const MAX_CONTAINER_NAME_LENGTH = 63;
+const MAX_BLOB_NAME_LENGTH = 1024;
+const MAX_MARKER_LENGTH = 2048;
+// Azure returns at most 5000 items per page and rejects maxresults below 1.
+const MAX_RESULTS = 5000;
 
 function encodePathSegment(segment: string): string {
   return encodeURIComponent(segment).replace(/%2F/gi, '/');
@@ -123,13 +128,13 @@ export const AzureBlob: ConnectorSpec = {
   metadata: {
     id: '.azure-blob',
     displayName: 'Azure Blob Storage',
-    description: i18n.translate('core.kibanaConnectorSpecs.azureBlob.metadata.description', {
+    description: i18n.translate('connectorSpecs.azureBlob.metadata.description', {
       defaultMessage:
         'Connect to Azure Blob Storage to list containers and blobs, and retrieve blob content.',
     }),
     isTechnicalPreview: true,
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
@@ -145,23 +150,20 @@ export const AzureBlob: ConnectorSpec = {
         .string()
         .min(1)
         .describe(
-          i18n.translate('core.kibanaConnectorSpecs.azureBlob.config.accountUrl.description', {
+          i18n.translate('connectorSpecs.azureBlob.config.accountUrl.description', {
             defaultMessage: 'Azure Blob Storage account URL',
           })
         )
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.azureBlob.config.accountUrl.label', {
+          label: i18n.translate('connectorSpecs.azureBlob.config.accountUrl.label', {
             defaultMessage: 'Storage account URL',
           }),
           placeholder: 'https://myaccount.blob.core.windows.net',
-          helpText: i18n.translate(
-            'core.kibanaConnectorSpecs.azureBlob.config.accountUrl.helpText',
-            {
-              defaultMessage:
-                'The blob service endpoint, for example https://myaccount.blob.core.windows.net.',
-            }
-          ),
+          helpText: i18n.translate('connectorSpecs.azureBlob.config.accountUrl.helpText', {
+            defaultMessage:
+              'The blob service endpoint, for example https://myaccount.blob.core.windows.net.',
+          }),
         }),
     })
   ),
@@ -169,22 +171,28 @@ export const AzureBlob: ConnectorSpec = {
   actions: {
     listContainers: {
       isTool: true,
+      scope: 'read',
       description:
         'List all containers in the Azure Blob Storage account. Supports optional prefix filtering and cursor-based pagination via marker.',
       input: lazySchema(() =>
         z.object({
           prefix: z
             .string()
+            .max(MAX_CONTAINER_NAME_LENGTH)
             .optional()
             .describe(
               'Optional prefix to filter containers by name. Only containers whose names begin with this string are returned.'
             ),
           maxresults: z
             .number()
+            .int()
+            .min(1)
+            .max(MAX_RESULTS)
             .optional()
             .describe('Maximum number of containers to return. Omit to use the service default.'),
           marker: z
             .string()
+            .max(MAX_MARKER_LENGTH)
             .optional()
             .describe(
               'Pagination cursor returned as nextMarker from a previous listContainers response. Pass this to retrieve the next page.'
@@ -213,25 +221,32 @@ export const AzureBlob: ConnectorSpec = {
 
     listBlobs: {
       isTool: true,
+      scope: 'read',
       description:
         'List blobs inside a specific Azure Blob Storage container. Supports optional prefix filtering and cursor-based pagination.',
       input: lazySchema(() =>
         z.object({
           container: z
             .string()
+            .max(MAX_CONTAINER_NAME_LENGTH)
             .describe('The name of the container to list blobs from. Example: "my-container"'),
           prefix: z
             .string()
+            .max(MAX_BLOB_NAME_LENGTH)
             .optional()
             .describe(
               'Optional prefix to filter blobs by name. Only blobs whose names begin with this string are returned. Example: "logs/2024/"'
             ),
           maxresults: z
             .number()
+            .int()
+            .min(1)
+            .max(MAX_RESULTS)
             .optional()
             .describe('Maximum number of blobs to return. Omit to use the service default.'),
           marker: z
             .string()
+            .max(MAX_MARKER_LENGTH)
             .optional()
             .describe(
               'Pagination cursor returned as nextMarker from a previous listBlobs response. Pass this to retrieve the next page.'
@@ -262,15 +277,18 @@ export const AzureBlob: ConnectorSpec = {
 
     getBlob: {
       isTool: true,
+      scope: 'read',
       description:
         'Download the full content of a blob from Azure Blob Storage, returned as base64. Always call getBlobProperties first to check contentLength — do not call this if the blob exceeds 1048576 bytes (1 MB).',
       input: lazySchema(() =>
         z.object({
           container: z
             .string()
+            .max(MAX_CONTAINER_NAME_LENGTH)
             .describe('The name of the container that holds the blob. Example: "my-container"'),
           blobName: z
             .string()
+            .max(MAX_BLOB_NAME_LENGTH)
             .describe(
               'The full name (path) of the blob to download. Example: "logs/2024/january.log"'
             ),
@@ -298,15 +316,18 @@ export const AzureBlob: ConnectorSpec = {
 
     getBlobProperties: {
       isTool: true,
+      scope: 'read',
       description:
         'Get metadata for a blob (content type, size, last modified, etag) without downloading its content. Call this before getBlob to check whether the blob is small enough to download (limit: 1048576 bytes / 1 MB).',
       input: lazySchema(() =>
         z.object({
           container: z
             .string()
+            .max(MAX_CONTAINER_NAME_LENGTH)
             .describe('The name of the container that holds the blob. Example: "my-container"'),
           blobName: z
             .string()
+            .max(MAX_BLOB_NAME_LENGTH)
             .describe(
               'The full name (path) of the blob to inspect. Example: "logs/2024/january.log"'
             ),
@@ -354,25 +375,21 @@ export const AzureBlob: ConnectorSpec = {
   ].join('\n'),
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.azureBlob.test.description', {
+    description: i18n.translate('connectorSpecs.azureBlob.test.description', {
       defaultMessage: 'Verifies Azure Blob connection by listing containers with maxresults=1',
     }),
     handler: async (ctx) => {
       ctx.log.debug('Azure Blob test handler');
-      try {
-        const baseUrl = getBaseUrl(ctx);
-        if (!baseUrl) {
-          return { ok: false, message: 'Storage account URL is required' };
-        }
-        await ctx.client.get(`${baseUrl}/`, {
-          params: { comp: 'list', maxresults: 1 },
-          responseType: 'text',
-        });
-        return { ok: true, message: 'Successfully connected to Azure Blob Storage' };
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        return { ok: false, message };
+      const baseUrl = getBaseUrl(ctx);
+      if (!baseUrl) {
+        throw new Error('Storage account URL is required');
       }
+      await ctx.client.get(`${baseUrl}/`, {
+        params: { comp: 'list', maxresults: 1 },
+        responseType: 'text',
+      });
+      return {};
     },
+    enabled: true,
   },
 };

@@ -12,7 +12,6 @@ import { getESQLResults } from '@kbn/esql-utils';
 import { buildEsQuery } from '@kbn/es-query';
 import { getTime } from '@kbn/data-plugin/public';
 import { ESQLVariableType } from '@kbn/esql-types';
-import { dataViewWithAtTimefieldMock } from '@kbn/unified-histogram/__mocks__/data_view_with_timefield';
 import {
   MetricsExecutionContextAction,
   MetricsExecutionContextName,
@@ -62,7 +61,7 @@ describe('executeEsqlQuery', () => {
     mockGetTime.mockReturnValue(undefined);
   });
 
-  it('calls getESQLResults with the given esqlQuery, search, signal, dataView, timeRange, and variables', async () => {
+  it('calls getESQLResults with the given esqlQuery, search, signal, timeFieldName, timeRange, and variables', async () => {
     const signal = new AbortController().signal;
     const timeRange = { from: 'now-15m', to: 'now' };
     const variables = [{ key: 'x', value: 'y', type: ESQLVariableType.VALUES }];
@@ -71,7 +70,7 @@ describe('executeEsqlQuery', () => {
       esqlQuery: 'TS metrics-* | METRICS_INFO',
       search: mockSearch,
       signal,
-      dataView: dataViewWithAtTimefieldMock,
+      timeFieldName: '@timestamp',
       timeRange,
       filters: [],
       variables,
@@ -94,13 +93,14 @@ describe('executeEsqlQuery', () => {
         ),
       })
     );
+    expect(mockGetESQLResults.mock.calls[0][0]).not.toHaveProperty('approximation');
   });
 
   it('passes metrics info execution context so the request is labeled in APM', async () => {
     await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',
       search: mockSearch,
-      dataView: dataViewWithAtTimefieldMock,
+      timeFieldName: '@timestamp',
       uiSettings: mockUiSettings,
       profileId: 'metrics-data-source-profile',
     });
@@ -116,11 +116,28 @@ describe('executeEsqlQuery', () => {
     );
   });
 
+  it('labels the request with the supplied executionContextName', async () => {
+    await executeEsqlQuery({
+      esqlQuery: 'FROM exemplars-*.otel-* | STATS BY metric_name',
+      search: mockSearch,
+      timeFieldName: '@timestamp',
+      uiSettings: mockUiSettings,
+      profileId: 'metrics-data-source-profile',
+      executionContextName: MetricsExecutionContextName.EXEMPLARS,
+    });
+
+    expect(mockGetESQLResults).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: expect.objectContaining({ page: 'metrics_fetch_exemplars' }),
+      })
+    );
+  });
+
   it('forwards profileId onto executionContext.meta so the server-side APM transaction is tagged via the standardized pipeline', async () => {
     await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',
       search: mockSearch,
-      dataView: dataViewWithAtTimefieldMock,
+      timeFieldName: '@timestamp',
       uiSettings: mockUiSettings,
       profileId: 'metrics-data-source-profile',
     });
@@ -139,7 +156,7 @@ describe('executeEsqlQuery', () => {
     const result = await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',
       search: mockSearch,
-      dataView: dataViewWithAtTimefieldMock,
+      timeFieldName: '@timestamp',
       uiSettings: mockUiSettings,
       profileId: 'metrics-data-source-profile',
     });
@@ -160,7 +177,7 @@ describe('executeEsqlQuery', () => {
     expect(result.rawResponse).toBeDefined();
   });
 
-  it('builds filter from time and filters when timeRange and dataView have timeFieldName', async () => {
+  it('builds filter from time and filters when timeRange and timeFieldName are provided', async () => {
     const timeFilter = {
       meta: { index: 'test', type: 'range' as const },
       query: { range: {} },
@@ -170,7 +187,7 @@ describe('executeEsqlQuery', () => {
     await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',
       search: mockSearch,
-      dataView: dataViewWithAtTimefieldMock,
+      timeFieldName: '@timestamp',
       timeRange: { from: 'now-1h', to: 'now' },
       filters: [],
       uiSettings: mockUiSettings,
@@ -178,9 +195,9 @@ describe('executeEsqlQuery', () => {
     });
 
     expect(mockGetTime).toHaveBeenCalledWith(
-      dataViewWithAtTimefieldMock,
+      undefined,
       { from: 'now-1h', to: 'now' },
-      { fieldName: dataViewWithAtTimefieldMock.timeFieldName }
+      { fieldName: '@timestamp' }
     );
     expect(mockBuildEsQuery).toHaveBeenCalled();
     expect(mockGetESQLResults).toHaveBeenCalledWith(
@@ -196,7 +213,7 @@ describe('executeEsqlQuery', () => {
     await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',
       search: mockSearch,
-      dataView: dataViewWithAtTimefieldMock,
+      timeFieldName: '@timestamp',
       filters: [],
       uiSettings: mockUiSettings,
       profileId: 'metrics-data-source-profile',
@@ -224,7 +241,7 @@ describe('executeEsqlQuery', () => {
       executeEsqlQuery({
         esqlQuery: 'TS metrics-* | METRICS_INFO',
         search: mockSearch,
-        dataView: dataViewWithAtTimefieldMock,
+        timeFieldName: '@timestamp',
         uiSettings: mockUiSettings,
         profileId: 'metrics-data-source-profile',
       })
@@ -250,7 +267,7 @@ describe('executeEsqlQuery', () => {
       executeEsqlQuery({
         esqlQuery: 'TS metrics-* | METRICS_INFO',
         search: mockSearch,
-        dataView: dataViewWithAtTimefieldMock,
+        timeFieldName: '@timestamp',
         uiSettings: mockUiSettings,
         profileId: 'metrics-data-source-profile',
       })

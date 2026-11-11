@@ -10,7 +10,7 @@ import type { EnrichmentDataSource } from '../../common/url_schema';
 
 type StreamType = 'wired' | 'classic' | 'query' | 'unknown';
 
-type ConfigurationMode = 'interactive' | 'yaml';
+type ConfigurationMode = 'interactive' | 'yaml' | 'json';
 
 type StreamsAttachmentCountProps = {
   name: string;

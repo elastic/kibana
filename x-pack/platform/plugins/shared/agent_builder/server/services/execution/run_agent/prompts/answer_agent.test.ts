@@ -7,10 +7,12 @@
 
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { getStructuredAnswerPrompt } from './answer_agent';
-import { convertPreviousRounds } from '../utils/to_langchain_messages';
+import { attachmentToolsUnavailableNotice } from './utils/attachments';
+import { prepareMessages } from '../utils/to_langchain_messages';
 
 jest.mock('../utils/to_langchain_messages', () => ({
-  convertPreviousRounds: jest.fn().mockResolvedValue([['human', 'history']]),
+  ...jest.requireActual('../utils/to_langchain_messages'),
+  prepareMessages: jest.fn().mockResolvedValue([['human', 'history']]),
 }));
 
 describe('getStructuredAnswerPrompt', () => {
@@ -20,7 +22,7 @@ describe('getStructuredAnswerPrompt', () => {
     const params = {
       conversationTimestamp: now,
       processedConversation: {
-        previousRounds: [],
+        timeline: [],
         nextInput: { message: '', attachments: [] },
         attachments: [],
         attachmentTypes: [],
@@ -35,12 +37,16 @@ describe('getStructuredAnswerPrompt', () => {
       },
       configuration: {
         instructions: '',
+        capabilities: { attachmentTools: true },
       },
-      capabilities: { visualizations: false },
       skills: [],
-      actions: [],
-      answerActions: [],
-      cycleLimit: 1,
+      run: {
+        steps: [],
+        renderState: {},
+        pendingToolCallIds: [],
+        retryNotices: [],
+        cycleLimit: 1,
+      },
       experimentalFeatures: { bash: false, skills: false },
       toolManager: {} as any,
       resultTransformer: jest.fn(),
@@ -50,7 +56,7 @@ describe('getStructuredAnswerPrompt', () => {
 
     const systemMessage = (messages[0] as ['system', string])[1];
     expect(systemMessage).not.toContain('Current date');
-    expect(convertPreviousRounds).toHaveBeenCalledWith(
+    expect(prepareMessages).toHaveBeenCalledWith(
       expect.objectContaining({ conversationTimestamp: now })
     );
   });
@@ -59,7 +65,7 @@ describe('getStructuredAnswerPrompt', () => {
     const params = {
       conversationTimestamp: now,
       processedConversation: {
-        previousRounds: [],
+        timeline: [],
         nextInput: { message: '', attachments: [] },
         attachments: [],
         attachmentTypes: [],
@@ -74,12 +80,16 @@ describe('getStructuredAnswerPrompt', () => {
       },
       configuration: {
         instructions: '',
+        capabilities: { attachmentTools: true },
       },
-      capabilities: { visualizations: false },
       skills: [],
-      actions: [],
-      answerActions: [],
-      cycleLimit: 1,
+      run: {
+        steps: [],
+        renderState: {},
+        pendingToolCallIds: [],
+        retryNotices: [],
+        cycleLimit: 1,
+      },
       experimentalFeatures: { bash: false, skills: false },
       toolManager: {} as any,
       resultTransformer: jest.fn(),
@@ -97,5 +107,49 @@ describe('getStructuredAnswerPrompt', () => {
     expect(systemMessage).not.toContain('## ATTACHMENT TYPES');
     expect(systemMessage).not.toContain('## Conversation Attachments');
     expect(systemMessage).not.toMatch(/attachment_id="/);
+  });
+
+  describe('attachment_tools capability', () => {
+    const systemPrompt = async (attachmentTools: boolean) => {
+      const messages = await getStructuredAnswerPrompt({
+        conversationTimestamp: now,
+        processedConversation: {
+          timeline: [],
+          nextInput: { message: '', attachments: [] },
+          attachments: [],
+          attachmentTypes: [],
+          attachmentStateManager: createAttachmentStateManager([], {
+            getTypeDefinition: (type: string) => ({ id: type } as any),
+          }),
+        },
+        configuration: { instructions: '', capabilities: { attachmentTools } },
+        skills: [],
+        run: {
+          steps: [],
+          renderState: {},
+          pendingToolCallIds: [],
+          retryNotices: [],
+          cycleLimit: 1,
+        },
+        experimentalFeatures: { bash: false, skills: false },
+        toolManager: {} as any,
+        resultTransformer: jest.fn(),
+      } as any);
+      return (messages[0] as ['system', string])[1];
+    };
+
+    it('replaces the ATTACHMENTS section with the notice when off', async () => {
+      const prompt = await systemPrompt(false);
+
+      expect(prompt).toContain(attachmentToolsUnavailableNotice());
+      expect(prompt).not.toContain('attachment_read(');
+    });
+
+    it('keeps the full ATTACHMENTS section when on', async () => {
+      const prompt = await systemPrompt(true);
+
+      expect(prompt).toContain('MUST use the attachment tools');
+      expect(prompt).not.toContain(attachmentToolsUnavailableNotice());
+    });
   });
 });

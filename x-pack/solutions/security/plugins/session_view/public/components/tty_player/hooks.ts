@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Terminal } from 'xterm';
-import 'xterm/css/xterm.css';
+import { Terminal } from '@xterm/xterm';
+import '@xterm/xterm/css/xterm.css';
 import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useInfiniteQuery } from '@kbn/react-query';
 import type { CoreStart } from '@kbn/core/public';

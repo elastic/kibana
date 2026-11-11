@@ -8,6 +8,7 @@
 import React, { type ReactNode } from 'react';
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createMemoryHistory } from 'history';
 
@@ -59,7 +60,12 @@ jest.mock('../../app_context', () => ({
 
 import { KibanaDeprecationsList } from './kibana_deprecations';
 
-const renderWithProviders = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
+const renderWithProviders = (ui: React.ReactElement) =>
+  render(
+    <MockAppHeaderProvider>
+      <I18nProvider>{ui}</I18nProvider>
+    </MockAppHeaderProvider>
+  );
 
 const kibanaDeprecations = [
   {

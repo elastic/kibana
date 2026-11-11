@@ -45,7 +45,7 @@ export const useTestRunDetailsBreadcrumbs = (
           {
             text: monitor?.name ?? '',
             href: `${appPath}${MONITOR_ROUTE.replace(
-              ':monitorId',
+              ':monitorId?',
               monitor?.[ConfigKey.CONFIG_ID] ?? ''
             )}${monitorSearch}`,
           },

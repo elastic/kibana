@@ -8,7 +8,6 @@
     "integration_tests/**/*"
   ],
   "kbn_references": [
-    "@kbn/security-plugin",
     "@kbn/config-schema",
     "@kbn/core",
     "@kbn/utility-types",

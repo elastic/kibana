@@ -54,7 +54,7 @@ export async function createAgentCard({
     version: '0.1.0',
     protocolVersion: '0.3.0',
     capabilities: {
-      streaming: false,
+      streaming: true,
       pushNotifications: false,
       stateTransitionHistory: false,
     },

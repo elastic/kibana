@@ -26,12 +26,17 @@ import { getMonacoRangeFromYamlNode } from '../utils';
 // 1. Check if triggers section exists (even if empty or has empty items)
 // 2. If triggers section exists, find the next line after the last trigger node range
 // 3. If no trigger section found, add triggers: section in the first line of yaml
+interface InsertTriggerSnippetOptions {
+  defaultCondition?: string;
+  requiresConnectorId?: boolean;
+}
+
 export function insertTriggerSnippet(
   model: monaco.editor.ITextModel,
   yamlDocument: Document | null,
   triggerType: string,
   editor?: monaco.editor.IStandaloneCodeEditor,
-  defaultCondition?: string
+  options: InsertTriggerSnippetOptions = {}
 ) {
   let document: Document;
   try {
@@ -109,7 +114,8 @@ export function insertTriggerSnippet(
     full: true,
     monacoSuggestionFormat: false,
     withTriggersSection: insertTriggersSection,
-    defaultCondition,
+    defaultCondition: options.defaultCondition,
+    requiresConnectorId: options.requiresConnectorId,
   });
 
   // Create separate undo boundary for each snippet insertion

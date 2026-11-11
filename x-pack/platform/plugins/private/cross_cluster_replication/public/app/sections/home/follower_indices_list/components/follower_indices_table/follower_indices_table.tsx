@@ -13,16 +13,7 @@ import type {
   EuiInMemoryTableProps,
   EuiSearchBarOnChangeArgs,
 } from '@elastic/eui';
-import {
-  EuiHealth,
-  EuiButton,
-  EuiInMemoryTable,
-  EuiLink,
-  EuiLoadingLogo,
-  EuiOverlayMask,
-} from '@elastic/eui';
-
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { EuiHealth, EuiInMemoryTable, EuiLink, EuiLoadingLogo, EuiOverlayMask } from '@elastic/eui';
 import { API_STATUS, UIM_FOLLOWER_INDEX_SHOW_DETAILS_CLICK } from '../../../../../constants';
 import { FollowerIndexActionsProvider } from '../../../../../components';
 import { routing } from '../../../../../services/routing';
@@ -305,7 +296,6 @@ export class FollowerIndicesTable extends PureComponent<
   render() {
     const { filteredIndices } = this.state;
     const { selectedItems, onSelectionChange, resetSelection } = this.props;
-    const reactRouter = routing.reactRouterOrThrow;
 
     const sorting = {
       sort: {
@@ -332,19 +322,6 @@ export class FollowerIndicesTable extends PureComponent<
           onActionComplete={resetSelection}
         />
       ) : undefined,
-      toolsRight: (
-        <EuiButton
-          {...reactRouterNavigate(reactRouter.history, `/follower_indices/add`)}
-          fill
-          iconType="plusCircle"
-          data-test-subj="createFollowerIndexButton"
-        >
-          <FormattedMessage
-            id="xpack.crossClusterReplication.followerIndexList.addFollowerButtonLabel"
-            defaultMessage="Create a follower index"
-          />
-        </EuiButton>
-      ),
       onChange: this.onSearch,
       box: {
         incremental: true,

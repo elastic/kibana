@@ -43,16 +43,12 @@ describe('splitSnakeKey', () => {
   });
 
   /**
-   * Templates accept arbitrary `name: z.string()` upstream, so the
-   * analytics layer cannot trust the charset. A template field whose
-   * name contains a single quote, backslash, or newline would
-   * otherwise be concatenated verbatim into a Painless string
-   * literal, breaking the script or — worst case — opening a
-   * Painless-injection path. The defensive drop silently skips such
-   * fields; once the template is fixed, the next refresh publishes
-   * the runtime field normally.
+   * Uses the lenient read charset (SAFE_SNAKE_KEY = /^[A-Za-z0-9_-]+$/).
+   * Characters that would break a Painless string literal are still rejected; hyphens are now
+   * accepted so keys pre-existing in the index (including UUID-shaped migration output) resolve
+   * to a runtime field rather than being silently dropped.
    */
-  it('rejects snake-keys containing characters outside [A-Za-z0-9_]', () => {
+  it('rejects snake-keys with characters that are unsafe in a Painless string literal', () => {
     expect(splitSnakeKey('evil\'); script("x"_as_long')).toBeNull();
     expect(splitSnakeKey('with space_as_long')).toBeNull();
     expect(splitSnakeKey('quote\u0027_as_long')).toBeNull();
@@ -64,6 +60,15 @@ describe('splitSnakeKey', () => {
   it('rejects snake-keys exceeding the length cap', () => {
     const longName = 'a'.repeat(300);
     expect(splitSnakeKey(`${longName}_as_long`)).toBeNull();
+  });
+
+  it('accepts hyphenated snake-keys (e.g. UUID names written by the v1→v2 migration)', () => {
+    // SAFE_SNAKE_KEY now includes hyphens so UUID-shaped field-definition names and any
+    // hand-authored hyphenated names produce a runtime field instead of being silently dropped.
+    const result = splitSnakeKey('my-field-name_as_keyword');
+    expect(result).not.toBeNull();
+    expect(result?.name).toBe('my-field-name');
+    expect(result?.suffix).toBe('keyword');
   });
 });
 

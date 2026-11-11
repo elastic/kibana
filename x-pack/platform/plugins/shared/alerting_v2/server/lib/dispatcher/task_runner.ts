@@ -7,6 +7,11 @@
 
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
 import { inject, injectable } from 'inversify';
+import { ConfigService } from '../services/config_service/config_service';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../services/logger_service/logger_service';
 import { type DispatcherServiceContract } from './dispatcher';
 import { DispatcherServiceInternalToken } from './tokens';
 import type {
@@ -19,17 +24,43 @@ type TaskRunParams = Pick<RunContext, 'taskInstance' | 'signal'>;
 
 @injectable()
 export class DispatcherTaskRunner {
+  private readonly paused: boolean;
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(DispatcherServiceInternalToken)
-    private readonly dispatcherService: DispatcherServiceContract
-  ) {}
+    private readonly dispatcherService: DispatcherServiceContract,
+    @inject(ConfigService) configService: ConfigService,
+    @inject(LoggerServiceToken) logger: LoggerServiceContract
+  ) {
+    this.paused = configService.get('dispatcher.paused');
+    this.logger = logger.forSubsystem('dispatcher');
+  }
 
   public async run({ taskInstance, signal }: TaskRunParams): Promise<RunResult> {
+    if (this.paused) {
+      return this.skipPausedTick(taskInstance);
+    }
+
     const params = this.createDispatcherParams(taskInstance, signal);
 
     const result = await this.dispatcherService.run(params);
 
     return this.buildRunResult(result);
+  }
+
+  private skipPausedTick(taskInstance: TaskRunParams['taskInstance']): RunResult {
+    const state: DispatcherTaskState = taskInstance.state;
+    this.logger.withLabels({ task_id: taskInstance.id }).debug({
+      message: 'dispatcher paused by config; tick skipped and watermark held',
+    });
+
+    return {
+      state: {
+        eventWatermark: state.eventWatermark,
+        stuckTicks: state.stuckTicks ?? 0,
+      },
+    };
   }
 
   private createDispatcherParams(
@@ -39,12 +70,19 @@ export class DispatcherTaskRunner {
     const state: DispatcherTaskState = taskInstance.state;
 
     return {
-      previousStartedAt: state.previousStartedAt ? new Date(state.previousStartedAt) : undefined,
+      eventWatermark: state.eventWatermark ? new Date(state.eventWatermark) : undefined,
+      stuckTicks: state.stuckTicks ?? 0,
       signal,
+      taskId: taskInstance.id,
     };
   }
 
   private buildRunResult(result: DispatcherExecutionResult): RunResult {
-    return { state: { previousStartedAt: result.startedAt.toISOString() } };
+    return {
+      state: {
+        eventWatermark: result.nextWatermark.toISOString(),
+        stuckTicks: result.nextStuckTicks,
+      },
+    };
   }
 }

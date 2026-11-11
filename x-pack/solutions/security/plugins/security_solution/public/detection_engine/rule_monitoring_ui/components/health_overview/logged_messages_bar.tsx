@@ -46,7 +46,7 @@ export const LoggedMessagesBar = memo(function LoggedMessagesBar({
   if (number_of_logged_messages.total === 0) {
     return (
       <EuiEmptyPrompt
-        iconType="visBarVertical"
+        iconType="chartBarVertical"
         title={<h4>{i18n.NO_LOGGED_MESSAGES_TITLE}</h4>}
         body={<p>{i18n.NO_LOGGED_MESSAGES_BODY}</p>}
       />

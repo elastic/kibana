@@ -7,6 +7,7 @@
 
 export type {
   BuiltinToolDefinition,
+  DynamicSchemaBuiltinToolDefinition,
   StaticToolRegistration,
   StaticEsqlTool,
   StaticWorkflowTool,
@@ -15,8 +16,12 @@ export type {
   ToolAvailabilityHandler,
   ToolAvailabilityResult,
   ToolAvailabilityConfig,
+  ToolSchemaContext,
   ToolReturnSummarizerFn,
   BuiltInToolConfirmationPolicy,
+  BuiltInToolConfirmationContext,
+  McpToolAnnotations,
+  InternalBuiltinToolDefinition,
 } from './builtin';
 export {
   type ToolHandlerFn,
@@ -29,7 +34,13 @@ export {
   isToolHandlerInterruptReturn,
   isToolHandlerStandardReturn,
 } from './handler';
-export { getToolResultId, createErrorResult, createOtherResult, isToolResultId } from './utils';
+export {
+  getToolResultId,
+  createErrorResult,
+  createNonInteractiveDeclinedResult,
+  createOtherResult,
+  isToolResultId,
+} from './utils';
 export { describeZodSchema, formatSchemaForLlm } from './schema_utils';
 export type { InternalToolDefinition, InternalToolAvailabilityHandler } from './internal';
 export type { ToolRegistry, ToolListParams, ToolCreateParams, ToolUpdateParams } from './registry';

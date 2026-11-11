@@ -15,7 +15,7 @@ export const buildAlertEntityGraphStepDefinition: PublicStepDefinition = {
     import('@elastic/eui/es/components/icon/assets/link')
       .then(({ icon }) => ({ default: icon }))
       .catch(() =>
-        import('@elastic/eui/es/components/icon/assets/search').then(({ icon }) => ({
+        import('@elastic/eui/es/components/icon/assets/magnify').then(({ icon }) => ({
           default: icon,
         }))
       )

@@ -30,7 +30,6 @@ test.describe(
       const { externalInference } = pageObjects;
 
       await expect(externalInference.pageHeader).toBeVisible();
-      await expect(externalInference.apiDocumentationLink).toBeVisible();
       await expect(externalInference.addEndpointHeaderButton).toBeVisible();
     });
 

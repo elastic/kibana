@@ -51,7 +51,7 @@ const WorkflowDetailActionsMenuContent = (): JSX.Element => {
         <EuiToolTip content={actionsMenuAriaLabel} disableScreenReaderOutput>
           <EuiButtonIcon
             display="base"
-            iconType="boxesVertical"
+            iconType="ellipsis"
             size="s"
             aria-label={actionsMenuAriaLabel}
             data-test-subj="workflowDetailActionsMenuButton"

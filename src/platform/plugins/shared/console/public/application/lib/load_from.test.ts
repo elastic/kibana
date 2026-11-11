@@ -14,6 +14,7 @@ const baseMockWindow = () => {
   return {
     history: {
       pushState: jest.fn(),
+      replaceState: jest.fn(),
     },
     location: {
       host: 'my-kibana.elastic.co',
@@ -223,7 +224,7 @@ describe('load from lib', () => {
         expectedUrl
       );
     });
-    it('noop if load_from not currently defined on QS', () => {
+    it('does not touch history when there is no load_from to remove', () => {
       mockWindow.location = {
         ...mockWindow.location,
         pathname: '/foo/app/dev_tools',
@@ -232,6 +233,39 @@ describe('load from lib', () => {
 
       removeLoadFromParameter();
       expect(mockWindow.history.pushState).not.toHaveBeenCalled();
+      expect(mockWindow.history.replaceState).not.toHaveBeenCalled();
+    });
+    it('replaces the current entry when asked to, so Back cannot re-consume load_from', () => {
+      mockWindow.location = {
+        ...mockWindow.location,
+        pathname: '/foo/app/dev_tools',
+        hash: `#/console?load_from=data:text/plain,${compressToEncodedURIComponent(
+          'GET /_cat/indices'
+        )}`,
+      };
+
+      const expectedUrl = 'https://my-kibana.elastic.co/foo/app/dev_tools#/console';
+
+      removeLoadFromParameter({ replace: true });
+      expect(mockWindow.history.pushState).not.toHaveBeenCalled();
+      expect(mockWindow.history.replaceState).toHaveBeenCalledTimes(1);
+      expect(mockWindow.history.replaceState).toHaveBeenCalledWith(
+        {
+          path: expectedUrl,
+        },
+        '',
+        expectedUrl
+      );
+    });
+    it('does not touch history when there is no load_from to remove, even when replacing', () => {
+      mockWindow.location = {
+        ...mockWindow.location,
+        pathname: '/foo/app/dev_tools',
+        hash: `#/console?foo=bar`,
+      };
+
+      removeLoadFromParameter({ replace: true });
+      expect(mockWindow.history.replaceState).not.toHaveBeenCalled();
     });
   });
 });

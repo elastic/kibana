@@ -8,20 +8,26 @@
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { AsyncDomainEventBus } from '../lib/events/event_bus';
 import { AlertingDomainEventBusToken } from '../lib/events/domain_events';
+import { AlertStatusChangedOptIns } from '../lib/alert_status_changed';
 import { AlertActionEventPublisher } from '../lib/events/alert_action_event_publisher/alert_action_event_publisher';
 import { AlertActionWorkflowSubscriber } from '../lib/events/alert_action_workflow_subscriber/alert_action_workflow_subscriber';
+import { AlertActionTelemetrySubscriber } from '../lib/events/alert_action_telemetry_subscriber/alert_action_telemetry_subscriber';
 import { RuleEventPublisher } from '../lib/events/rule_event_publisher/rule_event_publisher';
 import { RuleWorkflowSubscriber } from '../lib/events/rule_workflow_subscriber/rule_workflow_subscriber';
+import { RuleChangesHistorySubscriber } from '../lib/events/rule_changes_history_subscriber/rule_changes_history_subscriber';
+import { RuleTelemetrySubscriber } from '../lib/events/rule_telemetry_subscriber/rule_telemetry_subscriber';
 import { RuleExecutorEventPublisher } from '../lib/events/rule_executor_event_publisher/rule_executor_event_publisher';
 import { RuleExecutorWorkflowSubscriber } from '../lib/events/rule_executor_workflow_subscriber/rule_executor_workflow_subscriber';
+import { AlertStatusChangedEventPublisher } from '../lib/events/alert_status_changed_event_publisher/alert_status_changed_event_publisher';
+import { AlertStatusChangedWorkflowSubscriber } from '../lib/events/alert_status_changed_workflow_subscriber/alert_status_changed_workflow_subscriber';
+import { ActionPolicyEventPublisher } from '../lib/events/action_policy_event_publisher/action_policy_event_publisher';
+import { ActionPolicyTelemetrySubscriber } from '../lib/events/action_policy_telemetry_subscriber/action_policy_telemetry_subscriber';
 
 /**
  * DI bindings for the in-process event subsystem.
  *
- * Future subscribers (event log, telemetry, …) and additional publishers
- * (rule executor, dispatcher) should be registered here so the events
- * subsystem's wiring lives in a single place, parallel to its code in
- * `lib/events/`.
+ * Register publishers and subscribers here so the events subsystem's wiring
+ * lives in one place, next to its code in `lib/events/`.
  *
  * Subscribers are wired as singletons but are NOT activated here —
  * `start()` is called from `bindOnStart` so subscriptions only attach
@@ -29,20 +35,37 @@ import { RuleExecutorWorkflowSubscriber } from '../lib/events/rule_executor_work
  * against partially-initialised dependencies during the setup phase.
  */
 export const bindEvents = ({ bind }: ContainerModuleLoadOptions) => {
-  bind(AsyncDomainEventBus).toSelf().inSingletonScope();
+  bind(AsyncDomainEventBus).toSelf();
   bind(AlertingDomainEventBusToken).toService(AsyncDomainEventBus);
 
   /**
    * Alert actions event publishers and subscribers.
    */
-  bind(AlertActionEventPublisher).toSelf().inSingletonScope();
-  bind(AlertActionWorkflowSubscriber).toSelf().inSingletonScope();
+  bind(AlertActionEventPublisher).toSelf();
+  bind(AlertActionWorkflowSubscriber).toSelf();
+  bind(AlertActionTelemetrySubscriber).toSelf();
 
   /**
    * Rule event publishers and subscribers.
    */
-  bind(RuleEventPublisher).toSelf().inSingletonScope();
-  bind(RuleWorkflowSubscriber).toSelf().inSingletonScope();
+  bind(RuleEventPublisher).toSelf();
+  bind(RuleWorkflowSubscriber).toSelf();
   bind(RuleExecutorEventPublisher).toSelf().inRequestScope();
-  bind(RuleExecutorWorkflowSubscriber).toSelf().inSingletonScope();
+  bind(RuleChangesHistorySubscriber).toSelf();
+  bind(RuleTelemetrySubscriber).toSelf();
+  bind(RuleExecutorWorkflowSubscriber).toSelf();
+
+  /**
+   * Alert status changed publisher, subscriber and the opt-ins that gate
+   * publishing, filled through the setup contract.
+   */
+  bind(AlertStatusChangedEventPublisher).toSelf().inRequestScope();
+  bind(AlertStatusChangedWorkflowSubscriber).toSelf();
+  bind(AlertStatusChangedOptIns).toSelf();
+
+  /**
+   * Action policy event publishers and subscribers.
+   */
+  bind(ActionPolicyEventPublisher).toSelf();
+  bind(ActionPolicyTelemetrySubscriber).toSelf();
 };

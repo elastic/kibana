@@ -56,6 +56,8 @@ export class GetRulesRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'List rules',
     oasOperationObject: listRulesOasExamples,
   } as const;

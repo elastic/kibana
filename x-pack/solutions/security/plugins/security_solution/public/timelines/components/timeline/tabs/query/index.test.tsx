@@ -11,10 +11,6 @@ import QueryTabContent from '.';
 import { defaultRowRenderers } from '../../body/renderers';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { useTimelineEventsDetails } from '../../../../containers/details';
-import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
-import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
-import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { DataLoadingState } from '@kbn/unified-data-table';
 import {
   createMockStore,
   createSecuritySolutionStorageMock,
@@ -50,12 +46,20 @@ import { mockBrowserFields } from '@kbn/timelines-plugin/public/mock/browser_fie
 import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
-import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
+
+const mockPatterns = [
+  'auditbeat-*',
+  'endgame-*',
+  'filebeat-*',
+  'logs-*',
+  'packetbeat-*',
+  'winlogbeat-*',
+  'journalbeat-*',
+];
 
 jest.mock('../../../../../data_view_manager/hooks/use_browser_fields');
 jest.mock('../../../../../flyout_v2/use_flyout_api');
-jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled');
 
 jest.mock('../../../../../common/utils/route/use_route_spy', () => {
   return {
@@ -73,10 +77,6 @@ jest.mock('../../../../containers/details');
 
 jest.mock('../../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
-}));
-
-jest.mock('../../../../../sourcerer/containers/use_signal_helpers', () => ({
-  useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
@@ -104,8 +104,6 @@ jest.mock('../../../../../common/lib/kibana');
 // unified-field-list is reporting multiple analytics events
 jest.mock(`@elastic/ebt/client`);
 
-const mockOpenFlyout = jest.fn();
-const mockCloseFlyout = jest.fn();
 jest.mock('@kbn/expandable-flyout');
 
 const TestComponent = (props: Partial<ComponentProps<typeof QueryTabContent>>) => {
@@ -197,11 +195,7 @@ describe.skip('query tab with unified timeline', () => {
   let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
   beforeAll(() => {
     fetchNotesSpy.mockImplementation(jest.fn());
-    jest.mocked(useExpandableFlyoutApi).mockImplementation(() => ({
-      ...createExpandableFlyoutApiMock(),
-      openFlyout: mockOpenFlyout,
-      closeFlyout: mockCloseFlyout,
-    }));
+    jest.mocked(useExpandableFlyoutApi).mockImplementation(() => createExpandableFlyoutApiMock());
 
     // https://github.com/atlassian/react-beautiful-dnd/blob/4721a518356f72f1dac45b5fd4ee9d466aa2996b/docs/guides/setup-problem-detection-and-error-recovery.md#disable-logging
     Object.defineProperty(window, '__@hello-pangea/dnd-disable-dev-warnings', {
@@ -251,7 +245,7 @@ describe.skip('query tab with unified timeline', () => {
 
     (useTimelineEventsDetails as jest.Mock).mockImplementation(() => [false, {}]);
 
-    jest.mocked(useDataView).mockReturnValue(withIndices(mockSourcererScope.selectedPatterns));
+    jest.mocked(useDataView).mockReturnValue(withIndices(mockPatterns));
 
     jest.mocked(useBrowserFields).mockReturnValue(mockBrowserFields);
 
@@ -269,7 +263,6 @@ describe.skip('query tab with unified timeline', () => {
 
     flyoutApi = createFlyoutApiMock();
     jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
   });
 
   describe('render', () => {
@@ -874,7 +867,7 @@ describe.skip('query tab with unified timeline', () => {
         });
 
         // column exists in the table
-        expect(screen.getByTestId(`dataGridHeaderCell-${field.name}`)).toBeVisible();
+        expect(await screen.findByTestId(`dataGridHeaderCell-${field.name}`)).toBeVisible();
 
         fireEvent.click(screen.getAllByTestId(`fieldToggle-${field.name}`)[0]);
 
@@ -967,54 +960,6 @@ describe.skip('query tab with unified timeline', () => {
     );
   });
 
-  describe('Leading actions - expand event', () => {
-    it(
-      'should expand and collapse event correctly',
-      async () => {
-        renderTestComponents();
-        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-        expect(screen.getByTestId('docTableExpandToggleColumn').firstChild).toHaveAttribute(
-          'data-euiicon-type',
-          'expand'
-        );
-
-        // Open Flyout
-        fireEvent.click(screen.getByTestId('docTableExpandToggleColumn'));
-
-        await waitFor(() => {
-          expect(mockOpenFlyout).toHaveBeenNthCalledWith(1, {
-            right: {
-              id: 'document-details-right',
-              params: {
-                id: '1',
-                indexName: '',
-                scopeId: TimelineId.test,
-              },
-            },
-          });
-        });
-
-        expect(screen.getByTestId('docTableExpandToggleColumn').firstChild).toHaveAttribute(
-          'data-euiicon-type',
-          'minimize'
-        );
-
-        // Close Flyout
-        fireEvent.click(screen.getByTestId('docTableExpandToggleColumn'));
-
-        await waitFor(() => {
-          expect(mockCloseFlyout).toHaveBeenNthCalledWith(1);
-          expect(screen.getByTestId('docTableExpandToggleColumn').firstChild).toHaveAttribute(
-            'data-euiicon-type',
-            'expand'
-          );
-        });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-  });
-
   describe('Leading actions - notes', () => {
     beforeEach(() => {
       (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
@@ -1046,54 +991,8 @@ describe.skip('query tab with unified timeline', () => {
       SPECIAL_TEST_TIMEOUT
     );
     it(
-      'should be able to add notes through expandable flyout',
+      'should open the notes flyout',
       async () => {
-        renderTestComponents();
-        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-        await waitFor(() => {
-          expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
-        });
-
-        fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
-
-        await waitFor(() => {
-          expect(mockOpenFlyout).toHaveBeenCalled();
-        });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-
-    it(
-      'should open the document details flyout with notes tab for a regular event',
-      async () => {
-        renderTestComponents();
-        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-        await waitFor(() => {
-          expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
-        });
-
-        fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
-
-        await waitFor(() => {
-          expect(mockOpenFlyout).toHaveBeenCalledWith(
-            expect.objectContaining({
-              right: expect.objectContaining({ id: 'document-details-right' }),
-              left: expect.objectContaining({ id: 'document-details-left' }),
-            })
-          );
-        });
-        expect(flyoutApi.openNotes).not.toHaveBeenCalled();
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-
-    it(
-      'should open the new notes flyout when the new flyout is enabled',
-      async () => {
-        jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
-
         renderTestComponents();
         expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
@@ -1109,65 +1008,6 @@ describe.skip('query tab with unified timeline', () => {
             origin: FLYOUT_ORIGIN.TIMELINE,
           });
         });
-        expect(mockOpenFlyout).not.toHaveBeenCalled();
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-
-    it(
-      'should open the attack details flyout with notes tab for an attack discovery event',
-      async () => {
-        const attackDiscoveryEvent = {
-          ...mockTimelineData[0],
-          data: [
-            ...mockTimelineData[0].data,
-            {
-              field: ALERT_RULE_TYPE_ID,
-              value: [ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID],
-            },
-          ],
-          ecs: {
-            ...mockTimelineData[0].ecs,
-            _index: '.alerts-security.attack.discovery.alerts-default-000001',
-          },
-        };
-
-        useTimelineEventsSpy.mockReturnValue([
-          DataLoadingState.loaded,
-          {
-            id: 'id',
-            pageInfo: {
-              activePage: 0,
-              querySize: 0,
-            },
-            events: [attackDiscoveryEvent],
-            rawEvents: [{ _id: attackDiscoveryEvent._id, _index: attackDiscoveryEvent.ecs._index }],
-            inspect: { dsl: [], response: [] },
-            totalCount: 1,
-            loadNextBatch: jest.fn(),
-            refreshedAt: 0,
-            refetch: jest.fn(),
-          },
-        ]);
-
-        renderTestComponents();
-        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-        await waitFor(() => {
-          expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
-        });
-
-        fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
-
-        await waitFor(() => {
-          expect(mockOpenFlyout).toHaveBeenCalledWith(
-            expect.objectContaining({
-              right: expect.objectContaining({ id: 'attack-details-right' }),
-              left: expect.objectContaining({ id: 'attack-details-left' }),
-            })
-          );
-        });
-        expect(flyoutApi.openNotes).not.toHaveBeenCalled();
       },
       SPECIAL_TEST_TIMEOUT
     );

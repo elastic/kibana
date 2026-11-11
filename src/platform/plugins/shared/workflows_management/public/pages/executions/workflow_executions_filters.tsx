@@ -7,136 +7,181 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
-import { FilterGroup } from '@kbn/alerts-ui-shared/src/alert_filter_controls/filter_group';
-import { FilterGroupLoading } from '@kbn/alerts-ui-shared/src/alert_filter_controls/loading';
-import type { FilterControlConfig } from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
+import React, { useCallback, useMemo } from 'react';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { createKbnUrlStateStorage, Storage } from '@kbn/kibana-utils-plugin/public';
-import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
-import {
-  WORKFLOW_EXECUTIONS_DATA_VIEW_CREATE_SPEC,
-  WORKFLOW_EXECUTIONS_DATA_VIEW_ID,
-} from './workflow_executions_data_view';
+import { i18n } from '@kbn/i18n';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { useQuery } from '@kbn/react-query';
+import { KbnWarningCallout } from '@kbn/ui-callout';
+import { WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID } from '@kbn/workflows/common/constants';
+import { useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { migrateExecutionFilterControls } from './migrate_execution_filter_controls';
+import { getWorkflowExecutionsFilterDataViewSpec } from './workflow_executions_data_view';
 import {
   DEFAULT_EXECUTION_PAGE_FILTERS,
+  EXECUTED_BY_FILTER_FIELD,
   EXECUTION_FILTERS_STORAGE_KEY,
-  EXECUTION_FILTERS_URL_PARAM_KEY,
+  LEGACY_EXECUTED_BY_FILTER_FIELD,
 } from './workflow_executions_page_constants';
+import {
+  buildExcludeManagedExecutionsFilter,
+  buildExcludeStepRunsFilter,
+  buildReadableWorkflowsFilter,
+} from './workflow_executions_scope_filters';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSpaceId } from '../../hooks/use_space_id';
+import {
+  type FilterControlConfig,
+  FilterControls,
+  type FilterGroupHandler,
+} from '../../shared/ui/filter_controls';
+
+const withoutExecutorControls = <T extends { field_name: string }>(controls: T[] | undefined) =>
+  controls?.filter(
+    ({ field_name: fieldName }) =>
+      fieldName !== EXECUTED_BY_FILTER_FIELD && fieldName !== LEGACY_EXECUTED_BY_FILTER_FIELD
+  );
 
 export interface WorkflowExecutionsFiltersProps {
+  controlsUrlState?: FilterControlConfig[];
   filters: Filter[];
+  onFilterGroupInit?: (handler: FilterGroupHandler | undefined) => void;
   query?: Query;
+  setControlsUrlState: (controls: FilterControlConfig[]) => void;
   timeRange: TimeRange;
   onFiltersChange: (filters: Filter[]) => void;
 }
 
 export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersProps>(
-  ({ filters, query, timeRange, onFiltersChange }) => {
+  ({
+    controlsUrlState,
+    filters,
+    onFilterGroupInit,
+    onFiltersChange,
+    query,
+    setControlsUrlState,
+    timeRange,
+  }) => {
     const { dataViews } = useKibana().services;
     const spaceId = useSpaceId();
-    const history = useHistory();
-    const location = useLocation();
-    const [isDataViewReady, setIsDataViewReady] = useState(false);
+    const api = useWorkflowsApi();
+    const { canReadManagedWorkflowExecution } = useWorkflowsCapabilities();
+    const showExecutor = useUiSetting<boolean>(WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID, true);
 
-    const urlStorage = useMemo(
+    // When executor identities are hidden, the "Triggered by" control is removed from defaults,
+    // URL state, and whatever local storage restores. The data view also drops the fields so the
+    // add-control editor cannot put the control back.
+    const defaultControls = useMemo(
       () =>
-        createKbnUrlStateStorage({
-          history,
-          useHash: false,
-          useHashQuery: false,
-        }),
-      [history]
+        showExecutor
+          ? DEFAULT_EXECUTION_PAGE_FILTERS
+          : withoutExecutorControls(DEFAULT_EXECUTION_PAGE_FILTERS),
+      [showExecutor]
+    );
+    const visibleControlsUrlState = useMemo(
+      () => (showExecutor ? controlsUrlState : withoutExecutorControls(controlsUrlState)),
+      [controlsUrlState, showExecutor]
+    );
+    const transformControls = useCallback(
+      (controls: FilterControlConfig[]) => migrateExecutionFilterControls(controls, showExecutor),
+      [showExecutor]
     );
 
-    const persisted = urlStorage.get<FilterControlConfig[] | undefined>(
-      EXECUTION_FILTERS_URL_PARAM_KEY
-    );
-    const controlsUrlState = persisted
-      ? persisted.map(convertCamelCasedKeysToSnakeCase)
-      : undefined;
+    // The options lists read the execution data as the current user, which ignores workflow access
+    // control, so they are scoped to the workflows the user can read until that data enforces it.
+    const {
+      data: readableWorkflows,
+      isError,
+      refetch,
+    } = useQuery({
+      networkMode: 'always',
+      queryKey: ['workflows', 'executions', 'readableWorkflowIds', spaceId],
+      queryFn: () => api.getReadableWorkflowIds(),
+      enabled: Boolean(spaceId),
+      retry: false,
+    });
+    const readableWorkflowIds = readableWorkflows?.workflowIds;
 
-    const setControlsUrlState = useCallback(
-      (next: FilterControlConfig[]) => {
-        urlStorage.set(EXECUTION_FILTERS_URL_PARAM_KEY, next);
-      },
-      [urlStorage]
+    const parentFilters = useMemo(
+      () => [
+        buildExcludeStepRunsFilter(),
+        ...(canReadManagedWorkflowExecution ? [] : [buildExcludeManagedExecutionsFilter()]),
+        ...(readableWorkflowIds ? [buildReadableWorkflowsFilter(readableWorkflowIds)] : []),
+      ],
+      [canReadManagedWorkflowExecution, readableWorkflowIds]
     );
 
-    const scopedDataViews = useMemo(
+    const handleRetry = useCallback(() => {
+      void refetch();
+    }, [refetch]);
+
+    const dataViewSpec = useMemo(
+      () => getWorkflowExecutionsFilterDataViewSpec(showExecutor),
+      [showExecutor]
+    );
+
+    const services = useMemo(
       () => ({
-        ...dataViews,
-        create: (
-          spec: Parameters<typeof dataViews.create>[0],
-          _skipFetchFields?: boolean,
-          displayErrors?: boolean
-        ) => dataViews.create(spec, true, displayErrors),
+        dataViews,
+        storage: Storage,
       }),
       [dataViews]
-    );
-
-    useEffect(() => {
-      let cancelled = false;
-
-      (async () => {
-        await scopedDataViews.create(WORKFLOW_EXECUTIONS_DATA_VIEW_CREATE_SPEC);
-        if (!cancelled) {
-          setIsDataViewReady(true);
-        }
-      })();
-
-      return () => {
-        cancelled = true;
-        dataViews.clearInstanceCache();
-      };
-    }, [dataViews, scopedDataViews]);
-
-    const handleFilterChanges = useCallback(
-      (newFilters: Filter[]) => {
-        onFiltersChange(
-          newFilters.map((filter) => ({
-            ...filter,
-            meta: {
-              ...filter.meta,
-              disabled: false,
-            },
-          }))
-        );
-      },
-      [onFiltersChange]
     );
 
     if (!spaceId) {
       return null;
     }
 
-    if (!isDataViewReady) {
+    // Without the scope the options are never fetched, so a failure must be surfaced, not hidden.
+    if (isError && !readableWorkflows) {
       return (
-        <div data-test-subj="workflowExecutionsFilters" key={location.search}>
-          <FilterGroupLoading />
-        </div>
+        <KbnWarningCallout
+          announceOnMount
+          data-test-subj="workflowExecutionsFiltersError"
+          title={i18n.translate('workflows.executionsPage.filters.scopeError.title', {
+            defaultMessage: 'Filters are unavailable',
+          })}
+          text={i18n.translate('workflows.executionsPage.filters.scopeError.description', {
+            defaultMessage: 'The workflows you can access could not be loaded.',
+          })}
+          actionProps={{
+            primary: {
+              children: i18n.translate('workflows.executionsPage.filters.scopeError.retry', {
+                defaultMessage: 'Retry',
+              }),
+              onClick: handleRetry,
+              'data-test-subj': 'workflowExecutionsFiltersRetry',
+            },
+          }}
+        />
       );
     }
 
+    // Wait for the scope so the options are never fetched unscoped, not even once.
+    if (!readableWorkflows) {
+      return null;
+    }
+
     return (
-      <div data-test-subj="workflowExecutionsFilters" key={location.search}>
-        <FilterGroup
-          controlsUrlState={controlsUrlState}
-          dataViewId={WORKFLOW_EXECUTIONS_DATA_VIEW_ID}
-          defaultControls={DEFAULT_EXECUTION_PAGE_FILTERS}
+      <div data-test-subj="workflowExecutionsFilters">
+        <FilterControls
+          key={showExecutor ? 'show-executor' : 'hide-executor'}
+          controlsUrlState={visibleControlsUrlState}
+          dataViewSpec={dataViewSpec}
+          defaultControls={defaultControls}
           filters={filters}
-          maxControls={4}
-          onFiltersChange={handleFilterChanges}
+          maxControls={5}
+          onFiltersChange={onFiltersChange}
+          onInit={onFilterGroupInit}
+          parentFilters={parentFilters}
           query={query}
-          ruleTypeIds={[]}
+          services={services}
           setControlsUrlState={setControlsUrlState}
           spaceId={spaceId}
           storageKey={EXECUTION_FILTERS_STORAGE_KEY}
-          Storage={Storage}
           timeRange={timeRange}
+          transformControls={transformControls}
         />
       </div>
     );

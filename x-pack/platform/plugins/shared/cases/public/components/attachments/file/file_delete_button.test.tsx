@@ -102,7 +102,7 @@ describe('FileDeleteButton', () => {
 
       expect(await screen.findByTestId('cases-files-delete-button')).toBeInTheDocument();
 
-      expect(useDeleteFileAttachmentMock).toBeCalledTimes(1);
+      expect(useDeleteFileAttachmentMock).toHaveBeenCalledTimes(1);
     });
 
     it('clicking delete button opens the confirmation modal', async () => {

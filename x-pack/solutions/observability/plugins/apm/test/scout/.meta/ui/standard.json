@@ -1,8 +1,7 @@
 {
-  "sha1": "c2ae1b61801091dced3cbc041b210bd5ff2a4581",
+  "sha1": "69e356e1b3f405039815cfbe3c880ad9d2f984c9",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -302,7 +301,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/06_agent_configuration.spec.ts",
         "line": 12,
-        "column": 14
+        "column": 81
       }
     },
     {
@@ -315,8 +314,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/06_agent_configuration.spec.ts",
-        "line": 14,
-        "column": 45
+        "line": 16,
+        "column": 9
       }
     },
     {
@@ -329,8 +328,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/06_agent_configuration.spec.ts",
-        "line": 20,
-        "column": 11
+        "line": 23,
+        "column": 8
+      }
+    },
+    {
+      "id": "5c2d8d732817208-0f7c2e72cc077a4",
+      "title": "APM date picker refresh advances the resolved absolute range on Refresh while keeping the relative range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/07_date_picker_refresh.spec.ts",
+        "line": 38,
+        "column": 5
       }
     }
   ]

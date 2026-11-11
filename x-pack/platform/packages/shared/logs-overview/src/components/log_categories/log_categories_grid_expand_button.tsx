@@ -57,7 +57,7 @@ const ExpandButton: React.FC<ExpandButtonProps> = ({ isCurrentRowExpanded, onCli
         data-test-subj="logsOverviewLogCategoriesGridExpandButton"
         onClick={onClickHandler}
         color={isCurrentRowExpanded ? 'primary' : 'text'}
-        iconType={isCurrentRowExpanded ? 'minimize' : 'expand'}
+        iconType={isCurrentRowExpanded ? 'minimize' : 'maximize'}
         isSelected={isCurrentRowExpanded}
       />
     </EuiToolTip>

@@ -6,16 +6,18 @@
  */
 
 import Boom from '@hapi/boom';
-import type { ServiceParams } from '@kbn/actions-plugin/server';
+import type { ServiceParams, ActionsClient } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { fullJitterBackoffFactory } from '@kbn/response-ops-retry-service';
 import type { CasesConnectorConfig, CasesConnectorRunParams, CasesConnectorSecrets } from './types';
-import { ZCasesConnectorRunParamsSchema } from './schema';
+import { resolveCasesConnectorActionSource, ZCasesConnectorRunParamsSchema } from './schema';
 import { CasesOracleService } from './cases_oracle_service';
 import { CasesService } from './cases_service';
-import type { CasesClient } from '../../client';
+import type { GetCasesClientFn } from '../../client/types';
+import { ActionSourceTypes, toActionSource } from '../../../common/types/domain';
 import {
   CasesConnectorError,
   createTaskUserError,
@@ -36,7 +38,8 @@ import { getSavedObjectsTypes } from '../../../common';
 interface CasesConnectorParams {
   connectorParams: ServiceParams<CasesConnectorConfig, CasesConnectorSecrets>;
   casesParams: {
-    getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
+    getCasesClient: GetCasesClientFn;
+    getActionsClient: (request: KibanaRequest) => Promise<PublicMethodsOf<ActionsClient>>;
     getSpaceId: (request?: KibanaRequest) => string;
     getUnsecuredSavedObjectsClient: (
       request: KibanaRequest,
@@ -45,6 +48,7 @@ interface CasesConnectorParams {
     getUiSettingsClient: (request: KibanaRequest) => Promise<IUiSettingsClient>;
     isCasesAttachmentsEnabled: boolean;
     isTemplatesEnabled: boolean;
+    isAtLeastPlatinum: () => Promise<boolean>;
   };
 }
 
@@ -117,7 +121,14 @@ export class CasesConnector extends SubActionConnector<
       const kibanaRequest = this.kibanaRequest as KibanaRequest;
       const uiSettingsClient = await this.casesParams.getUiSettingsClient(kibanaRequest);
       const validatedParams = await this.getValidatedRunParams(params, uiSettingsClient);
-      const casesClient = await this.casesParams.getCasesClient(kibanaRequest);
+      const actionSource = toActionSource({
+        type:
+          validatedParams.source === 'attack' ? ActionSourceTypes.attack : ActionSourceTypes.rule,
+        id: validatedParams.rule.id,
+        name: validatedParams.rule.name,
+      });
+      const casesClient = await this.casesParams.getCasesClient(kibanaRequest, { actionSource });
+      const actionsClient = await this.casesParams.getActionsClient(kibanaRequest);
       const savedObjectsClient = await this.casesParams.getUnsecuredSavedObjectsClient(
         kibanaRequest,
         [...getSavedObjectsTypes(), CASE_RULES_SAVED_OBJECT]
@@ -135,9 +146,10 @@ export class CasesConnector extends SubActionConnector<
         casesOracleService,
         casesService: this.casesService,
         casesClient,
+        actionsClient,
         spaceId,
-        isCasesAttachmentsEnabled: this.casesParams.isCasesAttachmentsEnabled,
         isTemplatesEnabled: this.casesParams.isTemplatesEnabled,
+        isAtLeastPlatinum: this.casesParams.isAtLeastPlatinum,
       });
 
       this.logDebugCurrentState(
@@ -171,10 +183,12 @@ export class CasesConnector extends SubActionConnector<
     const configuredMaxOpenCases = getMaximumOpenCases(
       await uiSettingsClient.get<number>(MAX_OPEN_CASES_ADVANCED_SETTING)
     );
+    const source = resolveCasesConnectorActionSource(params);
 
-    if (params.internallyManagedAlerts) {
+    if (source === 'attack') {
       return {
         ...params,
+        source,
         maximumCasesToOpen: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
       };
     }
@@ -186,7 +200,7 @@ export class CasesConnector extends SubActionConnector<
       );
     }
 
-    return params;
+    return { ...params, source };
   }
 
   private handleError(error: Error) {

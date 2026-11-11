@@ -97,24 +97,33 @@ In general, the recommendation is to check our telemetry to validate the usage o
 
 ## Evaluating feature flags
 
-This service provides 2 ways to evaluate your feature flags, depending on the use case:
+There are 3 typed methods. Each is available as an RxJS observable (`get*Value$`) and, in the browser, as a React hook (`use*Value`). Both follow the current value, and update when the flag or evaluation context changes.
 
-1. **Single evaluation**: performs the evaluation once, and doesn't react to updates. These APIs are synchronous in the
-browser, and asynchronous in the server.
-2. **Observed evaluation**: observes the flag for any changes so that the code can adapt. These APIs return an RxJS observable.
+|  Type   | Observable                                               | React                                                |
+|:-------:|:---------------------------------------------------------|:-----------------------------------------------------|
+| Boolean | `core.featureFlags.getBooleanValue$(flagName, fallback)` | `core.featureFlags.useBooleanValue(flagName, fallback)` |
+| String  | `core.featureFlags.getStringValue$(flagName, fallback)`  | `core.featureFlags.useStringValue(flagName, fallback)`  |
+| Number  | `core.featureFlags.getNumberValue$(flagName, fallback)`  | `core.featureFlags.useNumberValue(flagName, fallback)`  |
 
-Also, the APIs are typed, so you need to use the appropriate API depending on the `variationType` you defined your flag:
+In React, call the `use*Value` hook during render. The first render uses the synchronous evaluation, then the hook updates when the flag or the evaluation context changes:
 
-|  Type   | Single evaluation                                       | Observed evaluation                                      |
-|:-------:|:--------------------------------------------------------|:---------------------------------------------------------|
-| Boolean | `core.featureFlags.getBooleanValue(flagName, fallback)` | `core.featureFlags.getBooleanValue$(flagName, fallback)` |
-| String  | `core.featureFlags.getStringValue(flagName, fallback)`  | `core.featureFlags.getStringValue$(flagName, fallback)`  |
-| Number  | `core.featureFlags.getNumberValue(flagName, fallback)`  | `core.featureFlags.getNumberValue$(flagName, fallback)`  |
+```tsx
+const enabled = core.featureFlags.useBooleanValue('myPlugin.exampleBoolean', false);
+const variant = core.featureFlags.useStringValue('myPlugin.exampleString', 'default');
+const limit = core.featureFlags.useNumberValue('myPlugin.exampleNumber', 1);
+```
+
+On the server (and in non-React browser code), subscribe directly:
+
+```ts
+core.featureFlags.getBooleanValue$('myPlugin.exampleBoolean', false).subscribe((enabled) => {
+  // adapt to the current value
+});
+```
 
 ### Request handler context
 
-Additionally, to make things easier in our HTTP handlers, the _Single evaluation_ APIs are available as part of the core
-context provided to the handlers:
+In HTTP handlers, evaluate flags from the core request context:
 
 ```typescript
 async (context, request, response) => {
@@ -124,7 +133,7 @@ async (context, request, response) => {
       number: await featureFlags.getNumberValue('myPlugin.exampleNumber', 1),
     },
   });
-}
+};
 ```
 
 ## Extending the evaluation context
@@ -171,6 +180,38 @@ PUT kbn:/internal/core/_settings
 > ```yaml
 > coreApp.allowDynamicConfigOverrides: true
 > ```
+
+### Runtime overrides
+
+Runtime overrides are stored in the `feature-flags-overrides` saved object and applied on every Kibana node. They win over `feature_flags.overrides` from `kibana.yml`, and both win over the feature flag provider.
+
+Only a superuser can read or change them, through:
+
+```
+GET    kbn:/internal/feature-flags/overrides
+PUT    kbn:/internal/feature-flags/overrides/{flagKey}
+DELETE kbn:/internal/feature-flags/overrides/{flagKey}
+DELETE kbn:/internal/feature-flags/overrides
+```
+
+`PUT` sends `{ "value": <boolean | number | string> }`. A node applies its own write immediately. Other nodes see it on their next poll, which runs every 10 seconds. The browser then sees the new value on its own 10 second feature-flag poll, or immediately if you refresh the helper.
+
+### Flags helper
+
+Kibana includes a Feature flag helper that allows users to test and troubleshoot their feature flag evaluations. 
+Superusers can see and update the flags to see their effect in Kibana. 
+Lower privileged users only can see the evaluated values without an option to upate it.
+
+The flyout can be opened in two ways:
+
+* When the Developer Toolbar is available, the **Feature flags** pill opens the flyout. That does not show or hide the corner button.
+* `toggleFeatureFlagsHelper()` in the browser console shows or hides the corner button, including when the Developer Toolbar is active. Hiding the button closes the flyout. The choice is remembered for the next page load.
+
+```js
+toggleFeatureFlagsHelper()
+```
+
+Without provider credentials the snapshot is empty, and the flyout still lists the flags Kibana has evaluated, using the value that evaluation returned.
 
 ## Usage in Cloud
 

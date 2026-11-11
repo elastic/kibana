@@ -7,38 +7,60 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import React, { type CSSProperties } from 'react';
+
+interface EmptyDroppableStyleOptions {
+  isDragging: boolean;
+}
 
 interface Props {
   message: string;
 }
 
 /**
- * A drop zone shown when a drag-and-drop list is empty, so users can still
- * drop an item into the list and to communicate that the list accepts drops.
+ * Styles EuiDroppable as the empty drop surface (dashed box). Omit the rest-state
+ * fill while dragging so EUI's isDragging / isDraggingOver background can show.
+ */
+export const getEmptyDroppableStyle = (
+  euiTheme: EuiThemeComputed,
+  { isDragging }: EmptyDroppableStyleOptions
+): CSSProperties => ({
+  position: 'relative',
+  minBlockSize: euiTheme.size.xxxl,
+  border: `${euiTheme.border.width.thin} dashed ${euiTheme.border.color}`,
+  borderRadius: euiTheme.border.radius.medium,
+  ...(isDragging ? {} : { backgroundColor: euiTheme.colors.backgroundBaseSubdued }),
+});
+
+/**
+ * Empty-list copy overlaid on EuiDroppable. Out of flow so the dnd placeholder
+ * opens inside the droppable instead of below the text.
  */
 export const EmptyDropPlaceholder = ({ message }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiPanel
-      color="subdued"
-      hasShadow={false}
-      paddingSize="m"
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="center"
+      gutterSize="none"
+      responsive={false}
       data-test-subj="customizeNavigationEmptyDropPlaceholder"
       css={css`
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-block-size: 48px;
-        border: ${euiTheme.border.width.thin} dashed ${euiTheme.border.color};
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        padding: ${euiTheme.size.m};
       `}
     >
-      <EuiText size="s" color="subdued">
-        {message}
-      </EuiText>
-    </EuiPanel>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s" color="subdued" textAlign="center">
+          {message}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

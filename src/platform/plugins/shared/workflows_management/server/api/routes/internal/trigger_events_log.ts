@@ -17,16 +17,20 @@ import {
   MAX_TRIGGER_EVENT_SEARCH_TIME_STRING_LENGTH,
 } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
-import { WORKFLOW_EXECUTION_READ_SECURITY } from '../utils/route_security';
+import { WORKFLOW_TRIGGER_EVENTS_READ_SECURITY } from '../utils/route_security';
+import { validatePaginationWindow } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-export const triggerEventsLogSearchBodySchema = schema.object({
-  kql: schema.maybe(schema.string({ maxLength: MAX_TRIGGER_EVENT_SEARCH_KQL_LENGTH })),
-  from: schema.maybe(schema.string({ maxLength: MAX_TRIGGER_EVENT_SEARCH_TIME_STRING_LENGTH })),
-  to: schema.maybe(schema.string({ maxLength: MAX_TRIGGER_EVENT_SEARCH_TIME_STRING_LENGTH })),
-  page: schema.maybe(schema.number({ min: 1 })),
-  size: schema.maybe(schema.number({ min: 1, max: MAX_PAGE_SIZE })),
-});
+export const triggerEventsLogSearchBodySchema = schema.object(
+  {
+    kql: schema.maybe(schema.string({ maxLength: MAX_TRIGGER_EVENT_SEARCH_KQL_LENGTH })),
+    from: schema.maybe(schema.string({ maxLength: MAX_TRIGGER_EVENT_SEARCH_TIME_STRING_LENGTH })),
+    to: schema.maybe(schema.string({ maxLength: MAX_TRIGGER_EVENT_SEARCH_TIME_STRING_LENGTH })),
+    page: schema.maybe(schema.number({ min: 1 })),
+    size: schema.maybe(schema.number({ min: 1, max: MAX_PAGE_SIZE })),
+  },
+  { validate: validatePaginationWindow(10) }
+);
 
 export function registerTriggerEventsLogRoutes(deps: RouteDependencies) {
   const { router, workflowsService, spaces } = deps;
@@ -35,7 +39,7 @@ export function registerTriggerEventsLogRoutes(deps: RouteDependencies) {
     .post({
       path: '/internal/workflows/trigger_events/_search',
       access: 'internal',
-      security: WORKFLOW_EXECUTION_READ_SECURITY,
+      security: WORKFLOW_TRIGGER_EVENTS_READ_SECURITY,
       enableQueryVersion: true,
     })
     .addVersion(

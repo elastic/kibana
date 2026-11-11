@@ -16,6 +16,7 @@ import type { LinkInfo } from '../../links';
 import { useLinkInfo } from '../../links';
 import { useUpsellingPage } from '../../hooks/use_upselling';
 import { SpyRoute } from '../../utils/route/spy_routes';
+import { SecurityAppHeader } from '../app_header';
 
 jest.mock('../../links');
 jest.mock('../../hooks/use_upselling');
@@ -84,6 +85,23 @@ describe('SecurityRoutePageWrapper', () => {
     expect(getByTestId(TEST_UPSELL_SUBJ)).toBeInTheDocument();
   });
 
+  it('should pass the Security app header to the upselling page', () => {
+    const MockUpsellPage = jest.fn(() => null);
+    mockUseUpsellingPage.mockReturnValue(MockUpsellPage);
+
+    render(
+      <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding}>
+        <TestComponent />
+      </SecurityRoutePageWrapper>,
+      { wrapper: Wrapper }
+    );
+
+    expect(MockUpsellPage).toHaveBeenCalledWith(
+      expect.objectContaining({ appHeader: SecurityAppHeader }),
+      expect.anything()
+    );
+  });
+
   it('should redirect to landing when link is missing', () => {
     mockUseLinkInfo.mockReturnValue(undefined);
 
@@ -97,6 +115,20 @@ describe('SecurityRoutePageWrapper', () => {
     expect(mockRedirect).toHaveBeenCalled();
   });
 
+  it('should render children for the entity analytics bookmark when the app link is gone', () => {
+    mockUseLinkInfo.mockReturnValue(undefined);
+
+    const { getByTestId } = render(
+      <SecurityRoutePageWrapper pageName={SecurityPageName.entityAnalytics}>
+        <TestComponent />
+      </SecurityRoutePageWrapper>,
+      { wrapper: Wrapper }
+    );
+
+    expect(getByTestId(TEST_COMPONENT_SUBJ)).toBeInTheDocument();
+    expect(mockRedirect).not.toHaveBeenCalled();
+  });
+
   it('should render NoPrivilegesPage when unauthorized', () => {
     mockUseLinkInfo.mockReturnValue({ ...defaultLinkInfo, unauthorized: true });
 
@@ -108,6 +140,20 @@ describe('SecurityRoutePageWrapper', () => {
     );
 
     expect(getByTestId('noPrivilegesPage')).toBeInTheDocument();
+  });
+
+  it('should render children when the page handles its own unauthorized state', () => {
+    mockUseLinkInfo.mockReturnValue({ ...defaultLinkInfo, unauthorized: true });
+
+    const { getByTestId, queryByTestId } = render(
+      <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding} skipLinkAuthorization>
+        <TestComponent />
+      </SecurityRoutePageWrapper>,
+      { wrapper: Wrapper }
+    );
+
+    expect(getByTestId(TEST_COMPONENT_SUBJ)).toBeInTheDocument();
+    expect(queryByTestId('noPrivilegesPage')).not.toBeInTheDocument();
   });
 
   it('should redirect when unavailable', () => {

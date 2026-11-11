@@ -19,14 +19,18 @@ import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@k
 import type { ESSearchResponse } from '@kbn/es-types';
 import type { VectorSourceRequestMeta } from '@kbn/maps-plugin/common';
 import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '@kbn/maps-plugin/common';
-import { type MLAnomalyDoc, getMlSeverityColorRampValue } from '@kbn/ml-anomaly-utils';
+import type { MLAnomalyDoc } from '@kbn/ml-anomaly-utils';
+import { getMlSeverityColorRampValue } from '@kbn/ml-anomaly-utils/severity_ramp';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import type { MlApi } from '../application/services/ml_api_service';
 import { tabColor } from '../../common/util/group_color_utils';
 import { AnomalySource } from './anomaly_source';
 import type { ExplorerJob } from '../application/explorer/explorer_utils';
-import { getIndexPattern, type SourceIndexGeoFields } from '../application/explorer/explorer_utils';
+import {
+  getAnomalyResultsIndexPattern,
+  type SourceIndexGeoFields,
+} from '../application/explorer/explorer_utils';
 
 export const ML_ANOMALY_LAYERS = {
   TYPICAL: 'typical',
@@ -174,7 +178,7 @@ export async function getResultsForJobId(
   const hasQuery = query && query.query !== '';
   let queryFilter;
 
-  const indexPattern = getIndexPattern([{ id: jobId }] as ExplorerJob[]);
+  const indexPattern = getAnomalyResultsIndexPattern([{ id: jobId }] as ExplorerJob[]);
 
   if (hasQuery && query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
     queryFilter = toElasticsearchQuery(fromKueryExpression(query.query), indexPattern);

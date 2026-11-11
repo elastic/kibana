@@ -51,6 +51,10 @@ interface MoonQueryProjectsResponse {
   }>;
 }
 
+interface MoonQueryTasksResponse {
+  tasks: Record<string, Record<string, object>>;
+}
+
 interface MoonChangedFilesInput {
   files?: string[];
 }
@@ -91,7 +95,7 @@ export const getMoonExecutablePath = async () => {
   }
 
   const execa = (await import('execa')).default;
-  const { stdout } = await execa('yarn', ['--silent', 'which', 'moon'], {
+  const { stdout } = await execa('pnpm', ['exec', 'which', 'moon'], {
     cwd: REPO_ROOT,
     stdin: 'ignore',
   });
@@ -220,6 +224,33 @@ export const getAffectedMoonProjectsFromChangedFiles = async ({
   }
 
   return projects;
+};
+
+/** Queries affected Jest tasks so downstream projects can be run as explicit targets. */
+export const getAffectedMoonJestTargets = async ({
+  changedFilesJson,
+  downstream = 'none',
+  workspaceRoot = REPO_ROOT,
+}: {
+  changedFilesJson: string;
+  downstream?: MoonDownstreamMode;
+  workspaceRoot?: string;
+}): Promise<string[]> => {
+  const execa = (await import('execa')).default;
+  const moonExec = await getMoonExecutablePath();
+  const args = ['query', 'tasks', '--tags', '^jest-unit-tests$', '--affected'];
+  if (downstream !== 'none') args.push('--downstream', downstream);
+
+  const { stdout } = await execa(moonExec, args, {
+    cwd: workspaceRoot,
+    input: changedFilesJson,
+    env: { ...process.env, CI_STATS_DISABLED: 'true' },
+  });
+  const { tasks } = JSON.parse(stdout) as MoonQueryTasksResponse;
+  return Object.entries(tasks)
+    .filter(([, projectTasks]) => Object.hasOwn(projectTasks, 'jest'))
+    .map(([project]) => `${project}:jest`)
+    .sort();
 };
 
 /** Summarizes affected Moon projects into non-root source roots and root-project flag. */

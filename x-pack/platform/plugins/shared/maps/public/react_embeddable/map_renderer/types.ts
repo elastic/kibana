@@ -14,7 +14,6 @@ export const MAP_RENDERER_TYPE = 'mapRenderer';
 export type MapRendererApi = HasType<typeof MAP_RENDERER_TYPE> & {
   getTooltipRenderer?: () => RenderToolTipContent;
   hideFilterActions?: boolean;
-  isSharable?: boolean;
 };
 
 export function isMapRendererApi(api: unknown): api is MapRendererApi {

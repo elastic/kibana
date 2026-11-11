@@ -18,7 +18,7 @@ describe('TransactionSummary', () => {
       transaction: exampleTransactions.httpOk,
     };
 
-    expect(() => renderWithContext(<TransactionSummary {...props} />)).not.toThrowError();
+    expect(() => renderWithContext(<TransactionSummary {...props} />)).not.toThrow();
   });
 
   it('renders RUM transaction without request info', () => {
@@ -28,6 +28,6 @@ describe('TransactionSummary', () => {
       transaction: exampleTransactions.httpRumOK,
     };
 
-    expect(() => renderWithContext(<TransactionSummary {...props} />)).not.toThrowError();
+    expect(() => renderWithContext(<TransactionSummary {...props} />)).not.toThrow();
   });
 });

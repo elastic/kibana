@@ -176,7 +176,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
 
     this._changes.processing = computeChange({
       isExistingStream,
-      hasMeaningfulValue: (this._definition.ingest.processing.steps || []).length > 0,
+      hasMeaningfulValue: this._definition.ingest.processing.steps.length > 0,
       hasChanged: () =>
         !_.isEqual(
           _.omit(this._definition.ingest.processing, ['updated_at']),
@@ -1155,12 +1155,6 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         },
       },
       {
-        type: 'delete_queries',
-        request: {
-          definition: this._definition,
-        },
-      },
-      {
         type: 'unlink_assets',
         request: {
           name: this._definition.name,
@@ -1168,12 +1162,6 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       },
       {
         type: 'unlink_systems',
-        request: {
-          name: this._definition.name,
-        },
-      },
-      {
-        type: 'unlink_features',
         request: {
           name: this._definition.name,
         },

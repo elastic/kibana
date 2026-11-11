@@ -7,7 +7,8 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
 import { useMlApi } from '../../contexts/kibana';
@@ -96,7 +97,7 @@ export const SavedObjectsWarning: FC<Props> = ({
 
   return showWarning === false ? null : (
     <>
-      <EuiCallOut
+      <KbnWarningCallout
         announceOnMount={false}
         title={
           <FormattedMessage
@@ -104,8 +105,6 @@ export const SavedObjectsWarning: FC<Props> = ({
             defaultMessage="ML job and trained model synchronization required"
           />
         }
-        color="warning"
-        iconType="warning"
         data-test-subj="mlJobSyncRequiredWarning"
       >
         <>
@@ -136,7 +135,7 @@ export const SavedObjectsWarning: FC<Props> = ({
           )}
           {showSyncFlyout && <JobSpacesSyncFlyout onClose={onClose} />}
         </>
-      </EuiCallOut>
+      </KbnWarningCallout>
       <EuiSpacer size="m" />
     </>
   );

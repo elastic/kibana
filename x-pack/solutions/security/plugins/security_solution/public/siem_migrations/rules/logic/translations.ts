@@ -50,8 +50,7 @@ export const UPDATE_MIGRATION_RULES_FAILURE = i18n.translate(
 
 export const UPDATE_INDEX_PATTERN_SUCCESS = (updated: number) =>
   i18n.translate('xpack.securitySolution.siemMigrations.rules.updateIndexPatternSuccess', {
-    defaultMessage:
-      '{updated, plural, one {# migration} other {# migrations}} updated successfully.',
+    defaultMessage: '{updated, plural, one {# rule} other {# rules}} updated successfully.',
     values: { updated },
   });
 

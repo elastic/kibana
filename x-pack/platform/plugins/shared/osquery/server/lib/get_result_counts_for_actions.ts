@@ -10,11 +10,13 @@ import type { estypes } from '@elastic/elasticsearch';
 import { chunk } from 'lodash';
 import { ACTION_RESPONSES_DATA_STREAM_INDEX } from '../../common/constants';
 import { buildIndexNamesWithNamespaces } from '../utils/build_index_name_with_namespace';
-import { buildSpaceIdFilter } from '../utils/build_space_id_filter';
 import { prefixIndexPatternsWithCcs } from '../utils/ccs_utils';
 
 const MAX_ACTION_IDS_PER_BATCH = 1000;
 
+// The `*Agents` fields hold DOCUMENT counts. Correct only on live-query paths,
+// where an agent emits one response doc per `action_id`. Names kept: they are
+// part of the live-query response schema.
 export interface ResultCountsEntry {
   totalRows: number;
   respondedAgents: number;
@@ -40,26 +42,32 @@ interface ActionResponseAggregation {
   };
 }
 
+/**
+ * Aggregates live-query action-response counts per `action_id`.
+ *
+ * SECURITY: applies no `space_id` filter, so agent-written responses count even
+ * when they were never space-stamped. `spaceScopedActionIds` MUST only hold
+ * `action_id`s taken from action documents already space-scoped on
+ * `.logs-osquery_manager.actions`, never ids supplied by the client.
+ */
 export const getResultCountsForActions = async (
   esClient: ElasticsearchClient,
-  actionIds: string[],
-  spaceId: string,
+  spaceScopedActionIds: string[],
   // When Fleet cannot resolve integration namespaces the caller passes
   // `undefined`; buildIndexNamesWithNamespaces then falls back to the base
-  // pattern, mirroring the other result read paths. Results stay scoped to the
-  // active space via the `space_id` filter.
+  // pattern, mirroring the other result read paths.
   integrationNamespaces?: readonly string[],
   ccsEnabled = false
 ): Promise<ResultCountsMap> => {
-  if (actionIds.length === 0) {
+  if (spaceScopedActionIds.length === 0) {
     return new Map();
   }
 
-  const batches = chunk(actionIds, MAX_ACTION_IDS_PER_BATCH);
+  const batches = chunk(spaceScopedActionIds, MAX_ACTION_IDS_PER_BATCH);
 
   const batchResults = await Promise.all(
     batches.map((batchIds) =>
-      fetchResultCountsBatch(esClient, batchIds, spaceId, integrationNamespaces, ccsEnabled)
+      fetchResultCountsBatch(esClient, batchIds, integrationNamespaces, ccsEnabled)
     )
   );
 
@@ -76,7 +84,6 @@ export const getResultCountsForActions = async (
 const fetchResultCountsBatch = async (
   esClient: ElasticsearchClient,
   actionIds: string[],
-  spaceId: string,
   integrationNamespaces: readonly string[] | undefined,
   ccsEnabled: boolean
 ): Promise<ResultCountsMap> => {
@@ -93,7 +100,7 @@ const fetchResultCountsBatch = async (
     size: 0,
     query: {
       bool: {
-        filter: [{ terms: { action_id: actionIds } }, buildSpaceIdFilter(spaceId)],
+        filter: [{ terms: { action_id: actionIds } }],
       },
     },
     aggs: {

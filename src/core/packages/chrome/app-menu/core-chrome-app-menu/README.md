@@ -17,7 +17,7 @@ The context is available automatically when:
 ```tsx
 import React from 'react';
 import { RegisterAppMenu } from '@kbn/core-chrome-browser-hooks';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/app-menu';
 
 
 interface Props {
@@ -35,7 +35,7 @@ const Example = ({ config }: Props) => {
 ```tsx
 import React, { useEffect } from 'react';
 import { AppMenu } from '@kbn/core-chrome-app-menu';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/app-menu';
 import type { CoreStart } from '@kbn/core/public';
 
 interface Props {
@@ -54,7 +54,7 @@ const Example = ({ config, core }: Props) => {
 
 ```tsx
 import React, { useEffect } from 'react';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/app-menu';
 import type { CoreStart } from '@kbn/core/public';
 
 interface Props {

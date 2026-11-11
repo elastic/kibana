@@ -139,6 +139,14 @@ export function taskRunner(opts: InvalidateApiKeysTaskRunnerOpts) {
                 type: TASK_SO_NAME,
                 apiKeyAttributePath: `${TASK_SO_NAME}.attributes.userScope.apiKeyId`,
               },
+              // UIAM key ids live in their own attribute, so they are invisible to the
+              // `apiKeyId` query above. Without this entry a UIAM key that is still
+              // referenced by a live task would be invalidated: keys are granted per task
+              // type, so a single UIAM key is routinely shared by several tasks.
+              {
+                type: TASK_SO_NAME,
+                apiKeyAttributePath: `${TASK_SO_NAME}.attributes.userScope.uiamApiKeyId`,
+              },
             ],
           });
           missingApiKeyRetries = result.missingApiKeyRetries;

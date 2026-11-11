@@ -44,19 +44,23 @@ interface RunByFilterPopoverProps {
   enabled: boolean;
 }
 
+const getFallbackAvatarUser = (username: string) => ({ username });
+
 const toSelectableOption = (
   option: HistoryUserOption,
   isSelected: boolean
-): EuiSelectableOption => {
-  const user = option.profile?.user ?? { username: option.userId };
-
-  return {
-    label: option.displayName,
-    key: option.userId,
-    checked: isSelected ? 'on' : undefined,
-    prepend: <UserAvatar user={user} avatar={option.profile?.data?.avatar} size="s" />,
-  };
-};
+): EuiSelectableOption => ({
+  label: option.displayName,
+  key: option.userId,
+  checked: isSelected ? 'on' : undefined,
+  prepend: (
+    <UserAvatar
+      user={option.profile?.user ?? getFallbackAvatarUser(option.userId)}
+      avatar={option.profile?.data?.avatar}
+      size="s"
+    />
+  ),
+});
 
 const RunByFilterPopoverComponent: React.FC<RunByFilterPopoverProps> = ({
   selectedUserIds,
@@ -127,7 +131,7 @@ const RunByFilterPopoverComponent: React.FC<RunByFilterPopoverProps> = ({
 
   const triggerButton = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={togglePopover}
       isLoading={isLoading}
       isSelected={isOpen}

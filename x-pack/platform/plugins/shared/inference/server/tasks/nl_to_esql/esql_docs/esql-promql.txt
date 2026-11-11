@@ -1,0 +1,173 @@
+# PROMQL
+
+The PROMQL source command queries time series indices using Prometheus Query Language (PromQL). It enables time series aggregation functions, accepts PromQL syntax, and returns results as regular columns that can be processed by later commands.
+
+## Syntax
+
+`PROMQL [ <option>=<value> ... ]  <result_name>=`
+
+### Parameters
+
+#### index
+
+Optional.
+
+A list of indices, data streams, or aliases. Supports wildcards and date math. Defaults to `metrics-*`, querying matching indices with `index.mode: time_series`.
+
+Example: `PROMQL index=metrics-*.otel-* http_rate=(sum(rate(http_requests_total)))`
+
+#### step
+
+Optional.
+
+Query resolution step width. Automatically determined from the number of target `buckets` and the selected time range. Mutually exclusive with `buckets`.
+
+Example: `PROMQL step=1m http_rate=(sum(rate(http_requests_total)))`
+
+#### buckets
+
+Optional.
+
+Target number of buckets for auto-step derivation. Defaults to `100`. Mutually exclusive with `step`. Requires a known time range, either by setting `start` and `end` explicitly or implicitly through Kibana's time range filter.
+
+Example: `PROMQL buckets=50 start="2026-04-01T00:00:00Z" end="2026-04-01T01:00:00Z" http_rate=(sum(rate(http_requests_total)))`
+
+#### start
+
+Optional.
+
+Start time of the query, inclusive. Uses the start based on Kibana's date picker if missing. Set together with `end`.
+
+Accepts an RFC 3339 timestamp with a UTC offset, such as `"2026-04-01T00:00:00Z"`, or a Unix timestamp in seconds, which can be fractional, such as `1775001600`. Date math, such as `now-1h`, isn't supported. In Kibana, `?_tstart` references the start of the date picker time range.
+
+Example: `PROMQL start="2026-04-01T00:00:00Z" end="2026-04-01T01:00:00Z" http_rate=(sum(rate(http_requests_total)))`
+
+#### end
+
+Optional.
+
+End time of the query, inclusive. Uses the end based on Kibana's date picker if missing. Set together with `start`, and not before it.
+
+Accepts an RFC 3339 timestamp with a UTC offset, such as `"2026-04-01T00:00:00Z"`, or a Unix timestamp in seconds, which can be fractional, such as `1775001600`. Date math, such as `now-1h`, isn't supported. In Kibana, `?_tend` references the end of the date picker time range.
+
+Example: `PROMQL start="2026-04-01T00:00:00Z" end="2026-04-01T02:00:00Z" http_rate=(sum(rate(http_requests_total)))`
+
+#### time
+
+Optional.
+
+Evaluation time of an instant query. Evaluates the expression once, at this time, instead of at each step of a range query. Mutually exclusive with `start`, `end`, `step`, and `buckets`.
+
+Accepts an RFC 3339 timestamp with a UTC offset, such as `"2026-04-01T00:00:00Z"`, or a Unix timestamp in seconds, which can be fractional, such as `1775001600`. Date math, such as `now-1h`, isn't supported. In Kibana, `?_tend` can reference the end of the date picker time range, such as `time=?_tend`.
+
+Example: `PROMQL time="2026-04-01T01:00:00Z" http_rate=(sum(rate(http_requests_total)))`
+
+#### scrape_interval
+
+Optional.
+
+The expected metric collection interval. Defaults to `1m`. Used to determine implicit range selector windows as `max(step, scrape_interval)`.
+
+Accepts a PromQL duration, such as `30s` or `5m`, or a number of seconds.
+
+Example: `PROMQL scrape_interval=15s http_rate=(sum(rate(http_requests_total)))`
+
+#### <result_name>=(<PromQL Expression>)
+
+Optional result name.
+
+Name of the output column with the query result timeseries. By default, the name of the output column is the PromQL expression itself.
+
+Example: `PROMQL http_rate=(sum by (instance) (rate(http_requests_total))) | SORT http_rate DESC`
+
+## Examples
+
+Run a fully adaptive dashboard query using Kibana's date picker, inferred step, and inferred range selector window:
+
+```esql
+PROMQL index=metrics-generic.prometheus-* http_rate=(sum(rate(http_requests_total)))
+```
+
+Run an instant query to evaluate the request rate once at a fixed timestamp:
+
+```esql
+PROMQL index=metrics-generic.prometheus-*
+  time="2026-04-01T01:00:00Z"
+  http_rate=(sum(rate(http_requests_total)))
+```
+
+Get the current request rate at the end of the Kibana date picker time range:
+
+```esql
+PROMQL index=metrics-generic.prometheus-* time=?_tend http_rate=(sum(rate(http_requests_total)))
+```
+
+Get total requests over the Kibana date picker time range:
+
+```esql
+PROMQL index=metrics-generic.prometheus-* time=?_tend
+  total_requests=(sum(increase(http_requests_total[?_tend - ?_tstart])))
+```
+
+Aggregate `network.cost` by `cluster` and sort the grouped results:
+
+```esql
+PROMQL index=k8s step=1h result=(sum by (cluster) (network.cost))
+| SORT result
+```
+
+Filter out the `prod` cluster in the PromQL selector and return a named `cost` column:
+
+```esql
+PROMQL index=k8s step=1h cost=(max by (cluster) (network.total_bytes_in{cluster!="prod"}))
+| SORT cluster
+```
+
+Post-process PromQL results with aggregation and sorting commands:
+
+```esql
+PROMQL index=k8s step=1h bytes=(max by (cluster) (network.bytes_in))
+| STATS max_bytes=MAX(bytes) BY cluster
+| SORT cluster
+```
+
+Run an ad-hoc query with explicit `start` and `end` times and inferred step:
+
+```esql
+PROMQL index=metrics-generic.prometheus-*
+  start="2026-04-01T00:00:00Z"
+  end="2026-04-01T01:00:00Z"
+  http_rate=(sum(rate(http_requests_total)))
+```
+
+Join PromQL results with instance metadata using a lookup join:
+
+```esql
+PROMQL index=metrics-generic.prometheus-*
+  http_rate=(sum by (instance) (rate(http_requests_total)))
+| LOOKUP JOIN instance_metadata ON instance
+```
+
+## Limitations
+
+The majority of PromQL expressions run unchanged. The following constructs are not evaluated yet and return a client error (4xx):
+
+- Binary set operators: `and` and `unless`.
+- Binary set operator `or`, except at the top level of an expression. A top-level `or` chain supports at most 8 operands by default (`esql.query.max_branch_count_per_merge`) and can't use `on(...)` or `ignoring(...)`. A nested `or`, a chain that exceeds that limit, or an `or` with `on(...)` or `ignoring(...)` returns a client error (4xx).
+- Comparison operators: evaluated only at the top level of an expression and only with a scalar literal on the right-hand side. Comparisons between two instant vectors, and nested comparisons, return a client error (4xx).
+- Group modifiers: `on(...)`, `ignoring(...)`, `group_left`, `group_right`.
+- The `@` modifier.
+- Subqueries, such as `max_over_time(rate(http_requests_total)[1h:])`.
+- Selectors without a metric name, and regex matchers on `__name__`, such as `{__name__=~"node_.*"}`.
+- Binary expressions with a `without(...)` aggregation as an operand, and `without(...)` aggregations nested inside another `without(...)` aggregation, such as `sum without (pod) (max without (container) (...))`. Use `by(...)` instead.
+- Binary expressions whose operands use different `offset` values, such as `rate(http_requests_total) / rate(http_requests_total offset 1h)`. This restriction doesn't apply to `or`.
+- Binary expressions where both operands read metrics and one of them nests an aggregation inside another aggregation, such as `count(count by (pod) (up)) / sum(machine_count)`. Nested aggregations on their own, such as `sum(sum by (pod) (...))`, are supported.
+- Binary expressions where both operands read metrics and the operands aren't aggregated alike. Both operands must be either not aggregated, such as `a / b`, or aggregated once across series, such as `sum(a) / sum(b)`. Mixing an aggregated and a non-aggregated operand (`sum(a) / b`), combining `scalar()` of a metric with an operand that has labels (`b / scalar(sum(a))`), and using `topk`, `bottomk`, `limitk`, or `limit_ratio` in an operand return a client error (4xx). Operations with a number, such as `topk(1, a) * 2`, are supported. This restriction doesn't apply to `or`.
+- `histogram_quantile` and `histogram_fraction` over `topk`, `bottomk`, `limitk`, `limit_ratio`, or a `without(...)` aggregation, unless the input is first aggregated with `by(...)`. For example, `histogram_quantile(0.9, topk(5, a))` returns a client error (4xx), but `histogram_quantile(0.9, topk(5, sum by (job, le) (a)))` is supported.
+- Some recognized functions are not yet supported. Some supported functions have restrictions.
+- In Elastic Stack 9.4 preview, binary set operator `or` is not supported.
+- In Elastic Stack 9.4 preview, the `offset` modifier is not supported.
+
+The following constructs return no results instead of an error:
+
+- Binary expressions between two operands that read different metrics without aggregating them, such as `node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes`. Unlike in Prometheus, the series of the two metrics aren't matched on their other labels. Aggregate both operands by the labels to keep instead, such as `avg by (instance) (node_memory_MemAvailable_bytes) / avg by (instance) (node_memory_MemTotal_bytes)`.

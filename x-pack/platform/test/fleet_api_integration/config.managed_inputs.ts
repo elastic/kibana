@@ -25,9 +25,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.cloud.id="ftr_fake_cloud_id:aGVsbG8uY29tOjQ0MyRFUzEyM2FiYyRrYm4xMjNhYmM="`,
         `--xpack.cloud.base_url="https://cloud.elastic.co"`,
         `--xpack.cloud.deployment_url="/deployments/deploymentId"`,
-        // Managed inputs: managed bulk (agentless) today, managed OTLP output (any policy) in
-        // a future addition to this same config.
         `--xpack.fleet.agentless.managedBulk.enabled=true`,
+        `--feature_flags.overrides.fleet.enableOtlpOutput=true`,
         `--xpack.cloud.managed_otlp.url=https://managed-otlp.ftr-test.invalid`,
       ],
     },

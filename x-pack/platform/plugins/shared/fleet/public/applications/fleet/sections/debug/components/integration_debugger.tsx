@@ -8,7 +8,6 @@
 import React, { useState } from 'react';
 import {
   EuiButton,
-  EuiCallOut,
   EuiComboBox,
   EuiConfirmModal,
   EuiFlexGroup,
@@ -21,6 +20,7 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useMutation, useQuery } from '@kbn/react-query';
 
 import { i18n } from '@kbn/i18n';
@@ -154,12 +154,16 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
 
   if (integrations.status === 'error') {
     return (
-      <EuiCallOut announceOnMount title="Error" color="danger">
-        <FormattedMessage
-          id="xpack.fleet.debug.integrationDebugger.fetchError"
-          defaultMessage="Error fetching installed Integrations"
-        />
-      </EuiCallOut>
+      <KbnDangerCallout
+        announceOnMount
+        title="Error"
+        text={
+          <FormattedMessage
+            id="xpack.fleet.debug.integrationDebugger.fetchError"
+            defaultMessage="Error fetching installed Integrations"
+          />
+        }
+      />
     );
   }
 

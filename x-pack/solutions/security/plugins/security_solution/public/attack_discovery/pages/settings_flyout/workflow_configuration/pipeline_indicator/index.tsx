@@ -49,7 +49,7 @@ const PipelineIndicatorComponent: React.FC<PipelineIndicatorProps> = ({
 
       <EuiFlexItem grow={false}>
         <span data-test-subj="pipelineIndicatorArrow">
-          <EuiIcon color="subdued" type="arrowRight" aria-hidden={true} />
+          <EuiIcon color="subdued" type="chevronSingleRight" aria-hidden={true} />
         </span>
       </EuiFlexItem>
 
@@ -68,7 +68,7 @@ const PipelineIndicatorComponent: React.FC<PipelineIndicatorProps> = ({
 
       <EuiFlexItem grow={false}>
         <span data-test-subj="pipelineIndicatorArrow">
-          <EuiIcon color="subdued" type="arrowRight" aria-hidden={true} />
+          <EuiIcon color="subdued" type="chevronSingleRight" aria-hidden={true} />
         </span>
       </EuiFlexItem>
 

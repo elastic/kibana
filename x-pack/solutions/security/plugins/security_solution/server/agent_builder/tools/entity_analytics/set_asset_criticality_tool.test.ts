@@ -42,7 +42,7 @@ describe('setAssetCriticalityTool', () => {
 
   const handlerContext = () => createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
-  const mockCheckPrivileges = jest.fn().mockResolvedValue({
+  const allowedPrivilegesResponse = {
     hasAllRequested: true,
     privileges: {
       elasticsearch: {
@@ -62,7 +62,8 @@ describe('setAssetCriticalityTool', () => {
         { privilege: 'api:securitySolution-entity-analytics', authorized: true },
       ],
     },
-  });
+  };
+  const mockCheckPrivileges = jest.fn().mockResolvedValue(allowedPrivilegesResponse);
   const mockSecurity = {
     authz: {
       checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(mockCheckPrivileges),
@@ -72,6 +73,7 @@ describe('setAssetCriticalityTool', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCheckPrivileges.mockResolvedValue(allowedPrivilegesResponse);
     mockBulkUpdateEntity = jest.fn().mockResolvedValue([]);
     mockCreateCRUDClient = jest.fn().mockReturnValue({
       bulkUpdateEntity: mockBulkUpdateEntity,
@@ -88,7 +90,10 @@ describe('setAssetCriticalityTool', () => {
     ]);
   });
 
-  const tool = setAssetCriticalityTool(mockCore, mockLogger, mockExperimentalFeatures, '8.0.0');
+  const tool = setAssetCriticalityTool(mockCore, mockLogger, mockExperimentalFeatures, '8.0.0', {
+    profile: false,
+    profileInterval: 7,
+  });
 
   describe('schema', () => {
     it('accepts valid inputs', () => {
@@ -164,7 +169,8 @@ describe('setAssetCriticalityTool', () => {
 
   describe('handler — permissions', () => {
     it('returns a permission error and does not update the entity when the caller lacks the Kibana feature privilege', async () => {
-      mockCheckPrivileges.mockResolvedValueOnce({
+      // checkEntityStoreIndexPrivileges tries neutral then legacy index patterns; both must deny.
+      mockCheckPrivileges.mockResolvedValue({
         hasAllRequested: false,
         privileges: {
           elasticsearch: {
@@ -372,6 +378,12 @@ describe('setAssetCriticalityTool', () => {
         ctx
       )) as ToolHandlerStandardReturn;
 
+      expect(mockRecalculate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          telemetry: mockCore.analytics,
+          profiling: { profile: false, profileInterval: 7 },
+        })
+      );
       const other = result.results[0] as OtherResult;
       expect(
         (
@@ -506,7 +518,8 @@ describe('setAssetCriticalityTool', () => {
     });
 
     it('reports success=false when the caller lacks write privilege', async () => {
-      mockCheckPrivileges.mockResolvedValueOnce({
+      // checkEntityStoreIndexPrivileges tries neutral then legacy index patterns; both must deny.
+      mockCheckPrivileges.mockResolvedValue({
         hasAllRequested: false,
         privileges: {
           elasticsearch: {

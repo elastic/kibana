@@ -13,6 +13,7 @@ import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_cons
 import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../../../hooks/state_selectors/use_data_test_subj';
+import { AutoSuggestComplete } from './auto_suggest_complete';
 
 const SCROLLING_PADDING = 20;
 
@@ -162,6 +163,7 @@ export const InputDisplay = memo<InputDisplayProps>(({ leftOfCursor, rightOfCurs
         </EuiFlexItem>
         <EuiFlexItem grow={false} className="noMinWidth">
           <span className="cursor essentialAnimation" ref={cursorRef} />
+          <AutoSuggestComplete data-test-subj={getTestId('cmdInput-suggestion')} />
         </EuiFlexItem>
         <EuiFlexItem className="noMinWidth" data-test-subj={getTestId('cmdInput-rightOfCursor')}>
           {rightOfCursor}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { buildHostDetailsQuery } from './query.host_details.dsl';
 import { mockOptions, expectedDsl } from './__mocks__';
 
@@ -43,6 +43,8 @@ describe('buildHostDetailsQuery', () => {
     expect(result.runtime_mappings).toBeUndefined();
 
     const filters = (result.query as { bool: { filter: unknown[] } }).bool.filter;
-    expect(filters[0]).toEqual(euid.dsl.getEuidDocumentsContainsIdFilter('host'));
+    expect(filters[0]).toEqual(
+      euid.dsl.getEuidDocumentsContainsIdFilter(getBuiltInEntityDefinition('host'))
+    );
   });
 });

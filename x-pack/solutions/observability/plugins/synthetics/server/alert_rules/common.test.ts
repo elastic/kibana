@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { IBasePath } from '@kbn/core/server';
-import { updateState, setRecoveredAlertsContext } from './common';
+import { getDefaultRecoveredSummary, updateState, setRecoveredAlertsContext } from './common';
 import type {
   AlertOverviewStatus,
   StaleDownConfig,
@@ -43,6 +43,14 @@ describe('updateState', () => {
         "meta": Object {},
       }
     `);
+  });
+
+  it('keeps pendingConfigs meta on the first execution when prior state is empty', () => {
+    const pendingConfigs = {
+      'mon-1-loc-1': { pendingCount: 1, configId: 'mon-1', locationId: 'loc-1' },
+    };
+    const result = updateState({} as SyntheticsCommonState, true, { pendingConfigs });
+    expect(result.meta).toEqual({ pendingConfigs });
   });
 
   it('updates the correct field in subsequent calls', () => {
@@ -295,7 +303,7 @@ describe('setRecoveredAlertsContext', () => {
       groupByLocation: true,
       stalePendingConfigs: {},
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       id: idWithLocation,
       context: {
         checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
@@ -317,6 +325,7 @@ describe('setRecoveredAlertsContext', () => {
         idWithLocation,
         timestamp: '2023-02-26T00:00:00.000Z',
         downThreshold: 1,
+        pendingThreshold: 2,
         checks: undefined,
         grouping: undefined,
         hostName: undefined,
@@ -399,7 +408,7 @@ describe('setRecoveredAlertsContext', () => {
       groupByLocation: true,
       stalePendingConfigs: {},
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       id: idWithLocation,
       context: {
         configId,
@@ -421,6 +430,7 @@ describe('setRecoveredAlertsContext', () => {
           'Monitor "test-monitor" from us_west is recovered. Alert when 1 out of the last 1 checks are down from at least 1 location.',
         locationId: location,
         downThreshold: 1,
+        pendingThreshold: 2,
         checks: undefined,
         grouping: undefined,
         hostName: undefined,
@@ -498,7 +508,7 @@ describe('setRecoveredAlertsContext', () => {
       groupByLocation: true,
       stalePendingConfigs: {},
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       id: idWithLocation,
       context: {
         configId,
@@ -520,6 +530,7 @@ describe('setRecoveredAlertsContext', () => {
           'Monitor "test-monitor" from us_west is recovered. Alert when 1 out of the last 1 checks are down from at least 1 location.',
         timestamp: '2023-02-26T00:00:00.000Z',
         downThreshold: 1,
+        pendingThreshold: 2,
         stateId: '123456',
         checks: undefined,
         grouping: undefined,
@@ -584,7 +595,7 @@ describe('setRecoveredAlertsContext', () => {
       groupByLocation: true,
       stalePendingConfigs: {},
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       id: idWithLocation,
       context: {
         configId,
@@ -604,6 +615,7 @@ describe('setRecoveredAlertsContext', () => {
           'Monitor "test-monitor" from Unnamed-location is recovered. Alert when 1 out of the last 1 checks are down from at least 1 location.',
         timestamp: '2023-02-26T00:00:00.000Z',
         downThreshold: 1,
+        pendingThreshold: 2,
         locationNames: 'Unnamed-location',
         locationName: 'Unnamed-location',
         lastErrorMessage: 'test-error-message',
@@ -670,7 +682,7 @@ describe('setRecoveredAlertsContext', () => {
       groupByLocation: true,
       stalePendingConfigs: {},
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       id: idWithLocation,
       context: {
         configId,
@@ -693,6 +705,7 @@ describe('setRecoveredAlertsContext', () => {
         stateId: '123456',
         timestamp: '2023-02-26T00:00:00.000Z',
         downThreshold: 1,
+        pendingThreshold: 2,
         locationNames: 'us-central and us-east',
         locationName: 'us-central and us-east',
         monitorType: 'HTTP',
@@ -755,7 +768,7 @@ describe('setRecoveredAlertsContext', () => {
       groupByLocation: false,
       stalePendingConfigs: {},
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       id: idWithLocation,
       context: {
         configId,
@@ -778,6 +791,7 @@ describe('setRecoveredAlertsContext', () => {
         stateId: '123456',
         timestamp: '2023-02-26T00:00:00.000Z',
         downThreshold: 1,
+        pendingThreshold: 2,
         locationNames: 'us-central and us-east',
         locationName: 'us-central and us-east',
         monitorType: 'HTTP',
@@ -847,7 +861,7 @@ describe('setRecoveredAlertsContext', () => {
         groupByLocation: true,
         stalePendingConfigs: {},
       });
-      expect(alertsClientMock.setAlertData).toBeCalledWith(
+      expect(alertsClientMock.setAlertData).toHaveBeenCalledWith(
         expect.objectContaining({
           id: configId,
           context: expect.objectContaining({
@@ -918,7 +932,7 @@ describe('setRecoveredAlertsContext', () => {
         groupByLocation: true,
         stalePendingConfigs,
       });
-      expect(alertsClientMock.setAlertData).toBeCalledWith(
+      expect(alertsClientMock.setAlertData).toHaveBeenCalledWith(
         expect.objectContaining({
           id: configId,
           context: expect.objectContaining({
@@ -967,7 +981,7 @@ describe('setRecoveredAlertsContext', () => {
         groupByLocation: true,
         stalePendingConfigs: {},
       });
-      expect(alertsClientMock.setAlertData).toBeCalledWith(
+      expect(alertsClientMock.setAlertData).toHaveBeenCalledWith(
         expect.objectContaining({
           id: configId,
           context: expect.objectContaining({
@@ -1056,7 +1070,7 @@ describe('setRecoveredAlertsContext', () => {
         groupByLocation: true,
         stalePendingConfigs,
       });
-      expect(alertsClientMock.setAlertData).toBeCalledWith(
+      expect(alertsClientMock.setAlertData).toHaveBeenCalledWith(
         expect.objectContaining({
           id: configId,
           context: expect.objectContaining({
@@ -1124,5 +1138,196 @@ describe('setRecoveredAlertsContext', () => {
       expect(call.context.recoveryStatus).toBe('has recovered');
       expect(call.context.recoveryReason).toBe('the alert condition is no longer met');
     });
+  });
+});
+
+describe('setRecoveredAlertsContext for pending alerts', () => {
+  const privateLocationId = '6e5323c1-aa6e-4f87-a80f-31164cfa71b6';
+  const privateLocationLabel = 'My private location';
+  const basePath = {
+    publicBaseUrl: 'https://localhost:5601',
+  } as IBasePath;
+
+  const prevPendingConfigs: AlertOverviewStatus['pendingConfigs'] = {
+    [`${configId}-${privateLocationId}`]: {
+      configId,
+      monitorQueryId: monitorId,
+      status: 'pending',
+      locationId: privateLocationId,
+      monitorInfo: {
+        monitor: { name: monitorName, id: monitorId, type: 'browser' },
+        observer: { geo: { name: privateLocationLabel } },
+        tags: [],
+      },
+    },
+  };
+
+  // A down result this run means data came back, even if below the down threshold
+  const currentDownConfigs = {
+    [`${configId}-${privateLocationId}`]: {},
+  } as unknown as AlertOverviewStatus['downConfigs'];
+
+  const getAlertsClientMock = (alertId: string) => ({
+    report: jest.fn(),
+    getAlertLimitValue: jest.fn().mockReturnValue(10),
+    setAlertLimitReached: jest.fn(),
+    getRecoveredAlerts: jest.fn().mockReturnValue([
+      {
+        alert: {
+          getId: () => alertId,
+          getUuid: () => 'alert-uuid',
+          getState: () => ({}),
+          setContext: jest.fn(),
+        },
+        hit: {
+          'kibana.alert.instance.id': alertId,
+          'location.id': [privateLocationId],
+          // Alerts written before the fix stored the location ID as its name
+          'observer.geo.name': [privateLocationId],
+          'monitor.name': monitorName,
+          'monitor.type': 'browser',
+          'monitor.id': monitorId,
+          '@timestamp': new Date().toISOString(),
+          configId,
+        },
+      },
+    ]),
+    setAlertData: jest.fn(),
+    isTrackedAlert: jest.fn(),
+  });
+
+  it('restores the location label and explains the pending recovery for ungrouped alerts', () => {
+    const alertsClientMock = getAlertsClientMock(configId);
+    setRecoveredAlertsContext({
+      alertsClient: alertsClientMock,
+      basePath,
+      spaceId: 'default',
+      staleDownConfigs: {},
+      stalePendingConfigs: {},
+      prevDownConfigs: {},
+      prevPendingConfigs,
+      downConfigs: currentDownConfigs,
+      upConfigs: {},
+      dateFormat,
+      tz: 'UTC',
+      groupByLocation: false,
+    });
+
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
+      id: configId,
+      context: expect.objectContaining({
+        monitorName,
+        locationId: privateLocationId,
+        locationName: privateLocationLabel,
+        locationNames: privateLocationLabel,
+        reason: expect.stringContaining(`from ${privateLocationLabel} is recovered`),
+        recoveryStatus: 'is no longer pending',
+        recoveryReason: 'the monitor is reporting data again',
+      }),
+    });
+  });
+
+  it('restores the location label for per-location alerts', () => {
+    const alertId = `${configId}-${privateLocationId}`;
+    const alertsClientMock = getAlertsClientMock(alertId);
+    setRecoveredAlertsContext({
+      alertsClient: alertsClientMock,
+      basePath,
+      spaceId: 'default',
+      staleDownConfigs: {},
+      stalePendingConfigs: {},
+      prevDownConfigs: {},
+      prevPendingConfigs,
+      downConfigs: currentDownConfigs,
+      upConfigs: {},
+      dateFormat,
+      tz: 'UTC',
+      groupByLocation: true,
+    });
+
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
+      id: alertId,
+      context: expect.objectContaining({
+        locationName: privateLocationLabel,
+        locationNames: privateLocationLabel,
+        recoveryStatus: 'is no longer pending',
+        recoveryReason: 'the monitor is reporting data again',
+      }),
+    });
+  });
+
+  it('restores the location label but keeps the default reason when no data came back', () => {
+    const alertsClientMock = getAlertsClientMock(configId);
+    setRecoveredAlertsContext({
+      alertsClient: alertsClientMock,
+      basePath,
+      spaceId: 'default',
+      staleDownConfigs: {},
+      stalePendingConfigs: {},
+      prevDownConfigs: {},
+      prevPendingConfigs,
+      upConfigs: {},
+      dateFormat,
+      tz: 'UTC',
+      groupByLocation: false,
+    });
+
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
+      id: configId,
+      context: expect.objectContaining({
+        locationName: privateLocationLabel,
+        recoveryStatus: 'has recovered',
+        recoveryReason: 'the alert condition is no longer met',
+      }),
+    });
+  });
+
+  it('keeps the default recovery message when the alert was down', () => {
+    const alertsClientMock = getAlertsClientMock(configId);
+    const prevDownConfigs = {
+      [`${configId}-${privateLocationId}`]: {},
+    } as unknown as AlertOverviewStatus['downConfigs'];
+    setRecoveredAlertsContext({
+      alertsClient: alertsClientMock,
+      basePath,
+      spaceId: 'default',
+      staleDownConfigs: {},
+      stalePendingConfigs: {},
+      prevDownConfigs,
+      prevPendingConfigs,
+      upConfigs: {},
+      dateFormat,
+      tz: 'UTC',
+      groupByLocation: false,
+    });
+
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
+      id: configId,
+      context: expect.objectContaining({
+        recoveryStatus: 'has recovered',
+        recoveryReason: 'the alert condition is no longer met',
+      }),
+    });
+  });
+});
+
+describe('getDefaultRecoveredSummary', () => {
+  it('leaves timestamp empty when the previous alert has no time', () => {
+    const summary = getDefaultRecoveredSummary({
+      recoveredAlert: {
+        hit: {
+          'monitor.id': monitorId,
+          'monitor.name': monitorName,
+          'monitor.type': 'http',
+          'location.id': 'us_west',
+          configId,
+        },
+      } as unknown as Parameters<typeof getDefaultRecoveredSummary>[0]['recoveredAlert'],
+      tz: 'UTC',
+      dateFormat,
+    });
+
+    expect(summary?.timestamp).toBeUndefined();
+    expect(summary?.checkedAt).toBeUndefined();
   });
 });

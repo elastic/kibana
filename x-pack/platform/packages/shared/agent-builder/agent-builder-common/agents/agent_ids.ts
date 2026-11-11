@@ -6,6 +6,7 @@
  */
 
 import { hasNamespaceName, isInProtectedNamespace } from '../base/namespaces';
+import { SELF_AGENT_ID } from './constants';
 
 // - Must start and end with letter or digit
 // - Can contain letters, digits, hyphens, underscores and dots
@@ -13,6 +14,8 @@ export const agentIdRegexp =
   /^(?:[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?)(?:\.(?:[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?))*$/;
 
 export const agentIdMaxLength = 64;
+export const AGENT_NAME_MAX_LENGTH = 256;
+export const AGENT_DESCRIPTION_MAX_LENGTH = 2000;
 
 export const validateAgentId = ({
   agentId,
@@ -21,6 +24,9 @@ export const validateAgentId = ({
   agentId: string;
   builtIn: boolean;
 }): string | undefined => {
+  if (agentId === SELF_AGENT_ID) {
+    return `Agent id "${SELF_AGENT_ID}" is reserved and cannot be used.`;
+  }
   if (!agentIdRegexp.test(agentId)) {
     return `Agent ids must start and end with a letter or number, and can only contain lowercase letters, numbers, dots, hyphens and underscores`;
   }

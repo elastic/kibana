@@ -9,6 +9,7 @@ import type { CommandBadgeData } from './types';
 import { getCommandDefinition } from '../command_menu';
 import { COMMAND_ID_ATTRIBUTE, COMMAND_METADATA_ATTRIBUTE } from './attributes';
 import { getCommandDefinitionByScheme } from '../command_menu/command_definitions';
+import { IMAGE_ATTACHMENT_SCHEME } from '../image_placeholder';
 
 interface TextSegment {
   type: 'text';
@@ -18,7 +19,11 @@ interface BadgeSegment {
   type: 'badge';
   data: CommandBadgeData;
 }
-export type ContentSegment = TextSegment | BadgeSegment;
+interface ImageSegment {
+  type: 'image';
+  name: string;
+}
+export type ContentSegment = TextSegment | BadgeSegment | ImageSegment;
 
 export class CommandBadgeSerializationError extends Error {
   constructor(message: string, options?: ErrorOptions) {
@@ -27,6 +32,21 @@ export class CommandBadgeSerializationError extends Error {
   }
 }
 
+const encodeId = (id: string): string =>
+  encodeURIComponent(id).replace(/[()]/g, (char) => `%${char.charCodeAt(0).toString(16)}`);
+
+const decodeId = (id: string): string => {
+  try {
+    return decodeURIComponent(id);
+  } catch {
+    // Malformed percent-encoding, keep the raw id.
+    return id;
+  }
+};
+
+// Unescaped brackets would end the link text early, and the badge would not parse.
+export const unescapeLinkText = (text: string): string => text.replace(/\\([\\[\]])/g, '$1');
+
 export const serializeCommandBadge = (element: HTMLElement): string => {
   const commandId = element.getAttribute(COMMAND_ID_ATTRIBUTE) ?? '';
   const commandDefinition = getCommandDefinition(commandId);
@@ -34,7 +54,7 @@ export const serializeCommandBadge = (element: HTMLElement): string => {
     return '';
   }
   const { scheme } = commandDefinition;
-  const displayText = element.textContent ?? '';
+  const displayText = (element.textContent ?? '').replace(/[\\[\]]/g, '\\$&');
 
   const metadataRaw = element.getAttribute(COMMAND_METADATA_ATTRIBUTE);
   let id = '';
@@ -65,7 +85,8 @@ export const serializeCommandBadge = (element: HTMLElement): string => {
     }
   }
 
-  return `[${displayText}](${scheme}://${id}${queryString})`;
+  // The id is encoded: an unencoded `:` (SML entry ids) or `)` would make the link invalid.
+  return `[${displayText}](${scheme}://${encodeId(id)}${queryString})`;
 };
 
 // Matches serialized badge markdown-links: [displayText](scheme://id) or [displayText](scheme://id?key=value)
@@ -74,13 +95,13 @@ export const serializeCommandBadge = (element: HTMLElement): string => {
 //   Group 2: scheme        → "skill"
 //   Group 3: id (path)     → "skill-1"
 //   Group 4: query string  → optional
-const BADGE_PATTERN = /\[([^\]]+)\]\((\w+):\/\/([^?)]+)(?:\?([^)]*))?\)/g;
+const BADGE_PATTERN = /\[((?:\\.|[^\]\\])+)\]\((\w+):\/\/([^?)]+)(?:\?([^)]*))?\)/g;
 
 /**
- * Parses text containing serialized badge markdown-links into segments.
- * Used to restore badges from serialized content.
+ * Parses text containing serialized badge and image markdown-links into segments.
+ * Used to restore badges and image chips from serialized content.
  */
-export const deserializeCommandBadge = (text: string): ContentSegment[] => {
+export const deserializeInputSegments = (text: string): ContentSegment[] => {
   const segments: ContentSegment[] = [];
   let lastIndex = 0;
   let match: RegExpExecArray | null;
@@ -92,35 +113,47 @@ export const deserializeCommandBadge = (text: string): ContentSegment[] => {
       segments.push({ type: 'text', value: text.slice(lastIndex, match.index) });
     }
 
-    const [_, displayText, scheme, path, queryString] = match;
-    const commandDefinition = getCommandDefinitionByScheme(scheme);
+    const [_, escapedDisplayText, scheme, path, queryString] = match;
+    const displayText = unescapeLinkText(escapedDisplayText);
 
-    if (commandDefinition) {
-      const { id: commandId, sequence } = commandDefinition;
-      const label = displayText.startsWith(sequence)
-        ? displayText.slice(sequence.length)
-        : displayText;
-
-      const metadata: CommandBadgeData['metadata'] = {};
-      if (queryString) {
-        const params = new URLSearchParams(queryString);
-        params.forEach((value, key) => {
-          metadata[key] = value;
-        });
+    if (scheme === IMAGE_ATTACHMENT_SCHEME) {
+      try {
+        segments.push({ type: 'image', name: decodeURIComponent(path) });
+      } catch {
+        // Malformed percent-encoding, preserve as text
+        segments.push({ type: 'text', value: match[0] });
       }
-
-      segments.push({
-        type: 'badge',
-        data: {
-          commandId,
-          label,
-          id: path,
-          metadata,
-        },
-      });
     } else {
-      // Unknown scheme, preserve as text
-      segments.push({ type: 'text', value: match[0] });
+      const commandDefinition = getCommandDefinitionByScheme(scheme);
+
+      if (commandDefinition) {
+        const { id: commandId, sequence, legacySequences = [] } = commandDefinition;
+        const prefix = [sequence, ...legacySequences].find((candidate) =>
+          displayText.startsWith(candidate)
+        );
+        const label = prefix ? displayText.slice(prefix.length) : displayText;
+
+        const metadata: CommandBadgeData['metadata'] = {};
+        if (queryString) {
+          const params = new URLSearchParams(queryString);
+          params.forEach((value, key) => {
+            metadata[key] = value;
+          });
+        }
+
+        segments.push({
+          type: 'badge',
+          data: {
+            commandId,
+            label,
+            id: decodeId(path),
+            metadata,
+          },
+        });
+      } else {
+        // Unknown scheme, preserve as text
+        segments.push({ type: 'text', value: match[0] });
+      }
     }
 
     lastIndex = match.index + match[0].length;

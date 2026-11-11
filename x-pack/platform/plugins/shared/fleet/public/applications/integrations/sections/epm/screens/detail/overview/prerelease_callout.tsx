@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -39,7 +40,7 @@ export const PrereleaseCallout: React.FC<{
   }
   return (
     <>
-      <EuiCallOut
+      <KbnWarningCallout
         announceOnMount
         data-test-subj="prereleaseCallout"
         title={i18n.translate('xpack.fleet.epm.prereleaseWarningCalloutTitle', {
@@ -48,20 +49,23 @@ export const PrereleaseCallout: React.FC<{
             packageTitle: title,
           },
         })}
-        iconType="info"
-        color="warning"
-      >
-        {latestGAVersion && (
-          <p>
-            <EuiButton href={overviewPathLatestGA} color="warning" data-test-subj="switchToGABtn">
-              <FormattedMessage
-                id="xpack.fleet.epm.prereleaseWarningCalloutSwitchToGAButton"
-                defaultMessage="Switch to latest GA version"
-              />
-            </EuiButton>
-          </p>
-        )}
-      </EuiCallOut>
+        actionProps={
+          latestGAVersion
+            ? {
+                primary: {
+                  href: overviewPathLatestGA,
+                  'data-test-subj': 'switchToGABtn',
+                  children: (
+                    <FormattedMessage
+                      id="xpack.fleet.epm.prereleaseWarningCalloutSwitchToGAButton"
+                      defaultMessage="Switch to latest GA version"
+                    />
+                  ),
+                },
+              }
+            : undefined
+        }
+      />
       <EuiSpacer size="m" />
     </>
   );
@@ -75,7 +79,7 @@ export const OtelPackageCallout: React.FC<{
 
   return (
     <>
-      <EuiCallOut
+      <KbnWarningCallout
         announceOnMount
         data-test-subj="prereleaseCallout"
         title={i18n.translate('xpack.fleet.epm.otelPackageWarningTitle', {
@@ -84,10 +88,7 @@ export const OtelPackageCallout: React.FC<{
             packageTitle,
           },
         })}
-        iconType="warning"
-        color="warning"
-      >
-        <p>
+        text={
           <FormattedMessage
             id="xpack.fleet.epm.otelPackageWarningMessage"
             defaultMessage="The {packageTitle} integration collects {OTelExternalLink} data adhering to {semanticConventionsLink}, and is available in technical preview. To collect OTel data, Elastic Agents must be on version {minVersion} or later. For more information, refer to the {fleetUserGuide}."
@@ -124,8 +125,8 @@ export const OtelPackageCallout: React.FC<{
               minVersion: OTEL_INPUTS_MINIMUM_VERSION,
             }}
           />
-        </p>
-      </EuiCallOut>
+        }
+      />
       <EuiSpacer size="m" />
     </>
   );

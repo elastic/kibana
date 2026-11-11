@@ -4,7 +4,7 @@ navigation_title: Key concepts
 
 # Key concepts [key-concepts]
 
-The mental models and architecture you need to build on the {{kib}} platform: plugins and packages versus core, the platform lifecycle, saved objects, security, data views, embeddables and other UI building blocks, and plugin performance.
+The mental models and architecture you need to build on the {{kib}} platform: plugins and packages versus core, the platform lifecycle, saved objects, security, data views, embeddables, UI actions, and plugin performance.
 
 ## Platform architecture
 
@@ -41,9 +41,8 @@ How queryable data sets are modeled and accessed.
 
 ## UI
 
-Architectural building blocks for plugin UIs.
+Plugin UI concepts.
 
-- [Building blocks](./ui/building-blocks.md)
 - [Embeddables](./ui/embeddables.md)
 - [UI Actions](./ui/ui-actions.md)
 - [Lens (visualization framework)](./ui/lens.md)

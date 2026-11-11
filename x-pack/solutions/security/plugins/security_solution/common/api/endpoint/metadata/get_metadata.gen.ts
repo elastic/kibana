@@ -31,27 +31,29 @@ export const GetEndpointMetadataListRequestQuery = lazySchema(() =>
     /**
      * The page number to return.
      */
-    page: Page.optional(),
+    page: Page.optional().describe('The page number to return.'),
     /**
      * The number of endpoints to return per page.
      */
-    pageSize: PageSize.optional(),
+    pageSize: PageSize.optional().describe('The number of endpoints to return per page.'),
     /**
      * A KQL string to filter the endpoint metadata results.
      */
-    kuery: Kuery.optional(),
+    kuery: Kuery.optional().describe('A KQL string to filter the endpoint metadata results.'),
     /**
      * A set of host statuses to filter the results by (for example, `healthy`, `updating`).
      */
-    hostStatuses: HostStatuses,
+    hostStatuses: HostStatuses.describe(
+      'A set of host statuses to filter the results by (for example, `healthy`, `updating`).'
+    ),
     /**
      * The field used to sort the results.
      */
-    sortField: SortField.optional(),
+    sortField: SortField.optional().describe('The field used to sort the results.'),
     /**
      * The sort order, either `asc` or `desc`.
      */
-    sortDirection: SortDirection.optional(),
+    sortDirection: SortDirection.optional().describe('The sort order, either `asc` or `desc`.'),
   })
 );
 export type GetEndpointMetadataListRequestQuery = z.infer<

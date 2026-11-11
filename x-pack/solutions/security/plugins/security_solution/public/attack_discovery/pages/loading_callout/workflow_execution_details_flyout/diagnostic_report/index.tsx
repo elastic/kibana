@@ -73,7 +73,7 @@ const DiagnosticReportComponent: React.FC<DiagnosticReportProps> = (props) => {
             <EuiButtonIcon
               aria-label={i18n.COPY_DIAGNOSTIC_REPORT}
               data-test-subj="copyDiagnosticReportButton"
-              iconType="copyClipboard"
+              iconType="copy"
               onClick={handleCopy}
               size="s"
             />

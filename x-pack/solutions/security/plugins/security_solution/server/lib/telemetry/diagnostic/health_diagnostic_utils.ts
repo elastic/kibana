@@ -6,16 +6,27 @@
  */
 
 import { randomUUID } from 'crypto';
+import moment from 'moment';
 import { type Interval, intervalFromDate } from '@kbn/task-manager-plugin/server/lib/intervals';
 import {
   Action,
   type HealthDiagnosticQuery,
-  type HealthDiagnosticQueryBase,
   type HealthDiagnosticQueryStats,
 } from './health_diagnostic_service.types';
 import { unflatten } from '../helpers';
 import type { AnyObject, Nullable } from '../types';
-import { generateDEK, encryptDEKWithRSA, encryptField } from './encryption';
+import { generateDEK, encryptDEKWithRSA, encryptField, encryptDocumentAsJson } from './encryption';
+
+const DATE_ONLY_FORMAT = 'YYYY-MM-DD';
+
+/**
+ * Formats a value as a `YYYY-MM-DD` date. Strings keep the date as written (offset ignored),
+ * `Date` instances use their UTC date. Fixed-width dates compare correctly as strings.
+ */
+export const toDateOnly = (value: string | Date): string =>
+  (typeof value === 'string' ? moment.parseZone(value) : moment.utc(value)).format(
+    DATE_ONLY_FORMAT
+  );
 
 export function shouldExecute(startDate: Date, endDate: Date, interval: Interval): boolean {
   const nextDate = intervalFromDate(startDate, interval);
@@ -46,11 +57,7 @@ export function fieldNames<T>(documents: T): string[] {
   return Array.from(result);
 }
 
-export const emptyStat = (
-  name: string,
-  now: Date,
-  descriptorVersion: number
-): HealthDiagnosticQueryStats => ({
+export const emptyStat = (name: string, now: Date): HealthDiagnosticQueryStats => ({
   name,
   started: now.toISOString(),
   traceId: randomUUID(),
@@ -58,7 +65,6 @@ export const emptyStat = (
   numDocs: 0,
   passed: false,
   fieldNames: [],
-  descriptorVersion,
   status: 'failed',
 });
 
@@ -66,17 +72,19 @@ export async function applyFilterlist(
   data: unknown[],
   rules: Record<string, Action>,
   salt: string,
-  query?: Pick<HealthDiagnosticQueryBase, 'encryptionKeyId'>,
+  query?: { encryptionKeyId?: string; encryptDocument?: true },
   encryptionPublicKeys?: Record<string, string>
 ): Promise<unknown[]> {
   const filteredResult: unknown[] = [];
 
-  const hasEncryptAction = Object.values(rules).some((action) => action === Action.ENCRYPT);
+  const needsDEK =
+    query?.encryptDocument === true ||
+    Object.values(rules).some((action) => action === Action.ENCRYPT);
   let dek: Nullable<Buffer>;
   let encryptedDEK: Nullable<Buffer>;
   let keyId: string | undefined;
 
-  if (hasEncryptAction) {
+  if (needsDEK) {
     if (!query?.encryptionKeyId) {
       throw new Error('encryptionKeyId is required when filterlist contains encrypt actions');
     }
@@ -84,7 +92,6 @@ export async function applyFilterlist(
       throw new Error(`Public key not found for encryptionKeyId: ${query.encryptionKeyId}`);
     }
 
-    // same DEK for all the data
     keyId = query.encryptionKeyId;
     const publicKey = encryptionPublicKeys[keyId];
     dek = generateDEK();
@@ -181,21 +188,27 @@ export async function applyFilterlist(
     }
   };
 
-  for (const rawDoc of data) {
-    const doc = unflatten(rawDoc as AnyObject);
-    if (Array.isArray(doc)) {
-      const docs = doc as unknown[];
-      const result = await Promise.all(
-        docs.map((d) => {
-          return applyFilterToDoc(d);
-        })
-      );
-      filteredResult.push(result);
-    } else {
-      filteredResult.push(await applyFilterToDoc(doc));
+  if (query?.encryptDocument === true) {
+    if (!dek || !encryptedDEK || !keyId) {
+      throw new Error('Encryption configuration not initialized');
     }
+    const hasRules = Object.keys(rules).length > 0;
+    const result: string[] = [];
+    for (const rawDoc of data) {
+      const doc = hasRules ? unflatten(rawDoc as AnyObject) : rawDoc;
+      const subDoc = hasRules ? await applyFilterToDoc(doc) : doc;
+      result.push(encryptDocumentAsJson(subDoc, dek, encryptedDEK, keyId));
+    }
+    dek.fill(0);
+    return result;
   }
 
+  for (const rawDoc of data) {
+    const doc = unflatten(rawDoc as AnyObject);
+    filteredResult.push(await applyFilterToDoc(doc));
+  }
+
+  dek?.fill(0);
   return filteredResult;
 }
 

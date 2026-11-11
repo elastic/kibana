@@ -10,8 +10,13 @@
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { EmbeddableComponentProps, LensEmbeddableInput } from '@kbn/lens-plugin/public';
+import type { DataSource } from '@kbn/data-source';
+import type {
+  EmbeddableComponentProps,
+  LensEmbeddableInput,
+  XYDataLayerConfig,
+  XYVisualizationState,
+} from '@kbn/lens-plugin/public';
 import type {
   UnifiedHistogramBucketInterval,
   UnifiedHistogramChartContext,
@@ -24,10 +29,9 @@ import type { LensProps } from './hooks/use_lens_props';
 export interface HistogramProps {
   abortController: AbortController | undefined;
   services: UnifiedHistogramServices;
-  dataView: DataView;
+  dataSource: DataSource;
   chart: UnifiedHistogramChartContext;
   bucketInterval: UnifiedHistogramBucketInterval | undefined;
-  isPlainRecord: boolean;
   requestData: string;
   lensProps: LensProps;
   visContext: UnifiedHistogramVisContext;
@@ -36,14 +40,25 @@ export interface HistogramProps {
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
+  onApiAvailable?: EmbeddableComponentProps['onApiAvailable'];
 }
+
+const getRenderedSeriesType = ({
+  visualizationType,
+  state,
+}: LensProps['attributes']): string | undefined => {
+  if (visualizationType !== 'lnsXY') {
+    return undefined;
+  }
+  const { layers } = state.visualization as XYVisualizationState;
+  return layers.find((layer): layer is XYDataLayerConfig => 'seriesType' in layer)?.seriesType;
+};
 
 export function Histogram({
   services: { lens, uiSettings },
-  dataView,
+  dataSource,
   chart: { timeInterval },
   bucketInterval,
-  isPlainRecord,
   requestData,
   lensProps,
   visContext,
@@ -52,6 +67,7 @@ export function Histogram({
   onFilter,
   onBrushEnd,
   withDefaultActions,
+  onApiAvailable,
   abortController,
 }: HistogramProps) {
   const { timeRangeText, timeRangeDisplay } = useTimeRange({
@@ -59,8 +75,7 @@ export function Histogram({
     bucketInterval,
     timeRange: lensProps.timeRange!,
     timeInterval,
-    isPlainRecord,
-    timeField: dataView.timeFieldName,
+    dataSource,
   });
   const { attributes } = visContext;
   const { euiTheme } = useEuiTheme();
@@ -105,6 +120,7 @@ export function Histogram({
         data-time-range={timeRangeText}
         data-request-data={requestData}
         data-suggestion-type={visContext.suggestionType}
+        data-series-type={getRenderedSeriesType(lensProps.attributes)}
         css={chartCss}
       >
         <lens.EmbeddableComponent
@@ -118,6 +134,7 @@ export function Histogram({
           onFilter={onFilter}
           onBrushEnd={onBrushEnd}
           withDefaultActions={withDefaultActions}
+          onApiAvailable={onApiAvailable}
         />
       </div>
       {timeRangeDisplay}

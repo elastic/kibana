@@ -7,22 +7,15 @@
 
 import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
-import { ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING } from '@kbn/security-solution-navigation';
 
 spaceTest.describe(
   'serverless security navigation',
   { tag: [...tags.serverless.security.complete] },
   () => {
-    // Reset the per-space setting toggled by the "alignment disabled" test below so it
-    // never leaks into other tests sharing this worker's space.
-    spaceTest.afterEach(async ({ scoutSpace }) => {
-      await scoutSpace.uiSettings.unset(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING);
-    });
-
     spaceTest(
-      'security serverless side nav, breadcrumbs, Launchpad panel, and active nav highlight',
+      'security serverless navigation, Launchpad panel, and active nav highlight',
       async ({ page, pageObjects, browserAuth }) => {
-        const { serverlessProjectChromePage, collapsibleNav } = pageObjects;
+        const { serverlessProjectChromePage, collapsibleNav, chrome } = pageObjects;
 
         await browserAuth.loginAsPrivilegedUser();
         await serverlessProjectChromePage.navigateToSecuritySolutionHomeForChromeNav();
@@ -31,18 +24,16 @@ spaceTest.describe(
           await expect(serverlessProjectChromePage.primaryNav).toBeVisible();
         });
 
-        await spaceTest.step('breadcrumbs reflect navigation state', async () => {
-          await expect(serverlessProjectChromePage.breadcrumbs).toBeVisible();
-
+        await spaceTest.step('updates the page title and navigates back home', async () => {
           // Alerts is nested inside the "Detections" panel opener; open it before clicking Alerts.
           await collapsibleNav.getNavItemById('securityGroup:alertDetections').click();
           await collapsibleNav.clickNavItemByDeepLinkId('securitySolutionUI:alerts');
-          await expect(serverlessProjectChromePage.getBreadcrumbByText('Alerts')).toBeVisible();
+          await page.waitForURL(/\/app\/security\/alerts/);
+          await expect(chrome.pageTitle).toHaveText('Alerts');
 
           const alertsUrl = page.url();
-          await serverlessProjectChromePage.clickLogo();
+          await chrome.clickLogo();
           await expect(page).not.toHaveURL(alertsUrl);
-          await expect(serverlessProjectChromePage.getBreadcrumbByText('Alerts')).toBeHidden();
         });
 
         await spaceTest.step(
@@ -65,20 +56,6 @@ spaceTest.describe(
             ).toBeVisible();
           }
         );
-      }
-    );
-
-    spaceTest(
-      'shows a flat Alerts link when alerts-and-attacks alignment is disabled',
-      async ({ page, pageObjects, browserAuth, scoutSpace }) => {
-        const { collapsibleNav } = pageObjects;
-        await scoutSpace.uiSettings.set({ [ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]: false });
-        await browserAuth.loginAsPrivilegedUser();
-        await pageObjects.serverlessProjectChromePage.navigateToSecuritySolutionHomeForChromeNav();
-
-        await expect(collapsibleNav.getNavItemById('securityGroup:alertDetections')).toBeHidden();
-        await collapsibleNav.clickNavItemByDeepLinkId('securitySolutionUI:alerts');
-        await page.waitForURL(/\/app\/security\/alerts/);
       }
     );
   }

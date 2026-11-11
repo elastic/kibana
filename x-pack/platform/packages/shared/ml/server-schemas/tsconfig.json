@@ -15,7 +15,7 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/config-schema",
+    "@kbn/zod",
     "@kbn/ml-anomaly-utils",
     "@kbn/presentation-publishing-schemas"
   ]

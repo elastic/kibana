@@ -11,6 +11,8 @@ applies_to:
 
 The Confluence Cloud connector communicates with the Confluence Cloud REST API v2 to list and retrieve spaces and pages. It uses Basic authentication (email and API token) and connects to your Atlassian site by subdomain.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-confluence-cloud-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
@@ -36,26 +38,26 @@ The Confluence Cloud connector has the following actions:
 
 List pages
 :   List Confluence pages with optional filters and cursor-based pagination.
-    - `limit` (optional): Maximum number of pages to return.
+    - `limit` (optional): Maximum number of pages to return, from 1 to 250.
     - `cursor` (optional): Pagination cursor from a previous response.
-    - `spaceId` (optional): Space ID or list of space IDs to filter by.
+    - `spaceId` (optional): Numeric space ID or list of space IDs to filter by.
     - `title` (optional): Filter pages by title (partial match).
-    - `status` (optional): Page status filter (for example, `current`, `archived`, `draft`).
-    - `bodyFormat` (optional): Format for page body in the response (for example, `atlas_doc_format`, `storage`).
+    - `status` (optional): Page status filter (`current`, `archived`, `deleted`, or `trashed`).
+    - `bodyFormat` (optional): Format for page body in the response (`atlas_doc_format` or `storage`).
 
 Get page
 :   Retrieve full details of a single Confluence page by ID.
-    - `id` (required): The ID of the page to retrieve.
+    - `id` (required): The numeric ID of the page to retrieve.
     - `bodyFormat` (optional): Format for page body in the response.
 
 List spaces
 :   List Confluence spaces with optional filters and cursor-based pagination.
-    - `limit` (optional): Maximum number of spaces to return.
+    - `limit` (optional): Maximum number of spaces to return, from 1 to 250.
     - `cursor` (optional): Pagination cursor from a previous response.
-    - `ids` (optional): Space ID or list of space IDs to filter by.
+    - `ids` (optional): Numeric space ID or list of space IDs to filter by.
     - `keys` (optional): Space key or list of space keys to filter by (for example, `DEMO`, `TEAM`).
     - `type` (optional): Space type filter (for example, `global`, `personal`).
-    - `status` (optional): Space status filter (for example, `current`, `archived`).
+    - `status` (optional): Space status filter (`current`, `archived`, or `trashed`).
 
 Get space
 :   Retrieve full details of a single Confluence space by ID.

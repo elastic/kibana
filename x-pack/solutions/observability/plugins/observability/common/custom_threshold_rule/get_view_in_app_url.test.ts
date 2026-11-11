@@ -5,11 +5,28 @@
  * 2.0.
  */
 
-import { Aggregators } from './types';
-import type { LocatorPublic } from '@kbn/share-plugin/common';
+import {
+  FilterStateStore,
+  buildCustomFilter,
+  fromKueryExpression,
+  toElasticsearchQuery,
+} from '@kbn/es-query';
 import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+
+import { Aggregators } from './types';
 import type { GetViewInAppUrlArgs } from './get_view_in_app_url';
 import { getViewInAppUrl } from './get_view_in_app_url';
+
+const metricFilterChip = (dataViewId: string, filter: string, disabled: boolean) =>
+  buildCustomFilter(
+    dataViewId,
+    toElasticsearchQuery(fromKueryExpression(filter)),
+    disabled,
+    false,
+    null,
+    FilterStateStore.APP_STATE
+  );
 
 describe('getViewInAppUrl', () => {
   const logsLocator = {
@@ -67,7 +84,7 @@ describe('getViewInAppUrl', () => {
         timeRange: returnedTimeRange,
         filters: [],
         query: {
-          query: 'mockedFilter and mockedCountFilter',
+          query: '(mockedFilter) and (mockedCountFilter)',
           language: 'kuery',
         },
       },
@@ -120,6 +137,7 @@ describe('getViewInAppUrl', () => {
           filter: 'mockedCountFilter',
         },
       ],
+      dataViewId: 'mockedDataViewId',
       logsLocator,
       startedAt,
       endedAt,
@@ -128,7 +146,7 @@ describe('getViewInAppUrl', () => {
     expect(getViewInAppUrl(args)).toBe('mockedGetRedirectUrl');
     expect(logsLocator.getRedirectUrl).toHaveBeenCalledWith(
       {
-        dataset: undefined,
+        dataViewId: 'mockedDataViewId',
         dataViewSpec: undefined,
         timeRange: returnedTimeRange,
         filters: [],
@@ -203,11 +221,55 @@ describe('getViewInAppUrl', () => {
           filter: 'mockedCountFilter',
         },
         {
+          name: 'B',
+          aggType: Aggregators.AVERAGE,
+          field: 'mockedAvgField',
+          filter: 'mockedAvgFilter',
+        },
+      ],
+      dataViewId: 'mockedDataViewId',
+      logsLocator,
+      startedAt,
+      endedAt,
+      searchConfiguration: {
+        index: {},
+        query: {
+          language: '',
+          query: 'mockedFilter',
+        },
+      },
+    };
+
+    expect(getViewInAppUrl(args)).toBe('mockedGetRedirectUrl');
+    expect(logsLocator.getRedirectUrl).toHaveBeenCalledWith(
+      {
+        dataViewId: 'mockedDataViewId',
+        dataViewSpec: undefined,
+        timeRange: returnedTimeRange,
+        filters: [
+          metricFilterChip('mockedDataViewId', 'mockedCountFilter', true),
+          metricFilterChip('mockedDataViewId', 'mockedAvgFilter', true),
+        ],
+        query: {
+          query: 'mockedFilter',
+          language: 'kuery',
+        },
+      },
+      {}
+    );
+  });
+
+  it('applies a single non-count metric filter to the query', () => {
+    const args: GetViewInAppUrlArgs = {
+      metrics: [
+        {
           name: 'A',
           aggType: Aggregators.AVERAGE,
           field: 'mockedAvgField',
+          filter: 'mockedAvgFilter',
         },
       ],
+      dataViewId: 'mockedDataViewId',
       logsLocator,
       startedAt,
       endedAt,
@@ -216,15 +278,78 @@ describe('getViewInAppUrl', () => {
     expect(getViewInAppUrl(args)).toBe('mockedGetRedirectUrl');
     expect(logsLocator.getRedirectUrl).toHaveBeenCalledWith(
       {
-        dataset: undefined,
+        dataViewId: 'mockedDataViewId',
         dataViewSpec: undefined,
         timeRange: returnedTimeRange,
         filters: [],
         query: {
-          query: '',
+          query: 'mockedAvgFilter',
           language: 'kuery',
         },
       },
+      {}
+    );
+  });
+
+  it('parenthesizes both sides so an OR in the rule query is not split by the metric filter', () => {
+    const args: GetViewInAppUrlArgs = {
+      metrics: [
+        {
+          name: 'A',
+          aggType: Aggregators.COUNT,
+          filter: 'container.id:x',
+        },
+      ],
+      dataViewId: 'mockedDataViewId',
+      logsLocator,
+      startedAt,
+      endedAt,
+      searchConfiguration: {
+        index: {},
+        query: {
+          language: 'kuery',
+          query: 'host.name:a or host.name:b',
+        },
+      },
+    };
+
+    expect(getViewInAppUrl(args)).toBe('mockedGetRedirectUrl');
+    expect(logsLocator.getRedirectUrl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          query: '(host.name:a or host.name:b) and (container.id:x)',
+          language: 'kuery',
+        },
+      }),
+      {}
+    );
+  });
+
+  it('disables the metric filter chip when another metric contributes no filter', () => {
+    const args: GetViewInAppUrlArgs = {
+      metrics: [
+        {
+          name: 'A',
+          aggType: Aggregators.COUNT,
+          filter: 'mockedCountFilter',
+        },
+        {
+          name: 'B',
+          aggType: Aggregators.AVERAGE,
+          field: 'mockedAvgField',
+        },
+      ],
+      dataViewId: 'mockedDataViewId',
+      logsLocator,
+      startedAt,
+      endedAt,
+    };
+
+    expect(getViewInAppUrl(args)).toBe('mockedGetRedirectUrl');
+    expect(logsLocator.getRedirectUrl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: [metricFilterChip('mockedDataViewId', 'mockedCountFilter', true)],
+      }),
       {}
     );
   });
@@ -243,6 +368,7 @@ describe('getViewInAppUrl', () => {
           field: 'mockedAvgField',
         },
       ],
+      dataViewId: 'mockedDataViewId',
       logsLocator,
       startedAt,
       endedAt,
@@ -276,7 +402,7 @@ describe('getViewInAppUrl', () => {
     expect(getViewInAppUrl(args)).toBe('mockedGetRedirectUrl');
     expect(logsLocator.getRedirectUrl).toHaveBeenCalledWith(
       {
-        dataViewId: undefined,
+        dataViewId: 'mockedDataViewId',
         dataViewSpec: undefined,
         timeRange: returnedTimeRange,
         filters: [
@@ -298,6 +424,7 @@ describe('getViewInAppUrl', () => {
               },
             },
           },
+          metricFilterChip('mockedDataViewId', 'mockedCountFilter', true),
         ],
         query: {
           query: 'mockedFilter',
@@ -318,6 +445,7 @@ describe('getViewInAppUrl', () => {
           filter: 'mockedCountFilter',
         },
       ],
+      dataViewId: 'mockedDataViewId',
       logsLocator,
       startedAt,
       endedAt,
@@ -327,7 +455,7 @@ describe('getViewInAppUrl', () => {
     expect(getViewInAppUrl(args)).toBe('mockedGetRedirectUrl');
     expect(logsLocator.getRedirectUrl).toHaveBeenCalledWith(
       {
-        dataset: undefined,
+        dataViewId: 'mockedDataViewId',
         dataViewSpec: undefined,
         timeRange: returnedTimeRange,
         filters: [],

@@ -125,6 +125,8 @@ const convertConfigureResponseToCasesConfigure = (
     connector,
     owner,
     observableTypes,
+    extractObservables,
+    workflowTags,
   } = configuration;
 
   return {
@@ -137,5 +139,7 @@ const convertConfigureResponseToCasesConfigure = (
     connector,
     owner,
     observableTypes,
+    extractObservables,
+    workflowTags,
   };
 };

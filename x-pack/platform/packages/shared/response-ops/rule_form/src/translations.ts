@@ -402,6 +402,13 @@ export const RULE_FLYOUT_HEADER_CREATE_TITLE = i18n.translate(
   }
 );
 
+export const RULE_FLYOUT_STEPS_ARIA_LABEL = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleFlyoutHeader.stepsAriaLabel',
+  {
+    defaultMessage: 'Create rule steps',
+  }
+);
+
 export const RULE_FLYOUT_HEADER_EDIT_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleFlyoutHeader.editTitle',
   {
@@ -659,6 +666,21 @@ export const RULE_FORM_PAGE_RULE_ACTIONS_NO_PERMISSION_DESCRIPTION = i18n.transl
   'responseOpsRuleForm.ruleForm.ruleActionsNoPermissionDescription',
   {
     defaultMessage: 'You must have read access to actions and connectors to edit rules.',
+  }
+);
+
+export const RULE_FORM_PAGE_RULE_NO_PERMISSION_TITLE = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleNoPermissionTitle',
+  {
+    defaultMessage: 'Rule privileges missing',
+  }
+);
+
+export const RULE_FORM_PAGE_RULE_NO_PERMISSION_DESCRIPTION = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleNoPermissionDescription',
+  {
+    defaultMessage:
+      'You must have All privileges for the feature this rule belongs to in order to edit it.',
   }
 );
 

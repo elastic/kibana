@@ -54,6 +54,8 @@
     "@kbn/react-kibana-mount",
     "@kbn/core-rendering-browser",
     "@kbn/scout-oblt",
+    "@kbn/app-header",
+    "@kbn/core-chrome-app-menu-components",
   ],
   "exclude": ["target/**/*"]
 }

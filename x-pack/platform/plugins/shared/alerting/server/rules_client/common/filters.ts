@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { KueryNode } from '@kbn/es-query';
-import { nodeBuilder } from '@kbn/es-query';
+import { fromKueryExpression, nodeBuilder, toElasticsearchQuery } from '@kbn/es-query';
 import { RULE_SAVED_OBJECT_TYPE } from '../..';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
@@ -70,6 +71,144 @@ export const buildTagsFilter = (tags?: string[], type = RULE_SAVED_OBJECT_TYPE) 
   }
 
   return buildFilter({ filters: tags, field: 'tags', operator: 'or', type });
+};
+
+/**
+ * Trim, and treat wrapping quotes as the user trying to phrase-search.
+ * Quotes are not operators in a wildcard query.
+ */
+export const sanitizeTemplateSearchQuery = (search?: string): string | undefined => {
+  let query = search?.trim() ?? '';
+  const quote = query[0];
+  if (query.length >= 2 && (quote === '"' || quote === "'") && query[query.length - 1] === quote) {
+    query = query.slice(1, -1).trim();
+  }
+  if (!query) {
+    return undefined;
+  }
+  return query;
+};
+
+/**
+ * Escape wildcard metacharacters that are not user-facing operators.
+ * Keep `*`. Escape `\` so it cannot neutralize the next character, and `?`
+ * so a typed question mark stays literal.
+ */
+export const escapeTemplateSearchWildcard = (value: string): string =>
+  value.replace(/[\\?]/g, '\\$&');
+
+export const buildTemplateSearchWildcardValue = (search?: string): string | undefined => {
+  const query = sanitizeTemplateSearchQuery(search);
+  if (!query) {
+    return undefined;
+  }
+  return `*${escapeTemplateSearchWildcard(query)}*`;
+};
+
+/**
+ * Substring search on name (wildcard, boost 3), tags (wildcard, boost 2),
+ * and description (full-word match, boost 1). Name matches rank highest.
+ * Spaces stay spaces; `*` stays a wildcard operator.
+ */
+export const buildTemplateSearchQuery = (search?: string): QueryDslQueryContainer | undefined => {
+  const value = buildTemplateSearchWildcardValue(search);
+  if (!value) {
+    return undefined;
+  }
+  const rawValue = sanitizeTemplateSearchQuery(search)!;
+
+  return {
+    bool: {
+      should: [
+        {
+          wildcard: {
+            // name.keyword is lowercase-normalized. Do not set case_insensitive.
+            [`${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.name.keyword`]: { value, boost: 3 },
+          },
+        },
+        {
+          wildcard: {
+            [`${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.tags`]: {
+              value,
+              case_insensitive: true,
+              boost: 2,
+            },
+          },
+        },
+        {
+          match: {
+            [`${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.description`]: { query: rawValue, boost: 1 },
+          },
+        },
+      ],
+      minimum_should_match: 1,
+    },
+  };
+};
+
+const isKueryNode = (value: unknown): value is KueryNode =>
+  typeof value === 'object' && value !== null && 'type' in value;
+
+/**
+ * `find()` rewrites `type.attributes.field` to `type.field` before querying
+ * ES. `search()` does not, so KQL nodes built for find must be rewritten
+ * before `toElasticsearchQuery`.
+ *
+ * Only rewrites field-name arguments (arguments[0] of is/range/exists nodes)
+ * to avoid mangling value literals that happen to contain `.attributes.`.
+ */
+const FIELD_ARGUMENT_FUNCTIONS = new Set(['is', 'range', 'exists']);
+
+export const stripAttributesFromKueryFields = (node: KueryNode): KueryNode => {
+  const next: KueryNode = { type: node.type };
+  const isFieldFunction = FIELD_ARGUMENT_FUNCTIONS.has(node.function);
+  for (const [key, value] of Object.entries(node)) {
+    if (key === 'type') {
+      continue;
+    }
+    if (key === 'arguments' && Array.isArray(value)) {
+      next[key] = value.map((item, index) => {
+        if (!isKueryNode(item)) return item;
+        const child = stripAttributesFromKueryFields(item);
+        if (
+          isFieldFunction &&
+          index === 0 &&
+          child.type === 'literal' &&
+          typeof child.value === 'string'
+        ) {
+          return { ...child, value: child.value.replace('.attributes.', '.') };
+        }
+        return child;
+      });
+      continue;
+    }
+    if (Array.isArray(value)) {
+      next[key] = value.map((item) =>
+        isKueryNode(item) ? stripAttributesFromKueryFields(item) : item
+      );
+      continue;
+    }
+    if (isKueryNode(value)) {
+      next[key] = stripAttributesFromKueryFields(value);
+      continue;
+    }
+    next[key] = value;
+  }
+  return next;
+};
+
+export const toSavedObjectEsQuery = (node: KueryNode): QueryDslQueryContainer =>
+  toElasticsearchQuery(stripAttributesFromKueryFields(node));
+
+/**
+ * Matches Fleet / alerting v1 rule templates: `engine: "v1"` or no `engine` field.
+ * Prefer this allowlist over excluding `"v2"` so future engine values stay out of v1 APIs.
+ */
+export const buildAlertingV1RuleTemplateEngineFilter = (
+  type = RULE_TEMPLATE_SAVED_OBJECT_TYPE
+): KueryNode => {
+  const field = `${type}.attributes.engine`;
+  return fromKueryExpression(`${field}: v1 or not ${field}: *`);
 };
 
 /**

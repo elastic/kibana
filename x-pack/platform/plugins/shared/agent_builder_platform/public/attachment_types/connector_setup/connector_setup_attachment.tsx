@@ -23,16 +23,16 @@ import {
   type HeaderBadge,
 } from '@kbn/agent-builder-browser/attachments';
 import { AGENTBUILDER_APP_ID } from '@kbn/agent-builder-plugin/public';
+import { AGENT_BUILDER_MANAGE_PATHS } from '@kbn/deeplinks-agent-builder';
 import {
   CONNECTOR_SETUP_ATTACHMENT_TYPE,
   type ConnectorSetupAttachment,
 } from '../../../common/attachments';
 
-const CONNECTORS_MANAGE_PATH = '/manage/connectors';
-
 interface ConnectorSetupDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   application: CoreStart['application'];
+  notifications: CoreStart['notifications'];
 }
 
 const getDisplayName = (attachment: ConnectorSetupAttachment) =>
@@ -64,7 +64,7 @@ const ConnectorSetupInline: React.FC<AttachmentRenderProps<ConnectorSetupAttachm
               {i18n.translate(
                 'xpack.agentBuilderPlatform.attachments.connectorSetup.inlineConnected',
                 {
-                  defaultMessage: 'Connected — the agent can now use {displayName}.',
+                  defaultMessage: 'Connected — {displayName} is set up.',
                   values: { displayName },
                 }
               )}
@@ -82,7 +82,7 @@ const ConnectorSetupCanvas: React.FC<
     callbacks: CanvasRenderCallbacks;
   }
 > = ({ attachment, deps, callbacks }) => {
-  const { triggersActionsUi } = deps;
+  const { triggersActionsUi, notifications } = deps;
   const { registerActionButtons, updateOrigin, closeCanvas } = callbacks;
   const { connector_type: connectorType, suggested_name: suggestedName } = attachment.data;
 
@@ -99,13 +99,23 @@ const ConnectorSetupCanvas: React.FC<
       const created = await handleRef.current.submit();
       if (created) {
         // `useCreateConnector` (inside the form) already shows the success toast.
-        await updateOrigin(created.id);
+        const originResponse = await updateOrigin(created.id);
+        const [warning] = originResponse?.warnings ?? [];
+        if (warning) {
+          notifications.toasts.addWarning({
+            title: i18n.translate(
+              'xpack.agentBuilderPlatform.attachments.connectorSetup.notAddedToAgentTitle',
+              { defaultMessage: 'Connector created, but not added to the agent' }
+            ),
+            text: warning,
+          });
+        }
         closeCanvas();
       }
     } finally {
       setIsSaving(false);
     }
-  }, [updateOrigin, closeCanvas]);
+  }, [updateOrigin, closeCanvas, notifications]);
 
   // Re-register the Save button whenever validity/saving changes so its
   // disabled state mirrors the form.
@@ -189,10 +199,10 @@ export const createConnectorSetupAttachmentDefinition = (
             'xpack.agentBuilderPlatform.attachments.connectorSetup.manageButton',
             { defaultMessage: 'Manage connector' }
           ),
-          icon: 'popout',
+          icon: 'external',
           type: ActionButtonType.SECONDARY,
           href: deps.application.getUrlForApp(AGENTBUILDER_APP_ID, {
-            path: CONNECTORS_MANAGE_PATH,
+            path: AGENT_BUILDER_MANAGE_PATHS.connectors,
           }),
           openInNewTab: true,
           handler: () => {

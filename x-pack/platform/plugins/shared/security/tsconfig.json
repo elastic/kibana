@@ -19,8 +19,14 @@
     "__mocks__/**/*"
   ],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/cloud-plugin",
+    "@kbn/cps",
+    "@kbn/cps-utils",
+    "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/es-query",
     "@kbn/features-plugin",
+    "@kbn/content-sanitization",
     "@kbn/licensing-plugin",
     "@kbn/spaces-plugin",
     "@kbn/core-spaces-common",
@@ -105,6 +111,10 @@
     "@kbn/licensing-types",
     "@kbn/lazy-object",
     "@kbn/scout",
+    "@kbn/es",
+    "@kbn/test-es-server",
+    "@kbn/dev-utils",
+    "@kbn/security-api-integration-helpers",
     "@kbn/mock-idp-utils",
     "@kbn/core-user-activity-server",
     "@kbn/core-user-activity-server-mocks",
@@ -116,6 +126,10 @@
     "@kbn/core-chrome-browser-components",
     "@kbn/core-logging-server",
     "@kbn/projects-solutions-groups",
+    "@kbn/unsaved-changes-prompt",
+    "@kbn/ui-callout",
+    "@kbn/zod",
+    "@kbn/zod-helpers",
   ],
   "exclude": ["target/**/*"]
 }

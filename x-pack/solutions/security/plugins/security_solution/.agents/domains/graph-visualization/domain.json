@@ -6,17 +6,25 @@
   ],
   "paths": [
     "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/**",
-    "x-pack/solutions/security/plugins/security_solution/public/flyout/**/*graph*",
-    "x-pack/solutions/security/plugins/security_solution/public/flyout_v2/**/*graph*",
     "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/graph/**",
     "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/graph_events/**",
     "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/graph_entities/**",
+    "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/schema/graph/**",
+    "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/schema/graph_events/**",
+    "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/schema/graph_entities/**",
     "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/types/graph/**",
     "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/types/graph_events/**",
     "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/types/graph_entities/**",
-    "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/schema/graph/**",
-    "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/schema/graph_events/**",
-    "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/schema/graph_entities/**"
+    "x-pack/solutions/security/plugins/security_solution/public/flyout/**/*graph*",
+    "x-pack/solutions/security/plugins/security_solution/public/flyout_v2/**/*graph*",
+    "x-pack/solutions/security/plugins/security_solution/public/common/lib/telemetry/events/graph/**",
+    "x-pack/solutions/security/plugins/security_solution/public/common/hooks/use_has_graph_visualization_license.ts",
+    "x-pack/solutions/security/test/cloud_security_posture_api/routes/graph*.ts",
+    "x-pack/solutions/security/test/cloud_security_posture_functional/group5/pages/alerts_flyout.ts",
+    "x-pack/solutions/security/test/cloud_security_posture_functional/group5/pages/entity_flyout.ts",
+    "x-pack/solutions/security/test/cloud_security_posture_functional/group5/pages/entity_preview_flyout.ts",
+    "x-pack/solutions/security/test/cloud_security_posture_functional/group5/pages/events_flyout.ts",
+    "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/tests/graph_visualization/**"
   ],
   "files": [
     {

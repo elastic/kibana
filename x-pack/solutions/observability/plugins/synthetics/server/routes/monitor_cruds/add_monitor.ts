@@ -4,9 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
+import path from 'path';
+import { z } from '@kbn/zod';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { queryBoolean, optionalRouteId } from '../zod_query';
+import { createMonitorRequestBody } from './monitor_request_body';
 import {
   legacySyntheticsMonitorTypeSingle,
   syntheticsMonitorSavedObjectType,
@@ -16,6 +19,7 @@ import {
   InvalidLocationError,
   InvalidScheduleError,
 } from '../../synthetics_service/project_monitor/normalizers/common_fields';
+import { InvalidMaintenanceWindowError } from '../../synthetics_service/maintenance_windows/resolve_maintenance_windows';
 import type { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { AddEditMonitorAPI } from './add_monitor/add_monitor_api';
 import type { SyntheticsRestApiRouteFactory } from '../types';
@@ -26,38 +30,40 @@ import { normalizeAPIConfig, validateMonitor } from './monitor_validation';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 import { getBrowserTimeoutWarningForMonitor } from './monitor_warnings';
 import {
-  assertCanUpdateMonitorInAllSpaces,
+  assertCanPerformMonitorBulkActionInAllSpaces,
   validateMonitorPrivateLocationSpaces,
 } from './monitor_locations_utils';
+import { isSecretConnectionsEnabled } from '../../config';
 
 export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
+  options: {
+    summary: 'Create a monitor',
+    description:
+      'Create a new monitor with the specified attributes.\nA monitor can be one of the following types: HTTP, TCP, ICMP, or Browser.\nThe required and default fields may vary based on the monitor type.\n\nYou must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.',
+    operationId: 'post-synthetic-monitors',
+    oasOperationObject: () => path.join(__dirname, 'examples/post_monitor.yaml'),
+  },
   validate: {},
   validation: {
     request: {
-      body: schema.any(),
-      query: schema.object({
-        id: schema.maybe(schema.string()),
-        preserve_namespace: schema.maybe(schema.boolean()),
-        gettingStarted: schema.maybe(schema.boolean()),
-        internal: schema.maybe(
-          schema.boolean({
-            defaultValue: false,
-          })
-        ),
+      body: createMonitorRequestBody,
+      query: z.strictObject({
+        id: optionalRouteId.describe('A custom ID for the new monitor. Generated if omitted.'),
+        preserve_namespace: queryBoolean
+          .optional()
+          .describe(
+            'If `true`, store the `namespace` as sent. Otherwise, a `default` namespace is replaced with one derived from the space ID.'
+          ),
+        gettingStarted: queryBoolean.optional().describe('For internal use only.'),
+        internal: queryBoolean.optional().default(false).describe('For internal use only.'),
         // primarily used for testing purposes, to specify the type of saved object
-        savedObjectType: schema.maybe(
-          schema.oneOf(
-            [
-              schema.literal(syntheticsMonitorSavedObjectType),
-              schema.literal(legacySyntheticsMonitorTypeSingle),
-            ],
-            {
-              defaultValue: syntheticsMonitorSavedObjectType,
-            }
-          )
-        ),
+        savedObjectType: z
+          .enum([syntheticsMonitorSavedObjectType, legacySyntheticsMonitorTypeSingle])
+          .optional()
+          .default(syntheticsMonitorSavedObjectType)
+          .describe('For internal use only.'),
       }),
     },
   },
@@ -99,12 +105,24 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         });
       }
 
+      const maintenanceWindowRefs = formattedConfig?.[ConfigKey.MAINTENANCE_WINDOWS];
+      const maintenanceWindows = maintenanceWindowRefs?.length
+        ? (await routeContext.syntheticsMonitorClient.getMaintenanceWindows(spaceId)) ?? []
+        : [];
+
       const monitorWithDefaults = await addMonitorAPI.normalizeMonitor(
         formattedConfig!,
-        request.body as CreateMonitorPayLoad
+        request.body as CreateMonitorPayLoad,
+        undefined,
+        maintenanceWindows
       );
 
-      const validationResult = validateMonitor(monitorWithDefaults, spaceId);
+      const validationResult = validateMonitor(
+        monitorWithDefaults,
+        spaceId,
+        server.cloud?.isServerlessEnabled,
+        isSecretConnectionsEnabled(server.config)
+      );
 
       if (!validationResult.valid || !validationResult.decodedMonitor) {
         const { reason: message, details } = validationResult;
@@ -136,7 +154,10 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
       const monitorSpaces = normalizedMonitor[ConfigKey.KIBANA_SPACES] ?? [];
       if (monitorSpaces.length > 0) {
-        const spaceAuthError = await assertCanUpdateMonitorInAllSpaces(routeContext, monitorSpaces);
+        const spaceAuthError = await assertCanPerformMonitorBulkActionInAllSpaces(
+          routeContext,
+          monitorSpaces
+        );
         if (spaceAuthError) {
           return spaceAuthError;
         }
@@ -177,7 +198,11 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       const monitorResponse = mapSavedObjectToMonitor({ monitor: newMonitor, internal });
       return warning ? { ...monitorResponse, warnings: [warning] } : monitorResponse;
     } catch (error) {
-      if (error instanceof InvalidLocationError || error instanceof InvalidScheduleError) {
+      if (
+        error instanceof InvalidLocationError ||
+        error instanceof InvalidScheduleError ||
+        error instanceof InvalidMaintenanceWindowError
+      ) {
         return response.badRequest({ body: { message: error.message } });
       }
       if (SavedObjectsErrorHelpers.isForbiddenError(error)) {

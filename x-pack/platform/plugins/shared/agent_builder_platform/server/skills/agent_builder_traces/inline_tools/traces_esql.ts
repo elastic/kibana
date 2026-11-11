@@ -74,8 +74,10 @@ export const createTracesEsqlTool = (): BuiltinSkillBoundedTool<typeof tracesEsq
         events,
         nlQuery: prompt,
         esClient: esClient.asCurrentUser,
+        internalEsClient: esClient.asInternalUser,
         index: tracesIndex,
         additionalContext,
+        execute: 'data',
       });
 
       if (esqlResponse.error) {

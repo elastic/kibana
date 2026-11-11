@@ -10,12 +10,15 @@ import type {
   AgentBuilderPluginStart,
 } from '@kbn/agent-builder-browser';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { CoreStart } from '@kbn/core/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { DataPublicPluginStart, ISessionService } from '@kbn/data-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { Subscription } from 'rxjs';
+import type { AgenticInvestigationsPublicPluginStart } from '@kbn/agentic-investigations-plugin/public';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
@@ -30,6 +33,11 @@ import type { AiRuleCreationService } from '../../detection_engine/common/ai_rul
 type UnknownAttachmentWithLabel = Attachment<
   string,
   { attachmentLabel?: string } & Record<string, unknown>
+>;
+
+type AlertsBatchAttachment = Attachment<
+  string,
+  { alertIds?: unknown[]; tags?: unknown[]; attachmentLabel?: string }
 >;
 
 interface AttachmentTypeConfig {
@@ -60,35 +68,79 @@ const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
 });
 
 /**
- * Registers the baseline attachment UI definitions that do not require Security Solution runtime
- * context:
- *   - `security.alert` — label + icon only (no rich renderer yet).
+ * Registers the baseline attachment UI definitions:
+ *   - `security.alert` — label and icon.
+ *   - `security.alerts` — label + icon. A batch names a set of alerts and no flyout shows a set.
  *
  * The rich `security.entity` renderer (card/table + Canvas) is installed via the separate
  * {@link registerEntityAttachment} entry point so the plugin's `start()` can supply
  * `application`, `chrome`, `agentBuilder`, and the lazy Redux/services bundle.
  */
-export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceStartContract) => {
-  attachments.addAttachmentType<UnknownAttachmentWithLabel>(
-    ALERT_ATTACHMENT_CONFIG.type,
-    createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon)
-  );
+export const registerAttachmentUiDefinitions = ({
+  attachments,
+}: {
+  attachments: AttachmentServiceStartContract;
+}) => {
+  attachments.addAttachmentType<UnknownAttachmentWithLabel>(ALERT_ATTACHMENT_CONFIG.type, {
+    ...createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon),
+  });
 
-  attachments.addAttachmentType<Attachment<string, { alertIds?: unknown[] }>>(
-    SecurityAgentBuilderAttachments.alerts,
-    {
-      getLabel: (attachment) => {
-        const count = attachment.data?.alertIds?.length ?? 0;
-        return count > 0
-          ? i18n.translate('xpack.securitySolution.agentBuilder.attachments.alerts.countLabel', {
-              defaultMessage: '{count} {count, plural, one {alert} other {alerts}}',
-              values: { count },
-            })
-          : ALERTS_DEFAULT_LABEL;
-      },
-      getIcon: () => 'bell',
-    }
-  );
+  attachments.addAttachmentType<AlertsBatchAttachment>(SecurityAgentBuilderAttachments.alerts, {
+    getLabel: (attachment) => {
+      // The label renders synchronously, so a batch referenced by tag cannot count its alerts.
+      if (attachment.data?.tags?.length) {
+        return attachment.data.attachmentLabel ?? ALERTS_DEFAULT_LABEL;
+      }
+      const count = attachment.data?.alertIds?.length ?? 0;
+      return count > 0
+        ? i18n.translate('xpack.securitySolution.agentBuilder.attachments.alerts.countLabel', {
+            defaultMessage: '{count} {count, plural, one {alert} other {alerts}}',
+            values: { count },
+          })
+        : ALERTS_DEFAULT_LABEL;
+    },
+    getIcon: () => 'bell',
+  });
+};
+
+/**
+ * Registers the `security.investigation.timeline` attachment renderer
+ * (chronological event table for forensic artifacts).
+ */
+export const registerInvestigationTimelineAttachment = ({
+  attachments,
+}: {
+  attachments: AttachmentServiceStartContract;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_investigation_timeline_attachment" */
+    './investigation_timeline'
+  ).then(({ createInvestigationTimelineAttachmentDefinition }) => {
+    attachments.addAttachmentType(
+      SecurityAgentBuilderAttachments.investigationTimeline,
+      createInvestigationTimelineAttachmentDefinition()
+    );
+  });
+};
+
+/**
+ * Registers the `security.investigation.iocs` attachment renderer
+ * (category table of indicator badges for forensic artifacts).
+ */
+export const registerInvestigationIocsAttachment = ({
+  attachments,
+}: {
+  attachments: AttachmentServiceStartContract;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_investigation_iocs_attachment" */
+    './investigation_iocs'
+  ).then(({ createInvestigationIocsAttachmentDefinition }) => {
+    attachments.addAttachmentType(
+      SecurityAgentBuilderAttachments.investigationIocs,
+      createInvestigationIocsAttachmentDefinition()
+    );
+  });
 };
 
 /**
@@ -104,6 +156,22 @@ export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceSt
  * `security.search_entities`), which are gated on `entityAnalyticsEntityStoreV2`, so non-V2
  * environments never exercise this renderer even though it's registered unconditionally.
  */
+/**
+ * The impact entity opener links into Security entity flyouts, so it is registered only in
+ * Security solution spaces. If the active space can't be resolved, fall back to registering.
+ */
+const isSecuritySolutionSpace = async (spaces?: SpacesPluginStart): Promise<boolean> => {
+  if (!spaces) {
+    return true;
+  }
+  try {
+    const { solution } = await spaces.getActiveSpace();
+    return solution === 'security';
+  } catch {
+    return true;
+  }
+};
+
 export const registerEntityAttachment = ({
   attachments,
   application,
@@ -112,7 +180,9 @@ export const registerEntityAttachment = ({
   experimentalFeatures,
   resolveSecurityCanvasContext,
   searchSession,
-  uiSettings,
+  rendering,
+  spaces,
+  registerImpactEntityOpener,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
@@ -121,8 +191,26 @@ export const registerEntityAttachment = ({
   experimentalFeatures: ExperimentalFeatures;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
   searchSession?: ISessionService;
-  uiSettings: IUiSettingsClient;
+  rendering: CoreStart['rendering'];
+  spaces?: SpacesPluginStart;
+  registerImpactEntityOpener?: AgenticInvestigationsPublicPluginStart['registerImpactEntityOpener'];
 }): void => {
+  if (registerImpactEntityOpener) {
+    void isSecuritySolutionSpace(spaces).then((isSecuritySpace) => {
+      if (!isSecuritySpace) {
+        return;
+      }
+      registerImpactEntityOpener((entity) => {
+        void import(
+          /* webpackChunkName: "security_impact_entity_flyout" */
+          './open_impact_entity_flyout'
+        ).then(({ openImpactEntityFlyout }) =>
+          openImpactEntityFlyout({ entity, rendering, resolveSecurityCanvasContext })
+        );
+      });
+    });
+  }
+
   void import(
     /* webpackChunkName: "security_entity_attachment_rich" */
     './entity_attachment'
@@ -136,7 +224,6 @@ export const registerEntityAttachment = ({
         chrome,
         resolveSecurityCanvasContext,
         searchSession,
-        uiSettings,
       })
     );
   });
@@ -218,17 +305,13 @@ export const registerEntityAnalyticsDashboardAttachment = ({
   application,
   agentBuilder,
   chrome,
-  experimentalFeatures,
   searchSession,
-  uiSettings,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
-  experimentalFeatures: ExperimentalFeatures;
   searchSession?: ISessionService;
-  uiSettings: IUiSettingsClient;
 }): void => {
   void import(
     /* webpackChunkName: "security_entity_analytics_dashboard_attachment" */
@@ -239,10 +322,123 @@ export const registerEntityAnalyticsDashboardAttachment = ({
       application,
       agentBuilder,
       chrome,
-      experimentalFeatures,
       searchSession,
-      uiSettings,
     });
+  });
+};
+
+/**
+ * Registers the `security.entity_graph` attachment renderer (inline read-only
+ * relationship-graph preview + "Open full graph" deep link). Dynamically imports
+ * [./entity_graph](./entity_graph/index.ts) so the heavy graph deps
+ * (`@kbn/cloud-security-posture-graph`) stay off the main `securitySolution`
+ * page-load bundle.
+ *
+ * Race-window: same semantics as {@link registerRuleAttachment} — the chunk
+ * resolves during plugin start well before the user can receive a graph preview
+ * attachment from the LLM.
+ */
+export const registerEntityGraphAttachment = ({
+  attachments,
+  application,
+  http,
+  agentBuilder,
+  chrome,
+  searchSession,
+}: {
+  attachments: AttachmentServiceStartContract;
+  application: ApplicationStart;
+  http: HttpStart;
+  agentBuilder?: AgentBuilderPluginStart;
+  chrome?: SecurityAgentBuilderChrome;
+  searchSession?: ISessionService;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_entity_graph_attachment" */
+    './entity_graph'
+  ).then(({ createEntityGraphAttachmentDefinition }) => {
+    attachments.addAttachmentType(
+      SecurityAgentBuilderAttachments.entityGraph,
+      createEntityGraphAttachmentDefinition({
+        application,
+        http,
+        agentBuilder,
+        chrome,
+        searchSession,
+      })
+    );
+  });
+};
+
+/**
+ * Registers the `security.entity_risk_score_history` attachment renderer
+ * (compact risk timeline chart + "Open full risk history" deep link into the entity
+ * flyout). Dynamically imports the chart chunk so `@elastic/charts` /
+ * RiskScoreTimeline stay off the main page-load bundle.
+ */
+export const registerEntityRiskScoreHistoryAttachment = ({
+  attachments,
+  application,
+  agentBuilder,
+  chrome,
+  searchSession,
+}: {
+  attachments: AttachmentServiceStartContract;
+  application: ApplicationStart;
+  agentBuilder?: AgentBuilderPluginStart;
+  chrome?: SecurityAgentBuilderChrome;
+  searchSession?: ISessionService;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_entity_risk_score_history_attachment" */
+    './entity_risk_score_history'
+  ).then(({ createEntityRiskScoreHistoryAttachmentDefinition }) => {
+    attachments.addAttachmentType(
+      SecurityAgentBuilderAttachments.entityRiskScoreHistory,
+      createEntityRiskScoreHistoryAttachmentDefinition({
+        application,
+        agentBuilder,
+        chrome,
+        searchSession,
+      })
+    );
+  });
+};
+
+/**
+ * Registers the `security.siem_migration.rule_migration_items` attachment renderer (chip label only).
+ * No rich renderer needed — the attachment label is pre-built by the client.
+ */
+export const registerSiemMigrationRuleItemsAttachment = (
+  attachments: AttachmentServiceStartContract
+): void => {
+  attachments.addAttachmentType<UnknownAttachmentWithLabel>(
+    SecurityAgentBuilderAttachments.ruleMigrationItems,
+    {
+      getLabel: (attachment) =>
+        attachment?.data?.attachmentLabel ??
+        i18n.translate('xpack.securitySolution.agentBuilder.ruleMigrationItemsAttachment.label', {
+          defaultMessage: 'Migration Rules',
+        }),
+      getIcon: () => 'productAgent',
+    }
+  );
+};
+
+/**
+ * Registers the `security.exception` attachment renderer (read-only card showing
+ * a proposed rule exception's description and conditions).
+ */
+export const registerExceptionAttachment = ({
+  attachments,
+}: {
+  attachments: AttachmentServiceStartContract;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_exception_attachment" */
+    './exception'
+  ).then(({ registerExceptionAttachment: register }) => {
+    register({ attachments });
   });
 };
 
@@ -270,5 +466,57 @@ export const registerRulePreviewAttachment = ({
     './rule_preview'
   ).then(({ registerRulePreviewAttachment: register }) => {
     register({ attachments, data, spaces, getServices, getStore });
+  });
+};
+
+/**
+ * Registers the `security.attack_discovery` attachment renderer (inline summary
+ * and details via `AttackDiscoveryMarkdownFormatter`, and an "Open in Attacks" link
+ * built with `getUrlForApp`).
+ *
+ * Dynamically imports
+ * [./attack_discovery](./attack_discovery) so the markdown field-plugin stack stays
+ * off the main `securitySolution` page-load bundle.
+ *
+ * Race-window: same semantics as {@link registerRuleAttachment} — until the chunk
+ * resolves, `security.attack_discovery` attachments are not rendered.
+ */
+export const registerAttackDiscoveryAttachment = ({
+  attachments,
+  getUrlForApp,
+}: {
+  attachments: AttachmentServiceStartContract;
+  getUrlForApp: ApplicationStart['getUrlForApp'];
+}): void => {
+  void import(
+    /* webpackChunkName: "security_attack_discovery_attachment" */
+    './attack_discovery'
+  ).then(({ registerAttackDiscoveryAttachment: register }) => {
+    register({ attachments, getUrlForApp });
+  });
+};
+
+/**
+ * Registers the `security.attack_discovery.verdict` attachment renderer (per-verdict
+ * header icon and badge, plus the summary and optional rationale via
+ * `AttackDiscoveryMarkdownFormatter`).
+ *
+ * Dynamically imports
+ * [./attack_discovery_verdict](./attack_discovery_verdict) so the markdown field-plugin
+ * stack stays off the main `securitySolution` page-load bundle.
+ *
+ * Race-window: same semantics as {@link registerRuleAttachment} — until the chunk
+ * resolves, `security.attack_discovery.verdict` attachments are not rendered.
+ */
+export const registerAttackDiscoveryVerdictAttachment = ({
+  attachments,
+}: {
+  attachments: AttachmentServiceStartContract;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_attack_discovery_verdict_attachment" */
+    './attack_discovery_verdict'
+  ).then(({ registerAttackDiscoveryVerdictAttachment: register }) => {
+    register({ attachments });
   });
 };

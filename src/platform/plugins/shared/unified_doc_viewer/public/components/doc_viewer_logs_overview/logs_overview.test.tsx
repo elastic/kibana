@@ -440,6 +440,24 @@ describe('LogsOverview content breakdown', () => {
   });
 });
 
+describe('LogsOverview with OTel severity_text', () => {
+  it('should display the log level badge from severity_text when log.level is missing', async () => {
+    await act(async () => {
+      renderLogsOverview({
+        hit: buildHit({
+          log: { file: { path: '/logs.overview.log' } },
+          severity_text: 'ERROR',
+          'body.text': 'Payment failed',
+        }),
+      });
+    });
+
+    const badge = screen.getByTestId(/^unifiedDocViewLogsOverviewLogLevel/);
+    expect(badge).toBeInTheDocument();
+    expect(badge).toHaveTextContent('ERROR');
+  });
+});
+
 describe('LogsOverview SimilarErrors section', () => {
   beforeEach(() => {
     Element.prototype.scrollIntoView = jest.fn();

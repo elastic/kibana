@@ -37,6 +37,24 @@ describe('create_case common step definition', () => {
     expect(InputSchema.safeParse(inputWithoutSettings).success).toBe(true);
   });
 
+  it('accepts create case input with extended_fields', () => {
+    const inputWithExtendedFields = {
+      ...createCaseRequestFixture,
+      extended_fields: { priority_as_keyword: 'high' },
+    };
+    expect(InputSchema.parse(inputWithExtendedFields)).toMatchObject({
+      extended_fields: inputWithExtendedFields.extended_fields,
+    });
+  });
+
+  it('rejects create case input with non-string extended_fields values', () => {
+    const inputWithInvalidExtendedFields = {
+      ...createCaseRequestFixture,
+      extended_fields: { priority_as_keyword: 42 },
+    };
+    expect(InputSchema.safeParse(inputWithInvalidExtendedFields).success).toBe(false);
+  });
+
   it('rejects invalid create case input', () => {
     const invalidInput = {
       ...createCaseRequestFixture,
@@ -46,8 +64,48 @@ describe('create_case common step definition', () => {
     expect(InputSchema.safeParse(invalidInput).success).toBe(false);
   });
 
+  it('accepts extended_fields on create case input', () => {
+    const extendedFields = {
+      priority_as_keyword: 'high',
+      ticket_number_as_integer: '4287',
+    };
+    const inputWithExtendedFields = {
+      ...createCaseRequestFixture,
+      extended_fields: extendedFields,
+    };
+
+    expect(InputSchema.parse(inputWithExtendedFields)).toMatchObject({
+      extended_fields: extendedFields,
+    });
+  });
+
+  it('accepts a template reference on create case input', () => {
+    const template = { id: 'triage_template', version: 3 };
+    const inputWithTemplate = {
+      ...createCaseRequestFixture,
+      template,
+    };
+
+    expect(InputSchema.parse(inputWithTemplate)).toMatchObject({ template });
+  });
+
   it('accepts valid output payload', () => {
     expect(OutputSchema.safeParse({ case: createCaseResponseFixture }).success).toBe(true);
+  });
+
+  it('accepts extended_fields on the output payload', () => {
+    const extendedFields = { priority_as_keyword: 'high' };
+    const responseWithExtendedFields = {
+      case: {
+        ...createCaseResponseFixture,
+        extended_fields: extendedFields,
+      },
+    };
+
+    const result = OutputSchema.parse(responseWithExtendedFields);
+    expect(result.case).toMatchObject({
+      extended_fields: extendedFields,
+    });
   });
 
   it('rejects invalid output payload', () => {

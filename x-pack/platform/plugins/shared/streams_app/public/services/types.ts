@@ -7,11 +7,12 @@
 
 import type { IDataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public';
 import type { StreamsTelemetryClient } from '../telemetry/client';
-import type { FocusedSignificantEventService } from './significant_events/focused_significant_event_service';
+import type { ComponentCatalogueClient } from './component_catalogue/types';
 
 export interface StreamsAppServices {
   dataStreamsClient: Promise<IDataStreamsStatsClient>;
-  focusedSignificantEventService: FocusedSignificantEventService;
   telemetryClient: StreamsTelemetryClient;
+  /** The distributor's component catalogue, memoised for the app session. */
+  componentCatalogue: ComponentCatalogueClient;
   version: string;
 }

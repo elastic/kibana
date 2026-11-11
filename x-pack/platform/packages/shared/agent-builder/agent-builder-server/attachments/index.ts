@@ -9,10 +9,15 @@ export type {
   AttachmentTypeDefinition,
   AttachmentRepresentation,
   TextAttachmentRepresentation,
+  ImageAttachmentRepresentation,
   AttachmentValidationResult,
   AgentFormattedAttachment,
   AttachmentFormatContext,
   AttachmentResolveContext,
+  AttachmentOriginUpdatedContext,
+  AttachmentValidateContext,
+  SurfaceComposition,
+  AttachmentSurfaceCompositionContext,
 } from './type_definition';
 export type {
   AttachmentBoundedTool,
@@ -22,9 +27,27 @@ export type {
   StaticEsqlAttachmentBoundedTool,
 } from './tools';
 export type {
+  AttachmentChange,
   AttachmentSnapshot,
   AttachmentStateManager,
   AttachmentUpdateInput,
   ResolvedAttachmentRef,
 } from './attachment_state_manager';
 export { createAttachmentStateManager } from './attachment_state_manager';
+export type { AttachmentChangesToEventsOptions } from './attachment_change_events';
+export { attachmentChangesToEvents } from './attachment_change_events';
+export type {
+  AttachmentPublicClient,
+  AttachmentWriteAccess,
+  ListAttachmentsResult,
+  CreateAttachmentArgs,
+  GetAttachmentArgs,
+  UpdateAttachmentArgs,
+  DeleteAttachmentArgs,
+  RestoreAttachmentArgs,
+  ListAttachmentsArgs,
+  BulkCreateAttachmentInput,
+  BulkCreateAttachmentError,
+  BulkCreateAttachmentsResult,
+  BulkCreateAttachmentsArgs,
+} from './public_client';

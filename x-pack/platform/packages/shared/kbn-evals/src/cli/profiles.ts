@@ -5,11 +5,21 @@
  * 2.0.
  */
 
+import { timeoutSignal } from '@kbn/std';
 import Fs from 'fs';
 import Path from 'path';
 import type { FlagsReader } from '@kbn/dev-cli-runner';
-import { KBN_EVALS_VAULT_PATHS, KBN_EVALS_VAULT_CONFIG_FIELD, safeExec } from './utils';
-import { validateKbnEvalsConfig } from '../../scripts/vault/manage_secrets';
+import {
+  KBN_EVALS_VAULT_PATHS,
+  KBN_EVALS_VAULT_CONFIG_FIELD,
+  getKbnEvalsVaultPath,
+  safeExec,
+} from './utils';
+import {
+  validateKbnEvalsConfig,
+  validateSuiteVaultConfig,
+  type SuiteVaultConfig,
+} from '../../scripts/vault/manage_secrets';
 
 export const VAULT_CONFIG_DIR = 'x-pack/platform/packages/shared/kbn-evals/scripts/vault';
 
@@ -26,8 +36,15 @@ export const stripTrailingSlash = (url: string): string => url.replace(/\/$/, ''
 
 export const probeHttp = async (url: string): Promise<boolean> => {
   try {
-    await fetch(url, { signal: AbortSignal.timeout(2000) });
-    return true;
+    const deadline = timeoutSignal(2000);
+    try {
+      const response = await fetch(url, { signal: deadline });
+      // Headers are enough. Cancel the unread body before dispose(), which does not abort the download.
+      await response.body?.cancel().catch(() => undefined);
+      return true;
+    } finally {
+      deadline.dispose();
+    }
   } catch {
     return false;
   }
@@ -45,6 +62,7 @@ export const isExportProfileImplicitLocal = (
 };
 
 interface VaultConfig {
+  evaluationConnectorId?: string;
   evaluationsKbn?: { url?: string; apiKey?: string };
   tracingEs?: { url?: string; apiKey?: string };
   tracingExporters?: unknown;
@@ -91,21 +109,89 @@ export const readVaultConfigFromFile = (
   return JSON.parse(raw) as VaultConfig;
 };
 
-export const readVaultConfigFromDevVault = (): VaultConfig | undefined => {
-  const stdout = safeExec('vault', [
-    'read',
-    `-field=${KBN_EVALS_VAULT_CONFIG_FIELD}`,
-    KBN_EVALS_VAULT_PATHS.dev,
-  ]);
-  if (!stdout) return undefined;
+interface DevVaultSecret<T> {
+  vaultPath: string;
+  /** Names the config in log lines, e.g. `dev-vault config`. */
+  label: string;
+  /** What a failed read leaves the caller with, e.g. `the dev-vault profile is empty`. */
+  fallback: string;
+  schemaName: string;
+  validate: (config: unknown) => T;
+}
 
-  try {
-    const value = Buffer.from(stdout, 'base64').toString('utf-8').trim();
-    const parsed = JSON.parse(value);
-    return validateKbnEvalsConfig(parsed);
-  } catch {
+const readDevVaultSecretUncached = <T>({
+  vaultPath,
+  label,
+  fallback,
+  schemaName,
+  validate,
+}: DevVaultSecret<T>): T | undefined => {
+  const stdout = safeExec('vault', ['read', `-field=${KBN_EVALS_VAULT_CONFIG_FIELD}`, vaultPath]);
+  if (!stdout) {
+    process.stderr.write(
+      `[kbn-evals] Could not read ${vaultPath} from Vault; ${fallback}. ` +
+        'Check `vault login --method oidc`.\n'
+    );
     return undefined;
   }
+
+  // Fixed messages only: parser and validator errors can quote the config, which holds credentials.
+  const ignore = (reason: string): undefined => {
+    process.stderr.write(`[kbn-evals] Ignoring ${label} (${reason}); ${fallback}.\n`);
+    return undefined;
+  };
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(Buffer.from(stdout, 'base64').toString('utf-8').trim());
+  } catch {
+    return ignore('not valid base64-encoded JSON');
+  }
+
+  try {
+    return validate(parsed);
+  } catch {
+    return ignore(`does not match the ${schemaName}`);
+  }
+};
+
+// One successful read per process: profile env and the suite's scout hook must see the same config,
+// and a later read that failed transiently would otherwise silently drop part of it. Failures are
+// not cached, so a read after `vault login` can still succeed.
+let devVaultConfig: VaultConfig | undefined;
+const devVaultSuiteSecrets = new Map<string, SuiteVaultConfig>();
+
+export const readVaultConfigFromDevVault = (): VaultConfig | undefined => {
+  devVaultConfig ??= readDevVaultSecretUncached({
+    vaultPath: KBN_EVALS_VAULT_PATHS.dev,
+    label: 'dev-vault config',
+    fallback: 'the dev-vault profile is empty',
+    schemaName: 'evals config schema',
+    validate: validateKbnEvalsConfig,
+  });
+  return devVaultConfig;
+};
+
+/** Reads a suite's own secret (its `vaultSecret` in `evals.suites.json`) from dev Vault. */
+export const readSuiteSecretFromDevVault = (secret: string): SuiteVaultConfig | undefined => {
+  const cached = devVaultSuiteSecrets.get(secret);
+  if (cached) return cached;
+
+  const config = readDevVaultSecretUncached({
+    vaultPath: getKbnEvalsVaultPath('dev', secret),
+    label: `dev-vault "${secret}" suite config`,
+    fallback: "the suite's scoutHook gets an empty config",
+    schemaName: 'suite config shape (a JSON object)',
+    validate: validateSuiteVaultConfig,
+  });
+  if (config) devVaultSuiteSecrets.set(secret, config);
+  return config;
+};
+
+/** Clears the cached dev-vault reads; for tests. */
+export const resetDevVaultConfigCache = (): void => {
+  devVaultConfig = undefined;
+  devVaultSuiteSecrets.clear();
 };
 
 /**
@@ -120,6 +206,18 @@ export const loadVaultConfig = (repoRoot: string, profile?: string): VaultConfig
   return readVaultConfigFromFile(repoRoot, profile);
 };
 
+/**
+ * Default judge connector: the profile's `evaluationConnectorId` (dev Vault, or a
+ * `config.<profile>.json` synced from Vault). Undefined when the profile does not set one.
+ */
+export const resolveDefaultJudgeConnectorId = (
+  repoRoot: string,
+  profile?: string
+): string | undefined => {
+  const value = loadVaultConfig(repoRoot, profile)?.evaluationConnectorId;
+  return isNonEmptyString(value) && !isPlaceholder(value) ? value : undefined;
+};
+
 export const envFromDatasetsProfile = (
   repoRoot: string,
   profile?: string
@@ -129,10 +227,10 @@ export const envFromDatasetsProfile = (
 
   if (cfg?.evaluationsKbn) {
     if (isNonEmptyString(cfg.evaluationsKbn.url) && !isPlaceholder(cfg.evaluationsKbn.url)) {
-      next.EVALUATIONS_KBN_URL = cfg.evaluationsKbn.url;
+      next.EVAL_KBN_URL = cfg.evaluationsKbn.url;
     }
     if (isNonEmptyString(cfg.evaluationsKbn.apiKey) && !isPlaceholder(cfg.evaluationsKbn.apiKey)) {
-      next.EVALUATIONS_KBN_API_KEY = cfg.evaluationsKbn.apiKey;
+      next.EVAL_KBN_API_KEY = cfg.evaluationsKbn.apiKey;
     }
   }
 

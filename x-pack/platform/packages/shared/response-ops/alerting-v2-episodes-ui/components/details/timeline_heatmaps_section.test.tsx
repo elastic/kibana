@@ -18,16 +18,10 @@ import { AlertEpisodeTimelineHeatmapsSection } from './timeline_heatmaps_section
 
 jest.mock('../../utils/run_esql_async_search');
 
-// Mock the heavy heatmap building blocks since the section dynamically imports them.
-jest.mock('./lifecycle_heatmap', () => ({
-  AlertEpisodeLifecycleHeatmap: ({ eventRows }: { eventRows: unknown[] }) => (
-    <div data-test-subj="alertingV2EpisodeLifecycleHeatmapMock">{eventRows.length}</div>
-  ),
-}));
-
-jest.mock('./severity_heatmap', () => ({
-  AlertEpisodeSeverityHeatmap: ({ eventRows }: { eventRows: unknown[] }) => (
-    <div data-test-subj="alertingV2EpisodeSeverityHeatmapMock">{eventRows.length}</div>
+// Mock the heavy chart building blocks since the section dynamically imports them.
+jest.mock('./episode_alert_timeline', () => ({
+  AlertEpisodeAlertTimeline: ({ eventRows }: { eventRows: unknown[] }) => (
+    <div data-test-subj="alertingV2EpisodeAlertTimelineMock">{eventRows.length}</div>
   ),
 }));
 
@@ -44,7 +38,7 @@ describe('AlertEpisodeTimelineHeatmapsSection', () => {
     queryClient.clear();
   });
 
-  it('renders both heatmaps inside a single shared panel once events are loaded', async () => {
+  it('passes all episode events to the combined alert timeline', async () => {
     runEsqlAsyncSearchMock.mockResolvedValue({
       columns: [
         { name: '@timestamp', type: 'date' },
@@ -66,11 +60,11 @@ describe('AlertEpisodeTimelineHeatmapsSection', () => {
     );
 
     const panel = screen.getByTestId('alertingV2EpisodeTimelineHeatmapsSection');
-    expect(panel).toContainElement(screen.getByTestId('alertingV2EpisodeLifecycleHeatmapMock'));
-    expect(panel).toContainElement(screen.getByTestId('alertingV2EpisodeSeverityHeatmapMock'));
+    expect(panel).toContainElement(screen.getByTestId('alertingV2EpisodeAlertTimelineMock'));
+    expect(screen.getByTestId('alertingV2EpisodeAlertTimelineMock')).toHaveTextContent('1');
   });
 
-  it('renders only the lifecycle heatmap when there are no supported severity events', async () => {
+  it('renders the combined timeline when there are no supported severity events', async () => {
     runEsqlAsyncSearchMock.mockResolvedValue({
       columns: [
         { name: '@timestamp', type: 'date' },
@@ -88,9 +82,8 @@ describe('AlertEpisodeTimelineHeatmapsSection', () => {
     );
 
     await waitFor(() =>
-      expect(screen.getByTestId('alertingV2EpisodeLifecycleHeatmapMock')).toBeInTheDocument()
+      expect(screen.getByTestId('alertingV2EpisodeAlertTimelineMock')).toBeInTheDocument()
     );
-    expect(screen.queryByTestId('alertingV2EpisodeSeverityHeatmapMock')).not.toBeInTheDocument();
   });
 
   it('renders the loading state while events are loading', () => {
@@ -104,8 +97,10 @@ describe('AlertEpisodeTimelineHeatmapsSection', () => {
     );
 
     expect(
-      screen.getByTestId('alertingV2EpisodeTimelineHeatmapsSectionLoading')
-    ).toBeInTheDocument();
+      screen
+        .getByTestId('alertingV2EpisodeTimelineHeatmapsSectionLoading')
+        .querySelector('.euiSkeletonRectangle')
+    ).not.toBeNull();
   });
 
   it('renders an error state when events fail to load', async () => {

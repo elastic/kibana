@@ -8,6 +8,7 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { createSkillAttachmentType } from './skill';
+import { SURFACE_BASE_URL, renderSurface, surfaceContext } from './test_utils';
 import { SKILL_ATTACHMENT_TYPE, type SkillAttachmentData } from '../../common/attachments';
 
 const validSkill: SkillAttachmentData = {
@@ -46,7 +47,7 @@ describe('skill attachment type', () => {
 
   describe('validate', () => {
     it('accepts a fully populated payload', async () => {
-      const result = await definition.validate(validSkill);
+      const result = await definition.validate(validSkill, formatContext);
       expect(result.valid).toBe(true);
       if (result.valid) {
         expect(result.data.skill.id).toBe('incident-triage');
@@ -54,40 +55,52 @@ describe('skill attachment type', () => {
     });
 
     it('rejects an empty content body', async () => {
-      const result = await definition.validate({
-        ...validSkill,
-        skill: { ...validSkill.skill, content: '' },
-      });
+      const result = await definition.validate(
+        {
+          ...validSkill,
+          skill: { ...validSkill.skill, content: '' },
+        },
+        formatContext
+      );
       expect(result.valid).toBe(false);
     });
 
     it('rejects an id with uppercase letters', async () => {
-      const result = await definition.validate({
-        ...validSkill,
-        skill: { ...validSkill.skill, id: 'Incident-Triage' },
-      });
+      const result = await definition.validate(
+        {
+          ...validSkill,
+          skill: { ...validSkill.skill, id: 'Incident-Triage' },
+        },
+        formatContext
+      );
       expect(result.valid).toBe(false);
     });
 
     it('rejects a referenced file with a path outside ./', async () => {
-      const result = await definition.validate({
-        ...validSkill,
-        skill: {
-          ...validSkill.skill,
-          referenced_content: [{ name: 'examples', relativePath: '/examples', content: 'x' }],
+      const result = await definition.validate(
+        {
+          ...validSkill,
+          skill: {
+            ...validSkill.skill,
+            referenced_content: [{ name: 'examples', relativePath: '/examples', content: 'x' }],
+          },
         },
-      });
+        formatContext
+      );
       expect(result.valid).toBe(false);
     });
 
     it('rejects more than 5 tool_ids', async () => {
-      const result = await definition.validate({
-        ...validSkill,
-        skill: {
-          ...validSkill.skill,
-          tool_ids: Array.from({ length: 6 }, (_, i) => `tool_${i}`),
+      const result = await definition.validate(
+        {
+          ...validSkill,
+          skill: {
+            ...validSkill.skill,
+            tool_ids: Array.from({ length: 6 }, (_, i) => `tool_${i}`),
+          },
         },
-      });
+        formatContext
+      );
       expect(result.valid).toBe(false);
     });
   });
@@ -98,9 +111,10 @@ describe('skill attachment type', () => {
       const formatted = await definition.format(attachment, formatContext);
       const repr = await formatted.getRepresentation?.();
       expect(repr?.type).toBe('text');
-      expect(repr?.value).toContain('Skill (id: incident-triage)');
-      expect(repr?.value).toContain(validSkill.skill.content);
-      expect(repr?.value).toContain('platform.core.execute_esql');
+      if (repr?.type !== 'text') throw new Error('expected text representation');
+      expect(repr.value).toContain('Skill (id: incident-triage)');
+      expect(repr.value).toContain(validSkill.skill.content);
+      expect(repr.value).toContain('platform.core.execute_esql');
     });
   });
 
@@ -110,5 +124,56 @@ describe('skill attachment type', () => {
       expect(description).toBeDefined();
       expect(description).toContain('render_attachment');
     });
+  });
+});
+
+describe('skill toSurfaceComposition', () => {
+  const definition = createSkillAttachmentType();
+
+  it('shows the description, tools, files and content', async () => {
+    const composition = await definition.toSurfaceComposition?.(
+      buildAttachment(validSkill),
+      surfaceContext
+    );
+
+    expect(composition).toEqual({
+      type: 'view',
+      title: 'Incident triage',
+      subtitle: 'incident-triage',
+      body: [
+        { type: 'markdown', text: 'Use when investigating production incidents.' },
+        {
+          type: 'fields',
+          items: [
+            { label: 'Tools', value: 'platform.core.execute_esql' },
+            { label: 'Files', value: './examples/examples.md' },
+          ],
+        },
+        {
+          type: 'code',
+          language: 'markdown',
+          text: '## When to Use\n\nUse this skill when triaging incidents.',
+        },
+        {
+          type: 'actions',
+          buttons: [
+            { label: 'Manage skills', url: `${SURFACE_BASE_URL}/app/agent_builder/manage/skills` },
+          ],
+        },
+      ],
+    });
+
+    const { valid, slack } = await renderSurface(composition);
+    expect(valid).toBe(true);
+    expect(slack).toContain(`${SURFACE_BASE_URL}/app/agent_builder/manage/skills`);
+  });
+
+  it('leaves out the button when Kibana has no public URL', async () => {
+    const composition = await definition.toSurfaceComposition?.(buildAttachment(validSkill), {
+      ...surfaceContext,
+      kibanaUrl: undefined,
+    });
+
+    expect(composition?.body.some(({ type }) => type === 'actions')).toBe(false);
   });
 });

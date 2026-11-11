@@ -5,9 +5,16 @@
  * 2.0.
  */
 
+import type { AppHeaderProps } from '@kbn/app-header';
 import type { SecurityPageName } from '@kbn/security-solution-navigation';
 
-export type PageUpsellings = Partial<Record<SecurityPageName, React.ComponentType>>;
+export interface UpsellingPageProps {
+  /** Header the host page renders above the upsell; defaults to the core `AppHeader`. */
+  appHeader?: React.ComponentType<AppHeaderProps>;
+}
+export type UpsellingPageComponent = React.ComponentType<UpsellingPageProps>;
+
+export type PageUpsellings = Partial<Record<SecurityPageName, UpsellingPageComponent>>;
 export type MessageUpsellings = Partial<Record<UpsellingMessageId, string>>;
 export type SectionUpsellings = Partial<Record<UpsellingSectionId, React.ComponentType>>;
 
@@ -20,6 +27,7 @@ export type UpsellingSectionId =
   | 'endpoint_agent_tamper_protection'
   | 'endpoint_custom_notification'
   | 'cloud_security_posture_integration_installation'
+  | 'cloud_defend_integration_installation'
   | 'ruleDetailsEndpointExceptions'
   | 'automatic_import'
   | 'siem_migrations_start'
@@ -33,4 +41,6 @@ export type UpsellingMessageId =
   | 'alert_suppression_rule_details'
   | 'note_management_user_filter'
   | 'prebuilt_rule_customization'
-  | 'prebuilt_rule_customization_description';
+  | 'prebuilt_rule_customization_description'
+  | 'endpoint_custom_yara_signatures'
+  | 'endpoint_registry_credential_hardening';

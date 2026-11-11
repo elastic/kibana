@@ -5,21 +5,31 @@
  * 2.0.
  */
 
-import { Logger, OnSetup, PluginSetup, PluginStart } from '@kbn/core-di';
-import { CoreSetup } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
-import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
+import { OnSetup, PluginSetup, PluginStart, Start } from '@kbn/core-di';
+import type { ServiceToken } from '@kbn/core-di';
+import { CoreSetup, CoreStart } from '@kbn/core-di-server';
+import type { KibanaRequest } from '@kbn/core/server';
+import { resolveRequestScoped } from '../agent_builder/resolve_request_scoped';
+import { PrivilegeChecker } from '../lib/services/privilege_checker/privilege_checker';
+import type {
+  AlertingServerSetupDependencies,
+  AlertingServerStartDependencies,
+  AlertingServerStart,
+} from '../types';
 import { registerFeaturePrivileges } from '../lib/security/privileges';
 import { registerSavedObjects } from '../saved_objects';
-import { EventLoggerToken } from '../lib/services/event_log_service/tokens';
-import { registerStepDefinitions } from '../lib/workflow_extensions/register_step_definitions';
+import { LoggerServiceToken } from '../lib/services/logger_service/logger_service';
+import { registerCreateAlertEventStep } from '../lib/workflow_extensions/register_create_alert_event_step';
 import { registerTriggerDefinitions } from '../lib/workflow_extensions/register_trigger_definitions';
+import { registerAlertingV2ManagedWorkflowOwner } from '../lib/workflow_extensions/managed_workflows';
 import { registerAlertingV2UsageCollector } from '../lib/usage/usage_collector';
 import {
   ACTION_POLICY_EVENT_ACTIONS,
   ACTION_POLICY_EVENT_PROVIDER,
-} from '../lib/dispatcher/steps/constants';
-import { alertingAdvancedSettings } from '../settings/advanced_settings';
+} from '../lib/services/event_log_service/constants';
+import { registerAlertingAdvancedSettings } from '../settings/advanced_settings';
+import { registerTelemetryEvents } from '../lib/telemetry/register_ebt_events';
 
 /**
  * Core platform setup-phase registrations (feature privileges, saved objects,
@@ -31,57 +41,89 @@ import { alertingAdvancedSettings } from '../settings/advanced_settings';
  * multi-bound token, so each module contributes its own handler.
  */
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
-  bind(OnSetup).toConstantValue((container) => {
-    const logger = container.get(Logger);
+  bind(OnSetup).toResolvedValue(
+    (
+        features,
+        savedObjects,
+        encryptedSavedObjects,
+        loggerService,
+        uiSettings,
+        analytics,
+        eventLog,
+        workflowsExtensions
+      ) =>
+      (container) => {
+        registerFeaturePrivileges(features);
 
-    registerFeaturePrivileges(container.get(PluginSetup('features')));
+        registerSavedObjects({
+          savedObjects,
+          encryptedSavedObjects,
+          logger: loggerService.forSubsystem('savedObjects'),
+        });
 
-    registerSavedObjects({
-      savedObjects: container.get(CoreSetup('savedObjects')),
-      encryptedSavedObjects: container.get(
-        PluginSetup<AlertingServerSetupDependencies['encryptedSavedObjects']>(
-          'encryptedSavedObjects'
-        )
+        registerAlertingAdvancedSettings(uiSettings);
+
+        // Event types must be registered during setup, before the first `reportEvent`.
+        registerTelemetryEvents(analytics);
+
+        eventLog.registerProviderActions(
+          ACTION_POLICY_EVENT_PROVIDER,
+          Object.values(ACTION_POLICY_EVENT_ACTIONS)
+        );
+
+        registerAlertingV2ManagedWorkflowOwner(workflowsExtensions);
+        registerTriggerDefinitions(workflowsExtensions);
+
+        // These run at workflow-step execution time (after start), so they must
+        // defer resolution of the start-stage services through the container.
+        const getAlertEventsClient = (request: KibanaRequest) =>
+          container
+            .get(Start as ServiceToken<AlertingServerStart>)
+            .getAlertEventsClientWithRequest(request);
+        const checkAlertWritePrivilege = (request: KibanaRequest) =>
+          resolveRequestScoped(
+            container.get(CoreStart('injection')),
+            request,
+            PrivilegeChecker
+          ).canWrite('alerts');
+        registerCreateAlertEventStep(
+          workflowsExtensions,
+          getAlertEventsClient,
+          checkAlertWritePrivilege
+        );
+
+        // Usage collection is optional. The telemetry task that feeds this collector
+        // is registered unconditionally via the `TaskDefinition` registry in
+        // `bind_tasks`.
+        const usageCollectionToken =
+          PluginSetup<NonNullable<AlertingServerSetupDependencies['usageCollection']>>(
+            'usageCollection'
+          );
+        if (container.isBound(usageCollectionToken)) {
+          // The getter is called at task run (after start), so the start-only
+          // taskManager binding exists by then.
+          const getTaskManagerStart = () =>
+            container.get(
+              PluginStart<AlertingServerStartDependencies['taskManager']>('taskManager')
+            );
+
+          registerAlertingV2UsageCollector(
+            getTaskManagerStart,
+            container.get(usageCollectionToken)
+          );
+        }
+      },
+    [
+      PluginSetup<AlertingServerSetupDependencies['features']>('features'),
+      CoreSetup('savedObjects'),
+      PluginSetup<AlertingServerSetupDependencies['encryptedSavedObjects']>(
+        'encryptedSavedObjects'
       ),
-      logger,
-    });
-
-    const uiSettingsSetup = container.get(CoreSetup('uiSettings'));
-
-    uiSettingsSetup.registerGlobal(alertingAdvancedSettings);
-
-    const eventLogService = container.get(
-      PluginSetup<AlertingServerSetupDependencies['eventLog']>('eventLog')
-    );
-    eventLogService.registerProviderActions(
-      ACTION_POLICY_EVENT_PROVIDER,
-      Object.values(ACTION_POLICY_EVENT_ACTIONS)
-    );
-    const eventLogger = eventLogService.getLogger({
-      event: { provider: ACTION_POLICY_EVENT_PROVIDER },
-    });
-    container.bind(EventLoggerToken).toConstantValue(eventLogger);
-
-    const workflowsExtensionsSetup = container.get(
-      PluginSetup<AlertingServerSetupDependencies['workflowsExtensions']>('workflowsExtensions')
-    );
-    registerTriggerDefinitions(workflowsExtensionsSetup);
-    registerStepDefinitions(workflowsExtensionsSetup);
-
-    // Usage collection is optional. The telemetry task that feeds this collector
-    // is registered unconditionally via the `TaskDefinition` registry in
-    // `bind_tasks`.
-    const usageCollectionToken =
-      PluginSetup<NonNullable<AlertingServerSetupDependencies['usageCollection']>>(
-        'usageCollection'
-      );
-    if (container.isBound(usageCollectionToken)) {
-      // The getter is called at task run (after start), so the start-only
-      // taskManager binding exists by then.
-      const getTaskManagerStart = () =>
-        container.get(PluginStart<AlertingServerStartDependencies['taskManager']>('taskManager'));
-
-      registerAlertingV2UsageCollector(getTaskManagerStart, container.get(usageCollectionToken));
-    }
-  });
+      LoggerServiceToken,
+      CoreSetup('uiSettings'),
+      CoreSetup('analytics'),
+      PluginSetup<AlertingServerSetupDependencies['eventLog']>('eventLog'),
+      PluginSetup<AlertingServerSetupDependencies['workflowsExtensions']>('workflowsExtensions'),
+    ]
+  );
 }

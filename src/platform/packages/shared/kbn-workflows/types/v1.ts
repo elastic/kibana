@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { UserProfile } from '@kbn/core-user-profile-common';
+import type { UserProfileAvatarData } from '@kbn/core-user-settings-types';
 import {
   HUMAN_READABLE_ID_MAX_LENGTH,
   HUMAN_READABLE_ID_MIN_LENGTH,
@@ -14,14 +16,17 @@ import {
 } from '@kbn/human-readable-id';
 import type { DotKeysOf, DotObject, JsonValue, RecursivePartial } from '@kbn/utility-types';
 import { z } from '@kbn/zod/v4';
+import type { WorkflowAccessSubject, WorkflowPermissions } from '../common/access_control';
 import type { StepDeprecationInfo } from '../spec/deprecated_step_metadata';
 import type {
   SerializedError,
+  WorkflowEffectiveIdentitySchema,
   WorkflowStepTokenUsageSchema,
   WorkflowTokenUsageSchema,
   WorkflowYaml,
 } from '../spec/schema';
 import { WorkflowSchema } from '../spec/schema';
+import type { WorkflowValidationRuleId } from '../validation/rules';
 
 export type { WorkflowYaml } from '../spec/schema';
 
@@ -134,9 +139,18 @@ export type WorkflowTokenUsage = z.infer<typeof WorkflowTokenUsageSchema>;
 
 export type WorkflowStepTokenUsage = z.infer<typeof WorkflowStepTokenUsageSchema>;
 
+/** Identity snapshot of the user who triggered an execution, captured at trigger time. */
+export interface WorkflowExecutionExecutedByUser {
+  /** Display name: the user's full name when set, otherwise the username. */
+  name: string;
+  username: string;
+  profileUid?: string;
+}
+
 export interface EsWorkflowExecution {
   spaceId: string;
   id: string;
+  runName?: string;
   workflowId: string;
   managed?: boolean;
   managedBy?: string | null;
@@ -144,6 +158,8 @@ export interface EsWorkflowExecution {
   originManagedWorkflowId?: string | null;
   managedVersion?: number | null;
   isTestRun: boolean;
+  /** Whether the test uses a submitted definition instead of the saved workflow. */
+  isEphemeral?: boolean;
   status: ExecutionStatus;
   context: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   workflowDefinition: WorkflowYaml;
@@ -155,7 +171,10 @@ export interface EsWorkflowExecution {
   createdAt: string;
   error: SerializedError | null;
   createdBy?: string; // Keep for backwards compatibility with existing documents
-  executedBy?: string; // User who executed the workflow
+  effectiveIdentity?: z.infer<typeof WorkflowEffectiveIdentitySchema>;
+  executedBy?: string; // User who triggered the workflow
+  /** Identity snapshot of the user who triggered the workflow, captured at trigger time. */
+  executedByUser?: WorkflowExecutionExecutedByUser;
   startedAt: string;
   finishedAt: string;
   cancelRequested: boolean;
@@ -247,11 +266,15 @@ export interface EsWorkflowStepExecution {
   /** Specific step execution instance state. Used by loops, retries, etc to track execution context. */
   state?: Record<string, unknown>;
 
+  /** Whether this step belongs to a managed workflow execution. */
+  managed?: boolean;
+
   /**
    * Optional Human-In-The-Loop audit envelope, populated only by
    * HITL-aware steps (today: `wait_for_input`). Both the wrapper and
    * every property inside it are optional and MUST be treated as such
-   * by readers — the engine itself remains field-agnostic.
+   * by readers — the engine itself remains field-agnostic. `null` once a
+   * claim whose response was not applied is released.
    */
   hitl?: {
     /** Server-resolved username (or API-key principal) that submitted the response. */
@@ -260,7 +283,7 @@ export interface EsWorkflowStepExecution {
     respondedAt?: string;
     /** Free-form channel slug identifying the surface that submitted the response. */
     channel?: string;
-  };
+  } | null;
 
   /** Per-step normalized LLM token usage. See {@link WorkflowTokenUsage}. */
   usage?: WorkflowTokenUsage;
@@ -288,6 +311,7 @@ export interface WorkflowExecutionLogModel {
 export interface WorkflowExecutionDto {
   spaceId: string;
   id: string;
+  runName?: string;
   managed?: boolean;
   managedBy?: string | null;
   originManagedWorkflowId?: string | null;
@@ -303,8 +327,13 @@ export interface WorkflowExecutionDto {
   /** If specified, only this step and its children were executed */
   stepId?: string | undefined;
   stepExecutions: WorkflowStepExecutionDto[];
+  /** Ordered step IDs returned by modern runs, which support pagination beyond the search window. */
+  stepExecutionIds?: string[];
   duration: number | null;
-  executedBy?: string; // User who executed the workflow
+  effectiveIdentity?: z.infer<typeof WorkflowEffectiveIdentitySchema>;
+  executedBy?: string; // User who triggered the workflow
+  /** Profile of `executedBy`, resolved server-side so readers don't need `bulkGetUserProfiles`. */
+  executedByProfile?: UserProfile<{ avatar?: UserProfileAvatarData }>;
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
   context?: Record<string, unknown>;
@@ -322,13 +351,26 @@ export interface WorkflowExecutionDto {
 export type WorkflowExecutionListItemDto = Omit<
   WorkflowExecutionDto,
   'stepExecutions' | 'yaml' | 'workflowDefinition'
->;
+> & {
+  tags?: string[];
+  managed?: boolean;
+};
 
 export interface WorkflowExecutionListDto {
   results: WorkflowExecutionListItemDto[];
   page: number;
   size: number;
   total: number;
+  /**
+   * Opaque `search_after` sort values for the next window.
+   * Absent when there are no further results.
+   */
+  searchAfter?: unknown[];
+  /**
+   * True when this workflow has a named execution in the space, ignoring list
+   * filters. Present only on the first page of a per-workflow list.
+   */
+  hasNamedExecution?: boolean;
 }
 
 export interface WorkflowStepExecutionListDto {
@@ -363,7 +405,7 @@ export const EsWorkflowSchema = z.object({
   version: z.number().optional(),
 });
 
-export type EsWorkflow = z.infer<typeof EsWorkflowSchema>;
+export type EsWorkflow = z.infer<typeof EsWorkflowSchema> & WorkflowAccessSubject;
 
 export type EsWorkflowCreate = Omit<
   EsWorkflow,
@@ -457,7 +499,8 @@ export interface UpdatedWorkflowResponseDto {
   validationErrors: string[];
 }
 
-export interface WorkflowDetailDto {
+export interface WorkflowDetailDto extends WorkflowAccessSubject {
+  permissions?: WorkflowPermissions;
   id: string;
   name: string;
   description?: string;
@@ -475,15 +518,22 @@ export interface WorkflowDetailDto {
   definition: WorkflowYaml | null;
   yaml: string;
   valid: boolean;
+  tags?: string[];
   version?: number;
 }
+
+export type WorkflowAccessControlUpdateResponseDto = Pick<
+  WorkflowDetailDto,
+  'owner_id' | 'access_control' | 'permissions' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'version'
+>;
 
 export interface WorkflowPartialDetailDto extends Partial<WorkflowDetailDto> {
   id: string;
 }
 export type WorkflowMgetResponseDto = WorkflowPartialDetailDto[];
 
-export interface WorkflowListItemDto {
+export interface WorkflowListItemDto extends WorkflowAccessSubject {
+  permissions?: WorkflowPermissions;
   id: string;
   name: string;
   description: string;
@@ -567,10 +617,13 @@ export interface ConnectorInstance {
   isPreconfigured: boolean;
   isDeprecated: boolean;
   config?: ConnectorInstanceConfig;
+  connectorType?: string;
+  isInferenceEndpoint?: boolean;
 }
 
 export interface ConnectorInstanceConfig {
   taskType?: string;
+  selectedActions?: string[];
 }
 
 export interface ConnectorTypeInfo {
@@ -839,6 +892,10 @@ export interface ConnectorIdSelectionHandler {
    * If true, creation from the connector ID selection will be enabled for the first type in the `connectorTypes` list.
    */
   enableCreation?: boolean;
+  /**
+   * Feature ID used to resolve inference endpoints for this selection.
+   */
+  inferenceFeatureId?: string;
 }
 
 export interface ConnectorExamples {
@@ -883,11 +940,24 @@ export interface WorkflowDiagnostic {
   message: string;
   source: string;
   path?: (string | number)[];
+  /**
+   * Stable identity of the check that produced this diagnostic. Prefer this over
+   * matching on `message`, which is translated and reworded freely.
+   * See WORKFLOW_VALIDATION_RULES.
+   */
+  ruleId: WorkflowValidationRuleId;
 }
 export interface ValidateWorkflowResponseDto {
   valid: boolean;
   diagnostics: WorkflowDiagnostic[];
   parsedWorkflow?: WorkflowYaml;
+  /**
+   * What the checks did not cover, each with the reason: a check either never
+   * ran or stopped at a budget part-way through. Reported separately from
+   * `diagnostics` because the absence of a diagnostic here means "not checked",
+   * not "nothing wrong".
+   */
+  notChecked?: string[];
 }
 
 export interface GetAvailableConnectorsResponse {

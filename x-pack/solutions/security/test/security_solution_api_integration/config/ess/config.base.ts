@@ -97,7 +97,7 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
           `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
-          '--xpack.eventLog.logEntries=true',
+          '--xpack.eventLog.logEntries=false',
           `--xpack.securitySolution.alertIgnoreFields=${JSON.stringify([
             'testing_ignored.constant',
             '/testing_regex*/',
@@ -120,6 +120,8 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
 
           '--xpack.task_manager.poll_interval=1000',
           `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_ACTION_CONNECTORS)}`,
+          // Mock prebuilt-rules setup uploads the bundled security_detection_engine package name.
+          `--xpack.fleet.internal.skipUploadPackageValidation=true`,
           ...(ssl
             ? [
                 `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,

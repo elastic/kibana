@@ -52,7 +52,7 @@ describe('validateChangesExistingType', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('migrations_deleted.json');
 
-    expect(() => validateChangesWrapper({ from, to, type: { name: 'config' } })).toThrowError(
+    expect(() => validateChangesWrapper({ from, to, type: { name: 'config' } })).toThrow(
       `Modifications have been detected in the 'config.migrations'. This property is deprecated and no modifications are allowed.`
     );
   });
@@ -61,7 +61,7 @@ describe('validateChangesExistingType', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('migrations_added.json');
 
-    expect(() => validateChangesWrapper({ from, to, type: { name: 'config' } })).toThrowError(
+    expect(() => validateChangesWrapper({ from, to, type: { name: 'config' } })).toThrow(
       `Modifications have been detected in the 'config.migrations'. This property is deprecated and no modifications are allowed.`
     );
   });
@@ -70,7 +70,7 @@ describe('validateChangesExistingType', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('model_versions_deleted.json');
 
-    expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrowError(
+    expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrow(
       `Some model versions have been deleted for SO type 'task'.`
     );
   });
@@ -78,7 +78,7 @@ describe('validateChangesExistingType', () => {
   it('should throw if more than one new model version is defined', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('two_new_model_versions.json');
-    expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrowError(
+    expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrow(
       `The SO type 'task' is defining 2 new model versions, but can only define one at a time.`
     );
   });
@@ -87,7 +87,7 @@ describe('validateChangesExistingType', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('mutated_model_versions.json');
 
-    expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrowError(
+    expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrow(
       `Some modelVersions have been structurally updated for SO type 'task' after they were defined: 10.6.0.`
     );
   });
@@ -141,7 +141,7 @@ describe('validateChangesExistingType', () => {
       };
       expect(() =>
         validateChangesExistingType({ from: typeFrom, to: typeTo, registeredType, log })
-      ).toThrowError(/Breaking schema changes.*field 'partition' removed from create schema/s);
+      ).toThrow(/Breaking schema changes.*field 'partition' removed from create schema/s);
     });
 
     it('should throw when a required field is added to the create schema', () => {
@@ -178,7 +178,7 @@ describe('validateChangesExistingType', () => {
       };
       expect(() =>
         validateChangesExistingType({ from: typeFrom, to: typeTo, registeredType, log })
-      ).toThrowError(
+      ).toThrow(
         /Breaking schema changes.*required field 'newRequiredField' added to create schema/s
       );
     });
@@ -217,7 +217,7 @@ describe('validateChangesExistingType', () => {
       };
       expect(() =>
         validateChangesExistingType({ from: typeFrom, to: typeTo, registeredType, log })
-      ).toThrowError(
+      ).toThrow(
         /Breaking schema changes.*required field 'newRequiredField' added to forwardCompatibility schema/s
       );
     });
@@ -283,7 +283,7 @@ describe('validateChangesExistingType', () => {
           registeredType,
           log,
         })
-      ).toThrowError(
+      ).toThrow(
         /Breaking schema changes.*'partition' changed from optional to required in forwardCompatibility schema/s
       );
     });
@@ -353,7 +353,7 @@ describe('validateChangesExistingType', () => {
       };
       expect(() =>
         validateChangesExistingType({ from: typeFrom, to: typeTo, registeredType, log })
-      ).toThrowError(/Breaking schema changes.*create schema removed from model version/s);
+      ).toThrow(/Breaking schema changes.*create schema removed from model version/s);
     });
 
     it('should throw when the forwardCompatibility schema is removed from an existing model version', () => {
@@ -382,9 +382,7 @@ describe('validateChangesExistingType', () => {
       };
       expect(() =>
         validateChangesExistingType({ from: typeFrom, to: typeTo, registeredType, log })
-      ).toThrowError(
-        /Breaking schema changes.*forwardCompatibility schema removed from model version/s
-      );
+      ).toThrow(/Breaking schema changes.*forwardCompatibility schema removed from model version/s);
     });
 
     it('should not flag an unchanged function-based schema when comparing against a legacy hash baseline', () => {
@@ -459,7 +457,7 @@ describe('validateChangesExistingType', () => {
           registeredType,
           log,
         })
-      ).toThrowError(/baseline snapshot uses the legacy hash format/);
+      ).toThrow(/baseline snapshot uses the legacy hash format/);
     });
 
     it('should throw when the registered type schema does not cover all mapping fields', () => {
@@ -482,7 +480,7 @@ describe('validateChangesExistingType', () => {
 
       expect(() =>
         validateChangesWrapper({ from, to, type: { name: 'task', modelVersions } })
-      ).toThrowError(
+      ).toThrow(
         /The SO type 'task' has mapping fields not present in the latest model version schema: partition, status/
       );
     });
@@ -509,6 +507,84 @@ describe('validateChangesExistingType', () => {
       expect(() =>
         validateChangesWrapper({ from, to, type: { name: 'task', modelVersions } })
       ).not.toThrow();
+    });
+  });
+
+  describe('update schema changes in an existing model version', () => {
+    const base = loadSnapshot('schema_only_change_in_latest_model_version.json').typeDefinitions
+      .task;
+    const registeredType: SavedObjectsType = {
+      name: 'task',
+      namespaceType: 'agnostic',
+      hidden: false,
+      mappings: { dynamic: false, properties: {} },
+      modelVersions: {},
+    };
+    const updateSchema = {
+      type: 'object',
+      keys: { taskType: { type: 'string' }, status: { type: 'string' } },
+    };
+    const withUpdate = (update?: Record<string, unknown>): MigrationInfoRecord => ({
+      ...base,
+      modelVersions: base.modelVersions.map((mv) =>
+        mv.version === '3' ? { ...mv, schemas: { ...mv.schemas, ...(update && { update }) } } : mv
+      ),
+    });
+    const validate = (from: MigrationInfoRecord, to: MigrationInfoRecord) =>
+      validateChangesExistingType({ from, to, registeredType, log });
+
+    it('does not report a schema change when neither side has an update schema', () => {
+      expect(() => validate(withUpdate(), withUpdate())).not.toThrow();
+      expect(log).not.toHaveBeenCalledWith(expect.stringContaining('Schema'));
+    });
+
+    it('allows adding an update schema to an existing model version', () => {
+      expect(() => validate(withUpdate(), withUpdate(updateSchema))).not.toThrow();
+      expect(log).toHaveBeenCalledWith(expect.stringContaining('WARNING'));
+    });
+
+    it('throws when a shipped update schema is removed', () => {
+      expect(() => validate(withUpdate(updateSchema), withUpdate())).toThrow(
+        /Breaking schema changes.*update schema removed from model version/s
+      );
+    });
+
+    it('throws when a field is removed from the update schema', () => {
+      const after = { type: 'object', keys: { taskType: { type: 'string' } } };
+      expect(() => validate(withUpdate(updateSchema), withUpdate(after))).toThrow(
+        /field 'status' removed from update schema/
+      );
+    });
+
+    it('throws when a field type changes in the update schema', () => {
+      const after = {
+        type: 'object',
+        keys: { taskType: { type: 'string' }, status: { type: 'number' } },
+      };
+      expect(() => validate(withUpdate(updateSchema), withUpdate(after))).toThrow(
+        /field 'status' type changed from 'string' to 'number' in update schema/
+      );
+    });
+
+    it('throws when a required field is added to the update schema', () => {
+      const after = {
+        type: 'object',
+        keys: { ...updateSchema.keys, partition: { type: 'string' } },
+      };
+      expect(() => validate(withUpdate(updateSchema), withUpdate(after))).toThrow(
+        /required field 'partition' added to update schema/
+      );
+    });
+
+    it('allows adding an optional field to the update schema', () => {
+      const after = {
+        type: 'object',
+        keys: {
+          ...updateSchema.keys,
+          partition: { type: 'string', flags: { presence: 'optional' } },
+        },
+      };
+      expect(() => validate(withUpdate(updateSchema), withUpdate(after))).not.toThrow();
     });
   });
 
@@ -550,7 +626,7 @@ describe('validateChangesExistingType', () => {
           registeredType,
           log,
         })
-      ).toThrowError(
+      ).toThrow(
         `Some modelVersions have been structurally updated for SO type 'task' after they were defined: 10.3.0.`
       );
     });
@@ -560,7 +636,7 @@ describe('validateChangesExistingType', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('non_consecutive_model_versions.json');
 
-    expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrowError(
+    expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrow(
       `The 'task' SO type is missing model version '7'. Model versions defined: 1,2,3,4,5,6,8`
     );
   });
@@ -569,7 +645,7 @@ describe('validateChangesExistingType', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('mappings_updated_no_bump.json');
 
-    expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrowError(
+    expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrow(
       `The 'task' SO type has changes in the mappings, but is missing a modelVersion that defines these changes.`
     );
   });
@@ -578,9 +654,7 @@ describe('validateChangesExistingType', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('changes_in_initial_version.json');
 
-    expect(() =>
-      validateChangesWrapper({ from, to, type: { name: 'usage-counter' } })
-    ).toThrowError(
+    expect(() => validateChangesWrapper({ from, to, type: { name: 'usage-counter' } })).toThrow(
       `The new model version '1' for SO type 'usage-counter' is defining mappings' changes. For backwards-compatibility reasons, the initial model version can only include schema definitions.`
     );
   });
@@ -589,7 +663,7 @@ describe('validateChangesExistingType', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('new_mappings_not_in_model_version.json');
 
-    expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrowError(
+    expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrow(
       /The SO type 'task' has new mapping fields that are not declared in model version '7': newUndeclaredField/
     );
   });
@@ -598,7 +672,7 @@ describe('validateChangesExistingType', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('index_false_in_new_mappings.json');
 
-    expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrowError(
+    expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrow(
       /The SO type 'task' has new mapping fields with 'index: false': fieldWithIndexFalse/
     );
   });
@@ -607,7 +681,7 @@ describe('validateChangesExistingType', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('enabled_false_in_new_mappings.json');
 
-    expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrowError(
+    expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrow(
       /The SO type 'task' has new mapping fields with 'enabled: false': fieldWithEnabledFalse/
     );
   });
@@ -672,7 +746,7 @@ describe('validateChangesExistingType', () => {
 
       expect(() =>
         validateChangesExistingType({ from, to, registeredType: baseRegisteredType, log })
-      ).toThrowError(
+      ).toThrow(
         /The SO type 'my-type' has newly introduced 'keyword' or 'flattened' mapping fields without 'ignore_above': newField/
       );
     });
@@ -683,7 +757,7 @@ describe('validateChangesExistingType', () => {
 
       expect(() =>
         validateChangesExistingType({ from, to, registeredType: baseRegisteredType, log })
-      ).toThrowError(
+      ).toThrow(
         /The SO type 'my-type' has newly introduced 'keyword' or 'flattened' mapping fields without 'ignore_above': dataField/
       );
     });
@@ -712,7 +786,7 @@ describe('validateChangesExistingType', () => {
 
       expect(() =>
         validateChangesExistingType({ from, to, registeredType: baseRegisteredType, log })
-      ).toThrowError(/newField/);
+      ).toThrow(/newField/);
       expect(log).toHaveBeenCalledWith(expect.stringContaining('pre-existing'));
       expect(log).toHaveBeenCalledWith(expect.stringContaining('oldField'));
     });
@@ -726,7 +800,7 @@ describe('validateChangesExistingType', () => {
 
       expect(() =>
         validateChangesExistingType({ from, to, registeredType: baseRegisteredType, log })
-      ).toThrowError(/name\.fields\.keyword/);
+      ).toThrow(/name\.fields\.keyword/);
     });
 
     it('should not throw when a keyword field lost ignore_above relative to baseline (treated as newly introduced problem)', () => {
@@ -740,7 +814,7 @@ describe('validateChangesExistingType', () => {
 
       expect(() =>
         validateChangesExistingType({ from, to, registeredType: baseRegisteredType, log })
-      ).toThrowError(
+      ).toThrow(
         /The SO type 'my-type' has newly introduced 'keyword' or 'flattened' mapping fields without 'ignore_above': myField/
       );
       expect(log).not.toHaveBeenCalled();
@@ -794,7 +868,7 @@ describe('validateChangesExistingType', () => {
 
       expect(() =>
         validateChangesExistingType({ from, to, registeredType: importableExportableType, log })
-      ).toThrowError(
+      ).toThrow(
         /The SO type 'my-type' has 'name' or 'title' fields with incorrect types.*name \(type: keyword, expected: text\)/
       );
     });
@@ -808,7 +882,7 @@ describe('validateChangesExistingType', () => {
 
       expect(() =>
         validateChangesExistingType({ from, to, registeredType: importableExportableType, log })
-      ).toThrowError(/name \(type: keyword, expected: text\)/);
+      ).toThrow(/name \(type: keyword, expected: text\)/);
       expect(log).toHaveBeenCalledWith(expect.stringContaining('title (type: keyword'));
     });
 
@@ -820,7 +894,7 @@ describe('validateChangesExistingType', () => {
 
       expect(() =>
         validateChangesExistingType({ from, to, registeredType: importableExportableType, log })
-      ).toThrowError(
+      ).toThrow(
         /The SO type 'my-type' has 'name' or 'title' fields with incorrect types.*name \(type: keyword, expected: text\)/
       );
       expect(log).not.toHaveBeenCalled();

@@ -99,4 +99,16 @@ describe('ConnectorSelector', () => {
     );
     expect(getByTestId('addNewConnectorButton')).toBeInTheDocument();
   });
+
+  it('should expose the selected connector name in the trigger button accessible name', () => {
+    const { getByRole } = render(
+      <ConnectorSelector
+        connectors={connectors}
+        selectedId="1"
+        onChange={mockOnChange}
+        settings={mockSettings}
+      />
+    );
+    expect(getByRole('button', { name: 'Select connector, Connector One' })).toBeInTheDocument();
+  });
 });

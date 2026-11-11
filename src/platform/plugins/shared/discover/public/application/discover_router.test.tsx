@@ -86,6 +86,12 @@ describe('DiscoverRouter', () => {
     expect(screen.getByTestId('context-app-route')).toBeInTheDocument();
     expect(history.location.pathname).toBe('/context/test-dataview/test-id');
   });
+
+  it('should show NotFoundRoute component for /yeti route', () => {
+    const history = renderWithRouter('/yeti');
+    expect(screen.getByTestId('not-found-route')).toBeInTheDocument();
+    expect(history.location.pathname).toBe('/yeti');
+  });
 });
 
 describe('getReadOnlyBadge', () => {

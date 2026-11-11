@@ -15,7 +15,7 @@ import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { cleanup, fireEvent, waitFor } from '@testing-library/react';
 import { createBrowserHistory } from 'history';
-import React from 'react';
+import React, { useState } from 'react';
 import Router from 'react-router-dom';
 import { BehaviorSubject } from 'rxjs';
 import { buildSlo } from '../../data/slo/slo';
@@ -140,11 +140,14 @@ const mockKibana = (license: ILicense | null = licenseMock) => {
         license$: new BehaviorSubject(license),
       },
       share: sharePluginMock.createStartContract(),
+      inspector: { open: jest.fn() },
     },
   });
 };
 
 const SLO_ID = 'slo-1234';
+
+const PREVIEW_PLACEHOLDER = 'Fill the indicator fields to see visualisation of the current metrics';
 
 describe('SLO Edit Page', () => {
   const mockCreate = jest.fn(() => Promise.resolve({ id: SLO_ID }));
@@ -239,7 +242,7 @@ describe('SLO Edit Page', () => {
 
       render(<SloEditPage />);
 
-      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slosWelcome));
+      expect(mockNavigate).toHaveBeenCalledWith(mockBasePathPrepend(paths.slosWelcome));
     });
 
     it('with no read permission triggers a redirect to the SLO welcome page', async () => {
@@ -253,7 +256,7 @@ describe('SLO Edit Page', () => {
 
       render(<SloEditPage />);
 
-      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slosWelcome));
+      expect(mockNavigate).toHaveBeenCalledWith(mockBasePathPrepend(paths.slosWelcome));
     });
 
     it('with no write permission triggers a redirect to the SLO List page', async () => {
@@ -267,7 +270,7 @@ describe('SLO Edit Page', () => {
 
       render(<SloEditPage />);
 
-      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slos));
+      expect(mockNavigate).toHaveBeenCalledWith(mockBasePathPrepend(paths.slos));
     });
 
     it('renders an empty SLO Edit Form', async () => {
@@ -284,6 +287,12 @@ describe('SLO Edit Page', () => {
       // other sections are hidden
       expect(queryByTestId('sloEditFormObjectiveSection')).toBeNull();
       expect(queryByTestId('sloEditFormDescriptionSection')).toBeNull();
+    });
+
+    it('shows the SLI preview placeholder while the indicator section is incomplete', async () => {
+      const { findByText } = render(<SloEditPage />);
+
+      expect(await findByText(PREVIEW_PLACEHOLDER)).toBeInTheDocument();
     });
 
     it('renders the SLO Edit Form with prefilled values from the URL', async () => {
@@ -364,6 +373,35 @@ describe('SLO Edit Page', () => {
         expect(mockCreate).toHaveBeenCalled();
       });
     });
+
+    it('allows Synthetics availability SLOs to use timeslices with guidance about the monitor interval', async () => {
+      const { getByTestId, queryByText, getByText } = render(<SloEditPage />);
+
+      fireEvent.change(getByTestId('sloFormIndicatorTypeSelect'), {
+        target: { value: 'sli.synthetics.availability' },
+      });
+
+      await waitFor(() => {
+        expect(getByTestId('sloFormBudgetingMethodSelect')).toBeEnabled();
+      });
+
+      expect(
+        queryByText('Match the timeslice window to the monitor interval')
+      ).not.toBeInTheDocument();
+
+      fireEvent.change(getByTestId('sloFormBudgetingMethodSelect'), {
+        target: { value: 'timeslices' },
+      });
+
+      expect(getByTestId('sloFormObjectiveTimesliceTargetInput')).toBeEnabled();
+      expect(getByTestId('sloFormObjectiveTimesliceWindowInput')).toBeEnabled();
+      expect(getByText('Match the timeslice window to the monitor interval')).toBeInTheDocument();
+      expect(
+        getByText(
+          'Set the timeslice window to at least the monitor run interval. A shorter window can cause periods without monitor executions to inflate the calculated SLI and reduce burn rates.'
+        )
+      ).toBeInTheDocument();
+    });
   });
 
   describe('edit SLO flow', () => {
@@ -383,7 +421,7 @@ describe('SLO Edit Page', () => {
 
       render(<SloEditPage />);
 
-      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slosWelcome));
+      expect(mockNavigate).toHaveBeenCalledWith(mockBasePathPrepend(paths.slosWelcome));
     });
 
     it('with no read permission triggers a redirect to the SLO welcome page', async () => {
@@ -397,7 +435,7 @@ describe('SLO Edit Page', () => {
 
       render(<SloEditPage />);
 
-      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slosWelcome));
+      expect(mockNavigate).toHaveBeenCalledWith(mockBasePathPrepend(paths.slosWelcome));
     });
 
     it('with no write permission triggers a redirect to the SLO List page', async () => {
@@ -410,7 +448,7 @@ describe('SLO Edit Page', () => {
       });
       render(<SloEditPage />);
 
-      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slos));
+      expect(mockNavigate).toHaveBeenCalledWith(mockBasePathPrepend(paths.slos));
     });
 
     it('prefills the form with the SLO values', async () => {
@@ -432,6 +470,131 @@ describe('SLO Edit Page', () => {
       expect(queryByTestId('sloFormDescriptionTextArea')).toHaveValue(slo.description);
     });
 
+    it('hides the SLI preview placeholder when the indicator section is complete', async () => {
+      const { findByText, queryByText } = render(<SloEditPage />);
+
+      expect(await findByText('SLI preview')).toBeInTheDocument();
+      await waitFor(() => expect(queryByText(PREVIEW_PLACEHOLDER)).not.toBeInTheDocument());
+    });
+
+    it('shows the required error message when the SLO name is cleared', async () => {
+      const { getByTestId, findByText, queryByText } = render(<SloEditPage />);
+
+      fireEvent.change(getByTestId('sloFormNameInput'), { target: { value: '' } });
+      expect(await findByText('SLO name cannot be empty.')).toBeInTheDocument();
+
+      fireEvent.change(getByTestId('sloFormNameInput'), { target: { value: 'My SLO' } });
+      await waitFor(() => expect(queryByText('SLO name cannot be empty.')).not.toBeInTheDocument());
+    });
+
+    function RerenderHarness() {
+      const [, setTick] = useState(0);
+      return (
+        <>
+          <button data-test-subj="forceRerender" onClick={() => setTick((n) => n + 1)} />
+          <SloEditPage />
+        </>
+      );
+    }
+
+    it('keeps user edits when the page re-renders with a refetched SLO', async () => {
+      const { getByTestId } = render(<RerenderHarness />);
+
+      fireEvent.change(getByTestId('sloFormNameInput'), { target: { value: 'Edited name' } });
+      await waitFor(() => expect(getByTestId('sloFormNameInput')).toHaveValue('Edited name'));
+
+      useFetchSloDetailsMock.mockReturnValue({
+        isInitialLoading: false,
+        data: buildSlo({ id: SLO_ID, name: 'Refetched name' }),
+      });
+      fireEvent.click(getByTestId('forceRerender'));
+
+      await waitFor(() => expect(getByTestId('sloFormNameInput')).toHaveValue('Edited name'));
+    });
+
+    it('waits for a fresh fetch before seeding the form from cached SLO data', async () => {
+      useFetchSloDetailsMock.mockReturnValue({
+        isInitialLoading: false,
+        isFetching: true,
+        isFetchedAfterMount: false,
+        data: buildSlo({ id: SLO_ID, name: 'Cached name' }),
+      });
+
+      const { getByTestId, queryByTestId } = render(<RerenderHarness />);
+
+      expect(queryByTestId('sloEditLoadingSpinner')).toBeTruthy();
+      expect(queryByTestId('sloForm')).toBeFalsy();
+
+      useFetchSloDetailsMock.mockReturnValue({
+        isInitialLoading: false,
+        isFetching: false,
+        isFetchedAfterMount: true,
+        data: buildSlo({ id: SLO_ID, name: 'Fresh name' }),
+      });
+      fireEvent.click(getByTestId('forceRerender'));
+
+      await waitFor(() => expect(getByTestId('sloFormNameInput')).toHaveValue('Fresh name'));
+    });
+
+    it('passes the data view id resolved from the index pattern on mount to the indicator form', async () => {
+      slo = buildSlo({
+        id: SLO_ID,
+        indicator: {
+          type: 'sli.kql.custom',
+          params: {
+            index: 'some-index',
+            good: 'a: 1',
+            total: 'a: *',
+            filter: '',
+            timestampField: '@timestamp',
+          },
+        },
+      });
+      useFetchSloDetailsMock.mockReturnValue({ isInitialLoading: false, data: slo });
+      useFetchDataViewsMock.mockReturnValue({
+        isLoading: false,
+        data: [{ id: 'dv-id', title: 'some-index', name: 'dv' }],
+        refetch: jest.fn(),
+      });
+
+      render(<SloEditPage />);
+
+      await waitFor(() =>
+        expect(useCreateDataViewMock).toHaveBeenCalledWith(
+          expect.objectContaining({ indexPatternString: 'some-index', dataViewId: 'dv-id' })
+        )
+      );
+    });
+
+    it('allows editing Synthetics availability SLOs with timeslices', async () => {
+      slo = buildSlo({
+        id: SLO_ID,
+        indicator: {
+          type: 'sli.synthetics.availability',
+          params: {
+            index: 'synthetics-*',
+            monitorIds: [],
+            projects: [],
+            tags: [],
+          },
+        },
+        budgetingMethod: 'timeslices',
+        objective: {
+          target: 0.98,
+          timesliceTarget: 0.95,
+          timesliceWindow: '5m',
+        },
+      });
+      useFetchSloDetailsMock.mockReturnValue({ isInitialLoading: false, data: slo });
+
+      const { getByTestId } = render(<SloEditPage />);
+
+      expect(getByTestId('sloFormBudgetingMethodSelect')).toHaveValue('timeslices');
+      expect(getByTestId('sloFormBudgetingMethodSelect')).toBeEnabled();
+      expect(getByTestId('sloFormObjectiveTimesliceTargetInput')).toHaveValue(95);
+      expect(getByTestId('sloFormObjectiveTimesliceWindowInput')).toHaveValue(5);
+    });
+
     it('calls the updateSlo hook if all required values are filled in', async () => {
       const { getByTestId } = render(<SloEditPage />);
 
@@ -442,7 +605,7 @@ describe('SLO Edit Page', () => {
       });
 
       expect(mockUpdate).toHaveBeenCalled();
-      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slos));
+      expect(mockNavigate).toHaveBeenCalledWith(mockBasePathPrepend(paths.slos));
     });
   });
 });

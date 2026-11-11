@@ -8,12 +8,14 @@
  */
 
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { DataSourceContext, RootContext } from '../../../../profiles';
 import { DataSourceCategory, DocumentType, SolutionType } from '../../../../profiles';
 import { createProfileProviderSharedServicesMock } from '../../../../__mocks__';
 import { createObservabilityTracesDocumentProfileProvider } from './profile';
 import type { ContextWithProfileId } from '../../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../../toolkit';
 
 describe('tracesDocumentProfileProvider', () => {
   const getRootContext = ({
@@ -87,6 +89,65 @@ describe('tracesDocumentProfileProvider', () => {
     });
   });
 
+  describe('getDocViewer', () => {
+    const spanDocumentProfileProvider =
+      createObservabilityTracesDocumentProfileProvider(mockServices);
+
+    const getDocViewer = spanDocumentProfileProvider.profile.getDocViewer!(
+      () => ({
+        title: 'test title',
+        docViewsRegistry: (registry) => registry,
+      }),
+      {
+        context: { type: DocumentType.Trace },
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+      }
+    );
+
+    it('adds only the overview tab when the record has no gen_ai fields', () => {
+      const docViewer = getDocViewer({
+        record: buildTraceMockRecord('traces-index', { 'trace.id': ['c0ffee'] }),
+      });
+
+      const registry = new DocViewsRegistry();
+      docViewer.docViewsRegistry(registry);
+
+      expect(registry.getAll().map(({ id }) => id)).toEqual(['doc_view_obs_traces_overview']);
+    });
+
+    it('adds the GenAI tab when the record has gen_ai fields', () => {
+      const docViewer = getDocViewer({
+        record: buildTraceMockRecord('traces-index', {
+          'trace.id': ['c0ffee'],
+          'attributes.gen_ai.request.model': ['gpt-4o'],
+        }),
+      });
+
+      const registry = new DocViewsRegistry();
+      docViewer.docViewsRegistry(registry);
+
+      expect(registry.getAll().map(({ id }) => id)).toEqual([
+        'doc_view_obs_traces_overview',
+        'doc_view_obs_traces_genai',
+      ]);
+    });
+
+    it('registers the GenAI tab with viewGenAi EBT click attributes', () => {
+      const docViewer = getDocViewer({
+        record: buildTraceMockRecord('traces-index', {
+          'trace.id': ['c0ffee'],
+          'attributes.gen_ai.request.model': ['gpt-4o'],
+        }),
+      });
+
+      const registry = new DocViewsRegistry();
+      docViewer.docViewsRegistry(registry);
+
+      const genAiDocView = registry.getAll().find(({ id }) => id === 'doc_view_obs_traces_genai');
+      expect(genAiDocView?.ebt).toEqual({ action: 'viewGenAi', element: 'docViewerTabs' });
+    });
+  });
+
   describe('when root profile is NOT observability', () => {
     const profileId = 'another-profile';
     const solutionType = SolutionType.Security;
@@ -103,6 +164,29 @@ describe('tracesDocumentProfileProvider', () => {
           }),
         })
       ).toEqual(RESOLUTION_MISMATCH);
+    });
+  });
+
+  describe('when root profile is Classic', () => {
+    it('matches records with a trace id independently of data source context', () => {
+      const spanDocumentProfileProvider =
+        createObservabilityTracesDocumentProfileProvider(mockServices);
+
+      expect(
+        spanDocumentProfileProvider.resolve({
+          rootContext: getRootContext({
+            profileId: 'classic-nav-root-profile',
+            solutionType: SolutionType.Default,
+          }),
+          dataSourceContext: {
+            profileId: 'default-data-source-profile',
+            category: DataSourceCategory.Default,
+          },
+          record: buildTraceMockRecord('traces-index', {
+            'trace.id': ['c0ffee'],
+          }),
+        })
+      ).toEqual(RESOLUTION_MATCH);
     });
   });
 });

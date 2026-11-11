@@ -6,15 +6,15 @@
  */
 
 import type { IUiSettingsClient, Logger } from '@kbn/core/server';
-import type { InferenceConnector } from '@kbn/inference-common';
+import type { ApiInferenceConnector, InferenceConnector } from '@kbn/inference-common';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
-import { mergeConnectors, type ApiInferenceConnector } from './merge_connectors';
-import type { ResolvedInferenceEndpoints } from '../types';
+import { mergeConnectors } from './merge_connectors';
+import type { GetForFeatureOptions, ResolvedInferenceEndpoints } from '../types';
 
-const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
+export const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 
 export interface ResolvedConnectorsForFeature {
   connectors: ApiInferenceConnector[];
@@ -26,7 +26,10 @@ export interface ResolvedConnectorsForFeature {
  * Resolves the full, ordered model list for a feature.
  *
  * The priority resolution is:
- *   - If the default only setting is enabled, return just the default connector (or nothing if not set).
+ *   - If the default only setting is enabled, return just the default connector without feature-declared parameters (or nothing if not set).
+ *   - If `opts.onlyReturnConfigured` is true, return only the explicitly configured endpoints
+ *     (SO override or recommendedEndpoints) without prepending the global default or the full
+ *     connector catalog. An empty list signals "nothing explicitly configured".
  *   - If there's a saved object entry for the feature, return that list.
  *   - If `ignoreGlobalDefault` is true, skip prepending the global default connector.
  *   - If there's a global default, return that and the feature-recommended models with isRecommended set to true, followed by the rest of the available models.
@@ -37,10 +40,11 @@ export interface ResolvedConnectorsForFeature {
  * HTTP endpoint and the `endpoints.getForFeature` server-side contract.
  *
  * @param getForFeature  Resolves feature-specific endpoints (without the global default).
- * @param getConnectorList  Returns the full connector catalog.
+ * @param getConnectorList  Returns the full connector catalog (not called when `opts.onlyReturnConfigured` is true).
  * @param getConnectorById  Fetches a single connector by ID (used for the global default).
  * @param uiSettingsClient  Scoped UI-settings client to read the default connector setting.
  * @param featureId  The feature to resolve connectors for.
+ * @param opts  Optional resolution options (see {@link GetForFeatureOptions}).
  * @param logger  Logger for warnings/errors.
  */
 export const resolveModelsForFeature = async ({
@@ -50,6 +54,7 @@ export const resolveModelsForFeature = async ({
   uiSettingsClient,
   featureId,
   ignoreGlobalDefault = false,
+  opts,
   logger,
 }: {
   getForFeature: (featureId: string) => Promise<ResolvedInferenceEndpoints>;
@@ -58,6 +63,7 @@ export const resolveModelsForFeature = async ({
   uiSettingsClient: IUiSettingsClient;
   featureId: string;
   ignoreGlobalDefault?: boolean;
+  opts?: GetForFeatureOptions;
   logger: Logger;
 }): Promise<ResolvedConnectorsForFeature> => {
   const [defaultConnectorId, defaultConnectorOnly] = await Promise.all([
@@ -74,6 +80,12 @@ export const resolveModelsForFeature = async ({
     }
   };
 
+  const getFeatureEndpoints = () =>
+    getForFeature(featureId).catch((e): ResolvedInferenceEndpoints => {
+      logger.error(`Failed to resolve endpoints for feature "${featureId}": ${e.message}`);
+      return { endpoints: [], warnings: [], soEntryFound: false };
+    });
+
   if (defaultConnectorOnly) {
     if (!defaultConnectorId || defaultConnectorId === NO_DEFAULT_CONNECTOR) {
       return { connectors: [], warnings: [], soEntryFound: false };
@@ -86,11 +98,20 @@ export const resolveModelsForFeature = async ({
     };
   }
 
+  if (opts?.onlyReturnConfigured) {
+    const featureResult = await getFeatureEndpoints();
+    const { soEntryFound } = featureResult;
+    return {
+      connectors: soEntryFound
+        ? featureResult.endpoints
+        : featureResult.endpoints.map((e) => ({ ...e, isRecommended: true })),
+      warnings: featureResult.warnings,
+      soEntryFound,
+    };
+  }
+
   const [featureResult, allConnectors] = await Promise.all([
-    getForFeature(featureId).catch((e): ResolvedInferenceEndpoints => {
-      logger.error(`Failed to resolve endpoints for feature "${featureId}": ${e.message}`);
-      return { endpoints: [], warnings: [], soEntryFound: false };
-    }),
+    getFeatureEndpoints(),
     getConnectorList().catch((e): InferenceConnector[] => {
       logger.error(`Failed to load connector list: ${e.message}`);
       return [];
@@ -109,8 +130,11 @@ export const resolveModelsForFeature = async ({
   ) {
     const defaultConnector = await fetchConnectorById(defaultConnectorId);
     if (defaultConnector) {
+      const parameters = featureResult.endpoints.find(
+        ({ connectorId }) => connectorId === defaultConnectorId
+      )?.parameters;
       connectors = [
-        defaultConnector,
+        parameters ? { ...defaultConnector, parameters } : defaultConnector,
         ...merged.filter((c) => c.connectorId !== defaultConnectorId),
       ];
     }

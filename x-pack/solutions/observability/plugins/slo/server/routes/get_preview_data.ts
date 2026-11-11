@@ -19,17 +19,16 @@ export const getPreviewData = createSloServerRoute({
     },
   },
   params: getPreviewDataParamsSchema,
-  handler: async ({ request, logger, params, plugins, getScopedClients }) => {
+  handler: async ({ request, logger, params, plugins, getScopedClients, config }) => {
     await assertPlatinumLicense(plugins);
-    const { scopedClusterClient, dataViewsService, spaceId } = await getScopedClients({
-      request,
-      logger,
-    });
+    const { scopedClusterClient, dataViewsService, spaceId, isCpsAvailable } =
+      await getScopedClients({ request, logger });
 
     const service = new GetPreviewData(
       scopedClusterClient.asCurrentUser,
       spaceId,
-      dataViewsService
+      dataViewsService,
+      { isServerless: config.isServerless, isCpsAvailable }
     );
     return await service.execute(params.body);
   },

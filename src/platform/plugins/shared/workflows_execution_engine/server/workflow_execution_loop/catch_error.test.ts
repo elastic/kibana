@@ -11,6 +11,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import { catchError } from './catch_error';
+import { ResumeTaskSchedulingError } from './resume_task_scheduling_error';
 import { createMockWorkflowExecutionCursor } from '../workflow_context_manager/mocks/workflow_execution_cursor.mock';
 
 const createParams = (error?: Error) => {
@@ -182,6 +183,35 @@ describe('catchError', () => {
     await catchError(params as any, stepRuntime as any);
 
     expect(stepRuntime.failStep).not.toHaveBeenCalled();
+  });
+
+  it('fails enclosing scopes without invoking catchers for a resume-task scheduling failure', async () => {
+    const schedulingError = new ResumeTaskSchedulingError(new Error('API key revoked'));
+    const { params, stepRuntime, stepErrorCatcher } = createParams(new Error('step error'));
+    const workflowExecutionCursor = createMockWorkflowExecutionCursor({
+      error: schedulingError,
+      currentStackFrames: [
+        { stepId: 'step-1', nestedScopes: [{ nodeId: 'scope-node', nodeType: 'atomic' }] },
+      ],
+      currentNode: { id: 'current-node' } as GraphNodeUnion,
+    });
+    workflowExecutionCursor.commitPendingNavigation.mockImplementation(() =>
+      workflowExecutionCursor.setMockCurrentStackFrames([])
+    );
+    params.workflowExecutionCursor = workflowExecutionCursor;
+    stepRuntime.stepExecution = { status: ExecutionStatus.WAITING };
+
+    await catchError(params as any, stepRuntime as any);
+
+    expect(stepErrorCatcher.catchError).not.toHaveBeenCalled();
+    expect(workflowExecutionCursor.captureError).not.toHaveBeenCalled();
+    expect(workflowExecutionCursor.error).toBe(schedulingError);
+    expect(stepRuntime.failStep).toHaveBeenCalledTimes(1);
+    const scopeRuntime =
+      params.stepExecutionRuntimeFactory.createStepExecutionRuntime.mock.results[0].value;
+    expect(scopeRuntime.failStep).toHaveBeenCalledTimes(1);
+    expect(workflowExecutionCursor.commitPendingNavigation).toHaveBeenCalled();
+    expect(workflowExecutionCursor.stop).toHaveBeenCalled();
   });
 
   it('stores workflow error on the driver and logs when catchError itself throws', async () => {

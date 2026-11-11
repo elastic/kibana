@@ -13,7 +13,7 @@ import { getDefaultRiskEngineConfiguration } from '../utils/saved_object_configu
 import { RiskScoreDataClient } from '../../risk_score/risk_score_data_client';
 import type { RiskEngineConfiguration } from '../../types';
 import { riskEngineConfigurationTypeName } from '../saved_object';
-import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
+import { buildNamespacedInternalSavedObjectsClientUnsafe } from '../../utils/internal_saved_objects_client';
 
 export const MAX_PER_PAGE = 10_000;
 
@@ -22,6 +22,7 @@ export const updateRiskScoreMappings = async ({
   logger,
   getStartServices,
   kibanaVersion,
+  spaceId,
 }: EntityAnalyticsMigrationsParams) => {
   const [coreStart] = await getStartServices();
   const soClientKibanaUser = coreStart.savedObjects.createInternalRepository();
@@ -30,7 +31,7 @@ export const updateRiskScoreMappings = async ({
   const savedObjectsResponse = await soClientKibanaUser.find<RiskEngineConfiguration>({
     type: riskEngineConfigurationTypeName,
     perPage: MAX_PER_PAGE,
-    namespaces: ['*'],
+    namespaces: spaceId ? [spaceId] : ['*'],
   });
 
   await asyncForEach(savedObjectsResponse.saved_objects, async (savedObject) => {
@@ -49,7 +50,7 @@ export const updateRiskScoreMappings = async ({
       );
 
       const esClient = coreStart.elasticsearch.client.asInternalUser;
-      const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
+      const soClient = buildNamespacedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
       const riskEngineDataClient = new RiskEngineDataClient({
         logger,
         kibanaVersion,

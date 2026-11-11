@@ -1,0 +1,24 @@
+{
+  "sha1": "fc2ceb3245235a2277d547d2e8b1fb52a28c0fd7",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "f5dfc643e9e3f7f-7110173ad329646",
+      "title": "Endpoint artifact changes bump the package policy revision creating and deleting a global trusted application bumps the revision",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/api/tests/artifact_policy_revision.spec.ts",
+        "line": 158,
+        "column": 7
+      }
+    }
+  ]
+}

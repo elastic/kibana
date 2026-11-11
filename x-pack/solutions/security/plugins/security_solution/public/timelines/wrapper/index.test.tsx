@@ -12,7 +12,6 @@ import '../../common/mock/react_beautiful_dnd';
 import { TestProviders, createMockStore, mockGlobalState } from '../../common/mock';
 import { TimelineId } from '../../../common/types/timeline';
 import * as timelineActions from '../store/actions';
-import { useIsNewFlyoutEnabled } from '../../common/hooks/use_is_new_flyout_enabled';
 import { timelineFlyoutHistoryKey } from '../../flyout_v2/shared/constants/flyout_history';
 import { TimelineWrapper } from '.';
 
@@ -52,7 +51,6 @@ jest.mock('../components/timeline', () => ({
   StatefulTimeline: () => <div />,
 }));
 jest.mock('../../common/hooks/timeline/use_timeline_save_prompt');
-jest.mock('../../common/hooks/use_is_new_flyout_enabled');
 
 const mockGetFlyoutManagerState = jest.fn(() => ({ sessions: [] as unknown[] }));
 const mockCloseFlyout = jest.fn();
@@ -79,7 +77,6 @@ describe('TimelineWrapper', () => {
     mockCloseFlyout.mockClear();
     mockCloseAllFlyouts.mockClear();
     mockGetFlyoutManagerState.mockReturnValue({ sessions: [] });
-    (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(false);
   });
 
   it('should render correctly the main timeline elements', () => {
@@ -111,85 +108,12 @@ describe('TimelineWrapper', () => {
 
     await userEvent.click(getByTestId('timeline-bottom-bar-title-button'));
 
-    expect(mockDispatch).toBeCalledWith(
+    expect(mockDispatch).toHaveBeenCalledWith(
       timelineActions.showTimeline({ id: TimelineId.test, show: true })
     );
   });
 
-  it('should hide timeline when user presses keyboard esc key', async () => {
-    render(
-      <TestProviders>
-        <TimelineWrapper {...props} />
-      </TestProviders>
-    );
-
-    await userEvent.keyboard('{Escape}');
-
-    expect(mockDispatch).toBeCalledWith(
-      timelineActions.showTimeline({ id: TimelineId.test, show: false })
-    );
-  });
-
-  describe('legacy expandable flyout (new flyout system disabled)', () => {
-    beforeEach(() => {
-      (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(false);
-    });
-
-    it('should not bubble the esc keydown to the underlying flyout when the timeline modal is visible', async () => {
-      // The expandable flyout (e.g. the graph investigation view) registers a window-level
-      // keydown listener too. The timeline wrapper mounts first (persistent app shell), so its
-      // listener runs first and must stop the event before the flyout's listener fires.
-      const underlyingFlyoutHandler = jest.fn();
-
-      render(
-        <TestProviders store={createVisibleTimelineStore()}>
-          <TimelineWrapper {...props} />
-        </TestProviders>
-      );
-
-      window.addEventListener('keydown', underlyingFlyoutHandler);
-
-      try {
-        await userEvent.keyboard('{Escape}');
-
-        // The timeline modal still closes...
-        expect(mockDispatch).toBeCalledWith(
-          timelineActions.showTimeline({ id: TimelineId.test, show: false })
-        );
-        // ...but the underlying flyout's window-level handler is never reached.
-        expect(underlyingFlyoutHandler).not.toHaveBeenCalled();
-      } finally {
-        window.removeEventListener('keydown', underlyingFlyoutHandler);
-      }
-    });
-
-    it('should let the esc keydown reach the underlying flyout when the timeline modal is not visible', async () => {
-      const underlyingFlyoutHandler = jest.fn();
-
-      render(
-        <TestProviders>
-          <TimelineWrapper {...props} />
-        </TestProviders>
-      );
-
-      window.addEventListener('keydown', underlyingFlyoutHandler);
-
-      try {
-        await userEvent.keyboard('{Escape}');
-
-        // When the timeline is collapsed, Esc must keep working on other pages/flyouts.
-        expect(underlyingFlyoutHandler).toHaveBeenCalled();
-      } finally {
-        window.removeEventListener('keydown', underlyingFlyoutHandler);
-      }
-    });
-  });
-
-  describe('new (EUI-managed) flyout system enabled', () => {
-    beforeEach(() => {
-      (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(true);
-    });
-
+  describe('Esc key handling', () => {
     it('should close a main-level flyout opened from within Timeline via closeAllFlyouts, and not the timeline itself', async () => {
       // Mirrors EuiManagedFlyout's own `onClose` for a main-level flyout with no child, which
       // calls `closeAllFlyouts()` (not `closeFlyout(id)`) so that any sibling session sharing
@@ -210,7 +134,7 @@ describe('TimelineWrapper', () => {
 
       expect(mockCloseAllFlyouts).toHaveBeenCalledTimes(1);
       expect(mockCloseFlyout).not.toHaveBeenCalled();
-      expect(mockDispatch).not.toBeCalledWith(
+      expect(mockDispatch).not.toHaveBeenCalledWith(
         timelineActions.showTimeline({ id: TimelineId.test, show: false })
       );
     });
@@ -234,9 +158,9 @@ describe('TimelineWrapper', () => {
 
       await userEvent.keyboard('{Escape}');
 
-      expect(mockCloseFlyout).toBeCalledWith('flyout-b-child');
-      expect(mockCloseFlyout).not.toBeCalledWith('flyout-b');
-      expect(mockDispatch).not.toBeCalledWith(
+      expect(mockCloseFlyout).toHaveBeenCalledWith('flyout-b-child');
+      expect(mockCloseFlyout).not.toHaveBeenCalledWith('flyout-b');
+      expect(mockDispatch).not.toHaveBeenCalledWith(
         timelineActions.showTimeline({ id: TimelineId.test, show: false })
       );
     });
@@ -267,7 +191,7 @@ describe('TimelineWrapper', () => {
 
       expect(mockCloseAllFlyouts).toHaveBeenCalledTimes(1);
       expect(mockCloseFlyout).not.toHaveBeenCalled();
-      expect(mockDispatch).not.toBeCalledWith(
+      expect(mockDispatch).not.toHaveBeenCalledWith(
         timelineActions.showTimeline({ id: TimelineId.test, show: false })
       );
     });
@@ -309,7 +233,7 @@ describe('TimelineWrapper', () => {
       expect(mockCloseAllFlyouts).toHaveBeenCalledTimes(1);
       expect(mockCloseFlyout).not.toHaveBeenCalledWith('document-flyout-a');
       expect(mockCloseFlyout).not.toHaveBeenCalledWith('analyzer-flyout-b');
-      expect(mockDispatch).not.toBeCalledWith(
+      expect(mockDispatch).not.toHaveBeenCalledWith(
         timelineActions.showTimeline({ id: TimelineId.test, show: false })
       );
     });
@@ -333,7 +257,7 @@ describe('TimelineWrapper', () => {
       await userEvent.keyboard('{Escape}');
 
       expect(mockCloseFlyout).not.toHaveBeenCalled();
-      expect(mockDispatch).toBeCalledWith(
+      expect(mockDispatch).toHaveBeenCalledWith(
         timelineActions.showTimeline({ id: TimelineId.test, show: false })
       );
     });
@@ -378,7 +302,7 @@ describe('TimelineWrapper', () => {
       await userEvent.keyboard('{Escape}');
 
       expect(mockCloseFlyout).not.toHaveBeenCalled();
-      expect(mockDispatch).toBeCalledWith(
+      expect(mockDispatch).toHaveBeenCalledWith(
         timelineActions.showTimeline({ id: TimelineId.test, show: false })
       );
     });
@@ -397,7 +321,7 @@ describe('TimelineWrapper', () => {
       await userEvent.keyboard('{Escape}');
 
       expect(mockCloseFlyout).not.toHaveBeenCalled();
-      expect(mockDispatch).not.toBeCalledWith(
+      expect(mockDispatch).not.toHaveBeenCalledWith(
         timelineActions.showTimeline({ id: TimelineId.test, show: false })
       );
     });

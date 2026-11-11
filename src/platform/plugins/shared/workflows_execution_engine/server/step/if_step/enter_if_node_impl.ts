@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EnterConditionBranchNode, EnterIfNode, WorkflowGraph } from '@kbn/workflows/graph';
+import { decodeKqlTemplateValues } from '@kbn/eval-kql';
+import type { EnterConditionBranchNode, EnterIfNode } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { RuntimeGraphView } from '../../workflow_context_manager/workflow_runtime_graph';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import { evaluateCondition } from '../evaluate_condition';
 import type { NodeImplementation } from '../node_implementation';
@@ -18,7 +20,7 @@ export class EnterIfNodeImpl implements NodeImplementation {
   constructor(
     private node: EnterIfNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
-    private workflowGraph: WorkflowGraph,
+    private workflowGraph: RuntimeGraphView,
     private stepExecutionRuntime: StepExecutionRuntime,
     private workflowContextLogger: IWorkflowEventLogger
   ) {}
@@ -48,7 +50,7 @@ export class EnterIfNodeImpl implements NodeImplementation {
       (node) => !Object.hasOwn(node, 'condition')
     ) as EnterConditionBranchNode;
     const context = this.stepExecutionRuntime.contextManager.getContext();
-    const renderedCondition = this.stepExecutionRuntime.contextManager.renderValueWithContext(
+    const renderedCondition = this.stepExecutionRuntime.contextManager.renderConditionWithContext(
       thenNode.condition,
       context
     );
@@ -59,7 +61,10 @@ export class EnterIfNodeImpl implements NodeImplementation {
     );
     this.stepExecutionRuntime.setInput({
       rawCondition: thenNode.condition as string,
-      condition: renderedCondition,
+      condition:
+        typeof renderedCondition === 'string'
+          ? decodeKqlTemplateValues(renderedCondition)
+          : renderedCondition,
       conditionResult: evaluatedConditionResult,
     });
     // set the condition result to the step state so that it can be used in the exit node

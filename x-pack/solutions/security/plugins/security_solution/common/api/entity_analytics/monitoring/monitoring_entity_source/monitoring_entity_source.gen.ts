@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 export const MonitoringEntitySourceType = lazySchema(() =>
@@ -31,7 +31,11 @@ export const Matcher = lazySchema(() =>
       * Matcher values. Must be either an array of strings (e.g. group or role names) or an array of booleans (e.g. integration-derived flags like privileged_group_member). Mixed types are intentionally not supported for simplicity and predictability.
 
       */
-    values: z.union([z.array(z.string().max(256)).max(1000), z.array(z.boolean()).max(1000)]),
+    values: z
+      .union([z.array(z.string().max(256)).max(1000), z.array(z.boolean()).max(1000)])
+      .describe(
+        'Matcher values. Must be either an array of strings (e.g. group or role names) or an array of booleans (e.g. integration-derived flags like privileged_group_member). Mixed types are intentionally not supported for simplicity and predictability.\n'
+      ),
   })
 );
 export type Matcher = z.infer<typeof Matcher>;
@@ -48,7 +52,11 @@ export const Integrations = lazySchema(() =>
     /**
      * Index to read latest sync markers from
      */
-    syncMarkerIndex: z.string().max(1000).optional(),
+    syncMarkerIndex: z
+      .string()
+      .max(1000)
+      .optional()
+      .describe('Index to read latest sync markers from'),
     /**
      * integrations latest full sync and update syncData
      */
@@ -57,13 +65,18 @@ export const Integrations = lazySchema(() =>
         /**
          * Timestamp of the last full sync from integrations
          */
-        lastFullSync: z.string().datetime().optional(),
+        lastFullSync: isoDateTime()
+          .optional()
+          .describe('Timestamp of the last full sync from integrations'),
         /**
          * Timestamp of the last update processed from integrations
          */
-        lastUpdateProcessed: z.string().datetime().optional(),
+        lastUpdateProcessed: isoDateTime()
+          .optional()
+          .describe('Timestamp of the last update processed from integrations'),
       })
-      .optional(),
+      .optional()
+      .describe('integrations latest full sync and update syncData'),
   })
 );
 export type Integrations = z.infer<typeof Integrations>;

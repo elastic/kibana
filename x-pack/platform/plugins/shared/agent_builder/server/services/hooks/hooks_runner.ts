@@ -8,7 +8,12 @@
 import type { Logger } from '@kbn/logging';
 import { createHooksExecutionError, createRequestAbortedError } from '@kbn/agent-builder-common';
 import { withTimeout } from '@kbn/std';
-import type { HookContext, HookRegistration, HooksServiceStart } from '@kbn/agent-builder-server';
+import type {
+  CycleHookDefinition,
+  HookContext,
+  HookRegistration,
+  HooksServiceStart,
+} from '@kbn/agent-builder-server';
 import {
   applyHookResultByLifecycle,
   HookExecutionMode,
@@ -25,7 +30,7 @@ import { orderBy } from 'lodash';
 const DEFAULT_HOOK_TIMEOUT_MS = 2 * 60 * 1000; // 2 minutes
 
 /** After hooks run in reverse order so they nest like LangChain (last before = first after). */
-const AFTER_EVENTS: HookLifecycle[] = [HookLifecycle.afterToolCall];
+const AFTER_EVENTS: HookLifecycle[] = [HookLifecycle.afterToolCall, HookLifecycle.afterExecution];
 
 const isAfterEvent = (event: HookLifecycle): boolean => AFTER_EVENTS.includes(event);
 
@@ -50,6 +55,8 @@ export interface CreateHooksRunnerDeps {
   logger: Logger;
   /** Returns all hook registrations for a given lifecycle (no filtering by mode). */
   getHooksForLifecycle: (lifecycle: HookLifecycle) => Array<HookRegistration<HookLifecycle>>;
+  /** Returns the cycle hook definitions in registration order. */
+  getCycleHooks: () => CycleHookDefinition[];
 }
 
 function getRelevantHooks<E extends HookLifecycle>(
@@ -69,7 +76,7 @@ function getRelevantHooks<E extends HookLifecycle>(
  * It runs blocking hooks first, then non-blocking hooks.
  */
 export function createHooksRunner(deps: CreateHooksRunnerDeps): HooksServiceStart {
-  const { logger, getHooksForLifecycle } = deps;
+  const { logger, getHooksForLifecycle, getCycleHooks } = deps;
   const getRelevant = <E extends HookLifecycle>(
     lifecycle: E,
     mode: HookExecutionMode,
@@ -139,5 +146,5 @@ export function createHooksRunner(deps: CreateHooksRunnerDeps): HooksServiceStar
     return updated;
   };
 
-  return { run };
+  return { run, listCycleHooks: getCycleHooks };
 }

@@ -71,7 +71,10 @@ describe('getColumns', () => {
       );
       expect(getByTestId('incoming-spanName-span123')).toHaveTextContent('mySpan');
       expect(useDiscoverLinkAndEsqlQuery).toHaveBeenCalledWith(
-        expect.objectContaining({ indexPattern: 'apm-traces-*', whereClause: expect.any(Function) })
+        expect.objectContaining({
+          indexPattern: 'apm-traces-*',
+          whereClause: expect.objectContaining({ type: 'function' }),
+        })
       );
     });
 
@@ -126,7 +129,10 @@ describe('getColumns', () => {
       );
       expect(getByTestId('incoming-serviceName-myService')).toHaveTextContent('myService');
       expect(useDiscoverLinkAndEsqlQuery).toHaveBeenCalledWith(
-        expect.objectContaining({ indexPattern: 'apm-traces-*', whereClause: expect.any(Function) })
+        expect.objectContaining({
+          indexPattern: 'apm-traces-*',
+          whereClause: expect.objectContaining({ type: 'function' }),
+        })
       );
     });
 
@@ -181,7 +187,10 @@ describe('getColumns', () => {
       );
       expect(getByTestId('incoming-traceId-trace456')).toHaveTextContent('trace456');
       expect(useDiscoverLinkAndEsqlQuery).toHaveBeenCalledWith(
-        expect.objectContaining({ indexPattern: 'apm-traces-*', whereClause: expect.any(Function) })
+        expect.objectContaining({
+          indexPattern: 'apm-traces-*',
+          whereClause: expect.objectContaining({ type: 'function' }),
+        })
       );
     });
 

@@ -1,16 +1,19 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
+    "module": "esnext",
+    // Only needed by ts-jest, which hardcodes `moduleResolution: Node10` when it
+    // transpiles regardless of what is configured here, and whose peer range is
+    // still `typescript: >=4.3 <7`. Drop this once ts-jest supports TS7; `tsc`
+    // itself no longer needs it under either TS6 or TS7.
     "ignoreDeprecations": "6.0",
-    "moduleResolution": "node",
-    "module": "commonjs",
+    "allowImportingTsExtensions": true,
+    "moduleResolution": "bundler",
     "outDir": "target/types",
-    "types": ["node", "jest"],
-    "baseUrl": ".",
-    "paths": {
-      "#pipeline-utils": ["pipeline-utils/index.ts"],
-      "#pipeline-utils/*": ["pipeline-utils/*"]
-    }
+    // Declare these extra dependencies explicitly; they are used by some tests
+    // importing `@kbn/storybook`.
+    "types": ["node", "jest", "@kbn/ambient-ui-types", "@kbn/ambient-common-types"],
+    "verbatimModuleSyntax": true
   },
   "include": [
     "pipeline-utils/**/*",
@@ -18,7 +21,8 @@
     "scripts/**/*",
     "pipelines/flaky_tests/groups.json",
     "pull_requests.json",
-    "pipeline-resource-definitions/**/*.ts"
+    "pipeline-resource-definitions/**/*.ts",
+    "../src/platform/packages/shared/kbn-config-schema/types/joi.d.ts"
   ],
   "exclude": ["target/**/*"]
 }

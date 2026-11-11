@@ -254,5 +254,12 @@ export const pciScopeDiscoveryTool = (
       };
     },
     tags: ['security', 'compliance', 'pci', 'discovery'],
+    annotations: {
+      title: 'PCI Scope Discovery',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
   };
 };

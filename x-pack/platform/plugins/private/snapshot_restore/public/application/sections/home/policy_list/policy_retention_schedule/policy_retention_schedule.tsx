@@ -17,10 +17,10 @@ import {
   EuiButtonIcon,
   EuiSpacer,
   EuiToolTip,
-  EuiCallOut,
   EuiContextMenu,
   EuiPopover,
 } from '@elastic/eui';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useServices } from '../../../../app_context';
 import type { UpdateRetentionSettings, ExecuteRetention } from '../../../../components';
@@ -137,15 +137,13 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
 
   const renderRetentionNotConfiguredCallout = () => (
     <>
-      <EuiCallOut
+      <KbnWarningCallout
         title={
           <FormattedMessage
             id="xpack.snapshotRestore.policyRetentionSchedulePanel.noScheduleConfiguredWarningTitle"
             defaultMessage="Retention not scheduled"
           />
         }
-        color="warning"
-        iconType="warning"
       >
         <p>
           <FormattedMessage
@@ -233,7 +231,7 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
             );
           }}
         </RetentionExecuteModalProvider>
-      </EuiCallOut>
+      </KbnWarningCallout>
       <EuiSpacer />
     </>
   );
@@ -252,7 +250,7 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
   if (error) {
     return (
       <Fragment>
-        <EuiCallOut
+        <KbnDangerCallout
           announceOnMount={false}
           title={
             <FormattedMessage
@@ -261,17 +259,20 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
             />
           }
           role="alert"
-          color="danger"
-          iconType="warning"
-        >
-          {error.data && error.data.message ? <p>{error.data.message}</p> : null}
-          <EuiButton iconType="refresh" color="danger" onClick={onRetentionScheduleUpdated}>
-            <FormattedMessage
-              id="xpack.snapshotRestore.policyRetentionSchedulePanel.errorFetchingRetentionScheduleReloadButtonLabel"
-              defaultMessage="Reload"
-            />
-          </EuiButton>
-        </EuiCallOut>
+          text={error.data && error.data.message ? <p>{error.data.message}</p> : undefined}
+          actionProps={{
+            primary: {
+              iconType: 'refresh',
+              onClick: onRetentionScheduleUpdated,
+              children: (
+                <FormattedMessage
+                  id="xpack.snapshotRestore.policyRetentionSchedulePanel.errorFetchingRetentionScheduleReloadButtonLabel"
+                  defaultMessage="Reload"
+                />
+              ),
+            },
+          }}
+        />
         <EuiSpacer />
       </Fragment>
     );

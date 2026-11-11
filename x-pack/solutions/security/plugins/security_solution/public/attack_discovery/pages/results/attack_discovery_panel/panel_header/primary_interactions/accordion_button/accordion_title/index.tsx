@@ -18,6 +18,7 @@ interface Props {
   replacements?: Replacements;
   showAnonymized?: boolean;
   title: string;
+  titleId: string;
 }
 
 const AccordionTitleComponent: React.FC<Props> = ({
@@ -25,6 +26,7 @@ const AccordionTitleComponent: React.FC<Props> = ({
   replacements,
   showAnonymized = false,
   title,
+  titleId,
 }) => {
   const titleWithReplacements = useMemo(
     () =>
@@ -55,7 +57,7 @@ const AccordionTitleComponent: React.FC<Props> = ({
           />
         ) : (
           <EuiTitle data-test-subj="titleText" size="xs">
-            <h2>{showAnonymized ? title : titleWithReplacements}</h2>
+            <h2 id={titleId}>{showAnonymized ? title : titleWithReplacements}</h2>
           </EuiTitle>
         )}
       </EuiFlexItem>

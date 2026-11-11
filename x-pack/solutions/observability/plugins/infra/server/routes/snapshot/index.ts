@@ -16,6 +16,7 @@ import { SnapshotRequestRT, SnapshotNodeResponseRT } from '../../../common/http_
 import { createSearchClient } from '../../lib/create_search_client';
 import { withInspect } from '../../lib/helpers/with_inspect';
 import { getNodes } from './lib/get_nodes';
+import { withDefaultSnapshotSchema } from './lib/with_default_snapshot_schema';
 
 const InspectQueryRT = rt.exact(rt.partial({ _inspect: jsonRt.pipe(rt.boolean) }));
 
@@ -34,7 +35,7 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
       },
     },
     withInspect(async (requestContext, request) => {
-      const snapshotRequest = request.body;
+      const snapshotRequest = withDefaultSnapshotSchema(request.body);
 
       if (snapshotRequest.metrics.length > SNAPSHOT_API_MAX_METRICS) {
         throw Boom.badRequest(

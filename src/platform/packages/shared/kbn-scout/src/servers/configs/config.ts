@@ -8,17 +8,13 @@
  */
 
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getServerlessProject } from '@kbn/test-kibana-server';
 import type { Schema } from 'joi';
 import { cloneDeepWith, get, has, toPath } from 'lodash';
 import Path from 'path';
 import * as Url from 'url';
 import { schema } from './schema';
-import {
-  formatCurrentDate,
-  getProjectType,
-  getOrganizationId,
-  getProductTier,
-} from './utils/common';
+import { formatCurrentDate, getOrganizationId } from './utils/common';
 import type { ScoutServerConfig, ScoutTestConfig } from '../../types';
 
 const $values = Symbol('values');
@@ -112,7 +108,7 @@ export class Config {
   public getScoutTestConfig(): ScoutTestConfig {
     const isServerless = this.get('serverless');
     const serverArgs: string[] = this.get('kbnTestServer.serverArgs');
-    const projectType = isServerless ? getProjectType(serverArgs) : undefined;
+    const serverlessProject = isServerless ? getServerlessProject(serverArgs) : undefined;
 
     return {
       serverless: isServerless,
@@ -124,8 +120,8 @@ export class Config {
       // - on stateful, UIAM is never available, so we force `false` regardless
       //   of any (mis)configured server option.
       uiam: isServerless ? this.get('esServerlessOptions.uiam') : false,
-      projectType,
-      productTier: isServerless ? getProductTier(serverArgs, projectType) : undefined,
+      projectType: serverlessProject?.projectType,
+      productTier: serverlessProject?.productTier,
       organizationId: isServerless ? getOrganizationId(serverArgs) : undefined,
       isCloud: false,
       license: this.get('esTestCluster.license'),

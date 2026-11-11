@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-export const SERVICE_FLYOUT_SOURCES = {
-  serviceMap: 'service_map',
-  dashboardEmbeddable: 'dashboard_embeddable',
-  alertDetails: 'alert_details',
-} as const;
-
-export type ServiceFlyoutSource =
-  (typeof SERVICE_FLYOUT_SOURCES)[keyof typeof SERVICE_FLYOUT_SOURCES];
+export const SERVICE_FLYOUT_SOURCE_SERVICE_MAP = 'service_map';

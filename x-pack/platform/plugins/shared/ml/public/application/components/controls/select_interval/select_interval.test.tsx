@@ -39,7 +39,7 @@ describe('SelectInterval', () => {
     await userEvent.selectOptions(getByTestId('mlAnomalyIntervalControls'), getByText('1 hour'));
 
     // assert updated state
-    expect(mockUpdateCallback).toBeCalledWith({ display: '1 hour', val: 'hour' });
+    expect(mockUpdateCallback).toHaveBeenCalledWith({ display: '1 hour', val: 'hour' });
     expect((getByText('1 hour') as HTMLOptionElement).selected).toBeTruthy();
   });
 });

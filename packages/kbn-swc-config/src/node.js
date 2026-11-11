@@ -7,26 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { getSharedConfig } = require('@kbn/transpiler-config');
+const { getNodeRegisterParserConfig } = require('./node_register');
 
 /**
- * Get SWC configuration for Node.js server-side builds.
+ * Get SWC configuration for Node.js server-side builds. Must stay loadable
+ * without a runtime transpiler, so it cannot require `@kbn/transpiler-config`.
  *
- * @param {{ production?: boolean }} options
+ * @param {string} path
+ * @param {{ production?: boolean }} [options]
+ * @returns {import('@swc/core').Options}
  */
-function getNodeSwcConfig(options = {}) {
+function getNodeSwcConfig(path, options = {}) {
   const { production = false } = options;
-  const sharedConfig = getSharedConfig();
 
   return {
+    filename: path,
+    swcrc: false,
+    configFile: false,
     jsc: {
-      parser: {
-        syntax: 'typescript',
-        tsx: true,
-        decorators: true,
-      },
+      parser: getNodeRegisterParserConfig(path),
       transform: {
-        legacyDecorator: sharedConfig.typescript.decoratorsLegacy,
+        legacyDecorator: true,
         decoratorMetadata: true,
       },
       target: 'es2022',
@@ -37,7 +38,6 @@ function getNodeSwcConfig(options = {}) {
     inlineSourcesContent: !production,
     module: {
       type: 'commonjs',
-      ignoreDynamic: true,
     },
     minify: false,
   };

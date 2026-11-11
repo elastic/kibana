@@ -13,6 +13,9 @@ import { getConfigurationTelemetryData } from './queries/configuration';
 import { getConnectorsTelemetryData } from './queries/connectors';
 import { getPushedTelemetryData } from './queries/push';
 import { getUserActionsTelemetryData } from './queries/user_actions';
+import { getTemplatesTelemetryData } from './queries/templates';
+import { getFieldLibraryTelemetryData } from './queries/field_definitions';
+import { getWorkflowsTelemetryData } from './queries/workflows';
 import type { CasesTelemetry, CollectTelemetryDataParams } from './types';
 
 export const collectTelemetryData = async ({
@@ -29,6 +32,9 @@ export const collectTelemetryData = async ({
       pushes,
       configuration,
       casesSystemAction,
+      templates,
+      fieldLibrary,
+      workflows,
     ] = await Promise.all([
       getCasesTelemetryData({ savedObjectsClient, logger }),
       getUserActionsTelemetryData({ savedObjectsClient, logger }),
@@ -38,6 +44,23 @@ export const collectTelemetryData = async ({
       getPushedTelemetryData({ savedObjectsClient, logger }),
       getConfigurationTelemetryData({ savedObjectsClient, logger }),
       getCasesSystemActionData({ savedObjectsClient, logger }),
+      getTemplatesTelemetryData({ savedObjectsClient, logger }).catch((err) => {
+        logger.debug('Failed collecting Cases templates telemetry data');
+        logger.debug(err);
+        return undefined;
+      }),
+      getFieldLibraryTelemetryData({ savedObjectsClient, logger }).catch((err) => {
+        logger.debug('Failed collecting Cases field library telemetry data');
+        logger.debug(err);
+
+        return undefined;
+      }),
+      getWorkflowsTelemetryData({ savedObjectsClient, logger }).catch((err) => {
+        logger.debug('Failed collecting Cases workflows telemetry data');
+        logger.debug(err);
+
+        return undefined;
+      }),
     ]);
 
     return {
@@ -49,6 +72,9 @@ export const collectTelemetryData = async ({
       pushes,
       configuration,
       casesSystemAction,
+      ...(templates !== undefined ? { templates } : {}),
+      ...(fieldLibrary !== undefined ? { fieldLibrary } : {}),
+      ...(workflows !== undefined ? { workflows } : {}),
     };
   } catch (err) {
     logger.debug('Failed collecting Cases telemetry data');
@@ -57,7 +83,11 @@ export const collectTelemetryData = async ({
      * Return an empty object instead of an empty state to distinguish between
      * clusters that they do not use cases thus all counts will be zero
      * and clusters where an error occurred.
-     *  */
+     *
+     * The isolation above is one-directional: a templates, field library, or workflows failure
+     * costs only its own numbers, but a failure in any area collected here still discards the
+     * whole payload.
+     */
 
     return {};
   }

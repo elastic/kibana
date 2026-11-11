@@ -18,7 +18,7 @@ import { doesClusterExist } from '../../lib/does_cluster_exist';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 
 const paramsValidation = schema.object({
-  nameOrNames: schema.string(),
+  nameOrNames: schema.string({ maxLength: 10000 }),
 });
 
 type RouteParams = TypeOf<typeof paramsValidation>;

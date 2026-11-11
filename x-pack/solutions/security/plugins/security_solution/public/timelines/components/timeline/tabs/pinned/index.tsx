@@ -10,18 +10,13 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { ConnectedProps } from 'react-redux-v7';
 import { connect } from 'react-redux-v7';
 import deepEqual from 'fast-deep-equal';
-import type { EuiDataGridControlColumn } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { RunTimeMappings, TimelineItem } from '@kbn/timelines-plugin/common/search_strategy';
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
 import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
-import {
-  DocumentDetailsLeftPanelKey,
-  DocumentDetailsRightPanelKey,
-} from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { timelineSelectors } from '../../../../store';
 import type { Direction } from '../../../../../../common/search_strategy';
@@ -35,9 +30,7 @@ import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
 import type { TimelineTabCommonProps } from '../shared/types';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
-import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
-import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import {
   DocumentEventTypes,
   FLYOUT_ORIGIN,
@@ -83,7 +76,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   const [pageIndex, setPageIndex] = useState(0);
 
   const { telemetry } = useKibana().services;
-  const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openNotes } = useFlyoutApi();
 
   const { dataView } = useDataView(PageScope.timeline);
@@ -191,40 +183,13 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
    */
   const onUpdatePageIndex = useCallback((newPageIndex: number) => setPageIndex(newPageIndex), []);
 
-  const { openFlyout } = useExpandableFlyoutApi();
-
   const onToggleShowNotes = useCallback(
     (eventId?: string, eventData?: DataTableRecord & TimelineItem) => {
-      if (!eventId) {
+      if (!eventId || !eventData) {
         return;
       }
 
-      if (enableNewFlyout && eventData) {
-        openNotes({ hit: eventData, origin: FLYOUT_ORIGIN.TIMELINE });
-      } else {
-        const indexName = selectedPatterns.join(',');
-        openFlyout({
-          right: {
-            id: DocumentDetailsRightPanelKey,
-            params: {
-              id: eventId,
-              indexName,
-              scopeId: timelineId,
-            },
-          },
-          left: {
-            id: DocumentDetailsLeftPanelKey,
-            path: {
-              tab: LeftPanelNotesTab,
-            },
-            params: {
-              id: eventId,
-              indexName,
-              scopeId: timelineId,
-            },
-          },
-        });
-      }
+      openNotes({ hit: eventData, origin: FLYOUT_ORIGIN.TIMELINE });
       telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
         location: timelineId,
       });
@@ -233,10 +198,10 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
         panel: 'left',
       });
     },
-    [enableNewFlyout, openNotes, openFlyout, selectedPatterns, telemetry, timelineId]
+    [openNotes, telemetry, timelineId]
   );
 
-  const leadingControlColumns = useTimelineControlColumn({
+  const rowAdditionalLeadingControls = useTimelineControlColumn({
     timelineId,
     refetch,
     events,
@@ -262,7 +227,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       activeTab={TimelineTabs.pinned}
       updatedAt={refreshedAt}
       isTextBasedQuery={false}
-      leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
+      rowAdditionalLeadingControls={rowAdditionalLeadingControls}
       trailingControlColumns={rowDetailColumn}
       onUpdatePageIndex={onUpdatePageIndex}
     />
@@ -289,7 +254,8 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-const connector = connect(makeMapStateToProps);
+type StateProps = ReturnType<ReturnType<typeof makeMapStateToProps>>;
+const connector = connect<StateProps, {}, TimelineTabCommonProps, State>(makeMapStateToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 

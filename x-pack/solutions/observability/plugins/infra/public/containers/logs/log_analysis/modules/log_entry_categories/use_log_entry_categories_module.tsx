@@ -9,9 +9,11 @@ import createContainer from 'constate';
 import type { estypes } from '@elastic/elasticsearch';
 import { useMemo } from 'react';
 import type { IdFormat } from '../../../../../../common/http_api/latest';
+import { logEntryCategoriesJobType } from '../../../../../../common/log_analysis';
 import { useLogAnalysisModule } from '../../log_analysis_module';
 import { useLogAnalysisModuleConfiguration } from '../../log_analysis_module_configuration';
 import { useLogAnalysisModuleDefinition } from '../../log_analysis_module_definition';
+import { useLogAnalysisJobProjectRouting } from '../../use_log_analysis_job_project_routing';
 import type { ModuleSourceConfiguration } from '../../log_analysis_module_types';
 import { logEntryCategoriesModule } from './module_descriptor';
 import { useLogEntryCategoriesQuality } from './use_log_entry_categories_quality';
@@ -81,6 +83,12 @@ export const useLogEntryCategoriesModule = ({
     [logAnalysisModule.jobStatus]
   );
 
+  const projectRouting = useLogAnalysisJobProjectRouting(
+    logAnalysisModule.jobSummaries.find(
+      (jobSummary) => jobSummary.id === logAnalysisModule.jobIds[logEntryCategoriesJobType]
+    )
+  );
+
   return {
     ...logAnalysisModule,
     categoryQualityWarnings,
@@ -88,6 +96,7 @@ export const useLogEntryCategoriesModule = ({
     hasOutdatedJobConfigurations,
     hasOutdatedJobDefinitions,
     hasStoppedJobs,
+    projectRouting,
   };
 };
 

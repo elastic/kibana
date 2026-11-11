@@ -27,7 +27,7 @@ import { PrebootService } from '@kbn/core-preboot-server-internal';
 import { ContextService } from '@kbn/core-http-context-server-internal';
 import { HttpService } from '@kbn/core-http-server-internal';
 import { ElasticsearchService } from '@kbn/core-elasticsearch-server-internal';
-import { MetricsService } from '@kbn/core-metrics-server-internal';
+import { EventLoopWatchdogService, MetricsService } from '@kbn/core-metrics-server-internal';
 import { CapabilitiesService } from '@kbn/core-capabilities-server-internal';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import { SavedObjectsService } from '@kbn/core-saved-objects-server-internal';
@@ -40,6 +40,7 @@ import { UiSettingsService } from '@kbn/core-ui-settings-server-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-server-internal';
 import { UserSettingsService } from '@kbn/core-user-settings-server-internal';
 import { DataStreamsService } from '@kbn/core-data-streams-server-internal';
+import { PubSubService } from '@kbn/core-pubsub-server-internal';
 import {
   CoreRouteHandlerContext,
   PrebootCoreRouteHandlerContext,
@@ -60,12 +61,18 @@ import type { DiscoveredPlugins } from '@kbn/core-plugins-server-internal';
 import { PluginsService } from '@kbn/core-plugins-server-internal';
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { SecurityService } from '@kbn/core-security-server-internal';
+import {
+  HTTPAuthorizationHeader,
+  isUiamCredential,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+} from '@kbn/core-security-server';
 import { UserProfileService } from '@kbn/core-user-profile-server-internal';
 import { PricingService } from '@kbn/core-pricing-server-internal';
 import { CoreInjectionService } from '@kbn/core-di-server-internal';
 import { SpanStatusCode } from '@opentelemetry/api';
 import { withActiveSpan } from '@kbn/tracing-utils';
 import { UserStorageService } from '@kbn/core-user-storage-server-internal';
+import { setLazyConfigSchemaDisabled } from '@kbn/config-schema';
 import { setLazySchemaDisabled } from '@kbn/zod';
 import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
@@ -92,6 +99,7 @@ export class Server {
   private readonly environment: EnvironmentService;
   private readonly node: NodeService;
   private readonly metrics: MetricsService;
+  private readonly eventLoopWatchdog: EventLoopWatchdogService;
   private readonly httpRateLimiter: HttpRateLimiterService;
   private readonly httpResources: HttpResourcesService;
   private readonly status: StatusService;
@@ -111,6 +119,7 @@ export class Server {
   private readonly userProfile: UserProfileService;
   private readonly injection: CoreInjectionService;
   private readonly dataStreams: DataStreamsService;
+  private readonly pubsub: PubSubService;
   private readonly userStorage: UserStorageService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
@@ -121,6 +130,8 @@ export class Server {
   private discoveredPlugins?: DiscoveredPlugins;
   private readonly logger: LoggerFactory;
   private nodeRoles?: NodeRoles;
+  private nodeRoleNames?: readonly string[];
+  private readonly serviceVersion: string;
 
   private readonly uptimePerStep: Partial<UptimeSteps> = {};
 
@@ -131,12 +142,12 @@ export class Server {
   ) {
     const constructorStartUptime = performance.now();
 
-    const serviceVersion =
+    this.serviceVersion =
       env.packageInfo.buildFlavor === 'serverless'
         ? env.packageInfo.buildShaShort
         : env.packageInfo.version;
     this.loggingSystem.setGlobalContext({
-      service: { version: serviceVersion, type: 'kibana', state: 'initializing' },
+      service: { version: this.serviceVersion, type: 'kibana', state: 'initializing' },
     });
     this.logger = this.loggingSystem.asLoggerFactory();
     this.log = this.logger.get('server');
@@ -157,6 +168,7 @@ export class Server {
     this.environment = new EnvironmentService(core);
     this.node = new NodeService(core);
     this.metrics = new MetricsService(core);
+    this.eventLoopWatchdog = new EventLoopWatchdogService(core);
     this.status = new StatusService(core);
     this.coreApp = new CoreAppsService(core);
     this.httpRateLimiter = new HttpRateLimiterService();
@@ -175,6 +187,7 @@ export class Server {
     this.security = new SecurityService(core);
     this.userProfile = new UserProfileService(core);
     this.dataStreams = new DataStreamsService(core);
+    this.pubsub = new PubSubService(core);
     this.userStorage = new UserStorageService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
@@ -221,10 +234,11 @@ export class Server {
     });
     const nodePreboot = await this.node.preboot({ loggingSystem: this.loggingSystem });
     this.nodeRoles = nodePreboot.roles;
+    this.nodeRoleNames = nodePreboot.roleNames;
 
-    // Apply the `disableLazyZodSchemas` static override for `@kbn/zod` before plugin
-    // discovery so that `lazySchema` calls evaluated at plugin-module-load time observe it.
-    await this.#applyLazyZodSchemaOverride();
+    // Apply the `disableLazyZodSchemas` / `disableLazyConfigSchemas` static overrides before plugin
+    // discovery so that schemas evaluated at plugin-module-load time observe them.
+    await this.#applyLazySchemaOverrides();
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
     this.discoveredPlugins = await this.plugins.discover({
@@ -372,6 +386,7 @@ export class Server {
     });
 
     const dataStreamsSetup = await this.dataStreams.setup();
+    const pubsubSetup = this.pubsub.setup();
 
     const metricsSetup = await this.metrics.setup({
       http: httpSetup,
@@ -428,10 +443,20 @@ export class Server {
       loggingSystem: this.loggingSystem,
     });
 
+    if (!this.nodeRoleNames) {
+      throw new Error('Node roles are only known after preboot');
+    }
+    await this.eventLoopWatchdog.setup({
+      status: statusSetup,
+      nodeRoles: this.nodeRoleNames,
+      serviceVersion: this.serviceVersion,
+    });
+
     const customBrandingSetup = this.customBranding.setup();
     const userSettingsServiceSetup = this.userSettingsService.setup();
     const featureFlagsSetup = this.featureFlags.setup({
       http: httpSetup,
+      savedObjects: savedObjectsSetup,
     });
 
     const renderingSetup = await this.rendering.setup({
@@ -480,6 +505,7 @@ export class Server {
       userProfile: userProfileSetup,
       injection: injectionSetup,
       dataStreams: dataStreamsSetup,
+      pubsub: pubsubSetup,
       userStorage: userStorageSetup,
     };
 
@@ -554,7 +580,6 @@ export class Server {
     });
 
     const deprecationsStart = this.deprecations.start();
-    const userActivityStart = this.userActivity.start();
     const soStartSpan = startTransaction.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await withActiveSpan(
       'saved_objects.migration',
@@ -585,6 +610,10 @@ export class Server {
       }
     );
 
+    const userActivityStart = this.userActivity.start({
+      typeRegistry: savedObjectsStart.getTypeRegistry(),
+    });
+
     if (this.nodeRoles?.migrator === true) {
       this.log.info('Detected migrator node role; shutting down Kibana...');
       throw new CriticalError(
@@ -606,13 +635,36 @@ export class Server {
     httpStart.setRedactedSessionIdGetter((request) =>
       securityStart.authc.getRedactedSessionId(request)
     );
+    const uiam = securityStart.authc.apiKeys.uiam;
+    if (uiam) {
+      httpStart.setSelfClientUiamAttestationGetter((request, outboundAuthorization) => {
+        const credential = outboundAuthorization
+          ? HTTPAuthorizationHeader.parseFromValue(outboundAuthorization)
+          : null;
+        if (!credential || !isUiamCredential(credential)) {
+          return undefined;
+        }
+        if (uiam.isExternalApiKey(request)) {
+          return undefined;
+        }
+
+        return uiam.getInternalCallerAttestationHeaders(credential)[
+          UIAM_INTERNAL_CALLER_ATTESTATION_HEADER
+        ];
+      });
+      httpStart.setSelfClientOwnClientAuthenticationCheck((value) =>
+        uiam.isOwnClientAuthentication(value)
+      );
+    }
     const coreUsageDataStart = this.coreUsageData.start({
       elasticsearch: elasticsearchStart,
       savedObjects: savedObjectsStart,
       exposedConfigsToUsage: this.plugins.getExposedPluginConfigsToUsage(),
     });
 
-    const featureFlagsStart = this.featureFlags.start();
+    const featureFlagsStart = this.featureFlags.start({ savedObjects: savedObjectsStart });
+    this.eventLoopWatchdog.start({ featureFlags: featureFlagsStart });
+    const pubsubStart = this.pubsub.start();
 
     const pricingStart = this.pricing.start();
 
@@ -644,6 +696,7 @@ export class Server {
       pricing: pricingStart,
       injection: injectionStart,
       dataStreams: dataStreamsStart,
+      pubsub: pubsubStart,
       userStorage: userStorageStart,
     };
 
@@ -663,12 +716,14 @@ export class Server {
     this.httpRateLimiter.stop();
     await this.analytics.stop();
     await this.http.stop(); // HTTP server has to stop before savedObjects and ES clients are closed to be able to gracefully attempt to resolve any pending requests
+    this.pubsub.stop(); // Stop dispatching before consumers are torn down, so no handler starts against a stopped plugin
     await this.plugins.stop();
     await this.savedObjects.stop();
     await this.elasticsearch.stop();
     await this.uiSettings.stop();
     await this.rendering.stop();
     await this.metrics.stop();
+    await this.eventLoopWatchdog.stop();
     await this.status.stop();
     await this.logging.stop();
     await this.customBranding.stop();
@@ -704,14 +759,17 @@ export class Server {
     }
   }
 
-  async #applyLazyZodSchemaOverride() {
+  async #applyLazySchemaOverrides() {
     const featureFlagsCfg = await firstValueFrom(
       this.configService.atPath<{ overrides?: Record<string, unknown> }>('feature_flags')
     );
-    const override = featureFlagsCfg.overrides?.disableLazyZodSchemas;
+    const { disableLazyZodSchemas, disableLazyConfigSchemas } = featureFlagsCfg.overrides ?? {};
 
-    if (typeof override === 'boolean') {
-      setLazySchemaDisabled(override);
+    if (typeof disableLazyZodSchemas === 'boolean') {
+      setLazySchemaDisabled(disableLazyZodSchemas);
+    }
+    if (typeof disableLazyConfigSchemas === 'boolean') {
+      setLazyConfigSchemaDisabled(disableLazyConfigSchemas);
     }
   }
 

@@ -6,15 +6,14 @@
  */
 
 import type React from 'react';
-import type { EuiCommentProps, IconType, EuiButtonProps, EuiThemeComputed } from '@elastic/eui';
+import type { EuiCommentProps, EuiButtonProps, EuiThemeComputed } from '@elastic/eui';
 import type { z } from '@kbn/zod/v4';
 import type {
-  ExternalReferenceAttachmentPayload,
-  PersistableStateAttachmentPayload,
   UnifiedReferenceAttachmentPayload,
   UnifiedValueAttachmentPayload,
 } from '../../../common/types/domain';
 import type { CaseUI, CaseUser } from '../../containers/types';
+import type { CasesPermissions } from '../../../common/ui/types';
 import { AttachmentActionType } from '../../../common/utils/attachment_actions';
 
 export { AttachmentActionType };
@@ -36,46 +35,55 @@ interface ButtonAttachmentAction extends BaseAttachmentAction {
 
 interface CustomAttachmentAction extends BaseAttachmentAction {
   type: AttachmentActionType.CUSTOM;
-  render: () => JSX.Element;
+  render: () => JSX.Element | null;
 }
 
 export type AttachmentAction = ButtonAttachmentAction | CustomAttachmentAction;
 
-export interface AttachmentViewObject<Props = {}> {
-  timelineAvatar?: EuiCommentProps['timelineAvatar'];
+export interface AttachmentCreationActivity<Props = {}> {
   getActions?: (props: Props) => AttachmentAction[];
   event?: EuiCommentProps['event'];
   eventColor?: EuiCommentProps['eventColor'];
   children?: React.LazyExoticComponent<React.FC<Props>>;
   hideDefaultActions?: boolean;
-  deleteSuccessTitle?: string;
+  deleteSuccessToast?: string;
   className?: string;
   css?: EuiCommentProps['css'];
 }
 
-export interface AttachmentTabViewObject<Props = {}> {
+export interface AttachmentRemovalActivity<Props = {}> {
+  event?: EuiCommentProps['event'];
+}
+
+export interface AttachmentList<Props = {}> {
   children?: React.ComponentType<Props>;
 }
 
 export interface CommonAttachmentViewProps {
   savedObjectId: string;
   caseData: Pick<CaseUI, 'id' | 'title'>;
+  permissions: CasesPermissions;
 }
 
-/** Props for case-level attachment tabs (Alerts/Events/… table hosts). */
-export interface CommonAttachmentTabViewProps {
+/**
+ * Saved object ids, or ids that this list's type references (grouped attachments keep the rest).
+ * The confirmation counts ids, so use `savedObjectIds` only when each attachment references 1 id.
+ */
+export type AttachmentRemovalRequest = { savedObjectIds: string[] } | { attachmentIds: string[] };
+
+export interface AttachmentRemovalOptions {
+  /** Called once the attachments are removed, e.g. to clear a table selection. */
+  onSuccess?: () => void;
+}
+
+/** Props for case-level attachment lists (Alerts/Events/… table hosts). */
+export interface CommonAttachmentListViewProps {
   caseData: CaseUI;
   searchTerm?: string;
-}
-
-export interface ExternalReferenceAttachmentViewProps extends CommonAttachmentViewProps {
-  externalReferenceId: ExternalReferenceAttachmentPayload['externalReferenceId'];
-  externalReferenceMetadata: ExternalReferenceAttachmentPayload['externalReferenceMetadata'];
-}
-
-export interface PersistableStateAttachmentViewProps extends CommonAttachmentViewProps {
-  persistableStateAttachmentTypeId: PersistableStateAttachmentPayload['persistableStateAttachmentTypeId'];
-  persistableStateAttachmentState: PersistableStateAttachmentPayload['persistableStateAttachmentState'];
+  /** Asks the user to confirm, removes the attachments, and refreshes the case. */
+  onRemove?: (request: AttachmentRemovalRequest, options?: AttachmentRemovalOptions) => void;
+  /** True while a removal is in progress. `onRemove` is ignored until it finishes. */
+  isRemoving?: boolean;
 }
 
 export interface RowContext {
@@ -96,6 +104,7 @@ interface UnifiedAttachmentViewPropsBase extends CommonAttachmentViewProps {
   createdBy: CaseUser;
   version: string;
   rowContext: RowContext;
+  isDeleted?: boolean;
 }
 
 /** Reference attachments point at another entity and may include a cached snapshot. */
@@ -126,15 +135,69 @@ export interface UnifiedHybridAttachmentViewProps<
   data?: Data;
 }
 
+export interface DocumentActionProps {
+  /** Scoping id for DOM ids and test subjects — the id of the hosting activity row. */
+  id: string;
+  /** ES `_id` of the target document. */
+  documentId: string;
+  /** ES index the document lives in. Absent when the origin was never enriched. */
+  index?: string;
+}
+
+export interface WorkflowActivityLabelProps {
+  workflowName: React.ReactNode;
+  count?: number;
+}
+
+export interface AttachmentWorkflow {
+  getActivityLabel: (props: WorkflowActivityLabelProps) => React.ReactNode;
+}
+
+export interface CountProps {
+  count: number;
+}
+
+export interface RelatedRemovalOptions {
+  /** Whether the related attachments leave the case too. */
+  includeRelated: boolean;
+}
+
+export interface RelatedRemovalChoice {
+  /** Which related attachments can leave the case with the removed ones. */
+  description: string;
+  /** Label of the button that removes only the selected attachments. */
+  removeOnlyLabel: string;
+  /** Label of the button that also removes the related attachments. */
+  removeWithRelatedLabel: string;
+}
+
 export interface AttachmentType<Props> {
   id: string;
-  icon: IconType;
-  displayName: string;
-  getAttachmentViewObject: (props: Props) => AttachmentViewObject<Props>;
-  getAttachmentRemovalObject?: (props: Props) => Pick<AttachmentViewObject<Props>, 'event'>;
-  getAttachmentTabViewObject?: (
-    props?: CommonAttachmentTabViewProps
-  ) => AttachmentTabViewObject<CommonAttachmentTabViewProps>;
+  getIcon: (props: Props) => EuiCommentProps['timelineAvatar'];
+  getLabel: () => string;
+  getCreationActivity: (props: Props) => AttachmentCreationActivity<Props>;
+  getRemovalActivity?: (props: Props) => AttachmentRemovalActivity<Props>;
+  /** Counted noun for `count` attachments of this type, e.g. "2 files". Lowercase except brand names. */
+  getCountLabel?: (props: CountProps) => string;
+  /**
+   * Lets the removal prompt offer to keep the attachments the server would remove with `count`
+   * attachments of this type, e.g. the alerts an attack brought to the case.
+   */
+  getRelatedRemoval?: (props: CountProps) => RelatedRemovalChoice;
+  getAttachmentList?: (
+    props?: CommonAttachmentListViewProps
+  ) => AttachmentList<CommonAttachmentListViewProps>;
+  /**
+   * Returns a control that opens the ES document this attachment type points at, for
+   * activity rows that reference the document but are not the attachment's own row
+   * (e.g. a workflow run recorded against `cases.attachment`).
+   *
+   * Return `null` when the target cannot be resolved (e.g. no `index`). Types whose
+   * documents have no flyout should omit this method entirely.
+   */
+  getDocumentAction?: (props: DocumentActionProps) => AttachmentAction | null;
+  /** Enables this registered type to render workflow activity labels. */
+  workflow?: AttachmentWorkflow;
 }
 
 interface UnifiedAttachmentSchema {
@@ -146,9 +209,6 @@ interface UnifiedAttachmentSchema {
    */
   workflowSchema?: z.ZodObject | false;
 }
-
-export type ExternalReferenceAttachmentType = AttachmentType<ExternalReferenceAttachmentViewProps>;
-export type PersistableStateAttachmentType = AttachmentType<PersistableStateAttachmentViewProps>;
 
 type UnifiedAttachmentRegistration<Props> = AttachmentType<Props> & UnifiedAttachmentSchema;
 export type UnifiedReferenceAttachmentType<
@@ -173,11 +233,5 @@ export type RegisteredUnifiedAttachmentType =
   | UnifiedHybridAttachmentType;
 
 export interface AttachmentFramework {
-  registerExternalReference: (
-    externalReferenceAttachmentType: ExternalReferenceAttachmentType
-  ) => void;
-  registerPersistableState: (
-    persistableStateAttachmentType: PersistableStateAttachmentType
-  ) => void;
-  registerUnified: (unifiedAttachmentType: RegisteredUnifiedAttachmentType) => void;
+  registerAttachment: (attachmentType: RegisteredUnifiedAttachmentType) => void;
 }

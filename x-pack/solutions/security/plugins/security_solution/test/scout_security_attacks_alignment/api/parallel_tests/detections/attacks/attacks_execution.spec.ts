@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout-security';
+import { PUBLIC_API_HEADERS, spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 
 spaceTest.describe(
@@ -43,7 +43,7 @@ spaceTest.describe(
         const response = await kbnClient.request({
           method: 'POST',
           path: `/s/${scoutSpace.id}/api/attack_discovery/_generate`,
-          headers: { 'kbn-xsrf': 'true', 'elastic-api-version': '2023-10-31' },
+          headers: { 'kbn-xsrf': 'true', ...PUBLIC_API_HEADERS },
           body: payload,
           ignoreErrors: [400, 500],
         });
@@ -70,7 +70,7 @@ spaceTest.describe(
         const enableResponse = await kbnClient.request({
           method: 'POST',
           path: `/s/${scoutSpace.id}/api/attack_discovery/schedules/${scheduleId}/_enable`,
-          headers: { 'kbn-xsrf': 'true', 'elastic-api-version': '2023-10-31' },
+          headers: { 'kbn-xsrf': 'true', ...PUBLIC_API_HEADERS },
         });
         expect(enableResponse.status).toBe(200);
 
@@ -106,7 +106,7 @@ spaceTest.describe(
           await kbnClient.request({
             method: 'POST',
             path: `/s/${scoutSpace.id}/api/attack_discovery/schedules/${scheduleId}/_disable`,
-            headers: { 'kbn-xsrf': 'true', 'elastic-api-version': '2023-10-31' },
+            headers: { 'kbn-xsrf': 'true', ...PUBLIC_API_HEADERS },
           });
         }
       }

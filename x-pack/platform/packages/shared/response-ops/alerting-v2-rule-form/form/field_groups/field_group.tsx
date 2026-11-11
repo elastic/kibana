@@ -132,7 +132,7 @@ export const FieldGroup = (props: FieldGroupProps) => {
                 disableScreenReaderOutput
               >
                 <EuiButtonIcon
-                  iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+                  iconType={isOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
                   onClick={onToggle}
                   aria-label={i18n.translate(
                     'xpack.alertingV2.ruleForm.fieldGroup.toggleButtonLabel',

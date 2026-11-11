@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/core-http-server-mocks'
   - '@kbn/core-logging-server-mocks'
+  - '@kbn/evals-common'
 tags:
   - plugin
   - prod
@@ -38,6 +39,4 @@ fileGroups:
   src:
     - server/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

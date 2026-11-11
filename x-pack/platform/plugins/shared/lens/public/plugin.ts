@@ -51,6 +51,7 @@ import {
   type EditorFrameSetup,
   type LensDocument,
   type LensByRefSerializedState,
+  type DefaultVisualizationOverrides,
   LENS_EMBEDDABLE_TYPE,
 } from '@kbn/lens-common';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
@@ -61,7 +62,6 @@ import type { EventAnnotationPluginStart } from '@kbn/event-annotation-plugin/pu
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -172,7 +172,6 @@ export interface LensPluginStartDependencies {
   charts: ChartsPluginStart;
   eventAnnotation: EventAnnotationPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
-  presentationUtil: PresentationUtilPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   dataViewEditor: DataViewEditorStart;
   inspector: InspectorStartContract;
@@ -286,7 +285,8 @@ export type LensSuggestionsApi = (
   dataViews: DataView,
   excludedVisualizations?: string[],
   preferredChartType?: ChartType,
-  preferredVisAttributes?: TypedLensByValueInput['attributes']
+  preferredVisAttributes?: TypedLensByValueInput['attributes'],
+  defaultVisualizationOverrides?: DefaultVisualizationOverrides
 ) => Suggestion[] | undefined;
 
 export class LensPlugin {
@@ -799,7 +799,8 @@ export class LensPlugin {
             dataView,
             excludedVisualizations,
             preferredChartType,
-            preferredVisAttributes
+            preferredVisAttributes,
+            defaultVisualizationOverrides
           ) => {
             return suggestionsApi({
               datasourceMap,
@@ -809,6 +810,7 @@ export class LensPlugin {
               excludedVisualizations,
               preferredChartType,
               preferredVisAttributes,
+              defaultVisualizationOverrides,
             });
           },
         };

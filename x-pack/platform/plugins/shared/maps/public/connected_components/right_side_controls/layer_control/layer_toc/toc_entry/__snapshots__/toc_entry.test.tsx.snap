@@ -36,28 +36,29 @@ exports[`TOCEntry is rendered 1`] = `
       <EuiToolTip
         content="Hide layer"
         disableScreenReaderOutput={true}
+        key="toggleVisiblity"
       >
         <EuiButtonIcon
           aria-label="Hide layer"
           iconType="eyeSlash"
-          key="toggleVisiblity"
           onClick={[Function]}
         />
       </EuiToolTip>
       <EuiToolTip
         content="Fit to data"
         disableScreenReaderOutput={true}
+        key="fitToBounds"
       >
         <EuiButtonIcon
           aria-label="Fit to data"
           iconType="maximize"
-          key="fitToBounds"
           onClick={[Function]}
         />
       </EuiToolTip>
       <EuiToolTip
         content="Edit layer settings"
         disableScreenReaderOutput={true}
+        key="settings"
       >
         <EuiButtonIcon
           aria-label="Edit layer settings"
@@ -70,12 +71,12 @@ exports[`TOCEntry is rendered 1`] = `
       <EuiToolTip
         content="Reorder layer"
         disableScreenReaderOutput={true}
+        key="reorder"
       >
         <EuiButtonIcon
           aria-label="Reorder layer"
           className="mapTocEntry__grab"
           iconType="dragVertical"
-          key="reorder"
         />
       </EuiToolTip>
     </div>
@@ -140,28 +141,29 @@ exports[`TOCEntry props Should indent child layer 1`] = `
       <EuiToolTip
         content="Hide layer"
         disableScreenReaderOutput={true}
+        key="toggleVisiblity"
       >
         <EuiButtonIcon
           aria-label="Hide layer"
           iconType="eyeSlash"
-          key="toggleVisiblity"
           onClick={[Function]}
         />
       </EuiToolTip>
       <EuiToolTip
         content="Fit to data"
         disableScreenReaderOutput={true}
+        key="fitToBounds"
       >
         <EuiButtonIcon
           aria-label="Fit to data"
           iconType="maximize"
-          key="fitToBounds"
           onClick={[Function]}
         />
       </EuiToolTip>
       <EuiToolTip
         content="Edit layer settings"
         disableScreenReaderOutput={true}
+        key="settings"
       >
         <EuiButtonIcon
           aria-label="Edit layer settings"
@@ -174,12 +176,12 @@ exports[`TOCEntry props Should indent child layer 1`] = `
       <EuiToolTip
         content="Reorder layer"
         disableScreenReaderOutput={true}
+        key="reorder"
       >
         <EuiButtonIcon
           aria-label="Reorder layer"
           className="mapTocEntry__grab"
           iconType="dragVertical"
-          key="reorder"
         />
       </EuiToolTip>
     </div>
@@ -240,28 +242,29 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
       <EuiToolTip
         content="Hide layer"
         disableScreenReaderOutput={true}
+        key="toggleVisiblity"
       >
         <EuiButtonIcon
           aria-label="Hide layer"
           iconType="eyeSlash"
-          key="toggleVisiblity"
           onClick={[Function]}
         />
       </EuiToolTip>
       <EuiToolTip
         content="Fit to data"
         disableScreenReaderOutput={true}
+        key="fitToBounds"
       >
         <EuiButtonIcon
           aria-label="Fit to data"
           iconType="maximize"
-          key="fitToBounds"
           onClick={[Function]}
         />
       </EuiToolTip>
       <EuiToolTip
         content="Edit layer settings"
         disableScreenReaderOutput={true}
+        key="settings"
       >
         <EuiButtonIcon
           aria-label="Edit layer settings"
@@ -274,12 +277,12 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
       <EuiToolTip
         content="Reorder layer"
         disableScreenReaderOutput={true}
+        key="reorder"
       >
         <EuiButtonIcon
           aria-label="Reorder layer"
           className="mapTocEntry__grab"
           iconType="dragVertical"
-          key="reorder"
         />
       </EuiToolTip>
     </div>
@@ -340,28 +343,29 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
       <EuiToolTip
         content="Hide layer"
         disableScreenReaderOutput={true}
+        key="toggleVisiblity"
       >
         <EuiButtonIcon
           aria-label="Hide layer"
           iconType="eyeSlash"
-          key="toggleVisiblity"
           onClick={[Function]}
         />
       </EuiToolTip>
       <EuiToolTip
         content="Fit to data"
         disableScreenReaderOutput={true}
+        key="fitToBounds"
       >
         <EuiButtonIcon
           aria-label="Fit to data"
           iconType="maximize"
-          key="fitToBounds"
           onClick={[Function]}
         />
       </EuiToolTip>
       <EuiToolTip
         content="Edit layer settings"
         disableScreenReaderOutput={true}
+        key="settings"
       >
         <EuiButtonIcon
           aria-label="Edit layer settings"
@@ -374,12 +378,12 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
       <EuiToolTip
         content="Reorder layer"
         disableScreenReaderOutput={true}
+        key="reorder"
       >
         <EuiButtonIcon
           aria-label="Reorder layer"
           className="mapTocEntry__grab"
           iconType="dragVertical"
-          key="reorder"
         />
       </EuiToolTip>
     </div>
@@ -440,22 +444,22 @@ exports[`TOCEntry props isReadOnly 1`] = `
       <EuiToolTip
         content="Hide layer"
         disableScreenReaderOutput={true}
+        key="toggleVisiblity"
       >
         <EuiButtonIcon
           aria-label="Hide layer"
           iconType="eyeSlash"
-          key="toggleVisiblity"
           onClick={[Function]}
         />
       </EuiToolTip>
       <EuiToolTip
         content="Fit to data"
         disableScreenReaderOutput={true}
+        key="fitToBounds"
       >
         <EuiButtonIcon
           aria-label="Fit to data"
           iconType="maximize"
-          key="fitToBounds"
           onClick={[Function]}
         />
       </EuiToolTip>
@@ -517,28 +521,29 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
       <EuiToolTip
         content="Hide layer"
         disableScreenReaderOutput={true}
+        key="toggleVisiblity"
       >
         <EuiButtonIcon
           aria-label="Hide layer"
           iconType="eyeSlash"
-          key="toggleVisiblity"
           onClick={[Function]}
         />
       </EuiToolTip>
       <EuiToolTip
         content="Fit to data"
         disableScreenReaderOutput={true}
+        key="fitToBounds"
       >
         <EuiButtonIcon
           aria-label="Fit to data"
           iconType="maximize"
-          key="fitToBounds"
           onClick={[Function]}
         />
       </EuiToolTip>
       <EuiToolTip
         content="Edit layer settings"
         disableScreenReaderOutput={true}
+        key="settings"
       >
         <EuiButtonIcon
           aria-label="Edit layer settings"
@@ -551,12 +556,12 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
       <EuiToolTip
         content="Reorder layer"
         disableScreenReaderOutput={true}
+        key="reorder"
       >
         <EuiButtonIcon
           aria-label="Reorder layer"
           className="mapTocEntry__grab"
           iconType="dragVertical"
-          key="reorder"
         />
       </EuiToolTip>
     </div>

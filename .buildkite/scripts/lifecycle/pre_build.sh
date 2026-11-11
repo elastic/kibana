@@ -4,19 +4,36 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
+GCS_BASE_URL="https://storage.googleapis.com"
+ES_SNAPSHOTS_DAILY_BUCKET="kibana-ci-es-snapshots-daily"
+SNAPSHOT_ID_PATTERN="[A-Za-z0-9_-]+"
+
 if [[ "${KIBANA_GITHUB_BUILD_COMMIT_STATUS_ENABLED:-}" != "true" ]] && [[ "${ELASTIC_GITHUB_BUILD_COMMIT_STATUS_ENABLED:-}" != "true" ]]; then
   "$(dirname "${0}")/commit_status_start.sh"
 fi
 
 
-ts-node "$(dirname "${0}")/ci_stats_start.ts"
+node "$(dirname "${0}")/ci_stats_start.ts"
 
 # We resolve the latest manifest URL at the beginning of the build to ensure that all steps in the build will use the same manifest
 # Otherwise, the manifest could change if a step is running around the time that a new one is promoted
 if [[ ! "${ES_SNAPSHOT_MANIFEST:-}" ]]; then
-  BUCKET=$(curl -s "https://storage.googleapis.com/kibana-ci-es-snapshots-daily/$(cat package.json | jq -r .version)/manifest-latest-verified.json" | jq -r .bucket)
-  ES_SNAPSHOT_MANIFEST_DEFAULT="https://storage.googleapis.com/$BUCKET/manifest.json"
+  KIBANA_VERSION=$(cat package.json | jq -r .version)
+  BUCKET=$(curl -s "$GCS_BASE_URL/$ES_SNAPSHOTS_DAILY_BUCKET/$KIBANA_VERSION/manifest-latest-verified.json" | jq -r .bucket)
+  if [[ ! "$BUCKET" =~ ^"$ES_SNAPSHOTS_DAILY_BUCKET/$KIBANA_VERSION/archives/"$SNAPSHOT_ID_PATTERN$ ]]; then
+    echo "Unexpected ES snapshot manifest bucket: $BUCKET"
+    exit 1
+  fi
+  ES_SNAPSHOT_MANIFEST_DEFAULT="$GCS_BASE_URL/$BUCKET/manifest.json"
   buildkite-agent meta-data set ES_SNAPSHOT_MANIFEST_DEFAULT "$ES_SNAPSHOT_MANIFEST_DEFAULT"
+fi
+
+# Non-fatal: test steps run in full when the selection is missing.
+# `timeout` hard-stops hung requests and git fetches that the script's own 2m timeout can't interrupt.
+if [[ "${BUILDKITE_PIPELINE_SLUG:-}" == "kibana-on-merge" && "${ON_MERGE_SELECTIVE_MODE:-off}" == "shadow" ]]; then
+  ES_SNAPSHOT_MANIFEST_DEFAULT="${ES_SNAPSHOT_MANIFEST_DEFAULT:-}" \
+    timeout 3m node "$(dirname "${0}")/resolve_on_merge_selection.ts" ||
+    echo "Failed to resolve on-merge selection; test steps will run in full" >&2
 fi
 
 if [[ "${KIBANA_BUILD_ID:-}" && "${KIBANA_REUSABLE_BUILD_JOB_URL:-}" ]]; then

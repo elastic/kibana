@@ -26,8 +26,6 @@ dependsOn:
   - '@kbn/core-custom-branding-browser'
   - '@kbn/core-saved-objects-utils-server'
   - '@kbn/react-kibana-context-theme'
-  - '@kbn/core-analytics-browser'
-  - '@kbn/shared-ux-error-boundary'
   - '@kbn/core-chrome-browser'
   - '@kbn/shared-ux-prompt-not-found'
   - '@kbn/react-kibana-mount'
@@ -39,6 +37,7 @@ dependsOn:
   - '@kbn/licensing-plugin'
   - '@kbn/core-rendering-browser'
   - '@kbn/std'
+  - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/core-test-helpers-test-utils'
   - '@kbn/core-logging-server-mocks'
   - '@kbn/core-http-router-server-mocks'
@@ -46,12 +45,15 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/scout'
   - '@kbn/ui-callout'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -59,6 +61,4 @@ fileGroups:
     - server/**/*
     - test/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

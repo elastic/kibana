@@ -49,6 +49,7 @@ export function createMultiJudgeEvaluator(config: {
   return {
     name: 'multi-judge',
     kind: hasLlmJudge ? 'LLM' : 'CODE',
+    direction: 'maximize',
     evaluate: async (params) => {
       const results = await Promise.allSettled(judges.map((judge) => judge.evaluate(params)));
 

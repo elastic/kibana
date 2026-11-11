@@ -12,8 +12,8 @@ import { HostMacosOtelPage } from '../macos_otel_page';
 import { buildFetchError, renderWithHostPageProviders } from './test_helpers';
 
 jest.mock('../../../quickstart_flows/otel_logs/steps', () => ({
-  OtelLogsInstallStep: ({ os, ingestionMode }: { os: string; ingestionMode: string }) => (
-    <div data-test-subj="otelInstallStep" data-os={os} data-ingestion-mode={ingestionMode} />
+  OtelLogsInstallStep: ({ os }: { os: string }) => (
+    <div data-test-subj="otelInstallStep" data-os={os} />
   ),
   OtelLogsStartStep: () => <div data-test-subj="otelStartStep" />,
   OtelLogsVisualizeStep: () => <div data-test-subj="otelVisualizeStep" />,
@@ -105,17 +105,6 @@ jest.mock('../../../shared/use_managed_otlp_service_availability', () => ({
   useManagedOtlpServiceAvailability: () => false,
 }));
 
-jest.mock('../../../../hooks/use_wired_streams_status', () => ({
-  useWiredStreamsStatus: () => ({
-    isEnabled: false,
-    isLoading: false,
-    isEnabling: false,
-    error: null,
-    enableWiredStreams: jest.fn(),
-    refetch: jest.fn(),
-  }),
-}));
-
 const renderMacosOtelPage = (initialEntries: string[] = ['/host/macos']) =>
   renderWithHostPageProviders(<HostMacosOtelPage />, { initialEntries });
 
@@ -143,15 +132,13 @@ describe('HostMacosOtelPage', () => {
     expect(screen.getByTestId('otelInstallStep')).toBeInTheDocument();
   });
 
-  it('uses wired ingestion mode when the URL says so', () => {
-    renderMacosOtelPage(['/host/macos?ingestion=wired']);
-    expect(screen.getByTestId('otelInstallStep').getAttribute('data-ingestion-mode')).toBe('wired');
-  });
-
-  it('wires the pre-existing-data probe with the otel_host flow id', () => {
+  it('scopes the pre-existing-data probe to darwin so other hosts cannot end the session', () => {
     usePreExistingDataCheckMock.mockClear();
     renderMacosOtelPage();
-    expect(usePreExistingDataCheckMock).toHaveBeenCalledWith({ flow: 'otel_host' });
+    expect(usePreExistingDataCheckMock).toHaveBeenCalledWith({
+      flow: 'otel_host',
+      osType: 'darwin',
+    });
   });
 
   it('reports onboardingFlowType=otel_logs to the window-blur and time-window detection hooks', () => {
@@ -177,11 +164,14 @@ describe('HostMacosOtelPage', () => {
     );
   });
 
-  it('drops the osType pin under wired streams since the streams pipeline does not project host.os.type onto docs', () => {
+  it('keeps the darwin osType pin even for a stale wired ingestion URL, since the param is no longer read', () => {
     useTimeWindowDataDetectionMock.mockClear();
     renderMacosOtelPage(['/host/macos?ingestion=wired']);
     expect(useTimeWindowDataDetectionMock).toHaveBeenCalledWith(
-      expect.objectContaining({ extraQueryParams: undefined })
+      expect.objectContaining({
+        extraQueryParams: { osType: 'darwin' },
+        keepExtraParamsOnFallback: true,
+      })
     );
   });
 

@@ -8,7 +8,6 @@
  */
 
 import {
-  DiscoverApp,
   extendPlaywrightPage,
   FilterBar,
   type KibanaUrl,
@@ -17,12 +16,12 @@ import {
   UnifiedTabs,
 } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../fixtures';
+import { spaceTest, DiscoverPage } from '../fixtures';
 
 const openSharedPage = async (page: ScoutPage, sharedUrl: string, kbnUrl: KibanaUrl) => {
   const sharedPage = extendPlaywrightPage({ page: await page.context().newPage(), kbnUrl });
   const pageObjects = {
-    discover: new DiscoverApp(sharedPage),
+    discover: new DiscoverPage(sharedPage),
     filterBar: new FilterBar(sharedPage),
     queryBar: new QueryBar(sharedPage),
     unifiedTabs: new UnifiedTabs(sharedPage),
@@ -35,6 +34,8 @@ const openSharedPage = async (page: ScoutPage, sharedUrl: string, kbnUrl: Kibana
 };
 
 spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }, () => {
+  spaceTest.setTimeout(90_000);
+
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
   });

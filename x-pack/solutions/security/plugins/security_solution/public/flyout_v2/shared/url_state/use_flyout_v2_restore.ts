@@ -10,17 +10,18 @@ import { useHistory } from 'react-router-dom';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
-import { noop } from 'lodash/fp';
+import { isEqual, noop, omit } from 'lodash/fp';
 import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import type { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import type { ManagedUserHit } from '../../../../common/search_strategy/security_solution/users/managed_details';
-import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
+import type { RiskScoreLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { FLYOUT_ORIGIN, type FlyoutOrigin } from '../../../common/lib/telemetry';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { PageScope } from '../../../data_view_manager/constants';
 import type { FlyoutApi } from '../../use_flyout_api';
 import { useFlyoutApi } from '../../use_flyout_api';
+import { getAttackAlertIds } from '../../attack/utils/get_attack_alert_ids';
 import type {
   AnalyzerDescriptor,
   AttackCorrelationsDescriptor,
@@ -39,6 +40,7 @@ import type {
   DocumentThreatIntelligenceDescriptor,
   EntityAlertsInsightsDescriptor,
   EntityAnomalyInsightsDescriptor,
+  EntityDescriptorMode,
   EntityEntraInsightsDescriptor,
   EntityGraphViewDescriptor,
   EntityMisconfigurationInsightsDescriptor,
@@ -59,7 +61,24 @@ import type {
   UserDescriptor,
 } from './flyout_v2_url_param';
 import { decodeFlyoutV2UrlParam } from './flyout_v2_url_param';
-import { subscribeToFlyoutV2Navigation } from './flyout_v2_navigation';
+import { consumeFlyoutV2UrlWrite } from './flyout_v2_url_write_guard';
+import { DEFAULT_PREVIEW_INDEX } from '../../../../common/constants';
+
+/**
+ * Compares two flyoutV2 stacks ignoring `origin` (telemetry-only) so a writer rewrite of the
+ * same logical chain does not look like a new deep link.
+ */
+const areSameFlyoutV2Descriptors = (
+  a: FlyoutV2UrlParamValue | null | undefined,
+  b: FlyoutV2UrlParamValue | null | undefined
+): boolean => {
+  if (a === b) return true;
+  if (!a?.length || !b?.length || a.length !== b.length) return false;
+
+  return a.every((descriptor, index) =>
+    isEqual(omit('origin', descriptor), omit('origin', b[index]))
+  );
+};
 
 // ---------------------------------------------------------------------------
 // Constants — which descriptor kinds require an async data fetch
@@ -89,11 +108,24 @@ const NEEDS_ATTACK_HIT = new Set<string>(['attackCorrelations', 'attackEntities'
 // Per-kind restorer helpers (pure functions, not hooks)
 // ---------------------------------------------------------------------------
 
-interface RestoreContext {
+export interface RestoreContext {
   docHit?: DataTableRecord;
   attackHit?: DataTableRecord;
   iocIndicator?: Indicator;
 }
+
+/**
+ * Rebuilds an `Indicator` from its fetched record. Carries `_index` through (the `Indicator` type
+ * only declares `_id`/`fields`, but the IOC opener reads `_index` off the raw hit to re-persist the
+ * URL descriptor). Without it, re-opening on restore would rewrite the descriptor with an empty
+ * index and a second refresh would no longer restore the flyout.
+ */
+export const recordToIndicator = (record: DataTableRecord): Indicator =>
+  ({
+    _id: record.raw._id ?? '',
+    _index: record.raw._index,
+    fields: (record.raw.fields ?? {}) as Indicator['fields'],
+  } as Indicator);
 
 /**
  * Builds the tool-header "show entity" callback for a restored entity tool flyout.
@@ -112,23 +144,43 @@ const buildShowEntityCallback = (
     entityName,
     entityId,
     scopeId,
-  }: { entityType?: string; entityName: string; entityId?: string; scopeId?: string }
+    mode,
+  }: {
+    entityType?: string;
+    entityName: string;
+    entityId?: string;
+    scopeId?: string;
+    mode?: EntityDescriptorMode;
+  }
 ): (() => void) => {
   return () => {
     switch (entityType) {
       case 'user':
-        api.openUserFlyoutAsChild({ userName: entityName, entityId, scopeId, title: entityName });
+        api.openUserFlyoutAsChild({
+          userName: entityName,
+          entityId,
+          scopeId,
+          mode,
+          title: entityName,
+        });
         break;
       case 'service':
         api.openServiceFlyoutAsChild({
           serviceName: entityName,
           entityId,
           scopeId,
+          mode,
           title: entityName,
         });
         break;
       case 'host':
-        api.openHostFlyoutAsChild({ hostName: entityName, entityId, scopeId, title: entityName });
+        api.openHostFlyoutAsChild({
+          hostName: entityName,
+          entityId,
+          scopeId,
+          mode,
+          title: entityName,
+        });
         break;
       default:
         // Generic / unknown entity type: only openable when we have the canonical entity id.
@@ -163,12 +215,20 @@ export const openDescriptorAsStart = (
     // --- Document main flyouts ---
     case 'document': {
       const { documentId, indexName } = descriptor as DocumentDescriptor;
-      api.openDocumentFlyoutFromIndex({ documentId, indexName, ...originParams });
+      api.openDocumentFlyoutFromIndex({
+        documentId,
+        indexName,
+        ...originParams,
+      });
       break;
     }
     case 'documentFromPattern': {
       const { documentId, indexName } = descriptor as DocumentFromPatternDescriptor;
-      api.openDocumentFlyoutFromPattern({ documentId, indexName, ...originParams });
+      api.openDocumentFlyoutFromPattern({
+        documentId,
+        indexName,
+        ...originParams,
+      });
       break;
     }
 
@@ -223,7 +283,6 @@ export const openDescriptorAsStart = (
         api.openDocumentCorrelations({
           hit: ctx.docHit,
           scopeId: d.scopeId,
-          isRulePreview: d.isRulePreview,
           ...originParams,
           // Provide a default onShowAlert that opens the alert as a child flyout.
           onShowAlert: (alertId, indexName) =>
@@ -325,13 +384,21 @@ export const openDescriptorAsStart = (
     // --- Attack main flyout + tools ---
     case 'attack': {
       const { attackId, indexName } = descriptor as AttackDescriptor;
-      api.openAttackFlyout({ attackId, indexName, ...originParams });
+      api.openAttackFlyout({
+        attackId,
+        indexName,
+        ...originParams,
+      });
       break;
     }
     case 'attackCorrelations': {
       const d = descriptor as AttackCorrelationsDescriptor;
       if (ctx.attackHit) {
-        api.openAttackCorrelations({ hit: ctx.attackHit, alertIds: d.alertIds, ...originParams });
+        api.openAttackCorrelations({
+          hit: ctx.attackHit,
+          alertIds: getAttackAlertIds(ctx.attackHit),
+          ...originParams,
+        });
       } else {
         api.openAttackFlyout({
           attackId: d.attackId,
@@ -344,7 +411,11 @@ export const openDescriptorAsStart = (
     case 'attackEntities': {
       const d = descriptor as AttackEntitiesDescriptor;
       if (ctx.attackHit) {
-        api.openAttackEntities({ hit: ctx.attackHit, alertIds: d.alertIds, ...originParams });
+        api.openAttackEntities({
+          hit: ctx.attackHit,
+          alertIds: getAttackAlertIds(ctx.attackHit),
+          ...originParams,
+        });
       } else {
         api.openAttackFlyout({
           attackId: d.attackId,
@@ -357,18 +428,18 @@ export const openDescriptorAsStart = (
 
     // --- Entity main flyouts ---
     case 'host': {
-      const { hostName, entityId, scopeId } = descriptor as HostDescriptor;
-      api.openHostFlyout({ hostName, entityId, scopeId, ...originParams });
+      const { hostName, entityId, scopeId, mode } = descriptor as HostDescriptor;
+      api.openHostFlyout({ hostName, entityId, scopeId, mode, ...originParams });
       break;
     }
     case 'user': {
-      const { userName, entityId, scopeId } = descriptor as UserDescriptor;
-      api.openUserFlyout({ userName, entityId, scopeId, ...originParams });
+      const { userName, entityId, scopeId, mode } = descriptor as UserDescriptor;
+      api.openUserFlyout({ userName, entityId, scopeId, mode, ...originParams });
       break;
     }
     case 'service': {
-      const { serviceName, entityId, scopeId } = descriptor as ServiceDescriptor;
-      api.openServiceFlyout({ serviceName, entityId, scopeId, ...originParams });
+      const { serviceName, entityId, scopeId, mode } = descriptor as ServiceDescriptor;
+      api.openServiceFlyout({ serviceName, entityId, scopeId, mode, ...originParams });
       break;
     }
     case 'genericEntity': {
@@ -394,11 +465,14 @@ export const openDescriptorAsStart = (
           | EntityType.service,
         entityName: d.entityName,
         entityId: d.entityId,
+        ...(d.subTab ? { subTab: d.subTab as RiskScoreLeftPanelSubTab } : {}),
+        scopeId: d.scopeId,
         ...originParams,
         onShowEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.entityName,
           entityId: d.entityId,
+          scopeId: d.scopeId,
         }),
       });
       break;
@@ -409,11 +483,15 @@ export const openDescriptorAsStart = (
         entityType: d.entityType as unknown as EntityType.host | EntityType.user,
         value: d.value,
         entityId: d.entityId,
+        mode: d.mode,
+        scopeId: d.scopeId,
         ...originParams,
         onOpenEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.value,
           entityId: d.entityId,
+          scopeId: d.scopeId,
+          mode: d.mode,
         }),
       });
       break;
@@ -427,11 +505,15 @@ export const openDescriptorAsStart = (
           | EntityType.generic,
         value: d.value,
         entityId: d.entityId,
+        mode: d.mode,
+        scopeId: d.scopeId,
         ...originParams,
         onShowEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.value,
           entityId: d.entityId,
+          scopeId: d.scopeId,
+          mode: d.mode,
         }),
       });
       break;
@@ -445,11 +527,13 @@ export const openDescriptorAsStart = (
           | EntityType.generic,
         value: d.value,
         entityId: d.entityId,
+        mode: d.mode,
         ...originParams,
         onShowEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.value,
           entityId: d.entityId,
+          mode: d.mode,
         }),
       });
       break;
@@ -460,11 +544,13 @@ export const openDescriptorAsStart = (
         value: d.value,
         entityId: d.entityId,
         entityType: d.entityType as unknown as EntityType.host | EntityType.generic | undefined,
+        mode: d.mode,
         ...originParams,
         onShowHost: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.value,
           entityId: d.entityId,
+          mode: d.mode,
         }),
       });
       break;
@@ -493,12 +579,14 @@ export const openDescriptorAsStart = (
         entityType: d.entityType as EntityType,
         entityName: d.entityName,
         scopeId: d.scopeId,
+        mode: d.mode,
         ...originParams,
         onShowEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.entityName,
           entityId: d.entityId,
           scopeId: d.scopeId,
+          mode: d.mode,
         }),
       });
       break;
@@ -536,7 +624,10 @@ export const openDescriptorAsStart = (
     }
     case 'rule': {
       const { ruleId } = descriptor as RuleDescriptor;
-      api.openRuleFlyout({ ruleId, ...originParams });
+      api.openRuleFlyout({
+        ruleId,
+        ...originParams,
+      });
       break;
     }
 
@@ -606,18 +697,18 @@ export const openDescriptorAsChild = (
       break;
     }
     case 'host': {
-      const { hostName, entityId, scopeId } = descriptor as HostDescriptor;
-      api.openHostFlyoutAsChild({ hostName, entityId, scopeId, ...originParams });
+      const { hostName, entityId, scopeId, mode } = descriptor as HostDescriptor;
+      api.openHostFlyoutAsChild({ hostName, entityId, scopeId, mode, ...originParams });
       break;
     }
     case 'user': {
-      const { userName, entityId, scopeId } = descriptor as UserDescriptor;
-      api.openUserFlyoutAsChild({ userName, entityId, scopeId, ...originParams });
+      const { userName, entityId, scopeId, mode } = descriptor as UserDescriptor;
+      api.openUserFlyoutAsChild({ userName, entityId, scopeId, mode, ...originParams });
       break;
     }
     case 'service': {
-      const { serviceName, entityId, scopeId } = descriptor as ServiceDescriptor;
-      api.openServiceFlyoutAsChild({ serviceName, entityId, scopeId, ...originParams });
+      const { serviceName, entityId, scopeId, mode } = descriptor as ServiceDescriptor;
+      api.openServiceFlyoutAsChild({ serviceName, entityId, scopeId, mode, ...originParams });
       break;
     }
     case 'genericEntity': {
@@ -682,62 +773,117 @@ export const openDescriptorAsChild = (
 // ---------------------------------------------------------------------------
 
 /**
- * Restore-on-mount hook: on first render, reads the `flyoutV2` (or `flyoutV2Timeline`) URL param,
- * resolves any `{id, index}` back to a DataTableRecord (for document/attack tool descriptors) or
- * Indicator (for IOC descriptors), then replays the ordered array via `useFlyoutApi()` — first
- * entry with session `'start'`, second entry via the `...AsChild` (`'inherit'`) form so both
- * the tool and its child reopen.
+ * Restore hook: on mount, reads the `flyoutV2` (or `flyoutV2Timeline`) URL param, resolves any
+ * `{id, index}` back to a DataTableRecord (for document/attack tool descriptors) or Indicator
+ * (for IOC descriptors), then replays the ordered array via `useFlyoutApi()` — first entry with
+ * session `'start'`, second entry via the `...AsChild` (`'inherit'`) form so both the tool and
+ * its child reopen.
  *
- * Gated on `useIsNewFlyoutEnabled()`. Runs at most once per mount.
+ * Also handles same-app deep links while Security stays mounted (Like from Agent Builder redirects):
+ *  - `history.listen` opens when an external navigation writes a new `flyoutV2` value
+ *  - writer self-updates are ignored via {@link consumeFlyoutV2UrlWrite}
+ *  - unrelated `history.replace` that preserves the initial URL stack is ignored until that
+ *    stack has been opened (after any required fetches)
+ *
+ * The initial URL stack is opened at most once; same-app opens
+ * may fire whenever the URL changes to a different descriptor chain.
  *
  * Mount this hook in the Security Solution app shell, analogous to `useUrlState()` in
  * `app/home/index.tsx`. The `useFlyoutApi()` contract requires the Redux store, router, and
  * Kibana services that the app shell provides.
  */
 export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
-  const isNewFlyoutEnabled = useIsNewFlyoutEnabled();
   const history = useHistory();
   const flyoutApi = useFlyoutApi();
+  // The deferred restore open must use the latest API: on the first render `useIsInSecurityApp`
+  // has not resolved yet, so that render's API carries Discover's history key, whose flyouts never
+  // write the URL param. A descriptor that needs no fetch restores right on that first render.
+  const flyoutApiRef = useRef(flyoutApi);
   const hasRestoredRef = useRef(false);
 
+  useEffect(() => {
+    flyoutApiRef.current = flyoutApi;
+  }, [flyoutApi]);
+
   // Read URL param exactly once (useState initializer runs on the first render only).
+  // Rule preview documents are stored in a transient index that no longer exists after the page
+  // is reloaded, so attempting to restore them reproduces the "Cannot find document" error.
+  // Drop descriptors whose indexName is a preview index before restoring.
   const [descriptors] = useState<FlyoutV2UrlParamValue | null>(() => {
-    if (!isNewFlyoutEnabled) return null;
     const raw = new URLSearchParams(history.location.search).get(urlParamKey);
-    return decodeFlyoutV2UrlParam(raw);
+    const decoded = decodeFlyoutV2UrlParam(raw);
+    if (!decoded) return null;
+    const filtered = decoded.filter(
+      (d) =>
+        !(
+          'indexName' in d && (d as { indexName: string }).indexName.includes(DEFAULT_PREVIEW_INDEX)
+        )
+    ) as FlyoutV2UrlParamValue;
+    return filtered.length > 0 ? filtered : null;
   });
+
+  // Seeded from the initial URL so history.listen can ignore unrelated replaces of the same stack
+  // while we are still fetching data needed to open it (empty-context opens would flash the wrong flyout).
+  const lastOpenedStackRef = useRef<FlyoutV2UrlParamValue | null>(descriptors);
 
   // Detect a malformed param (raw present but decode failed) to strip it.
   const [isMalformed] = useState<boolean>(() => {
-    if (!isNewFlyoutEnabled) return false;
     const raw = new URLSearchParams(history.location.search).get(urlParamKey);
     return raw != null && decodeFlyoutV2UrlParam(raw) === null;
   });
 
-  // The restore state above is intentionally mount-only. Agent Builder can also navigate to a
-  // different entity while Entity Analytics is already mounted, so handle that same-app signal
-  // directly instead of waiting for a remount that will not happen.
+  // Same-app opens: react to external flyoutV2 URL writes while Security stays mounted.
   useEffect(() => {
     let pendingOpen: ReturnType<typeof setTimeout> | undefined;
-    const unsubscribe = subscribeToFlyoutV2Navigation(
-      ({ urlParamKey: navigationParamKey, descriptors: next }) => {
-        if (!isNewFlyoutEnabled || navigationParamKey !== urlParamKey) return;
-        const [first, second] = next;
-        clearTimeout(pendingOpen);
-        pendingOpen = setTimeout(() => {
-          openDescriptorAsStart(first, {}, flyoutApi);
-          if (second) {
-            openDescriptorAsChild(second, {}, flyoutApi);
-          }
-        }, 0);
+
+    const openFromExternalNavigation = (next: FlyoutV2UrlParamValue): void => {
+      if (areSameFlyoutV2Descriptors(next, lastOpenedStackRef.current)) return;
+      lastOpenedStackRef.current = next;
+      const [first, second] = next;
+      clearTimeout(pendingOpen);
+      pendingOpen = setTimeout(() => {
+        openDescriptorAsStart(first, {}, flyoutApi);
+        if (second) {
+          openDescriptorAsChild(second, {}, flyoutApi);
+        }
+      }, 0);
+    };
+
+    const unlistenHistory = history.listen((location) => {
+      const wasSelfWrite = consumeFlyoutV2UrlWrite(urlParamKey);
+      const encodedParam = new URLSearchParams(location.search).get(urlParamKey);
+
+      if (encodedParam == null) {
+        // Param gone (flyout closed). Reset so the same stack can open again later.
+        // Also runs for writer closes — otherwise the next deep link looks like a duplicate.
+        lastOpenedStackRef.current = null;
+        return;
       }
-    );
+
+      const next = decodeFlyoutV2UrlParam(encodedParam);
+      if (!next?.length) return;
+
+      if (wasSelfWrite) {
+        // Writer already opened/updated the flyout; record the stack but do not open again.
+        lastOpenedStackRef.current = next;
+        return;
+      }
+
+      // Same stack as on page load, and that open has not finished yet — do not open here
+      // with empty context; the effect that resolves doc/attack hits will open it.
+      if (descriptors && !hasRestoredRef.current && areSameFlyoutV2Descriptors(next, descriptors)) {
+        lastOpenedStackRef.current = next;
+        return;
+      }
+
+      openFromExternalNavigation(next);
+    });
 
     return () => {
-      unsubscribe();
+      unlistenHistory();
       clearTimeout(pendingOpen);
     };
-  }, [flyoutApi, isNewFlyoutEnabled, urlParamKey]);
+  }, [descriptors, flyoutApi, history, urlParamKey]);
 
   // Strip malformed param once on mount.
   useEffect(() => {
@@ -856,21 +1002,13 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
     // All required fetches are done. Mark restored before setTimeout so a fast
     // double-render cannot trigger a second open.
     hasRestoredRef.current = true;
+    // Same as history.listen: remember what we opened so the writer's URL rewrite does not reopen it.
+    lastOpenedStackRef.current = descriptors;
 
     // Build resolved context. `useEsDocSearch` already returns `DataTableRecord`s.
     const docHit = docHitRecord ?? undefined;
     const attackHit = attackHitRecord ?? undefined;
-    // Carry `_index` through on the reconstructed indicator (the `Indicator` type only declares
-    // `_id`/`fields`, but the IOC opener reads `_index` off the raw hit to re-persist the URL
-    // descriptor). Without it, re-opening on restore would rewrite the descriptor with an empty
-    // index and a second refresh would no longer restore the flyout.
-    const iocIndicator: Indicator | undefined = iocHitRecord
-      ? ({
-          _id: iocHitRecord.raw._id ?? '',
-          _index: iocHitRecord.raw._index,
-          fields: (iocHitRecord.raw.fields ?? {}) as Indicator['fields'],
-        } as Indicator)
-      : undefined;
+    const iocIndicator = iocHitRecord ? recordToIndicator(iocHitRecord) : undefined;
 
     const ctx: RestoreContext = { docHit, attackHit, iocIndicator };
     const [first, second] = descriptors;
@@ -878,9 +1016,10 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
     // Defer to a macrotask to avoid z-index ordering races with Timeline restore, which also
     // fires on mount and claims its slot in the same render cycle.
     setTimeout(() => {
-      openDescriptorAsStart(first, ctx, flyoutApi, FLYOUT_ORIGIN.URL_RESTORE);
+      const { current: api } = flyoutApiRef;
+      openDescriptorAsStart(first, ctx, api, FLYOUT_ORIGIN.URL_RESTORE);
       if (second) {
-        openDescriptorAsChild(second, ctx, flyoutApi, FLYOUT_ORIGIN.URL_RESTORE);
+        openDescriptorAsChild(second, ctx, api, FLYOUT_ORIGIN.URL_RESTORE);
       }
     }, 0);
   }, [
@@ -896,6 +1035,5 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
     attackHitRecord,
     iocRequestState,
     iocHitRecord,
-    flyoutApi,
   ]);
 };

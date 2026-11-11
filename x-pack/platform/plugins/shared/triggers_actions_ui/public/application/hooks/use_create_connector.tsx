@@ -14,7 +14,7 @@ import { useKibana } from '../../common/lib/kibana';
 
 type CreateConnectorSchema = Pick<
   UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>,
-  'actionTypeId' | 'name' | 'config' | 'secrets' | 'id'
+  'actionTypeId' | 'name' | 'config' | 'secrets' | 'id' | 'isInboundEventsEnabled'
 >;
 
 export interface CreateConnectorError {
@@ -28,7 +28,17 @@ interface UseCreateConnectorReturnValue {
   createConnector: (connector: CreateConnectorSchema) => Promise<ActionConnector | undefined>;
 }
 
-export const useCreateConnector = (): UseCreateConnectorReturnValue => {
+export interface UseCreateConnectorParams {
+  /**
+   * Skips the "Created '<name>'" success toast, for hosts that confirm the create with their own
+   * toast. Errors are still toasted.
+   */
+  hideSuccessToast?: boolean;
+}
+
+export const useCreateConnector = ({
+  hideSuccessToast = false,
+}: UseCreateConnectorParams = {}): UseCreateConnectorReturnValue => {
   const {
     http,
     notifications: { toasts },
@@ -55,17 +65,19 @@ export const useCreateConnector = (): UseCreateConnectorReturnValue => {
       if (isMounted.current) {
         setIsLoading(false);
 
-        toasts.addSuccess(
-          i18n.translate(
-            'xpack.triggersActionsUI.sections.addConnectorForm.updateSuccessNotificationText',
-            {
-              defaultMessage: "Created ''{connectorName}''",
-              values: {
-                connectorName: res.name,
-              },
-            }
-          )
-        );
+        if (!hideSuccessToast) {
+          toasts.addSuccess(
+            i18n.translate(
+              'xpack.triggersActionsUI.sections.addConnectorForm.updateSuccessNotificationText',
+              {
+                defaultMessage: "Created ''{connectorName}''",
+                values: {
+                  connectorName: res.name,
+                },
+              }
+            )
+          );
+        }
       }
 
       return res;

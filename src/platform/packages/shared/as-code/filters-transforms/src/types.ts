@@ -7,12 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import type { Writable } from '@kbn/utility-types';
+import type { z } from '@kbn/zod';
 import type { storedFilterSchema } from '@kbn/es-query-server';
+import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
 
 /**
  * Local type definition for stored filters
  * Inferred from the storedFilterSchema in @kbn/es-query-server
  */
-export type StoredFilter = Writable<TypeOf<typeof storedFilterSchema>>;
+export type StoredFilter = z.output<typeof storedFilterSchema>;
+
+/**
+ * AsCodeFilter persisted in its as code shape, with `data_view_id` replaced by a reference name
+ */
+export type StoredAsCodeFilter = AsCodeFilter & {
+  data_view_id?: never;
+  data_view_ref_name?: string;
+};

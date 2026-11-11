@@ -288,6 +288,105 @@ export default function (providerContext: FtrProviderContext) {
         });
     });
 
+    it('should return a 400 when updating with a path-traversal input id', async function () {
+      const { body } = await supertest
+        .put(`/api/fleet/package_policies/${packagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'filetest-1',
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          inputs: [
+            {
+              id: '../../../../../../tmp/evil',
+              type: 'logfile',
+              policy_template: 'template_a',
+              enabled: true,
+              streams: [],
+            },
+          ],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        })
+        .expect(400);
+      expect(body.message).to.contain('path traversal');
+    });
+
+    it('should return a 400 when updating with a path-traversal id in overrides.inputs', async function () {
+      const { body } = await supertest
+        .put(`/api/fleet/package_policies/${packagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'filetest-1',
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          inputs: [
+            {
+              id: 'safe-input-id',
+              type: 'logfile',
+              policy_template: 'template_a',
+              enabled: true,
+              streams: [],
+            },
+          ],
+          overrides: {
+            inputs: {
+              'safe-input-id': { id: '../../../../../../tmp/evil' },
+            },
+          },
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        })
+        .expect(400);
+      expect(body.message).to.contain('path traversal');
+    });
+
+    it('should return a 400 when updating with a path-traversal nested stream id in overrides.inputs', async function () {
+      const { body } = await supertest
+        .put(`/api/fleet/package_policies/${packagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'filetest-1',
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          inputs: [
+            {
+              id: 'safe-input-id',
+              type: 'logfile',
+              policy_template: 'template_a',
+              enabled: true,
+              streams: [],
+            },
+          ],
+          overrides: {
+            inputs: {
+              'safe-input-id': {
+                streams: [{ id: 'a/../../../../../../tmp/evil' }],
+              },
+            },
+          },
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        })
+        .expect(400);
+      expect(body.message).to.contain('path traversal');
+    });
+
     it('should work with multiple policy ids', async function () {
       const response = await supertest
         .put(`/api/fleet/package_policies/${packagePolicyId}`)
@@ -932,6 +1031,72 @@ export default function (providerContext: FtrProviderContext) {
             },
           })
           .expect(200);
+      });
+    });
+
+    describe('Agent variable placeholder in data_stream.dataset', () => {
+      const placeholder = '${env.LOGS_DATASET}';
+      let placeholderPolicyId: string;
+
+      const buildBody = (description: string, dataset: string) => ({
+        policy_id: agentPolicyId,
+        force: true,
+        package: { name: 'integration_to_input', version: '1.0.0' },
+        name: 'integration_to_input-placeholder',
+        description,
+        namespace: 'default',
+        inputs: {
+          'logs-logfile': {
+            enabled: true,
+            streams: {
+              'integration_to_input.log': {
+                enabled: true,
+                vars: {
+                  paths: ['/tmp/test.log'],
+                  'data_stream.dataset': dataset,
+                  custom: '',
+                },
+              },
+            },
+          },
+        },
+      });
+
+      before(async () => {
+        const { body } = await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(buildBody('', placeholder))
+          .expect(200);
+        placeholderPolicyId = body.item.id;
+      });
+
+      after(async () => {
+        await supertest
+          .delete(`/api/fleet/package_policies/${placeholderPolicyId}`)
+          .set('kbn-xsrf', 'xxxx');
+      });
+
+      it('should allow updating another field while the placeholder is unchanged', async () => {
+        const { body } = await supertest
+          .put(`/api/fleet/package_policies/${placeholderPolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(buildBody('updated description', placeholder))
+          .expect(200);
+
+        expect(body.item.description).to.eql('updated description');
+      });
+
+      it('should still reject changing the dataset value', async () => {
+        const { body } = await supertest
+          .put(`/api/fleet/package_policies/${placeholderPolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(buildBody('updated description', 'somedataset'))
+          .expect(400);
+
+        expect(body.message).to.eql(
+          'Package policy dataset cannot be modified, please create a new package policy.'
+        );
       });
     });
 

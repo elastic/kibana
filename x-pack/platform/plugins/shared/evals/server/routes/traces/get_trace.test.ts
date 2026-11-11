@@ -13,6 +13,7 @@ import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { EVALS_TRACE_URL, API_VERSIONS, TRACES_INDEX_PATTERN } from '@kbn/evals-common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { registerGetTraceRoute } from './get_trace';
 
@@ -24,7 +25,7 @@ describe('GET /internal/evals/traces/{traceId}', () => {
       router,
       logger,
       canEncrypt: false,
-      evaluatorRegistry: { list: () => [], get: () => undefined },
+      evaluatorRegistry: createEvaluatorRegistryMock(),
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),

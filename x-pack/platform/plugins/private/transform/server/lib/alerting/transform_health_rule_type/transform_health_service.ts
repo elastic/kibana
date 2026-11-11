@@ -126,7 +126,6 @@ export function transformHealthServiceProvider({
         return (
           await esClient.transform.getTransformStats({
             transform_id: transformIdsString,
-            // @ts-expect-error `basic` query option not yet in @elastic/elasticsearch
             basic: true,
             size: transformIds.size,
           })
@@ -136,7 +135,6 @@ export function transformHealthServiceProvider({
         return (
           (
             await esClient.transform.getTransformStats({
-              // @ts-expect-error `basic` query option not yet in @elastic/elasticsearch
               basic: true,
               transform_id: '_all',
               size: TRANSFORM_PAGE_SIZE,

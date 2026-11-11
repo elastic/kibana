@@ -48,7 +48,9 @@ describe('updateRiskScoreMappings', () => {
       ...coreStart,
       savedObjects: {
         createInternalRepository: jest.fn().mockReturnValue(soClient),
-        getScopedClient: jest.fn().mockReturnValue(soClient),
+        getUnsafeInternalClient: jest
+          .fn()
+          .mockReturnValue({ asScopedToNamespace: jest.fn().mockReturnValue(soClient) }),
       },
       elasticsearch: { client: { asInternalUser: esClient } },
     },
@@ -134,6 +136,26 @@ describe('updateRiskScoreMappings', () => {
     expect(mockCreateOrUpdateComponentTemplate).not.toHaveBeenCalled();
     expect(mockRolloverDataStream).not.toHaveBeenCalled();
     expect(mockUpdateSavedObjectAttribute).not.toHaveBeenCalled();
+  });
+
+  it('should query only the specified space when spaceId is defined', async () => {
+    soClient.find.mockResolvedValue({ ...mockSavedObjectsResponseDefaults, saved_objects: [] });
+    mockGetDefaultRiskEngineConfiguration.mockResolvedValue({
+      _meta: { mappingsVersion: '2.0.0' },
+    });
+
+    await updateRiskScoreMappings({
+      auditLogger: mockAuditLogger,
+      logger,
+      kibanaVersion,
+      getStartServices: getStartServicesMock,
+      hasEncryptionKey: true,
+      spaceId: 'my-space',
+    });
+
+    expect(soClient.find).toHaveBeenCalledWith(
+      expect.objectContaining({ namespaces: ['my-space'] })
+    );
   });
 
   it('should update risk score mappings for every space when versions are different', async () => {

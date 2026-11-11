@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { EuiToastWrapper, type ScoutPage } from '@kbn/scout-oblt';
+import type { ScoutPage } from '@kbn/scout-oblt';
 import { EXTENDED_TIMEOUT } from './constants';
 
 /**
- * Waits for the APM settings header link to be visible.
- * This is commonly used to ensure the APM page has fully loaded.
+ * Waits for a stable app-menu signal so the APM page is considered loaded.
+ * Prefer Add data (primary action) — same role Settings played before it moved into More.
+ * Alerts is privilege-gated and is not a reliable ready signal for all roles.
  */
-export async function waitForApmSettingsHeaderLink(page: ScoutPage): Promise<void> {
+export async function waitForApmAppMenuReady(page: ScoutPage): Promise<void> {
   await page
-    .getByTestId('apmSettingsHeaderLink')
+    .getByTestId('apmAddDataHeaderLink')
     .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
 }
 
@@ -40,10 +41,37 @@ export async function waitForSearchBarReady(page: ScoutPage): Promise<void> {
 }
 
 /**
+ * Reads the absolute range the search bar's date picker resolved for its current
+ * value, as shown in the tooltip of the picker button (both picker variants
+ * render one), and moves the mouse away again so the tooltip closes.
+ */
+export async function readResolvedDateRange(page: ScoutPage): Promise<string> {
+  const pickerButton = page
+    .getByTestId('dateRangePickerControlButton')
+    .or(page.getByTestId('superDatePickerShowDatesButton'));
+  const tooltip = page.getByRole('tooltip');
+
+  await pickerButton.hover();
+  await tooltip.waitFor({ state: 'visible' });
+  const resolvedRange = (await tooltip.innerText()).trim();
+
+  await page.mouse.move(0, 0);
+  await tooltip.waitFor({ state: 'hidden' });
+
+  return resolvedRange;
+}
+
+/**
+ * Clicks the unified search bar's Refresh button.
+ */
+export async function clickSearchBarRefresh(page: ScoutPage): Promise<void> {
+  await page.getByTestId('querySubmitButton').click();
+}
+
+/**
  * Close global EUI toasts when present — they intercept pointer events and break
  * interactions (e.g. Investigate menu) while still visible (#246662 CI flakes).
  */
 export async function dismissGlobalToastsIfPresent(page: ScoutPage): Promise<void> {
-  const toast = new EuiToastWrapper(page, { locator: '.euiToast' });
-  await toast.closeAllToasts();
+  await page.components.toast().closeAll();
 }

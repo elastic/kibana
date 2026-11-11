@@ -137,9 +137,7 @@ describe('Session service', () => {
     });
 
     it('Tracks searches for current session', () => {
-      expect(() =>
-        sessionService.trackSearch({ abort: () => {}, poll: async () => {} })
-      ).toThrowError();
+      expect(() => sessionService.trackSearch({ abort: () => {}, poll: async () => {} })).toThrow();
       expect(state$.getValue()).toBe(SearchSessionState.None);
 
       sessionService.start();
@@ -173,7 +171,7 @@ describe('Session service', () => {
 
       await sessionService.cancel({ source: 'test' });
 
-      expect(abort).toBeCalledTimes(3);
+      expect(abort).toHaveBeenCalledTimes(3);
     });
   });
 
@@ -611,13 +609,17 @@ describe('Session service', () => {
 
   it('can continue an old session', () => {
     const firstSessionId = sessionService.start();
+    expect(sessionService.hasSession(firstSessionId)).toBe(true);
+    expect(sessionService.hasSession('unknown')).toBe(false);
 
     for (let i = 0; i < 30; i++) {
       sessionService.start();
     }
 
+    expect(sessionService.hasSession(firstSessionId)).toBe(true);
     sessionService.continue(firstSessionId!);
     expect(sessionService.getSessionId()).toBe(firstSessionId);
+    expect(sessionService.hasSession(firstSessionId)).toBe(true);
   });
 
   it('holds a maximum of 30 sessions', () => {
@@ -627,6 +629,7 @@ describe('Session service', () => {
       sessionService.start();
     }
 
+    expect(sessionService.hasSession(firstSessionId)).toBe(false);
     sessionService.continue(firstSessionId!);
     expect(sessionService.getSessionId()).not.toBe(firstSessionId);
   });

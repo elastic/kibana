@@ -64,7 +64,7 @@ describe('waitForPickupUpdatedMappingsTask', () => {
       taskId: 'my task id',
       timeout: '2m',
     });
-    expect(task()).rejects.toThrowError(nonRetryableError);
+    expect(task()).rejects.toThrow(nonRetryableError);
   });
 
   it('returns task_completed_with_retriable_error when the client returns a search_phase_execution_exception', async () => {

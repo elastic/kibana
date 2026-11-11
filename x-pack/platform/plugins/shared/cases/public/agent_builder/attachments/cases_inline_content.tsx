@@ -147,7 +147,7 @@ const InlineContent: React.FC<InlineContentProps> = ({ attachment, application }
             <EuiFlexItem grow={false}>
               <EuiButton
                 size="s"
-                iconType="popout"
+                iconType="external"
                 iconSide="right"
                 href={casesUrl || undefined}
                 target="_blank"
