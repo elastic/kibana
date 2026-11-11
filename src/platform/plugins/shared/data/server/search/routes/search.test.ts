@@ -8,6 +8,7 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
+import moment from 'moment';
 import { from } from 'rxjs';
 import type { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
 import { type Logger } from '@kbn/core/server';
@@ -100,15 +101,16 @@ describe('Search service', () => {
     });
   });
 
-  it('handler passes pollLength as a search option, not as part of the request', async () => {
+  it('handler passes pollLength as an Elasticsearch duration search option, not as part of the request', async () => {
     const mockContext = {
       search: {
         search: jest.fn().mockReturnValue(from(Promise.resolve({ id: 'yay', rawResponse: {} }))),
       },
     };
 
+    // the route's body validation turns the `pollLength` string into a duration
     const mockRequest = httpServerMock.createKibanaRequest({
-      body: { params: {}, pollLength: '30s' },
+      body: { params: {}, pollLength: moment.duration(30, 's') },
       params: { strategy: 'foo', id: 'yay' },
     });
     const mockResponse = httpServerMock.createResponseFactory();
@@ -117,7 +119,52 @@ describe('Search service', () => {
 
     const [[request, options]] = mockContext.search.search.mock.calls;
     expect(request).toStrictEqual({ id: 'yay', params: {} });
-    expect(options).toEqual(expect.objectContaining({ strategy: 'foo', pollLength: '30s' }));
+    expect(options).toEqual(expect.objectContaining({ strategy: 'foo', pollLength: '30000ms' }));
+  });
+
+  it('handler passes a zero pollLength through as 0ms', async () => {
+    const mockContext = {
+      search: {
+        search: jest.fn().mockReturnValue(from(Promise.resolve({ id: 'yay', rawResponse: {} }))),
+      },
+    };
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      body: { params: {}, pollLength: moment.duration(0) },
+      params: { strategy: 'foo', id: 'yay' },
+    });
+
+    await runMockSearch(mockContext, mockRequest, httpServerMock.createResponseFactory());
+
+    const [[, options]] = mockContext.search.search.mock.calls;
+    expect(options).toEqual(expect.objectContaining({ pollLength: '0ms' }));
+  });
+
+  describe('pollLength validation', () => {
+    const getBodySchema = () => {
+      registerSearchRoute(
+        mockCoreSetup.http.createRouter(),
+        mockLogger,
+        mockCoreSetup.executionContext
+      );
+      const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
+      const { validate } =
+        mockRouter.versioned.post.mock.results[0].value.addVersion.mock.calls[0][0];
+      return validate.request.body;
+    };
+
+    it.each([['30s'], ['100ms'], ['0'], [5000]])('accepts %p', (pollLength) => {
+      const { pollLength: validated } = getBodySchema().validate({ pollLength });
+      expect(moment.isDuration(validated)).toBe(true);
+    });
+
+    it('is optional', () => {
+      expect(getBodySchema().validate({}).pollLength).toBeUndefined();
+    });
+
+    it.each([['banana'], ['-1s'], [{}]])('rejects %p', (pollLength) => {
+      expect(() => getBodySchema().validate({ pollLength })).toThrow();
+    });
   });
 
   it('handler returns an error response if the search throws a painless error', async () => {
