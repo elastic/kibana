@@ -7,11 +7,15 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import useSet from 'react-use/lib/useSet';
+import { useQueryClient } from '@kbn/react-query';
 import type { ToastInput } from '@kbn/core/public';
+import type { Conversation } from '@kbn/agent-builder-common';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type { MessageEditorController } from './message_editor/use_message_editor';
 import { getTextFileName } from './file_type';
 import { readTextFile } from './read_text_file';
+import { findStoredTextFileId } from './find_stored_text_file';
+import { queryKeys } from '../../../query_keys';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 
 export interface UseTextFileUploadParams {
@@ -32,6 +36,7 @@ export const useTextFileUpload = ({
 }: UseTextFileUploadParams): UseTextFileUploadResult => {
   const { attachments, conversationId, upsertAttachments, removeAttachments } =
     useConversationContext();
+  const queryClient = useQueryClient();
   const [
     loadingTextFileNames,
     { add: addLoadingName, remove: removeLoadingName, clear: clearLoadingNames },
@@ -98,10 +103,27 @@ export const useTextFileUpload = ({
           return;
         }
         addedNames.current.add(name);
-        upsertAttachments([{ type: AttachmentType.text, data: { content: result.content, name } }]);
+        const textFile = { content: result.content, name };
+        upsertAttachments([{ type: AttachmentType.text, data: textFile }]);
+
+        const conversation = conversationId
+          ? queryClient.getQueryData<Conversation>(queryKeys.conversations.byId(conversationId))
+          : undefined;
+        const storedTextFileId = findStoredTextFileId(textFile, conversation?.attachments);
+        if (storedTextFileId) {
+          messageEditorController.setPlaceholderAttachmentId(name, 'text', storedTextFileId);
+        }
       });
     },
-    [upsertAttachments, addLoadingName, removeLoadingName, addErrorToast, messageEditorController]
+    [
+      upsertAttachments,
+      addLoadingName,
+      removeLoadingName,
+      addErrorToast,
+      messageEditorController,
+      conversationId,
+      queryClient,
+    ]
   );
 
   // Keeps the attachments in step with the chips: a chip the user deleted drops its text file.

@@ -15,25 +15,26 @@ import {
 } from '@kbn/agent-builder-common/attachments';
 import {
   ATTACHMENT_ID_PARAM,
-  type PlaceholderKind,
+  ATTACHMENT_KINDS,
 } from '../../conversation_input/message_editor/attachment_placeholder';
 
-const BINARY_KIND: PlaceholderKind = 'binary';
-
-// The query of a binary chip link, e.g. `id=abc` in `[a.pdf](binary://a.pdf?id=abc)`.
-const BINARY_LINK_QUERY_PATTERN = new RegExp(`\\]\\(${BINARY_KIND}:\\/\\/[^?)]*\\?([^)]*)\\)`, 'g');
+// The query of a chip link, e.g. `id=abc` in `[a.pdf](binary://a.pdf?id=abc)`.
+const CHIP_LINK_QUERY_PATTERN = new RegExp(
+  `\\]\\((?:${ATTACHMENT_KINDS.join('|')}):\\/\\/[^?)]*\\?([^)]*)\\)`,
+  'g'
+);
 
 /** Ids of the attachments the message text links to, in text order. */
 export const getLinkedAttachmentIds = (text: string): string[] =>
-  Array.from(text.matchAll(BINARY_LINK_QUERY_PATTERN)).flatMap(([, query]) => {
+  Array.from(text.matchAll(CHIP_LINK_QUERY_PATTERN)).flatMap(([, query]) => {
     const id = new URLSearchParams(query).get(ATTACHMENT_ID_PARAM);
     return id ? [id] : [];
   });
 
 /**
- * Adds a ref for each attachment the message text links to, e.g. a PDF added to the conversation
- * on paste. Such an attachment has no `chat_input` event tied to the message, so the link is
- * what ties it to the message.
+ * Adds a ref for each attachment the message text links to: a PDF added on paste, or a text file
+ * the conversation already had. Such an attachment has no `chat_input` event tied to the message,
+ * so the link is what ties it to the message.
  */
 export const withLinkedAttachmentRefs = ({
   text,

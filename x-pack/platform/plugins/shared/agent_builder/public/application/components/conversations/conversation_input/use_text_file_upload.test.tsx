@@ -5,7 +5,11 @@
  * 2.0.
  */
 
+import React, { type PropsWithChildren } from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { hashContent } from '@kbn/agent-builder-common/attachments';
+import { queryKeys } from '../../../query_keys';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { readTextFile } from './read_text_file';
 import { useTextFileUpload } from './use_text_file_upload';
@@ -49,17 +53,25 @@ const notesAttachment = { type: 'text', data: { content: '# Hi', name: 'notes.md
 
 const createFile = (name = 'notes.md') => new File(['# Hi'], name, { type: '' });
 
+let queryClient: QueryClient;
+const wrapper = ({ children }: PropsWithChildren) => (
+  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+);
+
 const renderTextFileUpload = () =>
-  renderHook(() =>
-    useTextFileUpload({
-      addErrorToast,
-      messageEditorController: messageEditorController as never,
-    })
+  renderHook(
+    () =>
+      useTextFileUpload({
+        addErrorToast,
+        messageEditorController: messageEditorController as never,
+      }),
+    { wrapper }
   );
 
 describe('useTextFileUpload', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    queryClient = new QueryClient();
     setContext();
     mockReadTextFile.mockResolvedValue({ status: 'done', content: '# Hi' });
     messageEditorController.getPlaceholderNames.mockReturnValue([]);
@@ -94,6 +106,39 @@ describe('useTextFileUpload', () => {
       expect(upsertAttachments).toHaveBeenCalledWith([
         { type: 'text', data: { content: '', name: 'empty.txt' } },
       ]);
+    });
+
+    it('links the chip to the stored attachment when the conversation already has the same file', async () => {
+      const storedData = { content: '# Hi', name: 'notes.md' };
+      queryClient.setQueryData(queryKeys.conversations.byId('conv-1'), {
+        attachments: [
+          {
+            id: 'stored-notes',
+            type: 'text',
+            current_version: 1,
+            versions: [{ version: 1, data: storedData, content_hash: hashContent(storedData) }],
+          },
+        ],
+      });
+      const { result } = renderTextFileUpload();
+
+      act(() => result.current.handlePasteTextFile?.(createFile(), 'notes.md'));
+      await waitFor(() => expect(upsertAttachments).toHaveBeenCalled());
+
+      expect(messageEditorController.setPlaceholderAttachmentId).toHaveBeenCalledWith(
+        'notes.md',
+        'text',
+        'stored-notes'
+      );
+    });
+
+    it('does not link the chip of a new file', async () => {
+      const { result } = renderTextFileUpload();
+
+      act(() => result.current.handlePasteTextFile?.(createFile(), 'notes.md'));
+      await waitFor(() => expect(upsertAttachments).toHaveBeenCalled());
+
+      expect(messageEditorController.setPlaceholderAttachmentId).not.toHaveBeenCalled();
     });
 
     it('shows the error and removes the chip when the file cannot be read', async () => {

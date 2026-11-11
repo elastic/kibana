@@ -27,17 +27,17 @@ const imageRef: AttachmentVersionRef = {
 };
 
 describe('getLinkedAttachmentIds', () => {
-  it('returns the ids of binary links in text order', () => {
+  it('returns the ids of PDF and text file links in text order', () => {
     expect(
       getLinkedAttachmentIds(
-        '[a.pdf](binary://a.pdf?id=att%201) hi [b.pdf](binary://b.pdf?id=att-2)'
+        '[a.pdf](binary://a.pdf?id=att%201) hi [b.md](text://b.md?id=att-2) [c.pdf](binary://c.pdf?id=att-3)'
       )
-    ).toEqual(['att 1', 'att-2']);
+    ).toEqual(['att 1', 'att-2', 'att-3']);
   });
 
-  it('ignores binary links without an id and links of other schemes', () => {
+  it('ignores chip links without an id and links of other schemes', () => {
     expect(
-      getLinkedAttachmentIds('[a.pdf](binary://a.pdf) [b.md](text://b.md?id=x) [s](skill://s?id=y)')
+      getLinkedAttachmentIds('[a.pdf](binary://a.pdf) [b.md](text://b.md) [s](skill://s?id=y)')
     ).toEqual([]);
   });
 });

@@ -365,6 +365,14 @@ describe('deserializeInputSegments', () => {
     expect(segments).toEqual([{ type: 'attachment', kind: 'text', name: 'my notes.md' }]);
   });
 
+  it('parses the attachment id of a text file segment', () => {
+    const segments = deserializeInputSegments('[notes.md](text://notes.md?id=att-1)');
+
+    expect(segments).toEqual([
+      { type: 'attachment', kind: 'text', name: 'notes.md', attachmentId: 'att-1' },
+    ]);
+  });
+
   it('preserves a text file link with malformed percent-encoding as text', () => {
     const segments = deserializeInputSegments('[x](text://bad%.md)');
 

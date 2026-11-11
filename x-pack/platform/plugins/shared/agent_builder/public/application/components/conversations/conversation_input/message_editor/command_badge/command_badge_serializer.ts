@@ -129,7 +129,7 @@ export const deserializeInputSegments = (text: string): ContentSegment[] => {
           ? new URLSearchParams(queryString).get(ATTACHMENT_ID_PARAM) ?? undefined
           : undefined;
         segments.push(
-          scheme === 'binary' && attachmentId
+          attachmentId
             ? { type: 'attachment', kind: scheme, name, attachmentId }
             : { type: 'attachment', kind: scheme, name }
         );
