@@ -40,6 +40,33 @@ fresh investigation using a `manual` question subject with an `automatic` trigge
 automatic-investigation quotas apply. An assessment that finds no issues still creates a conversation.
 The Investigate/Ask selector does not select a different execution path.
 
+The **Run** item in an automation's row menu and details **Actions** menu immediately requests a
+run of its saved scheduled investigation. Only enabled, schedule-only automations can be run
+manually. Disabled automations and those with alert or Slack triggers, including mixed triggers,
+show a disabled Run item with an explanation. Enable a disabled automation before running it.
+With the default `drop` overlap policy, Run is also disabled while the automation has a pending,
+running, queued, or waiting execution, or a linked investigation still running after dispatch ends.
+Open menus check live activity independently of the history range and poll every five seconds to
+re-enable Run after completion. A just-accepted execution is
+tracked directly before it appears in search. Saved `queue` and `cancel_in_progress` policies still
+allow another manual request; workflow concurrency remains authoritative for concurrent callers.
+Run is disabled when the daily manual or total investigation quota is reached, with a tooltip
+showing which limit blocks it and when the UTC window resets. Open menus refresh quotas every
+five seconds, including after asynchronous admission or a window reset. Automatic-investigation
+and per-automation limits do not block manual Run. Server quota enforcement still handles races.
+
+The caller needs Nightshift management, bound-workflow management, and Workflows execution
+permissions. The run uses the automation service account, saved instructions, scope, destination,
+timeout, and overlap policy. It creates a fresh investigation, bypasses the per-automation budget,
+and follows existing manual investigation quota enforcement. History shows it as Manual with the
+initiating user's display name and a link to the investigation. Ordinary Workflows UI runs retain
+their existing accounting; caller-supplied metadata cannot grant manual accounting.
+
+The automation's enabled state continues to control its backing workflow and scheduled triggers.
+Run requires the saved workflow to be enabled, valid, and bound to the automation service account.
+Missing or invalid configuration must be repaired by saving the automation. A manual run leaves the saved workflow
+YAML, schedule, and next scheduled time unchanged.
+
 `runtime.dailyDispatchLimit` caps the new investigations an automation opens, per space and UTC day.
 Attempts that continue an open investigation and starts with the `manual` trigger type do not count
 and are never blocked, even when the limit is reached. For an automatic attempt that would open a new
@@ -60,7 +87,7 @@ both slots. The claims it wrote are removed, but a concurrent start can join the
 removal, and a failed removal leaves them live. Keeping the slots means the count never falls below
 the number of investigations; a retry after such a failure is charged again. A failure while the investigation runs does not give
 back either slot. The limit is at least 1, and an omitted limit allows unlimited new investigations.
-To stop an automation from opening investigations, disable it. Changing the limit takes effect on
+To stop automatic investigation starts, disable the automation. Changing the limit takes effect on
 the next attempt.
 
 The API-only `scopeQuery` field is forwarded as `scope_query` guidance in the investigation context.

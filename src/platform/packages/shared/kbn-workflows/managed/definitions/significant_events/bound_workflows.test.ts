@@ -9,7 +9,6 @@
 
 import { parse } from 'yaml';
 import BOUND_CLEANUP_YAML from './bound_cleanup.yaml';
-import BOUND_INVESTIGATION_COMPLETED_YAML from './bound_investigation_completed.yaml';
 import BOUND_SCHEDULED_DETECTION_YAML from './bound_scheduled_detection.yaml';
 import BOUND_SCHEDULED_REVIEW_YAML from './bound_scheduled_review.yaml';
 import BOUND_CONTINUOUS_ONBOARDING_YAML from './knowledge_indicators/bound_continuous_onboarding.yaml';
@@ -64,22 +63,6 @@ describe('bound detection engine workflows', () => {
     }
   );
 
-  // A manual run could supply any event and attach it as the service account. The engine sets
-  // `triggeredBy` to the id of the trigger that fired.
-  it('investigation completed refuses every run but its two lifecycle triggers', () => {
-    const { steps, triggers }: IParsedWorkflow = parse(BOUND_INVESTIGATION_COMPLETED_YAML);
-
-    expect(triggers?.map(({ type }) => type)).toEqual([
-      'nightshift-investigations.completed',
-      'nightshift-investigations.failed',
-    ]);
-    expect(steps[0]).toMatchObject({ name: 'refuse_direct_runs', type: 'if' });
-    expect(steps[0].condition).toBe(
-      'not execution.triggeredBy : ("nightshift-investigations.completed" or "nightshift-investigations.failed")'
-    );
-    expect(steps[0].steps?.[0].type).toBe('workflow.fail');
-  });
-
   it.each(startedBySchedule)('%s has no manual trigger', (_name, yaml) => {
     const { triggers }: IParsedWorkflow = parse(yaml);
 
@@ -124,13 +107,12 @@ describe('bound detection engine workflows', () => {
   });
 
   // A workflow-level `continue` would swallow the failure of the refusal step and run the rest.
-  it.each([
-    ...startedBySchedule,
-    ...startedByServerCode,
-    ['investigation completed', BOUND_INVESTIGATION_COMPLETED_YAML],
-  ])('%s does not continue past a failed step by default', (_name, yaml) => {
-    const { settings }: IParsedWorkflow = parse(yaml);
+  it.each([...startedBySchedule, ...startedByServerCode])(
+    '%s does not continue past a failed step by default',
+    (_name, yaml) => {
+      const { settings }: IParsedWorkflow = parse(yaml);
 
-    expect(settings?.['on-failure']).toBeUndefined();
-  });
+      expect(settings?.['on-failure']).toBeUndefined();
+    }
+  );
 });

@@ -380,7 +380,6 @@ describe('createDetectionEngineSetupService.enable workflows', () => {
       'system-sources-ki-sync-bound',
       'system-nightshift-cleanup-bound',
       'system-nightshift-source-reconciliation-bound',
-      'system-nightshift-investigation-completed-bound',
     ];
     expect(install.mock.calls.map(([, workflowId]) => workflowId)).toEqual(expectedIds);
     expect(install).toHaveBeenCalledWith('significantEvents', SETUP_WORKFLOW_IDS[0], {

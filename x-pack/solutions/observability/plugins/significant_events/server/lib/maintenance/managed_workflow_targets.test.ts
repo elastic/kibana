@@ -8,7 +8,6 @@
 import { asSpaceId } from '@kbn/core-spaces-common';
 import {
   NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
-  NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_ORCHESTRATOR_WORKFLOW_ID,
@@ -30,10 +29,7 @@ describe('managed_workflow_targets registry', () => {
     );
 
     for (const id of ALL_INSTALLABLE_WORKFLOW_IDS) {
-      // The investigation-completed workflow starts no background work, so it is not swept.
-      if (id !== NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW_ID) {
-        expect(cancelledIds.has(id)).toBe(true);
-      }
+      expect(cancelledIds.has(id)).toBe(true);
     }
   });
 

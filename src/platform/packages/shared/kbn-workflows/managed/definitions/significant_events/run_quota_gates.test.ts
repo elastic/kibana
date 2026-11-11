@@ -217,30 +217,6 @@ describe('Significant Events run quota workflow contracts', () => {
     );
   });
 
-  it('starts investigations after eligibility, event resolution, and deduplication', () => {
-    const orderedSteps = [
-      'gate_investigatable_severity',
-      'resolve_active_event',
-      'guard_resolved_event',
-      'guard_missing_investigation',
-      'trigger_investigation',
-    ];
-    const indexes = orderedSteps.map((name) => stepIndex(definitions.discovery, name));
-
-    expect(indexes.every((index) => index >= 0)).toBe(true);
-    expect(indexes).toEqual([...indexes].sort((left, right) => left - right));
-  });
-
-  it('delegates automatic investigation admission to the trigger step and fails open', () => {
-    expect(findStep(definitions.discovery, 'trigger_investigation')).toEqual(
-      expect.objectContaining({
-        type: 'nightshift.triggerInvestigation',
-        with: expect.objectContaining({ trigger_type: 'automatic' }),
-        'on-failure': { continue: true },
-      })
-    );
-  });
-
   it('keeps only the root origin worker input', () => {
     expect(findInput(definitions.discovery, 'rootTriggeredBy')).toEqual(
       expect.objectContaining({

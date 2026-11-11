@@ -8,6 +8,7 @@
  */
 import type { estypes } from '@elastic/elasticsearch';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
+import { encodeHitVersion } from '@kbn/core-saved-objects-base-server-internal';
 import {
   type ISavedObjectTypeRegistry,
   type ISavedObjectsSecurityExtension,
@@ -274,6 +275,7 @@ export const changeObjectAccessControl = async (
     }
 
     const { id, type, esRequestIndex } = expectedBulkGetResult.value;
+    const { version } = objects[esRequestIndex];
     const rawDoc = bulkGetResponse!.body.docs[esRequestIndex];
 
     if (isMgetError(rawDoc) || !rawDoc?.found) {
@@ -303,7 +305,7 @@ export const changeObjectAccessControl = async (
     const currentSource = rawDoc._source;
 
     const versionProperties = getExpectedVersionProperties(
-      undefined,
+      version,
       rawDoc as unknown as SavedObjectsRawDoc
     );
 
@@ -353,25 +355,26 @@ export const changeObjectAccessControl = async (
     : undefined;
 
   return {
-    objects: expectedBulkOperationResults.map<{ id: string; type: string; error?: any }>(
-      (expectedResult) => {
-        if (isLeft(expectedResult)) {
-          return expectedResult.value;
-        }
-
-        const { type, id, esRequestIndex } = expectedResult.value;
-        const response = bulkOperationResponse?.items[esRequestIndex] ?? {};
-
-        const rawResponse = Object.values(
-          response
-        )[0] as unknown as GetBulkOperationErrorRawResponse;
-        const error = getBulkOperationError(type, id, rawResponse);
-        if (error) {
-          return { id, type, error };
-        }
-
-        return { id, type };
+    objects: expectedBulkOperationResults.map<{
+      id: string;
+      type: string;
+      error?: any;
+      version?: string;
+    }>((expectedResult) => {
+      if (isLeft(expectedResult)) {
+        return expectedResult.value;
       }
-    ),
+
+      const { type, id, esRequestIndex } = expectedResult.value;
+      const response = bulkOperationResponse?.items[esRequestIndex] ?? {};
+
+      const rawResponse = Object.values(response)[0] as unknown as GetBulkOperationErrorRawResponse;
+      const error = getBulkOperationError(type, id, rawResponse);
+      if (error) {
+        return { id, type, error };
+      }
+
+      return { id, type, version: encodeHitVersion(rawResponse) };
+    }),
   };
 };

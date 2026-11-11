@@ -10,7 +10,6 @@ import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { getNightshiftRoleName, getNightshiftServiceAccountName } from '@kbn/nightshift-shared';
 import {
   NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
-  NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_ORCHESTRATOR_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
@@ -45,7 +44,6 @@ export const SETUP_WORKFLOW_IDS = [
   NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID,
-  NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW_ID,
 ] as const;
 
 // Boom errors, which the workflows plugin throws, keep their status in `output.statusCode`.
