@@ -1446,7 +1446,7 @@ describe('XY', () => {
       }
     });
 
-    it('should not store nor emit a static y-axis color under an active breakdown in DSL layer', () => {
+    it('should neither store nor emit a static y-axis color under an active breakdown in DSL layer', () => {
       const config = {
         type: 'xy',
         title: 'Y-axis static color with active breakdown',
@@ -1480,7 +1480,7 @@ describe('XY', () => {
       expect(xyConfigSchema.parse(apiOutput)).toEqual(apiOutput);
     });
 
-    it('should not store nor emit a static y-axis color under an active breakdown in ES|QL layer', () => {
+    it('should neither store nor emit a static y-axis color under an active breakdown in ES|QL layer', () => {
       const config = {
         type: 'xy',
         title: 'Y-axis static color with active breakdown',

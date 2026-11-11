@@ -238,7 +238,7 @@ describe('Partition', () => {
         ['treemap', baseTreemapConfig],
         ['waffle', baseWaffleConfig],
       ])(
-        'should not store nor emit a static metric color when a group is active in %s',
+        'should neither store nor emit a static metric color when a group is active in %s',
         (_name, base) => {
           const config = { ...base, group_by: [activeGroup] } satisfies PartitionConfig;
 

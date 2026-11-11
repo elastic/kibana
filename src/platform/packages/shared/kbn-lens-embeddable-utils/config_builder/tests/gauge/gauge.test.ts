@@ -138,7 +138,7 @@ describe('Gauge', () => {
       const builder = new LensConfigBuilder();
       const lensState = builder.fromAPIFormat(baseGauge);
       const apiOutput = builder.toAPIFormat(lensState) as GaugeConfig;
-      const parsed = gaugeConfigSchema.parse(apiOutput) as GaugeConfig;
+      const parsed = gaugeConfigSchema.parse(apiOutput);
 
       expect(apiOutput.metric.ticks).toEqual({ visible: true, mode: 'bands' });
       expect(parsed.metric.ticks).toEqual({ visible: true, mode: 'bands' });
@@ -153,7 +153,7 @@ describe('Gauge', () => {
       const builder = new LensConfigBuilder();
       const lensState = builder.fromAPIFormat(config);
       const apiOutput = builder.toAPIFormat(lensState) as GaugeConfig;
-      const parsed = gaugeConfigSchema.parse(apiOutput) as GaugeConfig;
+      const parsed = gaugeConfigSchema.parse(apiOutput);
 
       expect(apiOutput.metric.ticks).toEqual({ visible: false });
       expect(parsed.metric.ticks).toEqual({ visible: false });

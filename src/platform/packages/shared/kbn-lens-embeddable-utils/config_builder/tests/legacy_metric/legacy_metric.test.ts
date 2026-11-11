@@ -163,7 +163,7 @@ describe('Legacy Metric', () => {
       const builder = new LensConfigBuilder();
       const lensState = builder.fromAPIFormat(config);
       const apiOutput = builder.toAPIFormat(lensState) as LegacyMetricConfig;
-      const parsed = legacyMetricConfigSchema.parse(apiOutput) as LegacyMetricConfig;
+      const parsed = legacyMetricConfigSchema.parse(apiOutput);
 
       expect(parsed.metric.color).not.toBeDefined();
     });
@@ -189,7 +189,7 @@ describe('Legacy Metric', () => {
       const builder = new LensConfigBuilder();
       const lensState = builder.fromAPIFormat(config);
       const apiOutput = builder.toAPIFormat(lensState) as LegacyMetricConfig;
-      const parsed = legacyMetricConfigSchema.parse(apiOutput) as LegacyMetricConfig;
+      const parsed = legacyMetricConfigSchema.parse(apiOutput);
 
       expect(parsed.metric.color).toEqual(AUTO_COLOR);
     });

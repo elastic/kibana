@@ -406,7 +406,7 @@ describe('Metric', () => {
 
     it('should keep the default placement of a visible name after schema parse', () => {
       const { apiOutput } = convert(getConfigWithSecondaryLabel({ visible: true }));
-      const parsed = metricConfigSchema.parse(apiOutput) as MetricConfig;
+      const parsed = metricConfigSchema.parse(apiOutput);
 
       expect(apiOutput.styling?.secondary?.label).toEqual({ visible: true, placement: 'before' });
       expect(parsed.styling?.secondary?.label).toEqual({ visible: true, placement: 'before' });
@@ -416,7 +416,7 @@ describe('Metric', () => {
       const { apiOutput } = convert(
         getConfigWithSecondaryLabel({ visible: false, placement: 'after' })
       );
-      const parsed = metricConfigSchema.parse(apiOutput) as MetricConfig;
+      const parsed = metricConfigSchema.parse(apiOutput);
 
       expect(apiOutput.styling?.secondary?.label).toEqual({ visible: false });
       expect(parsed.styling?.secondary?.label).toEqual({ visible: false });
