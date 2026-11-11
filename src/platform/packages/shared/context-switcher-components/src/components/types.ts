@@ -52,17 +52,41 @@ export interface ContextSwitcherEnvironmentConfig {
   submenuFooterAction?: ActionConfig;
 }
 
+/** Design variants for the header context switcher. */
+export type ContextSwitcherVariant = 'original' | 'proposal1' | 'proposal2';
+
+/** Project identity shown in the proposal 2 popover header. */
+export interface ContextSwitcherProjectSummary {
+  /** Solution logo, for example "logoSecurity". */
+  icon?: IconType;
+  /** Project name. */
+  name: string;
+  /** Smaller line under the name, for example "Serverless project". */
+  description: string;
+  /** Opens this project in Cloud. */
+  href?: string;
+}
+
 export interface ContextSwitcherProps {
   /** Active space info + full list of spaces. */
   spaces: ContextSwitcherSpacesConfig;
   /**
-   * If provided, enables the root menu with an environment row
-   * (project or deployment) + submenu navigation.
+   * Which header design to render.
+   * `original` is the combined project and space menu.
+   * `proposal1` is the project menu on the Elastic logo and a spaces-only switcher.
+   * `proposal2` is a space-name trigger that opens a header, space list, and footer.
+   */
+  variant?: ContextSwitcherVariant;
+  /**
+   * Used by the original variant. Enables the root menu with an environment row
+   * (project or deployment) and submenu navigation.
    * When absent, the popover shows only the spaces list.
    */
   environmentContext?: ContextSwitcherEnvironmentConfig;
-  /** Optional footer links (e.g. "Connection details", "Manage deployments"). */
+  /** Footer links such as "Get started" and "Connection details". */
   footerLinks?: LinksListItem[];
+  /** Used by proposal 2. */
+  projectSummary?: ContextSwitcherProjectSummary;
   /** Called when the popover opens. */
   onOpen?: () => void;
 }
@@ -85,6 +109,7 @@ export interface ActionConfig {
   onClick?: () => void;
   external?: boolean;
   disabled?: boolean;
+  iconType?: IconType;
   ['data-test-subj']?: string;
 }
 

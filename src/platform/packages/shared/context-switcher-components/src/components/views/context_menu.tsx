@@ -16,7 +16,7 @@ import type { ContextRowModel } from '../types';
 import { type LinksListItem } from '../types';
 
 export interface ContextMenuViewProps {
-  readonly environmentRow: ContextRowModel;
+  readonly environmentRow?: ContextRowModel;
   readonly spacesRow: ContextRowModel;
   readonly footerLinks?: ReadonlyArray<LinksListItem>;
   readonly onClickEnvironmentRow: () => void;
@@ -37,7 +37,7 @@ export const ContextMenuView = ({
   return (
     <>
       <EuiListGroup>
-        <ContextRow row={environmentRow} onClick={onClickEnvironmentRow} />
+        {environmentRow && <ContextRow row={environmentRow} onClick={onClickEnvironmentRow} />}
         <ContextRow row={spacesRow} onClick={onClickSpacesRow} />
       </EuiListGroup>
 

@@ -243,6 +243,16 @@ export function useGlobalSearch(): GlobalSearchConfig | undefined {
  * Returns the current context switcher content set via
  * `chrome.controls.contextSwitcher.set()`, or null if not set.
  */
+/**
+ * Returns the header logo override set via `chrome.controls.headerLogo.set()`,
+ * or null when the Elastic logo should render.
+ */
+export function useHeaderLogo(): ReactNode {
+  const chrome = useChromeService();
+  const content$ = useMemo(() => chrome.controls.headerLogo.get$(), [chrome]);
+  return useObservable(content$, null);
+}
+
 export function useContextSwitcher(): ReactNode {
   const chrome = useChromeService();
   const content$ = useMemo(() => chrome.controls.contextSwitcher.get$(), [chrome]);
@@ -288,5 +298,15 @@ export function useInternalLegacyActionMenu(): MountPoint | undefined {
 export function useUserMenu(): ReactNode {
   const chrome = useChromeService();
   const content$ = useMemo(() => chrome.controls.userMenu.get$(), [chrome]);
+  return useObservable(content$, null);
+}
+
+/**
+ * Returns the action rendered beside the user menu, set via
+ * `chrome.controls.userMenuAction.set()`, or null if not set.
+ */
+export function useUserMenuAction(): ReactNode {
+  const chrome = useChromeService();
+  const content$ = useMemo(() => chrome.controls.userMenuAction.get$(), [chrome]);
   return useObservable(content$, null);
 }

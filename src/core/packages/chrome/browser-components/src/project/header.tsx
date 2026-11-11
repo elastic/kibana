@@ -18,6 +18,7 @@ import {
   useProjectPicker,
   useSubscriptionBadge,
   useUserMenu,
+  useUserMenuAction,
 } from '../shared/chrome_hooks';
 import { ChromeHeaderPageAnnouncer } from '../shared/header_page_announcer';
 
@@ -33,6 +34,7 @@ export const ChromeHeader = React.memo(() => {
         switcher={useContextSwitcher()}
         projectPicker={useProjectPicker()}
         subscriptionBadge={useSubscriptionBadge()}
+        userMenuAction={useUserMenuAction()}
         userMenu={useUserMenu()}
       />
     </>

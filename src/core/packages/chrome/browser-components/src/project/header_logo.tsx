@@ -10,7 +10,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { useBasePath, useCustomBranding, useProjectHome } from '../shared/chrome_hooks';
+import { useBasePath, useCustomBranding, useHeaderLogo, useProjectHome } from '../shared/chrome_hooks';
 import { LoadingIndicator } from '../shared/loading_indicator';
 import { headerButtonBaseStyles, useHeaderButtonStyleVars } from '../shared/header_action_button';
 
@@ -33,10 +33,15 @@ const logoLinkStyles = css`
 `;
 
 export const ChromeHeaderLogo = React.memo(() => {
+  const headerLogo = useHeaderLogo();
   const basePath = useBasePath();
   const homeHref = basePath.prepend(useProjectHome());
   const { logo: customLogo } = useCustomBranding();
   const styleVars = useHeaderButtonStyleVars();
+
+  if (headerLogo) {
+    return <>{headerLogo}</>;
+  }
 
   return (
     <a

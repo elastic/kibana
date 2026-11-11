@@ -24,7 +24,7 @@ describe('useManagementActions', () => {
 
     expect(result.current.headerAction).toMatchObject({
       id: 'manageSpaces',
-      label: 'Manage',
+      label: 'Manage spaces',
     });
     expect(result.current.footerAction).toMatchObject({
       id: 'createSpace',

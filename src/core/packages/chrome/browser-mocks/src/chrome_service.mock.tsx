@@ -40,6 +40,8 @@ const createSetupContractMock = (): DeeplyMockedKeys<InternalChromeSetup> => {
 const createStartContractMock = () => {
   const nextGlobalSearchState$ = new BehaviorSubject<GlobalSearchConfig | undefined>(undefined);
   const nextUserMenuState$ = new BehaviorSubject<ReactNode>(null);
+  const nextUserMenuActionState$ = new BehaviorSubject<ReactNode>(null);
+  const nextHeaderLogoState$ = new BehaviorSubject<ReactNode>(null);
   const nextContextSwitcherState$ = new BehaviorSubject<ReactNode>(null);
   const nextProjectPickerState$ = new BehaviorSubject<ReactNode>(null);
   const nextSubscriptionBadgeState$ = new BehaviorSubject<ReactNode>(null);
@@ -66,6 +68,18 @@ const createStartContractMock = () => {
     get$: jest.fn().mockReturnValue(nextUserMenuState$),
     set: jest.fn((content?: ReactNode) => {
       nextUserMenuState$.next(content ?? null);
+    }),
+  });
+  const userMenuAction = lazyObject({
+    get$: jest.fn().mockReturnValue(nextUserMenuActionState$),
+    set: jest.fn((content?: ReactNode) => {
+      nextUserMenuActionState$.next(content ?? null);
+    }),
+  });
+  const headerLogo = lazyObject({
+    get$: jest.fn().mockReturnValue(nextHeaderLogoState$),
+    set: jest.fn((content?: ReactNode) => {
+      nextHeaderLogoState$.next(content ?? null);
     }),
   });
   const contextSwitcher = lazyObject({
@@ -126,6 +140,8 @@ const createStartContractMock = () => {
     aiButton,
     globalSearch,
     userMenu,
+    userMenuAction,
+    headerLogo,
     contextSwitcher,
     projectPicker,
     subscriptionBadge,
