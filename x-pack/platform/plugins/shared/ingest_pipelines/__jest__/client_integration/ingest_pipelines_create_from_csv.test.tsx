@@ -108,6 +108,7 @@ describe('<PipelinesCreateFromCsv />', () => {
 
         const callout = await screen.findByTestId('errorCallout');
         expect(callout).toHaveTextContent('File too large');
+        expect(callout).toHaveTextContent('File is greater than allowed size of 10 MB.');
         expect(readFile).not.toHaveBeenCalled();
         expect(httpSetup.post).toHaveBeenCalledTimes(postCallsBefore);
       });
