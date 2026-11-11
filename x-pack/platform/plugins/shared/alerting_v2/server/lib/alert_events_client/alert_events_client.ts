@@ -9,6 +9,7 @@ import { createHash } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import Boom from '@hapi/boom';
 import { inject, injectable } from 'inversify';
+import { createSignalEventDataSchema } from '@kbn/alerting-v2-schemas';
 import type {
   AlertEventSeverity,
   CreateAlertEventData,
@@ -211,6 +212,13 @@ export class AlertEventsClient {
    * as `breached`, and `type: 'signal'` keeps it away from the dispatcher.
    */
   public async createSignalEvent(event: CreateSignalEventData): Promise<CreateSignalEventResponse> {
+    // Validate here as well as in the workflow step, so direct callers of the client
+    // cannot store a reserved source, a lifecycle status or a rule id.
+    const validation = createSignalEventDataSchema.safeParse(event);
+    if (!validation.success) {
+      throw Boom.badRequest(`Invalid signal event: ${validation.error.message}`);
+    }
+
     const groupHash = getGroupHash(event, this.spaceId);
 
     const doc: AlertEventDocument = {
@@ -228,6 +236,8 @@ export class AlertEventsClient {
     // The doc may omit `@timestamp`, so the ingest pipeline must be in place before writing.
     await this.resourceManager.ensureResourceReady(ALERT_EVENTS_RESOURCE_KEY);
 
+    // No `refresh: 'wait_for'` as in Create Alert: that is there so the next episode lookup
+    // sees the write, and a signal has no lookup.
     const { errors } = await this.storageService.bulkIndexDocs({
       index: ALERT_EVENTS_DATA_STREAM,
       docs: [doc],

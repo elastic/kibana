@@ -53,6 +53,24 @@ describe('getCreateSignalEventStepDefinition', () => {
     expect(getAlertEventsClient).toHaveBeenCalledWith(fakeRequest);
   });
 
+  it('passes the data, timestamp, severity and fingerprint through to the client', async () => {
+    const input = {
+      source: 'datadog',
+      data: { message: 'disk almost full' },
+      timestamp: '2026-11-06T10:00:00.000Z',
+      severity: 'high',
+      fingerprint: 'fp-1',
+    };
+    const mockCreate = jest.fn().mockResolvedValue({ group_hash: 'abc123' });
+    const getAlertEventsClient = jest.fn().mockResolvedValue({ createSignalEvent: mockCreate });
+
+    const { handler } = getCreateSignalEventStepDefinition(getAlertEventsClient, allowedPrivilege);
+    const result = await handler(createMockContext(input));
+
+    expect(result).toEqual({ output: { group_hash: 'abc123' } });
+    expect(mockCreate).toHaveBeenCalledWith(input);
+  });
+
   it.each([
     ['a reserved source prefix', { source: 'elastic_monitoring' }],
     ['an alert lifecycle status', { source: 'datadog', alert_status: 'active' }],

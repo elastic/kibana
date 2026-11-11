@@ -493,6 +493,33 @@ describe('AlertEventsClient.createSignalEvent', () => {
     );
   });
 
+  it('leaves @timestamp unset and sets an ISO scheduled_timestamp when the caller sends none', async () => {
+    const { client, storageService } = createClient([]);
+
+    await client.createSignalEvent({ source: 'datadog' });
+
+    const [{ docs }] = storageService.bulkIndexDocs.mock.calls[0];
+    expect(docs[0]).not.toHaveProperty('@timestamp');
+    expect(docs[0].scheduled_timestamp).toEqual(
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
+    );
+  });
+
+  it('rejects invalid input without writing', async () => {
+    const { client, storageService } = createClient([]);
+
+    const reservedSource = { source: 'elastic_internal' };
+    const withLifecycleStatus = { source: 'datadog', alert_status: 'inactive' };
+    const withRuleId = { source: 'datadog', rule_id: 'rule-1' };
+
+    await expect(client.createSignalEvent(reservedSource)).rejects.toThrow('Invalid signal event');
+    await expect(client.createSignalEvent(withLifecycleStatus)).rejects.toThrow(
+      'Invalid signal event'
+    );
+    await expect(client.createSignalEvent(withRuleId)).rejects.toThrow('Invalid signal event');
+    expect(storageService.bulkIndexDocs).not.toHaveBeenCalled();
+  });
+
   it('narrows the series with a fingerprint or fingerprint_fields', async () => {
     const { client } = createClient([]);
 
