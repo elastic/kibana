@@ -10,7 +10,7 @@ import {
   DASHBOARD_ATTACHMENT_TYPE,
   DASHBOARD_SO_TYPE,
 } from '@kbn/cases-plugin/common/constants/attachments';
-import type { BulkCreateUnifiedAttachmentsRequest } from '@kbn/cases-plugin/common/types/api';
+import type { BulkCreateAttachmentsRequestV2 } from '@kbn/cases-plugin/common/types/api';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getPostCaseRequest, postCaseReq } from '../../../../common/lib/mock';
 import {
@@ -149,7 +149,7 @@ export default ({ getService }: FtrProviderContext): void => {
             metadata: { title: 'My dashboard', soType: DASHBOARD_SO_TYPE },
             owner: 'securitySolutionFixture',
           },
-        ] as unknown as BulkCreateUnifiedAttachmentsRequest,
+        ] as unknown as BulkCreateAttachmentsRequestV2,
       });
 
       expect(
