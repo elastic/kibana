@@ -44,24 +44,45 @@ Every run reads ORCA through the suite's per-cutoff document-level-security keys
 Each lane has its own Elasticsearch: the investigator's ORCA connector is per space and its key is
 swapped per cutoff, so a shared cluster would race. Lanes start with `~/.nightshift-harness/lane.kibana.yml`
 loaded after `kibana.dev.yml` (`DEV_STACK_EXTRA_KIBANA_CONFIG`): Wiki, Memory, decision trees and
-learning off, online evals paused, Task Manager capacity 21, and the suite's sandbox key.
+learning off, online evals paused, Task Manager capacity 26 (16 investigations in flight), and
+the suite's sandbox key.
 `prepare` binds the service accounts, turns quotas off, sets the ORCA custom context and allows
 GitHub on the space's sandbox egress allowlist.
 
+## Run cache
+
+Every scored rollout is stored under `~/.nightshift-harness/cache/`, keyed by everything that
+determines its outcome distribution: task, the variant's editable files, the lane's committed
+runtime trees (`nightshift_investigations`, `agent_builder`), agent model, judge model, telemetry
+variant, the suite's task and judge code, and a `CACHE_VERSION` in `cache.ts` to bump when the
+meaning of a stored run changes. A run asks for `tasks × rollouts`; stored rollouts are reused
+and only the rest run. Harness and infrastructure failures (judge errors, transport errors,
+investigations that outlive their deadline) are not stored; the agent's own failures are, since
+re-running only failures would bias a sample toward success. An unchanged incumbent therefore
+costs nothing after its first measurement, and a gate round runs only the candidate.
+
 ## Loop
 
-1. Measure the incumbent on the search split (reused while the incumbent is unchanged).
+1. Measure the incumbent on the search split (cached).
 2. Write the bundle into `<candidate>/.harness-scratch/`: `index.md` (worst first), `cases/*.json`
    (question, report, judge reading, usage, full tool-call trajectory), history, feedback.
 3. Proposer (cursor `grok-4.7-high`) edits the candidate worktree and writes `proposal.json`. The
    task prompt states the grading contract (held-out incidents, no-flags tier, unseen customer
    corpus, cost, regressions).
-4. Reviewer (cursor) blocks benchmark encoding, flag privileging, grader gaming.
+4. Reviewer (cursor) blocks only blatant cheating: answer-key leaks (flag, service, index names),
+   evaluation detection, grader gaming, removed placeholders or guardrails. Grey areas go to the
+   gate.
 5. Lint (paths, placeholders) + jest on the agent and sandbox tool folders.
 6. Restart the candidate lane; both lanes run the gate split in parallel.
-7. Paired bootstrap over incidents; quality or cost path, regression cap, execution guard.
+7. Paired bootstrap over incidents at 80% two-sided confidence (the low end is a one-sided 90%
+   bound); quality or cost path, regression cap, execution guard.
 8. Re-measure the candidate on search to check the proposal's predictions.
 9. Promote: write the edits into the incumbent worktree and restart it.
+10. After the last round, once: the customer0 holdout (`ns-investigation-golden-2710` + `-0911`,
+    18 graded production incidents) compares the final incumbent with the campaign's start, in
+    `~/.nightshift-harness/holdout/` and `lineage/holdout-<campaign>.json`. Never fed back.
+
+The agent model defaults to Haiku 5.5 (`--agent` to change).
 
 ## Commands
 

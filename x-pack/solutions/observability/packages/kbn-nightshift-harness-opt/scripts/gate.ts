@@ -9,6 +9,8 @@ import type { RunSummary, TaskRun } from './runner';
 
 export interface GateResult {
   accepted: boolean;
+  /** Two-sided coverage of the reported intervals, e.g. 0.8 for the 10th–90th percentile. */
+  confidence?: number;
   acceptedVia: 'quality' | 'cost' | null;
   /** Incidents scored on both sides; only these enter the paired comparison. */
   seeds: number;
@@ -89,7 +91,9 @@ const percentile = (sorted: number[], fraction: number): number =>
   sorted[Math.min(sorted.length - 1, Math.floor(fraction * sorted.length))] ?? 0;
 
 /**
- * Paired accept test, clustered by incident, with two acceptance paths:
+ * Paired accept test, clustered by incident, with two acceptance paths. Intervals are two-sided at
+ * \`confidence\` (default 0.8: the low end is a one-sided 90% bound), so an accept means "better
+ * with 90% confidence", which needs about 2.3× fewer samples than a 95% two-sided interval:
  *
  * - **quality**: reward CI excludes 0 and cost is at most `maxCostRatio` of the incumbent's;
  * - **cost**: reward non-inferior (CI low above `−nonInferiorityMargin`) and USD per unit of
@@ -108,6 +112,7 @@ export const gateCandidate = ({
   regressionEpsilon = 0.05,
   nonInferiorityMargin = 0.02,
   maxExecutionDrop = 0.03,
+  confidence = 0.8,
 }: {
   incumbent: RunSummary;
   candidate: RunSummary;
@@ -117,6 +122,7 @@ export const gateCandidate = ({
   regressionEpsilon?: number;
   nonInferiorityMargin?: number;
   maxExecutionDrop?: number;
+  confidence?: number;
 }): GateResult => {
   const incumbentBySeed = aggregateBySeed(incumbent.runs);
   const candidateBySeed = aggregateBySeed(candidate.runs);
@@ -149,10 +155,11 @@ export const gateCandidate = ({
   rewardMeans.sort((a, b) => a - b);
   costDeltas.sort((a, b) => a - b);
 
-  const ciLow = percentile(rewardMeans, 0.025);
-  const ciHigh = percentile(rewardMeans, 0.975);
-  const costPerSolvedCiLow = percentile(costDeltas, 0.025);
-  const costPerSolvedCiHigh = percentile(costDeltas, 0.975);
+  const tail = (1 - confidence) / 2;
+  const ciLow = percentile(rewardMeans, tail);
+  const ciHigh = percentile(rewardMeans, 1 - tail);
+  const costPerSolvedCiLow = percentile(costDeltas, tail);
+  const costPerSolvedCiHigh = percentile(costDeltas, 1 - tail);
 
   const improvements = seeds.filter((seedId) => rewardDelta(seedId) > regressionEpsilon);
   // A cluster regresses only when every scored run got worse than every incumbent run: most runs
@@ -208,6 +215,7 @@ export const gateCandidate = ({
     executionOk && ((qualityWin && qualityRegressionsOk) || (costWin && costRegressionsOk));
   return {
     accepted,
+    confidence,
     acceptedVia: !accepted ? null : qualityWin && qualityRegressionsOk ? 'quality' : 'cost',
     seeds: seeds.length,
     meanDelta,

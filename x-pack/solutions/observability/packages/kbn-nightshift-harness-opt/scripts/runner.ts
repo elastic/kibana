@@ -31,6 +31,7 @@ import type { OrcaTask } from './dataset';
 import type { LaneSettings } from './paths';
 import { createLaneFetch, createLaneKbnClient, applyOrcaSpace } from './kibana';
 import { costUsd } from './pricing';
+import { createRunCache, isInfrastructureFailure } from './cache';
 
 export type TelemetryVariant = 'full' | 'no-flags';
 
@@ -67,6 +68,10 @@ export interface TaskRun {
   costUsd: number;
   /** Holdout only: the anti-leakage judge found post-incident evidence in the trajectory. */
   leaked?: boolean;
+  /** A judge call failed: the run is unscored for a harness reason, not the agent's. */
+  judgeError?: boolean;
+  /** Served from the run cache instead of a fresh investigation. */
+  cached?: boolean;
   /** Full trajectory, report and scores on disk, for the proposer bundle. */
   tracePath: string;
 }
@@ -208,7 +213,7 @@ const runVariantOnLane = async ({
   lane,
   tasks,
   rollouts,
-  concurrency = 8,
+  concurrency = 16,
   agentConnectorId,
   judgeConnectorId,
   telemetryVariant = 'no-flags',
@@ -220,19 +225,47 @@ const runVariantOnLane = async ({
   const traceDir = Path.join(outputDir, label, 'traces');
   Fs.mkdirSync(traceDir, { recursive: true });
 
-  const work = tasks.flatMap((task) =>
+  const cache = createRunCache({
+    kind: 'orca',
+    variantHash: variant.hash,
+    worktree: lane.worktree,
+    agentConnectorId,
+    judgeConnectorId,
+    telemetryVariant,
+  });
+  const requested = tasks.flatMap((task) =>
     Array.from({ length: rollouts }, (unused, rollout) => ({ task, rollout }))
   );
-  const cutoffs = [...new Set(tasks.map(({ cutoff }) => cutoff))];
+  // Stored rollouts of the same key are samples of the same distribution: reuse them, run the rest.
+  const cachedRuns: TaskRun[] = [];
+  const work = requested.filter(({ task, rollout }) => {
+    const hit = cache.get(task.id, rollout);
+    if (!hit) return true;
+    const tracePath = Path.join(traceDir, `${task.caseId}-r${rollout}.json`);
+    Fs.writeFileSync(tracePath, hit.trace);
+    cachedRuns.push({ ...hit.run, tracePath, cached: true });
+    return false;
+  });
+  const cutoffs = [...new Set(work.map(({ task }) => task.cutoff))];
   const batches = cutoffs.reduce(
     (sum, cutoff) =>
-      sum +
-      Math.ceil((tasks.filter((task) => task.cutoff === cutoff).length * rollouts) / concurrency),
+      sum + Math.ceil(work.filter(({ task }) => task.cutoff === cutoff).length / concurrency),
     0
   );
   log.info(
-    `[harness-opt] "${label}" on ${lane.lane} (variant ${variant.hash}, ${telemetryVariant}): ${tasks.length} tasks × ${rollouts} over ${cutoffs.length} cutoffs, ~${batches} batches`
+    `[harness-opt] "${label}" on ${lane.lane} (variant ${variant.hash}, ${telemetryVariant}): ${tasks.length} tasks × ${rollouts} = ${requested.length} runs, ${cachedRuns.length} cached (key ${cache.key}), ${work.length} to run over ${cutoffs.length} cutoffs, ~${batches} batches`
   );
+  if (work.length === 0) {
+    return summarize({
+      label,
+      variant,
+      telemetryVariant,
+      agentConnectorId,
+      runs: cachedRuns,
+      outputDir,
+      log,
+    });
+  }
 
   const evaluators = createOrcaEvaluators({
     inferenceClient: createRestClient({ fetch, bindTo: { connectorId: judgeConnectorId } }),
@@ -317,6 +350,7 @@ const runVariantOnLane = async ({
         cachedInputTokens: usage?.cached_input_tokens,
         outputTokens: usage?.output_tokens,
       }),
+      judgeError: results.some((result) => result.label === 'judge-error'),
       tracePath,
     };
     Fs.writeFileSync(
@@ -388,7 +422,11 @@ const runVariantOnLane = async ({
 
   // Judges run after every investigation ended: they never hold a cutoff's slot.
   const scored = await Promise.all(
-    runs.map(({ task, rollout, output }) => scoreRun(task, rollout, output))
+    runs.map(async ({ task, rollout, output }) => {
+      const run = await scoreRun(task, rollout, output);
+      if (!isInfrastructureFailure(run)) cache.put(task.id, run);
+      return run;
+    })
   );
 
   return summarize({
@@ -396,7 +434,7 @@ const runVariantOnLane = async ({
     variant,
     telemetryVariant,
     agentConnectorId,
-    runs: scored,
+    runs: [...cachedRuns, ...scored],
     outputDir,
     log,
   });

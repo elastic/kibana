@@ -319,7 +319,7 @@ function viewRounds() {
     failureBlock +
     (g ? cards([
       ['Δ reward', sign(g.meanDelta), cls(g.meanDelta)],
-      ['95% CI', '[' + n(g.ciLow) + ', ' + n(g.ciHigh) + ']'],
+      [Math.round((g.confidence || 0.95) * 100) + '% CI', '[' + n(g.ciLow) + ', ' + n(g.ciHigh) + ']'],
       ['incidents', g.seeds],
       ['execution', pct(g.incumbentExecutionSuccess) + ' → ' + pct(g.candidateExecutionSuccess)],
       ['$ / solved', usd(g.incumbentCostPerSolved) + ' → ' + usd(g.candidateCostPerSolved)],

@@ -28,6 +28,7 @@ import { readCustomer0Telemetry } from './secrets';
 import { judgeConnector, summarize, withLane } from './runner';
 import type { RunSummary, TaskRun } from './runner';
 import { gateCandidate } from './gate';
+import { createRunCache, isInfrastructureFailure } from './cache';
 
 const SETTLE_MS = 2 * 60_000;
 
@@ -59,7 +60,7 @@ export const runHoldoutVariant = ({
   variant,
   lane,
   tasks,
-  concurrency = 8,
+  concurrency = 16,
   agentConnectorId,
   judgeConnectorId,
   outputDir,
@@ -79,9 +80,37 @@ export const runHoldoutVariant = ({
     const fetch = createLaneFetch(lane);
     const traceDir = Path.join(outputDir, label, 'traces');
     Fs.mkdirSync(traceDir, { recursive: true, mode: 0o700 });
+    const cache = createRunCache({
+      kind: 'customer0',
+      variantHash: variant.hash,
+      worktree: lane.worktree,
+      agentConnectorId,
+      judgeConnectorId,
+      telemetryVariant: 'full',
+    });
+    const cachedRuns: TaskRun[] = [];
+    const pending = tasks.filter((task) => {
+      const hit = cache.get(task.id, 0);
+      if (!hit) return true;
+      const tracePath = Path.join(traceDir, `${task.caseId}.json`);
+      Fs.writeFileSync(tracePath, hit.trace, { mode: 0o600 });
+      cachedRuns.push({ ...hit.run, tracePath, cached: true });
+      return false;
+    });
     log.info(
-      `[holdout] "${label}" on ${lane.lane} (variant ${variant.hash}): ${tasks.length} customer0 incidents`
+      `[holdout] "${label}" on ${lane.lane} (variant ${variant.hash}): ${tasks.length} customer0 incidents, ${cachedRuns.length} cached, ${pending.length} to run`
     );
+    if (pending.length === 0) {
+      return summarize({
+        label,
+        variant,
+        telemetryVariant: 'full',
+        agentConnectorId,
+        runs: cachedRuns,
+        outputDir,
+        log,
+      });
+    }
     await applyCustomer0Space({
       fetch,
       kbnClient: createLaneKbnClient(lane, log),
@@ -101,9 +130,9 @@ export const runHoldoutVariant = ({
 
     // A plain pool: customer0 has no telemetry cutoff to group by.
     const outputs: Array<{ task: OrcaTask; output: InvestigationTaskOutput }> = [];
-    const queue = [...tasks];
+    const queue = [...pending];
     await Promise.all(
-      Array.from({ length: Math.min(concurrency, tasks.length) }, async () => {
+      Array.from({ length: Math.min(concurrency, pending.length) }, async () => {
         for (let task = queue.shift(); task; task = queue.shift()) {
           const output = await runInvestigation(fetch, task.example, { id: agentConnectorId });
           if (
@@ -135,6 +164,7 @@ export const runHoldoutVariant = ({
             }
           })
         );
+        const judgeError = [goal, cause, leakage].some((result) => result.label === 'judge-error');
         const goalPass = asScore(goal.score);
         const causeCompleteness = asScore(cause.score);
         const leaked = asScore(leakage.score) === 0;
@@ -202,8 +232,10 @@ export const runHoldoutVariant = ({
             cachedInputTokens: usage?.cached_input_tokens,
             outputTokens: usage?.output_tokens,
           }),
+          judgeError,
           tracePath,
         };
+        if (!isInfrastructureFailure(run)) cache.put(task.id, run);
         log.info(
           `[${label}] ${task.caseId}: reward ${reward?.toFixed(2) ?? 'unscored'} (goal ${
             goalPass?.toFixed(2) ?? '-'
@@ -219,7 +251,7 @@ export const runHoldoutVariant = ({
       variant,
       telemetryVariant: 'full',
       agentConnectorId,
-      runs,
+      runs: [...cachedRuns, ...runs],
       outputDir,
       log,
     });

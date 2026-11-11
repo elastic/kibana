@@ -29,7 +29,8 @@ import { dryRound, runCampaign } from './campaign';
 import { serveReport, writeReport } from './report';
 import { rescoreTraces } from './rescore';
 
-const DEFAULT_AGENT = '.anthropic-claude-5.5-sonnet-chat_completion';
+/** Haiku: about 20× cheaper than Sonnet per investigation, so gates can afford rollouts. */
+const DEFAULT_AGENT = '.anthropic-claude-5.5-haiku-chat_completion';
 /** ORCA's judges bind to GPT-5.4 in the suite; same model here. */
 const DEFAULT_JUDGE = '.openai-gpt-5.4-chat_completion';
 
@@ -126,7 +127,7 @@ export const cli = () =>
               variant: { hash: treeHash(lane.worktree) },
               lane,
               tasks: limited,
-              concurrency: asNumber(flags.concurrency, 8),
+              concurrency: asNumber(flags.concurrency, 16),
               agentConnectorId,
               judgeConnectorId,
               outputDir,
@@ -149,7 +150,7 @@ export const cli = () =>
             lane,
             tasks,
             rollouts: asNumber(flags.rollouts, 1) ?? 1,
-            concurrency: asNumber(flags.concurrency, 8),
+            concurrency: asNumber(flags.concurrency, 16),
             agentConnectorId,
             judgeConnectorId,
             telemetryVariant,
@@ -209,7 +210,7 @@ export const cli = () =>
             rounds: asNumber(flags.rounds, 1) ?? 1,
             searchRollouts: asNumber(flags['search-rollouts'], 1) ?? 1,
             gateRollouts: asNumber(flags['gate-rollouts'], 2) ?? 2,
-            concurrency: asNumber(flags.concurrency, 8) ?? 8,
+            concurrency: asNumber(flags.concurrency, 16) ?? 16,
             searchTasks: tasksForSplit('search', { limit: asNumber(flags['search-limit']) }),
             gateTasks: tasksForSplit('gate', { limit: asNumber(flags['gate-limit']) }),
             lanes,
