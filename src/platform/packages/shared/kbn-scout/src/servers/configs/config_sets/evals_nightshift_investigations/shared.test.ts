@@ -124,9 +124,9 @@ describe.each([
     );
   });
 
-  it('reserves capacity for sixteen investigations and five background tasks', () => {
+  it('reserves capacity for sixteen investigations and the knowledge tasks they queue', () => {
     const servers = loadServers(configPath, { SANDBOX_KIBANA_CONFIG });
-    expect(servers.kbnTestServer.serverArgs).toContain('--xpack.task_manager.capacity=21');
+    expect(servers.kbnTestServer.serverArgs).toContain('--xpack.task_manager.capacity=42');
   });
 
   it('loads the optional connector set YAML and keeps tracing exporter headers in the environment', () => {

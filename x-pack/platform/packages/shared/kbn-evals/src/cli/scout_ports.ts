@@ -8,8 +8,8 @@
 import Net from 'net';
 import { execFileSync } from 'child_process';
 
-/** Host ports kbn-es always maps for the serverless ES nodes' transport (es01-es03). */
-export const SERVERLESS_TRANSPORT_PORTS = [9300, 9301, 9302] as const;
+/** Host ports kbn-es maps for the serverless ES nodes' transport (es01 on 9300, es02 on 9302). */
+export const SERVERLESS_TRANSPORT_PORTS = [9300, 9302] as const;
 
 const isPortInUse = (port: number): Promise<boolean> =>
   new Promise((resolve) => {

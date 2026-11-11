@@ -97,6 +97,9 @@ const readSpace = async (source: Client, index: string, spaceId: string) => {
   return hits;
 };
 
+const isArchived = (hit: { _source: Record<string, unknown> }): boolean =>
+  (hit._source.attributes as { status?: unknown } | undefined)?.status === 'archived';
+
 const readSystem = async (source: Client, system: KnowledgeSystem, spaceId: string) => {
   try {
     const hits = await readSpace(source, KNOWLEDGE_INDICES[system], spaceId);
@@ -132,7 +135,8 @@ const writeAll = async (
 
 /**
  * Replaces the eval space's knowledge with the source space's, for every selected system, before
- * the first example runs. Returns what was loaded, for the experiment's metadata.
+ * the first example runs. Archived Wiki pages are left out. Returns what was loaded, for the
+ * experiment's metadata.
  *
  * Known limitation: the dump is the source space's knowledge as it is now. It is not filtered
  * against the cases under test, so it can hold knowledge an earlier investigation of the same case
@@ -170,7 +174,9 @@ export const restoreKnowledge = async ({
   const dumps = new Map<KnowledgeSystem, Awaited<ReturnType<typeof readSpace>>>();
   try {
     for (const system of systems) {
-      const hits = await readSystem(source, system, sourceSpaceId);
+      const hits = (await readSystem(source, system, sourceSpaceId)).filter(
+        (hit) => system !== 'wiki' || !isArchived(hit)
+      );
       if (hits.length === 0) {
         throw new Error(
           `The knowledge source has no ${system} documents in space ${sourceSpaceId}`
