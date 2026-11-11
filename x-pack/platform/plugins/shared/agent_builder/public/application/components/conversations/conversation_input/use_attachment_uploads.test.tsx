@@ -56,7 +56,7 @@ const getNames = (attachments: ConversationAttachment[] = []): string[] =>
     return (attachment.data as { name?: string }).name ?? '';
   });
 
-const renderUploads = () => {
+const renderUploads = ({ isBinaryUploadEnabled }: { isBinaryUploadEnabled?: boolean } = {}) => {
   const queryClient = new QueryClient();
   const wrapper = ({ children }: PropsWithChildren) => (
     <QueryClientProvider client={queryClient}>
@@ -69,6 +69,7 @@ const renderUploads = () => {
         addErrorToast,
         messageEditorController: messageEditorController as never,
         createConversation: jest.fn(),
+        isBinaryUploadEnabled,
       }),
       attachments: useConversationContext().attachments,
     }),
@@ -110,6 +111,19 @@ describe('useAttachmentUploads', () => {
     jest.mocked(processImageFile).mockImplementation(async ({ name, upsertAttachments }) => {
       upsertAttachments([{ type: 'image', data: { file_id: `file-${name}`, name } }]);
       return true;
+    });
+  });
+
+  describe('when PDF upload is turned off', () => {
+    it('does not accept or upload a PDF, but still reads a text file', async () => {
+      const { result } = renderUploads({ isBinaryUploadEnabled: false });
+
+      expect(result.current.uploads.acceptedFileMimeTypes).not.toContain('application/pdf');
+      paste(result, [createFile('a.pdf', 'application/pdf'), createFile('b.md')]);
+      await waitFor(() => expect(result.current.attachments).toHaveLength(1));
+
+      expect(uploadBinary).not.toHaveBeenCalled();
+      expect(getNames(result.current.attachments)).toEqual(['b.md']);
     });
   });
 

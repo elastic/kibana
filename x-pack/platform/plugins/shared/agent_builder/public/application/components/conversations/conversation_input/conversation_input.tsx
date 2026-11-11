@@ -326,7 +326,12 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     handleRemoveAttachment,
     handleRemoveLoadingFile,
     handleSubmitted: handleUploadsSubmitted,
-  } = useAttachmentUploads({ addErrorToast, messageEditorController, createConversation });
+  } = useAttachmentUploads({
+    addErrorToast,
+    messageEditorController,
+    createConversation,
+    isBinaryUploadEnabled: !onSubmitOverride,
+  });
 
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
