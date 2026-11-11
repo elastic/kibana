@@ -11,13 +11,17 @@ import supertest_ from 'supertest';
 import type SuperTest from 'supertest';
 import { format as formatUrl } from 'url';
 import { ELASTIC_HTTP_VERSION_HEADER, X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+{{#if (some operations 'requestParams')}}
 import { replaceParams } from '@kbn/openapi-common/shared';
+{{/if}}
 
-{{#each operations}}
+{{#each (groupBySourcePath operations 'requestQuery' 'requestParams' 'requestBody')}}
 import type {
-  {{operationId}}RequestQueryInput,
-  {{operationId}}RequestParamsInput,
-  {{operationId}}RequestBodyInput
+  {{~#each operations}}
+  {{~#if requestQuery}}{{operationId}}RequestQueryInput,{{/if}}
+  {{~#if requestParams}}{{operationId}}RequestParamsInput,{{/if}}
+  {{~#if requestBody}}{{operationId}}RequestBodyInput,{{/if}}
+  {{~/each}}
 } from '{{replace sourcePath 'schema.yaml' 'gen'}}';
 {{/each}}
 

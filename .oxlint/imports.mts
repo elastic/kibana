@@ -292,11 +292,11 @@ export const importsOverrides: OxlintOverride[] = [
     },
   },
   {
-    // ESLint fixes the generated API client bundles with this rule and `import/no-duplicates` in one
-    // pass, as the OpenAPI generator expects. See the matching override in `.eslintrc.js`.
+    // The OpenAPI generator writes these API client bundles with duplicate and unused imports and
+    // relies on this rule and `import/no-duplicates` to clean them up.
     files: ['x-pack/solutions/security/packages/test-api-clients/{supertest,scout}/*.gen.ts'],
     rules: {
-      '@kbn/imports/no_unused_imports': 'off',
+      '@kbn/imports/no_unused_imports': 'error',
     },
   },
 ];
