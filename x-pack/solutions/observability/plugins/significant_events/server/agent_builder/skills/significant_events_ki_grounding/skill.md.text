@@ -255,8 +255,9 @@ One sample per rule proves whether its failure is happening now. Apply `<query_r
     `affected` does not explain it.
   - text field: the plain field that is the first argument of a top-level `AND` `MATCH_PHRASE` or
     `MATCH` in `{failure}` (not under `NOT` or `OR`, not inside a function); `:`, `LIKE`, `KQL()`,
-    `QSTR()` and multi-field conditions give none. It is decided from `{failure}` alone; examples also
-    need it usable: the sample result has a column of that name holding a string with a space.
+    `QSTR()` and multi-field conditions give none. When `{failure}` gives none, it is the first field of
+    the `sample` (or `re-sample`) result that holds a string with a space. Examples need it usable: the
+    sample result has a field of that name holding a string with a space.
   - `off_topic` rule: its final sample's verdict is `off_topic` (`<verdicts>`). The isolating condition
     built from that row's observed error replaces `{failure}` in its second `spread` and its profile
     queries.
@@ -278,7 +279,7 @@ One sample per rule proves whether its failure is happening now. Apply `<query_r
   | `sample` | every rule | always `LIMIT 1`; an aggregate KI gets `LIMIT 2`; an authored KI limit of 3 or fewer rows stays instead of ours; `time_range.from` is the rule's `sample_from` (`<query_rules>` rule 3) |
   | `re-sample` | once, when the sample row does not show the rule's failure (healthy, or `off_topic`) or the rule has a text field and the sample result has no usable column for it (Definitions) | `LIMIT 3`, a new query, not a re-run; row-level KIs only. Never after an empty or errored sample or an authored limit of 3 or less, and never just to get a text column that an authored projection omits |
   | `dimensions` | the rule's `affected` is above 0 and it has 2 or more candidates | one query over the candidates |
-  | `examples` | the rule's `affected` is above 0, it is not `off_topic`, and has a usable text field | up to 5 message categories, one sampled message each |
+  | `examples` | the rule's `affected` is above 0, and has a usable text field | up to 5 message categories, one sampled message each |
   | `trend`, `baseline` | every rule, except an `off_topic` rule with no isolating observed-error condition | |
   | `breakdown` | one query per kept field with `f` of 2 or more | up to 3 queries |
 
@@ -462,7 +463,7 @@ sentence 3 allows them):
   service, dependency or target) and is at most 32
   characters of letters, digits and `._:-`; name anything else by its field and what it
   distinguishes. `dimensions` and `breakdown` take field names only from the `candidates:` line; the
-  examples query takes the text field only from `{failure}` (Confirm step). Never group by an
+  examples query takes the text field (Confirm step). Never group by an
   expression over message text, except the `examples` query's CATEGORIZE, or by a high-cardinality
   field (IDs, URLs, timestamps).
 
@@ -513,17 +514,18 @@ Build one topology graph for the batch. `query.features[]` seeds the graph; it n
 query KI is authoritative for which entity a rule concerns: the found row is supporting evidence, and
 the fallback only when the KI identifies none.
 Evaluate every fetched `dependency`, `entity`, and `infrastructure` KI once. Do not issue another KI
-search. When a fetched result is returned as a file, read the whole file before you consolidate:
-never conclude an absence (no edge, no entity) from a summary of it.
+search. When a fetched result is returned as a file, read the whole file before you consolidate or
+write anything that uses it: never conclude an absence (no edge, no entity) from a summary of it.
 
 1. **Activate paths.** Only `confirms` signals activate paths. If no signal is `confirms`, emit empty
    `causal_features` and `blast_radius` and skip the remaining sub-steps. A feature that is not a
    service (a feature of the types `dataset_analysis`, `log_samples`, `log_patterns` or `error_logs`
    describes data) is not a service: it is never the failed entity and never enters
    `causal_features` or `blast_radius`. For a rule with no single failed entity (an unscoped rule
-   whose `breakdown` or `examples` show several services failing), activate paths from
-   every service the breakdown and examples show failing, not only the sampled row: match each failing
-   service, as a source, to the fetched dependency edges whose call target the rows show failing, and
+   whose `breakdown` or `examples` show several services failing), activate paths from every
+   service they show failing well above background (a share of its own lines clearly above the other
+   services', not near zero), not only the sampled row; a service at background activates none: match
+   each such failing service, as a source, to the fetched dependency edges whose call target the rows show failing, and
    keep every grounded edge on those paths. For each confirming signal:
    - Identify the failed entity or infrastructure from the query KI first: `query.features[]`, then
      any value its predicate pins to a field that identifies an entity (e.g: a service, host, pod, database,

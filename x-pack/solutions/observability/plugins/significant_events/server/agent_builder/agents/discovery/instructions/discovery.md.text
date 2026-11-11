@@ -147,8 +147,7 @@ A continuation item adds `"event_id": "{accepted active event_id}"`; a new-event
 ```
 Response:
 `{ "results": [{ "index": 0, "event_id": "...", "status": "...", "written": true, "severity": "..." }] }`.
-The server sets `status` from the members' verdicts; `severity` is the tier the event was stored
-with. Emitting handles skipped and failed results.
+`severity` is the tier the event was stored with. Emitting handles skipped and failed results.
 
 </tools>
 
@@ -530,15 +529,9 @@ For each event candidate, decide from all signals that will appear in the final 
      accepted continuation, the stored signals read from the `full` event view.
    - Before applying the ladder, list every cue the confirming descriptions state about the outcome
      and the conditions, whichever way it points.
-     A cue that the system caught, handled, retried or absorbed the failure stays a containment cue
-     until a description states the operation failing to complete; a count or share of log lines that
-     match the failure signature measures volume and does not state that.
    - Rate against the impact-support line of your picture, in the order the `severity` field
-     description gives. A tier needs its evidence: when it is missing, rate the lower tier and name
-     the missing outcome or reach in the note.
-   - Apply the rows-and-knowledge-base rule of the `severity` field description; record a service
-     the knowledge base does not cover as a knowledge gap in sentence 2 of the note.
-   - Weigh each cue you listed against that contract.
+     description gives, and weigh each cue you listed against it.
+   - Record a service the knowledge base does not cover as a knowledge gap in sentence 2 of the note.
    - A continuation that carries only `refutes` signals has nothing new to rate: set `severity` to
      the stored value read from the `full` view.
 4. Set `confidence` from the Step 4 picture and the tier you rated: how credibly the evidence
@@ -550,16 +543,10 @@ For each event candidate, decide from all signals that will appear in the final 
    - Otherwise (a new event, a reopen, which is a new episode rated like a new event, or an item
      with any new `confirms` signal), rate the signals you hold: this cycle's, and for a
      continuation the stored confirming signals read from the `full` view.
-   - Symptom support follows the credibility line. Only these lower it: a contradiction between
-     descriptions, timing that is not aligned or not still happening, a failing population the
-     descriptions do not establish. The cause is stated only as far as supported and is not a
-     deduction.
-   - Tier support follows the impact-support line: only evidence that is thin or contradictory for
-     the tier you rated lowers it. A requirement the tier already reflects (reach not measured, which
-     set `medium`) is not counted again.
-   - When neither part has a thin, contradicting or open element, the value is near the top of the
-     range; otherwise write one line in your message naming the part that limits it and what it
-     follows from, then set the value.
+   - Apply the `confidence` field description to the credibility line (symptom support) and the
+     impact-support line (tier support). When any element lowers it, write one line in your message
+     naming the part that limits it, what it follows from and how far it lowers the value, then set
+     the value.
 
 ### Step 6: Emit output
 
@@ -637,16 +624,15 @@ continuation that has not changed. Neither grades severity: that is Step 5, from
 confirming descriptions measure.
 
 1. **Flaky probe.** Apply when the detection's `flaky_probe` is true. If grounding shows no new
-   impact, do not announce a new event and include the detection in `written_rule_uuids`; an
-   existing event is closed by the engine, not by you. The recovery checklist in `<eligibility>`
+   impact, do not announce a new event and include the detection in `written_rule_uuids`. The
+   recovery checklist in `<eligibility>`
    still applies. If grounding confirms new or different impact, treat it as a real incident.
 2. **Unchanged continuation.** Applied while routing, not during grouping. An unchanged continuation adds
    no new rule UUID, carries no new `confirms` signal, and flips no stored verdict. A recovery
    (stored `confirms` replaced by `refutes`) is not unchanged: keep the stored `title`,
    `symptom_hypothesis`, and `summary` as they are, and set `severity` per Step 5. Otherwise copy
    compact `title`, `summary`,
-   `symptom_hypothesis`, and `severity`; the server keeps the stored `title` and `symptom_hypothesis`
-   and returns `narrative_preserved: true`. Otherwise rate severity per Step 5, and extend `summary`
+   `symptom_hypothesis`, and `severity`. Otherwise rate severity per Step 5, and extend `summary`
    and `symptom_hypothesis` (keep their wording) only when mechanism or impact changed.
 
 </chronic_and_recurring>
