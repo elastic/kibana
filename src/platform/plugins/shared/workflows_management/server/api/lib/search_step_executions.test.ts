@@ -119,6 +119,30 @@ describe('searchStepExecutions', () => {
     );
   });
 
+  it('matches any of several step ids with a terms clause', async () => {
+    mockStepDataClient.search.mockResolvedValue({
+      hits: { hits: [], total: { value: 0 } },
+    } as any);
+
+    await searchStepExecutions({
+      ...baseParams,
+      stepExecutionsDataClient: mockStepDataClient,
+      logger: mockLogger,
+      workflowId: 'wf-1',
+      stepId: ['step_a', 'step_b'],
+    });
+
+    expect(mockStepDataClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            must: expect.arrayContaining([{ terms: { stepId: ['step_a', 'step_b'] } }]),
+          },
+        },
+      })
+    );
+  });
+
   it('paginates and tracks total hits when workflowExecutionId is used with page and size', async () => {
     mockStepDataClient.search.mockResolvedValue({
       hits: { hits: [], total: { value: 3 } },

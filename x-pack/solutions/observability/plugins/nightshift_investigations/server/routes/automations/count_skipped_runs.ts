@@ -24,7 +24,7 @@ interface StepSearch {
   searchStepExecutions: (
     params: {
       workflowId: string;
-      stepId: string;
+      stepId: string[];
       includeOutput: boolean;
       sourceIncludes: string[];
       page: number;
@@ -61,30 +61,28 @@ export const countSkippedRuns = async ({
   spaceId: string;
 }): Promise<number> => {
   const skippedRunIds = new Set<string>();
-  for (const stepId of TRIGGER_STEP_IDS) {
-    let page = 1;
-    let total = 0;
-    do {
-      const { results, total: stepTotal } = await management.searchStepExecutions(
-        {
-          workflowId,
-          stepId,
-          includeOutput: true,
-          sourceIncludes: ['workflowRunId', 'output'],
-          page,
-          size: PAGE_SIZE,
-          startedAfter,
-          startedBefore,
-          request,
-        },
-        spaceId
-      );
-      total = stepTotal;
-      for (const { workflowRunId, output } of results) {
-        if (hasSkipReason(output)) skippedRunIds.add(workflowRunId);
-      }
-      page++;
-    } while ((page - 1) * PAGE_SIZE < total);
-  }
+  let page = 1;
+  let total = 0;
+  do {
+    const { results, total: stepTotal } = await management.searchStepExecutions(
+      {
+        workflowId,
+        stepId: TRIGGER_STEP_IDS,
+        includeOutput: true,
+        sourceIncludes: ['workflowRunId', 'output'],
+        page,
+        size: PAGE_SIZE,
+        startedAfter,
+        startedBefore,
+        request,
+      },
+      spaceId
+    );
+    total = stepTotal;
+    for (const { workflowRunId, output } of results) {
+      if (hasSkipReason(output)) skippedRunIds.add(workflowRunId);
+    }
+    page++;
+  } while ((page - 1) * PAGE_SIZE < total);
   return skippedRunIds.size;
 };

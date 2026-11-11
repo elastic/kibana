@@ -7,6 +7,7 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { getAutomationsRunCountsRoute } from './get_automations_run_counts';
+import { TRIGGER_STEP_IDS } from './count_skipped_runs';
 
 const { handler } =
   getAutomationsRunCountsRoute['POST /internal/nightshift/automations/run_counts'];
@@ -83,29 +84,27 @@ describe('POST /internal/nightshift/automations/run_counts', () => {
       workflowRunId,
       output: { skip_reason: 'daily_limit' },
     });
-    mockSearchSteps.mockImplementation(async ({ stepId, page }) => {
-      if (stepId === 'trigger_investigation') {
-        const results =
-          page === 1
-            ? Array.from({ length: 100 }, (_, i) => skipped(`r${i}`))
-            : [
-                skipped('r1'),
-                skipped('r100'),
-                { workflowRunId: 'ok', output: { investigation_id: 'x' } },
-              ];
-        return { results, total: 103 };
-      }
-      if (stepId === 'trigger_investigation_slack') {
-        return { results: [skipped('r100'), skipped('r101')], total: 2 };
-      }
-      return { results: [], total: 0 };
-    });
+    mockSearchSteps.mockImplementation(async ({ page }) => ({
+      results:
+        page === 1
+          ? Array.from({ length: 100 }, (_, i) => skipped(`r${i}`))
+          : [
+              skipped('r1'),
+              skipped('r100'),
+              skipped('r101'),
+              skipped('r100'),
+              { workflowRunId: 'ok', output: { investigation_id: 'x' } },
+            ],
+      total: 105,
+    }));
 
     const result = await call({ ids: ['a1'] });
 
     expect(result).toEqual({
       counts: { a1: { succeeded: 48, skipped: 103, running: 0, failed: 0 } },
     });
+    expect(mockSearchSteps).toHaveBeenCalledTimes(2);
+    expect(mockSearchSteps.mock.calls[0][0].stepId).toEqual(TRIGGER_STEP_IDS);
   });
 
   it('never lets succeeded go below zero', async () => {

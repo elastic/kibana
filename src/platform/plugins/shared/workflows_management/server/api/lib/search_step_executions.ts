@@ -29,7 +29,7 @@ export interface SearchStepExecutionsParams {
   workflowExecutionId?: string;
   /** When set, search steps across all runs of a workflow. Use with optional stepId. */
   workflowId?: string;
-  stepId?: string;
+  stepId?: string | string[];
   /** When set, only step executions of this type, e.g. `ai.agent`. */
   stepType?: string;
   additionalQuery?: estypes.QueryDslQueryContainer;
@@ -56,7 +56,7 @@ export interface SearchStepExecutionsParams {
 function buildMustQueries(params: {
   workflowExecutionId?: string;
   workflowId?: string;
-  stepId?: string;
+  stepId?: string | string[];
   stepType?: string;
   spaceId: string;
   additionalQuery?: estypes.QueryDslQueryContainer;
@@ -71,7 +71,11 @@ function buildMustQueries(params: {
     mustQueries.push({ term: { workflowId: params.workflowId } });
   }
   if (params.stepId !== undefined) {
-    mustQueries.push({ term: { stepId: params.stepId } });
+    mustQueries.push(
+      Array.isArray(params.stepId)
+        ? { terms: { stepId: params.stepId } }
+        : { term: { stepId: params.stepId } }
+    );
   }
   if (params.stepType !== undefined) {
     mustQueries.push({ term: { stepType: params.stepType } });
