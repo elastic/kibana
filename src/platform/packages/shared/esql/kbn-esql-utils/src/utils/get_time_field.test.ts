@@ -59,4 +59,15 @@ describe('getESQLTimeField', () => {
 
     expect(http.post).toHaveBeenCalledTimes(2);
   });
+
+  it('reuses the cache when only the pipeline of a shared LET binding changes', async () => {
+    const http = createHttp();
+    const query =
+      'LET base = (FROM logs-timefield-shared-* | LIMIT 1); LET selected = (FROM base, base); FROM selected';
+
+    await getESQLTimeField({ query, http });
+    await getESQLTimeField({ query: query.replace('LIMIT 1', 'LIMIT 2'), http });
+
+    expect(http.post).toHaveBeenCalledTimes(1);
+  });
 });

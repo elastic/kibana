@@ -9,19 +9,11 @@
 import { BasicPrettyPrinter, Builder, isSource, isSubQuery, synth } from '@elastic/esql';
 import {
   esqlCommandRegistry,
-  findNamedSubqueryForSource,
   getIndexFromPromQLParams,
   getNamedSubqueries,
-  getNamedSubqueriesAvailableTo,
   resolveNamedSubquerySources,
 } from '@kbn/esql-language';
-import type { NamedSubquery } from '@kbn/esql-language';
-import type {
-  ESQLSource,
-  ESQLCommand,
-  ESQLAstPromqlCommand,
-  ESQLAstQueryExpression,
-} from '@elastic/esql/types';
+import type { ESQLSource, ESQLCommand, ESQLAstPromqlCommand } from '@elastic/esql/types';
 import { parseEsqlCached } from './parse_esql_cached';
 
 const INDEX_SOURCE_COMMANDS = new Set(['FROM', 'TS']);
@@ -113,49 +105,31 @@ export function getSourceCommandFromESQLQuery(
   return sourceCommand?.name.toUpperCase() ?? '';
 }
 
-const reduceQueryToSource = (
-  query: ESQLAstQueryExpression,
-  namedSubqueries: readonly NamedSubquery[]
-): ESQLAstQueryExpression => {
-  const [source] = query.commands;
-
-  return {
-    ...query,
-    commands: source ? [reduceSubqueriesToSource(source, namedSubqueries)] : [],
-  };
-};
-
 // A DSL filter applies to every source's documents before a subquery's own commands,
 // so a subquery contributes the fields of its source command.
-const reduceSubqueriesToSource = (
-  command: ESQLCommand,
-  namedSubqueries: readonly NamedSubquery[]
-): ESQLCommand => ({
+const reduceSubqueriesToSource = (command: ESQLCommand): ESQLCommand => ({
   ...command,
   args: command.args.map((arg) => {
-    if (isSubQuery(arg)) {
-      return { ...arg, child: reduceQueryToSource(arg.child, namedSubqueries) };
-    }
-    const namedSubquery = isSource(arg)
-      ? findNamedSubqueryForSource(arg, namedSubqueries)
-      : undefined;
-    if (!namedSubquery) {
+    if (!isSubQuery(arg)) {
       return arg;
     }
-    return Builder.expression.parens(
-      reduceQueryToSource(
-        namedSubquery.query,
-        getNamedSubqueriesAvailableTo(namedSubqueries, namedSubquery)
-      )
-    );
+    const [subquerySource] = arg.child.commands;
+    return {
+      ...arg,
+      child: {
+        ...arg.child,
+        commands: subquerySource ? [reduceSubqueriesToSource(subquerySource)] : [],
+      },
+    };
   }),
 });
 
 /**
- * Returns the FROM or TS command alone (with METADATA, and each subquery reduced to its source
+ * Returns the FROM or TS command (with METADATA, and each subquery reduced to its source
  * command), whose columns are the schema of the queried dataset; for PROMQL, `FROM <index>` of
  * its index parameter. `SET project_routing` is left out, so the text matches the ES|QL editor's
  * fields query; pass the routing separately. Empty string if there is no such command.
+ * The LET bindings come first, with their bodies reduced to their source command.
  */
 export function getSourceCommandQueryFromESQLQuery(esql: string | undefined): string {
   if (!esql?.trim()) {
@@ -170,11 +144,25 @@ export function getSourceCommandQueryFromESQLQuery(esql: string | undefined): st
   if (sourceCommand) {
     // Nothing to describe yet, e.g. `FROM ` while typing.
     const hasSources = sourceCommand.args.some((arg) => isSource(arg) || isSubQuery(arg));
-    return hasSources
-      ? BasicPrettyPrinter.command(
-          reduceSubqueriesToSource(sourceCommand, getNamedSubqueries(root.header))
-        )
-      : '';
+    if (!hasSources) {
+      return '';
+    }
+
+    const header = getNamedSubqueries(root.header).map(({ identifier, query }) => {
+      const [bodySource] = query.commands;
+      const body = Builder.expression.query(
+        bodySource ? [reduceSubqueriesToSource(bodySource)] : []
+      );
+      return Builder.header.command.let([
+        Builder.expression.func.binary('=', [identifier, Builder.expression.parens(body)]),
+      ]);
+    });
+
+    return BasicPrettyPrinter.print({
+      ...root,
+      header,
+      commands: [reduceSubqueriesToSource(sourceCommand)],
+    });
   }
 
   const [promqlIndex] = getPromQLSources(root.commands);

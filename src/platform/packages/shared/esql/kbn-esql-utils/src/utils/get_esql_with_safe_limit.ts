@@ -23,17 +23,11 @@ export function getESQLWithSafeLimit(esql: string, limit: number): string {
   });
 
   if (!sortCommand || (sortCommand && sortCommandIndex !== 1)) {
-    const sourcePipeText = esql.substring(
-      sourceCommand.location.min,
-      sourceCommand.location.max + 1
-    );
-    return esql.replace(sourcePipeText, `${sourcePipeText} \n| LIMIT ${limit}`);
+    const sourcePipeText = esql.substring(0, sourceCommand.location.max + 1);
+    return esql.replace(sourcePipeText, () => `${sourcePipeText} \n| LIMIT ${limit}`);
   }
 
-  const sourceSortPipeText = esql.substring(
-    sourceCommand.location.min,
-    sortCommand.location.max + 1
-  );
+  const sourceSortPipeText = esql.substring(0, sortCommand.location.max + 1);
 
-  return esql.replace(sourceSortPipeText, `${sourceSortPipeText} \n| LIMIT ${limit}`);
+  return esql.replace(sourceSortPipeText, () => `${sourceSortPipeText} \n| LIMIT ${limit}`);
 }
