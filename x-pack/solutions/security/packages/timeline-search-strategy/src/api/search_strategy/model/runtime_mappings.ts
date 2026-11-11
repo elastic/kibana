@@ -49,4 +49,4 @@ export const runtimeMappings = lazySchema(() =>
     .optional()
 );
 
-export type RunTimeMappings = z.infer<typeof runtimeMappings>;
+export type ApiRunTimeMappings = z.infer<typeof runtimeMappings>;

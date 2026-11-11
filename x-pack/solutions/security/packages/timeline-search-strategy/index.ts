@@ -7,10 +7,3 @@
 
 export * from './src/search_strategy';
 export * from './src/api/search_strategy';
-
-// Both subtrees declare a `RunTimeMappings` type with the same name but different shapes.
-// The `search_strategy` variant is the one consumed externally, so re-export it explicitly
-// to resolve the star-export ambiguity (TS2308). The API request-schema variant (inferred
-// from zod) is re-exported under an explicit alias for the few consumers that need it.
-export type { RunTimeMappings } from './src/search_strategy';
-export type { RunTimeMappings as ApiRunTimeMappings } from './src/api/search_strategy';

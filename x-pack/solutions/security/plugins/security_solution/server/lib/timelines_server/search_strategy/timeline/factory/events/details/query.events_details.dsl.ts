@@ -7,9 +7,7 @@
 
 import type { ExpandWildcards, MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { JsonObject } from '@kbn/utility-types';
-// The runtime mappings arrive from the parsed API request options, so this consumer needs the
-// request-schema variant (`ApiRunTimeMappings`) rather than the search-strategy `RunTimeMappings`.
-import type { ApiRunTimeMappings as RunTimeMappings } from '@kbn/securitysolution-timeline-search-strategy';
+import type { ApiRunTimeMappings } from '@kbn/securitysolution-timeline-search-strategy';
 
 export const buildTimelineDetailsQuery = ({
   authFilter,
@@ -21,7 +19,7 @@ export const buildTimelineDetailsQuery = ({
   authFilter?: JsonObject;
   id: string;
   indexName: string;
-  runtimeMappings: RunTimeMappings;
+  runtimeMappings: ApiRunTimeMappings;
   includeHiddenIndices?: boolean;
 }) => {
   const basicFilter = {
