@@ -50,7 +50,12 @@ export function getAllowedSearchAiLakeInstallPackagesIfEnabled() {
 }
 
 export function getElasticConnectorsServerlessEnabled() {
-  const ELASTIC_CONNECTORS_SERVERLESS_PROJECT_TYPES = ['security', 'observability'];
+  const ELASTIC_CONNECTORS_SERVERLESS_PROJECT_TYPES = [
+    'security',
+    'observability',
+    'search',
+    'vectordb',
+  ];
 
   const cloud = appContextService.getCloud();
 
