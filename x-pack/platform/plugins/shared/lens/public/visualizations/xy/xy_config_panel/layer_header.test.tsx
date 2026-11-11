@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { screen } from '@testing-library/react';
 
 import type { FramePublicAPI } from '@kbn/lens-common';
 import { LayerHeader, LayerHeaderContent } from './layer_header';
@@ -16,7 +17,7 @@ import type {
   XYLayerConfig,
   XYVisualizationState,
 } from '../types';
-import { mountWithProviders } from '../../../test_utils/test_utils';
+import { renderWithProviders } from '../../../test_utils/test_utils';
 
 describe('layer header', () => {
   describe('annotation layer header', () => {
@@ -61,26 +62,19 @@ describe('layer header', () => {
         setState: () => {},
       };
 
-      expect(
-        mountWithProviders(<LayerHeader {...props} state={getStateWithLayers([byValueLayer])} />)
-          .text()
-          .trim()
-      ).toBe('Annotations');
+      const { container, rerender } = renderWithProviders(
+        <LayerHeader {...props} state={getStateWithLayers([byValueLayer])} />
+      );
+      expect(container.textContent?.trim()).toBe('Annotations');
 
-      expect(
-        mountWithProviders(<LayerHeader {...props} state={getStateWithLayers([byRefLayer])} />)
-          .text()
-          .trim()
-      ).toBe(byRefGroupTitle);
+      rerender(<LayerHeader {...props} state={getStateWithLayers([byRefLayer])} />);
+      expect(container.textContent?.trim()).toBe(byRefGroupTitle);
 
       const cachedMetadata = { title: 'A cached title', description: '', tags: [] };
-      expect(
-        mountWithProviders(
-          <LayerHeader {...props} state={getStateWithLayers([{ ...byRefLayer, cachedMetadata }])} />
-        )
-          .text()
-          .trim()
-      ).toBe(cachedMetadata.title);
+      rerender(
+        <LayerHeader {...props} state={getStateWithLayers([{ ...byRefLayer, cachedMetadata }])} />
+      );
+      expect(container.textContent?.trim()).toBe(cachedMetadata.title);
     });
   });
 
@@ -111,16 +105,16 @@ describe('layer header', () => {
       const frame = createMockFramePublicAPI({
         datasourceLayers: { data: createMockDatasource('formBased').publicAPIMock },
       });
-      const instance = mountWithProviders(<LayerHeaderContent {...getProps(frame)} />);
-      expect(instance.find('[data-test-subj="indexPattern-switcher"]').exists()).toBe(true);
+      renderWithProviders(<LayerHeaderContent {...getProps(frame)} />);
+      expect(screen.getByTestId('lns_layerIndexPatternLabel')).toBeInTheDocument();
     });
 
     it('hides the data view switcher on ES|QL charts', () => {
       const frame = createMockFramePublicAPI({
         datasourceLayers: { data: createMockDatasource('textBased').publicAPIMock },
       });
-      const instance = mountWithProviders(<LayerHeaderContent {...getProps(frame)} />);
-      expect(instance.isEmptyRender()).toBe(true);
+      const { container } = renderWithProviders(<LayerHeaderContent {...getProps(frame)} />);
+      expect(container).toBeEmptyDOMElement();
     });
   });
 });
