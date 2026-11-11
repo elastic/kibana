@@ -94,7 +94,7 @@ describe('GroupSimilarMessagesButton', () => {
     await userEvent.click(screen.getByTestId('dscGroupSimilarMessagesButton'));
 
     expect(getQuery()).toEqual({
-      esql: 'FROM logs-*\n| STATS Count = COUNT(*) BY Pattern = CATEGORIZE(message)\n| SORT Count DESC',
+      esql: 'FROM logs-*\n  | STATS Count = COUNT(*) BY Pattern = CATEGORIZE(message)\n  | SORT Count DESC',
     });
     expect(trackEsqlCategorizeEvent).toHaveBeenCalledWith({
       eventName: 'group_similar_messages_clicked',
