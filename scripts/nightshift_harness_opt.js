@@ -9,15 +9,24 @@
 
 require('@kbn/setup-node-env');
 
-var spawnSync = require('child_process').spawnSync;
+var spawn = require('child_process').spawn;
 var resolve = require('path').resolve;
 
 var script = resolve(
   __dirname,
   '../x-pack/solutions/observability/packages/kbn-nightshift-harness-opt/scripts/run'
 );
-var result = spawnSync(process.execPath, [script].concat(process.argv.slice(2)), {
+var child = spawn(process.execPath, [script].concat(process.argv.slice(2)), {
   stdio: 'inherit',
 });
 
-process.exit(result.status == null ? 1 : result.status);
+// Forward termination, so killing this launcher stops the run (and its sub-agents) instead of
+// orphaning it.
+['SIGTERM', 'SIGINT', 'SIGHUP'].forEach(function (signal) {
+  process.on(signal, function () {
+    child.kill(signal);
+  });
+});
+child.on('exit', function (code, signal) {
+  process.exit(code == null ? (signal ? 130 : 1) : code);
+});
