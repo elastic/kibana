@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import type { Feature, Geometry, Position } from 'geojson';
+import type {
+  AggregationsCompositeAggregate,
+  AggregationsCompositeBucket,
+  AggregationsGeoCentroidAggregate,
+  AggregationsGeoTileGridAggregate,
+  AggregationsGeoTileGridBucket,
+  LatLonGeoLocation,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import {
   RENDER_AS,
   GEOTILE_GRID_AGG_NAME,
@@ -17,37 +25,53 @@ import { clamp, extractPropertiesFromBucket } from '../../../../common/elasticse
 
 const GRID_BUCKET_KEYS_TO_IGNORE = ['key', GEOCENTROID_AGG_NAME];
 
-export function convertCompositeRespToGeoJson(esResponse: any, renderAs: RENDER_AS): Feature[] {
-  return convertToGeoJson(
+type EsResponse = Pick<SearchResponse<unknown>, 'aggregations'>;
+
+export function convertCompositeRespToGeoJson(
+  esResponse: EsResponse,
+  renderAs: RENDER_AS
+): Feature[] {
+  return convertToGeoJson<AggregationsCompositeBucket>(
     esResponse,
     renderAs,
-    (esResponse: any) => {
-      return _.get(esResponse, 'aggregations.compositeSplit.buckets', []);
+    (response) => {
+      const compositeSplit = response.aggregations?.compositeSplit as
+        | AggregationsCompositeAggregate
+        | undefined;
+      return (compositeSplit?.buckets as AggregationsCompositeBucket[] | undefined) ?? [];
     },
-    (gridBucket: any) => {
-      return gridBucket.key[GEOTILE_GRID_AGG_NAME];
+    (gridBucket) => {
+      return gridBucket.key[GEOTILE_GRID_AGG_NAME] as string;
     }
   );
 }
 
-export function convertRegularRespToGeoJson(esResponse: any, renderAs: RENDER_AS): Feature[] {
-  return convertToGeoJson(
+export function convertRegularRespToGeoJson(
+  esResponse: EsResponse,
+  renderAs: RENDER_AS
+): Feature[] {
+  return convertToGeoJson<AggregationsGeoTileGridBucket>(
     esResponse,
     renderAs,
-    (esResponse: any) => {
-      return _.get(esResponse, `aggregations.${GEOTILE_GRID_AGG_NAME}.buckets`, []);
+    (response) => {
+      const geotileGrid = response.aggregations?.[GEOTILE_GRID_AGG_NAME] as
+        | AggregationsGeoTileGridAggregate
+        | undefined;
+      return (geotileGrid?.buckets as AggregationsGeoTileGridBucket[] | undefined) ?? [];
     },
-    (gridBucket: any) => {
+    (gridBucket) => {
       return gridBucket.key;
     }
   );
 }
 
-function convertToGeoJson(
-  esResponse: any,
+function convertToGeoJson<
+  TBucket extends AggregationsCompositeBucket | AggregationsGeoTileGridBucket
+>(
+  esResponse: EsResponse,
   renderAs: RENDER_AS,
-  pluckGridBuckets: (esResponse: any) => any[],
-  pluckGridKey: (gridBucket: any) => string
+  pluckGridBuckets: (esResponse: EsResponse) => TBucket[],
+  pluckGridKey: (gridBucket: TBucket) => string
 ): Feature[] {
   const features: Feature[] = [];
 
@@ -59,7 +83,7 @@ function convertToGeoJson(
       type: 'Feature',
       geometry: rowToGeometry({
         gridKey,
-        [GEOCENTROID_AGG_NAME]: gridBucket[GEOCENTROID_AGG_NAME],
+        gridCentroid: gridBucket[GEOCENTROID_AGG_NAME] as AggregationsGeoCentroidAggregate,
         renderAs,
       }),
       id: gridKey,
@@ -76,7 +100,7 @@ function rowToGeometry({
   renderAs,
 }: {
   gridKey: string;
-  gridCentroid: any;
+  gridCentroid: AggregationsGeoCentroidAggregate;
   renderAs: RENDER_AS;
 }): Geometry {
   const { top, bottom, right, left } = getTileBoundingBox(gridKey);
@@ -98,8 +122,8 @@ function rowToGeometry({
 
   // see https://github.com/elastic/elasticsearch/issues/24694 for why clamp is used
   const pointCoordinates: Position = [
-    clamp(gridCentroid.location.lon, left, right),
-    clamp(gridCentroid.location.lat, bottom, top),
+    clamp((gridCentroid.location as LatLonGeoLocation).lon, left, right),
+    clamp((gridCentroid.location as LatLonGeoLocation).lat, bottom, top),
   ];
 
   return {
