@@ -15,29 +15,15 @@ import type {
 import { EuiButtonEmpty, EuiDataGrid, EuiPanel } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { UI_SETTINGS } from '@kbn/data-service';
-import type {
-  InventoryCellValue,
-  InventoryEntityType,
-  InventoryListResponse,
-  InventoryRow,
-} from '../../../inventory_api/types';
+import type { InventoryEntityType, InventoryListResponse } from '../../../inventory_api/types';
 import {
   ENTITY_INVENTORY_EBT_ACTIONS,
   ENTITY_INVENTORY_EBT_ELEMENTS,
 } from '../../../ebt_constants';
 import { useKibana } from '../../../hooks/use_kibana';
-import { formatCellValue } from '../../utils/format_cell_value';
 import { sortEntityRows } from '../../utils/sort_entity_rows';
-import { getColumnLabel } from './column_labels';
-import { EntityCell, EntityNameCell } from './entity_table_cells';
-import {
-  NAME_COLUMN_ID,
-  getColumnIds,
-  getColumnValue,
-  getDefaultVisibleColumns,
-  getDisplayConfig,
-} from './entity_type_config';
-import { RESET_TO_DEFAULT_LABEL, getTableAriaLabel } from './translations';
+import { EntityCell } from './entity_table_cells';
+import { RESET_TO_DEFAULT_LABEL, getColumnLabel, getTableAriaLabel } from './translations';
 import type { EntityTablePreferences } from './use_entity_table_state';
 import { PAGE_SIZE_OPTIONS, useEntityTableState } from './use_entity_table_state';
 
@@ -61,7 +47,10 @@ export interface EntityTableProps {
   onPreferencesChange: (preferences: EntityTablePreferences) => void;
 }
 
-/** One entity type's results as a data grid. Sorting and pagination run over the loaded rows. */
+/**
+ * One entity type's results as a data grid, with the columns of the response in response order.
+ * Sorting and pagination run over the loaded rows.
+ */
 export const EntityTable = ({
   entityType,
   list,
@@ -72,14 +61,9 @@ export const EntityTable = ({
     services: { uiSettings },
   } = useKibana();
   const { type, name: typeName } = entityType;
-  const displayConfig = useMemo(() => getDisplayConfig(type), [type]);
-  const { iconType, badgeColumns } = displayConfig;
   const dateFormat: string = uiSettings.get(UI_SETTINGS.DATE_FORMAT);
 
-  const defaultVisibleColumns = useMemo(
-    () => getDefaultVisibleColumns(type, list.columns),
-    [type, list.columns]
-  );
+  const defaultVisibleColumns = useMemo(() => list.columns.map(({ name }) => name), [list.columns]);
   const {
     visibleColumns,
     setVisibleColumns,
@@ -103,28 +87,23 @@ export const EntityTable = ({
   );
   const columns = useMemo<EuiDataGridColumn[]>(
     () =>
-      getColumnIds(type, list.columns).map((id) => ({
-        id,
-        displayAsText: getColumnLabel(id),
+      list.columns.map((column) => ({
+        id: column.name,
+        displayAsText: getColumnLabel(column),
         isSortable: true,
-        initialWidth: columnKinds.get(id) === 'last_seen' ? LAST_SEEN_COLUMN_WIDTH : undefined,
+        initialWidth: column.kind === 'last_seen' ? LAST_SEEN_COLUMN_WIDTH : undefined,
       })),
-    [type, list.columns, columnKinds]
+    [list.columns]
   );
   // A kept choice can name a column that a later response of the type does not have.
   const knownVisibleColumns = useMemo(
-    () => visibleColumns.filter((id) => columns.some((column) => column.id === id)),
-    [visibleColumns, columns]
+    () => visibleColumns.filter((id) => columnKinds.has(id)),
+    [visibleColumns, columnKinds]
   );
 
-  const getSortValue = useCallback(
-    (row: InventoryRow, columnId: string): InventoryCellValue | undefined =>
-      getColumnValue(row, columnId, displayConfig),
-    [displayConfig]
-  );
   const sortedRows = useMemo(
-    () => sortEntityRows(list.rows, sortingColumns, getSortValue),
-    [list.rows, sortingColumns, getSortValue]
+    () => sortEntityRows(list.rows, sortingColumns),
+    [list.rows, sortingColumns]
   );
 
   const renderCellValue = useCallback(
@@ -133,20 +112,15 @@ export const EntityTable = ({
       if (!row) {
         return null;
       }
-      const value = getColumnValue(row, columnId, displayConfig);
-      if (columnId === NAME_COLUMN_ID) {
-        return <EntityNameCell name={formatCellValue(value)} iconType={iconType} />;
-      }
       return (
         <EntityCell
-          value={value}
+          value={row[columnId]}
           kind={columnKinds.get(columnId)}
-          isBadge={badgeColumns.includes(columnId)}
           dateFormat={dateFormat}
         />
       );
     },
-    [sortedRows, displayConfig, iconType, badgeColumns, columnKinds, dateFormat]
+    [sortedRows, columnKinds, dateFormat]
   );
 
   const toolbarVisibility = useMemo<EuiDataGridToolBarVisibilityOptions>(

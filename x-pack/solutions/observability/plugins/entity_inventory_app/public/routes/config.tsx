@@ -11,11 +11,20 @@ import { EuiText } from '@elastic/eui';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import type { PathsOf, RouteMap } from '@kbn/typed-react-router-config';
 import { EntityInventoryPageShell } from '../application/components/page_shell';
-import { ENTITY_TYPE_BY_CATEGORY } from '../application/components/entity_table/entity_type_config';
 import { EntityTypeResults } from '../application/components/entity_table/entity_type_results';
 import { EntityInventoryPageFilterControls } from '../application/filters/page_filter_controls';
 import { ENTITY_LIST_PLACEHOLDER } from '../application/translations';
 import type { EntityInventoryEntityCategory } from '../types';
+
+/**
+ * The entity type each page lists; All resources lists groups instead (#6340). The only place in
+ * the app that names a type: it goes when definitions carry a category
+ * (elastic/observability-dev#6239).
+ */
+const ENTITY_TYPE_BY_CATEGORY: Readonly<Partial<Record<EntityInventoryEntityCategory, string>>> = {
+  hosts: 'host',
+  kubernetes: 'k8s.deployment',
+};
 
 const EntityInventoryPage = ({
   entityCategory,

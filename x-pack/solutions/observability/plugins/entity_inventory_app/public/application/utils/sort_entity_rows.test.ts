@@ -8,7 +8,6 @@
 import type { InventoryRow } from '../../inventory_api/types';
 import { sortEntityRows } from './sort_entity_rows';
 
-const getSortValue = (row: InventoryRow, columnId: string) => row[columnId];
 const ids = (rows: InventoryRow[]) => rows.map((row) => row.id);
 
 describe('sortEntityRows', () => {
@@ -20,20 +19,20 @@ describe('sortEntityRows', () => {
   ];
 
   it('returns a copy in input order when there is no sort, without mutating the input', () => {
-    const result = sortEntityRows(rows, [], getSortValue);
+    const result = sortEntityRows(rows, []);
 
     expect(ids(result)).toEqual(['a', 'b', 'c', 'd']);
     expect(result).not.toBe(rows);
   });
 
   it('sorts strings case-insensitively in both directions with nulls last', () => {
-    expect(ids(sortEntityRows(rows, [{ id: 'name', direction: 'asc' }], getSortValue))).toEqual([
+    expect(ids(sortEntityRows(rows, [{ id: 'name', direction: 'asc' }]))).toEqual([
       'c',
       'a',
       'd',
       'b',
     ]);
-    expect(ids(sortEntityRows(rows, [{ id: 'name', direction: 'desc' }], getSortValue))).toEqual([
+    expect(ids(sortEntityRows(rows, [{ id: 'name', direction: 'desc' }]))).toEqual([
       'd',
       'a',
       'c',
@@ -42,13 +41,13 @@ describe('sortEntityRows', () => {
   });
 
   it('sorts numbers numerically with nulls last', () => {
-    expect(ids(sortEntityRows(rows, [{ id: 'count', direction: 'asc' }], getSortValue))).toEqual([
+    expect(ids(sortEntityRows(rows, [{ id: 'count', direction: 'asc' }]))).toEqual([
       'b',
       'a',
       'd',
       'c',
     ]);
-    expect(ids(sortEntityRows(rows, [{ id: 'count', direction: 'desc' }], getSortValue))).toEqual([
+    expect(ids(sortEntityRows(rows, [{ id: 'count', direction: 'desc' }]))).toEqual([
       'd',
       'a',
       'b',
@@ -57,13 +56,13 @@ describe('sortEntityRows', () => {
   });
 
   it('sorts booleans with false before true and nulls last', () => {
-    expect(ids(sortEntityRows(rows, [{ id: 'paused', direction: 'asc' }], getSortValue))).toEqual([
+    expect(ids(sortEntityRows(rows, [{ id: 'paused', direction: 'asc' }]))).toEqual([
       'b',
       'd',
       'a',
       'c',
     ]);
-    expect(ids(sortEntityRows(rows, [{ id: 'paused', direction: 'desc' }], getSortValue))).toEqual([
+    expect(ids(sortEntityRows(rows, [{ id: 'paused', direction: 'desc' }]))).toEqual([
       'a',
       'b',
       'd',
@@ -72,7 +71,7 @@ describe('sortEntityRows', () => {
   });
 
   it('sorts multi-value cells by their first value, treating empty arrays as null', () => {
-    expect(ids(sortEntityRows(rows, [{ id: 'ip', direction: 'asc' }], getSortValue))).toEqual([
+    expect(ids(sortEntityRows(rows, [{ id: 'ip', direction: 'asc' }]))).toEqual([
       'c',
       'a',
       'b',
@@ -90,23 +89,11 @@ describe('sortEntityRows', () => {
 
     expect(
       ids(
-        sortEntityRows(
-          tied,
-          [
-            { id: 'group', direction: 'asc' },
-            { id: 'name', direction: 'asc' },
-          ],
-          getSortValue
-        )
+        sortEntityRows(tied, [
+          { id: 'group', direction: 'asc' },
+          { id: 'name', direction: 'asc' },
+        ])
       )
     ).toEqual(['3', '4', '1', '2']);
-  });
-
-  it('sorts by the value the getter derives', () => {
-    const derived = sortEntityRows(rows, [{ id: 'derived', direction: 'asc' }], (row) =>
-      row.name === null ? 'zzz' : row.id
-    );
-
-    expect(ids(derived)).toEqual(['a', 'c', 'd', 'b']);
   });
 });

@@ -110,7 +110,7 @@ describe('EntityInventoryShell', () => {
     act(() => history.push('/hosts'));
 
     expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
-    expect(screen.getByTestId('dataGridHeaderCell-entityInventory.name')).toBeInTheDocument();
+    expect(screen.getByTestId('dataGridHeaderCell-host.name')).toBeInTheDocument();
     expect(screen.queryByTestId('dataGridHeaderCell-cloud.account.id')).not.toBeInTheDocument();
   });
 

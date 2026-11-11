@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type {
+  InventoryListColumn,
+  InventoryOutputColumnKind,
   InventorySourceError,
   InventoryUnavailableColumn,
 } from '../../../inventory_api/types';
@@ -16,6 +18,19 @@ export const getTableAriaLabel = (typeName: string) =>
     defaultMessage: '{typeName} entities',
     values: { typeName },
   });
+
+const COLUMN_LABEL_BY_KIND: Readonly<Partial<Record<InventoryOutputColumnKind, string>>> = {
+  id: i18n.translate('xpack.entityInventoryApp.entityTable.columns.entityId', {
+    defaultMessage: 'Entity ID',
+  }),
+  last_seen: i18n.translate('xpack.entityInventoryApp.entityTable.columns.lastSeen', {
+    defaultMessage: 'Last seen',
+  }),
+};
+
+/** The header of a column: "Entity ID" for kind `id`, "Last seen" for `last_seen`, else its name. */
+export const getColumnLabel = ({ name, kind }: InventoryListColumn): string =>
+  COLUMN_LABEL_BY_KIND[kind] ?? name;
 
 export const NO_VALUE_LABEL = i18n.translate('xpack.entityInventoryApp.entityTable.noValue', {
   defaultMessage: 'No value',

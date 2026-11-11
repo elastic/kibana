@@ -38,7 +38,7 @@ describe('createFixtureEntityInventoryApiClient', () => {
     }
   );
 
-  it('includes rows with null, multi-value and fallback-name host values', async () => {
+  it('includes host rows with null, multi-value and no host.id values', async () => {
     const { rows } = await createFixtureEntityInventoryApiClient().getEntities('host', REQUEST, {});
 
     expect(rows.some((row) => row['cloud.provider'] === null)).toBe(true);
@@ -46,15 +46,15 @@ describe('createFixtureEntityInventoryApiClient', () => {
     expect(rows.some((row) => row['host.id'] === null && row['host.name'] !== null)).toBe(true);
   });
 
-  it('reports deployments under the OpenTelemetry names, the Elastic Agent names, or both', async () => {
+  it('reports deployments from Elastic Agent, OpenTelemetry, or both', async () => {
     const { rows } = await createFixtureEntityInventoryApiClient().getEntities(
       'k8s.deployment',
       REQUEST,
       {}
     );
     const reportedBy = (row: (typeof rows)[number]) => ({
-      otel: row['k8s.deployment.name'] !== null,
-      elasticAgent: row['kubernetes.deployment.name'] !== null,
+      otel: row['k8s.deployment.uid'] !== null,
+      elasticAgent: row['k8s.deployment.paused'] !== null,
     });
 
     expect(rows.some((row) => reportedBy(row).otel && !reportedBy(row).elasticAgent)).toBe(true);
@@ -69,7 +69,7 @@ describe('createFixtureEntityInventoryApiClient', () => {
       {}
     );
 
-    expect(rows.some((row) => row.paused === true)).toBe(true);
+    expect(rows.some((row) => row['k8s.deployment.paused'] === true)).toBe(true);
   });
 
   it('rejects for an unknown type', async () => {

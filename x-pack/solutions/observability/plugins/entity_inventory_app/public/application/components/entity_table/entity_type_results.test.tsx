@@ -147,9 +147,7 @@ describe('EntityTypeResults', () => {
 
   it('shows the columns and rows of the new type when the type changes', async () => {
     const { showType } = renderResults(createFixtureEntityInventoryApiClient());
-    expect(
-      await screen.findByTestId('dataGridHeaderCell-entityInventory.name')
-    ).toBeInTheDocument();
+    expect(await screen.findByTestId('dataGridHeaderCell-host.name')).toBeInTheDocument();
     expect(screen.getByTestId('dataGridHeaderCell-cloud.account.id')).toBeInTheDocument();
 
     showType('k8s.deployment');
@@ -160,7 +158,7 @@ describe('EntityTypeResults', () => {
         'k8s.deployment'
       )
     );
-    expect(screen.getByTestId('dataGridHeaderCell-entityInventory.namespace')).toBeInTheDocument();
+    expect(screen.getByTestId('dataGridHeaderCell-kubernetes.namespace')).toBeInTheDocument();
     expect(screen.queryByTestId('dataGridHeaderCell-cloud.account.id')).not.toBeInTheDocument();
   });
 
@@ -229,7 +227,7 @@ describe('EntityTypeResults', () => {
       fireEvent.click(screen.getByRole('button', { name: RETRY_LABEL }));
 
       expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
-      expect(screen.getByTestId('dataGridHeaderCell-entityInventory.name')).toBeInTheDocument();
+      expect(screen.getByTestId('dataGridHeaderCell-host.name')).toBeInTheDocument();
       expect(screen.queryByTestId('dataGridHeaderCell-cloud.account.id')).not.toBeInTheDocument();
     });
 
@@ -243,7 +241,7 @@ describe('EntityTypeResults', () => {
 
       showType('k8s.deployment');
       expect(
-        await screen.findByTestId('dataGridHeaderCell-entityInventory.namespace')
+        await screen.findByTestId('dataGridHeaderCell-kubernetes.namespace')
       ).toBeInTheDocument();
       showType('host');
 

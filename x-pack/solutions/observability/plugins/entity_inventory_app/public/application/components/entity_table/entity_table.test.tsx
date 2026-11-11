@@ -9,22 +9,17 @@ import React, { useState } from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import {
-  buildListResponseFixture,
-  HOST_TYPE_FIXTURE,
-  K8S_DEPLOYMENT_TYPE_FIXTURE,
-} from '../../../inventory_api/fixture_data';
+import { UI_SETTINGS } from '@kbn/data-service';
+import { HOST_TYPE_FIXTURE } from '../../../inventory_api/fixture_data';
 import { buildScenarioListResponse } from '../../../inventory_api/fixture_scenarios';
-import type { InventoryListResponse, InventoryRow } from '../../../inventory_api/types';
+import type {
+  InventoryEntityType,
+  InventoryListResponse,
+  InventoryRow,
+} from '../../../inventory_api/types';
 import { createAppServicesMock } from '../../../mocks';
 import type { EntityTableProps } from './entity_table';
 import { EntityTable } from './entity_table';
-import {
-  NAME_COLUMN_ID,
-  NAMESPACE_COLUMN_ID,
-  CLUSTER_COLUMN_ID,
-  getDefaultVisibleColumns,
-} from './entity_type_config';
 import { NO_VALUE_LABEL, RESET_TO_DEFAULT_LABEL } from './translations';
 import type { EntityTablePreferences } from './use_entity_table_state';
 import { DEFAULT_PAGE_SIZE, NO_PREFERENCES } from './use_entity_table_state';
@@ -63,6 +58,8 @@ const smallList = (rows: InventoryRow[]): InventoryListResponse => ({
   unavailableColumns: [],
 });
 
+const NAME_COLUMN_ID = 'host.name';
+
 const renderTable = (list: InventoryListResponse) =>
   render(
     <I18nProvider>
@@ -70,6 +67,62 @@ const renderTable = (list: InventoryListResponse) =>
         <StatefulEntityTable entityType={HOST_TYPE_FIXTURE} list={list} />
       </KibanaContextProvider>
     </I18nProvider>
+  );
+
+// A type the app has never seen: the table knows only what the response says about it.
+const WIDGET_COLUMNS: InventoryListResponse['columns'] = [
+  { name: 'entity.id', kind: 'id' },
+  { name: 'widget.name', kind: 'identity' },
+  { name: 'widget.size', kind: 'attribute' },
+  { name: 'last_seen', kind: 'last_seen' },
+];
+
+const WIDGET_TYPE: InventoryEntityType = {
+  type: 'widget',
+  name: 'Widget',
+  identityFields: ['widget.name'],
+  columns: WIDGET_COLUMNS,
+};
+
+const WIDGET_LIST: InventoryListResponse = {
+  columns: WIDGET_COLUMNS,
+  rows: [
+    {
+      'entity.id': 'widget:sprocket',
+      'widget.name': 'sprocket',
+      'widget.size': 3,
+      last_seen: '2026-10-30T12:00:00.000Z',
+    },
+  ],
+  truncated: false,
+  errors: [],
+  unavailableColumns: [],
+};
+
+const renderWidgetTable = (preferences: EntityTablePreferences = NO_PREFERENCES) => {
+  const services = createAppServicesMock();
+  jest
+    .mocked(services.uiSettings.get)
+    .mockImplementation((key: string) =>
+      key === UI_SETTINGS.DATE_FORMAT ? 'YYYY-MM-DD' : undefined
+    );
+  return render(
+    <I18nProvider>
+      <KibanaContextProvider services={services}>
+        <EntityTable
+          entityType={WIDGET_TYPE}
+          list={WIDGET_LIST}
+          preferences={preferences}
+          onPreferencesChange={jest.fn()}
+        />
+      </KibanaContextProvider>
+    </I18nProvider>
+  );
+};
+
+const getHeaderIds = () =>
+  Array.from(document.querySelectorAll('[data-test-subj^="dataGridHeaderCell-"]')).map((cell) =>
+    cell.getAttribute('data-test-subj')?.replace('dataGridHeaderCell-', '')
   );
 
 const getCell = (rowIndex: number, columnId: string) => {
@@ -88,23 +141,44 @@ const openColumnActions = (columnId: string) => {
 };
 
 describe('EntityTable', () => {
-  it('shows the default visible columns of the type and hides the others', () => {
+  describe('for a type the app has never seen', () => {
+    it('shows every column of the response in response order', () => {
+      renderWidgetTable();
+
+      expect(getHeaderIds()).toEqual(['entity.id', 'widget.name', 'widget.size', 'last_seen']);
+    });
+
+    it('labels the id and last seen columns by kind and the others by their name', () => {
+      renderWidgetTable();
+
+      expect(screen.getByTestId('dataGridHeaderCell-entity.id')).toHaveTextContent('Entity ID');
+      expect(screen.getByTestId('dataGridHeaderCell-widget.name')).toHaveTextContent('widget.name');
+      expect(screen.getByTestId('dataGridHeaderCell-widget.size')).toHaveTextContent('widget.size');
+      expect(screen.getByTestId('dataGridHeaderCell-last_seen')).toHaveTextContent('Last seen');
+    });
+
+    it('renders the cells as returned, with last seen in the date format', () => {
+      renderWidgetTable();
+
+      expect(getCell(0, 'entity.id')).toHaveTextContent('widget:sprocket');
+      expect(getCell(0, 'widget.name')).toHaveTextContent('sprocket');
+      expect(getCell(0, 'widget.size')).toHaveTextContent('3');
+      expect(getCell(0, 'last_seen')).toHaveTextContent('2026-10-30');
+      expect(getCell(0, 'last_seen')).not.toHaveTextContent('T12:00');
+    });
+
+    it('shows the columns the user chose and ignores a chosen column the response lacks', () => {
+      renderWidgetTable({ visibleColumns: ['widget.size', 'widget.color', 'entity.id'] });
+
+      expect(getHeaderIds()).toEqual(['widget.size', 'entity.id']);
+    });
+  });
+
+  it('shows every column of the response by default', () => {
     const list = getFixture('normal');
     renderTable(list);
 
-    getDefaultVisibleColumns('host', list.columns).forEach((columnId) => {
-      expect(screen.getByTestId(`dataGridHeaderCell-${columnId}`)).toBeInTheDocument();
-    });
-    expect(screen.queryByTestId('dataGridHeaderCell-entity.id')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('dataGridHeaderCell-host.os.kernel')).not.toBeInTheDocument();
-  });
-
-  it('names an entity from its fallback name field', () => {
-    renderTable(
-      smallList([hostRow({ 'entity.id': 'host:abc', 'host.hostname': 'web-001.internal' })])
-    );
-
-    expect(getCell(0, NAME_COLUMN_ID)).toHaveTextContent('web-001.internal');
+    expect(getHeaderIds()).toEqual(list.columns.map(({ name }) => name));
   });
 
   it('renders a placeholder for an empty cell', () => {
@@ -168,94 +242,6 @@ describe('EntityTable', () => {
 
     expect(DEFAULT_PAGE_SIZE).toBe(10);
     expect(screen.getByRole('button', { name: 'Rows per page: 10' })).toBeInTheDocument();
-  });
-
-  it('renders the cluster of a deployment as a badge under either naming convention and leaves an empty cluster as a placeholder', () => {
-    const k8sList = buildListResponseFixture('k8s.deployment');
-    if (!k8sList) {
-      throw new Error('Missing k8s.deployment fixture');
-    }
-    const row = (overrides: InventoryRow): InventoryRow => ({
-      ...Object.fromEntries(k8sList.columns.map(({ name }) => [name, null])),
-      ...overrides,
-    });
-    render(
-      <I18nProvider>
-        <KibanaContextProvider services={createAppServicesMock()}>
-          <StatefulEntityTable
-            entityType={K8S_DEPLOYMENT_TYPE_FIXTURE}
-            list={{
-              ...k8sList,
-              rows: [
-                row({ 'k8s.deployment.name': 'frontend', 'k8s.cluster.name': 'prod-cluster-0' }),
-                row({
-                  'kubernetes.deployment.name': 'cart',
-                  'orchestrator.cluster.name': 'prod-cluster-1',
-                }),
-                row({ 'kubernetes.deployment.name': 'scheduler' }),
-              ],
-              truncated: false,
-            }}
-          />
-        </KibanaContextProvider>
-      </I18nProvider>
-    );
-
-    expect(
-      within(getCell(0, CLUSTER_COLUMN_ID) as HTMLElement).getByTestId('entityInventoryCellBadge')
-    ).toHaveTextContent('prod-cluster-0');
-    expect(
-      within(getCell(1, CLUSTER_COLUMN_ID) as HTMLElement).getByTestId('entityInventoryCellBadge')
-    ).toHaveTextContent('prod-cluster-1');
-    expect(
-      within(getCell(2, CLUSTER_COLUMN_ID) as HTMLElement).queryByTestId('entityInventoryCellBadge')
-    ).not.toBeInTheDocument();
-    expect(
-      within(getCell(2, CLUSTER_COLUMN_ID) as HTMLElement).getByText(NO_VALUE_LABEL)
-    ).toBeTruthy();
-  });
-
-  it('shows the deployment name and namespace reported under either naming convention', () => {
-    const k8sList = buildListResponseFixture('k8s.deployment');
-    if (!k8sList) {
-      throw new Error('Missing k8s.deployment fixture');
-    }
-    const row = (overrides: InventoryRow): InventoryRow => ({
-      ...Object.fromEntries(k8sList.columns.map(({ name }) => [name, null])),
-      ...overrides,
-    });
-    render(
-      <I18nProvider>
-        <KibanaContextProvider services={createAppServicesMock()}>
-          <StatefulEntityTable
-            entityType={K8S_DEPLOYMENT_TYPE_FIXTURE}
-            list={{
-              ...k8sList,
-              rows: [
-                row({ 'k8s.deployment.name': 'frontend', 'k8s.namespace.name': 'payments' }),
-                row({ 'kubernetes.deployment.name': 'cart', 'kubernetes.namespace': 'checkout' }),
-              ],
-              truncated: false,
-            }}
-          />
-        </KibanaContextProvider>
-      </I18nProvider>
-    );
-
-    expect(getCell(0, NAME_COLUMN_ID)).toHaveTextContent('frontend');
-    expect(getCell(0, NAMESPACE_COLUMN_ID)).toHaveTextContent('payments');
-    expect(getCell(1, NAME_COLUMN_ID)).toHaveTextContent('cart');
-    expect(getCell(1, NAMESPACE_COLUMN_ID)).toHaveTextContent('checkout');
-  });
-
-  it('keeps cells of other columns as plain text', () => {
-    renderTable(smallList([hostRow({ 'host.name': 'web-001', 'cloud.account.id': 'account-1' })]));
-
-    expect(
-      within(getCell(0, 'cloud.account.id') as HTMLElement).queryByTestId(
-        'entityInventoryCellBadge'
-      )
-    ).not.toBeInTheDocument();
   });
 
   it('clears an active sort on reset', async () => {

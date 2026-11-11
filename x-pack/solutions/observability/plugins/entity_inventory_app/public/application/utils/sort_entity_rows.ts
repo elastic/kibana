@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InventoryCellValue, InventoryRow } from '../../inventory_api/types';
+import type { InventoryRow } from '../../inventory_api/types';
 import { getFirstScalar } from './get_first_scalar';
 
 export interface EntityRowSortingColumn {
@@ -24,13 +24,12 @@ const compareScalars = (a: string | number | boolean, b: string | number | boole
 };
 
 /**
- * Sorts rows by the given columns. Nulls sort last in both directions, multi-value cells sort by
+ * Sorts rows by the raw values of the given columns. Nulls sort last in both directions, multi-value cells sort by
  * their first value, and rows that tie on every column keep their input order.
  */
 export const sortEntityRows = (
   rows: readonly InventoryRow[],
-  sortingColumns: readonly EntityRowSortingColumn[],
-  getSortValue: (row: InventoryRow, columnId: string) => InventoryCellValue | undefined
+  sortingColumns: readonly EntityRowSortingColumn[]
 ): InventoryRow[] => {
   if (sortingColumns.length === 0) {
     return rows.slice();
@@ -38,8 +37,8 @@ export const sortEntityRows = (
 
   return rows.slice().sort((rowA, rowB) => {
     for (const { id, direction } of sortingColumns) {
-      const a = getFirstScalar(getSortValue(rowA, id));
-      const b = getFirstScalar(getSortValue(rowB, id));
+      const a = getFirstScalar(rowA[id]);
+      const b = getFirstScalar(rowB[id]);
       if (a === null || b === null) {
         if (a !== b) {
           return a === null ? 1 : -1;

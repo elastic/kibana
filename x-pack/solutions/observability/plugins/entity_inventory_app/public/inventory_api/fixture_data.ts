@@ -13,7 +13,9 @@ import type {
   InventoryTypesResponse,
 } from './types';
 
-// Columns in `buildColumns` order: id, identity fields, attributes, last_seen.
+// The columns `buildColumns` produces for the entity store's built-in `host`: `entity.id`, the
+// identity fields in ranking order, the attributes in source order with names shared across
+// sources listed once, then `last_seen`.
 const HOST_LIST_COLUMNS: InventoryListColumn[] = [
   { name: 'entity.id', kind: 'id' },
   { name: 'host.id', kind: 'identity' },
@@ -34,27 +36,25 @@ const HOST_LIST_COLUMNS: InventoryListColumn[] = [
   { name: 'last_seen', kind: 'last_seen' },
 ];
 
-// Mirrors the k8s.deployment definition: identity fields of both naming conventions, then the
-// attributes of both sources.
+// The columns `buildColumns` produces for the inventory's `k8s.deployment`.
 const K8S_DEPLOYMENT_LIST_COLUMNS: InventoryListColumn[] = [
   { name: 'entity.id', kind: 'id' },
-  { name: 'k8s.cluster.name', kind: 'identity' },
-  { name: 'k8s.namespace.name', kind: 'identity' },
-  { name: 'k8s.deployment.name', kind: 'identity' },
-  { name: 'orchestrator.cluster.name', kind: 'identity' },
   { name: 'kubernetes.namespace', kind: 'identity' },
   { name: 'kubernetes.deployment.name', kind: 'identity' },
-  { name: 'available_replicas', kind: 'attribute' },
-  { name: 'desired_replicas', kind: 'attribute' },
-  { name: 'paused', kind: 'attribute' },
-  { name: 'app', kind: 'attribute' },
-  { name: 'resource_id', kind: 'attribute' },
+  { name: 'k8s.cluster.name', kind: 'attribute' },
+  { name: 'k8s.deployment.available', kind: 'attribute' },
+  { name: 'k8s.deployment.desired', kind: 'attribute' },
+  { name: 'k8s.deployment.paused', kind: 'attribute' },
+  { name: 'k8s.deployment.label.app', kind: 'attribute' },
+  { name: 'k8s.deployment.uid', kind: 'attribute' },
   { name: 'last_seen', kind: 'last_seen' },
 ];
 
 export const HOST_TYPE_FIXTURE: InventoryEntityType = {
   type: 'host',
   name: 'Host',
+  description:
+    'A physical or virtual machine that runs workloads. Identified by host.id, falling back to host.name, then host.hostname.',
   identityFields: ['host.id', 'host.name', 'host.hostname'],
   columns: HOST_LIST_COLUMNS,
 };
@@ -62,14 +62,8 @@ export const HOST_TYPE_FIXTURE: InventoryEntityType = {
 export const K8S_DEPLOYMENT_TYPE_FIXTURE: InventoryEntityType = {
   type: 'k8s.deployment',
   name: 'K8s Deployment',
-  identityFields: [
-    'k8s.cluster.name',
-    'k8s.namespace.name',
-    'k8s.deployment.name',
-    'orchestrator.cluster.name',
-    'kubernetes.namespace',
-    'kubernetes.deployment.name',
-  ],
+  description: 'A Kubernetes deployment, identified by namespace/name.',
+  identityFields: ['kubernetes.namespace', 'kubernetes.deployment.name'],
   columns: K8S_DEPLOYMENT_LIST_COLUMNS,
 };
 
@@ -84,15 +78,7 @@ const LAST_SEEN_STEP_MS = 7_000;
 const lastSeenAt = (index: number): string =>
   new Date(LAST_SEEN_ANCHOR_MS - index * LAST_SEEN_STEP_MS).toISOString();
 
-const pick = <T>(values: readonly T[], index: number): T => values[index % values.length];
-
 const HOST_ROLES = ['web', 'api', 'db', 'cache', 'worker'] as const;
-const OPERATING_SYSTEMS = [
-  { type: 'linux', name: 'Ubuntu', version: '22.04', kernel: '5.15.0-1051-aws' },
-  { type: 'linux', name: 'Red Hat Enterprise Linux', version: '9.3', kernel: '5.14.0-362' },
-  { type: 'windows', name: 'Windows Server 2022', version: '10.0', kernel: '10.0.20348' },
-  { type: 'macos', name: 'macOS', version: '14.4', kernel: '23.4.0' },
-] as const;
 const CLOUDS = [
   { provider: 'aws', platform: 'aws_ec2', region: 'us-east-1', zone: 'us-east-1a' },
   {
@@ -104,32 +90,37 @@ const CLOUDS = [
   { provider: 'azure', platform: 'azure_vm', region: 'westeurope', zone: 'westeurope-1' },
 ] as const;
 
-/** Builds `count` deterministic host rows, including null, multi-value and missing-id rows. */
+/**
+ * Builds `count` deterministic host rows. A host is reported by the system integration (which
+ * adds `os.name` and `host.os.kernel`), by the OpenTelemetry hostmetrics receiver, or only by the
+ * metric-less existence source, whose rows have every attribute null. Some hosts have no `host.id`.
+ */
 export const buildHostRows = (count: number): InventoryRow[] =>
   Array.from({ length: count }, (_, index) => {
-    const hostName = `${pick(HOST_ROLES, index)}-${String(index).padStart(3, '0')}`;
-    const hostId = index % 9 === 2 ? null : `a1b2c3d4-${String(index).padStart(4, '0')}`;
-    const os = pick(OPERATING_SYSTEMS, index);
-    const cloud = index % 7 === 3 ? null : pick(CLOUDS, index);
+    const hostName = `${HOST_ROLES[index % HOST_ROLES.length]}-${String(index).padStart(3, '0')}`;
+    const hostId = index % 9 === 2 ? null : `a1b2c3d4${String(index).padStart(24, '0')}`;
+    const source = index % 11 === 7 ? 'existence' : index % 2 === 0 ? 'system' : 'hostmetrics';
+    const hasAttributes = source !== 'existence';
+    const cloud = hasAttributes && index % 7 !== 3 ? CLOUDS[index % CLOUDS.length] : null;
     const ip = `10.0.${Math.floor(index / 250)}.${(index % 250) + 1}`;
 
     return {
       'entity.id': `host:${hostId ?? hostName}`,
       'host.id': hostId,
-      'host.name': index % 13 === 5 ? null : hostName,
-      'host.hostname': `${hostName}.internal`,
-      'os.type': os.type,
-      'os.version': os.version,
-      'host.arch': index % 4 === 3 ? 'arm64' : 'x86_64',
-      'host.ip': index % 10 === 1 ? [ip, `fe80::${index}`] : ip,
-      'k8s.cluster.name': index % 3 === 0 ? `prod-cluster-${index % 2}` : null,
+      'host.name': hostName,
+      'host.hostname': hostName,
+      'os.type': hasAttributes ? 'linux' : null,
+      'os.version': hasAttributes ? '22.04' : null,
+      'host.arch': hasAttributes ? (index % 4 === 3 ? 'arm64' : 'amd64') : null,
+      'host.ip': hasAttributes ? [ip, `fe80::${index.toString(16)}`] : null,
+      'k8s.cluster.name': hasAttributes && index % 3 === 0 ? `prod-cluster-${index % 2}` : null,
       'cloud.provider': cloud?.provider ?? null,
       'cloud.platform': cloud?.platform ?? null,
       'cloud.region': cloud?.region ?? null,
       'cloud.availability_zone': cloud?.zone ?? null,
-      'cloud.account.id': cloud ? `account-${index % 3}` : null,
-      'os.name': os.name,
-      'host.os.kernel': os.kernel,
+      'cloud.account.id': cloud ? `12345678901${index % 3}` : null,
+      'os.name': source === 'system' ? 'Ubuntu' : null,
+      'host.os.kernel': source === 'system' ? '5.15.0-1051-aws' : null,
       last_seen: lastSeenAt(index),
     };
   });
@@ -138,31 +129,31 @@ const NAMESPACES = ['default', 'payments', 'checkout', 'monitoring'] as const;
 const DEPLOYMENTS = ['frontend', 'api-gateway', 'worker', 'scheduler', 'cart'] as const;
 
 /**
- * Builds `count` deterministic k8s.deployment rows. A deployment is reported by the OpenTelemetry
- * receiver, by Elastic Agent, or by both, and the fields of the other convention are null.
+ * Builds `count` deterministic k8s.deployment rows. A deployment is reported by Elastic Agent
+ * (which adds `paused` and the `app` label), by the OpenTelemetry receiver (which adds the uid), or
+ * by both; the attributes only the other source reads are null.
  */
 export const buildK8sDeploymentRows = (count: number): InventoryRow[] =>
   Array.from({ length: count }, (_, index) => {
-    const cluster = `prod-cluster-${index % 2}`;
-    const namespace = pick(NAMESPACES, index);
-    const name = `${pick(DEPLOYMENTS, index)}-${index}`;
+    const namespace = NAMESPACES[index % NAMESPACES.length];
+    const app = DEPLOYMENTS[index % DEPLOYMENTS.length];
+    const name = `${app}-${index}`;
     const reportedByOtel = index % 3 !== 1;
     const reportedByElasticAgent = index % 3 !== 0;
-    const desiredReplicas = 1 + (index % 4);
+    const desired = 1 + (index % 4);
 
     return {
-      'entity.id': `${cluster}/${namespace}/${name}`,
-      'k8s.cluster.name': reportedByOtel ? cluster : null,
-      'k8s.namespace.name': reportedByOtel ? namespace : null,
-      'k8s.deployment.name': reportedByOtel ? name : null,
-      'orchestrator.cluster.name': reportedByElasticAgent ? cluster : null,
-      'kubernetes.namespace': reportedByElasticAgent ? namespace : null,
-      'kubernetes.deployment.name': reportedByElasticAgent ? name : null,
-      available_replicas: index % 5 === 4 ? desiredReplicas - 1 : desiredReplicas,
-      desired_replicas: desiredReplicas,
-      paused: reportedByElasticAgent ? index % 11 === 4 : null,
-      app: reportedByElasticAgent ? pick(DEPLOYMENTS, index) : null,
-      resource_id: reportedByOtel ? `uid-${String(index).padStart(4, '0')}` : null,
+      'entity.id': `k8s.deployment:${namespace}/${name}`,
+      'kubernetes.namespace': namespace,
+      'kubernetes.deployment.name': name,
+      'k8s.cluster.name': `prod-cluster-${index % 2}`,
+      'k8s.deployment.available': index % 5 === 4 ? desired - 1 : desired,
+      'k8s.deployment.desired': desired,
+      'k8s.deployment.paused': reportedByElasticAgent ? index % 11 === 4 : null,
+      'k8s.deployment.label.app': reportedByElasticAgent && index % 6 !== 5 ? app : null,
+      'k8s.deployment.uid': reportedByOtel
+        ? `5f0c7a3e-1b2d-4c6e-9a8b-${String(index).padStart(12, '0')}`
+        : null,
       last_seen: lastSeenAt(index),
     };
   });
