@@ -53,6 +53,8 @@ const ruleTypesInObltProjects: string[] = [
   'apm.transaction_error_rate',
   'apm.transaction_duration',
   'apm.anomaly',
+  'datasetQuality.degradedDocs',
+  'xpack.ml.anomaly_detection_jobs_health',
 ];
 const ruleTypesInSecurityProjects: string[] = [
   '.index-threshold',
@@ -69,7 +71,33 @@ const ruleTypesInSecurityProjects: string[] = [
   'siem.savedQueryRule',
   'siem.thresholdRule',
   'siem.newTermsRule',
+  'attack-discovery',
+  'siem.esqlRule',
 ];
+const skippedRuleTypes = [
+  'logs.alert.document.count',
+  'metrics.alert.threshold',
+  'monitoring_alert_cluster_health',
+  'monitoring_alert_cpu_usage',
+  'monitoring_alert_disk_usage',
+  'monitoring_alert_elasticsearch_version_mismatch',
+  'monitoring_alert_jvm_memory_usage',
+  'monitoring_alert_kibana_version_mismatch',
+  'monitoring_alert_license_expiration',
+  'monitoring_alert_logstash_version_mismatch',
+  'monitoring_alert_missing_monitoring_data',
+  'monitoring_alert_nodes_changed',
+  'monitoring_alert_thread_pool_search_rejections',
+  'monitoring_alert_thread_pool_write_rejections',
+  'monitoring_ccr_read_exceptions',
+  'monitoring_shard_size',
+  'xpack.synthetics.alerts.monitorStatus',
+  'xpack.synthetics.alerts.tls',
+  'xpack.uptime.alerts.durationAnomaly',
+  'xpack.uptime.alerts.monitorStatus',
+  'xpack.uptime.alerts.tls',
+  'xpack.uptime.alerts.tlsCertificate',
+]
 
 describe('Serverless upgrade and rollback checks', () => {
   let esServer: TestElasticsearchUtils;
@@ -98,6 +126,42 @@ describe('Serverless upgrade and rollback checks', () => {
     if (esServer) {
       await esServer.stop();
     }
+  });
+
+  // if this test fails, then a rule type in the lists above is missing
+  test('ensure all rule types still exist', () => {
+    const registeredRuleTypes = Array.from(ruleTypeRegistry.list().keys());
+    for (const ruleTypeId of ruleTypesToCheck) {
+      expect(registeredRuleTypes).toContain(ruleTypeId);
+    }
+  });
+  
+  // if this test fails, the rule type should be added to one of the lists above
+  test('ensure all rule types are checked or skipped', () => {
+    const registeredRuleTypes = Array.from(ruleTypeRegistry.list().keys());
+    for (const ruleTypeId of registeredRuleTypes) {
+      if (!ruleTypesToCheck.includes(ruleTypeId)) {
+        expect(skippedRuleTypes).toContain(ruleTypeId);
+      }
+    }
+  });
+
+  // if this test fails, a skipped rule type has a schema and should added
+  // to one of the other lists above
+  test('ensure all skipped types have no schema', () => {
+    const typesWithSchema: string[] = [];
+    for (const ruleTypeId of skippedRuleTypes) {
+      let ruleType: ReturnType<typeof ruleTypeRegistry.get>;
+      try {
+        ruleType = ruleTypeRegistry.get(ruleTypeId);
+      } catch (e) {
+        continue;
+      }
+      if (ruleType?.schemas?.params) {
+        typesWithSchema.push(ruleTypeId);
+      }
+    }
+    expect(typesWithSchema).toHaveLength(0); // ensure no skipped types have a schema
   });
 
   for (const ruleTypeId of ruleTypesToCheck) {
