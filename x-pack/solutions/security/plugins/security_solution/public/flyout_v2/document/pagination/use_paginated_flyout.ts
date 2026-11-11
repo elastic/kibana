@@ -7,9 +7,10 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 import { getFlyoutManagerStore, useGeneratedHtmlId } from '@elastic/eui';
-import type { OverlayRef } from '@kbn/core-mount-utils-browser';
+import type { OverlaySystemFlyoutRef } from '@kbn/core-overlays-browser';
 import { createPaginationStore } from './store';
 import { PaginationStoreProvider } from './context';
+import { getAlertHistoryTitle } from '../main/utils/get_header_title';
 import { useDefaultDocumentFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../../shared/hooks/use_open_flyout';
 import { FLYOUT_SESSION_KIND, FLYOUT_SURFACE, FLYOUT_TYPE } from '../../../common/lib/telemetry';
@@ -34,6 +35,7 @@ const SOFT_RESET: Partial<ScopedPaginationSlice> = {
   flyoutDocumentIndex: null,
   flyoutDocumentId: null,
   flyoutDocumentIndexName: null,
+  flyoutHistoryTitle: null,
   hasFlyoutQueryError: false,
 };
 
@@ -87,7 +89,7 @@ export const usePaginatedFlyout = ({
   const urlParamKey = urlParamKeyForHistoryKey(historyKey);
   const { writeOnOpen, buildOnClose } = useFlyoutV2UrlWriter(urlParamKey, historyKey);
 
-  const v2OverlayRef = useRef<OverlayRef | null>(null);
+  const v2OverlayRef = useRef<OverlaySystemFlyoutRef | null>(null);
 
   // Stable EUI id for the overlay this hook opens, so `ownsTheScreen` can look the flyout up
   // in the flyout manager. Unique per hook instance, which keeps concurrently mounted sources
@@ -206,6 +208,8 @@ export const usePaginatedFlyout = ({
         {
           ...infraDefaultProps,
           id: flyoutId,
+          // Generic until the displayed document resolves; the effect below keeps it current.
+          title: store.getSnapshot().flyoutHistoryTitle ?? getAlertHistoryTitle(),
           historyKey,
           session: FLYOUT_SESSION_KIND.START,
           onClose: () => {
@@ -242,6 +246,17 @@ export const usePaginatedFlyout = ({
       store.setState({ openDocumentFlyoutImpl: null });
     };
   }, [openPaginatedFlyout]);
+
+  // Keep the history title following the document currently displayed. EUI captures the title at
+  // registration, so core's `setTitle` re-registers the flyout when it changes, and closing a
+  // main flyout closes its whole history group. Only retitle while this flyout is alone in its
+  // group, otherwise the re-registration would wipe the earlier sessions (and their Back/history
+  // entries). While other sessions are stacked the title stays as it was.
+  useEffect(() => {
+    if (rawSlice.flyoutHistoryTitle && ownsTheScreen()) {
+      v2OverlayRef.current?.setTitle(rawSlice.flyoutHistoryTitle);
+    }
+  }, [rawSlice.flyoutHistoryTitle, ownsTheScreen]);
 
   // Close the overlay on unmount (navigation away from the source page).
   useEffect(() => {

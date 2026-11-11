@@ -46,6 +46,8 @@ export interface ScopedPaginationSlice {
    * no document is expanded.
    */
   readonly flyoutDocumentIndexName: string | null;
+  /** History title of the document currently displayed; null until it has been resolved. */
+  readonly flyoutHistoryTitle: string | null;
   /**
    * Implementation registered by the source that opens (or swaps) the
    * document-details flyout for a given absolute index. Lives in the store
@@ -69,6 +71,7 @@ export const absentSlice: ScopedPaginationSlice = {
   hasFlyoutQueryError: false,
   flyoutDocumentId: null,
   flyoutDocumentIndexName: null,
+  flyoutHistoryTitle: null,
   openDocumentFlyoutImpl: null,
 };
 

@@ -62,6 +62,7 @@ const resolveSecurityCanvasContext = jest.fn().mockResolvedValue({ store: {}, ki
 const openFlyout = jest.fn((_content: React.ReactNode, _options?: object) => ({
   close: jest.fn(),
   onClose: Promise.resolve(),
+  setTitle: jest.fn(),
 }));
 
 const events = [
