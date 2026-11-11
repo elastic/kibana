@@ -19,6 +19,8 @@ export type TestReport =
         /* attributes on the root <testsuites> element, e.g. name="ftr" | "jest" */
         $?: {
           name?: string;
+          /* FTR only: the Scout test target tag of the run, e.g. "cloud-serverless-search" */
+          target?: string;
         };
         testsuite: TestSuite[];
       };
