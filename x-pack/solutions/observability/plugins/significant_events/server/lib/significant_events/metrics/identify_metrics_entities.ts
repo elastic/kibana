@@ -38,6 +38,7 @@ export interface IdentifyMetricsEntitiesOptions {
 }
 
 export interface IdentifyMetricsEntitiesResult {
+  /** False only when no entity-key row matches and logs onboarding should run. */
   handled: boolean;
   skipReason?: 'no_data' | 'no_entity_key_row';
   metricsEntitiesCount: number;
@@ -196,7 +197,7 @@ export const identifyMetricsEntities = async ({
   if (metricsCatalogueRowsCount === 0) {
     logger.info(`Metrics source [${sourceId}] returned no data; no entities were written.`);
     return {
-      handled: false,
+      handled: true,
       skipReason: 'no_data',
       metricsEntitiesCount: 0,
       metricsCatalogueRowsCount,

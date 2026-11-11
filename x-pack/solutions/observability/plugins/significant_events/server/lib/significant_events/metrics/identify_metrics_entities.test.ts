@@ -880,7 +880,7 @@ describe('identifyMetricsEntities', () => {
     ).toBe(true);
   });
 
-  it('falls back without inventory queries or writes when the source returns no data', async () => {
+  it('handles no data without inventory queries or writes', async () => {
     const harness = createHarness([{ columns: datasetColumns, values: [] }]);
 
     const result = await identifyMetricsEntities({
@@ -893,7 +893,7 @@ describe('identifyMetricsEntities', () => {
 
     expect(result).toEqual(
       expect.objectContaining({
-        handled: false,
+        handled: true,
         skipReason: 'no_data',
         metricsEntitiesCount: 0,
         uncoveredDatasetsCount: 0,
