@@ -50,7 +50,7 @@ export const NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW = {
   id: NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
   // 2: the caller's timeout caps the investigation step (`timeout_seconds`, at most an hour).
-  version: 2,
+  version: 3,
   billable: false,
   yamlTemplate: renderBoundInvestigationYaml,
   management: {
