@@ -120,10 +120,10 @@ const ProposalContextSwitcher = ({ spaces, onOpen }: ContextSwitcherProps) => {
 };
 
 /**
- * Header context switcher. `variant` selects the original menu, proposal 1, or proposal 2.
+ * Header context switcher. `variant` selects the original menu, proposal 1, proposal 2, or proposal 3.
  */
 export const ContextSwitcher = (props: ContextSwitcherProps) => {
-  if (props.variant === 'original') {
+  if (props.variant === 'original' || props.variant === 'proposal3') {
     return <OriginalContextSwitcher {...props} />;
   }
 

@@ -135,10 +135,10 @@ const ContextSwitcherInner = ({
 
   if (!spacesConfig) return null;
 
-  if (variant === 'original') {
+  if (variant === 'original' || variant === 'proposal3') {
     return (
       <ContextSwitcher
-        variant="original"
+        variant={variant}
         spaces={spacesConfig}
         environmentContext={environmentContext}
         footerLinks={footerLinks}

@@ -10,9 +10,10 @@ import { useSyncExternalStore } from 'react';
 import type { ContextSwitcherVariant } from '@kbn/context-switcher-components';
 
 const STORAGE_KEY = 'kbn.contextSwitcherProposal';
+const PROPOSAL_CHANGE_EVENT = 'kbn.contextSwitcherProposalChange';
 
 const isProposal = (value: string | null): value is ContextSwitcherVariant =>
-  value === 'original' || value === 'proposal1' || value === 'proposal2';
+  value === 'original' || value === 'proposal1' || value === 'proposal2' || value === 'proposal3';
 
 const readStoredProposal = (): ContextSwitcherVariant => {
   try {
@@ -47,6 +48,7 @@ export const setContextSwitcherProposal = (next: ContextSwitcherVariant) => {
     // Ignore write failures. The in-memory value still updates.
   }
   listeners.forEach((listener) => listener());
+  window.dispatchEvent(new CustomEvent(PROPOSAL_CHANGE_EVENT, { detail: next }));
 };
 
 const subscribe = (listener: () => void) => {

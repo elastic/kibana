@@ -79,6 +79,20 @@ const PROPOSAL_TWO_DESCRIPTION = i18n.translate(
   }
 );
 
+const PROPOSAL_THREE_LABEL = i18n.translate(
+  'xpack.spaces.contextSwitcher.proposalSidebar.proposalThreeLabel',
+  {
+    defaultMessage: 'Proposal 3',
+  }
+);
+
+const PROPOSAL_THREE_DESCRIPTION = i18n.translate(
+  'xpack.spaces.contextSwitcher.proposalSidebar.proposalThreeDescription',
+  {
+    defaultMessage: 'The original menu. The header shows the real Trial badge.',
+  }
+);
+
 const optionLabel = (label: string, description: string) => (
   <>
     <EuiText size="s">
@@ -94,10 +108,11 @@ const OPTIONS: Array<{ id: ContextSwitcherVariant; label: ReactNode }> = [
   { id: 'original', label: optionLabel(ORIGINAL_LABEL, ORIGINAL_DESCRIPTION) },
   { id: 'proposal1', label: optionLabel(PROPOSAL_ONE_LABEL, PROPOSAL_ONE_DESCRIPTION) },
   { id: 'proposal2', label: optionLabel(PROPOSAL_TWO_LABEL, PROPOSAL_TWO_DESCRIPTION) },
+  { id: 'proposal3', label: optionLabel(PROPOSAL_THREE_LABEL, PROPOSAL_THREE_DESCRIPTION) },
 ];
 
 const isProposal = (id: string): id is ContextSwitcherVariant =>
-  id === 'original' || id === 'proposal1' || id === 'proposal2';
+  id === 'original' || id === 'proposal1' || id === 'proposal2' || id === 'proposal3';
 
 const PREVIEW_TITLE = i18n.translate('xpack.spaces.contextSwitcher.proposalSidebar.previewTitle', {
   defaultMessage: 'Project type',
