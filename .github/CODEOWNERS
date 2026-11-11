@@ -4025,7 +4025,7 @@ pnpm-workspace.yaml @elastic/kibana-operations
 
 /knip.jsonc @elastic/kibana-security
 
-# EUI preset rules. Severity changes here should be reviewed by the EUI team.
+# Lint overrides
 /.oxlint/eui.mts @elastic/eui-team
 
 # Auto-generated Scout test metadata has no owner so the automated update PRs are auto-approved.
