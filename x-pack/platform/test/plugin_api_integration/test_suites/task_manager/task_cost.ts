@@ -164,5 +164,34 @@ export default function ({ getService }: FtrProviderContext) {
       // updates after the run merge into the stored task, so the unknown cost is kept for newer versions
       expect(await getStoredCost(task.id)).to.eql('huge');
     });
+
+    it('keeps a stored cost it does not recognize when the task schedule is updated', async () => {
+      const task = await scheduleTask(supertest, {
+        taskType: 'sampleTask',
+        schedule: { interval: '1d' },
+        params: {},
+        enabled: false,
+      });
+
+      // simulate a cost tier written by a newer version of Kibana
+      await es.update({
+        index: '.kibana_task_manager',
+        id: `task:${task.id}`,
+        refresh: true,
+        doc: { task: { cost: 'huge' } },
+      });
+
+      // bulkUpdateSchedules replaces the whole stored task instead of merging into it
+      const { body } = await supertest
+        .post('/api/sample_tasks/bulk_update_schedules')
+        .set('kbn-xsrf', 'xxx')
+        .send({ taskIds: [task.id], schedule: { interval: '2d' } })
+        .expect(200);
+      expect(body.tasks.length).to.be(1);
+      expect(body.errors.length).to.be(0);
+
+      expect((await getTask(task.id)).schedule).to.eql({ interval: '2d' });
+      expect(await getStoredCost(task.id)).to.eql('huge');
+    });
   });
 }

@@ -771,6 +771,12 @@ export interface ConcreteTaskInstance extends Omit<TaskInstance, 'runAs'> {
    * value whose decryption fails if `credential` was changed. Only written when the task is created.
    */
   encryptedCredential?: string;
+
+  /**
+   * The stored cost when it isn't a tier this version of Kibana knows, e.g. one added by a newer
+   * version. `cost` is unset in that case; a full replace writes this back so the tier is kept.
+   */
+  unrecognizedCost?: string;
 }
 
 export type PartialConcreteTaskInstance = Partial<ConcreteTaskInstance> & {
@@ -800,7 +806,14 @@ export interface ConcreteTaskInstanceVersion {
 
 export type SerializedConcreteTaskInstance = Omit<
   ConcreteTaskInstance,
-  'state' | 'params' | 'scheduledAt' | 'startedAt' | 'retryAt' | 'runAt' | 'cost'
+  | 'state'
+  | 'params'
+  | 'scheduledAt'
+  | 'startedAt'
+  | 'retryAt'
+  | 'runAt'
+  | 'cost'
+  | 'unrecognizedCost'
 > & {
   state: string;
   params: string;

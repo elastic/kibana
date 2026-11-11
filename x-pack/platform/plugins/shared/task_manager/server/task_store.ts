@@ -1066,7 +1066,7 @@ export class TaskStore {
           const apiKey = updatedFields?.apiKey || doc?.apiKey;
           const uiamApiKey = updatedFields?.uiamApiKey || doc?.uiamApiKey;
           const userScope = updatedFields?.userScope || doc?.userScope;
-          const { credential, encryptedCredential } = doc;
+          const { credential, encryptedCredential, unrecognizedCost } = doc;
           // The encryption-aware client can't rewrite such a task: a merged update re-encrypts the
           // API key without credential in its AAD, and a full replace encrypts encryptedCredential
           // twice.
@@ -1093,6 +1093,10 @@ export class TaskStore {
               ...(!mergeAttributes && credential !== undefined ? { credential } : {}),
               ...(!mergeAttributes && encryptedCredential !== undefined
                 ? { encryptedCredential }
+                : {}),
+              // A cost tier only a newer version of Kibana knows is kept for that version to read.
+              ...(!mergeAttributes && doc.cost === undefined && unrecognizedCost !== undefined
+                ? { cost: unrecognizedCost }
                 : {}),
             },
             mergeAttributes,
@@ -1875,9 +1879,14 @@ function costToAttributes(cost?: TaskCost): Pick<SerializedConcreteTaskInstance,
   return instanceCost ? { cost: instanceCost } : {};
 }
 
-function costFromAttributes(cost?: string): Pick<ConcreteTaskInstance, 'cost'> {
+function costFromAttributes(
+  cost?: string
+): Pick<ConcreteTaskInstance, 'cost' | 'unrecognizedCost'> {
+  if (!cost) {
+    return {};
+  }
   const taskCost = getTaskCostFromInstance(cost);
-  return taskCost === undefined ? {} : { cost: taskCost };
+  return taskCost === undefined ? { unrecognizedCost: cost } : { cost: taskCost };
 }
 
 export function taskInstanceToAttributes(
@@ -1895,7 +1904,8 @@ export function taskInstanceToAttributes(
       'credential',
       'encryptedCredential',
       'runAs',
-      'cost'
+      'cost',
+      'unrecognizedCost'
     ),
     ...costToAttributes(doc.cost),
     params: JSON.stringify(doc.params || {}),
@@ -1923,7 +1933,8 @@ export function partialTaskInstanceToAttributes(
       'uiamApiKey',
       'credential',
       'encryptedCredential',
-      'cost'
+      'cost',
+      'unrecognizedCost'
     ),
     ...costToAttributes(doc.cost),
     ...(doc.params ? { params: JSON.stringify(doc.params) } : {}),
