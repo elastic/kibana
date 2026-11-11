@@ -597,7 +597,7 @@ export class ObservableService {
   }
 
   /**
-   * Cases, other than the source case, that hold any of the keys, with how many of them each
+   * Cases, other than the excluded case, that hold any of the keys, with how many of them each
    * holds, most first.
    */
   public async findSimilarCandidates({
@@ -606,7 +606,7 @@ export class ObservableService {
     owners,
     size,
   }: {
-    excludeCaseId: string;
+    excludeCaseId?: string;
     keys: ObservableKey[];
     owners?: string[];
     size: number;
@@ -620,7 +620,7 @@ export class ObservableService {
       query: {
         bool: {
           filter: [keysQuery(keys), ...ownersQuery(owners)],
-          must_not: [caseReferenceQuery([excludeCaseId])],
+          ...(excludeCaseId != null && { must_not: [caseReferenceQuery([excludeCaseId])] }),
         },
       },
       aggs: caseIdsAggs({ size }),

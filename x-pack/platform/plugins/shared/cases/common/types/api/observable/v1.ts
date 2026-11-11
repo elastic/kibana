@@ -8,6 +8,8 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import {
   DEFAULT_OBSERVABLES_PER_PAGE,
   MAX_BULK_CREATE_OBSERVABLES,
+  MAX_CASE_ID_LENGTH,
+  MAX_CASES_PER_PAGE,
   MAX_OBSERVABLE_DESCRIPTION_LENGTH,
   MAX_OBSERVABLE_METADATA_FILTERS,
   MAX_OBSERVABLE_METADATA_KEY_LENGTH,
@@ -19,11 +21,14 @@ import {
   MAX_OBSERVABLES_PER_CASE,
   MAX_OBSERVABLES_PER_PAGE,
   MAX_STORED_OBSERVABLE_FIELD_LENGTH,
+  MAX_OWNER_LENGTH,
   MIN_BULK_DELETE_OBSERVABLE_IDS,
   OBSERVABLE_ID_MAX_LENGTH,
 } from '../../../constants';
-import { limitedArraySchema, limitedStringSchema } from '../../../schema';
+import { limitedArraySchema, limitedStringSchema, paginationSchema } from '../../../schema';
+import { CaseSchema } from '../../domain/case/v1';
 import { CaseObservableBaseSchema, CaseObservableSchema } from '../../domain/observable/v1';
+import { CasesFindRequestSortFieldsSchema } from '../case/v1';
 
 // The bounds apply to requests only: the domain schema must keep parsing stored observables that predate them.
 const BoundedObservableValueSchema = lazySchema(() => z.string().max(MAX_OBSERVABLE_VALUE_LENGTH));
@@ -185,6 +190,52 @@ export const FindObservablesResponseSchema = lazySchema(() =>
   })
 );
 
+/** The cases of an owner holding an observable with the exact type key and value, in either store. */
+export const FindCasesByObservableRequestSchema = lazySchema(() =>
+  paginationSchema({ maxPerPage: MAX_CASES_PER_PAGE }).extend({
+    owner: z.string().min(1).max(MAX_OWNER_LENGTH),
+    typeKey: z.string().min(1).max(MAX_OBSERVABLE_TYPE_KEY_LENGTH),
+    value: z.string().min(1).max(MAX_OBSERVABLE_VALUE_LENGTH),
+    /** A case left out of the results, such as the case the observable was opened from. */
+    excludeCaseId: z.string().max(MAX_CASE_ID_LENGTH).optional(),
+    sortField: CasesFindRequestSortFieldsSchema.default('createdAt'),
+    sortOrder: z.enum(['asc', 'desc']).default('desc'),
+  })
+);
+
+export const FindCasesByObservableResponseSchema = lazySchema(() =>
+  z.object({
+    cases: z.array(CaseSchema),
+    page: z.number(),
+    per_page: z.number(),
+    total: z.number(),
+  })
+);
+
+/** For each observable, how many cases of the owner hold its exact type key and value. */
+export const CountCasesByObservablesRequestSchema = lazySchema(() =>
+  z.object({
+    owner: z.string().min(1).max(MAX_OWNER_LENGTH),
+    observables: limitedArraySchema({
+      codec: z.object({
+        typeKey: z.string().min(1).max(MAX_OBSERVABLE_TYPE_KEY_LENGTH),
+        value: z.string().min(1).max(MAX_OBSERVABLE_VALUE_LENGTH),
+      }),
+      min: 1,
+      max: MAX_OBSERVABLES_PER_PAGE,
+      fieldName: 'observables',
+    }),
+    /** A case left out of every count, such as the case the observables belong to. */
+    excludeCaseId: z.string().max(MAX_CASE_ID_LENGTH).optional(),
+  })
+);
+
+export const CountCasesByObservablesResponseSchema = lazySchema(() =>
+  z.object({
+    counts: z.array(z.object({ typeKey: z.string(), value: z.string(), total: z.number() })),
+  })
+);
+
 export type ObservablePost = z.infer<typeof ObservablePostSchema>;
 export type ObservablePatch = z.infer<typeof ObservablePatchSchema>;
 export type AddObservableRequest = z.infer<typeof AddObservableRequestSchema>;
@@ -199,3 +250,7 @@ export type FindObservablesResponse = z.infer<typeof FindObservablesResponseSche
 export type ObservableMetadata = z.infer<typeof ObservableMetadataSchema>;
 export type ObservableMetadataFilter = z.infer<typeof ObservableMetadataFilterSchema>;
 export type ObservableWithMetadata = z.infer<typeof ObservableWithMetadataSchema>;
+export type FindCasesByObservableRequest = z.input<typeof FindCasesByObservableRequestSchema>;
+export type FindCasesByObservableResponse = z.infer<typeof FindCasesByObservableResponseSchema>;
+export type CountCasesByObservablesRequest = z.infer<typeof CountCasesByObservablesRequestSchema>;
+export type CountCasesByObservablesResponse = z.infer<typeof CountCasesByObservablesResponseSchema>;

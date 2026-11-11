@@ -422,6 +422,22 @@ describe('ObservableService', () => {
         { caseId: 'case-3', sharedCount: 1 },
       ]);
     });
+
+    it('keeps every case when none is excluded', async () => {
+      unsecuredSavedObjectsClient.search.mockResolvedValue(
+        searchResponse({ aggregations: { refs: { cases: { caseIds: { buckets: [] } } } } })
+      );
+
+      await service.findSimilarCandidates({
+        keys: [{ typeKey: 'observable-type-ipv4', value: '10.0.0.8' }],
+        owners: ['securitySolution'],
+        size: 10_000,
+      });
+
+      const [[request]] = unsecuredSavedObjectsClient.search.mock.calls;
+      expect(JSON.stringify(request.query)).not.toContain('"must_not"');
+      expect(JSON.stringify(request.aggs)).toContain('"size":10000');
+    });
   });
 });
 

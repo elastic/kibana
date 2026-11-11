@@ -6,17 +6,9 @@
  */
 
 import Boom from '@hapi/boom';
-import type { estypes } from '@elastic/elasticsearch';
-import { toElasticsearchQuery } from '@kbn/es-query';
-import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { ObservableType } from '../../../common/types/domain/observable/v1';
 import type { Case, Observable } from '../../../common/types/domain';
-import {
-  CASE_SAVED_OBJECT,
-  MAX_OBSERVABLES_PER_CASE,
-  OWNER_FIELD,
-} from '../../../common/constants';
+import { MAX_OBSERVABLES_PER_CASE } from '../../../common/constants';
 import type { CasesSimilarResponse, SimilarCasesSearchRequest } from '../../../common/types/api';
 import {
   SimilarCasesSearchRequestSchema,
@@ -26,14 +18,12 @@ import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runti
 
 import { createCaseError } from '../../common/error';
 import type { CasesClient, CasesClientArgs } from '..';
-import { convertSortField, buildFilter, removeAttributesFromFilter } from '../utils';
-import { Operations } from '../../authorization';
-import { combineFilterWithAuthorizationFilter } from '../../authorization/utils';
+import { convertSortField } from '../utils';
 import { getAvailableObservableTypesMap } from '../observable_types';
 import { withObservablesPreview } from '../../common/observables_preview';
 import type { ObservableKey } from '../../services/observables';
-import { groupValuesByTypeKey } from '../../services/observables';
 import { observableKey } from './observables';
+import { searchCasesByObservableKeys } from './search_cases_by_observables';
 import { DEFAULT_PER_PAGE } from '../../routes/api';
 
 /** Most candidate cases the `cases-observables` side of a similar search keeps, most shared first. */
@@ -52,22 +42,6 @@ const uniqueKeys = (observables: ObservableKey[]): ObservableKey[] => {
   }
   return [...seen.values()];
 };
-
-/** One nested clause per type key with its values as a set, over other cases' fields. */
-const fieldMatchClauses = (keys: ObservableKey[]): estypes.QueryDslQueryContainer[] =>
-  [...groupValuesByTypeKey(keys)].map(([typeKey, values]) => ({
-    nested: {
-      path: `${CASE_SAVED_OBJECT}.observables`,
-      query: {
-        bool: {
-          filter: [
-            { term: { [`${CASE_SAVED_OBJECT}.observables.typeKey`]: typeKey } },
-            { terms: { [`${CASE_SAVED_OBJECT}.observables.value`]: values } },
-          ],
-        },
-      },
-    },
-  }));
 
 const toSimilarities = (
   observables: Array<Pick<Observable, 'typeKey' | 'value'>>,
@@ -99,8 +73,6 @@ export const similar = async (
   const {
     services: { caseService, licensingService, attachmentService, observableService },
     logger,
-    authorization,
-    spaceId,
   } = clientArgs;
 
   const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
@@ -137,55 +109,20 @@ export const similar = async (
       };
     }
 
-    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
-      await authorization.getAuthorizationFilter(Operations.findCases);
-
-    const candidates = await observableService.findSimilarCandidates({
-      excludeCaseId: caseId,
-      keys: sourceKeys,
-      owners: [owner],
-      size: MAX_SIMILAR_CANDIDATE_CASES,
-    });
-
-    const casesFilter = combineFilterWithAuthorizationFilter(
-      buildFilter({ filters: owner, field: OWNER_FIELD, operator: 'or' }),
-      authorizationFilter
-    );
-
-    const { cases, total } = await caseService.searchCasesPage({
-      namespaces: [spaceIdToNamespace(spaceId) ?? DEFAULT_NAMESPACE_STRING],
-      query: {
-        bool: {
-          // The raw search reads `cases.<field>`, not the find-style `cases.attributes.<field>`.
-          filter: casesFilter
-            ? [toElasticsearchQuery(removeAttributesFromFilter(casesFilter))]
-            : [],
-          must_not: [{ term: { _id: `${CASE_SAVED_OBJECT}:${caseId}` } }],
-          should: [
-            ...fieldMatchClauses(sourceKeys),
-            ...(candidates.length > 0
-              ? [
-                  {
-                    terms: {
-                      _id: candidates.map(({ caseId: id }) => `${CASE_SAVED_OBJECT}:${id}`),
-                    },
-                  },
-                ]
-              : []),
-          ],
-          minimum_should_match: 1,
+    const { cases, total } = await searchCasesByObservableKeys(
+      {
+        keys: sourceKeys,
+        owner,
+        excludeCaseId: caseId,
+        candidateCap: MAX_SIMILAR_CANDIDATE_CASES,
+        caseOptions: {
+          sortField: convertSortField(paramArgs.sortField),
+          sortOrder: paramArgs.sortOrder,
+          page: paramArgs.page,
+          perPage: paramArgs.perPage,
         },
       },
-      caseOptions: {
-        sortField: convertSortField(paramArgs.sortField),
-        sortOrder: paramArgs.sortOrder,
-        page: paramArgs.page,
-        perPage: paramArgs.perPage,
-      },
-    });
-
-    ensureSavedObjectsAreAuthorized(
-      cases.map(({ id, owner: caseOwner }) => ({ id, owner: caseOwner }))
+      clientArgs
     );
 
     const caseIds = cases.map(({ id }) => id);
