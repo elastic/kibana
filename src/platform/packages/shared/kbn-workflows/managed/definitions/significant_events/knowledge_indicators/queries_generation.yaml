@@ -130,6 +130,7 @@ steps:
           body:
             connectorId: "${{ steps.build_agent_input.output.connectorId }}"
             conversationId: "${{ steps.build_agent_input.output.conversationId }}"
+            parentWorkflowExecutionId: "${{ parent.executionId }}"
         on-failure:
           retry:
             max-attempts: 3

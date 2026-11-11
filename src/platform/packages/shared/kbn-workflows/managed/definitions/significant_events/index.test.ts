@@ -35,7 +35,7 @@ interface WorkflowStep {
   retry?: unknown;
   with?: {
     path?: string;
-    body?: Record<string, unknown> & { runId?: string };
+    body?: Record<string, unknown> & { runId?: string; parentWorkflowExecutionId?: string };
     written_rule_uuids?: string;
     inputs?: Record<string, string>;
     schema?: WorkflowJsonSchema;
@@ -68,6 +68,8 @@ const requireStep = (workflow: ParsedWorkflow, name: string): WorkflowStep => {
 
 const discovery = parse(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.yaml) as ParsedWorkflow;
 const orchestrator = parse(BOUND_ORCHESTRATOR_YAML) as ParsedWorkflow;
+const queriesGeneration = parse(QUERIES_GENERATION_YAML) as ParsedWorkflow;
+const featuresIdentification = parse(FEATURES_IDENTIFICATION_YAML) as ParsedWorkflow;
 
 describe('significant events persistence workflow contracts', () => {
   it('reports only the written rule uuids in the discovery output schema', () => {
@@ -129,6 +131,15 @@ describe('significant events persistence workflow contracts', () => {
       'product-solution': 'observability',
       'product-feature': 'nightshift',
     });
+  });
+
+  it('sends the parent workflow execution to the KI result routes', () => {
+    expect(
+      requireStep(queriesGeneration, 'generate_queries').with?.body?.parentWorkflowExecutionId
+    ).toBe('${{ parent.executionId }}');
+    expect(
+      requireStep(featuresIdentification, 'identify_inferred').with?.body?.parentWorkflowExecutionId
+    ).toBe('${{ parent.executionId }}');
   });
 
   it('stamps discovery detections only from reported completed outcomes', () => {

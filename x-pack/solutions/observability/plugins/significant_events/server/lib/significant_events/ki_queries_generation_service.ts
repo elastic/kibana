@@ -66,6 +66,10 @@ export interface CollectGeneratedKIQueriesParams {
   connectorId: string;
   /** The conversation the `ai.agent` step stored. */
   agentConversation: Pick<Conversation, 'rounds'>;
+  /** The workflow run that called the route, read from the request, never from its body. */
+  workflowExecutionId?: string;
+  /** The run that started the calling workflow, as that workflow reports it. */
+  parentWorkflowExecutionId?: string;
 }
 
 export interface CollectGeneratedKIQueriesDependencies {
@@ -74,7 +78,13 @@ export interface CollectGeneratedKIQueriesDependencies {
 }
 
 export function collectGeneratedKIQueries(
-  { source, connectorId, agentConversation }: CollectGeneratedKIQueriesParams,
+  {
+    source,
+    connectorId,
+    agentConversation,
+    workflowExecutionId,
+    parentWorkflowExecutionId,
+  }: CollectGeneratedKIQueriesParams,
   { logger, telemetry }: CollectGeneratedKIQueriesDependencies
 ): SignificantEventsQueriesGenerationResult & { connectorId: string; finalized: boolean } {
   const result = readKIQueryGenerationResult({
@@ -95,6 +105,8 @@ export function collectGeneratedKIQueries(
   const { queries, tokensUsed, durationMs } = result;
 
   telemetry.trackSignificantEventsQueriesGenerated({
+    workflow_execution_id: workflowExecutionId,
+    parent_workflow_execution_id: parentWorkflowExecutionId,
     count: queries.length,
     connector_id: connectorId,
     source_id: source.id,

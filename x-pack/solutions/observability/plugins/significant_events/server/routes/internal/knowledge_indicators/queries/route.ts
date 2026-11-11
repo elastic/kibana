@@ -72,6 +72,7 @@ import type {
 import { cleanupStaleEvents } from '../../../../lib/significant_events/events/cleanup_stale_events';
 import { QueryNotFoundError } from '../../../../lib/errors/query_not_found_error';
 import { validateEsqlQueryForSourceOrThrow } from '../../../../lib/significant_events/validate_esql_query';
+import { getWorkflowExecutionIdFromRequest } from '../../../../lib/telemetry/ebt/workflow_execution_id';
 
 // Id lookups are for deep links into the discovery table, not bulk reads.
 const MAX_DISCOVERY_QUERY_IDS = 100;
@@ -336,6 +337,7 @@ const bulkDeleteQueriesRoute = createServerRoute({
           eventSearchClient: await scopedClients.getEventSearchClient(),
           rulesClient,
           candidateRuleIds: [...candidateRuleIds],
+          workflowExecutionId: getWorkflowExecutionIdFromRequest(request),
         });
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
@@ -611,6 +613,11 @@ const generateQueriesRoute = createServerRoute({
           .describe(
             'The conversation the `ai.agent` step ran in, as returned by `_generate/input`.'
           ),
+        parentWorkflowExecutionId: z
+          .string()
+          .max(MAX_ID_LENGTH)
+          .optional()
+          .describe('The workflow run that started the calling workflow, for telemetry.'),
       }),
     })
   ),
@@ -648,7 +655,7 @@ const generateQueriesRoute = createServerRoute({
     }
 
     const { sourceId } = params.path;
-    const { connectorId, conversationId } = params.body;
+    const { connectorId, conversationId, parentWorkflowExecutionId } = params.body;
 
     const [{ source }, conversationClient] = await Promise.all([
       sourcesClient.get(sourceId),
@@ -675,7 +682,13 @@ const generateQueriesRoute = createServerRoute({
     }
 
     return collectGeneratedKIQueries(
-      { source, connectorId, agentConversation },
+      {
+        source,
+        connectorId,
+        agentConversation,
+        workflowExecutionId: getWorkflowExecutionIdFromRequest(request),
+        parentWorkflowExecutionId: parentWorkflowExecutionId?.trim() || undefined,
+      },
       { logger: generationLogger, telemetry }
     );
   },

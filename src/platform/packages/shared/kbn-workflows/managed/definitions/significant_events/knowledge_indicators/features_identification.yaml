@@ -193,6 +193,7 @@ steps:
             connectorId: "${{ steps.build_agent_input.output.connectorId }}"
             conversationId: "${{ steps.build_agent_input.output.conversationId }}"
             runId: "${{ execution.id }}"
+            parentWorkflowExecutionId: "${{ parent.executionId }}"
             iteration: "${{ variables.iterationResults.size | plus: 1 }}"
             documents: "${{ steps.prepare.output.documents }}"
             samplingTelemetry: "${{ steps.prepare.output.samplingTelemetry }}"

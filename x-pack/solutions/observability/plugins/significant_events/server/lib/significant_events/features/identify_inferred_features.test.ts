@@ -111,6 +111,7 @@ describe('buildKnownFeatureIds', () => {
 
 describe('buildTelemetry', () => {
   const context = {
+    workflow_execution_id: 'workflow-1',
     run_id: 'run-1',
     connector_id: 'connector-1',
     iteration: 1,
@@ -127,6 +128,7 @@ describe('buildTelemetry', () => {
     (state) => {
       expect(buildTelemetry(context, 100, { state })).toEqual(
         expect.objectContaining({
+          workflow_execution_id: context.workflow_execution_id,
           state,
           features_remapped: 0,
         })

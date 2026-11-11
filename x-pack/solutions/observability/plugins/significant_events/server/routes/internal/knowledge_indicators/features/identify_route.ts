@@ -33,6 +33,7 @@ import {
   installFeatureIdentificationAgent,
 } from '../../../../agent_builder/agents/feature_identification';
 import { createAgentConversation } from '../../../../lib/significant_events/create_agent_conversation';
+import { getWorkflowExecutionIdFromRequest } from '../../../../lib/telemetry/ebt/workflow_execution_id';
 import { FeatureNotEnabledError } from '../../../../lib/errors/feature_not_enabled_error';
 import { createSignificantEventsAvailability } from '../../../../agent_builder/tools/significant_events_availability';
 
@@ -245,6 +246,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
         /** Conversation the `ai.agent` step ran in, as returned by `_identify/inferred/input`. */
         conversationId: z.string().max(MAX_ID_LENGTH),
         runId: z.string().max(MAX_ID_LENGTH).optional(),
+        parentWorkflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
         iteration: z.number().optional(),
         documents: inferenceDocumentsSchema,
         samplingTelemetry: z.object({
@@ -281,6 +283,10 @@ const identifyInferredFeaturesRoute = createServerRoute({
     const now = Date.now();
     const { connectorId, conversationId, runId, iteration, documents, samplingTelemetry } =
       params.body;
+    const workflowProvenance = {
+      workflow_execution_id: getWorkflowExecutionIdFromRequest(request),
+      parent_workflow_execution_id: params.body.parentWorkflowExecutionId?.trim(),
+    };
     const resolvedRunId = runId?.trim() || uuidv4();
     const { totalFilters, filtersCapped, hasFilteredDocuments } = samplingTelemetry;
 
@@ -313,7 +319,8 @@ const identifyInferredFeaturesRoute = createServerRoute({
         filtersCapped,
         hasFilteredDocuments,
         iteration,
-        trackFeaturesIdentified: (data) => telemetry.trackFeaturesIdentified(data),
+        trackFeaturesIdentified: (data) =>
+          telemetry.trackFeaturesIdentified({ ...data, ...workflowProvenance }),
       });
 
       return { ...result, connectorId };
@@ -327,6 +334,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       telemetry.trackFeaturesIdentified(
         buildTelemetry(
           {
+            ...workflowProvenance,
             run_id: resolvedRunId,
             connector_id: connectorId,
             iteration: iteration ?? 1,

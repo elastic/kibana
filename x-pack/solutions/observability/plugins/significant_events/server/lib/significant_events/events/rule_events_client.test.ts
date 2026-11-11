@@ -151,6 +151,39 @@ describe('RuleEventsClient', () => {
       expect(lastStatusWritten(alertEventsClient)).toMatchObject({ alert_status: 'inactive' });
     });
 
+    it('replaces prior workflow provenance with the workflow that writes the status version', async () => {
+      const existing = createStatusEvent({
+        status: 'active',
+        workflow_execution_id: 'prior-workflow',
+      });
+      const alertEventsClient = makeStatusAlertEventsClient();
+
+      await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
+        eventId: existing.event_id,
+        change: DEACTIVATE_STATUS,
+        workflowExecutionId: 'current-workflow',
+      });
+
+      expect(lastStatusWritten(alertEventsClient).data.workflow_execution_id).toBe(
+        'current-workflow'
+      );
+    });
+
+    it('clears prior workflow provenance when a standalone status update writes a version', async () => {
+      const existing = createStatusEvent({
+        status: 'active',
+        workflow_execution_id: 'prior-workflow',
+      });
+      const alertEventsClient = makeStatusAlertEventsClient();
+
+      await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
+        eventId: existing.event_id,
+        change: DEACTIVATE_STATUS,
+      });
+
+      expect(lastStatusWritten(alertEventsClient).data.workflow_execution_id).toBeUndefined();
+    });
+
     it('records the given note, and falls back to the operator note when it is omitted or blank', async () => {
       const existing = createStatusEvent({ assessment_note: 'Operator dismissed as noise.' });
       const written = async (assessmentNote?: string) => {

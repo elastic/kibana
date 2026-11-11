@@ -12,6 +12,10 @@ import {
 } from '@kbn/significant-events-schema';
 import { forbidden } from '@hapi/boom';
 import { DeepStrict } from '@kbn/zod-helpers';
+import {
+  EVENT_CHAIN_DEPTH_HEADER,
+  EVENT_CHAIN_SOURCE_EXECUTION_HEADER,
+} from '@kbn/workflows-extensions/server';
 import type { SignificantEventsMaintenanceState } from '../../../../../common/maintenance/state_machine';
 import { KI_QUERY_GENERATION_AGENT_ID } from '../../../../agent_builder/agents/ki_query_generation';
 import { internalKIQueriesRoutes } from './route';
@@ -719,13 +723,32 @@ describe('generateQueriesRoute', () => {
     });
   });
 
-  const makeHandlerParams = ({ agentBuilder }: { agentBuilder: unknown }) =>
+  const makeHandlerParams = ({
+    agentBuilder,
+    body = {},
+    workflowExecutionId,
+    isInternalApiRequest = workflowExecutionId !== undefined,
+  }: {
+    agentBuilder: unknown;
+    body?: Record<string, unknown>;
+    workflowExecutionId?: string;
+    isInternalApiRequest?: boolean;
+  }) =>
     ({
       params: {
         path: { sourceId: 'logs.test' },
-        body: { connectorId: 'test-connector', conversationId: 'conversation-1' },
+        body: { connectorId: 'test-connector', conversationId: 'conversation-1', ...body },
       },
-      request: { spaceId: 'default' },
+      request: {
+        spaceId: 'default',
+        isInternalApiRequest,
+        headers: workflowExecutionId
+          ? {
+              [EVENT_CHAIN_DEPTH_HEADER]: '0',
+              [EVENT_CHAIN_SOURCE_EXECUTION_HEADER]: workflowExecutionId,
+            }
+          : {},
+      },
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: {
           get: jest.fn().mockResolvedValue({
@@ -782,6 +805,49 @@ describe('generateQueriesRoute', () => {
       tokensUsed: { prompt: 0, completion: 0, total: 0 },
       connectorId: 'test-connector',
     });
+  });
+
+  it('passes the trusted workflow execution and the body parent execution to the collector', async () => {
+    const conversationClient = { get: jest.fn().mockResolvedValue({ rounds: [] }) };
+    const agentBuilder = {
+      conversations: { getScopedClient: jest.fn().mockResolvedValue(conversationClient) },
+    };
+
+    await generateRoute.handler(
+      makeHandlerParams({
+        agentBuilder,
+        body: { parentWorkflowExecutionId: 'onboarding-run-1' },
+        workflowExecutionId: 'workflow-run-1',
+      })
+    );
+
+    expect(mockCollectGeneratedKIQueries).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowExecutionId: 'workflow-run-1',
+        parentWorkflowExecutionId: 'onboarding-run-1',
+      }),
+      expect.any(Object)
+    );
+  });
+
+  it('does not accept a workflow execution header from a non-internal request', async () => {
+    const conversationClient = { get: jest.fn().mockResolvedValue({ rounds: [] }) };
+    const agentBuilder = {
+      conversations: { getScopedClient: jest.fn().mockResolvedValue(conversationClient) },
+    };
+
+    await generateRoute.handler(
+      makeHandlerParams({
+        agentBuilder,
+        workflowExecutionId: 'caller-chosen-run',
+        isInternalApiRequest: false,
+      })
+    );
+
+    expect(mockCollectGeneratedKIQueries).toHaveBeenCalledWith(
+      expect.objectContaining({ workflowExecutionId: undefined }),
+      expect.any(Object)
+    );
   });
 
   it('reports a missing conversation as an attempt that never finalized, so the loop retries', async () => {

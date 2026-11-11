@@ -340,6 +340,7 @@ export class SignificantEventsKIsOnboardingClient {
 
     this.telemetry.trackOnboardingScheduled({
       source_id: inputs.sourceId,
+      workflow_execution_id: executionId,
       execution_id: executionId,
       workflow_id: NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
       space_id: request.spaceId,

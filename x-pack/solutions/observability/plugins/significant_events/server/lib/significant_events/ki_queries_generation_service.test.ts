@@ -107,7 +107,13 @@ describe('collectGeneratedKIQueries', () => {
     } as unknown as Pick<Conversation, 'rounds'>;
 
     const result = collectGeneratedKIQueries(
-      { source, connectorId: 'test-connector', agentConversation },
+      {
+        source,
+        connectorId: 'test-connector',
+        agentConversation,
+        workflowExecutionId: 'run-1',
+        parentWorkflowExecutionId: 'onboarding-run-1',
+      },
       { logger: loggerMock.create(), telemetry }
     );
 
@@ -115,6 +121,8 @@ describe('collectGeneratedKIQueries', () => {
     expect(result.queries).toHaveLength(1);
     expect(telemetry.trackSignificantEventsQueriesGenerated).toHaveBeenCalledWith(
       expect.objectContaining({
+        workflow_execution_id: 'run-1',
+        parent_workflow_execution_id: 'onboarding-run-1',
         count: 1,
         connector_id: 'test-connector',
         source_id: 'source-1',
