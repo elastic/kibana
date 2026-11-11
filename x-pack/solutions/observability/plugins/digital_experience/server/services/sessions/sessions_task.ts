@@ -118,17 +118,17 @@ export const runSessionsTask = async ({
     };
   }
 
+  // A deleted index, or a new version, is rebuilt from the lookback, also after a failed run.
+  let rebuild = state.version !== SESSIONS_VERSION;
   try {
-    const newVersion = state.version !== SESSIONS_VERSION;
-    if (newVersion) {
+    if (rebuild) {
       await putSessionsIndexTemplate(internalClient, signal);
     }
-    // A deleted index, or a new version, is rebuilt from the lookback.
     const created = await createSessionsIndex(esClient, signal);
-    if (newVersion) {
+    if (rebuild) {
       await deleteOtherSessionsIndices(esClient, signal);
     }
-    const rebuild = newVersion || created;
+    rebuild = rebuild || created;
     const result = await summarizeSessions({
       esClient,
       signal,
@@ -174,6 +174,8 @@ export const runSessionsTask = async ({
     return {
       state: {
         ...state,
+        // A rebuild that failed starts over: the next run finds the index it created.
+        ...(rebuild ? { checkpoint: null, caughtUp: false, windowMs: INITIAL_WINDOW_MS } : {}),
         lastRunAt: at,
         lastError: { message, at },
         apiKeyInvalid: unauthorized,
@@ -184,6 +186,19 @@ export const runSessionsTask = async ({
 };
 
 /**
+ * The run's result, with the configured interval when it differs from the task's: a changed
+ * `frequency` then applies from the next run. Not while the task runs again right away.
+ */
+export const withConfiguredInterval = (
+  result: { state: SessionsTaskState; runAt?: Date },
+  scheduledInterval: string | undefined,
+  frequency: string
+) =>
+  result.runAt || scheduledInterval === frequency
+    ? result
+    : { state: result.state, schedule: { interval: frequency } };
+
+/**
  * Registers the task that builds the session summaries with ES|QL. It runs with the API key Task
  * Manager granted on behalf of the user who enabled sessions, never as the internal user, so it
  * only summarizes what that user can read. Only the index template is the internal user's.
@@ -192,10 +207,12 @@ export const registerSessionsTask = ({
   core,
   logger,
   taskManager,
+  settings,
 }: {
   core: CoreSetup;
   logger: Logger;
   taskManager: TaskManagerSetupContract;
+  settings: SessionsSettings;
 }): void => {
   taskManager.registerTaskDefinitions({
     [SESSIONS_TASK_TYPE]: {
@@ -209,7 +226,7 @@ export const registerSessionsTask = ({
       createTaskRunner: ({ taskInstance, signal, fakeRequest }) => ({
         run: async () => {
           const [coreStart] = await core.getStartServices();
-          return runSessionsTask({
+          const result = await runSessionsTask({
             state: taskInstance.state,
             esClient: fakeRequest
               ? coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser
@@ -220,6 +237,11 @@ export const registerSessionsTask = ({
             logger,
             now: Date.now(),
           });
+          return withConfiguredInterval(
+            result,
+            taskInstance.schedule?.interval,
+            settings.frequency
+          );
         },
       }),
     },
@@ -247,6 +269,7 @@ export const scheduleSessionsTask = async ({
       params: {},
       state: {},
     },
-    { request, regenerateApiKey: true }
+    // Also while it runs: Task Manager otherwise skips a running task, keeping the old key.
+    { request, regenerateApiKey: true, includeRunningTasks: true }
   );
 };

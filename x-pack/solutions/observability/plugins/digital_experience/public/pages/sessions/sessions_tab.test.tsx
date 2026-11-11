@@ -697,6 +697,19 @@ describe('SessionsTab', () => {
     expect(searchParams(history).rangeFrom).toBe('now-24h');
   });
 
+  it('goes back to the first page when the environment changes', async () => {
+    respondWith({ list: listResponse({ total: 60 }) });
+    const history = renderTab({ search: '&page=2' });
+    await screen.findByTestId('digitalExperienceSessionRow-session-1');
+
+    act(() => {
+      history.push(`/shop/sessions?${TIME_QUERY}&source=otel&environment=staging&page=2`);
+    });
+
+    await waitFor(() => expect(searchParams(history).page).toBeUndefined());
+    expect(searchParams(history).environment).toBe('staging');
+  });
+
   it('keeps the page that Back restores with an earlier time range', async () => {
     respondWith({ list: listResponse({ total: 60 }) });
     const history = renderTab({ search: '&page=2' });

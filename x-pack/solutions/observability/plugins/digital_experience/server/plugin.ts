@@ -80,7 +80,12 @@ export class Plugin
     });
 
     if (taskManager) {
-      registerSessionsTask({ core, logger: this.logger, taskManager });
+      registerSessionsTask({
+        core,
+        logger: this.logger,
+        taskManager,
+        settings: this.config.sessions,
+      });
     }
   }
 

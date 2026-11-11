@@ -14,7 +14,7 @@ import {
   SESSIONS_VERSION,
   type SessionsStatus,
 } from '../../../common/sessions';
-import { getSessionsStatus } from './sessions_status';
+import { RUN_FAILED_MESSAGE, getSessionsStatus } from './sessions_status';
 import type { SessionsTaskState } from './sessions_task';
 
 type TaskUserScope = NonNullable<ConcreteTaskInstance['userScope']>;
@@ -67,9 +67,18 @@ describe('getSessionsStatus', () => {
       taskManagerMock.createTask({ id: SESSIONS_TASK_ID, state, userScope, ...overrides })
     );
 
-  const statusOf = (state: SessionsTaskState, overrides: { frequency?: string } = {}) => {
+  /** The status as a user who can set sessions up reads it, with the details. */
+  const statusOf = (
+    state: SessionsTaskState,
+    { frequency, withDetails = true }: { frequency?: string; withDetails?: boolean } = {}
+  ) => {
     mockTask(state);
-    return getSessionsStatus({ taskManager, settings: { ...settings, ...overrides }, now: NOW });
+    return getSessionsStatus({
+      taskManager,
+      settings: { ...settings, ...(frequency ? { frequency } : {}) },
+      withDetails,
+      now: NOW,
+    });
   };
 
   beforeEach(() => {
@@ -226,7 +235,12 @@ describe('getSessionsStatus', () => {
     it('is degraded when the task has no API key', async () => {
       mockTask(healthyState, { userScope: undefined });
 
-      const status = await getSessionsStatus({ taskManager, settings, now: NOW });
+      const status = await getSessionsStatus({
+        taskManager,
+        settings,
+        withDetails: true,
+        now: NOW,
+      });
 
       expect(status).toEqual(
         expect.objectContaining({ health: 'degraded', apiKeyInvalid: true, enabledBy: null })
@@ -266,6 +280,32 @@ describe('getSessionsStatus', () => {
       });
 
       expect(status).toEqual(expect.objectContaining({ health: 'degraded', lagSeconds: 3600 }));
+    });
+  });
+
+  describe('without the details, for users who cannot set sessions up', () => {
+    it('hides who enabled sessions', async () => {
+      expect((await statusOf(healthyState, { withDetails: false })).enabledBy).toBeNull();
+    });
+
+    it('says the last run failed, but not why', async () => {
+      const at = secondsAgo(30);
+      const status = await statusOf(
+        {
+          ...healthyState,
+          lastError: { message: 'security_exception: action denied for user [ana]', at },
+        },
+        { withDetails: false }
+      );
+
+      expect(status).toEqual(
+        expect.objectContaining({
+          health: 'degraded',
+          reason: RUN_FAILED_MESSAGE,
+          lastError: { message: RUN_FAILED_MESSAGE, at },
+        })
+      );
+      expect(JSON.stringify(status)).not.toContain('ana');
     });
   });
 });

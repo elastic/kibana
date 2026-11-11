@@ -41,6 +41,13 @@ const MISSING_STATUS: SessionsStatus = {
 const API_KEY_INVALID_REASON =
   'The API key the session summaries are built with was invalidated or has expired. A user with the Digital Experience "Set up session summaries" privilege must enable sessions again.';
 
+/**
+ * The last run's error for users who can't set sessions up: Elasticsearch errors can name the user
+ * who enabled them, their roles and indices.
+ */
+export const RUN_FAILED_MESSAGE =
+  'The last run failed. A user with the Digital Experience "Set up session summaries" privilege can see why.';
+
 const getTask = async (
   taskManager: TaskManagerStartContract
 ): Promise<ConcreteTaskInstance | undefined> => {
@@ -70,7 +77,13 @@ const healthOf = ({
     return { health: 'degraded', reason: API_KEY_INVALID_REASON };
   }
   if (lastError) {
-    return { health: 'degraded', reason: `The last run failed: ${lastError.message}` };
+    return {
+      health: 'degraded',
+      reason:
+        lastError.message === RUN_FAILED_MESSAGE
+          ? RUN_FAILED_MESSAGE
+          : `The last run failed: ${lastError.message}`,
+    };
   }
   if (lagging && lagSeconds !== null) {
     return {
@@ -83,15 +96,18 @@ const healthOf = ({
 
 /**
  * The sessions status, from the summaries task and what its last run recorded. Without Task
- * Manager, nothing can build sessions, so they're missing.
+ * Manager, nothing can build sessions, so they're missing. Who enabled sessions and why the last
+ * run failed are only included `withDetails`, for users who can set sessions up.
  */
 export const getSessionsStatus = async ({
   taskManager,
   settings,
+  withDetails = false,
   now = Date.now(),
 }: {
   taskManager: TaskManagerStartContract | undefined;
   settings: SessionsSettings;
+  withDetails?: boolean;
   now?: number;
 }): Promise<SessionsStatus> => {
   const task = taskManager ? await getTask(taskManager) : undefined;
@@ -114,7 +130,11 @@ export const getSessionsStatus = async ({
     !!task.userScope &&
     state.failedApiKeyId !== task.userScope.apiKeyId;
   const apiKeyInvalid = !task.userScope || (state.apiKeyInvalid === true && !replacedKeyFailed);
-  const lastError = replacedKeyFailed ? null : state.lastError ?? null;
+  const recordedError = replacedKeyFailed ? null : state.lastError ?? null;
+  const lastError =
+    recordedError && !withDetails
+      ? { ...recordedError, message: RUN_FAILED_MESSAGE }
+      : recordedError;
   const lagging =
     !rebuilding &&
     lagSeconds !== null &&
@@ -132,6 +152,6 @@ export const getSessionsStatus = async ({
     lastRunAt: state.lastRunAt ?? null,
     lastSuccessAt: state.lastSuccessAt ?? null,
     lastError,
-    enabledBy: task.userScope?.userName ?? null,
+    enabledBy: withDetails ? task.userScope?.userName ?? null : null,
   };
 };

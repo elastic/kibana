@@ -148,15 +148,17 @@ const statusRoute = createDigitalExperienceServerRoute({
     const canManage =
       request.authzResult?.[DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions] === true;
     const { taskManager } = await getSessionsServices();
-    let status: SessionsStatus;
     try {
       // The task and its state only; no session data is read with the internal user.
-      status = await getSessionsStatus({ taskManager, settings: sessionsSettings });
+      return await getSessionsStatus({
+        taskManager,
+        settings: sessionsSettings,
+        withDetails: canManage,
+      });
     } catch (error) {
       logger.error(`Could not read the sessions status: ${describeError(error)}`);
       throw internal(LOAD_FAILED_MESSAGE);
     }
-    return canManage ? status : { ...status, enabledBy: null };
   },
 });
 
@@ -212,7 +214,12 @@ const enableRoute = createDigitalExperienceServerRoute({
     audit('success');
     logger.info(`Sessions enabled by [${enabledBy}]`);
     try {
-      return await getSessionsStatus({ taskManager, settings: sessionsSettings });
+      // Only users who can set sessions up get here.
+      return await getSessionsStatus({
+        taskManager,
+        settings: sessionsSettings,
+        withDetails: true,
+      });
     } catch (error) {
       throw toReadError(error, logger, 'the sessions status');
     }

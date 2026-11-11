@@ -201,19 +201,20 @@ function SessionsList({
     hiddenByDefault: SESSIONS_HIDDEN_BY_DEFAULT,
   });
 
-  // A new time range lists other sessions, so a later page may not exist anymore: start over. Not
-  // when Back or Forward (a POP) restores a range, as that URL's page goes with it.
+  // A new time range or environment lists other sessions, so a later page may not exist anymore:
+  // start over. Not when Back or Forward (a POP) restores them, as that URL's page goes with it.
   const history = useHistory();
-  const previousTimeRange = useRef(timeRange);
+  const previousScope = useRef({ timeRange, environment });
   useEffect(() => {
-    if (previousTimeRange.current === timeRange) {
+    const previous = previousScope.current;
+    if (previous.timeRange === timeRange && previous.environment === environment) {
       return;
     }
-    previousTimeRange.current = timeRange;
+    previousScope.current = { timeRange, environment };
     if (state.page > 0 && history.action !== 'POP') {
       update({ page: undefined }, true);
     }
-  }, [timeRange, state.page, update, history]);
+  }, [timeRange, environment, state.page, update, history]);
 
   const {
     value: response,

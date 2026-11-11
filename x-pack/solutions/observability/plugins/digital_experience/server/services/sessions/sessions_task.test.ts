@@ -25,6 +25,7 @@ import {
   NO_API_KEY_MESSAGE,
   apiKeyIdOf,
   registerSessionsTask,
+  withConfiguredInterval,
   runSessionsTask,
   scheduleSessionsTask,
   type RunSessionsTaskParams,
@@ -279,6 +280,32 @@ describe('runSessionsTask', () => {
       );
     });
 
+    it('starts the rebuild over when the run that recreated the index fails', async () => {
+      jest.mocked(createSessionsIndex).mockResolvedValue(true);
+      jest.mocked(summarizeSessions).mockRejectedValue(new Error('esql timed out'));
+
+      const { state } = await run(caughtUpState);
+
+      expect(state).toMatchObject({
+        checkpoint: null,
+        caughtUp: false,
+        windowMs: INITIAL_WINDOW_MS,
+        lastError: { message: 'esql timed out', at: AT },
+      });
+    });
+
+    it('starts the rebuild over when a run of a new version fails', async () => {
+      jest.mocked(summarizeSessions).mockRejectedValue(new Error('esql timed out'));
+
+      const { state } = await run({ ...caughtUpState, version: SESSIONS_VERSION - 1 });
+
+      expect(state).toMatchObject({
+        version: SESSIONS_VERSION - 1,
+        checkpoint: null,
+        caughtUp: false,
+      });
+    });
+
     it('stops at a failed step', async () => {
       jest.mocked(createSessionsIndex).mockRejectedValue(new Error('cluster_block_exception'));
 
@@ -353,7 +380,7 @@ describe('registerSessionsTask', () => {
     const core = coreMock.createSetup();
     const logger = loggingSystemMock.createLogger();
     const taskManager = taskManagerMock.createSetup();
-    registerSessionsTask({ core, logger, taskManager });
+    registerSessionsTask({ core, logger, taskManager, settings: { frequency: '1m' } });
     const definitions: TaskDefinitionRegistry =
       taskManager.registerTaskDefinitions.mock.calls[0][0];
     return { core, definition: definitions[SESSIONS_TASK_TYPE] };
@@ -395,7 +422,7 @@ describe('registerSessionsTask', () => {
     const result = await definition
       .createTaskRunner(
         taskManagerMock.createRunContext({
-          taskInstance: taskManagerMock.createTask({ state: {} }),
+          taskInstance: taskManagerMock.createTask({ state: {}, schedule: { interval: '1m' } }),
           fakeRequest,
           signal,
         })
@@ -420,7 +447,10 @@ describe('registerSessionsTask', () => {
     const result = await definition
       .createTaskRunner(
         taskManagerMock.createRunContext({
-          taskInstance: taskManagerMock.createTask({ state: caughtUpState }),
+          taskInstance: taskManagerMock.createTask({
+            state: caughtUpState,
+            schedule: { interval: '1m' },
+          }),
         })
       )
       .run();
@@ -433,6 +463,27 @@ describe('registerSessionsTask', () => {
         lastError: expect.objectContaining({ message: NO_API_KEY_MESSAGE }),
       }),
     });
+  });
+});
+
+describe('withConfiguredInterval', () => {
+  const result = { state: { caughtUp: true } };
+
+  it('keeps the run result when the task has the configured interval', () => {
+    expect(withConfiguredInterval(result, '1m', '1m')).toBe(result);
+  });
+
+  it('applies a changed interval from the next run', () => {
+    expect(withConfiguredInterval(result, '1m', '5m')).toEqual({
+      state: result.state,
+      schedule: { interval: '5m' },
+    });
+  });
+
+  it('runs again right away first, while the task is behind', () => {
+    const behind = { ...result, runAt: new Date() };
+
+    expect(withConfiguredInterval(behind, '1m', '5m')).toBe(behind);
   });
 });
 
@@ -451,7 +502,7 @@ describe('scheduleSessionsTask', () => {
         params: {},
         state: {},
       },
-      { request, regenerateApiKey: true }
+      { request, regenerateApiKey: true, includeRunningTasks: true }
     );
   });
 

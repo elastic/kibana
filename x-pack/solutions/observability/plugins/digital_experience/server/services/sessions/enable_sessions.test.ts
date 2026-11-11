@@ -102,7 +102,7 @@ describe('enableSessions', () => {
         taskType: SESSIONS_TASK_TYPE,
         schedule: { interval: '1m' },
       }),
-      { request, regenerateApiKey: true }
+      { request, regenerateApiKey: true, includeRunningTasks: true }
     );
     expect(taskManager.runSoon).toHaveBeenCalledWith(SESSIONS_TASK_ID);
   });

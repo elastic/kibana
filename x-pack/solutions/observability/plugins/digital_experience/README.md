@@ -220,7 +220,9 @@ Each run:
 2. Counts the sessions with an event in the window, and fetches their ids in ranges of the SHA-256
    of their `session.id`, about 5,000 a range, as ES|QL returns at most 10,000 rows. A range that
    still fills a response is split again. Hashing keeps the ranges even whatever the ids look like
-   (EDOT iOS writes them in uppercase).
+   (EDOT iOS writes them in uppercase). The task relies on that default of
+   `esql.query.result_truncation_max_size`: a cluster that lowers it below 10,000 truncates the
+   responses without saying so, and the sessions past the cap are missing.
 3. Rebuilds the sessions, 5,000 at a time, from their events of the last 24 hours, the longest a
    session lasts, with their ids as a literal `IN` list, which Elasticsearch looks up in the index:
    an `IN (subquery)` scanned the whole lookback. One query aggregates per session and page URL,
@@ -294,8 +296,10 @@ enabling again retries from where it failed. Enabling again also gives the task 
 on behalf of whoever enabled it last, and Task Manager invalidates the previous one. The task keeps
 its state, so its summaries are kept. The task never runs as the Kibana internal user: only the
 index template is the internal user's. Each enable writes a `digital_experience_sessions_enable`
-audit event, successful or not, and status reports who last enabled sessions only to users who can
-set them up. Without Task Manager, sessions can't be enabled.
+audit event, successful or not. Status reports who last enabled sessions, and why the last run
+failed, only to users who can set them up: Elasticsearch errors can name that user, their roles
+and indices, so the others get a generic message. A run in progress doesn't stop enabling again
+from replacing the key. Without Task Manager, sessions can't be enabled.
 
 Like any granted key, the task's key has the access the user had when it was granted, and no
 expiration. Anyone with `manage_api_key` or `manage_security`, or the enabling user with
@@ -322,7 +326,8 @@ xpack.digital_experience.sessions:
 - **`frequency`**: an active session is re-read and rewritten once per run. Going from `1m` to
   `2m`–`5m` cuts the work roughly 2–5× for long sessions, and adds about the same time to the session
   list's lag. Session detail reads raw events up to the longest a session lasts, so its timeline
-  stays current; its summary figures are as fresh as the last run.
+  stays current; its summary figures are as fresh as the last run. A changed `frequency` applies
+  after a restart, from the task's next run once it has caught up.
 
 Status reports the summaries as lagging when their checkpoint is more than three runs plus the sync
 delay behind, and at least 5 minutes, once they have caught up; the task logs when a run starts

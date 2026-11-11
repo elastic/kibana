@@ -158,21 +158,19 @@ describe('sessions routes', () => {
   });
 
   describe('status', () => {
-    it.each([
-      [true, status],
-      [false, { ...status, enabledBy: null }],
-    ])(
-      'shows who enabled sessions only to managers (manage sessions: %s)',
-      async (canManage, body) => {
+    it.each([true, false])(
+      'reads the details of the status only for managers (manage sessions: %s)',
+      async (canManage) => {
         // The router fills `authzResult` from the route's extended privileges.
         const { result, services } = runHandler(SESSIONS_STATUS_ENDPOINT, {
           authzResult: { manage_digital_experience_sessions: canManage },
         });
 
-        expect(await result).toEqual(body);
+        expect(await result).toEqual(status);
         expect(getSessionsStatus).toHaveBeenCalledWith({
           taskManager: services.taskManager,
           settings,
+          withDetails: canManage,
         });
       }
     );
@@ -184,7 +182,11 @@ describe('sessions routes', () => {
 
       await result;
 
-      expect(getSessionsStatus).toHaveBeenCalledWith({ taskManager: undefined, settings });
+      expect(getSessionsStatus).toHaveBeenCalledWith({
+        taskManager: undefined,
+        settings,
+        withDetails: false,
+      });
     });
 
     it('answers 500 without the details when the status read fails', async () => {
@@ -220,6 +222,7 @@ describe('sessions routes', () => {
       expect(getSessionsStatus).toHaveBeenCalledWith({
         taskManager: services.taskManager,
         settings,
+        withDetails: true,
       });
       expect(coreContext.security.audit.logger.log).toHaveBeenCalledWith({
         message: 'User [ana] enabled Digital Experience sessions',
