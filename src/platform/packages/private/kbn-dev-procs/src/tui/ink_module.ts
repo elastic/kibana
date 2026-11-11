@@ -59,6 +59,10 @@ export interface InkModule {
   readonly useStdout: () => { readonly stdout: NodeJS.WriteStream };
   readonly render: (
     node: ReactElement,
-    options: { readonly exitOnCtrlC: boolean; readonly patchConsole: boolean }
+    options: {
+      readonly exitOnCtrlC: boolean;
+      readonly patchConsole: boolean;
+      readonly stdout: NodeJS.WriteStream;
+    }
   ) => InkInstance;
 }

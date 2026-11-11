@@ -10,6 +10,7 @@
 import React from 'react';
 import type { Supervisor } from '../supervisor';
 import type { InkInstance, InkModule } from './ink_module';
+import { createSynchronizedStdout } from './synchronized_stdout';
 import { createTuiApp } from './tui_app';
 
 /** Shows the TUI, starts every process, and resolves once the user quit and every process has stopped. */
@@ -38,6 +39,7 @@ export const runTui = async (ink: InkModule, supervisor: Supervisor): Promise<vo
       // Raw mode turns Ctrl+C into a key press, which the app handles like q so that processes stop gracefully.
       exitOnCtrlC: false,
       patchConsole: true,
+      stdout: createSynchronizedStdout(process.stdout),
     }
   );
   await instance.waitUntilExit();
