@@ -31,6 +31,8 @@ export interface CampaignOptions {
   rounds: number;
   searchRollouts: number;
   gateRollouts: number;
+  /** Two-sided coverage of the gate's reward interval; its low end must clear 0. */
+  gateConfidence?: number;
   searchTasks: OrcaTask[];
   gateTasks: OrcaTask[];
   pool: WorkerPool;
@@ -141,6 +143,7 @@ export const runCampaign = async ({
   rounds,
   searchRollouts,
   gateRollouts,
+  gateConfidence,
   searchTasks,
   gateTasks,
   pool,
@@ -314,7 +317,11 @@ export const runCampaign = async ({
       saveLedger();
       continue;
     }
-    const gate = gateCandidate({ incumbent: incumbentGate, candidate: candidateGate });
+    const gate = gateCandidate({
+      incumbent: incumbentGate,
+      candidate: candidateGate,
+      ...(gateConfidence ? { confidence: gateConfidence } : {}),
+    });
 
     // Predictions name search cases, so they are checked by re-measuring the search split.
     const candidateSearchRun = candidateSearch

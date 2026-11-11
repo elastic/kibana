@@ -74,8 +74,9 @@ costs nothing after its first measurement, and a gate round runs only the candid
    gate.
 5. Lint (paths, placeholders) + jest on the agent and sandbox tool folders.
 6. Restart the candidate lane; both lanes run the gate split in parallel.
-7. Paired bootstrap over incidents at 80% two-sided confidence (the low end is a one-sided 90%
-   bound); quality or cost path, regression cap, execution guard.
+7. Paired bootstrap over incidents at 60% two-sided confidence (`--gate-confidence`; the low end is
+   a one-sided 80% bound, so a zero-effect candidate clears the reward test about 1 time in 5);
+   quality or cost path, regression cap, execution guard.
 8. Re-measure the candidate on search to check the proposal's predictions.
 9. Promote: write the edits into the incumbent worktree and restart it.
 10. After the last round, once: the customer0 holdout (`ns-investigation-golden-2710` + `-0911`,

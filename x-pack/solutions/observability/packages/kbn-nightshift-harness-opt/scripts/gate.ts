@@ -92,8 +92,9 @@ const percentile = (sorted: number[], fraction: number): number =>
 
 /**
  * Paired accept test, clustered by incident, with two acceptance paths. Intervals are two-sided at
- * \`confidence\` (default 0.8: the low end is a one-sided 90% bound), so an accept means "better
- * with 90% confidence", which needs about 2.3× fewer samples than a 95% two-sided interval:
+ * \`confidence\` (default 0.6: the low end is a one-sided 80% bound), so an accept means "better
+ * with 80% confidence". A zero-effect candidate passes the reward test about 1 time in 5; the
+ * regression cap, the cost limit and the end-of-campaign holdout are the backstops:
  *
  * - **quality**: reward CI excludes 0 and cost is at most `maxCostRatio` of the incumbent's;
  * - **cost**: reward non-inferior (CI low above `−nonInferiorityMargin`) and USD per unit of
@@ -112,7 +113,7 @@ export const gateCandidate = ({
   regressionEpsilon = 0.05,
   nonInferiorityMargin = 0.02,
   maxExecutionDrop = 0.03,
-  confidence = 0.8,
+  confidence = 0.6,
 }: {
   incumbent: RunSummary;
   candidate: RunSummary;

@@ -179,6 +179,7 @@ export const cli = () =>
             rounds: asNumber(flags.rounds, 1) ?? 1,
             searchRollouts: asNumber(flags['search-rollouts'], 1) ?? 1,
             gateRollouts: asNumber(flags['gate-rollouts'], 5) ?? 5,
+            gateConfidence: asNumber(flags['gate-confidence']),
             searchTasks: tasksForSplit('search', { limit: asNumber(flags['search-limit']) }),
             gateTasks: tasksForSplit('gate', { limit: asNumber(flags['gate-limit']) }),
             pool,
@@ -210,7 +211,7 @@ unedited files with --base.
   dry-round --from <runs/.../label.json>  propose, review and validate only
   report [--serve --port 7712] [--ledger ledger.json]   HTML report of runs and rounds
   campaign --rounds 1 --search-limit 12 --gate-limit 12 --gate-rollouts 5
-      [--candidate-search] [--holdout-limit N] [--skip-holdout] [--holdout-always (debug)]`,
+      [--gate-confidence 0.6] [--candidate-search] [--holdout-limit N] [--skip-holdout] [--holdout-always (debug)]`,
       flags: {
         string: [
           'split',
@@ -232,6 +233,7 @@ unedited files with --base.
           'host',
           'port',
           'holdout-limit',
+          'gate-confidence',
         ],
         boolean: [
           'candidate-search',
