@@ -35,9 +35,10 @@ import {
   type FailingTarget,
   type FailingTest,
 } from './failing_suite_issue';
+import { extractErrorMessage } from './failure_text';
 import type { TestFailure } from './get_failures';
 import type { GithubApi } from './github_api';
-import { extractErrorMessage, testLabel } from './report_failure';
+import { testLabel } from './report_failure';
 
 /**
  * Days of the branch's builds the rule looks at: enough for the clean runs it asks for on a busy

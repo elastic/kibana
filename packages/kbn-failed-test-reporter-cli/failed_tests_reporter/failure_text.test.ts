@@ -7,9 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import dedent from 'dedent';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import { toRepoRelativePaths, trimFailureText } from './failure_text';
+import { extractErrorMessage, toRepoRelativePaths, trimFailureText } from './failure_text';
+
+describe('extractErrorMessage', () => {
+  it('returns the text before the first stack-frame line', () => {
+    const failure = dedent`
+      Error: retry.tryWithRetries reached the limit of attempts
+      waiting for element to be visible
+        at onFailure (retry_for_success.ts:17:9)
+        at retryForSuccess (retry_for_success.ts:59:13)
+    `;
+
+    expect(extractErrorMessage(failure)).toBe(
+      'Error: retry.tryWithRetries reached the limit of attempts\nwaiting for element to be visible'
+    );
+  });
+
+  it('returns the full text when there are no stack-frame lines', () => {
+    expect(extractErrorMessage('some failure text without a stack\nsecond line')).toBe(
+      'some failure text without a stack\nsecond line'
+    );
+  });
+
+  it('falls back to the full text when the blob starts with stack frames', () => {
+    const failure = '  at onFailure (retry_for_success.ts:17:9)\n  at retryForSuccess (rfs.ts:5:1)';
+    expect(extractErrorMessage(failure)).toBe(failure.trim());
+  });
+});
 
 describe('toRepoRelativePaths', () => {
   it('strips the buildkite agent checkout prefix', () => {
