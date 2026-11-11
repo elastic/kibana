@@ -49,10 +49,14 @@ export interface WorkflowPagesSystemClient {
   /** Deletes every page of the given workflows. Workflow deletes call it. */
   retireWorkflowPages(params: { workflowIds: string[]; spaceId: string }): Promise<void>;
   /**
-   * Checks a secret from a public URL. True only for an online page whose hash matches.
-   * Never decrypts, and returns false for every miss, so callers cannot tell them apart.
+   * Checks a secret from a page URL. True only for an online page of the workflow created at
+   * `workflowCreatedAt` whose hash matches. Never decrypts, and returns false for every miss.
    */
-  verifyPageSecret(ref: WorkflowPageRef, secret: string): Promise<boolean>;
+  verifyPageSecret(
+    ref: WorkflowPageRef,
+    secret: string,
+    workflowCreatedAt: string
+  ): Promise<boolean>;
 }
 
 export interface WorkflowPagesSystemClientDeps {
@@ -117,7 +121,11 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
     await this.deletePages(await this.findWorkflowPages(workflowIds, spaceId), spaceId);
   }
 
-  async verifyPageSecret(ref: WorkflowPageRef, secret: string): Promise<boolean> {
+  async verifyPageSecret(
+    ref: WorkflowPageRef,
+    secret: string,
+    workflowCreatedAt: string
+  ): Promise<boolean> {
     if (!this.deps.canEncrypt) {
       return false;
     }
@@ -126,6 +134,7 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
       page !== undefined &&
       page.attributes.workflowId === ref.workflowId &&
       page.attributes.pageId === ref.pageId &&
+      page.attributes.workflowCreatedAt === workflowCreatedAt &&
       isPageOnline(page.attributes, this.deps.canEncrypt) &&
       isPageSecretValid(ref, secret, page.attributes.secretHash)
     );

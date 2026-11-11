@@ -220,18 +220,31 @@ describe('WorkflowPagesSystemClient', () => {
 
     it('accepts the secret of an online page without a decrypt', async () => {
       const { client, store } = await onlinePage();
-      await expect(client.verifyPageSecret(ref, 'the-secret')).resolves.toBe(true);
+      await expect(client.verifyPageSecret(ref, 'the-secret', WORKFLOW_CREATED_AT)).resolves.toBe(
+        true
+      );
       expect(store.encryptedClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
     });
 
     it('rejects a wrong secret, another workflow, and another space', async () => {
       const { client } = await onlinePage();
-      await expect(client.verifyPageSecret(ref, 'wrong')).resolves.toBe(false);
+      await expect(client.verifyPageSecret(ref, 'wrong', WORKFLOW_CREATED_AT)).resolves.toBe(false);
       await expect(
-        client.verifyPageSecret({ ...ref, workflowId: 'workflow-2' }, 'the-secret')
+        client.verifyPageSecret(
+          { ...ref, workflowId: 'workflow-2' },
+          'the-secret',
+          WORKFLOW_CREATED_AT
+        )
       ).resolves.toBe(false);
       await expect(
-        client.verifyPageSecret({ ...ref, spaceId: 'other' }, 'the-secret')
+        client.verifyPageSecret({ ...ref, spaceId: 'other' }, 'the-secret', WORKFLOW_CREATED_AT)
+      ).resolves.toBe(false);
+    });
+
+    it('rejects the page of an earlier workflow with the same id', async () => {
+      const { client } = await onlinePage();
+      await expect(
+        client.verifyPageSecret(ref, 'the-secret', '2026-02-01T00:00:00.000Z')
       ).resolves.toBe(false);
     });
 
@@ -239,19 +252,25 @@ describe('WorkflowPagesSystemClient', () => {
       const { client, storedPage } = await onlinePage();
       const page = storedPage();
       if (page) page.attributes.access = null;
-      await expect(client.verifyPageSecret(ref, 'the-secret')).resolves.toBe(false);
+      await expect(client.verifyPageSecret(ref, 'the-secret', WORKFLOW_CREATED_AT)).resolves.toBe(
+        false
+      );
     });
 
     it('rejects a disabled page', async () => {
       const { client, storedPage } = await onlinePage();
       const page = storedPage();
       if (page) page.attributes.enabled = false;
-      await expect(client.verifyPageSecret(ref, 'the-secret')).resolves.toBe(false);
+      await expect(client.verifyPageSecret(ref, 'the-secret', WORKFLOW_CREATED_AT)).resolves.toBe(
+        false
+      );
     });
 
     it('rejects every secret without an encryption key', async () => {
       const { client } = setup({ canEncrypt: false });
-      await expect(client.verifyPageSecret(ref, 'anything')).resolves.toBe(false);
+      await expect(client.verifyPageSecret(ref, 'anything', WORKFLOW_CREATED_AT)).resolves.toBe(
+        false
+      );
     });
   });
 });

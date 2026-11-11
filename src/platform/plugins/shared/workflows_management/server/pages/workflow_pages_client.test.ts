@@ -142,8 +142,12 @@ describe('WorkflowPagesClient', () => {
       const rotated = await client.rotateSecret(key);
 
       expect(rotated).not.toBe(secret);
-      await expect(systemClient.verifyPageSecret(ref, secret)).resolves.toBe(false);
-      await expect(systemClient.verifyPageSecret(ref, rotated)).resolves.toBe(true);
+      await expect(systemClient.verifyPageSecret(ref, secret, WORKFLOW_CREATED_AT)).resolves.toBe(
+        false
+      );
+      await expect(systemClient.verifyPageSecret(ref, rotated, WORKFLOW_CREATED_AT)).resolves.toBe(
+        true
+      );
       await expect(client.getSecret(key)).resolves.toBe(rotated);
     });
 
@@ -153,10 +157,14 @@ describe('WorkflowPagesClient', () => {
       const secret = await client.getSecret(key);
 
       await client.setEnabled(key, false);
-      await expect(systemClient.verifyPageSecret(ref, secret)).resolves.toBe(false);
+      await expect(systemClient.verifyPageSecret(ref, secret, WORKFLOW_CREATED_AT)).resolves.toBe(
+        false
+      );
 
       await client.setEnabled(key, true);
-      await expect(systemClient.verifyPageSecret(ref, secret)).resolves.toBe(true);
+      await expect(systemClient.verifyPageSecret(ref, secret, WORKFLOW_CREATED_AT)).resolves.toBe(
+        true
+      );
     });
 
     it('takes a page offline when the access level is removed', async () => {
@@ -249,7 +257,9 @@ describe('WorkflowPagesClient', () => {
         expect.objectContaining({ online: true, enabled: true })
       );
       await expect(client.getSecret(key)).resolves.toBe(rotated);
-      await expect(systemClient.verifyPageSecret(teamRef, rotated)).resolves.toBe(true);
+      await expect(
+        systemClient.verifyPageSecret(teamRef, rotated, WORKFLOW_CREATED_AT)
+      ).resolves.toBe(true);
     });
   });
 

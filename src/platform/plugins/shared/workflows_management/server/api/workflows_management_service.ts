@@ -85,10 +85,12 @@ import type {
 } from '../../common/lib/workflow_change_history/types';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { getHistoryForWorkflow } from '../lib/get_workflow_change_history';
+import { resolveWorkflowPage } from '../lib/resolve_workflow_page';
 import {
   type ManagedInstallReadinessResult,
   waitForManagedWorkflowInstallReadiness,
 } from '../lib/wait_for_managed_workflow_install_readiness';
+import type { WorkflowPageRef } from '../pages/page_secret';
 import type { WorkflowPagesClient } from '../pages/workflow_pages_client';
 import type {
   WorkflowPagesService,
@@ -367,6 +369,24 @@ export class WorkflowsService {
     await this.ensureInitialized();
     if (!this.pages) throw new Error('Workflow pages are not set up');
     return this.pages.getClient({ request });
+  }
+
+  /** Returns the workflow behind a page URL, or undefined when the page must not run. */
+  public async resolveWorkflowPage(
+    ref: WorkflowPageRef,
+    secret: string
+  ): Promise<WorkflowProperties | undefined> {
+    await this.ensureInitialized();
+    if (!this.pages) throw new Error('Workflow pages are not set up');
+    return resolveWorkflowPage(
+      {
+        getWorkflowSource: (id, spaceId) =>
+          this.crudService.getWorkflowDocumentSource(id, spaceId, { includeGlobal: false }),
+        pagesSystemClient: this.pages.getSystemClient(),
+        serviceAccountBindings: this.workflowsExecutionEngine.serviceAccountBindings,
+      },
+      { ref, secret }
+    );
   }
 
   public async getAccessControl(): Promise<WorkflowAccessControlService> {
