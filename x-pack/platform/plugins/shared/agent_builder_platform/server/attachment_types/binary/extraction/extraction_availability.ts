@@ -29,7 +29,6 @@ interface InferenceEndpointsResponse {
   endpoints?: Array<{ inference_id: string }>;
 }
 
-// The ES client types do not know the `document_extraction` task type yet, so we call the API directly.
 const findEndpointId = async (esClient: ElasticsearchClient): Promise<string | undefined> => {
   try {
     const { endpoints = [] } = await esClient.transport.request<InferenceEndpointsResponse>({
