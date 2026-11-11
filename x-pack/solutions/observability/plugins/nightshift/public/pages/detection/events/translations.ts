@@ -85,6 +85,13 @@ export const LIST_ERROR_MESSAGE = i18n.translate(
   'xpack.nightshift.detectionPage.events.listErrorMessage',
   { defaultMessage: "The significant events list couldn't be loaded." }
 );
+export const INVESTIGATION_FILTER_ERROR_MESSAGE = i18n.translate(
+  'xpack.nightshift.detectionPage.events.investigationFilterErrorMessage',
+  {
+    defaultMessage:
+      "Events can't be filtered by investigation right now. Check that you can read investigations, or remove the filter.",
+  }
+);
 export const RETRY_LABEL = i18n.translate('xpack.nightshift.detectionPage.events.retryLabel', {
   defaultMessage: 'Try again',
 });

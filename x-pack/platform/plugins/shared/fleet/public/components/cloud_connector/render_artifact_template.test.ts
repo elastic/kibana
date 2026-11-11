@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { sendRenderIacTemplate } from '../../../hooks/use_request/iac_provisioner';
-import { CLOUD_CONNECTOR_RENDER_FLOW } from '../../../../common/telemetry/iac_provisioner_events';
-import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../../common/types/rest_spec/iac_provisioner';
+import { sendRenderIacTemplate } from '../../hooks/use_request/iac_provisioner';
+import { CLOUD_CONNECTOR_RENDER_FLOW } from '../../../common/telemetry/iac_provisioner_events';
+import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
 
 import { getRenderIntegrations, renderArtifactTemplate } from './render_artifact_template';
 
-jest.mock('../../../hooks/use_request/iac_provisioner');
+jest.mock('../../hooks/use_request/iac_provisioner');
 
 const mockedSendRenderIacTemplate = jest.mocked(sendRenderIacTemplate);
 
@@ -103,6 +103,44 @@ describe('renderArtifactTemplate', () => {
       templateSha: TEMPLATE_SHA,
       blueprint: BLUEPRINT,
     });
+  });
+
+  it('adds the extra stack params, asked for with the rendered template details', async () => {
+    respond({
+      render: true,
+      artifactUrl: ARTIFACT_URL,
+      templateSha: TEMPLATE_SHA,
+      blueprint: BLUEPRINT,
+    });
+    const getExtraStackParams = jest.fn().mockResolvedValue({ ElasticCallbackToken: 'tok-1' });
+
+    const result = await renderArtifactTemplate({
+      ...PARAMS,
+      stackParams: { ElasticOrganizationId: '2070044029' },
+      getExtraStackParams,
+    });
+
+    expect(getExtraStackParams).toHaveBeenCalledWith({
+      templateSha: TEMPLATE_SHA,
+      blueprint: BLUEPRINT,
+    });
+    expect(result).toMatchObject({
+      status: 'rendered',
+      launchUrl: expect.stringContaining(
+        '&param_ElasticOrganizationId=2070044029&param_ElasticCallbackToken=tok-1'
+      ),
+    });
+  });
+
+  it('does not ask for extra stack params when nothing was rendered', async () => {
+    const getExtraStackParams = jest.fn();
+
+    respond({ render: false, templateSha: TEMPLATE_SHA, blueprint: BLUEPRINT });
+    await renderArtifactTemplate({ ...PARAMS, getExtraStackParams });
+    respond(null, new Error('boom'));
+    await renderArtifactTemplate({ ...PARAMS, getExtraStackParams });
+
+    expect(getExtraStackParams).not.toHaveBeenCalled();
   });
 
   it('builds the quick-create launch URL on the static URL when one is given', async () => {

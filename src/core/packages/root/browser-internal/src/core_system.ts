@@ -387,10 +387,10 @@ export class CoreSystem {
         injectedMetadata,
         getNotifications: () => notificationsPromise,
         customBranding,
-        i18n,
         theme,
         userProfile,
         uiSettings,
+        settings,
       });
       const deprecations = this.deprecations.start({ http });
 

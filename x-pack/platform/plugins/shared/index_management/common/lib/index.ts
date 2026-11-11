@@ -10,6 +10,7 @@ export {
   serializeAsESLifecycle,
   deserializeESLifecycle,
   resolveLogisticsLifecycle,
+  serializeComponentTemplateLifecycle,
   HOT_ONLY_INFINITE_DATA_RETENTION,
 } from './data_stream_utils';
 
