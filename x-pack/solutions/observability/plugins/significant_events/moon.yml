@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/nightshift-shared'
   - '@kbn/nightshift-sources-plugin'
   - '@kbn/core'
+  - '@kbn/std'
   - '@kbn/core-pricing-common'
   - '@kbn/significant-events-schema'
   - '@kbn/agent-builder-common'
@@ -85,12 +86,14 @@ dependsOn:
   - '@kbn/agentic-investigations-plugin'
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/core-http-server-mocks'
+  - '@kbn/std'
 tags:
   - plugin
   - prod
   - group-observability
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*

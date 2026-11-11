@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { MODAL_TRANSLATIONS } from './translations';
 export {
   InvestigationActionModals,
   type InvestigationActionModalsProps,

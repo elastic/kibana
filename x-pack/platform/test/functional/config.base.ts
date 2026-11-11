@@ -98,14 +98,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       graph: {
         pathname: '/app/graph',
       },
-      grokDebugger: {
-        pathname: '/app/dev_tools',
-        hash: '/grokdebugger',
-      },
-      searchProfiler: {
-        pathname: '/app/dev_tools',
-        hash: '/searchprofiler',
-      },
       painlessLab: {
         pathname: '/app/dev_tools',
         hash: '/painless_lab',
@@ -146,12 +138,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       },
       indexManagement: {
         pathname: '/app/management/data/index_management',
-      },
-      indexLifecycleManagement: {
-        pathname: '/app/management/data/index_lifecycle_management',
-      },
-      ingestPipelines: {
-        pathname: '/app/management/ingest/ingest_pipelines',
       },
       spacesManagement: {
         pathname: '/app/management/kibana/spaces',
@@ -641,7 +627,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
         ingest_pipelines_user: {
           elasticsearch: {
-            cluster: ['manage_pipeline', 'cluster:monitor/nodes/info'],
+            cluster: ['manage_pipeline'],
           },
           kibana: [
             {

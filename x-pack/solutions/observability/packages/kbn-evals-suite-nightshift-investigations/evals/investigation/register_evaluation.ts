@@ -10,24 +10,34 @@ import pMap from 'p-map';
 import { tags } from '@kbn/evals';
 import type { EvaluationDataset, EvalsClient } from '@kbn/evals';
 import type { ConversationRound } from '@kbn/agent-builder-common';
-import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { evaluate } from '../../src/evaluate';
+import { restoreKnowledge } from '../../src/knowledge/restore_knowledge';
 import { loadInvestigationDataset } from './datasets';
 import { getDatasetCustomContext, replaceCustomContext } from './custom_context';
 import {
-  ANTI_LEAKAGE_EVALUATOR,
-  CAUSE_COMPLETENESS_EVALUATOR,
-  DECISION_TREE_HELPFULNESS_EVALUATOR,
-  GOAL_PASS_EVALUATOR,
-  TRUTHFULNESS_EVALUATOR,
-  createInvestigationJudges,
-} from './judges';
-import { INVESTIGATION_TIMEOUT_MS, runInvestigation } from './task';
+  ORCABENCH_ES_CONNECTOR_ID,
+  saveConnectorSetOnInvestigator,
+  saveConnectorsOnInvestigator,
+} from './connector_sets';
+import { createInvestigationJudges, createOrcaEvaluators } from './judges';
+import { orcaJudgeConnector } from './orca_judge';
+import { efficiencyEvaluators } from './efficiency_evaluators';
+import { INVESTIGATION_TIMEOUT_MS, runInvestigation, waitForInvestigationToEnd } from './task';
+import { assertScoresWithinQueryLimit } from './score_budget';
 import { assertSuccessfulSandboxCommand } from './trace_evidence';
+import { enableNightshiftSpace } from './space_setup';
 import type { InvestigationExample, InvestigationTaskOutput } from './types';
-import { assertOrcaSource, hasOrcaTelemetryQuery } from './orca_dataset';
+import { hasOrcaTelemetryQuery, resolveOrcaTelemetryVariant } from './orca_dataset';
 import {
-  EXECUTION_SUCCESS_EVALUATOR,
+  getOrcaCutoff,
+  getOrcaCutoffs,
+  mintOrcaCutoffKeys,
+  resolveOrcaEsCredentials,
+  withOrcaKeysInvalidated,
+} from './orca_cutoff';
+import { createOrcaCutoffGate } from './orca_cutoff_gate';
+import { saveOrcaConnector } from './orca_connector';
+import {
   assertExecutionSuccessRate,
   executionSuccessEvaluator,
   getExecutionFailure,
@@ -35,6 +45,9 @@ import {
 
 // CI runs the suite on a serverless observability Scout cluster.
 const suiteTags = [...tags.serverless.observability.complete];
+// How long an ORCA investigation that outlived its poll may take to end before its cutoff's key is
+// taken off the connector.
+const ORCA_SETTLE_MS = 2 * 60_000;
 
 /** Registers a dataset with the native investigation task, RCA judges and execution checks. */
 export const registerInvestigationEvaluation = ({
@@ -42,15 +55,25 @@ export const registerInvestigationEvaluation = ({
   loadDataset = loadInvestigationDataset,
   trustUpstreamDataset = Boolean(process.env.NIGHTSHIFT_DATASET_NAME),
   orca = false,
+  // Only the default loader can return the bundled synthetic examples.
+  bundledSynthetic: bundledSyntheticDataset = !process.env.NIGHTSHIFT_EXAMPLES_FILE &&
+    !process.env.NIGHTSHIFT_DATASET_NAME,
   metadata: experimentMetadata = {},
+  // Experiment ids come from the build, suite, model and this name, so datasets that can run in one
+  // build need distinct names or their scores merge.
+  experimentName = orca
+    ? 'Nightshift ORCA investigation traces'
+    : 'Nightshift graded investigation traces',
 }: {
   name: string;
   loadDataset?: (
-    client: Pick<EvalsClient, 'getDatasetByName'>
+    client: Pick<EvalsClient, 'getDatasetByName' | 'upsertDataset'>
   ) => Promise<EvaluationDataset<InvestigationExample>>;
   trustUpstreamDataset?: boolean;
   orca?: boolean;
+  bundledSynthetic?: boolean;
   metadata?: Record<string, string | number>;
+  experimentName?: string;
 }): void => {
   evaluate.describe(`Nightshift investigations: ${name}`, { tag: suiteTags }, () => {
     // Scout retries a failed test once on CI; expensive investigations must not run twice.
@@ -58,6 +81,8 @@ export const registerInvestigationEvaluation = ({
     evaluate(
       'grades investigations with the RCA judges and persists complete agent traces',
       async ({
+        config,
+        esClient,
         executorClient,
         connector,
         fetch,
@@ -68,67 +93,156 @@ export const registerInvestigationEvaluation = ({
         log,
         inferenceClient,
         evaluationConnector,
+        kbnUrl,
+        kbnClient,
+        samlAuth,
       }) => {
         if (orca) {
           expect(repetitions, 'ORCA runs each incident once').toBe(1);
-          await assertOrcaSource();
         }
+        const orcaCredentials = orca ? resolveOrcaEsCredentials() : undefined;
         const dataset = await loadDataset(evalsClient);
-        // The judges score with the evaluation connector, not the model under test.
-        const judges = createInvestigationJudges({
-          inferenceClient: inferenceClient.bindTo({ connectorId: evaluationConnector.id }),
-          evaluationConnector,
+        // An ORCA task reads telemetry only up to its snapshot, through a key whose document-level
+        // security stops there.
+        const orcaVariant = orca ? resolveOrcaTelemetryVariant() : undefined;
+        const cutoffs = orcaVariant ? getOrcaCutoffs(dataset.examples) : [];
+        // The bundled synthetic examples supply their own evidence and must not query a cluster.
+        const bundledSynthetic = !orca && bundledSyntheticDataset;
+        // Customer-0 judges use the suite's evaluation connector. ORCA judges use a fixed model,
+        // not the agent under test.
+        const judgeConnector = orca ? orcaJudgeConnector(evaluationConnector) : evaluationConnector;
+        const judgeDeps = {
+          inferenceClient: inferenceClient.bindTo({ connectorId: judgeConnector.id }),
+          evaluationConnector: judgeConnector,
           log,
+        };
+        const judges = createInvestigationJudges(judgeDeps);
+        const evaluators = [
+          ...judges,
+          ...(orca ? createOrcaEvaluators(judgeDeps) : []),
+          executionSuccessEvaluator,
+          ...efficiencyEvaluators,
+        ];
+        const evaluatorsByName = new Map(evaluators.map((each) => [each.name, each]));
+        assertScoresWithinQueryLimit({
+          examples: dataset.examples.length,
+          repetitions,
+          evaluators: evaluators.length,
         });
-        const evaluators = [...judges, executionSuccessEvaluator];
         // The evals_nightshift_investigations config set sizes Task Manager for 16 investigations.
         const concurrency = Math.min(orca ? 8 : 16, requestedConcurrency);
-        evaluate.setTimeout(
-          Math.ceil((dataset.examples.length * repetitions) / concurrency) *
-            (INVESTIGATION_TIMEOUT_MS + 2 * 60_000) +
-            5 * 60_000
-        );
-        await expect
-          .poll(
-            async () =>
-              (
-                await fetch<{ available: boolean }>(
-                  `/internal/nightshift/investigations/availability?connector_id=${encodeURIComponent(
-                    connector.id
-                  )}`
-                )
-              ).available,
-            { timeout: 60_000 }
-          )
-          .toBe(true);
-        // Availability can turn true while Kibana is still installing the managed workflow after a
-        // cold start.
-        await expect
-          .poll(
-            async () =>
-              fetch(`/api/workflows/workflow/${NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID}`, {
-                headers: { 'elastic-api-version': '2023-10-31' },
-              }).then(
-                () => true,
-                () => false
-              ),
-            { timeout: 60_000 }
-          )
-          .toBe(true);
-        await replaceCustomContext(fetch, getDatasetCustomContext(dataset.name));
-        const [experiment] = await executorClient.runExperiment(
-          {
-            name: orca
-              ? 'Nightshift ORCA investigation traces'
-              : 'Nightshift graded investigation traces',
-            datasets: [dataset],
-            trustUpstreamDataset,
-            concurrency,
-            metadata: { ...experimentMetadata, concurrency },
+        // ORCA runs one cutoff at a time, so only investigations sharing a cutoff run together.
+        const rounds = orca
+          ? cutoffs.reduce(
+              (sum, cutoff) =>
+                sum +
+                Math.ceil(
+                  (dataset.examples.filter((example) => getOrcaCutoff(example) === cutoff).length *
+                    repetitions) /
+                    concurrency
+                ),
+              0
+            )
+          : Math.ceil((dataset.examples.length * repetitions) / concurrency);
+        const timeoutMs =
+          rounds * (INVESTIGATION_TIMEOUT_MS + (orca ? ORCA_SETTLE_MS : 0) + 2 * 60_000) +
+          5 * 60_000 +
+          // Minting and checking each ORCA cutoff's key, and putting it on the connector.
+          cutoffs.length * 60_000;
+        evaluate.setTimeout(timeoutMs);
+        await enableNightshiftSpace({
+          config,
+          esClient,
+          kbnUrl,
+          samlAuth,
+          fetch,
+          log,
+          connectorId: connector.id,
+        });
+        await replaceCustomContext(fetch, getDatasetCustomContext(dataset));
+        const knowledgeMetadata = await restoreKnowledge({ esClient, log });
+        const runExperiment = ({
+          runConcurrency,
+          task,
+        }: {
+          runConcurrency: number;
+          task: (example: InvestigationExample) => Promise<InvestigationTaskOutput>;
+        }) =>
+          executorClient.runExperiment(
+            {
+              name: experimentName,
+              datasets: [dataset],
+              trustUpstreamDataset,
+              concurrency: runConcurrency,
+              metadata: {
+                ...experimentMetadata,
+                ...knowledgeMetadata,
+                concurrency,
+                ...(orca ? { telemetry_cutoffs: cutoffs.length } : {}),
+              },
+              task,
+            },
+            evaluators
+          );
+
+        let experimentResults: Awaited<ReturnType<typeof runExperiment>>;
+        if (orcaCredentials && orcaVariant) {
+          const { url } = orcaCredentials;
+          const { apiKeys, invalidate } = await mintOrcaCutoffKeys({
+            credentials: orcaCredentials,
+            cutoffs,
+            variant: orcaVariant,
+            // Minted after the timeout is set, so no key expires while the test can still run.
+            expiresInMs: timeoutMs,
+          });
+          const keyFor = (cutoff: string) => {
+            const apiKey = apiKeys.get(cutoff);
+            if (!apiKey) throw new Error(`No ORCA key was minted for cutoff ${cutoff}`);
+            return apiKey;
+          };
+          log.info(
+            `ORCA: ${dataset.examples.length} tasks read through ${cutoffs.length} cutoff keys, one cutoff at a time`
+          );
+          // The keys only serve the investigations, so they are revoked as soon as those finish.
+          experimentResults = await withOrcaKeysInvalidated(invalidate, async () => {
+            // Nightshift runs only in the default space, so its one investigator reads ORCA through
+            // one connector, which holds the key of the cutoff whose investigations are running.
+            await saveOrcaConnector(kbnClient, { url, apiKey: keyFor(cutoffs[0]) });
+            await saveConnectorsOnInvestigator(fetch, [ORCABENCH_ES_CONNECTOR_ID]);
+            const inCutoff = createOrcaCutoffGate({
+              concurrency,
+              activate: (cutoff) => saveOrcaConnector(kbnClient, { url, apiKey: keyFor(cutoff) }),
+            });
+            return runExperiment({
+              // Every task enters the gate at once, and the gate runs `concurrency` of them.
+              runConcurrency: dataset.examples.length * repetitions,
+              task: (example) =>
+                inCutoff(getOrcaCutoff(example), async () => {
+                  const output = await runInvestigation(fetch, example, connector);
+                  const { investigation_id: investigationId, case_id: caseId } = output;
+                  // The next cutoff's key must not reach an investigation that outlived its poll.
+                  if (
+                    investigationId &&
+                    !(await waitForInvestigationToEnd(fetch, investigationId, ORCA_SETTLE_MS))
+                  ) {
+                    throw new Error(
+                      `ORCA investigation ${investigationId} (${caseId}) still ran ${
+                        ORCA_SETTLE_MS / 60_000
+                      } minutes after its timeout, so no other cutoff's key can be put in place`
+                    );
+                  }
+                  return output;
+                }),
+            });
+          });
+        } else {
+          await saveConnectorSetOnInvestigator(fetch, { withoutConnectors: bundledSynthetic });
+          experimentResults = await runExperiment({
+            runConcurrency: concurrency,
             task: (example) => runInvestigation(fetch, example, connector),
-          },
-          evaluators
-        );
+          });
+        }
+        const [experiment] = experimentResults;
 
         const runs = Object.values(experiment.runs);
         expect(runs).toHaveLength(dataset.examples.length * repetitions);
@@ -177,11 +291,7 @@ export const registerInvestigationEvaluation = ({
               if (orca && hasOrcaTelemetryQuery(conversation.rounds)) {
                 casesWithOrcaTelemetry.push(output.case_id);
               }
-              if (
-                !orca &&
-                !process.env.NIGHTSHIFT_EXAMPLES_FILE &&
-                !process.env.NIGHTSHIFT_DATASET_NAME
-              ) {
+              if (bundledSynthetic) {
                 assertSuccessfulSandboxCommand(conversation.rounds);
               }
               expect(output.traceId).toMatch(/^[a-f0-9]{32}$/);
@@ -219,27 +329,25 @@ export const registerInvestigationEvaluation = ({
             expect(persistedOutput?.query).toBe(output.query);
             // Every evaluator scored this run, each in its own evaluation trace.
             expect(new Set(exampleScores.map((each) => each.evaluator.name))).toEqual(
-              new Set([
-                GOAL_PASS_EVALUATOR,
-                CAUSE_COMPLETENESS_EVALUATOR,
-                ANTI_LEAKAGE_EVALUATOR,
-                TRUTHFULNESS_EVALUATOR,
-                DECISION_TREE_HELPFULNESS_EVALUATOR,
-                EXECUTION_SUCCESS_EVALUATOR,
-              ])
+              new Set(evaluatorsByName.keys())
             );
             for (const exampleScore of exampleScores) {
-              expect(exampleScore.evaluator.kind).toBe(
-                exampleScore.evaluator.name === EXECUTION_SUCCESS_EVALUATOR ? 'code' : 'llm'
-              );
-              expect(exampleScore.evaluator.direction).toBe('maximize');
-              expect(exampleScore.evaluator.trace_id).not.toBe(output.traceId);
+              const {
+                name: evaluatorName,
+                kind,
+                direction,
+                trace_id: evaluatorTraceId,
+              } = exampleScore.evaluator;
+              const registered = evaluatorsByName.get(evaluatorName);
+              expect(kind).toBe(registered?.kind.toLowerCase());
+              expect(direction).toBe(registered?.direction);
+              expect(evaluatorTraceId).not.toBe(output.traceId);
               const { score: judgeScore } = exampleScore.evaluator;
-              // Judges emit a normalized [0, 1] score, or null when a dimension does not apply.
-              if (judgeScore !== null && judgeScore !== undefined) {
-                expect(judgeScore).toBeGreaterThanOrEqual(0);
-                expect(judgeScore).toBeLessThanOrEqual(1);
-              }
+              if (judgeScore === null || judgeScore === undefined) continue;
+              // Quality judges emit a normalized [0, 1] score, or null when a dimension does not
+              // apply; efficiency and recall measures are raw non-negative counts or durations.
+              expect(judgeScore).toBeGreaterThanOrEqual(0);
+              if (registered?.direction === 'maximize') expect(judgeScore).toBeLessThanOrEqual(1);
             }
 
             log.info(
@@ -276,10 +384,8 @@ export const registerInvestigationEvaluation = ({
           .filter((traceId): traceId is string => Boolean(traceId));
         expect(experiment.evaluationRuns).toHaveLength(runs.length * scoresPerRun);
         expect(
-          experiment.evaluationRuns.every((evaluationRun) =>
-            evaluationRun.name === EXECUTION_SUCCESS_EVALUATOR
-              ? evaluationRun.kind === 'CODE'
-              : evaluationRun.kind === 'LLM'
+          experiment.evaluationRuns.every(
+            (evaluationRun) => evaluationRun.kind === evaluatorsByName.get(evaluationRun.name)?.kind
           )
         ).toBe(true);
         expect(evaluatorTraces).toHaveLength(runs.length * scoresPerRun);

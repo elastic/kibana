@@ -7,9 +7,10 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, skip, Subject } from 'rxjs';
-import type { ChatEvent, Conversation } from '@kbn/agent-builder-common';
+import { ChatEventType, type ChatEvent, type Conversation } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
@@ -19,6 +20,7 @@ import {
   registerDashboardAppIntegration,
 } from './dashboard_app_integration';
 import type { IdGenerator } from '..';
+import { DASHBOARD_UPDATED_UI_EVENT } from '../../../common';
 
 const createDashboardSaveState = (): DashboardSaveEvent['dashboardState'] => ({
   title: 'Saved Dashboard',
@@ -43,7 +45,11 @@ interface MockDashboardApi {
   filters$: BehaviorSubject<unknown[]>;
   query$: BehaviorSubject<unknown>;
   timeRange$: BehaviorSubject<unknown>;
+  getAppContext: () => { currentAppId: string };
+  isEditableByUser: boolean;
+  isManaged: boolean;
   setState: jest.Mock;
+  setViewMode: jest.Mock;
   getSerializedState: jest.Mock;
 }
 
@@ -54,7 +60,11 @@ const createMockDashboardApi = (anyStateChange$: Observable<void>): MockDashboar
   filters$: new BehaviorSubject<unknown[]>([]),
   query$: new BehaviorSubject<unknown>({ query: '', language: 'kuery' }),
   timeRange$: new BehaviorSubject<unknown>({ from: 'now-15m', to: 'now' }),
+  getAppContext: () => ({ currentAppId: 'dashboards' }),
+  isEditableByUser: true,
+  isManaged: false,
   setState: jest.fn(),
+  setViewMode: jest.fn(),
   getSerializedState: jest.fn().mockReturnValue({
     attributes: {
       title: 'Test Dashboard',
@@ -131,8 +141,10 @@ describe('registerDashboardAppIntegration', () => {
   }) => void;
   let cleanup: () => void;
   let simulateDashboardStateChange: () => void;
+  let toasts: ReturnType<typeof notificationServiceMock.createStartContract>['toasts'];
 
   beforeEach(() => {
+    toasts = notificationServiceMock.createStartContract().toasts;
     const mockAnyStateChange$ = new BehaviorSubject(undefined);
     simulateDashboardStateChange = () => {
       mockAnyStateChange$.next(undefined);
@@ -164,7 +176,7 @@ describe('registerDashboardAppIntegration', () => {
     jest.useRealTimers();
   });
 
-  const register = () => {
+  const register = ({ canWriteDashboards = true }: { canWriteDashboards?: boolean } = {}) => {
     const activeConversation$ = new BehaviorSubject<ActiveConversation | null>(null);
     const agentBuilder = {
       addAttachment,
@@ -191,6 +203,8 @@ describe('registerDashboardAppIntegration', () => {
     cleanup = registerDashboardAppIntegration({
       agentBuilder,
       api: mockApi as unknown as DashboardApi,
+      canWriteDashboards,
+      toasts,
       draftAttachmentId,
       checkSavedDashboardExist,
       getUpdateOrigin,
@@ -216,6 +230,106 @@ describe('registerDashboardAppIntegration', () => {
         origin: 'dashboard-1',
       })
     );
+  });
+
+  it('stages the attachment of a managed dashboard without linking it to the dashboard', () => {
+    mockApi.savedObjectId$.next('managed-dashboard');
+    mockApi.isManaged = true;
+    register();
+    emitConversationChange({});
+
+    jest.runOnlyPendingTimers();
+
+    expect(addAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'draft-attachment-id-1', origin: undefined })
+    );
+  });
+
+  it('does not sync manual changes of a managed dashboard into an unlinked attachment of an existing conversation', () => {
+    mockApi.savedObjectId$.next('managed-dashboard');
+    mockApi.isManaged = true;
+    register();
+    emitConversationChange({
+      id: 'conversation-1',
+      attachments: [createVersionedAttachment(createDashboardAttachment())],
+    });
+
+    jest.runOnlyPendingTimers();
+    simulateDashboardStateChange();
+    jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
+
+    expect(addAttachment).not.toHaveBeenCalled();
+  });
+
+  const emitDashboardUpdated = (attachment: DashboardAttachment) =>
+    chatEventsByConversationId.get('conversation-1')?.next({
+      type: ChatEventType.toolUi,
+      data: {
+        tool_id: 'tool',
+        tool_call_id: 'call',
+        custom_event: DASHBOARD_UPDATED_UI_EVENT,
+        data: { attachment },
+      },
+    } as unknown as ChatEvent);
+
+  const flushPromises = async () => {
+    for (let i = 0; i < 5; i++) {
+      await Promise.resolve();
+    }
+  };
+
+  it("warns only once that the agent's changes weren't applied when the user can't write dashboards", async () => {
+    register({ canWriteDashboards: false });
+    emitConversationChange({ id: 'conversation-1', attachments: [] });
+
+    emitDashboardUpdated(createDashboardAttachment());
+    emitDashboardUpdated(createDashboardAttachment());
+    await flushPromises();
+
+    expect(mockApi.setState).not.toHaveBeenCalled();
+    expect(toasts.addWarning).toHaveBeenCalledTimes(1);
+  });
+
+  it("doesn't tell a user who can't write dashboards about a different dashboard", () => {
+    mockApi.savedObjectId$.next('dashboard-1');
+    register({ canWriteDashboards: false });
+    emitConversationChange({ id: 'conversation-1', attachments: [] });
+
+    emitDashboardUpdated(createDashboardAttachment({ origin: 'dashboard-2' }));
+
+    expect(toasts.addInfo).not.toHaveBeenCalled();
+    expect(toasts.addWarning).not.toHaveBeenCalled();
+  });
+
+  it('shows an error toast when the agent changes fail to apply', async () => {
+    const error = new Error('Panel failed to load');
+    mockApi.setState.mockRejectedValue(error);
+    register();
+    emitConversationChange({ id: 'conversation-1', attachments: [] });
+
+    emitDashboardUpdated(createDashboardAttachment());
+    await flushPromises();
+
+    expect(toasts.addError).toHaveBeenCalledWith(error, {
+      title: "Couldn't apply the agent's changes to the dashboard",
+    });
+  });
+
+  it('tells the user when the agent updated a different dashboard, until they leave this one', () => {
+    const toast = { id: 'toast-1' };
+    toasts.addInfo.mockReturnValue(toast);
+    mockApi.savedObjectId$.next('dashboard-1');
+    register();
+    emitConversationChange({ id: 'conversation-1', attachments: [] });
+
+    emitDashboardUpdated(createDashboardAttachment({ origin: 'dashboard-2' }));
+
+    expect(mockApi.setState).not.toHaveBeenCalled();
+    expect(toasts.addInfo).toHaveBeenCalledTimes(1);
+
+    cleanup();
+
+    expect(toasts.remove).toHaveBeenCalledWith(toast);
   });
 
   it('selects the matching existing dashboard attachment for manual sync', () => {

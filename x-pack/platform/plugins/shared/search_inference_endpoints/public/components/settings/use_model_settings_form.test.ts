@@ -68,6 +68,25 @@ describe('useModelSettingsForm', () => {
     expect(result.current.sections[0].children).toHaveLength(2);
   });
 
+  it('reset restores the saved assignments and clears the dirty state', () => {
+    const { result } = renderHook(() => useModelSettingsForm());
+
+    act(() => {
+      result.current.updateEndpoints('child_1', ['endpoint-z']);
+    });
+    expect(result.current.isDirty).toBe(true);
+
+    act(() => {
+      result.current.reset();
+    });
+
+    expect(result.current.isDirty).toBe(false);
+    expect(result.current.assignments).toEqual({
+      child_1: ['endpoint-a', 'endpoint-b'],
+      child_2: ['endpoint-c'],
+    });
+  });
+
   it('initializes assignments from recommendedEndpoints when no saved data', () => {
     const { result } = renderHook(() => useModelSettingsForm());
 
@@ -156,6 +175,129 @@ describe('useModelSettingsForm', () => {
 
     expect(mockSaveSettings).toHaveBeenCalledWith({
       features: [{ feature_id: 'child_1', endpoints: [{ id: 'ep-1' }, { id: 'ep-2' }] }],
+    });
+  });
+
+  describe('saved model parameters', () => {
+    const savedWithParameters = {
+      data: {
+        data: {
+          features: [
+            {
+              feature_id: 'child_1',
+              endpoints: [
+                {
+                  id: 'endpoint-a',
+                  parameters: { reasoning: { effort: 'high' } },
+                },
+                { id: 'endpoint-b' },
+              ],
+            },
+          ],
+        },
+      },
+      isLoading: false,
+    };
+
+    it('keeps saved parameters when an unrelated feature is saved', () => {
+      mockUseInferenceSettings.mockReturnValue(savedWithParameters);
+      const { result } = renderHook(() => useModelSettingsForm());
+
+      act(() => {
+        result.current.updateEndpoints('child_2', ['ep-1']);
+      });
+      act(() => {
+        result.current.save();
+      });
+
+      expect(mockSaveSettings).toHaveBeenCalledWith({
+        features: [
+          {
+            feature_id: 'child_1',
+            endpoints: [
+              { id: 'endpoint-a', parameters: { reasoning: { effort: 'high' } } },
+              { id: 'endpoint-b' },
+            ],
+          },
+          { feature_id: 'child_2', endpoints: [{ id: 'ep-1' }] },
+        ],
+      });
+    });
+
+    it('keeps parameters for retained endpoints when endpoints are reordered or added', () => {
+      mockUseInferenceSettings.mockReturnValue(savedWithParameters);
+      const { result } = renderHook(() => useModelSettingsForm());
+
+      act(() => {
+        result.current.updateEndpoints('child_1', ['endpoint-b', 'endpoint-a', 'ep-new']);
+      });
+      act(() => {
+        result.current.save();
+      });
+
+      expect(mockSaveSettings).toHaveBeenCalledWith({
+        features: [
+          {
+            feature_id: 'child_1',
+            endpoints: [
+              { id: 'endpoint-b' },
+              { id: 'endpoint-a', parameters: { reasoning: { effort: 'high' } } },
+              { id: 'ep-new' },
+            ],
+          },
+        ],
+      });
+    });
+
+    it('removes the override and its parameters when reset to recommended endpoints', () => {
+      mockUseInferenceSettings.mockReturnValue({
+        data: {
+          data: {
+            features: [
+              {
+                feature_id: 'child_1',
+                endpoints: [
+                  { id: 'endpoint-a', parameters: { reasoning: { effort: 'high' } } },
+                  { id: 'ep-custom' },
+                ],
+              },
+            ],
+          },
+        },
+        isLoading: false,
+      });
+      const { result } = renderHook(() => useModelSettingsForm());
+
+      act(() => {
+        result.current.updateEndpoints('child_1', ['endpoint-a', 'endpoint-b']);
+      });
+      act(() => {
+        result.current.save();
+      });
+
+      expect(mockSaveSettings).toHaveBeenCalledWith({ features: [] });
+    });
+
+    it('drops parameters when their endpoint is removed', () => {
+      mockUseInferenceSettings.mockReturnValue(savedWithParameters);
+      const { result } = renderHook(() => useModelSettingsForm());
+
+      act(() => {
+        result.current.updateEndpoints('child_1', ['endpoint-b']);
+      });
+      act(() => {
+        result.current.updateEndpoints('child_2', ['ep-1']);
+      });
+      act(() => {
+        result.current.save();
+      });
+
+      expect(mockSaveSettings).toHaveBeenCalledWith({
+        features: [
+          { feature_id: 'child_1', endpoints: [{ id: 'endpoint-b' }] },
+          { feature_id: 'child_2', endpoints: [{ id: 'ep-1' }] },
+        ],
+      });
     });
   });
 

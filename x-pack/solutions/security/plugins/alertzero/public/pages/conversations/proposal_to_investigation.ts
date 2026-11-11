@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { isProposalSettling, isTerminal } from '@kbn/proposals-common';
+import { isDecisionShown } from '@kbn/proposals-plugin/public';
 import type { ProposalConfidence, ProposalImpact } from '@kbn/proposals-common';
 import type { Investigation, RecommendedAction } from '@kbn/agentic-investigations-common';
 import type { ProposalItem } from '../../../common/proposals/list';
@@ -97,6 +98,7 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     conversationStatus: proposal.conversationStatus,
     pendingProposalCount: proposal.status === 'pending' ? 1 : 0,
     isProposalSettling: isProposalSettling(proposal),
+    isDecisionShown: isDecisionShown(proposal),
     recommendedAction: bucket,
     // severity collapse: 4-level impact → 3-level severity string.
     // 'critical' maps to 'high' so helpers.tsx's === 'high' check still fires.

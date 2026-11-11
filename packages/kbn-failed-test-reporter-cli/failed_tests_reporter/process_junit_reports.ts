@@ -44,6 +44,7 @@ export async function processJUnitReports(
     pipeline,
     prependTitle,
     updateGithub,
+    perTestIssues,
     indexInEs,
     reportUpdate,
     bkMeta,
@@ -75,9 +76,19 @@ export async function processJUnitReports(
       };
 
       if (failure.likelyIrrelevant) {
+        const { infraReason } = failure;
+        if (infraReason) {
+          log.info(
+            `FTR failure is likely an infrastructure issue (${infraReason.category}): ` +
+              `${failure.classname} - ${failure.name}`
+          );
+        }
         pushMessage(
-          'Failure is likely irrelevant' +
-            (updateGithub ? ', so an issue was not created or updated' : '')
+          (infraReason
+            ? `Failure is likely an infrastructure issue (${infraReason.category})`
+            : 'Failure is likely irrelevant') +
+            (updateGithub ? ', so an issue was not created or updated' : '') +
+            (infraReason ? `. ${infraReason.message}` : '')
         );
         continue;
       }
@@ -150,6 +161,12 @@ export async function processJUnitReports(
         if (updateGithub) {
           pushMessage(`Updated existing issue: ${url} (fail count: ${newCount})`);
         }
+        continue;
+      }
+
+      if (!perTestIssues) {
+        pushMessage('No failed-test issue tracks this test yet');
+        failure.failureCount = 0;
         continue;
       }
 

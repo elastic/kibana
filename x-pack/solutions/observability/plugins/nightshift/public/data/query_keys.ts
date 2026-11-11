@@ -5,10 +5,21 @@
  * 2.0.
  */
 
+export const AUTOMATIONS_QUERY_KEY = ['nightshift.automations'] as const;
+export const RUN_QUOTAS_QUERY_KEY = ['nightshiftRunQuotas'] as const;
+
+export const automationRunActivityQueryKey = (id: string) =>
+  [...AUTOMATIONS_QUERY_KEY, id, 'activity'] as const;
+
 export const DISCOVERY_QUERIES_QUERY_KEY = ['discoveryQueries'] as const;
-export const DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY = ['discoveryQueriesOccurrences'] as const;
 export const SOURCES_QUERY_KEY = ['nightshiftSources'] as const;
 export const FEATURES_QUERY_KEY = ['features'] as const;
+export const TOPOLOGY_QUERY_KEY = ['nightshiftTopology'] as const;
+export const NIGHTSHIFT_ONBOARDING_QUERY_KEY = ['nightshift.onboarding'] as const;
+
+export const INVESTIGATION_AVAILABILITY_QUERY_KEY = [
+  'nightshift.investigationAvailability',
+] as const;
 
 export const DETECTION_OVERVIEW_QUERY_KEY = ['nightshift.detectionOverview'] as const;
 export const DETECTION_ENTITIES_QUERY_KEY = ['nightshift.detectionEntities'] as const;

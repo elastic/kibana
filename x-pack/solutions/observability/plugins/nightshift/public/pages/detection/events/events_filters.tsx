@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiSuperDatePicker,
   useEuiTheme,
 } from '@elastic/eui';
 import {
@@ -26,6 +25,7 @@ import {
   type Severity,
   type SignificantEventStatus,
 } from '@kbn/significant-events-schema';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
   SIGNIFICANT_EVENT_INVESTIGATION_STATE_LABELS,
@@ -34,6 +34,7 @@ import {
 } from '../../../components/entities/significant_event/significant_event_status';
 import { FilterPopover } from '../../../components/ui/filter_popover';
 import { SIGNIFICANT_EVENT_SEVERITY } from '../../../components/ui/severity_badge';
+import { NightshiftTimeRangePicker } from '../../../components/ui/time_range_picker';
 import type { DetectionTimeRange } from '../use_detection_time_range';
 import {
   INVESTIGATION_LABEL,
@@ -41,6 +42,14 @@ import {
   SEVERITY_LABEL,
   STATUS_LABEL,
 } from './translations';
+
+const INVESTIGATION_WINDOW_TRUNCATED_NOTE = i18n.translate(
+  'xpack.nightshift.eventsFilters.investigationWindowTruncatedNote',
+  {
+    defaultMessage:
+      'Only the newest 1,000 investigations are matched. Events with older investigations count as not started.',
+  }
+);
 
 export interface EventsFiltersProps {
   timeRange: DetectionTimeRange;
@@ -86,13 +95,11 @@ export const EventsFilters = ({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiSuperDatePicker
-          compressed
-          width="auto"
-          showUpdateButton={false}
+        <NightshiftTimeRangePicker
           start={timeRange.from}
           end={timeRange.to}
-          onTimeChange={({ start, end }) => onTimeRangeChange({ from: start, to: end })}
+          onChange={({ start, end }) => onTimeRangeChange({ from: start, to: end })}
+          showRefreshButton
           data-test-subj="nightshiftDetectionEventsTimePicker"
         />
       </EuiFlexItem>
@@ -135,6 +142,11 @@ export const EventsFilters = ({
             options={SIGNIFICANT_EVENT_INVESTIGATION_STATES}
             selected={investigation}
             counts={facets?.investigation}
+            footerNote={
+              facets?.investigation_window_truncated
+                ? INVESTIGATION_WINDOW_TRUNCATED_NOTE
+                : undefined
+            }
             getLabel={(value) => SIGNIFICANT_EVENT_INVESTIGATION_STATE_LABELS[value]}
             onChange={onInvestigationChange}
             testSubject="nightshiftDetectionEventsInvestigationFilter"

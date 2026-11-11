@@ -34,7 +34,7 @@ const createEntry = (overrides: Record<string, unknown> = {}) => ({
   target: 'cloud-serverless-observability_complete',
   command: 'node scripts/scout run-tests',
   location: 'x-pack/platform/plugins/shared/streams_app/test/scout/processing/ui/tests/x.spec.ts',
-  owner: ['@elastic/obs-onboarding-team'],
+  owner: ['@elastic/streams-ui'],
   duration: 60000,
   error: { message: LOCATOR_TIMEOUT, stack_trace: LOCATOR_TIMEOUT },
   attachments: [],
@@ -77,6 +77,14 @@ describe('getScoutFailures', () => {
     );
     expect(failure.likelyIrrelevant).toBe(true);
     expect(failure.infraReason?.category).toBe(category);
+  });
+
+  it('keeps Elasticsearch request timeouts relevant, that rule is FTR only', async () => {
+    const message = 'TimeoutError: Request timed out';
+    const [failure] = await getScoutFailures(
+      writeReport([createEntry({ error: { message, stack_trace: message } })])
+    );
+    expect(failure.infraReason).toBeUndefined();
   });
 
   it('keeps local SAML failures relevant but still attributes local ECONNREFUSED to infra', async () => {

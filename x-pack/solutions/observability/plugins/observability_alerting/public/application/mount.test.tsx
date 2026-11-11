@@ -37,6 +37,7 @@ describe('mountObservabilityAlertingApp', () => {
     };
     const triggersActionsUi = {
       getClassicRulesPage: () => <div />,
+      getAlertFormatter: () => undefined,
     };
 
     const observabilityShared = {

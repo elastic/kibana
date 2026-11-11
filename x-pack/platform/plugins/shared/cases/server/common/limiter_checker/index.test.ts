@@ -18,14 +18,6 @@ describe('AttachmentLimitChecker', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockAttachmentService.executeCaseAggregations.mockImplementation(async () => {
-      return {
-        limiter: {
-          value: 5,
-        },
-      };
-    });
-
     mockAttachmentService.countAlertsWithinCase.mockResolvedValue(5);
 
     mockFileService.find.mockImplementation(async () => {
@@ -95,6 +87,30 @@ describe('AttachmentLimitChecker', () => {
           checker.validate(createFileRequests({ numFiles: 96, numRequests: 1 }))
         ).rejects.toMatchInlineSnapshot(
           `[Error: Case has reached the maximum allowed number (100) of attached files.]`
+        );
+      });
+    });
+
+    describe('replaced attachments', () => {
+      it('does not count the replaced alerts twice', async () => {
+        expect.assertions(1);
+
+        mockAttachmentService.countAlertsWithinCase.mockResolvedValue(1000);
+
+        await expect(
+          checker.validate(createAlertRequests(1, ['a']), createAlertRequests(1, ['b']))
+        ).resolves.not.toThrow();
+      });
+
+      it('throws when the request has more alerts than the replaced attachment', async () => {
+        expect.assertions(1);
+
+        mockAttachmentService.countAlertsWithinCase.mockResolvedValue(1000);
+
+        await expect(
+          checker.validate(createAlertRequests(1, ['a', 'b']), createAlertRequests(1, ['c']))
+        ).rejects.toMatchInlineSnapshot(
+          `[Error: Case has reached the maximum allowed number (1000) of attached alerts.]`
         );
       });
     });

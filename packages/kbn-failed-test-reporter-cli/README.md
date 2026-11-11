@@ -10,6 +10,17 @@ failing test. Run by `.buildkite/scripts/lifecycle/post_command.sh` after every 
 started failing every attempt build after build, by the Scout test events, in `elastic/kibana` or
 the `--failing-suites-repo owner/name` given.
 
+`REPORT_FAILED_TESTS_PER_TEST_ISSUES=false` keeps it from opening per-test issues: a failure that
+an issue already tracks, per-test or flaky suite, still bumps it, and one that none tracks is
+indexed and written to the failure report but gets no issue, its suite issue comes from
+`report_flaky_test_issues` below once it qualifies as flaky. Unset or `true` (the default) is the
+legacy behaviour, where every new failure opens a per-test issue. It only disables the per-test
+issues: `--report-failing-suites` still files `Failing … suite` issues. Set it in the pipeline env
+next to `REPORT_FAILED_TESTS_TO_GITHUB`, only on pipelines the daily flaky report reads
+(`FLAKY_TESTS_PIPELINES` of `kibana-report-flaky-tests`) and together with `REPORT_FAILING_SUITES`,
+anywhere else a new failure would never get an issue. Flip it back to fall back to the legacy
+reporting at any time.
+
 Issues for FTR, Jest (unit and integration) and Scout tests link to the
 [Single test history](https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history)
 dashboard in the CI space, which shows the test's daily passed and failed attempts, its daily
@@ -49,6 +60,22 @@ builds (default 10), failed in at least `minFailedBuilds` of them (default 2) an
 the window. Thresholds are checked per branch, so a clean branch cannot hide a flaky one; the
 branch a test qualified on is recorded as `flakiestBranch`. Tests that never passed in the window
 are consistently failing, not flaky, and are not reported.
+
+Breakages don't count as flakiness. A breakage is a run of at least 3 failed builds in a row in one
+pipeline, config and target, a failure that passed on a retry included, with less than a 1% chance
+for a test failing at random as often. A test in a breakage up to its latest build is broken right
+now and is dropped from the report. A test whose breakages are over is checked against the
+thresholds again without their builds: it's dropped if it no longer clears them, and otherwise
+kept, counted and ranked without those builds. Each test dropped this way is logged with the
+breakage that dropped it, or the longest one, and each test kept with how many builds it lost.
+
+Tests that were fixed since are dropped too. On every branch the test qualifies on, its last failure
+was at least 24 hours before the end of the window, and it has passed enough builds since then
+that, failing as often as before, it would have failed at least 1.5 times on average. The failure
+rate leaves out the breakage builds, but a breakage still counts as its last failure, as the test
+may have changed to end it. For a test failing 8% of its builds, that's 19 builds. Only
+the pipelines, configs and targets where the test failed are counted, so a test can only look less
+fixed for it.
 
 Tests that have been skipped since are left out (`--no-omit-skipped-tests` keeps them): on every
 branch the test failed on, its latest run in every pipeline, config and target was a skip. A suite
@@ -93,20 +120,22 @@ off.
 - The body text stays as filed. Only the hidden metadata is updated (report count, history, last
   report); the test ids and branches recorded before are kept, so `/skip` still covers a branch
   the suite stopped failing on this week.
-- A comment with the new numbers ("This test suite still appears to be flaky […]") is posted when
-  the suite failed since the last one, or since the issue was filed, and at least
+- A short comment on where the suite is still flaky ("Still flaky on `main`: 4% of builds
+  (18 / 441), last failed […]", one line per branch when there are several) is posted when the
+  suite failed since the last one, or since the issue was filed, and at least
   `--comment-cooldown-days` later (default 3). Failures in between are covered by the next
-  comment. Every comment ends with how to skip the test.
+  comment. How to skip the test is at the end of the body.
 - A closed issue is reopened, with a comment, when the suite failed after it was closed. It stays
   closed when it was closed as a duplicate, or when the suite has not failed since: the report
   window can still hold the failures a fix was merged for.
 - An issue that already has the report, as on a retried build, is left alone.
 
-In `elastic/kibana`, a `kibanamachine` comment on a `failed-test` issue runs the failed-test
-alert of `elastic/kibana-operations` (`triage/`): a Slack message to the teams that opted in to
-alerts for existing failures (none at the time of writing). The alert reads `report.count` from
-the metadata, so the body is updated before the comment is posted. Editing a body or reopening an
-issue runs no alert; a reopen does start the `failed-test-investigator` workflow again.
+In CI the command posts as `elastic-vault-github-plugin-prod[bot]`, the app behind the pipeline's
+short-lived GitHub token. The failed-test alert of `elastic/kibana-operations` (`triage/`) doesn't
+run on its comments, only on the `kibanamachine` ones `report_failed_tests` posts for CI failures:
+a Slack message to the teams that opted in to alerts for existing failures (none at the time of
+writing). Editing a body or reopening an issue runs no alert; a reopen does start the
+`failed-test-investigator` workflow again.
 
 The stale `failed-test` sweep closes the issues of suites that drop out of the report, as nothing
 refreshes them any more.

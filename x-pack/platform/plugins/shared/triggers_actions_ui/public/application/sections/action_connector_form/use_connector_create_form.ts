@@ -31,6 +31,8 @@ export interface UseConnectorCreateFormParams {
   actionTypeId: string | undefined;
   /** Optional initial values merged onto the empty connector (name, config, …). */
   initialConnector?: Partial<Omit<ActionConnector, 'secrets'>>;
+  /** Skips the "Created '<name>'" success toast; see `useCreateConnector`. */
+  hideSuccessToast?: boolean;
 }
 
 /**
@@ -44,6 +46,7 @@ export const useConnectorCreateForm = ({
   actionTypeRegistry,
   actionTypeId,
   initialConnector,
+  hideSuccessToast,
 }: UseConnectorCreateFormParams) => {
   const services = useKibana().services;
   const connectorContext = useContext(ConnectorContext);
@@ -61,7 +64,7 @@ export const useConnectorCreateForm = ({
     isLoading: isSavingConnector,
     createConnector,
     createConnectorError,
-  } = useCreateConnector();
+  } = useCreateConnector({ hideSuccessToast });
 
   const isMounted = useRef(false);
   const canSave = hasSaveActionsCapability(capabilities);
