@@ -173,8 +173,8 @@ export function NightshiftApp({
       .openConversationDetails({
         conversationId: selectedInvestigationId,
         trailingActions: [shareInvestigationAction],
-        // Closed by the user, not replaced by another selection or unmounted.
         onConversationUpdated: () => refetchAllRef.current(),
+        // Closed by the user, not replaced by another selection or unmounted.
         onClose: () => {
           if (!isCancelled) {
             handleFlyoutClose();

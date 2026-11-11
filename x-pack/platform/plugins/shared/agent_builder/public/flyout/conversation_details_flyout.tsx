@@ -204,6 +204,7 @@ export interface ConversationDetailsFlyoutSnapshotProps {
   conversationTemplatesService: ConversationTemplatesService;
   titleId: string;
   onNotFound?: () => void;
+  onConversationUpdated?: () => void;
 }
 
 /**
@@ -217,6 +218,7 @@ export const ConversationDetailsFlyoutSnapshot = ({
   conversationTemplatesService,
   titleId,
   onNotFound,
+  onConversationUpdated,
 }: ConversationDetailsFlyoutSnapshotProps) => {
   const {
     data: conversation,
@@ -240,7 +242,8 @@ export const ConversationDetailsFlyoutSnapshot = ({
 
   const refetchConversation = useCallback(async () => {
     await refetch();
-  }, [refetch]);
+    onConversationUpdated?.();
+  }, [refetch, onConversationUpdated]);
 
   if (isLoading) {
     return (

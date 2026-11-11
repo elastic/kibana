@@ -50,13 +50,6 @@ export const openConversationDetailsFlyout = async ({
 }: OpenConversationDetailsFlyoutOptions): Promise<() => void> => {
   const titleId = generateTitleId();
   const queryClient = new QueryClient();
-  const unsubscribeFromMutations = queryClient
-    .getMutationCache()
-    .subscribe(({ type, mutation }) => {
-      if (type === 'updated' && mutation.state.status === 'success') {
-        onConversationUpdated?.();
-      }
-    });
 
   const onNotFound = () => {
     flyoutRef.close();
@@ -71,6 +64,7 @@ export const openConversationDetailsFlyout = async ({
         conversationTemplatesService={conversationTemplatesService}
         titleId={titleId}
         onNotFound={onNotFound}
+        onConversationUpdated={onConversationUpdated}
       />
     </QueryClientProvider>,
     {
@@ -91,7 +85,6 @@ export const openConversationDetailsFlyout = async ({
   );
 
   flyoutRef.onClose.then(() => {
-    unsubscribeFromMutations();
     onClose?.();
   });
 

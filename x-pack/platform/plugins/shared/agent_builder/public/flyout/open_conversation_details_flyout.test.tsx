@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type React from 'react';
 import type { EuiFlyoutMenuAction } from '@elastic/eui';
-import type { QueryClient } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
 import type { ConversationsService } from '../services/conversations/conversations_service';
@@ -33,11 +31,9 @@ describe('openConversationDetailsFlyout', () => {
 
     const open = ({
       onClose,
-      onConversationUpdated,
       trailingActions,
     }: {
       onClose?: () => void;
-      onConversationUpdated?: () => void;
       trailingActions?: EuiFlyoutMenuAction[];
     } = {}) =>
       openConversationDetailsFlyout({
@@ -46,7 +42,6 @@ describe('openConversationDetailsFlyout', () => {
         conversationTemplatesService,
         conversationId: 'conversation',
         onClose,
-        onConversationUpdated,
         trailingActions,
       });
 
@@ -158,27 +153,6 @@ describe('openConversationDetailsFlyout', () => {
     await Promise.resolve();
 
     expect(onClose).toHaveBeenCalledTimes(1);
-  });
-
-  it('notifies the caller when a mutation in the flyout succeeds, not when it fails', async () => {
-    const { core, open } = setup();
-    const onConversationUpdated = jest.fn();
-    await open({ onConversationUpdated });
-    const [[element]] = core.overlays.openSystemFlyout.mock.calls;
-    const { client } = (element as React.ReactElement<{ client: QueryClient }>).props;
-
-    await client
-      .getMutationCache()
-      .build(client, { mutationFn: () => Promise.reject(new Error('fail')) })
-      .execute()
-      .catch(() => {});
-    expect(onConversationUpdated).not.toHaveBeenCalled();
-
-    await client
-      .getMutationCache()
-      .build(client, { mutationFn: () => Promise.resolve() })
-      .execute();
-    expect(onConversationUpdated).toHaveBeenCalled();
   });
 
   it('returns a handle that closes the flyout', async () => {
