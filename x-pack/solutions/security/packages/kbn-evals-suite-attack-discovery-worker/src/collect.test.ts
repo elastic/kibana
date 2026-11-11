@@ -77,13 +77,27 @@ describe('isParkedAtGate', () => {
 });
 
 describe('collectReviewArtifact', () => {
-  const collect = (execution: WorkflowExecutionDto) =>
+  const collect = (execution: WorkflowExecutionDto, fetch: HttpHandler = jest.fn()) =>
     collectReviewArtifact({
       client: {} as AttackDiscoveryWorkerClient,
       review: execution,
-      fetch: jest.fn() as unknown as HttpHandler,
+      fetch,
       spaceId: 'space',
     });
+
+  const reviewWithEmit = (output: Record<string, unknown>): WorkflowExecutionDto =>
+    ({
+      id: 'review-1',
+      status: 'completed',
+      stepExecutions: [step('emit_result', 'completed', output)],
+    } as unknown as WorkflowExecutionDto);
+
+  const conversationFetch = (conversation: unknown): HttpHandler => {
+    const fetch = jest.fn();
+    if (conversation instanceof Error) fetch.mockRejectedValue(conversation);
+    else fetch.mockResolvedValue(conversation);
+    return fetch as unknown as HttpHandler;
+  };
 
   it('carries the execution error message of a failed review', async () => {
     const failed = {
@@ -95,6 +109,32 @@ describe('collectReviewArtifact', () => {
 
   it('carries no error for a review that did not fail', async () => {
     expect(await collect(review('waiting_for_input', []))).not.toHaveProperty('error');
+  });
+
+  it('counts an opened investigation when the conversation lookup finds it', async () => {
+    const artifacts = await collect(
+      reviewWithEmit({ investigation_id: 'inv-1', investigation_opened: true }),
+      conversationFetch({ id: 'inv-1' })
+    );
+    expect(artifacts.investigationOpened).toBe(true);
+  });
+
+  it('does not count the self-reported flag when the conversation lookup 404s', async () => {
+    const artifacts = await collect(
+      reviewWithEmit({ investigation_id: 'inv-1', investigation_opened: true }),
+      conversationFetch(Object.assign(new Error('not found'), { status: 404 }))
+    );
+    expect(artifacts.investigationOpened).toBe(false);
+  });
+
+  it('counts the self-reported flag when there was no id to look up', async () => {
+    const fetch = jest.fn();
+    const artifacts = await collect(
+      reviewWithEmit({ investigation_opened: true }),
+      fetch as unknown as HttpHandler
+    );
+    expect(artifacts.investigationOpened).toBe(true);
+    expect(fetch).not.toHaveBeenCalled();
   });
 });
 
@@ -570,6 +610,53 @@ describe('collectWorkerArtifacts', () => {
       expect.objectContaining({
         query: { terms: { 'kibana.alert.rule.execution.uuid': ['u-doc'] } },
       })
+    );
+  });
+
+  const emptySearch = () =>
+    jest.fn().mockResolvedValue({ hits: { hits: [] } }) as unknown as jest.Mock;
+  const collectGeneration = async (
+    generationOutput: Record<string, unknown> | undefined,
+    log: ToolingLog
+  ) => {
+    const run = {
+      id: 'run-w',
+      status: 'completed',
+      stepExecutions: [
+        generationOutput === undefined
+          ? { id: 'g', stepId: 'run_generation', status: 'completed' }
+          : step('run_generation', 'completed', generationOutput),
+      ],
+    } as unknown as WorkflowExecutionDto;
+    return collectWorkerArtifacts({
+      client: { track: jest.fn() } as unknown as AttackDiscoveryWorkerClient,
+      esClient: { search: emptySearch() } as unknown as Client,
+      run,
+      spaceId: 'space',
+      seeded: {
+        runMarker: 'marker',
+        spaceId: 'space',
+        goldIdBySeededId: new Map(),
+        alertCount: 0,
+        openAlertIds: [],
+        worldDocs: [],
+      },
+      fetch: jest.fn() as unknown as HttpHandler,
+      log,
+    });
+  };
+
+  it('does not warn when run_generation carried an empty attack_discoveries array', async () => {
+    const log = { info: jest.fn(), warning: jest.fn(), debug: jest.fn() } as unknown as ToolingLog;
+    await collectGeneration({ attack_discoveries: [] }, log);
+    expect(log.warning).not.toHaveBeenCalledWith(expect.stringContaining('no attack_discoveries'));
+  });
+
+  it('warns when run_generation output carried no attack_discoveries field', async () => {
+    const log = { info: jest.fn(), warning: jest.fn(), debug: jest.fn() } as unknown as ToolingLog;
+    await collectGeneration({ execution_uuids: ['u1'] }, log);
+    expect(log.warning).toHaveBeenCalledWith(
+      expect.stringContaining('run_generation output carried no attack_discoveries')
     );
   });
 });
