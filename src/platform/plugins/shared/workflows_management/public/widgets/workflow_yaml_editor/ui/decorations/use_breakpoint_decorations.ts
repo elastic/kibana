@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme } from '@elastic/eui';
+import { transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
@@ -42,18 +42,28 @@ export const useBreakpointDecorations = (
   useEffect(() => {
     decorationsCollection?.clear();
 
-    if (isExecutionsTab || !breakpoints.length || !workflowLookup?.steps) {
+    if (isExecutionsTab || !workflowLookup?.steps) {
       return;
     }
 
+    const breakpointSet = new Set(breakpoints);
     const decorations: monaco.editor.IModelDeltaDecoration[] = [];
-    for (const stepId of breakpoints) {
-      const stepInfo = workflowLookup.steps[stepId];
-      if (stepInfo) {
+    for (const [stepId, stepInfo] of Object.entries(workflowLookup.steps)) {
+      if (breakpointSet.has(stepId)) {
         decorations.push({
           range: new monaco.Range(stepInfo.lineStart, 1, stepInfo.lineStart, 1),
           options: {
+            isWholeLine: true,
+            className: 'step-breakpoint-line',
+            marginClassName: 'step-breakpoint-margin',
             glyphMarginClassName: 'step-breakpoint-glyph',
+          },
+        });
+      } else {
+        decorations.push({
+          range: new monaco.Range(stepInfo.lineStart, 1, stepInfo.lineStart, 1),
+          options: {
+            glyphMarginClassName: 'step-breakpoint-hover-target',
           },
         });
       }
@@ -95,7 +105,14 @@ export const useBreakpointDecorations = (
   const styles = useMemo(
     () =>
       css({
-        '.step-breakpoint-glyph': {
+        '.step-breakpoint-line': {
+          backgroundColor: transparentize(colors.danger, 0.1),
+          boxShadow: `inset 2px 0 0 0 ${colors.danger}`,
+        },
+        '.step-breakpoint-margin': {
+          backgroundColor: transparentize(colors.danger, 0.1),
+        },
+        '.step-breakpoint-glyph, .step-breakpoint-hover-target': {
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
@@ -104,10 +121,19 @@ export const useBreakpointDecorations = (
         '.step-breakpoint-glyph:before': {
           content: '""',
           display: 'block',
-          width: '8px',
-          height: '8px',
+          width: '9px',
+          height: '9px',
           borderRadius: '50%',
           backgroundColor: colors.danger,
+          boxShadow: `0 0 0 2px ${transparentize(colors.danger, 0.25)}`,
+        },
+        '.step-breakpoint-hover-target:hover:before': {
+          content: '""',
+          display: 'block',
+          width: '9px',
+          height: '9px',
+          borderRadius: '50%',
+          backgroundColor: transparentize(colors.danger, 0.4),
         },
       }),
     [colors]

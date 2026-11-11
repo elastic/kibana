@@ -156,11 +156,11 @@ steps:
       breakpointHit: true,
     });
 
-    // Simulate resume input arrival and resume execution
+    // Simulate resume input arrival (overriding the step input!) and resume execution
     if (pausedExecution) {
       pausedExecution.context = {
         ...pausedExecution.context,
-        resumeInput: {},
+        resumeInput: { message: 'overridden-at-breakpoint' },
       };
     }
     await workflowRunFixture.resumeWorkflow();
@@ -175,10 +175,86 @@ steps:
       workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
     ).find((s) => s.stepId === 'step_two');
     expect(stepTwoCompleted?.status).toBe(ExecutionStatus.COMPLETED);
-    expect(stepTwoCompleted?.output).toBe('second: from-step-one');
+    expect(stepTwoCompleted?.input).toEqual({ message: 'overridden-at-breakpoint' });
+    expect(stepTwoCompleted?.output).toBe('overridden-at-breakpoint');
     expect(stepTwoCompleted?.state).toEqual({
       breakpointPaused: false,
       breakpointHit: true,
     });
+  });
+
+  it('pauses on each iteration of a foreach loop when a breakpoint is set on an inner step', async () => {
+    await workflowRunFixture.runWorkflow({
+      isTestRun: true,
+      debug: {
+        enabled: true,
+        breakpoints: ['loop_step'],
+      },
+      workflowYaml: `
+steps:
+  - name: loop_items
+    type: foreach
+    foreach:
+      - "alpha"
+      - "beta"
+    steps:
+      - name: loop_step
+        type: console
+        with:
+          message: "Item {{ foreach.index }}: {{ foreach.item }}"
+`,
+    });
+
+    // Paused at Iteration #0
+    const pausedIter0 = workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+      'fake_workflow_execution_id'
+    );
+    expect(pausedIter0?.status).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+
+    const stepExecsIter0 = Array.from(
+      workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+    ).filter((s) => s.stepId === 'loop_step');
+    expect(stepExecsIter0).toHaveLength(1);
+    expect(stepExecsIter0[0].status).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+    expect(stepExecsIter0[0].input).toEqual({ message: 'Item 0: alpha' });
+
+    // Resume from Iteration #0 -> should pause at Iteration #1
+    if (pausedIter0) {
+      pausedIter0.context = { ...pausedIter0.context, resumeInput: {} };
+    }
+    await workflowRunFixture.resumeWorkflow();
+
+    const pausedIter1 = workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+      'fake_workflow_execution_id'
+    );
+    expect(pausedIter1?.status).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+
+    const stepExecsIter1 = Array.from(
+      workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+    ).filter((s) => s.stepId === 'loop_step');
+    expect(stepExecsIter1).toHaveLength(2);
+    expect(stepExecsIter1[0].status).toBe(ExecutionStatus.COMPLETED);
+    expect(stepExecsIter1[0].output).toBe('Item 0: alpha');
+    expect(stepExecsIter1[1].status).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+    expect(stepExecsIter1[1].input).toEqual({ message: 'Item 1: beta' });
+
+    // Resume from Iteration #1 -> should complete workflow
+    if (pausedIter1) {
+      pausedIter1.context = { ...pausedIter1.context, resumeInput: {} };
+    }
+    await workflowRunFixture.resumeWorkflow();
+
+    const completedExecution =
+      workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        'fake_workflow_execution_id'
+      );
+    expect(completedExecution?.status).toBe(ExecutionStatus.COMPLETED);
+
+    const stepExecsFinal = Array.from(
+      workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+    ).filter((s) => s.stepId === 'loop_step');
+    expect(stepExecsFinal).toHaveLength(2);
+    expect(stepExecsFinal[1].status).toBe(ExecutionStatus.COMPLETED);
+    expect(stepExecsFinal[1].output).toBe('Item 1: beta');
   });
 });

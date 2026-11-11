@@ -453,7 +453,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
     );
 
     const renderDebugWorkflowButton = () =>
-      isTestRun && onDebugSubmit ? (
+      onDebugSubmit ? (
         <EuiButton
           onClick={handleDebugSubmit}
           iconType="bug"

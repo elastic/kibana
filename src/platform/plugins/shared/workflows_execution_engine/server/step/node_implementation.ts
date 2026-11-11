@@ -163,7 +163,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     }
 
     let input: Record<string, unknown> = {};
-    this.clearBreakpointPauseOnResume();
+    const resumeInputOverride = this.clearBreakpointPauseOnResume();
     this.stepExecutionRuntime.startStep();
 
     // Start the span after a microtask so it does not stay in the caller's APM context
@@ -179,7 +179,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
 
     let suspended = false;
     try {
-      input = await this.getInput();
+      input = resumeInputOverride ?? (await this.getInput());
       this.stepExecutionRuntime.setInput(input);
 
       if (this.shouldPauseAtBreakpoint()) {
@@ -373,16 +373,24 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     this.stepExecutionRuntime.tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_INPUT);
   }
 
-  private clearBreakpointPauseOnResume(): void {
+  private clearBreakpointPauseOnResume(): Record<string, unknown> | undefined {
     const currentState = this.stepExecutionRuntime.getCurrentStepState();
     if (!currentState?.breakpointPaused) {
-      return;
+      return undefined;
     }
     this.stepExecutionRuntime.setCurrentStepState({
       ...currentState,
       breakpointPaused: false,
     });
     const context = this.workflowExecutionRuntime.getWorkflowExecution()?.context;
+    const rawResumeInput = context?.resumeInput;
+    const overrideInput =
+      rawResumeInput != null &&
+      typeof rawResumeInput === 'object' &&
+      !Array.isArray(rawResumeInput) &&
+      Object.keys(rawResumeInput).length > 0
+        ? (rawResumeInput as Record<string, unknown>)
+        : undefined;
     if (context != null && typeof context === 'object' && 'resumeInput' in context) {
       this.stepExecutionRuntime.updateWorkflowExecution({
         context: {
@@ -393,6 +401,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
         },
       });
     }
+    return overrideInput;
   }
 
   private getActiveDebugMock(): StepMock | undefined {

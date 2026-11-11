@@ -95,7 +95,9 @@ export const createMarkStepAsRespondedUpdater = (
       ...(audit.channel != null ? { channel: audit.channel } : {}),
     };
 
-    const input = stripHitlTokenFieldsFromInput(current.input);
+    const input = isHitlWaitStepType(current.stepType)
+      ? stripHitlTokenFieldsFromInput(current.input)
+      : current.input;
     const patch: Partial<EsWorkflowStepExecution> = { hitl };
     if (input !== current.input) {
       patch.input = input;

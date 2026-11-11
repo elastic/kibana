@@ -27,6 +27,7 @@ export interface WaitingStepResume {
   resumeSchema: JsonModelSchemaType | undefined;
   approvalLabels: ApprovalLabels | undefined;
   isBreakpointPause?: boolean;
+  pausedStepInput?: Record<string, unknown>;
   /** True when the waiting step is known but its input could not be fetched. */
   hasResumeError: boolean;
   retryResume: () => void;
@@ -140,6 +141,13 @@ export function useWaitingStepResume(
       pausedStepFullData?.state?.breakpointPaused === true;
 
     if (waitingStepExecutionId && isBreakpointPause) {
+      const rawPausedInput = pausedStepFullData?.input ?? waitingStep?.input;
+      const pausedStepInput =
+        rawPausedInput != null &&
+        typeof rawPausedInput === 'object' &&
+        !Array.isArray(rawPausedInput)
+          ? (rawPausedInput as Record<string, unknown>)
+          : undefined;
       return {
         waitingStepExecutionId,
         waitingStepStartedAt,
@@ -147,6 +155,7 @@ export function useWaitingStepResume(
         resumeSchema: undefined,
         approvalLabels: undefined,
         isBreakpointPause: true,
+        pausedStepInput,
         hasResumeError,
         retryResume,
       };
@@ -225,6 +234,7 @@ export function useWaitingStepResume(
     isPausedStepLoading,
     pausedStepFullData,
     retryResume,
+    waitingStep?.input,
     waitingStep?.state?.breakpointPaused,
     waitingStepExecutionId,
     waitingStepId,

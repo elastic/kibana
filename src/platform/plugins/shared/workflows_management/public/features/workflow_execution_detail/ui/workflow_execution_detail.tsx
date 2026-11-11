@@ -141,6 +141,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
       resumeSchema,
       approvalLabels,
       isBreakpointPause,
+      pausedStepInput,
       hasResumeError,
       retryResume,
     } = useWaitingStepResume(executionId, workflowExecution);
@@ -179,6 +180,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               resumeSchema,
               approvalLabels,
               isBreakpointPause,
+              pausedStepInput,
               autoOpen: shouldAutoResume,
               submitState: resumeSubmitState,
             }
@@ -187,6 +189,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
         approvalLabels,
         executionId,
         isBreakpointPause,
+        pausedStepInput,
         resumeMessage,
         resumeSchema,
         resumeSubmitState,

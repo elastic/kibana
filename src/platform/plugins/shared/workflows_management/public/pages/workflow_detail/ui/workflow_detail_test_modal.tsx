@@ -115,6 +115,46 @@ export const WorkflowDetailTestModal = () => {
 
   const handleDebugWorkflow = useCallback(
     async (inputs: Record<string, unknown>, triggerTab?: WorkflowTriggerTab) => {
+      if (isReplay) {
+        if (!workflowId) {
+          const missingIdError = new Error(
+            i18n.translate('workflows.detail.testModal.reRunMissingWorkflowId', {
+              defaultMessage: 'Workflow id is missing',
+            })
+          );
+          notifications.toasts.addError(missingIdError, {
+            title: i18n.translate('workflows.detail.testModal.reRunFailed', {
+              defaultMessage: 'Failed to re-run workflow',
+            }),
+            toastLifeTimeMs: 5000,
+          });
+          throw missingIdError;
+        }
+
+        try {
+          const result = await testSavedWorkflow({
+            workflowId,
+            inputs,
+            debug: {
+              enabled: true,
+              breakpoints,
+            },
+          });
+          if (result?.workflowExecutionId) {
+            setSelectedExecution(result.workflowExecutionId);
+          }
+        } catch (error) {
+          notifications.toasts.addError(error as Error, {
+            title: i18n.translate('workflows.detail.testModal.reRunFailed', {
+              defaultMessage: 'Failed to re-run workflow',
+            }),
+            toastLifeTimeMs: 5000,
+          });
+          throw error;
+        }
+        return;
+      }
+
       const executionId = await testWorkflow({
         inputs,
         triggerTab,
@@ -128,7 +168,16 @@ export const WorkflowDetailTestModal = () => {
         selectEditorRun(executionId.workflowExecutionId);
       }
     },
-    [breakpoints, selectEditorRun, testWorkflow]
+    [
+      breakpoints,
+      isReplay,
+      notifications.toasts,
+      selectEditorRun,
+      setSelectedExecution,
+      testSavedWorkflow,
+      testWorkflow,
+      workflowId,
+    ]
   );
 
   const closeModal = useCallback(() => {
@@ -186,7 +235,7 @@ export const WorkflowDetailTestModal = () => {
       yamlString={yamlString}
       onClose={closeModal}
       onSubmit={handleRunWorkflow}
-      onDebugSubmit={isReplay ? undefined : handleDebugWorkflow}
+      onDebugSubmit={handleDebugWorkflow}
       hasBreakpoints={breakpoints.length > 0}
       initialExecutionId={replayExecutionId ?? undefined}
     />

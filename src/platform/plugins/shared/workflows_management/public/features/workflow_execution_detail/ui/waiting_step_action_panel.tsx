@@ -22,6 +22,7 @@ export interface WaitingStepAction {
   resumeSchema?: JsonModelSchemaType;
   approvalLabels?: ApprovalLabels;
   isBreakpointPause?: boolean;
+  pausedStepInput?: Record<string, unknown>;
   autoOpen?: boolean;
   submitState?: React.ComponentProps<typeof ResumeExecutionButton>['submitState'];
 }
@@ -88,6 +89,7 @@ export const WaitingStepActionPanel = React.memo<WaitingStepActionPanelProps>(
                 resumeSchema={action.resumeSchema}
                 approvalLabels={action.approvalLabels}
                 isBreakpointPause={action.isBreakpointPause}
+                pausedStepInput={action.pausedStepInput}
                 autoOpen={action.autoOpen}
                 waitingStepExecutionId={action.stepExecutionId}
                 submitState={action.submitState}
