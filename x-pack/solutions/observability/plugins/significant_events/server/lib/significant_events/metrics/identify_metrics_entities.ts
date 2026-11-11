@@ -59,6 +59,7 @@ const createDroppedRows = (): DroppedMetricsEntityRows => ({
   ownerless: 0,
   nullNamespace: 0,
   nullNodeName: 0,
+  idTooLong: 0,
 });
 
 const toCell = (value: ESQLSearchResponse['values'][number][number]): EsqlCell => {
@@ -211,6 +212,7 @@ export const identifyMetricsEntities = async ({
     droppedRows.ownerless += folded.droppedRows.ownerless;
     droppedRows.nullNamespace += folded.droppedRows.nullNamespace;
     droppedRows.nullNodeName += folded.droppedRows.nullNodeName;
+    droppedRows.idTooLong += folded.droppedRows.idTooLong;
     unknownClusterRows += folded.unknownClusterRows;
   }
 

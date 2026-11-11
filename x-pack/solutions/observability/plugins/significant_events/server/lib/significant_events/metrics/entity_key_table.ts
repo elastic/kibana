@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { FeatureUpsert } from '@kbn/significant-events-schema';
+import {
+  MAX_ID_LENGTH,
+  MAX_TITLE_LENGTH,
+  type FeatureUpsert,
+} from '@kbn/significant-events-schema';
 import type { Condition } from '@kbn/streamlang';
 
 export type EsqlCell = string | number | boolean | null;
@@ -15,6 +19,7 @@ export interface DroppedMetricsEntityRows {
   ownerless: number;
   nullNamespace: number;
   nullNodeName: number;
+  idTooLong: number;
 }
 
 export interface EntityFoldResult {
@@ -103,10 +108,14 @@ const createDroppedRows = (): DroppedMetricsEntityRows => ({
   ownerless: 0,
   nullNamespace: 0,
   nullNodeName: 0,
+  idTooLong: 0,
 });
 
 const droppedRowsCount = (droppedRows: DroppedMetricsEntityRows): number =>
-  droppedRows.ownerless + droppedRows.nullNamespace + droppedRows.nullNodeName;
+  droppedRows.ownerless +
+  droppedRows.nullNamespace +
+  droppedRows.nullNodeName +
+  droppedRows.idTooLong;
 
 const derivedOwnerSources: Partial<
   Record<WorkloadKind, { stampedField: string; sourceField: string }>
@@ -243,32 +252,38 @@ export const foldWorkloadRows = (rows: EsqlRow[]): EntityFoldResult => {
   }
 
   const workloads = [...groups.values()];
-  const features = [...groups.entries()].map(([id, group]): FeatureUpsert => {
+  const features = [...groups.entries()].flatMap(([id, group]): FeatureUpsert[] => {
+    if (id.length > MAX_ID_LENGTH || group.name.length > MAX_TITLE_LENGTH) {
+      droppedRows.idTooLong += 1;
+      return [];
+    }
     const ownerField = workloadOwnerFields[group.kind];
     const { replicas, lastSeen } = entityTotals(group.clusters);
     const entityStoreType = KUBERNETES_ENTITY_STORE_TYPES[group.kind];
-    return {
-      type: 'entity',
-      subtype: 'k8s_workload',
-      id,
-      title: group.name,
-      description: `Kubernetes ${group.kind} ${group.name} in namespace ${group.namespace}.`,
-      filter: buildWorkloadFilter(group, workloads),
-      properties: {
-        identity: {
-          'kubernetes.namespace': group.namespace,
-          [ownerField]: group.name,
+    return [
+      {
+        type: 'entity',
+        subtype: 'k8s_workload',
+        id,
+        title: group.name,
+        description: `Kubernetes ${group.kind} ${group.name} in namespace ${group.namespace}.`,
+        filter: buildWorkloadFilter(group, workloads),
+        properties: {
+          identity: {
+            'kubernetes.namespace': group.namespace,
+            [ownerField]: group.name,
+          },
+          breakdown: ['orchestrator.cluster.name'],
+          entity_store_type: entityStoreType,
+          clusters: group.clusters,
+          replicas,
+          last_seen: lastSeen,
+          origin: 'metrics',
+          key_row: 'ecs.k8s_workload',
         },
-        breakdown: ['orchestrator.cluster.name'],
-        entity_store_type: entityStoreType,
-        clusters: group.clusters,
-        replicas,
-        last_seen: lastSeen,
-        origin: 'metrics',
-        key_row: 'ecs.k8s_workload',
+        confidence: 100,
       },
-      confidence: 100,
-    };
+    ];
   });
 
   return {
@@ -311,27 +326,33 @@ export const foldNodeRows = (rows: EsqlRow[]): EntityFoldResult => {
     addClusterMetrics(group.clusters, cluster, row);
   }
 
-  const features = [...groups.entries()].map(([id, group]): FeatureUpsert => {
+  const features = [...groups.entries()].flatMap(([id, group]): FeatureUpsert[] => {
+    if (id.length > MAX_ID_LENGTH || group.name.length > MAX_TITLE_LENGTH) {
+      droppedRows.idTooLong += 1;
+      return [];
+    }
     const { replicas, lastSeen } = entityTotals(group.clusters);
-    return {
-      type: 'entity',
-      subtype: 'k8s_node',
-      id,
-      title: group.name,
-      description: `Kubernetes node ${group.name}.`,
-      filter: { field: 'kubernetes.node.name', eq: group.name },
-      properties: {
-        identity: { 'kubernetes.node.name': group.name },
-        breakdown: ['orchestrator.cluster.name'],
-        entity_store_type: KUBERNETES_ENTITY_STORE_TYPES.node,
-        clusters: group.clusters,
-        replicas,
-        last_seen: lastSeen,
-        origin: 'metrics',
-        key_row: 'ecs.k8s_node',
+    return [
+      {
+        type: 'entity',
+        subtype: 'k8s_node',
+        id,
+        title: group.name,
+        description: `Kubernetes node ${group.name}.`,
+        filter: { field: 'kubernetes.node.name', eq: group.name },
+        properties: {
+          identity: { 'kubernetes.node.name': group.name },
+          breakdown: ['orchestrator.cluster.name'],
+          entity_store_type: KUBERNETES_ENTITY_STORE_TYPES.node,
+          clusters: group.clusters,
+          replicas,
+          last_seen: lastSeen,
+          origin: 'metrics',
+          key_row: 'ecs.k8s_node',
+        },
+        confidence: 100,
       },
-      confidence: 100,
-    };
+    ];
   });
 
   return {

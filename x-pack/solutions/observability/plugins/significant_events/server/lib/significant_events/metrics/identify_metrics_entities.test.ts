@@ -234,6 +234,37 @@ describe('Kubernetes entity derivation', () => {
       true
     );
   });
+
+  it('drops an overlong workload identity while keeping other entities', () => {
+    const longName = 'x'.repeat(300);
+    const result = foldWorkloadRows([
+      {
+        'orchestrator.cluster.name': 'cluster-a',
+        'kubernetes.namespace': 'apps',
+        kind: 'deployment',
+        workload: longName,
+        replicas: 1,
+        last_seen: '2026-11-10T12:00:00.000Z',
+      },
+      {
+        'orchestrator.cluster.name': 'cluster-a',
+        'kubernetes.namespace': 'apps',
+        kind: 'deployment',
+        workload: 'api',
+        replicas: 1,
+        last_seen: '2026-11-10T12:00:00.000Z',
+      },
+    ]);
+
+    expect(result.features.map(({ id }) => id)).toEqual(['k8s.deployment:apps/api']);
+    expect(result.droppedIncompleteRowsCount).toBe(1);
+    expect(result.droppedRows).toEqual({
+      ownerless: 0,
+      nullNamespace: 0,
+      nullNodeName: 0,
+      idTooLong: 1,
+    });
+  });
 });
 
 describe('identifyMetricsEntities', () => {
@@ -291,7 +322,7 @@ describe('identifyMetricsEntities', () => {
         metricsEntityRowsCount: 9,
         droppedIncompleteRowsCount: 3,
         droppedOverflowRowsCount: 0,
-        droppedRows: { ownerless: 1, nullNamespace: 1, nullNodeName: 1 },
+        droppedRows: { ownerless: 1, nullNamespace: 1, nullNodeName: 1, idTooLong: 0 },
         unknownClusterRows: 1,
         handled: true,
         errors: [],
