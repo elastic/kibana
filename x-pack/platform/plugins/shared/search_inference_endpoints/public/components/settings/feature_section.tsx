@@ -41,6 +41,7 @@ interface FeatureSectionProps {
   isBeta?: boolean;
   globalDefaultId: string | undefined;
   canManage?: boolean;
+  discardVersion?: number;
 }
 
 export const FeatureSection: React.FC<FeatureSectionProps> = ({
@@ -54,6 +55,7 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
   isBeta = false,
   globalDefaultId,
   canManage = true,
+  discardVersion,
 }) => {
   return (
     <EuiFlexGroup gutterSize="m" direction="column">
@@ -127,6 +129,7 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
                         : globalDefaultId ?? NO_DEFAULT_MODEL
                     }
                     canManage={canManage}
+                    discardVersion={discardVersion}
                   />
                 </EuiFlexItem>
               )
