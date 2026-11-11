@@ -206,10 +206,11 @@ function describePinMismatch({
   const [, fingerprint] = actual.split(':');
   const nextVersion = version + 1;
   return (
-    `'${id}' renders differently for values other than its hashValues at version ${version}. ` +
-    `The definition hash does not cover those values, so installed copies rendered from them ` +
-    `keep the old workflow until version moves. Bump version to ${nextVersion} and set its ` +
-    `BLIND_SPOTS pin to '${nextVersion}:${fingerprint}'.`
+    `At version ${version}, the lines '${id}' renders differently for values other than its ` +
+    `hashValues have changed. If its render for hashValues is unchanged, so is the definition ` +
+    `hash, and installed copies rendered from other values keep the old workflow until version ` +
+    `moves. Bump version to ${nextVersion} and set its BLIND_SPOTS pin to ` +
+    `'${nextVersion}:${fingerprint}'.`
   );
 }
 
