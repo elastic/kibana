@@ -761,19 +761,18 @@ describe('refreshing a suite issue', () => {
     expect(metadata?.['report.history'][29].generatedAt).toBe('2026-09-09T09:04:41.000Z');
   });
 
-  it('lists the branches the suite is still flaky on, each with its newest failure', () => {
+  it('says in one sentence where the suite is still flaky when it is a single branch', () => {
     const { suite, report } = singleTestReport();
 
     expect(renderFlakySuiteIssueComment(suite, { report, reopened: false })).toBe(
-      [
-        'Still flaky:',
-        '',
-        '- `main`: 10% of builds (49 / 509), last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)',
-      ].join('\n')
+      'Still flaky on `main`: 10% of builds (49 / 509), last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd).'
+    );
+    expect(renderFlakySuiteIssueComment(suite, { report, reopened: true })).toMatch(
+      /^Flaky again after this issue was closed, on `main`: 10% of builds/
     );
   });
 
-  it('counts the tests and says the suite is flaky again when the issue is reopened', () => {
+  it('lists the branches, counts the tests and says the suite is flaky again when the issue is reopened', () => {
     const { suite, report } = multiTestReport();
 
     // the worst test's numbers on each branch, as the body's branch table; the clean 9.1 left out

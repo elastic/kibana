@@ -837,8 +837,9 @@ const lastFailedLink = ({
 };
 
 /**
- * The comment of a refresh that found new failures: one line per branch the suite is flaky on,
- * with the worst test's numbers there and its newest failure. The body keeps the full tables.
+ * The comment of a refresh that found new failures: where the suite is flaky, with the worst
+ * test's numbers and its newest failure on each branch, in one sentence for a single branch and
+ * one line per branch otherwise. The body keeps the full tables.
  */
 export const renderFlakySuiteIssueComment = (
   suite: FlakySuite,
@@ -858,12 +859,23 @@ export const renderFlakySuiteIssueComment = (
     .filter(({ worst }) => flaky.has(worst.branch))
     .map(({ worst, latest }) => {
       const lastFailed = latest ? lastFailedLink(latest) : undefined;
-      return (
-        `- ${inlineCode(worst.branch)}: ${formatPercent(worst.buildFailRate)} of builds ` +
-        `(${worst.failedBuilds} / ${worst.builds})${
-          lastFailed ? `, last failed ${lastFailed}` : ''
-        }`
-      );
+      return {
+        branch: inlineCode(worst.branch),
+        numbers:
+          `${formatPercent(worst.buildFailRate)} of builds ` +
+          `(${worst.failedBuilds} / ${worst.builds})${
+            lastFailed ? `, last failed ${lastFailed}` : ''
+          }`,
+      };
     });
-  return branches.length > 0 ? `${lead}:\n\n${branches.join('\n')}` : `${lead}.`;
+  if (branches.length === 0) {
+    return `${lead}.`;
+  }
+  if (branches.length === 1) {
+    const [{ branch, numbers }] = branches;
+    return `${lead}${reopened ? ',' : ''} on ${branch}: ${numbers}.`;
+  }
+  return `${lead}:\n\n${branches
+    .map(({ branch, numbers }) => `- ${branch}: ${numbers}`)
+    .join('\n')}`;
 };

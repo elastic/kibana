@@ -579,7 +579,7 @@ describe('reportFlakySuiteIssues', () => {
       expect(github.addIssueComment).toHaveBeenCalledWith(
         42,
         expect.stringMatching(
-          /^Still flaky:\n\n- `main`: 10% of builds \(49 \/ 509\), last failed \[9 Sep\]\(.*\)$/
+          /^Still flaky on `main`: 10% of builds \(49 \/ 509\), last failed \[9 Sep\]\(.*\)\.$/
         )
       );
       // The failed-test alert a comment runs reads the metadata, so the body goes first
@@ -661,7 +661,7 @@ describe('reportFlakySuiteIssues', () => {
       });
       expect(github.addIssueComment).toHaveBeenCalledWith(
         42,
-        expect.stringMatching(/^Flaky again after this issue was closed:\n\n- `main`: /)
+        expect.stringContaining('Flaky again after this issue was closed, on `main`: ')
       );
       expect(summary.actions[0]).toMatchObject({
         action: 'updated',
