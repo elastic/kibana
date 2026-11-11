@@ -25,9 +25,7 @@ import {
 
 const MAX_ENTITIES = 500;
 const DATASET_QUERY_TIMEOUT_MS = 30_000;
-const COVERED_DATASET_FAMILIES = new Set(
-  ENTITY_KEY_TABLE.flatMap(({ family, coveredFamilies = [] }) => [family, ...coveredFamilies])
-);
+const COVERED_DATASET_FAMILIES = new Set(ENTITY_KEY_TABLE.flatMap(({ families }) => families));
 
 export interface IdentifyMetricsEntitiesOptions {
   esClient: ElasticsearchClient;

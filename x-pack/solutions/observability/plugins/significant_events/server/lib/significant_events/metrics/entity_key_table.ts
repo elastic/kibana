@@ -35,8 +35,7 @@ export interface EntityFoldResult {
 
 export interface EntityKeyRow {
   id: string;
-  family: string;
-  coveredFamilies?: readonly string[];
+  families: readonly string[];
   datasets: readonly string[];
   datasetPrefixes?: readonly string[];
   subtype: 'k8s_workload' | 'k8s_node' | 'k8s_namespace' | 'k8s_cluster' | 'host' | 'service';
@@ -120,6 +119,22 @@ const clustersOf = (value: EsqlCell | undefined): string[] => {
   return clusters.length > 0 ? clusters : [UNKNOWN_CLUSTER];
 };
 
+const KUBERNETES_POD_DATASETS = ['kubernetes.pod', 'kubeletstatsreceiver.otel'] as const;
+const KUBERNETES_NODE_DATASETS = ['kubernetes.node', 'kubeletstatsreceiver.otel'] as const;
+const KUBERNETES_CLUSTER_DATASETS = [
+  'kubernetes.pod',
+  'kubernetes.node',
+  'kubeletstatsreceiver.otel',
+] as const;
+const KUBERNETES_DATASET_FAMILIES = [
+  'kubernetes',
+  'kubeletstatsreceiver',
+  'k8sclusterreceiver',
+] as const;
+
+const formatDatasetList = (datasets: readonly string[]): string =>
+  datasets.map((dataset) => `"${dataset}"`).join(', ');
+
 const createDroppedRows = (): DroppedMetricsEntityRows => ({
   ownerless: 0,
   nullNamespace: 0,
@@ -183,7 +198,9 @@ export const buildWorkloadFilter = (
 };
 
 const buildWorkloadQuery = (sourceQuery: string): string => `${sourceQuery}
-| WHERE @timestamp > NOW() - 1 hour AND data_stream.dataset == "kubernetes.pod"
+| WHERE @timestamp > NOW() - 1 hour
+    AND data_stream.dataset IN (${formatDatasetList(KUBERNETES_POD_DATASETS)})
+    AND kubernetes.pod.uid IS NOT NULL
 | EVAL h = \`kubernetes.labels.pod-template-hash\`,
        rs = kubernetes.replicaset.name,
        derived_deployment = CASE(
@@ -293,7 +310,9 @@ export const foldWorkloadRows = (rows: EsqlRow[]): EntityFoldResult => {
 };
 
 const buildNodeQuery = (sourceQuery: string): string => `${sourceQuery}
-| WHERE @timestamp > NOW() - 1 hour AND data_stream.dataset == "kubernetes.node"
+| WHERE @timestamp > NOW() - 1 hour
+    AND data_stream.dataset IN (${formatDatasetList(KUBERNETES_NODE_DATASETS)})
+    AND kubernetes.node.name IS NOT NULL
 | STATS replicas = COUNT_DISTINCT(kubernetes.node.name), last_seen = MAX(@timestamp),
         clusters = VALUES(orchestrator.cluster.name)
   BY kubernetes.node.name
@@ -364,7 +383,9 @@ export const foldNodeRows = (rows: EsqlRow[]): EntityFoldResult => {
 };
 
 const buildNamespaceQuery = (sourceQuery: string): string => `${sourceQuery}
-| WHERE @timestamp > NOW() - 1 hour AND data_stream.dataset == "kubernetes.pod"
+| WHERE @timestamp > NOW() - 1 hour
+    AND data_stream.dataset IN (${formatDatasetList(KUBERNETES_POD_DATASETS)})
+    AND kubernetes.pod.uid IS NOT NULL
 | STATS replicas = COUNT_DISTINCT(kubernetes.pod.uid), last_seen = MAX(@timestamp),
         clusters = VALUES(orchestrator.cluster.name)
   BY kubernetes.namespace
@@ -421,7 +442,7 @@ export const foldNamespaceRows = (rows: EsqlRow[]): EntityFoldResult => {
 
 const buildClusterQuery = (sourceQuery: string): string => `${sourceQuery}
 | WHERE @timestamp > NOW() - 1 hour
-    AND data_stream.dataset IN ("kubernetes.pod", "kubernetes.node")
+    AND data_stream.dataset IN (${formatDatasetList(KUBERNETES_CLUSTER_DATASETS)})
 | STATS nodes = COUNT_DISTINCT(kubernetes.node.name),
         replicas = COUNT_DISTINCT(kubernetes.pod.uid),
         last_seen = MAX(@timestamp)
@@ -666,39 +687,39 @@ export const foldServiceRows = (rows: EsqlRow[]): EntityFoldResult => {
 export const ENTITY_KEY_TABLE: readonly EntityKeyRow[] = [
   {
     id: 'ecs.k8s_workload',
-    family: 'kubernetes',
-    datasets: ['kubernetes.pod'],
+    families: KUBERNETES_DATASET_FAMILIES,
+    datasets: KUBERNETES_POD_DATASETS,
     subtype: 'k8s_workload',
     buildQuery: buildWorkloadQuery,
     foldRows: foldWorkloadRows,
   },
   {
     id: 'ecs.k8s_node',
-    family: 'kubernetes',
-    datasets: ['kubernetes.node'],
+    families: KUBERNETES_DATASET_FAMILIES,
+    datasets: KUBERNETES_NODE_DATASETS,
     subtype: 'k8s_node',
     buildQuery: buildNodeQuery,
     foldRows: foldNodeRows,
   },
   {
     id: 'ecs.k8s_namespace',
-    family: 'kubernetes',
-    datasets: ['kubernetes.pod'],
+    families: KUBERNETES_DATASET_FAMILIES,
+    datasets: KUBERNETES_POD_DATASETS,
     subtype: 'k8s_namespace',
     buildQuery: buildNamespaceQuery,
     foldRows: foldNamespaceRows,
   },
   {
     id: 'ecs.k8s_cluster',
-    family: 'kubernetes',
-    datasets: ['kubernetes.pod', 'kubernetes.node'],
+    families: KUBERNETES_DATASET_FAMILIES,
+    datasets: KUBERNETES_CLUSTER_DATASETS,
     subtype: 'k8s_cluster',
     buildQuery: buildClusterQuery,
     foldRows: foldClusterRows,
   },
   {
     id: 'ecs.host',
-    family: 'system',
+    families: ['system'],
     datasets: [],
     datasetPrefixes: ['system.'],
     subtype: 'host',
@@ -707,7 +728,7 @@ export const ENTITY_KEY_TABLE: readonly EntityKeyRow[] = [
   },
   {
     id: 'otel.host',
-    family: 'hostmetricsreceiver',
+    families: ['hostmetricsreceiver'],
     datasets: ['hostmetricsreceiver.otel'],
     subtype: 'host',
     buildQuery: buildOtelHostQuery,
@@ -715,8 +736,7 @@ export const ENTITY_KEY_TABLE: readonly EntityKeyRow[] = [
   },
   {
     id: 'apm.service',
-    family: 'apm',
-    coveredFamilies: ['generic'],
+    families: ['apm', 'generic'],
     datasets: ['apm.service_summary.1m', 'apm.service_summary.1m.otel', 'generic.otel'],
     subtype: 'service',
     buildQuery: buildServiceQuery,

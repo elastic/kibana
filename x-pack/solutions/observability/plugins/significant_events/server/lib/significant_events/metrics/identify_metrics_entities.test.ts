@@ -243,6 +243,32 @@ describe('Kubernetes entity derivation', () => {
     expect(workloadQuery).toContain('clusters = VALUES(orchestrator.cluster.name)');
     expect(workloadQuery).toContain('| SORT replicas DESC, kubernetes.namespace, workload');
     expect(workloadQuery).toMatch(/\| LIMIT 501$/);
+    const kubernetesQueries = new Map(
+      ENTITY_KEY_TABLE.filter(({ id }) => id.startsWith('ecs.k8s_')).map(({ id, buildQuery }) => [
+        id,
+        buildQuery('SET unmapped_fields = "NULLIFY"; FROM metrics-*'),
+      ])
+    );
+    expect([...kubernetesQueries.values()]).toHaveLength(4);
+    kubernetesQueries.forEach((query) => {
+      expect(query).toContain('data_stream.dataset IN (');
+      expect(query).toContain('"kubeletstatsreceiver.otel"');
+    });
+    expect(kubernetesQueries.get('ecs.k8s_workload')).toContain(
+      'data_stream.dataset IN ("kubernetes.pod", "kubeletstatsreceiver.otel")'
+    );
+    expect(kubernetesQueries.get('ecs.k8s_workload')).toContain('kubernetes.pod.uid IS NOT NULL');
+    expect(kubernetesQueries.get('ecs.k8s_node')).toContain(
+      'data_stream.dataset IN ("kubernetes.node", "kubeletstatsreceiver.otel")'
+    );
+    expect(kubernetesQueries.get('ecs.k8s_node')).toContain('kubernetes.node.name IS NOT NULL');
+    expect(kubernetesQueries.get('ecs.k8s_namespace')).toContain(
+      'data_stream.dataset IN ("kubernetes.pod", "kubeletstatsreceiver.otel")'
+    );
+    expect(kubernetesQueries.get('ecs.k8s_namespace')).toContain('kubernetes.pod.uid IS NOT NULL');
+    expect(kubernetesQueries.get('ecs.k8s_cluster')).toContain(
+      'data_stream.dataset IN ("kubernetes.pod", "kubernetes.node", "kubeletstatsreceiver.otel")'
+    );
     ENTITY_KEY_TABLE.forEach(({ buildQuery }) => {
       const query = buildQuery('SET unmapped_fields = "NULLIFY"; FROM metrics-*');
       expect(query).toMatch(/^SET unmapped_fields = "NULLIFY"; FROM/);
@@ -650,6 +676,67 @@ describe('identifyMetricsEntities', () => {
       )?.index.feature.properties.environments
     ).toEqual(['production', 'staging']);
     expect(harness.info).not.toHaveBeenCalled();
+  });
+
+  it('matches OTel Kubernetes rows without counting object-level datasets as uncovered', async () => {
+    const harness = createHarness([
+      {
+        columns: datasetColumns,
+        values: datasetRows(
+          'kubeletstatsreceiver.otel',
+          'k8sclusterreceiver.otel',
+          'hostmetricsreceiver.otel'
+        ),
+      },
+      {
+        columns: workloadColumns,
+        values: [['apps', 'deployment', 'api', 3, '2026-11-10T12:00:00.000Z', ['edge-edot'], 0]],
+      },
+      {
+        columns: nodeColumns,
+        values: [['node-a', 1, '2026-11-10T12:00:00.000Z', ['edge-edot']]],
+      },
+      {
+        columns: namespaceColumns,
+        values: [['apps', 3, '2026-11-10T12:00:00.000Z', ['edge-edot']]],
+      },
+      {
+        columns: clusterColumns,
+        values: [['edge-edot', 1, 3, '2026-11-10T12:00:00.000Z']],
+      },
+      {
+        columns: otelHostColumns,
+        values: [['router-1', null, '2026-11-10T12:00:00.000Z', ['Linux'], [], [], null]],
+      },
+    ]);
+
+    const result = await identifyMetricsEntities({
+      esClient: harness.esClient,
+      esql: sourceEsql,
+      sourceId: 'edge-edot',
+      kiClient: harness.kiClient,
+      logger: harness.logger,
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        handled: true,
+        metricsEntitiesCount: 5,
+        matchedEntityKeyRowsCount: 5,
+        uncoveredDatasetsCount: 0,
+      })
+    );
+    expect(
+      harness.bulk.mock.calls[0][1].map(
+        ({ index }: { index: { feature: { id: string } } }) => index.feature.id
+      )
+    ).toEqual([
+      'k8s.cluster:edge-edot',
+      'k8s.node:node-a',
+      'host:router-1',
+      'k8s.deployment:apps/api',
+      'k8s.namespace:apps',
+    ]);
   });
 
   it('keeps nodes before the highest-replica workloads within the 500 entity cap', async () => {
