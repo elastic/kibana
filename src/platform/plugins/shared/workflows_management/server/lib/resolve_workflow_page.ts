@@ -26,7 +26,8 @@ export interface ResolveWorkflowPageDeps {
 
 /**
  * Returns the workflow behind a page URL, or undefined when the page must not run.
- * Every miss returns undefined, so a visitor cannot tell which check failed.
+ * Every miss returns undefined. The secret is checked right after the workflow read, so a visitor
+ * without it learns nothing about the workflow's state and costs no binding read.
  */
 export const resolveWorkflowPage = async (
   { getWorkflowSource, pagesSystemClient, serviceAccountBindings }: ResolveWorkflowPageDeps,
@@ -37,7 +38,9 @@ export const resolveWorkflowPage = async (
   }
   const workflow = await getWorkflowSource(ref.workflowId, ref.spaceId);
   if (
-    !workflow?.enabled ||
+    !workflow ||
+    !(await pagesSystemClient.verifyPageSecret(ref, secret, workflow.created_at)) ||
+    !workflow.enabled ||
     !workflow.valid ||
     !workflow.definition?.triggers.some(
       (trigger) => isPageTrigger(trigger) && getPageTriggerId(trigger) === ref.pageId
@@ -56,9 +59,5 @@ export const resolveWorkflowPage = async (
     workloadId: ref.workflowId,
     spaceId: ref.spaceId,
   });
-  if (binding?.serviceAccountId !== accountId) {
-    return undefined;
-  }
-  const verified = await pagesSystemClient.verifyPageSecret(ref, secret, workflow.created_at);
-  return verified ? workflow : undefined;
+  return binding?.serviceAccountId === accountId ? workflow : undefined;
 };

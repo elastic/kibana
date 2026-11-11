@@ -71,17 +71,30 @@ describe('resolveWorkflowPage', () => {
     );
   });
 
-  it.each<[string, Partial<WorkflowProperties> | null]>([
-    ['the workflow is missing, deleted, or global', null],
+  it('returns undefined when the workflow is missing, deleted, or global', async () => {
+    const { resolve, pagesSystemClient } = setup(null);
+
+    await expect(resolve(pageRef, 'the-secret')).resolves.toBeUndefined();
+    expect(pagesSystemClient.verifyPageSecret).not.toHaveBeenCalled();
+  });
+
+  it('checks the secret before anything else about the workflow', async () => {
+    const { resolve, pagesSystemClient, serviceAccountBindings } = setup({ enabled: false });
+    pagesSystemClient.verifyPageSecret.mockResolvedValue(false);
+
+    await expect(resolve(pageRef, 'wrong')).resolves.toBeUndefined();
+    expect(serviceAccountBindings.isEnabled).not.toHaveBeenCalled();
+    expect(serviceAccountBindings.getWorkloadBinding).not.toHaveBeenCalled();
+  });
+
+  it.each<[string, Partial<WorkflowProperties>]>([
     ['the workflow is disabled', { enabled: false }],
     ['the workflow is invalid', { valid: false }],
     ['the workflow has no service account', { definition: pageDefinition() }],
     ['the page trigger is gone', { definition: boundPageDefinition('other-page') }],
-  ])('returns undefined when %s, without a secret check', async (_, overrides) => {
-    const { resolve, pagesSystemClient } = setup(overrides);
-
+  ])('returns undefined when %s, even with the right secret', async (_, overrides) => {
+    const { resolve } = setup(overrides);
     await expect(resolve(pageRef, 'the-secret')).resolves.toBeUndefined();
-    expect(pagesSystemClient.verifyPageSecret).not.toHaveBeenCalled();
   });
 
   it('reads the binding of the workflow in its space', async () => {
@@ -100,18 +113,9 @@ describe('resolveWorkflowPage', () => {
     ['service account execution is off', { bindingsEnabled: false }],
     ['the workflow has no binding', { boundAccountId: null }],
     ['the binding names another account', { boundAccountId: 'service-account-2' }],
-  ])('returns undefined when %s, without a secret check', async (_, bindingState) => {
-    const { resolve, pagesSystemClient } = setup({}, bindingState);
-
+  ])('returns undefined when %s, even with the right secret', async (_, bindingState) => {
+    const { resolve } = setup({}, bindingState);
     await expect(resolve(pageRef, 'the-secret')).resolves.toBeUndefined();
-    expect(pagesSystemClient.verifyPageSecret).not.toHaveBeenCalled();
-  });
-
-  it('returns undefined when the page rejects the secret', async () => {
-    const { resolve, pagesSystemClient } = setup();
-    pagesSystemClient.verifyPageSecret.mockResolvedValue(false);
-
-    await expect(resolve(pageRef, 'wrong')).resolves.toBeUndefined();
   });
 
   it('never resolves a page in the global space', async () => {
