@@ -41,6 +41,11 @@ export const servers: ScoutServerConfig = {
         REPO_ROOT,
         'x-pack/platform/test/task_manager/plugins/service_accounts'
       )}`,
+      // Buffers server EBT events so specs can read what an execution reported.
+      `--plugin-path=${resolve(
+        REPO_ROOT,
+        'src/platform/test/analytics/plugins/analytics_ftr_helpers'
+      )}`,
     ],
   },
 };
