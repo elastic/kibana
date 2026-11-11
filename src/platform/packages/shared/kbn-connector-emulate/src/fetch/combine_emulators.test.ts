@@ -471,8 +471,8 @@ describe('combineEmulators', () => {
 
     expect(captures()).toEqual([
       ['outlook', undefined],
-      ['tenant', '[redacted]'],
-      ['outlook', '[redacted]'],
+      ['tenant', 'Bearer [redacted]'],
+      ['outlook', 'Bearer [redacted]'],
       ['one_drive', undefined],
     ]);
 
@@ -483,11 +483,11 @@ describe('combineEmulators', () => {
     await fetch(tenant, bearer('t2'));
 
     expect(captures()).toEqual([
-      ['tenant', '[redacted]'],
+      ['tenant', 'Bearer [redacted]'],
       ['one_drive', undefined],
       ['outlook', undefined],
-      ['outlook', '[redacted]'],
-      ['tenant', '[redacted]'],
+      ['outlook', 'Bearer [redacted]'],
+      ['tenant', 'Bearer [redacted]'],
     ]);
   });
 

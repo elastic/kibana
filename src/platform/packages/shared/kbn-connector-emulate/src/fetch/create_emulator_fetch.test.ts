@@ -432,7 +432,7 @@ describe('createEmulatorFetch with capture', () => {
       request: {
         headers: expect.objectContaining({
           'content-type': 'application/json',
-          authorization: '[redacted]',
+          authorization: 'Bearer [redacted]',
           'x-api-key': '[redacted]',
         }),
         query: {},

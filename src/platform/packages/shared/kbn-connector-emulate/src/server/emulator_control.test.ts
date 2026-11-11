@@ -83,7 +83,7 @@ describe('createEmulatorControlHandler', () => {
       captured: {
         request: {
           headers: {
-            authorization: '[redacted]',
+            authorization: 'Bearer [redacted]',
             'x-api-key': '[redacted]',
             accept: 'application/json',
           },

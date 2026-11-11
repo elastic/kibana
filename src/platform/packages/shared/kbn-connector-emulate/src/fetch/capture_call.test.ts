@@ -24,7 +24,7 @@ const ok = { statusCode: 200, headers: { 'content-type': 'application/json' }, b
 describe('createCaptureExchange', () => {
   const capture = createCaptureExchange();
 
-  it('redacts secret headers and query parameters, keeping other values', () => {
+  it('redacts credential headers and query parameters, keeping the auth scheme and other values', () => {
     const { request: captured } = capture(
       request({
         headers: {
@@ -39,7 +39,7 @@ describe('createCaptureExchange', () => {
     );
 
     expect(captured.headers).toEqual({
-      Authorization: REDACTED,
+      Authorization: `Bearer ${REDACTED}`,
       'x-api-key': REDACTED,
       cookie: REDACTED,
       'content-type': 'application/json',
@@ -47,7 +47,7 @@ describe('createCaptureExchange', () => {
     expect(captured.query).toEqual({ access_token: REDACTED, limit: '10' });
   });
 
-  it('redacts secret keys in JSON bodies at any depth, whatever their case', () => {
+  it('redacts credential keys in JSON bodies at any depth, whatever their case', () => {
     const { request: captured } = capture(
       request({
         headers: { 'content-type': 'application/json' },
@@ -145,6 +145,55 @@ describe('createCaptureExchange', () => {
 
     expect(captured.body).toBe('token=abc');
     expect(response).toEqual({ headers: {} });
+  });
+});
+
+describe('createCaptureExchange redaction scope', () => {
+  const capture = createCaptureExchange();
+
+  it('keeps pagination cursors readable', () => {
+    const { request: captured } = capture(
+      request({
+        query: { page_token: 'p', pageToken: 'p', nextToken: 'n', continuation_token: 'c' },
+      }),
+      ok
+    );
+
+    expect(captured.query).toEqual({
+      page_token: 'p',
+      pageToken: 'p',
+      nextToken: 'n',
+      continuation_token: 'c',
+    });
+  });
+
+  it('redacts credential tokens and keys by name', () => {
+    const { request: captured } = capture(
+      request({
+        headers: {
+          'x-amz-security-token': 's',
+          'dd-application-key': 'a',
+          'x-auth-token': 't',
+          'proxy-authorization': 'Basic dXNlcjpwYXNz',
+        },
+        query: { token: 't', key: 'kept', id_token: 'i' },
+      }),
+      ok
+    );
+
+    expect(captured.headers).toEqual({
+      'x-amz-security-token': REDACTED,
+      'dd-application-key': REDACTED,
+      'x-auth-token': REDACTED,
+      'proxy-authorization': `Basic ${REDACTED}`,
+    });
+    expect(captured.query).toEqual({ token: REDACTED, key: 'kept', id_token: REDACTED });
+  });
+
+  it('redacts an auth header without a scheme whole', () => {
+    const { request: captured } = capture(request({ headers: { authorization: 'abc' } }), ok);
+
+    expect(captured.headers).toEqual({ authorization: REDACTED });
   });
 });
 

@@ -26,13 +26,13 @@ export interface CaptureOptions {
   /** Bodies longer than this, serialized, are cut to it and flagged. Default 8 KiB. */
   readonly maxBodyBytes?: number;
   /**
-   * More keys whose values are redacted, matched like the built-in ones: case-insensitively,
-   * after converting camelCase and kebab-case to snake_case, the key itself or its end.
+   * More keys whose values are redacted, such as Trello's `key`: compared after converting
+   * camelCase and kebab-case to snake_case, the key itself or its end.
    */
   readonly redact?: readonly string[];
 }
 
-/** A request or response as captured: headers and body, with secrets redacted. */
+/** A request or response as captured: headers and body, with credentials redacted. */
 export interface CapturedMessage {
   readonly headers: Readonly<Record<string, string>>;
   /** JSON and form bodies as values, other bodies as text; absent when there is none. */
@@ -45,24 +45,48 @@ export interface CapturedRequest extends CapturedMessage {
   readonly query: Readonly<Record<string, string | string[]>>;
 }
 
-/** The headers and bodies of one exchange, with secrets redacted. */
+/** The headers and bodies of one exchange, with credentials redacted. */
 export interface CapturedExchange {
   readonly request: CapturedRequest;
   readonly response: CapturedMessage;
 }
 
-/** Keys redacted wherever they appear, after normalizing to snake_case. */
-const SECRET_KEYS = new Set([
+/**
+ * Keys that carry credentials, redacted wherever they appear, after normalizing to snake_case.
+ * Only credentials: cursors such as `page_token` or `nextToken` stay readable for debugging.
+ */
+const CREDENTIAL_KEYS = new Set([
   'authorization',
   'proxy_authorization',
   'cookie',
   'set_cookie',
-  // JWT bearer grants (RFC 7523) send the signed assertion in the token request's body.
+  // Trello and others take the API token as a bare `token` parameter.
+  'token',
+  // JWT bearer grants (RFC 7523) and client assertions send a signed JWT.
   'assertion',
+  'client_assertion',
 ]);
 
-/** Keys redacted when the key is one of these or ends in it, after normalizing to snake_case. */
-const SECRET_SUFFIXES = ['token', 'secret', 'password', 'api_key', 'private_key'];
+/** Keys redacted when they end in one of these, after normalizing to snake_case. */
+const CREDENTIAL_SUFFIXES = [
+  'api_key',
+  'apikey',
+  'application_key',
+  'secret',
+  'password',
+  'private_key',
+  'access_token',
+  'refresh_token',
+  'id_token',
+  'auth_token',
+  'api_token',
+  'bearer_token',
+  'security_token',
+  'session_token',
+];
+
+/** Headers whose value starts with an auth scheme, which is kept: `Bearer [redacted]`. */
+const SCHEME_KEYS = new Set(['authorization', 'proxy_authorization']);
 
 const toSnakeCase = (key: string): string =>
   key
@@ -70,17 +94,27 @@ const toSnakeCase = (key: string): string =>
     .replace(/[-\s]+/g, '_')
     .toLowerCase();
 
-const createIsSecret = (redact: readonly string[] = []): ((key: string) => boolean) => {
-  const suffixes = [...SECRET_SUFFIXES, ...redact.map(toSnakeCase)];
-  return (key) => {
+/** The redacted value of a credential key, or `undefined` when the key holds none. */
+type RedactEntry = (key: string, value: unknown) => string | undefined;
+
+const createRedactEntry = (redact: readonly string[] = []): RedactEntry => {
+  const suffixes = [...CREDENTIAL_SUFFIXES, ...redact.map(toSnakeCase)];
+  return (key, value) => {
     const normalized = toSnakeCase(key);
-    return SECRET_KEYS.has(normalized) || suffixes.some((suffix) => normalized.endsWith(suffix));
+    if (!CREDENTIAL_KEYS.has(normalized) && !suffixes.some((end) => normalized.endsWith(end))) {
+      return undefined;
+    }
+    const scheme =
+      SCHEME_KEYS.has(normalized) && typeof value === 'string'
+        ? /^(\S+)\s+\S/.exec(value)?.[1]
+        : undefined;
+    return scheme ? `${scheme} ${REDACTED}` : REDACTED;
   };
 };
 
-const redactValue = (value: unknown, isSecret: (key: string) => boolean): unknown => {
+const redactValue = (value: unknown, redactEntry: RedactEntry): unknown => {
   if (Array.isArray(value)) {
-    return value.map((item) => redactValue(item, isSecret));
+    return value.map((item) => redactValue(item, redactEntry));
   }
   if (value === null || typeof value !== 'object') {
     return value;
@@ -88,17 +122,17 @@ const redactValue = (value: unknown, isSecret: (key: string) => boolean): unknow
   return Object.fromEntries(
     Object.entries(value).map(([key, item]) => [
       key,
-      isSecret(key) ? REDACTED : redactValue(item, isSecret),
+      redactEntry(key, item) ?? redactValue(item, redactEntry),
     ])
   );
 };
 
 const redactRecord = <T>(
   record: Readonly<Record<string, T>>,
-  isSecret: (key: string) => boolean
+  redactEntry: RedactEntry
 ): Record<string, T | string> =>
   Object.fromEntries(
-    Object.entries(record).map(([key, value]) => [key, isSecret(key) ? REDACTED : value])
+    Object.entries(record).map(([key, value]) => [key, redactEntry(key, value) ?? value])
   );
 
 const findHeader = (
@@ -138,13 +172,13 @@ const toStructuredBody = (body: unknown, contentType = ''): unknown => {
 const toBody = (
   body: unknown,
   contentType: string | undefined,
-  isSecret: (key: string) => boolean,
+  redactEntry: RedactEntry,
   maxBodyBytes: number
 ): Pick<CapturedMessage, 'body' | 'bodyTruncated'> => {
   if (body === undefined || body === null || body === '') {
     return {};
   }
-  const redacted = redactValue(toStructuredBody(body, contentType), isSecret);
+  const redacted = redactValue(toStructuredBody(body, contentType), redactEntry);
   const text = typeof redacted === 'string' ? redacted : JSON.stringify(redacted);
   const bytes = Buffer.from(text);
   if (bytes.length <= maxBodyBytes) {
@@ -160,26 +194,33 @@ export type CaptureExchange = (
 
 /**
  * Creates a function that captures an exchange's headers, query and bodies. Values of keys that
- * may hold secrets are replaced with `[redacted]` in headers, the query, and JSON and form bodies,
- * at any depth; then bodies longer than `maxBodyBytes` are cut and flagged.
+ * carry credentials are replaced with `[redacted]` in headers, the query, and JSON and form
+ * bodies, at any depth, keeping an auth header's scheme; then bodies longer than `maxBodyBytes` are
+ * cut and flagged. Redaction keeps credentials out of logs and agent context by accident; it is
+ * no security control, as whoever points Kibana at the emulator can read its traffic anyway.
  */
 export const createCaptureExchange = ({
   maxBodyBytes = DEFAULT_MAX_CAPTURED_BODY_BYTES,
   redact,
 }: CaptureOptions = {}): CaptureExchange => {
-  const isSecret = createIsSecret(redact);
+  const redactEntry = createRedactEntry(redact);
   return (request, response) => ({
     request: {
-      headers: redactRecord(request.headers, isSecret),
-      query: redactRecord(request.query, isSecret),
-      ...toBody(request.body, findHeader(request.headers, 'content-type'), isSecret, maxBodyBytes),
+      headers: redactRecord(request.headers, redactEntry),
+      query: redactRecord(request.query, redactEntry),
+      ...toBody(
+        request.body,
+        findHeader(request.headers, 'content-type'),
+        redactEntry,
+        maxBodyBytes
+      ),
     },
     response: {
-      headers: redactRecord(response.headers ?? {}, isSecret),
+      headers: redactRecord(response.headers ?? {}, redactEntry),
       ...toBody(
         response.body,
         findHeader(response.headers, 'content-type'),
-        isSecret,
+        redactEntry,
         maxBodyBytes
       ),
     },
