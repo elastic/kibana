@@ -101,7 +101,13 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
         let indices: string[] = [];
         try {
           const resolved = await client.indices.resolveIndex({ name: '*' });
-          indices = resolved.indices.map(({ name }) => name).sort();
+          indices = Array.from(
+            new Set(
+              [...resolved.indices, ...resolved.aliases, ...resolved.data_streams].map(
+                ({ name }) => name
+              )
+            )
+          ).sort();
         } catch (error) {
           log.debug(`Search Profiler index suggestions unavailable: ${error.message}`);
         }
