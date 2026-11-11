@@ -58,6 +58,25 @@ export const panelJsonStrings = {
       defaultMessage: '{count} panels were added',
       values: { count },
     }),
+  getPanelsCopiedSuccess: (count: number) =>
+    i18n.translate('dashboard.panelJson.panelsCopiedSuccess', {
+      defaultMessage: '{count, plural, one {Panel copied} other {# panels copied}}',
+      values: { count },
+    }),
+  getPanelsNotCopiedHeading: (count: number) =>
+    i18n.translate('dashboard.panelJson.panelsNotCopiedHeading', {
+      defaultMessage:
+        '{count, plural, one {This panel can’t be copied:} other {These panels can’t be copied:}}',
+      values: { count },
+    }),
+  getNoPanelsCanBeCopiedError: () =>
+    i18n.translate('dashboard.panelJson.noPanelsCanBeCopiedError', {
+      defaultMessage: 'None of the selected panels can be copied.',
+    }),
+  getCopyPanelsErrorTitle: () =>
+    i18n.translate('dashboard.panelJson.copyPanelsErrorTitle', {
+      defaultMessage: 'Unable to copy the panels',
+    }),
   getCancelButtonLabel: () =>
     i18n.translate('dashboard.panelJson.cancelButtonLabel', {
       defaultMessage: 'Cancel',

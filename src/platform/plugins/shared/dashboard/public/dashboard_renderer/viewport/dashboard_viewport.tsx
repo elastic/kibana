@@ -17,6 +17,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { DashboardGrid } from '../grid';
+import { usePanelClipboardShortcuts } from '../grid/use_panel_clipboard_shortcuts';
 import { SelectedPanelsToolbar } from '../selected_panels_toolbar';
 import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
 
@@ -43,6 +44,8 @@ export const DashboardViewport = () => {
   const onExit = useCallback(() => {
     dashboardApi.setFullScreenMode(false);
   }, [dashboardApi]);
+
+  usePanelClipboardShortcuts({ enabled: viewMode === 'edit' && expandedPanelId === undefined });
 
   const { panelCount, visiblePanelCount, sectionCount } = useMemo(() => {
     const panels = Object.values(layout.panels);

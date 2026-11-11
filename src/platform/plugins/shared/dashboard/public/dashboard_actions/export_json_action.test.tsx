@@ -10,7 +10,7 @@
 import { render } from '@testing-library/react';
 import { BehaviorSubject, of } from 'rxjs';
 import type { ExportJSONActionApi } from './export_json_action';
-import { ExportJSONAction } from './export_json_action';
+import { ExportJSONAction, getPanelsJsonEntries } from './export_json_action';
 import * as ExportJsonFlyout from '../dashboard_app/top_nav/share/export_json/flyout/export_json_flyout';
 
 const mockOpenLazyFlyout = jest.fn();
@@ -127,6 +127,15 @@ describe('Export JSON action', () => {
       getExportJson(true);
       expect(getSerializedStateByValueMock).toHaveBeenCalledTimes(1);
       expect(embeddableWithLibrary.serializeState).not.toHaveBeenCalled();
+    });
+
+    it('getPanelsJsonEntries exports the full configuration of library panels only when forced', () => {
+      expect(getPanelsJsonEntries([embeddableWithLibrary], false)[0].config).toEqual({
+        rawState: { key: 'value' },
+      });
+      expect(getPanelsJsonEntries([embeddableWithLibrary], true)[0].config).toEqual({
+        rawState: { byValue: true },
+      });
     });
 
     it('uses serializeState when embeddable does not support library transforms', async () => {

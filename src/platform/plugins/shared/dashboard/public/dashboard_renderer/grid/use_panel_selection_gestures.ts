@@ -55,7 +55,7 @@ const SELECTION_MODE_IGNORED_TARGET_SELECTOR = [
  * Panel flyouts opened with `openLazyFlyout`. Push flyouts are rendered next to the page rather than
  * in a portal, so they need their own entry to act on the selection without clearing it.
  */
-const PANEL_FLYOUT_SELECTOR = '.kbnPresentationLazyFlyout';
+export const PANEL_FLYOUT_SELECTOR = '.kbnPresentationLazyFlyout';
 
 /** Clicks on these elements never clear the current selection */
 const KEEP_SELECTION_SELECTOR = [

@@ -81,6 +81,22 @@ const getPanelConfig = (panel: ExportJSONActionApi, forceExportByValue: boolean)
     ? panel.getSerializedStateByValue()
     : panel.serializeState();
 
+/**
+ * Builds the Dashboards API entries of the panels, keeping their position on the dashboard.
+ * With `forceExportByValue`, panels linked to the library are exported with their full configuration.
+ */
+export const getPanelsJsonEntries = (
+  panels: ExportJSONActionApi[],
+  forceExportByValue: boolean
+): PanelJsonEntry[] =>
+  buildPanelJsonEntries(
+    panels.map((panel) => ({
+      type: panel.type,
+      grid: getPanelGrid(panel),
+      config: getPanelConfig(panel, forceExportByValue),
+    }))
+  );
+
 type ExportedPanels = PanelJsonEntry | PanelJsonEntry[];
 
 /**
@@ -119,13 +135,7 @@ export const openPanelsExportJsonFlyout = (panels: ExportJSONActionApi[]): void 
           closeFlyout={closeFlyout}
           isByReference={linkedToLibrary.some(Boolean)}
           getExportJson={(forceExportByValue = false) => {
-            const entries = buildPanelJsonEntries(
-              panels.map((panel) => ({
-                type: panel.type,
-                grid: getPanelGrid(panel),
-                config: getPanelConfig(panel, forceExportByValue),
-              }))
-            );
+            const entries = getPanelsJsonEntries(panels, forceExportByValue);
             return isSinglePanel ? entries[0] : entries;
           }}
           sanitizeState={async (state) => {
