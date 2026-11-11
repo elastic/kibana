@@ -7,8 +7,8 @@
 
 import { useMemo } from 'react';
 import React from 'react';
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { FormattedDate, FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
 import {
   LICENSE_FOR_AGENT_MIGRATION,
@@ -21,7 +21,10 @@ import {
   isAgentRestartSupported,
   isAgentUpgrading,
 } from '../../../../../../common/services';
-import { isStuckInUpdating } from '../../../../../../common/services/agent_status';
+import {
+  hasPendingUnenroll,
+  isStuckInUpdating,
+} from '../../../../../../common/services/agent_status';
 
 import type { Agent, AgentPolicy } from '../../../types';
 import { useAuthz, useLicense, useRestartAgentAction } from '../../../hooks';
@@ -44,6 +47,7 @@ export interface SingleAgentMenuCallbacks {
   onRequestDiagnosticsClick: () => void;
   onChangeAgentPrivilegeLevelClick: () => void;
   onUnenrollClick: () => void;
+  onForceUnenrollClick: () => void;
   onUninstallClick: () => void;
   onRollbackClick: () => void;
   onRestartClick: () => void;
@@ -70,7 +74,7 @@ export function useSingleAgentMenuItems({
   const { isRestartAgentActionEnabled } = useRestartAgentAction();
 
   const isAgentless = agentPolicy?.supports_agentless === true;
-  const isUnenrolling = agent.status === 'unenrolling';
+  const pendingUnenroll = hasPendingUnenroll(agent);
   const isAgentUpdating = isStuckInUpdating(agent);
   const hasFleetAllPrivileges = authz.fleet.allAgents;
   const agentPrivilegeLevelChangeEnabled =
@@ -388,19 +392,37 @@ export function useSingleAgentMenuItems({
 
     // Unenroll and Uninstall agent
     if (hasFleetAllPrivileges && !agentPolicy?.is_managed) {
+      const unenrollLabel = (
+        <FormattedMessage
+          id="xpack.fleet.agentList.unenrollOneButton"
+          defaultMessage="Unenroll agent"
+        />
+      );
+
       securityChildren.push({
         id: 'unenroll',
-        name: isUnenrolling ? (
-          <FormattedMessage
-            id="xpack.fleet.agentList.forceUnenrollOneButton"
-            defaultMessage="Force unenroll"
-          />
+        // When an unenroll is already outstanding, flag it without disabling the item: the
+        // predicate is also true for healthy agents (a replace-token re-enrolment leaves a stale
+        // `unenrollment_started_at`), and a wrong disable would push people to the forced path.
+        name: pendingUnenroll ? (
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+            <EuiFlexItem grow={false}>{unenrollLabel}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="info" size="s" aria-hidden={true} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ) : (
-          <FormattedMessage
-            id="xpack.fleet.agentList.unenrollOneButton"
-            defaultMessage="Unenroll agent"
-          />
+          unenrollLabel
         ),
+        toolTipContent: pendingUnenroll ? (
+          <FormattedMessage
+            id="xpack.fleet.agentList.pendingUnenrollTooltip"
+            defaultMessage="An unenroll was requested on {date} and the agent has not acknowledged it. Use Force unenroll to remove it immediately."
+            values={{
+              date: <FormattedDate value={agent.unenrollment_started_at} />,
+            }}
+          />
+        ) : undefined,
         icon: 'trash',
         iconColor: 'danger',
         disabled: !agent.active,
@@ -408,6 +430,25 @@ export function useSingleAgentMenuItems({
           callbacks.onUnenrollClick();
         },
         'data-test-subj': 'agentUnenrollBtn',
+      });
+
+      securityChildren.push({
+        id: 'force-unenroll',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.agentList.forceUnenrollOneButton"
+            defaultMessage="Force unenroll"
+          />
+        ),
+        icon: 'crossCircle',
+        iconColor: 'danger',
+        // Deliberately not gated on `pendingUnenroll`: an unenroll that will never be
+        // acknowledged is the main reason to reach for this.
+        disabled: !agent.active,
+        onClick: () => {
+          callbacks.onForceUnenrollClick();
+        },
+        'data-test-subj': 'agentForceUnenrollBtn',
       });
 
       // Uninstall agent
@@ -459,7 +500,7 @@ export function useSingleAgentMenuItems({
     agentRollbackEnabled,
     agentHasValidRollback,
     licenseService,
-    isUnenrolling,
+    pendingUnenroll,
     authz.integrations.readIntegrationPolicies,
     isRestartAgentActionEnabled,
   ]);

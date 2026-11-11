@@ -34415,8 +34415,6 @@
     "xpack.fleet.unenrollAgents.deleteSingleTitle": "エージェントの登録解除",
     "xpack.fleet.unenrollAgents.fatalErrorNotificationTitle": "{count, plural, one {agent} other {エージェント}}の登録解除エラー",
     "xpack.fleet.unenrollAgents.forceDeleteMultipleTitle": "{count}個のエージェントを登録解除",
-    "xpack.fleet.unenrollAgents.forceUnenrollCheckboxLabel": "{count, plural, one {agent} other {個のエージェント}}を直ちに削除します。エージェントが最後のデータを送信するまで待機しない。",
-    "xpack.fleet.unenrollAgents.forceUnenrollLegendText": "{count, plural, one {agent} other {エージェント}}を強制的に登録解除",
     "xpack.fleet.unenrollAgents.successForceMultiNotificationTitle": "エージェントが登録解除されました",
     "xpack.fleet.unenrollAgents.successForceSingleNotificationTitle": "エージェントが登録解除されました",
     "xpack.fleet.unenrollAgents.successMultiNotificationTitle": "エージェントを登録解除しています",

@@ -30,6 +30,7 @@ import { policyHasFleetServer } from '../../../services';
 import { SO_SEARCH_LIMIT } from '../../../constants';
 import {
   AgentReassignAgentPolicyModal,
+  AgentForceUnenrollModal,
   AgentUnenrollAgentModal,
   AgentRemoveCollectorModal,
   AgentUpgradeAgentModal,
@@ -87,6 +88,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   // Agent actions states
   const [agentToReassign, setAgentToReassign] = useState<Agent | undefined>(undefined);
   const [agentToUnenroll, setAgentToUnenroll] = useState<Agent | undefined>(undefined);
+  const [agentToForceUnenroll, setAgentToForceUnenroll] = useState<Agent | undefined>(undefined);
   const [agentToGetUninstallCommand, setAgentToGetUninstallCommand] = useState<Agent | undefined>(
     undefined
   );
@@ -235,6 +237,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         agentPolicy={agentPolicy}
         onReassignClick={() => setAgentToReassign(agent)}
         onUnenrollClick={() => setAgentToUnenroll(agent)}
+        onForceUnenrollClick={() => setAgentToForceUnenroll(agent)}
         onUpgradeClick={() => setAgentToUpgrade(agent)}
         onAddRemoveTagsClick={(button) => {
           setTagsPopoverButton(button);
@@ -293,6 +296,11 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     const agentPolicy = getAgentPolicy(agentToUnenroll);
     return agentPolicy ? policyHasFleetServer(agentPolicy) : false;
   }, [agentToUnenroll, getAgentPolicy]);
+
+  const agentToForceUnenrollHasFleetServer = useMemo(() => {
+    const agentPolicy = getAgentPolicy(agentToForceUnenroll);
+    return agentPolicy ? policyHasFleetServer(agentPolicy) : false;
+  }, [agentToForceUnenroll, getAgentPolicy]);
 
   // Missing Encryption key
   const [canShowMissingEncryptionKeyCallout, dismissEncryptionKeyCallout] =
@@ -390,8 +398,20 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               setAgentToUnenroll(undefined);
               refreshAgents({ refreshTags: true });
             }}
-            useForceUnenroll={agentToUnenroll.status === 'unenrolling'}
             hasFleetServer={agentToUnenrollHasFleetServer}
+          />
+        </EuiPortal>
+      )}
+      {agentToForceUnenroll && (
+        <EuiPortal>
+          <AgentForceUnenrollModal
+            agents={[agentToForceUnenroll]}
+            agentCount={1}
+            onClose={() => {
+              setAgentToForceUnenroll(undefined);
+              refreshAgents({ refreshTags: true });
+            }}
+            hasFleetServer={agentToForceUnenrollHasFleetServer}
           />
         </EuiPortal>
       )}

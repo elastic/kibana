@@ -34409,8 +34409,6 @@
     "xpack.fleet.unenrollAgents.deleteSingleTitle": "取消注册代理",
     "xpack.fleet.unenrollAgents.fatalErrorNotificationTitle": "取消注册{count, plural, one {agent} other {智能体}}时出错",
     "xpack.fleet.unenrollAgents.forceDeleteMultipleTitle": "取消注册 {count} 个代理",
-    "xpack.fleet.unenrollAgents.forceUnenrollCheckboxLabel": "立即移除{count, plural, one {agent} other {智能体}}。不用等待智能体发送任何最终数据。",
-    "xpack.fleet.unenrollAgents.forceUnenrollLegendText": "强制取消注册 {count, plural, one {agent} other {代理}}",
     "xpack.fleet.unenrollAgents.successForceMultiNotificationTitle": "代理已取消注册",
     "xpack.fleet.unenrollAgents.successForceSingleNotificationTitle": "代理已取消注册",
     "xpack.fleet.unenrollAgents.successMultiNotificationTitle": "正在取消注册代理",

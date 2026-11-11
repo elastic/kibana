@@ -34342,8 +34342,6 @@
     "xpack.fleet.unenrollAgents.deleteSingleTitle": "Agent abmelden",
     "xpack.fleet.unenrollAgents.fatalErrorNotificationTitle": "Fehler beim Abmelden von {count, plural, one {agent} other {Agenten}}",
     "xpack.fleet.unenrollAgents.forceDeleteMultipleTitle": "{count} Agenten abmelden",
-    "xpack.fleet.unenrollAgents.forceUnenrollCheckboxLabel": "Entfernen Sie {count, plural, one {agent} other {Agenten}} sofort. Warten Sie nicht darauf, dass der Agent die letzten Daten sendet.",
-    "xpack.fleet.unenrollAgents.forceUnenrollLegendText": "Abmelden erzwingen {count, plural, one {agent} other {agents}}",
     "xpack.fleet.unenrollAgents.successForceMultiNotificationTitle": "Agenten abgemeldet",
     "xpack.fleet.unenrollAgents.successForceSingleNotificationTitle": "Agent abgemeldet",
     "xpack.fleet.unenrollAgents.successMultiNotificationTitle": "Abmeldung von Agenten",

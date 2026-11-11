@@ -5,30 +5,28 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiConfirmModal,
-  EuiFormFieldset,
-  EuiCheckbox,
-  EuiSpacer,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiConfirmModal, EuiLink, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KbnWarningCallout } from '@kbn/ui-callout';
+import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
+
+import { hasPendingUnenroll } from '../../../../../../../common/services/agent_status';
 
 import type { Agent } from '../../../../types';
-import {
-  sendPostAgentUnenroll,
-  sendPostBulkAgentUnenroll,
-  useStartServices,
-} from '../../../../hooks';
+import { useStartServices } from '../../../../hooks';
+
+import { useUnenrollAgents } from './use_unenroll_agents';
+
+export { AgentForceUnenrollModal } from './force_unenroll_modal';
+
+const isAgentOffline = ({ status }: Agent): boolean =>
+  status === 'offline' || status === 'inactive';
 
 interface Props {
   onClose: () => void;
   agents: Agent[] | string;
   agentCount: number;
-  useForceUnenroll?: boolean;
   hasFleetServer?: boolean;
 }
 
@@ -36,63 +34,34 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
   onClose,
   agents,
   agentCount,
-  useForceUnenroll,
   hasFleetServer = false,
 }) => {
   const confirmModalTitleId = useGeneratedHtmlId();
+  const { docLinks } = useStartServices();
 
-  const { notifications } = useStartServices();
-  const [forceUnenroll, setForceUnenroll] = useState<boolean>(useForceUnenroll || false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const isSingleAgent = Array.isArray(agents) && agents.length === 1;
+  const { isSubmitting, isSingleAgent, onSubmit } = useUnenrollAgents({
+    agents,
+    agentCount,
+    revoke: false,
+    onClose,
+  });
 
-  async function onSubmit() {
-    try {
-      setIsSubmitting(true);
-      const { error } = isSingleAgent
-        ? await sendPostAgentUnenroll((agents[0] as Agent).id, {
-            revoke: forceUnenroll,
-          })
-        : await sendPostBulkAgentUnenroll({
-            agents: Array.isArray(agents) ? agents.map((agent) => agent.id) : agents,
-            revoke: forceUnenroll,
-            // includeInactive is only used when the agents are selected by query, it's ignored in the case of agent ids
-            includeInactive: true,
-          });
-      if (error) {
-        throw error;
-      }
-      setIsSubmitting(false);
-      if (forceUnenroll) {
-        const successMessage = isSingleAgent
-          ? i18n.translate('xpack.fleet.unenrollAgents.successForceSingleNotificationTitle', {
-              defaultMessage: 'Agent unenrolled',
-            })
-          : i18n.translate('xpack.fleet.unenrollAgents.successForceMultiNotificationTitle', {
-              defaultMessage: 'Agents unenrolled',
-            });
-        notifications.toasts.addSuccess(successMessage);
-      } else {
-        const successMessage = isSingleAgent
-          ? i18n.translate('xpack.fleet.unenrollAgents.successSingleNotificationTitle', {
-              defaultMessage: 'Unenrolling agent',
-            })
-          : i18n.translate('xpack.fleet.unenrollAgents.successMultiNotificationTitle', {
-              defaultMessage: 'Unenrolling agents',
-            });
-        notifications.toasts.addSuccess(successMessage);
-      }
-      onClose();
-    } catch (error) {
-      setIsSubmitting(false);
-      notifications.toasts.addError(error, {
-        title: i18n.translate('xpack.fleet.unenrollAgents.fatalErrorNotificationTitle', {
-          defaultMessage: 'Error unenrolling {count, plural, one {agent} other {agents}}',
-          values: { count: agentCount },
-        }),
-      });
-    }
-  }
+  // The bulk endpoint rejects agents that already have an unenroll pending, so report how many of
+  // the selection that is. Not computable when the selection is a KQL query rather than a list.
+  const pendingUnenrollCount = Array.isArray(agents)
+    ? agents.filter((agent) => hasPendingUnenroll(agent)).length
+    : 0;
+
+  // An offline agent will not act on the unenroll until it checks in again. The status is a
+  // snapshot from when the agents were loaded, so this only adapts the advice, never blocks.
+  const offlineCount = Array.isArray(agents) ? agents.filter(isAgentOffline).length : 0;
+  const isSingleAgentOffline = isSingleAgent && offlineCount === 1;
+
+  const learnMore = (
+    <EuiLink href={docLinks.links.fleet.unenrollElasticAgent} target="_blank" external>
+      <FormattedMessage id="xpack.fleet.unenrollAgents.learnMoreLink" defaultMessage="Learn more" />
+    </EuiLink>
+  );
 
   return (
     <EuiConfirmModal
@@ -170,33 +139,60 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
               Any data that was already sent by these agents will not be affected. This action cannot be undone."
           />
         )}
-      </p>
-      <EuiFormFieldset
-        legend={{
-          children: (
+        {!isSingleAgent && offlineCount > 0 ? (
+          <>
+            {' '}
             <FormattedMessage
-              id="xpack.fleet.unenrollAgents.forceUnenrollLegendText"
-              defaultMessage="Force unenroll {count, plural, one {agent} other {agents}}"
-              values={{ count: agentCount }}
+              id="xpack.fleet.unenrollAgents.offlineCountDescription"
+              defaultMessage="{count} of these agents {count, plural, one {appears} other {appear}} to be offline and will not unenroll until {count, plural, one {it checks} other {they check}} in."
+              values={{ count: offlineCount }}
             />
-          ),
-        }}
-      >
-        <EuiCheckbox
-          id="fleetForceUnenrollAgents"
-          label={
+          </>
+        ) : null}
+        {pendingUnenrollCount > 0 ? (
+          <>
+            {' '}
             <FormattedMessage
-              id="xpack.fleet.unenrollAgents.forceUnenrollCheckboxLabel"
-              defaultMessage="Remove {count, plural, one {agent} other {agents}} immediately.
-                  Do not wait for agent to send any last data."
-              values={{ count: agentCount }}
+              id="xpack.fleet.unenrollAgents.pendingUnenrollCountDescription"
+              defaultMessage="{count} of these agents {count, plural, one {already has} other {already have}} an unenroll pending and will not be affected."
+              values={{ count: pendingUnenrollCount }}
+            />
+          </>
+        ) : null}
+      </p>
+      {isSingleAgentOffline ? (
+        <KbnWarningCallout
+          title={i18n.translate('xpack.fleet.unenrollAgents.offlineAgentTitle', {
+            defaultMessage: 'This agent appears to be offline',
+          })}
+          text={
+            <FormattedMessage
+              id="xpack.fleet.unenrollAgents.offlineAgentText"
+              defaultMessage="Fleet waits for the agent to check in before unenrolling it. If the agent is stuck offline, use Force unenroll instead. {learnMore}"
+              values={{ learnMore }}
             />
           }
-          checked={forceUnenroll}
-          onChange={(e) => setForceUnenroll(e.target.checked)}
-          disabled={useForceUnenroll}
         />
-      </EuiFormFieldset>
+      ) : (
+        <KbnInfoCallout
+          title={
+            isSingleAgent
+              ? i18n.translate('xpack.fleet.unenrollAgents.forceUnenrollSignpostSingleTitle', {
+                  defaultMessage: 'The agent must acknowledge this request',
+                })
+              : i18n.translate('xpack.fleet.unenrollAgents.forceUnenrollSignpostMultipleTitle', {
+                  defaultMessage: 'Each agent must acknowledge this request',
+                })
+          }
+          text={
+            <FormattedMessage
+              id="xpack.fleet.unenrollAgents.forceUnenrollSignpostText"
+              defaultMessage="Fleet waits for {count, plural, one {the agent} other {each agent}} to check in before unenrolling it. If {count, plural, one {the agent is} other {any agents are}} stuck offline, use Force unenroll instead. {learnMore}"
+              values={{ count: agentCount, learnMore }}
+            />
+          }
+        />
+      )}
     </EuiConfirmModal>
   );
 };

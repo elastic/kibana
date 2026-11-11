@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy } from '../../../../types';
 import {
+  AgentForceUnenrollModal,
   AgentUnenrollAgentModal,
   AgentRemoveCollectorModal,
   AgentReassignAgentPolicyModal,
@@ -53,6 +54,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
     // Modal/flyout state
     const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState(assignFlyoutOpenByDefault);
     const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState(false);
+    const [isForceUnenrollModalOpen, setIsForceUnenrollModalOpen] = useState(false);
     const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
     const [isRequestDiagnosticsModalOpen, setIsRequestDiagnosticsModalOpen] = useState(false);
     const [isAgentDetailsJsonFlyoutOpen, setIsAgentDetailsJsonFlyoutOpen] = useState(false);
@@ -70,7 +72,6 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
     }, []);
 
     const hasFleetServer = agentPolicy && policyHasFleetServer(agentPolicy);
-    const isUnenrolling = agent.status === 'unenrolling';
 
     const onClose = useMemo(() => {
       if (onCancelReassign) {
@@ -93,6 +94,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
         onRequestDiagnosticsClick: () => setIsRequestDiagnosticsModalOpen(true),
         onChangeAgentPrivilegeLevelClick: () => setIsChangePrivilegeLevelFlyoutOpen(true),
         onUnenrollClick: () => setIsUnenrollModalOpen(true),
+        onForceUnenrollClick: () => setIsForceUnenrollModalOpen(true),
         onUninstallClick: () => setIsUninstallCommandFlyoutOpen(true),
         onRollbackClick: () => setIsRollbackModalOpen(true),
         onRestartClick: () => setIsRestartModalOpen(true),
@@ -124,7 +126,19 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
                 setIsUnenrollModalOpen(false);
                 refreshAgent();
               }}
-              useForceUnenroll={isUnenrolling}
+              hasFleetServer={hasFleetServer}
+            />
+          </EuiPortal>
+        )}
+        {isForceUnenrollModalOpen && (
+          <EuiPortal>
+            <AgentForceUnenrollModal
+              agents={[agent]}
+              agentCount={1}
+              onClose={() => {
+                setIsForceUnenrollModalOpen(false);
+                refreshAgent();
+              }}
               hasFleetServer={hasFleetServer}
             />
           </EuiPortal>

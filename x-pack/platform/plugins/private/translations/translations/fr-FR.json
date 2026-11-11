@@ -34266,8 +34266,6 @@
     "xpack.fleet.unenrollAgents.deleteSingleTitle": "Désenregistrer l'agent",
     "xpack.fleet.unenrollAgents.fatalErrorNotificationTitle": "Erreur lors du désenregistrement de {count, plural, one {agent} other {agents}}",
     "xpack.fleet.unenrollAgents.forceDeleteMultipleTitle": "Désenregistrer {count} agents",
-    "xpack.fleet.unenrollAgents.forceUnenrollCheckboxLabel": "Supprimer {count, plural, one {agent} other {agents}} immédiatement. N'attendez pas que l'agent envoie les dernières données.",
-    "xpack.fleet.unenrollAgents.forceUnenrollLegendText": "Forcer le désenregistrement de {count, plural, one {agent} other {agents}}",
     "xpack.fleet.unenrollAgents.successForceMultiNotificationTitle": "Agents désenregistrés",
     "xpack.fleet.unenrollAgents.successForceSingleNotificationTitle": "Agent désenregistré",
     "xpack.fleet.unenrollAgents.successMultiNotificationTitle": "Désenregistrement des agents",

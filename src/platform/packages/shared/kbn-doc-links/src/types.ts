@@ -627,6 +627,7 @@ export interface DocLinks {
     grantESAccessToStandaloneAgents: string;
     packageSignatures: string;
     upgradeElasticAgent: string;
+    unenrollElasticAgent: string;
     learnMoreBlog: string;
     apiKeysLearnMore: string;
     onPremRegistry: string;

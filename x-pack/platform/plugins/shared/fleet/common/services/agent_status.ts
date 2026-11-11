@@ -34,6 +34,23 @@ export function getPreviousAgentStatusForOfflineAgents(
   }
 }
 
+/**
+ * True when Fleet has sent an unenroll that the agent has not acknowledged yet.
+ *
+ * Prefer this over `agent.status === 'unenrolling'`: the status runtime field resolves `offline`,
+ * `inactive`, `updating` and `enrolling` ahead of `unenrolling`, so an agent that was sent an
+ * UNENROLL and then went dark — the case this is meant to catch — never reports `unenrolling`.
+ *
+ * Once #297992 lands this also needs `&& !agent.uninstall_pending`: a remote uninstall sends an
+ * UNENROLL as its first step and Fleet Server records the pending state without writing
+ * `unenrolled_at`, so both clauses below hold for an agent that did acknowledge the request.
+ */
+export function hasPendingUnenroll(agent: Agent): boolean {
+  const { unenrollment_started_at: unenrollmentStartedAt, unenrolled_at: unenrolledAt } = agent;
+
+  return Boolean(unenrollmentStartedAt && !unenrolledAt);
+}
+
 export function buildKueryForUnenrolledAgents(): string {
   return 'status:unenrolled';
 }

@@ -18,6 +18,7 @@ export const TableRowActions: React.FunctionComponent<{
   agentPolicy?: AgentPolicy;
   onReassignClick: () => void;
   onUnenrollClick: () => void;
+  onForceUnenrollClick: () => void;
   onGetUninstallCommandClick: () => void;
   onUpgradeClick: () => void;
   onAddRemoveTagsClick: (button: HTMLElement) => void;
@@ -34,6 +35,7 @@ export const TableRowActions: React.FunctionComponent<{
   agentPolicy,
   onReassignClick,
   onUnenrollClick,
+  onForceUnenrollClick,
   onGetUninstallCommandClick,
   onUpgradeClick,
   onAddRemoveTagsClick,
@@ -64,6 +66,7 @@ export const TableRowActions: React.FunctionComponent<{
       onRequestDiagnosticsClick,
       onChangeAgentPrivilegeLevelClick,
       onUnenrollClick,
+      onForceUnenrollClick,
       onUninstallClick: onGetUninstallCommandClick,
       onRollbackClick,
       onRestartClick,
@@ -81,6 +84,7 @@ export const TableRowActions: React.FunctionComponent<{
       onRequestDiagnosticsClick,
       onChangeAgentPrivilegeLevelClick,
       onUnenrollClick,
+      onForceUnenrollClick,
       onGetUninstallCommandClick,
       onRollbackClick,
       onRestartClick,

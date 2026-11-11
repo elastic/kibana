@@ -34435,8 +34435,6 @@
     "xpack.fleet.unenrollAgents.deleteSingleTitle": "Cancelar inscrição do agente",
     "xpack.fleet.unenrollAgents.fatalErrorNotificationTitle": "Erro ao cancelar a inscrição {count, plural, one {agent} other {agentes}}",
     "xpack.fleet.unenrollAgents.forceDeleteMultipleTitle": "Cancelar a inscrição de {count} agentes",
-    "xpack.fleet.unenrollAgents.forceUnenrollCheckboxLabel": "Remova {count, plural, one {agent} other {agentes}} imediatamente. Não aguarde o agente enviar os últimos dados.",
-    "xpack.fleet.unenrollAgents.forceUnenrollLegendText": "Forçar o cancelamento da inscrição de {count, plural, one {agent} other {agentes}}",
     "xpack.fleet.unenrollAgents.successForceMultiNotificationTitle": "Inscrição dos agentes cancelada",
     "xpack.fleet.unenrollAgents.successForceSingleNotificationTitle": "Inscrição do agente cancelada",
     "xpack.fleet.unenrollAgents.successMultiNotificationTitle": "Cancelando a inscrição dos agentes",
