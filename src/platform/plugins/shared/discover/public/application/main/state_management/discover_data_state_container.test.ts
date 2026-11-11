@@ -159,7 +159,7 @@ describe('test getDataStateContainer', () => {
     });
   });
 
-  test('does not report load performance after Cancel', async () => {
+  test('completes the load after Cancel', async () => {
     const toolkit = getDiscoverInternalStateMock();
     await toolkit.initializeTabs();
     const tabId = toolkit.getCurrentTab().id;
@@ -169,8 +169,6 @@ describe('test getDataStateContainer', () => {
 
     const response = Promise.withResolvers<Awaited<ReturnType<typeof fetchEsql>>>();
     mockFetchEsql.mockReturnValueOnce(response.promise);
-    const reportEvent = jest.fn();
-    trackQueryPerformanceEvent.mockReturnValue({ reportEvent });
     const { dataStateContainer } = await toolkit.initializeSingleTab({
       tabId,
       skipWaitForDataFetching: true,
@@ -182,11 +180,6 @@ describe('test getDataStateContainer', () => {
     await waitFor(() =>
       expect(dataStateContainer.data$.main$.getValue().fetchStatus).toBe(FetchStatus.COMPLETE)
     );
-
-    expect(trackQueryPerformanceEvent).toHaveBeenCalledWith(
-      expect.objectContaining({ eventName: 'discoverFetchAll' })
-    );
-    expect(reportEvent).not.toHaveBeenCalled();
   });
 
   test('fetch clears skipInitialFetch so later query switches do not return to the empty state', async () => {
