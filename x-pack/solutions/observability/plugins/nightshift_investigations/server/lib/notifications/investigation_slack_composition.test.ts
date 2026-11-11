@@ -206,6 +206,16 @@ describe('renderInvestigationSlackMessage', () => {
     expect(json).not.toContain('Less likely');
   });
 
+  it('keeps the affected entities when the impact text is long', () => {
+    const summary = `Checkout failed. ${'Orders were rejected after the deploy. '.repeat(60)}`;
+    const message = render({
+      investigation: completed({ impact: { summary, entities: [{ name: 'checkout' }] } }),
+    });
+
+    expect(detailsOf(message)).toContain('checkout');
+    expect(detailsOf(message)).toContain('Affected');
+  });
+
   it('caps the impact entities', () => {
     const entities = Array.from({ length: 8 }, (_, index) => ({ name: `svc-${index}` }));
     const json = JSON.stringify(

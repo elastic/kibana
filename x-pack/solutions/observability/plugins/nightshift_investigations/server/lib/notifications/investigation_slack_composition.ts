@@ -102,6 +102,8 @@ interface Finding {
   label: string;
   lead: string;
   detail: string;
+  /** Kept whole after the detail is cut, so a long detail cannot drop it. */
+  tail?: string;
 }
 
 const findingsOf = ({ summary, verdict, impact }: NotifiableInvestigation): Finding[] => {
@@ -115,7 +117,8 @@ const findingsOf = ({ summary, verdict, impact }: NotifiableInvestigation): Find
       ? {
           label: 'Impact',
           lead: impacted.lead,
-          detail: [impacted.rest, affected].filter(Boolean).join('\n\n'),
+          detail: impacted.rest,
+          tail: affected,
         }
       : affected
       ? { label: 'Impact', lead: affected, detail: '' }
@@ -199,9 +202,11 @@ const detailsSection = (
 ): ComponentsNode[] => {
   const groups: ComponentsNode[][] = [
     ...findings
-      .filter(({ detail }) => detail)
-      .map(({ label, detail }) => {
-        const text = truncateAtSentence(detail, MAX_DETAIL_LENGTH);
+      .filter(({ detail, tail }) => detail || tail)
+      .map(({ label, detail, tail }) => {
+        const text = [truncateAtSentence(detail, MAX_DETAIL_LENGTH), tail]
+          .filter(Boolean)
+          .join('\n\n');
         return [
           markdown(
             serializeMarkdown([
