@@ -41444,7 +41444,6 @@
     "xpack.maps.source.esGrid.highLabel": "élevé",
     "xpack.maps.source.esGrid.lowLabel": "bas",
     "xpack.maps.source.esGrid.metricsLabel": "Indicateurs",
-    "xpack.maps.source.esGrid.resolutionParamErrorMessage": "Paramètre de résolution de grille non reconnu : {resolution}",
     "xpack.maps.source.esGrid.superFineHelpText": "La haute résolution utilise des tuiles vectorielles.",
     "xpack.maps.source.esGrid.vectorTileModal.cancelBtnLabel": "Annuler",
     "xpack.maps.source.esGrid.vectorTileModal.confirmBtnLabel": "Accepter",

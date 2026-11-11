@@ -41515,7 +41515,6 @@
     "xpack.maps.source.esGrid.highLabel": "hoch",
     "xpack.maps.source.esGrid.lowLabel": "niedrig",
     "xpack.maps.source.esGrid.metricsLabel": "Metriken",
-    "xpack.maps.source.esGrid.resolutionParamErrorMessage": "Der Parameter für die Gitterauflösung wurde nicht erkannt: {resolution}",
     "xpack.maps.source.esGrid.superFineHelpText": "Hohe Auflösung verwendet Vektorkacheln.",
     "xpack.maps.source.esGrid.vectorTileModal.cancelBtnLabel": "Abbrechen",
     "xpack.maps.source.esGrid.vectorTileModal.confirmBtnLabel": "Akzeptieren",

@@ -41616,7 +41616,6 @@
     "xpack.maps.source.esGrid.highLabel": "高",
     "xpack.maps.source.esGrid.lowLabel": "低",
     "xpack.maps.source.esGrid.metricsLabel": "メトリック",
-    "xpack.maps.source.esGrid.resolutionParamErrorMessage": "グリッド解像度パラメーターが認識されません：{resolution}",
     "xpack.maps.source.esGrid.superFineHelpText": "高解像度はベクトルタイルを使用します。",
     "xpack.maps.source.esGrid.vectorTileModal.cancelBtnLabel": "キャンセル",
     "xpack.maps.source.esGrid.vectorTileModal.confirmBtnLabel": "承諾",

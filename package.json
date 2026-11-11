@@ -809,6 +809,7 @@
     "@kbn/gen-ai-streaming-response-example-plugin": "workspace:*",
     "@kbn/genai-common": "workspace:*",
     "@kbn/generate-csv": "workspace:*",
+    "@kbn/geo-precision": "workspace:*",
     "@kbn/global-redirect-app-links": "workspace:*",
     "@kbn/global-search-bar-plugin": "workspace:*",
     "@kbn/global-search-plugin": "workspace:*",
