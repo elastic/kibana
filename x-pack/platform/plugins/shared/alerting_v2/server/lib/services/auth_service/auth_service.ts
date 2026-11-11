@@ -63,6 +63,10 @@ export class AuthService implements AuthServiceContract {
    * privilege; resolves otherwise.
    */
   public async ensureAuthorized(requirement: AuthRequirement): Promise<void> {
+    if (!this.security.authz.mode.useRbacForRequest(this.request)) {
+      return;
+    }
+
     const action = this.security.authz.actions.api.actionFromRouteTag(getApiPrivilege(requirement));
 
     const { hasAllRequested } = await this.security.authz

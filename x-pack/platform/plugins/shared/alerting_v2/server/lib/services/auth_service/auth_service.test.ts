@@ -35,6 +35,8 @@ const createSecurity = (privilegesByRequest: Map<KibanaRequest, string[]>) => {
     .mocked(security.authz.actions.api.actionFromRouteTag)
     .mockImplementation((tag: string) => apiActions.actionFromRouteTag(tag));
 
+  jest.mocked(security.authz.mode.useRbacForRequest).mockReturnValue(true);
+
   security.authz.checkPrivilegesWithRequest.mockImplementation((req: KibanaRequest) => ({
     globally: jest.fn(),
     atSpace: jest.fn().mockImplementation((_sid: string, { kibana }: { kibana: string[] }) => {
@@ -162,6 +164,22 @@ describe('AuthService', () => {
       await expect(
         authService.ensureAuthorized({ feature: 'alerts', operation: 'write' })
       ).rejects.toThrow('Unauthorized to access "Alerts: All"');
+    });
+  });
+
+  describe('rbac disabled', () => {
+    it('authorizes without checking privileges when RBAC is not in use for the request', async () => {
+      const request = createRequestMock([]);
+      const testSecurity = createSecurity(new Map());
+      jest.mocked(testSecurity.authz.mode.useRbacForRequest).mockReturnValue(false);
+      const authService = new AuthService(request.request, spaceId, testSecurity);
+
+      await expect(
+        authService.ensureAuthorized({ feature: 'alerts', operation: 'write' })
+      ).resolves.toBeUndefined();
+
+      expect(testSecurity.authz.mode.useRbacForRequest).toHaveBeenCalledWith(request.request);
+      expect(testSecurity.authz.checkPrivilegesWithRequest).not.toHaveBeenCalled();
     });
   });
 
