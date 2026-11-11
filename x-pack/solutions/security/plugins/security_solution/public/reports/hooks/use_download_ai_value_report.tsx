@@ -9,20 +9,17 @@ import { i18n } from '@kbn/i18n';
 import { AI_VALUE_REPORT_LOCATOR } from '@kbn/deeplinks-analytics';
 import { SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE } from '@kbn/management-settings-ids';
 import { useMemo } from 'react';
+import type { AppMenuRunActionParams } from '@kbn/app-menu';
 import { useKibana } from '../../common/lib/kibana';
 import type { AIValueReportParams } from '../../../common/locators/ai_value_report/locator';
 import type { TimeRange } from '../../common/store/inputs/model';
 import { useAIValueExportContext } from '../providers/ai_value/export_provider';
 
 interface UseDownloadAIValueReportParams {
-  anchorElement: HTMLElement | null;
   timeRange: TimeRange;
 }
 
-export const useDownloadAIValueReport = ({
-  anchorElement,
-  timeRange,
-}: UseDownloadAIValueReportParams) => {
+export const useDownloadAIValueReport = ({ timeRange }: UseDownloadAIValueReportParams) => {
   const { share: shareService, serverless, uiSettings } = useKibana().services;
   const isServerless = !!serverless;
   const aiValueExportContext = useAIValueExportContext();
@@ -48,7 +45,6 @@ export const useDownloadAIValueReport = ({
     forwardedState !== undefined &&
     // exporting the report via the share service is only available in ESS
     !isServerless &&
-    anchorElement !== null &&
     shareService !== undefined;
 
   const toggleContextMenu = useMemo(() => {
@@ -56,7 +52,7 @@ export const useDownloadAIValueReport = ({
       return () => {};
     }
 
-    return () => {
+    return (params?: AppMenuRunActionParams) => {
       const reportTitle =
         uiSettings?.get<string>(SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE) ??
         i18n.translate('xpack.securitySolution.reports.aiValue.pdfReportJobTitle', {
@@ -64,7 +60,7 @@ export const useDownloadAIValueReport = ({
         });
       shareService.toggleShareContextMenu({
         isDirty: false,
-        anchorElement,
+        anchorElement: params?.triggerElement,
         allowShortUrl: false,
         asExport: true,
         objectType: 'ai_value_report',
@@ -89,7 +85,7 @@ export const useDownloadAIValueReport = ({
         },
       });
     };
-  }, [anchorElement, shareService, forwardedState, isExportEnabled, uiSettings]);
+  }, [shareService, forwardedState, isExportEnabled, uiSettings]);
 
   return {
     toggleContextMenu,

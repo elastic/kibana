@@ -488,7 +488,7 @@ export function useMiDeploy({
           if (plan.targets.length === 0 && !plan.hasPendingCleanup) {
             if (onboardingDeploymentId) {
               const soUpdated = await updateDeployment(onboardingDeploymentId, {
-                ...toSOSettingsUpdate(serviceSettings),
+                ...toSOSettingsUpdate(serviceSettings, 'managed_integration'),
                 services: selectedServiceIds,
                 serviceVars: toSOServiceVars(
                   serviceSettings?.serviceVars ?? {},
@@ -582,7 +582,7 @@ export function useMiDeploy({
               ([iid, pid]) => !cleanedInstanceIds.has(iid) && !deletedIds.has(pid)
             );
             soWriteSucceeded = await updateDeployment(onboardingDeploymentId, {
-              ...toSOSettingsUpdate(serviceSettings),
+              ...toSOSettingsUpdate(serviceSettings, 'managed_integration'),
               services: selectedServiceIds,
               packagePolicyIds: [...new Set(survivingEntries.map(([, pid]) => pid))],
               policyIdsByInstance: Object.fromEntries(survivingEntries),
@@ -735,7 +735,7 @@ export function useMiDeploy({
               Record<string, unknown>
             >,
             globalRegion,
-            ...toSOSettings(serviceSettings),
+            ...toSOSettings(serviceSettings, 'managed_integration'),
             dataFormat,
             authMethod: connectorId ? 'identity_federation' : 'static_keys',
           })) ?? undefined;
@@ -840,7 +840,7 @@ export function useMiDeploy({
           }).filter(([iid, pid]) => !cleanedInstanceIds.has(iid) && !deletedPolicyIds.has(pid))
         );
         soWriteSucceeded = await updateDeployment(currentOnboardingDeploymentId, {
-          ...toSOSettingsUpdate(serviceSettings),
+          ...toSOSettingsUpdate(serviceSettings, 'managed_integration'),
           services: selectedServiceIds,
           serviceVars: toSOServiceVars(
             serviceSettings?.serviceVars ?? {},

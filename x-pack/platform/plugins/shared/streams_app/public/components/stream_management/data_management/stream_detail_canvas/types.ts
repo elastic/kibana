@@ -17,6 +17,8 @@ import type {
   DestinationSignal,
   DestinationViewModel,
 } from '../../../streams_layout/destinations/types';
+import type { UnitRoutableLine } from '../../../../services/unit_connections';
+import type { SourceType } from '../../../streams_layout/sources/types';
 
 export const SOURCE_NODE_TYPE = 'source';
 export const DESTINATION_NODE_TYPE = 'destination';
@@ -26,6 +28,8 @@ export const ANIMATED_EDGE_TYPE = 'animated';
 
 export interface SourceNodeData extends Record<string, unknown> {
   sourceId?: string;
+  /** Decides whether the node shows stats. A node without it shows none. */
+  sourceType?: SourceType;
   unconfiguredNodeId?: string;
   configurationLabel?: string;
   title: string;
@@ -57,11 +61,15 @@ export interface RoutingNodeRule {
   connected: boolean;
   action?: 'copy' | 'move';
   signals?: DestinationSignal[];
+  /** Why the last save rejected the rule. */
+  diagnostics?: string[];
 }
 
 export interface RoutingNodeData extends Record<string, unknown> {
   pipelineId: string;
   rules: RoutingNodeRule[];
+  /** Why the last save rejected the routing, for every rule and the node itself. */
+  diagnostics?: string[];
 }
 
 export interface ProcessingNodeData extends Record<string, unknown> {
@@ -87,6 +95,8 @@ export interface UnitEdgeData extends Record<string, unknown> {
   reference?: UnitEdgeReference;
   /** The slot "Add processing" writes to; unset when the line leads to a read-only node. */
   processingTarget?: UnitEdgeProcessingTarget;
+  /** The line "Add routing" puts a routing node on; unset when the line cannot be routed. */
+  routingLine?: UnitRoutableLine;
 }
 
 export type SourceNode = Node<SourceNodeData, typeof SOURCE_NODE_TYPE>;

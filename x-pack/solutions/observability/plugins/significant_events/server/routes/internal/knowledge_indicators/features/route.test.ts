@@ -18,7 +18,7 @@ const bulkAcrossRoute = internalKIFeatureRoutes['POST /internal/streams/features
 const makeParams = <T>(params: unknown, kiClient: Record<string, jest.Mock>) =>
   ({
     params,
-    request: {},
+    request: { spaceId: 'default' },
     server: {},
     logger: loggingSystemMock.createLogger(),
     getScopedClients: jest.fn().mockResolvedValue({
