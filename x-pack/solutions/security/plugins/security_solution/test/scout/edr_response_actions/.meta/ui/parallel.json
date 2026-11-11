@@ -1,5 +1,5 @@
 {
-  "sha1": "c1b5f19c6f0e9cc378f73281f0e418a12aa373b2",
+  "sha1": "f2cd3000e408d48b77381cf4bfece5a6d939c094",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -114,6 +114,20 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/isolate_from_case.spec.ts",
         "line": 72,
         "column": 9
+      }
+    },
+    {
+      "id": "4591e4c8f142640-a15767c0aefd7c4",
+      "title": "Response console isolate from the endpoint list isolates the host and the endpoint list shows it as isolated",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/isolate_from_console.spec.ts",
+        "line": 57,
+        "column": 31
       }
     },
     {
