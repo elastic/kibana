@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RunHistory, type Run } from './run_history';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -47,11 +47,12 @@ describe('RunHistory skipped run summary', () => {
       </I18nProvider>
     );
 
-  it('hides status pills and the run total when run counts are unavailable', () => {
+  it('keeps the status filter clearable when run counts are unavailable', () => {
     render(
       <I18nProvider>
         <RunHistory
           runs={[skippedRun('daily_limit', 20)]}
+          initialFilter="succeeded"
           isLoading={false}
           startedAfter="2026-01-01T00:00:00.000Z"
           startedBefore="2026-01-02T00:00:00.000Z"
@@ -62,8 +63,9 @@ describe('RunHistory skipped run summary', () => {
       </I18nProvider>
     );
 
-    expect(screen.queryByText(/0 runs/)).not.toBeInTheDocument();
     expect(screen.queryByText(/ runs? ·/)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('automationRunFilter-succeeded'));
+    expect(screen.getByTestId('automationRunFilter-skipped')).toHaveTextContent('1');
   });
 
   it('explains a no_open_investigation skip instead of the daily limit', () => {

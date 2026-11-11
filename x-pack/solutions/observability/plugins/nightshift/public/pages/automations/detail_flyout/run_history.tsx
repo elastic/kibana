@@ -350,12 +350,10 @@ export const RunHistory = ({
   const endMs = Date.parse(startedBefore);
   const bucketMs = pickBucketMs(endMs - startMs);
   const visibleRuns = filter ? runs.filter(({ status }) => status === filter) : runs;
-  const counts = runCounts
-    ? STATUSES.map((status) => ({
-        status,
-        count: runCounts[status],
-      })).filter(({ count, status }) => count > 0 || status === filter)
-    : [];
+  const counts = STATUSES.map((status) => ({
+    status,
+    count: runCounts ? runCounts[status] : runs.filter((run) => run.status === status).length,
+  })).filter(({ count, status }) => count > 0 || status === filter);
   const baseline = toBuckets(runs, startMs, endMs, bucketMs);
   const buckets = toBuckets(visibleRuns, startMs, endMs, bucketMs);
   const peak = Math.max(
