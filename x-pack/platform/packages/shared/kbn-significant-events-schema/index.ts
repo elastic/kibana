@@ -126,6 +126,7 @@ export {
   severitySchema,
   SEVERITY_OPTIONS,
   SEVERITY_CONTRACT_RULE,
+  CONFIDENCE_CONTRACT_RULE,
   getSeverityLabel,
   detectionSchema,
   detectionSkipSchema,

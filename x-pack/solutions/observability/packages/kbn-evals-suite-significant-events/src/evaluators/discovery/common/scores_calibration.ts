@@ -7,6 +7,7 @@
 
 import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
 import {
+  CONFIDENCE_CONTRACT_RULE,
   DISCOVERY_SEVERITY_APPLICATION_RULE,
   SEVERITY_CONTRACT_RULE,
 } from '@kbn/significant-events-schema';
@@ -35,11 +36,11 @@ const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'critical_severity_requires_confirmed_impact',
-    text: `Apply the \`severity\` field contract in order — do not invent tier rules beyond it and its discovery application rule. Contract:\n\n${SEVERITY_CONTRACT_RULE.trim()}\n\n${DISCOVERY_SEVERITY_APPLICATION_RULE.trim()}\n\nGrade the direct signal evidence over a generic "degraded" phrase in the summary.`,
+    text: `Apply the \`severity\` field contract in order — do not invent tier rules beyond it and its discovery application rule. Contract:\n\n${SEVERITY_CONTRACT_RULE.trim()}\n\n${DISCOVERY_SEVERITY_APPLICATION_RULE.trim()}\n\nGrade the direct signal evidence over a generic "degraded" phrase in the summary. A tier needs the evidence these rules name: an error line is evidence of a failure mode, not of impact.`,
   },
   {
     id: 'weak_signals_low_severity',
-    text: 'Unconfirmed signals — no confirmed failure evidence — should not claim high criticality. Neither change-point shape nor raw alert volume is a severity signal: a low-volume but evidence-confirmed failure on a user-critical path can warrant high criticality, and a high-volume signal is not severe without confirmed impact. Do not lower criticality merely because a rule fired few times.',
+    text: 'Unconfirmed signals — no confirmed failure evidence — should not claim high criticality. Neither change-point shape nor raw alert volume is a severity signal: a high volume of log lines is not impact by itself. A rule that fired few times is not lowered for that alone, and a failure confirmed on a user-critical path is rated on its evidenced outcome and reach, not on how many detections fired.',
     score: 1,
   },
   {
@@ -49,7 +50,22 @@ const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'under_escalation_is_fail',
-    text: 'Under-escalation is a FAIL. When grounding confirms a non-benign failure or material degradation, assign the highest tier the `severity` field contract supports for that confirmed mechanism and blocked or degraded work. Do not assign `medium` or `low` solely because topology is sparse, the component is internal, narratives use cautious wording, or detection metadata looks weak — unless the known-ongoing cap explicitly applies, a contained-failure cue lowers the tier per the discovery application rule, or impact is genuinely bounded/unconfirmed per the schema. Grade `title`, `symptom_hypothesis`, and `summary` together: the tier must be evident in the narratives.',
+    text: 'Under-escalation is a FAIL. When the descriptions state a failed outcome for the operation together with a reach (a numerator and denominator at attempt, request or user level), a rate clearly above the operation’s own normal, or a dependent’s own operation stated failing because of a named dependency or component, assign the tier the severity rules support. Do not assign `medium` or `low` solely because topology is sparse, the component is internal, narratives use cautious wording, or detection metadata looks weak — unless a contained-failure cue lowers the tier per the discovery application rule. The `critical` conditions are met by their structural facts, without a share. Grade `title`, `symptom_hypothesis`, and `summary` together: the tier must be evident in the narratives.',
+    score: 2,
+  },
+  {
+    id: 'over_escalation_is_fail',
+    text: 'Over-escalation is a FAIL. An event rated `high` without a stated failed outcome, or without a reach, a rate clearly above the operation’s own normal, or a dependent’s own operation stated failing because of a named dependency or component, scores 0 on this criterion. An error line, a share or count of log lines, partial results without a request-level share, or an unresolved completion rates `medium`, and the assessment note names the missing outcome or reach.',
+    score: 2,
+  },
+  {
+    id: 'error_line_is_not_impact',
+    text: 'An error line is evidence of a failure mode, not of impact. A WARN partial-result line whose log-line share has stayed at about the same level for days (for example 10%, 12% and 11% of a service’s log lines on three consecutive days) is the operation’s normal and volume, not reach: it rates `medium`, with the missing request-level reach named in the assessment note.',
+    score: 2,
+  },
+  {
+    id: 'total_failure_stays_high',
+    text: 'A clear, repeated, total failure of a critical operation stays `high`, or `critical` when its critical conditions are met, without a quoted share: descriptions that state all or nearly all of the attempts checked failed (the reach is the attempts checked), repeatedly and over time, support the tier.',
     score: 2,
   },
 ];
@@ -57,7 +73,7 @@ const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
 const CONFIDENCE_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   {
     id: 'confidence_reflects_support',
-    text: 'Confidence is how credibly the signal descriptions support the hypothesis, not how strong or unusual the detection was. Timing, scope and mechanism that the descriptions leave not aligned or not established, and any contradiction or unresolved item, lower it: a confirmed, severe failure whose cause is not established carries lower confidence than an event whose timing, scope and mechanism are all established.',
+    text: `Confidence follows the confidence contract:\n\n${CONFIDENCE_CONTRACT_RULE.trim()}\n\nGrade whether the number fits the evidence the descriptions carry.`,
   },
   {
     id: 'confidence_basis_stated',
@@ -66,6 +82,21 @@ const CONFIDENCE_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   {
     id: 'detection_metadata_not_confidence',
     text: '`p_value`, `change_point_type`, and `recent_detection_count` are not inputs to confidence. A confirmed, well-supported finding is not given a low confidence because its `p_value` is weak, and a weakly supported one is not given a high confidence because its `p_value` is strong.',
+    score: 2,
+  },
+  {
+    id: 'severity_confidence_pairing',
+    text: 'A `high` or `critical` tier with low confidence is a warning sign: the symptom evidence is weak, or the tier rests on thin evidence. When the doubt is about the impact itself (reach, completion, strength) the event is rated at the lower tier instead, and a tier already lowered for a missing requirement does not also carry a low confidence for the same gap. A cause that is not established is not a reason for low confidence.',
+    score: 2,
+  },
+  {
+    id: 'kb_gap_not_a_penalty',
+    text: 'A missing knowledge-base edge, an empty `blast_radius` or a knowledge gap (a service or call target the rows name that no knowledge record covers) neither lowers the severity nor the confidence. The rows outrank the knowledge base; the note records the gap as unverified in sentence 2 and says "none found in the knowledge base", never "no dependency edges".',
+    score: 2,
+  },
+  {
+    id: 'hypothesis_explains_only_whats_supported',
+    text: 'The symptom hypothesis explains only as far as the evidence supports: it names no cause beyond a failing component or dependency the rows or a topology edge show, says at most in one clause that a cause is not established, and keeps longer unknowns and disclaimers in the assessment note.',
     score: 2,
   },
 ];

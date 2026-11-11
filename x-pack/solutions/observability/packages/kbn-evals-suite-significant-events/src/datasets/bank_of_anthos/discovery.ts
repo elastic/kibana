@@ -511,7 +511,7 @@ export const discovery: DatasetConfig['discovery'] = [
       criteria: [
         {
           id: 'weak-detection-strong-severity',
-          text: 'Sets severity=high because grounding confirms read-timeout errors fail account-balance lookups. Weak p_value and stationary change_point_type must not cap severity at medium or low.',
+          text: 'Sets severity=high because grounding states a failed outcome (read timeouts fail account-balance lookups) and users cannot view balances, which is a dependent’s own operation (the frontend’s balance lookup) stated failing because of balancereader. Weak p_value and stationary change_point_type must not cap severity at medium or low, and the assessment note names the evidence the tier rests on.',
           score: 3,
         },
         {

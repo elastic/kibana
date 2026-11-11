@@ -37,7 +37,7 @@ the batch holds. Read each entry as a whole, and use any other field it returns 
   `off_topic` may carry an observed error of its own, which is a separate candidate; `inconclusive`
   and `not_checked` establish nothing (`<eligibility>`).
 - `description`: what the rows state (their fields, values and correlations), its measured size and
-  reach (the failing share, the dimensions the failing rows carry, by their values, how many failure messages differ),
+  reach (the failing share, the dimensions the failing rows carry, by their values, the share of failing lines per message category),
   and how long it has lasted. Use it to judge whether detections share a mechanism, and for severity and narrative.
 - `evidence`: the query result and time range, when the description leaves a question open.
 - `knowledge_gaps`: services and call targets the sampled rows state that no KI covers, each with what the
@@ -189,6 +189,10 @@ Compare one current detection against one active event using that event's compac
      latest state. Whether it is accepted is governed only by the recovery checklist in
      `<eligibility>`; any other detection, including a breach, must still pass the remaining checks
      and the Rule Match rejection conditions.
+4. Either side is a broad detection: its `<grounding_evidence>` description shows failing rows
+   across three or more services or several distinct failure categories, and its matched query KI
+   names no service. It is its own event, as an observed-error `off_topic` detection is, and is
+   never paired or grouped, whatever it shares with another detection.
 
 **Impact check**
 - Use the affected operation when evaluating a match; different or uncertain effects do not reject a
@@ -421,7 +425,7 @@ groups and the flow continues to Step 4.
 
 1. Build the grouping graph before any ownership, titles, or narratives:
    - One node per such detection, after the `<incident_matching>` pre-check; a concrete off-topic
-     observed error is its own node.
+     observed error or a broad detection (pre-check 4) is its own node.
    - **Index first.** List each confirmed detection with the `features[].id` values of its matched
      query KI and the services named in its description. A `features[].id` counts only when the Step 1
      feature search returned it; any other id never does, so a rule that lists only those, or whose
@@ -483,12 +487,18 @@ finalized topology, and the onset timing from `<incident_matching>` Gather conte
      component the `blast_radius` shows other services depending on;
    - the mechanism the evidence supports, or "not established";
    - what the descriptions leave unresolved;
-   - credibility: whether timing (the onset and how long it has lasted), scope and mechanism each
-     align with what the descriptions state (aligned / not aligned / not established), and any
-     contradiction between descriptions.
+   - credibility: whether timing (the onset, how long it has lasted, and whether it is still
+     happening) and scope each align with what the descriptions state (aligned / not aligned / not
+     established), and any contradiction between descriptions;
+   - impact support: whether the descriptions state the outcome of the operation (stated / not
+     stated), the reach (at request, attempt or user level / log lines only / not measured), and
+     the strength (a rate against the operation's own normal, or how long it has lasted; stated /
+     not stated).
 
    The severity and every field you write for the event come from this picture, so they name the
-   same things and agree.
+   same things and agree. Never state an absence (no edge, no row, no service record) from a result
+   you did not read: read the whole result first. An empty `blast_radius` means
+   none found in the knowledge base, not none.
 2. **5 Whys.** Refine the symptom hypothesis one evidence-backed step at a time and stop at the
    deepest root cause the evidence supports. When several confirmed rows share one failing
    component that explains the failures seen downstream (for example, one backend error behind
@@ -527,37 +537,33 @@ For each event candidate, decide from all signals that will appear in the final 
      A cue that the system caught, handled, retried or absorbed the failure stays a containment cue
      until a description states the operation failing to complete; a count or share of log lines that
      match the failure signature measures volume and does not state that.
-   - Combine the signals with the topology. Treat signals that describe the same operation as one,
-     rated from the most direct failure measure. Read the finalized `causal_features` and
-     `blast_radius` for how far the failure spreads, and for each component the descriptions show
-     failing, check which services depend on it: a component others depend on that is confirmed
-     blocked is rated against the contract's `critical` clause, and the note names it.
-   - Then list each distinct core operation those descriptions show blocked. Several blocked at
-     once is `critical` under the contract, not `high`.
+   - Rate against the impact-support line of your picture, in the order the `severity` field
+     description gives. A tier needs its evidence: when it is missing, rate the lower tier and name
+     the missing outcome or reach in the note.
+   - Apply the rows-and-knowledge-base rule of the `severity` field description; record a service
+     the knowledge base does not cover as a knowledge gap in sentence 2 of the note.
    - Weigh each cue you listed against that contract.
    - A continuation that carries only `refutes` signals has nothing new to rate: set `severity` to
      the stored value read from the `full` view.
-4. Set `confidence` from the Step 4 picture, independent of the tier: how credibly the signal
-   descriptions support the hypothesis you wrote.
+4. Set `confidence` from the Step 4 picture and the tier you rated: how credibly the evidence
+   supports the symptom and that tier, the weaker of the two limiting it.
    - **No new `confirms` signal in the item.** Write the stored `confidence` and skip the rest of
      this item. This covers an unchanged continuation (`<chronic_and_recurring>` rule 2) and a
      recovery accepted under the checklist in `<eligibility>`: a recovery says the failure ended,
      not that the hypothesis lacked support.
-   - Otherwise (a new event, or an item with any new `confirms` signal), rate the signals you
-     hold: this cycle's, and for a continuation the stored confirming signals read from the `full`
-     view.
-   - Each of timing, scope and mechanism that is not aligned or not established, and every
-     contradiction or unresolved item in the picture, lowers it; all three aligned with nothing
-     contradicted or unresolved is as credible as an event gets. A confirmed, severe failure whose
-     cause is not established is a legitimate `high` severity, with lower `confidence` than the same
-     failure with an established mechanism.
-   - Write one line in your message naming what the confidence follows from, then set the value.
-
-   Two examples; the values show the reasoning, not targets:
-   - Descriptions confirm timeouts on the checkout path, state no failing share, and the cause is
-     "not established": `confidence: 0.4` (mechanism not established, share unmeasured).
-   - Descriptions agree on the onset, state the failing share and name the failing dependency, and
-     nothing contradicts them: `confidence: 0.8` (timing, scope and mechanism aligned).
+   - Otherwise (a new event, a reopen, which is a new episode rated like a new event, or an item
+     with any new `confirms` signal), rate the signals you hold: this cycle's, and for a
+     continuation the stored confirming signals read from the `full` view.
+   - Symptom support follows the credibility line. Only these lower it: a contradiction between
+     descriptions, timing that is not aligned or not still happening, a failing population the
+     descriptions do not establish. The cause is stated only as far as supported and is not a
+     deduction.
+   - Tier support follows the impact-support line: only evidence that is thin or contradictory for
+     the tier you rated lowers it. A requirement the tier already reflects (reach not measured, which
+     set `medium`) is not counted again.
+   - When neither part has a thin, contradicting or open element, the value is near the top of the
+     range; otherwise write one line in your message naming the part that limits it and what it
+     follows from, then set the value.
 
 ### Step 6: Emit output
 

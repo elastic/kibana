@@ -336,22 +336,34 @@ export const SEVERITY_OPTIONS = [
 
 /**
  * Severity field contract — single source of truth for schema `.describe()`, the discovery agent
- * and eval judges. It is the ladder the investigation agent applies. Order of `SEVERITY_OPTIONS`
- * is part of this contract (most-severe first).
+ * and eval judges. Discovery and `event_create` share it; the investigation agent rates severity
+ * with its own rubric. Order of `SEVERITY_OPTIONS` is part of this contract (most-severe first).
  */
 export const SEVERITY_CONTRACT_RULE = dedent`
     Severity rates the situation the grounding evidence confirms.
 
     Decide in order and stop at the first match:
     - "critical": a global outage affecting all or most customers; several distinct core operations confirmed blocked at once (for example balance, history, and payment together); a mandatory service, job, or platform-critical operation confirmed blocked end-to-end so the component can no longer perform its primary function — unless the block is confined to a single endpoint or lookup path affecting only that one operation, which stays at "high"; or confirmed active exposure of PII, PCI DSS data, SSNs, credentials, secrets, or tokens.
-    - "high": the affected operation fails or is blocked on the verified path, or is broadly degraded, intermittent, or partially failing for a significant subset. A single endpoint or lookup path stays here even when every caller hits it. An error signature on the operation's path with no signals showing the operation failing to complete is not enough: that is "medium".
-    - "medium": minor confirmed degradation with limited reach, signals say the operation is slow, or cannot say whether it is failing or completing. Not for a confirmed failing operation.
+    - "high": the affected operation fails or is blocked on the verified path, or is broadly degraded, intermittent, or partially failing for a significant subset. An error signature on the operation's path with no signals showing the operation failing to complete is not enough: that is "medium".
+    - "medium": minor confirmed degradation with limited reach, signals say the operation is slow, or cannot say whether it is failing or completing.
     - "low": confirmed recovery, or confirmed absence of impact: noise, a false alarm, or a non-issue, including an internal dependency error the system demonstrably tolerates.
 
-    Rate what the evidence shows, with the numbers measured: how much of the operation fails, how many parties are affected, and whether it is still happening. A signal's evidence that could not be collected (a query that timed out or returned nothing) is no evidence, not ambiguous evidence: it adds nothing to the rating and is never grounds for "medium". Weigh scope by what the operations do, not by how many detections fired. Signals on the same operation overlap: rate it from its most direct failure measure (the share of attempts that fail, otherwise the share of log lines), never by adding shares across signals or taking the highest of differently scoped ones.
+    Rate what the evidence shows, with the numbers measured: how much of the operation fails, how many parties are affected, and whether it is still happening. A signal's evidence that could not be collected (a query that timed out or returned nothing) is no evidence, not ambiguous evidence: it adds nothing to the rating and is never grounds for "medium". Weigh scope by what the operations do, not by how many detections fired. Signals on the same operation overlap: rate it from its most direct failure measure (the share of attempts that fail), never by adding shares across signals or taking the highest of differently scoped ones.
     A mandatory component is one that the event's blast_radius shows other services depending on; when it shows none, that clause does not apply.
 
-    Tie-break: when two adjacent tiers fit the same evidence, choose the lower only when it is genuinely unresolved whether the operation still completes.
+    Tie-break: when two adjacent tiers fit the same evidence, choose the lower when the evidence for the higher tier is missing or it is unresolved whether the operation still completes.
+  `;
+
+/**
+ * Confidence field contract: the single owner of what confidence means. The field description, the
+ * skill and the eval judge point to it.
+ */
+export const CONFIDENCE_CONTRACT_RULE = dedent`
+    Confidence is how credibly the evidence supports two things together: the symptom the event reports, and the tier rated. Judge the weaker of the two.
+    - Symptom support: the signals show the failure is real, current (still happening), consistent between signals and measured, as timing and scope show. Only a contradiction between signals, timing that is not aligned or not still happening, or a failing population the signals do not establish lowers it. The cause is stated in the hypothesis only as far as the evidence supports it, so a cause that is not established is not a deduction here.
+    - Tier support: how well the evidence backs the tier actually rated (a stated outcome, a measured reach, the strength of the signal). A missing requirement that already lowered the tier does not lower confidence a second time: confidence records only the doubt that remains about the tier rated.
+    When neither part has a thin, contradicting or open element, confidence is near the top of the range; each such element lowers it only as far as it leaves the claim open. The signal rows and the knowledge-base topology agreeing raises it. Nothing else about the knowledge base changes it: an empty blast_radius means unknown, not none.
+    An event written without signals is rated on the evidence its author holds. Confidence reflects the evidence held, never how strong or unusual the detection was.
   `;
 
 /** Canonical severity used by storage, APIs, and tools. */
@@ -430,14 +442,7 @@ export const significantEventBaseSchema = lazySchema(() =>
       ),
     // 4-level enum aligned with Elastic Incident Management;
     severity: severitySchema,
-    confidence: z
-      .number()
-      .min(0)
-      .max(1)
-      .describe(
-        'How credibly the evidence collected on the event supports symptom_hypothesis, 0.0–1.0 float: how well its signal descriptions agree on timing, scope and mechanism; every contradiction or unresolved item lowers it. ' +
-          'An event written without signals is rated on the evidence its author holds. It reflects the evidence held, never how strong or unusual the detection was.'
-      ),
+    confidence: z.number().min(0).max(1).describe(`0.0–1.0 float. ${CONFIDENCE_CONTRACT_RULE}`),
     source_ids: z
       .array(z.string().max(MAX_ID_LENGTH))
       .max(MAX_ARRAY_LENGTH)
