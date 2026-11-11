@@ -264,10 +264,12 @@ export function initializeLayoutManager(
       const incomingVariableName =
         type === ESQL_CONTROL ? getEsqlVariableName(serializedState) : undefined;
 
-      // Discover sends the pinned control's own id to update its selection. Update it in place
-      // so it isn't skipped or added to the grid as a second copy.
+      // Discover sends the pinned control's own id to update its selection. This happens on a fresh
+      // load, before the control mounts, so update the state it will read. Once it's on screen, skip
+      // it: it won't read the stored state, and its next change would overwrite it.
       if (
         !existingPanel &&
+        !children$.value[uuid] &&
         existingPinnedPanel?.type === ESQL_CONTROL &&
         incomingVariableName !== undefined &&
         getEsqlVariableName(currentChildState[uuid]) === incomingVariableName
@@ -276,7 +278,6 @@ export function initializeLayoutManager(
           ...(currentChildState[uuid] ?? {}),
           ...serializedState,
         };
-        anchorId ??= uuid;
         continue;
       }
 

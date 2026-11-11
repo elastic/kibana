@@ -401,6 +401,91 @@ describe('layout manager', () => {
       });
     });
 
+    test('should scroll to and highlight the new grid panel, not the pinned control it updates', () => {
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        [panel1],
+        [pinnedEsqlControl],
+        trackPanelMock
+      );
+
+      layoutManager.api.addIncomingEmbeddables([
+        {
+          embeddableId: 'pinnedEsqlControl',
+          type: ESQL_CONTROL,
+          serializedState: {
+            ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+            variable_name: 'geo_dest',
+            selected_options: ['CN'],
+          },
+        },
+        {
+          embeddableId: 'searchPanel',
+          type: 'search',
+          serializedState: { title: 'Session' },
+          size: { width: 1, height: 1 },
+        },
+      ]);
+
+      const layout = layoutManager.api.layout$.value;
+      expect(Object.keys(layout.panels)).toEqual([PANEL_ONE_ID, 'searchPanel']);
+      expect(layout.panels.pinnedEsqlControl).toBeUndefined();
+      expect(Object.keys(layout.pinnedPanels)).toEqual(['pinnedEsqlControl']);
+      expect(layoutManager.internalApi.getSerializedStateForPanel('pinnedEsqlControl')).toEqual({
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+        variable_name: 'geo_dest',
+        selected_options: ['CN'],
+      });
+      expect(trackPanelMock.setScrollToPanelId).toHaveBeenCalledWith('searchPanel');
+      expect(trackPanelMock.setHighlightPanelId).toHaveBeenCalledWith('searchPanel');
+    });
+
+    test('should leave a mounted pinned ES|QL control unchanged when its id is sent again', () => {
+      const existingState = {
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+        variable_name: 'geo_dest',
+        selected_options: ['US'],
+      };
+      const applySerializedState = jest.fn();
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        [panel1],
+        [pinnedEsqlControl],
+        trackPanelMock
+      );
+      layoutManager.api.registerChildApi({
+        ...panel1Api,
+        type: ESQL_CONTROL,
+        uuid: 'pinnedEsqlControl',
+        latestState$: of(existingState),
+        serializeState: () => existingState,
+        applySerializedState,
+      });
+
+      layoutManager.api.addIncomingEmbeddables([
+        {
+          embeddableId: 'pinnedEsqlControl',
+          type: ESQL_CONTROL,
+          serializedState: {
+            ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+            variable_name: 'geo_dest',
+            selected_options: ['CN'],
+          },
+        },
+      ]);
+
+      const layout = layoutManager.api.layout$.value;
+      expect(Object.keys(layout.panels)).toEqual([PANEL_ONE_ID]);
+      expect(layout.panels.pinnedEsqlControl).toBeUndefined();
+      expect(Object.keys(layout.pinnedPanels)).toEqual(['pinnedEsqlControl']);
+      expect(layoutManager.internalApi.getSerializedStateForPanel('pinnedEsqlControl')).toEqual(
+        existingState
+      );
+      expect(applySerializedState).not.toHaveBeenCalled();
+      expect(trackPanelMock.setScrollToPanelId).not.toHaveBeenCalled();
+      expect(trackPanelMock.setHighlightPanelId).not.toHaveBeenCalled();
+    });
+
     test('should add only the first control when an incoming batch has two controls with the same new variable_name', () => {
       const layoutManager = initializeLayoutManager(
         viewModeManagerMock,
