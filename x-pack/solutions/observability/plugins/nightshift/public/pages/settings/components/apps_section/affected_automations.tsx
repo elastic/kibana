@@ -32,35 +32,30 @@ interface ChannelRef {
 }
 
 /**
- * Automations that stop triggering once `removed` channels are gone: every channel of their Slack
- * trigger is removed and none is in `remaining`. `#name` is matched too, since older automations
- * store the channel name instead of its id. A trigger with no channel filter fires in every
- * connected channel, so it only counts with `includeUnscoped` (a workspace disconnect).
+ * Automations whose Slack triggers can fire before `removed` channels are disconnected but not
+ * after, when only `remaining` channels stay connected. A trigger row fires in a connected channel
+ * it names, or in any connected channel when it has no channel filter. `#name` is matched too,
+ * since older automations store the channel name instead of its id.
  */
 export const findAffectedAutomations = (
   automations: AutomationLike[],
   removed: ChannelRef[],
-  {
-    remaining = [],
-    includeUnscoped = false,
-  }: { remaining?: ChannelRef[]; includeUnscoped?: boolean } = {}
+  remaining: ChannelRef[]
 ): AffectedAutomations => {
   const accept = (channels: ChannelRef[]) =>
     new Set(
       channels.flatMap(({ id, displayName }) => (displayName ? [id, `#${displayName}`] : [id]))
     );
-  const gone = accept(removed);
-  const kept = accept(remaining);
-  const affected = automations.filter(({ trigger }) =>
-    trigger.rows.some(({ kind, channels: triggerChannels = [] }) => {
-      if (kind !== 'slack' || gone.size === 0) return false;
-      if (triggerChannels.length === 0) return includeUnscoped;
-      return (
-        triggerChannels.some((value) => gone.has(value)) &&
-        !triggerChannels.some((value) => kept.has(value))
-      );
-    })
-  );
+  const before = accept([...removed, ...remaining]);
+  const after = accept(remaining);
+  const fires = (rows: AutomationLike['trigger']['rows'], connected: Set<string>) =>
+    rows.some(({ channels = [] }) =>
+      channels.length === 0 ? connected.size > 0 : channels.some((value) => connected.has(value))
+    );
+  const affected = automations.filter(({ trigger }) => {
+    const slackRows = trigger.rows.filter(({ kind }) => kind === 'slack');
+    return fires(slackRows, before) && !fires(slackRows, after);
+  });
   return {
     count: affected.length,
     names: affected.slice(0, MAX_LISTED_AUTOMATIONS).map(({ name, isEnabled }) =>
@@ -77,19 +72,14 @@ export const findAffectedAutomations = (
 const AutomationsWarning = ({
   removed,
   remaining,
-  includeUnscoped,
 }: {
   removed: ChannelRef[];
-  remaining?: ChannelRef[];
-  includeUnscoped?: boolean;
+  remaining: ChannelRef[];
 }) => {
   const { data } = useFetchAutomations();
   if (!data) return null;
 
-  const { count, names } = findAffectedAutomations(data.automations, removed, {
-    remaining,
-    includeUnscoped,
-  });
+  const { count, names } = findAffectedAutomations(data.automations, removed, remaining);
   if (count === 0) return null;
 
   return (
@@ -125,17 +115,19 @@ const toChannelRefs = (bindings: SlackChannelBinding[]): ChannelRef[] =>
  * loading, on error, or when none are affected, so it never blocks the disconnect.
  */
 export const ChannelAffectedAutomationsWarning = ({ channel }: { channel: ChannelRef }) => {
-  const { bindings, isError, isComplete } = useAllRelayAppBindings();
-  // Without the full connected list, an automation on several channels can't be ruled out.
-  const remaining =
-    isError || !isComplete
-      ? undefined
-      : toChannelRefs(bindings).filter(({ id }) => id !== channel.id);
-  return <AutomationsWarning removed={[channel]} remaining={remaining} />;
+  const { bindings, isLoading, isError, isComplete } = useAllRelayAppBindings();
+  // Which automations lose every trigger depends on the channels that stay connected.
+  if (isLoading || isError || !isComplete) return null;
+  return (
+    <AutomationsWarning
+      removed={[channel]}
+      remaining={toChannelRefs(bindings).filter(({ id }) => id !== channel.id)}
+    />
+  );
 };
 
 /** Same warning for a workspace disconnect, which drops every currently connected channel. */
 export const WorkspaceAffectedAutomationsWarning = () => {
   const { bindings } = useAllRelayAppBindings();
-  return <AutomationsWarning removed={toChannelRefs(bindings)} includeUnscoped />;
+  return <AutomationsWarning removed={toChannelRefs(bindings)} remaining={[]} />;
 };
