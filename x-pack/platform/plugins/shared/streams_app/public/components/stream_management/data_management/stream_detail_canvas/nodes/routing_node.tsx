@@ -189,7 +189,12 @@ export function RoutingNode({ data, selected, dragging }: NodeProps<RoutingNodeT
               border-right: 2px solid ${euiTheme.border.color};
             `}
           >
-            <EuiFlexGroup alignItems="center" direction="column" gutterSize="s">
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="center"
+              direction="column"
+              gutterSize="s"
+            >
               <EuiFlexItem grow={false}>
                 <EuiIcon
                   type="branch"
