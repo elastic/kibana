@@ -25,7 +25,7 @@ export const getDreamingStatusStepDefinition = ({
     ...getDreamingStatusStepCommonDefinition,
     handler: async (context) => {
       const { spaceId } = context.contextManager.getContext().workflow;
-      const { ai_index_id: aiIndexId } = context.input;
+      const { ai_index_id: aiIndexId, source = 'memories' } = context.input;
       if (!(await checkReadPrivilege(context.contextManager.getFakeRequest(), spaceId))) {
         throw new ExecutionError({
           type: 'PermissionError',
@@ -46,6 +46,9 @@ export const getDreamingStatusStepDefinition = ({
         const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
         if (!shouldDream(aiIndex)) {
           return skip(`Dreaming is not turned on for AI index '${aiIndexId}'.`);
+        }
+        if (source === 'traces' && aiIndex.traces.length === 0) {
+          return skip(`AI index '${aiIndexId}' has no trace sources to dream on.`);
         }
       } catch (error) {
         if (error instanceof AiIndexNotFoundError) {
