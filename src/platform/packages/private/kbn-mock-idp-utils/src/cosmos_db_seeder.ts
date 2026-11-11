@@ -42,6 +42,8 @@ export interface TestUserData {
   applicationRoles: string[];
   /** Built-in UIAM organization roles, see `buildMockIdpUiamRoleAssignments`. */
   organizationRoleIds?: string[];
+  /** Built-in UIAM project roles, see `buildMockIdpUiamRoleAssignments`. */
+  projectRoles?: string[];
 }
 
 /**
@@ -112,6 +114,7 @@ function createUserDocument(userData: TestUserData): PersistableUser {
     projectType: userData.projectType,
     applicationRoles: userData.applicationRoles,
     organizationRoleIds: userData.organizationRoleIds,
+    projectRoles: userData.projectRoles,
   });
   return {
     id: userData.userId,

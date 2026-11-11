@@ -17,6 +17,11 @@ export interface LoginOptions {
    * or `organization-admin`. Only supported on local UIAM-enabled serverless projects.
    */
   uiamOrganizationRoles?: string[];
+  /**
+   * Built-in UIAM project roles the user holds on the project type Kibana runs as, named without
+   * the type prefix, such as `admin`. Only supported on local UIAM-enabled serverless projects.
+   */
+  uiamProjectRoles?: string[];
 }
 
 export type LoginFunction = (role: string, options?: LoginOptions) => Promise<void>;
@@ -96,6 +101,7 @@ export const browserAuthFixture = coreWorkerFixtures.extend<{ browserAuth: Brows
     const loginAs: LoginFunction = async (role, options) => {
       const cookie = await samlAuth.session.getInteractiveUserSessionCookieWithRoleScope(role, {
         uiamOrganizationRoles: options?.uiamOrganizationRoles,
+        uiamProjectRoles: options?.uiamProjectRoles,
       });
       await setSessionCookie(cookie);
     };

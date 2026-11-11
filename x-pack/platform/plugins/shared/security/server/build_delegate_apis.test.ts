@@ -519,7 +519,7 @@ describe('buildSecurityApi', () => {
           checks: [{ ...check, permitted: true }],
         });
 
-        await expect(api.authz.uiam!.hasBillingAccess(request)).resolves.toBe(true);
+        await expect(api.authz.uiam!.canViewBillingDetails(request)).resolves.toBe(true);
 
         expect(uiam.checkAuthorization).toHaveBeenCalledTimes(1);
         expect(uiam.checkAuthorization).toHaveBeenCalledWith(request, [check]);
@@ -529,27 +529,62 @@ describe('buildSecurityApi', () => {
         const request = httpServerMock.createKibanaRequest();
         uiam.checkAuthorization.mockResolvedValue({ permitted: false, checks: [] });
 
-        await expect(api.authz.uiam!.hasBillingAccess(request)).resolves.toBe(false);
+        await expect(api.authz.uiam!.canViewBillingDetails(request)).resolves.toBe(false);
       });
 
-      it('should omit the organization from the check when none is configured', async () => {
-        api = buildSecurityApi({
-          getAuthc: () => authc,
-          getSession: () => session,
-          getServiceAccounts: () => serviceAccounts,
-          getUiam: () => uiam,
-          audit: auditService,
-          config: { uiam: { enabled: true } },
-          logger,
-        });
+      it.each([
+        ['canInviteOrganizationMembers' as const, 'create', 'organization-invitation'],
+        ['canListOrganizationMembers' as const, 'list', 'organization-members'],
+      ])('%s should ask UIAM for %s on %s in the organization', async (method, action, type) => {
         const request = httpServerMock.createKibanaRequest();
+        const check = { action, resource: { type, organization_id: 'org-1' } };
+        uiam.checkAuthorization.mockResolvedValue({
+          permitted: true,
+          checks: [{ ...check, permitted: true }],
+        });
 
-        await api.authz.uiam!.hasBillingAccess(request);
+        await expect(api.authz.uiam![method](request)).resolves.toBe(true);
 
-        expect(uiam.checkAuthorization).toHaveBeenCalledWith(request, [
-          { action: 'get', resource: { type: 'billing-details' } },
-        ]);
+        expect(uiam.checkAuthorization).toHaveBeenCalledTimes(1);
+        expect(uiam.checkAuthorization).toHaveBeenCalledWith(request, [check]);
       });
+
+      it.each(['canInviteOrganizationMembers' as const, 'canListOrganizationMembers' as const])(
+        '%s should be false when UIAM denies the check',
+        async (method) => {
+          uiam.checkAuthorization.mockResolvedValue({ permitted: false, checks: [] });
+
+          await expect(api.authz.uiam![method](httpServerMock.createKibanaRequest())).resolves.toBe(
+            false
+          );
+        }
+      );
+
+      it.each([
+        'canViewBillingDetails' as const,
+        'canInviteOrganizationMembers' as const,
+        'canListOrganizationMembers' as const,
+      ])(
+        '%s should fail without calling UIAM when no organization is configured',
+        async (method) => {
+          api = buildSecurityApi({
+            getAuthc: () => authc,
+            getSession: () => session,
+            getServiceAccounts: () => serviceAccounts,
+            getUiam: () => uiam,
+            audit: auditService,
+            config: { uiam: { enabled: true } },
+            logger,
+          });
+
+          await expect(
+            api.authz.uiam![method](httpServerMock.createKibanaRequest())
+          ).rejects.toThrow(
+            'Cloud organization access cannot be checked because Kibana is not configured with a Cloud organization.'
+          );
+          expect(uiam.checkAuthorization).not.toHaveBeenCalled();
+        }
+      );
 
       it('should fail the billing access check until the UIAM service is available', async () => {
         api = buildSecurityApi({
@@ -566,7 +601,7 @@ describe('buildSecurityApi', () => {
         });
 
         await expect(
-          api.authz.uiam!.hasBillingAccess(httpServerMock.createKibanaRequest())
+          api.authz.uiam!.canViewBillingDetails(httpServerMock.createKibanaRequest())
         ).rejects.toThrow('UIAM service is not available.');
       });
 

@@ -51,6 +51,7 @@ export function buildMockIdpUiamRoleAssignments({
   projectType,
   applicationRoles,
   organizationRoleIds = [],
+  projectRoles = [],
 }: {
   organizationId: string;
   projectType: string;
@@ -61,6 +62,12 @@ export function buildMockIdpUiamRoleAssignments({
    * user's application roles still come from the project assignments.
    */
   organizationRoleIds?: string[];
+  /**
+   * Built-in UIAM project roles the user holds on every project of `projectType`, named without
+   * the project type prefix, such as `admin` for `elasticsearch-admin`. They grant project-level
+   * actions only: the user's application roles still come from `applicationRoles`.
+   */
+  projectRoles?: string[];
 }): {
   organization: MockIdpUiamOrganizationRoleAssignment[];
   project: MockIdpUiamProjectRoleAssignment[];
@@ -83,14 +90,21 @@ export function buildMockIdpUiamRoleAssignments({
     // One grant per project type, like an org admin with mixed projects. This lets the user
     // reach cross-project (CPS) linked projects of any type, not just the type of the Kibana
     // instance they logged in to.
-    project: [...new Set([projectType, ...MOCK_IDP_UIAM_PROJECT_TYPES])].map(
-      (grantedProjectType) => ({
+    project: [
+      ...[...new Set([projectType, ...MOCK_IDP_UIAM_PROJECT_TYPES])].map((grantedProjectType) => ({
         role_id: getMockIdpUiamProjectRoleId(grantedProjectType),
         organization_id: organizationId,
         project_type: grantedProjectType,
         application_roles: applicationRoles,
         project_scope: { scope: 'all' as const },
-      })
-    ),
+      })),
+      ...projectRoles.map((projectRole) => ({
+        role_id: `${projectType}-${projectRole}`,
+        organization_id: organizationId,
+        project_type: projectType,
+        application_roles: [],
+        project_scope: { scope: 'all' as const },
+      })),
+    ],
   };
 }

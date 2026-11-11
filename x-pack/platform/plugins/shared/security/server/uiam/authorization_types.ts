@@ -43,3 +43,15 @@ export const UIAM_BILLING_DETAILS_RESOURCE_TYPE = 'billing-details';
 
 /** The UIAM action that reads a resource. */
 export const UIAM_BILLING_DETAILS_READ_ACTION = 'get';
+
+/** The UIAM resource type of invitations into an organization. */
+export const UIAM_ORGANIZATION_INVITATION_RESOURCE_TYPE = 'organization-invitation';
+
+/** The UIAM action that creates a resource. */
+export const UIAM_ORGANIZATION_INVITATION_CREATE_ACTION = 'create';
+
+/** The UIAM resource type of an organization's membership list. */
+export const UIAM_ORGANIZATION_MEMBERS_RESOURCE_TYPE = 'organization-members';
+
+/** The UIAM action that lists a resource. */
+export const UIAM_ORGANIZATION_MEMBERS_LIST_ACTION = 'list';

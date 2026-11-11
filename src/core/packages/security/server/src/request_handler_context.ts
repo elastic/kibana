@@ -31,8 +31,12 @@ export interface AuthzRequestHandlerContext {
 }
 
 export interface UiamAuthzRequestHandlerContext {
-  /** See `CoreUiamAuthorizationService.hasBillingAccess`, bound to the context's request. */
-  hasBillingAccess(): Promise<boolean>;
+  /** See `CoreUiamAuthorizationService.canViewBillingDetails`, bound to the context's request. */
+  canViewBillingDetails(): Promise<boolean>;
+  /** See `CoreUiamAuthorizationService.canInviteOrganizationMembers`, bound to the context's request. */
+  canInviteOrganizationMembers(): Promise<boolean>;
+  /** See `CoreUiamAuthorizationService.canListOrganizationMembers`, bound to the context's request. */
+  canListOrganizationMembers(): Promise<boolean>;
 }
 
 export interface AuditRequestHandlerContext {

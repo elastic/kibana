@@ -60,7 +60,13 @@ export class CoreSecurityRouteHandlerContext implements SecurityRequestHandlerCo
       const uiam = this.securityStart.authz.uiam;
 
       this.#authz = {
-        uiam: uiam ? { hasBillingAccess: () => uiam.hasBillingAccess(this.request) } : null,
+        uiam: uiam
+          ? {
+              canViewBillingDetails: () => uiam.canViewBillingDetails(this.request),
+              canInviteOrganizationMembers: () => uiam.canInviteOrganizationMembers(this.request),
+              canListOrganizationMembers: () => uiam.canListOrganizationMembers(this.request),
+            }
+          : null,
       };
     }
     return this.#authz;

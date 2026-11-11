@@ -31,18 +31,18 @@ describe('CoreSecurityRouteHandlerContext', () => {
     expect(getPrincipal).toHaveBeenCalledWith(request);
   });
 
-  it('binds authz.uiam.hasBillingAccess to the context request', async () => {
+  it('binds authz.uiam.canViewBillingDetails to the context request', async () => {
     const request = httpServerMock.createKibanaRequest();
-    const hasBillingAccess = jest.fn().mockResolvedValue(true);
+    const canViewBillingDetails = jest.fn().mockResolvedValue(true);
     const securityStart = {
-      authz: { uiam: { hasBillingAccess } },
+      authz: { uiam: { canViewBillingDetails } },
     } as unknown as InternalSecurityServiceStart;
 
     const context = new CoreSecurityRouteHandlerContext(securityStart, request);
 
     const { authz } = context;
-    await expect(authz.uiam?.hasBillingAccess()).resolves.toBe(true);
-    expect(hasBillingAccess).toHaveBeenCalledWith(request);
+    await expect(authz.uiam?.canViewBillingDetails()).resolves.toBe(true);
+    expect(canViewBillingDetails).toHaveBeenCalledWith(request);
     expect(context.authz).toBe(authz);
   });
 

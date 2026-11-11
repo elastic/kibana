@@ -227,6 +227,60 @@ describe('SamlSessionManager', () => {
       );
     });
 
+    test(`should create a distinct UIAM user per project role combination`, async () => {
+      const samlSessionManager = new SamlSessionManager({
+        ...samlSessionManagerOptions,
+        serverless: { organizationId: 'org123', projectType: 'oblt', uiam: true },
+      });
+      await samlSessionManager.getApiCredentialsForRole(roleViewer, {
+        uiamProjectRoles: ['admin'],
+      });
+      await samlSessionManager.getApiCredentialsForRole(roleViewer, {
+        uiamOrganizationRoles: ['billing-admin'],
+        uiamProjectRoles: ['admin'],
+      });
+      await samlSessionManager.getApiCredentialsForRole(roleViewer, {
+        uiamProjectRoles: ['admin', 'admin'],
+      });
+
+      expect(createLocalSAMLSessionMock).toHaveBeenCalledTimes(2);
+      expect(createLocalSAMLSessionMock).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          email: 'elastic_viewer_project-admin@elastic.co',
+          serverless: {
+            organizationId: 'org123',
+            projectType: 'oblt',
+            uiamEnabled: true,
+            projectRoles: ['admin'],
+          },
+        })
+      );
+      expect(createLocalSAMLSessionMock).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          email: 'elastic_viewer_billing-admin_project-admin@elastic.co',
+          serverless: expect.objectContaining({
+            organizationRoleIds: ['billing-admin'],
+            projectRoles: ['admin'],
+          }),
+        })
+      );
+    });
+
+    test(`should reject UIAM project roles when UIAM is not enabled`, async () => {
+      const samlSessionManager = new SamlSessionManager({
+        ...samlSessionManagerOptions,
+        serverless: { organizationId: 'org123', projectType: 'oblt', uiam: false },
+      });
+      await expect(
+        samlSessionManager.getApiCredentialsForRole(roleViewer, { uiamProjectRoles: ['admin'] })
+      ).rejects.toThrow(
+        `UIAM project roles [admin] can only be granted to local UIAM-enabled serverless sessions.`
+      );
+      expect(createLocalSAMLSessionMock).not.toHaveBeenCalled();
+    });
+
     test(`'getUserData' should request the session of the UIAM user holding the organization roles`, async () => {
       const samlSessionManager = new SamlSessionManager({
         ...samlSessionManagerOptions,

@@ -17,74 +17,97 @@ import { expect } from '@kbn/scout/api';
 
 import { COMMON_HEADERS, COMMON_UNSAFE_HEADERS } from '../fixtures';
 
-// These tests cannot be run on MKI because the mock IdP is what grants UIAM organization roles.
-apiTest.describe('[NON-MKI] UIAM billing access through Core', { tag: tags.serverless.all }, () => {
-  const billingAccessWith = (apiClient: ApiClientFixture, credentials: Record<string, string>) =>
-    apiClient.get('test_endpoints/uiam/billing_access', {
+const NO_ACCESS = {
+  canViewBillingDetails: false,
+  canInviteOrganizationMembers: false,
+  canListOrganizationMembers: false,
+};
+
+const FULL_ACCESS = {
+  canViewBillingDetails: true,
+  canInviteOrganizationMembers: true,
+  canListOrganizationMembers: true,
+};
+
+// These tests cannot be run on MKI because the mock IdP is what grants UIAM roles.
+apiTest.describe('[NON-MKI] UIAM access checks through Core', { tag: tags.serverless.all }, () => {
+  const accessWith = (apiClient: ApiClientFixture, credentials: Record<string, string>) =>
+    apiClient.get('test_endpoints/uiam/access', {
       headers: { ...COMMON_HEADERS, ...credentials },
       responseType: 'json',
     });
 
-  const billingAccessAs = async (
+  const accessAs = async (
     apiClient: ApiClientFixture,
     samlAuth: SamlAuth,
     role: string,
-    uiamOrganizationRoles: string[]
+    uiamRoles: { uiamOrganizationRoles?: string[]; uiamProjectRoles?: string[] } = {}
   ) => {
-    const credentials = await samlAuth.session.getApiCredentialsForRole(role, {
-      uiamOrganizationRoles,
-    });
-    return billingAccessWith(apiClient, credentials);
+    const credentials = await samlAuth.session.getApiCredentialsForRole(role, uiamRoles);
+    return accessWith(apiClient, credentials);
   };
 
-  apiTest(
-    'denies billing access to a member without organization roles',
-    async ({ apiClient, samlAuth }) => {
-      const response = await billingAccessAs(apiClient, samlAuth, 'viewer', []);
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual({ hasBillingAccess: false });
-    }
-  );
-
-  apiTest(
-    'denies billing access to a project admin without organization roles',
-    async ({ apiClient, samlAuth }) => {
-      const response = await billingAccessAs(apiClient, samlAuth, 'admin', []);
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual({ hasBillingAccess: false });
-    }
-  );
-
-  apiTest(
-    'grants billing access to a billing admin regardless of project role',
-    async ({ apiClient, samlAuth }) => {
-      const response = await billingAccessAs(apiClient, samlAuth, 'viewer', ['billing-admin']);
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual({ hasBillingAccess: true });
-    }
-  );
-
-  apiTest('grants billing access to an organization admin', async ({ apiClient, samlAuth }) => {
-    const response = await billingAccessAs(apiClient, samlAuth, 'admin', ['organization-admin']);
+  apiTest('denies everything to a member without UIAM roles', async ({ apiClient, samlAuth }) => {
+    const response = await accessAs(apiClient, samlAuth, 'viewer');
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body).toStrictEqual({ hasBillingAccess: true });
+    expect(response.body).toStrictEqual(NO_ACCESS);
   });
 
-  apiTest('grants billing access to an organization admin UIAM API key', async ({ apiClient }) => {
-    const response = await billingAccessWith(apiClient, {
+  apiTest(
+    'denies everything to a Kibana admin without UIAM roles',
+    async ({ apiClient, samlAuth }) => {
+      const response = await accessAs(apiClient, samlAuth, 'admin');
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body).toStrictEqual(NO_ACCESS);
+    }
+  );
+
+  apiTest(
+    'grants only billing access to a billing admin regardless of project role',
+    async ({ apiClient, samlAuth }) => {
+      const response = await accessAs(apiClient, samlAuth, 'viewer', {
+        uiamOrganizationRoles: ['billing-admin'],
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body).toStrictEqual({ ...NO_ACCESS, canViewBillingDetails: true });
+    }
+  );
+
+  apiTest(
+    'lets a project viewer list organization members but not invite them',
+    async ({ apiClient, samlAuth }) => {
+      const response = await accessAs(apiClient, samlAuth, 'viewer', {
+        uiamProjectRoles: ['viewer'],
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body).toStrictEqual({ ...NO_ACCESS, canListOrganizationMembers: true });
+    }
+  );
+
+  apiTest('grants everything to an organization admin', async ({ apiClient, samlAuth }) => {
+    const response = await accessAs(apiClient, samlAuth, 'admin', {
+      uiamOrganizationRoles: ['organization-admin'],
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body).toStrictEqual(FULL_ACCESS);
+  });
+
+  apiTest('grants everything to an organization admin UIAM API key', async ({ apiClient }) => {
+    const response = await accessWith(apiClient, {
       Authorization: `ApiKey ${MOCK_IDP_UIAM_ORG_ADMIN_API_KEY}`,
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body).toStrictEqual({ hasBillingAccess: true });
+    expect(response.body).toStrictEqual(FULL_ACCESS);
   });
 
   apiTest(
-    'denies billing access to a UIAM API key granted by a plain member',
+    'denies everything to a UIAM API key granted by a plain member',
     async ({ apiClient, samlAuth }) => {
       // Granting with the member's own session gives the key that member's roles.
       const grantResponse = await apiClient.post('test_endpoints/uiam/api_keys/_grant', {
@@ -93,14 +116,14 @@ apiTest.describe('[NON-MKI] UIAM billing access through Core', { tag: tags.serve
           ...(await samlAuth.session.getApiCredentialsForRole('viewer')),
         },
         responseType: 'json',
-        body: { name: 'billing-access-plain-member' },
+        body: { name: 'access-plain-member' },
       });
       expect(grantResponse).toHaveStatusCode(200);
 
       // A key granted through Kibana is internal: on a real request it only authenticates
       // alongside Kibana's caller attestation, the way Kibana's own loopback callers send it.
       const credential = new HTTPAuthorizationHeader('ApiKey', grantResponse.body.api_key);
-      const response = await billingAccessWith(apiClient, {
+      const response = await accessWith(apiClient, {
         Authorization: credential.toString(),
         [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
           MOCK_IDP_UIAM_SHARED_SECRET,
@@ -109,7 +132,7 @@ apiTest.describe('[NON-MKI] UIAM billing access through Core', { tag: tags.serve
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual({ hasBillingAccess: false });
+      expect(response.body).toStrictEqual(NO_ACCESS);
     }
   );
 
@@ -117,7 +140,7 @@ apiTest.describe('[NON-MKI] UIAM billing access through Core', { tag: tags.serve
     'rejects a credential that did not come from UIAM',
     async ({ apiClient, config: { auth } }) => {
       const basic = Buffer.from(`${auth.username}:${auth.password}`).toString('base64');
-      const response = await billingAccessWith(apiClient, { Authorization: `Basic ${basic}` });
+      const response = await accessWith(apiClient, { Authorization: `Basic ${basic}` });
 
       expect(response).toHaveStatusCode(400);
       expect(response.body).toMatchObject({

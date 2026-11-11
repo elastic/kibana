@@ -10,7 +10,8 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 
 /**
- * Cloud privileges evaluated by UIAM for the principal behind a request.
+ * Cloud privileges evaluated by UIAM for the principal behind a request. Every check is scoped to
+ * the Cloud organization Kibana is configured with and fails when there is none.
  */
 export interface CoreUiamAuthorizationService {
   /**
@@ -19,5 +20,22 @@ export interface CoreUiamAuthorizationService {
    * The request must carry UIAM credentials; the call fails for any other credential.
    * @param request The request whose credentials the check is evaluated for.
    */
-  hasBillingAccess(request: KibanaRequest): Promise<boolean>;
+  canViewBillingDetails(request: KibanaRequest): Promise<boolean>;
+
+  /**
+   * Whether the user behind the request may invite members into the organization (UIAM
+   * `organization-invitation:create`, granted by `organization-admin`). The request must carry
+   * UIAM credentials; the call fails for any other credential.
+   * @param request The request whose credentials the check is evaluated for.
+   */
+  canInviteOrganizationMembers(request: KibanaRequest): Promise<boolean>;
+
+  /**
+   * Whether the user behind the request may list the organization's members (UIAM
+   * `organization-members:list`, granted by `organization-admin` and by every project role, but
+   * not by `billing-admin` or plain membership). The request must carry UIAM credentials; the
+   * call fails for any other credential.
+   * @param request The request whose credentials the check is evaluated for.
+   */
+  canListOrganizationMembers(request: KibanaRequest): Promise<boolean>;
 }

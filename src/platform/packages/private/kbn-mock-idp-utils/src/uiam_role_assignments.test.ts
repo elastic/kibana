@@ -16,6 +16,8 @@ const KNOWN_UIAM_ROLE_IDS = new Set([
   'organization-admin',
   'billing-admin',
   'elasticsearch-application-only',
+  'elasticsearch-viewer',
+  'observability-admin',
   'observability-application-only',
   'security-application-only',
   'vectordb-application-only',
@@ -80,12 +82,31 @@ describe('buildMockIdpUiamRoleAssignments', () => {
     );
   });
 
+  it('grants the requested project roles on the origin project type without application roles', () => {
+    const { project } = buildMockIdpUiamRoleAssignments({
+      organizationId,
+      projectType: 'security',
+      applicationRoles: ['viewer'],
+      projectRoles: ['admin'],
+    });
+
+    expect(project).toHaveLength(5);
+    expect(project[4]).toEqual({
+      role_id: 'security-admin',
+      organization_id: organizationId,
+      project_type: 'security',
+      application_roles: [],
+      project_scope: { scope: 'all' },
+    });
+  });
+
   it('only uses role IDs that UIAM defines', () => {
     const { organization, project } = buildMockIdpUiamRoleAssignments({
       organizationId,
       projectType: 'observability',
       applicationRoles: ['admin'],
       organizationRoleIds: ['organization-admin', 'billing-admin'],
+      projectRoles: ['admin'],
     });
 
     for (const { role_id: roleId } of [...organization, ...project]) {

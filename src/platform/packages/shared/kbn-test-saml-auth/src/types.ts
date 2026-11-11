@@ -30,6 +30,8 @@ export interface LocalSamlSessionParams {
     uiamEnabled: boolean;
     /** Built-in UIAM organization roles the user holds, such as `billing-admin`. */
     organizationRoleIds?: string[];
+    /** Built-in UIAM project roles the user holds, named without the type prefix, such as `admin`. */
+    projectRoles?: string[];
   };
   log: ToolingLog;
 }
@@ -94,4 +96,5 @@ export interface GetSessionByRole {
   forceNewSession: boolean;
   spaceId?: string;
   uiamOrganizationRoles?: string[];
+  uiamProjectRoles?: string[];
 }

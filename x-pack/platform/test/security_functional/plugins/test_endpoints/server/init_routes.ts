@@ -1073,28 +1073,35 @@ export function initRoutes(
     }
   );
 
-  // Asks Core's security contract whether the request's own credentials may see billing, so tests
+  // Asks Core's security contract what the request's own credentials may do in Cloud, so tests
   // can observe UIAM's decision for each kind of user.
   router.get(
     {
-      path: '/test_endpoints/uiam/billing_access',
+      path: '/test_endpoints/uiam/access',
       validate: false,
       security: {
-        authz: { enabled: false, reason: 'Test endpoint relaying a billing access check to UIAM' },
+        authz: { enabled: false, reason: 'Test endpoint relaying UIAM access checks' },
       },
     },
     async (context, request, response) => {
-      const [{ security: coreSecurity }] = await core.getStartServices();
-      if (!coreSecurity.authz.uiam) {
+      const { security } = await context.core;
+      const { uiam } = security.authz;
+      if (!uiam) {
         return response.badRequest({ body: { message: 'UIAM authorization is not available' } });
       }
 
       try {
+        const [canViewBillingDetails, canInviteOrganizationMembers, canListOrganizationMembers] =
+          await Promise.all([
+            uiam.canViewBillingDetails(),
+            uiam.canInviteOrganizationMembers(),
+            uiam.canListOrganizationMembers(),
+          ]);
         return response.ok({
-          body: { hasBillingAccess: await coreSecurity.authz.uiam.hasBillingAccess(request) },
+          body: { canViewBillingDetails, canInviteOrganizationMembers, canListOrganizationMembers },
         });
       } catch (err) {
-        logger.error(`Failed to check billing access with UIAM: ${err}`, err);
+        logger.error(`Failed to check access with UIAM: ${err}`, err);
         return response.customError({
           statusCode: Boom.isBoom(err) ? err.output.statusCode : 500,
           body: { message: err.message },

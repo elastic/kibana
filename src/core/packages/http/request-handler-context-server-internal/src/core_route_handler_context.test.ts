@@ -245,15 +245,15 @@ describe('#security', () => {
       expect(authz1).toBe(authz2);
     });
 
-    test('calls coreStart.security.authz.uiam.hasBillingAccess with the context request', async () => {
+    test('calls coreStart.security.authz.uiam.canViewBillingDetails with the context request', async () => {
       const request = httpServerMock.createKibanaRequest();
       const coreStart = createCoreRouteHandlerContextParamsMock();
       const context = new CoreRouteHandlerContext(coreStart, request);
 
-      coreStart.security.authz.uiam?.hasBillingAccess.mockResolvedValue(true);
+      coreStart.security.authz.uiam?.canViewBillingDetails.mockResolvedValue(true);
 
-      await expect(context.security.authz.uiam?.hasBillingAccess()).resolves.toBe(true);
-      expect(coreStart.security.authz.uiam?.hasBillingAccess).toHaveBeenCalledWith(request);
+      await expect(context.security.authz.uiam?.canViewBillingDetails()).resolves.toBe(true);
+      expect(coreStart.security.authz.uiam?.canViewBillingDetails).toHaveBeenCalledWith(request);
     });
   });
 });
