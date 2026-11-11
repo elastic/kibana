@@ -195,8 +195,11 @@ export function useVarGroupSelections({
     return sanitizedSavedSelections ? { ...derived, ...sanitizedSavedSelections } : derived;
   }, [sanitizedSavedSelections, deriveSelections]);
 
-  // Initialize on mount if not already set. The default selection applies the same
-  // policy effects as a user selection, so its vars are required from the start.
+  // Initialize on mount if not already set. The default selection must apply the
+  // same policy effects as a user selection: a required var_group makes the selected
+  // option's vars required, and the support flag var (e.g. supports_identity_federation)
+  // is only ever populated by those effects. Without them a fresh agentless policy
+  // fails validation until the user toggles the selector away and back.
   useEffect(() => {
     if (varGroups && varGroups.length > 0 && !savedSelections) {
       const derived = deriveSelections();
