@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DismissReason, Proposal } from '@kbn/proposals-common';
+import type { DismissReason, Proposal, ProposalOrigin } from '@kbn/proposals-common';
 
 /** Where in the UI a proposed action was decided. */
 export type ProposalDecisionSurface = 'chat' | 'flyout' | 'hypothesis_tree';
@@ -20,6 +20,8 @@ export interface ProposalDecidedEvent {
   /** Only set where the surface knows the investigation, which the chat card and flyout do not. */
   investigationId?: string;
   conversationId?: string;
+  /** Which product created the proposal, so a consumer can ignore the others' decisions. */
+  origin?: ProposalOrigin;
   dismissReason?: DismissReason;
   category?: Proposal['category'];
   confidence?: Proposal['confidence'];

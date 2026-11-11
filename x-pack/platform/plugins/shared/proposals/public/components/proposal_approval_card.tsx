@@ -118,6 +118,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
         proposalId,
         surface: 'chat',
         conversationId: liveProposal?.conversationId,
+        origin: liveProposal?.origin,
         category: liveProposal?.category,
         confidence: liveProposal?.confidence,
         impact: liveProposal?.impact,

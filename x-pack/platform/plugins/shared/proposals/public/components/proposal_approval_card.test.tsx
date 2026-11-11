@@ -20,6 +20,11 @@ import {
 } from '../hooks/use_proposals_api';
 import { useCurrentUserProfile } from '../hooks/use_current_user_profile';
 import type { ProposalWithMetadata } from '@kbn/proposals-common';
+import {
+  addProposalDecidedListener,
+  type ProposalDecidedListener,
+} from '../proposal_decision_listeners';
+import { useReopenProposal } from '../hooks/use_proposals_api';
 
 // ── Mock heavy external deps ──────────────────────────────────────────────────
 
@@ -52,6 +57,7 @@ jest.mock('@kbn/ui-callout', () => ({
  *  (e.g. to assert what its promise rejects with) without going through a simulated click. */
 let latestOnApprove: (() => void | Promise<void>) | undefined;
 let latestOnDismiss: ((params: DeclineParams) => Promise<void>) | undefined;
+let latestOnReopen: (() => Promise<void>) | undefined;
 
 jest.mock('@kbn/proposals-ui', () => {
   const actual = jest.requireActual('@kbn/proposals-ui');
@@ -69,6 +75,7 @@ jest.mock('@kbn/proposals-ui', () => {
       secondaryActions,
       readOnly,
       onDismiss,
+      onReopen,
       isSubmitting,
       currentActorName,
       'data-test-subj': dataTestSubj,
@@ -78,6 +85,7 @@ jest.mock('@kbn/proposals-ui', () => {
       secondaryActions?: ApprovalAction[];
       readOnly?: boolean;
       onDismiss?: (params: DeclineParams) => Promise<void>;
+      onReopen?: () => Promise<void>;
       isSubmitting?: 'applying' | 'declining';
       currentActorName?: string;
       'data-test-subj'?: string;
@@ -86,6 +94,7 @@ jest.mock('@kbn/proposals-ui', () => {
       const isReplaced = proposal.supersededBy !== undefined || proposal.status === 'superseded';
       latestOnApprove = onApprove;
       latestOnDismiss = onDismiss;
+      latestOnReopen = onReopen;
       const decision = isReplaced ? undefined : actual.getProposalDecision(proposal);
       const isExpired = actual.isProposalExpired(proposal);
       return (
@@ -258,6 +267,7 @@ describe('ProposalApprovalCard', () => {
     jest.clearAllMocks();
     latestOnApprove = undefined;
     latestOnDismiss = undefined;
+    latestOnReopen = undefined;
     useKibanaMock.mockReturnValue(capabilitiesFor(true));
   });
 
@@ -686,6 +696,95 @@ describe('ProposalApprovalCard', () => {
       await expect(latestOnDismiss!({ dismissReason: 'no_reason' })).rejects.toThrow(
         'Network failure'
       );
+    });
+  });
+
+  describe('decision notifications', () => {
+    const listener: jest.MockedFunction<ProposalDecidedListener> = jest.fn();
+    let unsubscribe: () => void;
+    const useReopenProposalMock = useReopenProposal as jest.MockedFunction<
+      typeof useReopenProposal
+    >;
+
+    beforeEach(() => {
+      listener.mockClear();
+      unsubscribe = addProposalDecidedListener(listener);
+    });
+    afterEach(() => unsubscribe());
+
+    it('reports an accepted approve with the proposal it belongs to', async () => {
+      setupMocks(baseProposal({ origin: 'nightshift', category: 'Response action' }));
+      useApproveProposalMock.mockReturnValue({
+        ...noopMutation,
+        mutateAsync: jest.fn().mockResolvedValue({}),
+      } as unknown as ReturnType<typeof useApproveProposal>);
+      render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+
+      await latestOnApprove!();
+
+      expect(listener).toHaveBeenCalledTimes(1);
+      expect(listener).toHaveBeenCalledWith({
+        proposalId: PROPOSAL_ID,
+        decision: 'approve',
+        surface: 'chat',
+        conversationId: 'conv-1',
+        origin: 'nightshift',
+        category: 'Response action',
+        confidence: 'medium',
+        impact: 'low',
+      });
+    });
+
+    it('reports an accepted decline with its reason and never its rationale', async () => {
+      setupMocks(baseProposal({ origin: 'nightshift' }));
+      useDismissProposalMock.mockReturnValue({
+        ...noopMutation,
+        mutateAsync: jest.fn().mockResolvedValue({}),
+      } as unknown as ReturnType<typeof useDismissProposal>);
+      render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+
+      await latestOnDismiss!({ dismissReason: 'duplicate', rationale: 'customer secret text' });
+
+      expect(listener).toHaveBeenCalledTimes(1);
+      expect(listener).toHaveBeenCalledWith(
+        expect.objectContaining({ decision: 'decline', dismissReason: 'duplicate' })
+      );
+      expect(JSON.stringify(listener.mock.calls)).not.toContain('customer secret text');
+    });
+
+    it('reports an accepted reopen', async () => {
+      setupMocks(baseProposal({ origin: 'nightshift' }));
+      useReopenProposalMock.mockReturnValue({
+        mutateAsync: jest.fn().mockResolvedValue({}),
+      } as unknown as ReturnType<typeof useReopenProposal>);
+      render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+
+      await latestOnReopen!();
+
+      expect(listener).toHaveBeenCalledWith(expect.objectContaining({ decision: 'reopen' }));
+    });
+
+    it('reports nothing when the server rejects the decision', async () => {
+      setupMocks();
+      const mutateAsync = jest.fn().mockRejectedValue(new Error('Network failure'));
+      useApproveProposalMock.mockReturnValue({
+        ...noopMutation,
+        mutateAsync,
+      } as unknown as ReturnType<typeof useApproveProposal>);
+      useDismissProposalMock.mockReturnValue({
+        ...noopMutation,
+        mutateAsync,
+      } as unknown as ReturnType<typeof useDismissProposal>);
+      useReopenProposalMock.mockReturnValue({ mutateAsync } as unknown as ReturnType<
+        typeof useReopenProposal
+      >);
+      render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+
+      await expect(latestOnApprove!()).rejects.toThrow();
+      await expect(latestOnDismiss!({ dismissReason: 'no_reason' })).rejects.toThrow();
+      await expect(latestOnReopen!()).rejects.toThrow();
+
+      expect(listener).not.toHaveBeenCalled();
     });
   });
 });

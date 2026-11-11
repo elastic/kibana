@@ -74,7 +74,6 @@ interface ProposalDecidedProps {
   investigation_id?: string;
   conversation_id?: string;
   dismiss_reason?: string;
-  category?: string;
   confidence?: string;
   impact?: string;
 }
@@ -185,10 +184,6 @@ export const registerNightshiftEbtEvents = (analytics: AnalyticsServiceSetup): v
         type: 'keyword',
         _meta: { description: 'Reason picked when declining.', optional: true },
       },
-      category: {
-        type: 'keyword',
-        _meta: { description: 'Category the action declared.', optional: true },
-      },
       confidence: {
         type: 'keyword',
         _meta: { description: 'Confidence the agent gave the action.', optional: true },
@@ -262,11 +257,14 @@ export const reportNightshiftInvestigationsSearched = (
   );
 };
 
-/** Reports an accepted decision on a proposed action. Rationale text is never reported. */
+/** Reports an accepted decision on a proposed action. Only Nightshift's own proposals are reported; rationale text and the free-form category never are. */
 export const reportNightshiftProposalDecided = (
   analytics: AnalyticsServiceStart,
   event: ProposalDecidedEvent
 ): void => {
+  // The proposals registry is global, so decisions on AlertZero and Agent Builder proposals arrive
+  // here too; only Nightshift's own are Nightshift's to count.
+  if (event.origin !== 'nightshift') return;
   analytics.reportEvent<ProposalDecidedProps>(NIGHTSHIFT_EBT_EVENTS.PROPOSAL_DECIDED, {
     proposal_id: event.proposalId,
     decision: event.decision,
@@ -274,7 +272,6 @@ export const reportNightshiftProposalDecided = (
     investigation_id: event.investigationId,
     conversation_id: event.conversationId,
     dismiss_reason: event.dismissReason,
-    category: event.category,
     confidence: event.confidence,
     impact: event.impact,
   });

@@ -32,7 +32,14 @@ import { useCurrentUserProfile } from '../../../user_profiles';
 /** The part of the proposal that shows whether its decision is visible in this row's data. */
 type ProposalDecisionData = Pick<
   Proposal,
-  'decision' | 'status' | 'supersededBy' | 'conversationId' | 'category' | 'confidence' | 'impact'
+  | 'decision'
+  | 'status'
+  | 'supersededBy'
+  | 'conversationId'
+  | 'origin'
+  | 'category'
+  | 'confidence'
+  | 'impact'
 >;
 
 export interface ProposalDecisionContext {
@@ -81,6 +88,7 @@ export const useProposalDecision = (
         surface,
         investigationId,
         conversationId: proposal?.conversationId,
+        origin: proposal?.origin,
         category: proposal?.category,
         confidence: proposal?.confidence,
         impact: proposal?.impact,
