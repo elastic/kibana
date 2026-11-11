@@ -7,18 +7,9 @@
 
 import { Simulator } from '../../test_utilities/simulator';
 import { createMemoryHistory } from 'history';
-import React from 'react';
-import type { ReactNode } from 'react';
 import { noAncestorsTwoChildren } from '../../data_access_layer/mocks/no_ancestors_two_children';
 import { nudgeAnimationDuration } from '../../store/camera/scaling_constants';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { mockFlyoutApi } from '../../../flyout/document_details/shared/mocks/mock_flyout_context';
 import '../../test_utilities/extend_jest';
-
-jest.mock('@kbn/expandable-flyout', () => ({
-  ExpandableFlyoutProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
-  useExpandableFlyoutApi: jest.fn(),
-}));
 
 describe('graph controls: when relsover is loaded with an origin node', () => {
   let simulator: Simulator;
@@ -37,7 +28,6 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     const {
       metadata: { databaseDocumentID, entityIDs },
       dataAccessLayer,
@@ -100,10 +90,10 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
     ).toYieldEqualTo({ showPanelButton: 1 });
   });
 
-  it('should open the analyzer details panel using system flyout by default', async () => {
+  it('should open the analyzer details panel in a system flyout', async () => {
     (await simulator.resolve('resolver:graph-controls:show-panel-button'))?.simulate('click');
 
-    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledTimes(0);
+    expect(simulator.coreStart.overlays.openSystemFlyout).toHaveBeenCalledTimes(1);
   });
 
   describe('when the user clicks the west panning button', () => {

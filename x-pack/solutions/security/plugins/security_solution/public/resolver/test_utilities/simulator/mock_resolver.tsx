@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 import { Router } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Provider } from 'react-redux-v7';
@@ -100,27 +99,25 @@ export const MockResolver = React.memo((props: MockResolverProps) => {
       <I18nProvider>
         <Router history={props.history}>
           <KibanaContextProvider services={props.coreStart}>
-            <ExpandableFlyoutProvider>
-              <SideEffectContext.Provider value={props.sideEffectSimulator.mock}>
-                <Provider store={props.store}>
-                  <>
-                    <ResolverWithoutProviders
-                      ref={resolverRef}
-                      databaseDocumentID={props.databaseDocumentID}
-                      resolverComponentInstanceID={props.resolverComponentInstanceID}
-                      indices={props.indices}
-                      shouldUpdate={props.shouldUpdate}
-                      filters={props.filters}
-                      renderCellActions={props.renderCellActions}
-                    />
-                    <DetailsPanel
-                      renderCellActions={props.renderCellActions}
-                      resolverComponentInstanceID={props.resolverComponentInstanceID}
-                    />
-                  </>
-                </Provider>
-              </SideEffectContext.Provider>
-            </ExpandableFlyoutProvider>
+            <SideEffectContext.Provider value={props.sideEffectSimulator.mock}>
+              <Provider store={props.store}>
+                <>
+                  <ResolverWithoutProviders
+                    ref={resolverRef}
+                    databaseDocumentID={props.databaseDocumentID}
+                    resolverComponentInstanceID={props.resolverComponentInstanceID}
+                    indices={props.indices}
+                    shouldUpdate={props.shouldUpdate}
+                    filters={props.filters}
+                    renderCellActions={props.renderCellActions}
+                  />
+                  <DetailsPanel
+                    renderCellActions={props.renderCellActions}
+                    resolverComponentInstanceID={props.resolverComponentInstanceID}
+                  />
+                </>
+              </Provider>
+            </SideEffectContext.Provider>
           </KibanaContextProvider>
         </Router>
       </I18nProvider>
