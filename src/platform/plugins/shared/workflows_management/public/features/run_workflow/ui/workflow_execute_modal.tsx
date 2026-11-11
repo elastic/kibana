@@ -134,8 +134,39 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       [hasAlertRacAccess, canReadWorkflowExecution, eventDrivenExecutionEnabled]
     );
 
-    const [selectedTrigger, setSelectedTrigger] = useState<WorkflowTriggerTab>(() =>
-      resolveInitialSelectedTrigger(
+    const hasStepMocks = useMemo(() => {
+      if (!definition?.steps) {
+        return false;
+      }
+      let found = false;
+      walkStepTree(definition.steps as unknown as Parameters<typeof walkStepTree>[0], (step) => {
+        if ((step as { mock?: unknown }).mock != null) {
+          found = true;
+        }
+      });
+      return found;
+    }, [definition]);
+
+    const isAutoRunEligible = useMemo(() => {
+      if (!definition || hasCustomEventTrigger(definition)) {
+        return false;
+      }
+      const hasAlertTrigger = definition.triggers?.some((trigger) => trigger.type === 'alert');
+      return !hasAlertTrigger && !hasWorkflowInputFields(normalizedInputs);
+    }, [definition, normalizedInputs]);
+
+    const shouldAutoRun = isAutoRunEligible && !(isTestRun && (hasBreakpoints || hasStepMocks));
+
+    const [selectedTrigger, setSelectedTrigger] = useState<WorkflowTriggerTab>(() => {
+      if (
+        !initialExecutionId &&
+        isAutoRunEligible &&
+        isTestRun &&
+        (hasBreakpoints || hasStepMocks)
+      ) {
+        return 'manual';
+      }
+      return resolveInitialSelectedTrigger(
         definition,
         initialExecutionId,
         hasAlertRacAccess,
@@ -143,8 +174,8 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         normalizedInputs,
         eventDrivenExecutionEnabled,
         { includeHistorical: includeHistoricalTrigger }
-      )
-    );
+      );
+    });
 
     const [executionInput, setExecutionInput] = useState<string>('');
     const [executionInputErrors, setExecutionInputErrors] = useState<string | null>(null);
@@ -294,33 +325,6 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       },
       [triggerTabAvailability, selectedTrigger]
     );
-
-    const hasStepMocks = useMemo(() => {
-      if (!definition?.steps) {
-        return false;
-      }
-      let found = false;
-      walkStepTree(definition.steps as unknown as Parameters<typeof walkStepTree>[0], (step) => {
-        if ((step as { mock?: unknown }).mock != null) {
-          found = true;
-        }
-      });
-      return found;
-    }, [definition]);
-
-    const shouldAutoRun = useMemo(() => {
-      if (!definition) {
-        return false;
-      }
-      if (isTestRun && (hasBreakpoints || hasStepMocks)) {
-        return false;
-      }
-      if (hasCustomEventTrigger(definition)) {
-        return false;
-      }
-      const hasAlertTrigger = definition.triggers?.some((trigger) => trigger.type === 'alert');
-      return !hasAlertTrigger && !hasWorkflowInputFields(normalizedInputs);
-    }, [definition, normalizedInputs, isTestRun, hasBreakpoints, hasStepMocks]);
 
     const autoRunFiredRef = useRef(false);
 
