@@ -18,6 +18,7 @@
 import { runPreBuild } from './pre_build.ts';
 import { postFrequentCancellationsTip } from './frequent_cancellations_tip.ts';
 import { getEvalTriggerStep } from '../../../pipelines/evals/eval_pipeline.ts';
+import { getNightshiftEvalTriggerStep } from '../../../pipelines/nightshift_evals/nightshift_evals_pipeline.ts';
 import { loadBuildkiteJson } from '../../../pipeline-utils/load_buildkite_json.ts';
 import {
   areChangesSkippable,
@@ -697,6 +698,13 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     const evalsTrigger = getEvalTriggerStep(GITHUB_PR_LABELS);
     if (evalsTrigger) {
       pipeline.push(evalsTrigger);
+    }
+
+    // Same hand-off for `nightshift-evals:<task>` labels, to `kibana-nightshift-evals-pr`. It needs no
+    // Kibana build, since nightshift-evals runs Kibana from source.
+    const nightshiftEvalsTrigger = getNightshiftEvalTriggerStep(GITHUB_PR_LABELS);
+    if (nightshiftEvalsTrigger) {
+      pipeline.push(nightshiftEvalsTrigger);
     }
 
     if (GITHUB_PR_LABELS.includes('ci:sync-model-labels')) {
