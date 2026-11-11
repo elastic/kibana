@@ -7,63 +7,66 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest } from '@kbn/scout';
+import { esArchiverFixture, findImportedSavedObjectId, mergeTests, spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 const KBN_ARCHIVE = 'src/platform/test/functional/fixtures/kbn_archiver/managed_content';
+const ES_ARCHIVE_LOGSTASH = 'x-pack/platform/test/fixtures/es_archives/logstash_functional';
+const test = mergeTests(spaceTest, esArchiverFixture);
 
-spaceTest.describe('Visualizations managed content', { tag: '@local-stateful-classic' }, () => {
+test.describe('Visualizations managed content', { tag: '@local-stateful-classic' }, () => {
   let managedId: string;
   let unmanagedId: string;
 
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
+  test.beforeAll(async ({ esArchiver, scoutSpace }) => {
+    await esArchiver.loadIfNeeded(ES_ARCHIVE_LOGSTASH);
     const imported = await scoutSpace.savedObjects.load(KBN_ARCHIVE);
-    const getId = (title: string) => {
-      const object = imported.find((item) => item.title === title);
-      if (!object) throw new Error(`Missing imported saved object: ${title}`);
-      return object.id;
-    };
-    managedId = getId('Managed legacy visualization');
-    unmanagedId = getId('Unmanaged legacy visualization');
+    managedId = findImportedSavedObjectId(
+      imported,
+      'visualization',
+      'Managed legacy visualization'
+    );
+    unmanagedId = findImportedSavedObjectId(
+      imported,
+      'visualization',
+      'Unmanaged legacy visualization'
+    );
     await scoutSpace.uiSettings.setDefaultIndex('logstash-*');
   });
 
-  spaceTest.beforeEach(async ({ browserAuth }) => {
+  test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
   });
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
+  test.afterAll(async ({ scoutSpace }) => {
     await scoutSpace.uiSettings.unset('defaultIndex');
     await scoutSpace.savedObjects.cleanStandardList();
   });
 
-  spaceTest(
-    'requires a copy when saving a managed visualization',
-    async ({ page, pageObjects }) => {
-      const { visualize } = pageObjects;
-      const badge = page.testSubj.locator('managedContentBadge');
-      const saveAsNew = page.testSubj.locator('saveAsNewCheckbox');
+  test('requires a copy when saving a managed visualization', async ({ page, pageObjects }) => {
+    const { visualize } = pageObjects;
+    const badge = page.testSubj.locator('managedContentBadge');
+    const saveAsNew = page.testSubj.locator('saveAsNewCheckbox');
 
-      await page.gotoApp('visualize', {
-        hash: `/edit/${managedId}`,
-        readyWhen: page.testSubj.locator('visualizationLoader'),
-      });
-      await visualize.waitForVisualizationLoaded();
-      await expect(badge).toBeVisible();
-      await visualize.openSaveModal();
-      await expect(saveAsNew).toHaveAttribute('aria-checked', 'true');
-      await expect(saveAsNew).toBeDisabled();
-      await visualize.saveModal.modal.getByRole('button', { name: 'Cancel' }).click();
+    await page.gotoApp('visualize', {
+      hash: `/edit/${managedId}`,
+      readyWhen: page.testSubj.locator('visualizationLoader'),
+    });
+    await visualize.waitForVisualizationLoaded();
+    await expect(badge).toBeVisible();
+    await visualize.openSaveModal();
+    await expect(saveAsNew).toHaveAttribute('aria-checked', 'true');
+    await expect(saveAsNew).toBeDisabled();
+    await visualize.saveModal.modal.getByRole('button', { name: 'Cancel' }).click();
 
-      await page.gotoApp('visualize', {
-        hash: `/edit/${unmanagedId}`,
-        readyWhen: page.testSubj.locator('visualizationLoader'),
-      });
-      await visualize.waitForVisualizationLoaded();
-      await expect(badge).toBeHidden();
-      await visualize.openSaveModal();
-      await expect(saveAsNew).toHaveAttribute('aria-checked', 'false');
-      await expect(saveAsNew).toBeEnabled();
-    }
-  );
+    await page.gotoApp('visualize', {
+      hash: `/edit/${unmanagedId}`,
+      readyWhen: page.testSubj.locator('visualizationLoader'),
+    });
+    await visualize.waitForVisualizationLoaded();
+    await expect(badge).toBeHidden();
+    await visualize.openSaveModal();
+    await expect(saveAsNew).toHaveAttribute('aria-checked', 'false');
+    await expect(saveAsNew).toBeEnabled();
+  });
 });
