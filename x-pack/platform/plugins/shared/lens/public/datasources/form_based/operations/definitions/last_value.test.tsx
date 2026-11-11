@@ -6,11 +6,9 @@
  */
 
 import React from 'react';
-import type { ShallowWrapper } from 'enzyme';
-import { shallow } from 'enzyme';
-import { screen, within } from '@testing-library/react';
+import { act, fireEvent, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
@@ -25,11 +23,18 @@ import type {
   TermsIndexPatternColumn,
 } from '@kbn/lens-common';
 import { lastValueOperation } from '.';
-import type { EuiSwitchEvent } from '@elastic/eui';
-import { EuiSwitch } from '@elastic/eui';
 import { buildExpression, parseExpression } from '@kbn/expressions-plugin/common';
-import { FormRow } from './shared_components';
 import { renderWithProviders } from '../../../../test_utils/test_utils';
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual<typeof import('@elastic/eui')>('@elastic/eui');
+  return {
+    ...actual,
+    EuiComboBox: jest.fn((props: React.ComponentProps<typeof actual.EuiComboBox>) => (
+      <actual.EuiComboBox {...props} />
+    )),
+  };
+});
 
 const uiSettingsMock = {} as IUiSettingsClient;
 
@@ -715,61 +720,22 @@ describe('last_value', () => {
   });
 
   describe('param editor', () => {
-    class Harness {
-      private _instance: ShallowWrapper;
+    const getSortFieldInput = () =>
+      within(screen.getByTestId('lns-indexPattern-lastValue-sortField')).getByRole('combobox', {
+        name: 'Sort by date field',
+      });
+    const getArrayValuesControl = () =>
+      within(screen.getByTestId('lns-indexPattern-lastValue-showArrayValues'));
+    const topValuesWarning =
+      'When you show array values, you are unable to use this field to rank top values.';
 
-      constructor(instance: ShallowWrapper) {
-        this._instance = instance;
-      }
-
-      private get sortField() {
-        return this._instance.find('[data-test-subj="lns-indexPattern-lastValue-sortField"]');
-      }
-
-      private get showArrayValuesSwitch() {
-        return this._instance
-          .find('[data-test-subj="lns-indexPattern-lastValue-showArrayValues"]')
-          .find(EuiSwitch);
-      }
-
-      public get showingTopValuesWarning() {
-        return Boolean(
-          this._instance
-            .find('[data-test-subj="lns-indexPattern-lastValue-showArrayValues"]')
-            .find(EuiFormRow)
-            .prop('isInvalid')
-        );
-      }
-
-      toggleShowArrayValues() {
-        this.showArrayValuesSwitch.prop('onChange')({} as EuiSwitchEvent);
-      }
-
-      public get showArrayValuesSwitchDisabled() {
-        return this.showArrayValuesSwitch.prop('disabled');
-      }
-
-      public get arrayValuesSwitchNotExisiting() {
-        return (
-          this._instance.find('[data-test-subj="lns-indexPattern-lastValue-showArrayValues"]')
-            .length === 0
-        );
-      }
-
-      changeSortFieldOptions(options: Array<{ label: string; value: string }>) {
-        this.sortField.find(EuiComboBox).prop('onChange')!([
-          { label: 'datefield2', value: 'datefield2' },
-        ]);
-      }
-
-      public get currentSortFieldOptions() {
-        return this.sortField.prop('selectedOptions');
-      }
-    }
+    beforeEach(() => {
+      jest.mocked(EuiComboBox).mockClear();
+    });
 
     it('should render current sortField', () => {
       const updateLayerSpy = jest.fn();
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultProps}
           layer={layer}
@@ -779,14 +745,12 @@ describe('last_value', () => {
         />
       );
 
-      const harness = new Harness(instance);
-
-      expect(harness.currentSortFieldOptions).toEqual([{ label: 'datefield', value: 'datefield' }]);
+      expect(getSortFieldInput()).toHaveValue('datefield');
     });
 
     it('should update state when changing sortField', () => {
       const updateLayerSpy = jest.fn();
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultProps}
           layer={layer}
@@ -796,7 +760,12 @@ describe('last_value', () => {
         />
       );
 
-      new Harness(instance).changeSortFieldOptions([{ label: 'datefield2', value: 'datefield2' }]);
+      // Preserve the child callback contract for an option outside the data view fixture.
+      act(() => {
+        jest
+          .mocked(EuiComboBox)
+          .mock.lastCall?.[0].onChange?.([{ label: 'datefield2', value: 'datefield2' }]);
+      });
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer.columns.col2,
@@ -811,7 +780,7 @@ describe('last_value', () => {
       it('should toggle param when switch clicked', () => {
         const updateLayerSpy = jest.fn();
 
-        const instance = shallow(
+        const { rerender } = renderWithProviders(
           <InlineOptions
             {...defaultProps}
             layer={layer}
@@ -821,9 +790,7 @@ describe('last_value', () => {
           />
         );
 
-        const harness = new Harness(instance);
-
-        harness.toggleShowArrayValues();
+        fireEvent.click(getArrayValuesControl().getByRole('switch'));
 
         expect(updateLayerSpy).toHaveBeenCalledWith({
           ...layer.columns.col2,
@@ -842,9 +809,17 @@ describe('last_value', () => {
             col2: newColumn,
           },
         };
-        instance.setProps({ layer: newLayer, currentColumn: newLayer.columns.col2 });
+        rerender(
+          <InlineOptions
+            {...defaultProps}
+            layer={newLayer}
+            paramEditorUpdater={updateLayerSpy}
+            columnId="col2"
+            currentColumn={newLayer.columns.col2}
+          />
+        );
 
-        expect(harness.showingTopValuesWarning).toBeTruthy();
+        expect(getArrayValuesControl().getByText(topValuesWarning)).toBeInTheDocument();
       });
 
       it('should not warn user when top-values not in use', () => {
@@ -860,7 +835,7 @@ describe('last_value', () => {
             },
           },
         };
-        const instance = shallow(
+        const { rerender } = renderWithProviders(
           <InlineOptions
             {...defaultProps}
             layer={localLayer}
@@ -870,8 +845,7 @@ describe('last_value', () => {
           />
         );
 
-        const harness = new Harness(instance);
-        harness.toggleShowArrayValues();
+        fireEvent.click(getArrayValuesControl().getByRole('switch'));
 
         // have to do this manually, but it happens automatically in the app
         const newColumn = updateLayerSpy.mock.calls[0][0];
@@ -883,16 +857,24 @@ describe('last_value', () => {
           },
         };
 
-        instance.setProps({ layer: newLayer, currentColumn: newLayer.columns.col2 });
+        rerender(
+          <InlineOptions
+            {...defaultProps}
+            layer={newLayer}
+            paramEditorUpdater={updateLayerSpy}
+            columnId="col2"
+            currentColumn={newLayer.columns.col2}
+          />
+        );
 
-        expect(harness.showingTopValuesWarning).toBeFalsy();
+        expect(getArrayValuesControl().queryByText(topValuesWarning)).not.toBeInTheDocument();
       });
 
       it('should set showArrayValues and disable switch when scripted field', () => {
         (layer.columns.col2 as LastValueIndexPatternColumn).sourceField = 'scripted';
 
         const updateLayerSpy = jest.fn();
-        const instance = shallow(
+        renderWithProviders(
           <InlineOptions
             {...defaultProps}
             layer={layer}
@@ -902,12 +884,12 @@ describe('last_value', () => {
           />
         );
 
-        expect(new Harness(instance).showArrayValuesSwitchDisabled).toBeTruthy();
+        expect(getArrayValuesControl().getByRole('switch')).toBeDisabled();
       });
 
       it('should not display an array for the last value if the column is referenced', () => {
         const updateLayerSpy = jest.fn();
-        const instance = shallow(
+        renderWithProviders(
           <InlineOptions
             {...defaultProps}
             isReferenced={true}
@@ -918,11 +900,13 @@ describe('last_value', () => {
           />
         );
 
-        expect(new Harness(instance).arrayValuesSwitchNotExisiting).toBeTruthy();
+        expect(
+          screen.queryByTestId('lns-indexPattern-lastValue-showArrayValues')
+        ).not.toBeInTheDocument();
       });
 
       it('should show valid sort field for date field', () => {
-        const instance = shallow(
+        renderWithProviders(
           <InlineOptions
             {...defaultProps}
             isReferenced={true}
@@ -940,11 +924,14 @@ describe('last_value', () => {
           />
         );
 
-        expect(instance.find(FormRow).prop('isInvalid')).toBe(false);
+        expect(getSortFieldInput()).toHaveAttribute('aria-invalid', 'false');
+        expect(
+          screen.queryByText('Invalid field. Check your data view or pick another field.')
+        ).not.toBeInTheDocument();
       });
 
       it('should show invalid sort field for missing field', () => {
-        const instance = shallow(
+        renderWithProviders(
           <InlineOptions
             {...defaultProps}
             isReferenced={true}
@@ -962,11 +949,14 @@ describe('last_value', () => {
           />
         );
 
-        expect(instance.find(FormRow).prop('isInvalid')).toBe(true);
+        expect(getSortFieldInput()).toHaveAttribute('aria-invalid', 'true');
+        expect(
+          screen.getByText('Invalid field. Check your data view or pick another field.')
+        ).toBeInTheDocument();
       });
 
       it('should show invalid sort field for non-date field', () => {
-        const instance = shallow(
+        renderWithProviders(
           <InlineOptions
             {...defaultProps}
             isReferenced={true}
@@ -984,7 +974,10 @@ describe('last_value', () => {
           />
         );
 
-        expect(instance.find(FormRow).prop('isInvalid')).toBe(true);
+        expect(getSortFieldInput()).toHaveAttribute('aria-invalid', 'true');
+        expect(
+          screen.getByText('Invalid field. Check your data view or pick another field.')
+        ).toBeInTheDocument();
       });
     });
 
