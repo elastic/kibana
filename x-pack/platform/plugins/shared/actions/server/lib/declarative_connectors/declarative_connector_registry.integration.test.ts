@@ -155,7 +155,10 @@ describe('declarative connector registry', () => {
       actionId: 'connector-1',
       config: { baseUrl: 'https://api.abuseipdb.com' },
       secrets: { authType: 'none' },
-      params: { subAction: 'checkIp', subActionParams: { ipAddress: '1.2.3.4' } },
+      params: {
+        subAction: 'checkIp',
+        subActionParams: { ipAddress: '1.2.3.4', maxAgeInDays: 90, verbose: false },
+      },
       logger: loggingSystemMock.create().get(),
       configurationUtilities: configUtils,
       connectorUsageCollector: {} as never,
