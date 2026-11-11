@@ -34,7 +34,6 @@ import {
   withoutAccessPatternAttributes,
 } from './access_patterns';
 import {
-  ABOUT_RELATION,
   citedMemoryIds,
   occurrencesOf,
   type DreamedKi,
@@ -42,10 +41,15 @@ import {
   type DreamedKiReference,
 } from './dreamed_ki';
 import { kiUri } from './ids';
-import { derivedPermissions, isVisibleInSpace, type KiPermissions } from './permissions';
+import {
+  derivedPermissions,
+  isVisibleInSpace,
+  samePermissions,
+  type KiPermissions,
+} from './permissions';
 import type {
+  DeleteOperation,
   DreamingOperation,
-  RelationshipOperation,
   UpsertEntityOperation,
   UpsertFactOperation,
 } from './resolve_change_set';
@@ -56,6 +60,11 @@ export interface ApplyCounts {
   created: number;
   updated: number;
   deleted: number;
+}
+
+export interface ApplyResult extends ApplyCounts {
+  /** Writes refused because the KI has different permissions than its memories. */
+  rejected: Array<{ item: string; reason: string }>;
 }
 
 /** A KI a dry run would write, as it would be stored; `ki` is absent when it would be deleted. */
@@ -91,14 +100,12 @@ export const addReferences = (
     byKey.set(referenceKey(reference), byKey.get(referenceKey(reference)) ?? reference);
   }
   const references = [...byKey.values()];
-  for (const relation of ['derived_from', 'relates_to'] as const) {
-    while (references.length > MAX_KI_REFERENCES) {
-      const index = references.findIndex((reference) => reference.relation === relation);
-      if (index === -1) {
-        break;
-      }
-      references.splice(index, 1);
+  while (references.length > MAX_KI_REFERENCES) {
+    const index = references.findIndex(({ relation }) => relation === 'derived_from');
+    if (index === -1) {
+      break;
     }
+    references.splice(index, 1);
   }
   return references.slice(-MAX_KI_REFERENCES);
 };
@@ -106,7 +113,13 @@ export const addReferences = (
 const sourceReferences = (sourceMemoryIds: readonly string[]): DreamedKiReference[] =>
   sourceMemoryIds.map((id) => ({ uri: kiUri(id), relation: 'derived_from' }));
 
-type BuildDocument = (current: DreamedKi | undefined) => Omit<DreamedKi, 'governance'> | undefined;
+type BuildDocument = (current: DreamedKi | undefined) => Omit<DreamedKi, 'governance'>;
+
+type BuildPermittedDocument = (
+  current: DreamedKi | undefined
+) => Omit<DreamedKi, 'governance'> | 'rejected';
+
+type WriteResult = 'created' | 'updated' | 'skipped' | 'rejected';
 
 const activeSource = (revision: KiRevision | undefined): DreamedKi | undefined => {
   const source = revision?.source as DreamedKi | undefined;
@@ -140,21 +153,34 @@ const hiddenFrom = ({ spaceId }: ApplyContext, revision: KiRevision | undefined)
   return source !== undefined && !isVisibleInSpace(source.permissions, spaceId);
 };
 
+/** The permissions of the batch's memories, which all share them. */
+const batchPermissions = ({
+  spaceId,
+  memoryPermissions,
+}: ApplyContext): KiPermissions | undefined =>
+  derivedPermissions([...memoryPermissions.values()], spaceId);
+
 const withDerivedPermissions =
   (
-    { spaceId, memoryPermissions }: ApplyContext,
+    context: ApplyContext,
     sourceMemoryIds: readonly string[],
     build: BuildDocument
-  ): BuildDocument =>
+  ): BuildPermittedDocument =>
   (current) => {
-    const document = build(current);
-    if (!document) {
-      return undefined;
+    const { spaceId, memoryPermissions } = context;
+    const cited = new Set(current ? citedMemoryIds(current) : []);
+    const sources = sourceMemoryIds.filter((id) => memoryPermissions.has(id) || !cited.has(id));
+    const permissions =
+      sources.length > 0
+        ? derivedPermissions(
+            sources.map((id) => memoryPermissions.get(id)),
+            spaceId
+          )
+        : batchPermissions(context);
+    if (current && !samePermissions(current.permissions, permissions)) {
+      return 'rejected';
     }
-    const permissions = derivedPermissions(
-      [current?.permissions, ...sourceMemoryIds.map((id) => memoryPermissions.get(id))],
-      spaceId
-    );
+    const document = build(current);
     return permissions ? { ...document, permissions } : document;
   };
 
@@ -162,8 +188,8 @@ const planDocument = async (
   context: ApplyContext,
   planned: Map<string, PlannedWrite>,
   kiId: string,
-  build: BuildDocument
-): Promise<'created' | 'updated' | 'skipped'> => {
+  build: BuildPermittedDocument
+): Promise<WriteResult> => {
   const { esClient, aiIndexId, dest, writer, abortSignal } = context;
   const previous = planned.get(kiId);
   const revision = previous
@@ -174,8 +200,8 @@ const planDocument = async (
   }
   const current = previous ? (previous.ki as DreamedKi | undefined) : activeSource(revision);
   const document = build(current);
-  if (!document) {
-    return 'skipped';
+  if (document === 'rejected') {
+    return document;
   }
   planned.set(kiId, {
     change: previous?.change === 'created' || !current ? 'created' : 'updated',
@@ -189,7 +215,7 @@ const writeDocument = async (
   kiId: string,
   sourceMemoryIds: readonly string[],
   buildDocument: BuildDocument
-): Promise<'created' | 'updated' | 'skipped'> => {
+): Promise<WriteResult> => {
   const { esClient, aiIndexId, dest, writer, abortSignal, dryRun } = context;
   const build = withDerivedPermissions(context, sourceMemoryIds, buildDocument);
   if (dryRun) {
@@ -210,8 +236,8 @@ const writeDocument = async (
       }
       const current = activeSource(revision);
       const document = build(current);
-      if (!document) {
-        return 'skipped' as const;
+      if (document === 'rejected') {
+        return document;
       }
       await putKiRevision({
         esClient,
@@ -283,7 +309,7 @@ const upsertEntity = (context: ApplyContext, operation: UpsertEntityOperation) =
     ...current,
     id: operation.id,
     type: `${ENTITY_TYPE_PREFIX}${operation.type}`,
-    title: operation.name,
+    title: operation.title,
     ...(operation.description !== undefined && { description: operation.description }),
     ...withAccessPatterns(current, operation.content, operation.accessPatterns, {
       ...current?.attributes,
@@ -294,67 +320,37 @@ const upsertEntity = (context: ApplyContext, operation: UpsertEntityOperation) =
   }));
 
 const upsertFact = (context: ApplyContext, operation: UpsertFactOperation) =>
-  writeDocument(context, operation.id, operation.sourceMemoryIds, (current) => {
-    const { about } = operation;
-    const kept =
-      about === undefined
-        ? current?.references
-        : current?.references?.filter(
-            ({ relation, description }) =>
-              relation !== 'relates_to' || description !== ABOUT_RELATION
-          );
-    return {
-      ...current,
-      id: operation.id,
-      type: `${FACT_TYPE_PREFIX}${operation.type}`,
-      title: operation.title,
-      ...withAccessPatterns(current, operation.content, operation.accessPatterns, {
-        ...current?.attributes,
-        ...sightingAttributes(current, operation.sourceMemoryIds, operation.lastSeenAt),
-      }),
-      references: addReferences(kept, [
-        ...(about ?? []).map((id) => ({
-          uri: kiUri(id),
-          relation: 'relates_to' as const,
-          description: ABOUT_RELATION,
-        })),
-        ...sourceReferences(operation.sourceMemoryIds),
-      ]),
-    };
-  });
+  writeDocument(context, operation.id, operation.sourceMemoryIds, (current) => ({
+    ...current,
+    id: operation.id,
+    type: `${FACT_TYPE_PREFIX}${operation.type}`,
+    title: operation.title,
+    ...withAccessPatterns(current, operation.content, operation.accessPatterns, {
+      ...current?.attributes,
+      ...sightingAttributes(current, operation.sourceMemoryIds, operation.lastSeenAt),
+    }),
+    references: addReferences(current?.references, sourceReferences(operation.sourceMemoryIds)),
+  }));
 
-const applyRelationship = (context: ApplyContext, operation: RelationshipOperation) =>
-  writeDocument(context, operation.sourceId, operation.sourceMemoryIds, (current) => {
-    if (!current) {
-      return undefined;
-    }
-    const relationship: DreamedKiReference = {
-      uri: kiUri(operation.targetId),
-      relation: 'relates_to',
-      description: operation.type,
-    };
-    if (operation.remove) {
-      return {
-        ...current,
-        references: current.references?.filter(
-          (reference) => referenceKey(reference) !== referenceKey(relationship)
-        ),
-      };
-    }
-    return {
-      ...current,
-      attributes: {
-        ...current.attributes,
-        ...sightingAttributes(current, operation.sourceMemoryIds, operation.lastSeenAt),
-      },
-      references: addReferences(current.references, [
-        relationship,
-        ...sourceReferences(operation.sourceMemoryIds),
-      ]),
-    };
-  });
+const upsert = (
+  context: ApplyContext,
+  operation: Exclude<DreamingOperation, DeleteOperation>
+): Promise<WriteResult> => {
+  switch (operation.op) {
+    case 'upsert_entity':
+      return upsertEntity(context, operation);
+    case 'upsert_fact':
+      return upsertFact(context, operation);
+  }
+};
 
-const deletable = async (context: ApplyContext, kiId: string): Promise<boolean> => {
+type DeleteResult = 'deleted' | 'skipped' | 'rejected';
+
+/** Whether this batch may delete a KI: it exists, and has the permissions of the batch's memories. */
+const deletable = async (
+  context: ApplyContext,
+  kiId: string
+): Promise<'allowed' | Exclude<DeleteResult, 'deleted'>> => {
   const { esClient, aiIndexId, dest, abortSignal } = context;
   const revision = await findKiRevision({
     esClient,
@@ -364,35 +360,41 @@ const deletable = async (context: ApplyContext, kiId: string): Promise<boolean> 
     includeSource: true,
     abortSignal,
   });
-  return revision !== undefined && !hiddenFrom(context, revision);
+  if (revision === undefined || hiddenFrom(context, revision)) {
+    return 'skipped';
+  }
+  const { permissions } = revision.source as DreamedKi;
+  return samePermissions(permissions, batchPermissions(context)) ? 'allowed' : 'rejected';
 };
 
 const planDelete = async (
   context: ApplyContext,
   planned: Map<string, PlannedWrite>,
   kiId: string
-): Promise<boolean> => {
-  const exists = planned.has(kiId) || (await deletable(context, kiId));
-  if (exists) {
-    planned.set(kiId, { change: 'deleted' });
+): Promise<DeleteResult> => {
+  const check = planned.has(kiId) ? 'allowed' : await deletable(context, kiId);
+  if (check !== 'allowed') {
+    return check;
   }
-  return exists;
+  planned.set(kiId, { change: 'deleted' });
+  return 'deleted';
 };
 
-const deleteKi = async (context: ApplyContext, kiId: string): Promise<boolean> => {
+const deleteKi = async (context: ApplyContext, kiId: string): Promise<DeleteResult> => {
   const { esClient, aiIndexId, dest, writer, abortSignal, dryRun } = context;
   if (dryRun) {
     return planDelete(context, dryRun, kiId);
   }
-  if (!(await deletable(context, kiId))) {
-    return false;
+  const check = await deletable(context, kiId);
+  if (check !== 'allowed') {
+    return check;
   }
   try {
     await softDeleteKi(esClient, { aiIndexId, dest, kiId, writer, refresh: true, abortSignal });
-    return true;
+    return 'deleted';
   } catch (error) {
     if (error instanceof KiNotFoundError) {
-      return false;
+      return 'skipped';
     }
     throw error;
   }
@@ -402,32 +404,30 @@ const deleteKi = async (context: ApplyContext, kiId: string): Promise<boolean> =
 export const applyOperations = async (
   context: ApplyContext,
   operations: readonly DreamingOperation[]
-): Promise<ApplyCounts> => {
-  const counts: ApplyCounts = { created: 0, updated: 0, deleted: 0 };
+): Promise<ApplyResult> => {
+  const result: ApplyResult = { created: 0, updated: 0, deleted: 0, rejected: [] };
   for (const operation of operations) {
-    switch (operation.op) {
-      case 'upsert_entity':
-      case 'upsert_fact': {
-        const result =
-          operation.op === 'upsert_entity'
-            ? await upsertEntity(context, operation)
-            : await upsertFact(context, operation);
-        if (result !== 'skipped') {
-          counts[result] += 1;
-        }
-        break;
+    if (operation.op === 'delete') {
+      const deleted = await deleteKi(context, operation.id);
+      if (deleted === 'rejected') {
+        result.rejected.push({
+          item: `delete ${operation.id}`,
+          reason: "it has different permissions than this batch's memories",
+        });
+      } else if (deleted === 'deleted') {
+        result.deleted += 1;
       }
-      case 'relationship':
-        if ((await applyRelationship(context, operation)) === 'updated') {
-          counts.updated += 1;
-        }
-        break;
-      case 'delete':
-        if (await deleteKi(context, operation.id)) {
-          counts.deleted += 1;
-        }
-        break;
+      continue;
+    }
+    const written = await upsert(context, operation);
+    if (written === 'rejected') {
+      result.rejected.push({
+        item: `${operation.op === 'upsert_entity' ? 'entity' : 'fact'} ${operation.id}`,
+        reason: 'it has different permissions than its memories',
+      });
+    } else if (written !== 'skipped') {
+      result[written] += 1;
     }
   }
-  return counts;
+  return result;
 };

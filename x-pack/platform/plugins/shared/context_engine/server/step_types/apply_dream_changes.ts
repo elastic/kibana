@@ -24,6 +24,7 @@ import type { KiStepDependencies } from './helpers';
 import {
   assertContextEngineEnabled,
   assertKiWritePrivilege,
+  assertSameMemoryPermissions,
   assertWritableDest,
   kiWriterFromContext,
 } from './helpers';
@@ -57,6 +58,7 @@ export const getApplyDreamChangesStepDefinition = ({
         });
       }
       const changeSet = parsed.data;
+      assertSameMemoryPermissions(memories);
 
       let aiIndex: AiIndexHttpItem;
       try {
@@ -100,6 +102,7 @@ export const getApplyDreamChangesStepDefinition = ({
         }
       }
 
+      const memoryPermissions = new Map(memories.map(({ id, permissions }) => [id, permissions]));
       const resolved = resolveChangeSet(changeSet, {
         executionId: stepContext.execution.id,
         vocabulary: vocabularyOf(aiIndex.dreaming),
@@ -109,36 +112,38 @@ export const getApplyDreamChangesStepDefinition = ({
             .map(({ id, updated_at: updatedAt }) => [id, updatedAt])
         ),
         existing,
+        memoryPermissions,
       });
       const { operations, dropped } = await keepVerifiedPatterns(
         resolved.operations,
         createVerifyEsql({ esClient, logger, abortSignal: context.abortSignal })
       );
       const planned = dryRun ? new Map<string, PlannedWrite>() : undefined;
-      const counts = await applyOperations(
+      const { rejected: refused, ...counts } = await applyOperations(
         {
           esClient,
           aiIndexId,
           dest: aiIndex.dest,
           writer: kiWriterFromContext(stepContext),
           spaceId,
-          memoryPermissions: new Map(memories.map(({ id, permissions }) => [id, permissions])),
+          memoryPermissions,
           abortSignal: context.abortSignal,
           dryRun: planned,
         },
         operations
       );
+      const rejected = [...resolved.rejected, ...refused];
 
       logger.debug(
         `${dryRun ? 'Dry run: dreaming' : 'Dreaming'} in AI index '${aiIndexId}' created ${
           counts.created
         }, updated ${counts.updated} and deleted ${counts.deleted} KIs; rejected ${
-          resolved.rejected.length
+          rejected.length
         } items and dropped ${dropped} access patterns`
       );
       const output: ApplyDreamChangesOutput = {
         ...counts,
-        rejected: resolved.rejected,
+        rejected,
         dropped_access_patterns: dropped,
         ...(planned && {
           would_write: [...planned].map(([id, { change, ki }]) => {

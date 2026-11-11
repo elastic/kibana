@@ -8,16 +8,15 @@
 import { ExecutionError } from '@kbn/workflows/server';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
+import { entityId } from '../dreaming/ids';
+import { audienceKeyOf } from '../dreaming/permissions';
 import { getApplyDreamChangesStepDefinition } from './apply_dream_changes';
 import { createMockStepContext, mockKiStepTelemetry, mockKiWriter } from './test_utils';
 
 const dreaming = {
   enabled: true,
   facts: [{ type: 'preference' }],
-  entities: {
-    nodes: [{ type: 'customer', attributes: ['tier'] }, { type: 'city' }],
-    edges: [{ type: 'lives_in', source: 'customer', target: 'city' }],
-  },
+  entities: { nodes: [{ type: 'customer', attributes: ['tier'] }, { type: 'city' }] },
 };
 
 const dest = { type: 'index' as const, value: 'ai-index-idx-support' };
@@ -38,7 +37,7 @@ const changes = {
       content: 'Nova member in Montreal. Prefers early morning departures.',
       source_memory_ids: ['mem-2'],
     },
-    { ref: 'new:1', type: 'city', name: 'Montreal', source_memory_ids: ['mem-2'] },
+    { ref: 'new:1', type: 'city', title: 'Montreal', source_memory_ids: ['mem-2'] },
   ],
   facts: [
     {
@@ -46,18 +45,9 @@ const changes = {
       type: 'preference',
       title: 'Customer 825464 prefers early morning departures',
       content: 'Customer 825464 (Nova, Montreal) prefers early morning departures.',
-      about: [existingCustomer.id],
       source_memory_ids: ['mem-2'],
     },
     { ref: 'new:3', type: 'complaint', title: 'X', content: 'Y', source_memory_ids: ['mem-2'] },
-  ],
-  relationships: [
-    {
-      type: 'lives_in',
-      source: existingCustomer.id,
-      target: 'new:1',
-      source_memory_ids: ['mem-2'],
-    },
   ],
 };
 
@@ -115,7 +105,7 @@ describe('getApplyDreamChangesStepDefinition', () => {
 
     expect(output).toEqual({
       created: 2,
-      updated: 2,
+      updated: 1,
       deleted: 0,
       rejected: [{ item: 'fact new:3', reason: "fact type 'complaint' is not configured" }],
       dropped_access_patterns: 0,
@@ -134,7 +124,6 @@ describe('getApplyDreamChangesStepDefinition', () => {
         references: [
           { uri: 'ki://mem-1', relation: 'derived_from' },
           { uri: 'ki://mem-2', relation: 'derived_from' },
-          { uri: 'ki://entity-city--montreal', relation: 'relates_to', description: 'lives_in' },
         ],
         governance: expect.objectContaining({
           provenance: { created_by: mockKiWriter, updated_by: mockKiWriter },
@@ -143,12 +132,7 @@ describe('getApplyDreamChangesStepDefinition', () => {
     );
     const fact = Object.values(stored).find(({ type }) => type === 'fact.preference');
     expect(fact).toEqual(
-      expect.objectContaining({
-        references: [
-          { uri: `ki://${existingCustomer.id}`, relation: 'relates_to', description: 'about' },
-          { uri: 'ki://mem-2', relation: 'derived_from' },
-        ],
-      })
+      expect.objectContaining({ references: [{ uri: 'ki://mem-2', relation: 'derived_from' }] })
     );
   });
 
@@ -181,11 +165,51 @@ describe('getApplyDreamChangesStepDefinition', () => {
 
     const { output } = await definition(aiIndexService()).handler(context);
 
-    expect(output).toEqual(expect.objectContaining({ created: 1, updated: 0 }));
-    expect(stored['entity-city--montreal']).toEqual(expect.objectContaining({ permissions }));
+    expect(output).toEqual(expect.objectContaining({ created: 2, updated: 0 }));
+    expect(stored[entityId('city', 'Montreal', audienceKeyOf([permissions]))]).toEqual(
+      expect.objectContaining({ permissions })
+    );
     expect(stored[existingCustomer.id]).not.toEqual(
       expect.objectContaining({ content: changes.entities[0].content })
     );
+  });
+
+  it('rejects an update to a KI with different permissions than its memories', async () => {
+    const stored: Record<string, Record<string, unknown>> = {
+      [existingCustomer.id]: existingCustomer,
+    };
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'support',
+        memories: [
+          {
+            id: 'mem-2',
+            updated_at: '2026-11-02T18:40:12.000Z',
+            permissions: {
+              kibana: { privileges: [{ space: 'default', name: ['ai_index:support/read'] }] },
+            },
+          },
+        ],
+        changes: { entities: [changes.entities[0]] },
+      },
+      esClient: createEsClient(stored),
+    });
+
+    const { output } = await definition(aiIndexService()).handler(context);
+
+    expect(output).toEqual({
+      created: 0,
+      updated: 0,
+      deleted: 0,
+      rejected: [
+        {
+          item: `entity ${existingCustomer.id}`,
+          reason: 'it has different permissions than its memories',
+        },
+      ],
+      dropped_access_patterns: 0,
+    });
+    expect(stored[existingCustomer.id]).toBe(existingCustomer);
   });
 
   it('on a dry run, reports what it would write and writes nothing', async () => {
@@ -212,7 +236,7 @@ describe('getApplyDreamChangesStepDefinition', () => {
     expect(output).toEqual(
       expect.objectContaining({
         created: 2,
-        updated: 2,
+        updated: 1,
         deleted: 0,
         rejected: [{ item: 'fact new:3', reason: "fact type 'complaint' is not configured" }],
       })
@@ -237,9 +261,10 @@ describe('getApplyDreamChangesStepDefinition', () => {
     );
     expect(output?.documents?.[0]).toEqual(
       expect.objectContaining({
-        references: expect.arrayContaining([
-          { uri: 'ki://entity-city--montreal', relation: 'relates_to', description: 'lives_in' },
-        ]),
+        references: [
+          { uri: 'ki://mem-1', relation: 'derived_from' },
+          { uri: 'ki://mem-2', relation: 'derived_from' },
+        ],
       })
     );
   });
@@ -257,7 +282,7 @@ describe('getApplyDreamChangesStepDefinition', () => {
           },
         ],
         changes: {
-          entities: [{ ref: 'new:1', type: 'city', name: 'Lyon', source_memory_ids: ['mem-9'] }],
+          entities: [{ ref: 'new:1', type: 'city', title: 'Lyon', source_memory_ids: ['mem-9'] }],
         },
       },
       esClient: createEsClient(stored),
@@ -283,6 +308,35 @@ describe('getApplyDreamChangesStepDefinition', () => {
     await expect(definition(aiIndexService()).handler(context)).rejects.toThrow(
       'The dreaming model returned an invalid change set'
     );
+  });
+
+  it('fails when the memories do not all have the same permissions, before writing anything', async () => {
+    const esClient = createEsClient({});
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'support',
+        memories: [
+          { id: 'mem-1', updated_at: '2026-11-01T09:00:00.000Z', title: 'A' },
+          {
+            id: 'mem-2',
+            updated_at: '2026-11-02T18:40:12.000Z',
+            title: 'B',
+            permissions: {
+              kibana: {
+                privileges: [{ space: 'default', name: ['ai_index:support/read'], count: 1 }],
+              },
+            },
+          },
+        ],
+        changes,
+      },
+      esClient,
+    });
+
+    await expect(definition(aiIndexService()).handler(context)).rejects.toThrow(
+      "The memories don't all have the same permissions"
+    );
+    expect(esClient.index).not.toHaveBeenCalled();
   });
 
   it('fails when the AI index has no dreaming config, or does not exist', async () => {
