@@ -242,10 +242,16 @@ export function useVarGroupSelections({
   }, [varGroups, savedSelections, onSelectionsChange, deriveSelections, packagePolicy]);
 
   // Handle selection change with policy effects computation
+  // The new selections build on `selections` — what the form actually
+  // shows — not on the sanitized saved map: a group the form only displays
+  // through derivation (a stale saved selection, or a group missing from a
+  // partial saved map, e.g. added by a package upgrade) would otherwise
+  // drop out of the persisted update, leaving the stored policy and
+  // validation disagreeing with the form.
   const handleSelectionChange = useCallback(
     (groupName: string, optionName: string) => {
       const newSelections: VarGroupSelection = {
-        ...sanitizedSavedSelections,
+        ...selections,
         [groupName]: optionName,
       };
 
@@ -278,23 +284,39 @@ export function useVarGroupSelections({
         ...(clearedStreamVars ? { vars: clearedStreamVars } : {}),
       });
     },
-    [sanitizedSavedSelections, selections, onSelectionsChange, packagePolicy, varGroups, streamVars]
+    [selections, onSelectionsChange, packagePolicy, varGroups, streamVars]
   );
 
-  // Persist the normalized selections when a stale saved selection was
-  // dropped, so the stored policy agrees with what the form shows and what
-  // validation checks. This lives after handleSelectionChange (rather than
+  // Persist the normalized selections when what the form shows differs
+  // from what is stored: a stale saved selection was dropped, or derivation
+  // filled in a group the stored map does not cover (an empty or partial
+  // map — e.g. a group added by a package upgrade after the policy was
+  // saved). Without this the form shows the derived option but the stored
+  // policy keeps the incomplete map, and validation — which for
+  // package-level groups only infers from populated vars and never invents
+  // a default — skips the required vars of the group the form shows as
+  // selected, so an incomplete policy can still be saved.
+  // This lives after handleSelectionChange (rather than
   // next to the mount effect above) because that effect is also touched by
   // upstream; keeping this write in its own block, separated by the
   // selection-change handler, avoids an adjacent-change merge conflict.
-  // It only runs when something is saved but stale: the mount effect above
-  // handles the nothing-saved case. The same policy effects apply here as
-  // to a user selection. (sanitizeVarGroupSelections returns the input
-  // object unchanged when nothing was dropped, so reference equality tells
-  // us whether any selection was stale.)
+  // It only runs when something is saved but the shown selections differ
+  // from it: the mount effect above handles the nothing-saved case. The
+  // same policy effects apply here as to a user selection, so a
+  // normalized-away cloud-connector option deactivates
+  // supports_cloud_connector instead of leaving the saved agent
+  // configuration disagreeing with the displayed choice.
+  // (sanitizeVarGroupSelections returns the input object unchanged when
+  // nothing was dropped, so reference equality cannot detect the
+  // missing-group case — compare the merged selections against the
+  // sanitized stored map instead.)
   useEffect(() => {
     if (!varGroups || varGroups.length === 0) return;
-    if (!savedSelections || sanitizedSavedSelections === savedSelections) return;
+    if (!savedSelections) return;
+    const needsPersist = Object.entries(selections).some(
+      ([groupName, optionName]) => sanitizedSavedSelections?.[groupName] !== optionName
+    );
+    if (!needsPersist) return;
     if (Object.keys(selections).length === 0) return;
     const policyEffects =
       packagePolicy && varGroups

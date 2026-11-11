@@ -555,6 +555,159 @@ describe('useVarGroupSelections', () => {
         })
       );
     });
+
+    it('should deactivate cloud connector when a stale selection is normalized to a non-cloud option', () => {
+      // Follow-up from the Libra P3 review (2026-11-11): when the saved
+      // cloud-connector option was removed by a package upgrade and
+      // normalization picks a non-cloud option, the mount write must carry
+      // the deactivation effects — otherwise the displayed authentication
+      // choice disagrees with the saved agent configuration
+      // (supports_cloud_connector / cloud_connector_id / support-flag var
+      // left enabled). The groups below no longer declare the
+      // cloud-connector option, so the saved selection is stale.
+      const noCloudConnectorGroups: RegistryVarGroup[] = [
+        {
+          name: 'auth_method',
+          title: 'Authentication',
+          selector_title: 'Select method',
+          options: [
+            { name: 'api_key', title: 'API Key', vars: ['api_key_var'] },
+            { name: 'oauth', title: 'OAuth', vars: ['client_id', 'client_secret'] },
+          ],
+        },
+      ];
+
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: noCloudConnectorGroups,
+          savedSelections: { auth_method: 'cloud_connector' },
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+          packagePolicy: {
+            supports_cloud_connector: true,
+            cloud_connector_id: 'conn-123',
+            vars: {
+              supports_cloud_connectors: { type: 'bool', value: true },
+            },
+            inputs: [],
+          } as any,
+          isEditPage: true,
+        })
+      );
+
+      expect(result.current.selections).toEqual({ auth_method: 'api_key' });
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          var_group_selections: { auth_method: 'api_key' },
+          supports_cloud_connector: false,
+          vars: expect.objectContaining({
+            supports_cloud_connectors: { type: 'bool', value: false },
+          }),
+        })
+      );
+      // cloud_connector_id is explicitly cleared, not left set
+      const call = mockOnSelectionsChange.mock.calls[0][0];
+      expect(call.cloud_connector_id).toBeUndefined();
+      expect('cloud_connector_id' in call).toBe(true);
+    });
+  });
+
+  describe('incomplete saved selections', () => {
+    // Follow-up from the Libra P3 review (2026-11-11): with an existing
+    // incomplete map (including {}), sanitization returns the original
+    // reference, so the old mount effect never persisted the derived
+    // selections for the missing groups. The selectors then show valid
+    // derived options without storing them, and validation — which for
+    // package-level groups only infers from populated vars — skips the
+    // required fields of the group the form shows as selected, so an
+    // incomplete policy can still be saved.
+    const twoGroups: RegistryVarGroup[] = [...mockVarGroups, ...mockStreamVarGroups];
+
+    it('should persist derived selections when the saved map is empty', () => {
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: twoGroups,
+          savedSelections: {},
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+        })
+      );
+
+      expect(result.current.selections).toEqual({
+        auth_method: 'api_key',
+        log_group_source: 'log_group_arn',
+      });
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith({
+        var_group_selections: {
+          auth_method: 'api_key',
+          log_group_source: 'log_group_arn',
+        },
+      });
+    });
+
+    it('should persist the derived selection for a group missing from a partial saved map', () => {
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: twoGroups,
+          savedSelections: { auth_method: 'api_key' },
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+          packagePolicy: { vars: {} } as any,
+          isEditPage: true,
+        })
+      );
+
+      expect(result.current.selections).toEqual({
+        auth_method: 'api_key',
+        log_group_source: 'log_group_arn',
+      });
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith({
+        var_group_selections: {
+          auth_method: 'api_key',
+          log_group_source: 'log_group_arn',
+        },
+      });
+    });
+
+    it('should apply policy effects when persisting a derived selection for a missing group', () => {
+      // The stored policy still has cloud connector enabled, but the
+      // derived option for the missing auth group is a non-cloud one — the
+      // mount write must deactivate it, as a user selection would.
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: twoGroups,
+          savedSelections: { log_group_source: 'log_group_name' },
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+          packagePolicy: {
+            supports_cloud_connector: true,
+            cloud_connector_id: 'conn-123',
+            vars: {
+              supports_cloud_connectors: { type: 'bool', value: true },
+            },
+            inputs: [],
+          } as any,
+          isEditPage: true,
+        })
+      );
+
+      expect(result.current.selections).toEqual({
+        auth_method: 'api_key',
+        log_group_source: 'log_group_name',
+      });
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          var_group_selections: {
+            auth_method: 'api_key',
+            log_group_source: 'log_group_name',
+          },
+          supports_cloud_connector: false,
+          vars: expect.objectContaining({
+            supports_cloud_connectors: { type: 'bool', value: false },
+          }),
+        })
+      );
+    });
   });
 
   describe('initialization effect', () => {
