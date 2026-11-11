@@ -72130,7 +72130,6 @@
     "xpack.transform.pivotPreview.PivotPreviewNoDataCalloutBody": "预览请求未返回任何数据。请确保可选查询返回数据且存在分组依据和聚合字段使用的字段的值。",
     "xpack.transform.pivotPreview.transformPreviewTitle": "转换预览",
     "xpack.transform.preview.sourceIndexUnavailableMessage": "在所选项目范围内，没有与所选数据视图匹配的源索引。请选择其他项目范围，或选择此范围内存在的数据视图。",
-    "xpack.transform.progress": "进度",
     "xpack.transform.projectScope": "项目范围",
     "xpack.transform.searchItems.errorInitializationTitle": "初始化 Kibana 数据视图或 Discover 会话时发生错误。",
     "xpack.transform.status": "状态",

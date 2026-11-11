@@ -72145,7 +72145,6 @@
     "xpack.transform.pivotPreview.PivotPreviewNoDataCalloutBody": "プレビューリクエストはデータを返しませんでした。オプションのクエリがデータを返し、グループ分け基準により使用されるフィールドと集約フィールドに値が存在することを確認してください。",
     "xpack.transform.pivotPreview.transformPreviewTitle": "トランスフォームプレビュー",
     "xpack.transform.preview.sourceIndexUnavailableMessage": "選択したプロジェクト範囲で、選択したデータビューに一致するソースインデックスはありません。別のプロジェクト範囲を選択するか、このスコープに存在するデータビューを選択してください。",
-    "xpack.transform.progress": "進捗",
     "xpack.transform.projectScope": "プロジェクトの範囲",
     "xpack.transform.searchItems.errorInitializationTitle": "KibanaデータビューまたはDiscoverセッションを初期化するときにエラーが発生しました。",
     "xpack.transform.status": "ステータス",

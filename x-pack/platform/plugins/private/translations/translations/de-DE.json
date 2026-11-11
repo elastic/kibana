@@ -71960,7 +71960,6 @@
     "xpack.transform.pivotPreview.PivotPreviewNoDataCalloutBody": "Die Vorschauanforderung hat keine Daten zurückgegeben. Bitte stellen Sie sicher, dass die optionale Abfrage Daten zurückgibt und dass Werte für das Feld vorhanden sind, das von den Gruppierungs- und Aggregationsfeldern verwendet wird.",
     "xpack.transform.pivotPreview.transformPreviewTitle": "Transformationsvorschau",
     "xpack.transform.preview.sourceIndexUnavailableMessage": "Keine Quellindizes entsprechen der ausgewählten Datenansicht im ausgewählten Projektbereich. Wählen Sie einen anderen Projektbereich aus oder wählen Sie eine Datenansicht, die in diesem Bereich vorhanden ist.",
-    "xpack.transform.progress": "Fortschritt",
     "xpack.transform.projectScope": "Projektumfang",
     "xpack.transform.searchItems.errorInitializationTitle": "Beim Initialisieren der Kibana-Datenansicht oder der Discover-Sitzung ist ein Fehler aufgetreten.",
     "xpack.transform.status": "Status",

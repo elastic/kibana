@@ -71691,7 +71691,6 @@
     "xpack.transform.pivotPreview.PivotPreviewNoDataCalloutBody": "La requête d'aperçu n'a renvoyé aucune donnée. Veuillez vous assurer que la requête facultative renvoie des données et que les valeurs existent pour le champ utilisé par le champ Regrouper par et le champ d'agrégation.",
     "xpack.transform.pivotPreview.transformPreviewTitle": "Aperçu de la transformation",
     "xpack.transform.preview.sourceIndexUnavailableMessage": "Aucun index source ne correspond à la data view sélectionnée dans le périmètre de projet sélectionné. Sélectionnez un autre périmètre de projet ou choisissez une data view qui existe dans ce périmètre.",
-    "xpack.transform.progress": "Progression",
     "xpack.transform.projectScope": "Périmètre du projet",
     "xpack.transform.searchItems.errorInitializationTitle": "Une erreur s'est produite lors de l'initialisation de la vue de données Kibana ou de la session Discover.",
     "xpack.transform.status": "État",

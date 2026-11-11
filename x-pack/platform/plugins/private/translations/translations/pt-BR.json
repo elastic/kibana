@@ -72157,7 +72157,6 @@
     "xpack.transform.pivotPreview.PivotPreviewNoDataCalloutBody": "A solicitação de prévia não retornou dados. Certifique-se de que a consulta opcional retorne dados e que existam valores para o campo usado nos campos de agrupamento e agregação.",
     "xpack.transform.pivotPreview.transformPreviewTitle": "Pré-visualização da transformação",
     "xpack.transform.preview.sourceIndexUnavailableMessage": "Nenhum índice de origem corresponde à Data view selecionada no escopo do projeto selecionado. Selecione outro escopo de projeto ou escolha uma Data view que exista nesse escopo.",
-    "xpack.transform.progress": "Progresso",
     "xpack.transform.projectScope": "Escopo do projeto",
     "xpack.transform.searchItems.errorInitializationTitle": "Ocorreu um erro ao inicializar a Data view do Kibana ou a sessão do Discover.",
     "xpack.transform.status": "Status",
