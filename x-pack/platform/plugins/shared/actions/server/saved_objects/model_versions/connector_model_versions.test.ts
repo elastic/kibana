@@ -22,6 +22,15 @@ describe('Connector Model Versions', () => {
   const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
   const versions = connectorModelVersions(encryptedSavedObjects);
 
+  describe('version 5', () => {
+    it('introduces only schemas without backfilling pins', () => {
+      const version5 = versions['5'] as SavedObjectsFullModelVersion;
+      expect(version5.changes).toEqual([]);
+      expect(version5.schemas?.create).toBeDefined();
+      expect(version5.schemas?.forwardCompatibility).toBeDefined();
+    });
+  });
+
   describe('version 1', () => {
     it('has correct structure', () => {
       const version1 = versions['1'] as SavedObjectsFullModelVersion;

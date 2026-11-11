@@ -12,6 +12,7 @@ import {
   rawConnectorSchemaV2,
   rawConnectorSchemaV3,
   rawConnectorSchemaV4,
+  rawConnectorSchemaV5,
 } from '../schemas/raw_connector';
 import { actionEncryptedRegistrationV2, actionEncryptedRegistrationV3 } from '../action_encryption';
 
@@ -93,4 +94,12 @@ export const connectorModelVersions = (
     inputType: actionEncryptedRegistrationV3,
     outputType: actionEncryptedRegistrationV3,
   }),
+  // Intermediate release: accept and retain pins, but do not populate them.
+  '5': {
+    changes: [],
+    schemas: {
+      create: rawConnectorSchemaV5,
+      forwardCompatibility: rawConnectorSchemaV5.extends({}, { unknowns: 'ignore' }),
+    },
+  },
 });
