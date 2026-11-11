@@ -95,22 +95,33 @@ const toSnakeCase = (key: string): string =>
     .replace(/[-\s]+/g, '_')
     .toLowerCase();
 
+/**
+ * Compares names without splitting camelCase: fetch lowercases header names, so a declared
+ * `X-DocuSign-Authentication` arrives as `x-docusign-authentication`.
+ */
+const toPlainKey = (key: string): string => key.toLowerCase().replace(/[-\s]+/g, '_');
+
 /** The redacted value of a credential key, or `undefined` when the key holds none. */
 type RedactEntry = (key: string, value: unknown) => string | undefined;
 
 /**
- * `redact` adds keys matched by their end; `names` adds keys matched whole, such as the
- * parameters a vendor's spec declares for its API keys, which can be as generic as `key`.
+ * `redact` adds keys matched by their end; `names` adds keys matched whole and
+ * case-insensitively, such as the parameters a vendor's spec declares for its API keys, which
+ * can be as generic as `key`.
  */
 const createRedactEntry = (
   redact: readonly string[] = [],
   names: readonly string[] = []
 ): RedactEntry => {
   const suffixes = [...CREDENTIAL_SUFFIXES, ...redact.map(toSnakeCase)];
-  const exact = new Set([...CREDENTIAL_KEYS, ...names.map(toSnakeCase)]);
+  const declared = new Set(names.map(toPlainKey));
   return (key, value) => {
     const normalized = toSnakeCase(key);
-    if (!exact.has(normalized) && !suffixes.some((end) => normalized.endsWith(end))) {
+    if (
+      !CREDENTIAL_KEYS.has(normalized) &&
+      !declared.has(toPlainKey(key)) &&
+      !suffixes.some((end) => normalized.endsWith(end))
+    ) {
       return undefined;
     }
     const scheme =

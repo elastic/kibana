@@ -519,10 +519,12 @@ describe('createEmulatorFetch with capture', () => {
       components: {
         securitySchemes: {
           figma: { type: 'apiKey', in: 'header', name: 'X-Figma-Token' },
+          // Camel-cased, as fetch lowercases the header it arrives in to x-docusign-authentication.
+          docusign: { type: 'apiKey', in: 'header', name: 'X-DocuSign-Authentication' },
           trello: { type: 'apiKey', in: 'query', name: 'key' },
         },
       },
-      security: [{ figma: [], trello: [] }],
+      security: [{ figma: [], docusign: [], trello: [] }],
     };
     const { fetch, calls } = createEmulatorFetch({
       specs: [securedSpec],
@@ -530,13 +532,18 @@ describe('createEmulatorFetch with capture', () => {
       respond: listResponder,
     });
 
-    await fetch(`${BASE_URL}/items?key=k`, { headers: { 'X-Figma-Token': 'f' } });
+    await fetch(`${BASE_URL}/items?key=k`, {
+      headers: { 'X-Figma-Token': 'f', 'x-docusign-AUTHENTICATION': 'd' },
+    });
 
     expect(calls[0]).toMatchObject({
       status: 200,
       captured: {
         request: {
-          headers: { 'x-figma-token': '[redacted]' },
+          headers: {
+            'x-figma-token': '[redacted]',
+            'x-docusign-authentication': '[redacted]',
+          },
           query: { key: '[redacted]' },
         },
       },
