@@ -8,6 +8,7 @@
  */
 
 import { spawn } from 'child_process';
+import { sortRows } from './format';
 import type { SettingRow, SettingsEditor, SettingsList } from './types';
 
 /** A command-line option of a start script, as its --help describes it. */
@@ -193,7 +194,8 @@ export const createLaunchFlags = (
     list: async () => {
       const all = await getFlags();
       return {
-        rows: all.map(toRow),
+        // Alphabetical like the settings lists, rather than in the order of the help.
+        rows: sortRows(all.map(toRow)),
         notes: [
           `Options of the start script, from its --help; ● marks the ones it runs with. Flags set here apply to this run only.`,
         ],

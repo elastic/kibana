@@ -105,13 +105,14 @@ describe('launch flags', () => {
     await editor.set({ key: '--port', detail: 'value · <port> · The port to bind to' }, '5611');
     const { rows } = await list();
     expect(rows.map(({ key, value, source }) => [key, value, source])).toEqual([
+      // Alphabetical, not in the order of the help.
+      ['--eis', undefined, undefined],
       ['--elasticsearch', undefined, undefined],
+      ['--no-base-path', 'true', '--kibana-arg'],
       ['--port', '5611', 'tui'],
       ['--serverless', undefined, undefined],
-      ['--no-base-path', 'true', '--kibana-arg'],
-      ['--eis', undefined, undefined],
     ]);
-    expect(rows[4].detail).toBe('switch · Auto-discover EIS inference endpoints');
+    expect(rows[0].detail).toBe('switch · Auto-discover EIS inference endpoints');
     expect(getFlagArgs(overrides)).toEqual(['--port', '5611']);
   });
 
