@@ -20,6 +20,7 @@ import { executeEsqlQuery } from '../utils/execute_esql_query';
 import {
   EMPTY_SOURCE_ERRORS,
   fetchFromV2AndSource,
+  resolveEpisodeSourceQueries,
   type EpisodeSourceError,
 } from '../utils/fetch_from_sources';
 import { buildAlertEventsTimeRangeFilter } from '../utils/build_alert_events_time_range_filter';
@@ -106,6 +107,11 @@ export const useEpisodesKpisQuery = ({
     ),
     queryFn: async ({ signal }) => {
       const timeRangeFilter = buildAlertEventsTimeRangeFilter(timeRange);
+      const sourceQueries = resolveEpisodeSourceQueries({
+        sources: filterState?.sources,
+        queryV2Source,
+        additionalSource: additionalEpisodesDataSource,
+      });
       const { v2, additional, errors } = await fetchFromV2AndSource({
         v2: () =>
           executeEsqlQuery<EpisodesKpisRow>({
@@ -118,10 +124,10 @@ export const useEpisodesKpisQuery = ({
             },
             abortSignal: signal,
           }),
-        source: additionalEpisodesDataSource,
+        source: sourceQueries.additionalSource,
         fromSource: (source) =>
           source.fetchKpis?.({ services, filterState, timeRange, abortSignal: signal }),
-        queryV2Source,
+        queryV2Source: sourceQueries.queryV2Source,
       });
 
       return {

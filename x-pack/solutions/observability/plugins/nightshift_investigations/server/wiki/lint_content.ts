@@ -79,11 +79,32 @@ const RULES: ReadonlyArray<{ rule: WikiLintRule; blocking: boolean; pattern: Reg
 
 const MAX_MATCH_LENGTH = 60;
 
+// A link a person shared is a pointer to be followed, not a claim about one occurrence, and its slug or
+// query string may hold an id or a time range, so the rules read the text around links only.
+const LINK_RUN = /https?:\/\/[^\s>\]]+/gi;
+
+// Kibana links nest parentheses (Rison, such as `_g=(time:(from:'...'))`), so a link ends at the first
+// closing parenthesis that has no opening one inside the link, which is the one that closes the prose
+// around it, as in "(see https://...)".
+const withoutLinks = (text: string): string =>
+  text.replace(LINK_RUN, (run) => {
+    let depth = 0;
+    for (let index = 0; index < run.length; index++) {
+      if (run[index] === '(') {
+        depth++;
+      } else if (run[index] === ')' && --depth < 0) {
+        return ` ${run.slice(index)}`;
+      }
+    }
+    return ' ';
+  });
+
 /** Returns every place the text carries a single-occurrence detail; an empty list means it is clean. */
 export const lintWikiContent = (text: string): WikiLintViolation[] => {
   const violations: WikiLintViolation[] = [];
+  const prose = withoutLinks(text);
   for (const { rule, blocking, pattern } of RULES) {
-    for (const found of text.matchAll(pattern)) {
+    for (const found of prose.matchAll(pattern)) {
       violations.push({ rule, blocking, match: found[0].trim().slice(0, MAX_MATCH_LENGTH) });
     }
   }

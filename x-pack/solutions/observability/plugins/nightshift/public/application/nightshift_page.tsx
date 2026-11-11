@@ -481,7 +481,7 @@ export function NightshiftPage(): React.ReactElement | null {
               canUseAutomationsPage
                 ? {
                     href: application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/' }),
-                    label: 'Nightshift',
+                    label: 'nightshift',
                   }
                 : undefined
             }

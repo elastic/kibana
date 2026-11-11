@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { EventBus } from '../event_bus';
 import { createEventBusMock } from '../event_bus/event_bus.mock';
 import type { AlertingDomainEvent, AlertingPublisherContext } from '../domain_events';
@@ -14,17 +15,19 @@ import { AlertActionEventPublisher } from './alert_action_event_publisher';
 /**
  * Builds a real {@link AlertActionEventPublisher} wired to a jest-mocked
  * {@link EventBus}. Use this when you want to test the publisher's
- * translation/dispatch behaviour against assertions on the bus.
+ * translation and dispatch behaviour.
  */
 export function createAlertActionEventPublisher(): {
   publisher: AlertActionEventPublisher;
   eventBus: jest.Mocked<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;
+  mockLogger: jest.Mocked<Logger>;
 } {
   const eventBus = createEventBusMock<AlertingDomainEvent, AlertingPublisherContext>();
-  const { loggerService } = createLoggerService();
+  const { loggerService, mockLogger } = createLoggerService();
 
   return {
     publisher: new AlertActionEventPublisher(eventBus, loggerService),
     eventBus,
+    mockLogger,
   };
 }
