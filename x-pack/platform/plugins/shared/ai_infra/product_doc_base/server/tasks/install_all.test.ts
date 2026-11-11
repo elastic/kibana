@@ -31,15 +31,24 @@ const task = (fields: Partial<ConcreteTaskInstance>) => fields as ConcreteTaskIn
 describe('InstallAll task', () => {
   let installProductIfNeeded: jest.Mock;
   let wasUninstalledSince: jest.Mock;
+  let getRepositoryVersion: jest.Mock;
   let withLock: jest.Mock;
   let logger: ReturnType<typeof loggerMock.create>;
+  let taskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
+  let runTaskWith: (
+    params: Record<string, unknown>,
+    state?: Record<string, unknown>
+  ) => Promise<unknown>;
   let runTask: () => Promise<unknown>;
 
   beforeEach(() => {
     installProductIfNeeded = jest.fn().mockResolvedValue(true);
     wasUninstalledSince = jest.fn().mockResolvedValue(false);
     withLock = jest.fn((_lockId: string, callback: () => Promise<void>) => callback());
+    getRepositoryVersion = jest.fn().mockResolvedValue(undefined);
     logger = loggerMock.create();
+    taskManagerStart = taskManagerMock.createStart();
+    taskManagerStart.get.mockResolvedValue(task({ id: 'install-task', state: {} }));
     const taskManager = taskManagerMock.createSetup();
     registerInstallAllTaskDefinition({
       taskManager,
@@ -47,16 +56,18 @@ describe('InstallAll task', () => {
       getServices: () =>
         ({
           logger,
-          packageInstaller: { installProductIfNeeded, wasUninstalledSince },
+          taskManager: taskManagerStart,
+          packageInstaller: { installProductIfNeeded, wasUninstalledSince, getRepositoryVersion },
         } as unknown as InternalServices),
     });
     const definition = taskManager.registerTaskDefinitions.mock.calls[0][0][INSTALL_ALL_TASK_TYPE];
-    runTask = () =>
+    runTaskWith = (params, state = {}) =>
       definition
         .createTaskRunner({
-          taskInstance: { params: { inferenceId: '.elser', requestedAt }, state: {} },
+          taskInstance: { id: 'install-task', params, state },
         } as unknown as RunContext)
         .run();
+    runTask = () => runTaskWith({ inferenceId: '.elser', requestedAt });
   });
 
   it('installs every product under the shared install lock and completes', async () => {
@@ -121,6 +132,37 @@ describe('InstallAll task', () => {
 
     expect(installProductIfNeeded).not.toHaveBeenCalled();
     expect(result).toEqual({ state: {}, runAt: expect.any(Date) });
+  });
+
+  it('defers a recent request made against a newer repository than this node has, keeping the state', async () => {
+    getRepositoryVersion.mockResolvedValue('2026-10-12T20:25:34.000Z');
+
+    const result = await runTaskWith(
+      {
+        inferenceId: '.elser',
+        requestedAt: new Date().toISOString(),
+        repositoryVersion: '2026-11-01T00:00:00.000Z',
+      },
+      { superseded: false }
+    );
+
+    expect(installProductIfNeeded).not.toHaveBeenCalled();
+    expect(withLock).not.toHaveBeenCalled();
+    expect(result).toEqual({ state: { superseded: false }, runAt: expect.any(Date) });
+  });
+
+  it('completes without installing when it was marked superseded', async () => {
+    taskManagerStart.get.mockResolvedValue(
+      task({ id: 'install-task', state: { superseded: true } })
+    );
+
+    const result = await runTaskWith(
+      { inferenceId: '.elser', requestedAt, repositoryVersion: '2026-10-12T20:25:34.000Z' },
+      { superseded: true }
+    );
+
+    expect(installProductIfNeeded).not.toHaveBeenCalled();
+    expect(result).toEqual({ state: { superseded: true } });
   });
 });
 

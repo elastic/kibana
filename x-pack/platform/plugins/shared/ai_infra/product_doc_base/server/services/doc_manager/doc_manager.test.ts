@@ -146,6 +146,7 @@ describe('DocumentationManager', () => {
         logger,
         inferenceId: DEFAULT_INFERENCE_ID,
         force: false,
+        repositoryVersion: '2026-10-12T20:25:34.000Z',
       });
 
       expect(waitUntilTaskCompletedMock).not.toHaveBeenCalled();
@@ -290,6 +291,7 @@ describe('DocumentationManager', () => {
         logger,
         inferenceId: defaultInferenceEndpoints.JINAv5,
         force: false,
+        repositoryVersion: '2026-10-12T20:25:34.000Z',
       });
       expect(waitUntilTaskCompletedMock).not.toHaveBeenCalled();
       expect(scheduleEnsureUpToDateTaskMock).not.toHaveBeenCalled();
@@ -323,6 +325,7 @@ describe('DocumentationManager', () => {
         logger,
         inferenceId: defaultInferenceEndpoints.JINAv5,
         force: false,
+        repositoryVersion: '2026-10-12T20:25:34.000Z',
       });
       expect(scheduleEnsureUpToDateTaskMock).not.toHaveBeenCalled();
     });

@@ -95,7 +95,6 @@ export class PackageInstaller {
   private readonly currentVersion: string;
   private readonly elserInferenceId: string;
   private readonly isServerless: boolean;
-  private repositoryVersion?: Promise<string | undefined>;
 
   constructor({
     artifactsFolder,
@@ -125,15 +124,7 @@ export class PackageInstaller {
    * repository's index, undefined for remote repositories.
    */
   getRepositoryVersion(): Promise<string | undefined> {
-    if (!this.repositoryVersion) {
-      this.repositoryVersion = fetchLocalRepositoryVersion(
-        this.getArtifactRepositoryOptions()
-      ).catch((error) => {
-        this.repositoryVersion = undefined;
-        throw error;
-      });
-    }
-    return this.repositoryVersion;
+    return fetchLocalRepositoryVersion(this.getArtifactRepositoryOptions());
   }
 
   /**

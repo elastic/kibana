@@ -103,6 +103,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
       logger: this.logger,
       inferenceId,
       force,
+      repositoryVersion: await this.getRepositoryVersion(),
     });
 
     if (request) {

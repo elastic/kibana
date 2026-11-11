@@ -23,6 +23,10 @@ import {
   logArtifactsFolderUsageMock,
   purgeArtifactsFolderMock,
 } from './package_installer.test.mocks';
+import Fs from 'fs';
+import Os from 'os';
+import Path from 'path';
+import { pathToFileURL } from 'url';
 import { cloneDeep } from 'lodash';
 import type { ProductName } from '@kbn/product-doc-common';
 import {
@@ -807,6 +811,38 @@ describe('PackageInstaller', () => {
       await expect(packageInstaller.updateProductIfNeeded(params)).rejects.toThrow(
         'es unavailable'
       );
+    });
+  });
+
+  describe('getRepositoryVersion', () => {
+    it('reflects a local repository index that changed since the last call', async () => {
+      const repositoryDir = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'product-doc-repository-'));
+      const writeIndex = (lastModified: string) =>
+        Fs.writeFileSync(
+          Path.join(repositoryDir, 'index.xml'),
+          `<ListBucketResult><Contents><Key>kb-product-doc-kibana-latest.zip</Key><LastModified>${lastModified}</LastModified></Contents></ListBucketResult>`
+        );
+      const localInstaller = new PackageInstaller({
+        artifactsFolder,
+        logger,
+        esClient,
+        productDocClient,
+        artifactRepositoryUrl: pathToFileURL(repositoryDir).href,
+        kibanaVersion,
+      });
+      try {
+        writeIndex('2026-10-12T20:25:34.000Z');
+        await expect(localInstaller.getRepositoryVersion()).resolves.toBe(
+          '2026-10-12T20:25:34.000Z'
+        );
+
+        writeIndex('2026-11-01T00:00:00.000Z');
+        await expect(localInstaller.getRepositoryVersion()).resolves.toBe(
+          '2026-11-01T00:00:00.000Z'
+        );
+      } finally {
+        Fs.rmSync(repositoryDir, { recursive: true, force: true });
+      }
     });
   });
 
