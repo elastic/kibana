@@ -116,9 +116,10 @@ export const PinnedConversationList: React.FC<PinnedConversationListProps> = ({
                       ${isDragging
                         ? euiTheme.colors.borderBasePrimary
                         : euiTheme.colors.borderBasePlain};
-                    padding: ${euiTheme.size.s};
+                    padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+                    font-size: ${euiTheme.size.m};
                     text-align: center;
-                    min-height: ${euiTheme.size.xxl};
+                    min-height: ${euiTheme.size.xl};
                     background-color: ${isDragging ? backgroundColor : 'transparent'};
                     transition: background-color 0.15s, border-color 0.15s;
                   `,

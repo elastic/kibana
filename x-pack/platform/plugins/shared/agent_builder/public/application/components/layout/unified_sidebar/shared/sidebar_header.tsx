@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
+  EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -60,10 +61,13 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
   const history = useHistory();
   const { navigateToAgentBuilderUrl } = useNavigation();
 
-  // Vertical padding matches the compact app header beside it, so both rows share one height.
+  // Matches the compact app header beside it: a 48px row plus its 1px bottom border.
+  // Inline padding lines the title up with the section labels and items below.
   const headerStyles = css`
     gap: ${euiTheme.size.s};
-    padding: ${euiTheme.size.s} ${euiTheme.size.base} ${euiTheme.size.s} ${euiTheme.size.l};
+    justify-content: center;
+    min-block-size: calc(${euiTheme.size.xxxl} + ${euiTheme.border.width.thin});
+    padding: 0 calc(${euiTheme.size.m} + ${euiTheme.size.s});
     flex-grow: 0;
   `;
 
@@ -138,6 +142,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               iconType="chevronSingleLeft"
+              iconSize="s"
               iconSide="left"
               size="s"
               flush="both"
@@ -152,7 +157,9 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
                 detail: AGENT_BUILDER_UI_EBT.detail.layerTransition.BACK_CLICK,
               })}
             >
-              {labels.manageComponents}
+              <EuiTitle size="xxs">
+                <span>{labels.manageComponents}</span>
+              </EuiTitle>
             </EuiButtonEmpty>
           </EuiFlexItem>
         )}
@@ -165,7 +172,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
                 aria-expanded={true}
                 color="text"
                 css={headingColorStyles}
-                size="s"
+                size="xs"
                 onClick={onToggleCondensed}
                 {...getEbtProps({
                   element: AGENT_BUILDER_UI_EBT.element.sidebar,
