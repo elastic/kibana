@@ -12,7 +12,7 @@ import { test } from '../fixtures';
 
 const TAB_NAMES = ['map', 'sources', 'destinations', 'classic'];
 
-// Keeps the Classic tab independent of the stack's data streams.
+// A saved field override, so the Classic tab shows no matter what the stack's data streams are.
 const mockStreamsList = async (page: ScoutPage) => {
   await page.route(
     (url) => url.pathname.endsWith('/api/streams'),
@@ -20,7 +20,17 @@ const mockStreamsList = async (page: ScoutPage) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ streams: [{ name: 'logs-test-default', type: 'classic' }] }),
+        body: JSON.stringify({
+          streams: [
+            {
+              name: 'logs-test-default',
+              type: 'classic',
+              ingest: {
+                classic: { field_overrides: { message: { type: 'keyword' } } },
+              },
+            },
+          ],
+        }),
       });
     }
   );
@@ -44,20 +54,20 @@ test.describe('Streams layout', { tag: tags.serverless.observability.complete },
     });
   });
 
-  test('renders every tab and lands on map', async ({ pageObjects: { streams } }) => {
+  test('renders every tab and lands on classic', async ({ pageObjects: { streams } }) => {
     await streams.gotoStreamsLayout();
 
     for (const tabName of TAB_NAMES) {
       await expect(streams.getStreamsLayoutTab(tabName)).toBeVisible();
     }
 
-    await expect(streams.getStreamsLayoutTab('map')).toHaveAttribute('aria-selected', 'true');
+    await expect(streams.getStreamsLayoutTab('classic')).toHaveAttribute('aria-selected', 'true');
   });
 
-  test('falls back to the map tab for an unknown tab', async ({ pageObjects: { streams } }) => {
+  test('falls back to the classic tab for an unknown tab', async ({ pageObjects: { streams } }) => {
     await streams.gotoStreamsLayoutTab('does-not-exist');
 
-    await expect(streams.getStreamsLayoutTab('map')).toHaveAttribute('aria-selected', 'true');
+    await expect(streams.getStreamsLayoutTab('classic')).toHaveAttribute('aria-selected', 'true');
   });
 
   test('the new experience callout opens the map and stays dismissed', async ({
