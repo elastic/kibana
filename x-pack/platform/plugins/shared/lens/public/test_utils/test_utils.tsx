@@ -11,8 +11,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { RenderOptions } from '@testing-library/react';
 import { render } from '@testing-library/react';
-import type { ComponentType, MountRendererProps } from 'enzyme';
-import { mount } from 'enzyme';
 import React from 'react';
 import type { PropsWithChildren, ReactElement } from 'react';
 import type { LensAppServices } from '@kbn/lens-common';
@@ -41,31 +39,4 @@ export const renderWithProviders = (
   const rtlRender = render(ui, { wrapper: Wrapper, ...options });
 
   return rtlRender;
-};
-
-// legacy enzyme usage: remove when all tests are migrated to @testing-library/react
-export const mountWithProviders = (component: React.ReactElement, options?: MountRendererProps) => {
-  const { wrappingComponent, wrappingComponentProps } = options || {};
-
-  const WrappingComponent = wrappingComponent as React.ComponentType<React.PropsWithChildren<{}>>;
-
-  const wrapper: React.FC<PropsWithChildren<{}>> = ({ children }) => (
-    <KibanaContextProvider services={coreMock.createStart() as unknown as LensAppServices}>
-      <I18nProvider>
-        <EuiThemeProvider>
-          {WrappingComponent ? (
-            <WrappingComponent {...wrappingComponentProps}>{children}</WrappingComponent>
-          ) : (
-            children
-          )}
-        </EuiThemeProvider>
-      </I18nProvider>
-    </KibanaContextProvider>
-  );
-
-  const instance = mount(component, {
-    ...options,
-    wrappingComponent: wrapper as ComponentType<PropsWithChildren<{}>>,
-  });
-  return instance;
 };
