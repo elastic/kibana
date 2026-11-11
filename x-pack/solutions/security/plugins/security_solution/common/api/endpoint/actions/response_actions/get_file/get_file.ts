@@ -7,7 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { BaseActionRequestSchema } from '../../common/base';
+import { BaseActionRequestSchema, ExportParameterSchema } from '../../common/base';
 
 export const EndpointActionGetFileSchema = {
   body: schema.object(
@@ -18,6 +18,8 @@ export const EndpointActionGetFileSchema = {
         path: schema.string({ minLength: 1, maxLength: 4096 }),
         // `force` applies only to the Elastic Defend Endpoint on Windows (validated below)
         force: schema.maybe(schema.boolean()),
+        // `export` applies only to the Elastic Defend Endpoint (validated below)
+        export: ExportParameterSchema,
       }),
     },
     {
@@ -28,6 +30,14 @@ export const EndpointActionGetFileSchema = {
           bodyContent.agent_type !== 'endpoint'
         ) {
           return `[parameters.force]: is not valid with agent type of ${bodyContent.agent_type}`;
+        }
+
+        if (
+          bodyContent.parameters.export !== undefined &&
+          bodyContent.agent_type &&
+          bodyContent.agent_type !== 'endpoint'
+        ) {
+          return `[parameters.export]: is not valid with agent type of ${bodyContent.agent_type}`;
         }
       },
     }

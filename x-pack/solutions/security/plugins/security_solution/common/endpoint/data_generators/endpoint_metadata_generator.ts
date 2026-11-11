@@ -182,6 +182,12 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
       capabilities.push('get_file_force');
     }
 
+    // v9.7.0 introduced `file_export` capability (export `get-file` / `memory-dump` output to
+    // external storage). Reported on every OS.
+    if (gte(agentVersion, '9.7.0')) {
+      capabilities.push('file_export');
+    }
+
     const hostMetadataDoc: HostMetadataInterface = {
       '@timestamp': ts,
       event: {

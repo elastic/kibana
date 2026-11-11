@@ -135,6 +135,22 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   protected async validateRequest(
     actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<any, any, any>
   ): Promise<ResponseActionsClientValidateRequestResponse> {
+    // Get-file/Memory Dump: `export` is gated by a feature flag. (The Endpoint capability that it
+    // requires is checked up front in `validateCommandCapabilities()`.)
+    if (
+      (actionRequest.command === 'get-file' || actionRequest.command === 'memory-dump') &&
+      actionRequest.parameters?.export !== undefined &&
+      !this.options.endpointService.experimentalFeatures.responseActionsEndpointFileExport
+    ) {
+      return {
+        isValid: false,
+        error: new ResponseActionsClientError(
+          `${actionRequest.command} \`export\` parameter is not enabled`,
+          400
+        ),
+      };
+    }
+
     // Memory Dump: ensure that agents/Endpoint support this command
     if (actionRequest.command === 'memory-dump') {
       const memDumpType = actionRequest.parameters.type;
@@ -279,8 +295,9 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   }
 
   /**
-   * Returns an error if the request uses a command parameter that requires an Endpoint capability
-   * which one or more of the target hosts do not report.
+   * Returns an error if the request uses command parameters that require Endpoint capabilities
+   * which one or more of the target hosts do not report. Every required capability is checked (ex.
+   * get-file with both `force` and `export`) and the error lists each one that is not supported.
    *
    * This intentionally uses the host metadata that was already retrieved when the agent IDs were
    * checked (instead of querying for it again) and is only called once per request. Re-running it
@@ -296,36 +313,50 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   ): ResponseActionsClientError | undefined {
     // `parameters` is a union of every command's parameters
     const parameters = (actionReq.parameters ?? {}) as Record<string, unknown>;
-    let capability: EndpointCapabilities | undefined;
-    let unsupportedMessage = '';
+    const requirements: Array<{ capability: EndpointCapabilities; unsupportedMessage: string }> =
+      [];
 
     if (command === 'kill-process' && parameters.kill_descendants === true) {
-      capability = 'kill_process_descendants';
-      unsupportedMessage = 'killing process descendents';
-    } else if (command === 'get-file' && parameters.force === true) {
+      requirements.push({
+        capability: 'kill_process_descendants',
+        unsupportedMessage: 'killing process descendents',
+      });
+    }
+
+    if (command === 'get-file' && parameters.force === true) {
       // `force` (read a locked file from a volume snapshot) is supported on Windows only
-      capability = 'get_file_force';
-      unsupportedMessage = 'the get-file `force` parameter (Windows only)';
+      requirements.push({
+        capability: 'get_file_force',
+        unsupportedMessage: 'the get-file `force` parameter (Windows only)',
+      });
     }
 
-    if (!capability) {
-      return;
+    if ((command === 'get-file' || command === 'memory-dump') && parameters.export !== undefined) {
+      requirements.push({
+        capability: 'file_export',
+        unsupportedMessage: 'exporting files to external storage',
+      });
     }
 
-    const unsupportedAgents = hosts
-      .filter((endpointMeta) => !endpointMeta.Endpoint.capabilities?.includes(capability))
-      .map(
-        (endpointMeta) =>
-          `${endpointMeta.agent.id} / ${endpointMeta.host.hostname} (Agent v.${endpointMeta.agent.version})`
-      );
+    const errorMessages = requirements.flatMap(({ capability, unsupportedMessage }) => {
+      const unsupportedAgents = hosts
+        .filter((endpointMeta) => !endpointMeta.Endpoint.capabilities?.includes(capability))
+        .map(
+          (endpointMeta) =>
+            `${endpointMeta.agent.id} / ${endpointMeta.host.hostname} (Agent v.${endpointMeta.agent.version})`
+        );
 
-    if (unsupportedAgents.length > 0) {
-      return new ResponseActionsClientError(
-        `The following agent IDs do not support ${unsupportedMessage}: ${unsupportedAgents.join(
-          ', '
-        )}`,
-        400
-      );
+      return unsupportedAgents.length > 0
+        ? [
+            `The following agent IDs do not support ${unsupportedMessage}: ${unsupportedAgents.join(
+              ', '
+            )}`,
+          ]
+        : [];
+    });
+
+    if (errorMessages.length > 0) {
+      return new ResponseActionsClientError(errorMessages.join('. '), 400);
     }
   }
 

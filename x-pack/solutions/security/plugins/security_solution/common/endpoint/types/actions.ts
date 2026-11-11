@@ -100,6 +100,20 @@ export interface KillProcessActionOutputContent {
   descendants?: KilledProcessDescendant[];
 }
 
+/** Where Endpoint uploaded the file of an action sent with `parameters.export`. Endpoint sends it only on success. */
+export interface ResponseActionExportedOutput {
+  /** The provider id from the request's `parameters.export` */
+  export: string;
+  /** The provider `type`, e.g. `azure_blob`. A plain string: newer Endpoints may report types this Kibana doesn't know */
+  service: string;
+  /** Storage account name */
+  account: string;
+  /** Container name */
+  container: string;
+  /** Blob name inside the container, e.g. `<action id>/upload.zip` */
+  path: string;
+}
+
 export interface ResponseActionGetFileOutputContent {
   code: string;
   zip_size: number;
@@ -115,6 +129,8 @@ export interface ResponseActionGetFileOutputContent {
    * The relative API path to download the output file for this response action
    */
   downloadUri?: string;
+  /** Set when the file was uploaded to an export provider instead of to Fleet */
+  exported?: ResponseActionExportedOutput;
 }
 
 export interface ResponseActionExecuteOutputContent {
@@ -310,6 +326,8 @@ export interface ResponseActionGetFileParameters {
    * type only, and supported on Windows only (requires the `get_file_force` capability).
    */
   force?: boolean;
+  /** Id of an export provider in the host's Elastic Defend policy. Endpoint uploads the file there instead of to Fleet */
+  export?: string;
 }
 
 export interface ResponseActionsExecuteParameters {
@@ -358,6 +376,10 @@ export interface ResponseActionMemoryDumpOutputContent {
    * Indicates if the user space memory was included in the dump
    */
   user_space_included?: boolean;
+  /** Set when the dump was uploaded to an export provider instead of to Fleet */
+  exported?: ResponseActionExportedOutput;
+  /** The dump file name. Only for Endpoint starting with v9.7 */
+  file_name?: string;
 }
 
 export type EndpointActionDataParameterTypes =
@@ -382,7 +404,8 @@ export type EndpointActionResponseDataOutput =
   | KillProcessActionOutputContent
   | ResponseActionScanOutputContent
   | ResponseActionRunScriptOutputContent
-  | ResponseActionCancelOutputContent;
+  | ResponseActionCancelOutputContent
+  | ResponseActionMemoryDumpOutputContent;
 
 /**
  * The data stored with each Response Action under `EndpointActions.data` property
