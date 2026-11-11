@@ -50,7 +50,7 @@ import {
   getCaseObservables,
   getObservablesSummary,
   observableKey,
-  updateCaseObservableDescription,
+  updateCaseObservable,
   withObservablesSummary,
 } from './observables_storage';
 
@@ -262,24 +262,28 @@ export const updateObservable = async (
     await ensureAuthorized(authorization, retrievedCase);
 
     const existing = await getCaseObservable(retrievedCase.id, observableId, clientArgs);
-    const { typeKey, value: currentValue } = existing.attributes.data;
-    const { value, description } = paramArgs.observable;
+    const { typeKey, value: currentValue, metadata: currentMetadata } = existing.attributes.data;
+    const { value, description, metadata } = paramArgs.observable;
 
     validateObservableValue(typeKey, value);
 
     if (value === currentValue) {
-      await updateCaseObservableDescription(
+      await updateCaseObservable(
         observableId,
-        { typeKey, value, description },
+        { typeKey, value, description, ...(metadata !== undefined && { metadata }) },
         clientArgs
       );
     } else {
       // The id is derived from the value, so a new value is a new observable. Create first so a
-      // duplicate value fails the request before the original is removed.
+      // duplicate value fails the request before the original is removed. The new observable keeps
+      // the metadata unless the request replaces or clears it.
+      const nextMetadata = metadata === undefined ? currentMetadata : metadata;
       const { added } = await createCaseObservables({
         caseId: retrievedCase.id,
         owner: retrievedCase.attributes.owner,
-        observables: [{ typeKey, value, description }],
+        observables: [
+          { typeKey, value, description, ...(nextMetadata != null && { metadata: nextMetadata }) },
+        ],
         clientArgs,
       });
 

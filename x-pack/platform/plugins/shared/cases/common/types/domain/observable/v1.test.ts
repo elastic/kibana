@@ -28,4 +28,11 @@ describe('CaseObservableSchema', () => {
     expect(result.success).toBe(true);
     expect(result.data).toStrictEqual(observable);
   });
+
+  it('keeps the metadata', () => {
+    const withMetadata = { ...observable, metadata: { verdict: 'malicious' } };
+    const result = CaseObservableSchema.safeParse(withMetadata);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(withMetadata);
+  });
 });

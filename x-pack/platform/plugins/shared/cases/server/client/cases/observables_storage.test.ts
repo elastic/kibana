@@ -7,9 +7,13 @@
 
 import { createCasesClientMockArgs } from '../mocks';
 import {
+  buildObservableAttachmentAttributes,
+  createCaseObservables,
   deriveObservableId,
   findCaseObservables,
   getObservablesSummary,
+  toObservable,
+  updateCaseObservable,
   withObservablesSummary,
 } from './observables_storage';
 
@@ -228,6 +232,22 @@ describe('observables storage', () => {
       expect(summaries.has('case-2')).toBe(false);
     });
 
+    it('leaves the metadata out of the preview', async () => {
+      (unsecuredSavedObjectsClient.find as jest.Mock).mockResolvedValue({
+        total: 0,
+        saved_objects: [],
+        aggregations: { refs: { caseIds: { buckets: [] } } },
+      });
+
+      await getObservablesSummary(['case-1'], clientArgs);
+
+      const { aggs } = (unsecuredSavedObjectsClient.find as jest.Mock).mock.calls[0][0];
+      const { _source: source } =
+        aggs.refs.aggregations.caseIds.aggregations.reverse.aggregations.preview.top_hits;
+      expect(source).toEqual(expect.arrayContaining(['type', 'cases-attachments.data.value']));
+      expect(source).not.toContain('cases-attachments.data.metadata');
+    });
+
     it('does not query when there are no cases', async () => {
       expect((await getObservablesSummary([], clientArgs)).size).toBe(0);
       expect(unsecuredSavedObjectsClient.find).not.toHaveBeenCalled();
@@ -247,6 +267,90 @@ describe('observables storage', () => {
       expect(
         withObservablesSummary({ id: 'case-2', observables: [], total_observables: 3 }, new Map())
       ).toEqual({ id: 'case-2', observables: [], total_observables: 0 });
+    });
+  });
+
+  describe('metadata', () => {
+    const metadata = { verdict: 'malicious', virustotal: 'https://www.virustotal.com/gui/ip/1' };
+
+    it('maps the stored metadata to the observable and leaves it out when there is none', () => {
+      const so = savedObject('a', '10.0.0.1');
+      expect(
+        toObservable({
+          ...so,
+          attributes: { ...so.attributes, data: { ...so.attributes.data, metadata } },
+        } as never).metadata
+      ).toEqual(metadata);
+      expect(toObservable(so as never)).not.toHaveProperty('metadata');
+      expect(
+        toObservable({
+          ...so,
+          attributes: { ...so.attributes, data: { ...so.attributes.data, metadata: null } },
+        } as never)
+      ).not.toHaveProperty('metadata');
+    });
+
+    it('stores the metadata of a new observable', () => {
+      const attributes = buildObservableAttachmentAttributes({
+        observable: {
+          typeKey: 'observable-type-ipv4',
+          value: '10.0.0.1',
+          description: null,
+          metadata,
+        },
+        owner: 'securitySolution',
+        createdAt: '2026-11-05T00:00:00.000Z',
+        createdBy: { username: 'elastic', full_name: null, email: null },
+      });
+
+      expect(attributes.data).toEqual({
+        typeKey: 'observable-type-ipv4',
+        value: '10.0.0.1',
+        description: null,
+        metadata,
+      });
+    });
+
+    it('creates observables with their metadata and returns it', async () => {
+      (unsecuredSavedObjectsClient.bulkCreate as jest.Mock).mockImplementation(
+        async (objects: Array<{ id: string }>) => ({
+          saved_objects: objects.map(({ id }) => ({ id, type: 'cases-attachments' })),
+        })
+      );
+
+      const { added } = await createCaseObservables({
+        caseId: 'case-1',
+        owner: 'securitySolution',
+        observables: [
+          { typeKey: 'observable-type-ipv4', value: '10.0.0.1', description: null, metadata },
+          { typeKey: 'observable-type-ipv4', value: '10.0.0.2', description: null },
+        ],
+        clientArgs,
+      });
+
+      const [objects] = (unsecuredSavedObjectsClient.bulkCreate as jest.Mock).mock.calls[0];
+      expect(objects[0].attributes.data.metadata).toEqual(metadata);
+      expect(objects[1].attributes.data).not.toHaveProperty('metadata');
+      expect(added[0].metadata).toEqual(metadata);
+      expect(added[1]).not.toHaveProperty('metadata');
+    });
+
+    it.each([
+      ['replaces', metadata],
+      ['clears', null],
+    ])('%s the metadata in a partial update', async (_, next) => {
+      await updateCaseObservable(
+        'a',
+        { typeKey: 'observable-type-ipv4', value: '10.0.0.1', description: null, metadata: next },
+        clientArgs
+      );
+
+      expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+        'cases-attachments',
+        'a',
+        expect.objectContaining({ data: expect.objectContaining({ metadata: next }) }),
+        { refresh: 'wait_for' }
+      );
     });
   });
 });

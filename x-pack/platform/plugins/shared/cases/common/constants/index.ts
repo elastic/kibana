@@ -427,6 +427,10 @@ export const MAX_OBSERVABLES_FIND_PER_PAGE = 100;
 /** Matches the keyword `ignore_above`, so every stored value is searchable and sortable. */
 export const MAX_OBSERVABLE_VALUE_LENGTH = 1_024;
 export const MAX_OBSERVABLE_DESCRIPTION_LENGTH = 1_024;
+export const MAX_OBSERVABLE_METADATA_ENTRIES = 20;
+export const MAX_OBSERVABLE_METADATA_KEY_LENGTH = 256;
+/** Matches the `flattened` field's `ignore_above`, so every stored value is searchable. */
+export const MAX_OBSERVABLE_METADATA_VALUE_LENGTH = 1_024;
 
 /**
  * Delays
