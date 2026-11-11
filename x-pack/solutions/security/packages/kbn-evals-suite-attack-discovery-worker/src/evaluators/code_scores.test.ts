@@ -20,6 +20,7 @@ import {
   scoreStageModelResolved,
   scoreVerdictMatchesGold,
   stageUsageMetadata,
+  STEP_USAGE_TELEMETRY_GAP,
 } from './code_scores';
 
 const NO_GENERATION = {
@@ -648,6 +649,81 @@ describe('scoreStageModelResolved', () => {
     );
     expect(result.score).toBe(0);
     expect(result.explanation).toContain('undeterminable');
+  });
+
+  it('treats a fully gapped review as a gap, not a failure, and still passes with a note', () => {
+    // Every analysis usage row reported no connector id: the review is unverifiable from
+    // telemetry, but the generation stage resolved, so the row passes with the gap noted.
+    const result = score(
+      expected,
+      withBoth({
+        reviews: [
+          review({
+            analysis: analysed({
+              connectorIds: [],
+              unresolvedReason: STEP_USAGE_TELEMETRY_GAP,
+            }),
+          }),
+        ],
+      })
+    );
+    expect(result.score).toBe(1);
+    expect(result.explanation).toContain('unverifiable from telemetry');
+  });
+
+  it('is N/A when every stage is unverifiable from telemetry', () => {
+    const result = score(
+      expected,
+      artifacts({
+        reviews: [
+          review({
+            analysis: analysed({
+              connectorIds: [],
+              unresolvedReason: STEP_USAGE_TELEMETRY_GAP,
+            }),
+          }),
+        ],
+      })
+    );
+    expect(result.score).toBeNull();
+    expect(result.explanation).toContain('unverifiable from telemetry');
+  });
+
+  it('fails when a telemetry-gapped retry ran on a different endpoint than planned', () => {
+    // A retry whose first attempt reported a real connector id and whose other attempts were
+    // gapped: the reported id is compared, so a wrong model must fail, not hide behind the gap.
+    const result = score(
+      expected,
+      withBoth({
+        reviews: [
+          review({
+            analysis: analysed({
+              connectorIds: ['other'],
+              unresolvedReason: STEP_USAGE_TELEMETRY_GAP,
+            }),
+          }),
+        ],
+      })
+    );
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('ran on other, planned review-model');
+  });
+
+  it('passes when a telemetry-gapped retry still reported only the planned endpoint', () => {
+    const result = score(
+      expected,
+      withBoth({
+        reviews: [
+          review({
+            analysis: analysed({
+              connectorIds: ['review-model'],
+              unresolvedReason: STEP_USAGE_TELEMETRY_GAP,
+            }),
+          }),
+        ],
+      })
+    );
+    expect(result.score).toBe(1);
   });
 
   it('fails when a review recorded no analysis at all', () => {

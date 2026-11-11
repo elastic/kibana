@@ -533,9 +533,22 @@ export const scoreStageModelResolved =
       if (!analysis) {
         problems.push(`review ${label} model undeterminable: it ran no analysis step`);
       } else if (analysis.unresolvedReason === STEP_USAGE_TELEMETRY_GAP) {
-        // The step ran (usage was reported) but the engine stamped no connector id: nothing else
-        // in the execution doc carries one, so this is a telemetry gap, not a model mismatch.
-        telemetryGapped.push(label);
+        if (analysis.connectorIds.length === 0) {
+          // Every usage row reported no connector id: nothing else in the execution doc carries
+          // one, so the model is genuinely unresolvable from telemetry — a gap, not a mismatch.
+          telemetryGapped.push(label);
+        } else {
+          // Some rows did report ids (a retry with telemetry gaps on the other attempts):
+          // compare the reported ids — a wrong model must fail, not hide behind the gap.
+          const wrong = analysis.connectorIds.filter((id) => id !== reviewModel);
+          if (wrong.length > 0) {
+            problems.push(
+              `review ${label} ran on ${joined(analysis.connectorIds)}, planned ${reviewModel}`
+            );
+          } else {
+            checked.push(`review ${label} ${reviewModel}`);
+          }
+        }
       } else if (analysis.unresolvedReason || analysis.connectorIds.length === 0) {
         problems.push(
           `review ${label} model undeterminable: ${
