@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { describeArtifactListPage } from '../fixtures/artifact_list_suite';
 import {
   ARTIFACT_TAB_POLICY_DETAILS_LOCAL_TAGS,
   describeArtifactTabPolicyDetails,
@@ -14,9 +15,10 @@ import { getArtifactTabCase } from '../fixtures/artifact_tabs_test_data';
 
 const endpointExceptions = getArtifactTabCase('endpointExceptions');
 
-// Same file on purpose: both suites mutate the agnostic endpoint exceptions
+// Same file on purpose: these suites mutate the agnostic endpoint exceptions
 // list, which spaces do not isolate.
 describeArtifactTabPolicyDetails(endpointExceptions, {
   tag: ARTIFACT_TAB_POLICY_DETAILS_LOCAL_TAGS,
 });
 describeEndpointExceptionOrOperator(endpointExceptions);
+describeArtifactListPage(endpointExceptions);

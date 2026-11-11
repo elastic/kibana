@@ -181,6 +181,38 @@ PUT kbn:/internal/core/_settings
 > coreApp.allowDynamicConfigOverrides: true
 > ```
 
+### Runtime overrides
+
+Runtime overrides are stored in the `feature-flags-overrides` saved object and applied on every Kibana node. They win over `feature_flags.overrides` from `kibana.yml`, and both win over the feature flag provider.
+
+Only a superuser can read or change them, through:
+
+```
+GET    kbn:/internal/feature-flags/overrides
+PUT    kbn:/internal/feature-flags/overrides/{flagKey}
+DELETE kbn:/internal/feature-flags/overrides/{flagKey}
+DELETE kbn:/internal/feature-flags/overrides
+```
+
+`PUT` sends `{ "value": <boolean | number | string> }`. A node applies its own write immediately. Other nodes see it on their next poll, which runs every 10 seconds. The browser then sees the new value on its own 10 second feature-flag poll, or immediately if you refresh the helper.
+
+### Flags helper
+
+Kibana includes a Feature flag helper that allows users to test and troubleshoot their feature flag evaluations. 
+Superusers can see and update the flags to see their effect in Kibana. 
+Lower privileged users only can see the evaluated values without an option to upate it.
+
+The flyout can be opened in two ways:
+
+* When the Developer Toolbar is available, the **Feature flags** pill opens the flyout. That does not show or hide the corner button.
+* `toggleFeatureFlagsHelper()` in the browser console shows or hides the corner button, including when the Developer Toolbar is active. Hiding the button closes the flyout. The choice is remembered for the next page load.
+
+```js
+toggleFeatureFlagsHelper()
+```
+
+Without provider credentials the snapshot is empty, and the flyout still lists the flags Kibana has evaluated, using the value that evaluation returned.
+
 ## Usage in Cloud
 
 Feature flags aren't whitelisted in Cloud, meaning that in production environments, users have to go through Support. Support sets feature flags as user setting overrides following a standard process for enabling non-whitelisted settings.

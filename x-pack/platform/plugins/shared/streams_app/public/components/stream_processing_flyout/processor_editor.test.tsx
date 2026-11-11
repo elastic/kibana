@@ -118,6 +118,26 @@ describe('ProcessorEditor', () => {
     });
   });
 
+  it('labels the status badge from the catalogue and explains it on hover', async () => {
+    renderEditor();
+
+    const badge = screen.getByTestId('streamsProcessingFlyoutStatusBadge');
+    expect(badge.textContent).toBe('Experimental');
+    await userEvent.hover(badge);
+    expect(await screen.findByText(/Recently added and still evolving/)).toBeTruthy();
+  });
+
+  it('falls back to the status value when the catalogue does not describe statuses', () => {
+    const { 'component.statuses': statuses, ...enumSets } = catalogue.metadata.enum_sets;
+    renderEditor({
+      catalogue: { ...catalogue, metadata: { ...catalogue.metadata, enum_sets: enumSets } },
+    });
+
+    expect(screen.getByTestId('streamsProcessingFlyoutStatusBadge').textContent).toBe(
+      'experimental'
+    );
+  });
+
   it('shows client validation errors instead of committing an incomplete processor', async () => {
     const { onCommit } = renderEditor();
     await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));

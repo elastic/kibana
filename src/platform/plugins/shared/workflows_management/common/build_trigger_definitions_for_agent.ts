@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BaseTriggerDefinition } from '@kbn/workflows';
+import type { BaseTriggerDefinition, TriggerSchemaOptions } from '@kbn/workflows';
 import {
-  builtInTriggerDefinitions,
   EventTimestampSchema,
+  getBuiltInTriggerDefinitions,
   getCustomTriggerZodSchema,
 } from '@kbn/workflows';
 import { BaseEventSchema } from '@kbn/workflows/spec/schema/common/base_event';
@@ -156,13 +156,15 @@ function formatRegisteredTrigger(
 /**
  * Full trigger catalog for workflow authoring agents.
  *
- * - Built-ins (`manual`, `scheduled`, `alert`) come from `@kbn/workflows`.
+ * - Built-ins (`manual`, `scheduled`, `alert`, and `page` when enabled) come from `@kbn/workflows`.
  * - Everything else comes from `api.getRegisteredTriggers()` (workflows_extensions registry).
  */
 export function getAllTriggerDefinitionsForAgent(
-  registeredTriggers: ServerTriggerDefinition[]
+  registeredTriggers: ServerTriggerDefinition[],
+  triggerSchemaOptions?: TriggerSchemaOptions
 ): TriggerDefinitionForAgent[] {
   const registeredById = createRegisteredTriggersMap(registeredTriggers);
+  const builtInTriggerDefinitions = getBuiltInTriggerDefinitions(triggerSchemaOptions);
   const builtInIds = new Set(builtInTriggerDefinitions.map((def) => def.id));
 
   const builtIn = builtInTriggerDefinitions.map((def) => formatBuiltInTrigger(def, registeredById));
@@ -196,12 +198,17 @@ export const isTriggerDefinitionsLookupError = (
  */
 export function lookupTriggerDefinitionsForAgent({
   registeredTriggers,
+  triggerSchemaOptions,
   triggerType,
 }: {
   registeredTriggers: ServerTriggerDefinition[];
+  triggerSchemaOptions?: TriggerSchemaOptions;
   triggerType?: string;
 }): TriggerDefinitionsLookupResult {
-  const allTriggerDefinitions = getAllTriggerDefinitionsForAgent(registeredTriggers);
+  const allTriggerDefinitions = getAllTriggerDefinitionsForAgent(
+    registeredTriggers,
+    triggerSchemaOptions
+  );
 
   if (!triggerType) {
     return { count: allTriggerDefinitions.length, triggerTypes: allTriggerDefinitions };

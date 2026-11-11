@@ -6,9 +6,10 @@
  */
 import {
   MAX_ID_LENGTH,
+  SIGNIFICANT_EVENTS_ALERT_SOURCE,
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { FeatureNotEnabledError } from '../../../lib/errors/feature_not_enabled_error';
@@ -85,6 +86,7 @@ const discoveryExecuteRoute = createServerRoute({
       });
       if (isNew) {
         telemetry.trackSignificantEventsDiscoveryTriggered({
+          workflow_execution_id: executionId,
           execution_id: executionId,
           space_id: spaceId,
         });
@@ -131,7 +133,152 @@ const discoveryStatusRoute = createServerRoute({
   },
 });
 
+const optionalCount = lazySchema(() => z.number().int().min(0).optional());
+
+const discoveryStartedRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/significant_events/discovery/_started',
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        workflow_execution_id: z.string().max(MAX_ID_LENGTH),
+        // Empty when the discovery workflow was run directly, with no parent execution.
+        parent_workflow_execution_id: z.string().max(MAX_ID_LENGTH).optional(),
+      }),
+    })
+  ),
+  options: {
+    access: 'internal',
+    summary: 'Report the start of a Significant Events discovery run',
+    description:
+      'Emits the discovery-started telemetry event for the reporting discovery workflow execution.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+    },
+  },
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    getSpaceId,
+    server,
+    telemetry,
+  }): Promise<{ acknowledged: true }> => {
+    const { licensing } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing });
+    const {
+      workflow_execution_id: discoveryExecutionId,
+      parent_workflow_execution_id: parentExecutionId,
+    } = params.body;
+
+    telemetry.trackSignificantEventsDiscoveryStarted({
+      ...(parentExecutionId ? { parent_workflow_execution_id: parentExecutionId } : {}),
+      workflow_execution_id: discoveryExecutionId,
+      space_id: await getSpaceId(request),
+      alert_source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
+    });
+    return { acknowledged: true };
+  },
+});
+
+/** Called by the discovery workflow before each exit and from its failure fallback (nightshift-program#1956). */
+const discoveryCompletedRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/significant_events/discovery/_completed',
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        workflow_execution_id: z.string().max(MAX_ID_LENGTH),
+        parent_workflow_execution_id: z.string().max(MAX_ID_LENGTH).optional(),
+        outcome: z.enum(['completed', 'failed']),
+        has_work: z.boolean().optional(),
+        budget_denied: z.boolean().optional(),
+        processed_count: optionalCount,
+        skipped_count: optionalCount,
+        held_back_count: optionalCount,
+        needs_agent_count: optionalCount,
+        written_rule_count: optionalCount,
+        classifier_failed: z.boolean().optional(),
+        error_type: z.string().max(MAX_ID_LENGTH).optional(),
+        error_message: z.string().max(1024).optional(),
+      }),
+    })
+  ),
+  options: {
+    access: 'internal',
+    summary: 'Report the end of a Significant Events discovery run',
+    description:
+      'Emits the discovery-completed telemetry event for the reporting discovery workflow execution, paired to the execution that started it.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+    },
+  },
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    workflowClients,
+    getSpaceId,
+    server,
+    telemetry,
+    logger,
+  }): Promise<{ acknowledged: true }> => {
+    const { significantEventsDiscoveryClient } = workflowClients;
+    if (!significantEventsDiscoveryClient) {
+      throw new FeatureNotEnabledError(
+        'Significant events discovery requires the workflows feature to be enabled'
+      );
+    }
+    const { licensing } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing });
+    const spaceId = await getSpaceId(request);
+    const {
+      workflow_execution_id: discoveryExecutionId,
+      parent_workflow_execution_id: parentExecutionId,
+      outcome,
+      error_type: errorType,
+      error_message: errorMessage,
+      ...counts
+    } = params.body;
+
+    // The report must land even when the execution record cannot be read.
+    const execution = await significantEventsDiscoveryClient
+      .getExecution({ id: discoveryExecutionId, spaceId, request })
+      .catch((error) => {
+        logger.debug(
+          `discovery-completed: could not read the discovery execution: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        return undefined;
+      });
+    // The management client resolves an unknown execution id to null rather than throwing.
+    const durationMs = !execution
+      ? undefined
+      : execution.finishedAt
+      ? execution.duration ?? undefined
+      : Date.now() - Date.parse(execution.startedAt);
+
+    telemetry.trackSignificantEventsDiscoveryCompleted({
+      ...(parentExecutionId ? { parent_workflow_execution_id: parentExecutionId } : {}),
+      workflow_execution_id: discoveryExecutionId,
+      space_id: spaceId,
+      alert_source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
+      // A step timeout reaches the failure fallback as a `TimeoutError`.
+      outcome: outcome === 'failed' && errorType === 'TimeoutError' ? 'timed_out' : outcome,
+      ...(durationMs !== undefined ? { duration_ms: durationMs } : {}),
+      ...counts,
+      ...(errorMessage ? { error_message: errorMessage } : {}),
+    });
+    return { acknowledged: true };
+  },
+});
+
 export const internalDiscoveryRoutes = {
   ...discoveryExecuteRoute,
   ...discoveryStatusRoute,
+  ...discoveryStartedRoute,
+  ...discoveryCompletedRoute,
 };

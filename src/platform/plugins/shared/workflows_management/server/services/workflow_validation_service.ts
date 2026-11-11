@@ -136,7 +136,8 @@ export class WorkflowValidationService {
     const triggerDefinitions = this.getRegisteredCustomTriggerDefinitions();
     const zodSchema = getWorkflowZodSchemaFromConnectors(
       allConnectors,
-      toCustomTriggerSchemaConfigs(triggerDefinitions)
+      toCustomTriggerSchemaConfigs(triggerDefinitions),
+      { includePageTrigger: this.deps.pagesEnabled }
     );
     const warnIgnoredKibanaFetcher = await firstValueFrom(
       this.deps
@@ -177,7 +178,8 @@ export class WorkflowValidationService {
 
     return getWorkflowZodSchemaFromConnectors(
       await this.resolveConnectors(spaceId, request),
-      toCustomTriggerSchemaConfigs(this.getRegisteredCustomTriggerDefinitions())
+      toCustomTriggerSchemaConfigs(this.getRegisteredCustomTriggerDefinitions()),
+      { includePageTrigger: this.deps.pagesEnabled }
     );
   }
 

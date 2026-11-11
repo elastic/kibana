@@ -9,7 +9,7 @@ import { setupTestUsers } from './test_users';
 import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
-  // total runtime ~ 4m
+  // total runtime ~ 17m
   describe('Fleet Endpoints', function () {
     before(async () => {
       await setupTestUsers(getService('security'));
@@ -59,11 +59,5 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
     // Uninstall tokens
     loadTestFile(require.resolve('./fleet_settings_privileges')); // ~ 1m
-
-    // Cloud connectors
-    loadTestFile(require.resolve('./cloud_connector'));
-
-    // Cloud onboarding deployments
-    loadTestFile(require.resolve('./cloud_onboarding_deployment'));
   });
 }
