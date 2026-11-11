@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { diffLines } from 'diff';
 import type { TemplatedManagedWorkflowId } from '.';
 import { managedWorkflowDefinitions } from '.';
 import {
@@ -82,27 +83,27 @@ const workerBlindSpotValues: BlindSpotValues = (hashValues) => {
 const BLIND_SPOTS: Record<TemplatedManagedWorkflowId, BlindSpots | null> = {
   [ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID]: {
     values: workerBlindSpotValues,
-    pin: '5:2847a85c',
+    pin: '5:989b142c',
   },
   [ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID]: {
     values: workerBlindSpotValues,
-    pin: '12:42c2401b',
+    pin: '12:45c2a8be',
   },
   [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID]: {
     values: workerBlindSpotValues,
-    pin: '18:b3345beb',
+    pin: '18:6ef8aab3',
   },
   [ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID]: {
     values: workerBlindSpotValues,
-    pin: '9:b0cda1d8',
+    pin: '9:4efc0779',
   },
   [ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID]: {
     values: workerBlindSpotValues,
-    pin: '7:bda3b621',
+    pin: '7:b42367ae',
   },
   [ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID]: {
     values: workerBlindSpotValues,
-    pin: '8:cd0c7798',
+    pin: '8:531ab7a6',
   },
   [CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID]: null,
   [EXAMPLE_MANAGED_WORKFLOW_ID]: null,
@@ -113,7 +114,7 @@ const BLIND_SPOTS: Record<TemplatedManagedWorkflowId, BlindSpots | null> = {
       { childWorkflowId: 'example-child' },
       { ...hashValues, fallbackChild: false },
     ],
-    pin: '2:12089a17',
+    pin: '2:44ac72d1',
   },
   [NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID]: null,
   [NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW_ID]: null,
@@ -144,29 +145,15 @@ function createContentFingerprint(content: string): string {
   return fingerprint.toString(16).padStart(8, '0');
 }
 
-function countLines(yaml: string): Map<string, number> {
-  const counts = new Map<string, number>();
-  for (const line of yaml.split('\n')) {
-    counts.set(line, (counts.get(line) ?? 0) + 1);
-  }
-  return counts;
-}
-
 /**
- * The lines a variant render adds (`+`) or drops (`-`) against `render(hashValues)`, sorted. An
- * edit that changes both renders the same way cancels out and does not move the fingerprint.
+ * The lines a variant render adds (`+`) or drops (`-`) against `render(hashValues)`, in render
+ * order, so reordering lines only one render has moves the fingerprint. Lines both renders share
+ * are left out, so an edit that changes both renders the same way usually does not move it.
  */
 function diffRenderedLines(hashedYaml: string, variantYaml: string): string[] {
-  const hashedCounts = countLines(hashedYaml);
-  const variantCounts = countLines(variantYaml);
-  const lines = new Set([...hashedCounts.keys(), ...variantCounts.keys()]);
-  return [...lines]
-    .flatMap((line) => {
-      const difference = (variantCounts.get(line) ?? 0) - (hashedCounts.get(line) ?? 0);
-      const sign = difference > 0 ? '+' : '-';
-      return Array.from({ length: Math.abs(difference) }, () => `${sign}${line}`);
-    })
-    .sort();
+  return diffLines(hashedYaml, variantYaml, { oneChangePerToken: true, ignoreNewlineAtEof: true })
+    .filter(({ added, removed }) => added || removed)
+    .map(({ added, value }) => `${added ? '+' : '-'}${value.replace(/\n$/, '')}`);
 }
 
 function getBlindSpotPin({
@@ -237,4 +224,54 @@ describe('managed workflow blind-spot pins', () => {
       throw new Error(describePinMismatch({ definition, pinned: pin, actual }));
     }
   );
+});
+
+describe('blind-spot pin fingerprint', () => {
+  const createBranchingDefinition = ({
+    sharedStep,
+    branchSteps,
+  }: {
+    sharedStep: string;
+    branchSteps: readonly string[];
+  }): ManagedWorkflowDefinition => ({
+    id: 'branching-template',
+    pluginId: 'test',
+    version: 1,
+    billable: false,
+    management: { lifecycle: 'static', versionStrategy: 'auto', enablement: 'enforced' },
+    yamlTemplate: {
+      hashValues: { branch: false },
+      render: ({ branch }) =>
+        [
+          'steps:',
+          `  - name: ${sharedStep}`,
+          ...(branch === true ? branchSteps.map((step) => `  - name: ${step}`) : []),
+        ].join('\n'),
+    },
+  });
+  const takeBranch: BlindSpotValues = (hashValues) => [{ ...hashValues, branch: true }];
+
+  it('moves when steps only other values render are reordered', () => {
+    const pin = getBlindSpotPin({
+      definition: createBranchingDefinition({ sharedStep: 'shared', branchSteps: ['a', 'b'] }),
+      values: takeBranch,
+    });
+    const reorderedPin = getBlindSpotPin({
+      definition: createBranchingDefinition({ sharedStep: 'shared', branchSteps: ['b', 'a'] }),
+      values: takeBranch,
+    });
+    expect(reorderedPin).not.toBe(pin);
+  });
+
+  it('does not move when an edit changes both renders the same way', () => {
+    const pin = getBlindSpotPin({
+      definition: createBranchingDefinition({ sharedStep: 'shared', branchSteps: ['a', 'b'] }),
+      values: takeBranch,
+    });
+    const editedPin = getBlindSpotPin({
+      definition: createBranchingDefinition({ sharedStep: 'renamed', branchSteps: ['a', 'b'] }),
+      values: takeBranch,
+    });
+    expect(editedPin).toBe(pin);
+  });
 });
