@@ -84,6 +84,7 @@ export const getHandlerWrapper =
             body: {
               message: e.message,
               attributes: {
+                code: e.code,
                 trace_id: e.meta?.traceId,
                 active_execution_id: e.meta?.activeExecutionId,
               },

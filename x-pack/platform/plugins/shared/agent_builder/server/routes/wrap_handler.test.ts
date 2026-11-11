@@ -92,7 +92,7 @@ describe('getHandlerWrapper', () => {
     expect(result.status).toBe(418);
     expect(result.payload).toMatchObject({
       message: 'boom',
-      attributes: { trace_id: 'trace-1' },
+      attributes: { code: 'internalError', trace_id: 'trace-1' },
     });
   });
 
@@ -109,7 +109,7 @@ describe('getHandlerWrapper', () => {
     expect(result.status).toBe(409);
     expect(result.payload).toEqual({
       message: 'Conversation conversation-1 already has an execution in progress',
-      attributes: { trace_id: undefined, active_execution_id: 'exec-1' },
+      attributes: { code: 'conversationBusy', trace_id: undefined, active_execution_id: 'exec-1' },
     });
     expect(logger.debug).toHaveBeenCalled();
     expect(logger.error).not.toHaveBeenCalled();
