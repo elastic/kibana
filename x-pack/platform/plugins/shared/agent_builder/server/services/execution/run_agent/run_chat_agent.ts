@@ -314,6 +314,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       agentConfiguration,
       aiIndexCatalog: resolvedConfiguration.aiIndexCatalog,
       aiIndicesEnabled: experimentalFeatures.aiIndices,
+      capabilities: resolvedConfiguration.capabilities,
       attachmentsService: attachments,
       request,
       spaceId: context.spaceId,
