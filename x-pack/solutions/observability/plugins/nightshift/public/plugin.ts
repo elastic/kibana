@@ -80,7 +80,7 @@ export class NightshiftPlugin
       }),
       appRoute: NIGHTSHIFT_APP_ROUTE,
       category: DEFAULT_APP_CATEGORIES.observability,
-      euiIconType: 'logoObservability',
+      euiIconType: 'productNightshift',
       // Replaces the bespoke global search provider the page had while it was an
       // observability deep link: core's application provider scores these keywords
       // with the same algorithm, and the standalone app renders as "Nightshift"
