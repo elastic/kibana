@@ -456,6 +456,53 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
   });
 
+  it('writes a new event when the item names the active event it is separate from', async () => {
+    const eventClient = makeEventSearchClient({
+      findLatestLive: jest.fn().mockResolvedValue({
+        hits: [
+          makeStoredEvent('existing-event-id', {
+            '@timestamp': new Date().toISOString(),
+            signals: dedupInput.signals,
+          }),
+        ],
+      }),
+    });
+
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: eventClient,
+      inputs: [{ ...dedupInput, unmatched_event_ids: ['existing-event-id'] }],
+    });
+
+    expect(results[0]).toMatchObject({ index: 0, written: true });
+    expect(results[0]).not.toMatchObject({ event_id: 'existing-event-id' });
+    expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips and lists the covering events when unmatched_event_ids leaves one out', async () => {
+    const stored = (eventId: string, timestamp: string) =>
+      makeStoredEvent(eventId, { '@timestamp': timestamp, signals: dedupInput.signals });
+    const eventClient = makeEventSearchClient({
+      findLatestLive: jest.fn().mockResolvedValue({
+        hits: [
+          stored('event-a', '2026-11-01T00:00:00.000Z'),
+          stored('event-b', '2026-11-02T00:00:00.000Z'),
+        ],
+      }),
+    });
+
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: eventClient,
+      inputs: [{ ...dedupInput, unmatched_event_ids: ['event-a'] }],
+    });
+
+    expect(results[0]).toMatchObject({
+      skipped: true,
+      reason: 'existing_active_event',
+      covering_event_ids: ['event-b', 'event-a'],
+    });
+    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+  });
+
   it('writes the first of two in-batch duplicates and flags the second', async () => {
     const results = await eventsWriteBulkHandler({
       eventSearchClient: makeEventSearchClient(),
@@ -1586,6 +1633,27 @@ describe('eventsWriteBulkHandler — reopening a closed series', () => {
       reason: 'duplicate_in_batch',
     });
     expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it('still reopens a covering closed series for an item that separates itself from the live event', async () => {
+    const live = makeStoredEvent('live-event', {
+      signals: [makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'confirms' })],
+    });
+    const closed = closedSeries();
+
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: makeEventSearchClient({
+        findLatestLive: jest.fn().mockResolvedValue({ hits: [live] }),
+        findLatestInactiveByIdentity: jest.fn().mockResolvedValue({
+          hits: [closed],
+          heads: [{ eventId: closedEventId, groupHash: 'group-1', episodeId: 'episode-1' }],
+        }),
+        findByEventId: jest.fn().mockResolvedValue({ hits: [closed] }),
+      }),
+      inputs: [{ ...reopeningBreachFor('rule-a'), unmatched_event_ids: ['live-event'] }],
+    });
+
+    expect(results[0]).toMatchObject({ written: true, event_id: closedEventId });
   });
 
   it('skips the closed-series read when every candidate is covered by a live event', async () => {

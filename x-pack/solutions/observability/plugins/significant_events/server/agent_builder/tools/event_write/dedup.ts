@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import type { Logger } from '@kbn/core/server';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import {
   INACTIVE_SERIES_LOOKBACK_HOURS,
@@ -201,13 +202,16 @@ const isCoveredByEvent = (
 
 /**
  * Marks dedup candidates whose identity rules are a subset of an active event's corresponding
- * identity rules (with source overlap) as `existing_active_event` in `results`. Returns the
- * candidates that still need to be written.
+ * identity rules (with source overlap) as `existing_active_event` in `results`, listing every
+ * covering event. The skip is waived when the item's `unmatched_event_ids` names every covering event:
+ * the agent judged the detection a different incident. Ids that do not cover the item are ignored.
+ * Returns the candidates that still need to be written.
  */
 export const resolveDedupSkips = (
   validCandidates: WriteCandidate[],
   activeEvents: SignificantEvent[],
-  results: BulkResults
+  results: BulkResults,
+  logger?: Logger
 ): WriteCandidate[] => {
   const sortedActiveEvents = activeEvents.toSorted((a, b) => {
     const timestampOrder = Date.parse(b['@timestamp']) - Date.parse(a['@timestamp']);
@@ -219,19 +223,41 @@ export const resolveDedupSkips = (
 
   for (const candidate of validCandidates) {
     if (candidate.mode === 'dedup') {
-      const duplicate = sortedActiveEvents.find((ev) =>
+      const covering = sortedActiveEvents.filter((ev) =>
         isCoveredByEvent(candidate, ev, SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS)
       );
+      const [duplicate] = covering;
       if (duplicate) {
-        const existingEventId = duplicate.event_id ?? candidate.eventId;
+        const idOf = (ev: SignificantEvent) => ev.event_id ?? candidate.eventId;
+        const coveringIds = covering.map(idOf);
+        const named = new Set(candidate.input.unmatched_event_ids ?? []);
+        const notNamed = coveringIds.filter((id) => !named.has(id));
+        if (notNamed.length === 0) {
+          const ignored = [...named].filter((id) => !coveringIds.includes(id));
+          logger?.info(
+            `dedup waived for item ${candidate.index}: covering ${coveringIds.join(', ')}${
+              ignored.length > 0 ? `; ignored unmatched_event_ids ${ignored.join(', ')}` : ''
+            }`
+          );
+          toWrite.push(candidate);
+          continue;
+        }
+        if (named.size > 0) {
+          logger?.info(
+            `unmatched_event_ids incomplete for item ${
+              candidate.index
+            }: covering events not named ${notNamed.join(', ')}`
+          );
+        }
         results[candidate.index] = {
           index: candidate.index,
-          event_id: existingEventId,
+          event_id: idOf(duplicate),
           status: duplicate.status,
           written: false,
           skipped: true,
           reason: 'existing_active_event',
-          existing_event_id: existingEventId,
+          existing_event_id: idOf(duplicate),
+          covering_event_ids: coveringIds,
           severity: duplicate.severity,
         };
         continue;

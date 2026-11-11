@@ -108,7 +108,7 @@ export async function eventsWriteBulkHandler({
   const dedupCandidates = candidates.filter((c): c is DedupCandidate => c.mode === 'dedup');
 
   const liveEvents = await fetchLiveEventsForDedup(eventSearchClient, dedupCandidates);
-  const unskipped = resolveDedupSkips(candidates, liveEvents, results);
+  const unskipped = resolveDedupSkips(candidates, liveEvents, results, logger);
   const inactiveEvents = await fetchInactiveEventsForReuse({
     eventSearchClient,
     dedupCandidates: unskipped.filter((c): c is DedupCandidate => c.mode === 'dedup'),

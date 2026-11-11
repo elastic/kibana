@@ -35,6 +35,14 @@ export type EventsWriteInput = Pick<
      * evidence it does not cover: the write then reopens the closed series.
      */
     reopen_deactivated?: boolean;
+    /**
+     * Set by an agent that evaluated the active events holding this item's rules and judged the
+     * detection a different incident: the ids of those events. The find-or-create dedup is waived
+     * only when every covering active event is named. Only valid without `event_id`. This is the
+     * explicit exception to one rule, one event: a guard that keeps a rule on its holding event
+     * must honor it.
+     */
+    unmatched_event_ids?: string[];
   };
 
 interface EventsWriteResultBase {
@@ -67,6 +75,8 @@ export interface EventsWriteDuplicateResult {
   skipped: true;
   reason: 'existing_active_event';
   existing_event_id: string;
+  /** Every active event that covers the item, newest first (`existing_event_id` is the first). */
+  covering_event_ids: string[];
   /** Stored tier of the active event this write deduplicated into. */
   severity?: Severity;
 }

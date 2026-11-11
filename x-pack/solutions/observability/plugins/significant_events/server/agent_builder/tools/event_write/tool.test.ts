@@ -122,6 +122,36 @@ describe('events_write tool', () => {
     ).toBe(true);
   });
 
+  it('exposes unmatched_event_ids to the agent on a new-event item', () => {
+    const parsed = eventsWriteSchema.safeParse({
+      items: [{ ...input, event_id: undefined, unmatched_event_ids: ['event-a'] }],
+    });
+
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.items[0].unmatched_event_ids).toEqual(['event-a']);
+    }
+  });
+
+  it('rejects an unmatched_event_ids entry longer than the id limit', () => {
+    const parsed = eventsWriteSchema.safeParse({
+      items: [{ ...input, event_id: undefined, unmatched_event_ids: ['x'.repeat(256)] }],
+    });
+
+    expect(parsed.success).toBe(false);
+  });
+
+  it('rejects unmatched_event_ids on an item that continues an event', () => {
+    const result = eventsWriteSchema.safeParse({
+      items: [{ ...input, event_id: 'event-b', unmatched_event_ids: ['event-a'] }],
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].message).toContain('unmatched_event_ids');
+    }
+  });
+
   it('rejects input without an items array', () => {
     expect(eventsWriteSchema.safeParse(input).success).toBe(false);
   });

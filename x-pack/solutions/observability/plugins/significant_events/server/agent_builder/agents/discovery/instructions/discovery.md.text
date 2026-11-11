@@ -127,7 +127,8 @@ Response:
 ```
 
 Example: `platform_sig_events_events_write`.
-A continuation item adds `"event_id": "{accepted active event_id}"`; a new-event item omits it.
+A continuation item adds `"event_id": "{accepted active event_id}"`; a new-event item omits it
+(and `unmatched_event_ids`, when empty, as below).
 ```json
 {
   "source": "discovery",
@@ -135,6 +136,7 @@ A continuation item adds `"event_id": "{accepted active event_id}"`; a new-event
     {
       "title": "...", "symptom_hypothesis": "...", "summary": "...", "severity": "...",
       "assessment_note": "...", "confidence": 0.0, "slugs": ["..."],
+      "unmatched_event_ids": ["{active event_id}"],
       "signals": [
         { "type": "detection", "source_id": "...", "description": "...", "verdict": "confirms", "evidence": { "esql_query": "...", "result": "found", "time_range": { "from": "...", "to": "..." } }, "metadata": { "detection_id": "...", "rule_uuid": "..." } }
       ],
@@ -358,7 +360,9 @@ For events returned by `platform_sig_events_event_search`, derive:
   current detection's grounded evidence passes `<incident_matching>` against the event's returned
   topology and compact summary context (`title`, `summary`, `symptom_hypothesis`). That pair is
   enough to copy `event_id`.
-- Omit `event_id` only when neither phase accepts.
+- Omit `event_id` only when neither phase accepts. For each such detection, write one line
+  `unmatched: {rule_uuid}: [event_id, ...]` listing every active event you evaluated and did not
+  continue (rejected under `<incident_matching>`); Step 6 copies it.
 
 Before either routing search, derive each remaining detection's topology ID set from grounded
 `causal_features[].feature_id`, `blast_radius[].feature_id`, and the matched query KI's
@@ -555,7 +559,10 @@ rules were written.
    rule bound to it; no two items share an `event_id`. Each detection with outcome Write or
    Recovery appears in exactly one item's signals, exactly once; a Not written detection is in no
    item. Only new-event items omit `event_id`;
-   continuations carry the accepted `event_id` and this cycle's grounded signals only.
+   continuations carry the accepted `event_id` and this cycle's grounded signals only. A new-event
+   item sets `unmatched_event_ids` to the union of its detections' `unmatched:` lines that hold one
+   of the item's rules, and omits it when that union is empty; never name an event you did not
+   evaluate.
 2. **Copy the topology.** Write the topology finalized in Step 3, or bound at routing for a
    continuation, on every item; do not re-derive it at emit time.
 3. **Check before write.** The tool schema validates structure, eligibility and `event_id`s and names
@@ -581,7 +588,7 @@ rules were written.
    | Result | Retry | Rules in `written_rule_uuids` |
    |---|---|---|
    | `written: true` | — | yes |
-   | `skipped`, `existing_active_event` (returns `existing_event_id`) | no | yes |
+   | `skipped`, `existing_active_event` (`covering_event_ids` is diagnostic; do not resend) | no | yes |
    | `skipped`, `unchanged_outcome` — a successful no-op; the stored title and hypothesis stay | no | yes |
    | `skipped`, `held_by_deactivation` (returns the closed series' `assessment_note`, `deactivated_at`) | only as **Held by deactivation** says | yes (the detection was judged); if you write it again, that second result decides |
    | `bulk_error` | once, unchanged | only if the retry succeeds |

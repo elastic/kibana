@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
 import type { SignalEntry, SignificantEvent } from '@kbn/significant-events-schema';
 import {
   buildWriteCandidates,
@@ -84,9 +85,15 @@ const makeClient = (
 const dedupCandidates = (inputs: EventsWriteInput[]): DedupCandidate[] =>
   buildWriteCandidates(inputs).filter((c): c is DedupCandidate => c.mode === 'dedup');
 
-const resolve = (inputs: EventsWriteInput[], activeEvents: SignificantEvent[]) => {
+const makeLogger = () => loggerMock.create();
+
+const resolve = (
+  inputs: EventsWriteInput[],
+  activeEvents: SignificantEvent[],
+  logger?: ReturnType<typeof makeLogger>
+) => {
   const results: BulkResults = new Array(inputs.length);
-  const toWrite = resolveDedupSkips(buildWriteCandidates(inputs), activeEvents, results);
+  const toWrite = resolveDedupSkips(buildWriteCandidates(inputs), activeEvents, results, logger);
   return { results, toWrite };
 };
 
@@ -136,6 +143,16 @@ describe('buildWriteCandidates', () => {
 describe('markDuplicateKeys', () => {
   it('flags a later in-batch item with the same streams and rules, keeping the first', () => {
     const { results, remaining } = flag([makeInput(), makeInput()]);
+
+    expect(remaining.map((c) => c.index)).toEqual([0]);
+    expect(results[1]).toMatchObject({ index: 1, written: false, reason: 'duplicate_in_batch' });
+  });
+
+  it('flags a later same-rule item even when only the first names unmatched_event_ids', () => {
+    const { results, remaining } = flag([
+      makeInput({ unmatched_event_ids: ['ev-old'] }),
+      makeInput(),
+    ]);
 
     expect(remaining.map((c) => c.index)).toEqual([0]);
     expect(results[1]).toMatchObject({ index: 1, written: false, reason: 'duplicate_in_batch' });
@@ -244,7 +261,144 @@ describe('resolveDedupSkips', () => {
       skipped: true,
       reason: 'existing_active_event',
       existing_event_id: 'existing-event-id',
+      covering_event_ids: ['existing-event-id'],
       severity: 'critical',
+    });
+  });
+
+  describe('unmatched_event_ids', () => {
+    const olderEvent = makeActiveEvent({
+      event_id: 'ev-old',
+      '@timestamp': '2026-11-01T00:00:00.000Z',
+    });
+    const newerEvent = makeActiveEvent({
+      event_id: 'ev-new',
+      '@timestamp': '2026-11-02T00:00:00.000Z',
+    });
+
+    it('writes the item when it names the only covering event', () => {
+      const { results, toWrite } = resolve(
+        [makeInput({ unmatched_event_ids: ['ev-old'] })],
+        [olderEvent]
+      );
+
+      expect(toWrite).toHaveLength(1);
+      expect(results[0]).toBeUndefined();
+    });
+
+    it('writes the item when it names every covering event', () => {
+      const { toWrite } = resolve(
+        [makeInput({ unmatched_event_ids: ['ev-old', 'ev-new'] })],
+        [olderEvent, newerEvent]
+      );
+
+      expect(toWrite).toHaveLength(1);
+    });
+
+    it('skips the item and lists every covering event, newest first, when it names only some', () => {
+      const { results, toWrite } = resolve(
+        [makeInput({ unmatched_event_ids: ['ev-old'] })],
+        [olderEvent, newerEvent]
+      );
+
+      expect(toWrite).toEqual([]);
+      expect(results[0]).toMatchObject({
+        skipped: true,
+        reason: 'existing_active_event',
+        existing_event_id: 'ev-new',
+        covering_event_ids: ['ev-new', 'ev-old'],
+      });
+    });
+
+    it('skips the item and lists the covering events when it names none', () => {
+      const { results } = resolve([makeInput()], [olderEvent, newerEvent]);
+
+      expect(results[0]).toMatchObject({ covering_event_ids: ['ev-new', 'ev-old'] });
+    });
+
+    it('ignores ids that are unknown, not live, or not covering', () => {
+      const inactive = makeActiveEvent({ event_id: 'ev-closed', status: 'inactive' });
+      const otherRule = makeActiveEvent({
+        event_id: 'ev-other-rule',
+        signals: [makeSignal('rule-xyz')],
+      });
+
+      const { toWrite } = resolve(
+        [makeInput({ unmatched_event_ids: ['ev-old', 'ghost', 'ev-closed', 'ev-other-rule'] })],
+        [olderEvent, inactive, otherRule]
+      );
+
+      expect(toWrite).toHaveLength(1);
+    });
+
+    it('still skips when the only ids it names do not cover the item', () => {
+      const otherRule = makeActiveEvent({
+        event_id: 'ev-other-rule',
+        signals: [makeSignal('rule-xyz')],
+      });
+
+      const { results } = resolve(
+        [makeInput({ unmatched_event_ids: ['ev-other-rule'] })],
+        [olderEvent, otherRule]
+      );
+
+      expect(results[0]).toMatchObject({ covering_event_ids: ['ev-old'] });
+    });
+
+    it('does not treat an event that holds only some of the item rules as covering', () => {
+      const logger = makeLogger();
+
+      const { results, toWrite } = resolve(
+        [
+          makeInput({
+            signals: [makeSignal('rule-abc'), makeSignal('rule-xyz')],
+            unmatched_event_ids: ['ev-old'],
+          }),
+        ],
+        [olderEvent],
+        logger
+      );
+
+      expect(toWrite).toHaveLength(1);
+      expect(results[0]).toBeUndefined();
+      expect(logger.info).not.toHaveBeenCalled();
+    });
+
+    it('logs the covering ids of a waiver and the named ids it ignored', () => {
+      const logger = makeLogger();
+
+      resolve([makeInput({ unmatched_event_ids: ['ev-old', 'ghost'] })], [olderEvent], logger);
+
+      expect(logger.info).toHaveBeenCalledTimes(1);
+      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('covering ev-old'));
+      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('ignored'));
+      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('ghost'));
+    });
+
+    it('logs a waiver with the item and the named ids', () => {
+      const logger = makeLogger();
+
+      resolve([makeInput({ unmatched_event_ids: ['ev-old'] })], [olderEvent], logger);
+
+      expect(logger.info).toHaveBeenCalledTimes(1);
+      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('ev-old'));
+    });
+
+    it('logs the covering ids an incomplete unmatched_event_ids left out', () => {
+      const logger = makeLogger();
+
+      resolve([makeInput({ unmatched_event_ids: ['ev-old'] })], [olderEvent, newerEvent], logger);
+
+      expect(logger.info).toHaveBeenCalledTimes(1);
+      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('ev-new'));
+    });
+
+    it('logs nothing when unmatched_event_ids is absent', () => {
+      const logger = makeLogger();
+
+      resolve([makeInput()], [olderEvent], logger);
+
+      expect(logger.info).not.toHaveBeenCalled();
     });
   });
 

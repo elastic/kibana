@@ -21,6 +21,7 @@ import {
   signalInputEntrySchema,
   significantEventSchema,
   MAX_ARRAY_LENGTH,
+  MAX_ID_LENGTH,
 } from '@kbn/significant-events-schema';
 import { nightshiftSourceSlugsField } from '@kbn/nightshift-shared';
 import { z, lazySchema } from '@kbn/zod/v4';
@@ -124,6 +125,19 @@ export const eventsWriteItemSchema = lazySchema(() =>
           extra call; a rejection of that call is not retried.
         `
         ),
+      unmatched_event_ids: z
+        .array(z.string().max(MAX_ID_LENGTH))
+        .max(MAX_ARRAY_LENGTH)
+        .optional()
+        .describe(
+          dedent`
+          The event_ids of the active events you evaluated, and judged to be a different incident
+          from this item, among those that already hold its rules. Only for an item without
+          \`event_id\`. The find-or-create skip is waived only when every active event that covers
+          the item is named; naming only some keeps the skip, and the skipped result lists every
+          covering event in \`covering_event_ids\`. Ids that do not cover the item are ignored.
+        `
+        ),
     })
     .partial({ event_id: true })
     .superRefine((item, ctx) => {
@@ -140,6 +154,14 @@ export const eventsWriteItemSchema = lazySchema(() =>
             path: ['signals', index],
             message: `A confirms item cannot include not_checked signals; remove the signal of rule ${ruleUuid} from this item, leave that detection out of the write, and add its rule_uuid to written_rule_uuids.`,
           });
+        });
+      }
+      if (item.event_id !== undefined && item.unmatched_event_ids !== undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['unmatched_event_ids'],
+          message:
+            'unmatched_event_ids only applies to a new event: remove it from an item that has event_id, or remove event_id to open a separate event.',
         });
       }
       // An event is born only from evidence that points to an error: a confirming signal or an
@@ -399,7 +421,8 @@ export function createEventsWriteTool({
       currently-active events for one that confirms every submitted confirmed rule and shares at
       least one source; non-confirming co-signals do not count. When the item
       has no confirmed rules, every submitted rule is used instead. If found, returns it without
-      writing (written: false, reason: existing_active_event). If a closed series (inactive,
+      writing (written: false, reason: existing_active_event, with every covering event in
+      \`covering_event_ids\`); \`unmatched_event_ids\` can waive that skip. If a closed series (inactive,
       within the last 48 hours) shares a source and already holds every confirmed rule, the write
       reopens it under that series' event_id with a new episode, rated from the item's signals;
       the series may hold more rules than the item. Otherwise it creates a new event with a
