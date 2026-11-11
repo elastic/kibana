@@ -241,6 +241,12 @@ describe('bulkCreate', () => {
     expect(res.version).toBe('patched-version');
     expect(res.observables).toEqual([observable]);
     expect(res.total_observables).toBe(1);
+    expect(extractAndAddObservablesMock).toHaveBeenCalledWith(
+      caseId,
+      expect.anything(),
+      expect.objectContaining({ owner: theCase.attributes.owner }),
+      clientArgs
+    );
   });
 
   describe('empty request', () => {

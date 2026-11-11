@@ -83,7 +83,7 @@ const createAttachment = async (
     const caseWithObservables = await extractAndAddObservables(
       caseId,
       [query],
-      { settings },
+      { settings, owner },
       clientArgs
     );
 
