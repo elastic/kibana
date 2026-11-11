@@ -413,3 +413,103 @@ describe('createEmulatorFetch', () => {
     });
   });
 });
+
+describe('createEmulatorFetch with capture', () => {
+  const sendItem = (fetch: typeof globalThis.fetch, name: string) =>
+    fetch(`${BASE_URL}/items`, {
+      method: 'POST',
+      headers: { ...json, authorization: 'Bearer abc', 'x-api-key': 'key' },
+      body: JSON.stringify({ name, apiToken: 't', client_secret: 's', private_key: 'pem' }),
+    });
+
+  it('adds the redacted headers, query and bodies to each call', async () => {
+    const { fetch, calls } = createEmulatorFetch({ specs: [spec], capture: true });
+
+    await sendItem(fetch, 'a');
+    await fetch(`${BASE_URL}/items?limit=10&refresh_token=r`);
+
+    expect(calls[0].captured).toEqual({
+      request: {
+        headers: expect.objectContaining({
+          'content-type': 'application/json',
+          authorization: '[redacted]',
+          'x-api-key': '[redacted]',
+        }),
+        query: {},
+        body: {
+          name: 'a',
+          apiToken: '[redacted]',
+          client_secret: '[redacted]',
+          private_key: '[redacted]',
+        },
+      },
+      response: { headers: json, body: { name: expect.any(String) } },
+    });
+    // An undeclared parameter is a violation, and the capture still shows what was sent.
+    expect(calls[1]).toMatchObject({
+      status: 422,
+      captured: { request: { query: { limit: '10', refresh_token: '[redacted]' } } },
+    });
+  });
+
+  it('passes calls with their capture to onCall', async () => {
+    const onCall = jest.fn();
+    const { fetch } = createEmulatorFetch({ specs: [spec], capture: true, onCall });
+
+    await sendItem(fetch, 'a');
+
+    expect(onCall).toHaveBeenCalledWith(
+      expect.objectContaining({ captured: expect.objectContaining({ request: expect.anything() }) })
+    );
+  });
+
+  it('keeps captures on the latest maxCalls calls, and every call', async () => {
+    const { fetch, calls, reset } = createEmulatorFetch({
+      specs: [spec],
+      capture: { maxCalls: 2 },
+    });
+
+    for (const name of ['a', 'b', 'c']) {
+      await sendItem(fetch, name);
+    }
+    expect(calls).toHaveLength(3);
+    expect(calls.map(({ captured }) => captured?.request.body)).toEqual([
+      undefined,
+      expect.objectContaining({ name: 'b' }),
+      expect.objectContaining({ name: 'c' }),
+    ]);
+
+    reset();
+    await sendItem(fetch, 'd');
+    await sendItem(fetch, 'e');
+    expect(calls.map(({ captured }) => captured?.request.body)).toEqual([
+      expect.objectContaining({ name: 'd' }),
+      expect.objectContaining({ name: 'e' }),
+    ]);
+  });
+
+  it('cuts bodies longer than maxBodyBytes and flags them', async () => {
+    const { fetch, calls } = createEmulatorFetch({
+      specs: [spec],
+      capture: { maxBodyBytes: 12 },
+      respond: listResponder,
+    });
+
+    await fetch(`${BASE_URL}/items`);
+
+    expect(calls[0].captured?.response).toEqual({
+      headers: json,
+      body: '[{"name":"a"',
+      bodyTruncated: true,
+    });
+  });
+
+  it('leaves calls without a capture by default', async () => {
+    const { fetch, calls, maxCapturedCalls } = createEmulatorFetch({ specs: [spec] });
+
+    await sendItem(fetch, 'a');
+
+    expect(calls[0]).not.toHaveProperty('captured');
+    expect(maxCapturedCalls).toBeUndefined();
+  });
+});

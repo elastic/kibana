@@ -67,6 +67,33 @@ describe('createEmulatorControlHandler', () => {
     });
   });
 
+  it('includes the captured, redacted exchanges when the emulator captures them', async () => {
+    const capturing = createEmulatorFetch({ specs: [spec], capture: true });
+    await capturing.fetch('https://api.vendor.example/v1/items', {
+      headers: { authorization: 'Bearer abc', 'x-api-key': 'k', accept: 'application/json' },
+    });
+
+    const { calls } = await (
+      await createEmulatorControlHandler(capturing)(control('/_mock/calls'))
+    ).json();
+
+    expect(calls[0]).toMatchObject({
+      operation: 'listItems',
+      status: 200,
+      captured: {
+        request: {
+          headers: {
+            authorization: '[redacted]',
+            'x-api-key': '[redacted]',
+            accept: 'application/json',
+          },
+          query: {},
+        },
+        response: { headers: expect.any(Object) },
+      },
+    });
+  });
+
   it('answers only the calls from index since on', async () => {
     const { calls, total } = await (await handle(control('/_mock/calls?since=1'))).json();
 

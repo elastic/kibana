@@ -449,6 +449,48 @@ describe('combineEmulators', () => {
     expect(() => combined.reset('unknown')).toThrow('No emulator for connector unknown');
   });
 
+  it('keeps captures on each connector’s latest calls, as its emulator does', async () => {
+    const combined = combineEmulators({
+      outlook: createEmulatorFetch({
+        specs: [graphSpec('/me/messages')],
+        fixtures: fixture('outlook'),
+        capture: { maxCalls: 1 },
+      }),
+      tenant: createEmulatorFetch({ specs: [tenantSpec], capture: true }),
+      one_drive: createEmulatorFetch({ specs: [graphSpec('/me/drive')] }),
+    });
+    const { fetch, calls } = combined;
+    const captures = () =>
+      calls.map(({ connector, captured }) => [connector, captured?.request.headers.authorization]);
+    const tenant = 'https://acme.tenant.example/api/tickets';
+
+    await fetch(`${GRAPH}/me`, bearer(emulatorCredential('outlook')));
+    await fetch(tenant, bearer('t1'));
+    await fetch(`${GRAPH}/me`, bearer(emulatorCredential('outlook')));
+    await fetch(`${GRAPH}/me`, bearer(emulatorCredential('one_drive')));
+
+    expect(captures()).toEqual([
+      ['outlook', undefined],
+      ['tenant', '[redacted]'],
+      ['outlook', '[redacted]'],
+      ['one_drive', undefined],
+    ]);
+
+    // Resetting one connector moves the other connectors' calls; their limits still apply.
+    combined.reset('outlook');
+    await fetch(`${GRAPH}/me`, bearer(emulatorCredential('outlook')));
+    await fetch(`${GRAPH}/me`, bearer(emulatorCredential('outlook')));
+    await fetch(tenant, bearer('t2'));
+
+    expect(captures()).toEqual([
+      ['tenant', '[redacted]'],
+      ['one_drive', undefined],
+      ['outlook', undefined],
+      ['outlook', '[redacted]'],
+      ['tenant', '[redacted]'],
+    ]);
+  });
+
   it('lists each connector’s operations and rejected responses', () => {
     const { operations, rejectedResponses, answers } = combineEmulators({
       outlook: createEmulatorFetch({

@@ -24,6 +24,21 @@ For every request, the mock:
 
 Each request is recorded in `calls` with its operation, status, and request and response violations, so tests can assert that a connector stays within the contract. `matched` gives the operation's method and path template.
 
+### Capturing exchanges
+
+`calls` say which operation a request reached and what was wrong with it, not what it carried. With `capture`, each call also gets `captured`: the request's headers, query and body, and the response's headers and body, as the connector sent and received them, e.g. to see why a test or a workflow step failed.
+
+```ts
+const { fetch, calls } = createEmulatorFetch({ specs: [spec], capture: true });
+// or: capture: { maxCalls: 20, maxBodyBytes: 2048, redact: ['key'] }
+```
+
+- **Redacted.** Values of keys that may hold secrets become `[redacted]`, in headers, the query, and JSON and form bodies at any depth. Keys are compared case-insensitively after converting camelCase and kebab-case to snake_case: `authorization`, `proxy_authorization`, `cookie`, `set_cookie` and `assertion`, and keys that are or end in `token`, `secret`, `password`, `api_key` or `private_key`, so `x-api-key`, `apiToken`, `client_secret` and `refresh_token` are redacted too, and so are pagination tokens such as `page_token`. `redact` adds keys, matched the same way, e.g. Trello's `key`.
+- **Capped.** Bodies longer than `maxBodyBytes` serialized (default 8 KiB) are cut to their first bytes as text, with `bodyTruncated: true`. Only the latest `maxCalls` calls (default 100) keep `captured`; older calls lose it but stay in `calls`, so indices such as `since` keep their meaning.
+- Calls recorded by one request, such as the tool calls of an MCP batch, share its capture. Requests no connector of a combined emulator matches aren't captured.
+
+Capture is off by default, as it takes memory in long Jest runs. Server mode (`node scripts/connector_emulate`) turns it on, so `GET /_mock/calls` and the MCP server's `list_calls` show what Kibana sent.
+
 Connectors that call several vendor specs (one per API version or product) can name them:
 
 ```ts
@@ -75,7 +90,7 @@ const rejected = await control.setFixtures([
 
 | Endpoint | Answer |
 | --- | --- |
-| `GET /_mock/calls?since=<n>` | `{ calls, total }`: the calls from index `n` on (default 0); pass `total` as the next `since` to read only later calls |
+| `GET /_mock/calls?since=<n>` | `{ calls, total }`: the calls from index `n` on (default 0); pass `total` as the next `since` to read only later calls. With `capture` (on in `connector_emulate`), the latest calls carry `captured` (see "Capturing exchanges") |
 | `POST /_mock/reset` | **204** after emptying the calls and responder state and dropping the runtime fixtures (`mock.reset()`) |
 | `GET /_mock/operations` | `{ operations }`: each OpenAPI operation's method, path template, server URLs and spec name, and each GraphQL root field or MCP tool by the name calls give it |
 | `GET /_mock/operations/<id>[?source=<name>]` | An OpenAPI operation's parameters, request body and responses (`mock.describeOperation(id)`): each status with its headers and media types, the schemas with their `$ref`s inlined a few levels deep, the examples, and a `sample` that conforms, to start a fixture from. `id` is the operation's `id` from `GET /_mock/operations`, URL-encoded |

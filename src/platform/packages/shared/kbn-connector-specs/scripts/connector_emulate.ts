@@ -269,6 +269,8 @@ run(
         pagination,
         fixtures,
         recordings,
+        // So GET /_mock/calls shows what Kibana sent and got, with secrets redacted.
+        capture: true,
         onCall: (call) => logCall(log, call, single ? '' : `[${name}] `),
       });
 

@@ -36,6 +36,13 @@ export type {
   EmulatorOptions,
   EmulatorSpec,
 } from './src/fetch/create_emulator_fetch';
+export { REDACTED } from './src/fetch/capture_call';
+export type {
+  CaptureOptions,
+  CapturedExchange,
+  CapturedMessage,
+  CapturedRequest,
+} from './src/fetch/capture_call';
 export type {
   EmulatorHttpOperation,
   EmulatorNamedOperation,
