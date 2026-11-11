@@ -106,22 +106,16 @@ export function SparkPlotItem({
   compact?: boolean;
   comparisonSeries?: Coordinate[];
   comparisonSeriesColor?: string;
-  // Range end (epoch ms). When set, the partial trailing bucket is trimmed.
   end?: number;
 }) {
   const { euiTheme } = useEuiTheme();
   const defaultChartThemes = useChartThemes();
   const comparisonChartTheme = getComparisonChartTheme();
 
-  // Trim the partial trailing bucket from each series independently, using the
-  // same range end for both (the comparison x values are already shifted onto
-  // the current period by the detailed-statistics route). Evaluating them apart
-  // matters when only one series has a non-null partial last bucket: an idle
-  // current period with a null tail must not stop the comparison tail from being
-  // trimmed, and vice versa. If trimming a series would leave no valid points (a
-  // service reporting only in its latest, partial bucket) keep it untrimmed so
-  // the row still shows a chart. This must sit above the isLoading early return
-  // to satisfy the rules of hooks.
+  // Trim the partial trailing bucket from each series using the same range end
+  // (comparison x values are pre-shifted onto the current period), falling back
+  // to the untrimmed series so a service with a single recent bucket still
+  // renders.
   const { trimmedSeries, trimmedComparisonSeries } = useMemo(() => {
     const trimOne = (input?: Coordinate[] | null) => {
       if (end === undefined || !input) {
@@ -176,10 +170,9 @@ export function SparkPlotItem({
     const { mainSegments, leadingEdge, trailingEdge, interiorEdges } =
       splitSeriesAtNullGaps(trimmedSeries);
 
-    const comparisonSplit =
-      hasComparisonSeries && trimmedComparisonSeries
-        ? splitSeriesAtNullGaps(trimmedComparisonSeries)
-        : null;
+    const comparisonSplit = trimmedComparisonSeries?.length
+      ? splitSeriesAtNullGaps(trimmedComparisonSeries)
+      : null;
 
     return (
       <Chart size={chartSize}>

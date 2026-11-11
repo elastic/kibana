@@ -39,9 +39,9 @@ import { useApmRouter } from '../../../../hooks/use_apm_router';
 import type { Breakpoints } from '../../../../hooks/use_breakpoints';
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback_to_transactions_fetcher';
-import { useTimeRange } from '../../../../hooks/use_time_range';
 import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { isFailure, isPending } from '../../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import type { ApmRoutes } from '../../../routing/apm_route_config';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
 import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
@@ -445,7 +445,7 @@ export function ApmServicesTable({
   const { kuery, environment, rangeFrom, rangeTo } = query;
 
   const { end } = useTimeRange({ rangeFrom, rangeTo });
-  const rangeEnd = useMemo(() => new Date(end).getTime(), [end]);
+  const rangeEnd = Date.parse(end);
 
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
