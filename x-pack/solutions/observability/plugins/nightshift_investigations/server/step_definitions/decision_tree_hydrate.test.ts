@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AuditedSandboxSession, NightshiftSandboxStart } from '../sandbox_audit';
 import { hydrateDecisionTreeWorkspace } from '../decision_trees/register_decision_trees';
 import { decisionTreeHydrateStepDefinition } from './decision_tree_hydrate';
+import { reinforcementSessionRegistry } from '../tools/decision_tree';
 import { NIGHTSHIFT_ASSISTANT_AGENT_ID, NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../common';
 
 jest.mock('../decision_trees/register_decision_trees', () => ({
@@ -16,6 +18,7 @@ jest.mock('../decision_trees/register_decision_trees', () => ({
 }));
 
 describe('decisionTreeHydrateStepDefinition', () => {
+  const analytics = coreMock.createSetup().analytics;
   const esClient = { search: jest.fn() };
   const getScopedEsClient = jest.fn().mockReturnValue(esClient);
   const mockSession = {
@@ -62,6 +65,7 @@ describe('decisionTreeHydrateStepDefinition', () => {
   it('hydrates the sandbox handed to it by obtain_sandbox', async () => {
     const sandboxStart = makeSandboxStart();
     const definition = decisionTreeHydrateStepDefinition({
+      analytics,
       getSandboxStart: () => sandboxStart,
       logger: loggerMock.create(),
     });
@@ -81,6 +85,9 @@ describe('decisionTreeHydrateStepDefinition', () => {
       spaceId: 'default',
       prompt: undefined,
       signal: expect.any(AbortSignal),
+      analytics,
+      conversationId: 'conv-1',
+      roundId: undefined,
     });
     expect(result).toEqual({
       output: {
@@ -92,11 +99,31 @@ describe('decisionTreeHydrateStepDefinition', () => {
     });
   });
 
+  it("reports the investigator's conversation and round for a reinforcement sandbox", async () => {
+    reinforcementSessionRegistry.registerSession('default__reinforce-1', {
+      conversationId: 'investigator-conv',
+      roundId: 'round-1',
+    });
+    const definition = decisionTreeHydrateStepDefinition({
+      analytics,
+      getSandboxStart: () => makeSandboxStart(),
+      logger: loggerMock.create(),
+    });
+
+    await definition.handler(createContext('default__reinforce-1'));
+    reinforcementSessionRegistry.drainSession('default__reinforce-1');
+
+    expect(hydrateDecisionTreeWorkspace).toHaveBeenLastCalledWith(
+      expect.objectContaining({ conversationId: 'investigator-conv', roundId: 'round-1' })
+    );
+  });
+
   // The reinforcement agent's own conversation resolves a differently-scoped sandbox key,
   // so the handler must not assume `default`.
   it('unscopes the sandbox id against the current Space', async () => {
     const sandboxStart = makeSandboxStart();
     const definition = decisionTreeHydrateStepDefinition({
+      analytics,
       getSandboxStart: () => sandboxStart,
       logger: loggerMock.create(),
     });
@@ -123,6 +150,7 @@ describe('decisionTreeHydrateStepDefinition', () => {
 
   it('forwards the round prompt so accessed-trees filtering still applies', async () => {
     const definition = decisionTreeHydrateStepDefinition({
+      analytics,
       getSandboxStart: () => makeSandboxStart(),
       logger: loggerMock.create(),
     });
@@ -140,6 +168,7 @@ describe('decisionTreeHydrateStepDefinition', () => {
   it('skips without touching the sandbox when the feature is disabled', async () => {
     const sandboxStart = makeSandboxStart();
     const definition = decisionTreeHydrateStepDefinition({
+      analytics,
       getSandboxStart: () => sandboxStart,
       logger: loggerMock.create(),
       isEnabled: () => false,
@@ -165,6 +194,7 @@ describe('decisionTreeHydrateStepDefinition', () => {
     async (agentId) => {
       const sandboxStart = makeSandboxStart();
       const definition = decisionTreeHydrateStepDefinition({
+        analytics,
         getSandboxStart: () => sandboxStart,
         logger: loggerMock.create(),
         isEnabled: () => true,
@@ -184,6 +214,7 @@ describe('decisionTreeHydrateStepDefinition', () => {
 
   it('hydrates for the investigator', async () => {
     const definition = decisionTreeHydrateStepDefinition({
+      analytics,
       getSandboxStart: () => makeSandboxStart(),
       logger: loggerMock.create(),
       isEnabled: () => true,
@@ -198,6 +229,7 @@ describe('decisionTreeHydrateStepDefinition', () => {
 
   it('throws when the sandbox is not configured', async () => {
     const definition = decisionTreeHydrateStepDefinition({
+      analytics,
       getSandboxStart: () => undefined,
       logger: loggerMock.create(),
     });
@@ -214,6 +246,7 @@ describe('decisionTreeHydrateStepDefinition', () => {
       .mocked(hydrateDecisionTreeWorkspace)
       .mockRejectedValueOnce(new Error('sandbox write refused'));
     const definition = decisionTreeHydrateStepDefinition({
+      analytics,
       getSandboxStart: () => makeSandboxStart(),
       logger: loggerMock.create(),
     });
@@ -238,6 +271,7 @@ describe('decisionTreeHydrateStepDefinition', () => {
 
   it('requires a sandbox_id', () => {
     const definition = decisionTreeHydrateStepDefinition({
+      analytics,
       getSandboxStart: () => makeSandboxStart(),
       logger: loggerMock.create(),
     });

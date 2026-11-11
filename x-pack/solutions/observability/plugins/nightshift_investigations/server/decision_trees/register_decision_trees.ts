@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import type { DecisionTreeTurnKind } from '@kbn/nightshift-decision-trees';
@@ -25,6 +25,7 @@ import { createLearningStore } from './learning_store';
 import { materializeDecisionTrees } from './materialize';
 import { createDecisionTreeStore } from './store';
 import { buildReinforcementPrompt } from './turn';
+import { createDecisionTreeTelemetry } from '../telemetry';
 
 /**
  * Registers the dedicated decision-tree AI index with the Context Engine so it is a managed,
@@ -60,6 +61,9 @@ export const hydrateDecisionTreeWorkspace = async ({
   spaceId,
   prompt,
   signal,
+  analytics,
+  conversationId,
+  roundId,
 }: {
   session: AuditedSandboxSession;
   esClient: ElasticsearchClient;
@@ -67,6 +71,9 @@ export const hydrateDecisionTreeWorkspace = async ({
   spaceId: string;
   prompt?: string;
   signal?: AbortSignal;
+  analytics: AnalyticsServiceSetup;
+  conversationId?: string;
+  roundId?: string;
 }): Promise<number | { treeCount: number; hydratedIds: string[] }> => {
   const store = createDecisionTreeStore({ esClient, logger, spaceId, signal });
   const accessedTreeIds = parseAccessedTreesMarker(prompt);
@@ -77,6 +84,15 @@ export const hydrateDecisionTreeWorkspace = async ({
     signal,
     ...(accessedTreeIds ? { treeIds: accessedTreeIds } : {}),
   });
+
+  // A marker means this is the reinforcement hydrate, which only writes the trees the investigator
+  // opened; its absence is the investigator hydrate, which writes every tree so the agent can
+  // discover a match through monitors.md.
+  createDecisionTreeTelemetry({ analytics, conversationId, roundId, logger }).reportLoaded({
+    selection: accessedTreeIds ? 'accessed' : 'discover',
+    treeIds: trees.map((tree) => tree.tree_id),
+  });
+
   return {
     treeCount: trees.length,
     hydratedIds: trees.map((tree) => tree.tree_id),
