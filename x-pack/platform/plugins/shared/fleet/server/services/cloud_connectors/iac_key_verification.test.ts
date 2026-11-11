@@ -157,13 +157,24 @@ describe('getIacKeyOutcome', () => {
     expect(mockedRender).not.toHaveBeenCalled();
   });
 
-  it('returns no_key without asking the provider once the set resolves and nothing is stored', async () => {
+  it('returns no_key once the set resolves, nothing is stored and the provider can render it', async () => {
+    mockedRender.mockResolvedValueOnce(rendered(true, 'sha256:current'));
+
     const result = await getIacKeyOutcome(soClient, keyless, selections, opts);
 
     expect(result).toBe('no_key');
     expect(mockedResolve).toHaveBeenCalledWith(resolveCall(selections));
-    expect(mockedRender).not.toHaveBeenCalled();
-    expect(reportIacProvisionerRenderRequested).not.toHaveBeenCalled();
+    expect(mockedRender).toHaveBeenCalledWith(
+      expect.not.objectContaining({ templateSha: expect.anything() })
+    );
+  });
+
+  it('returns key_unavailable, not no_key, for a keyless connector when the provider is unreachable', async () => {
+    mockedRender.mockRejectedValueOnce(new IacProvisionerUnavailableError('ENOTFOUND'));
+
+    const result = await getIacKeyOutcome(soClient, keyless, selections, opts);
+
+    expect(result).toBe('key_unavailable');
   });
 
   it('returns key_unavailable, not no_key, for a keyless connector whose set no longer resolves', async () => {
@@ -488,6 +499,7 @@ describe('verifyCloudConnectorIacKey', () => {
 
   it('reports no_key when the connector deployed the static template', async () => {
     soClient.get.mockResolvedValueOnce(connector({}));
+    mockedRender.mockResolvedValueOnce(rendered(true, 'sha256:current'));
     // Two package policies on the same connector, so the returned set has to be merged.
     mockedSelections.mockResolvedValueOnce(
       stored([
@@ -513,8 +525,8 @@ describe('verifyCloudConnectorIacKey', () => {
         ],
       },
     ]);
-    // The static template is a fact about the connector, so no render is needed.
-    expect(mockedRender).not.toHaveBeenCalled();
+    // Rendered without a key, only to learn that IaCP can produce the template the Update uses.
+    expect(mockedRender).toHaveBeenCalledTimes(1);
   });
 
   it('fails open and emits key_unavailable when IaCP is unavailable', async () => {
@@ -598,11 +610,14 @@ describe('verifyCloudConnectorIacKey', () => {
 
   it('treats a whitespace-only stored key as no_key', async () => {
     soClient.get.mockResolvedValueOnce(connector({ iac_key: '   ' }));
+    mockedRender.mockResolvedValueOnce(rendered(true, 'sha256:current'));
 
     const result = await verifyCloudConnectorIacKey(soClient, 'cc-1');
 
     expect(result).toMatchObject({ matches: false, reason: 'no_key' });
-    expect(mockedRender).not.toHaveBeenCalled();
+    expect(mockedRender).toHaveBeenCalledWith(
+      expect.not.objectContaining({ templateSha: expect.anything() })
+    );
   });
 
   it('omits region when the deployment id is malformed', async () => {
@@ -726,6 +741,7 @@ describe('verifyCloudConnectorIacKey', () => {
 
     it('stores upgrade_available when a re-check finds no stored key', async () => {
       soClient.get.mockResolvedValueOnce(connector({ iac_upgrade_status: 'up_to_date' }));
+      mockedRender.mockResolvedValueOnce(rendered(true, 'sha256:current'));
 
       await verifyCloudConnectorIacKey(soClient, 'cc-1');
 

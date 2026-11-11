@@ -2902,6 +2902,86 @@ describe('ManagedWorkflowsService', () => {
       );
     });
 
+    it('retries an orphan delete after a concurrent write conflict', async () => {
+      mockManagedWorkflowDefinitions = [];
+      const { audit, crudService, logger, service } = createService();
+      crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue([
+        {
+          id: 'system-contended',
+          source: createWorkflowSource({
+            managedBy: PLUGIN_ID,
+            originManagedWorkflowId: 'system-removed',
+          }),
+        },
+      ]);
+      crudService.deleteManagedOrphan
+        .mockRejectedValueOnce(Object.assign(new Error('version conflict'), { statusCode: 409 }))
+        .mockResolvedValueOnce(true);
+
+      await service.cleanupUnregisteredOrphans([PLUGIN_ID]);
+
+      expect(crudService.deleteManagedOrphan).toHaveBeenCalledTimes(2);
+      expect(audit.logWorkflowDeleted).toHaveBeenCalledTimes(1);
+      expect(crudService.disableManagedWorkflowWithoutRequest).not.toHaveBeenCalled();
+      expect(logger.error).not.toHaveBeenCalled();
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('warns instead of erroring when orphan delete conflicts persist', async () => {
+      mockManagedWorkflowDefinitions = [];
+      const { crudService, logger, service } = createService();
+      crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue([
+        {
+          id: 'system-contended',
+          source: createWorkflowSource({
+            managedBy: PLUGIN_ID,
+            originManagedWorkflowId: 'system-removed',
+          }),
+        },
+      ]);
+      crudService.deleteManagedOrphan.mockRejectedValue(
+        Object.assign(new Error('version conflict'), { meta: { statusCode: 409 } })
+      );
+
+      await service.cleanupUnregisteredOrphans([PLUGIN_ID]);
+
+      expect(crudService.deleteManagedOrphan).toHaveBeenCalledTimes(3);
+      expect(logger.error).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining("failed to remove orphaned workflow 'system-contended'"),
+        expect.objectContaining({ error: expect.any(Error) })
+      );
+      expect(crudService.disableManagedWorkflowWithoutRequest).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not retry an orphan with running executions', async () => {
+      mockManagedWorkflowDefinitions = [];
+      const { crudService, logger, service } = createService();
+      crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue([
+        {
+          id: 'system-running',
+          source: createWorkflowSource({
+            managedBy: PLUGIN_ID,
+            originManagedWorkflowId: 'system-removed',
+          }),
+        },
+      ]);
+      crudService.deleteManagedOrphan.mockRejectedValue(
+        new WorkflowConflictError(
+          'Cannot force-delete workflow with running executions: system-running',
+          'system-running'
+        )
+      );
+
+      await service.cleanupUnregisteredOrphans([PLUGIN_ID]);
+
+      expect(crudService.deleteManagedOrphan).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining("failed to remove orphaned workflow 'system-running'"),
+        expect.objectContaining({ error: expect.any(WorkflowConflictError) })
+      );
+    });
+
     it('does not delete managed docs for registered owners with known definitions', async () => {
       const staticDefinition = createDefinition({ id: 'system-static' });
       const dynamicDefinition = createDefinition({

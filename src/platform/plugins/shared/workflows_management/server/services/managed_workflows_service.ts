@@ -11,7 +11,7 @@ import { createHash } from 'node:crypto';
 import { setImmediate as yieldToEventLoop } from 'node:timers/promises';
 import pMap from 'p-map';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { DEFAULT_RETRY_DELAY_MS, delayMs } from '@kbn/occ';
+import { DEFAULT_RETRY_DELAY_MS, delayMs, isElasticsearchWriteConflict } from '@kbn/occ';
 import { requiresDelegatedIdentity, toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
@@ -59,6 +59,7 @@ import type { WorkflowProperties } from '../storage/workflow_storage';
 const MANAGED_WORKFLOW_SYSTEM_USER = 'elastic/kibana';
 const MAX_MANAGED_INSTALL_RETRIES = 2;
 const ORPHAN_DELETE_CONCURRENCY = 10;
+const MAX_ORPHAN_DELETE_RETRIES = 2;
 
 const computeDefinitionHash = (yaml: string): string => {
   return createHash('sha256').update(yaml.trim()).digest('hex');
@@ -1154,13 +1155,24 @@ export class ManagedWorkflowsService {
       definitionId: source.originManagedWorkflowId ?? null,
     };
     let deleted = false;
-    try {
-      deleted = await this.deps.crudService.deleteManagedOrphan(workflowId, spaceId, orphan);
-    } catch (error) {
-      this.logger.error(
-        `Managed workflows: failed to remove orphaned workflow '${workflowId}' in space '${spaceId}'`,
-        { error }
-      );
+    for (let attempt = 0; attempt <= MAX_ORPHAN_DELETE_RETRIES; attempt++) {
+      try {
+        deleted = await this.deps.crudService.deleteManagedOrphan(workflowId, spaceId, orphan);
+        break;
+      } catch (error) {
+        // Another Kibana instance can write the same orphan concurrently at startup.
+        const isWriteConflict =
+          !(error instanceof WorkflowConflictError) && isElasticsearchWriteConflict(error);
+        if (!isWriteConflict || attempt === MAX_ORPHAN_DELETE_RETRIES) {
+          const message = `Managed workflows: failed to remove orphaned workflow '${workflowId}' in space '${spaceId}'`;
+          if (isWriteConflict) {
+            this.logger.warn(`${message} after concurrent update conflicts`, { error });
+          } else {
+            this.logger.error(message, { error });
+          }
+          break;
+        }
+      }
     }
 
     if (deleted) {

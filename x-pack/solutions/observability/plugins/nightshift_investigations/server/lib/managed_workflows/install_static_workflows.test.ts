@@ -22,7 +22,7 @@ const ALWAYS = [
   NIGHTSHIFT_ONLINE_EVALS_WORKFLOW_ID,
   NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID,
 ];
-const WIKI_OR_MEMORY = [
+const KNOWLEDGE = [
   NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
   NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
 ];
@@ -40,8 +40,9 @@ const createClient = () => {
 describe('installStaticWorkflows', () => {
   it.each([
     [false, false, ALWAYS],
-    [true, false, [...ALWAYS, ...WIKI_OR_MEMORY]],
-    [false, true, [...ALWAYS, NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID]],
+    [true, false, [...ALWAYS, ...KNOWLEDGE]],
+    [false, true, [...ALWAYS, ...KNOWLEDGE, NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID]],
+    [true, true, [...ALWAYS, ...KNOWLEDGE, NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID]],
   ])(
     'installs the global set for wiki or memory=%s and decision trees=%s, then signals ready',
     async (wikiOrMemoryEnabled, decisionTreesEnabled, expectedIds) => {

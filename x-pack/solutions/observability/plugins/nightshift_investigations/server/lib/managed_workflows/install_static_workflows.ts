@@ -21,7 +21,8 @@ const ALWAYS_INSTALLED_WORKFLOW_IDS = [
   NIGHTSHIFT_ONLINE_EVALS_WORKFLOW_ID,
   NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID,
 ] as const;
-const WIKI_OR_MEMORY_WORKFLOW_IDS = [
+// Installed with Wiki, Memory, or decision trees.
+const KNOWLEDGE_WORKFLOW_IDS = [
   NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
   NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
 ] as const;
@@ -44,7 +45,7 @@ export const installStaticWorkflows = async ({
 }): Promise<void> => {
   const ids = [
     ...ALWAYS_INSTALLED_WORKFLOW_IDS,
-    ...(wikiOrMemoryEnabled ? WIKI_OR_MEMORY_WORKFLOW_IDS : []),
+    ...(wikiOrMemoryEnabled || decisionTreesEnabled ? KNOWLEDGE_WORKFLOW_IDS : []),
     ...(decisionTreesEnabled ? DECISION_TREE_WORKFLOW_IDS : []),
   ];
 

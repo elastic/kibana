@@ -63,7 +63,7 @@ const knowledgeIndicatorQueriesGeneratedSchema: RootSchema<KnowledgeIndicatorQue
     source_id: {
       type: 'keyword',
       _meta: {
-        description: 'The Nightshift source id the queries were generated for',
+        description: 'The nightshift source id the queries were generated for',
       },
     },
     external_content_tool_continuations: {
@@ -224,7 +224,7 @@ const knowledgeIndicatorFeaturesIdentifiedSchema: RootSchema<KnowledgeIndicatorF
     source_id: {
       type: 'keyword',
       _meta: {
-        description: 'The Nightshift source id the features were identified for',
+        description: 'The nightshift source id the features were identified for',
       },
     },
     state: {
@@ -277,7 +277,21 @@ const agentBuilderKnowledgeIndicatorCreatedSchema: RootSchema<AgentBuilderKnowle
     source_id: {
       type: 'keyword',
       _meta: {
-        description: 'The Nightshift source id the knowledge indicator was created for',
+        description: 'The nightshift source id the knowledge indicator was created for',
+      },
+    },
+    space_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'The Kibana space that owns the knowledge indicator',
+      },
+    },
+    knowledge_indicator_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'The `feature.id` or `query.id` the write addressed, unique within `source_id`; absent only when a failed query write had no caller-supplied id',
+        optional: true,
       },
     },
     error_message: {
@@ -300,7 +314,7 @@ const agentToolKnowledgeIndicatorIdentificationStartedSchema: RootSchema<AgentTo
     source_id: {
       type: 'keyword',
       _meta: {
-        description: 'The Nightshift source id identification was started for',
+        description: 'The nightshift source id identification was started for',
       },
     },
     error_message: {
@@ -369,11 +383,11 @@ const agentToolEventCreateSchema: RootSchema<AgentToolEventCreateProps> = {
     items: {
       type: 'keyword',
       _meta: {
-        description: 'A Nightshift source id',
+        description: 'A nightshift source id',
       },
     },
     _meta: {
-      description: 'The Nightshift source ids associated with the event',
+      description: 'The nightshift source ids associated with the event',
     },
   },
   error_message: {
@@ -520,7 +534,7 @@ const onboardingScheduledSchema: RootSchema<KnowledgeIndicatorOnboardingSchedule
   source_id: {
     type: 'keyword',
     _meta: {
-      description: 'The Nightshift source id being onboarded',
+      description: 'The nightshift source id being onboarded',
     },
   },
   execution_id: {
@@ -629,11 +643,11 @@ const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
     items: {
       type: 'keyword',
       _meta: {
-        description: 'A Nightshift source id',
+        description: 'A nightshift source id',
       },
     },
     _meta: {
-      description: 'The Nightshift source ids associated with the event',
+      description: 'The nightshift source ids associated with the event',
     },
   },
   error_message: {

@@ -8,6 +8,7 @@
 import { createPrompt } from '@kbn/inference-common';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_JUDGE_TEXT_LENGTH } from '../alert_outcome_shared';
+import { withIdentifierRule } from '../with_identifier_rule';
 import systemPromptText from './system_prompt.text';
 
 export const ALERT_OUTCOME_BENIGN_CLASSIFICATION_TOOL_NAME = 'score_alert_outcome_benign';
@@ -29,7 +30,7 @@ export type AlertOutcomeBenignClassificationOutput = z.infer<
 export const alertOutcomeBenignClassificationPrompt = createPrompt({
   name: 'nightshift_alert_outcome_benign_classification',
   description:
-    'Grades whether a Nightshift investigation classified its alert as benign or actionable the way its recovery confirmed',
+    'Grades whether a nightshift investigation classified its alert as benign or actionable the way its recovery confirmed',
   input: lazySchema(() =>
     z.object({
       confirmed_root_cause: z.string().max(MAX_JUDGE_TEXT_LENGTH),
@@ -40,7 +41,7 @@ export const alertOutcomeBenignClassificationPrompt = createPrompt({
   .version({
     system: {
       mustache: {
-        template: systemPromptText,
+        template: withIdentifierRule(systemPromptText),
       },
     },
     template: {

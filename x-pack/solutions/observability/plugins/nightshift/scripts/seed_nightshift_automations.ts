@@ -96,7 +96,7 @@ const AUTOMATIONS: SeedAutomation[] = [
     trigger: { kind: 'slack', event: 'message', channels: ['#nightshift'] },
     completions: [THREAD_REPLY],
     tags: [],
-    author: 'Nightshift',
+    author: 'nightshift',
     enabled: true,
     limit: 50,
     runs48h: 2,
