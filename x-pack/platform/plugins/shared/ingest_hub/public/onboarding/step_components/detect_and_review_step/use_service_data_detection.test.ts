@@ -67,6 +67,7 @@ function setup({
   queryData,
   entry = CLOUDTRAIL,
   deploymentMethod = 'agent_based',
+  ecfStacks,
   outputs = [],
 }: {
   serviceSettings: ServiceSettingsPersistedState;
@@ -77,6 +78,12 @@ function setup({
   queryData?: { results: Record<string, boolean> };
   entry?: AwsServiceMatrixEntry;
   deploymentMethod?: 'managed_integration' | 'agent_based';
+  ecfStacks?: Array<{
+    family: string;
+    stackName: string;
+    templateVersion: string;
+    namespace?: string;
+  }>;
   outputs?: Array<{ id: string; type: string }>;
 }) {
   const httpGet = jest.fn().mockResolvedValue({ results: {} });
@@ -88,7 +95,7 @@ function setup({
   const updateDetectAndReviewStep = jest.fn();
   mockUseOnboardingFlow.mockReturnValue({
     servicesStep: { selectedServiceIds: ['cloudtrail'] },
-    detectAndReviewStep: { serviceStatuses, deployErrors, policyIdsByInstance },
+    detectAndReviewStep: { serviceStatuses, deployErrors, policyIdsByInstance, ecfStacks },
     awsServicesMap: new Map([['cloudtrail', entry]]),
     deploymentMethod,
     updateDetectAndReviewStep,
@@ -159,28 +166,58 @@ describe('useServiceDataDetection', () => {
     );
   });
 
-  it('polls every pattern of an ECF service in any namespace, ignoring the global one', async () => {
-    const ecfEntry = {
-      ...CLOUDTRAIL,
-      deploymentMethods: [{ method: 'ecf' }],
-    } as unknown as AwsServiceMatrixEntry;
-    const { httpGet } = setup({
-      entry: ecfEntry,
-      deploymentMethod: 'managed_integration',
-      serviceSettings: {
-        globalRegion: 'us-east-1',
-        namespace: 'prod',
-        instances: [
-          { instanceId: 'cloudtrail', serviceId: 'cloudtrail', name: 'CT', isDuplicate: false },
-        ],
-        serviceVars: {},
-      },
+  describe('ECF services', () => {
+    const ecfSetup = (
+      ecfFields: Record<string, unknown>,
+      ecfStacks?: Parameters<typeof setup>[0]['ecfStacks']
+    ) =>
+      setup({
+        entry: {
+          ...CLOUDTRAIL,
+          deploymentMethods: [{ method: 'ecf' }],
+          ecfLogType: 'cloudtrail',
+          ...ecfFields,
+        } as unknown as AwsServiceMatrixEntry,
+        deploymentMethod: 'managed_integration',
+        ecfStacks,
+        serviceSettings: {
+          globalRegion: 'us-east-1',
+          namespace: 'staging',
+          instances: [
+            { instanceId: 'cloudtrail', serviceId: 'cloudtrail', name: 'CT', isDuplicate: false },
+          ],
+          serviceVars: {},
+        },
+      });
+    const polledPattern = async (httpGet: jest.Mock) => {
+      renderHook(() => useServiceDataDetection());
+      await mockUseQuery.mock.calls[0][0].queryFn();
+      return httpGet.mock.calls[0][1].query.dataStreams;
+    };
+
+    it('polls the namespace of the launched stack, not the global one that is not applied yet', async () => {
+      const { httpGet } = ecfSetup({}, [
+        { family: 'unified', stackName: 'stack', templateVersion: '1.0.0', namespace: 'prod' },
+      ]);
+
+      expect(await polledPattern(httpGet)).toBe('logs-aws.cloudtrail-prod');
     });
-    renderHook(() => useServiceDataDetection());
 
-    await mockUseQuery.mock.calls[0][0].queryFn();
+    it('polls the default namespace for a stack saved without one', async () => {
+      const { httpGet } = ecfSetup({}, [
+        { family: 'unified', stackName: 'stack', templateVersion: '1.0.0' },
+      ]);
 
-    expect(httpGet.mock.calls[0][1].query.dataStreams).toBe('logs-aws.cloudtrail-*');
+      expect(await polledPattern(httpGet)).toBe('logs-aws.cloudtrail-default');
+    });
+
+    it('polls every namespace for a service whose template takes none', async () => {
+      const { httpGet } = ecfSetup({ ecfDedicatedTemplate: 'otel' }, [
+        { family: 'otel', stackName: 'stack', templateVersion: '1.0.0' },
+      ]);
+
+      expect(await polledPattern(httpGet)).toBe('logs-aws.cloudtrail-*');
+    });
   });
 
   it('polls the global namespace for a managed integration service that deploys as a policy', async () => {

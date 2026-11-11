@@ -31,7 +31,7 @@ const PAYLOAD = toWorkflowPayload(
   createActionGroup({
     spaceId: SPACE_ID,
     alerts: [createAlert({ space_id: SPACE_ID, severity: 'high' })],
-    rules: { 'rule-1': { name: 'Rule 1' } },
+    rules: { 'rule-1': { name: 'Rule 1', grouping_fields: [] } },
   })
 );
 

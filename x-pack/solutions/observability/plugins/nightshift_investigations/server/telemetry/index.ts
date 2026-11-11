@@ -11,6 +11,7 @@ import { semanticMemoryMaterializedEvent, semanticMemoryOptimizedEvent } from '.
 import { onlineEvalScoreEvent } from './online_eval_score_event';
 import { onlineEvalsStepFailedEvent } from './online_evals_step_failed_event';
 import { investigationSkippedEvent } from './investigation_skipped_event';
+import { investigationStartedEvent } from './investigation_started_event';
 
 export const setupNightshiftTelemetry = ({
   analytics,
@@ -24,6 +25,7 @@ export const setupNightshiftTelemetry = ({
   analytics.registerEventType(onlineEvalScoreEvent);
   analytics.registerEventType(onlineEvalsStepFailedEvent);
   analytics.registerEventType(investigationSkippedEvent);
+  analytics.registerEventType(investigationStartedEvent);
   return new NightshiftTelemetryClient(analytics, logger);
 };
 
@@ -44,14 +46,14 @@ export {
   type OnlineEvalsStepFailedEvent,
 } from './online_evals_step_failed_event';
 export {
-  NIGHTSHIFT_CORTEX_EDIT_APPLIED_EVENT_TYPE,
-  NIGHTSHIFT_CORTEX_HYDRATED_EVENT_TYPE,
-  type CortexEditAppliedProps,
-  type CortexHydratedProps,
-} from './cortex_events';
+  NIGHTSHIFT_WIKI_EDIT_APPLIED_EVENT_TYPE,
+  NIGHTSHIFT_WIKI_HYDRATED_EVENT_TYPE,
+  type WikiEditAppliedProps,
+  type WikiHydratedProps,
+} from './wiki_events';
 export {
-  createCortexTelemetry,
-  registerCortexTelemetryEvents,
-  type AppliedCortexEdit,
-  type CortexTelemetry,
-} from './cortex_telemetry';
+  createWikiTelemetry,
+  registerWikiTelemetryEvents,
+  type AppliedWikiEdit,
+  type WikiTelemetry,
+} from './wiki_telemetry';

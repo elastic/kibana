@@ -7,10 +7,11 @@
 
 import React from 'react';
 import type { ReactNode } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
 import { useFormatters } from '../../../hooks/use_formatters';
+import { SESSIONS_LABEL, SESSIONS_UNAVAILABLE_LABEL } from '../../../labels';
 import type { ApplicationsSummary } from '../utils/summarize_applications';
 
 const LABELS = {
@@ -40,8 +41,26 @@ export function ApplicationsSummaryPanel({
   isLoading: boolean;
 }) {
   const { formatNumber, formatPercent } = useFormatters();
-  const stats: Array<{ id: string; label: string; value: ReactNode; color?: 'danger' }> = [
+  const stats: Array<{
+    id: string;
+    label: ReactNode;
+    value: ReactNode;
+    color?: 'danger';
+  }> = [
     { id: 'applications', label: LABELS.applications, value: formatNumber(summary.applications) },
+    {
+      id: 'sessions',
+      // Without a total, the label says where the sessions come from.
+      label:
+        summary.sessions === null ? (
+          <EuiToolTip content={SESSIONS_UNAVAILABLE_LABEL}>
+            <span tabIndex={0}>{SESSIONS_LABEL}</span>
+          </EuiToolTip>
+        ) : (
+          SESSIONS_LABEL
+        ),
+      value: summary.sessions === null ? <EmptyCellValue /> : formatNumber(summary.sessions),
+    },
     { id: 'pageLoads', label: LABELS.pageLoads, value: formatNumber(summary.pageLoads) },
     {
       id: 'errorsPerPageLoad',

@@ -118,6 +118,26 @@ describe('ProcessorEditor', () => {
     });
   });
 
+  it('labels the status badge from the catalogue and explains it on hover', async () => {
+    renderEditor();
+
+    const badge = screen.getByTestId('streamsProcessingFlyoutStatusBadge');
+    expect(badge.textContent).toBe('Experimental');
+    await userEvent.hover(badge);
+    expect(await screen.findByText(/Recently added and still evolving/)).toBeTruthy();
+  });
+
+  it('falls back to the status value when the catalogue does not describe statuses', () => {
+    const { 'component.statuses': statuses, ...enumSets } = catalogue.metadata.enum_sets;
+    renderEditor({
+      catalogue: { ...catalogue, metadata: { ...catalogue.metadata, enum_sets: enumSets } },
+    });
+
+    expect(screen.getByTestId('streamsProcessingFlyoutStatusBadge').textContent).toBe(
+      'experimental'
+    );
+  });
+
   it('shows client validation errors instead of committing an incomplete processor', async () => {
     const { onCommit } = renderEditor();
     await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
@@ -247,17 +267,17 @@ describe('ProcessorEditor', () => {
       renderEditor({ telemetry: ['logs', 'metrics'] });
 
       expect(
-        within(screen.getByTestId('streamsProcessingFlyoutEditorSignals')).getByText('logs')
+        within(screen.getByTestId('streamsProcessingFlyoutEditorSignals')).getByText('Logs')
       ).toBeTruthy();
       expect(
-        within(screen.getByTestId('streamsProcessingFlyoutEditorSignals')).getByText('metrics')
+        within(screen.getByTestId('streamsProcessingFlyoutEditorSignals')).getByText('Metrics')
       ).toBeTruthy();
     });
 
     it('narrows a new processor to the signals left after removing one', async () => {
       const { onCommit } = renderEditor({ telemetry: ['logs', 'metrics', 'traces'] });
 
-      await userEvent.click(screen.getByLabelText('Remove metrics from selection in this group'));
+      await userEvent.click(screen.getByLabelText('Remove Metrics from selection in this group'));
       commitPath('team');
       fireEvent.change(screen.getByTestId('componentDefinitionFormLiteral-value'), {
         target: { value: 'core' },
@@ -280,16 +300,16 @@ describe('ProcessorEditor', () => {
         },
       });
 
-      await userEvent.click(screen.getByLabelText('Remove logs from selection in this group'));
-      await userEvent.click(screen.getByLabelText('Remove metrics from selection in this group'));
+      await userEvent.click(screen.getByLabelText('Remove Logs from selection in this group'));
+      await userEvent.click(screen.getByLabelText('Remove Metrics from selection in this group'));
 
       expect(screen.getByText('Choose at least one signal')).toBeTruthy();
       expect(screen.getByTestId('streamsProcessingFlyoutEditorSubmit')).toBeDisabled();
 
       const picker = screen.getByTestId('streamsProcessingFlyoutEditorSignals');
       await userEvent.click(within(picker).getByRole('combobox'));
-      await userEvent.click(screen.getByRole('option', { name: 'metrics' }));
-      expect(within(picker).getByText('metrics')).toBeTruthy();
+      await userEvent.click(screen.getByRole('option', { name: 'Metrics' }));
+      expect(within(picker).getByText('Metrics')).toBeTruthy();
       expect(screen.queryByText('Choose at least one signal')).toBeNull();
     });
 
@@ -297,10 +317,10 @@ describe('ProcessorEditor', () => {
       renderEditor({ telemetry: ['logs', 'metrics'] });
       expect(screen.getByTestId('componentDefinitionFormItemTelemetry')).toBeTruthy();
 
-      await userEvent.click(screen.getByLabelText('Remove logs from selection in this group'));
+      await userEvent.click(screen.getByLabelText('Remove Logs from selection in this group'));
       expect(screen.queryByTestId('componentDefinitionFormItemTelemetry')).toBeNull();
 
-      await userEvent.click(screen.getByLabelText('Remove metrics from selection in this group'));
+      await userEvent.click(screen.getByLabelText('Remove Metrics from selection in this group'));
       expect(screen.queryByTestId('componentDefinitionFormItemTelemetry')).toBeNull();
     });
 
@@ -328,7 +348,7 @@ describe('ProcessorEditor', () => {
 
       await userEvent.click(
         within(screen.getByTestId('streamsProcessingFlyoutEditorSignals')).getByLabelText(
-          'Remove metrics from selection in this group'
+          'Remove Metrics from selection in this group'
         )
       );
 
@@ -369,7 +389,7 @@ describe('ProcessorEditor', () => {
           'comboBoxSearchInput'
         )
       );
-      await userEvent.click(screen.getByRole('option', { name: 'metrics' }));
+      await userEvent.click(screen.getByRole('option', { name: 'Metrics' }));
       await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
 
       await waitFor(() => expect(onCommit).toHaveBeenCalled());

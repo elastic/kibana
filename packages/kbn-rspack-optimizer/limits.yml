@@ -2,7 +2,7 @@ pageLoadAssetSize:
   actions: 3928
   advancedSettings: 1981
   agentBuilder: 745
-  agentBuilderDashboards: 3743
+  agentBuilderDashboards: 4468
   agentBuilderPlatform: 23882
   agentBuilderSml: 597
   agentBuilderVisualizations: 1551
@@ -27,7 +27,6 @@ pageLoadAssetSize:
   cloudConnect: 5575
   cloudDataMigration: 2042
   cloudDefend: 3030
-  cloudExperiments: 137406
   cloudFullStory: 1642
   cloudLinks: 21894
   cloudSecurityPosture: 14802
@@ -137,7 +136,7 @@ pageLoadAssetSize:
   monitoring: 22416
   navigation: 13400
   newsfeed: 10708
-  nightshift: 4343
+  nightshift: 5038
   nightshiftInvestigations: 9405
   nightshiftSources: 3928
   noDataPage: 630
@@ -151,7 +150,7 @@ pageLoadAssetSize:
   observabilityLogsExplorer: 1351
   observabilityOnboarding: 8873
   observabilityShared: 8355
-  osquery: 14483
+  osquery: 14738
   painlessLab: 2550
   presentationUtil: 350
   productDocBase: 4218
@@ -192,7 +191,7 @@ pageLoadAssetSize:
   serverlessVectordb: 8809
   sessionView: 647
   share: 379
-  shared-core: 311749
+  shared-core: 343009
   shared-misc: 155260
   shared-packages: 6066047
   shared-plugins: 13536562

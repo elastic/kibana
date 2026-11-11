@@ -95,6 +95,7 @@ export async function hydrateOnboardingSession(
         ...(item.integrationName ? { integrationName: item.integrationName } : {}),
         ...(item.description ? { description: item.description } : {}),
         ...(item.namespace ? { namespace: item.namespace } : {}),
+        ...(item.dedicatedNamespaceTemplates ? { dedicatedNamespaceTemplates: true } : {}),
         ...(item.policySettings ? { policySettings: item.policySettings } : {}),
         // Left out (not an empty list) on onboardings saved before the instances were stored:
         // with `instances` absent, the duplicates are still recovered from the saved `serviceVars`.
@@ -177,6 +178,11 @@ export async function hydrateOnboardingSession(
             item.ecfStacks
               .filter((s) => s.serviceConfigs !== undefined)
               .map((s) => [s.family, s.serviceConfigs])
+          ),
+          launchedNamespaces: Object.fromEntries(
+            item.ecfStacks
+              .filter((s) => s.namespace !== undefined)
+              .map((s) => [s.family, s.namespace])
           ),
         })
       );

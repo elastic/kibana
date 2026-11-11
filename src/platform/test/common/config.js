@@ -60,7 +60,7 @@ export default function () {
         // newsfeed mock service
         `--plugin-path=${path.join(__dirname, 'plugins', 'newsfeed')}`,
         // otel mock service
-        `--plugin-path=${path.join(__dirname, 'plugins', 'otel_metrics')}`,
+        `--plugin-path=${path.resolve(__dirname, '..', '..', 'test_plugins', 'otel_metrics')}`,
         `--newsfeed.service.urlRoot=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
         `--newsfeed.service.pathTemplate=/api/_newsfeed-FTS-external-service-simulators/kibana/v{VERSION}.json`,
         `--logging.appenders.deprecation=${JSON.stringify({

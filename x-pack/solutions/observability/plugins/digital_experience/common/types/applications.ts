@@ -58,6 +58,11 @@ export interface ApplicationSummary {
   /** Environments the application reported in the time range, up to 10; empty when none is set. */
   environments: string[];
   pageLoads: { count: number };
+  /**
+   * Sessions that overlap the time range, `null` when the source doesn't count them. Only the
+   * sessions index does: the raw events and Classic RUM don't.
+   */
+  sessions: { count: number } | null;
   webVitals: WebVitals;
   jsErrors: {
     count: number;
@@ -79,6 +84,12 @@ export interface ApplicationsResponse {
   environments: string[];
   /** Page loads over the time range in the selected environment, per source. */
   pageLoadsOverTime: PageLoadsOverTime;
+  /**
+   * The EDOT Browser sessions that started in each bucket of the time range in the selected
+   * environment, in the same buckets as `pageLoadsOverTime`. `null` when the sessions index did not
+   * answer, as the raw events and Classic RUM don't count sessions.
+   */
+  sessionsOverTime: TimeSeriesPoint[] | null;
   /**
    * Sources whose search failed while others loaded, so their rows are missing; empty when none.
    * Indices the user can't read are left out of the search rather than failing it, so partial
