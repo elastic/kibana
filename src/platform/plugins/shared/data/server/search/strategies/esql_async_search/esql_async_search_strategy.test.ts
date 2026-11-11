@@ -118,17 +118,16 @@ describe('ES|QL async search strategy', () => {
         expect(request).toHaveProperty('keep_alive', '60000ms');
       });
 
-      it('allows overriding keep_alive and wait_for_completion_timeout', async () => {
+      it('allows overriding keep_alive, and wait_for_completion_timeout via pollLength', async () => {
         mockAsyncQueryGet.mockResolvedValueOnce(mockAsyncResponse);
 
         const params = {
           query: 'from logs* | limit 10',
-          wait_for_completion_timeout: '10s',
           keep_alive: '5m',
         };
         const esSearch = await esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
 
-        await esSearch.search({ id: 'foo', params }, {}, mockDeps).toPromise();
+        await esSearch.search({ id: 'foo', params }, { pollLength: '10s' }, mockDeps).toPromise();
 
         expect(mockAsyncQueryGet).toBeCalled();
         const request = mockAsyncQueryGet.mock.calls[0][0];
