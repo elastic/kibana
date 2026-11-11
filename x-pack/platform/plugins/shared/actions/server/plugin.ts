@@ -689,6 +689,7 @@ export class ActionsPlugin
       unsecuredSavedObjectsClient: SavedObjectsClientContract;
       spaceId?: SpaceId;
     }) => {
+      await this.catalogReady;
       return new ActionsClient({
         publicBaseUrl: core.http.basePath.publicBaseUrl,
         connectorSigningKeysEnabled: this.actionsConfig.connectorSigningKeys.enabled,
@@ -784,6 +785,7 @@ export class ActionsPlugin
         kibanaIndices: core.savedObjects.getAllIndices(),
         logger: this.logger,
         connectorTypeRegistry: actionTypeRegistry!,
+        whenCatalogReady: () => this.catalogReady,
       });
     };
 
@@ -911,7 +913,8 @@ export class ActionsPlugin
 
     this.startConnectorCatalog(core);
 
-    this.validateEnabledConnectorTypes(plugins);
+    // Spec types register after start, so an unknown id can only be judged once they are in.
+    void this.catalogReady.then(() => this.validateEnabledConnectorTypes(plugins));
 
     this.connectorUsageReportingTask?.start(plugins.taskManager).catch(() => {});
 
@@ -1133,9 +1136,12 @@ export class ActionsPlugin
     const evictClientPool = async (connectorId: string): Promise<void> => {
       await this.clientLeasePool.evict(connectorId);
     };
+    const whenCatalogReady = () => this.catalogReady;
 
     return async function actionsRouteHandlerContext(context, request) {
       const [coreStart, pluginsStart] = await core.getStartServices();
+      // Requests that arrive before the first catalog load ends wait for it.
+      await whenCatalogReady();
       const { taskManager, encryptedSavedObjects, eventLog } = pluginsStart;
       const { savedObjects } = coreStart;
 
@@ -1235,8 +1241,11 @@ export class ActionsPlugin
       this.actionsConfig.enabledActionTypes[0] !== AllowedHosts.Any
     ) {
       this.actionsConfig.enabledActionTypes.forEach((connectorType) => {
-        // Throws error if action type doesn't exist
-        this.actionTypeRegistry?.get(connectorType);
+        if (!this.actionTypeRegistry?.has(connectorType)) {
+          this.logger.warn(
+            `Connector type "${connectorType}" in "xpack.actions.enabledActionTypes" is not registered.`
+          );
+        }
       });
     }
   };

@@ -224,6 +224,15 @@ describe('Actions Plugin', () => {
     });
 
     describe('routeHandlerContext.getActionsClient()', () => {
+      // The route handler context waits for the catalog load, which starts in start().
+      const startPlugin = () =>
+        plugin.start(coreMock.createStart(), {
+          licensing: licensingMock.createStart(),
+          taskManager: taskManagerMock.createStart(),
+          encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+          eventLog: eventLogMock.createStart(),
+        });
+
       it('should not throw error when ESO plugin has encryption key', async () => {
         await plugin.setup(coreSetup, {
           ...pluginsSetup,
@@ -233,6 +242,7 @@ describe('Actions Plugin', () => {
           },
         });
 
+        startPlugin();
         expect(coreSetup.http.registerRouteHandlerContext).toHaveBeenCalledTimes(1);
         const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0] as [
           string,
@@ -260,6 +270,7 @@ describe('Actions Plugin', () => {
       it('should throw error when ESO plugin is missing encryption key', async () => {
         await plugin.setup(coreSetup, pluginsSetup);
 
+        startPlugin();
         expect(coreSetup.http.registerRouteHandlerContext).toHaveBeenCalledTimes(1);
         const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0] as [
           string,
@@ -621,28 +632,90 @@ describe('Actions Plugin', () => {
       };
     });
 
-    it('should throw when there is an invalid connector type in enabledActionTypes', async () => {
-      const pluginSetup = await plugin.setup(coreSetup, {
-        ...pluginsSetup,
-        encryptedSavedObjects: {
-          ...pluginsSetup.encryptedSavedObjects,
-          canEncrypt: true,
-        },
-        serverless: serverlessPluginMock.createSetupContract(),
-      });
+    describe('enabledActionTypes check', () => {
+      const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
-      pluginSetup.registerType(serverLogConnectorType);
+      const setupServerless = async (enabledTypes: string[]) => {
+        const pluginSetup = await plugin.setup(coreSetup, {
+          ...pluginsSetup,
+          encryptedSavedObjects: {
+            ...pluginsSetup.encryptedSavedObjects,
+            canEncrypt: true,
+          },
+          serverless: serverlessPluginMock.createSetupContract(),
+        });
+        pluginSetup.registerType(serverLogConnectorType);
+        pluginSetup.setEnabledConnectorTypes(enabledTypes);
+      };
 
-      pluginSetup.setEnabledConnectorTypes(['.server-log', 'non-existing']);
+      it('does not throw for an unknown connector type, and warns after ready', async () => {
+        await setupServerless(['.server-log', 'non-existing']);
 
-      await expect(async () =>
-        plugin.start(coreStart, {
+        const pluginStart = plugin.start(coreStart, {
           ...pluginsStart,
           serverless: serverlessPluginMock.createStartContract(),
-        })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Action type \\"non-existing\\" is not registered."`
-      );
+        });
+        await pluginStart.whenCatalogReady();
+        await flushPromises();
+
+        expect(context.logger.get().warn).toHaveBeenCalledWith(
+          'Connector type "non-existing" in "xpack.actions.enabledActionTypes" is not registered.'
+        );
+        expect(context.logger.get().warn).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not warn when every enabled connector type is registered', async () => {
+        await setupServerless(['.server-log']);
+
+        const pluginStart = plugin.start(coreStart, {
+          ...pluginsStart,
+          serverless: serverlessPluginMock.createStartContract(),
+        });
+        await pluginStart.whenCatalogReady();
+        await flushPromises();
+
+        expect(context.logger.get().warn).not.toHaveBeenCalled();
+      });
+
+      it('waits for the catalog before it judges an id registered from the catalog', async () => {
+        coreStart.featureFlags.getBooleanValue$.mockReturnValue(of(true));
+        const esClient = coreStart.elasticsearch.client.asInternalUser as jest.Mocked<any>;
+        esClient.indices.create.mockResolvedValue({ acknowledged: true });
+        esClient.get.mockResolvedValue({
+          found: true,
+          _source: {
+            type: 'manifest',
+            raw: JSON.stringify({
+              connectors: [{ id: '.declarative-abuseipdb', version: '1.1.0' }],
+            }),
+          },
+        });
+        esClient.mget.mockResolvedValue({
+          docs: [
+            {
+              found: true,
+              _source: {
+                type: 'definition',
+                connectorId: '.declarative-abuseipdb',
+                version: '1.1.0',
+                yaml: loadFixture('abuseipdb-1.1.0.yaml'),
+                contentHash: 'sha256:abuseipdb',
+                catalogVersion: '2026.11.1',
+              },
+            },
+          ],
+        });
+        await setupServerless(['.server-log', '.declarative-abuseipdb']);
+
+        const pluginStart = plugin.start(coreStart, {
+          ...pluginsStart,
+          serverless: serverlessPluginMock.createStartContract(),
+        });
+        await pluginStart.whenCatalogReady();
+        await flushPromises();
+
+        expect(context.logger.get().warn).not.toHaveBeenCalled();
+      });
     });
 
     describe('connector catalog', () => {
@@ -762,6 +835,48 @@ describe('Actions Plugin', () => {
 
           await expect(pluginStart.whenCatalogReady()).resolves.toBeUndefined();
           expect(getTypeIds(pluginStart)).not.toContain(SPEC_TYPE_ID);
+        });
+      });
+
+      describe('requests before the first load ends', () => {
+        beforeEach(() => {
+          coreStart.featureFlags.getBooleanValue$.mockReturnValue(of(true));
+        });
+
+        const getPendingState = (promise: Promise<unknown>) =>
+          Promise.race([promise.then(() => 'resolved'), flush().then(() => 'pending')]);
+
+        it('keeps the route handler context and the actions client pending, then resolves them', async () => {
+          seedCatalog();
+          let resolveGet: (value: unknown) => void = () => {};
+          getEsClient().get.mockReturnValue(
+            new Promise((resolve) => {
+              resolveGet = resolve;
+            })
+          );
+          await setupPlugin();
+          const [, contextHandler] = coreSetup.http.registerRouteHandlerContext.mock
+            .calls[0] as unknown as [string, Function];
+          const pluginStart = plugin.start(coreStart, pluginsStart);
+
+          const routeContext = contextHandler(
+            { core: { elasticsearch: { client: jest.fn() }, savedObjects: { client: {} } } },
+            httpServerMock.createKibanaRequest(),
+            httpServerMock.createResponseFactory()
+          ) as Promise<ActionsApiRequestHandlerContext>;
+          const clientPromise = pluginStart.getActionsClientWithRequest(
+            httpServerMock.createKibanaRequest()
+          );
+
+          expect(await getPendingState(routeContext)).toBe('pending');
+          expect(await getPendingState(clientPromise)).toBe('pending');
+
+          resolveGet(manifestDoc);
+          await pluginStart.whenCatalogReady();
+
+          await expect(routeContext).resolves.toBeDefined();
+          await expect(clientPromise).resolves.toBeDefined();
+          expect(pluginStart.listTypes().map(({ id }) => id)).toContain(SPEC_TYPE_ID);
         });
       });
 
