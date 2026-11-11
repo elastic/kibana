@@ -27,7 +27,11 @@ export interface FlattedEcsData {
 interface ExtractionRule {
   typeKey: string;
   valuePattern?: RegExp;
+  excludedValues: ReadonlySet<string>;
 }
+
+// A value pattern is a regular expression of a user. It never runs on a longer value.
+export const MAX_VALUE_LENGTH_FOR_PATTERN = 1024;
 
 export const processObservable = (
   observablesMap: Map<string, ObservablePost>,
@@ -46,7 +50,7 @@ export const processObservable = (
   });
 };
 
-const compileValuePattern = (valuePattern: string): RegExp | null => {
+const compilePattern = (valuePattern: string): RegExp | null => {
   try {
     return new RegExp(valuePattern);
   } catch {
@@ -60,14 +64,16 @@ const getRulesByPath = (
   const rulesByPath = new Map<string, ExtractionRule[]>();
 
   for (const { key, paths, valuePattern } of Object.values(observableTypes)) {
-    const compiledPattern =
-      valuePattern === undefined ? undefined : compileValuePattern(valuePattern);
+    const compiledPattern = valuePattern === undefined ? undefined : compilePattern(valuePattern);
 
     // A pattern that does not compile skips its type.
     if (compiledPattern !== null) {
-      const rule: ExtractionRule = { typeKey: key, valuePattern: compiledPattern };
-
-      for (const { path } of paths.filter(({ enabled }) => enabled)) {
+      for (const { path, excludedValues = [] } of paths.filter(({ enabled }) => enabled)) {
+        const rule: ExtractionRule = {
+          typeKey: key,
+          valuePattern: compiledPattern,
+          excludedValues: new Set(excludedValues),
+        };
         rulesByPath.set(path, [...(rulesByPath.get(path) ?? []), rule]);
       }
     }
@@ -75,6 +81,9 @@ const getRulesByPath = (
 
   return rulesByPath;
 };
+
+const matchesPattern = (valuePattern: RegExp | undefined, value: string): boolean =>
+  !valuePattern || (value.length <= MAX_VALUE_LENGTH_FOR_PATTERN && valuePattern.test(value));
 
 // helper function to get observables from array of flattened ECS data
 export const getObservablesFromEcs = (
@@ -94,8 +103,8 @@ export const getObservablesFromEcs = (
       const items = value ? castArray(value).filter(Boolean) : [];
 
       for (const item of items) {
-        for (const { typeKey, valuePattern } of rules) {
-          if (!valuePattern || valuePattern.test(item)) {
+        for (const { typeKey, valuePattern, excludedValues } of rules) {
+          if (!excludedValues.has(item) && matchesPattern(valuePattern, item)) {
             processObservable(observablesMap, item, typeKey, description);
           }
         }
