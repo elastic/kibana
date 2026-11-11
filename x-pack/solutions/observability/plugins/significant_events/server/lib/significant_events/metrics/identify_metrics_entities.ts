@@ -91,6 +91,9 @@ const replicasOf = (feature: FeatureUpsert): number => {
   return typeof replicas === 'number' ? replicas : 0;
 };
 
+const compareEntityIds = (left: FeatureUpsert, right: FeatureUpsert): number =>
+  left.id < right.id ? -1 : left.id > right.id ? 1 : 0;
+
 /** Catalogues a metrics source and writes its Kubernetes workload and node entities. */
 export const identifyMetricsEntities = async ({
   esClient,
@@ -211,9 +214,13 @@ export const identifyMetricsEntities = async ({
     unknownClusterRows += folded.unknownClusterRows;
   }
 
-  const selectedFeatures = [...features].sort(
-    (left, right) => replicasOf(right) - replicasOf(left)
-  );
+  const selectedFeatures = [...features].sort((left, right) => {
+    const nodePriority = Number(right.subtype === 'k8s_node') - Number(left.subtype === 'k8s_node');
+    if (nodePriority !== 0) {
+      return nodePriority;
+    }
+    return replicasOf(right) - replicasOf(left) || compareEntityIds(left, right);
+  });
   const droppedOverflowRowsCount = Math.max(0, selectedFeatures.length - MAX_ENTITIES);
   if (droppedOverflowRowsCount > 0) {
     logger.info(

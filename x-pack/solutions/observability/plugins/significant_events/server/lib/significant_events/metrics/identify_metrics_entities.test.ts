@@ -303,12 +303,17 @@ describe('identifyMetricsEntities', () => {
     expect(
       operations.map(({ index }: { index: { feature: { id: string } } }) => index.feature.id)
     ).toEqual([
+      'k8s.node:node-a',
       'k8s.deployment:payments/checkout',
       'k8s.daemonset:payments/checkout',
-      'k8s.node:node-a',
       'k8s.deployment:payments/unknown-cluster',
     ]);
-    expect(operations[0].index.feature).toEqual({
+    expect(
+      operations.find(
+        ({ index }: { index: { feature: { id: string } } }) =>
+          index.feature.id === 'k8s.deployment:payments/checkout'
+      )?.index.feature
+    ).toEqual({
       type: 'entity',
       subtype: 'k8s_workload',
       id: 'k8s.deployment:payments/checkout',
@@ -468,13 +473,13 @@ describe('identifyMetricsEntities', () => {
     );
   });
 
-  it('keeps the 500 workload rows with the most replicas and logs overflow', async () => {
+  it('keeps nodes before the highest-replica workloads within the 500 entity cap', async () => {
     const catalogue = {
       columns: catalogueColumns,
       values: [
         [
           'kubernetes.pod.cpu.usage.limit.pct',
-          ['metrics-kubernetes.pod-default'],
+          ['metrics-kubernetes.pod-default', 'metrics-kubernetes.node-default'],
           'percent',
           'gauge',
           'double',
@@ -493,7 +498,14 @@ describe('identifyMetricsEntities', () => {
         '2026-11-10T12:00:00.000Z',
       ]),
     };
-    const harness = createHarness([catalogue, workloads]);
+    const nodes = {
+      columns: nodeColumns,
+      values: [
+        ['cluster-a', 'node-b', 1, '2026-11-10T12:00:00.000Z'],
+        ['cluster-a', 'node-a', 1, '2026-11-10T12:00:00.000Z'],
+      ],
+    };
+    const harness = createHarness([catalogue, workloads, nodes]);
 
     const result = await identifyMetricsEntities({
       esClient: harness.esClient,
@@ -504,10 +516,22 @@ describe('identifyMetricsEntities', () => {
     });
 
     expect(result.metricsEntitiesCount).toBe(500);
-    expect(result.droppedOverflowRowsCount).toBe(1);
-    expect(harness.bulk.mock.calls[0][1]).toHaveLength(500);
+    expect(result.droppedOverflowRowsCount).toBe(3);
+    const operations = harness.bulk.mock.calls[0][1];
+    expect(operations).toHaveLength(500);
+    const ids = operations.map(
+      ({ index }: { index: { feature: { id: string } } }) => index.feature.id
+    );
+    expect(ids.slice(0, 2)).toEqual(['k8s.node:node-a', 'k8s.node:node-b']);
+    expect(ids).not.toEqual(
+      expect.arrayContaining([
+        'k8s.deployment:namespace-a/workload-498',
+        'k8s.deployment:namespace-a/workload-499',
+        'k8s.deployment:namespace-a/workload-500',
+      ])
+    );
     expect(harness.info).toHaveBeenCalledTimes(1);
     expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('source [overflow-source]'));
-    expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('501 rows, dropped 1'));
+    expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('503 rows, dropped 3'));
   });
 });
