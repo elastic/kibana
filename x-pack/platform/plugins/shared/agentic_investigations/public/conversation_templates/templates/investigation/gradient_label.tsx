@@ -14,9 +14,7 @@ export interface GradientLabelProps {
   children: React.ReactNode;
 }
 
-export const GradientLabel = ({
-  children,
-}: GradientLabelProps): React.ReactElement => {
+export const GradientLabel = ({ children }: GradientLabelProps): React.ReactElement => {
   const { labelCss } = useAiButtonGradientStyles({ variant: 'outlined' });
 
   return (
