@@ -145,6 +145,14 @@ export const buildAlertEntityGraphOutputSchema = lazySchema(() =>
         timestamp: z.string().optional(),
         rule_name: z.string().optional(),
         severity: z.string().optional(),
+        process_name: z.string().optional(),
+        process_executable: z.string().optional(),
+        process_command_line: z.string().optional(),
+        process_parent_command_line: z.string().optional(),
+        host_name: z.string().optional(),
+        host_id: z.string().optional(),
+        user_name: z.string().optional(),
+        user_id: z.string().optional(),
       })
     ),
     stats: z
@@ -187,7 +195,7 @@ export const buildAlertEntityGraphStepCommonDefinition: BaseStepDefinition<
           'Round 0 queries a fixed time window (seed_window) around the seed timestamp. Each subsequent round widens the search bounds by expand_window based on the min/max timestamps of newly discovered alerts, chaining through transitively linked entities up to max_depth hops or max_alerts total. ' +
           'Entity fields carry configurable scores that reflect identifier specificity (e.g. process.entity_id=5, host.id=4, user.name=2, source.ip=1). Aliases allow cross-field matching (e.g. source.ip ↔ destination.ip for lateral-movement detection). ' +
           'An edge is created between two alerts when their summed per-label entity scores meet or exceed min_entity_score. ignore_entities filters out noisy values (service accounts, loopback IPs) that would create false correlation chains. ' +
-          'The output is a scored nodes-and-edges graph with per-alert metadata (rule name, severity, timestamp), per-edge label scores, and traversal stats (depth reached, query count, effective time range).',
+          'The output is a scored nodes-and-edges graph with per-alert metadata (rule name, severity, timestamp, process name, executable and command lines), per-edge label scores, and traversal stats (depth reached, query count, effective time range).',
       }
     ),
     examples: [

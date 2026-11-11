@@ -329,6 +329,9 @@ consts:
   # Related alerts summarised per alert. Same cap as the shipped per-alert workflow.
   max_related_alerts: 20
 
+  # Related alerts listed in the prompt per alert (newest first); the rest are counted but dropped.
+  max_related_summary_lines: 8
+
   # Structured reply both runAgent_step and runPrompt_step must return: one verdict object per
   # alert in the batch. Shared so the two ways of calling the model cannot drift apart. The root
   # must stay an object (the steps' schema contract does not accept a root-level array), so the
@@ -1236,9 +1239,10 @@ steps:
                     id: "{{ foreach.item._id }}"
                     count: "${{ steps.get_related_alerts.output.alerts | size }}"
                     summary: >-
-                      {%- assign related = steps.get_related_alerts.output.alerts -%}
-                      {%- for r in related -%}
-                      {{ r.rule_name | default: 'unknown rule' }} [{{ r.severity | default: 'unknown severity' }}] at {{ r.timestamp }}{% unless forloop.last %}; {% endunless %}
+                      {%- assign related = steps.get_related_alerts.output.alerts | reverse -%}
+                      {%- for r in related limit: consts.max_related_summary_lines -%}
+                      {%- assign rhost = r.host_name -%}{%- if rhost == blank -%}{%- assign rhost = r.host_id -%}{%- endif -%}{%- assign ruser = r.user_name -%}{%- if ruser == blank -%}{%- assign ruser = r.user_id -%}{%- endif -%}
+                      rule=`{{ r.rule_name | default: 'unknown rule' | replace: '\r', ' ' | replace: '\n', ' ' | replace: '\u2028', ' ' | replace: '\u2029', ' ' | replace: '\u0085', ' ' | replace: '\v', ' ' | replace: '\f', ' ' | replace: '`', ' ' | escape | truncate: 80 }}` [{{ r.severity | default: 'unknown severity' | replace: '\r', ' ' | replace: '\n', ' ' | replace: '\u2028', ' ' | replace: '\u2029', ' ' | replace: '\u0085', ' ' | replace: '\v', ' ' | replace: '\f', ' ' | replace: '`', ' ' | replace: ']', ' ' | replace: '[', ' ' | replace: ';', ' ' | escape | truncate: 20 }}] at {{ r.timestamp | replace: '\r', ' ' | replace: '\n', ' ' | replace: '\u2028', ' ' | replace: '\u2029', ' ' | replace: '\u0085', ' ' | replace: '\v', ' ' | replace: '\f', ' ' | replace: '`', ' ' | replace: ';', ' ' | replace: '=', ' ' | replace: '[', ' ' | replace: ']', ' ' | escape | truncate: 40 }}{% if rhost != blank %} host=`{{ rhost | replace: '\r', ' ' | replace: '\n', ' ' | replace: '\u2028', ' ' | replace: '\u2029', ' ' | replace: '\u0085', ' ' | replace: '\v', ' ' | replace: '\f', ' ' | replace: '`', ' ' | escape | truncate: 60 }}`{% if r.host_name != blank and r.host_id != blank %} (id: `{{ r.host_id | replace: '\r', ' ' | replace: '\n', ' ' | replace: '\u2028', ' ' | replace: '\u2029', ' ' | replace: '\u0085', ' ' | replace: '\v', ' ' | replace: '\f', ' ' | replace: '`', ' ' | escape | truncate: 40 }}`){% endif %}{% endif %}{% if ruser != blank %} user=`{{ ruser | replace: '\r', ' ' | replace: '\n', ' ' | replace: '\u2028', ' ' | replace: '\u2029', ' ' | replace: '\u0085', ' ' | replace: '\v', ' ' | replace: '\f', ' ' | replace: '`', ' ' | escape | truncate: 60 }}`{% if r.user_name != blank and r.user_id != blank %} (id: `{{ r.user_id | replace: '\r', ' ' | replace: '\n', ' ' | replace: '\u2028', ' ' | replace: '\u2029', ' ' | replace: '\u0085', ' ' | replace: '\v', ' ' | replace: '\f', ' ' | replace: '`', ' ' | escape | truncate: 40 }}`){% endif %}{% endif %}{% if r.process_name != blank %} process=`{{ r.process_name | replace: '\r', ' ' | replace: '\n', ' ' | replace: '\u2028', ' ' | replace: '\u2029', ' ' | replace: '\u0085', ' ' | replace: '\v', ' ' | replace: '\f', ' ' | replace: '`', ' ' | escape | truncate: 40 }}`{% endif %}{% if r.process_command_line != blank %} cmd=`{{ r.process_command_line | replace: '\r', ' ' | replace: '\n', ' ' | replace: '\u2028', ' ' | replace: '\u2029', ' ' | replace: '\u0085', ' ' | replace: '\v', ' ' | replace: '\f', ' ' | replace: '`', ' ' | escape | truncate: 120 }}`{% endif %}{% if r.process_parent_command_line != blank %} parent_cmd=`{{ r.process_parent_command_line | replace: '\r', ' ' | replace: '\n', ' ' | replace: '\u2028', ' ' | replace: '\u2029', ' ' | replace: '\u0085', ' ' | replace: '\v', ' ' | replace: '\f', ' ' | replace: '`', ' ' | escape | truncate: 80 }}`{% endif %}{% unless forloop.last %}; {% endunless %}
                       {%- endfor -%}
 
               - name: push_related_summary
@@ -1292,8 +1296,8 @@ steps:
 
                 - Tier 1 — Highest-confidence (event.code = "ransomware" or "malicious_file"): Elastic Defend's automated malware/ransomware engine has identified a known-bad file hash or confirmed ransomware behaviour. These detections have very high specificity. Classify as true_positive unless you have clear, concrete evidence of a benign explanation (e.g. a documented security researcher tool explicitly expected in this environment).
                 - Tier 2 — High-confidence behavioral (event.code = "behavior", rule name prefix = "Malicious Behavior Detection Alert:" or "Malicious Behavior Prevention Alert:", and the specific technique is inherently low-FP): Elastic Defend's behavioral ML engine detected a specific attack technique pattern. Rules naming techniques such as shellcode execution, LSASS credential access, ransomware file activity, memory injection, or process hollowing have very few legitimate explanations. Apply a TP prior.
-                - Tier 3 — Moderate behavioral (event.code = "behavior", technique has known legitimate uses): Rules naming techniques such as WMI execution, startup persistence, token manipulation, obfuscated scripts, or file creation can fire legitimately on admin tooling, software installers, or scheduled automation. Require positive anomaly evidence (suspicious command-line content, unsigned process in system paths, external C2 URLs) to classify as TP.
-                - Tier 4 — Low-confidence (generic heuristic or threshold rules): Rules without Elastic Defend-specific prefixes, or rules that fire on broad patterns. Require positive anomaly evidence before TP classification.
+                - Tier 3 — Moderate behavioral (event.code = "behavior", technique has known legitimate uses): Rules naming techniques such as WMI execution, startup persistence, token manipulation, obfuscated scripts, or file creation can fire legitimately on admin tooling, software installers, or scheduled automation. Require positive anomaly evidence (suspicious command-line content, unsigned process in system paths, external C2 URLs, or Gate B corroboration) to classify as TP.
+                - Tier 4 — Low-confidence (generic heuristic or threshold rules): Rules without Elastic Defend-specific prefixes, or rules that fire on broad patterns. Require positive anomaly evidence (or Gate B corroboration) before TP classification.
 
                 NOTE: "Prevention" vs "Detection" in the rule name prefix does NOT determine confidence tier. Prevention alerts (event.type includes "denied") can be false positives when the blocked action is legitimate. Do not assume "denied" = TP.
                 </alert_confidence_tier>
@@ -1302,7 +1306,7 @@ steps:
                 You MUST classify every alert as either true_positive or false_positive. Use confidence_score to express uncertainty — never use inconclusive as a hedge.
 
                 true_positive: The observable evidence (action, actor, target, parameters) contains anomalies that a competent analyst would flag — suspicious command-line content (external C2 URLs, download-and-execute patterns, encoded payloads), unsigned processes in system directories, DLLs loaded from anomalous paths, processes masquerading as system binaries, or a coherent attack chain with corroborating alerts. For Tier 1 (ransomware/malicious_file) and Tier 2 (specific high-precision behavioral technique) detections, classify as true_positive when the observable evidence is consistent with the technique and no concrete legitimate explanation is present.
-                false_positive: The observable evidence collectively fits a plausible legitimate operational pattern (IT management, automation, scheduled jobs, developer workflows, known software) AND the process/actor is consistent with that pattern (e.g., signed process from a known vendor, well-understood scheduled task command-line, standard software installer). For Tier 3 and Tier 4 alerts, default to false_positive when positive anomaly evidence is absent.
+                false_positive: The observable evidence collectively fits a plausible legitimate operational pattern (IT management, automation, scheduled jobs, developer workflows, known software) AND the process/actor is consistent with that pattern (e.g., signed process from a known vendor, well-understood scheduled task command-line, standard software installer). For Tier 3 and Tier 4 alerts, default to false_positive when positive anomaly evidence (on this alert or, per Gate B, in its related alerts) is absent.
                 inconclusive: Reserve ONLY for cases where critical observable fields are entirely absent (no action details, no actor, no parameters whatsoever) making any classification indefensible. This should be extremely rare.
                 </verdict_semantics>
 
@@ -1334,12 +1338,12 @@ steps:
                    - Is the signing authority (code_signature.subject_name) consistent with the claimed identity and action?
 
                 4. Look for corroborating attack-chain evidence in the alert's own Related Alerts line.
-                   - Related alerts sharing strong identifiers (process lineage, unique IDs) raise TP confidence.
+                   - Related alerts raise TP confidence only when their own activity (process, command line) is independently suspicious. Sharing a host, user or other identifier with this alert, and a related alert's rule name alone, are not evidence; inspect the related alert's cmd/parent_cmd before crediting it.
                    - Absence of corroboration lowers TP confidence for Tier 3/4 alerts but does NOT override a Tier 1/2 assessment.
 
                 5. Apply Decision Gates (in order — stop at the first gate that matches):
                    - Gate A (High-confidence automated detection): event.code is "ransomware" or "malicious_file" (Tier 1). These are Elastic Defend's highest-confidence automated detections. Classify as true_positive unless there is concrete evidence of a benign explanation.
-                   - Gate B (Corroborated attack chain): multiple related alerts with strong entity correlation form a coherent attack sequence → true_positive.
+                   - Gate B (Corroborated attack chain): multiple related alerts that are each independently suspicious on their own process/command-line evidence, and share this alert's host or user (name, or ID when no name is shown; an id match counts even when this alert shows only IDs; host=/user= on each related line), form a coherent attack sequence → true_positive, even if this alert's own activity looks routine; do not fall through to Gate D. Entity correlation or scary rule names without suspicious command lines do not satisfy this gate. A shared generic account (root, SYSTEM, administrator) alone does not count.
                    - Gate C (Malicious observable evidence): the command line, process path, or actor contains clear attack indicators (e.g. external C2 URL with download+execute, DLL from anomalous path, unsigned process accessing LSASS, process masquerading as a system binary with no signature) → true_positive. The technique name alone is NOT sufficient; require at least one concrete observable indicator.
                    - Gate D (Routine operational pattern): actor, action, arguments, and signing authority collectively fit a plausible legitimate workflow with no anomalous indicators → false_positive. Use lower confidence_score when evidence is thin. This gate is appropriate for Tier 3/4 alerts; apply it cautiously for Tier 2 alerts.
                    - Gate E (Tier 2 no-evidence default): for Tier 2 (specific high-precision behavioral technique) alerts where observable evidence is ambiguous but not clearly benign, classify as true_positive with moderate-low confidence (rather than defaulting to FP).
@@ -1482,6 +1486,9 @@ steps:
                 {% if a.host.name != blank -%}
                 - host.name: {{ a.host.name | escape }}
                 {% endif -%}
+                {% if a.host.id != blank -%}
+                - host.id: {{ a.host.id | escape }}
+                {% endif -%}
                 {% if a.host.hostname != blank and a.host.hostname != a.host.name -%}
                 - host.hostname: {{ a.host.hostname | escape }}
                 {% endif -%}
@@ -1585,7 +1592,7 @@ steps:
                 {% comment %}── Related alerts (per alert, from the entity graph) ─{% endcomment %}
                 {% assign related = variables.related_summaries | where: 'id', a._id | first -%}
                 {% if related.count > 0 -%}
-                - related alerts ({{ related.count }} sharing strong entity identifiers): {{ related.summary | truncate: 500 | escape }}
+                - related alerts ({{ related.count }} correlated by shared entities; newest {{ related.count | at_most: consts.max_related_summary_lines }} shown): {{ related.summary | truncate: 5340 }}
                 {% endif -%}
                 </alert>
                 {% endfor %}

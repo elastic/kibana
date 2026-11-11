@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { addEntitiesWithLimit, buildIgnoreMap, extractEntityValues } from './entity_utils';
+import {
+  addEntitiesWithLimit,
+  buildIgnoreMap,
+  extractEntityValues,
+  getValuesAtPath,
+} from './entity_utils';
 import { buildEntityShouldClauses } from './query_utils';
 import { clampPositiveInt, computePageSize, toIso } from './number_utils';
 import { symmetrizeAliases, expandEntitiesByAliases } from './alias_utils';
@@ -134,6 +139,29 @@ const fetchSeedAlert = async (
 
 // ── Alert metadata extraction ───────────────────────────────────────────────
 
+const ALERT_RELATED_FIELDS = {
+  process_name: 'process.name',
+  process_executable: 'process.executable',
+  process_command_line: 'process.command_line',
+  process_parent_command_line: 'process.parent.command_line',
+  host_name: 'host.name',
+  host_id: 'host.id',
+  user_name: 'user.name',
+  user_id: 'user.id',
+} as const;
+
+const getFirstString = (source: Record<string, unknown> | undefined, field: string) => {
+  const flat = source?.[field];
+  if (typeof flat === 'string') return flat;
+  if (Array.isArray(flat)) {
+    const firstFlat = flat.find((value): value is string => typeof value === 'string');
+    if (firstFlat !== undefined) return firstFlat;
+  }
+  return getValuesAtPath(source, field.split('.')).find(
+    (value): value is string => typeof value === 'string'
+  );
+};
+
 const extractAlertMeta = (id: string, hit: EsHit): AlertMeta => {
   const source = hit._source as Record<string, unknown> | undefined;
   const ts = source?.['@timestamp'];
@@ -145,11 +173,24 @@ const extractAlertMeta = (id: string, hit: EsHit): AlertMeta => {
     timestamp: typeof ts === 'string' ? ts : undefined,
     rule_name: source?.['kibana.alert.rule.name'] as string | undefined,
     severity: source?.['kibana.alert.severity'] as string | undefined,
+    process_name: getFirstString(source, ALERT_RELATED_FIELDS.process_name),
+    process_executable: getFirstString(source, ALERT_RELATED_FIELDS.process_executable),
+    process_command_line: getFirstString(source, ALERT_RELATED_FIELDS.process_command_line),
+    process_parent_command_line: getFirstString(
+      source,
+      ALERT_RELATED_FIELDS.process_parent_command_line
+    ),
+    host_name: getFirstString(source, ALERT_RELATED_FIELDS.host_name),
+    host_id: getFirstString(source, ALERT_RELATED_FIELDS.host_id),
+    user_name: getFirstString(source, ALERT_RELATED_FIELDS.user_name),
+    user_id: getFirstString(source, ALERT_RELATED_FIELDS.user_id),
     ts_ms: Number.isFinite(tsMs) ? tsMs : undefined,
   };
 };
 
 // ── Output formatting ───────────────────────────────────────────────────────
+
+const omitTsMs = ({ ts_ms: _tsMs, ...rest }: AlertMeta) => rest;
 
 const formatOutput = (params: {
   nodesInternal: Set<string>;
@@ -198,7 +239,7 @@ const formatOutput = (params: {
   return {
     nodes,
     edges,
-    alerts: alertsSorted.map(({ ts_ms: _tsMs, ...rest }) => rest),
+    alerts: alertsSorted.map(omitTsMs),
     stats: {
       depth_reached: depthReached,
       nodes: nodes.length,
@@ -239,17 +280,14 @@ export const buildRelatedAlertsGraph = async (
       '@timestamp',
       'kibana.alert.rule.name',
       'kibana.alert.severity',
+      ...Object.values(ALERT_RELATED_FIELDS),
       ...entityFields,
     ])
   );
 
   // ── Step 1: Fetch the seed alert ────────────────────────────────────────
 
-  const { seedHit, seedSource, seedTimestamp, seedTsMs } = await fetchSeedAlert(
-    esClient,
-    seed,
-    sourceFields
-  );
+  const { seedHit, seedSource, seedTsMs } = await fetchSeedAlert(esClient, seed, sourceFields);
 
   // ── Step 2: Initialize traversal state ──────────────────────────────────
 
@@ -268,18 +306,8 @@ export const buildRelatedAlertsGraph = async (
     addEntitiesWithLimit({ known: knownEntitiesByField, field, values, maxEntitiesPerField });
   }
 
-  alertMetaById.set(seed.alertId, {
-    alert_id: seed.alertId,
-    alert_index: seedHit._index,
-    timestamp: typeof seedTimestamp === 'string' ? seedTimestamp : undefined,
-    rule_name: (seedSource as Record<string, unknown> | undefined)?.['kibana.alert.rule.name'] as
-      | string
-      | undefined,
-    severity: (seedSource as Record<string, unknown> | undefined)?.['kibana.alert.severity'] as
-      | string
-      | undefined,
-    ts_ms: seedTsMs,
-  });
+  const seedMeta = extractAlertMeta(seed.alertId, seedHit);
+  alertMetaById.set(seed.alertId, seedMeta);
 
   indexEntitiesForAlert({ entityToAlertIds, alertId: seed.alertId, entities: seedEntities });
 
@@ -291,15 +319,7 @@ export const buildRelatedAlertsGraph = async (
     return {
       nodes,
       edges: [],
-      alerts: includeSeed
-        ? [
-            {
-              alert_id: seed.alertId,
-              alert_index: seedHit._index,
-              timestamp: typeof seedTimestamp === 'string' ? seedTimestamp : undefined,
-            },
-          ]
-        : [],
+      alerts: includeSeed ? [omitTsMs(seedMeta)] : [],
       stats: {
         depth_reached: 0,
         nodes: nodes.length,
