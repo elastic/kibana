@@ -30,13 +30,13 @@ const seedItem = async (kbnClient: KbnClient, spaceId: string, title: string) =>
 };
 
 const findItems = async (kbnClient: KbnClient, spaceId: string, title: string) => {
-  const { data } = await kbnClient.request<{ data: Array<VegaItemResponse['data']> }>({
+  const { data } = await kbnClient.request<{ data: VegaItemResponse[] }>({
     method: 'GET',
     path: `/s/${spaceId}/api/vega`,
     headers: { 'elastic-api-version': VEGA_API_VERSION },
     query: { query: `"${title}"` },
   });
-  return data.data.filter((item) => item.title === title);
+  return data.data.filter((item) => item.data.title === title);
 };
 
 spaceTest.describe('Vega library editor', { tag: '@local-stateful-classic' }, () => {
@@ -74,7 +74,13 @@ spaceTest.describe('Vega library editor', { tag: '@local-stateful-classic' }, ()
       await queryInput.press('Enter');
       await expect(page.testSubj.locator('vegaLibraryEditorSaveButtonPrimary')).toBeEnabled();
 
+      // The save button is also disabled while saving, so wait for the update itself.
+      const updated = page.waitForResponse(
+        (response) =>
+          response.request().method() === 'PUT' && response.url().endsWith(`/api/vega/${item.id}`)
+      );
       await page.testSubj.click('vegaLibraryEditorSaveButtonPrimary');
+      expect((await updated).ok()).toBe(true);
 
       // The editor stays open, with nothing left to save.
       await expect(page.testSubj.locator('vegaLibraryEditorSaveButtonPrimary')).toBeDisabled();

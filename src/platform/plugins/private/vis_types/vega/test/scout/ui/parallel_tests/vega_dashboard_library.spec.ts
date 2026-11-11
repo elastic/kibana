@@ -42,13 +42,13 @@ const getItem = async (kbnClient: KbnClient, spaceId: string, id: string) => {
 };
 
 const findItems = async (kbnClient: KbnClient, spaceId: string, title: string) => {
-  const { data } = await kbnClient.request<{ data: Array<VegaItemResponse['data']> }>({
+  const { data } = await kbnClient.request<{ data: VegaItemResponse[] }>({
     method: 'GET',
     path: `/s/${spaceId}/api/vega`,
     headers: { 'elastic-api-version': VEGA_API_VERSION },
     query: { query: `"${title}"` },
   });
-  return data.data.filter((item) => item.title === title);
+  return data.data.filter((item) => item.data.title === title);
 };
 
 spaceTest.describe('Vega panels linked to the library', { tag: '@local-stateful-classic' }, () => {
