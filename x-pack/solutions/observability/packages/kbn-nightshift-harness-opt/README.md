@@ -80,8 +80,8 @@ node scripts/nightshift_harness_opt.js report --serve --port 7712
 
 ## Known limitations
 
-- Single tier (one model, `full` telemetry). The `no-flags` tier and the customer0 canary from the
-  issue are not wired into the gate yet.
+- Single tier: one model, `no-flags` telemetry (the default since flag telemetry turned every run into a flag lookup; `--telemetry full` restores it). The customer0 canary from the
+  issue is not wired into the gate yet.
 - Small subsets saturate: on 4 tasks the incumbent already scores 1.0, leaving nothing to search.
 - **Run-to-run noise dominates at one rollout.** The unchanged incumbent gave different rewards on
   6 of 10 cases it ran more than once (per-case sd ≈ 0.19, mostly 0.3 ↔ 1.0 flips on multi-flag

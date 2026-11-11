@@ -193,10 +193,11 @@ discarded and the round is wasted.
    are unscored, not zero.
 2. **Held-out incidents.** The score is measured on incidents that are not in \`cases/\`. Those
    files are evidence about failure modes, not the test set. Fixing one case by name buys nothing.
-3. **Every tier must pass.** The candidate also runs with all feature-flag telemetry hidden by
-   document-level security (flag service logs, spans and metrics, every \`feature_flag\` field, log
-   lines that name a flag). A change that depends on reading flag data fails there and is
-   rejected. Do not teach the agent to look for feature flags first.
+3. **Flag telemetry is hidden.** Every measurement, including the cases in \`cases/\`, runs with
+   all feature-flag telemetry removed by document-level security (flag service logs, spans and
+   metrics, every \`feature_flag\` field, log lines that name a flag). The agent has to get from
+   symptoms to the trigger through the telemetry and the source code, as on a customer cluster.
+   Do not teach it to look for feature flags first: there is nothing to find.
 4. **An unseen production corpus decides promotion.** Real Elastic Cloud incidents whose causes are
    deploys, config pushes, resource exhaustion, networking and long-standing defects — not flag
    toggles — on different telemetry layouts with different service names. You will never see

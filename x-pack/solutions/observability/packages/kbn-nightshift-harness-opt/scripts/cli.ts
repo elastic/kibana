@@ -35,8 +35,10 @@ const asLane = (value: unknown): Lane => {
   throw createFlagError(`--lane must be incumbent or candidate (got ${String(value)})`);
 };
 const asVariant = (value: unknown): TelemetryVariant => {
-  if (str(value) === undefined || value === 'full') return 'full';
-  if (value === 'no-flags') return 'no-flags';
+  // Default no-flags: with flag telemetry visible every investigation reads the fault switches
+  // directly (71/71 incidents queried flagd), so the benchmark measured a lookup, not RCA.
+  if (str(value) === undefined || value === 'no-flags') return 'no-flags';
+  if (value === 'full') return 'full';
   throw createFlagError(`--telemetry must be full or no-flags (got ${String(value)})`);
 };
 /** dev-cli-runner defaults unset string flags to '', which must read as "not given". */

@@ -144,7 +144,7 @@ const runVariantOnLane = async ({
   concurrency = 8,
   agentConnectorId,
   judgeConnectorId,
-  telemetryVariant = 'full',
+  telemetryVariant = 'no-flags',
   outputDir,
   log,
 }: RunVariantOptions): Promise<RunSummary> => {
