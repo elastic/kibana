@@ -189,10 +189,6 @@ Compare one current detection against one active event using that event's compac
      latest state. Whether it is accepted is governed only by the recovery checklist in
      `<eligibility>`; any other detection, including a breach, must still pass the remaining checks
      and the Rule Match rejection conditions.
-4. Either side is a broad detection: its `<grounding_evidence>` description shows failing rows
-   across three or more services or several distinct failure categories, and its matched query KI
-   names no service. It is its own event, as an observed-error `off_topic` detection is, and is
-   never paired or grouped, whatever it shares with another detection.
 
 **Impact check**
 - Use the affected operation when evaluating a match; different or uncertain effects do not reject a
@@ -425,7 +421,7 @@ groups and the flow continues to Step 4.
 
 1. Build the grouping graph before any ownership, titles, or narratives:
    - One node per such detection, after the `<incident_matching>` pre-check; a concrete off-topic
-     observed error or a broad detection (pre-check 4) is its own node.
+     observed error is its own node.
    - **Index first.** List each confirmed detection with the `features[].id` values of its matched
      query KI and the services named in its description. A `features[].id` counts only when the Step 1
      feature search returned it; any other id never does, so a rule that lists only those, or whose
