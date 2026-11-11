@@ -10,6 +10,7 @@
 import path from 'path';
 import React, { useEffect, useReducer, useState } from 'react';
 import type { ComponentType } from 'react';
+import type { SettingRow, SettingsKind } from '../settings/types';
 import type { Supervisor } from '../supervisor';
 import type { LogLine, ProcessState } from '../types';
 import type { InkModule } from './ink_module';
@@ -18,7 +19,10 @@ import {
   ALL,
   createTuiState,
   getMatchingLines,
+  getMatchingSettings,
+  getSettingsEntry,
   getVisibleLines,
+  getVisibleSettings,
   reduceTuiState,
   toDisplayText,
 } from './tui_state';
@@ -60,6 +64,11 @@ const STATE_ICONS: Readonly<Record<ProcessState, string>> = {
 };
 
 const PROCESS_COLORS = ['cyan', 'magenta', 'blue', 'yellow', 'green'] as const;
+const MAX_KEY_WIDTH = 56;
+const PANE_TITLES: Readonly<Record<SettingsKind, string>> = {
+  current: 'current settings',
+  available: 'available settings',
+};
 
 const displayPath = (file: string): string => {
   const relative = path.relative(process.cwd(), file);
@@ -93,6 +102,8 @@ export const createTuiApp = ({
     <Box
       flexDirection="column"
       width={SIDEBAR_WIDTH}
+      // Long lines in the pane would otherwise squeeze the sidebar.
+      flexShrink={0}
       borderStyle="round"
       borderColor="gray"
       paddingX={1}
@@ -157,6 +168,89 @@ export const createTuiApp = ({
     );
   };
 
+  const SettingLine = ({
+    row: { key, value, source, detail },
+    kind,
+    keyWidth,
+  }: {
+    readonly row: SettingRow;
+    readonly kind: SettingsKind;
+    readonly keyWidth: number;
+  }) => {
+    const isSet = value !== undefined;
+    return (
+      <Text wrap="truncate-end">
+        {kind === 'available' ? <Text color="green">{isSet ? '● ' : '  '}</Text> : null}
+        <Text bold={isSet && kind === 'available'}>{key.padEnd(keyWidth)}</Text>
+        {isSet ? <Text color="cyan"> {toDisplayText(value)}</Text> : null}
+        {source ? <Text dimColor>{kind === 'current' ? ` ${source}` : ` (${source})`}</Text> : null}
+        {kind === 'available' && detail ? <Text dimColor> · {detail}</Text> : null}
+      </Text>
+    );
+  };
+
+  const SettingsPane = ({
+    state,
+    height,
+    kind,
+    hint,
+  }: {
+    readonly state: TuiState;
+    readonly height: number;
+    readonly kind: SettingsKind;
+    readonly hint?: string;
+  }) => {
+    const entry = getSettingsEntry(state);
+    const total = entry?.status === 'ready' ? entry.list.rows.length : undefined;
+    const matchCount = getMatchingSettings(state).length;
+    const title = [
+      state.selected,
+      PANE_TITLES[kind],
+      total === undefined
+        ? undefined
+        : state.query
+        ? `filter "${state.query}": ${matchCount} of ${total}`
+        : `${total}`,
+    ]
+      .filter(Boolean)
+      .join(' · ');
+    const notes = entry?.status === 'ready' ? entry.list.notes : [];
+    const visible = getVisibleSettings(state, Math.max(height - notes.length, 1));
+    const keyWidth = Math.min(Math.max(0, ...visible.map(({ key }) => key.length)), MAX_KEY_WIDTH);
+    return (
+      <Box
+        flexDirection="column"
+        flexGrow={1}
+        borderStyle="round"
+        borderColor="blue"
+        paddingX={1}
+        overflow="hidden"
+      >
+        <Text bold wrap="truncate-end">
+          {title}
+        </Text>
+        {!entry || entry.status === 'loading' ? (
+          <Text color="yellow" wrap="truncate-end">
+            loading…{hint ? ` ${hint}` : ''}
+          </Text>
+        ) : null}
+        {entry?.status === 'error' ? (
+          <Text color="red" wrap="truncate-end">
+            {entry.error}
+          </Text>
+        ) : null}
+        {notes.map((note) => (
+          <Text key={note} dimColor wrap="truncate-end">
+            {note}
+          </Text>
+        ))}
+        {visible.map((row) => (
+          <SettingLine key={row.key} row={row} kind={kind} keyWidth={keyWidth} />
+        ))}
+      </Box>
+    );
+  };
+
   const Footer = ({ state }: { readonly state: TuiState }) => {
     if (state.isQuitting) {
       return <Text color="yellow">stopping every process…</Text>;
@@ -170,10 +264,14 @@ export const createTuiApp = ({
         </Text>
       );
     }
-    const processKeys = state.selected === ALL ? '' : ' · r restart · s start · x stop';
+    const processKeys =
+      state.selected === ALL ? '' : ' · tab logs/settings · r restart · s start · x stop';
+    const scrollKeys =
+      state.pane === 'logs' ? 'PgUp/PgDn scroll · G follow' : 'PgUp/PgDn scroll · G top';
     return (
       <Text dimColor wrap="truncate-end">
-        ↑↓ select · / filter · esc clear filter · PgUp/PgDn scroll · G follow{processKeys} · q quit
+        ↑↓ select · / filter · esc clear filter · {scrollKeys}
+        {processKeys} · q quit
       </Text>
     );
   };
@@ -205,6 +303,36 @@ export const createTuiApp = ({
       };
     }, [supervisor, onSubscribed]);
 
+    const { selected, pane } = state;
+    const selectedState = state.statuses[selected]?.state;
+    const provider = selected === ALL ? undefined : supervisor.getSettingsProvider(selected);
+    useEffect(() => {
+      if (pane === 'logs' || selected === ALL) {
+        return;
+      }
+      if (!provider) {
+        dispatch({
+          type: 'settingsFailed',
+          processId: selected,
+          kind: pane,
+          error: 'This process does not report its settings.',
+        });
+        return;
+      }
+      // Reloads when the process changes state, e.g. once Elasticsearch is ready to answer.
+      dispatch({ type: 'settingsLoading', processId: selected, kind: pane });
+      provider[pane]().then(
+        (list) => dispatch({ type: 'settingsLoaded', processId: selected, kind: pane, list }),
+        (error: Error) =>
+          dispatch({
+            type: 'settingsFailed',
+            processId: selected,
+            kind: pane,
+            error: error.message,
+          })
+      );
+    }, [provider, selected, pane, selectedState]);
+
     useInput((input, key) => {
       const { actions, control } = handleKey(state, input, key, Math.max(logLines - 1, 1));
       actions.forEach(dispatch);
@@ -223,7 +351,16 @@ export const createTuiApp = ({
       <Box flexDirection="column" height={Math.max(rows - SPARE_ROWS, 1)}>
         <Box flexGrow={1}>
           <Sidebar state={state} />
-          <LogPane state={state} height={logLines} />
+          {pane === 'logs' ? (
+            <LogPane state={state} height={logLines} />
+          ) : (
+            <SettingsPane
+              state={state}
+              height={logLines}
+              kind={pane}
+              hint={provider?.loadingHint?.[pane]}
+            />
+          )}
         </Box>
         <Footer state={state} />
       </Box>

@@ -1,5 +1,5 @@
 {
-  "type": "shared-common",
+  "type": "tooling",
   "id": "@kbn/dev-procs",
   "owner": [
     "@elastic/kibana-operations"

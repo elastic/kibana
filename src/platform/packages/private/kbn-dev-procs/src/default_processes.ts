@@ -9,6 +9,8 @@
 
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { createEsSettingsProvider } from './settings/es_settings';
+import { createKibanaSettingsProvider } from './settings/kibana_settings';
 import type { ProcessDefinition } from './types';
 
 export interface DefaultProcessOptions {
@@ -16,16 +18,20 @@ export interface DefaultProcessOptions {
   readonly kibanaArgs?: readonly string[];
   /** Where Elasticsearch answers once started, used for its readiness check. */
   readonly esUrl?: string;
+  /** Where to cache data that is slow to compute, like the list of every Kibana setting. */
+  readonly cacheDir: string;
 }
 
 const DEFAULT_ES_URL = 'http://localhost:9200';
+const ES_AUTH = { username: 'elastic', password: 'changeme' } as const;
 
 /** Elasticsearch from a snapshot, and Kibana in dev mode once Elasticsearch is ready. */
 export const getDefaultProcesses = ({
   esArgs = [],
   kibanaArgs = [],
   esUrl = DEFAULT_ES_URL,
-}: DefaultProcessOptions = {}): readonly ProcessDefinition[] => [
+  cacheDir,
+}: DefaultProcessOptions): readonly ProcessDefinition[] => [
   {
     id: 'es',
     command: process.execPath,
@@ -34,8 +40,9 @@ export const getDefaultProcesses = ({
     ready: {
       type: 'http',
       url: new URL('/_cluster/health?wait_for_status=yellow&timeout=1s', esUrl).href,
-      auth: { username: 'elastic', password: 'changeme' },
+      auth: ES_AUTH,
     },
+    settings: createEsSettingsProvider({ esUrl, auth: ES_AUTH }),
   },
   {
     id: 'kibana',
@@ -44,5 +51,6 @@ export const getDefaultProcesses = ({
     cwd: REPO_ROOT,
     dependsOn: ['es'],
     ready: { type: 'log', pattern: /Kibana is now available/ },
+    settings: createKibanaSettingsProvider({ repoRoot: REPO_ROOT, kibanaArgs, cacheDir }),
   },
 ];

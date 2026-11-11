@@ -43,6 +43,7 @@ export const handleKey = (
   if (key.pageUp || input === 'u') return { actions: [{ type: 'scroll', delta: pageSize }] };
   if (key.pageDown || input === 'd') return { actions: [{ type: 'scroll', delta: -pageSize }] };
   if (input === 'G') return { actions: [{ type: 'scrollToBottom' }] };
+  if (key.tab) return { actions: [{ type: 'cyclePane' }] };
   if (input === '/') return { actions: [{ type: 'editQuery' }] };
   if (key.escape) return { actions: [{ type: 'clearQuery' }] };
   if (state.selected !== ALL) {

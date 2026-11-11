@@ -41,6 +41,7 @@ export interface InkKey {
   readonly pageUp: boolean;
   readonly pageDown: boolean;
   readonly return: boolean;
+  readonly tab: boolean;
   readonly escape: boolean;
   readonly ctrl: boolean;
   readonly backspace: boolean;

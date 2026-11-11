@@ -14,7 +14,10 @@ import {
   MAX_LINES,
   createTuiState,
   getMatchingLines,
+  getMatchingSettings,
+  getSettingsEntry,
   getVisibleLines,
+  getVisibleSettings,
   reduceTuiState,
   toDisplayText,
 } from './tui_state';
@@ -55,6 +58,7 @@ const noKey: InkKey = {
   pageUp: false,
   pageDown: false,
   return: false,
+  tab: false,
   escape: false,
   ctrl: false,
   backspace: false,
@@ -122,6 +126,86 @@ describe('TUI state', () => {
     });
     expect(state.statuses.es).toMatchObject({ state: 'ready', pid: 1 });
     expect(state.statuses.kibana.state).toBe('stopped');
+  });
+});
+
+describe('settings panes', () => {
+  const list = {
+    rows: [
+      { key: 'server.host', detail: 'string' },
+      { key: 'server.port', value: '5602', source: 'config/kibana.dev.yml', detail: 'number' },
+      { key: 'xpack.fleet.enabled', detail: 'boolean' },
+    ],
+    notes: ['note'],
+  };
+  const onKibana = () => apply(initial(), { type: 'select', direction: -1 });
+
+  it('cycles the selected process through logs, current and available settings', () => {
+    const state = onKibana();
+    const panes = [1, 2, 3].map(
+      (count) => apply(state, ...Array(count).fill({ type: 'cyclePane' })).pane
+    );
+    expect(panes).toEqual(['current', 'available', 'logs']);
+    expect(apply(initial(), { type: 'cyclePane' }).pane).toBe('logs');
+  });
+
+  it('shows logs again for the combined view', () => {
+    const state = apply(onKibana(), { type: 'cyclePane' }, { type: 'select', direction: 1 });
+    expect(state).toMatchObject({ selected: ALL, pane: 'logs' });
+  });
+
+  it('keeps settings per process and kind, and the previous list while one reloads', () => {
+    const loaded = apply(
+      onKibana(),
+      { type: 'cyclePane' },
+      { type: 'cyclePane' },
+      { type: 'settingsLoading', processId: 'kibana', kind: 'available' },
+      { type: 'settingsLoaded', processId: 'kibana', kind: 'available', list }
+    );
+    expect(getSettingsEntry(loaded)).toEqual({ status: 'ready', list });
+    const reloading = apply(loaded, {
+      type: 'settingsLoading',
+      processId: 'kibana',
+      kind: 'available',
+    });
+    expect(getSettingsEntry(reloading)).toEqual({ status: 'ready', list });
+    const failed = apply(reloading, {
+      type: 'settingsFailed',
+      processId: 'kibana',
+      kind: 'available',
+      error: 'boom',
+    });
+    expect(getSettingsEntry(failed)).toEqual({ status: 'error', error: 'boom' });
+    expect(getSettingsEntry(apply(failed, { type: 'cyclePane' }))).toBeUndefined();
+  });
+
+  it('filters settings by key, value or detail and scrolls from the top', () => {
+    const state = apply(
+      onKibana(),
+      { type: 'cyclePane' },
+      { type: 'cyclePane' },
+      { type: 'settingsLoaded', processId: 'kibana', kind: 'available', list }
+    );
+    const keys = (next: TuiState, height = 10) =>
+      getVisibleSettings(next, height).map(({ key }) => key);
+    expect(keys(apply(state, { type: 'queryInput', text: 'BOOL' }))).toEqual([
+      'xpack.fleet.enabled',
+    ]);
+    expect(keys(apply(state, { type: 'queryInput', text: '5602' }))).toEqual(['server.port']);
+    expect(getMatchingSettings(apply(state, { type: 'queryInput', text: 'server' }))).toHaveLength(
+      2
+    );
+    expect(keys(apply(state, { type: 'scroll', delta: -1 }), 1)).toEqual(['server.port']);
+    expect(apply(state, { type: 'scroll', delta: -100 }).settingsScroll).toBe(2);
+    expect(
+      apply(state, { type: 'scroll', delta: -1 }, { type: 'scroll', delta: 5 }).settingsScroll
+    ).toBe(0);
+  });
+
+  it('switches panes with tab', () => {
+    expect(handleKey(onKibana(), '', { ...noKey, tab: true }, 10).actions).toEqual([
+      { type: 'cyclePane' },
+    ]);
   });
 });
 

@@ -18,10 +18,27 @@ the output of the selected process, or of all of them.
 | Key               | Action                                           |
 | ----------------- | ------------------------------------------------ |
 | `↑` `↓` / `k` `j` | Select a process, or `all`                       |
+| `tab`             | Switch the selected process between its logs, current settings and available settings |
 | `/`               | Filter the output; `enter` keeps it, `esc` clears |
 | `PgUp` `PgDn`     | Scroll back through the output; `G` follows again |
 | `r` `s` `x`       | Restart, start or stop the selected process      |
 | `q` / `Ctrl+C`    | Stop every process, Kibana first, and quit       |
+
+### Settings
+
+`tab` shows the settings of the selected process:
+
+- **Current settings**: what it runs with. For Kibana, the settings from `config/kibana.yml`,
+  `config/kibana.dev.yml` and the flags passed with `--kibana-arg`, each with its source; `--dev` adds
+  development defaults on top. For Elasticsearch, the node settings (`elasticsearch.yml` and `-E` flags)
+  and cluster settings, read from the running node.
+- **Available settings**: everything it supports, with the ones you set marked ●. For Kibana, the
+  settings and types from every plugin's config schema; listing them boots Kibana's plugins in a child
+  process (`node scripts/dev kibana-settings`), which takes about 20s and is cached per commit in
+  `data/dev`. For Elasticsearch, every setting the node knows, with its default.
+
+`/` filters settings by name, value or type. Values of settings that look like credentials, such as
+`elasticsearch.password`, are masked.
 
 Without a terminal, or with `--headless`, the output of every process is printed with a `[es]` or
 `[kibana]` prefix (`--hide-output` prints only state changes).

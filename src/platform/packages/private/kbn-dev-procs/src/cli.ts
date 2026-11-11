@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import fs from 'fs';
 import path from 'path';
 import { run } from '@kbn/dev-cli-runner';
 import type { CleanupTask, FlagsReader } from '@kbn/dev-cli-runner';
@@ -15,6 +16,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getDefaultProcesses } from './default_processes';
 import { readStatusFile } from './status_file';
+import type { KibanaSettingType } from './settings/kibana_settings';
 import { Supervisor } from './supervisor';
 import type { InkModule } from './tui/ink_module';
 import { runTui } from './tui/run_tui';
@@ -77,6 +79,7 @@ const runStart = async ({ log, flagsReader, logDir, addCleanupTask, loadInk }: S
       esArgs: flagsReader.arrayOfStrings('es-arg'),
       kibanaArgs: flagsReader.arrayOfStrings('kibana-arg'),
       esUrl: flagsReader.string('es-url'),
+      cacheDir: logDir,
     }),
     logDir,
   });
@@ -158,6 +161,25 @@ const runStatus = async (log: ToolingLog, flagsReader: FlagsReader, logDir: stri
   }
 };
 
+/** Writes every Kibana setting and its type to --out; the TUI runs this in a child process, as it boots Kibana's plugins. */
+const runListKibanaSettings = async (flagsReader: FlagsReader) => {
+  const out = flagsReader.requiredPath('out');
+  // Loaded here so that the other commands do not load Kibana's core.
+  const { setupKibana, stopKibana, getKibanaSettings } = await import(
+    '@kbn/check-kibana-settings-cli'
+  );
+  const kibana = await setupKibana();
+  try {
+    const settings: readonly KibanaSettingType[] = getKibanaSettings(kibana);
+    fs.mkdirSync(path.dirname(out), { recursive: true });
+    fs.writeFileSync(out, JSON.stringify(settings));
+  } finally {
+    await stopKibana(kibana);
+  }
+  // Kibana's core leaves handles open after shutdown, like the check_kibana_settings script works around too.
+  process.exit(0);
+};
+
 /** Entry point for `node scripts/dev`. */
 export const runDevCli = ({ loadInk }: DevCliOptions = {}): void => {
   run(
@@ -175,20 +197,24 @@ export const runDevCli = ({ loadInk }: DevCliOptions = {}): void => {
         await runStatus(log, flagsReader, logDir);
         return;
       }
+      if (command === 'kibana-settings') {
+        await runListKibanaSettings(flagsReader);
+        return;
+      }
       throw createFlagError(`Unknown command "${command}", expected start or status`);
     },
     {
       usage: 'node scripts/dev [start|status] [options]',
       description: `Runs Elasticsearch and Kibana together: Kibana starts once Elasticsearch is ready, each process logs to <log-dir>/<id>.log and <log-dir>/status.json reports their state.
 
-      In a terminal it shows a TUI with a pane per process: select with the arrow keys, filter with /, restart (r), start (s) or stop (x) the selected process, and quit (q) to stop all of them.
+      In a terminal it shows a TUI with a pane per process: select with the arrow keys, switch between its logs, current settings and available settings with tab, filter with /, restart (r), start (s) or stop (x) the selected process, and quit (q) to stop all of them.
 
       node scripts/dev                         start Elasticsearch and Kibana
       node scripts/dev --headless              the same without the TUI, e.g. for agents and CI
       node scripts/dev status                  show the state of each process
       node scripts/dev status --wait-for kibana  wait until Kibana is ready (exits 1 if it fails or times out)`,
       flags: {
-        string: ['log-dir', 'es-arg', 'kibana-arg', 'es-url', 'wait-for', 'timeout'],
+        string: ['log-dir', 'es-arg', 'kibana-arg', 'es-url', 'wait-for', 'timeout', 'out'],
         boolean: ['headless', 'hide-output', 'json'],
         help: `
         --log-dir      Where logs and status.json are written (default data/dev)

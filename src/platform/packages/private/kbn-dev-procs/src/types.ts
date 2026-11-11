@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SettingsProvider } from './settings/types';
+
 /** How the supervisor decides that a process is ready for its dependents. */
 export type ReadyCheck =
   | { readonly type: 'log'; readonly pattern: RegExp }
@@ -28,6 +30,8 @@ export interface ProcessDefinition {
   readonly ready: ReadyCheck;
   readonly readyTimeoutMs?: number;
   readonly stopTimeoutMs?: number;
+  /** Reads the settings the process runs with and the ones it supports, for the TUI. */
+  readonly settings?: SettingsProvider;
 }
 
 export type ProcessState =

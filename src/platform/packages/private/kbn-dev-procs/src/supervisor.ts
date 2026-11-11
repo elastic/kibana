@@ -11,6 +11,7 @@ import fs from 'fs';
 import path from 'path';
 import { ManagedProcess } from './managed_process';
 import { writeStatusFile } from './status_file';
+import type { SettingsProvider } from './settings/types';
 import type { LogLine, ProcessDefinition, ProcessStatus, SupervisorStatus } from './types';
 
 export interface SupervisorOptions {
@@ -149,6 +150,10 @@ export class Supervisor {
     for (const { id } of [...this.definitions].reverse()) {
       await this.stop(id);
     }
+  }
+
+  public getSettingsProvider(id: string): SettingsProvider | undefined {
+    return this.getDefinition(id).settings;
   }
 
   /** Signals every running process group synchronously, for use in exit handlers. */
