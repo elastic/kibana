@@ -19,6 +19,7 @@ import type {
   ExecutionInterruption,
   SerializedExecutionError,
 } from '@kbn/agent-builder-common';
+import { ExecutionStatus } from '@kbn/agent-builder-common';
 import { generateXmlTree } from '@kbn/agent-builder-genai-utils/tools/utils/formatting';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
@@ -210,29 +211,65 @@ export const formatAwaitingPromptNotice = (questions: string[]): string =>
     ],
   });
 
-export const formatSystemNotice = (execution: BackgroundExecutionState): string => {
-  const { status, execution_id: executionId } = execution;
+/**
+ * The text of a finished background sub-agent's report: what a running parent is told, and what
+ * a wake stores as the agent's message.
+ */
+export const describeFinishedExecution = ({
+  executionId,
+  agentId,
+  status,
+  response,
+  error,
+}: {
+  executionId: string;
+  agentId?: string;
+  status: ExecutionStatus;
+  response?: string;
+  error?: string;
+}): string => {
+  const agent = agentId ? ` (agent ${agentId})` : '';
+  const header = `Background sub-agent execution ${executionId}${agent} finished with status ${status}.`;
+  if (error) {
+    return `${header}\n\nError: ${error}`;
+  }
+  if (status === ExecutionStatus.completed) {
+    return `${header}\n\nResult:\n${response ?? 'No response'}`;
+  }
+  return header;
+};
 
-  const outcome = execution.error
-    ? {
-        message: 'A background agent execution has failed.',
-        detail: { tagName: 'error', children: [execution.error.message] },
-      }
-    : {
-        message: 'A background agent execution has completed.',
-        detail: { tagName: 'result', children: [execution.response?.message ?? 'No response'] },
-      };
-
-  return generateXmlTree({
+/**
+ * A background sub-agent's report as a notice to the model, in one shape whether the parent was
+ * running when it finished or woken by it: never a user turn.
+ */
+export const formatBackgroundReportNotice = ({
+  agentId,
+  report,
+}: {
+  agentId?: string;
+  report: string;
+}): string =>
+  generateXmlTree({
     tagName: 'system_notice',
     children: [
-      { tagName: 'message', children: [outcome.message] },
-      { tagName: 'execution-id', children: [executionId] },
-      { tagName: 'status', children: [status] },
-      outcome.detail,
+      { tagName: 'message', children: ['A background agent has reported back.'] },
+      ...(agentId ? [{ tagName: 'agent-id', children: [agentId] }] : []),
+      { tagName: 'report', children: [report] },
     ],
   });
-};
+
+export const formatSystemNotice = (execution: BackgroundExecutionState): string =>
+  formatBackgroundReportNotice({
+    agentId: execution.agent_id,
+    report: describeFinishedExecution({
+      executionId: execution.execution_id,
+      agentId: execution.agent_id,
+      status: execution.status,
+      response: execution.response?.message,
+      error: execution.error?.message,
+    }),
+  });
 
 /**
  * Render the active persistent sub-agent roster as a system notice.

@@ -15,6 +15,7 @@ import type {
 } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { IsomerPluginStart } from '@kbn/isomer-plugin/server';
 import type { ZodObject } from '@kbn/zod/v4';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { registerRoutes } from '@kbn/server-route-repository';
@@ -82,7 +83,7 @@ import { decisionTreeReinforceStepDefinition } from './step_definitions/decision
 import { memoryOptimizeStepDefinition } from './step_definitions/memory_optimize';
 import { createWikiStore, registerWikiAiIndex } from './wiki/register_wiki';
 import { registerMemoryAiIndex } from './memory/register_memory';
-import { registerWikiTelemetryEvents } from './telemetry';
+import { registerDecisionTreeTelemetryEvents, registerWikiTelemetryEvents } from './telemetry';
 import { createMemoryPageStore } from './memory/page_store';
 import { createDecisionTreeStore } from './decision_trees/store';
 import { createKnowledgePurgeClient } from './purge/purge_client';
@@ -172,6 +173,7 @@ export class NightshiftInvestigationsPlugin
   private featureFlags?: CoreStart['featureFlags'];
   private actionsStart?: ActionsPluginStart;
   private nightshiftSources?: NightshiftInvestigationsStartDeps['nightshiftSources'];
+  private isomerStart?: IsomerPluginStart;
   private cloudSetup?: NightshiftInvestigationsSetupDeps['cloud'];
   private esHosts: string[] = [];
   private securityStart?: NightshiftInvestigationsStartDeps['security'];
@@ -227,7 +229,9 @@ export class NightshiftInvestigationsPlugin
     // this, so nothing can reach the sandbox service while `nightshift.enabled` is off.
     const getGatedSandboxStart = createGatedSandboxStart({
       getSandboxStart: () => this.sandboxStart,
+      getAudit: () => this.security?.audit,
       isNightshiftEnabled: isNightshiftEnabledSync,
+      logger: this.logger.get('sandbox'),
     });
     const telemetry = setupNightshiftTelemetry({
       analytics: core.analytics,
@@ -249,11 +253,10 @@ export class NightshiftInvestigationsPlugin
     }
 
     this.decisionTreesEnabled =
-      this.ctx.config.get().decision_trees.enabled &&
-      this.wikiEnabled &&
-      Boolean(plugins.sandbox?.isAvailable);
+      this.ctx.config.get().decision_trees.enabled && Boolean(plugins.sandbox?.isAvailable);
     if (this.decisionTreesEnabled) {
       registerDecisionTreeAiIndex(plugins.contextEngine, this.logger.get('decision_trees'));
+      registerDecisionTreeTelemetryEvents(core.analytics);
     }
 
     core.savedObjects.registerType(nightshiftAutomationSavedObjectType);
@@ -402,7 +405,11 @@ export class NightshiftInvestigationsPlugin
                 resolvedCredentials: new Map(),
               });
               return createRecorderWorkspace({
-                session: sandboxStart.getSessionForSpace(spaceId, conversationId),
+                // The request is the investigation's, so the audit events name its user or
+                // service account, and the space comes from it as for the investigator's tools.
+                session: sandboxStart.getSession(request, conversationId, {
+                  type: 'findings_recorder',
+                }),
                 redactor,
               });
             },
@@ -503,6 +510,7 @@ export class NightshiftInvestigationsPlugin
             connectorNames: [],
             getSpaceId,
             getUsername: (req: KibanaRequest) => this.security?.authc.getCurrentUser(req)?.username,
+            analytics: core.analytics,
             logger: decisionTreeLogger,
           })) {
             plugins.agentBuilder.tools.register(tool);
@@ -577,6 +585,7 @@ export class NightshiftInvestigationsPlugin
             investigationLocator,
             getInvestigationsClient: this.getInvestigationsClient,
             getActions: () => this.actionsStart,
+            getIsomerRuntime: this.getIsomerRuntime,
             getRoutingClient: this.getNotificationRoutingClient,
           })
         );
@@ -585,6 +594,7 @@ export class NightshiftInvestigationsPlugin
             investigationLocator,
             getInvestigationsClient: this.getInvestigationsClient,
             getActions: () => this.actionsStart,
+            getIsomerRuntime: this.getIsomerRuntime,
             getRoutingClient: this.getNotificationRoutingClient,
             getTriggerEmitter,
             getWorkflowsManagement: () => this.workflowsManagement,
@@ -595,6 +605,7 @@ export class NightshiftInvestigationsPlugin
             investigationLocator,
             getInvestigationsClient: this.getInvestigationsClient,
             getActions: () => this.actionsStart,
+            getIsomerRuntime: this.getIsomerRuntime,
             getRoutingClient: this.getNotificationRoutingClient,
             getTriggerEmitter,
           })
@@ -603,6 +614,7 @@ export class NightshiftInvestigationsPlugin
           renderSlackMessageStepDefinition({
             investigationLocator,
             getInvestigationsClient: this.getInvestigationsClient,
+            getIsomerRuntime: this.getIsomerRuntime,
           })
         );
         // Registered even when disabled: the combined workflow no-ops a writer branch instead
@@ -639,14 +651,15 @@ export class NightshiftInvestigationsPlugin
             getUiSettings: () => this.uiSettings,
           })
         );
-        // Registered unconditionally: the combined materialize workflow installs with Wiki
-        // or Memory, so a trees-off install would otherwise reference an unknown step type.
-        // The handler no-ops on the flag instead, matching wiki/memory above.
+        // Registered unconditionally: the combined materialize workflow installs with Wiki,
+        // Memory, or decision trees, so a trees-off install would otherwise reference an unknown
+        // step type. The handler no-ops on the flag instead, matching wiki/memory above.
         plugins.workflowsExtensions.registerStepDefinition(
           decisionTreeHydrateStepDefinition({
             getSandboxStart: getGatedSandboxStart,
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
+            analytics: core.analytics,
             logger: this.logger.get('decision_trees'),
             isEnabled: () => this.decisionTreesEnabled,
           })
@@ -674,8 +687,8 @@ export class NightshiftInvestigationsPlugin
           })
         );
         // Registered unconditionally for the same reason as the tree hydrate above: the
-        // combined optimize workflow installs with Wiki or Memory and now runs the
-        // reinforcement phase too. The handler no-ops on the flag.
+        // combined optimize workflow installs with Wiki, Memory, or decision trees and now
+        // runs the reinforcement phase too. The handler no-ops on the flag.
         plugins.workflowsExtensions.registerStepDefinition(
           decisionTreePrepareStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
@@ -705,6 +718,10 @@ export class NightshiftInvestigationsPlugin
           getEpisodeLookup: this.getEpisodeLookup,
           getAutomationsSoClient: this.getAutomationsSoClient,
           getWorkflowsManagement: () => this.workflowsManagement,
+          getUserProfileService: async () => {
+            const [start] = await core.getStartServices();
+            return start.userProfile;
+          },
           isUniversalAlertingAvailable: () => this.alertingVTwo !== undefined,
           isWikiEnabled: () => this.wikiEnabled,
           listSandboxConnectors,
@@ -808,6 +825,7 @@ export class NightshiftInvestigationsPlugin
     this.featureFlags = coreStart.featureFlags;
     this.actionsStart = plugins.actions;
     this.nightshiftSources = plugins.nightshiftSources;
+    this.isomerStart = plugins.isomer;
     this.securityStart = plugins.security;
     this.security = coreStart.security;
     this.coreStart = coreStart;
@@ -1018,6 +1036,13 @@ export class NightshiftInvestigationsPlugin
       return this.notificationRoutingService;
     };
 
+  private getIsomerRuntime: IsomerPluginStart['getRuntime'] = () => {
+    if (!this.isomerStart) {
+      throw new Error('isomer is not available');
+    }
+    return this.isomerStart.getRuntime();
+  };
+
   private getNotificationRoutingClient = async (
     request: KibanaRequest,
     spaceId: string,
@@ -1092,7 +1117,7 @@ export class NightshiftInvestigationsPlugin
     await client.install(NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID, {
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
-    if (this.wikiEnabled || this.memoryEnabled) {
+    if (this.wikiEnabled || this.memoryEnabled || this.decisionTreesEnabled) {
       await installSandboxMaterializeWorkspaceWorkflow({ client });
       await installAgentOptimizationsWorkflow({ client });
     }

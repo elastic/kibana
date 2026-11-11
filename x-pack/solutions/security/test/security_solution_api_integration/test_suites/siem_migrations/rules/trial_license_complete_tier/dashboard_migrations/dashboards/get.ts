@@ -156,6 +156,58 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
       });
 
+      it('should filter by a sub-string of a name joined by `_` or `-`', async () => {
+        const substringMigrationResponse = await dashboardMigrationRoutes.create({});
+        const substringMigrationId = substringMigrationResponse.body.migration_id;
+
+        const titles = [
+          'sysmon_dashboard_overview',
+          'okta-login-activity-dashboard',
+          'Unrelated dashboard name',
+        ];
+        const dashboards = titles.map((title) =>
+          getDefaultDashboardMigrationDocumentWithOverrides({
+            original_dashboard: { title },
+            elastic_dashboard: { title },
+            status: 'completed',
+            translation_result: 'full',
+            migration_id: substringMigrationId,
+          })
+        );
+        await indexMigrationDashboards(es, dashboards);
+
+        // Sub-word inside an underscore-joined name.
+        let response = await dashboardMigrationRoutes.getDashboards({
+          migrationId: substringMigrationId,
+          queryParams: { search_term: 'sysmon' },
+        });
+        expect(response.body.total).toEqual(1);
+        expect(response.body.data).toEqual([
+          expect.objectContaining({
+            elastic_dashboard: expect.objectContaining({ title: 'sysmon_dashboard_overview' }),
+          }),
+        ]);
+
+        // Case-insensitive.
+        response = await dashboardMigrationRoutes.getDashboards({
+          migrationId: substringMigrationId,
+          queryParams: { search_term: 'SYSMON' },
+        });
+        expect(response.body.total).toEqual(1);
+
+        // Sub-word inside a hyphen-joined name.
+        response = await dashboardMigrationRoutes.getDashboards({
+          migrationId: substringMigrationId,
+          queryParams: { search_term: 'login' },
+        });
+        expect(response.body.total).toEqual(1);
+        expect(response.body.data).toEqual([
+          expect.objectContaining({
+            elastic_dashboard: expect.objectContaining({ title: 'okta-login-activity-dashboard' }),
+          }),
+        ]);
+      });
+
       it('should filter by ids', async () => {
         const response = await dashboardMigrationRoutes.getDashboards({
           migrationId,

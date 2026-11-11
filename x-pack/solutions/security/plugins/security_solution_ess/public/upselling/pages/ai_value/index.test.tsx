@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { AIValueUpsellingPageESS } from '.';
 
 jest.mock('../attack_discovery/upgrade_actions', () => ({
@@ -23,9 +23,27 @@ jest.mock('@kbn/shared-ux-page-kibana-template', () => {
   return { KibanaPageTemplate };
 });
 
+jest.mock('../../../common/services', () => ({
+  useKibana: jest.fn(() => ({
+    services: {
+      docLinks: {
+        links: {
+          siem: {
+            valueReport: 'https://www.elastic.co/guide/en/security/current/ai-value-report.html',
+          },
+        },
+      },
+    },
+  })),
+}));
+
 describe('AIValueUpsellingPageESS', () => {
   it('renders the assistant beacon', () => {
-    render(<AIValueUpsellingPageESS />);
+    render(
+      <MockAppHeaderProvider>
+        <AIValueUpsellingPageESS />
+      </MockAppHeaderProvider>
+    );
 
     expect(screen.getByTestId('assistantAvatar')).toBeInTheDocument();
   });

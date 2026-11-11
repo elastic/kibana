@@ -97,6 +97,13 @@ describe('AWS JSON services from Smithy models', () => {
       body: JSON.stringify(body),
     });
 
+  it('says it answers the hosts of its services, whose requests all go to the root path', () => {
+    const { answers } = createEmulatorFetch({ specs: { metrics: model } });
+
+    expect(answers('POST', new URL(`${ORIGIN}/`))).toBe(true);
+    expect(answers('POST', new URL('https://other.example/'))).toBe(false);
+  });
+
   it('routes requests by X-Amz-Target and answers with the output shape', async () => {
     const { fetch, calls } = createEmulatorFetch({ specs: { metrics: model } });
 
@@ -113,6 +120,7 @@ describe('AWS JSON services from Smithy models', () => {
         request: `POST ${ORIGIN}/`,
         operation: 'GetMetricData',
         matched: { method: 'post', path: '/GetMetricData', source: 'metrics' },
+        responseSource: 'generated',
         status: 200,
         requestViolations: [],
         responseViolations: [],

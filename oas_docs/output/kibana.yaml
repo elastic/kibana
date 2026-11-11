@@ -288,6 +288,10 @@ tags:
     description: |
       Fleet enrollment API keys APIs enable you to manage enrollment API keys for Fleet, including creating, retrieving, and revoking API keys used for agent enrollment.
     x-displayName: Fleet enrollment API keys
+  - name: Fleet IaC provisioner
+    description: |
+      Fleet infrastructure-as-code (IaC) provisioner APIs, including the CloudFormation callback that reports a created IAM role back to Kibana.
+    x-displayName: Fleet IaC provisioner
   - name: Fleet internals
     description: |
       Fleet internals APIs enable you to manage Fleet internal operations, including checking permissions, monitoring Fleet Server health, managing settings, and initiating Fleet setup.
@@ -44450,6 +44454,8 @@ paths:
                           type: string
                         unenrolled_at:
                           type: string
+                        unenrolled_reason:
+                          type: string
                         unenrollment_started_at:
                           type: string
                         unhealthy_reason:
@@ -45139,6 +45145,8 @@ paths:
                         type: string
                       unenrolled_at:
                         type: string
+                      unenrolled_reason:
+                        type: string
                       unenrollment_started_at:
                         type: string
                       unhealthy_reason:
@@ -45636,6 +45644,8 @@ paths:
                           - OPAMP
                         type: string
                       unenrolled_at:
+                        type: string
+                      unenrolled_reason:
                         type: string
                       unenrollment_started_at:
                         type: string
@@ -50391,6 +50401,10 @@ paths:
                             - ecs
                             - otel
                           type: string
+                        dedicatedNamespaceTemplates:
+                          description: Whether the global namespace uses dedicated index templates. Applied to the installed packages after a deployment. Absent means off.
+                          type: boolean
+                          x-state: Experimental; added in 9.7.0
                         deploymentId:
                           description: Opaque deployment identifier; for AWS, the CFN stack ARN.
                           type: string
@@ -50571,7 +50585,7 @@ paths:
                         policySettings:
                           additionalProperties:
                             default: null
-                            maxLength: 1024
+                            maxLength: 10000
                             nullable: true
                             type: string
                           description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
@@ -50804,6 +50818,10 @@ paths:
                     - ecs
                     - otel
                   type: string
+                dedicatedNamespaceTemplates:
+                  description: Whether the global namespace uses dedicated index templates. Applied to the installed packages after a deployment. Absent means off.
+                  type: boolean
+                  x-state: Experimental; added in 9.7.0
                 description:
                   description: Integration description from the Service settings step.
                   maxLength: 2048
@@ -50873,7 +50891,7 @@ paths:
                 policySettings:
                   additionalProperties:
                     default: null
-                    maxLength: 1024
+                    maxLength: 10000
                     nullable: true
                     type: string
                   description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
@@ -51024,6 +51042,10 @@ paths:
                           - ecs
                           - otel
                         type: string
+                      dedicatedNamespaceTemplates:
+                        description: Whether the global namespace uses dedicated index templates. Applied to the installed packages after a deployment. Absent means off.
+                        type: boolean
+                        x-state: Experimental; added in 9.7.0
                       deploymentId:
                         description: Opaque deployment identifier; for AWS, the CFN stack ARN.
                         type: string
@@ -51183,7 +51205,7 @@ paths:
                       policySettings:
                         additionalProperties:
                           default: null
-                          maxLength: 1024
+                          maxLength: 10000
                           nullable: true
                           type: string
                         description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
@@ -51473,6 +51495,10 @@ paths:
                           - ecs
                           - otel
                         type: string
+                      dedicatedNamespaceTemplates:
+                        description: Whether the global namespace uses dedicated index templates. Applied to the installed packages after a deployment. Absent means off.
+                        type: boolean
+                        x-state: Experimental; added in 9.7.0
                       deploymentId:
                         description: Opaque deployment identifier; for AWS, the CFN stack ARN.
                         type: string
@@ -51632,7 +51658,7 @@ paths:
                       policySettings:
                         additionalProperties:
                           default: null
-                          maxLength: 1024
+                          maxLength: 10000
                           nullable: true
                           type: string
                         description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
@@ -51814,6 +51840,10 @@ paths:
                   maxLength: 255
                   nullable: true
                   type: string
+                dedicatedNamespaceTemplates:
+                  description: Whether the global namespace uses dedicated index templates. Omit it to keep the stored value. Applied to the installed packages after a deployment.
+                  type: boolean
+                  x-state: Experimental; added in 9.7.0
                 deploymentId:
                   description: CFN stack ARN (or equivalent); provided by the client after manual deployment.
                   maxLength: 2048
@@ -51977,7 +52007,7 @@ paths:
                 policySettings:
                   additionalProperties:
                     default: null
-                    maxLength: 1024
+                    maxLength: 10000
                     nullable: true
                     type: string
                   description: Integration policy settings that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`). Replaces the stored settings; omit it to keep them.
@@ -52085,6 +52115,10 @@ paths:
                           - ecs
                           - otel
                         type: string
+                      dedicatedNamespaceTemplates:
+                        description: Whether the global namespace uses dedicated index templates. Applied to the installed packages after a deployment. Absent means off.
+                        type: boolean
+                        x-state: Experimental; added in 9.7.0
                       deploymentId:
                         description: Opaque deployment identifier; for AWS, the CFN stack ARN.
                         type: string
@@ -52244,7 +52278,7 @@ paths:
                       policySettings:
                         additionalProperties:
                           default: null
-                          maxLength: 1024
+                          maxLength: 10000
                           nullable: true
                           type: string
                         description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
@@ -52461,6 +52495,10 @@ paths:
                             - ecs
                             - otel
                           type: string
+                        dedicatedNamespaceTemplates:
+                          description: Whether the global namespace uses dedicated index templates. Applied to the installed packages after a deployment. Absent means off.
+                          type: boolean
+                          x-state: Experimental; added in 9.7.0
                         deploymentId:
                           description: Opaque deployment identifier; for AWS, the CFN stack ARN.
                           type: string
@@ -52620,7 +52658,7 @@ paths:
                         policySettings:
                           additionalProperties:
                             default: null
-                            maxLength: 1024
+                            maxLength: 10000
                             nullable: true
                             type: string
                           description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
@@ -57987,6 +58025,202 @@ paths:
       summary: Check Fleet Server health
       tags:
         - Fleet internals
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/fleet/iac_provisioner/callbacks/{callbackId}:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/iac_provisioner/callbacks/{callbackId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Called by the CloudFormation stack launched from Kibana to report the IAM role ARN and stack ARN it created. The request is not authenticated: present the one-time token issued when the callback was created in the `x-elastic-callback-token` header. The token is not an Elasticsearch credential and admits nothing but this report. `role_arn` and `stack_arn` must be in the same AWS account. While the record is pending, a repeat report with the same values succeeds and different values return 409; an expired or cancelled record returns 410.
+      operationId: receive-provisioning-callback
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: ID of the callback record, as issued to the stack.
+          in: path
+          name: callbackId
+          required: true
+          schema:
+            maxLength: 128
+            minLength: 1
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              receiveProvisioningCallbackRequestExample:
+                description: The report the launched CloudFormation stack sends once its IAM role exists
+                summary: Report a created IAM role
+                value:
+                  role_arn: arn:aws:iam::123456789012:role/ElasticWorkloadIdentity-abc123
+                  stack_arn: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-identity/11111111-2222-3333-4444-555555555555
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                role_arn:
+                  description: ARN of the IAM role the stack created.
+                  maxLength: 2048
+                  minLength: 1
+                  type: string
+                stack_arn:
+                  description: ARN (StackId) of the CloudFormation stack.
+                  maxLength: 2048
+                  minLength: 1
+                  type: string
+              required:
+                - role_arn
+                - stack_arn
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                receiveProvisioningCallbackExample:
+                  description: The report was applied and the federated identity exists
+                  summary: Identity created
+                  value:
+                    status: received
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  status:
+                    description: 'State of the callback record. `pending`: waiting for the stack. `receiving`: a report is being applied. `received`: values stored and the identity exists. `cancelled`: the form stopped waiting and the token is refused.'
+                    enum:
+                      - pending
+                      - receiving
+                      - received
+                      - cancelled
+                    type: string
+                required:
+                  - status
+          description: The values were stored, or were already stored
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: The role and the stack are in different AWS accounts
+                  summary: Role and stack accounts differ
+                  value:
+                    error: Bad Request
+                    message: role_arn and stack_arn must be in the same AWS account
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: No record has this ID, or the token is not the one issued for it
+                  summary: Unknown callback or token
+                  value:
+                    error: Not Found
+                    message: Callback not found
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              examples:
+                conflictExample:
+                  description: A report with different values was already received
+                  summary: Different values already received
+                  value:
+                    error: Conflict
+                    message: Callback already received with different values
+                    statusCode: 409
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Conflict
+        '410':
+          content:
+            application/json:
+              examples:
+                goneExample:
+                  description: The record expired or was cancelled before the report arrived
+                  summary: Callback expired or cancelled
+                  value:
+                    error: Gone
+                    message: Callback is no longer accepting values
+                    statusCode: 410
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Gone
+      summary: Receive a provisioning callback
+      tags:
+        - Fleet IaC provisioner
+      x-state: Experimental; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -68907,24 +69141,28 @@ paths:
           name: filters
           required: false
           schema:
+            example: '{"bool":{"filter":[{"term":{"slo.tags":"production"}}]}}'
             type: string
         - description: A valid kql query to filter the SLO with
           in: query
           name: kqlQuery
           required: false
           schema:
+            example: 'slo.name: checkout*'
             type: string
         - description: The page to use for pagination, must be greater or equal than 1
           in: query
           name: page
           required: false
           schema:
+            example: '1'
             type: string
         - description: Number of SLOs returned by page
           in: query
           name: perPage
           required: false
           schema:
+            example: '25'
             type: string
         - description: Sort by field
           in: query
@@ -68953,6 +69191,7 @@ paths:
               - enum:
                   - burn_rate_1d
                 type: string
+            example: error_budget_consumed
         - description: Sort order
           in: query
           name: sortDirection
@@ -68965,6 +69204,7 @@ paths:
               - enum:
                   - desc
                 type: string
+            example: desc
         - description: Hide stale SLOs from the list as defined by stale SLO threshold in SLO settings
           in: query
           name: hideStale
@@ -68976,6 +69216,7 @@ paths:
                   - 'false'
                 type: string
               - type: boolean
+            example: 'true'
         - description: The cursor to use for fetching the results from, when using a cursor-based pagination.
           in: query
           name: searchAfter
@@ -68991,6 +69232,7 @@ paths:
           name: size
           required: false
           schema:
+            example: '25'
             type: string
       requestBody:
         content:
@@ -69008,17 +69250,122 @@ paths:
           content:
             application/json:
               examples:
+                findGroupedSlosResponse:
+                  summary: A paginated list where an SLO that uses groupBy returns one result per instance
+                  value:
+                    page: 1
+                    perPage: 25
+                    results:
+                      - artifacts:
+                          dashboards: []
+                        budgetingMethod: occurrences
+                        createdAt: '2025-01-12T10:03:19.000Z'
+                        createdBy: elastic
+                        description: Availability of each host, reported as one SLO instance per host.name
+                        enabled: true
+                        groupBy:
+                          - host.name
+                        groupings:
+                          host.name: web-01
+                        id: 1620783d-cacd-4c40-a56e-8f25fd9ecda1
+                        indicator:
+                          params:
+                            good: 'event.outcome : "success"'
+                            index: logs-*
+                            timestampField: '@timestamp'
+                            total: 'event.outcome : *'
+                          type: sli.kql.custom
+                        instanceId: web-01
+                        name: Host Availability
+                        objective:
+                          target: 0.99
+                        revision: 1
+                        settings:
+                          frequency: 1m
+                          preventInitialBackfill: false
+                          syncDelay: 1m
+                        summary:
+                          errorBudget:
+                            consumed: 0.09
+                            initial: 0.01
+                            isEstimated: false
+                            remaining: 0.91
+                          fiveMinuteBurnRate: 0
+                          oneDayBurnRate: 0
+                          oneHourBurnRate: 0
+                          sliValue: 0.9991
+                          status: HEALTHY
+                          summaryUpdatedAt: '2025-01-12T10:05:00.000Z'
+                        tags: []
+                        timeWindow:
+                          duration: 30d
+                          type: rolling
+                        updatedAt: '2025-01-12T10:03:19.000Z'
+                        updatedBy: elastic
+                        version: 2
+                      - artifacts:
+                          dashboards: []
+                        budgetingMethod: occurrences
+                        createdAt: '2025-01-12T10:03:19.000Z'
+                        createdBy: elastic
+                        description: Availability of each host, reported as one SLO instance per host.name
+                        enabled: true
+                        groupBy:
+                          - host.name
+                        groupings:
+                          host.name: web-02
+                        id: 1620783d-cacd-4c40-a56e-8f25fd9ecda1
+                        indicator:
+                          params:
+                            good: 'event.outcome : "success"'
+                            index: logs-*
+                            timestampField: '@timestamp'
+                            total: 'event.outcome : *'
+                          type: sli.kql.custom
+                        instanceId: web-02
+                        name: Host Availability
+                        objective:
+                          target: 0.99
+                        revision: 1
+                        settings:
+                          frequency: 1m
+                          preventInitialBackfill: false
+                          syncDelay: 1m
+                        summary:
+                          errorBudget:
+                            consumed: 1.88
+                            initial: 0.01
+                            isEstimated: false
+                            remaining: -0.88
+                          fiveMinuteBurnRate: 2.1
+                          oneDayBurnRate: 1.88
+                          oneHourBurnRate: 1.9
+                          sliValue: 0.9812
+                          status: VIOLATED
+                          summaryUpdatedAt: '2025-01-12T10:05:00.000Z'
+                        tags: []
+                        timeWindow:
+                          duration: 30d
+                          type: rolling
+                        updatedAt: '2025-01-12T10:03:19.000Z'
+                        updatedBy: elastic
+                        version: 2
+                    total: 2
                 findSloResponse:
                   summary: A paginated list of SLOs
                   value:
                     page: 1
                     perPage: 25
                     results:
-                      - budgetingMethod: occurrences
+                      - artifacts:
+                          dashboards: []
+                        budgetingMethod: occurrences
                         createdAt: '2025-01-12T10:03:19.000Z'
-                        description: Availability of my web service
+                        createdBy: elastic
+                        description: Availability of my web service measured by successful HTTP responses
                         enabled: true
                         groupBy: '*'
+                        groupings: {}
                         id: 8853df00-ae2e-11ed-90af-09bb6422b258
                         indicator:
                           params:
@@ -69035,6 +69382,7 @@ paths:
                         revision: 1
                         settings:
                           frequency: 5m
+                          preventInitialBackfill: false
                           syncDelay: 5m
                         summary:
                           errorBudget:
@@ -69042,8 +69390,12 @@ paths:
                             initial: 0.01
                             isEstimated: false
                             remaining: 0.83
+                          fiveMinuteBurnRate: 0.12
+                          oneDayBurnRate: 0.17
+                          oneHourBurnRate: 0.15
                           sliValue: 0.9983
                           status: HEALTHY
+                          summaryUpdatedAt: '2025-01-12T10:05:00.000Z'
                         tags:
                           - production
                           - web-service
@@ -69051,8 +69403,116 @@ paths:
                           duration: 30d
                           type: rolling
                         updatedAt: '2025-01-12T10:03:19.000Z'
+                        updatedBy: elastic
                         version: 2
-                    total: 42
+                    total: 1
+                findSlosCursorResponse:
+                  summary: A page of results using cursor-based pagination (request with the searchAfter and size query parameters)
+                  value:
+                    page: 1
+                    perPage: 25
+                    results:
+                      - artifacts:
+                          dashboards: []
+                        budgetingMethod: occurrences
+                        createdAt: '2025-01-12T10:03:19.000Z'
+                        createdBy: elastic
+                        description: Availability of each host, reported as one SLO instance per host.name
+                        enabled: true
+                        groupBy:
+                          - host.name
+                        groupings:
+                          host.name: web-01
+                        id: 1620783d-cacd-4c40-a56e-8f25fd9ecda1
+                        indicator:
+                          params:
+                            good: 'event.outcome : "success"'
+                            index: logs-*
+                            timestampField: '@timestamp'
+                            total: 'event.outcome : *'
+                          type: sli.kql.custom
+                        instanceId: web-01
+                        name: Host Availability
+                        objective:
+                          target: 0.99
+                        revision: 1
+                        settings:
+                          frequency: 1m
+                          preventInitialBackfill: false
+                          syncDelay: 1m
+                        summary:
+                          errorBudget:
+                            consumed: 0.09
+                            initial: 0.01
+                            isEstimated: false
+                            remaining: 0.91
+                          fiveMinuteBurnRate: 0
+                          oneDayBurnRate: 0
+                          oneHourBurnRate: 0
+                          sliValue: 0.9991
+                          status: HEALTHY
+                          summaryUpdatedAt: '2025-01-12T10:05:00.000Z'
+                        tags: []
+                        timeWindow:
+                          duration: 30d
+                          type: rolling
+                        updatedAt: '2025-01-12T10:03:19.000Z'
+                        updatedBy: elastic
+                        version: 2
+                      - artifacts:
+                          dashboards: []
+                        budgetingMethod: occurrences
+                        createdAt: '2025-01-12T10:03:19.000Z'
+                        createdBy: elastic
+                        description: Availability of each host, reported as one SLO instance per host.name
+                        enabled: true
+                        groupBy:
+                          - host.name
+                        groupings:
+                          host.name: web-02
+                        id: 1620783d-cacd-4c40-a56e-8f25fd9ecda1
+                        indicator:
+                          params:
+                            good: 'event.outcome : "success"'
+                            index: logs-*
+                            timestampField: '@timestamp'
+                            total: 'event.outcome : *'
+                          type: sli.kql.custom
+                        instanceId: web-02
+                        name: Host Availability
+                        objective:
+                          target: 0.99
+                        revision: 1
+                        settings:
+                          frequency: 1m
+                          preventInitialBackfill: false
+                          syncDelay: 1m
+                        summary:
+                          errorBudget:
+                            consumed: 1.88
+                            initial: 0.01
+                            isEstimated: false
+                            remaining: -0.88
+                          fiveMinuteBurnRate: 2.1
+                          oneDayBurnRate: 1.88
+                          oneHourBurnRate: 1.9
+                          sliValue: 0.9812
+                          status: VIOLATED
+                          summaryUpdatedAt: '2025-01-12T10:05:00.000Z'
+                        tags: []
+                        timeWindow:
+                          duration: 30d
+                          type: rolling
+                        updatedAt: '2025-01-12T10:03:19.000Z'
+                        updatedBy: elastic
+                        version: 2
+                    searchAfter:
+                      - 0
+                      - VIOLATED
+                      - 1620783d-cacd-4c40-a56e-8f25fd9ecda1
+                      - web-02
+                    size: 25
+                    total: 2
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOFindResponse'
           description: Successful request
@@ -69060,11 +69520,63 @@ paths:
           content:
             application/json:
               examples:
-                badRequestExample:
-                  summary: Bad request
+                badRequestPerPageExample:
+                  summary: perPage above the limit
                   value:
                     error: Bad Request
-                    message: "Invalid value 'invalid' supplied to: sortBy"
+                    message: perPage limit set to 5000
+                    statusCode: 400
+                badRequestSearchAfterExample:
+                  summary: Invalid searchAfter cursor
+                  value:
+                    error: Bad Request
+                    message: |-
+                      [
+                        {
+                          "code": "custom",
+                          "message": "Invalid searchAfter value, must be a JSON array of strings or numbers",
+                          "path": [
+                            "searchAfter"
+                          ]
+                        }
+                      ]
+                    statusCode: 400
+                badRequestSortDirectionExample:
+                  summary: Invalid query parameter value
+                  value:
+                    error: Bad Request
+                    message: |-
+                      [
+                        {
+                          "code": "invalid_union",
+                          "errors": [
+                            [
+                              {
+                                "code": "invalid_value",
+                                "values": [
+                                  "asc"
+                                ],
+                                "path": [],
+                                "message": "Invalid input: expected \"asc\""
+                              }
+                            ],
+                            [
+                              {
+                                "code": "invalid_value",
+                                "values": [
+                                  "desc"
+                                ],
+                                "path": [],
+                                "message": "Invalid input: expected \"desc\""
+                              }
+                            ]
+                          ],
+                          "path": [
+                            "sortDirection"
+                          ],
+                          "message": "Invalid input"
+                        }
+                      ]
                     statusCode: 400
               schema:
                 properties:
@@ -69072,7 +69584,17 @@ paths:
                     example: Bad Request
                     type: string
                   message:
-                    example: "Invalid value 'foo' supplied to: [...]"
+                    example: |-
+                      [
+                        {
+                          "expected": "string",
+                          "code": "invalid_type",
+                          "path": [
+                            "name"
+                          ],
+                          "message": "Invalid input: expected string, received undefined"
+                        }
+                      ]
                     type: string
                   statusCode:
                     example: 400
@@ -69092,7 +69614,10 @@ paths:
                   summary: Unauthorized
                   value:
                     error: Unauthorized
-                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 properties:
@@ -69103,7 +69628,7 @@ paths:
                     example: |-
                       [security_exception
                       	Root causes:
-                      		security_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     type: string
                   statusCode:
                     example: 401
@@ -69123,7 +69648,7 @@ paths:
                   summary: Forbidden
                   value:
                     error: Forbidden
-                    message: 'security_exception: action [slo_read] is unauthorized for user'
+                    message: API [GET /api/observability/slos] is unauthorized for user, this action is granted by the Kibana privileges [slo_read]
                     statusCode: 403
               schema:
                 properties:
@@ -69131,10 +69656,7 @@ paths:
                     example: Forbidden
                     type: string
                   message:
-                    example: |-
-                      [security_exception
-                      	Root causes:
-                      		security_exception: action [slo_write] is unauthorized for user [limited_user] for REST request [/api/observability/slos]]: action [slo_write] is unauthorized for user [limited_user]
+                    example: API [POST /api/observability/slos] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
                     type: string
                   statusCode:
                     example: 403
@@ -69146,34 +69668,6 @@ paths:
                 title: Forbidden
                 type: object
           description: Forbidden response
-        '404':
-          content:
-            application/json:
-              examples:
-                notFoundExample:
-                  summary: Not found
-                  value:
-                    error: Not Found
-                    message: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
-                    statusCode: 404
-              schema:
-                properties:
-                  error:
-                    example: Not Found
-                    type: string
-                  message:
-                    example: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
-                    type: string
-                  statusCode:
-                    example: 404
-                    type: number
-                required:
-                  - statusCode
-                  - error
-                  - message
-                title: Not found
-                type: object
-          description: Not found response
       summary: Get a paginated list of SLOs
       tags:
         - slo
@@ -69202,6 +69696,112 @@ paths:
         content:
           application/json:
             examples:
+              createSloApmAvailabilityExample:
+                summary: Create an SLO with an APM availability indicator
+                value:
+                  budgetingMethod: occurrences
+                  description: Transactions of the checkout service that do not fail
+                  indicator:
+                    params:
+                      environment: production
+                      index: metrics-apm*,apm*
+                      service: checkout
+                      transactionName: '*'
+                      transactionType: request
+                    type: sli.apm.transactionErrorRate
+                  name: Checkout Service Availability
+                  objective:
+                    target: 0.995
+                  timeWindow:
+                    duration: 30d
+                    type: rolling
+              createSloApmLatencyExample:
+                summary: Create an SLO with an APM latency indicator
+                value:
+                  budgetingMethod: occurrences
+                  description: Transactions of the checkout service served in less than 500 ms
+                  indicator:
+                    params:
+                      environment: production
+                      index: metrics-apm*,apm*
+                      service: checkout
+                      threshold: 500
+                      transactionName: '*'
+                      transactionType: request
+                    type: sli.apm.transactionDuration
+                  name: Checkout Service Latency
+                  objective:
+                    target: 0.99
+                  timeWindow:
+                    duration: 30d
+                    type: rolling
+              createSloCalendarAlignedExample:
+                summary: Create an SLO with a monthly calendar aligned time window
+                value:
+                  budgetingMethod: occurrences
+                  description: Availability measured on calendar months
+                  indicator:
+                    params:
+                      good: 'request.status_code : "2xx"'
+                      index: logs-*
+                      timestampField: '@timestamp'
+                      total: 'request.status_code : *'
+                    type: sli.kql.custom
+                  name: Monthly Service Availability
+                  objective:
+                    target: 0.99
+                  settings:
+                    frequency: 1m
+                    preventInitialBackfill: true
+                    syncDelay: 5m
+                  timeWindow:
+                    duration: 1M
+                    type: calendarAligned
+              createSloGroupByExample:
+                summary: Create an SLO that generates one instance per host
+                value:
+                  budgetingMethod: occurrences
+                  description: Availability of each host, reported as one SLO instance per host.name
+                  groupBy:
+                    - host.name
+                  indicator:
+                    params:
+                      good: 'event.outcome : "success"'
+                      index: logs-*
+                      timestampField: '@timestamp'
+                      total: 'event.outcome : *'
+                    type: sli.kql.custom
+                  name: Host Availability
+                  objective:
+                    target: 0.99
+                  timeWindow:
+                    duration: 30d
+                    type: rolling
+              createSloHistogramExample:
+                summary: Create an SLO with a histogram indicator
+                value:
+                  budgetingMethod: occurrences
+                  description: Requests served in less than 300 ms
+                  indicator:
+                    params:
+                      filter: 'service.name : "my-service"'
+                      good:
+                        aggregation: range
+                        field: latency.histogram
+                        from: 0
+                        to: 300
+                      index: metrics-*
+                      timestampField: '@timestamp'
+                      total:
+                        aggregation: value_count
+                        field: latency.histogram
+                    type: sli.histogram.custom
+                  name: Request Latency
+                  objective:
+                    target: 0.95
+                  timeWindow:
+                    duration: 30d
+                    type: rolling
               createSloKqlExample:
                 summary: Create an SLO with a KQL indicator
                 value:
@@ -69226,6 +69826,138 @@ paths:
                     - web-service
                   timeWindow:
                     duration: 30d
+                    type: rolling
+              createSloKqlWithFiltersExample:
+                summary: Create an SLO with a KQL indicator that combines KQL queries and filters
+                value:
+                  budgetingMethod: occurrences
+                  description: Successful checkout requests, excluding health checks
+                  indicator:
+                    params:
+                      good:
+                        filters:
+                          - meta:
+                              alias: null
+                              disabled: false
+                              field: url.path
+                              key: url.path
+                              negate: true
+                              params:
+                                query: /healthz
+                              type: phrase
+                            query:
+                              match_phrase:
+                                url.path: /healthz
+                        kqlQuery: http.response.status_code < 500
+                      index: logs-*
+                      timestampField: '@timestamp'
+                      total:
+                        filters: []
+                        kqlQuery: 'url.path : "/checkout*"'
+                    type: sli.kql.custom
+                  name: Checkout Availability
+                  objective:
+                    target: 0.995
+                  timeWindow:
+                    duration: 7d
+                    type: rolling
+              createSloMetricCustomExample:
+                summary: Create an SLO with a custom metric indicator
+                value:
+                  budgetingMethod: occurrences
+                  description: Share of the bytes received that were served successfully
+                  indicator:
+                    params:
+                      filter: 'service.name : "my-service"'
+                      good:
+                        equation: A
+                        metrics:
+                          - aggregation: sum
+                            field: network.bytes_ok
+                            name: A
+                      index: metrics-*
+                      timestampField: '@timestamp'
+                      total:
+                        equation: A
+                        metrics:
+                          - aggregation: sum
+                            field: network.bytes_total
+                            name: A
+                    type: sli.metric.custom
+                  name: Request Payload Efficiency
+                  objective:
+                    target: 0.99
+                  timeWindow:
+                    duration: 30d
+                    type: rolling
+              createSloSyntheticsAvailabilityExample:
+                summary: Create an SLO with a Synthetics availability indicator
+                value:
+                  budgetingMethod: occurrences
+                  description: Availability of the login page monitor
+                  indicator:
+                    params:
+                      index: synthetics-*
+                      monitorIds:
+                        - label: Login page
+                          value: 5c1a5e6e-6a9c-4c8d-93f6-5d1a8b1d6a11
+                      projects: []
+                      tags:
+                        - label: production
+                          value: production
+                    type: sli.synthetics.availability
+                  name: Login Page Uptime
+                  objective:
+                    target: 0.99
+                  timeWindow:
+                    duration: 30d
+                    type: rolling
+              createSloTimesliceMetricExample:
+                summary: Create an SLO with a timeslice metric indicator and the timeslices budgeting method
+                value:
+                  budgetingMethod: timeslices
+                  description: Minutes in which the average CPU usage stays below 80 percent
+                  indicator:
+                    params:
+                      filter: 'host.name : "web-01"'
+                      index: metrics-system.cpu-*
+                      metric:
+                        comparator: LT
+                        equation: A
+                        metrics:
+                          - aggregation: avg
+                            field: system.cpu.total.norm.pct
+                            name: A
+                        threshold: 0.8
+                      timestampField: '@timestamp'
+                    type: sli.metric.timeslice
+                  name: CPU Usage Under 80 Percent
+                  objective:
+                    target: 0.99
+                    timesliceTarget: 0.95
+                    timesliceWindow: 5m
+                  timeWindow:
+                    duration: 30d
+                    type: rolling
+              createSloTimeslicesBudgetingExample:
+                summary: Create an SLO that uses the timeslices budgeting method with a KQL indicator
+                value:
+                  budgetingMethod: timeslices
+                  description: Five minute slices in which at least 95 percent of the searches succeed
+                  indicator:
+                    params:
+                      good: 'event.outcome : "success"'
+                      index: logs-*
+                      timestampField: '@timestamp'
+                      total: 'event.action : "search"'
+                    type: sli.kql.custom
+                  name: Search Availability By Timeslice
+                  objective:
+                    target: 0.99
+                    timesliceTarget: 0.95
+                    timesliceWindow: 5m
+                  timeWindow:
+                    duration: 7d
                     type: rolling
             schema:
               additionalProperties: false
@@ -69314,11 +70046,71 @@ paths:
           content:
             application/json:
               examples:
-                badRequestExample:
-                  summary: Bad request
+                badRequestDurationExample:
+                  summary: Invalid duration
                   value:
                     error: Bad Request
-                    message: "Invalid value 'foo' supplied to: indicator/type"
+                    message: |-
+                      [
+                        {
+                          "code": "custom",
+                          "message": "Invalid duration: 30x, must be {duration}{unit}, for example 30d",
+                          "path": [
+                            "timeWindow",
+                            "duration"
+                          ]
+                        }
+                      ]
+                    statusCode: 400
+                badRequestIndicatorTypeExample:
+                  summary: Unknown indicator type
+                  value:
+                    error: Bad Request
+                    message: |-
+                      [
+                        {
+                          "code": "invalid_union",
+                          "errors": [],
+                          "note": "No matching discriminator",
+                          "discriminator": "type",
+                          "options": [
+                            "sli.apm.transactionDuration",
+                            "sli.apm.transactionErrorRate",
+                            "sli.synthetics.availability",
+                            "sli.kql.custom",
+                            "sli.metric.custom",
+                            "sli.metric.timeslice",
+                            "sli.histogram.custom"
+                          ],
+                          "path": [
+                            "indicator",
+                            "type"
+                          ],
+                          "message": "Invalid discriminator value. Expected 'sli.apm.transactionDuration' | 'sli.apm.transactionErrorRate' | 'sli.synthetics.availability' | 'sli.kql.custom' | 'sli.metric.custom' | 'sli.metric.timeslice' | 'sli.histogram.custom'"
+                        }
+                      ]
+                    statusCode: 400
+                badRequestMissingFieldExample:
+                  summary: Missing required field
+                  value:
+                    error: Bad Request
+                    message: |-
+                      [
+                        {
+                          "expected": "string",
+                          "code": "invalid_type",
+                          "path": [
+                            "name"
+                          ],
+                          "message": "Invalid input: expected string, received undefined"
+                        }
+                      ]
+                    statusCode: 400
+                badRequestObjectiveExample:
+                  summary: Objective target out of range (domain validation, for example a target of 1.5)
+                  value:
+                    error: Bad Request
+                    message: Invalid objective.target
                     statusCode: 400
               schema:
                 properties:
@@ -69326,7 +70118,17 @@ paths:
                     example: Bad Request
                     type: string
                   message:
-                    example: "Invalid value 'foo' supplied to: [...]"
+                    example: |-
+                      [
+                        {
+                          "expected": "string",
+                          "code": "invalid_type",
+                          "path": [
+                            "name"
+                          ],
+                          "message": "Invalid input: expected string, received undefined"
+                        }
+                      ]
                     type: string
                   statusCode:
                     example: 400
@@ -69346,7 +70148,10 @@ paths:
                   summary: Unauthorized
                   value:
                     error: Unauthorized
-                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 properties:
@@ -69357,7 +70162,7 @@ paths:
                     example: |-
                       [security_exception
                       	Root causes:
-                      		security_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     type: string
                   statusCode:
                     example: 401
@@ -69377,7 +70182,7 @@ paths:
                   summary: Forbidden
                   value:
                     error: Forbidden
-                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    message: API [POST /api/observability/slos] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
                     statusCode: 403
               schema:
                 properties:
@@ -69385,10 +70190,7 @@ paths:
                     example: Forbidden
                     type: string
                   message:
-                    example: |-
-                      [security_exception
-                      	Root causes:
-                      		security_exception: action [slo_write] is unauthorized for user [limited_user] for REST request [/api/observability/slos]]: action [slo_write] is unauthorized for user [limited_user]
+                    example: API [POST /api/observability/slos] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
                     type: string
                   statusCode:
                     example: 403
@@ -69428,6 +70230,34 @@ paths:
                 title: Conflict
                 type: object
           description: Conflict - The SLO id already exists
+        '503':
+          content:
+            application/json:
+              examples:
+                serviceUnavailableExample:
+                  summary: Service unavailable
+                  value:
+                    error: Service Unavailable
+                    message: Operation did not complete within 60000ms
+                    statusCode: 503
+              schema:
+                properties:
+                  error:
+                    example: Service Unavailable
+                    type: string
+                  message:
+                    example: Operation did not complete within 60000ms
+                    type: string
+                  statusCode:
+                    example: 503
+                    type: number
+                required:
+                  - statusCode
+                  - error
+                  - message
+                title: Service unavailable
+                type: object
+          description: Service unavailable - The operation did not complete within the request deadline
       summary: Create an SLO
       tags:
         - slo
@@ -69494,11 +70324,21 @@ paths:
           content:
             application/json:
               examples:
-                badRequestExample:
-                  summary: Bad request
+                badRequestBodyExample:
+                  summary: Invalid request body
                   value:
                     error: Bad Request
-                    message: "Invalid value 'foo' supplied to: list"
+                    message: |-
+                      [
+                        {
+                          "expected": "array",
+                          "code": "invalid_type",
+                          "path": [
+                            "list"
+                          ],
+                          "message": "Invalid input: expected array, received string"
+                        }
+                      ]
                     statusCode: 400
               schema:
                 properties:
@@ -69506,7 +70346,17 @@ paths:
                     example: Bad Request
                     type: string
                   message:
-                    example: "Invalid value 'foo' supplied to: [...]"
+                    example: |-
+                      [
+                        {
+                          "expected": "string",
+                          "code": "invalid_type",
+                          "path": [
+                            "name"
+                          ],
+                          "message": "Invalid input: expected string, received undefined"
+                        }
+                      ]
                     type: string
                   statusCode:
                     example: 400
@@ -69526,7 +70376,10 @@ paths:
                   summary: Unauthorized
                   value:
                     error: Unauthorized
-                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 properties:
@@ -69537,7 +70390,7 @@ paths:
                     example: |-
                       [security_exception
                       	Root causes:
-                      		security_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     type: string
                   statusCode:
                     example: 401
@@ -69557,7 +70410,7 @@ paths:
                   summary: Forbidden
                   value:
                     error: Forbidden
-                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    message: API [POST /api/observability/slos/_bulk_delete] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
                     statusCode: 403
               schema:
                 properties:
@@ -69565,10 +70418,7 @@ paths:
                     example: Forbidden
                     type: string
                   message:
-                    example: |-
-                      [security_exception
-                      	Root causes:
-                      		security_exception: action [slo_write] is unauthorized for user [limited_user] for REST request [/api/observability/slos]]: action [slo_write] is unauthorized for user [limited_user]
+                    example: API [POST /api/observability/slos] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
                     type: string
                   statusCode:
                     example: 403
@@ -69642,34 +70492,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOBulkDeleteStatusResponse'
           description: Successful response
-        '400':
-          content:
-            application/json:
-              examples:
-                badRequestExample:
-                  summary: Bad request
-                  value:
-                    error: Bad Request
-                    message: "Invalid value 'foo' supplied to: taskId"
-                    statusCode: 400
-              schema:
-                properties:
-                  error:
-                    example: Bad Request
-                    type: string
-                  message:
-                    example: "Invalid value 'foo' supplied to: [...]"
-                    type: string
-                  statusCode:
-                    example: 400
-                    type: number
-                required:
-                  - statusCode
-                  - error
-                  - message
-                title: Bad request
-                type: object
-          description: Bad request
         '401':
           content:
             application/json:
@@ -69678,7 +70500,10 @@ paths:
                   summary: Unauthorized
                   value:
                     error: Unauthorized
-                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 properties:
@@ -69689,7 +70514,7 @@ paths:
                     example: |-
                       [security_exception
                       	Root causes:
-                      		security_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     type: string
                   statusCode:
                     example: 401
@@ -69709,7 +70534,7 @@ paths:
                   summary: Forbidden
                   value:
                     error: Forbidden
-                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    message: API [GET /api/observability/slos/_bulk_delete/abc] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
                     statusCode: 403
               schema:
                 properties:
@@ -69717,10 +70542,7 @@ paths:
                     example: Forbidden
                     type: string
                   message:
-                    example: |-
-                      [security_exception
-                      	Root causes:
-                      		security_exception: action [slo_write] is unauthorized for user [limited_user] for REST request [/api/observability/slos]]: action [slo_write] is unauthorized for user [limited_user]
+                    example: API [POST /api/observability/slos] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
                     type: string
                   statusCode:
                     example: 403
@@ -69768,7 +70590,7 @@ paths:
                     - 8853df00-ae2e-11ed-90af-09bb6422b258
                   purgePolicy:
                     age: 7d
-                    purgeType: fixed-age
+                    purgeType: fixed_age
               purgeByTimestampExample:
                 summary: Purge rollup data before a specific date
                 value:
@@ -69776,7 +70598,7 @@ paths:
                     - 8853df00-ae2e-11ed-90af-09bb6422b258
                     - d077e940-1515-11ee-9c50-9d096392f520
                   purgePolicy:
-                    purgeType: fixed-time
+                    purgeType: fixed_time
                     timestamp: '2024-12-31T00:00:00.000Z'
             schema:
               additionalProperties: false
@@ -69810,7 +70632,7 @@ paths:
                 bulkPurgeResponse:
                   summary: Bulk purge response with task ID
                   value:
-                    taskId: 8853df00-ae2e-11ed-90af-09bb6422b258
+                    taskId: -sOV3daHSeqIWgQLNaKYtw:35832
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOBulkPurgeRollupResponse'
           description: Successful request
@@ -69818,11 +70640,34 @@ paths:
           content:
             application/json:
               examples:
-                badRequestExample:
-                  summary: Bad request
+                badRequestBodyExample:
+                  summary: Invalid purge policy type
                   value:
                     error: Bad Request
-                    message: "Invalid value 'foo' supplied to: purgePolicy/purgeType"
+                    message: |-
+                      [
+                        {
+                          "code": "invalid_union",
+                          "errors": [],
+                          "note": "No matching discriminator",
+                          "discriminator": "purgeType",
+                          "options": [
+                            "fixed_age",
+                            "fixed_time"
+                          ],
+                          "path": [
+                            "purgePolicy",
+                            "purgeType"
+                          ],
+                          "message": "Invalid discriminator value. Expected 'fixed_age' | 'fixed_time'"
+                        }
+                      ]
+                    statusCode: 400
+                badRequestPurgePolicyExample:
+                  summary: Purge policy shorter than the SLO time window
+                  value:
+                    error: Bad Request
+                    message: The provided purge policy is invalid. At least one SLO has a time window that is longer than the provided purge policy.
                     statusCode: 400
               schema:
                 properties:
@@ -69830,7 +70675,17 @@ paths:
                     example: Bad Request
                     type: string
                   message:
-                    example: "Invalid value 'foo' supplied to: [...]"
+                    example: |-
+                      [
+                        {
+                          "expected": "string",
+                          "code": "invalid_type",
+                          "path": [
+                            "name"
+                          ],
+                          "message": "Invalid input: expected string, received undefined"
+                        }
+                      ]
                     type: string
                   statusCode:
                     example: 400
@@ -69850,7 +70705,10 @@ paths:
                   summary: Unauthorized
                   value:
                     error: Unauthorized
-                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 properties:
@@ -69861,7 +70719,7 @@ paths:
                     example: |-
                       [security_exception
                       	Root causes:
-                      		security_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     type: string
                   statusCode:
                     example: 401
@@ -69881,7 +70739,7 @@ paths:
                   summary: Forbidden
                   value:
                     error: Forbidden
-                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    message: API [POST /api/observability/slos/_bulk_purge_rollup] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
                     statusCode: 403
               schema:
                 properties:
@@ -69889,10 +70747,7 @@ paths:
                     example: Forbidden
                     type: string
                   message:
-                    example: |-
-                      [security_exception
-                      	Root causes:
-                      		security_exception: action [slo_write] is unauthorized for user [limited_user] for REST request [/api/observability/slos]]: action [slo_write] is unauthorized for user [limited_user]
+                    example: API [POST /api/observability/slos] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
                     type: string
                   statusCode:
                     example: 403
@@ -69941,7 +70796,7 @@ paths:
                     - id: 8853df00-ae2e-11ed-90af-09bb6422b258
                       instanceId: '*'
                     - id: d077e940-1515-11ee-9c50-9d096392f520
-                      instanceId: host.name:web-01
+                      instanceId: web-01
             schema:
               additionalProperties: false
               type: object
@@ -70000,7 +70855,7 @@ paths:
                           message: SLO [d077e940-1515-11ee-9c50-9d096392f520] not found
                           statusCode: 404
                         id: d077e940-1515-11ee-9c50-9d096392f520
-                        instanceId: host.name:web-01
+                        instanceId: web-01
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOSnapshotResponse'
           description: Successful response
@@ -70008,8 +70863,24 @@ paths:
           content:
             application/json:
               examples:
-                badRequestExample:
-                  summary: Bad request
+                badRequestBodyExample:
+                  summary: Invalid request body
+                  value:
+                    error: Bad Request
+                    message: |-
+                      [
+                        {
+                          "expected": "array",
+                          "code": "invalid_type",
+                          "path": [
+                            "requests"
+                          ],
+                          "message": "Invalid input: expected array, received string"
+                        }
+                      ]
+                    statusCode: 400
+                badRequestTooManyRequestsExample:
+                  summary: More than 100 requests
                   value:
                     error: Bad Request
                     message: '`requests` is limited to 100 entries'
@@ -70020,7 +70891,17 @@ paths:
                     example: Bad Request
                     type: string
                   message:
-                    example: "Invalid value 'foo' supplied to: [...]"
+                    example: |-
+                      [
+                        {
+                          "expected": "string",
+                          "code": "invalid_type",
+                          "path": [
+                            "name"
+                          ],
+                          "message": "Invalid input: expected string, received undefined"
+                        }
+                      ]
                     type: string
                   statusCode:
                     example: 400
@@ -70040,7 +70921,10 @@ paths:
                   summary: Unauthorized
                   value:
                     error: Unauthorized
-                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 properties:
@@ -70051,7 +70935,7 @@ paths:
                     example: |-
                       [security_exception
                       	Root causes:
-                      		security_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     type: string
                   statusCode:
                     example: 401
@@ -70071,7 +70955,7 @@ paths:
                   summary: Forbidden
                   value:
                     error: Forbidden
-                    message: 'security_exception: action [slo_read] is unauthorized for user'
+                    message: API [POST /api/observability/slos/_bulk_snapshot] is unauthorized for user, this action is granted by the Kibana privileges [slo_read]
                     statusCode: 403
               schema:
                 properties:
@@ -70079,10 +70963,7 @@ paths:
                     example: Forbidden
                     type: string
                   message:
-                    example: |-
-                      [security_exception
-                      	Root causes:
-                      		security_exception: action [slo_write] is unauthorized for user [limited_user] for REST request [/api/observability/slos]]: action [slo_write] is unauthorized for user [limited_user]
+                    example: API [POST /api/observability/slos] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
                     type: string
                   statusCode:
                     example: 403
@@ -70118,6 +70999,7 @@ paths:
           name: search
           required: false
           schema:
+            example: checkout
             type: string
         - description: Indicates if the API returns only outdated SLO or all SLO definitions
           in: query
@@ -70130,6 +71012,7 @@ paths:
                   - 'false'
                 type: string
               - type: boolean
+            example: 'true'
         - description: Indicates if the API returns SLO health data with definitions
           in: query
           name: includeHealth
@@ -70141,23 +71024,27 @@ paths:
                   - 'false'
                 type: string
               - type: boolean
+            example: 'true'
         - description: Filters the SLOs by tag
           in: query
           name: tags
           required: false
           schema:
+            example: production
             type: string
         - description: The page to use for pagination, must be greater or equal than 1
           in: query
           name: page
           required: false
           schema:
+            example: '1'
             type: string
         - description: Number of SLOs returned by page
           in: query
           name: perPage
           required: false
           schema:
+            example: '100'
             type: string
       requestBody:
         content:
@@ -70179,11 +71066,14 @@ paths:
                   summary: A paginated list of SLO definitions
                   value:
                     page: 1
-                    perPage: 25
+                    perPage: 100
                     results:
-                      - budgetingMethod: occurrences
+                      - artifacts:
+                          dashboards: []
+                        budgetingMethod: occurrences
                         createdAt: '2025-01-12T10:03:19.000Z'
-                        description: Availability of my web service
+                        createdBy: elastic
+                        description: Availability of my web service measured by successful HTTP responses
                         enabled: true
                         groupBy: '*'
                         id: 8853df00-ae2e-11ed-90af-09bb6422b258
@@ -70205,10 +71095,63 @@ paths:
                           syncDelay: 5m
                         tags:
                           - production
+                          - web-service
                         timeWindow:
                           duration: 30d
                           type: rolling
                         updatedAt: '2025-01-12T10:03:19.000Z'
+                        updatedBy: elastic
+                        version: 2
+                    total: 1
+                findSloDefinitionsWithHealthResponse:
+                  summary: SLO definitions with their health (request with includeHealth=true)
+                  value:
+                    page: 1
+                    perPage: 100
+                    results:
+                      - artifacts:
+                          dashboards: []
+                        budgetingMethod: occurrences
+                        createdAt: '2025-01-12T10:03:19.000Z'
+                        createdBy: elastic
+                        description: Availability of each host, reported as one SLO instance per host.name
+                        enabled: true
+                        groupBy:
+                          - host.name
+                        health:
+                          isProblematic: false
+                          rollup:
+                            isProblematic: false
+                            missing: false
+                            state: started
+                            status: healthy
+                          summary:
+                            isProblematic: false
+                            missing: false
+                            state: started
+                            status: healthy
+                        id: 1620783d-cacd-4c40-a56e-8f25fd9ecda1
+                        indicator:
+                          params:
+                            good: 'event.outcome : "success"'
+                            index: logs-*
+                            timestampField: '@timestamp'
+                            total: 'event.outcome : *'
+                          type: sli.kql.custom
+                        name: Host Availability
+                        objective:
+                          target: 0.99
+                        revision: 1
+                        settings:
+                          frequency: 1m
+                          preventInitialBackfill: false
+                          syncDelay: 1m
+                        tags: []
+                        timeWindow:
+                          duration: 30d
+                          type: rolling
+                        updatedAt: '2025-01-12T10:03:19.000Z'
+                        updatedBy: elastic
                         version: 2
                     total: 1
               schema:
@@ -70218,11 +71161,47 @@ paths:
           content:
             application/json:
               examples:
-                badRequestExample:
-                  summary: Bad request
+                badRequestIncludeHealthExample:
+                  summary: Invalid query parameter value
                   value:
                     error: Bad Request
-                    message: "Invalid value 'foo' supplied to: includeOutdatedOnly"
+                    message: |-
+                      [
+                        {
+                          "code": "invalid_union",
+                          "errors": [
+                            [
+                              {
+                                "code": "invalid_value",
+                                "values": [
+                                  "true",
+                                  "false"
+                                ],
+                                "path": [],
+                                "message": "Invalid option: expected one of \"true\"|\"false\""
+                              }
+                            ],
+                            [
+                              {
+                                "expected": "boolean",
+                                "code": "invalid_type",
+                                "path": [],
+                                "message": "Invalid input: expected boolean, received string"
+                              }
+                            ]
+                          ],
+                          "path": [
+                            "includeHealth"
+                          ],
+                          "message": "Invalid input"
+                        }
+                      ]
+                    statusCode: 400
+                badRequestPerPageExample:
+                  summary: perPage above the limit
+                  value:
+                    error: Bad Request
+                    message: perPage limit set to 1000
                     statusCode: 400
               schema:
                 properties:
@@ -70230,7 +71209,17 @@ paths:
                     example: Bad Request
                     type: string
                   message:
-                    example: "Invalid value 'foo' supplied to: [...]"
+                    example: |-
+                      [
+                        {
+                          "expected": "string",
+                          "code": "invalid_type",
+                          "path": [
+                            "name"
+                          ],
+                          "message": "Invalid input: expected string, received undefined"
+                        }
+                      ]
                     type: string
                   statusCode:
                     example: 400
@@ -70250,7 +71239,10 @@ paths:
                   summary: Unauthorized
                   value:
                     error: Unauthorized
-                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos/_definitions]'
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 properties:
@@ -70261,7 +71253,7 @@ paths:
                     example: |-
                       [security_exception
                       	Root causes:
-                      		security_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     type: string
                   statusCode:
                     example: 401
@@ -70281,7 +71273,7 @@ paths:
                   summary: Forbidden
                   value:
                     error: Forbidden
-                    message: 'security_exception: action [slo_read] is unauthorized for user'
+                    message: API [GET /api/observability/slos/_definitions] is unauthorized for user, this action is granted by the Kibana privileges [slo_read]
                     statusCode: 403
               schema:
                 properties:
@@ -70289,10 +71281,7 @@ paths:
                     example: Forbidden
                     type: string
                   message:
-                    example: |-
-                      [security_exception
-                      	Root causes:
-                      		security_exception: action [slo_write] is unauthorized for user [limited_user] for REST request [/api/observability/slos]]: action [slo_write] is unauthorized for user [limited_user]
+                    example: API [POST /api/observability/slos] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
                     type: string
                   statusCode:
                     example: 403
@@ -70374,11 +71363,43 @@ paths:
           content:
             application/json:
               examples:
-                badRequestExample:
-                  summary: Bad request
+                badRequestAllInstancesExample:
+                  summary: The instanceId * cannot be deleted
                   value:
                     error: Bad Request
-                    message: "Invalid value 'foo' supplied to: list/0/sloId"
+                    message: Cannot delete an SLO instance '*'
+                    statusCode: 400
+                badRequestBodyExample:
+                  summary: Invalid request body
+                  value:
+                    error: Bad Request
+                    message: |-
+                      [
+                        {
+                          "origin": "string",
+                          "code": "too_small",
+                          "minimum": 8,
+                          "inclusive": true,
+                          "path": [
+                            "list",
+                            0,
+                            "sloId"
+                          ],
+                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                        },
+                        {
+                          "origin": "string",
+                          "code": "invalid_format",
+                          "format": "regex",
+                          "pattern": "/^[a-z0-9-_]+$/",
+                          "path": [
+                            "list",
+                            0,
+                            "sloId"
+                          ],
+                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                        }
+                      ]
                     statusCode: 400
               schema:
                 properties:
@@ -70386,7 +71407,17 @@ paths:
                     example: Bad Request
                     type: string
                   message:
-                    example: "Invalid value 'foo' supplied to: [...]"
+                    example: |-
+                      [
+                        {
+                          "expected": "string",
+                          "code": "invalid_type",
+                          "path": [
+                            "name"
+                          ],
+                          "message": "Invalid input: expected string, received undefined"
+                        }
+                      ]
                     type: string
                   statusCode:
                     example: 400
@@ -70406,7 +71437,10 @@ paths:
                   summary: Unauthorized
                   value:
                     error: Unauthorized
-                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 properties:
@@ -70417,7 +71451,7 @@ paths:
                     example: |-
                       [security_exception
                       	Root causes:
-                      		security_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     type: string
                   statusCode:
                     example: 401
@@ -70437,7 +71471,7 @@ paths:
                   summary: Forbidden
                   value:
                     error: Forbidden
-                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    message: API [POST /api/observability/slos/_delete_instances] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
                     statusCode: 403
               schema:
                 properties:
@@ -70445,10 +71479,7 @@ paths:
                     example: Forbidden
                     type: string
                   message:
-                    example: |-
-                      [security_exception
-                      	Root causes:
-                      		security_exception: action [slo_write] is unauthorized for user [limited_user] for REST request [/api/observability/slos]]: action [slo_write] is unauthorized for user [limited_user]
+                    example: API [POST /api/observability/slos] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
                     type: string
                   statusCode:
                     example: 403
@@ -70512,11 +71543,33 @@ paths:
           content:
             application/json:
               examples:
-                badRequestExample:
-                  summary: Bad request
+                badRequestIdExample:
+                  summary: Invalid SLO id
                   value:
                     error: Bad Request
-                    message: "Invalid value 'foo' supplied to: id"
+                    message: |-
+                      [
+                        {
+                          "origin": "string",
+                          "code": "too_small",
+                          "minimum": 8,
+                          "inclusive": true,
+                          "path": [
+                            "id"
+                          ],
+                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                        },
+                        {
+                          "origin": "string",
+                          "code": "invalid_format",
+                          "format": "regex",
+                          "pattern": "/^[a-z0-9-_]+$/",
+                          "path": [
+                            "id"
+                          ],
+                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                        }
+                      ]
                     statusCode: 400
               schema:
                 properties:
@@ -70524,7 +71577,17 @@ paths:
                     example: Bad Request
                     type: string
                   message:
-                    example: "Invalid value 'foo' supplied to: [...]"
+                    example: |-
+                      [
+                        {
+                          "expected": "string",
+                          "code": "invalid_type",
+                          "path": [
+                            "name"
+                          ],
+                          "message": "Invalid input: expected string, received undefined"
+                        }
+                      ]
                     type: string
                   statusCode:
                     example: 400
@@ -70544,7 +71607,10 @@ paths:
                   summary: Unauthorized
                   value:
                     error: Unauthorized
-                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 properties:
@@ -70555,7 +71621,7 @@ paths:
                     example: |-
                       [security_exception
                       	Root causes:
-                      		security_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     type: string
                   statusCode:
                     example: 401
@@ -70575,7 +71641,7 @@ paths:
                   summary: Forbidden
                   value:
                     error: Forbidden
-                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    message: API [DELETE /api/observability/slos/8853df00-ae2e-11ed-90af-09bb6422b258] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
                     statusCode: 403
               schema:
                 properties:
@@ -70583,10 +71649,7 @@ paths:
                     example: Forbidden
                     type: string
                   message:
-                    example: |-
-                      [security_exception
-                      	Root causes:
-                      		security_exception: action [slo_write] is unauthorized for user [limited_user] for REST request [/api/observability/slos]]: action [slo_write] is unauthorized for user [limited_user]
+                    example: API [POST /api/observability/slos] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
                     type: string
                   statusCode:
                     example: 403
@@ -70662,11 +71725,13 @@ paths:
                   - '*'
                 type: string
               - type: string
+            example: web-01
         - description: The name of the remote cluster where the SLO is defined, for remote SLOs
           in: query
           name: remoteName
           required: false
           schema:
+            example: my-remote-cluster
             type: string
       requestBody:
         content:
@@ -70684,14 +71749,122 @@ paths:
           content:
             application/json:
               examples:
-                getSloResponse:
-                  summary: Get SLO response
+                getGroupedSloInstanceResponse:
+                  summary: Get one instance of an SLO that uses groupBy (request with the instanceId query parameter)
                   value:
+                    artifacts:
+                      dashboards: []
                     budgetingMethod: occurrences
                     createdAt: '2025-01-12T10:03:19.000Z'
-                    description: Availability of my web service
+                    createdBy: elastic
+                    description: Availability of each host, reported as one SLO instance per host.name
+                    enabled: true
+                    groupBy:
+                      - host.name
+                    groupings:
+                      host.name: web-01
+                    id: 1620783d-cacd-4c40-a56e-8f25fd9ecda1
+                    indicator:
+                      params:
+                        good: 'event.outcome : "success"'
+                        index: logs-*
+                        timestampField: '@timestamp'
+                        total: 'event.outcome : *'
+                      type: sli.kql.custom
+                    instanceId: web-01
+                    name: Host Availability
+                    objective:
+                      target: 0.99
+                    revision: 1
+                    settings:
+                      frequency: 1m
+                      preventInitialBackfill: false
+                      syncDelay: 1m
+                    summary:
+                      errorBudget:
+                        consumed: 0.09
+                        initial: 0.01
+                        isEstimated: false
+                        remaining: 0.91
+                      fiveMinuteBurnRate: 0
+                      oneDayBurnRate: 0
+                      oneHourBurnRate: 0
+                      sliValue: 0.9991
+                      status: HEALTHY
+                      summaryUpdatedAt: '2025-01-12T10:05:00.000Z'
+                    tags: []
+                    timeWindow:
+                      duration: 30d
+                      type: rolling
+                    updatedAt: '2025-01-12T10:03:19.000Z'
+                    updatedBy: elastic
+                    version: 2
+                getRemoteSloResponse:
+                  summary: Get an SLO defined in a remote cluster (request with the remoteName query parameter)
+                  value:
+                    artifacts:
+                      dashboards: []
+                    budgetingMethod: occurrences
+                    createdAt: '2025-01-12T10:03:19.000Z'
+                    createdBy: elastic
+                    description: Availability of my web service measured by successful HTTP responses
                     enabled: true
                     groupBy: '*'
+                    groupings: {}
+                    id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                    indicator:
+                      params:
+                        filter: 'field.environment : "production" and service.name : "my-service"'
+                        good: 'request.status_code : "2xx"'
+                        index: logs-*
+                        timestampField: '@timestamp'
+                        total: 'request.status_code : *'
+                      type: sli.kql.custom
+                    instanceId: '*'
+                    name: My Service Availability
+                    objective:
+                      target: 0.99
+                    remote:
+                      kibanaUrl: https://my-remote-cluster.kb.example.com:9243
+                      remoteName: my-remote-cluster
+                    revision: 1
+                    settings:
+                      frequency: 5m
+                      preventInitialBackfill: false
+                      syncDelay: 5m
+                    summary:
+                      errorBudget:
+                        consumed: 0.17
+                        initial: 0.01
+                        isEstimated: false
+                        remaining: 0.83
+                      fiveMinuteBurnRate: 0.12
+                      oneDayBurnRate: 0.17
+                      oneHourBurnRate: 0.15
+                      sliValue: 0.9983
+                      status: HEALTHY
+                      summaryUpdatedAt: '2025-01-12T10:05:00.000Z'
+                    tags:
+                      - production
+                      - web-service
+                    timeWindow:
+                      duration: 30d
+                      type: rolling
+                    updatedAt: '2025-01-12T10:03:19.000Z'
+                    updatedBy: elastic
+                    version: 2
+                getSloResponse:
+                  summary: Get an SLO
+                  value:
+                    artifacts:
+                      dashboards: []
+                    budgetingMethod: occurrences
+                    createdAt: '2025-01-12T10:03:19.000Z'
+                    createdBy: elastic
+                    description: Availability of my web service measured by successful HTTP responses
+                    enabled: true
+                    groupBy: '*'
+                    groupings: {}
                     id: 8853df00-ae2e-11ed-90af-09bb6422b258
                     indicator:
                       params:
@@ -70708,6 +71881,7 @@ paths:
                     revision: 1
                     settings:
                       frequency: 5m
+                      preventInitialBackfill: false
                       syncDelay: 5m
                     summary:
                       errorBudget:
@@ -70715,8 +71889,12 @@ paths:
                         initial: 0.01
                         isEstimated: false
                         remaining: 0.83
+                      fiveMinuteBurnRate: 0.12
+                      oneDayBurnRate: 0.17
+                      oneHourBurnRate: 0.15
                       sliValue: 0.9983
                       status: HEALTHY
+                      summaryUpdatedAt: '2025-01-12T10:05:00.000Z'
                     tags:
                       - production
                       - web-service
@@ -70724,6 +71902,7 @@ paths:
                       duration: 30d
                       type: rolling
                     updatedAt: '2025-01-12T10:03:19.000Z'
+                    updatedBy: elastic
                     version: 2
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOWithSummaryResponse'
@@ -70732,11 +71911,68 @@ paths:
           content:
             application/json:
               examples:
-                badRequestExample:
-                  summary: Bad request
+                badRequestIdExample:
+                  summary: Invalid SLO id
                   value:
                     error: Bad Request
-                    message: "Invalid value 'foo' supplied to: id"
+                    message: |-
+                      [
+                        {
+                          "origin": "string",
+                          "code": "too_small",
+                          "minimum": 8,
+                          "inclusive": true,
+                          "path": [
+                            "id"
+                          ],
+                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                        },
+                        {
+                          "origin": "string",
+                          "code": "invalid_format",
+                          "format": "regex",
+                          "pattern": "/^[a-z0-9-_]+$/",
+                          "path": [
+                            "id"
+                          ],
+                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                        }
+                      ]
+                    statusCode: 400
+                badRequestInstanceIdExample:
+                  summary: Invalid instanceId query parameter
+                  value:
+                    error: Bad Request
+                    message: |-
+                      [
+                        {
+                          "code": "invalid_union",
+                          "errors": [
+                            [
+                              {
+                                "code": "invalid_value",
+                                "values": [
+                                  "*"
+                                ],
+                                "path": [],
+                                "message": "Invalid input: expected \"*\""
+                              }
+                            ],
+                            [
+                              {
+                                "expected": "string",
+                                "code": "invalid_type",
+                                "path": [],
+                                "message": "Invalid input: expected string, received array"
+                              }
+                            ]
+                          ],
+                          "path": [
+                            "instanceId"
+                          ],
+                          "message": "Invalid input"
+                        }
+                      ]
                     statusCode: 400
               schema:
                 properties:
@@ -70744,7 +71980,17 @@ paths:
                     example: Bad Request
                     type: string
                   message:
-                    example: "Invalid value 'foo' supplied to: [...]"
+                    example: |-
+                      [
+                        {
+                          "expected": "string",
+                          "code": "invalid_type",
+                          "path": [
+                            "name"
+                          ],
+                          "message": "Invalid input: expected string, received undefined"
+                        }
+                      ]
                     type: string
                   statusCode:
                     example: 400
@@ -70764,7 +72010,10 @@ paths:
                   summary: Unauthorized
                   value:
                     error: Unauthorized
-                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 properties:
@@ -70775,7 +72024,7 @@ paths:
                     example: |-
                       [security_exception
                       	Root causes:
-                      		security_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     type: string
                   statusCode:
                     example: 401
@@ -70795,7 +72044,7 @@ paths:
                   summary: Forbidden
                   value:
                     error: Forbidden
-                    message: 'security_exception: action [slo_read] is unauthorized for user'
+                    message: API [GET /api/observability/slos/8853df00-ae2e-11ed-90af-09bb6422b258] is unauthorized for user, this action is granted by the Kibana privileges [slo_read]
                     statusCode: 403
               schema:
                 properties:
@@ -70803,10 +72052,7 @@ paths:
                     example: Forbidden
                     type: string
                   message:
-                    example: |-
-                      [security_exception
-                      	Root causes:
-                      		security_exception: action [slo_write] is unauthorized for user [limited_user] for REST request [/api/observability/slos]]: action [slo_write] is unauthorized for user [limited_user]
+                    example: API [POST /api/observability/slos] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
                     type: string
                   statusCode:
                     example: 403
@@ -70883,6 +72129,22 @@ paths:
         content:
           application/json:
             examples:
+              updateSloGroupByExample:
+                summary: Generate one SLO instance per service and host
+                value:
+                  groupBy:
+                    - service.name
+                    - host.name
+              updateSloIndicatorExample:
+                summary: Change the SLO indicator
+                value:
+                  indicator:
+                    params:
+                      good: request.status_code < 500
+                      index: logs-*
+                      timestampField: '@timestamp'
+                      total: 'request.status_code : *'
+                    type: sli.kql.custom
               updateSloNameExample:
                 summary: Update the SLO name and tags
                 value:
@@ -70895,6 +72157,12 @@ paths:
                 value:
                   objective:
                     target: 0.995
+              updateSloSettingsExample:
+                summary: Change the SLO settings
+                value:
+                  settings:
+                    frequency: 2m
+                    syncDelay: 5m
             schema:
               additionalProperties: false
               type: object
@@ -70956,12 +72224,90 @@ paths:
           content:
             application/json:
               examples:
-                updateSloResponse:
-                  summary: Update SLO response
+                updateSloGroupByResponse:
+                  summary: Response after updating groupBy (the revision is incremented)
                   value:
+                    artifacts:
+                      dashboards: []
                     budgetingMethod: occurrences
                     createdAt: '2025-01-12T10:03:19.000Z'
-                    description: Availability of my web service
+                    createdBy: elastic
+                    description: Availability of my web service measured by successful HTTP responses
+                    enabled: true
+                    groupBy:
+                      - service.name
+                      - host.name
+                    id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                    indicator:
+                      params:
+                        filter: 'field.environment : "production" and service.name : "my-service"'
+                        good: 'request.status_code : "2xx"'
+                        index: logs-*
+                        timestampField: '@timestamp'
+                        total: 'request.status_code : *'
+                      type: sli.kql.custom
+                    name: My Service Availability
+                    objective:
+                      target: 0.99
+                    revision: 2
+                    settings:
+                      frequency: 5m
+                      preventInitialBackfill: false
+                      syncDelay: 5m
+                    tags:
+                      - production
+                      - web-service
+                    timeWindow:
+                      duration: 30d
+                      type: rolling
+                    updatedAt: '2025-03-26T14:30:00.000Z'
+                    updatedBy: elastic
+                    version: 2
+                updateSloIndicatorResponse:
+                  summary: Response after updating the indicator (the revision is incremented)
+                  value:
+                    artifacts:
+                      dashboards: []
+                    budgetingMethod: occurrences
+                    createdAt: '2025-01-12T10:03:19.000Z'
+                    createdBy: elastic
+                    description: Availability of my web service measured by successful HTTP responses
+                    enabled: true
+                    groupBy: '*'
+                    id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                    indicator:
+                      params:
+                        good: request.status_code < 500
+                        index: logs-*
+                        timestampField: '@timestamp'
+                        total: 'request.status_code : *'
+                      type: sli.kql.custom
+                    name: My Service Availability
+                    objective:
+                      target: 0.99
+                    revision: 2
+                    settings:
+                      frequency: 5m
+                      preventInitialBackfill: false
+                      syncDelay: 5m
+                    tags:
+                      - production
+                      - web-service
+                    timeWindow:
+                      duration: 30d
+                      type: rolling
+                    updatedAt: '2025-03-26T14:30:00.000Z'
+                    updatedBy: elastic
+                    version: 2
+                updateSloNameResponse:
+                  summary: Response after updating the name and tags (the revision does not change)
+                  value:
+                    artifacts:
+                      dashboards: []
+                    budgetingMethod: occurrences
+                    createdAt: '2025-01-12T10:03:19.000Z'
+                    createdBy: elastic
+                    description: Availability of my web service measured by successful HTTP responses
                     enabled: true
                     groupBy: '*'
                     id: 8853df00-ae2e-11ed-90af-09bb6422b258
@@ -70976,9 +72322,10 @@ paths:
                     name: Updated Service Availability
                     objective:
                       target: 0.99
-                    revision: 2
+                    revision: 1
                     settings:
                       frequency: 5m
+                      preventInitialBackfill: false
                       syncDelay: 5m
                     tags:
                       - production
@@ -70987,6 +72334,81 @@ paths:
                       duration: 30d
                       type: rolling
                     updatedAt: '2025-03-26T14:30:00.000Z'
+                    updatedBy: elastic
+                    version: 2
+                updateSloObjectiveResponse:
+                  summary: Response after updating the objective (the revision is incremented)
+                  value:
+                    artifacts:
+                      dashboards: []
+                    budgetingMethod: occurrences
+                    createdAt: '2025-01-12T10:03:19.000Z'
+                    createdBy: elastic
+                    description: Availability of my web service measured by successful HTTP responses
+                    enabled: true
+                    groupBy: '*'
+                    id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                    indicator:
+                      params:
+                        filter: 'field.environment : "production" and service.name : "my-service"'
+                        good: 'request.status_code : "2xx"'
+                        index: logs-*
+                        timestampField: '@timestamp'
+                        total: 'request.status_code : *'
+                      type: sli.kql.custom
+                    name: My Service Availability
+                    objective:
+                      target: 0.995
+                    revision: 2
+                    settings:
+                      frequency: 5m
+                      preventInitialBackfill: false
+                      syncDelay: 5m
+                    tags:
+                      - production
+                      - web-service
+                    timeWindow:
+                      duration: 30d
+                      type: rolling
+                    updatedAt: '2025-03-26T14:30:00.000Z'
+                    updatedBy: elastic
+                    version: 2
+                updateSloSettingsResponse:
+                  summary: Response after updating the settings (the revision is incremented)
+                  value:
+                    artifacts:
+                      dashboards: []
+                    budgetingMethod: occurrences
+                    createdAt: '2025-01-12T10:03:19.000Z'
+                    createdBy: elastic
+                    description: Availability of my web service measured by successful HTTP responses
+                    enabled: true
+                    groupBy: '*'
+                    id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                    indicator:
+                      params:
+                        filter: 'field.environment : "production" and service.name : "my-service"'
+                        good: 'request.status_code : "2xx"'
+                        index: logs-*
+                        timestampField: '@timestamp'
+                        total: 'request.status_code : *'
+                      type: sli.kql.custom
+                    name: My Service Availability
+                    objective:
+                      target: 0.99
+                    revision: 2
+                    settings:
+                      frequency: 2m
+                      preventInitialBackfill: false
+                      syncDelay: 5m
+                    tags:
+                      - production
+                      - web-service
+                    timeWindow:
+                      duration: 30d
+                      type: rolling
+                    updatedAt: '2025-03-26T14:30:00.000Z'
+                    updatedBy: elastic
                     version: 2
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_SLODefinition'
@@ -70995,11 +72417,49 @@ paths:
           content:
             application/json:
               examples:
-                badRequestExample:
-                  summary: Bad request
+                badRequestBodyExample:
+                  summary: Invalid request body
                   value:
                     error: Bad Request
-                    message: "Invalid value 'foo' supplied to: indicator/type"
+                    message: |-
+                      [
+                        {
+                          "expected": "string",
+                          "code": "invalid_type",
+                          "path": [
+                            "name"
+                          ],
+                          "message": "Invalid input: expected string, received number"
+                        }
+                      ]
+                    statusCode: 400
+                badRequestIdExample:
+                  summary: Invalid SLO id
+                  value:
+                    error: Bad Request
+                    message: |-
+                      [
+                        {
+                          "origin": "string",
+                          "code": "too_small",
+                          "minimum": 8,
+                          "inclusive": true,
+                          "path": [
+                            "id"
+                          ],
+                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                        },
+                        {
+                          "origin": "string",
+                          "code": "invalid_format",
+                          "format": "regex",
+                          "pattern": "/^[a-z0-9-_]+$/",
+                          "path": [
+                            "id"
+                          ],
+                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                        }
+                      ]
                     statusCode: 400
               schema:
                 properties:
@@ -71007,7 +72467,17 @@ paths:
                     example: Bad Request
                     type: string
                   message:
-                    example: "Invalid value 'foo' supplied to: [...]"
+                    example: |-
+                      [
+                        {
+                          "expected": "string",
+                          "code": "invalid_type",
+                          "path": [
+                            "name"
+                          ],
+                          "message": "Invalid input: expected string, received undefined"
+                        }
+                      ]
                     type: string
                   statusCode:
                     example: 400
@@ -71027,7 +72497,10 @@ paths:
                   summary: Unauthorized
                   value:
                     error: Unauthorized
-                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 properties:
@@ -71038,7 +72511,7 @@ paths:
                     example: |-
                       [security_exception
                       	Root causes:
-                      		security_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     type: string
                   statusCode:
                     example: 401
@@ -71058,7 +72531,7 @@ paths:
                   summary: Forbidden
                   value:
                     error: Forbidden
-                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    message: API [PUT /api/observability/slos/8853df00-ae2e-11ed-90af-09bb6422b258] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
                     statusCode: 403
               schema:
                 properties:
@@ -71066,10 +72539,7 @@ paths:
                     example: Forbidden
                     type: string
                   message:
-                    example: |-
-                      [security_exception
-                      	Root causes:
-                      		security_exception: action [slo_write] is unauthorized for user [limited_user] for REST request [/api/observability/slos]]: action [slo_write] is unauthorized for user [limited_user]
+                    example: API [POST /api/observability/slos] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
                     type: string
                   statusCode:
                     example: 403
@@ -71109,6 +72579,34 @@ paths:
                 title: Not found
                 type: object
           description: Not found response
+        '503':
+          content:
+            application/json:
+              examples:
+                serviceUnavailableExample:
+                  summary: Service unavailable
+                  value:
+                    error: Service Unavailable
+                    message: Operation did not complete within 60000ms
+                    statusCode: 503
+              schema:
+                properties:
+                  error:
+                    example: Service Unavailable
+                    type: string
+                  message:
+                    example: Operation did not complete within 60000ms
+                    type: string
+                  statusCode:
+                    example: 503
+                    type: number
+                required:
+                  - statusCode
+                  - error
+                  - message
+                title: Service unavailable
+                type: object
+          description: Service unavailable - The operation did not complete within the request deadline
       summary: Update an SLO
       tags:
         - slo
@@ -71160,11 +72658,14 @@ paths:
             application/json:
               examples:
                 resetSloResponse:
-                  summary: Reset SLO response
+                  summary: Reset SLO response (the revision is incremented)
                   value:
+                    artifacts:
+                      dashboards: []
                     budgetingMethod: occurrences
                     createdAt: '2025-01-12T10:03:19.000Z'
-                    description: Availability of my web service
+                    createdBy: elastic
+                    description: Availability of my web service measured by successful HTTP responses
                     enabled: true
                     groupBy: '*'
                     id: 8853df00-ae2e-11ed-90af-09bb6422b258
@@ -71182,6 +72683,7 @@ paths:
                     revision: 2
                     settings:
                       frequency: 5m
+                      preventInitialBackfill: false
                       syncDelay: 5m
                     tags:
                       - production
@@ -71190,6 +72692,7 @@ paths:
                       duration: 30d
                       type: rolling
                     updatedAt: '2025-03-26T14:30:00.000Z'
+                    updatedBy: elastic
                     version: 2
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_SLODefinition'
@@ -71198,11 +72701,33 @@ paths:
           content:
             application/json:
               examples:
-                badRequestExample:
-                  summary: Bad request
+                badRequestIdExample:
+                  summary: Invalid SLO id
                   value:
                     error: Bad Request
-                    message: "Invalid value 'foo' supplied to: id"
+                    message: |-
+                      [
+                        {
+                          "origin": "string",
+                          "code": "too_small",
+                          "minimum": 8,
+                          "inclusive": true,
+                          "path": [
+                            "id"
+                          ],
+                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                        },
+                        {
+                          "origin": "string",
+                          "code": "invalid_format",
+                          "format": "regex",
+                          "pattern": "/^[a-z0-9-_]+$/",
+                          "path": [
+                            "id"
+                          ],
+                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                        }
+                      ]
                     statusCode: 400
               schema:
                 properties:
@@ -71210,7 +72735,17 @@ paths:
                     example: Bad Request
                     type: string
                   message:
-                    example: "Invalid value 'foo' supplied to: [...]"
+                    example: |-
+                      [
+                        {
+                          "expected": "string",
+                          "code": "invalid_type",
+                          "path": [
+                            "name"
+                          ],
+                          "message": "Invalid input: expected string, received undefined"
+                        }
+                      ]
                     type: string
                   statusCode:
                     example: 400
@@ -71230,7 +72765,10 @@ paths:
                   summary: Unauthorized
                   value:
                     error: Unauthorized
-                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 properties:
@@ -71241,7 +72779,7 @@ paths:
                     example: |-
                       [security_exception
                       	Root causes:
-                      		security_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     type: string
                   statusCode:
                     example: 401
@@ -71261,7 +72799,7 @@ paths:
                   summary: Forbidden
                   value:
                     error: Forbidden
-                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    message: API [POST /api/observability/slos/8853df00-ae2e-11ed-90af-09bb6422b258/_reset] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
                     statusCode: 403
               schema:
                 properties:
@@ -71269,10 +72807,7 @@ paths:
                     example: Forbidden
                     type: string
                   message:
-                    example: |-
-                      [security_exception
-                      	Root causes:
-                      		security_exception: action [slo_write] is unauthorized for user [limited_user] for REST request [/api/observability/slos]]: action [slo_write] is unauthorized for user [limited_user]
+                    example: API [POST /api/observability/slos] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
                     type: string
                   statusCode:
                     example: 403
@@ -71312,6 +72847,34 @@ paths:
                 title: Not found
                 type: object
           description: Not found response
+        '503':
+          content:
+            application/json:
+              examples:
+                serviceUnavailableExample:
+                  summary: Service unavailable
+                  value:
+                    error: Service Unavailable
+                    message: Operation did not complete within 60000ms
+                    statusCode: 503
+              schema:
+                properties:
+                  error:
+                    example: Service Unavailable
+                    type: string
+                  message:
+                    example: Operation did not complete within 60000ms
+                    type: string
+                  statusCode:
+                    example: 503
+                    type: number
+                required:
+                  - statusCode
+                  - error
+                  - message
+                title: Service unavailable
+                type: object
+          description: Service unavailable - The operation did not complete within the request deadline
       summary: Reset an SLO
       tags:
         - slo
@@ -71344,9 +72907,10 @@ paths:
           name: at
           required: true
           schema:
+            example: '2025-01-12T10:00:00.000Z'
             maxLength: 128
             type: string
-        - description: The SLO instance ID. Omit this parameter or set it to `'*'` to return all instances for the SLO (up to 1000). Set a specific value (for example `host.name:web-01`) to return that instance only.
+        - description: The SLO instance ID. Omit this parameter or set it to `'*'` to return all instances for the SLO (up to 1000). Set a specific value (for example `web-01`) to return that instance only.
           in: query
           name: instanceId
           required: false
@@ -71356,6 +72920,7 @@ paths:
                   - '*'
                 type: string
               - type: string
+            example: web-01
       requestBody:
         content:
           application/json:
@@ -71394,7 +72959,7 @@ paths:
                     at: '2025-01-12T10:00:00.000Z'
                     results:
                       - id: 8853df00-ae2e-11ed-90af-09bb6422b258
-                        instanceId: host.name:web-01
+                        instanceId: web-01
                         summary:
                           errorBudget:
                             consumed: 5
@@ -71411,11 +72976,48 @@ paths:
           content:
             application/json:
               examples:
-                badRequestExample:
-                  summary: Bad request
+                badRequestAtExample:
+                  summary: Invalid at query parameter
                   value:
                     error: Bad Request
-                    message: "Invalid value 'foo' supplied to: at"
+                    message: |-
+                      [
+                        {
+                          "code": "custom",
+                          "path": [
+                            "at"
+                          ],
+                          "message": "Invalid date"
+                        }
+                      ]
+                    statusCode: 400
+                badRequestIdExample:
+                  summary: Invalid SLO id
+                  value:
+                    error: Bad Request
+                    message: |-
+                      [
+                        {
+                          "origin": "string",
+                          "code": "too_small",
+                          "minimum": 8,
+                          "inclusive": true,
+                          "path": [
+                            "id"
+                          ],
+                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                        },
+                        {
+                          "origin": "string",
+                          "code": "invalid_format",
+                          "format": "regex",
+                          "pattern": "/^[a-z0-9-_]+$/",
+                          "path": [
+                            "id"
+                          ],
+                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                        }
+                      ]
                     statusCode: 400
               schema:
                 properties:
@@ -71423,7 +73025,17 @@ paths:
                     example: Bad Request
                     type: string
                   message:
-                    example: "Invalid value 'foo' supplied to: [...]"
+                    example: |-
+                      [
+                        {
+                          "expected": "string",
+                          "code": "invalid_type",
+                          "path": [
+                            "name"
+                          ],
+                          "message": "Invalid input: expected string, received undefined"
+                        }
+                      ]
                     type: string
                   statusCode:
                     example: 400
@@ -71443,7 +73055,10 @@ paths:
                   summary: Unauthorized
                   value:
                     error: Unauthorized
-                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 properties:
@@ -71454,7 +73069,7 @@ paths:
                     example: |-
                       [security_exception
                       	Root causes:
-                      		security_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     type: string
                   statusCode:
                     example: 401
@@ -71474,7 +73089,7 @@ paths:
                   summary: Forbidden
                   value:
                     error: Forbidden
-                    message: 'security_exception: action [slo_read] is unauthorized for user'
+                    message: API [GET /api/observability/slos/8853df00-ae2e-11ed-90af-09bb6422b258/_snapshot?at=2025-01-12T10:00:00.000Z] is unauthorized for user, this action is granted by the Kibana privileges [slo_read]
                     statusCode: 403
               schema:
                 properties:
@@ -71482,10 +73097,7 @@ paths:
                     example: Forbidden
                     type: string
                   message:
-                    example: |-
-                      [security_exception
-                      	Root causes:
-                      		security_exception: action [slo_write] is unauthorized for user [limited_user] for REST request [/api/observability/slos]]: action [slo_write] is unauthorized for user [limited_user]
+                    example: API [POST /api/observability/slos] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
                     type: string
                   statusCode:
                     example: 403
@@ -71505,7 +73117,7 @@ paths:
                   summary: Not found
                   value:
                     error: Not Found
-                    message: SLO [8853df00-ae2e-11ed-90af-09bb6422b258] not found
+                    message: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
                     statusCode: 404
               schema:
                 properties:
@@ -71578,11 +73190,33 @@ paths:
           content:
             application/json:
               examples:
-                badRequestExample:
-                  summary: Bad request
+                badRequestIdExample:
+                  summary: Invalid SLO id
                   value:
                     error: Bad Request
-                    message: "Invalid value 'foo' supplied to: id"
+                    message: |-
+                      [
+                        {
+                          "origin": "string",
+                          "code": "too_small",
+                          "minimum": 8,
+                          "inclusive": true,
+                          "path": [
+                            "id"
+                          ],
+                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                        },
+                        {
+                          "origin": "string",
+                          "code": "invalid_format",
+                          "format": "regex",
+                          "pattern": "/^[a-z0-9-_]+$/",
+                          "path": [
+                            "id"
+                          ],
+                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                        }
+                      ]
                     statusCode: 400
               schema:
                 properties:
@@ -71590,7 +73224,17 @@ paths:
                     example: Bad Request
                     type: string
                   message:
-                    example: "Invalid value 'foo' supplied to: [...]"
+                    example: |-
+                      [
+                        {
+                          "expected": "string",
+                          "code": "invalid_type",
+                          "path": [
+                            "name"
+                          ],
+                          "message": "Invalid input: expected string, received undefined"
+                        }
+                      ]
                     type: string
                   statusCode:
                     example: 400
@@ -71610,7 +73254,10 @@ paths:
                   summary: Unauthorized
                   value:
                     error: Unauthorized
-                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 properties:
@@ -71621,7 +73268,7 @@ paths:
                     example: |-
                       [security_exception
                       	Root causes:
-                      		security_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     type: string
                   statusCode:
                     example: 401
@@ -71641,7 +73288,7 @@ paths:
                   summary: Forbidden
                   value:
                     error: Forbidden
-                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    message: API [POST /api/observability/slos/8853df00-ae2e-11ed-90af-09bb6422b258/disable] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
                     statusCode: 403
               schema:
                 properties:
@@ -71649,10 +73296,7 @@ paths:
                     example: Forbidden
                     type: string
                   message:
-                    example: |-
-                      [security_exception
-                      	Root causes:
-                      		security_exception: action [slo_write] is unauthorized for user [limited_user] for REST request [/api/observability/slos]]: action [slo_write] is unauthorized for user [limited_user]
+                    example: API [POST /api/observability/slos] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
                     type: string
                   statusCode:
                     example: 403
@@ -71744,11 +73388,33 @@ paths:
           content:
             application/json:
               examples:
-                badRequestExample:
-                  summary: Bad request
+                badRequestIdExample:
+                  summary: Invalid SLO id
                   value:
                     error: Bad Request
-                    message: "Invalid value 'foo' supplied to: id"
+                    message: |-
+                      [
+                        {
+                          "origin": "string",
+                          "code": "too_small",
+                          "minimum": 8,
+                          "inclusive": true,
+                          "path": [
+                            "id"
+                          ],
+                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                        },
+                        {
+                          "origin": "string",
+                          "code": "invalid_format",
+                          "format": "regex",
+                          "pattern": "/^[a-z0-9-_]+$/",
+                          "path": [
+                            "id"
+                          ],
+                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                        }
+                      ]
                     statusCode: 400
               schema:
                 properties:
@@ -71756,7 +73422,17 @@ paths:
                     example: Bad Request
                     type: string
                   message:
-                    example: "Invalid value 'foo' supplied to: [...]"
+                    example: |-
+                      [
+                        {
+                          "expected": "string",
+                          "code": "invalid_type",
+                          "path": [
+                            "name"
+                          ],
+                          "message": "Invalid input: expected string, received undefined"
+                        }
+                      ]
                     type: string
                   statusCode:
                     example: 400
@@ -71776,7 +73452,10 @@ paths:
                   summary: Unauthorized
                   value:
                     error: Unauthorized
-                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 properties:
@@ -71787,7 +73466,7 @@ paths:
                     example: |-
                       [security_exception
                       	Root causes:
-                      		security_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     type: string
                   statusCode:
                     example: 401
@@ -71807,7 +73486,7 @@ paths:
                   summary: Forbidden
                   value:
                     error: Forbidden
-                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    message: API [POST /api/observability/slos/8853df00-ae2e-11ed-90af-09bb6422b258/enable] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
                     statusCode: 403
               schema:
                 properties:
@@ -71815,10 +73494,7 @@ paths:
                     example: Forbidden
                     type: string
                   message:
-                    example: |-
-                      [security_exception
-                      	Root causes:
-                      		security_exception: action [slo_write] is unauthorized for user [limited_user] for REST request [/api/observability/slos]]: action [slo_write] is unauthorized for user [limited_user]
+                    example: API [POST /api/observability/slos] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]
                     type: string
                   statusCode:
                     example: 403
@@ -147576,6 +149252,7 @@ paths:
                 getWorkflowExecutionsResponseExample:
                   description: Example response returning a paginated list of executions for a workflow
                   value:
+                    hasNamedExecution: false
                     page: 1
                     results:
                       - duration: 3000
@@ -159713,7 +161390,7 @@ components:
           minLength: 1
           type: string
         name:
-          description: Rule name (must be unique within the space).
+          description: Rule name.
           maxLength: 256
           minLength: 1
           type: string
@@ -159762,7 +161439,7 @@ components:
           nullable: true
           type: string
         name:
-          description: Rule name (must be unique within the space).
+          description: Rule name.
           maxLength: 256
           minLength: 1
           type: string
@@ -163026,12 +164703,10 @@ components:
                     vars:
                       additionalProperties:
                         anyOf:
-                          - maxLength: 10000
-                            type: string
+                          - type: string
                           - type: number
                           - type: boolean
                           - items:
-                              maxLength: 10000
                               type: string
                             maxItems: 100
                             type: array
@@ -163059,12 +164734,10 @@ components:
               vars:
                 additionalProperties:
                   anyOf:
-                    - maxLength: 10000
-                      type: string
+                    - type: string
                     - type: number
                     - type: boolean
                     - items:
-                        maxLength: 10000
                         type: string
                       maxItems: 100
                       type: array
@@ -163112,12 +164785,10 @@ components:
         vars:
           additionalProperties:
             anyOf:
-              - maxLength: 10000
-                type: string
+              - type: string
               - type: number
               - type: boolean
               - items:
-                  maxLength: 10000
                   type: string
                 maxItems: 100
                 type: array
@@ -164679,12 +166350,10 @@ components:
                         vars:
                           additionalProperties:
                             anyOf:
-                              - maxLength: 10000
-                                type: string
+                              - type: string
                               - type: number
                               - type: boolean
                               - items:
-                                  maxLength: 10000
                                   type: string
                                 maxItems: 100
                                 type: array
@@ -164712,12 +166381,10 @@ components:
                   vars:
                     additionalProperties:
                       anyOf:
-                        - maxLength: 10000
-                          type: string
+                        - type: string
                         - type: number
                         - type: boolean
                         - items:
-                            maxLength: 10000
                             type: string
                           maxItems: 100
                           type: array
@@ -164841,12 +166508,10 @@ components:
               type: object
             - additionalProperties:
                 anyOf:
-                  - maxLength: 10000
-                    type: string
+                  - type: string
                   - type: number
                   - type: boolean
                   - items:
-                      maxLength: 10000
                       type: string
                     maxItems: 100
                     type: array
@@ -169893,7 +171558,7 @@ components:
               items:
                 maxLength: 1000000
                 type: string
-              maxItems: 1
+              maxItems: 10
               type: array
             hide_border:
               description: When true, the panel border is hidden. Defaults to false.
@@ -174517,12 +176182,10 @@ components:
                     vars:
                       additionalProperties:
                         anyOf:
-                          - maxLength: 10000
-                            type: string
+                          - type: string
                           - type: number
                           - type: boolean
                           - items:
-                              maxLength: 10000
                               type: string
                             maxItems: 100
                             type: array
@@ -174550,12 +176213,10 @@ components:
               vars:
                 additionalProperties:
                   anyOf:
-                    - maxLength: 10000
-                      type: string
+                    - type: string
                     - type: number
                     - type: boolean
                     - items:
-                        maxLength: 10000
                         type: string
                       maxItems: 100
                       type: array
@@ -174612,12 +176273,10 @@ components:
         vars:
           additionalProperties:
             anyOf:
-              - maxLength: 10000
-                type: string
+              - type: string
               - type: number
               - type: boolean
               - items:
-                  maxLength: 10000
                   type: string
                 maxItems: 100
                 type: array
@@ -182004,12 +183663,10 @@ components:
                         vars:
                           additionalProperties:
                             anyOf:
-                              - maxLength: 10000
-                                type: string
+                              - type: string
                               - type: number
                               - type: boolean
                               - items:
-                                  maxLength: 10000
                                   type: string
                                 maxItems: 100
                                 type: array
@@ -182037,12 +183694,10 @@ components:
                   vars:
                     additionalProperties:
                       anyOf:
-                        - maxLength: 10000
-                          type: string
+                        - type: string
                         - type: number
                         - type: boolean
                         - items:
-                            maxLength: 10000
                             type: string
                           maxItems: 100
                           type: array
@@ -182166,12 +183821,10 @@ components:
               type: object
             - additionalProperties:
                 anyOf:
-                  - maxLength: 10000
-                    type: string
+                  - type: string
                   - type: number
                   - type: boolean
                   - items:
-                      maxLength: 10000
                       type: string
                     maxItems: 100
                     type: array
@@ -183679,12 +185332,10 @@ components:
                     vars:
                       additionalProperties:
                         anyOf:
-                          - maxLength: 10000
-                            type: string
+                          - type: string
                           - type: number
                           - type: boolean
                           - items:
-                              maxLength: 10000
                               type: string
                             maxItems: 100
                             type: array
@@ -183712,12 +185363,10 @@ components:
               vars:
                 additionalProperties:
                   anyOf:
-                    - maxLength: 10000
-                      type: string
+                    - type: string
                     - type: number
                     - type: boolean
                     - items:
-                        maxLength: 10000
                         type: string
                       maxItems: 100
                       type: array
@@ -183783,12 +185432,10 @@ components:
         vars:
           additionalProperties:
             anyOf:
-              - maxLength: 10000
-                type: string
+              - type: string
               - type: number
               - type: boolean
               - items:
-                  maxLength: 10000
                   type: string
                 maxItems: 100
                 type: array

@@ -445,7 +445,7 @@ export const registerExceptionAttachment = ({
 /**
  * Registers the `security.rulePreview` attachment renderer (inline alert table showing
  * preview results). Dynamically imports {@link ./rule_preview_attachment} so the heavy
- * transitive deps (SecuritySolutionFlyout, RulePreviewAlertsTable, sourcerer, etc.)
+ * transitive deps (RulePreviewAlertsTable, sourcerer, etc.)
  * stay off the main `securitySolution` page-load bundle.
  */
 export const registerRulePreviewAttachment = ({

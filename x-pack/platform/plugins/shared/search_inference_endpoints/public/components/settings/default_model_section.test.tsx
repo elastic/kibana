@@ -35,6 +35,7 @@ const createMockSettings = (
 ): UseDefaultModelSettingsReturn => ({
   state: { enableAi: true, defaultModelId: 'pre-1', featureSpecificModels: true },
   isDirty: false,
+  dirtyFields: new Set() as ReadonlySet<'enableAi' | 'defaultModelId' | 'featureSpecificModels'>,
   setEnableAi: jest.fn(),
   setDefaultModelId: jest.fn(),
   setFeatureSpecificModels: jest.fn(),
@@ -84,6 +85,24 @@ describe('DefaultModelSection', () => {
     expect(screen.getByTestId('featureSpecificModelsRow')).toBeInTheDocument();
     expect(screen.getByTestId('globalModelComboBox')).toBeInTheDocument();
     expect(screen.getByTestId('featureSpecificModelsSwitch')).toBeInTheDocument();
+  });
+
+  it('marks rows with pending changes as unsaved', () => {
+    render(
+      <Wrapper>
+        <DefaultModelSection
+          defaultModelSettings={createMockSettings({
+            isDirty: true,
+            dirtyFields: new Set(['featureSpecificModels']),
+          })}
+          validation={validResult}
+        />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('featureSpecificModelsTitle-unsaved')).toBeInTheDocument();
+    expect(screen.queryByTestId('aiCapabilitiesTitle-unsaved')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('globalModelTitle-unsaved')).not.toBeInTheDocument();
   });
 
   it('toggling Use AI features calls setEnableAi', () => {

@@ -18,6 +18,7 @@ import type {
 } from '@kbn/alerting-v2-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
+import type { IsomerPluginStart } from '@kbn/isomer-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
@@ -101,6 +102,7 @@ export interface NightshiftInvestigationsSetupDeps {
 }
 
 export interface NightshiftInvestigationsStartDeps {
+  isomer: IsomerPluginStart;
   actions?: ActionsPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
   agenticInvestigations?: AgenticInvestigationsPluginStart;
