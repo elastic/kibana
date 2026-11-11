@@ -130,15 +130,7 @@ export const createTuiState = (
   pendingRestart: [],
 });
 
-const TAB = '    ';
-
-/** Expands tabs and drops other control characters, which the terminal would draw at a different width than Ink measures. */
-export const toDisplayText = (text: string): string =>
-  Array.from(text, (char) => {
-    if (char === '\t') return TAB;
-    const code = char.charCodeAt(0);
-    return code < 32 || code === 127 ? '' : char;
-  }).join('');
+export { toDisplayText } from '../ansi';
 
 /** The lines the pane would show if it were unlimited in height: the selected process, narrowed by the query. */
 export const getMatchingLines = ({ lines, selected, query }: TuiState): readonly LogLine[] => {

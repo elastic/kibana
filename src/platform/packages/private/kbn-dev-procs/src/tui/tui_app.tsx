@@ -16,6 +16,7 @@ import type {
   SettingsEditResult,
   SettingsKind,
 } from '../settings/types';
+import { toColoredDisplayText } from '../ansi';
 import type { RepoInfo } from '../repo_info';
 import type { ToolOptions } from '../types';
 import type { Supervisor } from '../supervisor';
@@ -238,7 +239,7 @@ export const createTuiApp = ({
                 {line.processId.padEnd(labelWidth)}{' '}
               </Text>
             ) : null}
-            {toDisplayText(line.text)}
+            {toColoredDisplayText(line.raw ?? line.text)}
           </Text>
         ))}
       </Box>

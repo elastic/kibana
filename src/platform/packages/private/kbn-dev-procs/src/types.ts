@@ -98,7 +98,10 @@ export interface LogLine {
   readonly processId: string;
   /** `help` is a tool's --help, shown in its pane before it starts. */
   readonly stream: 'stdout' | 'stderr' | 'help';
+  /** The line without escape sequences, for searching and the log file. */
   readonly text: string;
+  /** The line as the process printed it, with its colours, when it has escape sequences. */
+  readonly raw?: string;
   readonly time: number;
 }
 

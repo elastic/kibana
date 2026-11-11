@@ -77,6 +77,11 @@ interface StartOptions extends DevCliOptions {
 const runStart = async ({ log, flagsReader, logDir, addCleanupTask, loadInk }: StartOptions) => {
   const hideOutput = flagsReader.boolean('hide-output');
   const isTui = Boolean(loadInk) && process.stdout.isTTY && !flagsReader.boolean('headless');
+  if (isTui) {
+    // Processes write to a pipe, where loggers such as chalk turn colours off; the TUI shows them, unless the user
+    // set FORCE_COLOR themselves.
+    process.env.FORCE_COLOR ??= '1';
+  }
   // The MCP server controls the supervisor, which is created right after it, before the server can start.
   const mcp = createMcpService({ getSupervisor: () => supervisor });
   const supervisor = new Supervisor({

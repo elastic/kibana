@@ -14,7 +14,7 @@ import os from 'os';
 import path from 'path';
 import { readStatusFile } from './status_file';
 import { Supervisor, sortByDependencies } from './supervisor';
-import type { ProcessDefinition, ProcessState } from './types';
+import type { LogLine, ProcessDefinition, ProcessState } from './types';
 
 const node = (
   id: string,
@@ -137,6 +137,26 @@ describe('Supervisor', () => {
       'ready',
       'ready',
     ]);
+  });
+
+  it('keeps the colours of a line for the TUI, and writes the log file without them', async () => {
+    supervisor = new Supervisor({
+      logDir,
+      definitions: [
+        node('es', `console.log('\\u001b[32mgreen\\u001b[39m plain'); ${KEEP_ALIVE}`, {
+          ready: { type: 'log', pattern: /green plain/ },
+        }),
+      ],
+    });
+    const lines: LogLine[] = [];
+    supervisor.onLine((line) => lines.push(line));
+    await supervisor.startAll();
+    await waitForState(supervisor, 'es', 'ready');
+
+    expect(lines).toContainEqual(
+      expect.objectContaining({ text: 'green plain', raw: '\u001b[32mgreen\u001b[39m plain' })
+    );
+    expect(fs.readFileSync(path.join(logDir, 'es.log'), 'utf8')).toContain('\ngreen plain\n');
   });
 
   it('polls an http readiness check until it answers with a 2xx status', async () => {

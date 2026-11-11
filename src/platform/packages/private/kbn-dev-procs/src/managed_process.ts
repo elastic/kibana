@@ -102,12 +102,14 @@ export class ManagedProcess extends Runner {
 
     const pipeLines = (stream: Readable, name: LogLine['stream']) => {
       readline.createInterface({ input: stream, crlfDelay: Infinity }).on('line', (raw) => {
-        logStream.write(`${raw}\n`);
         const text = stripAnsi(raw);
+        // The log file stays plain text, for grep, less and agents reading it.
+        logStream.write(`${text}\n`);
         this.callbacks.onLine({
           processId: this.definition.id,
           stream: name,
           text,
+          ...(raw !== text ? { raw } : {}),
           time: Date.now(),
         });
         if (ready.type === 'log' && this.status.state === 'starting' && ready.pattern.test(text)) {
