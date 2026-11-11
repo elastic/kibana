@@ -123,7 +123,14 @@ describe('cleanupSeed', () => {
     await cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded });
     const indices = deleteByQuery.mock.calls.map(([{ index }]) => index);
     expect(indices).toContain(attackDiscoveryIndexForSpace('space-a'));
-    expect(indices).toHaveLength(3);
+    expect(indices).toEqual([
+      alertsIndexForSpace('space-a'),
+      'ai-index-idx-security-attack-fingerprints',
+      attackDiscoveryIndexForSpace('space-a'),
+      '.chat-conversations',
+      '.kibana-investigation-*',
+      '.kibana-proposals',
+    ]);
   });
 
   it('retries a failed delete in the next round and passes once everything is gone', async () => {
@@ -133,7 +140,7 @@ describe('cleanupSeed', () => {
       .mockRejectedValueOnce(new Error('es unavailable'))
       .mockResolvedValue({});
     await cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded, wait });
-    expect(deleteByQuery).toHaveBeenCalledTimes(6);
+    expect(deleteByQuery).toHaveBeenCalledTimes(12);
     expect(wait).toHaveBeenCalledTimes(1);
   });
 
@@ -146,7 +153,7 @@ describe('cleanupSeed', () => {
       .mockImplementationOnce(async () => ({ count: 1 }))
       .mockImplementation(async () => ({ count: 0 }));
     await cleanupSeed({ esClient: esWith({ deleteByQuery, count }), seeded, wait });
-    expect(deleteByQuery).toHaveBeenCalledTimes(6);
+    expect(deleteByQuery).toHaveBeenCalledTimes(12);
     expect(wait).toHaveBeenCalledTimes(1);
   });
 
@@ -161,7 +168,7 @@ describe('cleanupSeed', () => {
     ).rejects.toThrow(
       `Cleanup of space "space-a" failed after ${CLEANUP_ROUNDS} rounds: 1 fingerprints are still present`
     );
-    expect(deleteByQuery).toHaveBeenCalledTimes(3 * CLEANUP_ROUNDS);
+    expect(deleteByQuery).toHaveBeenCalledTimes(6 * CLEANUP_ROUNDS);
     expect(wait).toHaveBeenCalledTimes(CLEANUP_ROUNDS - 1);
   });
 
@@ -178,7 +185,7 @@ describe('cleanupSeed', () => {
     expect((error as AggregateError).message).toMatch(
       /failed after 6 rounds: could not delete fingerprints: es unavailable/
     );
-    expect(deleteByQuery).toHaveBeenCalledTimes(3 * CLEANUP_ROUNDS);
+    expect(deleteByQuery).toHaveBeenCalledTimes(6 * CLEANUP_ROUNDS);
   });
 
   it('treats a failed refresh as a problem, not as clean', async () => {
@@ -518,7 +525,7 @@ describe('seedScenario world documents', () => {
       ['entities-latest-space-a', { ids: { values: ['adw-1-world-entity-0'] } }],
       ['logs-endpoint.events.process-space-a', { ids: { values: ['adw-1-world-process-1'] } }],
     ]);
-    expect(deleteByQuery).toHaveBeenCalledTimes(5);
+    expect(deleteByQuery).toHaveBeenCalledTimes(8);
   });
 });
 
@@ -826,7 +833,7 @@ describe('cleanupSeed alert delete', () => {
     await expect(
       cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded, wait })
     ).rejects.toThrow(/Cleanup of space "space-a" failed/);
-    expect(deleteByQuery).toHaveBeenCalledTimes(3 * CLEANUP_ROUNDS);
+    expect(deleteByQuery).toHaveBeenCalledTimes(6 * CLEANUP_ROUNDS);
   });
 
   it('throws when a delete reports version conflicts', async () => {

@@ -39,6 +39,12 @@ import {
 
 /** Index holding the fingerprints that `match_fingerprints` compares new attacks against. */
 export const ATTACK_FINGERPRINT_INDEX = 'ai-index-idx-security-attack-fingerprints';
+/** Agent Builder conversations (Investigations live here); scoped by the top-level `space` field. */
+const CONVERSATIONS_INDEX = '.chat-conversations';
+/** Agentic-investigations side documents (subject/claim/hypotheses/impact), scoped by `spaceId`. */
+const INVESTIGATION_SIDE_INDEX = '.kibana-investigation-*';
+/** Proposals the review opened; scoped by `spaceId` (see `@kbn/proposals-common` storage). */
+const PROPOSALS_INDEX_NAME = '.kibana-proposals';
 
 /** A fresh marker per seed: attacks dedupe on a hash of their alert ids, so ids must be new. */
 export const newRunMarker = (scenarioId: string): string =>
@@ -1180,8 +1186,27 @@ export const cleanupSeed = async ({
       index: attackDiscoveryIndexForSpace(spaceId),
       query: { match_all: {} },
     },
+    {
+      // Investigations are Agent Builder conversations in the shared `.chat-conversations` index
+      // (top-level `space` keyword); the review derives the id from the attack discovery id
+      // (`investigationIdFor` in collect.ts). Its side documents (subjects/impact/hypotheses)
+      // live in separate indexes keyed by conversationId and are scoped with the same space id.
+      what: 'investigations (conversations)',
+      index: CONVERSATIONS_INDEX,
+      query: { term: { space: spaceId } },
+    },
+    {
+      what: 'investigation side documents',
+      index: INVESTIGATION_SIDE_INDEX,
+      query: { term: { spaceId } },
+    },
+    {
+      what: 'proposals',
+      index: PROPOSALS_INDEX_NAME,
+      query: { term: { spaceId } },
+    },
   ];
-  const [alerts, fingerprints, discoveries] = targets;
+  const [alerts, fingerprints, discoveries, conversations, sideDocs, proposals] = targets;
   const deletions: Array<{ what: string; run: () => Promise<void> }> = [
     ...[alerts, fingerprints].map(({ what, index, query }) => ({
       what,
@@ -1193,6 +1218,19 @@ export const cleanupSeed = async ({
     {
       what: discoveries.what,
       run: () => deleteMatching({ esClient, index: discoveries.index, query: discoveries.query }),
+    },
+    {
+      what: conversations.what,
+      run: () =>
+        deleteMatching({ esClient, index: conversations.index, query: conversations.query }),
+    },
+    {
+      what: sideDocs.what,
+      run: () => deleteMatching({ esClient, index: sideDocs.index, query: sideDocs.query }),
+    },
+    {
+      what: proposals.what,
+      run: () => deleteMatching({ esClient, index: proposals.index, query: proposals.query }),
     },
   ];
   let problems: Error[] = [];
