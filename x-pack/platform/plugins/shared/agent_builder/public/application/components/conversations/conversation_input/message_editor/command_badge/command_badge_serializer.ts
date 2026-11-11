@@ -128,11 +128,7 @@ export const deserializeInputSegments = (text: string): ContentSegment[] => {
         const attachmentId = queryString
           ? new URLSearchParams(queryString).get(ATTACHMENT_ID_PARAM) ?? undefined
           : undefined;
-        segments.push(
-          attachmentId
-            ? { type: 'attachment', kind: scheme, name, attachmentId }
-            : { type: 'attachment', kind: scheme, name }
-        );
+        segments.push({ type: 'attachment', kind: scheme, name, attachmentId });
       } catch {
         // Malformed percent-encoding, preserve as text
         segments.push({ type: 'text', value: match[0] });
