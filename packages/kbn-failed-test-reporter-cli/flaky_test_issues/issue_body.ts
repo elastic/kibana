@@ -837,9 +837,9 @@ const lastFailedLink = ({
 };
 
 /**
- * The comment of a refresh that found new failures: where the suite is flaky, with the worst
- * test's numbers and its newest failure on each branch, in one sentence for a single branch and
- * one line per branch otherwise. The body keeps the full tables.
+ * The comment of a refresh that found new failures: where the suite is flaky and not skipped, with
+ * the worst test's numbers and its newest failure on each branch, in one sentence for a single
+ * branch and one line per branch otherwise. The body keeps the full tables.
  */
 export const renderFlakySuiteIssueComment = (
   suite: FlakySuite,
@@ -851,12 +851,13 @@ export const renderFlakySuiteIssueComment = (
       ? `${plural(suite.tests.length, 'test')} ${state}`
       : `${state[0].toUpperCase()}${state.slice(1)}`;
   const flaky = flakyBranches(suite, report.thresholds);
+  const skipped = branchSkips(suite);
   const branches = worstPerKey(
     suite,
     (test) => test.byBranch,
     (stats) => stats.branch
   )
-    .filter(({ worst }) => flaky.has(worst.branch))
+    .filter(({ worst }) => flaky.has(worst.branch) && !skipped.has(worst.branch))
     .map(({ worst, latest }) => {
       const lastFailed = latest ? lastFailedLink(latest) : undefined;
       return {

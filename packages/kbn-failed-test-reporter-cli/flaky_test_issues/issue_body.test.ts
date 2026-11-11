@@ -772,6 +772,23 @@ describe('refreshing a suite issue', () => {
     );
   });
 
+  it('leaves out the branches every test of the suite is skipped on', () => {
+    const { suite, report } = multiTestReport();
+    const skippedOnMain = {
+      ...suite,
+      tests: suite.tests.map((test) => ({
+        ...test,
+        byBranch: test.byBranch.map((stats) =>
+          stats.branch === 'main' ? { ...stats, skipped: true } : stats
+        ),
+      })),
+    };
+
+    expect(renderFlakySuiteIssueComment(skippedOnMain, { report, reopened: false })).toBe(
+      '3 tests still flaky on `9.2`: 5% of builds (3 / 64), last failed [7 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200).'
+    );
+  });
+
   it('lists the branches, counts the tests and says the suite is flaky again when the issue is reopened', () => {
     const { suite, report } = multiTestReport();
 
