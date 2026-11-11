@@ -78,7 +78,7 @@ export const EntityTableLoadError = ({
 
 export interface EntityTableEmptyProps {
   typeName: string;
-  /** The response could not confirm that nothing matched: a source failed or the count failed. */
+  /** The response could not confirm that nothing matched: a source failed. */
   isIncomplete: boolean;
 }
 

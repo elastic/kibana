@@ -96,14 +96,40 @@ const formatSignificantSecurityEventForAgent = (
     `Threat report: ${data.report_id}`,
     '',
     `Hypothesis tested: ${data.hypothesis_tested}`,
-    '',
-    'Timeline:',
   ];
 
-  if (data.timeline.length === 0) {
-    lines.push('  no timeline entries recorded');
-  } else {
-    pushBoundedSection(lines, data.timeline, (entry) => `  ${entry.at} — ${entry.what}`);
+  // The hit-centric fields are what the card leads with; the agent reads the same story.
+  if (data.summary) {
+    lines.push(`Summary: ${data.summary}`);
+  }
+  if (data.basis) {
+    lines.push(`Basis: ${data.basis}`);
+  }
+  if (data.detections && data.detections.length > 0) {
+    lines.push('', 'Detections (what matched):');
+    pushBoundedSection(lines, data.detections, (detection) => {
+      const what =
+        detection.kind === 'behavior'
+          ? `behavior ${detection.technique_id ?? ''}${
+              detection.technique_name ? ` ${detection.technique_name}` : ''
+            }`
+          : `ioc ${detection.matched_on[0]?.value ?? detection.id}${
+              detection.field ? ` on ${detection.field}` : ''
+            }`;
+      const scope = [
+        `${detection.total} event(s)`,
+        detection.host_count !== undefined
+          ? `${detection.host_count}${detection.hosts_truncated ? '+' : ''} host(s)`
+          : undefined,
+        detection.user_count !== undefined
+          ? `${detection.user_count}${detection.users_truncated ? '+' : ''} user(s)`
+          : undefined,
+        detection.from_sample ? 'from sampled hits' : undefined,
+      ]
+        .filter((part): part is string => part !== undefined)
+        .join(', ');
+      return `  - ${what} [${detection.basis}]: ${scope}`;
+    });
   }
 
   if (data.hunt_result) {
@@ -138,9 +164,10 @@ const formatSignificantSecurityEventForAgent = (
           `    ${entry.index}: ${entry.hit_count} hit(s)${entry.required ? ' (required)' : ''}`
       );
     }
-    if (tier1.resolved_iocs.length > 0) {
+    const resolvedIocs = tier1.resolved_iocs ?? [];
+    if (resolvedIocs.length > 0) {
       lines.push(`  Resolved IOCs${truncationNote(tier1.resolved_iocs_truncated)}:`);
-      pushBoundedSection(lines, tier1.resolved_iocs, (ioc) => `    ${ioc.type}: ${ioc.value}`);
+      pushBoundedSection(lines, resolvedIocs, (ioc) => `    ${ioc.type}: ${ioc.value}`);
     }
     if (tier2) {
       lines.push(`Behavior Hunt: ${tier2.status}${truncationNote(tier2.behaviors_truncated)}`);
@@ -217,40 +244,9 @@ const formatSignificantSecurityEventForAgent = (
     pushBoundedSection(lines, data.evidence_against, (item) => `  - ${item}`);
   }
 
-  if (data.maps_to_proposal) {
-    const proposal = data.maps_to_proposal;
-    lines.push('', 'Maps to proposal:');
-    if (proposal.category) {
-      lines.push(`  Category: ${proposal.category}`);
-    }
-    if (proposal.impact) {
-      lines.push(`  Impact: ${proposal.impact}`);
-    }
-    if (proposal.confidence != null) {
-      lines.push(`  Confidence: ${proposal.confidence}`);
-    }
-    if (proposal.actionWorkflowId) {
-      lines.push(`  Action workflow: ${proposal.actionWorkflowId}`);
-    }
-    if (proposal.actionInput) {
-      const inputEntries = Object.entries(proposal.actionInput);
-      if (inputEntries.length > 0) {
-        lines.push('  Action input:');
-        pushBoundedSection(
-          lines,
-          inputEntries,
-          ([key, value]) =>
-            `    ${key}: ${typeof value === 'string' ? value : JSON.stringify(value)}`
-        );
-      }
-    }
-    if (proposal.manual_remediation && proposal.manual_remediation.length > 0) {
-      lines.push('  Manual remediation:');
-      pushBoundedSection(lines, proposal.manual_remediation, (step) => `    - ${step}`);
-    }
+  if (data.evaluation_record_ref) {
+    lines.push('', `Evaluation record: ${data.evaluation_record_ref}`);
   }
-
-  lines.push('', `Evaluation record: ${data.evaluation_record_ref}`);
 
   if (data.truncated) {
     lines.push(
@@ -274,14 +270,11 @@ The payload contains:
 - entities: ECS \`{ field, value }\` refs (allowlisted entity fields only)
 - alerts: \`{ alert_id, index, timestamp? }\` — always include the concrete alerts index
 - events: \`{ event_id, source_index, timestamp?, matched? }\` — matched names the IOC or technique that produced the hit; source_index must be the hit's concrete _index (the .ds-... backing name for a data stream), never the data stream or alias searched
-- timeline: an ordered sequence of (at, what) entries describing what happened
+- summary, basis, detections: the hit-centric headline, the graded basis for the hit (ioc_strong, ioc_weak, behavior_only, ioc_and_behavior) and one entry per IOC or behavior that matched, with the field it matched on and its event/host/user scope. Old payloads may lack them.
 - hunt_result: structured IOC Hunt / Behavior Hunt findings (status, counts, per-index hit detail, resolved IOCs, derived behaviors). Prefer these numbers over evidence_for/evidence_against when both are present.
   "Confirmed by" names the hunt(s) that corroborated this finding; the hunt statuses are report-scoped, so attribute the hit to that line and not to a hunt status. A behavior with "no verdict" learned nothing and is not evidence of a clean environment.
 - hypothesis_tested, evidence_for, evidence_against: the hunt's working hypothesis and its analyst narrative on top of hunt_result
-- maps_to_proposal, evaluation_record_ref: optional links into the proposal/evaluation subsystem
-
-Quote the \`what\` field of timeline entries verbatim rather than re-classifying or summarizing
-them into different categories.`;
+- evaluation_record_ref: link into the evaluation subsystem`;
 
 export const createSignificantSecurityEventAttachmentType = (): AttachmentTypeDefinition =>
   createReadonlyAttachmentType({

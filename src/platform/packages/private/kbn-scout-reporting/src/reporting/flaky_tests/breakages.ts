@@ -14,6 +14,10 @@ export interface SetupBuild {
   buildNumber: number;
   /** Whether the test failed in the build, a failure that passed on a retry included. */
   failed: boolean;
+  /** When the build first ran the test in the setup. */
+  ranAt: Date;
+  /** When the test last failed in the build in the setup: a later retry can be well after `ranAt`. */
+  failedAt?: Date;
 }
 
 /** A test's builds in one setup (pipeline, config file and Scout target) on one branch, oldest first. */

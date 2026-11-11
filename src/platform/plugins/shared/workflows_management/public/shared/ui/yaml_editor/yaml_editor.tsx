@@ -36,6 +36,14 @@ export const YamlEditor = React.memo(
     ...props
   }: YamlEditorProps) => {
     const [internalValue, setInternalValue] = useState(value);
+    const [prevValue, setPrevValue] = useState(value);
+
+    // Adopt a new upstream value during render, so Monaco receives it in the same commit
+    // as the data derived from it.
+    if (value !== prevValue) {
+      setPrevValue(value);
+      setInternalValue(value);
+    }
 
     // Create a wrapped onChange that also updates sync state
     const onChangeWithSync = useCallback(
@@ -47,12 +55,6 @@ export const YamlEditor = React.memo(
     );
 
     const onChangeDebounced = useMemo(() => debounce(onChangeWithSync, 200), [onChangeWithSync]);
-
-    useEffect(() => {
-      // Update the internal value to the latest value from the props
-      // Most of the time will be the same value, so monaco won't even update, only if some forced modification happened.
-      setInternalValue(value);
-    }, [value]);
 
     const onChangeInternal = useCallback(
       (newValue: string) => {

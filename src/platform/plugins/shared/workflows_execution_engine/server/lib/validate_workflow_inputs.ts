@@ -9,7 +9,7 @@
 
 import { isDeepStrictEqual } from 'node:util';
 import type { CoreStart, Logger } from '@kbn/core/server';
-import { ExecutionStatus } from '@kbn/workflows';
+import { evaluatesProvidedInputExpressions, ExecutionStatus } from '@kbn/workflows';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import {
   applyInputDefaults,
@@ -55,10 +55,12 @@ export const validateWorkflowInputs = async (
   });
 
   // Caller-provided values are data. Evaluate only the explicit whole-expression
-  // form and preserve ordinary strings that happen to resemble Liquid templates.
+  // form, and only for a run a person or API caller started directly. Preserve
+  // ordinary strings that happen to resemble Liquid templates.
+  const evaluatesExpressions = evaluatesProvidedInputExpressions(workflowExecution.triggeredBy);
   const renderProvidedValue = (value: unknown): unknown => {
     if (typeof value === 'string') {
-      return value.startsWith('${{') && value.endsWith('}}')
+      return evaluatesExpressions && value.startsWith('${{') && value.endsWith('}}')
         ? templateEngine.render(value, renderContext)
         : value;
     }

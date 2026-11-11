@@ -76,4 +76,30 @@ describe('mergeServiceMapNodesWithBadges', () => {
 
     expect(merged[0]).toEqual(dep);
   });
+
+  it('clears idle fade when alerts or a violated/degrading SLO are merged', () => {
+    const idleNode: ServiceMapNode = {
+      id: 'quiet',
+      type: 'service',
+      position: { x: 0, y: 0 },
+      data: {
+        id: 'quiet',
+        label: 'media-adapter',
+        isService: true,
+        isIdle: true,
+      },
+    };
+
+    const withAlert = mergeServiceMapNodesWithBadges([idleNode], {
+      alerts: [{ serviceName: 'media-adapter', alertsCount: 2 }],
+      slos: [],
+    });
+    expect(withAlert[0].data.isIdle).toBe(false);
+
+    const withSlo = mergeServiceMapNodesWithBadges([idleNode], {
+      alerts: [],
+      slos: [{ serviceName: 'media-adapter', sloStatus: 'degrading', sloCount: 1 }],
+    });
+    expect(withSlo[0].data.isIdle).toBe(false);
+  });
 });

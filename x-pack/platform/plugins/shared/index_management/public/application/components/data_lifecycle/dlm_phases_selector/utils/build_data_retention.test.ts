@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { HOT_ONLY_INFINITE_DATA_RETENTION } from '../../../../../../common/lib/data_stream_utils';
 import { buildDataRetentionFromSerializedDlmPhases } from './build_data_retention';
 
 describe('buildDataRetentionFromSerializedDlmPhases', () => {
-  it('returns hot-only infinite retention when no optional phases are configured', () => {
-    expect(buildDataRetentionFromSerializedDlmPhases({})).toEqual(HOT_ONLY_INFINITE_DATA_RETENTION);
+  it('returns disabled retention when no optional phases are configured', () => {
+    expect(buildDataRetentionFromSerializedDlmPhases({})).toEqual({ enabled: false });
   });
 
   it('serializes delete phase configuration', () => {

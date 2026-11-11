@@ -1992,6 +1992,20 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
         }),
       ]);
       await expectStableCount(apiServices, 1, { ruleId: 'rule-1', actionTypes: ['fire'] });
+      // A later event for the same episode makes the next tick re-evaluate the group. It is still
+      // breached, so np-1 (no throttle, per_alert) suppresses it with the default on_status_change
+      // strategy and records a `throttled` event.
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          ruleId: 'rule-1',
+          groupHash: 'rule-1-series-telemetry',
+          episodeId: 'rule-1-series-telemetry-episode-1',
+          episodeStatus: 'active',
+          status: 'breached',
+          timestamp: relativeTime(2),
+        }),
+      ]);
+      await apiServices.alertingV2.dispatcher.waitForDispatcherTick({ ticks: 2 });
 
       const state = await apiServices.alertingV2.telemetry.runAndWaitForState();
 
@@ -2003,6 +2017,12 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
       );
       expect(state.dispatcher_policies_count_by_activity_24hr?.failing).toBeGreaterThanOrEqual(1);
       expect(state.dispatcher_policies_count_by_activity_24hr?.broken).toBeGreaterThanOrEqual(1);
+      expect(
+        state.dispatcher_action_groups_throttled_count_by_strategy_24hr?.on_status_change
+      ).toBeGreaterThanOrEqual(1);
+      expect(
+        state.dispatcher_action_groups_dispatched_per_policy_by_grouping_mode_24hr
+      ).toStrictEqual({});
     }
   );
 });

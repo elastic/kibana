@@ -75,6 +75,23 @@ describe('RunHistory skipped run summary', () => {
     ).toBeInTheDocument();
   });
 
+  it.each([
+    ['Alice Smith', 'Manual · Alice Smith'],
+    [undefined, 'Manual'],
+  ])('shows a resolved executor or a safe fallback for a manual run: %s', (name, label) => {
+    renderRunHistory({
+      id: 'manual-1',
+      status: 'running',
+      startedAt: '2026-01-01T12:00:00.000Z',
+      triggeredBy: 'manual',
+      executedBy: 'u_alice',
+      executedByDisplayName: name,
+      investigationId: 'inv-1',
+    });
+    expect(screen.getByText(label)).toBeInTheDocument();
+    expect(screen.queryByText(/u_alice/)).not.toBeInTheDocument();
+  });
+
   it('shows the failure reason of a failed run instead of the automation name', () => {
     renderRunHistory({
       id: 'run-2',

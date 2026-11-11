@@ -1,0 +1,104 @@
+# Error response schemas shared by the `oasOperationObject` example files.
+# Request and successful response schemas are generated from the routes' Zod schemas.
+400_response:
+  title: Bad request
+  type: object
+  required:
+    - statusCode
+    - error
+    - message
+  properties:
+    statusCode:
+      type: number
+      example: 400
+    error:
+      type: string
+      example: Bad Request
+    message:
+      type: string
+      example: "[\n  {\n    \"expected\": \"string\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      \"name\"\n    ],\n    \"message\": \"Invalid input: expected string, received undefined\"\n  }\n]"
+401_response:
+  title: Unauthorized
+  type: object
+  required:
+    - statusCode
+    - error
+    - message
+  properties:
+    statusCode:
+      type: number
+      example: 401
+    error:
+      type: string
+      example: Unauthorized
+    message:
+      type: string
+      example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+403_response:
+  title: Forbidden
+  type: object
+  required:
+    - statusCode
+    - error
+    - message
+  properties:
+    statusCode:
+      type: number
+      example: 403
+    error:
+      type: string
+      example: Forbidden
+    message:
+      type: string
+      example: "API [POST /api/observability/slos] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]"
+404_response:
+  title: Not found
+  type: object
+  required:
+    - statusCode
+    - error
+    - message
+  properties:
+    statusCode:
+      type: number
+      example: 404
+    error:
+      type: string
+      example: Not Found
+    message:
+      type: string
+      example: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
+409_response:
+  title: Conflict
+  type: object
+  required:
+    - statusCode
+    - error
+    - message
+  properties:
+    statusCode:
+      type: number
+      example: 409
+    error:
+      type: string
+      example: Conflict
+    message:
+      type: string
+      example: SLO [d077e940-1515-11ee-9c50-9d096392f520] already exists
+503_response:
+  title: Service unavailable
+  type: object
+  required:
+    - statusCode
+    - error
+    - message
+  properties:
+    statusCode:
+      type: number
+      example: 503
+    error:
+      type: string
+      example: Service Unavailable
+    message:
+      type: string
+      example: Operation did not complete within 60000ms

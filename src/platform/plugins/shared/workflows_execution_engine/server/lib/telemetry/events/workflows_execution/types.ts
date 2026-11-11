@@ -9,6 +9,9 @@
 
 import type { WellKnownWorkflowTriggerSource } from '@kbn/workflows';
 
+/** Whose credentials a workflow execution runs with. */
+export type WorkflowExecutionRunAs = 'service_account' | 'user';
+
 /**
  * Base parameters for all workflow execution telemetry events
  */
@@ -54,6 +57,16 @@ export interface BaseWorkflowExecutionTelemetryParams {
    * Registered managed workflow definition version, when this execution came from one
    */
   managedVersion?: number;
+  /**
+   * Whose credentials the execution runs with: 'service_account' when it is bound to a service
+   * account, 'user' when it runs as the user or API key that triggered or scheduled it.
+   */
+  runAs: WorkflowExecutionRunAs;
+  /**
+   * Whether the service account came from the parent workflow rather than this workflow's own
+   * `settings.run_as`. Only present when runAs is 'service_account'.
+   */
+  runAsInherited?: boolean;
   /**
    * The alert rule ID if triggered by alert. Only present when triggerType is 'alert'.
    */

@@ -237,7 +237,7 @@ describe('SandboxConnectorsTable', () => {
     setup({ connectors: [connector('github')], agentError: notFoundError() });
 
     expect(await screen.findByTestId('nightshiftSandboxConnectorsNotEnabled')).toHaveTextContent(
-      'Elastic Nightshift is not enabled in this space yet.'
+      'Elastic nightshift is not enabled in this space yet.'
     );
     expect(screen.getByTestId('nightshiftSandboxConnectorsEnableLink')).toHaveAttribute(
       'href',

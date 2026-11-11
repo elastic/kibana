@@ -6,3 +6,4 @@
  */
 
 export { AlertActionsClient } from './alert_actions_client';
+export { onAlertActionsClientActivation } from './authorization';
