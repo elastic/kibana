@@ -25,6 +25,12 @@ export const translations = {
         defaultMessage:
           'The maximum number of queued actions was reached; excess actions were not triggered.',
       }),
+      updatePersistedAlerts: (errorMessage: string) =>
+        i18n.translate('xpack.alerting.taskRunner.warning.updatePersistedAlerts', {
+          defaultMessage:
+            'Failed to update alerts with their last scheduled actions and maintenance windows: {errorMessage}',
+          values: { errorMessage },
+        }),
     },
   },
 };

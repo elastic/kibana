@@ -27,6 +27,7 @@ export function getState({
   logger,
   stackTraceLog,
   originalState,
+  persistedAlertsState = null,
   apiKeyCreatedByUser = false,
 }: {
   runRuleResult: Result<RunRuleResult, Error>;
@@ -37,6 +38,7 @@ export function getState({
   logger: Logger;
   stackTraceLog: RuleRunnerErrorStackTraceLog | null;
   originalState: RuleTaskState;
+  persistedAlertsState?: RuleTaskState | null;
   apiKeyCreatedByUser?: boolean;
 }) {
   return map<RunRuleResult, ElasticsearchError, RuleTaskState>(
@@ -74,7 +76,9 @@ export function getState({
           error: { stack_trace: stack },
         });
       }
-      return originalState;
+      return persistedAlertsState
+        ? { ...persistedAlertsState, previousStartedAt: startedAt?.toISOString() }
+        : originalState;
     }
   );
 }
