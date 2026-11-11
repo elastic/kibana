@@ -322,7 +322,7 @@ const metricStylingSchema = lazySchema(() =>
                */
               placement: labelPlacementSchema.optional().meta({
                 description:
-                  'How the secondary metric name is shown: before the value, after the value, or in a tooltip. Defaults to `before` when the label is visible. Ignored when the label is not visible.',
+                  'How the secondary metric name is shown: before the value, after the value, or in a tooltip. Defaults to `before`. Ignored when the label is not visible.',
               }),
             })
             .strict()

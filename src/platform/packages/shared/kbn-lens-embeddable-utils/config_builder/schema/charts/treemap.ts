@@ -82,7 +82,7 @@ const partitionConfigPrimaryMetricOptionsShape = {
   color: lazySchema(() =>
     z.union([staticColorSchema, autoColorSchema]).optional().meta({
       description:
-        'Static color of the metric. Defaults to `auto`. Ignored while a group is active.',
+        'Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.',
     })
   ),
 };

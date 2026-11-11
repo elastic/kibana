@@ -84,7 +84,7 @@ const legacyMetricConfigMetricOptionsShape = {
       .optional()
       .meta({
         description:
-          'Color configuration based on the metric value. Only applied when `apply_color_to` is set. Defaults to `auto`.',
+          'Color configuration based on the metric value. Defaults to `auto`. Ignored without `apply_color_to`.',
       })
   ),
 };

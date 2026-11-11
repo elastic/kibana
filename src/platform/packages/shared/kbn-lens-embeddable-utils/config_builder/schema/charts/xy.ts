@@ -580,7 +580,7 @@ const yMetricOnAxisSchema = lazySchema(() =>
 const yMetricColorSchema = lazySchema(() =>
   z.union([staticColorSchema, autoColorSchema]).meta({
     description:
-      'Color of the Y metric. Defaults to `auto`. Ignored while the layer has an active breakdown.',
+      'Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.',
   })
 );
 

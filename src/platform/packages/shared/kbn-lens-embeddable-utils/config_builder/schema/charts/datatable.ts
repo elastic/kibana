@@ -219,7 +219,7 @@ const datatableConfigRowsOptionsNoESQLSchema = lazySchema(() =>
      */
     color: z.union([colorMappingSchema, autoColorSchema]).optional().meta({
       description:
-        'Color configuration for datatable rows. Only applied when `apply_color_to` is set. Defaults to `auto`.',
+        'Color configuration for datatable rows. Defaults to `auto`. Ignored without `apply_color_to`.',
     }),
     /**
      * Whether to enable the one click filter
@@ -245,7 +245,7 @@ const datatableConfigRowsOptionsESQLSchema = lazySchema(() =>
      */
     color: z.union([colorByValueSchema, colorMappingSchema, autoColorSchema]).optional().meta({
       description:
-        'Color configuration for ESQL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Only applied when `apply_color_to` is set, and then defaults to `auto`.',
+        'Color configuration for ES|QL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.',
     }),
   })
 );
@@ -257,7 +257,7 @@ const datatableConfigMetricsOptionsSchema = lazySchema(() =>
      */
     color: z.union([colorByValueSchema, colorMappingSchema, autoColorSchema]).optional().meta({
       description:
-        'Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Only applied when `apply_color_to` is set, and then defaults to `auto`.',
+        'Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.',
     }),
     /**
      * Alignment of the columns
