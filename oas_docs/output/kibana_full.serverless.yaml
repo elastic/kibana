@@ -160716,12 +160716,10 @@ components:
                     vars:
                       additionalProperties:
                         anyOf:
-                          - maxLength: 10000
-                            type: string
+                          - type: string
                           - type: number
                           - type: boolean
                           - items:
-                              maxLength: 10000
                               type: string
                             maxItems: 100
                             type: array
@@ -160749,12 +160747,10 @@ components:
               vars:
                 additionalProperties:
                   anyOf:
-                    - maxLength: 10000
-                      type: string
+                    - type: string
                     - type: number
                     - type: boolean
                     - items:
-                        maxLength: 10000
                         type: string
                       maxItems: 100
                       type: array
@@ -160802,12 +160798,10 @@ components:
         vars:
           additionalProperties:
             anyOf:
-              - maxLength: 10000
-                type: string
+              - type: string
               - type: number
               - type: boolean
               - items:
-                  maxLength: 10000
                   type: string
                 maxItems: 100
                 type: array
@@ -162369,12 +162363,10 @@ components:
                         vars:
                           additionalProperties:
                             anyOf:
-                              - maxLength: 10000
-                                type: string
+                              - type: string
                               - type: number
                               - type: boolean
                               - items:
-                                  maxLength: 10000
                                   type: string
                                 maxItems: 100
                                 type: array
@@ -162402,12 +162394,10 @@ components:
                   vars:
                     additionalProperties:
                       anyOf:
-                        - maxLength: 10000
-                          type: string
+                        - type: string
                         - type: number
                         - type: boolean
                         - items:
-                            maxLength: 10000
                             type: string
                           maxItems: 100
                           type: array
@@ -162531,12 +162521,10 @@ components:
               type: object
             - additionalProperties:
                 anyOf:
-                  - maxLength: 10000
-                    type: string
+                  - type: string
                   - type: number
                   - type: boolean
                   - items:
-                      maxLength: 10000
                       type: string
                     maxItems: 100
                     type: array
@@ -172207,12 +172195,10 @@ components:
                     vars:
                       additionalProperties:
                         anyOf:
-                          - maxLength: 10000
-                            type: string
+                          - type: string
                           - type: number
                           - type: boolean
                           - items:
-                              maxLength: 10000
                               type: string
                             maxItems: 100
                             type: array
@@ -172240,12 +172226,10 @@ components:
               vars:
                 additionalProperties:
                   anyOf:
-                    - maxLength: 10000
-                      type: string
+                    - type: string
                     - type: number
                     - type: boolean
                     - items:
-                        maxLength: 10000
                         type: string
                       maxItems: 100
                       type: array
@@ -172302,12 +172286,10 @@ components:
         vars:
           additionalProperties:
             anyOf:
-              - maxLength: 10000
-                type: string
+              - type: string
               - type: number
               - type: boolean
               - items:
-                  maxLength: 10000
                   type: string
                 maxItems: 100
                 type: array
@@ -179694,12 +179676,10 @@ components:
                         vars:
                           additionalProperties:
                             anyOf:
-                              - maxLength: 10000
-                                type: string
+                              - type: string
                               - type: number
                               - type: boolean
                               - items:
-                                  maxLength: 10000
                                   type: string
                                 maxItems: 100
                                 type: array
@@ -179727,12 +179707,10 @@ components:
                   vars:
                     additionalProperties:
                       anyOf:
-                        - maxLength: 10000
-                          type: string
+                        - type: string
                         - type: number
                         - type: boolean
                         - items:
-                            maxLength: 10000
                             type: string
                           maxItems: 100
                           type: array
@@ -179856,12 +179834,10 @@ components:
               type: object
             - additionalProperties:
                 anyOf:
-                  - maxLength: 10000
-                    type: string
+                  - type: string
                   - type: number
                   - type: boolean
                   - items:
-                      maxLength: 10000
                       type: string
                     maxItems: 100
                     type: array
@@ -181343,12 +181319,10 @@ components:
                     vars:
                       additionalProperties:
                         anyOf:
-                          - maxLength: 10000
-                            type: string
+                          - type: string
                           - type: number
                           - type: boolean
                           - items:
-                              maxLength: 10000
                               type: string
                             maxItems: 100
                             type: array
@@ -181376,12 +181350,10 @@ components:
               vars:
                 additionalProperties:
                   anyOf:
-                    - maxLength: 10000
-                      type: string
+                    - type: string
                     - type: number
                     - type: boolean
                     - items:
-                        maxLength: 10000
                         type: string
                       maxItems: 100
                       type: array
@@ -181447,12 +181419,10 @@ components:
         vars:
           additionalProperties:
             anyOf:
-              - maxLength: 10000
-                type: string
+              - type: string
               - type: number
               - type: boolean
               - items:
-                  maxLength: 10000
                   type: string
                 maxItems: 100
                 type: array
