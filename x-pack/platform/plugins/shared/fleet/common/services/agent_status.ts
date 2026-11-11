@@ -45,7 +45,9 @@ export function getPreviousAgentStatusForOfflineAgents(
  * UNENROLL as its first step and Fleet Server records the pending state without writing
  * `unenrolled_at`, so both clauses below hold for an agent that did acknowledge the request.
  */
-export function hasPendingUnenroll(agent: Agent): boolean {
+export function hasPendingUnenroll(
+  agent: Agent
+): agent is Agent & { unenrollment_started_at: string } {
   const { unenrollment_started_at: unenrollmentStartedAt, unenrolled_at: unenrolledAt } = agent;
 
   return Boolean(unenrollmentStartedAt && !unenrolledAt);
