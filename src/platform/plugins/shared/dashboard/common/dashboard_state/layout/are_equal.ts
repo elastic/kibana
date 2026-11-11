@@ -94,11 +94,12 @@ export async function areEqual(
     return false;
   }
 
+  // asyncForEach callbacks run concurrently, so the flag is only ever set to false
   const arePanelsEqual = async () => {
     let isEqual = true;
     await asyncForEach(Object.entries(currentLayout.layout.panels), async ([id, { type }]) => {
       if (!isEqual) return;
-      isEqual =
+      const isPanelEqual =
         baselineLayout.layout.panels[id].type === type &&
         (await areConfigsEqual(
           getComparators,
@@ -106,6 +107,7 @@ export async function areEqual(
           baselineLayout.childState[id],
           currentLayout.childState[id]
         ));
+      if (!isPanelEqual) isEqual = false;
     });
     return isEqual;
   };
@@ -116,12 +118,13 @@ export async function areEqual(
       Object.entries(currentLayout.layout.pinnedPanels),
       async ([id, { type }]) => {
         if (!isEqual) return;
-        isEqual = await areConfigsEqual(
+        const isPinnedPanelEqual = await areConfigsEqual(
           getComparators,
           type,
           baselineLayout.childState[id],
           currentLayout.childState[id]
         );
+        if (!isPinnedPanelEqual) isEqual = false;
       }
     );
     return isEqual;
