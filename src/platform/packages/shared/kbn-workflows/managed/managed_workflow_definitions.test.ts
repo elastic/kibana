@@ -52,8 +52,9 @@ import ACTION_ISOLATE_HOST_YAML from './definitions/alertzero/actions/defend/act
 import ACTION_KILL_PROCESS_YAML from './definitions/alertzero/actions/defend/action_kill_process.yaml';
 import ACTION_SUSPEND_PROCESS_YAML from './definitions/alertzero/actions/defend/action_suspend_process.yaml';
 import CLOSE_ATTACK_AND_ALERTS_YAML from './definitions/alertzero/close_attack_and_alerts.yaml';
-import DETECTION_RULE_COVERAGE_YAML from './definitions/alertzero/detection_rule_coverage.yaml';
-import DETECTION_RULE_TUNING_YAML from './definitions/alertzero/detection_rule_tuning.yaml';
+import DETECTION_RULE_COVERAGE_YAML from './definitions/alertzero/detection/detection_rule_coverage.yaml';
+import DETECTION_RULE_TUNING_YAML from './definitions/alertzero/detection/detection_rule_tuning.yaml';
+import RULE_TUNING_WORKER_YAML from './definitions/alertzero/detection/rule_tuning_worker.yaml';
 import FLOOR_ALERT_TRIAGE_YAML from './definitions/alertzero/floor_alert_triage.yaml';
 import FLOOR_ALERT_TRIAGE_BATCH_YAML from './definitions/alertzero/floor_alert_triage_batch.yaml';
 import FLOOR_ALERT_TRIAGE_REVIEW_YAML from './definitions/alertzero/floor_alert_triage_review.yaml';
@@ -62,7 +63,6 @@ import FORENSICS_CLOSE_INVESTIGATION_GATE_YAML from './definitions/alertzero/for
 import FORENSICS_ENDPOINT_ANALYSIS_YAML from './definitions/alertzero/forensics_endpoint_analysis.yaml';
 import FORENSICS_PROPOSAL_GATE_YAML from './definitions/alertzero/forensics_proposal_gate.yaml';
 import FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML from './definitions/alertzero/forensics_run_endpoint_analysis.yaml';
-import RULE_TUNING_WORKER_YAML from './definitions/alertzero/rule_tuning_worker.yaml';
 import {
   ALERT_TRIAGE_WORKER_SETTINGS_DEFAULTS,
   ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS,

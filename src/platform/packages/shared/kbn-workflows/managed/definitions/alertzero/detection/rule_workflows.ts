@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
-} from './constants';
 import COVERAGE_REVIEW_YAML from './coverage_review.yaml';
 import COVERAGE_WORKER_YAML from './coverage_worker.yaml';
 import RULE_CREATION_YAML from './rule_creation.yaml';
 import RULE_PREVIEW_YAML from './rule_preview.yaml';
 import RULE_TUNING_REVIEW_YAML from './rule_tuning_review.yaml';
 import RULE_TUNING_WORKER_YAML from './rule_tuning_worker.yaml';
-import type { ManagedWorkflowDefinition } from '../../types';
+import type { ManagedWorkflowDefinition } from '../../../types';
+import {
+  ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
+  ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
+} from '../constants';
 
 export const ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID = 'system-security-coverage-review';
 export const ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID = 'system-security-coverage-worker';

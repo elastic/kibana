@@ -1936,7 +1936,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/functional/services/logs_ui @elastic/obs-signals-logs-team
 /x-pack/solutions/observability/test/functional/page_objects/observability_logs_explorer.ts @elastic/obs-signals-logs-team
 /x-pack/solutions/observability/test/api_integration/apis/logs_ui @elastic/obs-signals-logs-team
-/x-pack/solutions/observability/test/serverless/functional/test_suites/discover @elastic/obs-signals-traces-team @elastic/obs-signals-logs-team @elastic/obs-signals-metrics-team @elastic/kibana-discover
 /src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview @elastic/obs-signals-logs-team
 /x-pack/solutions/observability/test/api_integration/apis/logs_shared @elastic/obs-signals-logs-team
 /x-pack/solutions/observability/plugins/infra/common/http_api/log_alerts @elastic/obs-signals-logs-team
@@ -2140,7 +2139,6 @@ x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/s
 /x-pack/platform/test/functional/apps/dashboard @elastic/kibana-dashboards
 /x-pack/platform/test/accessibility/apps/group3/maps.ts  @elastic/kibana-dashboards
 /x-pack/platform/test/accessibility/apps/group1/dashboard_panel_options.ts  @elastic/kibana-dashboards
-/x-pack/platform/test/accessibility/apps/group1/dashboard_links.ts  @elastic/kibana-dashboards
 /x-pack/platform/test/accessibility/apps/group1/dashboard_controls.ts  @elastic/kibana-dashboards
 /src/platform/test/functional/apps/dashboard/  @elastic/kibana-dashboards
 /src/platform/test/functional/apps/dashboard_elements/  @elastic/kibana-dashboards
@@ -2842,7 +2840,6 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ai_index_aut
 /src/platform/test/functional/page_objects/embedded_console.ts @elastic/search-ml-ux
 /src/platform/test/functional/page_objects/console_page.ts @elastic/kibana-management
 /src/platform/test/functional/apps/console/*.ts @elastic/kibana-management
-/src/platform/test/accessibility/apps/management.ts @elastic/kibana-discover
 /x-pack/platform/test/functional/apps/rollup_job/ @elastic/kibana-management
 
 ## Kibana Cases
@@ -3277,6 +3274,20 @@ x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analy
 /x-pack/solutions/security/plugins/alertzero/server/telemetry/workers/hunt.md @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui/pages/alert_analysis_workflow @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/server/workflows/alert_analysis_workflow @elastic/security-investigations
+
+# AlertZero Detection Watch services
+/src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/detection @elastic/security-detection-engineering
+/x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/detection_watch_settings.schema.yaml @elastic/security-detection-engineering
+/x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/detection_watch_settings.gen.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/packages/kbn-alertzero-common/impl/worker_settings/detection_watch.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/common/telemetry/to_detection_rule_type.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/common/telemetry/to_detection_rule_type.test.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/public/pages/watches/custom_settings/rule_coverage @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/public/pages/watches/custom_settings/rule_tuning @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/server/managed_workflows/detection_rule_workflows.test.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/server/step_types/report_worker_outcome/shipped_yaml_contract.detection.fixture.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/server/step_types/report_worker_outcome/shipped_yaml_contract.detection.test.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/server/telemetry/workers/detection.md @elastic/security-detection-engineering
 
 # AlertZero Worker settings contract
 /x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/fixtures @elastic/alertzero-common-layer

@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID, ALERTZERO_WORKER_MANAGEMENT } from './constants';
 import DETECTION_RULE_COVERAGE_YAML from './detection_rule_coverage.yaml';
+import type { ManagedWorkflowDefinition } from '../../../types';
+import { ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID, ALERTZERO_WORKER_MANAGEMENT } from '../constants';
 import {
   RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS,
   upgradeStoredWorkerSettings,
-} from './worker_settings_defaults';
+} from '../worker_settings_defaults';
 import {
   renderRuleCoverageWorkerYaml,
   type RuleCoverageWorkerTemplateValues,
-} from './worker_template_values';
-import type { ManagedWorkflowDefinition } from '../../types';
+} from '../worker_template_values';
 
 export const ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID =
   'system-security-detection-rule-coverage';

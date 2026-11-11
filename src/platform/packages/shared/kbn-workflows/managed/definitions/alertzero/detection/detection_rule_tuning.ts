@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID, ALERTZERO_WORKER_MANAGEMENT } from './constants';
 import DETECTION_RULE_TUNING_YAML from './detection_rule_tuning.yaml';
+import type { ManagedWorkflowDefinition } from '../../../types';
+import { ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID, ALERTZERO_WORKER_MANAGEMENT } from '../constants';
 import {
   RULE_TUNING_WORKER_SETTINGS_DEFAULTS,
   upgradeStoredWorkerSettings,
-} from './worker_settings_defaults';
+} from '../worker_settings_defaults';
 import {
   renderRuleTuningWorkerYaml,
   type RuleTuningWorkerTemplateValues,
-} from './worker_template_values';
-import type { ManagedWorkflowDefinition } from '../../types';
+} from '../worker_template_values';
 
 export const ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID =
   'system-security-detection-rule-tuning';

@@ -12,7 +12,7 @@ import {
   ALERTZERO_COVERAGE_WORKER_WORKFLOW,
   ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW,
   ALERTZERO_RULE_TUNING_WORKER_WORKFLOW,
-} from '.';
+} from '..';
 import {
   allSteps,
   describeCloseReports,
@@ -23,8 +23,8 @@ import {
   stepNamed,
   stepsOf,
   topLevelSteps,
-} from './worker_reports.test_helpers';
-import type { YamlStep } from './worker_reports.test_helpers';
+} from '../worker_reports.test_helpers';
+import type { YamlStep } from '../worker_reports.test_helpers';
 
 /**
  * The Rule Tuning and Rule Coverage Workers' reports (`alertzero.reportWorkerOutcome`), rendered

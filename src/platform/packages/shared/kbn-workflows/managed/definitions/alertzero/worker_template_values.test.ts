@@ -8,8 +8,8 @@
  */
 
 import { parse } from 'yaml';
-import DETECTION_RULE_COVERAGE_YAML from './detection_rule_coverage.yaml';
-import DETECTION_RULE_TUNING_YAML from './detection_rule_tuning.yaml';
+import DETECTION_RULE_COVERAGE_YAML from './detection/detection_rule_coverage.yaml';
+import DETECTION_RULE_TUNING_YAML from './detection/detection_rule_tuning.yaml';
 import FLOOR_ALERT_TRIAGE_YAML from './floor_alert_triage.yaml';
 import FLOOR_ATTACK_DISCOVERY_YAML from './floor_attack_discovery.yaml';
 import FORENSICS_ENDPOINT_ANALYSIS_YAML from './forensics_endpoint_analysis.yaml';
