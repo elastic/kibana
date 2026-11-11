@@ -8,7 +8,6 @@
 import {
   getInitialSearchProfilerIndex,
   getInitialSearchProfilerQuery,
-  isSearchProfilerQueryPersistable,
   readSearchProfilerState,
   SEARCH_PROFILER_STATE_STORAGE_KEY,
   updateSearchProfilerQueryState,
@@ -144,14 +143,10 @@ describe('search profiler state storage', () => {
         queryFromUrl: null,
         storedQuery: '',
       })
-    ).toBe(DEFAULT_QUERY);
+    ).toBe('');
   });
 
-  it('only persists empty or valid JSON query content', () => {
-    expect(isSearchProfilerQueryPersistable('')).toBe(true);
-    expect(isSearchProfilerQueryPersistable(STORED_QUERY)).toBe(true);
-    expect(isSearchProfilerQueryPersistable('!!!invalid')).toBe(false);
-
+  it('persists unfinished and empty query drafts', () => {
     writeSearchProfilerState({
       index: 'logs-*',
       query: STORED_QUERY,
@@ -161,8 +156,15 @@ describe('search profiler state storage', () => {
 
     expect(readSearchProfilerState()).toEqual({
       index: 'logs-*',
-      query: STORED_QUERY,
+      query: '!!!invalid',
     });
+    expect(
+      getInitialSearchProfilerQuery({
+        defaultQuery: DEFAULT_QUERY,
+        queryFromUrl: null,
+        storedQuery: readSearchProfilerState().query,
+      })
+    ).toBe('!!!invalid');
 
     updateSearchProfilerQueryState('');
 
