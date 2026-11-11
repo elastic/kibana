@@ -36,7 +36,7 @@ export const extractCaseObservables = async (
   casesClient: CasesClient
 ): Promise<ExtractObservablesResponse> => {
   const {
-    services: { caseService, licensingService },
+    services: { attachmentService, caseService, licensingService },
     authorization,
   } = clientArgs;
 
@@ -73,8 +73,21 @@ export const extractCaseObservables = async (
         );
 
   const resultingCase = outcome.status === 'extracted' ? outcome.caseWithPatch : retrievedCase;
+  const attachmentStats = await attachmentService.getter.getCaseAttatchmentStats({
+    caseIds: [retrievedCase.id],
+  });
+  const { userComments, alerts, events } = attachmentStats.get(retrievedCase.id) ?? {
+    userComments: 0,
+    alerts: 0,
+    events: 0,
+  };
   const decodedCase = decodeOrThrowZod(CaseSchema)(
-    flattenCaseSavedObject({ savedObject: resultingCase })
+    flattenCaseSavedObject({
+      savedObject: resultingCase,
+      totalComment: userComments,
+      totalAlerts: alerts,
+      totalEvents: events,
+    })
   );
 
   if (outcome.status === 'extracted') {
