@@ -1565,15 +1565,6 @@
       "enabled": true
     },
     {
-      "groupName": "lmdb",
-      "matchDepNames": ["lmdb"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "pirates",
       "matchDepNames": ["pirates"],
       "reviewers": ["team:kibana-operations"],
@@ -2341,7 +2332,6 @@
       "reviewers": [
         "team:search-ml-ux",
         "team:kibana-core",
-        "team:kibana-security",
         "team:stack-monitoring"
       ],
       "matchBaseBranches": ["main"],
@@ -2350,8 +2340,7 @@
         "backport:skip",
         "Team:AI Infra",
         "Team:Monitoring",
-        "Team:Core",
-        "Team:Security"
+        "Team:Core"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true

@@ -280,6 +280,20 @@ const agentBuilderKnowledgeIndicatorCreatedSchema: RootSchema<AgentBuilderKnowle
         description: 'The Nightshift source id the knowledge indicator was created for',
       },
     },
+    space_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'The Kibana space that owns the knowledge indicator',
+      },
+    },
+    knowledge_indicator_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'The `feature.id` or `query.id` the write addressed, unique within `source_id`; absent only when a failed query write had no caller-supplied id',
+        optional: true,
+      },
+    },
     error_message: {
       type: 'text',
       _meta: {

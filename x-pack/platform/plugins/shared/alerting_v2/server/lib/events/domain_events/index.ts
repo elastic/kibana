@@ -10,9 +10,9 @@
  * event bus.
  *
  * This module is the single import point for code that needs to talk about
- * "alerting framework events" as a whole (e.g. when typing `EventBus<...>` or
- * `EventBusSubscriber<...>`). It re-exports each publisher's event types and
- * exposes the {@link AlertingDomainEvent} discriminated union.
+ * "alerting framework events" as a whole (e.g. when typing `EventBus<...>`). It
+ * re-exports each publisher's event types and exposes the
+ * {@link AlertingDomainEvent} discriminated union.
  *
  * New publishers (e.g. the rule executor or dispatcher) should:
  *  1. Define their concrete event type and runtime `*_TYPE` constant inside

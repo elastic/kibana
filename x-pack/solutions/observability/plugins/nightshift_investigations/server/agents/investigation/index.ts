@@ -11,6 +11,7 @@ import type {
   AgentConfigContext,
   AgentTypeDefinition,
 } from '@kbn/agent-builder-server/agents';
+import { platformSignificantEventsTools } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/core/server';
 import {
   SET_HYPOTHESES_TOOL_ID,
@@ -86,6 +87,8 @@ export interface InvestigationAgentTypeOptions {
   wikiEnabled: boolean;
   memoryEnabled?: boolean;
   decisionTreesEnabled?: boolean;
+  /** Runs the post-execution optimize hook, so a round can change what later rounds read. */
+  learningEnabled?: boolean;
   /** The agentic investigations plugin is enabled, so its tools are registered. */
   investigationToolsEnabled?: boolean;
   /** The proposals plugin is enabled, so `proposals.create` is registered. */
@@ -169,7 +172,8 @@ export type NightshiftAgentTypeOptions = Omit<
 /**
  * Builds the configuration every Nightshift agent type shares: tools, connectors, the Wiki and
  * Memory hooks and the space's custom context. Only the instructions differ between types.
- * With `standalone`, the agent lists only its own tools and the Slack read tool.
+ * With `standalone`, the agent lists only its own tools, the significant event search tool and
+ * the Slack read tool.
  * Agent Builder's own prompt and internal tools still apply to it.
  */
 export const buildNightshiftAgentConfiguration = ({
@@ -177,6 +181,8 @@ export const buildNightshiftAgentConfiguration = ({
   sandboxEnabled,
   wikiEnabled,
   memoryEnabled = false,
+  decisionTreesEnabled = false,
+  learningEnabled = true,
   investigationToolsEnabled,
   proposalsEnabled,
   standalone = false,
@@ -186,7 +192,11 @@ export const buildNightshiftAgentConfiguration = ({
 }: NightshiftAgentTypeOptions & {
   instructions: string;
   standalone?: boolean;
+  /** Only the investigator passes this; the other agent types never hydrate or reinforce trees. */
+  decisionTreesEnabled?: boolean;
 }): AgentTypeDefinition['baseConfiguration'] => {
+  // Trees do not require Wiki or Memory, so any one of the three attaches the combined workflows.
+  const contextWorkflows = wikiEnabled || memoryEnabled || decisionTreesEnabled;
   const configurationFor = ({
     materializeWorkflowId,
     optimizeWorkflowId,
@@ -198,7 +208,11 @@ export const buildNightshiftAgentConfiguration = ({
         {
           tool_ids: [
             ...(standalone
-              ? [...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []), TIME_CONVERTER_TOOL_ID]
+              ? [
+                  ...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []),
+                  TIME_CONVERTER_TOOL_ID,
+                  platformSignificantEventsTools.searchEvent,
+                ]
               : [
                   ...(investigationToolsEnabled ? [...INVESTIGATION_TOOL_IDS] : []),
                   ...(proposalsEnabled ? [PROPOSALS_CREATE_TOOL_ID] : []),
@@ -216,16 +230,15 @@ export const buildNightshiftAgentConfiguration = ({
         // Decision trees are no longer a separate before-agent hook: they hydrate as a third
         // parallel branch of the combined materialize workflow, which already carries the
         // sandbox_id they need. The reinforcement agent keeps its own hydrate workflow because
-        // it runs in a different conversation. `decisionTreesEnabled` implies `wikiEnabled`,
-        // so it adds nothing to either gate below.
+        // it runs in a different conversation.
         const beforeAgentWorkflowIds =
-          sandboxEnabled && (wikiEnabled || memoryEnabled) ? [materializeWorkflowId] : [];
+          sandboxEnabled && contextWorkflows ? [materializeWorkflowId] : [];
         return beforeAgentWorkflowIds.length ? { workflow_ids: beforeAgentWorkflowIds } : {};
       })(),
       // One post-hook. Decision-tree reinforcement is the tail phase of the combined optimize
       // workflow, so listing the reinforce workflow here as well would reinforce every round
       // twice — two ai.agent runs, up to 900s each, writing the same trees.
-      ...(wikiEnabled || memoryEnabled
+      ...(contextWorkflows && learningEnabled
         ? { post_execution_workflow_ids: [optimizeWorkflowId] }
         : {}),
     } satisfies AgentBaseConfiguration);
@@ -261,8 +274,9 @@ export const buildNightshiftAgentConfiguration = ({
 
 /**
  * Builds the Nightshift investigation agent type. It works from the sandbox, so it carries a
- * standalone prompt and no Elastic tools. Telemetry is reached through an Elasticsearch connector the
- * user assigned, as described in `/workspace/.connector-docs/elastic.md`.
+ * standalone prompt and no Elastic data tools beyond the read-only significant event search.
+ * Telemetry is reached through an Elasticsearch connector the user assigned, as described in
+ * `/workspace/.connector-docs/elastic.md`.
  */
 export const getInvestigationAgentType = ({
   decisionTreesEnabled = false,
@@ -274,6 +288,7 @@ export const getInvestigationAgentType = ({
   avatar_icon: 'logoElastic',
   baseConfiguration: buildNightshiftAgentConfiguration({
     ...options,
+    decisionTreesEnabled,
     standalone: true,
     instructions: fillContextInstructions({
       includeWiki: options.sandboxEnabled && options.wikiEnabled,
@@ -285,29 +300,7 @@ export const getInvestigationAgentType = ({
 
 export const registerInvestigationAgentType = (
   agentBuilder: AgentBuilderPluginSetup,
-  {
-    sandboxEnabled,
-    wikiEnabled,
-    memoryEnabled = false,
-    decisionTreesEnabled = false,
-    investigationToolsEnabled,
-    proposalsEnabled,
-    getCustomContextInstructions,
-    getInheritedConnectorIds,
-    logger,
-  }: InvestigationAgentTypeOptions
+  options: InvestigationAgentTypeOptions
 ): void => {
-  agentBuilder.agents.registerType(
-    getInvestigationAgentType({
-      sandboxEnabled,
-      wikiEnabled,
-      memoryEnabled,
-      decisionTreesEnabled,
-      investigationToolsEnabled,
-      proposalsEnabled,
-      getCustomContextInstructions,
-      getInheritedConnectorIds,
-      logger,
-    })
-  );
+  agentBuilder.agents.registerType(getInvestigationAgentType(options));
 };
