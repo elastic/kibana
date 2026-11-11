@@ -15,7 +15,7 @@ import { ExecutionError } from '@kbn/workflows/server';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { createMockWorkflowEventLogger } from '../../workflow_event_logger/mocks';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/types';
-import { StepExecutionRuntime } from '../step_execution_runtime';
+import { INPUT_RECORDED_STATE_KEY, StepExecutionRuntime } from '../step_execution_runtime';
 import type { StepIoService } from '../step_io_service';
 import type { WorkflowContextManager } from '../workflow_context_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
@@ -174,6 +174,63 @@ describe('StepExecutionRuntime', () => {
       stepLogger: workflowLogger,
       workflowExecutionState,
       stepIoService,
+    });
+  });
+
+  describe('input recorded flag', () => {
+    const installState = (initial?: Record<string, unknown>) => {
+      let state = initial;
+      (workflowExecutionState.getStepExecution as jest.Mock).mockImplementation(() =>
+        state === undefined ? undefined : { stepId: 'node1', state }
+      );
+      (workflowExecutionState.upsertStep as jest.Mock).mockImplementation(
+        (partial: { state?: Record<string, unknown> }) => {
+          if (partial && 'state' in partial) {
+            state = partial.state;
+          }
+        }
+      );
+    };
+
+    it('is false before input is recorded', () => {
+      installState();
+
+      expect(underTest.isInputRecorded).toBe(false);
+    });
+
+    it('sets the flag on step state and keeps fields already stored there', () => {
+      installState({ dynamicTimeout: '72h' });
+
+      underTest.setInput({ message: 'hi' });
+
+      expect(stepIoService.getStepInput(fakeStepExecutionId)).toEqual({ message: 'hi' });
+      expect(underTest.isInputRecorded).toBe(true);
+      expect(underTest.getCurrentStepState()).toEqual({
+        dynamicTimeout: '72h',
+        [INPUT_RECORDED_STATE_KEY]: true,
+      });
+    });
+
+    it('keeps the flag when a later write replaces step state', () => {
+      installState({ [INPUT_RECORDED_STATE_KEY]: true, dynamicTimeout: '72h' });
+
+      underTest.setCurrentStepState({ __durableStepState: { attempt: 2 } });
+
+      expect(underTest.getCurrentStepState()).toEqual({
+        __durableStepState: { attempt: 2 },
+        [INPUT_RECORDED_STATE_KEY]: true,
+      });
+    });
+
+    it('drops the flag when step state is cleared', () => {
+      installState({ [INPUT_RECORDED_STATE_KEY]: true });
+
+      underTest.setCurrentStepState(undefined);
+
+      expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+        expect.objectContaining({ state: undefined })
+      );
+      expect(underTest.isInputRecorded).toBe(false);
     });
   });
 
@@ -568,18 +625,34 @@ describe('StepExecutionRuntime', () => {
         );
       });
 
-      it('should exit wait state and clear resumeAt when step already has resumeAt in state', () => {
+      it('exits the wait and clears resumeAt once the stored resumeAt has passed', () => {
+        const now = new Date();
+        const resumeAt = new Date(now.getTime() - 1_000).toISOString();
         (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
           status: ExecutionStatus.WAITING,
-          state: { resumeAt: '2025-12-31T00:00:00.000Z' },
+          state: { resumeAt },
         } as Partial<EsWorkflowStepExecution>);
 
-        const entered = underTest.tryEnterWaitUntil(new Date('2025-12-31T00:00:00.000Z'));
+        const entered = underTest.tryEnterWaitUntil(new Date(now.getTime()));
 
         expect(entered).toBe(false);
         expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
           expect.objectContaining({ state: undefined })
         );
+      });
+
+      it('stays parked when re-entered before the stored resumeAt', () => {
+        const now = new Date();
+        const resumeAt = new Date(now.getTime() + 60_000).toISOString();
+        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
+          status: ExecutionStatus.WAITING,
+          state: { resumeAt, resolvedDuration: '60s' },
+        } as Partial<EsWorkflowStepExecution>);
+
+        const entered = underTest.tryEnterWaitUntil(new Date(now.getTime() + 60_000));
+
+        expect(entered).toBe(true);
+        expect(workflowExecutionState.upsertStep).not.toHaveBeenCalled();
       });
 
       it('should enter wait state even when status is WAITING but resumeAt is absent', () => {

@@ -363,7 +363,7 @@ In Kibana's TypeScript code it is considered a formatting issue to use snake cas
 
   If you would like to use object destructuring in your code:
   - Convert to camel case by renaming inline `const { snake_case: camelCase } = body`
-  - Consider opting-out of this eslint rule about naming conventions `// eslint-disable-next-line @typescript-eslint/naming-convention` or disable the lint rule for a section `/* eslint-disable @typescript-eslint/naming-convention */` and re-enabling with `/* eslint-enable ... */`.
+  - Consider opting-out of this eslint rule about naming conventions `// eslint-disable-next-line @kbn/compat/typescript-naming-convention` or disable the lint rule for a section `/* eslint-disable @kbn/compat/typescript-naming-convention */` and re-enabling with `/* eslint-enable ... */`.
 :::
 
 **Use JSON**

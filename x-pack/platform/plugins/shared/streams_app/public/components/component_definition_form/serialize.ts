@@ -15,9 +15,20 @@ import type {
   StreamsUnit,
 } from '@kbn/streams-schema';
 import { resolveEnumOptions } from '../../services/component_catalogue';
-import { findChoiceGroup, isUnselectedChoice } from './choice_groups';
+import {
+  findChoiceGroup,
+  getDefaultChoice,
+  isMandatoryChoiceGroup,
+  isUnselectedChoice,
+} from './choice_groups';
 import { isFieldAvailable, isFieldRequired } from './conditions';
-import { isObjectValue, toFormValue, type FormValue, type ObjectValue } from './values';
+import {
+  isObjectValue,
+  joinPointer,
+  toFormValue,
+  type FormValue,
+  type ObjectValue,
+} from './values';
 
 type UnitComponent = NonNullable<StreamsUnit.Configuration['processors']>[number];
 export type ConfigEntry = NonNullable<UnitComponent['config']>[number];
@@ -29,10 +40,87 @@ export const ITEM_TELEMETRY_KEY = 'telemetry';
 export const allowsItemTelemetry = (field: CatalogueArrayField): boolean =>
   field.items.type === 'object' && field.items.telemetry_selection === 'configurable';
 
+/** The signals an item's telemetry scope names; anything that is not a list of strings is none. */
+export const readItemScope = (value: FormValue | undefined): string[] =>
+  (Array.isArray(value) ? value : []).flatMap((signal) =>
+    typeof signal === 'string' ? [signal] : []
+  );
+
 export interface FormContextValues {
   metadata: CatalogueMetadata;
   telemetry: readonly CatalogueSignal[];
 }
+
+/** Called with each scoped item's telemetry scope and its pointer; returns the scope to keep. */
+export type ItemScopeVisitor = (scope: FormValue, pointer: string) => FormValue;
+
+const mapFieldScopes = (
+  field: CatalogueFieldDefinition,
+  value: FormValue,
+  visit: ItemScopeVisitor,
+  pointer: string
+): FormValue => {
+  if (field.type === 'object' && isObjectValue(value)) {
+    return mapItemScopes(field.fields, value, visit, pointer);
+  }
+  if (field.type !== 'array' || field.items.type !== 'object' || !Array.isArray(value)) {
+    return value;
+  }
+  const itemFields = field.items.fields;
+  return value.map((item, index) => {
+    if (!isObjectValue(item)) {
+      return item;
+    }
+    const itemPointer = joinPointer(pointer, index);
+    const mapped = mapItemScopes(itemFields, item, visit, itemPointer);
+    const scope = mapped[ITEM_TELEMETRY_KEY];
+    return allowsItemTelemetry(field) && scope !== undefined
+      ? {
+          ...mapped,
+          [ITEM_TELEMETRY_KEY]: visit(scope, joinPointer(itemPointer, ITEM_TELEMETRY_KEY)),
+        }
+      : mapped;
+  });
+};
+
+/**
+ * Walks `values` by its field definitions, into nested objects and object arrays, and lets
+ * `visit` rewrite the telemetry scope of every array item that carries one. Validation uses it
+ * to find scopes, serialization to narrow them.
+ */
+export const mapItemScopes = (
+  fields: readonly CatalogueNamedFieldDefinition[],
+  values: ObjectValue,
+  visit: ItemScopeVisitor,
+  pointer = ''
+): ObjectValue =>
+  Object.fromEntries(
+    Object.entries(values).map(([name, value]) => {
+      const field = fields.find((candidate) => candidate.name === name);
+      return [
+        name,
+        field ? mapFieldScopes(field, value, visit, joinPointer(pointer, name)) : value,
+      ];
+    })
+  );
+
+const trimScope = (scope: FormValue, telemetry: readonly CatalogueSignal[]): FormValue => {
+  const kept = readItemScope(scope).filter((signal) =>
+    telemetry.some((allowed) => allowed === signal)
+  );
+  // An empty scope means every signal, so a scope with nothing left stays for the user to resolve.
+  return kept.length > 0 ? kept : scope;
+};
+
+/**
+ * Narrows each item's telemetry scope to the component's signals after they change. A scope
+ * none of whose signals remain is left unchanged, so validation flags it instead.
+ */
+export const trimItemScopes = (
+  fields: readonly CatalogueNamedFieldDefinition[],
+  values: ObjectValue,
+  telemetry: readonly CatalogueSignal[]
+): ObjectValue => mapItemScopes(fields, values, (scope) => trimScope(scope, telemetry));
 
 /**
  * Splits component config entries into editable defaults and per-telemetry
@@ -207,13 +295,27 @@ export const createInitialObject = (
 ): ObjectValue => {
   const result: ObjectValue = {};
   for (const field of fields) {
-    if (isUnselectedChoice(choiceGroups, {}, field.name)) {
+    const group = findChoiceGroup(choiceGroups, field.name);
+    if (group) {
+      if (getDefaultChoice(group) !== field.name) {
+        continue;
+      }
+      // A mandatory group's default counts as chosen while absent, so it only needs a value when
+      // the field has one of its own; an optional group's default must be present to count, so
+      // it starts as a blank.
+      const choice = isMandatoryChoiceGroup(group)
+        ? initialFieldValue(field, context, true)
+        : createChoiceValue(field, context);
+      if (choice !== undefined) {
+        result[field.name] = choice;
+      }
       continue;
     }
-    const preselect =
-      findChoiceGroup(choiceGroups, field.name) !== undefined ||
-      isFieldRequired(field, result, context.telemetry);
-    const value = initialFieldValue(field, context, preselect);
+    const value = initialFieldValue(
+      field,
+      context,
+      isFieldRequired(field, result, context.telemetry)
+    );
     if (value !== undefined) {
       result[field.name] = value;
     }

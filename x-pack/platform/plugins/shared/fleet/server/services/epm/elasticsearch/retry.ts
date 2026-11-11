@@ -19,8 +19,19 @@ const retryResponseStatuses = [
 
 const retryMessages = ['no_shard_available_action_exception'];
 
-const isRetryableError = (e: any, additionalResponseStatuses: number[] = []) =>
-  retryMessages.some((msg) => e.message.includes(msg)) ||
+interface RetryOptions {
+  logger?: Logger;
+  attempt?: number;
+  additionalResponseStatuses?: number[];
+  additionalRetryMessages?: string[];
+}
+
+const isRetryableError = (
+  e: any,
+  additionalResponseStatuses: number[] = [],
+  additionalRetryMessages: string[] = []
+) =>
+  [...retryMessages, ...additionalRetryMessages].some((msg) => e.message.includes(msg)) ||
   e instanceof EsErrors.NoLivingConnectionsError ||
   e instanceof EsErrors.ConnectionError ||
   e instanceof EsErrors.TimeoutError ||
@@ -37,12 +48,16 @@ export const retryTransientEsErrors = async <T>(
     logger,
     attempt = 0,
     additionalResponseStatuses = [],
-  }: { logger?: Logger; attempt?: number; additionalResponseStatuses?: number[] } = {}
+    additionalRetryMessages = [],
+  }: RetryOptions = {}
 ): Promise<T> => {
   try {
     return await esCall();
   } catch (e) {
-    if (attempt < MAX_ATTEMPTS && isRetryableError(e, additionalResponseStatuses)) {
+    if (
+      attempt < MAX_ATTEMPTS &&
+      isRetryableError(e, additionalResponseStatuses, additionalRetryMessages)
+    ) {
       const retryCount = attempt + 1;
       const retryDelaySec = Math.min(Math.pow(2, retryCount), 64); // 2s, 4s, 8s, 16s, 32s, 64s, 64s, 64s ...
 
@@ -53,7 +68,12 @@ export const retryTransientEsErrors = async <T>(
       );
 
       await setTimeout(retryDelaySec * 1000);
-      return retryTransientEsErrors(esCall, { logger, attempt: retryCount });
+      return retryTransientEsErrors(esCall, {
+        logger,
+        attempt: retryCount,
+        additionalResponseStatuses,
+        additionalRetryMessages,
+      });
     }
 
     throw e;

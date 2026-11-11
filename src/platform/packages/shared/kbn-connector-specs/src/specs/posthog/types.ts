@@ -10,6 +10,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 const ISSUE_STATUSES = ['active', 'resolved', 'archived', 'suppressed', 'pending_release'] as const;
+const WRITABLE_ISSUE_STATUSES = ['active', 'resolved', 'suppressed'] as const;
 
 export const PostHogListIssuesInputSchema = lazySchema(() =>
   z.object({
@@ -83,9 +84,9 @@ export const PostHogUpdateIssueStatusInputSchema = lazySchema(() =>
   z.object({
     issueId: z.string().max(200).describe('UUID of the error-tracking issue to update.'),
     status: z
-      .enum(ISSUE_STATUSES)
+      .enum(WRITABLE_ISSUE_STATUSES)
       .describe(
-        'Target status. "active" for issues needing attention, "resolved" once fixed, "suppressed" for noisy/unhelpful issues, "archived" to hide it, "pending_release" while awaiting a fix release.'
+        'Target status. "active" for issues needing attention, "resolved" once fixed, "suppressed" for noisy/unhelpful issues.'
       ),
   })
 );
@@ -177,6 +178,7 @@ export const PostHogCreateAnnotationInputSchema = lazySchema(() =>
     dateMarker: z
       .string()
       .max(40)
+      .datetime({ offset: true })
       .describe(
         'ISO 8601 timestamp of when the marked event happened, used to position it on charts.'
       ),
@@ -207,7 +209,7 @@ export const PostHogListSessionRecordingsInputSchema = lazySchema(() =>
       .string()
       .max(200)
       .optional()
-      .describe('Restrict results to recordings for this person ID.'),
+      .describe('Restrict results to recordings for this person UUID.'),
     limit: z
       .number()
       .int()
@@ -224,7 +226,7 @@ export type PostHogListSessionRecordingsInput = z.infer<
 
 export const PostHogCreateExternalReferenceInputSchema = lazySchema(() =>
   z.object({
-    issueId: z.string().max(200).describe('UUID of the error-tracking issue to link.'),
+    issueId: z.string().max(200).uuid().describe('UUID of the error-tracking issue to link.'),
     integrationId: z
       .number()
       .int()

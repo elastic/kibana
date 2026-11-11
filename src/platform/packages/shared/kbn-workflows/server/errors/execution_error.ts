@@ -12,11 +12,14 @@ import type { SerializedError } from '../../spec/schema';
 export class ExecutionError extends Error {
   public readonly type: string;
   public readonly details?: Record<string, unknown>;
+  /** `false` marks a failure that retrying cannot fix. Unset means retryable. */
+  public readonly retryable?: boolean;
 
   constructor(params: SerializedError) {
     super(params.message);
     this.type = params.type;
     this.details = params.details;
+    this.retryable = params.retryable;
   }
 
   /**
@@ -43,6 +46,10 @@ export class ExecutionError extends Error {
 
     if (this.details) {
       baseError.details = this.details;
+    }
+
+    if (this.retryable !== undefined) {
+      baseError.retryable = this.retryable;
     }
 
     return baseError;

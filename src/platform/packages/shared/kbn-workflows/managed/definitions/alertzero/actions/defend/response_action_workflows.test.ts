@@ -25,7 +25,9 @@ import {
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
 } from './action_suspend_process';
 import { ALERTZERO_ACTION_WORKFLOW_IDS } from '../..';
+import { createWorkflowLiquidEngine } from '../../../../../common/utils/create_workflow_liquid_engine/create_workflow_liquid_engine';
 import { WorkflowSchema } from '../../../../../spec/schema';
+import { ACTION_NON_RETRYABLE_ERROR_TYPE } from '../../../../action_workflow';
 
 /**
  * These four actions probe Actions-log privilege, dispatch via the
@@ -64,6 +66,7 @@ interface YamlWorkflow {
       properties?: {
         actionInput?: {
           properties?: {
+            endpoint_ids?: { minItems?: number };
             parameters?: { properties?: { type?: { enum?: string[] } } };
           };
         };
@@ -265,6 +268,68 @@ describe('AlertZero response-action workflows', () => {
     const body = dispatch?.with?.body as Record<string, string> | undefined;
 
     expect(body?.parameters).toContain('inputs.actionInput.parameters');
+  });
+
+  describe.each([
+    ['kill', ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW, 'ra_kill-process_error_not-found'],
+    ['suspend', ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW, 'ra_suspend-process_error_not-found'],
+    ['memory dump', ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW, 'ra_memory-dump_error_not-found'],
+  ] as const)('%s on a failed action', (_label, workflow, notFoundCode) => {
+    const parsed = parseWorkflow(workflow.yaml);
+    const stepByName = (name: string) => flatten(parsed.steps).find((step) => step.name === name);
+    // Same options as the execution engine's templating engine.
+    const liquid = createWorkflowLiquidEngine({ strictFilters: true, strictVariables: false });
+    const notFound = { content: { code: notFoundCode } };
+
+    // Renders the flag, evaluates the branch condition on it, and returns the fail type taken.
+    const failureType = (endpointIds: string[], outputs: Record<string, unknown>) => {
+      const processNotFound = liquid.parseAndRenderSync(
+        String(stepByName('check_process_not_found')?.with?.process_not_found),
+        {
+          consts: parsed.consts,
+          inputs: { actionInput: { endpoint_ids: endpointIds } },
+          steps: { poll_status: { output: { data: { outputs } } } },
+        }
+      );
+      const branchStep = stepByName('emit_failure_by_cause');
+      // The engine evaluates a `${{ }}` condition as one Liquid expression; anything else is KQL.
+      const rawCondition = String(branchStep?.condition).trim();
+      expect(rawCondition).toMatch(/^\$\{\{[\s\S]*\}\}$/);
+      const condition = rawCondition.slice(3, -2).trim();
+      const branch = liquid.evalValueSync(condition, {
+        variables: { process_not_found: processNotFound },
+      })
+        ? branchStep?.steps
+        : branchStep?.else;
+      return branch?.find((step) => step.type === 'workflow.fail')?.with?.type;
+    };
+
+    it.each([
+      [
+        'non-retryable when every endpoint reports not-found',
+        ['a', 'b'],
+        { a: notFound, b: notFound },
+        ACTION_NON_RETRYABLE_ERROR_TYPE,
+      ],
+      [
+        'retryable when another endpoint reports a different code',
+        ['a', 'b'],
+        { a: notFound, b: { content: { code: 'other' } } },
+        undefined,
+      ],
+      ['retryable when another endpoint has no output', ['a', 'b'], { a: notFound }, undefined],
+    ])('fails as %s', (_case, endpointIds, outputs, expectedType) => {
+      expect(failureType(endpointIds, outputs)).toBe(expectedType);
+    });
+
+    // The not-found flag starts true and a loop over no endpoints would leave it there. Inputs
+    // are validated against this schema before the first step runs, so the loop never sees an
+    // empty list.
+    it('requires at least one endpoint', () => {
+      const endpointIds =
+        parsed.triggers?.[0]?.inputs?.properties?.actionInput?.properties?.endpoint_ids;
+      expect(endpointIds?.minItems).toBe(1);
+    });
   });
 
   it('memory dump is process-only, low impact, irreversible, and names Execute Operations as the privilege', () => {

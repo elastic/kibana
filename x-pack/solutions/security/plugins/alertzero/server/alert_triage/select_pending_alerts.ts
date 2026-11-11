@@ -28,6 +28,8 @@ export interface SelectedAlerts {
   pending: TriageAlert[];
   /** Carrying the claim tag, whatever their age. */
   claimed: TriageAlert[];
+  /** Already classified or analysed but still carrying the claim tag. Never planned again. */
+  settledClaimed: TriageAlert[];
 }
 
 const isDone = (alert: TriageAlert, analysisTagPrefix: string): boolean =>
@@ -45,13 +47,17 @@ export const selectPendingAlerts = ({
   analysisTagPrefix,
 }: SelectPendingAlertsParams): SelectedAlerts => {
   const cutoff = now - lookbackHours * HOUR_MS;
-  const selected: SelectedAlerts = { pending: [], claimed: [] };
+  const selected: SelectedAlerts = { pending: [], claimed: [], settledClaimed: [] };
 
   for (const alert of alerts) {
     if (!(OPEN_ALERT_STATUSES as readonly string[]).includes(alert.status)) continue;
-    if (isDone(alert, analysisTagPrefix)) continue;
+    const hasClaim = alert.tags.includes(TRIAGE_PENDING_TAG);
+    if (isDone(alert, analysisTagPrefix)) {
+      if (hasClaim) selected.settledClaimed.push(alert);
+      continue;
+    }
 
-    if (alert.tags.includes(TRIAGE_PENDING_TAG)) {
+    if (hasClaim) {
       selected.claimed.push(alert);
     } else if (alert.timestamp >= cutoff) {
       // Older alerts are left alone: the search window is the look-back, so they are never tagged.

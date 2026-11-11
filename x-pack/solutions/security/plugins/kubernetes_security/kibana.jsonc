@@ -12,7 +12,6 @@
     "server": true,
     "requiredPlugins": [
       "data",
-      "timelines",
       "ruleRegistry",
       "sessionView"
     ],

@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/proposals-plugin",
-  "owner": ["@elastic/security-solution"],
+  "owner": ["@elastic/alertzero-common-layer"],
   "group": "platform",
   "visibility": "shared",
   "description": "Solution-agnostic proposals: a recommendation an agent makes and a human decides, gated by a managed workflow. Owns the record, its API, and its workflow steps.",

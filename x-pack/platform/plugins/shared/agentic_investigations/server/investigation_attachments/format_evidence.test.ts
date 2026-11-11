@@ -8,20 +8,32 @@
 import { formatEvidenceForAgent } from './format_evidence';
 
 describe('formatEvidenceForAgent', () => {
-  it('lists links and queries after the description', () => {
+  it('summarizes the chart after the description', () => {
     expect(
       formatEvidenceForAgent({
         description: 'Errors spiked.',
-        references: [
-          { url: 'https://github.com/elastic/kibana/pull/1', label: 'Deploy PR' },
-          { query: 'FROM logs-* | LIMIT 1' },
-        ],
+        chart: {
+          type: 'line',
+          title: 'Errors per minute',
+          x_axis: { type: 'time' },
+          y_axis: { unit: 'number' },
+          series: [
+            {
+              name: 'checkout',
+              points: [
+                { x: '2024-01-01T00:00:00.000Z', y: 1 },
+                { x: '2024-01-01T00:01:00.000Z', y: 9 },
+              ],
+            },
+          ],
+          annotations: [{ x: '2024-01-01T00:01:00.000Z', label: 'Deploy' }],
+        },
       })
     ).toBe(
       [
         'Errors spiked.',
-        'Link: Deploy PR: https://github.com/elastic/kibana/pull/1',
-        'Query: FROM logs-* | LIMIT 1',
+        'Chart "Errors per minute" (line, time x axis (number)): checkout: 2 points, 1 to 9',
+        'Annotations: Deploy at 2024-01-01T00:01:00.000Z',
       ].join('\n')
     );
   });
