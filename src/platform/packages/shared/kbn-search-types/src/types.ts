@@ -129,6 +129,12 @@ export interface ISearchOptions {
    * Project routing configuration for cross-project search (CPS).
    */
   projectRouting?: ProjectRouting;
+
+  /**
+   * How long a poll for an async search waits for completion (as an Elasticsearch duration, e.g. `30s`).
+   * Set by the search interceptor when polling, so strategies that rebuild `params` still long-poll.
+   */
+  pollLength?: string;
 }
 
 /**
@@ -147,4 +153,5 @@ export type ISearchOptionsSerializable = Pick<
   | 'executionContext'
   | 'stream'
   | 'projectRouting'
+  | 'pollLength'
 >;

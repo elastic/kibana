@@ -56,6 +56,7 @@ export function registerSearchRoute(
                 stream: schema.maybe(schema.boolean()),
                 requestHash: schema.maybe(schema.string()),
                 projectRouting: schema.maybe(schema.string()),
+                pollLength: schema.maybe(schema.duration()),
               },
               { unknowns: 'allow' }
             ),
@@ -72,6 +73,7 @@ export function registerSearchRoute(
           stream,
           requestHash,
           projectRouting,
+          pollLength,
           ...searchRequest
         } = request.body;
         const { strategy, id } = request.params;
@@ -107,6 +109,7 @@ export function registerSearchRoute(
                   stream,
                   requestHash,
                   projectRouting,
+                  pollLength: pollLength ? `${pollLength.asMilliseconds()}ms` : undefined,
                 }
               )
               .pipe(first())
