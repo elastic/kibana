@@ -141,7 +141,16 @@ describe('runHop', () => {
       ['role-a', 'seed', 'role-a'],
       ['role-a', 'seed', 'role-a'],
     ]);
+    // Rows come back ordered by the node they reach, whatever order the queries returned them.
     expect(out.edges).toEqual([
+      {
+        hop: 1,
+        relation: 'runs_as',
+        source: 'role-a',
+        target: 'i-1',
+        count: 2,
+        payload: { 'entity.name': ['Role A'] },
+      },
       {
         hop: 1,
         relation: 'can_assume',
@@ -158,22 +167,14 @@ describe('runHop', () => {
         count: 1,
         payload: { 'entity.name': ['Role A', 'alias'] },
       },
-      {
-        hop: 1,
-        relation: 'runs_as',
-        source: 'role-a',
-        target: 'i-1',
-        count: 2,
-        payload: { 'entity.name': ['Role A'] },
-      },
     ]);
     expect(out.nodes).toEqual([
+      { id: 'i-1', hop: 1, via: 'runs_as', type: 'asset' },
       { id: 'role-b', hop: 1, via: 'can_assume', type: 'asset' },
       { id: 'role-c', hop: 1, via: 'can_assume', type: 'asset' },
-      { id: 'i-1', hop: 1, via: 'runs_as', type: 'asset' },
     ]);
-    expect(out.next_frontier).toEqual(['role-b', 'role-c', 'i-1']);
-    expect(out.visited).toEqual(['seed', 'role-a', 'role-b', 'role-c', 'i-1']);
+    expect(out.next_frontier).toEqual(['i-1', 'role-b', 'role-c']);
+    expect(out.visited).toEqual(['seed', 'role-a', 'i-1', 'role-b', 'role-c']);
     expect(out.truncated).toBe(false);
     expect(out.stop_reason).toBe('');
     expect(out.stats).toMatchObject({ queries: 2, rows_returned: 3, edges_added: 3, new_nodes: 3 });
@@ -204,12 +205,12 @@ describe('runHop', () => {
     // The loop carries the nodes, so they stay id, hop, via and type; the workflow resolves
     // them once after the traversal.
     expect(out.nodes).toEqual([
-      { id: 'role-b', hop: 1, via: 'can_assume', type: 'asset' },
       { id: 'ghost', hop: 1, via: 'can_assume', type: 'asset' },
+      { id: 'role-b', hop: 1, via: 'can_assume', type: 'asset' },
     ]);
     // The payload describes the reached node, so a stop condition on it matches it.
-    expect(out.edges[0].payload).toEqual({ 'entity.name': ['Role B'] });
-    expect(out.edges[1].payload).toBeUndefined();
+    expect(out.edges[1].payload).toEqual({ 'entity.name': ['Role B'] });
+    expect(out.edges[0].payload).toBeUndefined();
   });
 
   it('caps every query at the smaller of max_edges_per_hop and the unfilled edge budget', async () => {
@@ -236,7 +237,7 @@ describe('runHop', () => {
     // Five edges may still be admitted, so both queries, issued together, take the per-hop
     // cap of four.
     expect(execute.queryLimits).toEqual([4, 4]);
-    expect(out.edges.map((e) => e.target)).toEqual(['role-b', 'role-c', 'i-1']);
+    expect(out.edges.map((e) => e.target)).toEqual(['i-1', 'role-b', 'role-c']);
     // Uncapped rows are one relationship each.
     expect(out.stats.relationships_read).toBe(3);
     expect(out.stats).toMatchObject({ queries: 2, queries_skipped: 0, edges_added: 3 });
@@ -266,10 +267,10 @@ describe('runHop', () => {
       },
       execute
     );
-    // Both queries run; the budget of two keeps the first field's distinct edges and drops the
-    // runs_as edge, reporting the same truncation.
+    // Both queries run; the budget of two keeps the edges onto the two smallest reached ids
+    // and drops the third, reporting the truncation.
     expect(execute.calls).toHaveLength(2);
-    expect(out.edges.map((e) => e.target)).toEqual(['role-b', 'role-c']);
+    expect(out.edges.map((e) => e.target)).toEqual(['i-1', 'role-b']);
     expect(out.stats).toMatchObject({
       queries: 2,
       queries_skipped: 0,
@@ -349,14 +350,14 @@ describe('runHop', () => {
     expect(execute.queries[0]).toContain('| WHERE src IN (?) AND kind IN (?, ?)');
     expect(execute.calls[0]).toEqual(['role-a', 'can_assume', 'runs_as', 'seed', 'role-a']);
     expect(out.edges.map((e) => [e.source, e.relation, e.target])).toEqual([
+      ['role-a', 'runs_as', 'i-1'],
       ['role-a', 'can_assume', 'role-b'],
       ['role-a', 'can_assume', 'role-c'],
-      ['role-a', 'runs_as', 'i-1'],
     ]);
     expect(out.nodes.map((n) => [n.id, n.via])).toEqual([
+      ['i-1', 'runs_as'],
       ['role-b', 'can_assume'],
       ['role-c', 'can_assume'],
-      ['i-1', 'runs_as'],
     ]);
     // 5 relationships matched for can_assume (2 kept), 1 for runs_as.
     expect(out.stats.relationships_read).toBe(6);
@@ -427,7 +428,7 @@ describe('runHop', () => {
       },
       execute
     );
-    expect(out.edges.map((e) => e.target)).toEqual(['seed', 'role-b']);
+    expect(out.edges.map((e) => e.target)).toEqual(['role-b', 'seed']);
     expect(out.next_frontier).toEqual(['role-b']);
     expect(out.stats.closing_edges).toBe(1);
   });
@@ -494,30 +495,38 @@ describe('runHop', () => {
     expect(out.stop_reason).toBe('frontier_exhausted');
   });
 
-  it('caps the frontier at max_frontier and marks the run truncated', async () => {
-    const execute = executor([result([]), result([])]);
-    const frontier = Array.from({ length: 15 }, (_, i) => `n${i}`);
+  it('expands the whole frontier and applies max_frontier to the new nodes it admits', async () => {
+    const reached: Array<[string, string]> = Array.from({ length: 12 }, (_, i) => [
+      'a',
+      `n${String(i).padStart(2, '0')}`,
+    ]);
+    // Returned out of order: the cap keeps the smallest ids, as the GRAPH EXPAND driver does.
+    const execute = executor([result([...reached].reverse()), result([])]);
+    const frontier = Array.from({ length: 15 }, (_, i) => `f${i}`);
     const out = await runHop(
       {
         hop,
         index: INDEX,
         direction: 'out',
-        frontier,
-        visited: frontier,
+        frontier: [...frontier, 'a'],
+        visited: [...frontier, 'a'],
         edgesSoFar: 0,
         truncatedSoFar: false,
         limits,
       },
       execute
     );
-    // The 10 smallest frontier ids (the cap sorts first), then the 15 visited ids.
-    expect(execute.calls[0]).toHaveLength(10 + frontier.length);
-    expect(execute.calls[0].slice(0, 10)).toEqual([...frontier].sort().slice(0, 10));
+    // All 16 frontier ids are expanded, then the 16 visited ids.
+    expect(execute.calls[0]).toHaveLength(16 + 16);
+    expect(out.next_frontier).toEqual(reached.slice(0, 10).map(([, id]) => id));
+    expect(out.edges).toHaveLength(10);
     expect(out.truncated).toBe(true);
+    expect(out.stop_reason).toBe('');
     expect(out.stats).toMatchObject({
-      frontier_size: 15,
-      frontier_expanded: 10,
-      dropped_frontier: 5,
+      frontier_size: 16,
+      frontier_expanded: 16,
+      dropped_frontier: 2,
+      new_nodes: 10,
     });
   });
 
@@ -583,7 +592,8 @@ describe('runHop', () => {
       },
       execute
     );
-    expect(out.edges).toHaveLength(3);
+    // The edge onto the refused node goes with it, as in the GRAPH EXPAND driver.
+    expect(out.edges.map((e) => e.target)).toEqual(['b', 'c']);
     expect(out.next_frontier).toEqual(['b', 'c']);
     expect(out.stop_reason).toBe('max_nodes');
     expect(out.truncated).toBe(true);
@@ -721,15 +731,15 @@ describe('runHop', () => {
     expect(out.stats.queries).toBe(4);
     // Edges keep the stored orientation: the host holds the relationship to the hash.
     expect(out.edges.map((e) => [e.source, e.target, e.relation])).toEqual([
-      ['hash-1', 'x', 'can_assume'],
       ['host:SRV-DC01', 'hash-1', 'can_assume'],
       ['host:WIN-FIN-03', 'hash-1', 'can_assume'],
+      ['hash-1', 'x', 'can_assume'],
     ]);
     // Nodes reached on the inbound leg are the holders, typed as the hop's source type.
     expect(out.nodes.map((n) => [n.id, n.type, n.via])).toEqual([
-      ['x', 'indicator', 'can_assume'],
       ['host:SRV-DC01', 'host', 'can_assume'],
       ['host:WIN-FIN-03', 'host', 'can_assume'],
+      ['x', 'indicator', 'can_assume'],
     ]);
   });
 
@@ -938,28 +948,32 @@ describe('runHop', () => {
     expect(out.stats.es_took_ms).toBe(0);
   });
 
-  it('sorts the frontier before cutting it to max_frontier so the cut is the same every run', async () => {
-    const execute = executor([result([['a', 'role-b']]), result([])]);
+  it('orders the rows by the node reached before the caps so the kept subset is the same every run', async () => {
+    const execute = executor([
+      result([
+        ['x', 'c'],
+        ['x', 'a'],
+        ['x', 'b'],
+      ]),
+      result([]),
+    ]);
     const out = await runHop(
       {
         hop,
         index: INDEX,
         direction: 'out',
-        frontier: ['c', 'a', 'b', 'a'],
-        visited: ['seed'],
+        frontier: ['x'],
+        visited: ['seed', 'x'],
         edgesSoFar: 0,
         truncatedSoFar: false,
         limits: { ...limits, max_frontier: 2 },
       },
       execute
     );
-    // The two kept ids are the smallest, whatever order the previous hop produced them in.
-    expect(execute.calls[0].slice(0, 2)).toEqual(['a', 'b']);
-    expect(out.stats).toMatchObject({
-      frontier_size: 3,
-      frontier_expanded: 2,
-      dropped_frontier: 1,
-    });
+    // The two kept nodes are the smallest ids, whatever order the query returned the rows in.
+    expect(out.edges.map((e) => e.target)).toEqual(['a', 'b']);
+    expect(out.next_frontier).toEqual(['a', 'b']);
+    expect(out.stats).toMatchObject({ frontier_expanded: 1, dropped_frontier: 1, new_nodes: 2 });
     expect(out.truncated).toBe(true);
   });
 

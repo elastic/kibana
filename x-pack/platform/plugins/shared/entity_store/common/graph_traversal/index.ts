@@ -141,7 +141,7 @@ export interface GraphTraversalHopStats {
   hop_number: number;
   name: string;
   frontier_size: number;
-  /** Frontier ids cut by `max_frontier`. */
+  /** New nodes the hop refused because it had already admitted `max_frontier` (they would have been the next frontier). */
   dropped_frontier: number;
   /** Frontier ids removed by an `entity.id` exclusion. */
   excluded_frontier: number;

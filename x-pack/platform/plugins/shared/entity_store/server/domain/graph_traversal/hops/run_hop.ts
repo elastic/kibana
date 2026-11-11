@@ -66,6 +66,7 @@ export interface RunHopInput {
 export interface RunHopStats {
   frontier_size: number;
   frontier_expanded: number;
+  /** New nodes refused because the hop had already admitted `max_frontier`. */
   dropped_frontier: number;
   queries: number;
   /** Always 0 since a hop's queries are issued together; kept so the stats shape is stable. */
@@ -275,6 +276,47 @@ const findHubs = (edges: CollectedEdge[], hubDegree: number): Set<string> => {
 /** Timings are reported to a tenth of a millisecond. */
 const roundMs = (ms: number): number => Math.round(ms * 10) / 10;
 
+/**
+ * Keep edges for at most `maxFrontier` and at most `nodeCapacity` distinct new nodes, in the
+ * rows' order, as the GRAPH EXPAND driver's `max_frontier` and `max_nodes` caps do. Closing
+ * edges (onto a node already visited) and further edges onto a kept new node are free. Nodes
+ * refused by the frontier cap and by the node cap are counted apart, so the stats say which
+ * cap bound.
+ */
+const capNewNodes = (
+  rows: CollectedEdge[],
+  visited: Set<string>,
+  maxFrontier: number,
+  nodeCapacity: number
+): { rows: CollectedEdge[]; droppedByFrontier: number; droppedByNodes: number } => {
+  const keptNew = new Set<string>();
+  const refused = new Set<string>();
+  let droppedByFrontier = 0;
+  let droppedByNodes = 0;
+  const kept: CollectedEdge[] = [];
+  for (const row of rows) {
+    const { reached } = row;
+    if (visited.has(reached) || keptNew.has(reached)) {
+      kept.push(row);
+      continue;
+    }
+    if (refused.has(reached)) continue;
+    if (keptNew.size >= maxFrontier) {
+      refused.add(reached);
+      droppedByFrontier += 1;
+      continue;
+    }
+    if (keptNew.size >= nodeCapacity) {
+      refused.add(reached);
+      droppedByNodes += 1;
+      continue;
+    }
+    keptNew.add(reached);
+    kept.push(row);
+  }
+  return { rows: kept, droppedByFrontier, droppedByNodes };
+};
+
 /** Drop edges of hub frontier nodes and repeated (relation, source, target) triples. */
 const dedupeEdges = (edges: CollectedEdge[], hubs: Set<string>): CollectedEdge[] => {
   const seen = new Set<string>();
@@ -291,19 +333,23 @@ const dedupeEdges = (edges: CollectedEdge[], hubs: Set<string>): CollectedEdge[]
  * Expand one hop over the entity store's latest index. Pure apart from `execute`, so the
  * bounding logic is unit-testable without Elasticsearch.
  *
- * Order of operations, each a circuit breaker on its own:
- * 1. Frontier beyond `max_frontier` is dropped before any query.
+ * Order of operations, the GRAPH EXPAND driver's, so both engines admit the same nodes under
+ * the same caps:
+ * 1. The whole frontier is expanded: the previous hop admitted at most `max_frontier` nodes.
  * 2. Remaining node and edge capacity is checked before any query; none left means stop.
  * 3. One query per relationship field, outbound; with direction `both`, one more per field
  *    inbound. Each is capped by `LIMIT` at the smaller of `max_edges_per_hop` and the edge
  *    capacity the edges collected so far leave unfilled, and no further query is issued once
  *    that capacity is full, since nothing more could be admitted. So a hop never holds more
  *    rows than it can admit, plus the repeats a `both` walk reads from each side.
- * 4. Frontier nodes reaching more distinct nodes than `hub_degree` are dropped (hubs).
- * 5. Edges are deduplicated and capped by the remaining edge capacity.
- * 6. New nodes are capped by the remaining node capacity; nodes already visited only
- *    produce closing edges.
- * 7. Stop conditions are tested on the admitted nodes; the fields they name are read as
+ * 4. The rows are ordered by the node they reach, so every cap below keeps the same rows
+ *    whatever order the queries returned them in.
+ * 5. Frontier nodes reaching more distinct nodes than `hub_degree` are dropped (hubs).
+ * 6. Edges are deduplicated.
+ * 7. New nodes are capped at `max_frontier` for the hop and at the remaining node capacity
+ *    for the run; nodes already visited only produce closing edges.
+ * 8. The edges kept are capped by the remaining edge capacity.
+ * 9. Stop conditions are tested on the admitted nodes; the fields they name are read as
  *    payload by every query, so a condition on a field the scenario did not list still fires.
  *
  * Edges keep the stored orientation: the source is the entity whose relationship field holds
@@ -376,15 +422,11 @@ export const runHop = async (
     return finish([], []);
   }
 
-  // 1. Frontier cap. When it binds, the ids are sorted first so the cap keeps the same subset
-  //    whatever order the previous hop's rows arrived in: a STATS result has no order, so an
-  //    unsorted cut varied between runs and between the array and edge-document queries, and
-  //    the two storages then walked on from different nodes.
-  const frontier = (
-    uniqueFrontier.length > limits.max_frontier ? [...uniqueFrontier].sort() : uniqueFrontier
-  ).slice(0, limits.max_frontier);
-  stats.dropped_frontier = uniqueFrontier.length - frontier.length;
-  if (stats.dropped_frontier > 0) truncated = true;
+  // 1. The frontier is expanded whole. `max_frontier` is applied below, when this hop's new
+  //    nodes are admitted, so the next frontier never holds more than that: the GRAPH EXPAND
+  //    driver's rule, which keeps the two engines on the same walk under the same caps. The
+  //    seed is the only frontier that was never admitted under the cap.
+  const frontier = uniqueFrontier;
   stats.frontier_expanded = frontier.length;
   const frontierSet = new Set(frontier);
 
@@ -469,6 +511,11 @@ export const runHop = async (
     ({ edge }) => !excludedIds.has(edge.source) && !excludedIds.has(edge.target)
   );
   stats.excluded_edges = collected.length - kept.length;
+  // The rows are ordered by the node they reach, as the GRAPH EXPAND driver orders a hop's
+  // rows before its hub refusal and caps: a STATS result has no order of its own, so without
+  // this the rows a cap kept varied between runs and between the array and edge-document
+  // queries, and the two storages walked on from different nodes.
+  kept.sort((a, b) => (a.reached < b.reached ? -1 : a.reached > b.reached ? 1 : 0));
 
   // 5. Hub exclusion
   const hubs = findHubs(kept, limits.hub_degree);
@@ -477,47 +524,52 @@ export const runHop = async (
     stats.hubs_skipped = Array.from(hubs);
   }
 
-  // 6. Dedupe and edge cap. Edges onto visited nodes are filtered inside the hop query; any
-  //    that still arrive are counted below as closing edges. In a `both` walk such an edge was
-  //    recorded from the other node's side when it was expanded, so it is dropped as a repeat.
+  // 6. Dedupe. Edges onto visited nodes are filtered inside the hop query; any that still
+  //    arrive are counted below as closing edges. In a `both` walk such an edge was recorded
+  //    from the other node's side when it was expanded, so it is dropped as a repeat.
   const deduped = dedupeEdges(kept, hubs).filter(
     ({ reached }) => direction !== 'both' || !visitedSet.has(reached)
   );
-  const admittedEdges = deduped.slice(0, edgeCapacity);
-  stats.dropped_edges = deduped.length - admittedEdges.length;
+
+  // 7. New-node caps, in the driver's order: `max_frontier` bounds the new nodes this hop
+  //    admits (they are the next frontier), then `max_nodes` bounds what the walk may still
+  //    admit. Closing edges and further edges onto an admitted new node keep their rows.
+  const capped = capNewNodes(deduped, visitedSet, limits.max_frontier, nodeCapacity);
+  stats.dropped_frontier = capped.droppedByFrontier;
+  if (capped.droppedByFrontier > 0) truncated = true;
+  const nodeCapHit = capped.droppedByNodes > 0;
+
+  // 8. Edge budget: the rows the run may still hold, in the same order.
+  const admittedEdges = capped.rows.slice(0, edgeCapacity);
+  stats.dropped_edges = capped.rows.length - admittedEdges.length;
   stats.edges_added = admittedEdges.length;
   if (stats.dropped_edges > 0) {
     truncated = true;
     stopReason = 'max_edges_total';
   }
 
-  // 7. New nodes and node cap
+  // 9. Admission: a node is new on its first admitted edge.
   const nodes: TraversalNode[] = [];
   const admitted = new Set<string>();
-  let nodeCapHit = false;
   for (const collectedEdge of admittedEdges) {
     const { edge, reached, inbound } = collectedEdge;
     if (visitedSet.has(reached)) {
       stats.closing_edges += 1;
     } else if (!admitted.has(reached)) {
-      if (nodes.length >= nodeCapacity) {
-        nodeCapHit = true;
-      } else {
-        admitted.add(reached);
-        // Reached on the pointed side, the node is the hop's target type; reached as the
-        // holder of the relationship (inbound), it is the source type.
-        const type = inbound ? hop.source_type : hop.target_type;
-        nodes.push({ id: reached, hop: hop.hop_number, via: edge.relation, ...(type && { type }) });
-        if (until.length > 0 && matchesStopCondition(collectedEdge, until)) {
-          untilMatches.push(reached);
-        }
+      admitted.add(reached);
+      // Reached on the pointed side, the node is the hop's target type; reached as the
+      // holder of the relationship (inbound), it is the source type.
+      const type = inbound ? hop.source_type : hop.target_type;
+      nodes.push({ id: reached, hop: hop.hop_number, via: edge.relation, ...(type && { type }) });
+      if (until.length > 0 && matchesStopCondition(collectedEdge, until)) {
+        untilMatches.push(reached);
       }
     }
   }
   for (const node of nodes) visitedSet.add(node.id);
   stats.new_nodes = nodes.length;
-  // 8. Stop conditions: the hop that admits a matching node is the last one. The whole hop is
-  //    kept (hops are unordered), so the result holds the match and its context.
+  // 10. Stop conditions: the hop that admits a matching node is the last one. The whole hop is
+  //     kept (hops are unordered), so the result holds the match and its context.
   stats.until_matched = untilMatches.length;
   if (untilMatches.length > 0) {
     stopReason = 'until_matched';
