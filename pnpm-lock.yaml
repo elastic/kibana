@@ -1842,7 +1842,7 @@ importers:
         version: link:x-pack/platform/plugins/shared/data_quality
       '@kbn/data-search-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/data_search
+        version: link:src/platform/test_plugins/data_search
       '@kbn/data-service':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-data-service
@@ -8866,8 +8866,6 @@ importers:
 
   src/platform/test/plugin_functional/plugins/core_provider_plugin: {}
 
-  src/platform/test/plugin_functional/plugins/data_search: {}
-
   src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin: {}
 
   src/platform/test/plugin_functional/plugins/hardening: {}
@@ -8900,6 +8898,7 @@ importers:
 
   src/platform/test/user_storage/plugins/user_storage_test: {}
 
+  src/platform/test_plugins/data_search: {}
   src/platform/test_plugins/otel_metrics: {}
 
   src/setup_node_env: {}
