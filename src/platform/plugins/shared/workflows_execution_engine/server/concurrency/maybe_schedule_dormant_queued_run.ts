@@ -10,6 +10,7 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 
+import { maybeDrainConcurrencyQueue } from './concurrency_queue_drainer';
 import { resumeSyncParentIfNeeded } from '../execution_functions/resume_sync_parent_if_needed';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
@@ -114,6 +115,14 @@ export async function handleConcurrencyBlockedExecution({
       workflowExecutionRepository,
       workflowTaskManager,
       logger,
+    });
+    // Re-drain: the holder's own drain may have run before this QUEUED run was searchable.
+    await maybeDrainConcurrencyQueue({
+      workflowExecution: execution,
+      workflowExecutionRepository,
+      workflowTaskManager,
+      logger,
+      failureLogLabel: `Concurrency queue drain after enqueueing execution ${workflowExecutionId} failed`,
     });
     return;
   }

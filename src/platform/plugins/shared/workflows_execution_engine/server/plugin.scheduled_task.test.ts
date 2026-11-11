@@ -71,7 +71,7 @@ jest.mock('./concurrency/maybe_schedule_dormant_queued_run', () => ({
 }));
 
 jest.mock('./concurrency/concurrency_queue_drainer', () => ({
-  maybeDrainConcurrencyQueueBeforeEnqueue: jest.fn().mockResolvedValue(undefined),
+  maybeDrainConcurrencyQueue: jest.fn().mockResolvedValue(undefined),
 }));
 
 const mockCheckConcurrency = jest.fn().mockResolvedValue(true);

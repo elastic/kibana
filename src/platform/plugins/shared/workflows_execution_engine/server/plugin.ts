@@ -36,7 +36,7 @@ import type {
 } from '@kbn/workflows';
 import { WorkflowDisabledError } from '@kbn/workflows/common/errors';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
-import { maybeDrainConcurrencyQueueBeforeEnqueue } from './concurrency/concurrency_queue_drainer';
+import { maybeDrainConcurrencyQueue } from './concurrency/concurrency_queue_drainer';
 import { handleConcurrencyBlockedExecution } from './concurrency/maybe_schedule_dormant_queued_run';
 import type { WorkflowsExecutionEngineConfig } from './config';
 import {
@@ -1215,7 +1215,7 @@ export class WorkflowsExecutionEnginePlugin
                   };
                 }
 
-                await maybeDrainConcurrencyQueueBeforeEnqueue({
+                await maybeDrainConcurrencyQueue({
                   workflowExecution,
                   workflowExecutionRepository,
                   workflowTaskManager,
@@ -1575,7 +1575,7 @@ export class WorkflowsExecutionEnginePlugin
       });
       ensureWorkflowCallerAvailable(originalRequest, workflowExecution);
 
-      await maybeDrainConcurrencyQueueBeforeEnqueue({
+      await maybeDrainConcurrencyQueue({
         workflowExecution,
         workflowExecutionRepository,
         workflowTaskManager,
@@ -2000,7 +2000,7 @@ export class WorkflowsExecutionEnginePlugin
         ...keylessItems.map(runCheck),
         ...Array.from(bucketsByGroup.values()).map(async (bucket) => {
           for (const p of bucket) {
-            await maybeDrainConcurrencyQueueBeforeEnqueue({
+            await maybeDrainConcurrencyQueue({
               workflowExecution: p.workflowExecution,
               workflowExecutionRepository,
               workflowTaskManager,
