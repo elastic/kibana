@@ -841,15 +841,38 @@ export const getMetricVisualization = ({
 
   getUserMessages(state, { frame }) {
     const currentData = frame.activeData?.[state.layerId];
+    const datasource = frame.datasourceLayers[state.layerId];
+    const canCollapseBy =
+      state.collapseFn && getAccessorType(datasource, state.metricAccessor).isNumeric;
 
-    const errors: UserMessage[] = [];
+    const messages: UserMessage[] = [];
+
+    if (
+      datasource?.isTextBasedLanguage() &&
+      state.metricAccessor &&
+      !state.breakdownByAccessor &&
+      !canCollapseBy &&
+      currentData &&
+      currentData.rows.length > 1
+    ) {
+      messages.push({
+        uniqueId: 'metric_esql_multiple_rows',
+        severity: 'warning',
+        fixableInEditor: true,
+        displayLocations: [{ id: 'visualization' }],
+        shortMessage: i18n.translate('xpack.lens.metric.multipleRowsDescription', {
+          defaultMessage: 'The metric query returned multiple rows. Only the first row is used.',
+        }),
+        longMessage: '',
+      });
+    }
 
     if (state.maxAccessor) {
       const isMetricNonNumeric = Boolean(
         state.metricAccessor && !isNumericFieldForDatatable(currentData, state.metricAccessor)
       );
       if (isMetricNonNumeric) {
-        errors.push({
+        messages.push({
           uniqueId: METRIC_NUMERIC_MAX,
           severity: 'error',
           fixableInEditor: true,
@@ -861,6 +884,6 @@ export const getMetricVisualization = ({
         });
       }
     }
-    return errors;
+    return messages;
   },
 });
