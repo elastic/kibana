@@ -23,9 +23,8 @@ interface Boxed<T> {
   readonly value: T;
 }
 
-const toAttributes = ({ name, source }: PluginWrapper) => ({
+const toAttributes = ({ name }: PluginWrapper) => ({
   'kibana.plugin.id': name,
-  'kibana.plugin.source': source,
 });
 
 /**

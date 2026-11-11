@@ -767,7 +767,6 @@ describe('lifecycle timeouts in telemetry', () => {
     seconds,
     {
       'kibana.plugin.id': pluginId,
-      'kibana.plugin.source': 'external',
       'kibana.plugin.lifecycle': lifecycle,
       outcome,
     },

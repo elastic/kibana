@@ -19,7 +19,7 @@ import type { PluginWrapper } from './plugin';
 import { PluginsTelemetry } from './plugins_telemetry';
 
 const plugin = { name: 'pluginA', source: 'x-pack' } as PluginWrapper;
-const pluginAttributes = { 'kibana.plugin.id': 'pluginA', 'kibana.plugin.source': 'x-pack' };
+const pluginAttributes = { 'kibana.plugin.id': 'pluginA' };
 
 describe('PluginsTelemetry', () => {
   let histograms: Map<string, { record: jest.Mock }>;
