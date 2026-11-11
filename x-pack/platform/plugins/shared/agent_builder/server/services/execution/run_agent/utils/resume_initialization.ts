@@ -15,7 +15,6 @@ import type {
 import {
   createUserQuestionAnsweredEvent,
   isAskUserQuestionStep,
-  isReasoningStep,
   isToolCallStep,
 } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
@@ -28,10 +27,7 @@ import {
   type PromptStorageState,
 } from '@kbn/agent-builder-common/agents/prompts';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
-import type {
-  ToolCallWithReasoning,
-  ToolIdMapping,
-} from '@kbn/agent-builder-genai-utils/langchain';
+import type { ToolCallWithIntent, ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
 import type { ResearchOutcome, ToolRenderStateMap } from '../transient_state';
 import type { ConversationTurn } from './conversation_turn';
 import { toModelToolCall } from './dynamic_tool_call';
@@ -139,23 +135,18 @@ export const buildResumeInitialization = ({
     return step;
   });
 
-  const reasoningSteps = steps.filter(isReasoningStep);
   const researchOutcome: ResearchOutcome | undefined =
     pendingSteps.length > 0
       ? {
           type: 'tool_calls',
           toolCallGroupId: pendingSteps[0].tool_call_group_id ?? uuidv4(),
-          toolCalls: pendingSteps.map((step): ToolCallWithReasoning => {
+          toolCalls: pendingSteps.map((step): ToolCallWithIntent => {
             const { toolId, args } = toModelToolCall(step);
             return {
               toolCallId: step.tool_call_id,
               toolName: langchainNameFor(toolId),
               args,
-              reasoning:
-                reasoningSteps
-                  .filter((reasoning) => reasoning.tool_call_id === step.tool_call_id)
-                  .map((reasoning) => reasoning.reasoning)
-                  .join('\n') || undefined,
+              ...(step.intent ? { intent: step.intent } : {}),
             };
           }),
         }

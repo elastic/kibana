@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-// eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line @kbn/compat/import-no-extraneous-dependencies
 import { waitFor, within } from '@testing-library/react';
-// eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line @kbn/compat/import-no-extraneous-dependencies
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import type { ArtifactFormComponentProps, ArtifactViewModeComponentProps } from './types';
 import type { ArtifactListPageProps } from './artifact_list_page';

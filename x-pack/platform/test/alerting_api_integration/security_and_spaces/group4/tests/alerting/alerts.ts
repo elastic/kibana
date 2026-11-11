@@ -2008,8 +2008,8 @@ instanceStateValue: true
          * Creates a rule that always fire with a system action
          * that has configured a connector adapter.
          *
-         * System action: x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/action_types.ts
-         * Adapter: x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/connector_adapters.ts
+         * System action: x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/action_types.ts
+         * Adapter: x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/connector_adapters.ts
          */
         const response = await alertUtils.createAlwaysFiringSystemAction({
           reference,
@@ -2051,7 +2051,7 @@ instanceStateValue: true
           reference: 'alert-utils-ref:1:superuser',
           /**
            * Param was injected by the connector adapter in
-           * x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/connector_adapters.ts
+           * x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/connector_adapters.ts
            */
           injected: 'param from connector adapter',
         });

@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH } from '../../../common/constants';
+import { PolicySettingsRecordSchema } from '../models/cloud_onboarding_deployment';
 
 // --- Shared primitives ---
 
@@ -58,6 +59,15 @@ const EcfStackSchema = schema.object({
       },
     })
   ),
+  namespace: schema.maybe(
+    schema.string({
+      minLength: 1,
+      maxLength: 100,
+      meta: {
+        description: 'Data stream namespace the stack was last launched or updated with.',
+      },
+    })
+  ),
 });
 
 const CloudOnboardingDeploymentProviderSchema = schema.oneOf(
@@ -96,6 +106,12 @@ const RequestServiceVarsSchema = schema.recordOf(
   { meta: { description: 'Per-service config keyed by instance ID.' } }
 );
 
+// The field shipped after the routes (`since: '9.5.0'`), so it carries its own availability.
+const POLICY_SETTINGS_AVAILABILITY = { stability: 'experimental' as const, since: '9.7.0' };
+
+const PolicySettingsSchema = (description: string) =>
+  PolicySettingsRecordSchema({ description, availability: POLICY_SETTINGS_AVAILABILITY });
+
 const InstanceSchema = schema.object({
   instanceId: schema.string({
     minLength: 1,
@@ -125,6 +141,13 @@ const InstanceSchema = schema.object({
 // The field shipped after the routes (`since: '9.5.0'`), so it carries its own availability.
 const INSTANCES_AVAILABILITY = { stability: 'experimental' as const, since: '9.7.0' };
 
+// Like `instances`, this field shipped after the routes (`since: '9.5.0'`), so it carries its own
+// availability.
+const DEDICATED_NAMESPACE_TEMPLATES_AVAILABILITY = {
+  stability: 'experimental' as const,
+  since: '9.7.0',
+};
+
 const InstancesSchema = (description: string) =>
   schema.arrayOf(InstanceSchema, {
     maxSize: 1000,
@@ -134,7 +157,7 @@ const InstancesSchema = (description: string) =>
 const OnboardingDeploymentIdParamSchema = schema.object({
   id: schema.string({
     maxLength: 255,
-    meta: { description: 'The saved object ID of the cloud onboarding deployment.' },
+    meta: { description: 'The saved object ID of the cloud onboarding instance.' },
   }),
 });
 
@@ -205,11 +228,25 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
       'Service instances, including duplicates, from the last deployment. Used to restore the service list when an onboarding is resumed.'
     )
   ),
+  policySettings: schema.maybe(
+    PolicySettingsSchema(
+      'Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).'
+    )
+  ),
   namespace: schema.maybe(
     schema.string({
       meta: {
         description:
           'Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.',
+      },
+    })
+  ),
+  dedicatedNamespaceTemplates: schema.maybe(
+    schema.boolean({
+      meta: {
+        description:
+          'Whether the global namespace uses dedicated index templates. Applied to the installed packages after a deployment. Absent means off.',
+        availability: DEDICATED_NAMESPACE_TEMPLATES_AVAILABILITY,
       },
     })
   ),
@@ -267,7 +304,7 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
       maxSize: 1000,
       meta: {
         description:
-          'Package policy IDs created for this deployment (managed_integration and agent_based).',
+          'Integration policy IDs created for this deployment (managed_integration and agent_based).',
       },
     })
   ),
@@ -354,12 +391,26 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
         'Service instances, including duplicates, being deployed. Used to restore the service list when the onboarding is resumed.'
       )
     ),
+    policySettings: schema.maybe(
+      PolicySettingsSchema(
+        'Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).'
+      )
+    ),
     namespace: schema.maybe(
       schema.string({
         maxLength: 100,
         meta: {
           description:
             'Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.',
+        },
+      })
+    ),
+    dedicatedNamespaceTemplates: schema.maybe(
+      schema.boolean({
+        meta: {
+          description:
+            'Whether the global namespace uses dedicated index templates. Applied to the installed packages after a deployment. Absent means off.',
+          availability: DEDICATED_NAMESPACE_TEMPLATES_AVAILABILITY,
         },
       })
     ),
@@ -449,7 +500,7 @@ const CloudOnboardingDeploymentListItemSchema = CloudOnboardingDeploymentItemSch
       maxSize: 100,
       meta: {
         description:
-          'Packages of the deployment instance package policies with their deployed versions. Empty for ECF-only deployment instances.',
+          'Packages of the deployment instance integration policies with their deployed versions. Empty for ECF-only deployment instances.',
       },
     }
   ),
@@ -569,6 +620,15 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
         })
       )
     ),
+    dedicatedNamespaceTemplates: schema.maybe(
+      schema.boolean({
+        meta: {
+          description:
+            'Whether the global namespace uses dedicated index templates. Omit it to keep the stored value. Applied to the installed packages after a deployment.',
+          availability: DEDICATED_NAMESPACE_TEMPLATES_AVAILABILITY,
+        },
+      })
+    ),
     packageNames: schema.maybe(
       schema.arrayOf(schema.string({ minLength: 1, maxLength: 255 }), {
         maxSize: 100,
@@ -590,6 +650,11 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
     instances: schema.maybe(
       InstancesSchema(
         'Service instances, including duplicates, from the last deployment. Replaces the stored list, so instances removed since the last deployment are dropped.'
+      )
+    ),
+    policySettings: schema.maybe(
+      PolicySettingsSchema(
+        'Integration policy settings that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`). Replaces the stored settings; omit it to keep them.'
       )
     ),
     services: schema.maybe(
@@ -639,7 +704,7 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
         maxSize: 1000,
         meta: {
           description:
-            'Package policy IDs created for this deployment (managed_integration and agent_based).',
+            'Integration policy IDs created for this deployment (managed_integration and agent_based).',
         },
       })
     ),

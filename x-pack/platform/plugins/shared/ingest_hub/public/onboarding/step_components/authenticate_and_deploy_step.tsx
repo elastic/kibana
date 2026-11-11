@@ -16,6 +16,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import { isAgentBasedOnly } from '../aws_service_matrix';
+import { getEcfTemplateFamily } from '../ecf_cloudformation';
 import type { AwsServiceMatrixEntry, DeploymentMethod } from '../aws_service_matrix';
 import { DeploymentMethodCard } from './authenticate_and_deploy_step/deployment_method_card';
 import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
@@ -25,6 +26,7 @@ import { useDeploy, toSOServiceVars } from './authenticate_and_deploy_step/use_d
 import { toSOSettings, toSOSettingsUpdate } from './authenticate_and_deploy_step/so_settings';
 import { useOnboardingDriftDetection } from './authenticate_and_deploy_step/use_onboarding_drift_detection';
 import { useAgentBasedDeploy } from './authenticate_and_deploy_step/use_agent_based_deploy';
+import { useApplyDedicatedTemplates } from './authenticate_and_deploy_step/use_apply_dedicated_templates';
 import { AgentBasedSection } from './authenticate_and_deploy_step/agent_based_section';
 import { useOnboardingSO } from './authenticate_and_deploy_step/use_onboarding_so';
 import { useEcfDeployment, EcfDeploymentSection } from './ecf_deployment_section';
@@ -333,6 +335,15 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     return handleAgentDeploy();
   }, [handleAgentDeploy]);
 
+  const applyDedicatedTemplates = useApplyDedicatedTemplates({
+    enabled: !!serviceSettings.dedicatedNamespaceTemplates,
+    // A deploy attempted here. "Done" alone also turns true for an existing deployment once its
+    // drift check settles, which is only a reopen and must not write the shared list.
+    isDeployDone: isAgentBased ? agentDeployAttempted && isAgentDone : deployAttempted && isMiDone,
+    groups: isAgentBased ? agentTargets : deployGroups,
+    globalNamespace: serviceSettings.namespace?.trim() ?? '',
+  });
+
   const isAwsIdentityFederationEnabled = useAwsIdentityFederationEnabled();
   const showIdentityFederation = useMemo(() => {
     if (!isAwsIdentityFederationEnabled) return false;
@@ -364,6 +375,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     sectionProps: ecfSectionProps,
     currentServiceIdsByFamily,
     currentConfigsByFamily,
+    currentNamespaceByFamily,
     advanceStaleSnapshots,
   } = useEcfDeployment({
     instances: isAgentBased ? [] : serviceSettings.instances,
@@ -371,6 +383,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     globalRegion,
     otlpEndpoint,
     dataFormat,
+    namespace: serviceSettings.namespace,
   });
 
   // ── ECF-only SO persistence ───────────────────────────────────────────────────
@@ -405,6 +418,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         const stackArn = ecfSectionProps.stackArns[family];
         const serviceIds = currentServiceIdsByFamily[family];
         const serviceConfigs = currentConfigsByFamily[family];
+        const namespace = currentNamespaceByFamily[family];
         return {
           family,
           stackName: ecfSectionProps.stackNames[family] || defaultNames[family],
@@ -412,6 +426,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           ...(stackArn ? { stackArn } : {}),
           serviceIds,
           serviceConfigs,
+          ...(namespace !== undefined ? { namespace } : {}),
         };
       })
       .filter((s): s is NonNullable<typeof s> => s !== null);
@@ -422,6 +437,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     ecfSectionProps.stackArns,
     currentServiceIdsByFamily,
     currentConfigsByFamily,
+    currentNamespaceByFamily,
   ]);
 
   const ecfStacksUnchanged = useMemo(
@@ -430,6 +446,26 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       JSON.stringify(ecfStacks) === JSON.stringify(detectAndReviewStep.ecfStacks),
     [ecfStacks, detectAndReviewStep.ecfStacks]
   );
+
+  // A stack that moves to a new namespace has to show data there, so the instances of its services
+  // start detection over instead of keeping a "receiving" earned in the old namespace.
+  const resetStatusesOfStacksChangingNamespace = useCallback(() => {
+    const movedFamilies = Object.keys(ecfSectionProps.staleNamespaceByFamily ?? {}).filter(
+      (family) =>
+        ecfSectionProps.isStaleByFamily[family as keyof typeof ecfSectionProps.isStaleByFamily] &&
+        ecfSectionProps.isUpdateOpenedByFamily[
+          family as keyof typeof ecfSectionProps.isUpdateOpenedByFamily
+        ]
+    );
+    if (movedFamilies.length === 0) return;
+    const statuses: Record<string, 'instantiating'> = {};
+    for (const { instanceId, serviceId } of serviceSettings.instances) {
+      const entry = awsServicesMap?.get(serviceId);
+      const family = entry && getEcfTemplateFamily(entry);
+      if (family && movedFamilies.includes(family)) statuses[instanceId] = 'instantiating';
+    }
+    if (Object.keys(statuses).length > 0) updateDetectAndReviewStep({ serviceStatuses: statuses });
+  }, [ecfSectionProps, serviceSettings.instances, awsServicesMap, updateDetectAndReviewStep]);
 
   // ── handleNext sub-handlers ───────────────────────────────────────────────────
 
@@ -450,7 +486,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           Record<string, unknown>
         >,
         globalRegion,
-        ...toSOSettings(serviceSettings),
+        ...toSOSettings(serviceSettings, 'ecf'),
         dataFormat,
       }));
     if (deploymentId) {
@@ -462,7 +498,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       // This write is load-bearing — failure leaves the SO advertising the wrong mechanism
       // and an orphaned connector reference, so we must confirm it before navigating.
       const writeSucceeded = await updateDeployment(deploymentId, {
-        ...toSOSettingsUpdate(serviceSettings),
+        ...toSOSettingsUpdate(serviceSettings, 'ecf'),
         mechanisms: ['ecf'],
         connectorId: null,
         authMethod: null,
@@ -499,6 +535,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     } else {
       setIsSavingSO(false);
     }
+    resetStatusesOfStacksChangingNamespace();
     advanceStaleSnapshots();
     onContinue();
     // persistDeploymentId after navigate: onContinue pushes a stale location snapshot, so
@@ -515,6 +552,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     awsServicesMap,
     globalRegion,
     dataFormat,
+    resetStatusesOfStacksChangingNamespace,
     advanceStaleSnapshots,
     onContinue,
     createDeployment,
@@ -525,9 +563,15 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
   // Mixed (MI + ECF): SO was created by handleDeploy with both mechanisms; update ecfStacks now.
   const handleMixedEcfNext = useCallback(async () => {
+    resetStatusesOfStacksChangingNamespace();
     advanceStaleSnapshots();
+    const shouldWriteEcfStacks =
+      !ecfStacksUnchanged && !!detectAndReviewStep.onboardingDeploymentId;
+    // Before navigating, so detection polls the stacks' new namespace from the start rather than
+    // finding the old one's data and marking the reset services receiving again.
+    if (shouldWriteEcfStacks) updateDetectAndReviewStep({ ecfStacks });
     onContinue();
-    if (!ecfStacksUnchanged && detectAndReviewStep.onboardingDeploymentId) {
+    if (shouldWriteEcfStacks && detectAndReviewStep.onboardingDeploymentId) {
       await updateDeployment(detectAndReviewStep.onboardingDeploymentId, {
         ecfStacks,
         serviceVars: toSOServiceVars(serviceVars, awsServicesMap ?? new Map()) as Record<
@@ -535,7 +579,6 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           Record<string, unknown>
         >,
       });
-      updateDetectAndReviewStep({ ecfStacks });
     }
     // A previously-failed service that was deselected from Step 1 never acquired a policy ID,
     // so policyIdsByInstance has no stale entry — it can slip through isAlreadyDeployed and
@@ -567,6 +610,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     deployGroups,
     failedInstances,
     selectedServiceIds,
+    resetStatusesOfStacksChangingNamespace,
     advanceStaleSnapshots,
     removeDeployInstances,
     onContinue,
@@ -597,8 +641,11 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       // Called after the SO write is confirmed so a failed write leaves state intact for retry.
       removeDeployInstances(staleFailedIds);
     }
+    // The switch may have been turned on after the deploy, which the Deploy button does not redo.
+    await applyDedicatedTemplates();
     onContinue();
   }, [
+    applyDedicatedTemplates,
     deployGroups,
     failedInstances,
     removeDeployInstances,
@@ -648,6 +695,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       // Short-circuit if already deployed (e.g. user went Back then Next again) to avoid
       // creating duplicate package policies on the same agent policy.
       if (isAgentDone) {
+        await applyDedicatedTemplates();
         onContinue();
         return;
       }
@@ -656,6 +704,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         // Deploy failed — stay on step 3, error callout is already shown by the section.
         return;
       }
+      // The step unmounts on navigation, before the done state the hook reacts to is rendered.
+      await applyDedicatedTemplates();
       onContinue();
       return;
     }
@@ -671,6 +721,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     handleMixedEcfNext,
     handleMiNext,
     handleAgentDeployForNext,
+    applyDedicatedTemplates,
     handleDeploy,
     awsServicesMap,
     detectAndReviewStep.policyIdsByInstance,

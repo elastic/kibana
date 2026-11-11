@@ -17,6 +17,7 @@ import { SANDBOX_STR_REPLACE_TOOL_ID } from '../tools/sandbox_bash/str_replace_t
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_WRITE_FILE_TOOL_ID } from '../tools/sandbox_bash/write_file_tool';
 import { TIME_CONVERTER_TOOL_ID } from '../tools/time_converter/tool';
+import { SLACK_READ_TOOL_ID } from '../tools/slack_read/tool';
 import {
   ANSWER_MAX_CHARS,
   QUESTION_MAX_CHARS,
@@ -246,6 +247,7 @@ const KNOWN_AGENT_TOOLS = [
   SANDBOX_VIEW_FILE_TOOL_ID,
   SANDBOX_WRITE_FILE_TOOL_ID,
   TIME_CONVERTER_TOOL_ID,
+  replayToolName(SLACK_READ_TOOL_ID),
 ];
 
 /** The tool names to define: the known ones, then any other the conversation calls, in a fixed order. */

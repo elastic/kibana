@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { AddLayerButton } from './add_layer';
 import type { XYVisualizationState } from './types';
 import { Position } from '@elastic/charts';
@@ -15,8 +15,9 @@ import { LENS_DATASOURCE_ID, LENS_LAYER_TYPES as LayerTypes } from '@kbn/lens-co
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import { IconChartBarAnnotations } from '@kbn/chart-icons';
 
-// Failing: See https://github.com/elastic/kibana/issues/255059
-describe.skip('AddLayerButton', () => {
+const ONE_FRAME_MS = 16;
+
+describe('AddLayerButton', () => {
   const addLayer = jest.fn();
 
   const renderAddLayerButton = () => {
@@ -67,15 +68,14 @@ describe.skip('AddLayerButton', () => {
       },
       clickVisualizationButton: () => {
         fireEvent.click(screen.getByRole('menuitem', { name: 'Visualization' }));
+        // EuiContextMenu defers switching to a sub-panel by one animation frame
+        act(() => {
+          jest.advanceTimersByTime(ONE_FRAME_MS);
+        });
       },
       clickSeriesOptionsButton: (seriesType = 'line') => {
         const lineOption = screen.getByTestId(`lnsXY_seriesType-${seriesType}`);
         fireEvent.click(lineOption);
-      },
-      waitForSeriesOptions: async () => {
-        await waitFor(() => {
-          expect(screen.queryByTestId('lnsXY_seriesType-area')).toBeInTheDocument();
-        });
       },
       getSeriesTypeOptions: () => {
         return screen.getAllByTestId('lnsChartSwitch-option-label').map((el) => el.textContent);
@@ -83,28 +83,27 @@ describe.skip('AddLayerButton', () => {
     };
   };
 
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
   afterEach(() => {
+    jest.useRealTimers();
     jest.clearAllMocks();
   });
 
-  it('renders all compatible series types', async () => {
-    const { clickAddLayer, clickVisualizationButton, waitForSeriesOptions, getSeriesTypeOptions } =
+  it('renders all compatible series types', () => {
+    const { clickAddLayer, clickVisualizationButton, getSeriesTypeOptions } =
       renderAddLayerButton();
     clickAddLayer();
     clickVisualizationButton();
-    await waitForSeriesOptions();
     expect(getSeriesTypeOptions()).toEqual(['Bar', 'Area', 'Line']);
   });
-  it('calls addLayer with a proper series type when button is clicked', async () => {
-    const {
-      clickAddLayer,
-      clickVisualizationButton,
-      waitForSeriesOptions,
-      clickSeriesOptionsButton,
-    } = renderAddLayerButton();
+  it('calls addLayer with a proper series type when button is clicked', () => {
+    const { clickAddLayer, clickVisualizationButton, clickSeriesOptionsButton } =
+      renderAddLayerButton();
     clickAddLayer();
     clickVisualizationButton();
-    await waitForSeriesOptions();
     clickSeriesOptionsButton('line');
     expect(addLayer).toHaveBeenCalledWith(LayerTypes.DATA, { seriesType: 'line' });
   });

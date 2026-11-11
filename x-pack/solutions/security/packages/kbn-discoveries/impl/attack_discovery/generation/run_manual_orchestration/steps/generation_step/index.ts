@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { AttackDiscoverySource, SourceMetadata } from '../../../../persistence/event_logging';
@@ -39,6 +40,7 @@ export interface GenerationStepParams {
   sourceMetadata?: SourceMetadata;
   spaceId: string;
   start?: string;
+  telemetryMetadata?: TelemetryMetadata;
   workflowConfig: WorkflowConfig;
   workflowsManagementApi: WorkflowsManagementApi;
 }
@@ -62,6 +64,7 @@ export const runGenerationStep = async ({
   sourceMetadata,
   spaceId,
   start,
+  telemetryMetadata,
   workflowConfig,
   workflowsManagementApi,
 }: GenerationStepParams): Promise<GenerationWorkflowResult> => {
@@ -90,6 +93,7 @@ export const runGenerationStep = async ({
       sourceMetadata,
       spaceId,
       start,
+      ...(telemetryMetadata != null ? { telemetryMetadata } : {}),
       workflowConfig,
       workflowId: generationWorkflowId,
       workflowsManagementApi,
