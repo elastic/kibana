@@ -22,25 +22,27 @@ const datasetColumns = [
 ];
 
 const workloadColumns = [
-  { name: 'orchestrator.cluster.name', type: 'keyword' },
   { name: 'kubernetes.namespace', type: 'keyword' },
   { name: 'kind', type: 'keyword' },
   { name: 'workload', type: 'keyword' },
   { name: 'replicas', type: 'long' },
   { name: 'last_seen', type: 'date' },
+  { name: 'clusters', type: 'keyword' },
+  { name: 'owner_derived', type: 'long' },
 ];
 
 const nodeColumns = [
-  { name: 'orchestrator.cluster.name', type: 'keyword' },
   { name: 'kubernetes.node.name', type: 'keyword' },
   { name: 'replicas', type: 'long' },
   { name: 'last_seen', type: 'date' },
+  { name: 'clusters', type: 'keyword' },
 ];
 
 const sourceEsql =
   'FROM metrics-gcp-us-central1:metrics-kubernetes.*,-metrics-gcp-us-central1:metrics-kubernetes.apiserver-* | WHERE orchestrator.cluster.name == "cluster-a"';
 
-type TestCell = string | number | null;
+type TestScalar = string | number | boolean | null;
+type TestCell = TestScalar | readonly TestScalar[];
 
 const datasetRows = (...datasets: Array<string | null>): TestCell[][] =>
   datasets.map((dataset, index) => [index + 1, dataset]);
@@ -89,47 +91,47 @@ describe('Kubernetes entity derivation', () => {
     const lastSeen = '2026-11-10T12:00:00.000Z';
     const { features } = foldWorkloadRows([
       {
-        'orchestrator.cluster.name': 'cluster-a',
         'kubernetes.namespace': 'apps',
         kind: 'deployment',
         workload: 'api',
-        owner_derived: true,
+        owner_derived: 1,
+        clusters: ['cluster-a'],
         replicas: 2,
         last_seen: lastSeen,
       },
       {
-        'orchestrator.cluster.name': 'cluster-a',
         'kubernetes.namespace': 'apps',
         kind: 'deployment',
         workload: 'kb',
-        owner_derived: true,
+        owner_derived: 1,
+        clusters: ['cluster-a'],
         replicas: 1,
         last_seen: lastSeen,
       },
       {
-        'orchestrator.cluster.name': 'cluster-a',
         'kubernetes.namespace': 'apps',
         kind: 'deployment',
         workload: 'kb-ui',
-        owner_derived: true,
+        owner_derived: 1,
+        clusters: ['cluster-a'],
         replicas: 1,
         last_seen: lastSeen,
       },
       {
-        'orchestrator.cluster.name': 'cluster-a',
         'kubernetes.namespace': 'ops',
         kind: 'cronjob',
         workload: 'nightly-backup',
-        owner_derived: true,
+        owner_derived: 1,
+        clusters: ['cluster-a'],
         replicas: 1,
         last_seen: lastSeen,
       },
       {
-        'orchestrator.cluster.name': 'cluster-a',
         'kubernetes.namespace': 'ops',
         kind: 'job',
         workload: 'migrate-2',
-        owner_derived: false,
+        owner_derived: 0,
+        clusters: ['cluster-a'],
         replicas: 1,
         last_seen: lastSeen,
       },
@@ -198,11 +200,14 @@ describe('Kubernetes entity derivation', () => {
     expect(workloadQuery).toContain(
       'BY orchestrator.cluster.name, kubernetes.namespace, kind, workload, owner_derived'
     );
+    expect(workloadQuery).toContain('clusters = VALUES(orchestrator.cluster.name)');
+    expect(workloadQuery).toContain('| SORT replicas DESC, kubernetes.namespace, workload');
+    expect(workloadQuery).toMatch(/\| LIMIT 501$/);
 
     const nodeFeatures = foldNodeRows([
       {
-        'orchestrator.cluster.name': 'cluster-a',
         'kubernetes.node.name': 'node-a',
+        clusters: ['cluster-a'],
         replicas: 1,
         last_seen: lastSeen,
       },
@@ -216,18 +221,18 @@ describe('Kubernetes entity derivation', () => {
     const longName = 'x'.repeat(300);
     const result = foldWorkloadRows([
       {
-        'orchestrator.cluster.name': 'cluster-a',
         'kubernetes.namespace': 'apps',
         kind: 'deployment',
         workload: longName,
+        clusters: ['cluster-a'],
         replicas: 1,
         last_seen: '2026-11-10T12:00:00.000Z',
       },
       {
-        'orchestrator.cluster.name': 'cluster-a',
         'kubernetes.namespace': 'apps',
         kind: 'deployment',
         workload: 'api',
+        clusters: ['cluster-a'],
         replicas: 1,
         last_seen: '2026-11-10T12:00:00.000Z',
       },
@@ -253,20 +258,42 @@ describe('identifyMetricsEntities', () => {
     const workloads = {
       columns: workloadColumns,
       values: [
-        ['cluster-a', 'payments', 'deployment', 'checkout', 3, '2026-11-10T12:00:00.000Z'],
-        ['cluster-b', 'payments', 'deployment', 'checkout', 2, '2026-11-10T12:05:00.000Z'],
-        ['cluster-a', 'payments', 'daemonset', 'checkout', 4, '2026-11-10T12:03:00.000Z'],
-        [null, 'payments', 'deployment', 'unknown-cluster', 1, '2026-11-10T12:04:00.000Z'],
-        ['cluster-a', 'payments', null, null, 0, '2026-11-10T12:02:00.000Z'],
-        ['cluster-a', null, 'deployment', 'missing-namespace', 1, '2026-11-10T12:00:00.000Z'],
+        [
+          'payments',
+          'deployment',
+          'checkout',
+          5,
+          '2026-11-10T12:05:00.000Z',
+          ['cluster-a', 'cluster-b'],
+          0,
+        ],
+        [
+          'payments',
+          'daemonset',
+          'checkout',
+          4,
+          '2026-11-10T12:03:00.000Z',
+          ['cluster-a'],
+          0,
+        ],
+        [
+          'payments',
+          'deployment',
+          'unknown-cluster',
+          1,
+          '2026-11-10T12:04:00.000Z',
+          null,
+          0,
+        ],
+        ['payments', null, null, 0, '2026-11-10T12:02:00.000Z', ['cluster-a'], 0],
+        [null, 'deployment', 'missing-namespace', 1, '2026-11-10T12:00:00.000Z', ['cluster-a'], 0],
       ],
     };
     const nodes = {
       columns: nodeColumns,
       values: [
-        ['cluster-a', 'node-a', 1, '2026-11-10T12:00:00.000Z'],
-        ['cluster-b', 'node-a', 1, '2026-11-10T12:06:00.000Z'],
-        ['cluster-a', null, 1, '2026-11-10T12:01:00.000Z'],
+        ['node-a', 1, '2026-11-10T12:06:00.000Z', ['cluster-a', 'cluster-b']],
+        [null, 1, '2026-11-10T12:01:00.000Z', ['cluster-a']],
       ],
     };
     const harness = createHarness([datasetList, workloads, nodes]);
@@ -285,7 +312,7 @@ describe('identifyMetricsEntities', () => {
         metricsCatalogueRowsCount: 2,
         matchedEntityKeyRowsCount: 2,
         uncoveredDatasetsCount: 0,
-        metricsEntityRowsCount: 9,
+        metricsEntityRowsCount: 7,
         droppedIncompleteRowsCount: 3,
         droppedOverflowRowsCount: 0,
         droppedRows: { ownerless: 1, nullNamespace: 1, nullNodeName: 1, idTooLong: 0 },
@@ -301,6 +328,9 @@ describe('identifyMetricsEntities', () => {
       expect(query).not.toContain('$.nightshift');
       expect(query).not.toContain('METRICS_INFO');
       expect(query).not.toMatch(/(?:^|;\s*|\|\s*)TS\s/);
+    });
+    queries.slice(1).forEach((query) => {
+      expect(query).toMatch(/\| SORT[\s\S]*\| LIMIT 501$/);
     });
     expect(harness.bulk).toHaveBeenCalledTimes(1);
     const operations = harness.bulk.mock.calls[0][1];
@@ -337,10 +367,7 @@ describe('identifyMetricsEntities', () => {
         },
         breakdown: ['orchestrator.cluster.name'],
         entity_store_type: 'k8s.deployment',
-        clusters: {
-          'cluster-a': { replicas: 3, last_seen: '2026-11-10T12:00:00.000Z' },
-          'cluster-b': { replicas: 2, last_seen: '2026-11-10T12:05:00.000Z' },
-        },
+        clusters: ['cluster-a', 'cluster-b'],
         replicas: 5,
         last_seen: '2026-11-10T12:05:00.000Z',
         origin: 'metrics',
@@ -354,9 +381,7 @@ describe('identifyMetricsEntities', () => {
         ({ index }: { index: { feature: { id: string } } }) =>
           index.feature.id === 'k8s.deployment:payments/unknown-cluster'
       )?.index.feature.properties.clusters
-    ).toEqual({
-      _unknown_cluster: { replicas: 1, last_seen: '2026-11-10T12:04:00.000Z' },
-    });
+    ).toEqual(['_unknown_cluster']);
     expect(
       operations.some(({ index }: { index: { feature: { id: string } } }) =>
         index.feature.id.includes('missing-namespace')
@@ -427,7 +452,15 @@ describe('identifyMetricsEntities', () => {
       {
         columns: workloadColumns,
         values: [
-          ['cluster-a', 'payments', 'deployment', 'checkout', 3, '2026-11-10T12:00:00.000Z'],
+          [
+            'payments',
+            'deployment',
+            'checkout',
+            3,
+            '2026-11-10T12:00:00.000Z',
+            ['cluster-a'],
+            0,
+          ],
         ],
       },
     ]);
@@ -461,19 +494,20 @@ describe('identifyMetricsEntities', () => {
     const workloads = {
       columns: workloadColumns,
       values: Array.from({ length: 501 }, (_, index) => [
-        'cluster-a',
         'namespace-a',
         'deployment',
         `workload-${index}`,
         501 - index,
         '2026-11-10T12:00:00.000Z',
+        ['cluster-a'],
+        0,
       ]),
     };
     const nodes = {
       columns: nodeColumns,
       values: [
-        ['cluster-a', 'node-b', 1, '2026-11-10T12:00:00.000Z'],
-        ['cluster-a', 'node-a', 1, '2026-11-10T12:00:00.000Z'],
+        ['node-b', 1, '2026-11-10T12:00:00.000Z', ['cluster-a']],
+        ['node-a', 1, '2026-11-10T12:00:00.000Z', ['cluster-a']],
       ],
     };
     const harness = createHarness([datasetList, workloads, nodes]);
@@ -501,7 +535,9 @@ describe('identifyMetricsEntities', () => {
         'k8s.deployment:namespace-a/workload-500',
       ])
     );
-    expect(harness.info).toHaveBeenCalledTimes(1);
+    expect(harness.info).toHaveBeenCalledTimes(2);
+    expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('row [ecs.k8s_workload]'));
+    expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('501 row limit'));
     expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('source [overflow-source]'));
     expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('503 rows, dropped 3'));
   });

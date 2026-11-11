@@ -12,8 +12,11 @@ import {
 } from '@kbn/significant-events-schema';
 import type { Condition } from '@kbn/streamlang';
 
-export type EsqlCell = string | number | boolean | null;
+export type EsqlScalar = string | number | boolean | null;
+export type EsqlCell = EsqlScalar | readonly EsqlScalar[];
 export type EsqlRow = Readonly<Record<string, EsqlCell>>;
+
+export const ENTITY_QUERY_LIMIT = 501;
 
 export interface DroppedMetricsEntityRows {
   ownerless: number;
@@ -80,29 +83,37 @@ const workloadOwnerFields: Record<WorkloadKind, string> = {
 const isWorkloadKind = (value: EsqlCell): value is WorkloadKind =>
   typeof value === 'string' && value in workloadOwnerFields;
 
-interface ClusterMetrics {
-  replicas: number;
-  last_seen: string;
-}
-
-interface WorkloadGroup {
+interface WorkloadEntity {
   kind: WorkloadKind;
   namespace: string;
   name: string;
   ownerDerived: boolean;
-  clusters: Record<string, ClusterMetrics>;
+  clusters: string[];
+  replicas: number;
+  lastSeen: string;
 }
 
-interface NodeGroup {
+interface NodeEntity {
   name: string;
-  clusters: Record<string, ClusterMetrics>;
+  clusters: string[];
+  replicas: number;
+  lastSeen: string;
 }
 
 const replicasOf = (row: EsqlRow): number => (typeof row.replicas === 'number' ? row.replicas : 0);
 const lastSeenOf = (row: EsqlRow): string =>
   typeof row.last_seen === 'string' ? row.last_seen : '';
-const latest = (left: string, right: string): string => (left > right ? left : right);
 const UNKNOWN_CLUSTER = '_unknown_cluster';
+
+const stringsOf = (value: EsqlCell | undefined): string[] => {
+  const values = Array.isArray(value) ? value : [value];
+  return values.filter((item): item is string => typeof item === 'string').sort();
+};
+
+const clustersOf = (value: EsqlCell | undefined): string[] => {
+  const clusters = stringsOf(value);
+  return clusters.length > 0 ? clusters : [UNKNOWN_CLUSTER];
+};
 
 const createDroppedRows = (): DroppedMetricsEntityRows => ({
   ownerless: 0,
@@ -131,12 +142,13 @@ const derivedOwnerSources: Partial<
 };
 
 export const buildWorkloadFilter = (
-  target: Pick<WorkloadGroup, 'kind' | 'namespace' | 'name' | 'ownerDerived'>,
-  workloads: ReadonlyArray<Pick<WorkloadGroup, 'kind' | 'namespace' | 'name'>>
+  target: Pick<WorkloadEntity, 'kind' | 'namespace' | 'name' | 'ownerDerived'>,
+  workloads: ReadonlyArray<Pick<WorkloadEntity, 'kind' | 'namespace' | 'name'>>
 ): Condition => {
   const ownerField = workloadOwnerFields[target.kind];
   const stampedOwner: Condition = { field: ownerField, eq: target.name };
   const derivedOwner = derivedOwnerSources[target.kind];
+  // The prefix-collision guard sees only rows returned by the ranked query.
   const hasPrefixCollision = workloads.some(
     (workload) =>
       workload.kind === target.kind &&
@@ -163,33 +175,6 @@ export const buildWorkloadFilter = (
   };
 };
 
-const addClusterMetrics = (
-  clusters: Record<string, ClusterMetrics>,
-  cluster: string,
-  row: EsqlRow
-): void => {
-  const current = clusters[cluster];
-  const replicas = replicasOf(row);
-  const lastSeen = lastSeenOf(row);
-  clusters[cluster] = current
-    ? {
-        replicas: current.replicas + replicas,
-        last_seen: latest(current.last_seen, lastSeen),
-      }
-    : { replicas, last_seen: lastSeen };
-};
-
-const entityTotals = (
-  clusters: Record<string, ClusterMetrics>
-): { replicas: number; lastSeen: string } =>
-  Object.values(clusters).reduce(
-    (totals, cluster) => ({
-      replicas: totals.replicas + cluster.replicas,
-      lastSeen: latest(totals.lastSeen, cluster.last_seen),
-    }),
-    { replicas: 0, lastSeen: '' }
-  );
-
 const buildWorkloadQuery = (sourceQuery: string): string => `${sourceQuery}
 | WHERE @timestamp > NOW() - 1 hour AND data_stream.dataset == "kubernetes.pod"
 | EVAL h = \`kubernetes.labels.pod-template-hash\`,
@@ -215,69 +200,75 @@ const buildWorkloadQuery = (sourceQuery: string): string => `${sourceQuery}
                            kubernetes.replicaset.name),
        owner_derived = derived_deployment IS NOT NULL OR derived_cronjob IS NOT NULL
 | STATS replicas = COUNT_DISTINCT(kubernetes.pod.uid), last_seen = MAX(@timestamp)
-  BY orchestrator.cluster.name, kubernetes.namespace, kind, workload, owner_derived`;
+  BY orchestrator.cluster.name, kubernetes.namespace, kind, workload, owner_derived
+| STATS replicas = SUM(replicas), last_seen = MAX(last_seen),
+        clusters = VALUES(orchestrator.cluster.name),
+        owner_derived = MAX(CASE(owner_derived, 1, 0))
+  BY kubernetes.namespace, kind, workload
+| SORT replicas DESC, kubernetes.namespace, workload
+| LIMIT ${ENTITY_QUERY_LIMIT}`;
 
 export const foldWorkloadRows = (rows: EsqlRow[]): EntityFoldResult => {
-  const groups = new Map<string, WorkloadGroup>();
   const droppedRows = createDroppedRows();
   let unknownClusterRows = 0;
 
-  for (const row of rows) {
+  const workloads = rows.flatMap((row): WorkloadEntity[] => {
     const namespace = row['kubernetes.namespace'];
     const kind = row.kind;
     const name = row.workload;
     if (!isWorkloadKind(kind) || typeof name !== 'string') {
       droppedRows.ownerless += 1;
-      continue;
+      return [];
     }
     if (typeof namespace !== 'string') {
       droppedRows.nullNamespace += 1;
-      continue;
+      return [];
     }
 
-    const clusterValue = row['orchestrator.cluster.name'];
-    const hasKnownCluster = typeof clusterValue === 'string';
-    const cluster = hasKnownCluster ? clusterValue : UNKNOWN_CLUSTER;
-    if (!hasKnownCluster) {
+    const clusters = clustersOf(row.clusters);
+    if (clusters.includes(UNKNOWN_CLUSTER)) {
       unknownClusterRows += 1;
     }
-    const id = buildKubernetesEntityId({ kind, namespace, name });
-    let group = groups.get(id);
-    if (!group) {
-      group = { kind, namespace, name, ownerDerived: false, clusters: {} };
-      groups.set(id, group);
-    }
-    group.ownerDerived = group.ownerDerived || row.owner_derived === true;
-    addClusterMetrics(group.clusters, cluster, row);
-  }
 
-  const workloads = [...groups.values()];
-  const features = [...groups.entries()].flatMap(([id, group]): FeatureUpsert[] => {
-    if (id.length > MAX_ID_LENGTH || group.name.length > MAX_TITLE_LENGTH) {
+    return [
+      {
+        kind,
+        namespace,
+        name,
+        ownerDerived: row.owner_derived === true || row.owner_derived === 1,
+        clusters,
+        replicas: replicasOf(row),
+        lastSeen: lastSeenOf(row),
+      },
+    ];
+  });
+
+  const features = workloads.flatMap((workload): FeatureUpsert[] => {
+    const id = buildKubernetesEntityId(workload);
+    if (id.length > MAX_ID_LENGTH || workload.name.length > MAX_TITLE_LENGTH) {
       droppedRows.idTooLong += 1;
       return [];
     }
-    const ownerField = workloadOwnerFields[group.kind];
-    const { replicas, lastSeen } = entityTotals(group.clusters);
-    const entityStoreType = getKubernetesEntityStoreType(group.kind);
+    const ownerField = workloadOwnerFields[workload.kind];
+    const entityStoreType = getKubernetesEntityStoreType(workload.kind);
     return [
       {
         type: 'entity',
         subtype: 'k8s_workload',
         id,
-        title: group.name,
-        description: `Kubernetes ${group.kind} ${group.name} in namespace ${group.namespace}.`,
-        filter: buildWorkloadFilter(group, workloads),
+        title: workload.name,
+        description: `Kubernetes ${workload.kind} ${workload.name} in namespace ${workload.namespace}.`,
+        filter: buildWorkloadFilter(workload, workloads),
         properties: {
           identity: {
-            'kubernetes.namespace': group.namespace,
-            [ownerField]: group.name,
+            'kubernetes.namespace': workload.namespace,
+            [ownerField]: workload.name,
           },
           breakdown: ['orchestrator.cluster.name'],
           ...(entityStoreType ? { entity_store_type: entityStoreType } : {}),
-          clusters: group.clusters,
-          replicas,
-          last_seen: lastSeen,
+          clusters: workload.clusters,
+          replicas: workload.replicas,
+          last_seen: workload.lastSeen,
           origin: 'metrics',
           key_row: 'ecs.k8s_workload',
         },
@@ -296,57 +287,59 @@ export const foldWorkloadRows = (rows: EsqlRow[]): EntityFoldResult => {
 
 const buildNodeQuery = (sourceQuery: string): string => `${sourceQuery}
 | WHERE @timestamp > NOW() - 1 hour AND data_stream.dataset == "kubernetes.node"
-| STATS replicas = COUNT_DISTINCT(kubernetes.node.name), last_seen = MAX(@timestamp)
-  BY orchestrator.cluster.name, kubernetes.node.name`;
+| STATS replicas = COUNT_DISTINCT(kubernetes.node.name), last_seen = MAX(@timestamp),
+        clusters = VALUES(orchestrator.cluster.name)
+  BY kubernetes.node.name
+| SORT replicas DESC, kubernetes.node.name
+| LIMIT ${ENTITY_QUERY_LIMIT}`;
 
 export const foldNodeRows = (rows: EsqlRow[]): EntityFoldResult => {
-  const groups = new Map<string, NodeGroup>();
   const droppedRows = createDroppedRows();
   let unknownClusterRows = 0;
 
-  for (const row of rows) {
+  const nodes = rows.flatMap((row): NodeEntity[] => {
     const name = row['kubernetes.node.name'];
     if (typeof name !== 'string') {
       droppedRows.nullNodeName += 1;
-      continue;
+      return [];
     }
 
-    const clusterValue = row['orchestrator.cluster.name'];
-    const hasKnownCluster = typeof clusterValue === 'string';
-    const cluster = hasKnownCluster ? clusterValue : UNKNOWN_CLUSTER;
-    if (!hasKnownCluster) {
+    const clusters = clustersOf(row.clusters);
+    if (clusters.includes(UNKNOWN_CLUSTER)) {
       unknownClusterRows += 1;
     }
-    const id = buildKubernetesEntityId({ kind: 'node', name });
-    let group = groups.get(id);
-    if (!group) {
-      group = { name, clusters: {} };
-      groups.set(id, group);
-    }
-    addClusterMetrics(group.clusters, cluster, row);
-  }
 
-  const features = [...groups.entries()].flatMap(([id, group]): FeatureUpsert[] => {
-    if (id.length > MAX_ID_LENGTH || group.name.length > MAX_TITLE_LENGTH) {
+    return [
+      {
+        name,
+        clusters,
+        replicas: replicasOf(row),
+        lastSeen: lastSeenOf(row),
+      },
+    ];
+  });
+
+  const features = nodes.flatMap((node): FeatureUpsert[] => {
+    const id = buildKubernetesEntityId({ kind: 'node', name: node.name });
+    if (id.length > MAX_ID_LENGTH || node.name.length > MAX_TITLE_LENGTH) {
       droppedRows.idTooLong += 1;
       return [];
     }
-    const { replicas, lastSeen } = entityTotals(group.clusters);
     return [
       {
         type: 'entity',
         subtype: 'k8s_node',
         id,
-        title: group.name,
-        description: `Kubernetes node ${group.name}.`,
-        filter: { field: 'kubernetes.node.name', eq: group.name },
+        title: node.name,
+        description: `Kubernetes node ${node.name}.`,
+        filter: { field: 'kubernetes.node.name', eq: node.name },
         properties: {
-          identity: { 'kubernetes.node.name': group.name },
+          identity: { 'kubernetes.node.name': node.name },
           breakdown: ['orchestrator.cluster.name'],
           entity_store_type: KUBERNETES_ENTITY_STORE_TYPES.node,
-          clusters: group.clusters,
-          replicas,
-          last_seen: lastSeen,
+          clusters: node.clusters,
+          replicas: node.replicas,
+          last_seen: node.lastSeen,
           origin: 'metrics',
           key_row: 'ecs.k8s_node',
         },

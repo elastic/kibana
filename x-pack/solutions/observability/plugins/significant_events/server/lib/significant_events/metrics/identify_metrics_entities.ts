@@ -13,11 +13,13 @@ import { toFromSourceQuery } from '@kbn/nightshift-shared';
 import { timeoutSignal } from '@kbn/std';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 import {
+  ENTITY_QUERY_LIMIT,
   ENTITY_KEY_TABLE,
   getDatasetFamily,
   type DroppedMetricsEntityRows,
   type EsqlCell,
   type EsqlRow,
+  type EsqlScalar,
 } from './entity_key_table';
 
 const MAX_ENTITIES = 500;
@@ -63,14 +65,18 @@ const createDroppedRows = (): DroppedMetricsEntityRows => ({
   idTooLong: 0,
 });
 
+const isEsqlScalar = (value: ESQLSearchResponse['values'][number][number]): value is EsqlScalar =>
+  typeof value === 'string' ||
+  typeof value === 'number' ||
+  typeof value === 'boolean' ||
+  value === null;
+
 const toCell = (value: ESQLSearchResponse['values'][number][number]): EsqlCell => {
-  if (
-    typeof value === 'string' ||
-    typeof value === 'number' ||
-    typeof value === 'boolean' ||
-    value === null
-  ) {
+  if (isEsqlScalar(value)) {
     return value;
+  }
+  if (Array.isArray(value)) {
+    return value.filter(isEsqlScalar);
   }
   return null;
 };
@@ -121,6 +127,24 @@ const replicasOf = (feature: FeatureUpsert): number => {
 
 const compareEntityIds = (left: FeatureUpsert, right: FeatureUpsert): number =>
   left.id < right.id ? -1 : left.id > right.id ? 1 : 0;
+
+const entityPriority = (feature: FeatureUpsert): number => {
+  switch (feature.subtype) {
+    case 'k8s_cluster':
+      return 0;
+    case 'k8s_node':
+      return 1;
+    case 'host':
+      return 2;
+    case 'service':
+      return 3;
+    case 'k8s_namespace':
+    case 'k8s_workload':
+      return 4;
+    default:
+      return 5;
+  }
+};
 
 /** Lists a metrics source's datasets and writes its Kubernetes workload and node entities. */
 export const identifyMetricsEntities = async ({
@@ -232,6 +256,11 @@ export const identifyMetricsEntities = async ({
       { signal }
     )) as ESQLSearchResponse;
     const rows = rowsFromResponse(response);
+    if (rows.length === ENTITY_QUERY_LIMIT) {
+      logger.info(
+        `Metrics entity query for source [${sourceId}] row [${keyRow.id}] reached the ${ENTITY_QUERY_LIMIT} row limit.`
+      );
+    }
     metricsEntityRowsCount += rows.length;
     const folded = keyRow.foldRows(rows);
     features.push(...folded.features);
@@ -244,9 +273,9 @@ export const identifyMetricsEntities = async ({
   }
 
   const selectedFeatures = [...features].sort((left, right) => {
-    const nodePriority = Number(right.subtype === 'k8s_node') - Number(left.subtype === 'k8s_node');
-    if (nodePriority !== 0) {
-      return nodePriority;
+    const priority = entityPriority(left) - entityPriority(right);
+    if (priority !== 0) {
+      return priority;
     }
     return replicasOf(right) - replicasOf(left) || compareEntityIds(left, right);
   });
