@@ -113,23 +113,20 @@ export const ConversationAppHeader: React.FC = () => {
     : getDisplayTitle(savedConversation.title);
 
   const isPinned = Boolean(savedConversation.pinned);
+  const { PIN_CONVERSATION, UNPIN_CONVERSATION } = AGENT_BUILDER_UI_EBT.action.conversationList;
 
   const favorite: AppHeaderFavoriteAction = {
     variant: 'pin',
     status: isPinned ? 'favorited' : 'unfavorited',
     onToggle: () => {
+      const togglePin = isPinned ? markAsUnpinned : markAsPinned;
+      togglePin(savedConversation.id);
+
       analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.UiClick, {
         ebt_element: AGENT_BUILDER_UI_EBT.element.pageContent,
-        ebt_action: isPinned
-          ? AGENT_BUILDER_UI_EBT.action.conversationList.UNPIN_CONVERSATION
-          : AGENT_BUILDER_UI_EBT.action.conversationList.PIN_CONVERSATION,
+        ebt_action: isPinned ? UNPIN_CONVERSATION : PIN_CONVERSATION,
         element_kind: 'button',
       });
-      if (isPinned) {
-        markAsUnpinned(savedConversation.id);
-      } else {
-        markAsPinned(savedConversation.id);
-      }
     },
   };
 
