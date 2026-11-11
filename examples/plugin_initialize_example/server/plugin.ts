@@ -8,23 +8,19 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import type { Subscription } from 'rxjs';
 import type {
   CoreSetup,
   CoreStart,
   ElasticsearchClient,
-  Logger,
   Plugin,
   PluginInitialization,
   PluginInitializerContext,
-  PluginInitStatus,
 } from '@kbn/core/server';
 import type { PluginInitializeExampleConfig } from './config';
 
 export const INDEX_NAME = '.kibana_plugin_initialize_example';
 export const DOC_ID = 'initialized';
 export const DOC_ROUTE = '/internal/plugin_initialize_example/doc';
-export const STATUS_ROUTE = '/internal/plugin_initialize_example/status';
 
 /** The document `initialize()` writes. */
 export interface PluginInitializeExampleDoc {
@@ -37,8 +33,6 @@ export interface PluginInitializeExampleDoc {
 export interface PluginInitializeExampleStartContract {
   /** Waits for this plugin's `initialize()`, then reads the document it wrote. */
   getDoc(): Promise<PluginInitializeExampleDoc>;
-  /** Never waits. */
-  getStatus(): PluginInitStatus;
 }
 
 const delay = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
@@ -50,22 +44,16 @@ const isIndexAlreadyExists = (error: unknown): boolean =>
 export class PluginInitializeExampleServerPlugin
   implements Plugin<void, PluginInitializeExampleStartContract>
 {
-  private readonly logger: Logger;
   private readonly config: PluginInitializeExampleConfig;
   private readonly instanceUuid: string;
   private readonly initialization: PluginInitialization;
-  private readonly statusSubscription: Subscription;
   private client?: ElasticsearchClient;
 
   constructor(ctx: PluginInitializerContext<PluginInitializeExampleConfig>) {
-    this.logger = ctx.logger.get();
     this.config = ctx.config.get();
     this.instanceUuid = ctx.env.instanceUuid;
     // Kept on the instance: route handlers and contract functions read it after boot.
     this.initialization = ctx.initialization;
-    this.statusSubscription = this.initialization.status$.subscribe((status) => {
-      this.logger.info(`initialize() status: ${status}`);
-    });
   }
 
   public setup(core: CoreSetup): void {
@@ -80,24 +68,12 @@ export class PluginInitializeExampleServerPlugin
       },
       async (_context, _request, response) => response.ok({ body: await this.getDoc() })
     );
-
-    // Does not need the initialized state, so it answers at once.
-    router.get(
-      {
-        path: STATUS_ROUTE,
-        security: {
-          authz: { enabled: false, reason: "Example route; serves the plugin's own init status." },
-        },
-        validate: false,
-      },
-      (_context, _request, response) =>
-        response.ok({ body: { status: this.initialization.getStatus() } })
-    );
   }
 
   /**
    * Core calls it once with start()'s arguments, after every plugin has started, and does not
-   * wait for it. A throw shuts Kibana down.
+   * wait for it. Core logs a throw and leaves it unhandled: production Kibana logs a warning and
+   * keeps running, dev Kibana exits.
    */
   public async initialize(core: CoreStart): Promise<void> {
     const { failInitialize, initDelayMs } = this.config;
@@ -137,12 +113,7 @@ export class PluginInitializeExampleServerPlugin
     this.client = core.elasticsearch.client.asInternalUser;
     return {
       getDoc: () => this.getDoc(),
-      getStatus: () => this.initialization.getStatus(),
     };
-  }
-
-  public stop(): void {
-    this.statusSubscription.unsubscribe();
   }
 
   private async getDoc(): Promise<PluginInitializeExampleDoc> {

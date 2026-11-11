@@ -16,8 +16,9 @@ goes in `initialize()`:
 - `initialize(core, plugins)` receives exactly what `start()` receives.
 - Core calls it once, after every plugin's `start()` has returned, and does not wait for it. Kibana
   serves HTTP while it runs.
-- A thrown error shuts Kibana down, like a thrown `setup()` or `start()`. Catch the errors the
-  plugin can recover from.
+- Core logs a thrown error and leaves it unhandled, like a promise started in `start()` without
+  being awaited: production Kibana logs a warning and keeps running, dev Kibana exits. Catch the
+  errors the plugin can recover from.
 - It runs on every Kibana instance against the same cluster, concurrently and without coordination,
   so the work must be safe to run more than once.
 
@@ -27,38 +28,26 @@ document carrying the instance UUID (`server/plugin.ts:PluginInitializeExampleSe
 ## Waiting for it
 
 Core does not hold routes or contract calls until `initialize()` has run. Each route handler and
-contract function decides for itself, through `ctx.initialization`:
+contract function that needs the initialized state awaits `ctx.initialization.initialize()` itself.
+It resolves once the plugin's `initialize()` has finished and rejects with its error when it fails.
+Calls made before `initialize()` runs, including during `start()`, wait for it.
 
-| Member | Behaviour |
-| --- | --- |
-| `initialize()` | Resolves once the plugin is `available`, rejects when its `initialize()` fails, and rejects during `setup()` and `start()`, where waiting would block boot. |
-| `status$` | Emits the current status (`idle`, `initializing`, `available` or `failed`), then every change. |
-| `getStatus()` | The current status. |
-
-This plugin shows both choices:
-
-- `GET /internal/plugin_initialize_example/doc` and the contract's `getDoc()` need the document, so
-  they await `initialize()` first.
-- `GET /internal/plugin_initialize_example/status` and the contract's `getStatus()` do not, so they
-  answer at once.
+`GET /internal/plugin_initialize_example/doc` and the contract's `getDoc()` need the document, so
+they await it first:
 
 ```sh
-# answers at once with the status
-curl -u elastic:changeme -H 'x-elastic-internal-origin: kibana' localhost:5601/internal/plugin_initialize_example/status
 # waits for initialize() after boot, then answers with the document
 curl -u elastic:changeme -H 'x-elastic-internal-origin: kibana' localhost:5601/internal/plugin_initialize_example/doc
 ```
 
-A route that should not keep the client waiting can instead answer `503` while `getStatus()` is not
-`available`.
-
-The constructor also subscribes to `status$` and logs each transition.
-
 ## Failure
 
 Set `plugin_initialize_example.failInitialize: true` in `config/kibana.dev.yml` and restart. About
-`initDelayMs` after boot, `initialize()` throws `Simulated initialize() failure` and Kibana shuts
-down with `Plugin "pluginInitializeExample" initialize() failed: Simulated initialize() failure`.
+`initDelayMs` after boot, `initialize()` throws `Simulated initialize() failure`. Core logs
+`Plugin "pluginInitializeExample" initialize() failed after <n>ms:` followed by the error's stack.
+Nothing awaits the failed initialization at that point, so it is an unhandled rejection and dev
+Kibana exits. Production Kibana logs a warning and keeps running, and the doc route answers `500`
+until a restart.
 
 ## Slow `initialize()`
 
@@ -71,4 +60,4 @@ times `initialize()` out.
 | Key | Default | Effect |
 | --- | --- | --- |
 | `plugin_initialize_example.initDelayMs` | `5000` | How long `initialize()` takes. Above `10000` core's slow `initialize()` warning appears. |
-| `plugin_initialize_example.failInitialize` | `false` | `initialize()` throws, which shuts Kibana down. |
+| `plugin_initialize_example.failInitialize` | `false` | `initialize()` throws, and dev Kibana exits on the unhandled rejection. |

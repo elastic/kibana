@@ -13,16 +13,9 @@ import {
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
-  loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import type { PluginInitializeExampleConfig } from './config';
-import {
-  DOC_ID,
-  DOC_ROUTE,
-  INDEX_NAME,
-  PluginInitializeExampleServerPlugin,
-  STATUS_ROUTE,
-} from './plugin';
+import { DOC_ID, DOC_ROUTE, INDEX_NAME, PluginInitializeExampleServerPlugin } from './plugin';
 
 type RouterMock = ReturnType<typeof httpServiceMock.createRouter>;
 
@@ -149,43 +142,20 @@ describe('PluginInitializeExampleServerPlugin', () => {
       await expect(callGetRoute(router, DOC_ROUTE)).rejects.toThrow('initialize() failed');
       expect(client.get).not.toHaveBeenCalled();
     });
-
-    it('the status route answers at once without waiting for initialize()', async () => {
-      const { ctx, plugin } = createPlugin();
-      ctx.initialization.getStatus.mockReturnValue('initializing');
-      const router = setupRoutes(plugin);
-
-      const response = await callGetRoute(router, STATUS_ROUTE);
-
-      expect(response.ok).toHaveBeenCalledWith({ body: { status: 'initializing' } });
-      expect(ctx.initialization.initialize).not.toHaveBeenCalled();
-    });
   });
 
   describe('start contract', () => {
-    it('getStatus() reads the status without waiting', () => {
+    it('getDoc() waits for initialize() before reading the document', async () => {
       const { ctx, plugin } = createPlugin();
-      ctx.initialization.getStatus.mockReturnValue('idle');
+      const { core, client } = createCoreStart();
+      client.get.mockResolvedValue({ _index: INDEX_NAME, _id: DOC_ID, found: true, _source: doc });
 
-      const contract = plugin.start(createCoreStart().core);
+      const contract = plugin.start(core);
 
-      expect(contract.getStatus()).toBe('idle');
-      expect(ctx.initialization.initialize).not.toHaveBeenCalled();
+      await expect(contract.getDoc()).resolves.toEqual(doc);
+      expect(ctx.initialization.initialize.mock.invocationCallOrder[0]).toBeLessThan(
+        client.get.mock.invocationCallOrder[0]
+      );
     });
-  });
-
-  it('logs every status transition', () => {
-    const { ctx, plugin } = createPlugin();
-
-    ctx.initialization.status$.next('initializing');
-    ctx.initialization.status$.next('available');
-    plugin.stop();
-    ctx.initialization.status$.next('failed');
-
-    expect(loggingSystemMock.collect(ctx.logger).info.map(([message]) => message)).toEqual([
-      'initialize() status: available',
-      'initialize() status: initializing',
-      'initialize() status: available',
-    ]);
   });
 });
