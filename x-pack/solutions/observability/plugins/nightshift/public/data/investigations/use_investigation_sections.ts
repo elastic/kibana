@@ -12,6 +12,7 @@ import type {
   InvestigationSeverityCounts,
   InvestigationSummary,
 } from '@kbn/agentic-investigations-plugin/common';
+import { useStatusSignal } from '@kbn/agentic-investigations-plugin/public';
 import {
   SHARED_INVESTIGATIONS_API_VERSION,
   SHARED_INVESTIGATIONS_SEVERITY_COUNTS_URL,
@@ -46,6 +47,8 @@ export interface InvestigationSectionsResult {
   severityCounts: SeverityCounts;
   /** The counts query is separate from the sections, so it settles on its own schedule. */
   areSeverityCountsLoading: boolean;
+  /** True when the finished open counts could not be loaded — do not treat zeros as a clear backlog. */
+  hasSeverityCountsError: boolean;
   hasActiveInvestigations: boolean;
   /** Running investigations per the API total (not capped by the in-progress page size). */
   activeInvestigationCount: number;
@@ -202,10 +205,15 @@ export const useInvestigationSections = ({
     void refetchSeverityCounts();
   }, [sections, refetchSeverityCounts]);
 
+  // Status toggles in the investigation flyout run on an isolated QueryClient, so closing a
+  // finished investigation would not invalidate this page's open-only lists/counts otherwise.
+  useStatusSignal(refetchAll);
+
   return {
     sections,
     severityCounts,
     areSeverityCountsLoading: severityCountsQuery.isInitialLoading,
+    hasSeverityCountsError: severityCountsQuery.isError,
     hasActiveInvestigations,
     activeInvestigationCount,
     isInitialLoading: sections.some((section) => section.isInitialLoading),

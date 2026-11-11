@@ -8,7 +8,7 @@
 import { css } from '@emotion/react';
 import React from 'react';
 import { EuiIcon, EuiLoadingSpinner, EuiText, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface ShowMoreButtonProps
   extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type' | 'children'> {
@@ -81,24 +81,27 @@ export function ShowMoreButton({
           font-weight: ${euiTheme.font.weight.medium};
         `}
       >
-        {i18n.translate('xpack.nightshift.showMoreButton.label', {
-          defaultMessage: 'Show {count} more',
-          values: { count: revealCount },
-        })}{' '}
-        <EuiText
-          component="span"
-          size="xs"
-          color={euiTheme.colors.textDisabled}
-          css={css`
-            display: inline;
-            font-weight: ${euiTheme.font.weight.regular};
-          `}
-        >
-          {i18n.translate('xpack.nightshift.showMoreButton.ofRemaining', {
-            defaultMessage: 'of {count}',
-            values: { count: remaining },
-          })}
-        </EuiText>
+        <FormattedMessage
+          id="xpack.nightshift.showMoreButton.label"
+          defaultMessage="Show {count} more <muted>of {remaining}</muted>"
+          values={{
+            count: revealCount,
+            remaining,
+            muted: (chunks) => (
+              <EuiText
+                component="span"
+                size="xs"
+                color={euiTheme.colors.textDisabled}
+                css={css`
+                  display: inline;
+                  font-weight: ${euiTheme.font.weight.regular};
+                `}
+              >
+                {chunks}
+              </EuiText>
+            ),
+          }}
+        />
       </EuiText>
     </button>
   );

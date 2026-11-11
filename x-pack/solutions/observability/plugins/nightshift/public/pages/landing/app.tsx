@@ -93,6 +93,7 @@ export function NightshiftApp({
     sections,
     severityCounts,
     areSeverityCountsLoading,
+    hasSeverityCountsError,
     activeInvestigationCount,
     isInitialLoading,
     isFetching,
@@ -355,6 +356,7 @@ export function NightshiftApp({
     >
       <NightshiftHeader
         isLoading={isInitialLoading || (activeInvestigationCount === 0 && areSeverityCountsLoading)}
+        hasSeverityCountsError={hasSeverityCountsError}
         activeInvestigationCount={activeInvestigationCount}
         needsYouCount={needsYouCount}
         severityCounts={severityCounts}

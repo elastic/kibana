@@ -119,6 +119,7 @@ function setSections({
   isInitialLoading = false,
   isFetching = false,
   areSeverityCountsLoading = false,
+  hasSeverityCountsError = false,
 }: {
   sections: InvestigationSectionState[];
   hasActiveInvestigations?: boolean;
@@ -126,6 +127,7 @@ function setSections({
   isInitialLoading?: boolean;
   isFetching?: boolean;
   areSeverityCountsLoading?: boolean;
+  hasSeverityCountsError?: boolean;
 }) {
   const sectionTotal = (id: InvestigationSectionState['id']) =>
     sections.find((section) => section.id === id)?.total ?? 0;
@@ -142,6 +144,7 @@ function setSections({
     sections,
     severityCounts,
     areSeverityCountsLoading,
+    hasSeverityCountsError,
     hasActiveInvestigations: hasActiveInvestigations || resolvedActiveCount > 0,
     activeInvestigationCount: resolvedActiveCount,
     isInitialLoading,
@@ -276,6 +279,20 @@ describe('NightshiftApp', () => {
     renderApp();
 
     expect(screen.getByText('Investigating 21 new problems')).toBeInTheDocument();
+  });
+
+  it('does not treat a failed severity-counts load as a zero backlog', () => {
+    setSections({
+      sections: defaultSections({
+        critical: { investigations: [investigation], total: 1 },
+      }),
+      hasSeverityCountsError: true,
+    });
+
+    renderApp();
+
+    expect(screen.getByText("Your investigation count couldn't be loaded")).toBeInTheDocument();
+    expect(screen.queryByText('1 investigation needs you')).not.toBeInTheDocument();
   });
 
   it('dismisses the detection setup banner from its dismiss button', () => {

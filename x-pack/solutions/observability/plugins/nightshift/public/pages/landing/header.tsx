@@ -18,6 +18,8 @@ import {
 
 export interface NightshiftHeaderProps {
   isLoading?: boolean;
+  /** Finished open counts failed to load — show unavailable copy instead of a zero backlog. */
+  hasSeverityCountsError?: boolean;
   /** In-progress investigations currently being worked. */
   activeInvestigationCount?: number;
   /** Finished investigations with a severity (critical / high / medium / low). */
@@ -55,10 +57,12 @@ const getGreeting = (): string => {
 
 const getHeroTitle = ({
   isLoading,
+  hasSeverityCountsError,
   activeInvestigationCount,
   needsYouCount,
 }: {
   isLoading: boolean;
+  hasSeverityCountsError: boolean;
   activeInvestigationCount: number;
   needsYouCount: number;
 }): string => {
@@ -76,6 +80,13 @@ const getHeroTitle = ({
     });
   }
 
+  // Failed counts arrive as zeros — do not claim the backlog is clear.
+  if (hasSeverityCountsError) {
+    return i18n.translate('xpack.nightshift.hero.countUnavailableTitle', {
+      defaultMessage: "Your investigation count couldn't be loaded",
+    });
+  }
+
   return i18n.translate('xpack.nightshift.hero.needsYouTitle', {
     defaultMessage:
       '{needsYouCount, plural, one {# investigation needs you} other {# investigations need you}}',
@@ -85,6 +96,7 @@ const getHeroTitle = ({
 
 export function NightshiftHeader({
   isLoading = false,
+  hasSeverityCountsError = false,
   activeInvestigationCount = 0,
   needsYouCount = 0,
   severityCounts,
@@ -92,10 +104,18 @@ export function NightshiftHeader({
 }: NightshiftHeaderProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const title =
-    titleOverride ?? getHeroTitle({ isLoading, activeInvestigationCount, needsYouCount });
-  const markSeverity: HeroMarkSeverity | undefined = severityCounts
-    ? getHeroMarkSeverity(severityCounts)
-    : undefined;
+    titleOverride ??
+    getHeroTitle({
+      isLoading,
+      hasSeverityCountsError,
+      activeInvestigationCount,
+      needsYouCount,
+    });
+  // Hide the status dot when counts failed — zeros are not a trustworthy "all clear".
+  const markSeverity: HeroMarkSeverity | undefined =
+    !hasSeverityCountsError && severityCounts
+      ? getHeroMarkSeverity(severityCounts)
+      : undefined;
 
   return (
     <EuiFlexItem

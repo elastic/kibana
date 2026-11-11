@@ -17,6 +17,9 @@ jest.mock('./use_fetch_investigations', () => ({
   ...jest.requireActual('./use_fetch_investigations'),
   useFetchInvestigations: jest.fn(),
 }));
+jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
+  useStatusSignal: jest.fn(),
+}));
 jest.mock('../../hooks/use_kibana');
 
 const mockUseFetchInvestigations = useFetchInvestigations as jest.MockedFunction<
