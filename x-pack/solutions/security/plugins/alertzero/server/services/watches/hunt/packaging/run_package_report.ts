@@ -188,8 +188,8 @@ export const runPackageReport = async ({
    * if the run were complete, silently dropping whichever finding failed to attach.
    *
    * Undefined skips the check below rather than failing closed: an already-installed Worker
-   * that has not yet picked up the call site supplying this field (its `yamlTemplate` hash does
-   * not cover the imported YAML it renders, so it only updates when its own `version` bumps)
+   * that has not yet picked up the call site supplying this field (it keeps its previous YAML
+   * until it is re-rendered)
    * must not have every packaging call start erroring just because this step's own schema
    * changed out from under it -- that would turn a staleness gap into an outage.
    */

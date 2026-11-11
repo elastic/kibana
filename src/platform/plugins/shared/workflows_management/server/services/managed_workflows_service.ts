@@ -215,7 +215,6 @@ export class ManagedWorkflowsService {
 
     const isStartupWindow = !this.readyPluginIds.has(registeredPluginId);
     const now = new Date();
-    const definitionHash = this.computeManagedDefinitionHash(definition);
     const existingDocument = await this.deps.crudService.getWorkflowDocumentWithVersion(
       workflowDocumentId,
       spaceId
@@ -237,6 +236,7 @@ export class ManagedWorkflowsService {
       values: options.values,
       existingTemplateValues: existing?.managedTemplateValues,
     });
+    const definitionHash = computeDefinitionHash(yaml);
 
     if (!existing) {
       if (this.shouldAbortManagedWrite(`install create '${id}'`)) {
@@ -452,7 +452,6 @@ export class ManagedWorkflowsService {
       options,
       registeredPluginId
     );
-    const registryHash = this.computeManagedDefinitionHash(definition);
     const existing = await this.deps.crudService.getWorkflowDocumentSource(
       workflowDocumentId,
       spaceId,
@@ -461,6 +460,10 @@ export class ManagedWorkflowsService {
         includeGlobal: true,
       }
     );
+    const registryHash = this.computeRegistryHash({
+      definition,
+      storedTemplateValues: existing?.managedTemplateValues,
+    });
 
     if (!existing || existing.deleted_at) {
       return this.createManagedWorkflowStatusReport({
@@ -493,6 +496,7 @@ export class ManagedWorkflowsService {
     } else if (!existing.enabled) {
       status = 'disabled';
     } else if (
+      registryHash === null ||
       storedHash !== registryHash ||
       storedVersion !== definition.version ||
       existing.originManagedWorkflowId !== definition.id
@@ -813,7 +817,7 @@ export class ManagedWorkflowsService {
     definitionId: ManagedWorkflowId;
     spaceId: string;
     definition: ManagedWorkflowDefinition;
-    registryHash: string;
+    registryHash: string | null;
     existing?: WorkflowProperties;
   }): ManagedWorkflowStatusReport {
     const {
@@ -994,9 +998,31 @@ export class ManagedWorkflowsService {
     };
   }
 
-  private computeManagedDefinitionHash(definition: ManagedWorkflowDefinition): string {
+  /**
+   * The hash an up-to-date document holds: of the definition's `yaml`, or of its `yamlTemplate`
+   * rendered with the document's stored values. `null` for a template with no stored values or
+   * whose render throws for them.
+   */
+  private computeRegistryHash({
+    definition,
+    storedTemplateValues,
+  }: {
+    definition: ManagedWorkflowDefinition;
+    storedTemplateValues: ManagedWorkflowTemplateValues | null | undefined;
+  }): string | null {
     if (definition.yamlTemplate) {
-      return computeDefinitionHash(definition.yamlTemplate.toString());
+      if (!storedTemplateValues || Object.keys(storedTemplateValues).length === 0) {
+        return null;
+      }
+      try {
+        return computeDefinitionHash(definition.yamlTemplate(storedTemplateValues));
+      } catch (error) {
+        this.logger.warn(
+          `Managed workflows: could not render '${definition.id}' with its stored values`,
+          { error }
+        );
+        return null;
+      }
     }
     if (!definition.yaml) {
       throw new Error(

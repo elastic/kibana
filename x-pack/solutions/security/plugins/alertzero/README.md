@@ -227,7 +227,7 @@ Two different version fields:
 | YAML `version: "1"` | Top of each Worker `*.yaml` | Workflow document schema / format version (stays `"1"` until the YAML language changes). |
 | Definition `version: N` | The Worker's module under `managed/definitions/alertzero/` | **Managed reconciliation counter** for `@kbn/workflows/managed`. Bump when you need install/`ready()` to re-apply the definition (`versionStrategy: 'auto'`). |
 
-Start a new definition at `1` and increment it for intentional definition changes. This counter is not product SemVer; once a definition has been published, do not reset it without an explicit managed-document migration decision. A change to a render helper in `src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/worker_template_values.ts` needs a definition version bump too; no test catches a missing one.
+Start a new definition at `1` and increment it for intentional definition changes. This counter is not product SemVer; once a definition has been published, do not reset it without an explicit managed-document migration decision. A change to a render helper in `src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/worker_template_values.ts` reaches installed copies without a bump, because the platform hashes each document's rendered YAML; no test requires one.
 
 ### Central AlertZero Worker registry guide
 
@@ -345,7 +345,7 @@ Every configured space stores its own copy of a Worker's settings, and that copy
 - **Unclassified schema features.** A failure saying "Unclassified … Teach the Worker settings contract check about it" means the schema uses a JSON Schema construct the classifier does not know. Ask the Common Worker Layer team to extend `test_helpers/settings_contract.ts`; do not work around it.
 - **Validation the contract cannot compare.** A failure saying "Cannot establish settings compatibility at …" means a stored or saved setting goes through a refinement (`.refine`, `.superRefine`, `.check`), a transform, a preprocess or a pipe. JSON Schema drops those, so a change to them would pass unnoticed. It is not a breaking change and cannot be accepted: express the constraint as a bound, an enum or a pattern, or ask the Common Worker Layer team to teach the contract to compare it.
 
-Installed copies re-render only when a Worker's definition `version` moves. `managed_workflow_definitions.test.ts` fails until you bump it whenever the Worker's YAML or its defaults in `worker_settings_defaults.ts` change: its fingerprint row covers both. A YAML-only edit touches nothing in the settings contract.
+Installed copies re-render when the YAML a Worker renders for them or its definition `version` changes. `managed_workflow_definitions.test.ts` fails until you bump it whenever the Worker's YAML or its defaults in `worker_settings_defaults.ts` change: its fingerprint row covers both. A YAML-only edit touches nothing in the settings contract.
 
 | Change | Result | What to do |
 |---|---|---|
@@ -353,7 +353,7 @@ Installed copies re-render only when a Worker's definition `version` moves. `man
 | New schedule on an existing Worker | Safe | As above. Task Manager picks up the schedule on the next save or enable in each space. |
 | Changed default | Safe | Bump the definition version (enforced) and run the update command. It reaches fresh installs and every stored document that does not hold the field; a stored value always wins. |
 | YAML edit | Not a settings change | Bump the definition version (enforced). |
-| Render-helper edit (`src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/worker_template_values.ts`) | Not a settings change | Bump the definition version yourself; no test catches a missing bump. |
+| Render-helper edit (`src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/worker_template_values.ts`) | Not a settings change | Installed copies re-render on their own; no test requires a definition version bump. |
 | Removed autonomy level that has a lower allowed level (for example `supervised` when `assisted` stays) | Safe | Bump the definition version (enforced) and run the update command. Stored documents holding the removed level read and render as the nearest allowed level; a trigger that depends on the level changes on the next save or enable in each space. |
 | Removed `extras` from a Worker | Safe | Bump the definition version (enforced) and run the update command. Stored extras are ignored on read and render. |
 | Renamed, removed or retyped setting; tightened bound; removed allowed value (autonomy: the lowest allowed level); new setting without a default, including a required key inside a nested object; removed Worker; settings version bump; a `WorkerSettings` or `WorkerSettingsWrite` change that rejects documents or saves that used to pass | Breaking | Prefer keeping the stored key and changing only the label. Otherwise, before customers, a coordinated reset recorded with `ACCEPT_WORKER_SETTINGS_BREAKING_CHANGE=<issue-url>` in update mode; after that, a migration ([security-team#19312](https://github.com/elastic/security-team/issues/19312)). |

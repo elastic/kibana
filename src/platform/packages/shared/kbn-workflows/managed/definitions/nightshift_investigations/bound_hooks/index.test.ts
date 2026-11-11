@@ -69,12 +69,6 @@ describe.each(cases)('Nightshift bound hook %#', (bound, hook) => {
   it("declares exactly the hook's inputs, so Agent Builder passes it the same ones", () => {
     expect(rendered.triggers).toEqual(parse(hook.yaml).triggers);
   });
-
-  // The definition hash of a template does not cover the hook's triggers, so a change to them
-  // only reaches installed copies through a version bump. Update both together.
-  it('pins its version to the hook triggers', () => {
-    expect({ version: bound.version, triggers: parse(hook.yaml).triggers }).toMatchSnapshot();
-  });
 });
 
 describe('getNightshiftBoundHookWorkflowId', () => {

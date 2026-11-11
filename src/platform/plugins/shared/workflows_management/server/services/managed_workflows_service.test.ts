@@ -91,6 +91,11 @@ const definitionHash = (yaml: string): string => {
   return createHash('sha256').update(yaml.trim()).digest('hex');
 };
 
+const renderedHash = (
+  definition: TemplateManagedWorkflowDefinition,
+  values: TemplateValues
+): string => definitionHash(definition.yamlTemplate(values));
+
 const createDefinition = (
   overrides: {
     id?: string;
@@ -119,6 +124,7 @@ const createTemplateDefinition = (
     id?: string;
     pluginId?: string;
     billable?: boolean;
+    importedYaml?: string;
     management?: Partial<ManagedWorkflowManagement>;
   } = {}
 ): TemplateManagedWorkflowDefinition => ({
@@ -127,7 +133,9 @@ const createTemplateDefinition = (
   version: 1,
   billable: overrides.billable ?? false,
   yamlTemplate: ({ recipient, enabled }) =>
-    workflowYaml({ name: `Managed Workflow - ${recipient}`, enabled }),
+    `${workflowYaml({ name: `Managed Workflow - ${recipient}`, enabled })}${
+      overrides.importedYaml ?? ''
+    }`,
   management: {
     ...defaultManagement,
     ...overrides.management,
@@ -932,7 +940,7 @@ describe('ManagedWorkflowsService', () => {
       crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
         createVersionedDocument(
           createWorkflowSource({
-            definitionHash: definitionHash(definition.yamlTemplate.toString()),
+            definitionHash: renderedHash(definition, { recipient: 'Original', enabled: true }),
             managedTemplateValues: { recipient: 'Original', enabled: true },
             yaml: workflowYaml({ name: 'Managed Workflow - Original', enabled: true }),
           })
@@ -984,7 +992,7 @@ describe('ManagedWorkflowsService', () => {
       crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
         createVersionedDocument(
           createWorkflowSource({
-            definitionHash: definitionHash(definition.yamlTemplate.toString()),
+            definitionHash: renderedHash(definition, templateValues),
             managedTemplateValues: templateValues,
           })
         )
@@ -997,6 +1005,31 @@ describe('ManagedWorkflowsService', () => {
       );
 
       expectNoOccWrites(crudService);
+    });
+
+    it('reindexes a template definition when only the YAML it imports changed', async () => {
+      const templateValues: TemplateValues = { recipient: 'World', enabled: true };
+      const install = async (importedYaml: string, stored: WorkflowProperties | null) => {
+        const definition = createTemplateDefinition({ importedYaml });
+        mockManagedWorkflowDefinitions = [definition];
+        const { crudService, service } = createService();
+        crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
+          stored && createVersionedDocument(stored)
+        );
+        await service.installManagedWorkflow(
+          WORKFLOW_ID,
+          { spaceId: SPACE_ID, values: templateValues },
+          definition.pluginId
+        );
+        return crudService;
+      };
+
+      const storedV1 = getIndexedDocument(await install('# imported v1', null));
+      const crudServiceV2 = await install('# imported v2', storedV1);
+
+      expect(getIndexedDocument(crudServiceV2)).toEqual(
+        expect.objectContaining({ yaml: expect.stringContaining('# imported v2') })
+      );
     });
 
     it('reindexes when the definition version changed but the hash is unchanged', async () => {
@@ -1034,7 +1067,7 @@ describe('ManagedWorkflowsService', () => {
       crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
         createVersionedDocument(
           createWorkflowSource({
-            definitionHash: definitionHash(definition.yamlTemplate.toString()),
+            definitionHash: renderedHash(definition, { recipient: 'World', enabled: true }),
             managedTemplateValues: { recipient: 'World', enabled: true },
           })
         )
@@ -1063,7 +1096,7 @@ describe('ManagedWorkflowsService', () => {
         createVersionedDocument(
           createWorkflowSource({
             version: 9,
-            definitionHash: definitionHash(definition.yamlTemplate.toString()),
+            definitionHash: renderedHash(definition, { recipient: 'World', enabled: true }),
             managedTemplateValues: { recipient: 'World', enabled: true },
           })
         )
@@ -1093,7 +1126,7 @@ describe('ManagedWorkflowsService', () => {
         createVersionedDocument(
           createWorkflowSource({
             version: 9,
-            definitionHash: definitionHash(definition.yamlTemplate.toString()),
+            definitionHash: renderedHash(definition, { recipient: 'World', enabled: true }),
             managedTemplateValues: { recipient: 'World', enabled: true },
           })
         )
@@ -1119,7 +1152,7 @@ describe('ManagedWorkflowsService', () => {
       wireOccAwareCrudWrites(crudService, logger);
       const stored = createWorkflowSource({
         version: 9,
-        definitionHash: definitionHash(definition.yamlTemplate.toString()),
+        definitionHash: renderedHash(definition, { recipient: 'World', enabled: true }),
         managedTemplateValues: { recipient: 'World', enabled: true },
       });
       const reads = [
@@ -1617,6 +1650,96 @@ describe('ManagedWorkflowsService', () => {
           storedHash: 'old-hash',
           registryHash: definitionHash(definition.yaml),
         })
+      );
+    });
+
+    it('hashes a template rendered with the stored values', async () => {
+      const templateValues: TemplateValues = { recipient: 'World', enabled: true };
+      const getStatus = async (importedYaml: string) => {
+        const definition = createTemplateDefinition({ importedYaml });
+        mockManagedWorkflowDefinitions = [definition];
+        const { crudService, service } = createService();
+        crudService.getWorkflowDocumentSource.mockResolvedValue(
+          createWorkflowSource({
+            definitionHash: renderedHash(
+              createTemplateDefinition({ importedYaml: '# imported v1' }),
+              templateValues
+            ),
+            managedTemplateValues: templateValues,
+            managedVersion: definition.version,
+            originManagedWorkflowId: definition.id,
+          })
+        );
+        return service.getManagedWorkflowStatus(
+          WORKFLOW_ID,
+          { spaceId: SPACE_ID },
+          definition.pluginId
+        );
+      };
+
+      expect(await getStatus('# imported v1')).toEqual(
+        expect.objectContaining({
+          status: 'intact',
+          registryHash: renderedHash(
+            createTemplateDefinition({ importedYaml: '# imported v1' }),
+            templateValues
+          ),
+        })
+      );
+      expect(await getStatus('# imported v2')).toEqual(
+        expect.objectContaining({
+          status: 'drifted',
+          registryHash: renderedHash(
+            createTemplateDefinition({ importedYaml: '# imported v2' }),
+            templateValues
+          ),
+        })
+      );
+    });
+
+    it('returns a null registryHash for a template that is not installed', async () => {
+      const definition = createTemplateDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      crudService.getWorkflowDocumentSource.mockResolvedValue(null);
+
+      const status = await service.getManagedWorkflowStatus(
+        WORKFLOW_ID,
+        { spaceId: SPACE_ID },
+        definition.pluginId
+      );
+
+      expect(status).toEqual(expect.objectContaining({ status: 'missing', registryHash: null }));
+    });
+
+    it('returns drifted with a null registryHash when the template throws for the stored values', async () => {
+      const definition: TemplateManagedWorkflowDefinition = {
+        ...createTemplateDefinition(),
+        yamlTemplate: () => {
+          throw new Error('stored values no longer render');
+        },
+      };
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, logger, service } = createService();
+      crudService.getWorkflowDocumentSource.mockResolvedValue(
+        createWorkflowSource({
+          definitionHash: 'stored-hash',
+          managedTemplateValues: { recipient: 'World', enabled: true },
+          managedVersion: definition.version,
+          originManagedWorkflowId: definition.id,
+        })
+      );
+
+      const status = await service.getManagedWorkflowStatus(
+        WORKFLOW_ID,
+        { spaceId: SPACE_ID },
+        definition.pluginId
+      );
+
+      expect(status).toEqual(expect.objectContaining({ status: 'drifted', registryHash: null }));
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Managed workflows: could not render '${WORKFLOW_ID}' with its stored values`,
+        expect.objectContaining({ error: expect.any(Error) })
       );
     });
 
