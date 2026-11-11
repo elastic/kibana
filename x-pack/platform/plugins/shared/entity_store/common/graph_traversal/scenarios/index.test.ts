@@ -175,9 +175,11 @@ describe('entity graph traversal scenarios', () => {
       expect(entityGraphTraversalScenarioSchema.safeParse(empty).success).toBe(false);
     });
 
-    it('accepts only out and both as directions, defaulting to out', () => {
+    it('accepts out, in and both as directions, defaulting to out', () => {
       const scenario = valid();
-      scenario.direction = 'in' as unknown as 'out';
+      scenario.direction = 'in';
+      expect(entityGraphTraversalScenarioSchema.safeParse(scenario).success).toBe(true);
+      scenario.direction = 'sideways' as unknown as 'out';
       expect(entityGraphTraversalScenarioSchema.safeParse(scenario).success).toBe(false);
 
       const { direction, ...withoutDirection } = valid();
@@ -190,5 +192,32 @@ describe('entity graph traversal scenarios', () => {
       scenario.limits = { max_nodes: ENTITY_GRAPH_TRAVERSAL_HARD_LIMITS.max_nodes + 1 };
       expect(entityGraphTraversalScenarioSchema.safeParse(scenario).success).toBe(false);
     });
+  });
+  describe('identity access graph scenarios', () => {
+    it('walks the okta user forward over the kinds the generator writes', () => {
+      const plan = loadEntityGraphTraversalPlan('okta-user-blast-radius-iag');
+      expect(plan?.direction).toBe('out');
+      expect(plan?.hops.map((h) => h.name)).toEqual([
+        'okta_groups',
+        'sso',
+        'cloud',
+        'cloud',
+        'cloud',
+        'cloud',
+        'cloud',
+      ]);
+      expect(plan?.hops[2].target_fields.map((t) => t.relation)).toContain('bucket_policy');
+    });
+
+    it.each(['domain-admins-reach', 'crown-jewel-bucket-reach'])(
+      '%s walks backwards from the crown jewel with every kind that can lead to it',
+      (id) => {
+        const plan = loadEntityGraphTraversalPlan(id);
+        expect(plan?.direction).toBe('in');
+        expect(plan?.hops).toHaveLength(8);
+        expect(plan?.hops[0].target_fields.length).toBeGreaterThan(8);
+        expect(plan?.limits.max_nodes).toBe(5000);
+      }
+    );
   });
 });

@@ -64,7 +64,7 @@ const lookbackToEsqlSpan = (lookback: string): string => {
 export interface GraphExpandStatement {
   query: string;
   params: string[];
-  direction: 'out' | 'both';
+  direction: 'out' | 'in' | 'both';
   /** The `TO` fields in the order written, each with the relation label it carries. */
   targets: Array<{ field: string; relation: string }>;
   /** Payload fields, in `__payload_<n>` order. */

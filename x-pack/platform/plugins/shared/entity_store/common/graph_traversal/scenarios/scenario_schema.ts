@@ -39,8 +39,11 @@ export const ENTITY_GRAPH_TRAVERSAL_DEFAULT_LIMITS = {
   hub_degree: 200,
 } as const;
 
-/** Relationship keys one hop may follow, and payload fields it may read. */
-export const MAX_RELATIONSHIPS_PER_HOP = 8;
+/**
+ * Relationship keys one hop may follow, and payload fields it may read. A reverse walk from
+ * a crown jewel follows every kind that can lead to it, which runs past a dozen.
+ */
+export const MAX_RELATIONSHIPS_PER_HOP = 16;
 export const MAX_PAYLOAD_FIELDS_PER_HOP = 5;
 /** Entries in `hops` (before `repeat`). */
 export const MAX_HOP_SPECS_PER_SCENARIO = 20;
@@ -71,10 +74,11 @@ export const entityGraphTraversalRelationshipKey = (field: string): string | und
 
 /**
  * Which way a walk follows the stored edges. `out` follows a node's own relationship ids;
- * `both` also reaches the nodes whose relationships point at the frontier, so a walk can go
- * host, indicator, host over edges that only the hosts carry.
+ * `in` reaches the nodes whose relationships point at the frontier, so a walk goes from a
+ * crown jewel back to everything that can reach it; `both` does both, so a walk can go host,
+ * indicator, host over edges that only the hosts carry.
  */
-export const ENTITY_GRAPH_TRAVERSAL_DIRECTIONS = ['out', 'both'] as const;
+export const ENTITY_GRAPH_TRAVERSAL_DIRECTIONS = ['out', 'in', 'both'] as const;
 
 export type EntityGraphTraversalDirection = (typeof ENTITY_GRAPH_TRAVERSAL_DIRECTIONS)[number];
 

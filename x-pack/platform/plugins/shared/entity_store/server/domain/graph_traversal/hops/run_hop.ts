@@ -404,7 +404,7 @@ export const runHop = async (
   //    so admission under the caps is the same as when they ran one after another.
   //    Over edge documents a kind is a value, so one query per leg covers every kind of the
   //    hop and each row names its own relation.
-  const legs = direction === 'both' ? [false, true] : [false];
+  const legs = direction === 'in' ? [true] : direction === 'both' ? [false, true] : [false];
   const limit = Math.min(limits.max_edges_per_hop, edgeCapacity);
   const requests: Array<{ inbound: boolean; relation?: string; query: HopQuery }> =
     edgesIndex !== undefined
