@@ -49,6 +49,40 @@ export type SessionWebVitals = Record<CoreWebVital, number | null>;
 export interface SessionsStatus {
   /** True once sessions are set up: the sessions index exists. */
   installed: boolean;
+  /** Worst health across the installed transforms. */
+  health: SessionsTransformHealth;
+  state: string | null;
+  installedVersion: number | null;
+  currentVersion: number;
+  /** True when a user with the manage sessions privilege must enable sessions again. */
+  needsUpdate: boolean;
+  /**
+   * True when the transforms run with a stored API key that Kibana can still use, so a background
+   * task applies a needed update without a user.
+   */
+  autoUpdate: boolean;
+  /**
+   * True when the stored API key was invalidated or expired. The transforms keep running, but
+   * updates no longer apply automatically. Checked live only for users who can manage sessions;
+   * others see what the health task last found.
+   */
+  apiKeyInvalid: boolean;
+  /**
+   * True while any of the current transforms hasn't completed its first checkpoint: the sessions
+   * index is being built, from up to `SESSIONS_LOOKBACK_DAYS` of data, and may be empty or hold
+   * only the sessions of the partitions that are done.
+   */
+  rebuilding: boolean;
+  reason: string | null;
+  /** Largest freshness lag across partitions, in seconds. */
+  lagSeconds: number | null;
+  configured: SessionsSettings;
+  installedPartitions: number;
+  /** Who last enabled sessions, and the credentials the transforms run with since. */
+  enabledBy: string | null;
+  enabledAt: string | null;
+  authorization: SessionsTransformAuthorization | null;
+  transforms: SessionsTransformStatus[];
 }
 
 export interface SessionUserAgent {

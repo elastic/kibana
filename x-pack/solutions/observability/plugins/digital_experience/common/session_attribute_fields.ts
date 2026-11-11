@@ -13,10 +13,12 @@
  */
 export const SESSION_ATTRIBUTE_FIELDS = {
   // `deployment.environment.name` replaces the deprecated `deployment.environment`, which
-  // `service.environment` aliases; the applications list reads both.
+  // `service.environment` aliases. These are the fields of `ENVIRONMENT_FIELDS` in
+  // `server/lib/otel/queries.ts`, by their stored names, which the raw search of the applications
+  // list matches. A session keeps the first one that an event has, where the raw search matches
+  // any, so they only differ for an application that sets different values in them.
   environment: [
     'resource.attributes.deployment.environment.name',
-    'attributes.deployment.environment.name',
     'resource.attributes.deployment.environment',
   ],
   user: [

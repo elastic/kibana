@@ -40,7 +40,9 @@ export const sessionsIndexMappings = {
     entry_page: { type: 'keyword' },
     exit_page: { type: 'keyword' },
     journey: { type: 'keyword' },
-    environment: { type: 'keyword' },
+    // Set by the browser, so bounded like the environments the routes accept.
+    environment: { type: 'keyword', ignore_above: 1024 },
+    error: { properties: { message: { type: 'keyword', ignore_above: 1024 } } },
     user: { properties: { key: { type: 'keyword' } } },
     user_agent: {
       properties: {

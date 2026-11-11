@@ -313,7 +313,95 @@ const waitUntilSearchable = async (client: ElasticsearchClient): Promise<void> =
 /** Whether sessions are set up. Reads index metadata only, so the internal user can call it. */
 export const getSessionsStatus = async (
   client: ElasticsearchClient,
-  { signal }: { signal?: AbortSignal } = {}
-): Promise<SessionsStatus> => ({
-  installed: await client.indices.exists({ index: SESSIONS_INDEX }, { signal }),
-});
+  {
+    settings,
+    signal,
+    now = Date.now(),
+  }: { settings: SessionsSettings; signal?: AbortSignal; now?: number }
+): Promise<SessionsStatus> => {
+  const installed = await managedTransforms(client, signal);
+  const base = { currentVersion: SESSIONS_VERSION, configured: settings };
+
+  if (installed.length === 0) {
+    return {
+      ...base,
+      installed: false,
+      health: 'missing',
+      state: null,
+      installedVersion: null,
+      needsUpdate: false,
+      autoUpdate: false,
+      apiKeyInvalid: false,
+      rebuilding: false,
+      reason: null,
+      lagSeconds: null,
+      installedPartitions: 0,
+      enabledBy: null,
+      enabledAt: null,
+      authorization: null,
+      transforms: [],
+    };
+  }
+
+  const { transforms: allStats } = await client.transform.getTransformStats(
+    { transform_id: installed.map(({ id }) => id).join(','), allow_no_match: true },
+    { signal }
+  );
+  const statuses = installed
+    .map((transform) =>
+      transformStatus(
+        transform,
+        allStats.find(({ id }) => id === transform.id),
+        now
+      )
+    )
+    .sort((a, b) => (a.partition ?? 0) - (b.partition ?? 0));
+  const current = statuses.filter(({ version }) => version === SESSIONS_VERSION);
+  const worst = statuses.reduce((a, b) => (HEALTH_RANK[b.health] > HEALTH_RANK[a.health] ? b : a));
+  const installedVersion = newestVersionOf(installed);
+  // Set up by a newer Kibana (rollback, rolling upgrade): this one can't update it, only report.
+  const newer = installedVersion != null && installedVersion > SESSIONS_VERSION;
+  const lags = statuses
+    .map(({ lagSeconds }) => lagSeconds)
+    .filter((lag): lag is number => lag != null);
+
+  const completedCheckpoint = (id: string) =>
+    (allStats.find((stats) => stats.id === id)?.checkpointing?.last?.checkpoint ?? 0) > 0;
+  // Each partition summarizes its own range of session ids, so the index is only whole once every
+  // one of them has completed a checkpoint.
+  const rebuilding = current.length > 0 && current.some(({ id }) => !completedCheckpoint(id));
+
+  const outdated = current.length !== statuses.length;
+  const configDrift =
+    current.length !== settings.partitions ||
+    current.some(({ frequency }) => frequency !== settings.frequency);
+  const needsUpdate = !newer && (outdated || configDrift);
+  const updateReason = newer
+    ? `Sessions transforms are from version ${installedVersion}, newer than this Kibana supports (version ${SESSIONS_VERSION}); upgrade Kibana to manage them.`
+    : outdated
+    ? `Sessions transforms are from version ${installedVersion}; enable sessions again to update them to version ${SESSIONS_VERSION}.`
+    : configDrift
+    ? `Configured ${settings.partitions} partition(s) at ${settings.frequency}, installed ${current.length}; enable sessions again to apply.`
+    : null;
+
+  return {
+    ...base,
+    installed: true,
+    health: worst.health === 'healthy' && needsUpdate ? 'outdated' : worst.health,
+    state: worst.state,
+    installedVersion,
+    needsUpdate,
+    autoUpdate: false,
+    apiKeyInvalid: false,
+    rebuilding,
+    reason:
+      worst.health === 'degraded' || worst.health === 'lagging'
+        ? worst.reason
+        : updateReason ?? worst.reason,
+    lagSeconds: lags.length > 0 ? Math.max(...lags) : null,
+    installedPartitions: current.length,
+    // Enabling stamps every partition together; the most recent stamp is the one in effect.
+    ...latestEnabled(statuses),
+    transforms: statuses,
+  };
+};

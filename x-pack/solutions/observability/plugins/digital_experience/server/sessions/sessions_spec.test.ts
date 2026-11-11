@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SERVICE_ENVIRONMENT } from '@kbn/apm-types';
 import { CORE_WEB_VITALS } from '../../common/core_web_vitals';
 import {
   SESSIONS_INDEX_PATTERN,
@@ -12,11 +13,250 @@ import {
   SESSIONS_MANAGED_BY,
   SESSIONS_VERSION,
 } from '../../common/sessions';
-import { sessionsIndexMappings, sessionsIndexTemplate } from './sessions_spec';
+import { SESSION_ATTRIBUTE_FIELDS } from '../../common/session_attribute_fields';
+import { ENVIRONMENT_FIELDS } from '../lib/otel/queries';
+import {
+  SESSION_ATTRIBUTE_GROUPS,
+  buildSessionsTransform,
+  sessionsDestPipeline,
+  sessionsIndexMappings,
+  sessionsIndexTemplate,
+} from './sessions_spec';
+import {
+  SOURCE_SERVICE_NAME_FIELD,
+  SOURCE_SESSION_ID_FIELD,
+  SOURCE_URL_FIELD,
+} from './source_fields';
 
-describe('sessions index template', () => {
-  it('covers the sessions indices of every version', () => {
-    expect(sessionsIndexTemplate.name).toBe(SESSIONS_INDEX_TEMPLATE_NAME);
+describe('sessions transform spec', () => {
+  const transform = buildSessionsTransform();
+
+  it('reads OTel traces and logs and writes through the dest pipeline', () => {
+    expect(transform.transform_id).toBe(SESSIONS_TRANSFORM_ID);
+    expect(transform.source.index).toEqual(['traces-*.otel-*', 'logs-*.otel-*']);
+    expect(transform.dest).toEqual({ index: SESSIONS_INDEX, pipeline: SESSIONS_PIPELINE_NAME });
+    expect(transform.sync?.time?.field).toBe('@timestamp');
+    expect(transform.retention_policy?.time?.field).toBe('end_time');
+  });
+
+  it('uses the default frequency and a 5000 page size', () => {
+    expect(transform.frequency).toBe('1m');
+    expect(transform.settings?.max_page_search_size).toBe(SESSIONS_MAX_PAGE_SEARCH_SIZE);
+    expect(SESSIONS_MAX_PAGE_SEARCH_SIZE).toBe(5000);
+    expect(buildSessionsTransform({ frequency: '5m' }).frequency).toBe('5m');
+  });
+
+  it('builds partitions that split session ids and share the dest index', () => {
+    const partitions = [0, 1, 2, 3].map((index) =>
+      buildSessionsTransform({ partition: { index, count: 4 } })
+    );
+
+    expect(partitions.map(({ transform_id: id }) => id)).toEqual([
+      `${SESSIONS_TRANSFORM_ID}-p0of4`,
+      `${SESSIONS_TRANSFORM_ID}-p1of4`,
+      `${SESSIONS_TRANSFORM_ID}-p2of4`,
+      `${SESSIONS_TRANSFORM_ID}-p3of4`,
+    ]);
+    expect(partitions.map(({ source }) => source.query?.bool?.filter)).toEqual(
+      [{ lt: '40' }, { gte: '40', lt: '80' }, { gte: '80', lt: 'c0' }, { gte: 'c0' }].map((range) =>
+        expect.arrayContaining([{ range: { [SOURCE_SESSION_ID_FIELD]: range } }])
+      )
+    );
+    expect(new Set(partitions.map(({ dest }) => dest.index))).toEqual(new Set([SESSIONS_INDEX]));
+    // Each partition prunes the shared dest index, so no slice depends on another's traffic.
+    expect(partitions.map(({ retention_policy: retention }) => retention?.time?.field)).toEqual([
+      'end_time',
+      'end_time',
+      'end_time',
+      'end_time',
+    ]);
+    expect(partitions[2]._meta).toEqual(expect.objectContaining({ partition: 2, partitions: 4 }));
+  });
+
+  it('adds no session id filter for a single partition', () => {
+    expect(JSON.stringify(transform.source.query)).not.toContain(
+      '"range":{"attributes.session.id"'
+    );
+  });
+
+  it('only summarizes browser events that carry a non-empty service.name and session.id', () => {
+    expect(transform.source.query?.bool?.filter).toEqual(
+      expect.arrayContaining([
+        { term: { 'telemetry.sdk.language': 'webjs' } },
+        { exists: { field: SOURCE_SESSION_ID_FIELD } },
+        { exists: { field: SOURCE_SERVICE_NAME_FIELD } },
+      ])
+    );
+    expect(transform.source.query?.bool?.must_not).toEqual([
+      { term: { [SOURCE_SESSION_ID_FIELD]: '' } },
+      { term: { [SOURCE_SERVICE_NAME_FIELD]: '' } },
+    ]);
+  });
+
+  it('matches web vital names in any case', () => {
+    expect(transform.pivot?.aggregations?.lcp.filter?.bool?.filter).toEqual(
+      expect.arrayContaining([
+        { term: { 'attributes.browser.web_vital.name': { value: 'lcp', case_insensitive: true } } },
+      ])
+    );
+  });
+
+  it('groups by the stored service.name and session.id fields, not their passthrough names', () => {
+    expect(transform.pivot?.group_by).toEqual({
+      'service.name': { terms: { field: 'resource.attributes.service.name' } },
+      'session.id': { terms: { field: 'attributes.session.id' } },
+    });
+  });
+
+  it('matches EDOT Browser events by event or span name', () => {
+    expect(transform.pivot?.aggregations?.page_view_count.filter).toEqual({
+      bool: {
+        should: [
+          { term: { event_name: 'documentLoad' } },
+          { term: { name: 'documentLoad' } },
+          { term: { event_name: 'browser.navigation' } },
+          { term: { name: 'browser.navigation' } },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  });
+
+  it('counts page loads, JS errors and HTTP requests as the applications list does', () => {
+    const aggregations = transform.pivot?.aggregations ?? {};
+    // `browser.navigation_timing` and `exception` events only: unlike the page views and errors
+    // above, soft navigations and failed outcomes are not counted.
+    expect(aggregations.page_load_count).toEqual({
+      filter: { bool: { filter: [{ term: { event_name: 'browser.navigation_timing' } }] } },
+    });
+    expect(aggregations.js_error_count).toEqual({
+      filter: { bool: { filter: [{ term: { event_name: 'exception' } }] } },
+    });
+    const requestDocuments = [
+      { term: { kind: 'Client' } },
+      { exists: { field: 'http.request.method' } },
+    ];
+    const noResponse = { term: { 'status.code': 'Error' } };
+    expect(aggregations.http_request_count.filter?.bool?.filter).toEqual([
+      ...requestDocuments,
+      {
+        bool: {
+          should: [{ exists: { field: 'http.response.status_code' } }, noResponse],
+          minimum_should_match: 1,
+        },
+      },
+    ]);
+    expect(aggregations.http_failed_request_count.filter?.bool?.filter).toEqual([
+      ...requestDocuments,
+      {
+        bool: {
+          should: [{ range: { 'http.response.status_code': { gte: 400 } } }, noResponse],
+          minimum_should_match: 1,
+        },
+      },
+    ]);
+  });
+
+  it('counts the samples of each web vital and those up to each rating threshold', () => {
+    const value = 'attributes.browser.web_vital.value';
+    const { lcp, cls } = transform.pivot?.aggregations ?? {};
+    expect(lcp.filter?.bool?.filter).toContainEqual({ exists: { field: value } });
+    expect(lcp.aggs).toEqual({
+      p75: { percentiles: { field: value, percents: [75], keyed: false } },
+      upToGood: { filter: { range: { [value]: { lte: 2500 } } } },
+      upToNeedsImprovement: { filter: { range: { [value]: { lte: 4000 } } } },
+      samples: { value_count: { field: value } },
+    });
+    expect(cls.aggs?.upToGood).toEqual({ filter: { range: { [value]: { lte: 0.1 } } } });
+  });
+
+  it('reads the environment from its own latest event', () => {
+    const { environment_seen: environment } = transform.pivot?.aggregations ?? {};
+    expect(environment.aggs?.latest.top_metrics?.metrics).toEqual(
+      SESSION_ATTRIBUTE_FIELDS.environment.map((field) => ({ field }))
+    );
+    // The new name first, then the deprecated one that `service.environment` aliases.
+    expect(SESSION_ATTRIBUTE_FIELDS.environment).toEqual([
+      'resource.attributes.deployment.environment.name',
+      'resource.attributes.deployment.environment',
+    ]);
+  });
+
+  it('reads the environment fields the raw search of the applications list matches', () => {
+    // `service.environment` aliases `resource.attributes.deployment.environment`.
+    const rawFieldsByStoredName = ENVIRONMENT_FIELDS.map((field) =>
+      field === SERVICE_ENVIRONMENT ? 'resource.attributes.deployment.environment' : field
+    );
+
+    expect([...SESSION_ATTRIBUTE_FIELDS.environment].sort()).toEqual(rawFieldsByStoredName.sort());
+  });
+
+  it('bounds the environment, which the browser sets', () => {
+    expect(sessionsIndexMappings.properties.environment).toEqual({
+      type: 'keyword',
+      ignore_above: 1024,
+    });
+  });
+
+  it('aggregates timestamps, counts, journey, attributes and every web vital', () => {
+    const aggregations = transform.pivot?.aggregations ?? {};
+    expect(Object.keys(aggregations)).toEqual(
+      expect.arrayContaining([
+        'start_time',
+        'end_time',
+        'event_count',
+        'page_view_count',
+        'page_load_count',
+        'js_error_count',
+        'http_request_count',
+        'http_failed_request_count',
+        'click_count',
+        'error_count',
+        'pages',
+        'exit',
+        'environment_seen',
+        'user_seen',
+        'user_agent_seen',
+        'geo_seen',
+        ...CORE_WEB_VITALS,
+      ])
+    );
+    // url.full is a wildcard field in the OTel templates: terms works, top_metrics does not.
+    expect(aggregations.pages.aggs?.urls.terms).toEqual({
+      field: SOURCE_URL_FIELD,
+      size: SESSIONS_JOURNEY_URL_CANDIDATES,
+      order: { first: 'asc' },
+    });
+    expect(aggregations.exit.aggs?.urls.terms).toEqual({
+      field: SOURCE_URL_FIELD,
+      size: 1,
+      order: { last: 'desc' },
+    });
+    expect(JSON.stringify(aggregations)).not.toContain('scripted_metric');
+    expect(aggregations.user_seen.aggs?.latest.top_metrics?.metrics).toEqual(
+      SESSION_ATTRIBUTE_FIELDS.user.map((field) => ({ field }))
+    );
+  });
+
+  it('reads user, user agent and geo from their own latest event', () => {
+    const aggregations = transform.pivot?.aggregations ?? {};
+    for (const [name, fields] of Object.entries(SESSION_ATTRIBUTE_GROUPS)) {
+      expect(aggregations[name].aggs?.latest.top_metrics?.metrics).toEqual(
+        fields.map((field) => ({ field }))
+      );
+    }
+    expect(SESSION_ATTRIBUTE_GROUPS.user_agent_seen).toContain('resource.attributes.browser.name');
+    expect(SESSION_ATTRIBUTE_GROUPS.geo_seen).toContain('attributes.client.geo.country_iso_code');
+  });
+
+  it('stamps managed_by and version so setup and health checks can find it', () => {
+    const meta = { managed: true, managed_by: SESSIONS_MANAGED_BY, version: SESSIONS_VERSION };
+    expect(transform._meta).toEqual({ ...meta, partition: 0, partitions: 1 });
+    expect(sessionsDestPipeline._meta).toEqual(meta);
+    expect(sessionsIndexTemplate._meta).toEqual(meta);
+  });
+
+  it('maps every field the dest pipeline writes', () => {
     expect(sessionsIndexTemplate.index_patterns).toEqual([SESSIONS_INDEX_PATTERN]);
   });
 

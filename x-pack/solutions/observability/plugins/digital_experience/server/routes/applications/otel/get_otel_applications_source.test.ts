@@ -11,7 +11,10 @@ import type { SessionsStatus } from '../../../../common/sessions';
 import { getSessionsStatus } from '../../../sessions/sessions_setup';
 import type { SourceApplications } from '../types';
 import { getOtelApplications } from './get_otel_applications';
-import { getOtelApplicationsFromBestSource } from './get_otel_applications_source';
+import {
+  clearSessionsStatusCache,
+  getOtelApplicationsFromBestSource,
+} from './get_otel_applications_source';
 import { getSessionsApplications } from './get_sessions_applications';
 
 jest.mock('../../../sessions/sessions_setup');
@@ -65,6 +68,7 @@ const setup = ({ start = NOW - DAY_MS, signal }: { start?: number; signal?: Abor
 describe('getOtelApplicationsFromBestSource', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    clearSessionsStatusCache();
     jest.useFakeTimers().setSystemTime(NOW);
     mockedStatus.mockResolvedValue(status());
     mockedSessions.mockResolvedValue(FROM_SESSIONS);
@@ -82,18 +86,55 @@ describe('getOtelApplicationsFromBestSource', () => {
     expect(mockedRaw).not.toHaveBeenCalled();
   });
 
-  it('searches as the current user and checks the status with the internal user', async () => {
-    const { signal } = new AbortController();
-    const { result, esClient, internalEsClient } = setup({ signal });
+  it('searches through a traced client of the current user and checks the transforms with the internal user', async () => {
+    const { result, esClient, internalEsClient } = setup();
     await result;
 
-    expect(mockedStatus).toHaveBeenCalledWith(internalEsClient, { signal });
+    expect(mockedStatus).toHaveBeenCalledWith(internalEsClient, { settings: SETTINGS });
     expect(mockedSessions).toHaveBeenCalledWith({
-      esClient,
+      tracedEsClient: expect.objectContaining({ client: esClient }),
       start: NOW - DAY_MS,
       end: NOW,
       environment: 'production',
-      signal,
+    });
+  });
+
+  describe('the status of the transforms', () => {
+    it('is read once for the requests of the next half minute', async () => {
+      await setup().result;
+      await setup().result;
+      await Promise.all([setup().result, setup().result]);
+
+      expect(mockedStatus).toHaveBeenCalledTimes(1);
+      expect(mockedSessions).toHaveBeenCalledTimes(4);
+    });
+
+    it('is read again after half a minute', async () => {
+      await setup().result;
+      jest.setSystemTime(NOW + 29_000);
+      await setup().result;
+      expect(mockedStatus).toHaveBeenCalledTimes(1);
+
+      jest.setSystemTime(NOW + 31_000);
+      await setup().result;
+      expect(mockedStatus).toHaveBeenCalledTimes(2);
+    });
+
+    it('is not cancelled by the abort of the request that read it', async () => {
+      const controller = new AbortController();
+      await setup({ signal: controller.signal }).result;
+      controller.abort();
+
+      await expect(setup().result).resolves.toBe(FROM_SESSIONS);
+      expect(mockedStatus).toHaveBeenCalledTimes(1);
+    });
+
+    it('is not remembered when it could not be read', async () => {
+      mockedStatus.mockRejectedValueOnce(new Error('transform status failed'));
+      await expect(setup().result).resolves.toBe(FROM_RAW);
+
+      await expect(setup().result).resolves.toBe(FROM_SESSIONS);
+      expect(mockedStatus).toHaveBeenCalledTimes(2);
     });
   });
 

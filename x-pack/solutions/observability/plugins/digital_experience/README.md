@@ -25,10 +25,11 @@ privileges like the app.
 
 - **Summary:** applications, sessions, page loads, JS errors per page load, failed HTTP requests and
   the applications with a poor Core Web Vital. Like the chart, it covers the selected environment and
-  source; the search narrows only the table. The sessions are the total of the EDOT Browser
-  applications, which only the sessions index counts, so it shows a dash while they are read from
-  the raw events (sessions not set up, a range past their lookback, no access to them) and for Classic
-  RUM, which has no sessions.
+  source; the search narrows only the table. The sessions are the total of the sessions that started
+  in the range, over the EDOT Browser applications, which only the sessions index counts, so it shows
+  a dash while they are read from the raw events (sessions not set up, a range past their lookback,
+  no access to them) and for Classic RUM, which has no sessions. It adds up to the same total as the
+  sessions in the chart.
 - **Partial data:** when one source fails to load, a warning above the summary names it.
 - **Chart:** page loads over time, or the sessions that started, picked with a toggle whose choice
   is kept in local storage; drag over it to zoom into that range. The sessions are counted only
@@ -48,10 +49,13 @@ privileges like the app.
 **Where the EDOT Browser rows come from:** the sessions index (see [Sessions](#sessions)) when it can
 answer, which takes one cheap search over session summaries instead of aggregating every raw event,
 and the raw OTel events otherwise. The response has the same shape either way, and Classic RUM
-always reads its own indices. The sessions are read when all of these hold, which is checked on every
-request with the index's metadata, read as the internal user:
+always reads its own indices. The sessions are read when all of these hold, which is checked with the
+transforms' metadata, read as the internal user and shared by the requests of the next 30 seconds, so
+a change of their status shows up within that time:
 
-- sessions are set up;
+- sessions are set up, their transforms are current (not outdated), healthy (not lagging or failed)
+  and past their first checkpoint (every partition, as each summarizes its own sessions), so a
+  build in progress is never shown as lower numbers;
 - the time range starts within the sessions' 30 day lookback (from the start of that day, in UTC);
 - the user can read `digital-experience-sessions-*`, otherwise the raw events are read quietly;
 - the sessions hold at least one application, so applications that send no `session.id`, which the
@@ -62,10 +66,12 @@ counts (page loads, JS errors, HTTP requests, failed requests, web vital samples
 are the sums of what each session counted with the list's own filters, so both sources count the same
 events of a session, and the environments are the sessions'. What differs when the sessions are read:
 
-- **Time range:** a session that overlaps the range counts in full, with its events outside the range,
-  as in the Sessions tab. The page loads chart puts a session's page loads at its start, in the same
-  buckets, and leaves out the sessions that started before the range, so its shape differs and its
-  total is a little lower than the table's.
+- **Time range:** a session that overlaps the range counts in full in the page loads, errors and
+  requests, with its events outside the range, as its events can't be told apart. The sessions are
+  those that started in the range, in the stat, the table and the chart alike, so they agree, where
+  the Sessions tab counts every session that overlaps the range. The page loads chart puts a
+  session's page loads at its start, in the same buckets, and leaves out the sessions that started
+  before the range, so its shape differs and its total is a little lower than the table's.
 - **Percentiles:** the p75 of a web vital is the p75 of the sessions' own p75s, as the summaries keep
   no samples. It is exact when a session has at most one sample of that vital, and higher than the
   p75 of the samples otherwise: on 3 hours of the synthtrace EDOT Browser data, with about seven
@@ -256,8 +262,79 @@ action in Digital Experience.
 The status route, `GET /internal/digital_experience/sessions/status`, reports whether sessions are
 set up: whether the index exists. It reads index metadata as the internal user.
 
-> **Security note:** the sessions index is meant to hold summaries of everything the enabling user
-> could read in the source indices, regardless of the document- and field-level security or index
+Sessions set up before the applications list read them have no summary fields for it, and enabling
+again does not update a transform's pivot, which only a new `SESSIONS_VERSION` replaces. The list
+would read zeros from such an install, so on a cluster that has one, delete the sessions transform and
+index, then enable sessions again.
+
+Enabling again is safe. It refreshes the transforms' stored credentials to the enabling user,
+restarts failed transforms, replaces transforms left over from an older version, and applies a
+changed `frequency` or partition count. It never replaces transforms from a newer version (after a
+Kibana rollback, or from an older node during a rolling upgrade): that would delete the newer
+summaries, so enabling fails with a 409 and the status asks to upgrade Kibana instead.
+
+The transforms, pipeline and index template are marked `managed`, so the Transforms and Index
+Management UIs warn before anyone edits or deletes them there. There is no disable action in
+Digital Experience; a user with Elasticsearch's `manage_transform` privilege can still stop or
+delete the transforms directly.
+
+### Scaling and freshness
+
+Each checkpoint re-aggregates every session that received new events over its full history, so
+cost grows with active sessions × events per session. Two settings trade cost for freshness and
+throughput:
+
+```yaml
+xpack.digital_experience.sessions:
+  frequency: 1m   # 1s–1h. Longer means fewer re-aggregations of each active session: cheaper, but staler.
+  partitions: 1   # 1–32. Splits sessions by session.id range across that many transforms.
+```
+
+- **`frequency`**: an active session is re-read and rewritten once per checkpoint. Going from `1m`
+  to `2m`–`5m` cuts background work roughly 2–5× for long sessions, and adds about the same time to
+  the session list's lag. Session detail reads raw events with no upper time bound, so its
+  timeline stays current; its summary figures are as fresh as the last checkpoint.
+- **`partitions`**: transforms run one request at a time, so partitions are how the work spreads
+  across transform nodes. They share the sessions index, document ids depend only on
+  `service.name` + `session.id`, and each partition's retention policy prunes the whole index, so
+  changing the count rewrites documents in place without emptying the list. EDOT Browser session
+  ids are random UUIDs, so the slices are even.
+
+Settings changes take effect on the health task's next run when the transforms run with a stored
+API key, and otherwise after a user with that privilege enables sessions again. The status route
+reports the drift until then.
+
+A background task (`digital_experience:sessions-health`, every 5 minutes) reads transform health,
+version and lag. It logs when transforms become degraded or lagging (more than three missed
+checkpoints plus the sync delay behind, at least 5 minutes), recover, need an update, or come from a
+newer Kibana: once per change, not on every run. When an update is needed (a new sessions version
+after a Kibana upgrade, or changed settings) and the transforms run with the stored API key, it
+applies the update with that same key, so they keep running with the same access, and writes a
+`digital_experience_sessions_auto_update` audit event naming the key and who granted it.
+`_meta.enabled_by` and `enabled_at` keep their enable-time values. If the update fails, the next
+runs retry it, and status stops saying it applies by itself and asks a user with the manage
+sessions privilege to update sessions instead. New transforms are created before the ones they
+replace are removed, so a failure part-way leaves the old ones running. A version update drops the old
+sessions index and rebuilds it from up to 30 days of data. The task never updates transforms from a
+newer Kibana, and never updates a transform as the internal user: an update re-stamps the transform
+with the updater's privileges, which as the internal user would bypass the enabling user's index
+privileges. Elasticsearch can't protect an API key from deletion: anyone with `manage_api_key` or
+`manage_security`, or the enabling user with `manage_own_api_key`, can invalidate it. The key is
+named "Digital Experience sessions (used by the sessions transforms)" and marked managed, so the API
+keys page warns before deleting it. A deleted key doesn't stop the transforms: they keep the
+identity they were last created or updated with, and keep summarizing sessions. It only stops
+Kibana from updating them without a user, so an upgrade or settings change then needs **Update
+sessions**. The health task checks the key until it finds it deleted, then logs it once, as a
+warning, and doesn't authenticate with that key again. Status checks it for users with the manage
+sessions privilege, and shows the others what the health task found. When one of those users opens
+the Sessions tab, it grants a new key automatically, as the **Update sessions** button would. If the
+key or the health task's state can't be read, status still loads, without automatic updates. If
+transforms fall behind under peak traffic, they lag and then catch up; no data is lost.
+
+There is no disable action yet. One must invalidate the stored API key and delete its saved object.
+
+> **Security note:** the sessions index contains summaries of everything the enabling user could
+> read in the source indices, regardless of the document- and field-level security or index
 > privileges of the people who later read it. Enable sessions with a user whose source access is
 > appropriate for every reader of `digital-experience-sessions-*`.
 

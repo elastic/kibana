@@ -59,6 +59,9 @@ export interface ValueCountAggregation {
 /** The documents of a bucket that have a value for `field`, e.g. the samples of a percentile. */
 export const countOf = (field: string) => ({ value_count: { field } });
 
+/** The sum of `field` over the documents of a bucket, e.g. a count the sessions transform kept. */
+export const sumOf = (field: string) => ({ sum: { field } });
+
 /** The latest document of a bucket. */
 export const LAST_SEEN_AGGREGATION = { max: { field: '@timestamp' } } as const;
 

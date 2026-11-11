@@ -547,7 +547,160 @@ describe('sessions setup', () => {
 
       await getSessionsStatus(client, { signal });
 
-      expect(client.indices.exists).toHaveBeenCalledWith({ index: SESSIONS_INDEX }, { signal });
+      expect(status.authorization).toEqual({
+        roles: null,
+        apiKeyId: 'key-1',
+        apiKeyName: 'Digital Experience sessions',
+        serviceAccount: null,
+      });
+      expect(status.autoUpdate).toBe(false);
+    });
+
+    it('reports rebuilding until the current transform completes its first checkpoint', async () => {
+      mockTransforms(client, [managedTransform(SESSIONS_TRANSFORM_ID)]);
+      mockStats(client, [
+        idleStats(SESSIONS_TRANSFORM_ID, 30, { checkpointing: { last: { checkpoint: 0 } } }),
+      ]);
+      expect(await getSessionsStatus(client, { settings: oneTransform, now: NOW })).toEqual(
+        expect.objectContaining({ rebuilding: true })
+      );
+
+      mockStats(client, [idleStats(SESSIONS_TRANSFORM_ID)]);
+      expect(await getSessionsStatus(client, { settings: oneTransform, now: NOW })).toEqual(
+        expect.objectContaining({ rebuilding: false })
+      );
+    });
+
+    it('reports rebuilding until every partition completes its first checkpoint', async () => {
+      const ids = [sessionsTransformId(0, 2), sessionsTransformId(1, 2)];
+      const settings = { frequency: '1m', partitions: 2 };
+      mockTransforms(
+        client,
+        ids.map((id, partition) => managedTransform(id, { partition }))
+      );
+
+      // One partition is done, the other has summarized none of its sessions yet.
+      mockStats(client, [
+        idleStats(ids[0]),
+        idleStats(ids[1], 30, { checkpointing: { last: { checkpoint: 0 } } }),
+      ]);
+      expect(await getSessionsStatus(client, { settings, now: NOW })).toEqual(
+        expect.objectContaining({ rebuilding: true })
+      );
+
+      mockStats(
+        client,
+        ids.map((id) => idleStats(id))
+      );
+      expect(await getSessionsStatus(client, { settings, now: NOW })).toEqual(
+        expect.objectContaining({ rebuilding: false })
+      );
+    });
+
+    it('reports healthy for green, started, fresh transforms that match the settings', async () => {
+      mockTransforms(client, [managedTransform(SESSIONS_TRANSFORM_ID)]);
+      mockStats(client, [idleStats(SESSIONS_TRANSFORM_ID)]);
+
+      expect(await getSessionsStatus(client, { settings: oneTransform, now: NOW })).toEqual(
+        expect.objectContaining({
+          installed: true,
+          health: 'healthy',
+          needsUpdate: false,
+          lagSeconds: 30,
+          installedPartitions: 1,
+        })
+      );
+    });
+
+    it('reports lagging when a partition falls behind', async () => {
+      const ids = [sessionsTransformId(0, 2), sessionsTransformId(1, 2)];
+      mockTransforms(client, [
+        managedTransform(ids[0]),
+        managedTransform(ids[1], { partition: 1 }),
+      ]);
+      mockStats(client, [
+        idleStats(ids[0]),
+        {
+          ...idleStats(ids[1]),
+          checkpointing: {
+            last: { checkpoint: 9, time_upper_bound_millis: NOW - 15 * 60_000 },
+            next: { checkpoint: 10 },
+          },
+        },
+      ]);
+
+      const status = await getSessionsStatus(client, {
+        settings: { frequency: '1m', partitions: 2 },
+        now: NOW,
+      });
+
+      expect(status).toEqual(
+        expect.objectContaining({ health: 'lagging', lagSeconds: 900, needsUpdate: false })
+      );
+      expect(status.reason).toMatch(/15 minutes behind/);
+      expect(status.transforms.map(({ health }) => health)).toEqual(['healthy', 'lagging']);
+    });
+
+    it('flags an outdated transform as needing an update', async () => {
+      mockTransforms(client, [managedTransform('digital-experience-sessions-0', { version: 0 })]);
+      mockStats(client, [idleStats('digital-experience-sessions-0')]);
+
+      expect(await getSessionsStatus(client, { settings: oneTransform, now: NOW })).toEqual(
+        expect.objectContaining({
+          installed: true,
+          health: 'outdated',
+          needsUpdate: true,
+          installedVersion: 0,
+        })
+      );
+    });
+
+    it('reports transforms from a newer version without asking to enable sessions again', async () => {
+      const newerId = `digital-experience-sessions-${SESSIONS_VERSION + 1}`;
+      mockTransforms(client, [managedTransform(newerId, { version: SESSIONS_VERSION + 1 })]);
+      mockStats(client, [idleStats(newerId)]);
+
+      const status = await getSessionsStatus(client, { settings: oneTransform, now: NOW });
+
+      expect(status).toEqual(
+        expect.objectContaining({
+          health: 'healthy',
+          needsUpdate: false,
+          installedVersion: SESSIONS_VERSION + 1,
+        })
+      );
+      expect(status.reason).toMatch(/newer than this Kibana supports.*upgrade Kibana/);
+    });
+
+    it('flags changed partition or frequency settings as needing an update', async () => {
+      mockTransforms(client, [managedTransform(SESSIONS_TRANSFORM_ID)]);
+      mockStats(client, [idleStats(SESSIONS_TRANSFORM_ID)]);
+
+      const status = await getSessionsStatus(client, {
+        settings: { frequency: '5m', partitions: 4 },
+        now: NOW,
+      });
+
+      expect(status).toEqual(
+        expect.objectContaining({ health: 'outdated', needsUpdate: true, installedPartitions: 1 })
+      );
+      expect(status.reason).toMatch(/Configured 4 partition\(s\) at 5m, installed 1/);
+    });
+
+    it('reports degraded with the failure reason', async () => {
+      mockTransforms(client, [managedTransform(SESSIONS_TRANSFORM_ID)]);
+      mockStats(client, [
+        {
+          id: SESSIONS_TRANSFORM_ID,
+          state: 'failed',
+          reason: 'no such index',
+          health: { status: 'red' },
+        },
+      ]);
+
+      expect(await getSessionsStatus(client, { settings: oneTransform, now: NOW })).toEqual(
+        expect.objectContaining({ health: 'degraded', reason: 'no such index' })
+      );
     });
 
     it('never writes', async () => {

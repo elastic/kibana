@@ -59,8 +59,9 @@ export interface ApplicationSummary {
   environments: string[];
   pageLoads: { count: number };
   /**
-   * Sessions that overlap the time range, `null` when the source doesn't count them. Only the
-   * sessions index does: the raw events and Classic RUM don't.
+   * Sessions that started in the time range, as `ApplicationsResponse.sessionsOverTime` counts
+   * them, `null` when the source doesn't count them. Only the sessions index does: the raw events
+   * and Classic RUM don't.
    */
   sessions: { count: number } | null;
   webVitals: WebVitals;

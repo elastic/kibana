@@ -95,6 +95,15 @@ export interface SessionDocument {
 
 const escapeWildcard = (value: string): string => value.replace(/[\\*?]/g, '\\$&');
 
+/** Sessions that overlap the [start, end] range. */
+export const sessionOverlapFilters = ({
+  start,
+  end,
+}: Pick<ListSessionsParams, 'start' | 'end'>): QueryDslQueryContainer[] => [
+  { range: { start_time: { lte: end } } },
+  { range: { end_time: { gte: start } } },
+];
+
 /** Sessions of `serviceName` that overlap the [start, end] range. */
 export const sessionScopeFilters = ({
   serviceName,
@@ -102,8 +111,7 @@ export const sessionScopeFilters = ({
   end,
 }: Pick<ListSessionsParams, 'serviceName' | 'start' | 'end'>): QueryDslQueryContainer[] => [
   { term: { 'service.name': serviceName } },
-  { range: { start_time: { lte: end } } },
-  { range: { end_time: { gte: start } } },
+  ...sessionOverlapFilters({ start, end }),
 ];
 
 const searchFilter = (query: string | undefined): QueryDslQueryContainer[] => {
