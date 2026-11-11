@@ -62,6 +62,8 @@ const TextSetting: React.FunctionComponent<{
       data-test-subj={`settingsOutputsFlyout.${testSubj}`}
       placeholder={placeholder}
       {...input.props}
+      // validate when leaving the field, not only on save
+      onBlur={() => input.validate()}
     />
   </EuiFormRow>
 );
@@ -137,6 +139,7 @@ const Headers: React.FunctionComponent<{ inputs: OutputFormInputsType }> = ({ in
                     isInvalid={rowErrors.some((e) => e.hasKeyError)}
                     value={row.key}
                     onChange={(e) => updateRow(index, 'key', e.target.value)}
+                    onBlur={() => inputs.otlpHeadersInput.validate()}
                     aria-label={i18n.translate(
                       'xpack.fleet.settings.editOutputFlyout.otlpHeaderNameAriaLabel',
                       { defaultMessage: 'Header name' }
@@ -156,6 +159,7 @@ const Headers: React.FunctionComponent<{ inputs: OutputFormInputsType }> = ({ in
                     isInvalid={rowErrors.some((e) => e.hasValueError)}
                     value={row.value}
                     onChange={(e) => updateRow(index, 'value', e.target.value)}
+                    onBlur={() => inputs.otlpHeadersInput.validate()}
                     aria-label={i18n.translate(
                       'xpack.fleet.settings.editOutputFlyout.otlpHeaderValueAriaLabel',
                       { defaultMessage: 'Header value' }

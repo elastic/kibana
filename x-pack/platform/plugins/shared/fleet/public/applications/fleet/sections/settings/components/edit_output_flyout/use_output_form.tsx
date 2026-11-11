@@ -1448,6 +1448,10 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
       (output && !hasChanged) ||
       !nameInput.value ||
       isHostsMissing ||
+      (isOtlp &&
+        Object.values(otlpInputs).some(
+          (input) => (input.formRowProps as { isInvalid?: boolean }).isInvalid
+        )) ||
       (isLogstash && !hasEncryptedSavedObjectConfigured) ||
       (!isKafka &&
         (sslCertificateAuthoritiesInput.props.isInvalid ||

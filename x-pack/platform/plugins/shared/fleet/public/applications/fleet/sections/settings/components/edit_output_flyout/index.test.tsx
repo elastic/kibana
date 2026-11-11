@@ -2108,6 +2108,32 @@ describe('EditOutputFlyout', () => {
       expect(utils.getByTestId('saveApplySettingsBtn')).toBeDisabled();
     });
 
+    it('should validate a field when leaving it and disable saving while it is invalid', async () => {
+      const { utils } = renderFlyout(otlpOutput);
+      const saveButton = utils.getByTestId('saveApplySettingsBtn');
+      const timeoutInput = utils.getByTestId('settingsOutputsFlyout.otlpTimeoutInput');
+
+      fireEvent.change(timeoutInput, { target: { value: '5 seconds' } });
+      fireEvent.blur(timeoutInput);
+
+      expect(utils.getByText('Specify a duration such as 500ms, 5s, 1m30s')).toBeInTheDocument();
+      expect(saveButton).toBeDisabled();
+
+      fireEvent.change(timeoutInput, { target: { value: '5s' } });
+
+      expect(utils.queryByText('Specify a duration such as 500ms, 5s, 1m30s')).toBeNull();
+      expect(saveButton).not.toBeDisabled();
+
+      const writeBufferSizeInput = utils.getByTestId(
+        'settingsOutputsFlyout.otlpWriteBufferSizeInput'
+      );
+      fireEvent.change(writeBufferSizeInput, { target: { value: '-1' } });
+      fireEvent.blur(writeBufferSizeInput);
+
+      expect(utils.getByText('Specify a whole number of bytes, 0 or more')).toBeInTheDocument();
+      expect(saveButton).toBeDisabled();
+    });
+
     it('should validate durations and buffer sizes', async () => {
       const { utils } = renderFlyout(otlpOutput);
       fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpTimeoutInput'), {
