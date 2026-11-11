@@ -9,6 +9,7 @@ import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ConfigurationAttributes } from '../../../common/types/domain';
 import type { IndexRefresh } from '../types';
 import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
+import type { ConfigurationWriteAttributes } from '../../common/types/configure';
 
 export interface ClientArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
@@ -25,12 +26,12 @@ export interface FindCaseConfigureArgs extends ClientArgs {
 }
 
 export interface PostCaseConfigureArgs extends ClientArgs, IndexRefresh {
-  attributes: ConfigurationAttributes;
+  attributes: ConfigurationWriteAttributes;
   id: string;
 }
 
 export interface PatchCaseConfigureArgs extends ClientArgs, IndexRefresh {
   configurationId: string;
-  updatedAttributes: Partial<ConfigurationAttributes>;
+  updatedAttributes: Partial<ConfigurationWriteAttributes>;
   originalConfiguration: SavedObject<ConfigurationAttributes>;
 }
