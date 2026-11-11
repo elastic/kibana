@@ -9,7 +9,6 @@ import type { Logger } from '@kbn/logging';
 import type { AgentsStart } from '@kbn/agent-builder-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import { toKibanaAppUrl } from '@kbn/agent-builder-plugin/server';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import { getConnectorSpec } from '@kbn/connector-specs';
@@ -102,7 +101,7 @@ export const createConnectorSetupAttachmentType = ({
       data: { connector_type: connectorType, connector_type_name: connectorTypeName, reason },
       origin,
     },
-    { agentId, kibanaUrl }
+    { agentId }
   ) => {
     const displayName =
       connectorTypeName ?? getConnectorSpec(connectorType)?.metadata.displayName ?? connectorType;
@@ -129,28 +128,21 @@ export const createConnectorSetupAttachmentType = ({
           }),
       body: [
         { type: 'markdown', text },
-        ...(kibanaUrl
-          ? [
-              {
-                type: 'actions' as const,
-                buttons: [
-                  {
-                    label: i18n.translate(
-                      'xpack.agentBuilderPlatform.attachments.connectorSetup.surface.configureInKibana',
-                      { defaultMessage: 'Configure in Kibana' }
-                    ),
-                    // The agent's connectors page assigns the connectors created there to the agent.
-                    url: toKibanaAppUrl(
-                      kibanaUrl,
-                      AGENT_BUILDER_APP_ID,
-                      `/agents/${encodeURIComponent(agentId)}/connectors`
-                    ),
-                    ...(origin ? {} : { primary: true }),
-                  },
-                ],
-              },
-            ]
-          : []),
+        {
+          type: 'actions',
+          buttons: [
+            {
+              label: i18n.translate(
+                'xpack.agentBuilderPlatform.attachments.connectorSetup.surface.configureInKibana',
+                { defaultMessage: 'Configure in Kibana' }
+              ),
+              app: AGENT_BUILDER_APP_ID,
+              // The agent's connectors page assigns the connectors created there to the agent.
+              path: `/agents/${encodeURIComponent(agentId)}/connectors`,
+              ...(origin ? {} : { primary: true }),
+            },
+          ],
+        },
       ],
     };
   },
