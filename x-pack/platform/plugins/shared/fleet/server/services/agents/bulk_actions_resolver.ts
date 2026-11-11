@@ -484,6 +484,17 @@ const runCheckTask = async (
     return deleteSelf();
   }
 
+  // And the same for a runner that gave up during those reads, for the same reason: the state
+  // claimed at the start of this run is too old to decide on. Resuming a runner that has just
+  // spent its budget would hand the action another MAX_RETRY_COUNT, which is precisely what
+  // `stoppedAt` exists to prevent.
+  if (freshState.stoppedAt) {
+    logger.debug(
+      `Bulk action ${actionId} gave up at ${freshState.stoppedAt}, removing check task ${taskInstance.id}`
+    );
+    return deleteSelf();
+  }
+
   // A retry task that is still going to run will restart the action by itself, and
   // `ensureScheduled` would be a no-op on its id, so resuming into it would log a resume and
   // spend an attempt without scheduling anything.

@@ -163,6 +163,8 @@ describe('ActionRunner', () => {
     mockedOpenPointInTime.mockResolvedValue('fresh-pit');
     mockActionedAgentIds([]);
     mockedGetAgentsWithoutActionResults.mockResolvedValue([]);
+    // the ids it could not write, so by default everything lands
+    mockedCreateErrorActionResults.mockResolvedValue([]);
   });
 
   const createRunner = (actionParams = {}, retryParams = {}) =>
@@ -325,15 +327,17 @@ describe('ActionRunner', () => {
 
     it('retries after a 404 instead of stopping silently', async () => {
       mockAgentPages(2, 2);
-      const runner = createRunner();
-      runner.processAgentsError = new EsErrors.ResponseError({
-        statusCode: 404,
-        body: { error: { type: 'search_phase_execution_exception' } },
-        warnings: [],
-        meta: {} as any,
-      });
+      // from the agent search, which is the only 404 that says this run's point in time expired
+      mockedGetAgentsByKuery.mockRejectedValue(
+        new EsErrors.ResponseError({
+          statusCode: 404,
+          body: { error: { type: 'search_phase_execution_exception' } },
+          warnings: [],
+          meta: {} as any,
+        })
+      );
 
-      await runner.runActionAsyncWithRetry();
+      await createRunner().runActionAsyncWithRetry();
 
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('404 error from Elasticsearch')
@@ -350,6 +354,31 @@ describe('ActionRunner', () => {
       expect(resolver.updateCheckTaskState).toHaveBeenLastCalledWith(
         CHECK_TASK_ID,
         expect.objectContaining({ pitId: undefined })
+      );
+    });
+
+    it('keeps the point in time when the 404 came from somewhere else', async () => {
+      mockAgentPages(2, 2);
+      // the runner reads `.fleet-actions` under a point in time of its own to deduplicate, and
+      // that one expiring says nothing about the cursor this run is paging agents with
+      const runner = createRunner();
+      runner.processAgentsError = new EsErrors.ResponseError({
+        statusCode: 404,
+        body: { error: { type: 'search_phase_execution_exception' } },
+        warnings: [],
+        meta: {} as any,
+      });
+
+      await runner.runActionAsyncWithRetry();
+
+      expect(logger.error).not.toHaveBeenCalledWith(
+        expect.stringContaining('404 error from Elasticsearch')
+      );
+      expect(resolver.run).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ retryCount: 2, pitId: 'stale-pit' }),
+        TASK_TYPE,
+        RETRY_TASK_ID
       );
     });
 
@@ -971,11 +1000,35 @@ describe('ActionRunner', () => {
       );
     });
 
-    it('does not swallow that error for a batch that was not replayed', async () => {
+    it('ends a batch the dedupe read did not cover at all, rather than replaying it forever', async () => {
       mockAgentPages(1, 2);
-      // nothing of this batch has been actioned, so there is no evidence an earlier run already
-      // decided these agents were not actionable
+      // the case this stands for is an earlier run whose agent writes landed and whose action
+      // document did not: the agents carry the change, so every attempt raises the same error,
+      // and the read that would prove it has nothing to find
       const runner = createRunner({ total: 2 });
+      runner.batchWithoutActionableAgents = true;
+      runner.processAgentsError = new Error('No agents to reassign');
+
+      await runner.runActionAsyncWithRetry();
+
+      expect(resolver.run).not.toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        TASK_TYPE,
+        RETRY_TASK_ID
+      );
+      // counted like any other batch, or the count never reaches the total
+      expect(resolver.updateCheckTaskState).toHaveBeenLastCalledWith(
+        CHECK_TASK_ID,
+        expect.objectContaining({ nbAgentsProcessed: 2 })
+      );
+    });
+
+    it('still fails a first attempt that has nothing to action', async () => {
+      mockAgentPages(1, 2);
+      // without a retry behind it there is no earlier run to blame: "nothing to do" is the answer
+      // the caller asked for, and swallowing it would report an action that did nothing as done
+      const runner = createRunner({ total: 2 }, { retryCount: undefined });
       runner.batchWithoutActionableAgents = true;
       runner.processAgentsError = new Error('No agents to reassign');
 

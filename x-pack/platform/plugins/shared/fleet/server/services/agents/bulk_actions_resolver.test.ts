@@ -834,6 +834,24 @@ describe('createRetryTask', () => {
       expect(resolver.run).not.toHaveBeenCalled();
     });
 
+    it('removes itself when the runner gives up while this run is reading', async () => {
+      // the claimed state predates every read this run makes, so a runner that spends its budget
+      // during them would otherwise be resumed and handed a second MAX_RETRY_COUNT
+      resolver.getCheckTaskState.mockResolvedValue({
+        stoppedAt: '2026-11-09T12:00:00.000Z',
+        ...STALLED_CHECKPOINT,
+      });
+
+      const result = await createRetryTask(
+        createTaskInstance({ state: { ...STALLED_CHECKPOINT } }),
+        getDeps,
+        jest.fn()
+      ).run();
+
+      expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+      expect(resolver.run).not.toHaveBeenCalled();
+    });
+
     it('resumes on the retry count the action had reached, not a fresh budget', async () => {
       // a runner that spent its budget records stoppedAt and removes this task, but that removal
       // can fail; continuing the count means one more attempt rather than another MAX_RETRY_COUNT

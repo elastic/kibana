@@ -74,7 +74,8 @@ describe('restartBatch', () => {
     mockIsAgentlessAgent.mockReturnValue(false);
     mockIsAgentRestartSupported.mockReturnValue(true);
     mockCreateAgentAction.mockResolvedValue({ id: 'action-1' } as any);
-    mockCreateErrorActionResults.mockResolvedValue(undefined);
+    // the ids it could not write, so by default everything lands
+    mockCreateErrorActionResults.mockResolvedValue([]);
   });
 
   it('creates action for all agents when none are hosted', async () => {
@@ -167,6 +168,7 @@ describe('restartBatch', () => {
     });
     mockCreateErrorActionResults.mockImplementation(async () => {
       callOrder.push('createErrorActionResults');
+      return [];
     });
 
     mockIsHostedAgent.mockReturnValue(true);

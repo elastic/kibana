@@ -12,15 +12,27 @@ import { BulkActionTaskType } from './bulk_action_types';
 export const MAX_RETRY_COUNT = 20;
 
 /**
- * Raised when Elasticsearch rejects the `search_after` cursor a run resumed from, as opposed to
- * any other bad request. Only the first search of a run can raise it: every later page searches
- * with a cursor Elasticsearch has just handed back, and a batch's own writes raise ordinary
- * errors.
+ * What an error from the agent search says about the cursor the run is paging with.
+ *
+ * - `rejected-checkpoint`: Elasticsearch rejected the `search_after` value the run resumed from,
+ *   as opposed to any other bad request. Only the first search of a run can raise it: every later
+ *   page searches with a cursor Elasticsearch has just handed back, and a batch's own writes raise
+ *   ordinary errors.
+ * - `expired-point-in-time`: the point in time the run pages with has expired, as opposed to any
+ *   other 404.
  */
-export class RejectedCheckpointError extends Error {
-  constructor(public readonly cause: Error) {
+export type AgentPagingFailure = 'rejected-checkpoint' | 'expired-point-in-time';
+
+/**
+ * Raised around the agent search alone, so the handler can tell what a status code means for the
+ * cursor rather than guessing from the status. The runner also reads `.fleet-actions` under a
+ * point in time of its own, and neither a 400 nor a 404 from that one says anything about the
+ * agent cursor — clearing it on one of those would throw away a cursor that still works.
+ */
+export class AgentPagingError extends Error {
+  constructor(public readonly kind: AgentPagingFailure, public readonly cause: Error) {
     super(cause.message);
-    this.name = 'RejectedCheckpointError';
+    this.name = 'AgentPagingError';
   }
 }
 

@@ -1192,16 +1192,26 @@ describe('Agent actions', () => {
       );
     });
 
-    it('does not throw when items are refused', async () => {
+    it('reports the refused agents rather than throwing', async () => {
       // failing the batch would have the retry rewrite the results that did land, under a new
-      // action id, while the action they belong to stayed short either way
+      // action id, while the action they belong to stayed short either way. The ids go back to
+      // the caller instead, for the one path that will never return to these agents.
       const esClientMock = elasticsearchServiceMock.createInternalClient();
       esClientMock.bulk.mockResolvedValue({
         errors: true,
         items: [{ create: { status: 400, error: { reason: 'rejected' } } }, { create: {} }],
       } as any);
 
-      await expect(bulkCreateAgentActionResults(esClientMock, results)).resolves.toBeUndefined();
+      await expect(bulkCreateAgentActionResults(esClientMock, results)).resolves.toEqual([
+        'agent1',
+      ]);
+    });
+
+    it('reports nothing when every result lands', async () => {
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.bulk.mockResolvedValue(okResponse as any);
+
+      await expect(bulkCreateAgentActionResults(esClientMock, results)).resolves.toEqual([]);
     });
   });
 

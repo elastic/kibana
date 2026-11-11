@@ -28,10 +28,10 @@ import { BulkActionTaskType } from './bulk_action_types';
 import type { BulkActionsResolver } from './bulk_actions_resolver';
 import type { BulkActionCheckTaskState, RetryParams } from './retry_helper';
 import {
+  AgentPagingError,
   CHECK_TASK_INTERVAL_MINUTES,
   getRetryParams,
   MAX_RETRY_COUNT,
-  RejectedCheckpointError,
   RUNNER_HEARTBEAT_INTERVAL_MINUTES,
 } from './retry_helper';
 
@@ -221,10 +221,12 @@ export abstract class ActionRunner {
         })
         .catch(async (error) => {
           try {
-            // A 404 here means the point in time this run paged with has expired. Retrying with
-            // the same pitId would 404 again every time until the retry budget is spent, so clear
-            // it and let processAgentsInBatches open a fresh one.
-            if (isResponseError(error) && error.statusCode === 404) {
+            // The point in time this run paged agents with has expired. Retrying with the same
+            // pitId would 404 again every time until the retry budget is spent, so clear it and
+            // let processAgentsInBatches open a fresh one. Only the agent search raises this: a
+            // 404 from the dedupe read's own point in time, or from any other call, is an
+            // ordinary failure and must not throw away a cursor that still works.
+            if (error instanceof AgentPagingError && error.kind === 'expired-point-in-time') {
               logger.error(
                 `404 error from Elasticsearch during action ${this.actionParams.actionId}, retrying without the expired point in time: ${error.message}`
               );
@@ -246,7 +248,7 @@ export abstract class ActionRunner {
             // This is raised only around the first search of the run, so a 400 from a subclass's
             // writes in `processAgents` or from a later page is an ordinary failure and is
             // retried rather than restarting the action and resetting its count.
-            if (error instanceof RejectedCheckpointError) {
+            if (error instanceof AgentPagingError && error.kind === 'rejected-checkpoint') {
               logger.error(
                 `Elasticsearch rejected the saved checkpoint of action ${this.actionParams.actionId}, restarting it from the beginning: ${error.message}`
               );
@@ -307,6 +309,13 @@ export abstract class ActionRunner {
             );
           }
         })
+        // Stopped here rather than when the batch loop exits, so the runner keeps looking alive
+        // until its retry is on Task Manager's books. A run that fails still owns the action
+        // while it schedules that retry, and letting the heartbeat lapse first would let the
+        // watchdog read it as dead and start a second runner alongside the one about to start.
+        // What stays uncovered is the backoff the retry then waits out, which is deliberate: a
+        // retry that is scheduled but never runs is exactly what the watchdog is there to catch.
+        .finally(() => this.stopHeartbeat())
     );
 
     return { actionId: this.actionParams.actionId! };
@@ -547,22 +556,39 @@ export abstract class ActionRunner {
       .info(
         `Writing the missing error results of ${agentIdsWithoutResults.length} agents excluded by an earlier run of action ${actionId}`
       );
-    await createErrorActionResults(
+    const refusedAgentIds = await createErrorActionResults(
       this.esClient,
       actionId,
       Object.fromEntries(agentIdsWithoutResults.map((agentId) => [agentId, error])),
       'no actionable agents left in a replayed batch'
     );
+    // `bulkCreateAgentActionResults` logs what it could not write and carries on, which is right
+    // where the batch will be tried again. Here it is not: the caller is about to move the
+    // checkpoint past these agents and never come back to them, so a result that did not land
+    // would leave the action short of its total forever. Failing sends the batch back round.
+    if (refusedAgentIds.length > 0) {
+      throw new Error(
+        `Could not write the error results of ${refusedAgentIds.length} of ${agentIdsWithoutResults.length} agents`
+      );
+    }
   }
 
   /**
    * Whether an error from `processAgents` means the batch held nothing the action could act on,
    * as opposed to a failure worth retrying. Subclasses that reject such a batch override this.
    *
-   * It is only consulted for a batch that was partially deduplicated, which is the one case where
-   * the answer is certain: a document covering part of the batch means an earlier run finished
-   * the batch and wrote its error results, so the agents left over are the ones it deliberately
-   * excluded and replaying them cannot produce a different outcome.
+   * It is only consulted on a run that deduplicates, so never on a first attempt: an action asked
+   * to do something that was already true reports that as a failure the first time round, which
+   * is the answer its caller asked for.
+   *
+   * On a retry it is read as "an earlier run of this action got here first", and that reading is
+   * surer for a batch the dedupe read covered in part — a document naming some of its agents
+   * proves an earlier run finished the batch — than for one it did not cover at all. The second
+   * case is the write that landed without its action document: the agents carry the change, so
+   * replaying them raises this error on every attempt, while the read that would prove it has
+   * nothing to find. Treating it as the end of the batch is what keeps that from spending the
+   * action's whole retry budget on one batch and hanging it, and the agents are not dropped
+   * silently: each is given the error as its result before the run moves on.
    */
   protected isBatchWithoutActionableAgents(error: Error): boolean {
     return false;
@@ -599,25 +625,29 @@ export abstract class ActionRunner {
       // hold the count below `total` so the check task's completion fallback never fires.
       return { actionId: this.actionParams.actionId! };
     }
-    if (remainingAgents.length === agents.length) {
-      return await this.processAgents(remainingAgents);
+    if (remainingAgents.length < agents.length) {
+      appContextService
+        .getLogger()
+        .debug(
+          `Dropping ${
+            agents.length - remainingAgents.length
+          } already actioned agents from a batch of action ${this.actionParams.actionId}`
+        );
     }
-
-    appContextService
-      .getLogger()
-      .debug(
-        `Dropping ${
-          agents.length - remainingAgents.length
-        } already actioned agents from a batch of action ${this.actionParams.actionId}`
-      );
 
     try {
       return await this.processAgents(remainingAgents);
     } catch (error) {
-      // An earlier run finished this batch — that is what the document covering part of it means —
-      // so the agents it left out are ones it could not act on: already on the target policy,
-      // hosted, agentless. Replaying them throws the same error every time, which would spend the
-      // whole retry budget on this batch and never reach the agents behind it.
+      // An earlier run of this action got here first, so replaying these agents throws the same
+      // error on every attempt and would spend the whole retry budget on this batch without ever
+      // reaching the agents behind it.
+      //
+      // For a batch the dedupe read covered in part, the document naming the rest of it says so
+      // outright. For one it did not cover, nothing does: the case it stands for is an earlier
+      // run whose agent writes landed and whose action document did not, which leaves the agents
+      // changed and the read with nothing to find. Both are read the same way here, because the
+      // alternative for the second is the hang this PR exists to close — and what the agents are
+      // owed either way is a result, which the recovery below writes.
       if (!this.isBatchWithoutActionableAgents(error)) {
         throw error;
       }
@@ -686,73 +716,75 @@ export abstract class ActionRunner {
     };
 
     // Only the first search of a run can be the one Elasticsearch rejects the resumed cursor on,
-    // so it is the only one wrapped: every later page searches with a cursor Elasticsearch has
-    // just handed back, and a failure from a batch's own writes has to stay an ordinary retryable
-    // error rather than restart the action.
+    // so the 400 is only read that way there: every later page searches with a cursor
+    // Elasticsearch has just handed back, and a failure from a batch's own writes has to stay an
+    // ordinary retryable error rather than restart the action.
+    //
+    // A 404, on the other hand, can come from any page. Both are raised as `AgentPagingError` so
+    // the handler keys on where the failure came from rather than on the status alone: the runner
+    // also reads `.fleet-actions` under a point in time of its own to deduplicate, and that one
+    // expiring says nothing about this cursor.
     const getPage = async (isFirstPage: boolean) => {
       try {
         return await getAgents();
       } catch (error) {
-        if (
-          isFirstPage &&
-          this.retryParams.searchAfter &&
-          isResponseError(error) &&
-          error.statusCode === 400
-        ) {
-          throw new RejectedCheckpointError(error);
+        if (!isResponseError(error)) {
+          throw error;
+        }
+        if (isFirstPage && this.retryParams.searchAfter && error.statusCode === 400) {
+          throw new AgentPagingError('rejected-checkpoint', error);
+        }
+        if (this.retryParams.pitId && error.statusCode === 404) {
+          throw new AgentPagingError('expired-point-in-time', error);
         }
         throw error;
       }
     };
 
-    try {
-      // The point in time is only missing once it has expired and the 404 handler cleared it (or
-      // for an action type that restarts from scratch). Open a fresh one rather than paging
-      // without one: a checkpoint saved under a point in time carries Elasticsearch's implicit
-      // `_shard_doc` tiebreaker, so it has one more value than the plain sort has clauses, and a
-      // non-PIT search would reject it with a 400. Inside the try so the heartbeat above is always
-      // stopped, and checkpointed once opened so a resume gets the new one.
-      if (!this.retryParams.pitId) {
-        this.retryParams.pitId = await openPointInTime(this.esClient, PIT_KEEP_ALIVE);
-        appContextService
-          .getLogger()
-          .debug(`Opened a new point in time to resume action ${this.actionParams.actionId}`);
-        await this.updateCheckpoint();
-      }
-
-      let allAgentsProcessed = 0;
-      let total = 0;
-      // One loop for every page, so the point in time is closed on the no-hits exit too rather
-      // than left open for its whole keep alive.
-      for (let isFirstPage = true; isFirstPage || allAgentsProcessed < total; isFirstPage = false) {
-        const page = await getPage(isFirstPage);
-        if (isFirstPage) {
-          total = page.total;
-        }
-        if (page.agents.length === 0) {
-          appContextService
-            .getLogger()
-            .debug('currentAgents returned 0 hits, returning from bulk action query');
-          break; // stop executing if there are no more results
-        }
-        await this.processBatch(page.agents);
-        allAgentsProcessed += page.agents.length;
-        await this.advanceCheckpoint(page.agents);
-      }
-
-      // Closed on the way out of a finished run only, not in the `finally`: a run that throws
-      // hands its point in time to the retry, which resumes the cursor against the very point in
-      // time that produced it. One that is never resumed expires on its own keep alive.
-      if (this.retryParams.pitId) {
-        await closePointInTime(this.esClient, this.retryParams.pitId);
-      }
-
+    // The point in time is only missing once it has expired and the 404 handler cleared it (or
+    // for an action type that restarts from scratch). Open a fresh one rather than paging
+    // without one: a checkpoint saved under a point in time carries Elasticsearch's implicit
+    // `_shard_doc` tiebreaker, so it has one more value than the plain sort has clauses, and a
+    // non-PIT search would reject it with a 400. Checkpointed once opened, so a resume gets the
+    // new one.
+    if (!this.retryParams.pitId) {
+      this.retryParams.pitId = await openPointInTime(this.esClient, PIT_KEEP_ALIVE);
       appContextService
         .getLogger()
-        .info(`processed ${allAgentsProcessed} agents, took ${Date.now() - start}ms`);
-      return { actionId: this.actionParams.actionId! };
-    } finally {
-      this.stopHeartbeat();
+        .debug(`Opened a new point in time to resume action ${this.actionParams.actionId}`);
+      await this.updateCheckpoint();
     }
+
+    let allAgentsProcessed = 0;
+    let total = 0;
+    // One loop for every page, so the point in time is closed on the no-hits exit too rather
+    // than left open for its whole keep alive.
+    for (let isFirstPage = true; isFirstPage || allAgentsProcessed < total; isFirstPage = false) {
+      const page = await getPage(isFirstPage);
+      if (isFirstPage) {
+        total = page.total;
+      }
+      if (page.agents.length === 0) {
+        appContextService
+          .getLogger()
+          .debug('currentAgents returned 0 hits, returning from bulk action query');
+        break; // stop executing if there are no more results
+      }
+      await this.processBatch(page.agents);
+      allAgentsProcessed += page.agents.length;
+      await this.advanceCheckpoint(page.agents);
+    }
+
+    // Closed on the way out of a finished run only: a run that throws hands its point in time to
+    // the retry, which resumes the cursor against the very point in time that produced it. One
+    // that is never resumed expires on its own keep alive.
+    if (this.retryParams.pitId) {
+      await closePointInTime(this.esClient, this.retryParams.pitId);
+    }
+
+    appContextService
+      .getLogger()
+      .info(`processed ${allAgentsProcessed} agents, took ${Date.now() - start}ms`);
+    return { actionId: this.actionParams.actionId! };
   }
 }

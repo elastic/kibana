@@ -242,30 +242,33 @@ export async function bulkCreateAgentActions(
   return actions;
 }
 
+/** Writes an error result per agent, and hands back the agent ids whose result did not land. */
 export async function createErrorActionResults(
   esClient: ElasticsearchClient,
   actionId: string,
   errors: Record<Agent['id'], Error>,
   errorMessage: string
-) {
+): Promise<string[]> {
   const errorCount = Object.keys(errors).length;
-  if (errorCount > 0) {
-    appContextService
-      .getLogger()
-      .info(
-        `Writing error action results of ${errorCount} agents. Possibly failed validation: ${errorMessage}.`
-      );
-
-    // writing out error result for those agents that have errors, so the action is not going to stay in progress forever
-    await bulkCreateAgentActionResults(
-      esClient,
-      Object.keys(errors).map((agentId) => ({
-        agentId,
-        actionId,
-        error: errors[agentId].message,
-      }))
-    );
+  if (errorCount === 0) {
+    return [];
   }
+
+  appContextService
+    .getLogger()
+    .info(
+      `Writing error action results of ${errorCount} agents. Possibly failed validation: ${errorMessage}.`
+    );
+
+  // writing out error result for those agents that have errors, so the action is not going to stay in progress forever
+  return await bulkCreateAgentActionResults(
+    esClient,
+    Object.keys(errors).map((agentId) => ({
+      agentId,
+      actionId,
+      error: errors[agentId].message,
+    }))
+  );
 }
 
 /** How many refused agents one log line names before it is cut short. */
@@ -301,6 +304,13 @@ const PERMANENT_RESULT_STATUS_CODES = [
   404, // no such index
 ];
 
+/**
+ * Write one result document per entry, and hand back the agent ids whose result did not land.
+ *
+ * A caller that has somewhere else to record the shortfall can ignore the return value — the
+ * failures are logged here either way. One that is about to move past these agents for good has
+ * to read it: a result that was never written leaves its action short of its total forever.
+ */
 export async function bulkCreateAgentActionResults(
   esClient: ElasticsearchClient,
   results: Array<{
@@ -309,9 +319,9 @@ export async function bulkCreateAgentActionResults(
     namespaces?: string[];
     error?: string;
   }>
-): Promise<void> {
+): Promise<string[]> {
   if (results.length === 0) {
-    return;
+    return [];
   }
 
   for (const result of results) {
@@ -483,11 +493,12 @@ export async function bulkCreateAgentActionResults(
   }
 
   const refused = [...permanentlyRefused, ...pending.map(({ result }) => result)];
+  const failedAgentIds = refused.map(({ agentId }) => agentId);
   if (refused.length > 0) {
-    // Not thrown: these results are written for a whole batch at once, and failing the batch would
-    // have the retry rewrite the ones that did land under a new action id while the action they
-    // belong to stayed short either way. Logging is what is left.
-    const failedAgentIds = refused.map(({ agentId }) => agentId);
+    // Logged rather than thrown: these results are written for a whole batch at once, and failing
+    // the batch would have the retry rewrite the ones that did land under a new action id while
+    // the action they belong to stayed short either way. A caller for which that trade-off does
+    // not hold — one that will never return to these agents — fails on the returned ids instead.
     // Naming one agent per line would be one line per agent, so only the first few are named: a
     // mapping problem or a full disk refuses every item of a batch that can hold ten thousand.
     logger.error(
@@ -498,6 +509,7 @@ export async function bulkCreateAgentActionResults(
         .join(', ')}${failedAgentIds.length > MAX_LOGGED_RESULT_FAILURES ? ', …' : ''}`
     );
   }
+  return failedAgentIds;
 }
 
 export async function getAgentActions(esClient: ElasticsearchClient, actionId: string) {

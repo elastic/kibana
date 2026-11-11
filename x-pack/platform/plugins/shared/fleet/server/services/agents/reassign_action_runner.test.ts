@@ -111,14 +111,15 @@ describe('ReassignActionRunner', () => {
       page: 1,
       perPage: AGENTS.length,
     } as Awaited<ReturnType<typeof getAgentsByKuery>>);
-    (createErrorActionResults as jest.Mock).mockResolvedValue(undefined);
+    // the ids it could not write, so by default everything lands
+    (createErrorActionResults as jest.Mock).mockResolvedValue([]);
     mockedBulkUpdateAgents.mockResolvedValue(undefined as never);
     mockedCreateAgentAction.mockResolvedValue({} as never);
     mockActionedAgentIds([]);
     mockedGetAgentsWithoutActionResults.mockResolvedValue([]);
   });
 
-  const createRunner = () =>
+  const createRunner = (retryParams = {}) =>
     new ReassignActionRunner(
       esClient,
       soClient,
@@ -129,7 +130,7 @@ describe('ReassignActionRunner', () => {
         total: AGENTS.length,
         newAgentPolicyId: TARGET_POLICY_ID,
       },
-      { retryCount: 1, taskId: RETRY_TASK_ID, pitId: 'stale-pit' }
+      { retryCount: 1, taskId: RETRY_TASK_ID, pitId: 'stale-pit', ...retryParams }
     );
 
   it('reassigns the eligible agents of a batch and rejects the rest', async () => {
@@ -202,9 +203,65 @@ describe('ReassignActionRunner', () => {
     expect(createErrorActionResults).not.toHaveBeenCalled();
   });
 
-  it('retries a batch that was not replayed and has nothing to reassign', async () => {
-    // no document covers any of these agents, so there is no evidence an earlier run already
-    // decided they were not actionable
+  it('completes a batch whose agent writes landed without their action document', async () => {
+    // the earlier run reassigned both agents and timed out before `createAgentAction`, so the
+    // dedupe read finds nothing and the whole batch is replayed — and reassignBatch raises
+    // AgentAlreadyAssignedError on every attempt, since the agents are already where it wants
+    // them. Retrying that spends MAX_RETRY_COUNT on one batch and leaves the action IN_PROGRESS
+    // for good.
+    mockedGetAgentsByKuery.mockResolvedValue({
+      agents: AGENTS.slice(0, 2),
+      total: 2,
+      page: 1,
+      perPage: 2,
+    } as Awaited<ReturnType<typeof getAgentsByKuery>>);
+    mockedGetAgentsWithoutActionResults.mockResolvedValue(['agent-0', 'agent-1']);
+
+    await createRunner().runActionAsyncWithRetry();
+
+    expect(resolver.run).not.toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      BulkActionTaskType.REASSIGN_RETRY,
+      RETRY_TASK_ID
+    );
+    // the agents are not dropped silently: each is given the error as its result
+    expect(createErrorActionResults).toHaveBeenCalledWith(
+      esClient,
+      ACTION_ID,
+      expect.objectContaining({ 'agent-0': expect.anything(), 'agent-1': expect.anything() }),
+      expect.any(String)
+    );
+    expect(resolver.updateCheckTaskState).toHaveBeenLastCalledWith(
+      `${BulkActionTaskType.REASSIGN_RETRY}:check:${ACTION_ID}`,
+      expect.objectContaining({ nbAgentsProcessed: 2 })
+    );
+  });
+
+  it('fails the batch when a recovered error result could not be written', async () => {
+    // moving the checkpoint past an agent whose result never landed leaves the action one short
+    // of its total forever, so this is the one path where a refused result has to fail the batch
+    mockActionedAgentIds(['agent-2', 'agent-3']);
+    mockedGetAgentsWithoutActionResults.mockResolvedValue(['agent-0', 'agent-1']);
+    (createErrorActionResults as jest.Mock).mockResolvedValue(['agent-1']);
+
+    await createRunner().runActionAsyncWithRetry();
+
+    expect(resolver.run).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      BulkActionTaskType.REASSIGN_RETRY,
+      RETRY_TASK_ID
+    );
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Could not write the missing error results'),
+      expect.anything()
+    );
+  });
+
+  it('still fails a first attempt with nothing to reassign', async () => {
+    // without a retry behind it, "every agent is already on this policy" is the answer the caller
+    // asked for rather than evidence that an earlier run got there first
     mockedGetAgentsByKuery.mockResolvedValue({
       agents: AGENTS.slice(0, 2),
       total: 2,
@@ -212,7 +269,7 @@ describe('ReassignActionRunner', () => {
       perPage: 2,
     } as Awaited<ReturnType<typeof getAgentsByKuery>>);
 
-    await createRunner().runActionAsyncWithRetry();
+    await createRunner({ retryCount: undefined }).runActionAsyncWithRetry();
 
     expect(resolver.run).toHaveBeenCalledWith(
       expect.anything(),

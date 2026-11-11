@@ -99,6 +99,14 @@ export default function (providerContext: FtrProviderContext) {
     return versionToActionIds;
   }
 
+  /** Every agent given an error result by one of these actions, whichever action carries it. */
+  async function getFailedAgentIds(actionIds: string[]): Promise<string[]> {
+    const { body } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
+    return body.items
+      .filter((item: any) => actionIds.includes(item.actionId))
+      .flatMap((item: any) => (item.latestErrors ?? []).map((error: any) => error.agentId));
+  }
+
   async function getNbAgentsActioned(actionIds: string[]) {
     const { body } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
     const actionIdToNbAgentsActioned: Record<string, number> = {};
@@ -460,13 +468,21 @@ export default function (providerContext: FtrProviderContext) {
 
           const versionToActionIds = await getActionIdsPerVersion(body.actionIds);
 
-          // Batches are paged in `agent.id` order, which puts agent8 and agent9 — the two with no
-          // rollback at all — in a batch of their own. A batch with nothing to roll back has no
-          // version to group its errors under, so they get an action outside the four versions.
+          // Batches are paged in `agent.id` order, which lands agent8 and agent9 — the two with
+          // no rollback at all — in a batch with nothing to roll back. Such a batch has no
+          // version to group its errors under, so they get one action outside the four versions,
+          // and exactly one: a second would mean a batch boundary moved under us.
           const rollbackVersions = Object.keys(versionToActionIds).filter(
             (version) => version !== NO_ROLLBACK_VERSION
           );
           expect(rollbackVersions.length).to.eql(4);
+          expect(versionToActionIds[NO_ROLLBACK_VERSION].length).to.eql(1);
+
+          // Wherever those two land, neither is dropped: each is rejected with an error result
+          // under one of this action's ids.
+          const failedAgentIds = await getFailedAgentIds(body.actionIds);
+          expect(failedAgentIds).to.contain('agent8');
+          expect(failedAgentIds).to.contain('agent9');
           expect(Object.keys(versionToActionIds)).to.contain('9.3.0');
           expect(versionToActionIds['9.3.0'].length).to.be.greaterThan(2);
           expect(versionToActionIds['9.3.0'].length).to.be.lessThan(7);
