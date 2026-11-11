@@ -48,8 +48,11 @@ export function ContextAppRoute() {
   const { dataViewId: encodedDataViewId, id } = useParams<ContextUrlParams>();
   const dataViewId = decodeURIComponent(encodedDataViewId);
   const anchorId = decodeURIComponent(id);
-  const { dataView, error } = useDataView({ index: locationState?.dataViewSpec || dataViewId });
   const rootProfileState = useRootProfile();
+  const { dataView, error } = useDataView({
+    index: locationState?.dataViewSpec || dataViewId,
+    rootProfileState,
+  });
 
   if (error) {
     return (

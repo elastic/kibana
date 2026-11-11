@@ -50,11 +50,11 @@ export const SingleDocRoute = () => {
     timefilter.disableTimeRangeSelector();
   }, [timefilter]);
 
+  const rootProfileState = useRootProfile();
   const { dataView, error } = useDataView({
     index: locationState?.dataViewSpec || decodeURIComponent(dataViewId),
+    rootProfileState,
   });
-
-  const rootProfileState = useRootProfile();
 
   if (error) {
     return (
