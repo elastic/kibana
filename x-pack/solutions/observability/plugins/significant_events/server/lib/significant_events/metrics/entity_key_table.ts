@@ -332,17 +332,17 @@ export const buildInfrastructureConceptDescription = ({
 const buildConceptListQuery = ({
   sourceQuery,
   cluster,
-  datasets,
+  datasetCondition,
   breakdownField,
 }: {
   sourceQuery: string;
   cluster: string;
-  datasets: readonly string[];
-  breakdownField: 'kubernetes.node.name' | 'kubernetes.namespace';
+  datasetCondition: string;
+  breakdownField: 'kubernetes.node.name' | 'kubernetes.namespace' | 'host.name';
 }): string => `${sourceQuery}
 | WHERE @timestamp > NOW() - 1 hour
     AND orchestrator.cluster.name == ${quoteEsqlString(cluster)}
-    AND data_stream.dataset IN (${formatDatasetList(datasets)})
+    AND ${datasetCondition}
 | STATS last_seen = MAX(@timestamp) BY ${breakdownField}
 | SORT ${breakdownField}`;
 
@@ -636,7 +636,9 @@ export const foldNodeRows = (
           list_query: buildConceptListQuery({
             sourceQuery,
             cluster,
-            datasets: KUBERNETES_NODE_DATASETS,
+            datasetCondition: `data_stream.dataset IN (${formatDatasetList(
+              KUBERNETES_NODE_DATASETS
+            )})`,
             breakdownField: 'kubernetes.node.name',
           }),
           host_summary: {
@@ -756,7 +758,9 @@ export const foldNamespaceRows = (
           list_query: buildConceptListQuery({
             sourceQuery,
             cluster,
-            datasets: KUBERNETES_POD_DATASETS,
+            datasetCondition: `data_stream.dataset IN (${formatDatasetList(
+              KUBERNETES_POD_DATASETS
+            )})`,
             breakdownField: 'kubernetes.namespace',
           }),
           origin: 'metrics',
@@ -857,13 +861,25 @@ const foldHostRows = ({
   rows,
   nodeField,
   keyRow,
+  sourceQuery,
+  datasetCondition,
 }: {
   rows: EsqlRow[];
   nodeField: 'kubernetes.node.name' | 'k8s.node.name';
   keyRow: 'ecs.host' | 'otel.host';
+  sourceQuery: string;
+  datasetCondition: string;
 }): EntityFoldResult => {
   const droppedRows = createDroppedRows();
   let unknownClusterRows = 0;
+  const nodeHostsByCluster = new Map<
+    string,
+    {
+      members: Set<string>;
+      os: Set<string>;
+      cloudProviders: Set<string>;
+    }
+  >();
   const features = rows.flatMap((row): FeatureUpsert[] => {
     const hostName = row['host.name'];
     if (typeof hostName !== 'string') {
@@ -882,23 +898,18 @@ const foldHostRows = ({
         droppedRows.nullCluster += 1;
         return [];
       }
-      return clusters.map((cluster) => ({
-        type: 'infrastructure',
-        subtype: 'k8s_nodes',
-        id: `k8s.nodes:${cluster}`,
-        title: `Kubernetes nodes of ${cluster}`,
-        description: `Kubernetes nodes in cluster ${cluster}.`,
-        filter: { field: 'orchestrator.cluster.name', eq: cluster },
-        properties: {
-          host_summary: {
-            os: host.os,
-            cloud_provider: host.cloud_provider,
-          },
-          origin: 'metrics',
-          key_row: keyRow,
-        },
-        confidence: 100,
-      }));
+      for (const cluster of clusters) {
+        const concept = nodeHostsByCluster.get(cluster) ?? {
+          members: new Set<string>(),
+          os: new Set<string>(),
+          cloudProviders: new Set<string>(),
+        };
+        concept.members.add(nodeName);
+        host.os.forEach((value) => concept.os.add(value));
+        host.cloud_provider.forEach((value) => concept.cloudProviders.add(value));
+        nodeHostsByCluster.set(cluster, concept);
+      }
+      return [];
     }
     const id = `host:${hostName}`;
     if (id.length > MAX_ID_LENGTH || hostName.length > MAX_TITLE_LENGTH) {
@@ -932,6 +943,52 @@ const foldHostRows = ({
       },
     ];
   });
+  features.push(
+    ...[...nodeHostsByCluster].flatMap(([cluster, concept]): FeatureUpsert[] => {
+      const id = `k8s.nodes:${cluster}`;
+      const title = `Kubernetes nodes of ${cluster}`;
+      if (id.length > MAX_ID_LENGTH || title.length > MAX_TITLE_LENGTH) {
+        droppedRows.idTooLong += 1;
+        return [];
+      }
+      const allMembers = [...concept.members];
+      const members = allMembers.slice(0, 50);
+      return [
+        {
+          type: 'infrastructure',
+          subtype: 'k8s_nodes',
+          id,
+          title,
+          description: buildInfrastructureConceptDescription({
+            concept: 'nodes',
+            cluster,
+            scale: allMembers.length,
+            breakdownField: 'kubernetes.node.name',
+            members,
+          }),
+          filter: { field: 'orchestrator.cluster.name', eq: cluster },
+          properties: {
+            breakdown: ['kubernetes.node.name'],
+            scale: allMembers.length,
+            members,
+            list_query: buildConceptListQuery({
+              sourceQuery,
+              cluster,
+              datasetCondition,
+              breakdownField: 'host.name',
+            }),
+            host_summary: {
+              os: [...concept.os].sort(),
+              cloud_provider: [...concept.cloudProviders].sort(),
+            },
+            origin: 'metrics',
+            key_row: keyRow,
+          },
+          confidence: 100,
+        },
+      ];
+    })
+  );
   return {
     features,
     droppedIncompleteRowsCount: droppedRowsCount(droppedRows),
@@ -942,11 +999,29 @@ const foldHostRows = ({
   };
 };
 
-export const foldSystemHostRows = (rows: EsqlRow[]): EntityFoldResult =>
-  foldHostRows({ rows, nodeField: 'kubernetes.node.name', keyRow: 'ecs.host' });
+export const foldSystemHostRows = (
+  rows: EsqlRow[],
+  { sourceQuery }: EntityFoldContext
+): EntityFoldResult =>
+  foldHostRows({
+    rows,
+    nodeField: 'kubernetes.node.name',
+    keyRow: 'ecs.host',
+    sourceQuery,
+    datasetCondition: 'STARTS_WITH(data_stream.dataset, "system.")',
+  });
 
-export const foldOtelHostRows = (rows: EsqlRow[]): EntityFoldResult =>
-  foldHostRows({ rows, nodeField: 'k8s.node.name', keyRow: 'otel.host' });
+export const foldOtelHostRows = (
+  rows: EsqlRow[],
+  { sourceQuery }: EntityFoldContext
+): EntityFoldResult =>
+  foldHostRows({
+    rows,
+    nodeField: 'k8s.node.name',
+    keyRow: 'otel.host',
+    sourceQuery,
+    datasetCondition: 'data_stream.dataset == "hostmetricsreceiver.otel"',
+  });
 
 const featureLastSeen = (feature: FeatureUpsert): string =>
   typeof feature.properties.last_seen === 'string' ? feature.properties.last_seen : '';
@@ -1003,9 +1078,7 @@ export const mergeHostFeatures = (features: FeatureUpsert[]): FeatureUpsert[] =>
       featuresById.set(feature.id, feature);
     }
   }
-  return [...featuresById.values()].filter(
-    (feature) => feature.subtype !== 'k8s_nodes' || feature.properties.key_row === 'ecs.k8s_nodes'
-  );
+  return [...featuresById.values()];
 };
 
 const buildServiceQuery = (sourceQuery: string): string => `${sourceQuery}

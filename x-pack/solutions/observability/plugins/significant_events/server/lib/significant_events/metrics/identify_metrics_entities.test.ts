@@ -86,6 +86,16 @@ const otelHostColumns = [
   { name: 'clusters', type: 'keyword' },
 ];
 
+const systemHostColumns = [
+  { name: 'host.name', type: 'keyword' },
+  { name: 'kubernetes.node.name', type: 'keyword' },
+  { name: 'last_seen', type: 'date' },
+  { name: 'os', type: 'keyword' },
+  { name: 'cloud_provider', type: 'keyword' },
+  { name: 'cloud_instance', type: 'keyword' },
+  { name: 'clusters', type: 'keyword' },
+];
+
 const serviceColumns = [
   { name: 'service.name', type: 'keyword' },
   { name: 'environments', type: 'keyword' },
@@ -454,44 +464,57 @@ describe('host entity merging', () => {
       ],
       { sourceQuery: 'SET unmapped_fields = "NULLIFY"; FROM metrics-*' }
     ).features;
-    const systemHostFeatures = foldSystemHostRows([
-      {
-        'host.name': 'node-x',
-        'kubernetes.node.name': 'node-x',
-        last_seen: lastSeen,
-        os: 'Wolfi',
-        cloud_provider: 'gcp',
-        cloud_instance: 'instance-x',
-        clusters: ['cluster-a'],
-      },
-      {
-        'host.name': 'node-y',
-        'kubernetes.node.name': 'node-y',
-        last_seen: lastSeen,
-        os: 'Linux',
-        cloud_provider: 'aws',
-        cloud_instance: 'instance-y',
-        clusters: ['cluster-b'],
-      },
-    ]).features;
-    const otelHostFeatures = foldOtelHostRows([
-      {
-        'host.name': 'router-1',
-        'k8s.node.name': null,
-        last_seen: lastSeen,
-        os: ['Linux'],
-        cloud_provider: [],
-        cloud_instance: [],
-        clusters: null,
-      },
-    ]).features;
+    const hostFoldContext = {
+      sourceQuery: 'SET unmapped_fields = "NULLIFY"; FROM metrics-*',
+    };
+    const systemHostFeatures = foldSystemHostRows(
+      [
+        {
+          'host.name': 'node-x',
+          'kubernetes.node.name': 'node-x',
+          last_seen: lastSeen,
+          os: 'Wolfi',
+          cloud_provider: 'gcp',
+          cloud_instance: 'instance-x',
+          clusters: ['cluster-a'],
+        },
+        {
+          'host.name': 'node-y',
+          'kubernetes.node.name': 'node-y',
+          last_seen: lastSeen,
+          os: 'Linux',
+          cloud_provider: 'aws',
+          cloud_instance: 'instance-y',
+          clusters: ['cluster-b'],
+        },
+      ],
+      hostFoldContext
+    ).features;
+    const otelHostFeatures = foldOtelHostRows(
+      [
+        {
+          'host.name': 'router-1',
+          'k8s.node.name': null,
+          last_seen: lastSeen,
+          os: ['Linux'],
+          cloud_provider: [],
+          cloud_instance: [],
+          clusters: null,
+        },
+      ],
+      hostFoldContext
+    ).features;
 
     const byId = new Map(
       mergeHostFeatures([...nodeFeatures, ...systemHostFeatures, ...otelHostFeatures]).map(
         (feature) => [feature.id, feature]
       )
     );
-    expect([...byId.keys()]).toEqual(['k8s.nodes:cluster-a', 'host:router-1']);
+    expect([...byId.keys()]).toEqual([
+      'k8s.nodes:cluster-a',
+      'k8s.nodes:cluster-b',
+      'host:router-1',
+    ]);
     expect(byId.has('host:node-x')).toBe(false);
     expect(byId.get('k8s.nodes:cluster-a')?.properties).toMatchObject({
       host_summary: {
@@ -499,7 +522,12 @@ describe('host entity merging', () => {
         cloud_provider: ['gcp'],
       },
     });
-    expect(byId.has('k8s.nodes:cluster-b')).toBe(false);
+    expect(byId.get('k8s.nodes:cluster-b')?.properties).toMatchObject({
+      breakdown: ['kubernetes.node.name'],
+      members: ['node-y'],
+      scale: 1,
+      list_query: expect.stringContaining('BY host.name'),
+    });
     expect(byId.get('host:router-1')).toEqual(
       expect.objectContaining({
         subtype: 'host',
@@ -545,6 +573,51 @@ describe('identifyMetricsEntities', () => {
       })
     );
     expect(harness.bulk).not.toHaveBeenCalled();
+  });
+
+  it('keeps a nodes concept for a source with only Kubernetes system hosts', async () => {
+    const lastSeen = '2026-11-10T12:00:00.000Z';
+    const harness = createHarness([
+      {
+        columns: datasetColumns,
+        values: datasetRows('system.cpu'),
+      },
+      {
+        columns: systemHostColumns,
+        values: [
+          ['node-a', 'node-a', lastSeen, ['Linux'], ['gcp'], ['instance-a'], ['cluster-a']],
+          ['node-b', 'node-b', lastSeen, ['Linux'], ['gcp'], ['instance-b'], ['cluster-a']],
+        ],
+      },
+    ]);
+
+    const result = await identifyMetricsEntities({
+      esClient: harness.esClient,
+      esql: sourceEsql,
+      sourceId: 'system-hosts-source',
+      kiClient: harness.kiClient,
+      logger: harness.logger,
+    });
+
+    expect(result.metricsEntitiesCount).toBe(1);
+    const operations = harness.bulk.mock.calls[0][1];
+    expect(operations).toHaveLength(1);
+    expect(operations[0].index.feature).toEqual(
+      expect.objectContaining({
+        type: 'infrastructure',
+        subtype: 'k8s_nodes',
+        id: 'k8s.nodes:cluster-a',
+        title: 'Kubernetes nodes of cluster-a',
+        filter: { field: 'orchestrator.cluster.name', eq: 'cluster-a' },
+        properties: expect.objectContaining({
+          breakdown: ['kubernetes.node.name'],
+          scale: 2,
+          members: ['node-a', 'node-b'],
+          list_query: expect.stringContaining('BY host.name'),
+          key_row: 'ecs.host',
+        }),
+      })
+    );
   });
 
   it('merges copied workloads while keeping local workloads and namespaces separate', async () => {
