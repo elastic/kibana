@@ -151,7 +151,7 @@ const hiddenCss = css`
 const isStoreEntityType = (value: unknown): value is EntityType =>
   EntityType.safeParse(value).success;
 
-/** Host and user keep their type; every other entity type opens as generic. */
+/** Host, user and service keep their type; every other entity type opens as generic. */
 const toSecurityEntityType = (
   rawType: string | undefined
 ):
