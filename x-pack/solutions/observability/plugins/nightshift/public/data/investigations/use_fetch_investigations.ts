@@ -22,12 +22,10 @@ import { useKibana } from '../../hooks/use_kibana';
 
 export const NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY = ['nightshift.investigations'] as const;
 
-const INVESTIGATIONS_PAGE_SIZE = 10;
+/** First load and each "Show more" click for non-in-progress home sections. */
+export const INVESTIGATIONS_PAGE_SIZE = 3;
 
-/**
- * The shared list API cannot filter on `in_progress`, so the in-progress section reads this many
- * of the newest open investigations and keeps the running ones.
- */
+/** How many of the newest running investigations the in-progress section reads. */
 const IN_PROGRESS_CANDIDATES = 20;
 
 /** How long a section's pages stay fresh, which bounds how often a refocus can refetch it. */
@@ -47,7 +45,13 @@ export interface FetchInvestigationsParams {
 
 export interface FetchInvestigationsResult {
   investigations: InvestigationSummary[];
+  /**
+   * Count the section UI should show: loaded rows for the capped in-progress page,
+   * otherwise the API pagination total.
+   */
   total: number;
+  /** API pagination total — for in-progress this can exceed the loaded page. */
+  matchTotal: number;
   hasMore: boolean;
   isInitialLoading: boolean;
   isFetchingNextPage: boolean;
@@ -112,8 +116,11 @@ export const useFetchInvestigations = ({
         query: {
           sort_field: 'created_at',
           sort_order: 'desc',
+          in_progress: inProgress,
+          // Home sections and tiles are open-only; closed finished work is out of scope here.
+          status: 'open',
           ...(inProgress
-            ? { page: 1, per_page: IN_PROGRESS_CANDIDATES, status: 'open' }
+            ? { page: 1, per_page: IN_PROGRESS_CANDIDATES }
             : {
                 page: typeof pageParam === 'number' ? pageParam : 1,
                 per_page: INVESTIGATIONS_PAGE_SIZE,
@@ -134,15 +141,12 @@ export const useFetchInvestigations = ({
     retry: (failureCount, err) => !isHttpClientError(err) && failureCount < 3,
   });
 
-  // The other sections keep running investigations: dropping them from a page could empty the
-  // section and hide the finished ones on later pages.
-  const investigations = useMemo(() => {
-    const loaded = flattenInvestigationPages(data?.pages ?? []);
-    return inProgress ? loaded.filter(({ in_progress: isRunning }) => isRunning) : loaded;
-  }, [data?.pages, inProgress]);
+  // The API applies `in_progress`, so every section holds only what belongs in it.
+  const investigations = useMemo(() => flattenInvestigationPages(data?.pages ?? []), [data?.pages]);
 
-  const listedTotal = data?.pages[data.pages.length - 1]?.pagination.total ?? 0;
-  const total = inProgress ? investigations.length : listedTotal;
+  const matchTotal = data?.pages[data.pages.length - 1]?.pagination.total ?? 0;
+  // The in-progress section loads one capped page, so its display total is what it can show.
+  const total = inProgress ? investigations.length : matchTotal;
 
   const handleFetchNextPage = useCallback(() => {
     void fetchNextPage();
@@ -156,6 +160,7 @@ export const useFetchInvestigations = ({
     () => ({
       investigations,
       total,
+      matchTotal,
       hasMore: hasNextPage ?? false,
       isInitialLoading,
       isFetchingNextPage,
@@ -168,6 +173,7 @@ export const useFetchInvestigations = ({
     [
       investigations,
       total,
+      matchTotal,
       hasNextPage,
       isInitialLoading,
       isFetchingNextPage,

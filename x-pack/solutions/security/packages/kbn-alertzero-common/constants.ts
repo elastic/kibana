@@ -405,6 +405,15 @@ export const ALERTZERO_THREAT_INTEL_ENRICH_TAXONOMY_TELEMETRY_PLUGIN_ID =
 export const ALERTZERO_THREAT_INTEL_EXTRACT_DIAMOND_TELEMETRY_PLUGIN_ID =
   'alertzero_threat_intel_extract_diamond' as const;
 
+/**
+ * `plugin_id` for the Attack Discovery generation calls the batched-generation workflow makes.
+ * AlertZero turns the ground-truth gate off, so generation is where its Attack Discovery tokens
+ * are spent. The YAML definition carries this as a literal (`@kbn/workflows` cannot import this
+ * package); a test in the alertzero plugin keeps the two in sync. Sent with
+ * `aggregate_by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID`.
+ */
+export const ALERTZERO_AD_GENERATION_TELEMETRY_PLUGIN_ID = 'alertzero_ad_generation' as const;
+
 /** Agent Builder conversation template ids. A proposal is an attachment, not a template. */
 export const TEMPLATE_ID_INVESTIGATION = 'investigation' as const;
 export const TEMPLATE_ID_ESCALATION = 'escalation' as const;

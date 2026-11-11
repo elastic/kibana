@@ -24,7 +24,7 @@ export function MappingHeader({ docLinks }: MappingHeaderProps) {
       <EuiTitle size="m">
         <h3>
           {i18n.translate('xpack.dataFederation.createDatasetWizard.schemaMappingsTitle', {
-            defaultMessage: 'Schema mappings',
+            defaultMessage: 'Schema',
           })}
         </h3>
       </EuiTitle>

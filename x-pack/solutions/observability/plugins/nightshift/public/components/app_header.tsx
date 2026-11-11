@@ -25,6 +25,10 @@ const detectionsLabel = i18n.translate('xpack.nightshift.detectionsLabel', {
   defaultMessage: 'Detections',
 });
 
+const investigateLabel = i18n.translate('xpack.nightshift.header.investigateButtonText', {
+  defaultMessage: 'Investigate',
+});
+
 export const SETTINGS_PAGE_TITLE = i18n.translate('xpack.nightshift.settingsPage.title', {
   defaultMessage: 'Settings',
 });
@@ -78,6 +82,11 @@ const detectionsEbtProps = getEbtProps({
   element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
 });
 
+const startInvestigationEbtProps = getEbtProps({
+  action: NIGHTSHIFT_EBT_ACTIONS.OPEN_START_INVESTIGATION,
+  element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
+});
+
 const applyEbtProps = (
   ebtProps: typeof settingsEbtProps,
   params?: AppMenuRunActionParams
@@ -93,6 +102,7 @@ const applyEbtProps = (
 
 export interface NightshiftAppHeaderProps {
   page?: 'landing' | 'automations' | 'detection' | 'knowledge' | 'settings' | 'sources';
+  hideMenu?: boolean;
   onSourcesClick?: () => void | Promise<void>;
   sourcesHref?: string;
   onKnowledgeClick?: () => void | Promise<void>;
@@ -103,12 +113,15 @@ export interface NightshiftAppHeaderProps {
   automationsHref?: string;
   onDetectionsClick?: () => void | Promise<void>;
   detectionsHref?: string;
+  /** Renders "Investigate" (opens the start investigation modal) as the primary action when set. */
+  onStartInvestigationClick?: () => void;
   tabs?: AppHeaderTab[];
   back?: AppHeaderBack;
 }
 
 export function NightshiftAppHeader({
   page = 'landing',
+  hideMenu = false,
   onSourcesClick,
   sourcesHref,
   onKnowledgeClick,
@@ -119,13 +132,27 @@ export function NightshiftAppHeader({
   automationsHref,
   onDetectionsClick,
   detectionsHref,
+  onStartInvestigationClick,
   tabs,
   back,
 }: NightshiftAppHeaderProps): React.ReactElement {
   const isLandingPage = page === 'landing';
+  const isAutomationsPage = page === 'automations';
   const isDetectionPage = page === 'detection';
   const menu = useMemo<AppMenuConfig>(
     () => ({
+      ...(onStartInvestigationClick && {
+        primaryActionItem: {
+          id: 'nightshiftStartInvestigation',
+          label: investigateLabel,
+          iconType: 'inspect',
+          testId: 'o11yNightshiftAppStartInvestigationButton',
+          run: (params?: AppMenuRunActionParams) => {
+            applyEbtProps(startInvestigationEbtProps, params);
+            onStartInvestigationClick();
+          },
+        },
+      }),
       items: [
         // Landing: Automations and Detections buttons; Settings in overflow.
         ...(isLandingPage && onAutomationsClick && automationsHref
@@ -148,7 +175,7 @@ export function NightshiftAppHeader({
               {
                 id: 'nightshiftDetections',
                 label: detectionsLabel,
-                iconType: 'visGauge' as const,
+                iconType: 'radar' as const,
                 href: detectionsHref,
                 run: (params?: AppMenuRunActionParams) => {
                   applyEbtProps(detectionsEbtProps, params);
@@ -192,7 +219,7 @@ export function NightshiftAppHeader({
             ]
           : []),
 
-        // Detections: Sources and Settings as buttons.
+        // Detections: Sources as a button.
         ...(isDetectionPage && onSourcesClick && sourcesHref
           ? [
               {
@@ -208,7 +235,8 @@ export function NightshiftAppHeader({
               },
             ]
           : []),
-        ...(isDetectionPage && onSettingsClick && settingsHref
+        // Detections and Automations: Settings as a button.
+        ...((isDetectionPage || isAutomationsPage) && onSettingsClick && settingsHref
           ? [
               {
                 id: 'nightshiftSettings',
@@ -230,6 +258,7 @@ export function NightshiftAppHeader({
     [
       automationsHref,
       detectionsHref,
+      isAutomationsPage,
       isDetectionPage,
       isLandingPage,
       knowledgeHref,
@@ -238,6 +267,7 @@ export function NightshiftAppHeader({
       onKnowledgeClick,
       onSourcesClick,
       onSettingsClick,
+      onStartInvestigationClick,
       settingsHref,
       sourcesHref,
     ]
@@ -260,7 +290,8 @@ export function NightshiftAppHeader({
       }
       back={back}
       tabs={tabs}
-      menu={menu}
+      menu={hideMenu ? undefined : menu}
+      docLink={hideMenu ? '' : undefined}
       spacing="compact"
     />
   );

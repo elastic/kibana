@@ -1,0 +1,74 @@
+{
+  "sources": [
+    { "id": "input", "type": "otlp", "supported_telemetry": ["logs"] }
+  ],
+  "destinations": [
+    {
+      "id": "es-prod",
+      "description": "Production application logs, upper-cased before indexing.",
+      "type": "elasticsearch",
+      "supported_telemetry": ["logs"],
+      "config": [
+        { "name": "index", "value": "logs-application.otel-prod" },
+        {
+          "name": "api_key",
+          "value": { "credential": "streams-full-dev-api-key" }
+        }
+      ]
+    },
+    {
+      "id": "es-dev",
+      "description": "Development application logs.",
+      "type": "elasticsearch",
+      "supported_telemetry": ["logs"],
+      "config": [
+        { "name": "index", "value": "logs-application.otel-dev" },
+        {
+          "name": "api_key",
+          "value": { "credential": "streams-full-dev-api-key" }
+        }
+      ]
+    }
+  ],
+  "processors": [
+    {
+      "id": "uppercase-message",
+      "type": "transform",
+      "supported_telemetry": ["logs"],
+      "config": [
+        {
+          "name": "statements",
+          "value": [
+            {
+              "context": "log",
+              "statements": ["set(log.body, ToUpperCase(log.body))"]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "pipelines": [
+    {
+      "id": "main",
+      "supported_telemetry": ["logs"],
+      "config": [
+        { "name": "sources", "value": ["input"] },
+        {
+          "name": "routes",
+          "value": [
+            {
+              "when": "resource.attributes[\"env\"] == \"prod\"",
+              "destinations": ["es-prod"],
+              "processors": ["uppercase-message"]
+            },
+            {
+              "when": "resource.attributes[\"env\"] == \"dev\"",
+              "destinations": ["es-dev"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

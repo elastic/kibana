@@ -8,7 +8,7 @@
  */
 
 import { commandStep } from '../helpers.ts';
-import { onDemandAgent } from '../presets.ts';
+import { gcpImageAgent, onDemandAgent } from '../presets.ts';
 import type { Step } from '../types.ts';
 
 // Cloud deploy keys are only granted to kibana-deploy-cloud-from-pr, so the PR build hands the deploy off to it
@@ -18,9 +18,7 @@ export const deployCloudSteps = (): readonly Step[] => [
     label: 'Trigger Cloud Deployment',
     key: 'deploy_cloud',
     agents: {
-      provider: 'gcp',
-      image: 'family/kibana-minimal-ubuntu-2604',
-      imageProject: 'elastic-images-prod',
+      ...gcpImageAgent('kibana-minimal-ubuntu-2604'),
       ...onDemandAgent('n2-standard-2'),
     },
     timeout_in_minutes: 10,

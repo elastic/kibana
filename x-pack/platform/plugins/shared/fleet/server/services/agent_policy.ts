@@ -76,6 +76,7 @@ import type {
 import type { AgentPolicyAgentVersionCondition } from '../../common/types/models/agent_policy';
 import {
   AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
+  AGENTLESS_UNENROLLED_REASON,
   AGENT_POLICY_INDEX,
   agentPolicyStatuses,
   FLEET_ELASTIC_AGENT_PACKAGE,
@@ -244,16 +245,19 @@ class AgentPolicyService {
       skipValidation: boolean;
       returnUpdatedPolicy?: boolean;
       asyncDeploy?: boolean;
-      hasAgentVersionConditions?: boolean;
-      minAgentVersion?: string | null;
-      packageAgentVersionConditions?: AgentPolicyAgentVersionCondition[] | null;
+      /**
+       * `recompute` derives the agent version condition fields from the package policies. `keep`
+       * leaves the stored ones, unless the agent policy has never stored them or they list one of
+       * `updatedPackageNames`.
+       */
+      agentVersionConditions?: 'recompute' | 'keep';
+      updatedPackageNames?: string[];
     } = {
       bumpRevision: true,
       removeProtection: false,
       skipValidation: false,
       returnUpdatedPolicy: true,
       asyncDeploy: false,
-      hasAgentVersionConditions: false,
     }
   ): Promise<AgentPolicy> {
     const logger = this.getLogger('_update');
@@ -305,7 +309,23 @@ class AgentPolicyService {
         getAllowedOutputTypesForAgentPolicy({ ...existingAgentPolicy, ...agentPolicy })
       );
     }
-    agentPolicy = this.normalizeDownloadSourceFields(agentPolicy);
+    // Every recompute writes `min_agent_version` (null when there is no condition), so a missing
+    // one means the fields were never fully stored, e.g. last updated before it was introduced.
+    // Callers only keep for updated packages without a condition, so a stored entry for one is
+    // stale, e.g. its package policy was saved but the bump that should have recomputed failed.
+    const keepsStoredConditions =
+      existingAgentPolicy.min_agent_version !== undefined &&
+      !existingAgentPolicy.package_agent_version_conditions?.some(({ name }) =>
+        options.updatedPackageNames?.includes(name)
+      );
+    const agentVersionData =
+      options.agentVersionConditions === 'recompute' ||
+      (options.agentVersionConditions === 'keep' && !keepsStoredConditions)
+        ? await this.computeMinAgentVersionData(soClient, id)
+        : undefined;
+
+    // Defense in depth: internal callers may pass full policy objects, never persist `id`
+    agentPolicy = omit(this.normalizeDownloadSourceFields(agentPolicy), 'id');
     await soClient
       .update<AgentPolicySOAttributes>(savedObjectType, id, {
         ...agentPolicy,
@@ -315,13 +335,7 @@ class AgentPolicyService {
           : { is_protected: agentPolicy.is_protected }),
         updated_at: new Date().toISOString(),
         updated_by: user ? user.username : 'system',
-        has_agent_version_conditions: options.hasAgentVersionConditions,
-        ...(options.minAgentVersion !== undefined
-          ? { min_agent_version: options.minAgentVersion }
-          : {}),
-        ...(options.packageAgentVersionConditions !== undefined
-          ? { package_agent_version_conditions: options.packageAgentVersionConditions }
-          : {}),
+        ...agentVersionData,
       })
       .catch(catchAndSetErrorStackTrace.withMessage(`SO update to agent policy [${id}] failed`));
 
@@ -359,7 +373,7 @@ class AgentPolicyService {
     if (
       appContextService.getExperimentalFeatures().enableVersionSpecificPolicies &&
       existingAgentPolicy.has_agent_version_conditions &&
-      options.hasAgentVersionConditions === false
+      agentVersionData?.has_agent_version_conditions === false
     ) {
       logger.debug(
         `Agent policy [${id}] no longer has agent version conditions, reassigning agents from version-specific policies back to the base policy`
@@ -1149,16 +1163,13 @@ class AgentPolicyService {
       });
     }
 
-    const { space_ids: _, ...preparedAgentPolicySo } = agentPolicy;
-    const { hasAgentVersionConditions, minAgentVersion, packageAgentVersionConditions } =
-      await this.computeMinAgentVersionData(soClient, id);
+    // `id` is the saved object id and must never be persisted in the attributes
+    const preparedAgentPolicySo = omit(agentPolicy, ['space_ids', 'id']);
     return this._update(soClient, esClient, id, { ...preparedAgentPolicySo }, options?.user, {
       bumpRevision: options?.bumpRevision ?? true,
       removeProtection: false,
       skipValidation: options?.skipValidation ?? false,
-      hasAgentVersionConditions,
-      minAgentVersion: minAgentVersion ?? null,
-      packageAgentVersionConditions: packageAgentVersionConditions ?? null,
+      agentVersionConditions: 'recompute',
     })
       .then((updatedAgentPolicy) => {
         return this.runExternalCallbacks(
@@ -1228,9 +1239,14 @@ class AgentPolicyService {
     );
 
     if (baseAgentPolicy.package_policies) {
+      // Package policies managed by a cloud onboarding instance can only be changed from the
+      // onboarding flow, so linking a shared one would lock the new agent policy too. Copy it
+      // instead: the copy is not managed.
+      const isSharedAndLinked = (packagePolicy: PackagePolicy) =>
+        packagePolicy.policy_ids.length > 1 && !packagePolicy.onboarding_deployment_id;
       // Copy non-shared package policies and append (copy n) to their names.
       const basePackagePolicies = baseAgentPolicy.package_policies.filter(
-        (packagePolicy) => packagePolicy.policy_ids.length < 2
+        (packagePolicy) => !isSharedAndLinked(packagePolicy)
       );
       if (basePackagePolicies.length > 0) {
         const newPackagePolicies = await pMap(
@@ -1257,9 +1273,7 @@ class AgentPolicyService {
         );
       }
       // Link shared package policies to new agent policy.
-      const sharedBasePackagePolicies = baseAgentPolicy.package_policies.filter(
-        (packagePolicy) => packagePolicy.policy_ids.length > 1
-      );
+      const sharedBasePackagePolicies = baseAgentPolicy.package_policies.filter(isSharedAndLinked);
       if (sharedBasePackagePolicies.length > 0) {
         const updatedSharedPackagePolicies = sharedBasePackagePolicies.map((packagePolicy) => ({
           ...packagePolicy,
@@ -1316,20 +1330,24 @@ class AgentPolicyService {
       removeProtection?: boolean;
       asyncDeploy?: boolean;
       skipValidation?: boolean;
+      /**
+       * Set when no package policy on this agent policy was added, removed, or changed in a way
+       * that affects its agent version conditions, so the stored ones can be kept as is.
+       */
+      agentVersionConditionsUnchanged?: boolean;
+      /** Packages of the updated package policies; stored conditions listing one are recomputed. */
+      updatedPackageNames?: string[];
     }
   ): Promise<void> {
     return withSpan('bump_agent_policy_revision', async () => {
-      const { hasAgentVersionConditions, minAgentVersion, packageAgentVersionConditions } =
-        await this.computeMinAgentVersionData(soClient, id);
       await this._update(soClient, esClient, id, {}, options?.user, {
         bumpRevision: true,
         removeProtection: options?.removeProtection ?? false,
         skipValidation: options?.skipValidation ?? true,
         returnUpdatedPolicy: false,
         asyncDeploy: options?.asyncDeploy,
-        hasAgentVersionConditions,
-        minAgentVersion: minAgentVersion ?? null,
-        packageAgentVersionConditions: packageAgentVersionConditions ?? null,
+        agentVersionConditions: options?.agentVersionConditionsUnchanged ? 'keep' : 'recompute',
+        updatedPackageNames: options?.updatedPackageNames,
       });
     });
   }
@@ -1338,9 +1356,9 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     policyId: string
   ): Promise<{
-    hasAgentVersionConditions: boolean;
-    minAgentVersion: string | undefined;
-    packageAgentVersionConditions: AgentPolicyAgentVersionCondition[] | undefined;
+    has_agent_version_conditions: boolean;
+    min_agent_version: string | null;
+    package_agent_version_conditions: AgentPolicyAgentVersionCondition[] | null;
   }> {
     // getPackageInfo only reuses results inside a runWithCache session. Sync updates never
     // opened one, so every package policy paid a full lookup.
@@ -1353,9 +1371,9 @@ class AgentPolicyService {
       const hasConditions = conditions.length > 0;
 
       return {
-        hasAgentVersionConditions: hasConditions || hasTemplateConditions,
-        minAgentVersion: hasConditions ? highestMinAgentVersion(conditions) : undefined,
-        packageAgentVersionConditions: hasConditions ? conditions : undefined,
+        has_agent_version_conditions: hasConditions || hasTemplateConditions,
+        min_agent_version: (hasConditions && highestMinAgentVersion(conditions)) || null,
+        package_agent_version_conditions: hasConditions ? conditions : null,
       };
     });
   }
@@ -1686,7 +1704,12 @@ class AgentPolicyService {
 
     if (agentPolicy?.supports_agentless) {
       logger.debug(`Starting  unenrolling agent from agentless policy ${id}`);
-      await unenrollForAgentPolicyId(soClient, esClient, id, { revoke: true });
+      // The unenrolled agent documents are kept, since in-flight Fleet Server checkins must still
+      // find them inactive. The reason hides them from the agents list once the policy is gone.
+      await unenrollForAgentPolicyId(soClient, esClient, id, {
+        revoke: true,
+        unenrolledReason: AGENTLESS_UNENROLLED_REASON,
+      });
       // unenroll  offline agents for agentless policies first to avoid 404 Save Object error
       await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
         spaceId: soClient.getCurrentNamespace(),
