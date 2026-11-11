@@ -212,7 +212,7 @@ export const runDevCli = ({ loadInk }: DevCliOptions = {}): void => {
       usage: 'node scripts/dev [start|status] [options]',
       description: `Runs Elasticsearch and Kibana together: Kibana starts once Elasticsearch is ready, each process logs to <log-dir>/<id>.log and <log-dir>/status.json reports their state.
 
-      In a terminal it shows a TUI with a pane per process: select with the arrow keys, switch between its logs, current settings and available settings with tab, filter with /, restart (r), start (s) or stop (x) the selected process, and quit (q) to stop all of them.
+      In a terminal it shows a TUI with a pane per process: select with the arrow keys, switch between its logs, current settings, available settings and launch flags with tab, filter with /, restart (r), start (s) or stop (x) the selected process, and quit (q) to stop all of them.
 
       node scripts/dev                         start Elasticsearch and Kibana
       node scripts/dev --headless              the same without the TUI, e.g. for agents and CI

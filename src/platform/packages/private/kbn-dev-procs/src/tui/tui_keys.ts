@@ -48,7 +48,8 @@ export const getToggledValue = ({ value, detail }: SettingRow): string | undefin
   if (defaultValue) {
     return defaultValue === 'true' ? 'false' : 'true';
   }
-  return detail?.startsWith('boolean') ? 'true' : undefined;
+  // Launch flags that can be switched on, as well as boolean settings.
+  return detail && /^(boolean|switch)/.test(detail) ? 'true' : undefined;
 };
 
 const handleValueEditKey = (state: TuiState, input: string, key: InkKey): KeyResult => {

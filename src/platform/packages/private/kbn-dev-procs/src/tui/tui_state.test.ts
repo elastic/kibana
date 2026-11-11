@@ -145,12 +145,12 @@ describe('settings panes', () => {
   };
   const onKibana = () => apply(initial(), { type: 'select', direction: -1 });
 
-  it('cycles the selected process through logs, current and available settings', () => {
+  it('cycles the selected process through logs, current and available settings, and launch flags', () => {
     const state = onKibana();
-    const panes = [1, 2, 3].map(
+    const panes = [1, 2, 3, 4].map(
       (count) => apply(state, ...Array(count).fill({ type: 'cyclePane' })).pane
     );
-    expect(panes).toEqual(['current', 'available', 'logs']);
+    expect(panes).toEqual(['current', 'available', 'flags', 'logs']);
     expect(apply(initial(), { type: 'cyclePane' }).pane).toBe('logs');
   });
 

@@ -22,7 +22,8 @@ export interface SettingsList {
   readonly notes: readonly string[];
 }
 
-export type SettingsKind = 'current' | 'available';
+/** The settings a process runs with, every setting it supports, and the command-line flags of its start script. */
+export type SettingsKind = 'current' | 'available' | 'flags';
 
 export interface SettingsEditResult {
   /** Says where the change went and how it applies. */
@@ -45,4 +46,7 @@ export interface SettingsProvider {
   /** Shown while a list loads, e.g. when it takes a while. */
   readonly loadingHint?: Partial<Record<SettingsKind, string>>;
   readonly editor?: SettingsEditor;
+  /** The command-line flags of the start script, and which ones the process runs with. */
+  readonly flags?: () => Promise<SettingsList>;
+  readonly flagEditor?: SettingsEditor;
 }

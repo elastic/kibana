@@ -11,6 +11,8 @@ import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { createEsSettingsProvider } from './settings/es_settings';
 import { createKibanaSettingsProvider } from './settings/kibana_settings';
+import { createLaunchFlags, getFlagArgs } from './settings/launch_flags';
+import type { FlagOverrides } from './settings/launch_flags';
 import type { ProcessDefinition } from './types';
 
 export interface DefaultProcessOptions {
@@ -34,14 +36,41 @@ export const getDefaultProcesses = ({
 }: DefaultProcessOptions): readonly ProcessDefinition[] => {
   // Settings changed in the TUI; Elasticsearch gets them as -E flags whenever it (re)starts.
   const esOverrides = new Map<string, string>();
+  // Command-line flags set in the TUI, passed whenever the process (re)starts.
+  const esFlagOverrides: FlagOverrides = new Map();
+  const kibanaFlagOverrides: FlagOverrides = new Map();
+  const esScript = [path.join(REPO_ROOT, 'scripts', 'es'), 'snapshot'];
+  const kibanaScript = [path.join(REPO_ROOT, 'scripts', 'kibana'), '--dev'];
+  const esFlags = createLaunchFlags({
+    processId: 'es',
+    helpCommand: process.execPath,
+    helpArgs: [...esScript, '--help'],
+    cwd: REPO_ROOT,
+    staticArgs: esArgs,
+    staticSource: '--es-arg',
+    exclude: ['--help'],
+    marksSwitches: false,
+    overrides: esFlagOverrides,
+  });
+  const kibanaFlags = createLaunchFlags({
+    processId: 'kibana',
+    helpCommand: process.execPath,
+    helpArgs: [path.join(REPO_ROOT, 'scripts', 'kibana'), '--help'],
+    cwd: REPO_ROOT,
+    staticArgs: kibanaArgs,
+    staticSource: '--kibana-arg',
+    exclude: ['--help', '--dev'],
+    marksSwitches: true,
+    overrides: kibanaFlagOverrides,
+  });
   return [
     {
       id: 'es',
       command: process.execPath,
       args: () => [
-        path.join(REPO_ROOT, 'scripts', 'es'),
-        'snapshot',
+        ...esScript,
         ...esArgs,
+        ...getFlagArgs(esFlagOverrides),
         ...[...esOverrides].flatMap(([key, value]) => ['-E', `${key}=${value}`]),
       ],
       cwd: REPO_ROOT,
@@ -50,16 +79,24 @@ export const getDefaultProcesses = ({
         url: new URL('/_cluster/health?wait_for_status=yellow&timeout=1s', esUrl).href,
         auth: ES_AUTH,
       },
-      settings: createEsSettingsProvider({ esUrl, auth: ES_AUTH, overrides: esOverrides }),
+      settings: {
+        ...createEsSettingsProvider({ esUrl, auth: ES_AUTH, overrides: esOverrides }),
+        flags: esFlags.list,
+        flagEditor: esFlags.editor,
+      },
     },
     {
       id: 'kibana',
       command: process.execPath,
-      args: [path.join(REPO_ROOT, 'scripts', 'kibana'), '--dev', ...kibanaArgs],
+      args: () => [...kibanaScript, ...kibanaArgs, ...getFlagArgs(kibanaFlagOverrides)],
       cwd: REPO_ROOT,
       dependsOn: ['es'],
       ready: { type: 'log', pattern: /Kibana is now available/ },
-      settings: createKibanaSettingsProvider({ repoRoot: REPO_ROOT, kibanaArgs, cacheDir }),
+      settings: {
+        ...createKibanaSettingsProvider({ repoRoot: REPO_ROOT, kibanaArgs, cacheDir }),
+        flags: kibanaFlags.list,
+        flagEditor: kibanaFlags.editor,
+      },
     },
   ];
 };

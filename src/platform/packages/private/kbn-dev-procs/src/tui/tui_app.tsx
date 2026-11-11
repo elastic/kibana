@@ -88,6 +88,7 @@ const COLUMN_GAP = '  ';
 const PANE_TITLES: Readonly<Record<SettingsKind, string>> = {
   current: 'current settings',
   available: 'available settings',
+  flags: 'launch flags',
 };
 
 /** How many settings fit in a settings pane of `height` rows, after its notes and the last notice. */
@@ -240,8 +241,8 @@ export const createTuiApp = ({
       kind === 'current' ? source : [detail, source && `(${source})`].filter(Boolean).join(' ');
     return (
       <Text wrap="truncate-end" inverse={isCursor}>
-        {kind === 'available' ? <Text color="green">{isSet ? '● ' : '  '}</Text> : null}
-        <Text bold={isSet && kind === 'available'}>{fitText(key, widths.key, 'middle')}</Text>
+        {kind !== 'current' ? <Text color="green">{isSet ? '● ' : '  '}</Text> : null}
+        <Text bold={isSet && kind !== 'current'}>{fitText(key, widths.key, 'middle')}</Text>
         {widths.value > 0 ? (
           <Text color="cyan">
             {COLUMN_GAP}
@@ -293,7 +294,7 @@ export const createTuiApp = ({
     const widths = getColumnWidths(
       // From every matching setting, not only the visible ones, so the columns stay put while scrolling.
       getMatchingSettings(state),
-      width - (kind === 'available' ? MARKER_WIDTH : 0)
+      width - (kind !== 'current' ? MARKER_WIDTH : 0)
     );
     return (
       <Box
@@ -464,7 +465,17 @@ export const createTuiApp = ({
       }
       // Reloads when the process changes state, e.g. once Elasticsearch is ready to answer, and after a change.
       dispatch({ type: 'settingsLoading', processId: selected, kind: pane });
-      provider[pane]().then(
+      const load = pane === 'flags' ? provider.flags : provider[pane];
+      if (!load) {
+        dispatch({
+          type: 'settingsFailed',
+          processId: selected,
+          kind: pane,
+          error: 'This process has no launch flags to show.',
+        });
+        return;
+      }
+      load().then(
         (list) => dispatch({ type: 'settingsLoaded', processId: selected, kind: pane, list }),
         (error: Error) =>
           dispatch({
@@ -477,7 +488,7 @@ export const createTuiApp = ({
     }, [provider, selected, pane, selectedState, settingsVersion]);
 
     const changeSetting = (change: (editor: SettingsEditor) => Promise<SettingsEditResult>) => {
-      const editor = provider?.editor;
+      const editor = pane === 'flags' ? provider?.flagEditor : provider?.editor;
       if (!editor) {
         dispatch({
           type: 'notice',

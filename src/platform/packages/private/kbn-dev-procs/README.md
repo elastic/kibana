@@ -18,7 +18,7 @@ the output of the selected process, or of all of them.
 | Key               | Action                                           |
 | ----------------- | ------------------------------------------------ |
 | `↑` `↓` / `←` `→` | Select a process, or `all`                       |
-| `tab`             | Switch the selected process between its logs, current settings and available settings |
+| `tab`             | Switch the selected process between its logs, current settings, available settings and launch flags |
 | `/`               | Filter the output; `enter` keeps it, `esc` clears |
 | `PgUp` `PgDn`     | Scroll back through the output; `G` follows again |
 | `r` `s` `x`       | Restart, start or stop the selected process      |
@@ -40,7 +40,7 @@ processes, and stops when you quit.
 
 ### Settings
 
-`tab` shows the settings of the selected process:
+`tab` shows the settings and launch flags of the selected process:
 
 - **Current settings**: what it runs with. For Kibana, the settings from `config/kibana.yml`,
   `config/kibana.dev.yml` and the flags passed with `--kibana-arg`, each with its source; `--dev` adds
@@ -50,6 +50,11 @@ processes, and stops when you quit.
   settings and types from every plugin's config schema; listing them boots Kibana's plugins in a child
   process (`node scripts/dev kibana-settings`), which takes about 20s and is cached per commit in
   `data/dev`. For Elasticsearch, every setting the node knows, with its default.
+
+- **Launch flags**: the options of the start script, such as `--eis`, `--ssl` or `--license`, read from
+  `node scripts/kibana --help` and `node scripts/es snapshot --help`, with the ones the process runs with
+  marked ●. `--dev` is left out, as `node scripts/dev` always passes it. kbn-es does not say which of its
+  options take a value, so those show as `switch or value` unless they document a default.
 
 `/` filters settings by name, value or type. Values of settings that look like credentials, such as
 `elasticsearch.password`, are masked.
@@ -66,6 +71,9 @@ Kibana changes are written to `config/kibana.dev.yml`, keeping the rest of the f
 mode restarts its server by itself. Only that file is changed: a value from `kibana.yml` can be
 overridden there but not unset, and `--kibana-arg` flags win over it. Elasticsearch changes are passed
 as `-E` flags the next time it starts, for this run only; `↻` marks it until you restart it with `r`.
+Launch flags work the same way for both: `space` switches one on or off, `e` gives it a value, and they
+apply from the next restart, for this run only. Flags passed with `--es-arg` or `--kibana-arg` cannot be
+changed in the TUI.
 
 Without a terminal, or with `--headless`, the output of every process is printed with a `[es]` or
 `[kibana]` prefix (`--hide-output` prints only state changes).

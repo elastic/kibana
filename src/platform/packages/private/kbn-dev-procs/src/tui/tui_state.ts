@@ -18,7 +18,7 @@ export const MAX_LINES = 20_000;
 
 /** What the pane shows for the selected process. */
 export type Pane = 'logs' | SettingsKind;
-const PANES: readonly Pane[] = ['logs', 'current', 'available'];
+const PANES: readonly Pane[] = ['logs', 'current', 'available', 'flags'];
 
 export type SettingsEntry =
   | { readonly status: 'loading' }
