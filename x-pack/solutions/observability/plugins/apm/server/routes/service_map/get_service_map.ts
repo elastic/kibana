@@ -23,7 +23,7 @@ import { getEnhancedServiceStats } from './get_enhanced_service_stats';
 import { fetchExitSpanSamplesFromTraceIds } from './fetch_exit_span_samples';
 import { getServiceCallGraph } from './get_service_call_graph';
 import { getServiceGroupingAttributes } from './get_service_grouping_attributes';
-import { matchCallGraphToServices } from './match_service_call_graph';
+import { matchCallGraphToServices } from './grouping/match_service_call_graph';
 
 export interface IEnvOptions {
   mlClient?: MlClient;

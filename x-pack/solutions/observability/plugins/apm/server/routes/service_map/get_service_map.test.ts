@@ -11,7 +11,7 @@ import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../common/e
 import type { ServiceMapSpan } from '../../../common/service_map/types';
 import { getServiceCallGraph } from './get_service_call_graph';
 import { getServiceGroupingAttributes } from './get_service_grouping_attributes';
-import { matchCallGraphToServices } from './match_service_call_graph';
+import { matchCallGraphToServices } from './grouping/match_service_call_graph';
 import { getServiceMap } from './get_service_map';
 import type { IEnvOptions, ServiceMapGroupingOptions } from './get_service_map';
 import { DEFAULT_ANOMALIES, getServiceAnomalies } from './get_service_anomalies';
@@ -22,7 +22,7 @@ import { fetchExitSpanSamplesFromTraceIds } from './fetch_exit_span_samples';
 
 jest.mock('./get_service_call_graph');
 jest.mock('./get_service_grouping_attributes');
-jest.mock('./match_service_call_graph');
+jest.mock('./grouping/match_service_call_graph');
 jest.mock('./get_service_anomalies');
 jest.mock('./get_service_stats');
 jest.mock('./get_enhanced_service_stats');
