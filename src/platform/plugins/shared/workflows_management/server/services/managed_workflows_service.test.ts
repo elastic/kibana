@@ -1655,16 +1655,15 @@ describe('ManagedWorkflowsService', () => {
 
     it('hashes a template rendered with the stored values', async () => {
       const templateValues: TemplateValues = { recipient: 'World', enabled: true };
+      const expectedHash = (importedYaml: string): string =>
+        renderedHash(createTemplateDefinition({ importedYaml }), templateValues);
       const getStatus = async (importedYaml: string) => {
         const definition = createTemplateDefinition({ importedYaml });
         mockManagedWorkflowDefinitions = [definition];
         const { crudService, service } = createService();
         crudService.getWorkflowDocumentSource.mockResolvedValue(
           createWorkflowSource({
-            definitionHash: renderedHash(
-              createTemplateDefinition({ importedYaml: '# imported v1' }),
-              templateValues
-            ),
+            definitionHash: expectedHash('# imported v1'),
             managedTemplateValues: templateValues,
             managedVersion: definition.version,
             originManagedWorkflowId: definition.id,
@@ -1680,19 +1679,13 @@ describe('ManagedWorkflowsService', () => {
       expect(await getStatus('# imported v1')).toEqual(
         expect.objectContaining({
           status: 'intact',
-          registryHash: renderedHash(
-            createTemplateDefinition({ importedYaml: '# imported v1' }),
-            templateValues
-          ),
+          registryHash: expectedHash('# imported v1'),
         })
       );
       expect(await getStatus('# imported v2')).toEqual(
         expect.objectContaining({
           status: 'drifted',
-          registryHash: renderedHash(
-            createTemplateDefinition({ importedYaml: '# imported v2' }),
-            templateValues
-          ),
+          registryHash: expectedHash('# imported v2'),
         })
       );
     });
@@ -1712,6 +1705,33 @@ describe('ManagedWorkflowsService', () => {
       expect(status).toEqual(expect.objectContaining({ status: 'missing', registryHash: null }));
     });
 
+    it('returns a null registryHash for a soft-deleted template without rendering its values', async () => {
+      const yamlTemplate = jest.fn((values: TemplateValues) =>
+        createTemplateDefinition().yamlTemplate(values)
+      );
+      const definition: TemplateManagedWorkflowDefinition = {
+        ...createTemplateDefinition(),
+        yamlTemplate,
+      };
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      crudService.getWorkflowDocumentSource.mockResolvedValue(
+        createWorkflowSource({
+          deleted_at: new Date('2024-01-02T00:00:00.000Z'),
+          managedTemplateValues: { recipient: 'World', enabled: true },
+        })
+      );
+
+      const status = await service.getManagedWorkflowStatus(
+        WORKFLOW_ID,
+        { spaceId: SPACE_ID },
+        definition.pluginId
+      );
+
+      expect(status).toEqual(expect.objectContaining({ status: 'missing', registryHash: null }));
+      expect(yamlTemplate).not.toHaveBeenCalled();
+    });
+
     it('returns drifted with a null registryHash when the template throws for the stored values', async () => {
       const definition: TemplateManagedWorkflowDefinition = {
         ...createTemplateDefinition(),
@@ -1723,7 +1743,7 @@ describe('ManagedWorkflowsService', () => {
       const { crudService, logger, service } = createService();
       crudService.getWorkflowDocumentSource.mockResolvedValue(
         createWorkflowSource({
-          definitionHash: 'stored-hash',
+          definitionHash: null,
           managedTemplateValues: { recipient: 'World', enabled: true },
           managedVersion: definition.version,
           originManagedWorkflowId: definition.id,

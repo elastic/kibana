@@ -155,6 +155,9 @@ When adding a managed workflow:
    - [ ] Exactly one of `yaml` or `yamlTemplate`
    - [ ] Explicit `management` policy chosen intentionally
    - [ ] Template defs use `as const satisfies ManagedWorkflowDefinition<TValues>`
+   - [ ] `yamlTemplate` returns the same YAML for the same values (no timestamps or random ids):
+         each document's `definitionHash` is the hash of its rendered YAML, so a varying render
+         reinstalls the document on every reconciliation
    - [ ] Added to `managedWorkflowDefinitions` in `definitions/index.ts`
    - [ ] Id re-exported from `definitions/index.ts`
    - [ ] Every raw request path (top-level `path` on `kibana.request`, `with.request.path`,

@@ -102,7 +102,7 @@ async function onEntityCreated(entityId: string, spaceId: string) {
 }
 ```
 
-Installs are idempotent on `(definition version, persisted values)`, so it is safe to call `install` again for the same id without checking whether the document already exists.
+Installs are idempotent on `(definition version, persisted values, rendered YAML)`, so it is safe to call `install` again for the same id without checking whether the document already exists.
 
 ## 3.1) Signaling readiness (`ready()`)
 
@@ -513,9 +513,9 @@ await managed.install(HEALTH_CHECK_WORKFLOW_ID, {
 
 ### `yamlTemplate(values)` — install-time parameterization
 
-Use when some values are only known at install time (entity id, connector id, rule id, etc.). The template renders at install/update time, install values are persisted alongside the document, and re-installs are idempotent on `(definition version, persisted values)`.
+Use when some values are only known at install time (entity id, connector id, rule id, etc.). The template renders at install/update time, install values are persisted alongside the document, and re-installs are idempotent on `(definition version, persisted values, rendered YAML)`.
 
-The platform hashes the YAML each install renders, so any change to that output, including edits to imported YAML files, render helpers and defaults, reaches installed documents on their next reconciliation without a `version` bump. `render` must return the same YAML for the same values every time: a render that varies, for example with a timestamp or a random id, reinstalls the document on every reconciliation.
+The platform hashes the YAML each install renders, so any change to that output, including edits to imported YAML files, render helpers and defaults, reaches installed documents on their next reconciliation without a `version` bump. `yamlTemplate` must return the same YAML for the same values every time: a render that varies, for example with a timestamp or a random id, reinstalls the document on every reconciliation.
 
 ```ts
 import type { ManagedWorkflowDefinition } from '@kbn/workflows/managed';
@@ -617,7 +617,7 @@ Status values:
 
 If multiple conditions apply, the API reports the first matching status in this priority order: `missing`, `not_managed`, `invalid`, `disabled`, `drifted`, `intact`.
 
-For a `yamlTemplate` definition, the registered hash (`registryHash`) is the hash of the template rendered with the document's stored values. It is `null` when the document holds no values or the template throws for them, and such a document is `drifted`.
+For a `yamlTemplate` definition, the registered hash (`registryHash`) is the hash of the template rendered with the document's stored values. It is `null` when there is no document, the document holds no values, or the template throws for them. An installed document with a `null` hash is reported as `drifted` unless an earlier status in the order above applies.
 
 The status API accepts the same identity options as install/uninstall, except template `values` are not needed:
 

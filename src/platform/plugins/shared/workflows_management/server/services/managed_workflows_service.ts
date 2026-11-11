@@ -49,6 +49,10 @@ const computeDefinitionHash = (yaml: string): string => {
   return createHash('sha256').update(yaml.trim()).digest('hex');
 };
 
+const hasTemplateValues = (
+  values: ManagedWorkflowTemplateValues | null | undefined
+): values is ManagedWorkflowTemplateValues => values != null && Object.keys(values).length > 0;
+
 interface ManagedWorkflowsServiceDeps {
   crudService: WorkflowCrudService;
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
@@ -460,11 +464,6 @@ export class ManagedWorkflowsService {
         includeGlobal: true,
       }
     );
-    const registryHash = this.computeRegistryHash({
-      definition,
-      storedTemplateValues: existing?.managedTemplateValues,
-    });
-
     if (!existing || existing.deleted_at) {
       return this.createManagedWorkflowStatusReport({
         status: 'missing',
@@ -472,9 +471,14 @@ export class ManagedWorkflowsService {
         definitionId: id,
         spaceId,
         definition,
-        registryHash,
+        registryHash: this.computeRegistryHash({ definition, storedTemplateValues: null }),
       });
     }
+
+    const registryHash = this.computeRegistryHash({
+      definition,
+      storedTemplateValues: existing.managedTemplateValues,
+    });
 
     if (existing.managed !== true) {
       return this.createManagedWorkflowStatusReport({
@@ -969,7 +973,7 @@ export class ManagedWorkflowsService {
 
     if (definition.yamlTemplate) {
       const templateValues = values ?? existingTemplateValues;
-      if (!templateValues || Object.keys(templateValues).length === 0) {
+      if (!hasTemplateValues(templateValues)) {
         throw new Error(
           `Managed workflow '${definition.id}' uses yamlTemplate but no template values were provided and none are persisted`
         );
@@ -1010,26 +1014,25 @@ export class ManagedWorkflowsService {
     definition: ManagedWorkflowDefinition;
     storedTemplateValues: ManagedWorkflowTemplateValues | null | undefined;
   }): string | null {
-    if (definition.yamlTemplate) {
-      if (!storedTemplateValues || Object.keys(storedTemplateValues).length === 0) {
-        return null;
-      }
-      try {
-        return computeDefinitionHash(definition.yamlTemplate(storedTemplateValues));
-      } catch (error) {
-        this.logger.warn(
-          `Managed workflows: could not render '${definition.id}' with its stored values`,
-          { error }
-        );
-        return null;
-      }
+    if (!definition.yamlTemplate) {
+      return computeDefinitionHash(this.resolveManagedWorkflowYaml({ definition }).yaml);
     }
-    if (!definition.yaml) {
-      throw new Error(
-        `Managed workflow '${definition.id}' must define either yaml or yamlTemplate`
+    if (!hasTemplateValues(storedTemplateValues)) {
+      return null;
+    }
+    try {
+      const { yaml } = this.resolveManagedWorkflowYaml({
+        definition,
+        existingTemplateValues: storedTemplateValues,
+      });
+      return computeDefinitionHash(yaml);
+    } catch (error) {
+      this.logger.warn(
+        `Managed workflows: could not render '${definition.id}' with its stored values`,
+        { error }
       );
+      return null;
     }
-    return computeDefinitionHash(definition.yaml);
   }
 
   private areTemplateValuesEqual(
