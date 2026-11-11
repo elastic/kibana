@@ -30,6 +30,7 @@ export const ESQL_VIEWS_CAPABILITIES = {
 export const NL_TO_ESQL_ROUTE = '/internal/esql/nl_to_esql';
 export const SUGGEST_FIX_ROUTE = '/internal/esql/suggest_fix';
 export const EXPLAIN_ERROR_ROUTE = '/internal/esql/explain_error';
+export const NO_AI_CONNECTOR_ERROR_CODE = 'no_ai_connector';
 export const FIX_WITH_AI_COMMAND_ID = 'esql.fixWithAI';
 
 const LOOKUP_INDEX_ROUTE = '/internal/esql/lookup_index';

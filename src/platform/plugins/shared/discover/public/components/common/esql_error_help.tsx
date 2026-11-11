@@ -24,13 +24,13 @@ import { css } from '@emotion/react';
 import type { HttpStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EsqlErrorExplanation } from './explain_esql_error';
-import { explainEsqlError } from './explain_esql_error';
+import { ExplainErrorFailure, explainEsqlError } from './explain_esql_error';
 
 type Stage =
   | { kind: 'idle' }
   | { kind: 'explaining' }
   | { kind: 'explained'; explanation: EsqlErrorExplanation }
-  | { kind: 'error'; message: string };
+  | { kind: 'error'; message: string; isNoConnector: boolean };
 
 const leftAligned = css`
   text-align: left;
@@ -42,11 +42,13 @@ export function EsqlErrorHelp({
   query,
   errorMessage,
   onApplyQuery,
+  connectorsUrl,
 }: {
   http: Pick<HttpStart, 'post'>;
   query: string;
   errorMessage: string;
   onApplyQuery?: (query: string) => void;
+  connectorsUrl?: string;
 }) {
   const [stage, setStage] = useState<Stage>({ kind: 'idle' });
   const controller = useRef<AbortController | undefined>();
@@ -82,6 +84,7 @@ export function EsqlErrorHelp({
         setStage({
           kind: 'error',
           message: caught instanceof Error ? caught.message : String(caught),
+          isNoConnector: caught instanceof ExplainErrorFailure && caught.isNoConnector,
         });
       }
     }
@@ -154,14 +157,42 @@ export function EsqlErrorHelp({
       ) : stage.kind === 'error' ? (
         <>
           <EuiText size="s" color="danger" data-test-subj="discoverErrorExplanationFailure">
-            <p>{stage.message}</p>
+            <p>
+              {stage.isNoConnector ? (
+                <FormattedMessage
+                  id="discover.esqlErrorHelp.noConnectorMessage"
+                  defaultMessage="No AI connector is set up."
+                />
+              ) : (
+                stage.message
+              )}
+            </p>
           </EuiText>
-          <EuiButtonEmpty size="xs" flush="left" onClick={dismiss}>
-            <FormattedMessage
-              id="discover.esqlErrorHelp.dismissButtonLabel"
-              defaultMessage="Dismiss"
-            />
-          </EuiButtonEmpty>
+          <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty size="xs" flush="left" onClick={dismiss}>
+                <FormattedMessage
+                  id="discover.esqlErrorHelp.dismissButtonLabel"
+                  defaultMessage="Dismiss"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            {stage.isNoConnector && connectorsUrl ? (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="xs"
+                  iconType="plugs"
+                  href={connectorsUrl}
+                  data-test-subj="discoverErrorExplanationSetUpConnector"
+                >
+                  <FormattedMessage
+                    id="discover.esqlErrorHelp.setUpConnectorLabel"
+                    defaultMessage="Set up a connector"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
         </>
       ) : (
         <>

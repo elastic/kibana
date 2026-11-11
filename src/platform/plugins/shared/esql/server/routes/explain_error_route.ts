@@ -12,7 +12,7 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { CoreSetup, IRouter, PluginInitializerContext } from '@kbn/core/server';
-import { EXPLAIN_ERROR_ROUTE } from '@kbn/esql-types';
+import { EXPLAIN_ERROR_ROUTE, NO_AI_CONNECTOR_ERROR_CODE } from '@kbn/esql-types';
 import type { DeploymentInfo } from '../deployment_info';
 import { describeDeployment } from '../deployment_info';
 import type { EsqlServerPluginStart } from '../types';
@@ -134,7 +134,12 @@ export const registerExplainErrorRoute = (
         });
 
         if (!connectorId) {
-          return response.badRequest({ body: { message: 'No AI connector available.' } });
+          return response.badRequest({
+            body: {
+              message: 'No AI connector available.',
+              attributes: { code: NO_AI_CONNECTOR_ERROR_CODE },
+            },
+          });
         }
 
         const model = await createScopedModel({ inference, request, connectorId });

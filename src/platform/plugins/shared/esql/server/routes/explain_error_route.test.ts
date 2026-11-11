@@ -9,6 +9,7 @@
 
 import { Subject } from 'rxjs';
 import type { CoreSetup, IRouter, PluginInitializerContext } from '@kbn/core/server';
+import { NO_AI_CONNECTOR_ERROR_CODE } from '@kbn/esql-types';
 import { registerExplainErrorRoute } from './explain_error_route';
 import type { DeploymentInfo } from '../deployment_info';
 import type { EsqlServerPluginStart } from '../types';
@@ -132,7 +133,9 @@ describe('registerExplainErrorRoute', () => {
 
     await handler(requestHandlerContext, request, response);
 
-    expect(response.badRequest).toHaveBeenCalled();
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: expect.objectContaining({ attributes: { code: NO_AI_CONNECTOR_ERROR_CODE } }),
+    });
   });
 
   it('answers forbidden for a license error', async () => {

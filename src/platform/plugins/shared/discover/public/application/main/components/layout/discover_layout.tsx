@@ -417,12 +417,20 @@ export function DiscoverLayout() {
   }, [customizationContext.displayMode, euiTheme.size.xxl, isProjectChromeStyle]);
 
   const hasEnterpriseLicense = useHasEnterpriseLicense(licensing);
+  const connectorsUrl = core.application.capabilities.management?.insightsAndAlerting
+    ?.triggersActionsConnectors
+    ? core.application.getUrlForApp('management', {
+        deepLinkId: 'triggersActionsConnectors',
+        path: '/connectors',
+      })
+    : undefined;
   const errorAiHelp =
     dataState.error && isEsqlMode && isOfAggregateQueryType(query) && hasEnterpriseLicense ? (
       <EsqlErrorHelp
         http={core.http}
         query={query.esql}
         errorMessage={dataState.error.message}
+        connectorsUrl={connectorsUrl}
         onApplyQuery={(esql) => dispatch(updateESQLQuery({ queryOrUpdater: esql }))}
       />
     ) : undefined;

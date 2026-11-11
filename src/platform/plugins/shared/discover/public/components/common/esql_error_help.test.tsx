@@ -13,6 +13,7 @@ import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { HttpStart } from '@kbn/core/public';
+import { NO_AI_CONNECTOR_ERROR_CODE } from '@kbn/esql-types';
 import { EsqlErrorHelp } from './esql_error_help';
 
 const buildHttp = ({ response, failure }: { response?: unknown; failure?: unknown }) => ({
@@ -91,6 +92,42 @@ describe('EsqlErrorHelp', () => {
 
     expect(screen.getByTestId('discoverErrorExplainButton')).toBeInTheDocument();
     expect(screen.queryByTestId('discoverErrorExplanationFailure')).not.toBeInTheDocument();
+  });
+
+  describe('when no AI connector is set up', () => {
+    const noConnector = {
+      failure: {
+        body: {
+          message: 'No AI connector available.',
+          attributes: { code: NO_AI_CONNECTOR_ERROR_CODE },
+        },
+      },
+    };
+
+    it('links to where connectors are set up', async () => {
+      renderHelp(buildHttp(noConnector), { connectorsUrl: '/app/management/connectors' });
+
+      await userEvent.click(await screen.findByTestId('discoverErrorExplainButton'));
+
+      expect(await screen.findByTestId('discoverErrorExplanationFailure')).toHaveTextContent(
+        'No AI connector is set up.'
+      );
+      expect(screen.getByTestId('discoverErrorExplanationSetUpConnector')).toHaveAttribute(
+        'href',
+        '/app/management/connectors'
+      );
+    });
+
+    it('leaves the link out when there is nowhere to send the user', async () => {
+      renderHelp(buildHttp(noConnector));
+
+      await userEvent.click(await screen.findByTestId('discoverErrorExplainButton'));
+      await screen.findByTestId('discoverErrorExplanationFailure');
+
+      expect(
+        screen.queryByTestId('discoverErrorExplanationSetUpConnector')
+      ).not.toBeInTheDocument();
+    });
   });
 
   it('goes back to the button when the error changes', async () => {
