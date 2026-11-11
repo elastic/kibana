@@ -53,6 +53,8 @@ export interface Props {
   sortOrder?: 'asc' | 'desc';
   unsupportedMigrateAgents: Agent[];
   unsupportedPrivilegeLevelChangeAgents: Agent[];
+  /** Whether a manually selected agent runs Fleet Server; always false for a query selection. */
+  selectionHasFleetServer: boolean;
 }
 
 export const AgentBulkActions: React.FunctionComponent<Props> = ({
@@ -69,6 +71,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   sortOrder,
   unsupportedMigrateAgents,
   unsupportedPrivilegeLevelChangeAgents,
+  selectionHasFleetServer,
 }) => {
   const licenseService = useLicense();
   const authz = useAuthz();
@@ -490,6 +493,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           <AgentUnenrollAgentModal
             agents={agents}
             agentCount={agentCount}
+            hasFleetServer={selectionHasFleetServer}
             onClose={() => {
               setIsUnenrollModalOpen(false);
               refreshAgents({ refreshTags: true });
@@ -502,6 +506,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           <AgentForceUnenrollModal
             agents={agents}
             agentCount={agentCount}
+            hasFleetServer={selectionHasFleetServer}
             onClose={() => {
               setIsForceUnenrollModalOpen(false);
               refreshAgents({ refreshTags: true });

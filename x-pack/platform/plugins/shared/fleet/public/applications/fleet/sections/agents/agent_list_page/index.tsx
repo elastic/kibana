@@ -224,6 +224,19 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     ];
   }, [selectedAgents, getAgentPolicy]);
 
+  // Uses the full policies of the listed agents: the bulk menu only receives policy summaries,
+  // which lack the package policies needed to detect Fleet Server. A query selection has no agents
+  // to inspect.
+  const selectionHasFleetServer = useMemo(
+    () =>
+      selectionMode === 'manual' &&
+      selectedAgents.some((agent) => {
+        const agentPolicy = getAgentPolicy(agent);
+        return agentPolicy ? policyHasFleetServer(agentPolicy) : false;
+      }),
+    [selectionMode, selectedAgents, getAgentPolicy]
+  );
+
   const renderActions = (agent: Agent) => {
     const agentPolicy = getAgentPolicy(agent);
 
@@ -614,6 +627,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         sortOrder={sort.direction}
         unsupportedMigrateAgents={unsupportedMigrateAgents}
         unsupportedPrivilegeLevelChangeAgents={unsupportedPrivilegeLevelChangeAgents}
+        selectionHasFleetServer={selectionHasFleetServer}
       />
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}

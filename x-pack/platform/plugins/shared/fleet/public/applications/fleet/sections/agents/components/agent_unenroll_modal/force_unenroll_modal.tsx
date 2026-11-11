@@ -92,18 +92,31 @@ export const AgentForceUnenrollModal: React.FunctionComponent<Props> = ({
       }
       buttonColor="danger"
     >
-      {hasFleetServer && isSingleAgent ? (
+      {hasFleetServer ? (
         <>
           <KbnWarningCallout
             announceOnMount
-            title={i18n.translate('xpack.fleet.forceUnenrollAgents.fleetServerTitle', {
-              defaultMessage: 'This agent is running Fleet Server',
-            })}
+            title={
+              isSingleAgent
+                ? i18n.translate('xpack.fleet.forceUnenrollAgents.fleetServerTitle', {
+                    defaultMessage: 'This agent is running Fleet Server',
+                  })
+                : i18n.translate('xpack.fleet.forceUnenrollAgents.fleetServerMultipleTitle', {
+                    defaultMessage: 'Some of these agents are running Fleet Server',
+                  })
+            }
             text={
-              <FormattedMessage
-                id="xpack.fleet.forceUnenrollAgents.fleetServerDescription"
-                defaultMessage="Force unenrolling this agent will disconnect a Fleet Server and prevent agents from sending data if no other Fleet Servers exist."
-              />
+              isSingleAgent ? (
+                <FormattedMessage
+                  id="xpack.fleet.forceUnenrollAgents.fleetServerDescription"
+                  defaultMessage="Force unenrolling this agent will disconnect a Fleet Server and prevent agents from sending data if no other Fleet Servers exist."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.fleet.forceUnenrollAgents.fleetServerMultipleDescription"
+                  defaultMessage="Force unenrolling them will disconnect those Fleet Servers and prevent agents from sending data if no other Fleet Servers exist."
+                />
+              )
             }
           />
           <EuiSpacer />
@@ -135,25 +148,14 @@ export const AgentForceUnenrollModal: React.FunctionComponent<Props> = ({
       />
       <EuiSpacer />
       <p>
-        {isSingleAgent ? (
-          <FormattedMessage
-            id="xpack.fleet.forceUnenrollAgents.consequencesSingleDescription"
-            defaultMessage="Revokes the agent's local API keys and marks it Unenrolled in Fleet.
-              The agent will keep running on the host and can keep sending data to any
-              output that does not use the revoked keys until it is uninstalled there. It cannot be
-              uninstalled remotely afterwards, and Fleet will not register a later manual uninstall. {learnMore}"
-            values={{ learnMore }}
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.fleet.forceUnenrollAgents.consequencesMultipleDescription"
-            defaultMessage="Revokes the agents' local API keys and marks them Unenrolled in Fleet.
-              The agents will keep running on their hosts and can keep sending data to any
-              output that does not use the revoked keys until they are uninstalled there. They cannot be
-              uninstalled remotely afterwards, and Fleet will not register a later manual uninstall. {learnMore}"
-            values={{ learnMore }}
-          />
-        )}
+        <FormattedMessage
+          id="xpack.fleet.forceUnenrollAgents.consequencesDescription"
+          defaultMessage="Revokes {count, plural, one {the agent's} other {the agents''}} local API keys and marks {count, plural, one {it} other {them}} Unenrolled in Fleet.
+            {count, plural, one {The agent} other {The agents}} will keep running on {count, plural, one {the host} other {their hosts}} and can keep sending data to any
+            output that does not use the revoked keys until {count, plural, one {it is} other {they are}} uninstalled there. {count, plural, one {It} other {They}} cannot be
+            uninstalled remotely afterwards, and Fleet will not register a later manual uninstall. {learnMore}"
+          values={{ count: agentCount, learnMore }}
+        />
       </p>
     </EuiConfirmModal>
   );

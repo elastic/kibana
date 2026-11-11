@@ -109,18 +109,31 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
       }
       buttonColor="danger"
     >
-      {hasFleetServer && isSingleAgent ? (
+      {hasFleetServer ? (
         <>
           <KbnWarningCallout
             announceOnMount
-            title={i18n.translate('xpack.fleet.unenrollAgents.unenrollFleetServerTitle', {
-              defaultMessage: 'This agent is running Fleet Server',
-            })}
+            title={
+              isSingleAgent
+                ? i18n.translate('xpack.fleet.unenrollAgents.unenrollFleetServerTitle', {
+                    defaultMessage: 'This agent is running Fleet Server',
+                  })
+                : i18n.translate('xpack.fleet.unenrollAgents.unenrollFleetServerMultipleTitle', {
+                    defaultMessage: 'Some of these agents are running Fleet Server',
+                  })
+            }
             text={
-              <FormattedMessage
-                id="xpack.fleet.unenrollAgents.unenrollFleetServerDescription"
-                defaultMessage="Unenrolling this agent will disconnect a Fleet Server and prevent agents from sending data if no other Fleet Servers exist."
-              />
+              isSingleAgent ? (
+                <FormattedMessage
+                  id="xpack.fleet.unenrollAgents.unenrollFleetServerDescription"
+                  defaultMessage="Unenrolling this agent will disconnect a Fleet Server and prevent agents from sending data if no other Fleet Servers exist."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.fleet.unenrollAgents.unenrollFleetServerMultipleDescription"
+                  defaultMessage="Unenrolling them will disconnect those Fleet Servers and prevent agents from sending data if no other Fleet Servers exist."
+                />
+              )
             }
           />
           <EuiSpacer />

@@ -205,6 +205,20 @@ describe('AgentUnenrollAgentModal', () => {
     );
   });
 
+  it('should warn when a bulk selection includes a Fleet Server agent', async () => {
+    const renderer = createFleetTestRendererMock();
+    const { getByText } = renderer.render(
+      <AgentUnenrollAgentModal
+        agents={[createAgent(), createAgent({ id: 'agent-2' })]}
+        agentCount={2}
+        hasFleetServer={true}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(getByText('Some of these agents are running Fleet Server')).toBeInTheDocument();
+  });
+
   it('should warn when unenrolling a Fleet Server agent', async () => {
     const renderer = createFleetTestRendererMock();
     const { getByText } = renderer.render(
@@ -292,6 +306,20 @@ describe('AgentForceUnenrollModal', () => {
 
     expect(getByText('This action does not notify the agents of unenrollment')).toBeInTheDocument();
     expect(getByText(/Revokes the agents' local API keys and marks them/)).toBeInTheDocument();
+  });
+
+  it('should warn when a bulk selection includes a Fleet Server agent', async () => {
+    const renderer = createFleetTestRendererMock();
+    const { getByText } = renderer.render(
+      <AgentForceUnenrollModal
+        agents={[createAgent(), createAgent({ id: 'agent-2' })]}
+        agentCount={2}
+        hasFleetServer={true}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(getByText('Some of these agents are running Fleet Server')).toBeInTheDocument();
   });
 
   it('should warn when force unenrolling a Fleet Server agent', async () => {
