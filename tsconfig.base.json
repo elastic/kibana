@@ -1123,6 +1123,8 @@
       "@kbn/dev-cli-runner/*": ["./src/platform/packages/shared/kbn-dev-cli-runner/*"],
       "@kbn/dev-proc-runner": ["./src/platform/packages/shared/kbn-dev-proc-runner"],
       "@kbn/dev-proc-runner/*": ["./src/platform/packages/shared/kbn-dev-proc-runner/*"],
+      "@kbn/dev-procs": ["./src/platform/packages/private/kbn-dev-procs"],
+      "@kbn/dev-procs/*": ["./src/platform/packages/private/kbn-dev-procs/*"],
       "@kbn/dev-tools-plugin": ["./src/platform/plugins/shared/dev_tools"],
       "@kbn/dev-tools-plugin/*": ["./src/platform/plugins/shared/dev_tools/*"],
       "@kbn/dev-utils": ["./src/platform/packages/shared/kbn-dev-utils"],

@@ -393,6 +393,7 @@ src/platform/packages/private/kbn-config-mocks @elastic/kibana-core
 src/platform/packages/private/kbn-controls-renderer @elastic/kibana-presentation
 src/platform/packages/private/kbn-cps-common @elastic/kibana-presentation
 src/platform/packages/private/kbn-data-streams @elastic/kibana-core
+src/platform/packages/private/kbn-dev-procs @elastic/kibana-operations
 src/platform/packages/private/kbn-dot-text @elastic/kibana-operations
 src/platform/packages/private/kbn-dot-text-loader @elastic/kibana-operations
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
