@@ -15,4 +15,6 @@ export const RULE_VERSION_CONFLICT_DESCRIPTION =
 export const RULE_UPSERT_CONFLICT_DESCRIPTION =
   'Indicates the rule was created or updated concurrently, or the request changes immutable fields.';
 
+export const RULE_ALREADY_EXISTS_DESCRIPTION = 'Indicates a rule with the given ID already exists.';
+
 export const RULES_NOT_FOUND_DESCRIPTION = 'One or more rule ids could not be found.';

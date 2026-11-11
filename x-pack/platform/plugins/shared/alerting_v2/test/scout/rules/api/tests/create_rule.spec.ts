@@ -67,6 +67,58 @@ apiTest.describe('Create rule API', { tag: testData.API_ENGINE_TAG }, () => {
     }
   );
 
+  apiTest(
+    'create: returns 201 and persists the rule under a client-supplied id',
+    async ({ apiClient, apiServices }) => {
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body: {
+          ...buildCreateRuleData({ metadata: { name: 'client-id-rule' } }),
+          id: 'client-supplied-id',
+        },
+      });
+      expect(response).toHaveStatusCode(201);
+      expect(response.body.id).toBe('client-supplied-id');
+
+      const persisted = await apiServices.alertingV2.rules.get('client-supplied-id');
+      expect(persisted.metadata.name).toBe('client-id-rule');
+    }
+  );
+
+  apiTest(
+    'create: returns 409 RULE_ALREADY_EXISTS for a colliding id and does not overwrite',
+    async ({ apiClient, apiServices }) => {
+      await apiServices.alertingV2.rules.upsert(
+        'existing-id',
+        buildCreateRuleData({ metadata: { name: 'already-there' } })
+      );
+
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body: {
+          ...buildCreateRuleData({ metadata: { name: 'collision' } }),
+          id: 'existing-id',
+        },
+      });
+      expect(response).toHaveStatusCode(409);
+      expect(response.body.code).toBe('RULE_ALREADY_EXISTS');
+
+      const persisted = await apiServices.alertingV2.rules.get('existing-id');
+      expect(persisted.metadata.name).toBe('already-there');
+    }
+  );
+
+  apiTest('validation: rejects an invalid client-supplied id', async ({ apiClient }) => {
+    for (const id of ['', 'has spaces']) {
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body: { ...buildCreateRuleData(), id },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  });
+
   apiTest('validation: rejects body with missing metadata.name', async ({ apiClient }) => {
     const body = buildCreateRuleData();
     // Replace metadata with one that has no name.
