@@ -44,6 +44,9 @@ interface MockDashboardApi {
   query$: BehaviorSubject<unknown>;
   timeRange$: BehaviorSubject<unknown>;
   setState: jest.Mock;
+  setViewMode: jest.Mock;
+  isEditableByUser: boolean;
+  getAppContext: () => { currentAppId: string };
   getSerializedState: jest.Mock;
 }
 
@@ -55,6 +58,9 @@ const createMockDashboardApi = (anyStateChange$: Observable<void>): MockDashboar
   query$: new BehaviorSubject<unknown>({ query: '', language: 'kuery' }),
   timeRange$: new BehaviorSubject<unknown>({ from: 'now-15m', to: 'now' }),
   setState: jest.fn(),
+  setViewMode: jest.fn(),
+  isEditableByUser: true,
+  getAppContext: () => ({ currentAppId: 'dashboards' }),
   getSerializedState: jest.fn().mockReturnValue({
     attributes: {
       title: 'Test Dashboard',
@@ -191,6 +197,7 @@ describe('registerDashboardAppIntegration', () => {
     cleanup = registerDashboardAppIntegration({
       agentBuilder,
       api: mockApi as unknown as DashboardApi,
+      canWriteDashboards: true,
       draftAttachmentId,
       checkSavedDashboardExist,
       getUpdateOrigin,
