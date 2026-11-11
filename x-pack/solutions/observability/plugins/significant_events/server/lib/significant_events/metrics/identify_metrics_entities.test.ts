@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { isConditionComplete } from '@kbn/streamlang';
 import { identifyMetricsEntities } from './identify_metrics_entities';
 import {
   buildKubernetesEntityId,
+  buildInfrastructureConceptDescription,
   ENTITY_KEY_TABLE,
   foldClusterRows,
   foldNamespaceRows,
@@ -47,19 +49,24 @@ const multiNamespaceWorkloadColumns = [
 ];
 
 const nodeColumns = [
+  { name: 'orchestrator.cluster.name', type: 'keyword' },
   { name: 'kubernetes.node.name', type: 'keyword' },
-  { name: 'replicas', type: 'long' },
+  { name: 'activity', type: 'long' },
   { name: 'last_seen', type: 'date' },
-  { name: 'clusters', type: 'keyword' },
+  { name: 'os', type: 'keyword' },
+  { name: 'cloud_provider', type: 'keyword' },
+  { name: 'scale', type: 'long' },
 ];
 
 const namespaceColumns = [
+  { name: 'orchestrator.cluster.name', type: 'keyword' },
   { name: 'kubernetes.namespace', type: 'keyword' },
   { name: 'replicas', type: 'long' },
+  { name: 'local_pods', type: 'long' },
   { name: 'last_seen', type: 'date' },
   { name: 'clusters', type: 'keyword' },
-  { name: 'local_pods', type: 'long' },
-  { name: 'namespaces_skipped', type: 'long' },
+  { name: 'scale', type: 'long' },
+  { name: 'tenant_namespaces', type: 'long' },
 ];
 
 const clusterColumns = [
@@ -126,19 +133,48 @@ describe('getDatasetFamily', () => {
   });
 });
 
+describe('buildInfrastructureConceptDescription', () => {
+  it('formats scale and truncates members within the schema limit', () => {
+    const exact = buildInfrastructureConceptDescription({
+      concept: 'nodes',
+      cluster: 'cluster-a',
+      scale: 3,
+      breakdownField: 'kubernetes.node.name',
+      members: ['node-a', 'node-b', 'node-c'],
+    });
+    const rounded = buildInfrastructureConceptDescription({
+      concept: 'nodes',
+      cluster: 'cluster-a',
+      scale: 188,
+      breakdownField: 'kubernetes.node.name',
+      members: ['node-a'],
+    });
+    const truncated = buildInfrastructureConceptDescription({
+      concept: 'namespaces',
+      cluster: 'cluster-a',
+      scale: 1000,
+      breakdownField: 'kubernetes.namespace',
+      members: Array.from({ length: 50 }, (_, index) => `${index}-${'x'.repeat(500)}`),
+      tenantNamespaces: 712,
+    });
+
+    expect(exact).toContain('3 nodes');
+    expect(exact).not.toContain('about 3 nodes');
+    expect(rounded).toContain('about 190 nodes');
+    expect(truncated).toContain('and about');
+    expect(truncated.length).toBeLessThanOrEqual(MAX_TEXT_LENGTH);
+  });
+});
+
 describe('buildKubernetesEntityId', () => {
-  it('uses the entity store type map for workload and node ids', () => {
+  it('uses the entity store type map for workload and cluster ids', () => {
     expect([
       buildKubernetesEntityId({ kind: 'deployment', namespace: 'payments', name: 'checkout' }),
       buildKubernetesEntityId({ kind: 'daemonset', namespace: 'payments', name: 'metricbeat' }),
-      buildKubernetesEntityId({ kind: 'node', name: 'node-a' }),
-      buildKubernetesEntityId({ kind: 'namespace', name: 'payments' }),
       buildKubernetesEntityId({ kind: 'cluster', name: 'cluster-a' }),
     ]).toEqual([
       `${KUBERNETES_ENTITY_STORE_TYPES.deployment}:payments/checkout`,
       `${KUBERNETES_ENTITY_STORE_TYPES.daemonset}:payments/metricbeat`,
-      `${KUBERNETES_ENTITY_STORE_TYPES.node}:node-a`,
-      `${KUBERNETES_ENTITY_STORE_TYPES.namespace}:payments`,
       `${KUBERNETES_ENTITY_STORE_TYPES.cluster}:cluster-a`,
     ]);
   });
@@ -276,14 +312,14 @@ describe('Kubernetes entity derivation', () => {
       'data_stream.dataset IN ("kubernetes.pod", "kubeletstatsreceiver.otel")'
     );
     expect(kubernetesQueries.get('ecs.k8s_workload')).toContain('kubernetes.pod.uid IS NOT NULL');
-    expect(kubernetesQueries.get('ecs.k8s_node')).toContain(
+    expect(kubernetesQueries.get('ecs.k8s_nodes')).toContain(
       'data_stream.dataset IN ("kubernetes.node", "kubeletstatsreceiver.otel")'
     );
-    expect(kubernetesQueries.get('ecs.k8s_node')).toContain('kubernetes.node.name IS NOT NULL');
-    expect(kubernetesQueries.get('ecs.k8s_namespace')).toContain(
+    expect(kubernetesQueries.get('ecs.k8s_nodes')).toContain('kubernetes.node.name IS NOT NULL');
+    expect(kubernetesQueries.get('ecs.k8s_namespaces')).toContain(
       'data_stream.dataset IN ("kubernetes.pod", "kubeletstatsreceiver.otel")'
     );
-    expect(kubernetesQueries.get('ecs.k8s_namespace')).toContain('kubernetes.pod.uid IS NOT NULL');
+    expect(kubernetesQueries.get('ecs.k8s_namespaces')).toContain('kubernetes.pod.uid IS NOT NULL');
     expect(kubernetesQueries.get('ecs.k8s_cluster')).toContain(
       'data_stream.dataset IN ("kubernetes.pod", "kubernetes.node", "kubeletstatsreceiver.otel")'
     );
@@ -306,22 +342,35 @@ describe('Kubernetes entity derivation', () => {
       expect(query).toMatch(/\| SORT[\s\S]*\| LIMIT 501$/);
     });
 
-    const nodeFeatures = foldNodeRows([
-      {
-        'kubernetes.node.name': 'node-a',
-        clusters: ['cluster-a'],
-        replicas: 1,
-        last_seen: lastSeen,
-      },
-    ]).features;
-    const namespaceFeatures = foldNamespaceRows([
-      {
-        'kubernetes.namespace': 'apps',
-        clusters: ['cluster-a'],
-        replicas: 4,
-        last_seen: lastSeen,
-      },
-    ]).features;
+    const foldContext = { sourceQuery: 'SET unmapped_fields = "NULLIFY"; FROM metrics-*' };
+    const nodeFeatures = foldNodeRows(
+      [
+        {
+          'orchestrator.cluster.name': 'cluster-a',
+          'kubernetes.node.name': 'node-a',
+          activity: 4,
+          os: ['Linux'],
+          cloud_provider: ['gcp'],
+          scale: 1,
+          last_seen: lastSeen,
+        },
+      ],
+      foldContext
+    ).features;
+    const namespaceFeatures = foldNamespaceRows(
+      [
+        {
+          'orchestrator.cluster.name': 'cluster-a',
+          'kubernetes.namespace': 'apps',
+          replicas: 4,
+          local_pods: 4,
+          scale: 1,
+          tenant_namespaces: 0,
+          last_seen: lastSeen,
+        },
+      ],
+      foldContext
+    ).features;
     const clusterResult = foldClusterRows([
       {
         'orchestrator.cluster.name': 'cluster-a',
@@ -336,7 +385,8 @@ describe('Kubernetes entity derivation', () => {
         last_seen: lastSeen,
       },
     ]);
-    expect(namespaceFeatures.map(({ id }) => id)).toEqual(['k8s.namespace:apps']);
+    expect(nodeFeatures.map(({ id }) => id)).toEqual(['k8s.nodes:cluster-a']);
+    expect(namespaceFeatures.map(({ id }) => id)).toEqual(['k8s.namespaces:cluster-a']);
     expect(clusterResult.features.map(({ id }) => id)).toEqual(['k8s.cluster:cluster-a']);
     expect(clusterResult.droppedRows.nullCluster).toBe(1);
     expect(
@@ -380,16 +430,22 @@ describe('Kubernetes entity derivation', () => {
 });
 
 describe('host entity merging', () => {
-  it('enriches nodes, creates host-derived nodes, and keeps standalone hosts', () => {
+  it('enriches the nodes concept and keeps only standalone hosts as entities', () => {
     const lastSeen = '2026-11-10T12:00:00.000Z';
-    const nodeFeatures = foldNodeRows([
-      {
-        'kubernetes.node.name': 'node-x',
-        clusters: ['cluster-a'],
-        replicas: 1,
-        last_seen: lastSeen,
-      },
-    ]).features;
+    const nodeFeatures = foldNodeRows(
+      [
+        {
+          'orchestrator.cluster.name': 'cluster-a',
+          'kubernetes.node.name': 'node-x',
+          activity: 10,
+          os: [],
+          cloud_provider: [],
+          scale: 1,
+          last_seen: lastSeen,
+        },
+      ],
+      { sourceQuery: 'SET unmapped_fields = "NULLIFY"; FROM metrics-*' }
+    ).features;
     const systemHostFeatures = foldSystemHostRows([
       {
         'host.name': 'node-x',
@@ -427,20 +483,15 @@ describe('host entity merging', () => {
         (feature) => [feature.id, feature]
       )
     );
-    expect([...byId.keys()]).toEqual(['k8s.node:node-x', 'k8s.node:node-y', 'host:router-1']);
+    expect([...byId.keys()]).toEqual(['k8s.nodes:cluster-a', 'host:router-1']);
     expect(byId.has('host:node-x')).toBe(false);
-    expect(byId.get('k8s.node:node-x')?.properties).toMatchObject({
-      host: {
+    expect(byId.get('k8s.nodes:cluster-a')?.properties).toMatchObject({
+      host_summary: {
         os: ['Wolfi'],
         cloud_provider: ['gcp'],
-        cloud_instance: ['instance-x'],
       },
-      aliases: ['host:node-x'],
     });
-    expect(byId.get('k8s.node:node-y')?.filter).toEqual({
-      field: 'kubernetes.node.name',
-      eq: 'node-y',
-    });
+    expect(byId.has('k8s.nodes:cluster-b')).toBe(false);
     expect(byId.get('host:router-1')).toEqual(
       expect.objectContaining({
         subtype: 'host',
@@ -513,8 +564,8 @@ describe('identifyMetricsEntities', () => {
       {
         columns: namespaceColumns,
         values: [
-          ['tenant-only', 10, lastSeen, ['cluster-a'], 0, 1],
-          ['team-local', 1, lastSeen, ['cluster-a'], 1, 1],
+          ['cluster-a', 'tenant-only', 10, 0, lastSeen, ['cluster-a'], 2, 1],
+          ['cluster-a', 'team-local', 1, 1, lastSeen, ['cluster-a'], 2, 1],
         ],
       },
       { columns: clusterColumns, values: [] },
@@ -541,14 +592,18 @@ describe('identifyMetricsEntities', () => {
     expect(
       operations.map(({ index }: { index: { feature: { id: string } } }) => index.feature.id)
     ).toEqual([
+      'k8s.namespaces:cluster-a',
       'k8s.deployment:*/kb-ui-kb',
       'k8s.deployment:team-1/redis',
       'k8s.deployment:team-2/redis',
       'k8s.deployment:team-3/redis',
       'k8s.deployment:team-4/redis',
-      'k8s.namespace:team-local',
     ]);
-    expect(operations[0].index.feature).toEqual(
+    const multiNamespaceFeature = operations.find(
+      ({ index }: { index: { feature: { id: string } } }) =>
+        index.feature.id === 'k8s.deployment:*/kb-ui-kb'
+    )?.index.feature;
+    expect(multiNamespaceFeature).toEqual(
       expect.objectContaining({
         title: 'kb-ui-kb',
         description: 'Kubernetes deployment kb-ui-kb in 10 namespaces.',
@@ -560,14 +615,14 @@ describe('identifyMetricsEntities', () => {
         }),
       })
     );
-    expect(operations[0].index.feature.properties).not.toHaveProperty('entity_store_type');
-    expect(isConditionComplete(operations[0].index.feature.filter)).toBe(true);
+    expect(multiNamespaceFeature.properties).not.toHaveProperty('entity_store_type');
+    expect(isConditionComplete(multiNamespaceFeature.filter)).toBe(true);
     const queries = harness.query.mock.calls.map(([request]: [{ query: string }]) => request.query);
     expect(queries[2]).toContain('| WHERE workload_key NOT IN ("deployment/kb-ui-kb")');
     expect(queries[3]).toContain(
       'CASE(workload_key IS NULL OR workload_key NOT IN ("deployment/kb-ui-kb"), kubernetes.pod.uid, NULL)'
     );
-    expect(queries[3]).toContain('| WHERE local_pods > 0');
+    expect(queries[3]).toContain('tenant_namespaces = SUM(CASE(local_pods == 0, 1, 0))');
     expect(harness.info).toHaveBeenCalledWith(
       expect.stringContaining(
         'source [multi-tenant-source] merged [1] workload names across namespaces'
@@ -604,15 +659,15 @@ describe('identifyMetricsEntities', () => {
     const nodes = {
       columns: nodeColumns,
       values: [
-        ['node-a', 1, '2026-11-10T12:06:00.000Z', ['cluster-a', 'cluster-b']],
-        [null, 1, '2026-11-10T12:01:00.000Z', ['cluster-a']],
+        ['cluster-a', 'node-a', 10, '2026-11-10T12:06:00.000Z', ['Linux'], ['gcp'], 1],
+        ['cluster-a', null, 1, '2026-11-10T12:01:00.000Z', ['Linux'], ['gcp'], 1],
       ],
     };
     const namespaces = {
       columns: namespaceColumns,
       values: [
-        ['payments', 9, '2026-11-10T12:06:00.000Z', ['cluster-a', 'cluster-b']],
-        [null, 1, '2026-11-10T12:01:00.000Z', ['cluster-a']],
+        ['cluster-a', 'payments', 9, 9, '2026-11-10T12:06:00.000Z', ['cluster-a'], 1, 0],
+        ['cluster-a', null, 1, 1, '2026-11-10T12:01:00.000Z', ['cluster-a'], 1, 0],
       ],
     };
     const clusters = {
@@ -678,8 +733,8 @@ describe('identifyMetricsEntities', () => {
       operations.map(({ index }: { index: { feature: { id: string } } }) => index.feature.id)
     ).toEqual([
       'k8s.cluster:cluster-a',
-      'k8s.node:node-a',
-      'k8s.namespace:payments',
+      'k8s.namespaces:cluster-a',
+      'k8s.nodes:cluster-a',
       'k8s.deployment:payments/checkout',
       'k8s.daemonset:payments/checkout',
       'k8s.deployment:payments/unknown-cluster',
@@ -858,11 +913,11 @@ describe('identifyMetricsEntities', () => {
       },
       {
         columns: nodeColumns,
-        values: [['node-a', 1, '2026-11-10T12:00:00.000Z', ['edge-edot']]],
+        values: [['edge-edot', 'node-a', 10, '2026-11-10T12:00:00.000Z', ['Linux'], ['gcp'], 1]],
       },
       {
         columns: namespaceColumns,
-        values: [['apps', 3, '2026-11-10T12:00:00.000Z', ['edge-edot']]],
+        values: [['edge-edot', 'apps', 3, 3, '2026-11-10T12:00:00.000Z', ['edge-edot'], 1, 0]],
       },
       {
         columns: clusterColumns,
@@ -896,14 +951,14 @@ describe('identifyMetricsEntities', () => {
       )
     ).toEqual([
       'k8s.cluster:edge-edot',
-      'k8s.node:node-a',
+      'k8s.namespaces:edge-edot',
+      'k8s.nodes:edge-edot',
       'host:router-1',
       'k8s.deployment:apps/api',
-      'k8s.namespace:apps',
     ]);
   });
 
-  it('keeps nodes before the highest-replica workloads within the 500 entity cap', async () => {
+  it('keeps the nodes concept before the highest-replica workloads within the cap', async () => {
     const datasetList = {
       columns: datasetColumns,
       values: datasetRows('kubernetes.pod', 'kubernetes.node'),
@@ -923,8 +978,8 @@ describe('identifyMetricsEntities', () => {
     const nodes = {
       columns: nodeColumns,
       values: [
-        ['node-b', 1, '2026-11-10T12:00:00.000Z', ['cluster-a']],
-        ['node-a', 1, '2026-11-10T12:00:00.000Z', ['cluster-a']],
+        ['cluster-a', 'node-b', 8, '2026-11-10T12:00:00.000Z', ['Linux'], ['gcp'], 2],
+        ['cluster-a', 'node-a', 7, '2026-11-10T12:00:00.000Z', ['Linux'], ['gcp'], 2],
       ],
     };
     const harness = createHarness([
@@ -945,13 +1000,13 @@ describe('identifyMetricsEntities', () => {
     });
 
     expect(result.metricsEntitiesCount).toBe(500);
-    expect(result.droppedOverflowRowsCount).toBe(3);
+    expect(result.droppedOverflowRowsCount).toBe(2);
     const operations = harness.bulk.mock.calls[0][1];
     expect(operations).toHaveLength(500);
     const ids = operations.map(
       ({ index }: { index: { feature: { id: string } } }) => index.feature.id
     );
-    expect(ids.slice(0, 2)).toEqual(['k8s.node:node-a', 'k8s.node:node-b']);
+    expect(ids[0]).toBe('k8s.nodes:cluster-a');
     expect(ids).not.toEqual(
       expect.arrayContaining([
         'k8s.deployment:namespace-a/workload-498',
@@ -963,6 +1018,6 @@ describe('identifyMetricsEntities', () => {
     expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('row [ecs.k8s_workload]'));
     expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('501 row limit'));
     expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('source [overflow-source]'));
-    expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('503 rows, dropped 3'));
+    expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('502 rows, dropped 2'));
   });
 });

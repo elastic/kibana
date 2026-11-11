@@ -138,13 +138,13 @@ const entityPriority = (feature: FeatureUpsert): number => {
   switch (feature.subtype) {
     case 'k8s_cluster':
       return 0;
-    case 'k8s_node':
+    case 'k8s_nodes':
+    case 'k8s_namespaces':
       return 1;
     case 'host':
       return 2;
     case 'service':
       return 3;
-    case 'k8s_namespace':
     case 'k8s_workload':
       return 4;
     default:
@@ -297,7 +297,7 @@ export const identifyMetricsEntities = async ({
       );
     }
     metricsEntityRowsCount += rows.length;
-    const folded = keyRow.foldRows(rows);
+    const folded = keyRow.foldRows(rows, { sourceQuery });
     features.push(...folded.features);
     droppedIncompleteRowsCount += folded.droppedIncompleteRowsCount;
     droppedRows.ownerless += folded.droppedRows.ownerless;
@@ -322,11 +322,11 @@ export const identifyMetricsEntities = async ({
   const selectedFeatures = mergedFeatures
     .filter(({ id }) => !excludedFeatureIds.has(id))
     .sort((left, right) => {
-    const priority = entityPriority(left) - entityPriority(right);
-    if (priority !== 0) {
-      return priority;
-    }
-    return replicasOf(right) - replicasOf(left) || compareEntityIds(left, right);
+      const priority = entityPriority(left) - entityPriority(right);
+      if (priority !== 0) {
+        return priority;
+      }
+      return replicasOf(right) - replicasOf(left) || compareEntityIds(left, right);
     });
   const excludedSkippedCount = mergedFeatures.length - selectedFeatures.length;
   const droppedOverflowRowsCount = Math.max(0, selectedFeatures.length - MAX_ENTITIES);
