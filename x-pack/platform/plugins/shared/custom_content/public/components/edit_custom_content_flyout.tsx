@@ -42,7 +42,8 @@ const EDITOR_DEFAULT_HEIGHT = 400;
 const FLYOUT_FIXED_CHROME_HEIGHT = 380;
 
 export interface EditCustomContentFlyoutProps {
-  esqlQuery: string | undefined;
+  /** The panel's queries. The editor changes the first; "Run preview" fetches all of them. */
+  esqlQueries: readonly string[];
   template: string | undefined;
   timeRange: TimeRange | undefined;
   isApproximate: boolean;
@@ -59,7 +60,7 @@ export interface EditCustomContentFlyoutProps {
 }
 
 export const EditCustomContentFlyout = ({
-  esqlQuery,
+  esqlQueries,
   template,
   timeRange,
   isApproximate,
@@ -89,7 +90,7 @@ export const EditCustomContentFlyout = ({
     isRenderLoading,
     handleRender,
   } = useEditFlyoutState({
-    esqlQuery,
+    esqlQueries,
     template,
     timeRange,
     isApproximate,
@@ -110,7 +111,8 @@ export const EditCustomContentFlyout = ({
     onGenerateWithChat?.(draftTemplate, draftEsqlQuery || undefined);
   }, [onGenerateWithChat, draftTemplate, draftEsqlQuery]);
 
-  const hasChanges = draftEsqlQuery !== (esqlQuery ?? '') || draftTemplate !== (template ?? '');
+  const hasChanges =
+    draftEsqlQuery !== (esqlQueries[0] ?? '') || draftTemplate !== (template ?? '');
 
   const handleSave = useCallback(() => {
     getTelemetry().trackPanelSaved({

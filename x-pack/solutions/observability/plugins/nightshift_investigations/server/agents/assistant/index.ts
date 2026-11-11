@@ -19,10 +19,10 @@ export const NIGHTSHIFT_ASSISTANT_AGENT_TYPE_ID = 'platform.nightshift.assistant
 
 export const ASSISTANT_AGENT_NAME = 'Nightshift Assistant';
 export const ASSISTANT_AGENT_DESCRIPTION =
-  'Answers a single question directly with the Nightshift investigator’s tools and connectors, ' +
+  'Answers a single question directly with the nightshift investigator’s tools and connectors, ' +
   'without running an investigation.';
 
-export const ASSISTANT_INSTRUCTIONS = `You are the Nightshift Assistant. Answer the user's question directly and quickly. This is not
+export const ASSISTANT_INSTRUCTIONS = `You are the nightshift Assistant. Answer the user's question directly and quickly. This is not
 an investigation: do only what the question asks.
 
 Your sandbox workspace documents everything you can use. Read a file with

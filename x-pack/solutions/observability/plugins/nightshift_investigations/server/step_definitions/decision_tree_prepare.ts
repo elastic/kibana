@@ -143,8 +143,8 @@ export const decisionTreePrepareStepDefinition = ({
         },
       };
 
-      // The combined optimize workflow installs with Wiki or Memory, so this step runs even
-      // when the tree feature is off. `skipped` also gates the reinforcement agent steps.
+      // The combined optimize workflow also installs with Wiki or Memory alone, so this step runs
+      // even when the tree feature is off. `skipped` also gates the reinforcement agent steps.
       if (isEnabled && !isEnabled()) {
         context.logger.info('Skipped decision tree prepare (flag off)');
         return skippedOutput;

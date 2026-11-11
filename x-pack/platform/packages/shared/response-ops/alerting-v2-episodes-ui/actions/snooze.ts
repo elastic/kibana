@@ -32,6 +32,7 @@ export const createSnoozeAction = (
 ): EpisodeAction => ({
   id: 'ALERTING_V2_SNOOZE_EPISODE',
   order: 20,
+  enforcesOwnPrivileges: false,
   displayName: i18n.SNOOZE,
   iconType: 'bellSlash',
   isCompatible: ({ episodes }: EpisodeActionContext) =>

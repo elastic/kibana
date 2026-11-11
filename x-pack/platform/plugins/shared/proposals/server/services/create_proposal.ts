@@ -33,6 +33,12 @@ export interface NewProposal {
   impact?: string;
   confidence?: string;
   category?: string;
+  /**
+   * Waives the discard reason: declining the proposal is recorded without asking why. Honoured
+   * on the direct path only — a proposal that runs an action is decided behind its gate, and
+   * that decision is always justified.
+   */
+  skipDiscardReason?: boolean;
 }
 
 export interface CreatedProposal {
@@ -113,7 +119,7 @@ export const createProposalCreator = ({
   };
 
   const create: ProposalCreator = async ({ request, spaceId, conversationId, proposal }) => {
-    const { title, comment, origin, impact, confidence, category } = proposal;
+    const { title, comment, origin, impact, confidence, category, skipDiscardReason } = proposal;
 
     if (category === PROPOSAL_CATEGORY_TODO) {
       // Workflows are not consulted at all here, so a to-do needs only
@@ -127,6 +133,7 @@ export const createProposalCreator = ({
           comment,
           origin,
           category: PROPOSAL_CATEGORY_TODO,
+          ...(skipDiscardReason !== undefined && { skipDiscardReason }),
           ...(asImpact(impact) !== undefined && { impact: asImpact(impact) }),
           confidence: asConfidence(confidence) ?? 'medium',
         },
