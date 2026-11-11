@@ -19,15 +19,15 @@ import {
   EVENT_ACTION,
   EVENT_KIND,
 } from '@kbn/rule-data-utils';
-import { TaskStatus } from '@kbn/task-manager-plugin/server/task';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { Spaces } from '../../../../scenarios';
-import type { TaskManagerDoc } from '../../../../../common/lib';
 import {
+  AlertUtils,
   getEventLog,
   getTestRuleData,
   getUrlPrefix,
   ObjectRemover,
+  TaskManagerUtils,
 } from '../../../../../common/lib';
 
 // Regression test for https://github.com/elastic/kibana/issues/259886.
@@ -45,6 +45,8 @@ export default function alertsAsDataAlertDelayGraduationTests({ getService }: Ft
   const retry = getService('retry');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const objectRemover = new ObjectRemover(supertestWithoutAuth);
+  const alertUtils = new AlertUtils({ space: Spaces.space1, supertestWithoutAuth });
+  const taskManagerUtils = new TaskManagerUtils(es, retry);
 
   type PatternFiringAlert = Alert & { patternIndex: number; instancePattern: boolean[] };
 
@@ -107,7 +109,7 @@ export default function alertsAsDataAlertDelayGraduationTests({ getService }: Ft
       // Drive runs 1..6.
       await waitForExecutionCount(ruleId, 1);
       for (let runCount = 2; runCount <= 6; runCount++) {
-        await runRuleSoon(ruleId);
+        await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
         await waitForExecutionCount(ruleId, runCount);
       }
 
@@ -161,27 +163,6 @@ export default function alertsAsDataAlertDelayGraduationTests({ getService }: Ft
       },
     });
     return result.hits.hits as Array<SearchHit<PatternFiringAlert>>;
-  }
-
-  // Task Manager returns the task to `idle` only after the `execute` event log doc
-  // is written, so `_run_soon` soft-fails with a 200 if it lands while the task is
-  // still running (or if the task update hits a 409 conflict).
-  async function runRuleSoon(ruleId: string) {
-    await retry.try(async () => {
-      const task = await es.get<TaskManagerDoc>({
-        id: `task:${ruleId}`,
-        index: '.kibana_task_manager',
-      });
-      const status = task._source!.task.status;
-      if (status !== TaskStatus.Idle) {
-        throw new Error(`Expected task:${ruleId} to be idle but was ${status}`);
-      }
-
-      const runSoon = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-        .set('kbn-xsrf', 'foo');
-      expect(runSoon.status).to.eql(204);
-    });
   }
 
   async function waitForExecutionCount(ruleId: string, count: number): Promise<IValidatedEvent[]> {
