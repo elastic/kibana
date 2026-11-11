@@ -146,7 +146,7 @@ steps:
           persistedQueries: []
           queriesTokensUsed: { prompt: 0, completion: 0, total: 0 }
           metricsEntitiesCount: 0
-          metricsEntitiesUncoveredDataStreamsCount: 0
+          metricsEntitiesUncoveredDatasetsCount: 0
           metricsEntitiesDroppedOwnerlessRows: 0
           metricsEntitiesHandled: false
           metricsEntitiesSkipReason: ''
@@ -168,7 +168,7 @@ steps:
       featuresConnectorUsed: ""
       queriesConnectorUsed: ""
       metricsEntitiesCount: 0
-      metricsEntitiesUncoveredDataStreamsCount: 0
+      metricsEntitiesUncoveredDatasetsCount: 0
       metricsEntitiesDroppedOwnerlessRows: 0
       metricsEntitiesHandled: false
       metricsEntitiesSkipReason: ""
@@ -192,7 +192,7 @@ steps:
         type: data.set
         with:
           metricsEntitiesCount: "${{ steps.run_metrics_entities.output.metricsEntitiesCount | default: 0 }}"
-          metricsEntitiesUncoveredDataStreamsCount: "${{ steps.run_metrics_entities.output.uncoveredDataStreamsCount | default: 0 }}"
+          metricsEntitiesUncoveredDatasetsCount: "${{ steps.run_metrics_entities.output.uncoveredDatasetsCount | default: 0 }}"
           metricsEntitiesDroppedOwnerlessRows: "${{ steps.run_metrics_entities.output.droppedRows.ownerless | default: 0 }}"
           metricsEntitiesHandled: >-
             ${{ steps.run_metrics_entities.error != null
@@ -331,7 +331,7 @@ steps:
       persistedQueries: "${{ variables.persistedQueries }}"
       queriesTokensUsed: "${{ variables.queriesTokensUsed }}"
       metricsEntitiesCount: "${{ variables.metricsEntitiesCount }}"
-      metricsEntitiesUncoveredDataStreamsCount: "${{ variables.metricsEntitiesUncoveredDataStreamsCount }}"
+      metricsEntitiesUncoveredDatasetsCount: "${{ variables.metricsEntitiesUncoveredDatasetsCount }}"
       metricsEntitiesDroppedOwnerlessRows: "${{ variables.metricsEntitiesDroppedOwnerlessRows }}"
       metricsEntitiesHandled: "${{ variables.metricsEntitiesHandled }}"
       metricsEntitiesSkipReason: "${{ variables.metricsEntitiesSkipReason }}"

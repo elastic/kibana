@@ -38,10 +38,8 @@ export interface EntityKeyRow {
   foldRows: (rows: EsqlRow[]) => EntityFoldResult;
 }
 
-export const getDataStreamFamily = (dataStream: string): string | undefined => {
-  const match = /^(?:[^:]+:)?[^-]+-([^-]+)-/.exec(dataStream);
-  return match?.[1].split('.')[0];
-};
+export const getDatasetFamily = (dataset: string | null): string | undefined =>
+  dataset?.split('.')[0];
 
 type WorkloadKind = 'deployment' | 'statefulset' | 'daemonset' | 'cronjob' | 'job' | 'replicaset';
 type KubernetesEntityKind = WorkloadKind | 'node';
@@ -192,8 +190,8 @@ const entityTotals = (
     { replicas: 0, lastSeen: '' }
   );
 
-const buildWorkloadQuery = (tsPrefix: string): string => `${tsPrefix}
-| WHERE TRANGE(1 hour) AND data_stream.dataset == "kubernetes.pod"
+const buildWorkloadQuery = (sourceQuery: string): string => `${sourceQuery}
+| WHERE @timestamp > NOW() - 1 hour AND data_stream.dataset == "kubernetes.pod"
 | EVAL h = \`kubernetes.labels.pod-template-hash\`,
        rs = kubernetes.replicaset.name,
        derived_deployment = CASE(
@@ -296,8 +294,8 @@ export const foldWorkloadRows = (rows: EsqlRow[]): EntityFoldResult => {
   };
 };
 
-const buildNodeQuery = (tsPrefix: string): string => `${tsPrefix}
-| WHERE TRANGE(1 hour) AND data_stream.dataset == "kubernetes.node"
+const buildNodeQuery = (sourceQuery: string): string => `${sourceQuery}
+| WHERE @timestamp > NOW() - 1 hour AND data_stream.dataset == "kubernetes.node"
 | STATS replicas = COUNT_DISTINCT(kubernetes.node.name), last_seen = MAX(@timestamp)
   BY orchestrator.cluster.name, kubernetes.node.name`;
 

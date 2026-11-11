@@ -9,19 +9,20 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { Logger } from '@kbn/logging';
 import type { FeatureUpsert } from '@kbn/significant-events-schema';
-import { toTimeSeriesSourceQuery } from '@kbn/nightshift-shared';
+import { toFromSourceQuery } from '@kbn/nightshift-shared';
+import { timeoutSignal } from '@kbn/std';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
-import { getMetricsCatalogue } from './catalogue';
 import {
   ENTITY_KEY_TABLE,
-  getDataStreamFamily,
+  getDatasetFamily,
   type DroppedMetricsEntityRows,
   type EsqlCell,
   type EsqlRow,
 } from './entity_key_table';
 
 const MAX_ENTITIES = 500;
-const COVERED_DATA_STREAM_FAMILIES = new Set(ENTITY_KEY_TABLE.map(({ family }) => family));
+const DATASET_QUERY_TIMEOUT_MS = 30_000;
+const COVERED_DATASET_FAMILIES = new Set(ENTITY_KEY_TABLE.map(({ family }) => family));
 
 export interface IdentifyMetricsEntitiesOptions {
   esClient: ElasticsearchClient;
@@ -34,12 +35,12 @@ export interface IdentifyMetricsEntitiesOptions {
 
 export interface IdentifyMetricsEntitiesResult {
   handled: boolean;
-  skipReason?: 'no_tsds' | 'no_entity_key_row';
+  skipReason?: 'no_data' | 'no_entity_key_row';
   metricsEntitiesCount: number;
   metricsCatalogueRowsCount: number;
   matchedEntityKeyRowsCount: number;
-  /** Catalogue data streams from families the entity-key table does not cover. */
-  uncoveredDataStreamsCount: number;
+  /** Datasets from families the entity-key table does not cover. */
+  uncoveredDatasetsCount: number;
   metricsEntityRowsCount: number;
   droppedIncompleteRowsCount: number;
   droppedOverflowRowsCount: number;
@@ -82,10 +83,36 @@ const rowsFromResponse = (response: ESQLSearchResponse): EsqlRow[] =>
     }, {})
   );
 
-const dataStreamMatchesDataset = (dataStream: string, dataset: string): boolean =>
-  dataStream === dataset ||
-  dataStream.includes(`-${dataset}-`) ||
-  dataStream.endsWith(`-${dataset}`);
+const buildSourceQuery = (esql: string): string =>
+  `SET unmapped_fields = "NULLIFY"; ${toFromSourceQuery(esql)}`;
+
+const buildDatasetQuery = (sourceQuery: string): string =>
+  `${sourceQuery} | WHERE @timestamp > NOW() - 1 hour | STATS docs = COUNT(*) BY data_stream.dataset`;
+
+const getMetricsDatasets = async ({
+  esClient,
+  sourceQuery,
+  signal,
+}: {
+  esClient: ElasticsearchClient;
+  sourceQuery: string;
+  signal?: AbortSignal;
+}): Promise<Array<string | null>> => {
+  const deadline = timeoutSignal(DATASET_QUERY_TIMEOUT_MS);
+  try {
+    const requestSignal = signal ? AbortSignal.any([signal, deadline]) : deadline;
+    const response = (await esClient.esql.query(
+      { query: buildDatasetQuery(sourceQuery) },
+      { signal: requestSignal }
+    )) as ESQLSearchResponse;
+    return rowsFromResponse(response).map((row) => {
+      const dataset = row['data_stream.dataset'];
+      return typeof dataset === 'string' ? dataset : null;
+    });
+  } finally {
+    deadline.dispose();
+  }
+};
 
 const replicasOf = (feature: FeatureUpsert): number => {
   const replicas = feature.properties.replicas;
@@ -95,7 +122,7 @@ const replicasOf = (feature: FeatureUpsert): number => {
 const compareEntityIds = (left: FeatureUpsert, right: FeatureUpsert): number =>
   left.id < right.id ? -1 : left.id > right.id ? 1 : 0;
 
-/** Catalogues a metrics source and writes its Kubernetes workload and node entities. */
+/** Lists a metrics source's datasets and writes its Kubernetes workload and node entities. */
 export const identifyMetricsEntities = async ({
   esClient,
   esql,
@@ -105,10 +132,12 @@ export const identifyMetricsEntities = async ({
   signal,
 }: IdentifyMetricsEntitiesOptions): Promise<IdentifyMetricsEntitiesResult> => {
   const startedAt = Date.now();
-  let catalogue;
+  let sourceQuery = '';
+  let datasets: Array<string | null> = [];
 
   try {
-    catalogue = await getMetricsCatalogue({ esClient, esql, signal });
+    sourceQuery = buildSourceQuery(esql);
+    datasets = await getMetricsDatasets({ esClient, sourceQuery, signal });
   } catch (error) {
     const catalogueMs = Date.now() - startedAt;
     const message = errorMessage(error instanceof Error ? error : new Error(String(error)));
@@ -117,7 +146,7 @@ export const identifyMetricsEntities = async ({
       metricsEntitiesCount: 0,
       metricsCatalogueRowsCount: 0,
       matchedEntityKeyRowsCount: 0,
-      uncoveredDataStreamsCount: 0,
+      uncoveredDatasetsCount: 0,
       metricsEntityRowsCount: 0,
       droppedIncompleteRowsCount: 0,
       droppedOverflowRowsCount: 0,
@@ -129,19 +158,16 @@ export const identifyMetricsEntities = async ({
   }
 
   const catalogueMs = Date.now() - startedAt;
-  const metricsCatalogueRowsCount = [...catalogue.values()].reduce(
-    (count, rows) => count + rows.length,
-    0
-  );
+  const metricsCatalogueRowsCount = datasets.length;
   if (metricsCatalogueRowsCount === 0) {
-    logger.info(`Metrics catalogue is empty for source [${sourceId}]; no entities were written.`);
+    logger.info(`Metrics source [${sourceId}] returned no data; no entities were written.`);
     return {
       handled: false,
-      skipReason: 'no_tsds',
+      skipReason: 'no_data',
       metricsEntitiesCount: 0,
       metricsCatalogueRowsCount,
       matchedEntityKeyRowsCount: 0,
-      uncoveredDataStreamsCount: 0,
+      uncoveredDatasetsCount: 0,
       metricsEntityRowsCount: 0,
       droppedIncompleteRowsCount: 0,
       droppedOverflowRowsCount: 0,
@@ -152,21 +178,23 @@ export const identifyMetricsEntities = async ({
     };
   }
 
-  const dataStreams = [...catalogue.keys()];
-  const matchedKeyRows = ENTITY_KEY_TABLE.filter(({ datasets }) =>
-    datasets.some((dataset) =>
-      dataStreams.some((dataStream) => dataStreamMatchesDataset(dataStream, dataset))
-    )
+  const matchedKeyRows = ENTITY_KEY_TABLE.filter(({ datasets: keyDatasets }) =>
+    keyDatasets.some((dataset) => datasets.includes(dataset))
   );
-  const uncoveredDataStreams = dataStreams.filter(
-    (dataStream) => !COVERED_DATA_STREAM_FAMILIES.has(getDataStreamFamily(dataStream) ?? '')
+  const uncoveredDatasets = datasets.filter(
+    (dataset) => !COVERED_DATASET_FAMILIES.has(getDatasetFamily(dataset) ?? '')
   );
-  const uncoveredDataStreamsCount = uncoveredDataStreams.length;
+  const uncoveredDatasetsCount = uncoveredDatasets.length;
+  const formatDatasets = (values: Array<string | null>): string =>
+    values
+      .slice(0, 20)
+      .map((dataset) => dataset ?? '<null>')
+      .join(', ');
   if (matchedKeyRows.length === 0) {
     logger.info(
-      `No metrics entity key row matched source [${sourceId}] data streams [${dataStreams
-        .slice(0, 20)
-        .join(', ')}]; no entities were written.`
+      `No metrics entity key row matched source [${sourceId}] datasets [${formatDatasets(
+        datasets
+      )}]; no entities were written.`
     );
     return {
       handled: false,
@@ -174,7 +202,7 @@ export const identifyMetricsEntities = async ({
       metricsEntitiesCount: 0,
       metricsCatalogueRowsCount,
       matchedEntityKeyRowsCount: 0,
-      uncoveredDataStreamsCount,
+      uncoveredDatasetsCount,
       metricsEntityRowsCount: 0,
       droppedIncompleteRowsCount: 0,
       droppedOverflowRowsCount: 0,
@@ -184,15 +212,14 @@ export const identifyMetricsEntities = async ({
       errors: [],
     };
   }
-  if (uncoveredDataStreamsCount > 0) {
+  if (uncoveredDatasetsCount > 0) {
     logger.info(
-      `Metrics entity-key table does not cover source [${sourceId}] data streams [${uncoveredDataStreams
-        .slice(0, 20)
-        .join(', ')}].`
+      `Metrics entity-key table does not cover source [${sourceId}] datasets [${formatDatasets(
+        uncoveredDatasets
+      )}].`
     );
   }
   const inventoryStartedAt = Date.now();
-  const sourceQuery = toTimeSeriesSourceQuery(esql);
   const features: FeatureUpsert[] = [];
   let metricsEntityRowsCount = 0;
   let droppedIncompleteRowsCount = 0;
@@ -247,7 +274,7 @@ export const identifyMetricsEntities = async ({
     metricsEntitiesCount: selectedFeatures.length,
     metricsCatalogueRowsCount,
     matchedEntityKeyRowsCount: matchedKeyRows.length,
-    uncoveredDataStreamsCount,
+    uncoveredDatasetsCount,
     metricsEntityRowsCount,
     droppedIncompleteRowsCount,
     droppedOverflowRowsCount,

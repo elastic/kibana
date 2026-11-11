@@ -7,8 +7,8 @@
 
 import { BasicPrettyPrinter, Parser } from '@elastic/esql';
 
-/** Rewrites a source to `TS` until elasticsearch#163536 lets `TS` read ES|QL views. */
-export const toTimeSeriesSourceQuery = (esql: string): string => {
+/** Rewrites a source query's first command to `FROM`. */
+export const toFromSourceQuery = (esql: string): string => {
   const { errors, root } = Parser.parse(esql);
   if (errors.length > 0) {
     throw new Error(`Invalid ES|QL query: ${errors.map(({ message }) => message).join('; ')}`);
@@ -22,7 +22,7 @@ export const toTimeSeriesSourceQuery = (esql: string): string => {
   return BasicPrettyPrinter.print({
     ...root,
     commands: root.commands.map((command, index) =>
-      index === 0 && command.name === 'from' ? { ...command, name: 'ts' } : command
+      index === 0 && command.name === 'ts' ? { ...command, name: 'from' } : command
     ),
   });
 };

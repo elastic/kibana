@@ -12,17 +12,13 @@ import {
   ENTITY_KEY_TABLE,
   foldNodeRows,
   foldWorkloadRows,
-  getDataStreamFamily,
+  getDatasetFamily,
   KUBERNETES_ENTITY_STORE_TYPES,
 } from './entity_key_table';
 
-const catalogueColumns = [
-  { name: 'metric_name', type: 'keyword' },
-  { name: 'data_stream', type: 'keyword' },
-  { name: 'unit', type: 'keyword' },
-  { name: 'metric_type', type: 'keyword' },
-  { name: 'field_type', type: 'keyword' },
-  { name: 'dimension_fields', type: 'keyword' },
+const datasetColumns = [
+  { name: 'docs', type: 'long' },
+  { name: 'data_stream.dataset', type: 'keyword' },
 ];
 
 const workloadColumns = [
@@ -44,33 +40,10 @@ const nodeColumns = [
 const sourceEsql =
   'FROM metrics-gcp-us-central1:metrics-kubernetes.*,-metrics-gcp-us-central1:metrics-kubernetes.apiserver-* | WHERE orchestrator.cluster.name == "cluster-a"';
 
-type TestCell = string | number | null | readonly string[];
+type TestCell = string | number | null;
 
-const kubernetesDataStreams = [
-  'metrics-gcp-us-central1:metrics-kubernetes.pod-default',
-  'metrics-gcp-us-central1:metrics-kubernetes.node-default',
-  'metrics-gcp-us-central1:metrics-kubernetes.container-default',
-  'metrics-gcp-us-central1:metrics-kubernetes.state_container-default',
-  'metrics-gcp-us-central1:metrics-kubernetes.state_deployment-default',
-  'metrics-gcp-us-central1:metrics-kubernetes.state_daemonset-default',
-  'metrics-gcp-us-central1:metrics-kubernetes.state_statefulset-default',
-  'metrics-gcp-us-central1:metrics-kubernetes.state_replicaset-default',
-  'metrics-gcp-us-central1:metrics-kubernetes.state_job-default',
-  'metrics-gcp-us-central1:metrics-kubernetes.state_node-default',
-  'metrics-gcp-us-central1:metrics-kubernetes.state_namespace-default',
-  'metrics-gcp-us-central1:metrics-kubernetes.state_resourcequota-default',
-  'metrics-gcp-us-central1:metrics-kubernetes.system-default',
-  'metrics-gcp-us-central1:metrics-kubernetes.volume-default',
-] as const;
-
-const catalogueRow = (index: number, dataStream: string): TestCell[] => [
-  `kubernetes.metric.${String(index).padStart(3, '0')}`,
-  [dataStream],
-  'percent',
-  'gauge',
-  'double',
-  ['orchestrator.cluster.name'],
-];
+const datasetRows = (...datasets: Array<string | null>): TestCell[][] =>
+  datasets.map((dataset, index) => [index + 1, dataset]);
 
 const createHarness = (responses: Array<{ columns: object[]; values: TestCell[][] }>) => {
   const query = jest.fn();
@@ -89,15 +62,11 @@ const createHarness = (responses: Array<{ columns: object[]; values: TestCell[][
   };
 };
 
-describe('getDataStreamFamily', () => {
-  it('reads the family from CCS, local, and OTel data stream names', () => {
-    expect(getDataStreamFamily('metrics-gcp-us-central1:metrics-kubernetes.pod-default')).toBe(
-      'kubernetes'
-    );
-    expect(getDataStreamFamily('metrics-kubernetes.node-default')).toBe('kubernetes');
-    expect(getDataStreamFamily('metrics-us-east-1:metrics-hostmetricsreceiver.otel-default')).toBe(
-      'hostmetricsreceiver'
-    );
+describe('getDatasetFamily', () => {
+  it('reads covered, uncovered, and null dataset families', () => {
+    expect(getDatasetFamily('kubernetes.pod')).toBe('kubernetes');
+    expect(getDatasetFamily('hostmetricsreceiver.otel')).toBe('hostmetricsreceiver');
+    expect(getDatasetFamily(null)).toBeUndefined();
   });
 });
 
@@ -217,7 +186,11 @@ describe('Kubernetes entity derivation', () => {
     );
 
     const workloadQuery =
-      ENTITY_KEY_TABLE.find(({ id }) => id === 'ecs.k8s_workload')?.buildQuery('TS metrics') ?? '';
+      ENTITY_KEY_TABLE.find(({ id }) => id === 'ecs.k8s_workload')?.buildQuery(
+        'SET unmapped_fields = "NULLIFY"; FROM metrics-*'
+      ) ?? '';
+    expect(workloadQuery).toMatch(/^SET unmapped_fields = "NULLIFY"; FROM/);
+    expect(workloadQuery).toContain('@timestamp > NOW() - 1 hour');
     expect(workloadQuery).toContain('`kubernetes.labels.pod-template-hash`');
     expect(workloadQuery).toContain('SUBSTRING(rs, 1, LENGTH(rs) - LENGTH(h) - 1)');
     expect(workloadQuery).toContain('kubernetes.job.name RLIKE ".*-[0-9]{8,}"');
@@ -273,20 +246,9 @@ describe('Kubernetes entity derivation', () => {
 
 describe('identifyMetricsEntities', () => {
   it('folds clusters while keeping equal deployment and daemonset names separate', async () => {
-    const firstCataloguePage = {
-      columns: catalogueColumns,
-      values: Array.from({ length: 100 }, (_, index) =>
-        catalogueRow(index, kubernetesDataStreams[index % kubernetesDataStreams.length])
-      ),
-    };
-    const secondCataloguePage = {
-      columns: catalogueColumns,
-      values: Array.from({ length: 16 }, (_, index) =>
-        catalogueRow(
-          index + 100,
-          kubernetesDataStreams[(index + 100) % kubernetesDataStreams.length]
-        )
-      ),
+    const datasetList = {
+      columns: datasetColumns,
+      values: datasetRows('kubernetes.pod', 'kubernetes.node'),
     };
     const workloads = {
       columns: workloadColumns,
@@ -307,7 +269,7 @@ describe('identifyMetricsEntities', () => {
         ['cluster-a', null, 1, '2026-11-10T12:01:00.000Z'],
       ],
     };
-    const harness = createHarness([firstCataloguePage, secondCataloguePage, workloads, nodes]);
+    const harness = createHarness([datasetList, workloads, nodes]);
 
     const result = await identifyMetricsEntities({
       esClient: harness.esClient,
@@ -320,9 +282,9 @@ describe('identifyMetricsEntities', () => {
     expect(result).toEqual(
       expect.objectContaining({
         metricsEntitiesCount: 4,
-        metricsCatalogueRowsCount: 116,
+        metricsCatalogueRowsCount: 2,
         matchedEntityKeyRowsCount: 2,
-        uncoveredDataStreamsCount: 0,
+        uncoveredDatasetsCount: 0,
         metricsEntityRowsCount: 9,
         droppedIncompleteRowsCount: 3,
         droppedOverflowRowsCount: 0,
@@ -332,6 +294,14 @@ describe('identifyMetricsEntities', () => {
         errors: [],
       })
     );
+    const queries = harness.query.mock.calls.map(([request]: [{ query: string }]) => request.query);
+    expect(queries).toHaveLength(3);
+    queries.forEach((query) => {
+      expect(query).toMatch(/^SET unmapped_fields = "NULLIFY"; FROM/);
+      expect(query).not.toContain('$.nightshift');
+      expect(query).not.toContain('METRICS_INFO');
+      expect(query).not.toMatch(/(?:^|;\s*|\|\s*)TS\s/);
+    });
     expect(harness.bulk).toHaveBeenCalledTimes(1);
     const operations = harness.bulk.mock.calls[0][1];
     expect(operations).toHaveLength(4);
@@ -394,8 +364,8 @@ describe('identifyMetricsEntities', () => {
     ).toBe(false);
   });
 
-  it('returns without inventory queries or writes when the catalogue is empty', async () => {
-    const harness = createHarness([{ columns: catalogueColumns, values: [] }]);
+  it('falls back without inventory queries or writes when the source returns no data', async () => {
+    const harness = createHarness([{ columns: datasetColumns, values: [] }]);
 
     const result = await identifyMetricsEntities({
       esClient: harness.esClient,
@@ -408,36 +378,27 @@ describe('identifyMetricsEntities', () => {
     expect(result).toEqual(
       expect.objectContaining({
         handled: false,
-        skipReason: 'no_tsds',
+        skipReason: 'no_data',
         metricsEntitiesCount: 0,
-        uncoveredDataStreamsCount: 0,
+        uncoveredDatasetsCount: 0,
       })
     );
     expect(harness.query).toHaveBeenCalledTimes(1);
     expect(harness.bulk).not.toHaveBeenCalled();
   });
 
-  it('falls back without writing when no entity key row matches the catalogue', async () => {
+  it('counts a null dataset as uncovered and falls back without writing', async () => {
     const harness = createHarness([
       {
-        columns: catalogueColumns,
-        values: [
-          [
-            'system.cpu.time',
-            ['metrics-us-east-1:metrics-hostmetricsreceiver.otel-default'],
-            'seconds',
-            'counter',
-            'double',
-            ['host.name'],
-          ],
-        ],
+        columns: datasetColumns,
+        values: datasetRows(null),
       },
     ]);
 
     const result = await identifyMetricsEntities({
       esClient: harness.esClient,
       esql: sourceEsql,
-      sourceId: 'otel-hostmetrics',
+      sourceId: 'plain-index',
       kiClient: harness.kiClient,
       logger: harness.logger,
     });
@@ -447,35 +408,21 @@ describe('identifyMetricsEntities', () => {
         handled: false,
         skipReason: 'no_entity_key_row',
         metricsEntitiesCount: 0,
-        uncoveredDataStreamsCount: 1,
+        uncoveredDatasetsCount: 1,
       })
     );
     expect(harness.query).toHaveBeenCalledTimes(1);
     expect(harness.bulk).not.toHaveBeenCalled();
     expect(harness.info).toHaveBeenCalledTimes(1);
-    expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('[otel-hostmetrics]'));
-    expect(harness.info).toHaveBeenCalledWith(
-      expect.stringContaining('metrics-us-east-1:metrics-hostmetricsreceiver.otel-default')
-    );
+    expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('[plain-index]'));
+    expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('<null>'));
   });
 
-  it('handles a matching catalogue and counts uncovered data streams', async () => {
+  it('handles a Kubernetes pod dataset and counts an uncovered OTel dataset', async () => {
     const harness = createHarness([
       {
-        columns: catalogueColumns,
-        values: [
-          [
-            'kubernetes.pod.cpu.usage.limit.pct',
-            [
-              'metrics-kubernetes.pod-default',
-              'metrics-us-east-1:metrics-hostmetricsreceiver.otel-default',
-            ],
-            'percent',
-            'gauge',
-            'double',
-            ['orchestrator.cluster.name', 'kubernetes.namespace'],
-          ],
-        ],
+        columns: datasetColumns,
+        values: datasetRows('kubernetes.pod', 'hostmetricsreceiver.otel'),
       },
       {
         columns: workloadColumns,
@@ -497,30 +444,19 @@ describe('identifyMetricsEntities', () => {
       expect.objectContaining({
         handled: true,
         matchedEntityKeyRowsCount: 1,
-        uncoveredDataStreamsCount: 1,
+        uncoveredDatasetsCount: 1,
       })
     );
     expect(harness.bulk).toHaveBeenCalledTimes(1);
     expect(harness.info).toHaveBeenCalledTimes(1);
     expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('[mixed-metrics]'));
-    expect(harness.info).toHaveBeenCalledWith(
-      expect.stringContaining('metrics-us-east-1:metrics-hostmetricsreceiver.otel-default')
-    );
+    expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('hostmetricsreceiver.otel'));
   });
 
   it('keeps nodes before the highest-replica workloads within the 500 entity cap', async () => {
-    const catalogue = {
-      columns: catalogueColumns,
-      values: [
-        [
-          'kubernetes.pod.cpu.usage.limit.pct',
-          ['metrics-kubernetes.pod-default', 'metrics-kubernetes.node-default'],
-          'percent',
-          'gauge',
-          'double',
-          ['orchestrator.cluster.name', 'kubernetes.namespace'],
-        ],
-      ],
+    const datasetList = {
+      columns: datasetColumns,
+      values: datasetRows('kubernetes.pod', 'kubernetes.node'),
     };
     const workloads = {
       columns: workloadColumns,
@@ -540,7 +476,7 @@ describe('identifyMetricsEntities', () => {
         ['cluster-a', 'node-a', 1, '2026-11-10T12:00:00.000Z'],
       ],
     };
-    const harness = createHarness([catalogue, workloads, nodes]);
+    const harness = createHarness([datasetList, workloads, nodes]);
 
     const result = await identifyMetricsEntities({
       esClient: harness.esClient,

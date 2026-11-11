@@ -134,7 +134,7 @@ export {
   type SourceTypeAnalysis,
 } from './src/sources/validate_source_query';
 
-export { toTimeSeriesSourceQuery } from './src/sources/to_time_series_query';
+export { toFromSourceQuery } from './src/sources/to_from_source_query';
 
 export {
   NIGHTSHIFT_USAGE_PARENT_ID,

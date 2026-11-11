@@ -217,7 +217,7 @@ describe('Significant Events run quota workflow contracts', () => {
           persistedQueries: [],
           queriesTokensUsed: { prompt: 0, completion: 0, total: 0 },
           metricsEntitiesCount: 0,
-          metricsEntitiesUncoveredDataStreamsCount: 0,
+          metricsEntitiesUncoveredDatasetsCount: 0,
           metricsEntitiesDroppedOwnerlessRows: 0,
           metricsEntitiesHandled: false,
           metricsEntitiesSkipReason: '',
