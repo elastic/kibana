@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH } from '../../../constants';
 import { limitedStringSchema, limitedNumberAsIntegerSchema } from '../../../schema';
 
@@ -18,14 +18,16 @@ export const CaseCustomFieldNumberWithValidationValueSchema = ({
   fieldName: string;
 }) => limitedNumberAsIntegerSchema({ fieldName });
 
-export const CustomFieldPutRequestSchema = z.object({
-  value: z.union([
-    z.boolean(),
-    z.null(),
-    CaseCustomFieldTextWithValidationValueSchema('value'),
-    CaseCustomFieldNumberWithValidationValueSchema({ fieldName: 'value' }),
-  ]),
-  caseVersion: z.string().max(512),
-});
+export const CustomFieldPutRequestSchema = lazySchema(() =>
+  z.object({
+    value: z.union([
+      z.boolean(),
+      z.null(),
+      CaseCustomFieldTextWithValidationValueSchema('value'),
+      CaseCustomFieldNumberWithValidationValueSchema({ fieldName: 'value' }),
+    ]),
+    caseVersion: z.string().max(512),
+  })
+);
 
 export type CustomFieldPutRequest = z.infer<typeof CustomFieldPutRequestSchema>;

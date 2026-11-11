@@ -10,7 +10,7 @@ import { timeRangeSchema } from '@kbn/agent-builder-dashboards-common';
 import { controlInputSchema } from '../controls';
 import { upsertPanelContentSchema } from '../panels';
 
-const idSchema = z.string().min(1).max(256);
+const idSchema = lazySchema(() => z.string().min(1).max(256));
 
 const upsertSectionSchema = lazySchema(() =>
   z.object({

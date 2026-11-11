@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export const SERVICE_MAP_ATTACHMENT_TYPE = 'observability.service-map' as const;
 
@@ -65,42 +65,44 @@ const serviceNodeMetadataSchema = z.object({
   anomalyScore: z.number().optional(),
 });
 
-export const serviceMapAttachmentDataSchema = z.object({
-  connections: z.array(connectionSchema),
-  /**
-   * Optional badge metadata keyed by `service.name`.
-   * Separating this from the connection topology avoids duplicating per-service
-   * state across every connection that service participates in.
-   */
-  nodeMetadata: z.record(z.string().max(MAX_LABEL_LENGTH), serviceNodeMetadataSchema).optional(),
-  serviceName: z.string().max(MAX_LABEL_LENGTH).optional(),
-  title: z.string().max(MAX_LABEL_LENGTH).optional(),
-  /**
-   * Time range used for the topology tool call. Drives the popover/flyout
-   * data fetches and the "Explore in Service map" link of the contextual
-   * renderer. Optional for back-compat with stored conversations; the
-   * renderer falls back to {@link SERVICE_MAP_ATTACHMENT_DEFAULT_TIME_RANGE}.
-   */
-  timeRange: z
-    .object({
-      start: z.string().max(MAX_LABEL_LENGTH),
-      end: z.string().max(MAX_LABEL_LENGTH),
-    })
-    .optional(),
-  /**
-   * Environment the investigation is scoped to, if any. Should match the
-   * `environment` passed to `get_service_topology` (which scopes the badges) so
-   * badges, the contextual renderer's drill-down views (popovers/flyout) and
-   * its "Explore in Service map" link agree.
-   */
-  environment: z.string().max(MAX_LABEL_LENGTH).optional(),
-  /**
-   * `contextual` (default): interactive map focused on `serviceName`.
-   * `full`: the whole topology the user asked for, rendered as the static map.
-   * Optional for back-compat with stored conversations.
-   */
-  view: z.enum(['contextual', 'full']).optional(),
-});
+export const serviceMapAttachmentDataSchema = lazySchema(() =>
+  z.object({
+    connections: z.array(connectionSchema),
+    /**
+     * Optional badge metadata keyed by `service.name`.
+     * Separating this from the connection topology avoids duplicating per-service
+     * state across every connection that service participates in.
+     */
+    nodeMetadata: z.record(z.string().max(MAX_LABEL_LENGTH), serviceNodeMetadataSchema).optional(),
+    serviceName: z.string().max(MAX_LABEL_LENGTH).optional(),
+    title: z.string().max(MAX_LABEL_LENGTH).optional(),
+    /**
+     * Time range used for the topology tool call. Drives the popover/flyout
+     * data fetches and the "Explore in Service map" link of the contextual
+     * renderer. Optional for back-compat with stored conversations; the
+     * renderer falls back to {@link SERVICE_MAP_ATTACHMENT_DEFAULT_TIME_RANGE}.
+     */
+    timeRange: z
+      .object({
+        start: z.string().max(MAX_LABEL_LENGTH),
+        end: z.string().max(MAX_LABEL_LENGTH),
+      })
+      .optional(),
+    /**
+     * Environment the investigation is scoped to, if any. Should match the
+     * `environment` passed to `get_service_topology` (which scopes the badges) so
+     * badges, the contextual renderer's drill-down views (popovers/flyout) and
+     * its "Explore in Service map" link agree.
+     */
+    environment: z.string().max(MAX_LABEL_LENGTH).optional(),
+    /**
+     * `contextual` (default): interactive map focused on `serviceName`.
+     * `full`: the whole topology the user asked for, rendered as the static map.
+     * Optional for back-compat with stored conversations.
+     */
+    view: z.enum(['contextual', 'full']).optional(),
+  })
+);
 
 /**
  * Renderer fallback when `timeRange` is absent or unparseable. Mirrors the

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import { indicatorSchema } from './indicators';
 import {
@@ -17,21 +17,23 @@ import {
 } from './slo';
 import { timeWindowSchema } from './time_window';
 
-const sloTemplateSchema = z.object({
-  templateId: z.string(),
-  name: z.string().optional(),
-  description: z.string().optional(),
-  indicator: indicatorSchema.optional(),
-  budgetingMethod: budgetingMethodSchema.optional(),
-  objective: objectiveSchema.optional(),
-  timeWindow: timeWindowSchema.optional(),
-  tags: tagsSchema.optional(),
-  settings: optionalSettingsSchema.optional(),
-  groupBy: z.array(z.string()).optional(),
-  artifacts: dashboardsWithIdSchema.optional(),
-});
+const sloTemplateSchema = lazySchema(() =>
+  z.object({
+    templateId: z.string(),
+    name: z.string().optional(),
+    description: z.string().optional(),
+    indicator: indicatorSchema.optional(),
+    budgetingMethod: budgetingMethodSchema.optional(),
+    objective: objectiveSchema.optional(),
+    timeWindow: timeWindowSchema.optional(),
+    tags: tagsSchema.optional(),
+    settings: optionalSettingsSchema.optional(),
+    groupBy: z.array(z.string()).optional(),
+    artifacts: dashboardsWithIdSchema.optional(),
+  })
+);
 
 // Permissive catch-all — integrations may push arbitrary data into the stored object
-const storedSloTemplateSchema = z.record(z.string(), z.unknown());
+const storedSloTemplateSchema = lazySchema(() => z.record(z.string(), z.unknown()));
 
 export { sloTemplateSchema, storedSloTemplateSchema };

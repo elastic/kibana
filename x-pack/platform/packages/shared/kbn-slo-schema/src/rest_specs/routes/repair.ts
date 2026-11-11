@@ -4,15 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import { sloIdSchema } from '../../schema/slo';
 
-const repairParamsSchema = z.object({
-  body: z.object({
-    list: z.array(sloIdSchema),
-  }),
-});
+const repairParamsSchema = lazySchema(() =>
+  z.object({
+    body: z.object({
+      list: z.array(sloIdSchema),
+    }),
+  })
+);
 
 type RepairParams = z.output<typeof repairParamsSchema.shape.body>;
 

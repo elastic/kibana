@@ -119,4 +119,4 @@ export const getPartialCaseTransformedAttributesSchema = () =>
 export type CaseSavedObject = SavedObject<CasePersistedAttributes>;
 export type CaseSavedObjectTransformed = SavedObject<CaseTransformedAttributes>;
 
-export const OwnerSchema = z.object({ owner: z.string() });
+export const OwnerSchema = lazySchema(() => z.object({ owner: z.string() }));

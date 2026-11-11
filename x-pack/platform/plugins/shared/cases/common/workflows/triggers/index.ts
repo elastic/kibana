@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { Owner as OwnerSchema } from '../../bundled-types.gen';
 import {
@@ -170,18 +170,20 @@ triggers:
 
 export const AttachmentsAddedTriggerId = 'cases.attachmentsAdded' as const;
 
-const attachmentsAddedEventSchema = baseCaseEventSchema.extend({
-  ids: z
-    .array(z.string())
-    .meta({ description: ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_IDS_DESCRIPTION }),
-  attachmentIds: z.array(z.string()).meta({
-    description: ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_IDS_DESCRIPTION,
-    deprecated: true,
-  }),
-  attachmentType: z
-    .string()
-    .meta({ description: ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_TYPE_DESCRIPTION }),
-});
+const attachmentsAddedEventSchema = lazySchema(() =>
+  baseCaseEventSchema.extend({
+    ids: z
+      .array(z.string())
+      .meta({ description: ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_IDS_DESCRIPTION }),
+    attachmentIds: z.array(z.string()).meta({
+      description: ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_IDS_DESCRIPTION,
+      deprecated: true,
+    }),
+    attachmentType: z
+      .string()
+      .meta({ description: ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_TYPE_DESCRIPTION }),
+  })
+);
 
 export const attachmentsAddedTriggerCommonDefinition: CommonTriggerDefinition = {
   id: AttachmentsAddedTriggerId,

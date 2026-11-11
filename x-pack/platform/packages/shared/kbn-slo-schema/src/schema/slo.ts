@@ -21,15 +21,15 @@ import {
   SLO_ID_REGEX,
 } from './validation_constants';
 
-const occurrencesBudgetingMethodSchema = z.literal('occurrences');
-const timeslicesBudgetingMethodSchema = z.literal('timeslices');
+const occurrencesBudgetingMethodSchema = lazySchema(() => z.literal('occurrences'));
+const timeslicesBudgetingMethodSchema = lazySchema(() => z.literal('timeslices'));
 
-const budgetingMethodSchema = z
-  .union([occurrencesBudgetingMethodSchema, timeslicesBudgetingMethodSchema])
-  .meta({
+const budgetingMethodSchema = lazySchema(() =>
+  z.union([occurrencesBudgetingMethodSchema, timeslicesBudgetingMethodSchema]).meta({
     id: 'SLOBudgetingMethod',
     description: 'The budgeting method to use when computing the rollup data.',
-  });
+  })
+);
 
 const targetSchema = lazySchema(() =>
   z.object({
@@ -58,15 +58,17 @@ const objectiveSchema = lazySchema(() =>
     .meta({ id: 'SLOObjective', description: 'Defines properties for the SLO objective' })
 );
 
-const boundedProjectRoutingSchema = z
-  .string()
-  .max(MAX_PROJECT_ROUTINGS_LENGTH, PROJECT_ROUTINGS_TOO_LONG_MESSAGE)
-  .refine((value) => value.trim().length > 0, PROJECT_ROUTINGS_EMPTY_MESSAGE)
-  .describe(
-    'ES ProjectRouting expression controlling which linked projects the L1 rollup reads. ' +
-      'When set (including null), overrides preventCrossProjectSearch. null and `_alias:_origin` mean origin only; ' +
-      '`_alias:*` means all linked projects. Subset example `_id:p1 AND _id:p2`.'
-  );
+const boundedProjectRoutingSchema = lazySchema(() =>
+  z
+    .string()
+    .max(MAX_PROJECT_ROUTINGS_LENGTH, PROJECT_ROUTINGS_TOO_LONG_MESSAGE)
+    .refine((value) => value.trim().length > 0, PROJECT_ROUTINGS_EMPTY_MESSAGE)
+    .describe(
+      'ES ProjectRouting expression controlling which linked projects the L1 rollup reads. ' +
+        'When set (including null), overrides preventCrossProjectSearch. null and `_alias:_origin` mean origin only; ' +
+        '`_alias:*` means all linked projects. Subset example `_id:p1 AND _id:p2`.'
+    )
+);
 
 const settingsSchema = lazySchema(() =>
   z
@@ -115,62 +117,74 @@ const groupBySchema = allOrAnyStringOrArray.meta({
 
 const optionalSettingsSchema = settingsSchema.partial();
 
-const tagsSchema = z.array(z.string()).describe('List of tags');
+const tagsSchema = lazySchema(() => z.array(z.string()).describe('List of tags'));
 
 // id cannot contain special characters and spaces
-const sloIdSchema = z
-  .string()
-  .min(MIN_SLO_ID_LENGTH, SLO_ID_INVALID_MESSAGE)
-  .max(MAX_SLO_ID_LENGTH, SLO_ID_INVALID_MESSAGE)
-  .regex(SLO_ID_REGEX, SLO_ID_INVALID_MESSAGE)
-  .describe('The identifier of the SLO.');
+const sloIdSchema = lazySchema(() =>
+  z
+    .string()
+    .min(MIN_SLO_ID_LENGTH, SLO_ID_INVALID_MESSAGE)
+    .max(MAX_SLO_ID_LENGTH, SLO_ID_INVALID_MESSAGE)
+    .regex(SLO_ID_REGEX, SLO_ID_INVALID_MESSAGE)
+    .describe('The identifier of the SLO.')
+);
 
-const baseSloSchema = z.object({
-  id: sloIdSchema,
-  name: z.string().describe('The name of the SLO.'),
-  description: z.string().describe('The description of the SLO.'),
-  indicator: indicatorSchema,
-  timeWindow: timeWindowSchema,
-  budgetingMethod: budgetingMethodSchema,
-  objective: objectiveSchema,
-  settings: settingsSchema,
-  revision: z.number().describe('The SLO revision'),
-  enabled: z.boolean().describe('Indicate if the SLO is enabled'),
-  tags: tagsSchema,
-  createdAt: dateType.describe('The creation date'),
-  updatedAt: dateType.describe('The last update date'),
-  groupBy: groupBySchema,
-  version: z.number().describe('The internal SLO version'),
-  createdBy: z.string().describe('The user who created the SLO.').optional(),
-  updatedBy: z.string().describe('The user who last updated the SLO.').optional(),
-});
+const baseSloSchema = lazySchema(() =>
+  z.object({
+    id: sloIdSchema,
+    name: z.string().describe('The name of the SLO.'),
+    description: z.string().describe('The description of the SLO.'),
+    indicator: indicatorSchema,
+    timeWindow: timeWindowSchema,
+    budgetingMethod: budgetingMethodSchema,
+    objective: objectiveSchema,
+    settings: settingsSchema,
+    revision: z.number().describe('The SLO revision'),
+    enabled: z.boolean().describe('Indicate if the SLO is enabled'),
+    tags: tagsSchema,
+    createdAt: dateType.describe('The creation date'),
+    updatedAt: dateType.describe('The last update date'),
+    groupBy: groupBySchema,
+    version: z.number().describe('The internal SLO version'),
+    createdBy: z.string().describe('The user who created the SLO.').optional(),
+    updatedBy: z.string().describe('The user who last updated the SLO.').optional(),
+  })
+);
 
-const dashboardsWithIdSchema = z.object({
-  dashboards: z
-    .array(z.object({ id: z.string().describe('Dashboard saved-object id') }))
-    .describe('Array of dashboard references')
-    .optional(),
-});
-const dashboardsWithRefIdSchema = z.object({
-  dashboards: z
-    .array(z.object({ refId: z.string().describe('Dashboard reference id') }))
-    .describe('Array of dashboard references')
-    .optional(),
-});
+const dashboardsWithIdSchema = lazySchema(() =>
+  z.object({
+    dashboards: z
+      .array(z.object({ id: z.string().describe('Dashboard saved-object id') }))
+      .describe('Array of dashboard references')
+      .optional(),
+  })
+);
+const dashboardsWithRefIdSchema = lazySchema(() =>
+  z.object({
+    dashboards: z
+      .array(z.object({ refId: z.string().describe('Dashboard reference id') }))
+      .describe('Array of dashboard references')
+      .optional(),
+  })
+);
 
-const artifactsWithIdSchema = dashboardsWithIdSchema.meta({
-  id: 'SLOArtifacts',
-  description: 'Links to related assets for the SLO',
-});
+const artifactsWithIdSchema = lazySchema(() =>
+  dashboardsWithIdSchema.meta({
+    id: 'SLOArtifacts',
+    description: 'Links to related assets for the SLO',
+  })
+);
 
 const sloDefinitionSchema = lazySchema(() =>
   baseSloSchema
     .extend({ artifacts: artifactsWithIdSchema.optional() })
     .meta({ id: 'SLODefinition', description: 'The SLO definition', additionalProperties: true })
 );
-const storedSloDefinitionSchema = baseSloSchema.extend({
-  artifacts: dashboardsWithRefIdSchema.optional(),
-});
+const storedSloDefinitionSchema = lazySchema(() =>
+  baseSloSchema.extend({
+    artifacts: dashboardsWithRefIdSchema.optional(),
+  })
+);
 
 export {
   artifactsWithIdSchema,

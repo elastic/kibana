@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { notFound } from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
@@ -59,12 +59,14 @@ const listSourceApiKeysRoute = createServerRoute({
       requiredPrivileges: [STREAMS_V2_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    query: z.object({
-      sourceId: sourceIdSchema,
-      unitId: streamsUnitIdentifierSchema.optional(),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      query: z.object({
+        sourceId: sourceIdSchema,
+        unitId: streamsUnitIdentifierSchema.optional(),
+      }),
+    })
+  ),
   handler: async ({ getScopedClients, request, params, logger }) => {
     const clients = await getScopedClients({ request });
     const {
@@ -135,13 +137,15 @@ const createSourceApiKeyRoute = createServerRoute({
       requiredPrivileges: [STREAMS_V2_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    body: z.object({
-      sourceTypeSlug: sourceTypeSlugSchema,
-      sourceId: sourceIdSchema,
-      unitId: streamsUnitIdentifierSchema.optional(),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        sourceTypeSlug: sourceTypeSlugSchema,
+        sourceId: sourceIdSchema,
+        unitId: streamsUnitIdentifierSchema.optional(),
+      }),
+    })
+  ),
   handler: async ({ getScopedClients, request, params, logger }) => {
     const clients = await getScopedClients({ request });
     const { scopedClusterClient, isSecurityEnabled } = clients;
@@ -219,13 +223,15 @@ const deleteSourceApiKeyRoute = createServerRoute({
       requiredPrivileges: [STREAMS_V2_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    body: z.object({
-      sourceId: sourceIdSchema,
-      apiKeyId: apiKeyIdSchema,
-      unitId: streamsUnitIdentifierSchema.optional(),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        sourceId: sourceIdSchema,
+        apiKeyId: apiKeyIdSchema,
+        unitId: streamsUnitIdentifierSchema.optional(),
+      }),
+    })
+  ),
   handler: async ({ getScopedClients, request, params, logger }) => {
     const clients = await getScopedClients({ request });
     const {

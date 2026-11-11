@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ALLOWED_MIME_TYPES } from '../constants/mime_types';
 import { MAX_DOCS_PER_PAGE } from '../constants';
 
@@ -17,10 +17,12 @@ export interface LimitedSchemaType {
 
 // Matches io-ts parity: rejects strings whose `.trim()` is empty (e.g. "   ", "\t\n").
 // Preserves the original (untrimmed) string on success.
-export const NonEmptyString = z
-  .string()
-  .max(1000)
-  .refine((s) => s.trim().length >= 1, 'string must have length >= 1');
+export const NonEmptyString = lazySchema(() =>
+  z
+    .string()
+    .max(1000)
+    .refine((s) => s.trim().length >= 1, 'string must have length >= 1')
+);
 
 export const limitedStringSchema = ({ fieldName, min, max }: LimitedSchemaType) =>
   z.string().superRefine((s, ctx) => {
@@ -163,17 +165,19 @@ export const regexStringSchema = ({
     }
   });
 
-export const mimeTypeString = z
-  .string()
-  .max(255)
-  .superRefine((s, ctx) => {
-    if (!ALLOWED_MIME_TYPES.includes(s)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: `The mime type field value ${s} is not allowed.`,
-      });
-    }
-  });
+export const mimeTypeString = lazySchema(() =>
+  z
+    .string()
+    .max(255)
+    .superRefine((s, ctx) => {
+      if (!ALLOWED_MIME_TYPES.includes(s)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `The mime type field value ${s} is not allowed.`,
+        });
+      }
+    })
+);
 
 /**
  * Recursive JSON value type.

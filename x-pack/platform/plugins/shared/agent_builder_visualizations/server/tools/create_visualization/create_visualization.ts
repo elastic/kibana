@@ -74,11 +74,13 @@ const optionalEsqlField = z
     `(optional) An ES|QL query. Omit it (or pass null) to generate one on create, or to keep the stored query on update. ${ESQL_SOURCE_RULE}`
   );
 
-const customContentHasDataField = z
-  .boolean()
-  .describe(
-    '(required) Whether the new panel shows live Elasticsearch values. True: a query is generated from "query" when esql is omitted. False: the panel has no data at all — a banner, a legend, an explanatory note — and no query. There is no default, so always state which. A supplied esql always means data: it wins over false. Never pass false to get past a failed query generation; fix the index or fields and retry instead.'
-  );
+const customContentHasDataField = lazySchema(() =>
+  z
+    .boolean()
+    .describe(
+      '(required) Whether the new panel shows live Elasticsearch values. True: a query is generated from "query" when esql is omitted. False: the panel has no data at all — a banner, a legend, an explanatory note — and no query. There is no default, so always state which. A supplied esql always means data: it wins over false. Never pass false to get past a failed query generation; fix the index or fields and retry instead.'
+    )
+);
 
 const attachmentHasDataField = z
   .boolean()
@@ -137,27 +139,29 @@ const customContentTargetSchema = z.object({
   has_data: customContentHasDataField,
 });
 
-const attachmentTargetSchema = z.object({
-  type: z
-    .literal('attachment')
-    .describe(
-      'Update an existing visualization attachment in place. The attachment must exist; edits keep its renderer.'
-    ),
-  attachment_id: z
-    .string()
-    .min(1)
-    .max(256)
-    .describe('ID of the visualization attachment to update.'),
-  chartType: z
-    .nativeEnum(SupportedChartType)
-    .optional()
-    .describe(
-      '(optional) For Lens: pass a new chart type when the request changes the chart family (e.g. xy to pie); omit it to keep the current one. For Vega it is only a styling hint. Ignored for custom content.'
-    ),
-  esql: optionalEsqlField,
-  has_data: attachmentHasDataField,
-  regenerate_esql: attachmentRegenerateEsqlField,
-});
+const attachmentTargetSchema = lazySchema(() =>
+  z.object({
+    type: z
+      .literal('attachment')
+      .describe(
+        'Update an existing visualization attachment in place. The attachment must exist; edits keep its renderer.'
+      ),
+    attachment_id: z
+      .string()
+      .min(1)
+      .max(256)
+      .describe('ID of the visualization attachment to update.'),
+    chartType: z
+      .nativeEnum(SupportedChartType)
+      .optional()
+      .describe(
+        '(optional) For Lens: pass a new chart type when the request changes the chart family (e.g. xy to pie); omit it to keep the current one. For Vega it is only a styling hint. Ignored for custom content.'
+      ),
+    esql: optionalEsqlField,
+    has_data: attachmentHasDataField,
+    regenerate_esql: attachmentRegenerateEsqlField,
+  })
+);
 
 const targetSchema = z
   .discriminatedUnion('type', [

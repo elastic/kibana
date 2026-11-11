@@ -10,9 +10,9 @@ import { z, lazySchema } from '@kbn/zod';
 import { ALL_VALUE, SLO_STATUS } from '../constants';
 import { MAX_DATE_STRING_LENGTH } from './limits';
 
-const allOrAnyString = z.union([z.literal(ALL_VALUE), z.string()]);
+const allOrAnyString = lazySchema(() => z.union([z.literal(ALL_VALUE), z.string()]));
 
-const allOrAnyStringOrArray = z.union([allOrAnyString, z.array(allOrAnyString)]);
+const allOrAnyStringOrArray = lazySchema(() => z.union([allOrAnyString, z.array(allOrAnyString)]));
 
 /**
  * Codec between a wire-form date string and a `Date` instance.
@@ -65,7 +65,7 @@ const errorBudgetSchema = lazySchema(() =>
     .meta({ id: 'SLOErrorBudget', additionalProperties: true })
 );
 
-const statusSchema = z.enum(SLO_STATUS).meta({ id: 'SLOSummaryStatus' });
+const statusSchema = lazySchema(() => z.enum(SLO_STATUS).meta({ id: 'SLOSummaryStatus' }));
 
 const summarySchema = lazySchema(() =>
   z
@@ -81,7 +81,7 @@ const summarySchema = lazySchema(() =>
     .meta({ id: 'SLOSummary', description: 'The SLO computed data', additionalProperties: true })
 );
 
-const groupingsSchema = z.record(z.string(), z.union([z.string(), z.number()]));
+const groupingsSchema = lazySchema(() => z.record(z.string(), z.union([z.string(), z.number()])));
 
 const metaSchema = lazySchema(() =>
   z
@@ -107,28 +107,32 @@ const remoteSchema = lazySchema(() =>
     .meta({ additionalProperties: true })
 );
 
-const groupSummarySchema = z.object({
-  total: z.number(),
-  worst: z.object({
-    sliValue: z.number(),
-    status: z.string(),
-    slo: z.object({
-      id: z.string(),
-      instanceId: z.string(),
-      name: z.string(),
-      groupings: z.record(z.string(), z.unknown()).optional(),
+const groupSummarySchema = lazySchema(() =>
+  z.object({
+    total: z.number(),
+    worst: z.object({
+      sliValue: z.number(),
+      status: z.string(),
+      slo: z.object({
+        id: z.string(),
+        instanceId: z.string(),
+        name: z.string(),
+        groupings: z.record(z.string(), z.unknown()).optional(),
+      }),
     }),
-  }),
-  violated: z.number(),
-  healthy: z.number(),
-  degrading: z.number(),
-  noData: z.number(),
-});
+    violated: z.number(),
+    healthy: z.number(),
+    degrading: z.number(),
+    noData: z.number(),
+  })
+);
 
-const dateRangeSchema = z.object({
-  from: dateType,
-  to: dateType,
-});
+const dateRangeSchema = lazySchema(() =>
+  z.object({
+    from: dateType,
+    to: dateType,
+  })
+);
 
 export {
   allOrAnyString,

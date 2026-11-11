@@ -5,24 +5,32 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { CaseUserActionConnectorSchema, CaseConnectorSchema } from '../../connector/v1';
 import { UserActionTypes } from '../action/v1';
 
-export const ConnectorUserActionPayloadWithoutConnectorIdSchema = z.object({
-  connector: CaseUserActionConnectorSchema,
-});
+export const ConnectorUserActionPayloadWithoutConnectorIdSchema = lazySchema(() =>
+  z.object({
+    connector: CaseUserActionConnectorSchema,
+  })
+);
 
-export const ConnectorUserActionPayloadSchema = z.object({
-  connector: CaseConnectorSchema,
-});
+export const ConnectorUserActionPayloadSchema = lazySchema(() =>
+  z.object({
+    connector: CaseConnectorSchema,
+  })
+);
 
-export const ConnectorUserActionWithoutConnectorIdSchema = z.object({
-  type: z.literal(UserActionTypes.connector),
-  payload: ConnectorUserActionPayloadWithoutConnectorIdSchema,
-});
+export const ConnectorUserActionWithoutConnectorIdSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(UserActionTypes.connector),
+    payload: ConnectorUserActionPayloadWithoutConnectorIdSchema,
+  })
+);
 
-export const ConnectorUserActionSchema = z.object({
-  type: z.literal(UserActionTypes.connector),
-  payload: ConnectorUserActionPayloadSchema,
-});
+export const ConnectorUserActionSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(UserActionTypes.connector),
+    payload: ConnectorUserActionPayloadSchema,
+  })
+);

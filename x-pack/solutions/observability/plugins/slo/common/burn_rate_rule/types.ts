@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-export const dependencySchema = z.object({
-  ruleId: z.string(),
-  actionGroupsToSuppressOn: z.array(z.string()),
-});
+export const dependencySchema = lazySchema(() =>
+  z.object({
+    ruleId: z.string(),
+    actionGroupsToSuppressOn: z.array(z.string()),
+  })
+);
 
 export type Dependency = z.input<typeof dependencySchema>;

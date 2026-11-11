@@ -49,14 +49,16 @@ const customContentUpdateFields = {
     .describe(
       'Natural language instruction for what to create or change. The server generates the HTML template from this prompt.'
     ),
-  esqlQuery: z
-    .string()
-    .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
-    .nullable()
-    .optional()
-    .describe(
-      'An ES|QL query the user supplied verbatim; it replaces the current one. Omit to keep the existing query. Pass null to remove it entirely. Do not write a query yourself: to change the data, set regenerateEsql to true and describe the change in "prompt". The server runs the query to sample its schema and rejects the whole operation if Elasticsearch refuses it.'
-    ),
+  esqlQuery: lazySchema(() =>
+    z
+      .string()
+      .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
+      .nullable()
+      .optional()
+      .describe(
+        'An ES|QL query the user supplied verbatim; it replaces the current one. Omit to keep the existing query. Pass null to remove it entirely. Do not write a query yourself: to change the data, set regenerateEsql to true and describe the change in "prompt". The server runs the query to sample its schema and rejects the whole operation if Elasticsearch refuses it.'
+      )
+  ),
   regenerateEsql: lazySchema(() =>
     z
       .boolean()
@@ -65,13 +67,15 @@ const customContentUpdateFields = {
         'Set true when the edit needs different data: a new measure or field ("also show the average bytes"), a new grouping or filter, or another time window. Without it the stored query is kept and the new data can never appear. The server regenerates the ES|QL query from "prompt", keeping the parts the request does not change. Omit for edits that only change the look: colors, sizes, wording, layout. Requires "prompt".'
       )
   ),
-  index: z
-    .string()
-    .max(256)
-    .optional()
-    .describe(
-      'Exact index, alias, or data stream to generate the query from. Pass it with regenerateEsql whenever known.'
-    ),
+  index: lazySchema(() =>
+    z
+      .string()
+      .max(256)
+      .optional()
+      .describe(
+        'Exact index, alias, or data stream to generate the query from. Pass it with regenerateEsql whenever known.'
+      )
+  ),
 } as const;
 
 const hasSomethingToChange = ({
@@ -96,25 +100,27 @@ const regenerateExcludesRemoval = {
  * Edit input for the chat tool. A conversation can hold one context attachment per panel, so the
  * target has to be explicit — without it the tool would act on whichever panel was attached first.
  */
-export const customContentPanelUpdateSchema = z
-  .object({
-    embeddable_id: z
-      .string()
-      .min(1)
-      .max(100)
-      .describe(
-        'The embeddable_id of the custom content panel to update, as shown in that panel\'s context header (e.g. "Custom content panel (embeddable_id: …)"). Always required — several panels can be attached to one conversation.'
-      ),
-    ...customContentUpdateFields,
-  })
-  .refine(hasSomethingToChange, atLeastOneChange)
-  .refine(
-    ({ prompt, regenerateEsql }) => !regenerateEsql || prompt !== undefined,
-    regenerateNeedsPrompt
-  )
-  .refine(
-    ({ esqlQuery, regenerateEsql }) => !(esqlQuery === null && regenerateEsql),
-    regenerateExcludesRemoval
-  );
+export const customContentPanelUpdateSchema = lazySchema(() =>
+  z
+    .object({
+      embeddable_id: z
+        .string()
+        .min(1)
+        .max(100)
+        .describe(
+          'The embeddable_id of the custom content panel to update, as shown in that panel\'s context header (e.g. "Custom content panel (embeddable_id: …)"). Always required — several panels can be attached to one conversation.'
+        ),
+      ...customContentUpdateFields,
+    })
+    .refine(hasSomethingToChange, atLeastOneChange)
+    .refine(
+      ({ prompt, regenerateEsql }) => !regenerateEsql || prompt !== undefined,
+      regenerateNeedsPrompt
+    )
+    .refine(
+      ({ esqlQuery, regenerateEsql }) => !(esqlQuery === null && regenerateEsql),
+      regenerateExcludesRemoval
+    )
+);
 
 export type CustomContentPanelUpdate = z.output<typeof customContentPanelUpdateSchema>;

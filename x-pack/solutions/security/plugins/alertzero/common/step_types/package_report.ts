@@ -178,103 +178,107 @@ const coverageSkippedSchema = z.object({
   reason: z.enum(['disabled', 'denied', 'storage_failure', 'already_processed']),
 });
 
-export const packageReportMintPayloadSchema = z.object({
-  /**
-   * What is being proposed: uuidv5(subjectId, actionWorkflowId[, processKey]). No Investigation in
-   * it, so two Investigations that reach the same host share it; the recommendation, which has no
-   * host or action, is the one key that is per Investigation.
-   */
-  subjectKey: z.string(),
-  /**
-   * The id the gate creates the Proposal under: `buildProposalId` over the subject key, at the
-   * first generation no live Proposal holds. Resolved by packaging, which has the Proposals
-   * service; `decidePackageReport` stays pure and never sees it. The service refuses an id that
-   * already exists, which is what makes two runs that race over one subject create one Proposal.
-   */
-  proposalId: z.uuid(),
-  conversationId: z.string(),
-  /** Short plain-text label naming what is proposed; omitting it falls back to the action's own name. */
-  title: z.string().max(256).optional(),
-  comment: z.string(),
-  category: z.string(),
-  impact: z.string().optional(),
-  actionWorkflowId: z.string().optional(),
-  actionInput: z.record(z.string(), z.unknown()).optional(),
-  /** Host name when the mint is host-scoped; absent on the analyst recommendation. */
-  hostName: z.string().optional(),
-  /** What the proposal acts on; absent on the analyst recommendation. `hostName` is set whenever it is present. */
-  subject: z
-    .object({
-      kind: z.enum(['host', 'process']),
-      value: z.string().max(2048),
-    })
-    .optional(),
-  confidence: z.enum(['low', 'medium', 'high']).optional(),
-});
+export const packageReportMintPayloadSchema = lazySchema(() =>
+  z.object({
+    /**
+     * What is being proposed: uuidv5(subjectId, actionWorkflowId[, processKey]). No Investigation in
+     * it, so two Investigations that reach the same host share it; the recommendation, which has no
+     * host or action, is the one key that is per Investigation.
+     */
+    subjectKey: z.string(),
+    /**
+     * The id the gate creates the Proposal under: `buildProposalId` over the subject key, at the
+     * first generation no live Proposal holds. Resolved by packaging, which has the Proposals
+     * service; `decidePackageReport` stays pure and never sees it. The service refuses an id that
+     * already exists, which is what makes two runs that race over one subject create one Proposal.
+     */
+    proposalId: z.uuid(),
+    conversationId: z.string(),
+    /** Short plain-text label naming what is proposed; omitting it falls back to the action's own name. */
+    title: z.string().max(256).optional(),
+    comment: z.string(),
+    category: z.string(),
+    impact: z.string().optional(),
+    actionWorkflowId: z.string().optional(),
+    actionInput: z.record(z.string(), z.unknown()).optional(),
+    /** Host name when the mint is host-scoped; absent on the analyst recommendation. */
+    hostName: z.string().optional(),
+    /** What the proposal acts on; absent on the analyst recommendation. `hostName` is set whenever it is present. */
+    subject: z
+      .object({
+        kind: z.enum(['host', 'process']),
+        value: z.string().max(2048),
+      })
+      .optional(),
+    confidence: z.enum(['low', 'medium', 'high']).optional(),
+  })
+);
 
-export const packageReportOutputSchema = z.discriminatedUnion('status', [
-  z.object({
-    status: z.literal('packaged'),
-    coverage: z.object({
-      written: z.array(coverageWrittenSchema),
-      skipped: z.array(coverageSkippedSchema),
+export const packageReportOutputSchema = lazySchema(() =>
+  z.discriminatedUnion('status', [
+    z.object({
+      status: z.literal('packaged'),
+      coverage: z.object({
+        written: z.array(coverageWrittenSchema),
+        skipped: z.array(coverageSkippedSchema),
+      }),
+      proposals: z.array(packageReportMintPayloadSchema),
+      /**
+       * What this run found that a live Proposal already covers, so it minted nothing for it. Each
+       * entry carries the journal line `hunt_package_report.yaml` writes on this Investigation.
+       */
+      converged: z.array(convergedProposalSchema),
+      /**
+       * Findings this run minted nothing for because a live Proposal this Investigation already
+       * holds covers them: a rerun landing on its own pending or executing Proposal. Not in
+       * `converged`, which is for what another Investigation holds and is what the journal reports,
+       * but it still means "this run created nothing", and the Investigation stays open for it, so
+       * the run's summary has to be able to say so.
+       */
+      alreadyOpenCount: z.number().int().min(0),
+      /**
+       * Bounded markdown bullets, one per proposal up to `MAX_SUMMARY_PROPOSAL_BULLETS`, for the run
+       * conclusion's prose. `proposals` itself stays complete because it drives the gate fan-out; this
+       * is only what gets embedded in the journal note, whose `message` is capped at 8,000 characters.
+       */
+      proposalBullets: z
+        .array(z.string().max(MAX_SUMMARY_BULLETS_CHARS))
+        .max(MAX_SUMMARY_PROPOSAL_BULLETS),
+      /** Proposals past the bullet cap that the prose states as a count instead of listing. */
+      omittedProposalCount: z.number().int().min(0),
+      dismiss: z.boolean(),
+      closureSummary: z.string(),
+      expectedProposalCount: z.number().int().min(0),
+      /**
+       * `none` unless packaging could not tell what already exists for this run's subjects, or what
+       * the Investigation already carries (the baseline the settlement barrier is counted from), so
+       * it minted nothing rather than risk a duplicate: `check_failed`. A Proposal that already
+       * holds a subject is not a suppression, it is `converged`.
+       */
+      mintSuppression: mintSuppressionSchema,
+      /**
+       * `none` unless this run was a clean one (no confirmed hit) whose dismissal was withheld
+       * because the Investigation still carries an open (`pending`/`executing`) Proposal from an
+       * earlier run: closing it as benign would strand a decision or an in-flight action.
+       * `open_proposal` means the lookup found one; `check_failed` means the lookup itself failed,
+       * so the dismissal fails closed without asserting a Proposal exists. Either way `dismiss` is
+       * `false` and the Investigation stays open. Narrower than `mintSuppression` on purpose: settled
+       * Proposals never hold a dismissal.
+       *
+       * Not airtight: a gate's Proposal is created asynchronously, after the packaging workflow has
+       * released its concurrency slot, so a clean run that lands in that create window sees no open
+       * Proposal and still dismisses. The per-subject ids that keep two runs from creating one
+       * Proposal twice do not apply: this asks whether anything is open on the Investigation, of a
+       * search that lags a write.
+       */
+      dismissHold: z.enum(['none', 'open_proposal', 'check_failed']),
     }),
-    proposals: z.array(packageReportMintPayloadSchema),
-    /**
-     * What this run found that a live Proposal already covers, so it minted nothing for it. Each
-     * entry carries the journal line `hunt_package_report.yaml` writes on this Investigation.
-     */
-    converged: z.array(convergedProposalSchema),
-    /**
-     * Findings this run minted nothing for because a live Proposal this Investigation already
-     * holds covers them: a rerun landing on its own pending or executing Proposal. Not in
-     * `converged`, which is for what another Investigation holds and is what the journal reports,
-     * but it still means "this run created nothing", and the Investigation stays open for it, so
-     * the run's summary has to be able to say so.
-     */
-    alreadyOpenCount: z.number().int().min(0),
-    /**
-     * Bounded markdown bullets, one per proposal up to `MAX_SUMMARY_PROPOSAL_BULLETS`, for the run
-     * conclusion's prose. `proposals` itself stays complete because it drives the gate fan-out; this
-     * is only what gets embedded in the journal note, whose `message` is capped at 8,000 characters.
-     */
-    proposalBullets: z
-      .array(z.string().max(MAX_SUMMARY_BULLETS_CHARS))
-      .max(MAX_SUMMARY_PROPOSAL_BULLETS),
-    /** Proposals past the bullet cap that the prose states as a count instead of listing. */
-    omittedProposalCount: z.number().int().min(0),
-    dismiss: z.boolean(),
-    closureSummary: z.string(),
-    expectedProposalCount: z.number().int().min(0),
-    /**
-     * `none` unless packaging could not tell what already exists for this run's subjects, or what
-     * the Investigation already carries (the baseline the settlement barrier is counted from), so
-     * it minted nothing rather than risk a duplicate: `check_failed`. A Proposal that already
-     * holds a subject is not a suppression, it is `converged`.
-     */
-    mintSuppression: mintSuppressionSchema,
-    /**
-     * `none` unless this run was a clean one (no confirmed hit) whose dismissal was withheld
-     * because the Investigation still carries an open (`pending`/`executing`) Proposal from an
-     * earlier run: closing it as benign would strand a decision or an in-flight action.
-     * `open_proposal` means the lookup found one; `check_failed` means the lookup itself failed,
-     * so the dismissal fails closed without asserting a Proposal exists. Either way `dismiss` is
-     * `false` and the Investigation stays open. Narrower than `mintSuppression` on purpose: settled
-     * Proposals never hold a dismissal.
-     *
-     * Not airtight: a gate's Proposal is created asynchronously, after the packaging workflow has
-     * released its concurrency slot, so a clean run that lands in that create window sees no open
-     * Proposal and still dismisses. The per-subject ids that keep two runs from creating one
-     * Proposal twice do not apply: this asks whether anything is open on the Investigation, of a
-     * search that lags a write.
-     */
-    dismissHold: z.enum(['none', 'open_proposal', 'check_failed']),
-  }),
-  z.object({
-    status: z.literal('run_incomplete'),
-    reason: z.string(),
-  }),
-]);
+    z.object({
+      status: z.literal('run_incomplete'),
+      reason: z.string(),
+    }),
+  ])
+);
 
 export type PackageReportInput = z.infer<typeof packageReportInputSchema>;
 export type PackageReportOutput = z.infer<typeof packageReportOutputSchema>;

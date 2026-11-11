@@ -250,66 +250,78 @@ export const streamsUnitStatsRequestSchema = lazySchema(() =>
   })
 );
 
-export const streamsUnitStatsErrorSchema = z.object({
-  code: z.string(),
-  reason: z.string(),
-});
+export const streamsUnitStatsErrorSchema = lazySchema(() =>
+  z.object({
+    code: z.string(),
+    reason: z.string(),
+  })
+);
 
 /** `value: null` means no data. `unit` is always set: a UCUM string, for example `s` or `{item}`. */
-const statsValueSchema = z.object({ value: z.number().nullable(), unit: z.string() });
+const statsValueSchema = lazySchema(() =>
+  z.object({ value: z.number().nullable(), unit: z.string() })
+);
 /** A rate is always per unit of time. `time_unit` is always set: the UCUM time unit, for example `s`. */
-const statsRateSchema = statsValueSchema.extend({ time_unit: z.string() });
+const statsRateSchema = lazySchema(() => statsValueSchema.extend({ time_unit: z.string() }));
 
-export const streamsUnitStatsSeriesSchema = z.object({
-  bucket_ms: z.number(),
-  points: z.array(z.object({ start: z.string(), value: z.number() })),
-});
+export const streamsUnitStatsSeriesSchema = lazySchema(() =>
+  z.object({
+    bucket_ms: z.number(),
+    points: z.array(z.object({ start: z.string(), value: z.number() })),
+  })
+);
 
-export const streamsUnitStatsDestinationResultSchema = z.object({
-  error: streamsUnitStatsErrorSchema.optional(),
-  latency: z.object({ average: statsValueSchema }),
-  events: z.object({
-    incoming: z.object({
-      total: statsValueSchema,
-      rate: statsRateSchema,
-      series: streamsUnitStatsSeriesSchema,
+export const streamsUnitStatsDestinationResultSchema = lazySchema(() =>
+  z.object({
+    error: streamsUnitStatsErrorSchema.optional(),
+    latency: z.object({ average: statsValueSchema }),
+    events: z.object({
+      incoming: z.object({
+        total: statsValueSchema,
+        rate: statsRateSchema,
+        series: streamsUnitStatsSeriesSchema,
+      }),
+      /**
+       * Items that failed in this destination, per second: every outcome other than "success".
+       * The destination is the last hop, so each of them is its own failure.
+       */
+      failed: z.object({ rate: statsRateSchema }),
     }),
-    /**
-     * Items that failed in this destination, per second: every outcome other than "success".
-     * The destination is the last hop, so each of them is its own failure.
-     */
-    failed: z.object({ rate: statsRateSchema }),
-  }),
-});
+  })
+);
 
-export const streamsUnitStatsProcessorInstanceSchema = z.object({
-  pipeline_id: z.string(),
-  /** The position of the route in the pipeline, null for the processors of the pipeline itself. */
-  route_index: z.number().int().nonnegative().nullable(),
-  processing_duration: z.object({ average: statsValueSchema }),
-  events: z.object({
-    incoming: z.object({
-      rate: statsRateSchema,
+export const streamsUnitStatsProcessorInstanceSchema = lazySchema(() =>
+  z.object({
+    pipeline_id: z.string(),
+    /** The position of the route in the pipeline, null for the processors of the pipeline itself. */
+    route_index: z.number().int().nonnegative().nullable(),
+    processing_duration: z.object({ average: statsValueSchema }),
+    events: z.object({
+      incoming: z.object({
+        rate: statsRateSchema,
+      }),
+      /**
+       * Items that failed in this processor, per second: outcome "failure". Items a downstream
+       * component refused are not counted, they belong to that component. null until
+       * opentelemetry-collector-contrib#52158 is fixed.
+       */
+      failed: z.object({ rate: statsRateSchema }),
     }),
-    /**
-     * Items that failed in this processor, per second: outcome "failure". Items a downstream
-     * component refused are not counted, they belong to that component. null until
-     * opentelemetry-collector-contrib#52158 is fixed.
-     */
-    failed: z.object({ rate: statsRateSchema }),
-  }),
-});
+  })
+);
 
-export const streamsUnitStatsProcessorResultSchema = z.object({
-  error: streamsUnitStatsErrorSchema.optional(),
-  /**
-   * Where the processor ran in the window, one entry per pipeline and route. Empty when it has no
-   * data. A route is identified by its position as the telemetry reports it, so when routes are
-   * added, removed or reordered a position can mean a different route in an older part of the
-   * window: an instance is only reliable within one unit version.
-   */
-  instances: z.array(streamsUnitStatsProcessorInstanceSchema),
-});
+export const streamsUnitStatsProcessorResultSchema = lazySchema(() =>
+  z.object({
+    error: streamsUnitStatsErrorSchema.optional(),
+    /**
+     * Where the processor ran in the window, one entry per pipeline and route. Empty when it has no
+     * data. A route is identified by its position as the telemetry reports it, so when routes are
+     * added, removed or reordered a position can mean a different route in an older part of the
+     * window: an instance is only reliable within one unit version.
+     */
+    instances: z.array(streamsUnitStatsProcessorInstanceSchema),
+  })
+);
 
 export const streamsUnitStatsSourceResultSchema = lazySchema(() =>
   z.object({

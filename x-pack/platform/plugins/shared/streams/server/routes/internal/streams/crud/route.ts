@@ -6,7 +6,7 @@
  */
 
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { estypes } from '@elastic/elasticsearch';
 import type {
   ClassicIngestStreamEffectiveLifecycle,
@@ -235,14 +235,16 @@ export const resolveIndexPatternsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    body: z.object({
-      patterns: z
-        .array(z.string().min(1).max(MAX_RESOLVE_INDEX_PATTERN_LENGTH))
-        .min(1)
-        .max(MAX_RESOLVE_INDEX_PATTERNS),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        patterns: z
+          .array(z.string().min(1).max(MAX_RESOLVE_INDEX_PATTERN_LENGTH))
+          .min(1)
+          .max(MAX_RESOLVE_INDEX_PATTERNS),
+      }),
+    })
+  ),
   handler: async ({ request, params, getScopedClients }): Promise<{ indices: string[] }> => {
     const { scopedClusterClient } = await getScopedClients({ request });
     const resolved = await scopedClusterClient.asCurrentUser.indices.resolveIndex({

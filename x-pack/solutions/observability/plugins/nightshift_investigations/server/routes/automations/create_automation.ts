@@ -6,7 +6,7 @@
  */
 
 import { badRequest, serverUnavailable } from '@hapi/boom';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
@@ -27,12 +27,14 @@ const executionSchema = z.object({
   connectorId: z.string().max(512).optional(),
 });
 
-const runtimeSchema = z.object({
-  dailyDispatchLimit: z.number().int().min(1).optional(),
-  timeoutSeconds: z.number().int().min(1).optional(),
-  dedupeWindowSeconds: z.number().int().min(0).optional(),
-  overlapPolicy: z.enum(['drop', 'cancel_in_progress', 'queue']).optional(),
-});
+const runtimeSchema = lazySchema(() =>
+  z.object({
+    dailyDispatchLimit: z.number().int().min(1).optional(),
+    timeoutSeconds: z.number().int().min(1).optional(),
+    dedupeWindowSeconds: z.number().int().min(0).optional(),
+    overlapPolicy: z.enum(['drop', 'cancel_in_progress', 'queue']).optional(),
+  })
+);
 
 // A username can be an opaque id (for example on Cloud), so prefer a name a person recognizes.
 const getAuthorName = (

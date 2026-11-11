@@ -9,7 +9,7 @@ import { z, lazySchema } from '@kbn/zod';
 
 import { durationType } from './duration';
 
-const rollingTimeWindowTypeSchema = z.literal('rolling');
+const rollingTimeWindowTypeSchema = lazySchema(() => z.literal('rolling'));
 const rollingTimeWindowSchema = lazySchema(() =>
   z
     .object({
@@ -23,7 +23,7 @@ const rollingTimeWindowSchema = lazySchema(() =>
     .meta({ id: 'SLOTimeWindowRolling' })
 );
 
-const calendarAlignedTimeWindowTypeSchema = z.literal('calendarAligned');
+const calendarAlignedTimeWindowTypeSchema = lazySchema(() => z.literal('calendarAligned'));
 const calendarAlignedTimeWindowSchema = lazySchema(() =>
   z
     .object({
@@ -37,13 +37,14 @@ const calendarAlignedTimeWindowSchema = lazySchema(() =>
     .meta({ id: 'SLOTimeWindowCalendarAligned' })
 );
 
-const timeWindowTypeSchema = z.union([
-  rollingTimeWindowTypeSchema,
-  calendarAlignedTimeWindowTypeSchema,
-]);
-const timeWindowSchema = z
-  .discriminatedUnion('type', [rollingTimeWindowSchema, calendarAlignedTimeWindowSchema])
-  .meta({ id: 'SLOTimeWindow', description: 'Defines properties for the SLO time window' });
+const timeWindowTypeSchema = lazySchema(() =>
+  z.union([rollingTimeWindowTypeSchema, calendarAlignedTimeWindowTypeSchema])
+);
+const timeWindowSchema = lazySchema(() =>
+  z
+    .discriminatedUnion('type', [rollingTimeWindowSchema, calendarAlignedTimeWindowSchema])
+    .meta({ id: 'SLOTimeWindow', description: 'Defines properties for the SLO time window' })
+);
 
 export {
   rollingTimeWindowSchema,

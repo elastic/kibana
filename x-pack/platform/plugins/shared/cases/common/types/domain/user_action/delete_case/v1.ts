@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { UserActionTypes } from '../action/v1';
 
-export const DeleteCaseUserActionSchema = z.object({
-  type: z.literal(UserActionTypes.delete_case),
-  payload: z.object({}),
-});
+export const DeleteCaseUserActionSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(UserActionTypes.delete_case),
+    payload: z.object({}),
+  })
+);

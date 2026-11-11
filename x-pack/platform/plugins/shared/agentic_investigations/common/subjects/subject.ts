@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_EVIDENCE_TEXT_LENGTH } from '../evidence/evidence';
 import { userSchema } from '../user';
 import {
@@ -36,44 +36,46 @@ export type InvestigationSubjectTriggerType = z.infer<typeof investigationSubjec
  * so every Nightshift snapshot validates, and any other field is kept as is. The key count and the
  * serialized size are bounded because the open fields are opaque.
  */
-export const alertSubjectSnapshotSchema = z
-  .looseObject({
-    /** `kibana.alert.uuid` */
-    id: z.string().min(1).max(500).optional(),
-    /** `kibana.alert.rule.uuid` */
-    rule_id: z.string().min(1).max(500).optional(),
-    /** `kibana.alert.rule.name` */
-    rule_name: z.string().min(1).max(500).optional(),
-    /** `kibana.alert.rule.rule_type_id` */
-    rule_type_id: z.string().min(1).max(500).optional(),
-    /** `kibana.alert.rule.category` */
-    rule_category: z.string().min(1).max(500).optional(),
-    /** `kibana.alert.reason` */
-    reason: z.string().min(1).max(5000).optional(),
-    /** `kibana.alert.status` */
-    status: z.string().min(1).max(100).optional(),
-    /** `kibana.alert.start` */
-    start: z.string().max(100).optional(),
-    timestamp: z.string().max(100).optional(),
-    /** `kibana.alert.url`: the link the rule type writes, if any (for example a Discover link). */
-    url: z.string().max(2000).optional(),
-    rule_tags: z.array(z.string().max(500)).max(50).optional(),
-    /**
-     * `source` of an alerting v2 alert: what produced it (`universal` for a rule,
-     * `elastic.significant_event`, or the external service a workflow imported it from). Only v2
-     * alerts carry one, so its presence is what tells the two alertings apart.
-     */
-    source: z.string().min(1).max(500).optional(),
-  })
-  .refine((value) => Object.keys(value).length <= MAX_SNAPSHOT_KEYS, {
-    message: `snapshot exceeds ${MAX_SNAPSHOT_KEYS} key limit`,
-  })
-  .refine((value) => Object.keys(value).every((key) => key.length <= MAX_SNAPSHOT_KEY_LENGTH), {
-    message: `snapshot has a key longer than ${MAX_SNAPSHOT_KEY_LENGTH} characters`,
-  })
-  .refine((value) => JSON.stringify(value).length <= MAX_SUBJECT_SNAPSHOT_LENGTH, {
-    message: `snapshot exceeds ${MAX_SUBJECT_SNAPSHOT_LENGTH} characters`,
-  });
+export const alertSubjectSnapshotSchema = lazySchema(() =>
+  z
+    .looseObject({
+      /** `kibana.alert.uuid` */
+      id: z.string().min(1).max(500).optional(),
+      /** `kibana.alert.rule.uuid` */
+      rule_id: z.string().min(1).max(500).optional(),
+      /** `kibana.alert.rule.name` */
+      rule_name: z.string().min(1).max(500).optional(),
+      /** `kibana.alert.rule.rule_type_id` */
+      rule_type_id: z.string().min(1).max(500).optional(),
+      /** `kibana.alert.rule.category` */
+      rule_category: z.string().min(1).max(500).optional(),
+      /** `kibana.alert.reason` */
+      reason: z.string().min(1).max(5000).optional(),
+      /** `kibana.alert.status` */
+      status: z.string().min(1).max(100).optional(),
+      /** `kibana.alert.start` */
+      start: z.string().max(100).optional(),
+      timestamp: z.string().max(100).optional(),
+      /** `kibana.alert.url`: the link the rule type writes, if any (for example a Discover link). */
+      url: z.string().max(2000).optional(),
+      rule_tags: z.array(z.string().max(500)).max(50).optional(),
+      /**
+       * `source` of an alerting v2 alert: what produced it (`universal` for a rule,
+       * `elastic.significant_event`, or the external service a workflow imported it from). Only v2
+       * alerts carry one, so its presence is what tells the two alertings apart.
+       */
+      source: z.string().min(1).max(500).optional(),
+    })
+    .refine((value) => Object.keys(value).length <= MAX_SNAPSHOT_KEYS, {
+      message: `snapshot exceeds ${MAX_SNAPSHOT_KEYS} key limit`,
+    })
+    .refine((value) => Object.keys(value).every((key) => key.length <= MAX_SNAPSHOT_KEY_LENGTH), {
+      message: `snapshot has a key longer than ${MAX_SNAPSHOT_KEY_LENGTH} characters`,
+    })
+    .refine((value) => JSON.stringify(value).length <= MAX_SUBJECT_SNAPSHOT_LENGTH, {
+      message: `snapshot exceeds ${MAX_SUBJECT_SNAPSHOT_LENGTH} characters`,
+    })
+);
 export type AlertSubjectSnapshot = z.infer<typeof alertSubjectSnapshotSchema>;
 
 /**

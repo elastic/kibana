@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { internalTools, ToolOrigin, ToolType } from '@kbn/agent-builder-common';
 import {
   type AgentBuilderToolEvent,
@@ -15,14 +15,16 @@ import {
 import { toDynamicToolEvent, type ToolManager } from '@kbn/agent-builder-server/runner';
 import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/tool_manager';
 
-const schema = z.object({
-  tool_id: z
-    .string()
-    .describe('Identifier of the dynamic tool to run, as listed in its definition'),
-  params: z
-    .record(z.string(), z.unknown())
-    .describe("Arguments for the tool, matching the tool definition's `parameters` schema"),
-});
+const schema = lazySchema(() =>
+  z.object({
+    tool_id: z
+      .string()
+      .describe('Identifier of the dynamic tool to run, as listed in its definition'),
+    params: z
+      .record(z.string(), z.unknown())
+      .describe("Arguments for the tool, matching the tool definition's `parameters` schema"),
+  })
+);
 
 export type ExecuteDynamicToolParams = z.infer<typeof schema>;
 

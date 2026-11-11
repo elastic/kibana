@@ -156,20 +156,22 @@ const pinnedPanelsSchema = z.array(pinnedControlSchema);
  * Zod schema for dashboard attachment data.
  * This schema matches the structure of DashboardState from @kbn/dashboard-plugin.
  */
-export const dashboardAttachmentDataSchema = z.object({
-  title: z.string(),
-  description: z.string().optional(),
-  panels: z.array(z.union([attachmentPanelSchema, dashboardSectionSchema])),
-  query: querySchema.optional(),
-  time_range: timeRangeSchema.optional(),
-  refresh_interval: refreshIntervalSchema.optional(),
-  filters: z.array(filterSchema).optional(),
-  options: optionsSchema.optional(),
-  tags: z.array(z.string()).optional(),
-  pinned_panels: pinnedPanelsSchema.optional(),
-  access_control: accessControlSchema.optional(),
-  project_routing: z.string().optional(),
-  esql_approximation: z.boolean().optional(),
-});
+export const dashboardAttachmentDataSchema = lazySchema(() =>
+  z.object({
+    title: z.string(),
+    description: z.string().optional(),
+    panels: z.array(z.union([attachmentPanelSchema, dashboardSectionSchema])),
+    query: querySchema.optional(),
+    time_range: timeRangeSchema.optional(),
+    refresh_interval: refreshIntervalSchema.optional(),
+    filters: z.array(filterSchema).optional(),
+    options: optionsSchema.optional(),
+    tags: z.array(z.string()).optional(),
+    pinned_panels: pinnedPanelsSchema.optional(),
+    access_control: accessControlSchema.optional(),
+    project_routing: z.string().optional(),
+    esql_approximation: z.boolean().optional(),
+  })
+);
 
 export type DashboardAttachmentData = z.infer<typeof dashboardAttachmentDataSchema>;

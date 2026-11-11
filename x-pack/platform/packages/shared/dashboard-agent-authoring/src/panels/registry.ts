@@ -6,7 +6,7 @@
  */
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { PanelContent, PanelContentAttempt } from '../resolve_panel';
 import type { ConfigPanelKind, RequestPanelKind } from './panel_kind';
 import { lensPanelKind, vegaPanelKind, type VisPanelResolutionRequest } from './vis';
@@ -61,17 +61,19 @@ const toNonEmpty = <T>([first, ...rest]: readonly T[]): [T, ...T[]] => [first, .
  * Panel content of an upsert item: creates a panel of any kind, or edits an existing panel of the
  * same kind.
  */
-export const upsertPanelContentSchema = z.discriminatedUnion('source', [
-  z.discriminatedUnion(
-    'type',
-    toNonEmpty(CONFIG_PANEL_KINDS.map(({ contentSchema }) => contentSchema))
-  ),
-  z.discriminatedUnion(
-    'renderer',
-    toNonEmpty(REQUEST_PANEL_KINDS.map(({ contentSchema }) => contentSchema))
-  ),
-  attachmentPanelInputSchema,
-]);
+export const upsertPanelContentSchema = lazySchema(() =>
+  z.discriminatedUnion('source', [
+    z.discriminatedUnion(
+      'type',
+      toNonEmpty(CONFIG_PANEL_KINDS.map(({ contentSchema }) => contentSchema))
+    ),
+    z.discriminatedUnion(
+      'renderer',
+      toNonEmpty(REQUEST_PANEL_KINDS.map(({ contentSchema }) => contentSchema))
+    ),
+    attachmentPanelInputSchema,
+  ])
+);
 
 export type UpsertPanelContent = z.infer<typeof upsertPanelContentSchema>;
 

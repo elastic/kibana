@@ -198,10 +198,12 @@ export const v2AlertSnapshotSchema = lazySchema(() =>
   })
 );
 
-export const investigationAlertSnapshotSchema = z.discriminatedUnion('alert_version', [
-  alertSnapshotSchema.extend({ alert_version: z.literal('v1').optional() }),
-  v2AlertSnapshotSchema,
-]);
+export const investigationAlertSnapshotSchema = lazySchema(() =>
+  z.discriminatedUnion('alert_version', [
+    alertSnapshotSchema.extend({ alert_version: z.literal('v1').optional() }),
+    v2AlertSnapshotSchema,
+  ])
+);
 
 /**
  * Strict, so that an alert investigation carries alert data and nothing else. In particular a

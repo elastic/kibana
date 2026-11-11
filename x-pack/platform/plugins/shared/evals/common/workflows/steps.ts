@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
@@ -233,27 +233,31 @@ export const ingestScoresCommonDefinition: CommonStepDefinition<
 
 export const PersistOnlineScoresStepId = 'ai.evals.persistOnlineScores' as const;
 
-export const persistOnlineScoresInputSchema = z.object({
-  monitor: z.object({ id: z.string(), name: z.string() }),
-  trace_id: z.string(),
-  connector_id: z.string().optional(),
-  results: z.array(
-    evaluatorResultSchema.extend({
-      evaluator: evaluatorResultSchema.shape.evaluator.extend({
-        version: z.string(),
-        kind: z.enum(['llm', 'code']),
-      }),
-    })
-  ),
-  /** Evaluator failures reported by `ai.evals.evaluateTrace`, counted but not persisted. */
-  errors: z.array(z.string()).optional(),
-});
+export const persistOnlineScoresInputSchema = lazySchema(() =>
+  z.object({
+    monitor: z.object({ id: z.string(), name: z.string() }),
+    trace_id: z.string(),
+    connector_id: z.string().optional(),
+    results: z.array(
+      evaluatorResultSchema.extend({
+        evaluator: evaluatorResultSchema.shape.evaluator.extend({
+          version: z.string(),
+          kind: z.enum(['llm', 'code']),
+        }),
+      })
+    ),
+    /** Evaluator failures reported by `ai.evals.evaluateTrace`, counted but not persisted. */
+    errors: z.array(z.string()).optional(),
+  })
+);
 
-export const persistOnlineScoresOutputSchema = z.object({
-  created: z.number().int(),
-  skipped: z.number().int(),
-  failed_evaluators: z.number().int(),
-});
+export const persistOnlineScoresOutputSchema = lazySchema(() =>
+  z.object({
+    created: z.number().int(),
+    skipped: z.number().int(),
+    failed_evaluators: z.number().int(),
+  })
+);
 
 export const persistOnlineScoresCommonDefinition: CommonStepDefinition<
   typeof persistOnlineScoresInputSchema,

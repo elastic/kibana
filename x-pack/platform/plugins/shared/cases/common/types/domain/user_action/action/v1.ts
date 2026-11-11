@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * These values are used in a number of places including to define the accepted values in the
@@ -55,6 +55,6 @@ export const UserActionActions = {
  */
 export type UserActionAction = (typeof UserActionActions)[keyof typeof UserActionActions];
 
-export const UserActionActionsSchema = z.enum(
-  Object.values(UserActionActions) as [UserActionAction, ...UserActionAction[]]
+export const UserActionActionsSchema = lazySchema(() =>
+  z.enum(Object.values(UserActionActions) as [UserActionAction, ...UserActionAction[]])
 );

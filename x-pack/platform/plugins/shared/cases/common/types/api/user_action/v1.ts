@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_USER_ACTIONS_PER_PAGE,
   MAX_USER_ACTION_SEARCH_LENGTH,
@@ -53,16 +53,18 @@ const UserActionFindRequestSourcesValues = [
 /**
  * User actions stats API
  */
-export const CaseUserActionStatsSchema = z.object({
-  total: z.number(),
-  total_deletions: z.number(),
-  total_comments: z.number(),
-  total_comment_deletions: z.number(),
-  total_comment_creations: z.number(),
-  total_hidden_comment_updates: z.number(),
-  total_other_actions: z.number(),
-  total_other_action_deletions: z.number(),
-});
+export const CaseUserActionStatsSchema = lazySchema(() =>
+  z.object({
+    total: z.number(),
+    total_deletions: z.number(),
+    total_comments: z.number(),
+    total_comment_deletions: z.number(),
+    total_comment_creations: z.number(),
+    total_hidden_comment_updates: z.number(),
+    total_other_actions: z.number(),
+    total_other_action_deletions: z.number(),
+  })
+);
 
 export const CaseUserActionStatsResponseSchema = CaseUserActionStatsSchema;
 
@@ -72,8 +74,8 @@ export const CaseUserActionStatsResponseSchema = CaseUserActionStatsSchema;
 export const CaseUserActionDeprecatedResponseSchema = CaseUserActionBasicSchema.and(
   CaseUserActionInjectedDeprecatedIdsSchema
 );
-export const CaseUserActionsDeprecatedResponseSchema = z.array(
-  CaseUserActionDeprecatedResponseSchema
+export const CaseUserActionsDeprecatedResponseSchema = lazySchema(() =>
+  z.array(CaseUserActionDeprecatedResponseSchema)
 );
 
 /**
@@ -82,16 +84,18 @@ export const CaseUserActionsDeprecatedResponseSchema = z.array(
 export const UserActionFindRequestSchema = paginationSchema({
   maxPerPage: MAX_USER_ACTIONS_PER_PAGE,
 }).extend({
-  types: z.array(z.enum(UserActionFindRequestTypesValues)).optional(),
-  sortOrder: z.enum(['desc', 'asc']).optional(),
+  types: lazySchema(() => z.array(z.enum(UserActionFindRequestTypesValues)).optional()),
+  sortOrder: lazySchema(() => z.enum(['desc', 'asc']).optional()),
 });
 
-export const UserActionFindResponseSchema = z.object({
-  userActions: UserActionsSchema,
-  page: z.number(),
-  perPage: z.number(),
-  total: z.number(),
-});
+export const UserActionFindResponseSchema = lazySchema(() =>
+  z.object({
+    userActions: UserActionsSchema,
+    page: z.number(),
+    perPage: z.number(),
+    total: z.number(),
+  })
+);
 
 export type CaseUserActionStats = z.infer<typeof CaseUserActionStatsSchema>;
 export type CaseUserActionStatsResponse = z.infer<typeof CaseUserActionStatsResponseSchema>;
@@ -114,7 +118,7 @@ export const UserActionInternalFindRequestSchema = UserActionFindRequestSchema.e
     max: MAX_USER_ACTION_SEARCH_LENGTH,
   }).optional(),
   sources: limitedArraySchema({
-    codec: z.enum(UserActionFindRequestSourcesValues),
+    codec: lazySchema(() => z.enum(UserActionFindRequestSourcesValues)),
     fieldName: 'sources',
     min: 0,
     max: MAX_USER_ACTION_SOURCES_FILTER_LENGTH,

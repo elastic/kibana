@@ -78,53 +78,64 @@ const UserActionCommonWriteAttributesSchema = lazySchema(() =>
  * This should only be used for the getAll route and it should be removed when the route is removed
  * @deprecated use CaseUserActionInjectedIdsSchema instead
  */
-export const CaseUserActionInjectedDeprecatedIdsSchema = z.object({
-  action_id: z.string(),
-  case_id: z.string(),
-  comment_id: z.string().nullable(),
-});
+export const CaseUserActionInjectedDeprecatedIdsSchema = lazySchema(() =>
+  z.object({
+    action_id: z.string(),
+    case_id: z.string(),
+    comment_id: z.string().nullable(),
+  })
+);
 
-export const CaseUserActionInjectedIdsSchema = z.object({
-  comment_id: z.string().nullable(),
-});
+export const CaseUserActionInjectedIdsSchema = lazySchema(() =>
+  z.object({
+    comment_id: z.string().nullable(),
+  })
+);
 
-const BasicUserActionsSchema = z.union([
-  DescriptionUserActionSchema,
-  TagsUserActionSchema,
-  TitleUserActionSchema,
-  SettingsUserActionSchema,
-  StatusUserActionSchema,
-  SeverityUserActionSchema,
-  AssigneesUserActionSchema,
-  DeleteCaseUserActionSchema,
-  CategoryUserActionSchema,
-  CustomFieldsUserActionSchema,
-  ObservablesUserActionSchema,
-  ExtendedFieldsUserActionSchema,
-  TemplateUserActionSchema,
-  WorkflowUserActionSchema,
-  BulkAttachmentsUserActionSchema,
-]);
+const BasicUserActionsSchema = lazySchema(() =>
+  z.union([
+    DescriptionUserActionSchema,
+    TagsUserActionSchema,
+    TitleUserActionSchema,
+    SettingsUserActionSchema,
+    StatusUserActionSchema,
+    SeverityUserActionSchema,
+    AssigneesUserActionSchema,
+    DeleteCaseUserActionSchema,
+    CategoryUserActionSchema,
+    CustomFieldsUserActionSchema,
+    ObservablesUserActionSchema,
+    ExtendedFieldsUserActionSchema,
+    TemplateUserActionSchema,
+    WorkflowUserActionSchema,
+    BulkAttachmentsUserActionSchema,
+  ])
+);
 
-const CommonUserActionsWithIdsSchema = z.union([BasicUserActionsSchema, CommentUserActionSchema]);
-const CommonUserActionsWithoutIdsSchema = z.union([
-  BasicUserActionsSchema,
-  CommentUserActionWithoutIdsSchema,
-]);
+const CommonUserActionsWithIdsSchema = lazySchema(() =>
+  z.union([BasicUserActionsSchema, CommentUserActionSchema])
+);
+const CommonUserActionsWithoutIdsSchema = lazySchema(() =>
+  z.union([BasicUserActionsSchema, CommentUserActionWithoutIdsSchema])
+);
 
-const UserActionPayloadSchema = z.union([
-  CommonUserActionsWithIdsSchema,
-  CreateCaseUserActionSchema,
-  ConnectorUserActionSchema,
-  PushedUserActionSchema,
-]);
+const UserActionPayloadSchema = lazySchema(() =>
+  z.union([
+    CommonUserActionsWithIdsSchema,
+    CreateCaseUserActionSchema,
+    ConnectorUserActionSchema,
+    PushedUserActionSchema,
+  ])
+);
 
-const UserActionsWithoutIdsSchema = z.union([
-  CommonUserActionsWithoutIdsSchema,
-  CreateCaseUserActionWithoutConnectorIdSchema,
-  ConnectorUserActionWithoutConnectorIdSchema,
-  PushedUserActionWithoutConnectorIdSchema,
-]);
+const UserActionsWithoutIdsSchema = lazySchema(() =>
+  z.union([
+    CommonUserActionsWithoutIdsSchema,
+    CreateCaseUserActionWithoutConnectorIdSchema,
+    ConnectorUserActionWithoutConnectorIdSchema,
+    PushedUserActionWithoutConnectorIdSchema,
+  ])
+);
 
 export const CaseUserActionBasicSchema = UserActionPayloadSchema.and(
   UserActionCommonAttributesSchema
@@ -149,7 +160,7 @@ const UserActionSchema = UserActionAttributesSchema.and(
   z.object({ id: z.string(), version: z.string() })
 );
 
-export const UserActionsSchema = z.array(UserActionSchema);
+export const UserActionsSchema = lazySchema(() => z.array(UserActionSchema));
 
 export type CaseUserActionWithoutReferenceIds = z.infer<
   typeof CaseUserActionWithoutReferenceIdsSchema
