@@ -25,6 +25,7 @@ import {
   OrcaFlagsJudgePrompt,
   RecallUsageJudgePrompt,
   ToolCallHealthJudgePrompt,
+  TOOL_CALL_WHY_VALUES,
   TruthfulnessJudgePrompt,
 } from './prompts';
 import {
@@ -365,10 +366,16 @@ const createRunMemo = <T>() => {
   };
 };
 
+type ToolCallWhy = (typeof TOOL_CALL_WHY_VALUES)[number];
+
 interface ToolCallIssue {
   step: number;
   reason: string;
+  why: ToolCallWhy;
 }
+
+const isToolCallWhy = (value: unknown): value is ToolCallWhy =>
+  TOOL_CALL_WHY_VALUES.some((why) => why === value);
 
 interface ToolCallHealth {
   failed: ToolCallIssue[];
@@ -377,15 +384,19 @@ interface ToolCallHealth {
 
 /** Valid, unique issues for steps that exist in the trajectory, in step order. */
 const toToolCallIssues = (
-  issues: ToolCallIssue[] | undefined,
+  issues: Array<Omit<ToolCallIssue, 'why'> & { why?: unknown }> | undefined,
   stepCount: number,
   excludedSteps: ReadonlySet<number> = new Set()
 ): ToolCallIssue[] => {
   const byStep = new Map<number, ToolCallIssue>();
-  for (const { step, reason } of Array.isArray(issues) ? issues : []) {
+  for (const { step, reason, why } of Array.isArray(issues) ? issues : []) {
     if (!Number.isInteger(step) || step < 1 || step > stepCount) continue;
     if (excludedSteps.has(step) || byStep.has(step)) continue;
-    byStep.set(step, { step, reason: String(reason ?? '') });
+    byStep.set(step, {
+      step,
+      reason: String(reason ?? ''),
+      why: isToolCallWhy(why) ? why : 'other',
+    });
   }
   return [...byStep.values()].sort((a, b) => a.step - b.step);
 };
@@ -399,9 +410,19 @@ const toolCallIssueResult = (
   label: issues.length > 0 ? noun : 'none',
   explanation:
     issues.length > 0
-      ? issues.map(({ step, reason }) => `step ${step}: ${reason}`).join('\n')
+      ? issues.map(({ step, reason, why }) => `step ${step} (${why}): ${reason}`).join('\n')
       : `No ${noun} tool calls.`,
-  metadata: { steps: issues.map(({ step }) => step), total_tool_calls: output.tool_call_count },
+  metadata: {
+    steps: issues.map(({ step }) => step),
+    total_tool_calls: output.tool_call_count,
+    // How many of these calls left the agent without data for each reason.
+    ...Object.fromEntries(
+      TOOL_CALL_WHY_VALUES.map((reason) => [
+        reason,
+        issues.filter(({ why }) => why === reason).length,
+      ])
+    ),
+  },
 });
 
 /** The task keeps only the trajectory prefix that fits its size budget, so it can be shorter than the run. */
@@ -425,8 +446,8 @@ export const createToolCallHealthEvaluators = (deps: JudgeDeps): InvestigationEv
   ): Promise<ToolCallHealth> =>
     memo(output, async () => {
       const result = await invokeJudge<{
-        failed_calls?: ToolCallIssue[];
-        empty_calls?: ToolCallIssue[];
+        failed_calls?: Array<Omit<ToolCallIssue, 'why'> & { why?: unknown }>;
+        empty_calls?: Array<Omit<ToolCallIssue, 'why'> & { why?: unknown }>;
       }>(deps, 'tool_call_health', ToolCallHealthJudgePrompt, { question, trajectory });
       const stepCount = output.tool_call_trajectory?.length ?? 0;
       const failed = toToolCallIssues(result.failed_calls, stepCount);

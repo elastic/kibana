@@ -25,4 +25,11 @@ A call is either FAILED or NO DATA, never both: if it failed, do not also list i
 - A call that returned useful data, even if part of it is noisy or truncated.
 - Calls you cannot assess because the result text is cut off. Judge only what is visible.
 
+## WHY
+For every call you list, also give why the agent came away without the data it wanted:
+- `no_access`: a permission, authentication or connector error, or a data source the agent has no credentials for;
+- `not_retained`: the data is gone, expired or outside the retention window;
+- `not_collected`: the source does not record it (an unknown index, field, metric or service);
+- `other`: anything else, such as a syntax error, a bad argument or a timeout.
+
 Refer to calls by the step number printed in the trajectory.

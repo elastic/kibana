@@ -51,21 +51,43 @@ describe('tool call health', () => {
   it('counts failed and no-data calls from one judge call, ignoring invalid steps', async () => {
     const { deps, prompt } = judgeReturning({
       failed_calls: [
-        { step: 1, reason: 'Unknown column.' },
+        { step: 1, reason: 'Unknown column.', why: 'not_collected' },
         { step: 1, reason: 'duplicate' },
+        { step: 2, reason: '403 from the connector.', why: 'no_access' },
+        { step: 4, reason: 'Odd.', why: 'because' },
         { step: 99, reason: 'out of range' },
       ],
       empty_calls: [
         { step: 1, reason: 'also listed as failed' },
-        { step: 3, reason: 'Empty index list.' },
+        { step: 3, reason: 'Empty index list.', why: 'not_retained' },
       ],
     });
     const [failed, empty] = createToolCallHealthEvaluators(deps);
-    const params = { ...example, output: output() };
+    const params = {
+      ...example,
+      output: output({
+        tool_call_trajectory: [
+          step('bash', {}),
+          step('bash', {}),
+          step('bash', {}),
+          step('bash', {}),
+        ],
+        tool_call_count: 4,
+      }),
+    };
     const failedResult = await failed.evaluate(params);
     const emptyResult = await empty.evaluate(params);
-    expect(failedResult).toMatchObject({ score: 1, label: 'failed', metadata: { steps: [1] } });
-    expect(emptyResult).toMatchObject({ score: 1, label: 'no-data', metadata: { steps: [3] } });
+    // Each flagged call carries why the data was missing, and an unknown reason counts as `other`.
+    expect(failedResult).toMatchObject({
+      score: 3,
+      label: 'failed',
+      metadata: { steps: [1, 2, 4], no_access: 1, not_retained: 0, not_collected: 1, other: 1 },
+    });
+    expect(emptyResult).toMatchObject({
+      score: 1,
+      label: 'no-data',
+      metadata: { steps: [3], not_retained: 1, no_access: 0 },
+    });
     expect(prompt).toHaveBeenCalledTimes(1);
   });
 

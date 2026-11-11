@@ -521,6 +521,14 @@ export const AntiLeakageJudgePrompt = createPrompt({
   } as const)
   .get();
 
+/** Why a flagged call left the agent without data: the same reasons the investigation's `missing_data` uses. */
+export const TOOL_CALL_WHY_VALUES = [
+  'no_access',
+  'not_retained',
+  'not_collected',
+  'other',
+] as const;
+
 const TOOL_CALL_ISSUE_SCHEMA = {
   type: 'array',
   items: {
@@ -528,8 +536,14 @@ const TOOL_CALL_ISSUE_SCHEMA = {
     properties: {
       step: { type: 'number', description: 'The trajectory step number of the call.' },
       reason: { type: 'string', description: 'One short sentence on what went wrong.' },
+      why: {
+        type: 'string',
+        enum: TOOL_CALL_WHY_VALUES,
+        description:
+          'no_access: permission, authentication or connector error. not_retained: the data is gone or outside retention. not_collected: the source does not record it (unknown index, field or metric). other: anything else, such as a bad argument or syntax error.',
+      },
     },
-    required: ['step', 'reason'],
+    required: ['step', 'reason', 'why'],
   },
 } as const;
 
