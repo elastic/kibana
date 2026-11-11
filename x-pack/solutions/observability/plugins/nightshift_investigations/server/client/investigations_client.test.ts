@@ -309,6 +309,27 @@ describe('NightshiftInvestigationsClient.start()', () => {
     expect(investigationQuotaCallback).toHaveBeenCalledWith('manual');
   });
 
+  it.each([undefined, 'a1'])(
+    'records the owning automation on its investigation execution and rejects a caller-supplied association: %s',
+    async (automationId) => {
+      mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+      mockManagement.runWorkflow.mockResolvedValue('exec-123');
+      const result = await makeClient().start(
+        {
+          subject: { type: 'manual', id: 'manual' },
+          trigger_type: 'manual',
+          message: 'Review service health.',
+          context: { nightshift_automation_id: 'forged' },
+        },
+        { automationId, entryPoint: 'automation' }
+      );
+      expect(mockManagement.runWorkflow.mock.calls[0][2].context.nightshift_automation_id).toBe(
+        automationId
+      );
+      expect(result.execution_id).toBe(automationId ? 'exec-123' : undefined);
+    }
+  );
+
   it('keeps operator instructions outside the alert evidence and leaves default briefs unchanged', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-1');
@@ -483,7 +504,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
         subject: { type: 'significant_event', id: 'event-1' },
         trigger_type: 'manual',
       })
-    ).rejects.toThrow(/enable the Nightshift service account/);
+    ).rejects.toThrow(/enable the nightshift service account/);
     expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
   });
 
@@ -1896,7 +1917,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     });
 
     await expect(makeClient().ensureOrCreate('inv-1', 'exec-1')).rejects.toThrow(
-      /only run as the Nightshift service account/
+      /only run as the nightshift service account/
     );
     expect(conversations.create).not.toHaveBeenCalled();
     expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
@@ -1997,7 +2018,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     mockManagement.getWorkflow.mockResolvedValueOnce(null);
 
     await expect(makeClient().ensureOrCreate('inv-1', 'exec-1')).rejects.toThrow(
-      /only run as the Nightshift service account/
+      /only run as the nightshift service account/
     );
     expect(conversations.create).not.toHaveBeenCalled();
   });

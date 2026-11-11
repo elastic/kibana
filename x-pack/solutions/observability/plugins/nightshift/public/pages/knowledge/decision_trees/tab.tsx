@@ -49,7 +49,7 @@ export function DecisionTreesTab() {
           <p>
             <FormattedMessage
               id="xpack.nightshift.knowledge.decisionTrees.loadErrorDescription"
-              defaultMessage="The decision trees could not be loaded. Confirm Nightshift investigations are enabled and refresh the page."
+              defaultMessage="The decision trees could not be loaded. Confirm nightshift investigations are enabled and refresh the page."
             />
           </p>
         }

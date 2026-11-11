@@ -5,11 +5,17 @@
  * 2.0.
  */
 
+import { expect } from '@kbn/scout-security/ui';
 import type { Locator, ScoutPage, ScoutTestConfig, SecurityPageObjects } from '@kbn/scout-security';
 
 /** The project-chrome group the Endpoint management areas hang off on serverless. */
 const SERVERLESS_MANAGEMENT_GROUP_ID = 'securityGroup:assets';
 const SERVERLESS_GROUP_SELECTOR = `[data-test-subj~="nav-item-id-${SERVERLESS_MANAGEMENT_GROUP_ID}"]`;
+
+/** One attempt at reading the opened panel: long enough to mount, short enough to retry early. */
+const PANEL_READ_TIMEOUT_MS = 2_000;
+/** Budget for the whole reveal. A rebuild costs one attempt, so a handful of them always fit. */
+const REVEAL_TIMEOUT_MS = 20_000;
 
 type ProjectChromePage = SecurityPageObjects['serverlessProjectChromePage'];
 
@@ -45,21 +51,37 @@ export class EndpointManagementNavPage {
   }
 
   /**
-   * The control that reveals the management areas, wherever chrome put it. Absent entirely when
-   * no area is reachable, which is what the no-access expectations assert.
+   * Reveals the management areas and returns only once they are readable, for the expectations
+   * that require at least one area to be reachable.
    *
-   * Safe to read unmeasured: `gotoSecurityRoot` settles the overflow before any caller gets here.
+   * Chrome rebuilds the primary menu every time the application republishes its navigation items:
+   * `useResponsiveMenu` drops the measured overflow split, returns every item to the primary menu
+   * and re-measures a frame later, which unmounts the open "More" popover and the group's panel
+   * with it. `data-overflow-measured` cannot rule that out — it reports the item set present at
+   * that instant, and Security keeps resolving links past the app having mounted, since
+   * `registerPluginUpdates` is deliberately not awaited and `getFilteredLinks` waits on HTTP. So
+   * the open state is re-established until a read of the panel survives it, instead of being
+   * established once up front. Re-entering is a no-op while the popover and panel are open.
    */
-  public get managementGroupToggle(): Locator {
+  public async revealManagementAreas(): Promise<void> {
     if (!this.isServerless) {
-      return this.page.testSubj.locator('solutionSideNavItemLink-administration');
+      await this.managementGroupToggle.click();
+      return;
     }
 
-    return this.projectChrome.navItemInBodyById(SERVERLESS_MANAGEMENT_GROUP_ID);
+    await expect(async () => {
+      await this.settleOverflow();
+
+      if (!(await this.managementAreasPanel.isVisible())) {
+        await this.managementGroupToggle.click();
+      }
+
+      await expect(this.managementAreasPanel).toBeVisible({ timeout: PANEL_READ_TIMEOUT_MS });
+    }).toPass({ timeout: REVEAL_TIMEOUT_MS });
   }
 
   /** Tolerates an absent group so the no-access expectations can assert on the areas themselves. */
-  public async openManagementGroup(): Promise<void> {
+  public async openManagementGroupIfPresent(): Promise<void> {
     if ((await this.managementGroupToggle.count()) > 0) {
       await this.managementGroupToggle.click();
     }
@@ -72,20 +94,40 @@ export class EndpointManagementNavPage {
 
     const selector = `[data-test-subj~="nav-item-id-${linkId}"]`;
 
-    // Opening the group from the rail renders a side panel; opening it from the overflow renders
-    // a panel nested inside the popover instead.
-    return this.page.testSubj
-      .locator(`~kbnChromeNav-sidePanel_${SERVERLESS_MANAGEMENT_GROUP_ID}`)
-      .locator(selector)
-      .or(
-        this.projectChrome.morePopover
-          .locator(`[data-test-subj="kbnChromeNav-nestedPanel-${SERVERLESS_MANAGEMENT_GROUP_ID}"]`)
-          .locator(selector)
-      );
+    return this.groupSidePanel.locator(selector).or(this.groupNestedPanel.locator(selector));
   }
 
   public landingCard(linkId: string): Locator {
     return this.page.testSubj.locator(`~LandingItem-${linkId}`);
+  }
+
+  /**
+   * The control that reveals the management areas, wherever chrome put it. Absent entirely when
+   * no area is reachable, which is what the no-access expectations assert.
+   */
+  private get managementGroupToggle(): Locator {
+    if (!this.isServerless) {
+      return this.page.testSubj.locator('solutionSideNavItemLink-administration');
+    }
+
+    return this.projectChrome.navItemInBodyById(SERVERLESS_MANAGEMENT_GROUP_ID);
+  }
+
+  /** Opening the group from the rail renders a side panel. */
+  private get groupSidePanel(): Locator {
+    return this.page.testSubj.locator(`~kbnChromeNav-sidePanel_${SERVERLESS_MANAGEMENT_GROUP_ID}`);
+  }
+
+  /** Opening it from the overflow renders a panel nested inside the popover instead. */
+  private get groupNestedPanel(): Locator {
+    return this.projectChrome.morePopover.locator(
+      `[data-test-subj="kbnChromeNav-nestedPanel-${SERVERLESS_MANAGEMENT_GROUP_ID}"]`
+    );
+  }
+
+  /** The open panel of management areas, wherever chrome rendered it. */
+  private get managementAreasPanel(): Locator {
+    return this.groupSidePanel.or(this.groupNestedPanel);
   }
 
   private get groupToggleInPrimary(): Locator {
@@ -128,7 +170,8 @@ export class EndpointManagementNavPage {
       return;
     }
 
-    // Measurement has already settled in `waitForNavRendered`, so placement reads true here.
+    // Scoped to the measured nav, so an unmeasured item set reads as "not in the rail" and the
+    // overflow is opened — which waits for measurement — rather than trusting a placement in flux.
     if (await this.groupToggleInPrimary.isVisible()) {
       return;
     }
