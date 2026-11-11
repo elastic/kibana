@@ -30,7 +30,7 @@ export const TOOLS: readonly Tool[] = [
   {
     name: 'list_processes',
     description:
-      'Lists Elasticsearch, Kibana and the dev tools with their state, error, log file and, for tools, the arguments they start with.',
+      'Lists Elasticsearch, Kibana and the dev tools with their state, URL, error, log file and, for tools, the arguments they start with.',
     inputSchema: { type: 'object', properties: {} },
     annotations: { readOnlyHint: true },
   },
@@ -138,11 +138,12 @@ const getProcessId = (supervisor: Supervisor, args: Arguments): string => {
 };
 
 const describeProcesses = (supervisor: Supervisor) =>
-  supervisor.getStatus().processes.map(({ id, state, pid, error, logFile, readyAt }) => {
+  supervisor.getStatus().processes.map(({ id, state, url, pid, error, logFile, readyAt }) => {
     const tool = supervisor.getTool(id);
     return {
       id,
       state,
+      ...(url ? { url } : {}),
       ...(pid ? { pid } : {}),
       ...(error ? { error } : {}),
       ...(readyAt ? { readyAt } : {}),

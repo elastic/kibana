@@ -205,6 +205,7 @@ export const createMcpService = ({
       getConnectInstructions(url).forEach(log);
 
       return {
+        url,
         stop: () =>
           new Promise<void>((resolve) => {
             httpServer.closeAllConnections();

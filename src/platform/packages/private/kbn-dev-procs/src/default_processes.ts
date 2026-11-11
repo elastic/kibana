@@ -74,6 +74,7 @@ export const getDefaultProcesses = ({
         ...[...esOverrides].flatMap(([key, value]) => ['-E', `${key}=${value}`]),
       ],
       cwd: REPO_ROOT,
+      url: esUrl,
       ready: {
         type: 'http',
         url: new URL('/_cluster/health?wait_for_status=yellow&timeout=1s', esUrl).href,
@@ -92,6 +93,8 @@ export const getDefaultProcesses = ({
       cwd: REPO_ROOT,
       dependsOn: ['es'],
       ready: { type: 'log', pattern: /Kibana is now available/ },
+      // In dev mode, Kibana is behind a proxy that adds a random base path; that is the URL to open.
+      urlPatterns: [/basepath proxy server running at (\S+)/, /http server running at (\S+)/],
       settings: {
         ...createKibanaSettingsProvider({ repoRoot: REPO_ROOT, kibanaArgs, cacheDir }),
         flags: kibanaFlags.list,

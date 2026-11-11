@@ -33,6 +33,13 @@ export interface ProcessDefinition {
   readonly stopTimeoutMs?: number;
   /** Reads the settings the process runs with and the ones it supports, for the TUI. */
   readonly settings?: SettingsProvider;
+  /** Where the process answers, when that is known before it starts. */
+  readonly url?: string;
+  /**
+   * Log lines that announce where the process answers, with the URL as the first group, most useful first: a match
+   * does not replace a URL found by an earlier pattern, e.g. Kibana's base path proxy over its own server.
+   */
+  readonly urlPatterns?: readonly RegExp[];
   /** Makes this an optional tool: not started with the rest, but from the TUI, with arguments the user can change. */
   readonly tool?: ToolOptions;
 }
@@ -44,6 +51,8 @@ export interface ServiceContext {
 
 export interface ServiceHandle {
   readonly stop: () => Promise<void>;
+  /** Where the service answers. */
+  readonly url?: string;
 }
 
 /** A service that runs inside the supervisor rather than as a child process, such as the MCP server. */
@@ -86,6 +95,8 @@ export interface ProcessStatus {
   readonly id: string;
   readonly state: ProcessState;
   readonly logFile: string;
+  /** Where the process answers, e.g. Kibana's URL with its dev base path. */
+  readonly url?: string;
   readonly pid?: number;
   readonly exitCode?: number | null;
   readonly signal?: string | null;

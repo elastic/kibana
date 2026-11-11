@@ -76,6 +76,8 @@ interface ToolSpec {
   readonly description: string;
   readonly defaultArgs: string;
   readonly dependsOn: readonly string[];
+  /** Log lines that announce where the tool answers; see ProcessDefinition.urlPatterns. */
+  readonly urlPatterns?: readonly RegExp[];
 }
 
 const TOOL_SPECS: readonly ToolSpec[] = [
@@ -95,6 +97,7 @@ const TOOL_SPECS: readonly ToolSpec[] = [
       "Serves a connector's contract mock as an HTTP proxy; its log shows the Kibana settings to use it",
     defaultArgs: '--connector datadog',
     dependsOn: [],
+    urlPatterns: [/is listening at (\S+)/],
   },
   {
     id: 'data-forge',
@@ -108,7 +111,7 @@ const TOOL_SPECS: readonly ToolSpec[] = [
 
 /** Dev tools that run next to Elasticsearch and Kibana, started from the TUI with arguments the user can change. */
 export const getDefaultTools = (repoRoot: string): readonly ProcessDefinition[] =>
-  TOOL_SPECS.map(({ id, script, description, defaultArgs, dependsOn }) => {
+  TOOL_SPECS.map(({ id, script, description, defaultArgs, dependsOn, urlPatterns }) => {
     let args = defaultArgs;
     let help: Promise<readonly string[]> | undefined;
     const scriptPath = path.join(repoRoot, ...script);
@@ -134,6 +137,7 @@ export const getDefaultTools = (repoRoot: string): readonly ProcessDefinition[] 
       cwd: repoRoot,
       dependsOn,
       ready: { type: 'spawned' },
+      urlPatterns,
       tool,
     };
   });

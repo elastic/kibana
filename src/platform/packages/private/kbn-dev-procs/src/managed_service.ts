@@ -53,6 +53,7 @@ export class ManagedService extends Runner {
       (handle) => {
         this.handle = handle;
         this.starting = undefined;
+        this.update({ url: handle.url });
         this.markReady();
       },
       (error: Error) => {
@@ -78,7 +79,7 @@ export class ManagedService extends Runner {
       await handle.stop();
     } finally {
       this.handle = undefined;
-      this.update({ state: 'stopped', error: undefined });
+      this.update({ state: 'stopped', error: undefined, url: undefined });
       this.logStream?.end(`--- ${new Date().toISOString()} stopped\n`);
     }
   }

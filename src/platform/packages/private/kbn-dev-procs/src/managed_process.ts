@@ -56,6 +56,8 @@ export class ManagedProcess extends Runner {
   private child?: ChildProcess;
   private closed: Promise<void> = Promise.resolve();
   private readiness?: AbortController;
+  /** The index in urlPatterns of the pattern that found the current URL. */
+  private urlPriority?: number;
 
   constructor(
     private readonly definition: ProcessDefinition,
@@ -63,6 +65,24 @@ export class ManagedProcess extends Runner {
     callbacks: RunnerCallbacks
   ) {
     super(definition.id, logFile, callbacks);
+  }
+
+  /** Takes the URL from a log line that announces it, unless a more useful pattern found one already. */
+  private readUrl(text: string): void {
+    const { urlPatterns = [] } = this.definition;
+    for (let index = 0; index < urlPatterns.length; index++) {
+      if (this.urlPriority !== undefined && this.urlPriority < index) {
+        return;
+      }
+      const url = urlPatterns[index].exec(text)?.[1];
+      if (url) {
+        this.urlPriority = index;
+        if (url !== this.status.url) {
+          this.update({ url });
+        }
+        return;
+      }
+    }
   }
 
   public isRunning(): boolean {
@@ -95,8 +115,10 @@ export class ManagedProcess extends Runner {
       startedAt: new Date().toISOString(),
       readyAt: undefined,
       error: undefined,
+      url: this.definition.url,
     });
 
+    this.urlPriority = undefined;
     const readiness = new AbortController();
     this.readiness = readiness;
 
@@ -112,6 +134,7 @@ export class ManagedProcess extends Runner {
           ...(raw !== text ? { raw } : {}),
           time: Date.now(),
         });
+        this.readUrl(text);
         if (ready.type === 'log' && this.status.state === 'starting' && ready.pattern.test(text)) {
           this.markReady();
         }

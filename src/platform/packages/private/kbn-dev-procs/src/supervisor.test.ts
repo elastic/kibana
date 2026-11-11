@@ -159,6 +159,30 @@ describe('Supervisor', () => {
     expect(fs.readFileSync(path.join(logDir, 'es.log'), 'utf8')).toContain('\ngreen plain\n');
   });
 
+  it('takes the URL from the most useful log line that announces one', async () => {
+    const kibanaLike = `
+      console.log('basepath proxy server running at http://localhost:5601/abc');
+      console.log('http server running at http://localhost:5603/abc');
+      console.log('Kibana is now available');
+      ${KEEP_ALIVE}
+    `;
+    supervisor = new Supervisor({
+      logDir,
+      definitions: [
+        node('kibana', kibanaLike, {
+          ready: { type: 'log', pattern: /Kibana is now available/ },
+          urlPatterns: [/basepath proxy server running at (\S+)/, /http server running at (\S+)/],
+        }),
+        node('es', KEEP_ALIVE, { url: 'http://localhost:9200' }),
+      ],
+    });
+    await supervisor.startAll();
+    await waitForState(supervisor, 'kibana', 'ready');
+
+    expect(statusOf(supervisor, 'kibana').url).toBe('http://localhost:5601/abc');
+    expect(statusOf(supervisor, 'es').url).toBe('http://localhost:9200');
+  });
+
   it('polls an http readiness check until it answers with a 2xx status', async () => {
     let requests = 0;
     const server = http.createServer((_request, response) => {

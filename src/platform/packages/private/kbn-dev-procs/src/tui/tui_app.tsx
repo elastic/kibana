@@ -198,7 +198,9 @@ export const createTuiApp = ({
     const matchCount = getMatchingLines(state).length;
     const title = [
       state.selected,
-      status ? `${status.state}${status.pid ? ` · pid ${status.pid}` : ''}` : undefined,
+      status?.state,
+      status?.url,
+      status?.pid ? `pid ${status.pid}` : undefined,
       status?.error,
       status ? `log: ${displayPath(status.logFile)}` : undefined,
       state.query ? `filter "${state.query}": ${matchCount} lines` : undefined,
