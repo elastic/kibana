@@ -10,7 +10,7 @@
 import { appendCategorizeToESQLQuery } from './append_categorize';
 
 const CATEGORIZE_PIPE =
-  '\n| STATS Count = COUNT(*) BY Pattern = CATEGORIZE(message)\n| SORT Count DESC';
+  '\n  | STATS Count = COUNT(*) BY Pattern = CATEGORIZE(message)\n  | SORT Count DESC';
 
 describe('appendCategorizeToESQLQuery', () => {
   it('appends the categorize pipeline to a source-only query', () => {
@@ -34,7 +34,7 @@ describe('appendCategorizeToESQLQuery', () => {
     ).toBe(`FROM logs-*${CATEGORIZE_PIPE}`);
   });
 
-  it('keeps preceding commands and their original formatting', () => {
+  it('keeps the preceding commands', () => {
     expect(
       appendCategorizeToESQLQuery(
         'FROM logs-*\n  | WHERE service.name == "checkout"\n  | EVAL x = 1\n  | LIMIT 1000',
@@ -45,25 +45,31 @@ describe('appendCategorizeToESQLQuery', () => {
 
   it('keeps a LIMIT that is followed by a non-droppable command', () => {
     expect(appendCategorizeToESQLQuery('FROM logs-* | LIMIT 10 | WHERE x > 1', 'message')).toBe(
-      `FROM logs-* | LIMIT 10 | WHERE x > 1${CATEGORIZE_PIPE}`
+      `FROM logs-*\n  | LIMIT 10\n  | WHERE x > 1${CATEGORIZE_PIPE}`
     );
   });
 
-  it('appends on a new line when the query ends with a comment', () => {
+  it('keeps comments of the remaining commands and drops the ones of removed commands', () => {
+    expect(
+      appendCategorizeToESQLQuery('FROM logs-* /* keep | me */ | LIMIT 10 /* drop me */', 'message')
+    ).toBe(`FROM logs-* /* keep | me */${CATEGORIZE_PIPE}`);
+  });
+
+  it('keeps a trailing line comment on its own line', () => {
     expect(appendCategorizeToESQLQuery('FROM logs-* // my comment', 'message')).toBe(
-      `FROM logs-* // my comment${CATEGORIZE_PIPE}`
+      `FROM\n  logs-* // my comment${CATEGORIZE_PIPE}`
     );
   });
 
   it('keeps named parameters untouched', () => {
     expect(
       appendCategorizeToESQLQuery('FROM logs-* | WHERE host.name == ?host | LIMIT 10', 'message')
-    ).toBe(`FROM logs-* | WHERE host.name == ?host${CATEGORIZE_PIPE}`);
+    ).toBe(`FROM logs-*\n  | WHERE host.name == ?host${CATEGORIZE_PIPE}`);
   });
 
   it('escapes field names that need quoting', () => {
     expect(appendCategorizeToESQLQuery('FROM logs-*', 'log message')).toBe(
-      'FROM logs-*\n| STATS Count = COUNT(*) BY Pattern = CATEGORIZE(`log message`)\n| SORT Count DESC'
+      'FROM logs-*\n  | STATS Count = COUNT(*) BY Pattern = CATEGORIZE(`log message`)\n  | SORT Count DESC'
     );
   });
 });
