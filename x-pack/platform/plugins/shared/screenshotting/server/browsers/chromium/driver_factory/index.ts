@@ -91,6 +91,7 @@ const DEFAULT_ARGS = [
 ];
 
 const DIAGNOSTIC_TIME = 5 * 1000;
+const FAILED_SETUP_CLOSE_TIMEOUT = 5 * 1000;
 
 export class HeadlessChromiumDriverFactory {
   private userDataDir: string;
@@ -260,7 +261,7 @@ export class HeadlessChromiumDriverFactory {
           page
         );
 
-        const error$ = Rx.concat(driver.screenshottingError$, this.getPageExit(browser, page)).pipe(
+        const error$ = Rx.merge(driver.screenshottingError$, this.getPageExit(browser, page)).pipe(
           mergeMap((err) => Rx.throwError(err))
         );
 
@@ -279,19 +280,39 @@ export class HeadlessChromiumDriverFactory {
             logger.error(error);
           });
         });
-      })().catch((error) => {
+      })().catch(async (error) => {
         // Browser died during page setup; without this the job hangs until it times out.
         logger.error(`Error setting up the Chromium browser page: ${error}`);
+        // Erroring releases the capture semaphore, and the next capture reuses this userDataDir,
+        // so the browser must be gone first or its profile lock can fail that launch too.
+        await this.closeBrowserAfterFailedSetup(browser, logger);
         observer.error(
           new errors.FailedToSpawnBrowserError(
             `Error setting up the Chromium browser page! ${error}`
           )
         );
-        Promise.resolve(browser?.close()).catch((closeError) => {
-          logger.debug(`Error closing the browser after a failed page setup: ${closeError}`);
-        });
       });
     });
+  }
+
+  private async closeBrowserAfterFailedSetup(
+    browser: Browser | undefined,
+    logger: Logger
+  ): Promise<void> {
+    if (!browser) {
+      return;
+    }
+
+    try {
+      await Rx.firstValueFrom(
+        Rx.defer(async () => browser.close()).pipe(Rx.timeout(FAILED_SETUP_CLOSE_TIMEOUT))
+      );
+    } catch (closeError) {
+      logger.debug(
+        `Error closing the browser after a failed page setup, killing it: ${closeError}`
+      );
+      browser.process()?.kill('SIGKILL');
+    }
   }
 
   /**

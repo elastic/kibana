@@ -12,8 +12,11 @@ import type { ConfigType } from '@kbn/screenshotting-server';
 import * as puppeteer from 'puppeteer';
 import * as Rx from 'rxjs';
 import { mergeMap, take } from 'rxjs';
+import { EventEmitter } from 'events';
 import { PassThrough } from 'stream';
 import { DEFAULT_VIEWPORT, HeadlessChromiumDriverFactory } from '.';
+
+const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
 jest.mock('puppeteer');
 
@@ -78,6 +81,72 @@ describe('HeadlessChromiumDriverFactory', () => {
         )
       ).rejects.toThrow(/Target closed/);
       expect(mockBrowser.close).toHaveBeenCalled();
+    });
+
+    it('waits for the browser to close before erroring when page setup fails', async () => {
+      let resolveClose = () => {};
+      (mockBrowser.close as jest.Mock).mockImplementationOnce(
+        () => new Promise<void>((resolve) => (resolveClose = resolve))
+      );
+      (mockBrowser.newPage as jest.Mock).mockRejectedValueOnce(new Error('Target closed'));
+      const onError = jest.fn();
+
+      factory
+        .createPage({ openUrlTimeout: 0, defaultViewport: DEFAULT_VIEWPORT })
+        .subscribe({ error: onError });
+      await flushPromises();
+
+      expect(mockBrowser.close).toHaveBeenCalled();
+      expect(onError).not.toHaveBeenCalled();
+
+      resolveClose();
+      await flushPromises();
+
+      expect(onError).toHaveBeenCalledWith(
+        expect.objectContaining({ message: expect.stringMatching(/Target closed/) })
+      );
+    });
+
+    it('kills the browser if it does not close after page setup fails', async () => {
+      jest.useFakeTimers();
+      try {
+        const kill = jest.fn();
+        (mockBrowser.process as jest.Mock).mockReturnValue({ stdio: [], kill });
+        (mockBrowser.close as jest.Mock).mockImplementationOnce(() => new Promise(() => {}));
+        (mockBrowser.newPage as jest.Mock).mockRejectedValueOnce(new Error('Target closed'));
+        const onError = jest.fn();
+
+        factory
+          .createPage({ openUrlTimeout: 0, defaultViewport: DEFAULT_VIEWPORT })
+          .subscribe({ error: onError });
+        await jest.advanceTimersByTimeAsync(0);
+        expect(onError).not.toHaveBeenCalled();
+
+        await jest.advanceTimersByTimeAsync(5000);
+
+        expect(kill).toHaveBeenCalledWith('SIGKILL');
+        expect(onError).toHaveBeenCalled();
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('errors error$ when the browser disconnects', async () => {
+      (factory.getPageExit as jest.Mock).mockRestore();
+      const browserEvents = new EventEmitter();
+      Object.assign(mockBrowser, {
+        addListener: browserEvents.addListener.bind(browserEvents),
+        removeListener: browserEvents.removeListener.bind(browserEvents),
+      });
+      Object.assign(await mockBrowser.newPage(), { on: jest.fn(), off: jest.fn() });
+
+      const { error$ } = await Rx.firstValueFrom(
+        factory.createPage({ openUrlTimeout: 0, defaultViewport: DEFAULT_VIEWPORT })
+      );
+      const errored = Rx.firstValueFrom(error$.pipe(Rx.timeout({ first: 1000 })));
+      browserEvents.emit('disconnected');
+
+      await expect(errored).rejects.toThrow('Browser was closed unexpectedly');
     });
 
     it('handles EPIPE errors on the browser pipes after puppeteer has stopped listening', async () => {
