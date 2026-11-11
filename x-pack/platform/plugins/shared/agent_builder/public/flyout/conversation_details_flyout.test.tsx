@@ -265,18 +265,22 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
     const { get, renderResult } = renderSnapshot(undefined, onConversationUpdated);
     get
       .mockResolvedValueOnce(createConversation({ title: 'First fetch' }))
+      .mockResolvedValueOnce(createConversation({ title: 'Polled' }))
       .mockResolvedValue(createConversation({ title: 'Refetched' }));
 
     renderResult();
 
     expect(await screen.findByText('First fetch')).toBeInTheDocument();
     await advance(5_000);
+    expect(await screen.findByText('Polled')).toBeInTheDocument();
     expect(onConversationUpdated).not.toHaveBeenCalled();
+    expect(get).toHaveBeenCalledTimes(2);
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Refetch' }));
     });
 
     await waitFor(() => expect(onConversationUpdated).toHaveBeenCalledTimes(1));
+    expect(get).toHaveBeenCalledTimes(3);
     expect(screen.getByText('Refetched')).toBeInTheDocument();
   });
 
