@@ -116,6 +116,11 @@ export class SignificantEventsDiscoveryClient {
     spaceId: string;
     request: KibanaRequest;
   }) {
-    return this.workflowExecutionService.getExecution({ id, spaceId, request });
+    return this.workflowExecutionService.getExecution({
+      id,
+      spaceId,
+      request,
+      options: { omitStepExecutions: true },
+    });
   }
 }
