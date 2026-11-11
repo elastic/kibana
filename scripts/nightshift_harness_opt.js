@@ -28,5 +28,6 @@ var child = spawn(process.execPath, [script].concat(process.argv.slice(2)), {
   });
 });
 child.on('exit', function (code, signal) {
-  process.exit(code == null ? (signal ? 130 : 1) : code);
+  if (code != null) process.exit(code);
+  process.exit(signal ? 130 : 1);
 });
