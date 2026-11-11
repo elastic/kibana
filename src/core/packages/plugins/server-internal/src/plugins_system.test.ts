@@ -15,6 +15,7 @@ import {
 } from './plugins_system.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
+import { metrics, type Meter } from '@opentelemetry/api';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { type PluginName, PluginType } from '@kbn/core-base-common';
@@ -731,6 +732,90 @@ describe('start', () => {
       pluginA: 'contractA',
       pluginB: 'contractB',
     });
+  });
+});
+
+describe('lifecycle timeouts in telemetry', () => {
+  beforeEach(() => {
+    jest.useFakeTimers({ doNotFake: ['setImmediate'] });
+    mockCreatePluginSetupContext.mockImplementation(() => ({}));
+    mockCreatePluginStartContext.mockImplementation(() => ({}));
+  });
+
+  afterEach(() => {
+    jest.mocked(metrics.getMeter).mockRestore();
+    jest.useRealTimers();
+  });
+
+  /** A plugins system whose lifecycle duration records land in the returned mock. */
+  const createMeasuredPluginsSystem = () => {
+    const lifecycleDurations = jest.fn();
+    jest.spyOn(metrics, 'getMeter').mockReturnValue({
+      createHistogram: (name: string) => ({
+        record: name === 'kibana.plugins.lifecycle.duration' ? lifecycleDurations : jest.fn(),
+      }),
+    } as unknown as Meter);
+    return { system: new PluginsSystem(coreContext, PluginType.standard), lifecycleDurations };
+  };
+
+  const durationRecord = (
+    pluginId: string,
+    lifecycle: 'setup' | 'start',
+    seconds: number,
+    outcome: 'success' | 'failure'
+  ) => [
+    seconds,
+    {
+      'kibana.plugin.id': pluginId,
+      'kibana.plugin.source': 'external',
+      'kibana.plugin.lifecycle': lifecycle,
+      outcome,
+    },
+  ];
+
+  const flushLateResult = () => new Promise((resolve) => setImmediate(resolve));
+
+  it('records a "setup" timeout as a failure and ignores a late result', async () => {
+    const { system, lifecycleDurations } = createMeasuredPluginsSystem();
+    const plugin = createPlugin('timeout-setup');
+    const { promise, resolve } = Promise.withResolvers<object>();
+    jest.spyOn(plugin, 'setup').mockReturnValue(promise);
+    system.addPlugin(plugin);
+
+    const setup = expect(system.setupPlugins(setupDeps)).rejects.toThrow(
+      `Setup lifecycle of "timeout-setup" plugin wasn't completed in 10sec.`
+    );
+    await jest.advanceTimersByTimeAsync(10 * 1000);
+    await setup;
+    resolve({});
+    await flushLateResult();
+
+    expect(lifecycleDurations.mock.calls).toEqual([
+      durationRecord('timeout-setup', 'setup', 10, 'failure'),
+    ]);
+  });
+
+  it('records a "start" timeout as a failure and ignores a late result', async () => {
+    const { system, lifecycleDurations } = createMeasuredPluginsSystem();
+    const plugin = createPlugin('timeout-start');
+    const { promise, resolve } = Promise.withResolvers<object>();
+    jest.spyOn(plugin, 'setup').mockReturnValue({});
+    jest.spyOn(plugin, 'start').mockReturnValue(promise);
+    system.addPlugin(plugin);
+
+    await system.setupPlugins(setupDeps);
+    const start = expect(system.startPlugins(startDeps)).rejects.toThrow(
+      `Start lifecycle of "timeout-start" plugin wasn't completed in 10sec.`
+    );
+    await jest.advanceTimersByTimeAsync(10 * 1000);
+    await start;
+    resolve({});
+    await flushLateResult();
+
+    expect(lifecycleDurations.mock.calls).toEqual([
+      durationRecord('timeout-start', 'setup', 0, 'success'),
+      durationRecord('timeout-start', 'start', 10, 'failure'),
+    ]);
   });
 });
 

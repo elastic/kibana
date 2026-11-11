@@ -30,6 +30,23 @@ import { PluginsTelemetry } from './plugins_telemetry';
 
 const Sec = 1000;
 
+/**
+ * Rejects a lifecycle promise that has not settled in 10 seconds. Called inside the measured call,
+ * so telemetry records the timeout as a failure.
+ */
+const withLifecycleTimeout = <TContract>(
+  contractOrPromise: TContract | Promise<TContract>,
+  message: string
+): TContract | Promise<TContract> =>
+  isPromise(contractOrPromise)
+    ? withTimeout({ promise: contractOrPromise, timeoutMs: 10 * Sec }).then((result) => {
+        if (result.timedout) {
+          throw new Error(message);
+        }
+        return result.value;
+      })
+    : contractOrPromise;
+
 /** @internal */
 export class PluginsSystem<T extends PluginType> {
   private readonly runtimeResolver = new RuntimePluginContractResolver();
@@ -140,31 +157,18 @@ export class PluginsSystem<T extends PluginType> {
       }
 
       await plugin.init();
-      let contract: unknown;
       const contractOrPromise = this.telemetry.measure(plugin, 'setup', () =>
-        plugin.setup(pluginSetupContext, pluginDepContracts)
+        withLifecycleTimeout(
+          plugin.setup(pluginSetupContext, pluginDepContracts),
+          `Setup lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
+        )
       );
-      if (isPromise(contractOrPromise)) {
-        if (this.coreContext.env.mode.dev) {
-          this.log.warn(
-            `Plugin ${pluginName} is using asynchronous setup lifecycle. Asynchronous plugins support will be removed in a later version.`
-          );
-        }
-        const contractMaybe = await withTimeout<any>({
-          promise: contractOrPromise,
-          timeoutMs: 10 * Sec,
-        });
-
-        if (contractMaybe.timedout) {
-          throw new Error(
-            `Setup lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
-          );
-        } else {
-          contract = contractMaybe.value;
-        }
-      } else {
-        contract = contractOrPromise;
+      if (isPromise(contractOrPromise) && this.coreContext.env.mode.dev) {
+        this.log.warn(
+          `Plugin ${pluginName} is using asynchronous setup lifecycle. Asynchronous plugins support will be removed in a later version.`
+        );
       }
+      const contract = isPromise(contractOrPromise) ? await contractOrPromise : contractOrPromise;
 
       contracts.set(pluginName, contract);
       this.satupPlugins.push(pluginName);
@@ -207,31 +211,18 @@ export class PluginsSystem<T extends PluginType> {
         plugin,
         runtimeResolver: this.runtimeResolver,
       });
-      let contract: unknown;
       const contractOrPromise = this.telemetry.measure(plugin, 'start', () =>
-        plugin.start(startContext, pluginDepContracts)
+        withLifecycleTimeout(
+          plugin.start(startContext, pluginDepContracts),
+          `Start lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
+        )
       );
-      if (isPromise(contractOrPromise)) {
-        if (this.coreContext.env.mode.dev) {
-          this.log.warn(
-            `Plugin ${pluginName} is using asynchronous start lifecycle. Asynchronous plugins support will be removed in a later version.`
-          );
-        }
-        const contractMaybe = await withTimeout({
-          promise: contractOrPromise,
-          timeoutMs: 10 * Sec,
-        });
-
-        if (contractMaybe.timedout) {
-          throw new Error(
-            `Start lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
-          );
-        } else {
-          contract = contractMaybe.value;
-        }
-      } else {
-        contract = contractOrPromise;
+      if (isPromise(contractOrPromise) && this.coreContext.env.mode.dev) {
+        this.log.warn(
+          `Plugin ${pluginName} is using asynchronous start lifecycle. Asynchronous plugins support will be removed in a later version.`
+        );
       }
+      const contract = isPromise(contractOrPromise) ? await contractOrPromise : contractOrPromise;
 
       contracts.set(pluginName, contract);
       initializeRuns.push(() =>
