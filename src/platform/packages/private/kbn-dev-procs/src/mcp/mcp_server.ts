@@ -145,6 +145,8 @@ export const createMcpService = ({
       parseMcpPort(input);
       args = input;
     },
+    // It runs inside node scripts/dev, as it controls its processes.
+    getCommand: () => `node scripts/dev --mcp (it runs inside node scripts/dev)`,
     helpCommand: 'esprocs MCP server',
     readHelp: async () => [
       ...getConnectInstructions(getUrl(parseMcpPort(args))),

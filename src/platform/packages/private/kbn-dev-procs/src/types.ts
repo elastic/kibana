@@ -65,6 +65,8 @@ export interface ToolOptions {
   readonly getArgs: () => string;
   /** Throws when the arguments cannot be parsed, e.g. with an unclosed quote. */
   readonly setArgs: (input: string) => void;
+  /** The command that starts the tool with its current arguments, to run it from another terminal. */
+  readonly getCommand: () => string;
   /** The command the help comes from, e.g. `node scripts/synthtrace --help`. */
   readonly helpCommand: string;
   /** Reads the tool's --help output, without the noise its startup prints. */

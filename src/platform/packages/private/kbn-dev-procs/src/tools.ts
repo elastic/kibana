@@ -119,6 +119,8 @@ export const getDefaultTools = (repoRoot: string): readonly ProcessDefinition[] 
         splitArgs(input);
         args = input;
       },
+      // Relative to the repository root, where scripts are run from.
+      getCommand: () => ['node', script.join('/'), args].filter(Boolean).join(' '),
       helpCommand: `node ${script.join('/')} --help`,
       readHelp: () => {
         help ??= readHelp(process.execPath, [scriptPath, '--help'], repoRoot).then(cleanHelp);

@@ -54,8 +54,8 @@ const SPARE_ROWS = 1;
 const CHROME_ROWS = SPARE_ROWS + 5;
 // How often the top bar re-reads the branch, which can change while the TUI runs.
 const REPO_INFO_INTERVAL_MS = 5000;
-// The line under a tool's pane title with its description and arguments.
-const TOOL_LINE_ROWS = 1;
+// The lines under a tool's pane title: its description and arguments, and the command that starts it.
+const TOOL_LINE_ROWS = 2;
 // Plain Unicode, so they show without a patched font.
 const BRANCH_SYMBOL = '⎇';
 const COMMIT_SYMBOL = '◉';
@@ -189,7 +189,7 @@ export const createTuiApp = ({
     const toolLine = tool
       ? `${tool.description} · args: ${tool.getArgs()}${isRunning ? '' : ' · press s to start'}`
       : undefined;
-    const lineCount = Math.max(height - (toolLine ? 1 : 0) - (notice ? 1 : 0), 1);
+    const lineCount = Math.max(height - (tool ? TOOL_LINE_ROWS : 0) - (notice ? 1 : 0), 1);
     const matchCount = getMatchingLines(state).length;
     const title = [
       state.selected,
@@ -217,6 +217,13 @@ export const createTuiApp = ({
         {toolLine ? (
           <Text dimColor wrap="truncate-end">
             {toolLine}
+          </Text>
+        ) : null}
+        {tool ? (
+          // To start the tool from another terminal instead.
+          <Text wrap="truncate-end">
+            <Text color="cyan">$ </Text>
+            {tool.getCommand()}
           </Text>
         ) : null}
         {notice ? (

@@ -71,7 +71,9 @@ describe('getDefaultTools', () => {
     }
     expect(args()).toEqual(['/repo/scripts/synthtrace', 'logs_and_metrics', '--live']);
 
+    expect(tool.getCommand()).toBe('node scripts/synthtrace logs_and_metrics --live');
     tool.setArgs('sre_incidents --from=now-1h --to=now');
+    expect(tool.getCommand()).toBe('node scripts/synthtrace sre_incidents --from=now-1h --to=now');
     expect(tool.getArgs()).toBe('sre_incidents --from=now-1h --to=now');
     expect(args()).toEqual([
       '/repo/scripts/synthtrace',
@@ -106,6 +108,7 @@ describe('Supervisor with tools', () => {
             description: 'test',
             getArgs: () => '',
             setArgs: () => {},
+            getCommand: () => 'node test',
             helpCommand: 'node test --help',
             readHelp: async () => [],
           },
