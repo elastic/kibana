@@ -33,6 +33,7 @@ export {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH,
+  PACKAGE_POLICY_CONDITION_MAX_LENGTH,
   OUTPUT_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
@@ -131,6 +132,7 @@ export {
   buildPolicyBaseIdsWithFallbackKuery,
   extractAgentIdsWithData,
   getIncompatibleIntegrations,
+  formatAgentConditionErrors,
 } from './services';
 
 export type {

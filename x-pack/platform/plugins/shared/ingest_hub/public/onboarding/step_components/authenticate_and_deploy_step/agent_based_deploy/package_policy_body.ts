@@ -269,6 +269,7 @@ export async function buildGroupPackagePolicy(
   package: { name: string; version: string };
   namespace?: string;
   output_id?: string;
+  condition?: string;
   additional_datastreams_permissions?: string[];
   vars?: Record<string, string | SecretRefValue | null>;
   inputs: Record<string, unknown>;

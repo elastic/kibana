@@ -219,6 +219,29 @@ describe('buildGroupPackagePolicy — output', () => {
   });
 });
 
+describe('buildGroupPackagePolicy — condition', () => {
+  const buildWithCondition = (condition?: string) =>
+    buildGroupPackagePolicy(group, pkgInfo, {
+      namespace: '',
+      globalRegion: 'us-east-1',
+      storedServiceVars: withInputs(['aws-s3']),
+      authenticateAndDeployStep: {},
+      pkgVersion: '1.0.0',
+      policySettings: { condition },
+    } as BuildPackagePolicyOpts);
+
+  it('sends the condition', async () => {
+    expect((await buildWithCondition('${host.platform} == "linux"')).condition).toBe(
+      '${host.platform} == "linux"'
+    );
+  });
+
+  it('leaves a blank condition out', async () => {
+    expect(await buildWithCondition(undefined)).not.toHaveProperty('condition');
+    expect(await buildWithCondition('  ')).not.toHaveProperty('condition');
+  });
+});
+
 describe('buildGroupPackagePolicy — reroute permissions', () => {
   const buildWithPermissions = (permissions?: string[]) =>
     buildGroupPackagePolicy(group, pkgInfo, {

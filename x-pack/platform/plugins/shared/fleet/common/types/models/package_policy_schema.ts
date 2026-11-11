@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { isValidNamespace, validateNoPathTraversalIdSchema } from '../../services';
 import {
   MAX_REUSABLE_AGENT_POLICIES_PER_PACKAGE_POLICY,
+  PACKAGE_POLICY_CONDITION_MAX_LENGTH,
   VALIDATE_DATASTREAMS_PERMISSION_REGEX,
 } from '../../constants/package_policy';
 
@@ -134,7 +135,7 @@ const PackagePolicyStreamsSchema = {
   condition: schema.maybe(
     schema.nullable(
       schema.string({
-        maxLength: 10000,
+        maxLength: PACKAGE_POLICY_CONDITION_MAX_LENGTH,
         meta: {
           description: 'Agent condition expression to evaluate whether to apply this stream.',
         },
@@ -159,7 +160,7 @@ export const PackagePolicyInputsSchema = {
   condition: schema.maybe(
     schema.nullable(
       schema.string({
-        maxLength: 10000,
+        maxLength: PACKAGE_POLICY_CONDITION_MAX_LENGTH,
         meta: {
           description: 'Agent condition expression to evaluate whether to apply this input.',
         },
@@ -335,7 +336,7 @@ export const PackagePolicyBaseSchema = {
   condition: schema.maybe(
     schema.nullable(
       schema.string({
-        maxLength: 10000,
+        maxLength: PACKAGE_POLICY_CONDITION_MAX_LENGTH,
         meta: {
           description:
             'Agent condition expression to evaluate whether to apply this integration to its inputs.',
@@ -591,7 +592,7 @@ export const SimplifiedPackagePolicyInputRecordSchema = schema.recordOf(
     condition: schema.maybe(
       schema.nullable(
         schema.string({
-          maxLength: 10000,
+          maxLength: PACKAGE_POLICY_CONDITION_MAX_LENGTH,
           meta: {
             description: 'Agent condition expression to evaluate whether to apply this input.',
           },
@@ -615,7 +616,7 @@ export const SimplifiedPackagePolicyInputRecordSchema = schema.recordOf(
           condition: schema.maybe(
             schema.nullable(
               schema.string({
-                maxLength: 10000,
+                maxLength: PACKAGE_POLICY_CONDITION_MAX_LENGTH,
                 meta: {
                   description:
                     'Agent condition expression to evaluate whether to apply this stream.',
@@ -725,7 +726,7 @@ export const SimplifiedPackagePolicyBaseSchema = schema.object(
     condition: schema.maybe(
       schema.nullable(
         schema.string({
-          maxLength: 10000,
+          maxLength: PACKAGE_POLICY_CONDITION_MAX_LENGTH,
           meta: {
             description:
               'Agent condition expression to evaluate whether to apply this integration to its inputs.',

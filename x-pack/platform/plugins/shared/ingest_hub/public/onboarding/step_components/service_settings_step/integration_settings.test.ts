@@ -7,8 +7,10 @@
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import {
+  MAX_CONDITION_LENGTH,
   MAX_DESCRIPTION_LENGTH,
   MAX_INTEGRATION_NAME_LENGTH,
+  getConditionErrors,
   getDescriptionError,
   getIntegrationNameError,
   getProxyUrlError,
@@ -30,6 +32,30 @@ describe('getIntegrationNameError', () => {
 
   it('rejects a longer name, which would not fit Fleet once suffixed', () => {
     expect(getIntegrationNameError('a'.repeat(MAX_INTEGRATION_NAME_LENGTH + 1))).toBeDefined();
+  });
+});
+
+describe('getConditionErrors', () => {
+  it('allows no condition', () => {
+    expect(getConditionErrors('')).toBeUndefined();
+    expect(getConditionErrors('   ')).toBeUndefined();
+  });
+
+  it('accepts a valid condition', () => {
+    expect(getConditionErrors('${host.platform} == "linux"')).toBeUndefined();
+  });
+
+  it('reports where the syntax is wrong', () => {
+    expect(getConditionErrors('${host.platform} ==')).toEqual(
+      expect.arrayContaining([expect.stringMatching(/^Line 1, column \d+: /)])
+    );
+  });
+
+  it('rejects a condition over the Fleet limit', () => {
+    const tooLong = `"${'a'.repeat(MAX_CONDITION_LENGTH)}"`;
+    expect(getConditionErrors(tooLong)).toEqual([
+      'The condition must be 10000 characters or less.',
+    ]);
   });
 });
 

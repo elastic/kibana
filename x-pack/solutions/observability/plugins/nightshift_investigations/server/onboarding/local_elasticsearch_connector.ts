@@ -19,7 +19,7 @@ const LOCAL_ELASTICSEARCH_CONNECTOR_NAME = 'Local Elasticsearch';
 
 const LOCAL_ELASTICSEARCH_API_KEY_ROLE_DESCRIPTORS = {
   nightshift_local_read: {
-    cluster: ['cluster:monitor/main', 'cluster:monitor/remote/info'],
+    cluster: [],
     indices: [
       {
         names: ['logs-*', 'metrics-*', 'traces-*'],

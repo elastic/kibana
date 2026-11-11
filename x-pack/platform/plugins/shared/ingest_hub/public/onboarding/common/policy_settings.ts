@@ -15,6 +15,8 @@ import type { DeploymentMethod } from '@kbn/fleet-plugin/public';
  */
 export interface PolicySettings {
   output_id?: string;
+  /** Agent condition expression that decides whether the integration applies to an agent. */
+  condition?: string;
   /** A package var (`vars.proxy_url`), not a top-level package policy field. */
   proxy_url?: string;
   /** Extra data stream names the policy may write to (the reroute processor permissions). */
@@ -51,6 +53,7 @@ const POLICY_SETTINGS: Record<
   }
 > = {
   output_id: { methods: ['agent_based'], target: 'field', isValid: isString },
+  condition: { methods: ['agent_based'], target: 'field', isValid: isString },
   proxy_url: { methods: ['agent_based', 'managed_integration'], target: 'var', isValid: isString },
   additional_datastreams_permissions: {
     methods: ['agent_based', 'managed_integration'],
@@ -119,7 +122,7 @@ const pickSettings = (settings: PolicySettingsSource, keys: PolicySettingKey[]):
 export const getPolicySettings = (
   settings: PolicySettingsSource,
   method: DeploymentMethod
-): Pick<PolicySettings, 'output_id' | 'additional_datastreams_permissions'> =>
+): Pick<PolicySettings, 'output_id' | 'condition' | 'additional_datastreams_permissions'> =>
   pickSettings(settings, getKeys(method, 'field'));
 
 /**
@@ -138,8 +141,18 @@ export const getPolicyVarSettings = (
   ) as Record<string, string>;
 
 /**
+ * Every setting of the deployment method, fields and vars alike, as the onboarding record saves
+ * them. One left over from another method is hidden in Step 2, so it is neither validated nor kept.
+ */
+export const getSavedPolicySettings = (
+  settings: PolicySettingsSource,
+  method: DeploymentMethod
+): PolicySettings => pickSettings(settings, getKeys(method));
+
+/**
  * The settings an update of a deployed policy sends. A setting set back to empty is sent as its
- * cleared value (`null`, or an empty list for a list), which clears the value the policy has; one never set, or with an invalid value, is left out, so
+ * cleared value (`null`, or an empty list for a list), which clears the value the policy has; one
+ * never set, or with an invalid value, is left out, so
  * the policy keeps its own.
  */
 const pickSettingsUpdate = (

@@ -22,9 +22,16 @@ describe('policy settings', () => {
     expect(supportsPolicySetting('output_id', 'ecf')).toBe(false);
   });
 
+  it('applies the condition to agent-based deploys only', () => {
+    expect(supportsPolicySetting('condition', 'agent_based')).toBe(true);
+    expect(supportsPolicySetting('condition', 'managed_integration')).toBe(false);
+    expect(supportsPolicySetting('condition', 'ecf')).toBe(false);
+  });
+
   describe('compactPolicySettings', () => {
     it('leaves out empty settings', () => {
       expect(compactPolicySettings({ output_id: '' })).toEqual({});
+      expect(compactPolicySettings({ condition: '   ' })).toEqual({});
       expect(compactPolicySettings({ output_id: 'logstash-1' })).toEqual({
         output_id: 'logstash-1',
       });
@@ -39,6 +46,16 @@ describe('policy settings', () => {
       });
       expect(getPolicySettings({ output_id: '' }, 'agent_based')).toEqual({});
       expect(getPolicySettings({ output_id: 'logstash-1' }, 'managed_integration')).toEqual({});
+    });
+
+    it('gives a new agent-based policy the condition, unless it is blank', () => {
+      const condition = '${host.platform} == "linux"';
+      expect(getPolicySettings({ output_id: 'logstash-1', condition }, 'agent_based')).toEqual({
+        output_id: 'logstash-1',
+        condition,
+      });
+      expect(getPolicySettings({ condition: '  ' }, 'agent_based')).toEqual({});
+      expect(getPolicySettings({ condition }, 'managed_integration')).toEqual({});
     });
 
     it('leaves out a value of the wrong type read back from the saved object', () => {
@@ -61,6 +78,12 @@ describe('policy settings', () => {
     it('clears a setting set back to empty', () => {
       expect(getPolicySettingsUpdate({ output_id: '' }, 'agent_based')).toEqual({
         output_id: null,
+      });
+    });
+
+    it('clears a condition set back to blank', () => {
+      expect(getPolicySettingsUpdate({ condition: ' ' }, 'agent_based')).toEqual({
+        condition: null,
       });
     });
 
@@ -91,8 +114,29 @@ describe('policy settings', () => {
       ).toBe(true);
     });
 
+    it('is dirty when the condition changed', () => {
+      expect(
+        detectPolicySettingsDrift(
+          { condition: '${host.platform} == "linux"' },
+          { condition: '${host.platform} == "windows"' },
+          'agent_based'
+        )
+      ).toBe(true);
+      expect(
+        detectPolicySettingsDrift({}, { condition: '${host.platform} == "linux"' }, 'agent_based')
+      ).toBe(true);
+      expect(
+        detectPolicySettingsDrift(
+          { condition: '${host.platform} == "linux"' },
+          {},
+          'managed_integration'
+        )
+      ).toBe(false);
+    });
+
     it('treats an empty setting and an absent one alike', () => {
       expect(detectPolicySettingsDrift({ output_id: '' }, undefined, 'agent_based')).toBe(false);
+      expect(detectPolicySettingsDrift({ condition: '  ' }, undefined, 'agent_based')).toBe(false);
     });
 
     it('ignores a value of the wrong type, as the deploy does', () => {

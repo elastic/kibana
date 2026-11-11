@@ -27,6 +27,8 @@ export interface CreateCloudOnboardingDeploymentRequest {
     globalRegion?: string;
     /** Global data stream namespace from the Service settings step. */
     namespace?: string;
+    /** Whether the global namespace uses dedicated index templates. */
+    dedicatedNamespaceTemplates?: boolean;
     /** The service instances (originals and duplicates) being deployed. */
     instances?: CloudOnboardingInstance[];
     /** Package policy settings that apply to every package policy of the deployment. */
@@ -87,6 +89,8 @@ export interface UpdateCloudOnboardingDeploymentRequest {
     description?: string | null;
     /** Set to null to clear the namespace. */
     namespace?: string | null;
+    /** Whether the global namespace uses dedicated index templates. */
+    dedicatedNamespaceTemplates?: boolean;
     services?: string[];
     packageNames?: string[];
     serviceNames?: Record<string, string>;
