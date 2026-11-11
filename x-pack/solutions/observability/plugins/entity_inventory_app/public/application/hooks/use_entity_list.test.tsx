@@ -13,7 +13,7 @@ import { createFixtureEntityInventoryApiClient } from '../../inventory_api/fixtu
 import { createScenarioEntityInventoryApiClient } from '../../inventory_api/fixture_scenarios';
 import { createAppServicesMock } from '../../mocks';
 import { EntityInventorySearchProvider, useEntityInventorySearch } from '../context/search_context';
-import { EntityTypeNotFoundError, useEntityList } from './use_entity_list';
+import { useEntityList } from './use_entity_list';
 
 const createClientMock = (
   client: EntityInventoryApiClient = createFixtureEntityInventoryApiClient()
@@ -45,7 +45,7 @@ describe('useEntityList', () => {
     expect(type).toBe('host');
     expect(Date.parse(request.to) - Date.parse(request.from)).toBe(15 * 60 * 1000);
     expect(new Date(request.from).toISOString()).toBe(request.from);
-    expect(result.current.result.entityType?.type).toBe('host');
+    expect(inventoryApi.getTypes).not.toHaveBeenCalled();
     expect(result.current.result.list?.rows.length).toBeGreaterThan(0);
     expect(result.current.result.error).toBeUndefined();
   });
@@ -56,14 +56,6 @@ describe('useEntityList', () => {
 
     await waitFor(() => expect(result.current.result.error).toBe(failWith));
     expect(result.current.result.list).toBeUndefined();
-  });
-
-  it('fails with a not found error when the type is not registered', async () => {
-    const { result } = renderUseEntityList(createFixtureEntityInventoryApiClient(), 'service');
-
-    await waitFor(() =>
-      expect(result.current.result.error).toBeInstanceOf(EntityTypeNotFoundError)
-    );
   });
 
   it('lists again when a search is submitted', async () => {

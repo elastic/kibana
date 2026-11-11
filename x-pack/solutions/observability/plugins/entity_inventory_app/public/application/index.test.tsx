@@ -17,6 +17,8 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
+import type { EntityInventoryApiClient } from '../inventory_api/client';
+import { createFixtureEntityInventoryApiClient } from '../inventory_api/fixture_client';
 import { createAppServicesMock, createCoreStartMock, createStartDependenciesMock } from '../mocks';
 import { ENTITY_INVENTORY_PAGES } from '../pages';
 import { entityInventoryRouter } from '../routes/config';
@@ -29,12 +31,15 @@ const PageTemplate = (({ children }: { children: React.ReactNode }) => (
 
 const APP_BASE_PATH = '/app/entity-inventory';
 
-const renderShell = (history: History) => {
+const renderShell = (
+  history: History,
+  inventoryApi: EntityInventoryApiClient = createFixtureEntityInventoryApiClient()
+) => {
   render(
     <I18nProvider>
       <EuiProvider>
         <MockAppHeaderProvider>
-          <KibanaContextProvider services={createAppServicesMock()}>
+          <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
             <RouterProvider history={history} router={entityInventoryRouter}>
               <EntityInventoryShell PageTemplate={PageTemplate} />
             </RouterProvider>
@@ -45,9 +50,9 @@ const renderShell = (history: History) => {
   );
 };
 
-const renderShellAt = (path: string) => {
+const renderShellAt = (path: string, inventoryApi?: EntityInventoryApiClient) => {
   const history = createMemoryHistory({ initialEntries: [path] });
-  renderShell(history);
+  renderShell(history, inventoryApi);
 
   return { history };
 };
@@ -112,6 +117,22 @@ describe('EntityInventoryShell', () => {
     expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
     expect(screen.getByTestId('dataGridHeaderCell-host.name')).toBeInTheDocument();
     expect(screen.queryByTestId('dataGridHeaderCell-cloud.account.id')).not.toBeInTheDocument();
+  });
+
+  it('requests the entity types again on a page change', async () => {
+    const fixtureClient = createFixtureEntityInventoryApiClient();
+    const getTypes = jest.fn(fixtureClient.getTypes);
+    const { history } = renderShellAt('/hosts', { ...fixtureClient, getTypes });
+    expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
+    expect(getTypes).toHaveBeenCalledTimes(1);
+
+    act(() => history.push('/kubernetes'));
+
+    expect(await screen.findByTestId('entityInventoryTable')).toHaveAttribute(
+      'data-entity-type',
+      'k8s.deployment'
+    );
+    expect(getTypes).toHaveBeenCalledTimes(2);
   });
 
   it.each(['/', '/unknown'])('redirects the path %s to all resources', (path) => {

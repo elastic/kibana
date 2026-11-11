@@ -123,3 +123,17 @@ export const EMPTY_WITH_FAILURES_BODY = i18n.translate(
       'Some data sources failed, so entities may exist that are not shown. See the details above.',
   }
 );
+
+export const ENTITY_COUNT_LABEL = i18n.translate(
+  'xpack.entityInventoryApp.entityTable.section.entityCountLabel',
+  { defaultMessage: 'Entities:' }
+);
+
+/** The number of listed entities; a truncated list holds only some, so it reads "250+". */
+export const getEntityCountValue = ({ count, truncated }: { count: number; truncated: boolean }) =>
+  truncated
+    ? i18n.translate('xpack.entityInventoryApp.entityTable.section.truncatedEntityCount', {
+        defaultMessage: '{count}+',
+        values: { count },
+      })
+    : String(count);

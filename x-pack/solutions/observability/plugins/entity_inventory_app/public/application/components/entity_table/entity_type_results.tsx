@@ -6,64 +6,97 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiProgress,
+  EuiText,
+  EuiTitle,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import type { InventoryEntityType } from '../../../inventory_api/types';
 import { useEntityTablePreferences } from '../../context/entity_table_preferences_context';
-import { EntityTypeNotFoundError, useEntityList } from '../../hooks/use_entity_list';
+import type { UseEntityListResult } from '../../hooks/use_entity_list';
+import { useEntityList } from '../../hooks/use_entity_list';
 import { EntityTable } from './entity_table';
-import type { EntityTablePreferences } from './use_entity_table_state';
 import {
   EntityTableDiagnosticsCallout,
   EntityTableTruncationCallout,
 } from './entity_table_callouts';
-import {
-  EntityTableEmpty,
-  EntityTableLoadError,
-  EntityTableLoading,
-  EntityTableTypeNotAvailable,
-} from './entity_table_states';
+import { EntityTableEmpty, EntityTableLoadError, EntityTableLoading } from './entity_table_states';
+import { ENTITY_COUNT_LABEL, getEntityCountValue } from './translations';
 
 /**
- * The results of one entity type over the committed time range, with its loading states. Keyed by
- * type so that a type switch starts with no rows. The column, sort and page size choices are kept
- * per type above the routes, in `EntityTablePreferencesProvider`, so an empty range, a failed
- * load, another type or another page does not discard them.
+ * One entity type as a collapsible section: its name from the `types` entry, the number of listed
+ * entities once its `_list` response arrives, and its results below. Each section loads and fails
+ * on its own.
  */
-export const EntityTypeResults = ({ entityType }: { entityType: string }) => {
-  const { preferences, onPreferencesChange } = useEntityTablePreferences(entityType);
+export const EntityTypeResults = ({ entityType }: { entityType: InventoryEntityType }) => {
+  const { type, name } = entityType;
+  const accordionId = useGeneratedHtmlId({ prefix: 'entityInventoryTypeSection' });
+  const listResult = useEntityList(type);
+  const { list } = listResult;
 
   return (
-    <EntityTypeResultsOfType
-      key={entityType}
-      entityType={entityType}
-      preferences={preferences}
-      onPreferencesChange={onPreferencesChange}
-    />
+    <EuiPanel
+      hasBorder
+      hasShadow={false}
+      paddingSize="m"
+      data-test-subj="entityInventoryTypeSection"
+      data-entity-type={type}
+    >
+      <EuiAccordion
+        id={accordionId}
+        initialIsOpen
+        buttonContent={
+          <EuiTitle size="xs">
+            <h3>{name}</h3>
+          </EuiTitle>
+        }
+        extraAction={
+          list && (
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">{ENTITY_COUNT_LABEL}</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow" data-test-subj="entityInventoryTypeSectionCount">
+                  {getEntityCountValue({ count: list.rows.length, truncated: list.truncated })}
+                </EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )
+        }
+        paddingSize="s"
+      >
+        <EntityTypeListResults entityType={entityType} listResult={listResult} />
+      </EuiAccordion>
+    </EuiPanel>
   );
 };
 
-interface EntityTypeResultsOfTypeProps {
-  entityType: string;
-  preferences: EntityTablePreferences;
-  onPreferencesChange: (preferences: EntityTablePreferences) => void;
+interface EntityTypeListResultsProps {
+  entityType: InventoryEntityType;
+  listResult: UseEntityListResult;
 }
 
-const EntityTypeResultsOfType = ({
-  entityType,
-  preferences,
-  onPreferencesChange,
-}: EntityTypeResultsOfTypeProps) => {
-  const { entityType: description, list, loading, error, refresh } = useEntityList(entityType);
+/** The list of one type with its loading, error, empty and partial states. */
+const EntityTypeListResults = ({ entityType, listResult }: EntityTypeListResultsProps) => {
+  const { type, name } = entityType;
+  const { list, loading, error, refresh } = listResult;
+  // The column, sort and page size choices are kept per type above the routes, in
+  // `EntityTablePreferencesProvider`, so an empty range, a failed load or another page does not
+  // discard them.
+  const { preferences, onPreferencesChange } = useEntityTablePreferences(type);
 
-  if (error instanceof EntityTypeNotFoundError) {
-    return <EntityTableTypeNotAvailable entityType={entityType} />;
-  }
   // A failed reload replaces the results of the last range rather than leaving them up as current.
   if (error && !loading) {
-    return (
-      <EntityTableLoadError entityType={entityType} message={error.message} onRetry={refresh} />
-    );
+    return <EntityTableLoadError ebtDetail={type} message={error.message} onRetry={refresh} />;
   }
-  if (!description || !list) {
+  if (!list) {
     return <EntityTableLoading />;
   }
 
@@ -90,10 +123,10 @@ const EntityTypeResultsOfType = ({
       )}
       <EuiFlexItem>
         {isEmpty ? (
-          <EntityTableEmpty typeName={description.name} isIncomplete={errors.length > 0} />
+          <EntityTableEmpty typeName={name} isIncomplete={errors.length > 0} />
         ) : (
           <EntityTable
-            entityType={description}
+            entityType={entityType}
             list={list}
             preferences={preferences}
             onPreferencesChange={onPreferencesChange}

@@ -12,7 +12,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { EntityInventoryApiClient } from '../../../inventory_api/client';
 import { createFixtureEntityInventoryApiClient } from '../../../inventory_api/fixture_client';
-import { HOST_TYPE_FIXTURE } from '../../../inventory_api/fixture_data';
+import {
+  HOST_TYPE_FIXTURE,
+  K8S_DEPLOYMENT_TYPE_FIXTURE,
+} from '../../../inventory_api/fixture_data';
 import type { FixtureScenario } from '../../../inventory_api/fixture_scenarios';
 import { createScenarioEntityInventoryApiClient } from '../../../inventory_api/fixture_scenarios';
 import { createAppServicesMock } from '../../../mocks';
@@ -21,7 +24,8 @@ import {
   EntityInventorySearchProvider,
   useEntityInventorySearch,
 } from '../../context/search_context';
-import { EntityTypeResults } from './entity_type_results';
+import { EntityTypesProvider } from '../../context/entity_types_context';
+import { EntityCategoryResults } from './entity_category_results';
 import {
   EMPTY_BODY,
   LOAD_ERROR_TITLE,
@@ -47,29 +51,34 @@ const NewRangeButton = () => {
   );
 };
 
-const renderResults = (inventoryApi: EntityInventoryApiClient, entityType = 'host') => {
-  const results = (type: string) => (
+const renderResults = (
+  inventoryApi: EntityInventoryApiClient,
+  entityTypes: readonly string[] = ['host']
+) => {
+  const results = (types: readonly string[]) => (
     <I18nProvider>
       <EuiProvider>
         <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
           <EntityTablePreferencesProvider>
             <EntityInventorySearchProvider entityCategory="hosts">
-              <NewRangeButton />
-              <EntityTypeResults entityType={type} />
+              <EntityTypesProvider>
+                <NewRangeButton />
+                <EntityCategoryResults entityTypes={types} />
+              </EntityTypesProvider>
             </EntityInventorySearchProvider>
           </EntityTablePreferencesProvider>
         </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>
   );
-  const { rerender, ...rest } = render(results(entityType));
-  return { ...rest, showType: (type: string) => rerender(results(type)) };
+  const { rerender, ...rest } = render(results(entityTypes));
+  return { ...rest, showType: (type: string) => rerender(results([type])) };
 };
 
 const renderScenario = (scenario: FixtureScenario) =>
   renderResults(createScenarioEntityInventoryApiClient({ scenario }));
 
-describe('EntityTypeResults', () => {
+describe('EntityCategoryResults', () => {
   it('shows a loading prompt until the entities arrive, then the table', async () => {
     renderScenario('normal');
 
@@ -137,7 +146,7 @@ describe('EntityTypeResults', () => {
   });
 
   it('says the type is not available when it is not registered, without a retry', async () => {
-    renderResults(createFixtureEntityInventoryApiClient(), 'service');
+    renderResults(createFixtureEntityInventoryApiClient(), ['service']);
 
     expect(await screen.findByTestId('entityInventoryTypeNotAvailable')).toHaveTextContent(
       getTypeNotAvailableTitle('service')
@@ -265,5 +274,102 @@ describe('EntityTypeResults', () => {
       'Request failed'
     );
     expect(screen.queryByTestId('entityInventoryTable')).not.toBeInTheDocument();
+  });
+  describe('sections', () => {
+    it('renders one section per type in the order of the types response, titled by its name', async () => {
+      renderResults(createFixtureEntityInventoryApiClient(), ['k8s.deployment', 'host']);
+
+      await waitFor(() => expect(screen.getAllByTestId('entityInventoryTable')).toHaveLength(2));
+      const sections = screen.getAllByTestId('entityInventoryTypeSection');
+      expect(sections.map((section) => section.getAttribute('data-entity-type'))).toEqual([
+        'host',
+        'k8s.deployment',
+      ]);
+      expect(sections[0]).toHaveTextContent(HOST_TYPE_FIXTURE.name);
+      expect(sections[1]).toHaveTextContent(K8S_DEPLOYMENT_TYPE_FIXTURE.name);
+    });
+
+    it('counts the listed entities of each section, with a plus when the list is truncated', async () => {
+      const { unmount } = renderScenario('normal');
+      const count = await screen.findByTestId('entityInventoryTypeSectionCount');
+      expect(count).toHaveTextContent(/^\d+$/);
+      unmount();
+
+      renderScenario('truncated');
+      expect(await screen.findByTestId('entityInventoryTypeSectionCount')).toHaveTextContent(
+        '250+'
+      );
+    });
+
+    it('requests the types once and the list of each section by its type id', async () => {
+      const fixtureClient = createFixtureEntityInventoryApiClient();
+      const getTypes = jest.fn(fixtureClient.getTypes);
+      const getEntities = jest.fn(fixtureClient.getEntities);
+      renderResults({ getTypes, getEntities }, ['host', 'k8s.deployment']);
+      await waitFor(() => expect(screen.getAllByTestId('entityInventoryTable')).toHaveLength(2));
+
+      fireEvent.click(screen.getByRole('button', { name: NEW_RANGE_LABEL }));
+      await waitFor(() => expect(getEntities).toHaveBeenCalledTimes(4));
+
+      expect(getTypes).toHaveBeenCalledTimes(1);
+      expect(getEntities.mock.calls.map(([type]) => type).sort()).toEqual([
+        'host',
+        'host',
+        'k8s.deployment',
+        'k8s.deployment',
+      ]);
+    });
+
+    it('keeps the other sections when the list of one type fails', async () => {
+      const fixtureClient = createFixtureEntityInventoryApiClient();
+      const getEntities = jest.fn(
+        (...args: Parameters<EntityInventoryApiClient['getEntities']>) => {
+          const [type] = args;
+          return type === 'host'
+            ? Promise.reject(new Error('Request failed'))
+            : fixtureClient.getEntities(...args);
+        }
+      );
+      renderResults({ ...fixtureClient, getEntities }, ['host', 'k8s.deployment']);
+
+      expect(await screen.findByTestId('entityInventoryTableError')).toHaveTextContent(
+        'Request failed'
+      );
+      expect(await screen.findByTestId('entityInventoryTable')).toHaveAttribute(
+        'data-entity-type',
+        'k8s.deployment'
+      );
+    });
+
+    it('shows the error of the types request with a retry that requests them again', async () => {
+      const fixtureClient = createFixtureEntityInventoryApiClient();
+      const getTypes = jest
+        .fn(fixtureClient.getTypes)
+        .mockRejectedValueOnce(new Error('Types failed'));
+      const getEntities = jest.fn(fixtureClient.getEntities);
+      renderResults({ getTypes, getEntities });
+
+      expect(await screen.findByTestId('entityInventoryTableError')).toHaveTextContent(
+        'Types failed'
+      );
+      expect(getEntities).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByRole('button', { name: RETRY_LABEL }));
+
+      expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
+      expect(getTypes).toHaveBeenCalledTimes(2);
+    });
+
+    it('lists the found types and says a missing one is not available', async () => {
+      renderResults(createFixtureEntityInventoryApiClient(), ['service', 'host']);
+
+      expect(await screen.findByTestId('entityInventoryTable')).toHaveAttribute(
+        'data-entity-type',
+        'host'
+      );
+      expect(screen.getByTestId('entityInventoryTypeNotAvailable')).toHaveTextContent(
+        getTypeNotAvailableTitle('service')
+      );
+    });
   });
 });
