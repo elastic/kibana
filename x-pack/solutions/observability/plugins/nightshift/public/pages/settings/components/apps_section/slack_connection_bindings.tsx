@@ -35,7 +35,6 @@ import { parseSlackChannelInput } from '../../../../common/parse_slack_channel_i
 
 interface SlackConnectionBindingsProps {
   canEdit: boolean;
-  onReconnect: () => void;
 }
 
 const failureCopy = ({ reason, message }: BindFailure): string => {
@@ -44,12 +43,12 @@ const failureCopy = ({ reason, message }: BindFailure): string => {
       // The Relay sends this for any channel it can't see, private or not.
       return i18n.translate('xpack.nightshift.settings.apps.bindNotMember', {
         defaultMessage:
-          'Invite @Elastic to the channel, then try again. If the channel is private, you may also need to reconnect Slack and allow private channel access.',
+          'Invite @Elastic to the channel, then try again. If the channel is private, the workspace also needs private channel access. To allow it, disconnect the workspace and connect it again. A Slack admin may need to approve it, and you will need to reconnect your channels.',
       });
     case 'private_channel_access_required':
       return i18n.translate('xpack.nightshift.settings.apps.bindPrivateAccessRequired', {
         defaultMessage:
-          'Private channels need private channel access, which applies to the whole Slack workspace and every Elastic deployment connected to it. Reconnect Slack and allow it, then try again.',
+          'Private channels need private channel access, which applies to the whole Slack workspace and every Elastic deployment connected to it. To allow it, disconnect the workspace and connect it again. A Slack admin may need to approve it, and you will need to reconnect your channels.',
       });
     default:
       return message;
@@ -58,40 +57,27 @@ const failureCopy = ({ reason, message }: BindFailure): string => {
 
 const bindFailureActions = ({
   failure: { reason },
-  onReconnect,
   onRetry,
   canRetry,
 }: {
   failure: BindFailure;
-  onReconnect: () => void;
   onRetry: () => void;
   canRetry: boolean;
 }): KbnCalloutProps['actionProps'] => {
-  const retry = {
-    children: i18n.translate('xpack.nightshift.settings.apps.slackBindRetry', {
-      defaultMessage: 'Try again',
-    }),
-    onClick: onRetry,
-    isDisabled: !canRetry,
-    'data-test-subj': 'streamsSlackAppBindFailureRetry',
-  };
   if (reason === 'channel_taken') return undefined;
-  if (reason === 'not_a_member' || reason === 'private_channel_access_required') {
-    return {
-      primary: {
-        children: i18n.translate('xpack.nightshift.settings.apps.slackReconnect', {
-          defaultMessage: 'Reconnect Slack',
-        }),
-        onClick: onReconnect,
-        'data-test-subj': 'streamsSlackAppBindFailureReconnect',
-      },
-      secondary: retry,
-    };
-  }
-  return { primary: retry };
+  return {
+    primary: {
+      children: i18n.translate('xpack.nightshift.settings.apps.slackBindRetry', {
+        defaultMessage: 'Try again',
+      }),
+      onClick: onRetry,
+      isDisabled: !canRetry,
+      'data-test-subj': 'streamsSlackAppBindFailureRetry',
+    },
+  };
 };
 
-export function SlackConnectionBindings({ canEdit, onReconnect }: SlackConnectionBindingsProps) {
+export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProps) {
   // Cursor-based pagination: `cursors[i]` is the opaque cursor used to fetch page `i`
   // (undefined for the first page). The Relay only exposes forward `nextCursor` values, so
   // we remember the cursors we've visited to allow stepping back and forth.
@@ -285,7 +271,6 @@ export function SlackConnectionBindings({ canEdit, onReconnect }: SlackConnectio
             title={failureCopy(failure)}
             actionProps={bindFailureActions({
               failure,
-              onReconnect,
               onRetry: onBind,
               canRetry: canBind,
             })}

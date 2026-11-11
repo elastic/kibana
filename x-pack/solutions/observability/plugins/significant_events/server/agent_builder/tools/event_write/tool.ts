@@ -28,10 +28,15 @@ import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
+import { getWorkflowExecutionIdFromRequest } from '../../../lib/telemetry/ebt/workflow_execution_id';
 import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
+import {
+  alertCreationAttemptIdentity,
+  eventsWriteResultEventId,
+} from '../alert_identity_telemetry';
 import {
   BulkWriteError,
   createBulkWriteValidationError,
@@ -61,7 +66,6 @@ export const eventsWriteItemSchema = lazySchema(() =>
       signals: true,
       causal_features: true,
       blast_radius: true,
-      workflow_execution_id: true,
       conversation_id: true,
     })
     .extend({
@@ -418,7 +422,20 @@ export function createEventsWriteTool({
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
       const { request } = context;
+      const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
       let storedItems: EventsWriteInput[] | undefined;
+      const runByDetectionId = new Map<string, string>();
+      const detectionRunsOf = ({ signals }: { signals?: EventsWriteInput['signals'] }) => {
+        const ids = [
+          ...new Set(
+            (signals ?? []).flatMap(({ metadata }) => {
+              const run = runByDetectionId.get(metadata.detection_id);
+              return run ? [run] : [];
+            })
+          ),
+        ];
+        return ids.length > 0 ? { detection_workflow_execution_ids: ids } : {};
+      };
       try {
         const {
           getEventSearchClient,
@@ -435,9 +452,18 @@ export function createEventsWriteTool({
         const detectionClient = await getDetectionClient();
         const identifiedItems = await fillDetectionMetadata({
           items: toolParams.items,
-          findDetections: (detectionIds) => detectionClient.findByIds(detectionIds),
+          findDetections: async (detectionIds) => {
+            const found = await detectionClient.findByIds(detectionIds);
+            found.hits.forEach(({ detection_id: detectionId, workflow_execution_id: run }) => {
+              if (run) runByDetectionId.set(detectionId, run);
+            });
+            return found;
+          },
         });
-        const resolvedItems = identifiedItems.map((item) => assignStoredSourceIds(catalog, item));
+        const resolvedItems = identifiedItems.map((item) => ({
+          ...assignStoredSourceIds(catalog, item),
+          workflow_execution_id: workflowExecutionId,
+        }));
         storedItems = resolvedItems;
         const items = await enrichCausalFeatures(
           resolvedItems,
@@ -465,11 +491,18 @@ export function createEventsWriteTool({
             description: 'events_write telemetry',
             track: () =>
               telemetry.trackAgentToolEventsWrite({
+                workflow_execution_id: workflowExecutionId,
+                ...alertCreationAttemptIdentity({
+                  spaceId: request.spaceId,
+                  eventId: eventsWriteResultEventId(result, input.event_id),
+                  groupHash: result.written && result.created ? result.group_hash : undefined,
+                }),
                 success: result.written || isSkipped,
                 event_id: result.event_id ?? 'unknown',
                 status: result.status,
                 written: result.written,
                 source_ids: input.source_ids,
+                ...detectionRunsOf(input),
                 error_message: isBulkError ? result.error.reason : undefined,
                 ...(result.written ? { severity: result.severity } : {}),
               }),
@@ -508,10 +541,16 @@ export function createEventsWriteTool({
             description: 'failed events_write telemetry',
             track: () =>
               telemetry.trackAgentToolEventsWrite({
+                workflow_execution_id: workflowExecutionId,
+                ...alertCreationAttemptIdentity({
+                  spaceId: request.spaceId,
+                  eventId: input.event_id,
+                }),
                 success: false,
                 event_id: input.event_id ?? 'unknown',
                 written: false,
                 source_ids: 'source_ids' in input ? input.source_ids : [],
+                ...('source_ids' in input ? detectionRunsOf(input) : {}),
                 error_message: message,
               }),
           });

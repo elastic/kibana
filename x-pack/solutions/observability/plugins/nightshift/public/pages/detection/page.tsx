@@ -182,7 +182,7 @@ export const DetectionPage = ({
         back={{
           href: application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/' }),
           label: i18n.translate('xpack.nightshift.detectionPage.backToNightshiftLabel', {
-            defaultMessage: 'Nightshift',
+            defaultMessage: 'nightshift',
           }),
         }}
       />

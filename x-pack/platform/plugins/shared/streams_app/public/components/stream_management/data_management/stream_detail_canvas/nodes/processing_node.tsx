@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import { EuiIcon, EuiPanel, EuiScreenReaderOnly, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
+import { PROCESSING_SLOT_KIND } from '../../../../../services/unit_graph';
 import type { ProcessingNode as ProcessingNodeType } from '../types';
 import { PROCESSING_NODE_HEIGHT, PROCESSING_NODE_WIDTH } from '../canvas_constants';
 import { ConnectionHandle } from './connection_handle';
@@ -26,7 +27,11 @@ export function ProcessingNode({ data, selected, dragging }: NodeProps<Processin
 
   return (
     <>
-      <ConnectionHandle type="target" position={Position.Left} isConnectable={false} />
+      <ConnectionHandle
+        type="target"
+        position={Position.Left}
+        isConnectable={data.ref.kind === PROCESSING_SLOT_KIND.pipeline}
+      />
       <EuiPanel
         className="nokey"
         hasShadow={false}
