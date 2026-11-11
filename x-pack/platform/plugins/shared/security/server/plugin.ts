@@ -59,7 +59,6 @@ import { securityFeatures } from './features';
 import type { FipsServiceSetupInternal } from './fips';
 import { FipsService } from './fips';
 import { defineRoutes } from './routes';
-import { defineTemporaryAccessRoute } from './routes/uiam/temporary_access_route';
 import { setupSavedObjects } from './saved_objects';
 import type { CloudProjectContext, ServiceAccountsServiceStart } from './service_accounts';
 import {
@@ -436,14 +435,6 @@ export class SecurityPlugin
         logger: this.logger,
       })
     ));
-    // TEMPORARY: QA verification of the UIAM access checks. Remove before merging.
-    if (config.uiam?.enabled) {
-      defineTemporaryAccessRoute({
-        router: core.http.createRouter(),
-        logger: this.initializerContext.logger.get('routes'),
-      });
-    }
-
     core.userProfile.registerUserProfileDelegate(
       buildUserProfileApi({
         getUserProfile: this.getUserProfileService.bind(this),
