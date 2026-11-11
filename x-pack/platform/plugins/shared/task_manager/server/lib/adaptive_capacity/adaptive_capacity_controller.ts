@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import numeral from '@elastic/numeral';
 import { getHeapStatistics } from 'v8';
 import { PerformanceObserver, constants as perfConstants } from 'perf_hooks';
 import { BehaviorSubject, type Observable } from 'rxjs';
@@ -385,22 +386,23 @@ export class AdaptiveCapacityController {
     this.currentCapacity = state.capacity;
     this.stateSubject.next(state);
     if (state.capacity !== previous) {
+      const bytes = (value: number) => numeral(value).format('0.0b');
       this.logger.debug(
-        `Adaptive capacity ${previous} -> ${state.capacity} on ${trigger}: heap ${mb(
+        `Adaptive capacity ${previous} -> ${state.capacity} on ${trigger}: heap ${bytes(
           state.heap_used_bytes
-        )}+${mb(state.heap_external_bytes)}/${mb(state.heap_limit_bytes)} MB, projected ${mb(
+        )}+${bytes(state.heap_external_bytes)}/${bytes(state.heap_limit_bytes)}, projected ${bytes(
           state.heap_projected_bytes
-        )} MB, heap budget ${mb(state.heap_budget_bytes)} MB${
+        )}, heap budget ${bytes(state.heap_budget_bytes)}${
           state.memory
-            ? `, rss ${mb(state.memory.rss_bytes)}/${mb(
+            ? `, rss ${bytes(state.memory.rss_bytes)}/${bytes(
                 state.memory.limit_bytes
-              )} MB, memory budget ${mb(state.memory.budget_bytes)} MB`
+              )}, memory budget ${bytes(state.memory.budget_bytes)}`
             : ''
-        }, budget ${mb(state.budget_bytes)} MB at ${mb(
+        }, budget ${bytes(state.budget_bytes)} at ${bytes(
           state.bytes_per_normal_task
-        )} MB per task, running cost ${state.running_cost}, reserved ${mb(
+        )} per task, running cost ${state.running_cost}, reserved ${bytes(
           state.reservations.bytes
-        )} MB`
+        )}`
       );
       this.capacitySubject.next(state.capacity);
     }
@@ -561,6 +563,3 @@ const ewma = (observed: number, previous: number | undefined, first: boolean): n
   first || previous === undefined
     ? observed
     : BASELINE_ALPHA * observed + (1 - BASELINE_ALPHA) * previous;
-
-/** Formats bytes as whole megabytes for log lines. */
-const mb = (bytes: number): string => (bytes / (1024 * 1024)).toFixed(0);
