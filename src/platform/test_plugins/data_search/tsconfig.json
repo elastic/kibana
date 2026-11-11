@@ -5,7 +5,7 @@
   },
   "include": [
     "server/**/*.ts",
-    "../../../../../../typings/**/*"
+    "../../../../typings/**/*"
   ],
   "exclude": [
     "target/**/*",
