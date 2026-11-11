@@ -11,6 +11,7 @@ import type { EuiFlyoutProps } from '@elastic/eui';
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
 import { asyncForEach } from '@kbn/std';
 
+import { isDashboardSection } from '../../../common';
 import { getLastSavedState } from '../../../common/default_dashboard_state';
 import { dashboardClient } from '../../dashboard_client';
 import { getPlacementHints } from '../../panel_placement/get_placement_hints';
@@ -19,7 +20,7 @@ import {
   getDashboardBackupService,
   initializeDashboardApiServices,
 } from '../../services/dashboard_api_services';
-import { coreServices } from '../../services/kibana_services';
+import { coreServices, embeddableService } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
 import { getDashboardUserActivityService } from '../../services/user_activity_service';
 import { parseChangeSources } from '../../../common/change_sources';
@@ -43,16 +44,6 @@ export async function loadDashboardApi({
   panelFlyoutType?: EuiFlyoutProps['type'];
 }) {
   const creationOptions = await getCreationOptions?.();
-
-  // --------------------------------------------------------------------------------------
-  // Determine sizes of incoming embeddables. Done here due to async fetching.
-  // --------------------------------------------------------------------------------------
-  const incomingEmbeddables = creationOptions?.getIncomingEmbeddables?.();
-  await asyncForEach(incomingEmbeddables ?? [], async (embeddable) => {
-    if (!embeddable.size) {
-      embeddable.size = await getPlacementHints(embeddable.type, embeddable.serializedState);
-    }
-  });
 
   const [readResult, user, isAccessControlEnabled] = savedObjectId
     ? await Promise.all([
@@ -90,15 +81,57 @@ export async function loadDashboardApi({
     getDashboardBackupService().storeViewMode(viewMode);
   }
 
+  const initialState = {
+    ...getLastSavedState(readResult),
+    ...unsavedChanges,
+    ...overrideState,
+  };
+
+  // --------------------------------------------------------------------------------------
+  // Determine sizes of incoming embeddables. Done here due to async fetching.
+  // --------------------------------------------------------------------------------------
+  const incomingEmbeddables = creationOptions?.getIncomingEmbeddables?.();
+  // Existing panels (grid and pinned) by type, gathered on demand for types with an isDuplicate check.
+  const panelsCache = new Map<string, Array<{ type: string; id?: string; state: object }>>();
+  const getPanels = (embeddableType: string) => {
+    const cached = panelsCache.get(embeddableType);
+    if (cached) return cached;
+
+    const panels = [
+      ...(initialState.pinned_panels ?? []),
+      ...(initialState.panels ?? []).flatMap((widget) =>
+        isDashboardSection(widget) ? widget.panels : [widget]
+      ),
+    ]
+      .filter(({ type }) => type === embeddableType)
+      .map(({ type, id, config }) => ({ type, id, state: config }));
+    panelsCache.set(embeddableType, panels);
+    return panels;
+  };
+
+  await asyncForEach(incomingEmbeddables ?? [], async (embeddable) => {
+    if (!embeddable.embeddableId) {
+      const embeddableDefinition = await embeddableService.getEmbeddableDefinition(embeddable.type);
+      if (embeddableDefinition?.isDuplicate) {
+        const duplicatePanel = getPanels(embeddable.type).find(({ state }) =>
+          embeddableDefinition.isDuplicate?.(embeddable.serializedState, state)
+        );
+        if (duplicatePanel?.id) {
+          embeddable.embeddableId = duplicatePanel.id;
+        }
+      }
+    }
+
+    if (!embeddable.size) {
+      embeddable.size = await getPlacementHints(embeddable.type, embeddable.serializedState);
+    }
+  });
+
   const { api, cleanup, internalApi } = getDashboardApi({
     creationOptions,
     panelFlyoutType,
     incomingEmbeddables,
-    initialState: {
-      ...getLastSavedState(readResult),
-      ...unsavedChanges,
-      ...overrideState,
-    },
+    initialState,
     readResult,
     savedObjectId,
     user,
