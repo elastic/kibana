@@ -392,6 +392,24 @@ describe('useBinaryUpload', () => {
       expect(result.current.pendingConversationId).toBeUndefined();
     });
 
+    it('ignores a conversation that is created after the user left', async () => {
+      let resolveCreate: (value: { id: string }) => void = () => {};
+      createConversation.mockReturnValue(
+        new Promise<{ id: string }>((resolve) => {
+          resolveCreate = resolve;
+        })
+      );
+      setContext({ conversationId: undefined });
+      const { result, rerender } = renderBinaryUpload();
+      paste(result);
+
+      setContext({ conversationId: 'other-conv' });
+      rerender();
+      await act(async () => resolveCreate({ id: 'late-conv' }));
+
+      expect(result.current.pendingConversationId).toBeUndefined();
+    });
+
     it('keeps the PDFs that were sent, even when the screen changes right after', async () => {
       setContext({ conversationId: undefined });
       const { result, rerender } = renderBinaryUpload();

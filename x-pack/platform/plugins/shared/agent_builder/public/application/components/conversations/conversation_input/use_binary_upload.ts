@@ -76,12 +76,13 @@ export const useBinaryUpload = ({
       if (!agentId) {
         return Promise.reject(new Error('agentId is required to start a conversation'));
       }
+      // A late answer after the user left belongs to the old chat, so it changes nothing.
       const created = createConversation(agentId).then(({ id }) => {
-        setPendingConversationId(id);
+        if (pendingConversation.current === created) setPendingConversationId(id);
         return id;
       });
       created.catch(() => {
-        pendingConversation.current = undefined;
+        if (pendingConversation.current === created) pendingConversation.current = undefined;
       });
       pendingConversation.current = created;
     }
