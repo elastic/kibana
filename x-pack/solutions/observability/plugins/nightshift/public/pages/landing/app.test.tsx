@@ -8,6 +8,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { usePageReady } from '@kbn/ebt-tools';
 import { I18nProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { NIGHTSHIFT_UI_PRIVILEGES } from '@kbn/nightshift-shared';
 import React from 'react';
@@ -15,6 +16,7 @@ import { MemoryRouter, useLocation } from 'react-router-dom';
 import { NightshiftApp } from './app';
 import type { InvestigationSectionState } from '../../data/investigations/use_investigation_sections';
 import { useInvestigationSections } from '../../data/investigations/use_investigation_sections';
+import { NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY } from '../../data/investigations/use_fetch_investigations';
 import { useKibana } from '../../hooks/use_kibana';
 import { useDetectionSetupBanner } from './use_detection_setup_banner';
 
@@ -165,6 +167,13 @@ function LocationProbe(): React.ReactElement {
   return <span data-test-subj="locationProbe">{useLocation().search}</span>;
 }
 
+const queryClient = new QueryClient();
+const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+
+const QueryWrapper = ({ children }: { children: React.ReactNode }) => (
+  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+);
+
 function renderApp({ initialEntries = ['/'] }: { initialEntries?: string[] } = {}) {
   return render(
     <I18nProvider>
@@ -172,7 +181,8 @@ function renderApp({ initialEntries = ['/'] }: { initialEntries?: string[] } = {
         <NightshiftApp />
         <LocationProbe />
       </MemoryRouter>
-    </I18nProvider>
+    </I18nProvider>,
+    { wrapper: QueryWrapper }
   );
 }
 
@@ -467,9 +477,11 @@ describe('NightshiftApp', () => {
     );
 
     const [{ onClose, onConversationUpdated }] = openConversationDetails.mock.calls[0];
-    refetchAll.mockClear();
+    invalidateQueries.mockClear();
     onConversationUpdated();
-    expect(refetchAll).toHaveBeenCalledTimes(1);
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY,
+    });
     onClose();
     await waitFor(() => expect(screen.getByTestId('locationProbe')).toHaveTextContent(''));
   });
