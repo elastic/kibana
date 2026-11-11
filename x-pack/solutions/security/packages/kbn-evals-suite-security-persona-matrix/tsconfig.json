@@ -21,6 +21,7 @@
     "@kbn/security-evals-matrix",
     "@kbn/tooling-log",
     "@kbn/kbn-client",
-    "@kbn/evals-common"
+    "@kbn/evals-common",
+    "@kbn/workflows"
   ]
 }

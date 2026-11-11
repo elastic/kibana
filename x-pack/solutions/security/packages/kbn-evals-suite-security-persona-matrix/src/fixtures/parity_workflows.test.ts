@@ -6,6 +6,7 @@
  */
 
 import { parse } from 'yaml';
+import { WorkflowInputSchema } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
 import { PARITY_DOCS } from './chrysalis_parity_docs';
 import {
   PARITY_WORKFLOWS,
@@ -41,6 +42,19 @@ describe('parity workflows', () => {
       expect(workflow.enabled).toBe(true);
       expect(workflow.triggers).toEqual([{ type: 'manual' }]);
       expect(workflow.steps.length).toBeGreaterThan(0);
+    }
+  );
+
+  it.each(PARITY_WORKFLOWS.map((w) => w.id))(
+    '%s trigger inputs satisfy the workflow-input schema the server enforces',
+    (id) => {
+      // The server parses trigger inputs with WorkflowInputSchema on create;
+      // a violation only surfaces at seed time (POST 400), so validate here.
+      const workflow = parse(PARITY_WORKFLOWS.find((w) => w.id === id)?.yaml ?? '') as {
+        inputs?: unknown;
+      };
+      const result = WorkflowInputSchema.safeParse(workflow.inputs);
+      expect(result.success ? 'valid' : JSON.stringify(result.error.issues)).toBe('valid');
     }
   );
 
