@@ -29,7 +29,11 @@ import {
 import { RuleSummaryQueryPreviewSection } from '../../components/rule/rule_summary/rule_summary_query_preview_section';
 import { OBSERVABILITY_ALERTING_HOST } from '../../../common/locators';
 import { RulesApi } from '../../services/rules_api';
-import { syncAttachmentOrigin, useRecordedAttachmentSync } from './attachment_save_state';
+import {
+  recordAttachmentSync,
+  syncAttachmentOrigin,
+  useRecordedAttachmentSync,
+} from './attachment_save_state';
 import type { RuleAttachment } from './rule_attachment_definition';
 
 export interface RuleCanvasContentProps
@@ -76,16 +80,26 @@ export const RuleCanvasContent = ({
           icon: 'save',
           type: ActionButtonType.PRIMARY,
           handler: async () => {
-            const savedRule = data.id
-              ? await rulesApi.upsertRule(data.id, buildRulePayload(data))
-              : await rulesApi.createRule(buildRulePayload(data));
-            await syncAttachmentOrigin(attachment.id, () => updateOrigin(savedRule.id));
-            notifications.toasts.addSuccess(
-              i18n.translate('xpack.alertingV2.ruleAttachment.createdSuccess', {
-                defaultMessage: 'Rule "{name}" created',
-                values: { name: data.metadata.name },
-              })
-            );
+            try {
+              const savedRule = data.id
+                ? await rulesApi.upsertRule(data.id, buildRulePayload(data))
+                : await rulesApi.createRule(buildRulePayload(data));
+              // Linking the origin is what turns the draft into a saved rule, so a failure here is surfaced.
+              recordAttachmentSync(attachment.id, await updateOrigin(savedRule.id));
+              notifications.toasts.addSuccess(
+                i18n.translate('xpack.alertingV2.ruleAttachment.createdSuccess', {
+                  defaultMessage: 'Rule "{name}" created',
+                  values: { name: data.metadata.name },
+                })
+              );
+            } catch (e) {
+              notifications.toasts.addDanger(
+                i18n.translate('xpack.alertingV2.ruleAttachment.createError', {
+                  defaultMessage: 'Failed to create rule: {error}',
+                  values: { error: e.body?.message ?? e.message },
+                })
+              );
+            }
           },
         },
       ]);
@@ -102,7 +116,17 @@ export const RuleCanvasContent = ({
         icon: 'save',
         type: ActionButtonType.PRIMARY,
         handler: async () => {
-          await rulesApi.upsertRule(ruleId, buildRulePayload(data));
+          try {
+            await rulesApi.upsertRule(ruleId, buildRulePayload(data));
+          } catch (e) {
+            notifications.toasts.addDanger(
+              i18n.translate('xpack.alertingV2.ruleAttachment.updateError', {
+                defaultMessage: 'Failed to update rule: {error}',
+                values: { error: e.body?.message ?? e.message },
+              })
+            );
+            return;
+          }
           // The origin is unchanged; this refreshes origin_snapshot_at so the save counts as synced.
           await syncAttachmentOrigin(attachment.id, () => updateOrigin(ruleId));
           notifications.toasts.addSuccess(

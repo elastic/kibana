@@ -23,7 +23,11 @@ import { ActionPolicyDefinitionList } from '../../components/action_policy/detai
 import { ActionPoliciesApi } from '../../services/action_policies_api';
 import { OBSERVABILITY_ALERTING_HOST } from '../../../common/locators';
 import type { ActionPolicyAttachment } from './action_policy_attachment_definition';
-import { syncAttachmentOrigin, useRecordedAttachmentSync } from './attachment_save_state';
+import {
+  recordAttachmentSync,
+  syncAttachmentOrigin,
+  useRecordedAttachmentSync,
+} from './attachment_save_state';
 
 const EMPTY_VALUE = '-';
 
@@ -116,7 +120,8 @@ export const ActionPolicyCanvasContent = ({
                 data.id,
                 attachmentDataToActionPolicyPayload(data)
               );
-              await syncAttachmentOrigin(attachment.id, () => updateOrigin(data.id));
+              // Linking the origin is what turns the draft into a saved policy, so a failure here is surfaced.
+              recordAttachmentSync(attachment.id, await updateOrigin(data.id));
               notifications.toasts.addSuccess(
                 i18n.translate('xpack.alertingV2.actionPolicyAttachment.createdSuccess', {
                   defaultMessage: 'Policy "{name}" created',

@@ -47,8 +47,9 @@ export const recordAttachmentSync = (
 };
 
 /**
- * Refreshes the attachment's origin sync after the object was saved. A failure here only affects the
- * unsaved-changes badge, so it is swallowed instead of reporting the (successful) save as failed.
+ * Refreshes the sync date of an attachment already linked to its saved object, after an update. A
+ * failure here only affects the unsaved-changes badge, so it is swallowed instead of reporting the
+ * (successful) save as failed. Do not use it on create, where `updateOrigin` establishes the link.
  */
 export const syncAttachmentOrigin = async (
   attachmentId: string,

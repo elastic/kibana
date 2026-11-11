@@ -202,6 +202,22 @@ describe('ActionPolicyCanvasContent', () => {
       expect(mockAddDanger).toHaveBeenCalledWith(expect.stringContaining('Failed to create'));
       expect(mockAddSuccess).not.toHaveBeenCalled();
     });
+
+    it('shows a danger toast when linking the created policy to the attachment fails', async () => {
+      const updateOrigin = jest.fn().mockRejectedValue(new Error('Conversation update failed'));
+      const { registerActionButtons } = await renderCanvas(
+        { data: { id: 'pre-assigned-id' } },
+        { updateOrigin }
+      );
+
+      const buttons = getLastRegisteredButtons(registerActionButtons);
+      await buttons.find((b) => b.label === 'Create policy')!.handler();
+
+      expect(mockAddDanger).toHaveBeenCalledWith(
+        expect.stringContaining('Conversation update failed')
+      );
+      expect(mockAddSuccess).not.toHaveBeenCalled();
+    });
   });
 
   describe('action buttons for persisted (saved) policies', () => {
