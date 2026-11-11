@@ -30,7 +30,6 @@ import {
   BEATS_OUTPUT_TYPES,
   OUTPUT_TYPES_WITH_PRESET_SUPPORT,
   OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT,
-  OUTPUT_TYPES_WITH_OTEL_EXPORTER_CONFIG,
   OUTPUT_TYPES_FOR_OTEL_ONLY_POLICIES,
   RESERVED_CONFIG_YML_KEYS,
   AGENTLESS_ALLOWED_OUTPUT_TYPES,
@@ -198,9 +197,8 @@ export function outputTypeSupportPresets<T extends { type: ValueOf<OutputType> }
   return OUTPUT_TYPES_WITH_PRESET_SUPPORT.includes(output.type);
 }
 
-/** Whether the output type carries the `otel_exporter_config_yaml` / `otel_disable_beatsauth` settings. */
 export function outputTypeSupportsOtelExporter(type: ValueOf<OutputType> | undefined): boolean {
-  return type !== undefined && OUTPUT_TYPES_WITH_OTEL_EXPORTER_CONFIG.includes(type);
+  return type !== undefined && OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT.includes(type);
 }
 
 /** Narrows outputs that carry OTel exporter fields. */
