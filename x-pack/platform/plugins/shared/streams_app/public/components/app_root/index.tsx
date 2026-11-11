@@ -40,12 +40,12 @@ export function AppRoot({
 } & { appMountParameters: AppMountParameters }) {
   const { history } = appMountParameters;
 
-  // Leaving Streams resets the stream check. On unmount, not mount: a mount effect runs after
-  // the routes have already started the check.
+  // Leaving Streams resets the stream check and the Classic tab origin. On unmount, not mount:
+  // a mount effect runs after the routes have already started the check.
   useEffect(
     () => () => {
       queryClient.removeQueries({ queryKey: CLASSIC_TAB_QUERY_KEY });
-      rememberClassicTabOrigin(false);
+      rememberClassicTabOrigin();
     },
     []
   );
