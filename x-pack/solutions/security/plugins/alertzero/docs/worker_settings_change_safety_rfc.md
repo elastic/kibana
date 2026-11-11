@@ -392,10 +392,12 @@ exists on `main`.
 A hash of each Worker's rendered YAML, per definition version, was tried. For YAML edits it
 duplicated the existing definition-version check, so a prompt edit would have needed two entries
 updated. Its only unique catch was an edit to a render helper made without a version bump: the
-platform decides whether to update installed copies by hashing the `yamlTemplate` function's source
-text, which does not include the helper it calls. That is a workflow versioning gap, not a settings
-compatibility one, so it is left to the Workflows platform. Until it is addressed, the plugin README
-states that a render-helper change needs a definition version bump.
+platform then decided whether to update installed copies by hashing the `yamlTemplate` function's
+source text, which does not include the helper it calls. That was a workflow versioning gap, not a
+settings compatibility one, so it was left to the Workflows platform. The platform now hashes the
+YAML each installed copy renders, so the hash covers everything the render uses: the YAML template,
+the stored values and any defaults the renderer fills in. A render-helper change reaches installed
+copies without a version bump.
 
 ## How the goals are met
 
@@ -479,7 +481,8 @@ configured space would store, then run update mode. The contract test reports `[
   and the renderer interpret them. A platform hook that lets a managed definition upgrade its own
   stored values at boot would need the Workflows team and a security review, and would call the same
   upgrade function.
-- **Render-helper edits** without a definition version bump are not caught, as described above.
+- **Render-helper edits** without a definition version bump are not caught by the fingerprint rows.
+  The platform still delivers them to installed copies, as described above.
 - **Rollback.** An older Kibana reading a document written by a newer one rejects unknown keys and
   shows the Worker as unavailable, leaving the stored values untouched. That is the MVP behaviour
   recorded on [security-team#19312](https://github.com/elastic/security-team/issues/19312). During a
