@@ -29,6 +29,7 @@ export interface ModelSettingsForm {
   dirtyFeatureIds: ReadonlySet<string>;
   updateEndpoints: (featureId: string, endpointIds: string[]) => void;
   save: () => Promise<void>;
+  reset: () => void;
 }
 
 const getEffectiveEndpoints = (
@@ -193,6 +194,10 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
     setAssignments((prev) => ({ ...prev, [featureId]: endpointIds }));
   }, []);
 
+  const reset = useCallback(() => {
+    setAssignments(defaultAssignments);
+  }, [defaultAssignments]);
+
   const save = useCallback(async () => {
     const changed = getChangedAssignments(
       assignments,
@@ -214,5 +219,6 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
     dirtyFeatureIds,
     updateEndpoints,
     save,
+    reset,
   };
 };
