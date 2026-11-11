@@ -371,6 +371,7 @@ export class NightshiftInvestigationsPlugin
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
             getAgenticInvestigations: () => this.agenticInvestigations,
+            getTelemetry: () => this.telemetry,
             // The final pass proposes actions for a person to decide, as the investigator's
             // `proposals.create` tool did, and sees which ones the conversation already has.
             getProposals: () =>

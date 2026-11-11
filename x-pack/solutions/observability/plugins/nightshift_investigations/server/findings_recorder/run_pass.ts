@@ -14,11 +14,13 @@ import { MessageRole, type Message, type ToolCall } from '@kbn/inference-common'
 import {
   INVESTIGATION_SEVERITY_CHANGED_EVENT_TYPE,
   INVESTIGATION_TEMPLATE_ID,
+  isMissingDataReason,
   serializeMissingData,
 } from '@kbn/agentic-investigations-plugin/common';
 import type { Hypothesis, ImpactEntity } from '@kbn/agentic-investigations-plugin/common';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
 import { createOptimizeModel } from '../lib/create_optimize_model';
+import type { NightshiftTelemetryClient } from '../telemetry';
 import { createInvestigationUsageTelemetry } from '../lib/investigation_usage_telemetry';
 import type { PassGuard, RecorderMemory } from './coordinator';
 import {
@@ -71,6 +73,7 @@ export interface FindingsPassDeps {
     conversationId: string;
     allowedConnectorIds: readonly string[];
   }) => Promise<RecorderWorkspace | undefined>;
+  getTelemetry?: () => NightshiftTelemetryClient | undefined;
   logger: Logger;
 }
 
@@ -556,8 +559,8 @@ export const runFindingsPass = async (
   const writes: Array<[string, () => Promise<unknown>]> = [
     [
       'metadata',
-      () =>
-        conversations.patchMetadata(conversationId, {
+      async () => {
+        await conversations.patchMetadata(conversationId, {
           ...(record?.summary
             ? { summary: record.summary }
             : // A final pass without a record replaces an early live summary with the answer.
@@ -572,7 +575,16 @@ export const runFindingsPass = async (
           ...(final && record
             ? { missing_data: serializeMissingData(record.missing_data ?? []) }
             : {}),
-        }),
+        });
+        // One event per stored gap, by reason only: never the gap's text.
+        if (final) {
+          record?.missing_data?.forEach(({ why }) =>
+            deps.getTelemetry?.()?.reportMissingDataRecorded({
+              reason: isMissingDataReason(why) ? why : 'unspecified',
+            })
+          );
+        }
+      },
     ],
   ];
   if (record && !keepHypotheses) {

@@ -56,6 +56,7 @@ describe('runFindingsPass', () => {
       getFindings: jest.fn().mockResolvedValue({ hypotheses: [], impactEntities: [] }),
     };
     const patchMetadata = jest.fn().mockResolvedValue(undefined);
+    const reportMissingDataRecorded = jest.fn();
     const chatComplete = jest.fn();
     answers.forEach((answer) => chatComplete.mockResolvedValueOnce(answer));
     chatComplete.mockResolvedValue({ content: '' });
@@ -79,9 +80,10 @@ describe('runFindingsPass', () => {
       getAgenticInvestigations: () => ({ getFindingsWriter: () => writer } as never),
       ...(workspace ? { getWorkspace: jest.fn().mockResolvedValue(workspace) } : {}),
       ...(proposals ? { getProposals: () => proposals as never } : {}),
+      getTelemetry: () => ({ reportMissingDataRecorded } as never),
       logger: loggerMock.create(),
     };
-    return { deps, writer, patchMetadata, chatComplete, memory };
+    return { deps, writer, patchMetadata, chatComplete, memory, reportMissingDataRecorded };
   };
 
   const run = (deps: FindingsPassDeps, memory: RecorderMemory, extra = {}) =>
@@ -333,7 +335,10 @@ describe('runFindingsPass', () => {
     const unconfirmed = {
       ...output,
       verdict: 'Cause not confirmed: a bad deploy.',
-      missing_data: [{ what: 'SLO definition', why: 'no_access', would_decide: 'if 499s count' }],
+      missing_data: [
+        { what: 'SLO definition', why: 'no_access', would_decide: 'if 499s count' },
+        { what: 'client app versions' },
+      ],
     };
     const final = setup({ answers: [answerWith(unconfirmed)] });
     await run(final.deps, final.memory, { answer: 'Cause not confirmed' });
@@ -349,10 +354,17 @@ describe('runFindingsPass', () => {
             why: 'no_access',
             would_decide: 'if 499s count',
           }),
+          JSON.stringify({ what: 'client app versions' }),
         ],
       })
     );
     expect(live.patchMetadata.mock.calls[0][1]).not.toHaveProperty('missing_data');
+    // Telemetry counts gaps by reason only, never their text, and a live pass reports none.
+    expect(final.reportMissingDataRecorded.mock.calls).toEqual([
+      [{ reason: 'no_access' }],
+      [{ reason: 'unspecified' }],
+    ]);
+    expect(live.reportMissingDataRecorded).not.toHaveBeenCalled();
   });
 
   it('asks a live pass for the live schema and a final pass for the full one', async () => {

@@ -11,6 +11,7 @@ import { semanticMemoryMaterializedEvent, semanticMemoryOptimizedEvent } from '.
 import { onlineEvalScoreEvent } from './online_eval_score_event';
 import { onlineEvalsStepFailedEvent } from './online_evals_step_failed_event';
 import { investigationSkippedEvent } from './investigation_skipped_event';
+import { missingDataRecordedEvent } from './missing_data_recorded_event';
 
 export const setupNightshiftTelemetry = ({
   analytics,
@@ -24,6 +25,7 @@ export const setupNightshiftTelemetry = ({
   analytics.registerEventType(onlineEvalScoreEvent);
   analytics.registerEventType(onlineEvalsStepFailedEvent);
   analytics.registerEventType(investigationSkippedEvent);
+  analytics.registerEventType(missingDataRecordedEvent);
   return new NightshiftTelemetryClient(analytics, logger);
 };
 
@@ -39,6 +41,11 @@ export {
   NIGHTSHIFT_INVESTIGATION_SKIPPED_EVENT,
   type InvestigationSkippedEvent,
 } from './investigation_skipped_event';
+export {
+  NIGHTSHIFT_MISSING_DATA_RECORDED_EVENT,
+  type MissingDataRecordedEvent,
+  type MissingDataRecordedReason,
+} from './missing_data_recorded_event';
 export {
   NIGHTSHIFT_ONLINE_EVALS_STEP_FAILED_EVENT,
   type OnlineEvalsStepFailedEvent,
