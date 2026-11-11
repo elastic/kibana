@@ -8,13 +8,23 @@
  */
 
 import React from 'react';
+import type { RepoInfo } from '../repo_info';
 import type { Supervisor } from '../supervisor';
 import type { InkInstance, InkModule } from './ink_module';
 import { createSynchronizedStdout } from './synchronized_stdout';
 import { createTuiApp } from './tui_app';
 
 /** Shows the TUI, starts every process, and resolves once the user quit and every process has stopped. */
-export const runTui = async (ink: InkModule, supervisor: Supervisor): Promise<void> => {
+export interface RunTuiOptions {
+  /** Reads the branch and commit shown in the top bar. */
+  readonly readRepoInfo?: () => Promise<RepoInfo | undefined>;
+}
+
+export const runTui = async (
+  ink: InkModule,
+  supervisor: Supervisor,
+  { readRepoInfo }: RunTuiOptions = {}
+): Promise<void> => {
   const TuiApp = createTuiApp(ink);
   let isQuitting = false;
   let isStarted = false;
@@ -34,7 +44,12 @@ export const runTui = async (ink: InkModule, supervisor: Supervisor): Promise<vo
   };
 
   const instance = ink.render(
-    <TuiApp supervisor={supervisor} onSubscribed={startAll} onQuit={() => void quit(instance)} />,
+    <TuiApp
+      supervisor={supervisor}
+      onSubscribed={startAll}
+      onQuit={() => void quit(instance)}
+      readRepoInfo={readRepoInfo}
+    />,
     {
       // Raw mode turns Ctrl+C into a key press, which the app handles like q so that processes stop gracefully.
       exitOnCtrlC: false,

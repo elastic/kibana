@@ -16,6 +16,7 @@ import type {
   SettingsEditResult,
   SettingsKind,
 } from '../settings/types';
+import type { RepoInfo } from '../repo_info';
 import type { Supervisor } from '../supervisor';
 import type { LogLine, ProcessState } from '../types';
 import type { InkModule } from './ink_module';
@@ -40,6 +41,8 @@ export interface TuiAppProps {
   /** Called once the app listens to the supervisor, so that no state change or output is missed. */
   readonly onSubscribed: () => void;
   readonly onQuit: () => void;
+  /** Reads the branch and commit shown in the top bar. */
+  readonly readRepoInfo?: () => Promise<RepoInfo | undefined>;
 }
 
 const FLUSH_INTERVAL_MS = 100;
@@ -47,8 +50,10 @@ const SIDEBAR_WIDTH = 26;
 // Ink clears the whole terminal before every frame that is as tall as the terminal, which flashes on each
 // update. One spare row keeps the frame shorter, so Ink rewrites it in place instead.
 const SPARE_ROWS = 1;
-// Rows that do not show output: the spare row, two border rows, the pane title and the key hints.
-const CHROME_ROWS = SPARE_ROWS + 4;
+// Rows that do not show output: the spare row, the top bar, two border rows, the pane title and the key hints.
+const CHROME_ROWS = SPARE_ROWS + 5;
+// How often the top bar re-reads the branch, which can change while the TUI runs.
+const REPO_INFO_INTERVAL_MS = 5000;
 
 const STATE_COLORS: Readonly<Record<ProcessState, string>> = {
   waiting: 'yellow',
@@ -306,6 +311,20 @@ export const createTuiApp = ({
     );
   };
 
+  const Header = ({ repoInfo }: { readonly repoInfo?: RepoInfo }) => (
+    <Box justifyContent="space-between" paddingX={1}>
+      <Text bold color="black" backgroundColor="cyan">
+        {' esprocs '}
+      </Text>
+      {repoInfo ? (
+        <Text wrap="truncate-end">
+          <Text color="magenta">{repoInfo.branch ?? 'detached HEAD'}</Text>
+          <Text dimColor> {repoInfo.shortCommit}</Text>
+        </Text>
+      ) : null}
+    </Box>
+  );
+
   const Footer = ({ state }: { readonly state: TuiState }) => {
     if (state.isQuitting) {
       return <Text color="yellow">stopping every process…</Text>;
@@ -342,7 +361,18 @@ export const createTuiApp = ({
     );
   };
 
-  const TuiApp = ({ supervisor, onSubscribed, onQuit }: TuiAppProps) => {
+  const TuiApp = ({ supervisor, onSubscribed, onQuit, readRepoInfo }: TuiAppProps) => {
+    const [repoInfo, setRepoInfo] = useState<RepoInfo | undefined>();
+    useEffect(() => {
+      if (!readRepoInfo) {
+        return;
+      }
+      const read = () => void readRepoInfo().then(setRepoInfo);
+      read();
+      const timer = setInterval(read, REPO_INFO_INTERVAL_MS);
+      return () => clearInterval(timer);
+    }, [readRepoInfo]);
+
     const [state, dispatch] = useReducer(reduceTuiState, supervisor, (initial) =>
       createTuiState(initial.getStatus().processes)
     );
@@ -445,6 +475,7 @@ export const createTuiApp = ({
 
     return (
       <Box flexDirection="column" height={Math.max(rows - SPARE_ROWS, 1)}>
+        <Header repoInfo={repoInfo} />
         <Box flexGrow={1}>
           <Sidebar state={state} />
           {pane === 'logs' ? (

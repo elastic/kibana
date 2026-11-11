@@ -18,6 +18,7 @@ export interface InkBoxProps {
   readonly flexDirection?: 'row' | 'column';
   readonly flexGrow?: number;
   readonly flexShrink?: number;
+  readonly justifyContent?: 'flex-start' | 'flex-end' | 'space-between' | 'center';
   readonly width?: number | string;
   readonly height?: number | string;
   readonly paddingX?: number;
@@ -29,6 +30,7 @@ export interface InkBoxProps {
 export interface InkTextProps {
   readonly children?: ReactNode;
   readonly color?: string;
+  readonly backgroundColor?: string;
   readonly bold?: boolean;
   readonly dimColor?: boolean;
   readonly inverse?: boolean;

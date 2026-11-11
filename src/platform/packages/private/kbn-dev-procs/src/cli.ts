@@ -15,6 +15,7 @@ import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getDefaultProcesses } from './default_processes';
+import { readRepoInfo } from './repo_info';
 import { readStatusFile } from './status_file';
 import type { KibanaSettingType } from './settings/kibana_settings';
 import { Supervisor } from './supervisor';
@@ -91,7 +92,7 @@ const runStart = async ({ log, flagsReader, logDir, addCleanupTask, loadInk }: S
   stopOnSignals(supervisor, isTui ? undefined : log);
 
   if (isTui && loadInk) {
-    await runTui(await loadInk(), supervisor);
+    await runTui(await loadInk(), supervisor, { readRepoInfo: () => readRepoInfo(REPO_ROOT) });
     return;
   }
 
