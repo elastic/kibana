@@ -50537,7 +50537,6 @@
     "xpack.queryActivity.breadcrumb.management": "Gestion de la Suite",
     "xpack.queryActivity.feature.featureName": "Activité de requête",
     "xpack.queryActivity.feature.privilegesTooltip": "L'octroi de ce privilège de fonctionnalité affiche l'option de navigation Activité de requête, mais les privilèges de cluster (cluster:monitor ou cluster:manage) sont également nécessaires pour accéder à la page.",
-    "xpack.queryActivity.flyout.ariaLabel": "Détails de la requête",
     "xpack.queryActivity.flyout.closeButton": "Fermer",
     "xpack.queryActivity.flyout.indicesLabel": "Index",
     "xpack.queryActivity.flyout.loadErrorBody": "Fermez le volet et réessayez.",

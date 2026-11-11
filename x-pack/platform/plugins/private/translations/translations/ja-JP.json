@@ -50752,7 +50752,6 @@
     "xpack.queryActivity.breadcrumb.management": "Stack Management",
     "xpack.queryActivity.feature.featureName": "クエリアクティビティ",
     "xpack.queryActivity.feature.privilegesTooltip": "この機能の権限を付与すると、クエリアクティビティのナビゲーションオプションが表示されますが、ページにアクセスするにはクラスター権限（cluster:monitorまたはcluster:manage）も必要です。",
-    "xpack.queryActivity.flyout.ariaLabel": "クエリ詳細",
     "xpack.queryActivity.flyout.closeButton": "閉じる",
     "xpack.queryActivity.flyout.indicesLabel": "インデックス",
     "xpack.queryActivity.flyout.loadErrorBody": "フライアウトを閉じて、再試行してください。",
