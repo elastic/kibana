@@ -1095,6 +1095,7 @@ x-pack/platform/packages/shared/kbn-change-history @elastic/kibana-core
 x-pack/platform/packages/shared/kbn-change-history-ui @elastic/workflows-eng
 x-pack/platform/packages/shared/kbn-classic-stream-flyout @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-content-packs-schema @elastic/streams-ui
+x-pack/platform/packages/shared/kbn-content-sanitization @elastic/kibana-security
 x-pack/platform/packages/shared/kbn-data-forge @elastic/nightshift-sre-agent-team @elastic/obs-signals-logs-team
 x-pack/platform/packages/shared/kbn-data-lifecycle-phases @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-dissect-heuristics @elastic/streams-ui
@@ -1130,8 +1131,8 @@ x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver @elastic/security
 x-pack/platform/packages/shared/kbn-mcp-client @elastic/workchat-eng
 x-pack/platform/packages/shared/kbn-nightshift-ai @elastic/nightshift
 x-pack/platform/packages/shared/kbn-profiler-cli @elastic/observability-ui
-x-pack/platform/packages/shared/kbn-proposals-common @elastic/security-solution
-x-pack/platform/packages/shared/kbn-proposals-ui @elastic/security-solution
+x-pack/platform/packages/shared/kbn-proposals-common @elastic/alertzero-common-layer
+x-pack/platform/packages/shared/kbn-proposals-ui @elastic/alertzero-common-layer
 x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-ui @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-shared-components @elastic/search-ml-ux
@@ -1246,7 +1247,7 @@ x-pack/platform/plugins/shared/agent_builder_platform @elastic/workchat-eng
 x-pack/platform/plugins/shared/agent_builder_sml @elastic/workchat-eng
 x-pack/platform/plugins/shared/agent_builder_visualizations @elastic/kibana-dashboards
 x-pack/platform/plugins/shared/agent_builder_workflows @elastic/workchat-eng @elastic/workflows-eng
-x-pack/platform/plugins/shared/agentic_investigations @elastic/security-solution @elastic/nightshift
+x-pack/platform/plugins/shared/agentic_investigations @elastic/alertzero-common-layer @elastic/nightshift
 x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/search-ml-ux
 x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/search-ml-ux
 x-pack/platform/plugins/shared/aiops @elastic/search-ml-ux
@@ -1299,7 +1300,7 @@ x-pack/platform/plugins/shared/notifications @elastic/appex-sharedux
 x-pack/platform/plugins/shared/observability_ai_assistant @elastic/nightshift-context-and-research-team
 x-pack/platform/plugins/shared/osquery @elastic/security-defend-workflows
 x-pack/platform/plugins/shared/osquery/cypress @elastic/security-defend-workflows
-x-pack/platform/plugins/shared/proposals @elastic/security-solution
+x-pack/platform/plugins/shared/proposals @elastic/alertzero-common-layer
 x-pack/platform/plugins/shared/query_activity @elastic/kibana-management
 x-pack/platform/plugins/shared/rule_registry @elastic/response-ops @elastic/nightshift-sre-agent-team
 x-pack/platform/plugins/shared/sample_data_ingest @elastic/search-ml-ux
@@ -1436,7 +1437,7 @@ x-pack/solutions/security/packages/ecs-data-quality-dashboard @elastic/security-
 x-pack/solutions/security/packages/expandable-flyout @elastic/security-threat-hunting
 x-pack/solutions/security/packages/features @elastic/security-investigations
 x-pack/solutions/security/packages/index-adapter @elastic/security-threat-hunting
-x-pack/solutions/security/packages/kbn-alertzero-common @elastic/security-solution
+x-pack/solutions/security/packages/kbn-alertzero-common @elastic/alertzero-common-layer
 x-pack/solutions/security/packages/kbn-attack-discovery-schedules-common @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-cloud-security-posture/common @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-cloud-security-posture/graph @elastic/contextual-security-apps
@@ -1490,7 +1491,7 @@ x-pack/solutions/security/packages/siem-readiness @elastic/contextual-security-a
 x-pack/solutions/security/packages/storybook/config @elastic/security-investigations
 x-pack/solutions/security/packages/test-api-clients @elastic/security-detection-engineering
 x-pack/solutions/security/packages/upselling @elastic/security-investigations
-x-pack/solutions/security/plugins/alertzero @elastic/security-solution
+x-pack/solutions/security/plugins/alertzero @elastic/alertzero-common-layer
 x-pack/solutions/security/plugins/cloud_defend @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/cloud_security_posture @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/discoveries @elastic/security-threat-hunting
@@ -1506,7 +1507,7 @@ x-pack/solutions/security/plugins/security_solution_serverless @elastic/security
 x-pack/solutions/security/plugins/session_view @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/timelines @elastic/security-threat-hunting
 x-pack/solutions/security/test
-x-pack/solutions/security/test/plugin_functional/plugins/resolver_test @elastic/security-solution
+x-pack/solutions/security/test_plugins/resolver_test @elastic/security-solution
 x-pack/solutions/security/test/security_solution_api_integration @elastic/security-detection-engineering
 x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response @elastic/security-detection-engineering
 x-pack/solutions/security/test/security_solution_endpoint @elastic/security-defend-workflows
@@ -3195,8 +3196,8 @@ src/platform/packages/shared/kbn-workflows/managed/definitions/significant_event
 src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations @elastic/nightshift
 
 # AlertZero managed workflows (shared files: index, constants, template values, rule workflows)
-src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero @elastic/security-solution
-# Per-watch definitions. Keep @elastic/security-solution until product-team ownership is settled.
+src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero @elastic/alertzero-common-layer
+# Per-watch definitions without an override below fall back to @elastic/alertzero-common-layer.
 
 # Actions directories
 src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/actions/defend @elastic/security-defend-workflows
@@ -3241,11 +3242,11 @@ x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule
 x-pack/solutions/security/plugins/security_solution/server/workflows/alert_analysis_workflow @elastic/security-investigations
 
 # AlertZero Worker settings contract
-/x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/fixtures @elastic/alertzero-common-layer @elastic/security-solution
-/x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/test_helpers @elastic/alertzero-common-layer @elastic/security-solution
-/x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/worker_settings_compat.test.ts @elastic/alertzero-common-layer @elastic/security-solution
-/src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/worker_settings_defaults.ts @elastic/alertzero-common-layer @elastic/security-solution
-/src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/worker_settings_defaults.test.ts @elastic/alertzero-common-layer @elastic/security-solution
+/x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/fixtures @elastic/alertzero-common-layer
+/x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/test_helpers @elastic/alertzero-common-layer
+/x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/worker_settings_compat.test.ts @elastic/alertzero-common-layer
+/src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/worker_settings_defaults.ts @elastic/alertzero-common-layer
+/src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/worker_settings_defaults.test.ts @elastic/alertzero-common-layer
 
 
 ## Security Threat Hunting owner connectors
@@ -3626,6 +3627,7 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/ent
 x-pack/solutions/security/test/security_solution_api_integration/test_suites/explore @elastic/security-entity-analytics
 
 /x-pack/solutions/security/packages/test-api-clients/supertest/entity_analytics.gen.ts @elastic/security-entity-analytics
+/x-pack/solutions/security/packages/test-api-clients/scout/entity_analytics.gen.ts @elastic/security-entity-analytics
 
 ## Security Solution sub teams - Entity Store / Maintainers / Entity Details
 x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details @elastic/security-entity-analytics

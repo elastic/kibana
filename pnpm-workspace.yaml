@@ -32,8 +32,6 @@ allowBuilds:
   'core-js': false # donation banner
   'core-js-pure': false # donation banner
   'es5-ext': false # prints an informational message
-  'lmdb': false # native bindings; prebuilds are sufficient
-  'msgpackr-extract': false # native bindings; prebuilds are sufficient
   'msw': false # copies a worker script if configured; unused
   'nice-napi': false # optional piscina nice-value helper
   'node-liblzma': false # optional native dep of just-bash; lazy-loads with fallback
@@ -1300,6 +1298,7 @@ packages:
   - 'x-pack/platform/packages/shared/kbn-change-history-ui'
   - 'x-pack/platform/packages/shared/kbn-classic-stream-flyout'
   - 'x-pack/platform/packages/shared/kbn-content-packs-schema'
+  - 'x-pack/platform/packages/shared/kbn-content-sanitization'
   - 'x-pack/platform/packages/shared/kbn-data-forge'
   - 'x-pack/platform/packages/shared/kbn-data-lifecycle-phases'
   - 'x-pack/platform/packages/shared/kbn-dissect-heuristics'
@@ -1711,10 +1710,10 @@ packages:
   - 'x-pack/solutions/security/plugins/session_view'
   - 'x-pack/solutions/security/plugins/timelines'
   - 'x-pack/solutions/security/test'
-  - 'x-pack/solutions/security/test/plugin_functional/plugins/resolver_test'
   - 'x-pack/solutions/security/test/security_solution_api_integration'
   - 'x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response'
   - 'x-pack/solutions/security/test/security_solution_endpoint'
+  - 'x-pack/solutions/security/test_plugins/resolver_test'
   - 'x-pack/solutions/vectordb/packages/kbn-vectordb-onboarding'
   - 'x-pack/solutions/vectordb/plugins/serverless_vectordb'
   - 'x-pack/solutions/vectordb/test'

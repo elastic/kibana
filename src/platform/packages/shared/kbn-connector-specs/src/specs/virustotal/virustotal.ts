@@ -377,11 +377,13 @@ export const VirusTotalConnector: ConnectorSpec = {
     getIpReport: {
       isTool: true,
       description:
-        'Get the VirusTotal reputation report for an IPv4 address. Use this to assess whether an IP is associated with malicious activity. Returns the IP attributes, including reputation score, country, and last_analysis_stats.',
+        'Get the VirusTotal reputation report for an IPv4 or IPv6 address. Use this to assess whether an IP is associated with malicious activity. Returns the IP attributes, including reputation score, country, and last_analysis_stats.',
       scope: 'read',
       input: lazySchema(() =>
         z.object({
-          ip: z.ipv4().max(15).describe('IP address'),
+          ip: z
+            .union([z.ipv4().max(15), z.ipv6().max(45)])
+            .describe('IPv4 or IPv6 address, e.g. "8.8.8.8" or "2001:4860:4860::8888"'),
           failOnError: z
             .boolean()
             .optional()

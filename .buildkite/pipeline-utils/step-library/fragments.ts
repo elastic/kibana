@@ -74,7 +74,6 @@ export const FRAGMENTS: readonly Fragment[] = [
   yamlFragment('pull_request/security_solution/osquery_cypress'),
   yamlFragment('pull_request/security_solution/rule_management'),
   yamlFragment('pull_request/security_solution/scout_edr_real_fleet'),
-  yamlFragment('pull_request/store_moon_cache'),
   yamlFragment('pull_request/storybooks'),
   yamlFragment('pull_request/sync_model_labels'),
   yamlFragment('pull_request/trigger_entity_store_performance'),

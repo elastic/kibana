@@ -42724,6 +42724,8 @@ paths:
                           type: string
                         unenrolled_at:
                           type: string
+                        unenrolled_reason:
+                          type: string
                         unenrollment_started_at:
                           type: string
                         unhealthy_reason:
@@ -43410,6 +43412,8 @@ paths:
                         type: string
                       unenrolled_at:
                         type: string
+                      unenrolled_reason:
+                        type: string
                       unenrollment_started_at:
                         type: string
                       unhealthy_reason:
@@ -43905,6 +43909,8 @@ paths:
                           - OPAMP
                         type: string
                       unenrolled_at:
+                        type: string
+                      unenrolled_reason:
                         type: string
                       unenrollment_started_at:
                         type: string
@@ -141235,7 +141241,7 @@ components:
               type: text
               required: false
           error: null
-          extractObservables: true
+          extractObservables: false
           id: 856ee650-6c82-11ee-a20a-6164169afa58
           mappings: []
           observableTypes: []
@@ -141692,7 +141698,7 @@ components:
             type: text
             required: false
         error: null
-        extractObservables: true
+        extractObservables: false
         id: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
         mappings:
           - action_type: overwrite
@@ -141805,7 +141811,7 @@ components:
             type: toggle
             required: false
         error: null
-        extractObservables: true
+        extractObservables: false
         id: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
         mappings:
           - action_type: overwrite
@@ -147510,7 +147516,7 @@ components:
           type: array
         extractObservables:
           description: |
-            Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. For owners that do not support observable extraction (currently Observability), setting this to `true` has no effect on case creation; new cases for those owners always use `false`.
+            Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. Observable extraction is available only for Security cases. For Stack and Observability cases, a value that is not sent resolves to `false`, and setting it to `true` returns a 400 error.
           type: boolean
         owner:
           $ref: '#/components/schemas/Cases_owner'
@@ -147537,7 +147543,7 @@ components:
       properties:
         extractObservables:
           description: |
-            When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. For owners that do not support observable extraction (currently Observability), an omitted value resolves to `false` regardless of the space configuration.
+            When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. Observable extraction is available only for Security cases. For Stack and Observability cases, a value that is not sent resolves to `false`, even if the template or space configuration says `true`. Sending `true` returns a 400 error unless the case already stores `true`.
           example: true
           type: boolean
         syncAlerts:
@@ -147676,7 +147682,7 @@ components:
       properties:
         definition:
           description: |
-            The template definition as a YAML string: case defaults (name, severity, category, tags, assignees, connector, settings) and a `fields` array of inline field definitions or `$ref` entries pointing into the owner's field library. Stored field values appear on cases under `extended_fields` keys shaped `<field_name>_as_<storage_type>`.
+            The template definition as a YAML string: case defaults (name, severity, category, tags, assignees, connector, settings) and a `fields` array of inline field definitions or `$ref` entries pointing into the owner's field library. Stored field values appear on cases under `extended_fields` keys shaped `<field_name>_as_<storage_type>`. Observable extraction (`settings.extractObservables`) is available only for Security templates. For Stack and Observability templates, setting it to `true` returns a 400 error. An update that keeps an already stored `true` for the same owner is accepted.
           example: |
             name: Security incident
             severity: high
@@ -148110,7 +148116,7 @@ components:
           type: array
         extractObservables:
           description: |
-            Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
+            Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. Observable extraction is available only for Security cases. For Stack and Observability cases, changing it to `true` returns a 400 error. A request that keeps an already stored `true` is accepted.
           type: boolean
         templates:
           $ref: '#/components/schemas/Cases_templates'
@@ -150591,7 +150597,7 @@ components:
           minLength: 1
           type: string
         name:
-          description: Rule name (must be unique within the space).
+          description: Rule name.
           maxLength: 256
           minLength: 1
           type: string
@@ -150640,7 +150646,7 @@ components:
           nullable: true
           type: string
         name:
-          description: Rule name (must be unique within the space).
+          description: Rule name.
           maxLength: 256
           minLength: 1
           type: string
@@ -197297,6 +197303,10 @@ components:
             parameters:
               type: object
               properties:
+                force:
+                  description: Read a file locked by the OS from a volume snapshot. Endpoint on Windows only.
+                  example: true
+                  type: boolean
                 path:
                   description: The full file path to retrieve from the endpoint.
                   maxLength: 4096

@@ -442,7 +442,7 @@ rule's \`metadata.routing_tags\`) and an optional KQL \`expression\` over
   \`alert.data.*\` — because query columns often differ across rules. If two rules need
   different message shapes, use two policies (or two workflows) rather than one
   brittle template. See [workflow-dispatch-payload](./workflow-dispatch-payload.md).
-- **Search first**: run \`platform.core.sml_search\` for existing policies before adding
+- **Search first**: run \`platform.alerting.find_action_policies\` for existing policies before adding
   another catch-all or overlapping tag matcher.
 - **Grouping**: \`per_alert\` is still a safe default. \`all\` batches mixed-rule
   alerts into a single notification; only use it when the user wants one combined
@@ -533,7 +533,7 @@ Use \`set_metadata\` to name the rule and add a description or \`tags\` so the u
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| \`name\` | string | optional | Rule name (must be unique within the space). (min length: 1, max length: 256) |
+| \`name\` | string | optional | Rule name. (min length: 1, max length: 256) |
 | \`description\` | string | optional | Human-readable description of the rule. Omit to leave it unset; send \`null\` on PATCH to clear it. An empty string is rejected. (min length: 1, max length: 1024) |
 | \`tags\` | string[] | optional | Tags for categorization, e.g. [\\"production\\", \\"infra\\"]. (min items: 1, max items: 20) |
 | \`routing_tags\` | string[] | optional | Routing tags that link alerts from this rule to action policies. An action policy applies when its \`matcher.tags\` contains at least one of these tags. Only allowed when kind is \\"alert\\". (min items: 1, max items: 20) |
