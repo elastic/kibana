@@ -71,10 +71,7 @@ describe('tab_sync actions', () => {
       const enableStorage = jest.mocked(services.data.search.session.enableStorage);
       const [, storageConfig] = enableStorage.mock.calls[enableStorage.mock.calls.length - 1];
       const { dataRequestParams } = selectTab(internalState.getState(), tabId);
-      const disabledWhileReplayed = {
-        disabled: true,
-        reasonText: 'Refresh the results before saving this search in the background.',
-      };
+      const disabledWhileReplayed = { disabled: true, reasonText: '' };
 
       internalState.dispatch(
         internalStateActions.setDataRequestParams({

@@ -8,7 +8,6 @@
  */
 
 import { combineLatest, merge, skip, startWith } from 'rxjs';
-import { i18n } from '@kbn/i18n';
 import {
   connectToQueryState,
   noSearchSessionStorageCapabilityMessage,
@@ -283,16 +282,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
           const dataRequestParams = getCurrentTab()?.dataRequestParams;
 
           if (dataRequestParams && isReplayedLoad(dataRequestParams)) {
-            return {
-              disabled: true,
-              reasonText: i18n.translate(
-                'discover.replayCache.backgroundSearchDisabledDescription',
-                {
-                  defaultMessage:
-                    'Refresh the results before saving this search in the background.',
-                }
-              ),
-            };
+            return { disabled: true, reasonText: '' };
           }
 
           return services.capabilities.discover_v2.storeSearchSession

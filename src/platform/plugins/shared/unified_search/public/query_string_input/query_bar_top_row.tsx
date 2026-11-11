@@ -544,9 +544,10 @@ export const QueryBarTopRow = React.memo(
       !isSendingToBackground &&
       !backgroundSearchAvailability.disabled;
 
-    const sendToBackgroundTooltipProps = backgroundSearchAvailability.disabled
-      ? { content: backgroundSearchAvailability.reasonText }
-      : { content: strings.getSendToBackgroundLabel(), disableScreenReaderOutput: true };
+    const sendToBackgroundTooltipProps =
+      backgroundSearchAvailability.disabled && backgroundSearchAvailability.reasonText
+        ? { content: backgroundSearchAvailability.reasonText }
+        : { content: strings.getSendToBackgroundLabel(), disableScreenReaderOutput: true };
 
     const queryLanguage = props.query && isOfQueryType(props.query) && props.query.language;
     const queryRef = useRef<Query | QT | undefined>(props.query);
