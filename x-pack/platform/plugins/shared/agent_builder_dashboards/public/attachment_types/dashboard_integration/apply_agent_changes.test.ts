@@ -61,14 +61,14 @@ describe('applyAgentChangesToDashboard', () => {
     );
   });
 
-  it('applies the changes in place without entering edit mode outside the Dashboard app', async () => {
+  it('enters edit mode in place outside the Dashboard app', async () => {
     const { api, dashboardLocator, result } = apply({
       api: buildDashboardApi({ currentAppId: 'securitySolutionUI' }),
     });
     await result;
 
     expect(api.setState).toHaveBeenCalledWith(agentDashboardState, { changedBy: ['agent'] });
-    expect(api.setViewMode).not.toHaveBeenCalled();
+    expect(api.setViewMode).toHaveBeenCalledWith('edit');
     expect(dashboardLocator.navigate).not.toHaveBeenCalled();
   });
 

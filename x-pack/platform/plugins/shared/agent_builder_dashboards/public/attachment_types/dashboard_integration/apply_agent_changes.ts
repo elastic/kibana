@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DASHBOARD_APP_ID } from '@kbn/deeplinks-analytics';
 import type { NotificationsStart } from '@kbn/core/public';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
@@ -48,10 +47,7 @@ export const applyAgentChangesToDashboard = async ({
   toasts,
 }: ApplyAgentChangesParams): Promise<ApplyAgentChangesOutcome> => {
   if (canApplyAgentChangesInPlace(api)) {
-    // Hosts other than the Dashboard app (e.g. Security) render the dashboard without save controls
-    if (api.getAppContext().currentAppId === DASHBOARD_APP_ID) {
-      api.setViewMode('edit');
-    }
+    api.setViewMode('edit');
     await api.setState(dashboardState, { changedBy: ['agent'] });
     return 'applied';
   }
