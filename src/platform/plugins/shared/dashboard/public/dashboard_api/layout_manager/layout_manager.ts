@@ -27,7 +27,7 @@ import {
 import { v4 } from 'uuid';
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { DEFAULT_PINNED_CONTROL_STATE, ESQL_CONTROL } from '@kbn/controls-constants';
+import { DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
 import type {
   PinnedControlLayoutState,
   PinnedControlLayoutState as PinnedPanelLayoutState,
@@ -76,11 +76,11 @@ import {
   arePinnedPanelLayoutsEqual,
 } from './are_layouts_equal';
 import { deserializeLayout } from './deserialize_layout';
+import { removeDuplicateEsqlControls } from './remove_duplicate_esql_controls';
 import { serializeLayout } from './serialize_layout';
 import {
   isDashboardLayoutPanel,
   type DashboardChildren,
-  type DashboardChildState,
   type DashboardLayout,
   type DashboardLayoutPanel,
   type DashboardPinnablePanel,
@@ -249,55 +249,49 @@ export function initializeLayoutManager(
     if (!embeddables?.length) return;
     const first = embeddables[0];
     if (!first.embeddableId) first.embeddableId = v4(); // give first panel an ID so we can place others around it
-    // Read from layout and child state because child APIs aren't registered yet on load.
-    const existingEsqlVariableNames = getExistingEsqlVariableNames(
+    const incomingEmbeddables = removeDuplicateEsqlControls(
+      embeddables,
       layout$.value,
       currentChildState
     );
+    const applyStatePromises: Array<Promise<void>> = [];
     let anchorId: string | undefined;
 
-    for (const incomingEmbeddable of embeddables) {
+    for (const incomingEmbeddable of incomingEmbeddables) {
       const { serializedState, size, type } = incomingEmbeddable;
       const uuid = incomingEmbeddable.embeddableId ?? v4();
       const existingPanel: DashboardLayoutPanel | undefined = layout$.value.panels[uuid];
       const existingPinnedPanel = layout$.value.pinnedPanels[uuid];
-      const incomingVariableName =
-        type === ESQL_CONTROL ? getEsqlVariableName(serializedState) : undefined;
 
-      // Discover sends the pinned control's own id to update its selection. This happens on a fresh
-      // load, before the control mounts, so update the state it will read. Once it's on screen, skip
-      // it: it won't read the stored state, and its next change would overwrite it.
-      if (
-        !existingPanel &&
-        !children$.value[uuid] &&
-        existingPinnedPanel?.type === ESQL_CONTROL &&
-        incomingVariableName !== undefined &&
-        getEsqlVariableName(currentChildState[uuid]) === incomingVariableName
-      ) {
-        currentChildState[uuid] = {
-          ...(currentChildState[uuid] ?? {}),
-          ...serializedState,
-        };
+      const sameType = (existingPanel ?? existingPinnedPanel)?.type === type;
+      const nextState = {
+        ...(sameType && currentChildState[uuid] ? currentChildState[uuid] : {}),
+        ...serializedState,
+      };
+      currentChildState[uuid] = nextState;
+
+      // A mounted child doesn't re-read currentChildState.
+      const child = children$.value[uuid];
+      if (sameType && child && apiHasSerializableState(child)) {
+        const stateToApply = cloneDeep(nextState);
+        applyStatePromises.push(
+          Promise.resolve().then(() => child.applySerializedState(stateToApply))
+        );
+      }
+
+      if (!existingPanel && existingPinnedPanel) {
+        layout$.next({
+          ...layout$.value,
+          pinnedPanels: {
+            ...layout$.value.pinnedPanels,
+            [uuid]: { ...existingPinnedPanel, type },
+          },
+        });
         continue;
       }
 
-      // Skip a control whose variable is already on the dashboard. Two controls for one variable
-      // both get sent with the query, and the existing one keeps the user's selection.
-      if (
-        !existingPanel &&
-        incomingVariableName &&
-        existingEsqlVariableNames.has(incomingVariableName)
-      ) {
-        continue;
-      }
-
-      // Catches a second control for the same variable in this batch.
-      if (incomingVariableName) {
-        existingEsqlVariableNames.add(incomingVariableName);
-      }
-      // Anchor on the first panel that lands, so nothing is placed beside or scrolled to a skipped control.
+      // Anchor on the first grid panel that lands, so nothing is placed beside or scrolled to a skipped or pinned control.
       anchorId ??= uuid;
-      const sameType = existingPanel?.type === type;
 
       const updatedLayout = existingPanel
         ? {
@@ -323,13 +317,17 @@ export function initializeLayoutManager(
              */
             beside: uuid === anchorId ? undefined : anchorId,
           });
-      currentChildState[uuid] = {
-        ...(sameType && currentChildState[uuid] ? currentChildState[uuid] : {}),
-        ...serializedState,
-      };
 
       layout$.next(updatedLayout);
     }
+
+    if (applyStatePromises.length) {
+      childrenStateLoading$.next(true);
+      void Promise.allSettled(applyStatePromises).then(() => {
+        childrenStateLoading$.next(false);
+      });
+    }
+
     if (anchorId) {
       trackPanel.setScrollToPanelId(anchorId);
       trackPanel.setHighlightPanelId(anchorId);
@@ -838,36 +836,4 @@ const transformDashboardLayoutToGridLayout = (
     }
   });
   return newLayout;
-};
-
-/** Returns the control's ES|QL variable name, or undefined when it's missing or empty. */
-const getEsqlVariableName = (state: object | undefined): string | undefined => {
-  if (
-    state &&
-    'variable_name' in state &&
-    typeof state.variable_name === 'string' &&
-    state.variable_name.length > 0
-  ) {
-    return state.variable_name;
-  }
-  return undefined;
-};
-
-/** Variable names used by ES|QL controls on the dashboard, in the grid or pinned. */
-const getExistingEsqlVariableNames = (
-  layout: DashboardLayout,
-  childState: DashboardChildState
-): Set<string> => {
-  const variableNames = new Set<string>();
-  const allPanels = [...Object.entries(layout.panels), ...Object.entries(layout.pinnedPanels)];
-
-  for (const [uuid, panel] of allPanels) {
-    if (panel.type !== ESQL_CONTROL) continue;
-    const variableName = getEsqlVariableName(childState[uuid]);
-    if (variableName) {
-      variableNames.add(variableName);
-    }
-  }
-
-  return variableNames;
 };
