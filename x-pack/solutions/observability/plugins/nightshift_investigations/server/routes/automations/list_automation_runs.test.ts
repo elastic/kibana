@@ -105,7 +105,7 @@ it.each([{ message: 'Investigate the alert' }, { instructions: 'Investigate the 
 
     expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
       {
-        workflowIds: ['wf-1'],
+        workflowId: ['wf-1'],
         omitStepRuns: true,
         page: 1,
         size: 20,
@@ -600,7 +600,7 @@ it('keeps investigation links from current and historical workflows on a combine
   });
   expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
     expect.objectContaining({
-      workflowIds: ['old', 'new'],
+      workflowId: ['old', 'new'],
       page: 2,
       size: 2,
       startedAfter: '2026-11-01T00:00:00Z',

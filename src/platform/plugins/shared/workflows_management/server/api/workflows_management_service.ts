@@ -136,9 +136,7 @@ export interface SearchExecutionsViewParams {
 export interface SearchWorkflowExecutionsParams {
   request?: KibanaRequest;
   accessControlFilter?: estypes.QueryDslQueryContainer;
-  workflowId?: string;
-  /** Workflow ids to query together; mutually exclusive with workflowId. */
-  workflowIds?: string[];
+  workflowId?: string | string[];
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];

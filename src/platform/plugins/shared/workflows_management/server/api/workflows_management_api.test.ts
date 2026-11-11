@@ -393,7 +393,7 @@ describe('WorkflowsManagementApi', () => {
     const access = await mockWorkflowsService.getAccessControl();
     jest.mocked(access.checkAccess).mockImplementation(async ({ id }) => id !== 'private');
     await api.getWorkflowExecutions(
-      { workflowIds: ['old', 'current', 'private', 'other-space'], request: mockRequest },
+      { workflowId: ['old', 'current', 'private', 'other-space'], request: mockRequest },
       'my-space'
     );
     expect(mockWorkflowsService.getWorkflowsByIds).toHaveBeenCalledWith(
@@ -407,12 +407,6 @@ describe('WorkflowsManagementApi', () => {
       }),
       'my-space'
     );
-    await expect(
-      api.getWorkflowExecutions(
-        { workflowId: 'old', workflowIds: ['current'], request: mockRequest },
-        'my-space'
-      )
-    ).rejects.toThrow('not both');
   });
 
   it('applies access control in the query that reads the requested workflow fields', async () => {

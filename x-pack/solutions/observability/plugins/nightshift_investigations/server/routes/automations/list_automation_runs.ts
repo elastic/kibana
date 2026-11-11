@@ -89,7 +89,7 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
 
     const executions = await workflowsManagement.management.getWorkflowExecutions(
       {
-        workflowIds,
+        workflowId: workflowIds,
         omitStepRuns: true,
         page: params.query.page,
         size: params.query.size,

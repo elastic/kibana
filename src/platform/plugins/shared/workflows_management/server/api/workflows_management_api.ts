@@ -1241,13 +1241,10 @@ export class WorkflowsManagementApi {
     params: SearchWorkflowExecutionsParams & { request: KibanaRequest },
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
-    if (params.workflowId !== undefined && params.workflowIds !== undefined) {
-      throw new Error('Specify either workflowId or workflowIds, not both.');
-    }
     const access = await this.workflowsService.getAccessControl();
     let accessControlFilter: estypes.QueryDslQueryContainer | undefined;
-    if (params.workflowIds !== undefined) {
-      const workflows = await this.workflowsService.getWorkflowsByIds(params.workflowIds, spaceId, {
+    if (Array.isArray(params.workflowId)) {
+      const workflows = await this.workflowsService.getWorkflowsByIds(params.workflowId, spaceId, {
         includeDeleted: true,
         includeGlobal: false,
       });

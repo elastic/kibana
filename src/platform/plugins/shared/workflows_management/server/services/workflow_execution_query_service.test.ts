@@ -101,7 +101,7 @@ describe('WorkflowExecutionQueryService', () => {
       mockEsClient.search.mockResolvedValue(emptyResponse as never);
       await service.getWorkflowExecutions(
         {
-          workflowIds: ['old', 'current', 'old'],
+          workflowId: ['old', 'current', 'old'],
           page: 2,
           size: 10,
           startedAfter: '2026-11-01T00:00:00Z',
@@ -122,6 +122,23 @@ describe('WorkflowExecutionQueryService', () => {
           },
         })
       );
+    });
+
+    it('matches no executions when the workflow ID array is empty', async () => {
+      mockEsClient.search.mockResolvedValue(emptyResponse as never);
+
+      await service.getWorkflowExecutions({ workflowId: [] }, 'my-space');
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              must: expect.arrayContaining([{ terms: { workflowId: [] } }]),
+            },
+          },
+        })
+      );
+      expect(mockEsClient.search.mock.calls[0][0]).not.toHaveProperty('aggs');
     });
 
     it('adds status filter when statuses provided', async () => {
