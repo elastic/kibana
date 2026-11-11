@@ -168,7 +168,7 @@ export class NightshiftPlugin
         });
       })
       .catch((error) => {
-        this.context.logger.get().error(`Failed to initialize Nightshift: ${error}`);
+        this.context.logger.get().error(`Failed to initialize nightshift: ${error}`);
       });
 
     return {};

@@ -67,7 +67,7 @@ export function createQueryKnowledgeIndicatorTool({
     id: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_QUERY_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
-      Create a query Knowledge Indicator (KI) for a Nightshift source and persist it to
+      Create a query Knowledge Indicator (KI) for a nightshift source and persist it to
       significant events query storage.
 
       Use this tool when the conversation discovers a new detection query that should be saved for

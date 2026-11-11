@@ -102,7 +102,7 @@ const createTestGraph = ({
   const graph = createAgentGraph({
     chatModel,
     toolManager,
-    configuration: { instructions: '', aiIndices: [] },
+    configuration: { instructions: '', aiIndices: [], capabilities: { attachmentTools: true } },
     logger: {} as Logger,
     events: { emit: jest.fn() } as unknown as AgentEventEmitter,
     structuredOutput,
