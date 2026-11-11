@@ -11,13 +11,11 @@ import { resolveServerlessStatus } from './resolve_serverless';
 
 const BASE_URL = 'https://cloud.elastic.co';
 const BILLING_URL = `${BASE_URL}/billing/overview#uTargetOrganizationId=org-1`;
-const PRICING_URL = `${BASE_URL}/cloud-pricing-table`;
 
 interface ResolveOptions {
   isServerlessEnabled?: boolean;
   organizationInTrial?: boolean;
   projectType?: ProjectType;
-  baseUrl?: string;
   getPrivilegedUrls?: () => Promise<CloudPrivilegedUrls>;
   csp?: string;
   region?: string;
@@ -27,7 +25,6 @@ const DEFAULTS: ResolveOptions = {
   isServerlessEnabled: true,
   organizationInTrial: true,
   projectType: 'search',
-  baseUrl: BASE_URL,
   getPrivilegedUrls: async () => ({ billingUrl: BILLING_URL }),
   csp: 'aws',
   region: 'us-east-1',
@@ -35,20 +32,12 @@ const DEFAULTS: ResolveOptions = {
 
 // Spread rather than default params, so an explicit `undefined` overrides the default.
 const resolve = (options: ResolveOptions = {}) => {
-  const {
-    isServerlessEnabled,
-    organizationInTrial,
-    projectType,
-    baseUrl,
-    getPrivilegedUrls,
-    csp,
-    region,
-  } = { ...DEFAULTS, ...options };
+  const { isServerlessEnabled, organizationInTrial, projectType, getPrivilegedUrls, csp, region } =
+    { ...DEFAULTS, ...options };
   const cloud: ServerlessCloud = {
     isServerlessEnabled: Boolean(isServerlessEnabled),
     serverless: { projectId: 'project-id', projectType, organizationInTrial },
     getPrivilegedUrls: getPrivilegedUrls ?? (async () => ({})),
-    getUrls: () => ({ baseUrl }),
   };
   return resolveServerlessStatus({ cloud, csp, region });
 };
@@ -73,7 +62,7 @@ describe('resolveServerlessStatus', () => {
     });
   });
 
-  it('shows the popover with billing and pricing links for billing admins', async () => {
+  it('shows the popover with subscribe and trial summary links for billing admins', async () => {
     expect(await resolve()).toEqual({
       kind: 'popover',
       label: 'Trial',
@@ -89,46 +78,22 @@ describe('resolveServerlessStatus', () => {
       secondaryAction: {
         id: 'view_pricing',
         label: 'View pricing',
-        href: `${PRICING_URL}?productType=serverless&solution=elasticsearch&provider=aws&region=us-east-1`,
+        href: `${BASE_URL}/billing/overview?intent=trial_summary#uTargetOrganizationId=org-1`,
         external: true,
       },
       projectType: 'search',
     });
   });
 
-  it.each<[ProjectType, string, string]>([
-    ['observability', 'Elastic Observability Serverless', 'observability'],
-    ['security', 'Elastic Security Serverless', 'security'],
-    ['vectordb', 'Elasticsearch Vector Database', 'vectordb'],
-  ])(
-    'maps the %s project to its title and pricing solution',
-    async (projectType, title, solution) => {
-      expect(await resolve({ projectType })).toMatchObject({
-        title,
-        secondaryAction: { href: expect.stringContaining(`solution=${solution}&`) },
-      });
-    }
-  );
-
-  it('omits the region subtitle and provider when the provider is unknown', async () => {
-    expect(await resolve({ csp: undefined })).toMatchObject({
-      subtitle: undefined,
-      secondaryAction: {
-        href: `${PRICING_URL}?productType=serverless&solution=elasticsearch&region=us-east-1`,
-      },
-    });
+  it.each<[ProjectType, string]>([
+    ['observability', 'Elastic Observability Serverless'],
+    ['security', 'Elastic Security Serverless'],
+    ['vectordb', 'Elasticsearch Vector Database'],
+  ])('maps the %s project to its title', async (projectType, title) => {
+    expect(await resolve({ projectType })).toMatchObject({ title });
   });
 
-  it('builds the pricing link from a base URL with a trailing slash', async () => {
-    expect(await resolve({ baseUrl: `${BASE_URL}/` })).toMatchObject({
-      secondaryAction: { href: expect.stringMatching(`^${PRICING_URL}\\?`) },
-    });
-  });
-
-  it('omits the pricing link without a Cloud base URL', async () => {
-    expect(await resolve({ baseUrl: undefined })).toMatchObject({
-      kind: 'popover',
-      secondaryAction: undefined,
-    });
+  it('omits the region subtitle when the provider is unknown', async () => {
+    expect(await resolve({ csp: undefined })).toMatchObject({ subtitle: undefined });
   });
 });

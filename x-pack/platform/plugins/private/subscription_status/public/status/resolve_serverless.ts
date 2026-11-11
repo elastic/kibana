@@ -13,7 +13,7 @@ export type ProjectType = NonNullable<CloudStart['serverless']['projectType']>;
 
 export type ServerlessCloud = Pick<
   CloudStart,
-  'isServerlessEnabled' | 'serverless' | 'getPrivilegedUrls' | 'getUrls'
+  'isServerlessEnabled' | 'serverless' | 'getPrivilegedUrls'
 >;
 
 interface ResolveServerlessStatusParams {
@@ -51,26 +51,6 @@ const getTitle = (projectType?: ProjectType): string => {
   }
 };
 
-/** Maps the project type to the Cloud pricing table `solution` param. */
-const getPricingSolution = (projectType?: ProjectType): string | undefined => {
-  switch (projectType) {
-    case 'search':
-      return 'elasticsearch';
-    case 'observability':
-      return 'observability';
-    case 'security':
-      return 'security';
-    case 'vectordb':
-      return 'vectordb';
-    case undefined:
-      return undefined;
-    default: {
-      const exhaustiveCheck: never = projectType;
-      return exhaustiveCheck;
-    }
-  }
-};
-
 const CSP_LABELS: Record<string, string> = { aws: 'AWS', gcp: 'GCP', azure: 'Azure' };
 
 const getRegionLabel = (csp?: string, region?: string): string | undefined => {
@@ -78,23 +58,11 @@ const getRegionLabel = (csp?: string, region?: string): string | undefined => {
   return `${CSP_LABELS[csp] ?? csp} (${region})`;
 };
 
-const getPricingUrl = ({
-  baseUrl,
-  solution,
-  csp,
-  region,
-}: {
-  baseUrl?: string;
-  solution?: string;
-  csp?: string;
-  region?: string;
-}): string | undefined => {
-  if (!baseUrl) return undefined;
-  const params = new URLSearchParams({ productType: 'serverless' });
-  if (solution) params.set('solution', solution);
-  if (csp) params.set('provider', csp);
-  if (region) params.set('region', region);
-  return `${baseUrl.replace(/\/$/, '')}/cloud-pricing-table?${params}`;
+// Cloud UI opens the dialog for the intent when the org supports it, and stays on the billing overview otherwise.
+const withBillingIntent = (billingUrl: string, intent: 'subscribe' | 'trial_summary'): string => {
+  const url = new URL(billingUrl);
+  url.searchParams.set('intent', intent);
+  return url.toString();
 };
 
 /** Resolves the subscription status of a Serverless project, or `undefined` when no badge applies. */
@@ -126,17 +94,6 @@ export const resolveServerlessStatus = async ({
     };
   }
 
-  // Cloud UI opens the subscribe dialog when the org can subscribe, and stays on the billing overview otherwise.
-  const subscribeUrl = new URL(billingUrl);
-  subscribeUrl.searchParams.set('intent', 'subscribe');
-
-  const pricingUrl = getPricingUrl({
-    baseUrl: cloud.getUrls().baseUrl,
-    solution: getPricingSolution(projectType),
-    csp,
-    region,
-  });
-
   return {
     kind: 'popover',
     label,
@@ -150,19 +107,17 @@ export const resolveServerlessStatus = async ({
       label: i18n.translate('xpack.subscriptionStatus.serverless.subscribeLabel', {
         defaultMessage: 'Subscribe',
       }),
-      href: subscribeUrl.toString(),
+      href: withBillingIntent(billingUrl, 'subscribe'),
       external: true,
     },
-    secondaryAction: pricingUrl
-      ? {
-          id: 'view_pricing',
-          label: i18n.translate('xpack.subscriptionStatus.serverless.viewPricingLabel', {
-            defaultMessage: 'View pricing',
-          }),
-          href: pricingUrl,
-          external: true,
-        }
-      : undefined,
+    secondaryAction: {
+      id: 'view_pricing',
+      label: i18n.translate('xpack.subscriptionStatus.serverless.viewPricingLabel', {
+        defaultMessage: 'View pricing',
+      }),
+      href: withBillingIntent(billingUrl, 'trial_summary'),
+      external: true,
+    },
     projectType,
   };
 };
