@@ -32,6 +32,10 @@ import type {
   BulkDeleteObservablesRequest,
   FindObservablesRequest,
   FindObservablesResponse,
+  FindCasesByObservableRequest,
+  FindCasesByObservableResponse,
+  CountCasesByObservablesRequest,
+  CountCasesByObservablesResponse,
   CasesPatchResponse,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
@@ -74,6 +78,7 @@ import {
   updateObservable,
 } from './observables';
 import { findObservables, getObservablesByIds } from './find_observables';
+import { countByObservables, findByObservable } from './find_by_observable';
 import type { GetApplicableFieldsParams } from './applicable_fields';
 import { getApplicableFields } from './applicable_fields';
 import type { ApplicableFieldsResponse } from '../../../common/types/domain/template/applicable_field';
@@ -200,6 +205,17 @@ export interface CasesSubClient {
    */
   getObservablesByIds(caseId: string, ids: string[]): Promise<Observable[]>;
   /**
+   * Returns a page of the cases of an owner holding an observable with the exact type key and
+   * value, in either store
+   */
+  findByObservable(params: FindCasesByObservableRequest): Promise<FindCasesByObservableResponse>;
+  /**
+   * For each observable, how many cases of the owner hold its exact type key and value
+   */
+  countByObservables(
+    params: CountCasesByObservablesRequest
+  ): Promise<CountCasesByObservablesResponse>;
+  /**
    * Bulk deletes observables from the case
    */
   bulkDeleteObservables(params: BulkDeleteObservablesRequest): Promise<Case>;
@@ -237,6 +253,8 @@ const usageCounterByMethod = {
   bulkCreateObservables: 'bulk_create_observables',
   findObservables: null,
   getObservablesByIds: null,
+  findByObservable: null,
+  countByObservables: null,
   bulkDeleteObservables: 'bulk_delete_observables',
   getApplicableFields: null,
 } as const satisfies Record<keyof CasesSubClient, string | null>;
@@ -323,6 +341,10 @@ export const createCasesSubClient = (
       findObservables(caseId, params, clientArgs),
     getObservablesByIds: (caseId: string, ids: string[]) =>
       getObservablesByIds(caseId, ids, clientArgs),
+    findByObservable: (params: FindCasesByObservableRequest) =>
+      findByObservable(params, clientArgs),
+    countByObservables: (params: CountCasesByObservablesRequest) =>
+      countByObservables(params, clientArgs),
     bulkDeleteObservables: withUsageCounter(
       usageCounterByMethod.bulkDeleteObservables,
       clientArgs,

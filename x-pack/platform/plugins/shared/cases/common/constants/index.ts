@@ -135,6 +135,10 @@ export const INTERNAL_CASE_OBSERVABLES_BULK_DELETE_URL =
 export const INTERNAL_CASE_OBSERVABLES_FIND_URL = `${INTERNAL_CASE_OBSERVABLES_URL}/_find` as const;
 export const INTERNAL_CASE_OBSERVABLES_BULK_CREATE_URL =
   `${INTERNAL_CASE_OBSERVABLES_URL}/_bulk_create` as const;
+export const INTERNAL_FIND_CASES_BY_OBSERVABLE_URL =
+  `${CASES_INTERNAL_URL}/observables/_find_cases` as const;
+export const INTERNAL_COUNT_CASES_BY_OBSERVABLES_URL =
+  `${CASES_INTERNAL_URL}/observables/_count_cases` as const;
 export const INTERNAL_CASE_WORKFLOW_RUN_URL =
   `${CASES_INTERNAL_URL}/workflows/{workflow_id}/run` as const;
 export const INTERNAL_CASE_FIND_USER_ACTIONS_URL =
