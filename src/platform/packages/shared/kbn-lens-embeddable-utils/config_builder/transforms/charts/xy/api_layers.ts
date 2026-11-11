@@ -92,6 +92,9 @@ function convertDataLayerToAPI(
     visualization.seriesType === 'line'
       ? DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING
       : DEFAULT_CATEGORICAL_COLOR_MAPPING;
+  // The runtime ignores the static Y color only while the breakdown is active (not collapsed).
+  const hasActiveBreakdown =
+    (visualization.splitAccessors?.length ?? 0) > 0 && !visualization.collapseFn;
 
   if (isFormBasedLayer(layer)) {
     const x = visualization.xAccessor
@@ -128,7 +131,7 @@ function convertDataLayerToAPI(
           const onAxis = resolveAxisId(yAccessorModesMap.get(accessor) ?? 'left');
           return {
             ...apiOperation,
-            ...(breakdown_by
+            ...(hasActiveBreakdown
               ? {}
               : { color: fromStaticColorLensStateToAPI(yConfig?.color) ?? AUTO_COLOR }),
             axis: onAxis,
@@ -173,7 +176,7 @@ function convertDataLayerToAPI(
     const axis = resolveAxisId(yAccessorModesMap.get(accessor) ?? 'left');
     return {
       ...getValueApiColumn(accessor, layer),
-      ...(breakdown_by ? {} : { color: fromStaticColorLensStateToAPI(yColor) ?? AUTO_COLOR }),
+      ...(hasActiveBreakdown ? {} : { color: fromStaticColorLensStateToAPI(yColor) ?? AUTO_COLOR }),
       axis,
     };
   });

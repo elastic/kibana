@@ -577,6 +577,13 @@ const yMetricOnAxisSchema = lazySchema(() =>
         'The Y axis this metric is plotted on. Values match the root axis configuration keys (axis.y, axis.y2). If omitted, defaults to the Y axis start (leading) side.',
     })
 );
+const yMetricColorSchema = lazySchema(() =>
+  z.union([staticColorSchema, autoColorSchema]).meta({
+    description:
+      'Color of the Y metric. Defaults to `auto`. Ignored while the layer has an active breakdown.',
+  })
+);
+
 /**
  * Data layer configuration for standard (non-ES|QL) queries with breakdown and metrics
  */
@@ -603,7 +610,7 @@ const xyDataLayerSchemaNoESQL = lazySchema(() =>
           getMetricsWithChartDimensionSchemaWithRefBasedOps('xyY').and(
             z.object({
               axis: yMetricOnAxisSchema.optional(),
-              color: z.union([staticColorSchema, autoColorSchema]).default(AUTO_COLOR).optional(),
+              color: yMetricColorSchema.optional(),
             })
           )
         )
@@ -641,7 +648,7 @@ const xyDataLayerSchemaESQL = lazySchema(() =>
           esqlColumnWithFormatSchema
             .extend({
               axis: yMetricOnAxisSchema.optional(),
-              color: z.union([staticColorSchema, autoColorSchema]).default(AUTO_COLOR).optional(),
+              color: yMetricColorSchema.optional(),
             })
             .strict()
             .meta({ description: 'ES|QL column for Y-axis metric' })

@@ -230,19 +230,20 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
 
         // Rebuild yConfig: one entry per accessor with normalized axisMode.
         // axisMode 'auto' normalizes to 'left' (the transform treats auto as no-preference → left).
-        // Per-series color is dropped when a breakdown is present (color moves to breakdown_by.color).
+        // Per-series color is dropped while the breakdown is active (not collapsed): the runtime
+        // ignores it and the transforms leave it out (the color moves to breakdown_by.color).
         const configuredAccessors = new Map<string, any>(
           (layer.yConfig ?? []).map((yc: any) => [yc.forAccessor, yc])
         );
         const allAccessors: string[] = layer.accessors ?? [];
-        const hasBreakdown = (layer.splitAccessors?.length ?? 0) > 0;
+        const hasActiveBreakdown = (layer.splitAccessors?.length ?? 0) > 0 && !layer.collapseFn;
         layer.yConfig = allAccessors
           .map((acc) => {
             const existing = configuredAccessors.get(acc);
             const rawMode = existing?.axisMode ?? 'left';
             const axisMode = rawMode === 'auto' ? 'left' : rawMode;
             const entry = existing ? { ...existing, axisMode } : { axisMode, forAccessor: acc };
-            if (hasBreakdown) delete entry.color;
+            if (hasActiveBreakdown) delete entry.color;
             // lineStyle/lineWidth are reference-line-only styling; dropped for data layers
             delete entry.lineStyle;
             delete entry.lineWidth;

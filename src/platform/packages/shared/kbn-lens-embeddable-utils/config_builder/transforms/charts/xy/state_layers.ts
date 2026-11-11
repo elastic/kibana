@@ -86,11 +86,19 @@ function buildDataLayer(config: XYConfig, layer: DataLayerType, i: number): XYDa
     layer.type.includes('percentage') ? `${layer.type}_stacked` : layer.type
   ) as SeriesType;
 
+  // The runtime ignores the static Y color while the breakdown is active (not collapsed),
+  // so it is not stored, mirroring what State -> API leaves out.
+  const hasActiveBreakdown =
+    layer.breakdown_by != null &&
+    !('collapse_by' in layer.breakdown_by && layer.breakdown_by.collapse_by);
+
   const yConfig = layer.y.map<YConfig>((yMetric, index) => {
     const onAxis = yMetric?.axis ?? 'y';
     const axisMode = onAxis === 'y2' ? 'right' : 'left';
     return {
-      ...(yMetric.color && !isAutoColor(yMetric.color) ? { color: yMetric.color?.color } : {}),
+      ...(!hasActiveBreakdown && yMetric.color && !isAutoColor(yMetric.color)
+        ? { color: yMetric.color.color }
+        : {}),
       axisMode,
       forAccessor: getAccessorNameForXY(layer, i, METRIC_ACCESSOR_PREFIX, index),
     };
