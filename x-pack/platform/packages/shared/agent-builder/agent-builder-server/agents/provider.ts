@@ -103,7 +103,7 @@ export interface SubAgentExecutionResult {
 
 /** Options of a sub-agent run as its own task, outliving the run that spawned it. */
 export interface SubAgentBackgroundOptions {
-  /** How the parent gets the result; defaults to `always`. */
+  /** How the parent gets the result; unset, the result waits for the parent's next run. */
   parentTriggerMode?: ChatTriggerMode;
 }
 

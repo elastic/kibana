@@ -87,7 +87,13 @@ export const createSendMessageTool = ({
     schema,
     tags: ['subagent'],
     handler: async (
-      { to, prompt, run_in_background = false, trigger_mode, effort = 'medium' }: SendMessageParams,
+      {
+        to,
+        prompt,
+        run_in_background = false,
+        trigger_mode,
+        effort = EffortLevels.medium,
+      }: SendMessageParams,
       { events, modelProvider }
     ) => {
       if (!subagentTracker) {
@@ -145,7 +151,13 @@ export const createSendMessageTool = ({
           prompt,
           connectorId,
           ...(run_in_background
-            ? { background: { ...(trigger_mode ? { parentTriggerMode: trigger_mode } : {}) } }
+            ? {
+                background: {
+                  ...(backgroundWakeEnabled
+                    ? { parentTriggerMode: trigger_mode ?? ChatTriggerMode.Always }
+                    : {}),
+                },
+              }
             : { abortSignal }),
         });
 

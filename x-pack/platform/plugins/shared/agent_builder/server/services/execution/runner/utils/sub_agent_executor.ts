@@ -7,11 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SubAgentExecutor } from '@kbn/agent-builder-server';
-import {
-  AgentExecutionMode,
-  ChatTriggerMode,
-  createNonInteractiveConfig,
-} from '@kbn/agent-builder-common';
+import { AgentExecutionMode, createNonInteractiveConfig } from '@kbn/agent-builder-common';
 import type { AutoApprovedApi, InteractivityConfig } from '@kbn/agent-builder-common';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import { unionBy } from 'lodash';
@@ -60,8 +56,8 @@ export const createSubAgentExecutor = ({
           agentId: params.agentId,
           connectorId: params.connectorId,
           parentExecutionId: params.parentExecutionId,
-          ...(params.background
-            ? { parentTriggerMode: params.background.parentTriggerMode ?? ChatTriggerMode.Always }
+          ...(params.background?.parentTriggerMode
+            ? { parentTriggerMode: params.background.parentTriggerMode }
             : {}),
           nextInput: { message: params.prompt },
           projectRouting,
@@ -83,8 +79,8 @@ export const createSubAgentExecutor = ({
           agentId: params.agentId,
           connectorId: params.connectorId,
           parentExecutionId: params.parentExecutionId,
-          ...(params.background
-            ? { parentTriggerMode: params.background.parentTriggerMode ?? ChatTriggerMode.Always }
+          ...(params.background?.parentTriggerMode
+            ? { parentTriggerMode: params.background.parentTriggerMode }
             : {}),
           conversationId: params.conversationId,
           autoCreateConversationWithId: true,
@@ -111,8 +107,8 @@ export const createSubAgentExecutor = ({
           agentId: params.agentId,
           connectorId: params.connectorId,
           parentExecutionId: params.parentExecutionId,
-          ...(params.background
-            ? { parentTriggerMode: params.background.parentTriggerMode ?? ChatTriggerMode.Always }
+          ...(params.background?.parentTriggerMode
+            ? { parentTriggerMode: params.background.parentTriggerMode }
             : {}),
           conversationId: params.conversationId,
           autoCreateConversationWithId: false,

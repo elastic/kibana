@@ -210,14 +210,15 @@ describe('createSubAgentExecutor', () => {
 });
 
 describe('createSubAgentExecutor and background sub-agents', () => {
-  it('asks a background sub-agent to wake the parent when it finishes', async () => {
+  it('runs a background sub-agent on its own task, waking the parent only when asked to', async () => {
     const executor = createExecutorWith({ enabled: false });
+    const background = { parentTriggerMode: ChatTriggerMode.Always };
 
     await executor.executeSubAgent({
       agentId: 'child',
       prompt: 'go',
       parentExecutionId: 'parent-execution-id',
-      background: {},
+      background,
     });
     await executor.createSubAgent({
       agentId: 'child',
@@ -226,14 +227,14 @@ describe('createSubAgentExecutor and background sub-agents', () => {
       conversationId: 'conversation-id',
       parentConversationId: 'parent-conversation-id',
       subagentName: 'child',
-      background: {},
+      background,
     });
     await executor.sendToSubAgent({
       agentId: 'child',
       prompt: 'and then',
       parentExecutionId: 'parent-execution-id',
       conversationId: 'conversation-id',
-      background: {},
+      background,
     });
 
     expect(executeAgentMock).toHaveBeenCalledTimes(3);
@@ -250,6 +251,16 @@ describe('createSubAgentExecutor and background sub-agents', () => {
       background: { parentTriggerMode: ChatTriggerMode.Never },
     });
     expect(executeAgentMock.mock.calls[3][0].params.parentTriggerMode).toBe(ChatTriggerMode.Never);
+
+    // No wake asked for: the run still gets its own task, and the result waits for the next run.
+    await executor.executeSubAgent({
+      agentId: 'child',
+      prompt: 'go',
+      parentExecutionId: 'parent-execution-id',
+      background: {},
+    });
+    expect(executeAgentMock.mock.calls[4][0].params.parentTriggerMode).toBeUndefined();
+    expect(executeAgentMock.mock.calls[4][0].useTaskManager).toBe(true);
   });
 
   it('leaves a foreground sub-agent alone', async () => {

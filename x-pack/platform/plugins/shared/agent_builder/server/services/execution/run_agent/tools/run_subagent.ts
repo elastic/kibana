@@ -424,7 +424,7 @@ export const createSubagentTool = ({
         prompt,
         run_in_background = false,
         trigger_mode,
-        effort = 'medium',
+        effort = EffortLevels.medium,
         mode,
         name,
         auto_approved_apis: autoApprovedApisByTarget,
@@ -555,7 +555,11 @@ export const createSubagentTool = ({
             ...(autoApprovedApis ? { autoApprovedApis } : {}),
             ...(run_in_background
               ? {
-                  background: { ...(trigger_mode ? { parentTriggerMode: trigger_mode } : {}) },
+                  background: {
+                    ...(backgroundWakeEnabled
+                      ? { parentTriggerMode: trigger_mode ?? ChatTriggerMode.Always }
+                      : {}),
+                  },
                 }
               : { abortSignal }),
           });
@@ -621,7 +625,11 @@ export const createSubagentTool = ({
           // background agents should continue running even if main execution completes
           ...(run_in_background
             ? {
-                background: { ...(trigger_mode ? { parentTriggerMode: trigger_mode } : {}) },
+                background: {
+                  ...(backgroundWakeEnabled
+                    ? { parentTriggerMode: trigger_mode ?? ChatTriggerMode.Always }
+                    : {}),
+                },
               }
             : { abortSignal }),
         });
