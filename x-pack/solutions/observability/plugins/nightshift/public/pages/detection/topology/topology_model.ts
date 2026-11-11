@@ -32,11 +32,18 @@ export interface TopologyViewModel {
   edges: TopologyViewEdge[];
 }
 
-export const getTopologyNodeLabel = (node: TopologyNode): string =>
-  node.title ?? node.name ?? node.node_id;
-
-const unresolvedNodeId = (edgeId: string, variantIndex: number, endpoint: 'source' | 'target') =>
-  `unresolved:${edgeId}:${variantIndex}:${endpoint}`;
+const unresolvedNodeId = (
+  edgeId: string,
+  variantIndex: number,
+  endpoint: 'source' | 'target',
+  takenIds: ReadonlyMap<string, unknown>
+): string => {
+  let id = `unresolved:${edgeId}:${variantIndex}:${endpoint}`;
+  while (takenIds.has(id)) {
+    id = `unresolved:${id}`;
+  }
+  return id;
+};
 
 type TopologySnapshotGraph = Pick<TopologySnapshotProperties, 'nodes' | 'edges'>;
 
@@ -58,7 +65,8 @@ const projectTopology = (
     if (node) {
       viewNodesById.set(nodeId, {
         id: nodeId,
-        label: getTopologyNodeLabel(node),
+        // Same label as the Detections entities list.
+        label: node.name ?? nodeId,
         subtitle: node.technology ?? node.subtype,
         unresolved: false,
         topologyNode: node,
@@ -76,8 +84,12 @@ const projectTopology = (
         return;
       }
 
-      const source = variant.source_node_id ?? unresolvedNodeId(edgeId, variantIndex, 'source');
-      const target = variant.target_node_id ?? unresolvedNodeId(edgeId, variantIndex, 'target');
+      const source =
+        variant.source_node_id ??
+        unresolvedNodeId(edgeId, variantIndex, 'source', topologyNodesById);
+      const target =
+        variant.target_node_id ??
+        unresolvedNodeId(edgeId, variantIndex, 'target', topologyNodesById);
 
       addResolvedNode(variant.source_node_id);
       addResolvedNode(variant.target_node_id);
@@ -121,10 +133,10 @@ export const buildFullTopology = (snapshot: TopologySnapshotGraph): TopologyView
     snapshot.nodes.map(({ node_id: nodeId }) => nodeId)
   );
 
-/** Projects dependencies within `hops` edges of an entity, in either direction. */
+/** Projects dependencies within `hops` edges of the focused entities, in either direction. */
 export const buildTopologyNeighborhood = (
   snapshot: TopologySnapshotGraph,
-  focusedNodeId: string,
+  focusedNodeIds: string[],
   hops = 1
 ): TopologyViewModel => {
   const adjacency = new Map<string, Set<string>>();
@@ -142,8 +154,8 @@ export const buildTopologyNeighborhood = (
     })
   );
 
-  const expanded = new Set<string>([focusedNodeId]);
-  let frontier = [focusedNodeId];
+  const expanded = new Set<string>(focusedNodeIds);
+  let frontier = focusedNodeIds;
   for (let depth = 1; depth < hops && frontier.length > 0; depth++) {
     const next: string[] = [];
     frontier.forEach((nodeId) =>
@@ -161,6 +173,6 @@ export const buildTopologyNeighborhood = (
     snapshot,
     ({ source_node_id: source, target_node_id: target }) =>
       (source !== null && expanded.has(source)) || (target !== null && expanded.has(target)),
-    [focusedNodeId]
+    focusedNodeIds
   );
 };

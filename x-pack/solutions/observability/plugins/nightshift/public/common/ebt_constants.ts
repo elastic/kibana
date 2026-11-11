@@ -11,7 +11,6 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   ADD_RECOMMENDED_SOURCES: 'addRecommendedSources',
   ASSIGN_INVESTIGATION: 'assignInvestigation',
   CANCEL_AUTOMATION_EDIT: 'cancelAutomationEdit',
-  CLEAR_TOPOLOGY_FOCUS: 'clearTopologyFocus',
   VIEW_INVESTIGATION: EBT_CLICK_ACTIONS.VIEW_INVESTIGATION,
   CLEAR_AUTOMATION_FILTERS: 'clearAutomationFilters',
   CANCEL_DETECTION_ENGINE_CHANGE: 'cancelDetectionEngineChange',

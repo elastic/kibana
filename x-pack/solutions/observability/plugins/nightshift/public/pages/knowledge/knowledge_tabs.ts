@@ -13,7 +13,6 @@ export const KNOWLEDGE_TAB_IDS = [
   'wiki',
   'memory',
   'decision_trees',
-  'topology',
 ] as const;
 
 export type KnowledgeTabId = (typeof KNOWLEDGE_TAB_IDS)[number];
@@ -31,9 +30,6 @@ export const KNOWLEDGE_TAB_LABELS: Record<KnowledgeTabId, string> = {
   }),
   decision_trees: i18n.translate('xpack.nightshift.knowledgePage.tabs.decisionTrees', {
     defaultMessage: 'Decision Trees',
-  }),
-  topology: i18n.translate('xpack.nightshift.knowledgePage.tabs.topology', {
-    defaultMessage: 'Topology',
   }),
 };
 

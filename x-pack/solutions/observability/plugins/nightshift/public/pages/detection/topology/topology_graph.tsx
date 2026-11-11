@@ -8,13 +8,17 @@
 import React, { useMemo } from 'react';
 import Dagre from '@dagrejs/dagre';
 import {
+  BaseEdge,
   Background,
   Controls,
+  EdgeLabelRenderer,
   Handle,
   MarkerType,
   Position,
+  getBezierPath,
   ReactFlow,
   type Edge,
+  type EdgeProps,
   type Node,
   type NodeProps,
 } from '@xyflow/react';
@@ -41,7 +45,78 @@ type TopologyFlowNode = Node<
   'topology'
 >;
 
-type TopologyFlowEdge = Edge<{ viewEdge: TopologyViewEdge }>;
+type TopologyFlowEdge = Edge<{ viewEdge: TopologyViewEdge; offset: number }, 'topology'>;
+
+const PARALLEL_EDGE_SPACING = 48;
+
+/** Fans edges that share endpoints apart along the normal so each stays clickable. */
+const TopologyEdge = ({
+  id,
+  sourceX,
+  sourceY,
+  targetX,
+  targetY,
+  sourcePosition,
+  targetPosition,
+  markerEnd,
+  label,
+  labelStyle,
+  labelBgStyle,
+  data,
+}: EdgeProps<TopologyFlowEdge>): React.ReactElement => {
+  const offset = data?.offset ?? 0;
+  let path: string;
+  let labelX: number;
+  let labelY: number;
+
+  if (offset === 0) {
+    [path, labelX, labelY] = getBezierPath({
+      sourceX,
+      sourceY,
+      targetX,
+      targetY,
+      sourcePosition,
+      targetPosition,
+    });
+  } else {
+    const midX = (sourceX + targetX) / 2;
+    const midY = (sourceY + targetY) / 2;
+    const length = Math.hypot(targetX - sourceX, targetY - sourceY) || 1;
+    const normalX = -(targetY - sourceY) / length;
+    const normalY = (targetX - sourceX) / length;
+    // A quadratic curve peaks at half its control-point displacement.
+    path = `M ${sourceX},${sourceY} Q ${midX + normalX * offset * 2},${
+      midY + normalY * offset * 2
+    } ${targetX},${targetY}`;
+    labelX = midX + normalX * offset;
+    labelY = midY + normalY * offset;
+  }
+
+  return (
+    <>
+      <BaseEdge id={id} path={path} markerEnd={markerEnd} interactionWidth={20} />
+      {label && (
+        <EdgeLabelRenderer>
+          <div
+            className="nodrag nopan"
+            style={{
+              position: 'absolute',
+              transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
+              padding: '2px 4px',
+              pointerEvents: 'none',
+              ...labelStyle,
+              background: labelBgStyle?.fill,
+            }}
+          >
+            {label}
+          </div>
+        </EdgeLabelRenderer>
+      )}
+    </>
+  );
+};
+
+const edgeTypes = { topology: TopologyEdge };
 
 const unresolvedLabel = i18n.translate('xpack.nightshift.topology.node.unresolvedLabel', {
   defaultMessage: 'Unresolved',
@@ -139,21 +214,33 @@ export function TopologyGraph({
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
 
-  const flowEdges = useMemo<TopologyFlowEdge[]>(
-    () =>
-      model.edges.map((viewEdge) => ({
+  const flowEdges = useMemo<TopologyFlowEdge[]>(() => {
+    const groups = new Map<string, TopologyViewEdge[]>();
+    model.edges.forEach((viewEdge) => {
+      const key = [viewEdge.source, viewEdge.target].sort().join('\u0000');
+      groups.set(key, [...(groups.get(key) ?? []), viewEdge]);
+    });
+
+    return model.edges.map((viewEdge) => {
+      const group = groups.get([viewEdge.source, viewEdge.target].sort().join('\u0000')) ?? [];
+      const direction = viewEdge.source <= viewEdge.target ? 1 : -1;
+      const offset =
+        group.length > 1
+          ? (group.indexOf(viewEdge) - (group.length - 1) / 2) * PARALLEL_EDGE_SPACING * direction
+          : 0;
+      return {
         id: viewEdge.id,
+        type: 'topology' as const,
         source: viewEdge.source,
         target: viewEdge.target,
         label: [viewEdge.variant.subtype, viewEdge.variant.protocol].filter(Boolean).join(' · '),
         markerEnd: { type: MarkerType.ArrowClosed },
-        data: { viewEdge },
-        labelStyle: { fill: euiTheme.colors.textParagraph, fontSize: 11 },
+        data: { viewEdge, offset },
+        labelStyle: { color: euiTheme.colors.textParagraph, fontSize: 11 },
         labelBgStyle: { fill: euiTheme.colors.backgroundBasePlain },
-        labelBgPadding: [4, 2] as [number, number],
-      })),
-    [euiTheme, model.edges]
-  );
+      };
+    });
+  }, [euiTheme, model.edges]);
 
   const flowNodes = useMemo(
     () =>
@@ -190,32 +277,43 @@ export function TopologyGraph({
   return (
     <div
       className={css`
-        height: 600px;
+        position: relative;
+        flex: 1 1 auto;
+        min-height: 480px;
         border: ${euiTheme.border.thin};
         border-radius: ${euiTheme.border.radius.medium};
       `}
       data-test-subj="nightshiftTopologyGraph"
     >
-      <ReactFlow
-        nodes={flowNodes}
-        edges={flowEdges}
-        nodeTypes={nodeTypes}
-        style={flowStyle}
-        nodesDraggable={false}
-        nodesConnectable={false}
-        fitView
-        minZoom={0.1}
-        proOptions={{ hideAttribution: true }}
-        onEdgeClick={(_, edge) => {
-          if (edge.data?.viewEdge) {
-            onSelect({ type: 'edge', edge: edge.data.viewEdge });
-          }
-        }}
-        onPaneClick={() => onSelect(undefined)}
+      {/* React Flow needs a definite height, which a flex-sized box does not give its children. */}
+      <div
+        className={css`
+          position: absolute;
+          inset: 0;
+        `}
       >
-        <Background />
-        <Controls showInteractive={false} />
-      </ReactFlow>
+        <ReactFlow
+          nodes={flowNodes}
+          edges={flowEdges}
+          nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
+          style={flowStyle}
+          nodesDraggable={false}
+          nodesConnectable={false}
+          fitView
+          minZoom={0.1}
+          proOptions={{ hideAttribution: true }}
+          onEdgeClick={(_, edge) => {
+            if (edge.data?.viewEdge) {
+              onSelect({ type: 'edge', edge: edge.data.viewEdge });
+            }
+          }}
+          onPaneClick={() => onSelect(undefined)}
+        >
+          <Background />
+          <Controls showInteractive={false} />
+        </ReactFlow>
+      </div>
     </div>
   );
 }

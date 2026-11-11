@@ -88,6 +88,5 @@ export const useKnowledgeTabsAvailability = ({
     memory: useMemoryEnabled(enabled),
     // A disabled query still returns its cached data, so mask it explicitly.
     decision_trees: isDeveloperMode ? decisionTrees : { isEnabled: false, isLoading: false },
-    topology: { isEnabled: enabled && isDeveloperMode, isLoading: false },
   };
 };

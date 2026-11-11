@@ -71,7 +71,7 @@ describe('buildTopologyNeighborhood', () => {
       ],
     };
 
-    const result = buildTopologyNeighborhood(snapshot, 'api');
+    const result = buildTopologyNeighborhood(snapshot, ['api']);
 
     expect(result.nodes.map(({ id }) => id)).toEqual([
       'api',
@@ -114,14 +114,21 @@ const chain: Pick<TopologySnapshotProperties, 'nodes' | 'edges'> = {
 
 describe('buildTopologyNeighborhood hops', () => {
   it('includes dependencies within the hop limit', () => {
-    const result = buildTopologyNeighborhood(chain, 'a', 2);
+    const result = buildTopologyNeighborhood(chain, ['a'], 2);
 
     expect(result.nodes.map(({ id }) => id)).toEqual(['a', 'b', 'c']);
     expect(result.edges.map(({ id }) => id)).toEqual(['a-b:0', 'b-c:0']);
   });
 
+  it('merges the neighborhoods of several focused entities', () => {
+    const result = buildTopologyNeighborhood(chain, ['a', 'd']);
+
+    expect(result.nodes.map(({ id }) => id)).toEqual(['a', 'b', 'c', 'd']);
+    expect(result.edges.map(({ id }) => id)).toEqual(['a-b:0', 'c-d:0']);
+  });
+
   it('follows dependencies against their direction', () => {
-    const result = buildTopologyNeighborhood(chain, 'd', 2);
+    const result = buildTopologyNeighborhood(chain, ['d'], 2);
 
     expect(result.nodes.map(({ id }) => id)).toEqual(['b', 'c', 'd']);
   });
@@ -133,5 +140,39 @@ describe('buildFullTopology', () => {
 
     expect(result.nodes.map(({ id }) => id)).toEqual(['a', 'b', 'c', 'd', 'isolated']);
     expect(result.edges).toHaveLength(3);
+  });
+});
+
+describe('synthetic unresolved endpoints', () => {
+  it('does not overwrite a real entity whose id matches the synthetic id', () => {
+    const syntheticId = 'unresolved:api-storage:0:target';
+    const snapshot: Pick<TopologySnapshotProperties, 'nodes' | 'edges'> = {
+      nodes: [node('api'), node(syntheticId)],
+      edges: [
+        {
+          edge_id: 'api-storage',
+          variants: [
+            {
+              source_ref: 'api',
+              target_ref: 'missing',
+              source_node_id: 'api',
+              target_node_id: null,
+              source_resolution: 'slug',
+              target_resolution: 'unresolved',
+              provenance: [],
+            },
+          ],
+        },
+      ],
+    };
+
+    const { nodes, edges } = buildFullTopology(snapshot);
+
+    expect(nodes.filter(({ unresolved }) => !unresolved).map(({ id }) => id)).toEqual([
+      'api',
+      syntheticId,
+    ]);
+    expect(nodes.find(({ id }) => id === edges[0].target)?.unresolved).toBe(true);
+    expect(edges[0].target).not.toBe(syntheticId);
   });
 });

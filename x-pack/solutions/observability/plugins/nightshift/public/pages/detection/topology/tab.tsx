@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { EuiComboBoxOptionOption, EuiDescriptionListProps } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiButtonEmpty,
   EuiButtonGroup,
   EuiComboBox,
   EuiDescriptionList,
@@ -24,21 +23,15 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { MAX_SOURCES_PER_PAGE } from '@kbn/nightshift-shared';
 import type { TopologyProvenance } from '@kbn/significant-events-schema';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { useFetchSources } from '../../../data/sources/use_fetch_sources';
 import { useTopologySnapshot } from '../../../data/topology/use_topology_snapshot';
 import { useProvenanceDetails } from './provenance_details';
 import { TopologyGraph, type TopologyGraphSelection } from './topology_graph';
-import {
-  buildFullTopology,
-  buildTopologyNeighborhood,
-  getTopologyNodeLabel,
-} from './topology_model';
+import { buildFullTopology, buildTopologyNeighborhood } from './topology_model';
 
 type TopologyViewMode = 'neighborhood' | 'full';
 
@@ -58,11 +51,6 @@ const protocolLabel = i18n.translate('xpack.nightshift.topology.details.protocol
   defaultMessage: 'Protocol',
 });
 const NO_PROVENANCE: TopologyProvenance[] = [];
-
-interface EntityOptionValue {
-  nodeId: string;
-  displayLabel: string;
-}
 
 const SelectionDetails = ({
   selection,
@@ -151,9 +139,9 @@ const SelectionDetails = ({
   );
 };
 
-export function TopologyTab(): React.ReactElement {
+/** `entities` is the selection of the Detections entities list; it focuses the neighborhood view. */
+export function TopologyTab({ entities }: { entities: string[] }): React.ReactElement {
   const [selectedSourceIds, setSelectedSourceIds] = useState<string[]>([]);
-  const [focusedNodeId, setFocusedNodeId] = useState<string>();
   const [viewMode, setViewMode] = useState<TopologyViewMode>('neighborhood');
   const [hops, setHops] = useState(1);
   const [selection, setSelection] = useState<TopologyGraphSelection>();
@@ -161,40 +149,42 @@ export function TopologyTab(): React.ReactElement {
   const topologyQuery = useTopologySnapshot(selectedSourceIds);
   const snapshot = topologyQuery.data;
 
+  // Titles are not unique, so a repeated one carries its slug wherever a source is named.
+  const sourceTitles = useMemo(() => {
+    const titleCounts = new Map<string, number>();
+    (sourcesQuery.data ?? []).forEach(({ title }) =>
+      titleCounts.set(title, (titleCounts.get(title) ?? 0) + 1)
+    );
+    return new Map(
+      (sourcesQuery.data ?? []).map(({ id, title, slug }) => [
+        id,
+        (titleCounts.get(title) ?? 0) > 1 ? `${title} (${slug})` : title,
+      ])
+    );
+  }, [sourcesQuery.data]);
   const sourceOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
     () =>
-      (sourcesQuery.data ?? []).map(({ id, title }) => ({
-        label: title,
+      [...sourceTitles].map(([id, label]) => ({
+        key: id,
+        label,
         value: id,
         disabled:
           selectedSourceIds.length >= MAX_SOURCES_PER_PAGE && !selectedSourceIds.includes(id),
       })),
-    [selectedSourceIds, sourcesQuery.data]
+    [selectedSourceIds, sourceTitles]
   );
   const selectedSourceOptions = sourceOptions.filter(({ value }) =>
     value ? selectedSourceIds.includes(value) : false
   );
-  const sourceTitles = useMemo(
-    () => new Map((sourcesQuery.data ?? []).map(({ id, title }) => [id, title])),
-    [sourcesQuery.data]
-  );
 
-  const entityOptions = useMemo(
-    () =>
-      (snapshot?.nodes ?? []).map((node): EuiComboBoxOptionOption<EntityOptionValue> => {
-        const displayLabel = getTopologyNodeLabel(node);
-        return {
-          label: [...new Set([displayLabel, node.node_id, node.name, node.technology])].join(' '),
-          value: { nodeId: node.node_id, displayLabel },
-        };
-      }),
-    [snapshot?.nodes]
-  );
-  const selectedEntityOptions = entityOptions.flatMap(({ value }) =>
-    value && value.nodeId === focusedNodeId ? [{ label: value.displayLabel, value }] : []
-  );
+  // A selected entity may sit outside the sources this snapshot was built from.
+  const focusedNodeIds = useMemo(() => {
+    const nodeIds = new Set((snapshot?.nodes ?? []).map(({ node_id: nodeId }) => nodeId));
+    return entities.filter((id) => nodeIds.has(id));
+  }, [entities, snapshot?.nodes]);
+  useEffect(() => setSelection(undefined), [focusedNodeIds]);
   const isFullView = viewMode === 'full';
-  const showGraph = isFullView || focusedNodeId !== undefined;
+  const showGraph = isFullView || focusedNodeIds.length > 0;
   const model = useMemo(() => {
     if (!snapshot) {
       return { nodes: [], edges: [] };
@@ -202,20 +192,17 @@ export function TopologyTab(): React.ReactElement {
     if (isFullView) {
       return buildFullTopology(snapshot);
     }
-    return focusedNodeId
-      ? buildTopologyNeighborhood(snapshot, focusedNodeId, hops)
-      : { nodes: [], edges: [] };
-  }, [focusedNodeId, hops, isFullView, snapshot]);
+    return buildTopologyNeighborhood(snapshot, focusedNodeIds, hops);
+  }, [focusedNodeIds, hops, isFullView, snapshot]);
 
   const updateSources = (options: Array<EuiComboBoxOptionOption<string>>) => {
     setSelectedSourceIds(options.flatMap(({ value }) => (value ? [value] : [])));
-    setFocusedNodeId(undefined);
     setSelection(undefined);
   };
 
   return (
-    <>
-      <EuiFlexGroup alignItems="flexEnd" wrap>
+    <div css={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
+      <EuiFlexGroup alignItems="flexEnd" wrap css={{ flexGrow: 0 }}>
         <EuiFlexItem grow={2}>
           <EuiFormRow
             fullWidth
@@ -240,33 +227,6 @@ export function TopologyTab(): React.ReactElement {
               isLoading={sourcesQuery.isLoading}
               placeholder={allSourcesLabel}
               data-test-subj="nightshiftTopologySources"
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem grow={3}>
-          <EuiFormRow
-            fullWidth
-            label={i18n.translate('xpack.nightshift.topology.entity.label', {
-              defaultMessage: 'Focus entity',
-            })}
-          >
-            <EuiComboBox
-              fullWidth
-              compressed
-              singleSelection={{ asPlainText: true }}
-              options={entityOptions}
-              selectedOptions={selectedEntityOptions}
-              onChange={(options) => {
-                setFocusedNodeId(options[0]?.value?.nodeId);
-                setSelection(undefined);
-              }}
-              renderOption={(option) => option.value?.displayLabel ?? option.label}
-              isLoading={topologyQuery.isLoading}
-              isDisabled={isFullView || !snapshot || snapshot.nodes.length === 0}
-              placeholder={i18n.translate('xpack.nightshift.topology.entity.placeholder', {
-                defaultMessage: 'Search entities by name, ID, or technology',
-              })}
-              data-test-subj="nightshiftTopologyEntitySearch"
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -330,26 +290,6 @@ export function TopologyTab(): React.ReactElement {
             </EuiFormRow>
           </EuiFlexItem>
         )}
-        {focusedNodeId && !isFullView && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              data-test-subj="nightshiftTopologyClearFocus"
-              {...getEbtProps({
-                action: NIGHTSHIFT_EBT_ACTIONS.CLEAR_TOPOLOGY_FOCUS,
-                element: NIGHTSHIFT_EBT_ELEMENTS.TOPOLOGY,
-              })}
-              onClick={() => {
-                setFocusedNodeId(undefined);
-                setSelection(undefined);
-              }}
-            >
-              {i18n.translate('xpack.nightshift.topology.clearFocus', {
-                defaultMessage: 'Clear focus',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
@@ -373,7 +313,7 @@ export function TopologyTab(): React.ReactElement {
             </h2>
           }
         />
-      ) : snapshot?.nodes.length === 0 ? (
+      ) : snapshot && snapshot.nodes.length === 0 && snapshot.edges.length === 0 ? (
         <EuiEmptyPrompt
           iconType="graphApp"
           title={
@@ -424,10 +364,10 @@ export function TopologyTab(): React.ReactElement {
           <EuiSpacer size="s" />
 
           {showGraph ? (
-            <EuiFlexGroup alignItems="stretch">
+            <EuiFlexGroup alignItems="stretch" css={{ flex: '1 1 auto' }}>
               <EuiFlexItem grow={3}>
                 <TopologyGraph
-                  key={isFullView ? 'full' : `${focusedNodeId}:${hops}`}
+                  key={isFullView ? 'full' : `${focusedNodeIds.join('\u0000')}:${hops}`}
                   model={model}
                   onSelect={setSelection}
                 />
@@ -444,7 +384,7 @@ export function TopologyTab(): React.ReactElement {
               title={
                 <h2>
                   {i18n.translate('xpack.nightshift.topology.focus.title', {
-                    defaultMessage: 'Choose an entity to explore',
+                    defaultMessage: 'Select an entity to explore',
                   })}
                 </h2>
               }
@@ -452,7 +392,7 @@ export function TopologyTab(): React.ReactElement {
                 <p>
                   {i18n.translate('xpack.nightshift.topology.focus.body', {
                     defaultMessage:
-                      'Search for an entity to show its dependencies within the selected number of hops, or switch to the full topology.',
+                      'Select entities in the Entities list to show their dependencies within the selected number of hops, or switch to the full topology.',
                   })}
                 </p>
               }
@@ -460,6 +400,6 @@ export function TopologyTab(): React.ReactElement {
           )}
         </>
       ) : null}
-    </>
+    </div>
   );
 }

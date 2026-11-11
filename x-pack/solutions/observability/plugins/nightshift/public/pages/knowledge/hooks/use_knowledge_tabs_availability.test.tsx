@@ -60,7 +60,6 @@ it('hides Decision Trees without requesting availability when developer mode is 
 
   await waitFor(() => expect(result.current.memory.isEnabled).toBe(true));
   expect(result.current.decision_trees).toEqual({ isEnabled: false, isLoading: false });
-  expect(result.current.topology).toEqual({ isEnabled: false, isLoading: false });
   expect(httpGetMock).not.toHaveBeenCalled();
 });
 
@@ -74,7 +73,6 @@ it('shows Decision Trees when developer mode is on and the feature is available'
   await waitFor(() =>
     expect(result.current.decision_trees).toEqual({ isEnabled: true, isLoading: false })
   );
-  expect(result.current.topology).toEqual({ isEnabled: true, isLoading: false });
   expect(httpGetMock).toHaveBeenCalledWith(
     '/internal/nightshift/decision_trees/availability',
     expect.anything()
@@ -122,7 +120,6 @@ it('does not request any tab availability when globally disabled', () => {
     wiki: { isEnabled: false, isLoading: false },
     memory: { isEnabled: false, isLoading: false },
     decision_trees: { isEnabled: false, isLoading: false },
-    topology: { isEnabled: false, isLoading: false },
   });
   expect(fetchMock).not.toHaveBeenCalled();
   expect(httpGetMock).not.toHaveBeenCalled();
