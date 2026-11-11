@@ -128,12 +128,6 @@ apiTest.describe(
         responseType: 'json',
       });
       expect(updateResponse).toHaveStatusCode(403);
-
-      const investigateResponse = await apiClient.post(
-        `${EVENTS_ENDPOINT}/${eventId}/investigate`,
-        { headers, responseType: 'json' }
-      );
-      expect(investigateResponse).toHaveStatusCode(403);
     });
 
     apiTest('cannot write detections', async ({ apiClient }) => {

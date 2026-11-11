@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactElement, ReactNode } from 'react';
 import { firstValueFrom } from 'rxjs';
 import { act, renderHook } from '@testing-library/react';
 import { apm } from '@elastic/apm-rum';
@@ -24,6 +25,27 @@ import type { HttpSetupMock } from '@kbn/core-http-browser-mocks';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import { FeatureFlagsService } from '..';
+import { mountFeatureFlagsHelper } from './helper';
+
+jest.mock('@openfeature/ofrep-web-provider', () => ({
+  OFREPWebProvider: jest.fn(),
+}));
+
+jest.mock('./helper', () => ({
+  mountFeatureFlagsHelper: jest.fn(() => ({
+    unmount: jest.fn(),
+    open: jest.fn(),
+    close: jest.fn(),
+    setCornerButtonVisible: jest.fn(),
+  })),
+}));
+
+/** Dynamic `import()` settles across more than one microtask. */
+async function flushAsyncWork() {
+  await act(async () => {
+    await new Promise((resolve) => setImmediate(resolve));
+  });
+}
 
 jest.mock('@openfeature/ofrep-web-provider', () => ({
   OFREPWebProvider: jest.fn(),
@@ -580,6 +602,99 @@ describe('FeatureFlagsService Browser', () => {
       expect(observedValues).toEqual([false, true]);
 
       openFeatureAddHandlerSpy.mockRestore();
+    });
+
+    test('records evaluations for the helper', async () => {
+      const flag$ = startContract.getBooleanValue$('my-flag', false);
+      flag$.subscribe(() => {});
+      await expect(firstValueFrom(flag$)).resolves.toEqual(false);
+
+      expect(featureFlagsService.getEvaluatedFlags()).toEqual([{ key: 'my-flag', value: false }]);
+    });
+  });
+
+  describe('helper registration', () => {
+    const helperDeps = () => ({
+      http,
+      overlays: { openFlyout: jest.fn() },
+      rendering: {
+        addContext: (element: ReactNode) => element as ReactElement,
+      },
+    });
+
+    beforeEach(() => {
+      localStorage.clear();
+      delete globalThis.toggleFeatureFlagsHelper;
+      jest.mocked(mountFeatureFlagsHelper).mockClear();
+    });
+
+    test('toggles the corner button and closes the flyout when hiding it', async () => {
+      featureFlagsService.registerHelper(helperDeps());
+      expect(globalThis.toggleFeatureFlagsHelper).toEqual(expect.any(Function));
+      expect(mountFeatureFlagsHelper).not.toHaveBeenCalled();
+
+      globalThis.toggleFeatureFlagsHelper?.();
+      await flushAsyncWork();
+
+      expect(localStorage.getItem('core.featureFlags.helper.enabled')).toBe('true');
+      expect(mountFeatureFlagsHelper).toHaveBeenCalledWith(
+        expect.objectContaining({ cornerButtonVisible: true })
+      );
+      const mounted = jest.mocked(mountFeatureFlagsHelper).mock.results[0]?.value;
+
+      globalThis.toggleFeatureFlagsHelper?.();
+      await flushAsyncWork();
+
+      expect(localStorage.getItem('core.featureFlags.helper.enabled')).toBe('false');
+      expect(mounted?.setCornerButtonVisible).toHaveBeenCalledWith(false);
+      expect(mounted?.close).toHaveBeenCalledTimes(1);
+      expect(mounted?.unmount).not.toHaveBeenCalled();
+    });
+
+    test('opens the helper flyout from the developer toolbar without storing the button', async () => {
+      const open = jest.fn();
+      const close = jest.fn();
+      const setCornerButtonVisible = jest.fn();
+      jest.mocked(mountFeatureFlagsHelper).mockReturnValue({
+        unmount: jest.fn(),
+        open,
+        close,
+        setCornerButtonVisible,
+      });
+      const { helper } = await featureFlagsService.start();
+      featureFlagsService.registerHelper(helperDeps());
+
+      helper.open();
+      await flushAsyncWork();
+
+      expect(localStorage.getItem('core.featureFlags.helper.enabled')).toBeNull();
+      expect(mountFeatureFlagsHelper).toHaveBeenCalledWith(
+        expect.objectContaining({ cornerButtonVisible: false })
+      );
+      expect(open).toHaveBeenCalledTimes(1);
+
+      globalThis.toggleFeatureFlagsHelper?.();
+      await flushAsyncWork();
+
+      expect(localStorage.getItem('core.featureFlags.helper.enabled')).toBe('true');
+      expect(setCornerButtonVisible).toHaveBeenCalledWith(true);
+      expect(mountFeatureFlagsHelper).toHaveBeenCalledTimes(1);
+    });
+
+    test('restores the corner button when it was left visible', async () => {
+      localStorage.setItem('core.featureFlags.helper.enabled', 'true');
+      featureFlagsService.registerHelper(helperDeps());
+      await flushAsyncWork();
+      expect(mountFeatureFlagsHelper).toHaveBeenCalledWith(
+        expect.objectContaining({ cornerButtonVisible: true })
+      );
+    });
+
+    test('refresh asks the provider to load the current context again', async () => {
+      const setContext = jest.spyOn(OpenFeature, 'setContext').mockResolvedValue(undefined);
+      featureFlagsService.setup(createSetupDeps());
+      await featureFlagsService.refresh();
+      expect(setContext).toHaveBeenCalledWith({ kind: 'multi' });
     });
   });
 });

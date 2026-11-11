@@ -28,7 +28,11 @@ jest.mock('@kbn/workflows-extensions/server', () => ({
 
 const request = {} as KibanaRequest;
 const logger = loggingSystemMock.createLogger();
-const createContext = (input: Record<string, unknown>) =>
+const createContext = (
+  input: Record<string, unknown>,
+  triggeredBy = 'scheduled',
+  metadata: Record<string, string> = {}
+) =>
   ({
     input,
     logger,
@@ -36,6 +40,8 @@ const createContext = (input: Record<string, unknown>) =>
       getFakeRequest: jest.fn().mockReturnValue(request),
       getContext: jest.fn().mockReturnValue({
         workflow: { id: 'wf-1', spaceId: 'test-space' },
+        execution: { triggeredBy },
+        metadata,
         kibanaUrl: 'https://kibana.example.com',
       }),
     },
@@ -179,7 +185,7 @@ describe('triggerInvestigationStepDefinition', () => {
         id: 'a1',
         type: 'nightshift-automation',
         references: [],
-        attributes: { workflowId: 'wf-1', runtime: {} },
+        attributes: { workflowId: 'wf-1', isEnabled: true, runtime: {} },
       });
       const start = jest.fn().mockResolvedValue({ investigation_id: 'inv-1' });
       const { definition } = createDefinition(start, soClient);
@@ -601,7 +607,12 @@ describe('automation budget enforcement before dispatch', () => {
       version: 'v1',
       attributes:
         type === 'nightshift-automation'
-          ? { workflowId: 'wf-1', runtime: { dailyDispatchLimit: limit } }
+          ? {
+              workflowId: 'wf-1',
+              isEnabled: true,
+              trigger: { rows: [{ kind: 'schedule' }] },
+              runtime: { dailyDispatchLimit: limit },
+            }
           : { automationId: 'a1', date: new Date().toISOString().slice(0, 10), used },
     }));
     const start = jest.fn().mockResolvedValue({ investigation_id: 'inv-1' });
@@ -635,6 +646,82 @@ describe('automation budget enforcement before dispatch', () => {
       );
     }
   );
+
+  it('dispatches a manual automation with a fresh subject and manual accounting', async () => {
+    const { definition, soClient, start } = setup(1, 1);
+    soClient.get.mockResolvedValueOnce({
+      id: 'a1',
+      type: 'nightshift-automation',
+      references: [],
+      attributes: {
+        workflowId: 'wf-1',
+        isEnabled: true,
+        trigger: { rows: [{ kind: 'schedule' }] },
+        runtime: { dailyDispatchLimit: 1 },
+      },
+    });
+    await definition.handler(
+      createContext(
+        {
+          ...input,
+          subject_id: 'shared-old-subject',
+          trigger_type: 'automatic',
+          scope_query: 'service.name:checkout',
+          timeout_seconds: 30,
+          notificationDestinations: [
+            { type: 'slack', connector_id: 'slack', params: { channel: 'C1' } },
+          ],
+        },
+        'nightshift-automation-manual'
+      )
+    );
+    expect(start).toHaveBeenCalledWith(
+      expect.objectContaining({
+        subject: expect.objectContaining({ type: 'manual', id: 'manual' }),
+        trigger_type: 'manual',
+        context: { scope_query: 'service.name:checkout' },
+        timeout_seconds: 30,
+        message: 'Review errors.',
+        notificationDestinations: [
+          { type: 'slack', connector_id: 'slack', params: { channel: 'C1' } },
+        ],
+      }),
+      expect.objectContaining({ automationBudget: undefined, entryPoint: 'automation' })
+    );
+    expect(soClient.update).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    undefined,
+    { triggeredBy: 'nightshift-automation-manual', nightshiftManualAutomationId: 'a1' },
+  ])('keeps Workflows UI runs on automatic accounting despite metadata: %j', async (metadata) => {
+    const { definition, start } = setup(1, 1);
+    start.mockImplementation(async (_request, { automationBudget }) => {
+      await automationBudget.consume();
+      return { investigation_id: 'inv-1' };
+    });
+    expect(await definition.handler(createContext(input, 'manual', metadata))).toEqual({
+      output: { skip_reason: 'daily_limit', daily_limit: 1 },
+    });
+    expect(start).toHaveBeenCalledWith(
+      expect.objectContaining({ trigger_type: 'automatic' }),
+      expect.objectContaining({ automationBudget: expect.anything() })
+    );
+  });
+
+  it('rejects a manual invocation of a non-scheduled automation', async () => {
+    const { definition, soClient, start } = setup(1, 1);
+    soClient.get.mockResolvedValueOnce({
+      id: 'a1',
+      type: 'nightshift-automation',
+      references: [],
+      attributes: { workflowId: 'wf-1', isEnabled: true, trigger: { rows: [{ kind: 'alert' }] } },
+    });
+    await expect(
+      definition.handler(createContext(input, 'nightshift-automation-manual'))
+    ).rejects.toThrow('Only automations with a schedule');
+    expect(start).not.toHaveBeenCalled();
+  });
 
   it('leaves the deployment quota denial to the client', async () => {
     const { start, definition, telemetry } = setup(2, 0);
