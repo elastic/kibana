@@ -40,6 +40,54 @@ The lists API checks the type, the operator and the value of each entry when an 
 
 An item cannot change what it applies to after it is created.
 
+### The shape of an exception item
+
+**Today.** An exception item is a saved object of the type `exception-list`:
+
+```json
+{
+  "list_id": "rule_default_list",
+  "item_id": "1a2b3c4d",
+  "name": "Known host",
+  "description": "",
+  "type": "simple",
+  "namespace_type": "single",
+  "os_types": [],
+  "tags": [],
+  "comments": [],
+  "entries": [
+    { "field": "host.name", "type": "match", "operator": "excluded", "value": "dc-01" },
+    { "field": "source.ip", "type": "match_any", "operator": "included", "value": ["10.0.0.1", "10.0.0.2"] }
+  ]
+}
+```
+
+An entry has a `field`, a `type` (`match` (`is`), `match_any` (`is one of`), `wildcard` (`matches`), `exists`, `list` or `nested`), an `operator` (`included` or `excluded`) and, depending on the type, a `value` or a `list`.
+
+**Proposed.** The item gets one new property and each entry gets one new property:
+
+```json
+{
+  "list_id": "rule_default_list",
+  "item_id": "5e6f7a8b",
+  "name": "Known destinations",
+  "description": "",
+  "type": "simple",
+  "namespace_type": "single",
+  "os_types": [],
+  "tags": [],
+  "comments": [],
+  "applies_to": "esql_output_columns",
+  "entries": [
+    { "field": "dest_count", "type": "match", "operator": "included", "value": "100", "column_type": "long" },
+    { "field": "dest_ips", "type": "match_any", "operator": "included", "value": ["10.0.0.1", "10.0.0.2"], "column_type": "ip" }
+  ]
+}
+```
+
+The new properties are optional in the request and response schemas. The API validates them as described in [Types supported at the end of the query](#types-supported-at-the-end-of-the-query).
+
+
 ### ES|QL rule execution
 
 **The whole flow**
