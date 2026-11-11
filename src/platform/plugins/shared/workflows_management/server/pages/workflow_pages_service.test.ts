@@ -24,6 +24,7 @@ import { WORKFLOW_PAGE_SAVED_OBJECT_TYPE } from './page_saved_object';
 import type { WorkflowPageAuditLog } from './types';
 import { WorkflowPagePrivilegesError } from './workflow_page_privileges_error';
 import { WorkflowPagesService } from './workflow_pages_service';
+import { WorkflowPagesUnavailableError } from './workflow_pages_unavailable_error';
 
 const key = { workflowId: pageRef.workflowId, pageId: pageRef.pageId };
 
@@ -157,6 +158,16 @@ describe('WorkflowPagesService', () => {
       await client.setEnabled(key, false).catch(() => undefined);
 
       expect(assertWorkflowAccess).toHaveBeenCalled();
+    });
+
+    it('refuses to publish when security is off, with a clear error', async () => {
+      const { start, core } = setup({ authz: undefined });
+      const client = await start.getClient({ request: httpServerMock.createKibanaRequest() });
+
+      await expect(client.setAccess(key, { level: 'secret_link' })).rejects.toBeInstanceOf(
+        WorkflowPagesUnavailableError
+      );
+      expect(core.elasticsearch.client.asScoped).not.toHaveBeenCalled();
     });
 
     it('builds the scoped client with the hidden page type', async () => {

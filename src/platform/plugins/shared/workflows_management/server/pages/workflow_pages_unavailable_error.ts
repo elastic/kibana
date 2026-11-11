@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** Pages need `xpack.encryptedSavedObjects.encryptionKey`. Without it they stay offline. */
+/** A page operation that this deployment cannot run, such as without an encryption key. */
 export class WorkflowPagesUnavailableError extends Error {
-  constructor() {
-    super(
-      'Workflow pages need an encryption key. Set xpack.encryptedSavedObjects.encryptionKey in kibana.yml.'
-    );
+  constructor(
+    message = 'Workflow pages need an encryption key. Set xpack.encryptedSavedObjects.encryptionKey in kibana.yml.'
+  ) {
+    super(message);
     this.name = 'WorkflowPagesUnavailableError';
   }
 }

@@ -21,6 +21,7 @@ import type { WorkflowPagesClient } from './workflow_pages_client';
 import { WorkflowPagesClientImpl } from './workflow_pages_client';
 import type { WorkflowPagesSystemClient } from './workflow_pages_system_client';
 import { WorkflowPagesSystemClientImpl } from './workflow_pages_system_client';
+import { WorkflowPagesUnavailableError } from './workflow_pages_unavailable_error';
 import { ensureWorkflowServiceAccountMutationAuthorized } from '../services/workflow_service_account_binding';
 
 const includedHiddenTypes = [WORKFLOW_PAGE_SAVED_OBJECT_TYPE];
@@ -117,6 +118,11 @@ export class WorkflowPagesService {
           assertWorkflowAccess,
           // Publishing has the same gate as binding the service account that runs the page.
           assertCanPublish: async () => {
+            if (!authz) {
+              throw new WorkflowPagesUnavailableError(
+                'Publishing a workflow page needs security: the page runs as a service account.'
+              );
+            }
             await ensureWorkflowServiceAccountMutationAuthorized(core, request);
           },
           audit,
