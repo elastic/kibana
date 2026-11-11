@@ -267,26 +267,8 @@ export const getFirstVisibleVarGroupOption = (
 };
 
 /**
- * Drops stored var_group selections that name no existing option in their
- * group, so the group is treated as having no selection and the normal
- * derive/inference path runs for it.
- *
- * This is the same existence rule validation applies in
- * `getEffectiveVarGroupSelections` (validate_package_policy.ts): a stored
- * selection for a removed or renamed option must not be treated as
- * authoritative. The form must apply it too — when the hook returns a stale
- * name as-is, `shouldShowVar` matches no option and hides every
- * group-controlled field, while validation requires the inferred option's
- * vars, so the edit page shows errors on fields the user cannot see.
- *
- * Entries for groups the package no longer declares at all are preserved:
- * they control no vars, so validation ignores them, and the form keeps them
- * today (dropping them would silently rewrite the stored policy on the next
- * save for no benefit).
- *
- * Returns the input object unchanged (same reference) when nothing is
- * dropped, so callers can tell by reference equality whether any selection
- * was stale.
+ * Drops stored selections that name an option no longer in the group, so the group is treated as
+ * having no selection. Entries for undeclared groups are kept. Returns the input when nothing is dropped.
  */
 export const sanitizeVarGroupSelections = (
   varGroups: RegistryVarGroup[] | undefined,
