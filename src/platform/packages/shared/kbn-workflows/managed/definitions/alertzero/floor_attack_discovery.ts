@@ -28,7 +28,8 @@ export const ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW = {
   id: ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  // Version 8 renders the prorated alert cap and the 12h workflow timeout.
+  // Version 8 renders the prorated alert cap and the 12h workflow timeout. The
+  // fingerprint test requires the bump.
   version: 9,
   yamlTemplate: {
     hashValues: workerHashValues({

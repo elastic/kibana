@@ -11,14 +11,54 @@ import { parse } from 'yaml';
 import { z } from '@kbn/zod/v4';
 import { getManagedWorkflowHashedYaml, managedWorkflowDefinitions } from '.';
 import {
+  ALERTZERO_ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_WORKFLOW_ID,
+  ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
+  ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
+  ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
   ALERTZERO_ACTION_WORKFLOW_IDS,
   ALERTZERO_ALERT_TRIAGE_WORKFLOW_IDS,
   ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
+  ALERTZERO_CLOSE_ATTACK_AND_ALERTS_WORKFLOW_ID,
+  ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW_ID,
+  ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID,
+  ALERTZERO_FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW_ID,
+  ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID,
+  ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_FORENSICS_WORKFLOW_IDS,
   ALERTZERO_MANAGED_WORKER_WORKFLOW_IDS,
+  ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID,
   ALERTZERO_RULE_WORKFLOW_IDS,
+  ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID,
+  ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
+  ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
+  ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
+  ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
 } from './definitions';
+import ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_YAML from './definitions/alertzero/actions/action_close_attack_discovery_investigation.yaml';
+import ACTION_ISOLATE_HOST_YAML from './definitions/alertzero/actions/defend/action_isolate_host.yaml';
+import ACTION_KILL_PROCESS_YAML from './definitions/alertzero/actions/defend/action_kill_process.yaml';
+import ACTION_SUSPEND_PROCESS_YAML from './definitions/alertzero/actions/defend/action_suspend_process.yaml';
+import CLOSE_ATTACK_AND_ALERTS_YAML from './definitions/alertzero/close_attack_and_alerts.yaml';
+import DETECTION_RULE_COVERAGE_YAML from './definitions/alertzero/detection_rule_coverage.yaml';
+import DETECTION_RULE_TUNING_YAML from './definitions/alertzero/detection_rule_tuning.yaml';
+import FLOOR_ALERT_TRIAGE_YAML from './definitions/alertzero/floor_alert_triage.yaml';
+import FLOOR_ALERT_TRIAGE_BATCH_YAML from './definitions/alertzero/floor_alert_triage_batch.yaml';
+import FLOOR_ALERT_TRIAGE_REVIEW_YAML from './definitions/alertzero/floor_alert_triage_review.yaml';
+import FLOOR_ATTACK_DISCOVERY_YAML from './definitions/alertzero/floor_attack_discovery.yaml';
+import FORENSICS_CLOSE_INVESTIGATION_GATE_YAML from './definitions/alertzero/forensics_close_investigation_gate.yaml';
+import FORENSICS_ENDPOINT_ANALYSIS_YAML from './definitions/alertzero/forensics_endpoint_analysis.yaml';
+import FORENSICS_PROPOSAL_GATE_YAML from './definitions/alertzero/forensics_proposal_gate.yaml';
+import FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML from './definitions/alertzero/forensics_run_endpoint_analysis.yaml';
+import RULE_TUNING_WORKER_YAML from './definitions/alertzero/rule_tuning_worker.yaml';
+import {
+  ALERT_TRIAGE_WORKER_SETTINGS_DEFAULTS,
+  ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS,
+  ENDPOINT_ANALYSIS_WORKER_SETTINGS_DEFAULTS,
+  RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS,
+  RULE_TUNING_WORKER_SETTINGS_DEFAULTS,
+  type WorkerSettingsDefaults,
+} from './definitions/alertzero/worker_settings_defaults';
 import type {
   ManagedWorkflowDefinition,
   ManagedWorkflowTemplateValues,
@@ -109,6 +149,87 @@ function assertTemplateRendersCleanly(workflowId: string, renderedYaml: string):
   expect(renderedYaml.match(UNREPLACED_TOKEN_PATTERN) ?? []).toEqual([]);
   assertWorkflowYamlIsValid(workflowId, renderedYaml);
 }
+
+function createContentFingerprint(content: string): string {
+  let fingerprint = 0;
+  for (const character of content) {
+    fingerprint = (fingerprint * 31 + character.charCodeAt(0)) % 0xffffffff;
+  }
+  return fingerprint.toString(16).padStart(8, '0');
+}
+
+/**
+ * What AlertZero bumps a definition's `version` for: its YAML and, for AlertZero Workers, the
+ * settings defaults their renderer fills stored values from.
+ */
+const renderInputs = (importedYaml: string, defaults?: WorkerSettingsDefaults): string =>
+  defaults === undefined ? importedYaml : `${importedYaml}\n${JSON.stringify(defaults)}`;
+
+it.each([
+  [
+    ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
+    renderInputs(FLOOR_ALERT_TRIAGE_YAML, ALERT_TRIAGE_WORKER_SETTINGS_DEFAULTS),
+    '18:1ec301f5',
+  ],
+  [ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_BATCH_YAML, '13:8948d29b'],
+  [ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_REVIEW_YAML, '15:a9d8d6ac'],
+  [
+    ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
+    renderInputs(FLOOR_ATTACK_DISCOVERY_YAML, ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS),
+    '9:5e3ea300',
+  ],
+  [
+    ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
+    renderInputs(FORENSICS_ENDPOINT_ANALYSIS_YAML, ENDPOINT_ANALYSIS_WORKER_SETTINGS_DEFAULTS),
+    '7:4084021c',
+  ],
+  [
+    ALERTZERO_FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW_ID,
+    FORENSICS_CLOSE_INVESTIGATION_GATE_YAML,
+    '3:36b83096',
+  ],
+  [ALERTZERO_CLOSE_ATTACK_AND_ALERTS_WORKFLOW_ID, CLOSE_ATTACK_AND_ALERTS_YAML, '1:e7a50b9e'],
+  [
+    ALERTZERO_ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_WORKFLOW_ID,
+    ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_YAML,
+    '2:c95fb7f7',
+  ],
+  [ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID, FORENSICS_PROPOSAL_GATE_YAML, '5:67acf4fc'],
+  [
+    ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
+    FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML,
+    '17:10eeb3eb',
+  ],
+  [
+    ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
+    renderInputs(DETECTION_RULE_TUNING_YAML, RULE_TUNING_WORKER_SETTINGS_DEFAULTS),
+    '12:8f08f83c',
+  ],
+  [
+    ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID,
+    renderInputs(DETECTION_RULE_COVERAGE_YAML, RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS),
+    '5:d2801f59',
+  ],
+  [ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID, RULE_TUNING_WORKER_YAML, '34:499cabfe'],
+  [ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID, ACTION_ISOLATE_HOST_YAML, '5:fa71b87b'],
+  [ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID, ACTION_KILL_PROCESS_YAML, '7:2ce58cc9'],
+  [ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID, ACTION_SUSPEND_PROCESS_YAML, '6:063c014a'],
+] as const)(
+  'requires bumping %s definition.version together with the fingerprint of its render inputs',
+  (workflowId, inputs, expectedFingerprint) => {
+    const definition = managedWorkflowDefinitions.find(({ id }) => id === workflowId);
+    if (!definition) throw new Error(`Managed worker "${workflowId}" is not registered`);
+    const actualFingerprint = `${definition.version}:${createContentFingerprint(inputs)}`;
+    if (actualFingerprint === expectedFingerprint) {
+      return;
+    }
+    throw new Error(
+      `Render inputs for '${workflowId}' changed (${actualFingerprint}, expected ${expectedFingerprint}). ` +
+        `AlertZero bumps definition.version for every change to its YAML or the settings defaults in worker_settings_defaults.ts. ` +
+        `Bump version in the worker module and update this expected fingerprint in the same change.`
+    );
+  }
+);
 
 function assertWorkflowYamlIsValid(workflowId: string, yamlContent: string): void {
   let parsedYaml: unknown;
