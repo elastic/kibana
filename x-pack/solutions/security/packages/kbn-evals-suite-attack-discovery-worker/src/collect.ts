@@ -379,6 +379,9 @@ const buildReviewArtifact = async ({
   const conversation = investigationId
     ? await getConversation({ fetch, spaceId, conversationId: investigationId })
     : undefined;
+  // A 404 on the conversation lookup is authoritative: the workflow's self-reported
+  // `investigation_opened` flag only counts when there was no id to look up.
+  const conversationMissing = investigationId !== undefined && conversation === undefined;
   const verdictAttachment = conversation?.attachments?.find(
     ({ type }) => type === VERDICT_ATTACHMENT_TYPE
   );
@@ -398,7 +401,9 @@ const buildReviewArtifact = async ({
       asVerdict(emit?.verdict) ??
       asVerdict(attachmentData?.verdict),
     investigationId,
-    investigationOpened: conversation !== undefined || opened === true || opened === 'true',
+    investigationOpened:
+      conversation !== undefined ||
+      (!conversationMissing && (opened === true || opened === 'true')),
     proposalStatus: asString(emit?.proposal_status),
     proposalDecision: asString(emit?.proposal_decision),
     verdictSummary: asString(attachmentData?.summary_markdown),
@@ -717,15 +722,16 @@ export const collectWorkerArtifacts = async ({
           executionUuids: generationUuids,
           log,
         });
-  if (reported.length === 0) {
+  // `run_generation` carries the discovery documents, so the engine can evict its whole output;
+  // an empty array is a legitimate "found nothing" and is not warned about.
+  if (!Array.isArray(generation?.attack_discoveries)) {
     log.warning(
       `[ad-worker] run ${run.id}: run_generation output carried no attack_discoveries ` +
         `(step ${
           generation
             ? `output keys: ${Object.keys(generation).join(',') || 'none'}`
             : 'output missing'
-        }); ` +
-        `read ${docs.length} persisted attacks from the index instead`
+        })`
     );
   }
   const { insights, ids } = toInsights(docs, seeded.goldIdBySeededId);
