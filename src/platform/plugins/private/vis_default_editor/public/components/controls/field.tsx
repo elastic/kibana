@@ -102,6 +102,20 @@ function FieldParamEditor({
     showErrorMessageImmediately = true;
   }
 
+  if (isDirty) {
+    errors.push(
+      i18n.translate('visDefaultEditor.controls.field.selectValidFieldError', {
+        defaultMessage: 'Please select a valid field.',
+      })
+    );
+  } else if (!value && indexedFields.length) {
+    errors.push(
+      i18n.translate('visDefaultEditor.controls.field.selectFieldError', {
+        defaultMessage: 'Field is required.',
+      })
+    );
+  }
+
   const isValid = !!value && !errors.length && !isDirty;
   // we show an error message right away if there is no compatible fields
   const showErrorMessage =
