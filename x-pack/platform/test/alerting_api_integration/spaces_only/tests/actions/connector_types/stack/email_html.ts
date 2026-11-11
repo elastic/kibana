@@ -29,7 +29,7 @@ export default function emailNotificationTest({ getService }: FtrProviderContext
       const startDate = new Date().toISOString();
 
       // The route sends two notifications, which will send two emails.
-      // see: x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts
+      // see: x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/routes.ts
       const body = {
         to,
         subject: 'testing',

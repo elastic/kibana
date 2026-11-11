@@ -12,6 +12,7 @@ import { onlineEvalScoreEvent } from './online_eval_score_event';
 import { onlineEvalsStepFailedEvent } from './online_evals_step_failed_event';
 import { investigationSkippedEvent } from './investigation_skipped_event';
 import { alertEnteredPipelineEvent } from './alert_entered_pipeline_event';
+import { investigationStartedEvent } from './investigation_started_event';
 
 export const setupNightshiftTelemetry = ({
   analytics,
@@ -26,6 +27,7 @@ export const setupNightshiftTelemetry = ({
   analytics.registerEventType(onlineEvalsStepFailedEvent);
   analytics.registerEventType(investigationSkippedEvent);
   analytics.registerEventType(alertEnteredPipelineEvent);
+  analytics.registerEventType(investigationStartedEvent);
   return new NightshiftTelemetryClient(analytics, logger);
 };
 

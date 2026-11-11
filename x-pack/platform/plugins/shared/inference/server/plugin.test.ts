@@ -220,7 +220,7 @@ describe('InferencePlugin.setup', () => {
 describe('InferencePlugin.start getClient', () => {
   const request = httpServerMock.createKibanaRequest();
 
-  const getClientOptions = async (resolver?: jest.Mock) => {
+  const getClientOptions = async (resolver?: jest.Mock, coreStart = coreMock.createStart()) => {
     const plugin = createPlugin(false);
     const { registerFeatureEndpointResolver } = plugin.setup(
       coreMock.createSetup(),
@@ -229,9 +229,7 @@ describe('InferencePlugin.start getClient', () => {
     if (resolver) {
       registerFeatureEndpointResolver(resolver);
     }
-    plugin
-      .start(coreMock.createStart(), { actions: actionsMock.createStart() })
-      .getClient({ request });
+    plugin.start(coreStart, { actions: actionsMock.createStart() }).getClient({ request });
     await plugin.stop();
     expect(createClientMock).toHaveBeenCalledTimes(1);
     return createClientMock.mock.calls[0][0];
@@ -253,5 +251,33 @@ describe('InferencePlugin.start getClient', () => {
     const { resolveFeatureEndpoint } = await getClientOptions();
 
     expect(resolveFeatureEndpoint).toBeUndefined();
+  });
+
+  describe('when the anonymization settings cannot be read', () => {
+    const settingsError = new Error('unable to authenticate with provided credentials');
+
+    const createCoreStartWithFailingSettings = () => {
+      const coreStart = coreMock.createStart();
+      const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
+        coreStart.savedObjects.getScopedClient(request)
+      );
+      jest.mocked(uiSettingsClient.get).mockRejectedValue(settingsError);
+      return coreStart;
+    };
+
+    it('does not leave an unhandled rejection when the client is never used', async () => {
+      await getClientOptions(undefined, createCoreStartWithFailingSettings());
+
+      await new Promise((resolve) => setImmediate(resolve));
+    });
+
+    it('still rejects with the settings error when the anonymization rules are awaited', async () => {
+      const { anonymizationRulesPromise } = await getClientOptions(
+        undefined,
+        createCoreStartWithFailingSettings()
+      );
+
+      await expect(anonymizationRulesPromise).rejects.toBe(settingsError);
+    });
   });
 });

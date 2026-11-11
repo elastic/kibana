@@ -35,11 +35,11 @@ import {
 import { useFormatTimestamp } from '../../../hooks/use_format_timestamp';
 import { useFetchDetectionOccurrences } from '../../../data/detections/use_fetch_detection_occurrences';
 import { useFetchEventLifecycle } from '../../../data/significant_events/use_fetch_event_lifecycle';
-import { useFetchInvestigationStatuses } from '../../../data/investigations/use_fetch_investigation_statuses';
+import { useFetchInvestigationAvailability } from '../../../data/investigations/use_fetch_investigation_availability';
+import { useFetchEventInvestigation } from '../../../data/significant_events/use_fetch_event_investigation';
 import { findDetectionSignal } from '../detection/resolve_detection_signal';
 import {
   getStatusColor,
-  isInvestigationRunning,
   isNeedsActionStatus,
   SIGNIFICANT_EVENT_STATUS_LABELS,
 } from './significant_event_status';
@@ -117,6 +117,20 @@ const FOLLOW_UP_INVESTIGATION_LABEL = i18n.translate(
   'xpack.nightshift.flyout.followUpInvestigationButtonLabel',
   { defaultMessage: 'Run follow-up' }
 );
+const NO_EPISODE_INVESTIGATION_TOOLTIP = i18n.translate(
+  'xpack.nightshift.flyout.noEpisodeInvestigationTooltip',
+  {
+    defaultMessage: 'This event has no alert to investigate yet.',
+  }
+);
+
+const INVESTIGATION_UNAVAILABLE_TOOLTIP = i18n.translate(
+  'xpack.nightshift.flyout.investigationUnavailableTooltip',
+  {
+    defaultMessage: 'Investigations are unavailable. You may need write access to Agent Builder.',
+  }
+);
+
 const FOLLOW_UP_INVESTIGATION_TOOLTIP = i18n.translate(
   'xpack.nightshift.flyout.followUpInvestigationTooltip',
   {
@@ -156,33 +170,46 @@ export function EventFlyout({
   const [isMarkInactiveModalOpen, setIsMarkInactiveModalOpen] = useState(false);
   const stagedOverlayEventId = useRef<string>();
   const lifecycleQuery = useFetchEventLifecycle(event.event_id);
+  const [startedInvestigation, setStartedInvestigation] = useState<{
+    id: string;
+    startedAt: number;
+    episodeId: string | undefined;
+    listedUpdatedAt?: string;
+  }>();
+  /** The listed investigation when a start was clicked: a follow-up's run is recorded past it. */
+  const startBaselineRef = useRef<{ id: string; updated_at: string }>();
+  const occurrencesQuery = useFetchDetectionOccurrences(lifecycleQuery.data?.detections ?? []);
+  // The investigation is found through its subject (the event's alert, by episode id), as for any
+  // alert. The event's own `investigations[]` is not read here.
+  const {
+    investigation: subjectInvestigation,
+    isAwaitingStart,
+    isListLoading,
+  } = useFetchEventInvestigation(event.episode_id, {
+    awaiting:
+      startedInvestigation?.episodeId === event.episode_id ? startedInvestigation : undefined,
+  });
+  const { isAvailable: canInvestigate, isLoading: isAvailabilityLoading } =
+    useFetchInvestigationAvailability();
   const { triggerInvestigation, triggeringEventId } = useTriggerEventInvestigation({
-    onTriggered: () => {
+    onTriggered: (investigationId, { episode_id: episodeId }) => {
+      const baseline = startBaselineRef.current;
+      setStartedInvestigation({
+        id: investigationId,
+        startedAt: Date.now(),
+        episodeId,
+        // Only a continued investigation has a listed state to be recorded past.
+        ...(baseline?.id === investigationId ? { listedUpdatedAt: baseline.updated_at } : {}),
+      });
       void lifecycleQuery.refetch();
     },
   });
-  const occurrencesQuery = useFetchDetectionOccurrences(lifecycleQuery.data?.detections ?? []);
-  const latestInvestigation = useMemo(() => event.investigations?.at(-1), [event.investigations]);
+  const hasInvestigation = subjectInvestigation != null || isAwaitingStart;
 
-  const investigationExecutionIds = useMemo(
-    () => (latestInvestigation ? [latestInvestigation.workflow_execution_id] : []),
-    [latestInvestigation]
-  );
-  const { data: investigationRunStatuses } =
-    useFetchInvestigationStatuses(investigationExecutionIds);
-  const latestRunStatus = latestInvestigation
-    ? investigationRunStatuses?.[latestInvestigation.workflow_execution_id]
-    : undefined;
-  const investigationNotFound =
-    latestInvestigation != null &&
-    investigationRunStatuses != null &&
-    latestRunStatus === undefined;
-  const availableInvestigation = investigationNotFound ? undefined : latestInvestigation;
-
-  // The recorded id is the investigation (Agent Builder conversation) id.
   const { investigation: investigationDetails, status: investigationStatus } = useInvestigation({
     http,
-    investigationId: availableInvestigation?.workflow_execution_id,
+    // While a start is pending, the listed investigation is an older run: show none of its details.
+    investigationId: isAwaitingStart ? undefined : subjectInvestigation?.id,
   });
   const conversationId = investigationDetails?.id;
 
@@ -273,19 +300,35 @@ export function EventFlyout({
     }
   }, [agentBuilder, conversationId]);
   const latestInvestigationInProgress =
-    availableInvestigation != null && availableInvestigation.completed_at == null;
-  const investigationRunning = isInvestigationRunning(event) || latestInvestigationInProgress;
+    isAwaitingStart || (subjectInvestigation?.in_progress ?? false);
   const actionMenuPanels = useMemo<FlyoutFooterMenuPanel[]>(() => {
     const items: FlyoutFooterMenuItem[] = [];
     if (canManage) {
       items.push({
-        name: investigationRunning ? FOLLOW_UP_INVESTIGATION_LABEL : RUN_INVESTIGATION_LABEL,
+        name: latestInvestigationInProgress
+          ? FOLLOW_UP_INVESTIGATION_LABEL
+          : RUN_INVESTIGATION_LABEL,
         icon: 'inspect',
         toolTipContent:
           activityBlockTooltip ??
-          (investigationRunning ? FOLLOW_UP_INVESTIGATION_TOOLTIP : undefined),
-        onClick: () => triggerInvestigation(event.event_id),
-        disabled: blocksActivity || triggeringEventId != null,
+          (event.episode_id ? undefined : NO_EPISODE_INVESTIGATION_TOOLTIP) ??
+          (canInvestigate || isAvailabilityLoading
+            ? undefined
+            : INVESTIGATION_UNAVAILABLE_TOOLTIP) ??
+          (latestInvestigationInProgress ? FOLLOW_UP_INVESTIGATION_TOOLTIP : undefined),
+        onClick: () => {
+          startBaselineRef.current = subjectInvestigation
+            ? { id: subjectInvestigation.id, updated_at: subjectInvestigation.updated_at }
+            : undefined;
+          triggerInvestigation({ event_id: event.event_id, episode_id: event.episode_id });
+        },
+        // Until the list is read, a start cannot tell a new investigation from a continued one.
+        disabled:
+          blocksActivity ||
+          triggeringEventId != null ||
+          !event.episode_id ||
+          !canInvestigate ||
+          isListLoading,
         hasAriaDisabled: true,
         'data-test-subj': 'nightshiftEventFlyoutRunInvestigationButton',
         ...getEbtProps({
@@ -297,7 +340,7 @@ export function EventFlyout({
         }),
       });
     }
-    if (agentBuilder && availableInvestigation) {
+    if (agentBuilder && hasInvestigation) {
       if (!latestInvestigationInProgress) {
         items.push({
           name: OPEN_INVESTIGATION_CHAT_LABEL,
@@ -346,16 +389,20 @@ export function EventFlyout({
   }, [
     activityBlockTooltip,
     agentBuilder,
-    availableInvestigation,
     blocksActivity,
+    canInvestigate,
+    isAvailabilityLoading,
     canManage,
     conversationId,
+    event.episode_id,
     event.event_id,
     event.status,
-    investigationRunning,
+    hasInvestigation,
+    isListLoading,
     latestInvestigationInProgress,
     openInvestigationChat,
     openNewChat,
+    subjectInvestigation,
     triggerInvestigation,
     triggeringEventId,
   ]);
@@ -395,7 +442,7 @@ export function EventFlyout({
             color="hollow"
             toolTipContent={i18n.translate('xpack.nightshift.flyout.confidenceTooltip', {
               defaultMessage:
-                'How confident Nightshift is that this is correct, based on evidence strength and consistency.',
+                'How confident nightshift is that this is correct, based on evidence strength and consistency.',
             })}
           >
             {i18n.translate('xpack.nightshift.flyout.confidenceLabel', {
@@ -412,10 +459,10 @@ export function EventFlyout({
             <FlyoutTemplate.Body.Section title={SUMMARY_TITLE}>
               <TruncatableSummary summary={event.summary} />
             </FlyoutTemplate.Body.Section>
-            {availableInvestigation ? (
+            {hasInvestigation ? (
               <FlyoutTemplate.Body.Section title={INVESTIGATION_TITLE}>
                 <EventInvestigationCard
-                  event={event}
+                  inProgress={latestInvestigationInProgress}
                   investigation={investigationDetails}
                   status={investigationStatus}
                 />

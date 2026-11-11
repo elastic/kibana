@@ -28,6 +28,10 @@ import {
   NIGHTSHIFT_ALERT_ENTERED_PIPELINE_EVENT,
   type AlertEnteredPipelineEvent,
 } from './alert_entered_pipeline_event';
+import {
+  NIGHTSHIFT_INVESTIGATION_STARTED_EVENT,
+  type InvestigationStartedEvent,
+} from './investigation_started_event';
 
 export class NightshiftTelemetryClient {
   constructor(private readonly analytics: AnalyticsServiceSetup, private readonly logger: Logger) {}
@@ -54,6 +58,10 @@ export class NightshiftTelemetryClient {
 
   reportAlertEnteredPipeline(event: AlertEnteredPipelineEvent): void {
     this.report(NIGHTSHIFT_ALERT_ENTERED_PIPELINE_EVENT, event);
+  }
+
+  reportInvestigationStarted(event: InvestigationStartedEvent): void {
+    this.report(NIGHTSHIFT_INVESTIGATION_STARTED_EVENT, event);
   }
 
   private report(eventType: string, event: object): void {

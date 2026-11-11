@@ -76,6 +76,7 @@
     "@kbn/eval-kql",
     "@kbn/rrule",
     "@kbn/inference-tracing",
+    "@kbn/core-logging-server-mocks",
     "@kbn/lock-manager",
     "@kbn/cloud-plugin",
     "@kbn/connector-specs",
