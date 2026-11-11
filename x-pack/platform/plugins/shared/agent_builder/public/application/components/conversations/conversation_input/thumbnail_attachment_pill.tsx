@@ -20,6 +20,12 @@ const removeAriaLabel = i18n.translate(
   }
 );
 
+const getViewAriaLabel = (label: string): string =>
+  i18n.translate('xpack.agentBuilder.thumbnailAttachmentPill.viewAriaLabel', {
+    defaultMessage: 'View image {label}',
+    values: { label },
+  });
+
 export interface ThumbnailAttachmentPillProps {
   /** Attachment id — used for the data-test-subj selector. */
   attachmentId: string;
@@ -28,6 +34,7 @@ export interface ThumbnailAttachmentPillProps {
   /** Human-readable label used as the img alt text. */
   label: string;
   onRemoveAttachment?: () => void;
+  onClick?: () => void;
   isHighlighted?: boolean;
 }
 
@@ -36,11 +43,26 @@ export const ThumbnailAttachmentPill: React.FC<ThumbnailAttachmentPillProps> = (
   thumbnailUrl,
   label,
   onRemoveAttachment,
+  onClick,
   isHighlighted = false,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isHovered, setIsHovered] = useState(false);
   const canRemoveAttachment = Boolean(onRemoveAttachment);
+  const isInteractive = canRemoveAttachment || Boolean(onClick);
+
+  const image = (
+    <img
+      src={thumbnailUrl}
+      alt={label}
+      css={css`
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      `}
+    />
+  );
 
   return (
     <div
@@ -54,7 +76,7 @@ export const ThumbnailAttachmentPill: React.FC<ThumbnailAttachmentPillProps> = (
         box-shadow: 0 0 0 ${euiTheme.border.width.thin}
           ${isHighlighted
             ? euiTheme.colors.borderStrongPrimary
-            : canRemoveAttachment && isHovered
+            : isInteractive && isHovered
             ? euiTheme.colors.borderBasePrimary
             : euiTheme.colors.borderBaseSubdued};
         overflow: hidden;
@@ -72,16 +94,26 @@ export const ThumbnailAttachmentPill: React.FC<ThumbnailAttachmentPillProps> = (
       onMouseLeave={() => setIsHovered(false)}
       data-test-subj={`agentBuilderAttachmentPill-${attachmentId}`}
     >
-      <img
-        src={thumbnailUrl}
-        alt={label}
-        css={css`
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-        `}
-      />
+      {onClick ? (
+        <button
+          type="button"
+          aria-label={getViewAriaLabel(label)}
+          onClick={onClick}
+          data-test-subj={`agentBuilderAttachmentPillView-${attachmentId}`}
+          css={css`
+            display: block;
+            width: 100%;
+            height: 100%;
+            &:focus-visible {
+              outline-offset: -${euiTheme.focus.width};
+            }
+          `}
+        >
+          {image}
+        </button>
+      ) : (
+        image
+      )}
       <div
         css={css`
           position: absolute;
