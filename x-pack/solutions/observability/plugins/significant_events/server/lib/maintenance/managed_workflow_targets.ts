@@ -10,7 +10,6 @@ import {
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
@@ -59,10 +58,7 @@ export const SCHEDULED_MAINTENANCE_WORKFLOW_IDS = [
 ] as const;
 
 /** Workflows installed once at the global scope (`spaceId: '*'`). */
-export const GLOBAL_MAINTENANCE_WORKFLOW_IDS = [
-  ...GLOBAL_CORE_WORKFLOW_IDS,
-  SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
-] as const;
+export const GLOBAL_MAINTENANCE_WORKFLOW_IDS = [...GLOBAL_CORE_WORKFLOW_IDS] as const;
 
 /**
  * Every workflow id that installers may create. Used by the drift test so a
@@ -70,7 +66,6 @@ export const GLOBAL_MAINTENANCE_WORKFLOW_IDS = [
  */
 export const ALL_INSTALLABLE_WORKFLOW_IDS = [
   ...GLOBAL_CORE_WORKFLOW_IDS,
-  SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
   ...SCHEDULED_MAINTENANCE_WORKFLOW_IDS,
 ] as const;
 
@@ -93,9 +88,7 @@ const scheduledTargetsFor = (spaceIds: SpaceId[]): MaintenanceWorkflowTarget[] =
  * Targets whose `enabled` flag is toggled by pause/resume. Only the per-space scheduled
  * documents of the given spaces: the global workflows (`*`) belong to every space, so
  * pausing one space must not turn them off. The manual ones are started by routes that are
- * blocked while their space is paused. The only event-triggered one,
- * `INVESTIGATION_COMPLETED`, just attaches a finished investigation to its event and starts
- * no new background work, so it is safe to leave enabled.
+ * blocked while their space is paused.
  */
 export const buildDisableTargets = (spaceIds: SpaceId[]): MaintenanceWorkflowTarget[] =>
   scheduledTargetsFor(spaceIds);
