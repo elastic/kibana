@@ -66,7 +66,7 @@ import {
   ProposalLookupTruncatedError,
   ProposalNotFoundError,
 } from './errors';
-import { reportProposalDecided } from '../telemetry/proposal_decided_event';
+import { reportProposalDecided, reportProposalReopened } from '../telemetry/proposal_decided_event';
 import type { ResolveProposalUser } from './resolve_proposal_user';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
@@ -990,6 +990,11 @@ export class ProposalsService {
     // Only once the link landed, so the card never points at a row the chain
     // disowned.
     await this.attachToConversation(successorId, document.conversationId, document.title, request);
+
+    reportProposalReopened(this.deps.analytics, this.deps.logger, {
+      proposal,
+      successorId,
+    });
 
     return { proposalId: successorId };
   }

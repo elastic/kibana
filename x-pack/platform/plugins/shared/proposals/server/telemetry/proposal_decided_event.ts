@@ -9,6 +9,7 @@ import type { AnalyticsServiceSetup, AnalyticsServiceStart, Logger } from '@kbn/
 import type { Proposal } from '@kbn/proposals-common';
 
 export const PROPOSAL_DECIDED_EVENT_TYPE = 'proposal_decided';
+export const PROPOSAL_REOPENED_EVENT_TYPE = 'proposal_reopened';
 
 interface ProposalDecidedEventProps {
   proposal_id: string;
@@ -23,8 +24,47 @@ interface ProposalDecidedEventProps {
   impact?: string;
 }
 
+interface ProposalReopenedEventProps {
+  proposal_id: string;
+  successor_id: string;
+  origin?: string;
+  conversation_id: string;
+  confidence?: string;
+  impact?: string;
+}
+
 /** Registers the proposals EBT event types. Call once, from the plugin's `setup`. */
 export const registerProposalsEbtEvents = (analytics: AnalyticsServiceSetup): void => {
+  analytics.registerEventType<ProposalReopenedEventProps>({
+    eventType: PROPOSAL_REOPENED_EVENT_TYPE,
+    schema: {
+      proposal_id: {
+        type: 'keyword',
+        _meta: { description: 'Id of the proposal that was marked as not applied.' },
+      },
+      successor_id: {
+        type: 'keyword',
+        _meta: { description: 'Id of the proposal that offers it again.' },
+      },
+      origin: {
+        type: 'keyword',
+        _meta: { description: 'Product that created the proposal.', optional: true },
+      },
+      conversation_id: {
+        type: 'keyword',
+        _meta: { description: 'Conversation the proposal was created in.' },
+      },
+      confidence: {
+        type: 'keyword',
+        _meta: { description: 'Confidence the proposer gave the proposal.', optional: true },
+      },
+      impact: {
+        type: 'keyword',
+        _meta: { description: 'Impact the proposer gave the proposal.', optional: true },
+      },
+    },
+  });
+
   analytics.registerEventType<ProposalDecidedEventProps>({
     eventType: PROPOSAL_DECIDED_EVENT_TYPE,
     schema: {
@@ -117,6 +157,39 @@ export const reportProposalDecided = (
   } catch (error) {
     logger.debug(
       `Failed to report the proposal decision: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+};
+
+/**
+ * Reports that a to-do proposal marked as applied was marked as not applied again, after the
+ * successor that re-offers it was linked. Never throws, for the same reason as the decision.
+ */
+export const reportProposalReopened = (
+  analytics: AnalyticsServiceStart,
+  logger: Logger,
+  {
+    proposal,
+    successorId,
+  }: {
+    proposal: Pick<Proposal, 'id' | 'origin' | 'conversationId' | 'confidence' | 'impact'>;
+    successorId: string;
+  }
+): void => {
+  try {
+    analytics.reportEvent<ProposalReopenedEventProps>(PROPOSAL_REOPENED_EVENT_TYPE, {
+      proposal_id: proposal.id,
+      successor_id: successorId,
+      origin: proposal.origin,
+      conversation_id: proposal.conversationId,
+      confidence: proposal.confidence,
+      impact: proposal.impact,
+    });
+  } catch (error) {
+    logger.debug(
+      `Failed to report the proposal reopen: ${
         error instanceof Error ? error.message : String(error)
       }`
     );

@@ -4082,6 +4082,58 @@ describe('ProposalsService.reopen', () => {
     expect(documents.get(proposalId)?.expiresAt).toBeUndefined();
   });
 
+  it('reports a reopen once the successor is linked', async () => {
+    const { storage } = createChainStorage(manual());
+    const { service, analytics } = createService(storage);
+
+    const { proposalId } = await service.reopen('proposal-1', SPACE_ID, request);
+
+    expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
+    expect(analytics.reportEvent).toHaveBeenCalledWith('proposal_reopened', {
+      proposal_id: 'proposal-1',
+      successor_id: proposalId,
+      origin: 'nightshift',
+      conversation_id: 'conv-1',
+      confidence: 'medium',
+      impact: 'low',
+    });
+  });
+
+  it('reports a reopen only for the call that won the race', async () => {
+    const { storage } = createChainStorage(manual());
+    const { service, analytics } = createService(storage);
+    let marked = false;
+    const index = storage.index.getMockImplementation()!;
+    storage.index.mockImplementation(async (args: { id: string; if_seq_no?: number }) => {
+      if (args.id === 'proposal-1' && args.if_seq_no !== undefined) {
+        if (marked) {
+          throw Object.assign(new Error('version conflict'), { statusCode: 409 });
+        }
+        marked = true;
+      }
+      return index(args);
+    });
+
+    await Promise.allSettled([
+      service.reopen('proposal-1', SPACE_ID, request),
+      service.reopen('proposal-1', SPACE_ID, request),
+    ]);
+
+    expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not fail a reopen that landed when the reporter throws', async () => {
+    const { storage } = createChainStorage(manual());
+    const { service, analytics } = createService(storage);
+    analytics.reportEvent.mockImplementationOnce(() => {
+      throw new Error('ebt down');
+    });
+
+    await expect(service.reopen('proposal-1', SPACE_ID, request)).resolves.toEqual({
+      proposalId: expect.any(String),
+    });
+  });
+
   it('leaves exactly one successor when two reopens race', async () => {
     const { storage, documents } = createChainStorage(manual());
     const { service } = createService(storage);
@@ -4123,12 +4175,13 @@ describe('ProposalsService.reopen', () => {
     ['was already re-offered', { supersededBy: 'proposal-2' }],
   ])('refuses a proposal that %s', async (_, overrides) => {
     const { storage } = createChainStorage(manual(overrides));
-    const { service } = createService(storage);
+    const { service, analytics } = createService(storage);
 
     await expect(service.reopen('proposal-1', SPACE_ID, request)).rejects.toBeInstanceOf(
       ProposalConflictError
     );
     expect(storage.index).not.toHaveBeenCalled();
+    expect(analytics.reportEvent).not.toHaveBeenCalled();
   });
 });
 
