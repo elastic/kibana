@@ -18,6 +18,8 @@ export interface GreetingTitleProps {
 export function GreetingTitle({ greeting, title }: GreetingTitleProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
 
+  // Same EuiTitle → heading → spans shape as AlertZero's page header; the heading
+  // child is required for EuiTitle sizing. A space between chunks keeps wrap natural.
   return (
     <EuiTitle
       size="m"
@@ -25,34 +27,15 @@ export function GreetingTitle({ greeting, title }: GreetingTitleProps): React.Re
         font-weight: ${euiTheme.font.weight.medium};
       `}
     >
-      <h2
-        css={css`
-          display: flex;
-          flex-wrap: wrap;
-          align-items: center;
-          column-gap: ${euiTheme.size.xs};
-          row-gap: 0;
-          margin: 0;
-          min-width: 0;
-          max-width: 100%;
-          text-align: left;
-        `}
-      >
+      <h2>
         <span
           css={css`
-            flex-shrink: 0;
             color: ${euiTheme.colors.textDisabled};
           `}
         >
           {greeting}
-        </span>
-        <span
-          css={css`
-            flex-shrink: 0;
-          `}
-        >
-          {title}
-        </span>
+        </span>{' '}
+        <span>{title}</span>
       </h2>
     </EuiTitle>
   );

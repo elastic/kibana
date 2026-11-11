@@ -7,18 +7,19 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-import { EuiIcon, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiText, useEuiTheme, type EuiButtonProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export interface ShowMoreButtonProps
-  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type' | 'children'> {
+export type ShowMoreButtonProps = {
   /** How many items this click will reveal (capped by what remains). */
   count: number;
   /** How many items are still hidden. */
   remaining: number;
   isLoading?: boolean;
-  'data-test-subj'?: string;
-}
+} & Omit<
+  EuiButtonProps,
+  'children' | 'color' | 'size' | 'iconType' | 'iconSide' | 'isLoading' | 'fullWidth' | 'css'
+>;
 
 /** Full-width list footer: “Show N more of M” with a down chevron — shared by home and onboarding. */
 export function ShowMoreButton({
@@ -26,7 +27,7 @@ export function ShowMoreButton({
   remaining,
   onClick,
   isLoading = false,
-  disabled,
+  isDisabled,
   'data-test-subj': dataTestSubj,
   'aria-label': ariaLabel,
   ...rest
@@ -35,54 +36,60 @@ export function ShowMoreButton({
   const revealCount = Math.min(count, remaining);
 
   return (
-    <button
-      type="button"
+    <EuiButton
+      fullWidth
+      color="text"
+      size="m"
+      iconType="chevronSingleDown"
+      iconSide="left"
+      isLoading={isLoading}
+      isDisabled={isDisabled || isLoading}
       onClick={onClick}
-      disabled={disabled || isLoading}
       data-test-subj={dataTestSubj}
       aria-label={ariaLabel}
       css={css`
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: ${euiTheme.size.xs};
-        width: 100%;
-        padding: ${euiTheme.size.m};
-        border: none;
-        border-top: ${euiTheme.border.thin};
-        background: ${euiTheme.colors.emptyShade};
-        cursor: ${isLoading ? 'default' : 'pointer'};
-        font-size: ${euiTheme.size.m};
-        line-height: ${euiTheme.size.base};
-        font-weight: ${euiTheme.font.weight.bold};
-        color: ${euiTheme.colors.textParagraph};
+        /* Keep the list-footer strip look: flat, full-bleed, top border only. */
+        && {
+          border: none;
+          border-radius: 0;
+          border-top: ${euiTheme.border.thin};
+          background: ${euiTheme.colors.emptyShade};
+          box-shadow: none;
+          color: ${euiTheme.colors.textParagraph};
+          font-weight: ${euiTheme.font.weight.bold};
+          height: auto;
+          min-height: 0;
+          padding: ${euiTheme.size.m};
 
-        &:hover:not(:disabled) {
-          background: ${euiTheme.colors.backgroundBaseSubdued};
+          &:hover:not(:disabled),
+          &:focus,
+          &:focus-visible {
+            background: ${euiTheme.colors.backgroundBaseSubdued};
+            text-decoration: none;
+          }
         }
       `}
       {...rest}
     >
-      {isLoading ? (
-        <EuiLoadingSpinner size="s" />
-      ) : (
-        <EuiIcon type="chevronSingleDown" size="s" aria-hidden={true} />
-      )}
       {i18n.translate('xpack.nightshift.showMoreButton.label', {
         defaultMessage: 'Show {count} more',
         values: { count: revealCount },
       })}{' '}
-      <span
+      <EuiText
+        component="span"
+        color={euiTheme.colors.textDisabled}
         css={css`
+          display: inline;
+          font-size: inherit;
           font-weight: ${euiTheme.font.weight.regular};
-          color: ${euiTheme.colors.textDisabled};
+          line-height: inherit;
         `}
       >
         {i18n.translate('xpack.nightshift.showMoreButton.ofRemaining', {
           defaultMessage: 'of {count}',
           values: { count: remaining },
         })}
-      </span>
-    </button>
+      </EuiText>
+    </EuiButton>
   );
 }
