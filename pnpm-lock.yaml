@@ -257,11 +257,11 @@ overrides:
   '@babel/plugin-transform-typescript': 7.24.7
   '@bufbuild/protobuf': 2.5.2
   '@elastic/elasticsearch@9>@elastic/transport': 9.4.0
-  '@elastic/esql-definitions': 4.36.0
-  '@elastic/esql-grammar': 4.36.0
-  '@elastic/esql-promql-grammar': 4.36.0
-  '@elastic/esql-types': 4.36.0
-  '@elastic/pretty-printer': 4.36.0
+  '@elastic/esql-definitions': 4.38.0
+  '@elastic/esql-grammar': 4.38.0
+  '@elastic/esql-promql-grammar': 4.38.0
+  '@elastic/esql-types': 4.38.0
+  '@elastic/pretty-printer': 4.38.0
   '@emnapi/core': 1.11.1
   '@emnapi/runtime': 1.11.1
   '@paulirish/trace_engine>legacy-javascript': 0.0.3
@@ -355,8 +355,8 @@ importers:
         specifier: 4.1.1
         version: 4.1.1
       '@dagrejs/dagre':
-        specifier: 3.1.1
-        version: 3.1.1
+        specifier: 3.1.3
+        version: 3.1.3
       '@dnd-kit/core':
         specifier: 6.3.1
         version: 6.3.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -397,20 +397,20 @@ importers:
         specifier: 8.8.1
         version: 8.8.1
       '@elastic/esql':
-        specifier: 4.36.0
-        version: 4.36.0
+        specifier: 4.38.0
+        version: 4.38.0
       '@elastic/esql-definitions':
-        specifier: 4.36.0
-        version: 4.36.0
+        specifier: 4.38.0
+        version: 4.38.0
       '@elastic/eui':
-        specifier: 123.3.0
-        version: 123.3.0(@elastic/datemath@5.0.3(moment@2.31.0))(@elastic/eui-theme-borealis@8.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)
+        specifier: 123.4.0
+        version: 123.4.0(@elastic/datemath@5.0.3(moment@2.31.0))(@elastic/eui-theme-borealis@8.2.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)
       '@elastic/eui-illustrations':
         specifier: 1.1.0
         version: 1.1.0
       '@elastic/eui-theme-borealis':
-        specifier: 8.1.0
-        version: 8.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: 8.2.0
+        version: 8.2.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@elastic/filesaver':
         specifier: 1.1.2
         version: 1.1.2
@@ -527,7 +527,7 @@ importers:
         version: 18.0.1(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@kbn/aad-fixtures-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/alerting_api_integration/common/plugins/aad
+        version: link:x-pack/platform/test_plugins/response_ops/alerting_api_integration/aad
       '@kbn/access-control-test-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin
@@ -536,7 +536,7 @@ importers:
         version: link:x-pack/platform/plugins/shared/actions
       '@kbn/actions-simulators-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators
+        version: link:x-pack/platform/test_plugins/response_ops/alerting_api_integration/actions_simulators
       '@kbn/actions-types':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-actions-types
@@ -581,7 +581,7 @@ importers:
         version: link:x-pack/platform/plugins/shared/agent_builder_sml
       '@kbn/agent-builder-sml-test-types-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/agent_builder_sml/plugins/sml_test_types
+        version: link:x-pack/platform/test_plugins/agent_builder_sml_test_types
       '@kbn/agent-builder-tools-base':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base
@@ -671,7 +671,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-aiops-utils
       '@kbn/alerting-api-integration-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/alerting_api_integration/common/plugins/alerts
+        version: link:x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts
       '@kbn/alerting-comparators':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-alerting-comparators
@@ -680,7 +680,7 @@ importers:
         version: link:x-pack/examples/alerting_example
       '@kbn/alerting-fixture-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/functional_with_es_ssl/plugins/alerts
+        version: link:x-pack/platform/test_plugins/response_ops/functional_with_es_ssl/alerts
       '@kbn/alerting-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/alerting
@@ -725,7 +725,7 @@ importers:
         version: link:x-pack/solutions/observability/packages/kbn-alerts-grouping
       '@kbn/alerts-restricted-fixtures-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/alerting_api_integration/common/plugins/alerts_restricted
+        version: link:x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts_restricted
       '@kbn/alerts-ui-shared':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-alerts-ui-shared
@@ -2195,7 +2195,7 @@ importers:
         version: link:src/platform/plugins/private/event_annotation
       '@kbn/event-log-fixture-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/plugin_api_integration/plugins/event_log
+        version: link:x-pack/platform/test_plugins/response_ops/plugin_api_integration/event_log
       '@kbn/event-log-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/event_log
@@ -2978,7 +2978,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-ols
       '@kbn/open-telemetry-instrumented-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/common/plugins/otel_metrics
+        version: link:src/platform/test_plugins/otel_metrics
       '@kbn/openapi-common':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-openapi-common
@@ -3155,7 +3155,7 @@ importers:
         version: link:src/platform/packages/private/kbn-reporting/export_types/png_common
       '@kbn/reporting-fixture':
         specifier: workspace:*
-        version: link:x-pack/platform/test/reporting_api_integration/plugins/reporting_fixture
+        version: link:x-pack/platform/test_plugins/response_ops/reporting_api_integration/reporting_fixture
       '@kbn/reporting-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/reporting
@@ -3167,7 +3167,7 @@ importers:
         version: link:src/platform/packages/private/kbn-reporting/server
       '@kbn/reporting-test-routes':
         specifier: workspace:*
-        version: link:x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes
+        version: link:x-pack/platform/test_plugins/response_ops/reporting_api_integration/reporting_test_routes
       '@kbn/resizable-layout':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-resizable-layout
@@ -3275,7 +3275,7 @@ importers:
         version: link:x-pack/platform/plugins/shared/sample_data_ingest
       '@kbn/sample-task-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin
+        version: link:x-pack/platform/test_plugins/response_ops/plugin_api_integration/sample_task_plugin
       '@kbn/sandbox-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/sandbox
@@ -3842,16 +3842,16 @@ importers:
         version: link:x-pack/platform/plugins/private/task_manager_dependencies
       '@kbn/task-manager-fixture-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture
+        version: link:x-pack/platform/test_plugins/response_ops/alerting_api_integration/task_manager_fixture
       '@kbn/task-manager-performance-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance
+        version: link:x-pack/platform/test_plugins/response_ops/plugin_api_perf/task_manager_performance
       '@kbn/task-manager-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/task_manager
       '@kbn/task-manager-service-accounts-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/task_manager/plugins/service_accounts
+        version: link:x-pack/platform/test_plugins/response_ops/task_manager/service_accounts
       '@kbn/telemetry':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-telemetry
@@ -4930,8 +4930,8 @@ importers:
         specifier: 5.12.5
         version: 5.12.5
       safe-stable-stringify:
-        specifier: 2.5.0
-        version: 2.5.0
+        specifier: 3.0.0
+        version: 3.0.0
       seedrandom:
         specifier: 3.0.5
         version: 3.0.5
@@ -5061,7 +5061,7 @@ importers:
         version: 13.1.0(openapi-types@12.1.3)
       '@axe-core/playwright':
         specifier: 4.13.0
-        version: 4.13.0(playwright-core@1.63.0)
+        version: 4.13.0(playwright-core@1.64.1)
       '@babel/core':
         specifier: 7.29.7
         version: 7.29.7(supports-color@10.2.2)
@@ -5129,14 +5129,14 @@ importers:
         specifier: 6.0.2
         version: 6.0.2(@babel/core@7.29.7(supports-color@10.2.2))(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(babel-loader@9.2.1(@babel/core@7.29.7(supports-color@10.2.2))(webpack@5.96.1))(supports-color@10.2.2)(webpack@5.96.1)
       '@elastic/eslint-plugin-eui':
-        specifier: 3.3.0
-        version: 3.3.0(eslint@8.57.0(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
+        specifier: 4.0.0
+        version: 4.0.0(eslint@8.57.0(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
       '@elastic/eui-test-helpers':
-        specifier: 2.2.0
-        version: 2.2.0(@playwright/test@1.63.0)
+        specifier: 2.3.0
+        version: 2.3.0(@playwright/test@1.64.1)
       '@elastic/eui-theme-common':
-        specifier: 10.1.0
-        version: 10.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: 10.2.0
+        version: 10.2.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@elastic/makelogs':
         specifier: 6.1.1
         version: 6.1.1
@@ -5169,7 +5169,7 @@ importers:
         version: 29.6.3
       '@kbn/alerting-api-integration-helpers':
         specifier: workspace:*
-        version: link:x-pack/platform/test/alerting_api_integration/packages/helpers
+        version: link:x-pack/platform/packages/shared/test/response_ops/alerting-api-integration-helpers
       '@kbn/ambient-common-types':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-ambient-common-types
@@ -5658,7 +5658,7 @@ importers:
         version: link:packages/kbn-find-used-node-modules
       '@kbn/fleet-plugin-cypress':
         specifier: workspace:*
-        version: link:x-pack/platform/plugins/shared/fleet/cypress
+        version: link:x-pack/platform/plugins/shared/fleet-cypress
       '@kbn/ftr-benchmarks':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-ftr-benchmarks
@@ -6086,8 +6086,8 @@ importers:
         specifier: 2.5.1
         version: 2.5.1
       '@playwright/test':
-        specifier: 1.63.0
-        version: 1.63.0
+        specifier: 1.64.1
+        version: 1.64.1
       '@pmmmwh/react-refresh-webpack-plugin':
         specifier: 0.6.2
         version: 0.6.2(react-refresh@0.18.0)(type-fest@4.41.0)(webpack-hot-middleware@2.26.1)(webpack@5.96.1)
@@ -6715,9 +6715,6 @@ importers:
       listr2:
         specifier: 8.2.5
         version: 8.2.5
-      lmdb:
-        specifier: 3.5.6
-        version: 3.5.6
       magic-string:
         specifier: 0.30.21
         version: 0.30.21
@@ -6776,8 +6773,8 @@ importers:
         specifier: 5.3.0
         version: 5.3.0
       playwright:
-        specifier: 1.63.0
-        version: 1.63.0
+        specifier: 1.64.1
+        version: 1.64.1
       pngjs:
         specifier: 7.0.0
         version: 7.0.0
@@ -8825,8 +8822,6 @@ importers:
 
   src/platform/test/common/plugins/newsfeed: {}
 
-  src/platform/test/common/plugins/otel_metrics: {}
-
   src/platform/test/health_gateway/plugins/status: {}
 
   src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline: {}
@@ -8898,6 +8893,8 @@ importers:
   src/platform/test/server_integration/plugins/status_plugin_b: {}
 
   src/platform/test/user_storage/plugins/user_storage_test: {}
+
+  src/platform/test_plugins/otel_metrics: {}
 
   src/setup_node_env: {}
 
@@ -9319,6 +9316,8 @@ importers:
 
   x-pack/platform/packages/shared/security/plugin_types_server: {}
 
+  x-pack/platform/packages/shared/test/response_ops/alerting-api-integration-helpers: {}
+
   x-pack/platform/plugins/private/ai_anonymization_settings: {}
 
   x-pack/platform/plugins/private/banners: {}
@@ -9489,7 +9488,7 @@ importers:
 
   x-pack/platform/plugins/shared/fleet: {}
 
-  x-pack/platform/plugins/shared/fleet/cypress: {}
+  x-pack/platform/plugins/shared/fleet-cypress: {}
 
   x-pack/platform/plugins/shared/global_search: {}
 
@@ -9577,26 +9576,6 @@ importers:
 
   x-pack/platform/test: {}
 
-  x-pack/platform/test/agent_builder_sml/plugins/sml_test_types: {}
-
-  x-pack/platform/test/alerting_api_integration/common/plugins/aad: {}
-
-  x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators: {}
-
-  x-pack/platform/test/alerting_api_integration/common/plugins/alerts: {}
-
-  x-pack/platform/test/alerting_api_integration/common/plugins/alerts_restricted: {}
-
-  x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture: {}
-
-  x-pack/platform/test/alerting_api_integration/packages/helpers: {}
-
-  x-pack/platform/test_plugins/security_investigations/cases_api_integration/cases: {}
-
-  x-pack/platform/test_plugins/security_investigations/cases_api_integration/observability: {}
-
-  x-pack/platform/test_plugins/security_investigations/cases_api_integration/security_solution: {}
-
   x-pack/platform/test/cloud_integration/plugins/saml_provider: {}
 
   x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin: {}
@@ -9607,25 +9586,11 @@ importers:
 
   x-pack/platform/test/functional_execution_context/plugins/alerts: {}
 
-  x-pack/platform/test/functional_with_es_ssl/plugins/alerts: {}
-
-  x-pack/platform/test_plugins/security_investigations/functional_with_es_ssl/cases: {}
-
   x-pack/platform/test/licensing_plugin/plugins/test_feature_usage: {}
 
   x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client: {}
 
-  x-pack/platform/test/plugin_api_integration/plugins/event_log: {}
-
   x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test: {}
-
-  x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin: {}
-
-  x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance: {}
-
-  x-pack/platform/test/reporting_api_integration/plugins/reporting_fixture: {}
-
-  x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes: {}
 
   x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin: {}
 
@@ -9651,13 +9616,45 @@ importers:
 
   x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin: {}
 
-  x-pack/platform/test/task_manager/plugins/service_accounts: {}
-
   x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin: {}
 
   x-pack/platform/test/usage_collection/plugins/application_usage_test: {}
 
   x-pack/platform/test/usage_collection/plugins/stack_management_usage_test: {}
+
+  x-pack/platform/test_plugins/agent_builder_sml_test_types: {}
+
+  x-pack/platform/test_plugins/response_ops/alerting_api_integration/aad: {}
+
+  x-pack/platform/test_plugins/response_ops/alerting_api_integration/actions_simulators: {}
+
+  x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts: {}
+
+  x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts_restricted: {}
+
+  x-pack/platform/test_plugins/response_ops/alerting_api_integration/task_manager_fixture: {}
+
+  x-pack/platform/test_plugins/response_ops/functional_with_es_ssl/alerts: {}
+
+  x-pack/platform/test_plugins/response_ops/plugin_api_integration/event_log: {}
+
+  x-pack/platform/test_plugins/response_ops/plugin_api_integration/sample_task_plugin: {}
+
+  x-pack/platform/test_plugins/response_ops/plugin_api_perf/task_manager_performance: {}
+
+  x-pack/platform/test_plugins/response_ops/reporting_api_integration/reporting_fixture: {}
+
+  x-pack/platform/test_plugins/response_ops/reporting_api_integration/reporting_test_routes: {}
+
+  x-pack/platform/test_plugins/response_ops/task_manager/service_accounts: {}
+
+  x-pack/platform/test_plugins/security_investigations/cases_api_integration/cases: {}
+
+  x-pack/platform/test_plugins/security_investigations/cases_api_integration/observability: {}
+
+  x-pack/platform/test_plugins/security_investigations/cases_api_integration/security_solution: {}
+
+  x-pack/platform/test_plugins/security_investigations/functional_with_es_ssl/cases: {}
 
   x-pack/solutions/observability/packages/alert-details: {}
 
@@ -9951,13 +9948,13 @@ importers:
 
   x-pack/solutions/security/test: {}
 
-  x-pack/solutions/security/test_plugins/resolver_test: {}
-
   x-pack/solutions/security/test/security_solution_api_integration: {}
 
   x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response: {}
 
   x-pack/solutions/security/test/security_solution_endpoint: {}
+
+  x-pack/solutions/security/test_plugins/resolver_test: {}
 
   x-pack/solutions/vectordb/packages/kbn-vectordb-onboarding: {}
 
@@ -11064,11 +11061,11 @@ packages:
   '@dabh/diagnostics@2.0.9':
     resolution: {integrity: sha512-R6siwR65Hm+3yfgP7o8DKhNvputQAwfoz9zTc3kyDudnomj2/BcLmD+uGQQPICjuFUp8ounPBU+jmKsocwVVAg==}
 
-  '@dagrejs/dagre@3.1.1':
-    resolution: {integrity: sha512-zroZB1dFOFiGgv4Xcrn1DckB1o4aOikPqD2NDQPV0WM//CXGcS6xiD0rNkqHmw6FEg4tabt4nxPLwgCWT+Vb2A==}
+  '@dagrejs/dagre@3.1.3':
+    resolution: {integrity: sha512-X4aUTwOReZvthaZWOVHqlJ52/ZdhZFEM4+Lh/uR4XooUSLE6p71bcy7MPGzYnNUcNh+nj+i/qJQpCMIdQnSmrg==}
 
-  '@dagrejs/graphlib@4.0.5':
-    resolution: {integrity: sha512-7xrBTqIts3o+PMUZX97wSc+7TUbW+/rULzGNCTP6yooNVDXbzw4Wutg/H/xOutTB/c/k0YqOAavgPh4/Zk9PFA==}
+  '@dagrejs/graphlib@4.0.6':
+    resolution: {integrity: sha512-Hjv7hbfmSBMP4nVXMFt4gusqWWHghQF0qNT4V5KHo4Jatvd+2L5VHKFnnIjXVuDnaHIRz7ZuHSnlf0RuZkOwWA==}
 
   '@date-fns/tz@1.5.0':
     resolution: {integrity: sha512-lwYN/vDPeNRULcepoE/LO2Pgx+7/RV+S9ARfbc9lr2DtGkOD7pAiruHvbR1RX3Qyf6ja47EWJDMsNK5vK08DJg==}
@@ -11179,63 +11176,63 @@ packages:
     resolution: {integrity: sha512-lPnpDtPb60cIb2SRSjlxeGbrYcOJQuSDdvcRlA279OMYseU+zBcHhNsNqdph3GqvMhrt/AWRjR3fu1hbLkHdIg==}
     engines: {node: '>=24'}
 
-  '@elastic/eslint-plugin-eui@3.3.0':
-    resolution: {integrity: sha512-Gj0Vw5IW4tt6+tR2LGglIZ44WWRul0vFxTOdcyjT3koDgLydTPUY0xG5zi4jMR6xA7fTyUkVRzc+gErgZOJ2vQ==}
+  '@elastic/eslint-plugin-eui@4.0.0':
+    resolution: {integrity: sha512-SSYLv4l57YoRXgufdk9ZwVNYCR79ZgkH2h8DiGtmQSp85JHuD16o+5hbIaHb2hAHjgIpLrN57Uo3lK5Jn6Fu8Q==}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
       typescript: 6.0.3
 
-  '@elastic/esql-ast@4.36.0':
-    resolution: {integrity: sha512-DF6gfruk8imGPjQXkhPGZ8weJ67BEIXC90iajhQqGrP9bb0U31RgSUyC27oN6lYPrN5XHWS/6So+47snPOyhfQ==}
+  '@elastic/esql-ast@4.38.0':
+    resolution: {integrity: sha512-FmDI4o9K2vSG/uXsVmU9kVaCP0hlSAz7zgeNdVf7lpdgs5Mdh2Rav4KClICt7Lcy8qNSMK4QorKsNaqMbRebPw==}
 
-  '@elastic/esql-definitions@4.36.0':
-    resolution: {integrity: sha512-Yfm/nHY4ru7LdGP0uidKLdqGUFc7DBSbRK4TZ1n2lUVOv3l2tqeC+gE58axMsHpqbWdIprwyMA8dnMACMbfOcw==}
+  '@elastic/esql-definitions@4.38.0':
+    resolution: {integrity: sha512-Q891U0Z3j8OZEZ/KiDYR2ft7kmL0BZicz1Hy+HGYbnZat7r2LXGV3ZgIwTOiPPsy0GtGtY2i/5BwxswyGRjLIA==}
 
-  '@elastic/esql-grammar@4.36.0':
-    resolution: {integrity: sha512-EB7rHhxl6K1av3xTc5xsRmK3xpdBWwxQWIFOMHhsruXjDA6rdD+vZq0Kvby2e0A+tVssSqYU09ZGBILPX+o56g==}
+  '@elastic/esql-grammar@4.38.0':
+    resolution: {integrity: sha512-KY1YsOQ9H5ZWI363EGCaPQXS+iU6el8R23Gp188GZVjjJ/EmkiXH1hS8wmKDSjVdE5OF/FjZ1+3gwq/WpSMO4Q==}
 
-  '@elastic/esql-parser@4.36.0':
-    resolution: {integrity: sha512-nedlmMnBaB99X+BmpLo6Od7BnWHCN1scHeYzBeeem2MFOJj/hWxdEE0geO8DHf6oCS2NXZlDJGiJUMaTITlsSA==}
+  '@elastic/esql-parser@4.38.0':
+    resolution: {integrity: sha512-9OpUJshtUQgcj/gKsGLL7FeMdhuUPkXmYg5CbB9pEqmlyzQlUbuJaRMtpCJHkPQjiBADi9+bIOC4FpMep1Wqyw==}
 
-  '@elastic/esql-promql-grammar@4.36.0':
-    resolution: {integrity: sha512-VFx0EPvV4a1kNtqdepJrA5S5dMroSkiCrp2xeTWq+dQ016hocwDaJvV8ChkRL1LRYAp/Z6ysbhJFhZ6D/hZ+gw==}
+  '@elastic/esql-promql-grammar@4.38.0':
+    resolution: {integrity: sha512-xW+Ik+3C7+c2bxd0ZLCqe1F0Aeuv5mCcaL301S0ykjZJTIEz2ANdzXbBw+pzCjaAOzVNTb6alIx6H32LsniIkg==}
 
-  '@elastic/esql-traversal@4.36.0':
-    resolution: {integrity: sha512-wEjbq53jpEfnPk+I27ixqlAFBAteFtNYLjdQoMxlFMTZEynxLlgU2Uv/8+ePYHDtS7yFtTPyPo+zf0+Yvyb15w==}
+  '@elastic/esql-traversal@4.38.0':
+    resolution: {integrity: sha512-cCLIyuHQAK9E52ep/mnOzbP86po74oyD3tXrVFXcTsNdxzyLu+hMtRyhTEWpJAot6JtSgaqO316UDk71MPPj8w==}
 
-  '@elastic/esql-types@4.36.0':
-    resolution: {integrity: sha512-QxU/F/X3cukG9bDArKK9avv5q6H9L7bOF1uP0MxyUhKC4m8AGuRhY3DY75MIPbyhvdnW2dKn5L3hbJgxgUspyA==}
+  '@elastic/esql-types@4.38.0':
+    resolution: {integrity: sha512-eS4Nrw4PD+v5DABvKdjfTaA8qTAWujA/h8Dn5hiyknNb6UwXt5fHLCXnDDXRf6XX7ec3ay8KgyQBhmnLJFQtgw==}
 
-  '@elastic/esql@4.36.0':
-    resolution: {integrity: sha512-dv65a2IEA1RhL2nSF3kx/ZUBndXDXwe4XsYJregM0JgUim0/EglnefxhO1z68amOK7nsDDljINzlLMZ1m25Sdw==}
+  '@elastic/esql@4.38.0':
+    resolution: {integrity: sha512-SnGBlDGS4eGlhVE+ZOHhZ4shbB132DcbByKcvvUGLYlzB76Xj8wunPoQbVY9snJ7wtxG8y383bO5YWEIeK2/jA==}
 
   '@elastic/eui-illustrations@1.1.0':
     resolution: {integrity: sha512-xqOf5dcFmB0WylGy7w2aTJfHMIOjGxW1xops2WkxsfWEpqSFz4r0y4QCpGW+zEhRBVemWcB/lr3S+GoFqm+AFQ==}
 
-  '@elastic/eui-test-helpers@2.2.0':
-    resolution: {integrity: sha512-G7zfrcMwoloxXQi0ZS9Cugn5rcv2TVCAkTKxoN8gEmoQPqUWljh4bzsTeYQfRKPSPA/pZy6htAyJ4Id95UEsVA==}
+  '@elastic/eui-test-helpers@2.3.0':
+    resolution: {integrity: sha512-Ay2bNNG8BhhYnMVAbvAku8RapHEcIm2EToTCvWtdL0RkoJ8MR+unc6bdUFk7JBWoV/xqDGAK74cperRKEnJisA==}
     peerDependencies:
       '@playwright/test': ^1.50.0
     peerDependenciesMeta:
       '@playwright/test':
         optional: true
 
-  '@elastic/eui-theme-borealis@8.1.0':
-    resolution: {integrity: sha512-S0WDpEJo4KeZVgTBTIbFKorkZcukmiFRL+5B8Ys6+wcUDXyuPzqUvJYCGpAqbawNMhVA0eWjGoh06YXOnSfjkQ==}
+  '@elastic/eui-theme-borealis@8.2.0':
+    resolution: {integrity: sha512-q3OskND7DTY5soKfTURxjRDMuG2tf8syjVE4TcRS9pMv1fzIHM8lMtf2uufpeNbLD+9wiI2HZ0210A1WuxrdfA==}
 
-  '@elastic/eui-theme-common@10.1.0':
-    resolution: {integrity: sha512-OVIK5bDZWUEu7DWx+aEgykYHeUTx3o1NYbxn6YA38Uu0DgsZ+RDfvmT3Jt7h/TTE/QzfBCOvB0M6EhJWhmhmEg==}
+  '@elastic/eui-theme-common@10.2.0':
+    resolution: {integrity: sha512-XULzJAxWPptVFMTEd6KX3PYhCZ7AdHHzo4T76QwWziNRWFgLQTaD3DOTBv03l+LHvEztWCR2pI3JjcqjkUpoUA==}
     peerDependencies:
       '@emotion/react': 11.x
       react: ^17.0 || ^18.0
       react-dom: ^17.0 || ^18.0
 
-  '@elastic/eui@123.3.0':
-    resolution: {integrity: sha512-LZCkig7WFOJIYi8rRpyEt/Q83ZFZvP4U35PcHK+EAR+YXPHVLY1jFSTzP5zf5yq/nhmA09LczXAhYFLLNfLSeQ==}
+  '@elastic/eui@123.4.0':
+    resolution: {integrity: sha512-U8WQzSUO9b2P+hblbl3zD5zlcgDNOQGc/X2c6a0zBL+3KAuFfg1bTwpFO4JgZsyMq9PCpxPrmnwPDL/1hFWrRw==}
     engines: {node: 16.x || 18.x || >=20.x}
     peerDependencies:
       '@elastic/datemath': ^5.0.2
-      '@elastic/eui-theme-borealis': 8.1.0
+      '@elastic/eui-theme-borealis': 8.2.0
       '@emotion/css': 11.x
       '@emotion/react': 11.x
       '@types/react': 18.2.79
@@ -11299,8 +11296,8 @@ packages:
     resolution: {integrity: sha512-/WCA7YiM855/QVxJIcNSiqw4/U5t0TFmPktbelcpT4e1NEosHRS7soQ7k7YMV21MlS2cnFcmvTq9fob59gs/Qw==}
     engines: {node: ^18.19.0 || >=20.6.0}
 
-  '@elastic/pretty-printer@4.36.0':
-    resolution: {integrity: sha512-cUxLIKNAi6SVbYcHaj2d6yVCVDY8NsIgtnY1EWuYnFHO2n+3+B5WDkibciqkK+XeGzSVwbzT22yFPs3AKSoqBw==}
+  '@elastic/pretty-printer@4.38.0':
+    resolution: {integrity: sha512-vgQR/z09mIa0J6HOTVNXdQgFTi2wfqJDEF7QS1WjzektV+gIM+f0ugwLKQzqyyJNdzZUmFjhxIl7CWKcRFUuaA==}
 
   '@elastic/prismjs-esql@4.28.0':
     resolution: {integrity: sha512-nl0x5VIZu1/duqOpcAYofBJBuqzuBJL3szSIytHtiNCDl4xgndnV5FR5D37r8OZmGY4M1nOYhKk2rZ/Iwl7XPA==}
@@ -11898,9 +11895,6 @@ packages:
   '@hapi/wreck@18.1.2':
     resolution: {integrity: sha512-3dMnV2pfhQiyEqu8DL3VBmxkdLiRDiiUDuG79Dp+UK1gL9ZxAfDOUhB6k3D5MLqcgJJ1IARyGFhwoc1NITr/pg==}
 
-  '@harperfast/extended-iterable@1.0.3':
-    resolution: {integrity: sha512-sSAYhQca3rDWtQUHSAPeO7axFIUJOI6hn1gjRC5APVE1a90tuyT8f5WIgRsFhhWA7htNkju2veB9eWL6YHi/Lw==}
-
   '@hello-pangea/dnd@18.0.1':
     resolution: {integrity: sha512-xojVWG8s/TGrKT1fC8K2tIWeejJYTAeJuj36zM//yEm/ZrnZUSFGS15BpO+jGZT1ybWvyXmeDJwPYb4dhWlbZQ==}
     peerDependencies:
@@ -12374,41 +12368,6 @@ packages:
       '@launchdarkly/node-server-sdk': ^9.0.0
       '@openfeature/server-sdk': ^1.16.0
 
-  '@lmdb/lmdb-darwin-arm64@3.5.6':
-    resolution: {integrity: sha512-mY5FG4TjPAkY4P0w+OhHaUka5mDh2TX2WKYIwuKzJ1zeW3VvRgxdam/lGJTquI+bthTx5CSHDW+BAQCnNAzkEA==}
-    cpu: [arm64]
-    os: [darwin]
-
-  '@lmdb/lmdb-darwin-x64@3.5.6':
-    resolution: {integrity: sha512-foa+pwitysO8k+xhs7psBFfTKnVgR69NlZRRTHaFVDqphh7AdGpLeyRzKw/ofatr/sN6TiHRRW6mmop0ZrrppQ==}
-    cpu: [x64]
-    os: [darwin]
-
-  '@lmdb/lmdb-linux-arm64@3.5.6':
-    resolution: {integrity: sha512-HmiyFFdJa38s1heCMSooSPaBSFTHJ3C+ERPp28xAPlDX1YiALJVOgbry065nXd8Y7KISWjnw05zpG1RX8IfftA==}
-    cpu: [arm64]
-    os: [linux]
-
-  '@lmdb/lmdb-linux-arm@3.5.6':
-    resolution: {integrity: sha512-QR4YRyR5h5Z8eGXrNQjiyo2NNDfqi3tCc9dQG5Is1blCt+qWw1ZoBWhlWAr5d+jshkifMIJjVHzHGKbkKzF8Tw==}
-    cpu: [arm]
-    os: [linux]
-
-  '@lmdb/lmdb-linux-x64@3.5.6':
-    resolution: {integrity: sha512-ADzCuCF2cTNiX9kDScqcz1fjnAkxPpQNneV3KFTdV3wWtVlI2sTGzySoMTgDpinkMMFj1NTJlxA6XR8fwc4hlA==}
-    cpu: [x64]
-    os: [linux]
-
-  '@lmdb/lmdb-win32-arm64@3.5.6':
-    resolution: {integrity: sha512-J7A9aEQsQiv0TYtBGL7NDIPp2lOS8nnl+zm4sWZm1xlsTTaQ4PgD096Adzdrk27rw3UxCkDXdCUa4ax41oztBQ==}
-    cpu: [arm64]
-    os: [win32]
-
-  '@lmdb/lmdb-win32-x64@3.5.6':
-    resolution: {integrity: sha512-1g7G0knRX2iV/voDu54yxrGqw5Dk0w2oIYb7dgJq8IkOi+m7wbD8Q3QpPFjh0C01G58S88dqGn03len6UPCXsg==}
-    cpu: [x64]
-    os: [win32]
-
   '@loaders.gl/core@3.4.7':
     resolution: {integrity: sha512-iKyOKtUTYsgmIaXFmkaV1bc4h36TiHoKzc4xrolU4eSw9BQzR3UATEx/356sUI8g90uQe1SosAcKAUgAvFqgGg==}
 
@@ -12579,36 +12538,6 @@ packages:
 
   '@moonrepo/core-windows-x64-msvc@2.6.2':
     resolution: {integrity: sha512-ABfBlco/Qbn8ed6SvTL4bqqD5dMUrbCCkIthaWfNrviM8WHjnbaFt8oYpGwInC/S2zmyWuxoEroV3gjkFNfrTg==}
-    cpu: [x64]
-    os: [win32]
-
-  '@msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.4':
-    resolution: {integrity: sha512-LCkGo6JDfaBhgST7UpPWgNgLINpcpabaHfyz5OBx75nUYxBsaEPxjnyNjWpeb/xBup/682QnBfRBy2/LvPutZQ==}
-    cpu: [arm64]
-    os: [darwin]
-
-  '@msgpackr-extract/msgpackr-extract-darwin-x64@3.0.4':
-    resolution: {integrity: sha512-zExlW9zUJKZH/tOtVMttwjKa4Xm/3KcNjnE3dPN92uCktwavMxpgCA3MoJK/DOnTWsQgo224OaST27/mPNAf+w==}
-    cpu: [x64]
-    os: [darwin]
-
-  '@msgpackr-extract/msgpackr-extract-linux-arm64@3.0.4':
-    resolution: {integrity: sha512-dgX0P/9wGPJeHFBG+ZmhgE6bmtMt7NP5CRBGyyktpopdk/mW4POnrpQsSLtKI1dwpc+pPLuXHDh6vvskyQE/sw==}
-    cpu: [arm64]
-    os: [linux]
-
-  '@msgpackr-extract/msgpackr-extract-linux-arm@3.0.4':
-    resolution: {integrity: sha512-Tg3yX65f5GbtXLkrYEHE5oibZG9epyYWas7FogTTEJeDEF9JlXJzKgXaNhT3UXlTOeA+AfZpYZYZ0uPj7Cfquw==}
-    cpu: [arm]
-    os: [linux]
-
-  '@msgpackr-extract/msgpackr-extract-linux-x64@3.0.4':
-    resolution: {integrity: sha512-8TNXMEjJc3QEy7R/x1INhgiU+XakDAFUzBhaz7+Rbrs8NH5UQeHQxxmzsSBJGyV6I1jW79undiQm8tOI+D+8FQ==}
-    cpu: [x64]
-    os: [linux]
-
-  '@msgpackr-extract/msgpackr-extract-win32-x64@3.0.4':
-    resolution: {integrity: sha512-CmCXPQrkbwExx3j946/PtHWHbYJiCRBRDl4BlkRQcJB/YOwQxJRTpoo7aTsortjgoJ1x7opzTSxn7C+ASSLVjQ==}
     cpu: [x64]
     os: [win32]
 
@@ -13848,8 +13777,8 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
-  '@playwright/test@1.63.0':
-    resolution: {integrity: sha512-oxMK4vllB9RK5NQ2l1pq1IfOf2AvnEuj/vYGDj0H2nMtmtZpKtCwt/l00GEO6xjGfpBNAvjovvYdCm50dRQkpQ==}
+  '@playwright/test@1.64.1':
+    resolution: {integrity: sha512-IaYGml/nSOiZWROfPtuIL7neuu9qDOZ3TNvNljUIrhDMxiGTgPjzj/g9p9RxpS2tSepPDRY+UwAaEeiKtUvIAg==}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -20598,10 +20527,6 @@ packages:
     resolution: {integrity: sha512-iyAZCeyD+c1gPyE9qpFu8af0Y+MRtmKOncdGoA2S5EY8iFq99dmmvkNnHiWo+pj0s7yH7l3KPIgee77tKpXPWQ==}
     engines: {node: '>=18.0.0'}
 
-  lmdb@3.5.6:
-    resolution: {integrity: sha512-j3uE8ReKNyUWDjhfEFSJqE/1DLtfTR5Z8yFzVHvBjAk37wNg7HdScjcv8ttPHRvrdgPQMPWxFFI0SsdBzI5lBw==}
-    hasBin: true
-
   loader-runner@4.3.2:
     resolution: {integrity: sha512-DFEqQ3ihfS9blba08cLfYf1NRAIEm+dDjic073DRDc3/JspI/8wYmtDsHwd3+4hwvdxSK7PGaElfTmm0awWJ4w==}
     engines: {node: '>=6.11.5'}
@@ -21344,13 +21269,6 @@ packages:
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
-  msgpackr-extract@3.0.4:
-    resolution: {integrity: sha512-4kmO/MdyUIkLIvTPr8VHLil4AtoKIoniWPIEk5+CDy0xnWC84azhSFmuJ7PxZdsYtiP5kEeQsORAVIeMgxT+Hw==}
-    hasBin: true
-
-  msgpackr@1.12.1:
-    resolution: {integrity: sha512-4EUH9tQHnMmEgzW/MdAP0KIfa1T9AF+htl0ffe2n5vb2EKn9y2co8ccpgWko6S52Jy1PQZKwRnx5/KkYjtd9MQ==}
-
   mssql@12.7.2:
     resolution: {integrity: sha512-zhpPw+WXBWLw7d7J6Y0aWgQy0EV8HKDGNSvmkAjP8bSM4H41X0fweAeKWI+bg9Ri+JHCbsf/QScjmACBFcEo8A==}
     engines: {node: '>=18.19.0'}
@@ -21449,9 +21367,6 @@ packages:
   node-abort-controller@3.1.1:
     resolution: {integrity: sha512-AGK2yQKIjRuqnc6VkX2Xj5d+QW8xZ87pa1UK6yA6ouUyuxfHuMP6umE5QK7UmTeOAymo+Zx1Fxiuw9rVx8taHQ==}
 
-  node-addon-api@6.1.0:
-    resolution: {integrity: sha512-+eawOlIgy680F0kBzPUNFhMZGtJ1YmqM6l4+Crf4IkImjYrO/mqPwRMh352g23uIaQKFItcQ64I7KMaJxHgAVA==}
-
   node-addon-api@7.1.1:
     resolution: {integrity: sha512-5m3bsyrjFWE1xf7nz7YXdN4udnVtXK6/Yfgn5qnahL6bCkf2yKt4k3nuTKAtT4r3IG8JNR2ncsIMdZuAzJjHQQ==}
 
@@ -21490,10 +21405,6 @@ packages:
   node-forge@1.4.2:
     resolution: {integrity: sha512-rRtAR5XLJ8gCKd9du4qrKAsgCG1ObGP4gLeNJMa4vYSeq4bmBMOJk5IHkrviBV0q7uoAJlVd8HEQYQSVUb4FGQ==}
     engines: {node: '>= 6.13.0'}
-
-  node-gyp-build-optional-packages@5.2.2:
-    resolution: {integrity: sha512-s+w+rBWnpTMwSFbaE0UXsRlg7hU4FjekKU4eyAih5T8nJuNZT1nNsskXpxmeqSK9UzkBl6UgRlnKc8hz8IEqOw==}
-    hasBin: true
 
   node-gyp-build@4.8.4:
     resolution: {integrity: sha512-LA4ZjwlnUblHVgq0oBF3Jl/6h/Nvs5fzBLwdEF4nuxnFdsfajde4WfxtJr3CaiH+F6ewcIB/q4jQ4UzPyid+CQ==}
@@ -21747,9 +21658,6 @@ packages:
   ora@9.4.1:
     resolution: {integrity: sha512-6VlU9MLXbjVQD04AZCMX28hVtA5bUoadvUqO76MUCVA0ilwJbMiHsITRPfyVm6p/BC0Av/BXMujx39WCe1LEqw==}
     engines: {node: '>=20'}
-
-  ordered-binary@1.6.2:
-    resolution: {integrity: sha512-BY+qgDArmYpvvmij141xbkB4Cw8RFLBQM5Zj4MODFb1SyXBRE/xO4Xj/QWbR7aUEBxbkjuNdsFVCL2TmbYrlNg==}
 
   original-url@1.2.3:
     resolution: {integrity: sha512-BYm+pKYLtS4mVe/mgT3YKGtWV5HzN/XKiaIu1aK4rsxyjuHeTW9N+xVBEpJcY1onB3nccfH0RbzUEoimMqFUHQ==}
@@ -22139,13 +22047,13 @@ packages:
   platform@1.3.6:
     resolution: {integrity: sha512-fnWVljUchTro6RiCFvCXBbNhJc2NijN7oIQxbwsyL0buWJPG85v81ehlHI9fXrJsMNgTofEoWIQeClKpgxFLrg==}
 
-  playwright-core@1.63.0:
-    resolution: {integrity: sha512-rYCsBF/M5HjUch52bbtVONEFjv6Xu8sm8h72dNlR5bzIE1fvC/bxgspzkjSfU+MweEMmPM8KJebG6nnyxo5mCg==}
+  playwright-core@1.64.1:
+    resolution: {integrity: sha512-BC4s8y6SEVA6Q1rSxZTto8hI1KUI3xXlHGZgvGqP4IqPdI/a6FX9H29IDNz7vKo9l21b6LfYosScPL6M3xxyDQ==}
     engines: {node: '>=20'}
     hasBin: true
 
-  playwright@1.63.0:
-    resolution: {integrity: sha512-+7ziBLidS4NaNCdt57SUDT+wYmmd5fmiQejUic/kb+YsYSCPyOOE9sebzMjNmQrsnNpDJqd4WHvV/8lfKfUDUg==}
+  playwright@1.64.1:
+    resolution: {integrity: sha512-HCrVhHr5QQuwYoswEUGTb7gGp522yflbv/ST8nF4sFWGuLjQCt17Q/EubpGGSNKYn1tsTCPZxqHhHCfVURu7UA==}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -23317,6 +23225,10 @@ packages:
   safe-stable-stringify@2.5.0:
     resolution: {integrity: sha512-b3rppTKm9T+PsVCBEOUR46GWI7fdOs00VKZ1+9c1EWDaDMvjQc6tUwuFyIprgGgTcWoVHSKrU8H31ZHA2e0RHA==}
     engines: {node: '>=10'}
+
+  safe-stable-stringify@3.0.0:
+    resolution: {integrity: sha512-1z5+QfsSGAtBGJrCw2DP9cwfdvSEMRN4BKKaZxFIKwcwRbshkrtKzzueVFAJ2d1QJm+J3AmpYvI88jFnlEZmyg==}
+    engines: {node: '>=18'}
 
   safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
@@ -25117,9 +25029,6 @@ packages:
   wcwidth@1.0.1:
     resolution: {integrity: sha512-XHPEwS0q6TaxcvG85+8EYkbiCux2XtWG2mkc47Ng2A77BQu9+DqIOJldST4HgPkuea7dvKSj5VgX3P1d4rW8Tg==}
 
-  weak-lru-cache@1.2.2:
-    resolution: {integrity: sha512-DEAoo25RfSYMuTGc9vPJzZcZullwIqRDSI9LOy+fkCJPi6hykCnfKaXTuPBDuXAUcqHXyOgFtHNp/kB2FjYHbw==}
-
   web-features@3.40.1:
     resolution: {integrity: sha512-HRdUYqZRNawtIEI39iKjk6E6g1yO/bct/8bFcD/O+bNGYsbG475PV80+HTrpkYOiZnoEaVSMu5Q/LTVwnBH5ag==}
 
@@ -25869,10 +25778,10 @@ snapshots:
 
   '@aws/lambda-invoke-store@0.3.0': {}
 
-  '@axe-core/playwright@4.13.0(playwright-core@1.63.0)':
+  '@axe-core/playwright@4.13.0(playwright-core@1.64.1)':
     dependencies:
       axe-core: 4.13.0
-      playwright-core: 1.63.0
+      playwright-core: 1.64.1
 
   '@azure-rest/core-client@2.9.0(supports-color@10.2.2)':
     dependencies:
@@ -27084,11 +26993,11 @@ snapshots:
       enabled: 2.0.0
       kuler: 2.0.0
 
-  '@dagrejs/dagre@3.1.1':
+  '@dagrejs/dagre@3.1.3':
     dependencies:
-      '@dagrejs/graphlib': 4.0.5
+      '@dagrejs/graphlib': 4.0.6
 
-  '@dagrejs/graphlib@4.0.5': {}
+  '@dagrejs/graphlib@4.0.6': {}
 
   '@date-fns/tz@1.5.0': {}
 
@@ -27240,7 +27149,7 @@ snapshots:
       semver: 7.8.5
       topojson-client: 3.1.0
 
-  '@elastic/eslint-plugin-eui@3.3.0(eslint@8.57.0(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)':
+  '@elastic/eslint-plugin-eui@4.0.0(eslint@8.57.0(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)':
     dependencies:
       '@typescript-eslint/typescript-estree': 8.71.0(supports-color@10.2.2)(typescript@6.0.3)
       '@typescript-eslint/utils': 8.60.0(eslint@8.57.0(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
@@ -27251,76 +27160,76 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@elastic/esql-ast@4.36.0':
+  '@elastic/esql-ast@4.38.0':
     dependencies:
-      '@elastic/esql-definitions': 4.36.0
-      '@elastic/esql-grammar': 4.36.0
-      '@elastic/esql-promql-grammar': 4.36.0
-      '@elastic/esql-types': 4.36.0
+      '@elastic/esql-definitions': 4.38.0
+      '@elastic/esql-grammar': 4.38.0
+      '@elastic/esql-promql-grammar': 4.38.0
+      '@elastic/esql-types': 4.38.0
       tslib: 2.8.1
 
-  '@elastic/esql-definitions@4.36.0': {}
+  '@elastic/esql-definitions@4.38.0': {}
 
-  '@elastic/esql-grammar@4.36.0':
+  '@elastic/esql-grammar@4.38.0':
     dependencies:
       antlr4: 4.13.2
       tslib: 2.8.1
 
-  '@elastic/esql-parser@4.36.0':
+  '@elastic/esql-parser@4.38.0':
     dependencies:
-      '@elastic/esql-ast': 4.36.0
-      '@elastic/esql-definitions': 4.36.0
-      '@elastic/esql-grammar': 4.36.0
-      '@elastic/esql-promql-grammar': 4.36.0
-      '@elastic/esql-traversal': 4.36.0
-      '@elastic/esql-types': 4.36.0
+      '@elastic/esql-ast': 4.38.0
+      '@elastic/esql-definitions': 4.38.0
+      '@elastic/esql-grammar': 4.38.0
+      '@elastic/esql-promql-grammar': 4.38.0
+      '@elastic/esql-traversal': 4.38.0
+      '@elastic/esql-types': 4.38.0
       antlr4: 4.13.2
       tslib: 2.8.1
 
-  '@elastic/esql-promql-grammar@4.36.0':
+  '@elastic/esql-promql-grammar@4.38.0':
     dependencies:
       antlr4: 4.13.2
       tslib: 2.8.1
 
-  '@elastic/esql-traversal@4.36.0':
+  '@elastic/esql-traversal@4.38.0':
     dependencies:
-      '@elastic/esql-ast': 4.36.0
-      '@elastic/esql-types': 4.36.0
+      '@elastic/esql-ast': 4.38.0
+      '@elastic/esql-types': 4.38.0
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
 
-  '@elastic/esql-types@4.36.0': {}
+  '@elastic/esql-types@4.38.0': {}
 
-  '@elastic/esql@4.36.0':
+  '@elastic/esql@4.38.0':
     dependencies:
-      '@elastic/esql-ast': 4.36.0
-      '@elastic/esql-definitions': 4.36.0
-      '@elastic/esql-grammar': 4.36.0
-      '@elastic/esql-parser': 4.36.0
-      '@elastic/esql-promql-grammar': 4.36.0
-      '@elastic/esql-traversal': 4.36.0
-      '@elastic/esql-types': 4.36.0
-      '@elastic/pretty-printer': 4.36.0
+      '@elastic/esql-ast': 4.38.0
+      '@elastic/esql-definitions': 4.38.0
+      '@elastic/esql-grammar': 4.38.0
+      '@elastic/esql-parser': 4.38.0
+      '@elastic/esql-promql-grammar': 4.38.0
+      '@elastic/esql-traversal': 4.38.0
+      '@elastic/esql-types': 4.38.0
+      '@elastic/pretty-printer': 4.38.0
       antlr4: 4.13.2
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
 
   '@elastic/eui-illustrations@1.1.0': {}
 
-  '@elastic/eui-test-helpers@2.2.0(@playwright/test@1.63.0)':
+  '@elastic/eui-test-helpers@2.3.0(@playwright/test@1.64.1)':
     optionalDependencies:
-      '@playwright/test': 1.63.0
+      '@playwright/test': 1.64.1
 
-  '@elastic/eui-theme-borealis@8.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@elastic/eui-theme-borealis@8.2.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      '@elastic/eui-theme-common': 10.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@elastic/eui-theme-common': 10.2.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       chroma-js: 2.4.2
     transitivePeerDependencies:
       - '@emotion/react'
       - react
       - react-dom
 
-  '@elastic/eui-theme-common@10.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@elastic/eui-theme-common@10.2.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@emotion/react': 11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2)
       '@types/lodash': 4.17.20
@@ -27329,11 +27238,11 @@ snapshots:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
-  '@elastic/eui@123.3.0(@elastic/datemath@5.0.3(moment@2.31.0))(@elastic/eui-theme-borealis@8.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)':
+  '@elastic/eui@123.4.0(@elastic/datemath@5.0.3(moment@2.31.0))(@elastic/eui-theme-borealis@8.2.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)':
     dependencies:
       '@elastic/datemath': 5.0.3(moment@2.31.0)
-      '@elastic/eui-theme-borealis': 8.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@elastic/eui-theme-common': 10.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@elastic/eui-theme-borealis': 8.2.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@elastic/eui-theme-common': 10.2.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@elastic/prismjs-esql': 4.28.0
       '@emotion/css': 11.13.5(supports-color@10.2.2)
       '@emotion/react': 11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2)
@@ -27419,7 +27328,7 @@ snapshots:
 
   '@elastic/monaco-esql@4.37.0(monaco-editor@0.56.0)':
     dependencies:
-      '@elastic/esql-definitions': 4.36.0
+      '@elastic/esql-definitions': 4.38.0
       monaco-editor: 0.56.0
 
   '@elastic/node-crypto@1.2.3': {}
@@ -27500,14 +27409,14 @@ snapshots:
       - encoding
       - supports-color
 
-  '@elastic/pretty-printer@4.36.0':
+  '@elastic/pretty-printer@4.38.0':
     dependencies:
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
 
   '@elastic/prismjs-esql@4.28.0':
     dependencies:
-      '@elastic/esql-definitions': 4.36.0
+      '@elastic/esql-definitions': 4.38.0
 
   '@elastic/react-search-ui-views@1.24.2(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)':
     dependencies:
@@ -28265,8 +28174,6 @@ snapshots:
       '@hapi/bourne': 3.0.0
       '@hapi/hoek': 11.0.7
 
-  '@harperfast/extended-iterable@1.0.3': {}
-
   '@hello-pangea/dnd@18.0.1(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@babel/runtime': 7.29.7
@@ -28904,27 +28811,6 @@ snapshots:
       '@launchdarkly/openfeature-js-server-common': 2.0.6(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@openfeature/server-sdk': 1.23.0(@openfeature/core@1.12.0)
 
-  '@lmdb/lmdb-darwin-arm64@3.5.6':
-    optional: true
-
-  '@lmdb/lmdb-darwin-x64@3.5.6':
-    optional: true
-
-  '@lmdb/lmdb-linux-arm64@3.5.6':
-    optional: true
-
-  '@lmdb/lmdb-linux-arm@3.5.6':
-    optional: true
-
-  '@lmdb/lmdb-linux-x64@3.5.6':
-    optional: true
-
-  '@lmdb/lmdb-win32-arm64@3.5.6':
-    optional: true
-
-  '@lmdb/lmdb-win32-x64@3.5.6':
-    optional: true
-
   '@loaders.gl/core@3.4.7':
     dependencies:
       '@babel/runtime': 7.29.7
@@ -29145,24 +29031,6 @@ snapshots:
     optional: true
 
   '@moonrepo/core-windows-x64-msvc@2.6.2':
-    optional: true
-
-  '@msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.4':
-    optional: true
-
-  '@msgpackr-extract/msgpackr-extract-darwin-x64@3.0.4':
-    optional: true
-
-  '@msgpackr-extract/msgpackr-extract-linux-arm64@3.0.4':
-    optional: true
-
-  '@msgpackr-extract/msgpackr-extract-linux-arm@3.0.4':
-    optional: true
-
-  '@msgpackr-extract/msgpackr-extract-linux-x64@3.0.4':
-    optional: true
-
-  '@msgpackr-extract/msgpackr-extract-win32-x64@3.0.4':
     optional: true
 
   '@mswjs/http-middleware@0.10.3(msw@2.15.0(@types/node@24.10.13)(typescript@6.0.3))(supports-color@10.2.2)':
@@ -30343,9 +30211,9 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@playwright/test@1.63.0':
+  '@playwright/test@1.64.1':
     dependencies:
-      playwright: 1.63.0
+      playwright: 1.64.1
 
   '@pmmmwh/react-refresh-webpack-plugin@0.6.2(react-refresh@0.18.0)(type-fest@4.41.0)(webpack-hot-middleware@2.26.1)(webpack@5.96.1)':
     dependencies:
@@ -38364,23 +38232,6 @@ snapshots:
       rfdc: 1.4.1
       wrap-ansi: 9.0.2
 
-  lmdb@3.5.6:
-    dependencies:
-      '@harperfast/extended-iterable': 1.0.3
-      msgpackr: 1.12.1
-      node-addon-api: 6.1.0
-      node-gyp-build-optional-packages: 5.2.2
-      ordered-binary: 1.6.2
-      weak-lru-cache: 1.2.2
-    optionalDependencies:
-      '@lmdb/lmdb-darwin-arm64': 3.5.6
-      '@lmdb/lmdb-darwin-x64': 3.5.6
-      '@lmdb/lmdb-linux-arm': 3.5.6
-      '@lmdb/lmdb-linux-arm64': 3.5.6
-      '@lmdb/lmdb-linux-x64': 3.5.6
-      '@lmdb/lmdb-win32-arm64': 3.5.6
-      '@lmdb/lmdb-win32-x64': 3.5.6
-
   loader-runner@4.3.2: {}
 
   loader-utils@2.0.4:
@@ -39341,22 +39192,6 @@ snapshots:
 
   ms@2.1.3: {}
 
-  msgpackr-extract@3.0.4:
-    dependencies:
-      node-gyp-build-optional-packages: 5.2.2
-    optionalDependencies:
-      '@msgpackr-extract/msgpackr-extract-darwin-arm64': 3.0.4
-      '@msgpackr-extract/msgpackr-extract-darwin-x64': 3.0.4
-      '@msgpackr-extract/msgpackr-extract-linux-arm': 3.0.4
-      '@msgpackr-extract/msgpackr-extract-linux-arm64': 3.0.4
-      '@msgpackr-extract/msgpackr-extract-linux-x64': 3.0.4
-      '@msgpackr-extract/msgpackr-extract-win32-x64': 3.0.4
-    optional: true
-
-  msgpackr@1.12.1:
-    optionalDependencies:
-      msgpackr-extract: 3.0.4
-
   mssql@12.7.2(supports-color@10.2.2):
     dependencies:
       '@tediousjs/connection-string': 1.1.0
@@ -39476,8 +39311,6 @@ snapshots:
 
   node-abort-controller@3.1.1: {}
 
-  node-addon-api@6.1.0: {}
-
   node-addon-api@7.1.1: {}
 
   node-addon-api@8.9.2:
@@ -39505,10 +39338,6 @@ snapshots:
       whatwg-url: 5.0.0
 
   node-forge@1.4.2: {}
-
-  node-gyp-build-optional-packages@5.2.2:
-    dependencies:
-      detect-libc: 2.1.2
 
   node-gyp-build@4.8.4:
     optional: true
@@ -39816,8 +39645,6 @@ snapshots:
       log-symbols: 7.0.1
       stdin-discarder: 0.3.2
       string-width: 8.3.0
-
-  ordered-binary@1.6.2: {}
 
   original-url@1.2.3:
     dependencies:
@@ -40270,11 +40097,11 @@ snapshots:
 
   platform@1.3.6: {}
 
-  playwright-core@1.63.0: {}
+  playwright-core@1.64.1: {}
 
-  playwright@1.63.0:
+  playwright@1.64.1:
     dependencies:
-      playwright-core: 1.63.0
+      playwright-core: 1.64.1
 
   plur@4.0.0:
     dependencies:
@@ -41670,6 +41497,8 @@ snapshots:
       sql-escape-string: 1.1.0
 
   safe-stable-stringify@2.5.0: {}
+
+  safe-stable-stringify@3.0.0: {}
 
   safer-buffer@2.1.2: {}
 
@@ -43813,8 +43642,6 @@ snapshots:
   wcwidth@1.0.1:
     dependencies:
       defaults: 1.0.4
-
-  weak-lru-cache@1.2.2: {}
 
   web-features@3.40.1: {}
 
