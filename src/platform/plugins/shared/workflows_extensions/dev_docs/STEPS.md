@@ -1148,13 +1148,13 @@ Public registration is identical to single-shot steps: `createPublicStepDefiniti
 
 ## Step Definition Approval Process
 
-All custom step definitions must be approved by the workflows-eng team before being merged. This is enforced through a Scout API test that validates registered steps against a set of approved hashes.
+All custom step definitions must be approved by the workflows-eng team before being merged. This is enforced by the workflow step schema generation job (a Jest integration test that boots a real Kibana), which runs in the `Checks` step of every PR and merge queue build and validates registered steps against a set of approved hashes.
 
 ### How It Works
 
-1. **Registration Detection**: When you register a new step or change an existing step definition (id, label, schemas, category, documentation, etc.), the test will detect it during CI runs.
+1. **Registration Detection**: When you register a new step or change an existing step definition (id, label, schemas, category, documentation, etc.), the job detects it during CI runs.
 
-2. **Definition Hash**: The test generates a SHA256 hash of each step's definition and exposes it on the `internal/workflows_extensions/step_definitions` endpoint as `definitionHash`. Any meaningful change to the definition produces a new hash.
+2. **Definition Hash**: The job reads a SHA256 hash of each step's definition from the `internal/workflows_extensions/step_definitions` endpoint (`definitionHash`). Any meaningful change to the definition produces a new hash.
 
 3. **Per-step approval files**: Each approved step is stored in its own file under:
 
@@ -1162,45 +1162,38 @@ All custom step definitions must be approved by the workflows-eng team before be
    test/scout/api/fixtures/approved_step_definitions/<step.id>.txt
    ```
 
-   The file contains a single line: the approved `definitionHash` for that step. One file per step means PRs that add or update different steps never conflict on a shared list.
+   The file contains a single line: the approved `definitionHash` for that step. One file per step means PRs that add or update different steps never conflict on a shared list. The directory is owned by workflows-eng through `CODEOWNERS`, so changing an approval file requests their review.
 
 ### Adding a New Step or Updating an Existing One
 
-1. **Run the approval test locally** so it prints the exact commands you need:
+1. **Run the approval check locally** so it prints the exact commands you need:
 
    ```bash
-   node scripts/scout.js run-tests --arch stateful --domain classic \
-     --config src/platform/plugins/shared/workflows_extensions/test/scout/api/playwright.config.ts
+   WORKFLOW_STEP_APPROVAL_REPORT=/tmp/step_approval.txt \
+     WORKFLOW_SCHEMA_OUTPUT_DIR="$PWD/target/workflow_step_schema_local" \
+     node scripts/jest_integration \
+     --config src/platform/packages/private/kbn-workflow-step-schema-cli/integration_tests/jest.integration.config.js
+   cat /tmp/step_approval.txt
    ```
 
-   When a step is unapproved (new id or changed hash), the test fails with a message like:
+   When a step is unapproved (new id or changed hash), the report (and the failing CI job) contains a message like:
 
    ```
-   Found 1 unapproved step definition(s). Run the following command(s) from your kibana directory and request review from the workflows-eng team:
+   Found 1 unapproved step definition(s):
+     - Step "my-namespace.myCustomStep" is not in the approved list.
+
+   Run the following command(s) from your kibana directory and request review from the workflows-eng team:
 
    echo <definitionHash> > src/platform/plugins/shared/workflows_extensions/test/scout/api/fixtures/approved_step_definitions/my-namespace.myCustomStep.txt
    ```
 
 2. **Run the printed `echo` command(s) from your kibana directory.** This creates (or overwrites) the per-step approval file with the new hash.
 
-3. **Re-run the test** to confirm it passes.
+3. **Re-run the check** to confirm the report is no longer produced.
 
 4. **Commit the new/updated file** under `approved_step_definitions/` and request approval from the workflows-eng team in your PR.
 
 If you change a step's definition later, only its own approval file needs updating — repeat the steps above.
 
-### Running the Approval Test
-
-To run the test locally:
-
-```bash
-# Start servers and run tests
-node scripts/scout.js run-tests --arch stateful --domain classic --config src/platform/plugins/shared/workflows_extensions/test/scout/api/playwright.config.ts
-
-# Or start servers separately, then run tests
-node scripts/scout.js start-server --arch stateful --domain classic
-node scripts/playwright test --config src/platform/plugins/shared/workflows_extensions/test/scout/api/playwright.config.ts --project local
-```
-
-The test prints one `echo … > …` command per offending step, ready to copy-paste from your kibana directory.
+CI never writes approval files: it prints the commands and fails the PR or merge queue build until the approval files are committed and reviewed.
 
