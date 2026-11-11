@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { VisualOptionsProps } from './value_labels_settings';
 import { ValueLabelsSettings } from './value_labels_settings';
@@ -21,23 +21,26 @@ describe('Value labels Settings', () => {
 
   it('should not render the component if not enabled', () => {
     render(<ValueLabelsSettings {...props} isVisible={false} />);
-    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('lens-value-labels-visibility-btn')).not.toBeInTheDocument();
   });
 
   it('should set hide as default value', () => {
     render(<ValueLabelsSettings {...props} />);
-    expect(screen.getByRole('button', { name: 'Hide' })).toHaveAttribute('aria-pressed', 'true');
+    const control = within(screen.getByTestId('lens-value-labels-visibility-btn'));
+    expect(control.getByRole('button', { name: 'Hide' })).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('should have called onValueLabelChange function on ButtonGroup change', async () => {
     render(<ValueLabelsSettings {...props} />);
-    await userEvent.click(screen.getByRole('button', { name: 'Show, if able' }));
+    const control = within(screen.getByTestId('lens-value-labels-visibility-btn'));
+    await userEvent.click(control.getByRole('button', { name: 'Show, if able' }));
     expect(props.onValueLabelChange).toHaveBeenCalledWith('show');
   });
 
   it('should render the passed value if given', () => {
     render(<ValueLabelsSettings {...props} valueLabels="show" />);
-    expect(screen.getByRole('button', { name: 'Show, if able' })).toHaveAttribute(
+    const control = within(screen.getByTestId('lens-value-labels-visibility-btn'));
+    expect(control.getByRole('button', { name: 'Show, if able' })).toHaveAttribute(
       'aria-pressed',
       'true'
     );
