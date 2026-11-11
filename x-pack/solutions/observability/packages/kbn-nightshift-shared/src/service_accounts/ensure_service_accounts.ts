@@ -128,6 +128,7 @@ const LIST_PAGE_SIZE = 100;
 const DESCRIPTION: Record<NightshiftServiceAccountKind, string> = {
   agent: 'Runs nightshift investigations, their sandbox tools and learning hooks.',
   automations: 'Runs nightshift automations, which start investigations.',
+  detection: 'Runs the nightshift detection engine.',
 };
 
 const listAll = async (api: NightshiftServiceAccountsApi): Promise<ListedServiceAccount[]> => {
@@ -165,9 +166,69 @@ const findForRole = (accounts: ListedServiceAccount[], name: string, role: strin
 };
 
 /**
+ * The account to use for a kind, found among the already listed `accounts` or created with its
+ * role as the current user. An existing account is reused, never changed, so setting up a second
+ * space reuses the account of the first.
+ */
+const ensureFromListed = async (
+  api: NightshiftServiceAccountsApi,
+  {
+    accounts,
+    kind,
+    isServerless,
+  }: { accounts: ListedServiceAccount[]; kind: NightshiftServiceAccountKind; isServerless: boolean }
+): Promise<string> => {
+  const name = getNightshiftServiceAccountName(kind);
+  const role = getNightshiftRoleName(kind, { isServerless });
+  const toId = (account: ListedServiceAccount): string => {
+    if (!isUsable(account)) {
+      throw new NightshiftServiceAccountSetupError('account_unusable', { kind, name, role });
+    }
+    return account.id;
+  };
+
+  const { account: existing, nameTaken } = findForRole(accounts, name, role);
+  if (existing) return toId(existing);
+  if (nameTaken) {
+    throw new NightshiftServiceAccountSetupError('role_mismatch', { kind, name, role });
+  }
+
+  if (!(await api.roleExists(role))) {
+    throw new NightshiftServiceAccountSetupError('role_missing', { kind, name, role });
+  }
+  try {
+    const { id } = await api.createServiceAccount({
+      name,
+      description: `${DESCRIPTION[kind]} Created by Nightshift.`,
+      roles: [role],
+    });
+    return id;
+  } catch (error) {
+    // Created concurrently (a name is unique on stateful), for example from another space.
+    if (!api.isConflict(error)) throw error;
+    const { account: concurrent } = findForRole(await listAll(api), name, role);
+    if (!concurrent) throw error;
+    return toId(concurrent);
+  }
+};
+
+/**
+ * Finds the deployment's Nightshift service account of one kind by name, or creates it with its
+ * role, as the current user. Returns the id the backend assigned.
+ *
+ * Throws a {@link NightshiftServiceAccountSetupError} when the account cannot be used or its role
+ * is missing, and the API's own error otherwise.
+ */
+export const ensureNightshiftServiceAccount = async (
+  api: NightshiftServiceAccountsApi,
+  { kind, isServerless }: { kind: NightshiftServiceAccountKind; isServerless: boolean }
+): Promise<string> => ensureFromListed(api, { accounts: await listAll(api), kind, isServerless });
+
+/**
  * Finds the deployment's Nightshift service accounts by name, and creates the missing ones with
- * their roles, as the current user. Returns the ids the backend assigned. Existing accounts are
- * reused, never changed, so setting up a second space reuses the accounts of the first.
+ * their roles, as the current user. Returns the ids the backend assigned. The accounts are listed
+ * once for both kinds. The detection account is not part of it, see
+ * {@link ensureNightshiftServiceAccount}.
  *
  * Throws a {@link NightshiftServiceAccountSetupError} when an account cannot be used or its role
  * is missing, and the API's own error otherwise.
@@ -177,41 +238,8 @@ export const ensureNightshiftServiceAccounts = async (
   { isServerless }: { isServerless: boolean }
 ): Promise<NightshiftServiceAccountIds> => {
   const accounts = await listAll(api);
-
-  const ensureOne = async (kind: NightshiftServiceAccountKind): Promise<string> => {
-    const name = getNightshiftServiceAccountName(kind);
-    const role = getNightshiftRoleName(kind, { isServerless });
-    const toId = (account: ListedServiceAccount): string => {
-      if (!isUsable(account)) {
-        throw new NightshiftServiceAccountSetupError('account_unusable', { kind, name, role });
-      }
-      return account.id;
-    };
-
-    const { account: existing, nameTaken } = findForRole(accounts, name, role);
-    if (existing) return toId(existing);
-    if (nameTaken) {
-      throw new NightshiftServiceAccountSetupError('role_mismatch', { kind, name, role });
-    }
-
-    if (!(await api.roleExists(role))) {
-      throw new NightshiftServiceAccountSetupError('role_missing', { kind, name, role });
-    }
-    try {
-      const { id } = await api.createServiceAccount({
-        name,
-        description: `${DESCRIPTION[kind]} Created by Nightshift.`,
-        roles: [role],
-      });
-      return id;
-    } catch (error) {
-      // Created concurrently (a name is unique on stateful), for example from another space.
-      if (!api.isConflict(error)) throw error;
-      const { account: concurrent } = findForRole(await listAll(api), name, role);
-      if (!concurrent) throw error;
-      return toId(concurrent);
-    }
+  return {
+    agent: await ensureFromListed(api, { accounts, kind: 'agent', isServerless }),
+    automations: await ensureFromListed(api, { accounts, kind: 'automations', isServerless }),
   };
-
-  return { agent: await ensureOne('agent'), automations: await ensureOne('automations') };
 };

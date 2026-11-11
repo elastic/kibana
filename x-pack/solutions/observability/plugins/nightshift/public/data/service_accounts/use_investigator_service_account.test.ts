@@ -5,24 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
-import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { useKibana } from '../../hooks/use_kibana';
-import {
-  isNightshiftSetUp,
-  useSetUpNightshiftServiceAccount,
-} from './use_investigator_service_account';
-
-jest.mock('../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
-jest.mock('@kbn/nightshift-shared', () => ({
-  ...jest.requireActual('@kbn/nightshift-shared'),
-  ensureNightshiftServiceAccounts: jest
-    .fn()
-    .mockResolvedValue({ agent: 'kibana/nightshift_agent', automations: 'kibana/auto' }),
-}));
-
-const mockUseKibana = useKibana as jest.Mock;
+import { isNightshiftSetUp } from './use_investigator_service_account';
 
 const status = (overrides: Record<string, unknown> = {}) => ({
   serviceAccountsEnabled: true,
@@ -51,41 +34,16 @@ const status = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
-describe('useSetUpNightshiftServiceAccount', () => {
-  it('binds the space to its service accounts and installs the agent in one step', async () => {
-    const fetch = jest.fn().mockResolvedValue(status());
-    const addSuccess = jest.fn();
-    mockUseKibana.mockReturnValue({
-      services: {
-        notifications: { toasts: { addSuccess, addError: jest.fn() } },
-        nightshiftInvestigations: { investigationsClient: { fetch } },
-        http: {},
-        security: { serviceAccounts: {} },
-        isServerless: false,
-      },
-    });
-    const queryClient = new QueryClient();
-    const { result } = renderHook(() => useSetUpNightshiftServiceAccount(), {
-      wrapper: ({ children }) =>
-        React.createElement(QueryClientProvider, { client: queryClient }, children),
-    });
-
-    result.current.mutate();
-
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    expect(fetch.mock.calls.map(([endpoint]) => endpoint)).toEqual([
-      'POST /internal/nightshift/investigations/service_account/_enable',
-      'POST /internal/nightshift/onboarding/enable',
-    ]);
-    await waitFor(() =>
-      expect(addSuccess).toHaveBeenCalledWith({ title: 'Elastic nightshift enabled' })
-    );
-  });
-});
+const detection = {
+  serviceAccountsEnabled: true,
+  canSetUp: true,
+  role: 'nightshift_detection',
+  serviceAccountId: 'kibana/nightshift_detection',
+};
 
 describe('isNightshiftSetUp', () => {
-  it('is set up once the bound investigation is installed and enabled', () => {
-    expect(isNightshiftSetUp(status())).toBe(true);
+  it('is set up once the bound investigation is installed and enabled and detection is bound', () => {
+    expect(isNightshiftSetUp({ investigator: status(), detection })).toBe(true);
   });
 
   it.each([
@@ -94,10 +52,21 @@ describe('isNightshiftSetUp', () => {
     ['the bound investigation is disabled', { enabled: false }],
     ['the entry point is bound to another account', { bound: false }],
   ])('is not set up when %s', (_, overrides) => {
-    expect(isNightshiftSetUp(status(overrides))).toBe(false);
+    expect(isNightshiftSetUp({ investigator: status(overrides), detection })).toBe(false);
+  });
+
+  // A space set up before the detection account existed has a bound investigator only, and its
+  // detection engine refuses every run until the prompt sets the account up.
+  it('is not set up when the detection engine has no account', () => {
+    expect(
+      isNightshiftSetUp({
+        investigator: status(),
+        detection: { ...detection, serviceAccountId: null },
+      })
+    ).toBe(false);
   });
 
   it('is not set up without a status', () => {
-    expect(isNightshiftSetUp(undefined)).toBe(false);
+    expect(isNightshiftSetUp({ investigator: undefined, detection: undefined })).toBe(false);
   });
 });

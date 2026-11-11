@@ -41,10 +41,22 @@ const TEST_DATA_READ_PRIVILEGES = {
   privileges: ['read', 'view_index_metadata'],
 };
 
+// Saving a source checks that its author can read every index the query names, and the All logs
+// recommendation is the query `FROM logs*`. The check asks for read on the pattern itself, so the
+// test-prefixed indices above do not cover it.
+const RECOMMENDED_SOURCE_READ_PRIVILEGES = {
+  names: ['logs*'],
+  privileges: ['read', 'view_index_metadata'],
+};
+
 export const NIGHTSHIFT_MANAGER_ROLE: KibanaRole = {
   elasticsearch: {
     cluster: [],
-    indices: [VIEW_MANAGE_PRIVILEGES, TEST_DATA_READ_PRIVILEGES],
+    indices: [
+      VIEW_MANAGE_PRIVILEGES,
+      TEST_DATA_READ_PRIVILEGES,
+      RECOMMENDED_SOURCE_READ_PRIVILEGES,
+    ],
   },
   kibana: [
     {
@@ -53,6 +65,24 @@ export const NIGHTSHIFT_MANAGER_ROLE: KibanaRole = {
       spaces: ['*'],
     },
   ],
+};
+
+/**
+ * A manager whose index read covers only the `readable` part of the test prefix, so it can run
+ * `FROM nightshift-sources-test-*` but does not hold read on the pattern itself.
+ */
+export const NIGHTSHIFT_PARTIAL_READ_MANAGER_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+    indices: [
+      VIEW_MANAGE_PRIVILEGES,
+      {
+        names: [`${TEST_INDEX_PREFIX}readable-*`],
+        privileges: ['read', 'view_index_metadata'],
+      },
+    ],
+  },
+  kibana: NIGHTSHIFT_MANAGER_ROLE.kibana,
 };
 
 /**

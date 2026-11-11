@@ -12,7 +12,8 @@ import { ExecutionStatus } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_DETECTION_ENGINE_TRIGGER_SOURCE,
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import {
@@ -21,12 +22,15 @@ import {
   parseSourceFromConcurrencyKey,
   parseSourceFromKiConcurrencyKey,
 } from './onboarding_workflow_client';
+// The onboarding workflow is installed per space; the mock request resolves to the default space.
+const ONBOARDING_DOC_ID = `${NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID}-default`;
+
 const statusRequest = httpServerMock.createKibanaRequest();
 
 const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => {
   const api = {
     getWorkflow: jest.fn().mockResolvedValue({
-      id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
+      id: ONBOARDING_DOC_ID,
       name: 'onboarding',
       enabled: true,
       definition: {},
@@ -120,9 +124,13 @@ describe('SignificantEventsKIsOnboardingClient', () => {
   describe('concurrency key sync with the workflow YAML', () => {
     const yamlKeyTemplate = (workflowId: Parameters<typeof getManagedWorkflowDefinition>[0]) => {
       const definition = getManagedWorkflowDefinition(workflowId);
-      expect(definition?.yaml).toBeDefined();
-      return (parse(definition!.yaml!) as { settings: { concurrency: { key: string } } }).settings
-        .concurrency.key;
+      const yaml =
+        definition && 'yamlTemplate' in definition && definition.yamlTemplate
+          ? definition.yamlTemplate({ serviceAccountId: 'sa-1' })
+          : definition?.yaml;
+      expect(yaml).toBeDefined();
+      return (parse(yaml!) as { settings: { concurrency: { key: string } } }).settings.concurrency
+        .key;
     };
     const fillTemplate = (template: string) =>
       template
@@ -131,7 +139,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
 
     it('buildConcurrencyKey produces keys that match the onboarding YAML concurrency template', () => {
       expect(buildConcurrencyKey({ sourceSlug: 'test-source', sourceId: 'source-id-1' })).toBe(
-        fillTemplate(yamlKeyTemplate(SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID))
+        fillTemplate(yamlKeyTemplate(NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID))
       );
     });
 
@@ -183,23 +191,21 @@ describe('SignificantEventsKIsOnboardingClient', () => {
           execution_id: 'execution-id',
         })
       );
-      expect(managementApi.getWorkflow).toHaveBeenCalledWith(
-        SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
-        '*'
-      );
+      expect(managementApi.getWorkflow).toHaveBeenCalledWith(ONBOARDING_DOC_ID, 'default');
       expect(managementApi.runWorkflow).toHaveBeenCalledWith(
-        expect.objectContaining({ id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID }),
+        expect.objectContaining({ id: ONBOARDING_DOC_ID }),
         'default',
         expect.objectContaining({
           sourceId: 'logs.nginx',
           sourceSlug: slugOf('logs.nginx'),
           sourceRevision: 'revision-2',
         }),
-        request
+        request,
+        NIGHTSHIFT_DETECTION_ENGINE_TRIGGER_SOURCE
       );
     });
 
-    it('throws when the workflow is not found', async () => {
+    it('throws the not-set-up error when the space has no bound workflow', async () => {
       const { client } = createClient({
         getWorkflow: jest.fn().mockResolvedValue(null),
       });
@@ -214,10 +220,10 @@ describe('SignificantEventsKIsOnboardingClient', () => {
           },
           request,
         })
-      ).rejects.toThrow(/not found/);
+      ).rejects.toThrow(/not set up/);
     });
 
-    it('throws when the workflow has no definition', async () => {
+    it('throws the not-set-up error when the bound workflow has no definition', async () => {
       const { client } = createClient({
         getWorkflow: jest.fn().mockResolvedValue({ id: 'wf', definition: null }),
       });
@@ -232,7 +238,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
           },
           request,
         })
-      ).rejects.toThrow(/not found/);
+      ).rejects.toThrow(/not set up/);
     });
   });
 
@@ -393,7 +399,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
       expect(result).toEqual({
         status: SignificantEventsWorkflowStatus.Failed,
         executionId: 'exec-1',
-        error: 'Workflow system-streams-ki-onboarding timed out',
+        error: `Workflow ${ONBOARDING_DOC_ID} timed out`,
       });
     });
 
@@ -450,7 +456,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
       expect(managementApi.getWorkflowExecutions).toHaveBeenCalledTimes(1);
       expect(managementApi.getWorkflowExecutions).toHaveBeenCalledWith(
         expect.objectContaining({
-          workflowId: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
+          workflowId: ONBOARDING_DOC_ID,
           size: 10000,
           sortField: 'createdAt',
           sortOrder: 'desc',
@@ -640,7 +646,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
     // `drop` concurrency keyed by slug and id, so a replacement run is dropped until they have stopped.
     const runningExecutionOf = (workflowId: string, concurrencyGroupKey: string) => {
       const ids: Record<string, string> = {
-        [SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID]: 'onboarding-exec',
+        [ONBOARDING_DOC_ID]: 'onboarding-exec',
         [SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID]: 'features-exec',
         [SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID]: 'queries-exec',
       };
@@ -689,9 +695,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
 
     it('cancels the sub-workflow runs even when no onboarding run is active', async () => {
       const getWorkflowExecutions = jest.fn(async ({ workflowId }: { workflowId: string }) =>
-        workflowId === SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID
-          ? { results: [] }
-          : runningExecutionOf(workflowId, 'key')
+        workflowId === ONBOARDING_DOC_ID ? { results: [] } : runningExecutionOf(workflowId, 'key')
       );
       const { client, managementApi } = createClient({ getWorkflowExecutions });
       const request = httpServerMock.createKibanaRequest();
@@ -718,7 +722,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
       const executions = await client.getNonTerminalExecutions({ request });
 
       expect(executions.map(({ id }) => id)).toEqual([
-        `${SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID}-exec`,
+        `${ONBOARDING_DOC_ID}-exec`,
         `${SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID}-exec`,
         `${SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID}-exec`,
       ]);

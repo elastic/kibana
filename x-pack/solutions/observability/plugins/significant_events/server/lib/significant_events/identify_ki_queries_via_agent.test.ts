@@ -5,124 +5,63 @@
  * 2.0.
  */
 
-import { of } from 'rxjs';
-import * as kbnStd from '@kbn/std';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import { ChatEventType } from '@kbn/agent-builder-common';
+import { ConversationRoundStepType } from '@kbn/agent-builder-common';
+import type { Conversation } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID } from '../../agent_builder/skills/ki_query_generation';
 import { sourceWithSlug } from '../../agent_builder/utils/test_helpers';
-import { executeKIQueryGenerationAgent } from './identify_ki_queries_via_agent';
+import { readKIQueryGenerationResult } from './identify_ki_queries_via_agent';
 
 const source = sourceWithSlug('logs.test', { description: 'Test logs' });
 
-describe('executeKIQueryGenerationAgent', () => {
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
+const validationStep = (toolCallId: string, data: Record<string, unknown>) => ({
+  type: ConversationRoundStepType.toolCall,
+  tool_id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
+  tool_call_id: toolCallId,
+  params: {},
+  results: [{ type: ToolResultType.other, data }],
+});
 
-  it('returns finalized queries from the latest validation result', async () => {
-    const validatedQuery = {
-      type: 'match' as const,
-      title: 'Validated query',
-      description: 'Detects validated failures',
-      esql: { query: 'FROM logs.test | WHERE message:"failure"' },
-      category: 'error' as const,
-      severity_score: 60,
-      features: [{ id: 'feature-1', run_id: 'run-1' }],
-    };
-    const executeAgent = jest.fn().mockResolvedValue({
-      events$: of(
-        {
-          type: ChatEventType.toolResult,
-          data: {
-            tool_id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
-            tool_call_id: 'validate-1',
-            results: [
-              {
-                type: ToolResultType.other,
-                data: {
-                  slug: 'logs.other',
-                  finalized: true,
-                  finalized_queries: [
-                    { ...validatedQuery, esql: { query: 'FROM superseded-validation' } },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-        {
-          type: ChatEventType.toolResult,
-          data: {
-            tool_id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
-            tool_call_id: 'validate-2',
-            results: [
-              {
-                type: ToolResultType.other,
-                data: {
-                  slug: 'logs.test',
-                  finalized: true,
-                  finalized_queries: [validatedQuery],
-                },
-              },
-            ],
-          },
-        },
-        {
-          type: ChatEventType.roundComplete,
-          data: {
-            round: {
-              model_usage: {
-                input_tokens: 10,
-                output_tokens: 5,
-                cached_input_tokens: 2,
-              },
-            },
-          },
-        }
-      ),
-    });
-    const request = {} as KibanaRequest;
-    const agentBuilder = {
-      conversations: {
-        getScopedClient: jest.fn().mockResolvedValue({
-          create: jest.fn().mockResolvedValue({ id: 'conversation-1' }),
-        }),
+const conversationOf = (steps: unknown[]) =>
+  ({
+    rounds: [
+      {
+        steps,
+        time_to_last_token: 1234,
+        model_usage: { input_tokens: 10, output_tokens: 5, cached_input_tokens: 2 },
       },
-      execution: { executeAgent },
-    } as unknown as AgentBuilderPluginStart;
-    const requestSignal = new AbortController().signal;
-    const deadline = Object.assign(new AbortController().signal, { dispose: jest.fn() });
-    const executionSignal = new AbortController().signal;
-    const timeoutSpy = jest
-      .spyOn(kbnStd, 'timeoutSignal')
-      .mockReturnValue(deadline as unknown as ReturnType<typeof kbnStd.timeoutSignal>);
-    const anySpy = jest.spyOn(AbortSignal, 'any').mockReturnValue(executionSignal);
+    ],
+  } as unknown as Pick<Conversation, 'rounds'>);
 
-    await expect(
-      executeKIQueryGenerationAgent({
-        agentBuilder,
-        request,
-        connectorId: 'connector-1',
-        interactionId: 'run-1',
-        source,
-        existingQueries: [
-          {
-            id: 'existing-1',
-            title: 'Existing query',
-            type: 'match',
-            description: 'Existing',
-            esql: 'FROM logs.test | WHERE message:"existing"',
-          },
-        ],
-        maxExistingQueriesForContext: 0,
-        signal: requestSignal,
-        logger: loggerMock.create(),
-      })
-    ).resolves.toEqual({
+describe('readKIQueryGenerationResult', () => {
+  const validatedQuery = {
+    type: 'match' as const,
+    title: 'Validated query',
+    description: 'Detects validated failures',
+    esql: { query: 'FROM logs.test | WHERE message:"failure"' },
+    category: 'error' as const,
+    severity_score: 60,
+    features: [{ id: 'feature-1', run_id: 'run-1' }],
+  };
+
+  it('returns the finalized queries of the latest validation result', () => {
+    const conversation = conversationOf([
+      validationStep('validate-1', {
+        slug: 'logs.test',
+        finalized: true,
+        finalized_queries: [{ ...validatedQuery, esql: { query: 'FROM superseded-validation' } }],
+      }),
+      validationStep('validate-2', {
+        slug: 'logs.test',
+        finalized: true,
+        finalized_queries: [validatedQuery],
+      }),
+    ]);
+
+    expect(
+      readKIQueryGenerationResult({ conversation, source, logger: loggerMock.create() })
+    ).toEqual({
       queries: [
         {
           type: 'match',
@@ -136,75 +75,48 @@ describe('executeKIQueryGenerationAgent', () => {
           features: [{ id: 'feature-1', run_id: 'run-1' }],
         },
       ],
-      tokensUsed: {
-        prompt: 10,
-        completion: 5,
-        total: 15,
-        cached: 2,
-      },
+      tokensUsed: { prompt: 10, completion: 5, total: 15, cached: 2 },
+      durationMs: 1234,
     });
-
-    expect(timeoutSpy).toHaveBeenCalledWith(300_000);
-    expect(anySpy).toHaveBeenCalledWith([requestSignal, deadline]);
-    expect(executeAgent).toHaveBeenCalledWith(
-      expect.objectContaining({
-        abortSignal: executionSignal,
-        params: expect.objectContaining({
-          nextInput: {
-            message: '`slug`: logs.test\n\n`target_description`: Test logs',
-          },
-          telemetryMetadata: {
-            pluginId: 'nightshift_ki_query_generation',
-            aggregateBy: 'nightshift',
-            productSolution: 'observability',
-            productFeature: 'nightshift',
-            interactionId: 'run-1',
-          },
-        }),
-      })
-    );
   });
 
-  it('rejects queries finalized for a different source', async () => {
-    const executeAgent = jest.fn().mockResolvedValue({
-      events$: of({
-        type: ChatEventType.toolResult,
-        data: {
-          tool_id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
-          tool_call_id: 'validate-1',
-          results: [
-            {
-              type: ToolResultType.other,
-              data: {
-                slug: 'logs.other',
-                finalized: true,
-                finalized_queries: [],
-              },
-            },
-          ],
-        },
+  it('counts the tokens of every round, since the step retries on the same conversation', () => {
+    const finalized = conversationOf([
+      validationStep('validate-1', {
+        slug: 'logs.test',
+        finalized: true,
+        finalized_queries: [validatedQuery],
       }),
-    });
-    const agentBuilder = {
-      conversations: {
-        getScopedClient: jest.fn().mockResolvedValue({
-          create: jest.fn().mockResolvedValue({ id: 'conversation-1' }),
-        }),
-      },
-      execution: { executeAgent },
-    } as unknown as AgentBuilderPluginStart;
+    ]);
+    const conversation = {
+      rounds: [
+        { steps: [], model_usage: { input_tokens: 100, output_tokens: 40 } },
+        ...finalized.rounds,
+      ],
+    } as unknown as Pick<Conversation, 'rounds'>;
 
-    await expect(
-      executeKIQueryGenerationAgent({
-        agentBuilder,
-        request: {} as KibanaRequest,
-        connectorId: 'connector-1',
-        interactionId: 'run-1',
+    expect(
+      readKIQueryGenerationResult({ conversation, source, logger: loggerMock.create() })
+    ).toMatchObject({ tokensUsed: { prompt: 110, completion: 45, total: 155, cached: 2 } });
+  });
+
+  it('rejects queries finalized for a different source', () => {
+    const conversation = conversationOf([
+      validationStep('validate-1', { slug: 'logs.other', finalized: true, finalized_queries: [] }),
+    ]);
+
+    expect(() =>
+      readKIQueryGenerationResult({ conversation, source, logger: loggerMock.create() })
+    ).toThrow('KI query generation agent finalized for unexpected source "logs.other"');
+  });
+
+  it('returns null when the agent never finalized, so the workflow can run it again', () => {
+    expect(
+      readKIQueryGenerationResult({
+        conversation: conversationOf([]),
         source,
-        existingQueries: [],
-        maxExistingQueriesForContext: 50,
         logger: loggerMock.create(),
       })
-    ).rejects.toThrow('KI query generation agent finalized for unexpected source "logs.other"');
+    ).toBeNull();
   });
 });

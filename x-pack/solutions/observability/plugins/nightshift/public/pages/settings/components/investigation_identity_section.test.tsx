@@ -26,6 +26,17 @@ jest.mock('../../../data/service_accounts/use_investigator_service_account', () 
   useInvestigatorServiceAccount: () => mockStatus,
 }));
 
+let mockDetection: {
+  data?: Record<string, unknown>;
+  isLoading?: boolean;
+  isError?: boolean;
+  error?: Error;
+  refetch?: () => void;
+} = {};
+jest.mock('../../../data/service_accounts/use_detection_engine_service_account', () => ({
+  useDetectionEngineServiceAccount: () => mockDetection,
+}));
+
 const status = (overrides: Record<string, unknown> = {}) => ({
   isLoading: false,
   data: {
@@ -60,6 +71,9 @@ const renderSection = () =>
 
 describe('InvestigationIdentitySection', () => {
   beforeEach(() => {
+    mockDetection = {
+      data: { serviceAccountId: 'uiam-detection-3', role: '_nightshift_detection' },
+    };
     mockUseDeveloperMode.mockReturnValue({
       isDeveloperMode: true,
       isSaving: false,
@@ -94,6 +108,9 @@ describe('InvestigationIdentitySection', () => {
     expect(screen.getByTestId('nightshiftServiceAccountOthers')).toHaveTextContent(
       'nightshift_automations (uiam-automations-2) · _nightshift_automations'
     );
+    expect(screen.getByTestId('nightshiftServiceAccountOthers')).toHaveTextContent(
+      'nightshift_detection (uiam-detection-3) · _nightshift_detection'
+    );
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 
@@ -112,5 +129,34 @@ describe('InvestigationIdentitySection', () => {
     expect(screen.getByTestId('nightshiftServiceAccountError')).toHaveTextContent('Forbidden');
     screen.getByTestId('nightshiftServiceAccountRetry').click();
     expect(refetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('waits for the detection status instead of reading the space as not set up', () => {
+    mockStatus = status();
+    mockDetection = { isLoading: true };
+    renderSection();
+
+    expect(screen.queryByTestId('nightshiftServiceAccountOff')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftServiceAccountOn')).not.toBeInTheDocument();
+  });
+
+  it('explains a failed detection status read and retries only that read', () => {
+    const statusRefetch = jest.fn();
+    const detectionRefetch = jest.fn();
+    mockStatus = { ...status(), refetch: statusRefetch };
+    mockDetection = {
+      isLoading: false,
+      isError: true,
+      error: new Error('Service Unavailable'),
+      refetch: detectionRefetch,
+    };
+    renderSection();
+
+    expect(screen.getByTestId('nightshiftServiceAccountError')).toHaveTextContent(
+      'Service Unavailable'
+    );
+    screen.getByTestId('nightshiftServiceAccountRetry').click();
+    expect(detectionRefetch).toHaveBeenCalledTimes(1);
+    expect(statusRefetch).not.toHaveBeenCalled();
   });
 });

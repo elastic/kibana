@@ -7,8 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import { SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID } from '@kbn/workflows/managed';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
+import { NIGHTSHIFT_BOUND_ORCHESTRATOR_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { type SignificantEventsWorkflowStatusResult } from '@kbn/significant-events-schema';
@@ -38,8 +37,8 @@ export class SignificantEventsDiscoveryClient {
   constructor({ managementApi }: { managementApi: WorkflowsServerPluginSetup['management'] }) {
     this.workflowExecutionService = new WorkflowExecutionService({
       managementApi,
-      workflowId: SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID,
-      workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      workflowId: NIGHTSHIFT_BOUND_ORCHESTRATOR_WORKFLOW_ID,
+      boundToSpace: true,
     });
   }
 

@@ -7,19 +7,12 @@
 
 import type { Feature } from '@kbn/significant-events-schema';
 import { loggerMock } from '@kbn/logging-mocks';
-import { executeFeatureIdentificationAgent } from './identify_features_via_agent';
 import {
   buildKnownFeatureIds,
   buildTelemetry,
   identifyInferredFeatures,
   selectPreviouslyIdentifiedFeatures,
 } from './identify_inferred_features';
-
-jest.mock('./identify_features_via_agent', () => ({
-  executeFeatureIdentificationAgent: jest.fn(),
-}));
-
-const mockExecuteFeatureIdentificationAgent = jest.mocked(executeFeatureIdentificationAgent);
 
 const createFeature = ({ id, ...overrides }: Partial<Feature> & Pick<Feature, 'id'>): Feature => ({
   id,
@@ -163,41 +156,74 @@ describe('buildTelemetry', () => {
 });
 
 describe('identifyInferredFeatures', () => {
-  it('passes the run id to feature identification as the interaction id', async () => {
-    mockExecuteFeatureIdentificationAgent.mockResolvedValue({
-      features: [],
-      ignoredFeatures: [],
-      tokensUsed: { prompt: 0, completion: 0, total: 0 },
-    });
-
+  it('records a failed iteration, and writes nothing, when the agent step stored no conversation', async () => {
     const kiClient = {
       getFeatures: jest.fn().mockResolvedValue({ hits: [] }),
       getExcludedFeatures: jest.fn().mockResolvedValue({ hits: [] }),
       bulk: jest.fn(),
       getDefaultExpiresAt: jest.fn(),
     };
+    const trackFeaturesIdentified = jest.fn();
 
-    await identifyInferredFeatures({
-      esClient: {},
+    const result = await identifyInferredFeatures({
       kiClient,
-      agentBuilder: {},
-      request: {},
+      agentConversation: undefined,
       connectorId: 'connector-1',
       logger: loggerMock.create(),
-      signal: new AbortController().signal,
       sourceId: 'logs.test',
-      streamType: 'wired',
-      definition: { name: 'logs.test' },
       runId: 'run-1',
       documents: [{ _id: 'doc-1', fields: { message: 'hello' } }],
       totalFilters: 0,
       filtersCapped: false,
       hasFilteredDocuments: false,
-      tuning: { maxExcludedFeaturesInPrompt: 10 },
+      trackFeaturesIdentified,
     } as unknown as Parameters<typeof identifyInferredFeatures>[0]);
 
-    expect(mockExecuteFeatureIdentificationAgent).toHaveBeenCalledWith(
-      expect.objectContaining({ interactionId: 'run-1' })
+    expect(result.iterationResult).toMatchObject({ runId: 'run-1', state: 'failure' });
+    expect(kiClient.bulk).not.toHaveBeenCalled();
+    expect(trackFeaturesIdentified).toHaveBeenCalledWith(
+      expect.objectContaining({ state: 'failure', run_id: 'run-1' })
     );
+  });
+
+  it('keeps the stored agent round time and tokens in a failed iteration when the agent never finalized', async () => {
+    const kiClient = {
+      getFeatures: jest.fn().mockResolvedValue({ hits: [] }),
+      getExcludedFeatures: jest.fn().mockResolvedValue({ hits: [] }),
+      bulk: jest.fn(),
+      getDefaultExpiresAt: jest.fn(),
+    };
+    const trackFeaturesIdentified = jest.fn();
+
+    const result = await identifyInferredFeatures({
+      kiClient,
+      agentConversation: {
+        rounds: [
+          {
+            steps: [],
+            time_to_last_token: 240_000,
+            model_usage: { input_tokens: 900, output_tokens: 300 },
+          },
+        ],
+      },
+      connectorId: 'connector-1',
+      logger: loggerMock.create(),
+      sourceId: 'logs.test',
+      runId: 'run-1',
+      documents: [{ _id: 'doc-1', fields: { message: 'hello' } }],
+      totalFilters: 0,
+      filtersCapped: false,
+      hasFilteredDocuments: false,
+      trackFeaturesIdentified,
+    } as unknown as Parameters<typeof identifyInferredFeatures>[0]);
+
+    expect(trackFeaturesIdentified).toHaveBeenCalledWith(
+      expect.objectContaining({ state: 'failure', duration_ms: expect.any(Number) })
+    );
+    expect(trackFeaturesIdentified.mock.calls[0][0].duration_ms).toBeGreaterThanOrEqual(240_000);
+    expect(result.iterationResult).toMatchObject({
+      state: 'failure',
+      tokensUsed: { prompt: 900, completion: 300, total: 1200, cached: 0 },
+    });
   });
 });

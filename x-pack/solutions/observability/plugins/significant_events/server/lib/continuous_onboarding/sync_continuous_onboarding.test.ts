@@ -10,7 +10,12 @@ import { OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED } from '@kbn/man
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { SourceChangeEvent } from '@kbn/nightshift-sources-plugin/server';
 import type { ContinuousOnboardingWorkflowService } from '../workflows/continuous_onboarding_workflow';
+import { canManageSecurity } from '../service_accounts/detection_engine_account';
 import { syncContinuousOnboarding } from './sync_continuous_onboarding';
+
+jest.mock('../service_accounts/detection_engine_account', () => ({
+  canManageSecurity: jest.fn(),
+}));
 
 const request = { spaceId: 'space-a' } as KibanaRequest;
 const source: NightshiftSource = {
@@ -94,6 +99,10 @@ const setup = ({ total = 1, paused = false }: { total?: number; paused?: boolean
 };
 
 describe('syncContinuousOnboarding', () => {
+  beforeEach(() => {
+    jest.mocked(canManageSecurity).mockResolvedValue(true);
+  });
+
   it('skips updated events before reading maintenance state', async () => {
     const { maintenanceService, run } = setup();
 
@@ -177,6 +186,16 @@ describe('syncContinuousOnboarding', () => {
       });
     }
   );
+
+  it('does not turn continuous onboarding on for a source author without manage_security', async () => {
+    jest.mocked(canManageSecurity).mockResolvedValue(false);
+    const { coreStart, run, workflowService } = setup({ total: 1 });
+
+    await run(makeEvent('created'));
+
+    expect(coreStart.uiSettings.asScopedToClient).not.toHaveBeenCalled();
+    expect(workflowService.ensureWorkflow).not.toHaveBeenCalled();
+  });
 
   it('leaves the setting alone when a create does not produce the first source', async () => {
     const { coreStart, run } = setup({ total: 2 });

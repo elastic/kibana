@@ -25,7 +25,7 @@ describe('createKiIdentificationStartTool', () => {
   }: { featurePrivilege?: NightshiftFeaturePrivilege } = {}) => {
     const managementApi = {
       getWorkflow: jest.fn().mockResolvedValue({
-        id: 'system-streams-ki-onboarding',
+        id: 'system-sources-ki-onboarding-bound-default',
         name: 'onboarding',
         enabled: true,
         definition: {},
@@ -48,7 +48,22 @@ describe('createKiIdentificationStartTool', () => {
     };
 
     const tool = createKiIdentificationStartTool({
-      server: createSignificantEventsServer({ featurePrivilege }),
+      server: {
+        ...createSignificantEventsServer({ featurePrivilege }),
+        inference: {
+          getConnectorById: jest.fn().mockImplementation(async (connectorId: string) => ({
+            connectorId,
+          })),
+        } as never,
+        core: {
+          // A user's request: the service account guard has nothing to refuse.
+          security: { authc: { getPrincipal: () => undefined } },
+          savedObjects: { getScopedClient: jest.fn() },
+          uiSettings: {
+            asScopedToClient: jest.fn(() => ({ get: jest.fn().mockResolvedValue(false) })),
+          },
+        } as never,
+      },
       telemetry: telemetry as never,
       streamsKIsOnboardingClient,
       maintenanceService: maintenanceService as never,
@@ -80,7 +95,7 @@ describe('createKiIdentificationStartTool', () => {
     );
 
     expect(managementApi.runWorkflow).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'system-streams-ki-onboarding' }),
+      expect.objectContaining({ id: 'system-sources-ki-onboarding-bound-default' }),
       'default',
       expect.objectContaining({
         sourceId: 'logs.nginx',
@@ -89,7 +104,8 @@ describe('createKiIdentificationStartTool', () => {
         skipFeatures: false,
         skipQueries: false,
       }),
-      context.request
+      context.request,
+      'nightshift-detection-engine'
     );
     expect(sourcesGet).toHaveBeenCalledWith('logs.nginx');
     if ('results' in result) {

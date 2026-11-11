@@ -12,7 +12,7 @@ import { NightshiftSetupPrompt } from './nightshift_setup_prompt';
 
 const mockMutate = jest.fn();
 
-jest.mock('../../../data/service_accounts/use_investigator_service_account', () => ({
+jest.mock('../../../data/service_accounts/use_set_up_nightshift_service_account', () => ({
   useSetUpNightshiftServiceAccount: () => ({ mutate: mockMutate, isLoading: false }),
 }));
 
@@ -61,6 +61,8 @@ describe('NightshiftSetupPrompt', () => {
 
     expect(screen.getByText('One-time admin setup required for this space')).toBeInTheDocument();
     expect(screen.getByText('nightshift_agent')).toBeInTheDocument();
+    expect(screen.getByText('nightshift_automations')).toBeInTheDocument();
+    expect(screen.getByText('nightshift_detection')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftSetupPrivilegesLink')).toHaveAttribute('target', '_blank');
     fireEvent.click(screen.getByTestId('nightshiftSetUpServiceAccount'));
     expect(mockMutate).toHaveBeenCalledTimes(1);

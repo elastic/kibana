@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { useCanRestoreDetectionEngine } from '../../data/service_accounts/use_can_restore_detection_engine';
 import { useKibana } from '../../hooks/use_kibana';
 import { ContinuousOnboardingSection } from './components/continuous_onboarding_section';
 import { CostEstimate } from './components/cost_estimate';
@@ -31,6 +32,7 @@ const DETECTION_RUN_LIMIT_GROUPS = ['detection', 'ki_extraction'] as const;
 export const DetectionsSettingsTab = () => {
   const { appParams, application, http, overlays } = useKibana().services;
   const form = useDetectionSettingsForm();
+  const canRestore = useCanRestoreDetectionEngine();
   const runLimits = useRunLimitsForm({ groups: DETECTION_RUN_LIMIT_GROUPS });
   const tokenTracking = useTokenTrackingForm({
     isEnabled: form.isDeveloperMode && !form.isDeveloperModeSaving && runLimits.canManage,
@@ -99,7 +101,7 @@ export const DetectionsSettingsTab = () => {
         })}
         data-test-subj="nightshiftDetectionProcessSection"
       >
-        <MaintenanceSection canManage={form.canManageAndConfigure} />
+        <MaintenanceSection canManage={form.canManageAndConfigure} canRestore={canRestore} />
 
         <EuiHorizontalRule margin="l" />
 
@@ -151,7 +153,7 @@ export const DetectionsSettingsTab = () => {
 
             <EuiHorizontalRule margin="l" />
 
-            <ResetSection canManage={form.canManageAndConfigure} />
+            <ResetSection canManage={form.canManageAndConfigure} canRestore={canRestore} />
 
             <EuiHorizontalRule margin="l" />
 

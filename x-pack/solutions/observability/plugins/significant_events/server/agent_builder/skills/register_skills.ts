@@ -8,6 +8,7 @@
 import type { AgentBuilderPluginStart, AvailabilityConfig } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
+import { getDetectionEngineAccountId } from '../../lib/service_accounts/detection_engine_account';
 import type { SignificantEventsMaintenanceService } from '../../lib/maintenance/maintenance_service';
 import type { SignificantEventsKIsOnboardingClient } from '../../lib/workflows/onboarding_workflow_client';
 import type { GetScopedClients } from '../../routes/types';
@@ -20,6 +21,14 @@ import { featureIdentificationSkill } from './feature_identification';
 import { significantEventsManagementSkill } from './significant_events_management';
 import { significantEventsKIGroundingSkill } from './significant_events_ki_grounding';
 
+const KI_IDENTIFICATION_SKILL_ID = 'ki-identification-management';
+
+/**
+ * How long a space's answer to "is the detection engine set up" is reused. Short, so a space that
+ * has just been enabled gets the skill without waiting for the default five minutes.
+ */
+const DETECTION_ENGINE_SETUP_CACHE_TTL_SECONDS = 30;
+
 type SignificantEventsSkill = Parameters<AgentBuilderPluginStart['skills']['register']>[0];
 
 interface RegisterSignificantEventsSkillsOptions {
@@ -28,7 +37,7 @@ interface RegisterSignificantEventsSkillsOptions {
   streamsKIsOnboardingClient?: SignificantEventsKIsOnboardingClient;
   maintenanceService?: SignificantEventsMaintenanceService;
   getScopedClients: GetScopedClients;
-  server: Pick<SignificantEventsServer, 'security'>;
+  server: Pick<SignificantEventsServer, 'security' | 'inference' | 'core'>;
   logger: Logger;
   isAvailable: () => Promise<boolean>;
   /**
@@ -70,6 +79,30 @@ export const registerSignificantEventsSkills = async ({
 }: RegisterSignificantEventsSkillsOptions): Promise<{ ensureRegistered: () => Promise<void> }> => {
   const registeredSkillIds = new Set<string>();
 
+  // Identification starts a workflow bound to the space's detection engine account, so in a space
+  // that is not set up every call fails. Hide the skill there instead of letting an agent pick an
+  // operation that cannot run.
+  const detectionEngineSetupAvailability: AvailabilityConfig = {
+    cacheMode: 'space',
+    cacheTtl: DETECTION_ENGINE_SETUP_CACHE_TTL_SECONDS,
+    handler: async (context) => {
+      const shared = await availability.handler(context);
+      if (shared.status === 'unavailable') {
+        return shared;
+      }
+      return (await getDetectionEngineAccountId({
+        core: server.core,
+        spaceId: context.spaceId,
+      })) === undefined
+        ? {
+            status: 'unavailable',
+            reason:
+              'Nightshift is not set up in this space. An administrator must enable it first.',
+          }
+        : { status: 'available' };
+    },
+  };
+
   const getCoreSkills = (): SignificantEventsSkill[] => [
     knowledgeIndicatorsManagementSkill,
     nightshiftSourcesManagementSkill,
@@ -103,7 +136,15 @@ export const registerSignificantEventsSkills = async ({
     }
 
     const results = await Promise.allSettled(
-      pending.map((skill) => agentBuilder.skills.register({ ...skill, availability }))
+      pending.map((skill) =>
+        agentBuilder.skills.register({
+          ...skill,
+          availability:
+            skill.id === KI_IDENTIFICATION_SKILL_ID
+              ? detectionEngineSetupAvailability
+              : availability,
+        })
+      )
     );
 
     const failed: string[] = [];

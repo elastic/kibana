@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { InternalRulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { InternalRulesClientApi, RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import type {
   SignificantEventsMaintenanceFailure,
@@ -24,6 +24,7 @@ import {
 import type { GetScopedClients } from '../../routes/types';
 import { listAllSources } from '../../routes/utils/list_all_sources';
 import type { SignificantEventsServer } from '../../types';
+import { getDetectionEngineAccountId } from '../service_accounts/detection_engine_account';
 import { ruleIdsFromQueryLinks } from '../knowledge_indicators/rule_ids_from_query_links';
 import type { SignificantEventsMaintenanceStateAttributes } from './saved_object';
 import {
@@ -33,12 +34,16 @@ import {
   isContinuousOnboardingWorkflowId,
   shouldRestoreSettingsBackedWorkflow,
 } from './feature_settings';
-import type { MaintenanceWorkflowTarget } from './managed_workflow_targets';
+import {
+  buildSetupEnabledTargets,
+  type MaintenanceWorkflowTarget,
+} from './managed_workflow_targets';
 import { createResetRunner } from './reset_maintenance';
 import type { MaintenanceAccess } from './maintenance_access';
 import { createMaintenanceSystemRequest } from './system_request';
 import { toMessage } from './to_message';
 import { logFailures } from './log_failures';
+import { bulkUpdateApiKeyWithRetry } from '../significant_events/rules/bulk_rule_operations';
 import { runRulesInBatches, setV2RulesEnabled, type RulesToggleResult } from './rules';
 import { requireAllSpaceIds } from './spaces';
 import { runForEachSpace, throwSpaceFailures } from './run_for_each_space';
@@ -52,7 +57,13 @@ import {
   type LoadedMaintenanceState,
   type MaintenanceRuleTarget,
 } from './state_store';
-import { reEnableWorkflow, sweepWorkflows, mergeTargets, targetKey } from './workflows';
+import {
+  createDisableManagedWorkflow,
+  reEnableWorkflow,
+  sweepWorkflows,
+  mergeTargets,
+  targetKey,
+} from './workflows';
 
 /**
  * `mode` is how the snapshot is treated, not where the pause came from: `pause` records a
@@ -285,6 +296,41 @@ export const createSignificantEventsMaintenanceService = ({
   };
 
   /** Re-enable the recorded rules; returns failed ids and how many were toggled on. */
+  // A rule runs on the key of whoever enables it, and a paused rule has no task left. In a set-up
+  // space Resume turns the rules on as the detection account, so pausing and resuming does not hand
+  // them to the user who resumed. A space that is not set up has no account: its legacy rules come
+  // back as the caller.
+  const enableRules = async ({
+    request,
+    alertingV2RulesClient,
+    withAccountAlertingV2RulesClient,
+    ids,
+  }: {
+    request: KibanaRequest;
+    alertingV2RulesClient: RulesClientApi;
+    withAccountAlertingV2RulesClient: <T>(
+      fn: (accountClient: RulesClientApi) => Promise<T>
+    ) => Promise<T>;
+    ids: string[];
+  }) =>
+    (await getDetectionEngineAccountId({ core: server.core, spaceId: request.spaceId })) ===
+    undefined
+      ? setV2RulesEnabled(alertingV2RulesClient, ids, true)
+      : withAccountAlertingV2RulesClient(async (accountClient) => {
+          const enabled = await setV2RulesEnabled(accountClient, ids, true);
+          // Bulk enable skips rules that are already on, so they would keep the previous owner's
+          // key. A rule that cannot be re-keyed stays in the retry inventory.
+          const rotated = await runRulesInBatches(enabled.toggledIds, (chunk) =>
+            bulkUpdateApiKeyWithRetry(accountClient, chunk)
+          );
+          const rotationFailed = new Set(rotated.failedIds);
+          return {
+            toggledIds: enabled.toggledIds.filter((id) => !rotationFailed.has(id)),
+            failedIds: [...enabled.failedIds, ...rotated.failedIds],
+            failures: [...enabled.failures, ...rotated.failures],
+          };
+        });
+
   const reEnableRules = async (
     request: KibanaRequest,
     ruleIds: string[],
@@ -296,7 +342,8 @@ export const createSignificantEventsMaintenanceService = ({
     try {
       const { getSignificantEventsAlertingContext, getKnowledgeIndicatorClient, sourcesClient } =
         await getScopedClients({ request });
-      const { alertingV2RulesClient } = await getSignificantEventsAlertingContext();
+      const { alertingV2RulesClient, withAccountAlertingV2RulesClient } =
+        await getSignificantEventsAlertingContext();
       if (!alertingV2RulesClient) {
         failures.push({ target: 'rules', error: 'Alerting v2 rules client is not available' });
         // Keep every rule recorded so a later resume can retry them.
@@ -320,7 +367,12 @@ export const createSignificantEventsMaintenanceService = ({
         toggledIds,
         failedIds,
         failures: ruleFailures,
-      } = await setV2RulesEnabled(alertingV2RulesClient, ruleIdsToEnable, true);
+      } = await enableRules({
+        request,
+        alertingV2RulesClient,
+        withAccountAlertingV2RulesClient,
+        ids: ruleIdsToEnable,
+      });
       failures.push(...ruleFailures);
       return { failedIds, toggledCount: toggledIds.length };
     } catch (error) {
@@ -355,7 +407,13 @@ export const createSignificantEventsMaintenanceService = ({
   }> => {
     const failures: SignificantEventsMaintenanceFailure[] = [];
     const mgmt = server.workflowsManagement?.management;
-    const newlyDisabled = await sweepWorkflows({ mgmt, spaceIds: [spaceId], request, failures });
+    const newlyDisabled = await sweepWorkflows({
+      mgmt,
+      spaceIds: [spaceId],
+      request,
+      failures,
+      disableManaged: createDisableManagedWorkflow(server),
+    });
 
     const newlyDisabledRules = (
       await disableBackedRules(requestForSpace(request, spaceId), access, spaceId, failures)
@@ -639,7 +697,14 @@ export const createSignificantEventsMaintenanceService = ({
         const { spaceId } = request;
         const existing = await readState(spaceId);
         const currentState = normalizeState(existing?.state);
-        const recordedWorkflows = existing?.disabledWorkflows ?? [];
+        // Space setup switches sync and cleanup on, unless the space is paused. One set up while
+        // paused has them off and unrecorded, so Resume covers them too.
+        const recordedWorkflows = mergeTargets(
+          existing?.disabledWorkflows ?? [],
+          currentState === 'paused' ? buildSetupEnabledTargets(spaceId) : []
+        );
+        // A setup target of a space that was never set up has no document: that is not a failure.
+        const recordedKeys = new Set((existing?.disabledWorkflows ?? []).map(targetKey));
         const recordedRules = existing?.disabledRules ?? [];
         const hasRetryInventory =
           recordedWorkflows.length > 0 ||
@@ -672,7 +737,13 @@ export const createSignificantEventsMaintenanceService = ({
             if (!shouldAttemptWorkflow(workflow)) {
               continue;
             }
-            const outcome = await reEnableWorkflow({ mgmt, workflow, request, failures });
+            const outcome = await reEnableWorkflow({
+              mgmt,
+              workflow,
+              request,
+              failures,
+              reportMissing: recordedKeys.has(targetKey(workflow)),
+            });
             if (outcome === 'toggled') {
               workflowsToggled += 1;
             } else if (outcome === 'failed') {

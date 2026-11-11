@@ -4,7 +4,8 @@
 #
 # Flow:
 #   init → while(iterationCount < max) {
-#     prepare → if(noDocuments) break → identify_inferred → update_state → mark_success
+#     prepare → if(noDocuments) break → build_agent_input → identify_agent (ai.agent)
+#     → identify_inferred (reconcile) → update_state → mark_success
 #     → track_convergence → if(converged) break
 #   } → if(allFailed) fail → identify_computed → output
 #
@@ -146,7 +147,40 @@ steps:
           - name: stop_loop
             type: loop.break
 
-      # 2c: Infer and reconcile from the prepared sample.
+      # 2c: Build the agent's input and resolve its connector. Short route; no LLM call.
+      - name: build_agent_input
+        type: kibana.request
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/internal/streams/{{ inputs.sourceId }}/features/_identify/inferred/input"
+          headers:
+            x-elastic-internal-origin: "kibana"
+            x-nightshift-source-revision: "{{ inputs.sourceRevision }}"
+          body:
+            connectorId: "${{ inputs.connectorId }}"
+            documents: "${{ steps.prepare.output.documents }}"
+            maxExcludedFeaturesInPrompt: "${{ inputs.maxExcludedFeaturesInPrompt }}"
+            maxPreviouslyIdentifiedFeatures: "${{ inputs.maxPreviouslyIdentifiedFeatures }}"
+
+      # 2d: Run the agent as a workflow step, with the workflow's own credential. A route handler
+      # holds the token it was called with and cannot renew it, so an agent run inside one is
+      # capped by the token's lifetime. A failed run is a degraded iteration, not a failed workflow.
+      - name: identify_agent
+        type: ai.agent
+        agent-id: "{{ steps.build_agent_input.output.agentId }}"
+        connector-id: "{{ steps.build_agent_input.output.connectorId }}"
+        plugin-id: "nightshift_ki_extraction"
+        aggregate-by: "nightshift"
+        product-solution: "observability"
+        product-feature: "nightshift"
+        timeout: "10m"
+        on-failure:
+          continue: true
+        with:
+          conversation_id: "${{ steps.build_agent_input.output.conversationId }}"
+          message: "${{ steps.build_agent_input.output.message }}"
+
+      # 2e: Reconcile the agent's result with the known features and persist it.
       - name: identify_inferred
         type: kibana.request
         with:
@@ -156,16 +190,15 @@ steps:
             x-elastic-internal-origin: "kibana"
             x-nightshift-source-revision: "{{ inputs.sourceRevision }}"
           body:
-            connectorId: "${{ inputs.connectorId }}"
+            connectorId: "${{ steps.build_agent_input.output.connectorId }}"
+            conversationId: "${{ steps.build_agent_input.output.conversationId }}"
             runId: "${{ execution.id }}"
             parentWorkflowExecutionId: "${{ parent.executionId }}"
             iteration: "${{ variables.iterationResults.size | plus: 1 }}"
             documents: "${{ steps.prepare.output.documents }}"
             samplingTelemetry: "${{ steps.prepare.output.samplingTelemetry }}"
-            maxExcludedFeaturesInPrompt: "${{ inputs.maxExcludedFeaturesInPrompt }}"
-            maxPreviouslyIdentifiedFeatures: "${{ inputs.maxPreviouslyIdentifiedFeatures }}"
 
-      # 2d: Update loop variables with iteration output.
+      # 2f: Update loop variables with iteration output.
       - name: update_state
         type: data.set
         with:
@@ -177,7 +210,7 @@ steps:
           totalTokens: "${{ variables.totalTokens | plus: steps.identify_inferred.output.iterationResult.tokensUsed.total }}"
           totalCachedTokens: "${{ variables.totalCachedTokens | plus: steps.identify_inferred.output.iterationResult.tokensUsed.cached }}"
 
-      # 2e: Track whether at least one iteration succeeded.
+      # 2g: Track whether at least one iteration succeeded.
       - name: mark_success
         type: if
         condition: "${{ steps.identify_inferred.output.iterationResult.state == 'success' }}"
@@ -187,7 +220,7 @@ steps:
             with:
               hasSuccess: true
 
-      # 2f: Convergence early-stop. LLM failures are neutral; only successful iterations move the counter.
+      # 2h: Convergence early-stop. LLM failures are neutral; only successful iterations move the counter.
       - name: track_convergence
         type: if
         condition: "${{ steps.identify_inferred.output.iterationResult.state == 'success' }}"

@@ -36,6 +36,7 @@ import {
   isNightshiftSetUp,
   useInvestigatorServiceAccount,
 } from '../data/service_accounts/use_investigator_service_account';
+import { useDetectionEngineServiceAccount } from '../data/service_accounts/use_detection_engine_service_account';
 import { DETECTION_TAB_IDS, isDetectionTabId } from '../pages/detection/detection_tabs';
 import { KNOWLEDGE_TAB_IDS } from '../pages/knowledge/knowledge_tabs';
 
@@ -289,9 +290,13 @@ export function NightshiftPage(): React.ReactElement | null {
   // step instead of the app. A failed status read (e.g. missing privileges) does not block it.
   const requiresSetup = nightshiftEnabled && nightshiftInvestigations?.investigationsClient != null;
   const serviceAccount = useInvestigatorServiceAccount();
-  const isSetupPending = requiresSetup && serviceAccount.isLoading;
+  const detectionAccount = useDetectionEngineServiceAccount();
+  const isSetupPending = requiresSetup && (serviceAccount.isLoading || detectionAccount.isLoading);
   const needsSetup =
-    requiresSetup && serviceAccount.isSuccess && !isNightshiftSetUp(serviceAccount.data);
+    requiresSetup &&
+    serviceAccount.isSuccess &&
+    detectionAccount.isSuccess &&
+    !isNightshiftSetUp({ investigator: serviceAccount.data, detection: detectionAccount.data });
   useBreadcrumbs(
     [
       {

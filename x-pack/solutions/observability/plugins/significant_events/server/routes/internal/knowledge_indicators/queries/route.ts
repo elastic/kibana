@@ -7,7 +7,6 @@
 
 import { lazySchema, z } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
-import { v4 as uuidv4 } from 'uuid';
 import type {
   QueriesGetResponse,
   QueryLink,
@@ -24,17 +23,25 @@ import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import { deriveQueryType } from '@kbn/streams-schema';
 import {
+  EMPTY_TOKENS,
   MAX_EXISTING_QUERIES_FOR_CONTEXT,
   resolveNightshiftModelForRequest,
 } from '@kbn/nightshift-ai';
+import { isConversationNotFoundError } from '@kbn/agent-builder-common';
 import { sortQueryLinksForTable } from '../../../../lib/significant_events/utils';
-import { generateKIQueries } from '../../../../lib/significant_events/ki_queries_generation_service';
-import { installKIQueryGenerationAgent } from '../../../../agent_builder/agents/ki_query_generation';
+import {
+  buildKIQueryGenerationInput,
+  collectGeneratedKIQueries,
+} from '../../../../lib/significant_events/ki_queries_generation_service';
+import {
+  KI_QUERY_GENERATION_AGENT_ID,
+  installKIQueryGenerationAgent,
+} from '../../../../agent_builder/agents/ki_query_generation';
 import { createSignificantEventsAvailability } from '../../../../agent_builder/tools/significant_events_availability';
+import { createAgentConversation } from '../../../../lib/significant_events/create_agent_conversation';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../../utils/assert_not_paused';
-import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 import { queryStatusSchema, toRuleUnbackedFilter } from '../../../utils/query_status';
 import { BUCKET_SIZE_PATTERN } from '../../../../lib/significant_events/helpers/fill_bucket_gaps';
 import { createSignificantEventsTracedEsClient } from '../../../../lib/significant_events/create_significant_events_traced_es_client';
@@ -482,8 +489,8 @@ const getDiscoveryQueriesRoute = createServerRoute({
   },
 });
 
-const generateQueriesRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{sourceId}/queries/_generate',
+const generateQueriesInputRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{sourceId}/queries/_generate/input',
   params: lazySchema(() =>
     z.object({
       path: z.object({
@@ -498,8 +505,6 @@ const generateQueriesRoute = createServerRoute({
             .describe(
               'Optional chat model connector or inference endpoint ID. When omitted the Significant Events default is used.'
             ),
-          runId: z.string().trim().min(1).max(MAX_ID_LENGTH).optional(),
-          parentWorkflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
           maxExistingQueriesForContext: z
             .number()
             .int()
@@ -512,9 +517,10 @@ const generateQueriesRoute = createServerRoute({
   ),
   options: {
     access: 'internal',
-    summary: 'Generate significant events queries',
-    description: 'Runs a single iteration of KI queries generation for the given source.',
-    timeout: { idleSocket: 600_000 },
+    summary: 'Build the input of a significant events queries generation agent run',
+    description:
+      'Resolves the connector and builds the message the query generation agent is run with.',
+    timeout: { idleSocket: 300_000 },
   },
   security: {
     authz: {
@@ -528,8 +534,12 @@ const generateQueriesRoute = createServerRoute({
     server,
     maintenanceService,
     logger,
-    telemetry,
-  }): Promise<SignificantEventsQueriesGenerationResult & { connectorId: string }> => {
+  }): Promise<{
+    agentId: string;
+    connectorId: string;
+    conversationId: string;
+    message: string;
+  }> => {
     const scopedClients = await getScopedClients({ request });
     const { sourcesClient, licensing } = scopedClients;
 
@@ -537,13 +547,8 @@ const generateQueriesRoute = createServerRoute({
     await assertNotPaused({ maintenanceService, request });
 
     const { sourceId } = params.path;
-    const {
-      connectorId,
-      runId,
-      parentWorkflowExecutionId,
-      maxExistingQueriesForContext = MAX_EXISTING_QUERIES_FOR_CONTEXT,
-    } = params.body ?? {};
-    const resolvedRunId = runId?.trim() || uuidv4();
+    const { connectorId, maxExistingQueriesForContext = MAX_EXISTING_QUERIES_FOR_CONTEXT } =
+      params.body ?? {};
 
     if (!server.agentBuilder) {
       throw new Error('Agent Builder is required to generate significant events queries');
@@ -562,18 +567,10 @@ const generateQueriesRoute = createServerRoute({
       scopedClients.getKnowledgeIndicatorClient(),
     ]);
 
-    const result = await generateKIQueries(
-      {
-        source,
-        connectorId,
-        runId: resolvedRunId,
-        workflowExecutionId: getWorkflowExecutionIdFromRequest(request),
-        parentWorkflowExecutionId: parentWorkflowExecutionId?.trim() || undefined,
-        maxExistingQueriesForContext,
-      },
+    const input = await buildKIQueryGenerationInput(
+      { source, connectorId, maxExistingQueriesForContext },
       {
         kiClient,
-        agentBuilder: server.agentBuilder,
         resolveModel: (requestedId) =>
           resolveNightshiftModelForRequest({
             request,
@@ -583,18 +580,117 @@ const generateQueriesRoute = createServerRoute({
             step: 'kiQueryGeneration',
             requestedId,
           }),
-        request,
         logger: logger.get('significant_events_queries_generation'),
-        signal: getRequestAbortSignal(request),
-        telemetry,
       }
     );
 
-    return {
-      queries: result.queries,
-      tokensUsed: result.tokensUsed,
-      connectorId: result.connectorId,
-    };
+    const conversationId = await createAgentConversation({
+      agentBuilder: server.agentBuilder,
+      request,
+      agentId: KI_QUERY_GENERATION_AGENT_ID,
+      title: `KI query generation: ${source.slug}`,
+    });
+
+    return { agentId: KI_QUERY_GENERATION_AGENT_ID, conversationId, ...input };
+  },
+});
+
+const generateQueriesRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{sourceId}/queries/_generate',
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        sourceId: z.string().max(MAX_ID_LENGTH).describe('The source id'),
+      }),
+      body: z.object({
+        connectorId: z
+          .string()
+          .max(MAX_ID_LENGTH)
+          .describe('The connector the agent run used, as returned by `_generate/input`.'),
+        conversationId: z
+          .string()
+          .max(MAX_ID_LENGTH)
+          .describe(
+            'The conversation the `ai.agent` step ran in, as returned by `_generate/input`.'
+          ),
+        parentWorkflowExecutionId: z
+          .string()
+          .max(MAX_ID_LENGTH)
+          .optional()
+          .describe('The workflow run that started the calling workflow, for telemetry.'),
+      }),
+    })
+  ),
+  options: {
+    access: 'internal',
+    summary: 'Read the queries a generation agent run produced',
+    description:
+      'Reads the finalized queries from the conversation of a query generation agent run for the given source.',
+    timeout: { idleSocket: 300_000 },
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+    },
+  },
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    maintenanceService,
+    logger,
+    telemetry,
+  }): Promise<
+    SignificantEventsQueriesGenerationResult & { connectorId: string; finalized: boolean }
+  > => {
+    const scopedClients = await getScopedClients({ request });
+    const { sourcesClient, licensing } = scopedClients;
+
+    await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
+
+    if (!server.agentBuilder) {
+      throw new Error('Agent Builder is required to generate significant events queries');
+    }
+
+    const { sourceId } = params.path;
+    const { connectorId, conversationId, parentWorkflowExecutionId } = params.body;
+
+    const [{ source }, conversationClient] = await Promise.all([
+      sourcesClient.get(sourceId),
+      server.agentBuilder.conversations.getScopedClient({ request }),
+    ]);
+    const generationLogger = logger.get('significant_events_queries_generation');
+    // A missing conversation (agent builder also answers not-found for one the caller may not
+    // read) is an attempt that never finalized, so the loop runs the agent again. Any other
+    // error is thrown for the step's own retry, which re-reads the same conversation instead
+    // of paying for a new agent run.
+    const agentConversation = await conversationClient
+      .get(conversationId)
+      .catch((error: unknown) => {
+        if (!isConversationNotFoundError(error)) {
+          throw error;
+        }
+        generationLogger.warn(
+          `Conversation [${conversationId}] of the query generation agent was not found: ${error.message}`
+        );
+        return undefined;
+      });
+    if (!agentConversation) {
+      return { queries: [], tokensUsed: { ...EMPTY_TOKENS }, connectorId, finalized: false };
+    }
+
+    return collectGeneratedKIQueries(
+      {
+        source,
+        connectorId,
+        agentConversation,
+        workflowExecutionId: getWorkflowExecutionIdFromRequest(request),
+        parentWorkflowExecutionId: parentWorkflowExecutionId?.trim() || undefined,
+      },
+      { logger: generationLogger, telemetry }
+    );
   },
 });
 
@@ -778,6 +874,7 @@ export const internalKIQueriesRoutes = {
   ...demoteBackedQueriesRoute,
   ...bulkDeleteQueriesRoute,
   ...getDiscoveryQueriesRoute,
+  ...generateQueriesInputRoute,
   ...generateQueriesRoute,
   ...persistQueriesRoute,
   ...upsertQueryRoute,

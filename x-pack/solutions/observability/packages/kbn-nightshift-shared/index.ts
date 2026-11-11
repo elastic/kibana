@@ -163,6 +163,7 @@ export {
 
 export {
   createHttpServiceAccountsApi,
+  ensureNightshiftServiceAccount,
   ensureNightshiftServiceAccounts,
   getSecurityRoleUrl,
   NightshiftServiceAccountSetupError,
@@ -182,5 +183,6 @@ export {
   getNightshiftServiceAccountName,
   NIGHTSHIFT_SERVICE_ACCOUNT_KINDS,
   type NightshiftServiceAccountIds,
+  type NightshiftInvestigationAccountKind,
   type NightshiftServiceAccountKind,
 } from './src/service_accounts/service_account';

@@ -1,11 +1,14 @@
 # KI Queries Generation Workflow
 #
 # On-demand workflow that generates KI queries for a single
-# stream via LLM inference. Each run calls the _generate endpoint once and
-# returns the generated queries with token usage.
+# stream via LLM inference. Each run builds the agent's input, runs the agent as a
+# workflow step and reads its queries, returning them with token usage.
 #
 # Flow:
-#   generate_queries (retry ×3) → persist_queries (retry ×3) → output
+#   init → generate_loop (up to 3 attempts: build_agent_input → generate_agent (ai.agent, retry ×3)
+#   → generate_queries (read)) → check_finalized → persist_queries (retry ×3) → output
+#
+# An attempt whose agent never finalized its queries is run again in a fresh conversation.
 #
 # Concurrency is keyed per source slug so only one generation run can be
 # active for a given source in a space at any time; overlapping triggers are
@@ -49,28 +52,119 @@ triggers:
         description: "Max number of existing queries to include as LLM context. When omitted the server-side default is used."
 steps:
   # -----------------------------------------------------------------------
-  # Step 1: Call the LLM-backed generation endpoint (retries up to 3×).
+  # Step 1: Initialize loop variables.
   # -----------------------------------------------------------------------
-  - name: generate_queries
-    type: kibana.request
+  - name: init
+    type: data.set
     with:
-      method: POST
-      path: "/s/{{ workflow.spaceId }}/internal/streams/{{ inputs.sourceId }}/queries/_generate"
-      headers:
-        x-elastic-internal-origin: "kibana"
-        x-nightshift-source-revision: "{{ inputs.sourceRevision }}"
-      body:
-        connectorId: "${{ inputs.connectorId }}"
-        runId: "${{ execution.id }}"
-        parentWorkflowExecutionId: "${{ parent.executionId }}"
-        maxExistingQueriesForContext: "${{ inputs.maxExistingQueriesForContext }}"
-    on-failure:
-      retry:
-        max-attempts: 3
-        delay: "5s"
-        strategy: exponential
+      attempts: 0
+      finalized: false
+      connectorId: ""
+      queries: []
+      tokensUsed:
+        completion: 0
+        prompt: 0
+        total: 0
+        cached: 0
+
   # -----------------------------------------------------------------------
-  # Step 2: Persist the generated queries.
+  # Step 2: Run the agent until it finalizes its queries, at most 3 attempts.
+  # -----------------------------------------------------------------------
+  - name: generate_loop
+    type: while
+    condition: "${{ variables.attempts < 3 and variables.finalized == false }}"
+    steps:
+      - name: count_attempt
+        type: data.set
+        with:
+          attempts: "${{ variables.attempts | plus: 1 }}"
+
+      # 2a: Build the agent's input and resolve its connector. Short route; no LLM call.
+      - name: build_agent_input
+        type: kibana.request
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/internal/streams/{{ inputs.sourceId }}/queries/_generate/input"
+          headers:
+            x-elastic-internal-origin: "kibana"
+            x-nightshift-source-revision: "{{ inputs.sourceRevision }}"
+          body:
+            connectorId: "${{ inputs.connectorId }}"
+            maxExistingQueriesForContext: "${{ inputs.maxExistingQueriesForContext }}"
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: "5s"
+            strategy: exponential
+
+      # 2b: Run the agent as a workflow step, with the workflow's own credential. A route handler
+      # holds the token it was called with and cannot renew it, so an agent run inside one is
+      # capped by the token's lifetime.
+      - name: generate_agent
+        type: ai.agent
+        agent-id: "{{ steps.build_agent_input.output.agentId }}"
+        connector-id: "{{ steps.build_agent_input.output.connectorId }}"
+        plugin-id: "nightshift_ki_query_generation"
+        aggregate-by: "nightshift"
+        product-solution: "observability"
+        product-feature: "nightshift"
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: "5s"
+            strategy: exponential
+        with:
+          conversation_id: "${{ steps.build_agent_input.output.conversationId }}"
+          message: "${{ steps.build_agent_input.output.message }}"
+
+      # 2c: Read the queries the agent finalized from its conversation. `finalized` is false when
+      # the agent finished without calling validate_queries.
+      - name: generate_queries
+        type: kibana.request
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/internal/streams/{{ inputs.sourceId }}/queries/_generate"
+          headers:
+            x-elastic-internal-origin: "kibana"
+            x-nightshift-source-revision: "{{ inputs.sourceRevision }}"
+          body:
+            connectorId: "${{ steps.build_agent_input.output.connectorId }}"
+            conversationId: "${{ steps.build_agent_input.output.conversationId }}"
+            parentWorkflowExecutionId: "${{ parent.executionId }}"
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: "5s"
+            strategy: exponential
+
+      # 2d: Keep this attempt's outcome; the loop stops once an attempt finalized.
+      - name: update_state
+        type: data.set
+        with:
+          finalized: "${{ steps.generate_queries.output.finalized }}"
+          connectorId: "${{ steps.generate_queries.output.connectorId }}"
+          queries: "${{ steps.generate_queries.output.queries }}"
+          # Every attempt runs a full agent conversation, so usage is summed across attempts.
+          tokensUsed:
+            completion: "${{ variables.tokensUsed.completion | plus: steps.generate_queries.output.tokensUsed.completion }}"
+            prompt: "${{ variables.tokensUsed.prompt | plus: steps.generate_queries.output.tokensUsed.prompt }}"
+            total: "${{ variables.tokensUsed.total | plus: steps.generate_queries.output.tokensUsed.total }}"
+            cached: "${{ variables.tokensUsed.cached | plus: steps.generate_queries.output.tokensUsed.cached }}"
+
+  # -----------------------------------------------------------------------
+  # Step 3: Fail when no attempt finalized.
+  # -----------------------------------------------------------------------
+  - name: check_finalized
+    type: if
+    condition: "${{ variables.finalized == false }}"
+    steps:
+      - name: not_finalized
+        type: workflow.fail
+        with:
+          message: "KI query generation agent did not finalize validate_queries for source {{ inputs.sourceId }}"
+
+  # -----------------------------------------------------------------------
+  # Step 4: Persist the generated queries.
   # -----------------------------------------------------------------------
   - name: persist_queries
     type: kibana.request
@@ -86,15 +180,15 @@ steps:
         x-elastic-internal-origin: "kibana"
         x-nightshift-source-revision: "{{ inputs.sourceRevision }}"
       body:
-        queries: "${{ steps.generate_queries.output.queries }}"
+        queries: "${{ variables.queries }}"
   # -----------------------------------------------------------------------
-  # Step 3: Output results.
+  # Step 5: Output results.
   # -----------------------------------------------------------------------
   - name: output_result
     type: workflow.output
     with:
-      connectorId: "${{ steps.generate_queries.output.connectorId }}"
-      queries: "${{ steps.generate_queries.output.queries }}"
-      tokensUsed: "${{ steps.generate_queries.output.tokensUsed }}"
+      connectorId: "${{ variables.connectorId }}"
+      queries: "${{ variables.queries }}"
+      tokensUsed: "${{ variables.tokensUsed }}"
       persistedQueries: "${{ steps.persist_queries.output.persistedQueries }}"
       skippedQueries: "${{ steps.persist_queries.output.skippedQueries }}"

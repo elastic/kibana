@@ -39,13 +39,19 @@ import {
   EXAMPLE_MANAGED_WORKFLOW_ID,
   EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_ORCHESTRATOR_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID,
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
 import ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_YAML from './definitions/alertzero/actions/action_close_attack_discovery_investigation.yaml';
 import ACTION_ISOLATE_HOST_YAML from './definitions/alertzero/actions/defend/action_isolate_host.yaml';
@@ -103,6 +109,32 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     serviceAccountId: 'kibana/nightshift_agent',
   },
   [NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID]: { serviceAccountId: 'kibana/nightshift_agent' },
+  [NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID]: { serviceAccountId: 'kibana/nightshift_detection' },
+  [NIGHTSHIFT_BOUND_ORCHESTRATOR_WORKFLOW_ID]: { serviceAccountId: 'kibana/nightshift_detection' },
+  [NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID]: { serviceAccountId: 'kibana/nightshift_detection' },
+  [NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID]: {
+    serviceAccountId: 'kibana/nightshift_detection',
+  },
+  [NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID]: { serviceAccountId: 'kibana/nightshift_detection' },
+  [NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID]: {
+    serviceAccountId: 'kibana/nightshift_detection',
+  },
+  [NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID]: {
+    serviceAccountId: 'kibana/nightshift_detection',
+    detectionIntervalMinutes: 30,
+    detectionBucketIntervalMinutes: 1,
+    detectionLookbackMinutes: 40,
+    targetCoverageMinutes: 30,
+  },
+  [NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW_ID]: {
+    serviceAccountId: 'kibana/nightshift_detection',
+    reviewIntervalMinutes: 10,
+    discoveryBatchSize: 3,
+    maxReviewPasses: 3,
+    flakyRuleDetectionThreshold: 10,
+    flakyRuleProbeAfterMinutes: 360,
+    flakyRuleExemptSeverityScore: 80,
+  },
   [EXAMPLE_MANAGED_WORKFLOW_ID]: {
     recipient: 'World',
   },
@@ -148,20 +180,6 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     autonomyLevel: 'manual',
     scheduleInterval: '1h',
     extras: { lookbackDays: 14, maxGapsPerRun: 5 },
-  },
-  [SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID]: {
-    detectionIntervalMinutes: 30,
-    detectionBucketIntervalMinutes: 1,
-    detectionLookbackMinutes: 40,
-    targetCoverageMinutes: 30,
-  },
-  [SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID]: {
-    reviewIntervalMinutes: 10,
-    discoveryBatchSize: 3,
-    maxReviewPasses: 3,
-    flakyRuleDetectionThreshold: 10,
-    flakyRuleProbeAfterMinutes: 360,
-    flakyRuleExemptSeverityScore: 80,
   },
 };
 

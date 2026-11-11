@@ -19,6 +19,7 @@ import {
 import type { SignificantEventsMaintenanceState } from '../../../../../common/maintenance/state_machine';
 import { KI_QUERY_GENERATION_AGENT_ID } from '../../../../agent_builder/agents/ki_query_generation';
 import { internalKIQueriesRoutes } from './route';
+import { createConversationNotFoundError } from '@kbn/agent-builder-common';
 
 jest.mock('../../../utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
@@ -26,7 +27,8 @@ jest.mock('../../../utils/assert_significant_events_access', () => ({
 
 const mockFetchQueryLinks = jest.fn();
 const mockComputeOccurrences = jest.fn();
-const mockGenerateKIQueries = jest.fn();
+const mockBuildKIQueryGenerationInput = jest.fn();
+const mockCollectGeneratedKIQueries = jest.fn();
 const mockCleanupStaleEvents = jest.fn();
 
 jest.mock('../../../../lib/significant_events/fetch_query_occurrences_from_alerts', () => ({
@@ -47,7 +49,8 @@ jest.mock('../../../../lib/significant_events/entities/get_live_entities', () =>
 }));
 
 jest.mock('../../../../lib/significant_events/ki_queries_generation_service', () => ({
-  generateKIQueries: (...args: unknown[]) => mockGenerateKIQueries(...args),
+  buildKIQueryGenerationInput: (...args: unknown[]) => mockBuildKIQueryGenerationInput(...args),
+  collectGeneratedKIQueries: (...args: unknown[]) => mockCollectGeneratedKIQueries(...args),
 }));
 
 jest.mock('../../../../lib/significant_events/events/cleanup_stale_events', () => ({
@@ -567,48 +570,38 @@ describe('persistQueriesRoute', () => {
   });
 });
 
-describe('generateQueriesRoute', () => {
-  const generateRoute =
-    internalKIQueriesRoutes['POST /internal/streams/{sourceId}/queries/_generate'];
-  const strictGenerateParams = DeepStrict(generateRoute.params);
+describe('generateQueriesInputRoute', () => {
+  const inputRoute =
+    internalKIQueriesRoutes['POST /internal/streams/{sourceId}/queries/_generate/input'];
+  const strictInputParams = DeepStrict(inputRoute.params);
 
   beforeEach(() => {
-    mockGenerateKIQueries.mockReset();
-    mockGenerateKIQueries.mockResolvedValue({
-      queries: [],
-      tokensUsed: { prompt: 0, completion: 0, total: 0 },
+    mockBuildKIQueryGenerationInput.mockReset();
+    mockBuildKIQueryGenerationInput.mockResolvedValue({
       connectorId: 'test-connector',
+      message: 'generate queries',
     });
   });
 
   const makeAgentBuilder = () => ({
     agents: { ensure: jest.fn().mockResolvedValue(undefined) },
+    conversations: {
+      getScopedClient: jest.fn().mockResolvedValue({
+        create: jest.fn().mockResolvedValue({ id: 'conversation-1' }),
+      }),
+    },
   });
 
   const makeHandlerParams = ({
     agentBuilder,
     body = { connectorId: 'test-connector' },
-    workflowExecutionId,
-    isInternalApiRequest = workflowExecutionId !== undefined,
   }: {
     agentBuilder: unknown;
     body?: Record<string, unknown>;
-    workflowExecutionId?: string;
-    isInternalApiRequest?: boolean;
   }) =>
     ({
       params: { path: { sourceId: 'logs.test' }, body },
-      request: {
-        spaceId: 'default',
-        events: { aborted$: { subscribe: jest.fn() } },
-        isInternalApiRequest,
-        headers: workflowExecutionId
-          ? {
-              [EVENT_CHAIN_DEPTH_HEADER]: '0',
-              [EVENT_CHAIN_SOURCE_EXECUTION_HEADER]: workflowExecutionId,
-            }
-          : {},
-      },
+      request: { spaceId: 'default', events: { aborted$: { subscribe: jest.fn() } } },
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: {
           get: jest.fn().mockResolvedValue({
@@ -630,43 +623,19 @@ describe('generateQueriesRoute', () => {
         get: jest.fn().mockReturnValue({ warn: jest.fn(), debug: jest.fn(), trace: jest.fn() }),
       },
       telemetry: {},
-    } as unknown as GenerateHandlerParams);
-
-  it('retains valid run ids and rejects blank or overlong run ids during route validation', () => {
-    const parsed = strictGenerateParams.safeParse({
-      path: { sourceId: 'logs.test' },
-      body: { runId: 'run-1' },
-    });
-
-    expect(parsed.success).toBe(true);
-    if (parsed.success) {
-      expect(parsed.data.body?.runId).toBe('run-1');
-    }
-    expect(
-      strictGenerateParams.safeParse({
-        path: { sourceId: 'logs.test' },
-        body: { runId: '   ' },
-      }).success
-    ).toBe(false);
-    expect(
-      strictGenerateParams.safeParse({
-        path: { sourceId: 'logs.test' },
-        body: { runId: 'x'.repeat(MAX_ID_LENGTH + 1) },
-      }).success
-    ).toBe(false);
-  });
+    } as unknown as Parameters<typeof inputRoute.handler>[0]);
 
   it('accepts bounded existing-query context limits and defaults omission to 50', () => {
     for (const value of [0, 10, 50]) {
       expect(
-        strictGenerateParams.safeParse({
+        strictInputParams.safeParse({
           path: { sourceId: 'logs.test' },
           body: { maxExistingQueriesForContext: value },
         }).success
       ).toBe(true);
     }
 
-    const omitted = strictGenerateParams.safeParse({
+    const omitted = strictInputParams.safeParse({
       path: { sourceId: 'logs.test' },
       body: {},
     });
@@ -677,7 +646,7 @@ describe('generateQueriesRoute', () => {
 
     for (const value of [-1, 51, 1.5]) {
       expect(
-        strictGenerateParams.safeParse({
+        strictInputParams.safeParse({
           path: { sourceId: 'logs.test' },
           body: { maxExistingQueriesForContext: value },
         }).success
@@ -685,29 +654,150 @@ describe('generateQueriesRoute', () => {
     }
   });
 
-  it('delegates to query generation and returns its result', async () => {
-    const result = await generateRoute.handler(
+  it('installs the agent in the request space, then returns what the ai.agent step runs with', async () => {
+    const agentBuilder = makeAgentBuilder();
+
+    const result = await inputRoute.handler(
       makeHandlerParams({
-        agentBuilder: makeAgentBuilder(),
-        body: {
-          connectorId: 'test-connector',
-          runId: 'run-1',
-          parentWorkflowExecutionId: 'onboarding-run-1',
-          maxExistingQueriesForContext: 10,
-        },
-        workflowExecutionId: 'workflow-run-1',
+        agentBuilder,
+        body: { connectorId: 'test-connector', maxExistingQueriesForContext: 10 },
       })
     );
 
-    expect(mockGenerateKIQueries).toHaveBeenCalledWith(
+    expect(result).toEqual({
+      agentId: KI_QUERY_GENERATION_AGENT_ID,
+      connectorId: 'test-connector',
+      conversationId: 'conversation-1',
+      message: 'generate queries',
+    });
+    expect(agentBuilder.agents.ensure).toHaveBeenCalledWith(
+      expect.objectContaining({
+        spaceId: 'default',
+        agent: expect.objectContaining({ id: KI_QUERY_GENERATION_AGENT_ID }),
+      })
+    );
+    expect(mockBuildKIQueryGenerationInput).toHaveBeenCalledWith(
       expect.objectContaining({
         source: { id: 'logs.test', view_name: '$.nightshift.sources.default.logs' },
         connectorId: 'test-connector',
-        runId: 'run-1',
-        workflowExecutionId: 'workflow-run-1',
-        parentWorkflowExecutionId: 'onboarding-run-1',
         maxExistingQueriesForContext: 10,
       }),
+      expect.any(Object)
+    );
+  });
+
+  it('fails when agent builder is unavailable', async () => {
+    await expect(
+      inputRoute.handler(makeHandlerParams({ agentBuilder: undefined }))
+    ).rejects.toThrow('Agent Builder is required');
+    expect(mockBuildKIQueryGenerationInput).not.toHaveBeenCalled();
+  });
+
+  it('maps a blocked model to a 400 response', async () => {
+    mockBuildKIQueryGenerationInput.mockRejectedValueOnce(
+      new NightshiftModelBlockedError('custom-model', 'default-model')
+    );
+
+    await expect(
+      inputRoute.handler(
+        makeHandlerParams({
+          agentBuilder: makeAgentBuilder(),
+          body: { connectorId: 'custom-model' },
+        })
+      )
+    ).rejects.toMatchObject({ output: { statusCode: 400 } });
+  });
+});
+
+describe('generateQueriesRoute', () => {
+  const generateRoute =
+    internalKIQueriesRoutes['POST /internal/streams/{sourceId}/queries/_generate'];
+  const strictGenerateParams = DeepStrict(generateRoute.params);
+
+  beforeEach(() => {
+    mockCollectGeneratedKIQueries.mockReset();
+    mockCollectGeneratedKIQueries.mockReturnValue({
+      queries: [],
+      tokensUsed: { prompt: 0, completion: 0, total: 0 },
+      connectorId: 'test-connector',
+    });
+  });
+
+  const makeHandlerParams = ({
+    agentBuilder,
+    body = {},
+    workflowExecutionId,
+    isInternalApiRequest = workflowExecutionId !== undefined,
+  }: {
+    agentBuilder: unknown;
+    body?: Record<string, unknown>;
+    workflowExecutionId?: string;
+    isInternalApiRequest?: boolean;
+  }) =>
+    ({
+      params: {
+        path: { sourceId: 'logs.test' },
+        body: { connectorId: 'test-connector', conversationId: 'conversation-1', ...body },
+      },
+      request: {
+        spaceId: 'default',
+        isInternalApiRequest,
+        headers: workflowExecutionId
+          ? {
+              [EVENT_CHAIN_DEPTH_HEADER]: '0',
+              [EVENT_CHAIN_SOURCE_EXECUTION_HEADER]: workflowExecutionId,
+            }
+          : {},
+      },
+      getScopedClients: jest.fn().mockResolvedValue({
+        sourcesClient: {
+          get: jest.fn().mockResolvedValue({
+            source: { id: 'logs.test', view_name: '$.nightshift.sources.default.logs' },
+          }),
+        },
+        licensing: {},
+      }),
+      server: { agentBuilder },
+      maintenanceService: makeMaintenanceService(),
+      logger: { get: jest.fn().mockReturnValue({ debug: jest.fn(), warn: jest.fn() }) },
+      telemetry: {},
+    } as unknown as GenerateHandlerParams);
+
+  it('requires the connector and the conversation of the agent run', () => {
+    const path = { sourceId: 'logs.test' };
+    expect(
+      strictGenerateParams.safeParse({
+        path,
+        body: { connectorId: 'test-connector', conversationId: 'conversation-1' },
+      }).success
+    ).toBe(true);
+    expect(strictGenerateParams.safeParse({ path, body: { connectorId: 'c' } }).success).toBe(
+      false
+    );
+    expect(
+      strictGenerateParams.safeParse({
+        path,
+        body: { connectorId: 'c', conversationId: 'x'.repeat(MAX_ID_LENGTH + 1) },
+      }).success
+    ).toBe(false);
+  });
+
+  it('collects the queries from the conversation the agent step stored', async () => {
+    const conversation = { rounds: [] };
+    const conversationClient = { get: jest.fn().mockResolvedValue(conversation) };
+    const agentBuilder = {
+      conversations: { getScopedClient: jest.fn().mockResolvedValue(conversationClient) },
+    };
+
+    const result = await generateRoute.handler(makeHandlerParams({ agentBuilder }));
+
+    expect(conversationClient.get).toHaveBeenCalledWith('conversation-1');
+    expect(mockCollectGeneratedKIQueries).toHaveBeenCalledWith(
+      {
+        source: { id: 'logs.test', view_name: '$.nightshift.sources.default.logs' },
+        connectorId: 'test-connector',
+        agentConversation: conversation,
+      },
       expect.any(Object)
     );
     expect(result).toEqual({
@@ -717,66 +807,90 @@ describe('generateQueriesRoute', () => {
     });
   });
 
-  it('does not accept a workflow execution header from a non-internal request', async () => {
+  it('passes the trusted workflow execution and the body parent execution to the collector', async () => {
+    const conversationClient = { get: jest.fn().mockResolvedValue({ rounds: [] }) };
+    const agentBuilder = {
+      conversations: { getScopedClient: jest.fn().mockResolvedValue(conversationClient) },
+    };
+
     await generateRoute.handler(
       makeHandlerParams({
-        agentBuilder: makeAgentBuilder(),
+        agentBuilder,
+        body: { parentWorkflowExecutionId: 'onboarding-run-1' },
+        workflowExecutionId: 'workflow-run-1',
+      })
+    );
+
+    expect(mockCollectGeneratedKIQueries).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowExecutionId: 'workflow-run-1',
+        parentWorkflowExecutionId: 'onboarding-run-1',
+      }),
+      expect.any(Object)
+    );
+  });
+
+  it('does not accept a workflow execution header from a non-internal request', async () => {
+    const conversationClient = { get: jest.fn().mockResolvedValue({ rounds: [] }) };
+    const agentBuilder = {
+      conversations: { getScopedClient: jest.fn().mockResolvedValue(conversationClient) },
+    };
+
+    await generateRoute.handler(
+      makeHandlerParams({
+        agentBuilder,
         workflowExecutionId: 'caller-chosen-run',
         isInternalApiRequest: false,
       })
     );
 
-    expect(mockGenerateKIQueries).toHaveBeenCalledWith(
+    expect(mockCollectGeneratedKIQueries).toHaveBeenCalledWith(
       expect.objectContaining({ workflowExecutionId: undefined }),
       expect.any(Object)
     );
   });
 
-  it('installs the KI query generation agent in the request space before generating', async () => {
-    const agentBuilder = makeAgentBuilder();
+  it('reports a missing conversation as an attempt that never finalized, so the loop retries', async () => {
+    const conversationClient = {
+      get: jest
+        .fn()
+        .mockRejectedValue(createConversationNotFoundError({ conversationId: 'conversation-1' })),
+    };
+    const agentBuilder = {
+      conversations: { getScopedClient: jest.fn().mockResolvedValue(conversationClient) },
+    };
 
-    await generateRoute.handler(makeHandlerParams({ agentBuilder }));
+    const result = await generateRoute.handler(makeHandlerParams({ agentBuilder }));
 
-    expect(agentBuilder.agents.ensure).toHaveBeenCalledWith(
-      expect.objectContaining({
-        spaceId: 'default',
-        agent: expect.objectContaining({ id: KI_QUERY_GENERATION_AGENT_ID }),
-      })
-    );
-    expect(agentBuilder.agents.ensure.mock.invocationCallOrder[0]).toBeLessThan(
-      mockGenerateKIQueries.mock.invocationCallOrder[0]
-    );
+    expect(result).toEqual({
+      queries: [],
+      tokensUsed: { prompt: 0, completion: 0, total: 0, cached: 0 },
+      connectorId: 'test-connector',
+      finalized: false,
+    });
+    expect(mockCollectGeneratedKIQueries).not.toHaveBeenCalled();
   });
 
-  it('generates a run id when one is not provided', async () => {
-    await generateRoute.handler(makeHandlerParams({ agentBuilder: makeAgentBuilder() }));
+  // The step's own retry re-reads the same conversation, which is far cheaper than a new agent run.
+  it('throws any other conversation read error for the step to retry', async () => {
+    const conversationClient = {
+      get: jest.fn().mockRejectedValue(new Error('search_phase_execution_exception')),
+    };
+    const agentBuilder = {
+      conversations: { getScopedClient: jest.fn().mockResolvedValue(conversationClient) },
+    };
 
-    const { runId, maxExistingQueriesForContext } = mockGenerateKIQueries.mock.calls[0][0];
-    expect(runId).toEqual(expect.any(String));
-    expect(runId).not.toBe('');
-    expect(maxExistingQueriesForContext).toBe(50);
+    await expect(generateRoute.handler(makeHandlerParams({ agentBuilder }))).rejects.toThrow(
+      'search_phase_execution_exception'
+    );
+    expect(mockCollectGeneratedKIQueries).not.toHaveBeenCalled();
   });
 
   it('fails when agent builder is unavailable', async () => {
     await expect(
       generateRoute.handler(makeHandlerParams({ agentBuilder: undefined }))
     ).rejects.toThrow('Agent Builder is required');
-    expect(mockGenerateKIQueries).not.toHaveBeenCalled();
-  });
-
-  it('maps a blocked model to a 400 response', async () => {
-    mockGenerateKIQueries.mockRejectedValueOnce(
-      new NightshiftModelBlockedError('custom-model', 'default-model')
-    );
-
-    await expect(
-      generateRoute.handler(
-        makeHandlerParams({
-          agentBuilder: makeAgentBuilder(),
-          body: { connectorId: 'custom-model' },
-        })
-      )
-    ).rejects.toMatchObject({ output: { statusCode: 400 } });
+    expect(mockCollectGeneratedKIQueries).not.toHaveBeenCalled();
   });
 });
 

@@ -5,26 +5,11 @@
  * 2.0.
  */
 
-import { firstValueFrom, toArray } from 'rxjs';
 import type { Logger } from '@kbn/logging';
-import type { KibanaRequest } from '@kbn/core/server';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
-import {
-  AgentExecutionMode,
-  CONVERSATION_TITLE_MAX_LENGTH,
-  ConversationAccessControlMode,
-  isRoundCompleteEvent,
-  isToolCallEvent,
-  isToolResultEvent,
-} from '@kbn/agent-builder-common';
+import { isToolCallStep } from '@kbn/agent-builder-common';
+import type { Conversation } from '@kbn/agent-builder-common';
 import type { BaseFeature, IgnoredFeature } from '@kbn/significant-events-schema';
-import {
-  NIGHTSHIFT_KI_EXTRACTION_USAGE_ID,
-  NIGHTSHIFT_USAGE_PARENT_ID,
-  NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
-  NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
-} from '@kbn/nightshift-shared';
 import {
   EMPTY_TOKENS,
   buildFeatureIdentificationUserMessage,
@@ -34,43 +19,25 @@ import {
   type ExcludedFeatureSummary,
   type PreviouslyIdentifiedFeature,
 } from '@kbn/nightshift-ai';
-import { FEATURE_IDENTIFICATION_AGENT_ID } from '../../../agent_builder/agents/feature_identification';
 import { FINALIZE_FEATURES_TOOL_ID } from '../../../agent_builder/skills/feature_identification';
 import { chatTokenCountFromModelUsage } from './chat_token_count';
-import { getWorkflowExecutionIdFromRequest } from '../../telemetry/ebt/workflow_execution_id';
 
-export interface ExecuteFeatureIdentificationAgentOptions {
-  agentBuilder: AgentBuilderPluginStart;
-  request: KibanaRequest;
-  connectorId: string;
+export interface BuildFeatureIdentificationMessageOptions {
   sourceId: string;
   sampleDocuments: InferenceDocument[];
   excludedFeatures?: ExcludedFeatureSummary[];
   previouslyIdentifiedFeatures?: PreviouslyIdentifiedFeature[];
   knownFeatureIds?: string;
-  interactionId: string;
-  signal?: AbortSignal;
-  logger: Logger;
 }
 
-export async function executeFeatureIdentificationAgent({
-  agentBuilder,
-  request,
-  connectorId,
+export function buildFeatureIdentificationMessage({
   sourceId,
   sampleDocuments,
   excludedFeatures,
   previouslyIdentifiedFeatures = [],
   knownFeatureIds = '',
-  interactionId,
-  signal,
-  logger,
-}: ExecuteFeatureIdentificationAgentOptions): Promise<{
-  features: BaseFeature[];
-  ignoredFeatures: IgnoredFeature[];
-  tokensUsed: ChatCompletionTokenCount;
-}> {
-  const userMessage = buildFeatureIdentificationUserMessage({
+}: BuildFeatureIdentificationMessageOptions): string {
+  return buildFeatureIdentificationUserMessage({
     sourceId,
     sampleDocuments: JSON.stringify(sampleDocuments),
     previouslyIdentifiedFeatures:
@@ -80,80 +47,56 @@ export async function executeFeatureIdentificationAgent({
     knownFeatureIds: knownFeatureIds || undefined,
     excludedFeatures: excludedFeatures?.length ? JSON.stringify(excludedFeatures) : undefined,
   });
+}
 
-  const conversationClient = await agentBuilder.conversations.getScopedClient({ request });
-  const conversation = await conversationClient.create({
-    agentId: FEATURE_IDENTIFICATION_AGENT_ID,
-    title: `Feature identification: ${sourceId}`.slice(0, CONVERSATION_TITLE_MAX_LENGTH),
-    accessControl: { access_mode: ConversationAccessControlMode.Public },
-  });
-
-  const { events$ } = await agentBuilder.execution.executeAgent({
-    mode: AgentExecutionMode.conversation,
-    request,
-    abortSignal: signal,
-    useTaskManager: false,
-    params: {
-      agentId: FEATURE_IDENTIFICATION_AGENT_ID,
-      connectorId,
-      conversationId: conversation.id,
-      storeConversation: true,
-      nextInput: { message: userMessage },
-      telemetryMetadata: {
-        pluginId: NIGHTSHIFT_KI_EXTRACTION_USAGE_ID,
-        aggregateBy: NIGHTSHIFT_USAGE_PARENT_ID,
-        productSolution: NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
-        productFeature: NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
-        interactionId,
-      },
-      workflowExecutionId: getWorkflowExecutionIdFromRequest(request),
-    },
-  });
-
-  const events = await firstValueFrom(events$.pipe(toArray()));
-
-  const successfulFinalizeCallIds = new Set(
-    events
-      .filter(isToolResultEvent)
-      .filter(
-        (event) =>
-          event.data.tool_id === FINALIZE_FEATURES_TOOL_ID &&
-          event.data.results.some(
-            (result) =>
-              typeof result.data === 'object' &&
-              result.data !== null &&
-              'finalized' in result.data &&
-              result.data.finalized === true
-          )
-      )
-      .map((event) => event.data.tool_call_id)
-  );
-  const finalizeEvent = events.findLast(
-    (event) =>
-      isToolCallEvent(event) &&
-      event.data.tool_id === FINALIZE_FEATURES_TOOL_ID &&
-      successfulFinalizeCallIds.has(event.data.tool_call_id)
-  );
-  if (!finalizeEvent || !isToolCallEvent(finalizeEvent)) {
+/**
+ * Reads what the feature identification agent finalized from the conversation the `ai.agent`
+ * step stored. The step runs the agent, this reads the `finalize_features` call it made.
+ */
+export function readFeatureIdentificationResult({
+  conversation,
+  logger,
+}: {
+  conversation: Pick<Conversation, 'rounds'>;
+  logger: Logger;
+}): {
+  features: BaseFeature[];
+  ignoredFeatures: IgnoredFeature[];
+  tokensUsed: ChatCompletionTokenCount;
+} {
+  const round = conversation.rounds.at(-1);
+  // A failed or aborted run leaves its round `completed` with the steps it finished, so a
+  // finalize call alone does not mean the run succeeded.
+  if (round?.interruption) {
+    throw new Error('Feature identification agent run was interrupted');
+  }
+  const finalizeStep = round?.steps
+    .filter(isToolCallStep)
+    .findLast(
+      (step) =>
+        step.tool_id === FINALIZE_FEATURES_TOOL_ID &&
+        step.results.some(
+          (result) =>
+            typeof result.data === 'object' &&
+            result.data !== null &&
+            'finalized' in result.data &&
+            result.data.finalized === true
+        )
+    );
+  if (!finalizeStep) {
     throw new Error('Feature identification agent did not successfully call finalize_features');
   }
 
-  const roundEvent = events.find(isRoundCompleteEvent);
-  const rawParams = finalizeEvent.data.params as RawFinalizeFeaturesParams;
-
+  const rawParams = finalizeStep.params as RawFinalizeFeaturesParams;
   if (!Array.isArray(rawParams.features)) {
     throw new Error('Feature identification agent returned invalid finalize_features output');
   }
 
   const { features, ignoredFeatures } = parseFinalizedFeatures(rawParams, logger);
 
-  const tokensUsed: ChatCompletionTokenCount = chatTokenCountFromModelUsage(
-    roundEvent?.data.round.model_usage
-  ) ?? { ...EMPTY_TOKENS };
-
   return {
     features,
     ignoredFeatures,
-    tokensUsed,
+    tokensUsed: chatTokenCountFromModelUsage(round?.model_usage) ?? { ...EMPTY_TOKENS },
   };
 }

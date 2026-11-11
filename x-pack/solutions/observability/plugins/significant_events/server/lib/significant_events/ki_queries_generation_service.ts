@@ -5,46 +5,37 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { Logger } from '@kbn/core/server';
+import type { Conversation } from '@kbn/agent-builder-common';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { SignificantEventsQueriesGenerationResult } from '@kbn/significant-events-schema';
 import type { EbtTelemetryClient } from '../telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
-import { executeKIQueryGenerationAgent } from './identify_ki_queries_via_agent';
+import {
+  buildKIQueryGenerationMessage,
+  readKIQueryGenerationResult,
+} from './identify_ki_queries_via_agent';
+import { chatTokenCountFromRounds } from './features/chat_token_count';
 
-export interface GenerateKIQueriesParams {
+export interface BuildKIQueryGenerationInputParams {
   source: NightshiftSource;
   connectorId?: string;
-  runId: string;
-  workflowExecutionId?: string;
-  parentWorkflowExecutionId?: string;
   maxExistingQueriesForContext: number;
 }
 
-export interface GenerateKIQueriesDependencies {
+export interface BuildKIQueryGenerationInputDependencies {
   kiClient: KnowledgeIndicatorClient;
-  agentBuilder: AgentBuilderPluginStart;
   resolveModel: (requestedId?: string) => Promise<string>;
-  request: KibanaRequest;
   logger: Logger;
-  signal: AbortSignal;
-  telemetry: EbtTelemetryClient;
 }
 
-export async function generateKIQueries(
-  params: GenerateKIQueriesParams,
-  deps: GenerateKIQueriesDependencies
-): Promise<SignificantEventsQueriesGenerationResult & { connectorId: string }> {
-  const {
-    source,
-    connectorId: connectorIdOverride,
-    runId,
-    workflowExecutionId,
-    parentWorkflowExecutionId,
-    maxExistingQueriesForContext,
-  } = params;
-  const { kiClient, agentBuilder, resolveModel, request, logger, signal, telemetry } = deps;
+/** Everything the query generation agent is asked, built before the agent runs. */
+export async function buildKIQueryGenerationInput(
+  params: BuildKIQueryGenerationInputParams,
+  deps: BuildKIQueryGenerationInputDependencies
+): Promise<{ connectorId: string; message: string }> {
+  const { source, connectorId: connectorIdOverride, maxExistingQueriesForContext } = params;
+  const { kiClient, resolveModel, logger } = deps;
 
   const connectorId = await resolveModel(connectorIdOverride);
 
@@ -60,19 +51,58 @@ export async function generateKIQueries(
     esql: query.esql.query,
   }));
 
-  const startedAt = Date.now();
-  const { queries, tokensUsed } = await executeKIQueryGenerationAgent({
-    agentBuilder,
-    request,
+  return {
     connectorId,
-    interactionId: runId,
+    message: buildKIQueryGenerationMessage({
+      source,
+      existingQueries,
+      maxExistingQueriesForContext,
+    }),
+  };
+}
+
+export interface CollectGeneratedKIQueriesParams {
+  source: NightshiftSource;
+  connectorId: string;
+  /** The conversation the `ai.agent` step stored. */
+  agentConversation: Pick<Conversation, 'rounds'>;
+  /** The workflow run that called the route, read from the request, never from its body. */
+  workflowExecutionId?: string;
+  /** The run that started the calling workflow, as that workflow reports it. */
+  parentWorkflowExecutionId?: string;
+}
+
+export interface CollectGeneratedKIQueriesDependencies {
+  logger: Logger;
+  telemetry: EbtTelemetryClient;
+}
+
+export function collectGeneratedKIQueries(
+  {
     source,
-    existingQueries,
-    maxExistingQueriesForContext,
-    signal,
-    logger: logger.get('significant_events_queries_generation'),
+    connectorId,
+    agentConversation,
+    workflowExecutionId,
+    parentWorkflowExecutionId,
+  }: CollectGeneratedKIQueriesParams,
+  { logger, telemetry }: CollectGeneratedKIQueriesDependencies
+): SignificantEventsQueriesGenerationResult & { connectorId: string; finalized: boolean } {
+  const result = readKIQueryGenerationResult({
+    conversation: agentConversation,
+    source,
+    logger,
   });
-  const durationMs = Date.now() - startedAt;
+  // The workflow runs the agent again when it never finalized, so this is not an error here. The
+  // attempt still spent tokens, which the workflow adds to its total.
+  if (!result) {
+    return {
+      queries: [],
+      tokensUsed: chatTokenCountFromRounds(agentConversation.rounds),
+      connectorId,
+      finalized: false,
+    };
+  }
+  const { queries, tokensUsed, durationMs } = result;
 
   telemetry.trackSignificantEventsQueriesGenerated({
     workflow_execution_id: workflowExecutionId,
@@ -86,5 +116,5 @@ export async function generateKIQueries(
     duration_ms: durationMs,
   });
 
-  return { queries, tokensUsed, connectorId };
+  return { queries, tokensUsed, connectorId, finalized: true };
 }

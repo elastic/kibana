@@ -8,11 +8,10 @@
  */
 
 import { parse } from 'yaml';
-import { SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW, SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW } from '.';
-import {
-  SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW,
-  SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW,
-} from './knowledge_indicators';
+import { SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW } from '.';
+import FEATURES_IDENTIFICATION_YAML from './knowledge_indicators/features_identification.yaml';
+import QUERIES_GENERATION_YAML from './knowledge_indicators/queries_generation.yaml';
+import BOUND_ORCHESTRATOR_YAML from './significant_events/bound_orchestrator.yaml';
 
 interface WorkflowJsonSchema {
   type?: string;
@@ -33,6 +32,7 @@ interface WorkflowStep {
   'connector-id-by-feature'?: string;
   'on-failure'?: { continue?: boolean };
   steps?: WorkflowStep[];
+  retry?: unknown;
   with?: {
     path?: string;
     body?: Record<string, unknown> & { runId?: string; parentWorkflowExecutionId?: string };
@@ -67,20 +67,11 @@ const requireStep = (workflow: ParsedWorkflow, name: string): WorkflowStep => {
 };
 
 const discovery = parse(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.yaml) as ParsedWorkflow;
-const orchestrator = parse(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.yaml) as ParsedWorkflow;
-const queriesGeneration = parse(
-  SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW.yaml
-) as ParsedWorkflow;
-const featuresIdentification = parse(
-  SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW.yaml
-) as ParsedWorkflow;
+const orchestrator = parse(BOUND_ORCHESTRATOR_YAML) as ParsedWorkflow;
+const queriesGeneration = parse(QUERIES_GENERATION_YAML) as ParsedWorkflow;
+const featuresIdentification = parse(FEATURES_IDENTIFICATION_YAML) as ParsedWorkflow;
 
 describe('significant events persistence workflow contracts', () => {
-  it('bumps managed workflow versions for the bulk persistence contract', () => {
-    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(29);
-    expect(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.version).toBe(4);
-  });
-
   it('reports only the written rule uuids in the discovery output schema', () => {
     const schema = requireStep(discovery, 'run_discovery_agent').with?.schema;
     const properties = schema?.properties;
@@ -121,17 +112,6 @@ describe('significant events persistence workflow contracts', () => {
     ).toBeUndefined();
   });
 
-  it('bootstraps per-space cleanup before discovery work', () => {
-    expect(discovery.steps[0]).toMatchObject({
-      name: 'bootstrap_cleanup_workflow',
-      type: 'kibana.request',
-      with: {
-        path: '/s/{{ workflow.spaceId }}/internal/significant_events/maintenance/cleanup/_bootstrap',
-      },
-      'on-failure': { continue: true },
-    });
-  });
-
   it('starts no investigation from discovery', () => {
     // Significant events are investigated like any other alert: by an automation or by the
     // `Investigate` action, never by discovery.
@@ -153,10 +133,7 @@ describe('significant events persistence workflow contracts', () => {
     });
   });
 
-  it('sends workflow lineage to the KI child routes', () => {
-    expect(requireStep(queriesGeneration, 'generate_queries').with?.body?.runId).toBe(
-      '${{ execution.id }}'
-    );
+  it('sends the parent workflow execution to the KI result routes', () => {
     expect(
       requireStep(queriesGeneration, 'generate_queries').with?.body?.parentWorkflowExecutionId
     ).toBe('${{ parent.executionId }}');
@@ -172,5 +149,14 @@ describe('significant events persistence workflow contracts', () => {
     expect(requireStep(discovery, 'maybe_stamp_processed').condition).toContain(
       'steps.count_written_rules.output.writtenCount > 0'
     );
+  });
+  it.each([
+    ['features_identification', FEATURES_IDENTIFICATION_YAML],
+    ['queries_generation', QUERIES_GENERATION_YAML],
+  ])('nests retry under a non-null on-failure in %s', (_name, yaml) => {
+    const collect = (steps: WorkflowStep[]): WorkflowStep[] =>
+      steps.flatMap((step) => [step, ...collect(step.steps ?? [])]);
+    const steps = collect((parse(yaml) as ParsedWorkflow).steps);
+    expect(steps.filter((step) => 'retry' in step || step['on-failure'] === null)).toEqual([]);
   });
 });

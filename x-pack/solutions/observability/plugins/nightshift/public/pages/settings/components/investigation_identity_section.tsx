@@ -18,6 +18,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getNightshiftServiceAccountName } from '@kbn/nightshift-shared';
+import { useDetectionEngineServiceAccount } from '../../../data/service_accounts/use_detection_engine_service_account';
 import {
   isNightshiftSetUp,
   useInvestigatorServiceAccount,
@@ -28,12 +30,25 @@ import { SettingsSectionRow } from './settings_section';
 /** Shows whether this space is set up with the Nightshift service account, read-only. */
 export const InvestigationIdentitySection = () => {
   const status = useInvestigatorServiceAccount();
+  const detection = useDetectionEngineServiceAccount();
   const { isDeveloperMode } = useDeveloperMode();
-  const isSetUp = isNightshiftSetUp(status.data);
+  const isSetUp = isNightshiftSetUp({ investigator: status.data, detection: detection.data });
+
+  // The badge needs both statuses: without the detection one it would read "Not set up" while
+  // loading, and for good when that read fails.
+  const readError = status.error ?? detection.error;
+  const retryFailedReads = () => {
+    if (!status.data) {
+      status.refetch();
+    }
+    if (detection.isError) {
+      detection.refetch();
+    }
+  };
 
   const renderStatus = () => {
-    if (status.isLoading) return <EuiLoadingSpinner size="m" />;
-    if (!status.data) {
+    if (status.isLoading || detection.isLoading) return <EuiLoadingSpinner size="m" />;
+    if (!status.data || detection.isError) {
       return (
         <EuiCallOut
           announceOnMount
@@ -45,12 +60,12 @@ export const InvestigationIdentitySection = () => {
           })}
           data-test-subj="nightshiftServiceAccountError"
         >
-          {status.error?.message && <p>{status.error.message}</p>}
+          {readError?.message && <p>{readError.message}</p>}
           <EuiButtonEmpty
             size="xs"
             flush="left"
             iconType="refresh"
-            onClick={() => status.refetch()}
+            onClick={retryFailedReads}
             data-test-subj="nightshiftServiceAccountRetry"
           >
             {i18n.translate('xpack.nightshift.settings.serviceAccount.retry', {
@@ -105,7 +120,20 @@ export const InvestigationIdentitySection = () => {
                 id="xpack.nightshift.settings.serviceAccount.otherAccounts"
                 defaultMessage="Other nightshift accounts: {accounts}"
                 values={{
-                  accounts: otherAccounts.map((account, index) => (
+                  accounts: [
+                    ...otherAccounts,
+                    // The detection engine reports its own account: it is bound separately.
+                    ...(detection.data
+                      ? [
+                          {
+                            kind: 'detection',
+                            name: getNightshiftServiceAccountName('detection'),
+                            id: detection.data.serviceAccountId,
+                            role: detection.data.role,
+                          },
+                        ]
+                      : []),
+                  ].map((account, index) => (
                     <React.Fragment key={account.kind}>
                       {index > 0 && ', '}
                       {renderAccount(account)} · <EuiCode>{account.role}</EuiCode>

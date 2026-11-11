@@ -9,12 +9,13 @@ import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '../../hooks/use_kibana';
-import { useSetUpNightshiftServiceAccount } from './use_investigator_service_account';
+import { useSetUpNightshiftServiceAccount } from './use_set_up_nightshift_service_account';
 
 jest.mock('../../hooks/use_kibana');
 
 const mockUseKibana = useKibana as jest.Mock;
 const investigationsFetch = jest.fn();
+const significantEventsFetch = jest.fn();
 const httpGet = jest.fn();
 const create = jest.fn();
 const addError = jest.fn();
@@ -48,6 +49,7 @@ describe('useSetUpNightshiftServiceAccount', () => {
         security: { serviceAccounts: { create } },
         notifications: { toasts: { addError, addWarning, addSuccess } },
         nightshiftInvestigations: { investigationsClient: { fetch: investigationsFetch } },
+        significantEvents: { significantEventsRepositoryClient: { fetch: significantEventsFetch } },
       },
     });
   });
@@ -68,13 +70,15 @@ describe('useSetUpNightshiftServiceAccount', () => {
           }
         : { name: '_nightshift_automations' }
     );
-    create.mockResolvedValue({ id: 'uiam-automations-2' });
+    create.mockImplementation(async ({ name }: { name: string }) => ({
+      id: name === 'nightshift_automations' ? 'uiam-automations-2' : 'uiam-detection-3',
+    }));
     const { result } = renderSetUp();
 
     act(() => result.current.mutate());
 
     await waitFor(() => expect(investigationsFetch).toHaveBeenCalled());
-    expect(create).toHaveBeenCalledTimes(1);
+    expect(create).toHaveBeenCalledTimes(2);
     expect(create).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'nightshift_automations',
@@ -92,6 +96,61 @@ describe('useSetUpNightshiftServiceAccount', () => {
         },
       }
     );
+  });
+
+  it('binds the detection engine to its own account, before the investigation entry point', async () => {
+    httpGet.mockImplementation(async (url: string) =>
+      url === '/internal/security/service_account'
+        ? {
+            serviceAccounts: ['agent', 'automations', 'detection'].map((kind) => ({
+              id: `uiam-${kind}`,
+              name: `nightshift_${kind}`,
+              roles: [`_nightshift_${kind}`],
+              enabled: true,
+              assumable: true,
+            })),
+          }
+        : { name: '_nightshift_detection' }
+    );
+    const { result } = renderSetUp();
+
+    act(() => result.current.mutate());
+
+    await waitFor(() =>
+      expect(investigationsFetch).toHaveBeenCalledWith(
+        'POST /internal/nightshift/onboarding/enable',
+        {
+          signal: null,
+        }
+      )
+    );
+    expect(create).not.toHaveBeenCalled();
+    expect(significantEventsFetch).toHaveBeenCalledWith(
+      'POST /internal/significant_events/service_account/_enable',
+      { signal: null, params: { body: { serviceAccountId: 'uiam-detection' } } }
+    );
+    expect(significantEventsFetch.mock.invocationCallOrder[0]).toBeLessThan(
+      investigationsFetch.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('leaves the investigation entry point unbound when the detection engine cannot be set up', async () => {
+    httpGet.mockResolvedValue({
+      serviceAccounts: ['agent', 'automations', 'detection'].map((kind) => ({
+        id: `uiam-${kind}`,
+        name: `nightshift_${kind}`,
+        roles: [`_nightshift_${kind}`],
+        enabled: true,
+        assumable: true,
+      })),
+    });
+    significantEventsFetch.mockRejectedValueOnce(new Error('role missing'));
+    const { result } = renderSetUp();
+
+    act(() => result.current.mutate());
+
+    await waitFor(() => expect(addError).toHaveBeenCalled());
+    expect(investigationsFetch).not.toHaveBeenCalled();
   });
 
   describe('automations the setup could not bind', () => {

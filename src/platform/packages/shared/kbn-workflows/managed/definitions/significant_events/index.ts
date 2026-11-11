@@ -7,22 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import CLEANUP_YAML from './cleanup.yaml';
 import DETECTION_YAML from './significant_events/detection.yaml';
 import DISCOVERY_YAML from './significant_events/discovery.yaml';
-import ORCHESTRATOR_YAML from './significant_events/orchestrator.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
-export {
-  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW,
-  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW,
-  SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
-} from './scheduled';
-
 export const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID = 'system-significant-events-detection';
 export const SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID = 'system-significant-events-discovery';
-export const SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID = 'system-significant-events-orchestrator';
-export const SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID = 'system-significant-events-cleanup';
 
 // lifecycle: 'static' — instances are declared at startup; orphans are cleaned up on restart.
 // versionStrategy: 'auto' — version bumps are handled automatically on install.
@@ -31,12 +20,6 @@ const SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT = {
   lifecycle: 'static',
   versionStrategy: 'auto',
   enablement: 'enforced',
-} as const;
-
-const SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_MANAGEMENT = {
-  lifecycle: 'dynamic',
-  versionStrategy: 'auto',
-  enablement: 'restorable',
 } as const;
 
 export const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW = {
@@ -55,22 +38,4 @@ export const SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW = {
   billable: false,
   yaml: DISCOVERY_YAML,
   management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
-} as const satisfies ManagedWorkflowDefinition;
-
-export const SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW = {
-  id: SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID,
-  pluginId: 'significantEvents',
-  version: 4,
-  billable: false,
-  yaml: ORCHESTRATOR_YAML,
-  management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
-} as const satisfies ManagedWorkflowDefinition;
-
-export const SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW = {
-  id: SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
-  pluginId: 'significantEvents',
-  version: 1,
-  billable: false,
-  yaml: CLEANUP_YAML,
-  management: SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;

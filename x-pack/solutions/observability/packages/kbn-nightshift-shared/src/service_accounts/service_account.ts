@@ -9,10 +9,16 @@
  * The Nightshift service accounts. There is one of each per deployment, shared by every space:
  * - `agent` runs investigations, their sandbox tools and their Agent Builder hooks.
  * - `automations` runs automation workflows, which start investigations.
+ * - `detection` runs the detection engine. It is created through `ensureNightshiftServiceAccount`
+ *   rather than `ensureNightshiftServiceAccounts`, and the Nightshift setup step needs its role
+ *   as much as the other two: without it, setup fails and the prompt stays.
  */
-export type NightshiftServiceAccountKind = 'agent' | 'automations';
+export type NightshiftServiceAccountKind = 'agent' | 'automations' | 'detection';
 
-export const NIGHTSHIFT_SERVICE_ACCOUNT_KINDS: readonly NightshiftServiceAccountKind[] = [
+/** The kinds investigations are set up with, and the ones `ensureNightshiftServiceAccounts` handles. */
+export type NightshiftInvestigationAccountKind = Exclude<NightshiftServiceAccountKind, 'detection'>;
+
+export const NIGHTSHIFT_SERVICE_ACCOUNT_KINDS: readonly NightshiftInvestigationAccountKind[] = [
   'agent',
   'automations',
 ];
@@ -39,4 +45,4 @@ export const getNightshiftRoleName = (
  * The ids of the accounts a space is set up with, as the service accounts backend assigned them:
  * `kibana/<name>` on stateful, a generated id on Serverless.
  */
-export type NightshiftServiceAccountIds = Record<NightshiftServiceAccountKind, string>;
+export type NightshiftServiceAccountIds = Record<NightshiftInvestigationAccountKind, string>;

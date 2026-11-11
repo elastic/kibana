@@ -413,6 +413,23 @@ describe('SourcesClient', () => {
       expect(viewsClient.getView).toHaveBeenCalledTimes(2);
     });
 
+    it('rejects with 403 when the author cannot read every index the query targets', async () => {
+      const { client, soClient, viewsClient, dataEsClient } = setup();
+      dataEsClient.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: false,
+      } as never);
+
+      await expect(
+        client.create({ title: 'all logs', tags: [], esql: 'FROM logs-*' })
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+      expect(dataEsClient.security.hasPrivileges).toHaveBeenCalledWith({
+        index: [{ names: ['logs-*'], privileges: ['read'] }],
+      });
+      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
     it('rejects a blank title before touching saved objects or ES', async () => {
       const { client, soClient, viewsClient, dataEsClient } = setup();
 
@@ -572,6 +589,36 @@ describe('SourcesClient', () => {
       expect(dataEsClient.esql.query).not.toHaveBeenCalled();
       expect(soClient.update).not.toHaveBeenCalled();
       expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
+    it('rejects with 403 when the author cannot read the indices of a changed query', async () => {
+      const { client, soClient, viewsClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+      dataEsClient.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: false,
+      } as never);
+
+      await expect(
+        client.update('source-1', { title: 'nginx errors', tags: ['nginx'], esql: 'FROM logs-*' })
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
+    it('does not check read access on a save that keeps the query', async () => {
+      const { client, soClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+      dataEsClient.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: false,
+      } as never);
+
+      await client.update('source-1', {
+        title: 'renamed',
+        tags: ['nginx'],
+        esql: 'FROM logs-nginx-* | WHERE status >= 500',
+      });
+
+      expect(dataEsClient.security.hasPrivileges).not.toHaveBeenCalled();
     });
 
     it('keeps the stored type on a title-only save', async () => {

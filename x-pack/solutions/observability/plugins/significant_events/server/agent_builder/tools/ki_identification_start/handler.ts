@@ -6,14 +6,17 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
 import type {
   SignificantEventsKIsOnboardingClient,
   SignificantEventsKIsOnboardingInputs,
 } from '../../../lib/workflows/onboarding_workflow_client';
 import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
+import { assertServiceAccountActsForSpace } from '../../../lib/service_accounts/detection_engine_account';
 import { assertNotPaused } from '../../../routes/utils/assert_not_paused';
 import { NIGHTSHIFT_SOURCES_APP_PATH } from '../../../../common/constants';
+import type { SignificantEventsServer } from '../../../types';
 
 const DEFAULT_LOOKBACK_MS = 24 * 60 * 60 * 1000;
 
@@ -25,6 +28,8 @@ interface StartKiIdentificationHandlerParams {
     features?: string;
     queries?: string;
   };
+  /** Resolves a requested connector with the caller's own access. */
+  server: Pick<SignificantEventsServer, 'inference' | 'core'>;
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
   maintenanceService: SignificantEventsMaintenanceService;
   request: KibanaRequest;
@@ -39,17 +44,54 @@ export async function startKiIdentificationToolHandler({
   sourceSlug,
   steps,
   connectors,
+  server,
   streamsKIsOnboardingClient,
   maintenanceService,
   request,
 }: StartKiIdentificationHandlerParams): Promise<StartKiIdentificationHandlerResult> {
-  // Agent Builder bypasses the HTTP onboarding route; enforce the same pause
-  // gate so Nightshift cannot start onboarding while activity is paused.
+  // Agent Builder bypasses the HTTP onboarding route, whose scoped clients refuse a service account
+  // that is not the space's detection account. Enforce the same here: the run executes as that
+  // account, so another account must not be able to start it through this tool.
+  await assertServiceAccountActsForSpace({
+    core: server.core,
+    request,
+    spaceId: request.spaceId,
+  });
+  // Same for the pause gate, so Nightshift cannot start onboarding while activity is paused.
   await assertNotPaused({ maintenanceService, request });
 
   const now = Date.now();
   const skipFeatures = !steps.includes(KIsOnboardingStep.FeaturesIdentification);
   const skipQueries = !steps.includes(KIsOnboardingStep.QueriesGeneration);
+
+  // The run executes as the detection engine service account, which may reach connectors the
+  // caller cannot. Like the HTTP onboarding route, resolve every selected step as the caller, with
+  // or without a requested id, so omitting the id cannot hand the account's default connector to
+  // a caller who is not allowed to use it.
+  const resolveSelectedConnector = (
+    step: 'kiExtraction' | 'kiQueryGeneration',
+    { skip, requestedId }: { skip: boolean; requestedId: string | undefined }
+  ): Promise<string | undefined> =>
+    skip
+      ? Promise.resolve(undefined)
+      : resolveNightshiftModelForRequest({
+          request,
+          inference: server.inference,
+          savedObjects: server.core.savedObjects,
+          uiSettings: server.core.uiSettings,
+          step,
+          requestedId,
+        });
+  const [featuresConnectorId, queriesConnectorId] = await Promise.all([
+    resolveSelectedConnector('kiExtraction', {
+      skip: skipFeatures,
+      requestedId: connectors?.features,
+    }),
+    resolveSelectedConnector('kiQueryGeneration', {
+      skip: skipQueries,
+      requestedId: connectors?.queries,
+    }),
+  ]);
 
   const inputs: SignificantEventsKIsOnboardingInputs = {
     sourceId,
@@ -58,11 +100,11 @@ export async function startKiIdentificationToolHandler({
       skip: skipFeatures,
       start: now - DEFAULT_LOOKBACK_MS,
       end: now,
-      ...(connectors?.features && { connectorId: connectors.features }),
+      ...(featuresConnectorId && { connectorId: featuresConnectorId }),
     },
     queries: {
       skip: skipQueries,
-      ...(connectors?.queries && { connectorId: connectors.queries }),
+      ...(queriesConnectorId && { connectorId: queriesConnectorId }),
     },
   };
 

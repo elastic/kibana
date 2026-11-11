@@ -6,7 +6,7 @@
  */
 
 import { ALERTING_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
-import { SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../knowledge_indicators';
 import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../knowledge_indicators/data_stream';
 import { DETECTIONS_DATA_STREAM } from '../significant_events/detections/data_stream';
@@ -297,7 +297,7 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(
         updateWorkflow.mock.calls.some(
           ([id, patch]) =>
-            id.startsWith(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID) &&
+            id.startsWith(NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID) &&
             patch.enabled === true
         )
       ).toBe(false);
@@ -311,6 +311,31 @@ describe('SignificantEventsMaintenanceService', () => {
       ).toBe(false);
       const lastWrite = soClient.create.mock.calls.at(-1)?.[1] as Record<string, unknown>;
       expect(lastWrite.pausedSettings).toBeUndefined();
+    });
+
+    it('turns the cleanup workflow back on when the space was set up while paused', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, soClient } = makeService({ management: api });
+
+      await service.pause({ request: REQUEST });
+      // Set up while paused leaves cleanup off and nothing recorded for it.
+      await soClient
+        .forSpace('default')
+        .update(
+          SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
+          SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
+          { disabledWorkflows: [] }
+        );
+      updateWorkflow.mockClear();
+
+      await service.reset({ request: REQUEST });
+
+      expect(updateWorkflow).toHaveBeenCalledWith(
+        cleanupDocumentId('default'),
+        { enabled: true },
+        expect.any(String),
+        REQUEST
+      );
     });
 
     it('keeps a settings-backed workflow running when its toggle could not be turned off', async () => {
@@ -335,7 +360,7 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(
         updateWorkflow.mock.calls.some(
           ([id, patch]) =>
-            id.startsWith(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID) &&
+            id.startsWith(NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID) &&
             patch.enabled === true
         )
       ).toBe(false);

@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { InvestigatorServiceAccountStatus } from '@kbn/nightshift-investigations-plugin/common';
 import { getNightshiftCapabilities, getNightshiftServiceAccountName } from '@kbn/nightshift-shared';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useSetUpNightshiftServiceAccount } from '../../../data/service_accounts/use_investigator_service_account';
+import { useSetUpNightshiftServiceAccount } from '../../../data/service_accounts/use_set_up_nightshift_service_account';
 
 /** The accounts, roles and privileges `_enable` grants, until product docs exist. */
 export const NIGHTSHIFT_SERVICE_ACCOUNT_PRIVILEGES_HREF =
@@ -46,8 +46,10 @@ export const NightshiftSetupPrompt = ({
     application.capabilities.nightshift
   );
   const setUp = useSetUpNightshiftServiceAccount();
-  // The account is found or created by name; the backend assigns its id on setup.
-  const account = getNightshiftServiceAccountName('agent');
+  // The accounts are found or created by name; the backend assigns their ids on setup.
+  const accounts = (['agent', 'automations', 'detection'] as const).map(
+    getNightshiftServiceAccountName
+  );
   const serviceAccountsOff = status?.serviceAccountsEnabled === false;
   const hasManageSecurity = status?.canModifyBoundWorkflows === true;
   const canEnable = canManageAndConfigure && !serviceAccountsOff && hasManageSecurity;
@@ -64,9 +66,32 @@ export const NightshiftSetupPrompt = ({
     <p>
       <FormattedMessage
         id="xpack.nightshift.setup.adminBody"
-        defaultMessage="Grant the agent a {account} account with {privilegesLink}. It will perform investigations and actions on behalf of users in this space. You can revoke privileges anytime in settings."
+        defaultMessage="Grant the Nightshift service accounts {accounts} with {privilegesLink}, and install them in this space. They will perform investigations, automations and detection on behalf of users in this space. You can revoke privileges anytime in Settings."
         values={{
-          account: <EuiCode>{account}</EuiCode>,
+          accounts: (
+            <>
+              {new Intl.ListFormat(i18n.getLocale(), {
+                style: 'long',
+                type: 'conjunction',
+              })
+                .formatToParts(accounts)
+                .map(({ type, value }, index) =>
+                  type === 'element' ? (
+                    <EuiCode key={value}>{value}</EuiCode>
+                  ) : (
+                    // EuiCode pads its right edge, which would leave a gap before the separator.
+                    <span
+                      key={`${index}-${value}`}
+                      css={css`
+                        margin-inline-start: -${euiTheme.size.xs};
+                      `}
+                    >
+                      {value}
+                    </span>
+                  )
+                )}
+            </>
+          ),
           privilegesLink: (
             <EuiLink
               href={NIGHTSHIFT_SERVICE_ACCOUNT_PRIVILEGES_HREF}

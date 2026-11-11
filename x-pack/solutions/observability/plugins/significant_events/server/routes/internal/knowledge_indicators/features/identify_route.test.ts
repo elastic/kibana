@@ -27,6 +27,7 @@ jest.mock('../../../utils/assert_significant_events_access', () => ({
 const mockGetStreamSamplingSource = jest.fn();
 const mockGetStreamTypeFromDefinition = jest.fn();
 const mockIdentifyInferredFeatures = jest.fn();
+const mockBuildFeatureIdentificationInput = jest.fn();
 const mockIdentifyComputedFeatures = jest.fn();
 const mockShouldIdentifyFeatures = jest.fn();
 const mockResolveNightshiftModelForRequest = jest.fn(
@@ -46,6 +47,8 @@ jest.mock('../../../../lib/significant_events/features', () => ({
   MAX_INFERENCE_FIELD_NAME_LENGTH: 1024,
   buildTelemetry: jest.fn(),
   prepareInferredSampling: jest.fn(),
+  buildFeatureIdentificationInput: (...args: unknown[]) =>
+    mockBuildFeatureIdentificationInput(...args),
   identifyInferredFeatures: (...args: unknown[]) => mockIdentifyInferredFeatures(...args),
   identifyComputedFeatures: (...args: unknown[]) => mockIdentifyComputedFeatures(...args),
 }));
@@ -64,6 +67,10 @@ const prepareRoute =
   internalIdentifyKIFeaturesRoutes[
     'POST /internal/streams/{sourceId}/features/_identify/inferred/prepare'
   ];
+const inputRoute =
+  internalIdentifyKIFeaturesRoutes[
+    'POST /internal/streams/{sourceId}/features/_identify/inferred/input'
+  ];
 const inferredRoute =
   internalIdentifyKIFeaturesRoutes['POST /internal/streams/{sourceId}/features/_identify/inferred'];
 const computedRoute =
@@ -71,21 +78,15 @@ const computedRoute =
 const shouldIdentifyRoute =
   internalIdentifyKIFeaturesRoutes['GET /internal/streams/{sourceId}/features/_should_identify'];
 
+type InputHandlerParams = Parameters<typeof inputRoute.handler>[0];
 type InferredHandlerParams = Parameters<typeof inferredRoute.handler>[0];
 type ComputedHandlerParams = Parameters<typeof computedRoute.handler>[0];
 type ShouldIdentifyHandlerParams = Parameters<typeof shouldIdentifyRoute.handler>[0];
 
-const createInferredParams = (
-  documents: Array<{ _id: string; fields: Record<string, unknown> }>
-) => ({
+const createInputParams = (documents: Array<{ _id: string; fields: Record<string, unknown> }>) => ({
   path: { sourceId: 'logs.test' },
   body: {
     documents,
-    samplingTelemetry: {
-      totalFilters: 0,
-      filtersCapped: false,
-      hasFilteredDocuments: false,
-    },
     maxExcludedFeaturesInPrompt: 10,
   },
 });
@@ -108,11 +109,7 @@ const makeRouteLogger = () => ({
   warn: jest.fn(),
 });
 
-const makeInferredHandlerParams = ({
-  ensureEnabled = jest.fn().mockResolvedValue(undefined),
-}: {
-  ensureEnabled?: jest.Mock;
-} = {}) => {
+const makeServerDeps = () => {
   const request = makeRequest();
   const routeLogger = makeRouteLogger();
   const source = {
@@ -122,7 +119,15 @@ const makeInferredHandlerParams = ({
     view_name: '$.nightshift.sources.default.logs',
   };
   const kiClient = {};
-  const agentBuilder = { agents: { ensure: jest.fn().mockResolvedValue(undefined) } };
+  const conversation = { rounds: [{ steps: [] }] };
+  const conversationClient = {
+    get: jest.fn().mockResolvedValue(conversation),
+    create: jest.fn().mockResolvedValue({ id: 'conversation-1' }),
+  };
+  const agentBuilder = {
+    agents: { ensure: jest.fn().mockResolvedValue(undefined) },
+    conversations: { getScopedClient: jest.fn().mockResolvedValue(conversationClient) },
+  };
   const server = {
     agentBuilder,
     inference: {},
@@ -131,16 +136,68 @@ const makeInferredHandlerParams = ({
   const licensing = {};
   const maintenanceService = makeMaintenanceService();
   const telemetry = { trackFeaturesIdentified: jest.fn() };
-  const identifyResult = { features: [], documentsSampled: 10 };
 
   mockGetStreamTypeFromDefinition.mockReturnValue('logs');
-  mockIdentifyInferredFeatures.mockResolvedValue(identifyResult);
+
+  const common = {
+    request,
+    getScopedClients: jest.fn().mockResolvedValue({
+      sourcesClient: { get: jest.fn().mockResolvedValue({ source }) },
+      licensing,
+      getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
+    }),
+    server,
+    logger: { get: jest.fn().mockReturnValue(routeLogger) },
+    telemetry,
+    maintenanceService,
+  };
+
+  return {
+    common,
+    request,
+    kiClient,
+    agentBuilder,
+    conversation,
+    conversationClient,
+    server,
+    licensing,
+    maintenanceService,
+    telemetry,
+  };
+};
+
+const makeInputHandlerParams = () => {
+  const deps = makeServerDeps();
+  mockBuildFeatureIdentificationInput.mockResolvedValue({ message: 'identify these documents' });
 
   const handlerParams = {
+    ...deps.common,
     params: {
       path: { sourceId: 'logs.test' },
       body: {
         connectorId: 'connector-1',
+        documents: [{ _id: 'document-1', fields: { message: 'test message' } }],
+        maxExcludedFeaturesInPrompt: 5,
+        maxPreviouslyIdentifiedFeatures: 6,
+      },
+    },
+  } as unknown as InputHandlerParams;
+
+  return { ...deps, handlerParams };
+};
+
+const makeInferredHandlerParams = () => {
+  const deps = makeServerDeps();
+  const identifyResult = { features: [], documentsSampled: 10 };
+  mockIdentifyInferredFeatures.mockResolvedValue(identifyResult);
+
+  const handlerParams = {
+    ...deps.common,
+    params: {
+      path: { sourceId: 'logs.test' },
+      body: {
+        connectorId: 'connector-1',
+        conversationId: 'conversation-1',
         runId: 'run-1',
         iteration: 2,
         documents: [{ _id: 'document-1', fields: { message: 'test message' } }],
@@ -149,41 +206,11 @@ const makeInferredHandlerParams = ({
           filtersCapped: false,
           hasFilteredDocuments: true,
         },
-        maxExcludedFeaturesInPrompt: 5,
-        maxPreviouslyIdentifiedFeatures: 6,
       },
     },
-    request,
-    getScopedClients: jest.fn().mockResolvedValue({
-      scopedClusterClient: { asCurrentUser: {} },
-      streamDataEsClient: {},
-      sourcesClient: { get: jest.fn().mockResolvedValue({ source }) },
-      soClient: {},
-      tuningConfig: {},
-      licensing,
-      getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
-    }),
-    server,
-    logger: { get: jest.fn().mockReturnValue(routeLogger) },
-    telemetry,
-    syncWorkflowService: { ensureEnabled },
-    maintenanceService,
   } as unknown as InferredHandlerParams;
 
-  return {
-    handlerParams,
-    request,
-    routeLogger,
-    source,
-    kiClient,
-    agentBuilder,
-    server,
-    licensing,
-    maintenanceService,
-    telemetry,
-    identifyResult,
-    ensureEnabled,
-  };
+  return { ...deps, handlerParams, identifyResult };
 };
 
 const makeComputedHandlerParams = () => {
@@ -339,17 +366,17 @@ describe('feature identification route schemas', () => {
     ).toBe(false);
   });
 
-  it('requires maxExcludedFeaturesInPrompt on the inferred route', () => {
-    const params = createInferredParams([{ _id: '1', fields: { message: 'ok' } }]);
-    expect(inferredRoute.params.safeParse(params).success).toBe(true);
+  it('requires maxExcludedFeaturesInPrompt on the input route', () => {
+    const params = createInputParams([{ _id: '1', fields: { message: 'ok' } }]);
+    expect(inputRoute.params.safeParse(params).success).toBe(true);
     expect(
-      inferredRoute.params.safeParse({
+      inputRoute.params.safeParse({
         ...params,
         body: { ...params.body, maxExcludedFeaturesInPrompt: undefined },
       }).success
     ).toBe(false);
     expect(
-      inferredRoute.params.safeParse({
+      inputRoute.params.safeParse({
         ...params,
         body: { ...params.body, maxExcludedFeaturesInPrompt: 51 },
       }).success
@@ -358,14 +385,13 @@ describe('feature identification route schemas', () => {
 
   it('enforces the compact inference document contract', () => {
     expect(
-      inferredRoute.params.safeParse(
-        createInferredParams([{ _id: '1', fields: { message: 'ok' } }])
-      ).success
+      inputRoute.params.safeParse(createInputParams([{ _id: '1', fields: { message: 'ok' } }]))
+        .success
     ).toBe(true);
-    expect(inferredRoute.params.safeParse(createInferredParams([])).success).toBe(false);
+    expect(inputRoute.params.safeParse(createInputParams([])).success).toBe(false);
     expect(
-      inferredRoute.params.safeParse(
-        createInferredParams([
+      inputRoute.params.safeParse(
+        createInputParams([
           {
             _id: '1',
             fields: Object.fromEntries(
@@ -379,8 +405,8 @@ describe('feature identification route schemas', () => {
       ).success
     ).toBe(false);
     expect(
-      inferredRoute.params.safeParse(
-        createInferredParams([
+      inputRoute.params.safeParse(
+        createInputParams([
           {
             _id: '1',
             fields: { ['x'.repeat(MAX_INFERENCE_FIELD_NAME_LENGTH + 1)]: 'value' },
@@ -389,15 +415,15 @@ describe('feature identification route schemas', () => {
       ).success
     ).toBe(false);
     expect(
-      inferredRoute.params.safeParse(
-        createInferredParams([
+      inputRoute.params.safeParse(
+        createInputParams([
           { _id: '1', fields: { message: 'x'.repeat(MAX_INFERENCE_DOCUMENT_BYTES) } },
         ])
       ).success
     ).toBe(false);
     expect(
-      inferredRoute.params.safeParse(
-        createInferredParams(
+      inputRoute.params.safeParse(
+        createInputParams(
           Array.from({ length: 30 }, (_, index) => ({
             _id: `${index}`,
             fields: { message: 'x'.repeat(30_000) },
@@ -408,43 +434,109 @@ describe('feature identification route schemas', () => {
   });
 });
 
+describe('inferred feature identification input route', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('rejects _identify/inferred/input with 409 while paused before building anything', async () => {
+    const { handlerParams, common } = makeInputHandlerParams();
+    handlerParams.maintenanceService = makeMaintenanceService(
+      'paused'
+    ) as unknown as InputHandlerParams['maintenanceService'];
+
+    await expect(inputRoute.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 409 },
+    });
+    expect(mockBuildFeatureIdentificationInput).not.toHaveBeenCalled();
+    expect(common.server.agentBuilder.agents.ensure).not.toHaveBeenCalled();
+  });
+
+  it('installs the agent in the request space, then returns what the ai.agent step runs with', async () => {
+    const { handlerParams, agentBuilder, conversationClient, kiClient } = makeInputHandlerParams();
+
+    await expect(inputRoute.handler(handlerParams)).resolves.toEqual({
+      agentId: FEATURE_IDENTIFICATION_AGENT_ID,
+      connectorId: 'connector-1',
+      conversationId: 'conversation-1',
+      message: 'identify these documents',
+    });
+
+    expect(conversationClient.create).toHaveBeenCalledWith({
+      agentId: FEATURE_IDENTIFICATION_AGENT_ID,
+      title: 'Feature identification: logs.test',
+      accessControl: { access_mode: 'public' },
+    });
+
+    expect(agentBuilder.agents.ensure).toHaveBeenCalledWith(
+      expect.objectContaining({
+        spaceId: 'default',
+        agent: expect.objectContaining({ id: FEATURE_IDENTIFICATION_AGENT_ID }),
+      })
+    );
+    expect(mockBuildFeatureIdentificationInput).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kiClient,
+        sourceId: 'logs.test',
+        documents: [{ _id: 'document-1', fields: { message: 'test message' } }],
+        tuning: { maxExcludedFeaturesInPrompt: 5, maxPreviouslyIdentifiedFeatures: 6 },
+      })
+    );
+  });
+
+  it('fails the request when the agent cannot be installed', async () => {
+    const { handlerParams, agentBuilder } = makeInputHandlerParams();
+    agentBuilder.agents.ensure.mockRejectedValue(new Error('agents index unavailable'));
+
+    await expect(inputRoute.handler(handlerParams)).rejects.toThrow('agents index unavailable');
+    expect(mockBuildFeatureIdentificationInput).not.toHaveBeenCalled();
+  });
+
+  it('maps an unknown connector override to a 400 response', async () => {
+    const { handlerParams } = makeInputHandlerParams();
+    mockResolveNightshiftModelForRequest.mockRejectedValueOnce(
+      new NightshiftModelNotFoundError('missing-model')
+    );
+    handlerParams.params.body.connectorId = 'missing-model';
+
+    await expect(inputRoute.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 400 },
+    });
+    expect(mockBuildFeatureIdentificationInput).not.toHaveBeenCalled();
+  });
+});
+
 describe('inferred feature identification route', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('rejects _identify/inferred with 409 while paused before touching inference', async () => {
-    const getKnowledgeIndicatorClient = jest.fn();
-    const handlerParams = {
-      params: { path: { sourceId: 'logs.test' }, body: null },
-      request: { spaceId: 'default' },
-      getScopedClients: jest.fn().mockResolvedValue({
-        licensing: {},
-        getKnowledgeIndicatorClient,
-      }),
-      server: {},
-      maintenanceService: makeMaintenanceService('paused'),
-    } as unknown as InferredHandlerParams;
+  it('rejects _identify/inferred with 409 while paused before reading the conversation', async () => {
+    const { handlerParams, agentBuilder } = makeInferredHandlerParams();
+    handlerParams.maintenanceService = makeMaintenanceService(
+      'paused'
+    ) as unknown as InferredHandlerParams['maintenanceService'];
 
     await expect(inferredRoute.handler(handlerParams)).rejects.toMatchObject({
       output: { statusCode: 409 },
     });
     expect(mockIdentifyInferredFeatures).not.toHaveBeenCalled();
-    expect(getKnowledgeIndicatorClient).not.toHaveBeenCalled();
+    expect(agentBuilder.conversations.getScopedClient).not.toHaveBeenCalled();
   });
 
-  it('identifies inferred features and bootstraps the sync workflow while enabled', async () => {
+  it('reconciles the conversation the agent step stored', async () => {
     const {
       handlerParams,
       request,
       kiClient,
       agentBuilder,
+      conversation,
+      conversationClient,
       server,
       licensing,
       maintenanceService,
       telemetry,
       identifyResult,
-      ensureEnabled,
     } = makeInferredHandlerParams();
 
     await expect(inferredRoute.handler(handlerParams)).resolves.toEqual({
@@ -454,11 +546,12 @@ describe('inferred feature identification route', () => {
 
     expect(assertSignificantEventsAccess).toHaveBeenCalledWith({ server, licensing });
     expect(maintenanceService.getState).toHaveBeenCalledWith({ request });
+    expect(agentBuilder.conversations.getScopedClient).toHaveBeenCalledWith({ request });
+    expect(conversationClient.get).toHaveBeenCalledWith('conversation-1');
     expect(mockIdentifyInferredFeatures).toHaveBeenCalledWith(
       expect.objectContaining({
-        agentBuilder,
-        request,
         kiClient,
+        agentConversation: conversation,
         sourceId: 'logs.test',
         connectorId: 'connector-1',
         runId: 'run-1',
@@ -467,39 +560,21 @@ describe('inferred feature identification route', () => {
         totalFilters: 3,
         filtersCapped: false,
         hasFilteredDocuments: true,
-        tuning: {
-          maxExcludedFeaturesInPrompt: 5,
-          maxPreviouslyIdentifiedFeatures: 6,
-        },
         trackFeaturesIdentified: expect.any(Function),
       })
     );
     expect(telemetry.trackFeaturesIdentified).not.toHaveBeenCalled();
-    expect(ensureEnabled).toHaveBeenCalledWith({ request, spaceId: 'default' });
   });
 
-  it('installs the feature identification agent in the request space before identifying', async () => {
-    const { handlerParams, agentBuilder } = makeInferredHandlerParams();
+  it('reconciles a failed iteration when the conversation cannot be read', async () => {
+    const { handlerParams, conversationClient } = makeInferredHandlerParams();
+    conversationClient.get.mockRejectedValue(new Error('conversation not found'));
 
     await inferredRoute.handler(handlerParams);
 
-    expect(agentBuilder.agents.ensure).toHaveBeenCalledWith(
-      expect.objectContaining({
-        spaceId: 'default',
-        agent: expect.objectContaining({ id: FEATURE_IDENTIFICATION_AGENT_ID }),
-      })
+    expect(mockIdentifyInferredFeatures).toHaveBeenCalledWith(
+      expect.objectContaining({ agentConversation: undefined })
     );
-    expect(agentBuilder.agents.ensure.mock.invocationCallOrder[0]).toBeLessThan(
-      mockIdentifyInferredFeatures.mock.invocationCallOrder[0]
-    );
-  });
-
-  it('fails the request when the agent cannot be installed', async () => {
-    const { handlerParams, agentBuilder } = makeInferredHandlerParams();
-    agentBuilder.agents.ensure.mockRejectedValue(new Error('agents index unavailable'));
-
-    await expect(inferredRoute.handler(handlerParams)).rejects.toThrow('agents index unavailable');
-    expect(mockIdentifyInferredFeatures).not.toHaveBeenCalled();
   });
 
   it('normalizes a blank run id before identifying inferred features', async () => {
@@ -535,34 +610,6 @@ describe('inferred feature identification route', () => {
         parent_workflow_execution_id: 'onboarding-run-1',
       })
     );
-  });
-
-  it('returns identification results when sync workflow bootstrap fails', async () => {
-    const ensureEnabled = jest.fn().mockRejectedValue(new Error('workflow unavailable'));
-    const { handlerParams, routeLogger, identifyResult } = makeInferredHandlerParams({
-      ensureEnabled,
-    });
-
-    await expect(inferredRoute.handler(handlerParams)).resolves.toEqual({
-      ...identifyResult,
-      connectorId: 'connector-1',
-    });
-    expect(routeLogger.warn).toHaveBeenCalledWith(
-      'Failed to ensure KI sync workflow is enabled: workflow unavailable'
-    );
-  });
-
-  it('maps an unknown connector override to a 400 response', async () => {
-    const { handlerParams } = makeInferredHandlerParams();
-    mockResolveNightshiftModelForRequest.mockRejectedValueOnce(
-      new NightshiftModelNotFoundError('missing-model')
-    );
-    handlerParams.params.body.connectorId = 'missing-model';
-
-    await expect(inferredRoute.handler(handlerParams)).rejects.toMatchObject({
-      output: { statusCode: 400 },
-    });
-    expect(mockIdentifyInferredFeatures).not.toHaveBeenCalled();
   });
 });
 

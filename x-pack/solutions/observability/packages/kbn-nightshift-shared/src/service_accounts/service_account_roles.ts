@@ -11,8 +11,8 @@ type RoleDescriptor = Omit<estypes.SecurityPutRoleRequest, 'name'>;
 
 /**
  * The roles of the Nightshift service accounts on stateful Elasticsearch, named like the accounts.
- * Serverless defines them in elasticsearch-controller as `_nightshift_agent` and
- * `_nightshift_automations`; keep the grants in sync. Nightshift never creates these roles at
+ * Serverless defines them in elasticsearch-controller as `_nightshift_agent`,
+ * `_nightshift_automations` and `_nightshift_detection`; keep the grants in sync. Nightshift never creates these roles at
  * runtime: tests, evals and local development create them with
  * `ensureNightshiftServiceAccountRoles`.
  */
@@ -65,6 +65,48 @@ export const NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES: Readonly<Record<string, 
           // Running an agent bound to a service account needs this sub-feature privilege;
           // `minimal_all` does not include it. See kibana#300175.
           'feature_agentBuilder.invoke_bound_agents',
+          'feature_actions.read',
+        ],
+        resources: ['*'],
+      },
+    ],
+    run_as: [],
+  },
+  nightshift_detection: {
+    description:
+      'Privileges for the service account the Nightshift detection engine runs as. Assigned by Kibana; do not assign to users.',
+    cluster: [
+      // Calls the LLM through an inference endpoint (feature identification, query generation).
+      'monitor_inference',
+      // Source data is read across every linked project.
+      'read_project_routing',
+    ],
+    indices: [
+      {
+        // Source data. A source is any ES|QL query, read through the source's view, and the
+        // caller needs read on the indices behind it: an explicit index it cannot read fails the
+        // query with a 403, while a wildcard silently skips what it cannot read. Saving a source
+        // checks that its author has read on every local index the query names (remote targets
+        // are not checked), but the query can name any of them, so the account reads every index
+        // except system ones, the pattern the `viewer` role uses.
+        // `.rule-events`, `.alert-actions` and the `.significant_events-*` data streams need no
+        // grant: the `nightshift` feature privilege below carries implicit read on them, and
+        // Kibana writes them as the internal user.
+        names: ['/~(([.]|ilm-history-).*)/'],
+        privileges: ['read', 'view_index_metadata', 'read_view_metadata'],
+        allow_restricted_indices: false,
+      },
+    ],
+    applications: [
+      {
+        application: 'kibana-.kibana',
+        privileges: [
+          // `manage_nightshift`, which every detection engine route requires.
+          'feature_nightshift.minimal_all',
+          // The KI extraction `ai.agent` step runs agents as the account.
+          'feature_agentBuilder.read',
+          // The stack connectors a run may name: the LLM lookup lists them through Actions, and a
+          // connector it cannot list is reported as not found.
           'feature_actions.read',
         ],
         resources: ['*'],

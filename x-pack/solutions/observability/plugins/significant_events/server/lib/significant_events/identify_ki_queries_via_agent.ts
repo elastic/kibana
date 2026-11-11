@@ -5,38 +5,19 @@
  * 2.0.
  */
 
-import { firstValueFrom, toArray } from 'rxjs';
 import type { Logger } from '@kbn/logging';
-import type { KibanaRequest } from '@kbn/core/server';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
-import {
-  AgentExecutionMode,
-  CONVERSATION_TITLE_MAX_LENGTH,
-  ConversationAccessControlMode,
-  isRoundCompleteEvent,
-  isToolResultEvent,
-} from '@kbn/agent-builder-common';
+import { isToolCallStep } from '@kbn/agent-builder-common';
+import type { Conversation } from '@kbn/agent-builder-common';
 import type { GeneratedSignificantEventQuery } from '@kbn/significant-events-schema';
-import {
-  NIGHTSHIFT_KI_QUERY_GENERATION_USAGE_ID,
-  NIGHTSHIFT_USAGE_PARENT_ID,
-  NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
-  NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
-} from '@kbn/nightshift-shared';
-import { EMPTY_TOKENS, buildKIQueryGenerationUserMessage } from '@kbn/nightshift-ai';
-import { timeoutSignal } from '@kbn/std';
+import { buildKIQueryGenerationUserMessage } from '@kbn/nightshift-ai';
 import type { ExistingQuerySummary } from '@kbn/nightshift-ai';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
-import { KI_QUERY_GENERATION_AGENT_ID } from '../../agent_builder/agents/ki_query_generation';
 import {
   SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
   type AcceptedQuery,
 } from '../../agent_builder/skills/ki_query_generation';
-import { chatTokenCountFromModelUsage } from './features/chat_token_count';
-import { getWorkflowExecutionIdFromRequest } from '../telemetry/ebt/workflow_execution_id';
-
-const QUERY_GENERATION_MAX_DURATION_MS = 300_000;
+import { chatTokenCountFromRounds } from './features/chat_token_count';
 
 interface FinalizedValidationData {
   slug: string;
@@ -54,114 +35,76 @@ const isFinalizedValidationData = (data: unknown): data is FinalizedValidationDa
   'finalized_queries' in data &&
   Array.isArray(data.finalized_queries);
 
-export interface ExecuteKIQueryGenerationAgentOptions {
-  agentBuilder: AgentBuilderPluginStart;
-  request: KibanaRequest;
-  connectorId: string;
-  interactionId: string;
+export interface BuildKIQueryGenerationMessageOptions {
   source: NightshiftSource;
   existingQueries: ExistingQuerySummary[];
   maxExistingQueriesForContext: number;
-  signal?: AbortSignal;
-  logger: Logger;
 }
 
-export async function executeKIQueryGenerationAgent({
-  agentBuilder,
-  request,
-  connectorId,
-  interactionId,
+export function buildKIQueryGenerationMessage({
   source,
   existingQueries,
   maxExistingQueriesForContext,
-  signal,
-  logger,
-}: ExecuteKIQueryGenerationAgentOptions): Promise<{
-  queries: GeneratedSignificantEventQuery[];
-  tokensUsed: ChatCompletionTokenCount;
-}> {
-  const userMessage = buildKIQueryGenerationUserMessage(
+}: BuildKIQueryGenerationMessageOptions): string {
+  return buildKIQueryGenerationUserMessage(
     { slug: source.slug, description: source.description },
     existingQueries,
     maxExistingQueriesForContext
   );
+}
 
-  const conversationClient = await agentBuilder.conversations.getScopedClient({ request });
-  const conversation = await conversationClient.create({
-    agentId: KI_QUERY_GENERATION_AGENT_ID,
-    title: `KI query generation: ${source.slug}`.slice(0, CONVERSATION_TITLE_MAX_LENGTH),
-    accessControl: { access_mode: ConversationAccessControlMode.Public },
-  });
+/**
+ * Reads what the query generation agent finalized from the conversation the `ai.agent` step
+ * stored. The step runs the agent, this reads its last `validate_queries` result.
+ */
+export function readKIQueryGenerationResult({
+  conversation,
+  source,
+  logger,
+}: {
+  conversation: Pick<Conversation, 'rounds'>;
+  source: NightshiftSource;
+  logger: Logger;
+}): {
+  queries: GeneratedSignificantEventQuery[];
+  tokensUsed: ChatCompletionTokenCount;
+  durationMs: number;
+} | null {
+  const round = conversation.rounds.at(-1);
+  const validationStep = round?.steps
+    .filter(isToolCallStep)
+    .filter((step) => step.tool_id === SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID)
+    .at(-1);
+  const finalizedData = validationStep?.results
+    .map(({ data }) => data)
+    .find(isFinalizedValidationData);
 
-  const queryTimeout = timeoutSignal(QUERY_GENERATION_MAX_DURATION_MS);
-  try {
-    const executionSignal = signal ? AbortSignal.any([signal, queryTimeout]) : queryTimeout;
-    const { events$ } = await agentBuilder.execution.executeAgent({
-      mode: AgentExecutionMode.conversation,
-      request,
-      abortSignal: executionSignal,
-      useTaskManager: false,
-      params: {
-        agentId: KI_QUERY_GENERATION_AGENT_ID,
-        connectorId,
-        conversationId: conversation.id,
-        storeConversation: true,
-        nextInput: { message: userMessage },
-        telemetryMetadata: {
-          pluginId: NIGHTSHIFT_KI_QUERY_GENERATION_USAGE_ID,
-          aggregateBy: NIGHTSHIFT_USAGE_PARENT_ID,
-          productSolution: NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
-          productFeature: NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
-          interactionId,
-        },
-        workflowExecutionId: getWorkflowExecutionIdFromRequest(request),
-      },
-    });
-
-    const events = await firstValueFrom(events$.pipe(toArray()));
-
-    const validationResultEvent = events
-      .filter(isToolResultEvent)
-      .filter((event) => event.data.tool_id === SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID)
-      .at(-1);
-    const finalizedData = validationResultEvent?.data.results
-      .map(({ data }) => data)
-      .find(isFinalizedValidationData);
-
-    if (!finalizedData) {
-      throw new Error('KI query generation agent did not finalize validate_queries');
-    }
-    if (finalizedData.slug !== source.slug) {
-      throw new Error(
-        `KI query generation agent finalized for unexpected source "${finalizedData.slug}"`
-      );
-    }
-
-    const roundEvent = events.find(isRoundCompleteEvent);
-    const rawQueries = finalizedData.finalized_queries;
-
-    const queries: GeneratedSignificantEventQuery[] = rawQueries.map((q) => ({
-      type: q.type,
-      title: q.title,
-      description: q.description,
-      esql: q.esql,
-      category: q.category,
-      severity_score: q.severity_score,
-      evidence: q.evidence,
-      replaces: q.replaces,
-      features: q.features,
-    }));
-
-    const tokensUsed: ChatCompletionTokenCount = chatTokenCountFromModelUsage(
-      roundEvent?.data.round.model_usage
-    ) ?? { ...EMPTY_TOKENS };
-
-    logger.debug(
-      `KI query generation agent returned ${queries.length} queries for "${source.slug}"`
-    );
-
-    return { queries, tokensUsed };
-  } finally {
-    queryTimeout.dispose();
+  if (!finalizedData) {
+    logger.warn(`KI query generation agent did not finalize validate_queries for "${source.slug}"`);
+    return null;
   }
+  if (finalizedData.slug !== source.slug) {
+    throw new Error(
+      `KI query generation agent finalized for unexpected source "${finalizedData.slug}"`
+    );
+  }
+
+  const queries: GeneratedSignificantEventQuery[] = finalizedData.finalized_queries.map((q) => ({
+    type: q.type,
+    title: q.title,
+    description: q.description,
+    esql: q.esql,
+    category: q.category,
+    severity_score: q.severity_score,
+    evidence: q.evidence,
+    replaces: q.replaces,
+    features: q.features,
+  }));
+
+  // Every round counts: the `ai.agent` step retries on the same conversation.
+  const tokensUsed: ChatCompletionTokenCount = chatTokenCountFromRounds(conversation.rounds);
+
+  logger.debug(`KI query generation agent returned ${queries.length} queries for "${source.slug}"`);
+
+  return { queries, tokensUsed, durationMs: round?.time_to_last_token ?? 0 };
 }

@@ -24,7 +24,10 @@ import {
   type StillOnFeatureSettings,
 } from './feature_settings';
 import { logFailures } from './log_failures';
-import type { MaintenanceWorkflowTarget } from './managed_workflow_targets';
+import {
+  buildSetupEnabledTargets,
+  type MaintenanceWorkflowTarget,
+} from './managed_workflow_targets';
 import { prepareDataStreamsForReset, resetDataStreams } from './reset_data_streams';
 import { collectResetSnapshot } from './reset_snapshot';
 import { deleteV2Rules } from './rules';
@@ -37,7 +40,12 @@ import {
   type LoadedMaintenanceState,
 } from './state_store';
 import { toMessage } from './to_message';
-import { mergeTargets, restoreWorkflowsAfterReset, sweepWorkflows } from './workflows';
+import {
+  createDisableManagedWorkflow,
+  mergeTargets,
+  restoreWorkflowsAfterReset,
+  sweepWorkflows,
+} from './workflows';
 
 /** The toggles of `toggles` that `removed` does not list, per toggle kind. */
 const subtractToggles = (
@@ -162,7 +170,13 @@ export const createResetRunner = ({
     let newlyDisabled: MaintenanceWorkflowTarget[] = [];
     let togglesBefore = emptyStillOn();
     let settingsStillOn = emptyStillOn();
-    let recoveryWorkflows = existing?.disabledWorkflows ?? [];
+    // Space setup switches sync and cleanup on, unless the space is paused. One set up while
+    // paused has them off and unrecorded, and the sweep skips workflows that are already off, so
+    // Reset records them like Resume does. A target without a document is skipped on restore.
+    let recoveryWorkflows = mergeTargets(
+      existing?.disabledWorkflows ?? [],
+      pausedByReset ? [] : buildSetupEnabledTargets(spaceId)
+    );
 
     const rollback = async (): Promise<void> => {
       if (!pausedByReset) {
@@ -227,7 +241,13 @@ export const createResetRunner = ({
     try {
       await persistPausedIntent({ spaceId, existing, actor: updatedBy, operation: 'reset' });
       togglesBefore = await featureSettings.readTogglesOn({ request, spaceIds: [spaceId] });
-      newlyDisabled = await sweepWorkflows({ mgmt, spaceIds: [spaceId], request, failures });
+      newlyDisabled = await sweepWorkflows({
+        mgmt,
+        spaceIds: [spaceId],
+        request,
+        failures,
+        disableManaged: createDisableManagedWorkflow(server),
+      });
       settingsStillOn = await featureSettings.reassertFeatureSettingsOff({
         request,
         spaceIds: [spaceId],

@@ -11,8 +11,8 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
 } from '@kbn/management-settings-ids';
 import {
-  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import {
   REQUEST,
@@ -25,6 +25,67 @@ import {
 
 describe('SignificantEventsMaintenanceService', () => {
   describe('resume', () => {
+    it('enables the rules through the account in a set-up space', async () => {
+      const { api } = makeManagementApi();
+      const accountClient = makeV2RulesClient();
+      const { service, v2RulesClient, withAccountAlertingV2RulesClient } = makeService({
+        management: api,
+        ruleBackedRuleIds: ['rule-1'],
+        accountV2RulesClient: accountClient,
+      });
+
+      await service.pause({ request: REQUEST });
+      await service.resume({ request: REQUEST });
+
+      expect(withAccountAlertingV2RulesClient).toHaveBeenCalledTimes(1);
+      expect(accountClient.bulkEnableRules).toHaveBeenCalledWith({ ids: ['rule-1'] });
+      expect(v2RulesClient?.bulkEnableRules).not.toHaveBeenCalled();
+    });
+
+    it('re-keys the rules it enabled and keeps one that cannot be re-keyed for a retry', async () => {
+      const { api } = makeManagementApi();
+      const accountClient = makeV2RulesClient();
+      accountClient.bulkUpdateApiKey.mockResolvedValueOnce({
+        affected_count: 1,
+        errors: [{ id: 'rule-2', error: { code: 'BOOM', message: 'boom' } }],
+      });
+      const { service } = makeService({
+        management: api,
+        ruleBackedRuleIds: ['rule-1', 'rule-2'],
+        accountV2RulesClient: accountClient,
+      });
+
+      await service.pause({ request: REQUEST });
+      const summary = await service.resume({ request: REQUEST });
+
+      expect(accountClient.bulkUpdateApiKey).toHaveBeenCalledWith({ ids: ['rule-1', 'rule-2'] });
+      expect(summary.partialFailures).toContainEqual({ target: 'rule:rule-2', error: 'boom' });
+      expect(summary.rulesDisabled).toBe(1);
+    });
+
+    it('retries a rule whose task was running during the re-key instead of reporting it disabled', async () => {
+      const { api } = makeManagementApi();
+      const accountClient = makeV2RulesClient();
+      accountClient.bulkUpdateApiKey
+        .mockResolvedValueOnce({
+          affected_count: 1,
+          errors: [{ id: 'rule-2', error: { code: 'RULE_ALREADY_RUNNING', message: 'busy' } }],
+        })
+        .mockResolvedValueOnce({ affected_count: 1, errors: [] });
+      const { service } = makeService({
+        management: api,
+        ruleBackedRuleIds: ['rule-1', 'rule-2'],
+        accountV2RulesClient: accountClient,
+      });
+
+      await service.pause({ request: REQUEST });
+      const summary = await service.resume({ request: REQUEST });
+
+      expect(accountClient.bulkUpdateApiKey).toHaveBeenLastCalledWith({ ids: ['rule-2'] });
+      expect(summary.partialFailures).toEqual([]);
+      expect(summary.rulesDisabled).toBe(0);
+    });
+
     it('leaves the rules of a source disabled before or during the pause off', async () => {
       const { api } = makeManagementApi();
       const { service, v2RulesClient } = makeService({
@@ -98,7 +159,7 @@ describe('SignificantEventsMaintenanceService', () => {
       };
       expect(
         clearWrite.disabledWorkflows.some(({ id }) =>
-          id.startsWith(SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID)
+          id.startsWith(NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID)
         )
       ).toBe(false);
 
@@ -113,7 +174,7 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(
         updateWorkflow.mock.calls.some(
           ([id, update]) =>
-            id.startsWith(SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID) &&
+            id.startsWith(NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID) &&
             update.enabled === true
         )
       ).toBe(false);
@@ -146,7 +207,7 @@ describe('SignificantEventsMaintenanceService', () => {
       });
       expect(
         pauseWrite.disabledWorkflows.some((workflow) =>
-          workflow.id.startsWith(SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID)
+          workflow.id.startsWith(NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID)
         )
       ).toBe(false);
 
@@ -168,7 +229,7 @@ describe('SignificantEventsMaintenanceService', () => {
         .filter((call) => call[1]?.enabled === true)
         .map((call) => call[0] as string);
       expect(
-        reEnabledIds.some((id) => id.startsWith(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID))
+        reEnabledIds.some((id) => id.startsWith(NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID))
       ).toBe(false);
       // Non-settings-backed workflows still come back.
       expect(reEnabledIds).toContain(cleanupDocumentId('default'));
@@ -210,7 +271,7 @@ describe('SignificantEventsMaintenanceService', () => {
         .map((call) => call[0] as string);
       expect(
         reEnabledIds.some((id) =>
-          id.startsWith(SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID)
+          id.startsWith(NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID)
         )
       ).toBe(false);
     });
@@ -265,6 +326,35 @@ describe('SignificantEventsMaintenanceService', () => {
         OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
         true
       );
+    });
+
+    it('does not report a missing sync or cleanup document of a space that was never set up', async () => {
+      const { api } = makeManagementApi({ missingWorkflows: [cleanupDocumentId('default')] });
+      const { service } = makeService({ management: api });
+
+      await service.pause({ request: REQUEST });
+      const summary = await service.resume({ request: REQUEST });
+
+      expect(summary.state).toBe('enabled');
+      expect(summary.partialFailures).toEqual([]);
+    });
+
+    it('still reports a workflow that pause recorded and that has gone missing since', async () => {
+      const { api, getWorkflow } = makeManagementApi();
+      const { service } = makeService({ management: api });
+
+      await service.pause({ request: REQUEST });
+      getWorkflow.mockImplementation(async (id: string) =>
+        id === cleanupDocumentId('default') ? null : { id, enabled: false, definition: { id } }
+      );
+      const summary = await service.resume({ request: REQUEST });
+
+      expect(summary.partialFailures).toEqual([
+        expect.objectContaining({
+          target: `workflow:${cleanupDocumentId('default')}@default`,
+          error: 'workflow not found',
+        }),
+      ]);
     });
 
     it('is a no-op when not paused', async () => {
@@ -484,7 +574,7 @@ describe('SignificantEventsMaintenanceService', () => {
         ])
       );
 
-      const scheduledDocId = `${SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-default`;
+      const scheduledDocId = `${NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID}-default`;
       const scheduledEnableCalls = updateWorkflow.mock.calls.filter(
         (call) => call[0] === scheduledDocId && call[1]?.enabled === true
       );

@@ -139,6 +139,7 @@ There is one account of each kind per deployment, shared by every space. Each ho
 |---|---|---|
 | `nightshift_agent` | `nightshift_agent` / `_nightshift_agent` | Investigations, their sandbox tools and Agent Builder hooks |
 | `nightshift_automations` | `nightshift_automations` / `_nightshift_automations` | Automation workflows |
+| `nightshift_detection` | `nightshift_detection` / `_nightshift_detection` | The detection engine: discovery, onboarding, sync and the rules it creates |
 
 The roles cover every space. Where an account acts is decided by the workflows bound to it, which are installed per space.
 

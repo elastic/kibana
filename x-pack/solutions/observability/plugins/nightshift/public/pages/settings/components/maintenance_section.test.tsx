@@ -51,7 +51,7 @@ describe('MaintenanceSection', () => {
   it('confirms pausing the detection engine with a warning action', () => {
     render(
       <I18nProvider>
-        <MaintenanceSection canManage />
+        <MaintenanceSection canManage canRestore />
       </I18nProvider>
     );
 
@@ -90,7 +90,7 @@ describe('MaintenanceSection', () => {
 
     render(
       <I18nProvider>
-        <MaintenanceSection canManage />
+        <MaintenanceSection canManage canRestore />
       </I18nProvider>
     );
 
@@ -125,7 +125,7 @@ describe('MaintenanceSection', () => {
 
     render(
       <I18nProvider>
-        <MaintenanceSection canManage />
+        <MaintenanceSection canManage canRestore />
       </I18nProvider>
     );
 
@@ -134,10 +134,44 @@ describe('MaintenanceSection', () => {
     ).not.toBeInTheDocument();
   });
 
+  describe('when resuming needs manage_security the user lacks', () => {
+    it('leaves Pause available', () => {
+      render(
+        <I18nProvider>
+          <MaintenanceSection canManage canRestore={false} />
+        </I18nProvider>
+      );
+
+      expect(screen.getByTestId('streams-settings-maintenance-toggle-button')).toBeEnabled();
+      expect(
+        screen.queryByTestId('streams-settings-maintenance-resume-needs-security')
+      ).not.toBeInTheDocument();
+    });
+
+    it('disables Resume and says an administrator must do it', () => {
+      mockMaintenanceStatus = {
+        data: { state: 'paused', updatedBy: 'elastic' },
+        isLoading: false,
+        isError: false,
+        refetch,
+      };
+      render(
+        <I18nProvider>
+          <MaintenanceSection canManage canRestore={false} />
+        </I18nProvider>
+      );
+
+      expect(screen.getByTestId('streams-settings-maintenance-toggle-button')).toBeDisabled();
+      expect(
+        screen.getByTestId('streams-settings-maintenance-resume-needs-security')
+      ).toHaveTextContent('requires the manage_security cluster privilege');
+    });
+  });
+
   it('locks activity controls and an open confirmation during another maintenance action', () => {
     const panel = (
       <I18nProvider>
-        <MaintenanceSection canManage />
+        <MaintenanceSection canManage canRestore />
       </I18nProvider>
     );
     const { rerender } = render(panel);
@@ -146,7 +180,7 @@ describe('MaintenanceSection', () => {
     mockMaintenanceActions = { ...mockMaintenanceActions, isMutating: true };
     rerender(
       <I18nProvider>
-        <MaintenanceSection canManage />
+        <MaintenanceSection canManage canRestore />
       </I18nProvider>
     );
 

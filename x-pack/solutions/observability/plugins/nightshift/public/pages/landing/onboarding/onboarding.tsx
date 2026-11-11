@@ -41,6 +41,7 @@ import {
   isNightshiftSetUp,
   useInvestigatorServiceAccount,
 } from '../../../data/service_accounts/use_investigator_service_account';
+import { useDetectionEngineServiceAccount } from '../../../data/service_accounts/use_detection_engine_service_account';
 import { ADD_DATA_TITLE, OnboardingAddDataStep } from './add_data_step';
 import { CONNECT_SOURCES_TITLE, OnboardingConnectSourcesStep } from './connect_sources_step';
 import { OnboardingFirstInvestigationStep } from './first_investigation_step';
@@ -126,6 +127,7 @@ export function NightshiftOnboarding({
   const { data, isInitialLoading } = useOnboarding();
   // The enable step binds the space's service accounts and installs the agent in one click.
   const serviceAccount = useInvestigatorServiceAccount();
+  const detectionAccount = useDetectionEngineServiceAccount();
   const startSuggestions = useStartOnboardingSuggestions();
   const { groups: connectorGroups } = useConnectorsByType();
   const [stepOverride, setStepOverride] = useState<StepOverride>();
@@ -135,7 +137,9 @@ export function NightshiftOnboarding({
   const execution = data?.execution;
   // Step 1 is done once the space is bound to its service accounts and the agent is installed:
   // one click does both, and removing the binding brings the step back.
-  const isEnabled = data?.agent_installed === true && isNightshiftSetUp(serviceAccount.data);
+  const isEnabled =
+    data?.agent_installed === true &&
+    isNightshiftSetUp({ investigator: serviceAccount.data, detection: detectionAccount.data });
   // Step 2 is done once an exploration run exists.
   const isConnected = execution != null;
   // A source is connected once a connector of a type offered on the step is assigned to the

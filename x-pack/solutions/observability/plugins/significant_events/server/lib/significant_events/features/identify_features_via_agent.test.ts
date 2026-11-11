@@ -5,140 +5,79 @@
  * 2.0.
  */
 
-import { of } from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { KibanaRequest } from '@kbn/core/server';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import {
-  EVENT_CHAIN_DEPTH_HEADER,
-  EVENT_CHAIN_SOURCE_EXECUTION_HEADER,
-} from '@kbn/workflows-extensions/server';
-import { AgentExecutionMode, ChatEventType } from '@kbn/agent-builder-common';
+import { ConversationRoundStepType } from '@kbn/agent-builder-common';
+import type { Conversation } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { FEATURE_IDENTIFICATION_AGENT_ID } from '../../../agent_builder/agents/feature_identification';
 import { FINALIZE_FEATURES_TOOL_ID } from '../../../agent_builder/skills/feature_identification';
-import { executeFeatureIdentificationAgent } from './identify_features_via_agent';
+import { readFeatureIdentificationResult } from './identify_features_via_agent';
 
-describe('executeFeatureIdentificationAgent', () => {
-  it('persists into a pre-titled private conversation and returns finalized features', async () => {
-    const createConversation = jest.fn().mockResolvedValue({ id: 'conversation-1' });
-    const executeAgent = jest.fn().mockResolvedValue({
-      events$: of(
-        {
-          type: ChatEventType.toolCall,
-          data: {
-            tool_id: FINALIZE_FEATURES_TOOL_ID,
-            tool_call_id: 'failed-finalize',
-            params: {},
-          },
-        },
-        {
-          type: ChatEventType.toolResult,
-          data: {
-            tool_id: FINALIZE_FEATURES_TOOL_ID,
-            tool_call_id: 'failed-finalize',
-            results: [{ type: ToolResultType.error, data: { message: 'Invalid parameters' } }],
-          },
-        },
-        {
-          type: ChatEventType.toolCall,
-          data: {
-            tool_id: FINALIZE_FEATURES_TOOL_ID,
-            tool_call_id: 'successful-finalize',
-            params: {
-              features: [],
-              ignored_features: [],
-            },
-          },
-        },
-        {
-          type: ChatEventType.toolResult,
-          data: {
-            tool_id: FINALIZE_FEATURES_TOOL_ID,
-            tool_call_id: 'successful-finalize',
-            results: [{ type: ToolResultType.other, data: { finalized: true } }],
-          },
-        },
-        {
-          type: ChatEventType.roundComplete,
-          data: {
-            round: {
-              model_usage: {
-                input_tokens: 10,
-                output_tokens: 5,
-                cached_input_tokens: 2,
-              },
-            },
-          },
-        }
-      ),
-    });
-    const agentBuilder = {
-      conversations: {
-        getScopedClient: jest.fn().mockResolvedValue({ create: createConversation }),
-      },
-      execution: { executeAgent },
-    } as unknown as AgentBuilderPluginStart;
-    const request = {
-      isInternalApiRequest: true,
-      headers: {
-        [EVENT_CHAIN_DEPTH_HEADER]: '0',
-        [EVENT_CHAIN_SOURCE_EXECUTION_HEADER]: 'workflow-run-1',
-      },
-    } as unknown as KibanaRequest;
+const finalizeStep = (
+  toolCallId: string,
+  params: Record<string, unknown>,
+  results: Array<{ type: ToolResultType; data: Record<string, unknown> }>
+) => ({
+  type: ConversationRoundStepType.toolCall,
+  tool_id: FINALIZE_FEATURES_TOOL_ID,
+  tool_call_id: toolCallId,
+  params,
+  results,
+});
 
-    await expect(
-      executeFeatureIdentificationAgent({
-        agentBuilder,
-        request,
-        connectorId: 'connector-1',
-        sourceId: 'logs.test',
-        sampleDocuments: [{ _id: 'doc-1', fields: { message: 'hello' } }],
-        interactionId: 'run-1',
-        logger: loggerMock.create(),
-      })
-    ).resolves.toEqual({
+const conversationOf = (steps: unknown[], interruption?: unknown) =>
+  ({
+    rounds: [
+      {
+        steps,
+        interruption,
+        time_to_last_token: 4321,
+        model_usage: { input_tokens: 10, output_tokens: 5, cached_input_tokens: 2 },
+      },
+    ],
+  } as unknown as Pick<Conversation, 'rounds'>);
+
+describe('readFeatureIdentificationResult', () => {
+  it('uses the successful finalize call and ignores one the tool rejected', () => {
+    const conversation = conversationOf([
+      finalizeStep('failed-finalize', {}, [
+        { type: ToolResultType.error, data: { message: 'Invalid parameters' } },
+      ]),
+      finalizeStep('successful-finalize', { features: [], ignored_features: [] }, [
+        { type: ToolResultType.other, data: { finalized: true } },
+      ]),
+    ]);
+
+    expect(readFeatureIdentificationResult({ conversation, logger: loggerMock.create() })).toEqual({
       features: [],
       ignoredFeatures: [],
-      tokensUsed: {
-        prompt: 10,
-        completion: 5,
-        total: 15,
-        cached: 2,
-      },
+      tokensUsed: { prompt: 10, completion: 5, total: 15, cached: 2 },
     });
+  });
 
-    expect(agentBuilder.conversations.getScopedClient).toHaveBeenCalledWith({ request });
-    expect(createConversation).toHaveBeenCalledWith({
-      agentId: FEATURE_IDENTIFICATION_AGENT_ID,
-      title: 'Feature identification: logs.test',
-      accessControl: { access_mode: 'public' },
-    });
-    expect(executeAgent).toHaveBeenCalledWith(
-      expect.objectContaining({
-        mode: AgentExecutionMode.conversation,
-        request,
-        params: expect.objectContaining({
-          agentId: FEATURE_IDENTIFICATION_AGENT_ID,
-          connectorId: 'connector-1',
-          conversationId: 'conversation-1',
-          storeConversation: true,
-          nextInput: {
-            message: expect.stringContaining('`sample_documents`:'),
-          },
-          telemetryMetadata: {
-            pluginId: 'nightshift_ki_extraction',
-            aggregateBy: 'nightshift',
-            productSolution: 'observability',
-            productFeature: 'nightshift',
-            interactionId: 'run-1',
-          },
-          workflowExecutionId: 'workflow-run-1',
-        }),
-      })
+  it('throws when the agent never finalized', () => {
+    const conversation = conversationOf([
+      finalizeStep('failed-finalize', {}, [
+        { type: ToolResultType.error, data: { message: 'Invalid parameters' } },
+      ]),
+    ]);
+
+    expect(() =>
+      readFeatureIdentificationResult({ conversation, logger: loggerMock.create() })
+    ).toThrow('did not successfully call finalize_features');
+  });
+
+  it('throws when the run was interrupted after a successful finalize', () => {
+    const conversation = conversationOf(
+      [
+        finalizeStep('successful-finalize', { features: [], ignored_features: [] }, [
+          { type: ToolResultType.other, data: { finalized: true } },
+        ]),
+      ],
+      { type: 'failed' }
     );
-    const executionParams = executeAgent.mock.calls[0][0].params;
-    expect(executionParams).not.toHaveProperty('structuredOutput');
-    expect(executionParams).not.toHaveProperty('outputSchema');
+
+    expect(() =>
+      readFeatureIdentificationResult({ conversation, logger: loggerMock.create() })
+    ).toThrow('was interrupted');
   });
 });

@@ -9,6 +9,7 @@ export { MS_PER_DAY } from './iteration_state';
 export { deriveSuccessCount, deriveTotalTokensUsed } from './iteration_state';
 
 export {
+  buildFeatureIdentificationInput,
   identifyInferredFeatures,
   buildTelemetry,
   KNOWN_FEATURE_IDS_MAX_CHARS,

@@ -1,9 +1,41 @@
 {
-  "sha1": "1c3fa430e9dad342660bcf72284f23e5b17bca44",
+  "sha1": "ae5babb5fcbb7e24ae2d16206a1d34450a431a12",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "617baa95f404deb-dcaa469e06810d5",
+      "title": "Nightshift sources author read access refuses a wildcard that reaches indices the author cannot read, and leaves no source or view behind",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_author_read_access.spec.ts",
+        "line": 63,
+        "column": 7
+      }
+    },
+    {
+      "id": "617baa95f404deb-e471c11e2c200fc",
+      "title": "Nightshift sources author read access refuses a query change to a wildcard the author cannot fully read, and keeps the stored query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_author_read_access.spec.ts",
+        "line": 85,
+        "column": 16
+      }
+    },
     {
       "id": "6395ba18a958586-8abd26b7d5e05b0",
       "title": "Nightshift sources authorization lets a Nightshift reader read but not write",

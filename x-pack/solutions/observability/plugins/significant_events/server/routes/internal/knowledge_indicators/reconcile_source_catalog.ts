@@ -304,7 +304,6 @@ export async function applySourceEnabled({
 export const createSourceChangeListener =
   ({
     enqueueReconciliation,
-    ensurePeriodicReconciliation,
     syncContinuousOnboarding,
   }: {
     enqueueReconciliation: (args: {
@@ -312,7 +311,6 @@ export const createSourceChangeListener =
       sourceSlug: string;
       request: KibanaRequest;
     }) => Promise<void>;
-    ensurePeriodicReconciliation: (request: KibanaRequest) => Promise<void>;
     syncContinuousOnboarding: (event: SourceChangeEvent) => Promise<void>;
   }): SourceChangeListener =>
   async (event) => {
@@ -335,7 +333,6 @@ export const createSourceChangeListener =
         sourceSlug: event.source.slug,
         request: event.request,
       }),
-      ensurePeriodicReconciliation(event.request),
       syncContinuousOnboarding(event),
     ]);
     const failures = results.flatMap((result) =>

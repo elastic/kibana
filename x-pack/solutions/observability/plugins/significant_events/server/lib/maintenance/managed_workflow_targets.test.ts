@@ -7,48 +7,76 @@
 
 import { asSpaceId } from '@kbn/core-spaces-common';
 import {
-  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_ORCHESTRATOR_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import {
   ALL_INSTALLABLE_WORKFLOW_IDS,
+  BOUND_ENTRY_POINT_WORKFLOW_IDS,
+  buildCancelTargets,
   buildDisableTargets,
   GLOBAL_CORE_WORKFLOW_IDS,
-  GLOBAL_MAINTENANCE_WORKFLOW_IDS,
+  isInstalledWorkflowDocumentId,
   SCHEDULED_MAINTENANCE_WORKFLOW_IDS,
 } from './managed_workflow_targets';
 
 describe('managed_workflow_targets registry', () => {
-  it('includes every installable workflow id in the maintenance sweep lists', () => {
-    const maintenanceIds = new Set<string>([
-      ...GLOBAL_MAINTENANCE_WORKFLOW_IDS,
-      ...SCHEDULED_MAINTENANCE_WORKFLOW_IDS,
-    ]);
+  it('includes every installable workflow id in the cancel sweep', () => {
+    const cancelledIds = new Set(
+      buildCancelTargets([asSpaceId('space-a')]).map(({ id }) => id.replace(/-space-a$/, ''))
+    );
 
     for (const id of ALL_INSTALLABLE_WORKFLOW_IDS) {
-      expect(maintenanceIds.has(id)).toBe(true);
+      expect(cancelledIds.has(id)).toBe(true);
     }
   });
 
-  it('keeps Significant Events core and lifecycle workflows in the global maintenance set', () => {
-    expect(GLOBAL_MAINTENANCE_WORKFLOW_IDS).toEqual([...GLOBAL_CORE_WORKFLOW_IDS]);
-  });
-
-  it('tracks continuous onboarding and sync as per-space scheduled workflows', () => {
+  it('tracks continuous onboarding, sync and cleanup as per-space scheduled workflows', () => {
     expect(SCHEDULED_MAINTENANCE_WORKFLOW_IDS).toEqual(
       expect.arrayContaining([
-        SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-        SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+        NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+        NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
+        NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
       ])
     );
-  });
-
-  it('tracks cleanup as a per-space scheduled workflow', () => {
-    expect(SCHEDULED_MAINTENANCE_WORKFLOW_IDS).toContain(SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID);
     expect(buildDisableTargets([asSpaceId('space-a')])).toContainEqual({
-      id: `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-space-a`,
+      id: `${NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID}-space-a`,
       spaceId: asSpaceId('space-a'),
     });
+  });
+
+  it('only disables per-space documents, never the global workflows', () => {
+    const disabledIds = buildDisableTargets([asSpaceId('space-a')]).map(({ id }) => id);
+
+    for (const id of [...GLOBAL_CORE_WORKFLOW_IDS, ...BOUND_ENTRY_POINT_WORKFLOW_IDS]) {
+      expect(disabledIds).not.toContain(id);
+    }
+  });
+
+  it('cancels the global workflows by id and the bound entry points by per-space document id', () => {
+    const targets = buildCancelTargets([asSpaceId('space-a'), asSpaceId('space-b')]);
+
+    for (const spaceId of ['space-a', 'space-b']) {
+      for (const id of GLOBAL_CORE_WORKFLOW_IDS) {
+        expect(targets).toContainEqual({ id, spaceId });
+      }
+      expect(targets).toContainEqual({
+        id: `${NIGHTSHIFT_BOUND_ORCHESTRATOR_WORKFLOW_ID}-${spaceId}`,
+        spaceId,
+      });
+    }
+  });
+
+  it('recognises per-space documents of installed workflows and drops ids of removed ones', () => {
+    expect(
+      isInstalledWorkflowDocumentId(`${NIGHTSHIFT_BOUND_ORCHESTRATOR_WORKFLOW_ID}-space-a`)
+    ).toBe(true);
+    expect(isInstalledWorkflowDocumentId(GLOBAL_CORE_WORKFLOW_IDS[0])).toBe(true);
+    expect(isInstalledWorkflowDocumentId('system-streams-ki-sync-space-a')).toBe(false);
+    expect(isInstalledWorkflowDocumentId('system-nightshift-scheduled-detection-space-a')).toBe(
+      false
+    );
   });
 });
