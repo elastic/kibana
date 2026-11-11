@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { dateHistogramOperation } from '.';
-import { mount, shallow } from 'enzyme';
-import { EuiSwitch } from '@elastic/eui';
+import { fireEvent, screen, within } from '@testing-library/react';
+import { renderWithProviders } from '../../../../test_utils/test_utils';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
@@ -17,7 +17,6 @@ import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { dataPluginMock, getCalculateAutoTimeExpression } from '@kbn/data-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
 import { getFieldByNameFactory } from '../../pure_helpers';
-import { act } from 'react-dom/test-utils';
 import type {
   DateHistogramIndexPatternColumn,
   FormBasedLayer,
@@ -337,9 +336,17 @@ describe('date_histogram', () => {
   });
 
   describe('param editor', () => {
+    const getIntervalInput = () =>
+      within(screen.getByTestId('lensDateHistogramInterval')).getByRole('combobox');
+    const createInterval = (value: string) => {
+      const input = getIntervalInput();
+      fireEvent.change(input, { target: { value } });
+      fireEvent.keyDown(input, { key: 'Enter' });
+    };
+
     it('should render current value', () => {
       const updateLayerSpy = jest.fn();
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultOptions}
           layer={layer}
@@ -349,9 +356,7 @@ describe('date_histogram', () => {
         />
       );
 
-      expect(
-        instance.find('[data-test-subj="lensDateHistogramInterval"]').prop('selectedOptions')
-      ).toEqual([expect.objectContaining({ label: '42w' })]);
+      expect(getIntervalInput()).toHaveValue('42w');
     });
 
     it('should render current value for other index pattern', () => {
@@ -375,7 +380,7 @@ describe('date_histogram', () => {
           } as DateHistogramIndexPatternColumn,
         },
       };
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultOptions}
           layer={secondLayer}
@@ -386,9 +391,7 @@ describe('date_histogram', () => {
         />
       );
 
-      expect(
-        instance.find('[data-test-subj="lensDateHistogramInterval"]').prop('selectedOptions')
-      ).toEqual([expect.objectContaining({ key: 'd' })]);
+      expect(getIntervalInput()).toHaveValue('Day');
     });
 
     it('should render time interval control set to auto for auto interval', () => {
@@ -411,7 +414,7 @@ describe('date_histogram', () => {
         },
       };
 
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultOptions}
           layer={thirdLayer}
@@ -421,9 +424,7 @@ describe('date_histogram', () => {
           indexPattern={indexPattern1}
         />
       );
-      expect(
-        instance.find('[data-test-subj="lensDateHistogramInterval"]').prop('selectedOptions')
-      ).toEqual([expect.objectContaining({ key: 'auto' })]);
+      expect(getIntervalInput()).toHaveValue('Auto (30d)');
     });
 
     it('should allow switching to manual interval', () => {
@@ -447,7 +448,7 @@ describe('date_histogram', () => {
       };
 
       const updateLayerSpy = jest.fn();
-      const instance = shallow(
+      const { container } = renderWithProviders(
         <InlineOptions
           {...defaultOptions}
           layer={thirdLayer}
@@ -457,12 +458,7 @@ describe('date_histogram', () => {
           indexPattern={{ ...indexPattern1, timeFieldName: '@timestamp' }}
         />
       );
-      instance
-        .find(EuiSwitch)
-        .at(1)
-        .simulate('change', {
-          target: { checked: true },
-        });
+      fireEvent.click(within(container).getByText('Bind to global time picker'));
       expect(updateLayerSpy).toHaveBeenCalled();
       const newLayer = updateLayerSpy.mock.calls[0][0](thirdLayer);
       expect(newLayer).toHaveProperty('columns.col1.params.interval', '30d');
@@ -489,7 +485,7 @@ describe('date_histogram', () => {
       };
 
       const updateLayerSpy = jest.fn();
-      const instance = shallow(
+      const { container } = renderWithProviders(
         <InlineOptions
           {...defaultOptions}
           layer={thirdLayer}
@@ -499,18 +495,13 @@ describe('date_histogram', () => {
           indexPattern={{ ...indexPattern1, timeFieldName: undefined }}
         />
       );
-      instance
-        .find(EuiSwitch)
-        .at(1)
-        .simulate('change', {
-          target: { checked: false },
-        });
+      fireEvent.click(within(container).getByText('Bind to global time picker'));
       expect(updateLayerSpy).toHaveBeenCalled();
       const newLayer = updateLayerSpy.mock.calls[0][0](thirdLayer);
       expect(newLayer).toHaveProperty('columns.col1.params.ignoreTimeRange', true);
     });
 
-    it('turns off time range ignore on switching to auto interval', () => {
+    it('turns off time range ignore on switching to auto interval', async () => {
       const thirdLayer: FormBasedLayer = {
         indexPatternId: '1',
         columnOrder: ['col1'],
@@ -532,7 +523,7 @@ describe('date_histogram', () => {
       };
 
       const updateLayerSpy = jest.fn();
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultOptions}
           layer={thirdLayer}
@@ -542,11 +533,8 @@ describe('date_histogram', () => {
           indexPattern={{ ...indexPattern1, timeFieldName: undefined }}
         />
       );
-      (
-        instance
-          .find('[data-test-subj="lensDateHistogramInterval"]')
-          .prop('onChange') as unknown as (v: Array<{ key: string }>) => void
-      )([{ key: 'auto' }]);
+      fireEvent.click(getIntervalInput());
+      fireEvent.click(await screen.findByRole('option', { name: 'Auto (30d)' }));
       expect(updateLayerSpy).toHaveBeenCalled();
       const newLayer = updateLayerSpy.mock.calls[0][0](thirdLayer);
       expect(newLayer).toHaveProperty('columns.col1.params.ignoreTimeRange', false);
@@ -574,7 +562,7 @@ describe('date_histogram', () => {
       };
 
       const updateLayerSpy = jest.fn();
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultOptions}
           layer={thirdLayer}
@@ -584,14 +572,12 @@ describe('date_histogram', () => {
           indexPattern={{ ...indexPattern1, timeFieldName: 'other_timestamp' }}
         />
       );
-      expect(
-        instance.find('[data-test-subj="lensDropPartialIntervals"]').prop('disabled')
-      ).toBeTruthy();
+      expect(screen.getByTestId('lensDropPartialIntervals')).toBeDisabled();
     });
 
     it('should force calendar values to 1', () => {
       const updateLayerSpy = jest.fn();
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultOptions}
           layer={layer}
@@ -600,20 +586,14 @@ describe('date_histogram', () => {
           currentColumn={layer.columns.col1 as DateHistogramIndexPatternColumn}
         />
       );
-      (
-        instance.find('[data-test-subj="lensDateHistogramInterval"]').prop('onCreateOption') as (
-          s: string
-        ) => void
-      )('2w');
-      expect(
-        instance.find('[data-test-subj="lensDateHistogramInterval"]').prop('isInvalid')
-      ).toBeTruthy();
+      createInterval('2w');
+      expect(getIntervalInput()).toHaveAttribute('aria-invalid', 'true');
     });
 
     it('should display error if an invalid interval is specified', () => {
       const updateLayerSpy = jest.fn();
       const testLayer = layerWithInterval('4quid');
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultOptions}
           layer={testLayer}
@@ -622,15 +602,13 @@ describe('date_histogram', () => {
           currentColumn={testLayer.columns.col1 as DateHistogramIndexPatternColumn}
         />
       );
-      expect(
-        instance.find('[data-test-subj="lensDateHistogramInterval"]').prop('isInvalid')
-      ).toBeTruthy();
+      expect(getIntervalInput()).toHaveAttribute('aria-invalid', 'true');
     });
 
     it('should not display error if interval value is blank', () => {
       const updateLayerSpy = jest.fn();
       const testLayer = layerWithInterval('d');
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultOptions}
           layer={testLayer}
@@ -639,15 +617,13 @@ describe('date_histogram', () => {
           currentColumn={testLayer.columns.col1 as DateHistogramIndexPatternColumn}
         />
       );
-      expect(
-        instance.find('[data-test-subj="lensDateHistogramInterval"]').prop('isInvalid')
-      ).toBeFalsy();
+      expect(getIntervalInput()).toHaveAttribute('aria-invalid', 'false');
     });
 
     it('should display error if interval value is 0', () => {
       const updateLayerSpy = jest.fn();
       const testLayer = layerWithInterval('0d');
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultOptions}
           layer={testLayer}
@@ -656,14 +632,12 @@ describe('date_histogram', () => {
           currentColumn={testLayer.columns.col1 as DateHistogramIndexPatternColumn}
         />
       );
-      expect(
-        instance.find('[data-test-subj="lensDateHistogramInterval"]').prop('isInvalid')
-      ).toBeTruthy();
+      expect(getIntervalInput()).toHaveAttribute('aria-invalid', 'true');
     });
 
     it('should update the unit', async () => {
       const updateLayerSpy = jest.fn();
-      const instance = mount(
+      renderWithProviders(
         <InlineOptions
           {...defaultOptions}
           layer={layer}
@@ -672,14 +646,7 @@ describe('date_histogram', () => {
           currentColumn={layer.columns.col1 as DateHistogramIndexPatternColumn}
         />
       );
-      act(() => {
-        (
-          instance
-            .find('[data-test-subj="lensDateHistogramInterval"]')
-            .at(0)
-            .prop('onCreateOption') as (s: string) => void
-        )('42d');
-      });
+      createInterval('42d');
       expect(updateLayerSpy.mock.calls[0][0](layer)).toEqual(layerWithInterval('42d'));
     });
 
@@ -687,7 +654,7 @@ describe('date_histogram', () => {
       const updateLayerSpy = jest.fn();
       const testLayer = layerWithInterval('42d');
 
-      const instance = mount(
+      renderWithProviders(
         <InlineOptions
           {...defaultOptions}
           layer={testLayer}
@@ -696,14 +663,7 @@ describe('date_histogram', () => {
           currentColumn={testLayer.columns.col1 as DateHistogramIndexPatternColumn}
         />
       );
-      act(() =>
-        (
-          instance
-            .find('[data-test-subj="lensDateHistogramInterval"]')
-            .at(0)
-            .prop('onCreateOption') as (s: string) => void
-        )('9d')
-      );
+      createInterval('9d');
       expect(updateLayerSpy.mock.calls[0][0](layer)).toEqual(layerWithInterval('9d'));
     });
 
@@ -712,7 +672,7 @@ describe('date_histogram', () => {
       const testLayer = layerWithInterval('42d');
       const nextLayer = layerWithInterval('1d');
 
-      const instance = mount(
+      const { rerender } = renderWithProviders(
         <InlineOptions
           {...defaultOptions}
           layer={testLayer}
@@ -722,25 +682,25 @@ describe('date_histogram', () => {
         />
       );
 
-      act(() => {
-        instance.setProps({
-          layer: nextLayer,
-          currentColumn: nextLayer.columns.col1 as DateHistogramIndexPatternColumn,
-        });
-      });
-      instance.update();
+      rerender(
+        <InlineOptions
+          {...defaultOptions}
+          layer={nextLayer}
+          paramEditorUpdater={updateLayerSpy}
+          columnId="col1"
+          currentColumn={nextLayer.columns.col1 as DateHistogramIndexPatternColumn}
+        />
+      );
 
       expect(updateLayerSpy).not.toHaveBeenCalled();
-      expect(
-        instance.find('[data-test-subj="lensDateHistogramInterval"]').at(0).prop('selectedOptions')
-      ).toEqual([expect.objectContaining({ key: '1d' })]);
+      expect(getIntervalInput()).toHaveValue('1d');
     });
 
     it('does not normalize shorthand calendar intervals on mount', () => {
       const updateLayerSpy = jest.fn();
       const testLayer = layerWithInterval('M');
 
-      mount(
+      renderWithProviders(
         <InlineOptions
           {...defaultOptions}
           layer={testLayer}
@@ -757,7 +717,7 @@ describe('date_histogram', () => {
       const updateLayerSpy = jest.fn();
       const testLayer = layerWithInterval('1w');
 
-      const instance = mount(
+      renderWithProviders(
         <InlineOptions
           {...defaultOptions}
           layer={testLayer}
@@ -767,15 +727,7 @@ describe('date_histogram', () => {
         />
       );
 
-      act(() => {
-        (
-          instance
-            .find('[data-test-subj="lensDateHistogramInterval"]')
-            .at(0)
-            .prop('onCreateOption') as (s: string) => void
-        )('w');
-      });
-      instance.update();
+      createInterval('w');
 
       expect(updateLayerSpy).not.toHaveBeenCalled();
     });
@@ -803,7 +755,7 @@ describe('date_histogram', () => {
         },
       } as DateHistogramIndexPatternColumn;
 
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultOptions}
           layer={staleLayer}
@@ -813,7 +765,7 @@ describe('date_histogram', () => {
         />
       );
 
-      instance.find('[data-test-subj="indexPattern-include-empty-rows"]').simulate('change');
+      fireEvent.click(screen.getByTestId('indexPattern-include-empty-rows'));
 
       expect(updateLayerSpy).toHaveBeenCalled();
 
@@ -868,7 +820,7 @@ describe('date_histogram', () => {
         getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
       };
 
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultOptions}
           layer={layer}
@@ -879,7 +831,7 @@ describe('date_histogram', () => {
         />
       );
 
-      expect(instance.find('[data-test-subj="lensDateHistogramInterval"]').exists()).toBeFalsy();
+      expect(screen.queryByTestId('lensDateHistogramInterval')).not.toBeInTheDocument();
     });
 
     it('should allow the drop of partial buckets', () => {
@@ -903,7 +855,7 @@ describe('date_histogram', () => {
       };
 
       const updateLayerSpy = jest.fn();
-      const instance = shallow(
+      renderWithProviders(
         <InlineOptions
           {...defaultOptions}
           layer={thirdLayer}
@@ -912,9 +864,7 @@ describe('date_histogram', () => {
           currentColumn={thirdLayer.columns.col1 as DateHistogramIndexPatternColumn}
         />
       );
-      instance.find('[data-test-subj="lensDropPartialIntervals"]').simulate('change', {
-        target: { checked: true },
-      });
+      fireEvent.click(screen.getByTestId('lensDropPartialIntervals'));
       expect(updateLayerSpy).toHaveBeenCalled();
       const newLayer = updateLayerSpy.mock.calls[0][0](layer);
       expect(newLayer).toHaveProperty('columns.col1.params.dropPartials', true);
