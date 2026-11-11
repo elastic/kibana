@@ -237,7 +237,7 @@ function SlackConnectionBody({
         <EuiText size="s" data-test-subj="streamsSlackAppDescription">
           {i18n.translate('xpack.nightshift.settings.apps.slackDescription', {
             defaultMessage:
-              'Connect the Elastic Slack App to get investigation updates in Slack and ask Nightshift for help from a channel.',
+              'Connect the Elastic Slack App to get investigation updates in Slack and ask nightshift for help from a channel.',
           })}
         </EuiText>
       </EuiFlexItem>

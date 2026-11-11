@@ -16,8 +16,7 @@
       "licensing",
       "management",
       "features",
-      "share",
-      "fileUpload"
+      "share"
     ],
     "optionalPlugins": [
       "security",

@@ -466,4 +466,19 @@ describe('searchHitToAgent', () => {
     const agent = searchHitToAgent(hit as any);
     expect(agent.pipeline_config).toBeUndefined();
   });
+
+  it('maps unenrolled_reason from the agent document', () => {
+    const hit = {
+      _source: {
+        type: 'PERMANENT',
+        active: false,
+        enrolled_at: '2023-01-01T00:00:00Z',
+        unenrolled_reason: 'agentless',
+      },
+      fields: { status: ['unenrolled'] },
+      _id: 'agent-3',
+    };
+    const agent = searchHitToAgent(hit as any);
+    expect(agent.unenrolled_reason).toBe('agentless');
+  });
 });

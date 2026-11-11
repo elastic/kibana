@@ -48,6 +48,85 @@ Requests aren't forwarded: the proxy answers each one with `fetch`, so the vendo
 
 Clients must trust the CA's certificate (`certificateAuthority.cert`, PEM). Kibana's actions plugin trusts it for a vendor host through `xpack.actions.customHostSettings` (`ssl.certificateAuthoritiesData`), or for every host through the `NODE_EXTRA_CA_CERTS` environment variable. `createCertificateAuthority({ cert, key })` loads a CA created earlier, so a Kibana configured to trust it keeps working when the mock restarts.
 
+### Control endpoints
+
+A test that drives Kibana can't read `mock.calls` across processes, so the proxy can serve control endpoints on its own origin:
+
+```ts
+import { createEmulatorControl, createEmulatorControlHandler } from '@kbn/connector-emulate';
+
+const proxy = createEmulatorProxy({
+  fetch: mock.fetch,
+  certificateAuthority,
+  control: createEmulatorControlHandler(mock),
+});
+const proxyUrl = await proxy.listen(8080);
+
+// In the test, possibly in another process:
+const control = createEmulatorControl(proxyUrl);
+const { calls, total } = await control.calls(); // GET /_mock/calls?since=0
+await control.reset(); // POST /_mock/reset
+const operations = await control.operations(); // GET /_mock/operations
+const getItem = await control.describeOperation('getItem'); // GET /_mock/operations/getItem
+const rejected = await control.setFixtures([
+  { operation: { method: 'GET', path: '/items' }, response: { status: 429 } },
+]); // PUT /_mock/fixtures
+```
+
+| Endpoint | Answer |
+| --- | --- |
+| `GET /_mock/calls?since=<n>` | `{ calls, total }`: the calls from index `n` on (default 0); pass `total` as the next `since` to read only later calls |
+| `POST /_mock/reset` | **204** after emptying the calls and responder state and dropping the runtime fixtures (`mock.reset()`) |
+| `GET /_mock/operations` | `{ operations }`: each OpenAPI operation's method, path template, server URLs and spec name, and each GraphQL root field or MCP tool by the name calls give it |
+| `GET /_mock/operations/<id>[?source=<name>]` | An OpenAPI operation's parameters, request body and responses (`mock.describeOperation(id)`): each status with its headers and media types, the schemas with their `$ref`s inlined a few levels deep, the examples, and a `sample` that conforms, to start a fixture from. `id` is the operation's `id` from `GET /_mock/operations`, URL-encoded |
+| `PUT /_mock/fixtures` | Sets runtime fixtures from `{ fixtures }`, replacing those of the operations they name, and answers `{ fixtures }` in effect; or **400** with `rejected` when the spec rejects one, setting none |
+| `GET /_mock/fixtures` | `{ fixtures }`: the runtime fixtures in effect |
+| `DELETE /_mock/fixtures[?operation=<id>&source=<name>]` | **204** after dropping the runtime fixtures of one OpenAPI operation, or all of them |
+| `POST /_mock/mcp` | An MCP server with tools for the same (see below) |
+
+Only requests sent to the proxy itself (a path, not an absolute URL) reach them: requests through the proxy, plain or tunnelled, always go to the mock, so a vendor path under `/_mock` can't collide with them. Other paths sent to the proxy itself still get **400**. The endpoints take no credentials; like the proxy, they are for local and CI test runs.
+
+**Runtime fixtures** (`mock.runtimeFixtures`, or the `/_mock/fixtures` endpoints) let a test or an agent pick a scenario while the emulator runs: an empty list, a 429, a third page, a value the vendor just added. They are `ResponseFixture`s, with `when` to answer only some requests, and take precedence over the fixtures the emulator was created with until they are cleared or `reset()`. Unlike those, they are checked when set: a response the spec doesn't allow is rejected with its violations, so a test can't pass on answers the vendor never gives. The exception is an error status the spec doesn't declare, such as a 429 or a 503, which vendors answer with anyway; its body isn't checked. Runtime fixtures answer OpenAPI operations.
+
+**MCP server.** The same control is offered to agents as an MCP server at `/_mock/mcp` on the proxy (Streamable HTTP, stateless, JSON responses), so an agent testing a connector in a running Kibana can steer the vendor's answers:
+
+```bash
+claude mcp add --transport http emulator http://localhost:8080/_mock/mcp
+```
+
+Its tools are `list_operations` (with a `search`), `describe_operation`, `set_fixtures`, `list_fixtures`, `clear_fixtures`, `list_calls` and `reset`, over the same emulator and checks as the endpoints: a fixture the spec rejects comes back as a tool error with its violations. `createEmulatorControlHandler(mock, { exportFixtures })` adds `export_fixtures`, which hands the runtime fixtures to `exportFixtures` to save them somewhere lasting, such as a connector's committed fixtures, and reports where. `onRequest` is called with each MCP request, tool calls with their arguments and a short summary of what they did, e.g. to log them. `createEmulatorMcpHandler` serves the MCP server on its own. It is a control server for the emulator, unrelated to the vendor MCP servers the emulator emulates (see "MCP" below), and like the endpoints it is for local and CI test runs.
+
+Each call says where its response came from in `responseSource`: `runtime-fixture`, `fixture`, `recording`, `generated` for the spec's examples and samples, or `responder` when a `respond` answered without deferring to the default chain. `createEmulatorFetch({ onCall })` is called with each call as it is recorded, e.g. to log requests as they arrive.
+
+### Several connectors
+
+`combineEmulators` puts several connectors' emulators behind one `fetch`, so one proxy, and one Kibana, can serve them all. Each keeps its own specs, overlay, fixtures and recordings: A request no connector's specs match gets 404, which only the `onCall` option of `combineEmulators` sees, as no emulator answers it.
+
+```ts
+import { combineEmulators, emulatorCredential } from '@kbn/connector-emulate';
+
+const mock = combineEmulators({
+  outlook: createEmulatorFetch({ specs: outlookSpecs }),
+  one_drive: createEmulatorFetch({ specs: oneDriveSpecs, fixtures }),
+});
+const proxy = createEmulatorProxy({
+  fetch: mock.fetch,
+  certificateAuthority,
+  control: createEmulatorControlHandler(mock),
+});
+
+// The connector's secrets carry its credential, e.g. an API key or OAuth client ID:
+emulatorCredential('one_drive'); // 'emulate-one_drive'
+```
+
+A request goes to the connector whose credential it carries: in any header, in Basic auth, the query, the body, or a claim of a JWT assertion. Token URLs answering a request with the credential issue tokens that carry it too, so later requests with the token reach the same connector. Other requests go to the first connector whose specs name the URL's host (`emulator.namesHost(method, url)`), else the first whose specs match it on any host (`emulator.answers(method, url)`), and requests no connector matches get **404**. A server names a host when its host has a literal part or a variable limited by an `enum`, as do absolute token URLs; relative servers, and hosts that are only free variables such as `https://{host}`, match any host. Connectors that share a vendor host, or whose servers match any host, therefore need the credential to get their own responses.
+
+Every call is recorded in the combined `calls` with its `connector`, and `operations` and `rejectedResponses` say whose they are. The control endpoints take `?connector=<id>` to see, reset or list only one connector's (`createEmulatorControl(proxyUrl, { connector })`), so tests running in parallel don't read or clear each other's calls; an unknown connector gets **400**.
+
+Runtime fixtures and `describeOperation` are per connector too. A fixture goes to its `connector` (or the `?connector=` of `PUT /_mock/fixtures`, or `runtimeFixtures.set(fixtures, { connector })`), else to the one connector whose specs have its operation; when several have it, as Outlook and OneDrive both have Graph's `GET /me`, it is rejected until one is named, and when any fixture is rejected none is set on any connector. Listed fixtures carry their `connector`, and `GET /_mock/operations/<id>?connector=<id>` describes one connector's operation (without it, the first connector's that has it). The MCP server's tools take a `connector` argument, listing the connectors in their schemas.
+
+**Running tests in parallel.** One Kibana sends its requests through one emulator, so tests running at the same time share its state. Tests on different connectors may run in parallel when they scope what they read and change with `?connector=` (or `createEmulatorControl(proxyUrl, { connector })`). Tests on the same connector that set fixtures, read calls or reset must run serially: they share that connector's calls and runtime fixtures, so one test's fixture answers another's requests, and one test's reset clears what another set up.
+
 ## GraphQL
 
 GraphQL APIs are specs too: the schema in SDL, and the URLs the vendor serves it at.
@@ -109,12 +188,12 @@ Vendor specs are sometimes wrong about authentication too. Trello's declares onl
 
 Responses come from, in order of preference:
 
-1. **Fixtures**: hand-written responses passed as `fixtures`, for operations where nothing else is good enough;
+1. **Fixtures**: hand-written responses passed as `fixtures`, for operations where nothing else is good enough. A fixture with `when` answers only the requests it matches, and one with `responses` answers them in turn (see below);
 2. **Recordings**: responses captured from the real vendor API, passed as `recordings`. A recording is served only while it conforms to the spec; one that doesn't, or that names an operation the spec lacks, is listed in `rejectedResponses` (with the `spec` it contradicts, for named specs), which signals drift on the vendor's side. Recorded error responses are not served by default;
 3. **Spec examples**: the response media type's `example` or `examples`, when they match the schema;
 4. **Samples** of the response schema.
 
-Fixtures and recordings name their operation by method and path template, not by URL, so they apply whatever the request's parameters are (GraphQL and MCP operations by name, see above):
+Fixtures and recordings name their operation by method and path template, not by URL, so without `when` they apply whatever the request's parameters are (GraphQL and MCP operations by name, see above):
 
 ```ts
 const { fetch, rejectedResponses } = createEmulatorFetch({
@@ -133,6 +212,44 @@ const { fetch, rejectedResponses } = createEmulatorFetch({
 });
 ```
 
+A fixture's `when` names the requests it answers: path parameters, query parameters and headers by value, and the fields of a body it lists, so `GET /users/1` and `GET /users/2` can get different users, and an unknown ID a `404`:
+
+```ts
+const { fetch } = createEmulatorFetch({
+  specs: [openApiDocument],
+  fixtures: [
+    {
+      operation: { method: 'GET', path: '/users/{id}' },
+      when: { path: { id: '1' } },
+      response: { status: 200, body: { id: 1, name: 'Ada' } },
+    },
+    {
+      operation: { method: 'GET', path: '/users/{id}' },
+      when: { path: { id: '404' } },
+      response: { status: 404, body: { message: 'Not found' } },
+    },
+  ],
+});
+```
+
+A request gets the fixture that checks the most values among those it matches, else the operation's fixture without `when`. A `when.path` naming a parameter the operation doesn't have is listed in `rejectedResponses`. Recordings match the request they recorded the same way, by its `pathParameters`, query and body (not its headers), and other requests get the operation's first recording. `when` applies to OpenAPI operations; GraphQL and MCP fixtures name their operation instead.
+
+**Sequences.** A handler that polls inside one action, such as Firecrawl's `crawlAndWait` until its job is `completed`, sends the same request until the answer changes, so one response per fixture can't take it through its waiting path. A fixture of an OpenAPI operation can give `responses` in place of `response`: the requests it answers get them in turn, and the last one repeats.
+
+```ts
+const fixtures: ResponseFixture[] = [
+  {
+    operation: { method: 'GET', path: '/crawl/{id}' },
+    responses: [
+      { status: 200, body: { status: 'scraping' } },
+      { status: 200, body: { status: 'completed', data: [] } },
+    ],
+  },
+];
+```
+
+Each fixture keeps its own count, so sequences with different `when`s advance separately, and `reset()` starts every sequence again. Sequences work wherever fixtures do: at creation, in `--fixtures` files and as runtime fixtures, where each response is checked like a single one, and the violations' paths start with `responses` and the index of the response they belong to. A response can be an error status, such as urlscan.io's 404 until a scan finishes. GraphQL and MCP fixtures take one `response`; a sequence for them is listed in `rejectedResponses`.
+
 Examples and samples use the lowest declared 2xx response (then `2XX`, then `default`; operations without one, such as downloads that redirect or endpoints the vendor removed, get their lowest declared 3xx, then their lowest declared status) and the content type that best matches the request's `Accept` header, preferring JSON; the mock answers **406** when no content type matches. Sampled values come from the schema's first `examples` entry, `example` or `default` that conforms to the schema, then its `const` or first `enum` value, and otherwise from a placeholder that stays within the schema's type, format and bounds (`minimum`/`maximum`, `multipleOf`, `minLength`/`maxLength`, `minItems`/`maxItems`, and `pattern`, sampled from the regex). Vendors' examples often contradict their own schemas (a date-time under `format: date`, a number for a string), so non-conforming ones are skipped; examples of schemas merged from `allOf` parts are used unchecked. For `oneOf`, the first variant whose sample matches exactly one variant is used. Below a fixed depth only required properties are generated, which keeps recursive schemas finite. Required properties the schema doesn't declare are filled from `additionalProperties`, or with `null`.
 
 `sampleJsonSchema(schema, { optional, boundary })` samples a standalone JSON Schema the same way, with refs resolving against the schema itself (`#/$defs/...`), for example to generate inputs from a zod schema converted with `z.toJSONSchema`. `optional: 'required'` leaves out optional properties at every depth, so object and array examples and defaults, which may include them, are skipped; `boundary: true` samples at the upper bounds, ignoring examples and defaults.
@@ -141,7 +258,7 @@ To test how a connector handles extreme responses, pass `sampling: 'boundary'`. 
 
 ### Responders
 
-Pass `respond` to answer OpenAPI operations in front of the default chain above, for example to keep state across requests (create something, then read it back), or to answer from another emulator. It gets the operation, the request and a context, and may return a promise:
+Pass `respond` to answer OpenAPI operations in front of the default chain above, for example to keep state across requests (create something, then read it back), or to answer from another emulator. It gets the operation, the request (with its decoded `pathParameters`) and a context, and may return a promise:
 
 ```ts
 const CREATED = Symbol('created items');
@@ -161,7 +278,7 @@ const { fetch, reset } = createEmulatorFetch({
 });
 ```
 
-- `context.next()` answers with the default chain: fixtures, recordings, then examples or samples, paged for operations in `pagination`. A responder that defers to it for an operation behaves as if it weren't there. Each call gets its own copy, so a responder can change it without affecting later requests. Only `next()` is paged: a list a responder builds itself, for example from `state`, is answered whole.
+- `context.next()` answers with the default chain: fixtures as written, else recordings, examples or samples, paged for operations in `pagination`. A responder that defers to it for an operation behaves as if it weren't there. Each call gets its own copy, so a responder can change it without affecting later requests. Only `next()` is paged: a list a responder builds itself, for example from `state`, is answered whole.
 - `context.state` is a `Map` kept for the emulator's run; `reset()` empties it, along with `calls`. Responders keep their entries under keys of their own, such as a symbol, so several can share it.
 - Answers are validated against the spec like any other, so a responder that drifts from the vendor's contract shows up in `calls`.
 
@@ -176,7 +293,7 @@ Operations listed in `pagination` (method, path template and a descriptor from t
 
 Next-page URLs are the request's URL with the cursor, offset or page parameter named in `request` set to the next page. Body paths use lodash syntax; quote keys that contain dots, as in `["@odata.nextLink"]`. An empty `itemsPath` means the body is the collection itself, as with Datadog's `GET /api/v1/monitor`; such a body has no room for a next cursor, URL or total, so these operations page by offset, page number, `Link` header or a cursor in a header.
 
-When an operation has recordings, its collection is the recorded pages joined, in place of copies of one item. Recordings store each exchange's request (`query`, `headers`, `body`) so pages can be placed: a page requested by offset or page number starts there, and a page requested with a vendor cursor starts where the page that returned that cursor ended. Recorded cursors then resolve to their position, so replaying them works, and the mock hands them out for the pages they lead to. `collectionSize` cuts the recorded items or pads them with copies of the last one. A fixture for the operation overrides its recordings.
+When an operation has recordings, its collection is the recorded pages joined, in place of copies of one item. Pages join with those recorded for the same path parameters, and the same query and body apart from the parameters that select a page, so `/users/2/items` gets the pages recorded for user 2. A request none of them match gets the operation's first collection, and the most specific one if several match. Recordings store each exchange's request (`pathParameters`, `query`, `headers`, `body`) so pages can be placed: a page requested by offset or page number starts there, and a page requested with a vendor cursor starts where the page that returned that cursor ended. Recorded cursors then resolve to their position, so replaying them works, and the mock hands them out for the pages they lead to. `collectionSize` cuts the recorded items or pads them with copies of the last one. Fixtures and runtime fixtures aren't paged: a request they answer gets the response as written, with its own items and next-page values, so an empty list stays empty. To serve several pages, give one fixture per page with a `when` on the cursor or page parameter.
 
 Page sizes above the vendor's `maximum` already get **422** from request validation.
 
