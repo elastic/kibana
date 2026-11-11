@@ -7,7 +7,10 @@
 
 import Boom from '@hapi/boom';
 import type { KibanaRequest } from '@kbn/core/server';
-import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import {
+  NIGHTSHIFT_API_PRIVILEGES,
+  NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
+} from '@kbn/nightshift-shared';
 import type { SignificantEventsServer } from '../../types';
 
 interface PrivilegeCheckParams {
@@ -15,18 +18,18 @@ interface PrivilegeCheckParams {
   server: Pick<SignificantEventsServer, 'security'>;
 }
 
-const hasNightshiftApiPrivilege = async ({
+const hasNightshiftApiPrivileges = async ({
   request,
   server,
-  privilege,
-}: PrivilegeCheckParams & { privilege: string }): Promise<boolean> => {
+  privileges,
+}: PrivilegeCheckParams & { privileges: readonly string[] }): Promise<boolean> => {
   const authz = server.security.authz;
   if (!authz) {
     return false;
   }
 
   const result = await authz.checkPrivilegesDynamicallyWithRequest(request)({
-    kibana: [authz.actions.api.get(privilege)],
+    kibana: privileges.map((privilege) => authz.actions.api.get(privilege)),
   });
   return result.hasAllRequested;
 };
@@ -35,21 +38,38 @@ export const assertCanManageSignificantEvents = async (
   params: PrivilegeCheckParams
 ): Promise<void> => {
   if (
-    !(await hasNightshiftApiPrivilege({ ...params, privilege: NIGHTSHIFT_API_PRIVILEGES.manage }))
+    !(await hasNightshiftApiPrivileges({
+      ...params,
+      privileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+    }))
   ) {
-    throw Boom.forbidden('Managing significant events requires the Nightshift manage privilege');
+    throw Boom.forbidden('Managing significant events requires the nightshift manage privilege');
+  }
+};
+
+/** Gates non-route source changes (Agent Builder tools) the way the source write routes are gated. */
+export const assertCanChangeSources = async (params: PrivilegeCheckParams): Promise<void> => {
+  if (
+    !(await hasNightshiftApiPrivileges({
+      ...params,
+      privileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
+    }))
+  ) {
+    throw Boom.forbidden(
+      'Changing sources requires the nightshift manage and nightshift configure privileges'
+    );
   }
 };
 
 /** Whether the request holds `read_nightshift`, for paths that degrade instead of failing (attachments). */
 export const canReadSignificantEvents = (params: PrivilegeCheckParams): Promise<boolean> =>
-  hasNightshiftApiPrivilege({ ...params, privilege: NIGHTSHIFT_API_PRIVILEGES.read });
+  hasNightshiftApiPrivileges({ ...params, privileges: [NIGHTSHIFT_API_PRIVILEGES.read] });
 
 /** Gates non-route reads (Agent Builder tools) the way `read_nightshift` gates routes. */
 export const assertCanReadSignificantEvents = async (
   params: PrivilegeCheckParams
 ): Promise<void> => {
   if (!(await canReadSignificantEvents(params))) {
-    throw Boom.forbidden('Reading significant events requires the Nightshift read privilege');
+    throw Boom.forbidden('Reading significant events requires the nightshift read privilege');
   }
 };

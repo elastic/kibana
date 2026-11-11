@@ -78,6 +78,28 @@ describe('createActionHandler', () => {
     ]);
   });
 
+  it('rejects a live query whose selected agents exceed maxAgents before writing actions', async () => {
+    const { context, bulkCreate } = buildOsqueryContext();
+    mockedParseAgentSelection.mockResolvedValue(['a1', 'a2']);
+
+    await expect(
+      createActionHandler(
+        context,
+        { query: 'SELECT 1;', agent_policy_ids: ['policy-1'] },
+        {
+          dispatch: { entryPoint: 'live_query', source: { kind: 'caller' } },
+          maxAgents: 1,
+        }
+      )
+    ).rejects.toMatchObject({
+      message: expect.stringMatching(/above the limit of 1/),
+      statusCode: 400,
+      code: 'AGENT_LIMIT_EXCEEDED',
+    });
+
+    expect(bulkCreate).not.toHaveBeenCalled();
+  });
+
   it('writes the originating space_id on each Fleet action document', async () => {
     const { context, bulkCreate } = buildOsqueryContext();
 
@@ -216,7 +238,11 @@ describe('createActionHandler', () => {
           dispatch: { entryPoint: 'live_query', source: { kind: 'caller' } },
         }
       )
-    ).rejects.toThrow('No agents found for selection');
+    ).rejects.toMatchObject({
+      message: 'No agents found for selection',
+      statusCode: 400,
+      code: 'NO_AGENTS_FOUND',
+    });
 
     expect(bulkCreate).not.toHaveBeenCalled();
   });

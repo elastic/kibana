@@ -633,6 +633,78 @@
       "prUrl": "https://github.com/elastic/kibana/pull/295450"
     },
     {
+      "path": "/api/osquery/history",
+      "method": "get",
+      "reason": "Intentional: query parameters gain maximum lengths. kuery and userIds accept 65,536 characters, more than the longest URL Kibana accepts (Node's default 65,535-octet HTTP/2 header list; 16 KiB over HTTP/1), so no request that reaches the route today is rejected. nextPage (4,096) is a server-generated cursor of a few hundred characters, sourceFilters (64) fits every combination of its three allowed values, and startDate/endDate (64) fit ISO timestamps and date math.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "request-parameter-max-length-set",
+      "prUrl": "https://github.com/elastic/kibana/pull/301372"
+    },
+    {
+      "path": "/api/osquery/scheduled_results/{scheduleId}/{executionCount}",
+      "method": "get",
+      "reason": "Intentional: parameters gain maximum lengths. scheduleId (1,024) holds UUID schedule IDs and sort (256) holds a field name. kuery accepts 65,536 characters, more than the longest URL Kibana accepts (Node's default 65,535-octet HTTP/2 header list; 16 KiB over HTTP/1), so no request that reaches the route today is rejected.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "request-parameter-max-length-set",
+      "prUrl": "https://github.com/elastic/kibana/pull/301372"
+    },
+    {
+      "path": "/api/osquery/scheduled_results/{scheduleId}/{executionCount}/results",
+      "method": "get",
+      "reason": "Intentional: parameters gain maximum lengths. scheduleId (1,024) holds UUID schedule IDs, sort (256) holds a field name and startDate (64) holds a timestamp. kuery accepts 65,536 characters, more than the longest URL Kibana accepts (Node's default 65,535-octet HTTP/2 header list; 16 KiB over HTTP/1), so no request that reaches the route today is rejected.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "request-parameter-max-length-set",
+      "prUrl": "https://github.com/elastic/kibana/pull/301372"
+    },
+    {
+      "path": "/api/osquery/scheduled_results/{scheduleId}/{executionCount}/_export",
+      "method": "post",
+      "reason": "Intentional: the scheduleId path parameter is capped at 1,024 characters. Schedule IDs are UUIDs, so no working value is affected.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "request-parameter-max-length-set",
+      "prUrl": "https://github.com/elastic/kibana/pull/301372"
+    },
+    {
+      "path": "/api/osquery/scheduled_results/{scheduleId}/{executionCount}/_export",
+      "method": "post",
+      "reason": "Intentional: body kuery is capped at 65,536 characters, the same limit as the KQL the results view sends in its URL, so any filter the results view accepts can still be exported. Each agentIds entry is capped at 1,024 characters; agent IDs are UUIDs.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "request-property-max-length-set",
+      "prUrl": "https://github.com/elastic/kibana/pull/301372"
+    },
+    {
+      "path": "/api/osquery/scheduled_results/{scheduleId}/{executionCount}/_export",
+      "method": "post",
+      "reason": "Intentional: agentIds is capped at 100,000 entries, matching osquery's other agent ID lists and above the roughly 26,900 UUIDs a default 1 MiB request body can hold.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "request-property-max-items-set",
+      "prUrl": "https://github.com/elastic/kibana/pull/301372"
+    },
+    {
+      "path": "/api/osquery/live_queries/{id}/results/{actionId}/_export",
+      "method": "post",
+      "reason": "Intentional: the id and actionId path parameters are capped at 1,024 characters. Both are UUID action IDs, so no working value is affected.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "request-parameter-max-length-set",
+      "prUrl": "https://github.com/elastic/kibana/pull/301372"
+    },
+    {
+      "path": "/api/osquery/live_queries/{id}/results/{actionId}/_export",
+      "method": "post",
+      "reason": "Intentional: body kuery is capped at 65,536 characters, the same limit as the KQL the results view sends in its URL, so any filter the results view accepts can still be exported. Each agentIds entry is capped at 1,024 characters; agent IDs are UUIDs.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "request-property-max-length-set",
+      "prUrl": "https://github.com/elastic/kibana/pull/301372"
+    },
+    {
+      "path": "/api/osquery/live_queries/{id}/results/{actionId}/_export",
+      "method": "post",
+      "reason": "Intentional: agentIds is capped at 100,000 entries, matching osquery's other agent ID lists and above the roughly 26,900 UUIDs a default 1 MiB request body can hold.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "request-property-max-items-set",
+      "prUrl": "https://github.com/elastic/kibana/pull/301372"
+    },
+    {
       "path": "/api/fleet/agents/bulk_migrate",
       "method": "post",
       "reason": "oasdiff misreports this as removed anyOf subschemas because both agents branches gained maxLength (512 per agent ID, 500000 for the KQL string). The real change is a new length limit. Agent IDs are UUIDs, and 500000 covers the largest query the Fleet UI generates (a select-all selection excluding up to 10000 agent IDs), so no known valid request is affected.",
@@ -777,76 +849,220 @@
       "prUrl": "https://github.com/elastic/kibana/pull/300516"
     },
     {
-      "path": "/api/osquery/history",
+      "path": "/api/observability/slos",
       "method": "get",
-      "reason": "Intentional: query parameters gain maximum lengths. kuery and userIds accept 65,536 characters, more than the longest URL Kibana accepts (Node's default 65,535-octet HTTP/2 header list; 16 KiB over HTTP/1), so no request that reaches the route today is rejected. nextPage (4,096) is a server-generated cursor of a few hundred characters, sourceFilters (64) fits every combination of its three allowed values, and startDate/endDate (64) fit ISO timestamps and date math.",
-      "approvedBy": "@elastic/security-defend-workflows",
-      "oasdiffId": "request-parameter-max-length-set",
-      "prUrl": "https://github.com/elastic/kibana/pull/301372"
+      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. settings.syncField is nullable in the SLO settings schema (`z.string().nullable().optional()`), so the stored definition and the response can already contain null; the hand-written spec did not document it.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-property-became-nullable",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
     },
     {
-      "path": "/api/osquery/scheduled_results/{scheduleId}/{executionCount}",
+      "path": "/api/observability/slos",
       "method": "get",
-      "reason": "Intentional: parameters gain maximum lengths. scheduleId (1,024) holds UUID schedule IDs and sort (256) holds a field name. kuery accepts 65,536 characters, more than the longest URL Kibana accepts (Node's default 65,535-octet HTTP/2 header list; 16 KiB over HTTP/1), so no request that reaches the route today is rejected.",
-      "approvedBy": "@elastic/security-defend-workflows",
-      "oasdiffId": "request-parameter-max-length-set",
-      "prUrl": "https://github.com/elastic/kibana/pull/301372"
+      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. Schema restructuring with the same accepted values: budgetingMethod is anyOf the 'occurrences' and 'timeslices' literals (same values); instanceId is anyOf '*' or a string (any string, as before); indicator is a $ref to SLOIndicator, a oneOf of the 7 indicator components discriminated by type; timeWindow is a $ref to SLOTimeWindow, a oneOf of SLOTimeWindowRolling and SLOTimeWindowCalendarAligned discriminated by type; createdAt and updatedAt gain format date-time (they are ISO 8601 strings from Date.toISOString()).",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
     },
     {
-      "path": "/api/osquery/scheduled_results/{scheduleId}/{executionCount}/results",
+      "path": "/api/observability/slos",
       "method": "get",
-      "reason": "Intentional: parameters gain maximum lengths. scheduleId (1,024) holds UUID schedule IDs, sort (256) holds a field name and startDate (64) holds a timestamp. kuery accepts 65,536 characters, more than the longest URL Kibana accepts (Node's default 65,535-octet HTTP/2 header list; 16 KiB over HTTP/1), so no request that reaches the route today is rejected.",
-      "approvedBy": "@elastic/security-defend-workflows",
-      "oasdiffId": "request-parameter-max-length-set",
-      "prUrl": "https://github.com/elastic/kibana/pull/301372"
+      "reason": "False positive: indicator and timeWindow are now oneOf named components, and the required properties moved into each variant. Every SLOIndicatorProperties* variant requires type and params, and both SLOTimeWindow* variants require duration and type. Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-required-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
     },
     {
-      "path": "/api/osquery/scheduled_results/{scheduleId}/{executionCount}/_export",
+      "path": "/api/observability/slos/_bulk_purge_rollup",
       "method": "post",
-      "reason": "Intentional: the scheduleId path parameter is capped at 1,024 characters. Schedule IDs are UUIDs, so no working value is affected.",
-      "approvedBy": "@elastic/security-defend-workflows",
-      "oasdiffId": "request-parameter-max-length-set",
-      "prUrl": "https://github.com/elastic/kibana/pull/301372"
+      "reason": "Documentation only: the purgePolicy variants are now the named components SLOBulkPurgePolicyFixedAge and SLOBulkPurgePolicyFixedTime with a discriminator mapping, and the fixed_time timestamp is documented as format date-time. oasdiff no longer matches the inline fixed_time variant; both variants and their required fields are unchanged, and request validation is unchanged.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "request-property-one-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
     },
     {
-      "path": "/api/osquery/scheduled_results/{scheduleId}/{executionCount}/_export",
+      "path": "/api/observability/slos/_bulk_snapshot",
       "method": "post",
-      "reason": "Intentional: body kuery is capped at 65,536 characters, the same limit as the KQL the results view sends in its URL, so any filter the results view accepts can still be exported. Each agentIds entry is capped at 1,024 characters; agent IDs are UUIDs.",
-      "approvedBy": "@elastic/security-defend-workflows",
-      "oasdiffId": "request-property-max-length-set",
-      "prUrl": "https://github.com/elastic/kibana/pull/301372"
+      "reason": "Documentation only: `at` is documented as format date-time. Request validation is unchanged and still accepts any date string that `new Date()` can parse.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "request-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
     },
     {
-      "path": "/api/osquery/scheduled_results/{scheduleId}/{executionCount}/_export",
+      "path": "/api/observability/slos/_bulk_snapshot",
       "method": "post",
-      "reason": "Intentional: agentIds is capped at 100,000 entries, matching osquery's other agent ID lists and above the roughly 26,900 UUIDs a default 1 MiB request body can hold.",
-      "approvedBy": "@elastic/security-defend-workflows",
-      "oasdiffId": "request-property-max-items-set",
-      "prUrl": "https://github.com/elastic/kibana/pull/301372"
+      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. Snapshot results[] is now documented as anyOf a summary variant (id, instanceId, summary) and an error variant (id, instanceId, error) instead of one object with optional summary and error. Each result still carries exactly one of them.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-optional-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
     },
     {
-      "path": "/api/osquery/live_queries/{id}/results/{actionId}/_export",
+      "path": "/api/observability/slos/_bulk_snapshot",
       "method": "post",
-      "reason": "Intentional: the id and actionId path parameters are capped at 1,024 characters. Both are UUID action IDs, so no working value is affected.",
-      "approvedBy": "@elastic/security-defend-workflows",
-      "oasdiffId": "request-parameter-max-length-set",
-      "prUrl": "https://github.com/elastic/kibana/pull/301372"
+      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. Snapshot results[] items are now documented as anyOf a summary variant and an error variant (both objects) instead of a single object; the result shape is unchanged.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
     },
     {
-      "path": "/api/osquery/live_queries/{id}/results/{actionId}/_export",
+      "path": "/api/observability/slos/_bulk_snapshot",
       "method": "post",
-      "reason": "Intentional: body kuery is capped at 65,536 characters, the same limit as the KQL the results view sends in its URL, so any filter the results view accepts can still be exported. Each agentIds entry is capped at 1,024 characters; agent IDs are UUIDs.",
-      "approvedBy": "@elastic/security-defend-workflows",
-      "oasdiffId": "request-property-max-length-set",
-      "prUrl": "https://github.com/elastic/kibana/pull/301372"
+      "reason": "False positive: snapshot results[] is now anyOf a summary variant and an error variant, and both variants still require id and instanceId. Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-required-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
     },
     {
-      "path": "/api/osquery/live_queries/{id}/results/{actionId}/_export",
+      "path": "/api/observability/slos/_definitions",
+      "method": "get",
+      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. settings.syncField is nullable in the SLO settings schema (`z.string().nullable().optional()`), so the stored definition and the response can already contain null; the hand-written spec did not document it.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-property-became-nullable",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/_definitions",
+      "method": "get",
+      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. Schema restructuring with the same accepted values: budgetingMethod is anyOf the 'occurrences' and 'timeslices' literals (same values); indicator is a $ref to SLOIndicator, a oneOf of the 7 indicator components discriminated by type; timeWindow is a $ref to SLOTimeWindow, a oneOf of SLOTimeWindowRolling and SLOTimeWindowCalendarAligned discriminated by type; createdAt and updatedAt gain format date-time (they are ISO 8601 strings from Date.toISOString()).",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/_definitions",
+      "method": "get",
+      "reason": "False positive: indicator and timeWindow are now oneOf named components, and the required properties moved into each variant. Every SLOIndicatorProperties* variant requires type and params, and both SLOTimeWindow* variants require duration and type. Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-required-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/{id}",
+      "method": "get",
+      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. settings.syncField is nullable in the SLO settings schema (`z.string().nullable().optional()`), so the stored definition and the response can already contain null; the hand-written spec did not document it.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-property-became-nullable",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/{id}",
+      "method": "get",
+      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. Schema restructuring with the same accepted values: budgetingMethod is anyOf the 'occurrences' and 'timeslices' literals (same values); instanceId is anyOf '*' or a string (any string, as before); indicator is a $ref to SLOIndicator, a oneOf of the 7 indicator components discriminated by type; timeWindow is a $ref to SLOTimeWindow, a oneOf of SLOTimeWindowRolling and SLOTimeWindowCalendarAligned discriminated by type; createdAt and updatedAt gain format date-time (they are ISO 8601 strings from Date.toISOString()).",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/{id}",
+      "method": "get",
+      "reason": "False positive: indicator and timeWindow are now oneOf named components, and the required properties moved into each variant. Every SLOIndicatorProperties* variant requires type and params, and both SLOTimeWindow* variants require duration and type. Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-required-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/{id}",
+      "method": "put",
+      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. settings.syncField is nullable in the SLO settings schema (`z.string().nullable().optional()`), so the stored definition and the response can already contain null; the hand-written spec did not document it.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-property-became-nullable",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/{id}",
+      "method": "put",
+      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. Schema restructuring with the same accepted values: budgetingMethod is anyOf the 'occurrences' and 'timeslices' literals (same values); indicator is a $ref to SLOIndicator, a oneOf of the 7 indicator components discriminated by type; timeWindow is a $ref to SLOTimeWindow, a oneOf of SLOTimeWindowRolling and SLOTimeWindowCalendarAligned discriminated by type; createdAt and updatedAt gain format date-time (they are ISO 8601 strings from Date.toISOString()).",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/{id}",
+      "method": "put",
+      "reason": "False positive: indicator and timeWindow are now oneOf named components, and the required properties moved into each variant. Every SLOIndicatorProperties* variant requires type and params, and both SLOTimeWindow* variants require duration and type. Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-required-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/{id}/_reset",
       "method": "post",
-      "reason": "Intentional: agentIds is capped at 100,000 entries, matching osquery's other agent ID lists and above the roughly 26,900 UUIDs a default 1 MiB request body can hold.",
-      "approvedBy": "@elastic/security-defend-workflows",
-      "oasdiffId": "request-property-max-items-set",
-      "prUrl": "https://github.com/elastic/kibana/pull/301372"
+      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. settings.syncField is nullable in the SLO settings schema (`z.string().nullable().optional()`), so the stored definition and the response can already contain null; the hand-written spec did not document it.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-property-became-nullable",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/{id}/_reset",
+      "method": "post",
+      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. Schema restructuring with the same accepted values: budgetingMethod is anyOf the 'occurrences' and 'timeslices' literals (same values); indicator is a $ref to SLOIndicator, a oneOf of the 7 indicator components discriminated by type; timeWindow is a $ref to SLOTimeWindow, a oneOf of SLOTimeWindowRolling and SLOTimeWindowCalendarAligned discriminated by type; createdAt and updatedAt gain format date-time (they are ISO 8601 strings from Date.toISOString()).",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/{id}/_reset",
+      "method": "post",
+      "reason": "False positive: indicator and timeWindow are now oneOf named components, and the required properties moved into each variant. Every SLOIndicatorProperties* variant requires type and params, and both SLOTimeWindow* variants require duration and type. Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-required-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/{id}/_snapshot",
+      "method": "get",
+      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. Snapshot results[] is now documented as anyOf a summary variant (id, instanceId, summary) and an error variant (id, instanceId, error) instead of one object with optional summary and error. Each result still carries exactly one of them.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-optional-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/{id}/_snapshot",
+      "method": "get",
+      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. Snapshot results[] items are now documented as anyOf a summary variant and an error variant (both objects) instead of a single object; the result shape is unchanged.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos/{id}/_snapshot",
+      "method": "get",
+      "reason": "False positive: snapshot results[] is now anyOf a summary variant and an error variant, and both variants still require id and instanceId. Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "response-required-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos",
+      "method": "post",
+      "reason": "Widening, not breaking: filters[].meta.value in SLOKqlWithFilters was string-only and now also accepts a range params object and an array of phrase values, matching FilterMeta.value in @kbn/es-query. Every request that was valid before is still valid.",
+      "approvedBy": "@elastic/nightshift-sre-agent-team",
+      "oasdiffId": "request-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/303236"
+    },
+    {
+      "path": "/api/observability/slos",
+      "method": "post",
+      "reason": "False-positive: oasdiff reports the anyOf subschemas as removed because each one embeds a filter whose SLOKqlWithFilters filters[].meta.value was widened from string to a union of string, range params object and array of phrase values. No subschema was removed, and every request that was valid before is still valid.",
+      "approvedBy": "@elastic/nightshift-sre-agent-team",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/303236"
+    },
+    {
+      "path": "/api/observability/slos/{id}",
+      "method": "put",
+      "reason": "Widening, not breaking: filters[].meta.value in SLOKqlWithFilters was string-only and now also accepts a range params object and an array of phrase values, matching FilterMeta.value in @kbn/es-query. Every request that was valid before is still valid.",
+      "approvedBy": "@elastic/nightshift-sre-agent-team",
+      "oasdiffId": "request-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/303236"
+    },
+    {
+      "path": "/api/observability/slos/{id}",
+      "method": "put",
+      "reason": "False-positive: oasdiff reports the anyOf subschemas as removed because each one embeds a filter whose SLOKqlWithFilters filters[].meta.value was widened from string to a union of string, range params object and array of phrase values. No subschema was removed, and every request that was valid before is still valid.",
+      "approvedBy": "@elastic/nightshift-sre-agent-team",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/303236"
     }
   ]
 }

@@ -47,6 +47,7 @@ describe('nightshift agent optimize workflow', () => {
         'connector_id',
         'conversation_id',
         'prompt',
+        'replay',
         'response',
         'round_connector_id',
         'round_id',
@@ -63,7 +64,7 @@ describe('nightshift agent optimize workflow', () => {
     expect(properties.round_connector_id).toEqual(expect.objectContaining({ maxLength: 500 }));
   });
 
-  it('obtains one sandbox then optimizes cortex and memory in parallel with that id', () => {
+  it('obtains one sandbox then optimizes wiki and memory in parallel with that id', () => {
     expect(NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW.id).toBe(NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID);
     expect(workflow.name).toBe('Nightshift Agent Optimize');
     expect(workflow.description).toContain(
@@ -86,11 +87,11 @@ describe('nightshift agent optimize workflow', () => {
         mode: 'settled',
         branches: [
           expect.objectContaining({
-            name: 'cortex',
+            name: 'wiki',
             steps: [
               expect.objectContaining({
-                name: 'optimize_cortex',
-                type: 'nightshift.cortexOptimize',
+                name: 'optimize_wiki',
+                type: 'nightshift.wikiOptimize',
                 with: expect.objectContaining({
                   sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}',
                   connector_id: '{{ inputs.connector_id }}',
@@ -171,10 +172,9 @@ describe('nightshift agent optimize workflow', () => {
 
   // Liquid `{{ }}` stringifies the array as "[object Object]…", the step's preprocess then
   // falls back to [], and extractAccessedTreeIds([]) makes every round distill from scratch.
-  it('forwards the investigator tool_calls and conversation into the prepare step', () => {
+  it('forwards the investigator tool_calls into the prepare step', () => {
     const prepare = workflow.steps.find((step) => step.name === 'prepare_turn');
     expect(prepare?.with?.tool_calls).toBe('${{ inputs.tool_calls }}');
-    expect(prepare?.with?.conversation_id).toBe('{{ inputs.conversation_id }}');
   });
 
   // Only the eligible investigator rounds may rewrite the trees, so the agent and the
@@ -196,6 +196,20 @@ describe('nightshift agent optimize workflow', () => {
     expect(ensure?.with?.agent_id).toBe('significant-events.decision-tree-reinforcement');
   });
 
+  // The round's place in its conversation is what tells a first round from a follow-up. The
+  // message, the answer and the round's model are only for a follow-up's causal check.
+  it('hands the turn preparation the conversation, the round, and what the causal check reads', () => {
+    const prepare = workflow.steps.find((step) => step.name === 'prepare_turn');
+    expect(prepare?.with).toMatchObject({
+      conversation_id: '{{ inputs.conversation_id }}',
+      round_id: '{{ inputs.round_id }}',
+      prompt: '{{ inputs.prompt }}',
+      response: '{{ inputs.response }}',
+      connector_id: '{{ inputs.connector_id }}',
+      round_connector_id: '{{ inputs.round_connector_id }}',
+    });
+  });
+
   // The agent replays the investigator's round as tool messages, so it needs the calls, their
   // results, and the round's prompt and answer. ${{ }} keeps the arrays intact.
   it("hands the reinforcement step the investigator's whole round and the prepared turn", () => {
@@ -212,7 +226,18 @@ describe('nightshift agent optimize workflow', () => {
       connector_id: '{{ steps.resolve_model.output.connector_id }}',
       tool_calls: '${{ inputs.tool_calls }}',
       tool_results: '${{ inputs.tool_results }}',
+      replay: '${{ inputs.replay }}',
     });
+  });
+
+  // An evaluation replays a recorded round under a synthetic conversation id no one can read,
+  // so it has to say so explicitly; ${{ }} keeps the flag a boolean for the step's schema.
+  it('declares an optional boolean replay input and forwards it to reinforcement', () => {
+    const { properties } = workflow.triggers[0].inputs;
+    expect(properties.replay).toEqual(expect.objectContaining({ type: 'boolean' }));
+    expect(
+      workflow.steps.find((step) => step.name === 'reinforce_decision_trees')?.with?.replay
+    ).toBe('${{ inputs.replay }}');
   });
 
   // Proves the sequential phase really compiles: the reinforcement steps become graph nodes
@@ -254,7 +279,7 @@ describe('nightshift agent optimize workflow', () => {
       .map((node) => (node as { stepId: string }).stepId);
     expect(atomicStepIds).toEqual([
       'obtain_sandbox',
-      'optimize_cortex',
+      'optimize_wiki',
       'optimize_memory',
       'prepare_turn',
       'resolve_model',

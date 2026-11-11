@@ -10,15 +10,15 @@
 import { v4 as uuid } from 'uuid';
 import React, { useState, type FC } from 'react';
 import { renderHook, render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { type Row } from '../table';
+import { type CascadeTableRow } from '../table';
 import {
   useTreeGridContainerARIAAttributes,
   useTreeGridRowARIAAttributes,
   useRegisterCascadeAccessibilityHelpers,
 } from '.';
 
-const createMockedRowInstance = (overrides: Partial<Row<any>> = {}) => {
-  return new Proxy({ id: uuid(), subRows: [], depth: 0, ...overrides } as Row<any>, {
+const createMockedRowInstance = (overrides: Partial<CascadeTableRow<any>> = {}) => {
+  return new Proxy({ id: uuid(), subRows: [], depth: 0, ...overrides } as CascadeTableRow<any>, {
     get: (target, prop) => {
       // catch all for function getters not explicitly catered for
       if (/get[a-zA-Z]/.test(prop as string) && !(prop in target)) {
@@ -101,7 +101,7 @@ describe('accessibility', () => {
 
   describe('useRegisterCascadeAccessibilityHelpers', () => {
     const SUTUsingCascadeAccessibilityHelper: FC<{
-      tableRows: Row<any>[];
+      tableRows: Array<CascadeTableRow<any>>;
     }> = ({ tableRows }) => {
       const [wrapperElRef, setWrapperElRef] = useState<HTMLDivElement | null>(null);
 

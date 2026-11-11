@@ -8,12 +8,7 @@
  */
 
 import { getElementFromPoint } from './get_element_from_point';
-import {
-  MEASURE_OVERLAY_ID,
-  EDIT_OVERLAY_ID,
-  LAYOUT_OVERLAY_ID,
-  DEVELOPER_TOOLBAR_ID,
-} from '../constants';
+import { EDIT_OVERLAY_ID, LAYOUT_OVERLAY_ID, DEVELOPER_TOOLBAR_ID } from '../constants';
 
 describe('getElementFromPoint', () => {
   let originalElementsFromPoint: typeof document.elementsFromPoint;
@@ -34,16 +29,6 @@ describe('getElementFromPoint', () => {
 
     expect(getElementFromPoint(mockEvent)).toBe(el);
     expect(document.elementsFromPoint).toHaveBeenCalledWith(100, 200);
-  });
-
-  it('should skip the measure overlay', () => {
-    const overlay = document.createElement('div');
-    overlay.id = MEASURE_OVERLAY_ID;
-    const target = document.createElement('div');
-
-    document.elementsFromPoint = jest.fn().mockReturnValue([overlay, target]);
-
-    expect(getElementFromPoint(mockEvent)).toBe(target);
   });
 
   it('should skip the edit overlay', () => {
@@ -110,7 +95,7 @@ describe('getElementFromPoint', () => {
 
   it('should return null when no valid elements exist', () => {
     const overlay = document.createElement('div');
-    overlay.id = MEASURE_OVERLAY_ID;
+    overlay.id = EDIT_OVERLAY_ID;
 
     document.elementsFromPoint = jest.fn().mockReturnValue([overlay]);
 

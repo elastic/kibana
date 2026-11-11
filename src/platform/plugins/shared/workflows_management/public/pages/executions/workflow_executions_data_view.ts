@@ -49,14 +49,18 @@ const WORKFLOW_EXECUTIONS_FIELD_SPECS: Record<string, FieldSpec> = {
   createdAt: dateField('createdAt'),
   finishedAt: dateField('finishedAt'),
   id: keywordField('id'),
+  runName: keywordField('runName'),
   workflowId: keywordField('workflowId'),
   status: keywordField('status'),
   triggeredBy: keywordField('triggeredBy'),
   executedBy: keywordField('executedBy'),
+  'executedByUser.name': keywordField('executedByUser.name'),
   createdBy: keywordField('createdBy'),
   isTestRun: booleanField('isTestRun'),
   spaceId: keywordField('spaceId'),
 };
+
+const EXECUTOR_DATA_VIEW_FIELDS = ['executedBy', 'executedByUser.name'] as const;
 
 export const WORKFLOW_EXECUTIONS_DATA_VIEW_SPEC: DataViewSpec = {
   id: WORKFLOW_EXECUTIONS_DATA_VIEW_ID,
@@ -65,6 +69,23 @@ export const WORKFLOW_EXECUTIONS_DATA_VIEW_SPEC: DataViewSpec = {
   allowHidden: true,
   fields: WORKFLOW_EXECUTIONS_FIELD_SPECS,
 };
+
+/** Data view for the executions filters. Executor fields are omitted when identities are hidden. */
+export function getWorkflowExecutionsFilterDataViewSpec(showExecutor: boolean): DataViewSpec {
+  if (showExecutor) {
+    return WORKFLOW_EXECUTIONS_DATA_VIEW_SPEC;
+  }
+
+  const fields = { ...WORKFLOW_EXECUTIONS_FIELD_SPECS };
+  for (const fieldName of EXECUTOR_DATA_VIEW_FIELDS) {
+    delete fields[fieldName];
+  }
+
+  return {
+    ...WORKFLOW_EXECUTIONS_DATA_VIEW_SPEC,
+    fields,
+  };
+}
 
 export function createWorkflowExecutionsDataView(fieldFormats: FieldFormatsStart): DataView {
   return new DataView({

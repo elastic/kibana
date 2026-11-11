@@ -23,6 +23,7 @@ jest.mock('@elastic/eui', () => {
       euiTheme: MOCK_EUI_THEME_FOR_USE_THEME,
       colorMode: 'LIGHT',
     }),
+    useEuiFontSize: () => ({ fontSize: '12px' }),
   };
 });
 
@@ -101,11 +102,70 @@ describe('ServiceNode', () => {
     expect(screen.getByText('Test Service')).toBeInTheDocument();
   });
 
-  it('renders agent icon when agentName is provided', () => {
+  it('renders agent icon when agentName is provided and stats are absent', () => {
     renderServiceNode();
     const icon = screen.getByAltText('java');
     expect(icon).toBeInTheDocument();
     expect(icon).toHaveAttribute('src', 'mock-icon-url.svg');
+    expect(screen.queryByTestId('serviceMapNodeStats')).not.toBeInTheDocument();
+  });
+
+  it('shows the failure ring and stats line when stats are present', () => {
+    renderServiceNode(
+      createServiceNodeData({
+        stats: {
+          transactionType: 'request',
+          throughput: 412.3,
+          failedTransactionRate: 0.2,
+          latency: 50_000,
+          requestCount: 200,
+        },
+      })
+    );
+    expect(screen.queryByAltText('java')).not.toBeInTheDocument();
+    expect(screen.getByText('412/m')).toBeInTheDocument();
+    expect(screen.getByTestId('serviceMapNodeFailureArc')).toBeInTheDocument();
+    expect(screen.getByTestId('serviceMapNodeStats')).toBeInTheDocument();
+  });
+
+  it('includes requests, failures, latency, and idle in the accessible name when stats are present', () => {
+    renderServiceNode(
+      createServiceNodeData({
+        isIdle: true,
+        stats: {
+          transactionType: 'request',
+          throughput: 12,
+          failedTransactionRate: 0.05,
+          latency: 2_500,
+          requestCount: 40,
+        },
+      })
+    );
+    const circle = screen.getByTestId('serviceMapNodeServiceCircle');
+    const label = circle.getAttribute('aria-label') ?? '';
+    expect(label).toMatch(/12 requests per minute/);
+    expect(label).toMatch(/of requests failed/);
+    expect(label).toMatch(/Latency/);
+    expect(label).toMatch(/Low traffic/);
+  });
+
+  it('stays focusable when marked idle', () => {
+    renderServiceNode(
+      createServiceNodeData({
+        isIdle: true,
+        stats: {
+          transactionType: 'request',
+          throughput: 0.5,
+          failedTransactionRate: null,
+          latency: null,
+          requestCount: 5,
+        },
+      })
+    );
+    const circle = screen.getByTestId('serviceMapNodeServiceCircle');
+    expect(circle).toHaveAttribute('tabIndex', '0');
+    circle.focus();
+    expect(circle).toHaveFocus();
   });
 
   it('renders with data-test-subj attribute', () => {

@@ -14,13 +14,14 @@ import type { ECSMappingOrUndefined } from '@kbn/osquery-io-ts-types';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import { createLiveQueryRequestBodySchema } from '../../../common/api';
-import { API_VERSIONS } from '../../../common/constants';
+import { API_VERSIONS, OSQUERY_MAX_AGENTS_HEADER } from '../../../common/constants';
 import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import { replaceParamsQuery } from '../../../common/utils/replace_params_query';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import type { StartPlugins } from '../../types';
 import { createActionHandler } from '../../handlers';
+import { CustomHttpRequestError } from '../../common/error';
 import { parser as OsqueryParser } from './osquery_parser';
 import { getUserInfo } from '../../lib/get_user_info';
 import type { AuthorizeOsqueryResponseActionResult } from '../../lib/check_response_action_authz';
@@ -216,6 +217,16 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
             liveDispatchSource = { kind: 'caller' };
           }
 
+          // Only the workflow steps send the header; it does nothing while they are off.
+          const maxAgents = osqueryContext.experimentalFeatures.workflowsExtensionsEnabled
+            ? maxAgentsFromHeader(request.headers[OSQUERY_MAX_AGENTS_HEADER])
+            : undefined;
+          if (maxAgents === null) {
+            return response.badRequest({
+              body: `${OSQUERY_MAX_AGENTS_HEADER} must be a positive integer`,
+            });
+          }
+
           const { response: osqueryAction, fleetActionsCount } = await createActionHandler(
             osqueryContext,
             request.body,
@@ -224,6 +235,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
               alertData,
               space,
               dispatch: { entryPoint: 'live_query', source: liveDispatchSource },
+              maxAgents,
             }
           );
 
@@ -241,7 +253,12 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
           });
         } catch (error) {
           if (error.statusCode === 400) {
-            return response.badRequest({ body: error });
+            return response.badRequest({
+              body:
+                error instanceof CustomHttpRequestError && error.code
+                  ? { message: error.message, attributes: { code: error.code } }
+                  : error,
+            });
           }
 
           return response.customError({
@@ -251,4 +268,24 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         }
       }
     );
+};
+
+/**
+ * The ceiling the workflow step sends: a positive integer, `undefined` when the header is absent
+ * and `null` when it is present but invalid. Node joins a repeated header into `"5, 9"`; the
+ * smallest value wins so a duplicate can only tighten the ceiling.
+ */
+export const maxAgentsFromHeader = (
+  header: string | string[] | undefined
+): number | undefined | null => {
+  if (header === undefined) return undefined;
+
+  const values = (Array.isArray(header) ? header : [header])
+    .flatMap((value) => value.split(','))
+    .map((value) => value.trim());
+  if (values.length === 0 || !values.every((value) => /^[1-9][0-9]{0,6}$/.test(value))) {
+    return null;
+  }
+
+  return Math.min(...values.map(Number));
 };

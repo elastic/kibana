@@ -14,7 +14,6 @@ import {
   type SignificantEvent,
 } from '@kbn/significant-events-schema';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
-import type { CompactBulkError } from '../bulk_write';
 import {
   addsNewDetectionRules,
   extractRuleUuids,
@@ -23,7 +22,6 @@ import {
   mergeSignalsLatestPerRule,
   preserveStableNarrative,
 } from './episode_context';
-import { lockSeverityForCompletedInvestigation, type EventsWriteSource } from './severity_lock';
 import type {
   BulkResults,
   EventsWriteInput,
@@ -31,6 +29,7 @@ import type {
   LoadedCandidate,
   ResolvedWriteCandidate,
   WriteCandidate,
+  WriteOutcome,
 } from './types';
 
 const isLiveStatus = (status: SignificantEvent['status'] | undefined): boolean =>
@@ -59,8 +58,7 @@ export const episodeHistory = (history: SignificantEvent[]): SignificantEvent[] 
 /**
  * Returns true when the latest stored version for this event_id has the same severity and status
  * as the candidate and the candidate introduces no new detection rules — indicating this snapshot
- * would produce a pure-churn duplicate. `severity` is the tier this write would store, after the
- * investigation lock.
+ * would produce a pure-churn duplicate. `severity` is the tier this write would store.
  */
 export const shouldSkipAsNoOp = ({
   candidate,
@@ -179,18 +177,15 @@ export const loadHistory = async ({
 
 /**
  * Merges this candidate's signals and topology with its prior versions (continuation only), then
- * takes the agent's proposed severity, floors an inactive event to low and applies the
- * investigation lock — the facts shared by the no-op check and the final document, derived once per
- * candidate so the two cannot disagree.
+ * takes the agent's proposed severity and floors an inactive event to low — the facts shared by
+ * the no-op check and the final document, derived once per candidate so the two cannot disagree.
  */
 export const computeEventFacts = ({
   candidate,
   timestamp,
-  source,
 }: {
   candidate: ResolvedWriteCandidate;
   timestamp: string;
-  source: EventsWriteSource | undefined;
 }): EventFacts => {
   const { event_id: _explicitId, ...rest } = candidate.input;
   const { latest, priorDocs } = candidate;
@@ -216,13 +211,7 @@ export const computeEventFacts = ({
 
   const { status } = candidate;
 
-  const severity = lockSeverityForCompletedInvestigation({
-    source,
-    latestEvent: latest,
-    proposedSeverity: decideSeverity({ proposed: candidate.input.severity, status, signals }),
-    proposedStatus: status,
-    proposedSignals: candidate.input.signals,
-  });
+  const severity = decideSeverity({ proposed: candidate.input.severity, status, signals });
 
   // For continuations: if no new rule UUIDs are introduced, freeze title and symptom_hypothesis to prevent identity hijack
   // A rule that now confirms what the event stored as unconfirmed changes what the event is about:
@@ -290,7 +279,6 @@ export const buildPendingWrite = ({
         : {}),
       '@timestamp': timestamp,
       event_id: candidate.eventId,
-      investigations: candidate.latest?.investigations,
       signals,
       source_ids: episodeContext.sourceIds,
       causal_features: episodeContext.causalFeatures,
@@ -305,23 +293,26 @@ export const buildPendingWrite = ({
 /** Writes `error ? bulk_error (or superseded) : written` into `results` for each pending write, by index. */
 export const applyWriteOutcomes = ({
   pendingWrites,
-  errors,
+  outcomes,
   results,
 }: {
   pendingWrites: Array<ReturnType<typeof buildPendingWrite>>;
-  errors: Array<CompactBulkError | undefined>;
+  outcomes: WriteOutcome[];
   results: BulkResults;
 }): void => {
   pendingWrites.forEach(({ candidate, status, narrativePreserved, severity }, responseIndex) => {
-    const error = errors[responseIndex];
-    if (error) {
+    const outcome = outcomes[responseIndex];
+    if (outcome.error) {
       results[candidate.index] = {
         index: candidate.index,
         event_id: candidate.eventId,
+        ...('reopensSeries' in candidate && candidate.reopensSeries
+          ? { existing_event_id: candidate.eventId }
+          : {}),
         status,
         written: false,
-        reason: error.type === 'superseded_write' ? 'superseded' : 'bulk_error',
-        error,
+        reason: outcome.error.type === 'superseded_write' ? 'superseded' : 'bulk_error',
+        error: outcome.error,
       };
       return;
     }
@@ -331,10 +322,9 @@ export const applyWriteOutcomes = ({
       status,
       written: true,
       severity,
+      ...(narrativePreserved ? { narrative_preserved: true } : {}),
+      ...(outcome.created ? { created: true, group_hash: outcome.groupHash } : { created: false }),
     };
-    if (narrativePreserved) {
-      result.narrative_preserved = true;
-    }
     results[candidate.index] = result;
   });
 };

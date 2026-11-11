@@ -48,7 +48,6 @@ const INPUT = {
   graded_report: 'first_round',
   evaluator_set: 'reference_free',
   evaluators: [{ name: 'conclusion_quality' }, { name: 'rca_reward', version: '1.0.0' }],
-  judge_connector_id: 'judge-connector',
   investigation_started_at: '2026-10-29T09:59:58.000Z',
   investigation_ended_at: '2026-10-29T10:02:00.000Z',
   investigation_execution_id: 'investigation-exec-1',
@@ -61,24 +60,38 @@ const setup = ({
   paused = false,
   includeExplanations = false,
   rounds = [ROUND],
+  agentBuilderAvailable = true,
 }: {
   evaluate?: jest.Mock<ReturnType<EvaluateFn>, Parameters<EvaluateFn>>;
   evalsAvailable?: boolean;
   paused?: boolean;
   includeExplanations?: boolean;
   rounds?: unknown[];
+  agentBuilderAvailable?: boolean;
 } = {}) => {
   const get = jest.fn().mockResolvedValue({ id: 'inv-1', agent_id: 'investigator', rounds });
   const getScopedClient = jest.fn().mockResolvedValue({ get });
   const reportOnlineEvalScore = jest.fn();
+  const reportOnlineEvalsStepFailed = jest.fn();
   const logger = { warn: jest.fn() };
+  const getContext = jest.fn().mockReturnValue({
+    workflow: { spaceId: 'ops' },
+    execution: { id: 'scoring-exec-1' },
+  });
+  const resolveJudgeConnectorId = jest.fn().mockResolvedValue('judge-connector');
   const definition = scoreOnlineEvalsRoundStepDefinition({
     getAgentBuilder: () =>
-      ({ conversations: { getScopedClient } } as unknown as AgentBuilderPluginStart),
+      agentBuilderAvailable
+        ? ({ conversations: { getScopedClient } } as unknown as AgentBuilderPluginStart)
+        : undefined,
     getEvaluate: () => (evalsAvailable ? evaluate : undefined),
+    resolveJudgeConnectorId,
     isPaused: () => paused,
     shouldIncludeExplanations: () => includeExplanations,
-    telemetry: { reportOnlineEvalScore } as unknown as NightshiftTelemetryClient,
+    telemetry: {
+      reportOnlineEvalScore,
+      reportOnlineEvalsStepFailed,
+    } as unknown as NightshiftTelemetryClient,
   });
   const run = (input: Record<string, unknown> = {}) =>
     definition.handler({
@@ -86,14 +99,21 @@ const setup = ({
       logger,
       contextManager: {
         getFakeRequest: jest.fn().mockReturnValue(request),
-        getContext: jest.fn().mockReturnValue({
-          workflow: { spaceId: 'ops' },
-          execution: { id: 'scoring-exec-1' },
-        }),
+        getContext,
       },
     } as never);
 
-  return { run, evaluate, get, getScopedClient, reportOnlineEvalScore, logger };
+  return {
+    run,
+    evaluate,
+    get,
+    getScopedClient,
+    getContext,
+    resolveJudgeConnectorId,
+    reportOnlineEvalScore,
+    reportOnlineEvalsStepFailed,
+    logger,
+  };
 };
 
 describe('scoreOnlineEvalsRoundStepDefinition', () => {
@@ -155,6 +175,100 @@ describe('scoreOnlineEvalsRoundStepDefinition', () => {
     expect(reportOnlineEvalScore.mock.calls[0][0].scores[0]).not.toHaveProperty('explanation');
   });
 
+  describe('an alert recovery round', () => {
+    const RECOVERY = {
+      ...ROUND,
+      id: 'round-recovery',
+      trace_id: 'trace-round-recovery',
+      input: { message: 'An alert in this investigation has recovered.' },
+      response: { message: 'Confirmed: rolling back the payments deploy cleared the alert.' },
+      steps: [],
+    };
+    const RECOVERY_INPUT = {
+      round_id: 'round-recovery',
+      round_kind: 'alert_recovery',
+      evaluator_set: 'reference_based',
+      entry_point: 'alert_recovery',
+    };
+
+    it('grades the first round against the recovery conclusion', async () => {
+      const evaluate = jest
+        .fn<ReturnType<EvaluateFn>, Parameters<EvaluateFn>>()
+        .mockResolvedValue([okResult('conclusion_quality'), okResult('rca_reward')]);
+      const { run, reportOnlineEvalScore } = setup({
+        evaluate,
+        rounds: [ROUND, { ...ROUND, id: 'round-follow-up' }, RECOVERY],
+      });
+
+      await run(RECOVERY_INPUT);
+
+      expect(evaluate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          evidence: {
+            round: {
+              input: { message: 'Why did the checkout alert fire?' },
+              steps: [expect.objectContaining({ tool_call_id: 'call-1' })],
+              response: { message: 'A bad deploy of the payments service.' },
+            },
+            reference_data: {
+              alert_outcome: 'Confirmed: rolling back the payments deploy cleared the alert.',
+            },
+          },
+        })
+      );
+      expect(reportOnlineEvalScore).toHaveBeenCalledWith(
+        expect.objectContaining({
+          round_id: 'round-recovery',
+          round_trace_id: 'trace-round-recovery',
+          round_kind: 'alert_recovery',
+          graded_report: 'first_round',
+          evaluator_set: 'reference_based',
+        })
+      );
+    });
+
+    it.each(['current', 'pre_recovery'])(
+      'never grades the recovery itself: rejects the %s report as invalid input',
+      async (gradedReport) => {
+        const { run, evaluate, reportOnlineEvalScore, reportOnlineEvalsStepFailed } = setup({
+          rounds: [ROUND, RECOVERY],
+        });
+
+        await expect(run({ ...RECOVERY_INPUT, graded_report: gradedReport })).resolves.toEqual({
+          output: { scored: false, skip_reason: 'scoring_failed' },
+        });
+        expect(evaluate).not.toHaveBeenCalled();
+        expect(reportOnlineEvalScore).not.toHaveBeenCalled();
+        expect(reportOnlineEvalsStepFailed).toHaveBeenCalledWith(
+          expect.objectContaining({ step: 'score', code: 'invalid_input' })
+        );
+      }
+    );
+
+    it('never grades a recovery that is the first round against itself', async () => {
+      const { run, evaluate, reportOnlineEvalsStepFailed } = setup({ rounds: [RECOVERY] });
+
+      await expect(run({ ...RECOVERY_INPUT, graded_report: 'first_round' })).resolves.toEqual({
+        output: { scored: false, skip_reason: 'scoring_failed' },
+      });
+      expect(evaluate).not.toHaveBeenCalled();
+      expect(reportOnlineEvalsStepFailed).toHaveBeenCalledWith(
+        expect.objectContaining({ step: 'score', code: 'invalid_input' })
+      );
+    });
+  });
+
+  it('passes no ground truth for an initial round', async () => {
+    const evaluate = jest
+      .fn<ReturnType<EvaluateFn>, Parameters<EvaluateFn>>()
+      .mockResolvedValue([okResult('conclusion_quality')]);
+    const { run } = setup({ evaluate });
+
+    await run({ evaluators: [{ name: 'conclusion_quality' }] });
+
+    expect(evaluate.mock.calls[0][0].evidence).not.toHaveProperty('reference_data');
+  });
+
   it('includes explanations when the flag is on', async () => {
     const evaluate = jest
       .fn<ReturnType<EvaluateFn>, Parameters<EvaluateFn>>()
@@ -202,18 +316,81 @@ describe('scoreOnlineEvalsRoundStepDefinition', () => {
       { evaluator_name: 'conclusion_quality', code: 'evaluation_failed' },
       { evaluator_name: 'rca_reward', evaluator_version: '1.0.0', code: 'evaluation_failed' },
     ]);
+    // The round was read, so the event still links to it.
+    expect(event).toEqual(
+      expect.objectContaining({ agent_id: 'investigator', round_trace_id: 'trace-round-1' })
+    );
     expect(JSON.stringify(event)).not.toContain('connector_id is required');
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('connector_id is required'));
   });
 
-  it('reports a failed evaluation when the round is not in the investigation', async () => {
-    const { run, evaluate, reportOnlineEvalScore } = setup({ rounds: [] });
+  it.each<[string, Parameters<typeof setup>[0]]>([
+    ['agent_builder_unavailable', { agentBuilderAvailable: false }],
+    ['round_not_found', { rounds: [] }],
+  ])('reports %s as a step failure, without a score event', async (code, options) => {
+    const { run, evaluate, reportOnlineEvalScore, reportOnlineEvalsStepFailed } = setup(options);
 
     await expect(run()).resolves.toEqual({
-      output: { scored: true, evaluator_count: 2, failed_count: 2, skipped_count: 0 },
+      output: { scored: false, skip_reason: 'scoring_failed' },
     });
     expect(evaluate).not.toHaveBeenCalled();
-    expect(reportOnlineEvalScore).toHaveBeenCalledTimes(1);
+    expect(reportOnlineEvalScore).not.toHaveBeenCalled();
+    expect(reportOnlineEvalsStepFailed).toHaveBeenCalledWith(
+      expect.objectContaining({ step: 'score', code, investigation_id: 'inv-1' })
+    );
+  });
+
+  it('reports a judge model it cannot resolve as a step failure, without running the judges', async () => {
+    const {
+      run,
+      evaluate,
+      resolveJudgeConnectorId,
+      reportOnlineEvalScore,
+      reportOnlineEvalsStepFailed,
+    } = setup();
+    resolveJudgeConnectorId.mockRejectedValue(
+      new Error('Model ".openai-gpt-6-sol-chat_completion" is blocked')
+    );
+
+    await expect(run()).resolves.toEqual({
+      output: { scored: false, skip_reason: 'scoring_failed' },
+    });
+    expect(resolveJudgeConnectorId).toHaveBeenCalledWith(request);
+    expect(evaluate).not.toHaveBeenCalled();
+    expect(reportOnlineEvalScore).not.toHaveBeenCalled();
+    expect(reportOnlineEvalsStepFailed).toHaveBeenCalledWith(
+      expect.objectContaining({ step: 'score', code: 'judge_model_unavailable' })
+    );
+  });
+
+  it('reports an unreadable investigation as a step failure', async () => {
+    const { run, get, reportOnlineEvalScore, reportOnlineEvalsStepFailed } = setup();
+    get.mockRejectedValue(new Error('Conversation inv-1 not found'));
+
+    await expect(run()).resolves.toEqual({
+      output: { scored: false, skip_reason: 'scoring_failed' },
+    });
+    expect(reportOnlineEvalScore).not.toHaveBeenCalled();
+    expect(reportOnlineEvalsStepFailed).toHaveBeenCalledWith(
+      expect.objectContaining({ step: 'score', code: 'investigation_unavailable' })
+    );
+  });
+
+  it('reports an unexpected failure without the run it could not read', async () => {
+    const { run, getContext, reportOnlineEvalsStepFailed } = setup();
+    getContext.mockImplementation(() => {
+      throw new Error('Workflow context is not available');
+    });
+
+    await expect(run()).resolves.toEqual({
+      output: { scored: false, skip_reason: 'scoring_failed' },
+    });
+    expect(reportOnlineEvalsStepFailed).toHaveBeenCalledWith({
+      step: 'score',
+      code: 'unexpected',
+      investigation_id: 'inv-1',
+      round_id: 'round-1',
+    });
   });
 
   it('sends nothing when the kill switch is on', async () => {
@@ -234,12 +411,21 @@ describe('scoreOnlineEvalsRoundStepDefinition', () => {
     expect(reportOnlineEvalScore).not.toHaveBeenCalled();
   });
 
-  it('rejects more evaluators than one evaluation runs in parallel', async () => {
-    const { run, reportOnlineEvalScore } = setup();
+  it('reports invalid input, such as more evaluators than one evaluation runs, without failing the step', async () => {
+    const { run, evaluate, reportOnlineEvalScore, reportOnlineEvalsStepFailed } = setup();
 
     await expect(
       run({ evaluators: ['a', 'b', 'c', 'd', 'e'].map((name) => ({ name })) })
-    ).rejects.toThrow();
+    ).resolves.toEqual({ output: { scored: false, skip_reason: 'scoring_failed' } });
+    expect(evaluate).not.toHaveBeenCalled();
     expect(reportOnlineEvalScore).not.toHaveBeenCalled();
+    expect(reportOnlineEvalsStepFailed).toHaveBeenCalledWith({
+      step: 'score',
+      code: 'invalid_input',
+      investigation_id: 'inv-1',
+      round_id: 'round-1',
+      workflow_execution_id: 'scoring-exec-1',
+      space_id: 'ops',
+    });
   });
 });
