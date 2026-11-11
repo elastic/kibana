@@ -45,14 +45,24 @@ const BADGE_LABELS: Readonly<Record<string, string>> = SEVERITY_LABELS;
 const toInfoBlocks = (values: HeaderBlockValues): InfoBlocks =>
   getHeaderBlocks(values).map(({ id, title, value }) => ({ id, title, children: value }));
 
-const Since = ({ createdAt, messageId }: { createdAt: string; messageId: string }) => (
+const getSinceValues = (createdAt: string) => ({
+  time: <FormattedTime value={createdAt} />,
+  relative: <FormattedRelative value={createdAt} />,
+});
+
+const DetailsSince = ({ createdAt }: { createdAt: string }) => (
   <FormattedMessage
-    id={messageId}
+    id="xpack.agenticInvestigations.detailsFlyout.header.since"
     defaultMessage="Since {time} ({relative})"
-    values={{
-      time: <FormattedTime value={createdAt} />,
-      relative: <FormattedRelative value={createdAt} />,
-    }}
+    values={getSinceValues(createdAt)}
+  />
+);
+
+const EscalationSince = ({ createdAt }: { createdAt: string }) => (
+  <FormattedMessage
+    id="xpack.agenticInvestigations.escalationFlyout.header.since"
+    defaultMessage="Since {time} ({relative})"
+    values={getSinceValues(createdAt)}
   />
 );
 
@@ -65,10 +75,7 @@ const InvestigationDescription = ({
 }) => (
   <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
     <EuiFlexItem grow={false}>
-      <Since
-        createdAt={createdAt}
-        messageId="xpack.agenticInvestigations.detailsFlyout.header.since"
-      />
+      <DetailsSince createdAt={createdAt} />
     </EuiFlexItem>
     {liveStateNode && <EuiFlexItem grow={false}>{liveStateNode}</EuiFlexItem>}
   </EuiFlexGroup>
@@ -240,10 +247,7 @@ export const useEscalationDetailsFlyout = (
     header: {
       title: conversation.title,
       description: (
-        <Since
-          createdAt={conversation.created_at}
-          messageId="xpack.agenticInvestigations.escalationFlyout.header.since"
-        />
+        <EscalationSince createdAt={conversation.created_at} />
       ),
       isLoading: isSyncing,
       loadingLabel: TEMPLATE_UI_LABELS.syncing,
