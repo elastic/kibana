@@ -97,7 +97,7 @@ const skippedRuleTypes = [
   'xpack.uptime.alerts.monitorStatus',
   'xpack.uptime.alerts.tls',
   'xpack.uptime.alerts.tlsCertificate',
-]
+];
 
 describe('Serverless upgrade and rollback checks', () => {
   let esServer: TestElasticsearchUtils;
@@ -135,7 +135,7 @@ describe('Serverless upgrade and rollback checks', () => {
       expect(registeredRuleTypes).toContain(ruleTypeId);
     }
   });
-  
+
   // if this test fails, the rule type should be added to one of the lists above
   test('ensure all rule types are checked or skipped', () => {
     const registeredRuleTypes = Array.from(ruleTypeRegistry.list().keys());
