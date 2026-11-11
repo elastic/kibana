@@ -703,6 +703,7 @@ exports[`schema_to_skill_docs generateRuleSchemaDoc matches the snapshot 1`] = `
 | Field | Type | Required | Description |
 |---|---|---|---|
 | \`kind\` | \\"alert\\" \\\\| \\"signal\\" | required | Whether the rule creates alerts (\`alert\`) or only stores matching events (\`signal\`). |
+| \`enabled\` | boolean | optional | Whether the rule is enabled. On create, defaults to \`true\` when omitted. On replace, omitting this field preserves the existing enabled state. A rule created with \`false\` is saved but does not run until you enable it. |
 | \`metadata\` | object | required | Rule metadata. |
 | \`time_field\` | string | required | Document field Kibana uses with \`schedule.lookback\` to time-filter \`query.base\`. (min length: 1, max length: 256, default: \\"@timestamp\\") |
 | \`schedule\` | object | required | Execution schedule configuration. |

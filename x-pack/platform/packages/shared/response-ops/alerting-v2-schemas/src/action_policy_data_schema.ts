@@ -300,21 +300,8 @@ const actionPolicyDescriptionSchema = lazySchema(() =>
     .describe(ACTION_POLICY_DESCRIPTION_DESCRIPTION)
 );
 
-const createActionPolicyDataBaseSchema = lazySchema(() =>
-  z
-    .object({
-      name: actionPolicyNameSchema,
-      description: actionPolicyDescriptionSchema.optional(),
-      destinations: actionPolicyDestinationsSchema,
-      matcher: policyMatcherSchema.optional().describe(POLICY_MATCHER_DESCRIPTION),
-      grouping: actionPolicyGroupingSchema.optional().describe(GROUPING_DESCRIPTION),
-      throttle: throttleSchema.optional().describe(THROTTLE_DESCRIPTION),
-    })
-    .strict()
-);
-
 /**
- * Optional `enabled` shared by the create and PUT bodies. Left as a plain optional with no default because "omitted" means `true` on create and the stored value on replace.
+ * Optional with no default because "omitted" means `true` on create and the stored value on replace.
  */
 const enabledSchema = lazySchema(() =>
   z
@@ -325,9 +312,22 @@ const enabledSchema = lazySchema(() =>
     )
 );
 
+const createActionPolicyDataBaseSchema = lazySchema(() =>
+  z
+    .object({
+      name: actionPolicyNameSchema,
+      description: actionPolicyDescriptionSchema.optional(),
+      destinations: actionPolicyDestinationsSchema,
+      matcher: policyMatcherSchema.optional().describe(POLICY_MATCHER_DESCRIPTION),
+      grouping: actionPolicyGroupingSchema.optional().describe(GROUPING_DESCRIPTION),
+      throttle: throttleSchema.optional().describe(THROTTLE_DESCRIPTION),
+      enabled: enabledSchema,
+    })
+    .strict()
+);
+
 export const createActionPolicyDataSchema = lazySchema(() =>
   createActionPolicyDataBaseSchema
-    .extend({ enabled: enabledSchema })
     .check(validateGroupingModeAndStrategy)
     .meta({ id: 'alerting_new_action_policy' })
 );
@@ -342,7 +342,6 @@ export type CreateActionPolicyDataInput = z.input<typeof createActionPolicyDataS
  */
 export const putActionPolicyDataSchema = lazySchema(() =>
   createActionPolicyDataBaseSchema
-    .extend({ enabled: enabledSchema })
     .check(validateGroupingModeAndStrategy)
     .meta({ id: 'alerting_put_action_policy' })
 );

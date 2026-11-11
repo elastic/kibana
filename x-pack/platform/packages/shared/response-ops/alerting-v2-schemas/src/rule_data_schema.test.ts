@@ -1914,6 +1914,7 @@ describe('rule field immutability classification', () => {
     expect(mutable).toMatchInlineSnapshot(`
       Array [
         "artifacts",
+        "enabled",
         "grouping",
         "metadata",
         "no_data",

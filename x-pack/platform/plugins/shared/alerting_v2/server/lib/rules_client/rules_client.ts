@@ -689,7 +689,7 @@ export class RulesClient {
     const prepared = this.prepareRuleForCreate({
       data: parsed,
       id: params.options?.id,
-      enabled: params.options?.enabled ?? parsed.enabled ?? true,
+      enabled: parsed.enabled ?? true,
       actor,
       nowIso,
       version: this.getNextVersion(),

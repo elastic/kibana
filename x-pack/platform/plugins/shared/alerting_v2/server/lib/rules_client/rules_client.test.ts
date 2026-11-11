@@ -258,24 +258,6 @@ describe('RulesClient', () => {
       ).rejects.toMatchObject({ output: { statusCode: 400 } });
     });
 
-    it('creates a disabled rule SO and does not schedule a task when options.enabled is false', async () => {
-      const client = createClient();
-
-      const res = await client.createRule({
-        data: baseCreateData,
-        options: { id: 'rule-id-disabled', enabled: false },
-      });
-
-      expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
-        expect.objectContaining({
-          id: 'rule-id-disabled',
-          attrs: expect.objectContaining({ enabled: false }),
-        }),
-      ]);
-      expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
-      expect(res).toEqual(expect.objectContaining({ id: 'rule-id-disabled', enabled: false }));
-    });
-
     it('creates a disabled rule SO and does not schedule a task when the body sets enabled=false', async () => {
       const client = createClient();
 
@@ -294,7 +276,7 @@ describe('RulesClient', () => {
       expect(res).toEqual(expect.objectContaining({ id: 'rule-id-body-disabled', enabled: false }));
     });
 
-    it('defaults to an enabled rule when options.enabled is omitted', async () => {
+    it('defaults to an enabled rule when the body omits enabled', async () => {
       const client = createClient();
 
       const res = await client.createRule({
@@ -5003,7 +4985,7 @@ describe('RulesClient', () => {
         rulesSavedObjectService.getTotalScheduledPerMinute.mockResolvedValueOnce(1);
 
         await expect(
-          client.createRule({ data: baseCreateData, options: { enabled: false } })
+          client.createRule({ data: { ...baseCreateData, enabled: false } })
         ).resolves.toBeDefined();
 
         expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalled();

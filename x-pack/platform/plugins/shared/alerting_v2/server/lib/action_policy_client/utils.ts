@@ -79,9 +79,10 @@ export const toPatchableActionPolicyData = (
  * entirely. The storage schema still accepts `null` so that documents written before this
  * convention keep validating, but nothing writes one.
  */
-const toStoredPolicyFields = (data: CreateActionPolicyData) => ({
+const toStoredPolicyFields = (data: CreateActionPolicyData, defaultEnabled: boolean) => ({
   name: data.name,
   description: data.description,
+  enabled: data.enabled ?? defaultEnabled,
   destinations: data.destinations,
   matcher: normalizeMatcher(data.matcher),
   grouping: data.grouping,
@@ -104,8 +105,7 @@ export const buildCreateActionPolicyAttributes = ({
   updatedAt: string;
 }): ActionPolicySavedObjectAttributes => {
   return {
-    ...toStoredPolicyFields(data),
-    enabled: data.enabled ?? true,
+    ...toStoredPolicyFields(data, true),
     ...toApiKeyAttributes(auth),
     createdBy,
     createdAt,
@@ -133,8 +133,7 @@ export const buildUpdateActionPolicyAttributes = ({
   updatedAt: string;
 }): ActionPolicySavedObjectAttributes => {
   return {
-    ...toStoredPolicyFields(data),
-    enabled: data.enabled ?? existing.enabled,
+    ...toStoredPolicyFields(data, existing.enabled),
     tags: existing.tags ?? undefined,
     snoozedUntil: existing.snoozedUntil ?? undefined,
     ...toApiKeyAttributes(auth),
