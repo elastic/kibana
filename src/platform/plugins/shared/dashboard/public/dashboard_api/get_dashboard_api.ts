@@ -247,10 +247,11 @@ export function getDashboardApi({
     dataLoading$: combineLatest([
       layoutManager.internalApi.childrenStateLoading$,
       layoutManager.internalApi.childrenLoading$,
+      layoutManager.internalApi.panelsSettling$,
       dataLoadingManager.api.dataLoading$,
     ]).pipe(
-      map(([childStateLoading, childrenLoading, dataLoading]) =>
-        Boolean(childStateLoading || childrenLoading || dataLoading)
+      map(([childStateLoading, childrenLoading, panelsSettling, dataLoading]) =>
+        Boolean(childStateLoading || childrenLoading || panelsSettling || dataLoading)
       )
     ),
     initialState$,
