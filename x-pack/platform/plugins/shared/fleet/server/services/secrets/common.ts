@@ -173,17 +173,15 @@ export async function deleteSecrets(opts: {
 }
 
 /**
- * Writes the audit entry for a deleted Fleet secret. `confirmed: false` records a deletion inferred
- * from a 404 after a retried request, with an `unknown` outcome.
+ * Writes the audit entry for a deleted Fleet secret. `confirmed: false` records a deletion Elasticsearch did
+ * not confirm (a 404 after a retried request, or a failed request that may have run) with an `unknown` outcome.
  */
 export function writeSecretDeletedAuditLog(
   id: string,
   { confirmed = true }: { confirmed?: boolean } = {}
 ) {
   auditLoggingService.writeCustomAuditLog({
-    message: confirmed
-      ? `secret deleted: ${id}`
-      : `secret deleted: ${id} (unconfirmed: a retried request returned 404)`,
+    message: confirmed ? `secret deleted: ${id}` : `secret possibly deleted: ${id}`,
     event: {
       action: 'secret_delete',
       category: ['database'],

@@ -59,8 +59,8 @@ export interface SecretsServiceInterface {
   createSecrets(values: string[]): Promise<Array<{ id: string }>>;
   /**
    * Deletes secrets by id. Callers may only pass ids returned by their own `createSecrets`.
-   * Throws before deleting anything when an id is malformed or still referenced by a package policy.
-   * Unknown ids are reported as `deleted: false`.
+   * Throws before deleting anything when an id is malformed or still referenced by a current package policy.
+   * Unknown ids are reported as `deleted: false`; a 404 after a retried request as `deleted: true`.
    */
   deleteSecrets(ids: string[]): Promise<Array<{ id: string; deleted: boolean }>>;
   /** True when all Fleet Servers support secrets for `feature` (always true when standalone). Fleet owns the key and version. */
@@ -101,6 +101,12 @@ const deleteSecret = async (
       // A retried attempt, by Fleet or by the Elasticsearch client itself, may have deleted the secret before failing.
       const retried = attempts > 1 || (err.meta.meta?.attempts ?? 0) > 0;
       return { deleted: retried, confirmed: false };
+    }
+
+    // A network error, timeout or 5xx response does not tell whether Elasticsearch deleted the secret.
+    const rejectedByElasticsearch = isESClientError(err) && (err.meta.statusCode ?? 500) < 500;
+    if (!rejectedByElasticsearch) {
+      writeSecretDeletedAuditLog(id, { confirmed: false });
     }
 
     const msg = `Error deleting secrets: ${err}`;

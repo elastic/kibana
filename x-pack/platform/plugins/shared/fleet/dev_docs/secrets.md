@@ -110,9 +110,10 @@ Other plugins call `FleetStartContract.getSecretsService({ request, consumer })`
 - `createSecrets(values)` creates one secret per value and returns `{ id }` in input order.
 - `deleteSecrets(ids)` returns `{ id, deleted }` per id.
   - Callers may only pass ids returned by their own `createSecrets`. `.fleet-secrets` is shared, and secrets have no owner.
-  - The whole call throws before any request is sent when an id is malformed (anything but the 20-character ids Elasticsearch generates) or still referenced by a package policy in any space. Outputs, Fleet Server hosts, download sources, SSL and action secrets are not checked; deleting a secret they reference breaks Fleet Server for the whole deployment.
+  - The whole call throws before any request is sent when an id is malformed (anything but the 20-character ids Elasticsearch generates) or still referenced by the current revision of a package policy in any space.
+  - Nothing else is checked: outputs, Fleet Server hosts, download sources, SSL settings, cloud connectors, previous package policy revisions, compiled agent policies (`.fleet-policies`) and agent actions. Deleting a secret an agent policy still references crashes Fleet Server for the whole deployment (elastic/fleet-server#7536). Delete a secret an action references only once the action can no longer be delivered (it expired or every target agent acknowledged it).
   - An unknown id is reported as `deleted: false`.
-  - A 404 after a retried request (retried by Fleet or by the Elasticsearch client) counts as `deleted: true`, because the earlier attempt may have deleted the secret. It is audited with the `unknown` outcome.
+  - A 404 after a retried request (retried by Fleet or by the Elasticsearch client) counts as `deleted: true`, because an earlier attempt may have deleted the secret. It is audited as `secret possibly deleted` with the `unknown` outcome, as is a failed request that may have run (network error, timeout or 5xx response).
 - `isSecretStorageEnabledForFeature(feature)` runs the Fleet Server version check described above for a `SecretStorageFeature`. Fleet owns each feature's settings key and minimum version.
 
 To add a feature:

@@ -243,7 +243,7 @@ describe('createSecretsService', () => {
       expect(esClientMock.transport.request).toHaveBeenCalledTimes(2);
       expect(mockContext.securitySetup.audit.withoutRequest.log).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: `secret deleted: ${SECRET_ID} (unconfirmed: a retried request returned 404)`,
+          message: `secret possibly deleted: ${SECRET_ID}`,
           event: expect.objectContaining({ action: 'secret_delete', outcome: 'unknown' }),
         })
       );
@@ -263,11 +263,27 @@ describe('createSecretsService', () => {
       );
     });
 
-    it('fails on errors other than a missing id', async () => {
+    it('fails without an audit entry when Elasticsearch rejects the request', async () => {
       esClientMock.transport.request.mockRejectedValue(buildResponseError(403));
 
       await expect(createService().deleteSecrets([SECRET_ID])).rejects.toThrow(
         'Error deleting secrets'
+      );
+      expect(mockContext.securitySetup.audit.withoutRequest.log).not.toHaveBeenCalled();
+    });
+
+    it('fails and audits a possible deletion when the request may have run', async () => {
+      // A proxy timed out every attempt the Elasticsearch client made.
+      esClientMock.transport.request.mockRejectedValue(buildResponseError(504, 3));
+
+      await expect(createService().deleteSecrets([SECRET_ID])).rejects.toThrow(
+        'Error deleting secrets'
+      );
+      expect(mockContext.securitySetup.audit.withoutRequest.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: `secret possibly deleted: ${SECRET_ID}`,
+          event: expect.objectContaining({ action: 'secret_delete', outcome: 'unknown' }),
+        })
       );
     });
   });
