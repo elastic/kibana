@@ -62282,6 +62282,8 @@ paths:
                         type: array
                       prerelease_integrations_enabled:
                         type: boolean
+                      response_actions_export_secret_storage_requirements_met:
+                        type: boolean
                       secret_storage_requirements_met:
                         type: boolean
                       ssl_secret_storage_requirements_met:
@@ -62497,6 +62499,8 @@ paths:
                         maxItems: 1
                         type: array
                       prerelease_integrations_enabled:
+                        type: boolean
+                      response_actions_export_secret_storage_requirements_met:
                         type: boolean
                       secret_storage_requirements_met:
                         type: boolean
