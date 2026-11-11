@@ -187,6 +187,20 @@ describe('buildFanoutMatrix - fail-fast', () => {
     ).toThrow(/does-not-exist/);
   });
 
+  it('throws when a required group unions in a model with no connector, even though another requested model matched', () => {
+    expect(() =>
+      buildFanoutMatrix({
+        connectors: CONNECTORS,
+        suiteInfo: {
+          requiredModelGroups: ['eis/not-provisioned'],
+        },
+        requestedModelGroups: ['eis/a'],
+        perSpec: false,
+        grepOverride: false,
+      })
+    ).toThrow(/not-provisioned/);
+  });
+
   it('throws when per-spec resolution leaves no step for the requested models', () => {
     expect(() =>
       run({

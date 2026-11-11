@@ -37,15 +37,16 @@ const noConnectorMatchError = (groups, connectors) =>
   );
 
 const assertRequestedConnectors = (connectors, requestedModelGroups) => {
-  const connectorIds = selectConnectorIds(connectors, requestedModelGroups);
-  if (
-    requestedModelGroups.length > 0 &&
-    !requestedModelGroups.includes('all') &&
-    connectorIds.length === 0
-  ) {
-    throw noConnectorMatchError(requestedModelGroups, connectors);
+  // Fail per group, not per list: one provisioned connector must not hide a requested group that
+  // matched nothing — a required group (unioned into the request by the caller) with no connector
+  // would otherwise silently disappear from the matrix instead of failing the run.
+  for (const group of requestedModelGroups) {
+    if (group === 'all') continue;
+    if (selectConnectorIds(connectors, [group]).length === 0) {
+      throw noConnectorMatchError([group], connectors);
+    }
   }
-  return connectorIds;
+  return selectConnectorIds(connectors, requestedModelGroups);
 };
 
 // `specModelGroups[].files` -> `models`, for entries that set a non-empty model list.
