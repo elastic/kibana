@@ -1446,16 +1446,16 @@ x-pack/solutions/security/packages/ai-security-labs-content @elastic/security-th
 x-pack/solutions/security/packages/connectors @elastic/security-threat-hunting
 x-pack/solutions/security/packages/data-stream-adapter @elastic/security-threat-hunting
 x-pack/solutions/security/packages/data-table @elastic/security-threat-hunting
-x-pack/solutions/security/packages/distribution-bar @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/packages/distribution-bar @elastic/contextual-security-apps
 x-pack/solutions/security/packages/ecs-data-quality-dashboard @elastic/security-threat-hunting
 x-pack/solutions/security/packages/expandable-flyout @elastic/security-threat-hunting
 x-pack/solutions/security/packages/features @elastic/security-investigations
 x-pack/solutions/security/packages/index-adapter @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-alertzero-common @elastic/alertzero-common-layer
 x-pack/solutions/security/packages/kbn-attack-discovery-schedules-common @elastic/security-threat-hunting
-x-pack/solutions/security/packages/kbn-cloud-security-posture/common @elastic/contextual-security-apps @elastic/siem-beacon
-x-pack/solutions/security/packages/kbn-cloud-security-posture/graph @elastic/contextual-security-apps @elastic/siem-beacon
-x-pack/solutions/security/packages/kbn-cloud-security-posture/public @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/packages/kbn-cloud-security-posture/common @elastic/contextual-security-apps
+x-pack/solutions/security/packages/kbn-cloud-security-posture/graph @elastic/contextual-security-apps
+x-pack/solutions/security/packages/kbn-cloud-security-posture/public @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-discoveries @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-discoveries-schemas @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow @elastic/security-investigations
@@ -1474,7 +1474,7 @@ x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage @elasti
 x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations @elastic/automatic-migrations
 x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix @elastic/security-generative-ai
-x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-evals-suite-threat-intel-enrichment @elastic/security-investigations
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
 x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot @elastic/security-generative-ai
@@ -1501,26 +1501,26 @@ x-pack/solutions/security/packages/security-mitre-attack-common @elastic/securit
 x-pack/solutions/security/packages/security-mitre-attack-mocks @elastic/security-detection-engineering
 x-pack/solutions/security/packages/security-mitre-attack-server @elastic/security-detection-engineering
 x-pack/solutions/security/packages/side-nav @elastic/security-investigations
-x-pack/solutions/security/packages/siem-readiness @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/packages/siem-readiness @elastic/contextual-security-apps
 x-pack/solutions/security/packages/storybook/config @elastic/security-investigations
 x-pack/solutions/security/packages/test-api-clients @elastic/security-detection-engineering
 x-pack/solutions/security/packages/timeline-common @elastic/security-threat-hunting
 x-pack/solutions/security/packages/timeline-components @elastic/security-threat-hunting
 x-pack/solutions/security/packages/upselling @elastic/security-investigations
 x-pack/solutions/security/plugins/alertzero @elastic/alertzero-common-layer
-x-pack/solutions/security/plugins/cloud_defend @elastic/contextual-security-apps @elastic/siem-beacon
-x-pack/solutions/security/plugins/cloud_security_posture @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/plugins/cloud_defend @elastic/contextual-security-apps
+x-pack/solutions/security/plugins/cloud_security_posture @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/discoveries @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/elastic_assistant @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/elastic_assistant_shared_state @elastic/security-threat-hunting
-x-pack/solutions/security/plugins/kubernetes_security @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/plugins/kubernetes_security @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/lists @elastic/security-detection-engineering
 x-pack/solutions/security/plugins/mitre_attack @elastic/security-detection-engineering
 x-pack/solutions/security/plugins/security_solution @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_serverless @elastic/security-solution
-x-pack/solutions/security/plugins/session_view @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/plugins/session_view @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/timelines @elastic/security-threat-hunting
 x-pack/solutions/security/test
 x-pack/solutions/security/test_plugins/resolver_test @elastic/security-solution
@@ -3745,7 +3745,17 @@ x-pack/platform/test/automatic_import_api_integration @elastic/siem-conduit
 # Cloud Security Posture team
 
 ## Packages
+x-pack/solutions/security/packages/distribution-bar @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/packages/kbn-cloud-security-posture/common @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/packages/kbn-cloud-security-posture/graph @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/packages/kbn-cloud-security-posture/public @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/packages/siem-readiness @elastic/contextual-security-apps @elastic/siem-beacon
 ## Plugins
+x-pack/solutions/security/plugins/cloud_defend @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/plugins/cloud_security_posture @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/plugins/kubernetes_security @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/plugins/session_view @elastic/contextual-security-apps @elastic/siem-beacon
 ## Security Solution sub teams
 x-pack/solutions/security/plugins/security_solution/public/common/components/sessions_viewer @elastic/contextual-security-apps @elastic/siem-beacon
 x-pack/solutions/security/plugins/security_solution/public/cloud_security_posture @elastic/contextual-security-apps @elastic/siem-beacon
