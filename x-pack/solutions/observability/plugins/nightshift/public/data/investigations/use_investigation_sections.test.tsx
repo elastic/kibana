@@ -9,6 +9,7 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
+import { useStatusSignal } from '@kbn/agentic-investigations-plugin/public';
 import { useFetchInvestigations, type FetchInvestigationsParams } from './use_fetch_investigations';
 import { useInvestigationSections } from './use_investigation_sections';
 import { useKibana } from '../../hooks/use_kibana';
@@ -25,6 +26,7 @@ jest.mock('../../hooks/use_kibana');
 const mockUseFetchInvestigations = useFetchInvestigations as jest.MockedFunction<
   typeof useFetchInvestigations
 >;
+const mockUseStatusSignal = useStatusSignal as jest.MockedFunction<typeof useStatusSignal>;
 const mockUseKibana = useKibana as jest.Mock;
 const httpGet = jest.fn();
 
@@ -258,5 +260,57 @@ describe('useInvestigationSections', () => {
     rerender({ query: 'checkout errors' });
 
     expect(refetchCritical).not.toHaveBeenCalled();
+  });
+
+  it('refetches every open section and the severity counts when the status signal bumps', async () => {
+    const refetchBySeverity = {
+      inProgress: jest.fn(),
+      critical: jest.fn(),
+      high: jest.fn(),
+      medium: jest.fn(),
+      low: jest.fn(),
+      none: jest.fn(),
+    };
+
+    mockUseFetchInvestigations.mockImplementation((params) => {
+      if (params.inProgress) {
+        return sectionResult({ ids: ['running-a'], refetch: refetchBySeverity.inProgress });
+      }
+
+      const severity = params.severities?.[0];
+      if (severity === 'critical') {
+        return sectionResult({ refetch: refetchBySeverity.critical });
+      }
+      if (severity === 'high') {
+        return sectionResult({ refetch: refetchBySeverity.high });
+      }
+      if (severity === 'medium') {
+        return sectionResult({ refetch: refetchBySeverity.medium });
+      }
+      if (severity === 'low') {
+        return sectionResult({ refetch: refetchBySeverity.low });
+      }
+      if (severity === 'none') {
+        return sectionResult({ refetch: refetchBySeverity.none });
+      }
+      return sectionResult();
+    });
+
+    renderSections();
+
+    await waitFor(() => expect(httpGet).toHaveBeenCalled());
+    httpGet.mockClear();
+
+    const onBump = mockUseStatusSignal.mock.calls.at(-1)?.[0];
+    expect(onBump).toEqual(expect.any(Function));
+    onBump!();
+
+    expect(refetchBySeverity.inProgress).toHaveBeenCalledTimes(1);
+    expect(refetchBySeverity.critical).toHaveBeenCalledTimes(1);
+    expect(refetchBySeverity.high).toHaveBeenCalledTimes(1);
+    expect(refetchBySeverity.medium).toHaveBeenCalledTimes(1);
+    expect(refetchBySeverity.low).toHaveBeenCalledTimes(1);
+    expect(refetchBySeverity.none).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
   });
 });
