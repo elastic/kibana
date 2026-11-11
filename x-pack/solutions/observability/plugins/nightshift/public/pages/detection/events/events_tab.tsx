@@ -6,13 +6,7 @@
  */
 
 import { css } from '@emotion/react';
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiIllustration,
-  EuiSpacer,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiIllustration, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { analyzeMagnifyGlass } from '@elastic/eui-illustrations';
 import type { SignificantEventResponse } from '@kbn/significant-events-schema';
 import { KbnDangerCallout } from '@kbn/ui-callout';
