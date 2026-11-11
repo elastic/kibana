@@ -51,18 +51,14 @@ interface Point {
   y: number;
 }
 
-interface ImageLike {
-  width: number;
-  height: number;
+interface ImageLike extends Size {
   data: Uint8Array;
 }
 
 type ImageData8 = Uint8Array | Uint8ClampedArray;
 
 // source images are only read from, so any array-like pixel buffer (including ImageData) is accepted
-interface ReadableImage {
-  width: number;
-  height: number;
+interface ReadableImage extends Size {
   data: ArrayLike<number>;
 }
 
