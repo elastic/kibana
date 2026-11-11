@@ -61,6 +61,7 @@ import type {
 } from '../api/workflows_management_service';
 
 const DEFAULT_PAGE_SIZE = 100;
+const STATUS_BUCKETS_SIZE = 20;
 
 /** Max completed steps fetched per page when resolving predecessor `output.reasoning`. */
 const PREDECESSOR_REASONING_MAX_HITS = 1000;
@@ -125,6 +126,26 @@ export interface WorkflowExecutionStatusItem {
   id: string;
   workflowId: string;
   status: ExecutionStatus;
+}
+
+export interface WorkflowExecutionStatusCountsParams {
+  workflowIds: string[];
+  startedAfter?: string;
+  startedBefore?: string;
+  accessControlFilter?: estypes.QueryDslQueryContainer;
+}
+
+export type WorkflowExecutionStatusCounts = Record<
+  string,
+  Partial<Record<ExecutionStatus, number>>
+>;
+
+interface StatusCountsAggs {
+  byWorkflow: estypes.AggregationsMultiBucketAggregateBase<
+    estypes.AggregationsStringTermsBucketKeys & {
+      byStatus: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringTermsBucketKeys>;
+    }
+  >;
 }
 
 export class WorkflowExecutionQueryService {
@@ -297,6 +318,66 @@ export class WorkflowExecutionQueryService {
             }
           : undefined,
     });
+  }
+
+  async getWorkflowExecutionStatusCounts(
+    {
+      workflowIds,
+      startedAfter,
+      startedBefore,
+      accessControlFilter,
+    }: WorkflowExecutionStatusCountsParams,
+    spaceId: string
+  ): Promise<WorkflowExecutionStatusCounts> {
+    if (workflowIds.length === 0) {
+      return {};
+    }
+    const startedAtRange = buildTimeRangeFilter('startedAt', startedAfter, startedBefore);
+    try {
+      const response = (await this.deps.workflowExecutionsDataClient.search({
+        size: 0,
+        track_total_hits: false,
+        query: {
+          bool: {
+            must: [
+              { terms: { workflowId: workflowIds } },
+              buildWorkflowExecutionsSpaceFilter(spaceId),
+              ...(accessControlFilter ? [accessControlFilter] : []),
+              ...(startedAtRange ? [startedAtRange] : []),
+            ],
+            must_not: [{ exists: { field: 'stepId' } }],
+          },
+        },
+        aggs: {
+          byWorkflow: {
+            terms: { field: 'workflowId', size: workflowIds.length },
+            aggs: { byStatus: { terms: { field: 'status', size: STATUS_BUCKETS_SIZE } } },
+          },
+        },
+      })) as unknown as estypes.SearchResponse<unknown, StatusCountsAggs>;
+
+      const workflowBuckets = response.aggregations?.byWorkflow.buckets ?? [];
+      return Object.fromEntries(
+        (Array.isArray(workflowBuckets) ? workflowBuckets : []).map((workflowBucket) => {
+          const statusBuckets = workflowBucket.byStatus.buckets;
+          return [
+            String(workflowBucket.key),
+            Object.fromEntries(
+              (Array.isArray(statusBuckets) ? statusBuckets : []).map((statusBucket) => [
+                String(statusBucket.key),
+                statusBucket.doc_count,
+              ])
+            ),
+          ];
+        })
+      );
+    } catch (error) {
+      if (isIndexNotFoundError(error)) {
+        return {};
+      }
+      this.deps.logger.error(`Failed to count workflow executions by status: ${error}`);
+      throw error;
+    }
   }
 
   async searchExecutionsView(

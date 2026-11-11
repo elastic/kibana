@@ -8,8 +8,8 @@
 import { serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { ExecutionStatus } from '@kbn/workflows';
 import { MANUAL_AUTOMATION_TRIGGER_SOURCE } from '../../../common/automation_run';
+import { mapRunStatus } from './map_run_status';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
@@ -17,22 +17,6 @@ import { readAutomationUsage } from '../../lib/automations/automation_budget';
 
 const SKIP_REASONS = ['daily_limit', 'investigation_limit', 'no_open_investigation'] as const;
 const MAX_ERROR_LENGTH = 200;
-
-const mapRunStatus = (status: ExecutionStatus): 'succeeded' | 'running' | 'failed' | 'skipped' => {
-  if (status === ExecutionStatus.COMPLETED) return 'succeeded';
-  if (status === ExecutionStatus.SKIPPED) return 'skipped';
-  if (
-    status === ExecutionStatus.PENDING ||
-    status === ExecutionStatus.WAITING ||
-    status === ExecutionStatus.WAITING_FOR_INPUT ||
-    status === ExecutionStatus.WAITING_FOR_CHILD ||
-    status === ExecutionStatus.RUNNING ||
-    status === ExecutionStatus.QUEUED
-  ) {
-    return 'running';
-  }
-  return 'failed';
-};
 
 export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'GET /internal/nightshift/automations/{id}/runs',

@@ -501,6 +501,66 @@ describe('WorkflowExecutionQueryService', () => {
     });
   });
 
+  describe('getWorkflowExecutionStatusCounts', () => {
+    it('aggregates per workflow and status within the space and time range, excluding step runs', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [] },
+        aggregations: {
+          byWorkflow: {
+            buckets: [
+              {
+                key: 'wf-1',
+                byStatus: {
+                  buckets: [
+                    { key: 'completed', doc_count: 150 },
+                    { key: 'failed', doc_count: 3 },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      } as any);
+
+      const counts = await service.getWorkflowExecutionStatusCounts(
+        { workflowIds: ['wf-1', 'wf-2'], startedAfter: '2026-01-01T00:00:00.000Z' },
+        'my-space'
+      );
+
+      expect(counts).toEqual({ 'wf-1': { completed: 150, failed: 3 } });
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      expect(call.size).toBe(0);
+      expect(call.query.bool.must[0]).toEqual({ terms: { workflowId: ['wf-1', 'wf-2'] } });
+      expect(call.query.bool.must[1]).toEqual(buildWorkflowExecutionsSpaceFilter('my-space'));
+      expect(call.query.bool.must[2].range.startedAt.gte).toBe('2026-01-01T00:00:00.000Z');
+      expect(call.query.bool.must_not).toEqual([{ exists: { field: 'stepId' } }]);
+      expect(call.aggs.byWorkflow.terms).toEqual({ field: 'workflowId', size: 2 });
+    });
+
+    it('returns no counts without querying when no workflow ids are given', async () => {
+      await expect(
+        service.getWorkflowExecutionStatusCounts({ workflowIds: [] }, 's')
+      ).resolves.toEqual({});
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+
+    it('returns no counts when the executions index does not exist', async () => {
+      mockEsClient.search.mockRejectedValue(
+        new errors.ResponseError({
+          statusCode: 404,
+          body: { error: { type: 'index_not_found_exception' } },
+          headers: {},
+          meta: {} as any,
+          warnings: [],
+        })
+      );
+
+      await expect(
+        service.getWorkflowExecutionStatusCounts({ workflowIds: ['wf-1'] }, 's')
+      ).resolves.toEqual({});
+    });
+  });
+
   describe('searchStepExecutions', () => {
     it('excludes input and output when not requested', async () => {
       mockEsClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } } as any);
