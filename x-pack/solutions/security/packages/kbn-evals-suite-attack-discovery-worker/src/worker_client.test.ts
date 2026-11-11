@@ -716,6 +716,11 @@ describe('AttackDiscoveryWorkerClient.cancelPending', () => {
   });
 
   it('counts a failed cancel afresh once the execution was forgotten and tracked again', async () => {
+    // Real path: the first `cancelPending` fails and `cancelEntries` re-tracks run-1 for a retry,
+    // then `run` finds run-1 as the floor's child via `/children` and tracks it again, so
+    // `pendingExecutions` holds it twice. When the run settles, `forget` splices only one entry,
+    // leaving the other for the next `cancelPending`, whose failure counts afresh because
+    // `forget` also cleared `failedCancels` (hence no "Giving up" warning yet).
     let cancelFails = true;
     const fetch = jest.fn(async (path: string) => {
       if (path.includes('/workflow/')) return { workflowExecutionId: 'floor-1' };

@@ -968,9 +968,10 @@ export const seedScenario = async ({
   };
   // The caller only receives `seeded` when this resolves, so it cannot clean up a seed that fails
   // midway. A bulk with some rejected items, or a failed read, has already left alerts behind and
-  // the next row would fail `assertCleanSpace`. Only this seed's alerts are removed, by id because a
-  // transport failure can leave them unsearchable: the workflow has not started, so there are no
-  // fingerprints or discoveries of this row to delete. `bulkSettled` is false only when the bulk
+  // the next row would fail `assertCleanSpace`. This seed's alerts are removed, by id because a
+  // transport failure can leave them unsearchable, along with its world documents by `_id` and
+  // the seeded discovery: the workflow has not started, so there are no fingerprints or reviews of
+  // this row to delete. `bulkSettled` is false only when the bulk
   // call itself rejected and was not refused on its first attempt (a retry may have been accepted
   // before the 4xx), the case where it may still be running in Elasticsearch.
   let bulkSettled = false;
@@ -1156,8 +1157,8 @@ const healSpace = async ({
  * refreshed and recounted; a failed delete or a document written meanwhile starts another round,
  * and whatever is left after `CLEANUP_ROUNDS` is thrown, because a space left dirty would poison
  * the next row. Alerts match exactly by run marker (they are searchable here, the seed bulk waited
- * for a refresh). A seed that failed before the workflow ran removes only its alerts, by id (see
- * `seedScenario`).
+ * for a refresh). A seed that failed before the workflow ran removes its alerts, by id, its world
+ * documents by `_id` and the seeded discovery (see `seedScenario`).
  */
 export const cleanupSeed = async ({
   esClient,
