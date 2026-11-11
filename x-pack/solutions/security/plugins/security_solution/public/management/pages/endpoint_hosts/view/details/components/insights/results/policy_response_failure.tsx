@@ -34,7 +34,10 @@ export const WorkflowInsightsPolicyResponseFailureResult = ({
     WORKFLOW_INSIGHTS.issues.remediationButton.policyResponseFailure;
 
   const { displayText, isExpanded, toggleExpanded, shouldTruncate } = useTruncateText(
-    (insight.remediation.descriptive ?? '').replace(/\\\\/g, '\\').replace(/\\n/g, '\n'),
+    // Single pass so an escaped backslash followed by `n` (e.g. `C:\\new`) is not turned into a newline.
+    (insight.remediation.descriptive ?? '').replace(/\\([\\n])/g, (_match, char: string) =>
+      char === 'n' ? '\n' : '\\'
+    ),
     120
   );
 

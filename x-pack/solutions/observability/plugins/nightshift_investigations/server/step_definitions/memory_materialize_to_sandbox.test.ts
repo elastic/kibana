@@ -6,7 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { AuditedSandboxSession, NightshiftSandboxStart } from '../sandbox_audit';
 import { hydrateMemoryWorkspace } from '../memory/register_memory';
 import { memoryMaterializeToSandboxStepDefinition } from './memory_materialize_to_sandbox';
 
@@ -33,13 +33,16 @@ const hydrateMemoryWorkspaceMock = jest.mocked(hydrateMemoryWorkspace);
 describe('memoryMaterializeToSandboxStepDefinition', () => {
   const esClient = { search: jest.fn() };
   const getScopedEsClient = jest.fn().mockReturnValue(esClient);
-  const mockSession = { writeFiles: jest.fn(), mkdirs: jest.fn() } as unknown as SandboxSession;
+  const mockSession = {
+    writeFiles: jest.fn(),
+    mkdirs: jest.fn(),
+  } as unknown as AuditedSandboxSession;
   const telemetry = {
     reportSemanticMemoryMaterialized: jest.fn(),
     reportSemanticMemoryOptimized: jest.fn(),
   };
 
-  const makeSandboxStart = (): SandboxPluginStart => ({
+  const makeSandboxStart = (): NightshiftSandboxStart => ({
     getSession: jest.fn(),
     getSessionForSpace: jest.fn().mockReturnValue(mockSession),
   });
@@ -99,7 +102,11 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
       createContext('default__conv-1', 'default', 'checkout lag', 'nightshift.investigation')
     );
 
-    expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith('default', 'conv-1');
+    expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith(
+      'default',
+      'conv-1',
+      expect.objectContaining({ type: 'workflow_step' })
+    );
     expect(getScopedEsClient).toHaveBeenCalledTimes(1);
     expect(hydrateMemoryWorkspace).toHaveBeenCalledWith({
       session: mockSession,
@@ -147,7 +154,11 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
       createContext('marketing__conv-1', 'marketing', undefined, 'nightshift.investigation')
     );
 
-    expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith('marketing', 'conv-1');
+    expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith(
+      'marketing',
+      'conv-1',
+      expect.objectContaining({ type: 'workflow_step' })
+    );
     expect(hydrateMemoryWorkspace).toHaveBeenCalledWith(
       expect.objectContaining({
         session: mockSession,

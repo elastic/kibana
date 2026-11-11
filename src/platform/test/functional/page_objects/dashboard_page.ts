@@ -244,6 +244,7 @@ export class DashboardPageObject extends FtrService {
     );
   }
 
+  // Scout equivalent: DashboardApp.navigateToListingFromCurrentDashboard (kbn-scout dashboard_app.ts)
   public async gotoDashboardLandingPage() {
     this.log.debug('gotoDashboardLandingPage');
     if (await this.onDashboardLandingPage()) return;
@@ -770,7 +771,7 @@ export class DashboardPageObject extends FtrService {
     await this.listingTable.searchForItemWithName(dashboardName, { escape: false });
     await this.retry.try(async () => {
       if (openInEditMode) {
-        await this.listingTable.clickActionButton('edit-action');
+        await this.listingTable.clickRowActionButton('edit-action', dashboardName);
       } else {
         await this.listingTable.clickItemLink('dashboard', dashboardName);
       }
@@ -778,6 +779,9 @@ export class DashboardPageObject extends FtrService {
       // check Dashboard landing page is not present
       await this.testSubjects.missingOrFail('dashboardLandingPage', { timeout: 10000 });
     });
+
+    // The check above also passes for the wrong dashboard; confirm which one opened.
+    await this.expectOnDashboard(dashboardName);
   }
 
   public async loadSavedDashboard(dashboardName: string) {

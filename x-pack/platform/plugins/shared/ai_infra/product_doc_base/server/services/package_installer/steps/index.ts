@@ -15,7 +15,7 @@ export {
   fetchArtifactVersions,
   fetchSecurityLabsVersions,
   type SecurityLabsVersionsResult,
-  type FetchArtifactVersionsResult,
+  type ArtifactRepositoryVersions,
   type ArtifactAvailableVersions,
   type ArtifactLastModifiedByProductVersion,
 } from './fetch_artifact_versions';

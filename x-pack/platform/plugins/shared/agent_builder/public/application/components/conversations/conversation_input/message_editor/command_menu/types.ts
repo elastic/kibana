@@ -14,6 +14,7 @@ export enum CommandId {
   Attachment = 'attachment',
   Skill = 'skill',
   Sml = 'sml',
+  Mention = 'mention',
 }
 
 /**
@@ -22,6 +23,7 @@ export enum CommandId {
 export interface CommandMenuComponentProps {
   readonly query: string;
   readonly onSelect: (selection: CommandBadgeData) => void;
+  readonly onReplaceText?: (text: string) => void;
   readonly onContentChange?: (hasContent: boolean, forQuery: string) => void;
 }
 

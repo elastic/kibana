@@ -17,3 +17,6 @@ export const ENTITY_ANOMALY_OVERVIEW_INTERNAL_URL =
 
 export const ENTITY_ANOMALY_PRIVILEGES_INTERNAL_URL =
   '/internal/entity_analytics/anomalies/privileges' as const;
+
+/** Every ML results index: jobs may write to `.ml-anomalies-custom-<job>` instead of the shared one. */
+export const ML_ANOMALY_INDICES = '.ml-anomalies-*';

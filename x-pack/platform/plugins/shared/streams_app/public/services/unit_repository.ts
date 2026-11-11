@@ -12,6 +12,7 @@ import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { DEFAULT_SUPPORTED_TELEMETRY, PIPELINE_ENTRY } from './unit_pipeline';
+import { toPublishedUnit } from './unit_connections';
 
 export type Unit = StreamsUnit.GetResponse;
 
@@ -65,11 +66,11 @@ export const createDefaultUnit = (): Unit => ({
 
 export const createUnitRepository = ({
   streamsRepositoryClient,
-  unitId = STREAMS_DEFAULT_UNIT_ID,
+  unitId,
   toasts,
 }: {
   streamsRepositoryClient: StreamsRepositoryClient;
-  unitId?: string;
+  unitId: string;
   toasts?: ToastsStart;
 }): UnitRepository => ({
   load: async () => {
@@ -79,13 +80,18 @@ export const createUnitRepository = ({
         signal: null,
       });
     } catch (error) {
-      if (isNotFoundError(error)) {
+      // Only the default unit may be missing before its first save, any other id is not found.
+      if (isNotFoundError(error) && unitId === STREAMS_DEFAULT_UNIT_ID) {
         return createDefaultUnit();
       }
       throw error;
     }
   },
-  persist: async (unit, secrets) => {
+  persist: async (stagedUnit, secrets) => {
+    // A component save (create a destination, save processing) persists the staged
+    // unit while lines may be unhooked. What comes back is the unit as stored; the
+    // canvas keeps its own staged copy.
+    const unit = toPublishedUnit(stagedUnit);
     const response = await streamsRepositoryClient.fetch('PUT /internal/streams/unit/{id}', {
       params: {
         path: { id: unitId },
@@ -122,5 +128,5 @@ export const createUnitRepository = ({
   },
 });
 
-const isNotFoundError = (error: unknown): boolean =>
+export const isNotFoundError = (error: unknown): boolean =>
   isHttpFetchError(error) && error.body?.statusCode === 404;

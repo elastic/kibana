@@ -17,6 +17,8 @@ export interface UseFetchSloDetailsResponse {
   isInitialLoading: boolean;
   isLoading: boolean;
   isRefetching: boolean;
+  isFetching: boolean;
+  isFetchedAfterMount: boolean;
   isSuccess: boolean;
   isError: boolean;
   data: GetSLOResponse | undefined;
@@ -38,39 +40,49 @@ export function useFetchSloDetails({
 }): UseFetchSloDetailsResponse {
   const { sloClient } = usePluginContext();
 
-  const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
-    {
-      queryKey: sloKeys.detail(sloId!, instanceId, remoteName),
-      queryFn: async ({ signal }) => {
-        try {
-          const response = await sloClient.fetch('GET /api/observability/slos/{id} 2023-10-31', {
-            params: {
-              path: { id: sloId! },
-              query: {
-                ...(instanceId !== ALL_VALUE && { instanceId }),
-                ...(remoteName && { remoteName }),
-              },
+  const {
+    isInitialLoading,
+    isLoading,
+    isError,
+    isSuccess,
+    isRefetching,
+    isFetching,
+    isFetchedAfterMount,
+    data,
+    refetch,
+  } = useQuery({
+    queryKey: sloKeys.detail(sloId!, instanceId, remoteName),
+    queryFn: async ({ signal }) => {
+      try {
+        const response = await sloClient.fetch('GET /api/observability/slos/{id} 2023-10-31', {
+          params: {
+            path: { id: sloId! },
+            query: {
+              ...(instanceId !== ALL_VALUE && { instanceId }),
+              ...(remoteName && { remoteName }),
             },
-            signal,
-          });
+          },
+          signal,
+        });
 
-          return response;
-        } catch (error) {
-          // ignore error for retrieving slos
-        }
-      },
-      keepPreviousData: true,
-      enabled: Boolean(sloId),
-      refetchInterval: shouldRefetch ? SLO_LONG_REFETCH_INTERVAL : undefined,
-      refetchOnWindowFocus: false,
-    }
-  );
+        return response;
+      } catch (error) {
+        // ignore error for retrieving slos
+      }
+    },
+    keepPreviousData: true,
+    enabled: Boolean(sloId),
+    refetchInterval: shouldRefetch ? SLO_LONG_REFETCH_INTERVAL : undefined,
+    refetchOnWindowFocus: false,
+  });
 
   return {
     data,
     isLoading,
     isInitialLoading,
     isRefetching,
+    isFetching,
+    isFetchedAfterMount,
     isSuccess,
     isError,
     refetch,

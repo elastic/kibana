@@ -6,7 +6,10 @@
  */
 
 import React, { Suspense } from 'react';
-import type { CreateIntegrationSideCardButtonComponent } from './types';
+import type {
+  CreateIntegrationSideCardButtonComponent,
+  CreateIntegrationSideCardButtonProps,
+} from './types';
 
 const CreateIntegrationSideCardButton = React.lazy(() =>
   import('./create_integration_card_button').then((module) => ({
@@ -16,10 +19,12 @@ const CreateIntegrationSideCardButton = React.lazy(() =>
 
 export const getCreateIntegrationSideCardButtonLazy =
   (): CreateIntegrationSideCardButtonComponent =>
-    React.memo(function CreateIntegrationSideCardButtonLazy() {
+    React.memo(function CreateIntegrationSideCardButtonLazy(
+      props: CreateIntegrationSideCardButtonProps
+    ) {
       return (
         <Suspense fallback={null}>
-          <CreateIntegrationSideCardButton />
+          <CreateIntegrationSideCardButton {...props} />
         </Suspense>
       );
     });

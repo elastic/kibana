@@ -7,6 +7,7 @@
 
 import {
   DocumentationProduct,
+  getArtifactName,
   getSecurityLabsArtifactName,
   parseArtifactName,
   parseSecurityLabsArtifactName,
@@ -29,24 +30,24 @@ export type ArtifactLastModifiedByProductVersion = Partial<
   Record<ArtifactProductKey, Record<string, string>>
 >;
 
-export interface FetchArtifactVersionsResult {
+export interface ArtifactRepositoryVersions {
+  /** Versions whose artifact may exist for the inference ID, per product */
   versions: ArtifactAvailableVersions;
+  /** Products with at least one artifact in the repository, for any inference ID */
+  publishedProducts: Array<ProductName | 'openapi'>;
   /** ISO 8601 GCS LastModified keyed by product then version string as stored in `versions`. */
   lastModifiedByProductVersion: ArtifactLastModifiedByProductVersion;
+}
+
+export interface SecurityLabsVersionsResult {
+  versions: string[];
+  /** ISO 8601 LastModified keyed by version string. */
+  lastModifiedByVersion: Record<string, string>;
 }
 
 const normalizeArtifactKey = (artifactName: string): string => {
   const withExtension = artifactName.endsWith('.zip') ? artifactName : `${artifactName}.zip`;
   return withExtension.toLowerCase();
-};
-
-const emptyVersions = (): ArtifactAvailableVersions => {
-  const record = {} as ArtifactAvailableVersions;
-  for (const product of Object.values(DocumentationProduct)) {
-    record[product] = [];
-  }
-  record.openapi = [];
-  return record;
 };
 
 const toIsoLastModified = (dateModified: string | undefined): string | undefined => {
@@ -81,6 +82,32 @@ const recordLastModified = ({
   lastModifiedByProductVersion[productName] = byVersion;
 };
 
+/**
+ * Unsuffixed zips belong to ELSER. A suffixed key belongs to that inference ID only.
+ */
+const artifactMatchesInferenceId = (
+  artifactInferenceId: string | undefined,
+  requestedInferenceId: string
+): boolean => {
+  if (isImpliedDefaultElserInferenceId(requestedInferenceId)) {
+    return (
+      artifactInferenceId === undefined || isImpliedDefaultElserInferenceId(artifactInferenceId)
+    );
+  }
+  return artifactInferenceId?.toLowerCase() === requestedInferenceId.toLowerCase();
+};
+
+/**
+ * Fetches the available artifact versions per product.
+ *
+ * Versioned (semver) entries are listed whatever the inference ID they were published for: the
+ * installer probes the artifact of the requested inference ID and falls back to previous versions.
+ * `latest` entries are versioned by the upload date of the artifact, so only the artifact published
+ * for `inferenceId` counts: a republish of another variant must not trigger a re-download. A product
+ * published for other inference IDs only is reported in `publishedProducts` with no version.
+ * LastModified is taken from the object published for `inferenceId` when that object exists, so
+ * another model's newer upload of the same stack version is not reported as an update.
+ */
 export const fetchArtifactVersions = async ({
   artifactRepositoryUrl,
   artifactRepositoryProxyUrl,
@@ -88,13 +115,8 @@ export const fetchArtifactVersions = async ({
 }: {
   artifactRepositoryUrl: string;
   artifactRepositoryProxyUrl?: string;
-  /**
-   * When set, an artifact contributes its version and LastModified only if the object key is the
-   * one published for this inference ID. The same stack version is a different object per model.
-   * Serverless `latest` keys are replaced in place, so that object's LastModified is the version.
-   */
-  inferenceId?: string;
-}): Promise<FetchArtifactVersionsResult> => {
+  inferenceId: string;
+}): Promise<ArtifactRepositoryVersions> => {
   const parsedUrl = new URL(artifactRepositoryUrl);
 
   let xml: string;
@@ -119,66 +141,77 @@ export const fetchArtifactVersions = async ({
         throw new Error('bucket content is truncated, cannot retrieve all versions');
       }
 
-      const versions = emptyVersions();
+      const allowedProductNames: ArtifactProductKey[] = Object.values(DocumentationProduct);
+      allowedProductNames.push('openapi');
+
+      const record: ArtifactAvailableVersions = {} as ArtifactAvailableVersions;
+      allowedProductNames.forEach((product) => {
+        record[product] = [];
+      });
+      const publishedProducts = new Set<ArtifactProductKey>();
       const lastModifiedByProductVersion: ArtifactLastModifiedByProductVersion = {};
+      const versionsWithMatchingLastModified = new Set<string>();
+
+      const rememberLastModified = (
+        productName: ArtifactProductKey,
+        version: string,
+        dateModified: string | undefined,
+        matchesRequestedInference: boolean
+      ) => {
+        const key = `${productName}\0${version}`;
+        if (!matchesRequestedInference && versionsWithMatchingLastModified.has(key)) {
+          return;
+        }
+        recordLastModified({
+          lastModifiedByProductVersion,
+          productName,
+          version,
+          dateModified,
+        });
+        if (matchesRequestedInference) {
+          versionsWithMatchingLastModified.add(key);
+        }
+      };
 
       result.ListBucketResult.Contents?.forEach((contentEntry) => {
         const artifactName = contentEntry.Key[0];
         const dateModified = contentEntry.LastModified?.[0];
         const parsed = parseArtifactName(artifactName);
-        if (parsed) {
-          const { productName, productVersion, inferenceId: artifactInferenceId } = parsed;
-          // Same stack version is a different object per model. Another model's newer upload
-          // must not make this inference ID look out of date.
-          if (
-            inferenceId !== undefined &&
-            !artifactMatchesInferenceId(artifactInferenceId, inferenceId)
-          ) {
-            return;
-          }
-          if (productVersion === LATEST_PRODUCT_VERSION) {
-            // The object key stays `...-latest[--{inferenceId}].zip`. LastModified is the version.
-            if (!dateModified) {
-              return;
-            }
-            const version = `${productVersion}-${dateModified}`;
-            versions[productName]!.push(version);
-            recordLastModified({
-              lastModifiedByProductVersion,
-              productName,
-              version,
-              dateModified,
-            });
-            return;
-          }
-          versions[productName]!.push(productVersion);
-          recordLastModified({
-            lastModifiedByProductVersion,
+        if (!parsed) {
+          return;
+        }
+        const { productName, productVersion, inferenceId: artifactInferenceId } = parsed;
+        publishedProducts.add(productName);
+        if (productVersion !== LATEST_PRODUCT_VERSION) {
+          record[productName].push(productVersion);
+          rememberLastModified(
             productName,
-            version: productVersion,
+            productVersion,
             dateModified,
-          });
+            artifactMatchesInferenceId(artifactInferenceId, inferenceId)
+          );
+          return;
+        }
+        const expectedName = getArtifactName({
+          productName,
+          productVersion: LATEST_PRODUCT_VERSION,
+          inferenceId,
+        });
+        if (normalizeArtifactKey(artifactName) === expectedName) {
+          // "latest" -> "latest-2026-01-27T23:25:54.727Z": the upload date versions the artifact
+          const version = `${productVersion}-${dateModified}`;
+          record[productName].push(version);
+          rememberLastModified(productName, version, dateModified, true);
         }
       });
 
-      resolve({ versions, lastModifiedByProductVersion });
+      resolve({
+        versions: record,
+        publishedProducts: [...publishedProducts],
+        lastModifiedByProductVersion,
+      });
     });
   });
-};
-
-/**
- * Unsuffixed zips belong to ELSER. A suffixed key belongs to that inference ID only.
- */
-const artifactMatchesInferenceId = (
-  artifactInferenceId: string | undefined,
-  requestedInferenceId: string
-): boolean => {
-  if (isImpliedDefaultElserInferenceId(requestedInferenceId)) {
-    return (
-      artifactInferenceId === undefined || isImpliedDefaultElserInferenceId(artifactInferenceId)
-    );
-  }
-  return artifactInferenceId?.toLowerCase() === requestedInferenceId.toLowerCase();
 };
 
 function fetchLocalFile(parsedUrl: URL): Promise<Buffer> {
@@ -202,12 +235,6 @@ interface ListBucketResponse {
     IsTruncated?: string[];
     Contents?: Array<{ Key: string[]; LastModified: string[] }>;
   };
-}
-
-export interface SecurityLabsVersionsResult {
-  versions: string[];
-  /** ISO 8601 LastModified keyed by version string. */
-  lastModifiedByVersion: Record<string, string>;
 }
 
 /**

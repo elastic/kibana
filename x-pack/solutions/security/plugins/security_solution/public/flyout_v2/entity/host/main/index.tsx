@@ -336,6 +336,7 @@ export const Host: FC<HostProps> = memo(function Host({
             entityType: EntityType.host,
             entityName: hostName,
             entityId: entityStoreEntityId,
+            scopeId,
             onShowEntity: onShowHost,
             title: hostName,
             subTab: path.subTab as RiskScoreLeftPanelSubTab | undefined,
@@ -464,6 +465,7 @@ export const Host: FC<HostProps> = memo(function Host({
             onCriticalitySave={onCriticalitySave}
           />
         )}
+        {isGroupView && !tabs && <EuiSpacer size="l" />}
         {tabsNode}
         {tabs && <EuiSpacer size="l" />}
         {tabs && selectedTabId === TABLE_TAB_ID && observedHost.entityRecord ? (

@@ -14,10 +14,13 @@ import {
 import { investigationIocsAttachmentDataSchema } from '../../attachments/investigation_iocs';
 import {
   ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID,
-  endpointForensicAnalysisSkill,
+  createEndpointForensicAnalysisSkill,
 } from './endpoint_forensic_analysis_skill';
 
 const mockEsqlQuery = jest.fn();
+const endpointForensicAnalysisSkill = createEndpointForensicAnalysisSkill({
+  automaticTroubleshootingUniversalSkill: false,
+});
 const mockContext = {
   esClient: { asCurrentUser: { esql: { query: mockEsqlQuery } } },
 } as unknown as ToolHandlerContext;
@@ -86,6 +89,30 @@ describe(`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID} handler`, () => {
     expect(mockEsqlQuery.mock.calls[0][0].query).toContain(
       '@timestamp >= TO_DATETIME("2026-10-16T12:00:00.000Z") AND @timestamp <= TO_DATETIME("2026-10-17T12:00:00.000Z")'
     );
+  });
+
+  // Each Defend stream maps only its own fields and a host may lack a stream entirely (no
+  // registry stream off Windows); without the setting ES|QL rejects the KEEP with "Unknown column".
+  it('reads all four Defend streams with unmapped fields resolving to null', async () => {
+    await runExtractIocs();
+
+    expect(mockEsqlQuery.mock.calls[0][0].query).toMatch(
+      /^SET unmapped_fields="nullify"; FROM logs-endpoint\.events\.process-\*, logs-endpoint\.events\.network-\*, logs-endpoint\.events\.file-\*, logs-endpoint\.events\.registry-\* \| WHERE /
+    );
+  });
+
+  it('escapes quotes in host names', async () => {
+    await runExtractIocs(['bad"host']);
+
+    expect(mockEsqlQuery.mock.calls[0][0].query).toContain('host.name IN ("bad\\"host")');
+  });
+
+  it('returns an error without querying when no hosts are given', async () => {
+    const data = await getData([]);
+
+    expect(mockEsqlQuery).not.toHaveBeenCalled();
+    expect(data.error).toBe('No hosts given.');
+    expect(data.guidance).toContain('host.name values');
   });
 
   // Anchored on the incident rather than on now, so a host's older activity cannot
