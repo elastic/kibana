@@ -249,9 +249,11 @@ export function EsqlErrorHelp({
                   </EuiCopy>
                 </EuiFlexItem>
               </EuiFlexGroup>
-              <EuiCodeBlock language="esql" fontSize="s" paddingSize="s">
-                {stage.explanation.query}
-              </EuiCodeBlock>
+              <EuiPanel color="plain" hasBorder hasShadow={false} paddingSize="none">
+                <EuiCodeBlock language="esql" fontSize="s" paddingSize="s" transparentBackground>
+                  {stage.explanation.query}
+                </EuiCodeBlock>
+              </EuiPanel>
               <EuiSpacer size="xs" />
               <EuiText size="xs" color="subdued">
                 <FormattedMessage
