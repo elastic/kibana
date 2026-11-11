@@ -78,6 +78,24 @@ export { type AggregatedFeature, groupFeaturesAcrossSources } from './src/featur
 
 export { FeatureAccumulator } from './src/feature_accumulator';
 
+export {
+  type TopologyEdge,
+  type TopologyEdgeVariant,
+  type TopologyEdgeResolution,
+  type TopologyNode,
+  type TopologyNodeType,
+  type TopologyProvenance,
+  type TopologySnapshotProperties,
+  MAX_TOPOLOGY_PROVENANCE,
+  TOPOLOGY_EDGE_RESOLUTIONS,
+  TOPOLOGY_NODE_TYPES,
+  topologyEdgeSchema,
+  topologyEdgeVariantSchema,
+  topologyNodeSchema,
+  topologyProvenanceSchema,
+  topologySnapshotPropertiesSchema,
+} from './src/topology';
+
 export type { IterationResult } from './src/api/features';
 
 export { tokenCountSchema, iterationResultSchema } from './src/api/features';
@@ -96,8 +114,6 @@ export {
   type TuningConfigFieldBounds,
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS,
-  type SignificantEventInvestigation,
-  type InvestigationRunStatus,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
   SIGNIFICANT_EVENTS_ALERT_SOURCE,
@@ -141,7 +157,6 @@ export {
   significantEventsTuningConfigSchema,
   validateSignificantEventsTuningConfig,
   resolveSignificantEventsTuningConfig,
-  significantEventInvestigationSchema,
   MAX_SHORT_STRING_LENGTH,
   MAX_MEDIUM_STRING_LENGTH,
   MAX_ARRAY_LENGTH,

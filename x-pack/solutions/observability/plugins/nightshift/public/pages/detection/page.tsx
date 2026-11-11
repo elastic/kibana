@@ -104,7 +104,7 @@ export const DetectionPage = ({
   const { timeRange, setTimeRange } = useDetectionTimeRange();
   const overview = useDetectionOverview(timeRange);
   const { view, onCreationStateChange, retryHistoryLookup } = useDetectionOnboardingState();
-  const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
+  const { canManageAndConfigure } = getNightshiftCapabilities(application.capabilities.nightshift);
   const selection = useEntitySelection();
   const [isOverviewCompact, setIsOverviewCompact] = useState(false);
   const fullOverviewSlotRef = useRef<HTMLDivElement>(null);
@@ -177,11 +177,12 @@ export const DetectionPage = ({
     >
       <NightshiftAppHeader
         {...headerProps}
+        hideMenu={view.type !== 'workspace'}
         page="detection"
         back={{
           href: application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/' }),
           label: i18n.translate('xpack.nightshift.detectionPage.backToNightshiftLabel', {
-            defaultMessage: 'Nightshift',
+            defaultMessage: 'nightshift',
           }),
         }}
       />
@@ -246,7 +247,7 @@ export const DetectionPage = ({
                 `}
               >
                 <DetectionOnboarding
-                  canManage={canManage}
+                  canManage={canManageAndConfigure}
                   isDetectionEnabled={view.sourceCreation === 'enabled'}
                   onCreationStateChange={onCreationStateChange}
                 />

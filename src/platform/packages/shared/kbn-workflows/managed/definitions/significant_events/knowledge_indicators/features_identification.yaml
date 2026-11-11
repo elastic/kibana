@@ -80,7 +80,16 @@ triggers:
         description: "Maximum number of excluded KI features sent in the LLM prompt."
       - name: maxEntityFilters
         type: number
+        default: 10
         description: "Maximum number of entity filters applied during sampling."
+      - name: samplingTimeoutMs
+        type: number
+        default: 60000
+        description: "Deadline (ms) per ES|QL sampling query during features identification sampling."
+      - name: computedFeaturesTimeoutMs
+        type: number
+        default: 60000
+        description: "Deadline (ms) for the whole computed-feature generation pass."
       - name: maxPreviouslyIdentifiedFeatures
         type: number
         description: "Maximum number of previously identified features sent in the LLM prompt."
@@ -127,6 +136,7 @@ steps:
             entityFilteredRatio: "${{ inputs.entityFilteredRatio }}"
             diverseRatio: "${{ inputs.diverseRatio }}"
             maxEntityFilters: "${{ inputs.maxEntityFilters }}"
+            samplingTimeoutMs: "${{ inputs.samplingTimeoutMs }}"
 
       # 2b: If no documents were returned, stop the loop.
       - name: check_docs
@@ -148,6 +158,7 @@ steps:
           body:
             connectorId: "${{ inputs.connectorId }}"
             runId: "${{ execution.id }}"
+            parentWorkflowExecutionId: "${{ parent.executionId }}"
             iteration: "${{ variables.iterationResults.size | plus: 1 }}"
             documents: "${{ steps.prepare.output.documents }}"
             samplingTelemetry: "${{ steps.prepare.output.samplingTelemetry }}"
@@ -237,6 +248,7 @@ steps:
         end: "${{ inputs.end }}"
         runId: "${{ execution.id }}"
         featureTtlDays: "${{ inputs.featureTtlDays }}"
+        computedFeaturesTimeoutMs: "${{ inputs.computedFeaturesTimeoutMs }}"
 
   # -----------------------------------------------------------------------
   # Step 5: Output results.

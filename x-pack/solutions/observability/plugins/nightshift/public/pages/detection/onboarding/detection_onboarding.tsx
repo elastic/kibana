@@ -11,8 +11,8 @@ import React from 'react';
 import {
   RecommendedSourcesTable,
   type RecommendedSourcesCreationState,
-} from '../../../sources/recommended_sources/recommended_sources_table';
-import { SOURCES_NOT_ADDED_TITLE } from '../../../sources/recommended_sources/translations';
+} from '../../../components/entities/source/recommended_sources/recommended_sources_table';
+import { SOURCES_NOT_ADDED_TITLE } from '../../../components/entities/source/recommended_sources/translations';
 import { DetectionExplainer } from './detection_explainer';
 import { DetectionOnboardingLocked } from './detection_onboarding_locked';
 import { HOW_DETECTION_WORKS_TITLE, SELECT_SOURCES_TITLE } from './translations';

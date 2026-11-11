@@ -92,6 +92,20 @@ export class TaskManagerUtils {
     });
   }
 
+  // `_run_soon` 200s with "Rule is already running" until the previous run releases the task.
+  async waitForIdle(id: string): Promise<void> {
+    return await this.retry.try(async () => {
+      const task = await this.es.get<TaskManagerDoc>({
+        id: `task:${id}`,
+        index: '.kibana_task_manager',
+      });
+      const status = task._source!.task.status;
+      if (status !== 'idle') {
+        throw new Error(`Expected task:${id} to be idle but was ${status}`);
+      }
+    });
+  }
+
   async waitForAllTasksIdle(taskRunAtFilter: Date) {
     return await this.retry.try(async () => {
       const searchResult = await this.es.search({
@@ -163,15 +177,17 @@ export class TaskManagerUtils {
     });
   }
 
-  async setTaskEnabled(id: string, enabled: boolean) {
+  async setTaskEnabled(id: string, enabled: boolean, runAt?: Date) {
     await this.es.update({
       id: `task:${id}`,
       index: '.kibana_task_manager',
       doc: {
         task: {
           enabled,
+          ...(runAt ? { runAt: runAt.toISOString() } : {}),
         },
       },
+      refresh: true,
     });
   }
 }

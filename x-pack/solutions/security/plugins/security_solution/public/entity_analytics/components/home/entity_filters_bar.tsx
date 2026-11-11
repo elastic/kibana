@@ -135,6 +135,8 @@ interface Props {
   spaceId: string | undefined;
   rowsMode: RowsMode;
   esFilter?: QueryDslQueryContainer;
+  searchExpression?: string;
+  isSearchOverridesPending?: boolean;
   watchlistNames: Map<string, string>;
 }
 
@@ -144,6 +146,8 @@ export const EntityFiltersBar: React.FC<Props> = ({
   spaceId,
   rowsMode,
   esFilter,
+  searchExpression,
+  isSearchOverridesPending,
   watchlistNames,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -151,6 +155,8 @@ export const EntityFiltersBar: React.FC<Props> = ({
     spaceId,
     rowsMode,
     filter: esFilter,
+    searchExpression,
+    isSearchOverridesPending,
   });
 
   // static options

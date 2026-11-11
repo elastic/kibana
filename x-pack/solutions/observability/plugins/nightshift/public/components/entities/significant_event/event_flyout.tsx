@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import {
@@ -24,7 +24,10 @@ import { EventTimeline } from './event_timeline';
 import { TruncatableSummary } from '../../ui/truncatable_summary';
 import { SIGNIFICANT_EVENT_SEVERITY } from '../../ui/severity_badge';
 import { useFlyoutShareUrlCustomAction } from '../../ui/flyout_share_url_button';
-import { buildNightshiftEventFlyoutShareUrl } from '../../../common/url_params';
+import {
+  buildNightshiftEventFlyoutShareUrl,
+  buildNightshiftEventsPageUrl,
+} from '../../../common/url_params';
 import {
   buildInvestigationConversationChatOptions,
   buildNewSignificantEventChatOptions,
@@ -32,11 +35,11 @@ import {
 import { useFormatTimestamp } from '../../../hooks/use_format_timestamp';
 import { useFetchDetectionOccurrences } from '../../../data/detections/use_fetch_detection_occurrences';
 import { useFetchEventLifecycle } from '../../../data/significant_events/use_fetch_event_lifecycle';
-import { useFetchInvestigationStatuses } from '../../../data/investigations/use_fetch_investigation_statuses';
+import { useFetchInvestigationAvailability } from '../../../data/investigations/use_fetch_investigation_availability';
+import { useFetchEventInvestigation } from '../../../data/significant_events/use_fetch_event_investigation';
 import { findDetectionSignal } from '../detection/resolve_detection_signal';
 import {
   getStatusColor,
-  isInvestigationRunning,
   isNeedsActionStatus,
   SIGNIFICANT_EVENT_STATUS_LABELS,
 } from './significant_event_status';
@@ -114,6 +117,20 @@ const FOLLOW_UP_INVESTIGATION_LABEL = i18n.translate(
   'xpack.nightshift.flyout.followUpInvestigationButtonLabel',
   { defaultMessage: 'Run follow-up' }
 );
+const NO_EPISODE_INVESTIGATION_TOOLTIP = i18n.translate(
+  'xpack.nightshift.flyout.noEpisodeInvestigationTooltip',
+  {
+    defaultMessage: 'This event has no alert to investigate yet.',
+  }
+);
+
+const INVESTIGATION_UNAVAILABLE_TOOLTIP = i18n.translate(
+  'xpack.nightshift.flyout.investigationUnavailableTooltip',
+  {
+    defaultMessage: 'Investigations are unavailable. You may need write access to Agent Builder.',
+  }
+);
+
 const FOLLOW_UP_INVESTIGATION_TOOLTIP = i18n.translate(
   'xpack.nightshift.flyout.followUpInvestigationTooltip',
   {
@@ -128,9 +145,21 @@ const MARK_INACTIVE_LABEL = i18n.translate('xpack.nightshift.flyout.markInactive
 export interface EventFlyoutProps {
   event: SignificantEventResponse;
   onClose: () => void;
+  /**
+   * `push` shares the page with the app that opens it. `overlay` stacks over another flyout, such
+   * as an investigation, without a mask or replacing it.
+   */
+  type?: 'push' | 'overlay';
+  /** The flyout's width: an EUI size or pixels. */
+  size?: 's' | 'm' | number;
 }
 
-export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactElement {
+export function EventFlyout({
+  event,
+  onClose,
+  type = 'push',
+  size = 's',
+}: EventFlyoutProps): React.ReactElement {
   const formatTimestamp = useFormatTimestamp();
   const { euiTheme } = useEuiTheme();
   const { agentBuilder, application, focusedSignificantEventService, http } = useKibana().services;
@@ -139,34 +168,48 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
   const [selectedDetectionId, setSelectedDetectionId] = useState<string>();
   const [selectedTabId, setSelectedTabId] = useState(OVERVIEW_TAB_ID);
   const [isMarkInactiveModalOpen, setIsMarkInactiveModalOpen] = useState(false);
+  const stagedOverlayEventId = useRef<string>();
   const lifecycleQuery = useFetchEventLifecycle(event.event_id);
+  const [startedInvestigation, setStartedInvestigation] = useState<{
+    id: string;
+    startedAt: number;
+    episodeId: string | undefined;
+    listedUpdatedAt?: string;
+  }>();
+  /** The listed investigation when a start was clicked: a follow-up's run is recorded past it. */
+  const startBaselineRef = useRef<{ id: string; updated_at: string }>();
+  const occurrencesQuery = useFetchDetectionOccurrences(lifecycleQuery.data?.detections ?? []);
+  // The investigation is found through its subject (the event's alert, by episode id), as for any
+  // alert. The event's own `investigations[]` is not read here.
+  const {
+    investigation: subjectInvestigation,
+    isAwaitingStart,
+    isListLoading,
+  } = useFetchEventInvestigation(event.episode_id, {
+    awaiting:
+      startedInvestigation?.episodeId === event.episode_id ? startedInvestigation : undefined,
+  });
+  const { isAvailable: canInvestigate, isLoading: isAvailabilityLoading } =
+    useFetchInvestigationAvailability();
   const { triggerInvestigation, triggeringEventId } = useTriggerEventInvestigation({
-    onTriggered: () => {
+    onTriggered: (investigationId, { episode_id: episodeId }) => {
+      const baseline = startBaselineRef.current;
+      setStartedInvestigation({
+        id: investigationId,
+        startedAt: Date.now(),
+        episodeId,
+        // Only a continued investigation has a listed state to be recorded past.
+        ...(baseline?.id === investigationId ? { listedUpdatedAt: baseline.updated_at } : {}),
+      });
       void lifecycleQuery.refetch();
     },
   });
-  const occurrencesQuery = useFetchDetectionOccurrences(lifecycleQuery.data?.detections ?? []);
-  const latestInvestigation = useMemo(() => event.investigations?.at(-1), [event.investigations]);
+  const hasInvestigation = subjectInvestigation != null || isAwaitingStart;
 
-  const investigationExecutionIds = useMemo(
-    () => (latestInvestigation ? [latestInvestigation.workflow_execution_id] : []),
-    [latestInvestigation]
-  );
-  const { data: investigationRunStatuses } =
-    useFetchInvestigationStatuses(investigationExecutionIds);
-  const latestRunStatus = latestInvestigation
-    ? investigationRunStatuses?.[latestInvestigation.workflow_execution_id]
-    : undefined;
-  const investigationNotFound =
-    latestInvestigation != null &&
-    investigationRunStatuses != null &&
-    latestRunStatus === undefined;
-  const availableInvestigation = investigationNotFound ? undefined : latestInvestigation;
-
-  // The recorded id is the investigation (Agent Builder conversation) id.
   const { investigation: investigationDetails, status: investigationStatus } = useInvestigation({
     http,
-    investigationId: availableInvestigation?.workflow_execution_id,
+    // While a start is pending, the listed investigation is an older run: show none of its details.
+    investigationId: isAwaitingStart ? undefined : subjectInvestigation?.id,
   });
   const conversationId = investigationDetails?.id;
 
@@ -176,9 +219,26 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
   }, [event.event_id]);
 
   useEffect(() => {
+    // The focused event belongs to Nightshift's own chat; an overlay over another page, such as an
+    // investigation, must not take it over unless its New chat action explicitly stages the event.
+    if (type === 'overlay') {
+      return;
+    }
     focusedSignificantEventService.setFocusedEvent(event);
-    return () => focusedSignificantEventService.clearFocusedEvent(event.event_id);
-  }, [event, focusedSignificantEventService]);
+    return () => {
+      focusedSignificantEventService.clearFocusedEvent(event.event_id);
+    };
+  }, [event, focusedSignificantEventService, type]);
+
+  useEffect(() => {
+    return () => {
+      const stagedEventId = stagedOverlayEventId.current;
+      if (stagedEventId) {
+        focusedSignificantEventService.clearFocusedEvent(stagedEventId);
+        stagedOverlayEventId.current = undefined;
+      }
+    };
+  }, [focusedSignificantEventService]);
 
   useEffect(() => {
     if (
@@ -215,8 +275,13 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
   }, []);
 
   const getShareUrl = useCallback(
-    () => buildNightshiftEventFlyoutShareUrl(event.event_id),
-    [event.event_id]
+    () =>
+      // Outside Nightshift the page behind the flyout cannot reopen the event, so the link goes to
+      // the events page, which can.
+      type === 'overlay'
+        ? buildNightshiftEventsPageUrl(application.getUrlForApp, event.event_id)
+        : buildNightshiftEventFlyoutShareUrl(event.event_id),
+    [application.getUrlForApp, event.event_id, type]
   );
   const shareUrlCustomAction = useFlyoutShareUrlCustomAction(getShareUrl);
   const flyoutMenuProps = useMemo(
@@ -227,26 +292,43 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
     agentBuilder?.openChat(buildNewSignificantEventChatOptions(event));
     // An open sidebar replaces its draft on openChat without a new conversation id, so re-stage the event.
     focusedSignificantEventService.setFocusedEvent(event);
-  }, [agentBuilder, event, focusedSignificantEventService]);
+    stagedOverlayEventId.current = type === 'overlay' ? event.event_id : undefined;
+  }, [agentBuilder, event, focusedSignificantEventService, type]);
   const openInvestigationChat = useCallback(() => {
     if (conversationId) {
       agentBuilder?.openChat(buildInvestigationConversationChatOptions(conversationId));
     }
   }, [agentBuilder, conversationId]);
   const latestInvestigationInProgress =
-    availableInvestigation != null && availableInvestigation.completed_at == null;
-  const investigationRunning = isInvestigationRunning(event) || latestInvestigationInProgress;
+    isAwaitingStart || (subjectInvestigation?.in_progress ?? false);
   const actionMenuPanels = useMemo<FlyoutFooterMenuPanel[]>(() => {
     const items: FlyoutFooterMenuItem[] = [];
     if (canManage) {
       items.push({
-        name: investigationRunning ? FOLLOW_UP_INVESTIGATION_LABEL : RUN_INVESTIGATION_LABEL,
+        name: latestInvestigationInProgress
+          ? FOLLOW_UP_INVESTIGATION_LABEL
+          : RUN_INVESTIGATION_LABEL,
         icon: 'inspect',
         toolTipContent:
           activityBlockTooltip ??
-          (investigationRunning ? FOLLOW_UP_INVESTIGATION_TOOLTIP : undefined),
-        onClick: () => triggerInvestigation(event.event_id),
-        disabled: blocksActivity || triggeringEventId != null,
+          (event.episode_id ? undefined : NO_EPISODE_INVESTIGATION_TOOLTIP) ??
+          (canInvestigate || isAvailabilityLoading
+            ? undefined
+            : INVESTIGATION_UNAVAILABLE_TOOLTIP) ??
+          (latestInvestigationInProgress ? FOLLOW_UP_INVESTIGATION_TOOLTIP : undefined),
+        onClick: () => {
+          startBaselineRef.current = subjectInvestigation
+            ? { id: subjectInvestigation.id, updated_at: subjectInvestigation.updated_at }
+            : undefined;
+          triggerInvestigation({ event_id: event.event_id, episode_id: event.episode_id });
+        },
+        // Until the list is read, a start cannot tell a new investigation from a continued one.
+        disabled:
+          blocksActivity ||
+          triggeringEventId != null ||
+          !event.episode_id ||
+          !canInvestigate ||
+          isListLoading,
         hasAriaDisabled: true,
         'data-test-subj': 'nightshiftEventFlyoutRunInvestigationButton',
         ...getEbtProps({
@@ -258,7 +340,7 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
         }),
       });
     }
-    if (agentBuilder && availableInvestigation) {
+    if (agentBuilder && hasInvestigation) {
       if (!latestInvestigationInProgress) {
         items.push({
           name: OPEN_INVESTIGATION_CHAT_LABEL,
@@ -307,16 +389,20 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
   }, [
     activityBlockTooltip,
     agentBuilder,
-    availableInvestigation,
     blocksActivity,
+    canInvestigate,
+    isAvailabilityLoading,
     canManage,
     conversationId,
+    event.episode_id,
     event.event_id,
     event.status,
-    investigationRunning,
+    hasInvestigation,
+    isListLoading,
     latestInvestigationInProgress,
     openInvestigationChat,
     openNewChat,
+    subjectInvestigation,
     triggerInvestigation,
     triggeringEventId,
   ]);
@@ -325,8 +411,9 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
     <>
       <FlyoutTemplate
         onClose={onClose}
-        size="s"
-        type="push"
+        size={size}
+        type={type}
+        ownFocus={type === 'overlay' ? false : undefined}
         session="start"
         historyKey={EVENT_FLYOUT_HISTORY_KEY}
         resizable
@@ -355,7 +442,7 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
             color="hollow"
             toolTipContent={i18n.translate('xpack.nightshift.flyout.confidenceTooltip', {
               defaultMessage:
-                'How confident Nightshift is that this is correct, based on evidence strength and consistency.',
+                'How confident nightshift is that this is correct, based on evidence strength and consistency.',
             })}
           >
             {i18n.translate('xpack.nightshift.flyout.confidenceLabel', {
@@ -372,10 +459,10 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
             <FlyoutTemplate.Body.Section title={SUMMARY_TITLE}>
               <TruncatableSummary summary={event.summary} />
             </FlyoutTemplate.Body.Section>
-            {availableInvestigation ? (
+            {hasInvestigation ? (
               <FlyoutTemplate.Body.Section title={INVESTIGATION_TITLE}>
                 <EventInvestigationCard
-                  event={event}
+                  inProgress={latestInvestigationInProgress}
                   investigation={investigationDetails}
                   status={investigationStatus}
                 />

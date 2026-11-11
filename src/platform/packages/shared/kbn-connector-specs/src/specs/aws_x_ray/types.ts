@@ -10,8 +10,9 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 // X-Ray insight IDs are UUIDs, e.g. returned by getInsightSummaries.
+// The pattern X-Ray's model gives InsightId: an RFC 4122 UUID (version 1-5, variant 8-b).
 const INSIGHT_ID_PATTERN =
-  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
 // X-Ray trace IDs look like "1-58fb9b6b-b19c04eaa851f22a02e4b4ac"; bound the
 // character set since the value flows directly into a JSON request body.
 const TRACE_ID_PATTERN = /^[0-9a-zA-Z-]{1,35}$/;
@@ -235,7 +236,8 @@ export type GetTimeSeriesServiceStatisticsInput = z.infer<
 
 export const GetGroupsInputSchema = lazySchema(() =>
   z.object({
-    nextToken: nextTokenField(2000),
+    // GetGroups caps its token at 100 characters, unlike the other operations.
+    nextToken: nextTokenField(100),
   })
 );
 export type GetGroupsInput = z.infer<typeof GetGroupsInputSchema>;

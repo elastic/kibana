@@ -11,7 +11,7 @@ import { useFetchSources } from '../../data/sources/use_fetch_sources';
 import {
   INITIAL_RECOMMENDED_SOURCES_CREATION_STATE,
   type RecommendedSourcesCreationState,
-} from '../../sources/recommended_sources/recommended_sources_table';
+} from '../../components/entities/source/recommended_sources/recommended_sources_table';
 
 const NO_SOURCES_HISTORY_RANGE = { from: 'now-10y', to: 'now' } as const;
 

@@ -142,7 +142,7 @@ export class WorkflowValidationService {
     const warnIgnoredKibanaFetcher = await firstValueFrom(
       this.deps
         .getCoreStart()
-        .featureFlags.getBooleanValue$(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false)
+        .featureFlags.getBooleanValue$(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, true)
     );
     const esql = includeEsqlRules ? this.createEsqlCallbacks(request) : undefined;
     const result = await validateWorkflowYaml(yaml, zodSchema, {

@@ -54,6 +54,7 @@ This will walk through 12 tasks: generating code, reviewing it, activating the c
 | `/create-connector <name>` | Generate just the connector spec, workflows, tests, and docs (no activation or testing) |
 | `/activate-connector <type>` | Create a connector instance in a running Kibana via the Actions API |
 | `/review-connector` | Review connector spec changes against a quality checklist |
+| `/update-connector <id> [issue]` | Follow a vendor API change: fix a drift issue from the weekly check, refresh the connector's vendor API artifacts and open a draft PR |
 
 ## Alternate: Generate a New Connector Spec
 
@@ -625,8 +626,8 @@ The pages are converted to OpenAPI with `convertMarkdownReference`, and recorded
 The folder holds:
 
 - `manifest.json`: the sources and the operations each action calls.
-- `snapshots/<source>.openapi.json`: each vendor spec, converted to OpenAPI 3 if needed (from Swagger 2.0, from a Google API Discovery document such as `https://gmail.googleapis.com/$discovery/rest?version=v1`, or from an AWS Smithy model of a `restJson1` or `restXml` service, such as the files in [`aws/api-models-aws`](https://github.com/aws/api-models-aws), pinned to a commit) and cut down to the recorded operations (under `paths`, or AutoRest's `x-ms-paths` for specs such as Azure Blob Storage's) and what they reference. Descriptions, examples and `x-` extensions other than `x-speakeasy-pagination`, `x-ms-pageable` and `x-ms-skip-url-encoding` (which marks a path parameter that spans segments, such as Azure's `{scope}`), and the routing that converted Smithy models carry (`x-path-parameter` for S3's virtual-hosted buckets, `x-optional-fixed-query` for its `x-id`) are dropped so that wording changes don't produce diffs. Snapshots are the vendor's spec as published: the overlay is not applied to them, but they keep the components its updates reference.
-- `overlay.yaml` (optional): an [OpenAPI Overlay](https://spec.openapis.org/overlay/latest.html) correcting the vendor specs, applied whenever they are loaded, including while recording. An action that no longer matches anything is reported, as the vendor may have fixed the spec.
+- `snapshots/<source>.openapi.json`: each vendor spec, converted to OpenAPI 3 if needed (from Swagger 2.0, from a Google API Discovery document such as `https://gmail.googleapis.com/$discovery/rest?version=v1`, or from an AWS Smithy model, such as the files in [`aws/api-models-aws`](https://github.com/aws/api-models-aws), pinned to a commit; `awsJson1_0` and `awsJson1_1` services, such as CloudWatch, become an operation per `POST /<Operation>`, marked `x-amz-json` so the mock serves them by `X-Amz-Target`) and cut down to the recorded operations (under `paths`, or AutoRest's `x-ms-paths` for specs such as Azure Blob Storage's) and what they reference. Descriptions, examples and `x-` extensions other than `x-speakeasy-pagination`, `x-ms-pageable` and `x-ms-skip-url-encoding` (which marks a path parameter that spans segments, such as Azure's `{scope}`), and the routing that converted Smithy models carry (`x-path-parameter` for S3's virtual-hosted buckets, `x-optional-fixed-query` for its `x-id`) are dropped so that wording changes don't produce diffs. Snapshots are the vendor's spec as published: the overlay is not applied to them, but they keep the components its updates reference.
+- `overlay.yaml` (optional): an [OpenAPI Overlay](https://spec.openapis.org/overlay/latest.html) correcting the vendor specs, applied whenever they are loaded, including while recording. An action that matches nothing in specs fetched from the vendor (`--refresh`, `--drift`) is reported, as the vendor may have fixed the spec. Offline runs (`--check`) don't report it: a snapshot only has the operations the connector calls, so the action may still be needed.
 - `fixtures.json` (optional): see below.
 
 Actions run with a connector config sampled from the connector's `schema`, required properties only, so optional settings such as custom base URLs keep their defaults. They run under each auth type in `auth.types`, with placeholder secrets, and the manifest lists the operations reached under any of them, so an action that only some auth types allow (such as Gmail's write actions, which Elastic-managed OAuth refuses) is still recorded.
@@ -713,7 +714,7 @@ Per action:
 - `input`: merged into each generated input, for values the schema can't describe, such as cross-field rules or IDs with a vendor format. A list of inputs generates the inputs once per entry, for rules no single value satisfies in every input, such as two mutually exclusive options.
 - `config`: merged into the connector config for the action's runs. Recording samples only the required config fields, so use this to set an optional field the action needs, such as a second server URL.
 - `queries`: for a `read` action, operations that use another method but only query, such as a search sent as `POST`. Each entry states that the operation changes no vendor state, so reviewers should check it. A `source` restricts an entry to one spec. Requests that match no operation (those in `"unmatched"`, such as calls to a vendor's MCP server) are matched by their path, where a `{name}` segment matches any segment.
-- `responses`: served by the mock for the action's runs instead of sampled responses, so handlers that branch on a response take the intended path. A `source` restricts an override to one spec. Overrides that break the spec, or name an operation it lacks, are reported.
+- `responses`: served by the mock for the action's runs instead of sampled responses, so handlers that branch on a response take the intended path. A `source` restricts an override to one spec, and a `when` (`path`, `query` and `headers` by value, and the `body` fields it lists) to the requests with those values. Overrides that break the spec, or name an operation it lacks, are reported.
 
 `vendorApiFixturesSchema` is the schema.
 
@@ -743,7 +744,7 @@ A connector the check can't run on at all is reported with an `error` instead.
 node scripts/connector_vendor_api --surface --report target/drift.json --github-repo elastic/kibana --dry-run
 ```
 
-Each connector whose outcome is `issue` gets one issue labelled `connector-validation`, found again on later runs by a marker in its body. The issue reports the two-mock result, the classified changes, the problems and the stale overlay actions, and mentions the CODEOWNERS of the connector's folder. A later run updates it when the findings change, reopens it when the connector drifts again, and closes it once the connector no longer needs an issue or no longer has vendor API artifacts. The summary (`--summary`, default `target/connector_vendor_api/drift_summary.json`) lists the connectors to refresh, with the body of the refresh PR. `--dry-run` reads the issues but only logs what it would write.
+Each connector whose outcome is `issue` gets one issue labelled `connector-validation`, found again on later runs by a marker in its body. The issue reports the two-mock result, the classified changes, the problems and the stale overlay actions, and mentions the CODEOWNERS of the connector's folder. A later run updates it when the findings change, reopens it when the connector drifts again, and closes it once the connector no longer needs an issue or no longer has vendor API artifacts. The issue points to the `/update-connector` skill, which fixes the connector. The summary (`--summary`, default `target/connector_vendor_api/drift_summary.json`) lists the connectors to refresh, with the body of the refresh PR. `--dry-run` reads the issues but only logs what it would write.
 
 The `kibana / connector vendor API drift` Buildkite pipeline (`.buildkite/pipelines/connector_vendor_api_drift.yml`) runs both weekly, creates the `connector-validation` label if it's missing, and refreshes the artifacts of the `refresh` connectors in a single bot PR, which it closes once there is nothing left to refresh. Start a build by hand to check now; set `CONNECTOR_VENDOR_API_CONNECTOR` on the build to check one connector, which leaves the refresh PR alone. `CONNECTOR_VENDOR_API_GITHUB_REPO` in its resource definition switches it from a dry run (empty) to a sandbox repository or to `elastic/kibana`.
 
@@ -758,7 +759,59 @@ node scripts/connector_emulate --connector firecrawl
 node scripts/connector_emulate --connector firecrawl --spec latest --port 5691
 ```
 
-The mock answers with the manifest's pagination, but not with the per-action `responses` in `fixtures.json`, because a proxied request doesn't say which action sent it. It logs every request with its status, and the violations of failed ones. On startup it prints the Kibana settings to use: `xpack.actions.proxyUrl` pointing at the proxy, and `xpack.actions.customHostSettings` entries that trust its CA for the vendor hosts in the specs, including per-operation servers and OAuth token URLs. Vendor hosts that come from connector config, such as a tenant's subdomain, need the CA trusted for every host instead, by starting Kibana with `NODE_EXTRA_CA_CERTS=data/connector_emulate/ca.crt`. The CA is created there on first use and reused afterwards, so Kibana keeps trusting it when the mock restarts.
+The mock answers with the manifest's pagination, but not with the per-action `responses` in `fixtures.json`, because a proxied request doesn't say which action sent it. To serve specific responses for one run, such as an empty inbox or a rate limit, pass them with `--fixtures` and `--recordings`:
+
+```bash
+# fixtures.json-style responses: [{ "method": "POST", "path": "/scrape", "status": 200, "body": { ... } }]
+node scripts/connector_emulate --connector firecrawl --fixtures scenarios/empty_results.json
+# Recordings ({ "exchanges": [{ operation, request, response }] }): one file, or a folder of them
+node scripts/connector_emulate --connector firecrawl --recordings scenarios/recorded/
+```
+
+A fixture can take a `when`, to answer only some requests. A request gets the matching fixture that checks the most values, else the operation's fixture without `when`. Fixtures are served as written, so on a paginated operation, give one per page:
+
+```json
+[
+  { "method": "GET", "path": "/items", "status": 200, "body": { "items": [{ "id": "1" }], "next": "two" } },
+  { "method": "GET", "path": "/items", "when": { "query": { "cursor": "two" } }, "status": 200, "body": { "items": [] } },
+  { "method": "GET", "path": "/items/{id}", "when": { "path": { "id": "missing" } }, "status": 404 }
+]
+```
+
+For an action that polls until a job finishes, such as Firecrawl's `crawlAndWait`, give `responses` in place of `status`, `headers` and `body`. The requests the fixture answers get them in turn, the last one repeating, and `POST /_mock/reset` starts the sequence again:
+
+```json
+[
+  {
+    "method": "GET",
+    "path": "/crawl/{id}",
+    "responses": [
+      { "status": 200, "body": { "status": "scraping" } },
+      { "status": 200, "body": { "status": "completed", "data": [] } }
+    ]
+  }
+]
+```
+
+Paths are the spec's path templates, relative to its server URL. Fixtures are served first, then conforming recordings (those given for the run ahead of any committed in `vendor_api/recordings/`), then the spec's examples and samples. Fixtures and recordings the spec rejects are listed on startup.
+
+It logs every request with its status, where the response came from (`[fixture]` or `[recording]`), and the violations of failed ones. Tests read and reset the calls through the control endpoints on the proxy's own origin (`GET /_mock/calls`, `POST /_mock/reset`, `GET /_mock/operations`, or `createEmulatorControl` from `@kbn/connector-emulate`). On startup it prints the Kibana settings to use: `xpack.actions.proxyUrl` pointing at the proxy, and `xpack.actions.customHostSettings` entries that trust its CA for the vendor hosts in the specs, including per-operation servers and OAuth token URLs. Vendor hosts that come from connector config, such as a tenant's subdomain, need the CA trusted for every host instead, by starting Kibana with `NODE_EXTRA_CA_CERTS=data/connector_emulate/ca.crt`. The CA is created there on first use and reused afterwards, so Kibana keeps trusting it when the mock restarts.
+
+#### Several connectors in one Kibana
+
+One proxy can serve several connectors, so one Kibana runs all their tests:
+
+```bash
+node scripts/connector_emulate --connector outlook,one_drive
+# Every connector with a vendor_api/manifest.json
+node scripts/connector_emulate --all
+# Run fixtures and recordings name their connector
+node scripts/connector_emulate --connector outlook,one_drive --fixtures outlook=scenarios/empty_inbox.json
+```
+
+Each connector is answered from its own specs, overlay, fixtures and recordings. A request goes to the connector whose credential it carries: `emulate-<id>`, e.g. `emulate-one_drive`, as an API key, token, Basic auth user or password, OAuth client ID, or a claim of a JWT assertion. The tokens its token URLs issue carry the credential too, so OAuth connectors only need it as their client ID. Other requests go to the first connector whose specs name the URL's host, else the first whose specs match it with a relative server, as self-hosted products' specs declare. Vendor hosts that several connectors call, such as `graph.microsoft.com`, are listed on startup: give those connectors the credential so they get their own responses.
+
+The control endpoints take `?connector=<id>` (`createEmulatorControl(proxyUrl, { connector })`) to see or reset only that connector's calls, so tests running in parallel don't read or clear each other's. Start Kibana with `NODE_EXTRA_CA_CERTS` rather than the printed `customHostSettings`, which list every vendor host. To compare the committed snapshots with the latest vendor specs, run one proxy and one Kibana per `--spec`, as Kibana has one `xpack.actions.proxyUrl`.
 
 ## Related Documentation
 
