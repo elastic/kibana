@@ -9,19 +9,29 @@
 
 import {
   EuiButton,
+  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiCheckbox,
+  EuiCheckboxGroup,
   EuiFieldNumber,
   EuiFieldText,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
+  EuiPanel,
   EuiRadioGroup,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
+  EuiText,
   EuiTextArea,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import type {
+  ArrayFieldTemplateProps,
   FieldTemplateProps,
+  IconButtonProps,
   ObjectFieldTemplateProps,
   RegistryWidgetsType,
   SubmitButtonProps,
@@ -32,6 +42,7 @@ import type {
 import { getSubmitButtonOptions } from '@rjsf/utils';
 import type { JSONSchema7 } from 'json-schema';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import type {
   PAGE_UI_WIDGETS,
   PageInputs,
@@ -213,6 +224,32 @@ const ToggleWidget = ({
   />
 );
 
+/** A multiple-choice list: an array whose items are an enum or `oneOf` consts. */
+const CheckboxesWidget = ({ id, value, options, disabled, readonly, onChange }: WidgetProps) => {
+  const selected = new Set(Array.isArray(value) ? value.map(toText) : []);
+  const choices = (options.enumOptions ?? []) as Array<{ label: string; value: unknown }>;
+  return (
+    <EuiCheckboxGroup
+      idSelected={Object.fromEntries(
+        choices.map((choice, index) => [`${id}-${index}`, selected.has(toText(choice.value))])
+      )}
+      options={choices.map((choice, index) => ({ id: `${id}-${index}`, label: choice.label }))}
+      disabled={disabled || readonly}
+      onChange={(optionId) => {
+        const index = Number(optionId.slice(id.length + 1));
+        const choice = choices[index];
+        if (!choice) {
+          return;
+        }
+        const next = selected.has(toText(choice.value))
+          ? choices.filter((c) => c !== choice && selected.has(toText(c.value)))
+          : choices.filter((c) => c === choice || selected.has(toText(c.value)));
+        onChange(next.map((c) => c.value));
+      }}
+    />
+  );
+};
+
 export const pageWidgets: RegistryWidgetsType = {
   TextWidget,
   EmailWidget,
@@ -221,6 +258,7 @@ export const pageWidgets: RegistryWidgetsType = {
   RadioWidget,
   SelectWidget,
   CheckboxWidget,
+  CheckboxesWidget,
   toggle: ToggleWidget,
 };
 
@@ -274,12 +312,25 @@ const collectFields = (schema: PageInputs | undefined): Record<string, JSONSchem
   return fields;
 };
 
+/** Drops `format` from a field and from the fields inside it. */
+const stripFormat = (field: JSONSchema7): JSONSchema7 => {
+  const { format, ...rest } = field;
+  const { items } = rest;
+  return {
+    ...rest,
+    ...(rest.properties ? { properties: withoutFormat(rest.properties) } : {}),
+    ...(items && typeof items === 'object' && !Array.isArray(items)
+      ? { items: stripFormat(items) }
+      : {}),
+  };
+};
+
 const withoutFormat = (properties: unknown) =>
   Object.fromEntries(
-    Object.entries((properties ?? {}) as Record<string, JSONSchema7>).map(([name, field]) => {
-      const { format, ...rest } = field;
-      return [name, rest];
-    })
+    Object.entries((properties ?? {}) as Record<string, JSONSchema7>).map(([name, field]) => [
+      name,
+      typeof field === 'object' ? stripFormat(field) : field,
+    ])
   );
 
 /**
@@ -302,8 +353,46 @@ export const toRenderSchema = (schema: PageInputs | undefined): PageInputs | und
   } as PageInputs;
 };
 
+const isChoiceList = (schema: JSONSchema7): boolean => {
+  const { items } = schema;
+  return (
+    schema.type === 'array' &&
+    Boolean(items) &&
+    typeof items === 'object' &&
+    !Array.isArray(items) &&
+    isSelectSchema(items)
+  );
+};
+
+/** Resolves the widget of one field, and of the fields inside an object or an array item. */
+const withFieldWidgets = (fieldSchema: JSONSchema7, fieldUi: UiSchema): UiSchema => {
+  const named = (fieldUi as PageUiField)['ui:widget'];
+  if (named === 'hidden') {
+    return fieldUi;
+  }
+  if (isChoiceList(fieldSchema)) {
+    return { ...fieldUi, 'ui:widget': CheckboxesWidget };
+  }
+  if (fieldSchema.type === 'object' && fieldSchema.properties) {
+    const nested: UiSchema = { ...fieldUi };
+    for (const [name, child] of Object.entries(fieldSchema.properties)) {
+      if (typeof child === 'object') {
+        nested[name] = withFieldWidgets(child, (fieldUi[name] ?? {}) as UiSchema);
+      }
+    }
+    return nested;
+  }
+  const { items } = fieldSchema;
+  if (fieldSchema.type === 'array' && items && typeof items === 'object' && !Array.isArray(items)) {
+    return { ...fieldUi, items: withFieldWidgets(items, (fieldUi.items ?? {}) as UiSchema) };
+  }
+  const widget = named ? WIDGETS_BY_NAME[named] : defaultWidgetFor(fieldSchema);
+  return widget ? { ...fieldUi, 'ui:widget': widget } : fieldUi;
+};
+
 /**
- * Sets `ui:widget` to a component for every field, root or conditional.
+ * Sets `ui:widget` to a component for every field: root, conditional, nested in an object,
+ * or inside an array item.
  *
  * RJSF resolves widget names with `react-is`, which comes from the Kibana shared-deps DLL
  * without a default export, so any widget name crashes. A component skips that lookup.
@@ -311,16 +400,7 @@ export const toRenderSchema = (schema: PageInputs | undefined): PageInputs | und
 export const withWidgetComponents = (schema: PageInputs | undefined, ui: UiSchema): UiSchema => {
   const resolved: UiSchema = { ...ui };
   for (const [name, fieldSchema] of Object.entries(collectFields(schema))) {
-    const fieldUi = (ui[name] ?? {}) as PageUiField;
-    const named = fieldUi['ui:widget'];
-    if (named === 'hidden') {
-      // eslint-disable-next-line no-continue
-      continue;
-    }
-    const widget = named ? WIDGETS_BY_NAME[named] : defaultWidgetFor(fieldSchema);
-    if (widget) {
-      resolved[name] = { ...fieldUi, 'ui:widget': widget };
-    }
+    resolved[name] = withFieldWidgets(fieldSchema, (ui[name] ?? {}) as UiSchema);
   }
   return resolved;
 };
@@ -345,10 +425,12 @@ const FieldTemplate = ({
     return children;
   }
   const helpText = [rawDescription, rawHelp].filter(Boolean).join(' ');
+  // RJSF hides the label of a list of objects, but the list needs its name above it.
+  const showLabel = displayLabel || schema.type === 'array';
   return (
     <EuiFormRow
       id={`${id}-row`}
-      label={displayLabel ? `${label}${required ? ' *' : ''}` : undefined}
+      label={showLabel ? `${label}${required ? ' *' : ''}` : undefined}
       helpText={helpText || undefined}
       isInvalid={isInvalid(rawErrors)}
       error={rawErrors}
@@ -359,13 +441,159 @@ const FieldTemplate = ({
   );
 };
 
-const ObjectFieldTemplate = ({ properties }: ObjectFieldTemplateProps) => (
-  <EuiFlexGroup direction="column" gutterSize="m">
-    {properties.map((property) => (
-      <div key={property.name}>{property.content}</div>
+const ObjectFieldTemplate = ({
+  properties,
+  title,
+  description,
+  idSchema,
+}: ObjectFieldTemplateProps) => {
+  const fields = (
+    <EuiFlexGroup direction="column" gutterSize="m">
+      {properties.map((property) => (
+        <div key={property.name}>{property.content}</div>
+      ))}
+    </EuiFlexGroup>
+  );
+  // The page draws the root heading. A nested object gets a titled group.
+  if (idSchema.$id === 'root' || (!title && !description)) {
+    return fields;
+  }
+  return (
+    <EuiPanel hasBorder paddingSize="m">
+      {title && (
+        <EuiTitle size="xxs">
+          <h3>{title}</h3>
+        </EuiTitle>
+      )}
+      {description && (
+        <EuiText size="xs" color="subdued">
+          <p>{description}</p>
+        </EuiText>
+      )}
+      <EuiSpacer size="s" />
+      {fields}
+    </EuiPanel>
+  );
+};
+
+const moveUpLabel = i18n.translate('workflows.pages.array.moveUp', { defaultMessage: 'Move up' });
+const moveDownLabel = i18n.translate('workflows.pages.array.moveDown', {
+  defaultMessage: 'Move down',
+});
+const copyLabel = i18n.translate('workflows.pages.array.copy', { defaultMessage: 'Copy item' });
+const removeLabel = i18n.translate('workflows.pages.array.remove', {
+  defaultMessage: 'Remove item',
+});
+
+interface IconActionProps {
+  iconType: string;
+  label: string;
+  onClick: React.MouseEventHandler<HTMLButtonElement>;
+  isDisabled?: boolean;
+  color?: 'danger';
+}
+
+/** An icon button with its label as a tooltip. */
+const IconAction = ({ iconType, label, onClick, isDisabled, color }: IconActionProps) => (
+  <EuiToolTip content={label} disableScreenReaderOutput>
+    <EuiButtonIcon
+      iconType={iconType}
+      aria-label={label}
+      color={color}
+      isDisabled={isDisabled}
+      onClick={onClick}
+    />
+  </EuiToolTip>
+);
+
+/**
+ * A list: each item in a row with its own buttons, then an Add button. An object item draws
+ * its own bordered group. The field row
+ * around it already shows the label, description, and errors.
+ */
+const ArrayFieldTemplate = ({
+  items,
+  canAdd,
+  onAddClick,
+  disabled,
+  readonly,
+}: ArrayFieldTemplateProps) => (
+  <EuiFlexGroup direction="column" gutterSize="s">
+    {items.map((item) => (
+      <div key={item.key}>
+        <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+          <EuiFlexItem>{item.children}</EuiFlexItem>
+          {item.hasToolbar && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="xs" responsive={false}>
+                {(item.hasMoveUp || item.hasMoveDown) && (
+                  <>
+                    <IconAction
+                      iconType="chevronSingleUp"
+                      label={moveUpLabel}
+                      isDisabled={item.disabled || item.readonly || !item.hasMoveUp}
+                      onClick={item.onReorderClick(item.index, item.index - 1)}
+                    />
+                    <IconAction
+                      iconType="chevronSingleDown"
+                      label={moveDownLabel}
+                      isDisabled={item.disabled || item.readonly || !item.hasMoveDown}
+                      onClick={item.onReorderClick(item.index, item.index + 1)}
+                    />
+                  </>
+                )}
+                {item.hasCopy && (
+                  <IconAction
+                    iconType="copy"
+                    label={copyLabel}
+                    isDisabled={item.disabled || item.readonly}
+                    onClick={item.onCopyIndexClick(item.index)}
+                  />
+                )}
+                {item.hasRemove && (
+                  <IconAction
+                    iconType="trash"
+                    color="danger"
+                    label={removeLabel}
+                    isDisabled={item.disabled || item.readonly}
+                    onClick={item.onDropIndexClick(item.index)}
+                  />
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </div>
     ))}
+    {canAdd && (
+      <div>
+        <EuiButtonEmpty
+          iconType="plus"
+          size="s"
+          flush="left"
+          onClick={onAddClick}
+          isDisabled={disabled || readonly}
+          data-test-subj="workflowPageArrayAdd"
+        >
+          {i18n.translate('workflows.pages.array.add', { defaultMessage: 'Add item' })}
+        </EuiButtonEmpty>
+      </div>
+    )}
   </EuiFlexGroup>
 );
+
+/** EUI icon buttons for the places RJSF draws them outside a list, such as extra properties. */
+const iconButton =
+  (iconType: string, label: string) =>
+  ({ onClick, disabled }: IconButtonProps) =>
+    (
+      <IconAction
+        iconType={iconType}
+        label={label}
+        isDisabled={disabled}
+        onClick={onClick as React.MouseEventHandler<HTMLButtonElement>}
+      />
+    );
 
 const SubmitButton = ({ uiSchema }: SubmitButtonProps) => {
   const { norender, submitText } = getSubmitButtonOptions(uiSchema);
@@ -385,5 +613,16 @@ const SubmitButton = ({ uiSchema }: SubmitButtonProps) => {
 export const pageTemplates: Partial<TemplatesType> = {
   FieldTemplate,
   ObjectFieldTemplate,
-  ButtonTemplates: { SubmitButton } as TemplatesType['ButtonTemplates'],
+  ArrayFieldTemplate,
+  ButtonTemplates: {
+    SubmitButton,
+    AddButton: iconButton(
+      'plus',
+      i18n.translate('workflows.pages.array.addIcon', { defaultMessage: 'Add' })
+    ),
+    RemoveButton: iconButton('trash', removeLabel),
+    MoveUpButton: iconButton('chevronSingleUp', moveUpLabel),
+    MoveDownButton: iconButton('chevronSingleDown', moveDownLabel),
+    CopyButton: iconButton('copy', copyLabel),
+  } as TemplatesType['ButtonTemplates'],
 };
