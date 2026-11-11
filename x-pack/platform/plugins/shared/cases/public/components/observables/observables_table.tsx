@@ -11,6 +11,7 @@ import type { EuiBasicTableColumn, EuiTableSelectionType } from '@elastic/eui';
 import { EuiInMemoryTable, EuiSkeletonText, EuiSpacer, EuiEmptyPrompt } from '@elastic/eui';
 
 import { OBSERVABLE_TYPES_BUILTIN } from '../../../common/constants';
+import { getCustomObservableTypes } from '../../../common/observables/resolve_observable_types';
 import type { Observable, ObservableType } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common/ui';
 import * as i18n from './translations';
@@ -136,7 +137,10 @@ export const ObservablesTable = ({
   const { data: currentConfiguration, isLoading: loadingCaseConfigure } = useGetCaseConfiguration();
 
   const observableTypes = useMemo(
-    () => [...OBSERVABLE_TYPES_BUILTIN, ...currentConfiguration.observableTypes],
+    () => [
+      ...OBSERVABLE_TYPES_BUILTIN,
+      ...getCustomObservableTypes(currentConfiguration.observableTypes),
+    ],
     [currentConfiguration.observableTypes]
   );
   const columns = useMemo(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiPanel,
@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 
 import { MAX_CUSTOM_OBSERVABLE_TYPES } from '../../../common/constants';
+import { getCustomObservableTypes } from '../../../common/observables/resolve_observable_types';
 import * as i18n from './translations';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import type { ObservableTypesConfiguration } from '../../../common/types/domain';
@@ -43,10 +44,14 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
   handleAddObservableType,
   handleDeleteObservableType,
   handleEditObservableType,
-  observableTypes,
+  observableTypes: configuredObservableTypes,
   useLineSeparators = false,
 }) => {
   const { permissions } = useCasesContext();
+  const observableTypes = useMemo(
+    () => getCustomObservableTypes(configuredObservableTypes),
+    [configuredObservableTypes]
+  );
   const canModifyObservableTypes = !disabled && permissions.settings;
 
   const onAddObservableType = useCallback(() => {

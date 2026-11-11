@@ -63,6 +63,26 @@ describe('ObservableTypes', () => {
       expect(screen.queryByTestId('observable-types-panel')).not.toBeInTheDocument();
     });
 
+    it('does not list the overrides of built-in types', async () => {
+      renderWithTestingProviders(
+        <ObservableTypes
+          {...{
+            ...props,
+            observableTypes: [
+              {
+                key: 'observable-type-agent-id',
+                label: 'Agent id',
+                paths: [{ path: 'agent.id', enabled: false }],
+              },
+            ],
+          }}
+        />
+      );
+
+      expect(await screen.findByTestId('empty-observable-types')).toBeInTheDocument();
+      expect(screen.queryByTestId('observable-types-list')).not.toBeInTheDocument();
+    });
+
     it('shows error when custom fields reaches the limit', async () => {
       const generatedMockCustomFields = [];
 
