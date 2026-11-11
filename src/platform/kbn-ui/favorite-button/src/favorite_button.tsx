@@ -13,11 +13,18 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { FavoriteButtonStatus } from './favorite_status';
 import { StardustWrapper } from './stardust_wrapper';
 
+const ICONS = {
+  star: { empty: 'star', filled: 'starFill' },
+  pin: { empty: 'pin', filled: 'pinFill' },
+} as const;
+
 export interface FavoriteButtonProps {
   status: FavoriteButtonStatus;
   onClick: () => void;
   addLabel: string;
   removeLabel: string;
+  /** Defaults to `star`. */
+  icon?: keyof typeof ICONS;
   isDisabled?: boolean;
   className?: string;
   'data-test-subj'?: string;
@@ -28,6 +35,7 @@ export const FavoriteButton = ({
   onClick,
   addLabel,
   removeLabel,
+  icon = 'star',
   isDisabled,
   className,
   'data-test-subj': dataTestSubj,
@@ -45,7 +53,7 @@ export const FavoriteButton = ({
           isLoading={isRemoving}
           isDisabled={isDisabled}
           aria-label={label}
-          iconType={isFavorite ? 'starFill' : 'star'}
+          iconType={isFavorite ? ICONS[icon].filled : ICONS[icon].empty}
           onClick={onClick}
           className={classNames('cm-favorite-button', {
             'cm-favorite-button--active': isPersistedFavorite && !isRemoving,

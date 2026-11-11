@@ -23,22 +23,26 @@ dependsOn:
   - '@kbn/core-plugins-server'
   - '@kbn/cps-server-utils'
   - '@kbn/es-errors'
-  - '@kbn/es-query'
   - '@kbn/features-plugin'
   - '@kbn/nightshift-shared'
   - '@kbn/server-route-repository'
   - '@kbn/server-route-repository-client'
   - '@kbn/scout-oblt'
   - '@kbn/streams-schema'
+  - '@kbn/task-manager-plugin'
   - '@kbn/zod'
+  - '@kbn/server-route-repository-utils'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod
   - group-observability
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
+    - common/**/*
     - server/**/*
     - public/**/*
     - test/scout/**/*

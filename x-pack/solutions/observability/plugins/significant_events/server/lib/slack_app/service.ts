@@ -325,7 +325,7 @@ export class SlackAppService {
     //   `manage_nightshift`. `configure_nightshift` stays out. Connectors/LLM go through
     //   `actions` (read) via the internal Kibana client, so no grants on system/dot indices
     //   (unsupported in serverless) are needed.
-    // - The agent's before/after workflows read and write the Cortex, memory and
+    // - The agent's before/after workflows read and write the Wiki, memory and
     //   decision-tree AI indices as the caller.
     const apiKeyResult = await this.server.security.authc.apiKeys.grantAsInternalUser(request, {
       name: 'nightshift-relay-agent-builder',
@@ -341,7 +341,7 @@ export class SlackAppService {
               },
               {
                 names: [
-                  'ai-index-idx-nightshift-cortex',
+                  'ai-index-idx-nightshift-wiki',
                   'ai-index-idx-nightshift-semantic-memory',
                   'ai-index-idx-nightshift-decision-trees',
                 ],
@@ -355,7 +355,9 @@ export class SlackAppService {
               spaces: ['*'],
               feature: {
                 nightshift: ['minimal_all'],
-                agentBuilder: ['minimal_all'],
+                // `minimal_all` leaves out the sub-feature that starts a conversation with an
+                // agent bound to a service account, like the Nightshift assistant.
+                agentBuilder: ['minimal_all', 'invoke_bound_agents'],
                 actions: ['read'],
                 workflowsManagement: ['read'],
               },
@@ -575,7 +577,10 @@ export class SlackAppService {
     return { available: true, status: RELAY_APP_CONNECTION_STATUS.error, error: message };
   }
 
-  async getStatus(request: KibanaRequest): Promise<SlackAppStatusResponse> {
+  async getStatus(
+    request: KibanaRequest,
+    { canAdvanceInstall }: { canAdvanceInstall: boolean }
+  ): Promise<SlackAppStatusResponse> {
     const soClient = this.getSoClient(request);
     const [relayClient, connection] = await Promise.all([
       this.getRelayClient(),
@@ -594,6 +599,7 @@ export class SlackAppService {
     // OAuth callback lands on the Relay, not Kibana). The Relay resolves the pending
     // claim from the transport-level deployment identity.
     if (
+      canAdvanceInstall &&
       connection.status === RELAY_APP_CONNECTION_STATUS.oauthInProgress &&
       !connection.tenantKey
     ) {

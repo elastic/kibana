@@ -5,34 +5,72 @@
  * 2.0.
  */
 import { BooleanFromString } from '@kbn/zod-helpers';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-import { sloHealthSchema } from '../../schema/zod/health';
-import { sloDefinitionSchema } from '../../schema/zod/slo';
+import { sloHealthSchema } from '../../schema/health';
+import { sloDefinitionSchema } from '../../schema/slo';
 
-const findSloDefinitionsParamsSchema = z.object({
-  query: z
-    .object({
-      search: z.string().optional(),
-      includeOutdatedOnly: BooleanFromString.optional(),
-      includeHealth: BooleanFromString.optional(),
-      tags: z.string().optional(),
-      page: z.string().optional(),
-      perPage: z.string().optional(),
+const findSloDefinitionsParamsSchema = lazySchema(() =>
+  z.object({
+    query: z
+      .object({
+        search: z
+          .string()
+          .meta({ example: 'checkout' })
+          .optional()
+          .describe('Filters the SLOs by name'),
+        includeOutdatedOnly: BooleanFromString.meta({ example: 'true' })
+          .optional()
+          .describe('Indicates if the API returns only outdated SLO or all SLO definitions'),
+        includeHealth: BooleanFromString.meta({ example: 'true' })
+          .optional()
+          .describe('Indicates if the API returns SLO health data with definitions'),
+        tags: z
+          .string()
+          .meta({ example: 'production' })
+          .optional()
+          .describe('Filters the SLOs by tag'),
+        page: z
+          .string()
+          .meta({ example: '1' })
+          .optional()
+          .describe('The page to use for pagination, must be greater or equal than 1'),
+        perPage: z
+          .string()
+          .meta({ example: '100' })
+          .optional()
+          .describe('Number of SLOs returned by page'),
+      })
+      .optional(),
+  })
+);
+
+const sloDefinitionResponseSchema = lazySchema(() =>
+  sloDefinitionSchema
+    .extend({
+      health: sloHealthSchema.optional(),
     })
-    .optional(),
-});
+    .meta({
+      id: 'SLODefinitionResponse',
+      description: 'The SLO definition, with its health when requested',
+      additionalProperties: true,
+    })
+);
 
-const sloDefinitionResponseSchema = sloDefinitionSchema.extend({
-  health: sloHealthSchema.optional(),
-});
-
-const findSloDefinitionsResponseSchema = z.object({
-  page: z.number(),
-  perPage: z.number(),
-  total: z.number(),
-  results: z.array(sloDefinitionResponseSchema),
-});
+const findSloDefinitionsResponseSchema = lazySchema(() =>
+  z
+    .object({
+      page: z.number(),
+      perPage: z.number(),
+      total: z.number(),
+      results: z.array(sloDefinitionResponseSchema),
+    })
+    .meta({
+      id: 'SLOFindDefinitionsResponse',
+      description: 'A paginated response of SLO definitions matching the query.',
+      additionalProperties: true,
+    })
+);
 
 type FindSLODefinitionsParams = NonNullable<
   z.output<typeof findSloDefinitionsParamsSchema.shape.query>

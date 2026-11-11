@@ -87,7 +87,8 @@ pre-run reset. Scored tasks never decide a Proposal.
 - `datasets/golden.ts`: one row per core path (confirmed hit, clean no-hit, blocked index scope).
 - `datasets/hard_cases.ts`: multi-candidate fan-out, clean repeat, unknown report id,
   IOC-only difficult hit, plus the two fault rows: a report over the per-hunt IOC bound
-  (`partial`) and an Investigation the Worker is locked out of (`failed`). See "Fault rows".
+  (`completed` with `retired_incomplete` hunt status) and an Investigation the Worker is locked out
+  of (`failed`). See "Fault rows".
 - `datasets/canary.ts`: a suite-authored prose-only report scored only by the inverted evaluator.
 - `datasets/holdout.ts`: one hit, one IOC-only hit and one clean row on report ids the iteration
   cohorts never touch. Skipped unless `HUNT_WATCH_HOLDOUT=1`, so day-to-day runs cannot tune
@@ -124,17 +125,18 @@ deletes the Investigation, and clears `evidence` on the report doc.
 
 ## Fault rows
 
-Nothing on `main` ends `partial` or `failed` on its own, and a suite that only ever sees
+Nothing on `main` ends `retired_incomplete` or `failed` on its own, and a suite that only ever sees
 `success` cannot tell whether the Worker's incomplete and failed paths still report honestly.
 Two hard rows force those paths without touching the product:
 
-- `hard-partial-ioc-dump` (`partial`, `incomplete_stage: hunt`). The seed writes a suite-authored
+- `hard-partial-ioc-dump` (`completed` via `retired_incomplete`). The seed writes a suite-authored
   report (`ti-report-hunt-eval-ioc-dump-01`) carrying one more IOC than
   `MAX_HUNT_REPORT_IOCS` in the Worker's `load_report_context`, all TEST-NET-3 addresses the
   generator never emits. The loader drops the overflow, the coordinator records an
   `input_truncated` gap, and because that gap is deterministic (no retry can make the report
-  smaller) the hunt ends `incomplete_final`: evidence is written, no verdict is recorded, the
-  Investigation stays `open`, and the narrative has to say part of the report was not searched.
+  smaller) the hunt ends `incomplete_final` and emits `retired_incomplete`: evidence is written as
+  incomplete, packaging closes the Investigation as `other` with the retired summary, and the
+  narrative has to say part of the report was not searched.
   `seed_contract.test.ts` reads the bound from the Worker source so a change to it fails in Jest
   first.
 - `hard-failed-locked-investigation` (`failed`, `incomplete_stage: hunt`). The seed copies the
@@ -257,7 +259,7 @@ d=$(mktemp -d) && cp gate_checklist.yaml "$d/gate-checklist.yaml"
 
 ## Known Worker behavior pinned by the datasets
 
-- No-hit rows end `completed` with the Investigation `closed` / `close_reason: benign`, and the
+- No-hit rows end `completed` with the Investigation `closed` / `close_reason: benign` (`other` for the retired row), and the
   gate's resumed close writes `closed` / `resolved`. Both depend on the Worker's in-process
   `ai.conversation.metadata.patch` being allowed to patch a conversation the service account owns
   (Public conversation access, #297385). Before that landed the clean rows pinned `partial` at

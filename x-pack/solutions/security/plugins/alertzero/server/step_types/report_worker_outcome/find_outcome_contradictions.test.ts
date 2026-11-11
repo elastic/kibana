@@ -113,6 +113,30 @@ describe('findOutcomeContradictions', () => {
       [],
     ],
     [
+      'none in a clean-closed successful hunt report',
+      hunt({ investigation_id: INVESTIGATION_ID, hunt_status: 'success', closed_clean: true }),
+      [],
+    ],
+    [
+      'none in a retired hunt report that closed as benign',
+      hunt({
+        investigation_id: INVESTIGATION_ID,
+        hunt_status: 'retired_incomplete',
+        closed_clean: true,
+      }),
+      [],
+    ],
+    [
+      'a partial hunt report that closed as benign',
+      hunt({ investigation_id: INVESTIGATION_ID, hunt_status: 'partial', closed_clean: true }),
+      ['hunt_report_completed closed_clean requires hunt_status success or retired_incomplete'],
+    ],
+    [
+      'a failed hunt report that closed as benign',
+      hunt({ investigation_id: INVESTIGATION_ID, hunt_status: 'failed', closed_clean: true }),
+      ['hunt_report_completed closed_clean requires hunt_status success or retired_incomplete'],
+    ],
+    [
       'a successful hunt report without an Investigation',
       hunt({ investigation_id: '', package_status: 'success' }),
       ['hunt_report_completed without investigation_id requires package_status run_incomplete'],

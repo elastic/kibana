@@ -10,10 +10,10 @@
 import type { Page, TestInfo } from '@playwright/test';
 import { test as base } from '@playwright/test';
 import type { ScoutPage } from '.';
-import type { PathOptions } from '../../../../../common/services/kibana_url';
 import type { KibanaUrl, ScoutLogger } from '../../worker';
 import type { ScoutSpaceParallelFixture } from '../../worker/scout_space';
 import { attachBrowserConsoleErrors, collectBrowserConsoleErrors } from './browser_console_errors';
+import { navigateToApp, type GotoAppOptions } from './goto_app';
 import { extendPlaywrightPage } from './single_thread';
 
 export const scoutPageParallelFixture = base.extend<
@@ -35,11 +35,12 @@ export const scoutPageParallelFixture = base.extend<
     const extendedPage = extendPlaywrightPage({ page, kbnUrl });
 
     // Overriding navigation to specific Kibana apps: url should respect the Kibana Space id
-    extendedPage.gotoApp = (
-      appName: string,
-      pathOptions?: PathOptions,
-      options?: Parameters<Page['goto']>[1]
-    ) => page.goto(kbnUrl.app(appName, { space: scoutSpace.id, pathOptions }), options);
+    extendedPage.gotoApp = (appName: string, options?: GotoAppOptions) =>
+      navigateToApp(
+        page,
+        (pathOptions) => kbnUrl.app(appName, { space: scoutSpace.id, pathOptions }),
+        options
+      );
 
     log.serviceLoaded(`scoutPage`);
     await use(extendedPage);

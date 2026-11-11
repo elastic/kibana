@@ -7,8 +7,13 @@
 
 import type { RunContextStackEntry } from '@kbn/agent-builder-server';
 import type { SignalEntry, SignificantEvent } from '@kbn/significant-events-schema';
-import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
+import {
+  DISCOVERY_SEVERITY_APPLICATION_RULE,
+  MAX_TEXT_LENGTH,
+  SEVERITY_CONTRACT_RULE,
+} from '@kbn/significant-events-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
@@ -111,6 +116,12 @@ describe('events_write tool', () => {
     ).toBe(false);
   });
 
+  it('exposes reopen_deactivated to the agent', () => {
+    expect(
+      eventsWriteSchema.safeParse({ items: [{ ...input, reopen_deactivated: true }] }).success
+    ).toBe(true);
+  });
+
   it('rejects input without an items array', () => {
     expect(eventsWriteSchema.safeParse(input).success).toBe(false);
   });
@@ -140,14 +151,19 @@ describe('events_write tool', () => {
       items: [{ ...input, signals: [signal, signal] }],
     });
 
-    [duplicateAcrossItems, duplicateWithinItem].forEach((result) => {
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues.at(-1)?.message).toBe(
-          'Each detection rule UUID may appear exactly once in the complete write, including within a single event item. Correct ownership before the single write; never retry with an empty placeholder.'
-        );
-      }
-    });
+    expect(duplicateAcrossItems.success).toBe(false);
+    if (!duplicateAcrossItems.success) {
+      expect(duplicateAcrossItems.error.issues.at(-1)?.message).toContain(
+        'Rule UUID rule-1 is in items 0 and 1'
+      );
+      expect(duplicateAcrossItems.error.issues.at(-1)?.message).toContain('merge those items');
+    }
+    expect(duplicateWithinItem.success).toBe(false);
+    if (!duplicateWithinItem.success) {
+      expect(duplicateWithinItem.error.issues.at(-1)?.message).toBe(
+        'Rule UUID rule-1 appears twice in item 0. List each rule once per item, then call again with the complete request.'
+      );
+    }
   });
 
   describe('breaching signal invariant', () => {
@@ -178,13 +194,13 @@ describe('events_write tool', () => {
     };
     const { event_id: _omitted, ...newEventInput } = input;
 
-    it('accepts a new event backed only by an inconclusive result that found rows, rated low', () => {
+    it('accepts a new event backed only by an off_topic row, rated low', () => {
       expect(
         eventsWriteSchema.safeParse({
           items: [
             {
               ...newEventInput,
-              signals: [signalWith('inconclusive')],
+              signals: [signalWith('off_topic')],
               severity: 'low',
               confidence: 0.2,
             },
@@ -196,6 +212,7 @@ describe('events_write tool', () => {
     it.each([
       ['refuting evidence', [signalWith('refutes')]],
       ['a quiet not_checked rule', [quiet]],
+      ['an inconclusive result', [signalWith('inconclusive')]],
       [
         'an inconclusive result with no rows',
         [
@@ -217,23 +234,6 @@ describe('events_write tool', () => {
         );
       }
     });
-
-    it.each([
-      ['severity', { severity: 'medium', confidence: 0.2 }, 'severity must be low'],
-      ['confidence', { severity: 'low', confidence: 0.6 }, 'confidence is at most 0.3'],
-    ])(
-      'rejects a new event with nothing confirmed that rates its %s too high',
-      (_label, fields, message) => {
-        const result = eventsWriteSchema.safeParse({
-          items: [{ ...newEventInput, signals: [signalWith('inconclusive')], ...fields }],
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error.issues.map(({ message: m }) => m).join(' ')).toContain(message);
-        }
-      }
-    );
 
     it('rejects a new event with no signals at all', () => {
       const result = eventsWriteSchema.safeParse({
@@ -698,6 +698,29 @@ describe('events_write tool', () => {
     );
   });
 
+  it('accepts a blast radius entry without a source_id and writes it as sent', async () => {
+    getFeatures.mockResolvedValue({ hits: [] });
+    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+      { index: 0, event_uuid: 'u', event_id: 'e', status: 'open', written: true },
+    ]);
+    const blastRadius = [{ type: 'entity' as const, feature_id: 'checkout-api', name: 'Checkout' }];
+
+    expect(eventsWriteItemSchema.safeParse({ ...input, blast_radius: blastRadius }).success).toBe(
+      true
+    );
+    await invokeHandler(
+      createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
+      { items: [{ ...input, blast_radius: blastRadius }] },
+      createMockToolContext()
+    );
+
+    expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        inputs: [expect.objectContaining({ blast_radius: blastRadius })],
+      })
+    );
+  });
+
   it('refuses a feature_id that names no Knowledge Indicator of a source that has some', async () => {
     getFeatures.mockImplementation((_sourceIds, options) => {
       const known = {
@@ -812,6 +835,60 @@ describe('events_write tool', () => {
     );
   });
 
+  it('reports only persisted alert identities and the creation group_hash', async () => {
+    const { event_id: _eventId, ...newItem } = input;
+    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+      {
+        index: 0,
+        event_id: 'event-1',
+        status: 'active',
+        written: true,
+        created: true,
+        group_hash: 'hash-1',
+      },
+      { index: 1, event_id: 'event-2', status: 'active', written: true, created: false },
+      {
+        index: 2,
+        event_id: 'generated-2',
+        written: false,
+        reason: 'bulk_error',
+        error: { type: 'rule_events_write_error', reason: 'busy' },
+      },
+      {
+        index: 3,
+        event_id: 'closed-event',
+        existing_event_id: 'closed-event',
+        written: false,
+        reason: 'bulk_error',
+        error: { type: 'rule_events_write_error', reason: 'busy' },
+      },
+    ]);
+    const telemetry = { trackAgentToolEventsWrite: jest.fn() };
+    const context = createMockToolContext();
+    context.request = httpServerMock.createKibanaRequest({ spaceId: 'space-a' });
+
+    await invokeHandler(
+      createTool(telemetry) as never,
+      { items: [input, { ...input, event_id: 'event-2' }, newItem, newItem] },
+      context
+    );
+
+    const identity = { alert_source: 'elastic.significant_events', space_id: 'space-a' };
+    const payloads = telemetry.trackAgentToolEventsWrite.mock.calls.map(([payload]) => payload);
+    expect(payloads[0]).toMatchObject({
+      ...identity,
+      fingerprint: 'event-1',
+      group_hash: 'hash-1',
+    });
+    expect(payloads[1]).toMatchObject({ ...identity, fingerprint: 'event-2' });
+    expect(payloads[1]).not.toHaveProperty('group_hash');
+    expect(payloads[2]).toMatchObject(identity);
+    expect(payloads[2]).not.toHaveProperty('fingerprint');
+    expect(payloads[2]).not.toHaveProperty('group_hash');
+    expect(payloads[3]).toMatchObject({ ...identity, fingerprint: 'closed-event' });
+    expect(payloads[3]).not.toHaveProperty('group_hash');
+  });
+
   it('returns a classified validation error', async () => {
     (eventsWriteBulkHandler as jest.Mock).mockRejectedValue(
       new BulkWriteError('validation_error', 'duplicate event_id')
@@ -862,6 +939,13 @@ describe('eventsWriteItemSchema', () => {
       },
     ],
   };
+
+  it('describes severity with the shared contract and the discovery application rule', () => {
+    const description = eventsWriteItemSchema.shape.severity.description;
+
+    expect(description).toContain(SEVERITY_CONTRACT_RULE);
+    expect(description).toContain(DISCOVERY_SEVERITY_APPLICATION_RULE);
+  });
 
   it('accepts a valid item at the field length boundaries', () => {
     expect(eventsWriteItemSchema.safeParse(validItem).success).toBe(true);

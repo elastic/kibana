@@ -12,18 +12,17 @@ import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/clas
 
 /**
  * Config set for the hunt-watch eval suite. The suite drives the managed Hunt Watch Worker
- * (`system-security-hunt-continuous-threat-hunt`), which needs four things that are off by
- * default.
+ * (`system-security-hunt-continuous-threat-hunt`).
  *
- * `xpack.alertzero.enabled` defaults to `false`. `agenticInvestigations` and `proposals` are
- * optional dependencies of alertzero that also default to `false`, and
- * `xpack.security.serviceAccounts.enabled` defaults to `false`. AlertZero checks all three at
- * setup and start (`alertzero/server/plugin.ts`): without any one of them the Worker services are
- * never created, the managed hunt workflows are never installed, and every `/internal/alertzero/*`
- * route (the Worker list/enable route this suite's preflight calls) answers 503 "AlertZero
- * dependencies are unavailable".
+ * The Worker needs `alertzero`, its runtime deps `agenticInvestigations` and `proposals`, and
+ * service accounts. All four are on by default in stateful. AlertZero checks them at setup and
+ * start (`alertzero/server/plugin.ts`): without any one of them the Worker services are never
+ * created, the managed hunt workflows are never installed, and every `/internal/alertzero/*` route
+ * (the Worker list/enable route this suite's preflight calls) answers 503 "AlertZero dependencies
+ * are unavailable".
  *
- * Only the service accounts flag is set here, not `serviceAccountsServerArgs`: that helper also
+ * The service accounts flag is pinned so a local override cannot refuse the Worker's service
+ * account. It is set directly rather than through `serviceAccountsServerArgs`: that helper also
  * loads the security API integration test plugin, which this suite never calls.
  *
  * Nothing else is needed. `workflows:ui:enabled` already defaults to `true`, and `inbox` is only
@@ -40,9 +39,6 @@ export const servers: ScoutServerConfig = {
     ...evalsTracingConfig.kbnTestServer,
     serverArgs: [
       ...evalsTracingConfig.kbnTestServer.serverArgs,
-      '--xpack.alertzero.enabled=true',
-      '--xpack.agenticInvestigations.enabled=true',
-      '--xpack.proposals.enabled=true',
       '--xpack.security.serviceAccounts.enabled=true',
     ],
   },

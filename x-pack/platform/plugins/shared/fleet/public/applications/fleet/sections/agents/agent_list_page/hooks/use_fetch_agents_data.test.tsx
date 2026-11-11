@@ -124,6 +124,7 @@ jest.mock('../../../../hooks', () => ({
     cloud: {},
     data: { dataViews: { getFieldsForWildcard: jest.fn() } },
   }),
+  useRestartAgentAction: jest.fn().mockReturnValue({ isRestartAgentActionEnabled: true }),
 }));
 
 describe('useFetchAgentsData', () => {

@@ -7,7 +7,7 @@
 
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { mockReactFlow } from './src/components/mock/react_flow';
-// eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line @kbn/compat/import-no-extraneous-dependencies
 import '@testing-library/jest-dom';
 
 mockReactFlow();

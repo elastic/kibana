@@ -10,7 +10,18 @@ import type { InvestigationTriggerType } from './workflows/triggers';
 
 export type { Severity } from '@kbn/significant-events-schema';
 
-export { MAX_RULE_NAMES, MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from './automation_limits';
+export type { AlertSourceMode } from './automation_limits';
+
+export {
+  MAX_RULE_NAMES,
+  MAX_ALERT_SOURCES,
+  MAX_ALERT_SOURCE_LENGTH,
+  CLASSIC_ALERT_SOURCE,
+  UNIVERSAL_ALERT_SOURCE,
+  EXTERNAL_ALERT_SOURCE,
+  MAX_AUTOMATION_INSTRUCTIONS_LENGTH,
+} from './automation_limits';
+export { isScheduleOnlyAutomation } from './automation_run';
 export { parsePresetSchedule, presetScheduleSchema } from './automation_schedule';
 export type { PresetSchedule } from './automation_schedule';
 
@@ -44,6 +55,7 @@ export {
   investigationSubjectSchema,
   MAX_ALERTS_PER_INVESTIGATION,
   MAX_INVESTIGATION_NOTIFICATIONS,
+  MAX_V2_ALERT_DATA_LENGTH,
   v2AlertSnapshotSchema,
 } from './schemas';
 
@@ -66,6 +78,8 @@ export interface StartInvestigationRequest {
   /** What initiated the investigation. */
   trigger_type: InvestigationTriggerType;
   message?: string;
+  /** Optional operator guidance for this round, limited to 5,000 characters. */
+  instructions?: string;
   /** Optional upper bound for this investigation workflow run, in seconds. */
   timeout_seconds?: number;
   /**
@@ -126,6 +140,8 @@ export interface StartInvestigationResponse {
    * after a first start the id may not resolve yet.
    */
   investigation_id: string;
+  /** The execution started for an automation, used to follow its investigation after dispatch. */
+  execution_id?: string;
 }
 
 export const NIGHTSHIFT_INVESTIGATION_AGENT_ID = 'nightshift.investigation';
@@ -142,19 +158,19 @@ export const DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID = 'manual';
 export type SeverityCounts = Record<Severity, number>;
 
 export {
-  CORTEX_AI_INDEX_ID,
-  CORTEX_AI_INDEX_DEST,
-  CORTEX_ENTITY_TYPES,
-  CORTEX_PAGE_STATUSES,
-  CORTEX_ENTITY_TYPE_BUCKETS,
-  type CortexEntityType,
-  type CortexPageStatus,
-  type CortexPageSummary,
-  type CortexPage,
-  type CortexStats,
-  type ListCortexPagesResponse,
-  type GetCortexPageResponse,
-} from './cortex';
+  WIKI_AI_INDEX_ID,
+  WIKI_AI_INDEX_DEST,
+  WIKI_ENTITY_TYPES,
+  WIKI_PAGE_STATUSES,
+  WIKI_ENTITY_TYPE_BUCKETS,
+  type WikiEntityType,
+  type WikiPageStatus,
+  type WikiPageSummary,
+  type WikiPage,
+  type WikiStats,
+  type ListWikiPagesResponse,
+  type GetWikiPageResponse,
+} from './wiki';
 
 export {
   NIGHTSHIFT_INVESTIGATION_LOCATOR_ID,
@@ -167,22 +183,28 @@ export {
 } from './locators';
 
 export {
-  SANDBOX_SECRETS_API_PATH,
-  SANDBOX_SECRET_KEY_REGEX,
-  MAX_SANDBOX_SECRET_KEY_LENGTH,
-  MIN_SANDBOX_SECRET_VALUE_LENGTH,
-  MAX_SANDBOX_SECRET_VALUE_LENGTH,
-  MAX_SANDBOX_SECRETS,
-  MAX_SANDBOX_SECRETS_VERSION_LENGTH,
-  validateSandboxSecretKey,
-  validateSandboxSecretValue,
-  hasSandboxSecretValueLineBreak,
-  type SandboxSecretEntry,
-  type GetSandboxSecretsResponse,
-  type PutSandboxSecretsRequest,
-  type PutSandboxSecretsResponse,
-} from './sandbox_secrets';
+  SANDBOX_CONNECTORS_API_PATH,
+  SANDBOX_CONNECTOR_TYPES_API_PATH,
+  type SandboxConnector,
+  type GetSandboxConnectorsResponse,
+  type SandboxConnectorType,
+  type GetSandboxConnectorTypesResponse,
+} from './sandbox_connectors';
 
+export {
+  SANDBOX_ALLOWLIST_API_PATH,
+  MAX_SANDBOX_ALLOWLIST_HOSTS,
+  MAX_SANDBOX_ALLOWLIST_HOST_LENGTH,
+  MAX_SANDBOX_ALLOWLIST_RULE_LENGTH,
+  MAX_SANDBOX_ALLOWLIST_RAW_HOST_LENGTH,
+  normalizeSandboxAllowlistHost,
+  validateSandboxAllowlist,
+  type SandboxAllowlistHostResult,
+  type SandboxAllowlistValidation,
+  type GetSandboxAllowlistResponse,
+  type PutSandboxAllowlistRequest,
+  type PutSandboxAllowlistResponse,
+} from './sandbox_allowlist';
 export {
   CUSTOM_CONTEXT_API_PATH,
   MAX_CUSTOM_CONTEXT_SNIPPET_LENGTH,
@@ -210,12 +232,14 @@ export {
   type OnboardingSuggestionsStatus,
   type OnboardingSuggestionsExecution,
   type GetOnboardingResponse,
+  type EnableOnboardingResponse,
   type StartOnboardingSuggestionsResponse,
 } from './onboarding';
 
 export {
   DECISION_TREE_AI_INDEX_ID,
   DECISION_TREE_AI_INDEX_DEST,
+  DECISION_TREE_TAG,
   DECISION_TREE_DOC_TYPES,
   type DecisionTreeDocType,
   type DecisionTreeStatus,
@@ -263,3 +287,22 @@ export {
   type InvestigationCompletedTriggerPayload,
   type InvestigationFailedTriggerPayload,
 } from './workflows/triggers';
+export type {
+  EnableInvestigatorServiceAccountBody,
+  InvestigatorServiceAccountStatus,
+  NightshiftBoundWorkflowStatus,
+  NightshiftServiceAccountInfo,
+  NightshiftUnboundAutomation,
+} from './service_account';
+
+export {
+  KNOWLEDGE_PURGE_CONFIRMATION,
+  KNOWLEDGE_PURGE_SCOPES,
+  MAX_PURGE_INVESTIGATIONS,
+  emptyPurgeCounts,
+  type KnowledgePurgeCounts,
+  type KnowledgePurgeInvestigation,
+  type KnowledgePurgePreview,
+  type KnowledgePurgeResult,
+  type KnowledgePurgeScope,
+} from './purge';

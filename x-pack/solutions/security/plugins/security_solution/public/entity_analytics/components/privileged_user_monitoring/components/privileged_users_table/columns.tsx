@@ -24,6 +24,7 @@ import {
 import { SecurityPageName, useNavigation } from '@kbn/security-solution-navigation';
 import { encode } from '@kbn/rison';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
+import { formatPageFilterSearchParam } from '@kbn/securitysolution-alerts-page-url';
 import { ALERTS_QUERY_NAMES } from '../../../../../detections/containers/detection_engine/alerts/constants';
 import type { AlertsByStatusAgg } from '../../../../../overview/components/detection_response/alerts_by_status/types';
 import { getRowItemsWithActions } from '../../../../../common/components/tables/helpers';
@@ -39,7 +40,6 @@ import {
 } from '../../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryAlerts } from '../../../../../detections/containers/detection_engine/alerts/use_query';
-import { formatPageFilterSearchParam } from '../../../../../../common/utils/format_page_filter_search_param';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/constants';
 import {
   OPEN_IN_ALERTS_TITLE_STATUS,

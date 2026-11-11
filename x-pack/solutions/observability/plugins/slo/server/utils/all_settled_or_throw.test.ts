@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { allSettledOrThrow } from './all_settled_or_throw';
 
 const flushPromises = () => new Promise<void>((resolve) => setImmediate(resolve));
@@ -46,6 +47,24 @@ describe('allSettledOrThrow', () => {
     first.reject(firstError);
 
     await assertion;
+  });
+
+  it('throws a failure that is not an abort over an earlier abort', async () => {
+    const abortError = new errors.RequestAbortedError('Request aborted');
+    const securityError = new Error('security_exception');
+
+    await expect(
+      allSettledOrThrow([Promise.reject(abortError), Promise.reject(securityError)])
+    ).rejects.toBe(securityError);
+  });
+
+  it('throws the first abort when every rejection is an abort', async () => {
+    const firstAbort = new errors.RequestAbortedError('first');
+    const secondAbort = new errors.RequestAbortedError('second');
+
+    await expect(
+      allSettledOrThrow([Promise.reject(firstAbort), Promise.reject(secondAbort)])
+    ).rejects.toBe(firstAbort);
   });
 
   it('resolves for an empty array', async () => {

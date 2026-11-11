@@ -20,10 +20,10 @@ export const RULES_SETTINGS_TEST_SUBJECTS = {
   RULE_ROW: 'rule-row',
   RULE_ROW_NON_EDITABLE: 'rule-row-isNotEditable',
 
-  // Rules Settings Flyout
-  RULES_SETTINGS_FLYOUT: 'rulesSettingsFlyout',
-  RULES_SETTINGS_FLYOUT_CANCEL_BUTTON: 'rulesSettingsFlyoutCancelButton',
-  RULES_SETTINGS_FLYOUT_SAVE_BUTTON: 'rulesSettingsFlyoutSaveButton',
+  // Rules Settings Page
+  RULES_SETTINGS_PAGE: 'rulesSettingsPage',
+  RULES_SETTINGS_PAGE_CANCEL_BUTTON: 'rulesSettingsPageCancelButton',
+  RULES_SETTINGS_PAGE_SAVE_BUTTON: 'rulesSettingsPageSaveButton',
 } as const;
 
 export const RULE_LIST_TEST_SUBJECTS = {
