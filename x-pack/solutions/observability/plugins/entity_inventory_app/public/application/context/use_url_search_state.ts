@@ -11,7 +11,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import qs from 'query-string';
 import * as rt from 'io-ts';
 import { isRight } from 'fp-ts/Either';
-import { isFilter } from '@kbn/es-query';
+import { buildEsQuery, isFilter } from '@kbn/es-query';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { decode, encode } from '@kbn/rison';
@@ -58,6 +58,15 @@ const UrlSearchStateRT = rt.partial({
 const reuseDefaultIfEqual = <T>(value: T, fallback: T): T =>
   isEqual(value, fallback) ? fallback : value;
 
+const canBuildEsQuery = (filter: Filter): boolean => {
+  try {
+    buildEsQuery(undefined, [], [filter]);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 const sanitize = (
   decoded: rt.TypeOf<typeof UrlSearchStateRT>,
   uiSettings: IUiSettingsClient
@@ -73,7 +82,7 @@ const sanitize = (
     dateRange: reuseDefaultIfEqual(dateRange, DEFAULT_URL_SEARCH_STATE.dateRange),
     query: reuseDefaultIfEqual(query, DEFAULT_URL_SEARCH_STATE.query),
     filters: reuseDefaultIfEqual(
-      (decoded.filters ?? []).filter(isFilter),
+      (decoded.filters ?? []).filter(isFilter).filter(canBuildEsQuery),
       DEFAULT_URL_SEARCH_STATE.filters
     ),
     filterControls: reuseDefaultIfEqual(

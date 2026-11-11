@@ -190,6 +190,15 @@ describe('useUrlSearchState', () => {
       expect(result.current[0].dateRange).toEqual({ from: 'now-1h', to: 'now' });
     });
 
+    it('drops a filter that cannot be built and keeps the rest of the state', () => {
+      const { result } = renderUrlState(
+        '/kubernetes?_a=(filters:!((meta:(type:combined))),dateRange:(from:now-1h,to:now))'
+      );
+
+      expect(result.current[0].filters).toEqual([]);
+      expect(result.current[0].dateRange).toEqual({ from: 'now-1h', to: 'now' });
+    });
+
     it('uses the defaults for the parts missing from the URL state', () => {
       const { result } = renderUrlState(
         '/kubernetes?_a=(filterControls:(attributes:(os.type:!(linux))))'
