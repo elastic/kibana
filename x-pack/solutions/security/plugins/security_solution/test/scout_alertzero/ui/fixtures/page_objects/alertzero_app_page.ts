@@ -26,7 +26,6 @@ export class AlertZeroAppPage {
   public readonly watchSettingsLink: Locator;
   public readonly noModelCallout: Locator;
   public readonly noModelFeatureSettingsButton: Locator;
-  public readonly featureSettingsLink: Locator;
   // Post-enable queue and gate surfaces.
   public readonly proposalsTrendChartRow: Locator;
   public readonly privilegesGate: Locator;
@@ -52,7 +51,6 @@ export class AlertZeroAppPage {
     this.noModelFeatureSettingsButton = this.page.testSubj.locator(
       'alertZeroOnboardingNoModelFeatureSettingsButton'
     );
-    this.featureSettingsLink = this.page.testSubj.locator('alertZeroOnboardingFeatureSettingsLink');
     this.proposalsTrendChartRow = this.page.testSubj.locator('alertZeroProposalsTrendChartRow');
     this.privilegesGate = this.page.testSubj.locator('alertzeroPrivilegesGate');
     this.investigationFlyoutOpenChat = this.page.getByTestId('investigationFlyoutOpenChat');

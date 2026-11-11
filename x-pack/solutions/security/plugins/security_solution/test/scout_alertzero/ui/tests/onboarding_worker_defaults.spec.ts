@@ -60,7 +60,7 @@ spaceTest.describe(
 
           expect(await countTogglesOn(alertZero, workers)).toBe(workers.length);
           await expect(alertZero.selectedCount).toHaveText(
-            `${workers.length} of ${workers.length} Workers selected`
+            `${workers.length} of ${workers.length} Workers on`
           );
         } finally {
           await space.cleanup();
