@@ -106,7 +106,7 @@ const Headers: React.FunctionComponent<{ inputs: OutputFormInputsType }> = ({ in
       label={
         <FormattedMessage
           id="xpack.fleet.settings.editOutputFlyout.otlpHeadersLabel"
-          defaultMessage="Headers (optional)"
+          defaultMessage="Headers"
         />
       }
       helpText={
@@ -242,7 +242,7 @@ const GrpcSettings: React.FunctionComponent<{ inputs: OutputFormInputsType }> = 
         label={
           <FormattedMessage
             id="xpack.fleet.settings.editOutputFlyout.otlpBalancerNameLabel"
-            defaultMessage="Load balancer (optional)"
+            defaultMessage="Load balancer"
           />
         }
         helpText={
@@ -256,7 +256,7 @@ const GrpcSettings: React.FunctionComponent<{ inputs: OutputFormInputsType }> = 
         label={
           <FormattedMessage
             id="xpack.fleet.settings.editOutputFlyout.otlpKeepaliveTimeLabel"
-            defaultMessage="Keepalive time (optional)"
+            defaultMessage="Keepalive time"
           />
         }
         helpText={
@@ -273,7 +273,7 @@ const GrpcSettings: React.FunctionComponent<{ inputs: OutputFormInputsType }> = 
         label={
           <FormattedMessage
             id="xpack.fleet.settings.editOutputFlyout.otlpKeepaliveTimeoutLabel"
-            defaultMessage="Keepalive timeout (optional)"
+            defaultMessage="Keepalive timeout"
           />
         }
         helpText={
@@ -301,7 +301,7 @@ const GrpcSettings: React.FunctionComponent<{ inputs: OutputFormInputsType }> = 
         label={
           <FormattedMessage
             id="xpack.fleet.settings.editOutputFlyout.otlpReadBufferSizeLabel"
-            defaultMessage="Read buffer size in bytes (optional)"
+            defaultMessage="Read buffer size in bytes"
           />
         }
         helpText={
@@ -322,7 +322,7 @@ const GrpcSettings: React.FunctionComponent<{ inputs: OutputFormInputsType }> = 
         label={
           <FormattedMessage
             id="xpack.fleet.settings.editOutputFlyout.otlpWriteBufferSizeLabel"
-            defaultMessage="Write buffer size in bytes (optional)"
+            defaultMessage="Write buffer size in bytes"
           />
         }
         helpText={
@@ -347,7 +347,7 @@ const GrpcSettings: React.FunctionComponent<{ inputs: OutputFormInputsType }> = 
         label={
           <FormattedMessage
             id="xpack.fleet.settings.editOutputFlyout.otlpUserAgentLabel"
-            defaultMessage="User agent (optional)"
+            defaultMessage="User agent"
           />
         }
         helpText={
@@ -368,7 +368,7 @@ const GrpcSettings: React.FunctionComponent<{ inputs: OutputFormInputsType }> = 
         label={
           <FormattedMessage
             id="xpack.fleet.settings.editOutputFlyout.otlpAuthorityLabel"
-            defaultMessage="Authority (optional)"
+            defaultMessage="Authority"
           />
         }
         helpText={
@@ -447,7 +447,7 @@ export const OutputFormOtlpSection: React.FunctionComponent<{ inputs: OutputForm
         label={
           <FormattedMessage
             id="xpack.fleet.settings.editOutputFlyout.otlpTimeoutLabel"
-            defaultMessage="Timeout (optional)"
+            defaultMessage="Timeout"
           />
         }
         helpText={<OtlpSpecDefaultHint defaultValue="5s" specUrl={OTEL_SPEC_URLS.exporterHelper} />}

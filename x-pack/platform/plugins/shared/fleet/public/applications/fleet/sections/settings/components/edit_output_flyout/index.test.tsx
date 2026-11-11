@@ -2283,7 +2283,7 @@ describe('EditOutputFlyout', () => {
       const { utils: grpcUtils } = renderFlyout(otlpOutput);
       expect(
         grpcUtils
-          .getByText('Headers (optional)')
+          .getByText('Headers')
           .closest('.euiFormRow')
           ?.querySelector('a')
           ?.getAttribute('href')
@@ -2299,7 +2299,7 @@ describe('EditOutputFlyout', () => {
       });
       expect(
         httpUtils
-          .getByText('Headers (optional)')
+          .getByText('Headers')
           .closest('.euiFormRow')
           ?.querySelector('a')
           ?.getAttribute('href')
