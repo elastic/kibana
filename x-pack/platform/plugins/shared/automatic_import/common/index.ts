@@ -45,6 +45,8 @@ export {
   UpdateDataStreamPipelineRequestBody,
 } from './model/api/data_streams/data_stream.gen';
 
+export { isUnsafeProperty, mergeObjectElements, mergeSamples } from './merge_samples';
+
 export type {
   Integration,
   DataStream,
