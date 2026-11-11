@@ -892,12 +892,7 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
               <EuiLiveAnnouncer>{selectionAnnouncement}</EuiLiveAnnouncer>
 
               <div style={{ maxWidth: '100%', overflow: 'auto' }}>
-                <EuiTable
-                  data-test-subj="indexTable"
-                  scrollableInline
-                  responsiveBreakpoint={false}
-                  tableLayout="auto"
-                >
+                <EuiTable data-test-subj="indexTable">
                   <EuiScreenReaderOnly>
                     <caption role="status" aria-relevant="text" aria-live="polite">
                       <FormattedMessage
