@@ -366,6 +366,14 @@ export const AutomationDetailFlyout = ({
     );
   };
 
+  const workflowWarning = (
+    <AutomationWorkflowWarning
+      automation={automation}
+      canManage={canManage}
+      editDisabledReason={editDisabledReason}
+    />
+  );
+
   return (
     <EuiFlyout
       type="overlay"
@@ -478,11 +486,7 @@ export const AutomationDetailFlyout = ({
                   </EuiBadgeGroup>
                 </header>
                 <div css={{ padding: `${euiTheme.size.s} ${euiTheme.size.base}` }}>
-                  <AutomationWorkflowWarning
-                    automation={automation}
-                    canManage={canManage}
-                    editDisabledReason={editDisabledReason}
-                  />
+                  {workflowWarning}
                   <InfoStrip
                     items={[
                       {
@@ -579,13 +583,7 @@ export const AutomationDetailFlyout = ({
             )}
             <EuiFlyoutBody>
               <div css={bodyCss}>
-                {isEditing && (
-                  <AutomationWorkflowWarning
-                    automation={automation}
-                    canManage={canManage}
-                    editDisabledReason={editDisabledReason}
-                  />
-                )}
+                {isEditing && workflowWarning}
                 {isEditing ? (
                   <AutomationFormBody
                     readOnly={Boolean(workflowRepairReason)}

@@ -140,29 +140,21 @@ export const AutomationWorkflowWarning = ({
         }
         data-test-subj="automationWorkflowWarning"
         actionProps={{
-          primary: needsRepair
-            ? {
-                children: getRepairLabel(automation),
-                iconType: 'wrench',
-                disabled: !canManage,
-                title: editDisabledReason,
-                isLoading: repair.isLoading,
-                onClick: () => repair.mutate(automation),
-                'data-test-subj': 'repairAutomation',
-                ...getEbtProps({
-                  action: NIGHTSHIFT_EBT_ACTIONS.REPAIR_AUTOMATION,
-                  element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_DETAIL_FLYOUT,
-                }),
-              }
-            : {
-                children: workflowRecoveryLabels.retry,
-                iconType: 'refresh',
-                onClick: () => refresh(),
-                ...getEbtProps({
-                  action: NIGHTSHIFT_EBT_ACTIONS.RETRY_AUTOMATION_WORKFLOW,
-                  element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_DETAIL_FLYOUT,
-                }),
-              },
+          primary: {
+            children: needsRepair ? getRepairLabel(automation) : workflowRecoveryLabels.retry,
+            iconType: needsRepair ? 'wrench' : 'refresh',
+            disabled: needsRepair && !canManage,
+            title: needsRepair ? editDisabledReason : undefined,
+            isLoading: needsRepair && repair.isLoading,
+            onClick: () => (needsRepair ? repair.mutate(automation) : refresh()),
+            'data-test-subj': needsRepair ? 'repairAutomation' : undefined,
+            ...getEbtProps({
+              action: needsRepair
+                ? NIGHTSHIFT_EBT_ACTIONS.REPAIR_AUTOMATION
+                : NIGHTSHIFT_EBT_ACTIONS.RETRY_AUTOMATION_WORKFLOW,
+              element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_DETAIL_FLYOUT,
+            }),
+          },
         }}
       />
       <EuiSpacer size="s" />

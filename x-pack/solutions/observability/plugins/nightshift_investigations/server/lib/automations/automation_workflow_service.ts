@@ -16,7 +16,7 @@ import { automationCompletionSchema } from './schemas';
 import { generateWorkflowYaml } from './generate_workflow_yaml';
 import { validateScheduledAutomation } from './validate_scheduled_automation';
 import type { NightshiftAutomationAttributes, NightshiftAutomationRecord } from './types';
-import type { AutomationUpdate } from './automation_update';
+import type { AutomationUpdate } from '../../routes/automations/update_automation';
 
 interface Dependencies {
   getAutomationsSoClient: GetAutomationsSoClient;
@@ -137,26 +137,105 @@ export const createAutomationWorkflowService = ({
     assertStateAvailable(states.get(automation.id)?.state);
   };
 
-  const reconcile = (
+  const readWorkflow = async (
+    workflowId: string | undefined,
+    spaceId: string,
+    message = 'Unable to verify the backing workflow. Try again.'
+  ) => {
+    try {
+      return workflowId ? (await readStates([workflowId], spaceId))[0] : undefined;
+    } catch {
+      throw serverUnavailable(message);
+    }
+  };
+
+  const validate = (automation: NightshiftAutomationAttributes): void => {
+    const completions = automationCompletionSchema
+      .array()
+      .max(10)
+      .safeParse(automation.completions);
+    if (!completions.success) throw badRequest(completions.error.message);
+    automation.completions = completions.data;
+    validateScheduledAutomation(automation);
+  };
+
+  const load = async (request: KibanaRequest, spaceId: string, id: string) => {
+    const workflows = management();
+    const serviceAccountId = await getInvestigatorServiceAccountService().resolveAutomationRunAs(
+      request,
+      spaceId
+    );
+    const soClient = getAutomationsSoClient(request, spaceId);
+    const { attributes, version } = await soClient.get<NightshiftAutomationAttributes>(
+      NIGHTSHIFT_AUTOMATION_SO_TYPE,
+      id
+    );
+    return {
+      attributes,
+      workflows,
+      read: () => readWorkflow(attributes.workflowId, spaceId),
+      save: (automation: NightshiftAutomationAttributes) =>
+        soClient.update<NightshiftAutomationAttributes>(
+          NIGHTSHIFT_AUTOMATION_SO_TYPE,
+          id,
+          automation,
+          {
+            mergeAttributes: false,
+            ...(version ? { version } : {}),
+          }
+        ),
+      yaml: (automation: NightshiftAutomationAttributes, isEnabled = automation.isEnabled) =>
+        generateWorkflowYaml({
+          automationId: id,
+          automation: { ...automation, isEnabled },
+          serviceAccountId,
+          universalAlerts: isUniversalAlertingAvailable(),
+        }),
+      updateWorkflow: async (
+        workflowId: string,
+        changes: { yaml?: string; enabled?: boolean }
+      ): Promise<boolean> => {
+        try {
+          await workflows.updateWorkflow(workflowId, changes, spaceId, request);
+          return true;
+        } catch (error) {
+          // An external deletion may race the first lookup; propagate every other failure.
+          if (await readWorkflow(attributes.workflowId, spaceId)) throw error;
+          return false;
+        }
+      },
+      verify: async (
+        automation: NightshiftAutomationAttributes
+      ): Promise<NightshiftAutomationRecord> => {
+        const workflow = await readWorkflow(
+          automation.workflowId,
+          spaceId,
+          'The automation was saved, but its backing workflow could not be verified. Refresh and try again.'
+        );
+        if (!workflow || workflow.enabled !== automation.isEnabled) {
+          throw conflict(
+            'The automation was saved but its backing workflow could not be synchronized. Use Repair to try again.'
+          );
+        }
+        return { id, ...automation, backingWorkflow: { state: 'available' } };
+      },
+    };
+  };
+
+  const update = (
     request: KibanaRequest,
     spaceId: string,
     id: string,
-    changes: AutomationUpdate,
-    repairOnly: boolean
+    changes: AutomationUpdate
   ): Promise<NightshiftAutomationRecord> =>
     withLock(spaceId, id, async () => {
-      const workflows = management();
-      const serviceAccountId = await getInvestigatorServiceAccountService().resolveAutomationRunAs(
+      const { attributes, read, save, yaml, updateWorkflow, verify } = await load(
         request,
-        spaceId
-      );
-      const soClient = getAutomationsSoClient(request, spaceId);
-      const existing = await soClient.get<NightshiftAutomationAttributes>(
-        NIGHTSHIFT_AUTOMATION_SO_TYPE,
+        spaceId,
         id
       );
-      const merged: NightshiftAutomationAttributes = {
-        ...applyChanges(existing.attributes, {
+      const automation: NightshiftAutomationAttributes = {
+        ...applyChanges(attributes, {
           name: changes.name,
           description: changes.description,
           tags: changes.tags,
@@ -164,155 +243,110 @@ export const createAutomationWorkflowService = ({
           trigger: changes.trigger,
           completions: changes.completions,
         }),
-        execution: applyChanges(existing.attributes.execution, changes.execution ?? {}),
-        runtime: applyChanges(existing.attributes.runtime, changes.runtime ?? {}),
+        execution: applyChanges(attributes.execution, changes.execution ?? {}),
+        runtime: applyChanges(attributes.runtime, changes.runtime ?? {}),
         updatedAt: new Date().toISOString(),
       };
       const pauseOnly = changes.isEnabled === false && Object.keys(changes).length === 1;
-
-      // This trusted, space-scoped lookup does not confuse an ACL-hidden workflow with deletion.
-      const readWorkflow = async () => {
-        if (!existing.attributes.workflowId) return undefined;
-        try {
-          return (await readStates([existing.attributes.workflowId], spaceId))[0];
-        } catch {
-          throw serverUnavailable('Unable to verify the backing workflow. Try again.');
-        }
-      };
-      let workflow = await readWorkflow();
-      if (!repairOnly && !pauseOnly) {
+      const workflow = await read();
+      if (!pauseOnly) {
         assertStateAvailable(
           !workflow
             ? 'missing'
-            : workflow.enabled === existing.attributes.isEnabled
+            : workflow.enabled === attributes.isEnabled
             ? 'available'
             : 'out_of_sync'
         );
+        validate(automation);
       }
-      if (repairOnly && workflow?.enabled === merged.isEnabled) {
-        return { id, ...existing.attributes, backingWorkflow: { state: 'available' } };
+      if (
+        workflow &&
+        (await updateWorkflow(
+          workflow.id,
+          pauseOnly ? { enabled: false } : { yaml: yaml(automation) }
+        ))
+      ) {
+        await save(automation);
+        return verify(automation);
       }
-      if (!pauseOnly) {
-        const completions = automationCompletionSchema
-          .array()
-          .max(10)
-          .safeParse(merged.completions);
-        if (!completions.success) throw badRequest(completions.error.message);
-        merged.completions = completions.data;
-        validateScheduledAutomation(merged);
-      }
-      const save = () =>
-        soClient.update<NightshiftAutomationAttributes>(NIGHTSHIFT_AUTOMATION_SO_TYPE, id, merged, {
-          mergeAttributes: false,
-          ...(existing.version ? { version: existing.version } : {}),
-        });
-      const yaml = (isEnabled: boolean) =>
-        generateWorkflowYaml({
-          automationId: id,
-          automation: { ...merged, isEnabled },
-          serviceAccountId,
-          universalAlerts: isUniversalAlertingAvailable(),
-        });
+      if (!pauseOnly) assertStateAvailable('missing');
+      await save(automation);
+      return { id, ...automation, backingWorkflow: { state: 'missing' } };
+    });
 
-      const verifySavedState = async (): Promise<NightshiftAutomationRecord> => {
-        let savedWorkflow: { id: string; enabled: boolean } | undefined;
+  const repair = (
+    request: KibanaRequest,
+    spaceId: string,
+    id: string
+  ): Promise<NightshiftAutomationRecord> =>
+    withLock(spaceId, id, async () => {
+      const { attributes, workflows, read, save, yaml, updateWorkflow, verify } = await load(
+        request,
+        spaceId,
+        id
+      );
+      const workflow = await read();
+      if (workflow?.enabled === attributes.isEnabled) {
+        return { id, ...attributes, backingWorkflow: { state: 'available' } };
+      }
+      const automation = { ...attributes, updatedAt: new Date().toISOString() };
+      validate(automation);
+      if (workflow && (await updateWorkflow(workflow.id, { yaml: yaml(automation) }))) {
+        await save(automation);
+      } else {
+        const replacement = await workflows.createWorkflow(
+          { yaml: yaml(automation, false) },
+          spaceId,
+          request
+        );
+        automation.workflowId = replacement.id;
+        automation.previousWorkflowIds = [
+          ...new Set([
+            ...(attributes.previousWorkflowIds ?? []),
+            ...(attributes.workflowId ? [attributes.workflowId] : []),
+          ]),
+        ];
         try {
-          [savedWorkflow] = await readStates(merged.workflowId ? [merged.workflowId] : [], spaceId);
-        } catch {
-          throw serverUnavailable(
-            'The automation was saved, but its backing workflow could not be verified. Refresh and try again.'
-          );
-        }
-        if (!savedWorkflow || savedWorkflow.enabled !== merged.isEnabled) {
-          throw conflict(
-            'The automation was saved but its backing workflow could not be synchronized. Use Repair to try again.'
-          );
-        }
-        return { id, ...merged, backingWorkflow: { state: 'available' } };
-      };
-
-      if (workflow) {
-        try {
-          await workflows.updateWorkflow(
-            workflow.id,
-            pauseOnly ? { enabled: false } : { yaml: yaml(merged.isEnabled) },
-            spaceId,
-            request
-          );
+          await save(automation);
         } catch (error) {
-          // An external deletion can race the first lookup. Only confirmed absence permits create.
-          workflow = await readWorkflow();
-          if (workflow) throw error;
-          if (!repairOnly && !pauseOnly) assertStateAvailable('missing');
-        }
-        if (workflow) {
-          await save();
-          const result = await verifySavedState();
-          if (repairOnly)
-            logger.info(
-              `Repaired automation ${id} in space ${spaceId} with workflow ${workflow.id}`
-            );
-          return result;
-        }
-      }
-      if (pauseOnly) {
-        await save();
-        return { id, ...merged, backingWorkflow: { state: 'missing' } };
-      }
-      const replacement = await workflows.createWorkflow({ yaml: yaml(false) }, spaceId, request);
-      merged.workflowId = replacement.id;
-      merged.previousWorkflowIds = [
-        ...new Set([
-          ...(existing.attributes.previousWorkflowIds ?? []),
-          ...(existing.attributes.workflowId ? [existing.attributes.workflowId] : []),
-        ]),
-      ];
-      try {
-        await save();
-      } catch (error) {
-        const logCleanupFailure = () =>
-          logger.warn(
-            `Could not remove disabled replacement ${replacement.id} for automation ${id} in space ${spaceId}`
-          );
-        try {
-          const result = await workflows.deleteWorkflows([replacement.id], spaceId, request);
-          if (result.failures.length > 0) logCleanupFailure();
-        } catch {
-          logCleanupFailure();
-        }
-        throw error;
-      }
-      if (merged.isEnabled) {
-        try {
-          await workflows.updateWorkflow(replacement.id, { enabled: true }, spaceId, request);
-        } catch {
-          // Workflows can fail after persisting activation, so compensate before returning failure.
-          try {
-            await workflows.updateWorkflow(replacement.id, { enabled: false }, spaceId, request);
-          } catch {
+          const logCleanupFailure = () =>
             logger.warn(
-              `Could not disable linked replacement ${replacement.id} for automation ${id} in space ${spaceId}`
+              `Could not remove disabled replacement ${replacement.id} for automation ${id} in space ${spaceId}`
+            );
+          try {
+            const result = await workflows.deleteWorkflows([replacement.id], spaceId, request);
+            if (result.failures.length > 0) logCleanupFailure();
+          } catch {
+            logCleanupFailure();
+          }
+          throw error;
+        }
+        if (automation.isEnabled) {
+          try {
+            await workflows.updateWorkflow(replacement.id, { enabled: true }, spaceId, request);
+          } catch {
+            // Activation can fail after being persisted, so compensate before returning failure.
+            try {
+              await workflows.updateWorkflow(replacement.id, { enabled: false }, spaceId, request);
+            } catch {
+              logger.warn(
+                `Could not disable linked replacement ${replacement.id} for automation ${id} in space ${spaceId}`
+              );
+            }
+            throw badRequest(
+              'The backing workflow was repaired but could not be enabled. Use Repair and enable to try again.'
             );
           }
-          throw badRequest(
-            'The backing workflow was repaired but could not be enabled. Use Repair and enable to try again.'
-          );
         }
       }
-      const result = await verifySavedState();
-      logger.info(`Repaired automation ${id} in space ${spaceId} with workflow ${replacement.id}`);
+      const result = await verify(automation);
+      logger.info(
+        `Repaired automation ${id} in space ${spaceId} with workflow ${automation.workflowId}`
+      );
       return result;
     });
 
-  return {
-    withLock,
-    getStates,
-    assertAvailable,
-    update: (request: KibanaRequest, spaceId: string, id: string, changes: AutomationUpdate) =>
-      reconcile(request, spaceId, id, changes, false),
-    repair: (request: KibanaRequest, spaceId: string, id: string) =>
-      reconcile(request, spaceId, id, {}, true),
-  };
+  return { withLock, getStates, assertAvailable, update, repair };
 };
 
 export type AutomationWorkflowService = ReturnType<typeof createAutomationWorkflowService>;

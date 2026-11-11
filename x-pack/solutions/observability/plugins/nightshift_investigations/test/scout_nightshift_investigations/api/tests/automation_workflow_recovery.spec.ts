@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-oblt/api';
-import { tags, type KibanaRole } from '@kbn/scout-oblt';
+import { tags, type ApiClientFixture, type KibanaRole } from '@kbn/scout-oblt';
 import { NIGHTSHIFT_ENABLED_FLAG, NIGHTSHIFT_FEATURE_ID } from '@kbn/nightshift-shared';
 import {
   apiTest,
@@ -16,6 +16,24 @@ import {
   startUnresponsiveLlm,
   uniqueId,
 } from '../fixtures';
+
+const createRequest =
+  (apiClient: ApiClientFixture, cookies: () => Record<string, string>) =>
+  <T = object>(
+    method: 'get' | 'post' | 'put' | 'delete',
+    path: string,
+    body?: object,
+    auth = cookies()
+  ) =>
+    apiClient[method]<T>(path, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...auth,
+        ...(path.startsWith('api/workflows') ? { 'elastic-api-version': '2023-10-31' } : {}),
+      },
+      responseType: 'json',
+      ...(body ? { body } : {}),
+    });
 
 const ROLE: KibanaRole = {
   elasticsearch: { cluster: ['manage_security'], indices: [] },
@@ -71,18 +89,13 @@ apiTest.describe(
 
     apiTest.afterAll(async ({ apiClient, apiServices, samlAuth }) => {
       ({ cookieHeader } = await samlAuth.asInteractiveUser(ROLE));
+      const request = createRequest(apiClient, () => cookieHeader);
       for (const id of [...workflowIds, 'system-nightshift-investigation']) {
-        await apiClient.post(`api/workflows/workflow/${id}/executions/cancel`, {
-          headers: { ...COMMON_HEADERS, ...cookieHeader, 'elastic-api-version': '2023-10-31' },
-        });
+        await request('post', `api/workflows/workflow/${id}/executions/cancel`);
       }
       if (automation) {
-        await apiClient.post(`${PATH}/${automation.id}/repair`, {
-          headers: { ...COMMON_HEADERS, ...cookieHeader },
-        });
-        await apiClient.delete(`${PATH}/${automation.id}`, {
-          headers: { ...COMMON_HEADERS, ...cookieHeader },
-        });
+        await request('post', `${PATH}/${automation.id}/repair`);
+        await request('delete', `${PATH}/${automation.id}`);
       }
       llm.close();
       await apiServices.core.settings({
@@ -94,28 +107,24 @@ apiTest.describe(
       'preserves automatic usage and history when paused, repaired and run again',
       async ({ apiClient, samlAuth }) => {
         apiTest.setTimeout(RECOVERY_JOURNEY_TIMEOUT_MS);
-        const headers = () => ({ ...COMMON_HEADERS, ...cookieHeader });
+        const request = createRequest(apiClient, () => cookieHeader);
         const due = new Date(Date.now() + 90_000);
-        const created = await apiClient.post(PATH, {
-          headers: headers(),
-          responseType: 'json',
-          body: {
-            name: uniqueId('scout-recovery'),
-            isEnabled: true,
-            trigger: {
-              rows: [
-                {
-                  kind: 'schedule',
-                  schedulePreset: 'daily',
-                  time: due.toISOString().slice(11, 16),
-                  timezone: 'UTC',
-                },
-              ],
-            },
-            execution: { promptTemplate: 'Review checkout health.' },
-            completions: [],
-            runtime: { timeoutSeconds: 30, dailyDispatchLimit: 3 },
+        const created = await request('post', PATH, {
+          name: uniqueId('scout-recovery'),
+          isEnabled: true,
+          trigger: {
+            rows: [
+              {
+                kind: 'schedule',
+                schedulePreset: 'daily',
+                time: due.toISOString().slice(11, 16),
+                timezone: 'UTC',
+              },
+            ],
           },
+          execution: { promptTemplate: 'Review checkout health.' },
+          completions: [],
+          runtime: { timeoutSeconds: 30, dailyDispatchLimit: 3 },
         });
         expect(created).toHaveStatusCode(200);
         automation = created.body as Automation;
@@ -123,10 +132,7 @@ apiTest.describe(
         const originalWorkflowId = automation.workflowId;
         workflowIds.add(originalWorkflowId);
         const getHistory = async (query = ''): Promise<History> => {
-          const response = await apiClient.get(`${PATH}/${id}/runs${query}`, {
-            headers: headers(),
-            responseType: 'json',
-          });
+          const response = await request('get', `${PATH}/${id}/runs${query}`);
           expect(response).toHaveStatusCode(200);
           return response.body as History;
         };
@@ -142,81 +148,47 @@ apiTest.describe(
           .toBe(true);
         expect(before.usedToday).toBe(1);
         expect(before.total).toBe(1);
-        const cancelled = await apiClient.post(
-          `api/workflows/workflow/${originalWorkflowId}/executions/cancel`,
-          {
-            headers: { ...headers(), 'elastic-api-version': '2023-10-31' },
-          }
-        );
-        expect(cancelled).toHaveStatusCode(200);
+        expect(
+          await request('post', `api/workflows/workflow/${originalWorkflowId}/executions/cancel`)
+        ).toHaveStatusCode(200);
 
-        const paused = await apiClient.put(`${PATH}/${id}`, {
-          headers: headers(),
-          body: { isEnabled: false },
-          responseType: 'json',
-        });
-        expect(paused).toHaveStatusCode(200);
+        expect(await request('put', `${PATH}/${id}`, { isEnabled: false })).toHaveStatusCode(200);
 
-        const deleted = await apiClient.delete('api/workflows', {
-          headers: { ...headers(), 'elastic-api-version': '2023-10-31' },
-          body: { ids: [originalWorkflowId] },
-          responseType: 'json',
-        });
-        expect(deleted).toHaveStatusCode(200);
-        const missing = await apiClient.get(`${PATH}/${id}`, {
-          headers: headers(),
-          responseType: 'json',
-        });
+        expect(
+          await request('delete', 'api/workflows', { ids: [originalWorkflowId] })
+        ).toHaveStatusCode(200);
+        const missing = await request('get', `${PATH}/${id}`);
         expect(missing).toHaveStatusCode(200);
         expect(missing.body).toMatchObject({
           isEnabled: false,
           backingWorkflow: { state: 'missing' },
         });
-        const refusedRun = await apiClient.post(`${PATH}/${id}/run`, {
-          headers: headers(),
-          responseType: 'json',
-        });
+        const refusedRun = await request('post', `${PATH}/${id}/run`);
         expect(refusedRun).toHaveStatusCode(409);
         expect(refusedRun.body).toMatchObject({ message: expect.stringContaining('Repair') });
 
         const readAuth = await samlAuth.asInteractiveUser(NIGHTSHIFT_READ_ROLE);
-        const readWarning = await apiClient.get(`${PATH}/${id}`, {
-          headers: { ...COMMON_HEADERS, ...readAuth.cookieHeader },
-          responseType: 'json',
-        });
+        const readWarning = await request('get', `${PATH}/${id}`, undefined, readAuth.cookieHeader);
         expect(readWarning).toHaveStatusCode(200);
         expect(readWarning.body).toMatchObject({ backingWorkflow: { state: 'missing' } });
-        const refusedRepair = await apiClient.post(`${PATH}/${id}/repair`, {
-          headers: { ...COMMON_HEADERS, ...readAuth.cookieHeader },
-          responseType: 'json',
-        });
-        expect(refusedRepair).toHaveStatusCode(403);
+        expect(
+          await request('post', `${PATH}/${id}/repair`, undefined, readAuth.cookieHeader)
+        ).toHaveStatusCode(403);
         ({ cookieHeader } = await samlAuth.asInteractiveUser(ROLE));
 
         for (const body of [{ isEnabled: true }, { name: 'Changed' }]) {
-          const refusedUpdate = await apiClient.put(`${PATH}/${id}`, {
-            headers: headers(),
-            body,
-            responseType: 'json',
-          });
+          const refusedUpdate = await request('put', `${PATH}/${id}`, body);
           expect(refusedUpdate).toHaveStatusCode(409);
           expect(refusedUpdate.body).toMatchObject({ message: expect.stringContaining('Repair') });
         }
-        const pausedMissing = await apiClient.put(`${PATH}/${id}`, {
-          headers: headers(),
-          body: { isEnabled: false },
-          responseType: 'json',
-        });
+        const pausedMissing = await request('put', `${PATH}/${id}`, { isEnabled: false });
         expect(pausedMissing).toHaveStatusCode(200);
         expect(pausedMissing.body).toMatchObject({
           isEnabled: false,
           workflowId: originalWorkflowId,
           backingWorkflow: { state: 'missing' },
         });
-        const repaired = await apiClient.post(`${PATH}/${id}/repair`, {
-          headers: headers(),
-          responseType: 'json',
-        });
+        const repaired = await request('post', `${PATH}/${id}/repair`);
         expect(repaired).toHaveStatusCode(200);
         automation = repaired.body as Automation;
         workflowIds.add(automation.workflowId);
@@ -226,10 +198,7 @@ apiTest.describe(
           backingWorkflow: { state: 'available' },
         });
         expect(automation.workflowId).not.toBe(originalWorkflowId);
-        const workflow = await apiClient.get(`api/workflows/workflow/${automation.workflowId}`, {
-          headers: { ...headers(), 'elastic-api-version': '2023-10-31' },
-          responseType: 'json',
-        });
+        const workflow = await request('get', `api/workflows/workflow/${automation.workflowId}`);
         expect(workflow).toHaveStatusCode(200);
         expect(workflow.body).toMatchObject({
           enabled: false,
@@ -245,16 +214,9 @@ apiTest.describe(
             }),
           ],
         });
-        const enabled = await apiClient.put(`${PATH}/${id}`, {
-          headers: headers(),
-          body: { isEnabled: true },
-          responseType: 'json',
-        });
+        const enabled = await request('put', `${PATH}/${id}`, { isEnabled: true });
         expect(enabled).toHaveStatusCode(200);
-        const run = await apiClient.post(`${PATH}/${id}/run`, {
-          headers: headers(),
-          responseType: 'json',
-        });
+        const run = await request('post', `${PATH}/${id}/run`);
         expect(run).toHaveStatusCode(200);
         const { workflowExecutionId } = run.body as { workflowExecutionId: string };
         let after: History = before;
@@ -279,24 +241,15 @@ apiTest.describe(
         expect(new Set([firstPage.runs[0].id, secondPage.runs[0].id])).toStrictEqual(
           new Set(after.runs.map((item) => item.id))
         );
-        const cancelledReplacement = await apiClient.post(
-          `api/workflows/workflow/${automation.workflowId}/executions/cancel`,
-          {
-            headers: { ...headers(), 'elastic-api-version': '2023-10-31' },
-          }
-        );
-        expect(cancelledReplacement).toHaveStatusCode(200);
-        const deletedReplacement = await apiClient.delete('api/workflows', {
-          headers: { ...headers(), 'elastic-api-version': '2023-10-31' },
-          body: { ids: [automation.workflowId] },
-          responseType: 'json',
-        });
-        expect(deletedReplacement).toHaveStatusCode(200);
-        const deletedAutomation = await apiClient.delete(`${PATH}/${id}`, {
-          headers: headers(),
-          responseType: 'json',
-        });
-        expect(deletedAutomation).toHaveStatusCode(200);
+        expect(
+          await request('post', `api/workflows/workflow/${automation.workflowId}/executions/cancel`)
+        ).toHaveStatusCode(200);
+        expect(
+          await request('delete', 'api/workflows', {
+            ids: [automation.workflowId],
+          })
+        ).toHaveStatusCode(200);
+        expect(await request('delete', `${PATH}/${id}`)).toHaveStatusCode(200);
         automation = undefined;
       }
     );
