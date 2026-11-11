@@ -6,17 +6,14 @@
  */
 
 import React from 'react';
-import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
-import { render, screen } from '@testing-library/react';
-import type { EuiButtonGroupProps } from '@elastic/eui';
-import { EuiButtonGroup } from '@elastic/eui';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { DataDimensionEditor } from './dimension_editor';
 import type { FramePublicAPI, DatasourcePublicAPI } from '@kbn/lens-common';
 import type { XYVisualizationState, XYDataLayerConfig } from '../types';
 import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../../../mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { EuiColorPicker } from '@elastic/eui';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { act } from 'react-dom/test-utils';
 import { getKbnPalettes } from '@kbn/palettes';
@@ -52,7 +49,7 @@ describe('XY Config panels', () => {
   describe('Dimension Editor', () => {
     test('shows the correct axis side options when in horizontal mode', () => {
       const state = testState();
-      const component = mount(
+      renderWithI18n(
         <DataDimensionEditor
           layerId={state.layers[0].layerId}
           frame={frame}
@@ -74,17 +71,14 @@ describe('XY Config panels', () => {
         />
       );
 
-      const options = component
-        .find(EuiButtonGroup)
-        .first()
-        .prop('options') as EuiButtonGroupProps['options'];
+      const options = within(screen.getByTestId('lnsXY_axisSide_groups')).getAllByRole('button');
 
-      expect(options!.map(({ label }) => label)).toEqual(['Bottom', 'Auto', 'Top']);
+      expect(options.map((option) => option.textContent)).toEqual(['Bottom', 'Auto', 'Top']);
     });
 
     test('shows the default axis side options when not in horizontal mode', () => {
       const state = testState();
-      const component = mount(
+      renderWithI18n(
         <DataDimensionEditor
           layerId={state.layers[0].layerId}
           frame={frame}
@@ -103,12 +97,9 @@ describe('XY Config panels', () => {
         />
       );
 
-      const options = component
-        .find(EuiButtonGroup)
-        .first()
-        .prop('options') as EuiButtonGroupProps['options'];
+      const options = within(screen.getByTestId('lnsXY_axisSide_groups')).getAllByRole('button');
 
-      expect(options!.map(({ label }) => label)).toEqual(['Left', 'Auto', 'Right']);
+      expect(options.map((option) => option.textContent)).toEqual(['Left', 'Auto', 'Right']);
     });
 
     test('sets the color of a dimension to the color from palette service if not set explicitly', () => {
@@ -125,7 +116,7 @@ describe('XY Config panels', () => {
           },
         ],
       } as XYVisualizationState;
-      const component = mount(
+      renderWithI18n(
         <DataDimensionEditor
           layerId={state.layers[0].layerId}
           frame={{
@@ -153,7 +144,9 @@ describe('XY Config panels', () => {
         />
       );
 
-      expect(component.find(EuiColorPicker).prop('color')).toEqual('black');
+      expect(screen.getByTestId(/(?:^|\s)indexPattern-dimension-colorPicker(?:\s|$)/)).toHaveValue(
+        'BLACK'
+      );
     });
 
     test('uses the overwrite color if set', () => {
@@ -172,7 +165,7 @@ describe('XY Config panels', () => {
         ],
       } as XYVisualizationState;
 
-      const component = mount(
+      renderWithI18n(
         <DataDimensionEditor
           layerId={state.layers[0].layerId}
           frame={{
@@ -200,7 +193,9 @@ describe('XY Config panels', () => {
         />
       );
 
-      expect(component.find(EuiColorPicker).prop('color')).toEqual('red');
+      expect(screen.getByTestId(/(?:^|\s)indexPattern-dimension-colorPicker(?:\s|$)/)).toHaveValue(
+        'RED'
+      );
     });
     test.each<{ collapseFn?: string; shouldDisplay?: boolean }>([
       // should display color picker
@@ -280,7 +275,7 @@ describe('XY Config panels', () => {
         ],
       } as XYVisualizationState;
 
-      const component = mount(
+      renderWithI18n(
         <DataDimensionEditor
           layerId={state.layers[0].layerId}
           frame={{
@@ -308,28 +303,19 @@ describe('XY Config panels', () => {
         />
       );
 
+      const colorPicker = screen.getByTestId(/(?:^|\s)indexPattern-dimension-colorPicker(?:\s|$)/);
+      fireEvent.change(colorPicker, { target: { value: 'INCORRECT_COLOR' } });
       act(() => {
-        component
-          .find('input[data-test-subj="euiColorPickerAnchor indexPattern-dimension-colorPicker"]')
-          .simulate('change', {
-            target: { value: 'INCORRECT_COLOR' },
-          });
+        jest.advanceTimersByTime(256);
       });
-      component.update();
-      jest.advanceTimersByTime(256);
-      expect(component.find(EuiColorPicker).prop('color')).toEqual('INCORRECT_COLOR');
+      expect(colorPicker).toHaveValue('INCORRECT_COLOR');
       expect(setState).not.toHaveBeenCalled();
 
+      fireEvent.change(colorPicker, { target: { value: '666666' } });
       act(() => {
-        component
-          .find('input[data-test-subj="euiColorPickerAnchor indexPattern-dimension-colorPicker"]')
-          .simulate('change', {
-            target: { value: '666666' },
-          });
+        jest.advanceTimersByTime(256);
       });
-      component.update();
-      jest.advanceTimersByTime(256);
-      expect(component.find(EuiColorPicker).prop('color')).toEqual('666666');
+      expect(colorPicker).toHaveValue('666666');
       expect(setState).toHaveBeenCalled();
       jest.useRealTimers();
     });
