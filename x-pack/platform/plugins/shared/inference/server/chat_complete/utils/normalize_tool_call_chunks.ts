@@ -23,6 +23,11 @@ interface ToolCallState {
   providerToolCallId?: string;
   /** True while the call has a generated id and no provider id arrived for it yet */
   awaitingProviderToolCallId: boolean;
+  /**
+   * The id forwarded for every provider id seen at this index, so that deltas of an earlier
+   * call keep reaching it after the index switched to another call
+   */
+  forwardedByProviderToolCallId: Map<string, string>;
 }
 
 /**
@@ -69,6 +74,7 @@ export const normalizeToolCallChunks = (): MonoTypeOperatorFunction<ChunkOrToken
               if (state?.awaitingProviderToolCallId) {
                 state.awaitingProviderToolCallId = false;
                 state.providerToolCallId = toolCallId;
+                state.forwardedByProviderToolCallId.set(toolCallId, state.forwardedToolCallId);
                 return [{ ...toolCall, toolCallId: '' }];
               }
 
@@ -82,14 +88,19 @@ export const normalizeToolCallChunks = (): MonoTypeOperatorFunction<ChunkOrToken
                 ];
               }
 
-              const forwardedToolCallId = generatedToolCallIds.has(toolCallId)
-                ? generateToolCallId()
-                : toolCallId;
+              const forwardedByProviderToolCallId =
+                state?.forwardedByProviderToolCallId ?? new Map<string, string>();
+              // Back to a call seen earlier at this index: its deltas keep the id forwarded for it
+              const forwardedToolCallId =
+                forwardedByProviderToolCallId.get(toolCallId) ??
+                (generatedToolCallIds.has(toolCallId) ? generateToolCallId() : toolCallId);
               usedToolCallIds.add(forwardedToolCallId);
+              forwardedByProviderToolCallId.set(toolCallId, forwardedToolCallId);
               indexToState.set(index, {
                 forwardedToolCallId,
                 providerToolCallId: toolCallId,
                 awaitingProviderToolCallId: false,
+                forwardedByProviderToolCallId,
               });
               return [{ ...toolCall, toolCallId: forwardedToolCallId }];
             }
@@ -106,6 +117,7 @@ export const normalizeToolCallChunks = (): MonoTypeOperatorFunction<ChunkOrToken
             indexToState.set(index, {
               forwardedToolCallId: generatedToolCallId,
               awaitingProviderToolCallId: true,
+              forwardedByProviderToolCallId: new Map(),
             });
             return [{ ...toolCall, toolCallId: generatedToolCallId }];
           });

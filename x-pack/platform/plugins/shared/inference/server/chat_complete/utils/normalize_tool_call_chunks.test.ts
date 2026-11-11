@@ -179,6 +179,24 @@ describe('normalizeToolCallChunks', () => {
     });
   });
 
+  it('keeps routing deltas of an earlier provider id to the id forwarded for that call, after the index switched to another call', async () => {
+    jest.spyOn(commonModule, 'generateFakeToolCallId').mockReturnValueOnce('generated-id');
+
+    const result = (await normalize([
+      chunk({ index: 0, toolCallId: '', name: 'first', args: '{' }),
+      chunk({ index: 0, toolCallId: 'A', name: '', args: '' }),
+      chunk({ index: 0, toolCallId: 'B', name: 'second', args: '{}' }),
+      chunk({ index: 0, toolCallId: 'A', name: '', args: '"a": 1 }' }),
+    ])) as ChatCompletionChunkEvent[];
+
+    expect(result.map((event) => event.tool_calls[0].toolCallId)).toEqual([
+      'generated-id',
+      '',
+      'B',
+      'generated-id',
+    ]);
+  });
+
   it('passes token count events through', async () => {
     const tokenCount: ChatCompletionTokenCountEvent = {
       type: ChatCompletionEventType.ChatCompletionTokenCount,
