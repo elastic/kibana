@@ -31,7 +31,11 @@ export const createFakeStore = () => {
   // The standard client strips encrypted attributes.
   const strip = ({ attributes, namespace, ...rest }: StoredPage) => {
     const { secret, ...visible } = attributes;
-    return { ...rest, attributes: visible as WorkflowPageAttributes };
+    return {
+      ...rest,
+      namespaces: [namespace ?? 'default'],
+      attributes: visible as WorkflowPageAttributes,
+    };
   };
 
   /**
@@ -126,7 +130,8 @@ export const createFakeStore = () => {
         const filterText = JSON.stringify(options.filter);
         const matches = [...docs.values()].filter(
           (doc) =>
-            (doc.namespace ?? 'default') === options.namespaces[0] &&
+            (options.namespaces[0] === '*' ||
+              (doc.namespace ?? 'default') === options.namespaces[0]) &&
             filterText.includes(`"${doc.attributes.workflowId}"`)
         );
         return {

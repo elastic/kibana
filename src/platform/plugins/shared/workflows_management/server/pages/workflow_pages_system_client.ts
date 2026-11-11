@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { chunk } from 'lodash';
+import { chunk, groupBy } from 'lodash';
 import type { Logger, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { nodeBuilder } from '@kbn/es-query';
@@ -22,6 +22,7 @@ import { getPageOrUndefined, isPageOnline, namespaceOf } from './utils';
 // A find returns at most 10,000 objects. 1,000 workflows leave room for stale pages.
 const FIND_WORKFLOW_IDS_PER_REQUEST = 1_000;
 const FIND_MAX_PAGES = 10_000;
+const ALL_SPACES = '*';
 
 /** The triggers that sync reads. A valid `WorkflowYaml` fits, and so do loosely parsed triggers. */
 export interface WorkflowPageTriggers {
@@ -86,14 +87,15 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
       return;
     }
     const wanted = getWantedPageIds(spaceId, definition);
-    const existing = await this.findWorkflowPages([workflowId], spaceId);
+    // Workflow ids are unique across spaces, so a page of this workflow in another space is
+    // left from a move into this space, such as a bulk overwrite, and must go.
+    const existing = await this.findWorkflowPages([workflowId], ALL_SPACES);
 
-    const isCurrent = ({ attributes }: SavedObject<WorkflowPageAttributes>) =>
-      wanted.has(attributes.pageId) && attributes.workflowCreatedAt === workflowCreatedAt;
-    await this.deletePages(
-      existing.filter((page) => !isCurrent(page)),
-      spaceId
-    );
+    const isCurrent = ({ attributes, namespaces }: SavedObject<WorkflowPageAttributes>) =>
+      namespaces?.[0] === spaceId &&
+      wanted.has(attributes.pageId) &&
+      attributes.workflowCreatedAt === workflowCreatedAt;
+    await this.deletePages(existing.filter((page) => !isCurrent(page)));
 
     const existingIds = new Set(
       existing.filter(isCurrent).map(({ attributes }) => attributes.pageId)
@@ -123,7 +125,7 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
     if (workflowIds.length === 0) {
       return;
     }
-    await this.deletePages(await this.findWorkflowPages(workflowIds, spaceId), spaceId);
+    await this.deletePages(await this.findWorkflowPages(workflowIds, spaceId));
   }
 
   async verifyPageSecret(
@@ -197,18 +199,19 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
     return pages;
   }
 
-  private async deletePages(
-    pages: Array<SavedObject<WorkflowPageAttributes>>,
-    spaceId: string
-  ): Promise<void> {
-    if (pages.length === 0) {
-      return;
-    }
-    const { statuses } = await this.deps.savedObjectsClient.bulkDelete(
-      pages.map(({ id }) => ({ type: WORKFLOW_PAGE_SAVED_OBJECT_TYPE, id })),
-      { namespace: namespaceOf(spaceId), refresh: 'wait_for' }
+  /** Deletes pages in their own spaces. A found page always has exactly one space. */
+  private async deletePages(pages: Array<SavedObject<WorkflowPageAttributes>>): Promise<void> {
+    const results = await Promise.all(
+      Object.entries(groupBy(pages, ({ namespaces }) => namespaces?.[0])).map(([spaceId, group]) =>
+        this.deps.savedObjectsClient.bulkDelete(
+          group.map(({ id }) => ({ type: WORKFLOW_PAGE_SAVED_OBJECT_TYPE, id })),
+          { namespace: namespaceOf(spaceId), refresh: 'wait_for' }
+        )
+      )
     );
-    const failed = statuses.filter(({ success, error }) => !success && error?.statusCode !== 404);
+    const failed = results
+      .flatMap(({ statuses }) => statuses)
+      .filter(({ success, error }) => !success && error?.statusCode !== 404);
     if (failed.length > 0) {
       throw new Error(
         `Failed to retire workflow pages: ${failed

@@ -17,6 +17,7 @@ import {
   pageRef as ref,
   WORKFLOW_CREATED_AT,
 } from './fake_page_store.mock';
+import { getWorkflowPageSavedObjectId } from './page_saved_object';
 import { computePageSecretHash } from './page_secret';
 import { WorkflowPagesSystemClientImpl } from './workflow_pages_system_client';
 
@@ -154,6 +155,19 @@ describe('WorkflowPagesSystemClient', () => {
 
         expect(storedPage()).toBeUndefined();
       });
+    });
+
+    it('moves the page with a workflow that moved to another space', async () => {
+      const { store, storedPage, sync } = setup();
+      await sync(pageDefinition());
+      const oldHash = storedPage()?.attributes.secretHash;
+
+      await sync(pageDefinition(), { spaceId: 'team' });
+
+      expect(storedPage()).toBeUndefined();
+      const moved = store.docs.get(store.key(getWorkflowPageSavedObjectId(ref), 'team'));
+      expect(moved).toBeDefined();
+      expect(moved?.attributes.secretHash).not.toBe(oldHash);
     });
 
     it('never gives a global workflow a page', async () => {
