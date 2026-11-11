@@ -8,14 +8,14 @@
 import _ from 'lodash';
 import React, { Fragment, Component } from 'react';
 
-import { SingleFieldSelect } from '../../../components/single_field_select';
-import { getIndexPatternService, getIndexPatternSelectComponent } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { EuiFormRow, EuiPanel } from '@elastic/eui';
+import { getIndexPatternService, getIndexPatternSelectComponent } from '../../../kibana_services';
+import { SingleFieldSelect } from '../../../components/single_field_select';
 import { getFieldsWithGeoTileAgg } from '../../../index_pattern_util';
 import { getDataViewLabel, getDataViewSelectPlaceholder } from '../../../../common/i18n_getters';
 import type { ESPewPewSourceDescriptor } from '../../../../common/descriptor_types';
@@ -101,7 +101,7 @@ export class CreateSourceEditor extends Component<Props, State> {
     const geoFields = getFieldsWithGeoTileAgg(indexPattern.fields);
     this.setState({
       isLoadingIndexPattern: false,
-      indexPattern: indexPattern,
+      indexPattern,
       indexPatternHasMultipleGeoFields: geoFields.length >= 2,
     });
   }, 300);

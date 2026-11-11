@@ -7,12 +7,12 @@
 
 import React, { Component } from 'react';
 
-import { SingleFieldSelect } from '../../../components/single_field_select';
-import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 
 import { EuiFormRow, EuiPanel } from '@elastic/eui';
+import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
+import { SingleFieldSelect } from '../../../components/single_field_select';
 import {
   getFieldsWithGeoTileAgg,
   getGeoFields,

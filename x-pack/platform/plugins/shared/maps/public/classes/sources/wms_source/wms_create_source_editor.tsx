@@ -19,10 +19,10 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { KbnWarningCallout } from '@kbn/ui-callout';
+import _ from 'lodash';
 import type { WMSSourceDescriptor } from '../../../../common/descriptor_types';
 import type { GroupedCapabilities } from './wms_client';
 import { WmsClient } from './wms_client';
-import _ from 'lodash';
 
 const LAYERS_LABEL = i18n.translate('xpack.maps.source.wms.layersLabel', {
   defaultMessage: 'Layers',

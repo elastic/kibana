@@ -6,8 +6,8 @@
  */
 
 import _ from 'lodash';
-import { parseXmlString } from '../../../../common/parse_xml_string';
 import { parse, format } from 'url';
+import { parseXmlString } from '../../../../common/parse_xml_string';
 
 interface LayerOption {
   path: string[];
@@ -70,7 +70,7 @@ export class WmsClient {
       layers,
       styles,
     });
-    //TODO Find a better way to avoid URL encoding the template braces
+    // TODO Find a better way to avoid URL encoding the template braces
     return `${urlTemplate}&bbox={bbox-epsg-3857}`;
   }
 

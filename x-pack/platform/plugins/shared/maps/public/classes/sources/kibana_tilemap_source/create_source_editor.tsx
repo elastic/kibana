@@ -8,8 +8,8 @@
 import React, { useEffect } from 'react';
 import { EuiFieldText, EuiFormRow, EuiPanel } from '@elastic/eui';
 
-import { getKibanaTileMap } from '../../../util';
 import { i18n } from '@kbn/i18n';
+import { getKibanaTileMap } from '../../../util';
 
 interface Props {
   onSourceConfigChange: () => void;
