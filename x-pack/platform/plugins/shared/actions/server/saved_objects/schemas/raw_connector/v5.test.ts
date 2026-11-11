@@ -21,7 +21,7 @@ describe('Raw Connector Schema v5', () => {
   });
 
   it('retains a pin when reading a connector from a later release', () => {
-    const pinned = { ...action, specVersion: '1.0.0' };
+    const pinned = { ...action, specVersion: '1.0' };
     expect(rawConnectorSchema.validate(pinned)).toEqual(pinned);
     expect(
       rawConnectorSchema.extends({}, { unknowns: 'ignore' }).validate({

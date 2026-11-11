@@ -14,13 +14,6 @@ export const ACTION_ATTRIBUTES_INCLUDED_IN_AAD = new Set([
   'config',
 ]);
 
-export const ACTION_ATTRIBUTES_INCLUDED_IN_AAD_V4 = new Set([
-  'actionTypeId',
-  'isMissingSecrets',
-  'config',
-  'specVersion',
-]);
-
 const ACTION_ATTRIBUTES_TO_ENCRYPT_V2 = new Set(['secrets']);
 const ACTION_ATTRIBUTES_TO_ENCRYPT_V3 = new Set(['secrets', 'apiKey', 'uiamApiKey']);
 
@@ -40,5 +33,5 @@ export const actionEncryptedRegistrationV3: EncryptedSavedObjectTypeRegistration
 
 export const actionEncryptedRegistrationV4: EncryptedSavedObjectTypeRegistration = {
   ...actionEncryptedRegistrationV3,
-  attributesToIncludeInAAD: ACTION_ATTRIBUTES_INCLUDED_IN_AAD_V4,
+  attributesToIncludeInAAD: new Set([...ACTION_ATTRIBUTES_INCLUDED_IN_AAD, 'specVersion']),
 };
