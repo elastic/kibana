@@ -190,9 +190,6 @@ export const FindObservablesResponseSchema = lazySchema(() =>
   })
 );
 
-/** `gte` when more cases hold the observables than the search kept, so `total` is a minimum. */
-export const CasesTotalRelationSchema = lazySchema(() => z.enum(['eq', 'gte']));
-
 /** The cases of an owner holding an observable with the exact type key and value, in either store. */
 export const FindCasesByObservableRequestSchema = lazySchema(() =>
   paginationSchema({ maxPerPage: MAX_CASES_PER_PAGE }).extend({
@@ -206,12 +203,16 @@ export const FindCasesByObservableRequestSchema = lazySchema(() =>
   })
 );
 
+/** `gte` when more cases hold the observables than the search kept, so `total` is a minimum. */
+export const CasesTotalRelationSchema = lazySchema(() => z.enum(['eq', 'gte']));
+
 export const FindCasesByObservableResponseSchema = lazySchema(() =>
   z.object({
     cases: z.array(CaseSchema),
     page: z.number(),
     per_page: z.number(),
     total: z.number(),
+    total_relation: CasesTotalRelationSchema,
   })
 );
 
@@ -253,9 +254,8 @@ export type FindObservablesResponse = z.infer<typeof FindObservablesResponseSche
 export type ObservableMetadata = z.infer<typeof ObservableMetadataSchema>;
 export type ObservableMetadataFilter = z.infer<typeof ObservableMetadataFilterSchema>;
 export type ObservableWithMetadata = z.infer<typeof ObservableWithMetadataSchema>;
-export type CasesTotalRelation = z.infer<typeof CasesTotalRelationSchema>;
-
 export type FindCasesByObservableRequest = z.input<typeof FindCasesByObservableRequestSchema>;
 export type FindCasesByObservableResponse = z.infer<typeof FindCasesByObservableResponseSchema>;
 export type CountCasesByObservablesRequest = z.infer<typeof CountCasesByObservablesRequestSchema>;
 export type CountCasesByObservablesResponse = z.infer<typeof CountCasesByObservablesResponseSchema>;
+export type CasesTotalRelation = z.infer<typeof CasesTotalRelationSchema>;

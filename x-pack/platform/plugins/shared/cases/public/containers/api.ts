@@ -728,9 +728,15 @@ export const findCasesByObservable = async (
       signal,
     }
   );
-  const { cases, page, per_page: perPage, total } = decodeCasesByObservableResponse(response);
+  const {
+    cases,
+    page,
+    per_page: perPage,
+    total,
+    total_relation: totalRelation,
+  } = decodeCasesByObservableResponse(response);
 
-  return { cases: convertCasesToCamelCase(cases), page, perPage, total };
+  return { cases: convertCasesToCamelCase(cases), page, perPage, total, totalRelation };
 };
 
 export const countCasesByObservables = async (

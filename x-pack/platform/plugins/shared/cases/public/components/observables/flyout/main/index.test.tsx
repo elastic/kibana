@@ -12,7 +12,7 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { FlyoutTemplateManagedProvider } from '@kbn/flyout-template';
 import { readCasesPermissions, renderWithTestingProviders } from '../../../../common/mock';
 import { mockCase, mockObservables } from '../../../../containers/mock';
-import { useFindCasesByObservable } from '../../../../containers/use_find_cases_by_observable';
+import { useCountCasesByObservables } from '../../../../containers/use_count_cases_by_observables';
 import { useFindObservables } from '../../../../containers/use_find_observables';
 import { useGetCaseConfiguration } from '../../../../containers/configure/use_get_case_configuration';
 import { useCaseConfigureResponse } from '../../../configure_cases/__mock__';
@@ -22,7 +22,7 @@ import { createObservableFlyoutApiMock } from '../use_observable_flyout_api.mock
 import { useAddObservableToChat } from '../../../../agent_builder/use_add_observable_to_chat';
 import { ObservableFlyout } from '.';
 
-jest.mock('../../../../containers/use_find_cases_by_observable');
+jest.mock('../../../../containers/use_count_cases_by_observables');
 jest.mock('../../../../containers/use_find_observables');
 jest.mock('../../../../containers/configure/use_get_case_configuration');
 jest.mock('../use_observable_flyout_api');
@@ -39,7 +39,7 @@ jest.mock('@kbn/workflows-ui', () => ({
   RunWorkflowPanel: () => <div data-test-subj="run-workflow-panel-mock" />,
 }));
 
-const useFindCasesByObservableMock = jest.mocked(useFindCasesByObservable);
+const useCountCasesByObservablesMock = jest.mocked(useCountCasesByObservables);
 const useFindObservablesMock = jest.mocked(useFindObservables);
 
 const flyoutApi = createObservableFlyoutApiMock();
@@ -71,11 +71,14 @@ const mockCount = ({
   isLoading?: boolean;
   isError?: boolean;
 }) =>
-  useFindCasesByObservableMock.mockReturnValue({
-    data: isLoading || isError ? undefined : { cases: [], page: 1, perPage: 0, total },
+  useCountCasesByObservablesMock.mockReturnValue({
+    data:
+      isLoading || isError
+        ? undefined
+        : { counts: [{ typeKey: params.observable.typeKey, value: '127.0.0.1', total }] },
     isLoading,
     isError,
-  } as unknown as ReturnType<typeof useFindCasesByObservable>);
+  } as unknown as ReturnType<typeof useCountCasesByObservables>);
 
 const renderPanel = () =>
   renderWithTestingProviders(
@@ -182,12 +185,10 @@ describe('ObservableFlyout', () => {
   it('counts the other cases of the owner holding the exact value', () => {
     renderPanel();
 
-    expect(useFindCasesByObservableMock).toHaveBeenCalledWith({
+    expect(useCountCasesByObservablesMock).toHaveBeenCalledWith({
       owner: 'securitySolution',
-      typeKey: params.observable.typeKey,
-      value: '127.0.0.1',
       excludeCaseId: 'case-1',
-      perPage: 0,
+      observables: [{ typeKey: params.observable.typeKey, value: '127.0.0.1' }],
     });
     const insights = screen.getByTestId('cases-observable-flyout-insights');
     expect(

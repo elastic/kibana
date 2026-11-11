@@ -27,9 +27,9 @@ const observable = mockObservables[0];
 const caseData = { id: 'case-1', owner: 'securitySolution' };
 const otherCase = { ...basicCase, id: 'case-2', title: 'Phishing campaign' };
 
-const mockPage = (cases = [otherCase], total = cases.length) =>
+const mockPage = (cases = [otherCase], total = cases.length, totalRelation: 'eq' | 'gte' = 'eq') =>
   useFindCasesByObservableMock.mockReturnValue({
-    data: { cases, page: 1, perPage: 10, total },
+    data: { cases, page: 1, perPage: 10, total, totalRelation },
     isFetching: false,
     isError: false,
   } as unknown as ReturnType<typeof useFindCasesByObservable>);
@@ -120,6 +120,21 @@ describe('ObservableCasesTable', () => {
     renderTable();
 
     expect(screen.getByText('No other cases have this observable.')).toBeInTheDocument();
+  });
+
+  it('says when the list keeps only some of the cases holding the observable', () => {
+    mockPage([otherCase], 10_000, 'gte');
+    renderTable();
+
+    expect(screen.getByTestId('cases-observable-cases-capped')).toHaveTextContent(
+      'Showing 10,000 cases, not all of them'
+    );
+  });
+
+  it('shows no limit message when every case is listed', () => {
+    renderTable();
+
+    expect(screen.queryByTestId('cases-observable-cases-capped')).not.toBeInTheDocument();
   });
 
   it('says when the cases could not be loaded', () => {

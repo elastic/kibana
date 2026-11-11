@@ -7,7 +7,8 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable, EuiSpacer } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { Status } from '@kbn/cases-components/src/status/status';
 import type { CaseUI, SortOrder } from '../../../../../../common/ui/types';
 import { SortFieldCase } from '../../../../../../common/ui/types';
@@ -128,19 +129,32 @@ export const ObservableCasesTable = ({
   );
 
   return (
-    <EuiBasicTable
-      tableCaption={i18n.CASES_TABLE_CAPTION}
-      items={data?.cases ?? []}
-      itemId="id"
-      columns={columns}
-      loading={isFetching}
-      error={isError ? i18n.OTHER_CASES_ERROR : undefined}
-      noItemsMessage={isFetching ? i18n.LOADING : i18n.NO_CASES}
-      pagination={pagination}
-      sorting={{ sort }}
-      onChange={onTableChange}
-      data-test-subj="cases-observable-cases-table"
-    />
+    <>
+      {data?.totalRelation === 'gte' ? (
+        <>
+          <KbnInfoCallout
+            size="s"
+            title={i18n.CASES_LIST_CAPPED_TITLE(data.total)}
+            text={i18n.CASES_LIST_CAPPED_DESCRIPTION}
+            data-test-subj="cases-observable-cases-capped"
+          />
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
+      <EuiBasicTable
+        tableCaption={i18n.CASES_TABLE_CAPTION}
+        items={data?.cases ?? []}
+        itemId="id"
+        columns={columns}
+        loading={isFetching}
+        error={isError ? i18n.OTHER_CASES_ERROR : undefined}
+        noItemsMessage={isFetching ? i18n.LOADING : i18n.NO_CASES}
+        pagination={pagination}
+        sorting={{ sort }}
+        onChange={onTableChange}
+        data-test-subj="cases-observable-cases-table"
+      />
+    </>
   );
 };
 

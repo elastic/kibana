@@ -1446,7 +1446,13 @@ describe('Cases API', () => {
 
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue({ cases: [basicCaseSnake], page: 1, per_page: 10, total: 1 });
+      fetchMock.mockResolvedValue({
+        cases: [basicCaseSnake],
+        page: 1,
+        per_page: 10,
+        total: 1,
+        total_relation: 'eq',
+      });
     });
 
     it('posts the request to the internal route', async () => {
@@ -1462,7 +1468,13 @@ describe('Cases API', () => {
     it('returns the cases in camel case', async () => {
       const resp = await findCasesByObservable(params, abortCtrl.signal);
 
-      expect(resp).toEqual({ cases: [basicCase], page: 1, perPage: 10, total: 1 });
+      expect(resp).toEqual({
+        cases: [basicCase],
+        page: 1,
+        perPage: 10,
+        total: 1,
+        totalRelation: 'eq',
+      });
     });
   });
 

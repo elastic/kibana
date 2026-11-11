@@ -6,9 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import pMap from 'p-map';
 import type { Case } from '../../../common/types/domain';
-import { MAX_STORED_OBSERVABLES_PER_CASE } from '../../../common/constants';
 import type {
   CountCasesByObservablesRequest,
   CountCasesByObservablesResponse,
@@ -26,23 +24,17 @@ import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '../types';
 import { convertSortField } from '../utils';
 import { withObservablesPreview } from '../../common/observables_preview';
-import { searchCasesByObservableKeys } from './search_cases_by_observables';
+import {
+  countCasesByObservableKeys,
+  searchCasesByObservableKeys,
+} from './search_cases_by_observables';
 import { DEFAULT_PER_PAGE } from '../../routes/api';
-import { Operations } from '../../authorization';
 import { observableKey } from './observables';
 
 /**
- * Most cases the `cases-observables` side of the search keeps. With one key every case holds it
- * once, so a lower cap would drop cases by id rather than by date.
- */
-export const MAX_CASES_BY_OBSERVABLE_CANDIDATES = MAX_STORED_OBSERVABLES_PER_CASE;
-
-/** Counts of a request that run at once; each is two searches. */
-const COUNT_CONCURRENCY = 10;
-
-/**
  * Returns a page of the cases of an owner that hold an observable with the type key and value, in
- * either store. The match is exact, like similar cases. `perPage: 0` returns only the total.
+ * either store. The match is exact, like similar cases. `perPage: 0` returns only the total, which
+ * is a minimum when `total_relation` is `gte`.
  */
 export const findByObservable = async (
   params: FindCasesByObservableRequest,
@@ -73,12 +65,11 @@ export const findByObservable = async (
       sortOrder,
     } = decodeWithExcessOrThrowZod(FindCasesByObservableRequestSchema)(params);
 
-    const { cases, total } = await searchCasesByObservableKeys(
+    const { cases, total, totalRelation } = await searchCasesByObservableKeys(
       {
         keys: [{ typeKey, value }],
         owner,
         excludeCaseId,
-        candidateCap: MAX_CASES_BY_OBSERVABLE_CANDIDATES,
         caseOptions: { sortField: convertSortField(sortField), sortOrder, page, perPage },
       },
       clientArgs
@@ -106,6 +97,7 @@ export const findByObservable = async (
       page,
       per_page: perPage,
       total,
+      total_relation: totalRelation,
     });
   } catch (error) {
     throw createCaseError({
@@ -121,14 +113,13 @@ export const findByObservable = async (
 
 /**
  * For each observable of a page, how many cases of the owner hold its exact type key and value,
- * in either store: the total `findByObservable` returns, for a whole page in one request. The
- * user's authorization is resolved once for all the counts.
+ * in either store. Two searches answer the whole page, with no cap.
  */
 export const countByObservables = async (
   params: CountCasesByObservablesRequest,
   clientArgs: CasesClientArgs
 ): Promise<CountCasesByObservablesResponse> => {
-  const { services, logger, authorization } = clientArgs;
+  const { services, logger } = clientArgs;
 
   if (!(await services.licensingService.isAtLeastPlatinum())) {
     throw Boom.forbidden(
@@ -141,7 +132,6 @@ export const countByObservables = async (
       CountCasesByObservablesRequestSchema
     )(params);
 
-    const authorizationFilter = await authorization.getAuthorizationFilter(Operations.findCases);
     const keys = [
       ...new Map(
         observables.map(({ typeKey, value }) => [
@@ -151,26 +141,11 @@ export const countByObservables = async (
       ).values(),
     ];
 
-    const counts = await pMap(
-      keys,
-      async ({ typeKey, value }) => {
-        const { total } = await searchCasesByObservableKeys(
-          {
-            keys: [{ typeKey, value }],
-            owner,
-            excludeCaseId,
-            candidateCap: MAX_CASES_BY_OBSERVABLE_CANDIDATES,
-            caseOptions: { page: 1, perPage: 0 },
-            authorizationFilter,
-          },
-          clientArgs
-        );
-        return { typeKey, value, total };
-      },
-      { concurrency: COUNT_CONCURRENCY }
-    );
+    const totals = await countCasesByObservableKeys({ keys, owner, excludeCaseId }, clientArgs);
 
-    return decodeOrThrowZod(CountCasesByObservablesResponseSchema)({ counts });
+    return decodeOrThrowZod(CountCasesByObservablesResponseSchema)({
+      counts: keys.map(({ typeKey, value }, index) => ({ typeKey, value, total: totals[index] })),
+    });
   } catch (error) {
     throw createCaseError({
       message: `Failed to count cases by observables: ${JSON.stringify({

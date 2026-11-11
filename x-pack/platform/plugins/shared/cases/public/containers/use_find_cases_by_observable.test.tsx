@@ -32,7 +32,13 @@ describe('useFindCasesByObservable', () => {
   });
 
   it('finds the cases holding the observable', async () => {
-    const response = { cases: [basicCase], page: 1, perPage: 0, total: 4 };
+    const response = {
+      cases: [basicCase],
+      page: 1,
+      perPage: 0,
+      total: 4,
+      totalRelation: 'eq' as const,
+    };
     const spy = jest.spyOn(api, 'findCasesByObservable').mockResolvedValue(response);
 
     const { result } = renderHook(() => useFindCasesByObservable(params), {

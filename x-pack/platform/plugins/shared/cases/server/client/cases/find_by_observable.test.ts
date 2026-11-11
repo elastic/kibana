@@ -7,12 +7,11 @@
 
 import { mockCases } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
+import { countByObservables, findByObservable } from './find_by_observable';
 import {
-  countByObservables,
-  findByObservable,
-  MAX_CASES_BY_OBSERVABLE_CANDIDATES,
-} from './find_by_observable';
-import { OBSERVABLE_TYPE_IPV4 } from '../../../common/constants';
+  MAX_CASES_BY_OBSERVABLES_CANDIDATES,
+  OBSERVABLE_TYPE_IPV4,
+} from '../../../common/constants';
 import { flattenCaseSavedObject } from '../../common/utils';
 
 const mockClientArgs = createCasesClientMockArgs();
@@ -53,7 +52,7 @@ describe('findByObservable', () => {
       excludeCaseId: undefined,
       keys: [{ typeKey: OBSERVABLE_TYPE_IPV4.key, value: '10.0.0.8' }],
       owners: ['securitySolution'],
-      size: MAX_CASES_BY_OBSERVABLE_CANDIDATES,
+      size: MAX_CASES_BY_OBSERVABLES_CANDIDATES,
     });
 
     const { query, namespaces } = searchArgs();
@@ -98,6 +97,33 @@ describe('findByObservable', () => {
     );
   });
 
+  it('says the total is a minimum when the type side reached the cap', async () => {
+    observableService.findSimilarCandidates.mockResolvedValue({
+      candidates: [{ caseId: 'case-in-type', sharedCount: 1 }],
+      capped: true,
+    });
+    caseService.searchCasesPage.mockResolvedValue({ cases: [], total: 10_000 });
+
+    const res = await findByObservable({ ...request, perPage: 0 }, mockClientArgs);
+
+    expect(res.total).toBe(10_000);
+    expect(res.total_relation).toBe('gte');
+  });
+
+  it('searches nothing when the user cannot read the owner', async () => {
+    jest.mocked(mockClientArgs.authorization.getAuthorizationFilter).mockResolvedValueOnce({
+      filter: undefined,
+      ensureSavedObjectsAreAuthorized: jest.fn(),
+      authorizedOwners: ['cases'],
+    });
+
+    const res = await findByObservable(request, mockClientArgs);
+
+    expect(res.total).toBe(0);
+    expect(observableService.findSimilarCandidates).not.toHaveBeenCalled();
+    expect(caseService.searchCasesPage).not.toHaveBeenCalled();
+  });
+
   it('sorts by created date, newest first, by default', async () => {
     await findByObservable(request, mockClientArgs);
 
@@ -129,7 +155,7 @@ describe('findByObservable', () => {
     const res = await findByObservable({ ...request, perPage: 0 }, mockClientArgs);
 
     expect(searchArgs().caseOptions.perPage).toBe(0);
-    expect(res).toEqual({ cases: [], page: 1, per_page: 0, total: 12 });
+    expect(res).toEqual({ cases: [], page: 1, per_page: 0, total: 12, total_relation: 'eq' });
   });
 
   it('returns the cases with their attachment totals', async () => {
@@ -204,18 +230,19 @@ describe('countByObservables', () => {
 
   beforeEach(() => {
     licensingService.isAtLeastPlatinum.mockResolvedValue(true);
-    observableService.findSimilarCandidates.mockResolvedValue({ candidates: [], capped: false });
-    caseService.searchCasesPage.mockResolvedValue({ cases: [], total: 0 });
+    caseService.countCasesByObservableKeys.mockImplementation(async ({ keys }) =>
+      keys.map(() => 0)
+    );
+    observableService.countCasesByKeys.mockImplementation(async ({ keys }) => keys.map(() => 0));
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('counts the cases holding each observable, leaving out the excluded case', async () => {
-    caseService.searchCasesPage
-      .mockResolvedValueOnce({ cases: [], total: 4 })
-      .mockResolvedValueOnce({ cases: [], total: 0 });
+  it('adds the counts of both stores for each observable, in two searches', async () => {
+    caseService.countCasesByObservableKeys.mockResolvedValue([1, 0]);
+    observableService.countCasesByKeys.mockResolvedValue([3, 0]);
 
     const res = await countByObservables(
       { owner, observables: [ipv4('10.0.0.8'), ipv4('10.0.0.9')], excludeCaseId: 'source-case' },
@@ -228,15 +255,27 @@ describe('countByObservables', () => {
         { ...ipv4('10.0.0.9'), total: 0 },
       ],
     });
-    expect(caseService.searchCasesPage).toHaveBeenCalledTimes(2);
-    const [[{ query, caseOptions }]] = caseService.searchCasesPage.mock.calls;
-    expect(caseOptions).toEqual({ page: 1, perPage: 0 });
-    expect(JSON.stringify(query?.bool?.filter)).toContain(
-      '"must_not":[{"term":{"_id":"cases:source-case"}}]'
+    expect(caseService.countCasesByObservableKeys).toHaveBeenCalledTimes(1);
+    expect(observableService.countCasesByKeys).toHaveBeenCalledWith({
+      keys: [ipv4('10.0.0.8'), ipv4('10.0.0.9')],
+      owners: [owner],
+      excludeCaseId: 'source-case',
+    });
+    expect(caseService.searchCasesPage).not.toHaveBeenCalled();
+    expect(observableService.findSimilarCandidates).not.toHaveBeenCalled();
+  });
+
+  it('counts the field side over the owner, leaving out the excluded case', async () => {
+    await countByObservables(
+      { owner, observables: [ipv4('10.0.0.8')], excludeCaseId: 'source-case' },
+      mockClientArgs
     );
-    expect(observableService.findSimilarCandidates).toHaveBeenCalledWith(
-      expect.objectContaining({ keys: [ipv4('10.0.0.8')], excludeCaseId: 'source-case' })
-    );
+
+    const [[{ query, keys, namespaces }]] = caseService.countCasesByObservableKeys.mock.calls;
+    expect(keys).toEqual([ipv4('10.0.0.8')]);
+    expect(namespaces).toEqual(['default']);
+    expect(query?.bool?.must_not).toEqual([{ term: { _id: 'cases:source-case' } }]);
+    expect(JSON.stringify(query?.bool?.filter)).toContain('"cases.owner"');
   });
 
   it('checks the authorization once for all the counts', async () => {
@@ -248,6 +287,23 @@ describe('countByObservables', () => {
     expect(mockClientArgs.authorization.getAuthorizationFilter).toHaveBeenCalledTimes(1);
   });
 
+  it('returns zeros without searching when the user cannot read the owner', async () => {
+    jest.mocked(mockClientArgs.authorization.getAuthorizationFilter).mockResolvedValueOnce({
+      filter: undefined,
+      ensureSavedObjectsAreAuthorized: jest.fn(),
+      authorizedOwners: ['cases'],
+    });
+
+    const res = await countByObservables(
+      { owner, observables: [ipv4('10.0.0.8')] },
+      mockClientArgs
+    );
+
+    expect(res.counts).toEqual([{ ...ipv4('10.0.0.8'), total: 0 }]);
+    expect(caseService.countCasesByObservableKeys).not.toHaveBeenCalled();
+    expect(observableService.countCasesByKeys).not.toHaveBeenCalled();
+  });
+
   it('counts a repeated observable once', async () => {
     const res = await countByObservables(
       { owner, observables: [ipv4('10.0.0.8'), ipv4('10.0.0.8')] },
@@ -255,7 +311,9 @@ describe('countByObservables', () => {
     );
 
     expect(res.counts).toHaveLength(1);
-    expect(caseService.searchCasesPage).toHaveBeenCalledTimes(1);
+    expect(observableService.countCasesByKeys).toHaveBeenCalledWith(
+      expect.objectContaining({ keys: [ipv4('10.0.0.8')] })
+    );
   });
 
   it('throws without a platinum license', async () => {
@@ -276,6 +334,6 @@ describe('countByObservables', () => {
         mockClientArgs
       )
     ).rejects.toThrow();
-    expect(caseService.searchCasesPage).not.toHaveBeenCalled();
+    expect(observableService.countCasesByKeys).not.toHaveBeenCalled();
   });
 });

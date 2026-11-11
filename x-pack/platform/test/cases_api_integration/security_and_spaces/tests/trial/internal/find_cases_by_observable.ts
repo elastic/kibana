@@ -173,6 +173,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(res.cases).to.eql([]);
         expect(res.total).to.be(3);
+        expect(res.total_relation).to.be('eq');
         expect(res.per_page).to.be(0);
       });
 
@@ -279,6 +280,33 @@ export default ({ getService }: FtrProviderContext): void => {
           { typeKey: OBSERVABLE_TYPE_IPV4.key, value: '10.0.0.9', total: 0 },
         ]);
         expect(total).to.be(2);
+      });
+
+      it('counts each case once per store and leaves out the excluded case', async () => {
+        const source = await createTitledCase('source');
+        const titles = ['field 1', 'field 2', 'type 1', 'type 2', 'type 3'];
+        const cases = await Promise.all(titles.map((title) => createTitledCase(title)));
+        await seedFieldObservables(source.id, [ipv4('10.0.0.8')]);
+        await seedFieldObservables(cases[0].id, [ipv4('10.0.0.8'), hostname('host-1')]);
+        await seedFieldObservables(cases[1].id, [ipv4('10.0.0.8')]);
+        for (const theCase of cases.slice(2)) {
+          await addToType(theCase.id, ipv4('10.0.0.8'));
+        }
+        await addToType(cases[2].id, hostname('host-1'));
+
+        const { counts } = await countCasesByObservables({
+          supertest,
+          params: {
+            owner: 'securitySolutionFixture',
+            excludeCaseId: source.id,
+            observables: [
+              { typeKey: OBSERVABLE_TYPE_IPV4.key, value: '10.0.0.8' },
+              { typeKey: OBSERVABLE_TYPE_HOSTNAME.key, value: 'host-1' },
+            ],
+          },
+        });
+
+        expect(counts.map(({ total }) => total)).to.eql([5, 2]);
       });
 
       it('counts none for an owner the user cannot read, and rejects a user without privileges', async () => {

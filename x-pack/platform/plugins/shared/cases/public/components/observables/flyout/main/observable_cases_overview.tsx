@@ -8,7 +8,7 @@
 import React from 'react';
 import type { ObservableWithMetadata } from '../../../../../common/types/api';
 import type { CaseUI } from '../../../../../common/ui/types';
-import { useFindCasesByObservable } from '../../../../containers/use_find_cases_by_observable';
+import { useCountCasesByObservables } from '../../../../containers/use_count_cases_by_observables';
 import { ExpandablePanel } from '../shared/expandable_panel';
 import { InsightsSummaryRow } from './insights_summary_row';
 import * as i18n from '../translations';
@@ -22,7 +22,8 @@ export interface ObservableCasesOverviewProps {
 
 /**
  * The preview of the cases tool, styled like the Security alert flyout insights: a panel whose
- * title opens the tool, with the number of other cases holding the observable.
+ * title opens the tool, with the number of other cases holding the observable. The number is the
+ * same uncapped count as the observables table's Related cases column.
  */
 export const ObservableCasesOverview = ({
   observable: { typeKey, value },
@@ -30,14 +31,12 @@ export const ObservableCasesOverview = ({
   onShowCases,
 }: ObservableCasesOverviewProps) => {
   // A count only: the tool loads the cases page by page.
-  const { data, isLoading, isError } = useFindCasesByObservable({
+  const { data, isLoading, isError } = useCountCasesByObservables({
     owner,
-    typeKey,
-    value,
     excludeCaseId: caseId,
-    perPage: 0,
+    observables: [{ typeKey, value }],
   });
-  const total = data?.total ?? 0;
+  const total = data?.counts[0]?.total ?? 0;
 
   return (
     <ExpandablePanel
