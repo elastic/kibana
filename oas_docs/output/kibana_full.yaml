@@ -14263,7 +14263,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates a rule. The request can include a client-supplied `id`. Kibana generates an identifier when `id` is omitted. If a rule with the supplied `id` already exists, the request fails with HTTP 409 and the existing rule is not changed. To create or replace a rule with a client-supplied identifier, use PUT /api/alerting/v2/rules/{id}/.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
+        Creates a rule. The request can include a client-supplied `id`. Kibana generates an identifier when `id` is omitted. If a rule with the supplied `id` already exists, the request fails with HTTP 409 and the existing rule is not changed. To replace an existing rule, use PUT /api/alerting/v2/rules/{id}/.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
       operationId: post-alerting-v2-rules
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -163043,7 +163043,7 @@ components:
         grouping:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
         id:
-          description: Optional rule ID. If omitted, Kibana generates one. IDs in the request must be unique.
+          description: Optional rule ID. If omitted, Kibana generates one. If a rule with this ID already exists, it is not changed and its create fails.
           maxLength: 150
           minLength: 1
           pattern: ^[a-zA-Z0-9_-]+$
@@ -163337,7 +163337,7 @@ components:
         grouping:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
         id:
-          description: Optional rule ID. If omitted, Kibana generates one. If a rule with this ID already exists, the request fails and the existing rule is not changed.
+          description: Optional rule ID. If omitted, Kibana generates one. If a rule with this ID already exists, it is not changed and its create fails.
           maxLength: 150
           minLength: 1
           pattern: ^[a-zA-Z0-9_-]+$
