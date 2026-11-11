@@ -21,6 +21,7 @@ import {
 import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import { getWorkflowExecutionIdFromRequest } from '../../../lib/telemetry/ebt/workflow_execution_id';
 import {
   cleanupStaleEvents,
   type CleanupStaleEventsResult,
@@ -362,6 +363,7 @@ const eventsUpdateRoute = createServerRoute({
       actor: 'rest_api',
       closeReason: params.body.close_reason,
       assessmentNote: params.body.assessment_note,
+      workflowExecutionId: getWorkflowExecutionIdFromRequest(request),
     });
   },
 });
@@ -403,6 +405,7 @@ const cleanupStaleEventsRoute = createServerRoute({
       eventSearchClient: await getEventSearchClient(),
       rulesClient,
       candidateRuleIds: params?.body?.candidateRuleIds,
+      workflowExecutionId: getWorkflowExecutionIdFromRequest(request),
     });
   },
 });

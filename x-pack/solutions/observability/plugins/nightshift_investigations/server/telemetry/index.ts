@@ -11,6 +11,7 @@ import { semanticMemoryMaterializedEvent, semanticMemoryOptimizedEvent } from '.
 import { onlineEvalScoreEvent } from './online_eval_score_event';
 import { onlineEvalsStepFailedEvent } from './online_evals_step_failed_event';
 import { investigationSkippedEvent } from './investigation_skipped_event';
+import { investigationStartedEvent } from './investigation_started_event';
 
 export const setupNightshiftTelemetry = ({
   analytics,
@@ -24,6 +25,7 @@ export const setupNightshiftTelemetry = ({
   analytics.registerEventType(onlineEvalScoreEvent);
   analytics.registerEventType(onlineEvalsStepFailedEvent);
   analytics.registerEventType(investigationSkippedEvent);
+  analytics.registerEventType(investigationStartedEvent);
   return new NightshiftTelemetryClient(analytics, logger);
 };
 

@@ -7,12 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
-import type {
-  InventoryRow,
-  Provenance,
-  SourceError,
-  TypedOutputColumn,
-} from '../inventory/executor';
+import type { InventoryRow, Provenance, SourceError } from '../inventory/executor';
 import type { NamedParams, OutputColumnKind, QueryEngine } from '../inventory/generator';
 import type { InventoryService } from '../service/inventory_service';
 
@@ -68,13 +63,11 @@ export interface ListQueryDiagnostic {
 
 /** One row per entity seen in the window, merged across the type's sources. */
 export interface ListResponse {
-  columns: TypedOutputColumn[];
+  columns: InventoryTypeColumn[];
   /** Every row carries every column, null where no source produced a value. */
   rows: InventoryRow[];
   /** For each returned row's `entity.id`, the index pattern that supplied each attribute value. */
   provenance: Provenance;
-  /** Exact entity count in the window, or null when a plan was cut, partial or failed. */
-  total: number | null;
   /** True only when the row limit left rows out; a failed or partial plan is reported in `errors`. */
   truncated: boolean;
   /** Wall time of the whole request in milliseconds, probes included. */

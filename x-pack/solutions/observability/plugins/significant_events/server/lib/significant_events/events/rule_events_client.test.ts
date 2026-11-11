@@ -152,6 +152,39 @@ describe('RuleEventsClient', () => {
       expect(lastStatusWritten(alertEventsClient)).toMatchObject({ alert_status: 'inactive' });
     });
 
+    it('replaces prior workflow provenance with the workflow that writes the status version', async () => {
+      const existing = createStatusEvent({
+        status: 'active',
+        workflow_execution_id: 'prior-workflow',
+      });
+      const alertEventsClient = makeStatusAlertEventsClient();
+
+      await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
+        eventId: existing.event_id,
+        change: DEACTIVATE_STATUS,
+        workflowExecutionId: 'current-workflow',
+      });
+
+      expect(lastStatusWritten(alertEventsClient).data.workflow_execution_id).toBe(
+        'current-workflow'
+      );
+    });
+
+    it('clears prior workflow provenance when a standalone status update writes a version', async () => {
+      const existing = createStatusEvent({
+        status: 'active',
+        workflow_execution_id: 'prior-workflow',
+      });
+      const alertEventsClient = makeStatusAlertEventsClient();
+
+      await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
+        eventId: existing.event_id,
+        change: DEACTIVATE_STATUS,
+      });
+
+      expect(lastStatusWritten(alertEventsClient).data.workflow_execution_id).toBeUndefined();
+    });
+
     it('records the given note, and falls back to the operator note when it is omitted or blank', async () => {
       const existing = createStatusEvent({ assessment_note: 'Operator dismissed as noise.' });
       const written = async (assessmentNote?: string) => {
@@ -325,12 +358,13 @@ describe('RuleEventsClient', () => {
     beforeEach(() => telemetry.trackEventStatusChanged.mockReset());
 
     it('reports an operator transition with the prior status, the actor and the quality fields', async () => {
-      const existing = createStatusEvent({ status: 'active', workflow_execution_id: 'exec-1' });
+      const existing = createStatusEvent({ status: 'active' });
 
       await withTelemetry(existing).updateEventStatus({
         eventId: existing.event_id,
         change: DEACTIVATE_STATUS,
         actor: 'rest_api',
+        workflowExecutionId: 'exec-1',
       });
 
       const [[reported]] = telemetry.trackEventStatusChanged.mock.calls;

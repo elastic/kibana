@@ -17,7 +17,21 @@ import type {
 } from '../../significant_events/events/lifecycle/lifecycle_controller';
 import type { SIGNIFICANT_EVENT_ENTITY_TYPE } from './constants';
 
-interface KnowledgeIndicatorQueriesGeneratedProps {
+interface WorkflowExecutionTelemetryProps {
+  workflow_execution_id: string;
+}
+
+interface OptionalWorkflowExecutionTelemetryProps {
+  workflow_execution_id?: string;
+}
+
+interface ParentWorkflowExecutionTelemetryProps {
+  parent_workflow_execution_id?: string;
+}
+
+interface KnowledgeIndicatorQueriesGeneratedProps
+  extends OptionalWorkflowExecutionTelemetryProps,
+    ParentWorkflowExecutionTelemetryProps {
   count: number;
   connector_id: string;
   input_tokens_used: number;
@@ -29,7 +43,10 @@ interface KnowledgeIndicatorQueriesGeneratedProps {
   external_content_tool_continuations?: number;
 }
 
-interface KnowledgeIndicatorFeaturesIdentifiedProps {
+interface KnowledgeIndicatorFeaturesIdentifiedProps
+  extends OptionalWorkflowExecutionTelemetryProps,
+    ParentWorkflowExecutionTelemetryProps {
+  /** @deprecated Use `workflow_execution_id`. */
   run_id: string;
   connector_id: string;
   iteration: number;
@@ -52,7 +69,8 @@ interface KnowledgeIndicatorFeaturesIdentifiedProps {
   state: 'success' | 'failure' | 'canceled';
 }
 
-interface AgentBuilderKnowledgeIndicatorCreatedProps {
+interface AgentBuilderKnowledgeIndicatorCreatedProps
+  extends OptionalWorkflowExecutionTelemetryProps {
   ki_kind: 'feature' | 'query';
   tool_id: 'ki_feature_create' | 'ki_query_create';
   success: boolean;
@@ -62,7 +80,8 @@ interface AgentBuilderKnowledgeIndicatorCreatedProps {
   error_message?: string;
 }
 
-interface AgentToolKnowledgeIndicatorIdentificationStartedProps {
+interface AgentToolKnowledgeIndicatorIdentificationStartedProps
+  extends OptionalWorkflowExecutionTelemetryProps {
   success: boolean;
   source_id: string;
   error_message?: string;
@@ -83,13 +102,17 @@ interface AlertCreationAttemptIdentityProps {
   group_hash?: string;
 }
 
-interface AgentToolEventCreateProps extends AlertCreationAttemptIdentityProps {
+interface AgentToolEventCreateProps
+  extends AlertCreationAttemptIdentityProps,
+    OptionalWorkflowExecutionTelemetryProps {
   success: boolean;
   source_ids: string[];
   error_message?: string;
 }
 
-interface AgentToolEventStatusUpdateProps extends ExistingAlertIdentityProps {
+interface AgentToolEventStatusUpdateProps
+  extends ExistingAlertIdentityProps,
+    OptionalWorkflowExecutionTelemetryProps {
   success: boolean;
   /**
    * @deprecated Superseded by `event_id`. Kept optional for schema continuity with events sent by
@@ -120,7 +143,9 @@ interface EventStatusChangedProps extends ExistingAlertIdentityProps {
   workflow_execution_id?: string;
 }
 
-interface AgentToolEventInvestigationAttachProps extends ExistingAlertIdentityProps {
+interface AgentToolEventInvestigationAttachProps
+  extends ExistingAlertIdentityProps,
+    OptionalWorkflowExecutionTelemetryProps {
   success: boolean;
   /**
    * @deprecated Superseded by `event_id`. Kept optional for schema continuity with pre-#1517
@@ -129,16 +154,17 @@ interface AgentToolEventInvestigationAttachProps extends ExistingAlertIdentityPr
   event_uuid?: string;
   /** Stable event_id slug. Optional for rolling-deploy compatibility with pre-#1517 nodes. */
   event_id?: string;
-  workflow_execution_id: string;
+  investigation_id: string;
   error_message?: string;
 }
 
-interface DiscoveryTriggeredProps {
+interface DiscoveryTriggeredProps extends WorkflowExecutionTelemetryProps {
+  /** @deprecated Use `workflow_execution_id`. */
   execution_id: string;
   space_id: string;
 }
 
-interface DetectionScanProps {
+interface DetectionScanProps extends OptionalWorkflowExecutionTelemetryProps {
   /** ES `took` (ms) reported by the alerts-source search itself. */
   took_ms: number;
   /** Wall-clock (ms) around the reader call, including transport and parsing. */
@@ -167,8 +193,9 @@ interface DetectionScanProps {
   space_id: string;
 }
 
-interface KnowledgeIndicatorOnboardingScheduledProps {
+interface KnowledgeIndicatorOnboardingScheduledProps extends WorkflowExecutionTelemetryProps {
   source_id: string;
+  /** @deprecated Use `workflow_execution_id`. */
   execution_id: string;
   workflow_id: string;
   space_id: string;
@@ -176,19 +203,22 @@ interface KnowledgeIndicatorOnboardingScheduledProps {
   skip_queries: boolean;
 }
 
-interface AgentToolEventWriteProps extends AlertCreationAttemptIdentityProps {
+interface AgentToolEventWriteProps
+  extends AlertCreationAttemptIdentityProps,
+    OptionalWorkflowExecutionTelemetryProps {
   success: boolean;
   event_id: string;
   /** Absent when no status was decided for the item (it was rejected or skipped earlier). */
   status?: SignificantEventStatus;
   written: boolean;
   source_ids: string[];
+  detection_workflow_execution_ids?: string[];
   error_message?: string;
   /** Tier actually stored. Present only when written is true. */
   severity?: Severity;
 }
 
-interface AgentToolEventSearchProps {
+interface AgentToolEventSearchProps extends OptionalWorkflowExecutionTelemetryProps {
   success: boolean;
   result_count: number;
   has_query: boolean;
@@ -216,4 +246,7 @@ export {
   type KnowledgeIndicatorQueriesGeneratedProps,
   type KnowledgeIndicatorFeaturesIdentifiedProps,
   type KnowledgeIndicatorOnboardingScheduledProps,
+  type OptionalWorkflowExecutionTelemetryProps,
+  type ParentWorkflowExecutionTelemetryProps,
+  type WorkflowExecutionTelemetryProps,
 };

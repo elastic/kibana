@@ -295,6 +295,18 @@ describe('useWorkflowExecutions', () => {
     await waitFor(() => expect(result.current.error).toBeTruthy());
   });
 
+  it('keeps hasNamedExecution when the loaded page has no names', async () => {
+    mockGetWorkflowExecutions.mockResolvedValue({
+      ...executionsPage1,
+      hasNamedExecution: true,
+    });
+
+    const { result } = renderExecutionsHook({ workflowId: 'wf-1' });
+
+    await waitFor(() => expect(result.current.data?.hasNamedExecution).toBe(true));
+    expect(result.current.data?.results.every((execution) => !execution.runName)).toBe(true);
+  });
+
   it('should expose hasNextPage as false when all results fit in one page', async () => {
     const { result } = renderExecutionsHook({ workflowId: 'wf-1' });
 

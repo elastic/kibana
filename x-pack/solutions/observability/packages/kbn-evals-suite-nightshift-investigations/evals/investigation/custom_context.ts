@@ -57,6 +57,12 @@ export const getDatasetCustomContext = ({
   return name.startsWith('nightshift/orca-') ? ORCA_CUSTOM_CONTEXT : [];
 };
 
+/** The space's current custom context snippets, in stored order. */
+export const readCustomContext = async (fetch: HttpHandler): Promise<string[]> => {
+  const current = await fetch<GetCustomContextResponse>(CUSTOM_CONTEXT_API_PATH);
+  return current.snippets.map(({ text }) => text);
+};
+
 /** Replaces the space's custom context with exactly these snippets. */
 export const replaceCustomContext = async (
   fetch: HttpHandler,

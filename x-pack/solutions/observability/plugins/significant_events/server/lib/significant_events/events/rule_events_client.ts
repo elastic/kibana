@@ -1042,6 +1042,7 @@ export class RuleEventsClient {
     closeReason,
     assessmentNote,
     expectedTimestamp,
+    workflowExecutionId,
   }: {
     eventId: string;
     change: StatusChange;
@@ -1051,6 +1052,7 @@ export class RuleEventsClient {
     assessmentNote?: string;
     /** Skips the write when the latest version's `@timestamp` differs (the event changed since). */
     expectedTimestamp?: string;
+    workflowExecutionId?: string;
   }): Promise<UpdateEventStatusResult> {
     const latest = await this.findLatestByEventId(eventId);
     if (!latest) {
@@ -1075,7 +1077,7 @@ export class RuleEventsClient {
     }
 
     const written = await this.updateEvent({
-      event: decision.event,
+      event: { ...decision.event, workflow_execution_id: workflowExecutionId },
       prior: latest,
       origin: { actor, change, closeReason },
     });

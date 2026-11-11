@@ -143,6 +143,11 @@ describe('plugin_discovery', () => {
     it('should discover more plugins when testPlugins=true', () => {
       expect(pluginsWithTest.length).toBeGreaterThanOrEqual(pluginsWithoutTest.length);
     });
+
+    it('excludes response ops fixtures unless test plugins are requested', () => {
+      expect(pluginsWithoutTest.some((plugin) => plugin.id === 'alertingFixture')).toBe(false);
+      expect(pluginsWithTest.some((plugin) => plugin.id === 'alertingFixture')).toBe(true);
+    });
   });
 
   describe('discoverPlugins with devOnly', () => {
@@ -183,6 +188,26 @@ describe('discoverPlugins with explicit paths', () => {
     expect(plugins).toContainEqual(
       expect.objectContaining({
         id: 'analyticsFtrHelpers',
+        contextDir: pluginPath,
+      })
+    );
+  }, 30000);
+
+  it('includes an explicitly selected response ops fixture', async () => {
+    const pluginPath = Path.resolve(
+      REPO_ROOT,
+      'x-pack/platform/test_plugins/response_ops/functional_with_es_ssl/alerts'
+    );
+    const plugins = await discoverPlugins({
+      repoRoot: REPO_ROOT,
+      examples: false,
+      testPlugins: false,
+      paths: [pluginPath],
+    });
+
+    expect(plugins).toContainEqual(
+      expect.objectContaining({
+        id: 'alertingFixture',
         contextDir: pluginPath,
       })
     );

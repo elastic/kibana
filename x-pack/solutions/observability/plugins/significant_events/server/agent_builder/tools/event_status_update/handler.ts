@@ -21,12 +21,14 @@ export async function updateEventStatusToolHandler({
   status,
   closeReason,
   assessmentNote,
+  workflowExecutionId,
 }: {
   eventSearchClient: RuleEventsClient;
   eventId: string;
   status: SignificantEventManualStatus;
   closeReason?: SignificantEventCloseReason;
   assessmentNote?: string;
+  workflowExecutionId?: string;
 }): Promise<{ event_id: string } & UpdateEventStatusResult> {
   const result = await eventSearchClient.updateEventStatus({
     eventId,
@@ -34,6 +36,7 @@ export async function updateEventStatusToolHandler({
     actor: 'agent_tool',
     closeReason,
     assessmentNote,
+    workflowExecutionId,
   });
 
   return { event_id: eventId, ...result };

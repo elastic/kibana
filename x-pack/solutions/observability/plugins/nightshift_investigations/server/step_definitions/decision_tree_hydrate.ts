@@ -91,8 +91,8 @@ export const decisionTreeHydrateStepDefinition = ({
       const executionId = workflowContext.execution?.id;
       const conversationId = unscopeConversationId(spaceId, sandboxId);
 
-      // The combined materialize workflow installs with Wiki or Memory, so this step is
-      // registered even when the tree feature is off. Fail closed without touching the sandbox.
+      // The combined materialize workflow also installs with Wiki or Memory alone, so this step
+      // is registered even when the tree feature is off. Fail closed without touching the sandbox.
       // It is also every knowledge agent's before-agent hook, but only the investigator reads
       // the trees.
       const flagOff = Boolean(isEnabled && !isEnabled());
