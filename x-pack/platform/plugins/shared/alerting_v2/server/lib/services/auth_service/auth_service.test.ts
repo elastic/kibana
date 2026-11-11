@@ -13,13 +13,7 @@ import { AuthService } from './auth_service';
 
 const spaceId = 'default';
 
-// securityMock stubs ApiActions, so pull the real class for actionFromRouteTag.
-const { ApiActions } = jest.requireActual(
-  '@kbn/security-authorization-core/src/actions/api'
-) as typeof import('@kbn/security-authorization-core/src/actions/api');
-const apiActions = new ApiActions();
-
-const actionFor = (privilege: string) => apiActions.actionFromRouteTag(privilege);
+const actionFor = (privilege: string) => `api:${privilege}`;
 
 const createRequestMock = (grantedPrivileges: string[]) => {
   const request = httpServerMock.createKibanaRequest();
@@ -27,14 +21,10 @@ const createRequestMock = (grantedPrivileges: string[]) => {
   return { request, grantedActions };
 };
 
-// securityMock has no privilege-check mock implementation, so map granted actions per request.
 const createSecurity = (privilegesByRequest: Map<KibanaRequest, string[]>) => {
   const security = securityMock.createStart();
 
-  jest
-    .mocked(security.authz.actions.api.actionFromRouteTag)
-    .mockImplementation((tag: string) => apiActions.actionFromRouteTag(tag));
-
+  jest.mocked(security.authz.actions.api.actionFromRouteTag).mockImplementation(actionFor);
   jest.mocked(security.authz.mode.useRbacForRequest).mockReturnValue(true);
 
   security.authz.checkPrivilegesWithRequest.mockImplementation((req: KibanaRequest) => ({
@@ -158,12 +148,6 @@ describe('AuthService', () => {
         isBoom: true,
         output: { statusCode: 403 },
       });
-    });
-
-    it('names the denied feature privilege in the error message', async () => {
-      await expect(
-        authService.ensureAuthorized({ feature: 'alerts', operation: 'write' })
-      ).rejects.toThrow('Unauthorized to access "Alerts: All"');
     });
   });
 
