@@ -1,0 +1,589 @@
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "metrics-kubernetes.state_deployment-default",
+    "index": ".ds-metrics-kubernetes.state_deployment-default-2026.11.01-000001",
+    "source": {
+      "@timestamp": "2026-11-01T10:00:00.000Z",
+      "metricset": {
+        "name": "state_deployment"
+      },
+      "orchestrator": {
+        "cluster": {
+          "name": "scout-cluster"
+        }
+      },
+      "kubernetes": {
+        "namespace": "checkout",
+        "labels": {
+          "app": "cart-api"
+        },
+        "deployment": {
+          "name": "cart-api",
+          "paused": false,
+          "replicas": {
+            "available": 3,
+            "desired": 3
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "metrics-k8sclusterreceiver.otel-default",
+    "index": ".ds-metrics-k8sclusterreceiver.otel-default-2026.11.01-000001",
+    "source": {
+      "@timestamp": "2026-11-01T10:00:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "checkout"
+        },
+        "deployment": {
+          "name": "cart-api",
+          "uid": "uid-checkout-cart-api",
+          "available": 3,
+          "desired": 3
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "metrics-kubernetes.state_deployment-default",
+    "index": ".ds-metrics-kubernetes.state_deployment-default-2026.11.01-000001",
+    "source": {
+      "@timestamp": "2026-11-01T10:00:00.000Z",
+      "metricset": {
+        "name": "state_deployment"
+      },
+      "orchestrator": {
+        "cluster": {
+          "name": "scout-cluster"
+        }
+      },
+      "kubernetes": {
+        "namespace": "checkout",
+        "labels": {
+          "app": "payments"
+        },
+        "deployment": {
+          "name": "payments",
+          "paused": false,
+          "replicas": {
+            "available": 2,
+            "desired": 3
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "metrics-k8sclusterreceiver.otel-default",
+    "index": ".ds-metrics-k8sclusterreceiver.otel-default-2026.11.01-000001",
+    "source": {
+      "@timestamp": "2026-11-01T10:00:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "checkout"
+        },
+        "deployment": {
+          "name": "payments",
+          "uid": "uid-checkout-payments",
+          "available": 2,
+          "desired": 3
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "metrics-kubernetes.state_deployment-default",
+    "index": ".ds-metrics-kubernetes.state_deployment-default-2026.11.01-000001",
+    "source": {
+      "@timestamp": "2026-11-01T10:00:00.000Z",
+      "metricset": {
+        "name": "state_deployment"
+      },
+      "orchestrator": {
+        "cluster": {
+          "name": "scout-cluster"
+        }
+      },
+      "kubernetes": {
+        "namespace": "platform",
+        "labels": {
+          "app": "ingress"
+        },
+        "deployment": {
+          "name": "ingress",
+          "paused": false,
+          "replicas": {
+            "available": 1,
+            "desired": 1
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "metrics-k8sclusterreceiver.otel-default",
+    "index": ".ds-metrics-k8sclusterreceiver.otel-default-2026.11.01-000001",
+    "source": {
+      "@timestamp": "2026-11-01T10:00:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "platform"
+        },
+        "deployment": {
+          "name": "ingress",
+          "uid": "uid-platform-ingress",
+          "available": 1,
+          "desired": 1
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "metrics-kubernetes.state_deployment-default",
+    "index": ".ds-metrics-kubernetes.state_deployment-default-2026.11.01-000001",
+    "source": {
+      "@timestamp": "2026-11-01T10:01:00.000Z",
+      "metricset": {
+        "name": "state_deployment"
+      },
+      "orchestrator": {
+        "cluster": {
+          "name": "scout-cluster"
+        }
+      },
+      "kubernetes": {
+        "namespace": "checkout",
+        "labels": {
+          "app": "cart-api"
+        },
+        "deployment": {
+          "name": "cart-api",
+          "paused": false,
+          "replicas": {
+            "available": 3,
+            "desired": 3
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "metrics-k8sclusterreceiver.otel-default",
+    "index": ".ds-metrics-k8sclusterreceiver.otel-default-2026.11.01-000001",
+    "source": {
+      "@timestamp": "2026-11-01T10:01:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "checkout"
+        },
+        "deployment": {
+          "name": "cart-api",
+          "uid": "uid-checkout-cart-api",
+          "available": 3,
+          "desired": 3
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "metrics-kubernetes.state_deployment-default",
+    "index": ".ds-metrics-kubernetes.state_deployment-default-2026.11.01-000001",
+    "source": {
+      "@timestamp": "2026-11-01T10:01:00.000Z",
+      "metricset": {
+        "name": "state_deployment"
+      },
+      "orchestrator": {
+        "cluster": {
+          "name": "scout-cluster"
+        }
+      },
+      "kubernetes": {
+        "namespace": "checkout",
+        "labels": {
+          "app": "payments"
+        },
+        "deployment": {
+          "name": "payments",
+          "paused": false,
+          "replicas": {
+            "available": 2,
+            "desired": 3
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "metrics-k8sclusterreceiver.otel-default",
+    "index": ".ds-metrics-k8sclusterreceiver.otel-default-2026.11.01-000001",
+    "source": {
+      "@timestamp": "2026-11-01T10:01:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "checkout"
+        },
+        "deployment": {
+          "name": "payments",
+          "uid": "uid-checkout-payments",
+          "available": 2,
+          "desired": 3
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "metrics-kubernetes.state_deployment-default",
+    "index": ".ds-metrics-kubernetes.state_deployment-default-2026.11.01-000001",
+    "source": {
+      "@timestamp": "2026-11-01T10:01:00.000Z",
+      "metricset": {
+        "name": "state_deployment"
+      },
+      "orchestrator": {
+        "cluster": {
+          "name": "scout-cluster"
+        }
+      },
+      "kubernetes": {
+        "namespace": "platform",
+        "labels": {
+          "app": "ingress"
+        },
+        "deployment": {
+          "name": "ingress",
+          "paused": false,
+          "replicas": {
+            "available": 1,
+            "desired": 1
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "metrics-k8sclusterreceiver.otel-default",
+    "index": ".ds-metrics-k8sclusterreceiver.otel-default-2026.11.01-000001",
+    "source": {
+      "@timestamp": "2026-11-01T10:01:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "platform"
+        },
+        "deployment": {
+          "name": "ingress",
+          "uid": "uid-platform-ingress",
+          "available": 1,
+          "desired": 1
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "metrics-k8sclusterreceiver.otel-default",
+    "index": ".ds-metrics-k8sclusterreceiver.otel-default-2026.11.01-000001",
+    "source": {
+      "@timestamp": "2026-11-05T10:00:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "streaming"
+        },
+        "deployment": {
+          "name": "tsds-shared",
+          "uid": "uid-streaming-tsds-shared",
+          "available": 4,
+          "desired": 5
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-k8sclusterreceiver.otel-tsds",
+    "source": {
+      "@timestamp": "2026-11-05T10:01:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "streaming"
+        },
+        "deployment": {
+          "name": "tsds-shared",
+          "uid": "uid-streaming-tsds-shared",
+          "available": 5,
+          "desired": 5
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-k8sclusterreceiver.otel-tsds",
+    "source": {
+      "@timestamp": "2026-11-05T10:00:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "streaming"
+        },
+        "deployment": {
+          "name": "tsds-only",
+          "uid": "uid-streaming-tsds-only",
+          "available": 2,
+          "desired": 5
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "metrics-k8sclusterreceiver.otel-default",
+    "index": ".ds-metrics-k8sclusterreceiver.otel-default-2026.11.01-000001",
+    "source": {
+      "@timestamp": "2026-11-05T10:00:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "streaming"
+        },
+        "deployment": {
+          "name": "standard-only",
+          "uid": "uid-streaming-standard-only",
+          "available": 1,
+          "desired": 5
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-k8sclusterreceiver.otel-tsds",
+    "source": {
+      "@timestamp": "2026-11-05T14:00:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "timeseries"
+        },
+        "deployment": {
+          "name": "ts-window",
+          "uid": "uid-timeseries-ts-window",
+          "available": 1,
+          "desired": 2
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-k8sclusterreceiver.otel-tsds",
+    "source": {
+      "@timestamp": "2026-11-05T14:01:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "timeseries"
+        },
+        "deployment": {
+          "name": "ts-window",
+          "uid": "uid-timeseries-ts-window",
+          "available": 2,
+          "desired": 2
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "entity-inventory-scout-aliased-standard",
+    "source": {
+      "@timestamp": "2026-11-07T10:00:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "aliased"
+        },
+        "deployment": {
+          "name": "kept-standard",
+          "uid": "uid-aliased-kept-standard",
+          "available": 1,
+          "desired": 1
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "entity-inventory-scout-aliased-standard",
+    "source": {
+      "@timestamp": "2026-11-07T10:00:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "aliased"
+        },
+        "deployment": {
+          "name": "dropped-standard",
+          "uid": "uid-aliased-dropped-standard",
+          "available": 1,
+          "desired": 1
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "entity-inventory-scout-aliased-tsds",
+    "source": {
+      "@timestamp": "2026-11-07T10:00:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "aliased"
+        },
+        "deployment": {
+          "name": "kept-tsds",
+          "uid": "uid-aliased-kept-tsds",
+          "available": 2,
+          "desired": 2
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "entity-inventory-scout-aliased-tsds",
+    "source": {
+      "@timestamp": "2026-11-07T10:00:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "aliased"
+        },
+        "deployment": {
+          "name": "dropped-tsds",
+          "uid": "uid-aliased-dropped-tsds",
+          "available": 2,
+          "desired": 2
+        }
+      }
+    }
+  }
+}

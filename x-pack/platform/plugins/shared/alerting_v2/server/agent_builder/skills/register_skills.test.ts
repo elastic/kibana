@@ -64,6 +64,7 @@ describe('registerSkills', () => {
       getWorkflowClient: jest.fn(() => ({ getWorkflow: jest.fn() })),
       getAvailableConnectors: jest.fn(),
       getRulesClient: jest.fn(),
+      getActionPolicyClient: jest.fn(),
       getPrivilegeChecker: jest.fn(),
       availability: {
         cacheMode: 'none',

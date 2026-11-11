@@ -129,18 +129,21 @@ describe('vendor API contract', () => {
         if (!found) {
           throw new Error(`specs/${name}/vendor_api belongs to no connector in all_specs.ts`);
         }
+        const { id } = found.connector.metadata;
         const { changed, problems } = await updateVendorApi({
           connector: found.connector,
           directory: found.directory,
           check: true,
+          // Only a source without a snapshot is loaded, such as one `--inspect` just added.
           fetchText: async (url) => {
-            throw new Error(`The contract test runs offline, but tried to fetch ${url}`);
+            throw new Error(
+              `${url} has no snapshot, and the contract test runs offline; run ${SCRIPT} --connector ${id} and commit the result`
+            );
           },
           now: () => new Date(0),
           log: { info: () => {}, warning: () => {} },
         });
 
-        const { id } = found.connector.metadata;
         expect({
           problems,
           outOfDate: changed.map(

@@ -84,6 +84,15 @@ export const resolveHuntModels = async ({
   logger: Logger;
   tiers?: readonly HuntModelTier[];
 }): Promise<ResolveHuntModelsOutcome> => {
+  // Without this the token-usage doc carries no feature_id/parent_feature_id, so the call is
+  // invisible to per-feature cost reporting.
+  const chatModelOptions = {
+    telemetryMetadata: {
+      pluginId: telemetryPluginId,
+      aggregateBy: ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
+    },
+  };
+
   const resolved = await Promise.all(
     tiers.map(
       async (
@@ -101,14 +110,7 @@ export const resolveHuntModels = async ({
             request,
             uiSettingsClient,
             logger,
-            chatModelOptions: {
-              // Without this the token-usage doc carries no feature_id/parent_feature_id, so the
-              // call is invisible to per-feature cost reporting.
-              telemetryMetadata: {
-                pluginId: telemetryPluginId,
-                aggregateBy: ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
-              },
-            },
+            chatModelOptions,
           });
           return outcome.ok
             ? { tier, model: outcome.model }
@@ -137,6 +139,7 @@ export const resolveHuntModels = async ({
     featureId: ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
     request,
     logger,
+    chatModelOptions,
   });
   if (cyber) models.cyber = cyber;
 

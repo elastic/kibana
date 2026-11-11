@@ -349,6 +349,64 @@ describe('buildInvestigationMessage with a mixed alert array', () => {
   });
 });
 
+describe('buildInvestigationMessage with a v2 alert without a rule', () => {
+  const base: V2AlertSnapshot = {
+    alert_version: 'v2',
+    id: 'episode-1',
+    group_hash: 'hash-1',
+    status: 'active',
+    start: '2026-08-24T12:00:00.000Z',
+  };
+
+  it('names the episode from its rule name', () => {
+    const message = buildInvestigationMessage({
+      alerts: [{ ...base, source: 'elastic.significant_events', rule_name: 'Ad hoc' }],
+    });
+
+    expect(message).toContain(
+      'Alerting v2 episode episode-1 (elastic.significant_events, "Ad hoc") is active'
+    );
+    expect(message).not.toContain('of rule');
+    expect(message).not.toContain('the id above');
+  });
+
+  it('describes the episode by its id alone', () => {
+    const message = buildInvestigationMessage({ alerts: [base] });
+
+    expect(message).toContain('Alerting v2 episode episode-1 is active');
+    expect(message).not.toContain('of rule');
+  });
+});
+
+describe('buildInvestigationMessage with a significant event alert', () => {
+  const v2: V2AlertSnapshot = {
+    alert_version: 'v2',
+    id: 'episode-1',
+    group_hash: 'hash-1',
+    status: 'active',
+    start: '2026-08-24T12:00:00.000Z',
+  };
+
+  it('names the event id and how to read it', () => {
+    const message = buildInvestigationMessage({
+      alerts: [{ ...v2, source: 'elastic.significant_events', data: { event_id: 'evt-42' } }],
+    });
+
+    expect(message).toContain('significant event (event id evt-42)');
+    expect(message).toContain('sig_events.event_search');
+    expect(message).not.toContain('not a classic one');
+  });
+
+  it('keeps the generic v2 wording for other sources', () => {
+    const message = buildInvestigationMessage({
+      alerts: [{ ...v2, source: 'custom.source', data: { event_id: 'evt-42' } }],
+    });
+
+    expect(message).toContain('not a classic one');
+    expect(message).not.toContain('significant event');
+  });
+});
+
 describe('buildAlertRecoveredFollowUpMessage', () => {
   const baseRecovery = {
     alertUuid: 'alert-uuid-1',
@@ -376,6 +434,19 @@ describe('buildAlertRecoveredFollowUpMessage', () => {
         '</alert_data>',
       ].join('\n')
     );
+  });
+
+  it('names a rule-less alert by its id and leaves out the rule identifiers', () => {
+    const message = buildAlertRecoveredFollowUpMessage({
+      alertUuid: 'episode-1',
+      alertId: 'group-hash',
+      recoveredAt: '2026-08-24T12:15:30.000Z',
+    });
+
+    expect(message).toContain(
+      'Alert "episode-1" (UUID episode-1, instance "group-hash") transitioned to recovered at 2026-08-24T12:15:30.000Z.'
+    );
+    expect(message).not.toContain('rule undefined');
   });
 
   it('asks the agent to use all available signals to reassess the root cause', () => {

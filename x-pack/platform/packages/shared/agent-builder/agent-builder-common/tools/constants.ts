@@ -79,7 +79,6 @@ export const platformSignificantEventsTools = {
   createEvent: `${internalNamespaces.platformSignificantEvents}.event_create`,
   updateEventStatus: `${internalNamespaces.platformSignificantEvents}.event_status_update`,
   eventsWrite: `${internalNamespaces.platformSignificantEvents}.events_write`,
-  attachInvestigation: `${internalNamespaces.platformStreams}.sig_events.event_investigation_attach`,
 } as const;
 
 /** Nightshift source tools, registered by the Significant Events plugin. */
@@ -123,7 +122,6 @@ export const internalTools = {
   runSubagent: 'run_subagent',
   sendMessageToAgent: 'send_message_to_agent',
   sleep: 'sleep',
-  writeTodos: 'write_todos',
   loadSkill: 'load_skill',
   searchRelevantSkills: 'search_relevant_skills',
   askUserQuestion: 'ask_user_question',

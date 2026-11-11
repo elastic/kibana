@@ -329,6 +329,28 @@ describe('deriveInstanceChipState', () => {
     isTimedOut: false,
   };
 
+  it('reports a running agent as unverified when its data goes outside the local cluster', () => {
+    expect(deriveInstanceChipState({ ...base, isDataVerifiable: false, hasLiveAgent: true })).toBe(
+      'unverified'
+    );
+  });
+
+  it('does not report unverified before an agent is running, or when the data can be checked', () => {
+    expect(deriveInstanceChipState({ ...base, isDataVerifiable: false })).toBe('detecting');
+    expect(deriveInstanceChipState({ ...base, hasLiveAgent: true })).toBe('detecting');
+  });
+
+  it('lets an unhealthy agent win over unverified', () => {
+    expect(
+      deriveInstanceChipState({
+        ...base,
+        agentHealth: 'unhealthy',
+        isDataVerifiable: false,
+        hasLiveAgent: true,
+      })
+    ).toBe('error');
+  });
+
   it('stays detecting while a healthy agent has not produced data', () => {
     expect(deriveInstanceChipState(base)).toBe('detecting');
   });
@@ -396,6 +418,11 @@ describe('aggregateInstanceChipStates', () => {
     [['receiving', 'detecting'], 'detecting'],
     [['receiving', 'instantiating'], 'instantiating'],
     [['detecting', 'instantiating'], 'detecting'],
+    [['unverified'], 'unverified'],
+    [['receiving', 'unverified'], 'unverified'],
+    [['unverified', 'detecting'], 'detecting'],
+    [['unverified', 'timeout'], 'timeout'],
+    [['unverified', 'error'], 'error'],
     [['receiving', 'timeout'], 'timeout'],
     [['timeout', 'detecting'], 'timeout'],
     [['receiving', 'error'], 'error'],

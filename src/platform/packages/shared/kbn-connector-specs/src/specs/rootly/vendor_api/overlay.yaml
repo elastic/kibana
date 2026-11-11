@@ -1,0 +1,54 @@
+overlay: 1.0.0
+info:
+  title: Rootly API corrections
+  version: 1.0.0
+actions:
+  - target: $.paths['/v1/incidents','/v1/incidents/{id}'].get.parameters[?@.name == 'include'].schema
+    description: >-
+      The spec only allows one related resource, but https://docs.rootly.com/api-reference/incidents/list-incidents
+      and https://docs.rootly.com/api-reference/incidents/retrieves-an-incident say include is
+      "comma separated if needed. eg: sub_statuses,causes,subscribers".
+    remove: true
+  - target: $.paths['/v1/incidents','/v1/incidents/{id}'].get.parameters[?@.name == 'include']
+    description: The same related resources, comma separated.
+    update:
+      schema:
+        type: string
+        pattern: '^(sub_statuses|causes|subscribers|roles|slack_messages|environments|incident_types|services|functionalities|groups|events|action_items|custom_field_selections|feedbacks|incident_post_mortem|alerts)(,(sub_statuses|causes|subscribers|roles|slack_messages|environments|incident_types|services|functionalities|groups|events|action_items|custom_field_selections|feedbacks|incident_post_mortem|alerts))*$'
+
+  - target: $.paths['/v1/incidents'].post
+    description: &writeInclude >-
+      Rootly follows JSON:API (https://jsonapi.org/format/#fetching-includes), and the incident
+      write endpoints sideload related resources for include as GET does: the connector's
+      include=services,groups on every incident write was verified against a live Rootly org in
+      https://github.com/elastic/kibana/pull/281142 ("services/groups on incident responses were
+      coming back null because Rootly's JSON:API only sideloads relationships when ?include= is
+      passed"). The spec documents include on GET only.
+    update:
+      parameters:
+        - name: include
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: '^(sub_statuses|causes|subscribers|roles|slack_messages|environments|incident_types|services|functionalities|groups|events|action_items|custom_field_selections|feedbacks|incident_post_mortem|alerts)(,(sub_statuses|causes|subscribers|roles|slack_messages|environments|incident_types|services|functionalities|groups|events|action_items|custom_field_selections|feedbacks|incident_post_mortem|alerts))*$'
+  - target: $.paths['/v1/incidents/{id}','/v1/incidents/{id}/cancel','/v1/incidents/{id}/in_triage','/v1/incidents/{id}/mitigate','/v1/incidents/{id}/resolve'].put
+    description: *writeInclude
+    update:
+      parameters:
+        - name: include
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: '^(sub_statuses|causes|subscribers|roles|slack_messages|environments|incident_types|services|functionalities|groups|events|action_items|custom_field_selections|feedbacks|incident_post_mortem|alerts)(,(sub_statuses|causes|subscribers|roles|slack_messages|environments|incident_types|services|functionalities|groups|events|action_items|custom_field_selections|feedbacks|incident_post_mortem|alerts))*$'
+  - target: $.paths['/v1/incidents/{id}/add_subscribers','/v1/incidents/{id}/assign_role_to_user'].post
+    description: *writeInclude
+    update:
+      parameters:
+        - name: include
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: '^(sub_statuses|causes|subscribers|roles|slack_messages|environments|incident_types|services|functionalities|groups|events|action_items|custom_field_selections|feedbacks|incident_post_mortem|alerts)(,(sub_statuses|causes|subscribers|roles|slack_messages|environments|incident_types|services|functionalities|groups|events|action_items|custom_field_selections|feedbacks|incident_post_mortem|alerts))*$'

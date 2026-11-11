@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/developer-toolbar-plugin'
   - '@kbn/shared-ux-utility'
+  - '@kbn/react-fiber'
 tags:
   - plugin
   - dev

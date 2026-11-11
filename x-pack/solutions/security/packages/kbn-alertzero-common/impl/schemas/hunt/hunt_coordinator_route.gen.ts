@@ -42,20 +42,20 @@ export const HuntCoordinatorResult = lazySchema(() =>
     report_id: z.string().optional(),
     run_id: z.string(),
     /**
-     * What Tier 1 searched: the space's Security Solution default data view patterns, exclusions included, never an alerts index. Empty when the scope was blocked or resolution failed.
+     * What IOC Hunt searched: the space's Security Solution default data view patterns, exclusions included, never an alerts index. Empty when the scope was blocked or resolution failed.
      */
     index_patterns: z
       .array(z.string())
       .describe(
-        "What Tier 1 searched: the space's Security Solution default data view patterns, exclusions included, never an alerts index. Empty when the scope was blocked or resolution failed."
+        "What IOC Hunt searched: the space's Security Solution default data view patterns, exclusions included, never an alerts index. Empty when the scope was blocked or resolution failed."
       ),
     /**
-     * What Tier 2 was allowed to read, target, and count as a hit, chosen after the report was read and Tier 1 ran: the union of the datasets the report's vendor or product matched, the indices Tier 1 hit, the model's matches (only when neither of those found anything), and `actionable_indices`, each `*`-suffixed. `tier2_target_sources` says which signals contributed. Empty when the scope was blocked, resolution failed, or no signal named a target.
+     * What Behavior Hunt was allowed to read, target, and count as a hit, chosen after the report was read and IOC Hunt ran: the union of the datasets the report's vendor or product matched, the indices IOC Hunt hit, the model's matches (only when neither of those found anything), and `actionable_indices`, each `*`-suffixed. `tier2_target_sources` says which signals contributed. Empty when the scope was blocked, resolution failed, or no signal named a target.
      */
     tier2_targets: z
       .array(z.string())
       .describe(
-        "What Tier 2 was allowed to read, target, and count as a hit, chosen after the report was read and Tier 1 ran: the union of the datasets the report's vendor or product matched, the indices Tier 1 hit, the model's matches (only when neither of those found anything), and `actionable_indices`, each `*`-suffixed. `tier2_target_sources` says which signals contributed. Empty when the scope was blocked, resolution failed, or no signal named a target."
+        "What Behavior Hunt was allowed to read, target, and count as a hit, chosen after the report was read and IOC Hunt ran: the union of the datasets the report's vendor or product matched, the indices IOC Hunt hit, the model's matches (only when neither of those found anything), and `actionable_indices`, each `*`-suffixed. `tier2_target_sources` says which signals contributed. Empty when the scope was blocked, resolution failed, or no signal named a target."
       ),
     /**
      * Which signals contributed to `tier2_targets`, in a fixed order. Empty when `tier2_targets` is empty.
@@ -66,13 +66,13 @@ export const HuntCoordinatorResult = lazySchema(() =>
         'Which signals contributed to `tier2_targets`, in a fixed order. Empty when `tier2_targets` is empty.'
       ),
     /**
-     * The datasets the report itself points at: the ones its vendor or product matched, or the model's match, without the indices Tier 1 hit or the process-bearing streams in `tier2_targets`. Hunt packaging names these as the data a detection would query when a run has no hit events to name. Empty when neither signal matched.
+     * The datasets the report itself points at: the ones its vendor or product matched, or the model's match, without the indices IOC Hunt hit or the process-bearing streams in `tier2_targets`. Hunt packaging names these as the data a detection would query when a run has no hit events to name. Empty when neither signal matched.
      */
     report_intent_targets: z
       .array(z.string())
       .max(200)
       .describe(
-        "The datasets the report itself points at: the ones its vendor or product matched, or the model's match, without the indices Tier 1 hit or the process-bearing streams in `tier2_targets`. Hunt packaging names these as the data a detection would query when a run has no hit events to name. Empty when neither signal matched."
+        "The datasets the report itself points at: the ones its vendor or product matched, or the model's match, without the indices IOC Hunt hit or the process-bearing streams in `tier2_targets`. Hunt packaging names these as the data a detection would query when a run has no hit events to name. Empty when neither signal matched."
       ),
     /**
      * `*`-suffixed streams and indices in the hunt's universe whose mapping carries `process.entity_id` or `process.pid`: where a hit can become a Defend response action. A mapping says a host can report process telemetry, not that it is enrolled; packaging decides that later. Empty when the scope was blocked or no mapping carries either field.
@@ -103,12 +103,12 @@ export const HuntCoordinatorResult = lazySchema(() =>
             tactic_ids: z.array(z.string()),
             parent_technique_id: z.string().optional(),
             /**
-             * The query Tier 2 generated and validated (and, when grounded, executed) to hunt this technique.
+             * The query Behavior Hunt generated and validated (and, when grounded, executed) to hunt this technique.
              */
             validated_esql: z
               .string()
               .describe(
-                'The query Tier 2 generated and validated (and, when grounded, executed) to hunt this technique.'
+                'The query Behavior Hunt generated and validated (and, when grounded, executed) to hunt this technique.'
               ),
             /**
              * Display title for this hunted finding.
@@ -185,14 +185,14 @@ export const HuntCoordinatorResult = lazySchema(() =>
               .optional()
               .describe('True when more than 20 distinct users were seen.'),
             /**
-             * Required-index execute rows as Discover refs (`id` + `index` + optional `timestamp`). Same shape as Tier 1 `hits[]`. Consumed by the SSE mapper into `events[]` / `alerts[]`.
+             * Required-index execute rows as Discover refs (`id` + `index` + optional `timestamp`). Same shape as IOC Hunt `hits[]`. Consumed by the SSE mapper into `events[]` / `alerts[]`.
              */
             hits: z
               .array(HuntForThreatHit)
               .max(50)
               .optional()
               .describe(
-                'Required-index execute rows as Discover refs (`id` + `index` + optional `timestamp`). Same shape as Tier 1 `hits[]`. Consumed by the SSE mapper into `events[]` / `alerts[]`.'
+                'Required-index execute rows as Discover refs (`id` + `index` + optional `timestamp`). Same shape as IOC Hunt `hits[]`. Consumed by the SSE mapper into `events[]` / `alerts[]`.'
               ),
           })
         ),
@@ -207,23 +207,23 @@ export const HuntCoordinatorResult = lazySchema(() =>
           })
         ),
         /**
-         * Every technique Tier 2 was asked about but could not corroborate, each with why. Absent or empty means every extracted technique was searched.
+         * Every technique Behavior Hunt was asked about but could not corroborate, each with why. Absent or empty means every extracted technique was searched.
          */
         incomplete: z
           .array(HuntIncompleteness)
           .optional()
           .describe(
-            'Every technique Tier 2 was asked about but could not corroborate, each with why. Absent or empty means every extracted technique was searched.'
+            'Every technique Behavior Hunt was asked about but could not corroborate, each with why. Absent or empty means every extracted technique was searched.'
           ),
         message: z.string().optional(),
         next_step: z.string(),
         /**
-         * True when any behavior's execute path found at least one row in a required index. Independent of Tier 1.
+         * True when any behavior's execute path found at least one row in a required index. Independent of IOC Hunt.
          */
         has_hit: z
           .boolean()
           .describe(
-            "True when any behavior's execute path found at least one row in a required index. Independent of Tier 1."
+            "True when any behavior's execute path found at least one row in a required index. Independent of IOC Hunt."
           ),
         tier: z.number().int().optional(),
       })
@@ -231,23 +231,33 @@ export const HuntCoordinatorResult = lazySchema(() =>
       .optional(),
     tier2_skipped_reason: z.string().optional(),
     /**
-     * Model tiers that had no usable model on this run, in tier order. Absent when every tier resolved. A missing balanced or frontier model is what makes Tier 2 report no_inference; a missing efficient model quietly degrades dataset matching and recommendations without skipping anything.
+     * Why Behavior Hunt was skipped, when the reason alone is ambiguous. Set when no_inference means the dataset-match model call failed rather than that no model was configured. Capped to match the producer clamp on the failure message.
+     */
+    tier2_skip_detail: z
+      .string()
+      .max(200)
+      .optional()
+      .describe(
+        'Why Behavior Hunt was skipped, when the reason alone is ambiguous. Set when no_inference means the dataset-match model call failed rather than that no model was configured. Capped to match the producer clamp on the failure message.'
+      ),
+    /**
+     * Model tiers that had no usable model on this run, in tier order. Absent when every tier resolved. A missing balanced or frontier model is what makes Behavior Hunt report no_inference; a missing efficient model quietly degrades dataset matching and recommendations without skipping anything.
      */
     unavailable_model_tiers: z
       .array(z.enum(['efficient', 'balanced', 'frontier']))
       .optional()
       .describe(
-        'Model tiers that had no usable model on this run, in tier order. Absent when every tier resolved. A missing balanced or frontier model is what makes Tier 2 report no_inference; a missing efficient model quietly degrades dataset matching and recommendations without skipping anything.'
+        'Model tiers that had no usable model on this run, in tier order. Absent when every tier resolved. A missing balanced or frontier model is what makes Behavior Hunt report no_inference; a missing efficient model quietly degrades dataset matching and recommendations without skipping anything.'
       ),
     message: z.string(),
     next_step: z.string(),
     /**
-     * True when Tier 1 confirmed a hit in the searched universe or any Tier 2 behavior executed with a hit in its targets. Callers that gate SSE emit or packaging on the hit bar must read this field, not tier1.has_confirmed_hit alone.
+     * True when IOC Hunt confirmed a hit in the searched universe or any derived behavior executed with a hit in its targets. Callers that gate SSE emit or packaging on the hit bar must read this field, not tier1.has_confirmed_hit alone.
      */
     has_confirmed_hit: z
       .boolean()
       .describe(
-        'True when Tier 1 confirmed a hit in the searched universe or any Tier 2 behavior executed with a hit in its targets. Callers that gate SSE emit or packaging on the hit bar must read this field, not tier1.has_confirmed_hit alone.'
+        'True when IOC Hunt confirmed a hit in the searched universe or any derived behavior executed with a hit in its targets. Callers that gate SSE emit or packaging on the hit bar must read this field, not tier1.has_confirmed_hit alone.'
       ),
     /**
      * Whether the run covered what it was asked to. Read this rather than `completed_successfully` when deciding what to record: a run can finish without errors and still have searched almost nothing, and the difference between `complete` and `incomplete_final` is the difference between "the environment is clean" and "we could not look". `tier1.incomplete` and `tier2.incomplete` say which gaps produced it.
@@ -264,42 +274,52 @@ export const HuntCoordinatorResult = lazySchema(() =>
         'Whether this run is done with the report and it can be retired: true when nothing a later sweep would cover is missing. Derived from `completeness`: false only for `incomplete_retryable`, where repeating the run could cover what this one missed. True for `incomplete_final` as well as `complete`, because a deterministic gap returns identically every run, so retrying only re-spends the budget. A caller that writes "clean" off this flag alone will record a clean environment for a run that could not search it — use `completeness` for that.'
       ),
     /**
-     * Technique ids this run settled in Tier 2: behaviors whose query executed and whose result a retry would not change (a conclusive result, or an inconclusive one the completeness classifier treats as final), plus techniques collapsed into a sibling whose query executed conclusively. Techniques that were skipped, failed, lost to the behavior budget, or whose sibling did not execute conclusively are not listed. Absent or empty when Tier 2 did not run. The caller records these so a later run can skip them.
+     * Technique ids this run settled in Behavior Hunt: behaviors whose query executed and whose result a retry would not change (a conclusive result, or an inconclusive one the completeness classifier treats as final), plus techniques collapsed into a sibling whose query executed conclusively. Techniques that were skipped, failed, lost to the behavior budget, or whose sibling did not execute conclusively are not listed. Absent or empty when Behavior Hunt did not run. The caller records these so a later run can skip them.
      */
     searched_technique_ids: z
       .array(z.string().min(1).max(32))
       .max(100)
       .optional()
       .describe(
-        'Technique ids this run settled in Tier 2: behaviors whose query executed and whose result a retry would not change (a conclusive result, or an inconclusive one the completeness classifier treats as final), plus techniques collapsed into a sibling whose query executed conclusively. Techniques that were skipped, failed, lost to the behavior budget, or whose sibling did not execute conclusively are not listed. Absent or empty when Tier 2 did not run. The caller records these so a later run can skip them.'
+        'Technique ids this run settled in Behavior Hunt: behaviors whose query executed and whose result a retry would not change (a conclusive result, or an inconclusive one the completeness classifier treats as final), plus techniques collapsed into a sibling whose query executed conclusively. Techniques that were skipped, failed, lost to the behavior budget, or whose sibling did not execute conclusively are not listed. Absent or empty when Behavior Hunt did not run. The caller records these so a later run can skip them.'
       ),
     /**
-     * Technique ids this run could not search but a later run still should: the ones a retryable coverage gap names. The caller records these so the next run keeps them as pending even if its own extraction no longer returns them. Absent when Tier 2 did not run, which tells the caller to leave what it has recorded alone; empty when nothing is pending.
+     * Technique ids this run could not search but a later run still should: the ones a retryable coverage gap names. The caller records these so the next run keeps them as pending even if its own extraction no longer returns them. Absent when Behavior Hunt did not run, which tells the caller to leave what it has recorded alone; empty when nothing is pending.
      */
     pending_technique_ids: z
       .array(z.string().min(1).max(32))
       .max(100)
       .optional()
       .describe(
-        'Technique ids this run could not search but a later run still should: the ones a retryable coverage gap names. The caller records these so the next run keeps them as pending even if its own extraction no longer returns them. Absent when Tier 2 did not run, which tells the caller to leave what it has recorded alone; empty when nothing is pending.'
+        'Technique ids this run could not search but a later run still should: the ones a retryable coverage gap names. The caller records these so the next run keeps them as pending even if its own extraction no longer returns them. Absent when Behavior Hunt did not run, which tells the caller to leave what it has recorded alone; empty when nothing is pending.'
       ),
     /**
-     * True when this was a manual run over the report's own text, so Tier 2 searched the whole report without skipping anything an earlier run searched. The caller reads it to let this run's result replace an earlier finding, which a run that skipped techniques cannot do. Absent when Tier 2 did not run.
+     * True when this was a manual run over the report's own text, so Behavior Hunt searched the whole report without skipping anything an earlier run searched. The caller reads it to let this run's result replace an earlier finding, which a run that skipped techniques cannot do. Absent when Behavior Hunt did not run.
      */
     replayed_whole_report: z
       .boolean()
       .optional()
       .describe(
-        "True when this was a manual run over the report's own text, so Tier 2 searched the whole report without skipping anything an earlier run searched. The caller reads it to let this run's result replace an earlier finding, which a run that skipped techniques cannot do. Absent when Tier 2 did not run."
+        "True when this was a manual run over the report's own text, so Behavior Hunt searched the whole report without skipping anything an earlier run searched. The caller reads it to let this run's result replace an earlier finding, which a run that skipped techniques cannot do. Absent when Behavior Hunt did not run."
       ),
     /**
-     * The coordinator's own coverage gaps — input this run had to truncate, and a Tier 2 that was requested but could not run, or had nothing to run against. Not a copy of `tier1.incomplete` / `tier2.incomplete`, which the caller already has; this is the part of `completeness` that would otherwise reach the caller only as an enum, or on the Tier-1-only paths, not even that. Absent or empty means the coordinator itself found nothing to report here.
+     * The distinct reasons of the coverage gaps that kept this run `incomplete_retryable`, from the coordinator and both tiers, judged in the same context as `completeness`. A reason that is final for this run (a technique it gave up on, a gate nothing could pass) is left out. Empty when the run is not retryable; absent on paths that record nothing.
+     */
+    retryable_reasons: z
+      .array(HuntIncompleteReason)
+      .max(100)
+      .optional()
+      .describe(
+        'The distinct reasons of the coverage gaps that kept this run `incomplete_retryable`, from the coordinator and both tiers, judged in the same context as `completeness`. A reason that is final for this run (a technique it gave up on, a gate nothing could pass) is left out. Empty when the run is not retryable; absent on paths that record nothing.'
+      ),
+    /**
+     * The coordinator's own coverage gaps — input this run had to truncate, and a Behavior Hunt that was requested but could not run, or had nothing to run against. Not a copy of `tier1.incomplete` / `tier2.incomplete`, which the caller already has; this is the part of `completeness` that would otherwise reach the caller only as an enum, or on the paths where only IOC Hunt ran, not even that. Absent or empty means the coordinator itself found nothing to report here.
      */
     incomplete: z
       .array(HuntIncompleteness)
       .optional()
       .describe(
-        "The coordinator's own coverage gaps — input this run had to truncate, and a Tier 2 that was requested but could not run, or had nothing to run against. Not a copy of `tier1.incomplete` / `tier2.incomplete`, which the caller already has; this is the part of `completeness` that would otherwise reach the caller only as an enum, or on the Tier-1-only paths, not even that. Absent or empty means the coordinator itself found nothing to report here."
+        "The coordinator's own coverage gaps — input this run had to truncate, and a Behavior Hunt that was requested but could not run, or had nothing to run against. Not a copy of `tier1.incomplete` / `tier2.incomplete`, which the caller already has; this is the part of `completeness` that would otherwise reach the caller only as an enum, or on the paths where only IOC Hunt ran, not even that. Absent or empty means the coordinator itself found nothing to report here."
       ),
     /**
      * Report IOCs excluded by adjudication, not searched by this run.
@@ -311,14 +331,14 @@ export const HuntCoordinatorResult = lazySchema(() =>
       .optional()
       .describe('Report IOCs excluded by adjudication, not searched by this run.'),
     /**
-     * Up to 8 analyst next-step lines for a confirmed hit, grounded to this run's own SSE-visible entities. Absent when there is no confirmed hit or the run stopped before Tier 2.
+     * Up to 8 analyst next-step lines for a confirmed hit, grounded to this run's own SSE-visible entities. Absent when there is no confirmed hit or the run stopped before Behavior Hunt.
      */
     recommendations: z
       .array(z.string().min(1).max(2000))
       .max(8)
       .optional()
       .describe(
-        "Up to 8 analyst next-step lines for a confirmed hit, grounded to this run's own SSE-visible entities. Absent when there is no confirmed hit or the run stopped before Tier 2."
+        "Up to 8 analyst next-step lines for a confirmed hit, grounded to this run's own SSE-visible entities. Absent when there is no confirmed hit or the run stopped before Behavior Hunt."
       ),
     /**
      * One clause for the run conclusion message: the outcome (confirmed hit or not) plus what each tier did.
@@ -339,7 +359,7 @@ export const HuntCoordinatorResult = lazySchema(() =>
         'The full hunt results narrative the hunt child writes to the Investigation: what was hunted, where and when, what each tier found, and why a tier did not run. Deterministic markdown derived from the structured fields, self-sufficient because the SSE attachment may not render everywhere.'
       ),
     /**
-     * Populated when `has_confirmed_hit` is true (Tier 1 environment hits or a Tier 2 executed required-index hit) and the request named a `report_id`: one entry per technique this run corroborated, meaning its ES|QL executed and returned required-index rows or a Tier 1 hit was attributed to it. A technique that was only proposed gets no entry of its own; when no technique was corroborated, a single report-scoped entry carries all of them under `hunt_result.tier2.behaviors`. The caller fans out over this array with ai.attachment.add, one call per entry; no templated fields.
+     * Populated when `has_confirmed_hit` is true (IOC Hunt environment hits or a Behavior Hunt executed required-index hit) and the request named a `report_id`: one entry per technique this run corroborated, meaning its ES|QL executed and returned required-index rows or an IOC Hunt hit was attributed to it. A technique that was only proposed gets no entry of its own; when no technique was corroborated, a single report-scoped entry carries all of them under `hunt_result.tier2.behaviors`. The caller fans out over this array with ai.attachment.add, one call per entry; no templated fields.
      */
     sse: z
       .array(
@@ -350,7 +370,7 @@ export const HuntCoordinatorResult = lazySchema(() =>
       )
       .optional()
       .describe(
-        'Populated when `has_confirmed_hit` is true (Tier 1 environment hits or a Tier 2 executed required-index hit) and the request named a `report_id`: one entry per technique this run corroborated, meaning its ES|QL executed and returned required-index rows or a Tier 1 hit was attributed to it. A technique that was only proposed gets no entry of its own; when no technique was corroborated, a single report-scoped entry carries all of them under `hunt_result.tier2.behaviors`. The caller fans out over this array with ai.attachment.add, one call per entry; no templated fields.'
+        'Populated when `has_confirmed_hit` is true (IOC Hunt environment hits or a Behavior Hunt executed required-index hit) and the request named a `report_id`: one entry per technique this run corroborated, meaning its ES|QL executed and returned required-index rows or an IOC Hunt hit was attributed to it. A technique that was only proposed gets no entry of its own; when no technique was corroborated, a single report-scoped entry carries all of them under `hunt_result.tier2.behaviors`. The caller fans out over this array with ai.attachment.add, one call per entry; no templated fields.'
       ),
     /**
      * Present alongside `sse`: the hosts and users the SSE entries name, deduplicated across entries, ready for the investigations impact route. Ids are `host:<host.name>` or `user:<user.name>`. Capped at 50, half of what one Investigation's impact may hold, because every sweep of a report merges onto the same Investigation.

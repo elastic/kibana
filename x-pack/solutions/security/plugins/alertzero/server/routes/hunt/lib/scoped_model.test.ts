@@ -66,7 +66,9 @@ describe('resolveScopedModel', () => {
     mockSearchInferenceEndpoints.endpoints.getForFeature.mockResolvedValue({
       endpoints: [{ connectorId: 'tier-connector' }],
     });
-    const chatModelOptions = { telemetryMetadata: { pluginId: 'test_plugin' } };
+    const chatModelOptions = {
+      telemetryMetadata: { pluginId: 'test_plugin', aggregateBy: 'alertzero_parent' },
+    };
 
     await resolveScopedModel({
       inference: mockInference as never,
@@ -82,6 +84,15 @@ describe('resolveScopedModel', () => {
       request: mockRequest,
       connectorId: 'tier-connector',
       chatModelOptions,
+    });
+    expect(mockInference.getClient).toHaveBeenCalledWith({
+      request: mockRequest,
+      bindTo: {
+        connectorId: 'tier-connector',
+        metadata: {
+          connectorTelemetry: { pluginId: 'test_plugin', aggregateBy: 'alertzero_parent' },
+        },
+      },
     });
   });
 
@@ -101,6 +112,10 @@ describe('resolveScopedModel', () => {
 
     expect(result.ok).toBe(true);
     expect(mockInference.getConnectorById).toHaveBeenCalledWith('tier-connector', mockRequest);
+    expect(mockInference.getClient).toHaveBeenCalledWith({
+      request: mockRequest,
+      bindTo: { connectorId: 'tier-connector' },
+    });
   });
 
   it('falls through to genAI default when no tier connector', async () => {
@@ -209,6 +224,10 @@ describe('resolveScopedModel', () => {
         connectorId: 'daybreak',
         chatModelOptions: {},
       });
+      expect(mockInference.getClient).toHaveBeenCalledWith({
+        request: mockRequest,
+        bindTo: { connectorId: 'daybreak' },
+      });
       expect(mockInference.getDefaultConnector).not.toHaveBeenCalled();
     });
 
@@ -217,7 +236,9 @@ describe('resolveScopedModel', () => {
       mockSearchInferenceEndpoints.endpoints.getForFeature.mockResolvedValue({
         endpoints: [{ connectorId: 'daybreak' }],
       });
-      const chatModelOptions = { telemetryMetadata: { pluginId: 'test_plugin' } };
+      const chatModelOptions = {
+        telemetryMetadata: { pluginId: 'test_plugin', aggregateBy: 'alertzero_parent' },
+      };
 
       await resolveConfiguredScopedModel({
         inference: mockInference as never,
@@ -232,6 +253,15 @@ describe('resolveScopedModel', () => {
         request: mockRequest,
         connectorId: 'daybreak',
         chatModelOptions,
+      });
+      expect(mockInference.getClient).toHaveBeenCalledWith({
+        request: mockRequest,
+        bindTo: {
+          connectorId: 'daybreak',
+          metadata: {
+            connectorTelemetry: { pluginId: 'test_plugin', aggregateBy: 'alertzero_parent' },
+          },
+        },
       });
     });
   });

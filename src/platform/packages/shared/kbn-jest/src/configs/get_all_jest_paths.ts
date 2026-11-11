@@ -9,7 +9,7 @@
 
 import Path from 'path';
 
-import { minimatch } from 'minimatch';
+import { Minimatch } from 'minimatch';
 import { getRepoFiles } from '@kbn/get-repo-files';
 
 import { testMatch } from '../../jest-preset';
@@ -17,10 +17,10 @@ import { testMatch } from '../../jest-preset';
 const UNIT_CONFIG_NAME = 'jest.config.js';
 const INTEGRATION_CONFIG_NAME = 'jest.integration.config.js';
 
-const testsRe = (testMatch as string[]).map((p) => minimatch.makeRe(p));
+const testMatchers = (testMatch as string[]).map((p) => new Minimatch(p));
 
 const classify = (rel: string) => {
-  if (testsRe.some((re) => re && re.test(rel))) {
+  if (testMatchers.some((matcher) => matcher.match(rel))) {
     return 'test' as const;
   }
 
