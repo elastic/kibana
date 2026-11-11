@@ -269,6 +269,34 @@ describe('Case View Attachments tab', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('renders no accordion for a type the viewer cannot use', () => {
+    const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+    unifiedAttachmentTypeRegistry.register({
+      id: 'security.alert',
+      isEnabled: () => false,
+      getLabel: () => 'Alerts',
+      getIcon: () => 'bell',
+      getCreationActivity: () => ({ event: 'added an alert' }),
+      getAttachmentList: () => ({ children: () => <div data-test-subj="test-alerts-table" /> }),
+      schema: z.object({}),
+    });
+    const caseWithAlert: CaseUI = { ...basicCase, comments: [alertComment] };
+
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseWithAlert}
+        onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
+      />,
+      { wrapperProps: { unifiedAttachmentTypeRegistry } }
+    );
+
+    expect(
+      screen.queryByTestId('case-view-attachment-accordion-security.alert')
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('test-alerts-table')).not.toBeInTheDocument();
+  });
+
   describe('removal', () => {
     const buildRemovableRegistry = () => {
       const registry = new UnifiedAttachmentTypeRegistry();

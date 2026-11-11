@@ -13,10 +13,13 @@ import { getFileAttachmentType } from './file';
 import { getMapAttachmentType } from './map';
 import { getVisualizationAttachmentType } from './lens';
 import { getStackAlertAttachmentType } from './alert';
+import { getProposalAttachmentType } from './proposal';
 
 export interface RegisterInternalAttachmentsOptions {
   hasDashboardPluginEnabled?: boolean;
   hasMapsPluginEnabled?: boolean;
+  /** The proposals plugin is disabled by default; without it a proposal cannot be read. */
+  hasProposalsPluginEnabled?: boolean;
 }
 
 export const registerInternalAttachments = (
@@ -24,6 +27,7 @@ export const registerInternalAttachments = (
   {
     hasDashboardPluginEnabled = false,
     hasMapsPluginEnabled = false,
+    hasProposalsPluginEnabled = false,
   }: RegisterInternalAttachmentsOptions = {}
 ) => {
   unifiedRegistry.register(getFileAttachmentType());
@@ -36,5 +40,8 @@ export const registerInternalAttachments = (
   }
   if (hasMapsPluginEnabled) {
     unifiedRegistry.register(getMapAttachmentType());
+  }
+  if (hasProposalsPluginEnabled) {
+    unifiedRegistry.register(getProposalAttachmentType());
   }
 };

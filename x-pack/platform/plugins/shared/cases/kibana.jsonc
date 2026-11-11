@@ -41,7 +41,8 @@
       "spaces",
       "serverless",
       "savedObjectsTaggingOss",
-      "workflowsManagement"
+      "workflowsManagement",
+      "proposals"
     ],
     "requiredBundles": [
       "dashboard",

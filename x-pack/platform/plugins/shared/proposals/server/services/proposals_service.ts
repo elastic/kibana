@@ -1817,6 +1817,9 @@ const toFilterClauses = (
   if (filters.origin) {
     filter.push({ term: { origin: filters.origin } });
   }
+  if (filters.rootProposalIds) {
+    filter.push({ terms: { rootProposalId: filters.rootProposalIds } });
+  }
   if (filters.category) {
     filter.push({ term: { category: filters.category } });
   }

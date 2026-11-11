@@ -37,6 +37,7 @@ interface ConversationCardProps {
   canManageEscalations?: boolean;
   /** When true the "Close investigation" action appears. */
   canCloseInvestigation?: boolean;
+  canAddToCase?: boolean;
   onCopyLink: BaseActionsProps['onCopyLink'];
   /**
    * Optional: render the assignee picker widget for this investigation. Supplied by the page
@@ -89,6 +90,7 @@ export const ConversationCard = memo<ConversationCardProps>(
     chatHref,
     canManageEscalations,
     canCloseInvestigation,
+    canAddToCase,
     onCopyLink,
     renderAssignees,
     renderInFlightStatus,
@@ -164,6 +166,7 @@ export const ConversationCard = memo<ConversationCardProps>(
                       canOpenInvestigationDetails={canOpenInvestigationDetails}
                       canManageEscalations={canManageEscalations}
                       canCloseInvestigation={canCloseInvestigation}
+                      canAddToCase={canAddToCase}
                       onCopyLink={onCopyLink}
                     />
                   </EuiFlexItem>

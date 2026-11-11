@@ -128,7 +128,9 @@ export class CasePlugin
 
     initUiSettings(core.uiSettings);
 
-    registerInternalAttachments(this.unifiedAttachmentTypeRegistry);
+    registerInternalAttachments(this.unifiedAttachmentTypeRegistry, {
+      hasProposalsPluginEnabled: Boolean(plugins.proposals),
+    });
 
     registerCaseFileKinds(this.caseConfig.files, plugins.files, core.security.fips.isEnabled());
     registerCasesAnalyticsIndexesTasks({

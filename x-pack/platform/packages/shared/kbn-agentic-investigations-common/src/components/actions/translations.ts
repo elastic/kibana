@@ -28,6 +28,9 @@ export const ACTIONS_TRANSLATIONS = Object.freeze({
         defaultMessage: 'Attach to an escalation',
       }
     ),
+    addToCase: i18n.translate('xpack.agenticInvestigations.baseActions.addToCase', {
+      defaultMessage: 'Add to case',
+    }),
     copyLink: i18n.translate('xpack.agenticInvestigations.baseActions.copyLink', {
       defaultMessage: 'Copy link',
     }),

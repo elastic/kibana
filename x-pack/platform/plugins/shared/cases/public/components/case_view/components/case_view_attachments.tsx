@@ -25,7 +25,7 @@ import { useRefreshCaseViewPage } from '../use_on_refresh_case_view_page';
 import type { CaseUI } from '../../../../common';
 import { FILE_ATTACHMENT_TYPE } from '../../../../common/constants';
 import { resolveUnifiedAttachmentType } from '../../../../common/utils/attachments/migration_utils';
-import { useCasesContext } from '../../cases_context/use_cases_context';
+import { useEnabledAttachmentTypes } from '../hooks/use_enabled_attachment_types';
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import { SEARCH_PLACEHOLDER } from '../../actions/translations';
 import { CaseViewAttachButton } from './case_view_attach_button';
@@ -77,7 +77,7 @@ export const CaseViewAttachments = ({
   onUpdateField,
 }: CaseViewAttachmentsProps) => {
   const { euiTheme } = useEuiTheme();
-  const { unifiedAttachmentTypeRegistry } = useCasesContext();
+  const enabledAttachmentTypes = useEnabledAttachmentTypes();
   const { observablesAuthorized, isObservablesFeatureEnabled } = useCasesFeatures();
   const { data: fileStats } = useGetCaseFileStats({ caseId: caseData.id, searchTerm });
   const fileCount = fileStats?.total ?? 0;
@@ -111,11 +111,10 @@ export const CaseViewAttachments = ({
 
   const excludedTypes = useMemo(
     () =>
-      unifiedAttachmentTypeRegistry
-        .list()
+      enabledAttachmentTypes
         .filter((type) => !type.getAttachmentList?.()?.children)
         .map((type) => type.id),
-    [unifiedAttachmentTypeRegistry]
+    [enabledAttachmentTypes]
   );
 
   const {
@@ -128,8 +127,7 @@ export const CaseViewAttachments = ({
   // Render one accordion per registered type that has a tab view AND a non-zero count.
   const attachmentSections = useMemo(
     () =>
-      unifiedAttachmentTypeRegistry
-        .list()
+      enabledAttachmentTypes
         .flatMap((type) => {
           if (!isTypeVisible(type.id)) return [];
           const Children = type.getAttachmentList?.()?.children;
@@ -152,14 +150,7 @@ export const CaseViewAttachments = ({
           ];
         })
         .sort((a, b) => a.label.localeCompare(b.label)),
-    [
-      unifiedAttachmentTypeRegistry,
-      countsByType,
-      effectiveFileCount,
-      isTypeVisible,
-      canRemove,
-      onRemove,
-    ]
+    [enabledAttachmentTypes, countsByType, effectiveFileCount, isTypeVisible, canRemove, onRemove]
   );
 
   // Observables stays hardcoded: there's no other entry point to add observables

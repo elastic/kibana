@@ -6,6 +6,7 @@
  */
 
 import type React from 'react';
+import type { Capabilities } from '@kbn/core/public';
 import type { EuiCommentProps, EuiButtonProps, EuiThemeComputed } from '@elastic/eui';
 import type { z } from '@kbn/zod/v4';
 import type {
@@ -171,8 +172,18 @@ export interface RelatedRemovalChoice {
   removeWithRelatedLabel: string;
 }
 
+export interface AttachmentTypeEnabledContext {
+  /** The viewer's UI capabilities. A feature below its `minimumLicense` grants none. */
+  capabilities: Capabilities;
+}
+
 export interface AttachmentType<Props> {
   id: string;
+  /**
+   * Whether the viewer can use this type. When false the attachments tab leaves out its
+   * section, its count and its filter option; activity rows still render. Omit to always enable.
+   */
+  isEnabled?: (context: AttachmentTypeEnabledContext) => boolean;
   getIcon: (props: Props) => EuiCommentProps['timelineAvatar'];
   getLabel: () => string;
   getCreationActivity: (props: Props) => AttachmentCreationActivity<Props>;

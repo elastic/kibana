@@ -461,7 +461,7 @@ See `definitions/alertzero/actions/action_create_detection_rule.yaml` for a work
 
 All routes are internal and versioned (`/internal/proposals`, version `1`):
 
-- `GET /internal/proposals` — list (filter by `status`, `decision`, `conversationId`, `excludeSuperseded`, `excludeExpired`; paged with `from` and `size`)
+- `GET /internal/proposals` — list (filter by `status`, `decision`, `conversationId`, `rootProposalIds`, `excludeSuperseded`, `excludeExpired`; paged with `from` and `size`). `rootProposalIds` reads whole revision chains, as the Cases proposal attachment does
 - `GET /internal/proposals/{id}` — read one, with action metadata resolved
 - `POST /internal/proposals/{id}/approve` — release the gate positively
 - `POST /internal/proposals/{id}/dismiss` — annotate the reason, then release the gate negatively

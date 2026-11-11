@@ -6,7 +6,7 @@ This is the v2 unified registration API. Public HTTP still uses `/comments` and 
 
 ## Who this is for
 
-Plugin authors that own an attachment type. Security, Observability, ML, and osquery are the current ones. Cases owns the registry and the comment, file, lens, dashboard, map, discover-session, and stack-alert types.
+Plugin authors that own an attachment type. Security, Observability, ML, and osquery are the current ones. Cases owns the registry and the comment, file, lens, dashboard, map, discover-session, stack-alert, and proposal types.
 
 ## Concepts
 
@@ -100,6 +100,7 @@ Import UI types from `@kbn/cases-plugin/public`: `UnifiedValueAttachmentViewProp
 | `getCreationActivity(props)` | yes | Activity-row create event. |
 | `getRemovalActivity(props)` | no | Activity-row delete event. |
 | `getAttachmentList(props?)` | no | Case-view table/tab (`AttachmentList`). See [Removing from the Attachments tab](#removing-from-the-attachments-tab). |
+| `isEnabled({ capabilities })` | no | Return `false` to leave the type's section, count, and filter option out of the Attachments tab for this viewer. Activity rows still render. A feature below its `minimumLicense` grants no capabilities, so one capability check covers license and privilege. Omit to always enable. |
 | `getCountLabel({ count })` | no | Counted noun, lowercase except brand names, e.g. "2 files" or "2 Discover sessions". Use an ICU plural. Cases builds "Remove 2 files?" and "removed 2 files" from it, so the label must read correctly on its own. Unset falls back to "2 attachments" in the confirm modal and "2 items" in the activity. |
 | `workflow.getActivityLabel(props)` | no | Opts the public registration into attachment workflow activity rendering. Receives the linked workflow name and an optional bulk count. |
 | `getDocumentAction(props)` | no | Control that opens the ES document this type points at, rendered from activity rows that reference the document but are not the attachment's own row (e.g. workflow runs). Return `null` when the target can't be resolved. |
@@ -177,7 +178,7 @@ This is the activity-row visual only. Data-driven icons are allowed.
 
 | Owner | Types |
 | --- | --- |
-| Cases, internal | `comment`, `file`, `lens`, `stack.alert`, `dashboard`, `map`, `discoverSession` |
+| Cases, internal | `comment`, `file`, `lens`, `stack.alert`, `dashboard`, `map`, `discoverSession`, `proposal` (only when the proposals plugin is enabled) |
 | security_solution | `security.endpoint`, `security.event`, `security.indicator`, `security.alert`, `security.timeline`, `security.entity` |
 | observability | `observability.alert` |
 | ml | `ml.anomaly_swimlane`, `ml.anomaly_charts`, `ml.single_metric_viewer` |

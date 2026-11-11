@@ -360,6 +360,8 @@ export type DismissProposalRequest = z.infer<typeof dismissProposalRequestSchema
  */
 export const MAX_PROPOSALS_PAGE_SIZE = 100;
 export const MAX_PROPOSALS_PAGE_OFFSET = 10_000 - MAX_PROPOSALS_PAGE_SIZE;
+/** Bounds the `rootProposalIds` filter, which a query string carries. */
+export const MAX_ROOT_PROPOSAL_IDS = MAX_PROPOSALS_PAGE_SIZE;
 
 /**
  * The filter vocabulary every read shares, applied as a conjunction. Both list
@@ -371,27 +373,39 @@ export const MAX_PROPOSALS_PAGE_OFFSET = 10_000 - MAX_PROPOSALS_PAGE_SIZE;
  * The complementary query — "no human ever answered", which also takes in
  * `expired` — is not expressible here, because nothing needs it yet.
  */
-export const proposalFiltersSchema = z.object({
-  status: proposalStatusSchema.optional(),
-  decision: proposalDecisionSchema.optional(),
-  conversationId: z.string().max(MAX_ID_LENGTH).optional(),
-  /**
-   * Restricts the read to one producing system. A queue that serves a single
-   * solution passes its own constant, so another solution's proposals — which
-   * share the index — do not appear in it.
-   */
-  origin: proposalOriginSchema.optional(),
-  /** Drops proposals that were replaced, so a chain shows only its live head. */
-  excludeSuperseded: z.stringbool().default(false),
-  /**
-   * Drops proposals whose deadline has passed, by date rather than by status.
-   * Distinct from `status: 'expired'`: between the deadline passing and the
-   * gate workflow settling the record there is task lag during which it still
-   * reads `pending`, and a queue wants it gone for that whole interval. Off by
-   * default so the list stays a faithful view of the index.
-   */
-  excludeExpired: z.stringbool().default(false),
-});
+export const proposalFiltersSchema = lazySchema(() =>
+  z.object({
+    status: proposalStatusSchema.optional(),
+    decision: proposalDecisionSchema.optional(),
+    conversationId: z.string().max(MAX_ID_LENGTH).optional(),
+    /**
+     * Restricts the read to one producing system. A queue that serves a single
+     * solution passes its own constant, so another solution's proposals — which
+     * share the index — do not appear in it.
+     */
+    origin: proposalOriginSchema.optional(),
+    /**
+     * Restricts the read to these revision chains, every revision included unless
+     * `excludeSuperseded` is set. A single query-string value arrives as a string, so it is wrapped.
+     */
+    rootProposalIds: z
+      .preprocess(
+        (value) => (typeof value === 'string' ? [value] : value),
+        z.array(z.string().max(MAX_ID_LENGTH)).min(1).max(MAX_ROOT_PROPOSAL_IDS)
+      )
+      .optional(),
+    /** Drops proposals that were replaced, so a chain shows only its live head. */
+    excludeSuperseded: z.stringbool().default(false),
+    /**
+     * Drops proposals whose deadline has passed, by date rather than by status.
+     * Distinct from `status: 'expired'`: between the deadline passing and the
+     * gate workflow settling the record there is task lag during which it still
+     * reads `pending`, and a queue wants it gone for that whole interval. Off by
+     * default so the list stays a faithful view of the index.
+     */
+    excludeExpired: z.stringbool().default(false),
+  })
+);
 export type ProposalFilters = z.infer<typeof proposalFiltersSchema>;
 
 export const listProposalsQuerySchema = proposalFiltersSchema.extend({

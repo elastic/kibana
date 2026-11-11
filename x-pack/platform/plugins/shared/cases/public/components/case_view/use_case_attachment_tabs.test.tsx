@@ -80,6 +80,33 @@ describe('useCaseAttachmentsTotal', () => {
     expect(result.current).toBe(4);
   });
 
+  it('leaves out a type the viewer cannot use', () => {
+    const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+    const isEnabled = jest.fn().mockReturnValue(false);
+    unifiedAttachmentTypeRegistry.register({
+      id: 'security.alert',
+      isEnabled,
+      getLabel: () => 'Alerts',
+      getIcon: () => 'bell',
+      getCreationActivity: () => ({ event: 'added an alert' }),
+      getAttachmentList: () => ({ children: () => <div /> }),
+      schema: z.object({}),
+    });
+    const caseWithAlert: CaseUI = { ...basicCase, comments: [alertComment] };
+
+    const { result } = renderHook(() => useCaseAttachmentsTotal({ caseData: caseWithAlert }), {
+      wrapper: ({ children }) => (
+        <TestProviders unifiedAttachmentTypeRegistry={unifiedAttachmentTypeRegistry}>
+          {children}
+        </TestProviders>
+      ),
+    });
+
+    // Only the 3 files: the alert comment's type is disabled.
+    expect(result.current).toBe(3);
+    expect(isEnabled).toHaveBeenCalledWith({ capabilities: expect.any(Object) });
+  });
+
   it('counts bulk-added alerts by id length', () => {
     const unifiedAttachmentTypeRegistry = buildRegistry();
     const bulkAlertComment = {

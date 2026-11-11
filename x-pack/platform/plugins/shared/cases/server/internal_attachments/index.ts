@@ -14,9 +14,18 @@ import {
   dashboardAttachmentType,
   mapAttachmentType,
   discoverSessionAttachmentType,
+  proposalAttachmentType,
 } from '../attachment_framework/attachments';
 
-export const registerInternalAttachments = (unifiedRegistry: UnifiedAttachmentTypeRegistry) => {
+export interface RegisterInternalAttachmentsOptions {
+  /** The proposals plugin is disabled by default; without it a proposal cannot be read. */
+  hasProposalsPluginEnabled?: boolean;
+}
+
+export const registerInternalAttachments = (
+  unifiedRegistry: UnifiedAttachmentTypeRegistry,
+  { hasProposalsPluginEnabled = false }: RegisterInternalAttachmentsOptions = {}
+) => {
   unifiedRegistry.register(fileAttachmentType);
   unifiedRegistry.register(lensAttachmentType);
   unifiedRegistry.register(commentAttachmentType);
@@ -24,4 +33,7 @@ export const registerInternalAttachments = (unifiedRegistry: UnifiedAttachmentTy
   unifiedRegistry.register(dashboardAttachmentType);
   unifiedRegistry.register(mapAttachmentType);
   unifiedRegistry.register(discoverSessionAttachmentType);
+  if (hasProposalsPluginEnabled) {
+    unifiedRegistry.register(proposalAttachmentType);
+  }
 };

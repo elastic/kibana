@@ -82,6 +82,8 @@ interface ConversationQueueProps {
   canManageEscalations?: boolean;
   /** When true the "Close investigation" action is shown on every card. */
   canCloseInvestigation?: boolean;
+  /** Offers "Add to case" on each card. */
+  canAddToCase?: boolean;
   /** Adds a "Copy link" item to each card's menu. */
   onCopyLink: BaseActionsProps['onCopyLink'];
   /**
@@ -132,6 +134,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     selectedIds,
     canManageEscalations,
     canCloseInvestigation,
+    canAddToCase,
     onCopyLink,
     renderAssignees,
     renderInFlightStatus,
@@ -205,6 +208,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
             chatHref: getChatHref?.(investigation.id),
             canManageEscalations,
             canCloseInvestigation,
+            canAddToCase,
             onCopyLink,
           };
 

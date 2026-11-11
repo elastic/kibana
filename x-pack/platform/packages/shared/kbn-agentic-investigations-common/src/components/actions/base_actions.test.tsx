@@ -141,6 +141,37 @@ describe('BaseActions open and close', () => {
   });
 });
 
+describe('BaseActions add to case', () => {
+  const renderMenu = (props: Partial<React.ComponentProps<typeof BaseActions>> = {}) => {
+    const onClickAction = jest.fn();
+    renderWithKibanaRenderContext(
+      <BaseActions
+        investigation={{ ...investigation, recordId: 'proposal-1' }}
+        onClickAction={onClickAction}
+        onCopyLink={jest.fn()}
+        data-test-subj="actions"
+        {...props}
+      />
+    );
+    openMenu();
+    return onClickAction;
+  };
+
+  it('reports the record when the caller opts in', () => {
+    const onClickAction = renderMenu({ canAddToCase: true });
+
+    fireEvent.click(screen.getByText('Add to case'));
+
+    expect(onClickAction).toHaveBeenCalledWith('addToCase', 'proposal-1');
+  });
+
+  it('is not offered by default', () => {
+    renderMenu();
+
+    expect(screen.queryByText('Add to case')).not.toBeInTheDocument();
+  });
+});
+
 describe('getCopyLinkFlyoutAction', () => {
   const renderTooltip = (action: ReturnType<typeof getCopyLinkFlyoutAction>) =>
     renderWithKibanaRenderContext(<>{action.toolTipContent}</>);
