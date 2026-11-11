@@ -128,7 +128,8 @@
     "@types/react": "18.2.79",
     "@types/react-dom": "18.2.25",
     "apache-arrow": "20.x - 21.x",
-    "globby/fast-glob": "3.3.3"
+    "globby/fast-glob": "3.3.3",
+    "guarded-fetch/undici": ">=7.29.1 <8.0.0"
   },
   "dependencies": {
     "@a2a-js/sdk": "0.3.4",
@@ -1493,7 +1494,7 @@
     "jsonwebtoken": "9.0.2",
     "jsts": "1.6.2",
     "jszip": "3.10.1",
-    "just-bash": "3.4.2",
+    "just-bash": "3.6.0",
     "kea": "2.6.0",
     "langsmith": "0.7.1",
     "liquidjs": "10.27.2",
