@@ -19,11 +19,16 @@ import transformListRow from '../../../../common/__mocks__/transform_list_row.js
 
 import { useGetTransformStats } from '../../../../hooks';
 
+const mockUseEnabledFeatures = jest.fn();
+
 jest.mock('../../../../hooks', () => ({
   useGetTransformStats: jest.fn(),
 }));
 
 jest.mock('../../../../app_dependencies');
+jest.mock('../../../../serverless_context', () => ({
+  useEnabledFeatures: () => mockUseEnabledFeatures(),
+}));
 
 const mockUseGetTransformStats = useGetTransformStats as jest.MockedFunction<
   typeof useGetTransformStats
@@ -35,6 +40,7 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
   beforeEach(() => {
     jest.clearAllMocks();
     appDependencies.useAppDependencies().cps = undefined;
+    mockUseEnabledFeatures.mockReturnValue({ showNodeInfo: false });
 
     // Set timezone to US/Eastern for consistent test results.
     moment.tz.setDefault('US/Eastern');
@@ -70,6 +76,27 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
 
     expect(screen.getByText('Last timestamp (milliseconds)')).toBeInTheDocument();
     expect(screen.getByText('1564388281199')).toBeInTheDocument();
+  });
+
+  test('displays the assigned node name when node information is enabled', () => {
+    mockUseEnabledFeatures.mockReturnValue({ showNodeInfo: true });
+    mockUseGetTransformStats.mockReturnValue({
+      data: undefined,
+      isError: false,
+      isLoading: false,
+    } as unknown as ReturnType<typeof useGetTransformStats>);
+    const item = {
+      ...transformListRow,
+      stats: {
+        ...transformListRow.stats,
+        node: { name: 'transform-node-1' },
+      },
+    } as unknown as TransformListRow;
+
+    renderWithI18n(<ExpandedRowDetailsPane item={item} onAlertEdit={onAlertEdit} />);
+
+    expect(screen.getByText('Node name')).toBeInTheDocument();
+    expect(screen.getByText('transform-node-1')).toBeInTheDocument();
   });
 
   test('displays source_index when index is a string', () => {

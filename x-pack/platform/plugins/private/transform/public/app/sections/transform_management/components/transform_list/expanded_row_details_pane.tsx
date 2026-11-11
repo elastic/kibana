@@ -22,6 +22,7 @@ import type { TransformListRow } from '../../../../common';
 import { useAppDependencies } from '../../../../app_dependencies';
 import { isTransformListRowWithStats } from '../../../../common/transform_list';
 import { useGetTransformStats } from '../../../../hooks';
+import { useEnabledFeatures } from '../../../../serverless_context';
 import { useTransformHasLinkedProjects } from '../../../../hooks/use_transform_has_linked_projects';
 
 import type { SectionConfig, SectionItem } from './expanded_row_column_view';
@@ -103,6 +104,7 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, 
   const { data: fullStats, isError, isLoading } = useGetTransformStats(item.id, false, true);
   const { cps } = useAppDependencies();
   const { hasLinkedProjects } = useTransformHasLinkedProjects(cps?.cpsManager);
+  const { showNodeInfo } = useEnabledFeatures();
 
   let displayStats = {};
 
@@ -198,6 +200,14 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, 
         }
       ),
       description: item.config.settings.num_failure_retries,
+    });
+  }
+  if (showNodeInfo && isTransformStats(displayStats) && displayStats.node !== undefined) {
+    configItems.push({
+      title: i18n.translate('xpack.transform.transformList.transformDetails.nodeNameLabel', {
+        defaultMessage: 'Node name',
+      }),
+      description: displayStats.node.name,
     });
   }
 
