@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/elastic-assistant-common'
   - '@kbn/repo-info'
   - '@kbn/zod'
+  - '@kbn/inference-common'
 tags:
   - functional-tests
   - package
