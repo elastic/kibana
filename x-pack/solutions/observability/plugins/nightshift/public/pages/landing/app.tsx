@@ -100,6 +100,8 @@ export function NightshiftApp({
     loadedCount,
     refetchAll,
   } = useInvestigationSections({ query: debouncedSearchQuery });
+  const refetchAllRef = useRef(refetchAll);
+  refetchAllRef.current = refetchAll;
 
   // A tile scrolls to its section, so it is only actionable while the list is rendering that
   // section — which the list, not the count, decides.
@@ -173,6 +175,7 @@ export function NightshiftApp({
         trailingActions: [shareInvestigationAction],
         // Closed by the user, not replaced by another selection or unmounted.
         onClose: () => {
+          refetchAllRef.current();
           if (!isCancelled) {
             handleFlyoutClose();
           }
