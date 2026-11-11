@@ -123,6 +123,20 @@ export const NO_ALERTS_FOUND_TO_EXTRACT = i18n.translate(
   }
 );
 
+export const ATTACHED_ALERTS_NOT_READABLE = i18n.translate(
+  'xpack.cases.caseView.observables.attachedAlertsNotReadable',
+  {
+    defaultMessage: "Attached alerts and events couldn't be read",
+  }
+);
+
+export const ATTACHED_ALERTS_NOT_READABLE_DESCRIPTION = i18n.translate(
+  'xpack.cases.caseView.observables.attachedAlertsNotReadableDescription',
+  {
+    defaultMessage: 'They might have been deleted, or you might not have access to their indices.',
+  }
+);
+
 export const OBSERVABLE_UPDATED = i18n.translate('xpack.cases.caseView.observables.updated', {
   defaultMessage: 'Observable updated',
 });
