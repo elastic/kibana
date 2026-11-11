@@ -12,7 +12,13 @@ import path from 'path';
 import { ManagedProcess } from './managed_process';
 import { writeStatusFile } from './status_file';
 import type { SettingsProvider } from './settings/types';
-import type { LogLine, ProcessDefinition, ProcessStatus, SupervisorStatus } from './types';
+import type {
+  LogLine,
+  ProcessDefinition,
+  ProcessStatus,
+  SupervisorStatus,
+  ToolOptions,
+} from './types';
 
 export interface SupervisorOptions {
   readonly definitions: readonly ProcessDefinition[];
@@ -106,7 +112,8 @@ export class Supervisor {
 
   /** Starts every process; each one waits until the processes it depends on are ready. */
   public async startAll(): Promise<void> {
-    await Promise.all(this.definitions.map(({ id }) => this.start(id)));
+    // Tools are optional; they start when the user starts them.
+    await Promise.all(this.definitions.filter(({ tool }) => !tool).map(({ id }) => this.start(id)));
   }
 
   /** Starts one process once its dependencies are ready; marks it failed if a dependency does not get there. */
@@ -150,6 +157,10 @@ export class Supervisor {
     for (const { id } of [...this.definitions].reverse()) {
       await this.stop(id);
     }
+  }
+
+  public getTool(id: string): ToolOptions | undefined {
+    return this.getDefinition(id).tool;
   }
 
   public getSettingsProvider(id: string): SettingsProvider | undefined {

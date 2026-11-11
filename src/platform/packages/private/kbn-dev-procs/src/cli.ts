@@ -19,6 +19,7 @@ import { readRepoInfo } from './repo_info';
 import { readStatusFile } from './status_file';
 import type { KibanaSettingType } from './settings/kibana_settings';
 import { Supervisor } from './supervisor';
+import { getDefaultTools } from './tools';
 import type { InkModule } from './tui/ink_module';
 import { runTui } from './tui/run_tui';
 import type { ProcessStatus } from './types';
@@ -76,12 +77,15 @@ const runStart = async ({ log, flagsReader, logDir, addCleanupTask, loadInk }: S
   const hideOutput = flagsReader.boolean('hide-output');
   const isTui = Boolean(loadInk) && process.stdout.isTTY && !flagsReader.boolean('headless');
   const supervisor = new Supervisor({
-    definitions: getDefaultProcesses({
-      esArgs: flagsReader.arrayOfStrings('es-arg'),
-      kibanaArgs: flagsReader.arrayOfStrings('kibana-arg'),
-      esUrl: flagsReader.string('es-url'),
-      cacheDir: logDir,
-    }),
+    definitions: [
+      ...getDefaultProcesses({
+        esArgs: flagsReader.arrayOfStrings('es-arg'),
+        kibanaArgs: flagsReader.arrayOfStrings('kibana-arg'),
+        esUrl: flagsReader.string('es-url'),
+        cacheDir: logDir,
+      }),
+      ...getDefaultTools(REPO_ROOT),
+    ],
     logDir,
   });
 

@@ -17,6 +17,7 @@ import type {
   SettingsKind,
 } from '../settings/types';
 import type { RepoInfo } from '../repo_info';
+import type { ToolOptions } from '../types';
 import type { Supervisor } from '../supervisor';
 import type { LogLine, ProcessState } from '../types';
 import type { InkModule } from './ink_module';
@@ -138,25 +139,43 @@ export const createTuiApp = ({
       {state.views.map((view) => {
         const isSelected = view === state.selected;
         const status = state.statuses[view];
+        const isFirstTool = view === state.tools[0];
         return (
-          <Text key={view} inverse={isSelected} wrap="truncate-end">
-            {isSelected ? '›' : ' '}{' '}
-            {status ? (
-              <Text color={STATE_COLORS[status.state]}>{STATE_ICONS[status.state]}</Text>
-            ) : (
-              <Text> </Text>
-            )}{' '}
-            <Text bold={isSelected}>{view}</Text>
-            {status ? <Text dimColor> {status.state}</Text> : null}
-            {state.pendingRestart.includes(view) ? <Text color="yellow"> ↻</Text> : null}
-          </Text>
+          <React.Fragment key={view}>
+            {isFirstTool ? <Text bold>{'\n'}tools</Text> : null}
+            <Text inverse={isSelected} wrap="truncate-end">
+              {isSelected ? '›' : ' '}{' '}
+              {status ? (
+                <Text color={STATE_COLORS[status.state]}>{STATE_ICONS[status.state]}</Text>
+              ) : (
+                <Text> </Text>
+              )}{' '}
+              <Text bold={isSelected}>{view}</Text>
+              {status ? <Text dimColor> {status.state}</Text> : null}
+              {state.pendingRestart.includes(view) ? <Text color="yellow"> ↻</Text> : null}
+            </Text>
+          </React.Fragment>
         );
       })}
     </Box>
   );
 
-  const LogPane = ({ state, height }: { readonly state: TuiState; readonly height: number }) => {
+  const LogPane = ({
+    state,
+    height,
+    tool,
+  }: {
+    readonly state: TuiState;
+    readonly height: number;
+    readonly tool?: ToolOptions;
+  }) => {
     const status = state.statuses[state.selected];
+    const { notice } = state;
+    const isRunning = status && ['waiting', 'starting', 'ready', 'stopping'].includes(status.state);
+    const toolLine = tool
+      ? `${tool.description} · args: ${tool.getArgs()}${isRunning ? '' : ' · press s to start'}`
+      : undefined;
+    const lineCount = Math.max(height - (toolLine ? 1 : 0) - (notice ? 1 : 0), 1);
     const matchCount = getMatchingLines(state).length;
     const title = [
       state.selected,
@@ -181,7 +200,17 @@ export const createTuiApp = ({
         <Text bold wrap="truncate-end">
           {title}
         </Text>
-        {getVisibleLines(state, height).map((line: LogLine, index) => (
+        {toolLine ? (
+          <Text dimColor wrap="truncate-end">
+            {toolLine}
+          </Text>
+        ) : null}
+        {notice ? (
+          <Text color={notice.isError ? 'red' : 'green'} wrap="truncate-end">
+            {notice.text}
+          </Text>
+        ) : null}
+        {getVisibleLines(state, lineCount).map((line: LogLine, index) => (
           <Text key={index} wrap="truncate-end">
             {state.selected === ALL ? (
               <Text color={colorFor(state.views, line.processId)}>
@@ -341,9 +370,13 @@ export const createTuiApp = ({
     if (valueEdit) {
       return (
         <Text wrap="truncate-end">
-          <Text bold>{valueEdit.row.key}</Text> = {valueEdit.text}
+          <Text bold>{valueEdit.label}</Text>
+          {valueEdit.target.type === 'setting' ? ' = ' : ': '}
+          {valueEdit.text}
           <Text inverse> </Text>
-          <Text dimColor> enter save · esc cancel</Text>
+          <Text dimColor>
+            {valueEdit.target.type === 'setting' ? ' enter save' : ' enter start'} · esc cancel
+          </Text>
         </Text>
       );
     }
@@ -382,7 +415,13 @@ export const createTuiApp = ({
     }, [readRepoInfo]);
 
     const [state, dispatch] = useReducer(reduceTuiState, supervisor, (initial) =>
-      createTuiState(initial.getStatus().processes)
+      createTuiState(
+        initial.getStatus().processes,
+        initial
+          .getStatus()
+          .processes.map(({ id }) => id)
+          .filter((id) => initial.getTool(id))
+      )
     );
     const { rows, columns } = useTerminalSize();
     const logLines = Math.max(rows - CHROME_ROWS, 1);
@@ -475,6 +514,29 @@ export const createTuiApp = ({
         case 'setSetting':
           changeSetting((editor) => editor.set(control.row, control.input));
           break;
+        case 'editToolArgs': {
+          const tool = supervisor.getTool(selected);
+          if (tool) {
+            dispatch({
+              type: 'startValueEdit',
+              target: { type: 'toolArgs' },
+              label: `${selected} arguments`,
+              text: tool.getArgs(),
+            });
+          }
+          break;
+        }
+        case 'startTool': {
+          const tool = supervisor.getTool(selected);
+          try {
+            tool?.setArgs(control.input);
+          } catch (error) {
+            dispatch({ type: 'notice', text: error.message, isError: true });
+            break;
+          }
+          void supervisor.start(selected);
+          break;
+        }
         case 'unsetSetting':
           changeSetting((editor) => editor.unset(control.row));
           break;
@@ -487,7 +549,11 @@ export const createTuiApp = ({
         <Box flexGrow={1}>
           <Sidebar state={state} />
           {pane === 'logs' ? (
-            <LogPane state={state} height={logLines} />
+            <LogPane
+              state={state}
+              height={logLines}
+              tool={selected === ALL ? undefined : supervisor.getTool(selected)}
+            />
           ) : (
             <SettingsPane
               state={state}

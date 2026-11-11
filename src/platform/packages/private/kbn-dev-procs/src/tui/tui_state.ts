@@ -46,12 +46,15 @@ export interface TuiState {
   readonly settingsCursor: number;
   /** Bumped after a setting changed, so the lists reload. */
   readonly settingsVersion: number;
-  /** The value being typed for a setting. */
+  /** What the user is typing: a value for a setting, or the arguments to start a tool with. */
   readonly valueEdit?: {
     readonly processId: string;
-    readonly row: SettingRow;
+    readonly target: ValueEditTarget;
+    readonly label: string;
     readonly text: string;
   };
+  /** Processes that are optional tools, listed after the others. */
+  readonly tools: readonly string[];
   /** Processes whose settings changed and that need a restart to apply them. */
   readonly pendingRestart: readonly string[];
   /** The outcome of the last settings change. */
@@ -85,7 +88,12 @@ export type TuiAction =
       readonly error: string;
     }
   | { readonly type: 'moveCursor'; readonly delta: number; readonly height: number }
-  | { readonly type: 'startValueEdit'; readonly row: SettingRow; readonly text: string }
+  | {
+      readonly type: 'startValueEdit';
+      readonly target: ValueEditTarget;
+      readonly label: string;
+      readonly text: string;
+    }
   | { readonly type: 'valueInput'; readonly text: string }
   | { readonly type: 'valueBackspace' }
   | { readonly type: 'endValueEdit' }
@@ -97,8 +105,16 @@ export type TuiAction =
     }
   | { readonly type: 'notice'; readonly text: string; readonly isError: boolean };
 
-export const createTuiState = (statuses: readonly ProcessStatus[]): TuiState => ({
+export type ValueEditTarget =
+  | { readonly type: 'setting'; readonly row: SettingRow }
+  | { readonly type: 'toolArgs' };
+
+export const createTuiState = (
+  statuses: readonly ProcessStatus[],
+  tools: readonly string[] = []
+): TuiState => ({
   views: [ALL, ...statuses.map(({ id }) => id)],
+  tools,
   selected: ALL,
   statuses: Object.fromEntries(statuses.map((status) => [status.id, status])),
   lines: [],
@@ -227,7 +243,12 @@ export const reduceTuiState = (state: TuiState, action: TuiAction): TuiState => 
     case 'startValueEdit':
       return {
         ...state,
-        valueEdit: { processId: state.selected, row: action.row, text: action.text },
+        valueEdit: {
+          processId: state.selected,
+          target: action.target,
+          label: action.label,
+          text: action.text,
+        },
         notice: undefined,
       };
     case 'valueInput':

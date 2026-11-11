@@ -33,6 +33,16 @@ export interface ProcessDefinition {
   readonly stopTimeoutMs?: number;
   /** Reads the settings the process runs with and the ones it supports, for the TUI. */
   readonly settings?: SettingsProvider;
+  /** Makes this an optional tool: not started with the rest, but from the TUI, with arguments the user can change. */
+  readonly tool?: ToolOptions;
+}
+
+export interface ToolOptions {
+  readonly description: string;
+  /** The arguments the tool starts with next, as the user typed them. */
+  readonly getArgs: () => string;
+  /** Throws when the arguments cannot be parsed, e.g. with an unclosed quote. */
+  readonly setArgs: (input: string) => void;
 }
 
 export type ProcessState =

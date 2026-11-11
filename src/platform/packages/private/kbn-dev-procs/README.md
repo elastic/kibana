@@ -24,6 +24,20 @@ the output of the selected process, or of all of them.
 | `r` `s` `x`       | Restart, start or stop the selected process      |
 | `q` / `Ctrl+C`    | Stop every process, Kibana first, and quit       |
 
+### Tools
+
+The sidebar also lists dev tools that are not started with Elasticsearch and Kibana. Select one and
+press `s` to start it: it asks for its arguments first, prefilled with the last ones used.
+
+| Tool                 | Runs                                   | Default arguments          |
+| -------------------- | -------------------------------------- | -------------------------- |
+| `synthtrace`         | `node scripts/synthtrace`, once Kibana is ready | `logs_and_metrics --live` |
+| `connector-emulator` | `node scripts/connector_emulate`       | `--connector datadog`      |
+| `data-forge`         | `node x-pack/scripts/data_forge`, once Elasticsearch is ready | `--dataset fake_logs` |
+
+A running tool has its own log pane and can be restarted (`r`) or stopped (`x`) like the other
+processes, and stops when you quit.
+
 ### Settings
 
 `tab` shows the settings of the selected process:

@@ -16,7 +16,10 @@ import type { TuiAction, TuiState } from './tui_state';
 export type Control =
   | { readonly type: 'quit' | 'restart' | 'start' | 'stop' }
   | { readonly type: 'setSetting'; readonly row: SettingRow; readonly input: string }
-  | { readonly type: 'unsetSetting'; readonly row: SettingRow };
+  | { readonly type: 'unsetSetting'; readonly row: SettingRow }
+  /** Asks for the arguments of the selected tool, to start it. */
+  | { readonly type: 'editToolArgs' }
+  | { readonly type: 'startTool'; readonly input: string };
 
 export interface KeyResult {
   readonly actions: readonly TuiAction[];
@@ -54,9 +57,13 @@ const handleValueEditKey = (state: TuiState, input: string, key: InkKey): KeyRes
     return { actions: [] };
   }
   if (key.return) {
+    const { target, text } = valueEdit;
     return {
       actions: [{ type: 'endValueEdit' }],
-      control: { type: 'setSetting', row: valueEdit.row, input: valueEdit.text },
+      control:
+        target.type === 'setting'
+          ? { type: 'setSetting', row: target.row, input: text }
+          : { type: 'startTool', input: text },
     };
   }
   if (key.escape) return { actions: [{ type: 'endValueEdit' }] };
@@ -99,7 +106,9 @@ const handleSettingsKey = (
   }
   if (input === 'e' || key.return) {
     const text = row.value === undefined || row.value === MASKED ? '' : row.value;
-    return { actions: [{ type: 'startValueEdit', row, text }] };
+    return {
+      actions: [{ type: 'startValueEdit', target: { type: 'setting', row }, label: row.key, text }],
+    };
   }
   if (input === 'u') {
     return { actions: [], control: { type: 'unsetSetting', row } };
@@ -150,7 +159,17 @@ export const handleKey = (
   if (input === 'G') return { actions: [{ type: 'scrollToBottom' }] };
   if (state.selected !== ALL) {
     if (input === 'r') return { actions: [], control: { type: 'restart' } };
-    if (input === 's') return { actions: [], control: { type: 'start' } };
+    if (input === 's') {
+      const isTool = state.tools.includes(state.selected);
+      const isRunning = ['waiting', 'starting', 'ready', 'stopping'].includes(
+        state.statuses[state.selected]?.state ?? 'stopped'
+      );
+      // A tool asks for its arguments first, so they can change between runs.
+      return {
+        actions: [],
+        control: isTool && !isRunning ? { type: 'editToolArgs' } : { type: 'start' },
+      };
+    }
     if (input === 'x') return { actions: [], control: { type: 'stop' } };
   }
   return { actions: [] };

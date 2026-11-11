@@ -272,7 +272,12 @@ describe('editing settings', () => {
   it('edits a value from what it is, and saves it on enter', () => {
     const onPort = press(onSettings(), 'j');
     const editing = press(onPort, 'e');
-    expect(editing.valueEdit).toEqual({ processId: 'kibana', row: list.rows[1], text: '5602' });
+    expect(editing.valueEdit).toEqual({
+      processId: 'kibana',
+      target: { type: 'setting', row: list.rows[1] },
+      label: 'b.port',
+      text: '5602',
+    });
     // Command keys are text while editing.
     const typed = press(press(press(editing, '', { backspace: true }), '3'), 'q');
     expect(typed.valueEdit?.text).toBe('5603q');
@@ -311,6 +316,43 @@ describe('editing settings', () => {
       status: status('es', { state: 'starting' }),
     });
     expect(restarted.pendingRestart).toEqual([]);
+  });
+});
+
+describe('tools', () => {
+  const withTool = () =>
+    apply(createTuiState([status('es'), status('kibana'), status('synthtrace')], ['synthtrace']), {
+      type: 'select',
+      direction: -1,
+    });
+  const keyPress = (state: TuiState, input: string, key: Partial<InkKey> = {}) =>
+    handleKey(state, input, { ...noKey, ...key }, SIZE);
+
+  it('asks for the arguments of a stopped tool before starting it', () => {
+    const state = withTool();
+    expect(state.selected).toBe('synthtrace');
+    expect(keyPress(state, 's').control).toEqual({ type: 'editToolArgs' });
+
+    const editing = apply(state, {
+      type: 'startValueEdit',
+      target: { type: 'toolArgs' },
+      label: 'synthtrace arguments',
+      text: 'logs_and_metrics --live',
+    });
+    expect(keyPress(editing, '', { return: true }).control).toEqual({
+      type: 'startTool',
+      input: 'logs_and_metrics --live',
+    });
+  });
+
+  it('starts a running tool, or a process that is not a tool, without asking', () => {
+    const running = apply(withTool(), {
+      type: 'status',
+      status: status('synthtrace', { state: 'ready' }),
+    });
+    expect(keyPress(running, 's').control).toEqual({ type: 'start' });
+    const onKibana = apply(withTool(), { type: 'select', direction: -1 });
+    expect(keyPress(onKibana, 's').control).toEqual({ type: 'start' });
   });
 });
 
