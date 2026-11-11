@@ -294,6 +294,7 @@ Nothing changes in the API schema or the UI: `scheduleInterval` is already optio
 Tests to update:
 
 - `managed_workflow_definitions.test.ts` — update the Worker's fingerprint row to `<newVersion>:<newHash>` (the failure message prints the hash).
+- `managed_workflow_version_pins.test.ts` — update the Worker's `BLIND_SPOTS` pin (the failure message prints the new pin).
 - `worker_registry.test.ts` — set the Worker's `EXPECTED_WORKER_SETTINGS` entry with its `scheduleInterval` and add `'scheduled'` to `triggerTypes` (keep `'manual'` if the YAML keeps that trigger).
 - `worker_settings.test.ts` — add the Worker to `SCHEDULED_WORKER_IDS` so the "rejects an interval patch" cases stop running against it.
 - `worker_settings_compat.test.ts` — regenerate the settings contract snapshot (see [Changing Worker settings safely](#changing-worker-settings-safely)).
