@@ -47,7 +47,6 @@ export interface TuiAppProps {
 }
 
 const FLUSH_INTERVAL_MS = 100;
-const SIDEBAR_WIDTH = 26;
 // Ink clears the whole terminal before every frame that is as tall as the terminal, which flashes on each
 // update. One spare row keeps the frame shorter, so Ink rewrites it in place instead.
 const SPARE_ROWS = 1;
@@ -80,6 +79,18 @@ const STATE_ICONS: Readonly<Record<ProcessState, string>> = {
   exited: '○',
   failed: '✖',
 };
+
+const MIN_SIDEBAR_WIDTH = 26;
+// Around each row: the border and padding on both sides, the cursor and state icon, and the restart marker.
+const SIDEBAR_CHROME_COLUMNS = 4 + 4 + 2;
+const LONGEST_STATE = Math.max(...Object.keys(STATE_ICONS).map((state) => state.length));
+
+/** Wide enough for every process with its longest state, e.g. "› ○ connector-emulator stopping ↻". */
+export const getSidebarWidth = (views: readonly string[]): number =>
+  Math.max(
+    MIN_SIDEBAR_WIDTH,
+    ...views.map((view) => view.length + 1 + LONGEST_STATE + SIDEBAR_CHROME_COLUMNS)
+  );
 
 const PROCESS_COLORS = ['cyan', 'magenta', 'blue', 'yellow', 'green'] as const;
 // Inside the pane: two border columns and one padding column on each side.
@@ -131,7 +142,7 @@ export const createTuiApp = ({
   const Sidebar = ({ state }: { readonly state: TuiState }) => (
     <Box
       flexDirection="column"
-      width={SIDEBAR_WIDTH}
+      width={getSidebarWidth(state.views)}
       // Long lines in the pane would otherwise squeeze the sidebar.
       flexShrink={0}
       borderStyle="round"
@@ -604,7 +615,7 @@ export const createTuiApp = ({
             <SettingsPane
               state={state}
               height={logLines}
-              width={Math.max(columns - SIDEBAR_WIDTH - PANE_CHROME_COLUMNS, 1)}
+              width={Math.max(columns - getSidebarWidth(state.views) - PANE_CHROME_COLUMNS, 1)}
               kind={pane}
               hint={provider?.loadingHint?.[pane]}
             />
