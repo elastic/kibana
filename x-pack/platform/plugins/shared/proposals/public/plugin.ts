@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { registerProposalsEbtEvents } from './ebt_events';
 import { registerProposalsPublicStepDefinitions } from './step_types';
 import type {
   ProposalsPublicPluginSetup,
@@ -18,9 +19,10 @@ export class ProposalsPublicPlugin
   implements Plugin<ProposalsPublicPluginSetup, ProposalsPublicPluginStart>
 {
   setup(
-    _core: CoreSetup,
+    core: CoreSetup,
     { workflowsExtensions }: ProposalsPublicSetupDependencies
   ): ProposalsPublicPluginSetup {
+    registerProposalsEbtEvents(core.analytics);
     registerProposalsPublicStepDefinitions(workflowsExtensions);
     return {};
   }

@@ -20,7 +20,6 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
-import type { ProposalDecidedListener } from '@kbn/proposals-plugin/public';
 import type { AlertSubjectSnapshot } from '../common/subjects/subject';
 import type { InvestigationCardProps } from './conversation_templates/templates/investigation/card';
 
@@ -59,11 +58,6 @@ export interface AgenticInvestigationsPublicPluginSetup {
    * Read when a subject is clicked, so the registration can be made, or finish, at any point.
    */
   registerAlertFlyout: (source: string, registration: AlertFlyoutRegistration) => void;
-  /**
-   * Called after the server accepts an approve, decline or reopen of a proposed action from any of
-   * the investigation UIs, so a solution can report its own telemetry. Returns an unsubscribe.
-   */
-  onProposalDecided: (listener: ProposalDecidedListener) => () => void;
 }
 
 /** Opens the entity flyout for one impacted entity. Supplied by the solution that owns the flyout. */

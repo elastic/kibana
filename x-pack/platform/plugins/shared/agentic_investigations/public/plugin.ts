@@ -8,7 +8,6 @@
 import React from 'react';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { createFlyoutGroupedAttachmentsRegistry } from '@kbn/agentic-investigations-common';
-import { addProposalDecidedListener } from '@kbn/proposals-plugin/public';
 import { registerEscalationConversationEventUiDefinitions } from './escalations/conversation_events';
 import { registerInvestigationConversationEventUiDefinitions } from './investigations/conversation_events';
 import { registerImpactAttachmentTypes } from './impact/attachments';
@@ -83,7 +82,6 @@ export class AgenticInvestigationsPublicPlugin
       registerAlertFlyout: (source, registration) => {
         this.alertFlyouts.set(source, registration);
       },
-      onProposalDecided: addProposalDecidedListener,
     };
   }
 

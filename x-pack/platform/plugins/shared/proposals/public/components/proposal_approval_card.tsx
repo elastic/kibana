@@ -32,7 +32,7 @@ import {
   useReopenProposal,
 } from '../hooks/use_proposals_api';
 import { useCurrentUserProfile } from '../hooks/use_current_user_profile';
-import { notifyProposalDecided, type ProposalDecidedEvent } from '../proposal_decision_listeners';
+import { reportProposalDecided, type ProposalDecidedEvent } from '../ebt_events';
 
 /**
  * Turns a decision mutation's rejection into the friendly text `ApprovalContent` shows in its own
@@ -90,7 +90,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
   const { euiTheme } = useEuiTheme();
   const titleId = useGeneratedHtmlId({ prefix: 'ApprovalChatCard' });
   const {
-    services: { application, http },
+    services: { application, http, analytics },
   } = useKibana<CoreStart>();
   const canDecide = application.capabilities.proposals?.[PROPOSALS_UI_CAPABILITY_DECIDE] === true;
 
@@ -113,17 +113,16 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
 
   const report = useCallback(
     (event: Pick<ProposalDecidedEvent, 'decision' | 'dismissReason'>) =>
-      notifyProposalDecided({
+      reportProposalDecided(analytics, {
         ...event,
         proposalId,
         surface: 'chat',
         conversationId: liveProposal?.conversationId,
         origin: liveProposal?.origin,
-        category: liveProposal?.category,
         confidence: liveProposal?.confidence,
         impact: liveProposal?.impact,
       }),
-    [proposalId, liveProposal]
+    [analytics, proposalId, liveProposal]
   );
 
   const handleApprove = useCallback(async () => {

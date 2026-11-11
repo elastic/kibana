@@ -20,10 +20,6 @@ import {
 } from '../hooks/use_proposals_api';
 import { useCurrentUserProfile } from '../hooks/use_current_user_profile';
 import type { ProposalWithMetadata } from '@kbn/proposals-common';
-import {
-  addProposalDecidedListener,
-  type ProposalDecidedListener,
-} from '../proposal_decision_listeners';
 import { useReopenProposal } from '../hooks/use_proposals_api';
 
 // ── Mock heavy external deps ──────────────────────────────────────────────────
@@ -203,6 +199,8 @@ const useCurrentUserProfileMock = useCurrentUserProfile as jest.MockedFunction<
 >;
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 
+const reportEvent = jest.fn();
+
 const capabilitiesFor = (canDecide: boolean) =>
   ({
     services: {
@@ -210,6 +208,7 @@ const capabilitiesFor = (canDecide: boolean) =>
         capabilities: { proposals: { decideProposals: canDecide } },
       },
       http: { basePath: { serverBasePath: '', prepend: (path: string) => path } },
+      analytics: { reportEvent },
     },
   } as unknown as ReturnType<typeof useKibana>);
 
@@ -699,21 +698,15 @@ describe('ProposalApprovalCard', () => {
     });
   });
 
-  describe('decision notifications', () => {
-    const listener: jest.MockedFunction<ProposalDecidedListener> = jest.fn();
-    let unsubscribe: () => void;
+  describe('decision telemetry', () => {
     const useReopenProposalMock = useReopenProposal as jest.MockedFunction<
       typeof useReopenProposal
     >;
 
-    beforeEach(() => {
-      listener.mockClear();
-      unsubscribe = addProposalDecidedListener(listener);
-    });
-    afterEach(() => unsubscribe());
+    beforeEach(() => reportEvent.mockClear());
 
     it('reports an accepted approve with the proposal it belongs to', async () => {
-      setupMocks(baseProposal({ origin: 'nightshift', category: 'Response action' }));
+      setupMocks(baseProposal({ origin: 'nightshift', category: 'customer label' }));
       useApproveProposalMock.mockReturnValue({
         ...noopMutation,
         mutateAsync: jest.fn().mockResolvedValue({}),
@@ -722,21 +715,23 @@ describe('ProposalApprovalCard', () => {
 
       await latestOnApprove!();
 
-      expect(listener).toHaveBeenCalledTimes(1);
-      expect(listener).toHaveBeenCalledWith({
-        proposalId: PROPOSAL_ID,
+      expect(reportEvent).toHaveBeenCalledTimes(1);
+      expect(reportEvent).toHaveBeenCalledWith('proposal_decided', {
+        proposal_id: PROPOSAL_ID,
         decision: 'approve',
         surface: 'chat',
-        conversationId: 'conv-1',
         origin: 'nightshift',
-        category: 'Response action',
+        investigation_id: undefined,
+        conversation_id: 'conv-1',
+        dismiss_reason: undefined,
         confidence: 'medium',
         impact: 'low',
       });
+      expect(JSON.stringify(reportEvent.mock.calls)).not.toContain('customer label');
     });
 
     it('reports an accepted decline with its reason and never its rationale', async () => {
-      setupMocks(baseProposal({ origin: 'nightshift' }));
+      setupMocks(baseProposal({ origin: 'alertzero' }));
       useDismissProposalMock.mockReturnValue({
         ...noopMutation,
         mutateAsync: jest.fn().mockResolvedValue({}),
@@ -745,15 +740,20 @@ describe('ProposalApprovalCard', () => {
 
       await latestOnDismiss!({ dismissReason: 'duplicate', rationale: 'customer secret text' });
 
-      expect(listener).toHaveBeenCalledTimes(1);
-      expect(listener).toHaveBeenCalledWith(
-        expect.objectContaining({ decision: 'decline', dismissReason: 'duplicate' })
+      expect(reportEvent).toHaveBeenCalledTimes(1);
+      expect(reportEvent).toHaveBeenCalledWith(
+        'proposal_decided',
+        expect.objectContaining({
+          decision: 'decline',
+          dismiss_reason: 'duplicate',
+          origin: 'alertzero',
+        })
       );
-      expect(JSON.stringify(listener.mock.calls)).not.toContain('customer secret text');
+      expect(JSON.stringify(reportEvent.mock.calls)).not.toContain('customer secret text');
     });
 
     it('reports an accepted reopen', async () => {
-      setupMocks(baseProposal({ origin: 'nightshift' }));
+      setupMocks();
       useReopenProposalMock.mockReturnValue({
         mutateAsync: jest.fn().mockResolvedValue({}),
       } as unknown as ReturnType<typeof useReopenProposal>);
@@ -761,7 +761,10 @@ describe('ProposalApprovalCard', () => {
 
       await latestOnReopen!();
 
-      expect(listener).toHaveBeenCalledWith(expect.objectContaining({ decision: 'reopen' }));
+      expect(reportEvent).toHaveBeenCalledWith(
+        'proposal_decided',
+        expect.objectContaining({ decision: 'reopen' })
+      );
     });
 
     it('reports nothing when the server rejects the decision', async () => {
@@ -784,7 +787,7 @@ describe('ProposalApprovalCard', () => {
       await expect(latestOnDismiss!({ dismissReason: 'no_reason' })).rejects.toThrow();
       await expect(latestOnReopen!()).rejects.toThrow();
 
-      expect(listener).not.toHaveBeenCalled();
+      expect(reportEvent).not.toHaveBeenCalled();
     });
   });
 });

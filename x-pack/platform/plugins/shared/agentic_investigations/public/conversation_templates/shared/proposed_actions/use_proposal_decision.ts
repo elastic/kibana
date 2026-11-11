@@ -15,7 +15,7 @@ import {
 } from '@kbn/proposals-common';
 import type { DeclineParams } from '@kbn/proposals-ui';
 import {
-  notifyProposalDecided,
+  reportProposalDecided,
   type ProposalDecidedEvent,
   type ProposalDecisionSurface,
   isDecisionShown,
@@ -32,14 +32,7 @@ import { useCurrentUserProfile } from '../../../user_profiles';
 /** The part of the proposal that shows whether its decision is visible in this row's data. */
 type ProposalDecisionData = Pick<
   Proposal,
-  | 'decision'
-  | 'status'
-  | 'supersededBy'
-  | 'conversationId'
-  | 'origin'
-  | 'category'
-  | 'confidence'
-  | 'impact'
+  'decision' | 'status' | 'supersededBy' | 'conversationId' | 'origin' | 'confidence' | 'impact'
 >;
 
 export interface ProposalDecisionContext {
@@ -69,7 +62,7 @@ export const useProposalDecision = (
   { surface, investigationId }: ProposalDecisionContext
 ): ProposalDecision => {
   const {
-    services: { application },
+    services: { application, analytics },
   } = useKibana<CoreStart>();
   const { mutateAsync: approveProposal } = useApproveProposal();
   const { mutateAsync: dismissProposal } = useDismissProposal();
@@ -82,18 +75,17 @@ export const useProposalDecision = (
 
   const report = useCallback(
     (event: Pick<ProposalDecidedEvent, 'decision' | 'dismissReason'>) =>
-      notifyProposalDecided({
+      reportProposalDecided(analytics, {
         ...event,
         proposalId,
         surface,
         investigationId,
         conversationId: proposal?.conversationId,
         origin: proposal?.origin,
-        category: proposal?.category,
         confidence: proposal?.confidence,
         impact: proposal?.impact,
       }),
-    [proposalId, surface, investigationId, proposal]
+    [analytics, proposalId, surface, investigationId, proposal]
   );
 
   const approve = useCallback(

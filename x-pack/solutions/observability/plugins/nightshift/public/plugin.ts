@@ -67,18 +67,6 @@ export class NightshiftPlugin
     };
     this.ensureEbtEvents = ensureEbtEvents;
 
-    // Decisions are made inside agentic investigations UI (flyout, hypothesis tree), possibly outside
-    // the Nightshift app, so the event types are registered before the first report.
-    pluginsSetup.agenticInvestigations?.onProposalDecided((event) => {
-      Promise.all([startServicesPromise, ensureEbtEvents(), import('./common/ebt_events')])
-        .then(([[coreStart], , { reportNightshiftProposalDecided }]) =>
-          reportNightshiftProposalDecided(coreStart.analytics, event)
-        )
-        .catch(() => {
-          // Telemetry only: a failed chunk load must not surface to the user.
-        });
-    });
-
     pluginsSetup.share.url.locators.create(new NightshiftSettingsLocatorDefinition());
 
     if (pluginsSetup.agenticInvestigations) {

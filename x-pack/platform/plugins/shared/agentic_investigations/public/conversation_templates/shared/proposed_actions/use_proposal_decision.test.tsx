@@ -7,22 +7,23 @@
 
 import { renderHook, act } from '@testing-library/react';
 import type { ProposalWithMetadata } from '@kbn/proposals-common';
-import { addProposalDecidedListener } from '@kbn/proposals-plugin/public';
 import {
+  reportProposalDecided,
   useApproveProposal,
   useDismissProposal,
   useReopenProposal,
 } from '@kbn/proposals-plugin/public';
 import { useProposalDecision } from './use_proposal_decision';
 
+const analytics = { reportEvent: jest.fn() };
+
 jest.mock('@kbn/proposals-plugin/public', () => {
-  // The real registry, so the test covers what a listener actually receives.
-  const { addProposalDecidedListener: add, notifyProposalDecided } = jest.requireActual(
-    '@kbn/proposals-plugin/public/proposal_decision_listeners'
+  // The real reporter, so the test covers the event a decision actually produces.
+  const { reportProposalDecided: report } = jest.requireActual(
+    '@kbn/proposals-plugin/public/ebt_events'
   );
   return {
-    addProposalDecidedListener: add,
-    notifyProposalDecided,
+    reportProposalDecided: jest.fn(report),
     useApproveProposal: jest.fn(),
     useDismissProposal: jest.fn(),
     useReopenProposal: jest.fn(),
@@ -34,7 +35,7 @@ jest.mock('@kbn/proposals-plugin/public', () => {
 });
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({ services: { application: { capabilities: {} } } }),
+  useKibana: () => ({ services: { application: { capabilities: {} }, analytics } }),
 }));
 
 jest.mock('../../../user_profiles', () => ({
@@ -44,8 +45,8 @@ jest.mock('../../../user_profiles', () => ({
 const proposal = {
   id: 'p1',
   conversationId: 'conv-1',
-  origin: 'nightshift',
-  category: 'Response action',
+  origin: 'alertzero',
+  category: 'customer label',
   confidence: 'high',
   impact: 'critical',
 } as unknown as ProposalWithMetadata;
@@ -56,15 +57,11 @@ const mockMutations = (mutateAsync: jest.Mock) => {
   (useReopenProposal as jest.Mock).mockReturnValue({ mutateAsync });
 };
 
-describe('useProposalDecision notifications', () => {
-  const listener = jest.fn();
-  let unsubscribe: () => void;
-
+describe('useProposalDecision telemetry', () => {
   beforeEach(() => {
-    listener.mockClear();
-    unsubscribe = addProposalDecidedListener(listener);
+    analytics.reportEvent.mockClear();
+    (reportProposalDecided as jest.Mock).mockClear();
   });
-  afterEach(() => unsubscribe());
 
   const setup = () =>
     renderHook(() =>
@@ -82,21 +79,21 @@ describe('useProposalDecision notifications', () => {
     });
 
     const base = {
-      proposalId: 'p1',
+      proposal_id: 'p1',
       surface: 'hypothesis_tree',
-      investigationId: 'inv-1',
-      conversationId: 'conv-1',
-      origin: 'nightshift',
-      category: 'Response action',
+      origin: 'alertzero',
+      investigation_id: 'inv-1',
+      conversation_id: 'conv-1',
       confidence: 'high',
       impact: 'critical',
     };
-    expect(listener.mock.calls.map(([event]) => event)).toEqual([
-      { ...base, decision: 'approve' },
-      { ...base, decision: 'decline', dismissReason: 'false_positive' },
-      { ...base, decision: 'reopen' },
+    expect(analytics.reportEvent.mock.calls).toEqual([
+      ['proposal_decided', { ...base, decision: 'approve', dismiss_reason: undefined }],
+      ['proposal_decided', { ...base, decision: 'decline', dismiss_reason: 'false_positive' }],
+      ['proposal_decided', { ...base, decision: 'reopen', dismiss_reason: undefined }],
     ]);
-    expect(JSON.stringify(listener.mock.calls)).not.toContain('private');
+    expect(JSON.stringify(analytics.reportEvent.mock.calls)).not.toContain('private');
+    expect(JSON.stringify(analytics.reportEvent.mock.calls)).not.toContain('customer label');
   });
 
   it('reports nothing when the server rejects the decision', async () => {
@@ -109,6 +106,6 @@ describe('useProposalDecision notifications', () => {
       await expect(result.current.reopen()).rejects.toThrow();
     });
 
-    expect(listener).not.toHaveBeenCalled();
+    expect(analytics.reportEvent).not.toHaveBeenCalled();
   });
 });

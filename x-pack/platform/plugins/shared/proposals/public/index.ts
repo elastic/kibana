@@ -32,10 +32,8 @@ export {
 
 export { mutationKeys, queryKeys } from './query_keys';
 export {
-  addProposalDecidedListener,
-  notifyProposalDecided,
+  reportProposalDecided,
   type ProposalDecidedEvent,
-  type ProposalDecidedListener,
   type ProposalDecisionKind,
   type ProposalDecisionSurface,
-} from './proposal_decision_listeners';
+} from './ebt_events';
