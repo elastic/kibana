@@ -26,6 +26,7 @@ import {
   type CreateWorkflowCommand,
   type EsWorkflow,
   getWorkflowAccessDecisions,
+  isPageTrigger,
   NonTerminalExecutionStatuses,
   storedWorkflowAccessControlSchema,
   toCustomTriggerSchemaConfigs,
@@ -146,6 +147,9 @@ export interface BulkCreateWorkflowsResult {
 type SuccessfullyWrittenBulkEntry = BulkWorkflowEntry & {
   workflowData: WorkflowProperties;
 };
+
+const hasPageTrigger = (definition: WorkflowYaml | null | undefined): boolean =>
+  Boolean(definition?.triggers?.some(isPageTrigger));
 
 export class WorkflowCrudService {
   constructor(private readonly deps: WorkflowCrudDeps) {}
@@ -551,12 +555,12 @@ export class WorkflowCrudService {
   async getWorkflow(
     id: string,
     spaceId: string,
-    options?: { includeDeleted?: boolean }
+    options?: { includeDeleted?: boolean; includeGlobal?: boolean }
   ): Promise<WorkflowDetailDto | null> {
     try {
       const source = await this.getWorkflowDocumentSource(id, spaceId, {
         includeDeleted: options?.includeDeleted ?? false,
-        includeGlobal: true,
+        includeGlobal: options?.includeGlobal ?? true,
       });
       if (!source) {
         return null;
@@ -967,6 +971,7 @@ export class WorkflowCrudService {
         : undefined;
 
     let previousVersion: number | undefined;
+    let hadPage = false;
     const finalData = await this.readModifyWriteWorkflowDocument(id, spaceId, {
       request,
       getOptions: { includeDeleted: true, includeGlobal: true },
@@ -1021,6 +1026,7 @@ export class WorkflowCrudService {
           merged.triggerTypes = getTriggerTypesFromDefinition(merged.definition) ?? [];
         }
         previousVersion = existingSource.version;
+        hadPage = hasPageTrigger(existingSource.definition);
         return merged;
       },
     });
@@ -1042,6 +1048,11 @@ export class WorkflowCrudService {
       finalData,
       shouldUpdateScheduler,
     });
+
+    // Removing the page trigger retires the URL; adding it back later gives a new one.
+    if (hadPage && !hasPageTrigger(finalData.definition)) {
+      await this.deps.retirePage?.({ workflowId: id, spaceId });
+    }
 
     return {
       response: {

@@ -15,6 +15,7 @@ import type {
 } from '@kbn/core/server';
 
 import { registerHitlLifecycleAuditor } from '@kbn/workflows-execution-engine/server';
+import { registerWorkflowPageType } from './api/pages/page_saved_object';
 import { defineRoutes } from './api/routes';
 import { WorkflowManagementAuditLog } from './api/routes/utils/workflow_audit_logging';
 import { WorkflowsManagementApi } from './api/workflows_management_api';
@@ -78,6 +79,11 @@ export class WorkflowsPlugin
 
     plugins.features?.registerKibanaFeature(WorkflowsManagementFeatureConfig);
 
+    registerWorkflowPageType({
+      savedObjects: core.savedObjects,
+      encryptedSavedObjects: plugins.encryptedSavedObjects,
+    });
+
     this.logger.debug('Workflows Management: Creating workflows service');
 
     const workflowsService = new WorkflowsService(core, plugins, this.logger, this.kibanaVersion);
@@ -118,12 +124,14 @@ export class WorkflowsPlugin
 
     defineRoutes({
       router,
+      httpResources: core.http.resources,
       config: this.config,
       logger: this.logger,
       api,
       spaces,
       workflowsService,
       audit,
+      canEncryptPages: plugins.encryptedSavedObjects?.canEncrypt === true,
     });
 
     core.http.registerRouteHandlerContext<WorkflowsRequestHandlerContext, 'workflowsManagement'>(

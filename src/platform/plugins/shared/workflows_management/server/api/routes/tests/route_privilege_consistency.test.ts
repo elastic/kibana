@@ -697,6 +697,7 @@ describe('Route privilege/ES-operation consistency', () => {
 
     const deps: RouteDependencies = {
       router: mockRouter,
+      httpResources: { register: jest.fn() },
       api,
       workflowsService,
       logger: mockLogger,

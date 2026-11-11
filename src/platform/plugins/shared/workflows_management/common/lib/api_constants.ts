@@ -9,3 +9,12 @@
 
 /** `elastic-api-version` for internal workflow routes (`access: internal`). */
 export const INTERNAL_API_VERSION = '1';
+
+/** Authenticated route that returns the page URL of a workflow to its author. */
+export const PAGE_LINK_API_PATH = '/internal/workflows/pages/{workflowId}/link';
+
+/** Authenticated route that turns a page on or off, like a workflow's `enabled`. */
+export const PAGE_ENABLED_API_PATH = '/internal/workflows/pages/{workflowId}/_enabled';
+
+/** Authenticated route that retires the current page URL and returns a new one. */
+export const PAGE_ROTATE_API_PATH = '/internal/workflows/pages/{workflowId}/_rotate';

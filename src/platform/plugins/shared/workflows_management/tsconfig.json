@@ -15,6 +15,8 @@
     "server/**/*.json"
   ],
   "kbn_references": [
+    "@kbn/workflows-pages-plugin",
+    "@kbn/encrypted-saved-objects-plugin",
     "@kbn/security-plugin",
     "@kbn/ui-callout",
     "@kbn/entity-access-control-ui",

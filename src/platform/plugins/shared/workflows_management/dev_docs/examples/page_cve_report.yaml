@@ -1,0 +1,99 @@
+# Workflow page example: a public CVE report form.
+# Ports the Datadog "CVE Report" app-builder form to a page trigger:
+# a radio choice, a conditional textarea, a toggle, and a conditional email.
+name: CVE report page
+description: Collects CVE reports from anyone who has the page URL.
+enabled: true
+triggers:
+  - type: page
+    title: CVE Report
+    description: Report a CVE found in one of our images.
+    inputs:
+      type: object
+      properties:
+        image_type:
+          type: string
+          title: Which image are you using?
+          oneOf:
+            - const: official
+              title: Official image
+            - const: custom
+              title: Custom image
+      required:
+        - image_type
+      allOf:
+        - if:
+            properties:
+              image_type:
+                const: custom
+            required:
+              - image_type
+          then:
+            properties:
+              custom_not_supported:
+                type: "null"
+                title: CVE reporting is not supported for custom images
+                description: Report vulnerabilities only for official images.
+        - if:
+            properties:
+              image_type:
+                const: official
+            required:
+              - image_type
+          then:
+            properties:
+              summary:
+                type: string
+                title: CVE summary
+                description: CVE ID (if known), affected image and version, and any details.
+                minLength: 1
+                maxLength: 5000
+              wants_contact:
+                type: boolean
+                title: Would you like to be contacted about this report?
+                default: false
+            required:
+              - summary
+        - if:
+            properties:
+              image_type:
+                const: official
+              wants_contact:
+                const: true
+            required:
+              - image_type
+              - wants_contact
+          then:
+            properties:
+              contact_email:
+                type: string
+                title: Email address
+                format: email
+            required:
+              - contact_email
+    ui:
+      ui:order:
+        - image_type
+        - custom_not_supported
+        - summary
+        - wants_contact
+        - contact_email
+      ui:submitButtonOptions:
+        submitText: Send report
+      image_type:
+        ui:widget: radio
+      summary:
+        ui:widget: textarea
+        ui:placeholder: e.g. CVE-2026-12345 found in image:tag ...
+        ui:options:
+          rows: 6
+      wants_contact:
+        ui:widget: toggle
+      contact_email:
+        ui:widget: email
+        ui:placeholder: you@example.com
+steps:
+  - name: log_report
+    type: console
+    with:
+      message: "CVE report: {{ inputs | json }}"

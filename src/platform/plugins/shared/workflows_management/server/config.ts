@@ -72,10 +72,20 @@ const configSchema = schema.object({
    * this plugin).
    */
   library: librarySchema,
+  /**
+   * Workflow pages (proof of concept): hosted forms for the `page` trigger. The
+   * unauthenticated routes are mounted only while `enabled` is true. A page runs as
+   * its workflow's `settings.run_as` service account.
+   */
+  pages: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
 });
 
 export type WorkflowsManagementConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<WorkflowsManagementConfig> = {
   schema: configSchema,
+  // Pages now run as the workflow's bound service account, so the POC key is ignored.
+  deprecations: ({ unused }) => [unused('pages.runAsApiKey', { level: 'warning' })],
 };

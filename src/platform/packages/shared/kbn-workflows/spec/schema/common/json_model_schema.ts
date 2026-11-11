@@ -11,43 +11,54 @@ import type { z } from '@kbn/zod/v4';
 import { JsonModelRootShapeSchema } from './json_model_shape_schema';
 import { isValidJsonSchema } from '../../lib/validate_json_schema';
 
+interface JsonModelRootLike {
+  properties?: Record<string, unknown>;
+  required?: string[];
+}
+
+/** Adds the root-level checks (valid property schemas, known required fields) to a root shape. */
+export const withJsonModelRootRefinements = <T extends z.ZodType<JsonModelRootLike>>(shape: T): T =>
+  shape
+    .refine(
+      (data) => {
+        // Validate that properties is a valid JSON Schema object
+        if (data.properties) {
+          // Validate each property is a valid JSON Schema
+          for (const value of Object.values(data.properties)) {
+            // $ref objects are valid JSON Schema but can't be validated in isolation
+            // since they reference definitions that exist in the parent schema
+            if (typeof value === 'object' && value !== null && '$ref' in value) {
+              // $ref is a valid JSON Schema construct, skip validation
+              // eslint-disable-next-line no-continue
+              continue;
+            }
+            if (!isValidJsonSchema(value)) {
+              return false;
+            }
+          }
+        }
+        return true;
+      },
+      { message: 'properties must contain valid JSON Schema definitions' }
+    )
+    .refine(
+      (data) => {
+        // Validate that required fields exist in properties
+        if (data.required && data.properties) {
+          for (const field of data.required) {
+            if (!(field in data.properties)) {
+              return false;
+            }
+          }
+        }
+        return true;
+      },
+      { message: 'required fields must exist in properties' }
+    );
+
 // Root-level JSON Schema model for workflow inputs/outputs and wait-for-input step schema.
 // Uses the narrower JsonModelRootShapeSchema so that only object-level keywords
 // (properties, required, definitions, etc.) are suggested at the root.
 // Each property definition must match JsonModelShapeSchema (see isValidJsonSchema).
-export const JsonModelSchema = JsonModelRootShapeSchema.refine(
-  (data) => {
-    // Validate that properties is a valid JSON Schema object
-    if (data.properties) {
-      // Validate each property is a valid JSON Schema
-      for (const value of Object.values(data.properties)) {
-        // $ref objects are valid JSON Schema but can't be validated in isolation
-        // since they reference definitions that exist in the parent schema
-        if (typeof value === 'object' && value !== null && '$ref' in value) {
-          // $ref is a valid JSON Schema construct, skip validation
-          // eslint-disable-next-line no-continue
-          continue;
-        }
-        if (!isValidJsonSchema(value)) {
-          return false;
-        }
-      }
-    }
-    return true;
-  },
-  { message: 'properties must contain valid JSON Schema definitions' }
-).refine(
-  (data) => {
-    // Validate that required fields exist in properties
-    if (data.required && data.properties) {
-      for (const field of data.required) {
-        if (!(field in data.properties)) {
-          return false;
-        }
-      }
-    }
-    return true;
-  },
-  { message: 'required fields must exist in properties' }
-);
+export const JsonModelSchema = withJsonModelRootRefinements(JsonModelRootShapeSchema);
 export type JsonModelSchemaType = z.infer<typeof JsonModelSchema>;

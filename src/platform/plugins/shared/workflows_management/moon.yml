@@ -17,6 +17,8 @@ project:
   owner: '@elastic/workflows-eng'
   sourceRoot: src/platform/plugins/shared/workflows_management
 dependsOn:
+  - '@kbn/workflows-pages-plugin'
+  - '@kbn/encrypted-saved-objects-plugin'
   - '@kbn/security-plugin'
   - '@kbn/ui-callout'
   - '@kbn/entity-access-control-ui'

@@ -19,6 +19,11 @@ import {
   LegacyWorkflowInputSchema,
 } from './schema/triggers/manual_trigger_schema';
 import {
+  hasAtMostOnePageTrigger,
+  isPageTrigger,
+  MULTIPLE_PAGE_TRIGGERS_ERROR,
+} from './schema/triggers/page_trigger_schema';
+import {
   CONNECTOR_ID_MAX_LENGTH,
   IF_CONDITION_MAX_LENGTH,
   WORKFLOW_RUN_NAME_MAX_LENGTH,
@@ -1381,12 +1386,16 @@ function normalizeFieldsToJsonSchema(value: unknown): z.infer<typeof JsonModelSc
 }
 
 export const WorkflowSchema = WorkflowSchemaBase.extend({
-  triggers: z.array(TriggerSchema).min(1),
+  triggers: z
+    .array(TriggerSchema)
+    .min(1)
+    .refine(hasAtMostOnePageTrigger, { message: MULTIPLE_PAGE_TRIGGERS_ERROR }),
 }).transform((data) => {
   const normalizedOutputs = normalizeFieldsToJsonSchema(data.outputs);
 
   const mappedTriggers = (data.triggers ?? []).map((trigger) => {
-    if (!isManualTrigger(trigger) || !trigger.inputs) {
+    const definesInputs = isManualTrigger(trigger) || isPageTrigger(trigger);
+    if (!definesInputs || !trigger.inputs) {
       return trigger;
     }
 
@@ -1584,8 +1593,9 @@ export const WorkflowContextSchema = z.object({
    */
   context: WorkflowTemplatePersistedContextSchema.optional(),
   /**
-   * Alias for the inputs defined on the manual trigger (`triggers[type=manual].inputs`) or
-   * workflow call trigger (`triggers[type=workflow_call].inputs`). Populated from the trigger's
+   * Alias for the inputs defined on the manual trigger (`triggers[type=manual].inputs`),
+   * page trigger (`triggers[type=page].inputs`), or workflow call trigger
+   * (`triggers[type=workflow_call].inputs`). Populated from the trigger's
    * event.input values at execution time.
    */
   inputs: z.record(z.string(), z.unknown()).optional(),

@@ -1155,6 +1155,7 @@ packages:
   - 'src/platform/plugins/shared/workflows_execution_engine'
   - 'src/platform/plugins/shared/workflows_extensions'
   - 'src/platform/plugins/shared/workflows_management'
+  - 'src/platform/plugins/shared/workflows_pages'
   - 'src/platform/test'
   - 'src/platform/test/analytics/plugins/analytics_ftr_helpers'
   - 'src/platform/test/analytics/plugins/analytics_plugin_a'

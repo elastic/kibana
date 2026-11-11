@@ -20,11 +20,12 @@ import { ChangeHistoryModalContext } from '@kbn/change-history-ui';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
-import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
+import { isPageTrigger, WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { useRunWorkflowWithConfirmation } from './use_run_workflow_with_confirmation';
 import { WorkflowAccessControlModal } from './workflow_access_control_modal';
 import { WorkflowSettingsFlyout } from './workflow_settings_flyout';
+import { WorkflowPageShareModal } from './workflow_page_share_modal';
 import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
@@ -138,6 +139,7 @@ export const WorkflowDetailHeader = React.memo(
     const styles = useMemoCss(componentStyles);
     const dispatch = useDispatch();
     const [isAccessOpen, setIsAccessOpen] = useState(false);
+    const [isPageShareOpen, setIsPageShareOpen] = useState(false);
     const {
       canCreateWorkflow,
       canUpdateWorkflow: hasUpdatePrivilege,
@@ -154,6 +156,10 @@ export const WorkflowDetailHeader = React.memo(
     const editorDefinition = useSelector(selectEditorWorkflowDefinition);
     const canUpdateWorkflow = hasUpdatePrivilege && workflow?.permissions?.edit !== false;
     const canExecuteWorkflow = hasExecutePrivilege && workflow?.permissions?.execute !== false;
+    // The saved definition, not the editor buffer: an unsaved page trigger has no URL yet.
+    const hasPage = Boolean(workflow?.definition?.triggers?.some(isPageTrigger));
+    // The page URL runs the workflow, so only users who can run it may share it.
+    const canSharePage = hasPage && canExecuteWorkflow;
     const canManageAccess = hasUpdatePrivilege && workflow?.permissions?.manage === true;
     const isManagedWorkflow = workflow?.managed === true;
     const isEditorReadOnly = useWorkflowEditorReadOnly();
@@ -511,6 +517,18 @@ export const WorkflowDetailHeader = React.memo(
           testId: 'runWorkflowHeaderButton',
         });
       }
+      if (workflowId && canSharePage) {
+        items.push({
+          id: 'workflowPageShare',
+          order: 3,
+          label: i18n.translate('workflows.workflowDetailHeader.sharePage', {
+            defaultMessage: 'Share page',
+          }),
+          iconType: 'link',
+          run: () => setIsPageShareOpen(true),
+          testId: 'workflowPageShareButton',
+        });
+      }
       if (addConnectorsMenuItem) {
         items.push(addConnectorsMenuItem);
       }
@@ -541,6 +559,7 @@ export const WorkflowDetailHeader = React.memo(
     }, [
       isViewingExecution,
       workflowId,
+      canSharePage,
       historyItem,
       executionsToggleItem,
       isVisualEditorEnabled,
@@ -608,6 +627,13 @@ export const WorkflowDetailHeader = React.memo(
           <WorkflowAccessControlModal workflow={workflow} onClose={() => setIsAccessOpen(false)} />
         )}
         {runConfirmationModal}
+        {isPageShareOpen && workflowId && (
+          <WorkflowPageShareModal
+            workflowId={workflowId}
+            canManage={canUpdateWorkflow}
+            onClose={() => setIsPageShareOpen(false)}
+          />
+        )}
       </>
     );
   }
