@@ -16,7 +16,6 @@ import { runVariant } from './runner';
 import type { RunSummary, TelemetryVariant } from './runner';
 import { gateCandidate } from './gate';
 import { checkHoldout, holdoutDir, runHoldoutVariant } from './holdout';
-import type { HoldoutResult } from './holdout';
 import { proposeCandidate, SCRATCH_DIR } from './proposer';
 import { reviewEdits } from './review';
 import {
@@ -50,9 +49,12 @@ export interface CampaignOptions {
   freshSearch?: boolean;
   /** Debug only: promote every measured candidate, to exercise promotion and lineage. */
   acceptAny?: boolean;
-  /** customer0 incidents a gate winner must not regress on; empty skips the holdout. */
+  /**
+   * customer0 incidents the campaign's final incumbent must not regress on, measured once after
+   * the last round against the incumbent the campaign started from. Empty skips the holdout.
+   */
   holdoutTasks: OrcaTask[];
-  /** Debug only: run the holdout after every measured candidate, not only gate winners. */
+  /** Debug only: run the final holdout even when nothing was promoted. */
   holdoutAlways?: boolean;
   log: ToolingLog;
 }
@@ -167,8 +169,8 @@ export const runCampaign = async ({
   let incumbentDiff = await workspaceDiff({ path: incumbent.worktree });
   let lastFeedback = '';
   let lastSearch: RunSummary | undefined;
-  // The incumbent's holdout run, reused while the incumbent is unchanged.
-  let lastIncumbentHoldout: RunSummary | undefined;
+  const startEdits = incumbentEdits;
+  const startVariant = { hash: treeHash(incumbent.worktree), diff: incumbentDiff };
 
   const common = {
     concurrency,
@@ -364,45 +366,7 @@ export const runCampaign = async ({
           rollouts: searchRollouts,
           outputDir,
         });
-    // The holdout: only a gate winner is worth the spend, and it must not be worse on production
-    // incidents. Its runs live outside runs/, and the proposer only ever learns pass or fail.
-    let holdout: HoldoutResult | undefined;
-    if (holdoutTasks.length > 0 && (gate.accepted || holdoutAlways)) {
-      const holdoutOutput = Path.join(holdoutDir(), Path.basename(outputDir));
-      const reuse = lastIncumbentHoldout?.configHash === incumbentVariant.hash;
-      const [incumbentHoldout, candidateHoldout] = await Promise.all([
-        reuse && lastIncumbentHoldout
-          ? lastIncumbentHoldout
-          : runHoldoutVariant({
-              ...common,
-              label: `round${round}-incumbent-holdout`,
-              variant: incumbentVariant,
-              lane: incumbent,
-              tasks: holdoutTasks,
-              outputDir: holdoutOutput,
-            }),
-        runHoldoutVariant({
-          ...common,
-          label: `round${round}-candidate-holdout`,
-          variant: candidateVariant,
-          lane: candidate,
-          tasks: holdoutTasks,
-          outputDir: holdoutOutput,
-        }),
-      ]);
-      lastIncumbentHoldout = incumbentHoldout;
-      holdout = checkHoldout({ incumbent: incumbentHoldout, candidate: candidateHoldout });
-      log.info(
-        `[harness-opt] round ${round} holdout: ${
-          holdout.passed ? 'passed' : 'FAILED'
-        } — Δ ${holdout.meanDelta.toFixed(3)} [${holdout.ciLow.toFixed(
-          3
-        )}, ${holdout.ciHigh.toFixed(3)}] over ${holdout.incidents} incidents${
-          holdout.reasons.length ? ` (${holdout.reasons.join('; ')})` : ''
-        }`
-      );
-    }
-    const promoted = gate.accepted && (holdout?.passed ?? true);
+    const promoted = gate.accepted;
 
     const searchDeltas = candidateSearch ? perCaseDeltas(searchRun, candidateSearch) : [];
     const predictionCheck = candidateSearch
@@ -419,11 +383,7 @@ export const runCampaign = async ({
     )} (CI ${gate.ciLow.toFixed(3)}..${gate.ciHigh.toFixed(3)}, ${
       gate.seeds
     } incidents) at ${gate.costRatio.toFixed(2)}× cost and was ${
-      !gate.accepted
-        ? `rejected: ${gate.reasons.join('; ')}`
-        : promoted
-        ? 'ACCEPTED'
-        : 'rejected: it won the gate but did worse on the unseen production holdout'
+      !gate.accepted ? `rejected: ${gate.reasons.join('; ')}` : 'ACCEPTED'
     }.`;
 
     log.info(
@@ -450,7 +410,6 @@ export const runCampaign = async ({
       telemetryVariant,
       agentConnectorId,
       gate,
-      holdout,
       promoted,
       gateDeltas: perCaseDeltas(incumbentGate, candidateGate),
       searchReward: searchRun.meanReward,
@@ -483,6 +442,70 @@ export const runCampaign = async ({
       await prepareLane({ lane: incumbent, agentConnectorId, log });
       log.info(`[harness-opt] round ${round} promoted to incumbent`);
     }
+  }
+
+  // The holdout, once: the campaign's net change against where it started, on real production
+  // incidents the proposer never saw. Its runs live outside runs/ and are never fed back.
+  const finalVariant = { hash: treeHash(incumbent.worktree), diff: incumbentDiff };
+  if (holdoutTasks.length > 0 && (finalVariant.hash !== startVariant.hash || holdoutAlways)) {
+    const holdoutOutput = Path.join(holdoutDir(), `campaign-${campaignId}`);
+    await resetWorkspace(candidateWorkspace);
+    writeEdits({ edits: startEdits, worktree: candidate.worktree });
+    if (treeHash(candidate.worktree) !== startVariant.hash) {
+      throw new Error('candidate worktree does not match the campaign start for the holdout');
+    }
+    if (
+      !(await restartLane({
+        command: restartCommandFor(candidate),
+        url: candidate.kibanaUrl,
+        auth: laneAuth(candidate),
+        log,
+      }))
+    ) {
+      throw new Error('candidate lane did not restart for the holdout');
+    }
+    await prepareLane({ lane: candidate, agentConnectorId, log });
+    const [startHoldout, finalHoldout] = await Promise.all([
+      runHoldoutVariant({
+        ...common,
+        label: 'start-holdout',
+        variant: startVariant,
+        lane: candidate,
+        tasks: holdoutTasks,
+        outputDir: holdoutOutput,
+      }),
+      runHoldoutVariant({
+        ...common,
+        label: 'final-holdout',
+        variant: finalVariant,
+        lane: incumbent,
+        tasks: holdoutTasks,
+        outputDir: holdoutOutput,
+      }),
+    ]);
+    const holdout = checkHoldout({ incumbent: startHoldout, candidate: finalHoldout });
+    const record = {
+      campaignId,
+      startHash: startVariant.hash,
+      finalHash: finalVariant.hash,
+      finalDiff: finalVariant.diff,
+      ...holdout,
+    };
+    Fs.writeFileSync(
+      Path.join(lineageDir, `holdout-${campaignId}.json`),
+      JSON.stringify(record, null, 2)
+    );
+    log.info(
+      `[harness-opt] holdout ${startVariant.hash} → ${finalVariant.hash}: ${
+        holdout.passed ? 'passed' : "FAILED — do not ship this campaign's incumbent"
+      }; Δ ${holdout.meanDelta.toFixed(3)} [${holdout.ciLow.toFixed(3)}, ${holdout.ciHigh.toFixed(
+        3
+      )}] over ${holdout.incidents} incidents, leaked ${holdout.incumbentLeaked} → ${
+        holdout.candidateLeaked
+      }${holdout.reasons.length ? ` (${holdout.reasons.join('; ')})` : ''}`
+    );
+  } else if (holdoutTasks.length > 0) {
+    log.info('[harness-opt] nothing was promoted; holdout skipped');
   }
   log.info(`[harness-opt] ledger: ${ledgerPath}`);
 };

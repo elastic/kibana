@@ -198,12 +198,11 @@ discarded and the round is wasted.
    metrics, every \`feature_flag\` field, log lines that name a flag). The agent has to get from
    symptoms to the trigger through the telemetry and the source code, as on a customer cluster.
    Do not teach it to look for feature flags first: there is nothing to find.
-4. **An unseen production holdout must not regress.** A candidate that wins the gate is also run on
-   real Elastic Cloud incidents whose causes are deploys, config pushes, resource exhaustion,
-   networking and long-standing defects — not flag toggles — on different telemetry layouts with
-   different service names, and is not promoted if it is worse there. You will never see those
-   cases or their scores, only whether the holdout passed. Guidance that only makes sense for an
-   OpenTelemetry demo shop will not survive it.
+4. **An unseen production holdout decides whether any of it ships.** After the last round, the
+   accumulated changes are run on real Elastic Cloud incidents whose causes are deploys, config
+   pushes, resource exhaustion, networking and long-standing defects — not flag toggles — on
+   different telemetry layouts with different service names. You will never see those cases or
+   their scores. Guidance that only makes sense for an OpenTelemetry demo shop will not survive it.
 5. **Cost counts.** A candidate that costs more than 1.1× the incumbent must be clearly better; one
    that is significantly cheaper per solved incident at equal quality is also accepted.
 6. **Regressions are capped, and giving up is worse.** Improved incidents must outnumber regressed
