@@ -158,7 +158,7 @@ describe('getHandlerWrapper', () => {
     const result: any = await handler(createCtx(), req, kibanaResponseFactory);
 
     expect(result.status).toBe(500);
-    expect(result.payload).toMatchObject({ message: 'something went wrong' });
+    expect(result.payload).toEqual({ message: 'something went wrong' });
   });
 
   it('falls back to 500 for an inference error with status outside 4xx/5xx', async () => {
@@ -169,6 +169,7 @@ describe('getHandlerWrapper', () => {
     const result: any = await handler(createCtx(), req, kibanaResponseFactory);
 
     expect(result.status).toBe(500);
+    expect(result.payload).toEqual({ message: 'not really an error' });
   });
 
   it('propagates the status of a 4xx Boom error', async () => {
