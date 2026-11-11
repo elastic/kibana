@@ -14,7 +14,6 @@
     "@kbn/calculate-auto",
     "@kbn/charts-theme",
     "@kbn/core",
-    "@kbn/core-http-server-utils",
     "@kbn/config-schema",
     "@kbn/css-utils",
     "@kbn/data-plugin",
