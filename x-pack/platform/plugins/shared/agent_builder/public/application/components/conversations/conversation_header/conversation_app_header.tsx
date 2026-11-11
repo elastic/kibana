@@ -9,10 +9,12 @@ import React, { useRef } from 'react';
 import {
   AppHeader,
   type AppHeaderBadge,
+  type AppHeaderFavoriteAction,
   type AppHeaderMenu,
   type AppHeaderTitle,
 } from '@kbn/app-header';
 import {
+  AGENT_BUILDER_EVENT_TYPES,
   AGENT_BUILDER_UI_EBT,
   DEFAULT_CONVERSATION_TITLE,
   isPrivatelySharedConversation,
@@ -27,7 +29,9 @@ import {
   useHasPersistedConversation,
 } from '../../../hooks/use_conversation';
 import { useConversationTemplateDisplay } from '../../../hooks/use_conversation_template_display';
+import { useConversationListMutations } from '../../../hooks/use_conversation_list_mutations';
 import { useDownloadConversation } from '../../../hooks/use_download_conversation';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useQueryState } from '../../../hooks/use_query_state';
 import { searchParamNames } from '../../../search_param_names';
 import { ConversationDetailsFlyout } from '../../../../flyout/conversation_details_flyout';
@@ -62,6 +66,14 @@ export const ConversationAppHeader: React.FC = () => {
   const [summaryParam, setSummaryParam] = useQueryState<string>(
     searchParamNames.openConversationDetails
   );
+  const {
+    services: { analytics },
+  } = useKibana();
+
+  const { markAsPinned, markAsUnpinned } = useConversationListMutations({
+    routeConversationId: conversation?.id,
+    agentId: conversation?.agent_id ?? '',
+  });
 
   // Open state for each flyout or modal the header opens. Each has its own, so EUI can stack the
   // flyouts. Menu items vanish once the menu closes, so closing returns focus to the menu.
@@ -99,6 +111,27 @@ export const ConversationAppHeader: React.FC = () => {
         },
       }
     : getDisplayTitle(savedConversation.title);
+
+  const isPinned = Boolean(savedConversation.pinned);
+
+  const favorite: AppHeaderFavoriteAction = {
+    variant: 'pin',
+    status: isPinned ? 'favorited' : 'unfavorited',
+    onToggle: () => {
+      analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.UiClick, {
+        ebt_element: AGENT_BUILDER_UI_EBT.element.pageContent,
+        ebt_action: isPinned
+          ? AGENT_BUILDER_UI_EBT.action.conversationList.UNPIN_CONVERSATION
+          : AGENT_BUILDER_UI_EBT.action.conversationList.PIN_CONVERSATION,
+        element_kind: 'button',
+      });
+      if (isPinned) {
+        markAsUnpinned(savedConversation.id);
+      } else {
+        markAsPinned(savedConversation.id);
+      }
+    },
+  };
 
   const badges: AppHeaderBadge[] = [
     {
@@ -203,6 +236,7 @@ export const ConversationAppHeader: React.FC = () => {
         key={savedConversation.id}
         spacing="compact"
         title={title}
+        favorite={favorite}
         badges={badges}
         menu={menu}
       />
