@@ -299,6 +299,19 @@ describe('infrastructure failures', () => {
     }
   });
 
+  // What an FTR run against an existing Cloud deployment reports: the domain cannot be resolved,
+  // so only the location is known, and the Cloud rules still have to apply.
+  it('attributes failures on a cloud target with an unresolved domain', async () => {
+    const [failure] = getFailures(
+      await parseTestReport(
+        report('target="cloud-unknown"', 'Error: Failed to parse SAML response value.')
+      )
+    );
+
+    expect(failure.likelyIrrelevant).toBe(true);
+    expect(failure.infraReason?.category).toBe('auth');
+  });
+
   it('keeps them relevant when the report has no target', async () => {
     const [failure] = getFailures(
       await parseTestReport(report('', 'Error: Failed to parse SAML response value.'))
