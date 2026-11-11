@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash';
+import type { MgetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getFlattenedObject } from '@kbn/std';
 
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import type { Case, Observable } from '../../../common/types/domain';
-import { MAX_OBSERVABLES_PER_CASE } from '../../../common/constants';
+import { MAX_ALERTS_PER_CASE, MAX_OBSERVABLES_PER_CASE } from '../../../common/constants';
 import type { AlertInfo } from '../../common/types';
+import { filterOriginAlerts } from '../../common/utils';
+import type { AlertService } from '../../services';
+import type { Alert } from '../../services/alerts';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
 import { getObservablesFromEcs } from '../../../common/observables/get_observables_from_ecs';
@@ -80,6 +85,24 @@ export type ExtractObservablesOutcome =
     });
 
 /**
+ * `getAlerts` reads at most MAX_ALERTS_PER_CASE references per call, and a case can have more
+ * events than that, so the references are read in batches.
+ */
+const getAlertDocs = async (
+  alertInfo: AlertInfo[],
+  alertsService: AlertService
+): Promise<Array<MgetResponse<Alert>['docs'][number]>> => {
+  const docs: Array<MgetResponse<Alert>['docs'][number]> = [];
+
+  for (const batch of chunk(alertInfo, MAX_ALERTS_PER_CASE)) {
+    const mgetResponse = await alertsService.getAlerts(batch);
+    docs.push(...(mgetResponse?.docs ?? []));
+  }
+
+  return docs;
+};
+
+/**
  * Reads the referenced alert/event documents, extracts observables from them, and persists the
  * new ones to the case. Reports what happened instead of hiding it.
  *
@@ -98,23 +121,20 @@ export const extractObservablesFromAlerts = async (
 
   const alertsRequested = alertInfo.length;
 
-  // Fetch the ECS source documents
-  const mgetResponse = await alertsService.getAlerts(alertInfo);
+  // The origin-only ES client cannot resolve linked-project (`cluster:index`) references.
+  const docs = await getAlertDocs(filterOriginAlerts(alertInfo), alertsService);
 
-  if (!mgetResponse || mgetResponse.docs.length === 0) {
+  if (docs.length === 0) {
     return { status: 'alerts_not_found', alertsRequested, alertsFound: 0 };
   }
 
   // Flatten each _source into FlattedEcsData[] for the extractor
-  const ecsDataArray: FlattedEcsData[][] = mgetResponse.docs.reduce<FlattedEcsData[][]>(
-    (allDocs, doc) => {
-      if ('_source' in doc && doc._source != null && typeof doc._source === 'object') {
-        allDocs.push(toFlattedEcsData(getFlattenedObject(doc._source)));
-      }
-      return allDocs;
-    },
-    []
-  );
+  const ecsDataArray: FlattedEcsData[][] = docs.reduce<FlattedEcsData[][]>((allDocs, doc) => {
+    if ('_source' in doc && doc._source != null && typeof doc._source === 'object') {
+      allDocs.push(toFlattedEcsData(getFlattenedObject(doc._source)));
+    }
+    return allDocs;
+  }, []);
 
   const alertsFound = ecsDataArray.length;
 

@@ -8,6 +8,7 @@
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import { type Case, type Observable } from '../../../common/types/domain';
 import {
+  MAX_ALERTS_PER_CASE,
   MAX_OBSERVABLES_PER_CASE,
   OBSERVABLE_TYPE_IPV4,
   SECURITY_SOLUTION_OWNER,
@@ -560,6 +561,61 @@ describe('extractObservablesFromAlerts', () => {
 
     await expect(extractObservablesFromAlerts('case-1', alertInfo, clientArgs)).rejects.toThrow(
       'version conflict'
+    );
+  });
+
+  it('does not look up linked-project references and reports them as not found', async () => {
+    await expect(
+      extractObservablesFromAlerts(
+        'case-1',
+        [{ id: 'alert-id-1', index: 'linked-project:alert-index-1' }],
+        clientArgs
+      )
+    ).resolves.toEqual({ status: 'alerts_not_found', alertsRequested: 1, alertsFound: 0 });
+    expect(alertsService.getAlerts).not.toHaveBeenCalled();
+  });
+
+  it('looks up only the local references when the case also has linked-project references', async () => {
+    alertsService.getAlerts.mockResolvedValue({ docs: [] });
+
+    await extractObservablesFromAlerts(
+      'case-1',
+      [...alertInfo, { id: 'alert-id-2', index: 'linked-project:alert-index-1' }],
+      clientArgs
+    );
+
+    expect(alertsService.getAlerts).toHaveBeenCalledTimes(1);
+    expect(alertsService.getAlerts).toHaveBeenCalledWith(alertInfo);
+  });
+
+  it('reads the references in batches when there are more than the lookup limit', async () => {
+    const manyAlertInfo = Array.from({ length: MAX_ALERTS_PER_CASE + 1 }, (_, index) => ({
+      id: `alert-id-${index}`,
+      index: 'alert-index-1',
+    }));
+    alertsService.getAlerts
+      .mockResolvedValueOnce({ docs: [] })
+      .mockResolvedValueOnce({ docs: [makeEcsDoc({ 'source.ip': '1.2.3.4' })] });
+    caseService.getCase.mockResolvedValue(caseSO);
+    caseService.patchCase.mockResolvedValue(caseSO);
+
+    const outcome = await extractObservablesFromAlerts('case-1', manyAlertInfo, clientArgs);
+
+    expect(alertsService.getAlerts).toHaveBeenCalledTimes(2);
+    expect(alertsService.getAlerts).toHaveBeenNthCalledWith(
+      1,
+      manyAlertInfo.slice(0, MAX_ALERTS_PER_CASE)
+    );
+    expect(alertsService.getAlerts).toHaveBeenNthCalledWith(
+      2,
+      manyAlertInfo.slice(MAX_ALERTS_PER_CASE)
+    );
+    expect(outcome).toEqual(
+      expect.objectContaining({
+        status: 'extracted',
+        alertsRequested: MAX_ALERTS_PER_CASE + 1,
+        alertsFound: 1,
+      })
     );
   });
 });
