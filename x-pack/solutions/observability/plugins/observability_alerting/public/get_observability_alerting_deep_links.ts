@@ -7,7 +7,6 @@
 
 import type { AppDeepLink, AppDeepLinkLocations, Capabilities } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { hasObservabilityCapabilities } from '@kbn/observability-shared-plugin/public';
 import {
   getObservabilityRulesTabVisibility,
   hasObservabilityAlertingCapabilities,
@@ -65,14 +64,6 @@ const getRulesDeepLinkOverrides = (
   return {};
 };
 
-/**
- * Same gate as the Observability classic nav (`updateGlobalNavigation`), plus Alerting v2 alerts
- * read. Alerts is the only entry listed in the classic hamburger.
- */
-const canListInClassicSideNav = (capabilities: Capabilities): boolean =>
-  hasObservabilityAlertingCapabilities(capabilities, 'alerts').v2 ||
-  hasObservabilityCapabilities(capabilities);
-
 const canAccessDeepLink = (id: string, capabilities: Capabilities): boolean => {
   switch (id) {
     case OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID: {
@@ -109,10 +100,9 @@ const getAccessibleVisibleIn = (
     return [];
   }
 
-  if (
-    link.id === OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID &&
-    canListInClassicSideNav(capabilities)
-  ) {
+  // Alerts is the only entry in the classic hamburger. List it for every user who can open
+  // the deep link, including Stack Rules, security, Data Quality, and Machine Learning.
+  if (link.id === OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID) {
     return [...SEARCHABLE_VISIBLE_IN, 'classicSideNav'];
   }
 

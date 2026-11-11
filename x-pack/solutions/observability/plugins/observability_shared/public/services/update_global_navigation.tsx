@@ -15,26 +15,20 @@ import type {
 } from '@kbn/core/public';
 import { AppStatus, type PricingServiceStart } from '@kbn/core/public';
 import { CasesDeepLinkId } from '@kbn/cases-plugin/public';
+import { OBSERVABILITY_SOLUTION_NAV_LINK_IDS } from '@kbn/rule-data-utils';
 import { casesFeatureId } from '../../common';
 
 /** Capability-based Observability access — pricing tiers do not affect this. */
 export function hasObservabilityCapabilities(capabilities: Capabilities): boolean {
-  const { apm, metrics, uptime, synthetics, slo } = capabilities.navLinks;
+  const { navLinks } = capabilities;
+  const hasSolutionNavLink = OBSERVABILITY_SOLUTION_NAV_LINK_IDS.some((appId) => navLinks[appId]);
   /* logs is a special case.
    * It is not a nav link but still exists as a
    * Kibana feature privilege with attached rule types */
   const logs = capabilities.logs?.show;
   const observabilityAlerts = capabilities.observabilityAlerts?.show;
 
-  return Object.values({
-    apm,
-    logs,
-    metrics,
-    uptime,
-    synthetics,
-    slo,
-    observabilityAlerts,
-  }).some(Boolean);
+  return hasSolutionNavLink || Boolean(logs) || Boolean(observabilityAlerts);
 }
 
 function hasAccessToCases(capabilities: Capabilities): boolean {

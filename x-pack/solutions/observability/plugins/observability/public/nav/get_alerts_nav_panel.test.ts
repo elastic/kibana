@@ -351,8 +351,17 @@ describe('getAlertsNavPanel', () => {
       });
     });
 
-    it('shows a visible v1 Rules link when the user only has stack rules read', () => {
-      setCapabilities(core, { stackAlerts: { show: true } });
+    it.each([
+      ['stack rules read', { stackAlerts: { show: true } }],
+      ['security rules read', { securitySolutionRulesV4: { read_rules: true } }],
+      ['data set quality', { dataQuality: { show: true } }],
+      ['the machine learning app privilege', { navLinks: { ml: true } }],
+    ])('shows Alerts and a visible v1 Rules link for %s', (_label, features) => {
+      setCapabilities(core, features);
+
+      expect(getSectionByTitle(core)?.children).toEqual([
+        expect.objectContaining({ link: 'observabilityAlerting:alerts' }),
+      ]);
 
       const children = getSectionByTitle(core, 'Rule Management')?.children;
 
@@ -369,6 +378,7 @@ describe('getAlertsNavPanel', () => {
         management: {
           insightsAndAlerting: {
             triggersActionsRules: true,
+            triggersActionsAlerts: true,
             triggersActionsConnectors: true,
           },
         },

@@ -8,7 +8,11 @@
  */
 
 import type { Capabilities } from '@kbn/core-capabilities-common';
-import { canAccessTriggersActionsRules, hasClassicRulesReadCapability } from './rule_capabilities';
+import {
+  canAccessTriggersActionsRules,
+  hasClassicAlertsReadCapability,
+  hasClassicRulesReadCapability,
+} from './rule_capabilities';
 
 describe('canAccessTriggersActionsRules', () => {
   it('returns true when the triggersActionsRules capability is granted', () => {
@@ -53,7 +57,7 @@ describe('hasClassicRulesReadCapability', () => {
     ['an observability nav link', { navLinks: { apm: true } }],
     ['logs show', { logs: { show: true } }],
     ['stack rules show', { stackAlerts: { show: true } }],
-    ['machine learning alerts', { ml: { canUseMlAlerts: true } }],
+    ['the machine learning app privilege', { navLinks: { ml: true } }],
     ['data set quality show', { dataQuality: { show: true } }],
     ['security rules read', { securitySolutionRulesV4: { read_rules: true } }],
     ['a legacy security rules feature', { securitySolutionRulesV1: { read_rules: true } }],
@@ -88,11 +92,82 @@ describe('hasClassicRulesReadCapability', () => {
     ).toBe(false);
   });
 
+  it('returns true for the Machine Learning app privilege when canUseMlAlerts is off', () => {
+    expect(
+      hasClassicRulesReadCapability(
+        capabilities({
+          navLinks: { ml: true },
+          ml: { canUseMlAlerts: false },
+        })
+      )
+    ).toBe(true);
+  });
+
+  it('returns false for the license-gated Machine Learning alerts capability alone', () => {
+    expect(hasClassicRulesReadCapability(capabilities({ ml: { canUseMlAlerts: true } }))).toBe(
+      false
+    );
+  });
+
   it('returns false for the Machine Learning APM sub-privilege', () => {
     expect(hasClassicRulesReadCapability(capabilities({ ml: { canGetJobs: true } }))).toBe(false);
   });
 
   it('returns false without any rules capability', () => {
     expect(hasClassicRulesReadCapability(capabilities({}))).toBe(false);
+  });
+
+  it('returns false for alert-only features', () => {
+    expect(
+      hasClassicRulesReadCapability(capabilities({ observabilityAlerts: { show: true } }))
+    ).toBe(false);
+    expect(hasClassicRulesReadCapability(capabilities({ stackAlertsOnly: { show: true } }))).toBe(
+      false
+    );
+  });
+});
+
+describe('hasClassicAlertsReadCapability', () => {
+  const capabilities = (features: Record<string, unknown>): Capabilities =>
+    ({
+      navLinks: {},
+      management: {},
+      catalogue: {},
+      ...features,
+    } as Capabilities);
+
+  it.each([
+    ['an observability nav link', { navLinks: { apm: true } }],
+    ['logs show', { logs: { show: true } }],
+    ['stack rules show', { stackAlerts: { show: true } }],
+    ['the machine learning app privilege', { navLinks: { ml: true } }],
+    ['data set quality show', { dataQuality: { show: true } }],
+    ['security rules read', { securitySolutionRulesV4: { read_rules: true } }],
+    ['observability alerts show', { observabilityAlerts: { show: true } }],
+    ['stack alerts only show', { stackAlertsOnly: { show: true } }],
+  ])('returns true for %s', (_label, features) => {
+    expect(hasClassicAlertsReadCapability(capabilities(features))).toBe(true);
+  });
+
+  it('returns false when only management rule and alert capabilities are granted', () => {
+    expect(
+      hasClassicAlertsReadCapability(
+        capabilities({
+          actions: { show: true },
+          rulesSettings: { show: true },
+          management: {
+            insightsAndAlerting: {
+              triggersActionsRules: true,
+              triggersActionsAlerts: true,
+              triggersActionsConnectors: true,
+            },
+          },
+        })
+      )
+    ).toBe(false);
+  });
+
+  it('returns false without any alerts capability', () => {
+    expect(hasClassicAlertsReadCapability(capabilities({}))).toBe(false);
   });
 });

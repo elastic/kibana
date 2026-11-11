@@ -8,7 +8,11 @@
  */
 
 import type { Capabilities } from '@kbn/core-capabilities-common';
-import { STACK_ALERTS_FEATURE_ID } from './rule_types/stack_rules';
+import {
+  STACK_ALERTS_FEATURE_ID,
+  STACK_ALERTS_ONLY_FEATURE_ID,
+  STACK_ALERTS_SHOW_UI_CAPABILITY,
+} from './rule_types/stack_rules';
 
 /**
  * UI capability key under `capabilities.management.insightsAndAlerting` granting access to the
@@ -19,11 +23,40 @@ export const TRIGGERS_ACTIONS_RULES_CAPABILITY_ID = 'triggersActionsRules' as co
 export const canAccessTriggersActionsRules = (capabilities: Capabilities): boolean =>
   Boolean(capabilities.management?.insightsAndAlerting?.[TRIGGERS_ACTIONS_RULES_CAPABILITY_ID]);
 
-const OBSERVABILITY_RULES_NAV_LINKS = ['apm', 'metrics', 'uptime', 'synthetics', 'slo'] as const;
+/**
+ * Observability apps whose nav link is granted with classic rule and alert read.
+ * `hasObservabilityCapabilities` uses the same list.
+ */
+export const OBSERVABILITY_SOLUTION_NAV_LINK_IDS = [
+  'apm',
+  'metrics',
+  'uptime',
+  'synthetics',
+  'slo',
+] as const;
+
+const LOGS_FEATURE_ID = 'logs';
+const DATA_QUALITY_FEATURE_ID = 'dataQuality';
+const OBSERVABILITY_ALERTS_FEATURE_ID = 'observabilityAlerts';
+const FEATURE_UI_SHOW = 'show';
 
 /**
- * Security rules feature ids that are still registered. Each grants `read_rules` with classic
- * rule read. Older ids stay so unmigrated roles keep the Observability Rules link.
+ * Machine Learning app id. The license switcher clears `ml.canUseMlAlerts` without
+ * removing the ML app privilege, so visibility follows `navLinks.ml`. Nav links are
+ * copied from a privilege's `app` list. The APM sub-privilege registers `app: []`
+ * (`getPluginPrivileges` in `@kbn/ml-common-types`).
+ */
+const ML_APP_ID = 'ml';
+
+/**
+ * Security rules feature ids that are still registered. Each grants `read_rules`
+ * together with classic rule read and `triggersActionsAlerts`. Older ids stay so
+ * unmigrated roles keep the Observability Rules and Alerts links.
+ *
+ * These ids, plus logs, dataQuality, observabilityAlerts, the ML nav link, and
+ * stackAlertsOnly, are a hardcoded list. A feature that grants triggersActionsRules
+ * and is missing here drops out of the nav with no failure. Drift-guard tests are
+ * tracked in https://github.com/elastic/kibana/issues/304874.
  */
 const SECURITY_RULES_FEATURE_IDS = [
   'securitySolutionRulesV1',
@@ -32,22 +65,41 @@ const SECURITY_RULES_FEATURE_IDS = [
   'securitySolutionRulesV4',
 ] as const;
 
+const SECURITY_RULES_READ_UI_CAPABILITY = 'read_rules';
+
+const hasNavLink = (capabilities: Capabilities, appId: string): boolean =>
+  capabilities.navLinks?.[appId] === true;
+
+const hasFeatureUi = (
+  capabilities: Capabilities,
+  featureId: string,
+  uiCapability: string
+): boolean => capabilities[featureId]?.[uiCapability] === true;
+
 /**
- * Feature UI capabilities that imply classic rule read.
- * `canUseMlAlerts` excludes the Machine Learning APM sub-privilege, which grants `canGetJobs`
- * and has no rule read.
+ * Privileges that grant both classic rule read and classic alert read.
+ * Alert-only privileges are not included; see `hasClassicAlertsReadCapability`.
  */
-const CLASSIC_RULES_FEATURE_CAPABILITIES: ReadonlyArray<readonly [string, string]> = [
-  ['logs', 'show'],
-  [STACK_ALERTS_FEATURE_ID, 'show'],
-  ['ml', 'canUseMlAlerts'],
-  ['dataQuality', 'show'],
-  ...SECURITY_RULES_FEATURE_IDS.map((featureId) => [featureId, 'read_rules'] as const),
-];
+const hasSolutionRuleAndAlertRead = (capabilities: Capabilities): boolean =>
+  OBSERVABILITY_SOLUTION_NAV_LINK_IDS.some((appId) => hasNavLink(capabilities, appId)) ||
+  hasFeatureUi(capabilities, LOGS_FEATURE_ID, FEATURE_UI_SHOW) ||
+  hasFeatureUi(capabilities, STACK_ALERTS_FEATURE_ID, STACK_ALERTS_SHOW_UI_CAPABILITY) ||
+  hasNavLink(capabilities, ML_APP_ID) ||
+  hasFeatureUi(capabilities, DATA_QUALITY_FEATURE_ID, FEATURE_UI_SHOW) ||
+  SECURITY_RULES_FEATURE_IDS.some((featureId) =>
+    hasFeatureUi(capabilities, featureId, SECURITY_RULES_READ_UI_CAPABILITY)
+  );
 
 /** True when a Kibana privilege grants read access to at least one classic rule type. */
 export const hasClassicRulesReadCapability = (capabilities: Capabilities): boolean =>
-  OBSERVABILITY_RULES_NAV_LINKS.some((appId) => capabilities.navLinks?.[appId] === true) ||
-  CLASSIC_RULES_FEATURE_CAPABILITIES.some(
-    ([featureId, uiCapability]) => capabilities[featureId]?.[uiCapability] === true
-  );
+  hasSolutionRuleAndAlertRead(capabilities);
+
+/**
+ * True when a Kibana privilege grants read access to at least one classic alert.
+ * Solution privileges that grant rule read are included because they also grant
+ * alert read. `observabilityAlerts` and `stackAlertsOnly` are checked only here.
+ */
+export const hasClassicAlertsReadCapability = (capabilities: Capabilities): boolean =>
+  hasSolutionRuleAndAlertRead(capabilities) ||
+  hasFeatureUi(capabilities, OBSERVABILITY_ALERTS_FEATURE_ID, FEATURE_UI_SHOW) ||
+  hasFeatureUi(capabilities, STACK_ALERTS_ONLY_FEATURE_ID, FEATURE_UI_SHOW);

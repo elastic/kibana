@@ -133,7 +133,7 @@ describe('getObservabilityAlertingDeepLinks', () => {
 
     it('offers Alerts and Rules V1 to a stack rules user', () => {
       expect(visibleInById(capabilities({ stackAlerts: { show: true } }))).toEqual({
-        [OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]: SEARCHABLE,
+        [OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]: ALERTS,
         [OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]: SEARCHABLE,
         [OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: [],
@@ -142,20 +142,34 @@ describe('getObservabilityAlertingDeepLinks', () => {
       });
     });
 
-    it('hides Rules V1 from an Actions and Connectors user', () => {
-      expect(
-        visibleInById(
-          capabilities({
-            actions: { show: true },
-            management: {
-              insightsAndAlerting: {
-                triggersActionsRules: true,
-                triggersActionsConnectors: true,
-              },
+    it('hides Alerts and Rules V1 from an Actions and Connectors user', () => {
+      const visibleIn = visibleInById(
+        capabilities({
+          actions: { show: true },
+          rulesSettings: { show: true },
+          management: {
+            insightsAndAlerting: {
+              triggersActionsRules: true,
+              triggersActionsAlerts: true,
+              triggersActionsConnectors: true,
             },
-          })
-        )[OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]
-      ).toEqual([]);
+          },
+        })
+      );
+
+      expect(visibleIn[OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]).toEqual([]);
+      expect(visibleIn[OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]).toEqual([]);
+    });
+
+    it.each([
+      ['data set quality', { dataQuality: { show: true } }],
+      ['security rules read', { securitySolutionRulesV4: { read_rules: true } }],
+      ['the machine learning app', { navLinks: { ml: true } }],
+      ['stack alerts only', { stackAlertsOnly: { show: true } }],
+    ])('lists Alerts in the classic side nav for %s', (_label, features) => {
+      expect(
+        visibleInById(capabilities(features))[OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]
+      ).toEqual(ALERTS);
     });
 
     it('offers Alerts and Rules V1 to a v1 apm navLink user', () => {

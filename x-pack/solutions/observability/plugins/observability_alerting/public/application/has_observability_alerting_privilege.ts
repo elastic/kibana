@@ -6,7 +6,10 @@
  */
 
 import type { Capabilities } from '@kbn/core/public';
-import { STACK_ALERTS_ONLY_FEATURE_ID, hasClassicRulesReadCapability } from '@kbn/rule-data-utils';
+import {
+  hasClassicAlertsReadCapability,
+  hasClassicRulesReadCapability,
+} from '@kbn/rule-data-utils';
 
 const ALERTING_V2_FEATURE_IDS: Record<string, string> = {
   rules: 'alerting_v2_rules',
@@ -47,6 +50,4 @@ export const getObservabilityRulesTabVisibility = (
 
 /** Capability-based check: does the user have any observability alerting access? */
 export const hasObservabilityAlertsV1Capability = (capabilities: Capabilities): boolean =>
-  hasClassicRulesReadCapability(capabilities) ||
-  capabilities.observabilityAlerts?.show === true ||
-  capabilities[STACK_ALERTS_ONLY_FEATURE_ID]?.show === true;
+  hasClassicAlertsReadCapability(capabilities);

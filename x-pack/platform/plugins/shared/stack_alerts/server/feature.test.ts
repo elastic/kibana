@@ -9,6 +9,11 @@ import { AlertingBuiltinsPlugin } from './plugin';
 import { coreMock } from '@kbn/core/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import {
+  hasClassicAlertsReadCapability,
+  hasClassicRulesReadCapability,
+  STACK_ALERTS_SHOW_UI_CAPABILITY,
+} from '@kbn/rule-data-utils';
 import { BUILT_IN_ALERTS_FEATURE, STACK_ALERTS_ONLY_FEATURE } from './feature';
 
 describe('Stack Alerts Feature Privileges', () => {
@@ -180,9 +185,50 @@ describe('Stack Alerts Feature Privileges', () => {
   });
 
   test('both privileges grant the show UI capability used to detect classic rules read', () => {
-    expect(BUILT_IN_ALERTS_FEATURE.privileges?.all.ui).toContain('show');
-    expect(BUILT_IN_ALERTS_FEATURE.privileges?.read.ui).toContain('show');
+    expect(BUILT_IN_ALERTS_FEATURE.privileges?.all.ui).toContain(STACK_ALERTS_SHOW_UI_CAPABILITY);
+    expect(BUILT_IN_ALERTS_FEATURE.privileges?.read.ui).toContain(STACK_ALERTS_SHOW_UI_CAPABILITY);
   });
+
+  test.each(['all', 'read'] as const)(
+    'the %s privilege is recognized as classic rule and alert read',
+    (level) => {
+      const privilege = BUILT_IN_ALERTS_FEATURE.privileges?.[level];
+      const ui = Object.fromEntries(
+        (privilege?.ui ?? []).map((uiCapability) => [uiCapability, true])
+      );
+      const capabilities = {
+        navLinks: {},
+        [BUILT_IN_ALERTS_FEATURE.id]: ui,
+      } as Parameters<typeof hasClassicRulesReadCapability>[0];
+
+      expect(privilege?.management?.insightsAndAlerting).toContain('triggersActionsRules');
+      expect(privilege?.alerting?.rule?.[level === 'all' ? 'all' : 'read']?.length).toBeGreaterThan(
+        0
+      );
+      expect(hasClassicRulesReadCapability(capabilities)).toBe(true);
+      expect(hasClassicAlertsReadCapability(capabilities)).toBe(true);
+    }
+  );
+});
+
+describe('Stack Alerts Only feature and the classic alerts gate', () => {
+  test.each(['all', 'read'] as const)(
+    'the %s privilege is alert read and not rule read',
+    (level) => {
+      const privilege = STACK_ALERTS_ONLY_FEATURE.privileges?.[level];
+      const ui = Object.fromEntries(
+        (privilege?.ui ?? []).map((uiCapability) => [uiCapability, true])
+      );
+      const capabilities = {
+        navLinks: {},
+        [STACK_ALERTS_ONLY_FEATURE.id]: ui,
+      } as Parameters<typeof hasClassicRulesReadCapability>[0];
+
+      expect(privilege?.management?.insightsAndAlerting).not.toContain('triggersActionsRules');
+      expect(hasClassicRulesReadCapability(capabilities)).toBe(false);
+      expect(hasClassicAlertsReadCapability(capabilities)).toBe(true);
+    }
+  );
 });
 
 describe('Stack Alerts Only Feature Privileges', () => {

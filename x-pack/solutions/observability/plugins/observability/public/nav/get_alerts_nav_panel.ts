@@ -18,8 +18,10 @@ import {
   OBSERVABILITY_ALERTING_BASE_PATH,
   type ObservabilityAlertingLinkId,
 } from '@kbn/deeplinks-observability';
-import { hasObservabilityCapabilities } from '@kbn/observability-shared-plugin/public';
-import { hasClassicRulesReadCapability } from '@kbn/rule-data-utils';
+import {
+  hasClassicAlertsReadCapability,
+  hasClassicRulesReadCapability,
+} from '@kbn/rule-data-utils';
 
 const PANEL_ID = 'alerting';
 const ALERTS_LINK = 'observability-overview:alerts' as const;
@@ -57,11 +59,10 @@ const hasManagementCapability = (core: CoreStart, capabilityId: string): boolean
   core.application.capabilities.management?.insightsAndAlerting?.[capabilityId] === true;
 
 /**
- * Same gate as classic nav (`updateGlobalNavigation` / `hasObservabilityCapabilities`):
- * any Observability app capability, not alerting-specific privileges.
+ * Same gate as the Alerts deep link and app guard (`hasClassicAlertsReadCapability`).
  */
 export const canReadV1Alerts = (core: CoreStart): boolean =>
-  hasObservabilityCapabilities(core.application.capabilities);
+  hasClassicAlertsReadCapability(core.application.capabilities);
 
 /** Gate for the Classic rules link in the Alerting panel. */
 export const canReadV1Rules = (core: CoreStart): boolean =>

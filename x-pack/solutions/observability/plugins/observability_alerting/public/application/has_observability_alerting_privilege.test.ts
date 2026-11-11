@@ -69,6 +69,48 @@ describe('hasObservabilityAlertingCapabilities', () => {
       expect(result).toEqual({ v1: true, v2: false });
     });
 
+    it.each([
+      ['stack rules show', { stackAlerts: { show: true } }],
+      ['data set quality show', { dataQuality: { show: true } }],
+      ['security rules read', { securitySolutionRulesV4: { read_rules: true } }],
+      ['the machine learning app privilege', { navLinks: { ml: true } }],
+    ])('returns v1: true for %s', (_label, features) => {
+      expect(hasObservabilityAlertingCapabilities(capabilities(features), 'alerts')).toEqual({
+        v1: true,
+        v2: false,
+      });
+    });
+
+    it('returns v1: true for stack alerts only, which does not grant rules', () => {
+      const stackAlertsOnly = capabilities({ stackAlertsOnly: { show: true } });
+
+      expect(hasObservabilityAlertingCapabilities(stackAlertsOnly, 'alerts')).toEqual({
+        v1: true,
+        v2: false,
+      });
+      expect(hasObservabilityAlertingCapabilities(stackAlertsOnly, 'rules')).toEqual({
+        v1: false,
+        v2: false,
+      });
+    });
+
+    it('returns v1: false when only triggersActionsAlerts and triggersActionsRules are granted', () => {
+      const result = hasObservabilityAlertingCapabilities(
+        capabilities({
+          actions: { show: true },
+          rulesSettings: { show: true },
+          management: {
+            insightsAndAlerting: {
+              triggersActionsRules: true,
+              triggersActionsAlerts: true,
+            },
+          },
+        }),
+        'alerts'
+      );
+      expect(result).toEqual({ v1: false, v2: false });
+    });
+
     it('returns v2: true for alerting_v2_alerts read', () => {
       const result = hasObservabilityAlertingCapabilities(
         capabilities({ alerting_v2_alerts: { read: true } }),

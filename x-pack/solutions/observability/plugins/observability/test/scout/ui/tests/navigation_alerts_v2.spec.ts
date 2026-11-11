@@ -564,6 +564,52 @@ test.describe(
       );
     });
 
+    test('hides Rules and Alerts when the user only has Classic Rules Settings read', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await expectPanelForRole(
+        { browserAuth, pageObjects, kbnClient, scoutSpace },
+        observabilityAlertingNavRole({ rulesSettings: ['read'] }),
+        []
+      );
+    });
+
+    test('shows Alerts and classic Rules when the user has Stack Rules read', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await expectPanelForRole(
+        { browserAuth, pageObjects, kbnClient, scoutSpace },
+        observabilityAlertingNavRole({ stackAlerts: ['read'] }),
+        [PANEL_LINKS.alerts, PANEL_LINKS.rulesV1]
+      );
+    });
+
+    test('shows Alerts and classic Rules when the user has security rules read', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+      config,
+    }) => {
+      // The Security rules feature is not registered in the Observability serverless project.
+      test.skip(
+        Boolean(config.serverless),
+        'Security rules are not part of serverless Observability'
+      );
+
+      await expectPanelForRole(
+        { browserAuth, pageObjects, kbnClient, scoutSpace },
+        observabilityAlertingNavRole({ securitySolutionRulesV4: ['read'] }),
+        [PANEL_LINKS.alerts, PANEL_LINKS.rulesV1]
+      );
+    });
+
     test('shows Alerts and Alerts V1 when the user has v1 observability alerts read and the V1 alerts table is on', async ({
       browserAuth,
       pageObjects,
