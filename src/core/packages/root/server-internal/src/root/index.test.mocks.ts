@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 export const logger = loggingSystemMock.create();
 jest.doMock('@kbn/core-logging-server-internal', () => ({
@@ -31,7 +30,6 @@ export const mockServer = {
   setup: jest.fn(),
   start: jest.fn(),
   stop: jest.fn(),
-  getPluginInitializationFailure$: jest.fn(() => new Subject<Error>()),
   configService,
 };
 jest.mock('../server', () => ({ Server: jest.fn(() => mockServer) }));

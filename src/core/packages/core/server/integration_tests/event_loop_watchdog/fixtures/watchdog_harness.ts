@@ -17,6 +17,7 @@ import { writeSync } from 'node:fs';
 import Path from 'node:path';
 import type { Logger } from '@kbn/logging';
 import { EventLoopWatchdog } from '@kbn/core-metrics-server-internal';
+import { REPORT_BURST } from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/constants';
 
 // The last argument: `node -e <code> <scenario>` puts it at argv[1].
 const scenario = process.argv[process.argv.length - 1];
@@ -24,8 +25,8 @@ const STATS_INTERVAL_MS = 1_000;
 
 const MAIN_LOG_FD = 3;
 const mainLogLines: string[] = [];
-const writeMainLogLine = (level: string, message: string) =>
-  writeSync(MAIN_LOG_FD, `${JSON.stringify({ level, message })}\n`);
+const writeMainLogLine = (level: string, message: string, at?: number) =>
+  writeSync(MAIN_LOG_FD, `${JSON.stringify({ level, message, at })}\n`);
 const log =
   (level: string) =>
   (message: string | (() => string)): void => {
@@ -74,8 +75,23 @@ const create = (workerEntry?: string) =>
       format: 'json',
       service: { node: { roles: ['background_tasks'] }, version: 'harness', type: 'kibana' },
     },
+    profiling: {
+      startAfterMs: { starting: 30_000, running: 30_000 },
+      maxDurationMs: { starting: 10_000, running: 10_000 },
+      cooldownMs: { starting: 60_000, running: 60_000 },
+    },
     workerEntry,
   });
+
+/** Starts the watchdog, marks running and waits a moment, so the next block is a running one. */
+const startRunning = async () => {
+  const watchdog = create();
+  watchdog.start();
+  await waitForLogLine('ready', 30_000);
+  watchdog.markRunning();
+  await sleep(BLOCK_GAP_MS);
+  return watchdog;
+};
 
 const scenarios: Record<string, () => Promise<void>> = {
   // 1 block while starting, then 7 while running: 5 warnings, 3 suppressed. Blocks are well over
@@ -98,10 +114,11 @@ const scenarios: Record<string, () => Promise<void>> = {
     await sleep(STATS_INTERVAL_MS * 2);
     await watchdog.stop();
   },
-  exhaust: async () => {
+  // Restart 4 is past three failures in a row; the watchdog never runs out of restarts.
+  restarts: async () => {
     const watchdog = create(Path.resolve(__dirname, 'throwing_entry.ts'));
     watchdog.start();
-    await waitForLogLine('exhausted', 60_000);
+    await waitForLogLine('restart 4 in', 60_000);
     await watchdog.stop();
   },
   oom: async () => {
@@ -109,6 +126,21 @@ const scenarios: Record<string, () => Promise<void>> = {
     watchdog.start();
     await waitForLogLine('(oom,', 60_000);
     await watchdog.stop();
+  },
+  // Short blocks use up the warning burst, with one more whose warning is suppressed, then a block
+  // that never ends: the test kills the process once the worker reports it.
+  permanent_block: async () => {
+    await startRunning();
+    for (let i = 0; i < REPORT_BURST + 1; i++) {
+      blockFor(500);
+      await sleep(BLOCK_GAP_MS);
+    }
+    // Written synchronously, with the time it was written, so the line is out before the main
+    // thread blocks.
+    writeMainLogLine('info', 'blocking', Date.now());
+    for (;;) {
+      // blocks the main thread until the process is killed
+    }
   },
 };
 

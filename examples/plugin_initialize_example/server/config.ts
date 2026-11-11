@@ -12,10 +12,10 @@ import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 const configSchema = schema.object({
-  // How long initialize() takes, so the `initializing` status stays observable. Above 10s core
-  // warns that it is slow.
+  // How long initialize() takes, so the doc route visibly waits for it. Above 10s core warns that
+  // it is slow.
   initDelayMs: schema.number({ defaultValue: 5000, min: 0 }),
-  // When true, initialize() throws, which shuts Kibana down.
+  // When true, initialize() throws. Core logs it and leaves it unhandled, so dev Kibana exits.
   failInitialize: schema.boolean({ defaultValue: false }),
 });
 

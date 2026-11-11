@@ -6,14 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiButton,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiShowFor,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EndpointUrl } from '@kbn/shared-components';
 import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
@@ -41,24 +34,22 @@ export const ConnectionDetails = () => {
           />
         </EuiFlexItem>
       )}
-      <EuiShowFor sizes={['xl']}>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            color="text"
-            iconType="plusCircle"
-            size="s"
-            onClick={() =>
-              openWiredConnectionDetails({ props: { options: { defaultTabId: 'apiKeys' } } })
-            }
-            data-test-subj="elasticsearchHomeGenerateApiKeyButton"
-            data-telemetry-id={getTelemetryId('connectionDetails-apiKeys')}
-          >
-            {i18n.translate('xpack.elasticsearchHome.home.connectionDetails.generateApiKey', {
-              defaultMessage: 'Generate API key',
-            })}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiShowFor>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          color="text"
+          iconType="plusCircle"
+          size="s"
+          onClick={() =>
+            openWiredConnectionDetails({ props: { options: { defaultTabId: 'apiKeys' } } })
+          }
+          data-test-subj="elasticsearchHomeGenerateApiKeyButton"
+          data-telemetry-id={getTelemetryId('connectionDetails-apiKeys')}
+        >
+          {i18n.translate('xpack.elasticsearchHome.home.connectionDetails.generateApiKey', {
+            defaultMessage: 'Generate API key',
+          })}
+        </EuiButton>
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiToolTip
           content={i18n.translate('xpack.elasticsearchHome.home.connectionDetails.tooltip', {

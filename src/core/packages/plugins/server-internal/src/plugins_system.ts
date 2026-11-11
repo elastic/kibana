@@ -25,7 +25,7 @@ import type {
   PluginsServiceStartDeps,
 } from './plugins_service';
 import { RuntimePluginContractResolver } from './plugin_contract_resolver';
-import type { DeferredInitEngine, PluginInitRunner } from './deferred_init';
+import { DeferredInitEngine } from './deferred_init';
 import { PluginsTelemetry } from './plugins_telemetry';
 
 const Sec = 1000;
@@ -34,17 +34,14 @@ const Sec = 1000;
 export class PluginsSystem<T extends PluginType> {
   private readonly runtimeResolver = new RuntimePluginContractResolver();
   private readonly telemetry = new PluginsTelemetry();
+  private readonly deferredInitEngine = new DeferredInitEngine();
   private readonly plugins = new Map<PluginName, PluginWrapper>();
   private readonly log: Logger;
   // `satup`, the past-tense version of the noun `setup`.
   private readonly satupPlugins: PluginName[] = [];
   private sortedPluginNames?: Set<string>;
 
-  constructor(
-    private readonly coreContext: CoreContext,
-    public readonly type: T,
-    private readonly deferredInitEngine?: DeferredInitEngine
-  ) {
+  constructor(private readonly coreContext: CoreContext, public readonly type: T) {
     this.log = coreContext.logger.get('plugins-system', this.type);
   }
 
@@ -190,7 +187,7 @@ export class PluginsSystem<T extends PluginType> {
 
     this.log.info(`Starting [${this.satupPlugins.length}] plugins: [${[...this.satupPlugins]}]`);
 
-    const initializeRunners = new Map<PluginName, PluginInitRunner>();
+    const initializeRuns: Array<() => void> = [];
     for (const pluginName of this.satupPlugins) {
       this.log.debug(`Starting plugin "${pluginName}"...`);
       const plugin = this.plugins.get(pluginName)!;
@@ -237,20 +234,16 @@ export class PluginsSystem<T extends PluginType> {
       }
 
       contracts.set(pluginName, contract);
-      if (plugin.hasInitialize) {
-        initializeRunners.set(pluginName, () =>
-          this.telemetry.measureInitialize(plugin, () =>
-            plugin.runInitialize(startContext, pluginDepContracts)
-          )
-        );
-      } else {
-        this.deferredInitEngine?.markAvailable(pluginName);
-      }
+      initializeRuns.push(() =>
+        plugin.runInitialize(startContext, pluginDepContracts, (run) =>
+          this.telemetry.measureInitialize(plugin, run)
+        )
+      );
     }
 
     this.runtimeResolver.resolveStartRequests(contracts);
-    // Only once every plugin has started, so no `start()` ever waits on an `initialize()`.
-    this.deferredInitEngine?.startInitialization(initializeRunners);
+    // After the start loop, so expensive `initialize()` work never runs while plugins are starting.
+    this.deferredInitEngine.startInitialization(initializeRuns);
 
     return contracts;
   }

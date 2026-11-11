@@ -9,7 +9,7 @@
 
 import { rawConfigService, configService, logger, mockServer } from './index.test.mocks';
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { filter, first } from 'rxjs';
 import { CriticalError } from '@kbn/core-base-server-internal';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -152,28 +152,6 @@ test('only shutdowns once', async () => {
   await root.shutdown();
 
   expect(mockOnShutdown).toHaveBeenCalledTimes(1);
-  expect(mockServer.stop).toHaveBeenCalledTimes(1);
-});
-
-test('stops services and calls `onShutdown` when a plugin `initialize()` fails after start', async () => {
-  const mockOnShutdown = jest.fn();
-  const root = new Root(rawConfigService, env, mockOnShutdown);
-  const initializationFailure$ = new Subject<Error>();
-  mockServer.getPluginInitializationFailure$.mockReturnValueOnce(initializationFailure$);
-
-  await root.preboot();
-  await root.setup();
-  await root.start();
-
-  expect(mockOnShutdown).not.toHaveBeenCalled();
-  expect(mockServer.stop).not.toHaveBeenCalled();
-
-  const initializeError = new Error('Plugin "foo" initialize() failed: boom');
-  initializationFailure$.next(initializeError);
-  await new Promise((resolve) => setImmediate(resolve));
-
-  expect(mockOnShutdown).toHaveBeenCalledTimes(1);
-  expect(mockOnShutdown).toHaveBeenCalledWith(initializeError);
   expect(mockServer.stop).toHaveBeenCalledTimes(1);
 });
 

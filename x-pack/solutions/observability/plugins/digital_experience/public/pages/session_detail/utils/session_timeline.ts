@@ -9,7 +9,49 @@ import type {
   SessionPageVisit,
   SessionSummary,
   SessionTimelineEvent,
+  SessionTimelineEventKind,
 } from '../../../../common/sessions';
+
+/** Events the journey lists; spans and logs are left to traces and Discover. */
+export const JOURNEY_EVENT_KINDS: readonly SessionTimelineEventKind[] = [
+  'page_view',
+  'click',
+  'error',
+  'web_vital',
+];
+
+export interface PageVisitEvents {
+  visit: SessionPageVisit;
+  events: SessionTimelineEvent[];
+}
+
+/**
+ * Attributes each journey event to the page visit it happened in: the last one that started at or
+ * before it. Events before the first visit belong to it, as the API starts a visit with its first
+ * event that has a page.
+ */
+export const groupEventsByVisit = (
+  pageVisits: SessionPageVisit[],
+  timeline: SessionTimelineEvent[]
+): PageVisitEvents[] => {
+  const groups = pageVisits.map((visit) => ({
+    visit,
+    startMs: Date.parse(visit.startTime),
+    events: [] as SessionTimelineEvent[],
+  }));
+  if (groups.length === 0) {
+    return [];
+  }
+  for (const event of timeline) {
+    if (!JOURNEY_EVENT_KINDS.includes(event.kind)) {
+      continue;
+    }
+    const eventMs = Date.parse(event.timestamp);
+    const group = groups.findLast(({ startMs }) => startMs <= eventMs) ?? groups[0];
+    group.events.push(event);
+  }
+  return groups.map(({ visit, events }) => ({ visit, events }));
+};
 
 export interface WaterfallSegment {
   /** Index in the page visits. */

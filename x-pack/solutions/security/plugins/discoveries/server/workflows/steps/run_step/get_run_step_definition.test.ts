@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { WorkflowExecutionAuthorizationError } from '@kbn/discoveries/impl/attack_discovery/generation/assert_authorized_to_execute_workflows';
 
+import { RunStepInputSchema } from '../../../../common/step_types/run_step';
 import { resolveConnectorDetails } from '../../helpers/resolve_connector_details';
 import { resolveDefaultConnectorId } from '../../helpers/resolve_default_connector_id';
 
@@ -404,6 +405,56 @@ describe('getRunStepDefinition', () => {
           }),
         })
       );
+    });
+  });
+
+  describe('telemetry attribution', () => {
+    const contextWith = (extra: Record<string, unknown>) => ({
+      ...baseMockContext,
+      input: {
+        alert_retrieval_mode: 'custom_query' as const,
+        alert_retrieval_workflow_ids: [],
+        mode: 'sync' as const,
+        validation_workflow_id: '',
+        ...extra,
+      },
+    });
+
+    it('forwards plugin_id and aggregate_by to the pipeline as telemetryMetadata', async () => {
+      await getStepDefinition().handler(
+        contextWith({ aggregate_by: 'rollup_parent', plugin_id: 'some_plugin' }) as never
+      );
+
+      expect(mockExecuteGenerationWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          telemetryMetadata: { aggregateBy: 'rollup_parent', pluginId: 'some_plugin' },
+        })
+      );
+    });
+
+    it('passes no telemetryMetadata when neither input is set', async () => {
+      await getStepDefinition().handler(contextWith({}) as never);
+
+      expect(mockExecuteGenerationWorkflow.mock.calls[0][0]).not.toHaveProperty(
+        'telemetryMetadata'
+      );
+    });
+
+    it('treats an empty plugin_id as unset', async () => {
+      await getStepDefinition().handler(contextWith({ aggregate_by: '', plugin_id: '' }) as never);
+
+      expect(mockExecuteGenerationWorkflow.mock.calls[0][0]).not.toHaveProperty(
+        'telemetryMetadata'
+      );
+    });
+
+    it('bounds plugin_id and aggregate_by in the input schema', () => {
+      const schema = RunStepInputSchema;
+      const tooLong = 'x'.repeat(257);
+
+      expect(schema.safeParse({ plugin_id: tooLong }).success).toBe(false);
+      expect(schema.safeParse({ aggregate_by: tooLong }).success).toBe(false);
+      expect(schema.safeParse({ aggregate_by: 'a', plugin_id: 'b' }).success).toBe(true);
     });
   });
 

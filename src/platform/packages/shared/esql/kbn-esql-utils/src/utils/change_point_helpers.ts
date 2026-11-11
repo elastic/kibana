@@ -170,6 +170,40 @@ const normalizePrintedEsql = (printed: string): string =>
     .join(' ');
 
 /**
+ * Narrows a CHANGE_POINT query to one series by inserting a WHERE after the command before
+ * CHANGE_POINT. Comments and spacing between that command and CHANGE_POINT stay in place.
+ * Returns the original query when there are no entity columns. Returns undefined for invalid
+ * queries, queries without a top-level CHANGE_POINT, and FORK queries.
+ */
+export const narrowChangePointEsqlToEntity = (
+  esql: string,
+  row: Readonly<Record<string, unknown>>,
+  entityColumnIds: readonly string[]
+): string | undefined => {
+  if (!esql) return undefined;
+  try {
+    const { root } = Parser.parse(esql);
+    if (root.commands.some((command) => command.name === 'fork')) return undefined;
+
+    const changePointIndex = root.commands.findIndex(
+      (command) => command.name === CommandNames.CHANGE_POINT
+    );
+    const previousCommand = root.commands[changePointIndex - 1];
+    if (changePointIndex < 1 || !previousCommand?.location) return undefined;
+    if (!entityColumnIds.length) return esql;
+
+    const predicates = entityColumnIds.map((columnId) =>
+      formatEsqlEntityPredicate(columnId, row[columnId])
+    );
+    // location.max is the command's last character, so the pipe and any comment stay with CHANGE_POINT.
+    const insertAt = previousCommand.location.max + 1;
+    return `${esql.slice(0, insertAt)} | WHERE ${predicates.join(' AND ')}${esql.slice(insertAt)}`;
+  } catch {
+    return undefined;
+  }
+};
+
+/**
  * Builds the ES|QL used as the Lens line-chart dataset: pipeline before CHANGE_POINT (trailing SORT
  * removed).
  * FORK queries are intentionally unsupported for line-series extraction.

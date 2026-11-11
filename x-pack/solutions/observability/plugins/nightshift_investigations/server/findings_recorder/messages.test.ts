@@ -245,7 +245,11 @@ describe('toolNamesToDefine', () => {
 
     expect(early).toEqual(late);
     expect(early).toEqual(
-      expect.arrayContaining(['nightshift_sandbox_bash', 'nightshift_time_converter_tool'])
+      expect.arrayContaining([
+        'nightshift_sandbox_bash',
+        'nightshift_time_converter_tool',
+        'platform_nightshift_slack_read',
+      ])
     );
     expect(early).not.toContain(STRUCTURED_OUTPUT_TOOL);
     expect([...early].sort()).toEqual(early);

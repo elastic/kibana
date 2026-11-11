@@ -61,7 +61,7 @@ const okFetch = () =>
   });
 
 describe('createConfigDistributorClient', () => {
-  it('logs an error and does not call the distributor when the URL is not configured', async () => {
+  it('answers 503 quietly without calling the distributor when the URL is not configured', async () => {
     const fetchImpl = jest.fn();
     const logger = loggerMock.create();
     const { publish, validate } = createConfigDistributorClient({
@@ -78,7 +78,9 @@ describe('createConfigDistributorClient', () => {
     });
 
     expect(fetchImpl).not.toHaveBeenCalled();
-    expect(logger.error).toHaveBeenCalledTimes(2);
+    // The plugin decides whether a missing URL is worth a warning; the client stays quiet.
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('PUTs authored unit YAML and a SHA-256 config hash without mutating the unit', async () => {
@@ -273,7 +275,7 @@ describe('createConfigDistributorClient', () => {
         severity: 'error',
         code: 'invalid_ottl',
         message: 'OTTL parse error',
-        path: 'processors > add-env',
+        path: '/processors/0',
         line: 4,
       },
     ];
@@ -353,6 +355,196 @@ describe('createConfigDistributorClient', () => {
     ).rejects.toMatchObject({
       message: expect.stringContaining('This operation was aborted'),
       statusCode: 502,
+    });
+  });
+
+  it.each([401, 403])(
+    'answers 502 when the distributor rejects the client certificate with %s',
+    async (status) => {
+      const fetchImpl = jest
+        .fn()
+        .mockResolvedValue({ ok: false, status, text: async () => 'certificate rejected' });
+      const { publish } = createConfigDistributorClient({
+        config: { url: 'https://distributor.example:8443', ssl: {} },
+        logger: loggerMock.create(),
+        fetchImpl,
+      });
+
+      await expect(publish({ unitId: 'default', unit, credentials: [] })).rejects.toMatchObject({
+        statusCode: 502,
+      });
+    }
+  );
+
+  describe('component catalogue', () => {
+    const catalogue = {
+      schema_version: 'v1',
+      component_revision: 'sha256:revision',
+      components: [],
+      metadata: { schema_version: 'v1', enum_sets: {}, path_sets: {} },
+      definitions: [],
+    };
+    const etagHeaders = (etag: string) => ({
+      get: (name: string) => (name === 'etag' ? etag : null),
+    });
+    const createClient = (fetchImpl: jest.Mock) =>
+      createConfigDistributorClient({
+        config: { url: 'https://distributor.example:8443', ssl: {} },
+        logger: loggerMock.create(),
+        fetchImpl,
+      });
+
+    it('GETs the catalogue without a body and returns it with its ETag', async () => {
+      const fetchImpl = jest.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        headers: etagHeaders('"sha256:body"'),
+        text: async () => JSON.stringify(catalogue),
+      });
+
+      await expect(createClient(fetchImpl).fetchComponentCatalogue({})).resolves.toEqual({
+        notModified: false,
+        catalogue,
+        etag: '"sha256:body"',
+      });
+      expect(fetchImpl).toHaveBeenCalledWith('https://distributor.example:8443/v1/components', {
+        method: 'GET',
+        headers: {},
+        body: undefined,
+        signal: expect.any(AbortSignal),
+      });
+    });
+
+    it('revalidates with If-None-Match and reports a 304 as not modified', async () => {
+      const fetchImpl = jest
+        .fn()
+        .mockResolvedValue({ ok: false, status: 304, text: async () => '' });
+
+      await expect(
+        createClient(fetchImpl).fetchComponentCatalogue({ etag: '"sha256:body"' })
+      ).resolves.toEqual({ notModified: true });
+      expect(fetchImpl.mock.calls[0][1].headers).toEqual({ 'if-none-match': '"sha256:body"' });
+    });
+
+    it('answers 502 for a catalogue it cannot read', async () => {
+      const fetchImpl = jest.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({ schema_version: 'v1', components: [] }),
+      });
+
+      await expect(createClient(fetchImpl).fetchComponentCatalogue({})).rejects.toMatchObject({
+        statusCode: 502,
+      });
+    });
+
+    it('answers 502 when the distributor rejects the client certificate', async () => {
+      const fetchImpl = jest
+        .fn()
+        .mockResolvedValue({ ok: false, status: 401, text: async () => 'no certificate' });
+
+      await expect(createClient(fetchImpl).fetchComponentCatalogue({})).rejects.toMatchObject({
+        statusCode: 502,
+      });
+    });
+
+    it('answers 503 without calling the distributor when the URL is not configured', async () => {
+      const fetchImpl = jest.fn();
+      const { fetchComponentCatalogue, validateComponent } = createConfigDistributorClient({
+        config: { ssl: {} },
+        logger: loggerMock.create(),
+        fetchImpl,
+      });
+
+      await expect(fetchComponentCatalogue({})).rejects.toMatchObject({ statusCode: 503 });
+      await expect(
+        validateComponent({
+          kind: 'processor',
+          component: { id: 'tag', type: 'add_fields', supported_telemetry: ['logs'] },
+        })
+      ).rejects.toMatchObject({ statusCode: 503 });
+      expect(fetchImpl).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('component validation', () => {
+    const component = {
+      id: 'tag',
+      type: 'add_fields',
+      supported_telemetry: ['logs' as const],
+      config: [{ name: 'fields', value: [{ location: 'record', path: 'tier', action: 'upsert' }] }],
+    };
+    const createClient = (fetchImpl: jest.Mock) =>
+      createConfigDistributorClient({
+        config: { url: 'https://distributor.example:8443', ssl: {} },
+        logger: loggerMock.create(),
+        fetchImpl,
+      });
+
+    it('POSTs the component as YAML with its kind', async () => {
+      const fetchImpl = jest.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({ valid: true, diagnostics: [] }),
+      });
+
+      await expect(
+        createClient(fetchImpl).validateComponent({ kind: 'processor', component })
+      ).resolves.toEqual({ valid: true, diagnostics: [] });
+      expect(fetchImpl).toHaveBeenCalledWith(
+        'https://distributor.example:8443/v1/components/validate',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ kind: 'processor', configuration: YAML.stringify(component) }),
+        })
+      );
+    });
+
+    it('returns the diagnostics of an invalid component instead of throwing', async () => {
+      const diagnostics = [
+        {
+          severity: 'error',
+          code: 'E028_INVALID_CONFIG_TYPE',
+          message: 'action must be one of upsert, update, insert, delete',
+          path: '/config/0/value/0/action',
+          line: 7,
+        },
+      ];
+      const fetchImpl = jest.fn().mockResolvedValue({
+        ok: false,
+        status: 400,
+        text: async () => JSON.stringify({ valid: false, diagnostics }),
+      });
+
+      await expect(
+        createClient(fetchImpl).validateComponent({ kind: 'processor', component })
+      ).resolves.toEqual({ valid: false, diagnostics });
+    });
+
+    it('answers 502 when the distributor has no component validation route', async () => {
+      const fetchImpl = jest
+        .fn()
+        .mockResolvedValue({ ok: false, status: 404, text: async () => '404 page not found' });
+
+      await expect(
+        createClient(fetchImpl).validateComponent({ kind: 'processor', component })
+      ).rejects.toMatchObject({ statusCode: 502 });
+    });
+
+    it('keeps a 413 and maps an unreadable 5xx to 502', async () => {
+      const tooLarge = jest
+        .fn()
+        .mockResolvedValue({ ok: false, status: 413, text: async () => 'too large' });
+      const broken = jest
+        .fn()
+        .mockResolvedValue({ ok: false, status: 500, text: async () => 'internal error' });
+
+      await expect(
+        createClient(tooLarge).validateComponent({ kind: 'processor', component })
+      ).rejects.toMatchObject({ statusCode: 413 });
+      await expect(
+        createClient(broken).validateComponent({ kind: 'processor', component })
+      ).rejects.toMatchObject({ statusCode: 502 });
     });
   });
 });
