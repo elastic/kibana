@@ -44,4 +44,10 @@ export interface UiSettingsServiceOptions {
   sharedUserProvidedCache?: NamespacedCache<Record<string, any>>;
   /** Namespace for cache keys (typically space ID) */
   namespace: string;
+  /**
+   * Credential scope. Cached reads and in-flight dedupe are shared only with
+   * other clients in the same namespace and scope. `null` skips the shared
+   * cache. Omit only in tests.
+   */
+  cacheScope?: string | null;
 }

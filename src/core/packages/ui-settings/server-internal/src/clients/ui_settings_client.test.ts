@@ -20,6 +20,7 @@ import {
   ValidationSettingNotFoundError,
 } from '../ui_settings_errors';
 import { NAMESPACED_CACHE_TTL, NamespacedCache } from '../namespaced_cache';
+import type { UiSettingsServiceOptions } from '../types';
 
 const logger = loggingSystemMock.create().get();
 
@@ -857,7 +858,10 @@ describe('ui settings', () => {
 
   describe('shared getUserProvided() cache', () => {
     function setupWithSharedCache(
-      options: SetupOptions & { sharedCache?: NamespacedCache<Record<string, any>> } = {}
+      options: SetupOptions & {
+        sharedCache?: NamespacedCache<Record<string, any>>;
+        cacheScope?: string | null;
+      } = {}
     ) {
       const {
         defaults = {},
@@ -865,6 +869,7 @@ describe('ui settings', () => {
         esDocSource = {},
         namespace = 'default',
         sharedCache,
+        cacheScope,
       } = options;
       const sharedUserProvidedCache = sharedCache || new NamespacedCache<Record<string, any>>();
 
@@ -881,6 +886,7 @@ describe('ui settings', () => {
         overrides,
         log: logger,
         namespace,
+        cacheScope,
         sharedUserProvidedCache,
       });
 
@@ -917,6 +923,179 @@ describe('ui settings', () => {
 
         await client2.getUserProvided();
         expect(soClient2.get).toHaveBeenCalledTimes(0);
+      });
+
+      it('does not store or share a read with no credential scope', async () => {
+        const sharedCache = new NamespacedCache<Record<string, any>>();
+        let resolveFirst: (value: unknown) => void;
+        const firstClient = savedObjectsClientMock.create();
+        firstClient.get.mockReturnValue(
+          new Promise((resolve) => {
+            resolveFirst = resolve;
+          }) as any
+        );
+        const secondClient = savedObjectsClientMock.create();
+        secondClient.get.mockResolvedValue({ attributes: { foo: 'second' } } as any);
+
+        const clientOptions = {
+          type: TYPE,
+          id: ID,
+          buildNum: BUILD_NUM,
+          defaults: {},
+          overrides: {},
+          log: logger,
+          namespace: 'default',
+          sharedUserProvidedCache: sharedCache,
+          cacheScope: null,
+        };
+        const first = new UiSettingsClient({
+          ...clientOptions,
+          type: TYPE,
+          savedObjectsClient: firstClient,
+        } satisfies UiSettingsServiceOptions);
+        const second = new UiSettingsClient({
+          ...clientOptions,
+          type: TYPE,
+          savedObjectsClient: secondClient,
+        } satisfies UiSettingsServiceOptions);
+
+        const firstRead = first.getUserProvided();
+        await expect(second.getUserProvided()).resolves.toEqual({ foo: { userValue: 'second' } });
+        expect(secondClient.get).toHaveBeenCalledTimes(1);
+
+        resolveFirst!({ attributes: { foo: 'first' } });
+        await expect(firstRead).resolves.toEqual({ foo: { userValue: 'first' } });
+        expect(firstClient.get).toHaveBeenCalledTimes(1);
+
+        await first.getUserProvided();
+        expect(firstClient.get).toHaveBeenCalledTimes(2);
+      });
+
+      it('does not reuse a successful read from a different credential', async () => {
+        const sharedCache = new NamespacedCache<Record<string, any>>();
+
+        const { uiSettings: validKey, savedObjectsClient: validClient } = setupWithSharedCache({
+          sharedCache,
+          cacheScope: 'valid-key',
+          esDocSource: { foo: 'from-valid-key' },
+        });
+        const { uiSettings: deadKey, savedObjectsClient: deadClient } = setupWithSharedCache({
+          sharedCache,
+          cacheScope: 'dead-key',
+          esDocSource: { foo: 'from-dead-key' },
+        });
+
+        await validKey.getUserProvided();
+        expect(validClient.get).toHaveBeenCalledTimes(1);
+
+        const result = await deadKey.getUserProvided();
+        expect(deadClient.get).toHaveBeenCalledTimes(1);
+        expect(result.foo).toEqual({ userValue: 'from-dead-key' });
+      });
+
+      it('does not hand one credential an in-flight rejection from another', async () => {
+        const sharedCache = new NamespacedCache<Record<string, any>>();
+        let rejectDeadKey: (error: Error) => void;
+        const deadKeyClient = savedObjectsClientMock.create();
+        deadKeyClient.get.mockReturnValue(
+          new Promise((_resolve, reject) => {
+            rejectDeadKey = reject;
+          }) as any
+        );
+        const validKeyClient = savedObjectsClientMock.create();
+        validKeyClient.get.mockResolvedValue({ attributes: { foo: 'ok' } } as any);
+
+        const clientOptions = {
+          type: TYPE,
+          id: ID,
+          buildNum: BUILD_NUM,
+          defaults: {},
+          overrides: {},
+          log: logger,
+          namespace: 'default',
+          sharedUserProvidedCache: sharedCache,
+        };
+        const deadKey = new UiSettingsClient({
+          ...clientOptions,
+          type: TYPE,
+          savedObjectsClient: deadKeyClient,
+          cacheScope: 'dead-key',
+        } satisfies UiSettingsServiceOptions);
+        const validKey = new UiSettingsClient({
+          ...clientOptions,
+          type: TYPE,
+          savedObjectsClient: validKeyClient,
+          cacheScope: 'valid-key',
+        } satisfies UiSettingsServiceOptions);
+
+        const deadKeyRead = deadKey.getUserProvided();
+        await expect(validKey.getUserProvided()).resolves.toEqual({
+          foo: { userValue: 'ok' },
+        });
+        expect(validKeyClient.get).toHaveBeenCalledTimes(1);
+
+        rejectDeadKey!(new Error('unable to authenticate'));
+        await expect(deadKeyRead).rejects.toThrow('unable to authenticate');
+      });
+
+      it('still dedupes concurrent reads that share a credential', async () => {
+        const sharedCache = new NamespacedCache<Record<string, any>>();
+        let resolveRead: (value: unknown) => void;
+        const savedObjectsClient = savedObjectsClientMock.create();
+        savedObjectsClient.get.mockReturnValue(
+          new Promise((resolve) => {
+            resolveRead = resolve;
+          }) as any
+        );
+
+        const clientOptions = {
+          type: TYPE,
+          id: ID,
+          buildNum: BUILD_NUM,
+          defaults: {},
+          overrides: {},
+          log: logger,
+          namespace: 'default',
+          sharedUserProvidedCache: sharedCache,
+          savedObjectsClient,
+          cacheScope: 'same-key',
+        } satisfies UiSettingsServiceOptions;
+        const first = new UiSettingsClient(clientOptions);
+        const second = new UiSettingsClient(clientOptions);
+
+        const firstRead = first.getUserProvided();
+        const secondRead = second.getUserProvided();
+        resolveRead!({ attributes: { foo: 'shared' } });
+
+        await expect(firstRead).resolves.toEqual({ foo: { userValue: 'shared' } });
+        await expect(secondRead).resolves.toEqual({ foo: { userValue: 'shared' } });
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+      });
+
+      it('drops every credential in the namespace when settings are written', async () => {
+        const sharedCache = new NamespacedCache<Record<string, any>>();
+        const { uiSettings: writer, savedObjectsClient: writerClient } = setupWithSharedCache({
+          sharedCache,
+          cacheScope: 'writer',
+          esDocSource: { foo: 'before' },
+        });
+        const { uiSettings: otherKey, savedObjectsClient: otherClient } = setupWithSharedCache({
+          sharedCache,
+          cacheScope: 'other-key',
+          esDocSource: { foo: 'before' },
+        });
+
+        await writer.getUserProvided();
+        await otherKey.getUserProvided();
+        expect(writerClient.get).toHaveBeenCalledTimes(1);
+        expect(otherClient.get).toHaveBeenCalledTimes(1);
+
+        writerClient.get.mockResolvedValue({ attributes: { foo: 'after' } } as any);
+        otherClient.get.mockResolvedValue({ attributes: { foo: 'after' } } as any);
+        await writer.set('foo', 'after');
+
+        await otherKey.getUserProvided();
+        expect(otherClient.get).toHaveBeenCalledTimes(2);
       });
 
       it('shares cache within same namespace', async () => {

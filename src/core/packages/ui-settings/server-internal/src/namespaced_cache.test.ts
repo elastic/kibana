@@ -270,6 +270,34 @@ describe('NamespacedCache', () => {
       expect(cache.getInflightRead('ns2')).toBe(promise2);
     });
 
+    it('isolates values and in-flight reads by scope', () => {
+      cache.set('default', 'a', 5000, 'key-a');
+      cache.set('default', 'b', 5000, 'key-b');
+      const inflightA = Promise.resolve('a');
+      const inflightB = Promise.resolve('b');
+      cache.setInflightRead('default', inflightA, 'key-a');
+      cache.setInflightRead('default', inflightB, 'key-b');
+
+      expect(cache.get('default', 'key-a')).toBe('a');
+      expect(cache.get('default', 'key-b')).toBe('b');
+      expect(cache.getInflightRead('default', 'key-a')).toBe(inflightA);
+      expect(cache.getInflightRead('default', 'key-b')).toBe(inflightB);
+    });
+
+    it('del drops every scope in the namespace and leaves other namespaces', () => {
+      cache.set('default', 'a', 5000, 'key-a');
+      cache.set('default', 'b', 5000, 'key-b');
+      cache.set('other', 'c', 5000, 'key-a');
+      cache.setInflightRead('default', Promise.resolve('a'), 'key-a');
+
+      cache.del('default');
+
+      expect(cache.get('default', 'key-a')).toBeNull();
+      expect(cache.get('default', 'key-b')).toBeNull();
+      expect(cache.getInflightRead('default', 'key-a')).toBeNull();
+      expect(cache.get('other', 'key-a')).toBe('c');
+    });
+
     it('replaces in-flight promise when setting same namespace again', () => {
       const promise1 = Promise.resolve('value1');
       const promise2 = Promise.resolve('value2');

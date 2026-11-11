@@ -8,5 +8,11 @@
  */
 
 export { SavedObjectsClient } from './saved_objects_client';
-export { SavedObjectsClientProvider, SavedObjectsRepository, PointInTimeFinder } from './lib';
+export {
+  SavedObjectsClientProvider,
+  SavedObjectsRepository,
+  PointInTimeFinder,
+  associateEsClientCacheScope,
+  INTERNAL_SAVED_OBJECTS_CACHE_SCOPE,
+} from './lib';
 export type { ISavedObjectsClientProvider } from './lib';

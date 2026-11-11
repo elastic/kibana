@@ -11,6 +11,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 import { CannotOverrideError } from '../ui_settings_errors';
 import type { UiSettingsServiceOptions } from '../types';
+import { NAMESPACED_CACHE_TTL } from '../namespaced_cache';
 import { BaseUiSettingsClient } from './base_ui_settings_client';
 
 interface ReadOptions {
@@ -34,22 +35,44 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
   private readonly savedObjectsClient: UiSettingsServiceOptions['savedObjectsClient'];
   private readonly sharedUserProvidedCache?: UiSettingsServiceOptions['sharedUserProvidedCache'];
   private readonly namespace: string;
+  private readonly cacheScope: string | null;
 
   constructor(options: UiSettingsServiceOptions) {
     super(options);
-    const { savedObjectsClient, type, id, buildNum, sharedUserProvidedCache, namespace } = options;
+    const {
+      savedObjectsClient,
+      type,
+      id,
+      buildNum,
+      sharedUserProvidedCache,
+      namespace,
+      cacheScope,
+    } = options;
     this.type = type;
     this.id = id;
     this.buildNum = buildNum;
     this.savedObjectsClient = savedObjectsClient;
     this.sharedUserProvidedCache = sharedUserProvidedCache;
     this.namespace = namespace;
+    // Tests construct clients without a scope and expect them to share. Production
+    // passes the credential scope, or null when the request must not be cached.
+    this.cacheScope = cacheScope === undefined ? '' : cacheScope;
+  }
+
+  /** Shared cache for this credential. Absent when the request must not be cached. */
+  private get credentialCache(): UiSettingsServiceOptions['sharedUserProvidedCache'] {
+    if (this.cacheScope === null) {
+      return undefined;
+    }
+    return this.sharedUserProvidedCache;
   }
 
   async getUserProvided<T = unknown>(bypassCache = false): Promise<UserProvided<T>> {
-    if (this.sharedUserProvidedCache && !bypassCache) {
+    const credentialCache = this.credentialCache;
+    const cacheScope = this.cacheScope;
+    if (credentialCache && cacheScope !== null && !bypassCache) {
       // check for in-flight read request (deduplication)
-      const inflightRead = this.sharedUserProvidedCache.getInflightRead(this.namespace);
+      const inflightRead = credentialCache.getInflightRead(this.namespace, cacheScope);
       if (inflightRead) {
         this.log.debug(
           `[UiSettings] getUserProvided using existing in-flight read for namespace=${this.namespace}`
@@ -57,7 +80,7 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
         return this.applyOverrides(await inflightRead);
       }
 
-      const sharedCached = this.sharedUserProvidedCache.get(this.namespace);
+      const sharedCached = credentialCache.get(this.namespace, cacheScope);
       if (sharedCached) {
         return this.applyOverrides(sharedCached);
       }
@@ -70,12 +93,12 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     // Fetch from ES, process, and cache
     const promise = this.computeUserProvided<T>();
 
-    if (!bypassCache) {
+    if (!bypassCache && this.cacheScope !== null) {
       // Register in-flight promise for deduplication
       //
       // if the cache is being bypassed, we don't want to register the promise as other
       // calls should not wait for it but should use the existing cache entry until it is updated
-      this.sharedUserProvidedCache?.setInflightRead(this.namespace, promise);
+      this.sharedUserProvidedCache?.setInflightRead(this.namespace, promise, this.cacheScope);
     }
 
     return this.applyOverrides(await promise);
@@ -93,7 +116,14 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
   private async computeUserProvided<T = unknown>(): Promise<UserProvided<T>> {
     const userProvided: UserProvided<T> = this.onReadHook(await this.read());
 
-    this.sharedUserProvidedCache?.set(this.namespace, userProvided);
+    if (this.cacheScope !== null) {
+      this.sharedUserProvidedCache?.set(
+        this.namespace,
+        userProvided,
+        NAMESPACED_CACHE_TTL,
+        this.cacheScope
+      );
+    }
 
     return userProvided;
   }
