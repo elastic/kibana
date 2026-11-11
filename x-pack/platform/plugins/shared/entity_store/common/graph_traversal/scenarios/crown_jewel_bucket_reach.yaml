@@ -1,0 +1,37 @@
+version: '2'
+id: crown-jewel-bucket-reach
+name: Who can reach a crown-jewel bucket
+description: >
+  Everything that can reach a bucket, walked backwards over the cloud relationships the
+  identity access graph generator writes: bucket, role and access point policies, roles
+  that assume roles, SSO from Okta groups and users, IAM users and groups, instances that
+  run as roles and the roles that control them, external account trusts, and GitHub
+  repositories whose OIDC trust gives a role.
+seed:
+  type: generic
+  description: The entity store id of the bucket, for example arn:aws:s3:::acme-customer-pii-s42
+direction: in
+limits:
+  max_hops: 8
+  max_nodes: 5000
+  max_frontier: 500
+  hub_degree: 5000
+hops:
+  - name: reach
+    description: One step back over every relationship that can lead to the frontier
+    relationships:
+      - bucket_policy
+      - role_policy
+      - access_point_policy
+      - fronts
+      - can_assume
+      - sso_to_role
+      - user_policy
+      - group_policy
+      - member_of
+      - external_trust
+      - runs_as
+      - can_control
+      - oidc_trust
+      - can_push
+    repeat: 8

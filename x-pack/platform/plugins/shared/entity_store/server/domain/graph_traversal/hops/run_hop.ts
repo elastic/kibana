@@ -384,7 +384,7 @@ export const runHop = async (
   //    and the whole unfilled edge budget: what a sibling returns is not known in advance, so
   //    the edge cap below trims any overshoot. Results are read back in field and leg order,
   //    so admission under the caps is the same as when they ran one after another.
-  const legs = direction === 'both' ? [false, true] : [false];
+  const legs = direction === 'in' ? [true] : direction === 'both' ? [false, true] : [false];
   const limit = Math.min(limits.max_edges_per_hop, edgeCapacity);
   const requests = legs.flatMap((inbound) =>
     hop.target_fields.map(({ field, relation }) => ({

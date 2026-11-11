@@ -24,10 +24,11 @@ export type EntityGraphTraversalEuidType = (typeof ENTITY_GRAPH_TRAVERSAL_EUID_T
 
 /**
  * Which way a hop follows the stored edges: `out` reads the frontier entities' own
- * relationship ids; `both` also reaches the entities whose relationship ids point at the
- * frontier (mirrors the scenario schema).
+ * relationship ids; `in` reaches the entities whose relationship ids point at the frontier,
+ * so a walk goes from a resource back to whatever can reach it; `both` does both (mirrors the
+ * scenario schema).
  */
-export const ENTITY_GRAPH_TRAVERSAL_DIRECTIONS = ['out', 'both'] as const;
+export const ENTITY_GRAPH_TRAVERSAL_DIRECTIONS = ['out', 'in', 'both'] as const;
 
 export const traversalDirectionSchema = () =>
   z.preprocess(

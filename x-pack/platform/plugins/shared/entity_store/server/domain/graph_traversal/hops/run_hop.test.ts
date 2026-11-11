@@ -347,6 +347,28 @@ describe('runHop', () => {
     expect(out.stats.es_took_ms).toBe(7);
   });
 
+  it('walks only inbound legs when the direction is in', async () => {
+    const execute = executor([result([['holder-1', 'role-a']]), result([])]);
+    const out = await runHop(
+      {
+        hop,
+        index: INDEX,
+        direction: 'in',
+        frontier: ['role-a'],
+        visited: ['role-a'],
+        edgesSoFar: 0,
+        truncatedSoFar: false,
+        limits,
+      },
+      execute
+    );
+    expect(execute.queries).toHaveLength(2);
+    expect(execute.queries.every((q) => q.includes('MV_INTERSECTS'))).toBe(true);
+    // The holder of the relationship is the node reached; rows keep the stored orientation.
+    expect(out.edges.map((e) => [e.source, e.target])).toEqual([['holder-1', 'role-a']]);
+    expect(out.next_frontier).toEqual(['holder-1']);
+  });
+
   it('filters visited ids inside the hop query, after the pointer field is exploded', async () => {
     const execute = executor([result([['role-a', 'role-b']]), result([])]);
     await runHop(
