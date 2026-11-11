@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButtonGroup } from '@elastic/eui';
+import { fireEvent, screen, within } from '@testing-library/react';
 import type {
   FramePublicAPI,
   VisualizationDimensionEditorProps,
@@ -18,12 +18,21 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { ColorMode } from '@kbn/charts-plugin/public';
 import type { PaletteOutput, PaletteRegistry, CustomPaletteParams } from '@kbn/coloring';
 import { CustomizablePalette } from '@kbn/coloring';
-import { act } from 'react-dom/test-utils';
-
-import { PalettePanelContainer } from '../../shared_components';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { DatasourcePublicAPI } from '../..';
-import { mountWithProviders } from '../../test_utils/test_utils';
+import { renderWithProviders } from '../../test_utils/test_utils';
+
+jest.mock('@kbn/coloring', () => {
+  const actual = jest.requireActual<typeof import('@kbn/coloring')>('@kbn/coloring');
+  return {
+    ...actual,
+    CustomizablePalette: jest.fn(
+      (props: React.ComponentProps<typeof actual.CustomizablePalette>) => (
+        <actual.CustomizablePalette {...props} />
+      )
+    ),
+  };
+});
 
 function paletteParamsContaining(paramsToCheck: PaletteOutput<CustomPaletteParams>['params']) {
   return expect.objectContaining({
@@ -86,54 +95,45 @@ describe('metric dimension editor', () => {
     };
     // add a div to the ref
     props.panelRef.current = document.createElement('div');
+    document.body.appendChild(props.panelRef.current);
+    jest.mocked(CustomizablePalette).mockClear();
+  });
+
+  afterEach(() => {
+    props.panelRef.current?.remove();
   });
 
   it('should not show the dynamic coloring option for non numeric columns', () => {
-    const instance = mountWithProviders(<MetricDimensionEditor {...props} />);
-    expect(
-      instance.find('[data-test-subj="lnsLegacyMetric_dynamicColoring_groups"]').exists()
-    ).toBe(false);
-    expect(instance.find('[data-test-subj="lns_dynamicColoring_edit"]').exists()).toBe(false);
+    renderWithProviders(<MetricDimensionEditor {...props} />);
+    expect(screen.queryByTestId('lnsLegacyMetric_dynamicColoring_groups')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('lns_dynamicColoring_edit')).not.toBeInTheDocument();
   });
 
   it('should set the dynamic coloring default to "none"', () => {
     frame.activeData!.first.columns[0].meta.type = 'number';
-    const instance = mountWithProviders(<MetricDimensionEditor {...props} />);
-    expect(
-      instance
-        .find('[data-test-subj="lnsLegacyMetric_dynamicColoring_groups"]')
-        .find(EuiButtonGroup)
-        .prop('idSelected')
-    ).toEqual(expect.stringContaining(ColorMode.None));
+    renderWithProviders(<MetricDimensionEditor {...props} />);
+    const control = within(screen.getByTestId('lnsLegacyMetric_dynamicColoring_groups'));
+    expect(control.getByRole('button', { name: 'None' })).toHaveAttribute('aria-pressed', 'true');
 
-    expect(instance.find('[data-test-subj="lns_dynamicColoring_edit"]').exists()).toBe(false);
+    expect(screen.queryByTestId('lns_dynamicColoring_edit')).not.toBeInTheDocument();
   });
 
   it('should show the dynamic palette display ony when colorMode is different from "none"', () => {
     frame.activeData!.first.columns[0].meta.type = 'number';
     state.colorMode = ColorMode.Labels;
-    const instance = mountWithProviders(<MetricDimensionEditor {...props} />);
-    expect(
-      instance
-        .find('[data-test-subj="lnsLegacyMetric_dynamicColoring_groups"]')
-        .find(EuiButtonGroup)
-        .prop('idSelected')
-    ).toEqual(expect.stringContaining(ColorMode.Labels));
+    renderWithProviders(<MetricDimensionEditor {...props} />);
+    const control = within(screen.getByTestId('lnsLegacyMetric_dynamicColoring_groups'));
+    expect(control.getByRole('button', { name: 'Text' })).toHaveAttribute('aria-pressed', 'true');
 
-    expect(instance.find('[data-test-subj="lns_dynamicColoring_edit"]').exists()).toBe(true);
+    expect(screen.getByTestId('lns_dynamicColoring_edit')).toBeInTheDocument();
   });
 
   it('should prefill the palette stops with some colors when enabling coloring', () => {
     frame.activeData!.first.columns[0].meta.type = 'number';
-    const instance = mountWithProviders(<MetricDimensionEditor {...props} />);
+    renderWithProviders(<MetricDimensionEditor {...props} />);
 
-    act(() => {
-      instance
-        .find('[data-test-subj="lnsLegacyMetric_dynamicColoring_groups"]')
-        .find(EuiButtonGroup)
-        .prop('onChange')!(ColorMode.Labels);
-    });
-    instance.update();
+    const control = within(screen.getByTestId('lnsLegacyMetric_dynamicColoring_groups'));
+    fireEvent.click(control.getByRole('button', { name: 'Text' }));
 
     expect(props.setState).toHaveBeenCalledWith(
       paletteParamsContaining({
@@ -145,42 +145,39 @@ describe('metric dimension editor', () => {
   it('should open the palette panel when "Settings" link is clicked in the palette input', () => {
     frame.activeData!.first.columns[0].meta.type = 'number';
     state.colorMode = ColorMode.Background;
-    const instance = mountWithProviders(<MetricDimensionEditor {...props} />);
+    renderWithProviders(<MetricDimensionEditor {...props} />);
 
-    act(() => {
-      instance.find('[data-test-subj="lns_colorEditing_trigger"]').first().simulate('click');
-    });
-    instance.update();
+    fireEvent.click(screen.getByTestId('lns_colorEditing_trigger'));
 
-    expect(instance.find(PalettePanelContainer).exists()).toBe(true);
+    expect(screen.getByTestId('lns-palettePanelFlyout')).toBeInTheDocument();
   });
 
   it('should provide have a special data min/max for zero metric value', () => {
     frame.activeData!.first.columns[0].meta.type = 'number';
     frame.activeData!.first.rows[0].foo = 0;
     state.colorMode = ColorMode.Background;
-    const instance = mountWithProviders(<MetricDimensionEditor {...props} />);
+    renderWithProviders(<MetricDimensionEditor {...props} />);
 
-    act(() => {
-      instance.find('[data-test-subj="lns_colorEditing_trigger"]').first().simulate('click');
+    fireEvent.click(screen.getByTestId('lns_colorEditing_trigger'));
+
+    expect(jest.mocked(CustomizablePalette).mock.lastCall?.[0].dataBounds).toEqual({
+      min: -50,
+      max: 100,
     });
-    instance.update();
-
-    expect(instance.find(CustomizablePalette).prop('dataBounds')).toEqual({ min: -50, max: 100 });
   });
 
   it('should work for negative metric value', () => {
     frame.activeData!.first.columns[0].meta.type = 'number';
     frame.activeData!.first.rows[0].foo = -1;
     state.colorMode = ColorMode.Background;
-    const instance = mountWithProviders(<MetricDimensionEditor {...props} />);
+    renderWithProviders(<MetricDimensionEditor {...props} />);
 
-    act(() => {
-      instance.find('[data-test-subj="lns_colorEditing_trigger"]').first().simulate('click');
+    fireEvent.click(screen.getByTestId('lns_colorEditing_trigger'));
+
+    expect(jest.mocked(CustomizablePalette).mock.lastCall?.[0].dataBounds).toEqual({
+      min: -2,
+      max: 0,
     });
-    instance.update();
-
-    expect(instance.find(CustomizablePalette).prop('dataBounds')).toEqual({ min: -2, max: 0 });
   });
 
   it('should apply the default named palette with open bounds', () => {
@@ -188,14 +185,10 @@ describe('metric dimension editor', () => {
     frame.activeData!.first.rows[0].foo = 5;
     state.colorMode = ColorMode.None;
     state.palette = undefined;
-    const instance = mountWithProviders(<MetricDimensionEditor {...props} />);
+    renderWithProviders(<MetricDimensionEditor {...props} />);
 
-    act(() => {
-      instance
-        .find('[data-test-subj="lnsLegacyMetric_dynamicColoring_groups"]')
-        .find(EuiButtonGroup)
-        .prop('onChange')!(ColorMode.Background);
-    });
+    const control = within(screen.getByTestId('lnsLegacyMetric_dynamicColoring_groups'));
+    fireEvent.click(control.getByRole('button', { name: 'Fill' }));
 
     expect(setState).toHaveBeenCalledWith(
       paletteParamsContaining({
