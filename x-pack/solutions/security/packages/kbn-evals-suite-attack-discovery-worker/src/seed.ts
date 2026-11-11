@@ -838,6 +838,9 @@ const assertWorldSearchable = async ({
   }
 };
 
+/** Backing-index name the registry itself would create (`.internal${baseName}` plus `-000001`). */
+const ADHOC_DEFAULT_BACKING_INDEX = `.internal${attackDiscoveryIndexForSpace('default')}-000001`;
+
 /**
  * Creates the space's ad-hoc discovery index the way the rule registry would (a `-000001` backing
  * index with the `default` namespace template's mappings, the space's alias as write index) when it
@@ -852,8 +855,6 @@ const assertWorldSearchable = async ({
  * alias exists. The backing index name mirrors the registry's (`.internal${baseName}` plus
  * `-000001`, see `rule_data_plugin_service/index_info.ts`).
  */
-const ADHOC_DEFAULT_BACKING_INDEX = `.internal${attackDiscoveryIndexForSpace('default')}-000001`;
-
 const ensureDiscoveryIndex = async ({
   esClient,
   log,
