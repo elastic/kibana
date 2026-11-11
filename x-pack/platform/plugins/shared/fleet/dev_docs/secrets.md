@@ -110,9 +110,9 @@ Other plugins call `FleetStartContract.getSecretsService({ request, consumer })`
 - `createSecrets(values)` creates one secret per value and returns `{ id }` in input order.
 - `deleteSecrets(ids)` returns `{ id, deleted }` per id.
   - Callers may only pass ids returned by their own `createSecrets`. `.fleet-secrets` is shared, and secrets have no owner.
+  - The whole call throws before any request is sent when an id is malformed (anything but the 20-character ids Elasticsearch generates) or still referenced by a package policy in any space. Outputs, Fleet Server hosts, download sources, SSL and action secrets are not checked; deleting a secret they reference breaks Fleet Server for the whole deployment.
   - An unknown id is reported as `deleted: false`.
-  - A 404 after a failed (retried) attempt counts as `deleted: true` and is audited, because the failed attempt may have deleted the secret.
-  - Malformed ids (anything but the 20-character ids Elasticsearch generates) throw before any request is sent.
+  - A 404 after a retried request (retried by Fleet or by the Elasticsearch client) counts as `deleted: true`, because the earlier attempt may have deleted the secret. It is audited with the `unknown` outcome.
 - `isSecretStorageEnabledForFeature(feature)` runs the Fleet Server version check described above for a `SecretStorageFeature`. Fleet owns each feature's settings key and minimum version.
 
 To add a feature:

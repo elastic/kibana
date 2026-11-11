@@ -28,6 +28,7 @@ import {
   isSecretStorageEnabledForFeature as isFleetSecretStorageEnabledForFeature,
   writeSecretDeletedAuditLog,
 } from './common';
+import { findPackagePoliciesUsingSecrets } from './package_policies';
 
 /** Features that may store secrets through the Fleet secrets service. */
 export type SecretStorageFeature = 'response_actions_export';
@@ -58,7 +59,8 @@ export interface SecretsServiceInterface {
   createSecrets(values: string[]): Promise<Array<{ id: string }>>;
   /**
    * Deletes secrets by id. Callers may only pass ids returned by their own `createSecrets`.
-   * Unknown ids are reported as `deleted: false`, never hidden or thrown. Malformed ids throw.
+   * Throws before deleting anything when an id is malformed or still referenced by a package policy.
+   * Unknown ids are reported as `deleted: false`.
    */
   deleteSecrets(ids: string[]): Promise<Array<{ id: string; deleted: boolean }>>;
   /** True when all Fleet Servers support secrets for `feature` (always true when standalone). Fleet owns the key and version. */
@@ -77,7 +79,7 @@ interface SecretsServiceOptions {
 const deleteSecret = async (
   esClient: ElasticsearchClient,
   id: string
-): Promise<{ id: string; deleted: boolean }> => {
+): Promise<{ deleted: boolean; confirmed: boolean }> => {
   const logger = appContextService.getLogger();
   let attempts = 0;
 
@@ -93,11 +95,12 @@ const deleteSecret = async (
       { logger }
     );
 
-    return { id, deleted };
+    return { deleted, confirmed: deleted };
   } catch (err) {
     if (isESClientError(err) && err.meta.statusCode === 404) {
-      // An earlier attempt failed with a transient error, so it may have deleted the secret before failing.
-      return { id, deleted: attempts > 1 };
+      // A retried attempt, by Fleet or by the Elasticsearch client itself, may have deleted the secret before failing.
+      const retried = attempts > 1 || (err.meta.meta?.attempts ?? 0) > 0;
+      return { deleted: retried, confirmed: false };
     }
 
     const msg = `Error deleting secrets: ${err}`;
@@ -140,17 +143,33 @@ export const createSecretsService = ({
         );
       }
 
-      return runInCallerContext(() =>
-        Promise.all(
+      if (ids.length === 0) {
+        return [];
+      }
+
+      return runInCallerContext(async () => {
+        // Deleting a secret a package policy still references breaks Fleet Server (elastic/fleet-server#7536).
+        const referencedIds = (
+          await findPackagePoliciesUsingSecrets({ soClient, ids, spaceId: '*' })
+        ).map(({ id }) => id);
+        if (referencedIds.length > 0) {
+          throw new FleetError(
+            `Cannot delete ${
+              referencedIds.length
+            } Fleet secret id(s) still referenced by package policies: ${referencedIds.join(', ')}`
+          );
+        }
+
+        return Promise.all(
           ids.map(async (id) => {
-            const result = await deleteSecret(esClient, id);
-            if (result.deleted) {
-              writeSecretDeletedAuditLog(id);
+            const { deleted, confirmed } = await deleteSecret(esClient, id);
+            if (deleted) {
+              writeSecretDeletedAuditLog(id, { confirmed });
             }
-            return result;
+            return { id, deleted };
           })
-        )
-      );
+        );
+      });
     },
 
     isSecretStorageEnabledForFeature: async (feature) => {

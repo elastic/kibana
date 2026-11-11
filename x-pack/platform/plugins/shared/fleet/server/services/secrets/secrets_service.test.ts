@@ -14,31 +14,35 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 
 import { GLOBAL_SETTINGS_ID, GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { FleetConfigType } from '../../../common/types';
-import type { SettingsSOAttributes } from '../../types';
+import type { PackagePolicy, SettingsSOAttributes } from '../../types';
 import type { MockedFleetAppContext } from '../../mocks';
 import { createAppContextStartContractMock } from '../../mocks';
 import { appContextService } from '../app_context';
 import { auditLoggingService } from '../audit_logging';
 import { checkFleetServerVersionsForSecretsStorage } from '../fleet_server';
+import { packagePolicyService } from '../package_policy';
 
 import type { SecretStorageFeature } from './secrets_service';
 import { createSecretsService } from './secrets_service';
 
 jest.mock('timers/promises'); // skips the backoff between retried Elasticsearch attempts
 jest.mock('../fleet_server'); // stubs checkFleetServerVersionsForSecretsStorage
+jest.mock('../package_policy'); // stubs the package policy lookup behind the reference check
 
 const mockedCheckFleetServerVersions = jest.mocked(checkFleetServerVersionsForSecretsStorage);
+const mockedPackagePolicyService = jest.mocked(packagePolicyService);
 
 // Elasticsearch auto-generated document ids, as returned by `POST _fleet/secret`.
 const SECRET_ID = 'yDS3pJQBWKcmPmxmCXvU';
 const OTHER_SECRET_ID = 'zB4sl5QBAyYgpnf8pVQs';
 
-const buildResponseError = (statusCode: number): EsErrors.ResponseError =>
+// `attempts` counts the Elasticsearch client's own retries before this response.
+const buildResponseError = (statusCode: number, attempts = 0): EsErrors.ResponseError =>
   new EsErrors.ResponseError({
     statusCode,
     body: { error: { type: 'some_exception', reason: 'some reason' } },
     headers: {},
-    meta: {} as DiagnosticResult['meta'],
+    meta: { attempts } as DiagnosticResult['meta'],
     warnings: [],
   });
 
@@ -76,6 +80,12 @@ describe('createSecretsService', () => {
       type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
       attributes: {},
       references: [],
+    });
+    mockedPackagePolicyService.list.mockResolvedValue({
+      items: [],
+      total: 0,
+      page: 1,
+      perPage: 10000,
     });
   });
 
@@ -184,7 +194,10 @@ describe('createSecretsService', () => {
       ]);
       expect(mockContext.securitySetup.audit.withoutRequest.log).toHaveBeenCalledTimes(1);
       expect(mockContext.securitySetup.audit.withoutRequest.log).toHaveBeenCalledWith(
-        expect.objectContaining({ message: `secret deleted: ${SECRET_ID}` })
+        expect.objectContaining({
+          message: `secret deleted: ${SECRET_ID}`,
+          event: expect.objectContaining({ action: 'secret_delete', outcome: 'success' }),
+        })
       );
     });
 
@@ -195,7 +208,31 @@ describe('createSecretsService', () => {
       expect(esClientMock.transport.request).not.toHaveBeenCalled();
     });
 
-    it('counts a 404 after a failed attempt as deleted and audits it', async () => {
+    it('rejects ids a package policy in any space references without deleting any id', async () => {
+      mockedPackagePolicyService.list.mockResolvedValue({
+        items: [
+          {
+            id: 'package-policy-1',
+            policy_ids: ['agent-policy-1'],
+            secret_references: [{ id: OTHER_SECRET_ID }],
+          } as PackagePolicy,
+        ],
+        total: 1,
+        page: 1,
+        perPage: 10000,
+      });
+
+      await expect(createService().deleteSecrets([SECRET_ID, OTHER_SECRET_ID])).rejects.toThrow(
+        `Cannot delete 1 Fleet secret id(s) still referenced by package policies: ${OTHER_SECRET_ID}`
+      );
+      expect(mockedPackagePolicyService.list).toHaveBeenCalledWith(
+        soClientMock,
+        expect.objectContaining({ spaceId: '*' })
+      );
+      expect(esClientMock.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('counts a 404 after a request Fleet retried as an unconfirmed deletion', async () => {
       esClientMock.transport.request
         .mockRejectedValueOnce(new EsErrors.TimeoutError('Request timed out'))
         .mockRejectedValueOnce(buildResponseError(404));
@@ -205,7 +242,24 @@ describe('createSecretsService', () => {
       ]);
       expect(esClientMock.transport.request).toHaveBeenCalledTimes(2);
       expect(mockContext.securitySetup.audit.withoutRequest.log).toHaveBeenCalledWith(
-        expect.objectContaining({ message: `secret deleted: ${SECRET_ID}` })
+        expect.objectContaining({
+          message: `secret deleted: ${SECRET_ID} (unconfirmed: a retried request returned 404)`,
+          event: expect.objectContaining({ action: 'secret_delete', outcome: 'unknown' }),
+        })
+      );
+    });
+
+    it('counts a 404 after a request the Elasticsearch client retried as an unconfirmed deletion', async () => {
+      esClientMock.transport.request.mockRejectedValueOnce(buildResponseError(404, 1));
+
+      await expect(createService().deleteSecrets([SECRET_ID])).resolves.toEqual([
+        { id: SECRET_ID, deleted: true },
+      ]);
+      expect(esClientMock.transport.request).toHaveBeenCalledTimes(1);
+      expect(mockContext.securitySetup.audit.withoutRequest.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'secret_delete', outcome: 'unknown' }),
+        })
       );
     });
 

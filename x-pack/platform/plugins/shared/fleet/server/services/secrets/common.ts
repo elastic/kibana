@@ -172,15 +172,23 @@ export async function deleteSecrets(opts: {
   });
 }
 
-/** Writes the audit entry for a deleted Fleet secret. */
-export function writeSecretDeletedAuditLog(id: string) {
+/**
+ * Writes the audit entry for a deleted Fleet secret. `confirmed: false` records a deletion inferred
+ * from a 404 after a retried request, with an `unknown` outcome.
+ */
+export function writeSecretDeletedAuditLog(
+  id: string,
+  { confirmed = true }: { confirmed?: boolean } = {}
+) {
   auditLoggingService.writeCustomAuditLog({
-    message: `secret deleted: ${id}`,
+    message: confirmed
+      ? `secret deleted: ${id}`
+      : `secret deleted: ${id} (unconfirmed: a retried request returned 404)`,
     event: {
       action: 'secret_delete',
       category: ['database'],
       type: ['access'],
-      outcome: 'success',
+      outcome: confirmed ? 'success' : 'unknown',
     },
   });
 }
