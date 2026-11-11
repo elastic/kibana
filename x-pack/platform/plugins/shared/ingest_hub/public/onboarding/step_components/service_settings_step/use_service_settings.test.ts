@@ -1416,6 +1416,23 @@ describe('useServiceSettings — reroute permissions', () => {
     expect(result.current.isReady).toBe(true);
   });
 
+  it('reads a wrong-typed saved value as no permissions instead of throwing', () => {
+    const { result } = render('agent_based', [regular]);
+    act(() => result.current.setGlobalRegion('us-east-1'));
+    act(() => result.current.setIntegrationName('my-aws'));
+    // The saved object allows a plain string for any key, so an API write can leave one here.
+    act(() =>
+      result.current.setPolicySetting(
+        'additional_datastreams_permissions',
+        'logs-a-default' as unknown as string[]
+      )
+    );
+
+    expect(result.current.reroutePermissions).toEqual([]);
+    expect(result.current.reroutePermissionsError).toBeUndefined();
+    expect(result.current.isReady).toBe(true);
+  });
+
   it('blocks Continue with an invalid value where the field is shown', () => {
     const { result } = render('agent_based', [regular]);
     act(() => result.current.setGlobalRegion('us-east-1'));

@@ -12,6 +12,7 @@ import {
   getPolicySettingsUpdate,
   getPolicyVarSettings,
   getPolicyVarSettingsUpdate,
+  getReroutePermissions,
   supportsPolicySetting,
 } from './policy_settings';
 
@@ -243,6 +244,16 @@ describe('policy settings', () => {
       expect(
         compactPolicySettings({ [key]: [' logs-a-default ', '', 'logs-a-default', '  '] })
       ).toEqual({ [key]: ['logs-a-default'] });
+    });
+
+    it('reads the list for Step 2, and anything else as no permissions', () => {
+      expect(getReroutePermissions({ [key]: ['logs-a-default'] })).toEqual(['logs-a-default']);
+      expect(getReroutePermissions({})).toEqual([]);
+      expect(getReroutePermissions(undefined)).toEqual([]);
+      // The saved object is an open record, so an API write can leave these.
+      expect(getReroutePermissions({ [key]: 'logs-a-default' })).toEqual([]);
+      expect(getReroutePermissions({ [key]: ['logs-a-default', 1] })).toEqual([]);
+      expect(getReroutePermissions({ [key]: null })).toEqual([]);
     });
 
     it('treats an empty list as empty', () => {

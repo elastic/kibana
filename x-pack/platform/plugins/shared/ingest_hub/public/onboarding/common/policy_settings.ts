@@ -90,6 +90,17 @@ const getKeys = (method: DeploymentMethod, target?: 'field' | 'var'): PolicySett
       (!target || POLICY_SETTINGS[key].target === target)
   );
 
+/**
+ * The reroute permissions Step 2 shows. The saved object is an open record, so an API write can
+ * leave another type here (a plain string is valid for any key). That reads as no permissions
+ * rather than reaching code that expects a list, as `getPolicySettings` does at deploy.
+ */
+export const getReroutePermissions = (settings: PolicySettingsSource): string[] => {
+  const value = (settings as Record<string, unknown> | undefined)
+    ?.additional_datastreams_permissions;
+  return isStringArray(value) ? (value as string[]) : [];
+};
+
 /** Whether a setting applies to the deployment method, which decides whether Step 2 offers it. */
 export const supportsPolicySetting = (key: PolicySettingKey, method: DeploymentMethod): boolean =>
   POLICY_SETTINGS[key].methods.includes(method);

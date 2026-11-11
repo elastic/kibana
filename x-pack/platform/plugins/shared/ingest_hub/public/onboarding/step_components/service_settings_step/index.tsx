@@ -69,6 +69,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     isProxyUrlSupported,
     proxyUrlError,
     isReroutePermissionsSupported,
+    reroutePermissions,
     reroutePermissionsError,
     setPolicySetting,
     conditionErrors,
@@ -560,7 +561,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         reroutePermissions={
           isReroutePermissionsSupported
             ? {
-                value: policySettings.additional_datastreams_permissions ?? [],
+                value: reroutePermissions,
                 onChange: setReroutePermissions,
                 error: reroutePermissionsError,
               }

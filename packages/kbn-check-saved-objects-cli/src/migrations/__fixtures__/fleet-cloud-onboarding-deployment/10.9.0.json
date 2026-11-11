@@ -72,10 +72,7 @@
         "aws.cloudtrail": "pkg-policy-id-1",
         "aws.vpcflow": "pkg-policy-id-2"
       },
-      "apiKeyId": "api-key-id-1",
-      "policySettings": {
-        "additional_datastreams_permissions": ["logs-custom-default", "metrics-custom-default"]
-      }
+      "apiKeyId": "api-key-id-1"
     },
     {
       "provider": "aws",
@@ -94,8 +91,7 @@
       },
       "policySettings": {
         "output_id": "logstash-output-id",
-        "condition": "${host.platform} == \"linux\"",
-        "additional_datastreams_permissions": ["logs-custom-default", "metrics-custom-default"]
+        "condition": "${host.platform} == \"linux\""
       }
     }
   ]

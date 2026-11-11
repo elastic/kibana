@@ -38,7 +38,11 @@ import {
   isMainPackageName,
 } from '../authenticate_and_deploy_step/deploy_group_helpers';
 import { getNamespaceError } from './instance_namespace_field';
-import { supportsPolicySetting, type PolicySettings } from '../../common/policy_settings';
+import {
+  getReroutePermissions,
+  supportsPolicySetting,
+  type PolicySettings,
+} from '../../common/policy_settings';
 import {
   getConditionErrors,
   getDescriptionError,
@@ -650,7 +654,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       }),
     [instances, awsServicesMap, deploymentMethod]
   );
-  const reroutePermissions = policySettings.additional_datastreams_permissions ?? [];
+  const reroutePermissions = getReroutePermissions(policySettings);
   const reroutePermissionsError = isReroutePermissionsSupported
     ? getReroutePermissionsError(reroutePermissions)
     : undefined;
@@ -722,6 +726,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     proxyUrlError,
     conditionErrors,
     isReroutePermissionsSupported,
+    reroutePermissions,
     reroutePermissionsError,
     bareNamePackage,
     instances,
