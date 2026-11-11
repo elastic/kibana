@@ -141,6 +141,69 @@ export default ({ getService }: FtrProviderContext) => {
         expect(response.body.data).toEqual(expectedRuleDocuments);
       });
 
+      it('should fetch rules filtered by a sub-string of a name joined by `_` or `-`', async () => {
+        const migrationId = uuidv4();
+        const titles = [
+          'sysmon_detect_sysmon_config_changed',
+          'okta-suspicious-user-activity',
+          'Unrelated rule name',
+        ];
+        const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
+          const title = titles[index];
+          return {
+            migration_id: migrationId,
+            original_rule: { ...defaultOriginalRule, title },
+            elastic_rule: { ...defaultElasticRule, title },
+          };
+        };
+        const migrationRuleDocuments = getMigrationRuleDocuments(titles.length, overrideCallback);
+        await createMigrationRules(es, migrationRuleDocuments);
+
+        // Sub-word inside an underscore-joined name.
+        let response = await migrationRulesRoutes.getRules({
+          migrationId,
+          queryParams: { search_term: 'sysmon' },
+        });
+        expect(response.body.total).toEqual(1);
+        expect(response.body.data).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              elastic_rule: expect.objectContaining({
+                title: 'sysmon_detect_sysmon_config_changed',
+              }),
+            }),
+          ])
+        );
+
+        // A word from the middle of the name also matches.
+        response = await migrationRulesRoutes.getRules({
+          migrationId,
+          queryParams: { search_term: 'config' },
+        });
+        expect(response.body.total).toEqual(1);
+
+        // The search is case-insensitive.
+        response = await migrationRulesRoutes.getRules({
+          migrationId,
+          queryParams: { search_term: 'SYSMON' },
+        });
+        expect(response.body.total).toEqual(1);
+
+        // Sub-word inside a hyphen-joined name.
+        response = await migrationRulesRoutes.getRules({
+          migrationId,
+          queryParams: { search_term: 'suspicious' },
+        });
+        expect(response.body.total).toEqual(1);
+        expect(response.body.data).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              elastic_rule: expect.objectContaining({ title: 'okta-suspicious-user-activity' }),
+            }),
+          ])
+        );
+      });
+
       it('should filter by search term failed translations', async () => {
         const migrationId = uuidv4();
         const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
