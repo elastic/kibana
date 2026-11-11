@@ -14,7 +14,6 @@ import { i18n } from '@kbn/i18n';
 export interface EsqlErrorExplanation {
   summary: string;
   suggestions: string[];
-  /** A corrected query, only when a change to the query resolves the error. */
   query?: string;
 }
 
@@ -26,35 +25,7 @@ interface ExplainErrorResponse {
 
 const MAX_ERROR_LENGTH = 8000;
 
-// Only an available answer is kept. HttpStart outlives a visit to Discover, so a user who sets up a
-// connector or a license after seeing an error must not stay stuck on an old "unavailable".
-const availability = new WeakMap<object, Promise<boolean>>();
-
-/**
- * Tells whether the action can be used: an AI connector exists and the license allows it. A
- * positive answer is kept per http service, so the server is asked once per page for it.
- */
-export function checkErrorExplanationAvailable(http: Pick<HttpStart, 'get'>): Promise<boolean> {
-  const known = availability.get(http);
-  if (known) {
-    return known;
-  }
-
-  const request = http
-    .get<{ available?: boolean }>(EXPLAIN_ERROR_ROUTE)
-    .then((response) => response.available === true)
-    .catch(() => false)
-    .then((isAvailable) => {
-      if (!isAvailable) {
-        availability.delete(http);
-      }
-      return isAvailable;
-    });
-  availability.set(http, request);
-  return request;
-}
-
-/** Asks the AI what an error from Elasticsearch means for a query, and what to do about it. */
+/** Asks the AI to explain an error for a query. */
 export async function explainEsqlError({
   http,
   query,

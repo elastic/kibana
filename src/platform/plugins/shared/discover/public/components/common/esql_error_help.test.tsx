@@ -86,6 +86,11 @@ describe('EsqlErrorHelp', () => {
     expect(await screen.findByTestId('discoverErrorExplanationFailure')).toHaveTextContent(
       'No AI connector available.'
     );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
+
+    expect(screen.getByTestId('discoverErrorExplainButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('discoverErrorExplanationFailure')).not.toBeInTheDocument();
   });
 
   it('goes back to the button when the error changes', async () => {

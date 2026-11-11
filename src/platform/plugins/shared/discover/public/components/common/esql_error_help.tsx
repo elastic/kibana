@@ -36,10 +36,7 @@ const leftAligned = css`
   text-align: left;
 `;
 
-/**
- * Offers to explain an ES|QL error with the AI, and to put a corrected query in the editor when
- * the error can be fixed that way. The caller shows it only when an AI connector is available.
- */
+/** Offers to explain an ES|QL error with the AI and to apply a corrected query. */
 export function EsqlErrorHelp({
   http,
   query,
@@ -47,10 +44,8 @@ export function EsqlErrorHelp({
   onApplyQuery,
 }: {
   http: Pick<HttpStart, 'post'>;
-  /** The query that failed. */
   query: string;
   errorMessage: string;
-  /** Puts a query in the editor and runs it. Without it the corrected query can only be copied. */
   onApplyQuery?: (query: string) => void;
 }) {
   const [stage, setStage] = useState<Stage>({ kind: 'idle' });
@@ -61,7 +56,6 @@ export function EsqlErrorHelp({
     controller.current = undefined;
   }, []);
 
-  // A different query or error makes an earlier explanation stale.
   useEffect(() => {
     cancel();
     setStage({ kind: 'idle' });
@@ -176,7 +170,6 @@ export function EsqlErrorHelp({
             {stage.explanation.suggestions.length > 0 ? (
               <ul data-test-subj="discoverErrorExplanationSuggestions">
                 {stage.explanation.suggestions.map((suggestion, index) => (
-                  // The model can repeat a suggestion, so the text alone is not a unique key.
                   <li key={`${index}-${suggestion}`}>{suggestion}</li>
                 ))}
               </ul>

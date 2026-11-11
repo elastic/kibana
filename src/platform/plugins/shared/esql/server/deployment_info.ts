@@ -31,11 +31,7 @@ const getEnvironment = (
   return 'self_managed';
 };
 
-/**
- * Tells where Kibana, and with it Elasticsearch, runs. It uses the same environments and shape as
- * the agent builder deployment context, which `@kbn/agent-builder-server` types. Without the cloud
- * plugin the build flavor still tells serverless from the rest, and anything else is self-managed.
- */
+/** Tells where Kibana, and with it Elasticsearch, runs. */
 export const getDeploymentInfo = (
   env: PluginInitializerContext['env'],
   cloud?: DeploymentCloudInfo
@@ -57,7 +53,6 @@ const ENVIRONMENT_NAMES: Record<DeploymentEnvironment, string> = {
   self_managed: 'self-managed, where the user runs the nodes',
 };
 
-/** A one-line description of the deployment, for a prompt. */
 export const describeDeployment = ({ environment, version, serverless }: DeploymentInfo): string =>
   [
     ENVIRONMENT_NAMES[environment],

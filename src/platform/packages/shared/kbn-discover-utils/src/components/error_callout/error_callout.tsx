@@ -38,7 +38,6 @@ export interface ErrorCalloutProps {
   aiHelp?: ReactNode;
 }
 
-/** The empty prompt limits the width of its content, so with extra content the callout is wider. */
 const WIDE_CALLOUT_MAX_WIDTH = '48rem';
 
 export const ErrorCallout = ({
@@ -143,7 +142,6 @@ export const ErrorCallout = ({
             <EuiSpacer size="m" />
             <EuiFlexGroup gutterSize="s" justifyContent="center" responsive={false} wrap>
               {actions.map((action, index) => (
-                // The actions are a fixed list from the error, so their position is their identity.
                 <EuiFlexItem grow={false} key={index}>
                   {action}
                 </EuiFlexItem>

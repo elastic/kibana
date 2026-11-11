@@ -96,49 +96,15 @@ const buildMessages = (
 const normalize = (query: string): string => query.replace(/\s+/g, ' ').trim();
 
 export interface ExplainErrorRouteOptions {
-  /** Where Elasticsearch runs, so the advice fits what the user can do about it. */
   deployment?: DeploymentInfo;
-  /** Like the other AI features of ES|QL, this one needs an active enterprise license. */
-  hasEnterpriseLicense: () => Promise<boolean>;
 }
 
 export const registerExplainErrorRoute = (
   router: IRouter,
   getStartServices: CoreSetup<EsqlServerPluginStart>['getStartServices'],
   context: PluginInitializerContext,
-  { deployment, hasEnterpriseLicense }: ExplainErrorRouteOptions
+  { deployment }: ExplainErrorRouteOptions
 ) => {
-  // A cheap check, with no model call, so the UI can hide the action when it cannot be used: there
-  // is no enterprise license, or no AI connector.
-  router.get(
-    {
-      path: EXPLAIN_ERROR_ROUTE,
-      validate: false,
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route only reports whether an AI connector is available',
-        },
-      },
-    },
-    async (_requestHandlerContext, request, response) => {
-      try {
-        if (!(await hasEnterpriseLicense())) {
-          return response.ok({ body: { available: false } });
-        }
-        const [, { inference, searchInferenceEndpoints }] = await getStartServices();
-        const connectorId = await resolveConnectorId({
-          inference,
-          request,
-          searchInferenceEndpoints,
-        });
-        return response.ok({ body: { available: Boolean(connectorId) } });
-      } catch (error) {
-        return response.ok({ body: { available: false } });
-      }
-    }
-  );
-
   router.post(
     {
       path: EXPLAIN_ERROR_ROUTE,
@@ -159,11 +125,6 @@ export const registerExplainErrorRoute = (
       const logger = context.logger.get();
       try {
         const { queryString, errorMessage } = request.body;
-        if (!(await hasEnterpriseLicense())) {
-          return response.forbidden({
-            body: { message: 'Explaining an error with AI needs an enterprise license.' },
-          });
-        }
         const [, { inference, searchInferenceEndpoints }] = await getStartServices();
 
         const connectorId = await resolveConnectorId({
@@ -176,15 +137,9 @@ export const registerExplainErrorRoute = (
           return response.badRequest({ body: { message: 'No AI connector available.' } });
         }
 
-        const model = await createScopedModel({
-          inference,
-          request,
-          connectorId,
-          chatModelOptions: { temperature: 0 },
-        });
+        const model = await createScopedModel({ inference, request, connectorId });
         const result = await model.chatModel
           .withStructuredOutput(ExplainErrorSchema, { name: 'explain_esql_error' })
-          // The UI aborts its request when the error changes, so the model stops with it.
           .invoke(buildMessages(queryString, errorMessage, deployment), {
             signal: getRequestAbortedSignal(request.events.aborted$),
           });

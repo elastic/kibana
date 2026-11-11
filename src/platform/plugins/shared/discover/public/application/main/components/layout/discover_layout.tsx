@@ -57,7 +57,7 @@ import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { EsqlErrorHelp } from '../../../../components/common/esql_error_help';
-import { useErrorExplanationAvailable } from '../../../../components/common/use_error_explanation_available';
+import { useHasEnterpriseLicense } from '../../../../components/common/use_has_enterprise_license';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useRegisterDiscoverEsqlFeedback } from '../../hooks/use_register_discover_esql_feedback';
 import {
@@ -101,6 +101,7 @@ export function DiscoverLayout() {
     observabilityAIAssistant,
     dataVisualizer: dataVisualizerService,
     fieldsMetadata,
+    licensing,
   } = useDiscoverServices();
   const customizationContext = useDiscoverCustomizationContext();
   const { scopedEBTManager } = useScopedServices();
@@ -415,17 +416,9 @@ export function DiscoverLayout() {
     return `${TABS_BAR_HEIGHT + 1}px`;
   }, [customizationContext.displayMode, euiTheme.size.xxl, isProjectChromeStyle]);
 
-  const isErrorExplanationAvailable = useErrorExplanationAvailable(
-    core.http,
-    Boolean(dataState.error) && isEsqlMode
-  );
-  // The AI help is passed only when it can be used, so that an error without it keeps the standard
-  // callout and layout, since an element is always truthy even when it renders nothing.
+  const hasEnterpriseLicense = useHasEnterpriseLicense(licensing);
   const errorAiHelp =
-    dataState.error &&
-    isEsqlMode &&
-    isOfAggregateQueryType(query) &&
-    isErrorExplanationAvailable ? (
+    dataState.error && isEsqlMode && isOfAggregateQueryType(query) && hasEnterpriseLicense ? (
       <EsqlErrorHelp
         http={core.http}
         query={query.esql}
@@ -512,7 +505,6 @@ export function DiscoverLayout() {
                     </div>
                     {dataState.error ? (
                       errorAiHelp ? (
-                        // The page hides overflow, so a tall error with an AI explanation scrolls here.
                         <div css={styles.errorContainer}>{errorCallout}</div>
                       ) : (
                         errorCallout

@@ -9,7 +9,6 @@
 
 import { Subject } from 'rxjs';
 import type { CoreSetup, IRouter, PluginInitializerContext } from '@kbn/core/server';
-import { EXPLAIN_ERROR_ROUTE } from '@kbn/esql-types';
 import { registerExplainErrorRoute } from './explain_error_route';
 import type { DeploymentInfo } from '../deployment_info';
 import type { EsqlServerPluginStart } from '../types';
@@ -21,16 +20,9 @@ jest.mock('./helpers', () => ({
 
 const { resolveConnectorId, createScopedModel } = jest.requireMock('./helpers');
 
-function buildMocks({
-  deployment,
-  hasEnterpriseLicense = true,
-}: { deployment?: DeploymentInfo; hasEnterpriseLicense?: boolean } = {}) {
+function buildMocks({ deployment }: { deployment?: DeploymentInfo } = {}) {
   const handler = jest.fn();
-  const availabilityHandler = jest.fn();
   const router = {
-    get: jest.fn((_, h) => {
-      availabilityHandler.mockImplementation(h);
-    }),
     post: jest.fn((_, h) => {
       handler.mockImplementation(h);
     }),
@@ -48,13 +40,12 @@ function buildMocks({
     router as unknown as IRouter,
     getStartServices as unknown as CoreSetup<EsqlServerPluginStart>['getStartServices'],
     context as unknown as PluginInitializerContext,
-    { deployment, hasEnterpriseLicense: async () => hasEnterpriseLicense }
+    { deployment }
   );
 
   return {
     router,
     handler,
-    availabilityHandler,
     response,
     requestHandlerContext: {},
     request: {
@@ -78,29 +69,6 @@ const modelReturning = (result: unknown) => {
 
 describe('registerExplainErrorRoute', () => {
   beforeEach(() => jest.clearAllMocks());
-
-  it('reports whether a connector is available without calling the model', async () => {
-    const { router, availabilityHandler, requestHandlerContext, request, response } = buildMocks();
-    resolveConnectorId.mockResolvedValue('connector-1');
-
-    expect(router.get).toHaveBeenCalledWith(
-      expect.objectContaining({ path: EXPLAIN_ERROR_ROUTE }),
-      expect.any(Function)
-    );
-    await availabilityHandler(requestHandlerContext, request, response);
-
-    expect(response.ok).toHaveBeenCalledWith({ body: { available: true } });
-    expect(createScopedModel).not.toHaveBeenCalled();
-  });
-
-  it('reports unavailable when no connector can be resolved', async () => {
-    const { availabilityHandler, requestHandlerContext, request, response } = buildMocks();
-    resolveConnectorId.mockResolvedValue(undefined);
-
-    await availabilityHandler(requestHandlerContext, request, response);
-
-    expect(response.ok).toHaveBeenCalledWith({ body: { available: false } });
-  });
 
   it('returns the explanation and no query for a resource error', async () => {
     const { handler, requestHandlerContext, request, response } = buildMocks();
@@ -203,32 +171,6 @@ describe('registerExplainErrorRoute', () => {
 
     const [, user] = invoke.mock.calls[0][0] as Array<[string, string]>;
     expect(user[1]).not.toContain('<environment>');
-  });
-
-  describe('license', () => {
-    it('reports unavailable without an enterprise license, even with a connector', async () => {
-      const { availabilityHandler, requestHandlerContext, request, response } = buildMocks({
-        hasEnterpriseLicense: false,
-      });
-      resolveConnectorId.mockResolvedValue('connector-1');
-
-      await availabilityHandler(requestHandlerContext, request, response);
-
-      expect(response.ok).toHaveBeenCalledWith({ body: { available: false } });
-      expect(resolveConnectorId).not.toHaveBeenCalled();
-    });
-
-    it('refuses to explain without an enterprise license, without calling the model', async () => {
-      const { handler, requestHandlerContext, request, response } = buildMocks({
-        hasEnterpriseLicense: false,
-      });
-      resolveConnectorId.mockResolvedValue('connector-1');
-
-      await handler(requestHandlerContext, request, response);
-
-      expect(response.forbidden).toHaveBeenCalled();
-      expect(createScopedModel).not.toHaveBeenCalled();
-    });
   });
 
   it('stops the model when the request is aborted', async () => {

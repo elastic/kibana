@@ -26,6 +26,8 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import userEvent from '@testing-library/user-event';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { of } from 'rxjs';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import * as savedSearchUrlConflictCallout from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
 
@@ -36,7 +38,7 @@ const setup = async ({
   hideTable = false,
   isEsqlEnabled = false,
   esqlQuery,
-  isErrorExplanationAvailable = false,
+  hasEnterpriseLicense = true,
   dataMainMsg = {
     fetchStatus: FetchStatus.COMPLETE,
     foundDocuments: true,
@@ -49,8 +51,7 @@ const setup = async ({
   isEsqlEnabled?: boolean;
   /** Puts Discover in ES|QL mode, with this query. */
   esqlQuery?: string;
-  /** What the server answers when asked whether an error can be explained with AI. */
-  isErrorExplanationAvailable?: boolean;
+  hasEnterpriseLicense?: boolean;
   dataMainMsg?: DataMainMsg;
 }) => {
   const { profilesManagerMock } = createContextAwarenessMocks({ shouldRegisterProviders: false });
@@ -59,7 +60,9 @@ const setup = async ({
   const originalGetImplementation = getUiSettingsMock.getMockImplementation();
 
   services.profilesManager = profilesManagerMock;
-  jest.mocked(services.core.http.get).mockResolvedValue({ available: isErrorExplanationAvailable });
+  services.licensing = {
+    license$: of({ isActive: true, hasAtLeast: () => hasEnterpriseLicense }),
+  } as unknown as LicensingPluginStart;
   getUiSettingsMock.mockImplementation((key, defaultOverride) => {
     if (key === ENABLE_ESQL) {
       return isEsqlEnabled;
@@ -309,7 +312,6 @@ describe('Discover component', () => {
         dataView: dataViewWithTimefieldMock,
         isEsqlEnabled: true,
         esqlQuery: 'FROM logs | STATS COUNT(*) BY host',
-        isErrorExplanationAvailable: true,
         dataMainMsg: errorMsg,
       });
 
@@ -317,31 +319,28 @@ describe('Discover component', () => {
       expect(screen.getByTestId('discoverErrorCalloutWide')).toBeInTheDocument();
     });
 
-    it('keeps the standard callout for an ES|QL error when it cannot be used', async () => {
-      const { services } = await setup({
+    it('keeps the standard callout for an ES|QL error without an enterprise license', async () => {
+      await setup({
         dataView: dataViewWithTimefieldMock,
         isEsqlEnabled: true,
         esqlQuery: 'FROM logs | STATS COUNT(*) BY host',
-        isErrorExplanationAvailable: false,
+        hasEnterpriseLicense: false,
         dataMainMsg: errorMsg,
       });
 
-      await waitFor(() => expect(services.core.http.get).toHaveBeenCalled());
       expect(screen.getByTestId('discoverErrorCalloutTitle')).toBeInTheDocument();
       expect(screen.queryByTestId('discoverErrorCalloutWide')).not.toBeInTheDocument();
       expect(screen.queryByTestId('discoverErrorExplainButton')).not.toBeInTheDocument();
     });
 
-    it('does not ask the server or offer it outside of ES|QL mode', async () => {
-      const { services } = await setup({
+    it('does not offer it outside of ES|QL mode', async () => {
+      await setup({
         dataView: dataViewWithTimefieldMock,
-        isErrorExplanationAvailable: true,
         dataMainMsg: errorMsg,
       });
 
       expect(screen.getByTestId('discoverErrorCalloutTitle')).toBeInTheDocument();
       expect(screen.queryByTestId('discoverErrorExplainButton')).not.toBeInTheDocument();
-      expect(services.core.http.get).not.toHaveBeenCalled();
     });
   });
 });
