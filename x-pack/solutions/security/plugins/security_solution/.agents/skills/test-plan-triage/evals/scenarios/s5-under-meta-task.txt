@@ -1,0 +1,1 @@
+Should https://github.com/elastic/security-team/issues/900401 get a test plan? If so, which issue should carry the label?

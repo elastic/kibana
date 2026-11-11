@@ -1,0 +1,1 @@
+Does elastic/kibana#900305 need a test plan? It's part of the Discover flyouts work.

@@ -1,0 +1,14 @@
+(Context: earlier in this conversation the user asked whether elastic/security-team#900801 needs a test plan. You ran `context`, and you showed this decision and stopped:
+
+**Issue:** [elastic/security-team#900801](https://github.com/elastic/security-team/issues/900801) — Bulk assign and unassign alerts beyond the 100-alert limit
+**Decision:** Yes — S3: removes the 100-alert cap on assign and unassign, a visible change in behavior
+**Hierarchy:** [elastic/security-team#900800](https://github.com/elastic/security-team/issues/900800) › **[elastic/security-team#900801](https://github.com/elastic/security-team/issues/900801)**
+**Suggested level for a test plan:** [elastic/security-team#900800](https://github.com/elastic/security-team/issues/900800) — one functionality: alert assignment at scale
+**Proposed label changes:**
+- add `Needs Test Plan` to [elastic/security-team#900801](https://github.com/elastic/security-team/issues/900801)
+- add `Needs Test Plan` to [elastic/security-team#900800](https://github.com/elastic/security-team/issues/900800) (suggested level)
+
+Reply "yes" to apply the label changes above, or tell me which ones to apply.)
+
+The user's new message is:
+yes, but only the first one, 900801. leave the epic alone
