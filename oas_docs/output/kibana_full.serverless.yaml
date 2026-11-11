@@ -157731,12 +157731,12 @@ components:
           type: integer
       required:
         - kind
+        - enabled
         - metadata
         - schedule
         - query
         - id
         - version
-        - enabled
         - created_by
         - created_at
         - updated_by
