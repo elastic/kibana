@@ -183,6 +183,11 @@ export class ManagedProcess {
           const state: ProcessState = fields.state ?? 'exited';
           this.update({ ...fields, state });
           logStream.end(`--- ${new Date().toISOString()} ${state}\n`);
+          // The process ended by itself, but its children may live on, like the Elasticsearch JVM when the
+          // wrapper script dies. Nothing would stop them later, as the process counts as ended.
+          if (child.pid !== undefined && isGroupAlive(child.pid)) {
+            this.signal(child, 'SIGTERM');
+          }
         }
         resolve();
       };

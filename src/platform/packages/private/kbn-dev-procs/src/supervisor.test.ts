@@ -261,6 +261,30 @@ describe('Supervisor', () => {
     expect(statusOf(supervisor, 'es').error).toBeUndefined();
   });
 
+  it('stops the children of a process that dies by itself', async () => {
+    const dieAndLeaveGrandchild = `
+      const { spawn } = require('child_process');
+      const grandchild = spawn(process.execPath, ['-e', '${KEEP_ALIVE}'], { stdio: 'ignore' });
+      console.log('grandchild ' + grandchild.pid);
+      setTimeout(() => process.exit(1), 200);
+    `;
+    supervisor = new Supervisor({
+      logDir,
+      definitions: [node('es', dieAndLeaveGrandchild)],
+    });
+    let grandchildPid = 0;
+    supervisor.onLine(({ text }) => {
+      const match = /grandchild (\d+)/.exec(text);
+      if (match) grandchildPid = Number(match[1]);
+    });
+    await supervisor.startAll();
+    await waitForState(supervisor, 'es', 'failed');
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    expect(grandchildPid).toBeGreaterThan(0);
+    expect(isAlive(grandchildPid)).toBe(false);
+  });
+
   it('restarts one process without touching the others', async () => {
     supervisor = new Supervisor({
       logDir,
