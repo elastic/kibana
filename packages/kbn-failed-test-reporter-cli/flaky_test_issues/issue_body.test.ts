@@ -561,7 +561,7 @@ describe('renderFlakySuiteIssueBody', () => {
     );
   });
 
-  it('records the suite, the first report snapshot and what the body shows in the metadata', () => {
+  it('records the suite and the first report snapshot in the metadata', () => {
     const { suite, report } = singleTestReport();
     const body = renderFlakySuiteIssueBody(suite, { report });
 
@@ -577,10 +577,6 @@ describe('renderFlakySuiteIssueBody', () => {
       'report.history': [
         { generatedAt: '2026-09-09T09:04:41.000Z', builds: 509, failedBuilds: 49 },
       ],
-      'report.posted': {
-        tests: [{ testId: suite.tests[0].testId, title: suite.tests[0].title, branches: ['main'] }],
-        errorKeys: ['Error: Timed out Nms waiting for expect(locator).toBeVisible()'],
-      },
     });
     expect(readFlakySuiteIssueMetadata('no metadata here')).toBeUndefined();
   });
@@ -734,35 +730,6 @@ describe('refreshing a suite issue', () => {
     expect(silent?.['report.commentedAt']).toBe('2026-09-08T09:04:41.000Z');
   });
 
-  it('records what the comment shows when the refresh comments, else keeps what was last shown', () => {
-    const { suite, report } = singleTestReport();
-    const posted = {
-      tests: [{ testId: 'old', title: 'old test', branches: ['9.3'] }],
-      errorKeys: [],
-    };
-    const shown = { ...previous, 'report.posted': posted };
-
-    const commenting = readFlakySuiteIssueMetadata(
-      refreshFlakySuiteIssueMetadata(filedBody(shown), suite, {
-        report,
-        previous: shown,
-        comment: true,
-      })
-    );
-    const silent = readFlakySuiteIssueMetadata(
-      refreshFlakySuiteIssueMetadata(filedBody(shown), suite, {
-        report,
-        previous: shown,
-        comment: false,
-      })
-    );
-
-    expect(commenting?.['report.posted']?.tests).toEqual([
-      { testId: suite.tests[0].testId, title: suite.tests[0].title, branches: ['main'] },
-    ]);
-    expect(silent?.['report.posted']).toEqual(posted);
-  });
-
   it('takes the report that filed the issue as the last one posted until a comment is recorded', () => {
     expect(lastPostedAt(previous)).toBe('2026-09-07T09:04:41.000Z');
     expect(lastPostedAt({ ...previous, 'report.commentedAt': '2026-09-08T09:04:41.000Z' })).toBe(
@@ -794,66 +761,29 @@ describe('refreshing a suite issue', () => {
     expect(metadata?.['report.history'][29].generatedAt).toBe('2026-09-09T09:04:41.000Z');
   });
 
-  const LATEST_FAILURE =
-    'Last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd).';
-
-  it('says where the suite is still flaky and links its newest failure there', () => {
+  it('lists the branches the suite is still flaky on, each with its newest failure', () => {
     const { suite, report } = singleTestReport();
 
-    // an issue filed before what it showed was recorded: nothing to compare with
-    expect(renderFlakySuiteIssueComment(suite, { report, reopened: false, previous })).toBe(
-      `Still flaky on \`main\`: 10% of builds (49 / 509). ${LATEST_FAILURE}`
-    );
-  });
-
-  it('says nothing changed since the report its owners last saw', () => {
-    const { suite, report } = singleTestReport();
-    const [{ testId, title, errors }] = suite.tests;
-    const shown = {
-      ...previous,
-      'report.commentedAt': '2026-09-06T09:04:41.000Z',
-      'report.posted': {
-        tests: [{ testId, title, branches: ['main'] }],
-        errorKeys: errors.map(({ key }) => key),
-      },
-    };
-
-    expect(renderFlakySuiteIssueComment(suite, { report, reopened: false, previous: shown })).toBe(
-      `Still flaky on \`main\`: 10% of builds (49 / 509), same as on 6 Sep. ${LATEST_FAILURE}`
-    );
-  });
-
-  it('says only what changed: tests and branches in or out, errors seen outside pull requests', () => {
-    const { suite, report } = multiTestReport();
-    const shown = {
-      ...previous,
-      'report.posted': {
-        tests: [
-          { testId: 'a', title: suite.tests[0].title, branches: ['main', '9.1'] },
-          { testId: 'gone', title: 'gone test', branches: ['main'] },
-        ],
-        errorKeys: ['Error: expect(locator).toBeVisible() failed\n\nLocator: chart | pipe'],
-      },
-    };
-
-    expect(renderFlakySuiteIssueComment(suite, { report, reopened: false, previous: shown })).toBe(
+    expect(renderFlakySuiteIssueComment(suite, { report, reopened: false })).toBe(
       [
-        '3 tests still flaky on `main` (10%) and `9.2` (5%).',
-        '*reverts breakdown, interval, and visibility on a saved session* and *persists hide/show of the histogram on a saved session* are now flaky too.',
-        '*gone test* is no longer flaky.',
-        'Now flaky on `9.2` too.',
-        'No longer flaky on `9.1`.',
-        'New error: `TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.`',
-        LATEST_FAILURE,
-      ].join(' ')
+        'Still flaky:',
+        '',
+        '- `main`: 10% of builds (49 / 509), last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)',
+      ].join('\n')
     );
   });
 
-  it('says the suite is flaky again when the issue is reopened', () => {
+  it('counts the tests and says the suite is flaky again when the issue is reopened', () => {
     const { suite, report } = multiTestReport();
 
-    expect(renderFlakySuiteIssueComment(suite, { report, reopened: true, previous })).toBe(
-      `3 tests flaky again after this issue was closed, on \`main\` (10%) and \`9.2\` (5%). ${LATEST_FAILURE}`
+    // the worst test's numbers on each branch, as the body's branch table; the clean 9.1 left out
+    expect(renderFlakySuiteIssueComment(suite, { report, reopened: true })).toBe(
+      [
+        '3 tests flaky again after this issue was closed:',
+        '',
+        '- `main`: 10% of builds (49 / 509), last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)',
+        '- `9.2`: 5% of builds (3 / 64), last failed [7 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200)',
+      ].join('\n')
     );
   });
 });
