@@ -99,7 +99,7 @@ const decisionTreesLoadedSchema: RootSchema<DecisionTreesLoadedProps> = {
       type: 'keyword',
       _meta: {
         description:
-          'Word phrase derived by an unsalted one-way hash of the symptom id of a materialized tree. The slug is not sent, but this is pseudonymous rather than anonymous: someone who guesses a slug can recompute its phrase.',
+          'SHA-256 hex digest (unsalted) of the symptom id of a materialized tree. The slug is not sent, but this is pseudonymous rather than anonymous: someone who guesses a slug can recompute its hash.',
       },
     },
     _meta: {

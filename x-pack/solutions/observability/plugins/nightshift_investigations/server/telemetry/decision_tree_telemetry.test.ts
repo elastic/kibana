@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { toReadableHash } from './readable_hash';
+import { hashTreeId } from './hash_tree_id';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   NIGHTSHIFT_DECISION_TREES_LOADED_EVENT_TYPE,
@@ -88,10 +88,7 @@ describe('createDecisionTreeTelemetry', () => {
           round_id: 'round-1',
           selection: 'accessed',
           tree_count: 2,
-          tree_ids: [
-            toReadableHash('symptom:checkout-latency'),
-            toReadableHash('symptom:oom-kill'),
-          ],
+          tree_ids: [hashTreeId('symptom:checkout-latency'), hashTreeId('symptom:oom-kill')],
         }
       );
     });

@@ -16,7 +16,7 @@ import {
   type DecisionTreeWrittenProps,
   type DecisionTreesLoadedProps,
 } from './decision_tree_events';
-import { toReadableHash } from './readable_hash';
+import { hashTreeId } from './hash_tree_id';
 
 export interface DecisionTreeTelemetry {
   reportLoaded: (params: { selection: DecisionTreeSelection; treeIds: readonly string[] }) => void;
@@ -69,7 +69,7 @@ export const createDecisionTreeTelemetry = ({
             ...runIds,
             selection,
             tree_count: treeIds.length,
-            tree_ids: selection === 'accessed' ? treeIds.map(toReadableHash) : [],
+            tree_ids: selection === 'accessed' ? treeIds.map(hashTreeId) : [],
           }
         )
       );

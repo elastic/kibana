@@ -11,7 +11,7 @@ import { embedAccessedTreesMarker } from './accessed_trees';
 import { materializeDecisionTrees } from './materialize';
 import { hydrateDecisionTreeWorkspace } from './register_decision_trees';
 import { NIGHTSHIFT_DECISION_TREES_LOADED_EVENT_TYPE } from '../telemetry';
-import { toReadableHash } from '../telemetry/readable_hash';
+import { hashTreeId } from '../telemetry/hash_tree_id';
 
 jest.mock('./store', () => ({ createDecisionTreeStore: jest.fn().mockReturnValue({}) }));
 jest.mock('./materialize', () => ({ materializeDecisionTrees: jest.fn() }));
@@ -73,7 +73,7 @@ describe('hydrateDecisionTreeWorkspace load telemetry', () => {
         round_id: 'round-1',
         selection: 'accessed',
         tree_count: 1,
-        tree_ids: [toReadableHash('symptom:a')],
+        tree_ids: [hashTreeId('symptom:a')],
       }
     );
   });
