@@ -318,7 +318,7 @@ export function NightshiftApp({
       value4: loadedInvestigations.filter(({ metadata }) => metadata.severity === undefined).length,
     },
     meta: {
-      description: '[ttfmp_nightshift] The Nightshift landing page has loaded investigations.',
+      description: '[ttfmp_nightshift] The nightshift landing page has loaded investigations.',
     },
   });
 

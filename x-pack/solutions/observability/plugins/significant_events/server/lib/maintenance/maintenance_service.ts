@@ -621,7 +621,7 @@ export const createSignificantEventsMaintenanceService = ({
 
             logFailures(
               log,
-              `Significant Events paused space "${spaceId}" because Nightshift was turned off: disabled ${summary.workflowsDisabled} workflow(s) and ${summary.rulesDisabled} rule(s), ${sweep.failures.length} failure(s)`,
+              `Significant Events paused space "${spaceId}" because nightshift was turned off: disabled ${summary.workflowsDisabled} workflow(s) and ${summary.rulesDisabled} rule(s), ${sweep.failures.length} failure(s)`,
               sweep.failures
             );
           },

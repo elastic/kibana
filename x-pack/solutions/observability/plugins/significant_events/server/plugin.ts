@@ -843,7 +843,7 @@ export class SignificantEventsPlugin
 
   private logFlagOffPauseError(error: unknown): void {
     this.logger.error(
-      `significantEvents: failed to pause after Nightshift was turned off: ${
+      `significantEvents: failed to pause after nightshift was turned off: ${
         error instanceof Error ? error.message : String(error)
       }`
     );
