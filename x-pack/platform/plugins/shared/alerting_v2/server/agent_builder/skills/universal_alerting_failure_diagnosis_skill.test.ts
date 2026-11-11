@@ -126,11 +126,11 @@ describe('createUniversalAlertingFailureDiagnosisSkill', () => {
     expect(content).toContain('never describe a check as using "your own access"');
   });
 
-  it('only treats a negative index check as conclusive for users with broad access', () => {
+  it('treats a negative index check as inconclusive', () => {
     const { content } = createUniversalAlertingFailureDiagnosisSkill(createDeps());
 
     expect(content).toContain('say whose access it reflects');
-    expect(content).toContain('conclusive only when the user clearly has broad access');
+    expect(content).toContain('A missing index is inconclusive');
     expect(content).toContain('does not prove the rule owner can read it');
   });
 
@@ -202,8 +202,43 @@ describe('createUniversalAlertingFailureDiagnosisSkill', () => {
     expect(content).toContain(
       'Action policy failures, notification workflow failures, or connector issues'
     );
-    expect(content).toContain('this skill only diagnoses **rule** failures');
+    expect(content).toContain('This skill only diagnoses **rule** failures');
     expect(content).toContain('do not guess a cause');
+  });
+
+  it.each(['A', 'B', 'C', 'D', 'E', 'F'])(
+    'gives each cause in group %s a confirmation check and a possible fix',
+    (group) => {
+      const { content } = createUniversalAlertingFailureDiagnosisSkill(createDeps());
+      const [, afterHeading = ''] = content.split(`#### ${group}. `);
+      const [section] = afterHeading.split('\n#### ');
+
+      expect(section).toContain('- Confirm:');
+      expect(section).toContain('- Possible fix (');
+    }
+  );
+
+  it('labels each possible fix as a rule change or not a rule change', () => {
+    const { content } = createUniversalAlertingFailureDiagnosisSkill(createDeps());
+
+    expect(content).toContain('Possible fix (rule change)');
+    expect(content).toContain('Possible fix (not a rule change)');
+    expect(content).not.toMatch(/^\s*- Fix[ :(]/m);
+  });
+
+  it('lists a column removed earlier in the query before blaming privileges for an unknown column', () => {
+    const { content } = createUniversalAlertingFailureDiagnosisSkill(createDeps());
+
+    expect(content).toContain('The column was removed earlier in the query');
+    expect(content).toContain('yet the rule still fails, and cause 5 does not apply');
+  });
+
+  it('lets the agent go beyond the listed causes and fixes when the evidence points elsewhere', () => {
+    const { content } = createUniversalAlertingFailureDiagnosisSkill(createDeps());
+
+    expect(content).toContain('common cases, not a complete list');
+    expect(content).toContain('If the evidence points to a different cause or a better fix');
+    expect(content).toContain('Do not force the failure into one of the listed causes');
   });
 
   it('points to the rule-authoring skill for general composition guidance', () => {
