@@ -12,10 +12,9 @@ import { buildWorkerRows, WORKER_SCENARIOS } from '../datasets/worker_rows';
 import type { CohortRouting } from './cohort_routing';
 
 const routing: CohortRouting = {
-  cohort: 'review',
-  generationModel: 'reference-model',
+  cohort: 'whole',
+  generationModel: 'model-under-test',
   reviewModel: 'model-under-test',
-  runnerConnectorId: 'reference-model',
   features: [],
 };
 
@@ -62,8 +61,8 @@ describe('worker dataset contract', () => {
   it('stamps the cohort and both stage models on every row', () => {
     for (const row of rows) {
       expect(row.metadata).toMatchObject({
-        cohort: 'review',
-        generation_model: 'reference-model',
+        cohort: 'whole',
+        generation_model: 'model-under-test',
         review_model: 'model-under-test',
       });
     }

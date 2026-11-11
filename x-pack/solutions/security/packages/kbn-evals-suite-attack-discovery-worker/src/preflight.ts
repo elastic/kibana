@@ -10,7 +10,7 @@ import type { HttpHandler } from '@kbn/core/public';
 import { getInferenceEndpointId, inferenceEndpointExists, type EvalConnector } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { parse } from 'yaml';
-import { planCohortRouting, type Cohort, type CohortRouting } from './cohort_routing';
+import { planCohortRouting, type CohortRouting } from './cohort_routing';
 import {
   EVAL_SPACE_ID,
   PUBLIC_API_VERSION,
@@ -195,23 +195,12 @@ export const runPreflight = async ({
   esClient,
   log,
   connector,
-  cohort,
-  referenceModel,
 }: {
   fetch: HttpHandler;
   esClient: Client;
   log: ToolingLog;
   connector: EvalConnector;
-  cohort: Cohort;
-  referenceModel?: string;
 }): Promise<PreflightResult> => {
-  if (cohort !== 'whole') {
-    // The floor worker passes the runner no `connector_id`, so generation and review resolve
-    // to the same feature routing and cannot be given different models.
-    throw new Error(
-      `The "${cohort}" cohort is not supported: runs start through the floor worker, which cannot pin generation to a different model than review. Use the "whole" cohort.`
-    );
-  }
   const modelUnderTest = getInferenceEndpointId(connector);
   if (!modelUnderTest) {
     throw new Error(
@@ -219,9 +208,6 @@ export const runPreflight = async ({
     );
   }
   await assertEndpointExists({ fetch, inferenceId: modelUnderTest, role: 'model under test' });
-  if (cohort !== 'whole' && referenceModel) {
-    await assertEndpointExists({ fetch, inferenceId: referenceModel, role: 'reference model' });
-  }
   const request = kbnRequestFromFetch(fetch);
   // The space must exist before the space-scoped reads below; nothing here is destructive.
   const { entityStoreStatus } = await prepareWorkerSpace({
@@ -233,16 +219,8 @@ export const runPreflight = async ({
   await assertWorkflowsInstalled(fetch);
 
   const original = await readFeatures(fetch, EVAL_SPACE_ID);
-  assertNoLeftoverRouting({
-    features: original,
-    models: referenceModel ? [modelUnderTest, referenceModel] : [modelUnderTest],
-  });
-  const routing = planCohortRouting({
-    cohort,
-    modelUnderTest,
-    referenceModel,
-    features: original,
-  });
+  assertNoLeftoverRouting({ features: original, models: [modelUnderTest] });
+  const routing = planCohortRouting({ modelUnderTest, features: original });
 
   // Everything from here on changes the stack, so it is undone on any failure.
   const restoreExtraction = await pauseEntityExtraction({
@@ -271,7 +249,7 @@ export const runPreflight = async ({
     throw error;
   }
   log.info(
-    `[ad-worker] cohort "${cohort}": generation=${routing.generationModel}, review=${routing.reviewModel}`
+    `[ad-worker] cohort "${routing.cohort}": generation=${routing.generationModel}, review=${routing.reviewModel}`
   );
 
   return { routing, floorWorkflowId, restore };

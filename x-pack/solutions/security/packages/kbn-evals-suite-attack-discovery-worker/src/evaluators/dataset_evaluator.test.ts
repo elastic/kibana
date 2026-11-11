@@ -44,10 +44,9 @@ const cleanup = cleanupSeed as jest.MockedFunction<typeof cleanupSeed>;
 const assertClean = assertCleanSpace as jest.MockedFunction<typeof assertCleanSpace>;
 
 const routing: CohortRouting = {
-  cohort: 'generation',
+  cohort: 'whole',
   generationModel: 'model-under-test',
-  reviewModel: 'reference-model',
-  runnerConnectorId: 'model-under-test',
+  reviewModel: 'model-under-test',
   features: [],
 };
 
@@ -135,7 +134,7 @@ const attackArtifacts = (overrides: Partial<WorkerArtifacts> = {}): WorkerArtifa
         verdict: 'true_positive',
         investigationOpened: true,
         steps: [],
-        analysis: { connectorIds: ['reference-model'], inputTokens: 1, outputTokens: 1 },
+        analysis: { connectorIds: ['model-under-test'], inputTokens: 1, outputTokens: 1 },
       },
     ],
     ...overrides,
@@ -357,7 +356,7 @@ describe('createEvaluateDataset', () => {
       verdict: 'false_positive',
       investigationOpened: true,
       steps: [],
-      analysis: { connectorIds: ['reference-model'], inputTokens: 1, outputTokens: 1 },
+      analysis: { connectorIds: ['model-under-test'], inputTokens: 1, outputTokens: 1 },
     });
     await expect(evaluateRow('seeded-false-positive')).resolves.toBeUndefined();
     expect(client.runReview).toHaveBeenCalledWith(
@@ -383,7 +382,7 @@ describe('createEvaluateDataset', () => {
       verdict: 'false_positive',
       investigationOpened: true,
       steps: [],
-      analysis: { connectorIds: ['reference-model'], inputTokens: 1, outputTokens: 1 },
+      analysis: { connectorIds: ['model-under-test'], inputTokens: 1, outputTokens: 1 },
     };
     const seedWithDiscovery = () =>
       seed.mockResolvedValue({

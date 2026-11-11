@@ -12,19 +12,22 @@ import {
 import { mergeFeatureOverride, type InferenceFeatureSetting } from './inference_override';
 
 /**
- * Which stage runs the model under test:
- * - `whole`: generation and review both run it.
- * - `generation`: generation runs it; review runs the fixed reference model.
- * - `review`: review runs it; generation runs the fixed reference model.
+ * Only the `whole` cohort is supported today: runs start through the floor worker, which passes
+ * the runner no `connector_id`, so generation and review always resolve to the same feature
+ * routing and cannot be given different models. Split cohorts (a pinned generation or review
+ * model) become possible once the floor worker can pin the runner's `connector_id`; see the
+ * README's future-work note.
  */
-export const COHORTS = ['whole', 'generation', 'review'] as const;
+export const COHORTS = ['whole'] as const;
 export type Cohort = (typeof COHORTS)[number];
 
 export const parseCohort = (raw: string | undefined): Cohort => {
   const value = raw?.trim() || 'whole';
   const cohort = COHORTS.find((candidate) => candidate === value);
   if (!cohort) {
-    throw new Error(`Unknown cohort "${value}"; expected one of ${COHORTS.join(', ')}.`);
+    throw new Error(
+      `Unknown cohort "${value}"; only "whole" is supported (split cohorts need the floor worker to pin the runner's connector_id).`
+    );
   }
   return cohort;
 };
@@ -35,8 +38,6 @@ export interface CohortRouting {
   generationModel: string;
   /** Inference endpoint that the review's FP/TP analysis resolves to. */
   reviewModel: string;
-  /** Runner input `connector_id`; unset when generation follows the feature routing. */
-  runnerConnectorId?: string;
   /** The full inference settings document to write. */
   features: InferenceFeatureSetting[];
 }
@@ -47,81 +48,54 @@ const firstEndpoint = (
 ): string | undefined => features.find(({ feature_id: id }) => id === featureId)?.endpoints[0]?.id;
 
 /**
- * Resolves each stage the way the workflows do. Generation uses the runner's `connector_id`
- * when set, otherwise the first mapped feature of `alertzero_template_models`, then
- * `alertzero_frontier`. The review's analysis step uses that same feature order and has no
- * `connector_id` override.
+ * Resolves each stage the way the workflows do: both use the first mapped feature of
+ * `alertzero_template_models`, then `alertzero_frontier`, and neither has a `connector_id`
+ * override in the `whole` cohort.
  */
 export const resolveStageModels = ({
   features,
-  runnerConnectorId,
 }: {
   features: readonly InferenceFeatureSetting[];
-  runnerConnectorId?: string;
 }): { generation: string | undefined; review: string | undefined } => {
   const byFeature =
     firstEndpoint(features, ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID) ??
     firstEndpoint(features, ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID);
-  return { generation: runnerConnectorId ?? byFeature, review: byFeature };
+  return { generation: byFeature, review: byFeature };
 };
 
 /**
- * Plans the routing for one cohort and checks it: each stage resolves to the model it should,
+ * Plans the `whole`-cohort routing and checks it: both stages resolve to the model under test,
  * whatever the space mapped before. `alertzero_template_models` outranks `alertzero_frontier`
  * for both stages, so when the space maps it, it is pointed at the same endpoint as the
  * frontier feature.
  */
 export const planCohortRouting = ({
-  cohort,
   modelUnderTest,
-  referenceModel,
   features,
 }: {
-  cohort: Cohort;
   modelUnderTest: string;
-  referenceModel?: string;
   features: readonly InferenceFeatureSetting[];
 }): CohortRouting => {
-  if (cohort !== 'whole') {
-    if (!referenceModel) {
-      throw new Error(`The "${cohort}" cohort needs a reference model for the other stage.`);
-    }
-    if (referenceModel === modelUnderTest) {
-      throw new Error(
-        `The reference model equals the model under test (${modelUnderTest}); the "${cohort}" cohort would isolate nothing.`
-      );
-    }
-  }
-  const reference = referenceModel ?? modelUnderTest;
-  const runnerConnectorId =
-    cohort === 'generation' ? modelUnderTest : cohort === 'review' ? reference : undefined;
-  const featureTarget = cohort === 'generation' ? reference : modelUnderTest;
-
   const withFrontier = mergeFeatureOverride(
     features,
     ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
-    featureTarget
+    modelUnderTest
   );
   const planned =
     firstEndpoint(features, ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID) === undefined
       ? withFrontier
-      : mergeFeatureOverride(withFrontier, ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID, featureTarget);
+      : mergeFeatureOverride(withFrontier, ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID, modelUnderTest);
 
-  const expected = {
-    generation: cohort === 'review' ? reference : modelUnderTest,
-    review: cohort === 'generation' ? reference : modelUnderTest,
-  };
-  const resolved = resolveStageModels({ features: planned, runnerConnectorId });
-  if (resolved.generation !== expected.generation || resolved.review !== expected.review) {
+  const resolved = resolveStageModels({ features: planned });
+  if (resolved.generation !== modelUnderTest || resolved.review !== modelUnderTest) {
     throw new Error(
-      `Cohort "${cohort}" routing does not isolate the stages: generation resolves to ${resolved.generation}, review to ${resolved.review}; expected ${expected.generation} and ${expected.review}.`
+      `Cohort "whole" routing does not reach the model under test: generation resolves to ${resolved.generation}, review to ${resolved.review}; expected ${modelUnderTest} for both.`
     );
   }
   return {
-    cohort,
-    generationModel: expected.generation,
-    reviewModel: expected.review,
-    ...(runnerConnectorId ? { runnerConnectorId } : {}),
+    cohort: 'whole',
+    generationModel: modelUnderTest,
+    reviewModel: modelUnderTest,
     features: planned,
   };
 };

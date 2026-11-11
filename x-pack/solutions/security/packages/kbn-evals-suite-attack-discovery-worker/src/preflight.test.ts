@@ -211,7 +211,6 @@ describe('runPreflight', () => {
       esClient: {} as Client,
       log,
       connector,
-      cohort: 'whole',
     });
 
   beforeEach(() => {
@@ -252,22 +251,8 @@ describe('runPreflight', () => {
     expect(writeFeatures).not.toHaveBeenCalled();
   });
 
-  it.each(['generation', 'review'] as const)(
-    'rejects the unsupported %s cohort',
-    async (cohort) => {
-      await expect(
-        runPreflight({
-          fetch: mockedFetch as unknown as HttpHandler,
-          esClient: {} as Client,
-          log,
-          connector,
-          cohort,
-          referenceModel: 'reference',
-        })
-      ).rejects.toThrow(/not supported/);
-      expect(pauseEntityExtraction).not.toHaveBeenCalled();
-    }
-  );
+  // Unsupported cohorts are rejected at parse time by `parseCohort` (cohort_routing.test.ts);
+  // the preflight only ever sees the `whole` routing it plans itself.
 
   it('enables the floor worker after the routing is written and returns its workflow id', async () => {
     const result = await run();

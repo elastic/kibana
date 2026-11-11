@@ -6,8 +6,6 @@
  */
 
 import { evaluate as base } from '@kbn/evals';
-import { parseCohort } from './cohort_routing';
-import { COHORT_ENV, REFERENCE_MODEL_ENV } from './constants';
 import { runPreflight, type PreflightResult } from './preflight';
 import { AttackDiscoveryWorkerClient, usingClient } from './worker_client';
 
@@ -32,8 +30,6 @@ export const evaluate = base.extend<
         esClient,
         log,
         connector,
-        cohort: parseCohort(process.env[COHORT_ENV]),
-        referenceModel: process.env[REFERENCE_MODEL_ENV]?.trim() || undefined,
       });
       try {
         await use(preflight);
