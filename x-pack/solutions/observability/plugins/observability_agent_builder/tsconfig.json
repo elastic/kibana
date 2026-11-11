@@ -6,6 +6,7 @@
   "include": ["common/**/*", "server/**/*", "../../../../../typings/**/*", "public/**/*", "scripts/**/*"],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/cps-server-utils",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-genai-utils",
     "@kbn/agent-builder-plugin",
