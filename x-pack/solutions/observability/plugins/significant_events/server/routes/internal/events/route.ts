@@ -12,8 +12,6 @@ import {
   severitySchema,
   MAX_ID_LENGTH,
   MAX_TEXT_LENGTH,
-  type InvestigationRunStatus,
-  type SignificantEventResponse,
   type LifecycleDetection,
   type EventLifecycleResponse,
 } from '@kbn/significant-events-schema';
@@ -25,9 +23,17 @@ import {
   cleanupStaleEvents,
   type CleanupStaleEventsResult,
 } from '../../../lib/significant_events/events/cleanup_stale_events';
-import { resolveInvestigationStatuses } from '../../../lib/significant_events/events/resolve_investigation_status';
 import type { DetectionClient } from '../../../lib/significant_events/detections';
-import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
+import {
+  attachInvestigationState,
+  createInvestigationStateUnavailableError,
+  toEpisodes,
+  toInvestigationFilter,
+} from '../../../lib/significant_events/events/attach_investigation_state';
+import {
+  listInvestigationStateSets,
+  type InvestigationStateSets,
+} from '../../../lib/significant_events/events/resolve_event_investigations';
 import type { EventsFilterOptions } from '../../../lib/significant_events/events/types';
 import {
   MAX_SIGNIFICANT_EVENTS_SEARCH_LENGTH,
@@ -35,6 +41,7 @@ import {
   SIGNIFICANT_EVENTS_SORT_FIELDS,
   SIGNIFICANT_EVENTS_SORT_ORDERS,
   type SignificantEventsFacets,
+  type SignificantEventsListResponse,
 } from '../../../../common/events_list';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
@@ -93,7 +100,6 @@ const toEventsFilterOptions = async (
     search,
     severity,
     topology_feature_id: topologyFeatureId,
-    investigation_state: investigationState,
     unassigned_entities: unassignedEntities,
   }: z.infer<typeof eventsFilterQuerySchema>,
   scopedClients: RouteHandlerScopedClients
@@ -128,7 +134,6 @@ const toEventsFilterOptions = async (
     severity: toArray(severity),
     topologyFeatureIds: toArray(topologyFeatureId),
     ...(unassignedEntityIds ? { unassignedEntityIds } : {}),
-    investigationStates: toArray(investigationState),
     search: search || undefined,
   };
 };
@@ -184,7 +189,8 @@ const eventsSearchRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-  }): Promise<PaginatedResponse<SignificantEventResponse>> => {
+    logger,
+  }): Promise<SignificantEventsListResponse> => {
     const scopedClients = await getScopedClients({ request });
     const { getEventSearchClient, licensing } = scopedClients;
 
@@ -200,14 +206,40 @@ const eventsSearchRoute = createServerRoute({
     } = params.query ?? {};
 
     const eventClient = await getEventSearchClient();
-    return eventClient.findLatestByCurrentStatePaginated({
+    const states = toArray(filters.investigation_state);
+    let sets: InvestigationStateSets | undefined;
+    if (states?.length) {
+      const listed = await listInvestigationStateSets({
+        agenticInvestigations: server.agenticInvestigations,
+        request,
+        logger,
+      });
+      if (listed === 'unavailable') {
+        throw createInvestigationStateUnavailableError();
+      }
+      sets = listed;
+    }
+
+    const result = await eventClient.findLatestByCurrentStatePaginated({
       ...(await toEventsFilterOptions(filters, scopedClients)),
+      investigation: toInvestigationFilter(states, sets),
       page,
       perPage,
       sortField,
       sortOrder,
       ...(eventId ? { eventIds: [eventId] } : {}),
     });
+    return {
+      ...result,
+      hits: await attachInvestigationState({
+        hits: result.hits,
+        sets,
+        agenticInvestigations: server.agenticInvestigations,
+        request,
+        logger,
+      }),
+      ...(sets?.truncated ? { investigation_window_truncated: true } : {}),
+    };
   },
 });
 
@@ -232,6 +264,7 @@ const eventsFacetsRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    logger,
   }): Promise<SignificantEventsFacets> => {
     const scopedClients = await getScopedClients({ request });
     const { getEventSearchClient, licensing } = scopedClients;
@@ -239,7 +272,38 @@ const eventsFacetsRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
 
     const eventClient = await getEventSearchClient();
-    return eventClient.countFacets(await toEventsFilterOptions(params.query ?? {}, scopedClients));
+    const states = toArray(params.query?.investigation_state);
+    // Started now so the severity and status counts do not wait for it, unless a filter needs it.
+    const listing = listInvestigationStateSets({
+      agenticInvestigations: server.agenticInvestigations,
+      request,
+      logger,
+    });
+    let sets: InvestigationStateSets | undefined;
+    if (states?.length) {
+      // The other dimensions honor the investigation filter, so they need the sets as well.
+      const listed = await listing;
+      if (listed === 'unavailable') {
+        throw createInvestigationStateUnavailableError();
+      }
+      sets = listed;
+    }
+    // Without a filter, an unreadable state only leaves the investigation counts out.
+    const investigationEpisodes = listing.then((listed) =>
+      listed === 'unavailable' ? undefined : toEpisodes(listed)
+    );
+    const facets = await eventClient.countFacets({
+      ...(await toEventsFilterOptions(params.query ?? {}, scopedClients)),
+      investigation: toInvestigationFilter(states, sets),
+      investigationEpisodes,
+    });
+    const listed = await listing;
+    return {
+      ...facets,
+      ...(listed !== 'unavailable' && listed.truncated
+        ? { investigation_window_truncated: true }
+        : {}),
+    };
   },
 });
 
@@ -404,51 +468,10 @@ const cleanupStaleEventsRoute = createServerRoute({
   },
 });
 
-const investigationStatusesRoute = createServerRoute({
-  endpoint: 'POST /internal/significant_events/investigations/_status',
-  options: {
-    access: 'internal',
-    summary: 'Resolve the outcome of investigation runs',
-    description:
-      'Reports whether each investigation is pending (an agent works on it) or complete, from the shared investigations API. The ids are the investigation ids a significant event records in `workflow_execution_id`. Investigations that do not exist or cannot be read are omitted.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({
-    body: z.object({
-      workflow_execution_ids: z.array(z.string().max(MAX_ID_LENGTH)).max(1000),
-    }),
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-    logger,
-  }): Promise<{ statuses: Record<string, InvestigationRunStatus> }> => {
-    const { licensing } = await getScopedClients({ request });
-
-    await assertSignificantEventsAccess({ server, licensing });
-
-    const statuses = await resolveInvestigationStatuses({
-      request,
-      agenticInvestigations: server.agenticInvestigations,
-      investigationIds: params.body.workflow_execution_ids,
-      logger,
-    });
-
-    return { statuses };
-  },
-});
-
 export const internalEventsRoutes = {
   ...eventsSearchRoute,
   ...eventsFacetsRoute,
   ...eventsLifecycleRoute,
   ...eventsUpdateRoute,
   ...cleanupStaleEventsRoute,
-  ...investigationStatusesRoute,
 };

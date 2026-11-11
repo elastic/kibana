@@ -130,7 +130,6 @@ Example: `platform_sig_events_events_write`.
 A continuation item adds `"event_id": "{accepted active event_id}"`; a new-event item omits it.
 ```json
 {
-  "source": "discovery",
   "items": [
     {
       "title": "...", "symptom_hypothesis": "...", "summary": "...", "severity": "...",
