@@ -94,3 +94,9 @@ export const MINIMAP_WIDTH = 150;
 export const MINIMAP_HEIGHT = 90;
 
 export const MINIMAP_MASK_COLOR = 'rgba(105, 112, 125, 0.14)';
+
+/** Opacity of nodes and edges outside the flow of the hovered node. */
+export const FLOW_DIMMED_OPACITY = 0.2;
+
+/** Fade duration (ms) when the flow highlight is applied or cleared. */
+export const FLOW_HIGHLIGHT_TRANSITION_MS = 120;

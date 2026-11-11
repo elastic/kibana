@@ -202,6 +202,8 @@ interface CanvasShellProps<NodeType extends Node, EdgeType extends Edge> {
   edgesReconnectable?: boolean;
   onNodeClick?: NodeMouseHandler<NodeType>;
   onNodeContextMenu?: NodeMouseHandler<NodeType>;
+  onNodeMouseEnter?: NodeMouseHandler<NodeType>;
+  onNodeMouseLeave?: NodeMouseHandler<NodeType>;
   onNodeDragStart?: OnNodeDrag<NodeType>;
   onPaneContextMenu?: (event: MouseEvent | React.MouseEvent) => void;
   /**
@@ -255,6 +257,8 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
   edgesReconnectable = false,
   onNodeClick,
   onNodeContextMenu,
+  onNodeMouseEnter,
+  onNodeMouseLeave,
   onNodeDragStart,
   onPaneContextMenu,
   onSelectionContextMenu,
@@ -342,6 +346,8 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
           onEdgeClick={noop}
           onNodeClick={onNodeClick}
           onNodeContextMenu={onNodeContextMenu}
+          onNodeMouseEnter={onNodeMouseEnter}
+          onNodeMouseLeave={onNodeMouseLeave}
           onNodeDragStart={onNodeDragStart}
           onPaneContextMenu={onPaneContextMenu}
           onSelectionContextMenu={onSelectionContextMenu}
