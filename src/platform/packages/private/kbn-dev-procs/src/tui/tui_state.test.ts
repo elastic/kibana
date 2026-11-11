@@ -370,6 +370,31 @@ describe('tools', () => {
     expect(getMatchingLines(all).map(({ text }) => text)).toEqual(['es started']);
   });
 
+  it('starts a stopped tool with enter, with its current arguments, and follows its output', () => {
+    expect(keyPress(withTool(), '', { return: true })).toEqual({
+      actions: [{ type: 'scrollToBottom' }],
+      control: { type: 'start' },
+    });
+    const running = apply(withTool(), {
+      type: 'status',
+      status: status('synthtrace', { state: 'ready' }),
+    });
+    expect(keyPress(running, '', { return: true })).toEqual({ actions: [] });
+  });
+
+  it("keeps a tool's run dividers in its own pane", () => {
+    const state = apply(withTool(), {
+      type: 'lines',
+      lines: [
+        { processId: 'synthtrace', stream: 'divider', text: 'node scripts/synthtrace', time: 0 },
+        { processId: 'synthtrace', stream: 'stdout', text: 'indexing', time: 0 },
+      ],
+    });
+    expect(getMatchingLines(state).map(({ stream }) => stream)).toEqual(['divider', 'stdout']);
+    const all = apply(state, { type: 'select', direction: 1 });
+    expect(getMatchingLines(all).map(({ text }) => text)).toEqual(['indexing']);
+  });
+
   it('starts a running tool, or a process that is not a tool, without asking', () => {
     const running = apply(withTool(), {
       type: 'status',

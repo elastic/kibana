@@ -107,8 +107,11 @@ export interface ProcessStatus {
 
 export interface LogLine {
   readonly processId: string;
-  /** `help` is a tool's --help, shown in its pane before it starts. */
-  readonly stream: 'stdout' | 'stderr' | 'help';
+  /**
+   * `help` is a tool's --help, shown in its pane before it starts; `divider` marks where a run of a tool starts,
+   * with its command as the text.
+   */
+  readonly stream: 'stdout' | 'stderr' | 'help' | 'divider';
   /** The line without escape sequences, for searching and the log file. */
   readonly text: string;
   /** The line as the process printed it, with its colours, when it has escape sequences. */

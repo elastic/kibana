@@ -24,7 +24,7 @@ import type { LogLine, ProcessState } from '../types';
 import type { InkModule } from './ink_module';
 import { fitText, getColumnWidths } from './columns';
 import type { ColumnWidths } from './columns';
-import { handleKey } from './tui_keys';
+import { handleKey, isStoppedTool } from './tui_keys';
 import {
   ALL,
   createTuiState,
@@ -182,10 +182,13 @@ export const createTuiApp = ({
   const LogPane = ({
     state,
     height,
+    width,
     tool,
   }: {
     readonly state: TuiState;
     readonly height: number;
+    /** The columns available for lines, inside the pane's border and padding. */
+    readonly width: number;
     readonly tool?: ToolOptions;
   }) => {
     const status = state.statuses[state.selected];
@@ -239,16 +242,23 @@ export const createTuiApp = ({
             {notice.text}
           </Text>
         ) : null}
-        {getVisibleLines(state, lineCount).map((line: LogLine, index) => (
-          <Text key={index} wrap="truncate-end">
-            {state.selected === ALL ? (
-              <Text color={colorFor(state.views, line.processId)}>
-                {line.processId.padEnd(labelWidth)}{' '}
-              </Text>
-            ) : null}
-            {toColoredDisplayText(line.raw ?? line.text)}
-          </Text>
-        ))}
+        {getVisibleLines(state, lineCount).map((line: LogLine, index) =>
+          line.stream === 'divider' ? (
+            // A rule across the pane where a run of the tool starts, below its help or a previous run.
+            <Text key={index} color="cyan" wrap="truncate-end">
+              ── {line.text} {'─'.repeat(Math.max(width - line.text.length - 4, 0))}
+            </Text>
+          ) : (
+            <Text key={index} wrap="truncate-end">
+              {state.selected === ALL ? (
+                <Text color={colorFor(state.views, line.processId)}>
+                  {line.processId.padEnd(labelWidth)}{' '}
+                </Text>
+              ) : null}
+              {toColoredDisplayText(line.raw ?? line.text)}
+            </Text>
+          )
+        )}
       </Box>
     );
   };
@@ -469,7 +479,12 @@ export const createTuiApp = ({
         : [
             ['tab', 'logs/settings'],
             ['r', 'restart'],
-            ['s', 'start'],
+            ...(isStoppedTool(state)
+              ? ([
+                  ['enter', 'start'],
+                  ['s', 'start with args'],
+                ] as const)
+              : ([['s', 'start']] as const)),
             ['x', 'stop'],
           ];
     return <KeyHints hints={[...paneKeys, ['/', 'filter'], ...processKeys, ['q', 'quit']]} />;
@@ -503,7 +518,19 @@ export const createTuiApp = ({
       // Kibana logs in bursts; one render per batch keeps the TUI responsive.
       let pending: LogLine[] = [];
       const offLine = supervisor.onLine((line) => pending.push(line));
-      const offChange = supervisor.onChange((status) => dispatch({ type: 'status', status }));
+      const offChange = supervisor.onChange((status) => {
+        const tool = supervisor.getTool(status.id);
+        if (tool && status.state === 'starting') {
+          // Queued with the output, so it comes before the first line of this run.
+          pending.push({
+            processId: status.id,
+            stream: 'divider',
+            text: tool.getCommand(),
+            time: Date.now(),
+          });
+        }
+        dispatch({ type: 'status', status });
+      });
       const timer = setInterval(() => {
         if (pending.length > 0) {
           const lines = pending;
@@ -668,6 +695,7 @@ export const createTuiApp = ({
             <LogPane
               state={state}
               height={logLines}
+              width={Math.max(columns - getSidebarWidth(state.views) - PANE_CHROME_COLUMNS, 1)}
               tool={selected === ALL ? undefined : supervisor.getTool(selected)}
             />
           ) : (

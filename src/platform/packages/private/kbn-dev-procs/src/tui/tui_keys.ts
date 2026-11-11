@@ -117,6 +117,12 @@ const handleSettingsKey = (
   return undefined;
 };
 
+const RUNNING_STATES = ['waiting', 'starting', 'ready', 'stopping'];
+
+/** Whether the selected process is a tool that is not running, so it can be started. */
+export const isStoppedTool = ({ tools, selected, statuses }: TuiState): boolean =>
+  tools.includes(selected) && !RUNNING_STATES.includes(statuses[selected]?.state ?? 'stopped');
+
 /** Maps a key press to the actions it triggers, and to the async control the app runs. */
 export const handleKey = (
   state: TuiState,
@@ -154,6 +160,10 @@ export const handleKey = (
   } else {
     if (key.upArrow || input === 'k') return { actions: [{ type: 'select', direction: -1 }] };
     if (key.downArrow || input === 'j') return { actions: [{ type: 'select', direction: 1 }] };
+    if (key.return && isStoppedTool(state)) {
+      // Starts the tool with its current arguments; s asks for them first.
+      return { actions: [{ type: 'scrollToBottom' }], control: { type: 'start' } };
+    }
     if (key.pageUp) return { actions: [{ type: 'scroll', delta: size.pageSize }] };
     if (key.pageDown) return { actions: [{ type: 'scroll', delta: -size.pageSize }] };
   }
@@ -161,14 +171,10 @@ export const handleKey = (
   if (state.selected !== ALL) {
     if (input === 'r') return { actions: [], control: { type: 'restart' } };
     if (input === 's') {
-      const isTool = state.tools.includes(state.selected);
-      const isRunning = ['waiting', 'starting', 'ready', 'stopping'].includes(
-        state.statuses[state.selected]?.state ?? 'stopped'
-      );
       // A tool asks for its arguments first, so they can change between runs.
       return {
         actions: [],
-        control: isTool && !isRunning ? { type: 'editToolArgs' } : { type: 'start' },
+        control: isStoppedTool(state) ? { type: 'editToolArgs' } : { type: 'start' },
       };
     }
     if (input === 'x') return { actions: [], control: { type: 'stop' } };

@@ -150,8 +150,8 @@ export const getMatchingLines = ({ lines, selected, query }: TuiState): readonly
   const needle = query.toLowerCase();
   return lines.filter(
     ({ processId, stream, text }) =>
-      // A tool's --help belongs to its own pane, not to the combined output.
-      (selected === ALL ? stream !== 'help' : processId === selected) &&
+      // A tool's --help and run dividers belong to its own pane, not to the combined output.
+      (selected === ALL ? stream === 'stdout' || stream === 'stderr' : processId === selected) &&
       (needle === '' || text.toLowerCase().includes(needle))
   );
 };
