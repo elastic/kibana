@@ -20,6 +20,9 @@ interface WorkflowStep {
   with?: {
     path?: string;
     'workflow-id'?: string;
+    metricsEntitiesExcludedSkipped?: string;
+    metricsEntitiesMultiNamespaceWorkloads?: string;
+    metricsEntitiesDroppedOverflow?: string;
   };
 }
 
@@ -91,6 +94,22 @@ describe('KI onboarding workflow metrics branch', () => {
         }),
       })
     );
+    expect(
+      metricsBranch?.steps?.find(({ name }) => name === 'save_metrics_entities_output')?.with
+    ).toMatchObject({
+      metricsEntitiesExcludedSkipped:
+        '${{ steps.run_metrics_entities.output.excludedSkippedCount | default: 0 }}',
+      metricsEntitiesMultiNamespaceWorkloads:
+        '${{ steps.run_metrics_entities.output.multiNamespaceWorkloadsCount | default: 0 }}',
+      metricsEntitiesDroppedOverflow:
+        '${{ steps.run_metrics_entities.output.droppedOverflowRowsCount | default: 0 }}',
+    });
+    expect(workflow.steps.find(({ name }) => name === 'output_result')?.with).toMatchObject({
+      metricsEntitiesExcludedSkipped: '${{ variables.metricsEntitiesExcludedSkipped }}',
+      metricsEntitiesMultiNamespaceWorkloads:
+        '${{ variables.metricsEntitiesMultiNamespaceWorkloads }}',
+      metricsEntitiesDroppedOverflow: '${{ variables.metricsEntitiesDroppedOverflow }}',
+    });
     expect(
       conditionMatches(metricsBranch, {
         sourceType: 'metrics',

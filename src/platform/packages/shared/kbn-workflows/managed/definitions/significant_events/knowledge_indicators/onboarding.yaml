@@ -148,6 +148,9 @@ steps:
           metricsEntitiesCount: 0
           metricsEntitiesUncoveredDatasetsCount: 0
           metricsEntitiesDroppedOwnerlessRows: 0
+          metricsEntitiesExcludedSkipped: 0
+          metricsEntitiesMultiNamespaceWorkloads: 0
+          metricsEntitiesDroppedOverflow: 0
           metricsEntitiesHandled: false
           metricsEntitiesSkipReason: ''
           keepAliveRefreshed: 0
@@ -170,6 +173,9 @@ steps:
       metricsEntitiesCount: 0
       metricsEntitiesUncoveredDatasetsCount: 0
       metricsEntitiesDroppedOwnerlessRows: 0
+      metricsEntitiesExcludedSkipped: 0
+      metricsEntitiesMultiNamespaceWorkloads: 0
+      metricsEntitiesDroppedOverflow: 0
       metricsEntitiesHandled: false
       metricsEntitiesSkipReason: ""
       cycleStartedAt: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.000Z" }}'
@@ -194,6 +200,9 @@ steps:
           metricsEntitiesCount: "${{ steps.run_metrics_entities.output.metricsEntitiesCount | default: 0 }}"
           metricsEntitiesUncoveredDatasetsCount: "${{ steps.run_metrics_entities.output.uncoveredDatasetsCount | default: 0 }}"
           metricsEntitiesDroppedOwnerlessRows: "${{ steps.run_metrics_entities.output.droppedRows.ownerless | default: 0 }}"
+          metricsEntitiesExcludedSkipped: "${{ steps.run_metrics_entities.output.excludedSkippedCount | default: 0 }}"
+          metricsEntitiesMultiNamespaceWorkloads: "${{ steps.run_metrics_entities.output.multiNamespaceWorkloadsCount | default: 0 }}"
+          metricsEntitiesDroppedOverflow: "${{ steps.run_metrics_entities.output.droppedOverflowRowsCount | default: 0 }}"
           metricsEntitiesHandled: >-
             ${{ steps.run_metrics_entities.error != null
               or steps.run_metrics_entities.output.handled != false }}
@@ -333,6 +342,9 @@ steps:
       metricsEntitiesCount: "${{ variables.metricsEntitiesCount }}"
       metricsEntitiesUncoveredDatasetsCount: "${{ variables.metricsEntitiesUncoveredDatasetsCount }}"
       metricsEntitiesDroppedOwnerlessRows: "${{ variables.metricsEntitiesDroppedOwnerlessRows }}"
+      metricsEntitiesExcludedSkipped: "${{ variables.metricsEntitiesExcludedSkipped }}"
+      metricsEntitiesMultiNamespaceWorkloads: "${{ variables.metricsEntitiesMultiNamespaceWorkloads }}"
+      metricsEntitiesDroppedOverflow: "${{ variables.metricsEntitiesDroppedOverflow }}"
       metricsEntitiesHandled: "${{ variables.metricsEntitiesHandled }}"
       metricsEntitiesSkipReason: "${{ variables.metricsEntitiesSkipReason }}"
       keepAliveRefreshed: "${{ steps.keep_alive_persistent.output.refreshed }}"
