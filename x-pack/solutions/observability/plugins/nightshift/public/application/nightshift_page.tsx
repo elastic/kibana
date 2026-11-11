@@ -177,6 +177,9 @@ export function NightshiftPage(): React.ReactElement | null {
   const detectionSettingsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
     path: '/settings/detections?origin=detections',
   });
+  const investigationSettingsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
+    path: '/settings/investigations?origin=automations',
+  });
   const knowledgeHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
     path: '/knowledge',
   });
@@ -203,6 +206,10 @@ export function NightshiftPage(): React.ReactElement | null {
   const navigateToDetectionSettings = useCallback(
     () => application.navigateToUrl(detectionSettingsHref),
     [application, detectionSettingsHref]
+  );
+  const navigateToInvestigationSettings = useCallback(
+    () => application.navigateToUrl(investigationSettingsHref),
+    [application, investigationSettingsHref]
   );
   const navigateToKnowledge = useCallback(
     () => application.navigateToUrl(knowledgeHref),
@@ -468,8 +475,20 @@ export function NightshiftPage(): React.ReactElement | null {
             page={canUseAutomationsPage ? 'automations' : 'landing'}
             onKnowledgeClick={navigateToKnowledge}
             knowledgeHref={knowledgeHref}
-            onSettingsClick={canManageAndConfigure ? navigateToSettings : undefined}
-            settingsHref={canManageAndConfigure ? settingsHref : undefined}
+            onSettingsClick={
+              canManageAndConfigure
+                ? canUseAutomationsPage
+                  ? navigateToInvestigationSettings
+                  : navigateToSettings
+                : undefined
+            }
+            settingsHref={
+              canManageAndConfigure
+                ? canUseAutomationsPage
+                  ? investigationSettingsHref
+                  : settingsHref
+                : undefined
+            }
             onAutomationsClick={
               canUseAutomations && !hidesHeaderActions ? navigateToAutomations : undefined
             }
