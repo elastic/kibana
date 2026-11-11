@@ -82,12 +82,12 @@ describe('AttachmentActions', () => {
     expect(openInEditor.handler).toHaveBeenCalledTimes(1);
   });
 
-  it('renders a menu-only button when all actions are overflow actions', async () => {
+  it('uses the first secondary action as the main button when there are multiple secondary actions', async () => {
     const remove = createButton({ label: 'Delete', type: ActionButtonType.SECONDARY });
     const archive = createButton({ label: 'Archive', type: ActionButtonType.SECONDARY });
     render(<AttachmentActions buttons={[remove, archive]} />);
 
-    expect(screen.queryByRole('button', { name: 'Delete' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Delete' })).toBeInTheDocument();
 
     openMenu();
     fireEvent.click(await screen.findByText('Archive'));
