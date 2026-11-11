@@ -25,6 +25,10 @@ for var_name in KIBANA_SOURCE_CLUSTER_URL KIBANA_SOURCE_INDEX KIBANA_SOURCE_CLUS
   fi
 done
 
+# latest = serverless artifacts. current = the running Kibana version from
+# GET /api/status, resolved inside the FTR suite (9.6.0 -> 9.6).
+export STACK_DOCS_VERSION="${STACK_DOCS_VERSION:-latest}"
+
 export FTR_CONFIG="${FTR_CONFIG:-x-pack/platform/test/functional_gen_ai/inference/generate_artifacts.config.ts}"
 export FTR_CONFIG_GROUP_KEY="${FTR_CONFIG_GROUP_KEY:-ftr-ai-infra-gen-ai-inference-api}"
 export FTR_GEN_AI="${FTR_GEN_AI:-1}"
@@ -32,10 +36,5 @@ export FTR_EIS_CCM="${FTR_EIS_CCM:-1}"
 
 .buildkite/scripts/steps/test/ftr_configs.sh
 
-# Mirror security labs: upload zips immediately after FTR so GCS gets artifacts
-# even if the ES|QL docs PR step fails or exits early.
 echo "--- Upload GenAI product docs artifacts to GCS"
 bash .buildkite/scripts/steps/gen_ai/upload_kb_artifacts.sh
-
-echo "--- Make PR for GenAI ES|QL docs sync update"
-.buildkite/scripts/steps/gen_ai/esql_docs_sync.sh

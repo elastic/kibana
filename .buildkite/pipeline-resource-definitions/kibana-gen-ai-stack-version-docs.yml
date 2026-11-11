@@ -1,0 +1,60 @@
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: bk-kibana-gen-ai-stack-version-docs
+  description: Every two weeks, reuses a recent Kibana build and publishes product docs artifacts for that Kibana version from GET /api/status (Jina and ELSER on EIS), then syncs ES|QL docs. Set KIBANA_REUSE_BUILD=false to force a fresh Kibana build.
+  links:
+    - url: 'https://buildkite.com/elastic/kibana-gen-ai-stack-version-docs'
+      title: Pipeline link
+spec:
+  type: buildkite-pipeline
+  owner: 'group:search-ml-ux'
+  system: buildkite
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / gen-ai-stack-version-docs
+      description: Every two weeks, reuses a recent Kibana build and publishes product docs artifacts for that Kibana version from GET /api/status (Jina and ELSER on EIS), then syncs ES|QL docs. Set KIBANA_REUSE_BUILD=false to force a fresh Kibana build.
+    spec:
+      env:
+        SLACK_NOTIFICATIONS_CHANNEL: '#search-ml-ux-alerts'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+      allow_rebuilds: true
+      branch_configuration: main
+      cancel_intermediate_builds: true
+      default_branch: main
+      repository: elastic/kibana
+      pipeline_file: .buildkite/pipelines/gen_ai_stack_version_docs.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/gen_ai_stack_version_docs.yml
+            cleanup_sparse_state: true
+      provider_settings:
+        build_branches: false
+        build_pull_requests: false
+        publish_commit_status: false
+        trigger_mode: none
+        prefix_pull_request_fork_branch_names: false
+        skip_pull_request_builds_for_existing_commits: false
+      teams:
+        everyone:
+          access_level: BUILD_AND_READ
+        search-ml-ux:
+          access_level: MANAGE_BUILD_AND_READ
+        kibana-operations:
+          access_level: MANAGE_BUILD_AND_READ
+        appex-qa:
+          access_level: MANAGE_BUILD_AND_READ
+        kibana-tech-leads:
+          access_level: MANAGE_BUILD_AND_READ
+      schedules:
+        Every two weeks:
+          # 1st and 15th at 11pm America/New_York. Standard cron cannot express
+          # "every other Friday"; this is the same night window, twice a month.
+          cronline: 0 23 1,15 * * America/New_York
+          message: Biweekly stack version product docs and ES|QL docs sync
+          branch: main
+      tags:
+        - kibana
