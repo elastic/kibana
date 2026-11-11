@@ -68,7 +68,7 @@ export class DigitalExperiencePage {
   public readonly sessionsTab: Locator;
   public readonly sessionsTable: EuiBasicTableObject;
   public readonly sessionsSearch: Locator;
-  public readonly sessionsErrorsFilter: Locator;
+  public readonly sessionsJsErrorsFilter: Locator;
   public readonly sessionsClearFilters: Locator;
   public readonly sessionsKpis: Locator;
   public readonly sessionsEmpty: Locator;
@@ -131,7 +131,7 @@ export class DigitalExperiencePage {
     this.sessionsTab = page.getByTestId('digitalExperienceTab-sessions');
     this.sessionsTable = page.components.basicTable('digitalExperienceSessionsTable');
     this.sessionsSearch = page.getByTestId('digitalExperienceSessionsSearch');
-    this.sessionsErrorsFilter = page.getByTestId('digitalExperienceSessionsErrorsFilter');
+    this.sessionsJsErrorsFilter = page.getByTestId('digitalExperienceSessionsJsErrorsFilter');
     this.sessionsClearFilters = page.getByTestId('digitalExperienceSessionsClearFilters');
     this.sessionsKpis = page.getByTestId('digitalExperienceSessionsKpis');
     this.sessionsEmpty = page.getByTestId('digitalExperienceSessionsEmpty');
@@ -308,7 +308,13 @@ export class DigitalExperiencePage {
   }
 
   sessionsKpi(
-    id: 'total' | 'withErrors' | 'medianDuration' | 'avgPageViews' | 'bounceRate'
+    id:
+      | 'total'
+      | 'withJsErrors'
+      | 'withFailedRequests'
+      | 'medianDuration'
+      | 'avgPageViews'
+      | 'bounceRate'
   ): Locator {
     return this.page.getByTestId(`digitalExperienceSessionsKpi-${id}`);
   }

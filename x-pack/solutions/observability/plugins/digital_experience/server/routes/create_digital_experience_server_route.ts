@@ -8,7 +8,17 @@
 import { createServerRouteFactory } from '@kbn/server-route-repository';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository-utils';
 import type { ApmDataAccessPluginSetup } from '@kbn/apm-data-access-plugin/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { SessionsSettings } from '../../common/sessions';
 import { describeError, toClientError } from '../lib/helpers/errors';
+
+/** What sessions need from other plugins, available once they have started. */
+export interface SessionsServices {
+  /** Runs the summaries task; without it, sessions can't be enabled. */
+  taskManager: TaskManagerStartContract | undefined;
+  /** Whether Kibana can store the task's API key, which needs an encryption key. */
+  canEncrypt: boolean;
+}
 
 export interface DigitalExperienceRouteHandlerResources extends DefaultRouteHandlerResources {
   /** Optional: only the Classic source needs it. */
@@ -16,6 +26,9 @@ export interface DigitalExperienceRouteHandlerResources extends DefaultRouteHand
   isServerless: boolean;
   /** Whether the ux plugin is enabled; the Classic RUM source needs it, like the browser does. */
   isUxEnabled: boolean;
+  /** `xpack.digital_experience.sessions` config: how often the summaries task runs. */
+  sessionsSettings: SessionsSettings;
+  getSessionsServices: () => Promise<SessionsServices>;
 }
 
 const createServerRoute = createServerRouteFactory<

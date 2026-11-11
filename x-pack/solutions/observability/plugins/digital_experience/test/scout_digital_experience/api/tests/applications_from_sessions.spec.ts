@@ -6,13 +6,13 @@
  */
 
 import type { KibanaRole } from '@kbn/scout-oblt';
-import { apiTest, type ApiClientFixture, type EsClient } from '@kbn/scout-oblt';
+import { apiTest, type ApiClientFixture, type EsClient, type KbnClient } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { BROWSER_SDK_LANGUAGE } from '../../../../common/otel_data';
 import {
   SESSIONS_INDEX,
   SESSIONS_SOURCE_INDICES,
-  SESSIONS_TRANSFORM_ID,
+  SESSIONS_TASK_ID,
   type SessionsStatus,
 } from '../../../../common/sessions';
 import type {
@@ -38,7 +38,7 @@ const STAGING = 'dx-sessions-staging';
 const NOT_DEFINED = 'ENVIRONMENT_NOT_DEFINED';
 
 const MINUTE_MS = 60_000;
-/** Checkpoints are triggered with `_schedule_now`, so summarizing takes seconds, not minutes. */
+/** The summaries task is run with `run_soon`, so summarizing takes seconds, not minutes. */
 const SUMMARIZE_TIMEOUT_MS = 90_000;
 const POLL_MS = 2_000;
 const TEST_TIMEOUT_MS = 4 * SUMMARIZE_TIMEOUT_MS;
@@ -151,6 +151,14 @@ const buildEvents = (baseMs: number) => {
   };
 };
 
+/** Runs the summaries task now instead of at its next interval. */
+const runSessionsTask = (kbnClient: KbnClient) =>
+  kbnClient.request({
+    method: 'POST',
+    path: `/internal/ftr/task_manager/${encodeURIComponent(SESSIONS_TASK_ID)}/run_soon`,
+    headers: { 'x-elastic-internal-origin': 'kibana' },
+  });
+
 const deleteEvents = (esClient: EsClient) =>
   esClient.deleteByQuery({
     index: [LOGS_INDEX, TRACES_INDEX],
@@ -181,8 +189,6 @@ apiTest.describe(
     let eventsStartMs: number;
     let viewerHeaders: Record<string, string>;
     let adminHeaders: Record<string, string>;
-    /** The API key enabling sessions granted, so it does not outlive the suite. */
-    let grantedApiKeyId: string | null = null;
 
     const getApplications = async (
       apiClient: ApiClientFixture,
@@ -202,8 +208,8 @@ apiTest.describe(
       return response.body as ApplicationsResponse;
     };
 
-    apiTest.beforeAll(async ({ esClient, samlAuth }) => {
-      await deleteSessionsData(esClient);
+    apiTest.beforeAll(async ({ esClient, kbnClient, samlAuth }) => {
+      await deleteSessionsData(esClient, kbnClient);
       await deleteEvents(esClient);
       viewerHeaders = {
         ...COMMON_HEADERS,
@@ -214,7 +220,7 @@ apiTest.describe(
         ...(await samlAuth.asInteractiveUser('admin')).cookieHeader,
       };
 
-      // Far enough back for the transform's sync delay.
+      // Far enough back for the summaries task's sync delay.
       eventsStartMs = Date.now() - 30 * MINUTE_MS;
       const { logs, spans } = buildEvents(eventsStartMs);
       const { errors, items } = await esClient.bulk({
@@ -229,19 +235,17 @@ apiTest.describe(
       }
     });
 
-    apiTest.afterAll(async ({ esClient }) => {
-      await deleteSessionsData(esClient);
+    // Removing the task also invalidates the API key enabling sessions granted.
+    apiTest.afterAll(async ({ esClient, kbnClient }) => {
+      await deleteSessionsData(esClient, kbnClient);
       await deleteEvents(esClient);
-      if (grantedApiKeyId) {
-        await esClient.security.invalidateApiKey({ ids: [grantedApiKeyId] });
-      }
     });
 
     // One test, as the stages build on each other: a retry in a fresh worker runs `beforeAll` again,
     // which starts from the raw events, so it can't be left half-way through the lifecycle.
     apiTest(
       'reads the applications from the raw events, then from the sessions index',
-      async ({ apiClient, esClient, samlAuth }) => {
+      async ({ apiClient, esClient, kbnClient, samlAuth }) => {
         apiTest.setTimeout(TEST_TIMEOUT_MS);
 
         // What the raw events give, before sessions are set up: the numbers the sessions must match.
@@ -281,21 +285,18 @@ apiTest.describe(
         );
 
         await apiTest.step(
-          'sets sessions up and waits for the transform to summarize the events',
+          'sets sessions up and waits for the summaries task to summarize the events',
           async () => {
             const enable = await apiClient.post(SESSIONS_ENABLE_PATH, {
               headers: adminHeaders,
               responseType: 'json',
             });
             expect(enable).toHaveStatusCode(200);
-            grantedApiKeyId = (enable.body as SessionsStatus).authorization?.apiKeyId ?? null;
 
             await expect
               .poll(
                 async () => {
-                  await esClient.transform.scheduleNowTransform({
-                    transform_id: SESSIONS_TRANSFORM_ID,
-                  });
+                  await runSessionsTask(kbnClient);
                   const { count } = await esClient.count({
                     index: SESSIONS_INDEX,
                     query: { term: { 'service.name': APP } },
@@ -307,8 +308,8 @@ apiTest.describe(
               )
               .toBe(3);
 
-            // The list reads the sessions only once their transforms are healthy and past their
-            // first checkpoint, so a build in progress is never shown as lower numbers.
+            // The list reads the sessions only once the task is healthy and has caught up since
+            // sessions were enabled, so a build in progress is never shown as lower numbers.
             await expect
               .poll(
                 async () => {

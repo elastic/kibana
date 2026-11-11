@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
   SESSIONS_LOOKBACK_DAYS,
   type SessionsSettings,
@@ -13,7 +14,7 @@ import {
 } from '../../../../common/sessions';
 import { createDigitalExperienceTracedEsClient } from '../../../lib/create_digital_experience_traced_es_client';
 import { describeError, isAccessDenied } from '../../../lib/helpers/errors';
-import { getSessionsStatus } from '../../../sessions/sessions_setup';
+import { getSessionsStatus } from '../../../services/sessions/sessions_status';
 import type { SourceApplications } from '../types';
 import type { GetOtelApplicationsParams } from './get_otel_applications';
 import { getOtelApplications } from './get_otel_applications';
@@ -21,23 +22,24 @@ import { getSessionsApplications } from './get_sessions_applications';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-/** The transforms change rarely, while the list is refreshed often and a read is two calls. */
+/** The status changes at most once a run, while the list is refreshed often. */
 const SESSIONS_STATUS_TTL_MS = 30_000;
 
 interface GetOtelApplicationsFromBestSourceParams extends GetOtelApplicationsParams {
-  /** Reads the status of the sessions, which only needs the index metadata. */
-  internalEsClient: ElasticsearchClient;
+  /** Reads the summaries task's status; `undefined` without Task Manager, so without sessions. */
+  taskManager: TaskManagerStartContract | undefined;
+  sessionsSettings: SessionsSettings;
   logger: Logger;
 }
 
 /**
- * The sessions summarize the events of the last `SESSIONS_LOOKBACK_DAYS` days, from the start of
- * that day, so a range that starts earlier is partly missing from the sessions index.
+ * The summaries task summarizes the events of the last `SESSIONS_LOOKBACK_DAYS` days, from the
+ * start of that day, so a range that starts earlier is partly missing from the sessions index.
  */
 const sessionsLookbackStart = (now: number): number =>
   Math.floor((now - SESSIONS_LOOKBACK_DAYS * DAY_MS) / DAY_MS) * DAY_MS;
 
-/** Sessions that are set up, current and healthy, with every transform past its first checkpoint. */
+/** Sessions that are set up, healthy and caught up with the events since they were enabled. */
 const isReadable = ({ installed, health, rebuilding }: SessionsStatus): boolean =>
   installed && health === 'healthy' && !rebuilding;
 
@@ -54,17 +56,18 @@ export const clearSessionsStatusCache = (): void => {
  * abort signal of the one that read it. A failed read is not remembered.
  */
 const areSessionsReadable = ({
-  internalEsClient,
+  taskManager,
   sessionsSettings,
   logger,
 }: GetOtelApplicationsFromBestSourceParams): Promise<boolean> => {
+  if (!taskManager) {
+    return Promise.resolve(false);
+  }
   const now = Date.now();
   if (sessionsReadable && sessionsReadable.expiresAt > now) {
     return sessionsReadable.result;
   }
-  const result: Promise<boolean> = getSessionsStatus(internalEsClient, {
-    settings: sessionsSettings,
-  })
+  const result: Promise<boolean> = getSessionsStatus({ taskManager, settings: sessionsSettings })
     .then(isReadable)
     .catch((error) => {
       logger.debug(`Could not read the sessions status: ${describeError(error)}`);
@@ -88,8 +91,8 @@ const sessionsCoverTimeRange = async (
 
 /**
  * The EDOT Browser applications, from the sessions index when it can answer and from the raw
- * events otherwise, in the same shape. The raw search runs when sessions are not set up, outdated,
- * unhealthy or still being built, when the time range reaches back past the sessions' lookback,
+ * events otherwise, in the same shape. The raw search runs when sessions are not set up, failing,
+ * lagging or still being built, when the time range reaches back past the sessions' lookback,
  * when the user can't read the sessions index, and when the sessions hold no application, which
  * the raw events still can, e.g. ones that send no `session.id`. An application that sends none
  * while others do is not in the sessions, so it is missing from the list.
@@ -97,7 +100,7 @@ const sessionsCoverTimeRange = async (
 export const getOtelApplicationsFromBestSource = async (
   params: GetOtelApplicationsFromBestSourceParams
 ): Promise<SourceApplications> => {
-  const { internalEsClient, sessionsSettings, logger, ...searchParams } = params;
+  const { taskManager, sessionsSettings, logger, ...searchParams } = params;
   const { esClient, signal, start, end, environment } = searchParams;
 
   if (await sessionsCoverTimeRange(params)) {

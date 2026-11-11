@@ -6,10 +6,9 @@
  */
 
 /**
- * Candidate source fields per summarized attribute, in priority order. The dest
- * pipeline keeps the first non-empty value, so the same attribute can come from
- * the event or resource scope. The Overview filters read the same lists, so a filter value
- * means what it does in the sessions.
+ * Candidate source fields per summarized attribute, in priority order. The session summary keeps
+ * the first non-empty value, so the same attribute can come from the event or resource scope. The
+ * Overview filters read the same lists, so a filter value means what it does in the sessions.
  */
 export const SESSION_ATTRIBUTE_FIELDS = {
   // `deployment.environment.name` replaces the deprecated `deployment.environment`, which
@@ -59,3 +58,5 @@ export const SESSION_ATTRIBUTE_FIELDS = {
   region: ['attributes.client.geo.region_name', 'resource.attributes.client.geo.region_name'],
   city: ['attributes.client.geo.city_name', 'resource.attributes.client.geo.city_name'],
 } as const;
+
+export type SessionAttribute = keyof typeof SESSION_ATTRIBUTE_FIELDS;

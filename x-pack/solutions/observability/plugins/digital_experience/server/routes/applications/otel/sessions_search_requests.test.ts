@@ -8,7 +8,7 @@
 import { ENVIRONMENT_NOT_DEFINED_VALUE } from '@kbn/apm-types';
 import { getBucketSizeSeconds } from '../../../lib/helpers/time_series';
 import { MAX_APPLICATIONS_PER_SOURCE, MAX_ENVIRONMENTS_PER_APPLICATION } from '../constants';
-import { sessionOverlapFilters } from '../../../sessions/list_sessions';
+import { sessionOverlapFilters } from '../../sessions/list_sessions';
 import { sessionsSearch } from './sessions_search_requests';
 
 const START = Date.parse('2021-01-18T12:00:00.000Z');

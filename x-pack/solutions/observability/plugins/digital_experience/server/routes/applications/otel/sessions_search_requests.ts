@@ -12,7 +12,7 @@ import { p75Of, sumOf } from '../../../lib/helpers/aggregations';
 import { environmentFilter, environmentNotDefinedFilter } from '../../../lib/helpers/environment';
 import { dateHistogram } from '../../../lib/helpers/time_series';
 import { MAX_ENVIRONMENTS } from '../../../lib/constants';
-import { sessionOverlapFilters } from '../../../sessions/list_sessions';
+import { sessionOverlapFilters } from '../../sessions/list_sessions';
 import { MAX_APPLICATIONS_PER_SOURCE, MAX_ENVIRONMENTS_PER_APPLICATION } from '../constants';
 import type { SearchParams } from './search_requests';
 
