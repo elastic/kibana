@@ -6933,6 +6933,8 @@ describe('Package policy service', () => {
               ? {
                   id: obj.id,
                   type: obj.type,
+                  attributes: {},
+                  references: [],
                   error: { statusCode: 409, error: 'Conflict', message: 'Conflict' },
                 }
               : { ...obj, references: [], version: 'test' }
