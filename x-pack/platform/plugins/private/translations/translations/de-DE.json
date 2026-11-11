@@ -52027,7 +52027,6 @@
     "xpack.searchInferenceEndpoints.eisModelsPage.entity": "Modell",
     "xpack.searchInferenceEndpoints.eisModelsPage.entityPlural": "Modelle",
     "xpack.searchInferenceEndpoints.eisModelspage.filter.embedding": "Einbettung",
-    "xpack.searchInferenceEndpoints.eisModelspage.filter.llm": "LLM",
     "xpack.searchInferenceEndpoints.eisModelspage.filter.rerank": "RERANK",
     "xpack.searchInferenceEndpoints.eisModelsPage.header": "Elastic Inference Service",
     "xpack.searchInferenceEndpoints.eisModelsPage.manageRegionsButton": "Regionseinstellungen",
