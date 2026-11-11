@@ -445,6 +445,7 @@ export const foldMultiNamespaceWorkloadRows = (rows: EsqlRow[]): EntityFoldResul
         description: `Kubernetes ${workload.kind} ${workload.name} in ${workload.namespaceCount} namespaces.`,
         filter: buildMultiNamespaceWorkloadFilter(workload, workloads),
         properties: {
+          name: workload.name,
           identity: { [workloadOwnerFields[workload.kind]]: workload.name },
           grain: 'multi_namespace',
           namespace_count: workload.namespaceCount,
@@ -524,6 +525,7 @@ export const foldWorkloadRows = (rows: EsqlRow[]): EntityFoldResult => {
         description: `Kubernetes ${workload.kind} ${workload.name} in namespace ${workload.namespace}.`,
         filter: buildWorkloadFilter(workload, workloads),
         properties: {
+          name: workload.name,
           identity: {
             'kubernetes.namespace': workload.namespace,
             [ownerField]: workload.name,
@@ -809,6 +811,7 @@ export const foldClusterRows = (rows: EsqlRow[]): EntityFoldResult => {
         description: `Kubernetes cluster ${cluster}.`,
         filter: { field: 'orchestrator.cluster.name', eq: cluster },
         properties: {
+          name: cluster,
           identity: { 'orchestrator.cluster.name': cluster },
           entity_store_type: KUBERNETES_ENTITY_STORE_TYPES.cluster,
           nodes: typeof row.nodes === 'number' ? row.nodes : 0,
@@ -915,6 +918,7 @@ const foldHostRows = ({
         description: `Host ${hostName}.`,
         filter: { field: 'host.name', eq: hostName },
         properties: {
+          name: hostName,
           identity: { 'host.name': hostName },
           breakdown: ['orchestrator.cluster.name'],
           entity_store_type: 'host',
@@ -1038,6 +1042,7 @@ export const foldServiceRows = (rows: EsqlRow[]): EntityFoldResult => {
         description: `Service ${name}.`,
         filter: { field: 'service.name', eq: name },
         properties: {
+          name,
           identity: { 'service.name': name },
           environments: stringsOf(row.environments),
           entity_store_type: 'service',

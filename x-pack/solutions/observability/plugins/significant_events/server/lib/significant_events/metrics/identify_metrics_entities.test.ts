@@ -505,6 +505,7 @@ describe('host entity merging', () => {
         subtype: 'host',
         filter: { field: 'host.name', eq: 'router-1' },
         properties: expect.objectContaining({
+          name: 'router-1',
           entity_store_type: 'host',
           host: { os: ['Linux'], cloud_provider: [], cloud_instance: [] },
         }),
@@ -617,6 +618,7 @@ describe('identifyMetricsEntities', () => {
         description: 'Kubernetes deployment kb-ui-kb in 10 namespaces.',
         filter: { field: 'kubernetes.deployment.name', eq: 'kb-ui-kb' },
         properties: expect.objectContaining({
+          name: 'kb-ui-kb',
           grain: 'multi_namespace',
           namespace_count: 10,
           breakdown: ['kubernetes.namespace', 'orchestrator.cluster.name'],
@@ -766,6 +768,7 @@ describe('identifyMetricsEntities', () => {
         ],
       },
       properties: {
+        name: 'checkout',
         identity: {
           'kubernetes.namespace': 'payments',
           'kubernetes.deployment.name': 'checkout',
@@ -793,6 +796,15 @@ describe('identifyMetricsEntities', () => {
         index.feature.id.includes('missing-namespace')
       )
     ).toBe(false);
+    expect(
+      operations
+        .map(
+          ({ index }: { index: { feature: { type: string; properties: { name?: string } } } }) =>
+            index.feature
+        )
+        .filter(({ type }: { type: string }) => type === 'entity')
+        .every(({ properties }: { properties: { name?: string } }) => properties.name !== undefined)
+    ).toBe(true);
   });
 
   it('falls back without inventory queries or writes when the source returns no data', async () => {
@@ -902,6 +914,12 @@ describe('identifyMetricsEntities', () => {
           index.feature.id === 'service:checkout'
       )?.index.feature.properties.environments
     ).toEqual(['production', 'staging']);
+    expect(
+      harness.bulk.mock.calls[0][1].map(
+        ({ index }: { index: { feature: { properties: { name?: string } } } }) =>
+          index.feature.properties.name
+      )
+    ).toEqual(['router-1', 'checkout', 'checkout']);
     expect(harness.info).not.toHaveBeenCalled();
   });
 
