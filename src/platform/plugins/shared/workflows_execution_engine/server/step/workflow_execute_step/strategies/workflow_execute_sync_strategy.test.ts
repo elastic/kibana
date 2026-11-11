@@ -14,7 +14,10 @@ import { WorkflowExecuteSyncStrategy } from './workflow_execute_sync_strategy';
 import type { StepExecutionRepository } from '../../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../../repositories/workflow_execution_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../../types';
-import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
+import {
+  INPUT_RECORDED_STATE_KEY,
+  type StepExecutionRuntime,
+} from '../../../workflow_context_manager/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 
 const createMockWorkflow = (overrides: Partial<EsWorkflow> = {}): EsWorkflow =>
@@ -183,6 +186,26 @@ describe('WorkflowExecuteSyncStrategy', () => {
         undefined,
         ExecutionStatus.WAITING_FOR_CHILD
       );
+    });
+
+    it('starts the child when step state only records that input was written', async () => {
+      mockStepRuntime.getCurrentStepState.mockReturnValue({
+        [INPUT_RECORDED_STATE_KEY]: true,
+      });
+
+      const result = await strategy.execute(
+        createMockWorkflow(),
+        { param1: 'value1' },
+        'default',
+        mockRequest,
+        0,
+        false,
+        'sync-step-1'
+      );
+
+      expect(result.status).toBe('waiting');
+      expect(mockEngine.executeWorkflow).toHaveBeenCalled();
+      expect(mockExecRepo.getWorkflowExecutionById).toHaveBeenCalledWith('child-exec-1', 'default');
     });
 
     it('should propagate isTestRun flag', async () => {

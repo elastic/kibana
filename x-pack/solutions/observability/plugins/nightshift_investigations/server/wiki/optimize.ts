@@ -229,7 +229,7 @@ export const renderToolCalls = (toolCalls: InvestigationToolCall[]): string => {
 };
 
 const NO_RESULT_PLACEHOLDER = '(no result recorded)';
-const SEEDED_READ_PLACEHOLDER = '(file Nightshift seeded in the workspace; content omitted)';
+const SEEDED_READ_PLACEHOLDER = '(file nightshift seeded in the workspace; content omitted)';
 
 /**
  * The round as the investigator lived it: the user's message, each tool call with its result as real

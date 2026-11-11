@@ -60,6 +60,7 @@ import type {
   DeploymentMethod,
   CloudOnboardingDeploymentStatus,
 } from '../../common/types/models/cloud_onboarding_deployment';
+import type { CloudConnectorCallback } from '../../common/types/models/provisioning_callback';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
@@ -109,6 +110,7 @@ export interface AgentSOAttributes {
   local_metadata: AgentMetadata;
   unenrolled_at?: string;
   unenrollment_started_at?: string;
+  unenrolled_reason?: string;
   upgraded_at?: string | null;
   upgrade_started_at?: string | null;
   upgrade_details?: AgentUpgradeDetails;
@@ -418,6 +420,8 @@ export interface CloudOnboardingDeploymentSOAttributes {
   description?: string;
   /** Global data stream namespace from the Service settings step. Absent or empty means each policy inherits its agent policy's namespace. */
   namespace?: string;
+  /** Whether the global namespace uses dedicated index templates (the package's namespace_customization_enabled_for list), as set in the Service settings step. Absent means off. */
+  dedicatedNamespaceTemplates?: boolean;
   /** The service instances (originals and duplicates) of the last deploy. Hydrated into the Service settings step on resume so duplicates and their names come back. */
   instances?: CloudOnboardingInstance[];
   /** Package policy settings from the Service settings step that apply to every package policy of the deployment, keyed by package policy field (e.g. output_id). Each deployment method uses only the settings it supports. */
@@ -445,4 +449,10 @@ export interface CloudOnboardingDeploymentSOAttributes {
   agentPolicyIds?: string[];
   /** Elasticsearch API key ID for push mechanisms (ecf). Set by the backend after key creation; used to identify the key for rotation/revocation. */
   apiKeyId?: string;
+}
+
+/** Stored shape of a callback record: the item without its id, plus the token binding. */
+export interface ProvisioningCallbackSOAttributes extends Omit<CloudConnectorCallback, 'id'> {
+  /** Keyed hash of the record's token, bound to its id, space and expiry. The token itself is never stored. */
+  token_hash: string;
 }

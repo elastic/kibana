@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import type { SignificantEventsMaintenanceState } from '../../../../common/maintenance/state_machine';
+import type { KibanaRequest } from '@kbn/core/server';
+import { setWorkflowEventChainContext } from '@kbn/workflows-extensions/server';
 import { asRuleEventsClient } from '../../../lib/significant_events/events/rule_events_client.mock';
 import { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import {
+  createInvestigationsReader as createReaderMock,
+  type FakeInvestigation,
+} from '../../../lib/significant_events/events/investigations_reader.mock';
 import { internalEventsRoutes } from './route';
 
 const mockCleanupStaleEvents = jest.fn();
@@ -20,8 +26,6 @@ jest.mock('../../utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
 }));
 
-const investigateRoute =
-  internalEventsRoutes['POST /internal/significant_events/events/{id}/investigate'];
 const eventsSearchRoute = internalEventsRoutes['GET /internal/significant_events/events'];
 const eventsFacetsRoute = internalEventsRoutes['GET /internal/significant_events/events/_facets'];
 const lifecycleRoute =
@@ -30,11 +34,42 @@ const eventsUpdateRoute =
   internalEventsRoutes['POST /internal/significant_events/events/{id}/update'];
 const cleanupRoute = internalEventsRoutes['POST /internal/significant_events/events/_cleanup'];
 
-type HandlerParams = Parameters<typeof investigateRoute.handler>[0];
+const logger = loggingSystemMock.createLogger();
 
-const makeMaintenanceService = (state: SignificantEventsMaintenanceState = 'enabled') => ({
-  getState: jest.fn().mockResolvedValue(state),
-});
+const createInvestigationsReader = (options: {
+  investigations: FakeInvestigation[];
+  total?: number;
+  failList?: boolean;
+}) => createReaderMock(options).reader;
+
+const listHandlerParams = ({
+  query = {},
+  server,
+  hits = [],
+  countFacets,
+}: {
+  query?: Record<string, unknown>;
+  server: unknown;
+  hits?: unknown[];
+  countFacets?: jest.Mock;
+}) => {
+  const findLatestByCurrentStatePaginated = jest
+    .fn()
+    .mockResolvedValue({ hits, page: 1, perPage: 25, total: hits.length });
+  return {
+    findLatestByCurrentStatePaginated,
+    params: {
+      params: { query },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        getEventSearchClient: () => ({ findLatestByCurrentStatePaginated, countFacets }),
+      }),
+      server,
+      logger,
+    } as never,
+  };
+};
 
 describe('POST /internal/significant_events/events/_cleanup', () => {
   it('runs cleanup with manage-scoped event and rule clients', async () => {
@@ -52,6 +87,7 @@ describe('POST /internal/significant_events/events/_cleanup', () => {
         getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ rulesClient }),
       }),
       server: {},
+      logger,
     } as never);
 
     expect(mockCleanupStaleEvents).toHaveBeenCalledWith({
@@ -60,78 +96,6 @@ describe('POST /internal/significant_events/events/_cleanup', () => {
       candidateRuleIds: ['rule-1'],
     });
     expect(result).toEqual({ scanned: 1, closed: 1, kept: 0, skipped: 0 });
-  });
-});
-
-describe('POST /internal/significant_events/events/{id}/investigate', () => {
-  it.each(['completed', 'failed'] as const)(
-    'replaces a %s investigation with a running follow-up',
-    async (outcome) => {
-      const event = {
-        '@timestamp': '2026-01-01T00:00:00.000Z',
-        event_uuid: 'version-1',
-        event_id: 'event-1',
-        status: 'active' as const,
-        source_ids: ['logs.test'],
-        title: 'Test event',
-        summary: 'Test summary',
-        severity: 'medium' as const,
-        confidence: 0.8,
-        investigations: [
-          {
-            workflow_execution_id: 'inv-1',
-            started_at: '2026-01-01T00:00:00.000Z',
-            completed_at: '2026-01-01T00:01:00.000Z',
-            outcome,
-          },
-        ],
-      };
-      const createAlertEvent = jest.fn().mockResolvedValue(undefined);
-      const start = jest.fn().mockResolvedValue({ investigation_id: 'inv-1' });
-      const beforeStart = Date.now();
-
-      const result = await investigateRoute.handler({
-        params: { path: { id: 'event-1' } },
-        request: { spaceId: 'default' },
-        getScopedClients: jest.fn().mockResolvedValue({
-          licensing: {},
-          getEventSearchClient: () => ({ findLatestByEventId: jest.fn().mockResolvedValue(event) }),
-          getAlertEventsClient: () => ({ createAlertEvent }),
-        }),
-        server: { nightshiftInvestigations: { getInvestigationsClient: () => ({ start }) } },
-        logger: { info: jest.fn(), warn: jest.fn() },
-        maintenanceService: makeMaintenanceService(),
-      } as never);
-
-      expect(result).toEqual({ executionId: 'inv-1' });
-      expect(createAlertEvent).toHaveBeenCalledTimes(1);
-      const investigations = createAlertEvent.mock.calls[0][0].data.investigations;
-      expect(investigations).toEqual([
-        { workflow_execution_id: 'inv-1', started_at: expect.any(String) },
-      ]);
-      expect(Date.parse(investigations[0].started_at)).toBeGreaterThanOrEqual(beforeStart);
-      expect(Date.parse(investigations[0].started_at)).toBeLessThanOrEqual(Date.now());
-    }
-  );
-
-  it('rejects with 409 while paused before loading the event', async () => {
-    const findLatestByEventId = jest.fn();
-    const handlerParams = {
-      params: { path: { id: 'event-1' } },
-      request: { spaceId: 'default' },
-      getScopedClients: jest.fn().mockResolvedValue({
-        licensing: {},
-        getEventSearchClient: () => ({ findLatestByEventId }),
-      }),
-      server: { nightshiftInvestigations: {} },
-      logger: { warn: jest.fn(), get: jest.fn().mockReturnValue({ warn: jest.fn() }) },
-      maintenanceService: makeMaintenanceService('paused'),
-    } as unknown as HandlerParams;
-
-    await expect(investigateRoute.handler(handlerParams)).rejects.toMatchObject({
-      output: { statusCode: 409 },
-    });
-    expect(findLatestByEventId).not.toHaveBeenCalled();
   });
 });
 
@@ -160,6 +124,7 @@ describe('GET /internal/significant_events/events', () => {
         params: { query: { unassigned_entities: true, topology_feature_id: selected } },
         request: { spaceId: 'default' },
         server: {},
+        logger,
         getScopedClients: jest.fn().mockResolvedValue({
           licensing: {},
           sourcesClient: {
@@ -256,10 +221,11 @@ describe('GET /internal/significant_events/events', () => {
         getEventSearchClient: () => ({ findLatestByCurrentStatePaginated }),
       }),
       server: {},
+      logger,
     } as never);
 
     expect(response).toEqual({
-      hits: [event],
+      hits: [{ ...event, investigation_state: 'not_started' }],
       page: 1,
       perPage: 25,
       total: 1,
@@ -297,7 +263,10 @@ describe('GET /internal/significant_events/events', () => {
         licensing: {},
         getEventSearchClient: () => ({ findLatestByCurrentStatePaginated }),
       }),
-      server: {},
+      server: {
+        agenticInvestigations: createInvestigationsReader({ investigations: [] }),
+      },
+      logger,
     } as never);
 
     expect(findLatestByCurrentStatePaginated).toHaveBeenCalledWith({
@@ -309,7 +278,7 @@ describe('GET /internal/significant_events/events', () => {
       sourceIds: ['logs.test'],
       topologyFeatureIds: ['checkout-service'],
       search: 'noise',
-      investigationStates: ['in_progress'],
+      investigation: { states: ['in_progress'], episodes: { inProgress: [], completed: [] } },
       sortField: 'severity',
       sortOrder: 'asc',
       page: 2,
@@ -317,7 +286,7 @@ describe('GET /internal/significant_events/events', () => {
     });
   });
 
-  it('passes through the RuleEventsClient-shaped result unchanged when getEventSearchClient() resolves the flag-on (RuleEventsClient) path', async () => {
+  it('passes through the RuleEventsClient-shaped result, plus the investigation state, when getEventSearchClient() resolves the flag-on (RuleEventsClient) path', async () => {
     const event = {
       '@timestamp': '2026-01-03T00:00:00.000Z',
       created_at: '2026-01-01T00:00:00.000Z',
@@ -345,11 +314,12 @@ describe('GET /internal/significant_events/events', () => {
         getEventSearchClient: () => ({ findLatestByCurrentStatePaginated }),
       }),
       server: {},
+      logger,
     } as never);
 
     expect(findLatestByCurrentStatePaginated).toHaveBeenCalled();
     expect(response).toEqual({
-      hits: [event],
+      hits: [{ ...event, investigation_state: 'not_started' }],
       page: 1,
       perPage: 25,
       total: 1,
@@ -395,6 +365,7 @@ describe('GET /internal/significant_events/events/{id}/lifecycle', () => {
         }),
       }),
       server: {},
+      logger,
     } as never);
 
     expect(response.events).toEqual([firstVersion, latestVersion]);
@@ -452,6 +423,7 @@ describe('GET /internal/significant_events/events/{id}/lifecycle, deactivations'
         }),
       }),
       server: {},
+      logger,
     } as never);
     return response.events;
   };
@@ -638,6 +610,7 @@ describe('GET /internal/significant_events/events/{id}/lifecycle, skipped detect
         }),
       }),
       server: {},
+      logger,
     } as never);
     return { response, findSkippedForEvent };
   };
@@ -701,21 +674,183 @@ describe('GET /internal/significant_events/events/{id}/lifecycle, skipped detect
   });
 });
 
+describe('events investigation state', () => {
+  const eventWithEpisode = (episodeId?: string) => ({
+    '@timestamp': '2026-01-03T00:00:00.000Z',
+    created_at: '2026-01-01T00:00:00.000Z',
+    event_uuid: `uuid-${episodeId}`,
+    event_id: `event-${episodeId}`,
+    status: 'active' as const,
+    source_ids: ['logs.test'],
+    title: 'Test event',
+    summary: 'Test summary',
+    severity: 'medium' as const,
+    confidence: 0.8,
+    ...(episodeId ? { episode_id: episodeId } : {}),
+  });
+
+  it('gives each hit the state of the investigation of its alert, resolved on its own', async () => {
+    const { params } = listHandlerParams({
+      hits: [eventWithEpisode('ep-run'), eventWithEpisode('ep-done'), eventWithEpisode('ep-none')],
+      server: {
+        agenticInvestigations: createInvestigationsReader({
+          investigations: [
+            { id: 'inv-run', alertIds: ['ep-run'], inProgress: true },
+            { id: 'inv-done', alertIds: ['ep-done'], open: false },
+          ],
+        }),
+      },
+    });
+
+    const response = await eventsSearchRoute.handler(params);
+
+    expect(
+      response.hits.map(({ investigation_state: state, investigation_id: id }) => [state, id])
+    ).toEqual([
+      ['in_progress', 'inv-run'],
+      ['completed', 'inv-done'],
+      ['not_started', undefined],
+    ]);
+    expect(response.investigation_window_truncated).toBeUndefined();
+  });
+
+  describe('with the investigation filter', () => {
+    it('filters on the episodes of the newest investigations and gives the rows the same state', async () => {
+      const { params, findLatestByCurrentStatePaginated } = listHandlerParams({
+        query: { investigation_state: 'in_progress' },
+        hits: [eventWithEpisode('ep-run'), eventWithEpisode('ep-other')],
+        server: {
+          agenticInvestigations: createInvestigationsReader({
+            investigations: [
+              { id: 'inv-run', alertIds: ['ep-run'], inProgress: true },
+              { id: 'inv-done', alertIds: ['ep-done'], open: false },
+            ],
+          }),
+        },
+      });
+
+      const response = await eventsSearchRoute.handler(params);
+
+      expect(findLatestByCurrentStatePaginated).toHaveBeenCalledWith(
+        expect.objectContaining({
+          investigation: {
+            states: ['in_progress'],
+            episodes: { inProgress: ['ep-run'], completed: ['ep-done'] },
+          },
+        })
+      );
+      expect(response.hits.map(({ investigation_state: state }) => state)).toEqual([
+        'in_progress',
+        'not_started',
+      ]);
+    });
+
+    it('says when the window of investigations was full', async () => {
+      const { params } = listHandlerParams({
+        query: { investigation_state: 'completed' },
+        server: {
+          agenticInvestigations: createInvestigationsReader({
+            investigations: [{ id: 'inv', alertIds: ['ep-1'], open: false }],
+            total: 5_000,
+          }),
+        },
+      });
+
+      const response = await eventsSearchRoute.handler(params);
+
+      expect(response.investigation_window_truncated).toBe(true);
+    });
+
+    it.each([
+      { name: 'the plugin is unavailable', server: {} },
+      {
+        name: 'the list is refused',
+        server: {
+          agenticInvestigations: createInvestigationsReader({ investigations: [], failList: true }),
+        },
+      },
+    ])('answers 503, not an unfiltered list, when $name', async ({ server }) => {
+      const { params, findLatestByCurrentStatePaginated } = listHandlerParams({
+        query: { investigation_state: 'completed' },
+        server,
+      });
+
+      await expect(eventsSearchRoute.handler(params)).rejects.toMatchObject({
+        output: { statusCode: 503 },
+      });
+      expect(findLatestByCurrentStatePaginated).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('facets', () => {
+    it('counts the investigation state from the episodes of the newest investigations', async () => {
+      const countFacets = jest
+        .fn()
+        .mockResolvedValue({ severity: {}, status: {}, investigation: {} });
+      const { params } = listHandlerParams({
+        countFacets,
+        server: {
+          agenticInvestigations: createInvestigationsReader({
+            investigations: [{ id: 'inv-run', alertIds: ['ep-run'], inProgress: true }],
+            total: 3_000,
+          }),
+        },
+      });
+
+      const response = await eventsFacetsRoute.handler(params);
+
+      const { investigationEpisodes } = countFacets.mock.calls[0][0];
+      await expect(investigationEpisodes).resolves.toEqual({
+        inProgress: ['ep-run'],
+        completed: [],
+      });
+      expect(response.investigation_window_truncated).toBe(true);
+    });
+
+    it('leaves the investigation counts out when the state cannot be read and no filter is set', async () => {
+      const countFacets = jest.fn().mockResolvedValue({ severity: {}, status: {} });
+      const { params } = listHandlerParams({ countFacets, server: {} });
+
+      const response = await eventsFacetsRoute.handler(params);
+
+      const { investigationEpisodes } = countFacets.mock.calls[0][0];
+      await expect(investigationEpisodes).resolves.toBeUndefined();
+      expect(response.investigation).toBeUndefined();
+    });
+
+    it('answers 503 when the investigation filter is set and the state cannot be read', async () => {
+      const countFacets = jest.fn();
+      const { params } = listHandlerParams({
+        query: { investigation_state: 'completed' },
+        countFacets,
+        server: {},
+      });
+
+      await expect(eventsFacetsRoute.handler(params)).rejects.toMatchObject({
+        output: { statusCode: 503 },
+      });
+      expect(countFacets).not.toHaveBeenCalled();
+    });
+  });
+});
+
 describe('POST /internal/significant_events/events/{id}/update', () => {
   const run = ({
     findLatestByEventId,
     createAlertEvent = jest.fn().mockResolvedValue(undefined),
     emitTrigger,
     body = { status: 'inactive' as const },
+    request = { spaceId: 'default' },
   }: {
     findLatestByEventId: jest.Mock;
     createAlertEvent?: jest.Mock;
     emitTrigger?: jest.Mock;
     body?: { status: 'active' | 'inactive'; assessment_note?: string };
+    request?: object;
   }) =>
     eventsUpdateRoute.handler({
       params: { path: { id: 'event-1' }, body },
-      request: { spaceId: 'default' },
+      request,
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () =>
@@ -725,6 +860,7 @@ describe('POST /internal/significant_events/events/{id}/update', () => {
           ),
       }),
       server: {},
+      logger,
     } as never);
 
   const stored = {
@@ -753,6 +889,27 @@ describe('POST /internal/significant_events/events/{id}/update', () => {
       })
     );
     expect(emitTrigger).toHaveBeenCalledTimes(1);
+  });
+
+  it('stamps the calling workflow run on the version it writes', async () => {
+    const createAlertEvent = jest.fn().mockResolvedValue(undefined);
+    const request = { spaceId: 'default' };
+    setWorkflowEventChainContext(request as unknown as KibanaRequest, {
+      depth: 0,
+      sourceExecutionId: 'workflow-run-1',
+    });
+
+    await run({
+      findLatestByEventId: jest.fn().mockResolvedValue(stored),
+      createAlertEvent,
+      request,
+    });
+
+    expect(createAlertEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ workflow_execution_id: 'workflow-run-1' }),
+      })
+    );
   });
 });
 
