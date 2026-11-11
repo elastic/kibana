@@ -6,8 +6,8 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { mockObservedService } from '../mocks';
-import { TestProviders } from '../../../../common/mock';
+import { mockObservedService } from '../../../../../flyout/entity_details/service_right/mocks';
+import { TestProviders } from '../../../../../common/mock';
 import { useObservedServiceItems } from './use_observed_service_items';
 
 describe('useObservedServiceItems', () => {
