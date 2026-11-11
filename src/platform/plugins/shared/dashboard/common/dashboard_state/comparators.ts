@@ -42,16 +42,9 @@ export const DASHBOARD_COMPARATOR_DEFAULTS = {
 } satisfies Partial<DashboardState>;
 
 /**
- * Comparators for every dashboard state key.
- * StateComparators requires an entry for every key, so adding a key to DashboardState
- * fails type checking until a comparator is added here.
- *
- * `panels` and `pinned_panels` are 'skip' here because they are NOT ignored.
- * Panel comparison is async (embeddable comparators are loaded on demand), but comparators
- * run synchronously, so `areEqual` compares panels and pinned panels separately.
- *
  * @param isTimeRestored Time range and refresh interval only count as changes when time is restored with the dashboard.
  * @param isProjectRoutingRestored Project routing only counts as a change when it is restored with the dashboard.
+ * @returns Comparators for dashboard state.
  */
 export function getDashboardComparators(
   isTimeRestored: () => boolean,
@@ -64,7 +57,7 @@ export function getDashboardComparators(
     ...getProjectRoutingComparators(isProjectRoutingRestored),
     ...approximationComparators,
     access_control: 'deepEquality',
-    // compared separately by areEqual, see above
+    // Skipped here, not ignored. Panels and pinned panels are compared separately.
     panels: 'skip',
     pinned_panels: 'skip',
   };
