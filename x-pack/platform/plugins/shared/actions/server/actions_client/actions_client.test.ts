@@ -3954,7 +3954,7 @@ describe('object-level security', () => {
       output: { statusCode: 403 },
     });
     expect(scopedOls.authorize).toHaveBeenCalledWith(
-      expect.objectContaining({ operation: 'use', objects: [{ id: '1', acl: PRIVATE_ACL }] })
+      expect.objectContaining({ operation: 'execute', objects: [{ id: '1', acl: PRIVATE_ACL }] })
     );
   });
 

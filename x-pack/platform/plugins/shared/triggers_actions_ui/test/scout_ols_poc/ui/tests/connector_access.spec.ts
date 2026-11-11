@@ -150,7 +150,9 @@ test.describe.serial('Connector access', { tag: '@local-stateful-classic' }, () 
 
     await openAccessTab(page);
     await expect(page.testSubj.locator('accessPanelReadOnly')).toBeVisible();
-    await expect(page.testSubj.locator('accessPanelPermission-use')).toContainText('Run and test');
+    await expect(page.testSubj.locator('accessPanelPermission-execute')).toContainText(
+      'Run and test'
+    );
     await expect(page.testSubj.locator('accessPanelPrincipalPicker')).toHaveCount(0);
   });
 

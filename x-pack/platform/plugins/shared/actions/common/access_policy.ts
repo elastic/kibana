@@ -20,7 +20,7 @@ export const CONNECTOR_ACCESS_POLICY: AccessPolicy = {
   entryLevels: ['use'],
   operations: {
     view: { level: 'view', privileges: { savedObject: [{ type: 'action', operation: 'get' }] } },
-    use: {
+    execute: {
       level: 'use',
       privileges: {
         savedObject: [

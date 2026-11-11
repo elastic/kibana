@@ -51,7 +51,7 @@ export const getRestrictedConnectorIds = async ({
       return connector.error.statusCode === 404 ? [] : [connector.id];
     }
 
-    return generalAccessPermits(CONNECTOR_ACCESS_POLICY, connector.acl, 'use')
+    return generalAccessPermits(CONNECTOR_ACCESS_POLICY, connector.acl, 'execute')
       ? []
       : [connector.id];
   });

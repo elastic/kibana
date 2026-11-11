@@ -20,7 +20,7 @@ import { ACTION_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
  * Connector operations that object-level security decides beyond viewing, which the Saved Objects
  * repository already enforces on every connector read.
  */
-export type ConnectorOperation = 'use' | 'edit' | 'delete';
+export type ConnectorOperation = 'execute' | 'edit' | 'delete';
 
 export interface ConnectorAccessContext {
   request: KibanaRequest;
@@ -90,4 +90,4 @@ export const ensureConnectorsOperation = async (
  * the connector is enough; a shared flow changes credentials everyone uses, so it needs edit.
  */
 export const operationForAuthMode = (authMode?: AuthMode): ConnectorOperation =>
-  authMode === 'per-user' ? 'use' : 'edit';
+  authMode === 'per-user' ? 'execute' : 'edit';

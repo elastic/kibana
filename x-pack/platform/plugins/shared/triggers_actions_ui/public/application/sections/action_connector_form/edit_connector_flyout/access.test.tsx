@@ -28,7 +28,7 @@ const POLICY: AccessPolicyResponse = {
   entry_levels: ['use'],
   operations: {
     view: { level: 'view' },
-    use: { level: 'use' },
+    execute: { level: 'use' },
     edit: { level: 'edit' },
     delete: { level: 'edit' },
   },
@@ -41,7 +41,7 @@ const ACCESS: AccessStateResponse = {
   state: 'valid',
   restricted: false,
   is_owner: true,
-  permissions: ['view', 'use', 'edit', 'delete', 'manage_access', 'transfer'],
+  permissions: ['view', 'execute', 'edit', 'delete', 'manage_access', 'transfer'],
   permissions_via_recovery: [],
   can_claim: false,
   current_principal: { type: 'user', id: 'u_owner' },
@@ -154,7 +154,7 @@ describe('EditConnectorFlyout with object-level security (OLS)', () => {
   });
 
   it('hides Save and shows the read-only callout to people who cannot edit', async () => {
-    access = { ...ACCESS, is_owner: false, permissions: ['view', 'use'], acl: undefined };
+    access = { ...ACCESS, is_owner: false, permissions: ['view', 'execute'], acl: undefined };
     renderFlyout();
 
     expect(await screen.findByTestId('connectorReadOnlyAccessCallout')).toBeInTheDocument();

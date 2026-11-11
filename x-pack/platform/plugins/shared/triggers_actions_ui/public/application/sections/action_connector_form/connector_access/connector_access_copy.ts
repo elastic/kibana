@@ -62,7 +62,7 @@ export const CONNECTOR_ACCESS_COPY: AccessCopy = {
     view: i18n.translate('xpack.triggersActionsUI.connectorAccess.operation.view', {
       defaultMessage: 'View',
     }),
-    use: i18n.translate('xpack.triggersActionsUI.connectorAccess.operation.use', {
+    execute: i18n.translate('xpack.triggersActionsUI.connectorAccess.operation.execute', {
       defaultMessage: 'Run and test',
     }),
     edit: i18n.translate('xpack.triggersActionsUI.connectorAccess.operation.edit', {

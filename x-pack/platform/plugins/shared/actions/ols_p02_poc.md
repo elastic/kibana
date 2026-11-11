@@ -13,8 +13,9 @@ What works end to end:
   connector is created in one request with `acl`. No interval exists in which it is public.
 - **List and read.** The list, point reads, `bulkGet`, `resolve` and `find` apply the ACL. Elasticsearch filters
   `find`, so totals, aggregations and pages count only visible objects.
-- **Execute.** HTTP execution, enqueue, task execution and connector auth paths need `use`. An object the caller
-  cannot view returns 404. A visible object with insufficient access returns 403.
+- **Execute.** HTTP execution, enqueue, task execution and connector auth paths check the `execute` operation,
+  which needs the `use` level. An object the caller cannot view returns 404. A visible object with insufficient
+  access returns 403.
 - **Execution logs and KPIs.** Events of connectors the caller cannot view add nothing to rows, totals or
   aggregations. The event log query excludes their IDs, which a system read of the connector index returns.
 - **Rules.** Every path that creates or keeps a rule API key checks that the key can use the rule's restricted

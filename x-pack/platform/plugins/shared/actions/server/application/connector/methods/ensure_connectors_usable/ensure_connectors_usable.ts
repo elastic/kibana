@@ -87,7 +87,7 @@ export const ensureConnectorsUsable = async ({
   const decisions = await ols.authorize({
     type: ACTION_SAVED_OBJECT_TYPE,
     spaceId: getConnectorSpaceId(context),
-    operation: 'use',
+    operation: 'execute',
     objects,
   });
   const deniedConnectorId = ids.find((id) => decisions.get(id)?.status !== 'allowed');

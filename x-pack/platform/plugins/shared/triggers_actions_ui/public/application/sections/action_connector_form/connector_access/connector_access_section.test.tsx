@@ -19,7 +19,7 @@ const POLICY: AccessPolicyResponse = {
   general_access_levels: ['none', 'use', 'edit'],
   default_general_access_level: 'use',
   entry_levels: ['use'],
-  operations: { view: { level: 'view' }, use: { level: 'use' }, edit: { level: 'edit' } },
+  operations: { view: { level: 'view' }, execute: { level: 'use' }, edit: { level: 'edit' } },
 };
 
 describe('ConnectorAccessSection', () => {

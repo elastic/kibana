@@ -69,7 +69,7 @@ export async function execute(
   }
 
   if (!isInMemory) {
-    await ensureConnectorOperation(context, { id: actionId, acl, operation: 'use' });
+    await ensureConnectorOperation(context, { id: actionId, acl, operation: 'execute' });
   }
 
   return context.actionExecutor.execute({

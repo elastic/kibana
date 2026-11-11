@@ -116,7 +116,7 @@ describe('ensureConnectorsUsable', () => {
     expect(scoped.authorize).toHaveBeenCalledWith({
       type: 'action',
       spaceId: 'default',
-      operation: 'use',
+      operation: 'execute',
       objects: [
         { id: 'c1', acl: ACL },
         { id: 'c2', acl: ACL },
@@ -180,7 +180,7 @@ describe('ensureConnectorsUsable', () => {
     scoped.authorize.mockResolvedValue(
       new Map([
         ['c1', { status: 'allowed' }],
-        ['c2', { status: 'forbidden', operation: 'use' }],
+        ['c2', { status: 'forbidden', operation: 'execute' }],
       ])
     );
 

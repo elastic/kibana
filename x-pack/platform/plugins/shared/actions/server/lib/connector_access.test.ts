@@ -46,7 +46,7 @@ describe('ensureConnectorOperation', () => {
   it('does nothing while object-level security is disabled', async () => {
     const { context, scoped } = createContext({ enabled: false });
 
-    await ensureConnectorOperation(context, { id: 'c1', acl: ACL, operation: 'use' });
+    await ensureConnectorOperation(context, { id: 'c1', acl: ACL, operation: 'execute' });
 
     expect(scoped.authorize).not.toHaveBeenCalled();
   });
@@ -72,7 +72,7 @@ describe('ensureConnectorOperation', () => {
     const error = await ensureConnectorOperation(context, {
       id: 'c1',
       acl: ACL,
-      operation: 'use',
+      operation: 'execute',
     }).catch((e) => e);
 
     expect(SavedObjectsErrorHelpers.isNotFoundError(error)).toBe(true);
@@ -97,7 +97,7 @@ describe('ensureConnectorOperation', () => {
     scoped.authorize.mockResolvedValue(
       new Map([
         ['c1', { status: 'allowed' }],
-        ['c2', { status: 'forbidden', operation: 'use' }],
+        ['c2', { status: 'forbidden', operation: 'execute' }],
       ])
     );
     const connectors = [
@@ -106,7 +106,7 @@ describe('ensureConnectorOperation', () => {
     ];
 
     await expect(
-      ensureConnectorsOperation(context, { connectors, operation: 'use' })
+      ensureConnectorsOperation(context, { connectors, operation: 'execute' })
     ).rejects.toMatchObject({ output: { statusCode: 403 } });
     expect(scoped.authorize).toHaveBeenCalledTimes(1);
     expect(scoped.authorize).toHaveBeenCalledWith(expect.objectContaining({ objects: connectors }));
@@ -115,7 +115,7 @@ describe('ensureConnectorOperation', () => {
   it('makes no decision for an empty list', async () => {
     const { context, scoped } = createContext();
 
-    await ensureConnectorsOperation(context, { connectors: [], operation: 'use' });
+    await ensureConnectorsOperation(context, { connectors: [], operation: 'execute' });
 
     expect(scoped.authorize).not.toHaveBeenCalled();
   });
@@ -134,7 +134,7 @@ describe('getConnectorSpaceId', () => {
 
 describe('operationForAuthMode', () => {
   it('needs only use for per-user flows, and edit for shared credentials', () => {
-    expect(operationForAuthMode('per-user')).toBe('use');
+    expect(operationForAuthMode('per-user')).toBe('execute');
     expect(operationForAuthMode('shared')).toBe('edit');
     expect(operationForAuthMode(undefined)).toBe('edit');
   });

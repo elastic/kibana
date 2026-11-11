@@ -801,7 +801,7 @@ export class ActionsClient {
     return this.context.bulkExecutionEnqueuer(
       this.context.unsecuredSavedObjectsClient,
       options,
-      (connectors) => ensureConnectorsOperation(this.context, { connectors, operation: 'use' })
+      (connectors) => ensureConnectorsOperation(this.context, { connectors, operation: 'execute' })
     );
   }
 

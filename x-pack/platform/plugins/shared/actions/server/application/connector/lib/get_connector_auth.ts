@@ -95,7 +95,7 @@ export async function getConnectorAuth(
   // Handing out credentials needs the same access as running the connector, checked before the
   // secrets are decrypted.
   if (!inMemoryAction) {
-    await ensureConnectorOperation(context, { id: connectorId, acl, operation: 'use' });
+    await ensureConnectorOperation(context, { id: connectorId, acl, operation: 'execute' });
   }
 
   let secrets;

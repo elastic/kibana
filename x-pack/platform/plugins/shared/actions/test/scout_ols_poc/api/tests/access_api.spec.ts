@@ -73,7 +73,7 @@ apiTest.describe('Connector access API', { tag: '@local-stateful-classic' }, () 
 
     const grantee = await getAccess(api, 'grantee', id);
     expect(grantee).toHaveStatusCode(200);
-    expect(grantee.body.permissions).toStrictEqual(['view', 'use']);
+    expect(grantee.body.permissions).toStrictEqual(['view', 'execute']);
     expect(grantee.body.acl).toBeUndefined();
     expect(grantee.body.profiles).toBeUndefined();
 

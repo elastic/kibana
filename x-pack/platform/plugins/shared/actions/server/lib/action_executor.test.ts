@@ -3069,7 +3069,7 @@ describe('object-level security', () => {
     expect(scopedOls.authorize).toHaveBeenCalledWith({
       type: 'action',
       spaceId: 'some-namespace',
-      operation: 'use',
+      operation: 'execute',
       objects: [{ id: CONNECTOR_ID, acl: privateConnector.acl }],
     });
     expect(connectorType.executor).toHaveBeenCalled();

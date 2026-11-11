@@ -271,7 +271,7 @@ export class ActionExecutor {
         if (
           !isInMemory &&
           security?.authz.ols &&
-          !generalAccessPermits(CONNECTOR_ACCESS_POLICY, acl, 'use')
+          !generalAccessPermits(CONNECTOR_ACCESS_POLICY, acl, 'execute')
         ) {
           errorMessage = `Cannot execute unsecured action on a restricted connector`;
         }
@@ -1071,7 +1071,7 @@ const ensureAllowedToUseConnector = async ({
   ols?: CoreScopedOlsService;
   spaceId: string;
 }) => {
-  if (!ols || generalAccessPermits(CONNECTOR_ACCESS_POLICY, acl, 'use')) {
+  if (!ols || generalAccessPermits(CONNECTOR_ACCESS_POLICY, acl, 'execute')) {
     return;
   }
 
@@ -1083,7 +1083,7 @@ const ensureAllowedToUseConnector = async ({
     const decisions = await ols.authorize({
       type: ACTION_SAVED_OBJECT_TYPE,
       spaceId,
-      operation: 'use',
+      operation: 'execute',
       objects: [{ id: actionId, acl }],
     });
     if (decisions.get(actionId)?.status !== 'allowed') {
