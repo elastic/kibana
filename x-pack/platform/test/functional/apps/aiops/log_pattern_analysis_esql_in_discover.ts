@@ -100,7 +100,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       const matchingResultsQuery = await monacoEditor.getCodeEditorValue();
       expect(matchingResultsQuery).to.contain('FROM logstash-*');
-      expect(matchingResultsQuery).to.contain('MATCH(@message');
+      expect(matchingResultsQuery).to.match(/MATCH\(\s*@message/);
       expect(matchingResultsQuery).not.to.contain('STATS');
 
       await aiops.logPatternAnalysisPage.assertDiscoverDocCountExists();

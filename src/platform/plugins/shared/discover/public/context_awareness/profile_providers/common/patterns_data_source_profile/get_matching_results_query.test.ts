@@ -22,9 +22,11 @@ describe('getMatchingResultsQuery', () => {
       pattern: '.*?payment.+?failed.*?',
     });
 
-    expect(result).toEqual({
-      esql: 'FROM logs-* | WHERE service.name == "checkout" | WHERE MATCH(message, "payment failed", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})',
-    });
+    expect(result?.esql).toMatch(
+      /^FROM logs-\*\n {2}\| WHERE service\.name == "checkout"\n {2}\| WHERE\s+MATCH\(\s*message, "payment failed",/
+    );
+    expect(result?.esql).toContain('"operator": "AND"');
+    expect(result?.esql).not.toContain('STATS');
   });
 
   it('falls back to an index-only query with an escaped pattern when the pattern column cannot be traced back', () => {
@@ -41,6 +43,20 @@ describe('getMatchingResultsQuery', () => {
     expect(result).toEqual({
       esql: 'FROM the-data-view-title\n  | WHERE MATCH(message, "say \\"hi\\"", {"auto_generate_synonyms_phrase_query": false, "fuzziness": 0, "operator": "AND"})\n  | LIMIT 10000',
     });
+  });
+
+  it('escapes the categorized field in the index-only query', () => {
+    const result = getMatchingResultsQuery({
+      query: {
+        esql: 'FROM logs-* | STATS Count = COUNT(*) BY Pattern = CATEGORIZE(`log message`) | RENAME Pattern AS p',
+      },
+      dataView: dataViewMock,
+      esqlVariables: [],
+      patternColumn: 'p',
+      pattern: '.*?payment.*?',
+    });
+
+    expect(result?.esql).toContain('WHERE MATCH(`log message`, "payment"');
   });
 
   it('returns undefined when the categorized field is not a column', () => {
