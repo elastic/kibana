@@ -228,6 +228,8 @@ interface RetryState {
   pendingVersions: Map<string, PendingVersionWrite>;
   /** Tree slugs an earlier attempt created; they stay tentative for the rest of the turn. */
   created: Set<string>;
+  /** Tree slugs already reported as rejected, so retries of the same tree count once. */
+  reportedRejections: Set<string>;
 }
 
 /** A conversation that has not retried for this long is not coming back. */
@@ -242,6 +244,7 @@ const freshRetryState = (): RetryState => ({
   persistedLearnings: new Map(),
   pendingVersions: new Map(),
   created: new Set(),
+  reportedRejections: new Set(),
 });
 
 const provenanceFieldsOf = (
@@ -669,7 +672,22 @@ export const createSubmitOptimizerResultTool = ({
 
       const rejected = outcomes.filter((outcome) => outcome.status === 'rejected');
       const persisted = outcomes.filter((outcome) => outcome.status === 'persisted');
-      telemetry?.reportWritten([...writeActions, ...rejected.map((): 'rejected' => 'rejected')]);
+      // A rejection names trees, not attempts: a duplicate-submission outcome lists several, a retry
+      // repeats one, and a tree whose head was saved but whose version is still owed was written.
+      const newlyRejected = new Set<string>();
+      for (const outcome of rejected) {
+        for (const treeId of outcome.tree_id.split(', ')) {
+          const slug = symptomSlugFromTreeId(treeId);
+          if (!state.pendingVersions.has(slug) && !state.reportedRejections.has(slug)) {
+            newlyRejected.add(slug);
+          }
+        }
+      }
+      newlyRejected.forEach((slug) => state.reportedRejections.add(slug));
+      telemetry?.reportWritten([
+        ...writeActions,
+        ...Array.from(newlyRejected, (): DecisionTreeWriteAction => 'rejected'),
+      ]);
       retryStates.delete(conversationId);
       if (rejected.length > 0) {
         retryStates.set(conversationId, { ...state, updatedAt: Date.now() });

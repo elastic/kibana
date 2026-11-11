@@ -16,6 +16,7 @@ import {
 } from '../../common/decision_trees';
 import {
   embedAccessedTreesMarker,
+  embedRunMarker,
   extractAccessedTreeIds,
   parseAccessedTreesMarker,
   type InvestigationToolCall,
@@ -111,6 +112,7 @@ export const hydrateDecisionTreeWorkspace = async ({
 export const prepareReinforcementTurn = async ({
   turnKind,
   investigationId,
+  roundId,
   earlierAccessedTreeIds = [],
   connectorNames,
   esClient,
@@ -122,6 +124,8 @@ export const prepareReinforcementTurn = async ({
 }: {
   turnKind: DecisionTreeTurnKind;
   investigationId: string;
+  /** The investigator's round, carried to the hydrate hook for telemetry. */
+  roundId?: string;
   /** Trees the investigator opened in the investigation's earlier rounds. */
   earlierAccessedTreeIds?: string[];
   connectorNames: string[];
@@ -180,7 +184,11 @@ export const prepareReinforcementTurn = async ({
   });
   return {
     skipped: false,
-    message: [embedAccessedTreesMarker(editable.map((tree) => tree.tree_id)), message].join('\n'),
+    message: [
+      embedAccessedTreesMarker(editable.map((tree) => tree.tree_id)),
+      embedRunMarker({ conversationId: investigationId, roundId }),
+      message,
+    ].join('\n'),
     treeCount: editable.length,
     turnKind,
     openedTreeIds: editable

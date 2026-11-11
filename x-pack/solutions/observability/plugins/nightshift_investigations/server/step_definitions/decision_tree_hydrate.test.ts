@@ -10,7 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { AuditedSandboxSession, NightshiftSandboxStart } from '../sandbox_audit';
 import { hydrateDecisionTreeWorkspace } from '../decision_trees/register_decision_trees';
 import { decisionTreeHydrateStepDefinition } from './decision_tree_hydrate';
-import { reinforcementSessionRegistry } from '../tools/decision_tree';
+import { embedRunMarker } from '../decision_trees/accessed_trees';
 import { NIGHTSHIFT_ASSISTANT_AGENT_ID, NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../common';
 
 jest.mock('../decision_trees/register_decision_trees', () => ({
@@ -99,19 +99,18 @@ describe('decisionTreeHydrateStepDefinition', () => {
     });
   });
 
-  it("reports the investigator's conversation and round for a reinforcement sandbox", async () => {
-    reinforcementSessionRegistry.registerSession('default__reinforce-1', {
-      conversationId: 'investigator-conv',
-      roundId: 'round-1',
-    });
+  it("reports the investigator's conversation and round carried in the prompt", async () => {
     const definition = decisionTreeHydrateStepDefinition({
       analytics,
       getSandboxStart: () => makeSandboxStart(),
       logger: loggerMock.create(),
     });
+    const prompt = `${embedRunMarker({
+      conversationId: 'investigator-conv',
+      roundId: 'round-1',
+    })}\nreinforce`;
 
-    await definition.handler(createContext('default__reinforce-1'));
-    reinforcementSessionRegistry.drainSession('default__reinforce-1');
+    await definition.handler(createContext('default__reinforce-1', 'default', prompt));
 
     expect(hydrateDecisionTreeWorkspace).toHaveBeenLastCalledWith(
       expect.objectContaining({ conversationId: 'investigator-conv', roundId: 'round-1' })

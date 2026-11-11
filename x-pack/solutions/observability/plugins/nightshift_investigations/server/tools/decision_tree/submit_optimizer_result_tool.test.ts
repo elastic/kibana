@@ -462,6 +462,64 @@ describe('nightshift_submit_optimizer_result', () => {
       expect(telemetry.reportWritten).toHaveBeenCalledWith(['rejected']);
     });
 
+    describe('rejected counts', () => {
+      const submitOnce = (
+        tool: ReturnType<typeof createSubmitOptimizerResultTool>,
+        symptomTrees: string[]
+      ) =>
+        tool.handler(
+          {
+            symptom_trees: symptomTrees.map((treeId) => ({
+              tree_id: treeId,
+              file_path: FILE_PATH,
+              evidence_gatherer_metadata: [],
+              merged_nodes: [],
+            })),
+            traversals: [],
+            summary: 'Merged this run.',
+          },
+          createContext() as never
+        );
+
+      const createTool = (store: jest.Mocked<DecisionTreeStore>, telemetry: object) =>
+        createSubmitOptimizerResultTool({
+          getSandboxStart: createSandboxStart(markdownFor(FULL_TREE)).getSandboxStart as never,
+          getStore: () => store,
+          getSpaceId: () => 'default',
+          getTelemetry: () => telemetry as never,
+          logger: loggerMock.create(),
+        });
+
+      it('counts each tree of a duplicate submission once', async () => {
+        const telemetry = createTelemetry();
+
+        await submitOnce(createTool(createStore(), telemetry), [TREE_ID, TREE_ID]);
+
+        expect(telemetry.reportWritten).toHaveBeenCalledWith(['rejected']);
+      });
+
+      it('counts a tree that keeps failing once across retries', async () => {
+        const telemetry = createTelemetry();
+        const tool = createTool(createStore(), telemetry);
+
+        await submitOnce(tool, [TREE_ID, TREE_ID]);
+        await submitOnce(tool, [TREE_ID, TREE_ID]);
+
+        expect(telemetry.reportWritten).toHaveBeenNthCalledWith(1, ['rejected']);
+        expect(telemetry.reportWritten).toHaveBeenNthCalledWith(2, []);
+      });
+
+      it('reports a write, not a rejection, when the head was saved but its version is owed', async () => {
+        const telemetry = createTelemetry();
+        const store = createStore();
+        store.commit.mockRejectedValue(versionWriteError());
+
+        await submitOnce(createTool(store, telemetry), [TREE_ID]);
+
+        expect(telemetry.reportWritten).toHaveBeenCalledWith(['create']);
+      });
+    });
+
     it('reports learnings_only when learnings attach without a structural edit', async () => {
       const telemetry = createTelemetry();
       const buffered = [

@@ -99,12 +99,12 @@ const decisionTreesLoadedSchema: RootSchema<DecisionTreesLoadedProps> = {
       type: 'keyword',
       _meta: {
         description:
-          'One-way word phrase derived from the symptom id of a materialized tree. Symptom slugs can name customer services, so the id itself is never sent.',
+          'Word phrase derived by an unsalted one-way hash of the symptom id of a materialized tree. The slug is not sent, but this is pseudonymous rather than anonymous: someone who guesses a slug can recompute its phrase.',
       },
     },
     _meta: {
       description:
-        'Hashed symptom ids of the trees materialized for this run. Only sent for accessed loads; empty for discover, where every tree is loaded and the list adds nothing over tree_count. Stable across runs, so it counts how often a tree is loaded without exposing its name.',
+        'Pseudonymous (unsalted hash) symptom ids of the trees materialized for this run. Only sent for accessed loads; empty for discover, where every tree is loaded and the list adds nothing over tree_count. Stable across runs, so it counts how often a tree is loaded without sending its slug.',
     },
   },
 };

@@ -81,7 +81,9 @@ const WORD_COUNT = 4;
  * Maps a value to a stable, one-way phrase such as `amber-otter-falcon-maple`. It lets telemetry
  * group and compare identifiers across events without carrying the identifier itself, and stays
  * readable enough to spot in a dashboard. Four words of 64 give 24 bits, so two ids in a large
- * set can occasionally share a phrase; it is a label, not a unique key.
+ * set can occasionally share a phrase; it is a label, not a unique key. The hash is unsalted, so
+ * it keeps slugs out of the payload but does not stop someone who can guess a slug from confirming
+ * it: treat the phrase as pseudonymous, not anonymous.
  */
 export const toReadableHash = (value: string): string => {
   const digest = createHash('sha256').update(value).digest();
