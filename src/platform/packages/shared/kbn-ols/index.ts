@@ -29,8 +29,17 @@ export {
   type AccessPolicy,
   type ReservedOperation,
 } from './src/policy';
-export type { Acl, AclEntry, AclState, StoredAcl, StoredAclEntry } from './src/acl';
-export { ACL_FIELD, normalizeAclSource, toStoredAcl } from './src/normalize';
+export {
+  ACL_FIELD,
+  normalizeAclSource,
+  toAclSource,
+  type Acl,
+  type AclEntry,
+  type AclState,
+  type StoredAcl,
+  type StoredAclEntry,
+} from './src/acl';
+export { buildAclReadFilter, type BuildAclReadFilterParams } from './src/read_filter';
 export {
   evaluateAcl,
   generalAccessPermits,
@@ -42,7 +51,6 @@ export {
   type AclObjectDecision,
   type EvaluateAclParams,
 } from './src/evaluate';
-export { buildAclReadFilter, type BuildAclReadFilterParams } from './src/query';
 export {
   AclChangeError,
   MAX_ACL_ENTRIES,

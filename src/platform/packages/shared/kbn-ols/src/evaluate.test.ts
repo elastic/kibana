@@ -15,7 +15,7 @@ import {
   type FixtureProbe,
 } from './__fixtures__';
 import { compareLevels, type EntryLevel } from './levels';
-import { normalizeAclSource } from './normalize';
+import { normalizeAclSource } from './acl';
 import type { StoredAcl } from './acl';
 
 /**
