@@ -22,7 +22,34 @@ jest.mock('./service_settings_flyout', () => ({
     <div>
       <div data-test-subj="mockFlyout">{JSON.stringify(datasetTemplatesPolicy ?? null)}</div>
       <button data-test-subj="mockApplyUntouched" onClick={() => onApply({}, [], undefined)} />
-      <button data-test-subj="mockApplyOff" onClick={() => onApply({}, [], undefined, false)} />
+      <button
+        data-test-subj="mockApplyOff"
+        onClick={() =>
+          // The dataset is left at its default, as when only the switch is turned off.
+          onApply(
+            { ec2: { enabledInputs: ['otelcol'], varsByInput: {} } },
+            ['ec2'],
+            undefined,
+            false
+          )
+        }
+      />
+      <button
+        data-test-subj="mockApplyCustomOff"
+        onClick={() =>
+          onApply(
+            {
+              ec2: {
+                enabledInputs: ['otelcol'],
+                varsByInput: { otelcol: { 'data_stream.dataset': 'aws.prod' } },
+              },
+            },
+            ['ec2'],
+            undefined,
+            false
+          )
+        }
+      />
     </div>
   ),
 }));
@@ -282,6 +309,24 @@ describe('ServiceSettingsStep — services that share a dataset template policy'
     openFlyout('ec2');
 
     fireEvent.click(screen.getByTestId('mockApplyOff'));
+
+    expect(setServiceFieldsAndInputs.mock.calls[0][5]).toStrictEqual({
+      instanceIds: ['ec2', 'lambda'],
+      enabled: false,
+    });
+  });
+
+  it('reaches the other services when the save is what first brings the service into the policy', () => {
+    // EC2 is saved with the generic dataset, so the switch does not apply to it yet.
+    const { setServiceFieldsAndInputs } = renderStep({
+      ...twoServices,
+      stored: { ec2: varsFor('ec2', 'generic') },
+    });
+    openFlyout('ec2');
+    expect(screen.getByTestId('mockFlyout')).toHaveTextContent('null');
+
+    // The user picks a custom dataset and turns the switch off in the same save.
+    fireEvent.click(screen.getByTestId('mockApplyCustomOff'));
 
     expect(setServiceFieldsAndInputs.mock.calls[0][5]).toStrictEqual({
       instanceIds: ['ec2', 'lambda'],

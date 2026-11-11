@@ -173,9 +173,9 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     ? awsServicesMap?.get(activeFlyoutInstance.serviceId) ?? null
     : null;
 
-  // The other services that deploy in the active service's policy share its template choice. A
+  // The services that deploy in the active service's policy share its template choice. A
   // duplicate has a policy of its own.
-  const activeDatasetTemplatesPolicy = useMemo(() => {
+  const activePolicyContext = useMemo(() => {
     if (!activeFlyoutInstance || activeFlyoutInstance.isDuplicate || !awsServicesMap) {
       return undefined;
     }
@@ -197,9 +197,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
       deploymentMethod === 'agent_based' ? undefined : DEFAULT_NAMESPACE,
       namespace
     ).find(({ instanceIds }) => instanceIds.includes(activeFlyoutInstance.instanceId));
-    return group
-      ? getDatasetTemplatesPolicy(activeFlyoutInstance.instanceId, group.members, storedServiceVars)
-      : undefined;
+    return group ? { members: group.members, storedServiceVars } : undefined;
   }, [
     activeFlyoutInstance,
     awsServicesMap,
@@ -208,6 +206,18 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     namespace,
     getServiceVars,
   ]);
+
+  const activeDatasetTemplatesPolicy = useMemo(
+    () =>
+      activeFlyoutInstance && activePolicyContext
+        ? getDatasetTemplatesPolicy(
+            activeFlyoutInstance.instanceId,
+            activePolicyContext.members,
+            activePolicyContext.storedServiceVars
+          )
+        : undefined,
+    [activeFlyoutInstance, activePolicyContext]
+  );
 
   const duplicates = useDuplicates({
     instances,
@@ -231,6 +241,18 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
       instanceNamespace?: string,
       createDatasetTemplates?: boolean
     ) => {
+      // The policy is read from what was submitted, not what was saved: a service that moves from
+      // the generic dataset to a custom one only joins the switch's policy with this save.
+      const submittedPolicy = activePolicyContext
+        ? getDatasetTemplatesPolicy(instanceId, activePolicyContext.members, {
+            ...activePolicyContext.storedServiceVars,
+            [instanceId]: {
+              ...activePolicyContext.storedServiceVars[instanceId],
+              enabledDataStreams,
+              varsByDataStream,
+            },
+          })
+        : undefined;
       setServiceFieldsAndInputs(
         instanceId,
         varsByDataStream,
@@ -241,9 +263,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         createDatasetTemplates === undefined
           ? undefined
           : {
-              instanceIds: [
-                ...new Set([instanceId, ...(activeDatasetTemplatesPolicy?.instanceIds ?? [])]),
-              ],
+              instanceIds: [...new Set([instanceId, ...(submittedPolicy?.instanceIds ?? [])])],
               enabled: createDatasetTemplates,
             }
       );
