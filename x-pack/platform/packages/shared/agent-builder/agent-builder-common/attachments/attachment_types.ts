@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * List of internal / built-in attachment types.
@@ -45,10 +45,12 @@ export interface EsqlAttachmentData {
   description?: string;
 }
 
-export const textAttachmentDataSchema = z.object({
-  content: z.string(),
-  name: z.string().max(1024).optional(),
-});
+export const textAttachmentDataSchema = lazySchema(() =>
+  z.object({
+    content: z.string(),
+    name: z.string().max(1024).optional(),
+  })
+);
 
 /**
  * Data for a text attachment.
@@ -181,12 +183,14 @@ export const MAX_BINARY_FILE_KIND_BYTES = Math.max(...Object.values(MAX_BINARY_B
 
 export const MAX_BINARY_TEXT_LENGTH = 60_000;
 
-export const binaryAttachmentDataSchema = z.object({
-  file_id: z.string().max(1024),
-  name: z.string().max(1024),
-  mime_type: z.enum(SUPPORTED_BINARY_MIME_TYPES),
-  text: z.string().max(MAX_BINARY_TEXT_LENGTH),
-});
+export const binaryAttachmentDataSchema = lazySchema(() =>
+  z.object({
+    file_id: z.string().max(1024),
+    name: z.string().max(1024),
+    mime_type: z.enum(SUPPORTED_BINARY_MIME_TYPES),
+    text: z.string().max(MAX_BINARY_TEXT_LENGTH),
+  })
+);
 
 /**
  * Data for a binary attachment. The original file stays in the Files API.
