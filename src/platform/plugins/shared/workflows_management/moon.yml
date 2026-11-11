@@ -122,6 +122,7 @@ dependsOn:
   - '@kbn/rule-data-utils'
   - '@kbn/std'
   - '@kbn/core-saved-objects-common'
+  - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/esql-types'
   - '@kbn/esql-language'
   - '@kbn/esql-utils'
@@ -150,6 +151,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
   - scout-tests
 fileGroups:
   src:
