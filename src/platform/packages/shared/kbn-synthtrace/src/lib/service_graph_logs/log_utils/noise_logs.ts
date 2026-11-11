@@ -13,8 +13,8 @@ import { mulberry32 } from '../placeholders';
 import { deriveSeed } from '../utils/seed';
 import { pickInfraMessage, pickNoiseMessage } from '../utils/templates';
 import { buildMessageOverrides, getOrBuildMetadata } from '../utils/metadata';
+import { buildLogDoc } from '../log_builder';
 import {
-  buildLogDoc,
   resolveLogLevel,
   resolveLogLevelFromSeed,
   type ServiceGraphOptions,
