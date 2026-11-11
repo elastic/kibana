@@ -131,7 +131,7 @@ describe('wakeParent', () => {
   let getScopedClientAsUser: jest.Mock;
   let conversationClient: ReturnType<typeof createConversationClientMock>;
 
-  const wake = () =>
+  const wake = (signal?: AbortSignal) =>
     wakeParent({
       request,
       childExecutionId: 'child-1',
@@ -142,6 +142,7 @@ describe('wakeParent', () => {
       executionService: { maybeExecuteAgent } as unknown as AgentExecutionService,
       uiSettings,
       savedObjects,
+      signal,
     });
 
   beforeEach(() => {
@@ -259,6 +260,26 @@ describe('wakeParent', () => {
     experimentalEnabled = new Error('settings unavailable');
 
     await expect(wake()).rejects.toThrow('settings unavailable');
+    expect(maybeExecuteAgent).not.toHaveBeenCalled();
+  });
+
+  it("carries the task's signal into the execution reads and stops before a run once cancelled", async () => {
+    const cancelledAfterSettings = new AbortController();
+    cancelledAfterSettings.abort();
+    await expect(wake(cancelledAfterSettings.signal)).rejects.toMatchObject({ name: 'AbortError' });
+    expect(get).not.toHaveBeenCalled();
+
+    const cancelledDuringConversationRead = new AbortController();
+    conversationClient.get.mockImplementation(async () => {
+      cancelledDuringConversationRead.abort();
+      return { id: 'conversation-1', state: { background_executions: pendingState } } as never;
+    });
+    await expect(wake(cancelledDuringConversationRead.signal)).rejects.toMatchObject({
+      name: 'AbortError',
+    });
+    const { signal } = cancelledDuringConversationRead;
+    expect(get).toHaveBeenCalledWith('child-1', { signal });
+    expect(get).toHaveBeenCalledWith('parent-1', { signal });
     expect(maybeExecuteAgent).not.toHaveBeenCalled();
   });
 

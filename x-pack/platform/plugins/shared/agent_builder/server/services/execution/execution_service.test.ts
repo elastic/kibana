@@ -145,6 +145,10 @@ describe('AgentExecutionService', () => {
     mergeAttachmentInputs: jest.fn(),
   };
 
+  const getSmlTypeDefinition = jest.fn((typeId: string) =>
+    typeId === 'dashboard' ? { attachmentType: 'dashboard-attachment' } : undefined
+  );
+
   const conversationClient = createConversationClientMock();
   const conversationService = {
     getScopedClient: jest.fn().mockImplementation(async () => conversationClient),
@@ -172,6 +176,10 @@ describe('AgentExecutionService', () => {
     logger,
   });
   const resolveConversation = jest.spyOn(callbackDeliveryService, 'resolveConversation');
+  const runOnBeforeNewConversation = jest.spyOn(
+    callbackDeliveryService,
+    'runOnBeforeNewConversation'
+  );
 
   const service = createAgentExecutionService({
     logger,
@@ -183,6 +191,7 @@ describe('AgentExecutionService', () => {
     agentService,
     runAgent: jest.fn(),
     attachmentsService,
+    getSmlTypeDefinition,
     uiSettings,
     savedObjects,
     meteringService,
@@ -347,6 +356,7 @@ describe('AgentExecutionService', () => {
         meteringService,
         searchInferenceEndpoints,
         callbackDeliveryService,
+        getSmlTypeDefinition,
       });
     const converse = (
       boundService: ReturnType<typeof createBoundService>,
@@ -849,6 +859,122 @@ describe('AgentExecutionService', () => {
         request
       );
       expect(mockExecutionClient.create).not.toHaveBeenCalled();
+    });
+
+    describe('items linked in the message', () => {
+      const execute = (message: string, attachments?: unknown[]) =>
+        service.executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request: httpServerMock.createKibanaRequest(),
+          params: { agentId: 'agent-1', nextInput: { message, attachments } as any },
+        });
+      const validated = () => {
+        const inputs = (
+          attachmentsService.validateAttachmentInputs as jest.Mock
+        ).mock.calls.flatMap(([attachments]) => attachments ?? []);
+        return inputs.length > 0 ? inputs : undefined;
+      };
+
+      it('attaches them by reference', async () => {
+        await execute(
+          'See [#dashboard/Sales](sml://dashboard%3Adash-1) and [#x](sml://dashboard:dash-2)'
+        );
+
+        expect(validated()).toEqual([
+          { type: 'dashboard-attachment', origin: 'dash-1', description: 'dashboard/Sales' },
+          { type: 'dashboard-attachment', origin: 'dash-2', description: 'x' },
+        ]);
+      });
+
+      it('adds them after the attachments of the request, once each', async () => {
+        const attachment = { type: 'some_type', data: { foo: 'bar' } };
+
+        await execute('[a](sml://dashboard:dash-1) [b](sml://dashboard:dash-1)', [attachment]);
+
+        expect(validated()).toEqual([
+          attachment,
+          { type: 'dashboard-attachment', origin: 'dash-1', description: 'a' },
+        ]);
+      });
+
+      it('reads escaped labels after many brackets without slowing down', async () => {
+        await execute(
+          `${'['.repeat(200_000)} [#dashboard/\\[Elastic\\] Rules](sml://dashboard:dash-2)`
+        );
+
+        expect(validated()).toEqual([
+          {
+            type: 'dashboard-attachment',
+            origin: 'dash-2',
+            description: 'dashboard/[Elastic] Rules',
+          },
+        ]);
+      });
+
+      // The pattern used to take about 40 seconds on this input, so the Jest timeout guards it.
+      it('does not slow down on text with many brackets and no links', async () => {
+        await execute('['.repeat(200_000));
+
+        expect(validated()).toBeUndefined();
+      }, 10_000);
+
+      it('does not attach link-shaped text inside an escaped label', async () => {
+        await execute(
+          '[#dashboard/Report \\](sml://dashboard:private-id)](sml://dashboard:real-id)'
+        );
+
+        expect(validated()).toEqual([
+          {
+            type: 'dashboard-attachment',
+            origin: 'real-id',
+            description: 'dashboard/Report ](sml://dashboard:private-id)',
+          },
+        ]);
+      });
+
+      it('still attaches a link whose label ends in a backslash', async () => {
+        await execute('[#dashboard/Back\\\\](sml://dashboard:dash-9)');
+
+        expect(validated()).toEqual([
+          { type: 'dashboard-attachment', origin: 'dash-9', description: 'dashboard/Back\\' },
+        ]);
+      });
+
+      it('attaches at most 30 linked items, in the order they appear', async () => {
+        const links = Array.from(
+          { length: 40 },
+          (_, index) => `[a](sml://dashboard:dash-${index + 1})`
+        );
+
+        await execute(links.join(' '));
+
+        const origins = (validated() as Array<{ origin: string }>).map(({ origin }) => origin);
+        expect(origins).toHaveLength(30);
+        expect(origins[0]).toBe('dash-1');
+        expect(origins[29]).toBe('dash-30');
+      });
+
+      it('sends the message without the linked items that cannot be attached', async () => {
+        (attachmentsService.validateAttachmentInputs as jest.Mock).mockImplementation(
+          async (attachments: Array<{ origin?: string }> | undefined) => {
+            if (attachments?.some(({ origin }) => origin === 'dash-1')) {
+              throw new Error('Failed to resolve content from origin');
+            }
+            return attachments;
+          }
+        );
+
+        await execute('[a](sml://dashboard:dash-1) [b](sml://dashboard:dash-2)');
+
+        expect(mockExecutionClient.create).toHaveBeenCalled();
+        expect(validated()).toContainEqual(expect.objectContaining({ origin: 'dash-2' }));
+      });
+
+      it('skips types that cannot be attached and ids that are not entry ids', async () => {
+        await execute('[a](sml://visualization:vis-1) [b](sml://dashboard) [c](sml://dashboard%)');
+
+        expect(validated()).toBeUndefined();
+      });
     });
 
     it('should return a live observable that emits events from the agent stream', async () => {
@@ -1944,6 +2070,95 @@ describe('AgentExecutionService', () => {
           'lookup failed'
         );
         expect(mockExecutionClient.create).not.toHaveBeenCalled();
+      });
+
+      it('runs the hooks for a new conversation on the requested agent before recording the execution', async () => {
+        await converse({ conversationId: undefined, origin });
+
+        expect(runOnBeforeNewConversation).toHaveBeenCalledWith({
+          origin,
+          spaceId: 'default',
+          request: expect.anything(),
+          agentId: 'agent-1',
+        });
+        expect(runOnBeforeNewConversation.mock.invocationCallOrder[0]).toBeLessThan(
+          mockExecutionClient.create.mock.invocationCallOrder[0]
+        );
+      });
+
+      it('does not run the hooks for a caller who may not run the agent', async () => {
+        agentRegistry.get.mockImplementation(async (agentId, options) => {
+          if (options?.access === 'use') {
+            throw new Error('forbidden');
+          }
+          return createMockedInternalAgent({ id: agentId });
+        });
+
+        await expect(converse({ conversationId: undefined, origin })).rejects.toThrow('forbidden');
+        expect(runOnBeforeNewConversation).not.toHaveBeenCalled();
+      });
+
+      it('does not run the hooks for a replayed delivery', async () => {
+        mockExecutionClient.peek.mockResolvedValue({
+          status: ExecutionStatus.scheduled,
+          eventCount: 0,
+        });
+        mockExecutionClient.create.mockRejectedValueOnce(conflictError());
+
+        await service.executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request: httpServerMock.createKibanaRequest(),
+          executionId: 'exec-1',
+          metadata: { execution_idempotency_key: 'Ev123' },
+          params: { agentId: 'agent-1', origin, nextInput: { message: 'Hello' } },
+        });
+
+        expect(runOnBeforeNewConversation).not.toHaveBeenCalled();
+      });
+
+      it.each([
+        ['gives back what the hooks took when the opening message is refused', true],
+        ['keeps what the hooks took when the opening message write may have landed', false],
+      ])('%s', async (_name, refused) => {
+        const release = jest.fn().mockResolvedValue(undefined);
+        runOnBeforeNewConversation.mockResolvedValueOnce(release);
+        conversationClient.create.mockRejectedValueOnce(
+          refused
+            ? createConversationWriteConflictError({ conversationId: 'conversation-1' })
+            : new Error('read after write failed')
+        );
+
+        await expect(converse({ conversationId: undefined, origin })).rejects.toBeDefined();
+        expect(release).toHaveBeenCalledTimes(refused ? 1 : 0);
+      });
+
+      it('keeps what the hooks took once the opening message is written', async () => {
+        const release = jest.fn().mockResolvedValue(undefined);
+        runOnBeforeNewConversation.mockResolvedValueOnce(release);
+
+        await converse({ conversationId: undefined, origin });
+
+        expect(release).not.toHaveBeenCalled();
+      });
+
+      it('writes nothing when a hook refuses the turn', async () => {
+        runOnBeforeNewConversation.mockRejectedValueOnce(new Error('limit reached'));
+
+        await expect(converse({ conversationId: undefined, origin })).rejects.toThrow(
+          'limit reached'
+        );
+        expect(conversationClient.create).not.toHaveBeenCalled();
+        expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+        expect(mockExecutionClient.create).not.toHaveBeenCalled();
+      });
+
+      it('does not run the hooks for a turn that continues a conversation', async () => {
+        resolveConversation.mockResolvedValueOnce({ conversationId: 'investigation-1' });
+        conversationClient.get.mockResolvedValueOnce(boundConversation);
+
+        await converse({ conversationId: undefined, origin });
+
+        expect(runOnBeforeNewConversation).not.toHaveBeenCalled();
       });
     });
 

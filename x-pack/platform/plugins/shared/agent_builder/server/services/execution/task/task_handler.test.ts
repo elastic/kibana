@@ -577,6 +577,7 @@ describe('TaskHandler retrying a wake of a busy parent', () => {
   const conversationService = { getScopedClient: jest.fn() };
   const uiSettings = { asScopedToClient: jest.fn() };
   const savedObjects = { getScopedClient: jest.fn() };
+  const { signal } = new AbortController();
 
   const wake = () =>
     createTaskHandler({
@@ -586,13 +587,13 @@ describe('TaskHandler retrying a wake of a busy parent', () => {
       uiSettings,
       savedObjects,
       getExecutionService: () => ({ executeAgent }),
-    } as never).wakeParent({ childExecutionId: 'child-1', fakeRequest });
+    } as never).wakeParent({ childExecutionId: 'child-1', fakeRequest, signal });
 
   beforeEach(() => {
     wakeParentMock.mockReset();
   });
 
-  it('wakes the parent with the task credential', async () => {
+  it('wakes the parent with the task credential and signal', async () => {
     wakeParentMock.mockResolvedValue('woken');
 
     await expect(wake()).resolves.toEqual({ done: true });
@@ -604,6 +605,7 @@ describe('TaskHandler retrying a wake of a busy parent', () => {
       executionService: { executeAgent },
       uiSettings,
       savedObjects,
+      signal,
     });
   });
 

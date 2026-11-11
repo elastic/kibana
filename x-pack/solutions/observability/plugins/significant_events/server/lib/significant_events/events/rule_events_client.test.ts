@@ -151,6 +151,39 @@ describe('RuleEventsClient', () => {
       expect(lastStatusWritten(alertEventsClient)).toMatchObject({ alert_status: 'inactive' });
     });
 
+    it('replaces prior workflow provenance with the workflow that writes the status version', async () => {
+      const existing = createStatusEvent({
+        status: 'active',
+        workflow_execution_id: 'prior-workflow',
+      });
+      const alertEventsClient = makeStatusAlertEventsClient();
+
+      await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
+        eventId: existing.event_id,
+        change: DEACTIVATE_STATUS,
+        workflowExecutionId: 'current-workflow',
+      });
+
+      expect(lastStatusWritten(alertEventsClient).data.workflow_execution_id).toBe(
+        'current-workflow'
+      );
+    });
+
+    it('clears prior workflow provenance when a standalone status update writes a version', async () => {
+      const existing = createStatusEvent({
+        status: 'active',
+        workflow_execution_id: 'prior-workflow',
+      });
+      const alertEventsClient = makeStatusAlertEventsClient();
+
+      await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
+        eventId: existing.event_id,
+        change: DEACTIVATE_STATUS,
+      });
+
+      expect(lastStatusWritten(alertEventsClient).data.workflow_execution_id).toBeUndefined();
+    });
+
     it('records the given note, and falls back to the operator note when it is omitted or blank', async () => {
       const existing = createStatusEvent({ assessment_note: 'Operator dismissed as noise.' });
       const written = async (assessmentNote?: string) => {
@@ -329,6 +362,23 @@ describe('RuleEventsClient', () => {
       ]);
     });
 
+    it('ignores the legacy investigations field of a stored row', async () => {
+      const row: MockRow = {
+        source: ruleEventSource(),
+        dataJson: JSON.stringify({
+          ...dataDoc,
+          investigations: [
+            { workflow_execution_id: 'wf-1', started_at: '2026-01-01T00:00:00.000Z' },
+          ],
+        }),
+      };
+      const { client } = createClient(async () => sourceResponse([row]));
+
+      const { hits } = await client.findLatest({});
+
+      expect(hits[0]).not.toHaveProperty('investigations');
+    });
+
     it('normalizes a scalar source_ids string to a 1-element array', async () => {
       const scalarDataDoc = { ...dataDoc, source_ids: 'logs.bridge.only' };
       const row: MockRow = {
@@ -459,7 +509,7 @@ describe('RuleEventsClient', () => {
       );
     });
 
-    it('filters topologyFeatureIds via MV_INTERSECTS against causal_features.feature_id OR blast_radius.feature_id', async () => {
+    it('filters topologyFeatureIds via MV_INTERSECTS against feature ids and dependency endpoints', async () => {
       const { client, query } = createClient(async (request) =>
         request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
       );
@@ -467,12 +517,14 @@ describe('RuleEventsClient', () => {
       await client.findLatestByCurrentStatePaginated({ topologyFeatureIds: ['feat-1'] });
 
       const q = lastQuery(query, (query_) => !query_.includes('STATS total'));
-      expect(q).toContain(
-        'MV_INTERSECTS(FIELD_EXTRACT(data, "causal_features.feature_id"), ["feat-1"])'
-      );
-      expect(q).toContain(
-        'MV_INTERSECTS(FIELD_EXTRACT(data, "blast_radius.feature_id"), ["feat-1"])'
-      );
+      for (const path of [
+        'causal_features.feature_id',
+        'blast_radius.feature_id',
+        'blast_radius.source',
+        'blast_radius.target',
+      ]) {
+        expect(q).toContain(`MV_INTERSECTS(FIELD_EXTRACT(data, "${path}"), ["feat-1"])`);
+      }
     });
 
     it('filters search, time range and status against the latest revision of each series', async () => {
@@ -602,22 +654,50 @@ describe('RuleEventsClient', () => {
       );
     });
 
-    it('filters on the investigation state derived from the investigations entries', async () => {
-      const { client, query } = createClient(async (request) =>
-        request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
-      );
+    describe('investigation state filter', () => {
+      const filterQuery = async (episodes: { inProgress: string[]; completed: string[] }) => {
+        const { client, query } = createClient(async (request) =>
+          request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
+        );
+        await client.findLatestByCurrentStatePaginated({
+          investigation: { states: ['in_progress'], episodes },
+        });
+        return lastQuery(query, (query_) => !query_.includes('STATS total'));
+      };
 
-      await client.findLatestByCurrentStatePaginated({ investigationStates: ['in_progress'] });
+      it('derives the state from the episode id of the current revision', async () => {
+        const q = await filterQuery({ inProgress: ['ep-1'], completed: ['ep-2', 'ep-3'] });
 
-      const q = lastQuery(query, (query_) => !query_.includes('STATS total'));
-      expect(q).toContain(
-        'EVAL investigation_state = CASE(COALESCE(MV_COUNT(FIELD_EXTRACT(data, "investigations.workflow_execution_id")), 0) == 0, "not_started", COALESCE(MV_COUNT(FIELD_EXTRACT(data, "investigations.completed_at")), 0) < COALESCE(MV_COUNT(FIELD_EXTRACT(data, "investigations.workflow_execution_id")), 0), "in_progress", "completed")'
-      );
-      expect(q).toContain('WHERE investigation_state IN ("in_progress")');
+        expect(q).toContain(
+          'EVAL investigation_state = CASE(`alert.id` IN ("ep-1"), "in_progress", `alert.id` IN ("ep-2", "ep-3"), "completed", "not_started")'
+        );
+        expect(q).toContain('WHERE investigation_state IN ("in_progress")');
+      });
+
+      it.each([
+        {
+          name: 'only running episodes',
+          episodes: { inProgress: ['ep-1'], completed: [] },
+          expected: 'CASE(`alert.id` IN ("ep-1"), "in_progress", "not_started")',
+        },
+        {
+          name: 'only finished episodes',
+          episodes: { inProgress: [], completed: ['ep-2'] },
+          expected: 'CASE(`alert.id` IN ("ep-2"), "completed", "not_started")',
+        },
+        {
+          name: 'no episodes at all',
+          episodes: { inProgress: [], completed: [] },
+          expected: 'EVAL investigation_state = "not_started"',
+        },
+      ])('builds valid ES|QL for $name', async ({ episodes, expected }) => {
+        const q = await filterQuery(episodes);
+
+        expect(q).toContain(expected);
+        expect(q).not.toContain('IN ()');
+      });
     });
-  });
 
-  describe('countFacets', () => {
     it('counts each dimension without its own filter and fills missing options with zero', async () => {
       const { client, query } = createClient(async (request) => {
         if (request.query.includes('BY severity')) {
@@ -635,7 +715,11 @@ describe('RuleEventsClient', () => {
       const facets = await client.countFacets({
         severity: ['critical'],
         status: ['active'],
-        investigationStates: ['completed'],
+        investigation: {
+          states: ['completed'],
+          episodes: { inProgress: ['ep-1'], completed: ['ep-2'] },
+        },
+        investigationEpisodes: Promise.resolve({ inProgress: ['ep-1'], completed: ['ep-2'] }),
       });
 
       expect(facets.severity).toEqual({ critical: 0, high: 3, medium: 0, low: 0 });
@@ -648,7 +732,25 @@ describe('RuleEventsClient', () => {
       expect(severityQuery).toContain('COALESCE(`alert.status`, "active") IN ("active")');
       expect(statusQuery).not.toContain('`alert.status` IN');
       expect(investigationQuery).not.toContain('investigation_state IN');
+      expect(investigationQuery).toContain(
+        'CASE(`alert.id` IN ("ep-1"), "in_progress", `alert.id` IN ("ep-2"), "completed", "not_started")'
+      );
       expect(investigationQuery).toContain('severity IN ("critical")');
+    });
+
+    it('leaves the investigation counts out, and runs no query for them, when the episodes could not be read', async () => {
+      const { client, query } = createClient(
+        async () => ({ columns: [], values: [] } as unknown as ESQLSearchResponse)
+      );
+
+      const facets = await client.countFacets({
+        investigationEpisodes: Promise.resolve(undefined),
+      });
+
+      expect(facets.investigation).toBeUndefined();
+      expect(
+        query.mock.calls.some(([request]) => request.query.includes('BY investigation_state'))
+      ).toBe(false);
     });
   });
 
@@ -1273,9 +1375,11 @@ describe('RuleEventsClient', () => {
       ...overrides,
     });
     const makeWriter = () =>
-      ({ createAlertEvent: jest.fn().mockResolvedValue(undefined) } as jest.Mocked<
-        Pick<AlertEventsClientApi, 'createAlertEvent'>
-      >);
+      ({
+        createAlertEvent: jest
+          .fn()
+          .mockResolvedValue({ group_hash: 'hash-1', alert_id: 'alert-1' }),
+      } as jest.Mocked<Pick<AlertEventsClientApi, 'createAlertEvent'>>);
     const clientWith = ({
       head,
       writer,
@@ -1290,13 +1394,14 @@ describe('RuleEventsClient', () => {
         { getAlertEventsClient: async () => writer as AlertEventsClientApi, emitTrigger }
       );
 
-    it('createEvent writes the version without reading the head, and notifies its creation', async () => {
+    it('createEvent writes without reading the head, returns its series identity, and notifies its creation', async () => {
       const writer = makeWriter();
       const emitTrigger = jest.fn();
       const client = clientWith({ writer, emitTrigger });
 
-      await client.createEvent({ event: version() });
+      const result = await client.createEvent({ event: version() });
 
+      expect(result).toEqual({ groupHash: 'hash-1', alertId: 'alert-1' });
       expect(writer.createAlertEvent).toHaveBeenCalledWith(
         expect.objectContaining({ fingerprint: 'agent-event-1' })
       );

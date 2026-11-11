@@ -24,6 +24,8 @@ describe('wake-parent task definition', () => {
     getStartServices: jest.fn(),
   });
 
+  const { signal } = new AbortController();
+
   const createRunner = (fakeRequest?: ReturnType<typeof httpServerMock.createKibanaRequest>) =>
     definitions[taskTypes.wakeParent].createTaskRunner({
       taskInstance: {
@@ -31,9 +33,10 @@ describe('wake-parent task definition', () => {
         params: { childExecutionId: 'child-1' },
       },
       fakeRequest,
+      signal,
     } as never);
 
-  it('runs the wake under the task request, again later while there is nothing to do yet', async () => {
+  it('runs the wake under the task request and signal, again later while there is nothing to do yet', async () => {
     expect(() => createRunner()).toThrow('missing API key');
 
     const runner = createRunner(httpServerMock.createKibanaRequest());
@@ -46,6 +49,7 @@ describe('wake-parent task definition', () => {
     expect(wakeParent).toHaveBeenCalledWith({
       childExecutionId: 'child-1',
       fakeRequest: expect.anything(),
+      signal,
     });
   });
 });

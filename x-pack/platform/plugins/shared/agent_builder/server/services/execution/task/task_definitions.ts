@@ -82,7 +82,7 @@ export const registerTaskDefinitions = ({
       timeout: '2m',
       maxAttempts: 5,
       createTaskRunner: (context) => {
-        const { taskInstance, fakeRequest } = context;
+        const { taskInstance, fakeRequest, signal } = context;
 
         if (!fakeRequest) {
           throw new Error('Cannot wake a parent agent without a request (missing API key)');
@@ -93,7 +93,7 @@ export const registerTaskDefinitions = ({
 
         return {
           run: async () => {
-            const { done } = await taskHandler.wakeParent({ ...params, fakeRequest });
+            const { done } = await taskHandler.wakeParent({ ...params, fakeRequest, signal });
             return done
               ? { state: {} }
               : { state: {}, runAt: new Date(Date.now() + WAKE_PARENT_RETRY_INTERVAL_MS) };

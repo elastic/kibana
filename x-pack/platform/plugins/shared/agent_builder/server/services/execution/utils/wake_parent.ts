@@ -45,6 +45,8 @@ export interface WakeParentParams {
   executionService: AgentExecutionService;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
+  /** The task's abort signal, when the wake runs from one. */
+  signal?: AbortSignal;
 }
 
 /**
@@ -99,7 +101,8 @@ export const describeFinishedChild = (child: AgentExecution): string =>
 /**
  * Reports a finished background sub-agent to its parent conversation: a run for `always`, the
  * message alone for `never`. Everything is resolved from the child's record, so a caller needs
- * nothing but its id.
+ * nothing but its id. A cancelled `signal` aborts the reads that take it and stops the wake at
+ * the next step, before the parent is run.
  */
 export const wakeParent = async ({
   request,
@@ -109,17 +112,19 @@ export const wakeParent = async ({
   executionService,
   uiSettings,
   savedObjects,
+  signal,
 }: WakeParentParams): Promise<WakeParentResult> => {
   if (!(await isWakeParentEnabled({ request, uiSettings, savedObjects }))) {
     return 'skipped';
   }
-  const child = await executionClient.get(childExecutionId);
+  signal?.throwIfAborted();
+  const child = await executionClient.get(childExecutionId, { signal });
   if (!child?.owner || !child.parentExecutionId) {
     return 'skipped';
   }
   // The run that spawned the child names the conversation and carries the settings the user
   // chose for it; the service would otherwise fall back to the agent's defaults.
-  const parent = await executionClient.get(child.parentExecutionId);
+  const parent = await executionClient.get(child.parentExecutionId, { signal });
   // A standalone parent has no conversation to report to.
   if (parent?.executionMode !== AgentExecutionMode.conversation) {
     return 'skipped';
@@ -156,6 +161,8 @@ export const wakeParent = async ({
     return 'skipped';
   }
 
+  // The conversation read cannot carry the signal, so a cancellation during it is caught here.
+  signal?.throwIfAborted();
   const triggerMode = child.agentParams.parentTriggerMode ?? ChatTriggerMode.Always;
   try {
     await executionService.maybeExecuteAgent({
@@ -189,7 +196,8 @@ export const wakeParent = async ({
   return triggerMode === ChatTriggerMode.Never ? 'queued' : 'woken';
 };
 
-export interface ReportToParentParams extends Omit<WakeParentParams, 'childExecutionId'> {
+export interface ReportToParentParams
+  extends Omit<WakeParentParams, 'childExecutionId' | 'signal'> {
   execution: AgentExecution;
   taskManager: TaskManagerStartContract;
   logger: Logger;

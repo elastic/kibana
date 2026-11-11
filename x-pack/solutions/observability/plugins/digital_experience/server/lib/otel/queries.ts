@@ -50,17 +50,26 @@ export const browserDocuments = (start: number, end: number) => [
 /** The documents of one application, by its exact name. */
 export const serviceDocuments = (serviceName: string) => termQuery(SERVICE_NAME, serviceName);
 
-/** The browser SDK documents of one application in the time range. */
+/**
+ * The browser SDK documents of one application in the time range, and only those `kuery` (the
+ * Overview's KQL, as a query) matches when it is given.
+ */
 export const applicationDocuments = ({
   serviceName,
   start,
   end,
+  kuery,
 }: {
   serviceName: string;
   start: number;
   end: number;
+  kuery?: estypes.QueryDslQueryContainer;
 }) => {
-  return [...browserDocuments(start, end), ...serviceDocuments(serviceName)];
+  return [
+    ...browserDocuments(start, end),
+    ...serviceDocuments(serviceName),
+    ...(kuery ? [kuery] : []),
+  ];
 };
 
 /** A filter aggregation counting the documents of one event, e.g. the page loads. */
@@ -85,16 +94,29 @@ export const otelSearchDefaults = (index: string) => ({
   allow_partial_search_results: false,
 });
 
-/** Up to 100 environments for the picker, whatever the selected one, and `aggs` in that one. */
+/** The documents of the environment, and of the other `filters` when given. */
+export const inEnvironmentFilter = (
+  environment: string | undefined,
+  filters: estypes.QueryDslQueryContainer[] = []
+): estypes.QueryDslQueryContainer =>
+  filters.length > 0
+    ? { bool: { filter: [environmentFilter(ENVIRONMENT_FIELDS, environment), ...filters] } }
+    : environmentFilter(ENVIRONMENT_FIELDS, environment);
+
+/**
+ * Up to 100 environments for the picker, whatever the selected one, and `aggs` in that one, and in
+ * the documents of `filters` too.
+ */
 export const byEnvironment = <
   TAggs extends Record<string, estypes.AggregationsAggregationContainer>
 >(
   environment: string | undefined,
-  aggs: TAggs
+  aggs: TAggs,
+  filters: estypes.QueryDslQueryContainer[] = []
 ) => ({
   ...environmentTerms(MAX_ENVIRONMENTS),
   environmentNotDefined: { filter: environmentNotDefinedFilter(ENVIRONMENT_FIELDS) },
-  inEnvironment: { filter: environmentFilter(ENVIRONMENT_FIELDS, environment), aggs },
+  inEnvironment: { filter: inEnvironmentFilter(environment, filters), aggs },
 });
 
 /** One vital's samples (the filter's doc count) and stats, matching `cls` and `CLS` alike. */

@@ -43,6 +43,8 @@ export interface TaskHandlerDeps extends AgentExecutionDeps {
 export interface WakeParentParams {
   childExecutionId: string;
   fakeRequest: KibanaRequest;
+  /** Task Manager's abort signal for the run: cancelled on timeout or when the task is reclaimed. */
+  signal: AbortSignal;
 }
 
 /**
@@ -339,6 +341,7 @@ class TaskHandlerImpl implements TaskHandler {
   async wakeParent({
     childExecutionId,
     fakeRequest,
+    signal,
   }: WakeParentParams): Promise<{ done: boolean }> {
     const result = await wakeParent({
       request: fakeRequest,
@@ -348,6 +351,7 @@ class TaskHandlerImpl implements TaskHandler {
       executionService: this.deps.getExecutionService(),
       uiSettings: this.deps.uiSettings,
       savedObjects: this.deps.savedObjects,
+      signal,
     });
     this.logger.debug(`Wake of the parent of background execution ${childExecutionId}: ${result}`);
     return { done: result !== 'busy' };

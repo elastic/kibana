@@ -7,6 +7,7 @@
 
 import { createPrompt } from '@kbn/inference-common';
 import { z, lazySchema } from '@kbn/zod/v4';
+import { withIdentifierRule } from '../with_identifier_rule';
 import systemPromptText from './system_prompt.text';
 
 export const RCA_REWARD_TOOL_NAME = 'score_investigation';
@@ -30,7 +31,7 @@ export type RcaRewardOutput = z.infer<typeof rcaRewardOutputSchema>;
 export const rcaRewardPrompt = createPrompt({
   name: 'nightshift_rca_reward',
   description:
-    'Scores the evidence, timeline, leakage and confidence of a Nightshift investigation',
+    'Scores the evidence, timeline, leakage and confidence of a nightshift investigation',
   input: lazySchema(() =>
     z.object({
       transcript: z.string(),
@@ -40,7 +41,7 @@ export const rcaRewardPrompt = createPrompt({
   .version({
     system: {
       mustache: {
-        template: systemPromptText,
+        template: withIdentifierRule(systemPromptText),
       },
     },
     template: {
@@ -62,7 +63,8 @@ export const rcaRewardPrompt = createPrompt({
             },
             investigation_reasoning: {
               type: 'string',
-              description: 'One sentence: what evidence was retrieved, or why none was available.',
+              description:
+                'One sentence: what evidence was retrieved, or why none was available. Describe it without naming hosts, people or IDs.',
             },
             timeline_contradiction_found: {
               type: 'boolean',
@@ -80,7 +82,8 @@ export const rcaRewardPrompt = createPrompt({
             },
             anti_leakage_reasoning: {
               type: 'string',
-              description: 'One sentence: what post-incident evidence was used (if any).',
+              description:
+                'One sentence: what post-incident evidence was used (if any). Describe it without naming hosts, people or IDs.',
             },
             confidence_overconfident: {
               type: 'boolean',
@@ -95,7 +98,7 @@ export const rcaRewardPrompt = createPrompt({
             temporal_proximity_reasoning: {
               type: 'string',
               description:
-                'One sentence: what root cause timestamp and alert onset were found, or why this could not be determined.',
+                'One sentence: what root cause timestamp and alert onset were found, or why this could not be determined. Describe them without naming hosts, people or IDs.',
             },
           },
           required: [

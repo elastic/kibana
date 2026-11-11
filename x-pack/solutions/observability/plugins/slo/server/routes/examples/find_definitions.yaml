@@ -4,22 +4,19 @@ requestBody:
       examples: {}
 responses:
   '200':
-    description: Successful request
     content:
       application/json:
-        schema:
-          $ref: ../oas_schemas.yaml#/find_slo_definitions_response
         examples:
           findSloDefinitionsResponse:
             summary: A paginated list of SLO definitions
             value:
               page: 1
-              perPage: 25
+              perPage: 100
               total: 1
               results:
                 - id: 8853df00-ae2e-11ed-90af-09bb6422b258
                   name: My Service Availability
-                  description: Availability of my web service
+                  description: Availability of my web service measured by successful HTTP responses
                   indicator:
                     type: sli.kql.custom
                     params:
@@ -40,48 +37,140 @@ responses:
                     preventInitialBackfill: false
                   revision: 1
                   enabled: true
-                  groupBy: '*'
                   tags:
                     - production
+                    - web-service
                   createdAt: '2025-01-12T10:03:19.000Z'
                   updatedAt: '2025-01-12T10:03:19.000Z'
+                  groupBy: '*'
                   version: 2
+                  createdBy: elastic
+                  updatedBy: elastic
+                  artifacts:
+                    dashboards: []
+          findSloDefinitionsWithHealthResponse:
+            summary: SLO definitions with their health (request with includeHealth=true)
+            value:
+              page: 1
+              perPage: 100
+              total: 1
+              results:
+                - id: 1620783d-cacd-4c40-a56e-8f25fd9ecda1
+                  name: Host Availability
+                  description: Availability of each host, reported as one SLO instance per host.name
+                  indicator:
+                    type: sli.kql.custom
+                    params:
+                      index: logs-*
+                      good: 'event.outcome : "success"'
+                      total: 'event.outcome : *'
+                      timestampField: '@timestamp'
+                  timeWindow:
+                    duration: 30d
+                    type: rolling
+                  budgetingMethod: occurrences
+                  objective:
+                    target: 0.99
+                  settings:
+                    syncDelay: 1m
+                    frequency: 1m
+                    preventInitialBackfill: false
+                  revision: 1
+                  enabled: true
+                  tags: []
+                  createdAt: '2025-01-12T10:03:19.000Z'
+                  updatedAt: '2025-01-12T10:03:19.000Z'
+                  groupBy:
+                    - host.name
+                  version: 2
+                  createdBy: elastic
+                  updatedBy: elastic
+                  artifacts:
+                    dashboards: []
+                  health:
+                    isProblematic: false
+                    rollup:
+                      isProblematic: false
+                      missing: false
+                      status: healthy
+                      state: started
+                    summary:
+                      isProblematic: false
+                      missing: false
+                      status: healthy
+                      state: started
   '400':
     description: Bad request
     content:
       application/json:
         schema:
-          $ref: ../oas_schemas.yaml#/400_response
+          $ref: ../oas_error_schemas.yaml#/400_response
         examples:
-          badRequestExample:
-            summary: Bad request
+          badRequestIncludeHealthExample:
+            summary: Invalid query parameter value
             value:
               statusCode: 400
               error: Bad Request
-              message: 'Invalid value ''foo'' supplied to: includeOutdatedOnly'
+              message: |-
+                [
+                  {
+                    "code": "invalid_union",
+                    "errors": [
+                      [
+                        {
+                          "code": "invalid_value",
+                          "values": [
+                            "true",
+                            "false"
+                          ],
+                          "path": [],
+                          "message": "Invalid option: expected one of \"true\"|\"false\""
+                        }
+                      ],
+                      [
+                        {
+                          "expected": "boolean",
+                          "code": "invalid_type",
+                          "path": [],
+                          "message": "Invalid input: expected boolean, received string"
+                        }
+                      ]
+                    ],
+                    "path": [
+                      "includeHealth"
+                    ],
+                    "message": "Invalid input"
+                  }
+                ]
+          badRequestPerPageExample:
+            summary: perPage above the limit
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: 'perPage limit set to 1000'
   '401':
     description: Unauthorized response
     content:
       application/json:
         schema:
-          $ref: ../oas_schemas.yaml#/401_response
+          $ref: ../oas_error_schemas.yaml#/401_response
         examples:
           unauthorizedExample:
             summary: Unauthorized
             value:
               statusCode: 401
               error: Unauthorized
-              message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos/_definitions]'
+              message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
   '403':
     description: Forbidden response
     content:
       application/json:
         schema:
-          $ref: ../oas_schemas.yaml#/403_response
+          $ref: ../oas_error_schemas.yaml#/403_response
         examples:
           forbiddenExample:
             summary: Forbidden
             value:
               statusCode: 403
               error: Forbidden
-              message: 'security_exception: action [slo_read] is unauthorized for user'
+              message: 'API [GET /api/observability/slos/_definitions] is unauthorized for user, this action is granted by the Kibana privileges [slo_read]'
