@@ -8,7 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { API_BASE_PATH } from '../../common/constants';
+import { API_BASE_PATH, PARSE_CSV_MAX_FILE_BYTES } from '../../common/constants';
 
 import { setupEnvironment, pageHelpers } from './helpers';
 import { PipelineCreateFromCsvTestBed } from './helpers/pipelines_create_from_csv.helpers';
@@ -66,6 +66,10 @@ describe('<PipelinesCreateFromCsv />', () => {
     });
 
     describe('form validation', () => {
+      test('should display the parse CSV file size limit', () => {
+        expect(testBed.component.text()).toContain('Upload file (up to 10 MB)');
+      });
+
       test('should prevent form submission if file for upload is missing', async () => {
         const { component, find, actions } = testBed;
 
@@ -75,6 +79,27 @@ describe('<PipelinesCreateFromCsv />', () => {
         component.update();
 
         expect(find('processFileButton').props().disabled).toEqual(false);
+      });
+
+      test('should reject a file larger than the parse CSV limit without uploading it', async () => {
+        const { actions, find, exists, component } = testBed;
+        const readFile = jest.fn(() => Promise.resolve('oversized'));
+        const oversizedFile = new File([], 'oversized.csv');
+        Object.defineProperties(oversizedFile, {
+          size: { value: PARSE_CSV_MAX_FILE_BYTES + 1 },
+          text: { value: readFile },
+        });
+
+        const postCallsBefore = httpSetup.post.mock.calls.length;
+        actions.selectCsvForUpload(oversizedFile);
+        component.update();
+        await actions.clickProcessCsv();
+
+        expect(exists('errorCallout')).toBe(true);
+        expect(find('errorCallout').text()).toContain('File too large');
+        expect(find('errorCallout').text()).toContain('File is greater than allowed size of 10 MB.');
+        expect(readFile).not.toHaveBeenCalled();
+        expect(httpSetup.post).toHaveBeenCalledTimes(postCallsBefore);
       });
     });
 

@@ -7,7 +7,11 @@
 
 import { schema, TypeOf, Type } from '@kbn/config-schema';
 
-import { API_BASE_PATH, APP_CLUSTER_REQUIRED_PRIVILEGES } from '../../../common/constants';
+import {
+  API_BASE_PATH,
+  APP_CLUSTER_REQUIRED_PRIVILEGES,
+  PARSE_CSV_MAX_FILE_BYTES,
+} from '../../../common/constants';
 import { FieldCopyAction } from '../../../common/types';
 import { csvToIngestPipeline } from '../../lib';
 import { RouteDependencies } from '../../types';
@@ -18,10 +22,8 @@ import { RouteDependencies } from '../../types';
 // check inside the handler (`authz.enabled: false`), which runs only after the body has been
 // buffered and parsed. A tight limit prevents an authenticated-but-unprivileged caller from
 // forcing large allocations before that check runs, while staying generous for any real CSV.
-export const parseCsvMaxFileBytes = 10 * 1024 * 1024; // 10MB
-
 export const parseCsvBodySchema = schema.object({
-  file: schema.string({ maxLength: parseCsvMaxFileBytes }),
+  file: schema.string({ maxLength: PARSE_CSV_MAX_FILE_BYTES }),
   copyAction: schema.string({ maxLength: 64 }) as Type<FieldCopyAction>,
 });
 
@@ -39,7 +41,7 @@ export const registerParseCsvRoute = ({ router }: RouteDependencies): void => {
       },
       options: {
         body: {
-          maxBytes: parseCsvMaxFileBytes,
+          maxBytes: PARSE_CSV_MAX_FILE_BYTES,
         },
       },
       validate: {
