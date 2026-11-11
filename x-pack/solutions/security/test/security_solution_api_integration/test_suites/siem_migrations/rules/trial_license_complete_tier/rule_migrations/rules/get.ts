@@ -382,8 +382,8 @@ export default ({ getService }: FtrProviderContext) => {
             index < 6
               ? MigrationTranslationResult.FULL
               : index < 8
-                ? MigrationTranslationResult.PARTIAL
-                : MigrationTranslationResult.UNTRANSLATABLE;
+              ? MigrationTranslationResult.PARTIAL
+              : MigrationTranslationResult.UNTRANSLATABLE;
           return {
             migration_id: migrationId,
             translation_result: translationResult,
@@ -415,8 +415,8 @@ export default ({ getService }: FtrProviderContext) => {
             index < 4
               ? MigrationTranslationResult.FULL
               : index < 8
-                ? MigrationTranslationResult.PARTIAL
-                : MigrationTranslationResult.UNTRANSLATABLE;
+              ? MigrationTranslationResult.PARTIAL
+              : MigrationTranslationResult.UNTRANSLATABLE;
           return {
             migration_id: migrationId,
             translation_result: translationResult,
@@ -448,8 +448,8 @@ export default ({ getService }: FtrProviderContext) => {
             index < 3
               ? MigrationTranslationResult.FULL
               : index < 5
-                ? MigrationTranslationResult.PARTIAL
-                : MigrationTranslationResult.UNTRANSLATABLE;
+              ? MigrationTranslationResult.PARTIAL
+              : MigrationTranslationResult.UNTRANSLATABLE;
           return {
             migration_id: migrationId,
             translation_result: translationResult,
