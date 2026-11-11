@@ -36,13 +36,10 @@ const asStrings = (value: EsqlRow[string] | undefined): string[] =>
 const attributeOf = (row: EsqlRow, attribute: SessionAttribute): string | null =>
   asString(row[attributeColumn(attribute)]);
 
-/** The URL of a `<time>|<url>` view key of the summary query. */
-const urlOf = (view: string): string => view.substring(view.indexOf('|') + 1);
-
-/** Pages in first-view order, without repeats, from the earliest page URLs only. */
-const toJourney = (firstViews: string[]): string[] =>
-  [...firstViews].sort().reduce<string[]>((journey, view) => {
-    const page = toPagePath(urlOf(view));
+/** Pages without repeats, from page URLs the summary query returns in first-view order. */
+const toJourney = (urls: string[]): string[] =>
+  urls.reduce<string[]>((journey, url) => {
+    const page = toPagePath(url);
     return page !== null && journey.length < SESSIONS_JOURNEY_SIZE && !journey.includes(page)
       ? [...journey, page]
       : journey;
@@ -89,8 +86,8 @@ export const toSessionDocuments = (rows: EsqlRow[]): SessionDocument[] =>
       return [];
     }
     const journey = toJourney(asStrings(row.pages));
-    const [lastView] = asStrings(row.exit);
-    const lastPage = lastView ? toPagePath(urlOf(lastView)) : null;
+    const [lastUrl] = asStrings(row.exit);
+    const lastPage = lastUrl ? toPagePath(lastUrl) : null;
     const pageViewCount = asNumber(row.page_view_count);
     const durationMs = Math.max(0, Date.parse(endTime) - Date.parse(startTime));
     const user = attributeOf(row, 'user');

@@ -44,13 +44,14 @@ const summaryRow = (overrides: EsqlRow = {}): EsqlRow => ({
   ...overrides,
 });
 
+// The summary query returns the page URLs in first-view order.
 const JOURNEY: EsqlRow = {
   pages: [
-    '2026-11-10T10:01:00.000Z|https://shop.example.com/cart?item=1',
-    '2026-11-10T10:00:00.000Z|https://shop.example.com/',
-    '2026-11-10T10:02:00.000Z|https://shop.example.com/cart?item=2',
+    'https://shop.example.com/',
+    'https://shop.example.com/cart?item=1',
+    'https://shop.example.com/cart?item=2',
   ],
-  exit: '2026-11-10T10:04:00.000Z|https://shop.example.com/checkout#/done',
+  exit: 'https://shop.example.com/checkout#/done',
 };
 
 describe('toEsqlRows', () => {
@@ -85,7 +86,7 @@ describe('toSessionDocuments', () => {
       http_request_count: 5,
       http_failed_request_count: 1,
       bounced: false,
-      // Sorted by first view, query strings dropped, repeats kept once.
+      // In first-view order, query strings dropped, repeats kept once.
       journey: ['/', '/cart'],
       entry_page: '/',
       exit_page: '/done',
@@ -125,7 +126,7 @@ describe('toSessionDocuments', () => {
 
   it('takes the entry and exit page from the last view when the journey is empty', () => {
     const [document] = toSessionDocuments([
-      summaryRow({ pages: [], exit: '2026-11-10T10:04:00.000Z|https://shop.example.com/a?b' }),
+      summaryRow({ pages: [], exit: 'https://shop.example.com/a?b' }),
     ]);
 
     expect(document).toMatchObject({ journey: [], entry_page: '/a', exit_page: '/a' });
@@ -137,9 +138,9 @@ describe('toSessionDocuments', () => {
     expect(document).toMatchObject({ journey: [], entry_page: null, exit_page: null });
   });
 
-  it('keeps a page whose URL holds the separator', () => {
+  it('takes a single page URL, which ES|QL returns as a value rather than a list', () => {
     const [document] = toSessionDocuments([
-      summaryRow({ pages: '2026-11-10T10:00:00.000Z|https://a.example.com/x|y', exit: [] }),
+      summaryRow({ pages: 'https://a.example.com/x|y', exit: [] }),
     ]);
 
     expect(document.journey).toEqual(['/x|y']);

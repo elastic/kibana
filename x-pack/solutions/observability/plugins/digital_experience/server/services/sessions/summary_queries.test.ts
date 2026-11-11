@@ -90,8 +90,11 @@ describe('sessionSummaryQuery', () => {
       'BY service = resource.attributes.service.name, session = attributes.session.id, page_url'
     );
     expect(query).toContain('page_url = CASE(is_page_view, attributes.url.full, null)');
-    expect(query).toContain('pages = TOP(first_view, 30, "asc")');
-    expect(query).toContain('exit = TOP(last_view, 1, "desc")');
+    expect(query).toContain(
+      'pages = TOP(first_view, 30, "asc", page_url) WHERE page_url IS NOT NULL'
+    );
+    expect(query).toContain('exit = LAST(page_url, last_view) WHERE page_url IS NOT NULL');
+    expect(query).not.toContain('CONCAT(');
     expect(query).toMatch(/BY service, session\n\| LIMIT 10000$/);
   });
 

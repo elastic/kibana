@@ -239,13 +239,11 @@ ${browserSessionEvents('rebuild_from', 'changed_to')}
         last_view = MAX(@timestamp) WHERE is_page_view,
         ${[...attributeStats(), ...CORE_WEB_VITALS.flatMap(vitalStats)].join(',\n        ')}
   BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD}, page_url
-| EVAL first_view = CONCAT(TO_STRING(first_view), "|", page_url),
-       last_view = CONCAT(TO_STRING(last_view), "|", page_url)
 | STATS start_time = MIN(start_time),
         end_time = MAX(end_time),
         ${COUNTS.map((count) => `${count} = SUM(${count})`).join(',\n        ')},
-        pages = TOP(first_view, ${SESSIONS_JOURNEY_URL_CANDIDATES}, "asc"),
-        exit = TOP(last_view, 1, "desc"),
+        pages = TOP(first_view, ${SESSIONS_JOURNEY_URL_CANDIDATES}, "asc", page_url) WHERE page_url IS NOT NULL,
+        exit = LAST(page_url, last_view) WHERE page_url IS NOT NULL,
         ${[...attributeStats(), ...CORE_WEB_VITALS.flatMap(vitalTotals)].join(',\n        ')}
   BY service, session
 | LIMIT ${ESQL_MAX_ROWS}`,
