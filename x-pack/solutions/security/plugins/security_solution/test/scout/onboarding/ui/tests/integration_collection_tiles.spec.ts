@@ -52,7 +52,7 @@ test.describe(
         (url) => url.pathname.endsWith('/api/fleet/epm/packages'),
         (route) => route.fulfill({ status: 200, json: MOCK_PACKAGES })
       );
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPlatformEngineer();
     });
 
     test('groups packages that share a group into one collection tile', async ({ page }) => {
