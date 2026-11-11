@@ -27,6 +27,18 @@ import { KibanaServices } from '../../common/lib/kibana';
 import { convertToCamelCase, convertArrayToCamelCase } from '../../api/utils';
 import type { ApiProps, CasesConfigurationUI } from '../types';
 import { decodeCaseConfigurationsResponse, decodeCaseConfigureResponse } from '../utils';
+import type { StoredObservableType } from '../../../common/observables/resolve_observable_types';
+
+/**
+ * The observable types in a save request can be overrides of built-in types, which have no label.
+ */
+type WithStoredObservableTypes<T extends { observableTypes?: unknown }> = Omit<
+  T,
+  'observableTypes'
+> & { observableTypes?: StoredObservableType[] };
+
+export type CaseConfigurationRequest = WithStoredObservableTypes<ConfigurationRequest>;
+export type CaseConfigurationPatchRequest = WithStoredObservableTypes<ConfigurationPatchRequest>;
 
 export const getSupportedActionConnectors = async ({
   signal,
@@ -65,7 +77,7 @@ export const getCaseConfigure = async ({
 };
 
 export const postCaseConfigure = async (
-  caseConfiguration: ConfigurationRequest
+  caseConfiguration: CaseConfigurationRequest
 ): Promise<CasesConfigurationUI> => {
   const response = await KibanaServices.get().http.fetch<CreateConfigureResponse>(
     CASE_CONFIGURE_URL,
@@ -85,7 +97,7 @@ export const postCaseConfigure = async (
 
 export const patchCaseConfigure = async (
   id: string,
-  caseConfiguration: ConfigurationPatchRequest
+  caseConfiguration: CaseConfigurationPatchRequest
 ): Promise<CasesConfigurationUI> => {
   const response = await KibanaServices.get().http.fetch<UpdateConfigureResponse>(
     getCaseConfigurationDetailsUrl(id),

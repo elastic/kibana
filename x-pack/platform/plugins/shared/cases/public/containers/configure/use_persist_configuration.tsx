@@ -16,8 +16,11 @@ import { useCasesContext } from '../../components/cases_context/use_cases_contex
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { ConfigurationRequest } from '../../../common/types/api';
 import type { CasesConfigurationUI } from '../types';
+import type { StoredObservableType } from '../../../common/observables/resolve_observable_types';
+import { toStoredObservableTypes } from '../../../common/observables/resolve_observable_types';
 
-type Request = Omit<SnakeToCamelCase<ConfigurationRequest>, 'owner'> & {
+type Request = Omit<SnakeToCamelCase<ConfigurationRequest>, 'owner' | 'observableTypes'> & {
+  observableTypes?: StoredObservableType[];
   id: string;
   version: string;
 };
@@ -39,6 +42,8 @@ export const usePersistConfiguration = () => {
       extractObservables,
       workflowTags,
     }: Request) => {
+      const storedObservableTypes = observableTypes && toStoredObservableTypes(observableTypes);
+
       if (isEmpty(id) || isEmpty(version)) {
         return postCaseConfigure({
           closure_type: closureType,
@@ -46,7 +51,7 @@ export const usePersistConfiguration = () => {
           customFields: customFields ?? [],
           templates: templates ?? [],
           owner: owner[0],
-          observableTypes,
+          observableTypes: storedObservableTypes,
           extractObservables,
           workflowTags,
         });
@@ -58,7 +63,7 @@ export const usePersistConfiguration = () => {
         connector,
         customFields: customFields ?? [],
         templates: templates ?? [],
-        observableTypes,
+        observableTypes: storedObservableTypes,
         extractObservables,
         workflowTags,
       });

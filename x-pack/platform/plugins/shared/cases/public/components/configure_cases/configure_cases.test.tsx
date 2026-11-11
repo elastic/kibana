@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 
@@ -505,6 +505,58 @@ describe('ConfigureCases', () => {
 
       expect(screen.queryByTestId('cases-extract-observables-section')).not.toBeInTheDocument();
       expect(screen.queryByTestId('extract-observables-default-switch')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('observable type overrides', () => {
+    const override = {
+      key: 'observable-type-agent-id',
+      label: 'Agent id',
+      paths: [{ path: 'agent.id', enabled: false }],
+    };
+    const customTypeWithFields = {
+      key: 'employee-id',
+      label: 'Employee ID',
+      paths: [{ path: 'user.employee_id', enabled: true }],
+      valuePattern: '^E\\d{6}$',
+    };
+
+    beforeEach(() => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: {
+          ...useCaseConfigureResponse.data,
+          observableTypes: [override, customTypeWithFields],
+        },
+      }));
+    });
+
+    it('lists the custom types and not the overrides of built-in types', async () => {
+      renderWithTestingProviders(<ConfigureCases />);
+
+      expect(await screen.findByTestId('observable-type-employee-id')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('observable-type-observable-type-agent-id')
+      ).not.toBeInTheDocument();
+    });
+
+    it('keeps the fields of a custom type and the overrides when the label changes', async () => {
+      renderWithTestingProviders(<ConfigureCases />);
+
+      await userEvent.click(await screen.findByTestId('employee-id-observable-type-edit'));
+
+      const labelInput = await screen.findByTestId('observable-type-label-input');
+      await userEvent.clear(labelInput);
+      await userEvent.type(labelInput, 'Staff ID');
+      await userEvent.click(screen.getByTestId('common-flyout-save'));
+
+      await waitFor(() => {
+        expect(persistCaseConfigure).toHaveBeenCalledWith(
+          expect.objectContaining({
+            observableTypes: [override, { ...customTypeWithFields, label: 'Staff ID' }],
+          })
+        );
+      });
     });
   });
 

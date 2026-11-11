@@ -20,6 +20,7 @@ import {
   OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
 } from '../../../common/types/domain/user_action/workflow/constants';
 import { OBSERVABLE_TYPES_BUILTIN } from '../../../common/constants';
+import { getCustomObservableTypes } from '../../../common/observables/resolve_observable_types';
 import type { UserActionBuilder, UserActionBuilderArgs } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import { renderAttachmentAction } from './attachment_action';
@@ -97,7 +98,7 @@ const WorkflowActivityLabel: React.FC<WorkflowActivityLabelProps> = ({
         if (origin.typeKey && origin.value) {
           const allObservableTypes = [
             ...OBSERVABLE_TYPES_BUILTIN,
-            ...(casesConfiguration?.observableTypes ?? []),
+            ...getCustomObservableTypes(casesConfiguration?.observableTypes ?? []),
           ];
           const found = allObservableTypes.find((t) => t.key === origin.typeKey);
           const typeLabel = found?.label ?? origin.typeKey;
