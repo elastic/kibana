@@ -27,14 +27,6 @@ describe('Moon Jest task inputs', () => {
     writeFileSync(filePath, contents);
   };
 
-  // In CI `moon run` diffs against the PR's target branch, which the fixture repo only has when the
-  // PR targets main. Pin the base to the fixture's own branch.
-  const moonRunEnv = (env: Record<string, string>): NodeJS.ProcessEnv => ({
-    ...process.env,
-    MOON_BASE: 'main',
-    ...env,
-  });
-
   const affectedProjects = (tag: string, changedFile: string, downstream = 'none'): string[] => {
     const args = ['query', 'tasks', '--tags', `^${tag}$`, '--affected'];
     if (downstream !== 'none') args.push('--downstream', downstream);
@@ -227,10 +219,11 @@ if (process.env.MOON_FIXTURE_ARGS_OUTPUT) fs.appendFileSync(process.env.MOON_FIX
       {
         cwd: fixtureRoot,
         encoding: 'utf8',
-        env: moonRunEnv({
+        env: {
+          ...process.env,
           MOON_FIXTURE_OUTPUT: outputFile,
           MOON_FIXTURE_ARGS_OUTPUT: argsFile,
-        }),
+        },
       }
     );
     expect(readFileSync(outputFile, 'utf8').trim().split('\n').sort()).toEqual([
@@ -251,7 +244,7 @@ if (process.env.MOON_FIXTURE_ARGS_OUTPUT) fs.appendFileSync(process.env.MOON_FIX
     const after = execFileSync(moon, ['run', 'app:jest', '--summary', 'detailed'], {
       cwd: fixtureRoot,
       encoding: 'utf8',
-      env: moonRunEnv({ MOON_FIXTURE_OUTPUT: outputFile }),
+      env: { ...process.env, MOON_FIXTURE_OUTPUT: outputFile },
     });
     const appHash = (output: string) =>
       output
