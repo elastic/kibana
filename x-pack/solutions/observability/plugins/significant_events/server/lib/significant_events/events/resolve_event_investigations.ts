@@ -143,7 +143,7 @@ export const listInvestigationStateSets = async ({
   }
 
   const client = agenticInvestigations.getInvestigationsClient(request);
-  const byEpisode = new Map<string, { open: boolean; state: 'in_progress' | 'completed' }>();
+  const byEpisode = new Map<string, InvestigationSummary>();
   let loaded = 0;
   let total = 0;
 
@@ -170,13 +170,13 @@ export const listInvestigationStateSets = async ({
       total = response.pagination.total;
       loaded += response.results.length;
       for (const summary of response.results) {
-        const open = isOpen(summary);
         for (const episodeId of getAlertSubjectIds(summary)) {
           const current = byEpisode.get(episodeId);
-          // Newest created first: an episode keeps its newest investigation unless an open one follows.
-          if (!current || (!current.open && open)) {
-            byEpisode.set(episodeId, { open, state: toState(summary) });
-          }
+          // Same rule as the per-event resolver, so a row, the filter and the facets agree.
+          byEpisode.set(
+            episodeId,
+            current ? pickInvestigation([current, summary]) ?? summary : summary
+          );
         }
       }
       if (response.results.length < LIST_PAGE_SIZE || loaded >= total) break;
@@ -189,8 +189,13 @@ export const listInvestigationStateSets = async ({
 
   const inProgress: string[] = [];
   const completed: string[] = [];
-  for (const [episodeId, { state }] of byEpisode) {
-    (state === 'in_progress' ? inProgress : completed).push(episodeId);
+  for (const [episodeId, summary] of byEpisode) {
+    (toState(summary) === 'in_progress' ? inProgress : completed).push(episodeId);
   }
-  return { inProgress, completed, truncated: total > loaded };
+  // The investigations client caps `total` at the listing cap, so reaching the cap also means truncated.
+  return {
+    inProgress,
+    completed,
+    truncated: total > loaded || loaded >= MAX_LISTED_INVESTIGATIONS,
+  };
 };

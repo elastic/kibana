@@ -267,6 +267,28 @@ describe('EventsTab', () => {
     expect(mockRefreshEvents).toHaveBeenCalled();
   });
 
+  it.each([
+    [503, /Events can't be filtered by investigation/],
+    [500, /The significant events list couldn't be loaded/],
+  ])('with an investigation filter, a %s list error shows the matching message', (status, text) => {
+    mockUseSignificantEventsList.mockReturnValue({
+      data: undefined,
+      error: Object.assign(new Error('failed'), {
+        name: 'HttpFetchError',
+        request: {},
+        response: { status },
+      }),
+      isError: true,
+      isLoading: false,
+      isFetching: false,
+      refetch: mockRefreshEvents,
+    });
+
+    renderTab('/detections/events?investigation=completed');
+
+    expect(screen.getByTestId('nightshiftDetectionEventsError')).toHaveTextContent(text);
+  });
+
   it('shows the error, not the previous rows, when a new filter fails to load', () => {
     mockUseSignificantEventsList.mockReturnValue({
       data: { hits: [event], page: 1, perPage: 25, total: 1 },

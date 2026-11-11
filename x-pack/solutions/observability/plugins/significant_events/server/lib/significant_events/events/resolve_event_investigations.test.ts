@@ -241,6 +241,49 @@ describe('listInvestigationStateSets', () => {
     }
   });
 
+  it('says the window was full when the upstream total is capped at 1,000', async () => {
+    const { reader } = createLister(
+      Array.from({ length: 10 }, (_, index) =>
+        Array.from({ length: 100 }, (__, offset) => ({
+          id: `inv-${index}-${offset}`,
+          alertIds: [`ep-${index}-${offset}`],
+        }))
+      )
+    );
+
+    const sets = await listInvestigationStateSets({
+      agenticInvestigations: reader,
+      request,
+      logger,
+    });
+
+    expect(sets).toMatchObject({ truncated: true });
+  });
+
+  it('takes the most recently updated open investigation of an episode, as the per-event resolver does', async () => {
+    const { reader } = createLister([
+      [
+        {
+          id: 'newer-created-idle',
+          open: true,
+          updatedAt: '2026-11-04T08:00:00.000Z',
+          alertIds: ['ep-1'],
+        },
+        {
+          id: 'older-created-running',
+          open: true,
+          inProgress: true,
+          updatedAt: '2026-11-04T12:00:00.000Z',
+          alertIds: ['ep-1'],
+        },
+      ],
+    ]);
+
+    expect(
+      await listInvestigationStateSets({ agenticInvestigations: reader, request, logger })
+    ).toMatchObject({ inProgress: ['ep-1'], completed: [] });
+  });
+
   it('is unavailable when the whole listing outlasts its deadline, not only one page', async () => {
     const { reader, list } = createLister(
       [
