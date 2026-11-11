@@ -7,7 +7,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { TRANSFORM_HEALTH_LABEL, TRANSFORM_STATE } from '../../../../../common/constants';
+import { TRANSFORM_HEALTH_LABEL } from '../../../../../common/constants';
 import type { TransformManagementPage } from '../../fixtures/page_objects';
 import type { ExpectedTransformRow, TransformRequest } from '../../fixtures';
 import {
@@ -21,14 +21,14 @@ import {
 type TransformUser = 'manager' | 'viewer';
 
 const PREFIX = 'reauthorizing';
-const UNAUTHORIZED_STATE = { status: TRANSFORM_STATE.STOPPED, health: TRANSFORM_HEALTH_LABEL.red };
+const UNAUTHORIZED_STATE = { status: 'Stopped', health: TRANSFORM_HEALTH_LABEL.red };
 
 const reauthorizedByManagerTestDataList = [
   {
     title: 'batch pivot transform created by viewer',
     config: getPivotTransformConfig(PREFIX, false),
     reauthorizedState: {
-      status: TRANSFORM_STATE.STOPPED,
+      status: 'Stopped',
       progress: 100,
       health: TRANSFORM_HEALTH_LABEL.green,
     },
@@ -36,7 +36,7 @@ const reauthorizedByManagerTestDataList = [
   {
     title: 'continuous pivot transform created by viewer',
     config: getPivotTransformConfig(`${PREFIX}-viewer-2`, true),
-    reauthorizedState: { status: TRANSFORM_STATE.STARTED, health: TRANSFORM_HEALTH_LABEL.green },
+    reauthorizedState: { status: 'Started', health: TRANSFORM_HEALTH_LABEL.green },
   },
 ];
 
@@ -56,7 +56,7 @@ const viewedByViewerTestDataList: Array<{
     title: 'continuous latest transform created by manager',
     config: getLatestTransformConfig(`${PREFIX}-manager-1`, true),
     createdBy: 'manager',
-    state: { status: TRANSFORM_STATE.STARTED, health: TRANSFORM_HEALTH_LABEL.green },
+    state: { status: 'Started', health: TRANSFORM_HEALTH_LABEL.green },
   },
 ];
 

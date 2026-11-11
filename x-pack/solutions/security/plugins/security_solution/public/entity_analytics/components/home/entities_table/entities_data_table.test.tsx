@@ -55,14 +55,6 @@ jest.mock('@kbn/unified-data-table', () => {
   };
 });
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(() => ({
-    openRightPanel: jest.fn(),
-    openFlyout: jest.fn(),
-    closeFlyout: jest.fn(),
-  })),
-}));
-
 jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
   useFlyoutApi: () => ({
     openEntityFlyout: jest.fn(),

@@ -57,7 +57,12 @@ export const sqlSearchStrategyProvider = (
             ...getDefaultAsyncGetParams(searchConfig, options),
             id,
           },
-          { ...options.transport, signal: options.abortSignal, meta: true }
+          {
+            ...options.transport,
+            signal: options.abortSignal,
+            meta: true,
+            requestTimeout: 600_000, // large enough to never interfere with `wait_for_completion_timeout`, which should control the timeout of the poll
+          }
         ));
       } else {
         ({ headers, body, meta } = await client.sql.query(
