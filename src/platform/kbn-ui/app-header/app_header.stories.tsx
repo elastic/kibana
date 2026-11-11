@@ -17,6 +17,7 @@ import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/ui-chrome-layout';
 import type {
   AppHeaderBack,
   AppHeaderBadge,
+  AppHeaderFavoriteStatus,
   AppHeaderMetadataItems,
   AppHeaderSpacing,
   AppHeaderTab,
@@ -533,6 +534,51 @@ export const LoadingToLoaded: Story = {
           'Side-by-side loading vs loaded for typical single-row combinations. Height and the ' +
           'trailing menu width should match closely; title width is a fixed skeleton. Multi-row ' +
           'headers (tabs, description, metadata) are not fully supported and will shift height.',
+      },
+    },
+  },
+};
+
+const favoriteVariantCases = [
+  { title: 'Star, not starred', variant: 'star', status: 'unfavorited' },
+  { title: 'Star, starred', variant: 'star', status: 'favorited' },
+  { title: 'Pin, not pinned', variant: 'pin', status: 'unfavorited' },
+  { title: 'Pin, pinned', variant: 'pin', status: 'favorited' },
+] as const;
+
+// Toggling passes through `adding` / `removing` like a real save, so the add animation plays.
+const FavoriteVariantRow = ({
+  title,
+  variant,
+  status: initialStatus,
+}: (typeof favoriteVariantCases)[number]) => {
+  const [status, setStatus] = useState<AppHeaderFavoriteStatus>(initialStatus);
+
+  const onToggle = () => {
+    action('favorite')();
+    const isFavorite = status === 'favorited' || status === 'adding';
+    setStatus(isFavorite ? 'removing' : 'adding');
+    setTimeout(() => setStatus(isFavorite ? 'unfavorited' : 'favorited'), 500);
+  };
+
+  return <AppHeaderView title={title} favorite={{ variant, status, onToggle }} sticky={false} />;
+};
+
+export const FavoriteVariants: Story = {
+  render: () => (
+    <div css={comparisonGrid}>
+      {favoriteVariantCases.map((favoriteCase) => (
+        <FavoriteVariantRow key={favoriteCase.title} {...favoriteCase} />
+      ))}
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The favorite title action as `star` (default) and `pin`. Pick the variant whose ' +
+          'wording matches the app; an item shows one or the other, never both. Click a button ' +
+          'to toggle it and see the add animation.',
       },
     },
   },
