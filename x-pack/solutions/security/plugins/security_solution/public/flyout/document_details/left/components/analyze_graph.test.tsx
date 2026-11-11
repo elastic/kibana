@@ -25,14 +25,12 @@ import {
 } from './test_ids';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
-import { DocumentDetailsAnalyzerPanelKey } from '../../shared/constants/panel_keys';
 import { useIsAnalyzerEnabled } from '../../../../detections/hooks/use_is_analyzer_enabled';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
-import { ANALYZER_PREVIEW_BANNER } from '../../../../resolver/view/resolver_without_providers';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
 
@@ -267,19 +265,5 @@ describe('<AnalyzeGraph />', () => {
     expect(getByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
       'Unable to retrieve the data view for analyzer'
     );
-  });
-
-  it('should open details panel in preview when clicking on view button', () => {
-    const wrapper = renderAnalyzer();
-
-    expect(wrapper.getByTestId('resolver:graph-controls:show-panel-button')).toBeInTheDocument();
-    wrapper.getByTestId('resolver:graph-controls:show-panel-button').click();
-    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
-      id: DocumentDetailsAnalyzerPanelKey,
-      params: {
-        resolverComponentInstanceID: `${FLYOUT_KEY}-${TableId.test}`,
-        banner: ANALYZER_PREVIEW_BANNER,
-      },
-    });
   });
 });

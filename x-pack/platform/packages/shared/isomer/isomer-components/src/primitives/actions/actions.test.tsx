@@ -10,6 +10,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { createIsomerRuntime } from '@elastic/isomer-runtime';
 import { buildJsxShim } from '@elastic/isomer-sdk/author';
 import { componentsPack, componentsPrimitives } from '../../pack';
+import type { ComponentsRenderContext } from '../../lib';
 import type { ActionsNode } from '.';
 
 const { surfaces, validate } = createIsomerRuntime({ packs: [componentsPack] });
@@ -77,6 +78,57 @@ describe('actions', () => {
     );
     expect(surfaces.markdown.renderNode(node)).toBe(`[Open](/app/discover) · [Docs](${URL})`);
     expect(surfaces.text.renderNode(node)).toBe(`Open: /app/discover\nDocs: ${URL}`);
+  });
+
+  describe('buttons to a Kibana app', () => {
+    const skills = { label: 'Manage skills', app: 'agent_builder', path: '/manage/skills' };
+
+    it('take an app and path instead of a URL, but not both', () => {
+      const view = (node: ActionsNode) => validate({ type: 'view', body: [node] });
+
+      expect(view(links(skills)).valid).toBe(true);
+      expect(view(links({ label: 'Open', app: 'discover' })).valid).toBe(true);
+      expect(view(links({ ...skills, url: URL })).valid).toBe(false);
+      expect(view(links({ label: 'Open' })).valid).toBe(false);
+      expect(view(links({ label: 'Open', path: '/manage/skills' })).valid).toBe(false);
+      expect(view(links({ label: 'Open', app: 'agent_builder', path: '/../../x' })).valid).toBe(
+        false
+      );
+    });
+
+    it('resolve against the Slack render’s base URL, and are dropped without one', () => {
+      const node = links(skills);
+
+      expect(
+        surfaces.slack.renderNode(node, { baseUrl: 'https://kibana.example.com/base/s/ops' }).blocks
+      ).toEqual([
+        {
+          type: 'actions',
+          elements: [
+            {
+              type: 'button',
+              text: { type: 'plain_text', text: 'Manage skills', emoji: true },
+              url: 'https://kibana.example.com/base/s/ops/app/agent_builder/manage/skills',
+            },
+          ],
+        },
+      ]);
+      expect(surfaces.slack.renderNode(node).blocks).toEqual([]);
+    });
+
+    it('resolve through the React host, and are left out of text and Markdown', () => {
+      const node = links(skills, { label: 'Docs', url: URL });
+      const context: ComponentsRenderContext = {
+        resolveKibanaPath: (path) => `/base/s/ops${path}`,
+      };
+
+      expect(renderToStaticMarkup(<>{surfaces.react.renderNode(node, { context })}</>)).toContain(
+        'href="/base/s/ops/app/agent_builder/manage/skills"'
+      );
+      expect(surfaces.markdown.renderNode(node)).toBe(`[Docs](${URL})`);
+      expect(surfaces.text.renderNode(node)).toBe(`Docs: ${URL}`);
+      expect(surfaces.markdown.renderNode(links(skills))).toBe('');
+    });
   });
 
   it('fills the primary button in React', () => {

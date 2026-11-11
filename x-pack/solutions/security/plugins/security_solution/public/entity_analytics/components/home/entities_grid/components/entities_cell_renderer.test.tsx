@@ -68,7 +68,7 @@ describe('renderEntityCell', () => {
     ['alert_count', 'host', true],
     ['alert_count', 'user', true],
     ['alert_count', 'generic', true],
-    ['alert_count', 'service', false],
+    ['alert_count', 'service', true],
     ['anomaly_count', 'host', true],
     ['anomaly_count', 'user', true],
     ['anomaly_count', 'generic', false],

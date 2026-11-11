@@ -114,7 +114,7 @@ export const RuleCanvasContent = ({
           defaultMessage: 'View in Rules',
         }),
         icon: 'external',
-        type: ActionButtonType.OVERFLOW,
+        type: ActionButtonType.SECONDARY,
         handler: () => {
           getAlertingV2Locators(share).rulesLocators.navigateSync({
             ruleId,

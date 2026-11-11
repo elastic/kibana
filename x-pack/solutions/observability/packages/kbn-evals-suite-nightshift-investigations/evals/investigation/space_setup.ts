@@ -19,8 +19,9 @@ import type { AdminSessionRequestOptions } from './admin_session_request';
 
 /**
  * Binds the space to the Nightshift service accounts, lifts the daily investigation limits, and
- * waits until the space can run the Nightshift agents. Until then Agent Builder reports both agents
- * unavailable, so every eval that calls them on a fresh stack needs this first.
+ * waits until the space can run the Nightshift agents and the given managed workflows are installed.
+ * Until then Agent Builder reports both agents unavailable, so every eval that calls them on a fresh
+ * stack needs this first.
  */
 export const enableNightshiftSpace = async ({
   config,
@@ -30,6 +31,7 @@ export const enableNightshiftSpace = async ({
   fetch,
   log,
   connectorId,
+  workflowIds = [NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID],
 }: {
   config: Pick<ScoutTestConfig, 'serverless'>;
   esClient: Parameters<typeof ensureNightshiftServiceAccountRoles>[0];
@@ -38,6 +40,8 @@ export const enableNightshiftSpace = async ({
   fetch: HttpHandler;
   log: { warning: (message: string) => void };
   connectorId: string;
+  /** Managed workflows the eval runs; the investigation workflow unless the eval names others. */
+  workflowIds?: readonly string[];
 }): Promise<void> => {
   // Investigations only run as the Nightshift agent service account, so the space has to be
   // set up first. The eval user holds manage_security; setup is idempotent. On stateful,
@@ -104,18 +108,20 @@ export const enableNightshiftSpace = async ({
       { timeout: 60_000 }
     )
     .toBe(true);
-  // Availability can turn true while Kibana is still installing the managed workflow after a
+  // Availability can turn true while Kibana is still installing the managed workflows after a
   // cold start.
-  await expect
-    .poll(
-      async () =>
-        fetch(`/api/workflows/workflow/${NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID}`, {
-          headers: { 'elastic-api-version': '2023-10-31' },
-        }).then(
-          () => true,
-          () => false
-        ),
-      { timeout: 60_000 }
-    )
-    .toBe(true);
+  for (const workflowId of workflowIds) {
+    await expect
+      .poll(
+        async () =>
+          fetch(`/api/workflows/workflow/${workflowId}`, {
+            headers: { 'elastic-api-version': '2023-10-31' },
+          }).then(
+            () => true,
+            () => false
+          ),
+        { timeout: 60_000 }
+      )
+      .toBe(true);
+  }
 };
