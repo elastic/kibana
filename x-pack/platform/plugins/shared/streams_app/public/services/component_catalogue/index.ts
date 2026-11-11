@@ -19,6 +19,7 @@ export {
   toEditableCatalogue,
 } from './catalogue_compatibility';
 export {
+  describeComponentStatus,
   getDefinition,
   listComponents,
   resolveEnumOptions,

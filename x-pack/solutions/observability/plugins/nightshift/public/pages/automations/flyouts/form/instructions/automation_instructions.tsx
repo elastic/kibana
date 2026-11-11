@@ -50,7 +50,7 @@ const labels = {
   schedulePlaceholder: i18n.translate(
     'xpack.nightshift.automations.flyout.scheduledInstructionsPlaceholder',
     {
-      defaultMessage: 'Describe what Nightshift should investigate each time this automation runs…',
+      defaultMessage: 'Describe what nightshift should investigate each time this automation runs…',
     }
   ),
 };

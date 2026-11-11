@@ -442,7 +442,7 @@ export function EventFlyout({
             color="hollow"
             toolTipContent={i18n.translate('xpack.nightshift.flyout.confidenceTooltip', {
               defaultMessage:
-                'How confident Nightshift is that this is correct, based on evidence strength and consistency.',
+                'How confident nightshift is that this is correct, based on evidence strength and consistency.',
             })}
           >
             {i18n.translate('xpack.nightshift.flyout.confidenceLabel', {
