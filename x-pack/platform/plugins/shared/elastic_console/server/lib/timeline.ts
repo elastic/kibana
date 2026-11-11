@@ -558,19 +558,6 @@ const hasResumeExecution = (block: ConversationEvent[]): boolean =>
   });
 
 /**
- * Rebuilds the timeline for a rounds write without destroying what flat rounds cannot express.
- *
- * - Additive/custom events (anything not derived from a round) are kept, re-inserted by
- *   `created_at`.
- * - A stored round block is regenerated from the submitted round, except when it spans a HITL
- *   resume, or when it has terminated but the submitted copy is still in progress: then the
- *   stored block is kept as is.
- * - A stored block absent from the submitted rounds is dropped only when the caller could see it
- *   (`visibleRoundIds`, the rounds GET returned) or it has a terminal outcome; otherwise (in
- *   progress, never returned) it is kept.
- * - Submitted rounds with no stored block are appended in order.
- */
-/**
  * A round records no agent author, so a regenerated block takes the stored `agent_message` (a
  * background sub-agent's report, written by Agent Builder) as is, and its run keeps that trigger
  * type. Mirrors Agent Builder's `keepStoredAgentMessages` in `round_writes.ts`.
@@ -603,6 +590,19 @@ const keepStoredAgentMessages = (
   });
 };
 
+/**
+ * Rebuilds the timeline for a rounds write without destroying what flat rounds cannot express.
+ *
+ * - Additive/custom events (anything not derived from a round) are kept, re-inserted by
+ *   `created_at`.
+ * - A stored round block is regenerated from the submitted round, except when it spans a HITL
+ *   resume, or when it has terminated but the submitted copy is still in progress: then the
+ *   stored block is kept as is.
+ * - A stored block absent from the submitted rounds is dropped only when the caller could see it
+ *   (`visibleRoundIds`, the rounds GET returned) or it has a terminal outcome; otherwise (in
+ *   progress, never returned) it is kept.
+ * - Submitted rounds with no stored block are appended in order.
+ */
 export const reconcileEvents = ({
   storedEvents,
   rounds,

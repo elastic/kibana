@@ -102,10 +102,18 @@ const parentRun = {
   },
 } as unknown as AgentExecution;
 
-// The Agent Builder experimental features setting, read through a client scoped to the request.
-let experimentalEnabled = true;
+// The Agent Builder experimental features setting, read through a client scoped to the request;
+// an `Error` stands for a read that fails.
+let experimentalEnabled: boolean | Error = true;
 const uiSettings = {
-  asScopedToClient: () => ({ get: async () => experimentalEnabled }),
+  asScopedToClient: () => ({
+    get: async () => {
+      if (experimentalEnabled instanceof Error) {
+        throw experimentalEnabled;
+      }
+      return experimentalEnabled;
+    },
+  }),
 } as unknown as UiSettingsServiceStart;
 const savedObjects = { getScopedClient: () => ({}) } as unknown as SavedObjectsServiceStart;
 
@@ -247,6 +255,13 @@ describe('wakeParent', () => {
     expect(maybeExecuteAgent).not.toHaveBeenCalled();
   });
 
+  it('propagates a failed read of the setting, so the attempt is retried instead of dropped', async () => {
+    experimentalEnabled = new Error('settings unavailable');
+
+    await expect(wake()).rejects.toThrow('settings unavailable');
+    expect(maybeExecuteAgent).not.toHaveBeenCalled();
+  });
+
   it('tries a held parent even when its stored state does not list the child yet', async () => {
     conversationClient.get.mockResolvedValue({
       id: 'conversation-1',
@@ -354,6 +369,16 @@ describe('reportToParent', () => {
     await report();
 
     expect(ensureScheduled).not.toHaveBeenCalled();
+    expect(maybeExecuteAgent).not.toHaveBeenCalled();
+    expect(removeIfExists).not.toHaveBeenCalled();
+  });
+
+  it('still leaves a retry task behind when the setting cannot be read', async () => {
+    experimentalEnabled = new Error('settings unavailable');
+
+    await report();
+
+    expect(ensureScheduled).toHaveBeenCalledWith(...retryTask);
     expect(maybeExecuteAgent).not.toHaveBeenCalled();
     expect(removeIfExists).not.toHaveBeenCalled();
   });

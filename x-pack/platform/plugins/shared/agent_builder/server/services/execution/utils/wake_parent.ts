@@ -49,7 +49,8 @@ export interface WakeParentParams {
 
 /**
  * Waking a parent is behind the Agent Builder experimental features setting: off, a finished
- * child is left for the parent's next run to pick up, as before the feature existed.
+ * child is left for the parent's next run to pick up, as before the feature existed. A read that
+ * fails throws, so the attempt is retried like any other failure rather than dropped.
  */
 const isWakeParentEnabled = ({
   request,
@@ -58,8 +59,7 @@ const isWakeParentEnabled = ({
 }: Pick<WakeParentParams, 'request' | 'uiSettings' | 'savedObjects'>): Promise<boolean> =>
   uiSettings
     .asScopedToClient(savedObjects.getScopedClient(request))
-    .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
-    .catch(() => false);
+    .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
 
 /**
  * The settings the user or caller chose for the run that spawned the child, which its wake
@@ -212,7 +212,9 @@ export const reportToParent = async ({
     return;
   }
   // Checked before a retry is left behind; the wake checks again for a retry run after a toggle.
-  if (!(await isWakeParentEnabled(wake))) {
+  // A read that fails leaves the setting unknown, so the attempt goes ahead and is retried.
+  const enabled = await isWakeParentEnabled(wake).catch(() => undefined);
+  if (enabled === false) {
     logger.debug(
       `Background execution ${childExecutionId} finished but waking its parent is disabled: left for the next run`
     );
