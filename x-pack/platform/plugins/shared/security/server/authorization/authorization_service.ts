@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { uniq } from 'lodash';
 import type { Observable, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs';
 
@@ -161,7 +162,14 @@ export class AuthorizationService {
           features.getElasticsearchFeatures(),
           this.logger,
           authz,
-          getCurrentUser(request)
+          getCurrentUser(request),
+          async () => {
+            const clusterClient = await getClusterClient();
+            const { indices } = await clusterClient
+              .asScoped(request)
+              .asCurrentUser.security.getUserPrivileges();
+            return uniq(indices.flatMap(({ names }) => names));
+          }
         );
 
         if (!request.auth.isAuthenticated) {
