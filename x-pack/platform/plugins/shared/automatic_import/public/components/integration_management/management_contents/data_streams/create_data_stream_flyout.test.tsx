@@ -865,9 +865,35 @@ describe('CreateDataStreamFlyout', () => {
       expect(queryByText("This file doesn't appear to contain text log samples.")).toBeNull();
     });
 
-    it('ignores a slower earlier file once a newer file is rejected', async () => {
-      const { findByText, getByTestId } = await renderFlyout(formWithoutLogSample);
-      const slowFile = new File(['<134>Nov  9 14:06:01 host sshd[123]: Accepted'], 'slow.log');
+    it.each([
+      ['UTF-16LE', [0xff, 0xfe], false],
+      ['UTF-16BE', [0xfe, 0xff], true],
+    ])('accepts a %s log file with a byte order mark', async (_name, bom, isBigEndian) => {
+      const { getByTestId } = await renderFlyout(formWithoutLogSample);
+      const text = '2026-11-11 14:06:01 user logged on\r\n2026-11-11 14:06:02 user logged off';
+      const textBytes = Buffer.from(text, 'utf16le');
+      if (isBigEndian) {
+        textBytes.swap16();
+      }
+
+      await selectFile(new File([Uint8Array.from([...bom, ...textBytes])], 'events.log'));
+      await waitFor(() => {
+        expect(getByTestId('analyzeLogsButton')).toBeEnabled();
+      });
+
+      fireEvent.click(getByTestId('analyzeLogsButton'));
+
+      await waitFor(() => {
+        expect(mockUploadMutateAsync).toHaveBeenCalledTimes(1);
+      });
+      expect(mockUploadMutateAsync.mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          samples: ['2026-11-11 14:06:01 user logged on', '2026-11-11 14:06:02 user logged off'],
+        })
+      );
+    });
+
+    const delayReadAsText = (slowFile: File) => {
       const originalReadAsText = FileReader.prototype.readAsText;
       let releaseSlowRead: (() => Promise<void>) | undefined;
       const readAsTextSpy = jest
@@ -884,9 +910,20 @@ describe('CreateDataStreamFlyout', () => {
           originalReadAsText.call(this, blob, encoding);
         });
 
+      return {
+        getReleaseSlowRead: () => releaseSlowRead,
+        restore: () => readAsTextSpy.mockRestore(),
+      };
+    };
+
+    it('ignores a slower earlier file once a newer file is rejected', async () => {
+      const { findByText, getByTestId } = await renderFlyout(formWithoutLogSample);
+      const slowFile = new File(['<134>Nov  9 14:06:01 host sshd[123]: Accepted'], 'slow.log');
+      const { getReleaseSlowRead, restore } = delayReadAsText(slowFile);
+
       try {
         await selectFile(slowFile);
-        await waitFor(() => expect(releaseSlowRead).toBeDefined());
+        await waitFor(() => expect(getReleaseSlowRead()).toBeDefined());
 
         await selectFile(new File(['print("hello")'], 'script.py'));
         const blockedMessage =
@@ -894,7 +931,7 @@ describe('CreateDataStreamFlyout', () => {
         expect(await findByText(blockedMessage)).toBeInTheDocument();
 
         await act(async () => {
-          await releaseSlowRead?.();
+          await getReleaseSlowRead()?.();
         });
 
         expect(await findByText(blockedMessage)).toBeInTheDocument();
@@ -906,7 +943,45 @@ describe('CreateDataStreamFlyout', () => {
         });
         expectNothingSubmitted();
       } finally {
-        readAsTextSpy.mockRestore();
+        restore();
+      }
+    });
+
+    it('ignores a slower earlier rejected file once a newer file is accepted', async () => {
+      const { getByTestId, queryByText } = await renderFlyout(formWithoutLogSample);
+      const slowFile = new File(['#!/bin/sh\necho hello'], 'slow.log');
+      const { getReleaseSlowRead, restore } = delayReadAsText(slowFile);
+
+      try {
+        await selectFile(slowFile);
+        await waitFor(() => expect(getReleaseSlowRead()).toBeDefined());
+
+        await selectFile(new File(['<134>Nov  9 14:06:01 host sshd[123]: Accepted'], 'auth.log'));
+        await waitFor(() => {
+          expect(getByTestId('analyzeLogsButton')).toBeEnabled();
+        });
+
+        await act(async () => {
+          await getReleaseSlowRead()?.();
+        });
+
+        expect(
+          queryByText('This file looks like a script or source code, not log samples.')
+        ).toBeNull();
+        await act(async () => {
+          fireEvent.click(getByTestId('analyzeLogsButton'));
+        });
+        await waitFor(() => {
+          expect(mockUploadMutateAsync).toHaveBeenCalledTimes(1);
+        });
+        expect(mockUploadMutateAsync.mock.calls[0][0]).toEqual(
+          expect.objectContaining({
+            samples: ['<134>Nov  9 14:06:01 host sshd[123]: Accepted'],
+            originalSource: { sourceType: 'file', sourceValue: 'auth.log' },
+          })
+        );
+      } finally {
+        restore();
       }
     });
   });
