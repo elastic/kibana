@@ -47,4 +47,3 @@ export {
   withAgentBuilderContext,
   type TracingPrivacySettings,
 } from './tracing';
-export { toKibanaAppUrl } from './utils/get_kibana_url';

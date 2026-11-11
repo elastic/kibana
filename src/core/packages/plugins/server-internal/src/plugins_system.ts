@@ -25,12 +25,33 @@ import type {
   PluginsServiceStartDeps,
 } from './plugins_service';
 import { RuntimePluginContractResolver } from './plugin_contract_resolver';
+import { DeferredInitEngine } from './deferred_init';
+import { PluginsTelemetry } from './plugins_telemetry';
 
 const Sec = 1000;
+
+/**
+ * Rejects a lifecycle promise that has not settled in 10 seconds. Called inside the measured call,
+ * so telemetry records the timeout as a failure.
+ */
+const withLifecycleTimeout = <TContract>(
+  contractOrPromise: TContract | Promise<TContract>,
+  message: string
+): TContract | Promise<TContract> =>
+  isPromise(contractOrPromise)
+    ? withTimeout({ promise: contractOrPromise, timeoutMs: 10 * Sec }).then((result) => {
+        if (result.timedout) {
+          throw new Error(message);
+        }
+        return result.value;
+      })
+    : contractOrPromise;
 
 /** @internal */
 export class PluginsSystem<T extends PluginType> {
   private readonly runtimeResolver = new RuntimePluginContractResolver();
+  private readonly telemetry = new PluginsTelemetry();
+  private readonly deferredInitEngine = new DeferredInitEngine();
   private readonly plugins = new Map<PluginName, PluginWrapper>();
   private readonly log: Logger;
   // `satup`, the past-tense version of the noun `setup`.
@@ -136,29 +157,18 @@ export class PluginsSystem<T extends PluginType> {
       }
 
       await plugin.init();
-      let contract: unknown;
-      const contractOrPromise = plugin.setup(pluginSetupContext, pluginDepContracts);
-      if (isPromise(contractOrPromise)) {
-        if (this.coreContext.env.mode.dev) {
-          this.log.warn(
-            `Plugin ${pluginName} is using asynchronous setup lifecycle. Asynchronous plugins support will be removed in a later version.`
-          );
-        }
-        const contractMaybe = await withTimeout<any>({
-          promise: contractOrPromise,
-          timeoutMs: 10 * Sec,
-        });
-
-        if (contractMaybe.timedout) {
-          throw new Error(
-            `Setup lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
-          );
-        } else {
-          contract = contractMaybe.value;
-        }
-      } else {
-        contract = contractOrPromise;
+      const contractOrPromise = this.telemetry.measure(plugin, 'setup', () =>
+        withLifecycleTimeout(
+          plugin.setup(pluginSetupContext, pluginDepContracts),
+          `Setup lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
+        )
+      );
+      if (isPromise(contractOrPromise) && this.coreContext.env.mode.dev) {
+        this.log.warn(
+          `Plugin ${pluginName} is using asynchronous setup lifecycle. Asynchronous plugins support will be removed in a later version.`
+        );
       }
+      const contract = isPromise(contractOrPromise) ? await contractOrPromise : contractOrPromise;
 
       contracts.set(pluginName, contract);
       this.satupPlugins.push(pluginName);
@@ -181,6 +191,7 @@ export class PluginsSystem<T extends PluginType> {
 
     this.log.info(`Starting [${this.satupPlugins.length}] plugins: [${[...this.satupPlugins]}]`);
 
+    const initializeRuns: Array<() => void> = [];
     for (const pluginName of this.satupPlugins) {
       this.log.debug(`Starting plugin "${pluginName}"...`);
       const plugin = this.plugins.get(pluginName)!;
@@ -195,37 +206,35 @@ export class PluginsSystem<T extends PluginType> {
         return depContracts;
       }, {} as Record<PluginName, unknown>);
 
-      let contract: unknown;
-      const contractOrPromise = plugin.start(
-        createPluginStartContext({ deps, plugin, runtimeResolver: this.runtimeResolver }),
-        pluginDepContracts
+      const startContext = createPluginStartContext({
+        deps,
+        plugin,
+        runtimeResolver: this.runtimeResolver,
+      });
+      const contractOrPromise = this.telemetry.measure(plugin, 'start', () =>
+        withLifecycleTimeout(
+          plugin.start(startContext, pluginDepContracts),
+          `Start lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
+        )
       );
-      if (isPromise(contractOrPromise)) {
-        if (this.coreContext.env.mode.dev) {
-          this.log.warn(
-            `Plugin ${pluginName} is using asynchronous start lifecycle. Asynchronous plugins support will be removed in a later version.`
-          );
-        }
-        const contractMaybe = await withTimeout({
-          promise: contractOrPromise,
-          timeoutMs: 10 * Sec,
-        });
-
-        if (contractMaybe.timedout) {
-          throw new Error(
-            `Start lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
-          );
-        } else {
-          contract = contractMaybe.value;
-        }
-      } else {
-        contract = contractOrPromise;
+      if (isPromise(contractOrPromise) && this.coreContext.env.mode.dev) {
+        this.log.warn(
+          `Plugin ${pluginName} is using asynchronous start lifecycle. Asynchronous plugins support will be removed in a later version.`
+        );
       }
+      const contract = isPromise(contractOrPromise) ? await contractOrPromise : contractOrPromise;
 
       contracts.set(pluginName, contract);
+      initializeRuns.push(() =>
+        plugin.runInitialize(startContext, pluginDepContracts, (run) =>
+          this.telemetry.measureInitialize(plugin, run)
+        )
+      );
     }
 
     this.runtimeResolver.resolveStartRequests(contracts);
+    // After the start loop, so expensive `initialize()` work never runs while plugins are starting.
+    this.deferredInitEngine.startInitialization(initializeRuns);
 
     return contracts;
   }

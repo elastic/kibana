@@ -12,55 +12,98 @@ import type { DiscoverServices } from '../../../../../build_services';
 import { internalStateSlice, type InternalStateThunkActionCreator } from '../internal_state';
 import type { RuntimeStateManager } from '../runtime_state';
 import type { DiscoverInternalState } from '../types';
+import { getMemoizedRequest } from '../utils';
 
-type DataAvailability = DiscoverInternalState['initializationState'];
+const initialESDataAvailabilityRequests = new WeakMap<RuntimeStateManager, Promise<void>>();
+const initialDataViewAvailabilityRequests = new WeakMap<RuntimeStateManager, Promise<void>>();
 
-const initialDataAvailabilityRequests = new WeakMap<
-  RuntimeStateManager,
-  Promise<DataAvailability>
->();
-
-/** Loads data availability once per Discover instance and shares the result with its tabs. */
+/**
+ * Waits until we can decide whether to open. With `needsDataView`, `hasDataView` is final;
+ * otherwise a false flag may still mean its check is pending.
+ */
 export const loadDataAvailabilityOnce: InternalStateThunkActionCreator<
-  [],
-  Promise<DataAvailability>
-> = () =>
-  function loadDataAvailabilityOnceThunkFn(dispatch, _, { services, runtimeStateManager }) {
-    let request = initialDataAvailabilityRequests.get(runtimeStateManager);
+  [options?: { needsDataView?: boolean }],
+  Promise<DiscoverInternalState['initializationState']>
+> = ({ needsDataView = false } = {}) =>
+  async function loadDataAvailabilityOnceThunkFn(dispatch, getState) {
+    const esDataRequest = dispatch(loadESDataAvailabilityOnce());
+    const dataViewRequest = dispatch(loadDataViewAvailabilityOnce());
+    const availabilityRequests = [esDataRequest, dataViewRequest];
 
-    if (!request) {
-      request = fetchDataAvailability(services)
-        .then((dataAvailability) => {
-          dispatch(internalStateSlice.actions.setInitializationState(dataAvailability));
-          return dataAvailability;
-        })
-        .catch((error) => {
-          initialDataAvailabilityRequests.delete(runtimeStateManager);
-          throw error;
-        });
-      initialDataAvailabilityRequests.set(runtimeStateManager, request);
+    // ES data alone can't decide whether a tab that needs a data view can open.
+    const isAvailable = await (needsDataView
+      ? dataViewRequest
+      : Promise.race(availabilityRequests));
+
+    if (!isAvailable) {
+      await Promise.all(availabilityRequests);
     }
 
-    return request;
+    return getState().initializationState;
   };
 
-const fetchDataAvailability = async ({
-  core,
-  dataViews,
-}: DiscoverServices): Promise<DataAvailability> => {
-  const esDataRequest = dataViews.hasData.hasESData().catch(() => false);
-  const esqlDatasetsRequest = core.http
-    .get<EsqlDatasetsResult>(DATASETS_ROUTE)
-    .then(({ datasets }) => datasets.length > 0)
-    .catch(() => false);
-  const hasDataView = await dataViews.hasData.hasDataView().catch(() => false);
+/**
+ * Checks ES indices and ES|QL datasets once per Discover instance. Resolves with the current
+ * state, which a data view created after the check may have updated.
+ */
+export const loadESDataAvailabilityOnce: InternalStateThunkActionCreator<
+  [],
+  Promise<boolean>
+> = () =>
+  async function loadESDataAvailabilityOnceThunkFn(
+    dispatch,
+    getState,
+    { services, runtimeStateManager }
+  ) {
+    await getMemoizedRequest(initialESDataAvailabilityRequests, runtimeStateManager, async () => {
+      const hasESData = await fetchESDataAvailability(services);
 
-  if (hasDataView) {
-    // With a data view, the welcome page and the tab's data view prompt don't read hasESData.
-    return { hasESData: true, hasDataView };
-  }
+      dispatch(
+        internalStateSlice.actions.setInitializationState({
+          ...getState().initializationState,
+          hasESData,
+        })
+      );
+    });
 
-  const [hasESData, hasESQLDatasets] = await Promise.all([esDataRequest, esqlDatasetsRequest]);
+    return getState().initializationState.hasESData;
+  };
 
-  return { hasESData: hasESData || hasESQLDatasets, hasDataView };
+/**
+ * Checks for persisted data views once per Discover instance, independently of the data checks.
+ * Resolves with the current state, which a data view created after the check may have updated.
+ */
+export const loadDataViewAvailabilityOnce: InternalStateThunkActionCreator<
+  [],
+  Promise<boolean>
+> = () =>
+  async function loadDataViewAvailabilityOnceThunkFn(
+    dispatch,
+    getState,
+    { services, runtimeStateManager }
+  ) {
+    await getMemoizedRequest(initialDataViewAvailabilityRequests, runtimeStateManager, async () => {
+      const hasDataView = await services.dataViews.hasData.hasDataView().catch(() => false);
+
+      dispatch(
+        internalStateSlice.actions.setInitializationState({
+          ...getState().initializationState,
+          hasDataView,
+        })
+      );
+    });
+
+    return getState().initializationState.hasDataView;
+  };
+
+const fetchESDataAvailability = async ({ core, dataViews }: DiscoverServices): Promise<boolean> => {
+  const [hasESData, hasESQLDatasets] = await Promise.all([
+    dataViews.hasData.hasESData().catch(() => false),
+    core.http
+      .get<EsqlDatasetsResult>(DATASETS_ROUTE)
+      .then(({ datasets }) => datasets.length > 0)
+      .catch(() => false),
+  ]);
+
+  return hasESData || hasESQLDatasets;
 };

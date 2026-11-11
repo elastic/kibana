@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { testUsers } from '../test_users';
+import { setupTestUsers, testUsers } from '../test_users';
 import { createAgentDoc } from '../agent_policy/cleanup_agent_policy_revisions';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
@@ -53,6 +53,7 @@ export default function (providerContext: FtrProviderContext) {
     };
 
     before(async () => {
+      await setupTestUsers(getService('security'));
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await kibanaServer.savedObjects.cleanStandardList();
       await fleetAndAgents.setup();
