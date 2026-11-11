@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ReactFlowProvider, type NodeProps } from '@xyflow/react';
+import { REMOTE_ELASTICSEARCH_TYPE } from '../../../../streams_layout/destinations/types';
 import type { DestinationNodeData, DestinationNode as DestinationNodeType } from '../types';
 import { DestinationNode } from './destination_node';
 
@@ -73,6 +74,35 @@ describe('DestinationNode', () => {
     expect(screen.getByTestId('streamsCanvasDestinationNotFlowing').textContent).toBe(
       'Data not flowing in'
     );
+  });
+
+  it('shows the stats footer of a remote Elasticsearch destination, without an index count', () => {
+    mockUseDestinationStats.mockReturnValue({
+      status: 'ready',
+      stats: {
+        eventsRate: 3700,
+        eventsTotal: null,
+        failedRate: null,
+        latencyAverage: 0.175,
+        series: { bucketMs: 300000, points: [] },
+      },
+    });
+
+    renderNode({
+      title: 'backup',
+      subtitle: 'my-cluster.es.example.com:9243',
+      destinationId: 'backup',
+      destinationType: REMOTE_ELASTICSEARCH_TYPE,
+      hasSavedSource: true,
+      signals: ['logs'],
+      endpoint: 'https://my-cluster.es.example.com:9243/proxy/',
+      remoteIndexNames: ['remote-logs'],
+    });
+
+    expect(mockUseDestinationStats).toHaveBeenCalledWith('backup');
+    expect(screen.getByTestId('streamsCanvasDestinationRate').textContent).toBe('3.7k/s');
+    expect(screen.getByTestId('streamsCanvasDestinationLatency').textContent).toBe('175ms');
+    expect(isShown('streamsCanvasDestinationIndexCount')).toBe(false);
   });
 
   it('still shows the title, the signals and the subtitle', () => {
