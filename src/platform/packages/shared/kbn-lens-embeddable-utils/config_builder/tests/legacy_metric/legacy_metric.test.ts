@@ -9,7 +9,7 @@
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 
-import type { LegacyMetricConfig } from '../../schema';
+import { legacyMetricConfigSchema, type LegacyMetricConfig } from '../../schema';
 import { AUTO_COLOR } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
 import {
@@ -141,6 +141,57 @@ describe('Legacy Metric', () => {
 
       expect(apiOutput.metric.color).not.toBeDefined();
       expect(apiOutput.metric.apply_color_to).not.toBeDefined();
+    });
+
+    it('should not add a color after schema parse when apply_color_to is not specified', () => {
+      const config = {
+        type: 'legacy_metric',
+        title: 'Color default test',
+        data_source: {
+          type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+          index_pattern: 'test-index',
+          time_field: '@timestamp',
+        },
+        metric: {
+          operation: 'count',
+          empty_as_null: false,
+        },
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies LegacyMetricConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as LegacyMetricConfig;
+      const parsed = legacyMetricConfigSchema.parse(apiOutput) as LegacyMetricConfig;
+
+      expect(parsed.metric.color).not.toBeDefined();
+    });
+
+    it('should keep AUTO_COLOR after schema parse when apply_color_to is set without color', () => {
+      const config = {
+        type: 'legacy_metric',
+        title: 'Color default test',
+        data_source: {
+          type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+          index_pattern: 'test-index',
+          time_field: '@timestamp',
+        },
+        metric: {
+          operation: 'count',
+          empty_as_null: false,
+          apply_color_to: 'value',
+        },
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies LegacyMetricConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as LegacyMetricConfig;
+      const parsed = legacyMetricConfigSchema.parse(apiOutput) as LegacyMetricConfig;
+
+      expect(parsed.metric.color).toEqual(AUTO_COLOR);
     });
   });
 });

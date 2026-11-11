@@ -10,7 +10,7 @@
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 
 import { validator } from '../utils/validator';
-import type { GaugeConfig } from '../../schema/charts/gauge';
+import { gaugeConfigSchema, type GaugeConfig } from '../../schema/charts/gauge';
 import { AUTO_COLOR, NO_COLOR } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
 import {
@@ -114,6 +114,49 @@ describe('Gauge', () => {
       const apiOutput = builder.toAPIFormat(lensState) as GaugeConfig;
 
       expect(apiOutput.metric.color).toEqual(NO_COLOR);
+    });
+  });
+
+  describe('ticks default application', () => {
+    const baseGauge = {
+      type: 'gauge',
+      title: 'Ticks default test',
+      data_source: {
+        type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+        index_pattern: 'test-index',
+        time_field: '@timestamp',
+      },
+      metric: {
+        operation: 'count',
+        empty_as_null: false,
+      },
+      sampling: 1,
+      ignore_global_filters: false,
+    } satisfies GaugeConfig;
+
+    it('should emit the bands tick mode when no ticks are specified and keep it after schema parse', () => {
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(baseGauge);
+      const apiOutput = builder.toAPIFormat(lensState) as GaugeConfig;
+      const parsed = gaugeConfigSchema.parse(apiOutput) as GaugeConfig;
+
+      expect(apiOutput.metric.ticks).toEqual({ visible: true, mode: 'bands' });
+      expect(parsed.metric.ticks).toEqual({ visible: true, mode: 'bands' });
+    });
+
+    it('should not add a tick mode after schema parse when ticks are hidden', () => {
+      const config = {
+        ...baseGauge,
+        metric: { ...baseGauge.metric, ticks: { visible: false, mode: 'auto' } },
+      } satisfies GaugeConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as GaugeConfig;
+      const parsed = gaugeConfigSchema.parse(apiOutput) as GaugeConfig;
+
+      expect(apiOutput.metric.ticks).toEqual({ visible: false });
+      expect(parsed.metric.ticks).toEqual({ visible: false });
     });
   });
 });

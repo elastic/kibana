@@ -13,7 +13,6 @@ import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { layerSettingsSchema, sharedPanelInfoSchema, dslOnlyPanelInfoSchema } from '../shared';
 import {
   applyColorToSchema,
-  AUTO_COLOR,
   colorByValueAbsoluteSchema,
   colorByValuePaletteSchema,
   legacyColorByValueAbsoluteSchema,
@@ -74,16 +73,20 @@ const legacyMetricConfigMetricOptionsShape = {
   /**
    * Color configuration
    */
-  color: z
-    .union([
-      colorByValueAbsoluteSchema,
-      colorByValuePaletteSchema,
-      legacyColorByValueAbsoluteSchema,
-      autoColorSchema,
-    ])
-    .default(AUTO_COLOR)
-    .optional()
-    .meta({ description: 'Color configuration based on the metric value.' }),
+  color: lazySchema(() =>
+    z
+      .union([
+        colorByValueAbsoluteSchema,
+        colorByValuePaletteSchema,
+        legacyColorByValueAbsoluteSchema,
+        autoColorSchema,
+      ])
+      .optional()
+      .meta({
+        description:
+          'Color configuration based on the metric value. Only applied when `apply_color_to` is set. Defaults to `auto`.',
+      })
+  ),
 };
 
 export const legacyMetricConfigSchemaNoESQL = lazySchema(() =>

@@ -45,7 +45,7 @@ describe('Legacy Metric Schema', () => {
       expect(validated.metric.labels).toBeUndefined();
       expect(validated.metric.values).toBeUndefined();
       expect(validated.metric.apply_color_to).toBeUndefined();
-      expect(validated.metric.color).toEqual({ type: 'auto' });
+      expect(validated.metric.color).toBeUndefined();
     });
 
     it('validates count metric operation', () => {

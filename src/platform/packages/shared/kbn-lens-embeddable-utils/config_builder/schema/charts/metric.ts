@@ -17,7 +17,6 @@ import {
   DEFAULT_PRIMARY_ICON_ALIGNMENT,
   DEFAULT_DENSITY,
   DEFAULT_SECONDARY_LABEL_VISIBLE,
-  DEFAULT_SECONDARY_LABEL_PLACEMENT,
   DEFAULT_SECONDARY_VALUE_ALIGNMENT,
   DEFAULT_SECONDARY_COMPARE_TO_PALETTE,
 } from '../../transforms/charts/metric/defaults';
@@ -321,13 +320,10 @@ const metricStylingSchema = lazySchema(() =>
                * - 'after': Label appears after the value
                * - 'tooltip': Label is hidden inline and shown in a tooltip on hover
                */
-              placement: labelPlacementSchema
-                .default(DEFAULT_SECONDARY_LABEL_PLACEMENT)
-                .optional()
-                .meta({
-                  description:
-                    'How the secondary metric name is shown: before the value, after the value, or in a tooltip. Ignored when the label is not visible.',
-                }),
+              placement: labelPlacementSchema.optional().meta({
+                description:
+                  'How the secondary metric name is shown: before the value, after the value, or in a tooltip. Defaults to `before` when the label is visible. Ignored when the label is not visible.',
+              }),
             })
             .strict()
             .optional(),

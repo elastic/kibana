@@ -12,7 +12,7 @@ import type { MetricVisualizationState, TermsIndexPatternColumn } from '@kbn/len
 
 import { validator } from '../utils/validator';
 import { DEFAULT_LAYER_ID } from '../../constants';
-import type { MetricConfig } from '../../schema/charts/metric';
+import { metricConfigSchema, type MetricConfig } from '../../schema/charts/metric';
 import { AUTO_COLOR, NO_COLOR } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
 import {
@@ -402,6 +402,24 @@ describe('Metric', () => {
       const { visualization } = convert(getConfigWithSecondaryLabel({ visible: true }));
 
       expect(visualization.secondaryNameVisibility).toBe('before');
+    });
+
+    it('should keep the default placement of a visible name after schema parse', () => {
+      const { apiOutput } = convert(getConfigWithSecondaryLabel({ visible: true }));
+      const parsed = metricConfigSchema.parse(apiOutput) as MetricConfig;
+
+      expect(apiOutput.styling?.secondary?.label).toEqual({ visible: true, placement: 'before' });
+      expect(parsed.styling?.secondary?.label).toEqual({ visible: true, placement: 'before' });
+    });
+
+    it('should not add a placement after schema parse when the name is hidden', () => {
+      const { apiOutput } = convert(
+        getConfigWithSecondaryLabel({ visible: false, placement: 'after' })
+      );
+      const parsed = metricConfigSchema.parse(apiOutput) as MetricConfig;
+
+      expect(apiOutput.styling?.secondary?.label).toEqual({ visible: false });
+      expect(parsed.styling?.secondary?.label).toEqual({ visible: false });
     });
   });
 
