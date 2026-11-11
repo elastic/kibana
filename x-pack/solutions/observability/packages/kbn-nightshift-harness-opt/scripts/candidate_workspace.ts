@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { execFile } from 'child_process';
+import { execFile, execFileSync } from 'child_process';
 import Crypto from 'crypto';
 import Fs from 'fs';
 import Path from 'path';
@@ -111,6 +111,32 @@ export const treeHash = (worktreePath: string): string => {
     hash.update(Fs.existsSync(absolute) ? Fs.readFileSync(absolute) : '');
   }
   return hash.digest('hex').slice(0, 10);
+};
+
+/**
+ * The hash \`treeHash\` would give a worktree at \`baseWorktree\`'s commit with \`edits\` written
+ * into it, without touching any worktree.
+ */
+export const variantHashOf = (baseWorktree: string, edits: CodeEdit[]): string => {
+  const hash = Crypto.createHash('sha256');
+  for (const file of EDITABLE_FILES) {
+    hash.update(file);
+    const edit = edits.find(({ path }) => path === file);
+    hash.update(edit ? edit.content : committedContent(baseWorktree, file));
+  }
+  return hash.digest('hex').slice(0, 10);
+};
+
+/** A file as committed at the worktree's HEAD, so local edits in the base do not leak in. */
+const committedContent = (worktree: string, file: string): Buffer => {
+  try {
+    return execFileSync('git', ['show', `HEAD:${file}`], {
+      cwd: worktree,
+      maxBuffer: 10 * 1024 * 1024,
+    });
+  } catch (e) {
+    return Buffer.from('');
+  }
 };
 
 /** Every changed or new file under the watched directories, editable or not (lint rejects). */

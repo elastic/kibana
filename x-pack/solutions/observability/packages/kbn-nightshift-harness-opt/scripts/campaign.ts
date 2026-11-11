@@ -9,44 +9,34 @@ import Fs from 'fs';
 import Path from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { OrcaTask } from './dataset';
-import type { Lane, LaneSettings } from './paths';
-import { harnessPaths, laneAuth, restartCommandFor } from './paths';
-import { prepareLane } from './kibana';
-import { runVariant } from './runner';
-import type { RunSummary, TelemetryVariant } from './runner';
+import { harnessPaths, proposerWorktree } from './paths';
+import type { RunSummary } from './runner';
 import { gateCandidate } from './gate';
-import { checkHoldout, holdoutDir, runHoldoutVariant } from './holdout';
+import { checkHoldout, holdoutDir } from './holdout';
 import { proposeCandidate, SCRATCH_DIR } from './proposer';
 import { reviewEdits } from './review';
 import {
   collectEdits,
   resetWorkspace,
-  restartLane,
   treeHash,
   validateEdits,
   workspaceDiff,
   writeEdits,
 } from './candidate_workspace';
 import type { CodeEdit } from './candidate_workspace';
+import { variantOf } from './workers';
+import type { Variant, WorkerPool } from './workers';
 
 export interface CampaignOptions {
   rounds: number;
   searchRollouts: number;
   gateRollouts: number;
-  concurrency: number;
   searchTasks: OrcaTask[];
   gateTasks: OrcaTask[];
-  lanes: Record<Lane, LaneSettings>;
+  pool: WorkerPool;
   agentConnectorId: string;
-  judgeConnectorId: string;
-  telemetryVariant: TelemetryVariant;
-  /** Skip re-measuring the candidate on the search split (prediction check), to save a run. */
-  skipCandidateSearch?: boolean;
-  /**
-   * Re-measure the incumbent on the search split every round, even when it has not changed since
-   * the last measurement. Off by default: an unchanged incumbent's search run is reused.
-   */
-  freshSearch?: boolean;
+  /** Re-measure the candidate on the search split (prediction check). Off by default. */
+  candidateSearch?: boolean;
   /** Debug only: promote every measured candidate, to exercise promotion and lineage. */
   acceptAny?: boolean;
   /**
@@ -58,6 +48,23 @@ export interface CampaignOptions {
   holdoutAlways?: boolean;
   log: ToolingLog;
 }
+
+/** The incumbent between campaigns: its edits on top of the workers' commit. */
+const incumbentPath = () => Path.join(harnessPaths().lineageDir, 'incumbent.json');
+
+export const loadIncumbent = (pool: WorkerPool): Variant => {
+  const path = incumbentPath();
+  if (!Fs.existsSync(path)) return variantOf(pool.workers, [], '');
+  const { edits, diff } = JSON.parse(Fs.readFileSync(path, 'utf8')) as {
+    edits: CodeEdit[];
+    diff: string;
+  };
+  return variantOf(pool.workers, edits, diff);
+};
+
+const saveIncumbent = (variant: Variant): void => {
+  Fs.writeFileSync(incumbentPath(), JSON.stringify(variant, null, 2));
+};
 
 type LedgerEntry = Record<string, unknown>;
 
@@ -123,26 +130,23 @@ const measuredFacts = (search: RunSummary, lastFeedback: string): string =>
   ].join('\n');
 
 /**
- * Propose → review → validate → gate → promote, repeated.
+ * Propose → review → validate → gate → promote, repeated, then one holdout.
  *
- * A variant is a set of edits to the editable files, nothing else. The incumbent runs from its
- * worktree, the candidate from a second one with its own Elasticsearch and Kibana; a candidate
- * becomes the incumbent only by beating it on held-out incidents.
+ * A variant is a set of edits to the editable files, nothing else. The incumbent is stored as its
+ * edits; the proposer edits its own worktree; every measurement runs on the worker pool, one
+ * variant at a time, from the run cache where it can. A candidate becomes the incumbent only by
+ * beating it on held-out incidents.
  */
 export const runCampaign = async ({
   rounds,
   searchRollouts,
   gateRollouts,
-  concurrency,
   searchTasks,
   gateTasks,
-  lanes,
+  pool,
   agentConnectorId,
-  judgeConnectorId,
-  telemetryVariant,
-  skipCandidateSearch = false,
+  candidateSearch = false,
   acceptAny = false,
-  freshSearch = false,
   holdoutTasks,
   holdoutAlways = false,
   log,
@@ -155,84 +159,47 @@ export const runCampaign = async ({
     : [];
   const saveLedger = () => Fs.writeFileSync(ledgerPath, JSON.stringify(ledger, null, 2));
 
-  const { incumbent, candidate } = lanes;
-  const candidateWorkspace = { path: candidate.worktree };
+  const proposer = { path: proposerWorktree() };
   const campaignId = new Date()
     .toISOString()
     .replace(/[-:.TZ]/g, '')
     .slice(0, 14);
   const priorRounds = ledger.length;
 
-  // Continue from whatever the incumbent worktree already is: accepted variants of an earlier
-  // campaign live there, and relabelling them as "base" would re-explore ground already won.
-  let incumbentEdits: CodeEdit[] = await collectEdits({ path: incumbent.worktree });
-  let incumbentDiff = await workspaceDiff({ path: incumbent.worktree });
+  let incumbent = loadIncumbent(pool);
+  const start = incumbent;
   let lastFeedback = '';
-  let lastSearch: RunSummary | undefined;
-  const startEdits = incumbentEdits;
-  const startVariant = { hash: treeHash(incumbent.worktree), diff: incumbentDiff };
-
-  const common = {
-    concurrency,
-    agentConnectorId,
-    judgeConnectorId,
-    telemetryVariant,
-    log,
-  };
   log.info(
     `[harness-opt] campaign ${campaignId}: ${rounds} round(s), search ${
       searchTasks.length
-    } tasks × ${searchRollouts}, gate ${
-      gateTasks.length
-    } tasks × ${gateRollouts}, incumbent ${treeHash(incumbent.worktree)}${
-      incumbentEdits.length ? ` (${incumbentEdits.length} file(s) already changed)` : ''
+    } tasks × ${searchRollouts}, gate ${gateTasks.length} tasks × ${gateRollouts}, ${
+      pool.workers.length
+    } workers, incumbent ${incumbent.hash}${
+      incumbent.edits.length ? ` (${incumbent.edits.length} file(s) changed)` : ''
     }`
   );
-
-  // The incumbent lane must be running the files on disk. Restart it once up front rather than
-  // trusting however it was left; a stale process measures a different variant.
-  if (
-    !(await restartLane({
-      command: restartCommandFor(incumbent),
-      url: incumbent.kibanaUrl,
-      auth: laneAuth(incumbent),
-      log,
-    }))
-  ) {
-    throw new Error('incumbent lane did not restart');
-  }
-  await prepareLane({ lane: incumbent, agentConnectorId, log });
 
   for (let roundInCampaign = 0; roundInCampaign < rounds; roundInCampaign++) {
     const round = priorRounds + roundInCampaign;
     const outputDir = Path.join(runsDir, `round-${round}-${Date.now()}`);
-    const incumbentVariant = { hash: treeHash(incumbent.worktree), diff: incumbentDiff };
-    const base = { round, campaignId, parentHash: incumbentVariant.hash };
+    const base = { round, campaignId, parentHash: incumbent.hash };
 
-    const searchRun =
-      !freshSearch && lastSearch?.configHash === incumbentVariant.hash
-        ? lastSearch
-        : await runVariant({
-            ...common,
-            label: `round${round}-incumbent-search`,
-            variant: incumbentVariant,
-            lane: incumbent,
-            tasks: searchTasks,
-            rollouts: searchRollouts,
-            outputDir,
-          });
-    if (searchRun === lastSearch) {
-      log.info(`[harness-opt] round ${round}: incumbent unchanged, reusing ${searchRun.label}`);
-    }
-    lastSearch = searchRun;
+    const searchRun = await pool.measure({
+      label: `round${round}-incumbent-search`,
+      variant: incumbent,
+      tasks: searchTasks,
+      rollouts: searchRollouts,
+      outputDir,
+    });
 
-    // The candidate always starts from the incumbent's files, so accepted edits accumulate.
-    await resetWorkspace(candidateWorkspace);
-    writeEdits({ edits: incumbentEdits, worktree: candidate.worktree });
-    const startHash = treeHash(candidate.worktree);
-    if (startHash !== incumbentVariant.hash) {
+    // The proposer starts from the incumbent's files, so accepted edits accumulate.
+    await resetWorkspace(proposer);
+    writeEdits({ edits: incumbent.edits, worktree: proposer.path });
+    // On disk, not from edits: a proposer worktree on another commit would hold other base files.
+    const startHash = treeHash(proposer.path);
+    if (startHash !== incumbent.hash) {
       throw new Error(
-        `candidate worktree (${startHash}) does not start from the incumbent (${incumbentVariant.hash})`
+        `proposer worktree (${startHash}) does not start from the incumbent (${incumbent.hash})`
       );
     }
 
@@ -242,7 +209,7 @@ export const runCampaign = async ({
         summary: searchRun,
         history: ledger,
         feedback: measuredFacts(searchRun, lastFeedback),
-        worktree: candidate.worktree,
+        worktree: proposer.path,
         log,
       });
     } catch (e) {
@@ -252,10 +219,10 @@ export const runCampaign = async ({
       continue;
     }
 
-    const allEdits = await collectEdits(candidateWorkspace);
+    const allEdits = await collectEdits(proposer);
     // Only files the incumbent does not already hold count as this round's proposal.
     const codeEdits = allEdits.filter(
-      (edit) => incumbentEdits.find((prior) => prior.path === edit.path)?.content !== edit.content
+      (edit) => incumbent.edits.find((prior) => prior.path === edit.path)?.content !== edit.content
     );
     if (codeEdits.length === 0) {
       log.warning(`[harness-opt] round ${round} produced no file changes`);
@@ -264,12 +231,12 @@ export const runCampaign = async ({
       lastFeedback = 'Your last round changed no editable file, so nothing was measured.';
       continue;
     }
-    const attemptedDiff = await workspaceDiff(candidateWorkspace);
+    const attemptedDiff = await workspaceDiff(proposer);
     const filesChanged = codeEdits.map((edit) => edit.path);
 
     const review = await reviewEdits({
       diff: attemptedDiff,
-      scratchDir: Path.join(candidate.worktree, SCRATCH_DIR, 'review'),
+      scratchDir: Path.join(proposer.path, SCRATCH_DIR, 'review'),
       log,
     });
     log.info(
@@ -293,11 +260,7 @@ export const runCampaign = async ({
       continue;
     }
 
-    const validation = await validateEdits({
-      workspace: candidateWorkspace,
-      edits: allEdits,
-      log,
-    });
+    const validation = await validateEdits({ workspace: proposer, edits: allEdits, log });
     if (!validation.ok) {
       log.warning(`[harness-opt] edits rejected: ${validation.failures.join(' | ').slice(0, 500)}`);
       ledger.push({
@@ -315,61 +278,36 @@ export const runCampaign = async ({
       continue;
     }
 
-    const candidateVariant = { hash: treeHash(candidate.worktree), diff: attemptedDiff };
-    if (
-      !(await restartLane({
-        command: restartCommandFor(candidate),
-        url: candidate.kibanaUrl,
-        auth: laneAuth(candidate),
-        log,
-      }))
-    ) {
-      ledger.push({ ...base, rejected: 'candidate-restart-failed', manifest: proposal.manifest });
-      saveLedger();
-      continue;
-    }
-    await prepareLane({ lane: candidate, agentConnectorId, log });
-
-    // Both lanes measure the gate split at the same time, so time-of-day effects (EIS load,
-    // sandbox pool) hit both sides alike.
-    const [incumbentGate, candidateGate] = await Promise.all([
-      runVariant({
-        ...common,
-        label: `round${round}-incumbent-gate`,
-        variant: incumbentVariant,
-        lane: incumbent,
-        tasks: gateTasks,
-        rollouts: gateRollouts,
-        outputDir,
-      }),
-      runVariant({
-        ...common,
-        label: `round${round}-candidate-gate`,
-        variant: candidateVariant,
-        lane: candidate,
-        tasks: gateTasks,
-        rollouts: gateRollouts,
-        outputDir,
-      }),
-    ]);
+    const candidate = variantOf(pool.workers, allEdits, attemptedDiff);
+    // The incumbent first: usually all cached, so the pool switches to the candidate only once.
+    const incumbentGate = await pool.measure({
+      label: `round${round}-incumbent-gate`,
+      variant: incumbent,
+      tasks: gateTasks,
+      rollouts: gateRollouts,
+      outputDir,
+    });
+    const candidateGate = await pool.measure({
+      label: `round${round}-candidate-gate`,
+      variant: candidate,
+      tasks: gateTasks,
+      rollouts: gateRollouts,
+      outputDir,
+    });
     const gate = gateCandidate({ incumbent: incumbentGate, candidate: candidateGate });
 
     // Predictions name search cases, so they are checked by re-measuring the search split.
-    const candidateSearch = skipCandidateSearch
-      ? undefined
-      : await runVariant({
-          ...common,
+    const candidateSearchRun = candidateSearch
+      ? await pool.measure({
           label: `round${round}-candidate-search`,
-          variant: candidateVariant,
-          lane: candidate,
+          variant: candidate,
           tasks: searchTasks,
           rollouts: searchRollouts,
           outputDir,
-        });
-    const promoted = gate.accepted;
-
-    const searchDeltas = candidateSearch ? perCaseDeltas(searchRun, candidateSearch) : [];
-    const predictionCheck = candidateSearch
+        })
+      : undefined;
+    const searchDeltas = candidateSearchRun ? perCaseDeltas(searchRun, candidateSearchRun) : [];
+    const predictionCheck = candidateSearchRun
       ? checkPredictions(
           {
             fixes: proposal.manifest.predictedFixes ?? [],
@@ -383,9 +321,8 @@ export const runCampaign = async ({
     )} (CI ${gate.ciLow.toFixed(3)}..${gate.ciHigh.toFixed(3)}, ${
       gate.seeds
     } incidents) at ${gate.costRatio.toFixed(2)}× cost and was ${
-      !gate.accepted ? `rejected: ${gate.reasons.join('; ')}` : 'ACCEPTED'
+      gate.accepted ? 'ACCEPTED' : `rejected: ${gate.reasons.join('; ')}`
     }.`;
-
     log.info(
       `[harness-opt] round ${round}: Δreward ${gate.meanDelta.toFixed(3)} [${gate.ciLow.toFixed(
         3
@@ -394,109 +331,70 @@ export const runCampaign = async ({
       )}, execution ${gate.incumbentExecutionSuccess.toFixed(
         2
       )} → ${gate.candidateExecutionSuccess.toFixed(2)} → ${
-        gate.accepted
-          ? `gate passed via ${gate.acceptedVia}`
-          : `rejected (${gate.reasons.join('; ')})`
-      }${promoted ? ' → PROMOTED' : ''}`
+        gate.accepted ? `ACCEPTED via ${gate.acceptedVia}` : `rejected (${gate.reasons.join('; ')})`
+      }`
     );
 
+    const promoted = gate.accepted || acceptAny;
     ledger.push({
       ...base,
       manifest: proposal.manifest,
       review,
       filesChanged,
       diff: attemptedDiff,
-      variantHash: candidateVariant.hash,
-      telemetryVariant,
+      variantHash: candidate.hash,
+      telemetryVariant: candidateGate.telemetryVariant,
       agentConnectorId,
       gate,
-      promoted,
+      promoted: gate.accepted,
       gateDeltas: perCaseDeltas(incumbentGate, candidateGate),
       searchReward: searchRun.meanReward,
-      candidateSearchReward: candidateSearch?.meanReward,
+      candidateSearchReward: candidateSearchRun?.meanReward,
       searchDeltas,
       predictionCheck,
       outputDir,
-      ...(acceptAny ? { forcedPromotion: !promoted } : {}),
+      ...(acceptAny ? { forcedPromotion: !gate.accepted } : {}),
     });
     saveLedger();
 
-    if (promoted || acceptAny) {
-      if (!promoted) log.warning(`[harness-opt] --accept-any: promoting a rejected candidate`);
-      incumbentEdits = allEdits;
-      incumbentDiff = attemptedDiff;
-      const acceptedDir = Path.join(lineageDir, `accepted-${round}-${candidateVariant.hash}`);
+    if (promoted) {
+      if (!gate.accepted) log.warning(`[harness-opt] --accept-any: promoting a rejected candidate`);
+      incumbent = candidate;
+      saveIncumbent(incumbent);
+      const acceptedDir = Path.join(lineageDir, `accepted-${round}-${candidate.hash}`);
       Fs.mkdirSync(acceptedDir, { recursive: true });
       Fs.writeFileSync(Path.join(acceptedDir, 'variant.diff'), attemptedDiff);
-      writeEdits({ edits: allEdits, worktree: incumbent.worktree });
-      if (
-        !(await restartLane({
-          command: restartCommandFor(incumbent),
-          url: incumbent.kibanaUrl,
-          auth: laneAuth(incumbent),
-          log,
-        }))
-      ) {
-        throw new Error('incumbent lane did not restart after promotion');
-      }
-      await prepareLane({ lane: incumbent, agentConnectorId, log });
-      log.info(`[harness-opt] round ${round} promoted to incumbent`);
+      log.info(`[harness-opt] round ${round} promoted to incumbent ${candidate.hash}`);
     }
   }
 
   // The holdout, once: the campaign's net change against where it started, on real production
   // incidents the proposer never saw. Its runs live outside runs/ and are never fed back.
-  const finalVariant = { hash: treeHash(incumbent.worktree), diff: incumbentDiff };
-  if (holdoutTasks.length > 0 && (finalVariant.hash !== startVariant.hash || holdoutAlways)) {
+  if (holdoutTasks.length > 0 && (incumbent.hash !== start.hash || holdoutAlways)) {
     const holdoutOutput = Path.join(holdoutDir(), `campaign-${campaignId}`);
-    await resetWorkspace(candidateWorkspace);
-    writeEdits({ edits: startEdits, worktree: candidate.worktree });
-    if (treeHash(candidate.worktree) !== startVariant.hash) {
-      throw new Error('candidate worktree does not match the campaign start for the holdout');
-    }
-    if (
-      !(await restartLane({
-        command: restartCommandFor(candidate),
-        url: candidate.kibanaUrl,
-        auth: laneAuth(candidate),
-        log,
-      }))
-    ) {
-      throw new Error('candidate lane did not restart for the holdout');
-    }
-    await prepareLane({ lane: candidate, agentConnectorId, log });
-    const [startHoldout, finalHoldout] = await Promise.all([
-      runHoldoutVariant({
-        ...common,
-        label: 'start-holdout',
-        variant: startVariant,
-        lane: candidate,
-        tasks: holdoutTasks,
-        outputDir: holdoutOutput,
-      }),
-      runHoldoutVariant({
-        ...common,
-        label: 'final-holdout',
-        variant: finalVariant,
-        lane: incumbent,
-        tasks: holdoutTasks,
-        outputDir: holdoutOutput,
-      }),
-    ]);
+    const startHoldout = await pool.measureHoldout({
+      label: 'start-holdout',
+      variant: start,
+      tasks: holdoutTasks,
+      outputDir: holdoutOutput,
+    });
+    const finalHoldout = await pool.measureHoldout({
+      label: 'final-holdout',
+      variant: incumbent,
+      tasks: holdoutTasks,
+      outputDir: holdoutOutput,
+    });
     const holdout = checkHoldout({ incumbent: startHoldout, candidate: finalHoldout });
-    const record = {
-      campaignId,
-      startHash: startVariant.hash,
-      finalHash: finalVariant.hash,
-      finalDiff: finalVariant.diff,
-      ...holdout,
-    };
     Fs.writeFileSync(
       Path.join(lineageDir, `holdout-${campaignId}.json`),
-      JSON.stringify(record, null, 2)
+      JSON.stringify(
+        { campaignId, startHash: start.hash, finalHash: incumbent.hash, ...holdout },
+        null,
+        2
+      )
     );
     log.info(
-      `[harness-opt] holdout ${startVariant.hash} → ${finalVariant.hash}: ${
+      `[harness-opt] holdout ${start.hash} → ${incumbent.hash}: ${
         holdout.passed ? 'passed' : "FAILED — do not ship this campaign's incumbent"
       }; Δ ${holdout.meanDelta.toFixed(3)} [${holdout.ciLow.toFixed(3)}, ${holdout.ciHigh.toFixed(
         3
@@ -510,28 +408,24 @@ export const runCampaign = async ({
   log.info(`[harness-opt] ledger: ${ledgerPath}`);
 };
 
-/** Propose → review → validate against a stored measurement; leaves the edit in the candidate. */
+/** Propose → review → validate against a stored measurement; leaves the edit in the proposer. */
 export const dryRound = async ({
   summary,
-  lanes,
+  pool,
   log,
 }: {
   summary: RunSummary;
-  lanes: Record<Lane, LaneSettings>;
+  pool: WorkerPool;
   log: ToolingLog;
 }): Promise<void> => {
-  const { incumbent, candidate } = lanes;
-  const workspace = { path: candidate.worktree };
+  const workspace = { path: proposerWorktree() };
   await resetWorkspace(workspace);
-  writeEdits({
-    edits: await collectEdits({ path: incumbent.worktree }),
-    worktree: candidate.worktree,
-  });
+  writeEdits({ edits: loadIncumbent(pool).edits, worktree: workspace.path });
   const proposal = await proposeCandidate({
     summary,
     history: [],
     feedback: measuredFacts(summary, ''),
-    worktree: candidate.worktree,
+    worktree: workspace.path,
     log,
   });
   log.info(`[dry-round] manifest: ${JSON.stringify(proposal.manifest, null, 2)}`);
@@ -540,7 +434,7 @@ export const dryRound = async ({
   log.info(`[dry-round] ${edits.length} file(s) changed:\n${diff.slice(0, 4000)}`);
   const review = await reviewEdits({
     diff,
-    scratchDir: Path.join(candidate.worktree, SCRATCH_DIR, 'review'),
+    scratchDir: Path.join(workspace.path, SCRATCH_DIR, 'review'),
     log,
   });
   log.info(`[dry-round] review: ${JSON.stringify(review)}`);

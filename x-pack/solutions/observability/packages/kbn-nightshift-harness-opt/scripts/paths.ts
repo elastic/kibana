@@ -8,9 +8,9 @@
 import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
-import { REPO_ROOT } from '@kbn/repo-info';
 
-export type Lane = 'incumbent' | 'candidate';
+/** A worker's name, e.g. `w1`. */
+export type Lane = string;
 
 /** Where datasets, runs, the ledger and lineage live. Outside any worktree, so resets keep them. */
 export const harnessPaths = () => {
@@ -47,28 +47,32 @@ const laneAt = (lane: Lane, worktree: string, index: number): LaneSettings => ({
 });
 
 /**
- * The two lanes: each is a worktree with its own Elasticsearch and Kibana. Not one shared
- * Elasticsearch as in the ES|QL loop — Nightshift saves its one investigator's connectors per
- * space, and both lanes rewrite that connector per cutoff, so a shared cluster would race.
+ * The worker pool: identical worktrees, each with its own Elasticsearch and headless Kibana. The
+ * harness measures one variant at a time on all of them, spreading its telemetry cutoffs across
+ * workers (one connector key per Kibana). \`NIGHTSHIFT_HARNESS_WORKERS\` overrides it as
+ * \`name:index,…\` with worktrees at \`~/kibana-nshopt-<name>\`.
  */
-export const defaultLanes = (): Record<Lane, LaneSettings> => ({
-  incumbent: laneAt(
-    'incumbent',
-    process.env.NIGHTSHIFT_HARNESS_INCUMBENT ?? REPO_ROOT,
-    Number(process.env.NIGHTSHIFT_HARNESS_INCUMBENT_INDEX ?? 1)
-  ),
-  candidate: laneAt(
-    'candidate',
-    process.env.NIGHTSHIFT_HARNESS_CANDIDATE ?? Path.join(Os.homedir(), 'kibana-nshopt-cand'),
-    Number(process.env.NIGHTSHIFT_HARNESS_CANDIDATE_INDEX ?? 2)
-  ),
-});
+export const defaultWorkers = (): LaneSettings[] =>
+  (process.env.NIGHTSHIFT_HARNESS_WORKERS ?? 'w1:3,w2:5,w3:6,w4:7').split(',').map((entry) => {
+    const [name, index] = entry.trim().split(':');
+    return laneAt(name, Path.join(Os.homedir(), `kibana-nshopt-${name}`), Number(index));
+  });
+
+/**
+ * Where the proposer edits. Never a worker: dev-mode Kibana restarts when its files change, so
+ * editing a running worker would restart it mid-measurement.
+ */
+export const proposerWorktree = (): string =>
+  process.env.NIGHTSHIFT_HARNESS_PROPOSER ?? Path.join(Os.homedir(), 'kibana-nshopt-cand');
 
 export const DEV_STACK = Path.join(Os.homedir(), 'kibana-dev-tools/dev_stack.sh');
 
 /** Shell command that restarts a lane's Kibana with the lane overrides loaded. */
 export const restartCommandFor = (lane: LaneSettings): string => {
-  const extra = `DEV_STACK_EXTRA_KIBANA_CONFIG=${JSON.stringify(harnessPaths().laneConfig)}`;
+  // Headless: the rspack optimizer only serves the UI and holds ~8 GB per Kibana.
+  const extra = `DEV_STACK_EXTRA_KIBANA_CONFIG=${JSON.stringify(
+    harnessPaths().laneConfig
+  )} DEV_STACK_KIBANA_ARGS=--no-optimizer`;
   const target = `${JSON.stringify(lane.worktree)} ${lane.index}`;
   return `${DEV_STACK} kibana stop ${target}; ${extra} ${DEV_STACK} kibana start ${target}`;
 };

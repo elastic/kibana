@@ -16,16 +16,13 @@ import {
   loadCustomer0Tasks,
   tasksForSplit,
 } from './dataset';
-import { holdoutDir, runHoldoutVariant } from './holdout';
+import { holdoutDir } from './holdout';
 import type { Split } from './dataset';
-import { defaultLanes, harnessPaths, laneAuth, restartCommandFor } from './paths';
-import type { Lane } from './paths';
+import { defaultWorkers, harnessPaths } from './paths';
 import { exportOrcaUserForSuite, readOrcaUser } from './secrets';
-import { prepareLane } from './kibana';
-import { runVariant } from './runner';
 import type { RunSummary, TelemetryVariant } from './runner';
-import { restartLane, treeHash } from './candidate_workspace';
-import { dryRound, runCampaign } from './campaign';
+import { dryRound, loadIncumbent, runCampaign } from './campaign';
+import { createWorkerPool, variantOf } from './workers';
 import { serveReport, writeReport } from './report';
 import { rescoreTraces } from './rescore';
 
@@ -37,10 +34,6 @@ const DEFAULT_JUDGE = '.openai-gpt-5.4-chat_completion';
 const asSplit = (value: unknown): Split => {
   if (value === 'search' || value === 'gate' || value === 'sealed') return value;
   throw createFlagError(`--split must be search, gate, sealed or customer0 (got ${String(value)})`);
-};
-const asLane = (value: unknown): Lane => {
-  if (value === 'incumbent' || value === 'candidate') return value;
-  throw createFlagError(`--lane must be incumbent or candidate (got ${String(value)})`);
 };
 const asVariant = (value: unknown): TelemetryVariant => {
   // Default no-flags: with flag telemetry visible every investigation reads the fault switches
@@ -70,10 +63,19 @@ export const cli = () =>
       }
       await ensureDataset();
       await ensureCustomer0Holdout();
-      const lanes = defaultLanes();
       const agentConnectorId = str(flags.agent) ?? DEFAULT_AGENT;
       const judgeConnectorId = str(flags.judge) ?? DEFAULT_JUDGE;
       const telemetryVariant = asVariant(flags.telemetry);
+      const pool = createWorkerPool({
+        workers: defaultWorkers(),
+        concurrency: asNumber(flags.concurrency, 16) ?? 16,
+        agentConnectorId,
+        judgeConnectorId,
+        telemetryVariant,
+        log,
+      });
+      // `--base` measures the unedited files instead of the stored incumbent.
+      const variant = () => (flags.base ? variantOf(pool.workers, [], '') : loadIncumbent(pool));
 
       switch (command) {
         case 'splits': {
@@ -86,34 +88,20 @@ export const cli = () =>
           }
           return;
         }
-        case 'prepare': {
-          const lane = lanes[asLane(str(flags.lane) ?? 'incumbent')];
-          await prepareLane({ lane, agentConnectorId, log });
-          return;
-        }
+        case 'prepare':
         case 'restart': {
-          const lane = lanes[asLane(str(flags.lane) ?? 'incumbent')];
-          const restartCommand = restartCommandFor(lane);
-          log.info(restartCommand);
-          if (
-            !(await restartLane({
-              command: restartCommand,
-              url: lane.kibanaUrl,
-              auth: laneAuth(lane),
-              log,
-            }))
-          ) {
-            throw new Error(`${lane.lane} did not restart`);
-          }
-          await prepareLane({ lane, agentConnectorId, log });
+          // Writes the incumbent (or --base) into every worker and restarts those not running it.
+          await pool.ensure(variant());
           return;
         }
         case 'run': {
           exportOrcaUserForSuite(readOrcaUser());
-          const lane = lanes[asLane(str(flags.lane) ?? 'incumbent')];
+          const cases = str(flags.case)?.split(',');
+          const outputDir = Path.join(
+            str(flags.split) === 'customer0' ? holdoutDir() : harnessPaths().runsDir,
+            `run-${Date.now()}`
+          );
           if (str(flags.split) === 'customer0') {
-            await prepareLane({ lane, agentConnectorId, log });
-            const cases = str(flags.case)?.split(',');
             const holdoutTasks = loadCustomer0Tasks().filter(
               ({ caseId }) => !cases || cases.includes(caseId)
             );
@@ -121,41 +109,26 @@ export const cli = () =>
               ? holdoutTasks
               : holdoutTasks.slice(0, asNumber(flags.limit) ?? holdoutTasks.length);
             if (limited.length === 0) throw createFlagError('no customer0 tasks selected');
-            const outputDir = Path.join(holdoutDir(), `run-${Date.now()}`);
-            await runHoldoutVariant({
-              label: `${lane.lane}-customer0`,
-              variant: { hash: treeHash(lane.worktree) },
-              lane,
+            await pool.measureHoldout({
+              label: 'customer0',
+              variant: variant(),
               tasks: limited,
-              concurrency: asNumber(flags.concurrency, 16),
-              agentConnectorId,
-              judgeConnectorId,
               outputDir,
-              log,
             });
             log.info(`[harness-opt] output: ${outputDir}`);
             return;
           }
           const split = asSplit(str(flags.split) ?? 'search');
-          const cases = str(flags.case)?.split(',');
           const tasks = cases
             ? tasksForSplit(split).filter(({ caseId }) => cases.includes(caseId))
             : tasksForSplit(split, { limit: asNumber(flags.limit) });
           if (tasks.length === 0) throw createFlagError('no tasks selected');
-          await prepareLane({ lane, agentConnectorId, log });
-          const outputDir = Path.join(harnessPaths().runsDir, `run-${Date.now()}`);
-          await runVariant({
-            label: `${lane.lane}-${split}`,
-            variant: { hash: treeHash(lane.worktree) },
-            lane,
+          await pool.measure({
+            label: split,
+            variant: variant(),
             tasks,
             rollouts: asNumber(flags.rollouts, 1) ?? 1,
-            concurrency: asNumber(flags.concurrency, 16),
-            agentConnectorId,
-            judgeConnectorId,
-            telemetryVariant,
             outputDir,
-            log,
           });
           log.info(`[harness-opt] output: ${outputDir}`);
           return;
@@ -168,7 +141,7 @@ export const cli = () =>
             runs: RunSummary['runs'];
             summary: Omit<RunSummary, 'runs'>;
           };
-          await dryRound({ summary: { ...summary, runs }, lanes, log });
+          await dryRound({ summary: { ...summary, runs }, pool, log });
           return;
         }
         case 'rescore': {
@@ -182,12 +155,7 @@ export const cli = () =>
                 .map((file) => Path.join(from, file))
             : traces;
           if (tracePaths.length === 0) throw createFlagError('--from <dir> or --traces <files>');
-          await rescoreTraces({
-            tracePaths,
-            lane: lanes[asLane(str(flags.lane) ?? 'incumbent')],
-            judgeConnectorId,
-            log,
-          });
+          await rescoreTraces({ tracePaths, lane: pool.workers[0], judgeConnectorId, log });
           return;
         }
         case 'report': {
@@ -209,17 +177,13 @@ export const cli = () =>
           await runCampaign({
             rounds: asNumber(flags.rounds, 1) ?? 1,
             searchRollouts: asNumber(flags['search-rollouts'], 1) ?? 1,
-            gateRollouts: asNumber(flags['gate-rollouts'], 2) ?? 2,
-            concurrency: asNumber(flags.concurrency, 16) ?? 16,
+            gateRollouts: asNumber(flags['gate-rollouts'], 5) ?? 5,
             searchTasks: tasksForSplit('search', { limit: asNumber(flags['search-limit']) }),
             gateTasks: tasksForSplit('gate', { limit: asNumber(flags['gate-limit']) }),
-            lanes,
+            pool,
             agentConnectorId,
-            judgeConnectorId,
-            telemetryVariant,
-            skipCandidateSearch: Boolean(flags['skip-candidate-search']),
+            candidateSearch: Boolean(flags['candidate-search']),
             acceptAny: Boolean(flags['accept-any']),
-            freshSearch: Boolean(flags['fresh-search']),
             holdoutTasks: flags['skip-holdout']
               ? []
               : loadCustomer0Tasks({ limit: asNumber(flags['holdout-limit']) }),
@@ -235,16 +199,19 @@ export const cli = () =>
     {
       description: `Nightshift investigation harness optimization loop (elastic/nightshift-program#2298).
 
+Every measurement runs on the worker pool (NIGHTSHIFT_HARNESS_WORKERS, default w1:3,w2:5,w3:6,w4:7)
+and is served from the run cache where it can. Measurements use the stored incumbent, or the
+unedited files with --base.
+
   splits [--split search --limit 4]     print the incident splits / a selection
-  prepare --lane incumbent              set up a lane's space for ORCA runs
-  run --lane incumbent --split search|gate|sealed|customer0 --limit 2 [--case <id,...>]
+  restart | prepare [--base]            put the incumbent on every worker
+  run --split search|gate|sealed|customer0 [--limit N] [--case <id,...>] [--rollouts N] [--base]
   dry-round --from <runs/.../label.json>  propose, review and validate only
   report [--serve --port 7712] [--ledger ledger.json]   HTML report of runs and rounds
-  campaign --rounds 1 --search-limit 3 --gate-limit 3 --gate-rollouts 1
-      [--holdout-limit N] [--skip-holdout] [--holdout-always (debug)]`,
+  campaign --rounds 1 --search-limit 12 --gate-limit 12 --gate-rollouts 5
+      [--candidate-search] [--holdout-limit N] [--skip-holdout] [--holdout-always (debug)]`,
       flags: {
         string: [
-          'lane',
           'split',
           'limit',
           'case',
@@ -266,12 +233,12 @@ export const cli = () =>
           'holdout-limit',
         ],
         boolean: [
-          'skip-candidate-search',
+          'candidate-search',
           'accept-any',
-          'fresh-search',
           'serve',
           'skip-holdout',
           'holdout-always',
+          'base',
         ],
       },
     }

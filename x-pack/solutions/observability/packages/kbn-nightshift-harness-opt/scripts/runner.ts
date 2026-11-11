@@ -31,7 +31,6 @@ import type { OrcaTask } from './dataset';
 import type { LaneSettings } from './paths';
 import { createLaneFetch, createLaneKbnClient, applyOrcaSpace } from './kibana';
 import { costUsd } from './pricing';
-import { createRunCache, isInfrastructureFailure } from './cache';
 
 export type TelemetryVariant = 'full' | 'no-flags';
 
@@ -127,9 +126,6 @@ export const withLane = async <T>(lane: LaneSettings, fn: () => Promise<T>): Pro
   }
 };
 
-export const runVariant = (options: RunVariantOptions): Promise<RunSummary> =>
-  withLane(options.lane, () => runVariantOnLane(options));
-
 /** The judge connector in the shape \`@kbn/evals\` evaluators expect. */
 export const judgeConnector = (judgeConnectorId: string): EvalConnector =>
   ({
@@ -192,60 +188,45 @@ export const summarize = ({
   return summary;
 };
 
-interface RunVariantOptions {
+export interface WorkItem {
+  task: OrcaTask;
+  rollout: number;
+}
+
+export interface OrcaWorkOptions {
   label: string;
-  /** Identity of the harness under test: a hash of the editable files and, optionally, its diff. */
-  variant: { hash: string; diff?: string };
   lane: LaneSettings;
-  tasks: OrcaTask[];
-  rollouts: number;
+  work: WorkItem[];
   concurrency?: number;
   agentConnectorId: string;
   judgeConnectorId: string;
-  telemetryVariant?: TelemetryVariant;
-  outputDir: string;
+  telemetryVariant: TelemetryVariant;
+  traceDir: string;
   log: ToolingLog;
 }
 
-const runVariantOnLane = async ({
+/**
+ * Runs ORCA work items on one lane, already running the variant under test, and scores them.
+ * The lane's cutoffs run one after another (one connector key per Kibana), each with up to
+ * \`concurrency\` investigations in flight. Caching and summaries belong to the caller.
+ */
+export const runOrcaWorkOnLane = (options: OrcaWorkOptions): Promise<TaskRun[]> =>
+  withLane(options.lane, () => runOrcaWork(options));
+
+const runOrcaWork = async ({
   label,
-  variant,
   lane,
-  tasks,
-  rollouts,
+  work,
   concurrency = 16,
   agentConnectorId,
   judgeConnectorId,
-  telemetryVariant = 'no-flags',
-  outputDir,
+  telemetryVariant,
+  traceDir,
   log,
-}: RunVariantOptions): Promise<RunSummary> => {
+}: OrcaWorkOptions): Promise<TaskRun[]> => {
   const fetch = createLaneFetch(lane);
   const kbnClient = createLaneKbnClient(lane, log);
-  const traceDir = Path.join(outputDir, label, 'traces');
   Fs.mkdirSync(traceDir, { recursive: true });
-
-  const cache = createRunCache({
-    kind: 'orca',
-    variantHash: variant.hash,
-    worktree: lane.worktree,
-    agentConnectorId,
-    judgeConnectorId,
-    telemetryVariant,
-  });
-  const requested = tasks.flatMap((task) =>
-    Array.from({ length: rollouts }, (unused, rollout) => ({ task, rollout }))
-  );
-  // Stored rollouts of the same key are samples of the same distribution: reuse them, run the rest.
-  const cachedRuns: TaskRun[] = [];
-  const work = requested.filter(({ task, rollout }) => {
-    const hit = cache.get(task.id, rollout);
-    if (!hit) return true;
-    const tracePath = Path.join(traceDir, `${task.caseId}-r${rollout}.json`);
-    Fs.writeFileSync(tracePath, hit.trace);
-    cachedRuns.push({ ...hit.run, tracePath, cached: true });
-    return false;
-  });
   const cutoffs = [...new Set(work.map(({ task }) => task.cutoff))];
   const batches = cutoffs.reduce(
     (sum, cutoff) =>
@@ -253,19 +234,9 @@ const runVariantOnLane = async ({
     0
   );
   log.info(
-    `[harness-opt] "${label}" on ${lane.lane} (variant ${variant.hash}, ${telemetryVariant}): ${tasks.length} tasks × ${rollouts} = ${requested.length} runs, ${cachedRuns.length} cached (key ${cache.key}), ${work.length} to run over ${cutoffs.length} cutoffs, ~${batches} batches`
+    `[${label}] ${lane.lane}: ${work.length} runs over ${cutoffs.length} cutoffs, ~${batches} batches`
   );
-  if (work.length === 0) {
-    return summarize({
-      label,
-      variant,
-      telemetryVariant,
-      agentConnectorId,
-      runs: cachedRuns,
-      outputDir,
-      log,
-    });
-  }
+  if (work.length === 0) return [];
 
   const evaluators = createOrcaEvaluators({
     inferenceClient: createRestClient({ fetch, bindTo: { connectorId: judgeConnectorId } }),
@@ -421,21 +392,5 @@ const runVariantOnLane = async ({
   });
 
   // Judges run after every investigation ended: they never hold a cutoff's slot.
-  const scored = await Promise.all(
-    runs.map(async ({ task, rollout, output }) => {
-      const run = await scoreRun(task, rollout, output);
-      if (!isInfrastructureFailure(run)) cache.put(task.id, run);
-      return run;
-    })
-  );
-
-  return summarize({
-    label,
-    variant,
-    telemetryVariant,
-    agentConnectorId,
-    runs: [...cachedRuns, ...scored],
-    outputDir,
-    log,
-  });
+  return Promise.all(runs.map(({ task, rollout, output }) => scoreRun(task, rollout, output)));
 };

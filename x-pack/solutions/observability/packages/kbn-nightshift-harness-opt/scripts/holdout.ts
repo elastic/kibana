@@ -25,10 +25,9 @@ import { harnessPaths } from './paths';
 import { createLaneFetch, createLaneKbnClient, applyCustomer0Space } from './kibana';
 import { costUsd } from './pricing';
 import { readCustomer0Telemetry } from './secrets';
-import { judgeConnector, summarize, withLane } from './runner';
+import { judgeConnector, withLane } from './runner';
 import type { RunSummary, TaskRun } from './runner';
 import { gateCandidate } from './gate';
-import { createRunCache, isInfrastructureFailure } from './cache';
 
 const SETTLE_MS = 2 * 60_000;
 
@@ -54,63 +53,35 @@ export const holdoutReward = ({
   return 0.5 * goalPass + 0.5 * causeCompleteness;
 };
 
-/** Runs the customer0 holdout on a lane, then puts nothing back: the next ORCA run resets it. */
-export const runHoldoutVariant = ({
+/**
+ * Runs customer0 holdout tasks on one lane, already running the variant under test, and scores
+ * them. Leaves the customer0 context and connector on the lane: the next ORCA run resets them.
+ */
+export const runHoldoutWorkOnLane = ({
   label,
-  variant,
   lane,
   tasks,
   concurrency = 16,
   agentConnectorId,
   judgeConnectorId,
-  outputDir,
+  traceDir,
   log,
 }: {
   label: string;
-  variant: { hash: string; diff?: string };
   lane: LaneSettings;
   tasks: OrcaTask[];
   concurrency?: number;
   agentConnectorId: string;
   judgeConnectorId: string;
-  outputDir: string;
+  traceDir: string;
   log: ToolingLog;
-}): Promise<RunSummary> =>
+}): Promise<TaskRun[]> =>
   withLane(lane, async () => {
     const fetch = createLaneFetch(lane);
-    const traceDir = Path.join(outputDir, label, 'traces');
     Fs.mkdirSync(traceDir, { recursive: true, mode: 0o700 });
-    const cache = createRunCache({
-      kind: 'customer0',
-      variantHash: variant.hash,
-      worktree: lane.worktree,
-      agentConnectorId,
-      judgeConnectorId,
-      telemetryVariant: 'full',
-    });
-    const cachedRuns: TaskRun[] = [];
-    const pending = tasks.filter((task) => {
-      const hit = cache.get(task.id, 0);
-      if (!hit) return true;
-      const tracePath = Path.join(traceDir, `${task.caseId}.json`);
-      Fs.writeFileSync(tracePath, hit.trace, { mode: 0o600 });
-      cachedRuns.push({ ...hit.run, tracePath, cached: true });
-      return false;
-    });
-    log.info(
-      `[holdout] "${label}" on ${lane.lane} (variant ${variant.hash}): ${tasks.length} customer0 incidents, ${cachedRuns.length} cached, ${pending.length} to run`
-    );
-    if (pending.length === 0) {
-      return summarize({
-        label,
-        variant,
-        telemetryVariant: 'full',
-        agentConnectorId,
-        runs: cachedRuns,
-        outputDir,
-        log,
-      });
-    }
+    log.info(`[${label}] ${lane.lane}: ${tasks.length} customer0 incidents`);
+    if (tasks.length === 0) return [];
+    const pending = tasks;
     await applyCustomer0Space({
       fetch,
       kbnClient: createLaneKbnClient(lane, log),
@@ -235,7 +206,6 @@ export const runHoldoutVariant = ({
           judgeError,
           tracePath,
         };
-        if (!isInfrastructureFailure(run)) cache.put(task.id, run);
         log.info(
           `[${label}] ${task.caseId}: reward ${reward?.toFixed(2) ?? 'unscored'} (goal ${
             goalPass?.toFixed(2) ?? '-'
@@ -246,15 +216,7 @@ export const runHoldoutVariant = ({
         return run;
       })
     );
-    return summarize({
-      label,
-      variant,
-      telemetryVariant: 'full',
-      agentConnectorId,
-      runs: [...cachedRuns, ...runs],
-      outputDir,
-      log,
-    });
+    return runs;
   });
 
 export interface HoldoutResult {
