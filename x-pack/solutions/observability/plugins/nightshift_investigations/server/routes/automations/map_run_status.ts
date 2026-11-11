@@ -24,3 +24,9 @@ export const mapRunStatus = (status: ExecutionStatus): AutomationRunStatus => {
   }
   return 'failed';
 };
+
+export const SKIP_REASONS = [
+  'daily_limit',
+  'investigation_limit',
+  'no_open_investigation',
+] as const;

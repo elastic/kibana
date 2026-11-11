@@ -11,6 +11,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ExecutionStatus } from '@kbn/workflows';
 import { mapRunStatus } from './map_run_status';
 import type { AutomationRunStatus } from './map_run_status';
+import { countSkippedRuns } from './count_skipped_runs';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
@@ -73,15 +74,31 @@ export const getAutomationsRunCountsRoute = createNightshiftInvestigationsServer
       );
 
     const counts = Object.fromEntries(
-      ids.map((id) => {
-        const runCounts = emptyCounts();
-        const workflowId = workflowIdByAutomationId.get(id);
-        const statusCounts = (workflowId && countsByWorkflowId[workflowId]) || {};
-        for (const status of Object.values(ExecutionStatus)) {
-          runCounts[mapRunStatus(status)] += statusCounts[status] ?? 0;
-        }
-        return [id, runCounts];
-      })
+      await Promise.all(
+        ids.map(async (id): Promise<[string, RunCounts]> => {
+          const runCounts = emptyCounts();
+          const workflowId = workflowIdByAutomationId.get(id);
+          if (!workflowId) return [id, runCounts];
+          const statusCounts = countsByWorkflowId[workflowId] || {};
+          for (const status of Object.values(ExecutionStatus)) {
+            runCounts[mapRunStatus(status)] += statusCounts[status] ?? 0;
+          }
+          const skipped = Math.min(
+            await countSkippedRuns({
+              management: workflowsManagement.management,
+              workflowId,
+              startedAfter,
+              startedBefore,
+              request,
+              spaceId,
+            }),
+            runCounts.succeeded
+          );
+          runCounts.succeeded -= skipped;
+          runCounts.skipped += skipped;
+          return [id, runCounts];
+        })
+      )
     );
 
     return { counts };

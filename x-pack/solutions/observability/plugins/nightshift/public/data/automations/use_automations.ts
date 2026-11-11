@@ -5,8 +5,15 @@
  * 2.0.
  */
 
+import { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useMutation, useQueries, useQuery, useQueryClient } from '@kbn/react-query';
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+} from '@kbn/react-query';
 import type {
   NightshiftInvestigationsAPIClientRequestParamsOf,
   NightshiftInvestigationsAPIReturnType,
@@ -108,20 +115,75 @@ const getAutomationRunsQuery = (
   retry: false,
 });
 
+const RUNS_PAGE_SIZE = 100;
+
 export const useAutomationRunsInRange = (
   id: string,
   startedAfter: string,
   startedBefore: string
 ) => {
-  const { nightshiftInvestigations } = useKibana().services;
-  return useQuery(
-    getAutomationRunsQuery(
-      nightshiftInvestigations?.investigationsClient,
-      id,
-      startedAfter,
-      startedBefore
-    )
-  );
+  const investigationsClient = useKibana().services.nightshiftInvestigations?.investigationsClient;
+  const { data, hasNextPage, isFetchingNextPage, fetchNextPage, isLoading } = useInfiniteQuery({
+    queryKey: [...AUTOMATIONS_QUERY_KEY, id, 'pagedRuns', startedAfter, startedBefore],
+    enabled: investigationsClient != null,
+    queryFn: async ({ pageParam = 1 }) => {
+      if (!investigationsClient) {
+        throw new Error('Nightshift investigations plugin is unavailable');
+      }
+      return investigationsClient.fetch('GET /internal/nightshift/automations/{id}/runs', {
+        params: {
+          path: { id },
+          query: { page: pageParam, size: RUNS_PAGE_SIZE, startedAfter, startedBefore },
+        },
+        signal: null,
+      });
+    },
+    getNextPageParam: (lastPage, pages) =>
+      pages.length * RUNS_PAGE_SIZE < lastPage.total ? pages.length + 1 : undefined,
+    retry: false,
+  });
+
+  useEffect(() => {
+    if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const runs = useMemo(() => data?.pages.flatMap((page) => page.runs) ?? [], [data]);
+  const [firstPage] = data?.pages ?? [];
+  return { runs, isLoading, usedToday: firstPage?.usedToday, total: firstPage?.total };
+};
+
+type RunCountsResponse =
+  NightshiftInvestigationsAPIReturnType<'POST /internal/nightshift/automations/run_counts'>;
+const RUN_COUNTS_CHUNK_SIZE = 100;
+
+export const useAutomationsRunCounts = (
+  ids: string[],
+  startedAfter: string,
+  startedBefore: string
+) => {
+  const investigationsClient = useKibana().services.nightshiftInvestigations?.investigationsClient;
+  return useQuery({
+    queryKey: [...AUTOMATIONS_QUERY_KEY, 'runCounts', ids, startedAfter, startedBefore],
+    enabled: investigationsClient != null && ids.length > 0,
+    queryFn: async ({ signal }): Promise<RunCountsResponse['counts']> => {
+      if (!investigationsClient) {
+        throw new Error('Nightshift investigations plugin is unavailable');
+      }
+      const chunks = Array.from({ length: Math.ceil(ids.length / RUN_COUNTS_CHUNK_SIZE) }, (_, i) =>
+        ids.slice(i * RUN_COUNTS_CHUNK_SIZE, (i + 1) * RUN_COUNTS_CHUNK_SIZE)
+      );
+      const responses = await Promise.all(
+        chunks.map((chunk) =>
+          investigationsClient.fetch('POST /internal/nightshift/automations/run_counts', {
+            params: { body: { ids: chunk, startedAfter, startedBefore } },
+            signal: signal ?? null,
+          })
+        )
+      );
+      return Object.assign({}, ...responses.map(({ counts }) => counts));
+    },
+    retry: false,
+  }).data;
 };
 
 type AutomationRunActivity =

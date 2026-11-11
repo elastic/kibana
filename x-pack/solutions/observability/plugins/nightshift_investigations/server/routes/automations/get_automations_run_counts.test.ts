@@ -14,6 +14,7 @@ const { handler } =
 const mockRequest = httpServerMock.createKibanaRequest();
 const mockBulkGet = jest.fn();
 const mockGetStatusCounts = jest.fn();
+const mockSearchSteps = jest.fn();
 const getAutomationsSoClient = jest.fn().mockReturnValue({ bulkGet: mockBulkGet });
 const getWorkflowsManagement = jest.fn();
 
@@ -34,8 +35,12 @@ const call = (body: { ids: string[]; startedAfter?: string; startedBefore?: stri
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockSearchSteps.mockResolvedValue({ results: [], total: 0 });
   getWorkflowsManagement.mockReturnValue({
-    management: { getWorkflowExecutionStatusCounts: mockGetStatusCounts },
+    management: {
+      getWorkflowExecutionStatusCounts: mockGetStatusCounts,
+      searchStepExecutions: mockSearchSteps,
+    },
   });
 });
 
@@ -67,6 +72,58 @@ describe('POST /internal/nightshift/automations/run_counts', () => {
       { workflowIds: ['wf-1'], startedAfter: 'now-7d', startedBefore: 'now', request: mockRequest },
       'default'
     );
+  });
+
+  it('moves distinct skip_reason runs from succeeded to skipped across pages', async () => {
+    mockBulkGet.mockResolvedValue({
+      saved_objects: [{ id: 'a1', attributes: { workflowId: 'wf-1' } }],
+    });
+    mockGetStatusCounts.mockResolvedValue({ 'wf-1': { completed: 150, skipped: 1 } });
+    const skipped = (workflowRunId: string) => ({
+      workflowRunId,
+      output: { skip_reason: 'daily_limit' },
+    });
+    mockSearchSteps.mockImplementation(async ({ stepId, page }) => {
+      if (stepId === 'trigger_investigation') {
+        const results =
+          page === 1
+            ? Array.from({ length: 100 }, (_, i) => skipped(`r${i}`))
+            : [
+                skipped('r1'),
+                skipped('r100'),
+                { workflowRunId: 'ok', output: { investigation_id: 'x' } },
+              ];
+        return { results, total: 103 };
+      }
+      if (stepId === 'trigger_investigation_slack') {
+        return { results: [skipped('r100'), skipped('r101')], total: 2 };
+      }
+      return { results: [], total: 0 };
+    });
+
+    const result = await call({ ids: ['a1'] });
+
+    expect(result).toEqual({
+      counts: { a1: { succeeded: 48, skipped: 103, running: 0, failed: 0 } },
+    });
+  });
+
+  it('never lets succeeded go below zero', async () => {
+    mockBulkGet.mockResolvedValue({
+      saved_objects: [{ id: 'a1', attributes: { workflowId: 'wf-1' } }],
+    });
+    mockGetStatusCounts.mockResolvedValue({ 'wf-1': { completed: 1 } });
+    mockSearchSteps.mockResolvedValue({
+      results: [
+        { workflowRunId: 'r1', output: { skip_reason: 'daily_limit' } },
+        { workflowRunId: 'r2', output: { skip_reason: 'daily_limit' } },
+      ],
+      total: 2,
+    });
+
+    const result = await call({ ids: ['a1'] });
+
+    expect(result).toEqual({ counts: { a1: { succeeded: 0, skipped: 1, running: 0, failed: 0 } } });
   });
 
   it('returns zeros for automations without a workflow or without runs', async () => {

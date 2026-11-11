@@ -14,6 +14,8 @@ import { RUN_QUOTAS_QUERY_KEY } from '../query_keys';
 import { useKibana } from '../../hooks/use_kibana';
 import {
   AUTOMATIONS_QUERY_KEY,
+  useAutomationRunsInRange,
+  useAutomationsRunCounts,
   useAutomationsRunsInRange,
   useAutomationRunActivity,
   useCreateAutomation,
@@ -99,6 +101,64 @@ describe('use_automations', () => {
         signal: null,
       }
     );
+  });
+
+  it('requests exact run counts with one POST per 100 automations and merges them', async () => {
+    investigationsFetch.mockImplementation((_endpoint, { params }) =>
+      Promise.resolve({
+        counts: Object.fromEntries(
+          params.body.ids.map((id: string) => [
+            id,
+            { succeeded: 1, running: 0, failed: 0, skipped: 0 },
+          ])
+        ),
+      })
+    );
+    const ids = Array.from({ length: 101 }, (_, i) => `a${i}`);
+    const { result } = renderWithClient(() =>
+      useAutomationsRunCounts(ids, '2026-10-01T00:00:00.000Z', '2026-10-02T00:00:00.000Z')
+    );
+
+    await waitFor(() => expect(Object.keys(result.current ?? {})).toHaveLength(101));
+    expect(investigationsFetch).toHaveBeenCalledTimes(2);
+    expect(investigationsFetch).toHaveBeenCalledWith(
+      'POST /internal/nightshift/automations/run_counts',
+      expect.objectContaining({
+        params: {
+          body: {
+            ids: ids.slice(100),
+            startedAfter: '2026-10-01T00:00:00.000Z',
+            startedBefore: '2026-10-02T00:00:00.000Z',
+          },
+        },
+      })
+    );
+  });
+
+  it('fetches every remaining page of runs and keeps first-page totals', async () => {
+    const run = (id: string) => ({
+      id,
+      status: 'succeeded',
+      startedAt: '2026-10-01T00:00:00.000Z',
+    });
+    investigationsFetch.mockImplementation((_endpoint, { params }) =>
+      Promise.resolve({
+        runs:
+          params.query.page === 1
+            ? Array.from({ length: 100 }, (_, i) => run(`r${i}`))
+            : [run('last')],
+        total: 101,
+        usedToday: params.query.page === 1 ? 7 : 0,
+      })
+    );
+    const { result } = renderWithClient(() =>
+      useAutomationRunsInRange('a', '2026-10-01T00:00:00.000Z', '2026-10-02T00:00:00.000Z')
+    );
+
+    await waitFor(() => expect(result.current.runs).toHaveLength(101));
+    expect(investigationsFetch).toHaveBeenCalledTimes(2);
+    expect(result.current.usedToday).toBe(7);
+    expect(result.current.total).toBe(101);
   });
 
   it('creates an automation, shows a toast, and refreshes the list', async () => {

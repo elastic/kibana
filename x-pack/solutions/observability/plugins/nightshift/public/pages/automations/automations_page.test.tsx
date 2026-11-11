@@ -15,6 +15,7 @@ import {
   useAutomationRunsInRange,
   useAutomationRunActivity,
   useAutomationsRunsInRange,
+  useAutomationsRunCounts,
   useCreateAutomation,
   useCurrentUsername,
   useDeleteAutomation,
@@ -32,6 +33,7 @@ jest.mock('../../data/automations/use_automations', () => ({
   useAutomationRunsInRange: jest.fn(),
   useAutomationRunActivity: jest.fn(),
   useAutomationsRunsInRange: jest.fn(),
+  useAutomationsRunCounts: jest.fn(),
   useCreateAutomation: jest.fn(),
   useCurrentUsername: jest.fn(),
   useDeleteAutomation: jest.fn(),
@@ -65,6 +67,7 @@ jest.mock('./flyouts/create_flyout/create_automation_flyout', () => ({
 
 const mockUseAutomationRunsInRange = useAutomationRunsInRange as jest.Mock;
 const mockUseAutomationsRunsInRange = useAutomationsRunsInRange as jest.Mock;
+const mockUseAutomationsRunCounts = useAutomationsRunCounts as jest.Mock;
 const mockUseCreateAutomation = useCreateAutomation as jest.Mock;
 const mockUseCurrentUsername = useCurrentUsername as jest.Mock;
 const mockUseDeleteAutomation = useDeleteAutomation as jest.Mock;
@@ -106,11 +109,9 @@ describe('AutomationsPage', () => {
     });
     mockUseFetchAutomations.mockReturnValue({ data: { automations: [] }, isInitialLoading: false });
     mockUseAutomationsRunsInRange.mockReturnValue([]);
+    mockUseAutomationsRunCounts.mockReturnValue(undefined);
     mockUseRunQuotas.mockReturnValue({ data: undefined, refetch: jest.fn() });
-    mockUseAutomationRunsInRange.mockReturnValue({
-      data: { runs: [], total: 0, usedToday: 0 },
-      isInitialLoading: false,
-    });
+    mockUseAutomationRunsInRange.mockReturnValue({ runs: [], isLoading: false });
     mockUseCreateAutomation.mockReturnValue({ mutate: jest.fn(), isLoading: false });
     mockUseCurrentUsername.mockReturnValue('Daniel Hughes');
     mockUseDeleteAutomation.mockReturnValue({ mutate: jest.fn(), isLoading: false });
@@ -549,28 +550,15 @@ describe('AutomationsPage', () => {
       deleteMutate.mockClear();
       toggleMutate.mockClear();
       mockUseFetchAutomations.mockReturnValue({ data: { automations }, isInitialLoading: false });
-      mockUseAutomationsRunsInRange.mockImplementation((ids: string[], startedAfter: string) =>
-        ids.map((id) => ({
-          data: {
-            total: startedAfter === todayStart.toISOString() ? totals[id].today : totals[id].range,
-            usedToday: totals[id].today,
-            runs:
-              id === 'triage'
-                ? [
-                    ...Array(25).fill({ status: 'succeeded' }),
-                    ...Array(3).fill({ status: 'skipped' }),
-                  ]
-                : [],
-          },
-        }))
+      mockUseAutomationsRunsInRange.mockImplementation((ids: string[]) =>
+        ids.map((id) => ({ data: { usedToday: totals[id].today } }))
       );
-      mockUseAutomationRunsInRange.mockImplementation((id: string) => ({
-        data: {
-          total: totals[id].range,
-          usedToday: totals[id].today,
-          runs: [{ status: 'completed', startedAt: new Date().toISOString() }],
-        },
-        isInitialLoading: false,
+      mockUseAutomationsRunCounts.mockReturnValue({
+        triage: { succeeded: 25, running: 0, failed: 0, skipped: 3 },
+      });
+      mockUseAutomationRunsInRange.mockImplementation(() => ({
+        runs: [{ status: 'completed', startedAt: new Date().toISOString() }],
+        isLoading: false,
       }));
       mockUseCreateAutomation.mockReturnValue({ mutate: createMutate, isLoading: false });
       mockUseDeleteAutomation.mockReturnValue({ mutate: deleteMutate, isLoading: false });

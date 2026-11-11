@@ -36,6 +36,7 @@ describe('RunHistory skipped run summary', () => {
       <I18nProvider>
         <RunHistory
           runs={[run]}
+          runCounts={{ succeeded: 0, running: 0, failed: 0, skipped: 1 }}
           isLoading={false}
           startedAfter="2026-01-01T00:00:00.000Z"
           startedBefore="2026-01-02T00:00:00.000Z"

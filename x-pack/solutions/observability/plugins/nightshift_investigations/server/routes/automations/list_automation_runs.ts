@@ -9,13 +9,13 @@ import { serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { MANUAL_AUTOMATION_TRIGGER_SOURCE } from '../../../common/automation_run';
-import { mapRunStatus } from './map_run_status';
+import { mapRunStatus, SKIP_REASONS } from './map_run_status';
+import { TRIGGER_STEP_IDS } from './count_skipped_runs';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
 import { readAutomationUsage } from '../../lib/automations/automation_budget';
 
-const SKIP_REASONS = ['daily_limit', 'investigation_limit', 'no_open_investigation'] as const;
 const MAX_ERROR_LENGTH = 200;
 
 export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute({
@@ -80,15 +80,7 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
 
     const { workflowId } = so.attributes;
     const stepExecutions = await Promise.all(
-      [
-        'trigger_investigation',
-        'trigger_alert_investigation',
-        'trigger_investigation_alert',
-        'trigger_investigation_slack',
-        'follow_up_recovered_alert',
-        'trigger_investigation_alert_v2',
-        'follow_up_recovered_alert_v2',
-      ].map((stepId) =>
+      TRIGGER_STEP_IDS.map((stepId) =>
         workflowsManagement.management.searchStepExecutions(
           {
             workflowId,

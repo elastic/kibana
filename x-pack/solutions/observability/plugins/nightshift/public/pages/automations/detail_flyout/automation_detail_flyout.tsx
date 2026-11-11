@@ -61,6 +61,7 @@ import { toAutomationUpdateBody } from '../flyouts/form/to_automation_request';
 import { SectionHeader, FormSection } from '../flyouts/form/section_header';
 import {
   useAutomationRunsInRange,
+  useAutomationsRunCounts,
   useAutomationRunActivity,
   useToggleAutomation,
   useUpdateAutomation,
@@ -221,15 +222,19 @@ export const AutomationDetailFlyout = ({
     runRange.startedAfter,
     runRange.startedBefore
   );
-  const runs = (runsQuery.data?.runs ?? []) as Run[];
-  const skippedRuns = runs.filter(({ status }) => status === 'skipped').length;
-  const startedRuns = (runsQuery.data?.total ?? 0) - skippedRuns;
+  const runs = runsQuery.runs as Run[];
+  const runCounts = useAutomationsRunCounts(
+    [automation.id],
+    runRange.startedAfter,
+    runRange.startedBefore
+  )?.[automation.id] ?? { succeeded: 0, running: 0, failed: 0, skipped: 0 };
+  const startedRuns = runCounts.succeeded + runCounts.running + runCounts.failed;
   const dailyLimit = automation.runtime.dailyDispatchLimit;
   const currentIndex = automations.findIndex(({ id: rowId }) => rowId === automation.id);
   const isInList = currentIndex !== -1;
   const previous = isInList ? automations[currentIndex - 1] : undefined;
   const next = isInList ? automations[currentIndex + 1] : undefined;
-  const runCount = (status: Run['status']) => runs.filter((run) => run.status === status).length;
+  const runCount = (status: Run['status']) => runCounts[status];
   const runsTooltip = i18n.translate('xpack.nightshift.automations.detail.runsTooltip', {
     defaultMessage: '{counts} in {range}',
     values: {
@@ -580,6 +585,7 @@ export const AutomationDetailFlyout = ({
                     key={initialRunFilter}
                     initialFilter={initialRunFilter}
                     runs={runs}
+                    runCounts={runCounts}
                     isLoading={runsQuery.isLoading}
                     startedAfter={runRange.startedAfter}
                     startedBefore={runRange.startedBefore}
