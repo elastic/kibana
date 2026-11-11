@@ -14,6 +14,7 @@ import type {
 import type { ProposalsPluginSetup, ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
+import type { CPSServerSetup } from '@kbn/cps/server';
 import type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
@@ -94,6 +95,7 @@ export interface AlertZeroSetupDependencies {
   proposals?: ProposalsPluginSetup;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
   contextEngine?: ContextEnginePluginSetup;
+  cps?: CPSServerSetup;
 }
 
 export interface AlertZeroStartDependencies {
