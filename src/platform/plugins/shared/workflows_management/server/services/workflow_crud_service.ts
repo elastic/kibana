@@ -37,7 +37,11 @@ import {
 import { buildWorkflowFilters, GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 
-import { InvalidYamlSchemaError, WorkflowConflictError } from '@kbn/workflows-yaml';
+import {
+  InvalidYamlSchemaError,
+  parseYamlToJSONWithoutValidation,
+  WorkflowConflictError,
+} from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import type { WorkflowCrudDeps } from './types';
 import {
@@ -101,6 +105,7 @@ import { hasScheduledTriggers } from '../lib/schedule_utils';
 import { WorkflowHistoryEventNotFoundError } from '../lib/workflow_history_event_not_found_error';
 import { resolveUniqueWorkflowIds, validateWorkflowId } from '../lib/workflow_id_resolver';
 import { applyWorkflowVersion } from '../lib/workflow_version';
+import type { WorkflowPageTriggers } from '../pages/workflow_pages_system_client';
 import { workflowIndexName } from '../storage/workflow_storage';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 import { scheduleWorkflowTriggers } from '../task_defs/schedule_workflow_triggers';
@@ -156,6 +161,30 @@ export interface BulkCreateWorkflowsResult {
 
 type SuccessfullyWrittenBulkEntry = BulkWorkflowEntry & {
   workflowData: WorkflowProperties;
+};
+
+/**
+ * Reads the triggers of a workflow that failed validation, without the schema, so the page sync
+ * can retire a page whose trigger was removed in the same save. Undefined for a YAML syntax error:
+ * the parser recovers from it, so the trigger list it returns may be cut short.
+ */
+const parseLooseTriggers = (yaml: string): WorkflowPageTriggers | undefined => {
+  const parsed = parseYamlToJSONWithoutValidation(yaml);
+  if (
+    !parsed.success ||
+    parsed.document.errors.length > 0 ||
+    parsed.json == null ||
+    typeof parsed.json !== 'object'
+  ) {
+    return undefined;
+  }
+  const { triggers } = parsed.json as { triggers?: unknown };
+  return {
+    triggers: (Array.isArray(triggers) ? triggers : []).map((trigger) => ({
+      type: typeof trigger?.type === 'string' ? trigger.type : undefined,
+      id: typeof trigger?.id === 'string' ? trigger.id : undefined,
+    })),
+  };
 };
 
 export class WorkflowCrudService {
@@ -1344,7 +1373,7 @@ export class WorkflowCrudService {
             workflowId: id,
             workflowCreatedAt: current.created_at,
             spaceId,
-            definition: current.definition,
+            definition: current.valid ? current.definition : parseLooseTriggers(current.yaml),
             valid: current.valid,
           });
         } catch (error) {

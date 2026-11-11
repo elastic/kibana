@@ -12,7 +12,6 @@ import type { Logger, SavedObject, SavedObjectsClientContract } from '@kbn/core/
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { nodeBuilder } from '@kbn/es-query';
 import { getPageTriggerId, isPageTrigger } from '@kbn/workflows';
-import type { WorkflowYaml } from '@kbn/workflows';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { getWorkflowPageSavedObjectId, WORKFLOW_PAGE_SAVED_OBJECT_TYPE } from './page_saved_object';
 import type { WorkflowPageAttributes } from './page_saved_object';
@@ -24,11 +23,16 @@ import { getPageOrUndefined, isPageOnline, namespaceOf } from './utils';
 const FIND_WORKFLOW_IDS_PER_REQUEST = 1_000;
 const FIND_MAX_PAGES = 10_000;
 
+/** The triggers that sync reads. A valid `WorkflowYaml` fits, and so do loosely parsed triggers. */
+export interface WorkflowPageTriggers {
+  triggers?: ReadonlyArray<{ type?: string; id?: string }>;
+}
+
 /** The page ids a definition asks for. Global workflows never get a page. */
-const getWantedPageIds = (spaceId: string, definition: WorkflowYaml | null | undefined) =>
+const getWantedPageIds = (spaceId: string, definition: WorkflowPageTriggers) =>
   spaceId === GLOBAL_WORKFLOW_SPACE_ID
     ? new Set<string>()
-    : new Set((definition?.triggers ?? []).filter(isPageTrigger).map(getPageTriggerId));
+    : new Set((definition.triggers ?? []).filter(isPageTrigger).map(getPageTriggerId));
 
 /** Page operations that run without a user. Only workflows internals get this client. */
 export interface WorkflowPagesSystemClient {
@@ -36,14 +40,15 @@ export interface WorkflowPagesSystemClient {
    * Makes the stored pages match the page triggers of a saved definition.
    * Creates a page for a new trigger: enabled, but offline until it gets an access level.
    * Retires the pages of removed triggers, so a trigger added back gets a new secret.
-   * Skips invalid definitions: a save with a typo must not retire a working link.
+   * An invalid save passes the triggers of its loosely parsed YAML: it only retires, and a page
+   * whose trigger is still there keeps its secret. Without a definition, nothing changes.
    */
   syncWorkflowPages(params: {
     workflowId: string;
     /** The workflow's `created_at`. Pages of an earlier workflow with the same id are retired. */
     workflowCreatedAt: string;
     spaceId: string;
-    definition: WorkflowYaml | null | undefined;
+    definition: WorkflowPageTriggers | null | undefined;
     valid: boolean;
   }): Promise<void>;
   /** Deletes every page of the given workflows. Workflow deletes call it. */
@@ -77,7 +82,7 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
     definition,
     valid,
   }: Parameters<WorkflowPagesSystemClient['syncWorkflowPages']>[0]): Promise<void> {
-    if (!valid) {
+    if (!definition) {
       return;
     }
     const wanted = getWantedPageIds(spaceId, definition);
@@ -94,7 +99,7 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
       existing.filter(isCurrent).map(({ attributes }) => attributes.pageId)
     );
     const toCreate = [...wanted].filter((pageId) => !existingIds.has(pageId));
-    if (toCreate.length === 0) {
+    if (!valid || toCreate.length === 0) {
       return;
     }
     if (!this.deps.canEncrypt) {

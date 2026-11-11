@@ -4786,6 +4786,33 @@ describe('workflow page lifecycle', () => {
     );
   });
 
+  it.each([
+    [
+      'the triggers of an invalid save, read without the schema',
+      ['name: Broken', 'triggers:', '  - type: manual', 'steps: 1'].join('\n'),
+      { triggers: [{ type: 'manual', id: undefined }] },
+    ],
+    [
+      'no definition for a YAML syntax error',
+      ['triggers:', '  - type: page', 'steps: [unclosed'].join('\n'),
+      undefined,
+    ],
+  ])('passes %s', async (_, yaml, definition) => {
+    const { service, client, pagesService, request } = setup();
+    const stored = storeWrites(client);
+    client.index.mockImplementation(async ({ id, document }) => {
+      // The stored state of an invalid save: no definition, and the YAML as written.
+      stored.set(id, { ...document, valid: false, definition: null, yaml });
+      return { result: 'created', _seq_no: 1, _primary_term: 1 };
+    });
+
+    await service.createWorkflow({ yaml: pageYaml }, 'default', request);
+
+    expect(pagesService.syncWorkflowPages).toHaveBeenCalledWith(
+      expect.objectContaining({ valid: false, definition })
+    );
+  });
+
   it('skips the page sync when the workflow is gone by then', async () => {
     const { service, client, pagesService, request } = setup();
     client.search.mockResolvedValue({ hits: { hits: [] } });

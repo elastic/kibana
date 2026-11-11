@@ -106,19 +106,54 @@ describe('WorkflowPagesSystemClient', () => {
       expect(storedPage({ ...ref, pageId: 'intake' })).toBeDefined();
     });
 
-    it('leaves the page alone when the saved definition is invalid', async () => {
-      const { client, storedPage, sync } = setup();
-      await sync(pageDefinition());
+    describe('with an invalid save', () => {
+      const syncInvalid = (
+        client: WorkflowPagesSystemClientImpl,
+        definition: WorkflowYaml | null
+      ) =>
+        client.syncWorkflowPages({
+          workflowId: ref.workflowId,
+          workflowCreatedAt: WORKFLOW_CREATED_AT,
+          spaceId: ref.spaceId,
+          definition,
+          valid: false,
+        });
 
-      await client.syncWorkflowPages({
-        workflowId: ref.workflowId,
-        workflowCreatedAt: WORKFLOW_CREATED_AT,
-        spaceId: ref.spaceId,
-        definition: null,
-        valid: false,
+      it('keeps the page and its secret while the trigger is still there', async () => {
+        const { client, storedPage, sync } = setup();
+        await sync(pageDefinition());
+        const { secretHash } = storedPage()?.attributes ?? {};
+
+        await syncInvalid(client, pageDefinition());
+
+        expect(storedPage()?.attributes.secretHash).toBe(secretHash);
       });
 
-      expect(storedPage()).toBeDefined();
+      it('retires the page when the trigger is gone', async () => {
+        const { client, storedPage, sync } = setup();
+        await sync(pageDefinition());
+
+        await syncInvalid(client, noPageDefinition);
+
+        expect(storedPage()).toBeUndefined();
+      });
+
+      it('changes nothing when the YAML did not parse', async () => {
+        const { client, storedPage, sync } = setup();
+        await sync(pageDefinition());
+
+        await syncInvalid(client, null);
+
+        expect(storedPage()).toBeDefined();
+      });
+
+      it('never creates a page', async () => {
+        const { client, storedPage } = setup();
+
+        await syncInvalid(client, pageDefinition());
+
+        expect(storedPage()).toBeUndefined();
+      });
     });
 
     it('never gives a global workflow a page', async () => {
