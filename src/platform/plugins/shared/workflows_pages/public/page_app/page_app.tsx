@@ -86,12 +86,17 @@ export const PageApp = ({ http, page }: { http: HttpSetup; page: PageRef | undef
     [http, page]
   );
 
+  // Centers the panel vertically. A form taller than the screen grows the page instead.
   const pageCss = css`
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     padding: ${euiTheme.size.xxl} ${euiTheme.size.base};
     background: ${euiTheme.colors.backgroundBasePlain};
   `;
   const panelCss = css`
+    width: 100%;
     max-width: 640px;
     margin: 0 auto;
   `;
@@ -119,7 +124,7 @@ export const PageApp = ({ http, page }: { http: HttpSetup; page: PageRef | undef
     content = (
       <EuiEmptyPrompt
         iconType="checkCircleFill"
-        color="success"
+        iconColor="success"
         title={
           <h2>
             {i18n.translate('workflows.pages.submitted', {
@@ -142,7 +147,7 @@ export const PageApp = ({ http, page }: { http: HttpSetup; page: PageRef | undef
 
   return (
     <div css={pageCss}>
-      <EuiPanel css={panelCss} paddingSize="xl" hasBorder>
+      <EuiPanel css={panelCss} paddingSize="xl" hasBorder grow={false}>
         {content}
       </EuiPanel>
     </div>
