@@ -1577,6 +1577,8 @@
       "@kbn/generate-console-definitions/*": ["./packages/kbn-generate-console-definitions/*"],
       "@kbn/generate-csv": ["./src/platform/packages/private/kbn-generate-csv"],
       "@kbn/generate-csv/*": ["./src/platform/packages/private/kbn-generate-csv/*"],
+      "@kbn/geo-precision": ["./src/platform/packages/private/geo/kbn-geo-precision"],
+      "@kbn/geo-precision/*": ["./src/platform/packages/private/geo/kbn-geo-precision/*"],
       "@kbn/get-repo-files": ["./src/platform/packages/private/kbn-get-repo-files"],
       "@kbn/get-repo-files/*": ["./src/platform/packages/private/kbn-get-repo-files/*"],
       "@kbn/global-redirect-app-links": ["./src/platform/packages/private/kbn-global-redirect-app-links"],

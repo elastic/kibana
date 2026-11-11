@@ -41633,7 +41633,6 @@
     "xpack.maps.source.esGrid.highLabel": "alta",
     "xpack.maps.source.esGrid.lowLabel": "baixo",
     "xpack.maps.source.esGrid.metricsLabel": "Métricas",
-    "xpack.maps.source.esGrid.resolutionParamErrorMessage": "Parâmetro de resolução da grade não reconhecido: {resolution}",
     "xpack.maps.source.esGrid.superFineHelpText": "A alta resolução utiliza mosaicos vetoriais.",
     "xpack.maps.source.esGrid.vectorTileModal.cancelBtnLabel": "Cancelar",
     "xpack.maps.source.esGrid.vectorTileModal.confirmBtnLabel": "Aceitar",

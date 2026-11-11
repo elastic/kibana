@@ -41600,7 +41600,6 @@
     "xpack.maps.source.esGrid.highLabel": "高",
     "xpack.maps.source.esGrid.lowLabel": "低",
     "xpack.maps.source.esGrid.metricsLabel": "指标",
-    "xpack.maps.source.esGrid.resolutionParamErrorMessage": "无法识别网格分辨率参数：{resolution}",
     "xpack.maps.source.esGrid.superFineHelpText": "高分辨率使用矢量磁贴。",
     "xpack.maps.source.esGrid.vectorTileModal.cancelBtnLabel": "取消",
     "xpack.maps.source.esGrid.vectorTileModal.confirmBtnLabel": "接受",
