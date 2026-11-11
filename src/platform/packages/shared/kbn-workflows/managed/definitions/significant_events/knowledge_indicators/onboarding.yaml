@@ -39,10 +39,6 @@ triggers:
         type: string
         required: true
         description: "Type of the target source."
-      - name: metricsEntitiesEnabled
-        type: boolean
-        default: false
-        description: "Run deterministic entity extraction for a metrics source."
       - name: skipFeatures
         type: boolean
         default: false
@@ -180,7 +176,7 @@ steps:
 
   - name: run_metrics_source_onboarding
     type: if
-    condition: '${{ inputs.sourceType == "metrics" and inputs.metricsEntitiesEnabled == true }}'
+    condition: '${{ inputs.sourceType == "metrics" }}'
     steps:
       - name: run_metrics_entities
         type: kibana.request
@@ -216,7 +212,6 @@ steps:
     type: if
     condition: >-
       ${{ inputs.sourceType != "metrics"
-        or inputs.metricsEntitiesEnabled != true
         or variables.metricsEntitiesHandled == false }}
     steps:
       - name: check_should_identify

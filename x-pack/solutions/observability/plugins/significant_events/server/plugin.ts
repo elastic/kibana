@@ -404,8 +404,7 @@ export class SignificantEventsPlugin
       async (request) => {
         const [, pluginsStart] = await core.getStartServices();
         return pluginsStart.nightshiftSources.getSourcesClient({ request });
-      },
-      core.getStartServices().then(([coreStart]) => coreStart.featureFlags)
+      }
     );
     const streamsKIsOnboardingClient = workflowClients.streamsKIsOnboardingClient;
     this.streamsKIsOnboardingClient = streamsKIsOnboardingClient;

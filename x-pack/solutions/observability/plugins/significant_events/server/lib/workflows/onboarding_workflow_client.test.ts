@@ -47,10 +47,7 @@ const onboardingKeyOf = (sourceId: string): string =>
 
 const createClient = (
   overrides: Record<string, jest.Mock> = {},
-  {
-    metricsEntitiesEnabled = false,
-    sourceType = 'logs',
-  }: { metricsEntitiesEnabled?: boolean; sourceType?: 'logs' | 'metrics' } = {}
+  { sourceType = 'logs' }: { sourceType?: 'logs' | 'metrics' } = {}
 ) => {
   const managementApi = createMockManagementApi(overrides);
   const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
@@ -64,14 +61,10 @@ const createClient = (
     },
   }));
   const getSourcesClient = jest.fn().mockResolvedValue({ get: sourcesClientGet });
-  const featureFlags = {
-    getBooleanValue: jest.fn(async () => metricsEntitiesEnabled),
-  } as never;
   const client = new SignificantEventsKIsOnboardingClient({
     managementApi: managementApi as never,
     telemetry,
     getSourcesClient,
-    featureFlags,
   });
   return { client, managementApi, telemetry };
 };
@@ -205,17 +198,13 @@ describe('SignificantEventsKIsOnboardingClient', () => {
           sourceSlug: slugOf('logs.nginx'),
           sourceRevision: 'revision-2',
           sourceType: 'logs',
-          metricsEntitiesEnabled: false,
         }),
         request
       );
     });
 
-    it('passes the source type and metrics entity flag to the workflow', async () => {
-      const { client, managementApi } = createClient(
-        {},
-        { metricsEntitiesEnabled: true, sourceType: 'metrics' }
-      );
+    it('passes the metrics source type to the workflow', async () => {
+      const { client, managementApi } = createClient({}, { sourceType: 'metrics' });
       const request = httpServerMock.createKibanaRequest();
 
       await client.run({
@@ -232,7 +221,6 @@ describe('SignificantEventsKIsOnboardingClient', () => {
         'default',
         expect.objectContaining({
           sourceType: 'metrics',
-          metricsEntitiesEnabled: true,
         }),
         request
       );

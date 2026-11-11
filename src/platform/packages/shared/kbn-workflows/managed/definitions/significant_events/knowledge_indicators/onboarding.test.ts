@@ -31,11 +31,9 @@ const conditionMatches = (
   step: WorkflowStep | undefined,
   {
     sourceType,
-    metricsEntitiesEnabled,
     metricsEntitiesHandled,
   }: {
     sourceType: string;
-    metricsEntitiesEnabled: boolean;
     metricsEntitiesHandled: boolean;
   }
 ): boolean => {
@@ -43,7 +41,7 @@ const conditionMatches = (
   const expression = step?.condition?.slice(3, -2).trim() ?? '';
   return Boolean(
     createWorkflowLiquidEngine().evalValueSync(expression, {
-      inputs: { sourceType, metricsEntitiesEnabled },
+      inputs: { sourceType },
       variables: { metricsEntitiesHandled },
     })
   );
@@ -52,7 +50,6 @@ const conditionMatches = (
 const sourceSteps = (metricsEntitiesHandled: boolean): WorkflowStep[] =>
   conditionMatches(sourceBranch, {
     sourceType: 'metrics',
-    metricsEntitiesEnabled: true,
     metricsEntitiesHandled,
   })
     ? sourceBranch?.steps ?? []
@@ -97,7 +94,6 @@ describe('KI onboarding workflow metrics branch', () => {
     expect(
       conditionMatches(metricsBranch, {
         sourceType: 'metrics',
-        metricsEntitiesEnabled: true,
         metricsEntitiesHandled: true,
       })
     ).toBe(true);

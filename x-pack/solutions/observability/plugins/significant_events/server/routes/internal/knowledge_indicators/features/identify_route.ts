@@ -6,7 +6,6 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { notFound } from '@hapi/boom';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { resolveNightshiftModelForRequest, type InferenceDocument } from '@kbn/nightshift-ai';
 import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
@@ -35,7 +34,6 @@ import { stateBlocksNewActivity } from '../../../../../common/maintenance/state_
 import { sourceToAnalysisTarget } from '../../../../lib/significant_events/source_to_analysis_target';
 import { installFeatureIdentificationAgent } from '../../../../agent_builder/agents/feature_identification';
 import { createSignificantEventsAvailability } from '../../../../agent_builder/tools/significant_events_availability';
-import { isMetricsEntitiesEnabled } from '../../../../lib/feature_flags/is_metrics_entities_enabled';
 import { identifyMetricsEntities } from '../../../../lib/significant_events/metrics/identify_metrics_entities';
 
 const getSerializedByteLength = (value: unknown) =>
@@ -413,24 +411,12 @@ const identifyMetricsEntitiesRoute = createServerRoute({
       path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
     })
   ),
-  handler: async ({
-    params,
-    request,
-    context,
-    getScopedClients,
-    server,
-    logger,
-    maintenanceService,
-  }) => {
+  handler: async ({ params, request, getScopedClients, server, logger, maintenanceService }) => {
     const scopedClients = await getScopedClients({ request });
     const { streamDataEsClient, sourcesClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
-    const { featureFlags } = await context.core;
-    if (!(await isMetricsEntitiesEnabled(featureFlags))) {
-      throw notFound();
-    }
 
     const { sourceId } = params.path;
     const routeLogger = logger.get('features_identification', 'metrics_entities', sourceId);
