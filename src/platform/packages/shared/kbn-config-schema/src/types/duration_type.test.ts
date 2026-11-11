@@ -208,3 +208,43 @@ test('returns error when not valid string or non-safe positive integer', () => {
     `"Failed to parse value as time value. Value must be a duration in milliseconds, or follow the format <count>[ms|s|m|h|d|w|M|y] (e.g. '70ms', '5s', '3d', '1y', '1m30s'), where the duration is a safe positive integer."`
   );
 });
+
+describe('#maxLength', () => {
+  test('accepts a string within the limit', () => {
+    expect(duration({ maxLength: 4 }).validate('30s')).toEqual(momentDuration(30000));
+    expect(duration({ maxLength: 3 }).validate('30s')).toEqual(momentDuration(30000));
+  });
+
+  test('rejects a string over the limit without parsing it', () => {
+    expect(() => duration({ maxLength: 3 }).validate('100s')).toThrowErrorMatchingInlineSnapshot(
+      `"Value must be a string of at most [3] characters"`
+    );
+  });
+
+  test('does not echo the rejected value in the error', () => {
+    const value = `${'0s'.repeat(1000)}`;
+    expect(() => duration({ maxLength: 32 }).validate(value)).toThrow(
+      'Value must be a string of at most [32] characters'
+    );
+    expect(() => duration({ maxLength: 32 }).validate(value)).not.toThrow(value);
+  });
+
+  test('rejects a long repeated-unit string quickly instead of recursing through it', () => {
+    const value = '0s'.repeat(500_000);
+    const start = Date.now();
+    expect(() => duration({ maxLength: 32 }).validate(value)).toThrow(/at most \[32\]/);
+    expect(Date.now() - start).toBeLessThan(500);
+  });
+
+  test('does not limit numbers', () => {
+    expect(duration({ maxLength: 1 }).validate(123000)).toEqual(momentDuration(123000));
+  });
+
+  test('works together with min, max and a default value', () => {
+    const type = duration({ maxLength: 4, min: '1s', max: '1m', defaultValue: '5s' });
+    expect(type.validate(undefined)).toEqual(momentDuration(5000));
+    expect(type.validate('30s')).toEqual(momentDuration(30000));
+    expect(() => type.validate('2m')).toThrow(/equal to or less than/);
+    expect(() => type.validate('1m30s')).toThrow(/at most \[4\]/);
+  });
+});

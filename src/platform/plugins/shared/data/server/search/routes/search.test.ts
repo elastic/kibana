@@ -165,6 +165,11 @@ describe('Search service', () => {
     it.each([['banana'], ['-1s'], [{}]])('rejects %p', (pollLength) => {
       expect(() => getBodySchema().validate({ pollLength })).toThrow();
     });
+
+    it('rejects a long string before parsing it', () => {
+      const pollLength = '0s'.repeat(100_000);
+      expect(() => getBodySchema().validate({ pollLength })).toThrow(/at most \[32\] characters/);
+    });
   });
 
   it('handler returns an error response if the search throws a painless error', async () => {

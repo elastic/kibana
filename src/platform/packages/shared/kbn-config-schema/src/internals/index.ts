@@ -134,7 +134,15 @@ export const internals: JoiRoot = Joi.extend(
   },
   {
     type: 'duration',
-    coerce(value, { error }) {
+    coerce(value, { error, schema }) {
+      // the string parser is recursive, so reject over-long input before parsing it
+      const maxLength = schema.$_getFlag('maxLength');
+      if (typeof value === 'string' && maxLength !== undefined && value.length > maxLength) {
+        return {
+          errors: [error('duration.maxLength', { limit: maxLength })],
+        };
+      }
+
       try {
         if (typeof value === 'string' || typeof value === 'number') {
           return { value: ensureDuration(value) };
@@ -155,6 +163,11 @@ export const internals: JoiRoot = Joi.extend(
       return { value };
     },
     rules: {
+      maxLength: {
+        method(limit: number) {
+          return this.$_setFlag('maxLength', limit);
+        },
+      },
       min: {
         args: [
           {

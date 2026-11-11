@@ -19,6 +19,8 @@ declare module 'joi' {
   }
 
   interface DurationSchema extends AnySchema {
+    maxLength(limit: number): this;
+
     min(limit: DurationValueType): this;
 
     max(limit: DurationValueType): this;
