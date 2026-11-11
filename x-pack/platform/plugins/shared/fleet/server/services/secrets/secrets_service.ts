@@ -97,14 +97,16 @@ const deleteSecret = async (
 
     return { deleted, confirmed: deleted };
   } catch (err) {
+    // A retried attempt, by Fleet or by the Elasticsearch client itself, may have deleted the secret before failing.
+    const retried = attempts > 1 || (isESClientError(err) && (err.meta.meta?.attempts ?? 0) > 0);
+
     if (isESClientError(err) && err.meta.statusCode === 404) {
-      // A retried attempt, by Fleet or by the Elasticsearch client itself, may have deleted the secret before failing.
-      const retried = attempts > 1 || (err.meta.meta?.attempts ?? 0) > 0;
       return { deleted: retried, confirmed: false };
     }
 
-    // A network error, timeout or 5xx response does not tell whether Elasticsearch deleted the secret.
-    const rejectedByElasticsearch = isESClientError(err) && (err.meta.statusCode ?? 500) < 500;
+    // Only an Elasticsearch error response to the sole attempt proves the secret was not deleted.
+    const rejectedByElasticsearch =
+      !retried && isESClientError(err) && (err.meta.statusCode ?? 500) < 500;
     if (!rejectedByElasticsearch) {
       writeSecretDeletedAuditLog(id, { confirmed: false });
     }

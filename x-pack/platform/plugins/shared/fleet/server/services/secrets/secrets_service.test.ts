@@ -286,6 +286,23 @@ describe('createSecretsService', () => {
         })
       );
     });
+
+    it('fails and audits a possible deletion when Elasticsearch rejects a retried request', async () => {
+      esClientMock.transport.request
+        .mockRejectedValueOnce(new EsErrors.TimeoutError('Request timed out'))
+        .mockRejectedValueOnce(buildResponseError(429));
+
+      await expect(createService().deleteSecrets([SECRET_ID])).rejects.toThrow(
+        'Error deleting secrets'
+      );
+      expect(esClientMock.transport.request).toHaveBeenCalledTimes(2);
+      expect(mockContext.securitySetup.audit.withoutRequest.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: `secret possibly deleted: ${SECRET_ID}`,
+          event: expect.objectContaining({ action: 'secret_delete', outcome: 'unknown' }),
+        })
+      );
+    });
   });
 
   describe('createSecrets', () => {
