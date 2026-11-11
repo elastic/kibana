@@ -12,9 +12,11 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import {
   constructCascadeQuery,
+  escapeEsqlColumnName,
   escapeStringValue,
   extractCategorizeTokens,
   getCategorizeField,
+  prettifyQuery,
 } from '@kbn/esql-utils';
 
 const FALLBACK_DOC_LIMIT = 10000;
@@ -45,7 +47,8 @@ export const getMatchingResultsQuery = ({
       nodePathMap: { [patternColumn]: pattern },
     });
     if (matchingResultsQuery) {
-      return matchingResultsQuery;
+      // The cascade query is printed on a single line, wrap it like a query typed in the editor
+      return { esql: prettifyQuery(matchingResultsQuery.esql) };
     }
   } catch {
     // The STATS shape is not supported (e.g. CATEGORIZE over a function), use the index-only query below
@@ -59,7 +62,9 @@ export const getMatchingResultsQuery = ({
   }
 
   return {
-    esql: `FROM ${index}\n  | WHERE MATCH(${categoryField}, ${escapeStringValue(
+    esql: `FROM ${index}\n  | WHERE MATCH(${escapeEsqlColumnName(
+      categoryField
+    )}, ${escapeStringValue(
       tokens
     )}, {"auto_generate_synonyms_phrase_query": false, "fuzziness": 0, "operator": "AND"})\n  | LIMIT ${FALLBACK_DOC_LIMIT}`,
   };
