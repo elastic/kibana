@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
@@ -17,6 +17,8 @@ interface ConversationActionButtonProps {
   onSubmit: () => void;
   isSubmitDisabled: boolean;
   isSubmitting?: boolean;
+  /** Keep Submit next to Stop while a run streams, so a message can be sent to the running agent. */
+  showSubmitWhileRunning?: boolean;
 }
 
 const labels = {
@@ -32,6 +34,7 @@ export const ConversationActionButton: React.FC<ConversationActionButtonProps> =
   onSubmit,
   isSubmitDisabled,
   isSubmitting = false,
+  showSubmitWhileRunning = false,
 }) => {
   const { canCancel, cancel, isCancelling } = useConversationStream();
   const { euiTheme } = useEuiTheme();
@@ -40,7 +43,31 @@ export const ConversationActionButton: React.FC<ConversationActionButtonProps> =
     background-color: ${euiTheme.colors.backgroundLightText};
   `;
 
-  return canCancel ? (
+  const submitButton = (
+    <EuiToolTip content={labels.submit} disableScreenReaderOutput>
+      <EuiButtonIcon
+        aria-label={labels.submit}
+        data-test-subj="agentBuilderConversationInputSubmitButton"
+        iconType="sortUp"
+        display="fill"
+        size="s"
+        disabled={isSubmitDisabled}
+        isLoading={isSubmitting}
+        onClick={onSubmit}
+        {...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+          action: AGENT_BUILDER_UI_EBT.action.conversation.SUBMIT,
+          detail: 'conversation',
+        })}
+      />
+    </EuiToolTip>
+  );
+
+  if (!canCancel) {
+    return submitButton;
+  }
+
+  const cancelButton = (
     <EuiToolTip content={labels.cancel} disableScreenReaderOutput>
       <EuiButtonIcon
         aria-label={labels.cancel}
@@ -59,23 +86,14 @@ export const ConversationActionButton: React.FC<ConversationActionButtonProps> =
         })}
       />
     </EuiToolTip>
+  );
+
+  return showSubmitWhileRunning ? (
+    <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+      <EuiFlexItem grow={false}>{cancelButton}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{submitButton}</EuiFlexItem>
+    </EuiFlexGroup>
   ) : (
-    <EuiToolTip content={labels.submit} disableScreenReaderOutput>
-      <EuiButtonIcon
-        aria-label={labels.submit}
-        data-test-subj="agentBuilderConversationInputSubmitButton"
-        iconType="sortUp"
-        display="fill"
-        size="s"
-        disabled={isSubmitDisabled}
-        isLoading={isSubmitting}
-        onClick={onSubmit}
-        {...getEbtProps({
-          element: AGENT_BUILDER_UI_EBT.element.pageContent,
-          action: AGENT_BUILDER_UI_EBT.action.conversation.SUBMIT,
-          detail: 'conversation',
-        })}
-      />
-    </EuiToolTip>
+    cancelButton
   );
 };

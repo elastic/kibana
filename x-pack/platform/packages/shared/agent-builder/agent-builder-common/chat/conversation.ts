@@ -26,7 +26,7 @@ import type {
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type { ConversationAccessControl } from './access_control';
 import type { RoundState } from './round_state';
-import type { ActiveExecution, ConversationEvent } from './timeline_events';
+import type { ActiveExecution, ConversationEvent, EventActor } from './timeline_events';
 import type { ExecutionInterruption } from './events';
 import type { MetadataFieldValue } from '../templates';
 
@@ -113,6 +113,7 @@ export enum ConversationRoundStepType {
   subagentRosterUpdated = 'subagent_roster_updated',
   substitution = 'substitution',
   injectedContext = 'injected_context',
+  deliveredMessage = 'delivered_message',
 }
 
 // tool call step
@@ -329,6 +330,45 @@ export const isInjectedContextStep = (step: ConversationRoundStep): step is Inje
 /** Registration id of the skill pre-selection cycle hook; its `injected_context` steps carry it. */
 export const relevantSkillsHookId = 'relevant-skills';
 
+/**
+ * A steer (a `user_message` sent while this execution ran) that the run put in front of the model.
+ * The message text is copied because the model renderer and the client cannot look it up cheaply.
+ */
+export interface DeliveredMessageStepData {
+  /** The stamped `user_message` event. */
+  event_id: string;
+  author: EventActor;
+  /** True when the author is the run owner, whose credentials the run uses. */
+  is_run_owner: boolean;
+  message: string;
+  /** When the run picked the message up (ISO). */
+  delivered_at: string;
+  /** The cycle at whose check the message was picked up. */
+  cycle: number;
+  /** The tool call group that preceded the pickup, for placement. */
+  tool_call_group_id?: string;
+  /** How many earlier executions read the same message without finishing. */
+  redelivered: number;
+}
+
+export type DeliveredMessageStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.deliveredMessage,
+  DeliveredMessageStepData
+>;
+
+export const createDeliveredMessageStep = (
+  data: DeliveredMessageStepData
+): DeliveredMessageStep => ({
+  type: ConversationRoundStepType.deliveredMessage,
+  ...data,
+});
+
+export const isDeliveredMessageStep = (
+  step: ConversationRoundStep
+): step is DeliveredMessageStep => {
+  return step.type === ConversationRoundStepType.deliveredMessage;
+};
+
 export type BackgroundAgentCompleteStep = ConversationRoundStepMixin<
   ConversationRoundStepType.backgroundAgentComplete,
   BackgroundExecutionState
@@ -450,7 +490,8 @@ export type ConversationRoundStep =
   | PreExecutionWorkflowStep
   | SubagentRosterUpdatedStep
   | SubstitutionStep
-  | InjectedContextStep;
+  | InjectedContextStep
+  | DeliveredMessageStep;
 
 /**
  * An entry in the active persistent-sub-agent roster.
@@ -757,6 +798,9 @@ export const DEFAULT_CONVERSATION_TITLE = 'New conversation';
 
 /** Maximum accepted length for a user chat message (`input` / `message`) */
 export const CHAT_MESSAGE_MAX_LENGTH = 100_000;
+
+/** Maximum accepted length for a steer: a message sent to a running agent (re-sent every cycle). */
+export const STEER_MESSAGE_MAX_LENGTH = 4_000;
 
 /** Maximum accepted length for a client-supplied conversation title */
 export const CONVERSATION_TITLE_MAX_LENGTH = 500;

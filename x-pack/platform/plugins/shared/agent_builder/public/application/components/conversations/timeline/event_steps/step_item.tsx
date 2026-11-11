@@ -13,6 +13,7 @@ import {
   isCompactionStep,
   isBackgroundAgentCompleteStep,
   isAskUserQuestionStep,
+  isDeliveredMessageStep,
 } from '@kbn/agent-builder-common/chat/conversation';
 import type {
   VersionedAttachment,
@@ -23,6 +24,7 @@ import { ToolCallStep } from './steps/tool_call_step';
 import { CompactionStep } from './steps/compaction_step';
 import { BackgroundAgentStep } from './steps/background_agent_step';
 import { AskUserQuestionStepEvent } from './steps/ask_user_question_step';
+import { DeliveredMessageStep } from './steps/delivered_message_step';
 
 interface StepItemProps {
   step: ConversationRoundStep;
@@ -62,6 +64,9 @@ export const StepItem: React.FC<StepItemProps> = ({
   }
   if (isAskUserQuestionStep(step)) {
     return <AskUserQuestionStepEvent step={step} />;
+  }
+  if (isDeliveredMessageStep(step)) {
+    return <DeliveredMessageStep step={step} />;
   }
   return null;
 };

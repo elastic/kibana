@@ -48,11 +48,19 @@ export interface AgentTurnItem {
   triggerAttachmentRefs?: AttachmentVersionRef[];
 }
 
+/**
+ * What happened to a message sent while the agent ran, derived from the document. A message the
+ * live or a finished run picked up renders as a step instead and has no state here.
+ */
+export type SteerState = 'waiting' | 'read_by_unfinished' | 'not_read' | 'before_pause';
+
 export interface UserMessageItem {
   kind: 'userMessage';
   key: string;
   event: UserMessageEvent;
   isPending?: boolean;
+  /** Set on a steer no finished run has read yet. */
+  steerState?: SteerState;
   /** Legacy refs, then the refs of the attachments sent with the message. */
   attachmentRefs?: AttachmentVersionRef[];
 }

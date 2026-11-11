@@ -13,9 +13,11 @@ import { EMPTY, mergeMap, of } from 'rxjs';
 import type { BackgroundAgentCompleteStep, ChatAgentEvent } from '@kbn/agent-builder-common/chat';
 import {
   ChatEventType,
+  createMessageDeliveredEvent,
   createSubstitutionAppliedEvent,
   isBackgroundAgentCompleteStep,
   isCompactionStep,
+  isDeliveredMessageStep,
   isReasoningStep,
   isSubagentRosterUpdatedStep,
   isSubstitutionStep,
@@ -162,7 +164,10 @@ export const convertGraphEvents = ({
         }
 
         // reset per-turn first-chunk tracker at the start of each research turn
-        if (matchEvent(event, 'on_chain_start') && matchName(event, steps.researchAgent)) {
+        if (
+          matchEvent(event, 'on_chain_start') &&
+          (matchName(event, steps.researchAgent) || matchName(event, steps.forcedAnswer))
+        ) {
           // reset per-turn first-chunk tracker at the start of each research turn
           currentTurnFirstChunkAt = undefined;
           // reset message id between research turns
@@ -189,8 +194,12 @@ export const convertGraphEvents = ({
           }
         }
 
-        // emit reasoning and tool call events for research agent turns
-        if (isRootGraphNodeEnd(event, graphName) && matchName(event, steps.researchAgent)) {
+        // emit reasoning and tool call events for research agent turns (a forced answer is a
+        // research turn with no tool calls)
+        if (
+          isRootGraphNodeEnd(event, graphName) &&
+          (matchName(event, steps.researchAgent) || matchName(event, steps.forcedAnswer))
+        ) {
           const output = event.data.output as ResearchNodeOutput;
           const events: ChatAgentEvent[] = stepUpdatesToEvents(
             output.steps ?? [],
@@ -309,6 +318,9 @@ export const convertGraphEvents = ({
           for (const update of output.steps ?? []) {
             if (update.type === 'append' && isBackgroundAgentCompleteStep(update.step)) {
               bgEvents.push(createBackgroundAgentCompleteEvent(stripStepType(update.step)));
+            } else if (update.type === 'append' && isDeliveredMessageStep(update.step)) {
+              const { type, ...data } = update.step;
+              bgEvents.push(createMessageDeliveredEvent(data));
             }
           }
 

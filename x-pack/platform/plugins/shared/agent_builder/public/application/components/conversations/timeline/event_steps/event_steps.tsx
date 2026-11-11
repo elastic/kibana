@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common/chat/conversation';
 import {
   isBackgroundAgentCompleteStep,
+  isDeliveredMessageStep,
   isToolCallStep,
 } from '@kbn/agent-builder-common/chat/conversation';
 import type {
@@ -76,5 +77,6 @@ export const EventSteps: React.FC<EventStepsProps> = ({
 const getStepKey = (step: ConversationRoundStep, index: number): string => {
   if (isToolCallStep(step)) return `tool-${step.tool_call_id}`;
   if (isBackgroundAgentCompleteStep(step)) return `bg-${step.execution_id}`;
+  if (isDeliveredMessageStep(step)) return `steer-${step.event_id}`;
   return `step-${index}-${step.type}`;
 };

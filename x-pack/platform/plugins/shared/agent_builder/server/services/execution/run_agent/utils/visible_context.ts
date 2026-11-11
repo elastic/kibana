@@ -35,6 +35,7 @@ import {
   roundOutcomeMessage,
   roundOutcomeNotice,
 } from './to_langchain_messages';
+import { isInterruptedRound } from './context_timeline';
 import {
   createPreExecutionWorkflowContextMessage,
   renderCurrentRun,
@@ -192,6 +193,7 @@ export const renderUnit = async (
       steps: unitSteps(unit, run.steps),
       resultTransformer: view.historyTransformer(round.id),
       attachments: { placement, notices },
+      interrupted: isInterruptedRound(round),
     })),
     ...(unit.last ? [roundOutcomeMessage(round), ...roundOutcomeNotice(placement, notices)] : []),
   ];

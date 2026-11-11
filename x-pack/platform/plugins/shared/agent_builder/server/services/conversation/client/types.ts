@@ -18,6 +18,7 @@ import type {
   RelevantSkillsStep,
   PreExecutionWorkflowStep,
   SubagentRosterUpdatedStep,
+  DeliveredMessageStep,
   ConversationRoundStepType,
   Conversation,
 } from '@kbn/agent-builder-common/chat/conversation';
@@ -31,6 +32,7 @@ import type { AgentNodeState } from '@kbn/agent-builder-common/chat/round_state'
 import type {
   ConversationEvent,
   ConversationWriteSource,
+  EventActor,
   TimelineEvent,
   UserIdAndName,
 } from '@kbn/agent-builder-common';
@@ -129,6 +131,32 @@ export interface AppendEventsRequest {
   consumeBackgroundExecution?: string;
 }
 
+/** Stores a message for the execution that holds the conversation lock to read at its next check. */
+export interface AppendSteerRequest {
+  /** Conversation to steer. */
+  id: string;
+  message: string;
+  /** Client-generated id, so a retry after a lost response stores nothing twice. */
+  eventId: string;
+  actor: EventActor;
+}
+
+export interface AppendSteerResult {
+  eventId: string;
+  /** The lock holder the message was stamped with. */
+  executionId: string;
+  createdAt: string;
+  /** True when an earlier request already stored this `eventId`. */
+  alreadyStored: boolean;
+}
+
+/** The conversation with the version of the document it was read from. */
+export interface ConversationWithVersion {
+  conversation: Conversation;
+  seqNo: number;
+  primaryTerm: number;
+}
+
 export interface ReplaceRoundEventsRequest {
   /** Conversation to update. */
   id: string;
@@ -198,7 +226,8 @@ export type PersistentConversationRoundStep =
   | PreExecutionWorkflowStep
   | SubagentRosterUpdatedStep
   | SubstitutionStep
-  | InjectedContextStep;
+  | InjectedContextStep
+  | DeliveredMessageStep;
 
 /**
  * Legacy fields that may exist in old persisted documents.

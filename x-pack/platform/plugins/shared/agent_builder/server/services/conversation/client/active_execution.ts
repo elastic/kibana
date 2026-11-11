@@ -28,7 +28,6 @@ import type {
 export class ConversationBusySignal {
   constructor(public readonly activeExecutionId: string) {}
 }
-
 export const isAcquireActiveExecution = (
   update?: ActiveExecutionUpdate
 ): update is AcquireActiveExecution => update?.action === 'acquire';

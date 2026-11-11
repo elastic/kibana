@@ -25,6 +25,7 @@ export {
 export {
   DEFAULT_CONVERSATION_TITLE,
   CHAT_MESSAGE_MAX_LENGTH,
+  STEER_MESSAGE_MAX_LENGTH,
   CONVERSATION_TITLE_MAX_LENGTH,
   CONVERSATION_ID_MAX_LENGTH,
   USER_MESSAGE_AUTHOR_NAME_MAX_LENGTH,
@@ -120,7 +121,17 @@ export {
   createInjectedContextStep,
   isInjectedContextStep,
   relevantSkillsHookId,
+  type DeliveredMessageStep,
+  type DeliveredMessageStepData,
+  createDeliveredMessageStep,
+  isDeliveredMessageStep,
 } from './conversation';
+export {
+  settledMessageIds,
+  pendingSteers,
+  pendingSteersFor,
+  unfinishedReadCount,
+} from './steering';
 export {
   ChatEventType,
   type ChatEventBase,
@@ -191,6 +202,10 @@ export {
   type BackgroundAgentCompleteEvent,
   type BackgroundAgentCompleteEventData,
   isBackgroundAgentCompleteEvent,
+  type MessageDeliveredEvent,
+  type MessageDeliveredEventData,
+  createMessageDeliveredEvent,
+  isMessageDeliveredEvent,
   type SubagentRosterUpdatedEvent,
   type SubagentRosterUpdatedEventData,
   createSubagentRosterUpdatedEvent,
@@ -280,6 +295,7 @@ export {
   type AttachmentTimelineEvent,
   isAttachmentEvent,
   isUserMessageEvent,
+  isSteerMessageEvent,
   isMessageEvent,
   ConversationActivityEventType,
   type ConversationCreatedActivityEventData,

@@ -57,6 +57,35 @@ export interface MarkPinnedConversationResponse {
 
 export type CreateConversationResponse = ConversationWithPermissions;
 
+/** A message for the agent that currently runs on the conversation (internal `_steer` route). */
+export interface SteerConversationRequestBody {
+  message: string;
+  /** Client-generated id: a retry after a lost response stores nothing twice. */
+  event_id: string;
+}
+
+export interface SteerConversationResponse {
+  event_id: string;
+  /** The execution the message was stamped with. */
+  execution_id: string;
+  created_at: string;
+  /** Present and true when an earlier request already stored this `event_id`. */
+  already_stored?: boolean;
+}
+
+export type SteerConversationErrorCode =
+  | 'not_steerable'
+  | 'awaiting_prompt'
+  | 'no_active_execution'
+  | 'too_many_pending';
+
+/** The body of a `409` / `429` refusal from the `_steer` route. */
+export interface SteerConversationErrorBody {
+  error: SteerConversationErrorCode;
+  /** On `no_active_execution`: whether the steer was stored by an earlier request. */
+  already_stored?: boolean;
+}
+
 export interface UpdateConversationAccessControlRequestBody {
   access_mode: ConversationAccessControlMode;
   entries: ConversationAccessControlEntryInput[];

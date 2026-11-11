@@ -29,6 +29,7 @@ import {
   isExecutionTerminatedEvent,
   isMessageChunkEvent,
   isMessageCompleteEvent,
+  isMessageDeliveredEvent,
   isPromptRequestEvent,
   isReasoningEvent,
   isSubstitutionAppliedEvent,
@@ -41,6 +42,7 @@ import {
   parseExecutionId,
 } from '@kbn/agent-builder-common';
 import {
+  createDeliveredMessageStep,
   createReasoningStep,
   createSubstitutionStep,
   createToolCallStep,
@@ -379,5 +381,8 @@ export const sseToEvents = (state: LiveEventsState, event: ChatEvent): LiveEvent
     return withAppendedStep(state, step);
   }
 
+  if (isMessageDeliveredEvent(event)) {
+    return withAppendedStep(state, createDeliveredMessageStep(event.data));
+  }
   return state;
 };

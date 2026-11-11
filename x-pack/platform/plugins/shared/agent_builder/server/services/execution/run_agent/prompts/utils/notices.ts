@@ -23,7 +23,12 @@ import { ExecutionStatus } from '@kbn/agent-builder-common';
 import { generateXmlTree } from '@kbn/agent-builder-genai-utils/tools/utils/formatting';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
-import type { BackgroundExecutionState, SubagentRosterEntry } from '@kbn/agent-builder-common/chat';
+import {
+  getEventActorDisplayName,
+  type BackgroundExecutionState,
+  type DeliveredMessageStep,
+  type SubagentRosterEntry,
+} from '@kbn/agent-builder-common/chat';
 import type { HandoverParams } from '../types';
 
 export const createCycleLimitSystemMessage = (cycle: number): BaseMessage => {
@@ -238,6 +243,53 @@ export const describeFinishedExecution = ({
   }
   return header;
 };
+
+/**
+ * A message the user sent while the run worked, as the model sees it: the text with a factual
+ * notice of who sent it and when it arrived. No instruction on what to do with it.
+ */
+export const formatDeliveredMessageNotice = (step: DeliveredMessageStep): string => {
+  const who = step.is_run_owner
+    ? 'the user who started this run'
+    : `another participant (${getEventActorDisplayName(step.author)})`;
+  const arrival = step.tool_call_group_id
+    ? `after the tool calls that just returned, at cycle ${step.cycle}`
+    : `before the first model call of this run`;
+  return generateXmlTree({
+    tagName: 'system_notice',
+    children: [
+      {
+        tagName: 'message',
+        children: [`A message from ${who} arrived during this run, ${arrival}.`],
+      },
+      ...(step.redelivered > 0
+        ? [
+            {
+              tagName: 'redelivered',
+              children: [
+                `This message was already read by ${step.redelivered} earlier run(s) that did not finish.`,
+              ],
+            },
+          ]
+        : []),
+      { tagName: 'user_message', children: [step.message] },
+    ],
+  });
+};
+
+/** The reference rendered for a steer read by an earlier run that did not finish; the text comes with the current pickup. */
+export const formatDeliveredMessageReference = (step: DeliveredMessageStep): string =>
+  generateXmlTree({
+    tagName: 'system_notice',
+    children: [
+      {
+        tagName: 'message',
+        children: [
+          `A message from the user (id ${step.event_id}) was read here by a run that did not finish; it is delivered again in the current run.`,
+        ],
+      },
+    ],
+  });
 
 /**
  * A background sub-agent's report as a notice to the model, in one shape whether the parent was

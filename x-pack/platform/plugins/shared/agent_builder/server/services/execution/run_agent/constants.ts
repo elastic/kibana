@@ -10,6 +10,11 @@ import { internalTools } from '@kbn/agent-builder-common';
 // check for background executions and other background work every X agent cycles.
 export const BACKGROUND_CHECK_CYCLE_INTERVAL = 3;
 
+// Steers (messages sent to a running agent) are re-sent to the model every remaining cycle, so
+// the per-run cap times `STEER_MESSAGE_MAX_LENGTH` bounds the extra context per cycle.
+export const STEERS_PER_RUN_MAX = 5;
+export const STEERS_PER_CHECK_MAX = 5;
+
 // Context management triggers, relative to the connector's context window.
 export const INTRA_ROUND_COMPACTION_FRACTION = 0.8;
 export const INTRA_ROUND_SUBSTITUTION_FRACTION = 0.5;
@@ -50,6 +55,7 @@ export const steps = {
   handleToolInterrupt: 'handleToolInterrupt',
   prepareToAnswer: 'prepareToAnswer',
   answerAgent: 'answerAgent',
+  forcedAnswer: 'forcedAnswer',
   finalize: 'finalize',
 };
 

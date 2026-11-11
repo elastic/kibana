@@ -75,6 +75,9 @@ jest.mock('../../../context/conversation/conversation_context', () => ({
 jest.mock('../../../hooks/use_submit_message', () => ({
   useSubmitMessage: jest.fn(),
 }));
+jest.mock('../../../hooks/use_send_steer', () => ({
+  useSendSteer: () => ({ sendSteer: jest.fn().mockResolvedValue(true), isSending: false }),
+}));
 jest.mock('../../../hooks/use_send_user_message', () => ({
   useSendUserMessage: jest.fn(),
 }));

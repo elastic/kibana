@@ -18,6 +18,7 @@ import type {
 import {
   isAskUserQuestionStep,
   isBackgroundAgentCompleteStep,
+  isDeliveredMessageStep,
   isInjectedContextStep,
   isPreExecutionWorkflowStep,
   isReasoningStep,
@@ -37,6 +38,8 @@ import { generateXmlTree } from '@kbn/agent-builder-genai-utils/tools/utils/form
 import type { HandoverParams, PromptImageResolver } from '../prompts/types';
 import {
   createCycleLimitSystemMessage,
+  formatDeliveredMessageNotice,
+  formatDeliveredMessageReference,
   formatHandover,
   formatRetryNotice,
   formatSubagentRosterNotice,
@@ -91,6 +94,8 @@ interface HistoryRenderContext {
   type: 'history';
   resultTransformer?: ToolCallResultTransformer;
   stepAttachments?: StepAttachments;
+  /** True when the round's execution failed or was aborted: its steers are rendered as references. */
+  interrupted?: boolean;
 }
 
 interface CurrentRenderContext extends Omit<CurrentRunRenderOptions, 'range' | 'attachments'> {
@@ -430,6 +435,10 @@ const renderSteps = async (
   let groupIndex = 0;
   for (const [index, step] of steps.entries()) {
     if (index < start || index > end) {
+      // A steer is pinned: it is re-rendered verbatim even when a summary covers its cycle.
+      if (index < start && current && isDeliveredMessageStep(step)) {
+        messages.push(createUserMessage(formatDeliveredMessageNotice(step)));
+      }
       if (isToolCallStep(step) && groups[groupIndex]?.[0] === step) {
         groupIndex++;
       }
@@ -440,6 +449,15 @@ const renderSteps = async (
     }
     if (isBackgroundAgentCompleteStep(step)) {
       messages.push(createUserMessage(formatSystemNotice(step)));
+    } else if (isDeliveredMessageStep(step)) {
+      // The text is rendered once: here for the current run and for finished past runs; a run
+      // that did not finish leaves only a reference, the current pickup carries the text.
+      const interrupted = context.type === 'history' && context.interrupted === true;
+      messages.push(
+        createUserMessage(
+          interrupted ? formatDeliveredMessageReference(step) : formatDeliveredMessageNotice(step)
+        )
+      );
     } else if (isSubagentRosterUpdatedStep(step)) {
       messages.push(createUserMessage(formatSubagentRosterNotice(step.roster)));
     } else if (isRelevantSkillsStep(step)) {
@@ -492,12 +510,20 @@ export const renderHistorySteps = async ({
   steps,
   resultTransformer,
   attachments,
+  interrupted,
 }: {
   steps: ConversationRoundStep[];
   resultTransformer?: ToolCallResultTransformer;
   attachments?: StepAttachments;
+  /** True when the round's execution failed or was aborted. */
+  interrupted?: boolean;
 }): Promise<BaseMessage[]> =>
-  renderSteps(steps, { type: 'history', resultTransformer, stepAttachments: attachments });
+  renderSteps(steps, {
+    type: 'history',
+    resultTransformer,
+    stepAttachments: attachments,
+    interrupted,
+  });
 
 /** Renders the current run (or the `range` of its steps) to LangChain messages. */
 export const renderCurrentRun = async ({

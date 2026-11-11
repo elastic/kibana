@@ -28,6 +28,7 @@ import type {
   ConversationRoundStep,
   RoundInput,
   BackgroundExecutionState,
+  DeliveredMessageStepData,
   SubagentRosterEntry,
   SubstitutionStepData,
 } from './conversation';
@@ -62,6 +63,7 @@ export enum ChatEventType {
   compactionStarted = 'compaction_started',
   compactionCompleted = 'compaction_completed',
   backgroundAgentComplete = 'background_agent_complete',
+  messageDelivered = 'message_delivered',
   subagentRosterUpdated = 'subagent_roster_updated',
   userQuestionAsked = 'user_question_asked',
   userQuestionAnswered = 'user_question_answered',
@@ -553,6 +555,27 @@ export const isBackgroundAgentCompleteEvent = (
   return event.type === ChatEventType.backgroundAgentComplete;
 };
 
+/** A steer the running agent picked up; same payload as the `delivered_message` step. */
+export type MessageDeliveredEventData = DeliveredMessageStepData;
+
+export type MessageDeliveredEvent = ChatEventBase<
+  ChatEventType.messageDelivered,
+  MessageDeliveredEventData
+>;
+
+export const createMessageDeliveredEvent = (
+  data: MessageDeliveredEventData
+): MessageDeliveredEvent => ({
+  type: ChatEventType.messageDelivered,
+  data,
+});
+
+export const isMessageDeliveredEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is MessageDeliveredEvent => {
+  return event.type === ChatEventType.messageDelivered;
+};
+
 export interface SubagentRosterUpdatedEventData {
   /** Full active roster at time of emission. */
   roster: SubagentRosterEntry[];
@@ -644,6 +667,7 @@ export type ChatAgentEvent =
   | CompactionStartedEvent
   | CompactionCompletedEvent
   | BackgroundAgentCompleteEvent
+  | MessageDeliveredEvent
   | SubagentRosterUpdatedEvent
   | SubstitutionAppliedEvent
   | UserQuestionAskedEvent

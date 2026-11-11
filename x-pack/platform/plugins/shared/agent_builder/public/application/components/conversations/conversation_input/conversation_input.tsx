@@ -15,7 +15,7 @@ import {
   euiShadowHover,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { CHAT_MESSAGE_MAX_LENGTH } from '@kbn/agent-builder-common';
+import { CHAT_MESSAGE_MAX_LENGTH, STEER_MESSAGE_MAX_LENGTH } from '@kbn/agent-builder-common';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -34,6 +34,7 @@ import { useInputDraft } from '../../../hooks/use_input_draft';
 import { useActiveSpaceId } from '../../../context/active_space_context';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useSendUserMessage } from '../../../hooks/use_send_user_message';
+import { useSendSteer } from '../../../hooks/use_send_steer';
 import { ChatTriggerMode } from '../../../../../common/http_api/chat';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
@@ -240,7 +241,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
 }) => {
   const [hoveredImageName, setHoveredImageName] = useState<string | null>(null);
 
-  const { isResponseLoading } = useConversationStream();
+  const { isResponseLoading, canCancel } = useConversationStream();
   const { isFetched } = useAgentBuilderAgents();
   const agentId = useAgentId();
   const conversationId = useConversationId();
@@ -322,6 +323,9 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   } = useConversationContext();
   const { submitMessage, isCreatingConversation } = useSubmitMessage();
   const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
+  const { sendSteer, isSending: isSendingSteer } = useSendSteer();
+  // Steer mode: the run has started (so the server knows it) and is not paused on a prompt.
+  const canSteer = canCancel && Boolean(conversationId) && !isAwaitingPrompt;
 
   const { uploadingNames, handlePasteFile, handleAfterInput, handleRemoveAttachment } =
     useImageUpload({
@@ -355,7 +359,8 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   const isSubmitDisabled =
     messageEditorController.isEmpty ||
     isMessageTooLong ||
-    isResponseLoading ||
+    (isResponseLoading && !canSteer) ||
+    isSendingSteer ||
     isSendingUserMessage ||
     isCreatingConversation ||
     !agentExists ||
@@ -495,6 +500,30 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
       saveDraftDebounceRef.current = null;
     }
 
+    if (canSteer) {
+      if (content.length > STEER_MESSAGE_MAX_LENGTH) {
+        addErrorToast(
+          i18n.translate('xpack.agentBuilder.conversationInput.steer.tooLong', {
+            defaultMessage:
+              'A message to a running agent can be at most {max} characters. Shorten it, or wait for the agent to finish.',
+            values: { max: STEER_MESSAGE_MAX_LENGTH },
+          })
+        );
+        return;
+      }
+      sendSteer(content).then((sent) => {
+        if (!sent) {
+          lastEditorContentRef.current = content;
+          return;
+        }
+        lastEditorContentRef.current = '';
+        clearDraft();
+        messageEditorController.clear();
+        onSubmit?.();
+      });
+      return;
+    }
+
     if (triggerMode === ChatTriggerMode.Never) {
       sendUserMessage(content)
         .then(() => {
@@ -579,7 +608,8 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
         <InputActions
           onSubmit={handleSubmit}
           isSubmitDisabled={isSubmitDisabled}
-          isSubmitting={isCreatingConversation || isSendingUserMessage}
+          isSubmitting={isCreatingConversation || isSendingUserMessage || isSendingSteer}
+          showSubmitWhileRunning={canSteer}
           showTriggerModeSelector={isTriggerModeSelectable}
           triggerMode={triggerMode}
           onTriggerModeChange={setTriggerMode}

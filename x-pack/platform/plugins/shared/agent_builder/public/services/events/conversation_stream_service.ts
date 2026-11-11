@@ -7,7 +7,7 @@
 
 import type { MonoTypeOperatorFunction, Observable } from 'rxjs';
 import { BehaviorSubject, defer, finalize, map, tap } from 'rxjs';
-import type { ChatEvent, PromptResponseEvent } from '@kbn/agent-builder-common';
+import type { ChatEvent, PromptResponseEvent, UserMessageEvent } from '@kbn/agent-builder-common';
 import type { LiveEventsState, TimelineDisplayEvent } from './sse_to_events';
 import { emptyLiveEventsState, sseToEvents, upsertEvent } from './sse_to_events';
 
@@ -108,6 +108,16 @@ export class ConversationStreamService {
    * immediately reflects the human's answer before the server persists it.
    */
   recordPromptResponse(conversationId: string, event: PromptResponseEvent): void {
+    const stream = this.ensure(conversationId);
+    const current = stream.state$.getValue();
+    stream.state$.next({ ...current, events: upsertEvent(current.events, event) });
+  }
+
+  /**
+   * Inserts a steer (a message sent to the running agent) into the live stream as soon as the
+   * server stored it, so the timeline shows it waiting before the run picks it up.
+   */
+  recordSteer(conversationId: string, event: UserMessageEvent): void {
     const stream = this.ensure(conversationId);
     const current = stream.state$.getValue();
     stream.state$.next({ ...current, events: upsertEvent(current.events, event) });

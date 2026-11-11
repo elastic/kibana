@@ -8,6 +8,7 @@
 import { END as _END_, START as _START_, StateGraph } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { BaseMessage } from '@langchain/core/messages';
+import { HumanMessage } from '@langchain/core/messages';
 import type { Logger } from '@kbn/core/server';
 import type { ChatCompleteCacheControl } from '@kbn/inference-common';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
@@ -20,10 +21,13 @@ import type { AgentEventEmitter } from '@kbn/agent-builder-server';
 import {
   createReasoningEvent,
   createToolCallMessage,
+  extractTextContent,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import {
   ConversationRoundStepType,
+  createDeliveredMessageStep,
+  isDeliveredMessageStep,
   isSubagentRosterUpdatedStep,
   isToolCallStep,
   TimelineEventType,
@@ -57,9 +61,14 @@ import type { ToolExecutionBuffer } from './run_tracker';
 import type { SubagentTracker } from './subagent_tracker';
 import type { RunAttachmentEvents } from './run_attachment_events';
 import type { ProcessedConversation } from './utils/prepare_conversation';
+import type { IncomingMessages } from './incoming_messages';
 
 // number of successive recoverable errors we try to recover from before throwing
 const MAX_ERROR_COUNT = 2;
+
+const FORCED_ANSWER_NOTICE =
+  'The tool budget for this turn is spent. Answer the user now from what you have, ' +
+  'taking into account every message they sent while you worked. Do not call tools.';
 
 export const createAgentGraph = ({
   chatModel,
@@ -80,6 +89,7 @@ export const createAgentGraph = ({
   cacheControl,
   contextManagement,
   cycleHooks,
+  incomingMessages,
 }: {
   chatModel: InferenceChatModel;
   toolManager: ToolManager;
@@ -105,6 +115,8 @@ export const createAgentGraph = ({
   >;
   /** The execution's cycle hooks, dispatched in their own node before each research model call. */
   cycleHooks?: CycleHookRuntime;
+  /** Messages sent to the conversation while this run holds it; drained at every check. */
+  incomingMessages?: IncomingMessages;
 }) => {
   const contextManagementNodes = createContextManagementNodes({
     ...contextManagement,
@@ -125,26 +137,38 @@ export const createAgentGraph = ({
   const checkBackgroundWork = async (state: StateType): Promise<StateUpdate> => {
     const due = firstPass || state.currentCycle % BACKGROUND_CHECK_CYCLE_INTERVAL === 0;
     firstPass = false;
-    if (!backgroundExecutionService?.hasPending() || !due) {
-      return {};
+
+    // Find the last tool call group ID for positioning the notices
+    const lastToolCallGroupId = [...state.steps].reverse().find(isToolCallStep)?.tool_call_group_id;
+    const updates: RunStepUpdate[] = [];
+
+    // Steers are drained on every traversal: a message sent mid-run is read at the next check.
+    if (incomingMessages) {
+      const delivered = await incomingMessages.drain({
+        cycle: state.currentCycle,
+        lastToolCallGroupId,
+      });
+      updates.push(
+        ...delivered.map((data) => stepUpdates.append(createDeliveredMessageStep(data)))
+      );
     }
 
-    // Find the last tool call group ID for positioning the completion notice
-    const lastToolCallGroupId = [...state.steps].reverse().find(isToolCallStep)?.tool_call_group_id;
+    if (backgroundExecutionService?.hasPending() && due) {
+      const completions = await backgroundExecutionService.checkForCompletions({
+        roundId,
+        toolCallGroupId: lastToolCallGroupId,
+      });
+      updates.push(
+        ...completions.map((execution) =>
+          stepUpdates.append({
+            type: ConversationRoundStepType.backgroundAgentComplete,
+            ...execution,
+          })
+        )
+      );
+    }
 
-    const completions = await backgroundExecutionService.checkForCompletions({
-      roundId,
-      toolCallGroupId: lastToolCallGroupId,
-    });
-
-    return {
-      steps: completions.map((execution) =>
-        stepUpdates.append({
-          type: ConversationRoundStepType.backgroundAgentComplete,
-          ...execution,
-        })
-      ),
-    };
+    return updates.length > 0 ? { steps: updates } : {};
   };
 
   /**
@@ -250,6 +274,10 @@ export const createAgentGraph = ({
         if (structuredOutput) {
           return steps.prepareToAnswer;
         }
+        // A steer never fails the round that picked it up: answer from what the run has.
+        if (state.steps.some(isDeliveredMessageStep)) {
+          return steps.forcedAnswer;
+        }
         throw createAgentExecutionError(
           `Agent exceeded its cycle budget of ${state.cycleLimit} without producing a final answer.`,
           ErrCodes.cycleLimitExceeded,
@@ -342,6 +370,24 @@ export const createAgentGraph = ({
     return {
       interrupted: true,
       prompts: outcome.prompts.map(({ prompt }) => prompt),
+    };
+  };
+
+  /**
+   * One model call with no tools, in place of the `cycleLimitExceeded` throw when the run picked up
+   * a steer. Streams under the research tags so the text reaches the client as the answer.
+   */
+  const forcedAnswer = async (state: StateType): Promise<StateUpdate> => {
+    const answerModel = chatModel.withConfig({
+      tags: [tags.agent, tags.researchAgent],
+      sessionId,
+      cacheControl,
+    });
+    const prompt = await promptFactory.getMainPrompt({ run: toCurrentRun(state) });
+    const response = await answerModel.invoke([...prompt, new HumanMessage(FORCED_ANSWER_NOTICE)]);
+    return {
+      researchOutcome: { type: 'handover', message: extractTextContent(response), forceful: true },
+      currentCycle: state.currentCycle + 1,
     };
   };
 
@@ -447,12 +493,16 @@ export const createAgentGraph = ({
         [steps.finalize]: steps.finalize,
       });
   } else {
-    graphBuilder.addConditionalEdges(steps.researchAgent, researchAgentEdge, {
-      [steps.cycleHooks]: steps.cycleHooks,
-      [steps.contextManagement]: steps.contextManagement,
-      [steps.executeTool]: steps.executeTool,
-      [steps.finalize]: steps.finalize,
-    });
+    graphBuilder
+      .addNode(steps.forcedAnswer, forcedAnswer)
+      .addConditionalEdges(steps.researchAgent, researchAgentEdge, {
+        [steps.cycleHooks]: steps.cycleHooks,
+        [steps.contextManagement]: steps.contextManagement,
+        [steps.executeTool]: steps.executeTool,
+        [steps.forcedAnswer]: steps.forcedAnswer,
+        [steps.finalize]: steps.finalize,
+      })
+      .addEdge(steps.forcedAnswer, steps.finalize);
   }
 
   return graphBuilder.compile();

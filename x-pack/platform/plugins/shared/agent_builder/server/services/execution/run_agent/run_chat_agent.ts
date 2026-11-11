@@ -69,6 +69,8 @@ import { steps } from './constants';
 import { createPromptFactory } from './prompts';
 import { createImageResolver } from './utils/image_resolver';
 import { BackgroundExecutionService } from './background_execution_service';
+import { createIncomingMessages } from './incoming_messages';
+import { currentUserActor } from '../../conversation/client/rounds_to_events';
 import { SubagentTracker } from './subagent_tracker';
 import type { StateUpdate } from './state';
 import {
@@ -420,6 +422,27 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       conversationMetadataWritable: updateConversationMetadata !== undefined,
     });
 
+    // Steers reach a storing run only: a run that stores nothing has no document to read them from.
+    const { getWithVersion, peekVersion, getUser } = conversationClient;
+    const incomingMessages =
+      storesConversation &&
+      conversationId &&
+      executionId &&
+      getWithVersion &&
+      peekVersion &&
+      getUser
+        ? createIncomingMessages({
+            conversationClient: {
+              getWithVersion: getWithVersion.bind(conversationClient),
+              peekVersion: peekVersion.bind(conversationClient),
+            },
+            conversationId,
+            executionId,
+            runOwnerId: currentUserActor(getUser.call(conversationClient)).id,
+            logger,
+          })
+        : undefined;
+
     const agentGraph = createAgentGraph({
       logger,
       events: { emit: eventEmitter },
@@ -449,6 +472,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
         executionId,
       },
       cycleHooks,
+      incomingMessages,
     });
 
     logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);

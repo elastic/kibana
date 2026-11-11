@@ -32,6 +32,7 @@ import { formatDate } from '../prompts/utils/helpers';
 import type { ProcessedConversation } from './prepare_conversation';
 import {
   isAwaitingPrompt,
+  isInterruptedRound,
   isTimelineStandaloneEvent,
   isTimelineRound,
   roundInterruption,
@@ -220,6 +221,7 @@ export const roundToLangchain = async (
         steps: round.steps.slice(fromStepIndex),
         resultTransformer,
         attachments: { placement, notices },
+        interrupted: isInterruptedRound(round),
       }))
     );
   }

@@ -18,6 +18,8 @@ import type {
   MarkPinnedConversationResponse,
   MarkReadConversationResponse,
   RenameConversationResponse,
+  SteerConversationRequestBody,
+  SteerConversationResponse,
   UpdateConversationAccessControlRequestBody,
   UpdateConversationAccessControlResponse,
 } from '../../../common/http_api/conversations';
@@ -102,6 +104,23 @@ export class ConversationsService {
       {
         body: JSON.stringify({ title }),
       }
+    );
+  }
+
+  /** Sends a message to the agent currently running on the conversation; refusals surface as HTTP errors. */
+  async steer({
+    conversationId,
+    message,
+    eventId,
+  }: {
+    conversationId: string;
+    message: string;
+    eventId: string;
+  }) {
+    const body: SteerConversationRequestBody = { message, event_id: eventId };
+    return await this.http.post<SteerConversationResponse>(
+      buildPath(`${internalApiPath}/conversations/{conversationId}/_steer`, { conversationId }),
+      { body: JSON.stringify(body) }
     );
   }
 

@@ -28,6 +28,10 @@ export enum AgentBuilderErrorCode {
   conversationAlreadyExists = 'conversationAlreadyExists',
   backgroundExecutionAlreadyReported = 'backgroundExecutionAlreadyReported',
   conversationPaused = 'conversationPaused',
+  conversationNotSteerable = 'conversationNotSteerable',
+  conversationAwaitingPrompt = 'conversationAwaitingPrompt',
+  noActiveExecution = 'noActiveExecution',
+  tooManyPendingSteers = 'tooManyPendingSteers',
   pluginNotFound = 'pluginNotFound',
   agentExecutionError = 'agentExecutionError',
   requestAborted = 'requestAborted',
@@ -399,6 +403,105 @@ export const createBackgroundExecutionAlreadyReportedError = ({
   );
 };
 
+// Steer refusals: the steer endpoint returns each as a typed 409/429 the client branches on.
+
+export type AgentBuilderConversationNotSteerableError =
+  AgentBuilderError<AgentBuilderErrorCode.conversationNotSteerable>;
+
+export const isConversationNotSteerableError = (
+  err: unknown
+): err is AgentBuilderConversationNotSteerableError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.conversationNotSteerable;
+};
+
+/** A public conversation cannot be steered: membership there is not a grant by the owner. */
+export const createConversationNotSteerableError = ({
+  conversationId,
+  meta = {},
+}: {
+  conversationId: string;
+  meta?: Record<string, unknown>;
+}): AgentBuilderConversationNotSteerableError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.conversationNotSteerable,
+    `Conversation ${conversationId} cannot be steered`,
+    { ...meta, conversationId, statusCode: 409 }
+  );
+};
+
+export type AgentBuilderConversationAwaitingPromptError =
+  AgentBuilderError<AgentBuilderErrorCode.conversationAwaitingPrompt>;
+
+export const isConversationAwaitingPromptError = (
+  err: unknown
+): err is AgentBuilderConversationAwaitingPromptError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.conversationAwaitingPrompt;
+};
+
+/** The round is paused on a prompt: free text is not routed as its answer. */
+export const createConversationAwaitingPromptError = ({
+  conversationId,
+  meta = {},
+}: {
+  conversationId: string;
+  meta?: Record<string, unknown>;
+}): AgentBuilderConversationAwaitingPromptError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.conversationAwaitingPrompt,
+    `Conversation ${conversationId} is awaiting a prompt answer`,
+    { ...meta, conversationId, statusCode: 409 }
+  );
+};
+
+export type AgentBuilderNoActiveExecutionError =
+  AgentBuilderError<AgentBuilderErrorCode.noActiveExecution>;
+
+export const isNoActiveExecutionError = (
+  err: unknown
+): err is AgentBuilderNoActiveExecutionError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.noActiveExecution;
+};
+
+/** No live run holds the conversation; `alreadyStored` says whether the steer was stored before. */
+export const createNoActiveExecutionError = ({
+  conversationId,
+  alreadyStored,
+  meta = {},
+}: {
+  conversationId: string;
+  alreadyStored: boolean;
+  meta?: Record<string, unknown>;
+}): AgentBuilderNoActiveExecutionError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.noActiveExecution,
+    `Conversation ${conversationId} has no active execution`,
+    { ...meta, conversationId, alreadyStored, statusCode: 409 }
+  );
+};
+
+export type AgentBuilderTooManyPendingSteersError =
+  AgentBuilderError<AgentBuilderErrorCode.tooManyPendingSteers>;
+
+export const isTooManyPendingSteersError = (
+  err: unknown
+): err is AgentBuilderTooManyPendingSteersError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.tooManyPendingSteers;
+};
+
+export const createTooManyPendingSteersError = ({
+  conversationId,
+  meta = {},
+}: {
+  conversationId: string;
+  meta?: Record<string, unknown>;
+}): AgentBuilderTooManyPendingSteersError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.tooManyPendingSteers,
+    `Conversation ${conversationId} has too many pending steers for its active execution`,
+    { ...meta, conversationId, statusCode: 429 }
+  );
+};
+
 /**
  * Error thrown when an input that cannot answer a prompt reaches a conversation paused on one.
  */
@@ -753,6 +856,10 @@ export const AgentBuilderErrorUtils = {
   isConversationNotFoundError,
   isConversationWriteConflictError,
   isConversationBusyError,
+  isConversationNotSteerableError,
+  isConversationAwaitingPromptError,
+  isNoActiveExecutionError,
+  isTooManyPendingSteersError,
   isPluginNotFoundError,
   isWorkflowAbortedError,
   isWorkflowExecutionError,
@@ -771,6 +878,10 @@ export const AgentBuilderErrorUtils = {
   createConversationNotFoundError,
   createConversationWriteConflictError,
   createConversationBusyError,
+  createConversationNotSteerableError,
+  createConversationAwaitingPromptError,
+  createNoActiveExecutionError,
+  createTooManyPendingSteersError,
   createPluginNotFoundError,
   createWorkflowAbortedError,
   createWorkflowExecutionError,

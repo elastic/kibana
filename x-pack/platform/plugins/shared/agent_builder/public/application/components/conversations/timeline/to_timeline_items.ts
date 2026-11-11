@@ -11,6 +11,9 @@ import {
   TimelineEventType,
   isActivityEvent,
   isCurrentFormatAttachmentEvent,
+  isDeliveredMessageStep,
+  isExecutionTerminalEvent,
+  isSteerMessageEvent,
   isTimelineEvent,
 } from '@kbn/agent-builder-common';
 import type { TimelineDisplayEvent } from '../../../../services/events';
@@ -21,6 +24,7 @@ import {
 import type {
   ExecutionAccumulator,
   GroupedItem,
+  SteerState,
   UnresolvedAttachmentItem,
   UnresolvedCustomEventItem,
   UserEntry,
@@ -36,6 +40,36 @@ import {
   inputRefsByMessageId,
 } from './attachment_event_refs';
 
+/**
+ * Where each steer stands: picked up by a run that is live or finished (the step carries it, the
+ * message item is dropped), read only by runs that did not finish, or not read at all.
+ */
+const steerPlacement = (events: TimelineDisplayEvent[]) => {
+  const terminals = new Map<string, TimelineEventType>();
+  const started = new Set<string>();
+  const stepsByEvent = new Map<string, string[]>();
+  for (const event of events) {
+    if (!event.execution_id) continue;
+    if (event.type === TimelineEventType.executionStarted) started.add(event.execution_id);
+    if (isExecutionTerminalEvent(event)) terminals.set(event.execution_id, event.type);
+    if (event.type === TimelineEventType.executionStep && isDeliveredMessageStep(event.data.step)) {
+      const list = stepsByEvent.get(event.data.step.event_id) ?? [];
+      list.push(event.execution_id);
+      stepsByEvent.set(event.data.step.event_id, list);
+    }
+  }
+  const finishedOrLive = (executionId: string) => {
+    const terminal = terminals.get(executionId);
+    return terminal === undefined || terminal === TimelineEventType.executionTerminated;
+  };
+  const hasLiveExecution = [...started].some((executionId) => !terminals.has(executionId));
+  return {
+    hasLiveExecution,
+    carriedByStep: (eventId: string) => (stepsByEvent.get(eventId) ?? []).some(finishedOrLive),
+    readByUnfinished: (eventId: string) => (stepsByEvent.get(eventId) ?? []).length > 0,
+  };
+};
+
 export const groupTimelineEvents = (
   events: ConversationEvent[],
   eventsById: Map<string, TimelineDisplayEvent>,
@@ -45,6 +79,15 @@ export const groupTimelineEvents = (
   // The run-shaped helpers only understand built-in events; narrow once, up front.
   const displayEvents = events.filter(isTimelineDisplayEvent);
   const awaitingPromptEventId = findAwaitingPromptEventId(displayEvents);
+  const steers = steerPlacement(displayEvents);
+  const steerStateOf = (eventId: string): SteerState =>
+    steers.readByUnfinished(eventId)
+      ? 'read_by_unfinished'
+      : awaitingPromptEventId
+      ? 'before_pause'
+      : steers.hasLiveExecution
+      ? 'waiting'
+      : 'not_read';
   const answers = answersByPromptId(displayEvents);
   const resolvedToolCalls = resolvedToolCallIds(displayEvents);
   const resumeLinks = resumeToOriginalExecutionId(displayEvents, eventsById);
@@ -91,6 +134,12 @@ export const groupTimelineEvents = (
     switch (event.type) {
       case TimelineEventType.userMessage: {
         foldAttachmentRefs(seenAttachmentRefs, event.data.attachment_refs);
+        const isSteer = isSteerMessageEvent(event);
+        // A steer the live or a finished run picked up is shown by its step, between the run's
+        // steps, so the message renders once.
+        if (isSteer && steers.carriedByStep(event.id)) {
+          break;
+        }
         const attachmentRefs = [
           ...(event.data.attachment_refs ?? []),
           ...(inputRefs.get(event.id) ?? []),
@@ -101,6 +150,7 @@ export const groupTimelineEvents = (
           event,
           ...(attachmentRefs.length > 0 ? { attachmentRefs } : {}),
           ...(event.id === pendingUserMessageId ? { isPending: true } : {}),
+          ...(isSteer ? { steerState: steerStateOf(event.id) } : {}),
         });
         break;
       }

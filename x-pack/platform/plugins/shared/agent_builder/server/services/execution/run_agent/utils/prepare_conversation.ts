@@ -17,8 +17,11 @@ import type {
 import {
   EventActorType,
   isAttachmentEvent,
+  isSteerMessageEvent,
   isTimelineEvent,
   isMessageEvent,
+  settledMessageIds,
+  type UserMessageEvent,
 } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
@@ -45,6 +48,7 @@ import {
   groupTimelineRounds,
   groupTimelineEntries,
   isTimelineStandaloneEvent,
+  isTimelineStandaloneUserMessage,
   isTimelineRound,
   linkedInputEvents,
 } from './context_timeline';
@@ -77,6 +81,12 @@ export interface ProcessedConversation {
    * round the run does not resume is rendered as history.
    */
   resumedRoundId?: string;
+  /**
+   * Steers (messages sent to a running agent) no finished execution has read. Kept out of the
+   * history: the run's first check reads the document and delivers them through a step, so the
+   * model sees each once. Informational here; the drain does not consume it.
+   */
+  pendingSteers?: UserMessageEvent[];
 }
 
 export const prepareConversation = async ({
@@ -117,8 +127,21 @@ export const prepareConversation = async ({
   // versions resolve consistently. Incomplete execution inputs remain outside the model history.
   const processedInputs: ProcessedRoundInput[] = [];
   const processedTimeline: ProcessedTimelineEvent[] = [];
+  const pendingSteers: UserMessageEvent[] = [];
+  const settledSteers = settledMessageIds(timeline);
   const includedRounds = new Set(effectiveRounds.map((round) => round.id));
   for (const round of groupTimelineEntries(timeline)) {
+    // A stamped message is never history: a settled one is rendered by its `delivered_message`
+    // step inside its round, a pending one is delivered by the run's first check.
+    const standaloneMessage = isTimelineStandaloneUserMessage(round)
+      ? round.userMessage
+      : undefined;
+    if (standaloneMessage && isSteerMessageEvent(standaloneMessage)) {
+      if (!settledSteers.has(standaloneMessage.id)) {
+        pendingSteers.push(standaloneMessage);
+      }
+      continue;
+    }
     if (isTimelineStandaloneEvent(round)) {
       // Rendered unescaped, so never taken from the stored event.
       const processedEvent = isAttachmentEvent(round.event)
@@ -222,6 +245,7 @@ export const prepareConversation = async ({
     describeAttachmentType: (type) =>
       attachmentsService.getTypeDefinition(type)?.getAgentDescription?.() ?? undefined,
     attachmentStateManager,
+    pendingSteers,
     ...(resumeAnchors ? { resumeAnchors } : {}),
     ...(metadata !== undefined ? { metadata } : {}),
     ...(templateId !== undefined ? { template_id: templateId } : {}),
