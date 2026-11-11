@@ -45,7 +45,7 @@ import { useAppDependencies } from '../../../../app_dependencies';
 import { TransformHealthColoredDot } from './transform_health_colored_dot';
 import { getProjectScopeSortValue, ProjectScopeColumn } from './project_scope_column';
 
-const TRUNCATE_TEXT_LINES = 3;
+const DESCRIPTION_TOOLTIP_THRESHOLD = 150;
 
 type TransformListColumn =
   | EuiTableComputedColumnType<TransformListRow>
@@ -58,8 +58,31 @@ const StatsUnknown = () => (
   </EuiText>
 );
 
+const TransformDescription = ({ description }: { description: string }) => {
+  const shouldTruncate = description.length > DESCRIPTION_TOOLTIP_THRESHOLD;
+  const displayedDescription = shouldTruncate
+    ? `${description.slice(0, DESCRIPTION_TOOLTIP_THRESHOLD)}…`
+    : description;
+  const descriptionContent = (
+    <EuiText color="subdued" size="xs">
+      <span data-test-subj="transformListColumnDescriptionText">{displayedDescription}</span>
+    </EuiText>
+  );
+
+  return shouldTruncate ? (
+    <EuiToolTip
+      content={description}
+      display="block"
+      anchorProps={{ 'data-test-subj': 'transformListColumnDescriptionTooltip' }}
+    >
+      <div tabIndex={0}>{descriptionContent}</div>
+    </EuiToolTip>
+  ) : (
+    descriptionContent
+  );
+};
+
 const TransformIdWithDescription = ({ item }: { item: TransformListRow }) => {
-  const { euiTheme } = useEuiTheme();
   const transformId = item.config.id;
   const description = item.config.description;
   const transformIdContent = !isManagedTransform(item) ? (
@@ -84,19 +107,10 @@ const TransformIdWithDescription = ({ item }: { item: TransformListRow }) => {
   );
 
   return (
-    <>
+    <div>
       <div>{transformIdContent}</div>
-      {description ? (
-        <EuiText
-          color="subdued"
-          css={{
-            fontSize: euiTheme.font.scale.xs * euiTheme.base,
-          }}
-        >
-          <span data-test-subj="transformListColumnDescriptionText">{description}</span>
-        </EuiText>
-      ) : null}
-    </>
+      {description ? <TransformDescription description={description} /> : null}
+    </div>
   );
 };
 
@@ -162,7 +176,6 @@ export const useColumns = (
       'data-test-subj': 'transformListColumnId',
       name: 'ID',
       sortable: true,
-      truncateText: { lines: TRUNCATE_TEXT_LINES },
       scope: 'row',
       render: (_transformId, item) => <TransformIdWithDescription item={item} />,
     },

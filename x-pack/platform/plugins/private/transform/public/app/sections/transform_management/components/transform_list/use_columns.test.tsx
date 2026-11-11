@@ -80,6 +80,32 @@ describe('Transform: Job List Columns', () => {
     expect(screen.getByTestId('transformListColumnDescriptionText')).toHaveTextContent(
       'Tracks inventory and stock levels.'
     );
+    expect(screen.queryByTestId('transformListColumnDescriptionTooltip')).not.toBeInTheDocument();
+  });
+
+  test('adds a tooltip when the description exceeds the character threshold', async () => {
+    const wrapper = createWrapper();
+    const { result } = renderHook(() => useColumns([], () => {}, 1, [], false), {
+      wrapper,
+    });
+
+    await waitFor(() => new Promise((resolve) => resolve(null)));
+
+    const idColumn = result.current.columns[0] as EuiTableFieldDataColumnType<TransformListRow>;
+    const item = {
+      ...transformListRow,
+      config: {
+        ...transformListRow.config,
+        description: 'A'.repeat(151),
+      },
+    } as unknown as TransformListRow;
+
+    renderWithI18n(<>{idColumn.render?.(item.id, item)}</>);
+
+    expect(screen.getByTestId('transformListColumnDescriptionTooltip')).toBeInTheDocument();
+    expect(screen.getByTestId('transformListColumnDescriptionText')).toHaveTextContent(
+      `${'A'.repeat(150)}…`
+    );
   });
 
   test('renders type, status, and execution with the redesigned semantics', async () => {
