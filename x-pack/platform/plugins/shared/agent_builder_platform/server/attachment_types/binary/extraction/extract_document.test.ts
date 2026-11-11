@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { DOCUMENT_EXTRACTION_ENDPOINT_ID, DOCUMENT_EXTRACTION_TIMEOUT_MS } from './constants';
+import { DOCUMENT_EXTRACTION_TIMEOUT_MS } from './constants';
 import { extractDocument } from './extract_document';
 
 describe('extractDocument', () => {
@@ -15,9 +15,10 @@ describe('extractDocument', () => {
   const pdf = Buffer.from('%PDF-1.7 fake');
   const request = jest.fn();
   const esClient = { transport: { request } } as unknown as ElasticsearchClient;
+  const endpointId = '.my-reader';
 
   const run = (signal?: AbortSignal) =>
-    extractDocument({ esClient, pdf, fileId: 'file-abc', signal, logger });
+    extractDocument({ esClient, endpointId, pdf, fileId: 'file-abc', signal, logger });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -30,16 +31,14 @@ describe('extractDocument', () => {
     jest.useRealTimers();
   });
 
-  it('sends the PDF as base64 to the document extraction endpoint', async () => {
+  it('sends the PDF as base64 to the given document extraction endpoint', async () => {
     await run();
 
     expect(request).toHaveBeenCalledTimes(1);
     const [params, options] = request.mock.calls[0];
     expect(params).toEqual({
       method: 'POST',
-      path: `/_inference/document_extraction/${encodeURIComponent(
-        DOCUMENT_EXTRACTION_ENDPOINT_ID
-      )}`,
+      path: '/_inference/document_extraction/.my-reader',
       querystring: { timeout: '90s' },
       body: {
         input: [

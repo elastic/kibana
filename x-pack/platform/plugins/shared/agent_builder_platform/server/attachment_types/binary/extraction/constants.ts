@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export const DOCUMENT_EXTRACTION_ENDPOINT_ID = '.jina-reader';
+export const DOCUMENT_EXTRACTION_TASK_TYPE = 'document_extraction';
+
+// Used when several document extraction endpoints exist. Otherwise the first endpoint is used.
+export const PREFERRED_DOCUMENT_EXTRACTION_ENDPOINT_ID = '.jina-reader';
 
 export const DOCUMENT_EXTRACTION_TIMEOUT_MS = 90 * 1000;
 

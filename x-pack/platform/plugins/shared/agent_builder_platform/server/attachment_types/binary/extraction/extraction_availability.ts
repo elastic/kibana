@@ -11,11 +11,13 @@ import type { Logger } from '@kbn/logging';
 import {
   DOCUMENT_EXTRACTION_AVAILABILITY_INTERVAL_MS,
   DOCUMENT_EXTRACTION_AVAILABILITY_RETRY_MS,
-  DOCUMENT_EXTRACTION_ENDPOINT_ID,
+  DOCUMENT_EXTRACTION_TASK_TYPE,
+  PREFERRED_DOCUMENT_EXTRACTION_ENDPOINT_ID,
 } from './constants';
 
 export interface DocumentExtractionAvailability {
   isAvailable: () => boolean;
+  getEndpointId: () => string | undefined;
   start: (esClient: ElasticsearchClient) => void;
   stop: () => void;
 }
@@ -23,46 +25,61 @@ export interface DocumentExtractionAvailability {
 const getStatusCode = (error: unknown): number | undefined =>
   (error as { statusCode?: number } | undefined)?.statusCode;
 
-const findEndpoint = async (esClient: ElasticsearchClient): Promise<boolean> => {
+interface InferenceEndpointsResponse {
+  endpoints?: Array<{ inference_id: string }>;
+}
+
+// The ES client types do not know the `document_extraction` task type yet, so we call the API directly.
+const findEndpointId = async (esClient: ElasticsearchClient): Promise<string | undefined> => {
   try {
-    const { endpoints } = await esClient.inference.get({
-      inference_id: DOCUMENT_EXTRACTION_ENDPOINT_ID,
+    const { endpoints = [] } = await esClient.transport.request<InferenceEndpointsResponse>({
+      method: 'GET',
+      path: `/_inference/${DOCUMENT_EXTRACTION_TASK_TYPE}/_all`,
     });
-    return endpoints.some(({ inference_id: id }) => id === DOCUMENT_EXTRACTION_ENDPOINT_ID);
+    const ids = endpoints.map(({ inference_id: id }) => id);
+    return ids.includes(PREFERRED_DOCUMENT_EXTRACTION_ENDPOINT_ID)
+      ? PREFERRED_DOCUMENT_EXTRACTION_ENDPOINT_ID
+      : ids[0];
   } catch (error) {
     if (getStatusCode(error) === 404) {
-      return false;
+      return undefined;
     }
     throw error;
   }
 };
 
 /**
- * Creates a holder for the document extraction state. `start` looks for the endpoint now and then every hour.
+ * Creates a holder for the document extraction endpoint. `start` looks for an endpoint now and then every hour.
  */
 export const createDocumentExtractionAvailability = ({
   logger,
 }: {
   logger: Logger;
 }): DocumentExtractionAvailability => {
-  let available: boolean | undefined;
+  let endpointId: string | undefined;
+  let checked = false;
   let subscription: Subscription | undefined;
 
-  const setAvailable = (next: boolean) => {
-    if (next === available) {
+  const setEndpointId = (next: string | undefined) => {
+    if (checked && next === endpointId) {
       return;
     }
-    available = next;
-    logger.info(`PDF reading is ${available ? 'available' : 'not available'} on this deployment.`);
+    checked = true;
+    endpointId = next;
+    logger.info(
+      endpointId
+        ? `PDF reading is available on this deployment (endpoint "${endpointId}").`
+        : 'PDF reading is not available on this deployment.'
+    );
   };
 
   const start = (esClient: ElasticsearchClient) => {
     if (subscription) {
       return;
     }
-    subscription = defer(() => findEndpoint(esClient))
+    subscription = defer(() => findEndpointId(esClient))
       .pipe(
-        tap(setAvailable),
+        tap(setEndpointId),
         delay(DOCUMENT_EXTRACTION_AVAILABILITY_INTERVAL_MS),
         repeat(),
         retry({
@@ -80,5 +97,10 @@ export const createDocumentExtractionAvailability = ({
     subscription = undefined;
   };
 
-  return { isAvailable: () => available === true, start, stop };
+  return {
+    isAvailable: () => endpointId !== undefined,
+    getEndpointId: () => endpointId,
+    start,
+    stop,
+  };
 };
