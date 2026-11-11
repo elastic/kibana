@@ -104,10 +104,8 @@ export const Navigation = ({
 
   const [isAnyPopoverLocked, setIsAnyPopoverLocked] = useState(false);
 
-  const { overflowMenuItems, primaryMenuRef, visibleMenuItems } = useResponsiveMenu(
-    isCollapsed,
-    items.primaryItems
-  );
+  const { isOverflowMeasured, overflowMenuItems, primaryMenuRef, visibleMenuItems } =
+    useResponsiveMenu(isCollapsed, items.primaryItems);
 
   const setSize = visibleMenuItems.length + (overflowMenuItems.length > 0 ? 1 : 0);
 
@@ -139,7 +137,11 @@ export const Navigation = ({
           {...logo}
         />
 
-        <SideNav.PrimaryMenu ref={primaryMenuRef} isCollapsed={isCollapsed}>
+        <SideNav.PrimaryMenu
+          ref={primaryMenuRef}
+          isCollapsed={isCollapsed}
+          isOverflowMeasured={isOverflowMeasured}
+        >
           {({ mainNavigationInstructionsId }) => (
             <>
               {visibleMenuItems.map((item, index) => {

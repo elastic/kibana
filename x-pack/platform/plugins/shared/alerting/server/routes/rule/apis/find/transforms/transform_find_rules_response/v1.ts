@@ -112,5 +112,6 @@ export const transformFindRulesResponse = <Params extends RuleParams = never>(
     data: result.data.map((rule) =>
       transformPartialRule<RuleParamsV1>(rule as Partial<Rule<Params>>, fields, includeArtifacts)
     ),
+    ...(result.errors ? { errors: result.errors } : {}),
   };
 };

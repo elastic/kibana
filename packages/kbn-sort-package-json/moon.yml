@@ -22,8 +22,11 @@ tags:
   - dev
   - group-platform
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - '**/*.js'
     - '!target/**/*'
+  jest-config:
+    - jest.config.js
 tasks: {}

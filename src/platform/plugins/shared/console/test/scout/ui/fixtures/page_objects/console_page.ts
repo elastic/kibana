@@ -26,17 +26,29 @@ export class ConsolePage {
   }
 
   /**
-   * Opens Console with the given request preloaded through the `load_from`
-   * data-URI parameter (the "Open in Console" deep-link mechanism). This avoids
-   * typing into Monaco, which is flaky under autocomplete. The appended request
-   * receives the cursor, so the send button becomes available.
+   * A tour step's popover dialog. The steps carry their `data-test-subj` on the popover
+   * anchor, which exists whether the step is open or not, so the step is identified by the
+   * title it renders instead. Interactions must stay scoped to this dialog: during a step
+   * transition the outgoing popover is briefly still on the page.
+   */
+  tourStep(title: string) {
+    return this.page.getByRole('dialog', { name: title });
+  }
+
+  async goto() {
+    await this.page.gotoApp('dev_tools', { hash: 'console', readyWhen: this.inputEditor });
+  }
+
+  /**
+   * Preloads a request through the `load_from` data URI ("Open in Console"), avoiding
+   * autocomplete-prone typing. The appended request gets the cursor, so it can be sent.
    */
   async gotoWithRequestLoaded(request: string) {
     const encoded = compressToEncodedURIComponent(request);
     await this.page.gotoApp('dev_tools', {
-      hash: `console?load_from=data:text/plain,${encoded}`,
+      hash: `console/shell?load_from=data:text/plain,${encoded}`,
+      readyWhen: this.inputEditor,
     });
-    await this.inputEditor.waitFor({ state: 'visible' });
     await this.sendRequestButton.waitFor({ state: 'visible' });
   }
 

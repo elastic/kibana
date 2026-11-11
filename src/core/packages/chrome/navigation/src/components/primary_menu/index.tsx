@@ -42,6 +42,7 @@ export type PrimaryMenuChildren = ReactNode | ((ids: PrimaryMenuIds) => ReactNod
 export interface PrimaryMenuProps {
   children: PrimaryMenuChildren;
   isCollapsed: boolean;
+  isOverflowMeasured: boolean;
 }
 
 interface PrimaryMenuComponent
@@ -50,7 +51,7 @@ interface PrimaryMenuComponent
 }
 
 export const PrimaryMenuBase = forwardRef<HTMLElement, PrimaryMenuProps>(
-  ({ children, isCollapsed }, ref: ForwardedRef<HTMLElement>): JSX.Element => {
+  ({ children, isCollapsed, isOverflowMeasured }, ref: ForwardedRef<HTMLElement>): JSX.Element => {
     const { euiTheme } = useEuiTheme();
     const mainNavigationInstructionsId = useGeneratedHtmlId({
       prefix: 'main-navigation-instructions',
@@ -97,6 +98,7 @@ export const PrimaryMenuBase = forwardRef<HTMLElement, PrimaryMenuProps>(
           css={styles}
           id={PRIMARY_NAVIGATION_ID}
           data-test-subj={PRIMARY_NAVIGATION_ID}
+          data-overflow-measured={isOverflowMeasured ? 'true' : 'false'}
           onKeyDown={handleRovingIndex}
           ref={handleRef}
         >
