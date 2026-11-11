@@ -70,11 +70,14 @@ export const typesOfDraft = ({
   facts: DreamingFactType[];
   entities: DreamingEntities | null;
   relationships: DreamingRelationshipType[];
-} => ({
-  facts,
-  entities: entitiesEnabled && entities.nodes.length > 0 ? entities : null,
-  relationships,
-});
+} => {
+  const enabledEntities = entitiesEnabled && entities.nodes.length > 0 ? entities : null;
+  return {
+    facts,
+    entities: enabledEntities,
+    relationships: enabledEntities ? relationships : [],
+  };
+};
 
 /** Whether a draft builds anything: a fact type, or entities that are on. */
 export const draftBuildsAnything = (draft: DreamingConfigDraft): boolean => {

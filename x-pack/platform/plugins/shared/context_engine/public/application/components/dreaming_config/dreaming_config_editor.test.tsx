@@ -43,15 +43,21 @@ const fillName = (value: string) =>
 const save = () => fireEvent.click(screen.getByTestId('contextDreamingTypeModalSave'));
 
 describe('DreamingConfigEditor', () => {
-  it('keeps entities on a draft while they are off, and leaves them out of the config', () => {
+  it('keeps entities and relationships on a draft while entities are off, and leaves them out of the config', () => {
     const off = { ...SUPPORT, entitiesEnabled: false };
 
     expect(typesOfDraft(off)).toEqual({
       facts: SUPPORT.facts,
       entities: null,
-      relationships: SUPPORT.relationships,
+      relationships: [],
     });
-    expect(typesOfDraft(SUPPORT).entities).toEqual(SUPPORT.entities);
+    expect(off.relationships).toEqual(SUPPORT.relationships);
+    expect(typesOfDraft(SUPPORT)).toEqual(
+      expect.objectContaining({
+        entities: SUPPORT.entities,
+        relationships: SUPPORT.relationships,
+      })
+    );
   });
 
   it('edits a fact type in a modal, writing the name the way types are named', () => {

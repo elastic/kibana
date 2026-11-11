@@ -67,6 +67,7 @@ const context = (
 ): ResolveRelationshipsContext => ({
   relationshipTypes: relationshipTypesOf({
     enabled: true,
+    entities: { nodes: [{ type: 'person' }, { type: 'city' }] },
     relationships: [{ type: 'manages' }, { type: 'lives_in' }],
   }),
   memoryPermissions: new Map([

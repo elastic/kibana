@@ -409,7 +409,7 @@ describe('softDeleteKi', () => {
       sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
       size: REVISION_TIE_WINDOW,
       seq_no_primary_term: true,
-      _source: ['id', 'governance'],
+      _source: true,
     });
   });
 
@@ -481,6 +481,75 @@ describe('softDeleteKi', () => {
     expect(thrown).toBeInstanceOf(KiNotFoundError);
     expect(esClient.update).not.toHaveBeenCalled();
     expect(esClient.index).not.toHaveBeenCalled();
+  });
+
+  it('also deletes the relationships linking a fact or entity', async () => {
+    const revisionHit = (id: string, type: string) => ({
+      hits: {
+        hits: [
+          {
+            _id: `doc-${id}`,
+            _index: indexDest.value,
+            _seq_no: 5,
+            _primary_term: 1,
+            _source: { id, type },
+          },
+        ],
+      },
+    });
+    const search = jest.fn(async (request: { collapse?: object; query: object }) => {
+      if (request.collapse) {
+        return {
+          hits: {
+            hits: [
+              {
+                sort: ['rel-1'],
+                inner_hits: { latest: { hits: { hits: [{ _source: { id: 'rel-1' } }] } } },
+              },
+            ],
+          },
+        };
+      }
+      return JSON.stringify(request.query).includes('rel-1')
+        ? revisionHit('rel-1', 'memory.relationship')
+        : revisionHit('ki-1', 'entity.customer');
+    });
+    const esClient = {
+      search,
+      update: jest.fn().mockResolvedValue({ result: 'updated' }),
+    } as unknown as ElasticsearchClient;
+
+    await softDeleteKi(esClient, {
+      aiIndexId: 'my-ai-index',
+      dest: indexDest,
+      kiId: 'ki-1',
+      writer: deleteWriter,
+      refresh: false,
+    });
+
+    expect((esClient.update as jest.Mock).mock.calls.map(([{ id }]) => id)).toEqual([
+      'doc-ki-1',
+      'doc-rel-1',
+    ]);
+    expect(esClient.update).not.toHaveBeenCalledWith(
+      expect.objectContaining({ refresh: expect.anything() })
+    );
+  });
+
+  it('does not look up relationships for other KI types', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
+      update: jest.fn().mockResolvedValue({ result: 'updated' }),
+    } as unknown as ElasticsearchClient;
+
+    await softDeleteKi(esClient, {
+      aiIndexId: 'my-ai-index',
+      dest: indexDest,
+      kiId: 'ki-1',
+      writer: deleteWriter,
+    });
+
+    expect(esClient.search).toHaveBeenCalledTimes(1);
   });
 });
 

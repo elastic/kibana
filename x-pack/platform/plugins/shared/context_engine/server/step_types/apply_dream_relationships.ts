@@ -17,13 +17,7 @@ import {
 import type { AiIndexDest, AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import { findKiRevision, isKiDeleted } from '../ai_indices/ki_revision';
-import {
-  applyOperations,
-  refreshWrites,
-  type ApplyContext,
-  type ApplyResult,
-  type PlannedWrite,
-} from '../dreaming/apply';
+import { applyOperations, type PlannedWrite } from '../dreaming/apply';
 import { kindOf, type DreamedKi } from '../dreaming/dreamed_ki';
 import { isVisibleInSpace } from '../dreaming/permissions';
 import {
@@ -163,26 +157,20 @@ export const getApplyDreamRelationshipsStepDefinition = ({
         existing,
       });
       const plannedWrites = dryRun ? new Map<string, PlannedWrite>() : undefined;
-      const applyContext: ApplyContext = {
-        esClient,
-        aiIndexId,
-        dest: aiIndex.dest,
-        writer: kiWriterFromContext(stepContext),
-        spaceId,
-        memoryPermissions,
-        abortSignal: context.abortSignal,
-        dryRun: plannedWrites,
-        deferRefresh: !dryRun,
-      };
-      let applied: ApplyResult;
-      try {
-        applied = await applyOperations(applyContext, resolved.operations);
-      } finally {
-        if (!dryRun && resolved.operations.length > 0) {
-          await refreshWrites(applyContext);
-        }
-      }
-      const { rejected: refused, ...counts } = applied;
+      const { rejected: refused, ...counts } = await applyOperations(
+        {
+          esClient,
+          aiIndexId,
+          dest: aiIndex.dest,
+          writer: kiWriterFromContext(stepContext),
+          spaceId,
+          memoryPermissions,
+          abortSignal: context.abortSignal,
+          dryRun: plannedWrites,
+          skipRefresh: true,
+        },
+        resolved.operations
+      );
       const rejected = [...resolved.rejected, ...refused];
 
       logger.debug(

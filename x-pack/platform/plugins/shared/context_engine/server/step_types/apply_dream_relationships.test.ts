@@ -117,11 +117,7 @@ describe('getApplyDreamRelationshipsStepDefinition', () => {
       expect.not.objectContaining({ refresh: expect.anything() }),
       expect.anything()
     );
-    expect(esClient.indices.refresh).toHaveBeenCalledTimes(1);
-    expect(esClient.indices.refresh).toHaveBeenCalledWith(
-      { index: dest.value, ignore_unavailable: true },
-      expect.anything()
-    );
+    expect(esClient.indices.refresh).not.toHaveBeenCalled();
     expect(stored[livesInId]).toEqual(
       expect.objectContaining({
         type: 'memory.relationship',

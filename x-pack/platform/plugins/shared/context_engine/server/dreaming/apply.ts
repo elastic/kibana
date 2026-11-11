@@ -28,6 +28,7 @@ import {
   type KiWriter,
   type StoredKi,
 } from '../ai_indices/ki_revision';
+import { findLinkingRelationshipIds } from '../ai_indices/ki_relationships';
 import { softDeleteKi } from '../ai_indices/ki_write';
 import {
   accessPatternAttributes,
@@ -59,7 +60,6 @@ import type {
 import type { RelationshipOperation, UpsertRelationshipOperation } from './resolve_relationships';
 
 const WRITE_CONFLICT_RETRIES = 3;
-const MAX_LINKED_RELATIONSHIPS = 100;
 
 export interface ApplyCounts {
   created: number;
@@ -92,8 +92,8 @@ export interface ApplyContext {
   dryRun?: Map<string, PlannedWrite>;
   /** Collects each KI stored, by id. */
   written?: Map<string, StoredKi>;
-  /** Skips the refresh after each write; the caller refreshes once with `refreshWrites`. Each KI must be written at most once. */
-  deferRefresh?: boolean;
+  /** Writes without waiting for a refresh. Each KI must be written at most once. */
+  skipRefresh?: boolean;
 }
 
 const referenceKey = ({ uri, relation, description }: DreamedKiReference): string =>
@@ -229,7 +229,7 @@ const writeDocument = async (
   sourceMemoryIds: readonly string[],
   buildDocument: BuildDocument
 ): Promise<WriteResult> => {
-  const { esClient, aiIndexId, dest, writer, abortSignal, dryRun, written, deferRefresh } = context;
+  const { esClient, aiIndexId, dest, writer, abortSignal, dryRun, written, skipRefresh } = context;
   const build = withDerivedPermissions(context, sourceMemoryIds, buildDocument);
   if (dryRun) {
     return planDocument(context, dryRun, kiId, build);
@@ -264,7 +264,7 @@ const writeDocument = async (
         document: stored,
         existing: dest.type === 'data_stream' ? undefined : revision,
         failIfExists: revision === undefined,
-        refresh: !deferRefresh,
+        refresh: !skipRefresh,
         abortSignal,
       });
       written?.set(kiId, stored);
@@ -446,7 +446,7 @@ const planDelete = async (
 };
 
 const deleteDocument = async (context: ApplyContext, kiId: string): Promise<DeleteResult> => {
-  const { esClient, aiIndexId, dest, writer, abortSignal, dryRun, deferRefresh } = context;
+  const { esClient, aiIndexId, dest, writer, abortSignal, dryRun, skipRefresh } = context;
   if (dryRun) {
     return planDelete(context, dryRun, kiId);
   }
@@ -460,7 +460,7 @@ const deleteDocument = async (context: ApplyContext, kiId: string): Promise<Dele
       dest,
       kiId,
       writer,
-      refresh: !deferRefresh,
+      refresh: !skipRefresh,
       abortSignal,
     });
     return 'deleted';
@@ -472,56 +472,22 @@ const deleteDocument = async (context: ApplyContext, kiId: string): Promise<Dele
   }
 };
 
-const relationshipsLinking = async (
-  { esClient, dest, abortSignal }: ApplyContext,
-  kiId: string
-): Promise<string[]> => {
-  const response = await esClient.search<Pick<DreamedKi, 'id' | 'governance'>>(
-    {
-      index: dest.value,
-      ignore_unavailable: true,
-      size: MAX_LINKED_RELATIONSHIPS,
-      sort: [{ updated_at: 'desc' }],
-      collapse: { field: 'id' },
-      _source: ['id', 'governance.lifecycle.status'],
-      query: {
-        bool: {
-          filter: [
-            { term: { type: RELATIONSHIP_KI_TYPE } },
-            { term: { 'references.uri': kiUri(kiId) } },
-          ],
-        },
-      },
-    },
-    { signal: abortSignal }
-  );
-  return response.hits.hits.flatMap(({ _source: source }) =>
-    source?.id !== undefined && !isKiDeleted(source) ? [source.id] : []
-  );
-};
-
 /** Deletes a KI, and the relationships that link it. */
 const deleteKi = async (context: ApplyContext, kiId: string): Promise<DeleteResult> => {
+  const { esClient, dest, abortSignal, dryRun } = context;
   const deleted = await deleteDocument(context, kiId);
-  if (deleted !== 'deleted') {
+  if (deleted !== 'deleted' || !dryRun) {
     return deleted;
   }
-  for (const relationshipId of await relationshipsLinking(context, kiId)) {
-    await deleteDocument(context, relationshipId);
+  for (const relationshipId of await findLinkingRelationshipIds({
+    esClient,
+    dest,
+    kiId,
+    abortSignal,
+  })) {
+    dryRun.set(relationshipId, { change: 'deleted' });
   }
   return 'deleted';
-};
-
-/** Makes the writes of a `deferRefresh` apply searchable. */
-export const refreshWrites = async ({
-  esClient,
-  dest,
-  abortSignal,
-}: Pick<ApplyContext, 'esClient' | 'dest' | 'abortSignal'>): Promise<void> => {
-  await esClient.indices.refresh(
-    { index: dest.value, ignore_unavailable: true },
-    { signal: abortSignal }
-  );
 };
 
 /** Applies dreaming operations in order. */

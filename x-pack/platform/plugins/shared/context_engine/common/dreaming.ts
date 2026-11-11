@@ -136,11 +136,14 @@ export const dreamingTypesOf = ({
   facts,
   entities,
   relationships,
-}: DreamingTypesConfig): DreamingTypes => ({
-  facts: facts ?? [],
-  entities: entities?.nodes ?? [],
-  relationships: relationships ?? [],
-});
+}: DreamingTypesConfig): DreamingTypes => {
+  const nodes = entities?.nodes ?? [];
+  return {
+    facts: facts ?? [],
+    entities: nodes,
+    relationships: nodes.length > 0 ? relationships ?? [] : [],
+  };
+};
 
 /**
  * Whether an AI index takes memories: its dreaming config is set up, on or off. `enabled` only

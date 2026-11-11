@@ -38,6 +38,20 @@ describe('dreamingTypesOf', () => {
       relationships: [],
     });
   });
+
+  it('returns no relationships without entity types', () => {
+    expect(
+      dreamingTypesOf({
+        facts: [{ type: 'preference' }],
+        entities: { nodes: [] },
+        relationships: [{ type: 'lives_in' }],
+      }).relationships
+    ).toEqual([]);
+    expect(
+      dreamingTypesOf({ facts: [{ type: 'preference' }], relationships: [{ type: 'lives_in' }] })
+        .relationships
+    ).toEqual([]);
+  });
 });
 
 describe('dreamingBuildsAnything', () => {

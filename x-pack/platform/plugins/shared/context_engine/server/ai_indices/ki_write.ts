@@ -7,9 +7,11 @@
 
 import { isEqual } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { isDreamedKiType } from '../../common/dreaming';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import type { KiLifecycleStatus, KiPartialFields } from '../../common/step_types/ki';
-import { KiDeletedError } from './errors';
+import { KiDeletedError, KiNotFoundError } from './errors';
+import { findLinkingRelationshipIds } from './ki_relationships';
 import {
   getKiRevision,
   isKiDeleted,
@@ -133,6 +135,7 @@ export const softDeleteKi = async (
     dest,
     kiId,
     backingIndex,
+    includeSource: true,
     abortSignal,
   });
   if (isKiDeleted(revision.source)) {
@@ -158,6 +161,29 @@ export const softDeleteKi = async (
     refresh,
     abortSignal,
   });
+
+  const { type } = revision.source;
+  if (typeof type === 'string' && isDreamedKiType(type)) {
+    for (const relationshipId of await findLinkingRelationshipIds({
+      esClient,
+      dest,
+      kiId,
+      abortSignal,
+    })) {
+      await softDeleteKi(esClient, {
+        aiIndexId,
+        dest,
+        kiId: relationshipId,
+        writer,
+        refresh,
+        abortSignal,
+      }).catch((error) => {
+        if (!(error instanceof KiNotFoundError)) {
+          throw error;
+        }
+      });
+    }
+  }
 
   return { id: kiId };
 };
