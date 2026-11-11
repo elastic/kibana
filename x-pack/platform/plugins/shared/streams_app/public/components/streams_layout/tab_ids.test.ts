@@ -68,6 +68,26 @@ const shippedWiredRoot = (name: string): Streams.WiredStream.Definition => {
 };
 
 describe('hasAlteredStreams', () => {
+  it('counts the complete classic definition returned by the layout scout mock', () => {
+    expect(
+      hasAlteredStreams([
+        {
+          name: 'logs-test-default',
+          description: '',
+          updated_at: '2026-01-01T00:00:00.000Z',
+          type: 'classic',
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [], updated_at: '2026-01-01T00:00:00.000Z' },
+            settings: {},
+            classic: { field_overrides: { message: { type: 'keyword' } } },
+            failure_store: { inherit: {} },
+          },
+        },
+      ])
+    ).toBe(true);
+  });
+
   it('ignores data streams that have never been edited', () => {
     expect(hasAlteredStreams([untouched('logs-nginx-default')])).toBe(false);
   });

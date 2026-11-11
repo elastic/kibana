@@ -12,7 +12,26 @@ import { test } from '../fixtures';
 
 const TAB_NAMES = ['map', 'sources', 'destinations', 'classic'];
 
-// A saved field override, so the Classic tab shows no matter what the stack's data streams are.
+/**
+ * A complete classic definition with a saved field override. `hasAlteredStreams` reads
+ * `processing`, `lifecycle`, `settings`, and `failure_store`, so a partial body throws in
+ * `select` and the tab stays up only because the query failed.
+ */
+const alteredClassicStream = {
+  name: 'logs-test-default',
+  description: '',
+  updated_at: '2026-01-01T00:00:00.000Z',
+  type: 'classic' as const,
+  ingest: {
+    lifecycle: { inherit: {} },
+    processing: { steps: [] as const, updated_at: '2026-01-01T00:00:00.000Z' },
+    settings: {},
+    classic: { field_overrides: { message: { type: 'keyword' } } },
+    failure_store: { inherit: {} },
+  },
+};
+
+// Forces the Classic tab on, independent of the stack's data streams.
 const mockStreamsList = async (page: ScoutPage) => {
   await page.route(
     (url) => url.pathname.endsWith('/api/streams'),
@@ -20,17 +39,7 @@ const mockStreamsList = async (page: ScoutPage) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({
-          streams: [
-            {
-              name: 'logs-test-default',
-              type: 'classic',
-              ingest: {
-                classic: { field_overrides: { message: { type: 'keyword' } } },
-              },
-            },
-          ],
-        }),
+        body: JSON.stringify({ streams: [alteredClassicStream] }),
       });
     }
   );
