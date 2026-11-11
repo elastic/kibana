@@ -8,10 +8,11 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { CoreStart, Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, CoreStart, Logger } from '@kbn/core/server';
 import type { NightshiftSandboxStart } from '../sandbox_audit';
 import { hydrateDecisionTreeWorkspace } from '../decision_trees/register_decision_trees';
 import { DECISION_TREE_WORKSPACE_ROOT } from '../decision_trees/materialize';
+import { parseRunMarker } from '../decision_trees/accessed_trees';
 import { degradeOnWriterFailure } from '../lib/hydrate_notification';
 import { withNightshiftBackgroundSpan } from '../tracing';
 import { unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
@@ -26,12 +27,14 @@ export const decisionTreeHydrateStepDefinition = ({
   getSandboxStart,
   getSavedObjects,
   getUiSettings,
+  analytics,
   logger,
   isEnabled,
 }: {
   getSandboxStart: () => NightshiftSandboxStart | undefined;
   getSavedObjects?: () => CoreStart['savedObjects'] | undefined;
   getUiSettings?: () => CoreStart['uiSettings'] | undefined;
+  analytics: AnalyticsServiceSetup;
   logger: Logger;
   isEnabled?: () => boolean;
 }) =>
@@ -130,6 +133,13 @@ export const decisionTreeHydrateStepDefinition = ({
         getSandboxStepCaller(context)
       );
 
+      // The reinforcement hydrate runs in a throwaway conversation. The prompt carries the
+      // investigator's ids (the hook can run on another node, so no process-local state), and those
+      // are the ids telemetry must join back to.
+      const investigatorIds = parseRunMarker(prompt);
+      const telemetryConversationId = investigatorIds?.conversationId ?? conversationId;
+      const telemetryRoundId = investigatorIds?.roundId;
+
       context.logger.info(`Hydrating decision trees into sandbox ${sandboxId} (space ${spaceId})`);
 
       // A failed write degrades to a system_update line rather than a failed step: this
@@ -159,6 +169,9 @@ export const decisionTreeHydrateStepDefinition = ({
                   spaceId,
                   prompt,
                   signal,
+                  analytics,
+                  conversationId: telemetryConversationId,
+                  roundId: telemetryRoundId,
                 }),
               HYDRATE_TIMEOUT_MS,
               `Decision tree hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`

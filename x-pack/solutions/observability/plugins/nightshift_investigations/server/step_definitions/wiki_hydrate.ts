@@ -38,7 +38,7 @@ export const wikiHydrateStepDefinition = ({
 }) =>
   createServerStepDefinition({
     id: 'nightshift.wikiHydrate',
-    label: 'Hydrate Nightshift Wiki into Sandbox',
+    label: 'Hydrate nightshift Wiki into Sandbox',
     category: StepCategory.Ai,
     description:
       'Writes the current Wiki into /workspace/wiki for the sandbox obtained ' +

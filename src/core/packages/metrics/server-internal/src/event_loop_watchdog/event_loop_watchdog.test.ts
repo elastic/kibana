@@ -163,6 +163,72 @@ describe('EventLoopWatchdog', () => {
     expect(slots()[Slot.runningSince]).toBeGreaterThan(0n);
   });
 
+  it('starts with CPU profiling disabled', () => {
+    create().start();
+    expect(slots()[Slot.profiling]).toBe(0n);
+  });
+
+  it('updates CPU profiling state without restarting the worker', () => {
+    const watchdog = create();
+    watchdog.start();
+    watchdog.setProfiling(true);
+    expect(slots()[Slot.profiling]).toBe(1n);
+    watchdog.setProfiling(false);
+    expect(slots()[Slot.profiling]).toBe(0n);
+    expect(createWorker).toHaveBeenCalledTimes(1);
+    expect(worker.stop).not.toHaveBeenCalled();
+  });
+
+  it('carries profiling over to a worker started later', async () => {
+    const watchdog = create();
+    watchdog.setProfiling(true);
+    watchdog.start();
+    expect(slots()[Slot.profiling]).toBe(1n);
+    const stopped = watchdog.stop();
+    watchdog.setProfiling(false);
+    watchdog.setProfiling(true);
+    resolveStop();
+    await stopped;
+    watchdog.start();
+    expect(slots(1)[Slot.profiling]).toBe(1n);
+  });
+
+  describe('profiling log line', () => {
+    const ON = 'Event loop watchdog profiling on for this node';
+    const OFF = 'Event loop watchdog profiling off for this node';
+    const profilingLines = () =>
+      logger.info.mock.calls
+        .map(([message]) => message)
+        .filter((message) => String(message).includes('profiling o'));
+
+    it('logs each change while the worker runs', () => {
+      const watchdog = create();
+      watchdog.start();
+      watchdog.setProfiling(true);
+      watchdog.setProfiling(true);
+      watchdog.setProfiling(false);
+      expect(profilingLines()).toEqual([ON, OFF]);
+    });
+
+    it('logs nothing while the worker is stopped, and on once it starts', () => {
+      const watchdog = create();
+      watchdog.setProfiling(true);
+      expect(profilingLines()).toEqual([]);
+      watchdog.start();
+      expect(profilingLines()).toEqual([ON]);
+    });
+
+    it('logs off when the worker stops', async () => {
+      const watchdog = create();
+      watchdog.start();
+      watchdog.setProfiling(true);
+      const stopped = watchdog.stop();
+      expect(profilingLines()).toEqual([ON, OFF]);
+      resolveStop();
+      await stopped;
+    });
+  });
+
   it('stops the heartbeat and the worker', async () => {
     const watchdog = create();
     watchdog.start();
