@@ -968,7 +968,11 @@ const buildEntry = ({
     data: {
       ...chrome,
       ...(summary.length > 0 ? { summary } : {}),
-      ...(detections.length > 0 ? { basis, detections } : {}),
+      // `detections` is written even when empty: the reader treats a stored array as
+      // authoritative and derives from the report-wide `per_ioc` only when it is absent,
+      // so an entry with nothing in scope cannot pick up another technique's IOCs.
+      detections,
+      ...(detections.length > 0 ? { basis } : {}),
       source_watch: SOURCE_WATCH_MANAGED_ID,
       capability: CAPABILITY_ID,
       run_id: result.run_id,

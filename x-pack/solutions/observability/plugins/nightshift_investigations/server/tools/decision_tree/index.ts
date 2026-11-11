@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type {
+  AnalyticsServiceSetup,
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { LearningRecord } from '@kbn/nightshift-decision-trees';
 import type { NightshiftSandboxStart } from '../../sandbox_audit';
 import { createDecisionTreeStore } from '../../decision_trees/store';
 import { createLearningStore } from '../../decision_trees/learning_store';
 import type { AppliedWriteRecord, WriteProvenance } from '../../investigation_round';
+import { createDecisionTreeTelemetry } from '../../telemetry';
 import {
   RECORD_REMEDIATION_TOOL_ID,
   RECORD_SYSTEM_LEARNING_TOOL_ID,
@@ -127,12 +133,14 @@ export const createDecisionTreeTools = ({
   connectorNames,
   getSpaceId,
   getUsername,
+  analytics,
   logger,
 }: {
   getSandboxStart: () => NightshiftSandboxStart | undefined;
   connectorNames: readonly string[];
   getSpaceId: (request: KibanaRequest) => string;
   getUsername?: (request: KibanaRequest) => string | undefined;
+  analytics: AnalyticsServiceSetup;
   logger: Logger;
 }): Array<BuiltinToolDefinition<never>> => {
   const getTreeStore = (esClient: ElasticsearchClient, request: KibanaRequest) =>
@@ -182,6 +190,8 @@ export const createDecisionTreeTools = ({
       getStore: getTreeStore,
       getSpaceId,
       getUsername,
+      getTelemetry: (conversationId, roundId) =>
+        createDecisionTreeTelemetry({ analytics, conversationId, roundId, logger }),
       peekLearnings,
       drainLearnings,
       getProvenance,
