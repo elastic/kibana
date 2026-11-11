@@ -26425,7 +26425,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema'
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-with-scripted-fields-schema'
                     description: The data view definition.
                   id:
                     description: The ID of the data view.
@@ -26565,7 +26565,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema'
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-with-scripted-fields-schema'
                     description: The data view definition.
                   id:
                     description: The ID of the data view.
@@ -26705,7 +26705,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema'
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-with-scripted-fields-schema'
                     description: The data view definition.
                   id:
                     description: The ID of the data view.
@@ -26771,7 +26771,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema'
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-with-scripted-fields-schema'
                     description: The data view definition.
                   id:
                     description: The ID of the data view.
@@ -167962,9 +167962,9 @@ components:
         - fields
       title: Saved composite runtime field
       type: object
-    Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema:
+    Kibana_HTTP_APIs_kbn-saved-data-view-spec-with-scripted-fields-schema:
       additionalProperties: false
-      description: Defines an stored data source with a mandatory index pattern and optional settings like id, name, show hidden indices and field settings.
+      description: A stored data view, including its deprecated scripted fields when it has any.
       properties:
         allow_hidden_indices:
           description: When `true`, allows the data view to match hidden indices.
@@ -167992,11 +167992,17 @@ components:
           minLength: 1
           title: Data view name
           type: string
+        scripted_fields:
+          additionalProperties:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-scripted-field-schema'
+          description: Deprecated scripted fields, keyed by field name. This property is returned for backwards compatibility and is ignored when creating or updating a data view.
+          title: Scripted fields
+          type: object
         time_field:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-time-field-schema'
       required:
         - index_pattern
-      title: Saved data view spec
+      title: Saved data view spec with scripted fields
       type: object
     Kibana_HTTP_APIs_kbn-saved-field-settings-entry:
       anyOf:
@@ -168040,6 +168046,40 @@ components:
       required:
         - type
       title: Saved runtime field
+      type: object
+    Kibana_HTTP_APIs_kbn-saved-scripted-field-schema:
+      additionalProperties: false
+      description: A deprecated scripted field. Scripted fields are evaluated at query time by Elasticsearch and are read-only in this API.
+      properties:
+        custom_description:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-custom-description'
+        custom_label:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-custom-label'
+        format:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format'
+        lang:
+          description: 'The language of the script. Example: "painless".'
+          maxLength: 1000
+          minLength: 1
+          title: Script language
+          type: string
+        popularity:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-runtime-field-popularity'
+        script:
+          description: The script that computes the value of the scripted field. Scripted fields are deprecated; use runtime fields instead.
+          minLength: 1
+          title: Script
+          type: string
+        type:
+          description: The Kibana field type of the scripted field (e.g., "string", "number", "date", "boolean", "ip", "geo_point").
+          maxLength: 1000
+          minLength: 1
+          title: Type
+          type: string
+      required:
+        - type
+        - script
+      title: Saved scripted field
       type: object
     Kibana_HTTP_APIs_kbn-tags-attributes:
       additionalProperties: false
