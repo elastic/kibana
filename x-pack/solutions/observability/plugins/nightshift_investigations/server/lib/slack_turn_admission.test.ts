@@ -51,7 +51,7 @@ describe('createSlackTurnAdmissionCheck', () => {
       expect(isBoom(error) && error.output.statusCode).toBe(429);
       expect(error.output.headers[USER_FACING_ERROR_HEADER]).toBe('true');
       expect(error.message).toBe(
-        `${reached}. An admin can raise it in [Nightshift settings](https://kibana.example/s/default/app/nightshift/settings).`
+        `${reached}. An admin can raise it in [nightshift settings](https://kibana.example/s/default/app/nightshift/settings).`
       );
     }
   );
@@ -62,7 +62,7 @@ describe('createSlackTurnAdmissionCheck', () => {
     const error = await admit(NIGHTSHIFT_ASSISTANT_AGENT_ID, callback).catch((e) => e);
 
     expect(error.message).toBe(
-      'The daily limit of 10 for all investigations has been reached. An admin can raise it in [Nightshift settings](https://kibana.example/s/default/app/nightshift/settings).'
+      'The daily limit of 10 for all investigations has been reached. An admin can raise it in [nightshift settings](https://kibana.example/s/default/app/nightshift/settings).'
     );
   });
 

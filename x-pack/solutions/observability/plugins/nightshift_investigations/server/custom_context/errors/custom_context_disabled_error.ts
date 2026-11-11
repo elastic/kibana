@@ -7,7 +7,7 @@
 
 export class CustomContextDisabledError extends Error {
   constructor() {
-    super('Custom context is unavailable: Nightshift is not enabled.');
+    super('Custom context is unavailable: nightshift is not enabled.');
     this.name = 'CustomContextDisabledError';
   }
 }

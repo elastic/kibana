@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { internalTools } from '@kbn/agent-builder-common/tools';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import type { AvailabilityConfig } from '@kbn/agent-builder-server/availability';
 import {
   ACTION_POLICY_AUTHORING_SKILL_ID,
+  ALERTING_API_IDS,
   ALERTING_TOOL_IDS,
   ALERTING_V2_ENABLED_SETTING_ID,
 } from '@kbn/alerting-v2-constants';
 import { attachActionPolicyTool } from '../tools/attach_action_policy';
 import type { AttachActionPolicyToolDeps } from '../tools/attach_action_policy';
-import { findActionPoliciesTool } from '../tools/find_action_policies';
-import type { FindActionPoliciesToolDeps } from '../tools/find_action_policies';
 import { manageActionPolicyTool } from '../tools/manage_action_policy';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
 import {
@@ -43,7 +43,6 @@ export {
 };
 
 type ActionPolicyAuthoringSkillDeps = ManageActionPolicyToolDeps &
-  FindActionPoliciesToolDeps &
   AttachActionPolicyToolDeps & {
     availability: AvailabilityConfig;
   };
@@ -127,11 +126,16 @@ An action policy is a **space-scoped saved object** that controls how alerts are
 
 ## Action Policy Discovery
 
-When a user asks about existing action policies:
-- Search with ${
-      ALERTING_TOOL_IDS.findActionPolicies
-    }, using keywords like the policy name. Omit \`search\` for a broad listing and page with \`page\` and \`perPage\`.
-- Summarize matches: name, enabled/disabled, destination count, matcher snippet, grouping mode.
+When a user asks about existing action policies, read them with the Kibana API tools:
+- To list or search, call ${internalTools.describeApi} for \`${
+      ALERTING_API_IDS.listActionPolicies
+    }\` to confirm its params, then call ${internalTools.executeApi} with \`target: "kibana"\`.
+- Use \`search\` with keywords from the user's request; it matches the policy name and description only. For exact conditions use \`filter\` (KQL on \`id\`, \`name\`, \`description\`, \`enabled\`). For a broad listing, omit both. Page with \`page\` and \`per_page\`, and keep \`per_page\` small: the API returns full policy objects.
+- To read a single policy, call ${internalTools.executeApi} for \`${
+      ALERTING_API_IDS.getActionPolicy
+    }\` with the policy \`id\`.
+- Summarize matches in plain language: name, enabled/disabled, destination count, matcher snippet, grouping mode.
+- Do **not** attach policies by default when only listing or comparing.
 - To inspect or edit a saved policy, attach it with ${
       ALERTING_TOOL_IDS.attachActionPolicy
     } using the policy \`id\`.
@@ -262,9 +266,5 @@ When the user asks how a notification gets from a rule firing to email/Slack, co
 
 ### Workflow Dispatch Payload
 When choosing Liquid variables for a notification workflow, including query-specific \`alert.data.*\` fields, consult the [workflow-dispatch-payload reference](./references/workflow-dispatch-payload.md).`,
-    getInlineTools: () => [
-      manageActionPolicyTool(deps),
-      findActionPoliciesTool(deps),
-      attachActionPolicyTool(deps),
-    ],
+    getInlineTools: () => [manageActionPolicyTool(deps), attachActionPolicyTool(deps)],
   });

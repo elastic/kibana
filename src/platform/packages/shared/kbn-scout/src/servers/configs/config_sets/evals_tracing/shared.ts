@@ -99,6 +99,8 @@ export const withEvalsTracing = (baseConfig: ScoutServerConfig): ScoutServerConf
         '--xpack.evals.enabled=true',
         // Suites ingest scores and read datasets through the evals routes.
         '--xpack.evals.mode=full',
+        // Documentation evals install and score the real product documentation, not the test stub
+        '--xpack.productDocBase.artifactRepositoryUrl=https://kibana-knowledge-base-artifacts.elastic.co',
         ...(shouldEnableTracing
           ? [
               '--elastic.apm.active=false',

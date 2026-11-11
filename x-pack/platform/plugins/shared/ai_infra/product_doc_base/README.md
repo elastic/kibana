@@ -127,6 +127,10 @@ On serverless the plugin uses that directory as a `file://` artifact repository 
 ```yaml
 xpack.productDocBase.useBundledArtifacts: false
 ```
+A `file://` URL pointing at a directory with a bucket `index.xml` and the zips is also accepted. Scout and FTR test
+servers default to the tiny stub repository shipped in `@kbn/test-kibana-server` (`PRODUCT_DOC_STUB_REPOSITORY_URL`)
+so that CI never downloads the real artifacts; a suite that needs the real documentation must set the CDN URL in its
+own config.
 
 Artifact naming conventions:
 

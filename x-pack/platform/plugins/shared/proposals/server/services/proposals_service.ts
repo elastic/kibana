@@ -261,6 +261,9 @@ export class ProposalsService {
       impact,
       confidence,
       category,
+      // The producer's call, not this service's: only it knows whether declining what it
+      // proposes is a judgement that has to be justified.
+      skipDiscardReason: params.skipDiscardReason,
       origin: params.origin,
       gate,
       ...toSortRanks({ impact, confidence }),
