@@ -291,6 +291,26 @@ describe('policy settings', () => {
       ).toBe(true);
     });
 
+    it('ignores the order of the list, but still sends it in the order chosen', () => {
+      expect(
+        detectPolicySettingsDrift(
+          { [key]: ['logs-b-default', 'logs-a-default'] },
+          { [key]: ['logs-a-default', 'logs-b-default'] },
+          'agent_based'
+        )
+      ).toBe(false);
+      expect(
+        detectPolicySettingsDrift(
+          { [key]: ['logs-b-default', 'logs-a-default'] },
+          { [key]: ['logs-a-default'] },
+          'agent_based'
+        )
+      ).toBe(true);
+      expect(
+        getPolicySettingsUpdate({ [key]: ['logs-b-default', 'logs-a-default'] }, 'agent_based')
+      ).toEqual({ [key]: ['logs-b-default', 'logs-a-default'] });
+    });
+
     it('is not dirty for the same list entered differently, or an empty list and none', () => {
       expect(
         detectPolicySettingsDrift(

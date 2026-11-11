@@ -71,9 +71,9 @@ const isEmptySetting = (value: unknown): boolean =>
 
 /**
  * Strings are trimmed (Step 2 keeps what was typed, so a space typed mid-edit is not eaten). In a
- * list, each entry is trimmed and blank or repeated ones are dropped, so the same permissions
- * compare equal however they were entered. A list with a non-string entry is left as it is for
- * `isValid` to reject.
+ * list, each entry is trimmed and blank or repeated ones are dropped, and the order the user chose
+ * is kept (it is what Step 2 shows again on resume). A list with a non-string entry is left as it
+ * is for `isValid` to reject.
  */
 const normalizeSetting = (value: unknown): unknown => {
   if (typeof value === 'string') return value.trim();
@@ -200,6 +200,18 @@ export const getPolicyVarSettingsUpdate = (
   ) as Record<string, string | null>;
 
 /**
+ * A list is a set of permissions, so for the drift check only its entries count, not their order:
+ * removing and re-adding one in another position must not mark the deployment dirty.
+ */
+const withSortedLists = (settings: PolicySettings): Record<string, unknown> =>
+  Object.fromEntries(
+    Object.entries(settings).map(([key, value]) => [
+      key,
+      Array.isArray(value) ? [...value].sort() : value,
+    ])
+  );
+
+/**
  * Whether the settings that apply to the deployment method differ from the ones saved with the
  * last deploy. Settings of other methods are ignored, so one left over from a method switch does
  * not mark the deployment dirty.
@@ -209,4 +221,7 @@ export const detectPolicySettingsDrift = (
   saved: PolicySettingsSource,
   method: DeploymentMethod
 ): boolean =>
-  !isEqual(pickSettings(current, getKeys(method)), pickSettings(saved, getKeys(method)));
+  !isEqual(
+    withSortedLists(pickSettings(current, getKeys(method))),
+    withSortedLists(pickSettings(saved, getKeys(method)))
+  );
