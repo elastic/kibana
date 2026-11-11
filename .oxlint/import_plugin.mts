@@ -88,6 +88,7 @@ export const importPluginOverrides: OxlintOverride[] = [
       'x-pack/solutions/*/test/api_integration_deployment_agnostic/*configs/**/*',
       'x-pack/solutions/*/test/alerting_api_integration/**/*',
       'x-pack/solutions/*/test/serverless/*/configs/**/*',
+      'x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/{apps,configs}/**/*',
       'x-pack/platform/test/saved_object_api_integration/*/apis/**/*',
       'x-pack/platform/test/ui_capabilities/*/tests/**/*',
       'x-pack/platform/test/upgrade_assistant_integration/**/*',
@@ -170,6 +171,7 @@ export const importPluginOverrides: OxlintOverride[] = [
     files: inDirs([
       'x-pack/solutions/security/packages/test-api-clients',
       'x-pack/solutions/security/packages/kbn-security-evals-matrix',
+      'x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint',
     ]),
     rules: {
       'import/no-nodejs-modules': 'off',

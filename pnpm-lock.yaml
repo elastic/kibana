@@ -5785,7 +5785,7 @@ importers:
         version: link:src/platform/packages/private/kbn-optimizer-webpack-helpers
       '@kbn/osquery-plugin-cypress':
         specifier: workspace:*
-        version: link:x-pack/platform/plugins/shared/osquery/cypress
+        version: link:x-pack/platform/packages/private/osquery-plugin-cypress
       '@kbn/otel-demo':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-otel-demo
@@ -6025,7 +6025,7 @@ importers:
         version: link:x-pack/solutions/security/test
       '@kbn/test-suites-xpack-security-endpoint':
         specifier: workspace:*
-        version: link:x-pack/solutions/security/test/security_solution_endpoint
+        version: link:x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint
       '@kbn/test-suites-xpack-vectordb':
         specifier: workspace:*
         version: link:x-pack/solutions/vectordb/test
@@ -9006,6 +9006,7 @@ importers:
 
   x-pack/platform/packages/private/ml/validators: {}
 
+  x-pack/platform/packages/private/osquery-plugin-cypress: {}
   x-pack/platform/packages/private/rollup: {}
 
   x-pack/platform/packages/private/security/authorization_core: {}
@@ -9538,7 +9539,6 @@ importers:
 
   x-pack/platform/plugins/shared/osquery: {}
 
-  x-pack/platform/plugins/shared/osquery/cypress: {}
 
   x-pack/platform/plugins/shared/proposals: {}
 
@@ -9898,6 +9898,7 @@ importers:
 
   x-pack/solutions/security/packages/kbn-securitysolution-utils: {}
 
+  x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint: {}
   x-pack/solutions/security/packages/navigation: {}
 
   x-pack/solutions/security/packages/security-ai-prompts: {}
@@ -9958,7 +9959,6 @@ importers:
 
   x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response: {}
 
-  x-pack/solutions/security/test/security_solution_endpoint: {}
 
   x-pack/solutions/security/test_plugins/resolver_test: {}
 

@@ -6,8 +6,7 @@
  */
 
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import type { Config } from '@kbn/test';
-import type { FtrConfigProviderContext } from '@kbn/test';
+import type { Config, FtrConfigProviderContext } from '@kbn/test';
 import { SecuritySolutionEndpointRegistryHelpers } from '../services/endpoint_registry_helpers';
 import type { TargetTags } from '../target_tags';
 import type { PageObjects } from '../page_objects';
