@@ -64,7 +64,7 @@ export function ShowMoreButton({
           &:hover:not(:disabled),
           &:focus,
           &:focus-visible {
-            background: ${euiTheme.colors.backgroundBaseSubdued};
+            background: ${euiTheme.colors.backgroundBaseInteractiveHover};
             text-decoration: none;
           }
         }
