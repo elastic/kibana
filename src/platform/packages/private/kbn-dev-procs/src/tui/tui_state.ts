@@ -109,26 +109,39 @@ export type ValueEditTarget =
   | { readonly type: 'setting'; readonly row: SettingRow }
   | { readonly type: 'toolArgs' };
 
+/** The sidebar lists the processes in the order they start, then the tools alphabetically. */
+const getViews = (
+  statuses: readonly ProcessStatus[],
+  tools: readonly string[]
+): readonly string[] => [
+  ALL,
+  ...statuses.map(({ id }) => id).filter((id) => !tools.includes(id)),
+  ...tools,
+];
+
 export const createTuiState = (
   statuses: readonly ProcessStatus[],
-  tools: readonly string[] = []
-): TuiState => ({
-  views: [ALL, ...statuses.map(({ id }) => id)],
-  tools,
-  selected: ALL,
-  statuses: Object.fromEntries(statuses.map((status) => [status.id, status])),
-  lines: [],
-  scrollOffset: 0,
-  query: '',
-  isEditingQuery: false,
-  isQuitting: false,
-  pane: 'logs',
-  settings: {},
-  settingsScroll: 0,
-  settingsCursor: 0,
-  settingsVersion: 0,
-  pendingRestart: [],
-});
+  unsortedTools: readonly string[] = []
+): TuiState => {
+  const tools = [...unsortedTools].sort((a, b) => a.localeCompare(b));
+  return {
+    views: getViews(statuses, tools),
+    tools,
+    selected: ALL,
+    statuses: Object.fromEntries(statuses.map((status) => [status.id, status])),
+    lines: [],
+    scrollOffset: 0,
+    query: '',
+    isEditingQuery: false,
+    isQuitting: false,
+    pane: 'logs',
+    settings: {},
+    settingsScroll: 0,
+    settingsCursor: 0,
+    settingsVersion: 0,
+    pendingRestart: [],
+  };
+};
 
 export { toDisplayText } from '../ansi';
 

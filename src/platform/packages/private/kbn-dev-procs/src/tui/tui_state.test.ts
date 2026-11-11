@@ -328,6 +328,15 @@ describe('tools', () => {
   const keyPress = (state: TuiState, input: string, key: Partial<InkKey> = {}) =>
     handleKey(state, input, { ...noKey, ...key }, SIZE);
 
+  it('lists the processes in the order they start, then the tools alphabetically', () => {
+    const state = createTuiState(
+      ['es', 'kibana', 'synthtrace', 'connector-emulator', 'mcp'].map((id) => status(id)),
+      ['synthtrace', 'connector-emulator', 'mcp']
+    );
+    expect(state.views).toEqual([ALL, 'es', 'kibana', 'connector-emulator', 'mcp', 'synthtrace']);
+    expect(state.tools).toEqual(['connector-emulator', 'mcp', 'synthtrace']);
+  });
+
   it('asks for the arguments of a stopped tool before starting it', () => {
     const state = withTool();
     expect(state.selected).toBe('synthtrace');
