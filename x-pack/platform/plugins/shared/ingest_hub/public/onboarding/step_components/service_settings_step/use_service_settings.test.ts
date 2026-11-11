@@ -1282,3 +1282,76 @@ describe('useServiceSettings — proxy URL', () => {
     expect(result.current.isReady).toBe(true);
   });
 });
+
+// --- reroute permissions ---
+
+describe('useServiceSettings — reroute permissions', () => {
+  const regular = makeEntry('svc_r', {
+    dataStreams: [],
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+  });
+  const ecfOnly = makeEntry('svc_e', {
+    dataStreams: [],
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
+  });
+
+  const render = (
+    deploymentMethod: 'agent_based' | 'managed_integration' | 'ecf',
+    entries: AwsServiceMatrixEntry[]
+  ) => {
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: entries.map((e) => e.id) },
+      removeDeployInstance: jest.fn(),
+      awsServicesMap: new Map(entries.map((e) => [e.id, e])),
+      deploymentMethod,
+      setServiceSettingsMethod: jest.fn(),
+    } as unknown as ReturnType<typeof useOnboardingFlow>);
+    return renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+  };
+
+  it.each(['agent_based', 'managed_integration'] as const)('is offered for %s', (method) => {
+    expect(render(method, [regular]).result.current.isReroutePermissionsSupported).toBe(true);
+  });
+
+  it('is not offered for ECF', () => {
+    expect(render('ecf', [regular]).result.current.isReroutePermissionsSupported).toBe(false);
+  });
+
+  it('is not offered under managed integration when every service is ECF-only', () => {
+    expect(
+      render('managed_integration', [ecfOnly]).result.current.isReroutePermissionsSupported
+    ).toBe(false);
+  });
+
+  it('is offered under managed integration when one service of several gets a policy', () => {
+    expect(
+      render('managed_integration', [ecfOnly, regular]).result.current.isReroutePermissionsSupported
+    ).toBe(true);
+  });
+
+  it('is offered under agent-based for an ECF-only service, which agent-based deploys too', () => {
+    expect(render('agent_based', [ecfOnly]).result.current.isReroutePermissionsSupported).toBe(
+      true
+    );
+  });
+
+  it('does not block Continue with a leftover invalid value where the field is hidden', () => {
+    const { result } = render('managed_integration', [ecfOnly]);
+    act(() => result.current.setGlobalRegion('us-east-1'));
+    act(() => result.current.setIntegrationName('my-aws'));
+    act(() => result.current.setPolicySetting('additional_datastreams_permissions', ['foo-bar']));
+
+    expect(result.current.reroutePermissionsError).toBeUndefined();
+    expect(result.current.isReady).toBe(true);
+  });
+
+  it('blocks Continue with an invalid value where the field is shown', () => {
+    const { result } = render('agent_based', [regular]);
+    act(() => result.current.setGlobalRegion('us-east-1'));
+    act(() => result.current.setIntegrationName('my-aws'));
+    act(() => result.current.setPolicySetting('additional_datastreams_permissions', ['foo-bar']));
+
+    expect(result.current.reroutePermissionsError).toBeDefined();
+    expect(result.current.isReady).toBe(false);
+  });
+});

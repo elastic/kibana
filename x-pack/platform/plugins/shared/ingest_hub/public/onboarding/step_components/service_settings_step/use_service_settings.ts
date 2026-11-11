@@ -599,12 +599,19 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   const proxyUrl = policySettings.proxy_url ?? '';
   const proxyUrlError = isProxyUrlSupported ? getProxyUrlError(proxyUrl) : undefined;
 
-  // The reroute permissions apply to every policy of the deployment methods that send them, so
-  // the field is shown for any selection. Elsewhere a value left over from another method must not
-  // block Continue.
-  const isReroutePermissionsSupported = supportsPolicySetting(
-    'additional_datastreams_permissions',
-    deploymentMethod
+  // The reroute permissions reach every package policy of the deployment methods that send them,
+  // so any selected service that gets a policy is enough. Under managed integration an ECF-only
+  // service gets none (it is deployed through CloudFormation), so with only such services the
+  // field would do nothing. Elsewhere the field is hidden, so a value left over from another
+  // method or selection must not block Continue.
+  const isReroutePermissionsSupported = useMemo(
+    () =>
+      supportsPolicySetting('additional_datastreams_permissions', deploymentMethod) &&
+      instances.some((inst) => {
+        const service = awsServicesMap?.get(inst.serviceId);
+        return !!service && supportsIntegrationSettings(service, deploymentMethod);
+      }),
+    [instances, awsServicesMap, deploymentMethod]
   );
   const reroutePermissions = policySettings.additional_datastreams_permissions ?? [];
   const reroutePermissionsError = isReroutePermissionsSupported
