@@ -19,8 +19,7 @@ import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
-// Failing: See https://github.com/elastic/kibana/issues/206205
-describe.skip(
+describe(
   'Automated Response Actions',
   {
     tags: ['@ess', '@serverless'],
@@ -88,12 +87,15 @@ describe.skip(
       waitForAlertsToPopulate(1, 2000, 120000);
 
       cy.getByTestSubj('expand-event').first().click();
-      cy.getByTestSubj('securitySolutionFlyoutNavigationExpandDetailButton').click();
-      cy.getByTestSubj('securitySolutionFlyoutResponseTab').click();
+      // The Response section is collapsed by default; its button opens the response tool.
+      cy.getByTestSubj('securitySolutionFlyoutResponseSectionHeader').click();
+      cy.getByTestSubj('securitySolutionFlyoutResponseButton').click();
 
-      cy.contains(/isolate is pending|isolate completed successfully/g);
-      cy.contains(/kill-process is pending|kill-process completed successfully/g);
-      cy.contains('The action was called with a non-existing event field name: entity_id');
+      cy.getByTestSubj('securitySolutionFlyoutResponseDetails').within(() => {
+        cy.contains(/isolate is pending|isolate completed successfully/g);
+        cy.contains(/kill-process is pending|kill-process completed successfully/g);
+        cy.contains('The action was called with a non-existing event field name: entity_id');
+      });
     });
   }
 );

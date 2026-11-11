@@ -50,6 +50,19 @@ export const browserDocuments = (start: number, end: number) => [
 /** The documents of one application, by its exact name. */
 export const serviceDocuments = (serviceName: string) => termQuery(SERVICE_NAME, serviceName);
 
+/** The browser SDK documents of one application in the time range. */
+export const applicationDocuments = ({
+  serviceName,
+  start,
+  end,
+}: {
+  serviceName: string;
+  start: number;
+  end: number;
+}) => {
+  return [...browserDocuments(start, end), ...serviceDocuments(serviceName)];
+};
+
 /** A filter aggregation counting the documents of one event, e.g. the page loads. */
 export const eventCount = (eventName: string) => ({
   filter: { bool: { filter: termQuery(OTEL_EVENT_NAME, eventName) } },
@@ -73,9 +86,11 @@ export const otelSearchDefaults = (index: string) => ({
 });
 
 /** Up to 100 environments for the picker, whatever the selected one, and `aggs` in that one. */
-export const byEnvironment = (
+export const byEnvironment = <
+  TAggs extends Record<string, estypes.AggregationsAggregationContainer>
+>(
   environment: string | undefined,
-  aggs: Record<string, estypes.AggregationsAggregationContainer>
+  aggs: TAggs
 ) => ({
   ...environmentTerms(MAX_ENVIRONMENTS),
   environmentNotDefined: { filter: environmentNotDefinedFilter(ENVIRONMENT_FIELDS) },

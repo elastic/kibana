@@ -146,29 +146,16 @@ describe('Nightshift investigation agent type', () => {
     expect(base.tools?.[0]?.tool_ids).toEqual([TIME_CONVERTER_TOOL_ID, SLACK_READ_TOOL_ID]);
   });
 
-  it('allow-lists the telemetry connector when one is configured', async () => {
+  it('adds inherited connectors to the allow-list when a resolver is given', async () => {
     const base = await baseFor(
       getInvestigationAgentType({
         sandboxEnabled: true,
         cortexEnabled: true,
-        telemetryConnectorId: 'elasticsearch-telemetry',
+        getInheritedConnectorIds: async () => ['github', 'elasticsearch', 'github'],
       })
     );
 
-    expect(base.connector_ids).toEqual(['elasticsearch-telemetry']);
-  });
-
-  it('adds inherited connectors to the telemetry allow-list when a resolver is given', async () => {
-    const base = await baseFor(
-      getInvestigationAgentType({
-        sandboxEnabled: true,
-        cortexEnabled: true,
-        telemetryConnectorId: 'elasticsearch-telemetry',
-        getInheritedConnectorIds: async () => ['github', 'elasticsearch-telemetry'],
-      })
-    );
-
-    expect(base.connector_ids).toEqual(['elasticsearch-telemetry', 'github']);
+    expect(base.connector_ids).toEqual(['github', 'elasticsearch']);
   });
 
   it('offers only the time converter and the Slack read tool when the sandbox is not configured', async () => {
@@ -197,23 +184,15 @@ describe('Nightshift investigation agent type', () => {
     }
   });
 
-  it("runs its hooks through the space's bound hook entry points and keeps its telemetry connectors", async () => {
+  it("runs its hooks through the space's bound hook entry points", async () => {
     const base = await baseFor(
       getInvestigationAgentType({
         sandboxEnabled: true,
         cortexEnabled: true,
-        telemetryConfig: {
-          telemetry_connector_id: 'legacy',
-          telemetry_targets: {
-            c0: { connector_id: 'c0-telemetry' },
-            orca: { connector_id: 'orca-telemetry' },
-          },
-        },
       }),
       'sa-a'
     );
 
-    expect(base.connector_ids).toEqual(['legacy', 'c0-telemetry', 'orca-telemetry']);
     expect(base.workflow_ids).toEqual([
       'system-nightshift-sandbox-materialize-workspace-bound-sa-a',
     ]);
@@ -279,20 +258,9 @@ describe('Nightshift investigation agent type', () => {
   });
 });
 
-it('allows configured telemetry connectors on the single investigator type', async () => {
+it('starts with no connectors: they come from the connectors users assign', async () => {
   const base = await baseFor(
-    getInvestigationAgentType({
-      sandboxEnabled: true,
-      cortexEnabled: false,
-      telemetryConfig: {
-        telemetry_connector_id: 'legacy',
-        telemetry_targets: {
-          c0: { connector_id: 'customer0' },
-          orca: { connector_id: 'orca' },
-          alias: { connector_id: 'orca' },
-        },
-      },
-    })
+    getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: false })
   );
-  expect(base.connector_ids).toEqual(['legacy', 'customer0', 'orca']);
+  expect(base.connector_ids).toEqual([]);
 });

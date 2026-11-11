@@ -1,5 +1,5 @@
 {
-  "sha1": "0087b84fa57e436571a9ad10767a3a004773bb54",
+  "sha1": "dc5384b7b2488377402e48675860fad3bfc9fb4f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -376,7 +376,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/service_account_setup.spec.ts",
-        "line": 46,
+        "line": 47,
         "column": 50
       }
     },
@@ -392,7 +392,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/service_account_setup.spec.ts",
-        "line": 54,
+        "line": 55,
         "column": 16
       }
     },
@@ -408,7 +408,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/service_account_setup.spec.ts",
-        "line": 67,
+        "line": 68,
         "column": 33
       }
     },
@@ -424,8 +424,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/service_account_setup.spec.ts",
-        "line": 88,
+        "line": 89,
         "column": 7
+      }
+    },
+    {
+      "id": "4f4f5d44815329f-d79036cdd124ec8",
+      "title": "Nightshift service account setup refuses to set a space up for a Nightshift manager without Manage engines",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/service_account_setup.spec.ts",
+        "line": 97,
+        "column": 13
       }
     },
     {
@@ -440,8 +456,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/service_account_setup.spec.ts",
-        "line": 95,
-        "column": 75
+        "line": 114,
+        "column": 15
       }
     },
     {
@@ -456,8 +472,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/service_account_setup.spec.ts",
-        "line": 104,
-        "column": 16
+        "line": 119,
+        "column": 44
       }
     },
     {
@@ -472,8 +488,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/service_account_setup.spec.ts",
-        "line": 112,
-        "column": 15
+        "line": 131,
+        "column": 25
       }
     },
     {

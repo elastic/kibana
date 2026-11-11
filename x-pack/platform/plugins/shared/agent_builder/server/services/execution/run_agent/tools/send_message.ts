@@ -126,8 +126,9 @@ export const createSendMessageTool = ({
           effortLevel: effort as EffortLevel,
           inferenceFeatureId: inferenceFeatureIdBySubagent?.get(entry.agent_id),
         });
+        const agentId = entry.agent_id === SELF_AGENT_ID ? ownerAgentId : entry.agent_id;
         const { executionId, events$ } = await subAgentExecutor.sendToSubAgent({
-          agentId: entry.agent_id === SELF_AGENT_ID ? ownerAgentId : entry.agent_id,
+          agentId,
           parentExecutionId,
           conversationId: entry.conversation_id,
           prompt,
@@ -140,7 +141,7 @@ export const createSendMessageTool = ({
         });
 
         if (run_in_background) {
-          backgroundExecutionService?.registerExecution(executionId);
+          backgroundExecutionService?.registerExecution(executionId, agentId);
           return {
             results: [
               createOtherResult({

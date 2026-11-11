@@ -12,7 +12,6 @@ import {
   AgentExecutionMode,
   ChatTriggerMode,
   EventActorType,
-  ExecutionStatus,
   isBackgroundExecutionAlreadyReportedError,
   isConversationBusyError,
   isConversationNotFoundError,
@@ -30,6 +29,7 @@ import {
   wakeParentTaskId,
   WAKE_PARENT_RETRY_INTERVAL_MS,
 } from '../task/task_definitions';
+import { describeFinishedExecution } from '../run_agent/prompts/utils/notices';
 import { isPendingResumeConversation } from './conversations';
 
 export type WakeParentResult = 'woken' | 'queued' | 'busy' | 'skipped';
@@ -68,18 +68,14 @@ export const inheritedRunSettings = ({
     }).filter(([, value]) => value !== undefined)
   );
 
-export const describeFinishedChild = (child: AgentExecution): string => {
-  const header = `Background sub-agent execution ${child.executionId} (agent ${child.agentId}) finished with status ${child.status}.`;
-  const response = child.events.find(isRoundCompleteEvent)?.data.round.response.message;
-
-  if (child.status === ExecutionStatus.completed && response) {
-    return `${header}\n\nResult:\n${response}`;
-  }
-  if (child.error) {
-    return `${header}\n\nError: ${child.error.message}`;
-  }
-  return header;
-};
+export const describeFinishedChild = (child: AgentExecution): string =>
+  describeFinishedExecution({
+    executionId: child.executionId,
+    agentId: child.agentId,
+    status: child.status,
+    response: child.events.find(isRoundCompleteEvent)?.data.round.response.message,
+    error: child.error?.message,
+  });
 
 /**
  * Reports a finished background sub-agent to its parent conversation: a run for `always`, the

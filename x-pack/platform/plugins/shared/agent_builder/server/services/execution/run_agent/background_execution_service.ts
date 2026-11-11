@@ -34,9 +34,10 @@ export class BackgroundExecutionService {
   }
 
   /** Register a new background execution (called by the run_subagent tool). */
-  registerExecution(executionId: string): void {
+  registerExecution(executionId: string, agentId?: string): void {
     this.state[executionId] = {
       execution_id: executionId,
+      ...(agentId ? { agent_id: agentId } : {}),
       status: ExecutionStatus.running,
     };
   }

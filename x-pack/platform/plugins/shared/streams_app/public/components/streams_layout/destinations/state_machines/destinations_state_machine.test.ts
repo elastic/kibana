@@ -14,9 +14,12 @@ import type { DestinationApiKeyGenerationDeps } from '../destination_api_keys';
 import type { UnitDestination } from '@kbn/streams-schema';
 import {
   EMPTY_DESTINATION_CREATION_FORM,
+  EMPTY_ELASTICSEARCH_DESTINATION_FORM,
   REMOTE_ELASTICSEARCH_TYPE,
   type DestinationCreationFormData,
+  type ElasticsearchDestinationFormData,
 } from '../types';
+import { composeStaticIndexesForAll } from '../destination_models';
 import {
   createDestinationsMachineImplementations,
   destinationsStateMachine,
@@ -254,6 +257,53 @@ describe('destinationsStateMachine', () => {
     );
   });
 
+  it.each<[string, Partial<ElasticsearchDestinationFormData>, string[]]>([
+    [
+      'Auto default',
+      {},
+      ['logs-*-*', 'metrics-*-*', 'traces-*-*', 'logs-*', 'metrics-*', 'traces-*'],
+    ],
+    [
+      'Auto custom logs and docs',
+      {
+        useCustomWritePatterns: true,
+        customSignals: ['logs', 'docs'],
+        logsIndex: 'logs-billing-*',
+        docsWritePatterns: ['logs-orders-*', 'metrics-orders-*'],
+      },
+      ['logs-billing-*', 'logs-orders-*', 'metrics-orders-*'],
+    ],
+    [
+      'Fixed shared name plus a docs index',
+      {
+        auto: false,
+        ...composeStaticIndexesForAll('billing-default'),
+        docsIndex: 'accounting-2026',
+      },
+      [
+        'logs-billing-default',
+        'metrics-billing-default',
+        'traces-billing-default',
+        'accounting-2026',
+      ],
+    ],
+    ['Fixed docs only', { auto: false, docsIndex: 'accounting-2026' }, ['accounting-2026']],
+  ])('scopes the destination key to the docs targets (%s)', async (_, elasticsearch, patterns) => {
+    await waitFor(actor, (snapshot) => snapshot.matches({ resolvedIndices: 'ready' }));
+    actor.send({ type: 'modal.openCreate' });
+    actor.send({
+      type: 'destination.create',
+      formData: {
+        ...EMPTY_DESTINATION_CREATION_FORM,
+        destinationName: 'Central',
+        elasticsearch: { ...EMPTY_ELASTICSEARCH_DESTINATION_FORM, ...elasticsearch },
+      },
+    });
+    await waitFor(actor, (snapshot) => snapshot.matches({ configuring: 'persisting' }));
+
+    expect(apiKeyCalls()[0][1].params.body.patterns).toEqual(patterns);
+  });
+
   it('keeps a unit loaded from outside when a destination is deleted afterwards', async () => {
     await waitFor(actor, (snapshot) => snapshot.matches({ resolvedIndices: 'ready' }));
     actor.send({ type: 'unit.loaded', unitDefinition });
@@ -405,6 +455,33 @@ describe('destinationsStateMachine', () => {
     expect(parentSend).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'unit.changed', intent: 'create', secrets: undefined })
     );
+  });
+
+  it('revokes only the minted key when a local Elasticsearch create fails to save', async () => {
+    actor.send({ type: 'modal.openCreate' });
+    actor.send({
+      type: 'destination.create',
+      formData: { ...EMPTY_DESTINATION_CREATION_FORM, destinationName: 'Logs' },
+    });
+    await waitFor(actor, (snapshot) => snapshot.matches({ configuring: 'persisting' }));
+    const [[{ destinationIds }]] = parentSend.mock.calls;
+    actor.send({
+      type: 'unit.persistenceFailed',
+      destinationIds,
+      unitDefinition,
+      message: 'nope',
+      intent: 'create',
+    });
+
+    const deletes = apiKeyCalls().filter(([endpoint]: [string]) => endpoint.startsWith('DELETE'));
+    expect(deletes).toEqual([
+      [
+        'DELETE /internal/streams/destinations/api_key',
+        expect.objectContaining({
+          params: { body: { destinationId: destinationIds[0], apiKeyId: 'k', unitId: 'default' } },
+        }),
+      ],
+    ]);
   });
 
   describe('remote Elasticsearch', () => {

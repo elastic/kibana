@@ -26,7 +26,7 @@ import {
   formatAwaitingPromptNotice,
   formatInterruptionNotice,
   formatSubagentRosterNotice,
-  formatAgentMessageNotice,
+  formatBackgroundReportNotice,
 } from '../prompts/utils/notices';
 import { formatDate } from '../prompts/utils/helpers';
 import type { ProcessedConversation } from './prepare_conversation';
@@ -307,7 +307,7 @@ export const formatUserInput = ({
 
   // An agent's message is a notice to the model, in the shape a running parent gets, never a user turn.
   if (actor?.type === EventActorType.agent) {
-    return createUserMessage(formatAgentMessageNotice({ agentId: actor.id, message }));
+    return createUserMessage(formatBackgroundReportNotice({ agentId: actor.id, report: message }));
   }
 
   let content = message;

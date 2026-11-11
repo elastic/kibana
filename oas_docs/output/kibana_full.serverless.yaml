@@ -55,15 +55,18 @@ tags:
     x-displayName: Agent Builder
   - name: alerting
     description: |
-      Alerting enables you to define rules, which detect complex conditions within your data. When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule. Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
+      Kibana Classic Alerting enables you to define rules, which detect complex conditions within your data. When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule. Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
     externalDocs:
-      description: Alerting documentation
-      url: https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts
-    x-displayName: Alerting
+      description: Kibana Classic Alerting documentation
+      url: https://www.elastic.co/docs/explore-analyze/alerting/alerts
+    x-displayName: Kibana Classic Alerting
   - name: alerting-v2
     description: |
-      Universal Alerting is an ES|QL-first alerting API for managing rules, alert actions, and action policies. Use these endpoints to create and manage detection rules, act on alerts, and control when and how notifications are delivered.
-    x-displayName: Universal Alerting
+      Kibana Universal Alerting is an ES|QL-first alerting API for managing rules, alert actions, and action policies. Use these endpoints to create and manage detection rules, act on alerts, and control when and how notifications are delivered.
+    externalDocs:
+      description: Kibana Universal Alerting documentation
+      url: https://www.elastic.co/docs/explore-analyze/alerting/esql/system-overview
+    x-displayName: Kibana Universal Alerting
   - description: |
       Adjust APM agent configuration without need to redeploy your application.
     name: APM agent configuration
@@ -9114,7 +9117,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9274,7 +9277,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9397,7 +9400,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9520,7 +9523,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9653,7 +9656,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9777,7 +9780,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9900,7 +9903,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10023,7 +10026,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10148,7 +10151,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10293,7 +10296,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10486,7 +10489,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10700,7 +10703,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10868,7 +10871,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11046,7 +11049,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11225,7 +11228,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11393,7 +11396,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11561,7 +11564,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11685,7 +11688,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11805,7 +11808,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11927,7 +11930,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12047,7 +12050,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12171,7 +12174,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12291,7 +12294,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12438,7 +12441,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12585,7 +12588,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12733,7 +12736,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12880,7 +12883,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13030,7 +13033,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13177,7 +13180,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13395,7 +13398,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13595,7 +13598,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13790,7 +13793,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13971,7 +13974,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14225,7 +14228,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14345,7 +14348,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14465,7 +14468,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14585,7 +14588,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14749,7 +14752,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14869,7 +14872,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14991,7 +14994,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15113,7 +15116,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15235,7 +15238,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15357,7 +15360,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15482,7 +15485,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15645,7 +15648,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15840,7 +15843,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -16093,7 +16096,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -16279,7 +16282,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -16461,7 +16464,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -16596,7 +16599,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -29341,7 +29344,7 @@ paths:
         ...
         ```
 
-        Additionally, you can set up notifications for when rules create alerts. The notifications use the [Alerting and Actions framework](https://www.elastic.co/docs/explore-analyze/alerting). Each action type requires a connector. Connectors store the information required to send notifications via external systems. The following connector types are supported for rule notifications:
+        Additionally, you can set up notifications for when rules create alerts. The notifications use [Kibana Classic Alerting](https://www.elastic.co/docs/explore-analyze/alerting/alerts). Each action type requires a connector. Connectors store the information required to send notifications via external systems. The following connector types are supported for rule notifications:
 
         * Slack
         * Email
@@ -29358,8 +29361,8 @@ paths:
 
         For detailed information on Kibana actions and alerting, and additional API calls, see:
 
-        * [Alerting API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-alerting)
-        * [Alerting and Actions framework](https://www.elastic.co/docs/explore-analyze/alerting)
+        * [Kibana Classic Alerting API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-alerting)
+        * [Kibana Classic Alerting](https://www.elastic.co/docs/explore-analyze/alerting/alerts)
         * [Connectors API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-connectors)
       operationId: CreateRule
       requestBody:
@@ -50196,6 +50199,11 @@ paths:
                                   - otel
                                   - crowdstrike
                                 type: string
+                              namespace:
+                                description: Data stream namespace the stack was last launched or updated with.
+                                maxLength: 100
+                                minLength: 1
+                                type: string
                               serviceConfigs:
                                 description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
                                 items:
@@ -50314,13 +50322,13 @@ paths:
                           maxItems: 100
                           type: array
                         packagePolicyIds:
-                          description: Package policy IDs created for this deployment (managed_integration and agent_based).
+                          description: Integration policy IDs created for this deployment (managed_integration and agent_based).
                           items:
                             type: string
                           maxItems: 1000
                           type: array
                         packages:
-                          description: Packages of the deployment instance package policies with their deployed versions. Empty for ECF-only deployment instances.
+                          description: Packages of the deployment instance integration policies with their deployed versions. Empty for ECF-only deployment instances.
                           items:
                             additionalProperties: false
                             type: object
@@ -50346,6 +50354,15 @@ paths:
                             type: string
                           description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
                           type: object
+                        policySettings:
+                          additionalProperties:
+                            default: null
+                            maxLength: 1024
+                            nullable: true
+                            type: string
+                          description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
+                          type: object
+                          x-state: Experimental
                         provider:
                           description: Cloud provider.
                           enum:
@@ -50639,6 +50656,15 @@ paths:
                     type: string
                   maxItems: 100
                   type: array
+                policySettings:
+                  additionalProperties:
+                    default: null
+                    maxLength: 1024
+                    nullable: true
+                    type: string
+                  description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
+                  type: object
+                  x-state: Experimental
                 provider:
                   description: Cloud provider.
                   enum:
@@ -50806,6 +50832,11 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            namespace:
+                              description: Data stream namespace the stack was last launched or updated with.
+                              maxLength: 100
+                              minLength: 1
+                              type: string
                             serviceConfigs:
                               description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
                               items:
@@ -50924,7 +50955,7 @@ paths:
                         maxItems: 100
                         type: array
                       packagePolicyIds:
-                        description: Package policy IDs created for this deployment (managed_integration and agent_based).
+                        description: Integration policy IDs created for this deployment (managed_integration and agent_based).
                         items:
                           type: string
                         maxItems: 1000
@@ -50935,6 +50966,15 @@ paths:
                           type: string
                         description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
                         type: object
+                      policySettings:
+                        additionalProperties:
+                          default: null
+                          maxLength: 1024
+                          nullable: true
+                          type: string
+                        description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
+                        type: object
+                        x-state: Experimental
                       provider:
                         description: Cloud provider.
                         enum:
@@ -51241,6 +51281,11 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            namespace:
+                              description: Data stream namespace the stack was last launched or updated with.
+                              maxLength: 100
+                              minLength: 1
+                              type: string
                             serviceConfigs:
                               description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
                               items:
@@ -51359,7 +51404,7 @@ paths:
                         maxItems: 100
                         type: array
                       packagePolicyIds:
-                        description: Package policy IDs created for this deployment (managed_integration and agent_based).
+                        description: Integration policy IDs created for this deployment (managed_integration and agent_based).
                         items:
                           type: string
                         maxItems: 1000
@@ -51370,6 +51415,15 @@ paths:
                           type: string
                         description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
                         type: object
+                      policySettings:
+                        additionalProperties:
+                          default: null
+                          maxLength: 1024
+                          nullable: true
+                          type: string
+                        description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
+                        type: object
+                        x-state: Experimental
                       provider:
                         description: Cloud provider.
                         enum:
@@ -51571,6 +51625,11 @@ paths:
                           - otel
                           - crowdstrike
                         type: string
+                      namespace:
+                        description: Data stream namespace the stack was last launched or updated with.
+                        maxLength: 100
+                        minLength: 1
+                        type: string
                       serviceConfigs:
                         description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
                         items:
@@ -51690,7 +51749,7 @@ paths:
                   maxItems: 100
                   type: array
                 packagePolicyIds:
-                  description: Package policy IDs created for this deployment (managed_integration and agent_based).
+                  description: Integration policy IDs created for this deployment (managed_integration and agent_based).
                   items:
                     maxLength: 255
                     type: string
@@ -51701,6 +51760,15 @@ paths:
                     maxLength: 255
                     type: string
                   type: object
+                policySettings:
+                  additionalProperties:
+                    default: null
+                    maxLength: 1024
+                    nullable: true
+                    type: string
+                  description: Integration policy settings that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`). Replaces the stored settings; omit it to keep them.
+                  type: object
+                  x-state: Experimental
                 serviceNames:
                   additionalProperties:
                     maxLength: 256
@@ -51825,6 +51893,11 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            namespace:
+                              description: Data stream namespace the stack was last launched or updated with.
+                              maxLength: 100
+                              minLength: 1
+                              type: string
                             serviceConfigs:
                               description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
                               items:
@@ -51943,7 +52016,7 @@ paths:
                         maxItems: 100
                         type: array
                       packagePolicyIds:
-                        description: Package policy IDs created for this deployment (managed_integration and agent_based).
+                        description: Integration policy IDs created for this deployment (managed_integration and agent_based).
                         items:
                           type: string
                         maxItems: 1000
@@ -51954,6 +52027,15 @@ paths:
                           type: string
                         description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
                         type: object
+                      policySettings:
+                        additionalProperties:
+                          default: null
+                          maxLength: 1024
+                          nullable: true
+                          type: string
+                        description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
+                        type: object
+                        x-state: Experimental
                       provider:
                         description: Cloud provider.
                         enum:
@@ -52187,6 +52269,11 @@ paths:
                                   - otel
                                   - crowdstrike
                                 type: string
+                              namespace:
+                                description: Data stream namespace the stack was last launched or updated with.
+                                maxLength: 100
+                                minLength: 1
+                                type: string
                               serviceConfigs:
                                 description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
                                 items:
@@ -52305,7 +52392,7 @@ paths:
                           maxItems: 100
                           type: array
                         packagePolicyIds:
-                          description: Package policy IDs created for this deployment (managed_integration and agent_based).
+                          description: Integration policy IDs created for this deployment (managed_integration and agent_based).
                           items:
                             type: string
                           maxItems: 1000
@@ -52316,6 +52403,15 @@ paths:
                             type: string
                           description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
                           type: object
+                        policySettings:
+                          additionalProperties:
+                            default: null
+                            maxLength: 1024
+                            nullable: true
+                            type: string
+                          description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
+                          type: object
+                          x-state: Experimental
                         provider:
                           description: Cloud provider.
                           enum:
@@ -171396,11 +171492,11 @@ components:
       properties:
         alerting:
           additionalProperties: false
-          description: Settings that control how this maintenance window affects Alerting V1 alerts, including an optional KQL filter. Always returned when scope is returned. Check `enabled` to see whether the maintenance window affects these alerts.
+          description: Settings that control how this maintenance window affects Kibana Classic Alerting alerts, including an optional KQL filter. Always returned when scope is returned. Check `enabled` to see whether the maintenance window affects these alerts.
           type: object
           properties:
             enabled:
-              description: Whether this maintenance window applies to Alerting V1 alerts. If omitted, is treated as `true`.
+              description: Whether this maintenance window applies to Kibana Classic Alerting alerts. If omitted, is treated as `true`.
               type: boolean
             query:
               additionalProperties: false
@@ -171415,18 +171511,18 @@ components:
             - query
         alerting_v2:
           additionalProperties: false
-          description: Settings that control how this maintenance window affects Alerting V2 alerts, including an optional KQL filter. If you omit `alerting_v2`, the maintenance window doesn't affect Alerting V2 alerts.
+          description: Settings that control how this maintenance window affects Kibana Universal Alerting alerts, including an optional KQL filter. If you omit `alerting_v2`, the maintenance window doesn't affect Kibana Universal Alerting alerts.
           type: object
           properties:
             enabled:
-              description: Whether the maintenance window applies to Alerting V2 alerts. If omitted, is treated as `true`.
+              description: Whether the maintenance window applies to Kibana Universal Alerting alerts. If omitted, is treated as `true`.
               type: boolean
             query:
               additionalProperties: false
               type: object
               properties:
                 kql:
-                  description: A KQL filter that limits which Alerting V2 alerts this maintenance window affects. It can filter on `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and `data.*`. Matching alerts don't send notifications while the window is active. If query isn't returned, the window affects all Alerting V2 alerts.
+                  description: A KQL filter that limits which Kibana Universal Alerting alerts this maintenance window affects. It can filter on `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and `data.*`. Matching alerts don't send notifications while the window is active. If query isn't returned, the window affects all Kibana Universal Alerting alerts.
                   maxLength: 4096
                   type: string
               required:
@@ -171440,36 +171536,36 @@ components:
       properties:
         alerting:
           additionalProperties: false
-          description: Settings that control how this maintenance window affects Alerting V1 alerts, including an optional KQL filter. If you include `scope` but omit `alerting`, the maintenance window doesn't affect these alerts.
+          description: Settings that control how this maintenance window affects Kibana Classic Alerting alerts, including an optional KQL filter. If you include `scope` but omit `alerting`, the maintenance window doesn't affect these alerts.
           type: object
           properties:
             enabled:
-              description: Whether this maintenance window applies to Alerting V1 alerts. If omitted, is treated as `true`.
+              description: Whether this maintenance window applies to Kibana Classic Alerting alerts. If omitted, is treated as `true`.
               type: boolean
             query:
               additionalProperties: false
               type: object
               properties:
                 kql:
-                  description: A KQL filter that limits which Alerting V1 alerts this maintenance window affects. Matching alerts don't run rule actions while the window is active. If you omit query, the window affects all alerts.
+                  description: A KQL filter that limits which Kibana Classic Alerting alerts this maintenance window affects. Matching alerts don't run rule actions while the window is active. If you omit query, the window affects all alerts.
                   maxLength: 10000
                   type: string
               required:
                 - kql
         alerting_v2:
           additionalProperties: false
-          description: Settings that control how this maintenance window affects Alerting V2 alerts, including an optional KQL filter. If you omit `alerting_v2`, the maintenance window doesn't affect Alerting V2 alerts.
+          description: Settings that control how this maintenance window affects Kibana Universal Alerting alerts, including an optional KQL filter. If you omit `alerting_v2`, the maintenance window doesn't affect Kibana Universal Alerting alerts.
           type: object
           properties:
             enabled:
-              description: Whether this maintenance window affects Alerting V2 alerts. Defaults to `true`.
+              description: Whether this maintenance window affects Kibana Universal Alerting alerts. Defaults to `true`.
               type: boolean
             query:
               additionalProperties: false
               type: object
               properties:
                 kql:
-                  description: A KQL filter that limits which Alerting V2 alerts this maintenance window affects. You can filter on `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and `data.*`. Matching alerts don't send notifications while the window is active. If you omit query, the window affects all Alerting V2 alerts.
+                  description: A KQL filter that limits which Kibana Universal Alerting alerts this maintenance window affects. You can filter on `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and `data.*`. Matching alerts don't send notifications while the window is active. If you omit query, the window affects all Kibana Universal Alerting alerts.
                   maxLength: 4096
                   type: string
               required:
@@ -181476,7 +181572,52 @@ components:
         type:
           type: string
         value:
-          type: string
+          anyOf:
+            - type: string
+            - additionalProperties: false
+              type: object
+              properties:
+                format:
+                  maxLength: 1024
+                  type: string
+                from:
+                  anyOf:
+                    - type: number
+                    - maxLength: 1024
+                      type: string
+                gt:
+                  anyOf:
+                    - type: number
+                    - maxLength: 1024
+                      type: string
+                gte:
+                  anyOf:
+                    - type: number
+                    - maxLength: 1024
+                      type: string
+                lt:
+                  anyOf:
+                    - type: number
+                    - maxLength: 1024
+                      type: string
+                lte:
+                  anyOf:
+                    - type: number
+                    - maxLength: 1024
+                      type: string
+                to:
+                  anyOf:
+                    - type: number
+                    - maxLength: 1024
+                      type: string
+            - items:
+                anyOf:
+                  - maxLength: 1024
+                    type: string
+                  - type: number
+                  - type: boolean
+              maxItems: 1000
+              type: array
     Kibana_HTTP_APIs_SLOGroupBy:
       anyOf:
         - anyOf:

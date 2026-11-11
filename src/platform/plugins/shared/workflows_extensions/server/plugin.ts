@@ -169,6 +169,12 @@ export class WorkflowsExtensionsServerPlugin
           'No workflows client provider set, using noop emitEvent to avoid errors. Trigger event ignored.'
         );
       },
+      resumeExternalHitl: async () => {
+        this.logger.warn(
+          'No workflows client provider set, using noop resumeExternalHitl to avoid errors. HITL resume ignored.'
+        );
+        throw new Error('Workflows client provider is not available');
+      },
       managedWorkflows: {
         install: async () => {
           this.logger.warn(

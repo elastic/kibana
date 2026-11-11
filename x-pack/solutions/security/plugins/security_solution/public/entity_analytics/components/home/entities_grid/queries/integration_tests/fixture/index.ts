@@ -12,7 +12,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import type { QueryArgs, Row } from '../../../common';
 import type { EsqlRunner } from '../../types';
 import { alertsIndex } from './alerts';
-import { anomaliesIndex, ANOMALY_JOB_ID } from './anomalies';
+import { anomaliesIndex, ANOMALY_JOB_ID, customAnomaliesIndex } from './anomalies';
 import { entitiesIndex, ENTITY_INDEX } from './entities';
 import { riskScoresIndex } from './risk_scores';
 import { HOUR_MS, NAMESPACE, toIsoAgo } from './fixture_index';
@@ -25,20 +25,22 @@ import type { FixtureIndex } from './fixture_index';
  *
  * Resolved rows (main entities):
  *
- * | entity.id        | name     | risk         | criticality | records | alerts (open, 30d)    | anomalies | risk change |
- * |------------------|----------|--------------|-------------|---------|-----------------------|-----------|-------------|
- * | host:h1          | web-1    | 90, Critical | high_impact | 3       | 3 (1 C, 2 H), last 3h | –         | +30         |
- * | host:h2          | web-2    | 50, Moderate | –           | 1       | 1 (L), last 1h        | 1         | 0           |
- * | host:h3          | web-3    | –            | –           | 1       | 0                     | –         | –           |
- * | service:payments | payments | 20, Low      | –           | 1       | 0                     | –         | –           |
- * | user:alice@okta  | alice    | 70, High     | –           | 1       | 2 (2 M), last 2h      | 2         | -10         |
- * | user:bob@okta    | bob      | –            | –           | 2       | 0                     | –         | –           |
+ * | entity.id        | name     | risk         | criticality | records | alerts (open, 30d)         | anomalies | risk change |
+ * |------------------|----------|--------------|-------------|---------|----------------------------|-----------|-------------|
+ * | host:h1          | web-1    | 90, Critical | high_impact | 3       | 4 (1 C, 2 H, 1 M), last 3h | –         | +30         |
+ * | host:h2          | web-2    | 50, Moderate | –           | 1       | 1 (L), last 1h             | 1         | 0           |
+ * | host:h3          | web-3    | –            | –           | 1       | 0                          | –         | –           |
+ * | service:payments | payments | 20, Low      | –           | 1       | 0                          | –         | –           |
+ * | user:alice@okta  | alice    | 70, High     | –           | 1       | 2 (2 M), last 2h           | 2         | -10         |
+ * | user:bob@okta    | bob      | –            | –           | 2       | 0                          | –         | –           |
  *
  * Aliases: host:h4 and host:h5 resolve to host:h1, user:carol@okta resolves to user:bob@okta.
  * Alerts are stamped with the entity id, except the one of host:h2, whose id comes from
  * `host.id`. One alert of host:h1 is also stamped with user:dave@okta, an entity outside the
  * store, so its `kibana.alert.entity.id` is multi-value. Anomaly records carry no entity id: theirs comes from `user.name` with
  * `event.module` (okta), or from `host.id`.
+ * One more alert of host:h1 is an unstamped failed login that also names user:bob@okta: the user's
+ * `documentsFilter` excludes failed outcomes, so it counts for host:h1 only.
  * Excluded alerts: a closed alert of host:h3, and an alert of host:h3 from 40 days ago.
  * Risk change is the current score minus the last score in the 2 hours before the window;
  * service:payments has no score there. host:h2 is on watchlist `wl-1`.
@@ -48,6 +50,7 @@ const FIXTURE_INDICES: readonly FixtureIndex[] = [
   entitiesIndex,
   alertsIndex,
   anomaliesIndex,
+  customAnomaliesIndex,
   riskScoresIndex,
 ];
 

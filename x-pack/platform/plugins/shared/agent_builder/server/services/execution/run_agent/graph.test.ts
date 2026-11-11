@@ -164,7 +164,7 @@ describe('createAgentGraph', () => {
     expect(result.retryNotices).toEqual([
       {
         phase: 'research',
-        afterNonTodosStepCount: 0,
+        afterStepCount: 0,
         error: expect.objectContaining({
           meta: expect.objectContaining({ errCode: AgentExecutionErrorCode.emptyResponse }),
         }),
@@ -439,7 +439,7 @@ describe('createAgentGraph', () => {
       data: { response: 'structured answer' },
     });
     expect(result.retryNotices).toEqual([
-      expect.objectContaining({ phase: 'answer', afterNonTodosStepCount: 0 }),
+      expect.objectContaining({ phase: 'answer', afterStepCount: 0 }),
     ]);
   });
 

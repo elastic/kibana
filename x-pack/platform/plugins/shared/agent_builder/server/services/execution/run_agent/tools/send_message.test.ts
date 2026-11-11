@@ -233,7 +233,7 @@ describe('createSendMessageTool', () => {
     });
     // Critical: without this, checkForCompletions can never surface a
     // backgroundAgentComplete event for this send_message call.
-    expect(registerExecution).toHaveBeenCalledWith('bg-sub-exec');
+    expect(registerExecution).toHaveBeenCalledWith('bg-sub-exec', 'test-agent');
 
     events$.complete();
   });

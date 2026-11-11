@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreStart, Logger } from '@kbn/core/server';
 import { isConversationNotFoundError } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { usesDecisionTrees } from '../agents/agent_policy';
@@ -23,17 +23,12 @@ import { withNightshiftBackgroundSpan } from '../tracing';
 import { toolCallsSchema, toolResultsSchema } from './tool_calls_schema';
 
 export const decisionTreePrepareStepDefinition = ({
-  getTelemetryConnectorId,
   getAgentBuilder,
   getSavedObjects,
   getUiSettings,
   logger,
   isEnabled,
 }: {
-  getTelemetryConnectorId: (
-    request: KibanaRequest,
-    conversationId?: string
-  ) => string | undefined | Promise<string | undefined>;
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   getSavedObjects?: () => CoreStart['savedObjects'] | undefined;
   getUiSettings?: () => CoreStart['uiSettings'] | undefined;
@@ -142,7 +137,6 @@ export const decisionTreePrepareStepDefinition = ({
       );
       const earlierRounds = roundsBefore(rounds, roundId);
 
-      const telemetryConnectorId = await getTelemetryConnectorId(request, conversationId);
       const workflowContext = context.contextManager.getContext();
       const { spaceId } = workflowContext.workflow;
       const executionId = workflowContext.execution?.id;
@@ -163,7 +157,7 @@ export const decisionTreePrepareStepDefinition = ({
               earlierRounds.length === 0 ? 'initial_investigation' : 'feedback_reinforcement',
             investigationId: conversationId,
             earlierAccessedTreeIds: extractAccessedTreeIdsFromRounds(earlierRounds),
-            connectorNames: telemetryConnectorId ? [telemetryConnectorId] : [],
+            connectorNames: [],
             esClient: context.contextManager.getScopedEsClient(),
             logger,
             spaceId,

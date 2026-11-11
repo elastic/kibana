@@ -25,7 +25,7 @@ describe('source_delete tool', () => {
   });
 
   const createTool = ({
-    featurePrivilege = 'all',
+    featurePrivilege = 'all_and_manage_engines',
     deleteSource = jest.fn(),
   }: {
     featurePrivilege?: NightshiftFeaturePrivilege;
@@ -64,10 +64,10 @@ describe('source_delete tool', () => {
     });
   });
 
-  it('does not delete a source without the Nightshift manage privilege', async () => {
+  it('does not delete a source without the Nightshift manage and configure privileges', async () => {
     const deleteSource = jest.fn();
 
-    const result = await createTool({ featurePrivilege: 'read', deleteSource }).handler(
+    const result = await createTool({ featurePrivilege: 'all', deleteSource }).handler(
       { source: 'checkout' },
       createMockToolContext()
     );
@@ -77,7 +77,11 @@ describe('source_delete tool', () => {
       results: [
         {
           type: 'error',
-          data: { message: expect.stringContaining('requires the Nightshift manage privilege') },
+          data: {
+            message: expect.stringContaining(
+              'requires the Nightshift manage and Nightshift configure privileges'
+            ),
+          },
         },
       ],
     });

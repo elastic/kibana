@@ -408,7 +408,7 @@ describe('createSubagentTool', () => {
       status: 'queued',
       trigger_mode: 'always',
     });
-    expect(registerExecution).toHaveBeenCalledWith('bg-exec-id');
+    expect(registerExecution).toHaveBeenCalledWith('bg-exec-id', 'test-agent');
     expect(executeSubAgent).toHaveBeenCalledWith(expect.objectContaining({ background: {} }));
     expect(executeSubAgent.mock.calls[0][0]).not.toHaveProperty('abortSignal');
 
@@ -666,7 +666,7 @@ describe('createSubagentTool', () => {
         status: 'queued',
         trigger_mode: 'always',
       });
-      expect(registerExecution).toHaveBeenCalledWith('bg-child');
+      expect(registerExecution).toHaveBeenCalledWith('bg-child', 'test-agent');
       expect(createSubAgent).toHaveBeenCalledWith(expect.objectContaining({ background: {} }));
       expect(subagentTracker.get('bg-agent')).toBeDefined();
 

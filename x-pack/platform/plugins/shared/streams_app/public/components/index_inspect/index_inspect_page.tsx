@@ -35,9 +35,7 @@ export function IndexInspectPage() {
   } = useStreamsAppParams('/new-experience/indices/{indexName}/{tab}');
   const router = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
-  const {
-    features: { canvas },
-  } = useStreamsPrivileges();
+  const { access } = useStreamsPrivileges();
   const { value: metadata, loading: metadataLoading } = useIndexMetadata(indexName);
   const exists = metadata?.exists ?? false;
   const targetKind = getIndexInspectTargetKind({ metadata, metadataLoading });
@@ -142,7 +140,7 @@ export function IndexInspectPage() {
     };
   }, [discoverLink, indexName, stackManagementLink]);
 
-  if (!canvas.enabled) {
+  if (!access.v2) {
     return <RedirectTo path="/" />;
   }
 

@@ -20,6 +20,10 @@ export const DIGITAL_EXPERIENCE_EBT_ACTIONS = {
   RETRY_LOAD: 'retryLoad',
   /** The user sets up sessions, or updates them. */
   ENABLE_SESSIONS: 'enableSessions',
+  /** The user opens the sessions list narrowed to what they clicked, e.g. a browser. */
+  VIEW_SESSIONS: 'viewSessions',
+  /** The user opens the full list behind a summary, e.g. every error from the Overview. */
+  VIEW_ALL: 'viewAll',
   /** The user opens a session's details. */
   VIEW_SESSION: 'viewSession',
   /** The user jumps from the session timeline to one of its page visits. */
@@ -38,6 +42,7 @@ export const DIGITAL_EXPERIENCE_EBT_ACTIONS = {
 /** Elements that more than one page shows. */
 export const DIGITAL_EXPERIENCE_EBT_ELEMENTS = {
   ENVIRONMENT_FILTER: 'environmentFilter',
+  INSTRUMENTATION_DOCS_LINK: 'instrumentationDocsLink',
 } as const;
 
 export const APPLICATIONS_LIST_EBT_ELEMENTS = {
@@ -52,6 +57,20 @@ export const APPLICATIONS_LIST_EBT_ELEMENTS = {
 
 export const APPLICATION_OVERVIEW_EBT_ELEMENTS = {
   RETRY: 'overviewRetry',
+  USAGE_RETRY: 'overviewUsageRetry',
+  BROWSER_SESSIONS_LINK: 'overviewBrowserSessionsLink',
+  OS_SESSIONS_LINK: 'overviewOsSessionsLink',
+} as const;
+
+export const ERRORS_EBT_ELEMENTS = {
+  RETRY: 'errorsRetry',
+  ERROR: 'errorsError',
+  VIEW_ALL: 'errorsViewAll',
+} as const;
+
+export const NETWORK_EBT_ELEMENTS = {
+  RETRY: 'networkRetry',
+  RENDER_BLOCKING_FILTER: 'networkRenderBlockingFilter',
 } as const;
 
 export const SESSIONS_EBT_ELEMENTS = {

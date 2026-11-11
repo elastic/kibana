@@ -31,7 +31,12 @@ export {
   waitForInvestigationInProgress,
 } from './write_path';
 export type { SharedInvestigation, SharedInvestigationSubject } from './write_path';
-export { NIGHTSHIFT_MANAGE_ROLE, NIGHTSHIFT_READ_ROLE, NIGHTSHIFT_NO_ACCESS_ROLE } from './roles';
+export {
+  NIGHTSHIFT_MANAGE_ENGINES_ROLE,
+  NIGHTSHIFT_MANAGE_ROLE,
+  NIGHTSHIFT_READ_ROLE,
+  NIGHTSHIFT_NO_ACCESS_ROLE,
+} from './roles';
 export { ensureNightshiftServiceAccountRoles } from '@kbn/nightshift-shared';
 export {
   getNightshiftServiceAccountStatus,

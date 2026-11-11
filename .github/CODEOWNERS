@@ -1502,6 +1502,7 @@ x-pack/solutions/security/packages/siem-readiness @elastic/contextual-security-a
 x-pack/solutions/security/packages/storybook/config @elastic/security-investigations
 x-pack/solutions/security/packages/test-api-clients @elastic/security-detection-engineering
 x-pack/solutions/security/packages/timeline-common @elastic/security-threat-hunting
+x-pack/solutions/security/packages/timeline-components @elastic/security-threat-hunting
 x-pack/solutions/security/packages/upselling @elastic/security-investigations
 x-pack/solutions/security/plugins/alertzero @elastic/security-solution
 x-pack/solutions/security/plugins/cloud_defend @elastic/contextual-security-apps
@@ -2043,9 +2044,12 @@ x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/s
 
 # Digital Experience (RUM)
 /src/platform/packages/shared/kbn-synthtrace-client/src/lib/edot_browser/ @elastic/obs-signals-rum-team
+/src/platform/packages/shared/kbn-synthtrace-client/src/lib/edot_react_native/ @elastic/obs-signals-rum-team
+/src/platform/packages/shared/kbn-synthtrace-client/src/lib/edot_shared/ @elastic/obs-signals-rum-team
 /src/platform/packages/shared/kbn-synthtrace/src/lib/otel/otel_synthtrace_es_client* @elastic/obs-signals-rum-team
 /src/platform/packages/shared/kbn-synthtrace/src/scenarios/digital_experience_* @elastic/obs-signals-rum-team
 /src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/digital_experience_apps* @elastic/obs-signals-rum-team
+/src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/digital_experience_mobile_apps* @elastic/obs-signals-rum-team
 /src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/classic_rum_page_loads* @elastic/obs-signals-rum-team
 
 # Observability-ui folder level permissions (need to be before individual files inside the folder)
@@ -2083,6 +2087,8 @@ x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/s
 /x-pack/platform/test/api_integration/apis/streams @elastic/streams-ui
 /x-pack/platform/test/api_integration/fixtures/kbn_archives/streams @elastic/streams-ui
 /x-pack/platform/plugins/shared/streams_app/test/scout @elastic/streams-ui
+/x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2 @elastic/streams-ui
+/x-pack/platform/plugins/shared/streams/test/scout_streams_v2 @elastic/streams-ui
 /x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle @elastic/kibana-management
 /x-pack/platform/plugins/shared/streams_app/test/scout/data_quality @elastic/kibana-management
 /x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle @elastic/kibana-management
@@ -3152,8 +3158,8 @@ x-pack/platform/plugins/shared/entity_store/common/domain/definitions/dynamic @e
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/urls @elastic/security-investigations
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/investigations @elastic/security-investigations
 
-/x-pack/solutions/security/test/security_solution_cypress/cypress/screens/expandable_flyout  @elastic/security-investigations
-/x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/security-investigations
+/x-pack/solutions/security/test/security_solution_cypress/cypress/screens/document_flyout.ts @elastic/security-investigations
+/x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/document_flyout.ts @elastic/security-investigations
 /x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/timeline.ts @elastic/security-investigations
 
 /x-pack/platform/test/fixtures/es_archives/auditbeat/overview @elastic/security-investigations
@@ -3593,6 +3599,7 @@ x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/to
 /x-pack/solutions/security/plugins/security_solution/server/agent_builder/tools/entity_analytics @elastic/security-entity-analytics
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_alerting_v2 @elastic/rna-project-team
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_endpoint @elastic/security-defend-workflows
+/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/osquery_workflows @elastic/security-defend-workflows
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_entity_analytics @elastic/security-entity-analytics
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_security_persona_matrix @elastic/security-generative-ai
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_attack_discovery_agent_builder @elastic/security-generative-ai
@@ -3600,6 +3607,7 @@ x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/to
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/nightshift_investigations @elastic/nightshift
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/discover_telemetry @elastic/observability-ui
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/cloud_trial @elastic/appex-sharedux
+/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/streams_v2 @elastic/streams-ui
 # /security_solution/common/endpoint/ and /security_solution/server/endpoint/ children overrides
 /x-pack/solutions/security/plugins/security_solution/common/endpoint/schema/resolver.ts @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/resolver.ts @elastic/security-investigations
@@ -3807,7 +3815,6 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /src/core/packages/chrome @elastic/appex-sharedux
 /src/platform/kbn-ui/* @elastic/appex-sharedux
 /src/platform/kbn-ui/_tooling @elastic/appex-sharedux
-/src/platform/test/api_integration/apis/short_url/**/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files#r1846654156
 /src/platform/test/functional/page_objects/share_page.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files#r1846648444
 /src/platform/test/accessibility/apps/kibana_overview_* @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files/cab99bce5ac2082fa77222beebe3b61ff836b94b#r1846659920
 /x-pack/platform/test/functional/services/sample_data @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200142#discussion_r1846512756
@@ -3824,7 +3831,6 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /x-pack/platform/plugins/shared/spaces/test/scout/ui/fixtures/ @elastic/appex-sharedux
 /x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_selection_serverless.spec.ts @elastic/appex-sharedux
 /x-pack/platform/test/serverless/functional/page_objects/svl_common_navigation.ts @elastic/appex-sharedux
-/x-pack/solutions/security/test/serverless/functional/page_objects/svl_sec_landing_page.ts @elastic/appex-sharedux
 
 # OpenAPI spec files
 oas_docs/linters                              @elastic/ski-docs

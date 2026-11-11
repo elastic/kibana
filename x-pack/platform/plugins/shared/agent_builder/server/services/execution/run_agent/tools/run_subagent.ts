@@ -572,7 +572,7 @@ export const createSubagentTool = ({
           });
 
           if (run_in_background) {
-            backgroundExecutionService?.registerExecution(executionId);
+            backgroundExecutionService?.registerExecution(executionId, resolvedAgentId);
             return {
               results: [
                 createOtherResult({
@@ -629,7 +629,7 @@ export const createSubagentTool = ({
         });
 
         if (run_in_background) {
-          backgroundExecutionService?.registerExecution(executionId);
+          backgroundExecutionService?.registerExecution(executionId, resolvedAgentId);
 
           return {
             results: [

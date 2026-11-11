@@ -18,6 +18,7 @@ import {
   DIGITAL_EXPERIENCE_APPS,
   generateEdotBrowserSessions,
   generatePerMinute,
+  getDefaultSeed,
   parseDigitalExperienceScenarioOpts,
 } from './digital_experience_apps';
 
@@ -26,6 +27,8 @@ const range = timerange(
   new Date('2026-10-16T12:02:00.000Z'),
   {} as ToolingLog
 );
+
+const FROM = range.from.getTime();
 
 const at = (offsetSeconds: number) => new Date(range.from.getTime() + offsetSeconds * 1000);
 
@@ -40,7 +43,7 @@ const collect = (
     withSessionId,
     includeRawAttribution,
     scale,
-    // Unseeded runs are random, which could make the minimums the tests rely on flaky
+    // Pin the seed so the minimums the tests rely on don't depend on the range's start
     seed: 'digital-experience-test',
   }).flatMap((generator) =>
     Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
@@ -49,68 +52,81 @@ const collect = (
 describe('digital experience apps', () => {
   describe('parseDigitalExperienceScenarioOpts', () => {
     it('defaults to session.id, no raw attribution and scale 1', () => {
-      expect(parseDigitalExperienceScenarioOpts(undefined)).toEqual({
+      expect(parseDigitalExperienceScenarioOpts(undefined, FROM)).toEqual({
         withSessionId: true,
         includeRawAttribution: false,
         scale: 1,
+        seed: getDefaultSeed(FROM),
       });
     });
 
     it('accepts typed values', () => {
       expect(
-        parseDigitalExperienceScenarioOpts({
-          withSessionId: false,
-          includeRawAttribution: true,
-          scale: 3,
-        })
-      ).toEqual({ withSessionId: false, includeRawAttribution: true, scale: 3 });
+        parseDigitalExperienceScenarioOpts(
+          {
+            withSessionId: false,
+            includeRawAttribution: true,
+            scale: 3,
+          },
+          FROM
+        )
+      ).toEqual({
+        withSessionId: false,
+        includeRawAttribution: true,
+        scale: 3,
+        seed: getDefaultSeed(FROM),
+      });
     });
 
     it('parses string options from the CLI', () => {
       expect(
-        parseDigitalExperienceScenarioOpts({
-          withSessionId: 'true',
-          includeRawAttribution: 'true',
-          scale: '2.5',
-        })
+        parseDigitalExperienceScenarioOpts(
+          {
+            withSessionId: 'true',
+            includeRawAttribution: 'true',
+            scale: '2.5',
+          },
+          FROM
+        )
       ).toEqual({
         withSessionId: true,
         includeRawAttribution: true,
         scale: 2.5,
+        seed: getDefaultSeed(FROM),
       });
     });
 
     it('accepts a seed as a string or a number', () => {
-      expect(parseDigitalExperienceScenarioOpts({ seed: 'abc' }).seed).toBe('abc');
-      expect(parseDigitalExperienceScenarioOpts({ seed: 42 }).seed).toBe('42');
-      expect(parseDigitalExperienceScenarioOpts(undefined).seed).toBeUndefined();
+      expect(parseDigitalExperienceScenarioOpts({ seed: 'abc' }, FROM).seed).toBe('abc');
+      expect(parseDigitalExperienceScenarioOpts({ seed: 42 }, FROM).seed).toBe('42');
+      expect(parseDigitalExperienceScenarioOpts(undefined, FROM).seed).toBe(String(FROM));
       ['', '  ', true, {}, NaN, Infinity].forEach((seed) => {
-        expect(() => parseDigitalExperienceScenarioOpts({ seed })).toThrow(
+        expect(() => parseDigitalExperienceScenarioOpts({ seed }, FROM)).toThrow(
           'seed must be a non-empty string or a finite number'
         );
       });
     });
 
     it('rejects unknown and invalid options', () => {
-      expect(() => parseDigitalExperienceScenarioOpts({ sessionId: true })).toThrow(
+      expect(() => parseDigitalExperienceScenarioOpts({ sessionId: true }, FROM)).toThrow(
         'Unknown scenarioOpts: sessionId'
       );
-      expect(() => parseDigitalExperienceScenarioOpts({ toString: 'x' })).toThrow(
+      expect(() => parseDigitalExperienceScenarioOpts({ toString: 'x' }, FROM)).toThrow(
         'Unknown scenarioOpts: toString'
       );
       ['0', 0, -1, 'abc', '2x', '', Infinity].forEach((scale) => {
-        expect(() => parseDigitalExperienceScenarioOpts({ scale })).toThrow(
+        expect(() => parseDigitalExperienceScenarioOpts({ scale }, FROM)).toThrow(
           'scale must be a positive number'
         );
       });
       ['yes', '1', 1, ''].forEach((withSessionId) => {
-        expect(() => parseDigitalExperienceScenarioOpts({ withSessionId })).toThrow(
+        expect(() => parseDigitalExperienceScenarioOpts({ withSessionId }, FROM)).toThrow(
           'withSessionId must be true or false'
         );
       });
-      expect(() => parseDigitalExperienceScenarioOpts({ includeRawAttribution: 'on' })).toThrow(
-        'includeRawAttribution must be true or false'
-      );
+      expect(() =>
+        parseDigitalExperienceScenarioOpts({ includeRawAttribution: 'on' }, FROM)
+      ).toThrow('includeRawAttribution must be true or false');
     });
   });
 
@@ -181,7 +197,8 @@ describe('digital experience apps', () => {
           withSessionId,
           includeRawAttribution: false,
           scale,
-          seed,
+          // Like the scenarios, without a seed option the parser defaults it to the run's start
+          seed: parseDigitalExperienceScenarioOpts(seed === undefined ? {} : { seed }, from).seed,
         }).flatMap((generator) =>
           Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
         );
@@ -203,7 +220,30 @@ describe('digital experience apps', () => {
         expect(docs.length).toBeGreaterThan(0);
         expect(generate('seed-a')).toEqual(docs);
         expect(generate('seed-b')).not.toEqual(docs);
-        expect(generate(undefined)).not.toEqual(generate(undefined));
+      });
+
+      it('derives the default seed from the start of the run, which all its batches share', () => {
+        const from = range.from.getTime();
+        // Synthtrace evaluates the scenario again in every worker and for every live batch
+        const batches = [0, 61.5, 120].map((seconds) => at(seconds));
+        const batched = batches
+          .slice(1)
+          .flatMap((end, i) =>
+            generate(undefined, { timeRange: timerange(batches[i], end, {} as ToolingLog), from })
+          );
+
+        expect(sorted(batched)).toEqual(sorted(generate(undefined)));
+        expect(generate(undefined)).toEqual(generate(getDefaultSeed(from)));
+        // A run that starts a millisecond earlier cuts off almost nothing else, but has other sessions
+        const earlier = generate(undefined, { from: from - 1 });
+        const sessionIds = (docs: EdotBrowserDocument[]) =>
+          new Set(docs.map(({ attributes }) => attributes?.['session.id']).filter(Boolean));
+        const earlierSessionIds = sessionIds(earlier);
+        expect(earlier).toEqual(generate(getDefaultSeed(from - 1), { from: from - 1 }));
+        expect(earlierSessionIds.size).toBeGreaterThan(0);
+        sessionIds(generate(undefined)).forEach((sessionId) =>
+          expect(earlierSessionIds.has(sessionId)).toBe(false)
+        );
       });
 
       it('generates the same data when the run is split into batches', () => {

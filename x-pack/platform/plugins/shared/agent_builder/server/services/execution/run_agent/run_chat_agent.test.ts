@@ -740,7 +740,6 @@ describe('runDefaultAgentMode', () => {
       expect(streamOptions(streamEvents).streamMode).toBe('values');
       // a sub-agent run must not inherit the checkpoint namespace of the parent node it runs in
       expect(streamOptions(streamEvents).configurable).toStrictEqual({ checkpoint_ns: '' });
-      expect(graphParams.todoStateManager).toBe(context.todoStateManager);
       // fresh run: starts at init with no pending calls
       const command = initialCommand(streamEvents);
       expect(command.goto).toEqual([nodeNames.init]);

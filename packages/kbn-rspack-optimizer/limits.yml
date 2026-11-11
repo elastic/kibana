@@ -137,7 +137,7 @@ pageLoadAssetSize:
   monitoring: 22416
   navigation: 13400
   newsfeed: 10708
-  nightshift: 4343
+  nightshift: 5038
   nightshiftInvestigations: 9405
   nightshiftSources: 3928
   noDataPage: 630
@@ -151,7 +151,7 @@ pageLoadAssetSize:
   observabilityLogsExplorer: 1351
   observabilityOnboarding: 8873
   observabilityShared: 8355
-  osquery: 14483
+  osquery: 14738
   painlessLab: 2550
   presentationUtil: 350
   productDocBase: 4218

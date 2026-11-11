@@ -42,7 +42,6 @@ import type {
   RenderersService,
   ConversationEventTypesService,
   ToolManager,
-  TodoStateManager,
   IFilesystemService,
   IBashService,
   ConversationTemplatesService,
@@ -184,8 +183,6 @@ export interface ExperimentalFeatures {
   sml: boolean;
   /** Whether context-aware skill filtering is enabled */
   relevantSkills: boolean;
-  /** Whether the todo list tool and task-management prompt are enabled */
-  todos: boolean;
   /** Whether the bash tool (and the just-bash runtime) is enabled */
   bash: boolean;
   /** Whether the `discover_apis` tool is enabled. */
@@ -344,10 +341,6 @@ export interface AgentHandlerContext {
    * Attachment state manager to manage conversation attachments during execution.
    */
   attachmentStateManager: AttachmentStateManager;
-  /**
-   * Manages the active todo list for this conversation execution.
-   */
-  todoStateManager: TodoStateManager;
   /**
    * Used to manage interruptions.
    */

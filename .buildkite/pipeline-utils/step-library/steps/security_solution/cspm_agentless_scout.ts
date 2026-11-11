@@ -8,7 +8,7 @@
  */
 
 import { commandStep } from '../../helpers.ts';
-import { retry, spotAgent, spotZones } from '../../presets.ts';
+import { pdBalanced, retry, spotAgent, spotZones } from '../../presets.ts';
 import type { Step } from '../../types.ts';
 
 export const cspmAgentlessScoutSteps = (): readonly Step[] => [
@@ -16,7 +16,7 @@ export const cspmAgentlessScoutSteps = (): readonly Step[] => [
     command: '.buildkite/scripts/steps/test/cspm_agentless_scout.sh',
     label: 'CSPM Agentless Scout E2E Tests',
     key: 'cspm-agentless-scout',
-    agents: spotAgent('n2-standard-8', spotZones.centralFCA),
+    agents: { ...spotAgent('n2-standard-8', spotZones.centralFCA), ...pdBalanced },
     depends_on: ['build'],
     timeout_in_minutes: 60,
     retry: retry.agentLossOrAnyOnce,

@@ -15,6 +15,7 @@ import { createUnitRepository, type Unit } from '../../../services/unit_reposito
 import {
   getDestinationViewModels,
   type DestinationsActorRef,
+  type ResolvedIndicesError,
   type ResolvedIndicesStatus,
 } from './state_machines/destinations_state_machine';
 import type { DestinationIndexStats } from './destination_index_stats';
@@ -35,7 +36,7 @@ export interface DestinationsController {
   destinations: DestinationViewModel[];
   resolvedIndicesByDestination: ReadonlyMap<string, ResolvedDestinationIndex[]>;
   resolvedIndicesStatus: ResolvedIndicesStatus;
-  resolvedIndicesError?: string;
+  resolvedIndicesError?: ResolvedIndicesError;
   /** Only destinations whose details were shown. */
   destinationDetailRefs: ReadonlyMap<string, DestinationDetailActorRef>;
   showDestinationDetail: (destinationId: string, viewerId: string) => void;

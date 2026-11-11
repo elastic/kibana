@@ -63,6 +63,7 @@ interface Deps {
   getAgentAvailability: () => AgentAvailabilityConfig;
   /** Automations are hidden saved objects; this client can read and write them. */
   getAutomationsSoClient?: (request: KibanaRequest, spaceId: string) => SavedObjectsClientContract;
+  isUniversalAlertingAvailable: () => boolean;
   /** Serverless accounts hold the `_`-prefixed predefined roles. */
   isServerless: boolean;
   logger: Logger;
@@ -106,6 +107,7 @@ export const createInvestigatorServiceAccountService = ({
   getAgentBuilder,
   getAgentAvailability,
   getAutomationsSoClient,
+  isUniversalAlertingAvailable,
   isServerless,
   logger,
 }: Deps) => {
@@ -285,6 +287,7 @@ export const createInvestigatorServiceAccountService = ({
                   automationId: id,
                   automation: attributes,
                   serviceAccountId: automationsServiceAccountId,
+                  universalAlerts: isUniversalAlertingAvailable(),
                 }),
               },
               spaceId,

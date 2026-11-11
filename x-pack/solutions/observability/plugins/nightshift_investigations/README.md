@@ -102,7 +102,7 @@ Starting an investigation also needs Agent Builder `all` (the start route's own 
 
 ## Service accounts
 
-Nightshift runs investigations only as the agent service account, `nightshift_agent`. There is no fallback that runs them as the user who starts them, so a space can use Nightshift only after an admin sets it up. Until then, every Nightshift page shows the onboarding with "Enable Elastic Nightshift" as its first step: users with `manage_security` get the button, others are told to ask an administrator, and the step says so when service accounts are turned off. The plan and the remaining PRs are tracked in elastic/obs-execution#570.
+Nightshift runs investigations only as the agent service account, `nightshift_agent`. There is no fallback that runs them as the user who starts them, so a space can use Nightshift only after an admin sets it up. Until then, every Nightshift page shows the onboarding with "Enable Elastic Nightshift" as its first step: users with `manage_security` and the Nightshift Manage engines privilege get the button, others are told to ask an administrator, and the step says so when service accounts are turned off. The plan and the remaining PRs are tracked in elastic/obs-execution#570.
 
 ### Accounts and roles
 
@@ -137,9 +137,9 @@ xpack.encryptedSavedObjects.encryptionKey: '<32+ characters>'
 ```
 
 ```
-POST /internal/nightshift/investigations/service_account/_enable   # needs manage_security
+POST /internal/nightshift/investigations/service_account/_enable   # manage_security, Nightshift manage and Manage engines
 GET  /internal/nightshift/investigations/service_account           # status, read_nightshift
-POST /internal/nightshift/investigations/service_account/_disable  # teardown
+POST /internal/nightshift/investigations/service_account/_disable  # teardown, same privileges as _enable
 ```
 
 Only the service accounts backend assigns account ids: `kibana/<name>` on stateful, a generated id on Serverless (UIAM). So the caller finds or creates the accounts first, as the current user, with `ensureNightshiftServiceAccounts` from `common`, and passes their ids to `_enable` as `{ "serviceAccountIds": { "agent": "...", "automations": "..." } }`. The setup step in the app does both on one click.
@@ -148,7 +148,7 @@ Every space does that: the account directory is the one source of which account 
 
 `_enable`:
 
-1. Refuses with 400 when service accounts are off, 403 without `manage_security`, and 404 when the space does not exist, before writing anything.
+1. Refuses with 400 when service accounts are off, 403 without `manage_security` or the Nightshift Manage engines privilege, and 404 when the space does not exist, before writing anything.
 2. Installs the investigation agent if the space does not have it yet, and binds it to the agent account, so every run of it - a workflow's, a hook's or a user's chat - executes as that account. This happens before any workflow is installed, since installing the entry point is what makes the space read as set up: a failed binding cannot leave a setup that looks done. The decision-tree reinforcement agent stays unbound - only `nightshift.decisionTreeReinforce` runs it, through `agents.runAgent`, which runs it as that step's workflow and never consults a binding.
 3. Installs the space's bound workflows with `settings.run_as` set to the agent account, the entry point `system-nightshift-investigation-bound-<space>` last. The entry point also keeps the automations account's id, as its `automationsServiceAccountId` template value. A setup that fails part-way leaves the space reading as not set up. A failed install names the workflow.
 4. Turns bound workflows an admin disabled back on.
