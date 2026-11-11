@@ -33,7 +33,8 @@ What works end to end:
   the destination ACL on overwrite.
 - **Audit.** Denials, grant-based access, recovery and access changes are audited without titles.
 - **UI.** The connector flyout has an Access tab built on the shared `@kbn/ols-ui` panel, and the
-  create flyout has an Access section.
+  create flyout has an Access section. The panel adds people only: service accounts get grants through the API, and
+  the panel lists those grants and can remove them.
 - **Hard disable.** With the setting off (the default), nothing changes for users, and stored ACLs are kept.
 
 ```mermaid

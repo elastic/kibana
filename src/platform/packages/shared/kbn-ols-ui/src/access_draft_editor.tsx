@@ -34,6 +34,11 @@ export interface AccessDraftEditorProps {
   /** Entries whose recipients lack feature privileges, from the last save. */
   warnings?: Principal[];
   isDisabled?: boolean;
+  /**
+   * Whether the editor offers a field to add a service account. Off in phase 1, where service
+   * accounts get access through the APIs; their entries are still listed and can be removed.
+   */
+  allowServiceAccounts?: boolean;
 }
 
 /**
@@ -50,6 +55,7 @@ export const AccessDraftEditor = ({
   profiles = [],
   warnings = [],
   isDisabled,
+  allowServiceAccounts = false,
 }: AccessDraftEditorProps) => {
   // Profiles of users picked in this session, so that new entries show names before saving.
   const [pickedUsers, setPickedUsers] = useState<SuggestedUser[]>([]);
@@ -126,8 +132,16 @@ export const AccessDraftEditor = ({
         }}
       />
       <EuiSpacer size="m" />
-      <ServiceAccountField excluded={excluded} isDisabled={isDisabled || isFull} onAdd={addEntry} />
-      <EuiSpacer size="m" />
+      {allowServiceAccounts ? (
+        <>
+          <ServiceAccountField
+            excluded={excluded}
+            isDisabled={isDisabled || isFull}
+            onAdd={addEntry}
+          />
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
       <AccessList
         entries={value.entries}
         entryLevels={policy.entry_levels}

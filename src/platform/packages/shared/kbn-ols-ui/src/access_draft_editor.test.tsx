@@ -100,8 +100,30 @@ describe('AccessDraftEditor', () => {
     expect(screen.queryByTestId('accessPanelEntryWarning-u_bob')).not.toBeInTheDocument();
   });
 
+  it('offers no service account field by default, but lists and removes service account entries', async () => {
+    render(
+      <Host
+        initialValue={{
+          general_access: 'use',
+          entries: [{ type: 'service_account', id: 'kibana/x', access: 'use' }],
+        }}
+      />
+    );
+
+    expect(screen.queryByTestId('accessPanelServiceAccountInput')).not.toBeInTheDocument();
+    expect(screen.getByTestId('accessPanelEntry-kibana/x')).toHaveTextContent('Service account');
+
+    await userEvent.click(
+      within(screen.getByTestId('accessPanelEntry-kibana/x')).getByRole('button', {
+        name: 'Remove access',
+      })
+    );
+
+    expect(onChange).toHaveBeenLastCalledWith({ general_access: 'use', entries: [] });
+  });
+
   it('adds a typed service account ID', async () => {
-    render(<Host initialValue={{ general_access: 'use', entries: [] }} />);
+    render(<Host allowServiceAccounts initialValue={{ general_access: 'use', entries: [] }} />);
 
     await userEvent.type(screen.getByTestId('accessPanelServiceAccountInput'), 'kibana/x');
     await userEvent.click(screen.getByTestId('accessPanelServiceAccountAdd'));
@@ -117,7 +139,7 @@ describe('AccessDraftEditor', () => {
   it.each(['not-a-service-account', 'kibana/x/y', 'kibana/'])(
     'rejects the invalid service account ID %s',
     async (id) => {
-      render(<Host initialValue={{ general_access: 'use', entries: [] }} />);
+      render(<Host allowServiceAccounts initialValue={{ general_access: 'use', entries: [] }} />);
 
       await userEvent.type(screen.getByTestId('accessPanelServiceAccountInput'), `${id}{enter}`);
 
@@ -129,6 +151,7 @@ describe('AccessDraftEditor', () => {
   it('rejects a service account that already has access', async () => {
     render(
       <Host
+        allowServiceAccounts
         initialValue={{
           general_access: 'use',
           entries: [{ type: 'service_account', id: 'kibana/x', access: 'use' }],

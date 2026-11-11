@@ -73,7 +73,7 @@ describe('ConnectorAccessSection', () => {
     expect(onChange).toHaveBeenCalledWith({ general_access: 'none', entries: [] });
   });
 
-  it('adds a typed service account and suggests connector principals', async () => {
+  it('offers no service account field and suggests connector principals', async () => {
     appMockRenderer.render(
       <ConnectorAccessSection
         policy={POLICY}
@@ -82,12 +82,7 @@ describe('ConnectorAccessSection', () => {
       />
     );
 
-    await userEvent.type(screen.getByTestId('accessPanelServiceAccountInput'), 'kibana/svc{enter}');
-
-    expect(onChange).toHaveBeenCalledWith({
-      general_access: 'use',
-      entries: [{ type: 'service_account', id: 'kibana/svc', access: 'use' }],
-    });
+    expect(screen.queryByTestId('accessPanelServiceAccountInput')).not.toBeInTheDocument();
     await waitFor(() =>
       expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith(
         '/internal/security/ols/action/_suggest_principals',

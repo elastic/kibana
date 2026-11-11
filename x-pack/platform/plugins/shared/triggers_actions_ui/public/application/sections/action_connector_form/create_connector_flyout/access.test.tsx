@@ -35,6 +35,14 @@ const POLICY: AccessPolicyResponse = {
   operations: { view: { level: 'view' }, execute: { level: 'use' }, edit: { level: 'edit' } },
 };
 
+const ALICE = {
+  uid: 'u_alice',
+  enabled: true,
+  user: { username: 'alice', email: 'alice@example.com', full_name: 'Alice Archer' },
+  data: {},
+  eligible_levels: ['use'],
+};
+
 const createConnectorResponse = {
   connector_type_id: 'test',
   is_preconfigured: false,
@@ -104,7 +112,7 @@ describe('CreateConnectorFlyout with object-level security (OLS)', () => {
       path === POLICY_PATH ? policy : {}
     ) as unknown as typeof appMockRenderer.coreStart.http.get;
     appMockRenderer.coreStart.http.post = jest.fn(async (path: string) =>
-      path.endsWith('/_suggest_principals') ? { users: [] } : createConnectorResponse
+      path.endsWith('/_suggest_principals') ? { users: [ALICE] } : createConnectorResponse
     ) as unknown as typeof appMockRenderer.coreStart.http.post;
     appMockRenderer.coreStart.http.head = jest.fn().mockResolvedValue({});
   });
@@ -122,8 +130,12 @@ describe('CreateConnectorFlyout with object-level security (OLS)', () => {
     await userEvent.click(screen.getByTestId('accessPanelGeneralAccess'));
     await waitForEuiPopoverOpen();
     await userEvent.click(screen.getByTestId('accessPanelGeneralAccessOption-none'));
-    await userEvent.type(screen.getByTestId('accessPanelServiceAccountInput'), 'kibana/svc{enter}');
-    expect(screen.getByTestId('accessPanelEntryLevel-kibana/svc')).toBeInTheDocument();
+    await userEvent.type(
+      within(screen.getByTestId('accessPanelPrincipalPicker')).getByRole('combobox'),
+      'alice'
+    );
+    await userEvent.click(await screen.findByTestId('accessPanelPrincipalPickerOption-u_alice'));
+    expect(screen.getByTestId('accessPanelEntryLevel-u_alice')).toBeInTheDocument();
 
     await userEvent.click(flyout.getByRole('tab', { name: 'Configuration' }));
     expect(screen.getByTestId('nameInput')).toHaveValue('My test');
@@ -132,7 +144,7 @@ describe('CreateConnectorFlyout with object-level security (OLS)', () => {
     expect(screen.getByTestId('accessPanelGeneralAccess')).toHaveTextContent(
       'Only people with access'
     );
-    expect(screen.getByTestId('accessPanelEntryLevel-kibana/svc')).toBeInTheDocument();
+    expect(screen.getByTestId('accessPanelEntryLevel-u_alice')).toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId('create-connector-flyout-save-btn'));
 
@@ -144,7 +156,7 @@ describe('CreateConnectorFlyout with object-level security (OLS)', () => {
         connector_type_id: actionTypeModel.id,
         acl: {
           general_access: 'none',
-          entries: [{ type: 'service_account', id: 'kibana/svc', access: 'use' }],
+          entries: [{ type: 'user', id: 'u_alice', access: 'use' }],
         },
       })
     );
