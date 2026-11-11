@@ -9,7 +9,7 @@
 
 import { z, lazySchema } from '@kbn/zod';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
-import { colorMappingSchema, staticColorSchema, autoColorSchema, AUTO_COLOR } from '../color';
+import { colorMappingSchema, staticColorSchema, autoColorSchema } from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import {
   collapseBySchema,
@@ -95,7 +95,12 @@ const pieStylingSchema = lazySchema(() =>
  * Color configuration for primary metric in pie chart
  */
 const partitionConfigPrimaryMetricOptionsShape = {
-  color: z.union([staticColorSchema, autoColorSchema]).default(AUTO_COLOR).optional(),
+  color: lazySchema(() =>
+    z.union([staticColorSchema, autoColorSchema]).optional().meta({
+      description:
+        'Static color of the metric. Defaults to `auto`. Ignored while a group is active.',
+    })
+  ),
 };
 
 /**

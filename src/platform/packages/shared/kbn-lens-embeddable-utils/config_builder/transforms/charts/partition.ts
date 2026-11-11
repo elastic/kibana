@@ -280,6 +280,12 @@ function convertAPIStaticColorToLensState(config: PartitionConfig) {
     return undefined;
   }
 
+  // The runtime ignores the static metric color while a group is active (not collapsed), so it is
+  // not stored, mirroring `fromLensStateToAPIMetrics`.
+  if (config.group_by?.some(groupIsNotCollapsed)) {
+    return {};
+  }
+
   // Key colorsByDimension by the metric's position in `config.metrics`
   const colorsByDimension = Object.fromEntries(
     config.metrics.flatMap((metric, index) => {
@@ -311,7 +317,8 @@ function convertCollapseAPItoCollapseFns<P extends 'group_by' | 'group_breakdown
 }
 
 function computeSharedPartitionLayerState(config: PartitionConfig) {
-  const groupColouring = config.group_by?.find(({ color }) => color != null)?.color;
+  // Only the first non-collapsed group is colored, as in `fromLensStateToAPIGroups`.
+  const groupColouring = config.group_by?.find(groupIsNotCollapsed)?.color;
   const hasColorMapping = groupColouring != null && !('type' in groupColouring);
   const collapseFns = Object.fromEntries(
     convertCollapseAPItoCollapseFns(config, 'group_by').concat(
