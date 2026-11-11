@@ -7,4 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { PRINCIPAL_TYPES, type Principal, type PrincipalType } from './principals';
+export {
+  PRINCIPAL_TYPES,
+  getPrincipalKey,
+  getPrincipalKind,
+  isPrincipalType,
+  matchesPrincipal,
+  type Principal,
+  type PrincipalType,
+  type StoredPrincipal,
+} from './principals';
