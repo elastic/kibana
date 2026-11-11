@@ -45,7 +45,7 @@ export interface BrowserAuthFixture {
   /**
    * Logs in as a user with a role.
    * @param role - A role object that defines the Kibana and ES previleges.
-   * @param options - Extra UIAM organization roles for the user, see {@link LoginOptions}.
+   * @param options - Extra UIAM organization and project roles for the user, see {@link LoginOptions}.
    * @returns A Promise that resolves once the cookie in browser is set.
    */
   loginAs: LoginFunction;
