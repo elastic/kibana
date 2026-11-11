@@ -396,6 +396,22 @@ describe('Expanded mode', () => {
         expect(moreButton).toBeInTheDocument();
       });
 
+      it('reports overflow measured only after the items move into More', async () => {
+        render(
+          <TestComponent
+            isCollapsed={false}
+            items={securityMock.navItems}
+            logo={securityMock.logo}
+          />
+        );
+
+        const primaryMenu = screen.getByTestId('kbnChromeNav-primaryNavigation');
+        expect(primaryMenu).toHaveAttribute('data-overflow-measured', 'false');
+
+        await screen.findByTestId(moreMenuId);
+        expect(primaryMenu).toHaveAttribute('data-overflow-measured', 'true');
+      });
+
       /**
        * GIVEN not all primary menu items fit the menu height
        * AND the navigation renders in expanded mode

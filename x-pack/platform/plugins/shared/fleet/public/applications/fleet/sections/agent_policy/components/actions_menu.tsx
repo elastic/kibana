@@ -111,6 +111,16 @@ export const AgentPolicyActionMenu = memo<{
           const viewPolicyItem = (
             <EuiContextMenuItem
               icon="inspect"
+              data-test-subj="agentPolicyActionMenuViewPolicyButton"
+              disabled={!authz.integrations.readIntegrationPolicies}
+              toolTipContent={
+                !authz.integrations.readIntegrationPolicies && (
+                  <FormattedMessage
+                    id="xpack.fleet.agentPolicyActionMenu.viewPolicyDisabledTooltip"
+                    defaultMessage="Agent policies and Integrations 'Read' privileges are required to view the policy."
+                  />
+                )
+              }
               onClick={() => {
                 setIsContextMenuOpen(false);
                 setIsYamlFlyoutOpen(!isYamlFlyoutOpen);
@@ -279,7 +289,7 @@ export const AgentPolicyActionMenu = memo<{
             copyPolicyItem,
             deletePolicyItem,
           ];
-          const agentlessMenuItems = [viewPolicyItem, deletePolicyItem];
+          const agentlessMenuItems = [viewPolicyItem];
 
           let menuItems;
 

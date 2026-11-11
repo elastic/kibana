@@ -31,6 +31,4 @@ fileGroups:
     - '**/*.ts'
     - '!target/**/*'
     - '!node_modules'
-  jest-config:
-    - jest.config.js
 tasks: {}

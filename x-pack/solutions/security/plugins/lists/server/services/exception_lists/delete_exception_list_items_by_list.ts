@@ -11,6 +11,7 @@ import type {
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { withSpan } from '@kbn/apm-utils';
 
 import { findExceptionListItemPointInTimeFinder } from './find_exception_list_item_point_in_time_finder';
 import { bulkDeleteExceptionListItems } from './bulk_delete_exception_list_items';
@@ -25,10 +26,18 @@ export const deleteExceptionListItemByList = async ({
   listId,
   savedObjectsClient,
   namespaceType,
-}: DeleteExceptionListItemByListOptions): Promise<void> => {
-  const ids = await getExceptionListItemIds({ listId, namespaceType, savedObjectsClient });
-  await bulkDeleteExceptionListItems({ ids, namespaceType, savedObjectsClient });
-};
+}: DeleteExceptionListItemByListOptions): Promise<void> =>
+  withSpan(
+    {
+      labels: { namespaceType },
+      name: 'exceptionLists.deleteExceptionListItemByList',
+      type: 'lists',
+    },
+    async () => {
+      const ids = await getExceptionListItemIds({ listId, namespaceType, savedObjectsClient });
+      await bulkDeleteExceptionListItems({ ids, namespaceType, savedObjectsClient });
+    }
+  );
 
 export const getExceptionListItemIds = async ({
   listId,

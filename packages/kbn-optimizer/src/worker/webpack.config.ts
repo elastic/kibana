@@ -172,15 +172,7 @@ export function getWebpackConfig(
                 sourceMap: !worker.dist,
               },
             },
-            {
-              loader: 'postcss-loader',
-              options: {
-                sourceMap: !worker.dist,
-                postcssOptions: {
-                  config: require.resolve('../../postcss.config.js'),
-                },
-              },
-            },
+            { loader: require.resolve('@kbn/optimizer-webpack-helpers/lightningcss_loader') },
           ],
         },
         {
@@ -199,15 +191,7 @@ export function getWebpackConfig(
                     sourceMap: !worker.dist,
                   },
                 },
-                {
-                  loader: 'postcss-loader',
-                  options: {
-                    sourceMap: !worker.dist,
-                    postcssOptions: {
-                      config: require.resolve('../../postcss.config.js'),
-                    },
-                  },
-                },
+                { loader: require.resolve('@kbn/optimizer-webpack-helpers/lightningcss_loader') },
                 {
                   loader: 'sass-loader',
                   options: {
@@ -269,12 +253,17 @@ export function getWebpackConfig(
           test: /\.text$/,
           loader: require.resolve('@kbn/dot-text-loader'),
         },
+        // MapLibre's module worker loads the shared module by relative filename.
+        {
+          test: /[\\/]maplibre-gl[\\/]dist[\\/]maplibre-gl-(?:worker|shared)\.mjs$/,
+          resourceQuery: /asUrl/,
+          type: 'asset/resource',
+          sideEffects: true,
+          generator: { filename: 'maplibre-gl/[name][ext]' },
+        },
         // emits a separate file and exports the URL. Previously achievable by using file-loader.
         {
-          include: [
-            require.resolve('@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js'),
-            require.resolve('maplibre-gl/dist/maplibre-gl-csp-worker'),
-          ],
+          include: [require.resolve('@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js')],
           type: 'asset/resource',
         },
         // exports the source code of the asset. Previously achievable by using raw-loader.

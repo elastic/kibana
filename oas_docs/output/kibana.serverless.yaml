@@ -4337,15 +4337,21 @@ paths:
                         description: |-
                           Execute an ES|QL query and return the results in a tabular format.
 
-                          **IMPORTANT**: This tool only **runs** queries; it does not write them.
-                          Think of this as the final step after a query has been prepared.
+                          ## Usage
 
-                          You **must** get the query from one of two sources before calling this tool:
-                          1.  The output of the `platform.core.generate_esql` tool (if the tool is available).
-                          2.  A verbatim query provided directly by the user.
+                          This tool runs an ES|QL query; it does not write one.
 
-                          Under no circumstances should you invent, guess, or modify a query yourself for this tool.
-                          If you need a query, use the `platform.core.generate_esql` tool first.
+                          ### Where the query comes from
+
+                          By default, when you need a new query, use the `platform_core_generate_esql` tool rather than writing it yourself: it inspects the target data and applies ES|QL guidance that is easy to get wrong when writing a query from memory.
+                          Adapting an earlier query to a new question, such as another metric or field, counts as writing a new query: call `platform_core_generate_esql` again for each new question.
+
+                          You can run a query as-is when it comes from:
+                          - the user,
+                          - your instructions or a skill you loaded, such as a query template,
+                          - the result of another tool, or an attachment.
+
+                          These are default guidelines. If your instructions or a skill you loaded tell you to write ES|QL queries yourself and run them with this tool, do so. Do the same if the `platform_core_generate_esql` tool is not available to you.
                         id: platform.core.execute_esql
                         readonly: true
                         schema:
@@ -24913,7 +24919,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.
+        Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: (fleet-agent-policies-read AND integrations-read) OR fleet-setup.
       operationId: get-fleet-agent-policies-agentpolicyid-download
       parameters:
         - description: The ID of the agent policy
@@ -25031,7 +25037,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get a full agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read.
+        Get a full agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read AND integrations-read.
       operationId: get-fleet-agent-policies-agentpolicyid-full
       parameters:
         - description: The ID of the agent policy
@@ -27390,6 +27396,8 @@ paths:
                           type: string
                         unenrolled_at:
                           type: string
+                        unenrolled_reason:
+                          type: string
                         unenrollment_started_at:
                           type: string
                         unhealthy_reason:
@@ -28056,6 +28064,8 @@ paths:
                         type: string
                       unenrolled_at:
                         type: string
+                      unenrolled_reason:
+                        type: string
                       unenrollment_started_at:
                         type: string
                       unhealthy_reason:
@@ -28538,6 +28548,8 @@ paths:
                           - OPAMP
                         type: string
                       unenrolled_at:
+                        type: string
+                      unenrolled_reason:
                         type: string
                       unenrollment_started_at:
                         type: string
@@ -30227,10 +30239,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 500000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -30377,10 +30391,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 500000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -30492,10 +30508,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 500000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -30606,10 +30624,12 @@ paths:
                   anyOf:
                     - items:
                         description: List of collector agent IDs
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
                     - description: KQL query string. Leave empty to target all collectors
+                      maxLength: 500000
                       type: string
                 dryRun:
                   type: boolean
@@ -30725,10 +30745,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 500000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -30833,10 +30855,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 500000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -30948,10 +30972,12 @@ paths:
                   anyOf:
                     - items:
                         description: list of agent IDs
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
                     - description: KQL query string, leave empty to action all agents
+                      maxLength: 500000
                       type: string
                 batchSize:
                   type: number
@@ -31069,10 +31095,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 500000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -31191,10 +31219,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 500000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -59736,6 +59766,81 @@ paths:
             {
               "entityTypes": ["user", "host", "service", "generic"]
             }
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/security/entity_store/update_api_key:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/update_api_key</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Replace the API key of every Entity Store background task with one owned by the user making this request, for example after the user who installed the Entity Store is removed. The tasks keep their schedules and state, and no entity data is changed. The user needs the same privileges as the install endpoint. Tasks that could not be updated are listed in `failed`; call the endpoint again to retry them.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+      operationId: post-security-entity-store-update-api-key
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateApiKeyExample:
+                description: Re-grant the API key of every Entity Store task as the user making the request.
+                summary: Update the API key of the Entity Store tasks
+                value: {}
+            schema:
+              additionalProperties: false
+              type: object
+              properties: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateApiKeyPartialExample:
+                  description: Call the endpoint again to retry the tasks listed in `failed`.
+                  summary: Some tasks could not be updated
+                  value:
+                    failed:
+                      - id: entity_store:v2:status_report_task:default
+                        message: Version conflict
+                        statusCode: 409
+                    ok: false
+                    updated:
+                      - entity_store:v2:history_snapshot_task:default
+                updateApiKeySuccessExample:
+                  description: Every Entity Store task now runs with an API key owned by the caller.
+                  summary: All tasks updated
+                  value:
+                    failed: []
+                    ok: true
+                    updated:
+                      - entity_store:v2:history_snapshot_task:default
+                      - entity_store:v2:status_report_task:default
+          description: Indicates that the request was processed. Check `ok` and `failed` to see whether every task was updated.
+      summary: Update the API key of the Entity Store tasks
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X POST -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{}' \
+              "${KIBANA_URL}/api/security/entity_store/update_api_key"
+        - lang: Console
+          source: |
+            POST kbn://api/security/entity_store/update_api_key
+            {}
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -122589,6 +122694,11 @@ components:
     Kibana_HTTP_APIs_bulk_install_packages_from_registry_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available
         force:
           default: false
           type: boolean
@@ -122874,6 +122984,11 @@ components:
     Kibana_HTTP_APIs_bulk_upgrade_managed_integrations_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Experimental
         policyIds:
           description: IDs of the managed integrations to upgrade to their installed package version.
           items:
@@ -122888,6 +123003,11 @@ components:
     Kibana_HTTP_APIs_bulk_upgrade_packages_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available
         force:
           default: false
           type: boolean
@@ -122962,8 +123082,11 @@ components:
                   anyOf:
                     - type: string
                     - type: number
+                    - type: boolean
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_multi_value_cell'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_range_key'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_multi_field_key'
+                  nullable: true
                 maxItems: 1000
                 type: array
             required:
@@ -124720,23 +124843,28 @@ components:
               type: string
             groupBy:
               items:
+                maxLength: 1000
                 type: string
+              maxItems: 100
               type: array
             searchConfiguration:
               additionalProperties: false
               type: object
               properties:
                 index:
+                  maxLength: 10000
                   type: string
               required:
                 - index
             threshold:
               items:
                 type: number
+              maxItems: 2
               type: array
             timeSize:
               type: number
             timeUnit:
+              maxLength: 64
               type: string
           required:
             - timeUnit
@@ -130681,8 +130809,11 @@ components:
                   anyOf:
                     - type: string
                     - type: number
+                    - type: boolean
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_multi_value_cell'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_range_key'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_multi_field_key'
+                  nullable: true
                 maxItems: 100
                 type: array
             required:
@@ -131977,6 +132108,11 @@ components:
     Kibana_HTTP_APIs_install_package_from_registry_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available
         force:
           default: false
           type: boolean
@@ -142967,6 +143103,7 @@ components:
       type: object
     Kibana_HTTP_APIs_multi_field_key:
       additionalProperties: false
+      description: Composite key from a multi-terms bucket.
       properties:
         keys:
           items:
@@ -142982,6 +143119,22 @@ components:
         - keys
       title: Multi Field Key
       type: object
+    Kibana_HTTP_APIs_multi_value_cell:
+      anyOf:
+        - items:
+            type: string
+          maxItems: 100
+          type: array
+        - items:
+            type: number
+          maxItems: 100
+          type: array
+        - items:
+            type: boolean
+          maxItems: 100
+          type: array
+      description: Values of a multi-value cell.
+      title: Multi Value Cell
     Kibana_HTTP_APIs_new_agent_policy:
       additionalProperties: false
       properties:
@@ -147261,6 +147414,7 @@ components:
         - stream
     Kibana_HTTP_APIs_range_key:
       additionalProperties: false
+      description: Identifies a range bucket. Omit either bound for an open end.
       properties:
         from:
           anyOf:
@@ -147282,8 +147436,6 @@ components:
                   - type: string
                   - type: number
             required:
-              - from
-              - to
               - label
           maxItems: 100
           type: array
@@ -147297,8 +147449,6 @@ components:
           type: string
       required:
         - type
-        - from
-        - to
         - ranges
       title: Range Key
       type: object
@@ -152209,12 +152359,16 @@ components:
             excludeTransforms:
               default: null
               items:
+                maxLength: 1000
                 type: string
+              maxItems: 1000
               nullable: true
               type: array
             includeTransforms:
               items:
+                maxLength: 1000
                 type: string
+              maxItems: 1000
               type: array
             testsConfig:
               additionalProperties: false
@@ -153594,6 +153748,7 @@ components:
                       required:
                         - id
                     - type: string
+                  nullable: true
         shipper:
           allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
@@ -153763,6 +153918,7 @@ components:
                   required:
                     - id
                 - type: string
+              nullable: true
             ssl:
               additionalProperties: false
               type: object
@@ -153779,6 +153935,7 @@ components:
                       required:
                         - id
                     - type: string
+                  nullable: true
               required:
                 - key
         shipper:
@@ -153870,6 +154027,7 @@ components:
                       required:
                         - id
                     - type: string
+                  nullable: true
         shipper:
           allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
@@ -153959,6 +154117,7 @@ components:
                   required:
                     - id
                 - type: string
+              nullable: true
             ssl:
               additionalProperties: false
               type: object
@@ -153975,6 +154134,7 @@ components:
                       required:
                         - id
                     - type: string
+                  nullable: true
         service_token:
           nullable: true
           type: string
@@ -154559,6 +154719,11 @@ components:
     Kibana_HTTP_APIs_upgrade_package_policies_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available
         packagePolicyIds:
           items:
             type: string
@@ -170544,6 +170709,10 @@ components:
             parameters:
               type: object
               properties:
+                force:
+                  description: Read a file locked by the OS from a volume snapshot. Endpoint on Windows only.
+                  example: true
+                  type: boolean
                 path:
                   description: The full file path to retrieve from the endpoint.
                   type: string

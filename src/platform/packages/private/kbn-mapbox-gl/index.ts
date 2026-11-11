@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import * as maplibregl from 'maplibre-gl';
 import type {
   AJAXError,
+  ErrorEvent,
   AttributionControlOptions,
   Map,
   LayerSpecification,
@@ -20,6 +22,7 @@ import type {
   StyleSpecification,
   MapOptions,
   MapMouseEvent,
+  MapWheelEvent,
   MapSourceDataEvent,
   LngLat,
   LngLatBounds,
@@ -31,14 +34,19 @@ import type {
   FeatureIdentifier,
 } from 'maplibre-gl';
 
-import type maplibreglDist from 'maplibre-gl/dist/maplibre-gl';
-// @ts-expect-error
-import maplibreglDistCsp from 'maplibre-gl/dist/maplibre-gl-csp';
 import mbRtlPlugin from '@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js?asUrl';
-import mbWorkerUrl from 'maplibre-gl/dist/maplibre-gl-csp-worker?asUrl';
+import mbWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?asUrl';
+import 'maplibre-gl/dist/maplibre-gl-shared.mjs?asUrl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-const maplibregl = maplibreglDistCsp as typeof maplibreglDist;
+// Kibana builds style expressions at runtime and clears properties with null.
+declare module 'maplibre-gl' {
+  interface Map {
+    setPaintProperty<Value>(layerId: string, name: string, value: Value): this;
+    setLayoutProperty<Value>(layerId: string, name: string, value: Value): this;
+  }
+}
+
 maplibregl.setWorkerUrl(mbWorkerUrl);
 maplibregl.setRTLTextPlugin(mbRtlPlugin, true);
 
@@ -46,6 +54,7 @@ export { maplibregl };
 
 export type {
   AJAXError,
+  ErrorEvent,
   AttributionControlOptions,
   Map,
   LayerSpecification,
@@ -57,6 +66,7 @@ export type {
   RasterTileSource,
   MapOptions,
   MapMouseEvent,
+  MapWheelEvent,
   MapSourceDataEvent,
   LngLat,
   LngLatBounds,

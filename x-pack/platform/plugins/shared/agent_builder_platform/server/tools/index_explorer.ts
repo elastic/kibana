@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import { memoize, once } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { indexExplorer } from '@kbn/agent-builder-genai-utils';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { includeFrozenSchema } from './include_frozen_schema';
+import {
+  createIncludeFrozenSchema,
+  getIncludeFrozenByDefault,
+  getIncludeFrozenParam,
+} from './include_frozen_schema';
 
-const indexExplorerSchema = z.object({
+const createIndexExplorerSchemaShape = () => ({
   query: z
     .string()
     .describe('A natural language query to infer which indices, aliases or datastreams to use.'),
@@ -24,10 +29,26 @@ const indexExplorerSchema = z.object({
     .string()
     .optional()
     .describe('(optional) Index pattern to filter indices by. Defaults to *.'),
-  include_frozen: includeFrozenSchema,
 });
 
-export const indexExplorerTool = (): BuiltinToolDefinition<typeof indexExplorerSchema> => {
+const createIndexExplorerSchema = memoize((includeFrozenByDefault: boolean) =>
+  z.object({
+    ...createIndexExplorerSchemaShape(),
+    include_frozen: createIncludeFrozenSchema(includeFrozenByDefault),
+  })
+);
+
+const createServerlessIndexExplorerSchema = once(() => z.object(createIndexExplorerSchemaShape()));
+
+type IndexExplorerSchema =
+  | ReturnType<typeof createIndexExplorerSchema>
+  | ReturnType<typeof createServerlessIndexExplorerSchema>;
+
+export const indexExplorerTool = ({
+  isServerless = false,
+}: {
+  isServerless?: boolean;
+} = {}): DynamicSchemaBuiltinToolDefinition<IndexExplorerSchema> => {
   return {
     id: platformCoreTools.indexExplorer,
     type: ToolType.builtin,
@@ -42,11 +63,12 @@ User: "Show me my latest alerts"
 You: call tool 'index_explorer' with { query: 'indices containing user alerts' }
 Tool result: [{ type: "index", name: '.alerts' }]
 `,
-    schema: indexExplorerSchema,
-    handler: async (
-      { query: nlQuery, indexPattern = '*', limit = 1, include_frozen: includeFrozen = false },
-      { esClient, experimentalFeatures, modelProvider, logger }
-    ) => {
+    getSchema: async (schemaContext) =>
+      isServerless
+        ? createServerlessIndexExplorerSchema()
+        : createIndexExplorerSchema(await getIncludeFrozenByDefault(schemaContext)),
+    handler: async (params, { esClient, experimentalFeatures, modelProvider, logger }) => {
+      const { query: nlQuery, indexPattern = '*', limit = 1 } = params;
       logger.debug(
         `Index explorer tool called with query: ${nlQuery}, indexPattern: ${indexPattern}, limit: ${limit}`
       );
@@ -56,7 +78,7 @@ Tool result: [{ type: "index", name: '.alerts' }]
         indexPattern,
         limit,
         includeDatasets: experimentalFeatures.datasets,
-        includeFrozen,
+        includeFrozen: getIncludeFrozenParam(params),
         esClient: esClient.asCurrentUser,
         model,
       });

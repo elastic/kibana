@@ -41,6 +41,8 @@ import type { FtrProviderContext } from '../../../../../common/ftr_provider_cont
 import { Spaces } from '../../../../scenarios';
 import type { TaskManagerDoc } from '../../../../../common/lib';
 import {
+  AlertUtils,
+  TaskManagerUtils,
   getEventLog,
   getTestRuleData,
   getUrlPrefix,
@@ -63,6 +65,8 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const objectRemover = new ObjectRemover(supertestWithoutAuth);
   const esTestIndexTool = new ESTestIndexTool(es, retry);
+  const alertUtils = new AlertUtils({ space: Spaces.space1, supertestWithoutAuth });
+  const taskManagerUtils = new TaskManagerUtils(es, retry);
 
   type PatternFiringAlert = Alert & { patternIndex: number; instancePattern: boolean[] };
   // type AlwaysFiringAlert = Alert & { patternIndex: number; instancePattern: boolean[] };
@@ -184,10 +188,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       // --------------------------
       // RUN 2 - 0 new alerts
       // --------------------------
-      let runSoon = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-        .set('kbn-xsrf', 'foo');
-      expect(runSoon.status).to.eql(204);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 2 }]]));
       executeEvent = events[1];
@@ -214,10 +215,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       // --------------------------
       // RUN 3 - 1 new alert
       // --------------------------
-      runSoon = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-        .set('kbn-xsrf', 'foo');
-      expect(runSoon.status).to.eql(204);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 3 }]]));
       executeEvent = events[2];
@@ -275,10 +273,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       // --------------------------
       // RUN 4 - 1 active alert
       // --------------------------
-      runSoon = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-        .set('kbn-xsrf', 'foo');
-      expect(runSoon.status).to.eql(204);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 4 }]]));
       executeEvent = events[3];
@@ -332,10 +327,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       // --------------------------
       // RUN 5 - 1 recovered alert
       // --------------------------
-      runSoon = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-        .set('kbn-xsrf', 'foo');
-      expect(runSoon.status).to.eql(204);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 5 }]]));
       executeEvent = events[4];
@@ -394,10 +386,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       // --------------------------
       // RUN 6 - 0 new alerts
       // --------------------------
-      runSoon = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-        .set('kbn-xsrf', 'foo');
-      expect(runSoon.status).to.eql(204);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 6 }]]));
       executeEvent = events[5];
@@ -504,10 +493,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       // --------------------------
       // RUN 2 - 0 new alerts
       // --------------------------
-      let runSoon = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-        .set('kbn-xsrf', 'foo');
-      expect(runSoon.status).to.eql(204);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 2 }]]));
       executeEvent = events[1];
@@ -535,10 +521,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       // --------------------------
       // RUN 3 - 0 new alerts
       // --------------------------
-      runSoon = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-        .set('kbn-xsrf', 'foo');
-      expect(runSoon.status).to.eql(204);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 3 }]]));
       executeEvent = events[2];
@@ -654,10 +637,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       // --------------------------
       // RUN 2 - 0 new alerts
       // --------------------------
-      let runSoon = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-        .set('kbn-xsrf', 'foo');
-      expect(runSoon.status).to.eql(204);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 2 }]]));
       executeEvent = events[1];
@@ -684,10 +664,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       // --------------------------
       // RUN 3 - 1 new alert
       // --------------------------
-      runSoon = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-        .set('kbn-xsrf', 'foo');
-      expect(runSoon.status).to.eql(204);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 3 }]]));
       executeEvent = events[2];
@@ -745,10 +722,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       // --------------------------
       // RUN 4 - 1 active alert
       // --------------------------
-      runSoon = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-        .set('kbn-xsrf', 'foo');
-      expect(runSoon.status).to.eql(204);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 4 }]]));
       executeEvent = events[3];
@@ -802,10 +776,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       // --------------------------
       // RUN 5 - 1 recovered alert
       // --------------------------
-      runSoon = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-        .set('kbn-xsrf', 'foo');
-      expect(runSoon.status).to.eql(204);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 5 }]]));
       executeEvent = events[4];
@@ -859,10 +830,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       // --------------------------
       // RUN 6 - 0 new alerts
       // --------------------------
-      runSoon = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-        .set('kbn-xsrf', 'foo');
-      expect(runSoon.status).to.eql(204);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 6 }]]));
       executeEvent = events[5];
@@ -971,10 +939,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       // --------------------------
       // RUN 2 - 0 new alerts
       // --------------------------
-      let runSoon = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-        .set('kbn-xsrf', 'foo');
-      expect(runSoon.status).to.eql(204);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 2 }]]));
       executeEvent = events[1];
@@ -1003,10 +968,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       // --------------------------
       // RUN 3 - 1 new alert
       // --------------------------
-      runSoon = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-        .set('kbn-xsrf', 'foo');
-      expect(runSoon.status).to.eql(204);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 3 }]]));
       executeEvent = events[2];
@@ -1089,13 +1051,19 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
     return searchResult.hits.hits as Array<SearchHit<T>>;
   }
 
-  async function getTaskState(ruleId: string): Promise<RuleTaskState> {
+  async function getTaskDoc(ruleId: string): Promise<TaskManagerDoc> {
     const task = await es.get<TaskManagerDoc>({
       id: `task:${ruleId}`,
       index: '.kibana_task_manager',
     });
 
-    return JSON.parse(task._source!.task.state);
+    return task._source!;
+  }
+
+  async function getTaskState(ruleId: string): Promise<RuleTaskState> {
+    const { task } = await getTaskDoc(ruleId);
+
+    return JSON.parse(task.state);
   }
 
   // The `execute` event log entry is written BEFORE task manager persists the

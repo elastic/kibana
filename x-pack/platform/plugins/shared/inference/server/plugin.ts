@@ -207,9 +207,11 @@ export class InferencePlugin
         anonymizationEnabled,
         policyService,
       });
+      const anonymizationRulesPromise = createAnonymizationRulesPromise(request);
+      void anonymizationRulesPromise.catch(() => {});
       return {
         namespace,
-        anonymizationRulesPromise: createAnonymizationRulesPromise(request),
+        anonymizationRulesPromise,
         regexWorker: (() => {
           if (!this.regexWorker) {
             this.logger.error(
@@ -318,7 +320,6 @@ export class InferencePlugin
           callbacks: options.callbacks,
           ...getAnonymizationOptions(options.request),
           actions: pluginsStart.actions,
-          anonymizationRulesPromise: createAnonymizationRulesPromise(options.request),
           regexWorker: this.regexWorker!,
           esClient: core.elasticsearch.client.asScoped(options.request).asCurrentUser,
           endpointIdCache: this.endpointIdCache,

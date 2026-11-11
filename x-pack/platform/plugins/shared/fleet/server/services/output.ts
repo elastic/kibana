@@ -88,7 +88,9 @@ import {
   extractAndWriteOutputSecrets,
   isOutputSecretStorageEnabled,
 } from './secrets';
+import { omitNullSecrets, withSavedSecrets } from './secrets/preserve';
 import { findAgentlessPolicies } from './outputs/helpers';
+import { getOutputSecretFields } from './outputs/secret_fields';
 import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
 
 import {
@@ -122,7 +124,9 @@ export function outputIdToUuid(id: string) {
 
 export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): Output {
   const logger = appContextService.getLogger();
-  const { output_id: outputId, ssl, proxy_id: proxyId, ...attributes } = so.attributes;
+  // the references of the secrets an update removed are kept as `null` by the saved object update
+  const soAttributes = omitNullSecrets(so.attributes);
+  const { output_id: outputId, ssl, proxy_id: proxyId, ...attributes } = soAttributes;
 
   let parsedSsl;
   try {
@@ -1033,7 +1037,16 @@ class OutputService {
     {
       fromPreconfiguration = false,
       secretHashes,
-    }: { fromPreconfiguration: boolean; secretHashes?: Record<string, any> } = {
+      declaresAllSecrets = false,
+    }: {
+      fromPreconfiguration: boolean;
+      secretHashes?: Record<string, any>;
+      /**
+       * The payload declares the whole output, so the secrets it leaves out are removed rather
+       * than kept. Set by preconfiguration, for which the Kibana config file is authoritative.
+       */
+      declaresAllSecrets?: boolean;
+    } = {
       fromPreconfiguration: false,
     }
   ) {
@@ -1051,6 +1064,20 @@ class OutputService {
       throw new OutputUnauthorizedError(
         `Default output ${id} cannot be set to is_default=false or is_default_monitoring=false manually. Make another output the default first.`
       );
+    }
+
+    const mergedType = data.type ?? originalOutput.type;
+
+    const secretStorageEnabled = await isOutputSecretStorageEnabled(esClient, soClient);
+    if (secretStorageEnabled && !declaresAllSecrets) {
+      // an update that does not touch a credential kept as a secret keeps it, and a plain text
+      // value for such a credential is stored as a secret too. Applied before the payload is
+      // turned into saved object attributes, so that every step sees the same data.
+      data = withSavedSecrets({
+        fields: getOutputSecretFields(mergedType),
+        original: originalOutput,
+        update: data,
+      });
     }
 
     // id is stripped to prevent poisoning the saved object's identity field.
@@ -1071,7 +1098,6 @@ class OutputService {
       }
     }
 
-    const mergedType = data.type ?? originalOutput.type;
     const mergedIsDefault = data.is_default ?? originalOutput.is_default;
     const defaultDataOutputId = await this.getDefaultDataOutputId();
     if (mergedType !== originalOutput.type || originalOutput.is_default !== mergedIsDefault) {
@@ -1288,7 +1314,7 @@ class OutputService {
     await remoteSyncIntegrationsCheck(esClient, data);
 
     // Store secret values if enabled; if not, store plain text values
-    if (await isOutputSecretStorageEnabled(esClient, soClient)) {
+    if (secretStorageEnabled) {
       const secretsRes = await extractAndUpdateOutputSecrets({
         oldOutput: originalOutput,
         outputUpdate: data,

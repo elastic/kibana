@@ -8,7 +8,7 @@ import Boom from '@hapi/boom';
 import { omit } from 'lodash';
 import type { SavedObject } from '@kbn/core/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import type { RawRule, IntervalSchedule } from '../../../../types';
+import type { RawRule, IntervalSchedule, RuleTypeParams } from '../../../../types';
 import { resetMonitoringLastRun, getNextRun } from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
@@ -23,7 +23,9 @@ import {
   createNewAPIKeySet,
   scheduleTask,
   bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
 } from '../../../../rules_client/lib';
+import { authorizeRuleTypeParams } from '../../../../lib';
 import { validateScheduleLimit } from '../get_schedule_frequency';
 import { getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
@@ -114,6 +116,13 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
   }
 
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
+
+  // Re-authorize persisted params before activating them: they may have bypassed
+  // the authorizer entirely (e.g. via Saved Objects import).
+  await authorizeRuleTypeParams(attributes.params as RuleTypeParams, ruleType.authorize?.params, {
+    request: context.request,
+  });
+
   const { autoRecoverAlerts: isLifecycleAlert } = ruleType;
   const indices = context.getAlertIndicesAlias([ruleType.id], context.spaceId);
 
@@ -214,6 +223,9 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
     } catch (e) {
       throw e;
     }
+
+    // Legacy actions are deleted only once the rule carrying them is saved, so a conflict can be retried
+    await deleteLegacyActionsForRules(context, migratedIds);
   }
 
   let scheduledTaskIdToCreate: string | null = null;

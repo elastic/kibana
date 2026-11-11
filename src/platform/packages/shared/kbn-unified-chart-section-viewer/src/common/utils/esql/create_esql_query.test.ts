@@ -53,6 +53,24 @@ const mockLegacyHistogramMetric: ParsedMetricItem = {
 };
 
 describe('createESQLQuery', () => {
+  describe('metadata fields', () => {
+    it('declares the metadata fields that the WHERE statements use in the TS source', () => {
+      const query = createESQLQuery({
+        metricItem: mockMetric,
+        whereStatements: ['_ignored IS NULL'],
+        metadataFields: ['_ignored'],
+      });
+
+      expect(query).toBe(
+        `
+TS metrics-* METADATA _ignored
+  | WHERE _ignored IS NULL
+  | STATS AVG(cpu.usage) BY TBUCKET(100)
+`.trim()
+      );
+    });
+  });
+
   it('should generate a basic AVG query for a metric field', () => {
     const query = createESQLQuery({ metricItem: mockMetric });
     expect(query).toBe(

@@ -38,10 +38,15 @@ const { mockListEntityStoreEntities } = jest.requireMock('../entities/service') 
   mockListEntityStoreEntities: jest.Mock;
 };
 
-const { mockPlainIndexSync, mockCreateIndexSyncService } = jest.requireMock(
-  './sync/index_sync'
-) as {
+const {
+  mockPlainIndexSync,
+  mockResolveFullSyncState,
+  mockMarkFullSyncProcessed,
+  mockCreateIndexSyncService,
+} = jest.requireMock('./sync/index_sync') as {
   mockPlainIndexSync: jest.Mock;
+  mockResolveFullSyncState: jest.Mock;
+  mockMarkFullSyncProcessed: jest.Mock;
   mockCreateIndexSyncService: jest.Mock;
 };
 
@@ -106,7 +111,7 @@ describe('createEntitySourcesService', () => {
           maxEntityId: 'user:2',
         };
       });
-    mockPlainIndexSync.mockResolvedValue(undefined);
+    mockPlainIndexSync.mockResolvedValue([{ sourceId: 'source-c', failed: false }]);
     mockGetIndexForWatchlist.mockReturnValue('.lists-watchlist-vip-users-default');
   });
 
@@ -139,21 +144,235 @@ describe('createEntitySourcesService', () => {
 
     // source-c gets one page call + one tail call
     expect(mockPlainIndexSync).toHaveBeenCalledTimes(2);
-    expect(mockPlainIndexSync).toHaveBeenCalledWith([
-      expect.objectContaining({
-        source: expect.objectContaining({ id: 'source-c' }),
-        entityStoreEntityIdsByType: { user: ['user:1'], host: [], service: [], generic: [] },
-        watchlistsByEuid: expect.any(Map),
-        pageRange: expect.objectContaining({ lte: expect.any(String) }),
-      }),
-    ]);
-    expect(mockPlainIndexSync).toHaveBeenCalledWith([
-      expect.objectContaining({
-        source: expect.objectContaining({ id: 'source-c' }),
-        entityStoreEntityIdsByType: { user: [], host: [], service: [], generic: [] },
-      }),
-    ]);
+    expect(mockPlainIndexSync).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          source: expect.objectContaining({ id: 'source-c' }),
+          entityStoreEntityIdsByType: { user: ['user:1'], host: [], service: [], generic: [] },
+          watchlistsByEuid: expect.any(Map),
+          pageRange: expect.objectContaining({ lte: expect.any(String) }),
+        }),
+      ],
+      { hasNewFullSync: false }
+    );
+    expect(mockPlainIndexSync).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          source: expect.objectContaining({ id: 'source-c' }),
+          entityStoreEntityIdsByType: { user: [], host: [], service: [], generic: [] },
+        }),
+      ],
+      { hasNewFullSync: false }
+    );
 
+    expect(logger.info).toHaveBeenCalledWith(
+      '[WatchlistSync] Completed sync for watchlist watchlist-1 (VIP Users)'
+    );
+  });
+
+  it('persists the full-sync marker exactly once, after every page and the tail pass for a source have succeeded', async () => {
+    mockGetEntitySourceIds.mockResolvedValue(['source-c']);
+    mockListEntitySources.mockResolvedValue({
+      sources: [{ id: 'source-c', type: 'integration', integrationName: 'entityanalytics_okta' }],
+    });
+    mockListEntityStoreEntities.mockReset().mockImplementationOnce(async function* () {
+      yield {
+        entityIdsByType: { user: ['user:1'], host: [], service: [], generic: [] },
+        watchlistsByEuid: new Map(),
+        maxEntityId: 'user:1',
+      };
+      yield {
+        entityIdsByType: { user: ['user:2'], host: [], service: [], generic: [] },
+        watchlistsByEuid: new Map(),
+        maxEntityId: 'user:2',
+      };
+    });
+
+    // Resolved once, up front — reused for every page below plus the tail pass.
+    const completedAt = '2024-03-01T00:00:00Z';
+    mockResolveFullSyncState.mockResolvedValueOnce({
+      hasNewFullSync: true,
+      syncMarker: '2024-02-01T00:00:00Z',
+      completedAt,
+    });
+    mockPlainIndexSync
+      .mockResolvedValueOnce([{ sourceId: 'source-c', failed: false }])
+      .mockResolvedValueOnce([{ sourceId: 'source-c', failed: false }])
+      .mockResolvedValueOnce([{ sourceId: 'source-c', failed: false }]);
+
+    const service = createEntitySourcesService({
+      esClient,
+      soClient,
+      logger,
+      namespace,
+      getStartServices: mockGetStartServices as never,
+      hasEncryptionKey: true,
+    });
+
+    await service.syncWatchlist('watchlist-1');
+
+    // Resolved exactly once per source, not once per page.
+    expect(mockResolveFullSyncState).toHaveBeenCalledTimes(1);
+    // Two pages + one tail pass = 3 calls for this one source, all given the same resolved state.
+    expect(mockPlainIndexSync).toHaveBeenCalledTimes(3);
+    for (const call of mockPlainIndexSync.mock.calls) {
+      expect(call[1]).toEqual({
+        hasNewFullSync: true,
+        syncMarker: '2024-02-01T00:00:00Z',
+        completedAt,
+      });
+    }
+    expect(mockMarkFullSyncProcessed).toHaveBeenCalledTimes(1);
+    expect(mockMarkFullSyncProcessed).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'source-c' }),
+      completedAt
+    );
+  });
+
+  it('does not persist the full-sync marker if any page for the source failed', async () => {
+    mockGetEntitySourceIds.mockResolvedValue(['source-c']);
+    mockListEntitySources.mockResolvedValue({
+      sources: [{ id: 'source-c', type: 'integration', integrationName: 'entityanalytics_okta' }],
+    });
+    mockListEntityStoreEntities.mockReset().mockImplementationOnce(async function* () {
+      yield {
+        entityIdsByType: { user: ['user:1'], host: [], service: [], generic: [] },
+        watchlistsByEuid: new Map(),
+        maxEntityId: 'user:1',
+      };
+    });
+
+    mockResolveFullSyncState.mockResolvedValueOnce({
+      hasNewFullSync: true,
+      completedAt: '2024-03-01T00:00:00Z',
+    });
+    mockPlainIndexSync
+      .mockResolvedValueOnce([{ sourceId: 'source-c', failed: false }])
+      // Tail pass fails for this source.
+      .mockResolvedValueOnce([{ sourceId: 'source-c', failed: true }]);
+
+    const service = createEntitySourcesService({
+      esClient,
+      soClient,
+      logger,
+      namespace,
+      getStartServices: mockGetStartServices as never,
+      hasEncryptionKey: true,
+    });
+
+    await service.syncWatchlist('watchlist-1');
+
+    expect(mockMarkFullSyncProcessed).not.toHaveBeenCalled();
+  });
+
+  it("does not let one source's resolveFullSyncState failure crash the whole sync, skip other sources, or skip orphaned-entity cleanup", async () => {
+    mockGetEntitySourceIds.mockResolvedValue(['source-c', 'source-d']);
+    mockListEntitySources.mockResolvedValue({
+      sources: [
+        { id: 'source-c', type: 'integration', integrationName: 'entityanalytics_okta' },
+        { id: 'source-d', type: 'integration', integrationName: 'entityanalytics_ad' },
+      ],
+    });
+    mockListEntityStoreEntities.mockReset().mockImplementation(async function* () {
+      yield {
+        entityIdsByType: { user: ['user:1'], host: [], service: [], generic: [] },
+        watchlistsByEuid: new Map(),
+        maxEntityId: 'user:1',
+      };
+    });
+
+    mockResolveFullSyncState.mockImplementation(async (source: { id: string }) => {
+      if (source.id === 'source-c') {
+        throw new Error('ES unavailable');
+      }
+      return { hasNewFullSync: false };
+    });
+    mockPlainIndexSync.mockResolvedValue([{ sourceId: 'source-c', failed: false }]);
+
+    const service = createEntitySourcesService({
+      esClient,
+      soClient,
+      logger,
+      namespace,
+      getStartServices: mockGetStartServices as never,
+      hasEncryptionKey: true,
+    });
+
+    await expect(service.syncWatchlist('watchlist-1')).resolves.toBeUndefined();
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'Failed to resolve full-sync state for source source-c: Error: ES unavailable'
+      )
+    );
+
+    // source-c falls back to hasNewFullSync: false instead of being skipped — its normal
+    // incremental sync still runs this cycle.
+    expect(mockPlainIndexSync).toHaveBeenCalledWith(
+      [expect.objectContaining({ source: expect.objectContaining({ id: 'source-c' }) })],
+      { hasNewFullSync: false }
+    );
+    // source-d, unaffected by source-c's failure, also still ran.
+    expect(mockPlainIndexSync).toHaveBeenCalledWith(
+      [expect.objectContaining({ source: expect.objectContaining({ id: 'source-d' }) })],
+      { hasNewFullSync: false }
+    );
+
+    // syncWatchlist reached the cleanup phase and completion log, not short-circuited by the
+    // rejection.
+    expect(logger.info).toHaveBeenCalledWith(
+      '[WatchlistSync] Completed sync for watchlist watchlist-1 (VIP Users)'
+    );
+  });
+
+  it("does not let one source's markFullSyncProcessed failure crash the whole sync, skip other sources, or skip orphaned-entity cleanup", async () => {
+    mockGetEntitySourceIds.mockResolvedValue(['source-c', 'source-d']);
+    mockListEntitySources.mockResolvedValue({
+      sources: [
+        { id: 'source-c', type: 'integration', integrationName: 'entityanalytics_okta' },
+        { id: 'source-d', type: 'integration', integrationName: 'entityanalytics_ad' },
+      ],
+    });
+    mockListEntityStoreEntities.mockReset().mockImplementation(async function* () {
+      yield {
+        entityIdsByType: { user: ['user:1'], host: [], service: [], generic: [] },
+        watchlistsByEuid: new Map(),
+        maxEntityId: 'user:1',
+      };
+    });
+
+    mockResolveFullSyncState.mockResolvedValue({
+      hasNewFullSync: true,
+      completedAt: '2024-03-01T00:00:00Z',
+    });
+    mockPlainIndexSync.mockResolvedValue([{ sourceId: 'source-c', failed: false }]);
+    mockMarkFullSyncProcessed.mockImplementation(async (source: { id: string }) => {
+      if (source.id === 'source-c') {
+        throw new Error('version conflict');
+      }
+    });
+
+    const service = createEntitySourcesService({
+      esClient,
+      soClient,
+      logger,
+      namespace,
+      getStartServices: mockGetStartServices as never,
+      hasEncryptionKey: true,
+    });
+
+    await expect(service.syncWatchlist('watchlist-1')).resolves.toBeUndefined();
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'Failed to persist full-sync marker for source source-c: Error: version conflict'
+      )
+    );
+    // source-d's marker is still persisted despite source-c's failure.
+    expect(mockMarkFullSyncProcessed).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'source-d' }),
+      '2024-03-01T00:00:00Z'
+    );
     expect(logger.info).toHaveBeenCalledWith(
       '[WatchlistSync] Completed sync for watchlist watchlist-1 (VIP Users)'
     );
@@ -424,6 +643,7 @@ describe('createEntitySourcesService', () => {
       // Abort mid-way through syncWatchlist, after plainIndexSync runs
       mockPlainIndexSync.mockImplementation(async () => {
         controller.abort();
+        return [{ sourceId: 'source-c', failed: false }];
       });
 
       const service = createService();

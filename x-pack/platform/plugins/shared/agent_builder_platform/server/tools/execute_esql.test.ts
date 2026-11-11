@@ -14,6 +14,7 @@ jest.mock('@kbn/agent-builder-genai-utils/tools/utils/esql', () => ({
 
 import { executeEsql } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
 import { executeEsqlTool } from './execute_esql';
+import { createSchemaContext, resolveToolSchema } from './test_utils';
 
 const executeEsqlMock = executeEsql as jest.MockedFunction<typeof executeEsql>;
 
@@ -33,23 +34,73 @@ describe('executeEsqlTool', () => {
   });
 
   describe('include_frozen', () => {
+    const getSchema = (includeFrozenByDefault: boolean) =>
+      resolveToolSchema(executeEsqlTool(), includeFrozenByDefault);
+
     it('excludes frozen tier indices by default', async () => {
-      await executeEsqlTool().handler({ query: 'FROM logs', limit: 100 }, createHandlerContext());
+      const schema = await getSchema(false);
+
+      await executeEsqlTool().handler(schema.parse({ query: 'FROM logs' }), createHandlerContext());
 
       expect(executeEsqlMock.mock.calls[0][0]).toMatchObject({ includeFrozen: false });
     });
 
-    it('includes frozen tier indices when opted in', async () => {
-      await executeEsqlTool().handler(
-        { query: 'FROM logs', limit: 100, include_frozen: true },
-        createHandlerContext()
-      );
+    it('includes frozen tier indices by default when the space setting is enabled', async () => {
+      const schema = await getSchema(true);
+
+      await executeEsqlTool().handler(schema.parse({ query: 'FROM logs' }), createHandlerContext());
 
       expect(executeEsqlMock.mock.calls[0][0]).toMatchObject({ includeFrozen: true });
     });
 
+    it('lets the agent override the default', async () => {
+      const schema = await getSchema(true);
+
+      await executeEsqlTool().handler(
+        schema.parse({ query: 'FROM logs', include_frozen: false }),
+        createHandlerContext()
+      );
+
+      expect(executeEsqlMock.mock.calls[0][0]).toMatchObject({ includeFrozen: false });
+    });
+
+    it('reuses the same schema instance for a given default', async () => {
+      expect(await getSchema(true)).toBe(await getSchema(true));
+      expect(await getSchema(false)).toBe(await getSchema(false));
+      expect(await getSchema(true)).not.toBe(await getSchema(false));
+    });
+
     it('describes how to opt in to the frozen tier', () => {
       expect(executeEsqlTool().description).toContain('include_frozen');
+    });
+
+    describe('in serverless', () => {
+      const tool = executeEsqlTool({ isServerless: true });
+
+      it('does not expose include_frozen or read the space setting', async () => {
+        const context = createSchemaContext(true);
+        const schema = await tool.getSchema(context);
+
+        expect(schema.shape).not.toHaveProperty('include_frozen');
+        expect(context.uiSettings.get).not.toHaveBeenCalled();
+      });
+
+      it('excludes frozen tier indices even when include_frozen is passed', async () => {
+        const schema = await tool.getSchema(createSchemaContext(true));
+
+        await tool.handler(
+          schema.parse({ query: 'FROM logs', include_frozen: true }),
+          createHandlerContext()
+        );
+
+        expect(executeEsqlMock.mock.calls[0][0]).toMatchObject({ includeFrozen: false });
+      });
+
+      it('does not mention data tiers in the description', () => {
+        expect(tool.description).not.toContain('include_frozen');
+        expect(tool.description).not.toContain('Data tiers');
+        expect(tool.description).toMatch(/the lowest limit will always prevail\.$/);
+      });
     });
   });
 });

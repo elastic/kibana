@@ -25,7 +25,8 @@ export function searchHitToAgent(
   hit: FleetServerAgentESResponse & {
     sort?: SortResults;
     fields?: { status?: AgentStatus[]; pipeline_config?: string[]; signals?: string[] };
-  }
+  },
+  options?: { requireStatusRuntimeField?: boolean }
 ): Agent {
   const outputs: OutputMap | undefined = hit._source?.outputs
     ? Object.entries(hit._source?.outputs).reduce((acc, [key, val]) => {
@@ -66,6 +67,7 @@ export function searchHitToAgent(
     enrolled_at: hit._source?.enrolled_at!,
     unenrolled_at: hit._source?.unenrolled_at!,
     unenrollment_started_at: hit._source?.unenrollment_started_at,
+    unenrolled_reason: hit._source?.unenrolled_reason,
     audit_unenrolled_reason: hit._source?.audit_unenrolled_reason!,
     upgraded_at: hit._source?.upgraded_at,
     upgrade_started_at: hit._source?.upgrade_started_at,
@@ -77,7 +79,7 @@ export function searchHitToAgent(
     // Always resolved to the base policy id, so consumers indexing base-id-keyed collections can
     // read this field directly instead of stripping the suffix off `policy_id` themselves. The
     // fallback covers documents that pre-date `policy_base_id` (agents enrolled via an older
-    // fleet-server during a mixed-version rollout, before the startup backfill catches them).
+    // fleet-server during a mixed-version rollout, before the setup backfill catches them).
     policy_base_id:
       hit._source?.policy_base_id ??
       (hit._source?.policy_id ? removeVersionSuffixFromPolicyId(hit._source.policy_id) : undefined),
@@ -118,14 +120,14 @@ export function searchHitToAgent(
     health: hit._source?.health,
   };
 
-  if (!hit.fields?.status?.length) {
+  if (hit.fields?.status?.length) {
+    agent.status = hit.fields.status[0];
+  } else if (options?.requireStatusRuntimeField !== false) {
     appContextService
       .getLogger()
       .error(
         'Agent status runtime field is missing, unable to get agent status for agent ' + agent.id
       );
-  } else {
-    agent.status = hit.fields.status[0];
   }
   if (hit.fields?.pipeline_config?.length) {
     agent.pipeline_config = hit.fields.pipeline_config[0];

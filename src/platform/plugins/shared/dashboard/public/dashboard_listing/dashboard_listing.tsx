@@ -25,6 +25,7 @@ import { dashboardQueryClient } from '../services/dashboard_query_client';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
 import { getDashboardListingTabs } from './get_dashboard_listing_tabs';
 import type { DashboardListingProps, DashboardListingTab } from './types';
+import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 
 export const DashboardListing = ({
   children,
@@ -136,7 +137,7 @@ export const DashboardListing = ({
       });
     }
 
-    if (!createDashboardAction) {
+    if (!createDashboardAction || !getDashboardCapabilities().createNew) {
       return undefined;
     }
 

@@ -12,7 +12,8 @@ import { type Filter, isOfAggregateQueryType } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { DataViewField, DataViewType, getAbsoluteTimeRange } from '@kbn/data-plugin/common';
-import { hasTransformationalCommand } from '@kbn/esql-utils';
+import { hasTransformationalCommand, isESQLColumnGroupable } from '@kbn/esql-utils';
+import { fieldSupportsBreakdown } from '@kbn/field-utils';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import type {
   UnifiedHistogramFetchParams,
@@ -93,17 +94,20 @@ function getProcessedBreakdownField({
     return undefined;
   }
 
+  // only keep a breakdown field the chart can actually use, so the selector label stays in sync
   if (isESQLQuery) {
     const breakdownColumn = columns?.find((column) => column.name === breakdownField);
-    const field = breakdownColumn
-      ? new DataViewField(convertDatatableColumnToDataViewFieldSpec(breakdownColumn))
-      : undefined;
+    const field =
+      breakdownColumn && isESQLColumnGroupable(breakdownColumn)
+        ? new DataViewField(convertDatatableColumnToDataViewFieldSpec(breakdownColumn))
+        : undefined;
     return {
       field,
     };
   }
 
+  const field = breakdownField ? dataView?.getFieldByName(breakdownField) : undefined;
   return {
-    field: breakdownField ? dataView?.getFieldByName(breakdownField) : undefined,
+    field: field && fieldSupportsBreakdown(field) ? field : undefined,
   };
 }
