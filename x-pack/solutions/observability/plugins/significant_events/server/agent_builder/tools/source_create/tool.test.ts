@@ -120,7 +120,7 @@ describe('source_create tool', () => {
           type: 'error',
           data: {
             message: expect.stringContaining(
-              'requires the nightshift manage and nightshift configure privileges'
+              'requires the Nightshift manage and Nightshift configure privileges'
             ),
           },
         },
