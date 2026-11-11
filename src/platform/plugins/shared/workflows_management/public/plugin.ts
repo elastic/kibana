@@ -31,6 +31,9 @@ import { getWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { AvailabilityService } from './common/lib/availability';
 import { TelemetryService } from './common/lib/telemetry/telemetry_service';
 import type { WorkflowsBaseTelemetry } from './common/service/telemetry';
+import { RunWorkflowUi } from './custom_app/run_workflow/action_ui';
+import { runWorkflowHandler } from './custom_app/run_workflow/handler';
+import { setCustomAppServices } from './custom_app/run_workflow/services';
 import type { DeepLinksParams } from './deep_links';
 import { getDeepLinks } from './deep_links';
 import { triggerSchemas } from './trigger_schemas';
@@ -44,6 +47,7 @@ import type {
   WorkflowsServices,
 } from './types';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { registerRunWorkflowAction } from '../common/custom_app/run_workflow/register';
 import { stepSchemas } from '../common/step_schemas';
 
 export class WorkflowsPlugin
@@ -87,6 +91,9 @@ export class WorkflowsPlugin
     if (!isWorkflowsUiEnabled) {
       return {};
     }
+
+    // Apps made of custom components can run a workflow, and say what it is handed.
+    registerRunWorkflowAction(runWorkflowHandler, RunWorkflowUi);
 
     // Register workflows connector UI component lazily to reduce main bundle size
     const registerConnectorType = async () => {
@@ -132,6 +139,8 @@ export class WorkflowsPlugin
     core: CoreStart,
     plugins: WorkflowsPublicPluginStartDependencies
   ): WorkflowsPublicPluginStart {
+    setCustomAppServices({ core });
+
     // Initialize singletons with workflowsExtensions
     stepSchemas.initialize(plugins.workflowsExtensions);
     triggerSchemas.initialize(plugins.workflowsExtensions);

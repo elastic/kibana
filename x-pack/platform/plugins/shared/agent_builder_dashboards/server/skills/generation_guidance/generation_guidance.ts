@@ -44,7 +44,7 @@ Each visualization request is authored in a separate context. New-panel authors 
 
 - Use \`source: "request"\` to create or edit a Lens, Vega, or custom content panel from a natural-language query — this is the only way to make a **new** generated panel.
 - Use \`source: "attachment"\` to place a visualization that \`${platformCoreTools.createVisualization}\` already returned in this conversation. A \`source: "request"\` would generate a **new**, different panel instead.
-- Use \`source: "config"\` for panels you author by value: markdown and ML anomaly panels.
+- Use \`source: "config"\` for panels you author by value: markdown, custom app and ML anomaly panels.
 
 ## Panel Type Selection
 
@@ -54,6 +54,10 @@ Choose the first panel type that fits:
 2. **Vega** (\`renderer: "vega"\`) — scatter/bubble plots, small multiples/faceting, layered or combination charts, or when the user asks for Vega.
 3. **Markdown** (\`source: "config"\`, \`type: "markdown"\`) — static text, links, or notes with no data.
 4. **Custom content** (\`renderer: "custom_content"\`) — a last resort for HTML/CSS layouts that Lens and Vega cannot express, such as KPI scorecards with colored status badges, health/status boards, or narrative text mixed with live data values, or when the user asks for a custom/HTML panel.
+
+## Custom App Panels
+
+A custom app is an interactive panel with filters, charts, tables and details, built in this conversation with \`custom_app_create_app\`. When the user asks to put one on the dashboard, add a panel whose \`content\` is \`{ source: "config", type: "custom_app", config: { title?, document } }\`, where \`document\` is the app exactly as it was created: read it from the app's attachment and pass it unchanged. Do not rebuild an app as separate panels, and do not write one by hand here. To change an app, change it with \`custom_app_update_app\` first, then replace the panel by its id with new \`content\` of the same kind. Layout is arranged for you and sizes it full width and tall; only set \`layout\` if the user asked for another arrangement.
 
 ## Custom Content Panels
 

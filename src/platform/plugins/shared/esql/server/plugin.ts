@@ -10,6 +10,7 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import { registerEsqlEditorCapability } from '../common/custom_app/esql_editor/register';
 import { getUiSettings } from './ui_settings';
 import { registerRoutes } from './routes';
 import { ESQLExtensionsRegistry } from './extensions_registry';
@@ -37,6 +38,7 @@ export class EsqlServerPlugin
   ) {
     const { initContext } = this;
 
+    registerEsqlEditorCapability();
     core.uiSettings.register(getUiSettings());
 
     plugins.contentManagement.favorites.registerFavoriteType('esql_query', {

@@ -48,6 +48,9 @@ dependsOn:
   - '@kbn/esql-types'
   - '@kbn/i18n-react'
   - '@kbn/inspector-plugin'
+  - '@kbn/custom-app-registry'
+  - '@kbn/custom-app-common'
+  - '@kbn/react-kibana-mount'
 tags:
   - plugin
   - prod
