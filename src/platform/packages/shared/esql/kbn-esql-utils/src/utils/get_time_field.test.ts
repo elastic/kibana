@@ -43,4 +43,20 @@ describe('getESQLTimeField', () => {
 
     expect(http.post).toHaveBeenCalledTimes(1);
   });
+
+  it('does not reuse the direct-source time field for a LET with the same indices', async () => {
+    const http = createHttp();
+    jest
+      .mocked(http.post)
+      .mockResolvedValueOnce({ timeField: '@timestamp' })
+      .mockResolvedValueOnce({});
+    const source = 'FROM logs-timefield-let-*, ecommerce-timefield-let-*';
+    const query = `LET selected = (${source}); FROM selected`;
+
+    expect(await getESQLTimeField({ query: source, http })).toBe('@timestamp');
+    expect(await getESQLTimeField({ query, http })).toBeUndefined();
+    expect(await getESQLTimeField({ query: `${query} | LIMIT 10`, http })).toBeUndefined();
+
+    expect(http.post).toHaveBeenCalledTimes(2);
+  });
 });
