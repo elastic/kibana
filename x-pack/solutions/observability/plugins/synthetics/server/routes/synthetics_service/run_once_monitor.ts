@@ -12,6 +12,7 @@ import { SyntheticsRestApiRouteFactory } from '../types';
 import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { validateMonitor } from '../monitor_cruds/monitor_validation';
+import { validatePermissions } from '../monitor_cruds/edit_monitor';
 
 export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -22,13 +23,9 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
       monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
     }),
   },
-  handler: async ({
-    request,
-    response,
-    syntheticsMonitorClient,
-    savedObjectsClient,
-    spaceId,
-  }): Promise<any> => {
+  handler: async (routeContext): Promise<any> => {
+    const { request, response, syntheticsMonitorClient, savedObjectsClient, spaceId } =
+      routeContext;
     const monitor = request.body as MonitorFields;
     const { monitorId } = request.params;
     if (isEmpty(monitor)) {
@@ -41,6 +38,11 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
     if (!validationResult.valid || !decodedMonitor) {
       const { reason: message, details, payload } = validationResult;
       return response.badRequest({ body: { message, attributes: { details, ...payload } } });
+    }
+
+    const permissionError = await validatePermissions(routeContext, decodedMonitor.locations);
+    if (permissionError) {
+      return response.forbidden({ body: { message: permissionError } });
     }
 
     const privateLocations: PrivateLocationAttributes[] = await getPrivateLocationsForMonitor(
