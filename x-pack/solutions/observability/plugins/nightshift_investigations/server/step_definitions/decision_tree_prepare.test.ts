@@ -500,6 +500,19 @@ describe('decisionTreePrepareStepDefinition', () => {
             has_learning: false,
           })
         );
+
+        await run({
+          ...followUp,
+          prompt:
+            "Slack user <@U03DA1H80BF> wrote in the investigation's thread:\n\nCan we check EU collector logs?",
+        });
+
+        expect(reportDecisionTreeCausalCheck).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            outcome: 'not_feedback',
+            follow_up_source: 'slack',
+          })
+        );
       });
 
       it('reports skipped_no_trees when a follow-up has no editable trees', async () => {

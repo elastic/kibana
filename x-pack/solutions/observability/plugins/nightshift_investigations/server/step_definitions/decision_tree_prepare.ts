@@ -55,6 +55,8 @@ import { withTimeout } from './with_timeout';
 const CAUSAL_CHECK_TIMEOUT_MS = 90_000;
 const CAUSAL_CHECK_TIMEOUT_MESSAGE = `Causal check timed out after ${CAUSAL_CHECK_TIMEOUT_MS}ms`;
 const CAUSAL_CHECK_LOG_TAGS = ['nightshift', 'decision_trees', 'causal_check'];
+/** Matches `slack_thread_workflow.yaml`'s reply brief (`Slack user <@...> wrote in the investigation's thread:`). */
+const SLACK_THREAD_REPLY_PATTERN = /^Slack user <@[^>]+> wrote in the investigation's thread:\s*\n/;
 
 class CausalCheckModelUnavailableError extends Error {
   constructor() {
@@ -86,7 +88,10 @@ const classifyFollowUpSource = (message: string | undefined): CausalCheckFollowU
   if (trimmed.startsWith(ALERT_RECOVERED_MESSAGE_PREFIX) && trimmed.includes('<alert_data>')) {
     return 'alert_recovery';
   }
-  if (trimmed.startsWith(SLACK_MESSAGE_PREFIX) && trimmed.includes('<slack_data>')) {
+  if (
+    (trimmed.startsWith(SLACK_MESSAGE_PREFIX) && trimmed.includes('<slack_data>')) ||
+    SLACK_THREAD_REPLY_PATTERN.test(trimmed)
+  ) {
     return 'slack';
   }
   return 'direct';
