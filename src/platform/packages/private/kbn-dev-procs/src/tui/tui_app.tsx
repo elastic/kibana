@@ -8,7 +8,7 @@
  */
 
 import path from 'path';
-import React, { useEffect, useReducer, useState } from 'react';
+import React, { useEffect, useReducer, useRef, useState } from 'react';
 import type { ComponentType } from 'react';
 import type {
   SettingRow,
@@ -55,6 +55,8 @@ const SPARE_ROWS = 1;
 const CHROME_ROWS = SPARE_ROWS + 5;
 // How often the top bar re-reads the branch, which can change while the TUI runs.
 const REPO_INFO_INTERVAL_MS = 5000;
+// The line under a tool's pane title with its description and arguments.
+const TOOL_LINE_ROWS = 1;
 // Plain Unicode, so they show without a patched font.
 const BRANCH_SYMBOL = '⎇';
 const COMMIT_SYMBOL = '◉';
@@ -487,6 +489,37 @@ export const createTuiApp = ({
       );
     }, [provider, selected, pane, selectedState, settingsVersion]);
 
+    // A tool's --help is shown in its pane, so its flags are at hand before starting it. Read once per tool.
+    const helpRequested = useRef(new Set<string>());
+    const selectedTool = selected === ALL ? undefined : supervisor.getTool(selected);
+    // Read when the help arrives, which can be after the user moved on or resized.
+    const current = useRef({ selected, logLines });
+    current.current = { selected, logLines };
+    useEffect(() => {
+      if (!selectedTool || helpRequested.current.has(selected)) {
+        return;
+      }
+      helpRequested.current.add(selected);
+      const toLines = (texts: readonly string[]): LogLine[] =>
+        texts.map((text) => ({ processId: selected, stream: 'help', text, time: Date.now() }));
+      selectedTool.readHelp().then(
+        (help) => {
+          const lines = toLines([`── ${selectedTool.helpCommand} ──`, ...help, '']);
+          dispatch({ type: 'lines', lines });
+          // Help reads from the top, so show its start rather than follow its end like a log.
+          if (current.current.selected === selected) {
+            const visibleRows = current.current.logLines - TOOL_LINE_ROWS;
+            dispatch({ type: 'scroll', delta: Math.max(lines.length - visibleRows, 0) });
+          }
+        },
+        (error: Error) =>
+          dispatch({
+            type: 'lines',
+            lines: toLines([`Could not read ${selectedTool.helpCommand}: ${error.message}`]),
+          })
+      );
+    }, [selected, selectedTool]);
+
     const changeSetting = (change: (editor: SettingsEditor) => Promise<SettingsEditResult>) => {
       const editor = pane === 'flags' ? provider?.flagEditor : provider?.editor;
       if (!editor) {
@@ -545,6 +578,8 @@ export const createTuiApp = ({
             dispatch({ type: 'notice', text: error.message, isError: true });
             break;
           }
+          // Follow the tool's output from here on, below its help.
+          dispatch({ type: 'scrollToBottom' });
           void supervisor.start(selected);
           break;
         }

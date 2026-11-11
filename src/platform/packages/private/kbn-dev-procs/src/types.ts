@@ -43,6 +43,10 @@ export interface ToolOptions {
   readonly getArgs: () => string;
   /** Throws when the arguments cannot be parsed, e.g. with an unclosed quote. */
   readonly setArgs: (input: string) => void;
+  /** The command the help comes from, e.g. `node scripts/synthtrace --help`. */
+  readonly helpCommand: string;
+  /** Reads the tool's --help output, without the noise its startup prints. */
+  readonly readHelp: () => Promise<readonly string[]>;
 }
 
 export type ProcessState =
@@ -68,7 +72,8 @@ export interface ProcessStatus {
 
 export interface LogLine {
   readonly processId: string;
-  readonly stream: 'stdout' | 'stderr';
+  /** `help` is a tool's --help, shown in its pane before it starts. */
+  readonly stream: 'stdout' | 'stderr' | 'help';
   readonly text: string;
   readonly time: number;
 }

@@ -8,6 +8,8 @@
  */
 
 import path from 'path';
+import stripAnsi from 'strip-ansi';
+import { readHelp } from './settings/launch_flags';
 import type { ProcessDefinition, ToolOptions } from './types';
 
 /**
@@ -47,6 +49,25 @@ export const splitArgs = (input: string): readonly string[] => {
     args.push(current);
   }
   return args;
+};
+
+// What scripts print on startup besides their help: the Browserslist update notice, and the APM agent's JSON line.
+const STARTUP_NOISE = [
+  /Browserslist: browsers data/,
+  /update-browserslist-db/,
+  /Why you should do it regularly/,
+  /^\{"log\.level"/,
+];
+
+/** The lines of a --help output, without startup noise, colours and surrounding blank lines. */
+export const cleanHelp = (output: string): readonly string[] => {
+  const lines = stripAnsi(output)
+    .split('\n')
+    .map((line) => line.trimEnd())
+    .filter((line) => !STARTUP_NOISE.some((noise) => noise.test(line)));
+  const first = lines.findIndex((line) => line !== '');
+  const last = lines.length - 1 - [...lines].reverse().findIndex((line) => line !== '');
+  return first === -1 ? [] : lines.slice(first, last + 1);
 };
 
 interface ToolSpec {
@@ -89,6 +110,8 @@ const TOOL_SPECS: readonly ToolSpec[] = [
 export const getDefaultTools = (repoRoot: string): readonly ProcessDefinition[] =>
   TOOL_SPECS.map(({ id, script, description, defaultArgs, dependsOn }) => {
     let args = defaultArgs;
+    let help: Promise<readonly string[]> | undefined;
+    const scriptPath = path.join(repoRoot, ...script);
     const tool: ToolOptions = {
       description,
       getArgs: () => args,
@@ -96,11 +119,16 @@ export const getDefaultTools = (repoRoot: string): readonly ProcessDefinition[] 
         splitArgs(input);
         args = input;
       },
+      helpCommand: `node ${script.join('/')} --help`,
+      readHelp: () => {
+        help ??= readHelp(process.execPath, [scriptPath, '--help'], repoRoot).then(cleanHelp);
+        return help;
+      },
     };
     return {
       id,
       command: process.execPath,
-      args: () => [path.join(repoRoot, ...script), ...splitArgs(args)],
+      args: () => [scriptPath, ...splitArgs(args)],
       cwd: repoRoot,
       dependsOn,
       ready: { type: 'spawned' },

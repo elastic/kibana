@@ -11,7 +11,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { Supervisor } from './supervisor';
-import { getDefaultTools, splitArgs } from './tools';
+import { cleanHelp, getDefaultTools, splitArgs } from './tools';
 import type { ProcessDefinition } from './types';
 
 describe('splitArgs', () => {
@@ -28,6 +28,31 @@ describe('splitArgs', () => {
 
   it('rejects an unclosed quote', () => {
     expect(() => splitArgs('--scenarioOpts "a b')).toThrow('Unclosed " in the arguments');
+  });
+});
+
+describe('cleanHelp', () => {
+  it('drops startup noise, colours and surrounding blank lines', () => {
+    const output = [
+      'Browserslist: browsers data (caniuse-lite) is 8 months old. Please run:',
+      '  npx update-browserslist-db@latest',
+      '  Why you should do it regularly: https://github.com/browserslist/update-db#readme',
+      '{"log.level":"info","message":"Elastic APM Node.js Agent v4.18.0"}',
+      '',
+      '\u001b[1msynthtrace.js <files ...>\u001b[22m   ',
+      '',
+      'Options:',
+      '  --live  Generate and index data continuously  [boolean]',
+      '',
+      '',
+    ].join('\n');
+    expect(cleanHelp(output)).toEqual([
+      'synthtrace.js <files ...>',
+      '',
+      'Options:',
+      '  --live  Generate and index data continuously  [boolean]',
+    ]);
+    expect(cleanHelp('\n\n')).toEqual([]);
   });
 });
 
@@ -77,7 +102,13 @@ describe('Supervisor with tools', () => {
         definition('es'),
         definition('synthtrace', {
           dependsOn: ['es'],
-          tool: { description: 'test', getArgs: () => '', setArgs: () => {} },
+          tool: {
+            description: 'test',
+            getArgs: () => '',
+            setArgs: () => {},
+            helpCommand: 'node test --help',
+            readHelp: async () => [],
+          },
         }),
       ],
     });

@@ -144,8 +144,9 @@ export const toDisplayText = (text: string): string =>
 export const getMatchingLines = ({ lines, selected, query }: TuiState): readonly LogLine[] => {
   const needle = query.toLowerCase();
   return lines.filter(
-    ({ processId, text }) =>
-      (selected === ALL || processId === selected) &&
+    ({ processId, stream, text }) =>
+      // A tool's --help belongs to its own pane, not to the combined output.
+      (selected === ALL ? stream !== 'help' : processId === selected) &&
       (needle === '' || text.toLowerCase().includes(needle))
   );
 };

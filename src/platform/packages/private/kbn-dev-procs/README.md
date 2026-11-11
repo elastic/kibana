@@ -26,8 +26,10 @@ the output of the selected process, or of all of them.
 
 ### Tools
 
-The sidebar also lists dev tools that are not started with Elasticsearch and Kibana. Select one and
-press `s` to start it: it asks for its arguments first, prefilled with the last ones used.
+The sidebar also lists dev tools that are not started with Elasticsearch and Kibana. Selecting one shows
+its `--help` in its pane, so its flags are at hand (`/` filters them, PgUp/PgDn scroll). Press `s` to
+start it: it asks for its arguments first, prefilled with the last ones used, and its output follows
+the help.
 
 | Tool                 | Runs                                   | Default arguments          |
 | -------------------- | -------------------------------------- | -------------------------- |

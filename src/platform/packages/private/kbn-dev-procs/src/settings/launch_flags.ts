@@ -74,7 +74,8 @@ export const parseHelpFlags = (
   return [...flags.values()];
 };
 
-const readHelp = (command: string, args: readonly string[], cwd: string): Promise<string> =>
+/** Runs a command with its --help arguments and returns everything it printed. */
+export const readHelp = (command: string, args: readonly string[], cwd: string): Promise<string> =>
   new Promise((resolve, reject) => {
     const child = spawn(command, [...args], { cwd, stdio: ['ignore', 'pipe', 'pipe'] });
     let output = '';

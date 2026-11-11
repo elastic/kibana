@@ -345,6 +345,22 @@ describe('tools', () => {
     });
   });
 
+  it("shows a tool's --help in its own pane, but not in the combined output", () => {
+    const state = apply(withTool(), {
+      type: 'lines',
+      lines: [
+        { processId: 'synthtrace', stream: 'help', text: '--live  Generate continuously', time: 0 },
+        { processId: 'es', stream: 'stdout', text: 'es started', time: 0 },
+      ],
+    });
+    expect(getMatchingLines(state).map(({ text }) => text)).toEqual([
+      '--live  Generate continuously',
+    ]);
+    const all = apply(state, { type: 'select', direction: 1 });
+    expect(all.selected).toBe(ALL);
+    expect(getMatchingLines(all).map(({ text }) => text)).toEqual(['es started']);
+  });
+
   it('starts a running tool, or a process that is not a tool, without asking', () => {
     const running = apply(withTool(), {
       type: 'status',
