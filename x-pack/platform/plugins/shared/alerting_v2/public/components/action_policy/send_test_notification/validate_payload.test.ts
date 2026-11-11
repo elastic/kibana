@@ -25,7 +25,7 @@ const payload: ActionPolicyWorkflowPayloadInput = {
   policyId: 'policy-1',
   groupKey: {},
   alerts: [alert],
-  rules: { 'test-rule-1': { name: 'Test rule 1' } },
+  rules: { 'test-rule-1': { name: 'Test rule 1', grouping_fields: [] } },
 };
 
 const toText = (value: object) => JSON.stringify(value, null, 2);

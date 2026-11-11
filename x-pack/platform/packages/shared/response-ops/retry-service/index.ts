@@ -6,5 +6,6 @@
  */
 
 export { fullJitterBackoffFactory } from './full_jitter_backoff';
+export { createLoggerRetryReporter } from './logger_retry_reporter';
 export { RetryService } from './retry_service';
-export type { BackoffFactory, BackoffStrategy } from './types';
+export type { BackoffFactory, BackoffStrategy, RetryReporter } from './types';

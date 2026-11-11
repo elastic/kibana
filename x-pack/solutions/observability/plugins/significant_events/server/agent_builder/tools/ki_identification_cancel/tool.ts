@@ -44,7 +44,7 @@ export const createKiIdentificationCancelTool = ({
   id: SIGNIFICANT_EVENTS_KI_IDENTIFICATION_CANCEL_TOOL_ID,
   type: ToolType.builtin,
   description: dedent`
-    Cancel an in-progress KI identification background task for a Nightshift source.
+    Cancel an in-progress KI identification background task for a nightshift source.
 
     Use this tool to:
     - Stop a running KI identification background task when the user requests cancellation

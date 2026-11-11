@@ -1,5 +1,5 @@
 {
-  "sha1": "2cb40218f3c81087d1f0293f12a3c6a4aa23002d",
+  "sha1": "5e0327f77a92b1589dc1d6b55c53009809f1ee9b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -114,6 +114,62 @@
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_aws_identity_federation_enabled.spec.ts",
         "line": 39,
         "column": 7
+      }
+    },
+    {
+      "id": "debcf954fb354a7-5104cd94e33014e",
+      "title": "Onboarding — dedicated index templates for the global namespace (agent-based) the Next click that deploys also adds the namespace to the installed package",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_dedicated_namespace_templates_agent_based.spec.ts",
+        "line": 195,
+        "column": 71
+      }
+    },
+    {
+      "id": "debcf954fb354a7-346f472573a964c",
+      "title": "Onboarding — dedicated index templates for the global namespace (agent-based) with the switch off, the deploy leaves the package alone",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_dedicated_namespace_templates_agent_based.spec.ts",
+        "line": 231,
+        "column": 15
+      }
+    },
+    {
+      "id": "04eecba1ce3827c-6ca203ebee59e84",
+      "title": "Onboarding — dedicated index templates for the global namespace (managed integrations) a deploy with the switch on adds the namespace to the installed package",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_dedicated_namespace_templates_mi.spec.ts",
+        "line": 45,
+        "column": 15
+      }
+    },
+    {
+      "id": "04eecba1ce3827c-8c50b2eae5eb343",
+      "title": "Onboarding — dedicated index templates for the global namespace (managed integrations) the switch survives going back to the settings step",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_dedicated_namespace_templates_mi.spec.ts",
+        "line": 73,
+        "column": 85
       }
     },
     {
@@ -411,6 +467,20 @@
       }
     },
     {
+      "id": "39541aaf6ca2008-a53d3c997e401ad",
+      "title": "Onboarding Service Settings step — at least one source a stream-level var_group drives the log group fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_source_rule.spec.ts",
+        "line": 232,
+        "column": 26
+      }
+    },
+    {
       "id": "39541aaf6ca2008-0dc61bf45f30569",
       "title": "Onboarding Service Settings step — at least one source CloudWatch logs input without a log group blocks Continue until one is set",
       "expectedStatus": "passed",
@@ -420,8 +490,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_source_rule.spec.ts",
-        "line": 166,
-        "column": 13
+        "line": 257,
+        "column": 63
       }
     },
     {
@@ -434,8 +504,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_source_rule.spec.ts",
-        "line": 190,
-        "column": 13
+        "line": 291,
+        "column": 23
       }
     },
     {
@@ -448,8 +518,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_source_rule.spec.ts",
-        "line": 210,
-        "column": 11
+        "line": 312,
+        "column": 13
       }
     },
     {
@@ -462,7 +532,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_source_rule.spec.ts",
-        "line": 207,
+        "line": 287,
         "column": 24
       }
     },

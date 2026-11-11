@@ -40,7 +40,7 @@ const DEFAULT_CUTOFF_HOURS_AGO = 24;
 const PreviewCounts = ({ preview }: { preview: KnowledgePurgePreview }) => {
   const { counts, investigations, investigations_capped: capped } = preview;
   const total =
-    counts.memory_pages + counts.cortex_pages + counts.decision_trees + counts.investigations;
+    counts.memory_pages + counts.wiki_pages + counts.decision_trees + counts.investigations;
 
   if (total === 0) {
     return (
@@ -67,9 +67,9 @@ const PreviewCounts = ({ preview }: { preview: KnowledgePurgePreview }) => {
         </li>
         <li>
           <FormattedMessage
-            id="xpack.nightshift.settings.purge.previewCortex"
-            defaultMessage="{count, plural, one {# Cortex page} other {# Cortex pages}}"
-            values={{ count: counts.cortex_pages }}
+            id="xpack.nightshift.settings.purge.previewWiki"
+            defaultMessage="{count, plural, one {# Wiki page} other {# Wiki pages}}"
+            values={{ count: counts.wiki_pages }}
           />
         </li>
         <li>
@@ -133,7 +133,7 @@ export const KnowledgePurgeSection = ({ canManage }: { canManage: boolean }) => 
           <p>
             <FormattedMessage
               id="xpack.nightshift.settings.purge.scopeDescription"
-              defaultMessage="After a suspected prompt injection, permanently delete the investigations, Semantic Memory pages, Cortex pages and decision tree versions in this space that were written after the chosen time. Knowledge written before it is kept. There is no undo."
+              defaultMessage="After a suspected prompt injection, permanently delete the investigations, Semantic Memory pages, Wiki pages and decision tree versions in this space that were written after the chosen time. Knowledge written before it is kept. There is no undo."
             />
           </p>
         }
@@ -199,7 +199,7 @@ export const KnowledgePurgeSection = ({ canManage }: { canManage: boolean }) => 
                   !canManage
                     ? i18n.translate('xpack.nightshift.settings.purge.privilegeTooltip', {
                         defaultMessage:
-                          'Purging requires the Nightshift Manage and Configure privileges.',
+                          'Purging requires the nightshift Manage and Configure privileges.',
                       })
                     : undefined
                 }
@@ -285,7 +285,7 @@ export const KnowledgePurgeSection = ({ canManage }: { canManage: boolean }) => 
                 <li>
                   <FormattedMessage
                     id="xpack.nightshift.settings.purge.confirmMemory"
-                    defaultMessage="Semantic Memory pages and Cortex pages"
+                    defaultMessage="Semantic Memory pages and Wiki pages"
                   />
                 </li>
                 <li>

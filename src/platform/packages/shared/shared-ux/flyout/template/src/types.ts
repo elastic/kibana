@@ -31,6 +31,7 @@ import type {
   FlyoutAccordionProps,
 } from '@kbn/flyout-sections';
 import type { KbnCalloutProps } from '@kbn/ui-callout';
+import type { AiButtonIconType } from '@kbn/ui-ai-components';
 
 type TabBarOwnedProps = 'aria-controls' | 'children' | 'id' | 'isSelected' | 'onClick';
 
@@ -203,19 +204,39 @@ interface FlyoutFooterActionBaseProps extends DataAttributeProps {
   tooltip?: ReactNode;
 }
 
+/** Colors a `FlyoutTemplate.Footer.PrimaryAction` can take. */
+export type FlyoutFooterPrimaryActionColor = 'primary' | 'danger';
+
 /** Props for the declarative `FlyoutTemplate.Footer.PrimaryAction` part. */
 export type FlyoutFooterPrimaryActionProps = Omit<
   EuiButtonPropsForButton,
   ActionOwnedProps | 'onClick'
 > &
-  FlyoutFooterActionBaseProps;
+  FlyoutFooterActionBaseProps & {
+    /** Button color; defaults to `primary`. Use `danger` for a destructive action. */
+    color?: FlyoutFooterPrimaryActionColor;
+  };
 
-/** Props for the declarative `FlyoutTemplate.Footer.SecondaryAction` part. */
-export type FlyoutFooterSecondaryActionProps = Omit<
+type FlyoutFooterSecondaryActionCommonProps = Omit<
   EuiButtonPropsForButton,
   ActionOwnedProps | 'onClick' | 'minWidth'
 > &
   FlyoutFooterActionBaseProps;
+
+/**
+ * Icons the AI-styled secondary action accepts. `addToChat` is left out because `AiButtonEmpty`
+ * replaces the button's text with its own label for that icon, which would override `label`.
+ */
+export type FlyoutFooterAiActionIconType = Exclude<AiButtonIconType, 'addToChat'>;
+
+/** Props for the declarative `FlyoutTemplate.Footer.SecondaryAction` part. */
+export type FlyoutFooterSecondaryActionProps =
+  | (FlyoutFooterSecondaryActionCommonProps & { variant?: undefined })
+  | (Omit<FlyoutFooterSecondaryActionCommonProps, 'iconType'> & {
+      /** Renders the action with AI styling, for an action that hands off to an AI agent or chat. */
+      variant: 'ai';
+      iconType?: FlyoutFooterAiActionIconType;
+    });
 
 type WithStringName<T> = T extends { name: ReactNode } ? Omit<T, 'name'> & { name: string } : T;
 
