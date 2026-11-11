@@ -279,9 +279,10 @@ This suite has no entry in the weekly CI pipeline; it is cohort-driven and run o
 
 ## Provenance
 
-The scenarios and the audit evaluators under `src/audit_failure_classes/` are copied from
-`@kbn/evals-suite-attack-discovery` (elastic/kibana#302714, `src/audit_failure_classes/`). Suites do
-not import from one another. The world seeding, inference routing and Entity Store handling follow
+The scenarios are local to this suite; the audit evaluators under `src/audit_failure_classes/` are
+imported from the `@kbn/evals-suite-attack-discovery` package barrel
+(elastic/kibana#302714, `src/audit_failure_classes/`), which this suite depends on directly. The
+world seeding, inference routing and Entity Store handling follow
 `@kbn/evals-suite-attack-discovery-fp-tp`. The package layout follows `@kbn/evals-suite-hunt-watch`.
 
 ## Tests

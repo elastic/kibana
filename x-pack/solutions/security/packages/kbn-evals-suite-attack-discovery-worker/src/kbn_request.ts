@@ -31,8 +31,9 @@ export const kbnRequestFromFetch =
       });
       if (!response) throw new Error(`no response for ${method} ${path}`);
       const statusCode = response.status;
-      // 204 (and other no-content statuses) have no body to parse.
-      const parsed = response.body && statusCode !== 204 ? await response.json() : undefined;
+      // No-content statuses (204) and a null body have nothing to parse.
+      const parsed =
+        response.body != null && statusCode !== 204 ? await response.json() : undefined;
       return { statusCode, body: parsed };
     } catch (error) {
       const statusCode = httpStatus(error);
