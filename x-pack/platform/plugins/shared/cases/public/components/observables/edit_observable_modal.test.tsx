@@ -32,6 +32,7 @@ describe('EditObservableModal', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(patchObservable).mockResolvedValue(mockCase);
   });
 
   it('renders correctly', async () => {
@@ -48,6 +49,46 @@ describe('EditObservableModal', () => {
     await userEvent.click(screen.getByText('Save observable'));
 
     expect(patchObservable).toHaveBeenCalled();
+  });
+
+  it('spins on save and closes once the update is saved', async () => {
+    let resolvePatch: (theCase: typeof mockCase) => void = () => {};
+    jest.mocked(patchObservable).mockReturnValue(
+      new Promise((resolve) => {
+        resolvePatch = resolve;
+      })
+    );
+    const onObservableUpdated = jest.fn();
+    renderWithTestingProviders(
+      <EditObservableModal {...props} onObservableUpdated={onObservableUpdated} />
+    );
+
+    await userEvent.click(screen.getByText('Save observable'));
+
+    await waitFor(() => expect(screen.getByTestId('save-observable')).toBeDisabled());
+    expect(props.onCloseModal).not.toHaveBeenCalled();
+    expect(onObservableUpdated).not.toHaveBeenCalled();
+
+    resolvePatch(mockCase);
+
+    await waitFor(() => expect(props.onCloseModal).toHaveBeenCalled());
+    expect(onObservableUpdated).toHaveBeenCalledWith(expect.objectContaining({ value: 'test' }));
+  });
+
+  it('stays open when the update fails', async () => {
+    jest.mocked(patchObservable).mockRejectedValue(new Error('conflict'));
+    const onObservableUpdated = jest.fn();
+    renderWithTestingProviders(
+      <EditObservableModal {...props} onObservableUpdated={onObservableUpdated} />
+    );
+
+    await userEvent.click(screen.getByText('Save observable'));
+
+    await waitFor(() => expect(screen.getByTestId('save-observable')).toBeEnabled());
+    expect(patchObservable).toHaveBeenCalled();
+    expect(props.onCloseModal).not.toHaveBeenCalled();
+    expect(onObservableUpdated).not.toHaveBeenCalled();
+    expect(screen.getByTestId('case-observables-edit-modal')).toBeInTheDocument();
   });
 
   it('leaves the metadata out when the user did not change it', async () => {

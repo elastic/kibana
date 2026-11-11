@@ -20,6 +20,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiScreenReaderOnly,
   EuiSelect,
   EuiSkeletonText,
   EuiSpacer,
@@ -49,6 +50,10 @@ import { ObservableMetadataBadges } from './observable_metadata_badges';
 import { parseMetadataFilter } from './metadata_filter';
 import { useCanRunCaseWorkflow } from '../workflows/use_run_case_workflow';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { useObservableFlyoutApi } from './flyout/use_observable_flyout_api';
+import { useOpenLinkedObservable } from './flyout/use_open_linked_observable';
+import { ObservableCasesCount } from './observable_cases_count';
+import { useCountCasesByObservables } from '../../containers/use_count_cases_by_observables';
 
 type ObservableSortField = NonNullable<FindObservablesRequest['sortField']>;
 
@@ -69,11 +74,43 @@ const SORT_FIELDS: ReadonlySet<string> = new Set<ObservableSortField>([
 
 const isSortField = (field: string): field is ObservableSortField => SORT_FIELDS.has(field);
 
+const countKey = ({ typeKey, value }: Pick<ObservableWithMetadata, 'typeKey' | 'value'>) =>
+  JSON.stringify([typeKey, value]);
+
+interface RelatedCasesColumnOptions {
+  getCount: (observable: ObservableWithMetadata) => number | undefined;
+  isLoading: boolean;
+  onShowCases: (observable: ObservableWithMetadata) => void;
+}
+
 const getColumns = (
   caseData: CaseUI,
   observableTypes: ObservableType[],
-  canRunWorkflow: boolean
+  canRunWorkflow: boolean,
+  onViewDetails: (observable: ObservableWithMetadata) => void,
+  relatedCases: RelatedCasesColumnOptions
 ): Array<EuiBasicTableColumn<ObservableWithMetadata>> => [
+  {
+    name: (
+      <EuiScreenReaderOnly>
+        <span>{i18n.VIEW_OBSERVABLE_DETAILS}</span>
+      </EuiScreenReaderOnly>
+    ),
+    width: '40px',
+    'data-test-subj': 'cases-observables-table-expand',
+    render: (observable: ObservableWithMetadata) => (
+      <EuiToolTip content={i18n.VIEW_OBSERVABLE_DETAILS} disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType="maximize"
+          size="xs"
+          color="primary"
+          aria-label={i18n.VIEW_OBSERVABLE_DETAILS}
+          onClick={() => onViewDetails(observable)}
+          data-test-subj={`cases-observables-table-expand-${observable.id}`}
+        />
+      </EuiToolTip>
+    ),
+  },
   {
     name: i18n.OBSERVABLE_VALUE,
     field: 'value',
@@ -98,6 +135,19 @@ const getColumns = (
     field: 'metadata',
     'data-test-subj': 'cases-observables-table-metadata',
     render: (metadata?: Record<string, string>) => <ObservableMetadataBadges metadata={metadata} />,
+  },
+  {
+    name: i18n.RELATED_CASES,
+    'data-test-subj': 'cases-observables-table-related-cases',
+    width: '120px',
+    render: (observable: ObservableWithMetadata) => (
+      <ObservableCasesCount
+        count={relatedCases.getCount(observable)}
+        isLoading={relatedCases.isLoading}
+        onShowCases={() => relatedCases.onShowCases(observable)}
+        data-test-subj={`cases-observables-table-related-cases-${observable.id}`}
+      />
+    ),
   },
   {
     name: i18n.DATE_ADDED,
@@ -314,9 +364,50 @@ export const ObservablesTable = ({
     []
   );
 
+  const { openObservableFlyout, openObservableCases } = useObservableFlyoutApi();
+  const flyoutParams = useCallback(
+    (observable: ObservableWithMetadata) => ({
+      observable,
+      caseData,
+      typeLabel: observableTypes.find(({ key }) => key === observable.typeKey)?.label,
+    }),
+    [caseData, observableTypes]
+  );
+  const onViewDetails = useCallback(
+    (observable: ObservableWithMetadata) => openObservableFlyout(flyoutParams(observable)),
+    [flyoutParams, openObservableFlyout]
+  );
+  // A copied link to an observable opens its flyout.
+  useOpenLinkedObservable(caseData.id, onViewDetails);
+
+  // The same counts as the flyout's Cases preview: the other cases of the owner holding each
+  // observable of the page, in one request.
+  const pageObservables = useMemo(
+    () => items.map(({ typeKey, value }) => ({ typeKey, value })),
+    [items]
+  );
+  const { data: casesCounts, isLoading: isLoadingCasesCounts } = useCountCasesByObservables({
+    owner: caseData.owner,
+    excludeCaseId: caseData.id,
+    observables: pageObservables,
+  });
+  const relatedCases: RelatedCasesColumnOptions = useMemo(() => {
+    const counts = new Map(
+      (casesCounts?.counts ?? []).map(({ typeKey, value, total: casesTotal }) => [
+        countKey({ typeKey, value }),
+        casesTotal,
+      ])
+    );
+    return {
+      getCount: (observable) => counts.get(countKey(observable)),
+      isLoading: isLoadingCasesCounts,
+      onShowCases: (observable) => openObservableCases(flyoutParams(observable)),
+    };
+  }, [casesCounts, flyoutParams, isLoadingCasesCounts, openObservableCases]);
+
   const columns = useMemo(
-    () => getColumns(caseData, observableTypes, canRunWorkflow),
-    [caseData, observableTypes, canRunWorkflow]
+    () => getColumns(caseData, observableTypes, canRunWorkflow, onViewDetails, relatedCases),
+    [caseData, observableTypes, canRunWorkflow, onViewDetails, relatedCases]
   );
 
   const pageSizeOptions = useMemo(

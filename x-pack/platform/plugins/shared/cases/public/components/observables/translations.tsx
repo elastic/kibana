@@ -66,6 +66,25 @@ export const OBSERVABLE_ACTIONS = i18n.translate('xpack.cases.caseView.observabl
   defaultMessage: 'Actions',
 });
 
+export const RELATED_CASES = i18n.translate('xpack.cases.caseView.observables.relatedCases', {
+  defaultMessage: 'Related cases',
+});
+
+export const SHOW_RELATED_CASES = i18n.translate(
+  'xpack.cases.caseView.observables.showRelatedCases',
+  { defaultMessage: 'Show the other cases with this observable' }
+);
+
+export const LOADING_RELATED_CASES = i18n.translate(
+  'xpack.cases.caseView.observables.loadingRelatedCases',
+  { defaultMessage: 'Counting the other cases with this observable' }
+);
+
+export const VIEW_OBSERVABLE_DETAILS = i18n.translate(
+  'xpack.cases.caseView.observables.viewDetails',
+  { defaultMessage: 'View details' }
+);
+
 export const DELETE_OBSERVABLE = i18n.translate('xpack.cases.caseView.observables.delete', {
   defaultMessage: 'Delete observable',
 });
