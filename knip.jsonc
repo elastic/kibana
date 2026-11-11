@@ -143,7 +143,7 @@
     },
     // The cypress plugin for knip is disabled because it cannot parse the JSX syntax that our config files transitively include.
     // These entries allow knip to follow the cypress config files without parsing the JSX.
-    "x-pack/platform/plugins/shared/fleet/cypress": {
+    "x-pack/platform/plugins/shared/fleet-cypress": {
       "entry": ["**/*.ts"]
     },
     "x-pack/solutions/observability/plugins/apm/ftr_e2e": {
