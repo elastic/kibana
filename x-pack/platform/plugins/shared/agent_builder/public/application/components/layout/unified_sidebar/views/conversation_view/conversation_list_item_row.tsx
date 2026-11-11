@@ -14,6 +14,7 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiLoadingSpinner,
   EuiPopover,
@@ -194,8 +195,36 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
 
   const isUnread = read === false;
 
+  const menuSeparatorStyles = useMemo(
+    () => css`
+      margin-inline: ${euiTheme.size.s};
+      inline-size: auto;
+    `,
+    [euiTheme.size.s]
+  );
+
   const menuItems = useMemo(
     () => [
+      <EuiContextMenuItem
+        key="pin"
+        icon="pin"
+        onClick={() => {
+          closePopover();
+          if (isPinned) {
+            markAsUnpinned(conversationId);
+          } else {
+            markAsPinned(conversationId);
+          }
+        }}
+        {...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.sidebar,
+          action: isPinned
+            ? AGENT_BUILDER_UI_EBT.action.conversationList.UNPIN_CONVERSATION
+            : AGENT_BUILDER_UI_EBT.action.conversationList.PIN_CONVERSATION,
+        })}
+      >
+        {isPinned ? labels.unpin : labels.pin}
+      </EuiContextMenuItem>,
       ...(canRename
         ? [
             <EuiContextMenuItem
@@ -217,7 +246,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         : []),
       <EuiContextMenuItem
         key="read-status"
-        icon={isUnread ? 'eyeSlash' : 'eye'}
+        icon={isUnread ? 'eye' : 'eyeSlash'}
         onClick={() => {
           closePopover();
           if (isUnread) {
@@ -235,28 +264,9 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
       >
         {isUnread ? labels.markAsRead : labels.markAsUnread}
       </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        key="pin"
-        icon="pin"
-        onClick={() => {
-          closePopover();
-          if (isPinned) {
-            markAsUnpinned(conversationId);
-          } else {
-            markAsPinned(conversationId);
-          }
-        }}
-        {...getEbtProps({
-          element: AGENT_BUILDER_UI_EBT.element.sidebar,
-          action: isPinned
-            ? AGENT_BUILDER_UI_EBT.action.conversationList.UNPIN_CONVERSATION
-            : AGENT_BUILDER_UI_EBT.action.conversationList.PIN_CONVERSATION,
-        })}
-      >
-        {isPinned ? labels.unpin : labels.pin}
-      </EuiContextMenuItem>,
       ...(canDelete
         ? [
+            <EuiHorizontalRule key="delete-separator" margin="xs" css={menuSeparatorStyles} />,
             <EuiContextMenuItem
               key="delete"
               icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
@@ -285,6 +295,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
       conversationId,
       euiTheme.colors.danger,
       isPinned,
+      menuSeparatorStyles,
       isUnread,
       markAsPinned,
       markAsRead,

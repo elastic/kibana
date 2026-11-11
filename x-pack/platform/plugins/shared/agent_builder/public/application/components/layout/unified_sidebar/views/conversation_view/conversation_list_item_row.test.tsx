@@ -28,7 +28,11 @@ const conversationId = 'conversation-1';
 
 const renderRow = (
   permissions: Partial<ConversationPermissions>,
-  { status, openMenu = true }: { status?: ConversationDisplayStatus; openMenu?: boolean } = {}
+  {
+    status,
+    read,
+    openMenu = true,
+  }: { status?: ConversationDisplayStatus; read?: boolean; openMenu?: boolean } = {}
 ) => {
   render(
     <IntlProvider locale="en">
@@ -40,6 +44,7 @@ const renderRow = (
           isActive={false}
           routeConversationId={conversationId}
           status={status}
+          read={read}
           permissions={{
             rename: false,
             delete: false,
@@ -123,5 +128,50 @@ describe('ConversationListItemRow', () => {
     expect(
       within(link).queryByText(/^(New|Working|Waiting for input|Error)$/)
     ).not.toBeInTheDocument();
+  });
+
+  describe('actions menu', () => {
+    const isBefore = (first: HTMLElement, second: HTMLElement) =>
+      Boolean(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING);
+
+    const iconOf = (label: string) =>
+      screen
+        .getByText(label)
+        .closest('button')
+        ?.querySelector('[data-euiicon-type]')
+        ?.getAttribute('data-euiicon-type');
+
+    it('lists Pin, Rename and the read action, then Delete after a separator', () => {
+      renderRow({ rename: true, delete: true });
+
+      const pin = screen.getByText('Pin');
+      const rename = screen.getByText('Rename');
+      const readAction = screen.getByText('Mark as unread');
+      const separator = screen.getByRole('separator');
+      const deleteAction = screen.getByText('Delete');
+
+      expect(isBefore(pin, rename)).toBe(true);
+      expect(isBefore(rename, readAction)).toBe(true);
+      expect(isBefore(readAction, separator)).toBe(true);
+      expect(isBefore(separator, deleteAction)).toBe(true);
+    });
+
+    it('omits the separator when delete is not permitted', () => {
+      renderRow({ rename: true, delete: false });
+
+      expect(screen.queryByRole('separator')).not.toBeInTheDocument();
+    });
+
+    it('uses the eye icon for Mark as read', () => {
+      renderRow({}, { read: false });
+
+      expect(iconOf('Mark as read')).toBe('eye');
+    });
+
+    it('uses the crossed-out eye icon for Mark as unread', () => {
+      renderRow({}, { read: true });
+
+      expect(iconOf('Mark as unread')).toBe('eyeSlash');
+    });
   });
 });
