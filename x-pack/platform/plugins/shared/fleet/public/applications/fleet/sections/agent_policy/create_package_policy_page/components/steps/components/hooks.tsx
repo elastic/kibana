@@ -219,9 +219,7 @@ export function useVarGroupSelections({
   // validation derives for the group, so the form and validation agree.
   const selections = useMemo((): VarGroupSelection => {
     const derived = deriveSelections();
-    return sanitizedSavedSelections
-      ? { ...derived, ...sanitizedSavedSelections }
-      : derived;
+    return sanitizedSavedSelections ? { ...derived, ...sanitizedSavedSelections } : derived;
   }, [sanitizedSavedSelections, deriveSelections]);
 
   // Initialize on mount if not already set. The default selection must apply the
@@ -326,7 +324,14 @@ export function useVarGroupSelections({
       var_group_selections: selections,
       ...(policyEffects || {}),
     });
-  }, [varGroups, savedSelections, sanitizedSavedSelections, selections, onSelectionsChange, packagePolicy]);
+  }, [
+    varGroups,
+    savedSelections,
+    sanitizedSavedSelections,
+    selections,
+    onSelectionsChange,
+    packagePolicy,
+  ]);
 
   return { selections, handleSelectionChange };
 }
