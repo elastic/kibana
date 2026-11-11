@@ -6,14 +6,22 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { BasicPrettyPrinter, isSource, isSubQuery, synth } from '@elastic/esql';
+import { BasicPrettyPrinter, Builder, isSource, isSubQuery, synth } from '@elastic/esql';
 import {
   esqlCommandRegistry,
+  findNamedSubqueryForSource,
   getIndexFromPromQLParams,
   getNamedSubqueries,
+  getNamedSubqueriesAvailableTo,
   resolveNamedSubquerySources,
 } from '@kbn/esql-language';
-import type { ESQLSource, ESQLCommand, ESQLAstPromqlCommand } from '@elastic/esql/types';
+import type { NamedSubquery } from '@kbn/esql-language';
+import type {
+  ESQLSource,
+  ESQLCommand,
+  ESQLAstPromqlCommand,
+  ESQLAstQueryExpression,
+} from '@elastic/esql/types';
 import { parseEsqlCached } from './parse_esql_cached';
 
 const INDEX_SOURCE_COMMANDS = new Set(['FROM', 'TS']);
@@ -105,22 +113,41 @@ export function getSourceCommandFromESQLQuery(
   return sourceCommand?.name.toUpperCase() ?? '';
 }
 
+const reduceQueryToSource = (
+  query: ESQLAstQueryExpression,
+  namedSubqueries: readonly NamedSubquery[]
+): ESQLAstQueryExpression => {
+  const [source] = query.commands;
+
+  return {
+    ...query,
+    commands: source ? [reduceSubqueriesToSource(source, namedSubqueries)] : [],
+  };
+};
+
 // A DSL filter applies to every source's documents before a subquery's own commands,
 // so a subquery contributes the fields of its source command.
-const reduceSubqueriesToSource = (command: ESQLCommand): ESQLCommand => ({
+const reduceSubqueriesToSource = (
+  command: ESQLCommand,
+  namedSubqueries: readonly NamedSubquery[]
+): ESQLCommand => ({
   ...command,
   args: command.args.map((arg) => {
-    if (!isSubQuery(arg)) {
+    if (isSubQuery(arg)) {
+      return { ...arg, child: reduceQueryToSource(arg.child, namedSubqueries) };
+    }
+    const namedSubquery = isSource(arg)
+      ? findNamedSubqueryForSource(arg, namedSubqueries)
+      : undefined;
+    if (!namedSubquery) {
       return arg;
     }
-    const [subquerySource] = arg.child.commands;
-    return {
-      ...arg,
-      child: {
-        ...arg.child,
-        commands: subquerySource ? [reduceSubqueriesToSource(subquerySource)] : [],
-      },
-    };
+    return Builder.expression.parens(
+      reduceQueryToSource(
+        namedSubquery.query,
+        getNamedSubqueriesAvailableTo(namedSubqueries, namedSubquery)
+      )
+    );
   }),
 });
 
@@ -143,7 +170,11 @@ export function getSourceCommandQueryFromESQLQuery(esql: string | undefined): st
   if (sourceCommand) {
     // Nothing to describe yet, e.g. `FROM ` while typing.
     const hasSources = sourceCommand.args.some((arg) => isSource(arg) || isSubQuery(arg));
-    return hasSources ? BasicPrettyPrinter.command(reduceSubqueriesToSource(sourceCommand)) : '';
+    return hasSources
+      ? BasicPrettyPrinter.command(
+          reduceSubqueriesToSource(sourceCommand, getNamedSubqueries(root.header))
+        )
+      : '';
   }
 
   const [promqlIndex] = getPromQLSources(root.commands);

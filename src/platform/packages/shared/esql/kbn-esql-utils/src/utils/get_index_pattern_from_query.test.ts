@@ -211,6 +211,14 @@ describe('getSourceCommandQueryFromESQLQuery', () => {
     ).toBe('FROM index1, (FROM index2, (FROM index3))');
   });
 
+  it('replaces LET references with their bodies reduced to the source command', () => {
+    expect(
+      getSourceCommandQueryFromESQLQuery(
+        'LET base = (FROM logs-* METADATA _id | KEEP a); LET selected = (FROM base | WHERE a > 1); LET unused = (FROM other); FROM selected, index1 | STATS count()'
+      )
+    ).toBe('FROM (FROM (FROM logs-* METADATA _id)), index1');
+  });
+
   it('uses the index parameter of a PROMQL query, as the ES|QL editor does', () => {
     const sourceQuery = getSourceCommandQueryFromESQLQuery(
       'PROMQL index=metrics-* step=1m start=?_tstart end=?_tend (avg(cpu_usage))'
