@@ -58,6 +58,11 @@ export interface SearchKnowledgeIndicatorsOutput {
   next_page: number | null;
 }
 
+export interface TopologySeedResolution {
+  featureIds: string[];
+  selectedFeatureUuids: string[];
+}
+
 export type KnowledgeIndicator = KnowledgeIndicatorFeature | KnowledgeIndicatorQuery;
 
 export interface KnowledgeIndicatorFeature {

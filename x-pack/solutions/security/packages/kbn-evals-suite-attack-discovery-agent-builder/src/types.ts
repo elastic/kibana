@@ -58,6 +58,10 @@ export interface AttackDiscovery {
 export interface AttackDiscoveryAgentBuilderExpected extends Record<string, unknown> {
   expectedToolPath: string[];
   expectedWorkflowStages: string[];
+  // Stages that must NOT appear. `expectedWorkflowStages: []` asserts nothing,
+  // so this is the only way to express "the pipeline must not have run past
+  // retrieval" (e.g. an example that seeds no alerts).
+  forbiddenWorkflowStages?: string[];
   // Count-expectation contract (see workflow_evidence_evaluator.ts): a number
   // asserts equality. `null` means don't-care for retrieved but ASSERTS `null`
   // for passed — so an ABSENT key is the only way to leave the passed count
@@ -103,19 +107,25 @@ export type AttackDiscoveryAgentBuilderExample = Example<
  * alerts index) — the only observable retrieval source in `provided` mode,
  * where the pipeline skips retrieval by design.
  *
- * `unscoped_retrieval` and `none` are the two ways a scoped example observes
- * none of this fixture's population, and both score 0 rather than `N/A` (which
- * the aggregate drops, so `N/A` would make skipping the retrieval the way to
- * avoid the assertion): `unscoped_retrieval` means a retrieval DID happen but
- * none of it carried the example's declared scope, `none` means no alerts
- * retrieval happened at all. `none` is also what an example that declares no
- * scope reports — it asks no retrieval question, so its count stays `null` and
- * the evaluator leaves the evidence incomplete.
+ * `unscoped_retrieval`, `agent_esql_retrieval_unidentified` and `none` are the
+ * three ways a scoped example observes none of this fixture's population, and
+ * all three score 0 rather than `N/A` (which the aggregate drops, so `N/A`
+ * would make skipping the retrieval the way to avoid the assertion):
+ * `unscoped_retrieval` means a retrieval DID happen but none of it carried the
+ * example's declared scope, `agent_esql_retrieval_unidentified` means a scoped
+ * retrieval happened and returned rows but no row carried an alert identity
+ * (`_id` or `kibana.alert.uuid`), so the observed population is not countable
+ * and its row count is NOT admitted as one (see
+ * `extractAgentAlertRetrievalPopulation`), and `none` means no alerts retrieval
+ * happened at all. `none` is also what an example that declares no scope
+ * reports — it asks no retrieval question, so its count stays `null` and the
+ * evaluator leaves the evidence incomplete.
  */
 export type RetrievedAlertCountSource =
   | 'pipeline_alert_retrieval'
   | 'pipeline_combined_alerts'
   | 'agent_esql_retrieval'
+  | 'agent_esql_retrieval_unidentified'
   | 'unscoped_retrieval'
   | 'none';
 

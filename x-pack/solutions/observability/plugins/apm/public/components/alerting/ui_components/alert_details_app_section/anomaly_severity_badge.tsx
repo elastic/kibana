@@ -9,7 +9,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiBadge, useEuiTheme } from '@elastic/eui';
 import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
-import { useSeverityColor } from '@kbn/ml-anomaly-utils';
+import { useSeverityColor } from '@kbn/ml-anomaly-utils/use_severity_color';
 import { formatSeverityLabel } from './helpers';
 import { AnomalySeverityIcon } from './anomaly_severity_icon';
 

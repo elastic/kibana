@@ -57,7 +57,7 @@ const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
 const CONFIDENCE_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   {
     id: 'confidence_reflects_support',
-    text: 'Confidence reflects how well-supported the assessment is — KI backing, number of confirmed evidences, and corroboration — not the raw anomaly strength.',
+    text: 'Confidence follows the agent’s confidence rule: for a new event the base comes from the strongest detection’s `p_value` (≤0.01 → 0.55–0.65; 0.01–0.05 → 0.40–0.55; 0.05–0.1 → 0.25–0.40; >0.1 → below 0.25), plus up to 0.10 for several `confirms` verdicts and aligned KI backing, minus 0.10 for outnumbering non-`confirms` verdicts, missing `causal_features` or a key query that is not `found`; a figure the descriptions state as not measured (share, duration) caps it at 0.65. A continuation starts from the matched active event’s stored confidence and adjusts it incrementally; it is not recalculated from `p_value`. Confidence is at most 0.30 with no `confirms` verdict and at most 0.85 in any case; a `dimensions`, examples or `breakdown` query that could not be run or was not sent counts toward neither cap. A low confidence that follows from a weak `p_value` is correct even when the finding is well supported; do not penalise it, and do not credit support the rule does not count.',
   },
   {
     id: 'no_ki_caps_confidence',

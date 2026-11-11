@@ -51,6 +51,7 @@ const renderColumns = (
     euiTheme: {
       colors: { textSubdued: '#666' },
     } as Parameters<typeof getExecutionHistoryColumns>[0]['euiTheme'],
+    showExecutionName: true,
     showExecutor: true,
     executedByUserProfiles: new Map([['u_tal', executedByProfile]]),
     showUnresolvedExecutors: true,
@@ -85,11 +86,32 @@ describe('execution history columns', () => {
     expect(EXECUTION_HISTORY_COLUMN_WIDTHS.duration).toBe('72px');
   });
 
-  it('orders columns Status → Started → Duration → Executed by', () => {
+  it('orders columns Execution name → Status → Started → Duration → Executed by', () => {
     const columns = getExecutionHistoryColumns({
       euiTheme: {
         colors: { textSubdued: '#666' },
       } as Parameters<typeof getExecutionHistoryColumns>[0]['euiTheme'],
+      showExecutionName: true,
+      showExecutor: true,
+      executedByUserProfiles: new Map(),
+      showUnresolvedExecutors: true,
+      timeZoneSetting: 'UTC',
+    });
+    expect(columns.map((c) => ('field' in c ? c.field : undefined))).toEqual([
+      'runName',
+      'status',
+      'startedAt',
+      'duration',
+      'executedBy',
+    ]);
+  });
+
+  it('omits Execution name when the workflow is not using execution names', () => {
+    const columns = getExecutionHistoryColumns({
+      euiTheme: {
+        colors: { textSubdued: '#666' },
+      } as Parameters<typeof getExecutionHistoryColumns>[0]['euiTheme'],
+      showExecutionName: false,
       showExecutor: true,
       executedByUserProfiles: new Map(),
       showUnresolvedExecutors: true,
@@ -111,6 +133,13 @@ describe('execution history columns', () => {
     expect(screen.getByText('Failed')).toBeInTheDocument();
     expect(screen.queryByText('Completed')).not.toBeInTheDocument();
     expect(screen.queryByText('Error')).not.toBeInTheDocument();
+  });
+
+  it('shows the execution name', () => {
+    renderColumns({ ...baseExecution, runName: 'Deploy staging' });
+    expect(screen.getByTestId('workflowExecutionListRunNameCell')).toHaveTextContent(
+      'Deploy staging'
+    );
   });
 
   it('renders a flask for test runs and none for production', () => {

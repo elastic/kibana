@@ -13,3 +13,4 @@ export * from './overview_status_filter_id';
 export * from './stale_run';
 export * from './stringify_kueries';
 export * from './vault_reference';
+export * from './allowed_monitor_hosts';
