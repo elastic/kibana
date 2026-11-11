@@ -371,11 +371,13 @@ export class TaskMemoryEstimator {
     return Math.max(percentile(heavy, this.slotPercentile), this.minBytesPerCostUnit);
   }
 
+  /** Per-cost-unit estimate of a type at the slot percentile of its recent runs; undefined until it has run. */
   private typeBytesPerCostUnit(taskType: string): number | undefined {
     const estimate = this.byType.get(taskType);
     return estimate === undefined ? undefined : percentile(estimate.recent, this.slotPercentile);
   }
 
+  /** Whether any run has ended on this node yet. */
   public hasObservations(): boolean {
     return this.byType.size > 0;
   }
@@ -392,6 +394,11 @@ export class TaskMemoryEstimator {
       .slice(0, limit);
   }
 
+  /**
+   * Turns a finished run into one observation: the larger of the attributed
+   * growth and the task's own report, per cost unit, folded into the type's
+   * window and heap share and into the instance's moving average.
+   */
   private observe(run: InFlightRun, reportedBytes?: number): void {
     // A report is live bytes the task held. The measured share is allocation
     // that the live ratio scales down later, so the report is lifted into the
@@ -421,6 +428,7 @@ export class TaskMemoryEstimator {
     if (this.recent.length > this.windowSize) this.recent.shift();
   }
 
+  /** Drops the least recently inserted instance estimate once the map is over its limit. */
   private trimInstances(): void {
     if (this.byInstance.size > this.maxInstances) {
       const oldest = this.byInstance.keys().next().value;
@@ -428,6 +436,11 @@ export class TaskMemoryEstimator {
     }
   }
 
+  /**
+   * Merges an observation into an estimate as an exponentially weighted moving
+   * average (`alpha` × new + (1 − `alpha`) × old), so the latest runs dominate
+   * and a seeded value from a document is replaced by the first local one.
+   */
   private fold(estimates: Map<string, Estimate>, key: string, observed: number): void {
     const current = estimates.get(key);
     if (current?.seeded) {

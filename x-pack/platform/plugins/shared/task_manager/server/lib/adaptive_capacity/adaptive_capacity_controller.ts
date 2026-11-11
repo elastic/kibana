@@ -180,7 +180,9 @@ export const observeV8MajorGc: MajorGcObserver = (onMajorGc) => {
   return () => observer.disconnect();
 };
 
+/** Resident set size of the process: heap, external memory and everything else the OS has mapped. */
 const readRssBytes = (): number => process.memoryUsage.rss();
+/** The cgroup memory limit Node detects for the process, 0 outside a container. */
 const readConstrainedMemory = (): number => process.constrainedMemory();
 
 /**
@@ -267,6 +269,7 @@ export class AdaptiveCapacityController {
     return this.refresh('tick');
   }
 
+  /** Reads the heap once and lets the estimator attribute its growth to the runs in flight. */
   private sampleEstimator(running: readonly RunningTaskSnapshot[]): void {
     const { usedHeapBytes, externalBytes } = this.getHeapStats();
     this.estimator.sample(usedHeapBytes, running, externalBytes);
@@ -404,6 +407,12 @@ export class AdaptiveCapacityController {
     return state.capacity;
   }
 
+  /**
+   * One capacity decision: budget = target − projected memory, free slots = budget
+   * over the price of a heavy run, capacity = running slots + free slots within
+   * the bounds, stepping up by at most `maxIncreasePerDecision`. Pure apart from
+   * the heap read; `refresh()` applies the result.
+   */
   private decide(trigger: AdaptiveCapacityTrigger): AdaptiveCapacityState {
     const { usedHeapBytes, externalBytes, heapLimitBytes } = this.getHeapStats();
     const running = this.getRunningTasks();
@@ -515,6 +524,7 @@ export class AdaptiveCapacityController {
     };
   }
 
+  /** The settings in the snake_case shape the health API reports. */
   private settingsState(): AdaptiveCapacitySettingsState {
     const {
       minCapacity,
@@ -541,9 +551,16 @@ export class AdaptiveCapacityController {
   }
 }
 
+/**
+ * Exponentially weighted moving average: the new value is `alpha` parts the
+ * latest observation and `1 − alpha` parts the previous average, so recent
+ * samples count most and old ones fade out without keeping a history. The
+ * first observation is taken as is.
+ */
 const ewma = (observed: number, previous: number | undefined, first: boolean): number =>
   first || previous === undefined
     ? observed
     : BASELINE_ALPHA * observed + (1 - BASELINE_ALPHA) * previous;
 
+/** Formats bytes as whole megabytes for log lines. */
 const mb = (bytes: number): string => (bytes / (1024 * 1024)).toFixed(0);
