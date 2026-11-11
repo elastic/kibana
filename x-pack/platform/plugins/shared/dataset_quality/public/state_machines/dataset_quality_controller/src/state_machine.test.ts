@@ -965,10 +965,21 @@ describe('DatasetQualityControllerStateMachine', () => {
         const dataStreamStatsClient = createMockDataStreamStatsClient({
           getDataStreamsStats: jest
             .fn()
-            .mockResolvedValueOnce(defaultDataStreamStatsResponse)
+            .mockResolvedValueOnce({
+              ...defaultDataStreamStatsResponse,
+              dataStreamsStats: defaultDataStreamStatsResponse.dataStreamsStats.filter(({ name }) =>
+                name.startsWith('logs-')
+              ),
+            })
             .mockImplementationOnce(() => refreshDiscovery),
         });
-        const { actor } = await startInMainState({ dataStreamStatsClient });
+        const { actor } = await startInMainState({
+          dataStreamStatsClient,
+          initialContext: {
+            ...DEFAULT_CONTEXT,
+            filters: { ...DEFAULT_CONTEXT.filters, types: [] },
+          },
+        });
         const degradedCallsBefore =
           dataStreamStatsClient.getDataStreamsDegradedStats.mock.calls.length;
 
@@ -980,7 +991,7 @@ describe('DatasetQualityControllerStateMachine', () => {
         );
         expect(dataStreamStatsClient.getDataStreamsStats).toHaveBeenLastCalledWith({
           types: ['logs', 'metrics', 'traces', 'synthetics'],
-          statsTypes: ['logs'],
+          statsTypes: ['logs', 'metrics', 'traces', 'synthetics'],
         });
 
         resolveRefreshDiscovery({
@@ -1257,15 +1268,16 @@ describe('DatasetQualityControllerStateMachine', () => {
       actor.stop();
     });
 
-    it('should query all authorized types when all signals flag is true and no types filter', async () => {
+    it('should query stats for every discoverable type when the types filter is cleared', async () => {
       const dataStreamStatsClient = createMockDataStreamStatsClient();
 
       const machine = createDatasetQualityControllerStateMachine({
         initialContext: {
           ...DEFAULT_CONTEXT,
+          authorizedDatasetTypes: ['logs'],
           filters: {
             ...DEFAULT_CONTEXT.filters,
-            types: [], // empty means use all authorized types
+            types: [],
           },
         },
         toasts: createMockToasts(),

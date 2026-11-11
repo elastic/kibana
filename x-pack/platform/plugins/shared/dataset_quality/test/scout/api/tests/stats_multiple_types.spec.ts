@@ -30,6 +30,7 @@ const SYNTHETICS_INDEX_TEMPLATE = 'dq-stats-synthetics';
 
 const INGEST_TO = '2023-11-20T15:01:00.000Z';
 const SYNTHETICS_TIMESTAMP = '2023-11-20T15:00:30.000Z';
+const TEST_TIMEOUT_MS = 120_000;
 
 const findStat = (stats: DataStreamStat[], name: string): DataStreamStat | undefined =>
   stats.find((stat) => stat.name === name);
@@ -82,7 +83,7 @@ apiTest.describe(
     });
 
     apiTest('returns the stats of every requested data stream type', async ({ apiClient }) => {
-      apiTest.setTimeout(120_000);
+      apiTest.setTimeout(TEST_TIMEOUT_MS);
 
       const query = { types: 'logs,synthetics' };
 
@@ -134,6 +135,30 @@ apiTest.describe(
     apiTest(
       'discovers every requested type but only calculates stats for selected types',
       async ({ apiClient }) => {
+        apiTest.setTimeout(TEST_TIMEOUT_MS);
+
+        await expect
+          .poll(
+            async () => {
+              const response = await apiClient.get(
+                testData.buildStatsUrl({
+                  types: 'logs,synthetics',
+                  statsTypes: 'logs',
+                }),
+                {
+                  headers: adminHeaders,
+                  responseType: 'json',
+                }
+              );
+              const stats: DataStreamStat[] = response.body.dataStreamsStats;
+              const logsStat = findStat(stats, LOGS_DATA_STREAM);
+
+              return (logsStat?.sizeBytes ?? 0) > 0 && (logsStat?.totalDocs ?? 0) > 0;
+            },
+            { timeout: testData.METERING_CACHE_TIMEOUT_MS, intervals: [2_000] }
+          )
+          .toBe(true);
+
         const response = await apiClient.get(
           testData.buildStatsUrl({
             types: 'logs,synthetics',
@@ -147,7 +172,9 @@ apiTest.describe(
 
         expect(response).toHaveStatusCode(200);
         const stats: DataStreamStat[] = response.body.dataStreamsStats;
-        expect(findStat(stats, LOGS_DATA_STREAM)).toBeDefined();
+        const logsStat = findStat(stats, LOGS_DATA_STREAM);
+        expect(logsStat?.sizeBytes).toBeGreaterThan(0);
+        expect(logsStat?.totalDocs).toBeGreaterThan(0);
         const syntheticsStat = findStat(stats, SYNTHETICS_DATA_STREAM);
         expect(syntheticsStat).toBeDefined();
         expect(syntheticsStat?.size).toBeUndefined();

@@ -772,10 +772,15 @@ const createLoadDataStreamStatsActor = ({
 }: ActorDeps) =>
   fromPromise(async ({ input }: { input: DatasetQualityControllerContext }) => {
     const selectedTypes = getSelectedDatasetTypes(input, isDatasetQualityAllSignalsAvailable);
+    const discoveryTypes = getDataStreamDiscoveryTypes(input, isDatasetQualityAllSignalsAvailable);
+    const statsTypes =
+      input.useInitialDataStreamStats && input.filters.types.length === 0
+        ? discoveryTypes
+        : selectedTypes;
 
     return dataStreamStatsClient.getDataStreamsStats({
-      types: getDataStreamDiscoveryTypes(input, isDatasetQualityAllSignalsAvailable),
-      statsTypes: selectedTypes,
+      types: discoveryTypes,
+      statsTypes,
     });
   });
 

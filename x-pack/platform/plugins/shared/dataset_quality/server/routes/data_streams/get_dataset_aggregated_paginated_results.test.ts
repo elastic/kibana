@@ -18,23 +18,32 @@ const mockCreateDatasetQualityESClient = createDatasetQualityESClient as jest.Mo
 >;
 
 describe('getAggregatedDatasetPaginatedResults', () => {
-  it('chunks concrete data stream names before searching', async () => {
-    const search = jest.fn(async ({ index }: { index: string }) => ({
-      aggregations: {
-        datasets: {
-          buckets: index.split(',').map((dataStream) => ({
-            key: { dataset: `.ds-${dataStream}-2026.11.10-000001` },
-            doc_count: 1,
-          })),
+  it('chunks concrete data stream names and bounds search concurrency', async () => {
+    let activeSearches = 0;
+    let maxActiveSearches = 0;
+    const search = jest.fn(async ({ index }: { index: string }) => {
+      activeSearches++;
+      maxActiveSearches = Math.max(maxActiveSearches, activeSearches);
+      await new Promise<void>((resolve) => setImmediate(resolve));
+      activeSearches--;
+
+      return {
+        aggregations: {
+          datasets: {
+            buckets: index.split(',').map((dataStream) => ({
+              key: { dataset: `.ds-${dataStream}-2026.11.10-000001` },
+              doc_count: 1,
+            })),
+          },
         },
-      },
-    }));
+      };
+    });
     mockCreateDatasetQualityESClient.mockReturnValue({
       search,
     } as unknown as ReturnType<typeof createDatasetQualityESClient>);
 
     const dataStreams = Array.from(
-      { length: 30 },
+      { length: 100 },
       (_, index) => `logs-${'dataset'.repeat(20)}-${index}`
     );
 
@@ -46,6 +55,7 @@ describe('getAggregatedDatasetPaginatedResults', () => {
     });
 
     expect(search.mock.calls.length).toBeGreaterThan(1);
+    expect(maxActiveSearches).toBe(3);
     expect(results).toHaveLength(dataStreams.length);
     expect(results).toEqual(
       expect.arrayContaining(dataStreams.map((dataset) => ({ dataset, count: 1 })))

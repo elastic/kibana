@@ -11,6 +11,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { bytePartition } from '@kbn/std';
+import pMap from 'p-map';
 import { extractIndexNameFromBackingIndex } from '../../../common/utils';
 import type { DataStreamDocsStat } from '../../../common/api_types';
 import { createDatasetQualityESClient } from '../../utils';
@@ -21,6 +22,7 @@ interface Dataset extends AggregationsCompositeAggregateKey {
 }
 
 const SIZE_LIMIT = 10000;
+const SEARCH_CONCURRENCY = 3;
 
 export async function getAggregatedDatasetPaginatedResults(options: {
   esClient: ElasticsearchClient;
@@ -32,16 +34,17 @@ export async function getAggregatedDatasetPaginatedResults(options: {
   prevResults?: DataStreamDocsStat[];
 }): Promise<DataStreamDocsStat[]> {
   if (Array.isArray(options.index)) {
-    const chunkResults = await Promise.all(
-      bytePartition(options.index).map((indexChunk) =>
+    const chunkResults = await pMap(
+      bytePartition(options.index),
+      (indexChunk) =>
         getAggregatedDatasetPaginatedResults({
           esClient: options.esClient,
           index: indexChunk.join(','),
           start: options.start,
           end: options.end,
           query: options.query,
-        })
-      )
+        }),
+      { concurrency: SEARCH_CONCURRENCY }
     );
 
     return mergeDatasetDocCounts(chunkResults.flat());
