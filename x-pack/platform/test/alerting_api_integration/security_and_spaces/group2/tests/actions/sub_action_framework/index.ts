@@ -14,7 +14,7 @@ import { getEventLog, getUrlPrefix, ObjectRemover } from '../../../../../common/
 
 /**
  * The sub action connector is defined here
- * x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/sub_action_connector.ts
+ * x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/sub_action_connector.ts
  */
 const createSubActionConnector = async ({
   supertest,

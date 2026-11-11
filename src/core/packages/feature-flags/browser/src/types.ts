@@ -169,3 +169,14 @@ export interface FeatureFlagsStart {
    */
   useNumberValue<Value extends number>(flagName: string, fallbackValue: Value): Value;
 }
+
+/**
+ * Feature flags APIs used by the developer toolbar. Not part of the public contract.
+ * @internal
+ */
+export interface InternalFeatureFlagsStart extends FeatureFlagsStart {
+  helper: {
+    /** Opens the flyout without changing whether the corner button is shown. */
+    open(): void;
+  };
+}

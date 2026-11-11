@@ -6,10 +6,3 @@
  */
 
 export const PLUGIN_ID = 'searchHomepage';
-export const PLUGIN_NAME = 'searchHomepage';
-
-/**
- * UI Setting id for Workflows, to show/hide related elements
- */
-
-export const WORKFLOWS_UI_SETTING_ENABLED_ID = 'workflows:ui:enabled';

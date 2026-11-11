@@ -155,6 +155,15 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     return {};
   }
 
+  /** Input recorded on the first entry of this step execution. */
+  private recordedInput(): Record<string, unknown> {
+    const stored = this.stepExecutionRuntime.getCurrentStepResult()?.input;
+    if (stored != null && typeof stored === 'object' && !Array.isArray(stored)) {
+      return stored as Record<string, unknown>;
+    }
+    return {};
+  }
+
   public async run(): Promise<void> {
     // If the execution is already aborted, do not start the step, navigate to make the execution finish properly
     if (this.stepExecutionRuntime.abortController.signal.aborted) {
@@ -179,9 +188,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
 
     let suspended = false;
     try {
-      input = resumeInputOverride ?? (await this.getInput());
-      this.stepExecutionRuntime.setInput(input);
-
+      input = await this.resolveStepInput(resumeInputOverride);
       const result = await this.executeStepWithDebugger(input);
 
       // Layer 2: Enforce output size limit before storing in execution state.
@@ -268,6 +275,21 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
 
   // Subclasses implement this to execute the step logic
   protected abstract _run(input: Record<string, unknown>): Promise<RunStepResult>;
+
+  private async resolveStepInput(
+    resumeInputOverride: Record<string, unknown> | undefined
+  ): Promise<Record<string, unknown>> {
+    if (resumeInputOverride) {
+      this.stepExecutionRuntime.setInput(resumeInputOverride);
+      return resumeInputOverride;
+    }
+    if (this.stepExecutionRuntime.isInputRecorded) {
+      return this.recordedInput();
+    }
+    const input = await this.getInput();
+    this.stepExecutionRuntime.setInput(input);
+    return input;
+  }
 
   private async executeStepWithDebugger(input: Record<string, unknown>): Promise<RunStepResult> {
     if (this.shouldPauseAtBreakpoint()) {

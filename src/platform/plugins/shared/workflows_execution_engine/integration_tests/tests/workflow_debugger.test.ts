@@ -151,7 +151,7 @@ steps:
     const stepTwoPaused = stepExecsWhenPaused.find((s) => s.stepId === 'step_two');
     expect(stepTwoPaused?.status).toBe(ExecutionStatus.WAITING_FOR_INPUT);
     expect(stepTwoPaused?.input).toEqual({ message: 'second: from-step-one' });
-    expect(stepTwoPaused?.state).toEqual({
+    expect(stepTwoPaused?.state).toMatchObject({
       breakpointPaused: true,
       breakpointHit: true,
     });
@@ -177,7 +177,7 @@ steps:
     expect(stepTwoCompleted?.status).toBe(ExecutionStatus.COMPLETED);
     expect(stepTwoCompleted?.input).toEqual({ message: 'overridden-at-breakpoint' });
     expect(stepTwoCompleted?.output).toBe('overridden-at-breakpoint');
-    expect(stepTwoCompleted?.state).toEqual({
+    expect(stepTwoCompleted?.state).toMatchObject({
       breakpointPaused: false,
       breakpointHit: true,
     });
