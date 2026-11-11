@@ -6,10 +6,11 @@
  */
 
 import type { OutputColumn } from './columns';
+import { fieldOfColumn } from './columns';
 import { quoteIdentifier } from './esql_syntax';
 import type { NamedParams, QueryPlan } from './types';
 
-/** The values picked in dropdowns: attribute name to the labels selected, as the response shows them. */
+/** The values picked in dropdowns: column name to the labels selected, as the response shows them. */
 export type AttributeSelections = Record<string, string[]>;
 
 /** What {@link buildAttributePredicate} turns selections into for one plan. */
@@ -46,8 +47,7 @@ export const buildAttributePredicate = (
 
   const selected = Object.entries(selections).filter(([, labels]) => labels.length > 0);
   for (const [selectionIndex, [name, labels]] of selected.entries()) {
-    const field = columns.find((column) => column.kind === 'attribute' && column.name === name)
-      ?.fieldByPlan?.[plan.index];
+    const field = fieldOfColumn(columns, name, plan);
     if (field === undefined) {
       return undefined;
     }

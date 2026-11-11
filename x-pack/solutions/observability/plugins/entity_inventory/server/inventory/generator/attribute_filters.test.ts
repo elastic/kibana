@@ -59,6 +59,17 @@ describe('buildAttributePredicate', () => {
     });
   });
 
+  it('reads an identity column from its own field in every plan', () => {
+    [fromFirstSource, fromSecondSource].forEach((plan) => {
+      expect(
+        buildAttributePredicate(plan, columns, { 'kubernetes.namespace': ['default'] })
+      ).toEqual({
+        predicate: 'TO_STRING(`kubernetes.namespace`) IN (?a0v0)',
+        params: [{ a0v0: 'default' }],
+      });
+    });
+  });
+
   it('cannot match when the plan carries no field for a selected attribute', () => {
     expect(buildAttributePredicate(fromFirstSource, columns, { paused: ['true'] })).toBeUndefined();
   });

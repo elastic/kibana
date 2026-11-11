@@ -9,7 +9,7 @@ import type { EntityDefinitionWithoutId } from '@kbn/entity-store/common';
 import type { AttributeSelections } from './attribute_filters';
 import { buildAttributePredicate } from './attribute_filters';
 import type { OutputColumn } from './columns';
-import { LAST_SEEN_COLUMN, buildColumns } from './columns';
+import { LAST_SEEN_COLUMN, buildColumns, fieldOfColumn } from './columns';
 import { quoteIdentifier } from './esql_syntax';
 import type { IdentityPlan } from './identity';
 import { resolveIdentityPlan } from './identity';
@@ -52,8 +52,7 @@ export const buildAttributeValuesQuery = ({
   limit,
 }: AttributeValuesQueryInput): GeneratedQuery | undefined => {
   assertValidLimit(limit, 'attribute values query');
-  const field = columns.find((column) => column.kind === 'attribute' && column.name === attribute)
-    ?.fieldByPlan?.[plan.index];
+  const field = fieldOfColumn(columns, attribute, plan);
   const attributePredicate = buildAttributePredicate(plan, columns, selections);
   if (field === undefined || attributePredicate === undefined) {
     return undefined;

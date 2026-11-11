@@ -119,6 +119,12 @@ describe('buildAttributeValuesQuery', () => {
     );
   });
 
+  it('lists the values of an identity column from its own field', () => {
+    expect(build(1, 'kubernetes.namespace')?.esql).toContain(
+      'BY `value` = TO_STRING(`kubernetes.namespace`)'
+    );
+  });
+
   it('adds the other selections and their parameters', () => {
     const query = build(3, 'cluster', { paused: ['true'] });
 
