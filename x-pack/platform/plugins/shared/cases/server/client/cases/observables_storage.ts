@@ -184,36 +184,44 @@ export const getCaseObservable = async (
   return observable;
 };
 
-const toAttachmentUser = (user: CasesClientArgs['user']) => ({
+type AttachmentUser = UnifiedAttachmentAttributes['created_by'];
+
+const toAttachmentUser = (user: CasesClientArgs['user']): AttachmentUser => ({
   email: user.email ?? null,
   full_name: user.full_name ?? null,
   username: user.username ?? null,
   ...(user.profile_uid != null && { profile_uid: user.profile_uid }),
 });
 
-const buildObservableAttributes = ({
-  observable,
+/** Attributes of an observable attachment; `legacyId` is set only for observables migrated off the case. */
+export const buildObservableAttachmentAttributes = ({
+  observable: { typeKey, value, description },
+  legacyId,
   owner,
   createdAt,
-  user,
+  updatedAt = null,
+  createdBy,
 }: {
   observable: ObservablePost;
+  legacyId?: string;
   owner: string;
   createdAt: string;
-  user: CasesClientArgs['user'];
+  updatedAt?: string | null;
+  createdBy: AttachmentUser;
 }): UnifiedAttachmentAttributes => ({
   type: OBSERVABLE_ATTACHMENT_TYPE,
   owner,
   data: {
-    typeKey: observable.typeKey,
-    value: observable.value,
-    description: observable.description ?? null,
+    typeKey,
+    value,
+    description: description ?? null,
+    ...(legacyId != null && { legacyId }),
   },
   created_at: createdAt,
-  created_by: toAttachmentUser(user),
+  created_by: createdBy,
   pushed_at: null,
   pushed_by: null,
-  updated_at: null,
+  updated_at: updatedAt,
   updated_by: null,
 });
 
@@ -246,7 +254,12 @@ export const createCaseObservables = async ({
       chunk.map((observable) => ({
         type: CASE_ATTACHMENT_SAVED_OBJECT,
         id: deriveObservableId({ caseId, ...observable }),
-        attributes: buildObservableAttributes({ observable, owner, createdAt, user }),
+        attributes: buildObservableAttachmentAttributes({
+          observable,
+          owner,
+          createdAt,
+          createdBy: toAttachmentUser(user),
+        }),
         references,
       })),
       { refresh: 'wait_for' }

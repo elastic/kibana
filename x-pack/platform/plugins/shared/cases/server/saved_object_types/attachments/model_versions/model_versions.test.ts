@@ -26,6 +26,7 @@ describe('cases-attachments model versions', () => {
                 typeKey: { type: 'keyword', ignore_above: 1024 },
                 value: { type: 'keyword', ignore_above: 1024 },
                 description: { type: 'keyword', ignore_above: 1024 },
+                legacyId: { type: 'keyword', ignore_above: 1024 },
               },
             },
           },
@@ -41,6 +42,23 @@ describe('cases-attachments model versions', () => {
           data: { typeKey: 'observable-type-ipv4', value: '10.0.0.1', description: null },
           created_at: '2026-11-04T00:00:00.000Z',
           created_by: { username: 'elastic' },
+        })
+      ).not.toThrow();
+    });
+
+    it('accepts the legacy id of a migrated observable', () => {
+      expect(() =>
+        modelVersion2.schemas.create.validate({
+          type: 'observable',
+          owner: 'securitySolution',
+          data: {
+            typeKey: 'observable-type-ipv4',
+            value: '10.0.0.1',
+            description: null,
+            legacyId: 'a9f6c5f0-2b4e-4d0a-9c1b-3e5f7a9b1c2d',
+          },
+          created_at: '2026-11-04T00:00:00.000Z',
+          created_by: { username: null },
         })
       ).not.toThrow();
     });
