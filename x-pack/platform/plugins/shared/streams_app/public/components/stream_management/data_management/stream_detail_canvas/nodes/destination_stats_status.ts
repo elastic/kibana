@@ -16,4 +16,5 @@ import {
 export const DESTINATION_TYPES_WITH_STATS: ReadonlyArray<DestinationViewModel['type']> = [
   'elasticsearch',
   REMOTE_ELASTICSEARCH_TYPE,
+  's3',
 ];
