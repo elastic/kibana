@@ -25,6 +25,8 @@ export interface AttachmentTileProps {
   children: React.ReactNode;
   onRemoveAttachment?: () => void;
   isHighlighted?: boolean;
+  /** Hides the content while a removable tile is hovered, so only the remove button shows. */
+  hideContentOnHover?: boolean;
 }
 
 /** The fixed-size frame shared by the image and the document attachment tiles. */
@@ -34,6 +36,7 @@ export const AttachmentTile: React.FC<AttachmentTileProps> = ({
   children,
   onRemoveAttachment,
   isHighlighted = false,
+  hideContentOnHover = false,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isHovered, setIsHovered] = useState(false);
@@ -57,20 +60,27 @@ export const AttachmentTile: React.FC<AttachmentTileProps> = ({
         overflow: hidden;
         flex-shrink: 0;
 
-        .agentBuilderThumbnailRemoveButton {
+        .agentBuilderAttachmentTileRemoveButton {
           opacity: 0;
         }
-        &:hover .agentBuilderThumbnailRemoveButton,
-        &:focus-within .agentBuilderThumbnailRemoveButton {
+        &:hover .agentBuilderAttachmentTileRemoveButton,
+        &:focus-within .agentBuilderAttachmentTileRemoveButton {
           opacity: 1;
         }
       `}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       data-test-subj={dataTestSubj ?? `agentBuilderAttachmentPill-${attachmentId}`}
-      data-removable={canRemoveAttachment}
     >
-      {children}
+      <div
+        css={css`
+          width: 100%;
+          height: 100%;
+          opacity: ${hideContentOnHover && canRemoveAttachment && isHovered ? 0 : 1};
+        `}
+      >
+        {children}
+      </div>
       <div
         css={css`
           position: absolute;
@@ -84,7 +94,7 @@ export const AttachmentTile: React.FC<AttachmentTileProps> = ({
         <EuiButtonIcon
           iconType="cross"
           size="s"
-          className="agentBuilderThumbnailRemoveButton"
+          className="agentBuilderAttachmentTileRemoveButton"
           css={css`
             position: absolute;
             top: 50%;

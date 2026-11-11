@@ -51,6 +51,7 @@ export const FileAttachmentPill: React.FC<FileAttachmentPillProps> = ({
         }
         onRemoveAttachment={onRemoveAttachment}
         isHighlighted={isHighlighted}
+        hideContentOnHover
       >
         <div
           role={isLoading ? 'status' : 'img'}
@@ -62,10 +63,6 @@ export const FileAttachmentPill: React.FC<FileAttachmentPillProps> = ({
             gap: ${euiTheme.size.xs};
             width: 100%;
             height: 100%;
-
-            [data-removable='true']:hover > & {
-              opacity: 0;
-            }
           `}
         >
           {isLoading ? (
