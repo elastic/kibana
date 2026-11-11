@@ -653,11 +653,16 @@ const toInt = (value: JsonValue | undefined): number => {
 
 /**
  * `parse_judge_response`, on the judge's already-decoded answer: range-checks every per-rubric
- * score. Throws on an answer that is not an object with a `rubrics` list.
+ * score. Throws on an answer that is not an object, or whose `rubrics` is set but not a list, where
+ * the verifier fails iterating it.
  */
 export const parseJudgeResponse = (parsed: JsonValue): OrcaJudgeResponse => {
   if (!isObject(parsed)) throw new Error('ORCA judge response is not an object');
-  const rubrics = asList(get(parsed, 'rubrics', []) || []);
+  const value = get(parsed, 'rubrics', []);
+  if (truthy(value) && !Array.isArray(value)) {
+    throw new Error('ORCA judge response rubrics is not a list');
+  }
+  const rubrics = asList(value);
   return {
     rubrics: rubrics.map((verdict) => {
       if (!isObject(verdict)) throw new Error('ORCA judge verdict is not an object');

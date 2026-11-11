@@ -114,6 +114,8 @@ describe('ORCA check_prediction port', () => {
   it('rejects an out-of-range or missing score', () => {
     expect(() => parseJudgeResponse({ rubrics: [{ score: 4 }] })).toThrow('out of range');
     expect(() => parseJudgeResponse({ rubrics: [{}] })).toThrow('not an integer');
+    expect(() => parseJudgeResponse({ rubrics: { score: 3 } })).toThrow('not a list');
+    expect(parseJudgeResponse({ rubrics: null }).rubrics).toEqual([]);
     expect(parseJudgeResponse({ rubrics: [{ score: 2.7 }] }).rubrics[0].score).toBe(2);
   });
 

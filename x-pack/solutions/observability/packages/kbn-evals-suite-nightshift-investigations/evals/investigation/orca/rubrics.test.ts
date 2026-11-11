@@ -10,7 +10,7 @@ import { join } from 'path';
 import type { EvalsClient } from '@kbn/evals';
 import type { OrcaRubric } from './check_prediction';
 import type { ORCA_RUBRICS_RELEASE } from './rubrics';
-import { getOrcaRubrics, getOrcaRubricsHash, loadOrcaRubrics } from './rubrics';
+import { getOrcaExpected, getOrcaRubrics, getOrcaRubricsHash, loadOrcaRubrics } from './rubrics';
 
 const synthetic: Record<string, OrcaRubric> = JSON.parse(
   readFileSync(join(__dirname, '__fixtures__', 'synthetic_rubrics.json'), 'utf8')
@@ -48,9 +48,33 @@ describe('ORCA rubrics', () => {
       index === 0 ? { ...example, output: { rubric: { feature_flag: 'x' } } } : example
     );
     await expect(loadOrcaRubrics(clientWith(changed), release)).rejects.toThrow('content differs');
+    // The judge prompt renders keys in file order, so the same content in another order differs.
+    const reordered = examples.map((example, index) =>
+      index === 0
+        ? {
+            ...example,
+            output: { rubric: Object.fromEntries(Object.entries(example.output.rubric).reverse()) },
+          }
+        : example
+    );
+    await expect(loadOrcaRubrics(clientWith(reordered), release)).rejects.toThrow(
+      'content differs'
+    );
     await expect(loadOrcaRubrics(clientWith(examples.slice(1)), release)).rejects.toThrow(
       'distinct event ids'
     );
+  });
+
+  it('reads orca_expected only when the task has one, and refuses a malformed one', () => {
+    const expected = { events: [{ event_id: 'e', root_cause: 'r', event_time: 't' }] };
+    expect(getOrcaExpected({ case_id: 'private' })).toBeUndefined();
+    expect(getOrcaExpected({ case_id: 'public', orca_expected: expected })).toEqual(expected);
+    expect(() =>
+      getOrcaExpected({
+        case_id: 'broken',
+        orca_expected: { events: [{ event_id: 'e', root_cause: 'r' }] },
+      })
+    ).toThrow('ORCA task broken has malformed orca_expected');
   });
 
   it('orders an incident rubrics by file name, as the verifier loads them', () => {
