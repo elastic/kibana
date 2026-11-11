@@ -68,6 +68,7 @@ See [MANAGED_WORKFLOWS.md](../../dev_docs/MANAGED_WORKFLOWS.md) for rationale an
 | `setup()`               | `registerManagedWorkflowOwner` only — never `install`                                   |
 | `start()`               | `initManagedWorkflowsClient` → one `installMany` of the static set → `ready()`          |
 | Static + `run_as`       | Never: static installs have no user request, and a binding needs one                   |
+| Static + `yamlTemplate` | Install with `install`: `installMany` does not accept templated ids yet. A typing limit, not a runtime one ([MANAGED_WORKFLOWS.md § Templated static workflows](../../dev_docs/MANAGED_WORKFLOWS.md#templated-static-workflows)) |
 | `spaceId`               | Required on every operation; use `GLOBAL_WORKFLOW_SPACE_ID` explicitly for global       |
 | Raw request paths       | `kibana.request`, `with.request`, `with.form_data` all skip prefixing. Add `/s/<executing space>/` (usually `{{ workflow.spaceId }}`) |
 | Multi-instance          | Use `workflowIdSuffix` or full `workflowId` — bare id overwrites                        |

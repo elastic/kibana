@@ -12,6 +12,7 @@ import type {
   ManagedWorkflowId,
   ManagedWorkflowTemplateValues,
   ManagedWorkflowTemplateValuesForId,
+  TemplatedManagedWorkflowId,
 } from '../managed';
 
 interface ManagedWorkflowOperationBaseOptions {
@@ -51,11 +52,16 @@ export type ManagedWorkflowServiceInstallOptions = ManagedWorkflowOperationBaseO
     values?: ManagedWorkflowTemplateValues;
   };
 
-/** One static workflow in an `installMany` batch, with the same `values` typing as `install()`. */
-export type ManagedWorkflowInstallManyItem<TId extends ManagedWorkflowId> = {
-  id: TId;
-} & ManagedWorkflowOperationBaseOptions &
-  ManagedWorkflowInstallValuesOption<TId>;
+/**
+ * One static workflow in an `installMany` batch. Templated workflows are left out of this type,
+ * not of the batch install: the service renders `values` like `install()` does. TypeScript can't
+ * check each item's `values` against its own id inside one array, so until a static templated
+ * workflow needs a batch install, use `install()` for it. To support it here, add a generic
+ * per-item helper, such as `managedInstallItem(id, options)`, and accept its items next to these.
+ */
+export type ManagedWorkflowInstallManyItem = ManagedWorkflowOperationBaseOptions & {
+  id: Exclude<ManagedWorkflowId, TemplatedManagedWorkflowId>;
+};
 
 export type ManagedWorkflowServiceInstallManyItem = ManagedWorkflowOperationBaseOptions & {
   id: ManagedWorkflowId;
@@ -157,10 +163,11 @@ export interface RegisteredManagedWorkflowsLifecycleApi {
    * with the same id, a write error) is reported in `failed` and does not stop the others. Rejects
    * only when the whole pass fails, such as the initial read. Best-effort like `install()`: may
    * resolve without persisting when Workflows is unavailable, Kibana is stopping, or ES is not
-   * ready for managed writes.
+   * ready for managed writes. Templated workflows are not accepted yet; see
+   * {@link ManagedWorkflowInstallManyItem}.
    */
-  installMany: <TId extends ManagedWorkflowId>(
-    items: ReadonlyArray<ManagedWorkflowInstallManyItem<TId>>
+  installMany: (
+    items: ReadonlyArray<ManagedWorkflowInstallManyItem>
   ) => Promise<ManagedWorkflowInstallManyResult>;
   uninstall: <TId extends ManagedWorkflowId>(
     id: TId,

@@ -9,7 +9,10 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { EXAMPLE_MANAGED_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  EXAMPLE_MANAGED_WORKFLOW_ID,
+  NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import {
   createManagedWorkflowsSystemApiProvider,
   createWorkflowsClientProvider,
@@ -314,11 +317,7 @@ describe('createManagedWorkflowsSystemApiProvider', () => {
     const service = createMockWorkflowsService();
     const config = { available: true } as WorkflowsManagementConfig;
     const provider = createManagedWorkflowsSystemApiProvider(service, config, logger);
-    const item = {
-      id: EXAMPLE_MANAGED_WORKFLOW_ID,
-      spaceId: 'default',
-      values: { recipient: 'World' },
-    } as const;
+    const item = { id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID, spaceId: 'default' } as const;
 
     const client = await provider('testPlugin');
 
@@ -334,9 +333,7 @@ describe('createManagedWorkflowsSystemApiProvider', () => {
     const client = await provider('testPlugin');
 
     await expect(
-      client.installMany([
-        { id: EXAMPLE_MANAGED_WORKFLOW_ID, spaceId: 'default', values: { recipient: 'World' } },
-      ])
+      client.installMany([{ id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID, spaceId: 'default' }])
     ).resolves.toEqual({ failed: [] });
     expect(service.bulkInstallManagedWorkflows).not.toHaveBeenCalled();
   });
