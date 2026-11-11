@@ -76,7 +76,7 @@ export function ShowMoreButton({
       )}
       <EuiText
         component="span"
-        size="s"
+        size="xs"
         css={css`
           font-weight: ${euiTheme.font.weight.medium};
         `}
@@ -87,7 +87,7 @@ export function ShowMoreButton({
         })}{' '}
         <EuiText
           component="span"
-          size="s"
+          size="xs"
           color={euiTheme.colors.textDisabled}
           css={css`
             display: inline;
