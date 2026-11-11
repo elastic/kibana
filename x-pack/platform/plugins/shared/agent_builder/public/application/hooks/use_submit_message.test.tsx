@@ -158,21 +158,6 @@ describe('useSubmitMessage', () => {
     expect(sendMessage).toHaveBeenCalledWith({ message: 'hello', conversationId: 'existing' });
   });
 
-  it('exposes the create mutation, which caches the conversation and does not send', async () => {
-    setState({});
-    const { result } = renderHook(() => useSubmitMessage(), { wrapper });
-
-    let conversation;
-    await act(async () => {
-      conversation = await result.current.createConversation('agent-1');
-    });
-
-    expect(conversation).toEqual(created);
-    expect(queryClient.getQueryData(queryKeys.conversations.byId('conv-1'))).toEqual(created);
-    expect(sendMessage).not.toHaveBeenCalled();
-    expect(navigateToAgentBuilderUrl).not.toHaveBeenCalled();
-  });
-
   it('shows an error and sends nothing when the conversation cannot be created', async () => {
     setState({});
     create.mockRejectedValue(new Error('boom'));

@@ -28,6 +28,7 @@ import { useIsAwaitingPrompt } from '../../../hooks/use_is_awaiting_prompt';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
+import { useCreateConversation } from '../../../hooks/use_create_conversation';
 import { useSendUserMessage } from '../../../hooks/use_send_user_message';
 import { useToasts } from '../../../hooks/use_toasts';
 import { useMessageEditor } from './message_editor';
@@ -77,6 +78,9 @@ jest.mock('../../../context/conversation/conversation_context', () => ({
 }));
 jest.mock('../../../hooks/use_submit_message', () => ({
   useSubmitMessage: jest.fn(),
+}));
+jest.mock('../../../hooks/use_create_conversation', () => ({
+  useCreateConversation: jest.fn(),
 }));
 jest.mock('../../../hooks/use_send_user_message', () => ({
   useSendUserMessage: jest.fn(),
@@ -327,9 +331,12 @@ describe('ConversationInput', () => {
     } as never);
     mockedUseSubmitMessage.mockReturnValue({
       submitMessage,
-      createConversation,
       isCreatingConversation: false,
     });
+    jest.mocked(useCreateConversation).mockReturnValue({
+      createConversation,
+      isCreatingConversation: false,
+    } as never);
     mockedUseSupportedBinaryTypes.mockReturnValue(['application/pdf']);
     mockedUseBinaryUpload.mockReturnValue(binaryUploadState());
     mockedUseTextFileUpload.mockReturnValue(textFileUploadState());
@@ -1162,11 +1169,25 @@ describe('ConversationInput', () => {
       );
     });
 
-    it('gives the binary upload the create conversation call of the submit hook', () => {
+    it('gives the binary upload its own create conversation call', () => {
       renderInput(<ConversationInput />);
 
       expect(mockedUseBinaryUpload).toHaveBeenCalledWith(
         expect.objectContaining({ createConversation })
+      );
+    });
+
+    it('keeps the input enabled while the upload creates a conversation', () => {
+      jest.mocked(useCreateConversation).mockReturnValue({
+        createConversation,
+        isCreatingConversation: true,
+      } as never);
+
+      renderInput(<ConversationInput />);
+
+      expect(screen.getByTestId('agentBuilderConversationInputForm')).not.toHaveAttribute(
+        'aria-disabled',
+        'true'
       );
     });
   });

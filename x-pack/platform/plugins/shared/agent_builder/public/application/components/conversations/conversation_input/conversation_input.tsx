@@ -33,6 +33,7 @@ import { labels } from '../../../utils/i18n';
 import { useInputDraft } from '../../../hooks/use_input_draft';
 import { useActiveSpaceId } from '../../../context/active_space_context';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
+import { useCreateConversation } from '../../../hooks/use_create_conversation';
 import { useSendUserMessage } from '../../../hooks/use_send_user_message';
 import { ChatTriggerMode } from '../../../../../common/http_api/chat';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
@@ -310,7 +311,9 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     autoSendInitialMessage,
     resetInitialMessage,
   } = useConversationContext();
-  const { submitMessage, createConversation, isCreatingConversation } = useSubmitMessage();
+  const { submitMessage, isCreatingConversation } = useSubmitMessage();
+  // Its own call, so a PDF paste in a new chat does not lock the editor.
+  const { createConversation: createUploadConversation } = useCreateConversation();
   const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
 
   const {
@@ -329,7 +332,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   } = useAttachmentUploads({
     addErrorToast,
     messageEditorController,
-    createConversation,
+    createConversation: createUploadConversation,
     isBinaryUploadEnabled: !onSubmitOverride,
   });
 

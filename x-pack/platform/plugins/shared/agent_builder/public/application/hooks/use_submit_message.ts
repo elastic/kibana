@@ -6,17 +6,12 @@
  */
 
 import { useCallback } from 'react';
-import { useMutation, useQueryClient } from '@kbn/react-query';
-import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { useConversationContext } from '../context/conversation/conversation_context';
 import { useConversationId } from '../context/conversation/use_conversation_id';
-import { mutationKeys } from '../mutation_keys';
-import { queryKeys } from '../query_keys';
-import { useAgentBuilderServices } from './use_agent_builder_service';
 import { useAgentId } from './use_conversation';
 import { useConversationStream } from './use_conversation_stream';
+import { useCreateConversation } from './use_create_conversation';
 import { useNavigation } from './use_navigation';
-import { useToasts } from './use_toasts';
 import { appPaths } from '../utils/app_paths';
 
 interface SubmitMessageOptions {
@@ -37,19 +32,7 @@ export const useSubmitMessage = () => {
   const { isEmbeddedContext, setConversationId } = useConversationContext();
   const agentId = useAgentId();
   const { navigateToAgentBuilderUrl } = useNavigation();
-  const { conversationsService } = useAgentBuilderServices();
-  const queryClient = useQueryClient();
-  const { addErrorToast } = useToasts();
-
-  const { mutateAsync: createConversation, isLoading: isCreatingConversation } = useMutation({
-    mutationKey: mutationKeys.createConversation,
-    mutationFn: (id: string) => conversationsService.create({ agentId: id }),
-    onSuccess: (created) => {
-      queryClient.setQueryData(queryKeys.conversations.byId(created.id), created);
-      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.list });
-    },
-    onError: (error) => addErrorToast({ title: formatAgentBuilderErrorMessage(error) }),
-  });
+  const { createConversation, isCreatingConversation } = useCreateConversation();
 
   const submitMessage = useCallback(
     async (
@@ -94,5 +77,5 @@ export const useSubmitMessage = () => {
     ]
   );
 
-  return { submitMessage, createConversation, isCreatingConversation };
+  return { submitMessage, isCreatingConversation };
 };
