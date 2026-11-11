@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
@@ -15,6 +16,7 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 import { DASHBOARD_UPDATED_UI_EVENT } from '../../../common';
 import { createAgentLiveUpdatesSubscription } from './agent_live_updates_subscription';
+import { createAppliedAttachmentsStore } from './applied_attachments_store';
 
 const buildAttachment = (origin?: string): DashboardAttachment => ({
   id: 'attachment-1',
@@ -31,6 +33,8 @@ const buildToolUiEvent = (
   data: { tool_id: 'tool', tool_call_id: 'call', custom_event: customEvent, data: { attachment } },
 });
 
+const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+
 const createHarness = (savedObjectId: string | undefined, isNewConversation = false) => {
   const chatEvents$ = new Subject();
   const activeConversation$ = new BehaviorSubject<{ id?: string }>({
@@ -39,13 +43,25 @@ const createHarness = (savedObjectId: string | undefined, isNewConversation = fa
   const getChatEvents$ = jest.fn().mockReturnValue(chatEvents$);
   const setState = jest.fn();
   const upsertAttachment = jest.fn();
+  const onOtherDashboardUpdated = jest.fn();
 
   const subscription = createAgentLiveUpdatesSubscription({
     agentBuilder: {
       events: { ui: { activeConversation$ }, getChatEvents$ },
     } as unknown as AgentBuilderPluginStart,
-    api: { savedObjectId$: { getValue: () => savedObjectId }, setState } as unknown as DashboardApi,
+    api: {
+      savedObjectId$: { getValue: () => savedObjectId },
+      setState,
+      getSerializedState: () => ({ attributes: { title: '', panels: [] } }),
+      layout$: new BehaviorSubject({ panels: {}, pinnedPanels: {} }),
+      diffStates: (baseline: unknown, current: unknown) =>
+        isEqual(baseline, current) ? {} : current,
+      getChildApi: jest.fn(),
+    } as unknown as DashboardApi,
+    appliedAttachments: createAppliedAttachmentsStore(),
     upsertAttachment,
+    onOtherDashboardUpdated,
+    onApplyError: jest.fn(),
   });
 
   return {
@@ -54,6 +70,7 @@ const createHarness = (savedObjectId: string | undefined, isNewConversation = fa
     getChatEvents$,
     setState,
     upsertAttachment,
+    onOtherDashboardUpdated,
     subscription,
   };
 };
@@ -61,24 +78,27 @@ const createHarness = (savedObjectId: string | undefined, isNewConversation = fa
 describe('createAgentLiveUpdatesSubscription', () => {
   it.each([
     ['the linked saved dashboard', 'dashboard-1', 'dashboard-1', 1],
-    ['an unsaved dashboard', undefined, undefined, 1],
+    ['an empty unsaved dashboard', undefined, undefined, 1],
     ['a different saved dashboard', 'dashboard-1', 'other-dashboard', 0],
+    ['an empty unsaved dashboard, for another saved dashboard', undefined, 'other-dashboard', 0],
   ])(
     'upserts the attachment and applies the state only for its own dashboard: %s',
-    (_, savedObjectId, origin, calls) => {
-      const { chatEvents$, setState, upsertAttachment, subscription } =
+    async (_, savedObjectId, origin, calls) => {
+      const { chatEvents$, setState, upsertAttachment, onOtherDashboardUpdated, subscription } =
         createHarness(savedObjectId);
       const attachment = buildAttachment(origin);
 
       chatEvents$.next(buildToolUiEvent(attachment));
+      await flushPromises();
 
       expect(upsertAttachment).toHaveBeenCalledWith(attachment);
       expect(setState).toHaveBeenCalledTimes(calls);
+      expect(onOtherDashboardUpdated).toHaveBeenCalledTimes(1 - calls);
       subscription.unsubscribe();
     }
   );
 
-  it('applies the dashboard state from the first run of a new conversation', () => {
+  it('applies the dashboard state from the first run of a new conversation', async () => {
     const { chatEvents$, activeConversation$, getChatEvents$, setState, subscription } =
       createHarness(undefined, true);
     expect(getChatEvents$).not.toHaveBeenCalled();
@@ -86,6 +106,7 @@ describe('createAgentLiveUpdatesSubscription', () => {
     // The chat creates the conversation before sending, so its id is published before the run streams
     activeConversation$.next({ id: 'new-conversation' });
     chatEvents$.next(buildToolUiEvent(buildAttachment()));
+    await flushPromises();
 
     expect(getChatEvents$).toHaveBeenCalledWith('new-conversation');
     expect(setState).toHaveBeenCalledTimes(1);

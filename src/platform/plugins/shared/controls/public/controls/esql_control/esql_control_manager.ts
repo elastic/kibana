@@ -27,7 +27,7 @@ import type {
   OptionsListSelection,
 } from '@kbn/controls-schemas';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
-import type { ESQLControlVariable, QueryESQLControl } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import {
   EsqlControlType,
   ESQLVariableType,
@@ -35,12 +35,7 @@ import {
   isStaticESQLControl,
 } from '@kbn/esql-types';
 import { castESQLValue, getESQLQueryVariables, hasStartEndParams } from '@kbn/esql-utils';
-import {
-  apiHasSections,
-  fetch$,
-  type PublishingSubject,
-  type StateComparators,
-} from '@kbn/presentation-publishing';
+import { apiHasSections, fetch$, type PublishingSubject } from '@kbn/presentation-publishing';
 
 import {
   getESQLSingleColumnValues,
@@ -50,44 +45,7 @@ import { dataService } from '../../services/kibana_services';
 import { initializeTemporayStateManager } from '../data_controls/options_list_control/temporay_state_manager';
 import type { ESQLOptionsListRuntimeState } from './types';
 import { getControlsTimezone } from '../utils';
-
-function selectedOptionsComparatorFunction(a?: OptionsListSelection[], b?: OptionsListSelection[]) {
-  return deepEqual(a ?? [], b ?? []);
-}
-
-type ComparatorsReturnType<ControlType = ESQLOptionsListRuntimeState['control_type']> =
-  StateComparators<
-    Pick<
-      ESQLOptionsListRuntimeState,
-      | 'selected_options'
-      | 'variable_name'
-      | 'single_select'
-      | 'variable_type'
-      | 'control_type'
-      | 'title'
-      | 'available_options'
-    > &
-      (ControlType extends EsqlControlType.STATIC_VALUES
-        ? {}
-        : Pick<QueryESQLControl, 'esql_query'>)
-  >;
-
-export const getSelectionComparators = <Type = ESQLOptionsListRuntimeState['control_type']>(
-  controlType: Type
-): ComparatorsReturnType<Type> => {
-  return {
-    selected_options: selectedOptionsComparatorFunction,
-    variable_name: 'referenceEquality',
-    variable_type: 'referenceEquality',
-    title: 'referenceEquality',
-    single_select: 'referenceEquality',
-    control_type: 'skip', // static
-    available_options: 'deepEquality',
-    ...(controlType === EsqlControlType.VALUES_FROM_QUERY
-      ? { esql_query: 'referenceEquality' }
-      : {}),
-  } as ComparatorsReturnType<Type>;
-};
+import { areSelectedOptionsEqual } from '../../../common/state_comparison';
 
 export function initializeESQLControlManager(
   uuid: string,
@@ -131,7 +89,7 @@ export function initializeESQLControlManager(
   function setSelectedOptions(next: OptionsListSelection[] | undefined) {
     if (!next) return;
     const selected = next as string[];
-    if (!selectedOptionsComparatorFunction(selectedOptions$.value, selected)) {
+    if (!areSelectedOptionsEqual(selectedOptions$.value, selected)) {
       selectedOptions$.next(selected);
     }
   }

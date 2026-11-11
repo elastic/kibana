@@ -12,6 +12,7 @@ import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import { createCustomContentContextAttachmentType } from './attachment_types/custom_content_context';
 import { createUpdateCustomContentTool } from './tools/update_custom_content_tool';
 import { customContentEmbeddableSchema } from './embeddable/schemas';
+import { customContentStateComparison } from '../common/state_comparison';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -23,6 +24,7 @@ export class CustomContentPlugin implements Plugin<void, void, SetupDeps> {
     embeddable.registerEmbeddableServerDefinition(CUSTOM_CONTENT_EMBEDDABLE_TYPE, {
       title: 'Custom panel',
       getSchema: () => customContentEmbeddableSchema,
+      stateComparison: customContentStateComparison,
     });
 
     if (agentBuilder) {

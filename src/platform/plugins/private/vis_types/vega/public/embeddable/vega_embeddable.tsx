@@ -65,8 +65,6 @@ import {
   type PublishesRendered,
   type HasSupportedTriggers,
   type SupportsJsonExport,
-  timeRangeComparators,
-  titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import {
@@ -74,6 +72,7 @@ import {
   VEGA_STANDALONE_EMBEDDABLE_FLAG,
   VEGA_SUPPORTED_TRIGGERS,
 } from '../../common/constants';
+import { vegaStateComparison } from '../../common/state_comparison';
 import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaEvent } from '../types';
 import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from '../plugin';
@@ -151,6 +150,7 @@ export const vegaEmbeddableFactory = (
   deps: VegaEmbeddableDependencies
 ): EmbeddablePublicDefinition<VegaByValueState, VegaEmbeddableApi> => ({
   type: VEGA_EMBEDDABLE_TYPE,
+  stateComparison: vegaStateComparison,
   buildEmbeddable: async ({
     initializeDrilldownsManager,
     initialState,
@@ -236,14 +236,7 @@ export const vegaEmbeddableFactory = (
         ),
         panelSearchStateManager.anyStateChange$
       ),
-      getComparators: () => ({
-        ...titleComparators,
-        ...timeRangeComparators,
-        ...drilldownsManager.comparators,
-        query: 'deepEquality',
-        filters: 'deepEquality',
-        spec: 'deepEquality',
-      }),
+      getComparators: () => vegaStateComparison.comparators,
       applySerializedState: (nextState) => {
         titleManager.reinitializeState(nextState);
         timeRangeManager.reinitializeState(nextState);

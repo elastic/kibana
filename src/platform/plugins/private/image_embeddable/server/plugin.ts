@@ -10,6 +10,7 @@
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import { IMAGE_EMBEDDABLE_TYPE } from '../common/constants';
 import { getTransforms } from '../common/transforms';
+import { imageStateComparison } from '../common/state_comparison';
 import type { SetupDeps, StartDeps } from './types';
 import { getImageEmbeddableSchema } from './schemas';
 
@@ -19,6 +20,7 @@ export class ImageEmbeddablePlugin implements Plugin<void, void, SetupDeps, Star
       title: 'Image',
       getTransforms,
       getSchema: (getDrilldownsSchemas) => getImageEmbeddableSchema(getDrilldownsSchemas),
+      stateComparison: imageStateComparison,
     });
   }
 

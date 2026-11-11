@@ -87,6 +87,21 @@ describe('initializeSettingsManager', () => {
         hide_panel_titles: !currentSettings.hide_panel_titles,
       });
     });
+
+    test('Should report a cleared title and description', (done) => {
+      const lastSavedState$ = new BehaviorSubject<DashboardState>(
+        getSampleDashboardState({ description: 'Overview' })
+      );
+      const settingsManager = initializeSettingsManager(lastSavedState$.value);
+      settingsManager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
+        expect(changes).toStrictEqual({
+          description: undefined,
+          title: '',
+        });
+        done();
+      });
+      settingsManager.api.setSettings({ description: '', title: '' });
+    });
   });
 
   describe('projectRoutingRestore deserialization', () => {

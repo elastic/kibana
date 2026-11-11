@@ -217,6 +217,15 @@ export type DashboardApi = CanExpandPanels &
     getSerializedState: () => {
       attributes: DashboardState;
     };
+    /**
+     * The changes from `baseline` to `current`, computed like unsaved changes but for any two
+     * states. Each panel is compared with the rules on its embeddable definition, so the result
+     * does not depend on which panels are loaded. Empty when equal.
+     */
+    diffStates: (
+      baseline: DashboardState,
+      current: DashboardState
+    ) => Promise<Partial<DashboardState>>;
     getDashboardPanelFromId: (id: string) => {
       type: string;
       grid?: GridData;

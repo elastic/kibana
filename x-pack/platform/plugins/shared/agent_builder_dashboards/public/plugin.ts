@@ -53,6 +53,7 @@ export class AgentBuilderDashboardsPlugin
     this.cleanupAttachmentUi = registerDashboardAttachmentUiDefinition({
       agentBuilder: plugins.agentBuilder,
       chrome: core.chrome,
+      toasts: core.notifications.toasts,
       canWriteDashboards,
       dashboardLocator: plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR),
       unifiedSearch: plugins.unifiedSearch,

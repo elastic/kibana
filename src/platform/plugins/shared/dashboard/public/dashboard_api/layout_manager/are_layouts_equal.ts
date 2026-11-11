@@ -84,3 +84,19 @@ export const arePinnedPanelLayoutsEqual = (
   }
   return true;
 };
+
+/**
+ * Whether the panels and the pinned panels changed: their layout, or any of their panels that `isPanelChanged` reports.
+ */
+export const getLayoutChanges = (
+  originalLayout: DashboardLayout,
+  newLayout: DashboardLayout,
+  isPanelChanged: (panelId: string) => boolean
+) => ({
+  hasPanelChanges:
+    !arePanelLayoutsEqual(originalLayout, newLayout) ||
+    Object.keys(newLayout.panels).some(isPanelChanged),
+  hasPinnedPanelChanges:
+    !arePinnedPanelLayoutsEqual(originalLayout, newLayout) ||
+    Object.keys(newLayout.pinnedPanels).some(isPanelChanged),
+});

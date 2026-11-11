@@ -18,6 +18,7 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { registerRoutes } from './api/register_routes';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
+import { markdownStateComparison } from '../common/state_comparison';
 import { markdownEmbeddableSchema } from './embeddable/schemas';
 import { markdownSavedObjectType, type StoredMarkdownState } from './markdown_saved_object';
 import type { SetupDeps, StartDeps } from './types';
@@ -36,6 +37,7 @@ export class MarkdownPlugin implements Plugin<void, void, SetupDeps, StartDeps> 
       title: 'Markdown',
       getSchema: () => markdownEmbeddableSchema,
       getTransforms,
+      stateComparison: markdownStateComparison,
     });
 
     core.savedObjects.registerType<StoredMarkdownState>(markdownSavedObjectType);
