@@ -46,6 +46,9 @@ dependsOn:
   - '@kbn/core-spaces-common'
   - '@kbn/react-query'
   - '@kbn/licensing-types'
+  - '@kbn/app-header'
+  - '@kbn/app-menu'
+  - '@kbn/security-solution-features'
 tags:
   - plugin
   - prod
