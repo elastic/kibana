@@ -360,6 +360,23 @@ describe('code scores', () => {
     ).toBe(1);
   });
 
+  it('reads "IOC Hunt had nothing to search" as no searchable terms', () => {
+    expect(
+      scoreCanaryTripped(
+        buildExpected({ tier1Status: 'no_searchable_terms' }),
+        buildArtifacts({
+          outcome: 'completed',
+          hunt: {
+            status: 'completed',
+            hit: false,
+            headline:
+              'no confirmed hits: IOC Hunt had nothing to search; Behavior Hunt derived no behaviors; coverage incomplete',
+          },
+        })
+      ).score
+    ).toBe(1);
+  });
+
   it('scores 1 for an SSE attachment whose hunt_result passed huntResultSchema', () => {
     expect(
       scoreSseAttachment(

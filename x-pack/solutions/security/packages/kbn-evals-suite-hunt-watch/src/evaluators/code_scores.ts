@@ -94,7 +94,7 @@ export const resolveTier1Status = (actual: HuntReportArtifacts): HuntTier1Status
 
   const headline = actual.hunt?.headline ?? '';
   if (/(?:IOC Hunt|Tier 1) found no matches/i.test(headline)) return 'no_environment_hits';
-  if (/no searchable/i.test(headline)) return 'no_searchable_terms';
+  if (/no searchable|had nothing to search/i.test(headline)) return 'no_searchable_terms';
   if (/(?:IOC Hunt|Tier 1) found (?!no matches)/i.test(headline)) return 'environment_hits_found';
   return undefined;
 };
@@ -470,9 +470,8 @@ export const scoreCanaryTripped = (expected: HuntExpected, artifacts: HuntArtifa
 /**
  * Actioned Proposals only: recommendations are keyed per Investigation and are expected to
  * duplicate across reports. Target paths match packaging's `holdsSubject` contract, and the
- * criticality level is part of the subject for the same reason packaging's `coversCriticality`
- * makes it one: a finding that wants a higher level than the live Proposal asks for is minted on
- * its own rather than absorbed, so two levels on one target is the product working, not a miss.
+ * criticality level is included so two set-asset-criticality Proposals on one target at different
+ * levels read as distinct: they are separate asks about the same target, not a duplicate subject.
  */
 export const actionedSubjectFingerprint = (proposal: ProposalWithMetadata): string | undefined => {
   if (!proposal.actionWorkflowId) return undefined;

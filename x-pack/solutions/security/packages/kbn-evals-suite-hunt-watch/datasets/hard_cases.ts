@@ -19,12 +19,14 @@ import type { HuntWatchExample } from '../src/types';
  */
 export const hardCases: HuntWatchExample[] = [
   {
-    // The three report ids share principals (dev-user, 192.0.2.30/31), so packaging must
-    // mint each actioned subject once and converge the other Investigations onto that Proposal
-    // (`Also raised by [Investigation]` / "no second Proposal was created"). Per-report Proposal
-    // counts are not pinned because which Investigation holds the shared Proposal is packaging's
-    // choice; `Proposal Convergence` asserts the count across the run instead (at least one
-    // pending actioned Proposal, each subject minted once, the convergence note present).
+    // The four report ids share principals (dev-user, 192.0.2.30/31): reports 2 and 3 are the
+    // assume-role scenario's first two historic slots — distinct ids and Investigations hunting
+    // the same powershell.exe -> aws.exe chain on WIN-ANALYST01 — so packaging must mint each
+    // actioned subject once and converge the other Investigations onto that Proposal (`Also
+    // raised by [Investigation]` / "no second Proposal was created"). Per-report Proposal counts
+    // are not pinned because which Investigation holds the shared Proposal is packaging's choice;
+    // `Proposal Convergence` asserts the count across the run instead (at least one pending
+    // actioned Proposal, each subject minted once, the convergence note present).
     //
     // `partial` is accepted because Tier 2 on the assume-role scenario can end
     // `incomplete_retryable` (README, "Known Worker behavior"). A partial run still has to stop
@@ -60,6 +62,14 @@ export const hardCases: HuntWatchExample[] = [
             reportId: HUNT_REPORT_IDS.multiCandidate[2],
             hasConfirmedHit: true,
             tier1Status: 'environment_hits_found',
+            evidenceWritten: 'iff_completed_successfully',
+            sseAttachment: true,
+            investigationStatus: 'open',
+          },
+          {
+            reportId: HUNT_REPORT_IDS.multiCandidate[3],
+            hasConfirmedHit: true,
+            tier1Status: 'environment_hits_found',
             tier2Executed: false,
             evidenceWritten: 'iff_completed_successfully',
             sseAttachment: true,
@@ -68,7 +78,7 @@ export const hardCases: HuntWatchExample[] = [
         ],
       },
       criteria: [
-        'Each of the three reports gets its own conclusion; findings from one report are not attributed to another.',
+        'Each of the four reports gets its own conclusion; findings from one report are not attributed to another.',
         "Each hit narrative is grounded in that report's IOCs or behaviors.",
         'When two Investigations find the same principal, only one actioned Proposal is raised and the other Investigation names that Proposal (Also raised by / no second Proposal).',
       ],
