@@ -72849,8 +72849,6 @@
     "xpack.triggersActionsUI.sections.rulesList.totalStatusesWarningDescription": "Avertissement : {totalStatusesWarning}",
     "xpack.triggersActionsUI.sections.rulesList.typeFilterLabel": "Type",
     "xpack.triggersActionsUI.sections.rulesList.typeFilterPopoverAriaLabel": "Filtrer par type",
-    "xpack.triggersActionsUI.sections.rulesList.uiamApiKeyBannerDescription": "Elastic améliore la sécurité des alertes dans les projets serverless. Les clés API d'Elasticsearch sont remplacées par un nouveau format basé sur les rôles qui améliore le contrôle d'accès. Aucune action n'est requise de votre part.",
-    "xpack.triggersActionsUI.sections.rulesList.uiamApiKeyBannerTitle": "Déploiement des clés API UIAM pour les règles",
     "xpack.triggersActionsUI.sections.rulesList.unableToLoadConnectorTypesMessage": "Impossible de charger les types de connecteurs",
     "xpack.triggersActionsUI.sections.rulesList.unableToLoadRulesMessage": "Impossible de charger les règles",
     "xpack.triggersActionsUI.sections.rulesList.unableToLoadRuleStatusInfoMessage": "Impossible de charger les infos de statut de règles",
