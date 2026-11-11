@@ -14,6 +14,7 @@ import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import {
+  AGENT_BUILDER_EVENT_TYPES,
   ConversationAccessControlMode,
   ConversationAccessControlRole,
   type Conversation,
@@ -25,6 +26,7 @@ import {
   useConversationReadOnly,
   useHasPersistedConversation,
 } from '../../../hooks/use_conversation';
+import { useConversationListMutations } from '../../../hooks/use_conversation_list_mutations';
 import { useConversationTemplateDisplay } from '../../../hooks/use_conversation_template_display';
 import { useQueryState } from '../../../hooks/use_query_state';
 import { useActivityLog } from '../activity_log/use_activity_log';
@@ -39,6 +41,14 @@ jest.mock('../../../hooks/use_conversation', () => ({
   useConversationPermissions: jest.fn(),
   useConversationReadOnly: jest.fn(),
   useHasPersistedConversation: jest.fn(),
+}));
+
+jest.mock('../../../hooks/use_conversation_list_mutations', () => ({
+  useConversationListMutations: jest.fn(),
+}));
+
+jest.mock('../../../hooks/use_kibana', () => ({
+  useKibana: () => ({ services: { analytics: { reportEvent: mockReportEvent } } }),
 }));
 
 jest.mock('../../../hooks/use_conversation_template_display', () => ({
@@ -95,7 +105,10 @@ jest.mock('../delete_conversation_modal', () => ({
 
 const mockDownloadConversation = jest.fn();
 const mockShareFlyoutMounted = jest.fn();
+const mockReportEvent = jest.fn();
 const renameConversation = jest.fn();
+const markAsPinned = jest.fn();
+const markAsUnpinned = jest.fn();
 const setSummaryParam = jest.fn();
 
 const mockUseConversation = jest.mocked(useConversation);
@@ -177,6 +190,10 @@ describe('ConversationAppHeader', () => {
     jest.mocked(useConversationContext).mockReturnValue({
       conversationActions: { renameConversation },
     } as never);
+    jest.mocked(useConversationListMutations).mockReturnValue({
+      markAsPinned,
+      markAsUnpinned,
+    } as never);
   });
 
   it('shows only the "New chat" title for a chat that is not saved yet', () => {
@@ -253,6 +270,45 @@ describe('ConversationAppHeader', () => {
     );
     await openAppMenuOverflow();
     expect(screen.getByTestId('agentBuilderConversationShareButton')).toBeInTheDocument();
+  });
+
+  it('shows an unpinned pin button for a saved chat and pins it on click', async () => {
+    const user = setUpUser();
+    setUp();
+    renderHeader();
+
+    const pinButton = screen.getByRole('button', { name: 'Pin' });
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.favorite)).toBeInTheDocument();
+    await user.click(pinButton);
+
+    expect(markAsPinned).toHaveBeenCalledWith('conversation-1');
+    expect(markAsUnpinned).not.toHaveBeenCalled();
+    expect(mockReportEvent).toHaveBeenCalledWith(
+      AGENT_BUILDER_EVENT_TYPES.UiClick,
+      expect.objectContaining({ ebt_action: 'pin_conversation' })
+    );
+  });
+
+  it('shows a pinned chat as pinned and unpins it on click', async () => {
+    const user = setUpUser();
+    setUp({ conversation: { ...baseConversation, pinned: true } as Conversation });
+    renderHeader();
+
+    await user.click(screen.getByRole('button', { name: 'Unpin' }));
+
+    expect(markAsUnpinned).toHaveBeenCalledWith('conversation-1');
+    expect(markAsPinned).not.toHaveBeenCalled();
+    expect(mockReportEvent).toHaveBeenCalledWith(
+      AGENT_BUILDER_EVENT_TYPES.UiClick,
+      expect.objectContaining({ ebt_action: 'unpin_conversation' })
+    );
+  });
+
+  it('shows no pin button for a chat that is not saved yet', () => {
+    setUp({ conversation: null, isPersisted: false });
+    renderHeader();
+
+    expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.favorite)).not.toBeInTheDocument();
   });
 
   it('shows the type badge and Summary for a typed chat', () => {

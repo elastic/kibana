@@ -244,6 +244,7 @@ describe('PR 3b write provenance, reinforcementSessionRegistry, and applied_writ
       const toolContext = {
         request: {} as never,
         runContext: { stack: [{ type: 'agent', conversationId: reinfConvId }] },
+        callContext: { toolId: 'tool', toolCallId: 'call-1', callSource: 'agent' },
         esClient: { asCurrentUser: esClient },
         agentConfiguration: { connector_ids: [] },
       } as never;
@@ -264,8 +265,10 @@ describe('PR 3b write provenance, reinforcementSessionRegistry, and applied_writ
               tree_id: 'symptom:checkout-high-latency',
               file_path: 'decision-trees/decision_tree_checkout-high-latency.md',
               evidence_gatherer_metadata: [],
+              merged_nodes: [],
             },
           ],
+          traversals: [],
           summary: 'Created initial tree.',
         } as never,
         toolContext
@@ -304,6 +307,9 @@ describe('PR 3b write provenance, reinforcementSessionRegistry, and applied_writ
     expect(result).toEqual({
       output: {
         message: 'Persisted 1 tree',
+        // The reinforcement agent's own conversation, and no submit steps in this mocked round.
+        conversation_id: expect.any(String),
+        submissions_json: '[]',
         applied_writes: [
           {
             store: 'decision_tree_learning',

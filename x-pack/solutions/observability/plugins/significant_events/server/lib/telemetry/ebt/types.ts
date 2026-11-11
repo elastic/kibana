@@ -49,6 +49,8 @@ interface AgentBuilderKnowledgeIndicatorCreatedProps extends EbtTelemetryContext
   tool_id: 'ki_feature_create' | 'ki_query_create';
   success: boolean;
   source_id: string;
+  space_id: string;
+  knowledge_indicator_id?: string;
   error_message?: string;
 }
 
