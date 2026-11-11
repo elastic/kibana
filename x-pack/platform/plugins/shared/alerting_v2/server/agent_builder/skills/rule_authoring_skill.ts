@@ -185,6 +185,11 @@ After composing or modifying a rule, always render it inline for user review:
 where \`attachmentId\` is \`ruleAttachment.id\` and \`version\` is \`version\` from the ${
       ALERTING_TOOL_IDS.manageRule
     } tool result.
+If you then call \`${
+      ALERTING_TOOL_IDS.linkRuleAndActionPolicy
+    }\`, render the rule again with the \`ruleAttachment.version\` from the link tool result instead: the version from ${
+      ALERTING_TOOL_IDS.manageRule
+    } does not include the routing tag, and saving it would persist the rule untagged.
 
 ---
 

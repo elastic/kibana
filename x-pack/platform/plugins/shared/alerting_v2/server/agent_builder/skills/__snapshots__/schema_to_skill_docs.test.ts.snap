@@ -864,6 +864,12 @@ Do **not** set \`matcher.tags\` yourself: the link tool does it in the next step
 Call \`platform.alerting.link_rule_and_action_policy\` with the \`ruleAttachmentId\` and the \`policyAttachmentId\`.
 Existing routing tags and matcher tags are kept.
 
+> **Render after linking**: render both attachments again with the \`ruleAttachment.version\`
+> and \`actionPolicyAttachment.version\` from the link result, not the versions from
+> \`manage_rule\` / \`manage_action_policy\`, which do not include the routing tag. Saving those
+> would persist an untagged rule or a catch-all policy. If \`alreadyLinked\` is \`true\` the result
+> has no versions: keep the ones you already have.
+
 > **Warnings**: if the result has \`warnings\`, explain them to the user. This happens when
 > the policy is already saved and has no \`matcher.tags\` (it applies to every rule today):
 > linking narrows it to this rule, so other rules stop notifying through it once saved.

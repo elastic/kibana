@@ -223,6 +223,11 @@ Then create the action policy from the matching reference above and render it:
 where \`attachmentId\` is \`actionPolicyAttachment.id\` and \`version\` is \`version\` from the ${
       ALERTING_TOOL_IDS.manageActionPolicy
     } tool result.
+If you call \`${
+      ALERTING_TOOL_IDS.linkRuleAndActionPolicy
+    }\` for this policy, render both the rule and the policy with the \`ruleAttachment.version\` and \`actionPolicyAttachment.version\` from the link tool result instead of the versions from \`manage_rule\` / ${
+      ALERTING_TOOL_IDS.manageActionPolicy
+    }: those do not include the routing tag, and saving them would persist an untagged rule or a catch-all policy. When the link result has \`alreadyLinked: true\`, it has no versions: keep the ones you already have.
 
 ## Save Order Reminder
 

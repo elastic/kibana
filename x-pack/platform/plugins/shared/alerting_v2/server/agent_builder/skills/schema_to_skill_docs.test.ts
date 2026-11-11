@@ -799,6 +799,8 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain(ALERTING_TOOL_IDS.linkRuleAndActionPolicy);
       expect(doc).toContain('Never set this tag by hand');
       expect(doc).toContain('Do **not** set `matcher.tags` yourself');
+      expect(doc).toContain('Render after linking');
+      expect(doc).toContain('`actionPolicyAttachment.version`');
       expect(doc).not.toContain('notify-');
       expect(doc).not.toContain('rule.id:');
       expect(doc).toContain('kind: signal');
