@@ -40,3 +40,12 @@ export const addPathParamToUrl = (
  */
 export const excludeContentCards = (cards: IntegrationCardItem[]): IntegrationCardItem[] =>
   cards.filter((card) => card.type !== 'content');
+
+/**
+ * Whether a card is one of the featured cards. A collection card has its own id
+ * (`collection:<group>`), so it is featured when any of its member packages is.
+ */
+export const isFeaturedCard = (card: IntegrationCardItem, featuredCardIds: string[]): boolean =>
+  featuredCardIds.includes(card.id) ||
+  (card.isCollectionCard === true &&
+    (card.groupMembers ?? []).some((member) => featuredCardIds.includes(member.id)));

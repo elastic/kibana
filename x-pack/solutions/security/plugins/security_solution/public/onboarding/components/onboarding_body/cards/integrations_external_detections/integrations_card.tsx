@@ -27,6 +27,7 @@ import { IntegrationContextProvider } from '../../../../../common/lib/integratio
 import { ONBOARDING_PATH } from '../../../../../../common/constants';
 import type { ExternalIntegrationCardMetadata } from './integrations_check_complete';
 import { useSelectedTab } from '../../../../../common/lib/integrations/hooks/use_selected_tab';
+import { isFeaturedCard } from '../../../../../common/utils/integrations';
 
 interface IntegrationsCardGridTabsProps {
   availablePackages: AvailablePackages;
@@ -40,13 +41,12 @@ const IntegrationsCardGridTabs = withAvailablePackages<IntegrationsCardGridTabsP
     const { activeIntegrations, isAgentRequired } = checkCompleteMetadata;
     const { selectedTab } = useSelectedTab();
 
-    const allowedIntegrations = useMemo(
-      () =>
-        availablePackages.filteredCards.filter(
-          (card) => selectedTab?.featuredCardIds?.includes(card.id) ?? true
-        ),
-      [availablePackages.filteredCards, selectedTab]
-    );
+    const allowedIntegrations = useMemo(() => {
+      const featuredCardIds = selectedTab?.featuredCardIds;
+      return availablePackages.filteredCards.filter((card) =>
+        featuredCardIds ? isFeaturedCard(card, featuredCardIds) : true
+      );
+    }, [availablePackages.filteredCards, selectedTab]);
 
     const { available: list } = useEnhancedIntegrationCards(
       allowedIntegrations,

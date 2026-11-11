@@ -20,7 +20,7 @@ import {
 } from '../constants';
 import { useIntegrationContext } from './integration_context';
 import { getIntegrationLinkState } from '../../../hooks/integrations/use_integration_link_state';
-import { addPathParamToUrl } from '../../../utils/integrations';
+import { addPathParamToUrl, isFeaturedCard } from '../../../utils/integrations';
 import type { UseSelectedTabReturn } from './use_selected_tab';
 
 export type GetCardItemExtraProps = (card: IntegrationCardItem) => Partial<IntegrationCardItem>;
@@ -96,14 +96,7 @@ export const useIntegrationCardList = ({
   );
 
   if (featuredCardIds && featuredCardIds.length > 0) {
-    // A collection card has its own id (`collection:<group>`), so it is featured when any of its
-    // member packages is.
-    return integrationCards.filter(
-      (card) =>
-        featuredCardIds.includes(card.id) ||
-        (card.isCollectionCard &&
-          card.groupMembers?.some((member) => featuredCardIds.includes(member.id)))
-    );
+    return integrationCards.filter((card) => isFeaturedCard(card, featuredCardIds));
   }
   return integrationCards ?? [];
 };

@@ -37,14 +37,18 @@ export const withAvailablePackages = <T extends { availablePackages: AvailablePa
           enableCollectionGrouping: true,
         });
         // Match the Fleet Integrations page, which hides content-only packages by default.
-        const visiblePackages = useMemo(
-          () => ({
-            ...availablePackages,
-            filteredCards: excludeContentCards(availablePackages.filteredCards),
-          }),
-          [availablePackages]
+        // The hook returns a new object on every render, but its `filteredCards` is memoized: key on
+        // the list only, so typing in the search box does not rebuild the cards and the grid's
+        // search index. The rest of the object is spread fresh so no field goes stale.
+        const filteredCards = useMemo(
+          () => excludeContentCards(availablePackages.filteredCards),
+          [availablePackages.filteredCards]
         );
-        return <Component {...({ ...props, availablePackages: visiblePackages } as T)} />;
+        return (
+          <Component
+            {...({ ...props, availablePackages: { ...availablePackages, filteredCards } } as T)}
+          />
+        );
       }
     ),
     () => import('@kbn/fleet-plugin/public').then((module) => module.AvailablePackagesHook()),

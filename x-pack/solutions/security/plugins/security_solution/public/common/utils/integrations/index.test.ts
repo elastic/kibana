@@ -6,7 +6,13 @@
  */
 
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
-import { addPathParamToUrl, excludeContentCards, RETURN_APP_ID, RETURN_PATH } from '.';
+import {
+  addPathParamToUrl,
+  excludeContentCards,
+  isFeaturedCard,
+  RETURN_APP_ID,
+  RETURN_PATH,
+} from '.';
 import { APP_UI_ID } from '../../../../common';
 
 describe('addPathParamToUrl', () => {
@@ -59,5 +65,31 @@ describe('excludeContentCards', () => {
       'input',
       'collection',
     ]);
+  });
+});
+
+describe('isFeaturedCard', () => {
+  const card = (id: string, extra: Partial<IntegrationCardItem> = {}) =>
+    ({ id, ...extra } as IntegrationCardItem);
+  const collection = card('collection:nginx', {
+    isCollectionCard: true,
+    groupMembers: [card('epr:nginx'), card('epr:nginx_otel')],
+  });
+
+  it('matches a card by its own id', () => {
+    expect(isFeaturedCard(card('epr:endpoint'), ['epr:endpoint'])).toBe(true);
+    expect(isFeaturedCard(card('epr:aws'), ['epr:endpoint'])).toBe(false);
+  });
+
+  it('matches a collection card when one of its members is featured', () => {
+    expect(isFeaturedCard(collection, ['epr:nginx_otel'])).toBe(true);
+    expect(isFeaturedCard(collection, ['collection:nginx'])).toBe(true);
+    expect(isFeaturedCard(collection, ['epr:redis'])).toBe(false);
+  });
+
+  it('does not look at the members of a card that is not a collection', () => {
+    const notCollection = card('epr:a', { groupMembers: [card('epr:b')] });
+
+    expect(isFeaturedCard(notCollection, ['epr:b'])).toBe(false);
   });
 });
