@@ -483,8 +483,8 @@ describe('softDeleteKi', () => {
     expect(esClient.index).not.toHaveBeenCalled();
   });
 
-  it('also deletes the relationships linking a fact or entity', async () => {
-    const revisionHit = (id: string, type: string) => ({
+  const linkedEntityClient = (entitySource: object = {}) => {
+    const revisionHit = (id: string, source: object) => ({
       hits: {
         hits: [
           {
@@ -492,7 +492,7 @@ describe('softDeleteKi', () => {
             _index: indexDest.value,
             _seq_no: 5,
             _primary_term: 1,
-            _source: { id, type },
+            _source: { id, ...source },
           },
         ],
       },
@@ -511,13 +511,17 @@ describe('softDeleteKi', () => {
         };
       }
       return JSON.stringify(request.query).includes('rel-1')
-        ? revisionHit('rel-1', 'memory.relationship')
-        : revisionHit('ki-1', 'entity.customer');
+        ? revisionHit('rel-1', { type: 'memory.relationship' })
+        : revisionHit('ki-1', { type: 'entity.customer', ...entitySource });
     });
-    const esClient = {
+    return {
       search,
       update: jest.fn().mockResolvedValue({ result: 'updated' }),
     } as unknown as ElasticsearchClient;
+  };
+
+  it('also deletes the relationships linking a fact or entity', async () => {
+    const esClient = linkedEntityClient();
 
     await softDeleteKi(esClient, {
       aiIndexId: 'my-ai-index',
@@ -534,6 +538,19 @@ describe('softDeleteKi', () => {
     expect(esClient.update).not.toHaveBeenCalledWith(
       expect.objectContaining({ refresh: expect.anything() })
     );
+  });
+
+  it('finishes deleting the linked relationships of an already-deleted fact or entity', async () => {
+    const esClient = linkedEntityClient({ governance: { lifecycle: { status: 'deleted' } } });
+
+    await softDeleteKi(esClient, {
+      aiIndexId: 'my-ai-index',
+      dest: indexDest,
+      kiId: 'ki-1',
+      writer: deleteWriter,
+    });
+
+    expect((esClient.update as jest.Mock).mock.calls.map(([{ id }]) => id)).toEqual(['doc-rel-1']);
   });
 
   it('does not look up relationships for other KI types', async () => {

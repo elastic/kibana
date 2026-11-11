@@ -138,30 +138,29 @@ export const softDeleteKi = async (
     includeSource: true,
     abortSignal,
   });
-  if (isKiDeleted(revision.source)) {
-    return { id: kiId };
+  if (!isKiDeleted(revision.source)) {
+    const now = new Date().toISOString();
+    const changes = {
+      updated_at: now,
+      governance: {
+        provenance: { updated_by: writer },
+        lifecycle: { status: 'deleted' as const },
+      },
+    };
+
+    await writeKiRevision({
+      esClient,
+      aiIndexId,
+      dest,
+      kiId,
+      revision,
+      changes,
+      refresh,
+      abortSignal,
+    });
   }
 
-  const now = new Date().toISOString();
-  const changes = {
-    updated_at: now,
-    governance: {
-      provenance: { updated_by: writer },
-      lifecycle: { status: 'deleted' as const },
-    },
-  };
-
-  await writeKiRevision({
-    esClient,
-    aiIndexId,
-    dest,
-    kiId,
-    revision,
-    changes,
-    refresh,
-    abortSignal,
-  });
-
+  // Runs for an already-deleted KI too, so a retry finishes a cleanup that failed partway.
   const { type } = revision.source;
   if (typeof type === 'string' && isDreamedKiType(type)) {
     for (const relationshipId of await findLinkingRelationshipIds({

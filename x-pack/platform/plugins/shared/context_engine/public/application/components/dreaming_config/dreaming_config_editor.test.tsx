@@ -120,6 +120,17 @@ describe('DreamingConfigEditor', () => {
     expect(latest.relationships).toEqual([{ type: 'solved_by' }]);
   });
 
+  it('shows relationship types only while entities are on', () => {
+    renderEditor(<Editable initial={{ ...SUPPORT, entitiesEnabled: false }} />);
+
+    expect(screen.queryByTestId('contextDreamingConfigRelationships')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('contextDreamingConfigEntitiesSwitch'));
+
+    expect(screen.getByTestId('contextDreamingConfigRelationships')).toBeInTheDocument();
+    expect(latest.relationships).toEqual(SUPPORT.relationships);
+  });
+
   it('suggests entities when they are turned on with none', () => {
     renderEditor(
       <DreamingConfigEditor

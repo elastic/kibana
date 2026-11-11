@@ -392,40 +392,47 @@ export const DreamingConfigEditor = ({
           </Section>
         </>
       )}
-      <EuiHorizontalRule margin="xl" />
-      <Section
-        icon="link"
-        title={i18n.translate('xpack.contextEngine.dreamingConfig.relationshipsTitle', {
-          defaultMessage: 'Relationship types',
-        })}
-        count={relationships.length}
-        description={i18n.translate('xpack.contextEngine.dreamingConfig.relationshipsDescription', {
-          defaultMessage:
-            'How the entities dreaming writes are linked, such as member_of or uses. Facts link to the entities they are about with the built-in "about" type. Each relationship is stored as its own knowledge item.',
-        })}
-        addLabel={i18n.translate('xpack.contextEngine.dreamingConfig.addRelationship', {
-          defaultMessage: 'Add relationship type',
-        })}
-        onAdd={readOnly ? undefined : () => setEditing({ kind: 'relationship' })}
-        emptyMessage={i18n.translate('xpack.contextEngine.dreamingConfig.relationshipsEmpty', {
-          defaultMessage: 'No relationship types yet. Without one, dreaming links nothing.',
-        })}
-        data-test-subj="contextDreamingConfigRelationships"
-      >
-        {relationships.map(({ type, description }, index) => (
-          <EuiFlexItem key={type}>
-            <TypeCard
-              type={type}
-              description={description}
-              {...(!readOnly && {
-                onEdit: () => setEditing({ kind: 'relationship', index }),
-                onDelete: () => update({ relationships: without(relationships, index) }),
-              })}
-              data-test-subj={`contextDreamingConfigRelationship-${type}`}
-            />
-          </EuiFlexItem>
-        ))}
-      </Section>
+      {entitiesEnabled && (
+        <>
+          <EuiHorizontalRule margin="xl" />
+          <Section
+            icon="link"
+            title={i18n.translate('xpack.contextEngine.dreamingConfig.relationshipsTitle', {
+              defaultMessage: 'Relationship types',
+            })}
+            count={relationships.length}
+            description={i18n.translate(
+              'xpack.contextEngine.dreamingConfig.relationshipsDescription',
+              {
+                defaultMessage:
+                  'How the entities dreaming writes are linked, such as member_of or uses. Facts link to the entities they are about with the built-in "about" type. Each relationship is stored as its own knowledge item.',
+              }
+            )}
+            addLabel={i18n.translate('xpack.contextEngine.dreamingConfig.addRelationship', {
+              defaultMessage: 'Add relationship type',
+            })}
+            onAdd={readOnly ? undefined : () => setEditing({ kind: 'relationship' })}
+            emptyMessage={i18n.translate('xpack.contextEngine.dreamingConfig.relationshipsEmpty', {
+              defaultMessage: 'No relationship types yet. Without one, dreaming links nothing.',
+            })}
+            data-test-subj="contextDreamingConfigRelationships"
+          >
+            {relationships.map(({ type, description }, index) => (
+              <EuiFlexItem key={type}>
+                <TypeCard
+                  type={type}
+                  description={description}
+                  {...(!readOnly && {
+                    onEdit: () => setEditing({ kind: 'relationship', index }),
+                    onDelete: () => update({ relationships: without(relationships, index) }),
+                  })}
+                  data-test-subj={`contextDreamingConfigRelationship-${type}`}
+                />
+              </EuiFlexItem>
+            ))}
+          </Section>
+        </>
+      )}
       {editing?.kind === 'fact' && (
         <FactTypeModal
           initial={editing.index !== undefined ? facts[editing.index] : undefined}
