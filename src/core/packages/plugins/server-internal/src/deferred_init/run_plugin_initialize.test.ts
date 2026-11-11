@@ -27,23 +27,24 @@ describe('runPluginInitialize', () => {
     expect(log.info).toHaveBeenCalledWith(expect.stringMatching(/^Plugin "foo" initialized in/));
   });
 
-  it('rejects with the plugin id and the cause, and logs the failure', async () => {
+  it('rejects with the original error and logs the failure with its stack', async () => {
     const cause = new Error('boom');
     const { log, result } = run(jest.fn().mockRejectedValue(cause));
 
-    const error = await result.catch((e: Error) => e);
-
-    expect(error).toEqual(new Error('Plugin "foo" initialize() failed: boom'));
-    expect((error as Error).cause).toBe(cause);
-    expect(log.error).toHaveBeenCalledWith(error);
+    await expect(result).rejects.toBe(cause);
+    expect(log.error).toHaveBeenCalledTimes(1);
+    expect(log.error).toHaveBeenCalledWith(
+      expect.stringMatching(/^Plugin "foo" initialize\(\) failed after \d+ms: Error: boom\n\s+at /)
+    );
   });
 
   it('turns a synchronous throw into a failed run', async () => {
+    const cause = new Error('sync boom');
     const { result } = run(() => {
-      throw new Error('sync boom');
+      throw cause;
     });
 
-    await expect(result).rejects.toThrow('Plugin "foo" initialize() failed: sync boom');
+    await expect(result).rejects.toBe(cause);
   });
 
   it('warns once initialize() has run longer than the threshold', () => {

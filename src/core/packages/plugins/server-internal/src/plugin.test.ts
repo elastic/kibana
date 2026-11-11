@@ -10,6 +10,7 @@
 import { ContainerModule } from 'inversify';
 import { join } from 'path';
 import { BehaviorSubject } from 'rxjs';
+import { runInThisContext } from 'vm';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { schema } from '@kbn/config-schema';
 import { Env } from '@kbn/config';
@@ -347,20 +348,62 @@ describe('initialize', () => {
     expect(instance.initializeCalls).toEqual([[context, deps]]);
   });
 
-  test('`runInitialize` rejects the initialization when `initialize` fails', async () => {
-    const plugin = createPlugin();
-    mockPluginInitializer.mockResolvedValue({
-      setup: jest.fn(),
-      start: jest.fn(),
-      initialize: jest.fn().mockRejectedValue(new Error('boom')),
+  describe('`runInitialize` when `initialize` fails', () => {
+    const cause = new Error('boom');
+
+    /**
+     * Returns the unhandled rejections Node reports while `run` executes. Jest gives tests a copy of
+     * `process` whose listeners never fire, and fails any test that leaves a rejection unhandled, so
+     * this replaces the real process's listeners with its own until `run` has finished.
+     */
+    const collectUnhandledRejections = async (run: () => Promise<void>): Promise<unknown[]> => {
+      const realProcess: NodeJS.Process = runInThisContext('process');
+      const jestListeners = realProcess.listeners('unhandledRejection');
+      const rejections: unknown[] = [];
+      realProcess.removeAllListeners('unhandledRejection');
+      realProcess.on('unhandledRejection', (reason) => rejections.push(reason));
+      try {
+        await run();
+        // Node reports unhandled rejections once the microtask queue drains, before `setImmediate` runs.
+        await new Promise((resolve) => setImmediate(resolve));
+      } finally {
+        realProcess.removeAllListeners('unhandledRejection');
+        jestListeners.forEach((listener) => realProcess.on('unhandledRejection', listener));
+      }
+      return rejections;
+    };
+
+    beforeEach(() => {
+      mockPluginInitializer.mockResolvedValue({
+        setup: jest.fn(),
+        start: jest.fn(),
+        initialize: jest.fn().mockRejectedValue(cause),
+      });
     });
 
-    await plugin.init();
-    plugin.runInitialize({} as any, {});
+    test('rejects the initialization with the original error and reports no unhandled rejection when awaited', async () => {
+      const plugin = createPlugin();
+      await plugin.init();
 
-    await expect(initialization.promise).rejects.toThrow(
-      'Plugin "some-plugin-id" initialize() failed: boom'
-    );
+      const rejections = await collectUnhandledRejections(async () => {
+        plugin.runInitialize({} as any, {});
+        await expect(initialization.promise).rejects.toBe(cause);
+      });
+
+      expect(rejections).toEqual([]);
+    });
+
+    test('reports exactly one unhandled rejection with the original error when nobody awaits the initialization', async () => {
+      const plugin = createPlugin();
+      await plugin.init();
+
+      const rejections = await collectUnhandledRejections(async () => {
+        plugin.runInitialize({} as any, {});
+      });
+
+      expect(rejections).toHaveLength(1);
+      expect(rejections[0]).toBe(cause);
+    });
   });
 
   test('`runInitialize` resolves the initialization when the plugin does not define `initialize`', async () => {

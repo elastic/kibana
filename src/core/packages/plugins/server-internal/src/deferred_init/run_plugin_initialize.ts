@@ -13,8 +13,8 @@ import type { Logger } from '@kbn/logging';
 export const SLOW_INITIALIZE_WARNING_MS = 10_000;
 
 /**
- * Runs a plugin's `initialize()` and logs its outcome. Rejects with an error naming the plugin
- * when it fails.
+ * Runs a plugin's `initialize()` and logs its outcome. Rejects with the original error when it
+ * fails.
  */
 export const runPluginInitialize = ({
   pluginName,
@@ -49,15 +49,12 @@ export const runPluginInitialize = ({
         );
       },
       (error: unknown) => {
-        const failure = new Error(
-          `Plugin "${pluginName}" initialize() failed: ${toMessage(error)}`,
-          { cause: error }
+        log.error(
+          `Plugin "${pluginName}" initialize() failed after ${Math.round(
+            performance.now() - startedAt
+          )}ms: ${error instanceof Error ? error.stack : error}`
         );
-        log.error(failure);
-        throw failure;
+        throw error;
       }
     );
 };
-
-const toMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
