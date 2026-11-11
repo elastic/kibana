@@ -46,4 +46,5 @@ export * from './use_upgrade_review_actions';
 export * from './use_iac_provisioner';
 export * from './use_restart_agent_action';
 export * from './use_kafka_auth_methods';
+export * from './use_otlp_output_enabled';
 export * from './use_onboarding_instance_url';

@@ -15,7 +15,9 @@ import { ExperimentalFeaturesService } from '../../../../../../services';
 import {
   useStartServices,
   useKafkaAuthMethods,
+  useOtlpOutputEnabled,
   sendPutOutput,
+  sendPostOutput,
   licenseService,
 } from '../../../../hooks';
 
@@ -45,7 +47,9 @@ jest.mock('../../../../hooks', () => {
     useBreadcrumbs: jest.fn(),
     useStartServices: jest.fn(),
     useKafkaAuthMethods: jest.fn(),
+    useOtlpOutputEnabled: jest.fn(),
     sendPutOutput: jest.fn(),
+    sendPostOutput: jest.fn(),
   };
 });
 
@@ -56,6 +60,8 @@ jest.mock('./confirm_update', () => ({
 const mockSendPutOutput = sendPutOutput as jest.MockedFunction<typeof sendPutOutput>;
 const mockUseStartServices = useStartServices as jest.Mock;
 const mockUseKafkaAuthMethods = useKafkaAuthMethods as jest.Mock;
+const mockUseOtlpOutputEnabled = useOtlpOutputEnabled as jest.Mock;
+const mockSendPostOutput = sendPostOutput as jest.MockedFunction<typeof sendPostOutput>;
 
 const mockedUseFleetStatus = useFleetStatus as jest.MockedFunction<typeof useFleetStatus>;
 
@@ -124,6 +130,7 @@ describe('EditOutputFlyout', () => {
     jest.clearAllMocks();
     // the optional authentication methods of the Kafka output are off by default
     mockUseKafkaAuthMethods.mockReturnValue({ isOAuth2Enabled: false, isKerberosEnabled: false });
+    mockUseOtlpOutputEnabled.mockReturnValue(false);
     jest.spyOn(licenseService, 'isEnterprise').mockClear();
 
     mockedUseFleetStatus.mockReturnValue({} as any);
@@ -1988,6 +1995,285 @@ describe('EditOutputFlyout', () => {
           'outputR',
           expect.objectContaining({
             otel_exporter_config_yaml: 'flush_interval: 10s',
+          })
+        );
+      });
+    });
+  });
+
+  describe('OTLP output', () => {
+    const otlpOutput: Output = {
+      id: 'outputOtlp',
+      name: 'otlp output',
+      type: 'otlp',
+      is_default: false,
+      is_default_monitoring: false,
+      otlp_exporter: {
+        protocol: 'grpc',
+        endpoint: 'collector.example.com:4317',
+        compression: 'zstd',
+        timeout: '10s',
+        headers: { 'x-tenant': 'acme' },
+        balancer_name: 'pick_first',
+        keepalive: { time: '30s', timeout: '5s', permit_without_stream: true },
+        read_buffer_size: 1024,
+        write_buffer_size: 2048,
+        wait_for_ready: true,
+        user_agent: 'my-agent',
+        authority: 'collector.internal',
+      },
+    };
+
+    const selectOtlpType = (utils: ReturnType<typeof renderFlyout>['utils']) =>
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.typeInput'), {
+        target: { value: 'otlp' },
+      });
+
+    const clear = (utils: ReturnType<typeof renderFlyout>['utils'], testSubj: string) =>
+      fireEvent.change(utils.getByTestId(`settingsOutputsFlyout.${testSubj}`), {
+        target: { value: '' },
+      });
+
+    beforeEach(() => {
+      mockUseOtlpOutputEnabled.mockReturnValue(true);
+      mockSendPutOutput.mockResolvedValue({ data: {} } as any);
+      mockSendPostOutput.mockResolvedValue({ data: {} } as any);
+    });
+
+    it('should not offer the OTLP type when the feature flag is off', () => {
+      mockUseOtlpOutputEnabled.mockReturnValue(false);
+      const { utils } = renderFlyout();
+
+      expect(
+        within(utils.getByTestId('settingsOutputsFlyout.typeInput')).queryByText('OTLP')
+      ).toBeNull();
+    });
+
+    it('should offer the OTLP type when the feature flag is on', () => {
+      const { utils } = renderFlyout();
+
+      expect(
+        within(utils.getByTestId('settingsOutputsFlyout.typeInput')).queryByText('OTLP')
+      ).not.toBeNull();
+    });
+
+    it('should render the core and gRPC fields, without the beats or OpenTelemetry exporter settings', () => {
+      const { utils } = renderFlyout();
+      selectOtlpType(utils);
+
+      [
+        'otlpEndpointInput',
+        'otlpCompressionInput',
+        'otlpTimeoutInput',
+        'otlpHeaderName0',
+        'otlpBalancerNameInput',
+        'otlpKeepaliveTimeInput',
+        'otlpKeepaliveTimeoutInput',
+        'otlpKeepalivePermitWithoutStreamInput',
+        'otlpReadBufferSizeInput',
+        'otlpWriteBufferSizeInput',
+        'otlpWaitForReadyInput',
+        'otlpUserAgentInput',
+        'otlpAuthorityInput',
+      ].forEach((testSubj) =>
+        expect(utils.queryByTestId(`settingsOutputsFlyout.${testSubj}`)).not.toBeNull()
+      );
+
+      expect(utils.queryByText('OpenTelemetry exporter')).toBeNull();
+      expect(utils.queryByTestId('settingsOutputsFlyout.proxyIdInput')).toBeNull();
+      expect(utils.queryByTestId('settingsOutputsFlyout.yamlConfigInput')).toBeNull();
+      expect(utils.queryByText(/Make this output the default for/)).toBeNull();
+    });
+
+    it('should show the OTel spec default with a link to the versioned spec', () => {
+      const { utils } = renderFlyout();
+      selectOtlpType(utils);
+
+      const links = utils.getAllByText('OpenTelemetry v0.155.0 spec');
+      expect(links.length).toBeGreaterThan(0);
+      links.forEach((link) =>
+        expect(link.closest('a')?.getAttribute('href')).toContain(
+          'opentelemetry-collector/blob/v0.155.0/'
+        )
+      );
+    });
+
+    it('should require the endpoint', async () => {
+      const { utils } = renderFlyout();
+      selectOtlpType(utils);
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+        target: { value: 'otlp' },
+      });
+
+      expect(utils.getByTestId('saveApplySettingsBtn')).toBeDisabled();
+    });
+
+    it('should validate durations and buffer sizes', async () => {
+      const { utils } = renderFlyout(otlpOutput);
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpTimeoutInput'), {
+        target: { value: 'ten seconds' },
+      });
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpReadBufferSizeInput'), {
+        target: { value: '-1' },
+      });
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(utils.getByText('Specify a duration such as 500ms, 5s, 1m30s')).toBeInTheDocument();
+        expect(utils.getByText('Specify a whole number of bytes, 0 or more')).toBeInTheDocument();
+      });
+      expect(mockSendPutOutput).not.toHaveBeenCalled();
+    });
+
+    it('should create an OTLP output with the gRPC protocol', async () => {
+      const { utils } = renderFlyout();
+      selectOtlpType(utils);
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+        target: { value: 'my otlp' },
+      });
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpEndpointInput'), {
+        target: { value: ' collector.example.com:4317 ' },
+      });
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpHeaderName0'), {
+        target: { value: 'x-tenant' },
+      });
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpHeaderValue0'), {
+        target: { value: 'acme' },
+      });
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpWriteBufferSizeInput'), {
+        target: { value: '4096' },
+      });
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(mockSendPostOutput).toHaveBeenCalledWith({
+          name: 'my otlp',
+          type: 'otlp',
+          is_default: false,
+          is_default_monitoring: false,
+          otlp_exporter: {
+            protocol: 'grpc',
+            endpoint: 'collector.example.com:4317',
+            compression: 'gzip',
+            timeout: null,
+            headers: { 'x-tenant': 'acme' },
+            balancer_name: null,
+            keepalive: null,
+            read_buffer_size: null,
+            write_buffer_size: 4096,
+            wait_for_ready: false,
+            user_agent: null,
+            authority: null,
+          },
+        });
+      });
+    });
+
+    it('should load the stored settings and send them back on update', async () => {
+      const { utils } = renderFlyout(otlpOutput);
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+        target: { value: 'otlp output updated' },
+      });
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'outputOtlp',
+          expect.objectContaining({
+            name: 'otlp output updated',
+            otlp_exporter: otlpOutput.otlp_exporter,
+          })
+        );
+      });
+    });
+
+    it('should send null for the cleared settings so the stored values are unset', async () => {
+      const { utils } = renderFlyout(otlpOutput);
+      [
+        'otlpTimeoutInput',
+        'otlpBalancerNameInput',
+        'otlpKeepaliveTimeInput',
+        'otlpKeepaliveTimeoutInput',
+        'otlpReadBufferSizeInput',
+        'otlpWriteBufferSizeInput',
+        'otlpUserAgentInput',
+        'otlpAuthorityInput',
+        'otlpHeaderName0',
+        'otlpHeaderValue0',
+      ].forEach((testSubj) => clear(utils, testSubj));
+      fireEvent.click(
+        utils.getByTestId('settingsOutputsFlyout.otlpKeepalivePermitWithoutStreamInput')
+      );
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'outputOtlp',
+          expect.objectContaining({
+            otlp_exporter: {
+              protocol: 'grpc',
+              endpoint: 'collector.example.com:4317',
+              compression: 'zstd',
+              timeout: null,
+              headers: null,
+              balancer_name: null,
+              keepalive: null,
+              read_buffer_size: null,
+              write_buffer_size: null,
+              wait_for_ready: true,
+              user_agent: null,
+              authority: null,
+            },
+          })
+        );
+      });
+    });
+
+    it('should keep the keepalive block while one of its settings is set', async () => {
+      const { utils } = renderFlyout(otlpOutput);
+      clear(utils, 'otlpKeepaliveTimeInput');
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'outputOtlp',
+          expect.objectContaining({
+            otlp_exporter: expect.objectContaining({
+              keepalive: { time: null, timeout: '5s', permit_without_stream: true },
+            }),
+          })
+        );
+      });
+    });
+
+    it('should keep the HTTP protocol of an output created through the API, without gRPC settings', async () => {
+      const { utils } = renderFlyout({
+        ...otlpOutput,
+        otlp_exporter: {
+          protocol: 'http/protobuf',
+          endpoint: 'https://collector.example.com:4318',
+          compression: 'none',
+        },
+      });
+
+      expect(utils.queryByTestId('settingsOutputsFlyout.otlpGrpcSettings')).toBeNull();
+
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+        target: { value: 'http output' },
+      });
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'outputOtlp',
+          expect.objectContaining({
+            otlp_exporter: {
+              protocol: 'http/protobuf',
+              endpoint: 'https://collector.example.com:4318',
+              compression: 'none',
+              timeout: null,
+              headers: null,
+            },
           })
         );
       });
