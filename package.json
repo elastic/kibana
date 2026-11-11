@@ -130,6 +130,7 @@
     "@types/react-dom": "18.2.25",
     "apache-arrow": "20.x - 21.x",
     "globby/fast-glob": "3.3.3",
+    "guarded-fetch/undici": ">=7.29.1 <8.0.0",
     "redux-thunk-v2/redux": "npm:redux@4.2.1"
   },
   "dependencies": {
@@ -1566,7 +1567,7 @@
     "jsonwebtoken": "9.0.2",
     "jsts": "1.6.2",
     "jszip": "3.10.1",
-    "just-bash": "3.4.2",
+    "just-bash": "3.6.0",
     "kea": "2.6.0",
     "langsmith": "0.11.1",
     "liquidjs": "10.28.0",
