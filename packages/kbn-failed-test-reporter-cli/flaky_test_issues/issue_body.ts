@@ -848,20 +848,11 @@ const lastFailedLink = ({
     : day;
 };
 
-const MAX_NAMED_TESTS = 3;
-
-/** `` `a` ``, `` `a` and `b` ``, or `` `a`, `b`, `c` and 2 more ``. */
-const listOfNames = (names: readonly string[]): string => {
-  const shown = names.slice(0, MAX_NAMED_TESTS);
-  const rest = names.length - shown.length;
-  const items = rest > 0 ? [...shown, `${rest} more`] : shown;
-  return items.length === 1
-    ? items[0]
-    : `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`;
-};
-
-/** `Newly flaky: …`, for the flaky tests the issue has not shown, when it records the ones it has. */
-const newlyFlakySentence = (
+/**
+ * `Newly flaky:` and a bullet per flaky test the issue has not shown, as many as the body's tests
+ * table, when it records the ones it has.
+ */
+const newlyFlakyList = (
   suite: FlakySuite,
   previous: RecordedFlakySuiteIssueMetadata | undefined
 ): string | undefined => {
@@ -870,9 +861,16 @@ const newlyFlakySentence = (
     return undefined;
   }
   const newTests = suite.tests.filter(({ testId }) => !shown.includes(testId));
-  return newTests.length > 0
-    ? `Newly flaky: ${listOfNames(newTests.map(({ title }) => inlineCode(title)))}.`
-    : undefined;
+  if (newTests.length === 0) {
+    return undefined;
+  }
+  const rest = newTests.length - MAX_TEST_ROWS;
+  return [
+    'Newly flaky:',
+    '',
+    ...newTests.slice(0, MAX_TEST_ROWS).map(({ title }) => `- ${title}`),
+    ...(rest > 0 ? ['', `and ${plural(rest, 'more test')}.`] : []),
+  ].join('\n');
 };
 
 /** Where the suite is still flaky, with the worst test's numbers on each branch. */
@@ -919,17 +917,14 @@ const whereStillFlaky = (
 /**
  * The comment of a refresh that found new failures: where the suite is flaky and not skipped, with
  * the worst test's numbers and its newest failure on each branch, in one sentence for a single
- * branch and one line per branch otherwise, then the flaky tests the issue has not shown yet. The
- * body keeps the full tables.
+ * branch and one line per branch otherwise, then a bullet per flaky test the issue has not shown
+ * yet. The body keeps the full tables.
  */
 export const renderFlakySuiteIssueComment = (
   suite: FlakySuite,
   context: FlakySuiteIssueCommentContext
 ): string => {
-  const newlyFlaky = newlyFlakySentence(suite, context.previous);
   const where = whereStillFlaky(suite, context);
-  if (!newlyFlaky) {
-    return where;
-  }
-  return where.includes('\n') ? `${where}\n\n${newlyFlaky}` : `${where} ${newlyFlaky}`;
+  const newlyFlaky = newlyFlakyList(suite, context.previous);
+  return newlyFlaky ? `${where}\n\n${newlyFlaky}` : where;
 };

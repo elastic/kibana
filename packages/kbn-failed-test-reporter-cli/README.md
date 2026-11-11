@@ -124,8 +124,8 @@ off.
   (18 / 441), last failed […]", one line per branch when there are several) is posted when the
   suite failed since the last one, or since the issue was filed, and at least
   `--comment-cooldown-days` later (default 3). Failures in between are covered by the next
-  comment. It ends with the flaky tests the issue has not shown yet, in its body or an earlier
-  comment ("Newly flaky: […]"). How to skip the test is at the end of the body.
+  comment. It ends with a "Newly flaky:" list of the flaky tests the issue has not shown yet, in
+  its body or an earlier comment, one bullet each. How to skip the test is at the end of the body.
 - A closed issue is reopened, with a comment, when the suite failed after it was closed. It stays
   closed when it was closed as a duplicate, or when the suite has not failed since: the report
   window can still hold the failures a fix was merged for.

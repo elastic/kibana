@@ -835,8 +835,13 @@ describe('refreshing a suite issue', () => {
         previous: shown(['an-older-test']),
       })
     ).toBe(
-      'Still flaky on `main`: 10% of builds (49 / 509), last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd). ' +
-        'Newly flaky: `creates default alert, triggers on down status, and recovers`.'
+      [
+        'Still flaky on `main`: 10% of builds (49 / 509), last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd).',
+        '',
+        'Newly flaky:',
+        '',
+        '- creates default alert, triggers on down status, and recovers',
+      ].join('\n')
     );
     expect(
       renderFlakySuiteIssueComment(multi.suite, {
@@ -845,8 +850,30 @@ describe('refreshing a suite issue', () => {
         previous: shown(['a']),
       })
     ).toMatch(
-      /\n- `9\.2`: [^\n]+\n\nNewly flaky: `reverts breakdown, interval, and visibility on a saved session` and `persists hide\/show of the histogram on a saved session`\.$/
+      /\n- `9\.2`: [^\n]+\n\nNewly flaky:\n\n- reverts breakdown, interval, and visibility on a saved session\n- persists hide\/show of the histogram on a saved session$/
     );
+  });
+
+  it('lists as many newly flaky tests as the body does, then counts the rest', () => {
+    const { suite, report } = singleTestReport();
+    const [test] = suite.tests;
+    const many = {
+      ...suite,
+      tests: Array.from({ length: 17 }, (_, i) => ({
+        ...test,
+        testId: `t${i}`,
+        title: `test ${i}`,
+      })),
+    };
+
+    const comment = renderFlakySuiteIssueComment(many, {
+      report,
+      reopened: false,
+      previous: { ...previous, 'report.shownTestIds': [] },
+    });
+
+    expect(comment).toContain('\n- test 14\n\nand 2 more tests.');
+    expect(comment).not.toContain('- test 15');
   });
 
   it('names no test when the issue has shown them all, or does not record which it has shown', () => {
