@@ -8,8 +8,6 @@
 import { buildCustomContentConfig } from '@kbn/agent-builder-visualizations-server';
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
-  readEsqlQuery,
-  toEsqlQueryState,
   type CustomContentState,
 } from '@kbn/custom-content-common';
 import {
@@ -17,6 +15,7 @@ import {
   type CustomContentPanelResolutionRequest,
   type PanelContentAttempt,
 } from '@kbn/dashboard-agent-authoring';
+
 import type { VisPanelResolverDeps } from './vis_panel_resolver';
 
 /**
@@ -36,14 +35,14 @@ export const createCustomContentPanelResolver = ({
     const regenerateESQL = request.existingPanel ? request.regenerateESQL : undefined;
     try {
       const existing = existingPanel?.config as CustomContentState | undefined;
-      const { esqlQuery, template } = await buildCustomContentConfig({
+      const { esqlQueries, template } = await buildCustomContentConfig({
         nlQuery,
         index,
         esql,
         hasData,
         regenerateESQL,
         resolveEsqlVariables,
-        existing: existing && { esqlQuery: readEsqlQuery(existing), template: existing.template },
+        existing: existing && { esqlQueries: existing.esql_query, template: existing.template },
         modelProvider,
         logger,
         events,
@@ -53,7 +52,11 @@ export const createCustomContentPanelResolver = ({
         type: 'success',
         panelContent: {
           type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
-          config: { ...existing, esql_query: toEsqlQueryState(esqlQuery), template },
+          config: {
+            ...existing,
+            esql_query: esqlQueries.length ? esqlQueries : undefined,
+            template,
+          },
         },
       };
     } catch (error) {

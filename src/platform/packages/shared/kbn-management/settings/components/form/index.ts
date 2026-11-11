@@ -11,3 +11,9 @@ export { Form } from './form';
 
 export type { FormKibanaDependencies, FormServices } from './types';
 export { FormProvider, FormKibanaProvider } from './services';
+export {
+  BottomBar,
+  DATA_TEST_SUBJ_SAVE_BUTTON,
+  DATA_TEST_SUBJ_CANCEL_BUTTON,
+} from './bottom_bar/bottom_bar';
+export type { BottomBarProps } from './bottom_bar/bottom_bar';

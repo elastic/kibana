@@ -72,6 +72,7 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   VIEW_RULE: 'viewRule',
   VIEW_SIGNAL: 'viewSignal',
   VIEW_SETTINGS: 'viewSettings',
+  VIEW_TOPOLOGY_NODE: 'viewTopologyNode',
   VIEW_SEVERITY_INVESTIGATIONS: 'viewSeverityInvestigations',
   VIEW_SIGNIFICANT_EVENT: 'viewSignificantEvent',
   VIEW_SIGNIFICANT_EVENTS: 'viewSignificantEvents',
@@ -109,6 +110,7 @@ export const NIGHTSHIFT_EBT_ELEMENTS = {
   SIGNIFICANT_EVENTS_LIST: 'nightshiftSignificantEventsList',
   START_INVESTIGATION_PANEL: 'nightshiftStartInvestigationPanel',
   STATUS_SUMMARY: 'nightshiftStatusSummary',
+  TOPOLOGY: 'nightshiftTopology',
 } as const;
 
 export const NIGHTSHIFT_EBT_DETAILS = {
