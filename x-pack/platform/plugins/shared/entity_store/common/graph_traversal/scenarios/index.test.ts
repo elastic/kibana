@@ -31,6 +31,10 @@ describe('entity graph traversal scenarios', () => {
         OKTA_USER_TO_AWS_RESOURCES_SCENARIO_ID,
         AWS_ROLE_BLAST_RADIUS_SCENARIO_ID,
         ENDPOINT_SHARED_INDICATOR_SPREAD_SCENARIO_ID,
+        'okta-user-blast-radius-iag',
+        'ad-account-blast-radius-iag',
+        'domain-admins-reach',
+        'crown-jewel-bucket-reach',
       ])
     );
   });

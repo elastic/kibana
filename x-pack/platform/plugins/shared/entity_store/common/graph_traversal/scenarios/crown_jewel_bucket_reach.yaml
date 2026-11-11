@@ -34,4 +34,5 @@ hops:
       - can_control
       - oidc_trust
       - can_push
+      - holds_its_password
     repeat: 8

@@ -29,6 +29,7 @@ import {
   listEntityGraphTraversalScenarioIds,
   loadEntityGraphTraversalPlan,
   type EntityGraphTraversalExpandedHop,
+  type EntityGraphTraversalLimitOverrides,
 } from '../../../common/graph_traversal/scenarios';
 import { GraphTraversalError } from './graph_traversal_error';
 import { resolveLatestEntityIndex } from './resolve_latest_entity_index';
@@ -53,12 +54,23 @@ export interface RunGraphTraversalParams {
   seedId: string;
   lookback?: string;
   maxHops?: number;
+  /** Limits replacing the scenario's for this run; `maxHops` wins over `limits.max_hops`. */
+  limits?: EntityGraphTraversalLimitOverrides;
   exclusions?: GraphTraversalExclusion[];
   /** Added to the scenario's own stop conditions. */
   until?: GraphTraversalStopCondition[];
   /** Read relationships from the space's edge documents instead of the entity arrays. */
   edgeDocuments?: boolean;
 }
+
+/** The run's limit overrides as one object, or undefined when the run sets none. */
+export const runLimitOverrides = (
+  maxHops: number | undefined,
+  limits: EntityGraphTraversalLimitOverrides | undefined
+): EntityGraphTraversalLimitOverrides | undefined => {
+  const overrides = { ...limits, ...(maxHops !== undefined && { max_hops: maxHops }) };
+  return Object.keys(overrides).length > 0 ? overrides : undefined;
+};
 
 /**
  * Runs a traversal scenario hop by hop, in process: one ES|QL query per relationship field
@@ -82,15 +94,13 @@ export class GraphTraversalClient {
     seedId,
     lookback,
     maxHops,
+    limits,
     exclusions = [],
     until = [],
     edgeDocuments = false,
   }: RunGraphTraversalParams): Promise<RunGraphTraversalResponse> {
     const startedAt = Date.now();
-    const plan = loadEntityGraphTraversalPlan(
-      scenarioId,
-      maxHops !== undefined ? { max_hops: maxHops } : undefined
-    );
+    const plan = loadEntityGraphTraversalPlan(scenarioId, runLimitOverrides(maxHops, limits));
     if (!plan) {
       throw new GraphTraversalError(
         `Unknown entity graph traversal scenario "${scenarioId}". Available: ${listEntityGraphTraversalScenarioIds().join(

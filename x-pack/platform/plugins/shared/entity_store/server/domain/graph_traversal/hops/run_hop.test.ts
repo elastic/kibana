@@ -938,6 +938,27 @@ describe('runHop', () => {
     expect(out.stats.es_took_ms).toBe(0);
   });
 
+  it('sorts the frontier before cutting it to max_frontier so the cut is the same every run', async () => {
+    const execute = executor([result([['a', 'role-b']]), result([])]);
+    const out = await runHop(
+      {
+        hop,
+        index: INDEX,
+        direction: 'out',
+        frontier: ['c', 'a', 'b', 'a'],
+        visited: ['seed'],
+        edgesSoFar: 0,
+        truncatedSoFar: false,
+        limits: { ...limits, max_frontier: 2 },
+      },
+      execute
+    );
+    // The two kept ids are the smallest, whatever order the previous hop produced them in.
+    expect(execute.calls[0].slice(0, 2)).toEqual(['a', 'b']);
+    expect(out.stats).toMatchObject({ frontier_size: 3, frontier_expanded: 2, dropped_frontier: 1 });
+    expect(out.truncated).toBe(true);
+  });
+
   it('does not stop on a closing edge to a node admitted earlier', async () => {
     const execute = executor([result([['role-a', 'role-x']]), result([])]);
     const out = await runHop(

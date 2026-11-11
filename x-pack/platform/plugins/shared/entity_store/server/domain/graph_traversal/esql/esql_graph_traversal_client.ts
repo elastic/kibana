@@ -10,7 +10,10 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   listEntityGraphTraversalScenarioIds,
   loadEntityGraphTraversalPlan,
+  type EntityGraphTraversalLimitOverrides,
+  type EntityGraphTraversalPlan,
 } from '../../../../common/graph_traversal/scenarios';
+import { runLimitOverrides } from '../graph_traversal_client';
 import {
   getEntityEdgesAlias,
   getLatestEntityIndexPattern,
@@ -44,11 +47,16 @@ export interface RunEsqlGraphTraversalParams {
   seedId: string;
   lookback?: string;
   maxHops?: number;
+  /** Limits replacing the scenario's for this run; `maxHops` wins over `limits.max_hops`. */
+  limits?: EntityGraphTraversalLimitOverrides;
   exclusions?: GraphTraversalExclusion[];
   until?: GraphTraversalStopCondition[];
   /** Read relationships from the space's edge documents instead of the entity arrays. */
   edgeDocuments?: boolean;
 }
+
+/** The relationship fields the array-form statement may name: everything under this prefix. */
+const RELATIONSHIP_FIELDS_PATTERN = 'entity.relationships.*';
 
 /**
  * Runs a traversal scenario as one ES|QL `GRAPH EXPAND` statement over the entity store's
@@ -73,16 +81,14 @@ export class EsqlGraphTraversalClient {
     seedId,
     lookback,
     maxHops,
+    limits,
     exclusions,
     until,
     edgeDocuments = false,
   }: RunEsqlGraphTraversalParams): Promise<RunGraphTraversalResponse> {
     const startedAt = Date.now();
-    const plan = loadEntityGraphTraversalPlan(
-      scenarioId,
-      maxHops !== undefined ? { max_hops: maxHops } : undefined
-    );
-    if (!plan) {
+    const loaded = loadEntityGraphTraversalPlan(scenarioId, runLimitOverrides(maxHops, limits));
+    if (!loaded) {
       throw new GraphTraversalError(
         `Unknown entity graph traversal scenario "${scenarioId}". Available: ${listEntityGraphTraversalScenarioIds().join(
           ', '
@@ -93,7 +99,41 @@ export class EsqlGraphTraversalClient {
     const indexPattern = getLatestEntityIndexPattern(this.namespace);
     const resolveStartedAt = performance.now();
     const lookupIndex = await this.resolveLookupIndex();
+    const plan = edgeDocuments ? loaded : await this.dropUnknownFields(loaded, indexPattern);
     const resolveIndexMs = elapsedMs(resolveStartedAt);
+    if (plan.hops.length === 0) {
+      // Nothing of the first hop's kinds exists in the index, so the walk cannot leave the seed.
+      const seedStartedAt = performance.now();
+      const seed = await this.lookupSeed(indexPattern, seedId, plan.seed.type);
+      return {
+        execution_id: ESQL_GRAPH_TRAVERSAL_EXECUTION_ID,
+        engine: 'esql',
+        status: 'completed',
+        output: {
+          scenario_id: plan.id,
+          scenario_name: plan.name,
+          seed_id: seedId,
+          hops_planned: loaded.limits.max_hops,
+          hops_executed: 0,
+          stop_reason: 'frontier_exhausted',
+          truncated: false,
+          node_count: 1,
+          edge_count: 0,
+          nodes: [seed],
+          edges: [],
+          limits: plan.limits,
+          ...(exclusions !== undefined && { exclusions }),
+          until: [...plan.until, ...(until ?? [])],
+        },
+        duration_ms: Date.now() - startedAt,
+        timings: {
+          resolve_index_ms: resolveIndexMs,
+          statement_ms: 0,
+          seed_lookup_ms: elapsedMs(seedStartedAt),
+          map_ms: 0,
+        },
+      };
+    }
     const statement = buildGraphExpandStatement({
       plan,
       indexPattern,
@@ -175,6 +215,64 @@ export class EsqlGraphTraversalClient {
         `entity graph traversal (ES|QL) found no latest entity index in space "${
           this.namespace
         }": ${error instanceof Error ? error.message : String(error)}`
+      );
+      return undefined;
+    }
+  }
+
+  /**
+   * The array-form statement names every relationship field of the plan in `TO (...)`, and the
+   * `GRAPH EXPAND` verifier rejects a field the index has never seen, mapped or not, even under
+   * unmapped-field loading. Fields the index does not know are dropped from the hops, as the hop
+   * engine's one-query-per-field form skips them in effect. A hop left with no field ends the
+   * walk there, since nothing of its kinds exists to follow. When the fields cannot be read the
+   * plan is used as is. The edge-document form filters on kind values and needs none of this.
+   */
+  private async dropUnknownFields(
+    plan: EntityGraphTraversalPlan,
+    indexPattern: string
+  ): Promise<EntityGraphTraversalPlan> {
+    const known = await this.knownRelationshipFields(indexPattern);
+    if (known === undefined) return plan;
+    const hops: EntityGraphTraversalPlan['hops'] = [];
+    const dropped = new Set<string>();
+    for (const hop of plan.hops) {
+      const targetFields = hop.target_fields.filter(({ field }) => {
+        if (known.has(field)) return true;
+        dropped.add(field);
+        return false;
+      });
+      if (targetFields.length === 0) break;
+      hops.push({ ...hop, target_fields: targetFields });
+    }
+    if (dropped.size === 0) return plan;
+    this.logger.debug(
+      `entity graph traversal (ES|QL) scenario "${plan.id}": the index ${indexPattern} has no ${Array.from(
+        dropped
+      ).join(', ')}; ${hops.length} of ${plan.hops.length} hops keep a field`
+    );
+    return {
+      ...plan,
+      hops,
+      limits: { ...plan.limits, max_hops: Math.min(plan.limits.max_hops, hops.length) },
+    };
+  }
+
+  /** The relationship fields the index knows, or undefined when they cannot be read. */
+  private async knownRelationshipFields(indexPattern: string): Promise<Set<string> | undefined> {
+    try {
+      const response = await this.esClient.fieldCaps({
+        index: indexPattern,
+        fields: RELATIONSHIP_FIELDS_PATTERN,
+        allow_no_indices: true,
+        ignore_unavailable: true,
+      });
+      return new Set(Object.keys(response.fields ?? {}));
+    } catch (error) {
+      this.logger.debug(
+        `entity graph traversal (ES|QL) could not read the relationship fields of ${indexPattern}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
       );
       return undefined;
     }

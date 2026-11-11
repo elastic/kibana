@@ -52,12 +52,26 @@ describe('buildGraphExpandStatement', () => {
           '| RENAME node_reached AS `entity.id`',
           `| LOOKUP JOIN ${LOOKUP} ON \`entity.id\``,
           '| KEEP node_from, node_to, hop, relation, dropped, __count, `entity.id`, `entity.name`, `entity.type`, `entity.sub_type`, `entity.EngineMetadata.Type`, `entity.source`, `asset.criticality`, `entity.risk.calculated_level`, `entity.risk.calculated_score_norm`, `entity.relationships.resolution.resolved_to`',
+          '| LIMIT 2000',
         ].join('\n')
       );
       expect(statement.params).toEqual(['user:john.doe@acmecrm.com@okta']);
       // No payload is aggregated: the reached node's document comes from the join.
       expect(statement.payloadFields).toEqual([]);
       expect(statement.maxHops).toBe(7);
+    });
+
+    it('limits the rows to the total-edge limit so the default row limit cannot cut the walk', () => {
+      expect(statement.rowLimit).toBe(2000);
+      const wider = buildGraphExpandStatement({
+        plan: loadEntityGraphTraversalPlan('okta-user-to-aws-resources', {
+          max_edges_total: 4500,
+        })!,
+        indexPattern: INDEX,
+        seedId: 'seed',
+      });
+      expect(wider.rowLimit).toBe(4500);
+      expect(wider.query.split('\n').at(-1)).toBe('| LIMIT 4500');
     });
 
     it('reads the reached node off the joined entity.id column', () => {
@@ -169,6 +183,7 @@ describe('buildGraphExpandStatement', () => {
       );
       expect(statement.query).not.toContain('hop_fields');
       expect(statement.query).toContain('| KEEP node_from, node_to, hop, relation, dropped');
+      expect(statement.query.split('\n').at(-1)).toBe('| LIMIT 2000');
     });
 
     it('maps a relation value to itself', () => {

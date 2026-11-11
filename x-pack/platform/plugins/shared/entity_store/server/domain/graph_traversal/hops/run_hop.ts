@@ -376,8 +376,13 @@ export const runHop = async (
     return finish([], []);
   }
 
-  // 1. Frontier cap
-  const frontier = uniqueFrontier.slice(0, limits.max_frontier);
+  // 1. Frontier cap. When it binds, the ids are sorted first so the cap keeps the same subset
+  //    whatever order the previous hop's rows arrived in: a STATS result has no order, so an
+  //    unsorted cut varied between runs and between the array and edge-document queries, and
+  //    the two storages then walked on from different nodes.
+  const frontier = (
+    uniqueFrontier.length > limits.max_frontier ? [...uniqueFrontier].sort() : uniqueFrontier
+  ).slice(0, limits.max_frontier);
   stats.dropped_frontier = uniqueFrontier.length - frontier.length;
   if (stats.dropped_frontier > 0) truncated = true;
   stats.frontier_expanded = frontier.length;

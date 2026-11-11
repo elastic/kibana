@@ -192,7 +192,9 @@ export const mapGraphExpandResult = (
     }
   }
 
-  const truncated = hubs.length > 0;
+  // A result that fills the statement's LIMIT was cut by it: the walk may have gone further.
+  const rowsCut = result.values.length >= statement.rowLimit;
+  const truncated = hubs.length > 0 || rowsCut;
   // UNTIL ends the walk on the hop that admits a matching node; the mapper reads that off the
   // admitted nodes rather than trusting the hop count.
   const wanted = new Set(statement.untilIds);
@@ -200,6 +202,8 @@ export const mapGraphExpandResult = (
   const stopReason =
     untilMatches.length > 0
       ? 'until_matched'
+      : rowsCut
+      ? 'max_edges_total'
       : hopsExecuted >= statement.maxHops
       ? 'max_hops'
       : 'frontier_exhausted';

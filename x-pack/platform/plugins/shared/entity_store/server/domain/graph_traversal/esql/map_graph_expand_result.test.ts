@@ -213,6 +213,32 @@ describe('mapGraphExpandResult', () => {
     expect(output.edges).toHaveLength(1);
   });
 
+  it('reports a result that fills the row limit as cut by max_edges_total', () => {
+    const narrow = loadEntityGraphTraversalPlan('endpoint-shared-indicator-spread', {
+      max_edges_total: 2,
+    });
+    if (!narrow) throw new Error('scenario missing');
+    const cut = buildGraphExpandStatement({
+      plan: narrow,
+      indexPattern: INDEX,
+      lookupIndex: LOOKUP,
+      seedId: seed.id,
+    });
+    expect(cut.rowLimit).toBe(2);
+    const rows = [
+      row(seed.id, HASH, HASH, 1, EXECUTED, { name: HASH, type: 'Indicator', engine: 'generic' }),
+      row(seed.id, '185.220.101.42', '185.220.101.42', 1, CONNECTED),
+    ];
+    const full = mapGraphExpandResult(result(rows), cut, narrow, seed);
+    expect(full.output).toMatchObject({
+      truncated: true,
+      stop_reason: 'max_edges_total',
+      edge_count: 2,
+    });
+    const partial = mapGraphExpandResult(result(rows.slice(0, 1)), cut, narrow, seed);
+    expect(partial.output).toMatchObject({ truncated: false, stop_reason: 'frontier_exhausted' });
+  });
+
   it('drops edges that touch an excluded node and never admits it', () => {
     const excluding = buildGraphExpandStatement({
       plan,

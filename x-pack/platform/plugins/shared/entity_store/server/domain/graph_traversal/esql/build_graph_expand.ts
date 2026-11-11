@@ -74,6 +74,12 @@ export interface GraphExpandStatement {
   /** Node ids the walk stops at (the scenario's and the run's stop conditions). */
   untilIds: string[];
   maxHops: number;
+  /**
+   * Rows the statement returns at most: the walk's `max_edges_total`. Without an explicit
+   * `LIMIT` Elasticsearch cuts the result at its own default (1,000 rows) and says nothing,
+   * so a result that fills this limit was cut and the run is reported truncated.
+   */
+  rowLimit: number;
   /** The column holding the reached node id: `entity.id` once joined, else `node_reached`. */
   reachedColumn: string;
   /** Whether the rows carry the reached node's entity document (`LOOKUP JOIN`). */
@@ -271,6 +277,8 @@ export const buildGraphExpandStatement = ({
       `| KEEP ${kept.join(', ')}`
     );
   }
+  // One row per admitted edge (plus hub stubs), so the total-edge limit bounds the result.
+  lines.push(`| LIMIT ${limits.max_edges_total}`);
 
   return {
     query: lines.join('\n'),
@@ -281,6 +289,7 @@ export const buildGraphExpandStatement = ({
     excludedIds,
     untilIds,
     maxHops: limits.max_hops,
+    rowLimit: limits.max_edges_total,
     reachedColumn: lookupIndex !== undefined ? NODE_ID_EXCLUSION_FIELD : NODE_REACHED_COLUMN,
     enriched: lookupIndex !== undefined,
     edgeDocuments,

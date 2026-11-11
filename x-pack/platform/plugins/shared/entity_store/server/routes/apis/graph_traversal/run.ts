@@ -19,9 +19,26 @@ import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import { enforceEntityStorePrivileges } from '../utils/check_entity_store_privileges';
 import { GraphTraversalError } from '../../../domain/graph_traversal';
+import { ENTITY_GRAPH_TRAVERSAL_HARD_LIMITS } from '../../../../common/graph_traversal/scenarios';
 
 /** The traversal runs inside the request; a walk at the hard limits can take a while. */
 const RUN_GRAPH_TRAVERSAL_SOCKET_TIMEOUT_MS = 5 * 60 * 1000;
+
+const limitOverride = (key: keyof typeof ENTITY_GRAPH_TRAVERSAL_HARD_LIMITS) =>
+  z.number().int().min(1).max(ENTITY_GRAPH_TRAVERSAL_HARD_LIMITS[key]).optional();
+
+/**
+ * Per-run limit overrides, each bounded by the hard limit the scenario schema enforces. They
+ * replace the scenario's own values for the run; `max_hops` keeps its top-level field.
+ */
+const limitOverridesSchema = () =>
+  z.object({
+    max_nodes: limitOverride('max_nodes'),
+    max_frontier: limitOverride('max_frontier'),
+    max_edges_per_hop: limitOverride('max_edges_per_hop'),
+    max_edges_total: limitOverride('max_edges_total'),
+    hub_degree: limitOverride('hub_degree'),
+  });
 
 const fieldValuesSchema = () =>
   z.object({
@@ -46,7 +63,9 @@ export const runGraphTraversalBodySchema = lazySchema(() =>
       .string()
       .regex(/^[0-9]{1,5}(m|h|d)$/)
       .optional(),
-    max_hops: z.number().int().min(1).max(20).optional(),
+    max_hops: z.number().int().min(1).max(ENTITY_GRAPH_TRAVERSAL_HARD_LIMITS.max_hops).optional(),
+    /** Node, frontier, edge and hub limits for this run, each capped at the hard limit. */
+    limits: limitOverridesSchema().optional(),
     exclusions: z.array(fieldValuesSchema()).max(50).optional(),
     /** Stop once a node matching one of these is reached; added to the scenario's own. */
     until: z.array(fieldValuesSchema()).max(50).optional(),
@@ -97,6 +116,7 @@ export function registerRunGraphTraversal(router: EntityStorePluginRouter) {
           scenario_id: scenarioId,
           lookback,
           max_hops: maxHops,
+          limits,
           exclusions,
           until,
           esql,
@@ -111,6 +131,7 @@ export function registerRunGraphTraversal(router: EntityStorePluginRouter) {
               seedId: entityId,
               lookback,
               maxHops,
+              limits,
               exclusions,
               until,
               edgeDocuments,
@@ -122,6 +143,7 @@ export function registerRunGraphTraversal(router: EntityStorePluginRouter) {
             seedId: entityId,
             lookback,
             maxHops,
+            limits,
             exclusions,
             until,
             edgeDocuments,

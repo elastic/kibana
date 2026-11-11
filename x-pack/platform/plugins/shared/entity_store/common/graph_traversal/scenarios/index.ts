@@ -10,6 +10,7 @@ import AWS_ROLE_BLAST_RADIUS_YAML from './aws_role_blast_radius.yaml';
 import ENDPOINT_SHARED_INDICATOR_SPREAD_YAML from './endpoint_shared_indicator_spread.yaml';
 import OKTA_USER_TO_AWS_RESOURCES_YAML from './okta_user_to_aws_resources.yaml';
 import OKTA_USER_BLAST_RADIUS_IAG_YAML from './okta_user_blast_radius_iag.yaml';
+import AD_ACCOUNT_BLAST_RADIUS_IAG_YAML from './ad_account_blast_radius_iag.yaml';
 import DOMAIN_ADMINS_REACH_YAML from './domain_admins_reach.yaml';
 import CROWN_JEWEL_BUCKET_REACH_YAML from './crown_jewel_bucket_reach.yaml';
 import {
@@ -66,6 +67,7 @@ export const AWS_ROLE_BLAST_RADIUS_SCENARIO_ID = 'aws-role-blast-radius';
 export const ENDPOINT_SHARED_INDICATOR_SPREAD_SCENARIO_ID = 'endpoint-shared-indicator-spread';
 /** Scenarios over the relationships the identity access graph generator writes. */
 export const OKTA_USER_BLAST_RADIUS_IAG_SCENARIO_ID = 'okta-user-blast-radius-iag';
+export const AD_ACCOUNT_BLAST_RADIUS_IAG_SCENARIO_ID = 'ad-account-blast-radius-iag';
 export const DOMAIN_ADMINS_REACH_SCENARIO_ID = 'domain-admins-reach';
 export const CROWN_JEWEL_BUCKET_REACH_SCENARIO_ID = 'crown-jewel-bucket-reach';
 
@@ -74,6 +76,7 @@ export const entityGraphTraversalScenarioDefinitions = [
   { id: AWS_ROLE_BLAST_RADIUS_SCENARIO_ID, yaml: AWS_ROLE_BLAST_RADIUS_YAML },
   { id: ENDPOINT_SHARED_INDICATOR_SPREAD_SCENARIO_ID, yaml: ENDPOINT_SHARED_INDICATOR_SPREAD_YAML },
   { id: OKTA_USER_BLAST_RADIUS_IAG_SCENARIO_ID, yaml: OKTA_USER_BLAST_RADIUS_IAG_YAML },
+  { id: AD_ACCOUNT_BLAST_RADIUS_IAG_SCENARIO_ID, yaml: AD_ACCOUNT_BLAST_RADIUS_IAG_YAML },
   { id: DOMAIN_ADMINS_REACH_SCENARIO_ID, yaml: DOMAIN_ADMINS_REACH_YAML },
   { id: CROWN_JEWEL_BUCKET_REACH_SCENARIO_ID, yaml: CROWN_JEWEL_BUCKET_REACH_YAML },
 ] as const satisfies readonly EntityGraphTraversalScenarioDefinition[];
