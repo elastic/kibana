@@ -5581,6 +5581,9 @@ importers:
       '@kbn/evals-suite-automatic-import':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-evals-suite-automatic-import
+      '@kbn/evals-suite-detection-watch-rule-coverage':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-coverage
       '@kbn/evals-suite-detection-watch-rule-creation':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation
@@ -9827,6 +9830,8 @@ importers:
   x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp: {}
+
+  x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-coverage: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation: {}
 

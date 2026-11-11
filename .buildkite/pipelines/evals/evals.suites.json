@@ -504,6 +504,20 @@
       "serverConfigSet": "evals_detection_watch_rule_creation"
     },
     {
+      "id": "detection-watch-rule-coverage",
+      "name": "Detection Watch Rule Coverage",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-coverage/playwright.config.ts",
+      "tags": [
+        "security",
+        "detection-engineering"
+      ],
+      "ciLabels": [
+        "evals:detection-watch-rule-coverage"
+      ],
+      "serverConfigSet": "evals_detection_watch_rule_creation"
+    },
+    {
       "id": "hunt-watch",
       "name": "Hunt Watch Worker",
       "slackChannel": "#security-generative-ai-evals",

@@ -1397,6 +1397,8 @@
       "@kbn/evals-suite-attack-discovery-fp-tp/*": ["./x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp/*"],
       "@kbn/evals-suite-automatic-import": ["./x-pack/platform/packages/shared/kbn-evals-suite-automatic-import"],
       "@kbn/evals-suite-automatic-import/*": ["./x-pack/platform/packages/shared/kbn-evals-suite-automatic-import/*"],
+      "@kbn/evals-suite-detection-watch-rule-coverage": ["./x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-coverage"],
+      "@kbn/evals-suite-detection-watch-rule-coverage/*": ["./x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-coverage/*"],
       "@kbn/evals-suite-detection-watch-rule-creation": ["./x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation"],
       "@kbn/evals-suite-detection-watch-rule-creation/*": ["./x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation/*"],
       "@kbn/evals-suite-endpoint": ["./x-pack/solutions/security/packages/kbn-evals-suite-endpoint"],
