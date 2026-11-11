@@ -323,7 +323,7 @@ describe('createVisualizationTool handler', () => {
       mode: 'relative',
     });
     mockBuildCustomContent.mockResolvedValue({
-      esqlQuery: 'FROM logs | STATS count() BY host',
+      esqlQueries: ['FROM logs | STATS count() BY host'],
       template: '<div>{{ row["host"].value }}</div>',
       height: 420,
     });
@@ -800,7 +800,11 @@ describe('createVisualizationTool handler', () => {
     });
 
     it('persists a panel without data with no esql when the builder returns no query', async () => {
-      mockBuildCustomContent.mockResolvedValue({ template: '<div>banner</div>', height: 200 });
+      mockBuildCustomContent.mockResolvedValue({
+        esqlQueries: [],
+        template: '<div>banner</div>',
+        height: 200,
+      });
 
       const { result, attachments } = await runHandler({
         query: 'a banner',
@@ -840,7 +844,7 @@ describe('createVisualizationTool handler', () => {
           hasData: undefined,
           regenerateESQL: undefined,
           existing: {
-            esqlQuery: 'FROM logs | STATS count() BY host',
+            esqlQueries: ['FROM logs | STATS count() BY host'],
             template: '<div>old</div>',
           },
         })
@@ -862,7 +866,7 @@ describe('createVisualizationTool handler', () => {
       expect(mockBuildCustomContent).toHaveBeenCalledWith(
         expect.objectContaining({
           hasData: true,
-          existing: { esqlQuery: undefined, template: '<div>old</div>' },
+          existing: { esqlQueries: [], template: '<div>old</div>' },
         })
       );
     });
@@ -894,7 +898,11 @@ describe('createVisualizationTool handler', () => {
     });
 
     it('persists the query the builder returns on an update, and drops it when there is none', async () => {
-      mockBuildCustomContent.mockResolvedValue({ template: '<div>static</div>', height: 200 });
+      mockBuildCustomContent.mockResolvedValue({
+        esqlQueries: [],
+        template: '<div>static</div>',
+        height: 200,
+      });
       const attachments = storedAttachment();
 
       const { result } = await runHandler(

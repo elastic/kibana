@@ -163,8 +163,6 @@ module.exports = {
         'no-duplicate-imports': 'off',
         // rely on typescript
         'no-undef': 'off',
-        'react/display-name': 'error',
-        'react/jsx-no-literals': 'error',
       },
       overrides: [
         {
@@ -185,6 +183,8 @@ module.exports = {
     {
       files: ['x-pack/platform/plugins/shared/cases/public/**/*.{js,mjs,ts,tsx}'],
       excludedFiles: ['x-pack/platform/plugins/shared/cases/**/*.{test,mock,test_helper}.{ts,tsx}'],
+      // Stays in ESLint: with `ignoreTranspilerName`, oxlint's `react/display-name` also flags
+      // `React.memo(Component)` when `Component` already sets `displayName`.
       rules: {
         'react/display-name': ['error', { ignoreTranspilerName: true }],
       },
@@ -213,10 +213,6 @@ module.exports = {
       env: {
         jest: true,
       },
-      rules: {
-        'react/display-name': 'error',
-        'react/jsx-no-literals': 'error',
-      },
     },
     {
       files: [
@@ -244,11 +240,8 @@ module.exports = {
     },
     {
       files: ['x-pack/solutions/security/plugins/lists/public/**/!(*.test).{js,mjs,ts,tsx}'],
+      // `react-perf/*` rules run in oxlint (.oxlint/team_overrides.mts); registered for `eslint-disable` directives.
       plugins: ['react-perf'],
-      rules: {
-        'react-perf/jsx-no-new-object-as-prop': 'error',
-        'react-perf/jsx-no-new-array-as-prop': 'error',
-      },
     },
     {
       // typescript and javascript for front and back
@@ -345,23 +338,13 @@ module.exports = {
      * Osquery overrides
      */
     {
-      files: ['x-pack/platform/plugins/shared/osquery/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        // Rules from `eslint:recommended` and `plugin:react/recommended` that don't run in oxlint.
-        'react/display-name': 'error',
-      },
-    },
-    {
       files: ['x-pack/platform/plugins/shared/osquery/**/*.{ts,tsx}'],
     },
     {
       // typescript and javascript for front end react performance
       files: ['x-pack/platform/plugins/shared/osquery/public/**/!(*.test).{js,mjs,ts,tsx}'],
+      // `react-perf/*` rules run in oxlint (.oxlint/team_overrides.mts); registered for `eslint-disable` directives.
       plugins: ['react', 'react-perf'],
-      rules: {
-        'react-perf/jsx-no-new-object-as-prop': 'error',
-        'react-perf/jsx-no-new-array-as-prop': 'error',
-      },
     },
 
     /**
@@ -411,8 +394,6 @@ module.exports = {
         'no-duplicate-imports': 'off',
         // rely on typescript
         'no-undef': 'off',
-        'react/display-name': 'error',
-        'react/jsx-no-literals': 'error',
       },
     },
     /**
