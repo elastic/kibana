@@ -63,6 +63,7 @@ describe('ui settings global client', () => {
       overrides,
       log: logger,
       namespace: '__global__',
+      cacheScope: '',
     });
 
     return {

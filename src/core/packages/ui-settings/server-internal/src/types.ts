@@ -47,7 +47,7 @@ export interface UiSettingsServiceOptions {
   /**
    * Credential scope. Cached reads and in-flight dedupe are shared only with
    * other clients in the same namespace and scope. `null` skips the shared
-   * cache. Omit only in tests.
+   * cache.
    */
-  cacheScope?: string | null;
+  cacheScope: string | null;
 }

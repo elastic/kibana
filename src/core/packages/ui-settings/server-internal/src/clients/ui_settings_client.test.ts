@@ -52,6 +52,7 @@ describe('ui settings', () => {
       overrides,
       log: logger,
       namespace,
+      cacheScope: '',
     });
 
     return {
@@ -869,7 +870,7 @@ describe('ui settings', () => {
         esDocSource = {},
         namespace = 'default',
         sharedCache,
-        cacheScope,
+        cacheScope = '',
       } = options;
       const sharedUserProvidedCache = sharedCache || new NamespacedCache<Record<string, any>>();
 
@@ -1142,6 +1143,7 @@ describe('ui settings', () => {
           overrides: {},
           log: logger,
           namespace: 'default',
+          cacheScope: '',
           sharedUserProvidedCache: sharedCache,
         });
 
@@ -1278,6 +1280,7 @@ describe('ui settings', () => {
           overrides: {},
           log: logger,
           namespace: 'default',
+          cacheScope: '',
         });
 
         await uiSettings.getUserProvided();
@@ -1303,6 +1306,7 @@ describe('ui settings', () => {
           overrides: {},
           log: logger,
           namespace: 'default',
+          cacheScope: '',
         });
 
         const client2 = new UiSettingsClient({
@@ -1314,6 +1318,7 @@ describe('ui settings', () => {
           overrides: {},
           log: logger,
           namespace: 'default',
+          cacheScope: '',
         });
 
         await client1.getUserProvided();
@@ -1344,6 +1349,7 @@ describe('ui settings', () => {
           overrides: {},
           log: logger,
           namespace: 'default',
+          cacheScope: '',
           sharedUserProvidedCache: sharedCache,
         });
 
@@ -1389,6 +1395,7 @@ describe('ui settings', () => {
           overrides: {},
           log: logger,
           namespace: 'default',
+          cacheScope: '',
           sharedUserProvidedCache: sharedCache,
         });
 

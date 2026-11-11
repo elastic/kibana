@@ -7,22 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License, v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import { createHash } from 'node:crypto';
 
 import type { IConfigService } from '@kbn/config';
 import type { KibanaRequest } from '@kbn/core-http-server';
 
 const SECURITY_CONFIG_PATH = ['xpack', 'security'];
-const MISSING_SECURITY_SCHEMA = 'No validation schema has been defined for [xpack.security]';
+const MISSING_CONFIG_SCHEMA_PREFIX = 'No validation schema has been defined';
 
 /**
  * Session cookie name from the security plugin config, including its default.
@@ -30,11 +21,11 @@ const MISSING_SECURITY_SCHEMA = 'No validation schema has been defined for [xpac
  */
 export function readSessionCookieName(configService: IConfigService): string | undefined {
   try {
-    const securityConfig = configService.atPathSync<{ cookieName?: string }>(SECURITY_CONFIG_PATH);
-    const cookieName = securityConfig.cookieName?.trim();
-    return cookieName ? cookieName : undefined;
+    const { cookieName } = configService.atPathSync<{ cookieName?: string }>(SECURITY_CONFIG_PATH);
+    const trimmed = cookieName?.trim();
+    return trimmed ? trimmed : undefined;
   } catch (error) {
-    if (error instanceof Error && error.message === MISSING_SECURITY_SCHEMA) {
+    if (error instanceof Error && error.message.startsWith(MISSING_CONFIG_SCHEMA_PREFIX)) {
       return undefined;
     }
     throw error;

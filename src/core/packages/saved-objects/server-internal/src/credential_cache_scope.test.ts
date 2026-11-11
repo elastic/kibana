@@ -7,15 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License, v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type { IConfigService } from '@kbn/config';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { credentialCacheScope, readSessionCookieName } from './credential_cache_scope';
@@ -106,6 +97,13 @@ describe('readSessionCookieName', () => {
   it('returns undefined when the security schema is not registered', () => {
     const atPathSync = jest.fn().mockImplementation(() => {
       throw new Error('No validation schema has been defined for [xpack.security]');
+    });
+    expect(readSessionCookieName(configService(atPathSync))).toBeUndefined();
+  });
+
+  it('returns undefined when the missing-schema message names a different path', () => {
+    const atPathSync = jest.fn().mockImplementation(() => {
+      throw new Error('No validation schema has been defined for [other.path]');
     });
     expect(readSessionCookieName(configService(atPathSync))).toBeUndefined();
   });

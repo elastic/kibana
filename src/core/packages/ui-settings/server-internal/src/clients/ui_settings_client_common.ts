@@ -54,9 +54,7 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     this.savedObjectsClient = savedObjectsClient;
     this.sharedUserProvidedCache = sharedUserProvidedCache;
     this.namespace = namespace;
-    // Tests construct clients without a scope and expect them to share. Production
-    // passes the credential scope, or null when the request must not be cached.
-    this.cacheScope = cacheScope === undefined ? '' : cacheScope;
+    this.cacheScope = cacheScope;
   }
 
   /** Shared cache for this credential. Absent when the request must not be cached. */
