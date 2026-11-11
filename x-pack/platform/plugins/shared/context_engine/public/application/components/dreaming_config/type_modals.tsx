@@ -17,7 +17,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiSelect,
   EuiTextArea,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -28,7 +27,6 @@ import {
   RESERVED_ENTITY_ATTRIBUTE_KEYS,
   type DreamingEntityType,
   type DreamingFactType,
-  type DreamingRelationshipType,
 } from '../../../../common/dreaming';
 
 /** Lowercase, with spaces and dashes as underscores, as names are typed. */
@@ -323,89 +321,6 @@ export const EntityTypeModal = ({ initial, taken, onSave, onClose }: EntityTypeM
               data-test-subj="contextDreamingEntityTypeModalAttributes"
             />
           </EuiFormRow>
-        </>
-      )}
-    </TypeModal>
-  );
-};
-
-interface RelationshipTypeModalProps {
-  initial?: DreamingRelationshipType;
-  taken: readonly string[];
-  /** The entity types a relationship can connect. */
-  entityTypes: readonly string[];
-  onSave: (relationshipType: DreamingRelationshipType) => void;
-  onClose: () => void;
-}
-
-export const RelationshipTypeModal = ({
-  initial,
-  taken,
-  entityTypes,
-  onSave,
-  onClose,
-}: RelationshipTypeModalProps) => {
-  const [name, setName] = useState(initial?.type ?? '');
-  const [source, setSource] = useState(initial?.source ?? entityTypes[0] ?? '');
-  const [target, setTarget] = useState(initial?.target ?? entityTypes[0] ?? '');
-  const [description, setDescription] = useState(initial?.description ?? '');
-  const error = nameError(name, taken);
-  const options = entityTypes.map((type) => ({ value: type, text: type }));
-  return (
-    <TypeModal
-      title={
-        initial
-          ? i18n.translate('xpack.contextEngine.dreamingConfig.relationshipModal.editTitle', {
-              defaultMessage: 'Edit relationship type',
-            })
-          : i18n.translate('xpack.contextEngine.dreamingConfig.relationshipModal.addTitle', {
-              defaultMessage: 'Add a relationship type',
-            })
-      }
-      isValid={error === undefined && source !== '' && target !== ''}
-      onSave={() => onSave(withDescription({ type: name, source, target }, description))}
-      onClose={onClose}
-      data-test-subj="contextDreamingRelationshipTypeModal"
-    >
-      {(showErrors) => (
-        <>
-          <NameField value={name} error={error} showErrors={showErrors} onChange={setName} />
-          <EuiFormRow
-            fullWidth
-            label={i18n.translate('xpack.contextEngine.dreamingConfig.relationshipModal.from', {
-              defaultMessage: 'From',
-            })}
-          >
-            <EuiSelect
-              fullWidth
-              options={options}
-              value={source}
-              onChange={(event) => setSource(event.target.value)}
-              data-test-subj="contextDreamingRelationshipTypeModalSource"
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            fullWidth
-            label={i18n.translate('xpack.contextEngine.dreamingConfig.relationshipModal.to', {
-              defaultMessage: 'To',
-            })}
-          >
-            <EuiSelect
-              fullWidth
-              options={options}
-              value={target}
-              onChange={(event) => setTarget(event.target.value)}
-              data-test-subj="contextDreamingRelationshipTypeModalTarget"
-            />
-          </EuiFormRow>
-          <DescriptionField
-            value={description}
-            onChange={setDescription}
-            helpText={i18n.translate(
-              'xpack.contextEngine.dreamingConfig.relationshipModal.descriptionHelp',
-              { defaultMessage: 'When one entity is linked to the other this way.' }
-            )}
-          />
         </>
       )}
     </TypeModal>

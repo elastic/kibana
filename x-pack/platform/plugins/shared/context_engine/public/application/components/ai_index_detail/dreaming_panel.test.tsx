@@ -26,7 +26,6 @@ const saveConfig = jest.fn();
 
 const SUPPORT_ENTITIES = {
   nodes: [{ type: 'issue' }, { type: 'product_area' }],
-  edges: [{ type: 'affects', source: 'issue', target: 'product_area' }],
 };
 
 const factsOnly: AiIndexDreamingConfig = {

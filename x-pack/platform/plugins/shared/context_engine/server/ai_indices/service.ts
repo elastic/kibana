@@ -34,17 +34,31 @@ import {
   AiIndexIdConflictError,
   AiIndexAlreadyExistsError,
 } from './errors';
-import type { AiIndexDocument, AiIndexStorageClient, StoredAiIndexDocument } from './storage';
+import type {
+  AiIndexDocument,
+  AiIndexStorageClient,
+  StoredAiIndexDocument,
+  StoredDreamingConfig,
+} from './storage';
 import { buildManagedAiIndexDocId, createAiIndexStorageClient } from './storage';
 import { buildTraceQueries } from './trace_queries';
 import { createAiIndexIdentityDslFilter } from '../utils/ai_index_identity_filter';
 
+const withoutLegacyEdges = (dreaming: StoredDreamingConfig): AiIndexDreamingConfig => {
+  if (!dreaming.entities || !('edges' in dreaming.entities)) {
+    return dreaming;
+  }
+  const { edges: _legacyEdges, ...entities } = dreaming.entities;
+  return { ...dreaming, entities };
+};
+
 /** Resolves the identity a pre-upgrade document carries implicitly, in its `_id` and its absence of a space. */
 const toAiIndexDocument = (
-  { memory_enabled: _legacyMemoryEnabled, ...source }: StoredAiIndexDocument,
+  { memory_enabled: _legacyMemoryEnabled, dreaming, ...source }: StoredAiIndexDocument,
   docId: string
 ): AiIndexDocument => ({
   ...source,
+  ...(dreaming !== undefined && { dreaming: withoutLegacyEdges(dreaming) }),
   id: source.id ?? docId,
   space: source.space ?? DEFAULT_SPACE_ID,
 });

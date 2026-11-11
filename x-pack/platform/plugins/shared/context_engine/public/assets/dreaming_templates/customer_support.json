@@ -58,32 +58,6 @@
             "price"
           ]
         }
-      ],
-      "edges": [
-        {
-          "type": "affects",
-          "source": "issue",
-          "target": "product_area",
-          "description": "The issue happens in this part of the product."
-        },
-        {
-          "type": "occurs_on",
-          "source": "issue",
-          "target": "platform",
-          "description": "The issue happens only on this platform or version."
-        },
-        {
-          "type": "duplicate_of",
-          "source": "issue",
-          "target": "issue",
-          "description": "The issue is the same as another, earlier one."
-        },
-        {
-          "type": "includes",
-          "source": "plan",
-          "target": "product_area",
-          "description": "The plan gives access to this part of the product."
-        }
       ]
     }
   }

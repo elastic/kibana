@@ -59,7 +59,7 @@ describe('access patterns', () => {
         op: 'upsert_entity',
         id: 'entity-person-bob',
         type: 'person',
-        name: 'Bob',
+        title: 'Bob',
         attributes: {},
         accessPatterns: [pattern('FROM bad')],
         sourceMemoryIds: ['m-1'],

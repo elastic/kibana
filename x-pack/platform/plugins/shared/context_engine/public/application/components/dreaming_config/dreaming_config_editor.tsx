@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonIcon,
   EuiCode,
@@ -28,30 +27,29 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import type {
-  AiIndexDreamingConfig,
   DreamingEntities,
   DreamingEntityType,
   DreamingFactType,
-  DreamingRelationshipType,
+  DreamingTypesConfig,
 } from '../../../../common/dreaming';
 import { Eyebrow } from '../dreaming_template/eyebrow';
-import { EntityTypeModal, FactTypeModal, RelationshipTypeModal } from './type_modals';
+import { EntityTypeModal, FactTypeModal } from './type_modals';
 
-/** The fact, entity and relationship types being edited, before they are saved. */
+/** The fact and entity types being edited, before they are saved. */
 export interface DreamingConfigDraft {
   facts: DreamingFactType[];
   /** Kept while entities are off, so turning them back on restores them. */
-  entities: { nodes: DreamingEntityType[]; edges: DreamingRelationshipType[] };
+  entities: { nodes: DreamingEntityType[] };
   entitiesEnabled: boolean;
 }
 
 /** A draft of a saved or proposed config. Entities are on when it has entity types. */
 export const draftOf = (
-  { facts, entities }: Pick<AiIndexDreamingConfig, 'facts' | 'entities'>,
+  { facts, entities }: DreamingTypesConfig,
   { entitiesEnabled }: { entitiesEnabled?: boolean } = {}
 ): DreamingConfigDraft => ({
   facts: facts ?? [],
-  entities: { nodes: entities?.nodes ?? [], edges: entities?.edges ?? [] },
+  entities: { nodes: entities?.nodes ?? [] },
   entitiesEnabled: entitiesEnabled ?? (entities?.nodes ?? []).length > 0,
 });
 
@@ -97,8 +95,6 @@ const deleteLabel = (type: string) =>
 interface TypeCardProps {
   type: string;
   description?: string;
-  /** Shown under the name, such as `issue → product_area` for a relationship. */
-  subtitle?: React.ReactNode;
   footer?: React.ReactNode;
   onEdit?: () => void;
   onDelete?: () => void;
@@ -108,7 +104,6 @@ interface TypeCardProps {
 const TypeCard = ({
   type,
   description,
-  subtitle,
   footer,
   onEdit,
   onDelete,
@@ -148,12 +143,6 @@ const TypeCard = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      {subtitle && (
-        <>
-          <EuiSpacer size="s" />
-          {subtitle}
-        </>
-      )}
       {description && (
         <>
           <EuiSpacer size="m" />
@@ -179,8 +168,6 @@ interface SectionProps {
   description: string;
   addLabel: string;
   onAdd?: () => void;
-  /** Why adding is not possible yet, if it isn't. */
-  addDisabledReason?: string;
   emptyMessage: string;
   children: React.ReactNode;
   'data-test-subj': string;
@@ -193,7 +180,6 @@ const Section = ({
   description,
   addLabel,
   onAdd,
-  addDisabledReason,
   emptyMessage,
   children,
   'data-test-subj': dataTestSubj,
@@ -216,8 +202,6 @@ const Section = ({
             size="s"
             iconType="plus"
             onClick={onAdd}
-            isDisabled={addDisabledReason !== undefined}
-            title={addDisabledReason}
             data-test-subj={`${dataTestSubj}-add`}
           >
             {addLabel}
@@ -232,7 +216,7 @@ const Section = ({
     <EuiSpacer size="m" />
     {count === 0 ? (
       <EuiText size="s" color="subdued" data-test-subj={`${dataTestSubj}-empty`}>
-        <p>{addDisabledReason ?? emptyMessage}</p>
+        <p>{emptyMessage}</p>
       </EuiText>
     ) : (
       <EuiFlexGrid columns={3} gutterSize="m">
@@ -242,10 +226,7 @@ const Section = ({
   </section>
 );
 
-type Editing =
-  | { kind: 'fact'; index?: number }
-  | { kind: 'entity'; index?: number }
-  | { kind: 'relationship'; index?: number };
+type Editing = { kind: 'fact'; index?: number } | { kind: 'entity'; index?: number };
 
 const without = <T,>(items: readonly T[], index: number): T[] =>
   items.filter((_, i) => i !== index);
@@ -259,13 +240,13 @@ interface DreamingConfigEditorProps {
   draft: DreamingConfigDraft;
   /** Absent for a config that can't be changed here, such as a managed AI index's. */
   onChange?: (draft: DreamingConfigDraft) => void;
-  /** Entity and relationship types to start from when entities are turned on with none. */
+  /** Entity types to start from when entities are turned on with none. */
   suggestedEntities?: DreamingEntities;
 }
 
 /**
- * What dreaming learns: fact types, then entity and relationship types, which are off until
- * turned on. Each type is added and edited in a modal.
+ * What dreaming learns: fact types, then entity types, which are off until turned on. Each type is
+ * added and edited in a modal.
  */
 export const DreamingConfigEditor = ({
   draft,
@@ -274,8 +255,7 @@ export const DreamingConfigEditor = ({
 }: DreamingConfigEditorProps) => {
   const [editing, setEditing] = useState<Editing>();
   const { facts, entities, entitiesEnabled } = draft;
-  const { nodes, edges } = entities;
-  const entityTypes = nodes.map(({ type }) => type);
+  const { nodes } = entities;
   const readOnly = onChange === undefined;
   const update = (next: Partial<DreamingConfigDraft>) => onChange?.({ ...draft, ...next });
   const close = () => setEditing(undefined);
@@ -285,37 +265,8 @@ export const DreamingConfigEditor = ({
       entitiesEnabled: enabled,
       ...(enabled &&
         nodes.length === 0 &&
-        suggestedEntities && {
-          entities: { nodes: suggestedEntities.nodes, edges: suggestedEntities.edges ?? [] },
-        }),
+        suggestedEntities && { entities: { nodes: suggestedEntities.nodes } }),
     });
-
-  const saveEntity = (entity: DreamingEntityType) => {
-    const index = editing?.index;
-    const previous = index !== undefined ? nodes[index].type : undefined;
-    const rename = (type: string) => (type === previous ? entity.type : type);
-    update({
-      entities: {
-        nodes: replaced(nodes, index, entity),
-        edges: edges.map((edge) => ({
-          ...edge,
-          source: rename(edge.source),
-          target: rename(edge.target),
-        })),
-      },
-    });
-    close();
-  };
-
-  const deleteEntity = (index: number) => {
-    const { type } = nodes[index];
-    update({
-      entities: {
-        nodes: without(nodes, index),
-        edges: edges.filter(({ source, target }) => source !== type && target !== type),
-      },
-    });
-  };
 
   const takenBy = (types: string[], index: number | undefined) =>
     types.filter((_, i) => i !== index);
@@ -358,7 +309,7 @@ export const DreamingConfigEditor = ({
       <EuiHorizontalRule margin="xl" />
       <EuiSwitch
         label={i18n.translate('xpack.contextEngine.dreamingConfig.entitiesSwitch', {
-          defaultMessage: 'Also learn entities and relationships',
+          defaultMessage: 'Also learn entities',
         })}
         checked={entitiesEnabled}
         disabled={readOnly}
@@ -370,7 +321,7 @@ export const DreamingConfigEditor = ({
         <p>
           {i18n.translate('xpack.contextEngine.dreamingConfig.entitiesSwitchDescription', {
             defaultMessage:
-              'Entities are the things facts are about, and relationships connect them, so your agent can follow from one to the next. Turn them on once facts are useful, or now.',
+              'Entities are the things your memories are about, each with a summary of what is known about it. Turn them on once facts are useful, or now.',
           })}
         </p>
       </EuiText>
@@ -384,8 +335,7 @@ export const DreamingConfigEditor = ({
             })}
             count={nodes.length}
             description={i18n.translate('xpack.contextEngine.dreamingConfig.entitiesDescription', {
-              defaultMessage:
-                'The things your agent remembers: the nouns of your domain. Facts and relationships attach to them.',
+              defaultMessage: 'The things your agent remembers: the nouns of your domain.',
             })}
             addLabel={i18n.translate('xpack.contextEngine.dreamingConfig.addEntity', {
               defaultMessage: 'Add entity type',
@@ -414,54 +364,9 @@ export const DreamingConfigEditor = ({
                   }
                   {...(!readOnly && {
                     onEdit: () => setEditing({ kind: 'entity', index }),
-                    onDelete: () => deleteEntity(index),
+                    onDelete: () => update({ entities: { nodes: without(nodes, index) } }),
                   })}
                   data-test-subj={`contextDreamingConfigEntity-${type}`}
-                />
-              </EuiFlexItem>
-            ))}
-          </Section>
-          <EuiHorizontalRule margin="xl" />
-          <Section
-            icon="link"
-            title={i18n.translate('xpack.contextEngine.dreamingConfig.relationshipsTitle', {
-              defaultMessage: 'Relationship types',
-            })}
-            count={edges.length}
-            description={i18n.translate(
-              'xpack.contextEngine.dreamingConfig.relationshipsDescription',
-              {
-                defaultMessage:
-                  'How entities connect: the verbs. Each links one entity to another, so your agent can follow from one to the next.',
-              }
-            )}
-            addLabel={i18n.translate('xpack.contextEngine.dreamingConfig.addRelationship', {
-              defaultMessage: 'Add relationship type',
-            })}
-            onAdd={readOnly ? undefined : () => setEditing({ kind: 'relationship' })}
-            addDisabledReason={
-              nodes.length === 0
-                ? i18n.translate('xpack.contextEngine.dreamingConfig.relationshipsNeedEntities', {
-                    defaultMessage: 'Add an entity type first: relationships connect them.',
-                  })
-                : undefined
-            }
-            emptyMessage={i18n.translate('xpack.contextEngine.dreamingConfig.relationshipsEmpty', {
-              defaultMessage: 'No relationship types yet. Add one, such as reported.',
-            })}
-            data-test-subj="contextDreamingConfigRelationships"
-          >
-            {edges.map(({ type, source, target, description }, index) => (
-              <EuiFlexItem key={type}>
-                <TypeCard
-                  type={type}
-                  subtitle={<EuiBadge color="hollow">{`${source} → ${target}`}</EuiBadge>}
-                  description={description}
-                  {...(!readOnly && {
-                    onEdit: () => setEditing({ kind: 'relationship', index }),
-                    onDelete: () => update({ entities: { nodes, edges: without(edges, index) } }),
-                  })}
-                  data-test-subj={`contextDreamingConfigRelationship-${type}`}
                 />
               </EuiFlexItem>
             ))}
@@ -485,21 +390,12 @@ export const DreamingConfigEditor = ({
       {editing?.kind === 'entity' && (
         <EntityTypeModal
           initial={editing.index !== undefined ? nodes[editing.index] : undefined}
-          taken={takenBy(entityTypes, editing.index)}
-          onSave={saveEntity}
-          onClose={close}
-        />
-      )}
-      {editing?.kind === 'relationship' && (
-        <RelationshipTypeModal
-          initial={editing.index !== undefined ? edges[editing.index] : undefined}
           taken={takenBy(
-            edges.map(({ type }) => type),
+            nodes.map(({ type }) => type),
             editing.index
           )}
-          entityTypes={entityTypes}
-          onSave={(edge) => {
-            update({ entities: { nodes, edges: replaced(edges, editing.index, edge) } });
+          onSave={(entity) => {
+            update({ entities: { nodes: replaced(nodes, editing.index, entity) } });
             close();
           }}
           onClose={close}

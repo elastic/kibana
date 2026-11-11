@@ -35,7 +35,6 @@ const SUPPORT = {
     facts: [{ type: 'solution', description: 'A confirmed fix.' }],
     entities: {
       nodes: [{ type: 'issue', description: 'A known problem.', attributes: ['severity'] }],
-      edges: [{ type: 'duplicate_of', source: 'issue', target: 'issue' }],
     },
   },
 };
@@ -46,10 +45,7 @@ const LEGAL = {
   dreaming: {
     instructions: 'Record obligations.',
     facts: [{ type: 'obligation' }],
-    entities: {
-      nodes: [{ type: 'contract' }],
-      edges: [{ type: 'supersedes', source: 'contract', target: 'contract' }],
-    },
+    entities: { nodes: [{ type: 'contract' }] },
   },
 };
 
@@ -174,15 +170,12 @@ describe('DreamingTemplatePage', () => {
     });
   });
 
-  it('suggests the example’s entities and relationships when they are turned on, and saves them', async () => {
+  it('suggests the example’s entities when they are turned on, and saves them', async () => {
     const services = renderPage();
     await pickedExample();
 
     fireEvent.click(screen.getByTestId('contextDreamingConfigEntitiesSwitch'));
     expect(screen.getByTestId('contextDreamingConfigEntity-issue')).toHaveTextContent('severity');
-    expect(screen.getByTestId('contextDreamingConfigRelationship-duplicate_of')).toHaveTextContent(
-      'issue → issue'
-    );
     fireEvent.click(screen.getByTestId('contextDreamingTemplateSave'));
 
     await waitFor(() => expect(services.http.put).toHaveBeenCalled());

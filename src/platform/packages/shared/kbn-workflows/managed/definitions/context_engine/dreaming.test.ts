@@ -47,7 +47,6 @@ const values: ContextEngineDreamingWorkflowTemplateValues = {
     { type: 'customer', description: 'A loyalty member.', attributes: ['loyalty_number', 'tier'] },
     { type: 'city' },
   ],
-  relationshipTypes: [{ type: 'lives_in', source: 'customer', target: 'city' }],
 };
 
 const render = (overrides: Partial<ContextEngineDreamingWorkflowTemplateValues> = {}) =>
@@ -62,7 +61,6 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
       instructions: values.instructions,
       fact_types: values.factTypes,
       entity_types: values.entityTypes,
-      relationship_types: values.relationshipTypes,
     });
   });
 
@@ -94,39 +92,47 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
     expect(manual.inputs).not.toHaveProperty('required');
   });
 
-  it('reads memories since the given time, else where the last run stopped, else since the last run', () => {
-    const range = (
-      findStep(render().steps, 'read_memories').with?.query?.bool?.filter as Array<{
-        range?: { updated_at: { gte: string } };
-      }>
-    ).find((filter) => filter.range)?.range?.updated_at.gte;
+  it('reads memories since the given time, else after the last memory the last run read, else since the last run', () => {
+    const filters = findStep(render().steps, 'read_memories').with?.query?.bool
+      ?.filter as unknown[];
+    const window = filters.find((filter) => JSON.stringify(filter).includes('updated_at'));
     const engine = createWorkflowLiquidEngine();
     const lastRun = { output: { since: '2026-11-01T00:00:00.000Z' } };
-    const lastOutput = (resumeFrom: string) => ({
-      output: { context: { output: { resume_from: resumeFrom } } },
+    const lastOutput = (resumeFrom: string, resumeAfterId: string) => ({
+      output: { context: { output: { resume_from: resumeFrom, resume_after_id: resumeAfterId } } },
+    });
+    const rendered = (scope: Record<string, unknown>) =>
+      JSON.parse(engine.parseAndRenderSync(JSON.stringify(window), scope));
+    const after = (since: string, afterId: string) => ({
+      bool: {
+        should: [
+          { range: { updated_at: { gt: since } } },
+          {
+            bool: { filter: [{ term: { updated_at: since } }, { range: { id: { gt: afterId } } }] },
+          },
+        ],
+        minimum_should_match: 1,
+      },
     });
 
+    expect(rendered({ inputs: {}, steps: { last_run: lastRun } })).toEqual(
+      after('2026-11-01T00:00:00.000Z', '')
+    );
     expect(
-      engine.parseAndRenderSync(range ?? '', { inputs: {}, steps: { last_run: lastRun } })
-    ).toBe('2026-11-01T00:00:00.000Z');
+      rendered({ inputs: {}, steps: { last_run: lastRun, last_output: lastOutput('', '') } })
+    ).toEqual(after('2026-11-01T00:00:00.000Z', ''));
     expect(
-      engine.parseAndRenderSync(range ?? '', {
+      rendered({
         inputs: {},
-        steps: { last_run: lastRun, last_output: lastOutput('') },
+        steps: { last_run: lastRun, last_output: lastOutput('2026-10-20T00:00:00.000Z', 'm-9') },
       })
-    ).toBe('2026-11-01T00:00:00.000Z');
+    ).toEqual(after('2026-10-20T00:00:00.000Z', 'm-9'));
     expect(
-      engine.parseAndRenderSync(range ?? '', {
-        inputs: {},
-        steps: { last_run: lastRun, last_output: lastOutput('2026-10-20T00:00:00.000Z') },
-      })
-    ).toBe('2026-10-20T00:00:00.000Z');
-    expect(
-      engine.parseAndRenderSync(range ?? '', {
+      rendered({
         inputs: { since: '2026-10-01T00:00:00.000Z' },
-        steps: { last_run: lastRun, last_output: lastOutput('2026-10-20T00:00:00.000Z') },
+        steps: { last_run: lastRun, last_output: lastOutput('2026-10-20T00:00:00.000Z', 'm-9') },
       })
-    ).toBe('2026-10-01T00:00:00.000Z');
+    ).toEqual(after('2026-10-01T00:00:00.000Z', ''));
   });
 
   it('reads the last run output only when it is not given a time and there is a last run', () => {
@@ -154,22 +160,32 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
 
   it('outputs where to resume when it read as many memories as it can, and nothing otherwise', () => {
     const readMemories = findStep(render().steps, 'read_memories').with;
-    const resumeFrom = findStep(render().steps, 'active').with?.resume_from;
+    const active = findStep(render().steps, 'active').with;
     const output = findStep(render().steps, 'output_result').with;
     const hits = (count: number) =>
       Array.from({ length: count }, (_, index) => ({
-        _source: { updated_at: `2026-11-01T00:00:${String(index % 60).padStart(2, '0')}.000Z` },
+        _source: {
+          id: `m-${index}`,
+          updated_at: `2026-11-01T00:00:${String(index % 60).padStart(2, '0')}.000Z`,
+        },
       }));
-    const rendered = (count: number) =>
-      createWorkflowLiquidEngine().parseAndRenderSync(String(resumeFrom), {
+    const rendered = (template: unknown, count: number) =>
+      createWorkflowLiquidEngine().parseAndRenderSync(String(template), {
         steps: { read_memories: { output: { hits: { hits: hits(count) } } } },
       });
+    const size = readMemories?.size as number;
 
-    expect(rendered(readMemories?.size as number)).toBe(
-      hits(readMemories?.size as number).at(-1)?._source.updated_at
+    expect(readMemories?._source).toEqual(['updated_at', 'id']);
+    expect(rendered(active?.resume_from, size)).toBe(hits(size).at(-1)?._source.updated_at);
+    expect(rendered(active?.resume_after_id, size)).toBe(`m-${size - 1}`);
+    expect(rendered(active?.resume_from, 3)).toBe('');
+    expect(rendered(active?.resume_after_id, 3)).toBe('');
+    expect(output).toEqual(
+      expect.objectContaining({
+        resume_from: '{{ variables.resume_from }}',
+        resume_after_id: '{{ variables.resume_after_id }}',
+      })
     );
-    expect(rendered(3)).toBe('');
-    expect(output).toEqual(expect.objectContaining({ resume_from: '{{ variables.resume_from }}' }));
   });
 
   it('ends a dry run cancelled, so it does not move the window the next run reads', () => {
@@ -223,9 +239,178 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
     );
   });
 
+  describe('the consolidate prompt', () => {
+    const memory = { id: 'm-1', type: 'memory.session_fact', title: 'Seat', content: 'Aisle.' };
+    const existing = { id: 'fact-1', type: 'fact.preference', title: 'Bob likes aisles' };
+    const deleted = {
+      id: 'fact-2',
+      type: 'fact.preference',
+      title: 'Gone',
+      governance: { lifecycle: { status: 'deleted' } },
+    };
+
+    const prompt = (
+      overrides: Partial<ContextEngineDreamingWorkflowTemplateValues> = {},
+      {
+        memories = [memory],
+        existingItems = [existing, deleted],
+      }: {
+        memories?: Array<Record<string, unknown>>;
+        existingItems?: Array<Record<string, unknown>>;
+      } = {}
+    ) => {
+      const workflow = render(overrides);
+      const batches = findStep(findStep(workflow.steps, 'dream').steps ?? [], 'batches');
+      const consolidate = findStep(batches.steps ?? [], 'consolidate');
+      return createWorkflowLiquidEngine().parseAndRenderSync(String(consolidate.with?.prompt), {
+        consts: workflow.consts,
+        foreach: { item: memories },
+        steps: {
+          read_existing: {
+            output: { hits: { hits: existingItems.map((source) => ({ _source: source })) } },
+          },
+        },
+      });
+    };
+
+    it('lists the configured types and instructions, then the memories and existing items', () => {
+      const rendered = prompt();
+
+      expect(rendered).toContain(
+        'FACT TYPES:\n- preference: Something a customer likes.\nENTITY TYPES:\n'
+      );
+      expect(rendered).toContain(
+        '- customer: A loyalty member. (attributes: loyalty_number, tier)\n- city\n'
+      );
+      expect(rendered).toContain(`INSTRUCTIONS:\n\n${values.instructions}\n`);
+      expect(rendered).toContain(`MEMORIES (one per line):\n${JSON.stringify(memory)}\n`);
+      expect(rendered).toContain(JSON.stringify(existing));
+      expect(rendered).not.toContain('"Gone"');
+    });
+
+    it('tells the model not to create a kind with no types configured', () => {
+      expect(prompt({ entityTypes: [] })).toContain(
+        'ENTITY TYPES:\nnone: do not create entities.\n\nINSTRUCTIONS:'
+      );
+      expect(prompt({ factTypes: [] })).toContain(
+        'FACT TYPES:\nnone: do not create facts.\nENTITY TYPES:'
+      );
+    });
+
+    it('describes only the kinds that are configured', () => {
+      const all = prompt();
+      const factsOnly = prompt({ entityTypes: [] });
+      const entitiesOnly = prompt({ factTypes: [] });
+
+      expect(all).toContain(
+        'of the kinds configured below:\n- facts: separate pieces of knowledge, each readable on its own.\n- entities: the things the memories are about, each with a summary of what is known about it.\n\nYou are given'
+      );
+      expect(factsOnly).toContain(
+        'of the kinds configured below:\n- facts: separate pieces of knowledge, each readable on its own.\n\nYou are given'
+      );
+      expect(factsOnly).toContain('keep every name, number, code and date exactly as stated');
+      expect(factsOnly).toContain('write a fact for each');
+      expect(factsOnly).not.toContain('Give every entity a content summary');
+      expect(entitiesOnly).toContain(
+        'of the kinds configured below:\n- entities: the things the memories are about, each with a summary of what is known about it.\n\nYou are given'
+      );
+      expect(entitiesOnly).toContain('Give every entity a content summary');
+      expect(entitiesOnly).not.toContain('Facts are read on their own');
+    });
+
+    it('shows only the existing items with the same permissions as the memories', () => {
+      const audience = (name: string) => ({
+        kibana: { privileges: [{ space: 'default', name: [name], count: 1 }] },
+      });
+      const open = { id: 'fact-open', type: 'fact.preference', title: 'Open' };
+      const teamA = { ...open, id: 'fact-a', permissions: audience('ai_index:a/read') };
+      const teamB = { ...open, id: 'fact-b', permissions: audience('ai_index:b/read') };
+      const shown = (memories: Array<Record<string, unknown>>) => {
+        const rendered = prompt({}, { memories, existingItems: [open, teamA, teamB] });
+        return rendered.slice(rendered.indexOf('EXISTING'));
+      };
+
+      const forOpen = shown([memory]);
+      const forTeamA = shown([{ ...memory, permissions: teamA.permissions }]);
+
+      expect(forOpen).toContain('"fact-open"');
+      expect(forOpen).not.toMatch(/"fact-a"|"fact-b"/);
+      expect(forTeamA).toContain('"fact-a"');
+      expect(forTeamA).not.toMatch(/"fact-open"|"fact-b"/);
+    });
+
+    it('never asks for relationships or links between items', () => {
+      const rendered = prompt();
+
+      expect(rendered).not.toMatch(/relationship|relates_to|about field/i);
+    });
+  });
+
+  it('batches only memories with the same permissions, 20 at a time', () => {
+    const batches = findStep(findStep(render().steps, 'dream').steps ?? [], 'batches');
+    const audience = (name: string) => ({
+      kibana: { privileges: [{ space: 'default', name: [name], count: 1 }] },
+    });
+    const open = Array.from({ length: 30 }, (_, index) => ({ id: `open-${index}` }));
+    const memories = [
+      ...open,
+      { id: 'a-1', permissions: audience('ai_index:a/read') },
+      { id: 'b-1', permissions: audience('ai_index:b/read') },
+      { id: 'a-2', permissions: audience('ai_index:a/read') },
+    ];
+    const rendered: Array<Array<{ id: string }>> = JSON.parse(
+      createWorkflowLiquidEngine().parseAndRenderSync(String(batches.foreach), {
+        variables: { memories },
+      })
+    );
+
+    expect(rendered.map((batch) => batch.map(({ id }) => id))).toEqual([
+      open.slice(0, 20).map(({ id }) => id),
+      open.slice(20).map(({ id }) => id),
+      ['a-1', 'a-2'],
+      ['b-1'],
+    ]);
+  });
+
+  it('reads existing facts and entities with what each is for', () => {
+    const batches = findStep(findStep(render().steps, 'dream').steps ?? [], 'batches');
+    const readExisting = findStep(batches.steps ?? [], 'read_existing').with;
+
+    expect(readExisting?._source).toEqual(expect.arrayContaining(['description', 'content']));
+    expect(readExisting?.query?.bool?.should).toEqual([
+      { prefix: { type: 'fact.' } },
+      { prefix: { type: 'entity.' } },
+    ]);
+  });
+
+  it('asks the model for entities and facts, and nothing else', () => {
+    const batches = findStep(findStep(render().steps, 'dream').steps ?? [], 'batches');
+    const { schema } = findStep(batches.steps ?? [], 'consolidate').with as {
+      schema: {
+        properties: Record<string, { items: { properties: Record<string, unknown> } }>;
+        required: string[];
+      };
+    };
+
+    expect(Object.keys(schema.properties)).toEqual(['entities', 'facts']);
+    expect(schema.required).toEqual(['entities', 'facts']);
+  });
+
+  it('names every item by its title, as EXISTING shows it', () => {
+    const batches = findStep(findStep(render().steps, 'dream').steps ?? [], 'batches');
+    const { schema } = findStep(batches.steps ?? [], 'consolidate').with as {
+      schema: { properties: Record<string, { items: { properties: Record<string, unknown> } }> };
+    };
+
+    for (const { items } of Object.values(schema.properties)) {
+      expect(items.properties).toHaveProperty('title');
+      expect(items.properties).not.toHaveProperty('name');
+    }
+  });
+
   it('keeps empty type lists as lists', () => {
-    expect(render({ entityTypes: [], relationshipTypes: [] }).consts).toEqual(
-      expect.objectContaining({ entity_types: [], relationship_types: [] })
+    expect(render({ factTypes: [], entityTypes: [] }).consts).toEqual(
+      expect.objectContaining({ fact_types: [], entity_types: [] })
     );
   });
 
@@ -258,7 +443,7 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
   it('keeps tombstones and expired revisions in the memory query, so collapse finds each memory latest revision', () => {
     const readMemories = findStep(render().steps, 'read_memories').with;
 
-    expect(readMemories?.sort).toEqual([{ updated_at: 'asc' }]);
+    expect(readMemories?.sort).toEqual([{ updated_at: 'asc' }, { id: 'asc' }]);
     expect(readMemories?.collapse).toEqual({
       field: 'id',
       inner_hits: expect.objectContaining({
@@ -307,8 +492,5 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
         steps: { read_memories: { output: { hits: { hits } } } },
       })
     ).toEqual([{ id: 'm-1' }, { id: 'm-3', governance: { lifecycle: { status: 'active' } } }]);
-    expect(findStep(findStep(render().steps, 'dream').steps ?? [], 'batches').foreach).toBe(
-      '{{ variables.memories | chunk: 50 | json }}'
-    );
   });
 });

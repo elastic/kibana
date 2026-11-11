@@ -26,11 +26,6 @@ responses:
                         - fixed_in
                     - type: platform
                       description: A browser, operating system or device, with its version.
-                  edges:
-                    - type: occurs_on
-                      source: issue
-                      target: platform
-                      description: The issue happens only on this platform or version.
           getAiIndexDreamingNeverConfiguredExample:
             summary: "Dreaming never configured"
             description: "An AI Index that never configured dreaming"

@@ -58,38 +58,6 @@
           "type": "plan",
           "description": "A pricing tier with its own limits."
         }
-      ],
-      "edges": [
-        {
-          "type": "raised_by",
-          "source": "error",
-          "target": "integration",
-          "description": "The integration returns this error."
-        },
-        {
-          "type": "requires",
-          "source": "sdk",
-          "target": "runtime",
-          "description": "The SDK needs this runtime or a later one."
-        },
-        {
-          "type": "incompatible_with",
-          "source": "sdk",
-          "target": "runtime",
-          "description": "The SDK breaks on this runtime."
-        },
-        {
-          "type": "supersedes",
-          "source": "sdk",
-          "target": "sdk",
-          "description": "The SDK version replaces an older one."
-        },
-        {
-          "type": "limited_by",
-          "source": "integration",
-          "target": "plan",
-          "description": "The plan sets the integration's limits."
-        }
       ]
     }
   }

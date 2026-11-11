@@ -11,6 +11,7 @@ import {
 } from '../../common/step_types/apply_dream_changes';
 import type { DreamedKi } from './dreamed_ki';
 import { batchKeyOf, factId } from './ids';
+import { audienceKeyOf } from './permissions';
 import {
   referencedIds,
   resolveChangeSet,
@@ -40,10 +41,7 @@ const context = (overrides: Partial<ResolveContext> = {}): ResolveContext => ({
   vocabulary: vocabularyOf({
     enabled: true,
     facts: [{ type: 'preference' }],
-    entities: {
-      nodes: [{ type: 'person', attributes: ['role'] }, { type: 'team' }],
-      edges: [{ type: 'member_of', source: 'person', target: 'team' }],
-    },
+    entities: { nodes: [{ type: 'person', attributes: ['role'] }, { type: 'team' }] },
   }),
   memories: new Map([
     ['m-1', '2026-10-01T10:00:00.000Z'],
@@ -53,8 +51,12 @@ const context = (overrides: Partial<ResolveContext> = {}): ResolveContext => ({
     [existingEntity.id, existingEntity],
     [existingFact.id, existingFact],
   ]),
+  memoryPermissions: new Map(),
   ...overrides,
 });
+
+const teamA = { kibana: { privileges: [{ space: 'team-a', name: ['ai_index:a/read'] }] } };
+const teamB = { kibana: { privileges: [{ space: 'team-a', name: ['ai_index:b/read'] }] } };
 
 const changeSet = (value: Partial<DreamChangeSet>): DreamChangeSet =>
   dreamChangeSetSchema.parse(value);
@@ -65,23 +67,22 @@ describe('referencedIds', () => {
       referencedIds(
         changeSet({
           entities: [{ ref: 'entity-person--bob' }, { ref: 'new:1' }],
-          facts: [{ ref: 'fact-abc', about: ['entity-person--bob', 'new:1', 'entity-team--x'] }],
-          relationships: [{ type: 'member_of', source: 'new:1', target: 'entity-team--y' }],
+          facts: [{ ref: 'fact-abc' }, { ref: 'new:2' }, { ref: 'entity-person--bob' }],
         })
       )
-    ).toEqual(['entity-person--bob', 'fact-abc', 'entity-team--x', 'entity-team--y']);
+    ).toEqual(['entity-person--bob', 'fact-abc']);
   });
 });
 
 describe('resolveChangeSet', () => {
-  it('creates entities with ids from their type and name, and resolves new keys in facts and relationships', () => {
+  it('creates entities with ids from their type and name, and facts with ids from their new keys', () => {
     const { operations, rejected } = resolveChangeSet(
       changeSet({
         entities: [
           {
             ref: 'new:1',
             type: 'team',
-            name: 'Platform Team',
+            title: 'Platform Team',
             content: 'The team Bob is a member of.',
             source_memory_ids: ['m-1'],
           },
@@ -92,16 +93,7 @@ describe('resolveChangeSet', () => {
             type: 'preference',
             title: 'Bob prefers tea',
             content: 'Bob prefers tea.',
-            about: [existingEntity.id, existingEntity.id],
             source_memory_ids: ['m-2'],
-          },
-        ],
-        relationships: [
-          {
-            type: 'member_of',
-            source: existingEntity.id,
-            target: 'new:1',
-            source_memory_ids: ['m-1'],
           },
         ],
       }),
@@ -113,25 +105,20 @@ describe('resolveChangeSet', () => {
       op: 'upsert_entity',
       id: 'entity-team--platform-team',
       type: 'team',
-      name: 'Platform Team',
+      title: 'Platform Team',
       content: 'The team Bob is a member of.',
       attributes: {},
       sourceMemoryIds: ['m-1'],
       lastSeenAt: '2026-10-01T10:00:00.000Z',
     });
-    const fact = operations[1] as UpsertFactOperation;
-    expect(fact).toMatchObject({
+    expect(operations[1]).toEqual({
       op: 'upsert_fact',
       id: factId('exec-1', batchKeyOf(['m-1', 'm-2']), 'new:2'),
-      about: [existingEntity.id],
+      type: 'preference',
+      title: 'Bob prefers tea',
+      content: 'Bob prefers tea.',
+      sourceMemoryIds: ['m-2'],
       lastSeenAt: '2026-10-02T10:00:00.000Z',
-    });
-    expect(operations[2]).toMatchObject({
-      op: 'relationship',
-      sourceId: existingEntity.id,
-      targetId: 'entity-team--platform-team',
-      type: 'member_of',
-      remove: false,
     });
   });
 
@@ -168,7 +155,7 @@ describe('resolveChangeSet', () => {
     );
 
     expect(rejected).toEqual([]);
-    expect(operations[0]).toMatchObject({ id: existingEntity.id, type: 'person', name: 'Bob' });
+    expect(operations[0]).toMatchObject({ id: existingEntity.id, type: 'person', title: 'Bob' });
     expect(operations[1]).toMatchObject({
       id: existingFact.id,
       type: 'preference',
@@ -178,22 +165,81 @@ describe('resolveChangeSet', () => {
     });
   });
 
+  it('keeps a new entity from restricted memories apart from the same name for others', () => {
+    const entities = changeSet({
+      entities: [{ ref: 'new:1', type: 'person', title: 'Bob', source_memory_ids: ['m-1'] }],
+    });
+    const memoryPermissions = new Map([['m-1', teamA]]);
+
+    const [open] = resolveChangeSet(entities, context()).operations;
+    const [restricted] = resolveChangeSet(entities, context({ memoryPermissions })).operations;
+
+    expect(open).toMatchObject({ id: 'entity-person--bob' });
+    expect(restricted).toMatchObject({ id: `entity-person--bob--${audienceKeyOf([teamA])}` });
+  });
+
+  it('keys a new entity by the audience of the memories it cites, not of the whole batch', () => {
+    const entities = changeSet({
+      entities: [{ ref: 'new:1', type: 'person', title: 'Bob', source_memory_ids: ['m-1'] }],
+    });
+
+    const [mixedBatch] = resolveChangeSet(
+      entities,
+      context({
+        memoryPermissions: new Map([
+          ['m-1', teamA],
+          ['m-2', teamB],
+        ]),
+      })
+    ).operations;
+    const [teamABatch] = resolveChangeSet(
+      entities,
+      context({ memoryPermissions: new Map([['m-1', teamA]]) })
+    ).operations;
+
+    expect(mixedBatch.id).toBe(teamABatch.id);
+  });
+
+  it('accepts types written with their kind prefix, as EXISTING shows them', () => {
+    const { operations, rejected } = resolveChangeSet(
+      changeSet({
+        entities: [
+          { ref: 'new:1', type: 'entity.team', title: 'Platform Team', source_memory_ids: ['m-1'] },
+        ],
+        facts: [
+          {
+            ref: 'new:2',
+            type: 'fact.preference',
+            title: 'Bob prefers tea',
+            content: 'Bob prefers tea.',
+            source_memory_ids: ['m-2'],
+          },
+        ],
+      }),
+      context()
+    );
+
+    expect(rejected).toEqual([]);
+    expect(operations[0]).toMatchObject({ id: 'entity-team--platform-team', type: 'team' });
+    expect(operations[1]).toMatchObject({ type: 'preference' });
+  });
+
   it('rejects unconfigured types and attributes item by item', () => {
     const { operations, rejected } = resolveChangeSet(
       changeSet({
         entities: [
-          { ref: 'new:1', type: 'robot', name: 'R2', source_memory_ids: ['m-1'] },
+          { ref: 'new:1', type: 'robot', title: 'R2', source_memory_ids: ['m-1'] },
           {
             ref: 'new:2',
             type: 'person',
-            name: 'Carol',
+            title: 'Carol',
             attributes: [{ key: 'age', value: '40' }],
             source_memory_ids: ['m-1'],
           },
           {
             ref: 'new:3',
             type: 'person',
-            name: 'Dan',
+            title: 'Dan',
             attributes: [{ key: 'role', value: 'SRE' }],
             source_memory_ids: ['m-1'],
           },
@@ -226,8 +272,8 @@ describe('resolveChangeSet', () => {
     const { rejected } = resolveChangeSet(
       changeSet({
         entities: [
-          { ref: 'new:1', type: 'team', name: 'A', source_memory_ids: ['m-unknown'] },
-          { ref: 'new:2', type: 'team', name: 'B' },
+          { ref: 'new:1', type: 'team', title: 'A', source_memory_ids: ['m-unknown'] },
+          { ref: 'new:2', type: 'team', title: 'B' },
         ],
       }),
       context()
@@ -289,83 +335,36 @@ describe('resolveChangeSet', () => {
     ]);
   });
 
-  it('rejects a relationship between the wrong entity types, or of an unknown type', () => {
-    const { rejected } = resolveChangeSet(
-      changeSet({
-        entities: [{ ref: 'new:1', type: 'person', name: 'Eve', source_memory_ids: ['m-1'] }],
-        relationships: [
-          {
-            type: 'member_of',
-            source: existingEntity.id,
-            target: 'new:1',
-            source_memory_ids: ['m-1'],
-          },
-          {
-            type: 'manages',
-            source: existingEntity.id,
-            target: 'new:1',
-            source_memory_ids: ['m-1'],
-          },
-          {
-            type: 'member_of',
-            source: existingEntity.id,
-            target: 'new:9',
-            source_memory_ids: ['m-1'],
-          },
-        ],
-      }),
-      context()
-    );
-
-    expect(rejected).toEqual([
-      {
-        item: `relationship ${existingEntity.id} member_of new:1`,
-        reason: "'member_of' connects a 'person' to a 'team'",
-      },
-      {
-        item: `relationship ${existingEntity.id} manages new:1`,
-        reason: "relationship type 'manages' is not configured",
-      },
-      {
-        item: `relationship ${existingEntity.id} member_of new:9`,
-        reason: "'new:9' does not refer to an entity",
-      },
-    ]);
-  });
-
-  it('removes a relationship without needing sources', () => {
-    const { operations, rejected } = resolveChangeSet(
-      changeSet({
-        entities: [{ ref: 'new:1', type: 'team', name: 'Ops', source_memory_ids: ['m-1'] }],
-        relationships: [
-          { type: 'member_of', source: existingEntity.id, target: 'new:1', remove: true },
-        ],
-      }),
-      context()
-    );
-
-    expect(rejected).toEqual([]);
-    expect(operations[1]).toEqual({
-      op: 'relationship',
-      sourceId: existingEntity.id,
-      targetId: 'entity-team--ops',
-      type: 'member_of',
-      remove: true,
-      sourceMemoryIds: [],
+  it('ignores the relationships and about links a model still returns', () => {
+    const parsed = dreamChangeSetSchema.parse({
+      facts: [
+        {
+          ref: 'new:1',
+          type: 'preference',
+          title: 'Bob prefers tea',
+          content: 'Bob prefers tea.',
+          about: [existingEntity.id],
+          source_memory_ids: ['m-1'],
+        },
+      ],
+      relationships: [{ type: 'member_of', source: existingEntity.id, target: 'entity-team--x' }],
     });
+
+    expect(parsed).not.toHaveProperty('relationships');
+    expect(parsed.facts[0]).not.toHaveProperty('about');
+    expect(resolveChangeSet(parsed, context()).operations[0]).not.toHaveProperty('about');
   });
 
-  it('builds facts only when entities are off, keeping the facts current about references', () => {
+  it('rejects each kind the AI index does not build', () => {
     const { operations, rejected } = resolveChangeSet(
       changeSet({
-        entities: [{ ref: 'new:1', type: 'person', name: 'Zed', source_memory_ids: ['m-1'] }],
+        entities: [{ ref: 'new:1', type: 'person', title: 'Zed', source_memory_ids: ['m-1'] }],
         facts: [
           {
             ref: 'new:2',
             type: 'preference',
             title: 'Zed likes tea',
             content: 'Zed likes tea.',
-            about: ['new:1'],
             source_memory_ids: ['m-1'],
           },
         ],
@@ -377,6 +376,5 @@ describe('resolveChangeSet', () => {
       { item: 'entity new:1', reason: 'this AI index does not build entities' },
     ]);
     expect(operations).toHaveLength(1);
-    expect(operations[0]).not.toHaveProperty('about');
   });
 });

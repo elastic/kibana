@@ -15,7 +15,7 @@ import type {
   AiIndexSource,
   AiIndexTrace,
 } from '../../common/http_api/ai_indices';
-import type { AiIndexDreamingConfig } from '../../common/dreaming';
+import type { AiIndexDreamingConfig, DreamingEntities } from '../../common/dreaming';
 
 export const aiIndicesIndexName = '.contextengine-ai-indices';
 
@@ -85,8 +85,24 @@ interface AiIndexDocumentFields {
   traces?: AiIndexTrace[];
 }
 
+/** A dreaming config as stored, which may still hold the relationship types it once had. */
+export type StoredDreamingConfig = Omit<AiIndexDreamingConfig, 'entities'> & {
+  // Written before relationships left the dreaming config; dropped on read.
+  entities?:
+    | (DreamingEntities & {
+        edges?: Array<{
+          type: string;
+          source: string;
+          target: string;
+          description?: string;
+        }> | null;
+      })
+    | null;
+};
+
 /** What the index may hold: pre-upgrade documents predate `id` and `space`. */
-export interface StoredAiIndexDocument extends AiIndexDocumentFields {
+export interface StoredAiIndexDocument extends Omit<AiIndexDocumentFields, 'dreaming'> {
+  dreaming?: StoredDreamingConfig;
   // Written before the dreaming config replaced it; dropped on read.
   memory_enabled?: boolean;
   // The logical id was the ES `_id` before ids became a field.

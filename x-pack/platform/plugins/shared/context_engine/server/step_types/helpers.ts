@@ -14,6 +14,7 @@ import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids'
 import { isIndexPattern, validateAiIndexId } from '../../common/ai_index_dest';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import type { KiWriter } from '../ai_indices/ki_revision';
+import { samePermissions, type KiPermissions } from '../dreaming/permissions';
 import {
   AiIndexAlreadyExistsError,
   AiIndexManagedError,
@@ -304,6 +305,20 @@ export const resolveOrCreateAiIndex = async (
   }
 
   return { dest, managed: false };
+};
+
+/** Fails the step when a dreaming batch's memories don't all have the same permissions. */
+export const assertSameMemoryPermissions = (
+  memories: ReadonlyArray<{ permissions?: KiPermissions }>
+): void => {
+  const [first] = memories;
+  if (memories.some(({ permissions }) => !samePermissions(permissions, first?.permissions))) {
+    throw new ExecutionError({
+      type: 'ValidationError',
+      message:
+        "The memories don't all have the same permissions: each dreaming batch must hold one audience's memories",
+    });
+  }
 };
 
 /** Fails the step when the dest is an index pattern, which cannot be a write target. */

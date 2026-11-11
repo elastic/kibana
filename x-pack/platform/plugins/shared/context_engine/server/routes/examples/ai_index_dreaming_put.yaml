@@ -4,7 +4,7 @@ requestBody:
       examples:
         putAiIndexDreamingRequestExample:
           summary: "Configure dreaming"
-          description: "Example request that turns dreaming on with fact, entity and relationship types"
+          description: "Example request that turns dreaming on with fact and entity types"
           value:
             enabled: true
             schedule:
@@ -24,11 +24,6 @@ requestBody:
                     - fixed_in
                 - type: platform
                   description: A browser, operating system or device, with its version.
-              edges:
-                - type: occurs_on
-                  source: issue
-                  target: platform
-                  description: The issue happens only on this platform or version.
         putAiIndexDreamingOffRequestExample:
           summary: "Turn dreaming off"
           description: "Example request that turns scheduled dreaming off and keeps the configured types"
@@ -64,22 +59,17 @@ responses:
                         - fixed_in
                     - type: platform
                       description: A browser, operating system or device, with its version.
-                  edges:
-                    - type: occurs_on
-                      source: issue
-                      target: platform
-                      description: The issue happens only on this platform or version.
   400:
     content:
       application/json:
         examples:
-          unknownEntityTypeExample:
-            summary: "Relationship to an unknown entity type"
-            description: "A relationship type links an entity type that is not configured"
+          duplicateTypeExample:
+            summary: "Type listed twice"
+            description: "The same fact type is listed twice"
             value:
               statusCode: 400
               error: Bad Request
-              message: "Relationship type 'occurs_on' links entity type 'device', which is not configured."
+              message: "Fact type 'known_issue' is listed twice."
           memoryDisabledExample:
             summary: "Memory turned off"
             description: "The request sets up dreaming while the global Context Engine memory setting is off"
@@ -136,9 +126,6 @@ x-codeSamples:
             "nodes": [
               { "type": "issue", "description": "A known problem customers run into.", "attributes": ["status", "fixed_in"] },
               { "type": "platform", "description": "A browser, operating system or device, with its version." }
-            ],
-            "edges": [
-              { "type": "occurs_on", "source": "issue", "target": "platform", "description": "The issue happens only on this platform or version." }
             ]
           }
         }'
@@ -157,9 +144,6 @@ x-codeSamples:
           "nodes": [
             { "type": "issue", "description": "A known problem customers run into.", "attributes": ["status", "fixed_in"] },
             { "type": "platform", "description": "A browser, operating system or device, with its version." }
-          ],
-          "edges": [
-            { "type": "occurs_on", "source": "issue", "target": "platform", "description": "The issue happens only on this platform or version." }
           ]
         }
       }

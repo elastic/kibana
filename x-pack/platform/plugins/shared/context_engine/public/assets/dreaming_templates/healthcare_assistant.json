@@ -54,38 +54,6 @@
           "type": "organization",
           "description": "An issuing or approving body, such as the CDC or FDA."
         }
-      ],
-      "edges": [
-        {
-          "type": "treats",
-          "source": "drug",
-          "target": "condition",
-          "description": "The drug is indicated for the condition."
-        },
-        {
-          "type": "contraindicated_in",
-          "source": "drug",
-          "target": "condition",
-          "description": "The drug must not be used with the condition."
-        },
-        {
-          "type": "recommended_for",
-          "source": "drug",
-          "target": "population",
-          "description": "A guideline recommends the drug for the population."
-        },
-        {
-          "type": "approved_by",
-          "source": "drug",
-          "target": "organization",
-          "description": "The body approved the drug, with the indication in the fact."
-        },
-        {
-          "type": "screened_for",
-          "source": "population",
-          "target": "condition",
-          "description": "A protocol recommends screening the population for the condition."
-        }
       ]
     }
   }
