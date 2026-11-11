@@ -153,7 +153,7 @@ export const Page: FC = () => {
     {
       onClick: () =>
         navigateToManagementPath(`/jobs/new_job/single_metric${getJobTypeUrlParams()}`),
-      iconType: 'createSingleMetricJob',
+      iconType: 'chartLine',
       title: i18n.translate('xpack.ml.newJob.wizard.jobType.singleMetricTitle', {
         defaultMessage: 'Single metric',
       }),
@@ -164,7 +164,7 @@ export const Page: FC = () => {
     },
     {
       onClick: () => navigateToManagementPath(`/jobs/new_job/multi_metric${getJobTypeUrlParams()}`),
-      iconType: 'createMultiMetricJob',
+      iconType: 'chartMix',
       title: i18n.translate('xpack.ml.newJob.wizard.jobType.multiMetricTitle', {
         defaultMessage: 'Multi-metric',
       }),
@@ -176,7 +176,7 @@ export const Page: FC = () => {
     },
     {
       onClick: () => navigateToManagementPath(`/jobs/new_job/population${getJobTypeUrlParams()}`),
-      iconType: 'createPopulationJob',
+      iconType: 'users',
       title: i18n.translate('xpack.ml.newJob.wizard.jobType.populationTitle', {
         defaultMessage: 'Population',
       }),
@@ -188,7 +188,7 @@ export const Page: FC = () => {
     },
     {
       onClick: () => navigateToManagementPath(`/jobs/new_job/advanced${getJobTypeUrlParams()}`),
-      iconType: 'createAdvancedJob',
+      iconType: 'controls',
       title: i18n.translate('xpack.ml.newJob.wizard.jobType.advancedTitle', {
         defaultMessage: 'Advanced',
       }),
@@ -201,7 +201,7 @@ export const Page: FC = () => {
     {
       onClick: () =>
         navigateToManagementPath(`/jobs/new_job/categorization${getJobTypeUrlParams()}`),
-      iconType: 'createGenericJob',
+      iconType: 'tag',
       title: i18n.translate('xpack.ml.newJob.wizard.jobType.categorizationTitle', {
         defaultMessage: 'Categorization',
       }),
@@ -212,7 +212,7 @@ export const Page: FC = () => {
     },
     {
       onClick: () => navigateToManagementPath(`/jobs/new_job/rare${getJobTypeUrlParams()}`),
-      iconType: 'createGenericJob',
+      iconType: 'chartAnomaly',
       title: i18n.translate('xpack.ml.newJob.wizard.jobType.rareTitle', {
         defaultMessage: 'Rare',
       }),
@@ -361,7 +361,7 @@ export const Page: FC = () => {
       <EuiFlexGrid gutterSize="l" columns={4}>
         <EuiFlexItem>
           <LinkCard
-            icon={<EuiIcon size="xl" type="dataVisualizer" aria-hidden={true} />}
+            icon={<EuiIcon size="xl" type="inspect" aria-hidden={true} />}
             title={i18n.translate('xpack.ml.newJob.wizard.jobType.dataVisualizerTitle', {
               defaultMessage: 'Data Visualizer',
             })}
