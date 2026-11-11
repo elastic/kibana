@@ -268,11 +268,14 @@ export class WorkflowCrudService {
     }
 
     for (const doc of response.docs) {
-      // A failed read would otherwise look like a missing workflow.
       if ('error' in doc) {
-        throw new Error(`Could not read workflow ${doc._id}: ${extractBulkItemError(doc.error)}`);
-      }
-      if (doc.found) {
+        // Elasticsearch answers 200 with this error on every document when the index does not
+        // exist yet, which is the state of a fresh deployment before its first write.
+        if (doc.error.type !== 'index_not_found_exception') {
+          // Any other failed read would otherwise look like a missing workflow.
+          throw new Error(`Could not read workflow ${doc._id}: ${extractBulkItemError(doc.error)}`);
+        }
+      } else if (doc.found) {
         if (!doc._source || doc._seq_no == null || doc._primary_term == null) {
           throw new Error(`Missing workflow revision or source for ${doc._id}.`);
         }

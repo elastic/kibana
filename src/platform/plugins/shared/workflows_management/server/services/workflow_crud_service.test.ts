@@ -568,6 +568,27 @@ describe('WorkflowCrudService', () => {
       );
     });
 
+    it('reads no workflows when Elasticsearch answers 200 with index_not_found_exception per document', async () => {
+      const { deps, mget } = makeMgetDeps();
+      // The real response for a missing index: HTTP 200, with the error on every document.
+      mget.mockResolvedValue({
+        docs: ['wf-1', 'wf-2'].map((id) => ({
+          _index: workflowIndexName,
+          _id: id,
+          error: {
+            type: 'index_not_found_exception',
+            reason: `no such index [${workflowIndexName}]`,
+          },
+        })),
+      });
+
+      const service = new WorkflowCrudService(deps);
+
+      await expect(service.getWorkflowDocumentsWithVersionByIds(['wf-1', 'wf-2'])).resolves.toEqual(
+        new Map()
+      );
+    });
+
     it('throws instead of reporting a workflow as missing when it cannot be read', async () => {
       const { deps, mget } = makeMgetDeps();
       mget.mockResolvedValue({
