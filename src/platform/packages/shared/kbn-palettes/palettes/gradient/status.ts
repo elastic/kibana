@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { euiPaletteForStatus } from '@elastic/eui/lib/services/color/eui_palettes';
+import { euiPaletteForStatus } from '@elastic/eui-theme-common';
 import { KbnColorFnPalette } from '../../classes/color_fn_palette';
 import { KbnPalette } from '../../constants';
 
