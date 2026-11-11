@@ -12,19 +12,16 @@ import { useAgentBuilderServices } from './use_agent_builder_service';
 
 const NO_BINARY_TYPES: readonly SupportedBinaryMimeType[] = [];
 
-/** The document types that can be pasted. Asked once per page load; empty when the check fails. */
+/**
+ * The document types that can be pasted. Asked once per page load; empty while the check fails.
+ * A failed check is not cached, so it is retried and asked again on the next mount.
+ */
 export const useSupportedBinaryTypes = (): readonly SupportedBinaryMimeType[] => {
   const { attachmentsService } = useAgentBuilderServices();
 
   const { data } = useQuery({
     queryKey: queryKeys.attachments.supportedBinaryTypes,
-    queryFn: async () => {
-      try {
-        return await attachmentsService.getSupportedBinaryMimeTypes();
-      } catch {
-        return NO_BINARY_TYPES;
-      }
-    },
+    queryFn: () => attachmentsService.getSupportedBinaryMimeTypes(),
     staleTime: Infinity,
   });
 

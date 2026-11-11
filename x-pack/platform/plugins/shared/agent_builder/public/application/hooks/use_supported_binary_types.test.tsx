@@ -64,6 +64,20 @@ describe('useSupportedBinaryTypes', () => {
     expect(result.current).toEqual([]);
   });
 
+  it('asks again on the next mount after a failed check', async () => {
+    mockGetSupportedBinaryMimeTypes.mockRejectedValueOnce(new Error('boom'));
+    mockGetSupportedBinaryMimeTypes.mockResolvedValueOnce(['application/pdf']);
+    const wrapper = createWrapper();
+
+    const first = renderHook(() => useSupportedBinaryTypes(), { wrapper });
+    await waitFor(() => expect(mockGetSupportedBinaryMimeTypes).toHaveBeenCalledTimes(1));
+    expect(first.result.current).toEqual([]);
+    const second = renderHook(() => useSupportedBinaryTypes(), { wrapper });
+
+    await waitFor(() => expect(second.result.current).toEqual(['application/pdf']));
+    expect(mockGetSupportedBinaryMimeTypes).toHaveBeenCalledTimes(2);
+  });
+
   it('keeps the same empty list between renders', async () => {
     mockGetSupportedBinaryMimeTypes.mockRejectedValue(new Error('boom'));
 
