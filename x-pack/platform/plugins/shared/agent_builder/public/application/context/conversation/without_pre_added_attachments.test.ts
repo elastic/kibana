@@ -8,7 +8,7 @@
 import type { AttachmentInput, VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { withoutPreAddedAttachments } from './without_pre_added_attachments';
 
-const stored = [{ id: 'pdf-1' }, { id: 'text-1' }] as VersionedAttachment[];
+const stored = [{ id: 'pdf-1' }, { id: 'text-1' }, { id: 'dashboard-1' }] as VersionedAttachment[];
 
 describe('withoutPreAddedAttachments', () => {
   it('drops an input without data that is already in the conversation', () => {
@@ -23,6 +23,12 @@ describe('withoutPreAddedAttachments', () => {
       { id: 'pdf-2', type: 'binary', origin: 'file-2' },
       { type: 'text', data: { content: 'new' } },
     ];
+
+    expect(withoutPreAddedAttachments(inputs, stored)).toEqual(inputs);
+  });
+
+  it('keeps a stored by-reference attachment of another type, so the server can refresh it', () => {
+    const inputs: AttachmentInput[] = [{ id: 'dashboard-1', type: 'dashboard', origin: 'so-1' }];
 
     expect(withoutPreAddedAttachments(inputs, stored)).toEqual(inputs);
   });
