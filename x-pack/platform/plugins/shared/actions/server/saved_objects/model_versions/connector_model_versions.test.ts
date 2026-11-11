@@ -14,22 +14,17 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import type { Logger } from '@kbn/core/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { rawConnectorSchemaV3, rawConnectorSchemaV4 } from '../schemas/raw_connector';
+import {
+  rawConnectorSchemaV3,
+  rawConnectorSchemaV4,
+  rawConnectorSchemaV5,
+} from '../schemas/raw_connector';
 import { connectorModelVersions } from './connector_model_versions';
 import { actionEncryptedRegistrationV2, actionEncryptedRegistrationV3 } from '../action_encryption';
 
 describe('Connector Model Versions', () => {
   const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
   const versions = connectorModelVersions(encryptedSavedObjects);
-
-  describe('version 5', () => {
-    it('introduces only schemas without backfilling pins', () => {
-      const version5 = versions['5'] as SavedObjectsFullModelVersion;
-      expect(version5.changes).toEqual([]);
-      expect(version5.schemas?.create).toBeDefined();
-      expect(version5.schemas?.forwardCompatibility).toBeDefined();
-    });
-  });
 
   describe('version 1', () => {
     it('has correct structure', () => {
@@ -378,6 +373,37 @@ describe('Connector Model Versions', () => {
         expect(migrated.attributes).toEqual(fixture['10.4.0'][index]);
         expect(rawConnectorSchemaV4.validate(fixture['10.4.0'][index])).toEqual(
           fixture['10.4.0'][index]
+        );
+      });
+    });
+  });
+
+  describe('version 5', () => {
+    it('introduces only schemas without backfilling pins', () => {
+      const version5 = versions['5'] as SavedObjectsFullModelVersion;
+      expect(version5.changes).toEqual([]);
+      expect(version5.schemas?.create).toBeDefined();
+      expect(version5.schemas?.forwardCompatibility).toBeDefined();
+    });
+
+    it('leaves the 10.5.0 action fixtures unchanged from v4 documents', () => {
+      const fixturePath = join(
+        __dirname,
+        '../../../../../../../../packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/action/10.5.0.json'
+      );
+      const fixture = JSON.parse(readFileSync(fixturePath, 'utf8')) as {
+        '10.4.0': Array<Record<string, unknown>>;
+        '10.5.0': Array<Record<string, unknown>>;
+      };
+
+      // Without a data_backfill the upgrade writes nothing, so both sides must be identical.
+      expect(fixture['10.4.0'].length).toBeGreaterThan(0);
+      expect(fixture['10.5.0']).toEqual(fixture['10.4.0']);
+
+      fixture['10.4.0'].forEach((previous, index) => {
+        expect(rawConnectorSchemaV4.validate(previous)).toEqual(previous);
+        expect(rawConnectorSchemaV5.validate(fixture['10.5.0'][index])).toEqual(
+          fixture['10.5.0'][index]
         );
       });
     });

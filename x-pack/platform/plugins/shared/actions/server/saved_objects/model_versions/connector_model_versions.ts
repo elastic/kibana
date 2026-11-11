@@ -94,7 +94,6 @@ export const connectorModelVersions = (
     inputType: actionEncryptedRegistrationV3,
     outputType: actionEncryptedRegistrationV3,
   }),
-  // Intermediate release: accept and retain pins, but do not populate them.
   '5': {
     changes: [],
     schemas: {
