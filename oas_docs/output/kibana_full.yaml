@@ -14259,7 +14259,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates a rule with a server-generated identifier. To create or replace a rule with a client-supplied identifier, use PUT /api/alerting/v2/rules/{id}/.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
+        Creates a rule. The request can include a client-supplied `id`. Kibana generates an identifier when `id` is omitted. If a rule with the supplied `id` already exists, the request fails with HTTP 409 and the existing rule is not changed. To create or replace a rule with a client-supplied identifier, use PUT /api/alerting/v2/rules/{id}/.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
       operationId: post-alerting-v2-rules
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -14306,7 +14306,7 @@ paths:
                       count: 1
                   time_field: '@timestamp'
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_rule'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_create_rule_request'
       responses:
         '201':
           content:
@@ -14399,6 +14399,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the user does not have the required privileges to perform the request.
+        '409':
+          content:
+            application/json:
+              examples:
+                ruleAlreadyExists:
+                  summary: Indicates a rule with the given ID already exists.
+                  value:
+                    code: RULE_ALREADY_EXISTS
+                    details:
+                      rule_id: rule-1
+                    error: Conflict
+                    message: Rule with id "rule-1" already exists
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates a rule with the given ID already exists.
         '500':
           content:
             application/json:
@@ -163108,6 +163123,59 @@ components:
           type: array
       required:
         - items
+    Kibana_HTTP_APIs_alerting_create_rule_request:
+      additionalProperties: false
+      type: object
+      properties:
+        artifacts:
+          description: 'Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present. An empty array is rejected: omit `artifacts` on create, or send `null` on PATCH to clear.'
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
+          maxItems: 100
+          minItems: 1
+          type: array
+        grouping:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
+        id:
+          description: Optional rule ID. If omitted, Kibana generates one. If a rule with this ID already exists, the request fails and the existing rule is not changed.
+          maxLength: 150
+          minLength: 1
+          pattern: ^[a-zA-Z0-9_-]+$
+          type: string
+        kind:
+          anyOf:
+            - description: Creates an alert for each matching group and tracks it until it recovers. Use this when you want to detect a problem and notify or automate a response.
+              enum:
+                - alert
+              type: string
+            - description: Stores each match as a rule event you can query. Alerts are not created and notifications are not sent.
+              enum:
+                - signal
+              type: string
+          description: Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).
+        metadata:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_metadata'
+        no_data:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
+        recovery:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery'
+        schedule:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_schedule'
+        state_transition:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition'
+        time_field:
+          default: '@timestamp'
+          description: Document field Kibana uses with `schedule.lookback` to time-filter `query.base`.
+          maxLength: 256
+          minLength: 1
+          type: string
+      required:
+        - kind
+        - metadata
+        - schedule
+        - query
     Kibana_HTTP_APIs_alerting_error_response:
       additionalProperties: false
       type: object
@@ -163216,53 +163284,6 @@ components:
           type: string
       required:
         - reason
-    Kibana_HTTP_APIs_alerting_new_rule:
-      additionalProperties: false
-      type: object
-      properties:
-        artifacts:
-          description: 'Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present. An empty array is rejected: omit `artifacts` on create, or send `null` on PATCH to clear.'
-          items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
-          maxItems: 100
-          minItems: 1
-          type: array
-        grouping:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
-        kind:
-          anyOf:
-            - description: Creates an alert for each matching group and tracks it until it recovers. Use this when you want to detect a problem and notify or automate a response.
-              enum:
-                - alert
-              type: string
-            - description: Stores each match as a rule event you can query. Alerts are not created and notifications are not sent.
-              enum:
-                - signal
-              type: string
-          description: Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).
-        metadata:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_metadata'
-        no_data:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
-        query:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
-        recovery:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery'
-        schedule:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_schedule'
-        state_transition:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition'
-        time_field:
-          default: '@timestamp'
-          description: Document field Kibana uses with `schedule.lookback` to time-filter `query.base`.
-          maxLength: 256
-          minLength: 1
-          type: string
-      required:
-        - kind
-        - metadata
-        - schedule
-        - query
     Kibana_HTTP_APIs_alerting_new_tag_alert_action:
       additionalProperties: false
       type: object
