@@ -64,7 +64,6 @@ export class CoreSecurityRouteHandlerContext implements SecurityRequestHandlerCo
           ? {
               canViewBillingDetails: () => uiam.canViewBillingDetails(this.request),
               canInviteOrganizationMembers: () => uiam.canInviteOrganizationMembers(this.request),
-              canListOrganizationMembers: () => uiam.canListOrganizationMembers(this.request),
             }
           : null,
       };

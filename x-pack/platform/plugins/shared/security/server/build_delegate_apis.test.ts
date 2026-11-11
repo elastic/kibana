@@ -532,39 +532,32 @@ describe('buildSecurityApi', () => {
         await expect(api.authz.uiam!.canViewBillingDetails(request)).resolves.toBe(false);
       });
 
-      it.each([
-        ['canInviteOrganizationMembers' as const, 'create', 'organization-invitation'],
-        ['canListOrganizationMembers' as const, 'list', 'organization-members'],
-      ])('%s should ask UIAM for %s on %s in the organization', async (method, action, type) => {
+      it('should ask UIAM whether the user may invite members into the organization', async () => {
         const request = httpServerMock.createKibanaRequest();
-        const check = { action, resource: { type, organization_id: 'org-1' } };
+        const check = {
+          action: 'create',
+          resource: { type: 'organization-invitation', organization_id: 'org-1' },
+        };
         uiam.checkAuthorization.mockResolvedValue({
           permitted: true,
           checks: [{ ...check, permitted: true }],
         });
 
-        await expect(api.authz.uiam![method](request)).resolves.toBe(true);
+        await expect(api.authz.uiam!.canInviteOrganizationMembers(request)).resolves.toBe(true);
 
         expect(uiam.checkAuthorization).toHaveBeenCalledTimes(1);
         expect(uiam.checkAuthorization).toHaveBeenCalledWith(request, [check]);
       });
 
-      it.each(['canInviteOrganizationMembers' as const, 'canListOrganizationMembers' as const])(
-        '%s should be false when UIAM denies the check',
-        async (method) => {
-          uiam.checkAuthorization.mockResolvedValue({ permitted: false, checks: [] });
+      it('should report no invitation access when UIAM denies the check', async () => {
+        uiam.checkAuthorization.mockResolvedValue({ permitted: false, checks: [] });
 
-          await expect(api.authz.uiam![method](httpServerMock.createKibanaRequest())).resolves.toBe(
-            false
-          );
-        }
-      );
+        await expect(
+          api.authz.uiam!.canInviteOrganizationMembers(httpServerMock.createKibanaRequest())
+        ).resolves.toBe(false);
+      });
 
-      it.each([
-        'canViewBillingDetails' as const,
-        'canInviteOrganizationMembers' as const,
-        'canListOrganizationMembers' as const,
-      ])(
+      it.each(['canViewBillingDetails' as const, 'canInviteOrganizationMembers' as const])(
         '%s should fail without calling UIAM when no organization is configured',
         async (method) => {
           api = buildSecurityApi({

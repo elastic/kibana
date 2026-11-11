@@ -83,7 +83,6 @@ const createStartMock = (): SecurityStartMock => {
       uiam: lazyObject({
         canViewBillingDetails: jest.fn().mockResolvedValue(false),
         canInviteOrganizationMembers: jest.fn().mockResolvedValue(false),
-        canListOrganizationMembers: jest.fn().mockResolvedValue(false),
       }),
     }),
     audit: auditServiceMock.create(),
@@ -130,7 +129,6 @@ const createInternalStartMock = (): InternalSecurityStartMock => {
       uiam: lazyObject({
         canViewBillingDetails: jest.fn().mockResolvedValue(false),
         canInviteOrganizationMembers: jest.fn().mockResolvedValue(false),
-        canListOrganizationMembers: jest.fn().mockResolvedValue(false),
       }),
     }),
     audit: auditServiceMock.create(),
@@ -174,7 +172,6 @@ const createRequestHandlerContextMock = () => {
       uiam: lazyObject({
         canViewBillingDetails: jest.fn().mockResolvedValue(false),
         canInviteOrganizationMembers: jest.fn().mockResolvedValue(false),
-        canListOrganizationMembers: jest.fn().mockResolvedValue(false),
       }),
     }),
     audit: lazyObject({

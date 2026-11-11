@@ -35,8 +35,6 @@ export interface UiamAuthzRequestHandlerContext {
   canViewBillingDetails(): Promise<boolean>;
   /** See `CoreUiamAuthorizationService.canInviteOrganizationMembers`, bound to the context's request. */
   canInviteOrganizationMembers(): Promise<boolean>;
-  /** See `CoreUiamAuthorizationService.canListOrganizationMembers`, bound to the context's request. */
-  canListOrganizationMembers(): Promise<boolean>;
 }
 
 export interface AuditRequestHandlerContext {

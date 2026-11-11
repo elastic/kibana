@@ -49,9 +49,3 @@ export const UIAM_ORGANIZATION_INVITATION_RESOURCE_TYPE = 'organization-invitati
 
 /** The UIAM action that creates a resource. */
 export const UIAM_ORGANIZATION_INVITATION_CREATE_ACTION = 'create';
-
-/** The UIAM resource type of an organization's membership list. */
-export const UIAM_ORGANIZATION_MEMBERS_RESOURCE_TYPE = 'organization-members';
-
-/** The UIAM action that lists a resource. */
-export const UIAM_ORGANIZATION_MEMBERS_LIST_ACTION = 'list';

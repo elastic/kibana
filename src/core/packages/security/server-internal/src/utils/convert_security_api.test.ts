@@ -48,7 +48,6 @@ describe('convertSecurityApi', () => {
         uiam: {
           canViewBillingDetails: jest.fn(),
           canInviteOrganizationMembers: jest.fn(),
-          canListOrganizationMembers: jest.fn(),
         },
       },
       audit: {

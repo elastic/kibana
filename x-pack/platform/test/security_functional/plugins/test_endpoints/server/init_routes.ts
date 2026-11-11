@@ -1091,15 +1091,11 @@ export function initRoutes(
       }
 
       try {
-        const [canViewBillingDetails, canInviteOrganizationMembers, canListOrganizationMembers] =
-          await Promise.all([
-            uiam.canViewBillingDetails(),
-            uiam.canInviteOrganizationMembers(),
-            uiam.canListOrganizationMembers(),
-          ]);
-        return response.ok({
-          body: { canViewBillingDetails, canInviteOrganizationMembers, canListOrganizationMembers },
-        });
+        const [canViewBillingDetails, canInviteOrganizationMembers] = await Promise.all([
+          uiam.canViewBillingDetails(),
+          uiam.canInviteOrganizationMembers(),
+        ]);
+        return response.ok({ body: { canViewBillingDetails, canInviteOrganizationMembers } });
       } catch (err) {
         logger.error(`Failed to check access with UIAM: ${err}`, err);
         return response.customError({

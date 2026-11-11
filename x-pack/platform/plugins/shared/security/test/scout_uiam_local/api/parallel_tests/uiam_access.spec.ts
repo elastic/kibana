@@ -17,17 +17,9 @@ import { expect } from '@kbn/scout/api';
 
 import { COMMON_HEADERS, COMMON_UNSAFE_HEADERS } from '../fixtures';
 
-const NO_ACCESS = {
-  canViewBillingDetails: false,
-  canInviteOrganizationMembers: false,
-  canListOrganizationMembers: false,
-};
+const NO_ACCESS = { canViewBillingDetails: false, canInviteOrganizationMembers: false };
 
-const FULL_ACCESS = {
-  canViewBillingDetails: true,
-  canInviteOrganizationMembers: true,
-  canListOrganizationMembers: true,
-};
+const FULL_ACCESS = { canViewBillingDetails: true, canInviteOrganizationMembers: true };
 
 // These tests cannot be run on MKI because the mock IdP is what grants UIAM roles.
 apiTest.describe('[NON-MKI] UIAM access checks through Core', { tag: tags.serverless.all }, () => {
@@ -76,17 +68,14 @@ apiTest.describe('[NON-MKI] UIAM access checks through Core', { tag: tags.server
     }
   );
 
-  apiTest(
-    'lets a project viewer list organization members but not invite them',
-    async ({ apiClient, samlAuth }) => {
-      const response = await accessAs(apiClient, samlAuth, 'viewer', {
-        uiamProjectRoles: ['viewer'],
-      });
+  apiTest('denies everything to a project viewer', async ({ apiClient, samlAuth }) => {
+    const response = await accessAs(apiClient, samlAuth, 'viewer', {
+      uiamProjectRoles: ['viewer'],
+    });
 
-      expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual({ ...NO_ACCESS, canListOrganizationMembers: true });
-    }
-  );
+    expect(response).toHaveStatusCode(200);
+    expect(response.body).toStrictEqual(NO_ACCESS);
+  });
 
   apiTest('grants everything to an organization admin', async ({ apiClient, samlAuth }) => {
     const response = await accessAs(apiClient, samlAuth, 'admin', {

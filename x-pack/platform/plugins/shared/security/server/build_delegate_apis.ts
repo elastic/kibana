@@ -28,8 +28,6 @@ import {
   UIAM_BILLING_DETAILS_RESOURCE_TYPE,
   UIAM_ORGANIZATION_INVITATION_CREATE_ACTION,
   UIAM_ORGANIZATION_INVITATION_RESOURCE_TYPE,
-  UIAM_ORGANIZATION_MEMBERS_LIST_ACTION,
-  UIAM_ORGANIZATION_MEMBERS_RESOURCE_TYPE,
 } from './uiam';
 import type { UserProfileServiceStartInternal } from './user_profile';
 
@@ -158,12 +156,6 @@ export const buildSecurityApi = ({
                 request,
                 UIAM_ORGANIZATION_INVITATION_CREATE_ACTION,
                 UIAM_ORGANIZATION_INVITATION_RESOURCE_TYPE
-              ),
-            canListOrganizationMembers: (request) =>
-              checkUiamAccess(
-                request,
-                UIAM_ORGANIZATION_MEMBERS_LIST_ACTION,
-                UIAM_ORGANIZATION_MEMBERS_RESOURCE_TYPE
               ),
           }
         : null,

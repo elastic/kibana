@@ -29,13 +29,4 @@ export interface CoreUiamAuthorizationService {
    * @param request The request whose credentials the check is evaluated for.
    */
   canInviteOrganizationMembers(request: KibanaRequest): Promise<boolean>;
-
-  /**
-   * Whether the user behind the request may list the organization's members (UIAM
-   * `organization-members:list`, granted by `organization-admin` and by every project role, but
-   * not by `billing-admin` or plain membership). The request must carry UIAM credentials; the
-   * call fails for any other credential.
-   * @param request The request whose credentials the check is evaluated for.
-   */
-  canListOrganizationMembers(request: KibanaRequest): Promise<boolean>;
 }
