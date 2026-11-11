@@ -113,12 +113,6 @@ export interface SearchSourceFields {
    */
   fields?: SearchFieldValue[];
   /**
-   * Retreive fields directly from _source (legacy behavior)
-   *
-   * @deprecated It is recommended to use `fields` wherever possible.
-   */
-  fieldsFromSource?: estypes.Fields;
-  /**
    * {@link IndexPatternService}
    */
   index?: DataView;
@@ -176,12 +170,6 @@ export type SerializedSearchSourceFields = {
    * Retrieve fields via the search Fields API
    */
   fields?: SearchFieldValue[];
-  /**
-   * Retreive fields directly from _source (legacy behavior)
-   *
-   * @deprecated It is recommended to use `fields` wherever possible.
-   */
-  fieldsFromSource?: estypes.Fields;
   /**
    * {@link IndexPatternService}
    */
