@@ -335,8 +335,6 @@ export const DetectionPage = ({
                     <EuiSpacer size="m" />
                     <div
                       css={css`
-                        display: flex;
-                        flex-direction: column;
                         flex: 1 1 auto;
                         min-height: 0;
                         overflow: auto;

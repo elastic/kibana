@@ -149,6 +149,7 @@ export const DetectionOverview = ({
             <EuiFlexGroup
               alignItems="center"
               gutterSize="none"
+              wrap
               responsive={false}
               css={{ gap: euiTheme.size.base }}
             >
@@ -167,7 +168,14 @@ export const DetectionOverview = ({
                       />
                     </EuiFlexItem>
                   ) : null}
-                  <EuiFlexItem grow={1} style={{ minWidth: 0 }}>
+                  <EuiFlexItem
+                    grow={1}
+                    css={{
+                      // Wrap before labels crush into neighbors at narrow widths / zoom.
+                      flex: `1 1 ${euiTheme.base * 12}px`,
+                      minWidth: 0,
+                    }}
+                  >
                     <MetricCell {...metric} isLoading={isCountsLoading} />
                   </EuiFlexItem>
                 </Fragment>
