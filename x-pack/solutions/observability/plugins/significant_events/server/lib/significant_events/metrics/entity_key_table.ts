@@ -25,6 +25,7 @@ export interface DroppedMetricsEntityRows {
   nullNodeName: number;
   nullCluster: number;
   idTooLong: number;
+  shortLived: number;
 }
 
 export interface EntityFoldResult {
@@ -60,7 +61,8 @@ export const getDatasetFamily = (dataset: string | null): string | undefined =>
 /** Names in fewer namespaces stay separate (e.g. redis in 4 team namespaces); multi-tenant copies run in hundreds. */
 export const MULTI_NAMESPACE_WORKLOAD_THRESHOLD = 10;
 
-type WorkloadKind = 'deployment' | 'statefulset' | 'daemonset' | 'cronjob' | 'job' | 'replicaset';
+type WorkloadKind = 'deployment' | 'statefulset' | 'daemonset' | 'cronjob';
+type ShortLivedWorkloadKind = 'job' | 'replicaset';
 type KubernetesEntityKind = WorkloadKind | 'cluster';
 
 /** Kubernetes entity types aligned with Entity Inventory and its proposed extensions. */
@@ -69,19 +71,18 @@ export const KUBERNETES_ENTITY_STORE_TYPES = {
   statefulset: 'k8s.statefulset',
   daemonset: 'k8s.daemonset',
   cronjob: 'k8s.cronjob',
-  replicaset: 'k8s.replicaset',
   cluster: 'k8s.cluster',
-} as const satisfies Record<Exclude<KubernetesEntityKind, 'job'>, string>;
+} as const satisfies Record<KubernetesEntityKind, string>;
 
 type KubernetesEntityIdentity =
   | { kind: WorkloadKind; namespace: string; name: string }
   | { kind: 'cluster'; name: string };
 
-const getKubernetesEntityStoreType = (kind: KubernetesEntityKind): string | undefined =>
-  kind === 'job' ? undefined : KUBERNETES_ENTITY_STORE_TYPES[kind];
+const getKubernetesEntityStoreType = (kind: KubernetesEntityKind): string =>
+  KUBERNETES_ENTITY_STORE_TYPES[kind];
 
 export const buildKubernetesEntityId = (identity: KubernetesEntityIdentity): string => {
-  const type = getKubernetesEntityStoreType(identity.kind) ?? 'k8s.job';
+  const type = getKubernetesEntityStoreType(identity.kind);
   return 'namespace' in identity
     ? `${type}:${identity.namespace}/${identity.name}`
     : `${type}:${identity.name}`;
@@ -92,12 +93,13 @@ const workloadOwnerFields: Record<WorkloadKind, string> = {
   statefulset: 'kubernetes.statefulset.name',
   daemonset: 'kubernetes.daemonset.name',
   cronjob: 'kubernetes.cronjob.name',
-  job: 'kubernetes.job.name',
-  replicaset: 'kubernetes.replicaset.name',
 };
 
 const isWorkloadKind = (value: EsqlCell): value is WorkloadKind =>
   typeof value === 'string' && value in workloadOwnerFields;
+
+const isShortLivedWorkloadKind = (value: EsqlCell): value is ShortLivedWorkloadKind =>
+  value === 'job' || value === 'replicaset';
 
 interface WorkloadEntity {
   kind: WorkloadKind;
@@ -156,6 +158,7 @@ const createDroppedRows = (): DroppedMetricsEntityRows => ({
   nullNodeName: 0,
   nullCluster: 0,
   idTooLong: 0,
+  shortLived: 0,
 });
 
 const droppedRowsCount = (droppedRows: DroppedMetricsEntityRows): number =>
@@ -163,7 +166,8 @@ const droppedRowsCount = (droppedRows: DroppedMetricsEntityRows): number =>
   droppedRows.nullNamespace +
   droppedRows.nullNodeName +
   droppedRows.nullCluster +
-  droppedRows.idTooLong;
+  droppedRows.idTooLong +
+  droppedRows.shortLived;
 
 const derivedOwnerSources: Partial<
   Record<WorkloadKind, { stampedField: string; sourceField: string }>
@@ -357,7 +361,8 @@ const buildMultiNamespaceWorkloadQuery = (sourceQuery: string): string => `${sou
     AND data_stream.dataset IN (${formatDatasetList(KUBERNETES_POD_DATASETS)})
     AND kubernetes.pod.uid IS NOT NULL
 ${WORKLOAD_OWNER_DERIVATION}
-| WHERE kind IS NOT NULL AND workload IS NOT NULL
+| WHERE kind IN ("deployment", "statefulset", "daemonset", "cronjob")
+    AND workload IS NOT NULL
 | STATS namespaces = COUNT_DISTINCT(kubernetes.namespace),
         replicas = COUNT_DISTINCT(kubernetes.pod.uid),
         last_seen = MAX(@timestamp),
@@ -397,6 +402,10 @@ export const foldMultiNamespaceWorkloadRows = (rows: EsqlRow[]): EntityFoldResul
   const workloads = rows.flatMap((row): MultiNamespaceWorkloadEntity[] => {
     const kind = row.kind;
     const name = row.workload;
+    if (isShortLivedWorkloadKind(kind)) {
+      droppedRows.shortLived += 1;
+      return [];
+    }
     if (!isWorkloadKind(kind) || typeof name !== 'string') {
       droppedRows.ownerless += 1;
       return [];
@@ -468,6 +477,10 @@ export const foldWorkloadRows = (rows: EsqlRow[]): EntityFoldResult => {
     const namespace = row['kubernetes.namespace'];
     const kind = row.kind;
     const name = row.workload;
+    if (isShortLivedWorkloadKind(kind)) {
+      droppedRows.shortLived += 1;
+      return [];
+    }
     if (!isWorkloadKind(kind) || typeof name !== 'string') {
       droppedRows.ownerless += 1;
       return [];
@@ -502,7 +515,6 @@ export const foldWorkloadRows = (rows: EsqlRow[]): EntityFoldResult => {
       return [];
     }
     const ownerField = workloadOwnerFields[workload.kind];
-    const entityStoreType = getKubernetesEntityStoreType(workload.kind);
     return [
       {
         type: 'entity',
@@ -518,7 +530,7 @@ export const foldWorkloadRows = (rows: EsqlRow[]): EntityFoldResult => {
           },
           grain: 'namespace',
           breakdown: ['orchestrator.cluster.name'],
-          ...(entityStoreType ? { entity_store_type: entityStoreType } : {}),
+          entity_store_type: getKubernetesEntityStoreType(workload.kind),
           clusters: workload.clusters,
           replicas: workload.replicas,
           last_seen: workload.lastSeen,

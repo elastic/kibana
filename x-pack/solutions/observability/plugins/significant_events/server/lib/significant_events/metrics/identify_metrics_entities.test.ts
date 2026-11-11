@@ -183,7 +183,7 @@ describe('buildKubernetesEntityId', () => {
 describe('Kubernetes entity derivation', () => {
   it('builds derived owners, guards prefixes, and emits complete filters', () => {
     const lastSeen = '2026-11-10T12:00:00.000Z';
-    const { features } = foldWorkloadRows([
+    const workloadResult = foldWorkloadRows([
       {
         'kubernetes.namespace': 'apps',
         kind: 'deployment',
@@ -229,7 +229,17 @@ describe('Kubernetes entity derivation', () => {
         replicas: 1,
         last_seen: lastSeen,
       },
+      {
+        'kubernetes.namespace': 'ops',
+        kind: 'replicaset',
+        workload: 'api-7d9f4',
+        owner_derived: 0,
+        clusters: ['cluster-a'],
+        replicas: 1,
+        last_seen: lastSeen,
+      },
     ]);
+    const { features } = workloadResult;
     const byId = new Map(features.map((feature) => [feature.id, feature]));
 
     expect(byId.get('k8s.deployment:apps/api')?.filter).toEqual({
@@ -270,13 +280,10 @@ describe('Kubernetes entity derivation', () => {
         },
       ],
     });
-    expect(byId.get('k8s.job:ops/migrate-2')?.filter).toEqual({
-      and: [
-        { field: 'kubernetes.namespace', eq: 'ops' },
-        { field: 'kubernetes.job.name', eq: 'migrate-2' },
-      ],
-    });
-    expect(byId.get('k8s.job:ops/migrate-2')?.properties).not.toHaveProperty('entity_store_type');
+    expect([...byId.keys()]).not.toEqual(
+      expect.arrayContaining(['k8s.job:ops/migrate-2', 'k8s.replicaset:ops/api-7d9f4'])
+    );
+    expect(workloadResult.droppedRows.shortLived).toBe(2);
     expect(byId.get('k8s.deployment:apps/api')?.properties.entity_store_type).toBe(
       'k8s.deployment'
     );
@@ -425,6 +432,7 @@ describe('Kubernetes entity derivation', () => {
       nullNodeName: 0,
       nullCluster: 0,
       idTooLong: 1,
+      shortLived: 0,
     });
   });
 });
@@ -709,6 +717,7 @@ describe('identifyMetricsEntities', () => {
           nullNodeName: 1,
           nullCluster: 1,
           idTooLong: 0,
+          shortLived: 0,
         },
         unknownClusterRows: 1,
         handled: true,

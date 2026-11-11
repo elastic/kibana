@@ -69,6 +69,7 @@ const createDroppedRows = (): DroppedMetricsEntityRows => ({
   nullNodeName: 0,
   nullCluster: 0,
   idTooLong: 0,
+  shortLived: 0,
 });
 
 const isEsqlScalar = (value: ESQLSearchResponse['values'][number][number]): value is EsqlScalar =>
@@ -305,6 +306,7 @@ export const identifyMetricsEntities = async ({
     droppedRows.nullNodeName += folded.droppedRows.nullNodeName;
     droppedRows.nullCluster += folded.droppedRows.nullCluster;
     droppedRows.idTooLong += folded.droppedRows.idTooLong;
+    droppedRows.shortLived += folded.droppedRows.shortLived;
     unknownClusterRows += folded.unknownClusterRows;
     multiNamespaceWorkloadsCount += folded.multiNamespaceWorkloadsCount;
     namespacesSkippedCount += folded.namespacesSkippedCount;
