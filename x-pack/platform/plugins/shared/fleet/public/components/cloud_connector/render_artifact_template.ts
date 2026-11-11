@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { sendRenderIacTemplate } from '../../../hooks/use_request/iac_provisioner';
-import { CLOUD_CONNECTOR_RENDER_FLOW } from '../../../../common/telemetry/iac_provisioner_events';
-import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../../common/types/rest_spec/iac_provisioner';
+import { sendRenderIacTemplate } from '../../hooks/use_request/iac_provisioner';
+import { CLOUD_CONNECTOR_RENDER_FLOW } from '../../../common/telemetry/iac_provisioner_events';
+import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
 import type {
   IacPolicyTemplateSelection,
   RenderedIacBlueprint,
   RenderIacTemplateIntegration,
   RenderIacTemplateRequest,
-} from '../../../../common/types/rest_spec/iac_provisioner';
-import { getArtifactLaunchUrl } from '../utils';
+} from '../../../common/types/rest_spec/iac_provisioner';
+
+import { getArtifactLaunchUrl } from './utils';
 
 export interface GetRenderIntegrationsParams {
   /** Full integration set to render (union). When set, overrides packageName + policyTemplates. */
@@ -51,6 +52,11 @@ export interface RenderArtifactTemplateParams {
    */
   deploymentId?: string;
   stackParams?: Readonly<Record<string, string>>;
+  /** Extra stack parameters for the rendered template, merged over `stackParams`. */
+  getExtraStackParams?: (rendered: {
+    templateSha: string;
+    blueprint: RenderedIacBlueprint;
+  }) => Promise<Record<string, string> | undefined>;
   /** Package's static quick-create URL; the launch URL keeps its console host and query params. */
   staticUrl?: string;
 }
@@ -77,6 +83,7 @@ export const renderArtifactTemplate = async ({
   templateSha,
   deploymentId,
   stackParams,
+  getExtraStackParams,
   staticUrl,
 }: RenderArtifactTemplateParams): Promise<ArtifactRenderResult> => {
   const { data, error } = await sendRenderIacTemplate({
@@ -98,11 +105,15 @@ export const renderArtifactTemplate = async ({
     return { status: 'failed' };
   }
 
+  const extraStackParams = await getExtraStackParams?.({
+    templateSha: data.templateSha,
+    blueprint: data.blueprint,
+  });
   const launchUrl = getArtifactLaunchUrl({
     provider,
     artifactUrl: data.artifactUrl,
     deploymentId,
-    stackParams,
+    stackParams: extraStackParams ? { ...stackParams, ...extraStackParams } : stackParams,
     staticUrl,
   });
   return launchUrl
