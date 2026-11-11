@@ -42,6 +42,7 @@ import type { ListRequest } from '../inventory/types';
 import type {
   GetTypesResponse,
   InventoryType,
+  InventoryTypeColumn,
   ListQueryDiagnostic,
   ListResponse,
   UnavailableColumn,
@@ -93,6 +94,9 @@ const toQueryDiagnostic = (
   };
 };
 
+const toResponseColumns = (columns: OutputColumn[]): InventoryTypeColumn[] =>
+  columns.map(({ name, kind }) => ({ name, kind }));
+
 const restrictProvenance = (provenance: Provenance, rows: InventoryRow[]): Provenance =>
   Object.fromEntries(
     rows.flatMap((row) => {
@@ -140,9 +144,8 @@ export class InventoryService {
    * Throws `InventoryTypeNotFoundError` when no `dynamic` definition is registered for the type and `InventoryTypeDefinitionError` when the definition cannot be turned into queries. A
    * source whose probe failed runs no plan, and a query that fails or reads nothing usable is
    * reported in `errors[]`; neither fails the request. A partial result is also reported in
-   * `errors[]` and its rows are kept. A failed probe or query or a partial result makes `total`
-   * null, since the entities of that source are unknown; `truncated` is true only when the row
-   * limit left rows out. `queries[]` lists every plan query sent, `provenance` covers the returned
+   * `errors[]` and its rows are kept. `truncated` is true only when the row limit left rows out.
+   * `queries[]` lists every plan query sent, `provenance` covers the returned
    * rows only, and `took` is the wall time of the whole call.
    */
   list = async ({ type, window, limit, signal }: ListRequest): Promise<ListResponse> => {
@@ -161,7 +164,6 @@ export class InventoryService {
     );
 
     const errors: SourceError[] = [...probeErrors];
-    const failedQueries = outcomes.filter(({ status }) => status === 'rejected').length;
     const unavailableColumns: UnavailableColumn[] = [];
     const results = outcomes.flatMap((outcome, planIndex): PlanResult[] => {
       const plan = plans[planIndex];
@@ -170,7 +172,7 @@ export class InventoryService {
         return [];
       }
       const { columns: resultColumns, rows, isPartial } = outcome.value;
-      const result: PlanResult = { plan, columns: resultColumns, rows, isPartial };
+      const result: PlanResult = { plan, columns: resultColumns, rows };
       if (isPartial) {
         errors.push({
           indexPattern: plan.indexPattern,
@@ -193,16 +195,13 @@ export class InventoryService {
 
     const merged = mergeRows(results, columns);
     const ordered = orderRows(merged.rows);
-    const { total, truncated } = summarizeResults(results, limit, ordered.length);
+    const { truncated } = summarizeResults(results, limit, ordered.length);
     const rows = fillColumns(applyLimit(ordered, limit), columns);
-    // A plan that read nothing usable is not a failure: its pattern holds no data the user can read.
-    const incomplete = probeErrors.length > 0 || failedQueries > 0;
 
     return {
-      columns: merged.columns,
+      columns: toResponseColumns(columns),
       rows,
       provenance: restrictProvenance(merged.provenance, rows),
-      total: incomplete ? null : total,
       truncated,
       took: Date.now() - startedAt,
       queries: outcomes.map((outcome, planIndex) =>
@@ -305,7 +304,7 @@ export class InventoryService {
       name,
       description,
       identityFields: identityPlan.groupingFields,
-      columns: columns.map(({ name: columnName, kind }) => ({ name: columnName, kind })),
+      columns: toResponseColumns(columns),
       sources: sources.map(({ indexPattern, filter }) => ({ indexPattern, filter })),
     };
   };

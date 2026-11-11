@@ -22,8 +22,8 @@ const decisionTreesConfigSchema = schema.object({
   // Governs the decision-tree reinforcement agent end to end: the post-execution hook on the
   // investigator, the hydrate step that materializes trees into the sandbox, the agent's own
   // tools, the decision-tree AI index, and the Decision Trees tab in the significant events app.
-  // Trees are edited in the sandbox and read the Wiki investigator context, so this still
-  // requires wiki.enabled (and sandbox) at runtime.
+  // Trees are edited in the sandbox, so this still requires sandbox at runtime. It does not
+  // require wiki.enabled.
   enabled: schema.boolean({ defaultValue: true }),
 });
 

@@ -355,7 +355,9 @@ export class SlackAppService {
               spaces: ['*'],
               feature: {
                 nightshift: ['minimal_all'],
-                agentBuilder: ['minimal_all'],
+                // `minimal_all` leaves out the sub-feature that starts a conversation with an
+                // agent bound to a service account, like the Nightshift assistant.
+                agentBuilder: ['minimal_all', 'invoke_bound_agents'],
                 actions: ['read'],
                 workflowsManagement: ['read'],
               },

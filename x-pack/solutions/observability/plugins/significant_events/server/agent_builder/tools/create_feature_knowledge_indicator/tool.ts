@@ -25,6 +25,7 @@ import {
   resolveSourcesBySlugOrId,
   toSourceRef,
 } from '../../utils/resolve_source_slugs';
+import { trackTelemetryBestEffort } from '../bulk_write';
 import { createFeatureKnowledgeIndicatorToolHandler } from './handler';
 
 export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID =
@@ -119,11 +120,18 @@ export function createFeatureKnowledgeIndicatorTool({
           logger,
         });
 
-        telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
-          ki_kind: 'feature',
-          tool_id: 'ki_feature_create',
-          success: true,
-          source_id: source.id,
+        trackTelemetryBestEffort({
+          logger,
+          description: 'ki_feature_create telemetry',
+          track: () =>
+            telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
+              ki_kind: 'feature',
+              tool_id: 'ki_feature_create',
+              success: true,
+              source_id: source.id,
+              space_id: request.spaceId,
+              knowledge_indicator_id: id,
+            }),
         });
 
         return {
@@ -149,12 +157,19 @@ export function createFeatureKnowledgeIndicatorTool({
           logger.debug(String(error));
         }
 
-        telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
-          ki_kind: 'feature',
-          tool_id: 'ki_feature_create',
-          success: false,
-          source_id: sourceId,
-          error_message: message,
+        trackTelemetryBestEffort({
+          logger,
+          description: 'failed ki_feature_create telemetry',
+          track: () =>
+            telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
+              ki_kind: 'feature',
+              tool_id: 'ki_feature_create',
+              success: false,
+              source_id: sourceId,
+              space_id: request.spaceId,
+              knowledge_indicator_id: featureInput.id,
+              error_message: message,
+            }),
         });
 
         return {
