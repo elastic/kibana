@@ -295,6 +295,16 @@ describe('SubjectView alert flyout', () => {
     expect(flyout).toHaveAttribute('data-href', '/app/observability/alerts/alert-1');
   });
 
+  it('opens the flyout from a button when the alert has no link', async () => {
+    renderView({ ...alert, snapshot: { rule_name: 'High latency' } }, { http: {} as never });
+
+    const row = screen.getByTestId('investigationSubject-alert');
+    expect(row.tagName).toBe('BUTTON');
+    fireEvent.click(row);
+
+    expect(await screen.findByTestId('subjectFlyoutStub')).toHaveTextContent('alert-1');
+  });
+
   it('lets the browser handle a new-tab click', async () => {
     renderView(alert, { http: {} as never });
 
@@ -320,6 +330,26 @@ describe('SubjectView alert flyout', () => {
 
     await waitFor(() => expect(navigate).toHaveBeenCalledWith({ alertId: 'alert-1' }));
     expect(screen.queryByTestId('subjectFlyoutStub')).not.toBeInTheDocument();
+  });
+});
+
+describe('SubjectView significant event with a registered flyout', () => {
+  const event = {
+    ...base,
+    subjectType: 'significant_event' as const,
+    subjectId: 'event-1',
+    summary: 'Checkout errors spiked',
+    snapshot: { source: 'elastic.example' },
+  };
+
+  it('opens the flyout on click although the event has no link', async () => {
+    renderView(event, { getAlertFlyout: () => () => null });
+
+    const row = screen.getByTestId('investigationSubject-significant_event');
+    expect(row.tagName).toBe('BUTTON');
+    fireEvent.click(row);
+
+    expect(await screen.findByTestId('subjectFlyoutStub')).toHaveTextContent('event-1');
   });
 });
 
@@ -504,17 +534,13 @@ describe('SubjectList', () => {
     // The alerts are on that page, not under the row.
     expect(screen.queryByTestId('investigationSubject-alert')).not.toBeInTheDocument();
 
-    fireEvent.click(summary);
+    expect(summary).toHaveAttribute('target', '_blank');
+    expect(summary).toHaveAttribute('rel', 'noopener noreferrer');
+    const click = createEvent.click(summary, { bubbles: true, cancelable: true });
+    fireEvent(summary, click);
 
-    await waitFor(() =>
-      expect(navigate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          filters: expect.objectContaining({
-            queryString: expect.stringContaining('kibana.alert.uuid: ("a-1" or "a-2" or "a-3")'),
-          }),
-        })
-      )
-    );
+    expect(click.defaultPrevented).toBe(false);
+    expect(navigate).not.toHaveBeenCalled();
   });
 });
 

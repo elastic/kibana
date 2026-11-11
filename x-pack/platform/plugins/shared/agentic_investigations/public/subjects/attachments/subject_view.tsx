@@ -9,7 +9,7 @@ import React, { useMemo, useState } from 'react';
 import { FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { IconType } from '@elastic/eui';
-import { EuiIcon, EuiPanel, EuiText, euiTextTruncate, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiIconTip, EuiPanel, EuiText, euiTextTruncate, useEuiTheme } from '@elastic/eui';
 import type {
   InvestigationSubject,
   InvestigationSubjectType,
@@ -19,6 +19,8 @@ import { getSubjectDisplayType, getSubjectTitle, type SubjectRowData } from './s
 import { useAlertsListLink, useSubjectLink } from './subject_link';
 import { useSubjectFlyout } from './use_subject_flyout';
 import {
+  OPEN_IN_FLYOUT,
+  OPEN_NEW_TAB,
   OPENS_IN_NEW_TAB,
   TRIGGER_LABEL,
   alertsCountLabel,
@@ -84,11 +86,12 @@ interface CompactRowProps {
   tone: SubjectIconTone;
   title: string;
   description: React.ReactNode;
-  /** Makes the row a link; Slack threads open in a new tab. */
+  /** Makes the row a link; an external link opens in a new tab. */
   href?: string;
   isExternal?: boolean;
-  /** Opens `href` inside Kibana instead of loading the page again. */
+  /** Opens `href` inside Kibana instead of loading the page again, or opens the flyout. */
   onLinkClick?: (event: React.MouseEvent) => void;
+  opensFlyout?: boolean;
   /** Makes the row a button that shows or hides more rows. */
   onToggle?: () => void;
   isExpanded?: boolean;
@@ -109,16 +112,17 @@ const CompactRow = ({
   href,
   isExternal = false,
   onLinkClick,
+  opensFlyout = false,
   onToggle,
   isExpanded,
   isNested = false,
   'data-test-subj': dataTestSubj,
 }: CompactRowProps) => {
   const { euiTheme } = useEuiTheme();
-  const isInteractive = href !== undefined || onToggle !== undefined;
+  const isInteractive = href !== undefined || onToggle !== undefined || opensFlyout;
+  const hasTrailingIcon = onToggle !== undefined || opensFlyout || isExternal;
+  const isTrailingHoverOnly = onToggle === undefined;
   const toggleIcon = isExpanded ? 'chevronSingleUp' : 'chevronSingleDown';
-  const trailingIcon = onToggle ? toggleIcon : 'external';
-  const hasTrailingIcon = onToggle !== undefined || isExternal;
 
   const rowStyles = css`
     display: grid;
@@ -137,6 +141,7 @@ const CompactRow = ({
     font: inherit;
     text-align: start;
     text-decoration: none;
+    ${isTrailingHoverOnly && `--subject-trailing-opacity: 0;`}
     ${isInteractive &&
     css`
       cursor: pointer;
@@ -144,11 +149,20 @@ const CompactRow = ({
         background: ${euiTheme.colors.backgroundBaseInteractiveHover};
         text-decoration: none;
       }
+      &:hover,
+      &:focus-visible {
+        --subject-trailing-opacity: 1;
+      }
       &:focus-visible {
         outline: ${euiTheme.focus.width} solid ${euiTheme.focus.color};
         outline-offset: -${euiTheme.focus.width};
       }
     `}
+  `;
+  const trailingStyles = css`
+    display: inline-flex;
+    opacity: var(--subject-trailing-opacity, 1);
+    transition: opacity ${euiTheme.animation.fast} ease-in;
   `;
   const textStyles = css`
     display: flex;
@@ -183,15 +197,30 @@ const CompactRow = ({
           {description}
         </EuiText>
       </span>
-      {hasTrailingIcon && (
-        <EuiIcon
-          type={trailingIcon}
-          size="s"
-          color="subdued"
-          {...(isExternal
-            ? { 'aria-label': OPENS_IN_NEW_TAB, 'data-test-subj': 'investigationSubjectExternal' }
-            : { 'aria-hidden': true })}
-        />
+      {onToggle !== undefined && <EuiIcon type={toggleIcon} size="s" color="subdued" aria-hidden />}
+      {onToggle === undefined && opensFlyout && (
+        <span css={trailingStyles}>
+          <EuiIconTip
+            type="maximize"
+            size="s"
+            color="subdued"
+            content={OPEN_IN_FLYOUT}
+            aria-label={OPEN_IN_FLYOUT}
+            iconProps={{ tabIndex: -1 }}
+          />
+        </span>
+      )}
+      {onToggle === undefined && !opensFlyout && isExternal && (
+        <span css={trailingStyles}>
+          <EuiIconTip
+            type="external"
+            size="s"
+            color="subdued"
+            content={OPEN_NEW_TAB}
+            aria-label={OPENS_IN_NEW_TAB}
+            iconProps={{ tabIndex: -1, 'data-test-subj': 'investigationSubjectExternal' }}
+          />
+        </span>
       )}
     </>
   );
@@ -218,6 +247,13 @@ const CompactRow = ({
         aria-expanded={isExpanded}
         data-test-subj={dataTestSubj}
       >
+        {content}
+      </button>
+    );
+  }
+  if (opensFlyout) {
+    return (
+      <button type="button" css={rowStyles} onClick={onLinkClick} data-test-subj={dataTestSubj}>
         {content}
       </button>
     );
@@ -271,7 +307,11 @@ export const SubjectRow: React.FC<{ subject: SubjectRowData; isNested?: boolean 
   isNested = false,
 }) => {
   const { href, onClick: onLinkClick, isExternal } = useSubjectLink(subject);
-  const { onClick: onRowClick, flyout } = useSubjectFlyout(subject, href, { onLinkClick });
+  const {
+    onClick: onRowClick,
+    flyout,
+    canOpenFlyout,
+  } = useSubjectFlyout(subject, href, { onLinkClick });
   const displayType = getSubjectDisplayType(subject);
 
   return (
@@ -283,7 +323,8 @@ export const SubjectRow: React.FC<{ subject: SubjectRowData; isNested?: boolean 
         description={getSubjectDescription(subject, isNested)}
         href={href}
         isExternal={isExternal}
-        onLinkClick={href === undefined ? undefined : onRowClick}
+        onLinkClick={onRowClick}
+        opensFlyout={canOpenFlyout}
         isNested={isNested}
         data-test-subj={`investigationSubject-${subject.type}`}
       />
@@ -299,7 +340,7 @@ const subjectKey = ({ type, id }: SubjectRowData): string => `${type}:${id}`;
  * to them. Without that list (alerting v2 not available) the row lists the alerts inline instead.
  */
 const AlertsSubjectRows: React.FC<{ alerts: SubjectRowData[] }> = ({ alerts }) => {
-  const { href, onClick } = useAlertsListLink(alerts);
+  const { href } = useAlertsListLink(alerts);
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
@@ -310,7 +351,7 @@ const AlertsSubjectRows: React.FC<{ alerts: SubjectRowData[] }> = ({ alerts }) =
         title={alertsCountLabel(alerts.length)}
         description={TRIGGER_LABEL}
         href={href}
-        onLinkClick={onClick}
+        isExternal={href !== undefined}
         onToggle={href === undefined ? () => setIsExpanded((expanded) => !expanded) : undefined}
         isExpanded={href === undefined ? isExpanded : undefined}
         data-test-subj="investigationSubject-alerts"

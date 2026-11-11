@@ -7,7 +7,7 @@
 
 import React, { Suspense, useState } from 'react';
 import { css, keyframes } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import type { HypothesisTreeInput } from './build_hypothesis_graph';
 import {
   OPEN_HYPOTHESIS_TREE_LABEL,
@@ -88,14 +88,27 @@ export const HypothesisTreeCard = ({
 
   return (
     <>
-      <EuiPanel
-        hasBorder
-        hasShadow={false}
-        paddingSize="m"
+      <button
+        type="button"
         css={css`
+          box-sizing: border-box;
+          inline-size: 100%;
+          margin: 0;
+          padding: ${euiTheme.size.base};
+          border: ${euiTheme.border.thin};
+          border-radius: ${euiTheme.size.m};
+          background: transparent;
+          color: inherit;
+          font: inherit;
+          text-align: start;
+          cursor: pointer;
           &:hover,
           &:focus-visible {
-            background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+            background: ${euiTheme.colors.backgroundBaseInteractiveHover};
+          }
+          &:focus-visible {
+            outline: ${euiTheme.focus.width} solid ${euiTheme.focus.color};
+            outline-offset: -${euiTheme.focus.width};
           }
         `}
         onClick={() => setIsOpen(true)}
@@ -131,7 +144,7 @@ export const HypothesisTreeCard = ({
             <EuiIcon type="chevronSingleRight" color="subdued" aria-hidden={true} />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPanel>
+      </button>
       {isOpen && (
         <Suspense fallback={null}>
           <LazyHypothesisTreeFlyout input={input} onClose={() => setIsOpen(false)} />
