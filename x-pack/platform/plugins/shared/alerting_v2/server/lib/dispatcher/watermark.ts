@@ -15,7 +15,7 @@ import type { DispatcherPipelineInput, DispatcherPipelineResult } from './types'
  *   commit_failed (an alert action write failed), or inline_stats_too_large (scan query
  *   rejected): no advance.
  * - No actions: window fully consumed. Advance to windowEnd.
- * - Truncated (row count === ESQL_QUERY_ROW_LIMIT): advance to the last fetched
+ * - Truncated (row count === `dispatcher.run.alerts.max`): advance to the last fetched
  *   alert's timestamp (the truncation edge); the deferred tail is re-read next tick.
  * - All other outcomes (no_alerts, normal completion): advance to windowEnd.
  *
