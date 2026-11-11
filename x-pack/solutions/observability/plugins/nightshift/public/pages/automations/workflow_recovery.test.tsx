@@ -49,6 +49,9 @@ it.each([true, false])('offers explicit recovery preserving desired enabled=%s',
     </I18nProvider>
   );
   expect(screen.getByText('Needs repair')).toBeInTheDocument();
+  expect(screen.getByTestId('automationWorkflowWarning')).toHaveTextContent(
+    'The workflow used by this automation was deleted. Repair recreates it from the saved automation configuration'
+  );
   fireEvent.click(screen.getByRole('button', { name: isEnabled ? 'Repair and enable' : 'Repair' }));
   expect(mockRepair).toHaveBeenCalledWith(selected);
 });
@@ -75,20 +78,43 @@ it('offers Retry without claiming deletion when verification is unavailable', ()
   fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
   expect(mockRefresh).toHaveBeenCalled();
 });
-it('disables Run and offers repair from the list row actions', () => {
+it('explains enabled-state repair without claiming the workflow was deleted', () => {
+  render(
+    <I18nProvider>
+      <AutomationWorkflowWarning
+        automation={{ ...automation, backingWorkflow: { state: 'out_of_sync' } }}
+        canManage
+      />
+    </I18nProvider>
+  );
+  expect(screen.getByTestId('automationWorkflowWarning')).toHaveTextContent(
+    'The workflow’s enabled state no longer matches this automation.'
+  );
+  expect(screen.getByTestId('automationWorkflowWarning')).not.toHaveTextContent('was deleted');
+});
+it('disables other list row actions and offers repair', () => {
+  const onRun = jest.fn();
+  const onClone = jest.fn();
+  const onDelete = jest.fn();
   render(
     <I18nProvider>
       <AutomationActions
         automation={automation}
-        onRun={jest.fn()}
+        onRun={onRun}
         isRunPending={false}
-        onClone={jest.fn()}
-        onDelete={jest.fn()}
+        onClone={onClone}
+        onDelete={onDelete}
       />
     </I18nProvider>
   );
   fireEvent.click(screen.getByTestId('automationActions-automation'));
   expect(screen.getByTestId('runAutomation')).toBeDisabled();
+  expect(screen.getByTestId('cloneAutomation')).toBeDisabled();
+  expect(screen.getByTestId('deleteAutomation')).toBeDisabled();
+  fireEvent.click(screen.getByTestId('cloneAutomation'));
+  fireEvent.click(screen.getByTestId('deleteAutomation'));
+  expect(onClone).not.toHaveBeenCalled();
+  expect(onDelete).not.toHaveBeenCalled();
   fireEvent.click(screen.getByTestId('repairAutomation'));
   expect(mockRepair).toHaveBeenCalledWith(automation);
 });

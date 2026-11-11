@@ -71,7 +71,11 @@ import type { RunRange } from '../hooks/use_automation_usage';
 import { useGlobalLimit } from '../hooks/use_global_limit';
 import { AutomationUsageCell } from '../list/cells/usage_cell';
 import { RunsSparkline } from '../list/cells/runs_sparkline';
-import { AutomationWorkflowBadge, AutomationWorkflowWarning } from '../workflow_recovery';
+import {
+  AutomationWorkflowBadge,
+  AutomationWorkflowWarning,
+  getWorkflowRepairDisabledReason,
+} from '../workflow_recovery';
 import { InfoStrip } from './info_strip';
 import { RunHistory, STATUSES, type Run } from './run_history';
 import { RunDetail } from './run_detail';
@@ -211,6 +215,7 @@ export const AutomationDetailFlyout = ({
   const [values, setValues] = useState<AutomationFormValues>(originalValues);
   const updateAutomation = useUpdateAutomation();
   const toggleAutomation = useToggleAutomation();
+  const workflowRepairReason = getWorkflowRepairDisabledReason(automation);
   const isRunsTab = embedded ? embeddedRunsTab : pathname.endsWith('/runs');
   const isDirty = JSON.stringify(values) !== JSON.stringify(originalValues);
   const { data: catalog, isComplete } = useRuleCatalog();
@@ -330,6 +335,7 @@ export const AutomationDetailFlyout = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEditing, next, previous, selectedRun, isRunsTab, isInList, onSelectAutomation]);
   const startEditing = (changes: Partial<AutomationFormValues> = {}) => {
+    if (workflowRepairReason) return;
     setValues({ ...originalValues, ...changes });
     setIsNameInvalid(false);
     setShowValidationErrors(false);
@@ -343,6 +349,7 @@ export const AutomationDetailFlyout = ({
     padding: ${euiTheme.size.base};
   `;
   const save = () => {
+    if (workflowRepairReason) return;
     if (!values.trigger || !isTriggerValid(values.trigger) || blocker) return;
     setShowValidationErrors(true);
     const isNameMissing = !values.name.trim();
@@ -479,13 +486,17 @@ export const AutomationDetailFlyout = ({
                       {
                         title: labels.enabled,
                         value: (
-                          <EuiToolTip content={editDisabledReason}>
+                          <EuiToolTip content={editDisabledReason ?? workflowRepairReason}>
                             <EuiSwitch
                               compressed
                               showLabel={false}
                               label={labels.enabled}
                               checked={automation.isEnabled}
-                              disabled={!canManage}
+                              disabled={
+                                !canManage ||
+                                Boolean(workflowRepairReason) ||
+                                toggleAutomation.isLoading
+                              }
                               onChange={(event) =>
                                 toggleAutomation.mutate({
                                   id: automation.id,
@@ -566,8 +577,16 @@ export const AutomationDetailFlyout = ({
             )}
             <EuiFlyoutBody>
               <div css={bodyCss}>
+                {isEditing && (
+                  <AutomationWorkflowWarning
+                    automation={automation}
+                    canManage={canManage}
+                    editDisabledReason={editDisabledReason}
+                  />
+                )}
                 {isEditing ? (
                   <AutomationFormBody
+                    readOnly={Boolean(workflowRepairReason)}
                     usedToday={usedToday}
                     values={values}
                     tagSuggestions={automations.flatMap(({ tags }) => tags ?? [])}
@@ -624,7 +643,7 @@ export const AutomationDetailFlyout = ({
                       readOnly
                       showIdentityFields={false}
                       onRaiseLimit={
-                        canManage
+                        canManage && !workflowRepairReason
                           ? (limit) => startEditing({ dailyDispatchLimit: String(limit) })
                           : undefined
                       }
@@ -663,7 +682,7 @@ export const AutomationDetailFlyout = ({
                     >
                       {labels.cancel}
                     </EuiButtonEmpty>
-                    <EuiToolTip content={blocker}>
+                    <EuiToolTip content={workflowRepairReason ?? blocker}>
                       <EuiButton
                         fill
                         data-test-subj="automationSaveButton"
@@ -672,7 +691,12 @@ export const AutomationDetailFlyout = ({
                           element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_DETAIL_FLYOUT,
                         })}
                         size="s"
-                        disabled={!valid || !isDirty || updateAutomation.isLoading}
+                        disabled={
+                          Boolean(workflowRepairReason) ||
+                          !valid ||
+                          !isDirty ||
+                          updateAutomation.isLoading
+                        }
                         onClick={save}
                       >
                         {labels.save}
@@ -693,18 +717,21 @@ export const AutomationDetailFlyout = ({
                 ) : (
                   canManage && (
                     <>
-                      <EuiButton
-                        data-test-subj="automationEditButton"
-                        {...getEbtProps({
-                          action: NIGHTSHIFT_EBT_ACTIONS.EDIT_AUTOMATION,
-                          element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_DETAIL_FLYOUT,
-                        })}
-                        size="s"
-                        iconType="pencil"
-                        onClick={() => startEditing()}
-                      >
-                        {labels.edit}
-                      </EuiButton>
+                      <EuiToolTip content={workflowRepairReason}>
+                        <EuiButton
+                          data-test-subj="automationEditButton"
+                          {...getEbtProps({
+                            action: NIGHTSHIFT_EBT_ACTIONS.EDIT_AUTOMATION,
+                            element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_DETAIL_FLYOUT,
+                          })}
+                          size="s"
+                          iconType="pencil"
+                          disabled={Boolean(workflowRepairReason)}
+                          onClick={() => startEditing()}
+                        >
+                          {labels.edit}
+                        </EuiButton>
+                      </EuiToolTip>
                       <EuiPopover
                         aria-label={labels.actions}
                         isOpen={isActionsOpen}
@@ -714,6 +741,8 @@ export const AutomationDetailFlyout = ({
                         button={
                           <EuiButton
                             data-test-subj="automationActionsButton"
+                            disabled={Boolean(workflowRepairReason)}
+                            title={workflowRepairReason}
                             size="s"
                             fill
                             iconType="chevronSingleDown"
@@ -751,6 +780,8 @@ export const AutomationDetailFlyout = ({
                                       {
                                         name: labels.clone,
                                         icon: cloneActionIcon,
+                                        disabled: Boolean(workflowRepairReason),
+                                        toolTipContent: workflowRepairReason,
                                         'data-test-subj': 'automationCloneButton',
                                         ...getEbtProps({
                                           action: NIGHTSHIFT_EBT_ACTIONS.CLONE_AUTOMATION,
@@ -769,6 +800,8 @@ export const AutomationDetailFlyout = ({
                                   name: labels.delete,
                                   icon: deleteActionIcon,
                                   color: 'danger',
+                                  disabled: Boolean(workflowRepairReason),
+                                  toolTipContent: workflowRepairReason,
                                   'data-test-subj': 'automationDeleteButton',
                                   ...getEbtProps({
                                     action: NIGHTSHIFT_EBT_ACTIONS.DELETE_AUTOMATION,

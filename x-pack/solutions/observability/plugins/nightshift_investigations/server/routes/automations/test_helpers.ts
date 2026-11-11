@@ -25,6 +25,7 @@ export const createServiceAccountService = () => ({
 
 export const createWorkflowService = () => ({
   withLock: jest.fn().mockImplementation((_spaceId, _id, callback) => callback()),
+  assertAvailable: jest.fn().mockResolvedValue(undefined),
   getStates: jest
     .fn()
     .mockImplementation(

@@ -26,6 +26,7 @@ import { AutomationActions } from './cells/row_actions';
 import { RunCountCell } from './cells/run_count_cell';
 import { AutomationUsageCell } from './cells/usage_cell';
 import { listLabels, runCountColumns } from './translations';
+import { getWorkflowRepairDisabledReason, needsWorkflowRepair } from '../workflow_recovery';
 
 const INTERACTIVE_ELEMENTS =
   'button, a, input, label, [role="switch"], [role="menu"], [role="dialog"], [role="listbox"]';
@@ -145,7 +146,7 @@ export const AutomationsTable = ({
       width: '96px',
       sortable: true,
       render: (isEnabled: boolean, automation: Automation) => (
-        <EuiToolTip content={editDisabledReason}>
+        <EuiToolTip content={editDisabledReason ?? getWorkflowRepairDisabledReason(automation)}>
           <EuiSwitch
             label={i18n.translate('xpack.nightshift.automations.toggleLabel', {
               defaultMessage: '{action} {name}',
@@ -154,7 +155,7 @@ export const AutomationsTable = ({
             showLabel={false}
             compressed
             checked={isEnabled}
-            disabled={!canManage || toggleAutomation.isLoading}
+            disabled={!canManage || needsWorkflowRepair(automation) || toggleAutomation.isLoading}
             {...getEbtProps({
               action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_AUTOMATION,
               element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_LIST,

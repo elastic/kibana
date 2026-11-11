@@ -24,9 +24,20 @@ export const workflowRecoveryLabels = {
   unknown: i18n.translate('xpack.nightshift.automations.workflow.unknown', {
     defaultMessage: 'Unable to verify backing workflow',
   }),
-  explanation: i18n.translate('xpack.nightshift.automations.workflow.explanation', {
+  deletedExplanation: i18n.translate('xpack.nightshift.automations.workflow.deletedDescription', {
     defaultMessage:
-      'The backing workflow is missing or its enabled state has changed. Automatic investigations cannot run reliably. Repair the workflow to restore the saved configuration.',
+      'The workflow used by this automation was deleted. Repair recreates it from the saved automation configuration, preserving run history and the enabled or paused state. Repair the workflow to use this automation or make changes.',
+  }),
+  outOfSyncExplanation: i18n.translate(
+    'xpack.nightshift.automations.workflow.outOfSyncDescription',
+    {
+      defaultMessage:
+        'The workflow’s enabled state no longer matches this automation. Repair regenerates the workflow from the saved automation configuration and restores its enabled or paused state, preserving run history. Repair the workflow to use this automation or make changes.',
+    }
+  ),
+  actionDisabled: i18n.translate('xpack.nightshift.automations.workflow.actionDisabledTooltip', {
+    defaultMessage:
+      'Repair the backing workflow before editing this automation or using other actions.',
   }),
   retry: i18n.translate('xpack.nightshift.automations.workflow.retry', {
     defaultMessage: 'Retry',
@@ -36,6 +47,9 @@ export const workflowRecoveryLabels = {
 export const needsWorkflowRepair = (automation: Automation): boolean =>
   automation.backingWorkflow?.state === 'missing' ||
   automation.backingWorkflow?.state === 'out_of_sync';
+
+export const getWorkflowRepairDisabledReason = (automation: Automation): string | undefined =>
+  needsWorkflowRepair(automation) ? workflowRecoveryLabels.actionDisabled : undefined;
 
 export const getRepairLabel = (automation: Automation): string =>
   automation.isEnabled
@@ -95,7 +109,13 @@ export const AutomationWorkflowWarning = ({
     <>
       <KbnWarningCallout
         title={needsRepair ? workflowRecoveryLabels.needsRepair : workflowRecoveryLabels.unknown}
-        text={needsRepair ? workflowRecoveryLabels.explanation : undefined}
+        text={
+          automation.backingWorkflow?.state === 'missing'
+            ? workflowRecoveryLabels.deletedExplanation
+            : automation.backingWorkflow?.state === 'out_of_sync'
+            ? workflowRecoveryLabels.outOfSyncExplanation
+            : undefined
+        }
         data-test-subj="automationWorkflowWarning"
         actionProps={{
           primary: needsRepair

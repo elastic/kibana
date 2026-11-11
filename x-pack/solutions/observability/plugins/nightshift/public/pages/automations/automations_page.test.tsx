@@ -163,6 +163,27 @@ describe('AutomationsPage', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
+  it('blocks the list toggle until the backing workflow is repaired', () => {
+    const automation = {
+      id: 'broken-1',
+      name: 'Health review',
+      isEnabled: true,
+      trigger: { rows: [{ kind: 'schedule', schedulePreset: 'hourly' }] },
+      execution: { promptTemplate: 'Review health.' },
+      completions: [],
+      runtime: {},
+      author: 'alice',
+      backingWorkflow: { state: 'missing' },
+    };
+    mockUseFetchAutomations.mockReturnValue({ data: { automations: [automation] } });
+    const mutate = jest.fn();
+    mockUseToggleAutomation.mockReturnValue({ mutate, isLoading: false });
+    renderPage();
+    expect(screen.getByTestId('automationToggle-broken-1')).toBeDisabled();
+    fireEvent.click(screen.getByTestId('automationToggle-broken-1'));
+    expect(mutate).not.toHaveBeenCalled();
+  });
+
   it.each([undefined, 'drop', 'queue', 'cancel_in_progress'] as const)(
     'handles an active execution with overlap policy %s in the row menu',
     async (overlapPolicy) => {

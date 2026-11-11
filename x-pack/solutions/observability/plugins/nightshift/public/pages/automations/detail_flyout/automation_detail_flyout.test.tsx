@@ -105,12 +105,12 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
     isRunPending?: boolean;
   } = {}) => {
     const history = createMemoryHistory({ initialEntries: ['/automations/automation-1'] });
-    render(
+    const flyout = (currentAutomation: Automation) => (
       <I18nProvider>
         <Router history={history}>
           <AutomationDetailFlyout
-            automations={[selectedAutomation]}
-            automation={selectedAutomation}
+            automations={[currentAutomation]}
+            automation={currentAutomation}
             canManage={canManage}
             editDisabledReason={editDisabledReason}
             usedToday={usedToday}
@@ -125,12 +125,46 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
         </Router>
       </I18nProvider>
     );
-    return history;
+    const { rerender } = render(flyout(selectedAutomation));
+    return { history, rerenderAutomation: (current: Automation) => rerender(flyout(current)) };
   };
 
   const startEditing = () => fireEvent.click(screen.getByTestId('automationEditButton'));
   const renameTo = (name: string) =>
     fireEvent.change(screen.getByTestId('automationName'), { target: { value: name } });
+
+  it.each(['missing', 'out_of_sync'] as const)(
+    'blocks editing, toggling and other actions until a %s workflow is repaired',
+    (state) => {
+      renderFlyout({ selectedAutomation: { ...automation, backingWorkflow: { state } } });
+      expect(screen.getByTestId('automationEditButton')).toBeDisabled();
+      expect(screen.getByRole('switch', { name: 'Enabled' })).toBeDisabled();
+      expect(screen.getByTestId('automationActionsButton')).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Repair and enable' })).toBeEnabled();
+      fireEvent.click(screen.getByTestId('automationEditButton'));
+      expect(screen.queryByTestId('automationSaveButton')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByRole('tab', { name: 'Run history' }));
+      expect(screen.getByRole('tab', { name: 'Run history' })).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
+    }
+  );
+
+  it('blocks an open edit form when a refresh discovers deletion and restores editing after repair', () => {
+    const { rerenderAutomation } = renderFlyout();
+    startEditing();
+    renameTo('Updated triage');
+    rerenderAutomation({ ...automation, backingWorkflow: { state: 'missing' } });
+    expect(screen.getByTestId('automationName')).toBeDisabled();
+    expect(screen.getByTestId('automationSaveButton')).toBeDisabled();
+    expect(screen.getByTestId('automationWorkflowWarning')).toHaveTextContent('was deleted');
+    fireEvent.click(screen.getByTestId('automationSaveButton'));
+    expect(mutate).not.toHaveBeenCalled();
+    rerenderAutomation({ ...automation, backingWorkflow: { state: 'available' } });
+    expect(screen.getByTestId('automationName')).toBeEnabled();
+    expect(screen.queryByTestId('automationWorkflowWarning')).not.toBeInTheDocument();
+  });
 
   it('runs an enabled automation from Actions and keeps the flyout open', async () => {
     const scheduled: Automation = {
@@ -139,7 +173,7 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
       trigger: { rows: [{ kind: 'schedule', schedulePreset: 'hourly' }] },
       execution: { promptTemplate: 'Review health.' },
     };
-    const history = renderFlyout({ selectedAutomation: scheduled });
+    const { history } = renderFlyout({ selectedAutomation: scheduled });
     fireEvent.click(screen.getByTestId('automationActionsButton'));
     fireEvent.click(screen.getByTestId('automationRunButton'));
     expect(onRun).toHaveBeenCalledWith(scheduled);
@@ -421,7 +455,7 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
   });
 
   it('blocks route changes with unsaved changes and replays the app path without its prefix', () => {
-    const history = renderFlyout();
+    const { history } = renderFlyout();
 
     startEditing();
     renameTo('Renamed');
@@ -435,7 +469,7 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
   });
 
   it('opens another app after discarding unsaved changes', () => {
-    const history = renderFlyout();
+    const { history } = renderFlyout();
 
     startEditing();
     renameTo('Renamed');

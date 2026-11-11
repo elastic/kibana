@@ -100,17 +100,29 @@ const setup = (overrides: Partial<NightshiftAutomationAttributes> = {}) => {
   };
 };
 
-it('pauses a missing workflow without recreating it or losing configuration', async () => {
-  const { service, stored, workflows } = setup();
-  const result = await service.update(request, 'default', 'automation', { isEnabled: false });
-  expect(result).toMatchObject({ isEnabled: false, backingWorkflow: { state: 'missing' } });
-  expect(stored()).toMatchObject({
-    workflowId: 'deleted-workflow',
-    runtime: { dailyDispatchLimit: 7 },
-    execution: attributes.execution,
-  });
-  expect(workflows.createWorkflow).not.toHaveBeenCalled();
-});
+it.each([
+  { name: 'save', changes: { name: 'Updated health' } },
+  { name: 'pause', changes: { isEnabled: false } },
+  { name: 'enable', changes: { isEnabled: true } },
+])(
+  'requires explicit repair before $name when the workflow is deleted or out of sync',
+  async ({ changes }) => {
+    for (const enabled of [undefined, false]) {
+      const { service, stored, workflows, states, soClient } = setup();
+      if (enabled !== undefined) states.set('deleted-workflow', enabled);
+      await expect(service.update(request, 'default', 'automation', changes)).rejects.toMatchObject(
+        {
+          output: { statusCode: 409 },
+          message: expect.stringContaining('Repair'),
+        }
+      );
+      expect(stored()).toEqual(attributes);
+      expect(workflows.createWorkflow).not.toHaveBeenCalled();
+      expect(workflows.updateWorkflow).not.toHaveBeenCalled();
+      expect(soClient.update).not.toHaveBeenCalled();
+    }
+  }
+);
 
 it.each([true, false])(
   'repairs a missing workflow with desired enabled=%s, preserving its history and identity',
@@ -119,7 +131,7 @@ it.each([true, false])(
       isEnabled,
       previousWorkflowIds: ['older-workflow'],
     });
-    const result = await service.update(request, 'default', 'automation', {}, true);
+    const result = await service.repair(request, 'default', 'automation');
     expect(result).toMatchObject({
       id: 'automation',
       isEnabled,
@@ -134,7 +146,7 @@ it.each([true, false])(
     expect(generated.enabled).toBe(false);
     expect(generated.settings.run_as).toBe('kibana/nightshift_automations');
     expect(states.get('replacement-1')).toBe(isEnabled);
-    await service.update(request, 'default', 'automation', {}, true);
+    await service.repair(request, 'default', 'automation');
     expect(workflows.createWorkflow).toHaveBeenCalledTimes(1);
   }
 );
@@ -142,7 +154,7 @@ it.each([true, false])(
 it('serializes repair, save and pause and re-reads the latest saved configuration', async () => {
   const { service, stored, workflows, states } = setup();
   await Promise.all([
-    service.update(request, 'default', 'automation', {}, true),
+    service.repair(request, 'default', 'automation'),
     service.update(request, 'default', 'automation', { name: 'Updated health' }),
     service.update(request, 'default', 'automation', { isEnabled: false }),
   ]);
@@ -158,9 +170,9 @@ it('serializes repair, save and pause and re-reads the latest saved configuratio
 it('removes the disabled replacement if linking conflicts and leaves the original automation unchanged', async () => {
   const { service, soClient, stored, states } = setup();
   soClient.update.mockRejectedValueOnce(new Error('Version conflict'));
-  await expect(
-    service.update(request, 'default', 'automation', { name: 'Updated' })
-  ).rejects.toThrow('Version conflict');
+  await expect(service.repair(request, 'default', 'automation')).rejects.toThrow(
+    'Version conflict'
+  );
   expect(states.size).toBe(0);
   expect(stored()).toEqual(attributes);
 });
@@ -171,7 +183,7 @@ it('keeps a linked disabled replacement after activation fails and retries that 
     states.set(id, true);
     throw new Error('Unavailable after activation was written');
   });
-  await expect(service.update(request, 'default', 'automation', {}, true)).rejects.toThrow(
+  await expect(service.repair(request, 'default', 'automation')).rejects.toThrow(
     'could not be enabled'
   );
   expect(stored().workflowId).toBe('replacement-1');
@@ -179,7 +191,7 @@ it('keeps a linked disabled replacement after activation fails and retries that 
   expect(await service.getStates([{ id: 'automation', ...stored() }], 'default')).toEqual(
     new Map([['automation', { state: 'out_of_sync' }]])
   );
-  await service.update(request, 'default', 'automation', {}, true);
+  await service.repair(request, 'default', 'automation');
   expect(workflows.createWorkflow).toHaveBeenCalledTimes(1);
   expect(states.get('replacement-1')).toBe(true);
 });
@@ -191,7 +203,7 @@ it('does not classify an unavailable lookup or permissions failure as deletion',
     new Map([['automation', { state: 'unknown' }]])
   );
   workflows.getWorkflowStates.mockRejectedValueOnce(new Error('Search unavailable'));
-  await expect(service.update(request, 'default', 'automation', {}, true)).rejects.toThrow(
+  await expect(service.repair(request, 'default', 'automation')).rejects.toThrow(
     'Unable to verify'
   );
   serviceAccount.resolveAutomationRunAs.mockRejectedValueOnce(new Error('manage_security'));
@@ -202,15 +214,35 @@ it('does not classify an unavailable lookup or permissions failure as deletion',
   expect(soClient.update).not.toHaveBeenCalled();
 });
 
-it('recovers an external deletion racing an update only after confirming absence', async () => {
+it('blocks other mutations on missing or mismatched workflows and fails closed on unavailable verification', async () => {
+  const { service, states, workflows } = setup();
+  const automation = { id: 'automation', ...attributes };
+  await expect(service.assertAvailable(automation, 'default')).rejects.toMatchObject({
+    output: { statusCode: 409 },
+  });
+  states.set('deleted-workflow', false);
+  await expect(service.assertAvailable(automation, 'default')).rejects.toThrow('Repair');
+  workflows.getWorkflowStates.mockRejectedValueOnce(new Error('Unavailable'));
+  await expect(service.assertAvailable(automation, 'default')).rejects.toMatchObject({
+    output: { statusCode: 503 },
+  });
+  states.set('deleted-workflow', true);
+  await expect(service.assertAvailable(automation, 'default')).resolves.toBeUndefined();
+});
+
+it('requires Repair after an external deletion races an update and preserves the saved configuration', async () => {
   const { service, workflows, states } = setup();
   states.set('deleted-workflow', true);
   workflows.updateWorkflow.mockImplementationOnce(async () => {
     states.delete('deleted-workflow');
     throw new Error('Not found');
   });
-  const result = await service.update(request, 'default', 'automation', { name: 'Updated' });
-  expect(result).toMatchObject({ name: 'Updated', workflowId: 'replacement-1' });
+  await expect(
+    service.update(request, 'default', 'automation', { name: 'Updated' })
+  ).rejects.toThrow('Repair');
+  expect(workflows.createWorkflow).not.toHaveBeenCalled();
+  const result = await service.repair(request, 'default', 'automation');
+  expect(result).toMatchObject({ name: attributes.name, workflowId: 'replacement-1' });
 });
 
 it('propagates an update failure when the original workflow still exists', async () => {
@@ -226,7 +258,7 @@ it('propagates an update failure when the original workflow still exists', async
 it('returns a retryable conflict when another process holds the automation lock', async () => {
   const { service, acquireLock, soClient } = setup();
   acquireLock.mockRejectedValueOnce(new LockAcquisitionError('Held'));
-  await expect(service.update(request, 'default', 'automation', {}, true)).rejects.toMatchObject({
+  await expect(service.repair(request, 'default', 'automation')).rejects.toMatchObject({
     output: { statusCode: 409 },
   });
   expect(soClient.get).not.toHaveBeenCalled();
@@ -240,7 +272,7 @@ it('logs failed cleanup responses with identifiers while retaining the original 
     total: 1,
     deleted: 0,
   });
-  await expect(service.update(request, 'default', 'automation', {}, true)).rejects.toThrow(
+  await expect(service.repair(request, 'default', 'automation')).rejects.toThrow(
     'Version conflict'
   );
   expect(states.get('replacement-1')).toBe(false);

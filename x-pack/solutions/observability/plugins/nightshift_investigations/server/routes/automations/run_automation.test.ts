@@ -10,7 +10,11 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { parse } from 'yaml';
 import { generateWorkflowYaml } from '../../lib/automations/generate_workflow_yaml';
 import { runAutomationRoute } from './run_automation';
-import { createRouteContext, createServiceAccountService } from './test_helpers';
+import {
+  createRouteContext,
+  createServiceAccountService,
+  createWorkflowService,
+} from './test_helpers';
 
 const { handler, params } = runAutomationRoute['POST /internal/nightshift/automations/{id}/run'];
 const soClient = { get: jest.fn() };
@@ -47,6 +51,7 @@ const call = async (spaceId = 'default') => {
     getAutomationsSoClient: jest.fn().mockReturnValue(soClient),
     getWorkflowsManagement,
     getInvestigatorServiceAccountService: () => serviceAccountService,
+    getAutomationWorkflowService: createWorkflowService,
     context,
   } as never);
 };

@@ -26,6 +26,6 @@ export const repairAutomationRoute = createNightshiftInvestigationsServerRoute({
   handler: async ({ request, params, getAutomationWorkflowService, context }) => {
     const spaceId =
       (await context.core).savedObjects.client.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
-    return getAutomationWorkflowService().update(request, spaceId, params.path.id, {}, true);
+    return getAutomationWorkflowService().repair(request, spaceId, params.path.id);
   },
 });

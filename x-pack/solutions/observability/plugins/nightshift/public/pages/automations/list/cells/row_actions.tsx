@@ -28,7 +28,11 @@ import {
   getRunAutomationDisabledReason,
   getManualRunQuotaDisabledReason,
 } from '../../utils/run_automation';
-import { getRepairLabel, needsWorkflowRepair } from '../../workflow_recovery';
+import {
+  getRepairLabel,
+  getWorkflowRepairDisabledReason,
+  needsWorkflowRepair,
+} from '../../workflow_recovery';
 import { listLabels } from '../translations';
 
 export const AutomationActions = ({
@@ -48,6 +52,7 @@ export const AutomationActions = ({
   const [isOpen, setIsOpen] = useState(false);
   const activity = useAutomationRunActivity(automation, { enabled: isOpen });
   const quotas = useRunQuotas({ enabled: isOpen, poll: isOpen });
+  const repairDisabledReason = getWorkflowRepairDisabledReason(automation);
   const runDisabledReason =
     getRunAutomationDisabledReason(automation, activity) ?? getManualRunQuotaDisabledReason(quotas);
   const allActionsLabel = useEuiI18n('euiCollapsedItemActions.allActionsTooltip', 'All actions');
@@ -116,6 +121,8 @@ export const AutomationActions = ({
           <EuiContextMenuItem
             key="clone"
             icon={cloneActionIcon}
+            disabled={Boolean(repairDisabledReason)}
+            toolTipContent={repairDisabledReason}
             onClick={(event: React.MouseEvent) => {
               setIsOpen(false);
               onClone();
@@ -132,6 +139,8 @@ export const AutomationActions = ({
             key="delete"
             icon={deleteActionIcon}
             color="danger"
+            disabled={Boolean(repairDisabledReason)}
+            toolTipContent={repairDisabledReason}
             onClick={(event: React.MouseEvent) => {
               setIsOpen(false);
               onDelete();

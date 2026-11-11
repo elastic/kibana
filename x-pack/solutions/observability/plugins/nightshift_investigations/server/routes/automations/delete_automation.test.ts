@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { conflict } from '@hapi/boom';
 import { httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { deleteAutomationRoute } from './delete_automation';
 import {
@@ -19,6 +20,7 @@ const soClient = savedObjectsClientMock.create();
 const deleteWorkflows = jest.fn();
 const getWorkflow = jest.fn();
 const serviceAccountService = createServiceAccountService();
+const workflowService = createWorkflowService();
 const call = () =>
   handler({
     request: httpServerMock.createKibanaRequest(),
@@ -26,7 +28,7 @@ const call = () =>
     getAutomationsSoClient: () => soClient,
     getWorkflowsManagement: () => ({ management: { deleteWorkflows, getWorkflow } }),
     getInvestigatorServiceAccountService: () => serviceAccountService,
-    getAutomationWorkflowService: createWorkflowService,
+    getAutomationWorkflowService: () => workflowService,
     context: createRouteContext(),
   } as never);
 
@@ -57,6 +59,16 @@ it('also deletes automations which have never dispatched', async () => {
   );
   await expect(call()).resolves.toEqual({});
   expect(soClient.delete).toHaveBeenCalledWith('nightshift-automation', 'auto-1');
+});
+
+it('requires repair before deleting an automation whose workflow is missing or out of sync', async () => {
+  workflowService.assertAvailable.mockRejectedValueOnce(conflict('Repair the backing workflow.'));
+  await expect(call()).rejects.toMatchObject({
+    output: { statusCode: 409 },
+    message: expect.stringContaining('Repair'),
+  });
+  expect(deleteWorkflows).not.toHaveBeenCalled();
+  expect(soClient.delete).not.toHaveBeenCalled();
 });
 
 it('still deletes the automation when deleting its unbound workflow fails', async () => {

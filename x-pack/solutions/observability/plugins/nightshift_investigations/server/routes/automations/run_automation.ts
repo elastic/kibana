@@ -45,6 +45,7 @@ export const runAutomationRoute = createNightshiftInvestigationsServerRoute({
     getAutomationsSoClient,
     getWorkflowsManagement,
     getInvestigatorServiceAccountService,
+    getAutomationWorkflowService,
     context,
   }) => {
     const workflowsManagement = getWorkflowsManagement();
@@ -56,6 +57,10 @@ export const runAutomationRoute = createNightshiftInvestigationsServerRoute({
       request,
       spaceId
     ).get<NightshiftAutomationAttributes>(NIGHTSHIFT_AUTOMATION_SO_TYPE, params.path.id);
+    await getAutomationWorkflowService().assertAvailable(
+      { id: params.path.id, ...automation },
+      spaceId
+    );
     if (!automation.isEnabled) {
       throw badRequest('Enable the automation before running it manually.');
     }
