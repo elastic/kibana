@@ -108,6 +108,15 @@ export function buildBuiltInTriggerOptions(euiTheme: UseEuiTheme['euiTheme']): A
       iconType: 'clock',
       iconColor: euiTheme.colors.textParagraph,
     },
+    {
+      id: 'page',
+      label: getTriggerName('page'),
+      description: i18n.translate('workflows.actionsMenu.pageDescription', {
+        defaultMessage: 'Trigger - When someone submits a form at a shareable URL',
+      }),
+      iconType: 'link',
+      iconColor: euiTheme.colors.vis.euiColorVis6,
+    },
   ];
 }
 

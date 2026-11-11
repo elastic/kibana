@@ -85,6 +85,18 @@ export function generateTriggerSnippet(
       parameters = {};
       break;
 
+    case 'page':
+      // A starter form: one required field, so the Inputs builder and the preview show something.
+      parameters = {
+        title: 'New page',
+        inputs: {
+          type: 'object',
+          properties: { message: { type: 'string', title: 'Message' } },
+          required: ['message'],
+        },
+      };
+      break;
+
     default:
       // Custom triggers: include on/condition so users can add a KQL filter (use defaultCondition when provided)
       parameters = {

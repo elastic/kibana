@@ -117,7 +117,12 @@ describe('getActionOptions', () => {
     expect(triggersGroup).toBeDefined();
     if (triggersGroup && 'options' in triggersGroup) {
       // Built-in triggers keep a fixed Manual → Alert → Schedule order (not A–Z).
-      expect(triggersGroup.options.map((opt) => opt.id)).toEqual(['manual', 'alert', 'scheduled']);
+      expect(triggersGroup.options.map((opt) => opt.id)).toEqual([
+        'manual',
+        'alert',
+        'scheduled',
+        'page',
+      ]);
     }
   });
 
@@ -136,7 +141,7 @@ describe('getActionOptions', () => {
 
     expect(triggersGroup).toBeDefined();
     if (triggersGroup && isActionGroup(triggersGroup)) {
-      const builtInCount = 3;
+      const builtInCount = 4;
       expect(triggersGroup.options).toHaveLength(builtInCount + 1);
 
       const casesOption = triggersGroup.options.find((opt) => opt.id === 'cases.updated');
@@ -175,12 +180,13 @@ describe('getActionOptions', () => {
 
     expect(triggersGroup).toBeDefined();
     if (triggersGroup && isActionGroup(triggersGroup)) {
-      expect(triggersGroup.options.slice(0, 3).map((opt) => opt.id)).toEqual([
+      expect(triggersGroup.options.slice(0, 4).map((opt) => opt.id)).toEqual([
         'manual',
         'alert',
         'scheduled',
+        'page',
       ]);
-      expect(triggersGroup.options.slice(3).map((opt) => opt.id)).toEqual([
+      expect(triggersGroup.options.slice(4).map((opt) => opt.id)).toEqual([
         'alerting.ruleCreated',
         'triggers.cases',
       ]);

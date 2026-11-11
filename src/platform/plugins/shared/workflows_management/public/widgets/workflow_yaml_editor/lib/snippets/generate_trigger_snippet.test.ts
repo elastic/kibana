@@ -24,6 +24,17 @@ describe('generateTriggerSnippet', () => {
     });
   });
 
+  describe('page trigger', () => {
+    it('starts a page with a title and one required input, without on.condition', () => {
+      const snippet = generateTriggerSnippet('page', { full: true });
+      expect(snippet).toContain('type: page');
+      expect(snippet).toContain('title: New page');
+      expect(snippet).toContain('message:');
+      expect(snippet).toContain('required:');
+      expect(snippet).not.toContain('condition:');
+    });
+  });
+
   describe('custom triggers with defaultCondition', () => {
     it('should include defaultCondition in the snippet when provided', () => {
       const snippet = generateTriggerSnippet('custom.my_trigger', {

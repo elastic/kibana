@@ -77,10 +77,10 @@ describe('build_trigger_options', () => {
   });
 
   describe('buildBuiltInTriggerOptions', () => {
-    it('returns manual, alert, and scheduled triggers', () => {
+    it('returns manual, alert, scheduled, and page triggers', () => {
       const result = buildBuiltInTriggerOptions(mockEuiTheme);
 
-      expect(result.map((option) => option.id)).toEqual(['manual', 'alert', 'scheduled']);
+      expect(result.map((option) => option.id)).toEqual(['manual', 'alert', 'scheduled', 'page']);
     });
   });
 
