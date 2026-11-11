@@ -6,30 +6,39 @@
  */
 
 import type { AnalyticsServiceSetup, AnalyticsServiceStart, Logger } from '@kbn/core/server';
-import type { Proposal } from '@kbn/proposals-common';
+import type {
+  Proposal,
+  ProposalConfidence,
+  ProposalDecision,
+  ProposalDecisionMode,
+  ProposalGate,
+  ProposalImpact,
+  ProposalOrigin,
+  ProposalStatus,
+} from '@kbn/proposals-common';
 
 export const PROPOSAL_DECIDED_EVENT_TYPE = 'proposals_proposal_decided';
 export const PROPOSAL_REOPENED_EVENT_TYPE = 'proposals_proposal_reopened';
 
 interface ProposalDecidedEventProps {
   proposal_id: string;
-  decision: string;
-  decision_mode?: string;
-  status: string;
-  gate?: string;
-  origin?: string;
+  decision: ProposalDecision;
+  decision_mode?: ProposalDecisionMode;
+  status: ProposalStatus;
+  gate?: ProposalGate;
+  origin?: ProposalOrigin;
   conversation_id: string;
-  confidence?: string;
-  impact?: string;
+  confidence?: ProposalConfidence;
+  impact?: ProposalImpact;
 }
 
 interface ProposalReopenedEventProps {
   proposal_id: string;
   successor_id: string;
-  origin?: string;
+  origin?: ProposalOrigin;
   conversation_id: string;
-  confidence?: string;
-  impact?: string;
+  confidence?: ProposalConfidence;
+  impact?: ProposalImpact;
 }
 
 /** Registers the proposals EBT event types. Call once, from the plugin's `setup`. */
