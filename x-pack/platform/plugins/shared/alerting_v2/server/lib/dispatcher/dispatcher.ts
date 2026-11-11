@@ -286,6 +286,8 @@ export class DispatcherService implements DispatcherServiceContract {
             spaceId: alert.space_id,
           })
         ),
+        // Terminal records only stop the re-read once searchable; see `DispatchStep.commit`.
+        refresh: 'wait_for',
       });
     } catch (writeErr) {
       const err = isError(writeErr) ? writeErr : new Error(String(writeErr));

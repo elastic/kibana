@@ -350,7 +350,7 @@ describe('DispatcherService', () => {
 
       expect(storageEsClient.bulk).toHaveBeenCalledWith({
         operations: expect.any(Array),
-        refresh: false,
+        refresh: 'wait_for',
       });
 
       const createOperations = bulkOperations().filter((_, index) => index % 2 === 0);
@@ -1558,9 +1558,11 @@ describe('DispatcherService', () => {
       expect(result.nextWatermark.toISOString()).toBe('2026-01-22T07:35:00.000Z');
       // Counter must reset
       expect(result.nextStuckTicks).toBe(0);
-      // Terminal unmatched records must have been bulk-indexed
+      // Terminal unmatched records must have been bulk-indexed, and be searchable before the
+      // next tick re-reads the overlap window.
       expect(escapeMockEsClient.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
+          refresh: 'wait_for',
           operations: expect.arrayContaining([
             expect.objectContaining({ create: expect.any(Object) }),
             expect.objectContaining({

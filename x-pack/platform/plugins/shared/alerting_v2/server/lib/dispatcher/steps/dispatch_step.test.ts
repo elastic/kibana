@@ -1187,6 +1187,20 @@ describe('DispatchStep', () => {
         last_event_timestamp: '2026-01-22T07:00:00.000Z',
       });
 
+      it('waits for the records to be searchable so the next tick dedups them', async () => {
+        await createStep().execute(
+          createDispatcherPipelineState({
+            dispatch: [createActionGroup({ id: 'group-1', policyId: 'p1', alerts: [alert] })],
+            policies,
+          }),
+          loggerService
+        );
+
+        expect(mockStorageService.bulkIndexDocs).toHaveBeenCalledWith(
+          expect.objectContaining({ refresh: 'wait_for' })
+        );
+      });
+
       it('records a dispatched alert with notified and fire after its chunk', async () => {
         const result = await createStep().execute(
           createDispatcherPipelineState({

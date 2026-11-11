@@ -206,6 +206,11 @@ export class DispatchStep implements DispatcherStep {
    * workflows they describe are already scheduled. A write that records nothing throws
    * `CommitFailedError` to stop scheduling: every workflow scheduled after it would also lack its
    * record and be dispatched again next tick.
+   *
+   * `refresh: 'wait_for'` is what makes the dedup hold: the next tick re-reads the overlap window
+   * and relies on `INLINE STATS last_fired` (`queries.ts`) seeing these rows to drop the alerts
+   * they record. Unlike event rows, action rows are not covered by `SETTLE_BUFFER_SECONDS`, so a
+   * tick starting within the refresh interval would dispatch the same group again.
    */
   private async commit(docs: AlertActionDocument[], logger: LoggerServiceContract): Promise<void> {
     if (docs.length === 0) {
@@ -217,6 +222,7 @@ export class DispatchStep implements DispatcherStep {
         this.storageService.bulkIndexDocs<AlertActionDocument>({
           index: ALERT_ACTIONS_DATA_STREAM,
           docs,
+          refresh: 'wait_for',
         })
       );
       if (errors.length === docs.length) {
