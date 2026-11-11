@@ -58,6 +58,12 @@ export const PERSONA_MATRIX_TOOL_IDS = ['virustotal_lookup', 'on_call_lookup'] a
  * suite id (SEED_PROFILE=parity / AGENT_PROFILE=chrysalis-parity when running
  * Playwright directly) — minimal-profile runs keep the two tools
  * above only, matching the published matrix environment.
+ *
+ * `write_todos` reconstructs the builtin planning tool the platform removed
+ * (#303186) after the external benchmark's baseline was captured; the parity
+ * agent needs it to see the tool surface that baseline ran against. The default
+ * agent never gets it (the parity seed early-returns before the default-agent
+ * attach), so weekly-matrix runs keep measuring the current platform surface.
  */
 export const PERSONA_MATRIX_PARITY_TOOL_IDS = [
   'vt.hash.lookup',
@@ -65,6 +71,7 @@ export const PERSONA_MATRIX_PARITY_TOOL_IDS = [
   'get.time',
   'create.case',
   'create.channel',
+  'write_todos',
 ] as const;
 
 /**
@@ -138,6 +145,40 @@ const PARITY_TOOLS: ReadonlyArray<Record<string, unknown>> = [
       'post). oncall_email defaults to the current on-call responder.',
     tags: ['security', 'incident-response', 'slack'],
     configuration: { workflow_id: 'create-channel' },
+  },
+  {
+    id: 'write_todos',
+    type: 'workflow',
+    // Verbatim copy of the builtin `write_todos` tool description as it read at
+    // removal (#303186, Nov 5 2026): the Oct-29 external-benchmark baseline was
+    // captured with this exact text, and tool-selection keys on it. Do not
+    // reword. The tool itself is gone platform-wide; this seeded workflow tool
+    // reproduces its contract (schema: todos: [{content, status}], ack result).
+    description:
+      'Manage the plan for this conversation by creating and tracking tasks. Use this tool frequently so the user can see what you are doing and how you are progressing.\n\n' +
+      '## When to use it\n\n' +
+      'Use the todo list in these situations:\n\n' +
+      '1. **Complex or multi-step tasks** — any task that requires 3 or more distinct actions\n' +
+      '2. **Non-trivial work** — tasks that benefit from upfront planning or have multiple components\n' +
+      '3. **Multiple tasks at once** — when the user gives you a list of things to do\n' +
+      '4. **After receiving new instructions** — capture requirements immediately as todos\n' +
+      '5. **When starting a new task** — mark it as `in_progress` before you begin\n' +
+      '6. **After completing a task** — mark it `completed` immediately and add any follow-up items\n\n' +
+      '## When NOT to use it\n\n' +
+      'Skip the todo list when:\n\n' +
+      '1. There is only a single, straightforward task\n' +
+      '2. The task is trivial and can be completed in fewer than 3 steps\n' +
+      '3. The request is purely conversational or informational\n\n' +
+      '## Rules\n\n' +
+      '- Mark a task `completed` **immediately** after you finish it. Do not batch completions.\n' +
+      '- Mark a task `in_progress` when you start working on it. You can mark the previous task as `completed` and start a new one as `in_progress` in the same call.\n' +
+      '- Only **one** task should be `in_progress` at a time.\n' +
+      '- Finish the current `in_progress` task before starting a new one.\n' +
+      '- Cancel tasks that become irrelevant as the work evolves.\n' +
+      '- Use clear, specific, actionable task descriptions.\n' +
+      '- Each call **replaces the entire todo list**. Always pass every todo — both existing and new — in a single call. Never call it with only the items you want to add or change.',
+    tags: ['persona-matrix', 'planning'],
+    configuration: { workflow_id: 'write-todos' },
   },
 ];
 

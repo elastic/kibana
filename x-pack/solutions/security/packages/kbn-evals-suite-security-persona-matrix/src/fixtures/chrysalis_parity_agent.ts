@@ -25,6 +25,7 @@ export const CHRYSALIS_PARITY_AGENT = {
     'check.on.call.schedule',
     'create.case',
     'create.channel',
+    'write_todos',
   ],
   skillIds: [
     'dashboard-management',

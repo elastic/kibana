@@ -242,7 +242,7 @@
         "evals:security-persona-matrix-parity"
       ],
       "excludeFromEvalsAll": true,
-      "serverConfigSet": "evals_security_persona_matrix"
+      "serverConfigSet": "evals_security_persona_matrix_parity"
     },
     {
       "id": "security-persona-matrix-attack-discovery",

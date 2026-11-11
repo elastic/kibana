@@ -386,7 +386,7 @@ describe('persona_matrix_tools_seed', () => {
       const order = calls(client)
         .filter((req) => req.method === 'POST')
         .map((req) => `${req.path}#${req.body?.id}`);
-      const workflowIds = ['vt-hash-lookup', 'create-case', 'create-channel'];
+      const workflowIds = ['vt-hash-lookup', 'create-case', 'create-channel', 'write-todos'];
       for (const workflowId of workflowIds) {
         expect(order).toContain(`/api/workflows/workflow#${workflowId}`);
       }
@@ -411,6 +411,7 @@ describe('persona_matrix_tools_seed', () => {
         'create.case',
         'create.channel',
         'vt.hash.lookup',
+        'write_todos',
       ]);
       for (const req of workflowTools) {
         expect(seededWorkflowIds).toContain(req.body?.configuration?.workflow_id);
@@ -450,7 +451,7 @@ describe('persona_matrix_tools_seed', () => {
   });
 
   describe("profile: 'chrysalis-parity'", () => {
-    it('creates the parity agent with the five parity tools and does not touch the default agent', async () => {
+    it('creates the parity agent with the six parity tools and does not touch the default agent', async () => {
       const { seedPersonaMatrixTools, PERSONA_MATRIX_PARITY_TOOL_IDS } = await load('parity');
       const client = createClient();
 
@@ -474,7 +475,7 @@ describe('persona_matrix_tools_seed', () => {
 
       await seedPersonaMatrixTools({ kbnClient: asKbn(client), log, profile: 'chrysalis-parity' });
 
-      expect(posts(client, '/api/workflows/workflow')).toHaveLength(3);
+      expect(posts(client, '/api/workflows/workflow')).toHaveLength(4);
       expect(posts(client, '/api/agent_builder/agents')).toHaveLength(1);
     });
 
@@ -560,7 +561,7 @@ describe('persona_matrix_tools_seed', () => {
       const toolIds = [...mod.PERSONA_MATRIX_TOOL_IDS, ...mod.PERSONA_MATRIX_PARITY_TOOL_IDS];
       const expected = [
         ...toolIds.map((id) => `/api/agent_builder/tools/${encodeURIComponent(id)}?force=true`),
-        ...['vt-hash-lookup', 'create-case', 'create-channel'].map(
+        ...['vt-hash-lookup', 'create-case', 'create-channel', 'write-todos'].map(
           (id) => `/api/workflows/workflow/${id}?force=true&acknowledgeAclLoss=true`
         ),
         PARITY_AGENT_PATH,

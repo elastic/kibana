@@ -230,7 +230,7 @@ describe('persona_matrix.parity.config.json', () => {
     expect(parityRegistryEntry).toBeDefined();
   });
 
-  it('registers the parity suite on its own config file, next to the default one, on the same stack', () => {
+  it('registers the parity suite on its own config file, next to the default one, on a parity config set', () => {
     expect(parityRegistryEntry?.configPath).not.toBe(defaultRegistryEntry?.configPath);
     expect(Path.dirname(parityRegistryEntry?.configPath ?? '')).toBe(
       Path.dirname(defaultRegistryEntry?.configPath ?? '')
@@ -240,7 +240,12 @@ describe('persona_matrix.parity.config.json', () => {
         Path.resolve(__dirname, '../../../../../..', parityRegistryEntry?.configPath ?? '')
       )
     ).toBe(true);
-    expect(parityRegistryEntry?.serverConfigSet).toBe(defaultRegistryEntry?.serverConfigSet);
+    // Deliberately NOT the default's config set: the parity fork drops the
+    // `agentBuilder:experimentalFeatures` override so `search_relevant_skills`
+    // (absent from the benchmark baseline) is not offered to the model.
+    expect(parityRegistryEntry?.serverConfigSet).toBe(
+      `${defaultRegistryEntry?.serverConfigSet}_parity`
+    );
     expect(parityRegistryEntry?.ciLabels).toEqual([
       `evals:${PERSONA_MATRIX_SUITE_IDS['chrysalis-parity']}`,
     ]);

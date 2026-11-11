@@ -28,6 +28,7 @@ export const PARITY_ON_CALL_EMAIL = 'priya.kapoor@example.corp';
 export const CREATE_CASE_WORKFLOW_ID = 'create-case';
 export const CREATE_CHANNEL_WORKFLOW_ID = 'create-channel';
 export const VT_HASH_LOOKUP_WORKFLOW_ID = 'vt-hash-lookup';
+export const WRITE_TODOS_WORKFLOW_ID = 'write-todos';
 
 const CREATE_CASE_WORKFLOW_YAML = `name: create-case
 description: Create a case in Elastic Security from a confirmed attack discovery.
@@ -121,6 +122,59 @@ export interface ParityWorkflow {
   yaml: string;
 }
 
+/** Index receiving every `write_todos` call, so planning behaviour stays inspectable. */
+export const TODOS_INDEX = 'persona-matrix-todos';
+
+/**
+ * The external benchmark's agent had the platform's builtin `write_todos` tool;
+ * the platform removed it platform-wide (#303186) after that baseline was
+ * captured. This workflow reconstructs the tool's contract: a required
+ * `todos` array of `{content, status}` objects (JSON-Schema trigger inputs,
+ * the only format carrying arrays of objects), a verbatim copy of the original
+ * tool description (model tool-selection keys on it), and an ack-only result.
+ * Writes land in TODOS_INDEX so planning divergence stays diagnosable without
+ * affecting any evaluator (planning is not a side effect, see
+ * `SIDE_EFFECT_TOOL_IDS`).
+ */
+const WRITE_TODOS_WORKFLOW_YAML = `name: write-todos
+description: Record the agent's updated task list (planning bookkeeping only).
+enabled: true
+tags:
+  - persona-matrix
+  - planning
+inputs:
+  type: object
+  properties:
+    todos:
+      type: array
+      description: Complete updated todo list. Always pass the full list — previous items are replaced.
+      items:
+        type: object
+        properties:
+          content:
+            type: string
+            description: The task description
+          status:
+            type: string
+            enum: [pending, in_progress, completed, cancelled]
+            description: Current status of the task
+        required: [content, status]
+  required: [todos]
+triggers:
+  - type: manual
+steps:
+  - name: record_todos
+    type: elasticsearch.index
+    with:
+      index: ${TODOS_INDEX}
+      id: "{{ execution.id }}"
+      refresh: wait_for
+      document:
+        "@timestamp": "{{ execution.startedAt }}"
+        todos: "{{ inputs.todos | json }}"
+        execution_id: "{{ execution.id }}"
+`;
+
 const VT_HASH_LOOKUP_WORKFLOW_YAML = `name: vt-hash-lookup
 description: Analyze a file hash (MD5, SHA-1, or SHA-256) against the seeded threat-intel corpus and return the detection verdict, names, and confidence. Used by the Chrysalis Hunting Agent to confirm whether a hash observed in the environment is known malware.
 enabled: true
@@ -155,4 +209,5 @@ export const PARITY_WORKFLOWS: readonly ParityWorkflow[] = [
   { id: VT_HASH_LOOKUP_WORKFLOW_ID, yaml: VT_HASH_LOOKUP_WORKFLOW_YAML },
   { id: CREATE_CASE_WORKFLOW_ID, yaml: CREATE_CASE_WORKFLOW_YAML },
   { id: CREATE_CHANNEL_WORKFLOW_ID, yaml: CREATE_CHANNEL_WORKFLOW_YAML },
+  { id: WRITE_TODOS_WORKFLOW_ID, yaml: WRITE_TODOS_WORKFLOW_YAML },
 ];

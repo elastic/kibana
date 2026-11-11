@@ -67,15 +67,15 @@ The parity tools are backed by Elastic Workflows, so the **workflows plugin must
 #### What `parity` seeds
 
 - **Data** - the 98 docs above, including a synthetic threat-intel record for the EICAR test hash. After seeding, a data gate checks that every seeded doc is searchable in its index and fails setup with per-index found/expected counts on any shortfall.
-- **Workflows** - `vt-hash-lookup` (ES|QL lookup against the seeded threat-intel index; no external call, no API key), `create-case` (opens a case tagged `persona-matrix-parity`), and `create-channel` (records the request in the `persona-matrix-side-effects` index instead of calling Slack).
-- **Tools** - `vt.hash.lookup`, `create.case`, `create.channel` (workflow tools wired to the workflows above), plus `get.time` and `check.on.call.schedule` (ES|QL tools; the on-call query keeps only fields present on the seeded schedule doc).
+- **Workflows** - `vt-hash-lookup` (ES|QL lookup against the seeded threat-intel index; no external call, no API key), `create-case` (opens a case tagged `persona-matrix-parity`), `create-channel` (records the request in the `persona-matrix-side-effects` index instead of calling Slack), and `write-todos` (records the full todo list in `persona-matrix-todos`; reconstructs the removed builtin `write_todos` tool contract — #303186 — so the parity agent sees the tool surface the external benchmark ran against).
+- **Tools** - `vt.hash.lookup`, `create.case`, `create.channel`, `write_todos` (workflow tools wired to the workflows above), plus `get.time` and `check.on.call.schedule` (ES|QL tools; the on-call query keeps only fields present on the seeded schedule doc).
 
 Cleanup removes only the tools, workflows and agent created by the run, plus, when the run created the `create-case` workflow, the cases tagged `persona-matrix-parity` opened since then.
 
 ### Agent profiles (`AGENT_PROFILE`)
 
 - **`default`** - the built-in Elastic AI Agent, with skills routed naturally. Used by `security-persona-matrix`.
-- **`chrysalis-parity`** - creates the dedicated agent used by the external EIS model benchmark (same instructions, skills and five tools) and runs every prompt against it. The default agent is left untouched. Requires the `parity` seed, which the parity suite id selects; setup fails otherwise. Skill ids missing from the install are dropped with a warning.
+- **`chrysalis-parity`** - creates the dedicated agent used by the external EIS model benchmark (same instructions, skills and six tools) and runs every prompt against it. The default agent is left untouched. Requires the `parity` seed, which the parity suite id selects; setup fails otherwise. Skill ids missing from the install are dropped with a warning.
 
 Use `chrysalis-parity` only to reproduce the external benchmark's environment. Scores under the two profiles are not comparable.
 
