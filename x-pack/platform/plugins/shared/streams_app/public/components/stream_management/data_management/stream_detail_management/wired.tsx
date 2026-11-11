@@ -11,7 +11,7 @@ import { EuiCallOut } from '@elastic/eui';
 import type { AppHeaderBadge } from '@kbn/app-header';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
-import { useStreamOrigin, useStreamsHomeLink } from '../../../../hooks/use_streams_home_link';
+import { useStreamsHomeLink } from '../../../../hooks/use_streams_home_link';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { RedirectTo } from '../../../redirect_to';
 import { StreamDetailRouting } from '../stream_detail_routing';
@@ -91,7 +91,6 @@ function WiredStreamDetailManagementContent({
   } = useStreamsAppParams('/{key}/management/{tab}');
   const router = useStreamsAppRouter();
   const streamsHomeLink = useStreamsHomeLink();
-  const origin = useStreamOrigin();
   const { rangeFrom, rangeTo } = useTimeRange();
   const importLifecycleFlyout = useImportLifecycleFlyoutContext();
 
@@ -214,7 +213,6 @@ function WiredStreamDetailManagementContent({
               share,
               router,
               timeRange: { rangeFrom, rangeTo },
-              origin,
               onImportFromStream: importLifecycleFlyout?.open,
               isImportFromStreamDisabled: importLifecycleFlyout?.isDisabled,
             }),

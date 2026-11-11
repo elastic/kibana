@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
+import { rememberClassicTabOrigin } from '../../hooks/use_streams_home_link';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
@@ -57,6 +58,12 @@ export function StreamsLayout({ showClassic }: { showClassic: boolean }) {
   const { access } = useStreamsPrivileges();
   const unitCheck = useUnitCheck(unitId);
 
+  // No cleanup: opening a stream unmounts the layout, and the flag has to survive that.
+  // AppRoot clears it when Streams itself unmounts.
+  useEffect(() => {
+    rememberClassicTabOrigin(tab === 'classic' ? unitId : undefined);
+  }, [tab, unitId]);
+
   // Classic stays reachable by URL, so an empty cluster keeps the V1 create and settings controls.
   const classicOpen = tab === 'classic' && access.legacy;
   const visibleTabs = useMemo(
@@ -99,7 +106,7 @@ export function StreamsLayout({ showClassic }: { showClassic: boolean }) {
 
   const { Component, noPadding, ownsHeader } = streamsLayoutTabs[tab];
   if (ownsHeader) {
-    return <Component tabs={appHeaderTabs} openedFromV2 />;
+    return <Component tabs={appHeaderTabs} />;
   }
 
   const title = i18n.translate('xpack.streams.streamsLayout.pageHeaderTitle', {

@@ -31,7 +31,6 @@ import { useStreamDetail } from '../../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import {
   useNavigateToStreamsHome,
-  useStreamOrigin,
   useStreamsHomeLink,
 } from '../../../../hooks/use_streams_home_link';
 import {
@@ -78,7 +77,6 @@ export function Wrapper({
   const router = useStreamsAppRouter();
   const streamsHomeLink = useStreamsHomeLink();
   const navigateToStreamsHome = useNavigateToStreamsHome();
-  const origin = useStreamOrigin();
   const { definition } = useStreamDetail();
   const {
     dependencies: {
@@ -340,7 +338,7 @@ export function Wrapper({
     label: currentTab.label,
     href: router.link('/{key}/management/{tab}', {
       path: { key: streamId, tab: tabName },
-      query: { rangeFrom, rangeTo, origin },
+      query: { rangeFrom, rangeTo },
     }),
     isSelected: tab === tabName,
     'data-test-subj': getTabTestSubj(tabName, currentTab),

@@ -24,7 +24,6 @@ import React, { useMemo } from 'react';
 import { useStreamDetail } from '../../hooks/use_stream_detail';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import { useStreamOrigin } from '../../hooks/use_streams_home_link';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useKibana } from '../../hooks/use_kibana';
 import { executeEsqlQuery } from '../../hooks/use_execute_esql_query';
@@ -40,7 +39,6 @@ export function DataQualityCard() {
   const { definition } = useStreamDetail();
   const router = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
-  const origin = useStreamOrigin();
 
   if (!Streams.ingest.all.GetResponse.is(definition)) {
     return null;
@@ -55,7 +53,7 @@ export function DataQualityCard() {
       failureStoreEnabled={isEnabledFailureStore(definition.effective_failure_store)}
       qualityHref={router.link('/{key}/management/{tab}', {
         path: { key: streamName, tab: 'dataQuality' },
-        query: { rangeFrom, rangeTo, origin },
+        query: { rangeFrom, rangeTo },
       })}
     />
   );

@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react';
 import type { AppHeaderTab } from '@kbn/app-header';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { CLASSIC_TAB_ORIGIN_KEY } from '../../hooks/use_streams_home_link';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useShowClassicTab } from './use_show_classic_tab';
@@ -55,13 +56,8 @@ jest.mock('./tabs', () => {
       classic: {
         label: 'classic',
         ownsHeader: true,
-        Component: ({ tabs, openedFromV2 }: { tabs?: AppHeaderTab[]; openedFromV2?: boolean }) => (
-          <div
-            data-test-subj="streamsLayoutTabContent-classic"
-            data-opened-from-v2={String(openedFromV2)}
-          >
-            {tabs?.length}
-          </div>
+        Component: ({ tabs }: { tabs?: AppHeaderTab[] }) => (
+          <div data-test-subj="streamsLayoutTabContent-classic">{tabs?.length}</div>
         ),
       },
     },
@@ -128,6 +124,10 @@ describe('StreamsLayout', () => {
     jest.clearAllMocks();
   });
 
+  afterEach(() => {
+    sessionStorage.clear();
+  });
+
   it('redirects to / without V2 access', () => {
     renderLayout({ v2: false });
 
@@ -168,13 +168,17 @@ describe('StreamsLayout', () => {
     expect(screen.queryByTestId('streamsUnitCheckLoading')).not.toBeInTheDocument();
   });
 
-  it('tells the classic tab that it was opened from the V2 layout', () => {
+  it('remembers the Classic tab as the return target', () => {
     renderLayout({ tab: 'classic' });
 
-    expect(screen.getByTestId('streamsLayoutTabContent-classic')).toHaveAttribute(
-      'data-opened-from-v2',
-      'true'
-    );
+    expect(sessionStorage.getItem(CLASSIC_TAB_ORIGIN_KEY)).toBe('edge');
+  });
+
+  it('forgets the Classic tab when another layout tab is open', () => {
+    sessionStorage.setItem(CLASSIC_TAB_ORIGIN_KEY, 'edge');
+    renderLayout({ tab: 'map' });
+
+    expect(sessionStorage.getItem(CLASSIC_TAB_ORIGIN_KEY)).toBeNull();
   });
 
   it('hides the classic tab when the stream check finds none', () => {

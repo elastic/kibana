@@ -31,13 +31,6 @@ const timeRangeQueryParams = t.partial({
   rangeTo: t.string,
 });
 
-/**
- * Set by the Classic tab of the V2 layout, so the stream page links back to that tab.
- */
-const streamOriginQueryParams = t.partial({
-  origin: t.literal('v2'),
-});
-
 const flyoutParams = t.partial({
   flyoutName: t.string,
   flyoutTab: t.string,
@@ -47,15 +40,12 @@ const flyoutParams = t.partial({
  * Extended query params for management routes that may include
  * additional feature-specific params (e.g., data quality page state).
  */
-const managementQueryParams = t.intersection([
-  t.partial({
-    rangeFrom: t.string,
-    rangeTo: t.string,
-    // Data quality page state
-    pageState: t.string,
-  }),
-  streamOriginQueryParams,
-]);
+const managementQueryParams = t.partial({
+  rangeFrom: t.string,
+  rangeTo: t.string,
+  // Data quality page state
+  pageState: t.string,
+});
 
 /**
  * The unit an index page was opened from, used only for its back link.
@@ -190,7 +180,7 @@ const streamsAppRoutes = {
             }),
           }),
           t.partial({
-            query: t.intersection([timeRangeQueryParams, streamOriginQueryParams]),
+            query: timeRangeQueryParams,
           }),
         ]),
         children: {
@@ -209,7 +199,7 @@ const streamsAppRoutes = {
                 }),
               }),
               t.partial({
-                query: t.intersection([timeRangeQueryParams, streamOriginQueryParams]),
+                query: timeRangeQueryParams,
               }),
             ]),
           },

@@ -15,7 +15,6 @@ import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import {
   useNavigateToStreamsHome,
-  useStreamOrigin,
   useStreamsHomeLink,
 } from '../../../../hooks/use_streams_home_link';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
@@ -55,7 +54,6 @@ export function QueryStreamDetailManagement({
   const router = useStreamsAppRouter();
   const streamsHomeLink = useStreamsHomeLink();
   const navigateToStreamsHome = useNavigateToStreamsHome();
-  const origin = useStreamOrigin();
   const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
@@ -173,7 +171,7 @@ export function QueryStreamDetailManagement({
     label,
     href: router.link('/{key}/management/{tab}', {
       path: { key, tab: tabKey },
-      query: { rangeFrom, rangeTo, origin },
+      query: { rangeFrom, rangeTo },
     }),
     isSelected: tab === tabKey,
     'data-test-subj': `queryStreamDetails-${tabKey}-tab`,

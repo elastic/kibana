@@ -6,40 +6,54 @@
  */
 
 import { useCallback } from 'react';
-import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
-import { useStreamsAppParams } from './use_streams_app_params';
 import { useStreamsAppRouter } from './use_streams_app_router';
 import { useStreamsPrivileges } from './use_streams_privileges';
 import { useTimeRange } from './use_time_range';
 
-/** `v2` marks a stream page opened from the Classic tab of the V2 layout. */
-export type StreamOrigin = 'v2';
+/** Unit id of the open Classic tab, so a stream page can link back to that unit. */
+export const CLASSIC_TAB_ORIGIN_KEY = 'streams.classicTabOrigin';
 
-const CLASSIC_TAB_PATH = { unitId: STREAMS_DEFAULT_UNIT_ID, tab: 'classic' };
-
-/** The `origin` of the open stream page, for links that stay on stream pages to copy. */
-export function useStreamOrigin(): StreamOrigin | undefined {
-  return useStreamsAppParams('/{key}', true)?.query.origin;
+/** Remembers the unit whose Classic tab is open. An empty value clears it. Blocked storage fails open, back to `/`. */
+export function rememberClassicTabOrigin(unitId?: string): void {
+  try {
+    if (unitId) {
+      sessionStorage.setItem(CLASSIC_TAB_ORIGIN_KEY, unitId);
+    } else {
+      sessionStorage.removeItem(CLASSIC_TAB_ORIGIN_KEY);
+    }
+  } catch {
+    // Private mode and blocked storage have no return target, so Streams goes back to `/`.
+  }
 }
 
-function useReturnsToClassicTab(): boolean {
-  const origin = useStreamOrigin();
+function readClassicTabUnitId(): string | undefined {
+  try {
+    return sessionStorage.getItem(CLASSIC_TAB_ORIGIN_KEY) || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function useClassicTabUnitId(): () => string | undefined {
   const {
     access: { legacy, v2 },
   } = useStreamsPrivileges();
-  return origin === 'v2' && legacy && v2;
+
+  // Read at call time: the stored unit changes when the layout tab changes, not when this hook renders.
+  return useCallback(() => (legacy && v2 ? readClassicTabUnitId() : undefined), [legacy, v2]);
 }
 
-/** Link back to the streams list: the Classic tab when the stream was opened from it, `/` otherwise. */
+/** Link back to the streams list: the Classic tab of the unit it was opened from, `/` otherwise. */
 export function useStreamsHomeLink(): string {
   const router = useStreamsAppRouter();
-  const returnsToClassicTab = useReturnsToClassicTab();
+  const classicTabUnitId = useClassicTabUnitId();
   const { rangeFrom, rangeTo } = useTimeRange();
+  const unitId = classicTabUnitId();
 
   // `/` takes no params here, DateRangeRedirect adds the range.
-  return returnsToClassicTab
+  return unitId
     ? router.link('/v2/unit/{unitId}/{tab}', {
-        path: CLASSIC_TAB_PATH,
+        path: { unitId, tab: 'classic' },
         query: { rangeFrom, rangeTo },
       })
     : router.link('/');
@@ -48,15 +62,16 @@ export function useStreamsHomeLink(): string {
 /** Navigates to the same place as {@link useStreamsHomeLink}, e.g. after deleting the stream. */
 export function useNavigateToStreamsHome(): () => void {
   const router = useStreamsAppRouter();
-  const returnsToClassicTab = useReturnsToClassicTab();
+  const classicTabUnitId = useClassicTabUnitId();
   const { rangeFrom, rangeTo } = useTimeRange();
 
   return useCallback(() => {
+    const unitId = classicTabUnitId();
     const query = { rangeFrom, rangeTo };
-    if (returnsToClassicTab) {
-      router.push('/v2/unit/{unitId}/{tab}', { path: CLASSIC_TAB_PATH, query });
+    if (unitId) {
+      router.push('/v2/unit/{unitId}/{tab}', { path: { unitId, tab: 'classic' }, query });
     } else {
       router.push('/', { path: {}, query });
     }
-  }, [router, returnsToClassicTab, rangeFrom, rangeTo]);
+  }, [router, classicTabUnitId, rangeFrom, rangeTo]);
 }

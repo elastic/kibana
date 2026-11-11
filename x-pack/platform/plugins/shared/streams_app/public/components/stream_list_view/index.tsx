@@ -26,16 +26,8 @@ import { LegacyLogsDeprecationCallout } from './legacy_logs_deprecation_callout'
 import { NewExperienceCallout } from './new_experience_callout';
 import { CreateQueryStreamFlyoutContent } from '../query_streams/create_query_stream_flyout';
 import { getFormattedError } from '../../util/errors';
-import type { StreamOrigin } from '../../hooks/use_streams_home_link';
 
-export function StreamListView({
-  tabs,
-  openedFromV2,
-}: {
-  tabs?: AppHeaderTab[];
-  openedFromV2?: boolean;
-}) {
-  const origin: StreamOrigin | undefined = openedFromV2 ? 'v2' : undefined;
+export function StreamListView({ tabs }: { tabs?: AppHeaderTab[] }) {
   const context = useKibana();
   const {
     dependencies: {
@@ -253,7 +245,6 @@ export function StreamListView({
               streams={streamsListFetch.value?.streams}
               wiredStreamsStatus={wiredStreamsStatus}
               openFlyout={() => setIsSettingsFlyoutOpen(true)}
-              origin={origin}
             />
           </>
         )}
@@ -267,10 +258,7 @@ export function StreamListView({
         />
       )}
       {isClassicStreamCreationFlyoutOpen && (
-        <ClassicStreamCreationFlyout
-          onClose={() => setIsClassicStreamCreationFlyoutOpen(false)}
-          origin={origin}
-        />
+        <ClassicStreamCreationFlyout onClose={() => setIsClassicStreamCreationFlyoutOpen(false)} />
       )}
       {isQueryStreamCreationFlyoutOpen && (
         <CreateQueryStreamFlyoutContent

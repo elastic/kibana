@@ -18,15 +18,13 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useTimeRange } from '../../hooks/use_time_range';
-import type { StreamOrigin } from '../../hooks/use_streams_home_link';
 import { getFormattedError } from '../../util/errors';
 
 interface ClassicStreamCreationFlyoutProps {
   onClose: () => void;
-  origin?: StreamOrigin;
 }
 
-export function ClassicStreamCreationFlyout({ onClose, origin }: ClassicStreamCreationFlyoutProps) {
+export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFlyoutProps) {
   const { signal } = useAbortController();
   const {
     core,
@@ -113,7 +111,7 @@ export function ClassicStreamCreationFlyout({ onClose, origin }: ClassicStreamCr
 
         router.push('/{key}/management/{tab}', {
           path: { key: streamName, tab: 'overview' },
-          query: { rangeFrom, rangeTo, origin },
+          query: { rangeFrom, rangeTo },
         });
 
         onClose();
@@ -137,7 +135,6 @@ export function ClassicStreamCreationFlyout({ onClose, origin }: ClassicStreamCr
       onClose,
       rangeFrom,
       rangeTo,
-      origin,
     ]
   );
 

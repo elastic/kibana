@@ -10,6 +10,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { StreamsAppStartDependencies } from '../../types';
 import type { StreamsAppServices } from '../../services/types';
+import { CLASSIC_TAB_ORIGIN_KEY } from '../../hooks/use_streams_home_link';
 import { useShowClassicTab } from '../streams_layout/use_show_classic_tab';
 import { AppRoot } from '.';
 
@@ -73,5 +74,14 @@ describe('AppRoot', () => {
       expect(screen.getByTestId('classicTabProbe')).toHaveTextContent('false-true')
     );
     expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('forgets the Classic tab origin when the app unmounts', () => {
+    sessionStorage.setItem(CLASSIC_TAB_ORIGIN_KEY, 'edge');
+    const view = renderAppRoot();
+
+    view.unmount();
+
+    expect(sessionStorage.getItem(CLASSIC_TAB_ORIGIN_KEY)).toBeNull();
   });
 });

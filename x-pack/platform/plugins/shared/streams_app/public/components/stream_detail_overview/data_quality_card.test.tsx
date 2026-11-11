@@ -27,20 +27,10 @@ jest.mock('../../hooks/use_streams_app_fetch', () => ({
 
 jest.mock('../../hooks/use_streams_app_router', () => ({
   useStreamsAppRouter: () => ({
-    link: (
-      _path: string,
-      params: { path: { key: string; tab: string }; query: { origin?: string } }
-    ) =>
-      `/streams/${params.path.key}/management/${params.path.tab}${
-        params.query.origin ? `?origin=${params.query.origin}` : ''
-      }`,
+    link: (_path: string, params: { path: { key: string; tab: string } }) =>
+      `/streams/${params.path.key}/management/${params.path.tab}`,
     push: jest.fn(),
   }),
-}));
-
-const mockUseStreamOrigin = jest.fn();
-jest.mock('../../hooks/use_streams_home_link', () => ({
-  useStreamOrigin: () => mockUseStreamOrigin(),
 }));
 
 jest.mock('../../hooks/use_time_range', () => ({
@@ -93,20 +83,6 @@ describe('DataQualityCard', () => {
 
     expect(screen.getByText('Dataset quality')).toBeInTheDocument();
     expect(screen.getByText('View all')).toBeInTheDocument();
-  });
-
-  it('keeps the origin of the stream page on the View all link', () => {
-    mockUseStreamDetail.mockReturnValue({
-      definition: createMockWiredStreamDefinition(),
-    });
-    mockUseStreamOrigin.mockReturnValue('v2');
-
-    renderWithI18n(<DataQualityCard />);
-
-    expect(screen.getByText('View all').closest('a')).toHaveAttribute(
-      'href',
-      expect.stringContaining('/management/dataQuality?origin=v2')
-    );
   });
 
   it('shows FailedDocsNoPrivilege when read_failure_store is false', () => {

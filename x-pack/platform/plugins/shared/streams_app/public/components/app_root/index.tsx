@@ -14,6 +14,7 @@ import {
 } from '@kbn/typed-react-router-config';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { rememberClassicTabOrigin } from '../../hooks/use_streams_home_link';
 import { StreamsAppContextProvider } from '../streams_app_context_provider';
 import { streamsAppRouter } from '../../routes/config';
 import type { StreamsAppStartDependencies } from '../../types';
@@ -44,6 +45,7 @@ export function AppRoot({
   useEffect(
     () => () => {
       queryClient.removeQueries({ queryKey: CLASSIC_TAB_QUERY_KEY });
+      rememberClassicTabOrigin(false);
     },
     []
   );
