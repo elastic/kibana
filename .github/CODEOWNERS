@@ -937,7 +937,7 @@ src/platform/test/plugin_functional/plugins/core_plugin_execution_context @elast
 src/platform/test/plugin_functional/plugins/core_plugin_helpmenu @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/core_plugin_route_timeouts @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/core_provider_plugin @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/data_search @elastic/kibana-data-discovery
+src/platform/test_plugins/data_search @elastic/kibana-data-discovery
 src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/hardening @elastic/kibana-security
 src/platform/test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
@@ -1527,7 +1527,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /src/platform/test/functional/services/data_views.ts @elastic/kibana-data-discovery
 /src/platform/test/functional/services/saved_objects_finder.ts @elastic/kibana-data-discovery
 /src/platform/test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
-/src/platform/test/plugin_functional/plugins/data_search @elastic/kibana-data-discovery
+/src/platform/test_plugins/data_search @elastic/kibana-data-discovery
 /src/platform/test/functional/page_objects/discover_page.ts @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/es_archiver/huge_fields @elastic/kibana-data-discovery
