@@ -10,7 +10,6 @@ import type {
   EntityInventoryRouteRepository,
   InventoryRow as ServerInventoryRow,
   InventoryType,
-  InventoryTypeColumn as ServerInventoryTypeColumn,
   ListResponse,
   OutputColumnKind,
   SourceError,
@@ -40,9 +39,6 @@ export type InventoryCellScalar = Exclude<InventoryCellValue, unknown[]>;
  * - `last_seen`: when the entity was last reported.
  */
 export type InventoryOutputColumnKind = OutputColumnKind;
-
-/** An output column of a registered entity type. */
-export type InventoryTypeColumn = ServerInventoryTypeColumn;
 
 /** An output column of a list response: the same shape the `types` route returns. */
 export type InventoryListColumn = ListResponse['columns'][number];

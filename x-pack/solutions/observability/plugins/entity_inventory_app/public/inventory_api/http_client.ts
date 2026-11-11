@@ -19,12 +19,10 @@ export const createHttpEntityInventoryApiClient = (http: HttpStart): EntityInven
 
   return {
     getTypes: ({ signal }) => fetch('GET /internal/entity_inventory/types', { signal }),
-    getEntities: (type, request, { signal }) => {
-      const { from, to } = request;
-      return fetch('POST /internal/entity_inventory/entities/{type}/_list', {
-        params: { path: { type }, body: { from, to } },
+    getEntities: (type, request, { signal }) =>
+      fetch('POST /internal/entity_inventory/entities/{type}/_list', {
+        params: { path: { type }, body: request },
         signal,
-      });
-    },
+      }),
   };
 };

@@ -24,7 +24,6 @@ export type {
 } from './types';
 export type { EntityInventoryRouteRepository } from './routes';
 export type {
-  GetTypesResponse,
   InventoryType,
   InventoryTypeColumn,
   ListResponse,

@@ -99,7 +99,10 @@ const WIDGET_LIST: InventoryListResponse = {
   unavailableColumns: [],
 };
 
-const renderWidgetTable = (preferences: EntityTablePreferences = NO_PREFERENCES) => {
+const renderWidgetTable = (
+  preferences: EntityTablePreferences = NO_PREFERENCES,
+  list: InventoryListResponse = WIDGET_LIST
+) => {
   const services = createAppServicesMock();
   jest
     .mocked(services.uiSettings.get)
@@ -111,7 +114,7 @@ const renderWidgetTable = (preferences: EntityTablePreferences = NO_PREFERENCES)
       <KibanaContextProvider services={services}>
         <EntityTable
           entityType={WIDGET_TYPE}
-          list={WIDGET_LIST}
+          list={list}
           preferences={preferences}
           onPreferencesChange={jest.fn()}
         />
@@ -172,13 +175,46 @@ describe('EntityTable', () => {
 
       expect(getHeaderIds()).toEqual(['widget.size', 'entity.id']);
     });
+
+    it('keeps the response order when the user sorted by a column the response lacks', () => {
+      const [sprocket] = WIDGET_LIST.rows;
+      const list: InventoryListResponse = {
+        ...WIDGET_LIST,
+        rows: [
+          { ...sprocket, 'entity.id': 'widget:b' },
+          { ...sprocket, 'entity.id': 'widget:a' },
+        ],
+      };
+
+      renderWidgetTable({ sortingColumns: [{ id: 'constructor', direction: 'asc' }] }, list);
+
+      expect(getCell(0, 'entity.id')).toHaveTextContent('widget:b');
+      expect(getCell(1, 'entity.id')).toHaveTextContent('widget:a');
+    });
   });
 
   it('shows every column of the response by default', () => {
-    const list = getFixture('normal');
-    renderTable(list);
+    renderTable(getFixture('normal'));
 
-    expect(getHeaderIds()).toEqual(list.columns.map(({ name }) => name));
+    expect(getHeaderIds()).toEqual([
+      'entity.id',
+      'host.id',
+      'host.name',
+      'host.hostname',
+      'os.type',
+      'os.version',
+      'host.arch',
+      'host.ip',
+      'k8s.cluster.name',
+      'cloud.provider',
+      'cloud.platform',
+      'cloud.region',
+      'cloud.availability_zone',
+      'cloud.account.id',
+      'os.name',
+      'host.os.kernel',
+      'last_seen',
+    ]);
   });
 
   it('renders a placeholder for an empty cell', () => {

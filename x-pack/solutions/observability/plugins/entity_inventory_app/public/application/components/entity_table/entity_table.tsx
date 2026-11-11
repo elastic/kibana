@@ -101,9 +101,14 @@ export const EntityTable = ({
     [visibleColumns, columnKinds]
   );
 
+  const knownSortingColumns = useMemo(
+    () => sortingColumns.filter(({ id }) => columnKinds.has(id)),
+    [sortingColumns, columnKinds]
+  );
+
   const sortedRows = useMemo(
-    () => sortEntityRows(list.rows, sortingColumns),
-    [list.rows, sortingColumns]
+    () => sortEntityRows(list.rows, knownSortingColumns),
+    [list.rows, knownSortingColumns]
   );
 
   const renderCellValue = useCallback(
@@ -166,7 +171,7 @@ export const EntityTable = ({
         gridStyle={GRID_STYLE}
         rowCount={sortedRows.length}
         renderCellValue={renderCellValue}
-        sorting={{ columns: sortingColumns, onSort }}
+        sorting={{ columns: knownSortingColumns, onSort }}
         pagination={{
           pageIndex,
           pageSize,
