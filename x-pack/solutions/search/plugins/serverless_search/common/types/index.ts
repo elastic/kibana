@@ -8,13 +8,6 @@
 import type { IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 import type { Connector } from '@kbn/search-connectors/types/connectors';
 
-export interface CreateAPIKeyArgs {
-  expiration?: string;
-  metadata?: Record<string, any>;
-  name: string;
-  role_descriptors?: Record<string, any>;
-}
-
 export interface IndexData {
   name: string;
   count: number;

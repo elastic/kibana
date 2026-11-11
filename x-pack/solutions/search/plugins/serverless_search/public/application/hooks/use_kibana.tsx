@@ -11,14 +11,12 @@ import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { useKibana as useKibanaBase } from '@kbn/kibana-react-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import type { SearchConnectorsPluginStart } from '@kbn/content-connectors-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-public';
 
 export interface ServerlessSearchContext {
   cloud: CloudStart;
   console: ConsolePluginStart;
   history: AppMountParameters['history'];
-  contentConnectors?: SearchConnectorsPluginStart;
   security: SecurityPluginStart;
   share: SharePluginStart;
   user?: AuthenticatedUser;
