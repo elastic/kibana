@@ -21,6 +21,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { evaluate as base } from '../src/evaluate';
 import { createEvaluateConverse } from '../src/evaluate_converse';
 import {
+  createAlertDetailEvaluator,
   createAlertRowsEvaluator,
   createSkillLoadedEvaluator,
   createToolUsageEvaluators,
@@ -161,6 +162,7 @@ const evaluate = base.extend<{ evaluateAlertList: EvaluateAlertList }, {}>({
           extraEvaluators: [
             ...createToolUsageEvaluators(log),
             createAlertRowsEvaluator(log),
+            createAlertDetailEvaluator(log),
             createSkillLoadedEvaluator('alert-analysis'),
           ],
         })
@@ -225,6 +227,37 @@ evaluate.describe(
           criteria: [
             'The response lists or summarizes high severity alerts',
             'If the response shows only part of the alerts, it says that the list is partial',
+          ],
+        });
+      }
+    );
+
+    // Why: the process command line is not in the summary fields. The model must ask for full detail to
+    // answer, so this checks that it does not use summary for an analysis question.
+    evaluate(
+      'Alert analysis — PowerShell command lines from the last 24 hours',
+      async ({ evaluateAlertList }) => {
+        await evaluateAlertList({
+          dataset: {
+            name: 'agent builder: security-alert-triage-alert-analysis-detail',
+            description:
+              'Asks for the command lines of PowerShell alerts. The model needs the process fields, ' +
+              'so it must ask security.alerts for full detail and not for the summary.',
+            examples: [
+              {
+                input: {
+                  question:
+                    'Which alerts from the last 24 hours ran PowerShell with an encoded command? Show the command line of a few of them.',
+                },
+                output: {
+                  expected:
+                    'The response shows at least one PowerShell command line that contains -EncodedCommand.',
+                },
+              },
+            ],
+          },
+          criteria: [
+            'The response shows at least one PowerShell command line that contains -EncodedCommand',
           ],
         });
       }

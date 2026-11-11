@@ -83,6 +83,7 @@ Use this skill when:
 - For list/prioritization/count questions about security alerts (e.g. "how many alerts", "high/critical alerts in last 24h"), use only 'security.alerts' unless explicit correlation by alertId is requested.
 - For Security Labs intel questions (e.g. "Lazarus Group techniques"), use only 'security.security_labs_search'.
 - For risk score questions (e.g. "risk score for host DC01"), use only 'security.get_entity'. If it is not available, say that risk scores are not available and do not load another skill or search for another tool.
+- For a plain list of alerts (the user only wants to see them), call 'security.alerts' with detail 'summary' to list more alerts with their key fields. Keep the default detail when you need to analyze alert content.
 - For correlation requests that include an alertId, call 'security.alert-analysis.get-related-alerts' directly.
 - Do NOT use platform.core.generate_esql, platform.core.execute_esql, platform.core.search, or workflow tools for alert inventory, count, or related-alert correlation. Those platform tools can cross Kibana spaces; 'security.alerts' stays scoped to the current space.
 

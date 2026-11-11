@@ -17,7 +17,15 @@ import {
   createToolTestMocks,
   setupMockCoreStartServices,
 } from '../__mocks__/test_helpers';
-import { alertsTool, MAX_ALERT_ROWS, SECURITY_ALERTS_TOOL_ID } from './alerts_tool';
+import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
+import {
+  alertsTool,
+  MAX_FULL_ALERT_ROWS,
+  MAX_RESULT_TOKENS,
+  MAX_SUMMARY_ALERT_ROWS,
+  SECURITY_ALERTS_TOOL_ID,
+  SUMMARY_ALERT_FIELDS,
+} from './alerts_tool';
 
 jest.mock('@kbn/agent-builder-genai-utils/tools', () => ({
   runSearchTool: jest.fn(),
@@ -90,6 +98,14 @@ describe('alertsTool', () => {
       expect(result.success).toBe(false);
     });
 
+    it.each(['summary', 'full'])('accepts detail %s', (detail) => {
+      expect(tool.schema.safeParse({ query: 'test', detail }).success).toBe(true);
+    });
+
+    it('rejects an unknown detail', () => {
+      expect(tool.schema.safeParse({ query: 'test', detail: 'huge' }).success).toBe(false);
+    });
+
     it('rejects non-boolean isCount', () => {
       const result = tool.schema.safeParse({
         query: 'test',
@@ -110,8 +126,15 @@ describe('alertsTool', () => {
     });
 
     it('tells the model about the row limit and that grouped results are not cut', () => {
-      expect(tool.description).toContain(`at most ${MAX_ALERT_ROWS} alert rows`);
+      expect(tool.description).toContain(`about ${MAX_FULL_ALERT_ROWS} alerts`);
       expect(tool.description).toContain('Grouped (STATS) results are not cut');
+    });
+
+    it('tells the model when to use each detail level', () => {
+      expect(tool.description).toContain('set detail to "summary"');
+      expect(tool.description).toContain(`up to ${MAX_SUMMARY_ALERT_ROWS} alerts`);
+      expect(tool.description).toContain('detail "full"');
+      expect(tool.description).toContain('names specific fields');
     });
 
     it('describes space-scoped search behavior', () => {
@@ -173,7 +196,7 @@ describe('alertsTool', () => {
         modelProvider: mockModelProvider,
         events: mockEvents,
         logger: mockLogger,
-        rowLimit: MAX_ALERT_ROWS + 1,
+        rowLimit: MAX_FULL_ALERT_ROWS + 1,
       });
     });
 
@@ -230,30 +253,32 @@ describe('alertsTool', () => {
         await callHandler();
 
         expect(runSearchTool).toHaveBeenCalledWith(
-          expect.objectContaining({ rowLimit: MAX_ALERT_ROWS + 1 })
+          expect.objectContaining({ rowLimit: MAX_FULL_ALERT_ROWS + 1 })
         );
       });
 
       // Why: one 100-row result pushed the agent context to ~160k tokens in security-team#20696.
       it('truncates results above the cap and tells the model how many rows were dropped', async () => {
-        const total = MAX_ALERT_ROWS + 35;
+        const total = MAX_FULL_ALERT_ROWS + 35;
         (runSearchTool as jest.Mock).mockResolvedValue([buildEsqlResult(total)]);
 
         const { results } = await callHandler();
 
         const [esqlResult, note] = results;
-        expect((esqlResult.data as { values: unknown[][] }).values).toHaveLength(MAX_ALERT_ROWS);
+        expect((esqlResult.data as { values: unknown[][] }).values).toHaveLength(
+          MAX_FULL_ALERT_ROWS
+        );
         expect((esqlResult.data as { values: unknown[][] }).values[0]).toEqual(['alert-0']);
         expect(note).toMatchObject({
           type: ToolResultType.other,
           data: {
-            message: expect.stringContaining(`${MAX_ALERT_ROWS} of at least ${total}`),
+            message: expect.stringContaining(`${MAX_FULL_ALERT_ROWS} of at least ${total}`),
           },
         });
       });
 
       it('returns results at or below the cap unchanged, without a note', async () => {
-        const atCap = buildEsqlResult(MAX_ALERT_ROWS);
+        const atCap = buildEsqlResult(MAX_FULL_ALERT_ROWS);
         (runSearchTool as jest.Mock).mockResolvedValue([atCap]);
 
         const { results } = await callHandler();
@@ -264,7 +289,7 @@ describe('alertsTool', () => {
       // Why: grouped rows are small, and a user who asks for "top 40 rules" must get 40 rows.
       it('does not truncate aggregated results, which are small and were asked for by number', async () => {
         const grouped = buildEsqlResult(
-          MAX_ALERT_ROWS + 15,
+          MAX_FULL_ALERT_ROWS + 15,
           'FROM alerts | STATS count = COUNT(*) BY kibana.alert.rule.name | SORT count DESC | LIMIT 40',
           'kibana.alert.rule.name'
         );
@@ -283,14 +308,16 @@ describe('alertsTool', () => {
         ['a comment', 'FROM alerts // STATS later\n| LIMIT 100'],
         ['a quoted identifier', 'FROM alerts | KEEP `STATS` | LIMIT 100'],
       ])('still caps a raw result when STATS only appears in %s', async (_label, query) => {
-        const total = MAX_ALERT_ROWS + 35;
+        const total = MAX_FULL_ALERT_ROWS + 35;
         (runSearchTool as jest.Mock).mockResolvedValue([buildEsqlResult(total, query)]);
 
         const { results } = await callHandler();
 
-        expect((results[0].data as { values: unknown[][] }).values).toHaveLength(MAX_ALERT_ROWS);
+        expect((results[0].data as { values: unknown[][] }).values).toHaveLength(
+          MAX_FULL_ALERT_ROWS
+        );
         expect(results[1]).toMatchObject({
-          data: { message: expect.stringContaining(`${MAX_ALERT_ROWS} of at least ${total}`) },
+          data: { message: expect.stringContaining(`${MAX_FULL_ALERT_ROWS} of at least ${total}`) },
         });
       });
 
@@ -304,7 +331,7 @@ describe('alertsTool', () => {
       ])(
         'treats a real STATS command %s as aggregated and does not cut it',
         async (_label, query) => {
-          const grouped = buildEsqlResult(MAX_ALERT_ROWS + 15, query, 'host.name');
+          const grouped = buildEsqlResult(MAX_FULL_ALERT_ROWS + 15, query, 'host.name');
           (runSearchTool as jest.Mock).mockResolvedValue([grouped]);
 
           const { results } = await callHandler();
@@ -314,15 +341,19 @@ describe('alertsTool', () => {
       );
 
       it('cuts the probe row and says that more rows exist when the generator hit its default limit', async () => {
-        (runSearchTool as jest.Mock).mockResolvedValue([buildEsqlResult(MAX_ALERT_ROWS + 1)]);
+        (runSearchTool as jest.Mock).mockResolvedValue([buildEsqlResult(MAX_FULL_ALERT_ROWS + 1)]);
 
         const { results } = await callHandler();
 
         const [esqlResult, note] = results;
-        expect((esqlResult.data as { values: unknown[][] }).values).toHaveLength(MAX_ALERT_ROWS);
+        expect((esqlResult.data as { values: unknown[][] }).values).toHaveLength(
+          MAX_FULL_ALERT_ROWS
+        );
         expect(note).toMatchObject({
           data: {
-            message: expect.stringContaining(`${MAX_ALERT_ROWS} of at least ${MAX_ALERT_ROWS + 1}`),
+            message: expect.stringContaining(
+              `${MAX_FULL_ALERT_ROWS} of at least ${MAX_FULL_ALERT_ROWS + 1}`
+            ),
           },
         });
       });
@@ -330,7 +361,7 @@ describe('alertsTool', () => {
       // Why: a grouped result at the default limit may be cut by the generator, and nothing else says so.
       it('keeps a grouped result at the default limit and says that more groups may exist', async () => {
         const groupedQuery = 'FROM alerts | STATS count = COUNT(*) BY host.name | LIMIT 26';
-        const grouped = buildEsqlResult(MAX_ALERT_ROWS + 1, groupedQuery, 'host.name');
+        const grouped = buildEsqlResult(MAX_FULL_ALERT_ROWS + 1, groupedQuery, 'host.name');
         (runSearchTool as jest.Mock).mockResolvedValue([grouped]);
 
         const { results } = await callHandler();
@@ -339,6 +370,152 @@ describe('alertsTool', () => {
         expect(results[1]).toMatchObject({
           type: ToolResultType.other,
           data: { message: expect.stringContaining('may be more groups') },
+        });
+      });
+
+      describe('detail and the token budget', () => {
+        const callWith = async (extra: { detail?: 'summary' | 'full' }) =>
+          (await tool.handler(
+            { query: 'list alerts', ...extra },
+            createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+              modelProvider: mockModelProvider,
+              events: mockEvents as ToolHandlerContext['events'],
+            })
+          )) as ToolHandlerStandardReturn;
+
+        // Why: a plain list needs a few fields per alert, and 100 such rows are smaller than 25 full ones.
+        it('asks for the summary fields only when detail is summary', async () => {
+          (runSearchTool as jest.Mock).mockResolvedValue([]);
+
+          await callWith({ detail: 'summary' });
+
+          const { nlQuery } = (runSearchTool as jest.Mock).mock.calls[0][0] as { nlQuery: string };
+          SUMMARY_ALERT_FIELDS.forEach((field) => expect(nlQuery).toContain(`\`${field}\``));
+          expect(nlQuery).not.toContain('`process.command_line`');
+        });
+
+        it('asks for the essential fields when detail is full', async () => {
+          (runSearchTool as jest.Mock).mockResolvedValue([]);
+
+          await callWith({ detail: 'full' });
+
+          const { nlQuery } = (runSearchTool as jest.Mock).mock.calls[0][0] as { nlQuery: string };
+          expect(nlQuery).toContain('`process.command_line`');
+        });
+
+        it('asks the generator for one row more than the summary maximum', async () => {
+          (runSearchTool as jest.Mock).mockResolvedValue([]);
+
+          await callWith({ detail: 'summary' });
+
+          expect(runSearchTool).toHaveBeenCalledWith(
+            expect.objectContaining({ rowLimit: MAX_SUMMARY_ALERT_ROWS + 1 })
+          );
+        });
+
+        it('shows summary rows up to the summary maximum and says when more exist', async () => {
+          const total = MAX_SUMMARY_ALERT_ROWS + 1;
+          (runSearchTool as jest.Mock).mockResolvedValue([buildEsqlResult(total)]);
+
+          const { results } = await callWith({ detail: 'summary' });
+
+          expect((results[0].data as { values: unknown[][] }).values).toHaveLength(
+            MAX_SUMMARY_ALERT_ROWS
+          );
+          expect(results[1]).toMatchObject({
+            data: {
+              message: expect.stringContaining(`${MAX_SUMMARY_ALERT_ROWS} of at least ${total}`),
+            },
+          });
+        });
+
+        // Why: a note that only says "narrow the query" makes some models run many more queries to fetch the
+        // rest of a list, which costs far more tokens than the partial list is worth.
+        it('tells the model to report that more rows exist, and not to query for the rest', async () => {
+          (runSearchTool as jest.Mock).mockResolvedValue([
+            buildEsqlResult(MAX_SUMMARY_ALERT_ROWS + 1),
+          ]);
+
+          const { results } = await callWith({ detail: 'summary' });
+
+          expect(results[1]).toMatchObject({
+            data: {
+              message: expect.stringMatching(
+                /Tell the user that more rows exist.*Do not run more queries to list the rest/
+              ),
+            },
+          });
+        });
+
+        it('does not cut summary rows below the maximum', async () => {
+          const rows = buildEsqlResult(MAX_FULL_ALERT_ROWS + 35);
+          (runSearchTool as jest.Mock).mockResolvedValue([rows]);
+
+          const { results } = await callWith({ detail: 'summary' });
+
+          expect(results).toEqual([rows]);
+        });
+
+        it('keeps a grouped summary result at its default limit and says that more groups may exist', async () => {
+          const grouped = buildEsqlResult(
+            MAX_SUMMARY_ALERT_ROWS + 1,
+            'FROM alerts | STATS count = COUNT(*) BY host.name | LIMIT 101',
+            'host.name'
+          );
+          (runSearchTool as jest.Mock).mockResolvedValue([grouped]);
+
+          const { results } = await callWith({ detail: 'summary' });
+
+          expect(results[0]).toEqual(grouped);
+          expect(results[1]).toMatchObject({
+            data: { message: expect.stringContaining('may be more groups') },
+          });
+        });
+
+        // Why: the platform replaces a tool result above about 20k estimated tokens with a preview and a
+        // read_file path, which sends the model into extra steps. Stay under that for any row size.
+        it('cuts rows that do not fit the token budget, and says so', async () => {
+          const bigRow = (i: number) => [`alert-${i}`, 'x'.repeat(4000)];
+          const result = {
+            ...buildEsqlResult(0),
+            data: {
+              query: 'FROM alerts | LIMIT 26',
+              columns: [
+                { name: 'kibana.alert.uuid', type: 'keyword' },
+                { name: 'process.command_line', type: 'keyword' },
+              ],
+              values: Array.from({ length: MAX_FULL_ALERT_ROWS }, (_, i) => bigRow(i)),
+            },
+          };
+          (runSearchTool as jest.Mock).mockResolvedValue([result]);
+
+          const { results } = await callWith({ detail: 'full' });
+
+          const kept = (results[0].data as { values: unknown[][] }).values;
+          expect(kept.length).toBeGreaterThan(0);
+          expect(kept.length).toBeLessThan(MAX_FULL_ALERT_ROWS);
+          expect(estimateTokens(results[0])).toBeLessThanOrEqual(MAX_RESULT_TOKENS);
+          expect(results[1]).toMatchObject({
+            data: {
+              message: expect.stringContaining(`${kept.length} of at least ${MAX_FULL_ALERT_ROWS}`),
+            },
+          });
+        });
+
+        it('keeps at least one row when a single row is over the budget', async () => {
+          const result = {
+            ...buildEsqlResult(0),
+            data: {
+              query: 'FROM alerts | LIMIT 26',
+              columns: [{ name: 'message', type: 'keyword' }],
+              values: [['x'.repeat(MAX_RESULT_TOKENS * 8)], ['second row']],
+            },
+          };
+          (runSearchTool as jest.Mock).mockResolvedValue([result]);
+
+          const { results } = await callWith({ detail: 'full' });
+
+          expect((results[0].data as { values: unknown[][] }).values).toHaveLength(1);
         });
       });
 

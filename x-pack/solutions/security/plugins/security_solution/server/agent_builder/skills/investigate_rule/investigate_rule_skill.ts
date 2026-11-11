@@ -171,6 +171,9 @@ these are the candidates for an exception condition (Step 4), so request exactly
 - every field listed in the rule's \`investigation_fields\` (from the attachment, Step 1) —
   these are the rule author's designated fields and the strongest exception candidates.
 
+Call \`security.alerts\` with \`detail\` set to \`full\` for this query. It needs the fields above,
+and the summary detail does not return them.
+
 These are the only alerts you can speak about with certainty — they carry a human verdict.
 
 **Time window (both queries):** set the \`time_window_hours\` parameter (NOT the query

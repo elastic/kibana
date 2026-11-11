@@ -70,6 +70,12 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
     expect(content).toMatch(/do not load it unless the user asks/i);
   });
 
+  // Why: a plain list needs a few fields per alert. Without this line, the model asks for full rows,
+  // which the tool cuts to about 25.
+  it('tells the model to ask for summary detail on plain list requests', () => {
+    expect(alertAnalysisSkill.content).toMatch(/detail[^.\n]*'summary'[^.\n]*list/i);
+  });
+
   it('only names registry tools that are loadable when skills are enabled', async () => {
     const skillsEnabledUiSettings = uiSettingsServiceMock.createClient();
     skillsEnabledUiSettings.get.mockResolvedValue(true); // agentBuilder:experimentalFeatures

@@ -73,6 +73,7 @@ export const createToolUsageEvaluators = (log: ToolingLog) => [
 interface RawToolStep {
   type?: string;
   tool_id?: string;
+  params?: Record<string, unknown>;
   results?: Array<{ type?: string; data?: unknown }>;
 }
 
@@ -142,6 +143,26 @@ export const createAlertRowsEvaluator = (log: ToolingLog) => ({
     return {
       score: rowCounts.length ? Math.max(...rowCounts) : 0,
       metadata: { rowCounts, truncationNotes },
+    };
+  },
+});
+
+/**
+ * CODE evaluator: how many security.alerts calls asked for the summary detail, and the detail of every
+ * call. Whether summary is right depends on the question, so the score has no direction.
+ */
+export const createAlertDetailEvaluator = (log: ToolingLog) => ({
+  name: 'security.alerts summary detail calls',
+  kind: 'CODE' as const,
+  direction: 'neutral' as const,
+  evaluate: async ({ output }: { output: unknown }) => {
+    const details = getRawToolSteps(output)
+      .filter(({ tool_id: toolId }) => toolId === SECURITY_ALERTS_TOOL_ID)
+      .map(({ params }) => String(params?.detail ?? 'default'));
+    log.info(`security.alerts detail per call: [${details.join(', ')}]`);
+    return {
+      score: details.filter((detail) => detail === 'summary').length,
+      metadata: { details },
     };
   },
 });
