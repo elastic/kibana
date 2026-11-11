@@ -6,7 +6,7 @@
  */
 
 import { EuiTextArea } from '@elastic/eui';
-import React, { useCallback, forwardRef } from 'react';
+import React, { useCallback, forwardRef, useState } from 'react';
 import { css } from '@emotion/react';
 
 import * as i18n from './translations';
@@ -20,6 +20,8 @@ export interface Props extends React.TextareaHTMLAttributes<HTMLTextAreaElement>
 
 export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
   ({ isDisabled = false, value, onPromptSubmit, setUserPrompt }, ref) => {
+    const [isComposing, setIsComposing] = useState(false);
+
     const onChangeCallback = useCallback(
       (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         setUserPrompt(event.target.value);
@@ -27,10 +29,15 @@ export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
       [setUserPrompt]
     );
 
+    const handleCompositionStart = () => setIsComposing(true);
+    const handleCompositionEnd = () => {
+      setIsComposing(false);
+    };
+
     const onKeyDown = useCallback(
       (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
         // keyCode 13 is needed in case of IME input
-        if (event.keyCode === 13 && !event.shiftKey) {
+        if (event.keyCode === 13 && !event.shiftKey && !isComposing) {
           event.preventDefault();
 
           if (value.trim().length) {
@@ -41,7 +48,7 @@ export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
           }
         }
       },
-      [value, onPromptSubmit, setUserPrompt]
+      [value, onPromptSubmit, setUserPrompt, isComposing]
     );
 
     return (
@@ -63,6 +70,8 @@ export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
         value={value}
         onChange={onChangeCallback}
         onKeyDown={onKeyDown}
+        onCompositionStart={handleCompositionStart}
+        onCompositionEnd={handleCompositionEnd}
         rows={1}
       />
     );
