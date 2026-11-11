@@ -44,7 +44,7 @@ jest.mock('../../../entity_analytics/api/hooks/use_entity_risk_scores', () => ({
 
 const mockedUseObservedService = jest.fn().mockReturnValue(mockObservedService);
 
-jest.mock('./hooks/use_observed_service', () => ({
+jest.mock('../../../flyout_v2/entity/service/main/hooks/use_observed_service', () => ({
   useObservedService: () => mockedUseObservedService(),
 }));
 

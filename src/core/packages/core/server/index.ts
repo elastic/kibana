@@ -77,6 +77,17 @@ export type {
   FeatureFlagsStart,
   FeatureFlagsSetup,
 } from '@kbn/core-feature-flags-server';
+export { defineTopic } from '@kbn/core-pubsub-server';
+export type {
+  PubSubEvent,
+  PubSubEventInit,
+  PubSubHandler,
+  PubSubPublishResult,
+  PubSubSetup,
+  PubSubStart,
+  PubSubSubscription,
+  Topic,
+} from '@kbn/core-pubsub-server';
 export type { Capabilities } from '@kbn/core-capabilities-common';
 export type {
   CapabilitiesProvider,
@@ -251,6 +262,15 @@ export type {
   HttpSelfResponse,
   HttpSelfScopedClient,
   HttpSelfService,
+  HttpSelfCredentialRefresher,
+  HttpSelfCredentialRefresherNotHandledResult,
+  HttpSelfCredentialRefresherOptions,
+  HttpSelfCredentialRefresherRejectParams,
+  HttpSelfCredentialRefresherRejectResult,
+  HttpSelfCredentialRefresherReplaceParams,
+  HttpSelfCredentialRefresherReplaceResult,
+  HttpSelfCredentialRefresherResult,
+  HttpSelfCredentialRefresherToolkit,
   HttpSelfUnauthorizedErrorHandler,
   HttpSelfUnauthorizedErrorHandlerNotHandledResult,
   HttpSelfUnauthorizedErrorHandlerOptions,
@@ -308,6 +328,7 @@ export type {
   SharedGlobalConfig,
   MakeUsageFromSchema,
   ExposedToBrowserDescriptor,
+  PluginInitialization,
 } from '@kbn/core-plugins-server';
 export type {
   PluginsServiceSetup,

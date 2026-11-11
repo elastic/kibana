@@ -19,10 +19,14 @@ import {
   DISCOVERY_QUERIES_ENDPOINT,
   EVENTS_ENDPOINT,
   KI_FEATURE_CREATE_TOOL_ID,
+  KNOWLEDGE_INDICATORS_DATA_STREAM,
   MARK_SCANNED_ENDPOINT,
   POLL_OPTIONS,
   QUERIES_ENDPOINT,
   SOURCES_ENDPOINT,
+  SOURCE_CREATE_TOOL_ID,
+  SOURCE_DELETE_TOOL_ID,
+  SOURCE_UPDATE_TOOL_ID,
   TOOL_API_HEADERS,
   TOOL_EXECUTE_ENDPOINT,
   buildDetection,
@@ -35,12 +39,11 @@ import {
   deleteQuery,
   fenceAutomaticOnboarding,
   getFeaturesEndpoint,
-  deleteSignificantEvent,
-  isToolWriteLeaseConflict,
-  retryOnWriteLease,
+  executeTool,
+  seedFeature,
   seedRuleBackedQuery,
-  seedSignificantEvent,
 } from '../../fixtures/built_in_role_access';
+import { deleteSignificantEvent, seedSignificantEvent } from '../../fixtures/rule_events';
 
 // No Kibana privilege besides Nightshift `all` and Agent Builder `read` (for the tools), and no
 // index privilege besides reading the data the source queries. Anything else Significant Events
@@ -59,19 +62,27 @@ const NIGHTSHIFT_ALL_ROLE: KibanaRole = {
   ],
 };
 
-const ROLES: ReadonlyArray<{ name: string; label: string; role: string | KibanaRole }> = [
-  { name: 'editor', label: 'the built-in editor role', role: 'editor' },
-  { name: 'admin', label: 'the built-in admin role', role: 'admin' },
+// Changing sources needs `configure_nightshift` on top of manage, which only the "Manage engines"
+// sub-feature grants. Base privileges exclude it, so only the built-in admin role has it.
+const ROLES: ReadonlyArray<{
+  name: string;
+  label: string;
+  role: string | KibanaRole;
+  canChangeSources: boolean;
+}> = [
+  { name: 'editor', label: 'the built-in editor role', role: 'editor', canChangeSources: false },
+  { name: 'admin', label: 'the built-in admin role', role: 'admin', canChangeSources: true },
   {
     name: 'nightshift-all',
     label: 'a role with only Nightshift all and Agent Builder read',
     role: NIGHTSHIFT_ALL_ROLE,
+    canChangeSources: false,
   },
 ];
 
 // These roles can do everything except changing Significant Events settings
-// (covered in settings_role_access.spec.ts).
-for (const { name, label, role } of ROLES) {
+// (covered in settings_role_access.spec.ts) and, unless `canChangeSources`, changing sources.
+for (const { name, label, role, canChangeSources } of ROLES) {
   apiTest.describe(
     `Significant Events actions for ${label}`,
     { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
@@ -92,7 +103,7 @@ for (const { name, label, role } of ROLES) {
       apiTest.beforeAll(async ({ apiServices, esClient, kbnClient, samlAuth }) => {
         // Detection writes are rejected while Significant Events is paused.
         await apiServices.significantEventsTest.resumeSignificantEvents();
-        await seedSignificantEvent(esClient, eventId);
+        await seedSignificantEvent(esClient, eventId, { title: 'Built-in role access check' });
         ({
           id: sourceId,
           slug: sourceSlug,
@@ -119,34 +130,66 @@ for (const { name, label, role } of ROLES) {
         }
       });
 
-      apiTest('creates and deletes a source', async ({ apiClient, kbnClient }) => {
-        const createResponse = await apiClient.post(SOURCES_ENDPOINT, {
-          headers,
-          body: { title: `${name}-created-${uuidv4()}`, esql: ACCESS_SOURCE_ESQL },
-          responseType: 'json',
-        });
-        expect(createResponse).toHaveStatusCode(200);
-        const { id, slug } = createResponse.body.source;
-        createdSourceId = id;
-        await fenceAutomaticOnboarding({ kbnClient, source: { id, slug } });
+      if (canChangeSources) {
+        apiTest('creates and deletes a source', async ({ apiClient, kbnClient }) => {
+          const createResponse = await apiClient.post(SOURCES_ENDPOINT, {
+            headers,
+            body: { title: `${name}-created-${uuidv4()}`, esql: ACCESS_SOURCE_ESQL },
+            responseType: 'json',
+          });
+          expect(createResponse).toHaveStatusCode(200);
+          const { id, slug } = createResponse.body.source;
+          createdSourceId = id;
+          await fenceAutomaticOnboarding({ kbnClient, source: { id, slug } });
 
-        const deleteResponse = await apiClient.delete(`${SOURCES_ENDPOINT}/${id}`, {
-          headers,
-          responseType: 'json',
+          const deleteResponse = await apiClient.delete(`${SOURCES_ENDPOINT}/${id}`, {
+            headers,
+            responseType: 'json',
+          });
+          expect(deleteResponse).toHaveStatusCode(200);
         });
-        expect(deleteResponse).toHaveStatusCode(200);
-      });
+      } else {
+        apiTest('refuses to create a source', async ({ apiClient }) => {
+          const response = await apiClient.post(SOURCES_ENDPOINT, {
+            headers,
+            body: { title: `${name}-refused-${uuidv4()}`, esql: ACCESS_SOURCE_ESQL },
+            responseType: 'json',
+          });
+          expect(response).toHaveStatusCode(403);
+        });
+
+        apiTest('refuses to create a source from Agent Builder', async ({ apiClient }) => {
+          const title = `${name}-tool-refused-${uuidv4()}`;
+
+          const response = await executeTool(apiClient, toolHeaders, SOURCE_CREATE_TOOL_ID, {
+            title,
+            esql: ACCESS_SOURCE_ESQL,
+          });
+          expect(response).toHaveStatusCode(400);
+
+          const listed = await apiClient.get(
+            `${SOURCES_ENDPOINT}?page=1&per_page=5&search=${encodeURIComponent(title)}`,
+            { headers, responseType: 'json' }
+          );
+          expect(listed.body.sources).toStrictEqual([]);
+        });
+      }
 
       apiTest('closes a significant event', async ({ apiClient }) => {
         await expect
           .poll(async () => {
-            const response = await apiClient.get(`${EVENTS_ENDPOINT}/${eventId}`, {
+            const response = await apiClient.get(`${EVENTS_ENDPOINT}?event_id=${eventId}`, {
               headers,
               responseType: 'json',
             });
-            return response.statusCode;
+            return {
+              statusCode: response.statusCode,
+              eventIds: (response.body.hits ?? []).map(
+                ({ event_id: id }: { event_id: string }) => id
+              ),
+            };
           }, POLL_OPTIONS)
-          .toBe(200);
+          .toStrictEqual({ statusCode: 200, eventIds: [eventId] });
 
         const response = await apiClient.post(`${EVENTS_ENDPOINT}/${eventId}/update`, {
           headers,
@@ -189,13 +232,10 @@ for (const { name, label, role } of ROLES) {
       });
 
       apiTest('creates, lists and deletes a feature knowledge indicator', async ({ apiClient }) => {
-        const createResponse = await retryOnWriteLease({
-          send: () =>
-            apiClient.post(getFeaturesEndpoint(sourceId), {
-              headers,
-              body: buildFeature(featureId),
-              responseType: 'json',
-            }),
+        const createResponse = await apiClient.post(getFeaturesEndpoint(sourceId), {
+          headers,
+          body: buildFeature(featureId),
+          responseType: 'json',
         });
         expect(createResponse).toHaveStatusCode(200);
         expect(createResponse.body).toStrictEqual({ acknowledged: true });
@@ -209,26 +249,20 @@ for (const { name, label, role } of ROLES) {
           expect.arrayContaining([expect.objectContaining({ id: featureId, source_id: sourceId })])
         );
 
-        const deleteResponse = await retryOnWriteLease({
-          send: () =>
-            apiClient.delete(`${getFeaturesEndpoint(sourceId)}/${featureId}`, {
-              headers,
-              responseType: 'json',
-            }),
-        });
+        const deleteResponse = await apiClient.delete(
+          `${getFeaturesEndpoint(sourceId)}/${featureId}`,
+          { headers, responseType: 'json' }
+        );
         expect(deleteResponse).toHaveStatusCode(200);
       });
 
       apiTest(
         'creates and lists a rule-backed query knowledge indicator',
         async ({ apiClient }) => {
-          const createResponse = await retryOnWriteLease({
-            send: () =>
-              apiClient.put(`${QUERIES_ENDPOINT}/${queryId}`, {
-                headers,
-                body: buildRuleBackedQuery({ sourceId, viewName: sourceViewName }),
-                responseType: 'json',
-              }),
+          const createResponse = await apiClient.put(`${QUERIES_ENDPOINT}/${queryId}`, {
+            headers,
+            body: buildRuleBackedQuery({ sourceId, viewName: sourceViewName }),
+            responseType: 'json',
           });
           expect(createResponse).toHaveStatusCode(200);
 
@@ -281,17 +315,13 @@ for (const { name, label, role } of ROLES) {
       );
 
       apiTest('creates a knowledge indicator from Agent Builder', async ({ apiClient }) => {
-        const response = await retryOnWriteLease({
-          send: () =>
-            apiClient.post(TOOL_EXECUTE_ENDPOINT, {
-              headers: toolHeaders,
-              body: {
-                tool_id: KI_FEATURE_CREATE_TOOL_ID,
-                tool_params: { ...buildFeature(toolFeatureId), slug: sourceSlug },
-              },
-              responseType: 'json',
-            }),
-          isLeaseConflict: isToolWriteLeaseConflict,
+        const response = await apiClient.post(TOOL_EXECUTE_ENDPOINT, {
+          headers: toolHeaders,
+          body: {
+            tool_id: KI_FEATURE_CREATE_TOOL_ID,
+            tool_params: { ...buildFeature(toolFeatureId), slug: sourceSlug },
+          },
+          responseType: 'json',
         });
         expect(response).toHaveStatusCode(200);
         expect(response.body.results).toStrictEqual([
@@ -305,6 +335,125 @@ for (const { name, label, role } of ROLES) {
           }),
         ]);
       });
+
+      if (canChangeSources) {
+        apiTest(
+          'creates, updates and deletes a source from Agent Builder',
+          async ({ apiClient, kbnClient }) => {
+            const title = `${name}-tool-source-${uuidv4()}`;
+
+            const createResponse = await executeTool(
+              apiClient,
+              toolHeaders,
+              SOURCE_CREATE_TOOL_ID,
+              {
+                title,
+                esql: ACCESS_SOURCE_ESQL,
+              }
+            );
+            // Read before any assertion, so the source is removed even when one fails.
+            const createdId: string | undefined = createResponse.body.results?.[0]?.data?.id;
+            try {
+              expect(createResponse).toHaveStatusCode(200);
+              const created = createResponse.body.results[0];
+              expect(created).toStrictEqual(
+                expect.objectContaining({
+                  type: 'other',
+                  data: expect.objectContaining({ title, enabled: true }),
+                })
+              );
+              const { id, slug } = created.data;
+              const updatedTitle = `${title}-renamed`;
+              const updateResponse = await executeTool(
+                apiClient,
+                toolHeaders,
+                SOURCE_UPDATE_TOOL_ID,
+                {
+                  source: slug,
+                  title: updatedTitle,
+                  enabled: false,
+                }
+              );
+              expect(updateResponse).toHaveStatusCode(200);
+              expect(updateResponse.body.results[0].data).toStrictEqual(
+                expect.objectContaining({
+                  id,
+                  slug,
+                  title: updatedTitle,
+                  esql: ACCESS_SOURCE_ESQL,
+                  enabled: false,
+                })
+              );
+
+              const deleteResponse = await executeTool(
+                apiClient,
+                toolHeaders,
+                SOURCE_DELETE_TOOL_ID,
+                {
+                  source: slug,
+                }
+              );
+              expect(deleteResponse).toHaveStatusCode(200);
+              expect(deleteResponse.body.results[0].data).toStrictEqual(
+                expect.objectContaining({ deleted: true, id })
+              );
+
+              const getResponse = await apiClient.get(`${SOURCES_ENDPOINT}/${id}`, {
+                headers,
+                responseType: 'json',
+              });
+              expect(getResponse).toHaveStatusCode(404);
+            } finally {
+              if (createdId) {
+                await deleteAccessSource({ kbnClient, sourceId: createdId });
+              }
+            }
+          }
+        );
+
+        apiTest(
+          'cleans up the knowledge indicators of a source deleted from Agent Builder',
+          async ({ apiClient, esClient, kbnClient }) => {
+            const { id, slug } = await createAccessSource({
+              kbnClient,
+              title: `${name}-delete-cascade-${uuidv4()}`,
+            });
+            try {
+              await seedFeature({
+                kbnClient,
+                sourceId: id,
+                featureId: `${name}-cascade-${uuidv4()}`,
+              });
+
+              const response = await executeTool(apiClient, toolHeaders, SOURCE_DELETE_TOOL_ID, {
+                source: slug,
+              });
+              expect(response).toHaveStatusCode(200);
+              expect(response.body.results[0].data).toStrictEqual(
+                expect.objectContaining({ deleted: true, id })
+              );
+
+              await expect
+                .poll(async () => {
+                  const { hits } = await esClient.search({
+                    index: KNOWLEDGE_INDICATORS_DATA_STREAM,
+                    size: 0,
+                    track_total_hits: true,
+                    query: {
+                      bool: {
+                        filter: [{ term: { 'source.id': id } }, { term: { deleted: true } }],
+                      },
+                    },
+                  });
+                  return typeof hits.total === 'number' ? hits.total : hits.total?.value;
+                }, POLL_OPTIONS)
+                .toBeGreaterThan(0);
+            } finally {
+              await deleteAccessSource({ kbnClient, sourceId: id });
+            }
+          }
+        );
+      }
     }
   );
 }

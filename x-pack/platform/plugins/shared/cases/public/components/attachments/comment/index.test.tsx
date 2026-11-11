@@ -12,7 +12,7 @@ import {
   AttachmentActionType,
   type UnifiedValueAttachmentViewProps,
 } from '../../../client/attachment_framework/types';
-import type { CommentAttachmentData } from '../../../../common/types/domain_zod/attachment/comment/v2';
+import type { CommentAttachmentData } from '../../../../common/types/domain/attachment/comment/v2';
 import { basicCase } from '../../../containers/mock';
 import { allCasesPermissions } from '../../../common/mock';
 import { getCommentAttachmentType } from '.';

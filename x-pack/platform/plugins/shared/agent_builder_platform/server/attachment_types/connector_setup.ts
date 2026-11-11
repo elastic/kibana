@@ -9,6 +9,8 @@ import type { Logger } from '@kbn/logging';
 import type { AgentsStart } from '@kbn/agent-builder-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import { getConnectorSpec } from '@kbn/connector-specs';
 import {
   CONNECTOR_SETUP_ATTACHMENT_TYPE,
@@ -92,6 +94,56 @@ export const createConnectorSetupAttachmentType = ({
         ].join('\n');
         return { type: 'text', value };
       },
+    };
+  },
+  toSurfaceComposition: (
+    {
+      data: { connector_type: connectorType, connector_type_name: connectorTypeName, reason },
+      origin,
+    },
+    { agentId }
+  ) => {
+    const displayName =
+      connectorTypeName ?? getConnectorSpec(connectorType)?.metadata.displayName ?? connectorType;
+
+    const text =
+      reason ||
+      i18n.translate('xpack.agentBuilderPlatform.attachments.connectorSetup.surface.reason', {
+        defaultMessage: 'Configure the {displayName} connector so the agent can use it here.',
+        values: { displayName },
+      });
+
+    return {
+      type: 'view',
+      title: displayName,
+      subtitle: origin
+        ? i18n.translate(
+            'xpack.agentBuilderPlatform.attachments.connectorSetup.surface.connected',
+            {
+              defaultMessage: 'Connected',
+            }
+          )
+        : i18n.translate('xpack.agentBuilderPlatform.attachments.connectorSetup.surface.setup', {
+            defaultMessage: 'Setup',
+          }),
+      body: [
+        { type: 'markdown', text },
+        {
+          type: 'actions',
+          buttons: [
+            {
+              label: i18n.translate(
+                'xpack.agentBuilderPlatform.attachments.connectorSetup.surface.configureInKibana',
+                { defaultMessage: 'Configure in Kibana' }
+              ),
+              app: AGENT_BUILDER_APP_ID,
+              // The agent's connectors page assigns the connectors created there to the agent.
+              path: `/agents/${encodeURIComponent(agentId)}/connectors`,
+              ...(origin ? {} : { primary: true }),
+            },
+          ],
+        },
+      ],
     };
   },
   getAgentDescription: () => {

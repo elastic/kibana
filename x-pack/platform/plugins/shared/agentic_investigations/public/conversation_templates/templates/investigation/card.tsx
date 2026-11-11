@@ -6,11 +6,20 @@
  */
 
 import { css } from '@emotion/react';
-import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
-import { ConversationMetaInfo } from '@kbn/agentic-investigations-common';
-import { useAiButtonGradientStyles } from '@kbn/shared-ux-ai-components';
+import React, { useState } from 'react';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  EuiTextBlockTruncate,
+  useEuiTheme,
+  useResizeObserver,
+} from '@elastic/eui';
+import { ConversationMetaInfo, toPlainSummary } from '@kbn/agentic-investigations-common';
 import type { InvestigationSummary } from '../../../../common';
+import { GradientLabel } from './gradient_label';
 import { InvestigatingTypingDots } from './investigating_typing_dots';
 import { getInvestigationDisplayTitle } from './to_view_model';
 import { IN_PROGRESS_LABEL, moreEntitiesLabel } from './translations';
@@ -27,6 +36,11 @@ export interface InvestigationCardProps {
    * the card button so actions are not nested interactive controls.
    */
   actions?: React.ReactNode;
+  /**
+   * Drop the card's own border and shadow so a host can wrap it in a custom frame (for example an
+   * AI gradient ring) without reaching into the card's DOM.
+   */
+  borderless?: boolean;
 }
 
 const EntityChips = ({ investigation }: { investigation: InvestigationSummary }) => {
@@ -62,7 +76,7 @@ const EntityChips = ({ investigation }: { investigation: InvestigationSummary })
 
 /**
  * A compact investigation card: age on top (with running indicator and optional trailing actions),
- * title, a two-line summary, and impacted entities. Presentational; the host supplies the
+ * title, a one-line summary, and impacted entities. Presentational; the host supplies the
  * investigation and decides what a click does.
  */
 export const InvestigationCard: React.FC<InvestigationCardProps> = ({
@@ -70,11 +84,9 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
   onClick,
   isSelected = false,
   actions,
+  borderless = false,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { labelCss: aiLabelCss } = useAiButtonGradientStyles({ variant: 'outlined' });
-  // Same primary→assistance stop colors the AI label gradient uses (dots can't use background-clip).
-  const aiDotsFill = `linear-gradient(135deg, ${euiTheme.colors.textPrimary} 2.98%, ${euiTheme.colors.textAssistance} 66.24%)`;
   const { metadata, in_progress: inProgress, created_at: createdAt } = investigation;
   const title = getInvestigationDisplayTitle(investigation);
   const { summary } = metadata;
@@ -102,28 +114,22 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
       <EuiText size="xs" color="subdued" component="span" aria-hidden>
         •
       </EuiText>
-      <EuiText
-        size="xs"
-        component="span"
-        css={[
-          aiLabelCss,
-          css`
-            padding: 0;
-            line-height: 1;
-          `,
-        ]}
-      >
-        {IN_PROGRESS_LABEL}
-      </EuiText>
-      <InvestigatingTypingDots color={aiDotsFill} />
+      <GradientLabel>{IN_PROGRESS_LABEL}</GradientLabel>
+      <InvestigatingTypingDots />
     </span>
   ) : undefined;
 
   const hasActions = actions != null;
+  const [actionsElement, setActionsElement] = useState<HTMLDivElement | null>(null);
+  const { width: actionsWidth } = useResizeObserver(actionsElement, 'width');
 
-  // Spacer matching ConversationsActionsGroup / Nightshift card actions: divider margins +
-  // two size="s" (32px) icon buttons + gutters — keeps age text from running under the icons.
-  const actionsSpacerWidth = `calc(${euiTheme.size.xl} * 2 + ${euiTheme.size.l} + ${euiTheme.size.s})`;
+  // The actions are positioned over the top row, so the row reserves their measured width to keep
+  // the age text from running under them. Until measured, fall back to the width of
+  // ConversationsActionsGroup: divider margins + two size="s" (32px) icon buttons + gutters.
+  const actionsSpacerWidth =
+    actionsWidth > 0
+      ? `${actionsWidth}px`
+      : `calc(${euiTheme.size.xl} * 2 + ${euiTheme.size.l} + ${euiTheme.size.s})`;
 
   return (
     <div
@@ -136,9 +142,15 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
         background: ${isSelected
           ? euiTheme.colors.backgroundBaseInteractiveSelect
           : euiTheme.colors.backgroundBasePlain};
+        ${borderless
+          ? css`
+              border: none;
+              box-shadow: none;
+            `
+          : ''}
         ${isInteractive && !isSelected
           ? `&:has([data-test-subj='investigationCardButton']:hover) {
-              background: ${euiTheme.colors.backgroundBaseSubdued};
+              background: ${euiTheme.colors.backgroundBaseInteractiveHover};
             }`
           : ''}
       `}
@@ -180,6 +192,7 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
                 <EuiFlexItem
                   grow={false}
                   aria-hidden
+                  data-test-subj="investigationCardActionsSpacer"
                   css={{
                     marginBlock: `-${euiTheme.size.s}`,
                     inlineSize: actionsSpacerWidth,
@@ -210,18 +223,16 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
           {summary && (
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
-                <p
-                  data-test-subj="investigationCardSummary"
-                  css={css`
-                    margin: 0;
-                    display: -webkit-box;
-                    -webkit-line-clamp: 2;
-                    -webkit-box-orient: vertical;
-                    overflow: hidden;
-                  `}
-                >
-                  {summary}
-                </p>
+                <EuiTextBlockTruncate lines={1} cloneElement>
+                  <p
+                    data-test-subj="investigationCardSummary"
+                    css={css`
+                      margin: 0;
+                    `}
+                  >
+                    {toPlainSummary(summary)}
+                  </p>
+                </EuiTextBlockTruncate>
               </EuiText>
             </EuiFlexItem>
           )}
@@ -241,6 +252,8 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
       </div>
       {hasActions && (
         <div
+          ref={setActionsElement}
+          data-test-subj="investigationCardActions"
           css={css`
             position: absolute;
             inset-block-start: ${euiTheme.size.l};

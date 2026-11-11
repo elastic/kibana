@@ -9,6 +9,7 @@ import { EuiButton, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import type { SignificantEventResponse } from '@kbn/significant-events-schema';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { getHttpErrorStatus } from '../../../common/http_error';
 import { EventFlyout } from '../../../components/entities/significant_event/event_flyout';
 import { useFetchEventById } from '../../../data/significant_events/use_fetch_event_by_id';
 import { useSignificantEventsFacets } from '../../../data/significant_events/use_significant_events_facets';
@@ -22,6 +23,7 @@ import {
   EMPTY_BODY,
   EMPTY_TITLE,
   EVENT_NOT_FOUND_TOAST_TITLE,
+  INVESTIGATION_FILTER_ERROR_MESSAGE,
   LIST_ERROR_MESSAGE,
   LIST_ERROR_TITLE,
   RETRY_LABEL,
@@ -29,13 +31,18 @@ import {
 import { useEventsUrlState } from './use_events_url_state';
 
 const DEFAULT_PAGE_SIZE = 25;
+const HTTP_SERVICE_UNAVAILABLE = 503;
 
 export const EventsTab = ({
   timeRange,
   onTimeRangeChange,
+  entities,
+  unassigned,
 }: {
   timeRange: DetectionTimeRange;
   onTimeRangeChange: (timeRange: DetectionTimeRange) => void;
+  entities: string[];
+  unassigned: boolean;
 }): React.ReactElement => {
   const { notifications } = useKibana().services;
   const [perPage, setPerPage] = useState(DEFAULT_PAGE_SIZE);
@@ -62,6 +69,8 @@ export const EventsTab = ({
   } = useEventsUrlState();
   const filters = {
     ...timeRange,
+    entities,
+    unassigned,
     search: searchQuery,
     status,
     severity,
@@ -75,6 +84,9 @@ export const EventsTab = ({
     sortOrder: sort.order,
   });
   const facetsQuery = useSignificantEventsFacets(filters);
+  // Only the 503 from the route means the investigation state is unavailable.
+  const isInvestigationStateUnavailable =
+    investigation.length > 0 && getHttpErrorStatus(eventsQuery.error) === HTTP_SERVICE_UNAVAILABLE;
   const events = eventsQuery.data?.hits ?? [];
   const lastPage = Math.max(1, Math.ceil((eventsQuery.data?.total ?? 0) / perPage));
   const isPastLastPage = Boolean(eventsQuery.data) && page > lastPage;
@@ -155,11 +167,15 @@ export const EventsTab = ({
         onSeverityChange={setSeverity}
       />
       <EuiSpacer size="m" />
-      {eventsQuery.isError && !eventsQuery.data ? (
+      {eventsQuery.isError && (!eventsQuery.data || eventsQuery.isPreviousData) ? (
         <KbnDangerCallout
           announceOnMount
           title={LIST_ERROR_TITLE}
-          text={LIST_ERROR_MESSAGE}
+          text={
+            isInvestigationStateUnavailable
+              ? INVESTIGATION_FILTER_ERROR_MESSAGE
+              : LIST_ERROR_MESSAGE
+          }
           size="s"
           data-test-subj="nightshiftDetectionEventsError"
           actionProps={{

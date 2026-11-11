@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type { SignificantEvent, SignificantEventResponse } from '@kbn/significant-events-schema';
 import { useSignificantEventsList } from './use_significant_events_list';
 
 const mockSignificantEventsFetch = jest.fn();
@@ -43,6 +43,7 @@ let capturedRefetchInterval:
   | undefined;
 
 jest.mock('@kbn/react-query', () => ({
+  useQueryClient: () => ({ getQueryData: () => undefined }),
   useQuery: (params: {
     queryFn: (args: { signal?: AbortSignal }) => Promise<unknown>;
     refetchInterval: (data: SignificantEventsListData | undefined) => number | false;
@@ -53,7 +54,7 @@ jest.mock('@kbn/react-query', () => ({
   },
 }));
 
-const createEvent = (investigations?: SignificantEvent['investigations']): SignificantEvent =>
+const createEvent = (investigationState: SignificantEventResponse['investigation_state']) =>
   ({
     '@timestamp': '2026-10-20T11:00:00.000Z',
     event_id: 'event-1',
@@ -63,8 +64,8 @@ const createEvent = (investigations?: SignificantEvent['investigations']): Signi
     summary: 'Latency increased for checkout.',
     severity: 'high',
     confidence: 0.9,
-    investigations,
-  } as SignificantEvent);
+    investigation_state: investigationState,
+  } as SignificantEventResponse);
 
 describe('useSignificantEventsList', () => {
   beforeEach(() => {
@@ -83,6 +84,8 @@ describe('useSignificantEventsList', () => {
         status: ['active', 'recovering'],
         severity: ['critical', 'high'],
         investigation: ['in_progress'],
+        entities: [],
+        unassigned: false,
         sortField: 'severity',
         sortOrder: 'desc',
       })
@@ -123,24 +126,15 @@ describe('useSignificantEventsList', () => {
         status: [],
         severity: [],
         investigation: [],
+        entities: [],
+        unassigned: false,
         sortField: 'severity',
         sortOrder: 'desc',
       })
     );
 
-    const runningEvent = createEvent([
-      {
-        workflow_execution_id: 'investigation-1',
-        started_at: new Date().toISOString(),
-      },
-    ]);
-    const completedEvent = createEvent([
-      {
-        workflow_execution_id: 'investigation-1',
-        started_at: '2026-10-20T11:05:00.000Z',
-        completed_at: '2026-10-20T11:10:00.000Z',
-      },
-    ]);
+    const runningEvent = createEvent('in_progress');
+    const completedEvent = createEvent('completed');
 
     expect(
       capturedRefetchInterval?.({ hits: [runningEvent], page: 1, perPage: 25, total: 1 })

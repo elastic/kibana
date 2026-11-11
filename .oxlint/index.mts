@@ -11,8 +11,7 @@
 // `@kbn/eslint-config` so each rule runs in exactly one linter. When enabling a rule here,
 // delete it from packages/kbn-eslint-config/*.js; when removing one, add it back there.
 // A rule whose ESLint options are stricter than oxlint's implementation must stay in ESLint.
-// Exception: the generated `test-api-clients` bundles keep `@kbn/imports/no_unused_imports` and
-// `import/no-duplicates` in ESLint, because the OpenAPI generator relies on both fixing its output in one pass.
+// The `@kbn/kbn-monaco` rules also run in ESLint to support editors using its extension.
 //
 // oxlint loads this through the repo-root `oxlint.config.mjs` and resolves `files`,
 // `ignorePatterns`, and `jsPlugins` paths relative to that root entry. Rule sets are spread
@@ -39,21 +38,30 @@ import { alertingV2Overrides } from './alerting_v2.mts';
 import { securityImportsOverrides } from './security_imports.mts';
 import { banOverrides } from './ban.mts';
 import { cypressOverrides } from './cypress.mts';
-import { dependRules } from './depend.mts';
+import { dependOverrides, dependRules } from './depend.mts';
 import { eslintCommentsOverrides } from './eslint_comments.mts';
 import { euiRules } from './eui.mts';
+import { formatjsOverrides } from './formatjs.mts';
+import { mochaOverrides } from './mocha.mts';
 import { nOverrides } from './n.mts';
 import { playwrightOverrides, playwrightSettings } from './playwright.mts';
 import { testingLibraryOverrides } from './testing_library.mts';
 import { unusedVarsOverrides } from './unused_vars.mts';
 import { importPluginOverrides } from './import_plugin.mts';
+import { importExtraneousDependenciesOverrides } from './import_compat.mts';
+import { restrictedImportsOverrides } from './restricted_imports.mts';
+import { monacoRules } from './monaco.mts';
 import { nestedConfigOverrides, teamOverrides } from './team_overrides.mts';
 
 const movedFromEslintOverrides: OxlintOverride[] = [
   ...javascriptOverrides,
   ...typescriptOverrides,
   ...jestOverrides,
+  ...importExtraneousDependenciesOverrides,
   ...teamOverrides,
+  ...restrictedImportsOverrides,
+  ...formatjsOverrides,
+  ...mochaOverrides,
   ...nestedConfigOverrides,
 ];
 
@@ -93,6 +101,14 @@ export default defineConfig<OxlintConfig>({
       name: '@kbn/alerting-v2',
       specifier: './packages/kbn-eslint-plugin-alerting-v2/oxlint_plugin.js',
     },
+    {
+      name: '@kbn/compat',
+      specifier: './packages/kbn-eslint-plugin-compat/oxlint_plugin.js',
+    },
+    {
+      name: '@kbn/kbn-monaco',
+      specifier: './packages/kbn-eslint-plugin-kbn-monaco/oxlint_plugin.js',
+    },
     'eslint-plugin-ban',
     'eslint-plugin-cypress',
     'eslint-plugin-depend',
@@ -101,11 +117,20 @@ export default defineConfig<OxlintConfig>({
     'eslint-plugin-n',
     'eslint-plugin-playwright',
     'eslint-plugin-testing-library',
+    // ESLint 8 plugins, wrapped so they run on Oxlint's ESLint 9 rule context
+    { name: 'formatjs', specifier: './packages/kbn-eslint-plugin-compat/formatjs.js' },
+    { name: 'mocha', specifier: './packages/kbn-eslint-plugin-compat/mocha.js' },
+    { name: 'no-unsanitized', specifier: './packages/kbn-eslint-plugin-compat/no_unsanitized.js' },
   ],
   categories: {
     correctness: 'off',
   },
-  settings: playwrightSettings,
+  settings: {
+    ...playwrightSettings,
+    // `@kbn/compat/import-*` resolve imports through eslint-plugin-import, which forgets resolutions
+    // after 30s by default. Files don't appear or disappear during a run.
+    'import/cache': { lifetime: 'Infinity' },
+  },
   rules: {
     ...javascriptRules,
     ...kbnConfigRules,
@@ -116,6 +141,7 @@ export default defineConfig<OxlintConfig>({
     ...kbnUiRules,
     ...dependRules,
     ...euiRules,
+    ...monacoRules,
   },
   overrides: [
     ...importPluginOverrides,
@@ -130,6 +156,7 @@ export default defineConfig<OxlintConfig>({
     ...kbnUiOverrides,
     ...alertingV2Overrides,
     ...banOverrides,
+    ...dependOverrides,
     ...cypressOverrides,
     ...eslintCommentsOverrides,
     ...nOverrides,

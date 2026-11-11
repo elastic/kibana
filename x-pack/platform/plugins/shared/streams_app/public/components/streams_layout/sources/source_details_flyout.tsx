@@ -34,6 +34,30 @@ import { SourceSetupInstructions } from './source_setup_instructions';
 import { RevealedApiKeyCallout } from './revealed_api_key_callout';
 import type { SourcesController } from './sources_context';
 import { DeleteSourcesConfirmation } from './delete_sources_confirmation';
+import type { SourceApiKeyPrivilegeFailure } from './source_api_keys';
+
+const getSourceApiKeyPrivilegeHint = (
+  failure: SourceApiKeyPrivilegeFailure,
+  sourceId: string
+): string => {
+  if (failure === 'cluster') {
+    return i18n.translate('xpack.streams.sources.missingApiKeyClusterPrivilegeHint', {
+      defaultMessage:
+        "Your account can't create API keys. Ask an admin for the manage_own_api_key privilege.",
+    });
+  }
+  if (failure === 'index') {
+    return i18n.translate('xpack.streams.sources.missingSourceIndexPrivilegeHint', {
+      defaultMessage:
+        "Your account can't create keys for this source. Ask an admin for the write and auto_configure index privileges on all indices.",
+    });
+  }
+  return i18n.translate('xpack.streams.sources.missingSourceWritePrivilegeHint', {
+    defaultMessage:
+      "Your account can't create keys for this source. Ask an admin for the write privilege of the streams application on source:{sourceId}, or on source:* for every source.",
+    values: { sourceId },
+  });
+};
 
 interface SourceDetailsFlyoutProps {
   sources: Pick<
@@ -49,9 +73,16 @@ interface SourceDetailsFlyoutProps {
   >;
   source: SourceViewModel;
   onClose: () => void;
+  /** Hides API key management and deletion for users without the V2 manage privilege. */
+  readOnly?: boolean;
 }
 
-export const SourceDetailsFlyout = ({ sources, source, onClose }: SourceDetailsFlyoutProps) => {
+export const SourceDetailsFlyout = ({
+  sources,
+  source,
+  onClose,
+  readOnly = false,
+}: SourceDetailsFlyoutProps) => {
   const {
     deleteSource,
     generateApiKey,
@@ -87,7 +118,7 @@ export const SourceDetailsFlyout = ({ sources, source, onClose }: SourceDetailsF
                 defaultMessage: 'No destinations connected',
               }),
               description: i18n.translate('xpack.streams.sources.noDestinationsDescription', {
-                defaultMessage: 'Connect this source from the canvas to route data.',
+                defaultMessage: 'Connect this source from the map to route data.',
               }),
             },
           ],
@@ -127,139 +158,140 @@ export const SourceDetailsFlyout = ({ sources, source, onClose }: SourceDetailsF
             apiKey={revealedApiKey?.encoded}
             showEndpointHelpText={false}
           />
-          <EuiSpacer size="m" />
-          {apiKeyError && (
+          {!readOnly && (
             <>
-              <KbnDangerCallout
-                announceOnMount
-                title={i18n.translate('xpack.streams.sources.apiKeyOperationFailedTitle', {
-                  defaultMessage: 'Could not update API keys',
-                })}
-                text={apiKeyError}
-              />
               <EuiSpacer size="m" />
-            </>
-          )}
-          {revealedApiKey && (
-            <>
-              <RevealedApiKeyCallout apiKey={revealedApiKey.encoded} />
-              <EuiSpacer size="m" />
-            </>
-          )}
-          <EuiTitle size="xxs">
-            <h3>
-              {i18n.translate('xpack.streams.sources.apiKeysTitle', {
-                defaultMessage: 'API key',
-              })}
-            </h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          {isLoadingApiKeys ? (
-            <EuiLoadingSpinner
-              size="m"
-              aria-label={i18n.translate('xpack.streams.sources.loadingApiKeysLabel', {
-                defaultMessage: 'Loading API keys',
-              })}
-            />
-          ) : source.apiKeys.length === 0 ? (
-            <EuiText size="s" color="subdued">
-              {i18n.translate('xpack.streams.sources.noApiKeysDescription', {
-                defaultMessage: 'No API keys have been generated for this source.',
-              })}
-            </EuiText>
-          ) : (
-            <EuiFlexGroup direction="column" gutterSize="s">
-              {source.apiKeys.map((apiKey) => (
-                <EuiFlexItem key={apiKey.id}>
-                  <EuiPanel hasShadow={false} hasBorder paddingSize="s">
-                    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon type="key" color="subdued" aria-hidden={true} />
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiText size="xs" color="subdued">
-                          <FormattedMessage
-                            id="xpack.streams.sources.apiKeyCreatedLabel"
-                            defaultMessage="Key generated on {createdAt}"
-                            values={{
-                              createdAt: (
-                                <FormattedDate
-                                  value={new Date(apiKey.createdAt)}
-                                  month="short"
-                                  day="2-digit"
-                                  year="numeric"
-                                />
-                              ),
-                            }}
-                          />
-                        </EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonEmpty
-                          color="danger"
-                          flush="right"
-                          size="xs"
-                          aria-label={deleteApiKeyLabel}
-                          onClick={() => setApiKeyPendingDeletion(apiKey.id)}
-                        >
-                          {i18n.translate('xpack.streams.sources.deleteApiKeyButtonLabel', {
-                            defaultMessage: 'Delete',
-                          })}
-                        </EuiButtonEmpty>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiPanel>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          )}
-          <EuiSpacer size="s" />
-          <EuiButton
-            size="s"
-            isLoading={isGeneratingApiKey || isLoadingApiKeys}
-            isDisabled={!source.endpoint || apiKeyPrivileges?.canCreate === false}
-            onClick={() => generateApiKey(source.id)}
-            data-test-subj="streamsSourceGenerateApiKeyButton"
-          >
-            {i18n.translate('xpack.streams.sources.generateKeyButtonLabel', {
-              defaultMessage: 'Generate key',
-            })}
-          </EuiButton>
-          {apiKeyPrivileges && !apiKeyPrivileges.canCreate && (
-            <>
-              <EuiSpacer size="s" />
-              <EuiText size="s" color="subdued" data-test-subj="streamsSourceApiKeyPrivilegeHint">
-                {apiKeyPrivileges.failure === 'cluster'
-                  ? i18n.translate('xpack.streams.sources.missingApiKeyClusterPrivilegeHint', {
-                      defaultMessage: "Your account can't create API keys.",
-                    })
-                  : i18n.translate('xpack.streams.sources.missingIngestSourcePrivilegeHint', {
-                      defaultMessage:
-                        "Your account can't create ingest keys. Ask an admin for the ingest_source_manager role.",
+              {apiKeyError && (
+                <>
+                  <KbnDangerCallout
+                    announceOnMount
+                    title={i18n.translate('xpack.streams.sources.apiKeyOperationFailedTitle', {
+                      defaultMessage: 'Could not update API keys',
                     })}
+                    text={apiKeyError}
+                  />
+                  <EuiSpacer size="m" />
+                </>
+              )}
+              {revealedApiKey && (
+                <>
+                  <RevealedApiKeyCallout apiKey={revealedApiKey.encoded} />
+                  <EuiSpacer size="m" />
+                </>
+              )}
+              <EuiTitle size="xxs">
+                <h3>
+                  {i18n.translate('xpack.streams.sources.apiKeysTitle', {
+                    defaultMessage: 'API key',
+                  })}
+                </h3>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              {isLoadingApiKeys ? (
+                <EuiLoadingSpinner
+                  size="m"
+                  aria-label={i18n.translate('xpack.streams.sources.loadingApiKeysLabel', {
+                    defaultMessage: 'Loading API keys',
+                  })}
+                />
+              ) : source.apiKeys.length === 0 ? (
+                <EuiText size="s" color="subdued" data-test-subj="streamsSourceNoApiKeys">
+                  {i18n.translate('xpack.streams.sources.noApiKeysDescription', {
+                    defaultMessage: 'No API keys have been generated for this source.',
+                  })}
+                </EuiText>
+              ) : (
+                <EuiFlexGroup direction="column" gutterSize="s">
+                  {source.apiKeys.map((apiKey) => (
+                    <EuiFlexItem key={apiKey.id}>
+                      <EuiPanel hasShadow={false} hasBorder paddingSize="s">
+                        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                          <EuiFlexItem grow={false}>
+                            <EuiIcon type="key" color="subdued" aria-hidden={true} />
+                          </EuiFlexItem>
+                          <EuiFlexItem>
+                            <EuiText size="xs" color="subdued">
+                              <FormattedMessage
+                                id="xpack.streams.sources.apiKeyCreatedLabel"
+                                defaultMessage="Key generated on {createdAt}"
+                                values={{
+                                  createdAt: (
+                                    <FormattedDate
+                                      value={new Date(apiKey.createdAt)}
+                                      month="short"
+                                      day="2-digit"
+                                      year="numeric"
+                                    />
+                                  ),
+                                }}
+                              />
+                            </EuiText>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonEmpty
+                              color="danger"
+                              flush="right"
+                              size="xs"
+                              aria-label={deleteApiKeyLabel}
+                              onClick={() => setApiKeyPendingDeletion(apiKey.id)}
+                            >
+                              {i18n.translate('xpack.streams.sources.deleteApiKeyButtonLabel', {
+                                defaultMessage: 'Delete',
+                              })}
+                            </EuiButtonEmpty>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiPanel>
+                    </EuiFlexItem>
+                  ))}
+                </EuiFlexGroup>
+              )}
+              <EuiSpacer size="s" />
+              <EuiButton
+                size="s"
+                isLoading={isGeneratingApiKey || isLoadingApiKeys}
+                isDisabled={!source.endpoint || apiKeyPrivileges?.canCreate === false}
+                onClick={() => generateApiKey(source.id)}
+                data-test-subj="streamsSourceGenerateApiKeyButton"
+              >
+                {i18n.translate('xpack.streams.sources.generateKeyButtonLabel', {
+                  defaultMessage: 'Generate key',
+                })}
+              </EuiButton>
+              {apiKeyPrivileges && !apiKeyPrivileges.canCreate && (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiText
+                    size="s"
+                    color="subdued"
+                    data-test-subj="streamsSourceApiKeyPrivilegeHint"
+                  >
+                    {getSourceApiKeyPrivilegeHint(apiKeyPrivileges.failure, source.id)}
+                  </EuiText>
+                </>
+              )}
+              <EuiHorizontalRule />
+              <EuiText size="xs" color="danger">
+                <strong>
+                  {i18n.translate('xpack.streams.sources.dangerAreaLabel', {
+                    defaultMessage: 'Danger area',
+                  })}
+                </strong>
               </EuiText>
+              <EuiSpacer size="s" />
+              <EuiButton
+                color="danger"
+                fill
+                size="s"
+                onClick={() => setIsConfirmingDelete(true)}
+                data-test-subj="streamsSourceDeleteButton"
+              >
+                {i18n.translate('xpack.streams.sources.deleteSourceButtonLabel', {
+                  defaultMessage: 'Delete source',
+                })}
+              </EuiButton>
             </>
           )}
-          <EuiHorizontalRule />
-          <EuiText size="xs" color="danger">
-            <strong>
-              {i18n.translate('xpack.streams.sources.dangerAreaLabel', {
-                defaultMessage: 'Danger area',
-              })}
-            </strong>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiButton
-            color="danger"
-            fill
-            size="s"
-            onClick={() => setIsConfirmingDelete(true)}
-            data-test-subj="streamsSourceDeleteButton"
-          >
-            {i18n.translate('xpack.streams.sources.deleteSourceButtonLabel', {
-              defaultMessage: 'Delete source',
-            })}
-          </EuiButton>
         </EuiFlyoutBody>
       </EuiFlyout>
       {isConfirmingDelete && (

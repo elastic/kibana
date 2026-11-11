@@ -44,19 +44,17 @@ describe('Transform: Job List Columns', () => {
 
     const columns: ReturnType<typeof useColumns>['columns'] = result.current.columns;
 
-    expect(columns).toHaveLength(9);
-    const expanderColumn = columns[0] as EuiTableComputedColumnType<TransformListRow>;
-    const alertRuleColumn = columns[2] as EuiTableComputedColumnType<TransformListRow>;
+    expect(columns).toHaveLength(8);
+    const progressColumn = columns[5] as EuiTableComputedColumnType<TransformListRow>;
+    const expanderColumn = columns[7] as EuiTableComputedColumnType<TransformListRow>;
 
+    expect(columns[0].name).toBe('ID');
+    expect(columns[1].name).toBe('Health');
+    expect(columns[2].name).toBe('Type');
+    expect(columns[3].name).toBe('Status');
+    expect(columns[4].name).toBe('Execution');
+    expect(progressColumn['data-test-subj']).toBe('transformListColumnProgress');
     expect(expanderColumn.isExpander).toBeTruthy();
-    expect(columns[1].name).toBe('ID');
-    expect(alertRuleColumn.id).toBe('alertRule');
-    expect(columns[3].name).toBe('Type');
-    expect(columns[4].name).toBe('Status');
-    expect(columns[5].name).toBe('Mode');
-    expect(columns[6].name).toBe('Progress');
-    expect(columns[7].name).toBe('Health');
-    expect(columns[8].name).toBe('Actions');
   });
 
   test('renders description below transform ID', async () => {
@@ -67,7 +65,7 @@ describe('Transform: Job List Columns', () => {
 
     await waitFor(() => new Promise((resolve) => resolve(null)));
 
-    const idColumn = result.current.columns[1] as EuiTableFieldDataColumnType<TransformListRow>;
+    const idColumn = result.current.columns[0] as EuiTableFieldDataColumnType<TransformListRow>;
     const item = {
       ...transformListRow,
       config: {
@@ -82,6 +80,84 @@ describe('Transform: Job List Columns', () => {
     expect(screen.getByTestId('transformListColumnDescriptionText')).toHaveTextContent(
       'Tracks inventory and stock levels.'
     );
+    expect(screen.queryByTestId('transformListColumnDescriptionTooltip')).not.toBeInTheDocument();
+  });
+
+  test('adds a tooltip when the description exceeds the character threshold', async () => {
+    const wrapper = createWrapper();
+    const { result } = renderHook(() => useColumns([], () => {}, 1, [], false), {
+      wrapper,
+    });
+
+    await waitFor(() => new Promise((resolve) => resolve(null)));
+
+    const idColumn = result.current.columns[0] as EuiTableFieldDataColumnType<TransformListRow>;
+    const item = {
+      ...transformListRow,
+      config: {
+        ...transformListRow.config,
+        description: 'A'.repeat(151),
+      },
+    } as unknown as TransformListRow;
+
+    renderWithI18n(<>{idColumn.render?.(item.id, item)}</>);
+
+    expect(screen.getByTestId('transformListColumnDescriptionTooltip')).toBeInTheDocument();
+    expect(screen.getByTestId('transformListColumnDescriptionText')).toHaveTextContent(
+      `${'A'.repeat(150)}…`
+    );
+  });
+
+  test('renders type, status, and execution with the redesigned semantics', async () => {
+    const wrapper = createWrapper();
+    const { result } = renderHook(() => useColumns([], () => {}, 1, [], false), {
+      wrapper,
+    });
+    await waitFor(() => new Promise((resolve) => resolve(null)));
+
+    const item = transformListRow as unknown as TransformListRow;
+    const typeColumn = result.current.columns[2] as EuiTableComputedColumnType<TransformListRow>;
+    const statusColumn = result.current.columns[3] as EuiTableComputedColumnType<TransformListRow>;
+    const executionColumn = result.current
+      .columns[4] as EuiTableComputedColumnType<TransformListRow>;
+    const progressColumn = result.current
+      .columns[5] as EuiTableComputedColumnType<TransformListRow>;
+
+    const { rerender } = renderWithI18n(<>{typeColumn.render?.(item)}</>);
+    expect(screen.getByText('Pivot')).toBeInTheDocument();
+
+    rerender(<>{statusColumn.render?.(item)}</>);
+    expect(screen.getByText('Stopped')).toBeInTheDocument();
+
+    rerender(<>{executionColumn.render?.(item)}</>);
+    expect(screen.getByText('100%')).toBeInTheDocument();
+    expect(screen.queryByTestId('transformListProgress')).not.toBeInTheDocument();
+
+    rerender(<>{executionColumn.render?.({ ...item, stats: undefined })}</>);
+    expect(screen.getByText('One-time')).toBeInTheDocument();
+
+    rerender(<>{progressColumn.render?.(item)}</>);
+    expect(screen.getByTestId('transformListProgress')).toBeInTheDocument();
+
+    rerender(
+      <>
+        {executionColumn.render?.({
+          ...item,
+          mode: 'continuous',
+        })}
+      </>
+    );
+    expect(screen.getByText('Continuous')).toBeInTheDocument();
+
+    rerender(
+      <>
+        {progressColumn.render?.({
+          ...item,
+          mode: 'continuous',
+        })}
+      </>
+    );
+    expect(screen.queryByTestId('transformListProgress')).not.toBeInTheDocument();
   });
 
   test('adds project scope column when CPS manager is ready with linked projects', async () => {
@@ -108,12 +184,12 @@ describe('Transform: Job List Columns', () => {
       wrapper,
     });
 
-    expect(result.current.columns).toHaveLength(9);
+    expect(result.current.columns).toHaveLength(8);
 
     await waitFor(() => {
-      expect(result.current.columns).toHaveLength(10);
+      expect(result.current.columns).toHaveLength(9);
     });
-    expect(result.current.columns[3].name).toBe('Project scope');
+    expect(result.current.columns[1].name).toBe('Project scope');
   });
 
   test('does not add project scope column when there are no linked projects', async () => {
@@ -137,7 +213,7 @@ describe('Transform: Job List Columns', () => {
       await cpsManager.whenReady();
     });
 
-    expect(result.current.columns).toHaveLength(9);
+    expect(result.current.columns).toHaveLength(8);
   });
 
   test('normalizes project scope sort values', async () => {
@@ -162,11 +238,11 @@ describe('Transform: Job List Columns', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.columns).toHaveLength(10);
+      expect(result.current.columns).toHaveLength(9);
     });
 
     const projectScopeColumn = result.current
-      .columns[3] as EuiTableComputedColumnType<TransformListRow>;
+      .columns[1] as EuiTableComputedColumnType<TransformListRow>;
     const getSortValue = projectScopeColumn.sortable as (item: TransformListRow) => string;
     const item = transformListRow as unknown as TransformListRow;
 
@@ -190,7 +266,7 @@ describe('Transform: Job List Columns', () => {
     ).toBe('all');
     await waitFor(() => {
       const updatedProjectScopeColumn = result.current
-        .columns[3] as EuiTableComputedColumnType<TransformListRow>;
+        .columns[1] as EuiTableComputedColumnType<TransformListRow>;
       const getUpdatedSortValue = updatedProjectScopeColumn.sortable as (
         item: TransformListRow
       ) => string;

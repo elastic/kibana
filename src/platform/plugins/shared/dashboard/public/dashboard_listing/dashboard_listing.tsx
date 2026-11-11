@@ -11,7 +11,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
-import { TabbedTableListView } from '@kbn/content-management-tabbed-table-list-view';
+import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { QueryClientProvider } from '@kbn/react-query';
@@ -20,16 +20,22 @@ import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderTab } from '@kbn/app-header';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import { KibanaContentListPage } from '@kbn/content-list-page';
+import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { coreServices } from '../services/kibana_services';
 import { dashboardQueryClient } from '../services/dashboard_query_client';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
-import { getDashboardListingTabs } from './get_dashboard_listing_tabs';
+import { getDashboardListingTabs, toContentListPageTabs } from './get_dashboard_listing_tabs';
 import type { DashboardListingProps } from './types';
 import { openImportDashboardJsonFlyout } from './import_json/open_import_dashboard_json_flyout';
 import { importDashboardJsonStrings } from './import_json/_import_dashboard_json_strings';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { confirmCreateWithUnsaved } from './confirm_overlays';
 import { getDashboardBackupService } from '../services/dashboard_api_services';
+
+const dashboardListingTitle = i18n.translate('dashboard.listing.title', {
+  defaultMessage: 'Dashboards',
+});
 
 export const DashboardListing = ({
   children,
@@ -48,6 +54,7 @@ export const DashboardListing = ({
   const { activeTab: activeTabParam } = useParams<{ activeTab?: string }>();
 
   const [refreshListBouncer, setRefreshListBouncer] = useState(false);
+  const [pageDataTestSubject, setPageDataTestSubject] = useState<string>();
 
   const tabs = useMemo(
     () =>
@@ -69,8 +76,9 @@ export const DashboardListing = ({
     ]
   );
 
+  // Must resolve to an existing tab: `ActiveTab` throws on an unknown id
   const activeTabId = useMemo(() => {
-    return tabs.find((tab) => tab.id === activeTabParam)?.id ?? 'dashboards';
+    return tabs.find((tab) => tab.id === activeTabParam)?.id ?? DASHBOARD_APP_ID;
   }, [tabs, activeTabParam]);
 
   const changeActiveTab = useCallback(
@@ -91,13 +99,12 @@ export const DashboardListing = ({
     [tabs, activeTabId, changeActiveTab]
   );
 
+  const activeTabTitle = tabs.find((tab) => tab.id === activeTabId)?.title;
+
   const getBreadcrumbs = useCallback(
     (appId: string): EmbeddableEditorBreadcrumb[] => {
-      const activeTabTitle = tabs.find((tab) => tab.id === activeTabId)?.title;
       const dashboardBreadcrumb = {
-        text: i18n.translate('dashboard.listing.title', {
-          defaultMessage: 'Dashboards',
-        }),
+        text: dashboardListingTitle,
         href: coreServices.application.getUrlForApp(appId, {
           path: `#${LANDING_PAGE_PATH}`,
         }),
@@ -117,13 +124,52 @@ export const DashboardListing = ({
         },
       ];
     },
-    [tabs, activeTabId]
+    [activeTabId, activeTabTitle]
   );
 
-  const onImportSuccess = useCallback((id: string, title: string) => {
-    setRefreshListBouncer((b) => !b);
-    coreServices.notifications.toasts.addSuccess(importDashboardJsonStrings.getSuccessToast(title));
-  }, []);
+  const tabParentProps = useMemo<TableListTabParentProps>(
+    () => ({
+      getBreadcrumbs,
+      showCreateButton: false,
+      onFetchSuccess: () => undefined,
+      setPageDataTestSubject,
+    }),
+    [getBreadcrumbs]
+  );
+
+  const contentTabs = useMemo(
+    () =>
+      toContentListPageTabs(tabs, {
+        goToDashboard,
+        getDashboardUrl,
+        useSessionStorageIntegration,
+        initialFilter,
+        refreshListBouncer,
+        parentProps: tabParentProps,
+      }),
+    [
+      tabs,
+      goToDashboard,
+      getDashboardUrl,
+      useSessionStorageIntegration,
+      initialFilter,
+      refreshListBouncer,
+      tabParentProps,
+    ]
+  );
+
+  const onImportSuccess = useCallback(
+    (id: string, title: string) => {
+      // Only refresh the Dashboards table: importing a dashboard should not affect other registered tabs.
+      if (activeTabId === DASHBOARD_APP_ID) {
+        setRefreshListBouncer((b) => !b);
+      }
+      coreServices.notifications.toasts.addSuccess(
+        importDashboardJsonStrings.getSuccessToast(title)
+      );
+    },
+    [activeTabId]
+  );
 
   const createDashboardAction = useCallback(() => {
     if (useSessionStorageIntegration && getDashboardBackupService().dashboardHasUnsavedEdits()) {
@@ -198,26 +244,20 @@ export const DashboardListing = ({
     };
   }, [onImportSuccess, createDashboardAction, getTabs]);
 
+  const sectionLabel = activeTabTitle ?? dashboardListingTitle;
+
   return (
     <I18nProvider>
       <QueryClientProvider client={dashboardQueryClient}>
         {children}
-        <AppHeader
-          title={i18n.translate('dashboard.listing.title', {
-            defaultMessage: 'Dashboards',
-          })}
-          tabs={headerTabs}
-          menu={appMenu}
-        />
-        <TabbedTableListView
-          headingId="dashboardListingHeading"
-          getBreadcrumbs={getBreadcrumbs}
-          tabs={tabs}
-          activeTabId={activeTabId}
-          changeActiveTab={changeActiveTab}
-          showCreateButton={false}
-          hideTabs
-        />
+        <AppHeader title={dashboardListingTitle} tabs={headerTabs} menu={appMenu} />
+        <KibanaContentListPage data-test-subj={pageDataTestSubject}>
+          <KibanaContentListPage.Section aria-label={sectionLabel}>
+            <KibanaSectionErrorBoundary key={activeTabId} sectionName={sectionLabel}>
+              <KibanaContentListPage.ActiveTab tabs={contentTabs} activeTabId={activeTabId} />
+            </KibanaSectionErrorBoundary>
+          </KibanaContentListPage.Section>
+        </KibanaContentListPage>
       </QueryClientProvider>
     </I18nProvider>
   );

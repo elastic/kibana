@@ -19,6 +19,7 @@ export {
   AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
   AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
   AGENTLESS_GLOBAL_TAG_NAME_TEAM,
+  AGENTLESS_UNENROLLED_REASON,
   UNPRIVILEGED_AGENT_KUERY,
   PRIVILEGED_AGENT_KUERY,
   MAX_TIME_COMPLETE_INSTALL,
@@ -146,4 +147,5 @@ export {
 export { FILE_STORAGE_DATA_AGENT_INDEX } from './fleet_es_assets';
 export { FILE_STORAGE_METADATA_AGENT_INDEX } from './fleet_es_assets';
 export * from '../../common/constants/mappings';
+export * from '../../common/constants/schema_field_limits';
 export * from './max_concurrency_constants';

@@ -10,6 +10,7 @@ import type { PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import type { QueryArgs, Row } from '../common';
 import type { PageEnricher, RunContext } from '../queries/types';
 import type { GridContext, UseEntityGridDataOptions } from './use_entity_grid_context';
@@ -191,6 +192,27 @@ describe('useEntityGridRowsEnrichment', () => {
   beforeEach(() => {
     mockEnrich.mockReset();
     mockEnrich.mockResolvedValue(new Map());
+    jest.mocked(useErrorToast).mockClear();
+  });
+
+  it('toasts an enricher failure', async () => {
+    const error = new Error('boom');
+    mockEnrich.mockRejectedValue(error);
+    const { result } = renderEnrichment(false);
+
+    await waitFor(() => expect(mockEnrich).toHaveBeenCalled());
+    await waitFor(() => expect(result.current.isFetching).toBe(false));
+    expect(useErrorToast).toHaveBeenCalledWith(expect.any(String), error);
+  });
+
+  it('does not toast a missing alerts index', async () => {
+    mockEnrich.mockRejectedValue(new Error('no such index [.alerts-security.alerts-default]'));
+    const { result } = renderEnrichment(false);
+
+    await waitFor(() => expect(mockEnrich).toHaveBeenCalled());
+    await waitFor(() => expect(result.current.isFetching).toBe(false));
+    const toasted = (useErrorToast as jest.Mock).mock.calls.map(([, error]) => error);
+    expect(toasted.filter(Boolean)).toEqual([]);
   });
 
   it('enriches every loaded row, a chunk at a time', async () => {
@@ -218,5 +240,33 @@ describe('useEntityGridRowsEnrichment', () => {
     // Back to the first chunk: its columns are already read.
     act(() => result.current.onRowsInViewChange(0, 10));
     expect(mockEnrich).toHaveBeenCalledTimes(2);
+  });
+
+  it('says when the first chunk asked for has its columns, whatever scrolling asks for later', async () => {
+    let resolveSecond: (values: Map<string, unknown>) => void = () => {};
+    mockEnrich
+      .mockResolvedValueOnce(new Map())
+      .mockImplementationOnce(() => new Promise((resolve) => (resolveSecond = resolve)));
+    const { result } = renderEnrichment(true);
+    expect(result.current.hasEnrichedRows).toBe(false);
+
+    act(() => result.current.onRowsInViewChange(0, 10));
+    await waitFor(() => expect(result.current.hasEnrichedRows).toBe(true));
+
+    // A scrolled-to chunk still loading leaves the first chunk's state as it was.
+    act(() => result.current.onRowsInViewChange(110, 120));
+    await waitFor(() => expect(result.current.isEnriching).toBe(true));
+    expect(result.current.hasEnrichedRows).toBe(true);
+    expect(result.current.hasFailedColumns).toBe(false);
+    act(() => resolveSecond(new Map()));
+  });
+
+  it('says when a computed column failed', async () => {
+    mockEnrich.mockRejectedValue(new Error('boom'));
+    const { result } = renderEnrichment(true);
+
+    act(() => result.current.onRowsInViewChange(0, 10));
+    await waitFor(() => expect(result.current.hasFailedColumns).toBe(true));
+    expect(result.current.hasEnrichedRows).toBe(true);
   });
 });

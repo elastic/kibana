@@ -1,0 +1,1 @@
+In the reasoning and other text you write, refer to hosts and people by their role (for example "a host", "an operator"), not by name. You may name the affected services. Never write host names, IP addresses, user or person names, email addresses, URLs, file paths, account, resource or request IDs, API keys or tokens in that text, even when they appear in the investigation.

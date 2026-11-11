@@ -1,5 +1,5 @@
 {
-  "sha1": "72eff71e65e0e61ce11dfd54310532d63b5a9c21",
+  "sha1": "bc5636823647c310fa484042ba1c6bd8805dd904",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,6 +16,20 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/ui/tests/conversation_history.spec.ts",
         "line": 35,
         "column": 51
+      }
+    },
+    {
+      "id": "901a3f6678617c9-a34ac43ae4436bd",
+      "title": "Agent Builder — re-attach to a running execution a reload mid-run replays text, shows Stop, continues streaming, and settles when it ends",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/ui/tests/conversation_reattach.spec.ts",
+        "line": 25,
+        "column": 48
       }
     },
     {
