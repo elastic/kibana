@@ -8,7 +8,7 @@
 import type { ApiClientFixture } from '@kbn/scout-oblt';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import { apiTest, INTERNAL_HEADERS, listPath } from '../fixtures';
+import { apiTest, INTERNAL_HEADERS, listPath, TYPES_PATH } from '../fixtures';
 
 // The archive writes every deployment at 10:00:00 and 10:01:00 on 2026-11-01.
 const K8S_DEPLOYMENT_LIST_PATH = listPath('k8s.deployment');
@@ -41,10 +41,9 @@ const summarizeQueries = (
   queries.map(({ indexPattern, engine, rowCount }) => ({ indexPattern, engine, rowCount }));
 
 interface ListResponse {
-  columns: Array<{ name: string; kind: string; type: string | null }>;
+  columns: Array<{ name: string; kind: string }>;
   rows: Array<Record<string, unknown>>;
   provenance: Record<string, Record<string, string>>;
-  total: number | null;
   truncated: boolean;
   took: number;
   queries: Array<{
@@ -104,7 +103,6 @@ apiTest.describe(
           'k8s.deployment.uid': null,
           last_seen: '2026-11-01T10:01:00.000Z',
         });
-        expect(body.total).toBe(3);
         expect(body.truncated).toBe(false);
         expect(body.errors).toStrictEqual([]);
         expect(body.unavailableColumns).toStrictEqual(UID_UNAVAILABLE_PER_OTEL_PLAN);
@@ -165,7 +163,6 @@ apiTest.describe(
         expect(columns.find(({ name }) => name === 'k8s.deployment.uid')).toStrictEqual({
           name: 'k8s.deployment.uid',
           kind: 'attribute',
-          type: null,
         });
         expect(rows.map((row) => row['k8s.deployment.uid'])).toStrictEqual([null, null, null]);
         // An unmapped attribute leaves its plans usable, so nothing is reported in `errors`.
@@ -173,26 +170,36 @@ apiTest.describe(
       }
     );
 
-    apiTest('returns the typed columns in column order', async ({ apiClient }) => {
-      const response = await postList(apiClient, WINDOW);
+    apiTest(
+      'returns the columns in column order, the same as the types route',
+      async ({ apiClient }) => {
+        const response = await postList(apiClient, WINDOW);
+        const typesResponse = await apiClient.get(TYPES_PATH, {
+          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
+          responseType: 'json',
+        });
 
-      expect(response).toHaveStatusCode(200);
-      const { columns }: ListResponse = response.body;
+        expect(response).toHaveStatusCode(200);
+        expect(typesResponse).toHaveStatusCode(200);
+        const { columns }: ListResponse = response.body;
+        const { types }: { types: Array<{ type: string; columns: ListResponse['columns'] }> } =
+          typesResponse.body;
 
-      expect(columns).toStrictEqual([
-        { name: 'entity.id', kind: 'id', type: 'keyword' },
-        { name: 'kubernetes.namespace', kind: 'identity', type: 'keyword' },
-        { name: 'kubernetes.deployment.name', kind: 'identity', type: 'keyword' },
-        { name: 'k8s.cluster.name', kind: 'attribute', type: 'keyword' },
-        { name: 'k8s.deployment.available', kind: 'attribute', type: 'long' },
-        { name: 'k8s.deployment.desired', kind: 'attribute', type: 'long' },
-        { name: 'k8s.deployment.paused', kind: 'attribute', type: 'boolean' },
-        { name: 'k8s.deployment.label.app', kind: 'attribute', type: 'keyword' },
-        // No type: no index maps it, so no plan settles one.
-        { name: 'k8s.deployment.uid', kind: 'attribute', type: null },
-        { name: 'last_seen', kind: 'last_seen', type: 'date' },
-      ]);
-    });
+        expect(columns).toStrictEqual([
+          { name: 'entity.id', kind: 'id' },
+          { name: 'kubernetes.namespace', kind: 'identity' },
+          { name: 'kubernetes.deployment.name', kind: 'identity' },
+          { name: 'k8s.cluster.name', kind: 'attribute' },
+          { name: 'k8s.deployment.available', kind: 'attribute' },
+          { name: 'k8s.deployment.desired', kind: 'attribute' },
+          { name: 'k8s.deployment.paused', kind: 'attribute' },
+          { name: 'k8s.deployment.label.app', kind: 'attribute' },
+          { name: 'k8s.deployment.uid', kind: 'attribute' },
+          { name: 'last_seen', kind: 'last_seen' },
+        ]);
+        expect(columns).toStrictEqual(types.find(({ type }) => type === 'k8s.deployment')?.columns);
+      }
+    );
 
     apiTest(
       'reports last_seen as the newest timestamp inside the window',
@@ -204,9 +211,8 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(200);
-        const { rows, total }: ListResponse = response.body;
+        const { rows }: ListResponse = response.body;
 
-        expect(total).toBe(3);
         expect(rows.map((row) => row.last_seen)).toStrictEqual([
           '2026-11-01T10:00:00.000Z',
           '2026-11-01T10:00:00.000Z',
@@ -222,31 +228,29 @@ apiTest.describe(
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.total).toBe(3);
+      expect(response.body.rows).toHaveLength(3);
     });
 
-    apiTest('cuts the rows at limit, reports truncated with no total', async ({ apiClient }) => {
+    apiTest('cuts the rows at limit and reports truncated', async ({ apiClient }) => {
       const response = await postList(apiClient, { ...WINDOW, limit: 2 });
 
       expect(response).toHaveStatusCode(200);
-      const { rows, provenance, total, truncated }: ListResponse = response.body;
+      const { rows, provenance, truncated }: ListResponse = response.body;
 
       expect(rows).toHaveLength(2);
       expect(Object.keys(provenance).sort()).toStrictEqual(
         rows.map((row) => row['entity.id']).sort()
       );
-      expect(total).toBeNull();
       expect(truncated).toBe(true);
     });
 
-    apiTest('reports an exact total when limit equals the entity count', async ({ apiClient }) => {
+    apiTest('is not truncated when limit equals the entity count', async ({ apiClient }) => {
       const response = await postList(apiClient, { ...WINDOW, limit: 3 });
 
       expect(response).toHaveStatusCode(200);
-      const { rows, total, truncated }: ListResponse = response.body;
+      const { rows, truncated }: ListResponse = response.body;
 
       expect(rows).toHaveLength(3);
-      expect(total).toBe(3);
       expect(truncated).toBe(false);
     });
 
@@ -283,7 +287,7 @@ apiTest.describe(
         );
 
         expect(response).toHaveStatusCode(200);
-        const { rows, total, errors, queries }: ListResponse = response.body;
+        const { rows, errors, queries }: ListResponse = response.body;
 
         expect(rows).toStrictEqual([
           {
@@ -299,7 +303,6 @@ apiTest.describe(
             last_seen: '2026-11-05T14:01:00.000Z',
           },
         ]);
-        expect(total).toBe(1);
         expect(errors).toStrictEqual([]);
         expect(summarizeQueries(queries)).toStrictEqual([
           { indexPattern: STATE_PATTERN, engine: 'FROM', rowCount: 0 },
@@ -321,7 +324,7 @@ apiTest.describe(
         );
 
         expect(response).toHaveStatusCode(200);
-        const { rows, total, truncated, errors, queries }: ListResponse = response.body;
+        const { rows, truncated, errors, queries }: ListResponse = response.body;
 
         expect(
           rows.map(
@@ -349,7 +352,6 @@ apiTest.describe(
             lastSeen: '2026-11-05T10:00:00.000Z',
           },
         ]);
-        expect(total).toBe(3);
         expect(truncated).toBe(false);
         expect(errors).toStrictEqual([]);
         // Two rows per plan: `FROM` leaves out the time-series index (it would return tsds-only as
@@ -375,13 +377,12 @@ apiTest.describe(
         );
 
         expect(response).toHaveStatusCode(200);
-        const { rows, total, errors, queries }: ListResponse = response.body;
+        const { rows, errors, queries }: ListResponse = response.body;
 
         expect(rows.map((row) => row['entity.id'])).toStrictEqual([
           'k8s.deployment:aliased/kept-standard',
           'k8s.deployment:aliased/kept-tsds',
         ]);
-        expect(total).toBe(2);
         expect(errors).toStrictEqual([]);
         expect(summarizeQueries(queries)).toStrictEqual([
           { indexPattern: STATE_PATTERN, engine: 'FROM', rowCount: 0 },
@@ -512,9 +513,9 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(200);
-        const { rows, errors, total, truncated }: ListResponse = response.body;
+        const { rows, errors, truncated }: ListResponse = response.body;
         // Elasticsearch drops the indices the user cannot read, so every plan reads nothing usable;
-        // that is not a query failure, so the empty result is exact.
+        // each is reported in `errors`, and that is not truncation.
         expect(rows).toStrictEqual([]);
         expect(errors).toStrictEqual(
           [STATE_PATTERN, OTEL_PATTERN].map((indexPattern) => ({
@@ -523,7 +524,6 @@ apiTest.describe(
             reason: `no readable index behind "${indexPattern}" maps @timestamp`,
           }))
         );
-        expect(total).toBe(0);
         expect(truncated).toBe(false);
       }
     );

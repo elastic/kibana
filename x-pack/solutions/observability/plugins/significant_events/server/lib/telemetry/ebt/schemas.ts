@@ -15,15 +15,55 @@ import type {
   AgentToolEventStatusUpdateProps,
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
   DetectionScanProps,
+  DiscoveryTriggeredProps,
+  EventStatusChangedProps,
   KnowledgeIndicatorFeaturesIdentifiedProps,
   KnowledgeIndicatorQueriesGeneratedProps,
   KnowledgeIndicatorOnboardingScheduledProps,
   AgentToolEventWriteProps,
   AgentToolEventSearchProps,
+  OptionalWorkflowExecutionTelemetryProps,
+  ParentWorkflowExecutionTelemetryProps,
+  WorkflowExecutionTelemetryProps,
 } from './types';
+
+const workflowExecutionTelemetrySchema: RootSchema<WorkflowExecutionTelemetryProps> = {
+  workflow_execution_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Workflow Engine execution ID of the workflow that produced the event; joins to Workflow Engine terminal telemetry',
+    },
+  },
+};
+
+const optionalWorkflowExecutionTelemetrySchema: RootSchema<OptionalWorkflowExecutionTelemetryProps> =
+  {
+    workflow_execution_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Workflow Engine execution ID that produced the event; absent for standalone invocations',
+        optional: true,
+      },
+    },
+  };
+
+const parentWorkflowExecutionTelemetrySchema: RootSchema<ParentWorkflowExecutionTelemetryProps> = {
+  parent_workflow_execution_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Execution ID of the workflow that started the producing workflow via workflow.execute (the onboarding run for KI children); joins to onboarding-scheduled workflow_execution_id; absent for top-level or standalone runs',
+      optional: true,
+    },
+  },
+};
 
 const knowledgeIndicatorQueriesGeneratedSchema: RootSchema<KnowledgeIndicatorQueriesGeneratedProps> =
   {
+    ...optionalWorkflowExecutionTelemetrySchema,
+    ...parentWorkflowExecutionTelemetrySchema,
     count: {
       type: 'long',
       _meta: {
@@ -63,7 +103,7 @@ const knowledgeIndicatorQueriesGeneratedSchema: RootSchema<KnowledgeIndicatorQue
     source_id: {
       type: 'keyword',
       _meta: {
-        description: 'The Nightshift source id the queries were generated for',
+        description: 'The nightshift source id the queries were generated for',
       },
     },
     external_content_tool_continuations: {
@@ -130,10 +170,13 @@ const knowledgeIndicatorQueriesGeneratedSchema: RootSchema<KnowledgeIndicatorQue
 
 const knowledgeIndicatorFeaturesIdentifiedSchema: RootSchema<KnowledgeIndicatorFeaturesIdentifiedProps> =
   {
+    ...optionalWorkflowExecutionTelemetrySchema,
+    ...parentWorkflowExecutionTelemetrySchema,
     run_id: {
       type: 'keyword',
       _meta: {
-        description: 'UUID identifying the full identification run (shared across iterations)',
+        description:
+          'Legacy feature-identification run ID; equals workflow_execution_id for workflow invocations',
       },
     },
     connector_id: {
@@ -224,7 +267,7 @@ const knowledgeIndicatorFeaturesIdentifiedSchema: RootSchema<KnowledgeIndicatorF
     source_id: {
       type: 'keyword',
       _meta: {
-        description: 'The Nightshift source id the features were identified for',
+        description: 'The nightshift source id the features were identified for',
       },
     },
     state: {
@@ -256,6 +299,7 @@ const knowledgeIndicatorFeaturesIdentifiedSchema: RootSchema<KnowledgeIndicatorF
 
 const agentBuilderKnowledgeIndicatorCreatedSchema: RootSchema<AgentBuilderKnowledgeIndicatorCreatedProps> =
   {
+    ...optionalWorkflowExecutionTelemetrySchema,
     ki_kind: {
       type: 'keyword',
       _meta: {
@@ -277,7 +321,21 @@ const agentBuilderKnowledgeIndicatorCreatedSchema: RootSchema<AgentBuilderKnowle
     source_id: {
       type: 'keyword',
       _meta: {
-        description: 'The Nightshift source id the knowledge indicator was created for',
+        description: 'The nightshift source id the knowledge indicator was created for',
+      },
+    },
+    space_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'The Kibana space that owns the knowledge indicator',
+      },
+    },
+    knowledge_indicator_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'The `feature.id` or `query.id` the write addressed, unique within `source_id`; absent only when a failed query write had no caller-supplied id',
+        optional: true,
       },
     },
     error_message: {
@@ -291,6 +349,7 @@ const agentBuilderKnowledgeIndicatorCreatedSchema: RootSchema<AgentBuilderKnowle
 
 const agentToolKnowledgeIndicatorIdentificationStartedSchema: RootSchema<AgentToolKnowledgeIndicatorIdentificationStartedProps> =
   {
+    ...optionalWorkflowExecutionTelemetrySchema,
     success: {
       type: 'boolean',
       _meta: {
@@ -300,7 +359,7 @@ const agentToolKnowledgeIndicatorIdentificationStartedSchema: RootSchema<AgentTo
     source_id: {
       type: 'keyword',
       _meta: {
-        description: 'The Nightshift source id identification was started for',
+        description: 'The nightshift source id identification was started for',
       },
     },
     error_message: {
@@ -357,6 +416,7 @@ const alertCreationAttemptIdentitySchema: RootSchema<AlertCreationAttemptIdentit
 };
 
 const agentToolEventCreateSchema: RootSchema<AgentToolEventCreateProps> = {
+  ...optionalWorkflowExecutionTelemetrySchema,
   ...alertCreationAttemptIdentitySchema,
   success: {
     type: 'boolean',
@@ -369,11 +429,11 @@ const agentToolEventCreateSchema: RootSchema<AgentToolEventCreateProps> = {
     items: {
       type: 'keyword',
       _meta: {
-        description: 'A Nightshift source id',
+        description: 'A nightshift source id',
       },
     },
     _meta: {
-      description: 'The Nightshift source ids associated with the event',
+      description: 'The nightshift source ids associated with the event',
     },
   },
   error_message: {
@@ -386,6 +446,7 @@ const agentToolEventCreateSchema: RootSchema<AgentToolEventCreateProps> = {
 };
 
 const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdateProps> = {
+  ...optionalWorkflowExecutionTelemetrySchema,
   ...existingAlertIdentitySchema,
   success: {
     type: 'boolean',
@@ -423,10 +484,114 @@ const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdatePro
   },
 };
 
-const discoveryTriggeredSchema = {
+const eventStatusChangedSchema: RootSchema<EventStatusChangedProps> = {
+  ...existingAlertIdentitySchema,
+  entity_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The kind of entity whose status changed; always `significant_event` here',
+    },
+  },
+  previous_status: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Status of the stored version before this write (active, recovering or inactive); absent when this write created the event',
+      optional: true,
+    },
+  },
+  status: {
+    type: 'keyword',
+    _meta: {
+      description: 'Status stored on the written version (active, recovering or inactive)',
+    },
+  },
+  actor: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The entry point that wrote the version: `agent_tool` (an Agent Builder tool, in discovery or chat), `rest_api` (the event update route, which the UI calls) or `stale_event_cleanup` (the cleanup that closes events whose rule was deleted). It names the code path, not whether a person was behind it',
+    },
+  },
+  change_kind: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'How the status was decided: `operator` (a status chosen through the update route or a chat tool), `assessment` (discovery re-checked the member signals) or `rule_deleted`. Absent when the writer supplied the status itself, as `event_create` does. An `operator` deactivation is a manual close; `close_reason` says why when the caller stated it',
+      optional: true,
+    },
+  },
+  assessment_outcome: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'For `change_kind: assessment`, what the member signals said: `breached`, `recovered` or `no_data`',
+      optional: true,
+    },
+  },
+  close_reason: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Why an operator set the event inactive: `resolved` (a real problem that is over) or `dismissed` (noise, not worth surfacing). Absent when the caller did not state it and on every other change',
+      optional: true,
+    },
+  },
+  severity: {
+    type: 'keyword',
+    _meta: {
+      description: 'Severity tier stored on the written version',
+    },
+  },
+  confidence: {
+    type: 'float',
+    _meta: {
+      description: 'Confidence stored on the written version, between 0 and 1',
+    },
+  },
+  signal_count: {
+    type: 'long',
+    _meta: {
+      description:
+        'Correlation fan-in: the number of signals stored on the written version, one per member rule',
+    },
+  },
+  confirmed_signal_count: {
+    type: 'long',
+    _meta: {
+      description: 'The number of stored signals whose verdict confirms the event',
+    },
+  },
+  source_ids: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: {
+        description: 'A Nightshift source id',
+      },
+    },
+    _meta: {
+      description: 'The Nightshift source ids the event covers',
+    },
+  },
+  workflow_execution_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The workflow execution stored on the written version, when a workflow wrote it; joins the discovery run and the workflow engine events',
+      optional: true,
+    },
+  },
+};
+
+const discoveryTriggeredSchema: RootSchema<DiscoveryTriggeredProps> = {
+  ...workflowExecutionTelemetrySchema,
   execution_id: {
     type: 'keyword' as const,
-    _meta: { description: 'The workflow execution ID returned by the orchestrator' },
+    _meta: {
+      description:
+        'Deprecated alias of workflow_execution_id; retained for discovery-triggered compatibility',
+    },
   },
   space_id: {
     type: 'keyword' as const,
@@ -435,6 +600,7 @@ const discoveryTriggeredSchema = {
 };
 
 const detectionScanSchema: RootSchema<DetectionScanProps> = {
+  ...optionalWorkflowExecutionTelemetrySchema,
   took_ms: {
     type: 'long',
     _meta: {
@@ -517,17 +683,18 @@ const detectionScanSchema: RootSchema<DetectionScanProps> = {
 };
 
 const onboardingScheduledSchema: RootSchema<KnowledgeIndicatorOnboardingScheduledProps> = {
+  ...workflowExecutionTelemetrySchema,
   source_id: {
     type: 'keyword',
     _meta: {
-      description: 'The Nightshift source id being onboarded',
+      description: 'The nightshift source id being onboarded',
     },
   },
   execution_id: {
     type: 'keyword',
     _meta: {
       description:
-        'The workflow execution ID for this onboarding run; join key to workflow_execution_completed/_failed/_cancelled engine events and to streams-features-identified / streams-significant-events-queries-generated events',
+        'Deprecated alias of workflow_execution_id; retained for onboarding-scheduled compatibility',
     },
   },
   workflow_id: {
@@ -558,6 +725,7 @@ const onboardingScheduledSchema: RootSchema<KnowledgeIndicatorOnboardingSchedule
 
 const agentToolEventInvestigationAttachSchema: RootSchema<AgentToolEventInvestigationAttachProps> =
   {
+    ...optionalWorkflowExecutionTelemetrySchema,
     ...existingAlertIdentitySchema,
     success: {
       type: 'boolean',
@@ -581,10 +749,11 @@ const agentToolEventInvestigationAttachSchema: RootSchema<AgentToolEventInvestig
         optional: true,
       },
     },
-    workflow_execution_id: {
+    investigation_id: {
       type: 'keyword',
       _meta: {
-        description: 'The investigation workflow execution id that was attached',
+        description:
+          'Agent Builder conversation ID of the attached investigation; joins to nightshift-investigation-started.investigation_id',
       },
     },
     error_message: {
@@ -597,6 +766,7 @@ const agentToolEventInvestigationAttachSchema: RootSchema<AgentToolEventInvestig
   };
 
 const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
+  ...optionalWorkflowExecutionTelemetrySchema,
   ...alertCreationAttemptIdentitySchema,
   success: {
     type: 'boolean',
@@ -629,11 +799,25 @@ const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
     items: {
       type: 'keyword',
       _meta: {
-        description: 'A Nightshift source id',
+        description: 'A nightshift source id',
       },
     },
     _meta: {
-      description: 'The Nightshift source ids associated with the event',
+      description: 'The nightshift source ids associated with the event',
+    },
+  },
+  detection_workflow_execution_ids: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: {
+        description: 'A detection workflow execution ID',
+      },
+    },
+    _meta: {
+      description:
+        'Distinct workflow_execution_id values of the stored detections behind the signals; joins discovery to the detection runs it consumed. Absent when no signal names a stored detection',
+      optional: true,
     },
   },
   error_message: {
@@ -653,6 +837,7 @@ const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
 };
 
 const agentToolEventSearchSchema: RootSchema<AgentToolEventSearchProps> = {
+  ...optionalWorkflowExecutionTelemetrySchema,
   success: {
     type: 'boolean',
     _meta: {
@@ -715,6 +900,7 @@ export {
   agentToolKnowledgeIndicatorIdentificationStartedSchema,
   detectionScanSchema,
   discoveryTriggeredSchema,
+  eventStatusChangedSchema,
   knowledgeIndicatorFeaturesIdentifiedSchema,
   knowledgeIndicatorQueriesGeneratedSchema,
   onboardingScheduledSchema,

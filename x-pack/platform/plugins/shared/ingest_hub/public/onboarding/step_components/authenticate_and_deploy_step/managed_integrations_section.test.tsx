@@ -117,7 +117,11 @@ function setupMocks({
       onConnectorIdChange,
       onIacTemplateRecorded,
       initialConnectorId: initId,
+      manualEntryActions,
+      onNewIdentityTabChange,
     }: {
+      manualEntryActions?: React.ReactNode;
+      onNewIdentityTabChange?: (isNewIdentityTab: boolean) => void;
       onReadyChange?: (v: boolean) => void;
       onConnectorIdChange?: (id: string | undefined, name?: string) => void;
       onIacTemplateRecorded?: (
@@ -135,6 +139,9 @@ function setupMocks({
         <button onClick={() => onReadyChange?.(true)}>mark-ready</button>
         <button onClick={() => onReadyChange?.(false)}>mark-not-ready</button>
         <button onClick={() => onConnectorIdChange?.('id-1', 'my-connector')}>mark-named</button>
+        <button onClick={() => onNewIdentityTabChange?.(true)}>tab-new</button>
+        <button onClick={() => onNewIdentityTabChange?.(false)}>tab-existing</button>
+        <div data-test-subj="manual-entry-actions">{manualEntryActions}</div>
         <button
           onClick={() =>
             onIacTemplateRecorded?.(
@@ -186,6 +193,7 @@ function renderSection(
     storedSecretFields?: Array<'access_key_id' | 'secret_access_key'>;
     isStoredSecretsLoading?: boolean;
     onReplaceFormDirtyChange?: jest.Mock;
+    isCleanupOnly?: boolean;
   } = {}
 ) {
   return render(
@@ -203,6 +211,7 @@ function renderSection(
           storedSecretFields={props.storedSecretFields}
           isStoredSecretsLoading={props.isStoredSecretsLoading}
           onReplaceFormDirtyChange={props.onReplaceFormDirtyChange}
+          isCleanupOnly={props.isCleanupOnly}
         />
       </React.Suspense>
     </I18nProvider>
@@ -212,6 +221,43 @@ function renderSection(
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
 describe('ManagedIntegrationsSection', () => {
+  describe('Deploy button placement with the identity form', () => {
+    it('shows Deploy inside the manual section of the identity form on the New Identity tab, below it otherwise', () => {
+      setupMocks();
+      renderSection({ showIdentityFederation: true });
+
+      fireEvent.click(screen.getByText('tab-new'));
+      expect(screen.getByTestId('manual-entry-actions')).toContainElement(
+        screen.getByTestId('managedIntegrationsSection-deployButton')
+      );
+
+      fireEvent.click(screen.getByText('tab-existing'));
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeInTheDocument();
+      expect(screen.getByTestId('manual-entry-actions')).toBeEmptyDOMElement();
+    });
+
+    it('moves Deploy below the form once the New Identity tab holds a ready identity', () => {
+      setupMocks();
+      renderSection({ showIdentityFederation: true });
+      fireEvent.click(screen.getByText('tab-new'));
+
+      // The stack's report made and selected the identity: Deploy is the next click, so it must
+      // not sit under "Create stack manually".
+      fireEvent.click(screen.getByText('mark-ready'));
+      expect(screen.getByTestId('manual-entry-actions')).toBeEmptyDOMElement();
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeEnabled();
+    });
+
+    it('keeps Deploy below the form on the New Identity tab when only a cleanup is left', () => {
+      setupMocks();
+      renderSection({ showIdentityFederation: true, isCleanupOnly: true });
+      fireEvent.click(screen.getByText('tab-new'));
+
+      expect(screen.getByTestId('manual-entry-actions')).toBeEmptyDOMElement();
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeEnabled();
+    });
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     setupMocks();

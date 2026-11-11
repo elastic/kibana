@@ -49,6 +49,7 @@ export interface InstanceInfo {
  * @param manifest The manifest of the plugin we're building these values for.
  * @param instanceInfo Info about the instance Kibana is running on.
  * @param nodeInfo Info about how the Kibana process has been configured.
+ * @param initialization The plugin's initialization, shared with its `PluginWrapper`, which settles it.
  *
  * @internal
  */
@@ -58,12 +59,14 @@ export function createPluginInitializerContext({
   manifest,
   instanceInfo,
   nodeInfo,
+  initialization,
 }: {
   coreContext: CoreContext;
   opaqueId: PluginOpaqueId;
   manifest: PluginManifest;
   instanceInfo: InstanceInfo;
   nodeInfo: NodeInfo;
+  initialization: PromiseWithResolvers<void>;
 }): PluginInitializerContext {
   return {
     opaqueId,
@@ -119,6 +122,10 @@ export function createPluginInitializerContext({
       get<T>() {
         return coreContext.configService.atPathSync<T>(manifest.configPath);
       },
+    },
+
+    initialization: {
+      initialize: () => initialization.promise,
     },
   };
 }

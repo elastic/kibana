@@ -9,6 +9,7 @@ import { serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ExecutionStatus } from '@kbn/workflows';
+import { MANUAL_AUTOMATION_TRIGGER_SOURCE } from '../../../common/automation_run';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
@@ -53,7 +54,15 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
       startedBefore: z.string().max(64).optional(),
     }),
   }),
-  handler: async ({ request, params, getAutomationsSoClient, getWorkflowsManagement, context }) => {
+  handler: async ({
+    request,
+    params,
+    getAutomationsSoClient,
+    getWorkflowsManagement,
+    getUserProfileService,
+    context,
+    logger,
+  }) => {
     const workflowsManagement = getWorkflowsManagement();
     if (!workflowsManagement) {
       throw serverUnavailable('Workflows management is not available');
@@ -159,7 +168,9 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         startedAt: exec.startedAt,
         finishedAt: exec.finishedAt,
         duration: exec.duration,
-        triggeredBy: exec.triggeredBy,
+        triggeredBy:
+          exec.triggeredBy === MANUAL_AUTOMATION_TRIGGER_SOURCE ? 'manual' : exec.triggeredBy,
+        executedBy: exec.executedBy,
         title,
         message: getString(input['message']) ?? getString(input['instructions']),
         investigationId: getString(output['investigation_id']),
@@ -169,8 +180,36 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
       };
     });
 
+    // Resolve only executors of manual runs the caller was authorized to read.
+    const profileUids = new Set(
+      runs.flatMap(({ triggeredBy, executedBy }) =>
+        triggeredBy === 'manual' && executedBy?.startsWith('u_') ? [executedBy] : []
+      )
+    );
+    const displayNames = new Map<string, string>();
+    if (profileUids.size > 0) {
+      try {
+        const userProfile = await getUserProfileService();
+        const profiles = await userProfile.bulkGet({ uids: profileUids });
+        for (const { uid, user } of profiles) {
+          displayNames.set(uid, user.full_name?.trim() || user.email?.trim() || user.username);
+        }
+      } catch (error) {
+        logger.debug(`Failed to resolve automation run executor profiles: ${error.message}`);
+      }
+    }
+
     return {
-      runs,
+      runs: runs.map((run) => ({
+        ...run,
+        executedByDisplayName:
+          run.triggeredBy === 'manual' && run.executedBy
+            ? displayNames.get(run.executedBy) ??
+              (run.executedBy.startsWith('u_') || run.executedBy === 'unknown'
+                ? undefined
+                : run.executedBy)
+            : undefined,
+      })),
       total: executions.total,
       usedToday,
       page: executions.page,

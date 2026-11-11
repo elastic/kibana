@@ -56,6 +56,7 @@ describe('parseDeclarativeConnectorSpec', () => {
         },
       },
     });
+    expect(parsed.config.properties?.baseUrl.meta?.validate?.allowedHosts).toBe(true);
     expect(parsed.test.request).toEqual(
       expect.objectContaining({
         method: 'GET',
@@ -295,5 +296,105 @@ describe('parseDeclarativeConnectorSpec', () => {
       expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(DeclarativeConnectorSpecError);
       expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(message);
     });
+  });
+
+  it.each(['ears', 'oauth_authorization_code', 'relay', 'not_a_type'])(
+    'rejects unsupported auth type %s',
+    (authTypeId) => {
+      const raw = minimalSpec(`      method: GET
+      url: https://example.com`).replace('    - none', `    - ${authTypeId}`);
+
+      expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(DeclarativeConnectorSpecError);
+      expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(new RegExp(authTypeId));
+    }
+  );
+
+  it.each(['basic', 'bearer', 'none'])('accepts shared auth type %s', (authTypeId) => {
+    const raw = minimalSpec(`      method: GET
+      url: https://example.com`).replace('    - none', `    - ${authTypeId}`);
+    const parsed = parseDeclarativeConnectorSpec(raw);
+
+    expect(parsed.auth.types[0]).toEqual({ type: authTypeId, defaults: {} });
+  });
+
+  it('rejects auth without types', () => {
+    const raw = minimalSpec(`      method: GET
+      url: https://example.com`).replace(
+      `auth:
+  types:
+    - none`,
+      `auth:
+  type: none`
+    );
+
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(DeclarativeConnectorSpecError);
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(/auth/);
+  });
+
+  it('rejects okta because auth.prefix is not supported', () => {
+    expect(() => parseDeclarativeConnectorSpec(loadFixture('okta-1.0.0.yaml'))).toThrow(
+      /auth\.prefix is not supported/
+    );
+  });
+
+  it('rejects a secrets template and names the action', () => {
+    const raw = minimalSpec(`      method: GET
+      url: https://example.com
+      headers:
+        Authorization: "Bearer {{ secrets.apiKey }}"`);
+
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(/Action "ping"/);
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(/secrets\.apiKey/);
+  });
+
+  it('rejects an unsafe template path segment', () => {
+    const raw = minimalSpec(`      method: GET
+      url: "https://example.com/{{ input.__proto__.x }}"`);
+
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(/__proto__/);
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(/Action "ping"/);
+  });
+
+  it('rejects a template root other than input or config', () => {
+    const raw = minimalSpec(`      method: GET
+      url: "https://example.com/{{ foo.bar }}"`);
+
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(/foo\.bar/);
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(/Action "ping"/);
+  });
+
+  it.each([
+    '{{ input.name',
+    'input.name }}',
+    '{{ input.name }',
+    '{{ secrets.api-key }}',
+    '{{{ input.name }}}',
+  ])('rejects malformed template markers in request values: %s', (value) => {
+    const raw = minimalSpec(`      method: GET
+      url: "https://example.com/${value}"`);
+
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(/malformed template placeholder/);
+  });
+
+  it('rejects template markers in nested request object keys', () => {
+    const raw = minimalSpec(`      method: POST
+      url: https://example.com
+      body:
+        "{{ input.name }}": value`);
+
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(
+      /request keys cannot contain template markers/
+    );
+  });
+
+  it('rejects template markers in query keys', () => {
+    const raw = minimalSpec(`      method: GET
+      url: https://example.com
+      query:
+        "{{ secrets.apiKey }}": value`);
+
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(
+      /request keys cannot contain template markers/
+    );
   });
 });
