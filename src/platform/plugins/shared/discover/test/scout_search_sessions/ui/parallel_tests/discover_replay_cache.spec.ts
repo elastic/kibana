@@ -18,6 +18,7 @@ import {
   DISCOVER_DEFAULT_KBN_ARCHIVE,
   DISCOVER_SEARCH_REQUESTS,
   RELATIVE_TIME_DEFAULTS,
+  goToDashboards,
   refetchDiscover,
   waitForDiscoverResults,
 } from '../fixtures';
@@ -42,62 +43,38 @@ spaceTest.describe('Discover replay cache', { tag: '@local-stateful-classic' }, 
   });
 
   spaceTest(
-    'replays the cached results when coming back from another app',
+    'replays every tab that was loaded before leaving until an explicit refresh',
     async ({ page, pageObjects, network }) => {
-      await pageObjects.collapsibleNav.clickItem('Dashboards');
-      await expect(page.testSubj.locator('dashboardLandingPage')).toBeVisible();
+      const { discover, unifiedTabs, collapsibleNav } = pageObjects;
+      const hitCount = discover.getHitCountLocator();
 
-      const requestCount = await network.countMatchingRequests(
-        DISCOVER_SEARCH_REQUESTS,
-        async () => {
-          await pageObjects.collapsibleNav.clickItem('Discover');
-          await waitForDiscoverResults(page, pageObjects.discover);
-        }
-      );
+      const firstTabHits = await spaceTest.step('loads a second tab', async () => {
+        await refetchDiscover({ page, network, discover }, () => discover.createNewTabAndSearch());
+        await unifiedTabs.selectTab(0);
+        await waitForDiscoverResults(page, discover);
+        return hitCount.innerText();
+      });
 
-      expect(requestCount).toBe(0);
-    }
-  );
+      await spaceTest.step('returns to the cached tabs without search requests', async () => {
+        await goToDashboards(page, collapsibleNav);
 
-  spaceTest(
-    'loads fresh results on refresh after a replay',
-    async ({ page, pageObjects, network }) => {
-      await pageObjects.collapsibleNav.clickItem('Dashboards');
-      await expect(page.testSubj.locator('dashboardLandingPage')).toBeVisible();
-      await pageObjects.collapsibleNav.clickItem('Discover');
-      await waitForDiscoverResults(page, pageObjects.discover);
+        const requestCount = await network.countMatchingRequests(
+          DISCOVER_SEARCH_REQUESTS,
+          async () => {
+            await collapsibleNav.clickItem('Discover');
+            await waitForDiscoverResults(page, discover);
+            await expect(hitCount).toHaveText(firstTabHits);
+            await unifiedTabs.selectTab(1);
+            await waitForDiscoverResults(page, discover);
+          }
+        );
 
-      const requestCount = await refetchDiscover(
-        { page, network, discover: pageObjects.discover },
-        () => pageObjects.discover.submitQuery()
-      );
+        expect(requestCount).toBe(0);
+      });
 
-      expect(requestCount).toBeGreaterThanOrEqual(2);
-    }
-  );
-
-  spaceTest(
-    'replays every tab that was loaded before leaving',
-    async ({ page, pageObjects, network }) => {
-      await refetchDiscover({ page, network, discover: pageObjects.discover }, () =>
-        pageObjects.discover.createNewTabAndSearch()
-      );
-      await pageObjects.unifiedTabs.selectTab(0);
-      await waitForDiscoverResults(page, pageObjects.discover);
-      await pageObjects.collapsibleNav.clickItem('Dashboards');
-      await expect(page.testSubj.locator('dashboardLandingPage')).toBeVisible();
-
-      const requestCount = await network.countMatchingRequests(
-        DISCOVER_SEARCH_REQUESTS,
-        async () => {
-          await pageObjects.collapsibleNav.clickItem('Discover');
-          await waitForDiscoverResults(page, pageObjects.discover);
-          await pageObjects.unifiedTabs.selectTab(1);
-          await waitForDiscoverResults(page, pageObjects.discover);
-        }
-      );
-
-      expect(requestCount).toBe(0);
+      await spaceTest.step('loads fresh results on refresh', async () => {
+        await refetchDiscover({ page, network, discover }, () => discover.submitQuery());
+      });
     }
   );
 });

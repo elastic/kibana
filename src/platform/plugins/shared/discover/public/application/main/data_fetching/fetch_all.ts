@@ -218,12 +218,15 @@ export function fetchAll(
       .catch((e) => {
         if (!abortController.signal.aborted) throw e;
 
+        // Without this, Discover keeps loading forever after the user clicks Cancel: a replaced
+        // fetch is finished by the newer one, but nothing else finishes a canceled one.
         if (abortController.signal.reason === AbortReason.CANCELED) {
           dataSubjects.documents$.next({
             ...dataSubjects.documents$.getValue(),
             fetchStatus: FetchStatus.COMPLETE,
           });
 
+          // ES|QL returns the hit count with the documents, classic mode loads it with the chart.
           if (isEsqlQuery) {
             dataSubjects.totalHits$.next({
               ...dataSubjects.totalHits$.getValue(),

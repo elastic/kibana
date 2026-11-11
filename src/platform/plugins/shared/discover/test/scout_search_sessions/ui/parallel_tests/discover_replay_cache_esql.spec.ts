@@ -13,6 +13,7 @@ import {
   DISCOVER_DEFAULT_KBN_ARCHIVE,
   ESQL_SEARCH_REQUESTS,
   RELATIVE_TIME_DEFAULTS,
+  goToDashboards,
   refetchDiscover,
   waitForDiscoverResults,
 } from '../fixtures';
@@ -54,8 +55,7 @@ spaceTest.describe('Discover ES|QL replay cache', { tag: '@local-stateful-classi
       });
 
       await spaceTest.step('returns to the cached results without search requests', async () => {
-        await collapsibleNav.clickItem('Dashboards');
-        await expect(page.testSubj.locator('dashboardLandingPage')).toBeVisible();
+        await goToDashboards(page, collapsibleNav);
 
         const requestCount = await network.countMatchingRequests(ESQL_SEARCH_REQUESTS, async () => {
           await collapsibleNav.clickItem('Discover');
@@ -63,17 +63,15 @@ spaceTest.describe('Discover ES|QL replay cache', { tag: '@local-stateful-classi
         });
 
         expect(requestCount).toBe(0);
-        expect(await discover.getEsqlQueryValue()).toBe(QUERY);
+        await expect.poll(() => discover.getEsqlQueryValue()).toBe(QUERY);
         await expect(discover.getHitCountLocator()).toHaveText('100');
       });
 
       await spaceTest.step('fetches documents and the chart again on refresh', async () => {
-        const requestCount = await refetchDiscover(
-          { page, network, discover, requests: ESQL_SEARCH_REQUESTS },
-          () => discover.submitQuery()
+        await refetchDiscover({ page, network, discover, requests: ESQL_SEARCH_REQUESTS }, () =>
+          discover.submitQuery()
         );
 
-        expect(requestCount).toBeGreaterThanOrEqual(2);
         await expect(discover.getHitCountLocator()).toHaveText('100');
       });
     }

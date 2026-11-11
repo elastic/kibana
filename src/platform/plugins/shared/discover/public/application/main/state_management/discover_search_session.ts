@@ -40,8 +40,7 @@ export interface TabSearchSession {
 }
 
 /**
- * Picks the search session for Discover: it restores the one in the URL, replays the cached
- * session of a tab when you come back to it, or starts a new one.
+ * Helps with state management of search session and {@link SEARCH_SESSION_ID_QUERY_PARAM} in the URL
  */
 export class DiscoverSearchSessionManager {
   private readonly deps: DiscoverSearchSessionManagerDeps;

@@ -71,6 +71,10 @@ describe('tab_sync actions', () => {
       const enableStorage = jest.mocked(services.data.search.session.enableStorage);
       const [, storageConfig] = enableStorage.mock.calls[enableStorage.mock.calls.length - 1];
       const { dataRequestParams } = selectTab(internalState.getState(), tabId);
+      const disabledWhileReplayed = {
+        disabled: true,
+        reasonText: 'Refresh the results before saving this search in the background.',
+      };
 
       internalState.dispatch(
         internalStateActions.setDataRequestParams({
@@ -81,16 +85,10 @@ describe('tab_sync actions', () => {
           },
         })
       );
-      expect(storageConfig?.isDisabled?.()).toEqual({
-        disabled: true,
-        reasonText: 'Refresh the results before saving this search in the background.',
-      });
+      expect(storageConfig?.isDisabled?.()).toEqual(disabledWhileReplayed);
 
       internalState.dispatch(internalStateActions.cancelFetchData({ tabId }));
-      expect(storageConfig?.isDisabled?.()).toEqual({
-        disabled: true,
-        reasonText: 'Refresh the results before saving this search in the background.',
-      });
+      expect(storageConfig?.isDisabled?.()).toEqual(disabledWhileReplayed);
 
       internalState.dispatch(
         internalStateActions.setDataRequestParams({

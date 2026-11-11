@@ -98,6 +98,12 @@ describe('test fetchAll', () => {
     mockfetchEsql.mockReset().mockResolvedValue({ records: [] });
   });
 
+  const setEsqlQuery = (query: { esql: string }) => {
+    deps.internalState.dispatch(
+      internalStateActions.updateAppState({ tabId: deps.getCurrentTab().id, appState: { query } })
+    );
+  };
+
   test('changes of fetchStatus when starting with FetchStatus.UNINITIALIZED', async () => {
     const stateArr: FetchStatus[] = [];
 
@@ -257,12 +263,7 @@ describe('test fetchAll', () => {
     ];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     const query = { esql: 'from foo' };
-    deps.internalState.dispatch(
-      internalStateActions.updateAppState({
-        tabId: deps.getCurrentTab().id,
-        appState: { query },
-      })
-    );
+    setEsqlQuery(query);
     const mockEsqlSource = createMockEsqlSource([], [], '@timestamp');
     mockfetchEsql.mockResolvedValue({ records: documents, dataSource: mockEsqlSource });
     fetchAll({
@@ -290,12 +291,7 @@ describe('test fetchAll', () => {
 
   test('finishes loading when ES|QL is canceled before returning results', async () => {
     const query = { esql: 'from foo' };
-    deps.internalState.dispatch(
-      internalStateActions.updateAppState({
-        tabId: deps.getCurrentTab().id,
-        appState: { query },
-      })
-    );
+    setEsqlQuery(query);
     mockfetchEsql.mockRejectedValue(new Error('The query was canceled'));
     const onFetchRecordsComplete = jest.fn();
 
@@ -317,12 +313,7 @@ describe('test fetchAll', () => {
 
   test('does not finish loading when the ES|QL search is replaced', async () => {
     const query = { esql: 'from foo' };
-    deps.internalState.dispatch(
-      internalStateActions.updateAppState({
-        tabId: deps.getCurrentTab().id,
-        appState: { query },
-      })
-    );
+    setEsqlQuery(query);
     mockfetchEsql.mockRejectedValue(new Error('The query was replaced'));
 
     fetchAll(deps);
@@ -434,13 +425,7 @@ describe('test fetchAll', () => {
     test('should swallow abort errors', async () => {
       const collect = subjectCollector(subjects.documents$);
       mockfetchEsql.mockRejectedValue({ msg: 'The query was aborted' });
-      const query = { esql: 'from foo' };
-      deps.internalState.dispatch(
-        internalStateActions.updateAppState({
-          tabId: deps.getCurrentTab().id,
-          appState: { query },
-        })
-      );
+      setEsqlQuery({ esql: 'from foo' });
       fetchAll(deps);
       deps.abortController.abort();
       await waitForNextTick();
