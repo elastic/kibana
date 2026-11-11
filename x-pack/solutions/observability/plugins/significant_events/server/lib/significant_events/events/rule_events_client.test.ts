@@ -162,6 +162,7 @@ describe('RuleEventsClient', () => {
       await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
         eventId: existing.event_id,
         change: DEACTIVATE_STATUS,
+        actor: 'rest_api',
         workflowExecutionId: 'current-workflow',
       });
 
@@ -180,6 +181,7 @@ describe('RuleEventsClient', () => {
       await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
         eventId: existing.event_id,
         change: DEACTIVATE_STATUS,
+        actor: 'rest_api',
       });
 
       expect(lastStatusWritten(alertEventsClient).data.workflow_execution_id).toBeUndefined();
