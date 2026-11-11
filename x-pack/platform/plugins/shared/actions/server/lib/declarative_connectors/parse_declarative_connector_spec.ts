@@ -18,7 +18,7 @@ import type {
 } from './types';
 import { declarativeFieldMetaSchema, DeclarativeConnectorSpecError } from './types';
 
-const TEMPLATE_PATTERN = /\{\{\s*([a-zA-Z0-9_.]+)\s*\}\}/g;
+const TEMPLATE_PATTERN = /\{\{\s*([a-zA-Z0-9_.]+)\??\s*\}\}/g;
 const UNSAFE_PATH_SEGMENTS = new Set(['__proto__', 'prototype', 'constructor']);
 const TEMPLATE_ROOTS = new Set<DeclarativeTemplateRoot>(['input', 'config']);
 
@@ -149,6 +149,7 @@ const httpRequestSchema = lazySchema(() =>
       query: z.record(z.string(), z.unknown()).optional(),
       headers: z.record(z.string(), z.unknown()).optional(),
       body: z.unknown().optional(),
+      bodyType: z.enum(['json', 'form', 'text']).optional(),
     })
     .strict()
     .superRefine((request, context) => {
