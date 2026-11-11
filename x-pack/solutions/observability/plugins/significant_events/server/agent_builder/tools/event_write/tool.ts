@@ -205,12 +205,6 @@ const eventsWriteItemsSchema = lazySchema(() =>
 export const eventsWriteSchema = lazySchema(() =>
   z
     .object({
-      source: z
-        .literal('discovery')
-        .optional()
-        .describe(
-          'Identifies the caller of this write. Discovery calls must set this to "discovery".'
-        ),
       items: eventsWriteItemsSchema,
     })
     .describe(
@@ -379,8 +373,6 @@ export function createEventsWriteTool({
       rejected ID, or omit the ID to turn it into a new event. Discovery must leave its rules
       unprocessed so the next cycle routes them again from fresh search results.
 
-      Discovery calls must set top-level \`source\` to \`"discovery"\`.
-
       **With event_id**: append a version to an existing event. Its status follows the merged
       members' verdicts: a breaching member returns a recovering event to active, while healthy or
       unjudgeable verdicts keep it recovering. Submit healthy evidence for a member too. A new event
@@ -389,10 +381,7 @@ export function createEventsWriteTool({
       Signals and topology are merged with prior versions. \`severity\` is your verdict under
       its field contract, decided from the merged confirming signals; the writer stores it as given
       (an inactive event is low) and returns the stored tier. No-op if the stored severity and
-      status are unchanged (written: false, reason: unchanged_outcome). For Discovery writes, a
-      completed investigation makes the stored severity authoritative over the newly proposed
-      one. It is preserved unless Discovery reactivates an inactive event or submits a confirmed
-      rule UUID absent from the current event. When no new rule UUIDs are introduced, title and
+      status are unchanged (written: false, reason: unchanged_outcome). When no new rule UUIDs are introduced, title and
       symptom_hypothesis are frozen to the stored values and narrative_preserved: true is returned.
 
       **Without event_id**: find-or-create. When the item has confirmed rules, scans all
@@ -474,7 +463,6 @@ export function createEventsWriteTool({
         const data = await eventsWriteBulkHandler({
           eventSearchClient: await getEventSearchClient(),
           inputs: items,
-          source: toolParams.source,
           rejectUnknownEventIds:
             getAgentFromRunContext(context.runContext)?.agentId ===
             SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,

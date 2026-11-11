@@ -281,6 +281,10 @@ export class SignificantEventsPlugin
           request,
           logger: this.logger,
         }),
+        telemetry: {
+          trackEventStatusChanged: (params) =>
+            this.ebtTelemetryService.getClient().trackEventStatusChanged(params, request),
+        },
       });
 
       const getAlertingV2RulesClient = async () =>

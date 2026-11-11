@@ -20,6 +20,7 @@ import {
   CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
   type CustomContentContextAttachmentData,
 } from '../../common/panel_context_attachment';
+import { readContextQueries, toContextQueries } from '../../common/panel_context_queries';
 import { readPanelContextData } from '../../common/read_panel_context_data';
 import {
   CUSTOM_CONTENT_UPDATED_UI_EVENT,
@@ -111,7 +112,7 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
           ? async () => currentData.esql_variables
           : undefined,
         existing: {
-          esqlQuery: currentData?.esql_query,
+          esqlQueries: currentData ? readContextQueries(currentData) : [],
           template: currentData?.panel_template || undefined,
         },
         modelProvider,
@@ -134,7 +135,7 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
 
     const newData: CustomContentContextAttachmentData = {
       panel_template: built.template,
-      esql_query: built.esqlQuery,
+      ...toContextQueries(built.esqlQueries),
       panel_title: currentData?.panel_title,
       embeddable_id: currentData?.embeddable_id ?? '',
       // Carried over so a refined version still previews against the range the panel was

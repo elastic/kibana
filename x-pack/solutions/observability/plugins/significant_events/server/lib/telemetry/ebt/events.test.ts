@@ -15,6 +15,7 @@ import {
   agentToolKiIdentificationStartedEventType,
   detectionScanEventType,
   discoveryTriggeredEventType,
+  eventStatusChangedEventType,
   knowledgeIndicatorEventsGeneratedEventType,
   knowledgeIndicatorFeaturesIdentifiedEventType,
   onboardingScheduledEventType,
@@ -33,6 +34,7 @@ describe('EBT event types', () => {
     agentToolKiIdentificationStartedEventType,
     detectionScanEventType,
     discoveryTriggeredEventType,
+    eventStatusChangedEventType,
     knowledgeIndicatorEventsGeneratedEventType,
     knowledgeIndicatorFeaturesIdentifiedEventType,
     onboardingScheduledEventType,
@@ -43,7 +45,11 @@ describe('EBT event types', () => {
     expect(isOptional(schema.target_cluster_ids_complete)).toBe(true);
   });
 
-  it.each([agentToolEventStatusUpdateEventType, agentToolEventInvestigationAttachEventType])(
+  it.each([
+    agentToolEventStatusUpdateEventType,
+    agentToolEventInvestigationAttachEventType,
+    eventStatusChangedEventType,
+  ])(
     '$eventType requires the full alert identity on an event about an existing alert',
     ({ schema }) => {
       const { alert_source: source, fingerprint, space_id: spaceId } = schema;

@@ -5,30 +5,51 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
+import { rememberClassicTabOrigin } from '../../hooks/use_streams_home_link';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { RedirectTo } from '../redirect_to';
 import { StreamsAppHeader, StreamsAppPageTemplate } from '../streams_app_page_template';
-import {
-  DEFAULT_STREAMS_LAYOUT_TAB,
-  isStreamsLayoutTab,
-  STREAMS_LAYOUT_TABS,
-  streamsLayoutTabs,
-} from './tabs';
+import { defaultStreamsLayoutTab, isStreamsLayoutTab, STREAMS_LAYOUT_TABS } from './tab_ids';
+import { streamsLayoutTabs } from './tabs';
 import { UnitNotFoundPrompt } from './unit_not_found_prompt';
+import { useShowClassicTab } from './use_show_classic_tab';
 import { useUnitCheck } from './use_unit_check';
+
+const techPreviewBadge = {
+  iconType: 'flask',
+  tooltip: i18n.translate('xpack.streams.technicalPreviewLabel', {
+    defaultMessage: 'Technical preview',
+  }),
+};
+
+/** Renders the V2 layout once the Classic tab check has settled, so the tab bar never changes. */
+export function StreamsV2LayoutGate() {
+  const { loading, showClassic } = useShowClassicTab();
+
+  if (loading) {
+    return (
+      <StreamsAppPageTemplate.EmptyPrompt
+        data-test-subj="streamsClassicTabLoading"
+        icon={<EuiLoadingSpinner size="xl" />}
+      />
+    );
+  }
+
+  return <StreamsLayout showClassic={showClassic} />;
+}
 
 /**
  * Top-level tabbed layout for Streams. It owns the tab bar and delegates each
  * tab's content to the matching entry in the tab registry.
  */
-export function StreamsLayout() {
+export function StreamsLayout({ showClassic }: { showClassic: boolean }) {
   const {
     path: { unitId, tab },
   } = useStreamsAppParams('/v2/unit/{unitId}/{tab}');
@@ -37,23 +58,53 @@ export function StreamsLayout() {
   const { access } = useStreamsPrivileges();
   const unitCheck = useUnitCheck(unitId);
 
+  // No cleanup: opening a stream unmounts the layout, and the flag has to survive that.
+  // AppRoot clears it when Streams itself unmounts.
+  useEffect(() => {
+    rememberClassicTabOrigin(tab === 'classic' ? unitId : undefined);
+  }, [tab, unitId]);
+
+  const visibleTabs = useMemo(
+    () => STREAMS_LAYOUT_TABS.filter((tabId) => showClassic || tabId !== 'classic'),
+    [showClassic]
+  );
+
   const appHeaderTabs = useMemo<AppHeaderTab[]>(
     () =>
-      STREAMS_LAYOUT_TABS.map((tabId) => ({
-        id: tabId,
-        label: streamsLayoutTabs[tabId].label,
-        href: router.link('/v2/unit/{unitId}/{tab}', {
-          path: { unitId, tab: tabId },
-          query: { rangeFrom, rangeTo },
-        }),
-        isSelected: tab === tabId,
-        'data-test-subj': `streamsLayoutTab-${tabId}`,
-      })),
-    [unitId, tab, router, rangeFrom, rangeTo]
+      visibleTabs.map((tabId) => {
+        const { label, techPreview } = streamsLayoutTabs[tabId];
+        return {
+          id: tabId,
+          label,
+          href: router.link('/v2/unit/{unitId}/{tab}', {
+            path: { unitId, tab: tabId },
+            query: { rangeFrom, rangeTo },
+          }),
+          isSelected: tab === tabId,
+          'data-test-subj': `streamsLayoutTab-${tabId}`,
+          ...(techPreview ? { badge: techPreviewBadge } : {}),
+        };
+      }),
+    [visibleTabs, unitId, tab, router, rangeFrom, rangeTo]
   );
 
   if (!access.v2) {
     return <RedirectTo path="/" />;
+  }
+
+  // Runs before the unit check so a bad tab never shows the unit not-found prompt first.
+  if (!isStreamsLayoutTab(tab) || !visibleTabs.includes(tab)) {
+    return (
+      <RedirectTo
+        path="/v2/unit/{unitId}/{tab}"
+        params={{ path: { tab: defaultStreamsLayoutTab(showClassic) } }}
+      />
+    );
+  }
+
+  const { Component, noPadding, ownsHeader } = streamsLayoutTabs[tab];
+  if (ownsHeader) {
+    return <Component tabs={appHeaderTabs} />;
   }
 
   const title = i18n.translate('xpack.streams.streamsLayout.pageHeaderTitle', {
@@ -79,16 +130,6 @@ export function StreamsLayout() {
     );
   }
 
-  if (!isStreamsLayoutTab(tab)) {
-    return (
-      <RedirectTo
-        path="/v2/unit/{unitId}/{tab}"
-        params={{ path: { tab: DEFAULT_STREAMS_LAYOUT_TAB } }}
-      />
-    );
-  }
-
-  const { Component, noPadding } = streamsLayoutTabs[tab];
   const body = (
     <StreamsAppPageTemplate.Body noPadding={noPadding} paddingSize="m">
       {/* The tab machines read the unit loader once, so a new unit needs a fresh mount. */}

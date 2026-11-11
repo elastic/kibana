@@ -19,6 +19,7 @@ import type {
   KnowledgeIndicatorOnboardingScheduledProps,
   DetectionScanProps,
   DiscoveryTriggeredProps,
+  EventStatusChangedProps,
   AgentToolEventWriteProps,
   EbtTelemetryContext,
 } from './types';
@@ -36,6 +37,7 @@ import {
   SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
   SIGNIFICANT_EVENTS_ONBOARDING_SCHEDULED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_WRITE_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_EVENT_STATUS_CHANGED_EVENT_TYPE,
 } from './constants';
 
 type TrackParams<T> = Omit<T, keyof EbtTelemetryContext> & Partial<EbtTelemetryContext>;
@@ -119,6 +121,13 @@ export class EbtTelemetryClient {
       request,
       'origin'
     );
+  }
+
+  public trackEventStatusChanged(
+    params: TrackParams<EventStatusChangedProps>,
+    request: KibanaRequest
+  ) {
+    this.report(SIGNIFICANT_EVENTS_EVENT_STATUS_CHANGED_EVENT_TYPE, params, request, 'origin');
   }
 
   public trackSignificantEventsDiscoveryTriggered(
