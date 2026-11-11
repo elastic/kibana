@@ -157,6 +157,15 @@ export const registerInvestigationEvaluation = ({
             { timeout: 120_000, intervals: [5_000] }
           )
           .toBe(true);
+        // New investigations are charged to daily run limits (5 manual a day by default), which
+        // would reject most of a dataset's cases with a 429. The eval's own Kibana has no one else
+        // to protect, so it starts with the investigation limits off.
+        await setupRequest('/internal/significant_events/run_quotas', {
+          method: 'PUT',
+          body: JSON.stringify({ investigationLimitsEnabled: false }),
+        }).catch((error: unknown) =>
+          log.warning(`Could not turn off the investigation run limits: ${String(error)}`)
+        );
         await expect
           .poll(
             async () =>
