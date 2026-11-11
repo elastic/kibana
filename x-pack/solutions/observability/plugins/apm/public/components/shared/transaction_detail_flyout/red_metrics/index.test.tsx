@@ -20,8 +20,12 @@ jest.mock('../../../../context/chart_pointer_event/chart_pointer_event_context',
     <>{children}</>
   ),
 }));
+const mockTimeseriesChart = jest.fn();
 jest.mock('../../charts/timeseries_chart', () => ({
-  TimeseriesChart: ({ id }: { id: string }) => <div data-test-subj={id} />,
+  TimeseriesChart: (props: { id: string }) => {
+    mockTimeseriesChart(props);
+    return <div data-test-subj={props.id} />;
+  },
 }));
 jest.mock('../../service_flyout/hooks/use_project_routing', () => ({
   useProjectRouting: () => undefined,
@@ -171,6 +175,19 @@ describe('TransactionDetailFlyoutRedMetrics', () => {
 
       API_CHART_PANEL_IDS.forEach((id) => {
         expect(screen.getByTestId(`${id}-header`)).toHaveStyleRule('min-height', euiTheme.size.xl);
+      });
+    });
+
+    it('does not mirror tooltips onto the sibling charts in the narrow row', () => {
+      render(<TransactionDetailFlyoutRedMetrics />);
+
+      expect(mockTimeseriesChart).toHaveBeenCalledTimes(3);
+      mockTimeseriesChart.mock.calls.forEach(([props]) => {
+        expect(props).toEqual(
+          expect.objectContaining({
+            settings: { externalPointerEvents: { tooltip: { visible: false } } },
+          })
+        );
       });
     });
 

@@ -39,6 +39,12 @@ import { useTransactionDetailFlyoutRedMetricsCharts } from './use_transaction_de
 
 const CHART_HEIGHT = 200;
 
+// Keep the synced crosshair across the three charts, but don't mirror the tooltip onto
+// sibling charts: the columns are too narrow for three tooltips side by side.
+const FLYOUT_CHART_SETTINGS = {
+  externalPointerEvents: { tooltip: { visible: false } },
+} as const;
+
 const CHARTS_LOAD_ERROR = i18n.translate('xpack.apm.transactionDetailFlyout.chartsUnavailable', {
   defaultMessage: 'Unable to load charts',
 });
@@ -212,6 +218,7 @@ function TransactionDetailFlyoutApiRedMetrics({
             comparisonEnabled={false}
             timeZone={timeZone}
             showAnnotations={false}
+            settings={FLYOUT_CHART_SETTINGS}
           />
         </FlyoutTimeseriesChartPanel>
 
@@ -238,6 +245,7 @@ function TransactionDetailFlyoutApiRedMetrics({
             comparisonEnabled={false}
             timeZone={timeZone}
             showAnnotations={false}
+            settings={FLYOUT_CHART_SETTINGS}
           />
         </FlyoutTimeseriesChartPanel>
 
@@ -258,6 +266,7 @@ function TransactionDetailFlyoutApiRedMetrics({
             comparisonEnabled={false}
             timeZone={timeZone}
             showAnnotations={false}
+            settings={FLYOUT_CHART_SETTINGS}
           />
         </FlyoutTimeseriesChartPanel>
       </div>

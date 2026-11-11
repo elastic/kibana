@@ -96,6 +96,9 @@ function FlyoutLensChartComponent({
         gutterSize="s"
         alignItems="center"
         justifyContent="spaceBetween"
+        // Don't stack the title action below the title on small viewports: the charts
+        // sit side by side in the flyout grid, so a taller header would misalign them.
+        responsive={false}
         // Reserve the compressed title action height on every chart, so headers with
         // and without an action are equally tall and side-by-side plots stay aligned.
         css={css`
