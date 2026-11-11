@@ -10,6 +10,8 @@ import { identifyMetricsEntities } from './identify_metrics_entities';
 import {
   buildKubernetesEntityId,
   ENTITY_KEY_TABLE,
+  foldClusterRows,
+  foldNamespaceRows,
   foldNodeRows,
   foldWorkloadRows,
   getDatasetFamily,
@@ -36,6 +38,20 @@ const nodeColumns = [
   { name: 'replicas', type: 'long' },
   { name: 'last_seen', type: 'date' },
   { name: 'clusters', type: 'keyword' },
+];
+
+const namespaceColumns = [
+  { name: 'kubernetes.namespace', type: 'keyword' },
+  { name: 'replicas', type: 'long' },
+  { name: 'last_seen', type: 'date' },
+  { name: 'clusters', type: 'keyword' },
+];
+
+const clusterColumns = [
+  { name: 'orchestrator.cluster.name', type: 'keyword' },
+  { name: 'nodes', type: 'long' },
+  { name: 'replicas', type: 'long' },
+  { name: 'last_seen', type: 'date' },
 ];
 
 const sourceEsql =
@@ -78,10 +94,14 @@ describe('buildKubernetesEntityId', () => {
       buildKubernetesEntityId({ kind: 'deployment', namespace: 'payments', name: 'checkout' }),
       buildKubernetesEntityId({ kind: 'daemonset', namespace: 'payments', name: 'metricbeat' }),
       buildKubernetesEntityId({ kind: 'node', name: 'node-a' }),
+      buildKubernetesEntityId({ kind: 'namespace', name: 'payments' }),
+      buildKubernetesEntityId({ kind: 'cluster', name: 'cluster-a' }),
     ]).toEqual([
       `${KUBERNETES_ENTITY_STORE_TYPES.deployment}:payments/checkout`,
       `${KUBERNETES_ENTITY_STORE_TYPES.daemonset}:payments/metricbeat`,
       `${KUBERNETES_ENTITY_STORE_TYPES.node}:node-a`,
+      `${KUBERNETES_ENTITY_STORE_TYPES.namespace}:payments`,
+      `${KUBERNETES_ENTITY_STORE_TYPES.cluster}:cluster-a`,
     ]);
   });
 });
@@ -212,9 +232,36 @@ describe('Kubernetes entity derivation', () => {
         last_seen: lastSeen,
       },
     ]).features;
-    expect([...features, ...nodeFeatures].every(({ filter }) => isConditionComplete(filter))).toBe(
-      true
-    );
+    const namespaceFeatures = foldNamespaceRows([
+      {
+        'kubernetes.namespace': 'apps',
+        clusters: ['cluster-a'],
+        replicas: 4,
+        last_seen: lastSeen,
+      },
+    ]).features;
+    const clusterResult = foldClusterRows([
+      {
+        'orchestrator.cluster.name': 'cluster-a',
+        nodes: 1,
+        replicas: 4,
+        last_seen: lastSeen,
+      },
+      {
+        'orchestrator.cluster.name': null,
+        nodes: 0,
+        replicas: 1,
+        last_seen: lastSeen,
+      },
+    ]);
+    expect(namespaceFeatures.map(({ id }) => id)).toEqual(['k8s.namespace:apps']);
+    expect(clusterResult.features.map(({ id }) => id)).toEqual(['k8s.cluster:cluster-a']);
+    expect(clusterResult.droppedRows.nullCluster).toBe(1);
+    expect(
+      [...features, ...nodeFeatures, ...namespaceFeatures, ...clusterResult.features].every(
+        ({ filter }) => isConditionComplete(filter)
+      )
+    ).toBe(true);
   });
 
   it('drops an overlong workload identity while keeping other entities', () => {
@@ -244,6 +291,7 @@ describe('Kubernetes entity derivation', () => {
       ownerless: 0,
       nullNamespace: 0,
       nullNodeName: 0,
+      nullCluster: 0,
       idTooLong: 1,
     });
   });
@@ -296,7 +344,21 @@ describe('identifyMetricsEntities', () => {
         [null, 1, '2026-11-10T12:01:00.000Z', ['cluster-a']],
       ],
     };
-    const harness = createHarness([datasetList, workloads, nodes]);
+    const namespaces = {
+      columns: namespaceColumns,
+      values: [
+        ['payments', 9, '2026-11-10T12:06:00.000Z', ['cluster-a', 'cluster-b']],
+        [null, 1, '2026-11-10T12:01:00.000Z', ['cluster-a']],
+      ],
+    };
+    const clusters = {
+      columns: clusterColumns,
+      values: [
+        ['cluster-a', 1, 9, '2026-11-10T12:06:00.000Z'],
+        [null, 0, 1, '2026-11-10T12:01:00.000Z'],
+      ],
+    };
+    const harness = createHarness([datasetList, workloads, nodes, namespaces, clusters]);
 
     const result = await identifyMetricsEntities({
       esClient: harness.esClient,
@@ -308,21 +370,27 @@ describe('identifyMetricsEntities', () => {
 
     expect(result).toEqual(
       expect.objectContaining({
-        metricsEntitiesCount: 4,
+        metricsEntitiesCount: 6,
         metricsCatalogueRowsCount: 2,
-        matchedEntityKeyRowsCount: 2,
+        matchedEntityKeyRowsCount: 4,
         uncoveredDatasetsCount: 0,
-        metricsEntityRowsCount: 7,
-        droppedIncompleteRowsCount: 3,
+        metricsEntityRowsCount: 11,
+        droppedIncompleteRowsCount: 5,
         droppedOverflowRowsCount: 0,
-        droppedRows: { ownerless: 1, nullNamespace: 1, nullNodeName: 1, idTooLong: 0 },
+        droppedRows: {
+          ownerless: 1,
+          nullNamespace: 2,
+          nullNodeName: 1,
+          nullCluster: 1,
+          idTooLong: 0,
+        },
         unknownClusterRows: 1,
         handled: true,
         errors: [],
       })
     );
     const queries = harness.query.mock.calls.map(([request]: [{ query: string }]) => request.query);
-    expect(queries).toHaveLength(3);
+    expect(queries).toHaveLength(5);
     queries.forEach((query) => {
       expect(query).toMatch(/^SET unmapped_fields = "NULLIFY"; FROM/);
       expect(query).not.toContain('$.nightshift');
@@ -334,11 +402,13 @@ describe('identifyMetricsEntities', () => {
     });
     expect(harness.bulk).toHaveBeenCalledTimes(1);
     const operations = harness.bulk.mock.calls[0][1];
-    expect(operations).toHaveLength(4);
+    expect(operations).toHaveLength(6);
     expect(
       operations.map(({ index }: { index: { feature: { id: string } } }) => index.feature.id)
     ).toEqual([
+      'k8s.cluster:cluster-a',
       'k8s.node:node-a',
+      'k8s.namespace:payments',
       'k8s.deployment:payments/checkout',
       'k8s.daemonset:payments/checkout',
       'k8s.deployment:payments/unknown-cluster',
@@ -463,6 +533,8 @@ describe('identifyMetricsEntities', () => {
           ],
         ],
       },
+      { columns: namespaceColumns, values: [] },
+      { columns: clusterColumns, values: [] },
     ]);
 
     const result = await identifyMetricsEntities({
@@ -476,7 +548,7 @@ describe('identifyMetricsEntities', () => {
     expect(result).toEqual(
       expect.objectContaining({
         handled: true,
-        matchedEntityKeyRowsCount: 1,
+        matchedEntityKeyRowsCount: 3,
         uncoveredDatasetsCount: 1,
       })
     );
@@ -510,7 +582,13 @@ describe('identifyMetricsEntities', () => {
         ['node-a', 1, '2026-11-10T12:00:00.000Z', ['cluster-a']],
       ],
     };
-    const harness = createHarness([datasetList, workloads, nodes]);
+    const harness = createHarness([
+      datasetList,
+      workloads,
+      nodes,
+      { columns: namespaceColumns, values: [] },
+      { columns: clusterColumns, values: [] },
+    ]);
 
     const result = await identifyMetricsEntities({
       esClient: harness.esClient,

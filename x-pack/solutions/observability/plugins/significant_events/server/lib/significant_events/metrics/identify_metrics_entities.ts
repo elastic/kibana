@@ -62,6 +62,7 @@ const createDroppedRows = (): DroppedMetricsEntityRows => ({
   ownerless: 0,
   nullNamespace: 0,
   nullNodeName: 0,
+  nullCluster: 0,
   idTooLong: 0,
 });
 
@@ -268,6 +269,7 @@ export const identifyMetricsEntities = async ({
     droppedRows.ownerless += folded.droppedRows.ownerless;
     droppedRows.nullNamespace += folded.droppedRows.nullNamespace;
     droppedRows.nullNodeName += folded.droppedRows.nullNodeName;
+    droppedRows.nullCluster += folded.droppedRows.nullCluster;
     droppedRows.idTooLong += folded.droppedRows.idTooLong;
     unknownClusterRows += folded.unknownClusterRows;
   }
