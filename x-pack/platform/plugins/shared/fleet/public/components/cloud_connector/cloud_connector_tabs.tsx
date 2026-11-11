@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { EuiTab, EuiTabs, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem, EuiRadio, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 
 import type { CloudProvider } from '../../types';
 
@@ -35,32 +34,36 @@ export const CloudConnectorTabs: React.FC<CloudConnectorTabsProps> = ({
   cloudConnectorsCount,
   isEditPage,
 }) => {
+  const radioIdPrefix = useGeneratedHtmlId({ prefix: 'cloudConnectorIdentity' });
+
   return (
     <>
       <EuiSpacer size="m" />
-      <EuiTabs>
+      <EuiFlexGroup
+        gutterSize="xl"
+        alignItems="center"
+        responsive={false}
+        wrap
+        role="radiogroup"
+        data-test-subj="cloudConnectorIdentityToggle"
+      >
         {tabs.map((tab) => (
-          <EuiTab
-            key={tab.id}
-            onClick={() => {
-              onTabClick(tab);
-            }}
-            isSelected={tab.id === selectedTabId}
-            disabled={
-              (tab.id === TABS.EXISTING_CONNECTION && !cloudConnectorsCount && !isEditPage) ||
-              (isEditPage && tab.id === TABS.NEW_CONNECTION)
-            }
-          >
-            <FormattedMessage
-              id="xpack.fleet.cloudConnector.tabs.tabName"
-              defaultMessage="{name}"
-              values={{
-                name: tab.name,
-              }}
+          <EuiFlexItem grow={false} key={tab.id}>
+            <EuiRadio
+              id={`${radioIdPrefix}-${tab.id}`}
+              name={radioIdPrefix}
+              label={tab.name}
+              checked={tab.id === selectedTabId}
+              disabled={
+                (tab.id === TABS.EXISTING_CONNECTION && !cloudConnectorsCount && !isEditPage) ||
+                (isEditPage && tab.id === TABS.NEW_CONNECTION)
+              }
+              onChange={() => onTabClick(tab)}
+              data-test-subj={`cloudConnectorIdentity-${tab.id}`}
             />
-          </EuiTab>
+          </EuiFlexItem>
         ))}
-      </EuiTabs>
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
       {tabs.find((tab) => tab.id === selectedTabId)?.content}
     </>
