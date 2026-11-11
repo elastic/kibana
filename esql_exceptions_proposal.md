@@ -62,7 +62,7 @@ An item cannot change what it applies to after it is created.
 }
 ```
 
-An entry has a `field`, a `type` (`match` (`is`), `match_any` (`is one of`), `wildcard` (`matches`), `exists`, `list` or `nested`), an `operator` (`included` or `excluded`) and, depending on the type, a `value` or a `list`.
+An entry has a `field`, a `type`, an `operator` (`included` or `excluded`) and, depending on the type, a `value` or a `list`. The types `match`, `match_any`, `wildcard` and `exists` are the entries that the UI shows as `is`, `is one of`, `matches` and `exists`. The operator `excluded` turns each of them into its exclusive form. The other two types are `list` and `nested` which are out of scope for this proposal.
 
 **Proposed.** The item gets one new property and each entry gets one new property:
 
