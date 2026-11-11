@@ -8,13 +8,14 @@
  */
 
 import type { DataViewSpec } from '@kbn/data-views-types';
-import type { AsCodeSavedDataView } from '@kbn/as-code-data-views-schema';
+import type { AsCodeSavedDataViewWithScriptedFields } from '@kbn/as-code-data-views-schema';
 import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_DATA_VIEW_SPEC_TYPE,
   type AsCodeDataView,
 } from '@kbn/as-code-data-views-schema';
-import { fromStoredFields } from './from_stored_fields';
+import { omit } from 'lodash';
+import { fromStoredFields, fromStoredScriptedFields } from './from_stored_fields';
 
 /**
  * Convert a stored search-source `index` value (saved object / serialized search source)
@@ -48,12 +49,25 @@ export function fromStoredDataView(
   };
 }
 
-export function fromStoredDataViewToAsCodeSavedSchema(index: DataViewSpec): AsCodeSavedDataView {
+export function fromStoredDataViewToAsCodeSavedSchema(
+  index: DataViewSpec
+): AsCodeSavedDataViewWithScriptedFields {
   if (!index.title) throw new Error('Cannot derive data view without `title`');
+  const scriptedFields = fromStoredScriptedFields(
+    index.fields,
+    index.fieldFormats,
+    index.fieldAttrs
+  );
+  const scriptedFieldNames = new Set(
+    Object.values(index.fields ?? {})
+      .filter((field) => field.scripted)
+      .map((field) => field.name)
+  );
+  // Scripted fields carry their own format and attributes, so they're not repeated in `field_settings`
   const fieldSettings = fromStoredFields(
     index.runtimeFieldMap,
-    index.fieldFormats,
-    index.fieldAttrs,
+    omit(index.fieldFormats, [...scriptedFieldNames]),
+    omit(index.fieldAttrs, [...scriptedFieldNames]),
     true
   );
 
@@ -64,6 +78,7 @@ export function fromStoredDataViewToAsCodeSavedSchema(index: DataViewSpec): AsCo
     time_field: index.timeFieldName,
     allow_hidden_indices: index.allowHidden,
     field_settings: fieldSettings,
+    ...(scriptedFields && { scripted_fields: scriptedFields }),
     ...toAsCodeFieldFilters(index.sourceFilters),
   };
 }

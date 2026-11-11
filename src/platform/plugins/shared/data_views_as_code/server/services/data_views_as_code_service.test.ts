@@ -30,6 +30,7 @@ const createMockDataViewLazy = ({
   spec = {},
   minimalSpec = spec,
   fieldAttrs = (spec.fieldAttrs as Record<string, unknown> | undefined) ?? {},
+  scriptedFields = {},
   savedObjectBody,
 }: {
   id?: string;
@@ -39,6 +40,7 @@ const createMockDataViewLazy = ({
   spec?: Record<string, unknown>;
   minimalSpec?: Record<string, unknown>;
   fieldAttrs?: Record<string, unknown>;
+  scriptedFields?: Record<string, Record<string, unknown>>;
   savedObjectBody?: Record<string, unknown>;
 } = {}) =>
   ({
@@ -49,6 +51,16 @@ const createMockDataViewLazy = ({
     toSpec: jest.fn().mockResolvedValue(spec),
     toMinimalSpec: jest.fn().mockResolvedValue(minimalSpec),
     getFieldAttrs: jest.fn().mockReturnValue(new Map(Object.entries(fieldAttrs))),
+    getScriptedFields: jest
+      .fn()
+      .mockReturnValue(
+        Object.fromEntries(
+          Object.entries(scriptedFields).map(([name, field]) => [
+            name,
+            { toSpec: () => ({ name, scripted: true, ...field }) },
+          ])
+        )
+      ),
     getAsSavedObjectBody: jest.fn().mockReturnValue(savedObjectBody ?? spec),
   } as unknown as DataViewLazy);
 
@@ -297,6 +309,39 @@ describe('DataViewsAsCodeService', () => {
       const result = await service.get('dv-3');
 
       expect(result.data).toEqual(getExpectedMappedData(detailedSpec));
+    });
+
+    it('should include scripted fields with their format, label and popularity', async () => {
+      const { service, mockDataViewsService } = createService();
+      const spec = {
+        title: 'logs-*',
+        fieldFormats: { double_bytes: { id: 'bytes', params: { pattern: '0,0.0b' } } },
+        fieldAttrs: { double_bytes: { customLabel: 'Double bytes', count: 3 } },
+      };
+      mockDataViewsService.getDataViewLazy = jest.fn().mockResolvedValue(
+        createMockDataViewLazy({
+          spec,
+          scriptedFields: {
+            double_bytes: { type: 'number', lang: 'painless', script: "doc['bytes'].value * 2" },
+          },
+        })
+      );
+
+      const result = await service.get('test-id');
+
+      expect(result.data).toEqual({
+        index_pattern: 'logs-*',
+        scripted_fields: {
+          double_bytes: {
+            type: 'number',
+            lang: 'painless',
+            script: "doc['bytes'].value * 2",
+            custom_label: 'Double bytes',
+            format: { type: 'bytes', params: { pattern: '0,0.0b' } },
+            popularity: 3,
+          },
+        },
+      });
     });
 
     it('should restore fieldAttrs from getFieldAttrs so popularity is mapped', async () => {

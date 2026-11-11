@@ -26,6 +26,7 @@ import {
   type AsCodeDataViewSpec,
   type AsCodeSavedDataView,
   type AsCodeSavedFieldSettings,
+  type AsCodeSavedScriptedField,
 } from '@kbn/as-code-data-views-schema';
 import { isNil, isPlainObject, omitBy, snakeCase } from 'lodash';
 import type { SerializableRecord, Serializable } from '@kbn/utility-types';
@@ -91,6 +92,38 @@ export function fromStoredFields<IncludePopularity extends boolean = false>(
   }
 
   return Object.keys(fieldSettings).length > 0 ? fieldSettings : undefined;
+}
+
+/**
+ * Convert the scripted fields stored in a DataViewSpec to their as-code representation.
+ *
+ * Unlike runtime fields, scripted fields live in their own map since their types (e.g. `number`,
+ * `string`) don't overlap with the runtime field ones. Label, description, format and popularity
+ * are folded into each entry.
+ *
+ * @param fields Map of field name → field spec from DataViewSpec, only `scripted` entries are used
+ * @param fieldFormats Map of field name → display format `{ id, params }` from DataViewSpec
+ * @param fieldAttrs Map of field name → `{ customLabel, customDescription, count }` from DataViewSpec
+ * @returns `scripted_fields` map, or `undefined` when there are no scripted fields
+ */
+export function fromStoredScriptedFields(
+  fields: DataViewSpec['fields'] = {},
+  fieldFormats: DataViewSpec['fieldFormats'] = {},
+  fieldAttrs: DataViewSpec['fieldAttrs'] = {}
+): Record<string, AsCodeSavedScriptedField> | undefined {
+  const scriptedFields: Record<string, AsCodeSavedScriptedField> = {};
+
+  for (const field of Object.values(fields)) {
+    if (!field.scripted || field.script === undefined) continue;
+    scriptedFields[field.name] = {
+      ...getCommonProperties(field.name, fieldAttrs, fieldFormats, true),
+      type: field.type,
+      script: field.script,
+      ...(field.lang && { lang: field.lang }),
+    };
+  }
+
+  return Object.keys(scriptedFields).length > 0 ? scriptedFields : undefined;
 }
 
 function omitNilParams<T extends object>(value: T | undefined): T | undefined {

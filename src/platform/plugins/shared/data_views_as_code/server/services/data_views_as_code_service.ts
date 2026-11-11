@@ -65,7 +65,17 @@ export class DataViewsAsCodeService {
     if (dataView.getFieldAttrs().size > 0)
       dataViewSpec.fieldAttrs = Object.fromEntries(dataView.getFieldAttrs().entries());
 
-    const dataViewAsCode = fromStoredDataViewToAsCodeSavedSchema(dataViewSpec);
+    // `toMinimalSpec` omits the field list, scripted fields are the only ones persisted in it.
+    const scriptedFields = Object.values(dataView.getScriptedFields({ fieldName: ['*'] })).map(
+      (field) => field.toSpec()
+    );
+
+    const dataViewAsCode = fromStoredDataViewToAsCodeSavedSchema({
+      ...dataViewSpec,
+      ...(scriptedFields.length > 0 && {
+        fields: Object.fromEntries(scriptedFields.map((field) => [field.name, field])),
+      }),
+    });
 
     return {
       id: dataView.id,

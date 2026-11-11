@@ -262,4 +262,69 @@ describe('fromStoredDataViewToAsCodeSavedSchema', () => {
 
     expect(result).not.toHaveProperty('field_filters');
   });
+
+  describe('scripted fields', () => {
+    const doubleBytes = {
+      name: 'double_bytes',
+      type: 'number',
+      scripted: true,
+      searchable: true,
+      aggregatable: true,
+      lang: 'painless',
+      script: "doc['bytes'].value * 2",
+    };
+
+    it('maps scripted fields to scripted_fields', () => {
+      const result = fromStoredDataViewToAsCodeSavedSchema({
+        title: 'logs-*',
+        fields: { double_bytes: doubleBytes },
+      });
+
+      expect(result.scripted_fields).toEqual({
+        double_bytes: { type: 'number', lang: 'painless', script: "doc['bytes'].value * 2" },
+      });
+    });
+
+    it('moves the format, attributes and popularity of a scripted field into its entry', () => {
+      const result = fromStoredDataViewToAsCodeSavedSchema({
+        title: 'logs-*',
+        fields: { double_bytes: doubleBytes },
+        fieldFormats: {
+          double_bytes: { id: 'bytes', params: { pattern: '0,0.0b' } },
+          other: { id: 'number', params: { pattern: '0,0' } },
+        },
+        fieldAttrs: {
+          double_bytes: { customLabel: 'Double', customDescription: 'Bytes x2', count: 2 },
+        },
+      });
+
+      expect(result.scripted_fields?.double_bytes).toEqual({
+        type: 'number',
+        lang: 'painless',
+        script: "doc['bytes'].value * 2",
+        custom_label: 'Double',
+        custom_description: 'Bytes x2',
+        format: { type: 'bytes', params: { pattern: '0,0.0b' } },
+        popularity: 2,
+      });
+      expect(result.field_settings).toEqual({
+        other: { format: { type: 'number', params: { pattern: '0,0' } } },
+      });
+    });
+
+    it('ignores non scripted fields', () => {
+      const result = fromStoredDataViewToAsCodeSavedSchema({
+        title: 'logs-*',
+        fields: { bytes: { name: 'bytes', type: 'number', searchable: true, aggregatable: true } },
+      });
+
+      expect(result).not.toHaveProperty('scripted_fields');
+    });
+
+    it('omits scripted_fields when there are no fields', () => {
+      expect(fromStoredDataViewToAsCodeSavedSchema({ title: 'logs-*' })).not.toHaveProperty(
+        'scripted_fields'
+      );
+    });
+  });
 });
