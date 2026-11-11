@@ -8,7 +8,7 @@
 import type { DismissReason, Proposal } from '@kbn/proposals-common';
 
 /** Where in the UI a proposed action was decided. */
-export type ProposalDecisionSurface = 'flyout' | 'hypothesis_tree';
+export type ProposalDecisionSurface = 'chat' | 'flyout' | 'hypothesis_tree';
 
 export type ProposalDecisionKind = 'approve' | 'decline' | 'reopen';
 
@@ -17,7 +17,7 @@ export interface ProposalDecidedEvent {
   proposalId: string;
   decision: ProposalDecisionKind;
   surface: ProposalDecisionSurface;
-  /** Only set where the surface knows the investigation, which the chat card does not. */
+  /** Only set where the surface knows the investigation, which the chat card and flyout do not. */
   investigationId?: string;
   conversationId?: string;
   dismissReason?: DismissReason;

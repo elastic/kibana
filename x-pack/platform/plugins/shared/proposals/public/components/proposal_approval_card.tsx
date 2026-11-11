@@ -32,6 +32,7 @@ import {
   useReopenProposal,
 } from '../hooks/use_proposals_api';
 import { useCurrentUserProfile } from '../hooks/use_current_user_profile';
+import { notifyProposalDecided, type ProposalDecidedEvent } from '../proposal_decision_listeners';
 
 /**
  * Turns a decision mutation's rejection into the friendly text `ApprovalContent` shows in its own
@@ -108,16 +109,33 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
     ? getUserDisplayName(currentUserProfile.user)
     : undefined;
 
+  const liveProposal = proposalQuery.data;
+
+  const report = useCallback(
+    (event: Pick<ProposalDecidedEvent, 'decision' | 'dismissReason'>) =>
+      notifyProposalDecided({
+        ...event,
+        proposalId,
+        surface: 'chat',
+        conversationId: liveProposal?.conversationId,
+        category: liveProposal?.category,
+        confidence: liveProposal?.confidence,
+        impact: liveProposal?.impact,
+      }),
+    [proposalId, liveProposal]
+  );
+
   const handleApprove = useCallback(async () => {
     try {
       await approveMutation.mutateAsync({
         id: proposalId,
-        body: { actionInput: proposalQuery.data?.actionInput },
+        body: { actionInput: liveProposal?.actionInput },
       });
     } catch (err) {
       throw toFriendlyError(err);
     }
-  }, [approveMutation, proposalQuery.data?.actionInput, proposalId]);
+    report({ decision: 'approve' });
+  }, [approveMutation, liveProposal?.actionInput, proposalId, report]);
 
   const handleDismiss = useCallback(
     async ({ dismissReason, rationale }: DeclineParams) => {
@@ -129,8 +147,9 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
       } catch (err) {
         throw toFriendlyError(err);
       }
+      report({ decision: 'decline', dismissReason });
     },
-    [dismissMutation, proposalId]
+    [dismissMutation, proposalId, report]
   );
 
   const handleReopen = useCallback(async () => {
@@ -139,9 +158,8 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
     } catch (err) {
       throw toFriendlyError(err);
     }
-  }, [reopenMutation, proposalId]);
-
-  const liveProposal = proposalQuery.data;
+    report({ decision: 'reopen' });
+  }, [reopenMutation, proposalId, report]);
 
   if (proposalQuery.isLoading) {
     return <EuiLoadingSpinner size="m" />;

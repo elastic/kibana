@@ -13,7 +13,7 @@ export type {
   ProposalDecidedListener,
   ProposalDecisionKind,
   ProposalDecisionSurface,
-} from './proposal_decision_listeners';
+} from '@kbn/proposals-plugin/public';
 
 export function plugin(
   initializerContext: PluginInitializerContext<AgenticInvestigationsPublicConfig>

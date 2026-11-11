@@ -15,6 +15,9 @@ import {
 } from '@kbn/proposals-common';
 import type { DeclineParams } from '@kbn/proposals-ui';
 import {
+  notifyProposalDecided,
+  type ProposalDecidedEvent,
+  type ProposalDecisionSurface,
   isDecisionShown,
   useApproveProposal,
   useDismissProposal,
@@ -25,11 +28,6 @@ import {
 } from '@kbn/proposals-plugin/public';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useCurrentUserProfile } from '../../../user_profiles';
-import {
-  notifyProposalDecided,
-  type ProposalDecidedEvent,
-  type ProposalDecisionSurface,
-} from '../../../proposal_decision_listeners';
 
 /** The part of the proposal that shows whether its decision is visible in this row's data. */
 type ProposalDecisionData = Pick<

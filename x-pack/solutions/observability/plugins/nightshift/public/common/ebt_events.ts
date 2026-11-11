@@ -168,7 +168,7 @@ export const registerNightshiftEbtEvents = (analytics: AnalyticsServiceSetup): v
       },
       surface: {
         type: 'keyword',
-        _meta: { description: 'Where the decision was made: flyout or hypothesis_tree.' },
+        _meta: { description: 'Where the decision was made: chat, flyout or hypothesis_tree.' },
       },
       investigation_id: {
         type: 'keyword',

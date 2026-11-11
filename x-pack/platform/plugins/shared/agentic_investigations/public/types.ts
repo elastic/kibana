@@ -20,7 +20,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
-import type { ProposalDecidedListener } from './proposal_decision_listeners';
+import type { ProposalDecidedListener } from '@kbn/proposals-plugin/public';
 import type { AlertSubjectSnapshot } from '../common/subjects/subject';
 import type { InvestigationCardProps } from './conversation_templates/templates/investigation/card';
 

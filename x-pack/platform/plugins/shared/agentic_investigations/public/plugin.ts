@@ -8,10 +8,10 @@
 import React from 'react';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { createFlyoutGroupedAttachmentsRegistry } from '@kbn/agentic-investigations-common';
+import { addProposalDecidedListener } from '@kbn/proposals-plugin/public';
 import { registerEscalationConversationEventUiDefinitions } from './escalations/conversation_events';
 import { registerInvestigationConversationEventUiDefinitions } from './investigations/conversation_events';
 import { registerImpactAttachmentTypes } from './impact/attachments';
-import { addProposalDecidedListener } from './proposal_decision_listeners';
 import type { AlertSubjectSnapshot } from '../common/subjects/subject';
 import { registerSubjectAttachmentTypes } from './subjects/attachments';
 import { registerHypothesesAttachmentTypes } from './hypotheses/attachments';
