@@ -106,6 +106,7 @@ describe('Serverless upgrade and rollback checks', () => {
   const ruleTypesToCheck: string[] = uniq(
     ruleTypesInEsProjects.concat(ruleTypesInObltProjects).concat(ruleTypesInSecurityProjects)
   );
+  const allListedRuleTypes = ruleTypesToCheck.concat(skippedRuleTypes);
 
   beforeAll(async () => {
     setLazySchemaDisabled(true);
@@ -131,7 +132,7 @@ describe('Serverless upgrade and rollback checks', () => {
   // if this test fails, then a rule type in the lists above is missing
   test('ensure all rule types still exist', () => {
     const registeredRuleTypes = Array.from(ruleTypeRegistry.list().keys());
-    for (const ruleTypeId of ruleTypesToCheck) {
+    for (const ruleTypeId of allListedRuleTypes) {
       expect(registeredRuleTypes).toContain(ruleTypeId);
     }
   });
