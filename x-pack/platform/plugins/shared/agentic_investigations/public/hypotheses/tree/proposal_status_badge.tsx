@@ -13,6 +13,7 @@ import {
   type ApprovalPhase,
 } from '@kbn/proposals-ui';
 import {
+  isDecisionShown,
   useIsApprovingProposal,
   useIsDecliningProposal,
   useProposal,
@@ -29,8 +30,9 @@ export const ProposalStatusBadge = ({
   proposalId: string;
 }): React.ReactElement | null => {
   const { data: proposal } = useProposal(proposalId);
-  const isApproving = useIsApprovingProposal(proposalId);
-  const isDeclining = useIsDecliningProposal(proposalId);
+  const decisionShown = isDecisionShown(proposal);
+  const isApproving = useIsApprovingProposal(proposalId, decisionShown);
+  const isDeclining = useIsDecliningProposal(proposalId, decisionShown);
 
   if (!proposal) {
     return null;
@@ -54,6 +56,7 @@ export const ProposalStatusBadge = ({
         iconType={badge?.iconType}
         label={badge?.label}
         isLoading={badge?.isLoading}
+        isDisabled={badge?.isDisabled}
       />
     </span>
   );

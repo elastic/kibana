@@ -588,7 +588,7 @@ describe('customContentEmbeddableFactory', () => {
           events.forEach((event) => chatEvents$.next(event));
           await flush();
         });
-      return { embeddable, emit, activeConversation$, getChatEvents$ };
+      return { embeddable, emit, activeConversation$, getChatEvents$, openChat };
     };
 
     const expectGenerating = (isGenerating: boolean) =>
@@ -614,6 +614,57 @@ describe('customContentEmbeddableFactory', () => {
         hasEsqlQuery: false,
         templateSizeBytes: '<p>mine</p>'.length,
       });
+      expectGenerating(false);
+    });
+
+    const buildToolCallEvent = (toolId: string, params: Record<string, unknown>) => ({
+      type: 'tool_call',
+      data: { tool_call_id: 'tool-call-2', tool_id: toolId, params },
+    });
+
+    it('does not show the generating state again when a later message is submitted', async () => {
+      const { emit, openChat } = await renderGeneratingPanel();
+      await emit({ type: TimelineEventType.executionTerminated, execution_id: 'e1', data: {} });
+      expectGenerating(false);
+
+      await act(async () => {
+        openChat.mock.calls[0][0].onSubmit();
+        await flush();
+      });
+
+      expectGenerating(false);
+    });
+
+    it.each([
+      ['the update tool', 'custom_content_update_panel', { embeddable_id: 'test-uuid' }],
+      [
+        'the dashboard tool',
+        'platform.dashboard.generate_dashboard',
+        { panels: [{ id: 'other-uuid' }, { id: 'test-uuid' }] },
+      ],
+    ])('shows the generating state when %s targets this panel', async (_, toolId, params) => {
+      const { emit } = await renderGeneratingPanel();
+      await emit({ type: TimelineEventType.executionTerminated, execution_id: 'e1', data: {} });
+      expectGenerating(false);
+
+      await emit(buildToolCallEvent(toolId, params));
+
+      expectGenerating(true);
+    });
+
+    it.each([
+      ['the update tool', 'custom_content_update_panel', { embeddable_id: 'other-uuid' }],
+      [
+        'the dashboard tool',
+        'platform.dashboard.generate_dashboard',
+        { panels: [{ id: 'other-uuid' }] },
+      ],
+    ])('ignores %s calls that target another panel', async (_, toolId, params) => {
+      const { emit } = await renderGeneratingPanel();
+      await emit({ type: TimelineEventType.executionTerminated, execution_id: 'e1', data: {} });
+
+      await emit(buildToolCallEvent(toolId, params));
+
       expectGenerating(false);
     });
 

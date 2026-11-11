@@ -8,7 +8,7 @@
 import { NIGHTSHIFT_ASSISTANT_AGENT_ID, NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../common';
 
 /**
- * Agents whose rounds read and write the shared Cortex wiki and Semantic Memory. The hooks run
+ * Agents whose rounds read and write the shared Wiki and Semantic Memory. The hooks run
  * from managed workflows that also have a manual trigger, so an unlisted or missing agent id is
  * refused rather than trusted.
  */
@@ -17,7 +17,7 @@ const KNOWLEDGE_AGENT_IDS: ReadonlySet<string> = new Set([
   NIGHTSHIFT_ASSISTANT_AGENT_ID,
 ]);
 
-/** Whether a round from this agent may read and update Cortex and Semantic Memory. */
+/** Whether a round from this agent may read and update Wiki and Semantic Memory. */
 export const usesKnowledge = (agentId: string | undefined): boolean =>
   agentId !== undefined && KNOWLEDGE_AGENT_IDS.has(agentId.trim());
 

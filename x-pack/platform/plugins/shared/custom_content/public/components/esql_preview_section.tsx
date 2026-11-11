@@ -8,7 +8,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiAccordion,
-  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -181,18 +181,20 @@ export const EsqlPreviewSection = ({
         </>
       )}
       <EuiSpacer size="s" />
-      <EuiButton
+      <EuiButtonEmpty
         size="s"
+        color="primary"
+        iconType="play"
+        flush="left"
         isLoading={isDataLoading}
         onClick={handleFetchData}
         disabled={!esqlQuery.trim()}
-        iconType="play"
         data-test-subj="customContentPreviewDataButton"
       >
-        {i18n.translate('xpack.customContent.editFlyout.esqlSection.previewButton', {
-          defaultMessage: 'Preview data',
+        {i18n.translate('xpack.customContent.editFlyout.esqlSection.searchButton', {
+          defaultMessage: 'Search',
         })}
-      </EuiButton>
+      </EuiButtonEmpty>
 
       {esqlDataError && (
         <>

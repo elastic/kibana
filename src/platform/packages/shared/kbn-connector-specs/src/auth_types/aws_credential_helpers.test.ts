@@ -29,9 +29,13 @@ describe('parseAwsHost()', () => {
     expect(parseAwsHost('example.com')).toBeNull();
   });
 
-  it('returns null when service/region are missing', () => {
+  it('returns null when the service is missing', () => {
     expect(parseAwsHost('amazonaws.com')).toBeNull();
-    expect(parseAwsHost('s3.amazonaws.com')).toBeNull();
+  });
+
+  it('signs global endpoints in us-east-1', () => {
+    expect(parseAwsHost('iam.amazonaws.com')).toEqual({ service: 'iam', region: 'us-east-1' });
+    expect(parseAwsHost('sts.amazonaws.com')).toEqual({ service: 'sts', region: 'us-east-1' });
   });
 
   it('parses service and region from standard AWS hostname', () => {
@@ -210,5 +214,27 @@ describe('signRequest()', () => {
     expect(result.Authorization).toMatch(/Signature=[a-f0-9]+/);
     expect(result['Content-Type']).toBe('application/json');
     expect(result['x-amz-content-sha256']).toMatch(/^[a-f0-9]{64}$/);
+  });
+
+  it('signs and returns the caller content type when one is set', async () => {
+    const contentType = 'application/x-www-form-urlencoded; charset=utf-8';
+    const result = await signRequest(
+      'POST',
+      'iam.amazonaws.com',
+      '/',
+      {},
+      'AKIA_TEST',
+      'SECRET_TEST',
+      'us-east-1',
+      'iam',
+      { 'Content-Type': contentType },
+      'Action=ListUsers&Version=2010-05-08'
+    );
+
+    const canonicalRequest = mockSha256Hash.mock.calls
+      .map(([arg]) => arg)
+      .find((arg) => arg.startsWith('POST\n'));
+    expect(canonicalRequest).toContain(`content-type:${contentType}\n`);
+    expect(result['Content-Type']).toBe(contentType);
   });
 });

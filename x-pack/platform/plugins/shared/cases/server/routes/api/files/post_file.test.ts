@@ -16,7 +16,7 @@ describe('getCaseRoute', () => {
   const incrementAttachmentTypeCounters = jest.fn();
 
   beforeEach(() => {
-    casesClientMock.attachments.addFile.mockResolvedValue({ comments: [] } as never);
+    casesClientMock.attachments.addFileAndGetCase.mockResolvedValue({ comments: [] } as never);
   });
 
   afterEach(() => jest.clearAllMocks());
@@ -31,7 +31,7 @@ describe('getCaseRoute', () => {
     // @ts-ignore
     await postFileRoute.handler({ context, request, response, incrementAttachmentTypeCounters });
 
-    expect(casesClientMock.attachments.addFile).toHaveBeenCalledWith(
+    expect(casesClientMock.attachments.addFileAndGetCase).toHaveBeenCalledWith(
       expect.objectContaining({
         caseId: 'bar',
         file: {
@@ -57,7 +57,7 @@ describe('getCaseRoute', () => {
     // @ts-ignore
     await postFileRoute.handler({ context, request, response, incrementAttachmentTypeCounters });
 
-    expect(casesClientMock.attachments.addFile).toHaveBeenCalledWith(
+    expect(casesClientMock.attachments.addFileAndGetCase).toHaveBeenCalledWith(
       expect.objectContaining({
         caseId: 'bar',
         file: {
@@ -83,7 +83,7 @@ describe('getCaseRoute', () => {
     // @ts-ignore
     await postFileRoute.handler({ context, request, response, incrementAttachmentTypeCounters });
 
-    expect(casesClientMock.attachments.addFile).toHaveBeenCalledWith(
+    expect(casesClientMock.attachments.addFileAndGetCase).toHaveBeenCalledWith(
       expect.objectContaining({
         caseId: 'bar',
         file: {
@@ -107,7 +107,7 @@ describe('getCaseRoute', () => {
     // @ts-ignore
     await postFileRoute.handler({ context, request, response, incrementAttachmentTypeCounters });
 
-    expect(casesClientMock.attachments.addFile).toHaveBeenCalledWith(
+    expect(casesClientMock.attachments.addFileAndGetCase).toHaveBeenCalledWith(
       expect.objectContaining({
         caseId: 'bar',
         file: {},
@@ -140,7 +140,7 @@ describe('getCaseRoute', () => {
     });
 
     it('does not count the file attachment when the upload fails', async () => {
-      casesClientMock.attachments.addFile.mockRejectedValue(new Error('upload failed'));
+      casesClientMock.attachments.addFileAndGetCase.mockRejectedValue(new Error('upload failed'));
 
       await expect(callHandler()).rejects.toThrow();
 

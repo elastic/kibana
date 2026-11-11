@@ -199,9 +199,12 @@ export const updateCloudConnectorPolicy: PolicyUpdateHandler = (
     // Only update if supports_cloud_connector flag or the var need to change.
     // cloud_connector_id is intentionally NOT checked here — once set by
     // CloudConnectorSetup it must be preserved across unrelated var_group changes.
+    // The var is `undefined` on a new policy (bool vars without a manifest default),
+    // and it is required by the var_group, so `undefined` must count as needing an
+    // update — otherwise the root flag being true already would leave it unset.
     if (
       packagePolicy.supports_cloud_connector !== true ||
-      (currentVarValue !== undefined && currentVarValue !== true)
+      (supportFlagVar !== undefined && currentVarValue !== true)
     ) {
       return {
         supports_cloud_connector: true,

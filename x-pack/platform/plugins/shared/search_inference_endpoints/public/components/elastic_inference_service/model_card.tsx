@@ -24,6 +24,7 @@ import {
   getModelEOLDate,
   getModelTitle,
   getProviderKeyForCreator,
+  getTaskTypeCategoryLabel,
   isModelEndOfLifeReached,
   isModelNearingEndOfLife,
 } from '../../utils/eis_utils';
@@ -97,7 +98,7 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model, onClick }) => {
                 color="hollow"
                 data-test-subj={`eisModelCardCategory-${modelName}-${cat}`}
               >
-                {cat}
+                {getTaskTypeCategoryLabel(cat)}
               </EuiBadge>
             ))}
             {isModelUnavailableUnderRegionPolicy(model.endpoints, modelId ?? '') && (

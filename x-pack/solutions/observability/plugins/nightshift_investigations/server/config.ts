@@ -9,36 +9,10 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 
-const sandboxConfigSchema = schema.object({
-  telemetry_targets: schema.recordOf(
-    schema.string({
-      maxLength: 64,
-      validate: (name) =>
-        name !== 'none' && /^[a-z][a-z0-9_-]*$/.test(name)
-          ? undefined
-          : 'Invalid telemetry target name',
-    }),
-    schema.object({
-      connector_id: schema.string({ minLength: 1, maxLength: 500 }),
-      readable_indices: schema.maybe(schema.string({ maxLength: 10_000 })),
-    }),
-    { defaultValue: {} }
-  ),
-  default_telemetry_target: schema.maybe(schema.string({ minLength: 1, maxLength: 64 })),
+const wikiConfigSchema = schema.object({
   /**
-   * Id of the preconfigured connector holding the Elasticsearch URL and API key the sandbox
-   * queries telemetry with. It is added to the investigator's connector allow-list; credentials
-   * are injected per command, only when the agent asks for it.
-   */
-  telemetry_connector_id: schema.maybe(schema.string()),
-  // Operator-supplied readable index patterns and remote names for the telemetry manifest.
-  telemetry_readable_indices: schema.maybe(schema.string({ maxLength: 10_000 })),
-});
-
-const cortexConfigSchema = schema.object({
-  /**
-   * Governs Cortex end to end: the hydrate/optimize hooks on the investigator agent, the Cortex
-   * HTTP routes, and the Cortex tab in the significant events app, which reads this flag through
+   * Governs Wiki end to end: the hydrate/optimize hooks on the investigator agent, the Wiki
+   * HTTP routes, and the Wiki tab in the significant events app, which reads this flag through
    * the routes below.
    */
   enabled: schema.boolean({ defaultValue: true }),
@@ -48,28 +22,59 @@ const decisionTreesConfigSchema = schema.object({
   // Governs the decision-tree reinforcement agent end to end: the post-execution hook on the
   // investigator, the hydrate step that materializes trees into the sandbox, the agent's own
   // tools, the decision-tree AI index, and the Decision Trees tab in the significant events app.
-  // Trees are edited in the sandbox and read the Cortex investigator context, so this still
-  // requires cortex.enabled (and sandbox) at runtime.
+  // Trees are edited in the sandbox, so this still requires sandbox at runtime. It does not
+  // require wiki.enabled.
   enabled: schema.boolean({ defaultValue: true }),
 });
 
 const memoryConfigSchema = schema.object({
-  // Governs Semantic Memory independently of Cortex: index ensure, hydrate/
+  // Governs Semantic Memory independently of Wiki: index ensure, hydrate/
   // optimize hooks on the deductive agent, and the matching managed workflows.
+  enabled: schema.boolean({ defaultValue: true }),
+});
+
+const learningConfigSchema = schema.object({
+  // Governs the investigator's post-run optimize hook (Wiki, Semantic Memory and decision-tree
+  // reinforcement). Turn it off to read knowledge without changing it, as the evals do so every
+  // example sees the same knowledge.
+  enabled: schema.boolean({ defaultValue: true }),
+});
+
+const findingsRecorderConfigSchema = schema.object({
+  // Governs the findings recorder: the cycle hook and the blocking final pass that write the
+  // summary, severity, verdict, hypotheses and impact the investigator no longer records itself.
+  // Turn it off to measure the investigator on its own, as the evals do.
   enabled: schema.boolean({ defaultValue: true }),
 });
 
 const configSchema = schema.object({
   // Reserved: Core skips loading this plugin entirely when false.
   enabled: schema.boolean({ defaultValue: true }),
-  sandbox: schema.maybe(sandboxConfigSchema),
-  cortex: cortexConfigSchema,
+  wiki: wikiConfigSchema,
   decision_trees: decisionTreesConfigSchema,
   memory: memoryConfigSchema,
+  learning: learningConfigSchema,
+  findings_recorder: findingsRecorderConfigSchema,
 });
 
 export type NightshiftInvestigationsConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<NightshiftInvestigationsConfig> = {
   schema: configSchema,
+  // The former `sandbox.telemetry_*` settings: Elasticsearch is now a connector saved on the
+  // investigator. Dropped with a warning so a stale kibana.yml does not stop Kibana from starting.
+  deprecations: ({ renameFromRoot, unused }) => [
+    // The feature was renamed from Cortex to Wiki. Deployments that still set the old key keep
+    // working, so cluster configs do not have to change in lockstep with this plugin.
+    renameFromRoot(
+      'xpack.nightshift_investigations.cortex.enabled',
+      'xpack.nightshift_investigations.wiki.enabled',
+      { level: 'warning' }
+    ),
+    unused('sandbox', {
+      level: 'warning',
+      message:
+        '"xpack.nightshift_investigations.sandbox" is no longer used. Save the Elasticsearch connector on the Nightshift investigator agent instead.',
+    }),
+  ],
 };
