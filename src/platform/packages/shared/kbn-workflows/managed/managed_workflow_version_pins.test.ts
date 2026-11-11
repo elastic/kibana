@@ -49,7 +49,7 @@ interface BlindSpots {
   pin: string;
 }
 
-/** Fixes the interval unit conversion and the three Attack Discovery max-alerts clamp regions. */
+/** Covers the interval unit conversion and the three Attack Discovery max-alerts clamp regions. */
 const WORKER_SCHEDULE_INTERVALS = ['5m', '90m', '2h', '3d'] as const;
 
 /**
@@ -153,8 +153,8 @@ function countLines(yaml: string): Map<string, number> {
 }
 
 /**
- * The lines a variant render adds (`+`) or drops (`-`) against `render(hashValues)`, sorted. A
- * template edit that both renders share cancels out, so only edits the hash cannot see move it.
+ * The lines a variant render adds (`+`) or drops (`-`) against `render(hashValues)`, sorted. An
+ * edit that changes both renders the same way cancels out and does not move the fingerprint.
  */
 function diffRenderedLines(hashedYaml: string, variantYaml: string): string[] {
   const hashedCounts = countLines(hashedYaml);

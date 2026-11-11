@@ -29,8 +29,6 @@ export const ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW = {
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   // Version 8 renders the prorated alert cap and the 12h workflow timeout.
-  // yamlTemplate hashing does not see this file's imported YAML, so installed
-  // spaces would keep the previous render.
   version: 9,
   yamlTemplate: {
     hashValues: workerHashValues({
