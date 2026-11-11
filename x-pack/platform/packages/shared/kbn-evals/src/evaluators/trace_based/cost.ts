@@ -17,20 +17,44 @@ import {
   PRICE_TABLE_VERSION,
   type TokenUsage,
 } from './model_prices';
-import { CACHE_READ_COLUMN_MISSING } from './tokens';
-
 export const ESTIMATED_COST_EVALUATOR_NAME = 'Estimated Cost (USD)';
 
 const UNKNOWN_MODEL = 'unknown';
+
+const CACHE_READ_FIELD = 'attributes.gen_ai.usage.cache_read.input_tokens';
+const CACHE_WRITE_FIELD = 'attributes.gen_ai.usage.cache_write.input_tokens';
 
 interface ModelUsage extends TokenUsage {
   model: string;
   promptTier: number;
   // False when the provider never reported cache reads, so all input is priced as uncached.
   cacheReported: boolean;
+  // False when the provider never reported cache writes, so they are priced as uncached input.
+  cacheWriteReported: boolean;
   costUsd: number | null;
   unpricedReason?: string;
 }
+
+interface CacheColumns {
+  withCacheReads: boolean;
+  withCacheWrites: boolean;
+}
+
+// ES|QL rejects a query naming a field no index maps, and these appear only once a provider
+// reported them, so the query only sums the ones the cluster knows about.
+const getCacheColumns = async (traceEsClient: EsClient): Promise<CacheColumns> => {
+  const { fields } = await traceEsClient.fieldCaps({
+    index: 'traces-*',
+    fields: [CACHE_READ_FIELD, CACHE_WRITE_FIELD],
+    allow_no_indices: true,
+    ignore_unavailable: true,
+  });
+
+  return {
+    withCacheReads: Object.hasOwn(fields, CACHE_READ_FIELD),
+    withCacheWrites: Object.hasOwn(fields, CACHE_WRITE_FIELD),
+  };
+};
 
 // Buckets each request by the largest tier boundary its prompt exceeds (0 below all of them).
 // A prompt of exactly the boundary stays in the lower tier, matching the catalog's `<=272K` rows.
@@ -38,10 +62,11 @@ const promptTierExpression = `CASE(${LONG_CONTEXT_THRESHOLDS.map(
   (threshold) => `prompt_tokens > ${threshold}, ${threshold}`
 ).join(', ')}, 0)`;
 
-const buildCostQuery = (traceId: string, { withCachedTokens }: { withCachedTokens: boolean }) => {
-  const cachedTokensStat = withCachedTokens
-    ? 'cached_tokens = SUM(TO_LONG(attributes.gen_ai.usage.cache_read.input_tokens)),'
-    : '';
+const buildCostQuery = (traceId: string, { withCacheReads, withCacheWrites }: CacheColumns) => {
+  const cacheStats = [
+    withCacheReads ? `cached_tokens = SUM(TO_LONG(${CACHE_READ_FIELD})),` : '',
+    withCacheWrites ? `cache_write_tokens = SUM(TO_LONG(${CACHE_WRITE_FIELD})),` : '',
+  ].join('\n');
 
   // TO_LONG resolves union types (integer vs long across trace index generations); the null
   // filter must run on the converted column, since a union-typed field can't be referenced
@@ -53,7 +78,7 @@ const buildCostQuery = (traceId: string, { withCachedTokens }: { withCachedToken
         | WHERE prompt_tokens IS NOT NULL
         | STATS
         input_tokens = SUM(prompt_tokens),
-        ${cachedTokensStat}
+        ${cacheStats}
         output_tokens = SUM(TO_LONG(attributes.gen_ai.usage.output_tokens))
         BY model = CASE(
           attributes.gen_ai.request.model IS NULL OR attributes.gen_ai.request.model == "${UNKNOWN_MODEL}",
@@ -72,9 +97,9 @@ const priceUsage = (
   if (!price) {
     return { costUsd: null, unpricedReason: 'no EIS list price' };
   }
-  // Input includes cache reads, so more cache reads than input means the usage data is inconsistent.
-  if (usage.cachedTokens > usage.inputTokens) {
-    return { costUsd: null, unpricedReason: 'cache reads exceed input tokens' };
+  // Input includes cache reads and writes, so more of them than input means inconsistent usage data.
+  if (usage.cachedTokens + usage.cacheWriteTokens > usage.inputTokens) {
+    return { costUsd: null, unpricedReason: 'cache reads and writes exceed input tokens' };
   }
   return { costUsd: estimateCostUsd(usage, getTokenRates(price, promptTier)) };
 };
@@ -84,17 +109,20 @@ const parseTraceUsage = ({ columns, values }: EsqlResponse): ModelUsage[] => {
   const modelIdx = columnIndex('model');
   const tierIdx = columnIndex('prompt_tier');
   const inputIdx = columnIndex('input_tokens');
-  // Absent when the fallback query ran because no span in the cluster ever reported cache reads.
+  // Absent when no span in the cluster ever reported cache reads or writes.
   const cachedIdx = columnIndex('cached_tokens');
+  const cacheWriteIdx = columnIndex('cache_write_tokens');
   const outputIdx = columnIndex('output_tokens');
 
   return values.map((row): ModelUsage => {
     const model: string = row[modelIdx] ?? UNKNOWN_MODEL;
     const promptTier: number = row[tierIdx] ?? 0;
     const cachedTokens: number | null = cachedIdx >= 0 ? row[cachedIdx] : null;
+    const cacheWriteTokens: number | null = cacheWriteIdx >= 0 ? row[cacheWriteIdx] : null;
     const usage: TokenUsage = {
       inputTokens: row[inputIdx],
       cachedTokens: cachedTokens ?? 0,
+      cacheWriteTokens: cacheWriteTokens ?? 0,
       outputTokens: row[outputIdx] ?? 0,
     };
 
@@ -103,6 +131,7 @@ const parseTraceUsage = ({ columns, values }: EsqlResponse): ModelUsage[] => {
       promptTier,
       ...usage,
       cacheReported: cachedTokens != null,
+      cacheWriteReported: cacheWriteTokens != null,
       ...priceUsage(usage, model, promptTier),
     };
   });
@@ -114,13 +143,18 @@ const describeModelUsage = ({
   inputTokens,
   cachedTokens,
   cacheReported,
+  cacheWriteTokens,
+  cacheWriteReported,
   outputTokens,
   costUsd,
 }: ModelUsage) => {
   const label = promptTier > 0 ? `${model} (prompts >${promptTier / 1000}k)` : model;
-  const cache = cacheReported ? `${cachedTokens} cached` : 'cache reads not reported';
+  const cacheReads = cacheReported ? `${cachedTokens} cached` : 'cache reads not reported';
+  const cacheWrites = cacheWriteReported
+    ? `${cacheWriteTokens} cache writes`
+    : 'cache writes not reported';
   const cost = costUsd === null ? 'unpriced' : `$${costUsd.toFixed(4)}`;
-  return `${label}: ${inputTokens} input (${cache}), ${outputTokens} output tokens = ${cost}`;
+  return `${label}: ${inputTokens} input (${cacheReads}, ${cacheWrites}), ${outputTokens} output tokens = ${cost}`;
 };
 
 export function createEstimatedCostEvaluator({
@@ -137,13 +171,7 @@ export function createEstimatedCostEvaluator({
       name: ESTIMATED_COST_EVALUATOR_NAME,
       direction: 'minimize',
       emptyResponseIsIncomplete: true,
-      buildQuery: (traceId) => buildCostQuery(traceId, { withCachedTokens: true }),
-      // An unmapped cache_read column means re-query without it and price all input as uncached.
-      fallbackQuery: {
-        matchesQueryError: (error) =>
-          error instanceof Error && CACHE_READ_COLUMN_MISSING.test(error.message),
-        buildQuery: (traceId) => buildCostQuery(traceId, { withCachedTokens: false }),
-      },
+      buildQuery: async (traceId) => buildCostQuery(traceId, await getCacheColumns(traceEsClient)),
       // A partial sum would understate the cost, so one unpriced model leaves the trace unscored.
       isNotReported: (response) =>
         parseTraceUsage(response).some(({ costUsd }) => costUsd === null),

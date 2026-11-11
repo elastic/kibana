@@ -12,7 +12,7 @@ import { createTraceBasedEvaluator } from './factory';
 
 // The ES client folds the root-cause reason into `message`. Pinned to this one column: any other
 // unknown column is a query bug and must stay a hard failure.
-export const CACHE_READ_COLUMN_MISSING =
+const CACHE_READ_COLUMN_MISSING =
   /Unknown column \[attributes\.gen_ai\.usage\.cache_read\.input_tokens\]/;
 
 export function createOutputTokensEvaluator({

@@ -23,7 +23,8 @@ const NOT_REPORTED = Symbol('notReported');
 
 export interface TraceBasedEvaluatorConfig {
   name: string;
-  buildQuery: (traceId: string) => string;
+  // Runs on every attempt, so a query that depends on the cluster mapping sees fields indexed since.
+  buildQuery: (traceId: string) => string | Promise<string>;
   extractResult: (response: EsqlResponse) => number | null;
   // Optional validation for the extracted result. Return false to signal the trace data looks incomplete, which triggers a retry
   isResultValid?: (result: number | null) => boolean;
@@ -36,12 +37,6 @@ export interface TraceBasedEvaluatorConfig {
     matchesQueryError: (error: unknown) => boolean;
     buildQuery: (traceId: string) => string;
     isTraceComplete: (response: EsqlResponse) => boolean;
-  };
-  // A narrower query to run when the main one is rejected for a known, permanent reason (e.g. a
-  // column that is unmapped for this provider). Its response goes through the same extraction.
-  fallbackQuery?: {
-    matchesQueryError: (error: unknown) => boolean;
-    buildQuery: (traceId: string) => string;
   };
   // For queries grouped with BY, no rows means no matching spans yet rather than a failed query,
   // so it ends like an ungrouped query's null row: retried, then potentially incomplete.
@@ -72,7 +67,6 @@ export function createTraceBasedEvaluator({
     isResultValid,
     isNotReported,
     notReportedProbe,
-    fallbackQuery,
     describeResult,
     direction,
     emptyResponseIsIncomplete,
@@ -107,8 +101,6 @@ export function createTraceBasedEvaluator({
       let lastResponse: EsqlResponse | undefined;
       // The response `lastResult` came from, so an incomplete result is described consistently.
       let lastResultResponse: EsqlResponse | undefined;
-      // The rejection is permanent for the cluster, so retries skip straight to the fallback.
-      let useFallbackQuery = false;
 
       async function runQuery(query: string): Promise<EsqlResponse> {
         return (await traceEsClient.esql.query({ query })) as unknown as EsqlResponse;
@@ -138,27 +130,12 @@ export function createTraceBasedEvaluator({
         return NOT_REPORTED;
       }
 
-      async function runMainQuery(): Promise<EsqlResponse> {
-        if (fallbackQuery && useFallbackQuery) {
-          return runQuery(fallbackQuery.buildQuery(traceId));
-        }
-        try {
-          return await runQuery(buildQuery(traceId));
-        } catch (error) {
-          if (!fallbackQuery?.matchesQueryError(error)) {
-            throw error;
-          }
-          useFallbackQuery = true;
-          return runQuery(fallbackQuery.buildQuery(traceId));
-        }
-      }
-
       async function fetchStats(): Promise<number | typeof NOT_REPORTED> {
         lastResponse = undefined;
 
         let response: EsqlResponse;
         try {
-          response = await runMainQuery();
+          response = await runQuery(await buildQuery(traceId));
         } catch (error) {
           return probeNotReported(error);
         }

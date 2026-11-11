@@ -15,6 +15,7 @@ const VALID_TRACE_ID = '0af7651916cd43dd8448eb211c80319c';
 const COLUMNS = [
   { name: 'input_tokens', type: 'long' },
   { name: 'cached_tokens', type: 'long' },
+  { name: 'cache_write_tokens', type: 'long' },
   { name: 'output_tokens', type: 'long' },
   { name: 'model', type: 'keyword' },
   { name: 'prompt_tier', type: 'integer' },
@@ -25,20 +26,32 @@ type Row = Array<number | string | null>;
 interface ChatTokens {
   input: number;
   cached?: number;
+  writes?: number;
   output?: number;
   tier?: number;
 }
 
-// openai-gpt-5.6-sol: $7.5 input, $0.75 cached input, $42 output per 1M tokens; $15 / $1.5 / $63
-// once a prompt exceeds 272k tokens.
+// openai-gpt-5.6-sol: $7.5 input, $0.75 cached input, $9.375 cache write, $42 output per 1M
+// tokens; $15 / $1.5 / $18.75 / $63 once a prompt exceeds 272k tokens.
 const SOL = 'openai-gpt-5.6-sol';
 // google-gemini-3.5-flash-lite: $0.45 input, $0.045 cached input, $3.5 output per 1M tokens.
 const FLASH_LITE = 'google-gemini-3.5-flash-lite';
 
 const chat = (
   model: string | null,
-  { input, cached = 0, output = 0, tier = 0 }: ChatTokens
-): Row => [input, cached, output, model, tier];
+  { input, cached = 0, writes = 0, output = 0, tier = 0 }: ChatTokens
+): Row => [input, cached, writes, output, model, tier];
+
+const CACHE_READ_FIELD = 'attributes.gen_ai.usage.cache_read.input_tokens';
+const CACHE_WRITE_FIELD = 'attributes.gen_ai.usage.cache_write.input_tokens';
+
+const withoutColumns = (names: string[], values: Row[]) => {
+  const kept = COLUMNS.flatMap((column, index) => (names.includes(column.name) ? [] : [index]));
+  return {
+    columns: kept.map((index) => COLUMNS[index]),
+    values: values.map((row) => kept.map((index) => row[index])),
+  };
+};
 
 const priceOf = (model: string): ModelPrice => {
   const price = getModelPrice(model);
@@ -61,13 +74,20 @@ describe('createEstimatedCostEvaluator', () => {
     });
 
   const queryMock = () => mockEsClient.esql.query as jest.Mock;
+  const fieldCapsMock = () => mockEsClient.fieldCaps as jest.Mock;
+  const mappedFields = (...fields: string[]) =>
+    fieldCapsMock().mockResolvedValue({
+      indices: [],
+      fields: Object.fromEntries(fields.map((field) => [field, {}])),
+    });
 
   const mockResponse = (values: Row[]) =>
     queryMock().mockResolvedValue({ columns: COLUMNS, values });
 
   beforeEach(() => {
     jest.useFakeTimers();
-    mockEsClient = { esql: { query: jest.fn() } } as any;
+    mockEsClient = { esql: { query: jest.fn() }, fieldCaps: jest.fn() } as any;
+    mappedFields(CACHE_READ_FIELD, CACHE_WRITE_FIELD);
     mockLog = {
       error: jest.fn(),
       warning: jest.fn(),
@@ -107,6 +127,16 @@ describe('createEstimatedCostEvaluator', () => {
     expect(result.explanation).toContain('600000 cached');
   });
 
+  it('prices cache writes at the cache-write rate', async () => {
+    mockResponse([chat(SOL, { input: 1_000_000, cached: 200_000, writes: 400_000 })]);
+
+    const result = await evaluate();
+
+    // 400k uncached at 7.5 + 200k cached at 0.75 + 400k written at 9.375
+    expect(result.score).toBeCloseTo(3 + 0.15 + 3.75);
+    expect(result.explanation).toContain('200000 cached, 400000 cache writes');
+  });
+
   it('prices requests above the long-context threshold at the higher tier', async () => {
     mockResponse([chat(SOL, { input: 1_000_000, tier: 272_000 }), chat(SOL, { input: 1_000_000 })]);
 
@@ -142,15 +172,15 @@ describe('createEstimatedCostEvaluator', () => {
     expect(result.explanation).toContain('Could not price unknown (no EIS list price)');
   });
 
-  it('reports no score when cache reads exceed input tokens', async () => {
-    mockResponse([chat(SOL, { input: 1_000, cached: 5_000 })]);
+  it('reports no score when cache reads and writes exceed input tokens', async () => {
+    mockResponse([chat(SOL, { input: 1_000, cached: 600, writes: 500 })]);
 
     const result = await evaluate();
 
     expect(result.score).toBeNull();
     expect(result.label).toBe('unavailable');
     expect(result.explanation).toContain(
-      `Could not price ${SOL} (cache reads exceed input tokens)`
+      `Could not price ${SOL} (cache reads and writes exceed input tokens)`
     );
   });
 
@@ -185,69 +215,72 @@ describe('createEstimatedCostEvaluator', () => {
     expect(mockLog.error).not.toHaveBeenCalled();
   });
 
-  describe('when the cache_read column is missing from the mapping', () => {
-    const unknownColumnError = () =>
-      new Error(
-        'verification_exception\n\tRoot causes:\n\t\tverification_exception: Found 1 problem\n' +
-          'line 1:79: Unknown column [attributes.gen_ai.usage.cache_read.input_tokens], ' +
-          'did you mean [attributes.gen_ai.usage.input_tokens]?'
+  describe('when cache columns are missing from the mapping', () => {
+    it('prices all input at the uncached rate without cache reads', async () => {
+      mappedFields(CACHE_WRITE_FIELD);
+      queryMock().mockResolvedValue(
+        withoutColumns(['cached_tokens'], [chat(SOL, { input: 1_000_000 })])
       );
-
-    const COLUMNS_WITHOUT_CACHE = COLUMNS.filter(({ name }) => name !== 'cached_tokens');
-    const withoutCache = (row: Row): Row => row.filter((_, index) => index !== 1);
-
-    it('prices all input tokens at the uncached rate', async () => {
-      queryMock()
-        .mockRejectedValueOnce(unknownColumnError())
-        .mockResolvedValueOnce({
-          columns: COLUMNS_WITHOUT_CACHE,
-          values: [withoutCache(chat(SOL, { input: 1_000_000 }))],
-        });
 
       const result = await evaluate();
 
       expect(result.score).toBeCloseTo(7.5);
       expect(result.explanation).toContain('cache reads not reported');
-      expect(queryMock()).toHaveBeenCalledTimes(2);
-      expect(queryMock().mock.calls[1][0].query).not.toContain('cache_read');
-      expect(mockLog.error).not.toHaveBeenCalled();
+      expect(queryMock().mock.calls[0][0].query).not.toContain('cache_read');
+      expect(queryMock().mock.calls[0][0].query).toContain('cache_write');
     });
 
-    it('goes straight to the fallback query on retries', async () => {
+    it('prices cache reads without cache writes', async () => {
+      mappedFields(CACHE_READ_FIELD);
+      queryMock().mockResolvedValue(
+        withoutColumns(['cache_write_tokens'], [chat(SOL, { input: 1_000_000, cached: 600_000 })])
+      );
+
+      const result = await evaluate();
+
+      expect(result.score).toBeCloseTo(3 + 0.45);
+      expect(result.explanation).toContain('600000 cached, cache writes not reported');
+      expect(queryMock().mock.calls[0][0].query).not.toContain('cache_write');
+    });
+
+    it('re-reads the mapping on retries', async () => {
+      fieldCapsMock()
+        .mockResolvedValueOnce({ indices: [], fields: {} })
+        .mockResolvedValue({
+          indices: [],
+          fields: { [CACHE_READ_FIELD]: {}, [CACHE_WRITE_FIELD]: {} },
+        });
       queryMock()
-        .mockRejectedValueOnce(unknownColumnError())
+        .mockResolvedValueOnce(withoutColumns(['cached_tokens', 'cache_write_tokens'], []))
         .mockResolvedValueOnce({
-          columns: COLUMNS_WITHOUT_CACHE,
-          values: [],
-        })
-        .mockResolvedValueOnce({
-          columns: COLUMNS_WITHOUT_CACHE,
-          values: [withoutCache(chat(SOL, { input: 1_000_000 }))],
+          columns: COLUMNS,
+          values: [chat(SOL, { input: 1_000_000, writes: 400_000 })],
         });
 
       const promise = evaluate();
       await jest.advanceTimersByTimeAsync(60_000);
       const result = await promise;
 
-      expect(result.score).toBeCloseTo(7.5);
-      expect(queryMock()).toHaveBeenCalledTimes(3);
-      expect(queryMock().mock.calls[2][0].query).not.toContain('cache_read');
+      // 600k uncached at 7.5 + 400k written at 9.375
+      expect(result.score).toBeCloseTo(4.5 + 3.75);
+      expect(fieldCapsMock()).toHaveBeenCalledTimes(2);
+      expect(queryMock().mock.calls[0][0].query).not.toContain('cache_');
+      expect(queryMock().mock.calls[1][0].query).toContain('cache_write');
     });
+  });
 
-    it('keeps an unknown column that is not cache_read a hard failure', async () => {
-      queryMock().mockRejectedValue(
-        new Error('verification_exception: Unknown column [typo_column]')
-      );
+  it('keeps a rejected query a hard failure', async () => {
+    queryMock().mockRejectedValue(
+      new Error('verification_exception: Unknown column [typo_column]')
+    );
 
-      const promise = evaluate();
-      await jest.advanceTimersByTimeAsync(300_000);
-      const result = await promise;
+    const promise = evaluate();
+    await jest.advanceTimersByTimeAsync(300_000);
+    const result = await promise;
 
-      expect(result.label).toBe('error');
-      // Only the main query runs; the fallback is never reached for an unrelated column.
-      expect(queryMock()).toHaveBeenCalledTimes(6);
-      expect(mockLog.error).toHaveBeenCalled();
-    });
+    expect(result.label).toBe('error');
+    expect(queryMock()).toHaveBeenCalledTimes(6);
+    expect(mockLog.error).toHaveBeenCalled();
   });
 });
 
@@ -278,9 +311,16 @@ describe('getTokenRates', () => {
 });
 
 describe('estimateCostUsd', () => {
-  it('falls back to the input rate when the model has no cache price', () => {
-    const usage = { inputTokens: 1_000_000, cachedTokens: 500_000, outputTokens: 0 };
+  it('falls back to the input rate when the model has no cache prices', () => {
+    const usage = {
+      inputTokens: 1_000_000,
+      cachedTokens: 300_000,
+      cacheWriteTokens: 200_000,
+      outputTokens: 0,
+    };
 
-    expect(estimateCostUsd(usage, { input: 2, cachedInput: null, output: 10 })).toBeCloseTo(2);
+    expect(
+      estimateCostUsd(usage, { input: 2, cachedInput: null, cacheWrite: null, output: 10 })
+    ).toBeCloseTo(2);
   });
 });
