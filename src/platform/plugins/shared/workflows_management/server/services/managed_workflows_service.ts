@@ -447,7 +447,11 @@ export class ManagedWorkflowsService {
               this.toInstallFailure(
                 target,
                 new WorkflowConflictError(
-                  `Workflow with id '${target.workflowDocumentId}' was updated concurrently. Please retry.`,
+                  `Workflow with id '${
+                    target.workflowDocumentId
+                  }' kept conflicting with concurrent updates after ${
+                    MAX_MANAGED_INSTALL_RETRIES + 1
+                  } attempts.`,
                   target.workflowDocumentId
                 )
               )

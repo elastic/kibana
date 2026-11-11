@@ -1659,6 +1659,7 @@ describe('ManagedWorkflowsService', () => {
           error: expect.any(WorkflowConflictError),
         },
       ]);
+      expect(failed[0].error.message).toContain('after 3 attempts');
     });
 
     it('rejects when the first read fails', async () => {
