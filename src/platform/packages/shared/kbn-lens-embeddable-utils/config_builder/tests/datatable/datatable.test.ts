@@ -275,7 +275,7 @@ describe('Datatable', () => {
       expect(apiOutput.metrics?.[0].apply_color_to).not.toBeDefined();
     });
 
-    it('should not add a color on metrics and rows after schema parse when apply_color_to is not specified (DSL)', () => {
+    it('should not add a color on metrics and rows after schema parse when apply_color_to is not specified in DSL datatable', () => {
       const config = {
         ...baseDatatable,
         metrics: [{ operation: 'count', empty_as_null: false }],
@@ -294,7 +294,7 @@ describe('Datatable', () => {
       expect(parsed.rows?.[0].color).not.toBeDefined();
     });
 
-    it('should not add a color on metrics and rows after schema parse when apply_color_to is not specified (ES|QL)', () => {
+    it('should not add a color on metrics and rows after schema parse when apply_color_to is not specified in ES|QL datatable', () => {
       const config = {
         type: 'data_table',
         title: 'Color default test',
