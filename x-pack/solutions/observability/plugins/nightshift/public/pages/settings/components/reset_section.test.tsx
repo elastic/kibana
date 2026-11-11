@@ -22,9 +22,9 @@ const actions = {
   isMutating: false,
 };
 
-const resetPanel = (canManage = true) => (
+const resetPanel = (canManage = true, canRestore = true) => (
   <I18nProvider>
-    <ResetSection canManage={canManage} />
+    <ResetSection canManage={canManage} canRestore={canRestore} />
   </I18nProvider>
 );
 
@@ -92,6 +92,16 @@ describe('developer reset controls', () => {
     expect(screen.getByTestId('significantEventsResetTrigger')).toHaveFocus();
     expect(await screen.findByRole('tooltip')).toHaveTextContent(
       'Reset requires the Nightshift Manage engines privilege.'
+    );
+  });
+
+  it('disables reset and names manage_security when bringing the engine back needs it', async () => {
+    render(resetPanel(true, false));
+
+    expect(screen.getByTestId('significantEventsResetButton')).toBeDisabled();
+    act(() => screen.getByTestId('significantEventsResetTrigger').focus());
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'manage_security cluster privilege'
     );
   });
 

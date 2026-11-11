@@ -131,6 +131,62 @@ describe('registerSignificantEventsSkills', () => {
     expect(registeredIds).toHaveLength(CORE_SKILL_IDS.length + 1);
   });
 
+  describe('KI identification availability', () => {
+    const getKiIdentificationAvailability = async (
+      workloadBinding: { serviceAccountId: string } | null
+    ) => {
+      const server = createSignificantEventsServer({ featurePrivilege: 'all' });
+      const core = {
+        security: {
+          serviceAccounts: {
+            isEnabled: () => true,
+            getWorkloadBinding: jest.fn().mockResolvedValue(workloadBinding),
+          },
+        },
+      };
+      const { agentBuilder, options } = createOptions({
+        streamsKIsOnboardingClient,
+        maintenanceService,
+        server: Object.assign(server, { core }),
+      });
+      await registerSignificantEventsSkills(options);
+      const skill = agentBuilder.skills.register.mock.calls.find(
+        ([registered]) => registered.id === KI_IDENTIFICATION_SKILL_ID
+      )![0];
+      return skill.availability!;
+    };
+    const context = { request: {}, uiSettings: {}, spaceId: 'default' } as Parameters<
+      typeof availability.handler
+    >[0];
+
+    beforeEach(() => {
+      availability.handler.mockResolvedValue({ status: 'available' });
+    });
+
+    it('hides the skill in a space whose detection engine is not set up', async () => {
+      const gate = await getKiIdentificationAvailability(null);
+
+      expect(await gate.handler(context)).toEqual({
+        status: 'unavailable',
+        reason: expect.stringContaining('Nightshift is not set up in this space'),
+      });
+    });
+
+    it('offers the skill once the space is bound, and re-checks within a minute', async () => {
+      const gate = await getKiIdentificationAvailability({ serviceAccountId: 'account-1' });
+
+      expect(await gate.handler(context)).toEqual({ status: 'available' });
+      expect(gate.cacheTtl).toBeLessThanOrEqual(60);
+    });
+
+    it('keeps the shared gate in front: an unavailable feature stays unavailable', async () => {
+      availability.handler.mockResolvedValue({ status: 'unavailable', reason: 'feature off' });
+      const gate = await getKiIdentificationAvailability({ serviceAccountId: 'account-1' });
+
+      expect(await gate.handler(context)).toEqual({ status: 'unavailable', reason: 'feature off' });
+    });
+  });
+
   it('does not register KI identification when only the onboarding client is provided', async () => {
     const { agentBuilder, options } = createOptions({
       streamsKIsOnboardingClient,

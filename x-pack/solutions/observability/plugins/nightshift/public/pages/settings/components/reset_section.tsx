@@ -21,11 +21,18 @@ import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common
 import { useSignificantEventsMaintenanceActions } from '../../../data/maintenance/use_significant_events_maintenance';
 import { SettingsSectionRow } from './settings_section';
 
-export function ResetSection({ canManage }: { canManage: boolean }) {
+interface IResetSectionProps {
+  canManage: boolean;
+  /** False when Reset needs `manage_security` to bring the bound workflows back and the user lacks it. */
+  canRestore: boolean;
+}
+
+export function ResetSection({ canManage, canRestore }: IResetSectionProps) {
   const { reset, isResetting, isMutating } = useSignificantEventsMaintenanceActions();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [confirmation, setConfirmation] = useState('');
-  const canConfirm = canManage && !isMutating && confirmation === 'RESET';
+  const isAllowed = canManage && canRestore;
+  const canConfirm = isAllowed && !isMutating && confirmation === 'RESET';
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -54,11 +61,16 @@ export function ResetSection({ canManage }: { canManage: boolean }) {
               ? i18n.translate('xpack.nightshift.settings.reset.privilegeTooltip', {
                   defaultMessage: 'Reset requires the Nightshift Manage engines privilege.',
                 })
+              : !canRestore
+              ? i18n.translate('xpack.nightshift.settings.reset.securityPrivilegeTooltip', {
+                  defaultMessage:
+                    'Reset requires the manage_security cluster privilege in a space that runs as the detection engine service account.',
+                })
               : undefined
           }
         >
           <span
-            tabIndex={!canManage ? 0 : undefined}
+            tabIndex={!isAllowed ? 0 : undefined}
             data-test-subj="significantEventsResetTrigger"
           >
             <EuiButton
@@ -67,7 +79,7 @@ export function ResetSection({ canManage }: { canManage: boolean }) {
               color="danger"
               iconType="trash"
               isLoading={isResetting}
-              isDisabled={!canManage || isMutating}
+              isDisabled={!isAllowed || isMutating}
               onClick={() => setIsModalOpen(true)}
               {...getEbtProps({
                 action: NIGHTSHIFT_EBT_ACTIONS.OPEN_RESET_CONFIRMATION,

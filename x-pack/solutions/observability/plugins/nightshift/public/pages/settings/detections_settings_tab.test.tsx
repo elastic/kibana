@@ -34,6 +34,9 @@ jest.mock('@kbn/unsaved-changes-prompt', () => ({
 }));
 jest.mock('../../hooks/use_kibana');
 jest.mock('../../hooks/use_developer_mode');
+jest.mock('../../data/service_accounts/use_can_restore_detection_engine', () => ({
+  useCanRestoreDetectionEngine: () => true,
+}));
 jest.mock('../../data/maintenance/use_significant_events_maintenance', () => ({
   useBlocksNewActivity: () => ({
     blocksActivity: mockBlocksActivity,

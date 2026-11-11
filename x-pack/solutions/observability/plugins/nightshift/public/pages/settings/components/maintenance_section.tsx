@@ -93,7 +93,13 @@ const ActivityCounts = ({
   );
 };
 
-export function MaintenanceSection({ canManage }: { canManage: boolean }) {
+interface IMaintenanceSectionProps {
+  canManage: boolean;
+  /** False when resuming needs `manage_security` and the user lacks it. Pause stays available. */
+  canRestore: boolean;
+}
+
+export function MaintenanceSection({ canManage, canRestore }: IMaintenanceSectionProps) {
   const { data: status, isLoading, isError, refetch } = useMaintenanceStatus();
   const { pause, resume, isPausing, isMutating } = useSignificantEventsMaintenanceActions();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -103,6 +109,7 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
 
   const paused = status?.state === 'paused';
   const statusReady = !isLoading && !isError && status !== undefined;
+  const resumeBlocked = paused && !canRestore;
   const activityCounts = {
     automationsDisabled: status?.lastSummary?.workflowsDisabled ?? 0,
     rulesDisabled: status?.lastSummary?.rulesDisabled ?? 0,
@@ -189,6 +196,29 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
             <EuiSpacer />
           </>
         )}
+        {resumeBlocked && canManage && (
+          <>
+            <KbnInfoCallout
+              announceOnMount
+              size="s"
+              data-test-subj="streams-settings-maintenance-resume-needs-security"
+              title={i18n.translate(
+                'xpack.nightshift.settings.maintenance.resumeNeedsSecurityTitle',
+                {
+                  defaultMessage: 'An administrator must resume',
+                }
+              )}
+              text={i18n.translate(
+                'xpack.nightshift.settings.maintenance.resumeNeedsSecurityBody',
+                {
+                  defaultMessage:
+                    'This space runs as the detection engine service account, so resuming it requires the manage_security cluster privilege. Ask an administrator to resume it.',
+                }
+              )}
+            />
+            <EuiSpacer />
+          </>
+        )}
         <EuiFlexGroup direction="column" gutterSize="m" alignItems="flexStart">
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -197,7 +227,7 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
               color={paused ? 'primary' : 'warning'}
               iconType={paused ? 'play' : 'pause'}
               isLoading={isMutating || isLoading}
-              isDisabled={!canManage || !statusReady || isMutating}
+              isDisabled={!canManage || !statusReady || isMutating || resumeBlocked}
               onClick={() => setIsModalOpen(true)}
               {...getEbtProps({
                 action: NIGHTSHIFT_EBT_ACTIONS.OPEN_DETECTION_ENGINE_CONFIRMATION,
