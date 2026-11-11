@@ -6,7 +6,7 @@
  */
 
 import type { ChangeEvent } from 'react';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
@@ -117,7 +117,6 @@ export function DataDriftIndexPatternsEditor({
   );
 
   const navigateToPath = useNavigateToPath();
-  const abortCtrl = useRef(new AbortController());
 
   useEffect(() => {
     let unmounted = false;
@@ -138,17 +137,15 @@ export function DataDriftIndexPatternsEditor({
 
   useEffect(
     function validateMatchingDataViews() {
-      let unmounted = false;
+      let superseded = false;
       const getMatchingDataView = async () => {
-        abortCtrl.current.abort();
-        abortCtrl.current = new AbortController();
-
         setDataViewMsg(undefined);
         setFoundDataViewId(undefined);
-        if (!unmounted && referenceIndexPattern && comparisonIndexPattern) {
+        if (referenceIndexPattern && comparisonIndexPattern) {
           const indicesName = getDefaultIndexPattern(referenceIndexPattern, comparisonIndexPattern);
 
           const matchingDataViews = await dataViews.find(indicesName);
+          if (superseded) return;
 
           const timeFieldName =
             Array.isArray(timeField) && timeField.length > 0 && timeField[0].value !== ''
@@ -180,8 +177,7 @@ export function DataDriftIndexPatternsEditor({
       getMatchingDataView();
 
       return () => {
-        abortCtrl.current?.abort();
-        unmounted = true;
+        superseded = true;
       };
     },
     [referenceIndexPattern, comparisonIndexPattern, timeField, dataViews]
