@@ -166,7 +166,7 @@ export class DiscoverSearchSessionManager {
     getQueryParams(this.deps.history.location)[SEARCH_SESSION_ID_QUERY_PARAM] as string | undefined;
 
   /**
-   * Continues the cached session of a tab, if its context key still matches
+   * Returns the replay cache entry for a tab, if its context key still matches
    */
   private replayTabSearchSession(tabId: string, contextKey: string) {
     const { replayCache, session } = this.deps;

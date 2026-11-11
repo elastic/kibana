@@ -56,7 +56,7 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
 
     const allTabs = await Promise.all(
       discoverSession.tabs.map(async (tab) => {
-        // Drop the old cache on Revert, including tabs we haven't opened yet.
+        // On Revert, drop the cache of every unsaved tab, including tabs not selected since returning to Discover.
         if (unsavedTabIds.includes(tab.id)) {
           searchSessionManager.forgetTab(tab.id);
         }
