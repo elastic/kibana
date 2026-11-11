@@ -145,12 +145,10 @@ const CompactRow = ({
     ${isInteractive &&
     css`
       cursor: pointer;
-      &:hover {
-        background: ${euiTheme.colors.backgroundBaseInteractiveHover};
-        text-decoration: none;
-      }
       &:hover,
       &:focus-visible {
+        background: ${euiTheme.colors.backgroundBaseInteractiveHover};
+        text-decoration: none;
         --subject-trailing-opacity: 1;
       }
       &:focus-visible {
