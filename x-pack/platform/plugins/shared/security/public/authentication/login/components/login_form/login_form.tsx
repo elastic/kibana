@@ -289,7 +289,7 @@ export class LoginForm extends Component<LoginFormProps, State> {
         {createElement('elastic-loader-ring', {
           mode: 'sweep',
           size: '120',
-          thickness: '5',
+          thickness: '4',
         })}
       </div>
     );

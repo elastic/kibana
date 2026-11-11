@@ -16,7 +16,7 @@ import React from 'react';
  * `<elastic-loader-ring>` web component from `/ui/loader_ring.js` instead.
  *
  * Geometry matches the Loader Ring handoff static SVG:
- *   - viewBox 120×120, r = 55.5, stroke width 5
+ *   - viewBox 120×120, r = 55.5, stroke width 4
  *   - segment colours / angles from the design spec
  *   - centre mark path from `logo_path.ts` (handoff)
  *
@@ -60,7 +60,7 @@ export const Logo: FC = () => (
         r="55.5"
         fill="none"
         stroke={color}
-        strokeWidth="5"
+        strokeWidth="4"
         strokeDasharray={dasharray}
         strokeDashoffset={dashoffset}
       />
@@ -69,6 +69,7 @@ export const Logo: FC = () => (
       className="kbnLoaderMark"
       fillRule="evenodd"
       clipRule="evenodd"
+      transform="translate(60 60) scale(1.3333) translate(-60 -60)"
       d={LOADING_ELASTIC_RING_MARK_PATH}
     />
   </svg>

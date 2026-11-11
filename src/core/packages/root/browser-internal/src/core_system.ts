@@ -564,7 +564,7 @@ type BootSplashRing = HTMLElement & {
 
 /**
  * Finish any remaining splash exit before Core replaces `document.body`.
- * Bootstrap normally fades ring then mark; this catches the fallback path.
+ * Bootstrap fades the ring; the mark rests until this fades it.
  */
 async function dismissBootSplash(): Promise<void> {
   const splash = document.getElementById('kbn_loading_message');

@@ -58,7 +58,7 @@ export const Template: FunctionComponent<Props> = ({
     createElement('elastic-loader-ring', {
       mode: 'sweep',
       size: '120',
-      thickness: '5',
+      thickness: '4',
       label: loadingLabel,
       'data-test-subj': 'kbnLoadingElasticRing',
     })
@@ -126,8 +126,9 @@ export const Template: FunctionComponent<Props> = ({
            * aria itself (see /ui/loader_ring.js). Custom branding keeps
            * the wrapper announcement + progress bar (static logo image).
            *
-           * Welcome text stays in the DOM (visually hidden) so bootstrap
-           * can still read the data-error-message-* attrs on failure.
+           * Welcome text carries the data-error-message-* attrs bootstrap
+           * reads on failure. On the default splash it fades in as
+           * "Finishing up…" once the ring fades; otherwise it's visually hidden.
            */}
           <div
             className="kbnLoaderWrap"
@@ -154,8 +155,9 @@ export const Template: FunctionComponent<Props> = ({
                 defaultMessage: 'Reload',
               })}
             >
+              {/* POC: reuses the old "Loading Elastic" ID; non-English locales keep the old translation. */}
               {i18n.translate('core.ui.welcomeMessage', {
-                defaultMessage: 'Loading Elastic',
+                defaultMessage: 'Finishing up…',
               })}
             </div>
             {customBranding.logo ? <div className="kbnProgress" /> : null}

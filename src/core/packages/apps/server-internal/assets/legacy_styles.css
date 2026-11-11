@@ -70,11 +70,11 @@ body, html {
 }
 
 /*
- * Visually hide the welcome text on the boot splash — the ring is the
- * loading affordance — but keep the element in the DOM so bootstrap can
- * still read the data-error-message-* attributes on failure.
+ * Visually hide the welcome text on the custom-branded splash — the progress
+ * bar is the loading affordance — but keep the element in the DOM so
+ * bootstrap can still read the data-error-message-* attributes on failure.
  */
-.kbnLoaderWrap > .kbnWelcomeText {
+.kbnLoaderWrap > img ~ .kbnWelcomeText {
   position: absolute;
   width: 1px;
   height: 1px !important;
@@ -85,6 +85,39 @@ body, html {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/*
+ * POC: default splash — "Finishing up…" fades in under the resting mark once
+ * the ring fades (bootstrap adds --finishing), and fades out with the mark.
+ * Absolutely positioned so the mark stays centred.
+ * POC: needs design input — offset, size, and the 400ms entry delay (which
+ * keeps the text from flashing when the wait is short).
+ */
+.kbnLoaderWrap > elastic-loader-ring ~ .kbnWelcomeText {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 250ms ease;
+}
+
+.kbnLoaderWrap--finishing > elastic-loader-ring ~ .kbnWelcomeText {
+  opacity: 1;
+  transition-delay: 400ms;
+}
+
+.kbnLoaderWrap--finishing > elastic-loader-ring[exiting-mark] ~ .kbnWelcomeText {
+  opacity: 0;
+  transition-delay: 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kbnLoaderWrap > elastic-loader-ring ~ .kbnWelcomeText {
+    transition: none;
+  }
 }
 
 .kbnLoaderWrap {

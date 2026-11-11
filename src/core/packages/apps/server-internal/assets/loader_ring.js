@@ -241,6 +241,7 @@
       mark.setAttribute('class', 'mark');
       mark.setAttribute('fill-rule', 'evenodd'); mark.setAttribute('clip-rule', 'evenodd');
       mark.setAttribute('d', LOGO_PATH);
+      mark.setAttribute('transform', 'translate(60 60) scale(1.3333) translate(-60 -60)');
       svg.appendChild(g); svg.appendChild(mark);
       this._label = document.createElement('span');
       this._label.className = 'sr';
@@ -277,7 +278,7 @@
 
     _render() {
       var px = clamp(num(this.getAttribute('size'), 120), 64, 240);
-      var sw = clamp(num(this.getAttribute('thickness'), 5), 3, 8);
+      var sw = clamp(num(this.getAttribute('thickness'), 4), 3, 8);
       this.style.width = px + 'px';
       this.style.height = px + 'px';
       this._segs.forEach(function (c) { c.setAttribute('stroke-width', String(sw)); });
@@ -291,7 +292,7 @@
     set loading(v) { this.setAttribute('loading', v ? 'true' : 'false'); }
     get size() { return num(this.getAttribute('size'), 120); }
     set size(v) { this.setAttribute('size', String(v)); }
-    get thickness() { return num(this.getAttribute('thickness'), 5); }
+    get thickness() { return num(this.getAttribute('thickness'), 4); }
     set thickness(v) { this.setAttribute('thickness', String(v)); }
     get sweepSpeed() { return num(this.getAttribute('sweep-speed'), 1.1); }
     set sweepSpeed(v) { this.setAttribute('sweep-speed', String(v)); }

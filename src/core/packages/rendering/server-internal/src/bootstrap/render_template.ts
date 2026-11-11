@@ -261,24 +261,24 @@ ${reactDevtoolsHookStub}
       }
     }
 
-    function fadeMark(ring) {
-      if (ring && typeof ring.exitMark === 'function') {
-        ring.exitMark();
-      } else if (ring) {
-        ring.setAttribute('exiting-mark', '');
-      }
+    // POC: reveal "Finishing up…" under the resting mark and announce it via the ring's live label.
+    function showFinishing(ring) {
+      var wrap = ring && ring.parentElement;
+      if (!wrap) return;
+      wrap.classList.add('kbnLoaderWrap--finishing');
+      var text = wrap.querySelector('.kbnWelcomeText');
+      if (text && text.textContent) ring.setAttribute('label', text.textContent);
     }
 
-    // Ring fades first, then the centre mark, then bundles execute — so the
-    // hitchy parse phase lands on an empty splash rather than mid-animation.
+    // Ring fades, then bundles execute — so the hitchy parse phase lands on a
+    // static mark rather than mid-animation.
+    // POC: the mark rests until core's dismissBootSplash() fades it, avoiding an empty splash.
     function exitSplashThenLoad() {
       var ring = document.querySelector('elastic-loader-ring');
       var step = reduceMotion ? 0 : SPLASH_EXIT_MS;
       fadeRing(ring);
-      setTimeout(function () {
-        fadeMark(ring);
-        setTimeout(startBundleLoad, step);
-      }, step);
+      showFinishing(ring);
+      setTimeout(startBundleLoad, step);
     }
 
     prefetch(bundleUrls);
