@@ -17053,7 +17053,6 @@
     "xpack.agenticInvestigations.escalationSync.failureTitle": "Anhänge konnten nicht synchronisiert werden",
     "xpack.agenticInvestigations.escalationSync.partialFailure": "{count, plural, one {# attachment} other {# Anhänge}} konnten nicht aus verknüpften Untersuchungen kopiert werden.",
     "xpack.agenticInvestigations.escalationSync.partialFailureTitle": "Einige Anhänge konnten nicht synchronisiert werden",
-    "xpack.agenticInvestigations.escalationSync.syncing": "Anhänge aus verknüpften Untersuchungen werden synchronisiert",
     "xpack.agenticInvestigations.escalationSync.updated": "{count, plural, one {# attachment was} other {# Anhänge wurden}} aus verknüpften Untersuchungen hinzugefügt",
     "xpack.agenticInvestigations.featureName": "Agentische Untersuchungen",
     "xpack.agenticInvestigations.hypotheses.attachments.empty": "Noch keine Hypothesen aufgezeichnet.",

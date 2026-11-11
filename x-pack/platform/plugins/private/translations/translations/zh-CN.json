@@ -17076,7 +17076,6 @@
     "xpack.agenticInvestigations.escalationSync.failureTitle": "无法同步附件",
     "xpack.agenticInvestigations.escalationSync.partialFailure": "{count, plural, one {# attachment} other {# 个附件}} 无法从关联调查中复制。",
     "xpack.agenticInvestigations.escalationSync.partialFailureTitle": "某些附件无法同步",
-    "xpack.agenticInvestigations.escalationSync.syncing": "正在从关联的调查中同步附件",
     "xpack.agenticInvestigations.escalationSync.updated": "{count, plural, one {# attachment was} other {# 个附件}} 已从关联调查中添加",
     "xpack.agenticInvestigations.featureName": "智能体调查",
     "xpack.agenticInvestigations.hypotheses.attachments.empty": "目前尚未记录任何假设",

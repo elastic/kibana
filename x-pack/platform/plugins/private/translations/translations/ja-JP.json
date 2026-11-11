@@ -17083,7 +17083,6 @@
     "xpack.agenticInvestigations.escalationSync.failureTitle": "添付ファイルの同期に失敗しました",
     "xpack.agenticInvestigations.escalationSync.partialFailure": "{count, plural, one {# attachment} other {#件の添付ファイル}}をリンクされた調査からコピーできませんでした。",
     "xpack.agenticInvestigations.escalationSync.partialFailureTitle": "一部の添付ファイルを同期できませんでした",
-    "xpack.agenticInvestigations.escalationSync.syncing": "リンクされた調査から添付ファイルを同期しています",
     "xpack.agenticInvestigations.escalationSync.updated": "{count, plural, one {# attachment was} other {#件の添付ファイルが}}リンクされた調査から追加されました",
     "xpack.agenticInvestigations.featureName": "エージェント型調査",
     "xpack.agenticInvestigations.hypotheses.attachments.empty": "仮説はまだ記録されていません。",

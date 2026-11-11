@@ -17032,7 +17032,6 @@
     "xpack.agenticInvestigations.escalationSync.failureTitle": "Échec de la synchronisation des pièces jointes",
     "xpack.agenticInvestigations.escalationSync.partialFailure": "Impossible de copier {count, plural, one {# attachment} other {# pièces jointes}} à partir des investigations associées.",
     "xpack.agenticInvestigations.escalationSync.partialFailureTitle": "Certaines pièces jointes n'ont pas pu être synchronisées",
-    "xpack.agenticInvestigations.escalationSync.syncing": "Synchronisation des pièces jointes provenant des investigations liées",
     "xpack.agenticInvestigations.escalationSync.updated": "{count, plural, one {# attachment was} other {# pièces jointes ont été}} ajoutées à partir des enquêtes liées",
     "xpack.agenticInvestigations.featureName": "Investigations agentiques",
     "xpack.agenticInvestigations.hypotheses.attachments.empty": "Aucune hypothèse n’a encore été consignée.",

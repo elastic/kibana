@@ -17103,7 +17103,6 @@
     "xpack.agenticInvestigations.escalationSync.failureTitle": "Falha ao sincronizar anexos",
     "xpack.agenticInvestigations.escalationSync.partialFailure": "{count, plural, one {# attachment} other {# anexos}} não puderam ser copiados das investigações vinculadas.",
     "xpack.agenticInvestigations.escalationSync.partialFailureTitle": "Não foi possível sincronizar alguns anexos",
-    "xpack.agenticInvestigations.escalationSync.syncing": "Sincronizando anexos das investigações vinculadas",
     "xpack.agenticInvestigations.escalationSync.updated": "{count, plural, one {# attachment was} other {# anexos foram}} adicionados a partir das investigações vinculadas",
     "xpack.agenticInvestigations.featureName": "Investigações agênticas",
     "xpack.agenticInvestigations.hypotheses.attachments.empty": "Nenhuma hipótese registrada ainda.",

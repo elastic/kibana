@@ -45,16 +45,14 @@ const BADGE_LABELS: Readonly<Record<string, string>> = SEVERITY_LABELS;
 const toInfoBlocks = (values: HeaderBlockValues): InfoBlocks =>
   getHeaderBlocks(values).map(({ id, title, value }) => ({ id, title, children: value }));
 
-const getSinceValues = (createdAt: string) => ({
-  time: <FormattedTime value={createdAt} />,
-  relative: <FormattedRelative value={createdAt} />,
-});
-
 const DetailsSince = ({ createdAt }: { createdAt: string }) => (
   <FormattedMessage
     id="xpack.agenticInvestigations.detailsFlyout.header.since"
     defaultMessage="Since {time} ({relative})"
-    values={getSinceValues(createdAt)}
+    values={{
+      time: <FormattedTime value={createdAt} />,
+      relative: <FormattedRelative value={createdAt} />,
+    }}
   />
 );
 
@@ -62,7 +60,10 @@ const EscalationSince = ({ createdAt }: { createdAt: string }) => (
   <FormattedMessage
     id="xpack.agenticInvestigations.escalationFlyout.header.since"
     defaultMessage="Since {time} ({relative})"
-    values={getSinceValues(createdAt)}
+    values={{
+      time: <FormattedTime value={createdAt} />,
+      relative: <FormattedRelative value={createdAt} />,
+    }}
   />
 );
 
