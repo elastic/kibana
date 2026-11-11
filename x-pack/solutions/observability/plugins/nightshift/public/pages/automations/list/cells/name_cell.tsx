@@ -7,7 +7,14 @@
 
 import { getEbtProps } from '@kbn/ebt-click';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  euiTextTruncateCSS,
+  useEuiTheme,
+} from '@elastic/eui';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../../common/ebt_constants';
 import type { Automation } from '../../../../data/automations/use_automations';
 import { getTriggerDisplay } from '../../utils/trigger_display';
@@ -21,7 +28,10 @@ export const AutomationNameCell = ({
   automation: Automation;
   onOpen: () => void;
 }) => {
+  const { euiTheme } = useEuiTheme();
   const tags = automation.tags ?? [];
+  const hasWorkflowStatus =
+    automation.backingWorkflow && automation.backingWorkflow.state !== 'available';
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -32,8 +42,10 @@ export const AutomationNameCell = ({
           aria-hidden={true}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem css={{ minInlineSize: 0, gap: euiTheme.size.xs }}>
         <EuiLink
+          css={euiTextTruncateCSS()}
+          title={automation.name}
           data-test-subj="nightshiftAutomationName"
           color="primary"
           onClick={onOpen}
@@ -44,15 +56,21 @@ export const AutomationNameCell = ({
         >
           {automation.name}
         </EuiLink>
+        {(hasWorkflowStatus || tags.length > 0) && (
+          <EuiFlexGroup wrap gutterSize="xs" responsive={false}>
+            {hasWorkflowStatus && (
+              <EuiFlexItem grow={false}>
+                <AutomationWorkflowBadge automation={automation} />
+              </EuiFlexItem>
+            )}
+            {tags.length > 0 && (
+              <EuiFlexItem grow={false}>
+                <AutomationTags tags={tags} />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        )}
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <AutomationWorkflowBadge automation={automation} />
-      </EuiFlexItem>
-      {tags.length > 0 && (
-        <EuiFlexItem grow={false}>
-          <AutomationTags tags={tags} />
-        </EuiFlexItem>
-      )}
     </EuiFlexGroup>
   );
 };
