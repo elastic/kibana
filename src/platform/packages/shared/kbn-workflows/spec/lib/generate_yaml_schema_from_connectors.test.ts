@@ -314,4 +314,72 @@ describe('generateYamlSchemaFromConnectors', () => {
       ).toEqual(onFailure);
     });
   });
+
+  describe('mock property scoping', () => {
+    const schema = generateYamlSchemaFromConnectors([
+      {
+        summary: 'Console',
+        description: 'Console',
+        type: 'console',
+        paramsSchema: z.object({
+          message: z.string(),
+        }),
+        outputSchema: z.object({
+          message: z.string(),
+        }),
+      },
+    ]);
+
+    it('accepts `mock` on atomic connector and data.set steps', () => {
+      expect(
+        schema.safeParse({
+          ...BASE_WORKFLOW,
+          steps: [
+            {
+              name: 's1',
+              type: 'console',
+              with: { message: 'hi' },
+              mock: { output: { message: 'mocked' } },
+            },
+            {
+              name: 's2',
+              type: 'data.set',
+              with: { foo: 'bar' },
+              mock: { output: { foo: 'mocked' } },
+            },
+          ],
+        }).success
+      ).toBe(true);
+    });
+
+    it('does not include `mock` in the shape of structural steps like `if` and `foreach`', () => {
+      const parsed = schema.parse({
+        ...BASE_WORKFLOW,
+        steps: [
+          {
+            name: 'check',
+            type: 'if',
+            condition: 'true',
+            mock: { output: true },
+            steps: [
+              {
+                name: 's1',
+                type: 'console',
+                with: { message: 'hi' },
+                mock: { output: { message: 'mocked' } },
+              },
+            ],
+          },
+        ],
+      }) as {
+        steps: Array<{
+          mock?: unknown;
+          steps?: Array<{ mock?: unknown }>;
+        }>;
+      };
+
+      expect(parsed.steps[0].mock).toBeUndefined();
+      expect(parsed.steps[0].steps?.[0].mock).toEqual({ output: { message: 'mocked' } });
+    });
+  });
 });
