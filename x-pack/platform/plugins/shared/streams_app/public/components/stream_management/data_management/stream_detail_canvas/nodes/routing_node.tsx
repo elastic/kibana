@@ -71,7 +71,18 @@ const getRoutingRowStyle = (euiTheme: UseEuiTheme['euiTheme']) => css`
   }
 `;
 
-function RoutingRuleRow({ rule }: { rule: RoutingNodeRule }) {
+const RULE_PREFIX = i18n.translate('xpack.streams.canvas.routingNode.rulePrefix', {
+  defaultMessage: 'rule',
+});
+
+const DEFAULT_RULE_LABEL = i18n.translate('xpack.streams.canvas.routingNode.defaultRuleLabel', {
+  defaultMessage: 'default',
+});
+
+const getRuleLabel = (rule: RoutingNodeRule, index: number) =>
+  rule.isCatchAll ? DEFAULT_RULE_LABEL : `${RULE_PREFIX} ${index}`;
+
+function RoutingRuleRow({ rule, id }: { rule: RoutingNodeRule; id: number }) {
   const { euiTheme } = useEuiTheme();
 
   const tooltipContent = (
@@ -118,7 +129,7 @@ function RoutingRuleRow({ rule }: { rule: RoutingNodeRule }) {
         <EuiFlexItem grow={false}>
           <EuiToolTip content={tooltipContent}>
             <EuiText tabIndex={0}>
-              <strong>{rule.handleId}</strong>
+              <strong>{getRuleLabel(rule, id)}</strong>
             </EuiText>
           </EuiToolTip>
         </EuiFlexItem>
@@ -202,9 +213,9 @@ export function RoutingNode({ data, selected, dragging }: NodeProps<RoutingNodeT
           </EuiFlexItem>
           <EuiFlexItem grow>
             <EuiFlexGroup gutterSize="none" direction="column">
-              {data.rules.map((rule) => (
+              {data.rules.map((rule, index) => (
                 <EuiFlexItem css={getRoutingRowStyle(euiTheme)}>
-                  <RoutingRuleRow key={rule.handleId} rule={rule} />
+                  <RoutingRuleRow key={rule.handleId} rule={rule} id={index + 1} />
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>
