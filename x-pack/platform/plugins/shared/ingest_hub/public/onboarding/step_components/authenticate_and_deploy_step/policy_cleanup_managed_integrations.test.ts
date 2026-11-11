@@ -296,6 +296,47 @@ describe('updateManagedIntegrationsPolicy — payload shape', () => {
     expect(payload.vars?.secret_access_key).toBe('SECRET');
   });
 
+  describe('proxy URL', () => {
+    const updateWithProxy = async (proxyUrl: string | undefined, pkgVars = ['proxy_url']) => {
+      mockGetPackageInfo.mockResolvedValue({
+        data: {
+          item: {
+            version: '2.5.0',
+            vars: pkgVars.map((name) => ({ name })),
+            policy_templates: [],
+          },
+        },
+      });
+      await cleanupManagedIntegrationsPolicies({
+        ...BASE_OPTS,
+        policySettings: proxyUrl === undefined ? {} : { proxy_url: proxyUrl },
+        instances: [instance],
+        servicesMap: new Map([['vpcflow', vpcflow]]),
+        pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+        currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+      });
+      return mockUpdateAgentless.mock.calls[0][1];
+    };
+
+    it('sends the proxy as a package var, not a top-level field', async () => {
+      const payload = await updateWithProxy('http://proxy:3128');
+      expect(payload.vars?.proxy_url).toBe('http://proxy:3128');
+      expect(payload).not.toHaveProperty('proxy_url');
+    });
+
+    it('clears the proxy with null, since the PUT replaces the whole policy', async () => {
+      expect((await updateWithProxy('')).vars?.proxy_url).toBeNull();
+    });
+
+    it('sends nothing when no proxy was ever set', async () => {
+      expect((await updateWithProxy(undefined)).vars?.proxy_url).toBeUndefined();
+    });
+
+    it('leaves it out when the package does not declare the var', async () => {
+      expect((await updateWithProxy('http://proxy:3128', [])).vars?.proxy_url).toBeUndefined();
+    });
+  });
+
   it("sends the policy's stored secret refs back when no keys are in memory", async () => {
     mockGetPackageInfo.mockResolvedValue({
       data: {

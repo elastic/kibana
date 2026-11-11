@@ -200,7 +200,7 @@ describe('SlackAppService', () => {
             },
             {
               names: [
-                'ai-index-idx-nightshift-cortex',
+                'ai-index-idx-nightshift-wiki',
                 'ai-index-idx-nightshift-semantic-memory',
                 'ai-index-idx-nightshift-decision-trees',
               ],
@@ -214,7 +214,7 @@ describe('SlackAppService', () => {
             spaces: ['*'],
             feature: {
               nightshift: ['minimal_all'],
-              agentBuilder: ['minimal_all'],
+              agentBuilder: ['minimal_all', 'invoke_bound_agents'],
               actions: ['read'],
               workflowsManagement: ['read'],
             },

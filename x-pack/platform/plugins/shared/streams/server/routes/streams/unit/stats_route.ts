@@ -8,7 +8,7 @@
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { streamsUnitIdentifierSchema, streamsUnitStatsRequestSchema } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { STREAMS_V2_API_PRIVILEGES } from '../../../../common/constants';
 import { StreamsUnitService } from '../../../lib/saved_objects/streams_unit_service';
 import { createServerRoute } from '../../create_server_route';
 import { assertStreamsCanvasEnabled } from './assert_streams_canvas_enabled';
@@ -23,7 +23,7 @@ export const getStreamsUnitStatsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_V2_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -38,13 +38,15 @@ export const getStreamsUnitStatsRoute = createServerRoute({
     getScopedClients,
     logger,
   }): Promise<StreamsUnit.StatsResponse> => {
-    const { soClient, uiSettingsClient, unitStatsClient } = await getScopedClients({
+    const { unitSoClient, uiSettingsClient, unitStatsClient } = await getScopedClients({
       request,
     });
 
     await assertStreamsCanvasEnabled(uiSettingsClient);
 
-    const { unit } = await new StreamsUnitService({ soClient, logger }).getUnit(params.path.id);
+    const { unit } = await new StreamsUnitService({ soClient: unitSoClient, logger }).getUnit(
+      params.path.id
+    );
 
     return unitStatsClient.getStats({
       unitId: params.path.id,

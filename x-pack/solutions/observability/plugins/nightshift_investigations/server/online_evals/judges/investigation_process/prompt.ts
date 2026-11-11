@@ -8,6 +8,7 @@
 import { createPrompt } from '@kbn/inference-common';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { gradeSchema } from '../run_judge';
+import { withIdentifierRule } from '../with_identifier_rule';
 import systemPromptText from './system_prompt.text';
 
 export const INVESTIGATION_PROCESS_TOOL_NAME = 'score_investigation_process';
@@ -40,7 +41,7 @@ const sentence = (description: string) =>
 
 export const investigationProcessPrompt = createPrompt({
   name: 'nightshift_investigation_process',
-  description: 'Scores how a Nightshift investigation was carried out',
+  description: 'Scores how a nightshift investigation was carried out',
   input: lazySchema(() =>
     z.object({
       transcript: z.string(),
@@ -50,7 +51,7 @@ export const investigationProcessPrompt = createPrompt({
   .version({
     system: {
       mustache: {
-        template: systemPromptText,
+        template: withIdentifierRule(systemPromptText),
       },
     },
     template: {
