@@ -23,6 +23,12 @@ config:
       format: uri
       default: http://127.0.0.1:8090
       description: AbuseIPDB API base URL
+      meta:
+        label: Base URL
+        placeholder: https://api.abuseipdb.com
+        helpText: Use the local mock URL for the PoC or https://api.abuseipdb.com for live testing.
+        validate:
+          allowedHosts: true
 auth:
   types:
     - type: api_key_header

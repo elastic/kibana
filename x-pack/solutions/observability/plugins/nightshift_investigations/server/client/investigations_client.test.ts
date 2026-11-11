@@ -504,7 +504,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
         subject: { type: 'significant_event', id: 'event-1' },
         trigger_type: 'manual',
       })
-    ).rejects.toThrow(/enable the Nightshift service account/);
+    ).rejects.toThrow(/enable the nightshift service account/);
     expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
   });
 
@@ -1917,7 +1917,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     });
 
     await expect(makeClient().ensureOrCreate('inv-1', 'exec-1')).rejects.toThrow(
-      /only run as the Nightshift service account/
+      /only run as the nightshift service account/
     );
     expect(conversations.create).not.toHaveBeenCalled();
     expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
@@ -2018,7 +2018,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     mockManagement.getWorkflow.mockResolvedValueOnce(null);
 
     await expect(makeClient().ensureOrCreate('inv-1', 'exec-1')).rejects.toThrow(
-      /only run as the Nightshift service account/
+      /only run as the nightshift service account/
     );
     expect(conversations.create).not.toHaveBeenCalled();
   });

@@ -10,6 +10,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import {
   InvestigationStatusService,
   assertNoUnexpectedProposals,
+  MissingDismissReasonError,
   ProposalDismissFailedError,
 } from './investigation_status_service';
 import { CloseTargetsChangedError } from './close_targets_changed_error';
@@ -229,6 +230,61 @@ describe('InvestigationStatusService.setStatus — expected_proposal_ids', () =>
         dismiss_reason: 'no_reason',
       })
     ).resolves.not.toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// InvestigationStatusService.setStatus — when a dismiss reason is required
+// ---------------------------------------------------------------------------
+
+describe('InvestigationStatusService.setStatus — dismiss reason requirement', () => {
+  const makeService = (pending: Array<{ id: string; skipDiscardReason?: boolean }>) => {
+    const proposalsService = {
+      list: jest.fn().mockResolvedValue({ proposals: pending, total: pending.length }),
+      releaseGate: jest.fn().mockResolvedValue({}),
+    };
+    const service = new InvestigationStatusService({
+      getConversationClient: jest.fn().mockResolvedValue({
+        get: jest.fn().mockResolvedValue(MOCK_CONVERSATION),
+        patchMetadata: jest.fn().mockResolvedValue({ conversation: MOCK_CONVERSATION }),
+      }),
+      getProposals: jest.fn().mockReturnValue({
+        getProposalsService: () => proposalsService,
+        getProposalPrivileges: () => ({
+          assertCanRead: jest.fn().mockResolvedValue(undefined),
+          assertCanManage: jest.fn().mockResolvedValue(undefined),
+        }),
+      }),
+      getSpaceId: jest.fn().mockReturnValue(SPACE_ID),
+      logger,
+    });
+    return { service, proposalsService };
+  };
+
+  it('rejects a close without a reason while a proposal that needs one is pending', async () => {
+    const { service } = makeService([{ id: 'p-1' }]);
+    await expect(service.setStatus(request, 'conv-1', { status: 'closed' })).rejects.toBeInstanceOf(
+      MissingDismissReasonError
+    );
+  });
+
+  it('closes without a reason when every pending proposal waived it, dismissing them as no_reason', async () => {
+    const { service, proposalsService } = makeService([{ id: 'p-1', skipDiscardReason: true }]);
+
+    const result = await service.setStatus(request, 'conv-1', { status: 'closed' });
+
+    expect(result.dismissed_proposal_ids).toEqual(['p-1']);
+    expect(proposalsService.releaseGate).toHaveBeenCalledWith(
+      'p-1',
+      expect.objectContaining({ approved: false, dismissReason: 'no_reason' })
+    );
+  });
+
+  it('still requires a reason when a to-do and an action proposal are pending together', async () => {
+    const { service } = makeService([{ id: 'p-1', skipDiscardReason: true }, { id: 'p-2' }]);
+    await expect(service.setStatus(request, 'conv-1', { status: 'closed' })).rejects.toBeInstanceOf(
+      MissingDismissReasonError
+    );
   });
 });
 
