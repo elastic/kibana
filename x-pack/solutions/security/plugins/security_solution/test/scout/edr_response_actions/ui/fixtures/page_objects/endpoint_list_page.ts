@@ -57,7 +57,6 @@ export class EndpointListPage {
     });
   }
 
-  /** The agent status badge (for example "Healthy") in the row for `hostname`. */
   agentStatusFor(hostname: string): Locator {
     return this.rowFor(hostname).getByTestId('rowHostStatus-agentStatus');
   }
