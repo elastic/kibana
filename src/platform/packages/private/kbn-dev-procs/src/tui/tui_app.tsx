@@ -19,6 +19,8 @@ import type {
 import type { Supervisor } from '../supervisor';
 import type { LogLine, ProcessState } from '../types';
 import type { InkModule } from './ink_module';
+import { fitText, getColumnWidths } from './columns';
+import type { ColumnWidths } from './columns';
 import { handleKey } from './tui_keys';
 import {
   ALL,
@@ -69,7 +71,11 @@ const STATE_ICONS: Readonly<Record<ProcessState, string>> = {
 };
 
 const PROCESS_COLORS = ['cyan', 'magenta', 'blue', 'yellow', 'green'] as const;
-const MAX_KEY_WIDTH = 56;
+// Inside the pane: two border columns and one padding column on each side.
+const PANE_CHROME_COLUMNS = 4;
+// The ● that marks set settings in the available list, and a space.
+const MARKER_WIDTH = 2;
+const COLUMN_GAP = '  ';
 const PANE_TITLES: Readonly<Record<SettingsKind, string>> = {
   current: 'current settings',
   available: 'available settings',
@@ -184,22 +190,33 @@ export const createTuiApp = ({
   const SettingLine = ({
     row: { key, value, source, detail },
     kind,
-    keyWidth,
+    widths,
     isCursor,
   }: {
     readonly row: SettingRow;
     readonly kind: SettingsKind;
-    readonly keyWidth: number;
+    readonly widths: ColumnWidths;
     readonly isCursor: boolean;
   }) => {
     const isSet = value !== undefined;
+    const rest =
+      kind === 'current' ? source : [detail, source && `(${source})`].filter(Boolean).join(' ');
     return (
       <Text wrap="truncate-end" inverse={isCursor}>
         {kind === 'available' ? <Text color="green">{isSet ? '● ' : '  '}</Text> : null}
-        <Text bold={isSet && kind === 'available'}>{key.padEnd(keyWidth)}</Text>
-        {isSet ? <Text color="cyan"> {toDisplayText(value)}</Text> : null}
-        {source ? <Text dimColor>{kind === 'current' ? ` ${source}` : ` (${source})`}</Text> : null}
-        {kind === 'available' && detail ? <Text dimColor> · {detail}</Text> : null}
+        <Text bold={isSet && kind === 'available'}>{fitText(key, widths.key, 'middle')}</Text>
+        {widths.value > 0 ? (
+          <Text color="cyan">
+            {COLUMN_GAP}
+            {fitText(toDisplayText(value ?? ''), widths.value, 'end')}
+          </Text>
+        ) : null}
+        {rest ? (
+          <Text dimColor>
+            {COLUMN_GAP}
+            {rest}
+          </Text>
+        ) : null}
       </Text>
     );
   };
@@ -207,11 +224,14 @@ export const createTuiApp = ({
   const SettingsPane = ({
     state,
     height,
+    width,
     kind,
     hint,
   }: {
     readonly state: TuiState;
     readonly height: number;
+    /** The columns available for settings, inside the pane's border and padding. */
+    readonly width: number;
     readonly kind: SettingsKind;
     readonly hint?: string;
   }) => {
@@ -233,7 +253,11 @@ export const createTuiApp = ({
     const visible = getVisibleSettings(state, getSettingsRows(state, height));
     const { notice } = state;
     const needsRestart = state.pendingRestart.includes(state.selected);
-    const keyWidth = Math.min(Math.max(0, ...visible.map(({ key }) => key.length)), MAX_KEY_WIDTH);
+    const widths = getColumnWidths(
+      // From every matching setting, not only the visible ones, so the columns stay put while scrolling.
+      getMatchingSettings(state),
+      width - (kind === 'available' ? MARKER_WIDTH : 0)
+    );
     return (
       <Box
         flexDirection="column"
@@ -274,7 +298,7 @@ export const createTuiApp = ({
             key={row.key}
             row={row}
             kind={kind}
-            keyWidth={keyWidth}
+            widths={widths}
             isCursor={state.settingsScroll + index === state.settingsCursor}
           />
         ))}
@@ -322,7 +346,7 @@ export const createTuiApp = ({
     const [state, dispatch] = useReducer(reduceTuiState, supervisor, (initial) =>
       createTuiState(initial.getStatus().processes)
     );
-    const { rows } = useTerminalSize();
+    const { rows, columns } = useTerminalSize();
     const logLines = Math.max(rows - CHROME_ROWS, 1);
 
     useEffect(() => {
@@ -429,6 +453,7 @@ export const createTuiApp = ({
             <SettingsPane
               state={state}
               height={logLines}
+              width={Math.max(columns - SIDEBAR_WIDTH - PANE_CHROME_COLUMNS, 1)}
               kind={pane}
               hint={provider?.loadingHint?.[pane]}
             />
