@@ -144441,6 +144441,23 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                debug:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    breakpoints:
+                      description: Step names where execution should pause before running the step.
+                      items:
+                        maxLength: 512
+                        minLength: 1
+                        type: string
+                      maxItems: 200
+                      type: array
+                    enabled:
+                      description: Whether debug mode (mocks and breakpoints) is enabled.
+                      type: boolean
+                  required:
+                    - enabled
                 inputs:
                   additionalProperties:
                     nullable: true
