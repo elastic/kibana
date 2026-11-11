@@ -1,0 +1,50 @@
+version: '2'
+id: okta-user-blast-radius-iag
+name: Okta user blast radius (identity access graph)
+description: >
+  Blast radius of a compromised Okta user over the relationships the identity access graph
+  generator writes: the Okta groups the user is in, the roles and apps those groups sign in
+  to, then the cloud side as roles chain into roles, control instances, pick up the roles
+  instances run as, read secrets and reach buckets, databases and keys. Kinds are the
+  generator's triple names in snake_case.
+seed:
+  type: user
+  description: The entity store id of the compromised Okta user, for example user:alice@acme-s42.com@okta
+limits:
+  max_hops: 7
+hops:
+  - name: okta_groups
+    description: Okta groups the user is a member of
+    relationships:
+      - member_of
+    source_type: user
+    target_type: group
+  - name: sso
+    description: Roles and apps the groups sign in to, and nested group memberships
+    relationships:
+      - sso_to_role
+      - app_assignment
+      - member_of
+    source_type: group
+  - name: cloud
+    description: >
+      Roles chain into roles, control instances, pick up instance roles, read secrets, and
+      reach buckets, databases and keys through policies. Repeated so a chain can run.
+    relationships:
+      - can_assume
+      - can_control
+      - runs_as
+      - can_read
+      - bucket_policy
+      - role_policy
+      - holds_its_password
+      - decrypt
+      - encrypted_with
+      - access_point_policy
+      - fronts
+    payload_fields:
+      - entity.name
+      - entity.sub_type
+    source_type: asset
+    target_type: asset
+    repeat: 5
