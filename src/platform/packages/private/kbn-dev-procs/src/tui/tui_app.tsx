@@ -10,7 +10,12 @@
 import path from 'path';
 import React, { useEffect, useReducer, useState } from 'react';
 import type { ComponentType } from 'react';
-import type { SettingRow, SettingsKind } from '../settings/types';
+import type {
+  SettingRow,
+  SettingsEditor,
+  SettingsEditResult,
+  SettingsKind,
+} from '../settings/types';
 import type { Supervisor } from '../supervisor';
 import type { LogLine, ProcessState } from '../types';
 import type { InkModule } from './ink_module';
@@ -70,6 +75,13 @@ const PANE_TITLES: Readonly<Record<SettingsKind, string>> = {
   available: 'available settings',
 };
 
+/** How many settings fit in a settings pane of `height` rows, after its notes and the last notice. */
+const getSettingsRows = (state: TuiState, height: number): number => {
+  const entry = getSettingsEntry(state);
+  const notes = entry?.status === 'ready' ? entry.list.notes.length : 0;
+  return Math.max(height - notes - (state.notice ? 1 : 0), 1);
+};
+
 const displayPath = (file: string): string => {
   const relative = path.relative(process.cwd(), file);
   return relative.startsWith('..') ? file : relative;
@@ -122,6 +134,7 @@ export const createTuiApp = ({
             )}{' '}
             <Text bold={isSelected}>{view}</Text>
             {status ? <Text dimColor> {status.state}</Text> : null}
+            {state.pendingRestart.includes(view) ? <Text color="yellow"> ↻</Text> : null}
           </Text>
         );
       })}
@@ -172,14 +185,16 @@ export const createTuiApp = ({
     row: { key, value, source, detail },
     kind,
     keyWidth,
+    isCursor,
   }: {
     readonly row: SettingRow;
     readonly kind: SettingsKind;
     readonly keyWidth: number;
+    readonly isCursor: boolean;
   }) => {
     const isSet = value !== undefined;
     return (
-      <Text wrap="truncate-end">
+      <Text wrap="truncate-end" inverse={isCursor}>
         {kind === 'available' ? <Text color="green">{isSet ? '● ' : '  '}</Text> : null}
         <Text bold={isSet && kind === 'available'}>{key.padEnd(keyWidth)}</Text>
         {isSet ? <Text color="cyan"> {toDisplayText(value)}</Text> : null}
@@ -215,7 +230,9 @@ export const createTuiApp = ({
       .filter(Boolean)
       .join(' · ');
     const notes = entry?.status === 'ready' ? entry.list.notes : [];
-    const visible = getVisibleSettings(state, Math.max(height - notes.length, 1));
+    const visible = getVisibleSettings(state, getSettingsRows(state, height));
+    const { notice } = state;
+    const needsRestart = state.pendingRestart.includes(state.selected);
     const keyWidth = Math.min(Math.max(0, ...visible.map(({ key }) => key.length)), MAX_KEY_WIDTH);
     return (
       <Box
@@ -228,7 +245,15 @@ export const createTuiApp = ({
       >
         <Text bold wrap="truncate-end">
           {title}
+          {needsRestart ? (
+            <Text color="yellow"> · ↻ press r to restart and apply changes</Text>
+          ) : null}
         </Text>
+        {notice ? (
+          <Text color={notice.isError ? 'red' : 'green'} wrap="truncate-end">
+            {notice.text}
+          </Text>
+        ) : null}
         {!entry || entry.status === 'loading' ? (
           <Text color="yellow" wrap="truncate-end">
             loading…{hint ? ` ${hint}` : ''}
@@ -244,8 +269,14 @@ export const createTuiApp = ({
             {note}
           </Text>
         ))}
-        {visible.map((row) => (
-          <SettingLine key={row.key} row={row} kind={kind} keyWidth={keyWidth} />
+        {visible.map((row, index) => (
+          <SettingLine
+            key={row.key}
+            row={row}
+            kind={kind}
+            keyWidth={keyWidth}
+            isCursor={state.settingsScroll + index === state.settingsCursor}
+          />
         ))}
       </Box>
     );
@@ -254,6 +285,16 @@ export const createTuiApp = ({
   const Footer = ({ state }: { readonly state: TuiState }) => {
     if (state.isQuitting) {
       return <Text color="yellow">stopping every process…</Text>;
+    }
+    const { valueEdit } = state;
+    if (valueEdit) {
+      return (
+        <Text wrap="truncate-end">
+          <Text bold>{valueEdit.row.key}</Text> = {valueEdit.text}
+          <Text inverse> </Text>
+          <Text dimColor> enter save · esc cancel</Text>
+        </Text>
+      );
     }
     if (state.isEditingQuery) {
       return (
@@ -266,12 +307,13 @@ export const createTuiApp = ({
     }
     const processKeys =
       state.selected === ALL ? '' : ' · tab logs/settings · r restart · s start · x stop';
-    const scrollKeys =
-      state.pane === 'logs' ? 'PgUp/PgDn scroll · G follow' : 'PgUp/PgDn scroll · G top';
+    const paneKeys =
+      state.pane === 'logs'
+        ? '↑↓/←→ select process · PgUp/PgDn scroll · G follow'
+        : '↑↓ move · ←→ process · space toggle · e edit · u unset';
     return (
       <Text dimColor wrap="truncate-end">
-        ↑↓ select · / filter · esc clear filter · {scrollKeys}
-        {processKeys} · q quit
+        {paneKeys} · / filter{processKeys} · q quit
       </Text>
     );
   };
@@ -303,7 +345,7 @@ export const createTuiApp = ({
       };
     }, [supervisor, onSubscribed]);
 
-    const { selected, pane } = state;
+    const { selected, pane, settingsVersion } = state;
     const selectedState = state.statuses[selected]?.state;
     const provider = selected === ALL ? undefined : supervisor.getSettingsProvider(selected);
     useEffect(() => {
@@ -319,7 +361,7 @@ export const createTuiApp = ({
         });
         return;
       }
-      // Reloads when the process changes state, e.g. once Elasticsearch is ready to answer.
+      // Reloads when the process changes state, e.g. once Elasticsearch is ready to answer, and after a change.
       dispatch({ type: 'settingsLoading', processId: selected, kind: pane });
       provider[pane]().then(
         (list) => dispatch({ type: 'settingsLoaded', processId: selected, kind: pane, list }),
@@ -331,19 +373,49 @@ export const createTuiApp = ({
             error: error.message,
           })
       );
-    }, [provider, selected, pane, selectedState]);
+    }, [provider, selected, pane, selectedState, settingsVersion]);
+
+    const changeSetting = (change: (editor: SettingsEditor) => Promise<SettingsEditResult>) => {
+      const editor = provider?.editor;
+      if (!editor) {
+        dispatch({
+          type: 'notice',
+          text: `${selected} settings cannot be changed here`,
+          isError: true,
+        });
+        return;
+      }
+      change(editor).then(
+        ({ message, needsRestart }) =>
+          dispatch({ type: 'settingChanged', processId: selected, message, needsRestart }),
+        (error: Error) => dispatch({ type: 'notice', text: error.message, isError: true })
+      );
+    };
 
     useInput((input, key) => {
-      const { actions, control } = handleKey(state, input, key, Math.max(logLines - 1, 1));
+      const visibleRows = pane === 'logs' ? logLines : getSettingsRows(state, logLines);
+      const pageSize = pane === 'logs' ? Math.max(logLines - 1, 1) : visibleRows;
+      const { actions, control } = handleKey(state, input, key, { visibleRows, pageSize });
       actions.forEach(dispatch);
-      if (control === 'quit') {
-        onQuit();
-      } else if (control === 'restart') {
-        void supervisor.restart(state.selected);
-      } else if (control === 'start') {
-        void supervisor.start(state.selected);
-      } else if (control === 'stop') {
-        void supervisor.stop(state.selected);
+      switch (control?.type) {
+        case 'quit':
+          onQuit();
+          break;
+        case 'restart':
+          void supervisor.restart(selected);
+          break;
+        case 'start':
+          void supervisor.start(selected);
+          break;
+        case 'stop':
+          void supervisor.stop(selected);
+          break;
+        case 'setSetting':
+          changeSetting((editor) => editor.set(control.row, control.input));
+          break;
+        case 'unsetSetting':
+          changeSetting((editor) => editor.unset(control.row));
+          break;
       }
     });
 

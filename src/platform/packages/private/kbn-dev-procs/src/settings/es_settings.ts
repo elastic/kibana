@@ -9,12 +9,16 @@
 
 import type { ConfigObject } from './format';
 import { formatValue, sortRows } from './format';
-import type { SettingRow, SettingsList, SettingsProvider } from './types';
+import type { SettingRow, SettingsEditor, SettingsList, SettingsProvider } from './types';
 
 export interface EsSettingsOptions {
   readonly esUrl: string;
   readonly auth: { readonly username: string; readonly password: string };
+  /** Settings changed in the TUI, which Elasticsearch gets as -E flags the next time it starts. */
+  readonly overrides: Map<string, string>;
 }
+
+const TUI_SOURCE = 'tui, -E';
 
 interface NodesSettingsResponse {
   readonly nodes?: Readonly<Record<string, { readonly settings: ConfigObject }>>;
@@ -58,10 +62,43 @@ const getCurrentRows = async (options: EsSettingsOptions): Promise<readonly Sett
   Object.values(nodes).forEach(({ settings }) => add(settings, 'node'));
   add(cluster.persistent, 'cluster, persistent');
   add(cluster.transient, 'cluster, transient');
+  // Shown as set from the TUI, also before Elasticsearch restarted with them.
+  options.overrides.forEach((value, key) =>
+    byKey.set(key, { key, value: formatValue(key, value), source: TUI_SOURCE })
+  );
   return sortRows([...byKey.values()]);
 };
 
+const APPLIES = 'press r on es to restart it with that (this run only)';
+
+/** Keeps changes as -E flags for the next start of Elasticsearch; nothing is written to disk. */
+const createEsEditor = ({ overrides }: EsSettingsOptions): SettingsEditor => ({
+  set: async ({ key }, input) => {
+    const value = input.trim();
+    if (value === '') {
+      throw new Error('Enter a value, or press u to unset the setting');
+    }
+    overrides.set(key, value);
+    return {
+      message: `Elasticsearch gets -E ${key}=${formatValue(key, value)}; ${APPLIES}`,
+      needsRestart: true,
+    };
+  },
+  unset: async ({ key, source }) => {
+    if (!overrides.has(key)) {
+      throw new Error(
+        source
+          ? `${key} comes from ${source}, not from the TUI, so it cannot be unset here`
+          : `${key} is not set`
+      );
+    }
+    overrides.delete(key);
+    return { message: `Removed -E ${key}; ${APPLIES}`, needsRestart: true };
+  },
+});
+
 export const createEsSettingsProvider = (options: EsSettingsOptions): SettingsProvider => ({
+  editor: createEsEditor(options),
   current: async (): Promise<SettingsList> => ({
     rows: await getCurrentRows(options),
     notes: ['From elasticsearch.yml and -E flags (node), and the cluster settings API.'],

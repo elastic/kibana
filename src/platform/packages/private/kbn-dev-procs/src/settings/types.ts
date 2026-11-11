@@ -24,10 +24,25 @@ export interface SettingsList {
 
 export type SettingsKind = 'current' | 'available';
 
+export interface SettingsEditResult {
+  /** Says where the change went and how it applies. */
+  readonly message: string;
+  /** Whether the process has to restart before the change applies. */
+  readonly needsRestart: boolean;
+}
+
+/** Changes the settings of one process. Both methods reject with a message for the user when they cannot. */
+export interface SettingsEditor {
+  /** Sets `row.key` to what the user typed; `row` carries what is known about the setting, like its type. */
+  readonly set: (row: SettingRow, input: string) => Promise<SettingsEditResult>;
+  readonly unset: (row: SettingRow) => Promise<SettingsEditResult>;
+}
+
 /** Reads the settings of one process: the ones it runs with, and every one it supports. */
 export interface SettingsProvider {
   readonly current: () => Promise<SettingsList>;
   readonly available: () => Promise<SettingsList>;
   /** Shown while a list loads, e.g. when it takes a while. */
   readonly loadingHint?: Partial<Record<SettingsKind, string>>;
+  readonly editor?: SettingsEditor;
 }

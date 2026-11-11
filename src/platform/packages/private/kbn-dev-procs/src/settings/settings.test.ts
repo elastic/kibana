@@ -183,6 +183,7 @@ describe('Elasticsearch settings', () => {
     const provider = createEsSettingsProvider({
       esUrl,
       auth: { username: 'elastic', password: 'changeme' },
+      overrides: new Map(),
     });
     const { rows } = await provider.current();
     expect(rows).toEqual([
@@ -201,6 +202,7 @@ describe('Elasticsearch settings', () => {
     const provider = createEsSettingsProvider({
       esUrl,
       auth: { username: 'elastic', password: 'changeme' },
+      overrides: new Map(),
     });
     const { rows } = await provider.available();
     expect(rows).toEqual([
@@ -220,6 +222,7 @@ describe('Elasticsearch settings', () => {
     const provider = createEsSettingsProvider({
       esUrl: 'http://127.0.0.1:1',
       auth: { username: 'elastic', password: 'changeme' },
+      overrides: new Map(),
     });
     await expect(provider.current()).rejects.toThrow(
       'Elasticsearch is not answering at http://127.0.0.1:1; its settings show once it is ready'

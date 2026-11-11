@@ -114,7 +114,9 @@ export class ManagedProcess {
     if (this.child) {
       return;
     }
-    const { command, args, cwd, env, ready, readyTimeoutMs } = this.definition;
+    const { command, cwd, env, ready, readyTimeoutMs } = this.definition;
+    const args =
+      typeof this.definition.args === 'function' ? this.definition.args() : this.definition.args;
     const logStream = fs.createWriteStream(this.status.logFile, { flags: 'a' });
     logStream.write(`\n--- ${new Date().toISOString()} starting: ${command} ${args.join(' ')}\n`);
 

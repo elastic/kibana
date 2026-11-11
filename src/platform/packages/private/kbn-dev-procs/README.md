@@ -17,7 +17,7 @@ the output of the selected process, or of all of them.
 
 | Key               | Action                                           |
 | ----------------- | ------------------------------------------------ |
-| `↑` `↓` / `k` `j` | Select a process, or `all`                       |
+| `↑` `↓` / `←` `→` | Select a process, or `all`                       |
 | `tab`             | Switch the selected process between its logs, current settings and available settings |
 | `/`               | Filter the output; `enter` keeps it, `esc` clears |
 | `PgUp` `PgDn`     | Scroll back through the output; `G` follows again |
@@ -39,6 +39,19 @@ the output of the selected process, or of all of them.
 
 `/` filters settings by name, value or type. Values of settings that look like credentials, such as
 `elasticsearch.password`, are masked.
+
+In a settings pane, `↑` `↓` move the cursor and `←` `→` switch process. On the selected setting:
+
+| Key               | Action                                           |
+| ----------------- | ------------------------------------------------ |
+| `space`           | Toggle a boolean                                 |
+| `e` / `enter`     | Edit the value; `enter` saves, `esc` cancels     |
+| `u`               | Unset it                                         |
+
+Kibana changes are written to `config/kibana.dev.yml`, keeping the rest of the file, and Kibana's dev
+mode restarts its server by itself. Only that file is changed: a value from `kibana.yml` can be
+overridden there but not unset, and `--kibana-arg` flags win over it. Elasticsearch changes are passed
+as `-E` flags the next time it starts, for this run only; `↻` marks it until you restart it with `r`.
 
 Without a terminal, or with `--headless`, the output of every process is printed with a `[es]` or
 `[kibana]` prefix (`--hide-output` prints only state changes).

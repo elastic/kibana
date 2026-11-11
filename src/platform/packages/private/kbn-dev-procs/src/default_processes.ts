@@ -31,26 +31,35 @@ export const getDefaultProcesses = ({
   kibanaArgs = [],
   esUrl = DEFAULT_ES_URL,
   cacheDir,
-}: DefaultProcessOptions): readonly ProcessDefinition[] => [
-  {
-    id: 'es',
-    command: process.execPath,
-    args: [path.join(REPO_ROOT, 'scripts', 'es'), 'snapshot', ...esArgs],
-    cwd: REPO_ROOT,
-    ready: {
-      type: 'http',
-      url: new URL('/_cluster/health?wait_for_status=yellow&timeout=1s', esUrl).href,
-      auth: ES_AUTH,
+}: DefaultProcessOptions): readonly ProcessDefinition[] => {
+  // Settings changed in the TUI; Elasticsearch gets them as -E flags whenever it (re)starts.
+  const esOverrides = new Map<string, string>();
+  return [
+    {
+      id: 'es',
+      command: process.execPath,
+      args: () => [
+        path.join(REPO_ROOT, 'scripts', 'es'),
+        'snapshot',
+        ...esArgs,
+        ...[...esOverrides].flatMap(([key, value]) => ['-E', `${key}=${value}`]),
+      ],
+      cwd: REPO_ROOT,
+      ready: {
+        type: 'http',
+        url: new URL('/_cluster/health?wait_for_status=yellow&timeout=1s', esUrl).href,
+        auth: ES_AUTH,
+      },
+      settings: createEsSettingsProvider({ esUrl, auth: ES_AUTH, overrides: esOverrides }),
     },
-    settings: createEsSettingsProvider({ esUrl, auth: ES_AUTH }),
-  },
-  {
-    id: 'kibana',
-    command: process.execPath,
-    args: [path.join(REPO_ROOT, 'scripts', 'kibana'), '--dev', ...kibanaArgs],
-    cwd: REPO_ROOT,
-    dependsOn: ['es'],
-    ready: { type: 'log', pattern: /Kibana is now available/ },
-    settings: createKibanaSettingsProvider({ repoRoot: REPO_ROOT, kibanaArgs, cacheDir }),
-  },
-];
+    {
+      id: 'kibana',
+      command: process.execPath,
+      args: [path.join(REPO_ROOT, 'scripts', 'kibana'), '--dev', ...kibanaArgs],
+      cwd: REPO_ROOT,
+      dependsOn: ['es'],
+      ready: { type: 'log', pattern: /Kibana is now available/ },
+      settings: createKibanaSettingsProvider({ repoRoot: REPO_ROOT, kibanaArgs, cacheDir }),
+    },
+  ];
+};

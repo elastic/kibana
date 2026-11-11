@@ -23,7 +23,8 @@ export type ReadyCheck =
 export interface ProcessDefinition {
   readonly id: string;
   readonly command: string;
-  readonly args: readonly string[];
+  /** A function is called on every start, so a restart can pick up changed arguments. */
+  readonly args: readonly string[] | (() => readonly string[]);
   readonly cwd?: string;
   readonly env?: Readonly<Record<string, string>>;
   readonly dependsOn?: readonly string[];

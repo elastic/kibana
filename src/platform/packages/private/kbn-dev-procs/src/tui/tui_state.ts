@@ -42,6 +42,20 @@ export interface TuiState {
   readonly settings: Readonly<Record<string, SettingsEntry>>;
   /** How many matching settings the pane is scrolled down from the first one. */
   readonly settingsScroll: number;
+  /** The index of the selected setting among the matching ones. */
+  readonly settingsCursor: number;
+  /** Bumped after a setting changed, so the lists reload. */
+  readonly settingsVersion: number;
+  /** The value being typed for a setting. */
+  readonly valueEdit?: {
+    readonly processId: string;
+    readonly row: SettingRow;
+    readonly text: string;
+  };
+  /** Processes whose settings changed and that need a restart to apply them. */
+  readonly pendingRestart: readonly string[];
+  /** The outcome of the last settings change. */
+  readonly notice?: { readonly text: string; readonly isError: boolean };
 }
 
 export type TuiAction =
@@ -69,7 +83,19 @@ export type TuiAction =
       readonly processId: string;
       readonly kind: SettingsKind;
       readonly error: string;
-    };
+    }
+  | { readonly type: 'moveCursor'; readonly delta: number; readonly height: number }
+  | { readonly type: 'startValueEdit'; readonly row: SettingRow; readonly text: string }
+  | { readonly type: 'valueInput'; readonly text: string }
+  | { readonly type: 'valueBackspace' }
+  | { readonly type: 'endValueEdit' }
+  | {
+      readonly type: 'settingChanged';
+      readonly processId: string;
+      readonly message: string;
+      readonly needsRestart: boolean;
+    }
+  | { readonly type: 'notice'; readonly text: string; readonly isError: boolean };
 
 export const createTuiState = (statuses: readonly ProcessStatus[]): TuiState => ({
   views: [ALL, ...statuses.map(({ id }) => id)],
@@ -83,6 +109,9 @@ export const createTuiState = (statuses: readonly ProcessStatus[]): TuiState => 
   pane: 'logs',
   settings: {},
   settingsScroll: 0,
+  settingsCursor: 0,
+  settingsVersion: 0,
+  pendingRestart: [],
 });
 
 const TAB = '    ';
@@ -135,16 +164,45 @@ export const getMatchingSettings = (state: TuiState): readonly SettingRow[] => {
 export const getVisibleSettings = (state: TuiState, height: number): readonly SettingRow[] =>
   getMatchingSettings(state).slice(state.settingsScroll, state.settingsScroll + height);
 
+export const getSelectedSetting = (state: TuiState): SettingRow | undefined =>
+  getMatchingSettings(state)[state.settingsCursor];
+
 const clampSettingsScroll = (state: TuiState, settingsScroll: number): number =>
   Math.min(Math.max(settingsScroll, 0), Math.max(getMatchingSettings(state).length - 1, 0));
+
+/** Moves the cursor and scrolls just enough to keep it among the `height` visible settings. */
+const moveCursor = (state: TuiState, cursor: number, height: number): TuiState => {
+  const settingsCursor = clampSettingsScroll(state, cursor);
+  const { settingsScroll } = state;
+  const scroll =
+    settingsCursor < settingsScroll
+      ? settingsCursor
+      : settingsCursor >= settingsScroll + height
+      ? settingsCursor - height + 1
+      : settingsScroll;
+  return { ...state, settingsCursor, settingsScroll: clampSettingsScroll(state, scroll) };
+};
+
+const RESET_SETTINGS_POSITION = {
+  settingsScroll: 0,
+  settingsCursor: 0,
+  notice: undefined,
+} as const;
 
 const clampScroll = (state: TuiState, scrollOffset: number): number =>
   Math.min(Math.max(scrollOffset, 0), Math.max(getMatchingLines(state).length - 1, 0));
 
 export const reduceTuiState = (state: TuiState, action: TuiAction): TuiState => {
   switch (action.type) {
-    case 'status':
-      return { ...state, statuses: { ...state.statuses, [action.status.id]: action.status } };
+    case 'status': {
+      const { status } = action;
+      // A restart picks up the changed settings.
+      const pendingRestart =
+        status.state === 'starting'
+          ? state.pendingRestart.filter((id) => id !== status.id)
+          : state.pendingRestart;
+      return { ...state, statuses: { ...state.statuses, [status.id]: status }, pendingRestart };
+    }
     case 'lines': {
       const combined = [...state.lines, ...action.lines];
       const lines = combined.length > MAX_LINES ? combined.slice(-MAX_LINES) : combined;
@@ -162,8 +220,38 @@ export const reduceTuiState = (state: TuiState, action: TuiAction): TuiState => 
       const selected = state.views[nextIndex];
       // The combined view only has logs.
       const pane = selected === ALL ? 'logs' : state.pane;
-      return { ...state, selected, pane, scrollOffset: 0, settingsScroll: 0 };
+      return { ...state, selected, pane, scrollOffset: 0, ...RESET_SETTINGS_POSITION };
     }
+    case 'moveCursor':
+      return moveCursor(state, state.settingsCursor + action.delta, action.height);
+    case 'startValueEdit':
+      return {
+        ...state,
+        valueEdit: { processId: state.selected, row: action.row, text: action.text },
+        notice: undefined,
+      };
+    case 'valueInput':
+      return state.valueEdit
+        ? { ...state, valueEdit: { ...state.valueEdit, text: state.valueEdit.text + action.text } }
+        : state;
+    case 'valueBackspace':
+      return state.valueEdit
+        ? { ...state, valueEdit: { ...state.valueEdit, text: state.valueEdit.text.slice(0, -1) } }
+        : state;
+    case 'endValueEdit':
+      return { ...state, valueEdit: undefined };
+    case 'settingChanged':
+      return {
+        ...state,
+        settingsVersion: state.settingsVersion + 1,
+        notice: { text: action.message, isError: false },
+        pendingRestart:
+          action.needsRestart && !state.pendingRestart.includes(action.processId)
+            ? [...state.pendingRestart, action.processId]
+            : state.pendingRestart,
+      };
+    case 'notice':
+      return { ...state, notice: { text: action.text, isError: action.isError } };
     case 'scroll':
       return state.pane === 'logs'
         ? { ...state, scrollOffset: clampScroll(state, state.scrollOffset + action.delta) }
@@ -173,13 +261,13 @@ export const reduceTuiState = (state: TuiState, action: TuiAction): TuiState => 
             settingsScroll: clampSettingsScroll(state, state.settingsScroll - action.delta),
           };
     case 'scrollToBottom':
-      return { ...state, scrollOffset: 0, settingsScroll: 0 };
+      return { ...state, scrollOffset: 0, ...RESET_SETTINGS_POSITION };
     case 'cyclePane': {
       if (state.selected === ALL) {
         return state;
       }
       const pane = PANES[(PANES.indexOf(state.pane) + 1) % PANES.length];
-      return { ...state, pane, settingsScroll: 0 };
+      return { ...state, pane, ...RESET_SETTINGS_POSITION };
     }
     case 'settingsLoading':
     case 'settingsLoaded':
@@ -194,19 +282,39 @@ export const reduceTuiState = (state: TuiState, action: TuiAction): TuiState => 
           : // Keep showing the previous list while it reloads.
             previous ?? { status: 'loading' };
       const next = { ...state, settings: { ...state.settings, [key]: entry } };
-      return { ...next, settingsScroll: clampSettingsScroll(next, next.settingsScroll) };
+      return {
+        ...next,
+        settingsScroll: clampSettingsScroll(next, next.settingsScroll),
+        settingsCursor: clampSettingsScroll(next, next.settingsCursor),
+      };
     }
     case 'editQuery':
       return { ...state, isEditingQuery: true };
     case 'queryInput':
-      return { ...state, query: state.query + action.text, scrollOffset: 0, settingsScroll: 0 };
+      return {
+        ...state,
+        query: state.query + action.text,
+        scrollOffset: 0,
+        ...RESET_SETTINGS_POSITION,
+      };
     case 'queryBackspace':
-      return { ...state, query: state.query.slice(0, -1), scrollOffset: 0, settingsScroll: 0 };
+      return {
+        ...state,
+        query: state.query.slice(0, -1),
+        scrollOffset: 0,
+        ...RESET_SETTINGS_POSITION,
+      };
     case 'submitQuery':
       return { ...state, isEditingQuery: false };
     case 'clearQuery':
-      return { ...state, query: '', isEditingQuery: false, scrollOffset: 0, settingsScroll: 0 };
+      return {
+        ...state,
+        query: '',
+        isEditingQuery: false,
+        scrollOffset: 0,
+        ...RESET_SETTINGS_POSITION,
+      };
     case 'quit':
-      return { ...state, isQuitting: true, isEditingQuery: false };
+      return { ...state, isQuitting: true, isEditingQuery: false, valueEdit: undefined };
   }
 };

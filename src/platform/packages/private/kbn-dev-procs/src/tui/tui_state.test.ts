@@ -8,13 +8,14 @@
  */
 
 import type { InkKey } from './ink_module';
-import { handleKey } from './tui_keys';
+import { getToggledValue, handleKey } from './tui_keys';
 import {
   ALL,
   MAX_LINES,
   createTuiState,
   getMatchingLines,
   getMatchingSettings,
+  getSelectedSetting,
   getSettingsEntry,
   getVisibleLines,
   getVisibleSettings,
@@ -52,9 +53,13 @@ const initial = () =>
     ],
   });
 
+const SIZE = { visibleRows: 10, pageSize: 10 };
+
 const noKey: InkKey = {
   upArrow: false,
   downArrow: false,
+  leftArrow: false,
+  rightArrow: false,
   pageUp: false,
   pageDown: false,
   return: false,
@@ -203,9 +208,109 @@ describe('settings panes', () => {
   });
 
   it('switches panes with tab', () => {
-    expect(handleKey(onKibana(), '', { ...noKey, tab: true }, 10).actions).toEqual([
+    expect(handleKey(onKibana(), '', { ...noKey, tab: true }, SIZE).actions).toEqual([
       { type: 'cyclePane' },
     ]);
+  });
+});
+
+describe('editing settings', () => {
+  const list = {
+    rows: [
+      { key: 'a.flag', detail: 'boolean' },
+      { key: 'b.port', value: '5602', source: 'config/kibana.dev.yml', detail: 'number' },
+      { key: 'c.secret', value: '••••', source: 'config/kibana.dev.yml', detail: 'string' },
+      { key: 'd.limit', detail: 'default true' },
+    ],
+    notes: [],
+  };
+  const onSettings = () =>
+    apply(
+      initial(),
+      { type: 'select', direction: -1 },
+      { type: 'cyclePane' },
+      { type: 'cyclePane' },
+      { type: 'settingsLoaded', processId: 'kibana', kind: 'available', list }
+    );
+  const keyPress = (state: TuiState, input: string, key: Partial<InkKey> = {}) =>
+    handleKey(state, input, { ...noKey, ...key }, { visibleRows: 2, pageSize: 2 });
+  const press = (state: TuiState, input: string, key: Partial<InkKey> = {}) =>
+    apply(state, ...keyPress(state, input, key).actions);
+
+  it('moves a cursor through the settings, scrolling to keep it visible', () => {
+    const atLast = press(press(press(onSettings(), 'j'), '', { downArrow: true }), 'j');
+    expect(getSelectedSetting(atLast)?.key).toBe('d.limit');
+    expect(atLast.settingsScroll).toBe(2);
+    expect(press(atLast, 'j').settingsCursor).toBe(3);
+    const backUp = press(atLast, '', { pageUp: true });
+    expect(backUp).toMatchObject({ settingsCursor: 1, settingsScroll: 1 });
+  });
+
+  it('switches process with left and right in every pane', () => {
+    expect(press(onSettings(), '', { leftArrow: true }).selected).toBe('es');
+    expect(press(onSettings(), 'l').selected).toBe(ALL);
+  });
+
+  it('toggles booleans with space, from their value or their default', () => {
+    expect(getToggledValue({ key: 'x', value: 'true' })).toBe('false');
+    expect(getToggledValue({ key: 'x', detail: 'default true' })).toBe('false');
+    expect(getToggledValue({ key: 'x', detail: 'boolean' })).toBe('true');
+    expect(getToggledValue({ key: 'x', value: '5602' })).toBeUndefined();
+
+    expect(keyPress(onSettings(), ' ').control).toEqual({
+      type: 'setSetting',
+      row: list.rows[0],
+      input: 'true',
+    });
+    const onPort = press(onSettings(), 'j');
+    expect(press(onPort, ' ').notice).toEqual({
+      text: 'b.port is not a boolean; press e to edit its value',
+      isError: true,
+    });
+  });
+
+  it('edits a value from what it is, and saves it on enter', () => {
+    const onPort = press(onSettings(), 'j');
+    const editing = press(onPort, 'e');
+    expect(editing.valueEdit).toEqual({ processId: 'kibana', row: list.rows[1], text: '5602' });
+    // Command keys are text while editing.
+    const typed = press(press(press(editing, '', { backspace: true }), '3'), 'q');
+    expect(typed.valueEdit?.text).toBe('5603q');
+    const saved = keyPress(typed, '', { return: true });
+    expect(saved.control).toEqual({ type: 'setSetting', row: list.rows[1], input: '5603q' });
+    expect(apply(typed, ...saved.actions).valueEdit).toBeUndefined();
+    expect(press(typed, '', { escape: true }).valueEdit).toBeUndefined();
+  });
+
+  it('does not put a masked secret into the editor', () => {
+    const onSecret = press(press(onSettings(), 'j'), 'j');
+    expect(press(onSecret, '', { return: true }).valueEdit?.text).toBe('');
+  });
+
+  it('unsets with u', () => {
+    expect(keyPress(onSettings(), 'u').control).toEqual({
+      type: 'unsetSetting',
+      row: list.rows[0],
+    });
+  });
+
+  it('marks a process for a restart until it starts again', () => {
+    const changed = apply(onSettings(), {
+      type: 'settingChanged',
+      processId: 'es',
+      message: 'restart es',
+      needsRestart: true,
+    });
+    expect(changed).toMatchObject({
+      pendingRestart: ['es'],
+      settingsVersion: 1,
+      notice: { text: 'restart es', isError: false },
+    });
+    const restarted = apply(changed, {
+      type: 'status',
+      status: status('es', { state: 'starting' }),
+    });
+    expect(restarted.pendingRestart).toEqual([]);
   });
 });
 
@@ -221,40 +326,42 @@ describe('toDisplayText', () => {
 describe('handleKey', () => {
   it('controls the selected process, but not the combined view', () => {
     const selectedEs = apply(initial(), { type: 'select', direction: 1 });
-    expect(handleKey(selectedEs, 'r', noKey, 10).control).toBe('restart');
-    expect(handleKey(selectedEs, 's', noKey, 10).control).toBe('start');
-    expect(handleKey(selectedEs, 'x', noKey, 10).control).toBe('stop');
-    expect(handleKey(initial(), 'r', noKey, 10).control).toBeUndefined();
+    expect(handleKey(selectedEs, 'r', noKey, SIZE).control).toEqual({ type: 'restart' });
+    expect(handleKey(selectedEs, 's', noKey, SIZE).control).toEqual({ type: 'start' });
+    expect(handleKey(selectedEs, 'x', noKey, SIZE).control).toEqual({ type: 'stop' });
+    expect(handleKey(initial(), 'r', noKey, SIZE).control).toBeUndefined();
   });
 
   it('quits on q and Ctrl+C, and ignores keys once quitting', () => {
-    expect(handleKey(initial(), 'q', noKey, 10)).toEqual({
+    expect(handleKey(initial(), 'q', noKey, SIZE)).toEqual({
       actions: [{ type: 'quit' }],
-      control: 'quit',
+      control: { type: 'quit' },
     });
-    expect(handleKey(initial(), 'c', { ...noKey, ctrl: true }, 10).control).toBe('quit');
+    expect(handleKey(initial(), 'c', { ...noKey, ctrl: true }, SIZE).control).toEqual({
+      type: 'quit',
+    });
     const quitting = apply(initial(), { type: 'quit' });
-    expect(handleKey(quitting, 'r', noKey, 10)).toEqual({ actions: [] });
+    expect(handleKey(quitting, 'r', noKey, SIZE)).toEqual({ actions: [] });
   });
 
   it('types into the filter while editing it, so command keys become text', () => {
     const editing = apply(initial(), { type: 'editQuery' });
-    expect(handleKey(editing, 'q', noKey, 10)).toEqual({
+    expect(handleKey(editing, 'q', noKey, SIZE)).toEqual({
       actions: [{ type: 'queryInput', text: 'q' }],
     });
-    expect(handleKey(editing, '', { ...noKey, return: true }, 10).actions).toEqual([
+    expect(handleKey(editing, '', { ...noKey, return: true }, SIZE).actions).toEqual([
       { type: 'submitQuery' },
     ]);
-    expect(handleKey(editing, '', { ...noKey, escape: true }, 10).actions).toEqual([
+    expect(handleKey(editing, '', { ...noKey, escape: true }, SIZE).actions).toEqual([
       { type: 'clearQuery' },
     ]);
   });
 
   it('scrolls by a page', () => {
-    expect(handleKey(initial(), '', { ...noKey, pageUp: true }, 10).actions).toEqual([
+    expect(handleKey(initial(), '', { ...noKey, pageUp: true }, SIZE).actions).toEqual([
       { type: 'scroll', delta: 10 },
     ]);
-    expect(handleKey(initial(), '', { ...noKey, pageDown: true }, 10).actions).toEqual([
+    expect(handleKey(initial(), '', { ...noKey, pageDown: true }, SIZE).actions).toEqual([
       { type: 'scroll', delta: -10 },
     ]);
   });

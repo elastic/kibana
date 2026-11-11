@@ -38,6 +38,8 @@ export interface InkTextProps {
 export interface InkKey {
   readonly upArrow: boolean;
   readonly downArrow: boolean;
+  readonly leftArrow: boolean;
+  readonly rightArrow: boolean;
   readonly pageUp: boolean;
   readonly pageDown: boolean;
   readonly return: boolean;

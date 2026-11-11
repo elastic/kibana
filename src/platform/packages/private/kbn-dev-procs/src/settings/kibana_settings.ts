@@ -14,7 +14,8 @@ import { promisify } from 'util';
 import { getConfigFromFiles } from '@kbn/config';
 import type { ConfigValue } from './format';
 import { flattenConfig, formatValue, sortRows } from './format';
-import type { SettingRow, SettingsList, SettingsProvider } from './types';
+import { parseSettingInput, writeConfigSetting } from './kibana_dev_config';
+import type { SettingRow, SettingsEditor, SettingsList, SettingsProvider } from './types';
 
 /** A Kibana setting and its schema type, as `ConfigService.listAllSettings()` reports it. */
 export interface KibanaSettingType {
@@ -142,7 +143,55 @@ const listKibanaSettings = async (
   return JSON.parse(fs.readFileSync(cacheFile, 'utf8'));
 };
 
+const APPLIES = "Kibana's dev mode restarts its server to apply it";
+
+/** Changes settings in config/kibana.dev.yml, which Kibana's dev mode watches. */
+const createKibanaEditor = (options: KibanaSettingsOptions): SettingsEditor => {
+  const { repoRoot, kibanaArgs } = options;
+  const devConfigFile = path.join(repoRoot, 'config', 'kibana.dev.yml');
+  const devConfig = path.relative(repoRoot, devConfigFile);
+  const getSource = (key: string): string | undefined =>
+    getKibanaCurrentSettings(options).rows.find((row) => row.key === key)?.source;
+  const ensureDevConfigIsRead = () => {
+    if (!parseKibanaArgs(kibanaArgs).loadsDevConfig) {
+      throw new Error(`Kibana runs with --no-dev-config, so it does not read ${devConfig}`);
+    }
+  };
+
+  return {
+    set: async ({ key, detail }, input) => {
+      ensureDevConfigIsRead();
+      const value = parseSettingInput(input, detail);
+      writeConfigSetting(devConfigFile, key, value);
+      const flagWins =
+        getSource(key) === 'flag' ? ' A --kibana-arg flag sets it too, and the flag wins.' : '';
+      return {
+        message: `Set ${key} to ${formatValue(key, value)} in ${devConfig}; ${APPLIES}.${flagWins}`,
+        needsRestart: false,
+      };
+    },
+    unset: async ({ key }) => {
+      ensureDevConfigIsRead();
+      const source = getSource(key);
+      if (source === undefined) {
+        throw new Error(`${key} is not set`);
+      }
+      if (source === 'flag') {
+        throw new Error(`${key} is set by a --kibana-arg flag, which the TUI cannot change`);
+      }
+      if (source !== devConfig) {
+        throw new Error(
+          `${key} is set in ${source}; the TUI only changes ${devConfig}, where a value overrides it`
+        );
+      }
+      writeConfigSetting(devConfigFile, key, undefined);
+      return { message: `Removed ${key} from ${devConfig}; ${APPLIES}.`, needsRestart: false };
+    },
+  };
+};
+
 export const createKibanaSettingsProvider = (options: KibanaSettingsOptions): SettingsProvider => ({
+  editor: createKibanaEditor(options),
   loadingHint: {
     available:
       "Listing every Kibana setting boots Kibana's plugins; the first time per commit takes about 20s",
