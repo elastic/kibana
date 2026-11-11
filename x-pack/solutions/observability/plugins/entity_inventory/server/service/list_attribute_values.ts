@@ -8,18 +8,13 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { RegisteredEntityDefinition } from '@kbn/entity-store/server';
 import { InventoryRequestError } from '../inventory/errors/inventory_request_error';
-import { InventoryTypeDefinitionError } from '../inventory/errors/inventory_type_definition_error';
-import { executeEsql, planRowLimit, probeSources, toSourceError } from '../inventory/executor';
+import { executeEsql, planRowLimit, toSourceError } from '../inventory/executor';
 import type { EsqlQueryResult, SourceError } from '../inventory/executor';
-import {
-  ATTRIBUTE_VALUE_COLUMN,
-  generateAttributeValuesQueries,
-  getDynamicBlock,
-  planSources,
-} from '../inventory/generator';
+import { ATTRIBUTE_VALUE_COLUMN, generateAttributeValuesQueries } from '../inventory/generator';
 import type { GeneratedQuery, QueryPlan } from '../inventory/generator';
 import type { ListAttributeValuesRequest } from '../inventory/types';
 import type { AttributeValuesResponse } from '../routes/types';
+import { probeAndPlanSources, toTypeDefinitionError } from './planning';
 
 /** What listing the values of an attribute reads from the plugin. */
 export interface AttributeValuesDependencies {
@@ -73,26 +68,10 @@ const planAttributeValues = async (
   return Promise.all(
     suggesting.map(async (definition): Promise<AttributeValuesPlan> => {
       try {
-        const { sources } = getDynamicBlock(definition);
-        const probes = await probeSources(
+        const { allPlans, probeErrors, failedPatterns } = await probeAndPlanSources(
           esClient,
-          sources.map(({ indexPattern }) => indexPattern),
-          { signal }
-        );
-        const probeErrors: SourceError[] = [];
-        probes.forEach((probe, indexPattern) => {
-          if (probe.failed) {
-            probeErrors.push({ indexPattern, status: probe.status, reason: probe.reason });
-          }
-        });
-        const failedPatterns = new Set(probeErrors.map(({ indexPattern }) => indexPattern));
-
-        const allPlans = planSources(
           definition,
-          sources.map(({ indexPattern }) => {
-            const probe = probes.get(indexPattern);
-            return { hasTimeSeries: probe !== undefined && !probe.failed && probe.hasTimeSeries };
-          })
+          signal
         );
         const allQueries = generateAttributeValuesQueries(definition, allPlans, {
           attribute,
@@ -113,12 +92,7 @@ const planAttributeValues = async (
           probeErrors,
         };
       } catch (error) {
-        if (error.name !== 'InventoryDefinitionError') {
-          throw error;
-        }
-        const definitionError = new InventoryTypeDefinitionError(definition.type, error.message);
-        logger.error(definitionError.message);
-        throw definitionError;
+        throw toTypeDefinitionError(logger, definition, error);
       }
     })
   );

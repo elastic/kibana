@@ -7,7 +7,6 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EntityDefinitionsClient, RegisteredEntityDefinition } from '@kbn/entity-store/server';
-import { InventoryTypeDefinitionError } from '../inventory/errors/inventory_type_definition_error';
 import { InventoryTypeNotFoundError } from '../inventory/errors/inventory_type_not_found_error';
 import {
   applyLimit,
@@ -18,7 +17,6 @@ import {
   mergeRows,
   orderRows,
   planRowLimit,
-  probeSources,
   summarizeResults,
   toSourceError,
 } from '../inventory/executor';
@@ -34,7 +32,6 @@ import {
   ENTITY_ID_COLUMN,
   generateListQueries,
   getDynamicBlock,
-  planSources,
   resolveIdentityPlan,
 } from '../inventory/generator';
 import type { GeneratedQuery, IdentityPlan, OutputColumn, QueryPlan } from '../inventory/generator';
@@ -49,6 +46,7 @@ import type {
   UnavailableColumn,
 } from '../routes/types';
 import { listAttributeValues } from './list_attribute_values';
+import { probeAndPlanSources, toTypeDefinitionError } from './planning';
 
 /** Everything the list queries are generated from. */
 interface ListPlan {
@@ -259,26 +257,10 @@ export class InventoryService {
     signal: AbortSignal | undefined
   ): Promise<ListPlan> => {
     try {
-      const { sources } = getDynamicBlock(definition);
-      const probes = await probeSources(
+      const { allPlans, probeErrors, failedPatterns } = await probeAndPlanSources(
         this.esClient,
-        sources.map(({ indexPattern }) => indexPattern),
-        { signal }
-      );
-      const probeErrors: SourceError[] = [];
-      probes.forEach((probe, indexPattern) => {
-        if (probe.failed) {
-          probeErrors.push({ indexPattern, status: probe.status, reason: probe.reason });
-        }
-      });
-      const failedPatterns = new Set(probeErrors.map(({ indexPattern }) => indexPattern));
-
-      const allPlans = planSources(
         definition,
-        sources.map(({ indexPattern }) => {
-          const probe = probes.get(indexPattern);
-          return { hasTimeSeries: probe !== undefined && !probe.failed && probe.hasTimeSeries };
-        })
+        signal
       );
       const identity = resolveIdentityPlan(definition);
       const columns = buildColumns(definition, allPlans, identity);
@@ -294,12 +276,7 @@ export class InventoryService {
         probeErrors,
       };
     } catch (error) {
-      if (error.name !== 'InventoryDefinitionError') {
-        throw error;
-      }
-      const definitionError = new InventoryTypeDefinitionError(definition.type, error.message);
-      this.logger.error(definitionError.message);
-      throw definitionError;
+      throw toTypeDefinitionError(this.logger, definition, error);
     }
   };
 
