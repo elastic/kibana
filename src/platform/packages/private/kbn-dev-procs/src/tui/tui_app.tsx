@@ -54,6 +54,9 @@ const SPARE_ROWS = 1;
 const CHROME_ROWS = SPARE_ROWS + 5;
 // How often the top bar re-reads the branch, which can change while the TUI runs.
 const REPO_INFO_INTERVAL_MS = 5000;
+// Plain Unicode, so they show without a patched font.
+const BRANCH_SYMBOL = '⎇';
+const COMMIT_SYMBOL = '◉';
 
 const STATE_COLORS: Readonly<Record<ProcessState, string>> = {
   waiting: 'yellow',
@@ -318,8 +321,13 @@ export const createTuiApp = ({
       </Text>
       {repoInfo ? (
         <Text wrap="truncate-end">
-          <Text color="magenta">{repoInfo.branch ?? 'detached HEAD'}</Text>
-          <Text dimColor> {repoInfo.shortCommit}</Text>
+          <Text color="magenta">
+            {BRANCH_SYMBOL} {repoInfo.branch ?? 'detached HEAD'}
+          </Text>
+          <Text dimColor>
+            {'  '}
+            {COMMIT_SYMBOL} {repoInfo.shortCommit}
+          </Text>
         </Text>
       ) : null}
     </Box>
