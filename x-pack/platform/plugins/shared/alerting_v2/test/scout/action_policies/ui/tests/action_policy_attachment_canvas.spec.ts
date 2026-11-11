@@ -90,15 +90,24 @@ test.describe(
 
     const expectCanvasContent = async (pageObjects: AlertingPageObjects, policyName: string) => {
       const { canvas, renderErrorCallout } = pageObjects.agentChat;
-      await expect(canvas.getByRole('heading', { name: policyName, level: 2 })).toBeVisible();
-      for (const term of ['Description', 'Matcher', 'Dispatch per', 'Frequency', 'Destinations']) {
-        await expect(canvas.getByText(term, { exact: true })).toBeVisible();
-      }
-      await expect(canvas.getByText(POLICY_DESCRIPTION)).toBeVisible();
-      await expect(canvas.getByText('Rule routing tags include')).toBeVisible();
-      await expect(canvas.getByText(ROUTING_TAG, { exact: true })).toBeVisible();
-      await expect(canvas.getByText('On status change', { exact: true })).toBeVisible();
-      await expect(canvas.getByText(workflowName)).toBeVisible();
+      // The policy name is the title of the Agent Builder canvas header, not part of the canvas body.
+      await expect(canvas.getByText(policyName, { exact: true })).toBeVisible();
+      await expect(canvas.getByTestId('actionPolicyDetailsFlyoutDefinition')).toBeVisible();
+      await expect(canvas.getByTestId('actionPolicyDetailsFlyoutNotification')).toBeVisible();
+      await expect(canvas.getByTestId('actionPolicyDetailsFlyoutDestinations')).toBeVisible();
+      await expect(canvas.getByTestId('actionPolicyDetailsFlyoutDescriptionBlock')).toContainText(
+        POLICY_DESCRIPTION
+      );
+      await expect(canvas.getByTestId('actionPolicyDetailsFlyoutPolicyScopeBlock')).toContainText(
+        ROUTING_TAG
+      );
+      await expect(canvas.getByTestId('actionPolicyDetailsFlyoutDispatchModeBlock')).toContainText(
+        'Alert'
+      );
+      await expect(canvas.getByTestId('actionPolicyDetailsFlyoutFrequencyBlock')).toContainText(
+        'On status change'
+      );
+      await expect(canvas.getByTestId('actionPolicyDestinationCard')).toContainText(workflowName);
       await expect(renderErrorCallout).toHaveCount(0);
     };
 
