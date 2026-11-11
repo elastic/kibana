@@ -510,9 +510,9 @@ describe('runHop', () => {
       },
       execute
     );
-    // 10 frontier ids, then the 15 visited ids.
+    // The 10 smallest frontier ids (the cap sorts first), then the 15 visited ids.
     expect(execute.calls[0]).toHaveLength(10 + frontier.length);
-    expect(execute.calls[0].slice(0, 10)).toEqual(frontier.slice(0, 10));
+    expect(execute.calls[0].slice(0, 10)).toEqual([...frontier].sort().slice(0, 10));
     expect(out.truncated).toBe(true);
     expect(out.stats).toMatchObject({
       frontier_size: 15,
@@ -955,7 +955,11 @@ describe('runHop', () => {
     );
     // The two kept ids are the smallest, whatever order the previous hop produced them in.
     expect(execute.calls[0].slice(0, 2)).toEqual(['a', 'b']);
-    expect(out.stats).toMatchObject({ frontier_size: 3, frontier_expanded: 2, dropped_frontier: 1 });
+    expect(out.stats).toMatchObject({
+      frontier_size: 3,
+      frontier_expanded: 2,
+      dropped_frontier: 1,
+    });
     expect(out.truncated).toBe(true);
   });
 

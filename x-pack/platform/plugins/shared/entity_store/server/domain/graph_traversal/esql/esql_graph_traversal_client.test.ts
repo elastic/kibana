@@ -79,7 +79,7 @@ describe('EsqlGraphTraversalClient', () => {
     const [statement] = statements();
     expect(statement).toContain('TO (`entity.relationships.member_of.ids`)');
     expect(statement).toContain('"max_hops":1');
-    expect(response.output.hops_planned).toBe(1);
+    expect(response.output?.hops_planned).toBe(1);
   });
 
   it('returns the seed alone when the first hop has no known field', async () => {
@@ -93,7 +93,7 @@ describe('EsqlGraphTraversalClient', () => {
       node_count: 1,
       edge_count: 0,
     });
-    expect(response.output.nodes[0]).toMatchObject({ id: 'user:a@okta', hop: 0, via: 'seed' });
+    expect(response.output?.nodes[0]).toMatchObject({ id: 'user:a@okta', hop: 0, via: 'seed' });
   });
 
   it('keeps every field when the fields cannot be read or over edge documents', async () => {
