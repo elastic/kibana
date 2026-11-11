@@ -206,7 +206,7 @@ export const ActionPolicyCanvasContent = ({
   ]);
 
   return (
-    <EuiPanel paddingSize="l" hasShadow={false}>
+    <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
       <EuiTitle size="s">
         <h2>{data.name ?? EMPTY_VALUE}</h2>
       </EuiTitle>

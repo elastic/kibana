@@ -51,17 +51,17 @@ describe('createActionPolicyAttachmentDefinition', () => {
   });
 
   describe('getIcon', () => {
-    it('returns reporter', () => {
+    it('returns tablePlay', () => {
       const definition = createActionPolicyAttachmentDefinition(createMockServices());
-      expect(definition.getIcon!()).toBe('reporter');
+      expect(definition.getIcon!()).toBe('tablePlay');
     });
   });
 
   describe('getHeader', () => {
-    it('returns the reporter icon without badges for a draft', () => {
+    it('returns the tablePlay icon without badges for a draft', () => {
       const definition = createActionPolicyAttachmentDefinition(createMockServices());
       expect(definition.getHeader!({ attachment: createAttachment() })).toEqual({
-        icon: 'reporter',
+        icon: 'tablePlay',
       });
     });
 

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { createUiSettingsMock } from '../../../test_utils/ui_settings_mock';
@@ -15,6 +15,7 @@ import { ApplicationsSummaryPanel } from './applications_summary_panel';
 
 const SUMMARY: ApplicationsSummary = {
   applications: 5,
+  sessions: 6702,
   pageLoads: 1533,
   errorsPerPageLoad: 0.5,
   failedHttpRatio: 0.125,
@@ -41,10 +42,19 @@ describe('ApplicationsSummaryPanel', () => {
     renderPanel();
 
     expect(stat('applications')).toHaveTextContent('5');
+    expect(stat('sessions')).toHaveTextContent('6,702');
     expect(stat('pageLoads')).toHaveTextContent('1,533');
     expect(stat('errorsPerPageLoad')).toHaveTextContent('0.50');
     expect(stat('failedHttp')).toHaveTextContent('12.5%');
     expect(stat('poorCoreWebVitals')).toHaveTextContent('2');
+  });
+
+  it('shows a dash for the sessions without a total, and where they come from on hover', async () => {
+    renderPanel({ ...SUMMARY, sessions: null });
+
+    expect(stat('sessions')).toHaveTextContent('—');
+    fireEvent.mouseOver(screen.getByText('Sessions'));
+    expect(await screen.findByText(/Counted from the session summaries/)).toBeInTheDocument();
   });
 
   it('shows a dash for the rates without page loads or requests', () => {

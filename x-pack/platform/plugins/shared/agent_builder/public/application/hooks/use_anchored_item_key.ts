@@ -13,15 +13,15 @@ import { useCurrentConversationStreamType } from './use_is_current_conversation_
 /**
  * Key of the timeline item the user's latest send appended: the item that landed at the position
  * recorded when this conversation's stream started. Kept after the stream ends so the space below
- * it does not collapse; replaced on the next send. A post without a run (trigger mode "never")
- * starts no stream and does not anchor: nothing follows the message, so there is nothing to make
- * room for.
+ * it does not collapse; replaced on the next send. Only a send anchors: a resume continues the
+ * turn already on screen, an attached run was not sent from here, and a post without a run
+ * (trigger mode "never") starts no stream, so in each case there is nothing to make room for.
  */
 export const useAnchoredItemKey = (): string | undefined => {
   const conversationId = useConversationId();
   const items = useTimelineItems();
   const streamType = useCurrentConversationStreamType();
-  const isResuming = streamType === 'resume';
+  const isSending = streamType === 'send';
   const isActive = streamType !== undefined;
   const observed = useRef<{ conversationId?: string; active: boolean }>({ active: false });
   const lastKey = useRef<string>();
@@ -40,10 +40,10 @@ export const useAnchoredItemKey = (): string | undefined => {
       setAnchor(undefined);
       return;
     }
-    if (isActive && !previous.active && !isResuming) {
+    if (isActive && !previous.active && isSending) {
       setAnchor({ index: items.length });
     }
-  }, [isActive, isResuming, conversationId, items.length]);
+  }, [isActive, isSending, conversationId, items.length]);
 
   if (!anchor) {
     lastKey.current = undefined;

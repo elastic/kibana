@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/core-theme-browser'
   - '@kbn/core-theme-browser-internal'
+  - '@kbn/core-theme-browser-internal-types'
   - '@kbn/lazy-object'
 tags:
   - shared-browser

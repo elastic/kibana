@@ -55,7 +55,7 @@ export const createSourceListTool = ({
   id: NIGHTSHIFT_SOURCE_LIST_TOOL_ID,
   type: ToolType.builtin,
   description: dedent`
-    List the Nightshift sources defined in the current space. This is the full source catalog:
+    List the nightshift sources defined in the current space. This is the full source catalog:
     it includes disabled sources and sources that have no Knowledge Indicators (KIs).
 
     Each source reports its \`id\`, \`slug\`, \`title\`, \`description\`, \`tags\`, \`esql\` (the

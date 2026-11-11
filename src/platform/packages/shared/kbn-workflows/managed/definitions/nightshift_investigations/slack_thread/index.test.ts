@@ -155,6 +155,7 @@ describe('Nightshift Slack thread workflow', () => {
         'run-as-mode': 'inherit',
         inputs: {
           investigation_id: '{{ steps.find_investigation.output.investigation_id }}',
+          context: { entry_point: 'slack' },
         },
       },
     });

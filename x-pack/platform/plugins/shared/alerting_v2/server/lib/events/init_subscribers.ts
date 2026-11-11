@@ -7,9 +7,11 @@
 
 import type { Container } from 'inversify';
 import { AlertActionWorkflowSubscriber } from './alert_action_workflow_subscriber/alert_action_workflow_subscriber';
+import { AlertActionTelemetrySubscriber } from './alert_action_telemetry_subscriber/alert_action_telemetry_subscriber';
 import { RuleWorkflowSubscriber } from './rule_workflow_subscriber/rule_workflow_subscriber';
 import { RuleChangesHistorySubscriber } from './rule_changes_history_subscriber/rule_changes_history_subscriber';
 import { RuleExecutorWorkflowSubscriber } from './rule_executor_workflow_subscriber/rule_executor_workflow_subscriber';
+import { AlertStatusChangedWorkflowSubscriber } from './alert_status_changed_workflow_subscriber/alert_status_changed_workflow_subscriber';
 import { RuleTelemetrySubscriber } from './rule_telemetry_subscriber/rule_telemetry_subscriber';
 import { ActionPolicyTelemetrySubscriber } from './action_policy_telemetry_subscriber/action_policy_telemetry_subscriber';
 
@@ -22,9 +24,11 @@ import { ActionPolicyTelemetrySubscriber } from './action_policy_telemetry_subsc
  */
 export function initSubscribers(container: Container): void {
   container.get(AlertActionWorkflowSubscriber).start();
+  container.get(AlertActionTelemetrySubscriber).start();
   container.get(RuleWorkflowSubscriber).start();
   container.get(RuleChangesHistorySubscriber).start();
   container.get(RuleExecutorWorkflowSubscriber).start();
+  container.get(AlertStatusChangedWorkflowSubscriber).start();
   container.get(RuleTelemetrySubscriber).start();
   container.get(ActionPolicyTelemetrySubscriber).start();
 }

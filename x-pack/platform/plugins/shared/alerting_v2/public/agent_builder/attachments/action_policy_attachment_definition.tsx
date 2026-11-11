@@ -37,9 +37,9 @@ export const createActionPolicyAttachmentDefinition = ({
   container,
 }: ActionPolicyAttachmentDefinitionServices): AttachmentUIDefinition<ActionPolicyAttachment> => ({
   getLabel: (attachment) => attachment.data.name ?? 'Action Policy',
-  getIcon: () => 'reporter',
+  getIcon: () => 'tablePlay',
   getHeader: ({ attachment }) => ({
-    icon: 'reporter',
+    icon: 'tablePlay',
     badges: hasUnsavedChanges(attachment) ? [UNSAVED_CHANGES_BADGE] : undefined,
   }),
 

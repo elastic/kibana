@@ -1,0 +1,247 @@
+{
+  "components": {
+    "schemas": {
+      "ListProjectsResponse": {
+        "properties": {
+          "nextPageToken": {
+            "type": "string"
+          },
+          "projects": {
+            "items": {
+              "$ref": "#/components/schemas/Project"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Project": {
+        "properties": {
+          "configuredCapabilities": {
+            "items": {
+              "type": "string"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "createTime": {
+            "format": "google-datetime",
+            "type": "string"
+          },
+          "isManagementProject": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "lifecycleState": {
+            "enum": [
+              "LIFECYCLE_STATE_UNSPECIFIED",
+              "ACTIVE",
+              "DELETE_REQUESTED",
+              "DELETE_IN_PROGRESS"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parent": {
+            "$ref": "#/components/schemas/ResourceId"
+          },
+          "projectId": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "format": "int64",
+            "type": "string"
+          },
+          "tags": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "ResourceId": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "Oauth2": {
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://accounts.google.com/o/oauth2/auth",
+            "scopes": {
+              "https://www.googleapis.com/auth/cloud-platform": "See, edit, configure, and delete your Google Cloud data and see the email address for your Google Account.",
+              "https://www.googleapis.com/auth/cloud-platform.read-only": "View your data across Google Cloud services and see the email address of your Google Account"
+            },
+            "tokenUrl": "https://oauth2.googleapis.com/token"
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "Cloud Resource Manager API"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/v1/projects": {
+      "get": {
+        "operationId": "cloudresourcemanager.projects.list",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListProjectsResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/cloud-platform.read-only"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://cloudresourcemanager.googleapis.com"
+    }
+  ]
+}

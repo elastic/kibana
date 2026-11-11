@@ -27,6 +27,10 @@ jest.mock('../../../hooks/use_kibana', () => ({
   }),
 }));
 
+jest.mock('./use_investigation_assignees', () => ({
+  useInvestigationAssignees: () => () => null,
+}));
+
 const investigation: InvestigationSummary = {
   id: 'investigation-1',
   title: 'Checkout errors',
@@ -46,6 +50,7 @@ const makeSection = (
   id,
   investigations: [],
   total: 0,
+  matchTotal: 0,
   hasMore: false,
   isInitialLoading: false,
   isFetchingNextPage: false,

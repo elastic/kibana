@@ -134,7 +134,16 @@ describe('code scores', () => {
     ).toBe(0);
   });
 
-  it('reads Tier 1 status from the headline when there is no SSE attachment', () => {
+  it('reads IOC Hunt status from the headline when there is no SSE attachment', () => {
+    expect(
+      scoreTier1Status(
+        buildExpected({ tier1Status: 'no_environment_hits' }),
+        buildArtifacts({ hunt: { headline: 'IOC Hunt found no matches in the environment' } })
+      ).score
+    ).toBe(1);
+  });
+
+  it('still reads the legacy Tier 1 headline wording from stored runs', () => {
     expect(
       scoreTier1Status(
         buildExpected({ tier1Status: 'no_environment_hits' }),
@@ -318,19 +327,19 @@ describe('code scores', () => {
     expect(result.explanation).toContain('did not reach a verdict');
   });
 
-  it('inverts the canary: 0 when Tier 1 did not report no_searchable_terms', () => {
+  it('inverts the canary: 0 when IOC Hunt did not report no_searchable_terms', () => {
     expect(
       scoreCanaryTripped(
         buildExpected({ tier1Status: 'no_searchable_terms' }),
         buildArtifacts({
           outcome: 'completed',
-          hunt: { status: 'completed', hit: false, headline: 'Tier 1 found no matches' },
+          hunt: { status: 'completed', hit: false, headline: 'IOC Hunt found no matches' },
         })
       ).score
     ).toBe(0);
   });
 
-  it('inverts the canary: MISSING when Tier 1 is pinned but cannot be read from the run', () => {
+  it('inverts the canary: MISSING when IOC Hunt is pinned but cannot be read from the run', () => {
     expect(
       scoreCanaryTripped(
         buildExpected({ tier1Status: 'no_searchable_terms' }),

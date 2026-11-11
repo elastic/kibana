@@ -11,7 +11,31 @@ import {
   SiemMigrationStatus,
 } from '../../../../../common/siem_migrations/constants';
 
+const escapeWildcard = (value: string): string => value.replace(/[\\*?]/g, '\\$&');
+
 export const dsl = {
+  /**
+   * Matches a `text` field either as full text or as a sub-string.
+   * The analyzed `match` keeps multi-word, any-order matching (e.g. "memory creation").
+   * The `.keyword` wildcard finds part of a value: titles are analyzed with the standard
+   * analyzer, which does not split on `_` or `-`, so a name like
+   * `sysmon_detect_sysmon_config_changed` is a single token that a plain `match` for
+   * `sysmon` can never hit.
+   */
+  keywordMatch(field: string, value: string): QueryDslQueryContainer {
+    return {
+      bool: {
+        should: [
+          { match: { [field]: { query: value, operator: 'and' } } },
+          {
+            wildcard: {
+              [`${field}.keyword`]: { value: `*${escapeWildcard(value)}*`, case_insensitive: true },
+            },
+          },
+        ],
+      },
+    };
+  },
   isFullyTranslated(): QueryDslQueryContainer {
     return { term: { translation_result: MigrationTranslationResult.FULL } };
   },

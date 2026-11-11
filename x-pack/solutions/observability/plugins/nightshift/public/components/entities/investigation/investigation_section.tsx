@@ -10,7 +10,6 @@ import React from 'react';
 import {
   EuiAccordion,
   EuiBadge,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -31,12 +30,15 @@ import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common
 import { RETRY_BUTTON_LABEL } from '../../../common/messages';
 import type { SeverityDotColor } from '../../../common/severity';
 import { SEVERITY_DOT_COLOR } from '../../../common/severity';
+import { ShowMoreButton } from '../../ui/show_more_button';
+import { INVESTIGATIONS_PAGE_SIZE } from '../../../data/investigations/use_fetch_investigations';
 import type {
   InvestigationSectionId,
   InvestigationSectionState,
 } from '../../../data/investigations/use_investigation_sections';
 import { useKibana } from '../../../hooks/use_kibana';
 import { InvestigationCardActions } from './investigation_card_actions';
+import { useInvestigationAssignees } from './use_investigation_assignees';
 
 export interface InvestigationSectionProps {
   id: InvestigationSectionId;
@@ -294,14 +296,28 @@ const RetryCallout = ({
 
 const SectionRows = ({
   investigations,
+  remaining,
+  hasMore,
+  isLoadingMore,
+  presentation,
+  onShowMore,
   selectedInvestigationId,
   onInvestigationClick,
 }: Pick<
   InvestigationSectionProps,
-  'investigations' | 'selectedInvestigationId' | 'onInvestigationClick'
->): React.ReactElement => {
+  | 'investigations'
+  | 'hasMore'
+  | 'isLoadingMore'
+  | 'onShowMore'
+  | 'selectedInvestigationId'
+  | 'onInvestigationClick'
+> & {
+  remaining: number;
+  presentation: SectionPresentation;
+}): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
   const InvestigationCard = useKibana().services.agenticInvestigations?.InvestigationCard;
+  const renderAssignees = useInvestigationAssignees(investigations);
 
   return (
     <SectionBlock paddingSize="none">
@@ -336,49 +352,41 @@ const SectionRows = ({
                 investigation={investigation}
                 isSelected={investigation.id === selectedInvestigationId}
                 onClick={onInvestigationClick}
-                actions={<InvestigationCardActions investigation={investigation} />}
+                actions={
+                  <InvestigationCardActions
+                    investigation={investigation}
+                    assignees={renderAssignees(investigation)}
+                  />
+                }
               />
             )}
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
+      {hasMore && remaining > 0 && (
+        <ShowMoreButton
+          count={INVESTIGATIONS_PAGE_SIZE}
+          remaining={remaining}
+          isLoading={isLoadingMore}
+          onClick={onShowMore}
+          data-test-subj={`nightshiftInvestigationSectionShowMore-${presentation.id}`}
+          // Six sections each render a "Show more", so the accessible name has to say which one.
+          aria-label={i18n.translate('xpack.nightshift.investigations.sectionShowMoreAriaLabel', {
+            defaultMessage: 'Show {count} more {sectionTitle} investigations',
+            values: {
+              count: Math.min(INVESTIGATIONS_PAGE_SIZE, remaining),
+              sectionTitle: presentation.title,
+            },
+          })}
+          {...getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.SHOW_MORE_INVESTIGATIONS,
+            element: NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATIONS_LIST,
+          })}
+        />
+      )}
     </SectionBlock>
   );
 };
-
-const ShowMoreButton = ({
-  presentation: { id, title },
-  isLoadingMore,
-  onShowMore,
-}: {
-  presentation: SectionPresentation;
-  isLoadingMore: boolean;
-  onShowMore: () => void;
-}): React.ReactElement => (
-  <EuiFlexGroup justifyContent="center" responsive={false}>
-    <EuiFlexItem grow={false}>
-      <EuiButtonEmpty
-        data-test-subj={`nightshiftInvestigationSectionShowMore-${id}`}
-        // Six sections each render a "Show more", so the accessible name has to say which one.
-        aria-label={i18n.translate('xpack.nightshift.investigations.sectionShowMoreAriaLabel', {
-          defaultMessage: 'Show more {sectionTitle} investigations',
-          values: { sectionTitle: title },
-        })}
-        isLoading={isLoadingMore}
-        size="s"
-        onClick={onShowMore}
-        {...getEbtProps({
-          action: NIGHTSHIFT_EBT_ACTIONS.SHOW_MORE_INVESTIGATIONS,
-          element: NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATIONS_LIST,
-        })}
-      >
-        {i18n.translate('xpack.nightshift.investigations.showMoreButtonLabel', {
-          defaultMessage: 'Show more',
-        })}
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
 
 export const InvestigationSection = ({
   id,
@@ -428,18 +436,14 @@ export const InvestigationSection = ({
             )}
             <SectionRows
               investigations={investigations}
+              remaining={Math.max(0, total - investigations.length)}
+              hasMore={hasMore}
+              isLoadingMore={isLoadingMore}
+              presentation={presentation}
+              onShowMore={onShowMore}
               selectedInvestigationId={selectedInvestigationId}
               onInvestigationClick={onInvestigationClick}
             />
-            {hasMore && (
-              <SectionBlock>
-                <ShowMoreButton
-                  presentation={presentation}
-                  isLoadingMore={isLoadingMore}
-                  onShowMore={onShowMore}
-                />
-              </SectionBlock>
-            )}
           </>
         );
       default: {
