@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -19,6 +19,7 @@ import {
   getTriageRetagProposalAlertsStepDefinition,
   getTriageTagPatternKeysStepDefinition,
 } from './alert_triage/alert_triage_steps';
+import { getEndpointEventIndexStepDefinition } from './endpoint_event_index';
 import { getPackageReportStepDefinition } from './package_report';
 import { getResolveProposalsStepDefinition } from './resolve_proposals';
 import {
@@ -43,6 +44,7 @@ export const registerStepDefinitions = ({
   getHuntServices,
   getResolveHostEnrollment,
   isContextEngineEnabled,
+  getCoreStart,
   getInternalEsClient,
   getTaskManager,
   getWorkflowsManagement,
@@ -57,6 +59,7 @@ export const registerStepDefinitions = ({
   getHuntServices: () => HuntServices;
   getResolveHostEnrollment?: PackageReportStepDependencies['getResolveHostEnrollment'];
   isContextEngineEnabled: PackageReportStepDependencies['isContextEngineEnabled'];
+  getCoreStart: () => CoreStart;
   getInternalEsClient?: () => ElasticsearchClient;
   getTaskManager: () => Pick<TaskManagerStartContract, 'aggregate'>;
   getWorkflowsManagement: LoadAlertsStepDependencies['getWorkflowsManagement'];
@@ -89,6 +92,9 @@ export const registerStepDefinitions = ({
       getProposals,
       logger,
     })
+  );
+  workflowsExtensions.registerStepDefinition(
+    getEndpointEventIndexStepDefinition({ getCoreStart, logger })
   );
   workflowsExtensions.registerStepDefinition(getTriageHeadroomStepDefinition({ getTaskManager }));
   workflowsExtensions.registerStepDefinition(getTriagePlanSweepStepDefinition());
