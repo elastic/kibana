@@ -108,6 +108,9 @@ For output secrets, we do not perform this check as outputs offer a plain text a
 Other plugins call `FleetStartContract.getSecretsService({ request, consumer })`. Fleet supplies its internal Elasticsearch and saved objects clients. Every audit entry the service writes records `consumer` (`labels.consumer`) and, when `request` is given, the user. Omit `request` only for background work such as tasks.
 
 - `createSecrets(values)` creates one secret per value and returns `{ id }` in input order.
+  - Requests are not retried: retrying a lost response would create a duplicate secret.
+  - All or nothing: on any failure, it deletes the secrets this call created and throws.
+  - A failed request Elasticsearch did not reject with a 4xx is audited as `secret possibly created` with the `unknown` outcome.
 - `deleteSecrets(ids)` returns `{ id, deleted }` per id.
   - Callers may only pass ids returned by their own `createSecrets`. `.fleet-secrets` is shared, and secrets have no owner.
   - The whole call throws before any request is sent when an id is malformed (anything but the 20-character ids Elasticsearch generates) or still referenced by the current revision of a package policy in any space.

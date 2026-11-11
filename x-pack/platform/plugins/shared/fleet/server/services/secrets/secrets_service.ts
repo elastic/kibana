@@ -11,20 +11,19 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 
-import type { DeletedSecretResponse } from '../../../common/types';
+import type { DeletedSecretResponse, Secret } from '../../../common/types';
 import {
   RESPONSE_ACTIONS_EXPORT_SECRETS_MINIMUM_FLEET_SERVER_VERSION,
   SECRETS_ENDPOINT_PATH,
 } from '../../constants';
 import { FleetError, isESClientError } from '../../errors';
 import { appContextService } from '../app_context';
-import { runWithAuditConsumer } from '../audit_logging';
+import { auditLoggingService, runWithAuditConsumer } from '../audit_logging';
 import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
 import type { FleetServerRequirementSettingsKey } from '../fleet_server/version_requirements';
 import { getRequestStore } from '../request_store';
 
 import {
-  createSecrets as createFleetSecrets,
   isSecretStorageEnabledForFeature as isFleetSecretStorageEnabledForFeature,
   writeSecretDeletedAuditLog,
 } from './common';
@@ -54,8 +53,23 @@ const SECRET_STORAGE_FEATURES: Readonly<
 // a time-based UUID of 15 bytes, encoded as 20 characters of unpadded URL-safe base64.
 const SECRET_ID_PATTERN = /^[A-Za-z0-9_-]{20}$/;
 
+/** Throws when any id is not a well-formed Fleet secret id (only ids `createSecrets` returned can be deleted). */
+export const assertValidSecretIds = (ids: string[]): void => {
+  const invalidIdCount = ids.filter(
+    (id) => typeof id !== 'string' || !SECRET_ID_PATTERN.test(id)
+  ).length;
+  if (invalidIdCount > 0) {
+    throw new FleetError(
+      `Cannot delete ${invalidIdCount} malformed Fleet secret id(s): only ids returned by createSecrets can be deleted`
+    );
+  }
+};
+
 export interface SecretsServiceInterface {
-  /** Creates one Fleet secret per value. Returns ids in input order. */
+  /**
+   * Creates one Fleet secret per value. Returns `{ id }` in input order.
+   * All or nothing: on any failure, deletes the secrets this call created and throws.
+   */
   createSecrets(values: string[]): Promise<Array<{ id: string }>>;
   /**
    * Deletes secrets by id. Callers may only pass ids returned by their own `createSecrets`.
@@ -117,6 +131,42 @@ const deleteSecret = async (
   }
 };
 
+const createSecret = async (esClient: ElasticsearchClient, value: string): Promise<string> => {
+  try {
+    // `POST _fleet/secret` is not idempotent: retrying after a lost response would create a second
+    // secret, so this request is sent exactly once (neither Fleet nor the Elasticsearch client retries it).
+    const { id }: Secret = await esClient.transport.request(
+      { method: 'POST', path: SECRETS_ENDPOINT_PATH, body: { value } },
+      { maxRetries: 0 }
+    );
+    auditLoggingService.writeCustomAuditLog({
+      message: `secret created: ${id}`,
+      event: {
+        action: 'secret_create',
+        category: ['database'],
+        type: ['access'],
+        outcome: 'success',
+      },
+    });
+    return id;
+  } catch (err) {
+    // Only an Elasticsearch error response proves no secret was created.
+    const rejectedByElasticsearch = isESClientError(err) && (err.meta.statusCode ?? 500) < 500;
+    if (!rejectedByElasticsearch) {
+      auditLoggingService.writeCustomAuditLog({
+        message: 'secret possibly created',
+        event: {
+          action: 'secret_create',
+          category: ['database'],
+          type: ['access'],
+          outcome: 'unknown',
+        },
+      });
+    }
+    throw err;
+  }
+};
+
 /** Creates the Fleet secrets service for one consumer, optionally scoped to the user's request for auditing. */
 export const createSecretsService = ({
   esClient,
@@ -136,20 +186,50 @@ export const createSecretsService = ({
   return {
     createSecrets: (values) =>
       runInCallerContext(async () => {
-        const secrets = await createFleetSecrets({ esClient, values });
+        const logger = appContextService.getLogger();
+        const results = await Promise.allSettled(
+          values.map((value) => createSecret(esClient, value))
+        );
 
-        return secrets.flat().map(({ id }) => ({ id }));
+        const isFulfilled = (
+          result: PromiseSettledResult<string>
+        ): result is PromiseFulfilledResult<string> => result.status === 'fulfilled';
+        const createdIds = results.filter(isFulfilled).map(({ value: id }) => id);
+
+        const firstRejection = results.find(
+          (result): result is PromiseRejectedResult => result.status === 'rejected'
+        );
+        if (!firstRejection) {
+          return createdIds.map((id) => ({ id }));
+        }
+
+        // Ids created by this call can't be referenced by a package policy yet, so unlike
+        // `deleteSecrets` this rollback skips the package-policy reference guard.
+        const rollbackResults = await Promise.allSettled(
+          createdIds.map(async (id) => {
+            const { deleted, confirmed } = await deleteSecret(esClient, id);
+            if (deleted) {
+              writeSecretDeletedAuditLog(id, { confirmed });
+            }
+          })
+        );
+        const undeletedIds = createdIds.filter(
+          (_id, index) => rollbackResults[index].status === 'rejected'
+        );
+        if (undeletedIds.length > 0) {
+          const idList = undeletedIds.join(', ');
+          logger.error(
+            `Failed to delete Fleet secret id(s) left over from a failed create: ${idList}`
+          );
+        }
+
+        const msg = `Error creating secrets: ${firstRejection.reason}`;
+        logger.error(msg);
+        throw new FleetError(msg);
       }),
 
     deleteSecrets: async (ids) => {
-      const invalidIdCount = ids.filter(
-        (id) => typeof id !== 'string' || !SECRET_ID_PATTERN.test(id)
-      ).length;
-      if (invalidIdCount > 0) {
-        throw new FleetError(
-          `Cannot delete ${invalidIdCount} malformed Fleet secret id(s): only ids returned by createSecrets can be deleted`
-        );
-      }
+      assertValidSecretIds(ids);
 
       if (ids.length === 0) {
         return [];

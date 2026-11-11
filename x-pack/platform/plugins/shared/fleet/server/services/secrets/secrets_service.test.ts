@@ -332,6 +332,74 @@ describe('createSecretsService', () => {
       await expect(createService().createSecrets([])).resolves.toEqual([]);
       expect(esClientMock.transport.request).not.toHaveBeenCalled();
     });
+
+    it('rolls back and deletes ids already created when another value fails', async () => {
+      esClientMock.transport.request.mockImplementation((params) => {
+        const { method, path, body } = params as {
+          method: string;
+          path: string;
+          body?: { value: string };
+        };
+        if (method === 'POST' && body?.value === 'first') {
+          return Promise.resolve({ id: SECRET_ID });
+        }
+        if (method === 'POST' && body?.value === 'second') {
+          return Promise.reject(buildResponseError(400));
+        }
+        if (method === 'DELETE' && path === `/_fleet/secret/${SECRET_ID}`) {
+          return Promise.resolve({ deleted: true });
+        }
+        throw new Error(`Unexpected request: ${JSON.stringify(params)}`);
+      });
+
+      await expect(createService().createSecrets(['first', 'second'])).rejects.toThrow(
+        'Error creating secrets'
+      );
+
+      expect(esClientMock.transport.request).toHaveBeenCalledWith({
+        method: 'DELETE',
+        path: `/_fleet/secret/${SECRET_ID}`,
+      });
+
+      const auditEvents = jest
+        .mocked(mockContext.securitySetup.audit.withoutRequest.log)
+        .mock.calls.map(([event]) => event);
+      expect(auditEvents).toContainEqual(
+        expect.objectContaining({
+          message: `secret created: ${SECRET_ID}`,
+          event: expect.objectContaining({ action: 'secret_create', outcome: 'success' }),
+        })
+      );
+      expect(auditEvents).toContainEqual(
+        expect.objectContaining({
+          message: `secret deleted: ${SECRET_ID}`,
+          event: expect.objectContaining({ action: 'secret_delete', outcome: 'success' }),
+        })
+      );
+      expect(auditEvents).not.toContainEqual(
+        expect.objectContaining({ message: 'secret possibly created' })
+      );
+    });
+
+    it('does not retry and audits a possible creation when the request fails without a 4xx response', async () => {
+      esClientMock.transport.request.mockRejectedValue(new EsErrors.ConnectionError('boom'));
+
+      await expect(createService().createSecrets(['value'])).rejects.toThrow(
+        'Error creating secrets'
+      );
+
+      expect(esClientMock.transport.request).toHaveBeenCalledTimes(1);
+      expect(esClientMock.transport.request).toHaveBeenCalledWith(
+        { method: 'POST', path: '/_fleet/secret', body: { value: 'value' } },
+        { maxRetries: 0 }
+      );
+      expect(mockContext.securitySetup.audit.withoutRequest.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'secret possibly created',
+          event: expect.objectContaining({ action: 'secret_create', outcome: 'unknown' }),
+        })
+      );
+    });
   });
 
   describe('audit entries', () => {

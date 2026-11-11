@@ -49,7 +49,10 @@ import type { FleetRequestHandlerContext } from '../types';
 import { packageServiceMock } from '../services/epm/package_service.mock';
 import type { UninstallTokenServiceInterface } from '../services/security/uninstall_token_service';
 import type { MessageSigningServiceInterface } from '../services/security';
-import type { SecretsServiceInterface } from '../services/secrets/secrets_service';
+import {
+  assertValidSecretIds,
+  type SecretsServiceInterface,
+} from '../services/secrets/secrets_service';
 
 import { getPackageSpecTagId } from '../services/epm/kibana/assets/tag_assets';
 
@@ -403,11 +406,17 @@ export function createUninstallTokenServiceMock(): DeeplyMockedKeys<UninstallTok
 }
 
 export function createSecretsServiceMock(): jest.Mocked<SecretsServiceInterface> {
+  let lastId = 0;
+
   return {
+    // 20 characters, like the ids Elasticsearch generates, and unique across calls on this mock.
     createSecrets: jest.fn(async (values: string[]) =>
-      values.map((_value, index) => ({ id: `secret-${index}` }))
+      values.map(() => ({ id: `mocksecret${String(++lastId).padStart(10, '0')}` }))
     ),
-    deleteSecrets: jest.fn(async (ids: string[]) => ids.map((id) => ({ id, deleted: true }))),
+    deleteSecrets: jest.fn(async (ids: string[]) => {
+      assertValidSecretIds(ids);
+      return ids.map((id) => ({ id, deleted: true }));
+    }),
     isSecretStorageEnabledForFeature: jest.fn().mockResolvedValue(true),
   };
 }
