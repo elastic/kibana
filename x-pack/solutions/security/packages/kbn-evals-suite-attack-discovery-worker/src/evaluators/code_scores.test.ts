@@ -519,6 +519,23 @@ describe('scoreOneReviewPerAttack', () => {
     );
     expect(result.score).toBe(1);
   });
+
+  it('is MISSING, not silently excluded, when a runner review reports no attack on a no-seed row', () => {
+    // `seededDiscoveryId` is absent unless the scenario seeds an FP discovery; with both undefined
+    // the old `attackDiscoveryId !== seededDiscoveryId` filter dropped the unidentified review and
+    // the MISSING branch below could never fire.
+    const result = scoreOneReviewPerAttack(
+      expected,
+      artifacts({
+        persistedAttackIds: ['runner-attack'],
+        fingerprintReviewCount: 1,
+        dispatchedReviewExecutionIds: ['runner-review'],
+        reviews: [review({ executionId: 'runner-review', attackDiscoveryId: undefined })],
+      })
+    );
+    expect(result.label).toBe('MISSING');
+    expect(result.explanation).toContain('did not report which attack they cover');
+  });
 });
 
 describe('scoreOutcomeReported', () => {
