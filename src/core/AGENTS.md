@@ -25,7 +25,7 @@ Each package declares `visibility` in its `kibana.jsonc`:
 - **`shared`** — any package in Kibana may import it. Used for public API types (`-server`, `-browser`, `common`) and mocks (`-mocks`).
 - **`private`** — only other `src/core` packages may import it. Used for all `-internal` packages since they contain implementation details that should not leak to plugins.
 
-The `@kbn/imports/no_group_crossing_imports` lint rule enforces `private` for every package under `src/core`. It rejects an import of a Core-private package from a file outside `src/core`, unless the file is in `packages/kbn-eslint-plugin-imports/src/helpers/core_private_importers.ts`. That list holds the files that imported a Core-private package when the rule was added. `@elastic/kibana-core` owns the list, so a new entry needs their review. Entries are not removed automatically; when a change removes the last Core-private import from a listed file, remove its entry too. To regenerate the list, run `node packages/kbn-eslint-plugin-imports/scripts/generate_core_private_importers.mjs`.
+The `@kbn/imports/no_group_crossing_imports` lint rule enforces `private` for every package under `src/core`. It rejects an import of a Core-private package from a file outside `src/core`, unless the file is in `packages/kbn-eslint-plugin-imports/src/helpers/core_private_importers.ts`. That list holds the files that imported a Core-private package when the rule was added. `@elastic/kibana-core` owns the list, so a new entry needs their review. Entries are not removed automatically; when a change removes the last Core-private import from a listed file, remove its entry too.
 
 ## KEEP THIS FILE UP TO DATE
 
