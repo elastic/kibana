@@ -7,6 +7,7 @@
 
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core/public';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
+import type { ProposalDecidedEvent } from '@kbn/agentic-investigations-plugin/public';
 import type { Severity, SeverityCounts } from '@kbn/nightshift-investigations-plugin/common';
 
 /**
@@ -24,6 +25,8 @@ export const NIGHTSHIFT_EBT_EVENTS = {
   INVESTIGATION_VIEWED: 'nightshift_investigation_viewed',
   /** The user searched the investigations list. The term itself is never reported. */
   INVESTIGATIONS_SEARCHED: 'nightshift_investigations_searched',
+  /** The user approved, declined or reopened a proposed action, and the server accepted it. */
+  PROPOSAL_DECIDED: 'nightshift_proposal_decided',
 } as const;
 
 /** How the user arrived at the investigation they are viewing. */
@@ -62,6 +65,18 @@ interface InvestigationsSearchedProps {
   query_length: number;
   /** Investigations the search matched, so empty results are distinguishable from hits. */
   result_count: number;
+}
+
+interface ProposalDecidedProps {
+  proposal_id: string;
+  decision: ProposalDecidedEvent['decision'];
+  surface: ProposalDecidedEvent['surface'];
+  investigation_id?: string;
+  conversation_id?: string;
+  dismiss_reason?: string;
+  category?: string;
+  confidence?: string;
+  impact?: string;
 }
 
 const severityCountField = (severity: Severity) => ({
@@ -142,6 +157,48 @@ export const registerNightshiftEbtEvents = (analytics: AnalyticsServiceSetup): v
       },
     },
   });
+
+  analytics.registerEventType<ProposalDecidedProps>({
+    eventType: NIGHTSHIFT_EBT_EVENTS.PROPOSAL_DECIDED,
+    schema: {
+      proposal_id: { type: 'keyword', _meta: { description: 'Id of the proposed action.' } },
+      decision: {
+        type: 'keyword',
+        _meta: { description: 'What the user did: approve, decline or reopen.' },
+      },
+      surface: {
+        type: 'keyword',
+        _meta: { description: 'Where the decision was made: flyout or hypothesis_tree.' },
+      },
+      investigation_id: {
+        type: 'keyword',
+        _meta: {
+          description: 'Investigation the proposed action belongs to, when the surface knows it.',
+          optional: true,
+        },
+      },
+      conversation_id: {
+        type: 'keyword',
+        _meta: { description: 'Conversation the proposed action was created in.', optional: true },
+      },
+      dismiss_reason: {
+        type: 'keyword',
+        _meta: { description: 'Reason picked when declining.', optional: true },
+      },
+      category: {
+        type: 'keyword',
+        _meta: { description: 'Category the action declared.', optional: true },
+      },
+      confidence: {
+        type: 'keyword',
+        _meta: { description: 'Confidence the agent gave the action.', optional: true },
+      },
+      impact: {
+        type: 'keyword',
+        _meta: { description: 'Impact the agent gave the action.', optional: true },
+      },
+    },
+  });
 };
 
 /** Reports that the landing page finished loading, with the investigation counts it shows. */
@@ -203,4 +260,22 @@ export const reportNightshiftInvestigationsSearched = (
     NIGHTSHIFT_EBT_EVENTS.INVESTIGATIONS_SEARCHED,
     { query_length: queryLength, result_count: resultCount }
   );
+};
+
+/** Reports an accepted decision on a proposed action. Rationale text is never reported. */
+export const reportNightshiftProposalDecided = (
+  analytics: AnalyticsServiceStart,
+  event: ProposalDecidedEvent
+): void => {
+  analytics.reportEvent<ProposalDecidedProps>(NIGHTSHIFT_EBT_EVENTS.PROPOSAL_DECIDED, {
+    proposal_id: event.proposalId,
+    decision: event.decision,
+    surface: event.surface,
+    investigation_id: event.investigationId,
+    conversation_id: event.conversationId,
+    dismiss_reason: event.dismissReason,
+    category: event.category,
+    confidence: event.confidence,
+    impact: event.impact,
+  });
 };

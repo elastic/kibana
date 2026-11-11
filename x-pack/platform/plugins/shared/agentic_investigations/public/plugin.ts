@@ -11,6 +11,7 @@ import { createFlyoutGroupedAttachmentsRegistry } from '@kbn/agentic-investigati
 import { registerEscalationConversationEventUiDefinitions } from './escalations/conversation_events';
 import { registerInvestigationConversationEventUiDefinitions } from './investigations/conversation_events';
 import { registerImpactAttachmentTypes } from './impact/attachments';
+import { addProposalDecidedListener } from './proposal_decision_listeners';
 import type { AlertSubjectSnapshot } from '../common/subjects/subject';
 import { registerSubjectAttachmentTypes } from './subjects/attachments';
 import { registerHypothesesAttachmentTypes } from './hypotheses/attachments';
@@ -82,6 +83,7 @@ export class AgenticInvestigationsPublicPlugin
       registerAlertFlyout: (source, registration) => {
         this.alertFlyouts.set(source, registration);
       },
+      onProposalDecided: addProposalDecidedListener,
     };
   }
 

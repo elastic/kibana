@@ -8,6 +8,12 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
 import { AgenticInvestigationsPublicPlugin } from './plugin';
 import type { AgenticInvestigationsPublicConfig } from './types';
+export type {
+  ProposalDecidedEvent,
+  ProposalDecidedListener,
+  ProposalDecisionKind,
+  ProposalDecisionSurface,
+} from './proposal_decision_listeners';
 
 export function plugin(
   initializerContext: PluginInitializerContext<AgenticInvestigationsPublicConfig>
