@@ -88,7 +88,7 @@ export async function loadDashboardApi({
   };
 
   // --------------------------------------------------------------------------------------
-  // Determine sizes of incoming embeddables. Done here due to async fetching.
+  // Prepare incoming embeddables. Done here due to async fetching.
   // --------------------------------------------------------------------------------------
   const incomingEmbeddables = creationOptions?.getIncomingEmbeddables?.();
   // Existing panels (grid and pinned) by type, gathered on demand for types with an isDuplicate check.
