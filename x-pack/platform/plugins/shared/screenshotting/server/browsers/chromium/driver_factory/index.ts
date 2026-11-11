@@ -144,8 +144,9 @@ export class HeadlessChromiumDriverFactory {
         `Launching with viewport: width=${viewport.width} height=${viewport.height} scaleFactor=${viewport.deviceScaleFactor}`
       );
 
+      let browser: Browser | undefined;
+
       (async () => {
-        let browser: Browser | undefined;
         try {
           // `puppeteer` is ESM-only (v25+), so it must be imported lazily. A static
           // import compiles to a top-level `require` that forces Jest to parse the
@@ -171,6 +172,8 @@ export class HeadlessChromiumDriverFactory {
           );
           return;
         }
+
+        this.handleBrowserPipeErrors(browser, logger);
 
         const page = await browser.newPage();
         const devTools = await page.target().createCDPSession();
@@ -276,7 +279,18 @@ export class HeadlessChromiumDriverFactory {
             logger.error(error);
           });
         });
-      })().catch(() => {});
+      })().catch((error) => {
+        // Browser died during page setup; without this the job hangs until it times out.
+        logger.error(`Error setting up the Chromium browser page: ${error}`);
+        observer.error(
+          new errors.FailedToSpawnBrowserError(
+            `Error setting up the Chromium browser page! ${error}`
+          )
+        );
+        Promise.resolve(browser?.close()).catch((closeError) => {
+          logger.debug(`Error closing the browser after a failed page setup: ${closeError}`);
+        });
+      });
     });
   }
 
@@ -361,6 +375,19 @@ export class HeadlessChromiumDriverFactory {
     );
 
     return Rx.merge(consoleMessages$, uncaughtExceptionPageError$, pageRequestFailed$);
+  }
+
+  handleBrowserPipeErrors(browser: Browser, logger: Logger): void {
+    // Puppeteer drops its pipe error listeners on disconnect, so an EPIPE from an in-flight write
+    // would become an uncaughtException and kill Kibana. Logging is enough: getPageExit reports the exit.
+    const stdio = browser.process()?.stdio ?? [];
+    for (const stream of stdio) {
+      stream?.on('error', (error: Error) => {
+        logger
+          .get('headless-browser-process')
+          .debug(`Browser process pipe error (the browser has likely exited): ${error.message}`);
+      });
+    }
   }
 
   getProcessLogger(browser: Browser, logger: Logger): Rx.Observable<void> {

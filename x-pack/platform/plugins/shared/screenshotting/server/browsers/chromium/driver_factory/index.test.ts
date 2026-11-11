@@ -12,6 +12,7 @@ import type { ConfigType } from '@kbn/screenshotting-server';
 import * as puppeteer from 'puppeteer';
 import * as Rx from 'rxjs';
 import { mergeMap, take } from 'rxjs';
+import { PassThrough } from 'stream';
 import { DEFAULT_VIEWPORT, HeadlessChromiumDriverFactory } from '.';
 
 jest.mock('puppeteer');
@@ -64,6 +65,39 @@ describe('HeadlessChromiumDriverFactory', () => {
   });
 
   describe('createPage', () => {
+    it('emits an error and closes the browser when the browser dies right after launch', async () => {
+      (mockBrowser.newPage as jest.Mock).mockRejectedValueOnce(
+        new Error('Protocol error (Target.createTarget): Target closed')
+      );
+
+      await expect(
+        Rx.firstValueFrom(
+          factory
+            .createPage({ openUrlTimeout: 0, defaultViewport: DEFAULT_VIEWPORT })
+            .pipe(Rx.timeout({ first: 1000 }))
+        )
+      ).rejects.toThrow(/Target closed/);
+      expect(mockBrowser.close).toHaveBeenCalled();
+    });
+
+    it('handles EPIPE errors on the browser pipes after puppeteer has stopped listening', async () => {
+      const pipeWrite = new PassThrough();
+      const pipeRead = new PassThrough();
+      (mockBrowser.process as jest.Mock).mockReturnValue({
+        stdio: [null, null, null, pipeWrite, pipeRead],
+      });
+      const epipe = Object.assign(new Error('write EPIPE'), { code: 'EPIPE' });
+      // With no listener, emit('error') throws (an uncaughtException in production).
+      expect(pipeWrite.listenerCount('error')).toBe(0);
+
+      await Rx.firstValueFrom(
+        factory.createPage({ openUrlTimeout: 0, defaultViewport: DEFAULT_VIEWPORT })
+      );
+
+      expect(() => pipeWrite.emit('error', epipe)).not.toThrow();
+      expect(() => pipeRead.emit('error', epipe)).not.toThrow();
+    });
+
     it('returns browser driver, error observable, and close callback', async () => {
       await expect(
         factory
