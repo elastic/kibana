@@ -341,7 +341,7 @@ describe('MetricsGrid', () => {
     );
   });
 
-  it('keeps the chart loading until exemplars are fetched', () => {
+  it('renders the chart while exemplars are still loading', () => {
     jest.mocked(useFetchExemplars).mockReturnValue({
       exemplars: undefined,
       hasError: false,
@@ -351,7 +351,7 @@ describe('MetricsGrid', () => {
     renderMetricsGrid();
 
     expect(Chart).toHaveBeenCalledWith(
-      expect.objectContaining({ isLoading: true }),
+      expect.objectContaining({ isLoading: false }),
       expect.anything()
     );
   });

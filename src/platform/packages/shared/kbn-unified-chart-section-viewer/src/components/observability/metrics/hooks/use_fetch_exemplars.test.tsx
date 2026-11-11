@@ -98,6 +98,7 @@ const createParams = (
   profileId: TEST_PROFILE_ID,
   isSupported: true,
   isComponentVisible: true,
+  isChartVisible: true,
   clusterSupport: { status: 'supported' },
   ...overrides,
 });
@@ -191,6 +192,48 @@ describe('useFetchExemplars', () => {
     expect(mockCreateExemplarsQuery).not.toHaveBeenCalled();
     expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
     expect(result.current).toEqual(IDLE_FETCH);
+  });
+
+  it('does not fetch while the chart is off screen', async () => {
+    const params = createParams({ isChartVisible: false });
+
+    const { result } = renderHook(() => useFetchExemplars(params));
+
+    await flushAsync();
+    expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
+    expect(result.current).toEqual(IDLE_FETCH);
+  });
+
+  it('fetches when the chart scrolls into view', async () => {
+    const params = createParams({ isChartVisible: false });
+    const { result, rerender } = renderHook(
+      (props: UseFetchExemplarsParams) => useFetchExemplars(props),
+      { initialProps: params }
+    );
+    await flushAsync();
+
+    rerender({ ...params, isChartVisible: true });
+
+    await waitFor(() => expect(result.current.exemplars).toBeDefined());
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not search again when the chart scrolls back into view', async () => {
+    const params = createParams();
+    const { result, rerender } = renderHook(
+      (props: UseFetchExemplarsParams) => useFetchExemplars(props),
+      { initialProps: params }
+    );
+    await waitFor(() => expect(result.current.exemplars).toBeDefined());
+
+    rerender({ ...params, isChartVisible: false });
+    await flushAsync();
+    expect(result.current.exemplars).toEqual({ columns: TEST_COLUMNS, values: TEST_ROWS });
+
+    rerender({ ...params, isChartVisible: true });
+    await flushAsync();
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+    expect(result.current.exemplars).toEqual({ columns: TEST_COLUMNS, values: TEST_ROWS });
   });
 
   it('does not fetch when the chart is unsupported', async () => {

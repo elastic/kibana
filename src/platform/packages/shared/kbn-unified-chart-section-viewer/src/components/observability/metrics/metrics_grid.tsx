@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -434,11 +434,13 @@ const ChartItem = React.memo(
         backgroundColor: euiTheme.colors.backgroundBasePlain,
       });
 
+    // Off until this chart's own intersection observer reports it. Mounted charts
+    // outside the viewport stay false, so they do not search.
+    const [isChartVisible, setIsChartVisible] = useState(false);
     const {
       exemplars,
       hasError: exemplarsFetchFailed,
       errorMessage: exemplarsErrorMessage,
-      isLoading: exemplarsLoading,
     } = useFetchExemplars({
       fetchParams,
       services,
@@ -451,6 +453,7 @@ const ChartItem = React.memo(
       // Heatmaps also have no series query, so they skip the exemplar fetch with `unsigned_long`.
       isSupported: isSupported && !shouldRenderHistogram,
       isComponentVisible,
+      isChartVisible,
       clusterSupport: exemplarsClusterSupport,
     });
     // TODO(kibana#289722): feed `exemplars` into useChartLayers as a points layer.
@@ -573,7 +576,8 @@ const ChartItem = React.memo(
           onFilter={onFilter}
           onExploreInDiscoverTab={actions.openInNewTab}
           onViewDetails={handleViewDetailsCallback}
-          isLoading={(shouldRenderHistogram && histogramBoundsLoading) || exemplarsLoading}
+          onChartVisibleChange={setIsChartVisible}
+          isLoading={shouldRenderHistogram && histogramBoundsLoading}
           error={shouldRenderHistogram ? boundsError : undefined}
           syncCursor
           syncTooltips={false}

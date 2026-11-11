@@ -77,6 +77,7 @@ export const useLensProps = ({
   error,
   userMessages,
   profileId,
+  onChartVisibleChange,
 }: {
   chartId: string;
   lensConfig: ChartLensConfig;
@@ -85,6 +86,8 @@ export const useLensProps = ({
   error?: Error;
   userMessages?: EmbeddableComponentProps['userMessages'];
   profileId: string;
+  /** Same signal Lens uses: true while the chart node intersects, or when it is missing. */
+  onChartVisibleChange?: (isIntersecting: boolean) => void;
 } & Pick<UnifiedMetricsGridProps, 'services' | 'fetchParams'>) => {
   const { euiTheme } = useEuiTheme();
   const reportError = useReportChartSectionError();
@@ -96,6 +99,7 @@ export const useLensProps = ({
   // Read inside the rxjs subscription without rebuilding it on identifier changes.
   const profileIdRef = useLatest(profileId);
   const chartIdRef = useLatest(chartId);
+  const onChartVisibleChangeRef = useLatest(onChartVisibleChange);
   // Dedup persistent failures by name+message so a fresh Error reference per retry
   // doesn't loop through setBuildError -> effectiveError -> rebuild.
   const lastBuildErrorKeyRef = useRef<string | null>(null);
@@ -168,12 +172,17 @@ export const useLensProps = ({
       if (chartRefCurrent) {
         observer.observe(chartRefCurrent);
       } else {
+        // Tests render the hook without a mounted node. Treat that as visible.
         subscriber.next(true);
         subscriber.complete();
       }
 
       return () => observer.disconnect();
-    }).pipe(distinctUntilChanged(), shareReplay(1));
+    }).pipe(
+      distinctUntilChanged(),
+      tap((isIntersecting) => onChartVisibleChangeRef.current?.(isIntersecting)),
+      shareReplay(1)
+    );
 
     // load lens props when any trigger emits;
     const triggers$ = merge(
@@ -239,6 +248,7 @@ export const useLensProps = ({
     euiTheme.size.base,
     profileIdRef,
     chartIdRef,
+    onChartVisibleChangeRef,
     reportError,
   ]);
 

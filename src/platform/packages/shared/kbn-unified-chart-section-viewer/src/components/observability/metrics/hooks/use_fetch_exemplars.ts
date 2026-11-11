@@ -11,6 +11,7 @@ import type { MetricsGridSettings } from '@kbn/discover-utils';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { useAbortableAsync } from '@kbn/react-hooks';
+import { useMemo, useRef } from 'react';
 import type { ParsedMetricItem } from '../../../../types';
 import { isSuppressedFetchError } from '../../../chart/utils/is_suppressed_fetch_error';
 import { useReportChartSectionError } from '../../../chart/hooks/use_report_chart_section_error';
@@ -55,6 +56,8 @@ export interface UseFetchExemplarsParams {
   isSupported: boolean;
   /** False while Discover keeps the grid mounted but hidden; nothing is fetched then. */
   isComponentVisible: boolean;
+  /** False until this chart intersects the viewport. A settled search is reused on the way back. */
+  isChartVisible: boolean;
   /**
    * Grid-level gate. Per-chart searches run only when this is `supported` and the chart would
    * otherwise fetch. `checking` and `failed` are ignored unless it would.
@@ -78,6 +81,7 @@ export const useFetchExemplars = ({
   profileId,
   isSupported,
   isComponentVisible,
+  isChartVisible,
   clusterSupport,
 }: UseFetchExemplarsParams): UseFetchExemplarsResult => {
   const reportError = useReportChartSectionError();
@@ -92,6 +96,7 @@ export const useFetchExemplars = ({
 
   const clusterReady = clusterSupport.status === 'supported';
   // String identity stays put when METRICS_INFO replaces `metricItem` with an equal object.
+  // Visibility stays out of this string so scrolling away does not look like a new search.
   const esqlQuery =
     clusterReady && isComponentVisible && dataSource && isSupported
       ? createExemplarsQuery({
@@ -102,13 +107,53 @@ export const useFetchExemplars = ({
           gridSettings,
         })
       : '';
+  // Same search identity as the chart embeddable (query, time range, filters, variables,
+  // session, reload). `use_fetch_histogram_bounds` uses this shape too. The search client
+  // and abort controller stay out: they cancel or run a search, they do not define a new one.
+  const requestKey = useMemo(
+    () =>
+      JSON.stringify({
+        esqlQuery,
+        timeFrom: fetchParams.timeRange?.from ?? null,
+        timeTo: fetchParams.timeRange?.to ?? null,
+        filters: fetchParams.filters ?? [],
+        variables: fetchParams.esqlVariables ?? [],
+        timeFieldName: timeFieldName ?? null,
+        lastReloadRequestTime: fetchParams.lastReloadRequestTime ?? null,
+        searchSessionId: fetchParams.searchSessionId ?? null,
+      }),
+    [
+      esqlQuery,
+      fetchParams.timeRange,
+      fetchParams.filters,
+      fetchParams.esqlVariables,
+      timeFieldName,
+      fetchParams.lastReloadRequestTime,
+      fetchParams.searchSessionId,
+    ]
+  );
+  const settledRef = useRef<{ key: string; state: ExemplarsFetchState } | undefined>(undefined);
 
   const { value, loading } = useAbortableAsync<ExemplarsFetchState>(
     async ({ signal }) => {
       if (!esqlQuery) {
+        settledRef.current = undefined;
         return IDLE_EXEMPLARS_FETCH;
       }
 
+      const settled = settledRef.current;
+      const sameRequest = settled?.key === requestKey;
+      // Off screen, or back on screen with the same Discover inputs: keep the settled rows.
+      if (!isChartVisible || sameRequest) {
+        return settled?.state ?? IDLE_EXEMPLARS_FETCH;
+      }
+
+      const remember = (state: ExemplarsFetchState) => {
+        if (!signal.aborted) {
+          settledRef.current = { key: requestKey, state };
+        }
+        return state;
+      };
       const onError = (error: unknown) =>
         reportError({ error, source: 'useFetchExemplars', labels: { profile_id: profileId } });
 
@@ -125,27 +170,30 @@ export const useFetchExemplars = ({
           profileId,
           executionContextName: MetricsExecutionContextName.EXEMPLARS,
         });
-        return {
+        return remember({
           exemplars: { columns: rawResponse.columns, values: rawResponse.values },
           hasError: false,
-        };
+        });
       } catch (error) {
         const isSuppressed = isSuppressedFetchError(error);
         if (!isSuppressed) {
           onError(error);
         }
-        return {
+        const failed: ExemplarsFetchState = {
           exemplars: undefined,
           hasError: !isSuppressed,
           errorMessage: error instanceof Error ? error.message : undefined,
         };
+        return isSuppressed ? failed : remember(failed);
       }
     },
     // `fetchParams.timeRange`, `filters`, `lastReloadRequestTime` and `abortController` are rebuilt
     // once per Discover fetch (see `processFetchParams` in kbn-unified-histogram), so this re-fires at
     // the chart's cadence and aborts the previous request when a new Discover fetch starts.
+    // `isChartVisible` aborts an in-flight search when the cell leaves the viewport.
     [
       esqlQuery,
+      isChartVisible,
       timeFieldName,
       search,
       fetchParams.timeRange,
@@ -179,6 +227,9 @@ export const useFetchExemplars = ({
       errorMessage: clusterSupport.errorMessage,
       isLoading: false,
     };
+  }
+  if (!isChartVisible) {
+    return { ...(settledRef.current?.state ?? IDLE_EXEMPLARS_FETCH), isLoading: false };
   }
 
   return { ...(value ?? IDLE_EXEMPLARS_FETCH), isLoading: loading };

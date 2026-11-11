@@ -38,6 +38,8 @@ export type ChartProps = Pick<UnifiedMetricsGridProps, 'fetchParams'> &
     profileId: string;
     id: string;
     isSelected: boolean;
+    /** Fired by the same intersection observer that gates the Lens search. */
+    onChartVisibleChange?: (isIntersecting: boolean) => void;
   };
 
 const LensWrapperMemo = React.memo(LensWrapper);
@@ -63,6 +65,7 @@ export const Chart = ({
   profileId,
   id,
   isSelected,
+  onChartVisibleChange,
 }: ChartProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -80,6 +83,7 @@ export const Chart = ({
     error,
     userMessages,
     profileId,
+    onChartVisibleChange,
   });
   // Lens copies userMessages once, when the embeddable is created. Props built
   // while exemplars are loading omit that error, so wait until they match.
