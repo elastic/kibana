@@ -82,7 +82,7 @@ describe('OnboardingFirstInvestigationStep', () => {
     renderStep({ execution_id: 'e1', status: 'succeeded', suggestions: [suggestion('S', 0)] });
 
     const compose = screen.getByTestId('nightshiftOnboardingCompose');
-    expect(compose).toHaveTextContent('Want something else investigated?');
+    expect(compose).toHaveTextContent('Ask your own question');
     const investigate = screen.getByTestId('nightshiftOnboardingInvestigateButton');
     expect(investigate).toBeDisabled();
 
@@ -102,7 +102,7 @@ describe('OnboardingFirstInvestigationStep', () => {
     renderStep(run);
 
     expect(screen.getByTestId('nightshiftOnboardingSuggestionsEmpty')).toHaveTextContent(
-      'Nothing to suggest yet'
+      'No investigation suggestions found'
     );
     expect(screen.queryByTestId('nightshiftOnboardingSuggestions')).not.toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();

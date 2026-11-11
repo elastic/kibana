@@ -36,7 +36,12 @@ export const DEFAULT_ATTACHMENT_SEARCH_FIELDS = [
   `${CASE_COMMENT_SAVED_OBJECT}.alertId`,
   `${CASE_COMMENT_SAVED_OBJECT}.eventId`,
   `${CASE_COMMENT_SAVED_OBJECT}.comment`,
-];
+] as const;
+
+export type AttachmentSearchField = (typeof DEFAULT_ATTACHMENT_SEARCH_FIELDS)[number];
+
+export const isAttachmentSearchField = (field: string): field is AttachmentSearchField =>
+  (DEFAULT_ATTACHMENT_SEARCH_FIELDS as readonly string[]).includes(field);
 
 export const mergeSearchQuery = (
   searchQuery?: estypes.QueryDslQueryContainer,

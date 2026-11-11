@@ -50,6 +50,7 @@ dependsOn:
   - '@kbn/core-spaces-common'
   - '@kbn/deeplinks-agent-builder'
   - '@kbn/agent-builder-common'
+  - '@kbn/search-api-keys-server'
 tags:
   - plugin
   - prod

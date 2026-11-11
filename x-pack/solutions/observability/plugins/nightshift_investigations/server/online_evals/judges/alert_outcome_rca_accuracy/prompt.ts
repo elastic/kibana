@@ -32,7 +32,7 @@ export type AlertOutcomeRcaAccuracyOutput = z.infer<typeof alertOutcomeRcaAccura
 export const alertOutcomeRcaAccuracyPrompt = createPrompt({
   name: 'nightshift_alert_outcome_rca_accuracy',
   description:
-    "Grades a Nightshift investigation's conclusion against the root cause confirmed when its alert recovered",
+    "Grades a nightshift investigation's conclusion against the root cause confirmed when its alert recovered",
   input: lazySchema(() =>
     z.object({
       confirmed_root_cause: z.string().max(MAX_JUDGE_TEXT_LENGTH),

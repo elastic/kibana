@@ -211,6 +211,34 @@ describe('canvas processing flyout', () => {
     expect(flyout.ref.getSnapshot().context.saveError).toBe('Distributor rejected the unit');
   });
 
+  it('restores the node positions from before the save when the save fails', async () => {
+    const { canvas } = startCanvas(async () => {
+      throw new Error('Distributor rejected the unit');
+    });
+    await waitForUnitReady(canvas);
+    canvas.send({ type: 'nodes.positions.change', positions: { es: { x: 10, y: 20 } } });
+    const positionsBeforeSave = canvas.getSnapshot().context.nodePositions;
+
+    stageProcessorAndSave(canvas);
+    // The canvas tidies the flow the new processing node joined while it saves.
+    canvas.send({ type: 'nodes.positions.change', positions: { es: { x: 370, y: 20 } } });
+
+    await waitFor(canvas, (snapshot) => snapshot.matches({ ready: { unit: 'saveFailed' } }));
+    expect(canvas.getSnapshot().context.nodePositions).toBe(positionsBeforeSave);
+  });
+
+  it('keeps the node positions written during the save when it succeeds', async () => {
+    const { canvas } = startCanvas(async (unit) => unit);
+    await waitForUnitReady(canvas);
+
+    stageProcessorAndSave(canvas);
+    canvas.send({ type: 'nodes.positions.change', positions: { es: { x: 370, y: 20 } } });
+
+    await waitFor(canvas, (snapshot) => snapshot.context.processingFlyout === undefined);
+    await waitForUnitReady(canvas);
+    expect(canvas.getSnapshot().context.nodePositions).toEqual({ es: { x: 370, y: 20 } });
+  });
+
   it('moves a shared source line onto its own pipeline only when its processing saves', async () => {
     const fanOut = loadedUnit();
     fanOut.unit.destinations.push({ id: 'debug', type: 'debug', supported_telemetry: ['logs'] });
@@ -267,6 +295,185 @@ describe('canvas processing flyout', () => {
     canvas.send({ type: 'processing.close' });
 
     expect(canvas.getSnapshot().context.processingFlyout).toBeUndefined();
+    expect(canvas.getSnapshot().context.nextUnit).toBe(staged);
+  });
+});
+
+describe('canvas node positions', () => {
+  it('merges changed positions and replaces them all on restore', async () => {
+    const { canvas } = startCanvas(async (unit) => unit);
+    await waitForUnitReady(canvas);
+
+    canvas.send({ type: 'nodes.positions.change', positions: { src: { x: 1, y: 2 } } });
+    canvas.send({ type: 'nodes.positions.change', positions: { es: { x: 3, y: 4 } } });
+    expect(canvas.getSnapshot().context.nodePositions).toEqual({
+      src: { x: 1, y: 2 },
+      es: { x: 3, y: 4 },
+    });
+
+    canvas.send({ type: 'nodes.positions.restore', positions: { src: { x: 1, y: 2 } } });
+    expect(canvas.getSnapshot().context.nodePositions).toEqual({ src: { x: 1, y: 2 } });
+  });
+});
+
+describe('canvas routing flyout', () => {
+  const line = { origin: { kind: 'source' as const, id: 'src' }, destinationId: 'es' };
+
+  const openRouting = (canvas: Canvas) => {
+    canvas.send({ type: 'routing.open', target: { kind: 'line', line } });
+    const ref = canvas.getSnapshot().context.routingFlyout?.ref;
+    if (!ref) {
+      throw new Error('Expected the routing flyout to open');
+    }
+    return ref;
+  };
+
+  it('stages a new routing node on the line without persisting it', async () => {
+    const persist = jest.fn(async (unit: Unit) => unit);
+    const { canvas } = startCanvas(persist);
+    await waitForUnitReady(canvas);
+    const persisted = canvas.getSnapshot().context.unit;
+
+    const ref = openRouting(canvas);
+    ref.send({ type: 'rule.add' });
+    ref.send({
+      type: 'rule.update',
+      key: 'rule-1',
+      changes: {
+        when: 'resource.attributes["service.name"] == "x"',
+        action: 'copy',
+      },
+    });
+    ref.send({ type: 'flyout.save' });
+
+    const { context } = canvas.getSnapshot();
+    expect(context.routingFlyout).toBeUndefined();
+    expect(context.unit).toBe(persisted);
+    // The canvas tidies the flow of a routing node it sees staged here.
+    expect(context.routingStagedUnit).toBe(context.nextUnit);
+    expect(context.nextUnit.unit.pipelines[0].config).toEqual([
+      { name: 'sources', value: ['src'] },
+      {
+        name: 'routes',
+        value: [
+          { when: 'resource.attributes["service.name"] == "x"', action: 'copy', destinations: [] },
+          { destinations: ['es'] },
+        ],
+      },
+    ]);
+    expect(canvas.getSnapshot().matches({ ready: { unit: 'ready' } })).toBe(true);
+    expect(persist).not.toHaveBeenCalled();
+  });
+
+  it('edits the rules of an existing routing node', async () => {
+    const { canvas } = startCanvas(async (unit) => unit);
+    await waitForUnitReady(canvas);
+    const ref = openRouting(canvas);
+    ref.send({ type: 'flyout.save' });
+
+    canvas.send({ type: 'routing.open', target: { kind: 'pipeline', pipelineId: 'p-src' } });
+    const editRef = canvas.getSnapshot().context.routingFlyout?.ref;
+    expect(editRef?.getSnapshot().context.target).toEqual({
+      kind: 'pipeline',
+      pipelineId: 'p-src',
+    });
+    editRef?.send({ type: 'rule.update', key: 'rule-0', changes: { action: 'copy' } });
+    editRef?.send({ type: 'flyout.save' });
+
+    expect(canvas.getSnapshot().context.nextUnit.unit.pipelines[0].config).toEqual([
+      { name: 'sources', value: ['src'] },
+      { name: 'routes', value: [{ action: 'copy', destinations: ['es'] }] },
+    ]);
+  });
+
+  it('opens the rules read-only for a user who cannot manage the stream, staging nothing', async () => {
+    const { canvas } = startCanvas(async (unit) => unit);
+    await waitForUnitReady(canvas);
+    const ref = openRouting(canvas);
+    ref.send({ type: 'flyout.save' });
+    const staged = canvas.getSnapshot().context.nextUnit;
+
+    canvas.send({
+      type: 'routing.open',
+      target: { kind: 'pipeline', pipelineId: 'p-src' },
+      readOnly: true,
+    });
+    const viewRef = canvas.getSnapshot().context.routingFlyout?.ref;
+    expect(viewRef?.getSnapshot().context).toMatchObject({ editable: false, readOnly: true });
+    viewRef?.send({ type: 'rule.update', key: 'rule-0', changes: { action: 'copy' } });
+    viewRef?.send({ type: 'flyout.save' });
+
+    expect(canvas.getSnapshot().context.nextUnit).toBe(staged);
+  });
+
+  it('puts a routing node on a rule line through a new child pipeline', async () => {
+    const routed = loadedUnit();
+    routed.unit.pipelines[0].config = [
+      { name: 'sources', value: ['src'] },
+      { name: 'routes', value: [{ when: 'body == "x"', destinations: ['es'] }] },
+    ];
+    const { canvas } = startCanvas(async (unit) => unit, routed);
+    await waitForUnitReady(canvas);
+
+    canvas.send({
+      type: 'routing.open',
+      target: {
+        kind: 'line',
+        line: {
+          origin: { kind: 'rule', rule: { pipelineId: 'p-src', ruleIndex: 0 } },
+          destinationId: 'es',
+        },
+      },
+    });
+    canvas.getSnapshot().context.routingFlyout?.ref?.send({ type: 'flyout.save' });
+
+    const { pipelines } = canvas.getSnapshot().context.nextUnit.unit;
+    expect(canvas.getSnapshot().context.routingFlyout).toBeUndefined();
+    expect(pipelines.map(({ id, config }) => [id, config])).toEqual([
+      [
+        'p-src',
+        [
+          { name: 'sources', value: ['src'] },
+          { name: 'routes', value: [{ when: 'body == "x"', pipelines: ['p-src-routing'] }] },
+        ],
+      ],
+      ['p-src-routing', [{ name: 'routes', value: [{ destinations: ['es'] }] }]],
+    ]);
+  });
+
+  it('shows the missing state for a line or routing node it cannot configure', async () => {
+    const { canvas } = startCanvas(async (unit) => unit);
+    await waitForUnitReady(canvas);
+
+    const unroutable = {
+      kind: 'line' as const,
+      line: { origin: { kind: 'source' as const, id: 'src' }, destinationId: 'missing' },
+    };
+    canvas.send({ type: 'routing.open', target: unroutable });
+    expect(canvas.getSnapshot().context.routingFlyout).toEqual({ target: unroutable });
+
+    const missing = { kind: 'pipeline' as const, pipelineId: 'missing' };
+    canvas.send({ type: 'routing.open', target: missing });
+    expect(canvas.getSnapshot().context.routingFlyout).toEqual({ target: missing });
+
+    canvas.send({ type: 'routing.close' });
+    expect(canvas.getSnapshot().context.routingFlyout).toBeUndefined();
+  });
+
+  it('rejects a save whose line can no longer be routed', async () => {
+    const { canvas } = startCanvas(async (unit) => unit);
+    await waitForUnitReady(canvas);
+    const ref = openRouting(canvas);
+    const staged = disconnectLine(
+      canvas.getSnapshot().context.nextUnit,
+      { kind: 'source', id: 'src' },
+      { kind: 'destination', id: 'es' }
+    );
+    canvas.send({ type: 'unit.stage', unitDefinition: staged });
+    ref.send({ type: 'flyout.save' });
+
+    expect(ref.getSnapshot().value).toBe('idle');
+    expect(ref.getSnapshot().context.saveError).toMatch(/no longer be applied/);
     expect(canvas.getSnapshot().context.nextUnit).toBe(staged);
   });
 });
@@ -591,5 +798,75 @@ describe('canvasStateMachine', () => {
     actor.send({ type: 'unit.reload' });
     await waitFor(actor, (snapshot) => snapshot.matches({ ready: { unit: 'reloadFailed' } }));
     expect(core.notifications.toasts.addError).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('canvas routing save diagnostics', () => {
+  const routedUnit = (): Unit => {
+    const routed = loadedUnit();
+    routed.unit.pipelines[0].config = [
+      { name: 'sources', value: ['src'] },
+      {
+        name: 'routes',
+        value: [{ when: 'attributes["a"] ==', destinations: ['es'] }, { destinations: ['es'] }],
+      },
+    ];
+    return routed;
+  };
+
+  const rejected = (diagnostics: object[]) =>
+    Object.assign(new Error('Bad Request'), {
+      name: 'HttpFetchError',
+      request: {},
+      body: { statusCode: 400, attributes: { data: { valid: false, diagnostics } } },
+    });
+
+  const failSave = async () => {
+    const persist = jest.fn(async (unit: Unit) => unit);
+    persist.mockRejectedValueOnce(
+      rejected([
+        {
+          severity: 'error',
+          code: 'E050',
+          message: 'unexpected end of condition',
+          path: '/pipelines/0/config/1/value/0/when',
+        },
+      ])
+    );
+    const { canvas } = startCanvas(persist, routedUnit());
+    await waitForUnitReady(canvas);
+    const staged = routedUnit();
+    staged.unit.pipelines[0].name = 'Routing';
+    canvas.send({ type: 'unit.stage', unitDefinition: staged });
+    canvas.send({ type: 'unit.save' });
+    await waitFor(canvas, (snapshot) => snapshot.matches({ ready: { unit: 'saveFailed' } }));
+    return canvas;
+  };
+
+  it('traces a rejected save back to the routing rule and hands it to the flyout', async () => {
+    const canvas = await failSave();
+    expect(canvas.getSnapshot().context.routingDiagnostics).toEqual([
+      { code: 'E050', message: 'unexpected end of condition', pipelineId: 'p-src', ruleIndex: 0 },
+    ]);
+
+    canvas.send({ type: 'routing.open', target: { kind: 'pipeline', pipelineId: 'p-src' } });
+    const rules = canvas.getSnapshot().context.routingFlyout?.ref?.getSnapshot().context.rules;
+    expect(rules?.map(({ diagnostics }) => diagnostics)).toEqual([
+      ['unexpected end of condition'],
+      undefined,
+    ]);
+  });
+
+  it('drops the routing node diagnostics once its rules are staged again', async () => {
+    const canvas = await failSave();
+    canvas.send({ type: 'routing.open', target: { kind: 'pipeline', pipelineId: 'p-src' } });
+    const ref = canvas.getSnapshot().context.routingFlyout?.ref;
+    ref?.send({
+      type: 'rule.update',
+      key: 'rule-0',
+      changes: { when: 'attributes["a"] == "b"' },
+    });
+    ref?.send({ type: 'flyout.save' });
+    expect(canvas.getSnapshot().context.routingDiagnostics).toEqual([]);
   });
 });
