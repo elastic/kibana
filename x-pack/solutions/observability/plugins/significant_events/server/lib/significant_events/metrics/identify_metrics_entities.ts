@@ -52,6 +52,7 @@ export interface IdentifyMetricsEntitiesResult {
   unknownClusterRows: number;
   multiNamespaceWorkloadsCount: number;
   namespacesSkippedCount: number;
+  excludedSkippedCount: number;
   timings: {
     catalogueMs: number;
     inventoryMs: number;
@@ -183,6 +184,7 @@ export const identifyMetricsEntities = async ({
       unknownClusterRows: 0,
       multiNamespaceWorkloadsCount: 0,
       namespacesSkippedCount: 0,
+      excludedSkippedCount: 0,
       timings: { catalogueMs, inventoryMs: 0, totalMs: catalogueMs },
       errors: [{ stage: 'catalogue', message }],
     };
@@ -206,6 +208,7 @@ export const identifyMetricsEntities = async ({
       unknownClusterRows: 0,
       multiNamespaceWorkloadsCount: 0,
       namespacesSkippedCount: 0,
+      excludedSkippedCount: 0,
       timings: { catalogueMs, inventoryMs: 0, totalMs: Date.now() - startedAt },
       errors: [],
     };
@@ -247,6 +250,7 @@ export const identifyMetricsEntities = async ({
       unknownClusterRows: 0,
       multiNamespaceWorkloadsCount: 0,
       namespacesSkippedCount: 0,
+      excludedSkippedCount: 0,
       timings: { catalogueMs, inventoryMs: 0, totalMs: Date.now() - startedAt },
       errors: [],
     };
@@ -312,13 +316,19 @@ export const identifyMetricsEntities = async ({
     );
   }
 
-  const selectedFeatures = mergeHostFeatures(features).sort((left, right) => {
+  const { hits: excludedFeatures } = await kiClient.getExcludedFeatures(sourceId);
+  const excludedFeatureIds = new Set(excludedFeatures.map(({ id }) => id));
+  const mergedFeatures = mergeHostFeatures(features);
+  const selectedFeatures = mergedFeatures
+    .filter(({ id }) => !excludedFeatureIds.has(id))
+    .sort((left, right) => {
     const priority = entityPriority(left) - entityPriority(right);
     if (priority !== 0) {
       return priority;
     }
     return replicasOf(right) - replicasOf(left) || compareEntityIds(left, right);
-  });
+    });
+  const excludedSkippedCount = mergedFeatures.length - selectedFeatures.length;
   const droppedOverflowRowsCount = Math.max(0, selectedFeatures.length - MAX_ENTITIES);
   if (droppedOverflowRowsCount > 0) {
     logger.info(
@@ -351,6 +361,7 @@ export const identifyMetricsEntities = async ({
     unknownClusterRows,
     multiNamespaceWorkloadsCount,
     namespacesSkippedCount,
+    excludedSkippedCount,
     timings: { catalogueMs, inventoryMs, totalMs: Date.now() - startedAt },
     errors: [],
   };

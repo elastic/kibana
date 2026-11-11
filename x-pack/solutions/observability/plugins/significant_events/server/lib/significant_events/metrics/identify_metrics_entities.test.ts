@@ -95,17 +95,23 @@ type TestCell = TestScalar | readonly TestScalar[];
 const datasetRows = (...datasets: Array<string | null>): TestCell[][] =>
   datasets.map((dataset, index) => [index + 1, dataset]);
 
-const createHarness = (responses: Array<{ columns: object[]; values: TestCell[][] }>) => {
+const createHarness = (
+  responses: Array<{ columns: object[]; values: TestCell[][] }>,
+  excludedIds: string[] = []
+) => {
   const query = jest.fn();
   responses.forEach((response) => query.mockResolvedValueOnce(response));
   const bulk = jest.fn().mockResolvedValue({ applied: 1, skipped: 0 });
   const getDefaultExpiresAt = jest.fn().mockReturnValue('2026-12-10T12:00:00.000Z');
+  const getExcludedFeatures = jest
+    .fn()
+    .mockResolvedValue({ hits: excludedIds.map((id) => ({ id })) });
   const info = jest.fn();
 
   return {
     esClient: { esql: { query } } as never,
     query,
-    kiClient: { bulk, getDefaultExpiresAt } as never,
+    kiClient: { bulk, getDefaultExpiresAt, getExcludedFeatures } as never,
     bulk,
     logger: { info } as never,
     info,
@@ -449,6 +455,38 @@ describe('host entity merging', () => {
 });
 
 describe('identifyMetricsEntities', () => {
+  it('does not rewrite an excluded entity', async () => {
+    const harness = createHarness(
+      [
+        {
+          columns: datasetColumns,
+          values: datasetRows('generic.otel'),
+        },
+        {
+          columns: serviceColumns,
+          values: [['checkout', ['production'], '2026-11-10T12:00:00.000Z', 42]],
+        },
+      ],
+      ['service:checkout']
+    );
+
+    const result = await identifyMetricsEntities({
+      esClient: harness.esClient,
+      esql: sourceEsql,
+      sourceId: 'service-source',
+      kiClient: harness.kiClient,
+      logger: harness.logger,
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        metricsEntitiesCount: 0,
+        excludedSkippedCount: 1,
+      })
+    );
+    expect(harness.bulk).not.toHaveBeenCalled();
+  });
+
   it('merges copied workloads while keeping local workloads and namespaces separate', async () => {
     const lastSeen = '2026-11-10T12:00:00.000Z';
     const harness = createHarness([
