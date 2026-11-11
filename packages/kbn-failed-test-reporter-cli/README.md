@@ -120,10 +120,11 @@ off.
 - The body text stays as filed. Only the hidden metadata is updated (report count, history, last
   report); the test ids and branches recorded before are kept, so `/skip` still covers a branch
   the suite stopped failing on this week.
-- A comment with the new numbers ("This test suite still appears to be flaky […]") is posted when
-  the suite failed since the last one, or since the issue was filed, and at least
+- A short comment on where the suite is still flaky ("Still flaky on `main`: 4% of builds
+  (18 / 441), last failed […]", one line per branch when there are several) is posted when the
+  suite failed since the last one, or since the issue was filed, and at least
   `--comment-cooldown-days` later (default 3). Failures in between are covered by the next
-  comment. Every comment ends with how to skip the test.
+  comment. How to skip the test is at the end of the body.
 - A closed issue is reopened, with a comment, when the suite failed after it was closed. It stays
   closed when it was closed as a duplicate, or when the suite has not failed since: the report
   window can still hold the failures a fix was merged for.

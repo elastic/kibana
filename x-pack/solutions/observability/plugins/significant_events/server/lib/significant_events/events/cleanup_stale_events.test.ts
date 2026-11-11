@@ -120,6 +120,26 @@ describe('cleanupStaleEvents', () => {
     );
   });
 
+  it('stamps the cleanup workflow run on the versions it writes', async () => {
+    const stale = {
+      ...createEvent('stale-event', ['deleted-rule']),
+      workflow_execution_id: 'discovery-run',
+    };
+    const eventSearchClient = createEventSearchClient([[stale]]);
+
+    await cleanupStaleEvents({
+      eventSearchClient,
+      rulesClient: createRulesClient([]),
+      workflowExecutionId: 'cleanup-run',
+    });
+
+    expect(alertEventsClient.createAlertEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ workflow_execution_id: 'cleanup-run' }),
+      })
+    );
+  });
+
   it('processes all keyset batches', async () => {
     const firstBatch = Array.from({ length: 1000 }, (_, index) =>
       createEvent(`event-${String(index).padStart(4, '0')}`, ['rule-1'])

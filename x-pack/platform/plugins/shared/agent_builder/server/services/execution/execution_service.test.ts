@@ -34,6 +34,7 @@ import {
   createRequestAbortedError,
   isBadRequestError,
   isConversationBusyError,
+  isConversationPausedError,
   isConversationWriteConflictError,
 } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_INFERENCE_FEATURE_ID } from '@kbn/agent-builder-common/constants';
@@ -99,6 +100,8 @@ jest.mock('./task/heartbeat_reporter', () => ({
 }));
 
 const mockTaskManagerSchedule = jest.fn();
+const mockTaskManagerEnsureScheduled = jest.fn();
+const mockTaskManagerRemoveIfExists = jest.fn();
 const mockTaskManagerRunSoon = jest.fn();
 
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -111,11 +114,14 @@ describe('AgentExecutionService', () => {
   const elasticsearch = elasticsearchServiceMock.createStart();
   const taskManager = {
     schedule: mockTaskManagerSchedule,
+    ensureScheduled: mockTaskManagerEnsureScheduled,
+    removeIfExists: mockTaskManagerRemoveIfExists,
     runSoon: mockTaskManagerRunSoon,
   } as any;
 
+  // Reports to a parent read the experimental features setting through this client.
   const uiSettings = {
-    asScopedToClient: jest.fn(),
+    asScopedToClient: jest.fn().mockReturnValue({ get: jest.fn().mockResolvedValue(true) }),
   } as any;
 
   const savedObjects = {
@@ -224,6 +230,94 @@ describe('AgentExecutionService', () => {
       },
       eventCount: 0,
       events: [],
+    });
+  });
+
+  describe('a background sub-agent finishing', () => {
+    const request = httpServerMock.createKibanaRequest();
+    const childRecord = {
+      executionId: 'child-1',
+      '@timestamp': new Date().toISOString(),
+      status: ExecutionStatus.scheduled,
+      agentId: 'child-agent',
+      executionMode: AgentExecutionMode.standalone,
+      spaceId: 'default',
+      parentExecutionId: 'parent-1',
+      owner: { id: 'profile-1', username: 'alice' },
+      agentParams: { nextInput: { message: 'go' }, parentTriggerMode: ChatTriggerMode.Always },
+      eventCount: 0,
+      events: [],
+    };
+
+    let wakeRun: jest.SpyInstance;
+
+    afterEach(() => {
+      wakeRun.mockRestore();
+    });
+
+    it('wakes the parent conversation with its own request and leaves the retry to a task when it is busy', async () => {
+      let finish!: () => void;
+      mockHandleAgentExecution.mockResolvedValue(of());
+      mockCollectAndWriteEvents.mockReturnValue(new Promise<void>((resolve) => (finish = resolve)));
+      mockExecutionClient.create.mockResolvedValueOnce(childRecord as never);
+      mockExecutionClient.get.mockImplementation(async (id: string) =>
+        id === 'parent-1'
+          ? ({
+              executionId: 'parent-1',
+              agentId: 'parent-agent',
+              executionMode: AgentExecutionMode.conversation,
+              agentParams: { conversationId: 'parent-conv', nextInput: { message: 'start' } },
+            } as never)
+          : // Read back once the run settled, so the record carries its terminal status.
+            ({ ...childRecord, status: ExecutionStatus.completed } as never)
+      );
+      conversationClient.get.mockResolvedValue({
+        id: 'parent-conv',
+        rounds: [],
+        events: [],
+        state: { background_executions: { 'child-1': { execution_id: 'child-1' } } },
+      } as never);
+
+      await service.executeAgent({
+        mode: AgentExecutionMode.standalone,
+        request,
+        params: {
+          agentId: 'child-agent',
+          nextInput: { message: 'go' },
+          parentExecutionId: 'parent-1',
+          parentTriggerMode: ChatTriggerMode.Always,
+        },
+        useTaskManager: false,
+      });
+
+      wakeRun = jest
+        .spyOn(service, 'maybeExecuteAgent')
+        .mockRejectedValue(
+          createConversationBusyError({ conversationId: 'parent-conv', activeExecutionId: 'other' })
+        );
+      finish();
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(wakeRun).toHaveBeenCalledWith(
+        expect.objectContaining({
+          mode: AgentExecutionMode.conversation,
+          request,
+          useTaskManager: true,
+          params: expect.objectContaining({
+            conversationId: 'parent-conv',
+            actor: expect.objectContaining({ id: 'child-agent' }),
+          }),
+        })
+      );
+      expect(mockTaskManagerEnsureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'agent-wake-child-1',
+          taskType: 'agent-builder:wake-parent',
+          params: { childExecutionId: 'child-1' },
+        }),
+        { request, cloneApiKey: true }
+      );
+      expect(mockTaskManagerRemoveIfExists).not.toHaveBeenCalled();
     });
   });
 
@@ -352,6 +446,28 @@ describe('AgentExecutionService', () => {
       expect(conversationClient.create).not.toHaveBeenCalled();
       expect(conversationClient.appendEvents).not.toHaveBeenCalled();
       expect(mockExecutionClient.create).not.toHaveBeenCalled();
+    });
+
+    it('refuses to run a bound agent in the background before creating anything', async () => {
+      await expect(
+        createBoundService().executeAgent({
+          mode: AgentExecutionMode.standalone,
+          request: httpServerMock.createKibanaRequest(),
+          params: {
+            agentId: 'agent-1',
+            parentExecutionId: 'parent-1',
+            parentTriggerMode: ChatTriggerMode.Always,
+            nextInput: { message: 'hello' },
+          },
+          useTaskManager: true,
+        })
+      ).rejects.toMatchObject({
+        meta: { statusCode: 400 },
+        message: expect.stringContaining('cannot run in the background'),
+      });
+
+      expect(mockExecutionClient.create).not.toHaveBeenCalled();
+      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
     });
 
     it('refuses to run a bound agent while service accounts are disabled', async () => {
@@ -1661,6 +1777,53 @@ describe('AgentExecutionService', () => {
 
       expect(conversationService.getScopedClientAsUser).not.toHaveBeenCalled();
     });
+
+    it('a wake run acts as the owner of the sub-agent execution it reports', async () => {
+      mockExecutionClient.peek.mockResolvedValueOnce({
+        status: ExecutionStatus.completed,
+        eventCount: 0,
+        owner: { id: 'profile-1', username: 'alice' },
+      });
+
+      await service
+        .executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request: httpServerMock.createKibanaRequest(),
+          params: {
+            conversationId: 'conv-1',
+            nextInput: { message: 'finished' },
+            reportsBackgroundExecution: 'child-1',
+          },
+          useTaskManager: true,
+        })
+        .catch(() => undefined);
+
+      expect(mockExecutionClient.peek).toHaveBeenCalledWith('child-1');
+      expect(conversationService.getScopedClientAsUser).toHaveBeenCalledWith(
+        expect.objectContaining({ user: expect.objectContaining({ id: 'profile-1' }) })
+      );
+
+      mockExecutionClient.peek.mockResolvedValueOnce({
+        status: ExecutionStatus.completed,
+        eventCount: 0,
+        owner: { id: 'profile-1', username: 'alice' },
+      });
+      await service
+        .maybeExecuteAgent({
+          mode: AgentExecutionMode.conversation,
+          request: httpServerMock.createKibanaRequest(),
+          params: {
+            conversationId: 'conv-1',
+            nextInput: { message: 'finished' },
+            reportsBackgroundExecution: 'child-1',
+            triggerMode: ChatTriggerMode.Never,
+          },
+          useTaskManager: true,
+        })
+        .catch(() => undefined);
+
+      expect(conversationService.getScopedClientAsUser).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe('executeAgent with an idempotency key', () => {
@@ -2436,6 +2599,24 @@ describe('AgentExecutionService', () => {
         expect.anything()
       );
       expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
+      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
+    });
+
+    it('refuses a background report while the conversation waits on a prompt, deleting its record', async () => {
+      conversationClient.get.mockResolvedValue({
+        ...conversation,
+        rounds: [createRound({ id: 'round-1', status: ConversationRoundStatus.awaitingPrompt })],
+      });
+
+      const error = await converse({ reportsBackgroundExecution: 'child-1' }).catch(
+        (thrown) => thrown
+      );
+
+      expect(isConversationPausedError(error)).toBe(true);
+      expect(conversationClient.update).not.toHaveBeenCalled();
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+      const [{ executionId }] = mockExecutionClient.create.mock.calls[0];
+      expect(mockExecutionClient.delete).toHaveBeenCalledWith(executionId);
       expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
     });
 

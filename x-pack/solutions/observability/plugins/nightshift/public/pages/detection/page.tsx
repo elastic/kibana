@@ -78,6 +78,10 @@ const SignalsTab = lazy(() =>
   import('./signals/signals_tab').then(({ SignalsTab: Tab }) => ({ default: Tab }))
 );
 
+const TopologyTab = lazy(() =>
+  import('./topology/tab').then(({ TopologyTab: Tab }) => ({ default: Tab }))
+);
+
 export type DetectionPageHeaderProps = Pick<
   NightshiftAppHeaderProps,
   | 'onSourcesClick'
@@ -182,7 +186,7 @@ export const DetectionPage = ({
         back={{
           href: application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/' }),
           label: i18n.translate('xpack.nightshift.detectionPage.backToNightshiftLabel', {
-            defaultMessage: 'Nightshift',
+            defaultMessage: 'nightshift',
           }),
         }}
       />
@@ -369,6 +373,9 @@ export const DetectionPage = ({
                             entities={selection.entities}
                             unassigned={selection.unassigned}
                           />
+                        )}
+                        {tab === 'topology' && isDeveloperMode && (
+                          <TopologyTab entities={selection.entities} />
                         )}
                       </Suspense>
                     </div>

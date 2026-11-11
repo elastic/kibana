@@ -25,6 +25,7 @@ import {
   type Severity,
   type SignificantEventStatus,
 } from '@kbn/significant-events-schema';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
   SIGNIFICANT_EVENT_INVESTIGATION_STATE_LABELS,
@@ -41,6 +42,14 @@ import {
   SEVERITY_LABEL,
   STATUS_LABEL,
 } from './translations';
+
+const INVESTIGATION_WINDOW_TRUNCATED_NOTE = i18n.translate(
+  'xpack.nightshift.eventsFilters.investigationWindowTruncatedNote',
+  {
+    defaultMessage:
+      'Only the newest 1,000 investigations are matched. Events with older investigations count as not started.',
+  }
+);
 
 export interface EventsFiltersProps {
   timeRange: DetectionTimeRange;
@@ -133,6 +142,11 @@ export const EventsFilters = ({
             options={SIGNIFICANT_EVENT_INVESTIGATION_STATES}
             selected={investigation}
             counts={facets?.investigation}
+            footerNote={
+              facets?.investigation_window_truncated
+                ? INVESTIGATION_WINDOW_TRUNCATED_NOTE
+                : undefined
+            }
             getLabel={(value) => SIGNIFICANT_EVENT_INVESTIGATION_STATE_LABELS[value]}
             onChange={onInvestigationChange}
             testSubject="nightshiftDetectionEventsInvestigationFilter"
