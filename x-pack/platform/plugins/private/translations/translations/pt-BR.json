@@ -68230,8 +68230,6 @@
     "xpack.streams.canvas.connectionHandle.receiveAriaLabel": "Solte para conectar uma fonte",
     "xpack.streams.canvas.contextMenu.tidyUpLabel": "Organizar",
     "xpack.streams.canvas.contextMenu.tidyUpSelectionLabel": "Organizar seleção",
-    "xpack.streams.canvas.emptyState.addDataButton": "Adicionar dados",
-    "xpack.streams.canvas.emptyState.body": "Streams representam como seus logs e métricas percorrem o caminho das fontes, passando pelos pipelines, até os destinos. Conecte fontes, modele os dados, encaminhe-os para qualquer lugar e inspecione todo o fluxo em um gráfico interativo. Comece integrando dados à Elastic.",
     "xpack.streams.canvas.emptyState.title": "Veja como seus dados chegam",
     "xpack.streams.canvas.fitToScreen": "Ajustar à tela",
     "xpack.streams.canvas.keyboardInstructions": "Use Tab para navegar entre os nós. Use as teclas de seta para reposicionar o nó em foco. Pressione Delete para remover uma origem ou um destino que esteja selecionado. Pressione Control ou Command + Z para desfazer; adicione Shift para refazer. Pressione Escape para fechar os menus e limpar a seleção.",

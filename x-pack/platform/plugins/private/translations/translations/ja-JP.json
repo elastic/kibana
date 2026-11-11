@@ -68221,8 +68221,6 @@
     "xpack.streams.canvas.connectionHandle.receiveAriaLabel": "ドロップしてソースを接続してください",
     "xpack.streams.canvas.contextMenu.tidyUpLabel": "整理してください",
     "xpack.streams.canvas.contextMenu.tidyUpSelectionLabel": "選択内容を整理してください",
-    "xpack.streams.canvas.emptyState.addDataButton": "データを追加",
-    "xpack.streams.canvas.emptyState.body": "Streamsは、ログとメトリクスがソースからパイプラインを経由して宛先へ移動する仕組みを表します。ソースを接続し、データを加工して任意の場所にルーティングし、インタラクティブなグラフでフロー全体を確認してください。まず、データをElasticに取り込むことから始めてください。",
     "xpack.streams.canvas.emptyState.title": "データの流れを確認",
     "xpack.streams.canvas.fitToScreen": "画面に合わせる",
     "xpack.streams.canvas.keyboardInstructions": "Tabキーを押してノード間を移動します。 フォーカスされているノードの位置を変更するには、矢印キーを押します。 Deleteキーを押すと、選択したソースまたはデスティネーションが削除されます。 元に戻すにはControlキーまたはCommandキーとZキーを押します。やり直すにはShiftキーも押してください。 Escapeキーを押すと、メニューを閉じて選択を解除できます。",

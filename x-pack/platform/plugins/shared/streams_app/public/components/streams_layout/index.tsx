@@ -16,7 +16,7 @@ import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { RedirectTo } from '../redirect_to';
 import { StreamsAppHeader, StreamsAppPageTemplate } from '../streams_app_page_template';
-import { DEFAULT_STREAMS_LAYOUT_TAB, isStreamsLayoutTab, STREAMS_LAYOUT_TABS } from './tab_ids';
+import { defaultStreamsLayoutTab, isStreamsLayoutTab, STREAMS_LAYOUT_TABS } from './tab_ids';
 import { streamsLayoutTabs } from './tabs';
 import { UnitNotFoundPrompt } from './unit_not_found_prompt';
 import { useShowClassicTab } from './use_show_classic_tab';
@@ -64,11 +64,9 @@ export function StreamsLayout({ showClassic }: { showClassic: boolean }) {
     rememberClassicTabOrigin(tab === 'classic' ? unitId : undefined);
   }, [tab, unitId]);
 
-  // Classic stays reachable by URL, so an empty cluster keeps the V1 create and settings controls.
-  const classicOpen = tab === 'classic' && access.legacy;
   const visibleTabs = useMemo(
-    () => STREAMS_LAYOUT_TABS.filter((tabId) => showClassic || classicOpen || tabId !== 'classic'),
-    [showClassic, classicOpen]
+    () => STREAMS_LAYOUT_TABS.filter((tabId) => showClassic || tabId !== 'classic'),
+    [showClassic]
   );
 
   const appHeaderTabs = useMemo<AppHeaderTab[]>(
@@ -99,7 +97,7 @@ export function StreamsLayout({ showClassic }: { showClassic: boolean }) {
     return (
       <RedirectTo
         path="/v2/unit/{unitId}/{tab}"
-        params={{ path: { tab: DEFAULT_STREAMS_LAYOUT_TAB } }}
+        params={{ path: { tab: defaultStreamsLayoutTab(showClassic) } }}
       />
     );
   }

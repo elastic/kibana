@@ -68040,8 +68040,6 @@
     "xpack.streams.canvas.connectionHandle.receiveAriaLabel": "Zum Verbinden einer Datenquelle ablegen",
     "xpack.streams.canvas.contextMenu.tidyUpLabel": "Bereinigen Sie",
     "xpack.streams.canvas.contextMenu.tidyUpSelectionLabel": "Bereinigen Sie die Auswahl",
-    "xpack.streams.canvas.emptyState.addDataButton": "Daten hinzufügen",
-    "xpack.streams.canvas.emptyState.body": "Streams veranschaulichen, wie Ihre Logs und Metriken aus Quellen durch Pipelines zu Zielen gelangen. Verbinden Sie Quellen, bereiten Sie Daten auf, leiten Sie sie an beliebige Ziele weiter und inspizieren Sie den gesamten Ablauf als interaktiven Graphen. Beginnen Sie mit dem Onboarding von Daten in Elastic.",
     "xpack.streams.canvas.emptyState.title": "Sehen Sie, wie Ihre Daten eingehen",
     "xpack.streams.canvas.fitToScreen": "An Bildschirm anpassen",
     "xpack.streams.canvas.keyboardInstructions": "Verwenden Sie die Tab-Taste zum Wechseln zwischen Nodes. Verwenden Sie die Pfeiltasten, um die fokussierte Node neu zu positionieren. Drücken Sie die Entf-Taste, um eine ausgewählte Quelle oder ein ausgewähltes Ziel zu entfernen. Drücken Sie Strg oder Command plus Z zum Rückgängigmachen und zusätzlich die Umschalttaste zum Wiederholen. Drücken Sie die Escape-Taste, um Menüs zu schließen und die Auswahl aufzuheben.",

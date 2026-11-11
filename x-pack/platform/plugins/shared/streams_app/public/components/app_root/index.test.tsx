@@ -67,7 +67,21 @@ describe('AppRoot', () => {
     );
     firstMount.unmount();
 
-    mockFetch.mockResolvedValue({ streams: [{ name: 'logs-nginx-default', type: 'classic' }] });
+    mockFetch.mockResolvedValue({
+      streams: [
+        {
+          name: 'logs-nginx-default',
+          type: 'classic',
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [{}] },
+            settings: {},
+            classic: {},
+            failure_store: { inherit: {} },
+          },
+        },
+      ],
+    });
     renderAppRoot();
 
     await waitFor(() =>

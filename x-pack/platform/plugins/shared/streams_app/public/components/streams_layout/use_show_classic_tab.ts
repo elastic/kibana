@@ -8,11 +8,11 @@
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
-import { hasClassicOrWiredStreams } from './tab_ids';
+import { hasAlteredStreams } from './tab_ids';
 
 export const CLASSIC_TAB_QUERY_KEY = ['streams', 'classicTabStreams'];
 
-/** Shows the Classic tab to users with both experiences, unless the check finds no streams. */
+/** Shows the Classic tab when a classic or wired stream has saved changes. A failed check keeps the tab. */
 export function useShowClassicTab(): { loading: boolean; showClassic: boolean } {
   const {
     dependencies: {
@@ -30,7 +30,7 @@ export function useShowClassicTab(): { loading: boolean; showClassic: boolean } 
     queryKey: CLASSIC_TAB_QUERY_KEY,
     queryFn: ({ signal }) =>
       streamsRepositoryClient.fetch('GET /api/streams 2023-10-31', { signal: signal ?? null }),
-    select: ({ streams }) => hasClassicOrWiredStreams(streams),
+    select: ({ streams }) => hasAlteredStreams(streams),
     enabled,
     // One check per Streams app mount (AppRoot drops the answer), also after a failure: V1 is
     // GA, so a failed check keeps the tab.
@@ -42,5 +42,7 @@ export function useShowClassicTab(): { loading: boolean; showClassic: boolean } 
     refetchOnReconnect: false,
   });
 
-  return { loading: isInitialLoading, showClassic: enabled && data !== false };
+  const showClassic = enabled && data !== false;
+
+  return { loading: isInitialLoading, showClassic };
 }

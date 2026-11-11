@@ -150,14 +150,23 @@ describe('StreamsLayout', () => {
     expect(screen.queryByTestId('streamsLayoutTabContent-sources')).not.toBeInTheDocument();
   });
 
-  it('redirects an unknown tab of a missing unit to the map', () => {
+  it('redirects an unknown tab to Classic when saved classic streams exist', () => {
     renderLayout({ check: 'notFound', tab: 'bogus' });
+
+    expect(screen.getByTestId('redirectTo')).toHaveAttribute(
+      'data-params',
+      JSON.stringify({ path: { tab: 'classic' } })
+    );
+    expect(screen.queryByTestId('streamsUnitNotFoundPrompt')).not.toBeInTheDocument();
+  });
+
+  it('redirects an unknown tab to the map when no saved classic streams exist', () => {
+    renderLayout({ check: 'notFound', tab: 'bogus', showClassic: false });
 
     expect(screen.getByTestId('redirectTo')).toHaveAttribute(
       'data-params',
       JSON.stringify({ path: { tab: 'map' } })
     );
-    expect(screen.queryByTestId('streamsUnitNotFoundPrompt')).not.toBeInTheDocument();
   });
 
   it('renders the classic tab with its own header and without a unit check', () => {
@@ -187,11 +196,14 @@ describe('StreamsLayout', () => {
     expect(screen.getByTestId('streamsLayoutHeader')).toHaveTextContent('3');
   });
 
-  it('keeps the classic tab reachable by URL when the stream check finds none', () => {
+  it('redirects the classic tab to the map when the stream check finds none', () => {
     renderLayout({ tab: 'classic', showClassic: false });
 
-    expect(screen.getByTestId('streamsLayoutTabContent-classic')).toHaveTextContent('4');
-    expect(screen.queryByTestId('redirectTo')).not.toBeInTheDocument();
+    expect(screen.getByTestId('redirectTo')).toHaveAttribute(
+      'data-params',
+      JSON.stringify({ path: { tab: 'map' } })
+    );
+    expect(screen.queryByTestId('streamsLayoutTabContent-classic')).not.toBeInTheDocument();
   });
 
   it('redirects the classic tab to the map without Streams access', () => {

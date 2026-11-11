@@ -67799,8 +67799,6 @@
     "xpack.streams.canvas.connectionHandle.receiveAriaLabel": "Déposez pour connecter une source",
     "xpack.streams.canvas.contextMenu.tidyUpLabel": "Nettoyez",
     "xpack.streams.canvas.contextMenu.tidyUpSelectionLabel": "Nettoyer la sélection",
-    "xpack.streams.canvas.emptyState.addDataButton": "Ajouter des données",
-    "xpack.streams.canvas.emptyState.body": "Les Streams représentent la manière dont vos logs et vos métriques circulent des sources, à travers les pipelines, jusqu’aux destinations. Connectez des sources, structurez les données, acheminez-les où vous le souhaitez et inspectez l’ensemble du flux sous la forme d’un graphe interactif. Commencez par intégrer des données dans Elastic.",
     "xpack.streams.canvas.emptyState.title": "Observez comment vos données circulent",
     "xpack.streams.canvas.fitToScreen": "Ajuster à l'écran",
     "xpack.streams.canvas.keyboardInstructions": "Utilisez Tab pour passer d'un nœud à l'autre. Utilisez les touches fléchées pour repositionner le nœud focalisé. Appuyez sur Suppr pour supprimer une source ou une destination sélectionnée. Appuyez sur Ctrl ou Commande + Z pour annuler, ajoutez Maj pour rétablir. Appuyez sur Échap pour fermer les menus et effacer la sélection.",
