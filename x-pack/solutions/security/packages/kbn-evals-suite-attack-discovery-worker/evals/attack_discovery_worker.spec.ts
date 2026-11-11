@@ -6,9 +6,10 @@
  */
 
 import { buildWorkerRows } from '../datasets/worker_rows';
-import { SCENARIOS_ENV } from '../src/constants';
+import { SCENARIOS_ENV, COHORT_ENV } from '../src/constants';
 import { evaluate, tags } from '../src/evaluate';
 import { createEvaluateDataset } from '../src/evaluators/dataset_evaluator';
+import { parseCohort } from '../src/cohort_routing';
 import { selectScenarios } from '../src/select_scenarios';
 
 /**
@@ -33,6 +34,13 @@ evaluate.describe('Attack Discovery Worker', { tag: tags.stateful.classic }, () 
       evaluationConnector,
     }) => {
       const { routing, floorWorkflowId } = adWorkerPreflight;
+      // parseCohort re-reads AD_WORKER_EVAL_COHORT here so an unsupported value fails fast
+      // (it throws) and the planned routing is checked against what was asked for.
+      if (routing.cohort !== parseCohort(process.env[COHORT_ENV])) {
+        throw new Error(
+          `Cohort routing planned "${routing.cohort}" but expected the requested one`
+        );
+      }
       const evaluateDataset = createEvaluateDataset({
         client: adWorkerClient,
         evaluators,

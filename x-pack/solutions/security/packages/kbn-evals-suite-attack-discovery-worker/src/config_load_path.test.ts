@@ -23,7 +23,8 @@ jest.mock('@kbn/evals', () => ({
 // Raw-text extensions the Jest preset transforms that the Playwright loader cannot parse
 // (`.pegg`/`.tex` come from the preset's trailing-`?` patterns; a bare trailing `.` matches the
 // preset's `|\.$` alternative). `.peg`, `.te` and `.yamll` are not transformed, so they are not
-// listed. See `kbn-jest/jest-preset.js` `transform`.
+// listed. Verified against the kbn-jest jest-preset.js `transform` list as of Nov 2026
+// (packages/kbn-jest/src/jest-preset.js); if the preset's transform list changes, re-check here. See `kbn-jest/jest-preset.js` `transform`.
 const RAW_TEXT_MODULE = /\.(ya?ml|txt|html|peggy?|text?)$|\.$/;
 
 /** Every module path that loading `entry` pulls in, from a registry emptied beforehand. */
