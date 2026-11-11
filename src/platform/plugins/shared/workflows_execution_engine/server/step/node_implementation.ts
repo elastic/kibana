@@ -338,7 +338,9 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   }
 
   private isDebugEnabled(): boolean {
-    const execution = this.workflowExecutionRuntime.getWorkflowExecution();
+    const execution =
+      this.workflowExecutionRuntime?.getWorkflowExecution?.() ??
+      this.stepExecutionRuntime.workflowExecution;
     const debug = execution?.context?.debug as { enabled?: boolean } | undefined;
     return Boolean(execution?.isTestRun && debug?.enabled === true);
   }
@@ -347,7 +349,9 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     if (!this.isDebugEnabled()) {
       return false;
     }
-    const execution = this.workflowExecutionRuntime.getWorkflowExecution();
+    const execution =
+      this.workflowExecutionRuntime?.getWorkflowExecution?.() ??
+      this.stepExecutionRuntime.workflowExecution;
     const debug = execution?.context?.debug as { breakpoints?: unknown } | undefined;
     if (!Array.isArray(debug?.breakpoints) || debug.breakpoints.length === 0) {
       return false;
@@ -360,11 +364,11 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     if (!debug.breakpoints.includes(stepName)) {
       return false;
     }
-    return this.stepExecutionRuntime.getCurrentStepState()?.breakpointHit !== true;
+    return this.stepExecutionRuntime.getCurrentStepState?.()?.breakpointHit !== true;
   }
 
   private enterBreakpointPause(): void {
-    const existingState = this.stepExecutionRuntime.getCurrentStepState() ?? {};
+    const existingState = this.stepExecutionRuntime.getCurrentStepState?.() ?? {};
     this.stepExecutionRuntime.setCurrentStepState({
       ...existingState,
       breakpointPaused: true,
@@ -374,7 +378,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   }
 
   private clearBreakpointPauseOnResume(): Record<string, unknown> | undefined {
-    const currentState = this.stepExecutionRuntime.getCurrentStepState();
+    const currentState = this.stepExecutionRuntime.getCurrentStepState?.();
     if (!currentState?.breakpointPaused) {
       return undefined;
     }
@@ -382,7 +386,10 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
       ...currentState,
       breakpointPaused: false,
     });
-    const context = this.workflowExecutionRuntime.getWorkflowExecution()?.context;
+    const execution =
+      this.workflowExecutionRuntime?.getWorkflowExecution?.() ??
+      this.stepExecutionRuntime.workflowExecution;
+    const context = execution?.context;
     const rawResumeInput = context?.resumeInput;
     const overrideInput =
       rawResumeInput != null &&
