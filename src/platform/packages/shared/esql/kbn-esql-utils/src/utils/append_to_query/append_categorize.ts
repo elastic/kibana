@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Parser } from '@elastic/esql';
+import { Parser, WrappingPrettyPrinter, mutate, synth } from '@elastic/esql';
 import { escapeEsqlColumnName } from '@kbn/esql-language';
-import { appendToESQLQuery } from './utils';
 
 const CATEGORIZE_COUNT_COLUMN = 'Count';
 const CATEGORIZE_PATTERN_COLUMN = 'Pattern';
@@ -22,23 +21,24 @@ const DROPPABLE_TRAILING_COMMANDS: ReadonlySet<string> = new Set(['limit', 'sort
  * Appends a `STATS ... BY CATEGORIZE(field)` pipeline to the query, removing trailing LIMIT/SORT/KEEP/DROP commands first.
  */
 export const appendCategorizeToESQLQuery = (esql: string, field: string): string => {
-  const { root } = Parser.parse(esql);
-  const { commands } = root;
+  // Parsing with formatting keeps comments on the AST, so the printer can write them back
+  const { root } = Parser.parse(esql, { withFormatting: true, withParens: true });
 
-  let lastKeptIndex = commands.length - 1;
-  while (lastKeptIndex > 0 && DROPPABLE_TRAILING_COMMANDS.has(commands[lastKeptIndex].name)) {
-    lastKeptIndex--;
+  let lastCommand = root.commands[root.commands.length - 1];
+  while (root.commands.length > 1 && DROPPABLE_TRAILING_COMMANDS.has(lastCommand.name)) {
+    mutate.generic.commands.remove(root, lastCommand);
+    lastCommand = root.commands[root.commands.length - 1];
   }
 
-  const baseQuery =
-    lastKeptIndex === commands.length - 1
-      ? esql
-      : esql.substring(0, commands[lastKeptIndex].location.max + 1);
-
-  const escapedField = escapeEsqlColumnName(field);
-
-  return appendToESQLQuery(
-    baseQuery,
-    `| STATS ${CATEGORIZE_COUNT_COLUMN} = COUNT(*) BY ${CATEGORIZE_PATTERN_COLUMN} = CATEGORIZE(${escapedField})\n| SORT ${CATEGORIZE_COUNT_COLUMN} DESC`
+  mutate.generic.commands.append(
+    root,
+    synth.cmd(
+      `STATS ${CATEGORIZE_COUNT_COLUMN} = COUNT(*) BY ${CATEGORIZE_PATTERN_COLUMN} = CATEGORIZE(${escapeEsqlColumnName(
+        field
+      )})`
+    )
   );
+  mutate.generic.commands.append(root, synth.cmd(`SORT ${CATEGORIZE_COUNT_COLUMN} DESC`));
+
+  return WrappingPrettyPrinter.print(root, { multiline: true });
 };
