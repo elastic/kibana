@@ -15,6 +15,7 @@ import {
 } from './plugins_system.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
+import { metrics, type Meter } from '@opentelemetry/api';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { type PluginName, PluginType } from '@kbn/core-base-common';
@@ -64,6 +65,7 @@ function createPlugin(
     },
     opaqueId: Symbol(id),
     initializerContext: { logger } as any,
+    initialization: Promise.withResolvers<void>(),
   });
   jest.spyOn(plugin, 'init').mockResolvedValue();
   return plugin;
@@ -730,6 +732,160 @@ describe('start', () => {
       pluginA: 'contractA',
       pluginB: 'contractB',
     });
+  });
+});
+
+describe('lifecycle timeouts in telemetry', () => {
+  beforeEach(() => {
+    jest.useFakeTimers({ doNotFake: ['setImmediate'] });
+    mockCreatePluginSetupContext.mockImplementation(() => ({}));
+    mockCreatePluginStartContext.mockImplementation(() => ({}));
+  });
+
+  afterEach(() => {
+    jest.mocked(metrics.getMeter).mockRestore();
+    jest.useRealTimers();
+  });
+
+  /** A plugins system whose lifecycle duration records land in the returned mock. */
+  const createMeasuredPluginsSystem = () => {
+    const lifecycleDurations = jest.fn();
+    jest.spyOn(metrics, 'getMeter').mockReturnValue({
+      createHistogram: (name: string) => ({
+        record: name === 'kibana.plugins.lifecycle.duration' ? lifecycleDurations : jest.fn(),
+      }),
+    } as unknown as Meter);
+    return { system: new PluginsSystem(coreContext, PluginType.standard), lifecycleDurations };
+  };
+
+  const durationRecord = (
+    pluginId: string,
+    lifecycle: 'setup' | 'start',
+    seconds: number,
+    outcome: 'success' | 'failure'
+  ) => [
+    seconds,
+    {
+      'kibana.plugin.id': pluginId,
+      'kibana.plugin.lifecycle': lifecycle,
+      outcome,
+    },
+  ];
+
+  const flushLateResult = () => new Promise((resolve) => setImmediate(resolve));
+
+  it('records a "setup" timeout as a failure and ignores a late result', async () => {
+    const { system, lifecycleDurations } = createMeasuredPluginsSystem();
+    const plugin = createPlugin('timeout-setup');
+    const { promise, resolve } = Promise.withResolvers<object>();
+    jest.spyOn(plugin, 'setup').mockReturnValue(promise);
+    system.addPlugin(plugin);
+
+    const setup = expect(system.setupPlugins(setupDeps)).rejects.toThrow(
+      `Setup lifecycle of "timeout-setup" plugin wasn't completed in 10sec.`
+    );
+    await jest.advanceTimersByTimeAsync(10 * 1000);
+    await setup;
+    resolve({});
+    await flushLateResult();
+
+    expect(lifecycleDurations.mock.calls).toEqual([
+      durationRecord('timeout-setup', 'setup', 10, 'failure'),
+    ]);
+  });
+
+  it('records a "start" timeout as a failure and ignores a late result', async () => {
+    const { system, lifecycleDurations } = createMeasuredPluginsSystem();
+    const plugin = createPlugin('timeout-start');
+    const { promise, resolve } = Promise.withResolvers<object>();
+    jest.spyOn(plugin, 'setup').mockReturnValue({});
+    jest.spyOn(plugin, 'start').mockReturnValue(promise);
+    system.addPlugin(plugin);
+
+    await system.setupPlugins(setupDeps);
+    const start = expect(system.startPlugins(startDeps)).rejects.toThrow(
+      `Start lifecycle of "timeout-start" plugin wasn't completed in 10sec.`
+    );
+    await jest.advanceTimersByTimeAsync(10 * 1000);
+    await start;
+    resolve({});
+    await flushLateResult();
+
+    expect(lifecycleDurations.mock.calls).toEqual([
+      durationRecord('timeout-start', 'setup', 0, 'success'),
+      durationRecord('timeout-start', 'start', 10, 'failure'),
+    ]);
+  });
+});
+
+describe('initialize', () => {
+  const createStartablePlugin = (...args: Parameters<typeof createPlugin>) => {
+    const plugin = createPlugin(...args);
+    jest.spyOn(plugin, 'setup').mockReturnValue({});
+    jest.spyOn(plugin, 'start').mockReturnValue(`contract-${plugin.name}`);
+    jest.spyOn(plugin, 'runInitialize');
+    pluginsSystem.addPlugin(plugin);
+    return plugin;
+  };
+
+  beforeEach(() => {
+    mockCreatePluginSetupContext.mockImplementation(() => ({}));
+    mockCreatePluginStartContext.mockImplementation(({ plugin }) => ({
+      startContextOf: plugin.name,
+    }));
+  });
+
+  it('runs every initialize() once every plugin has started, with the arguments start() received', async () => {
+    const pluginA = createStartablePlugin('pluginA');
+    const pluginB = createStartablePlugin('pluginB', { required: ['pluginA'] });
+
+    await pluginsSystem.setupPlugins(setupDeps);
+    await pluginsSystem.startPlugins(startDeps);
+
+    expect(pluginA.runInitialize).toHaveBeenCalledTimes(1);
+    expect(pluginA.runInitialize).toHaveBeenCalledWith(
+      { startContextOf: 'pluginA' },
+      {},
+      expect.any(Function)
+    );
+    expect(pluginB.runInitialize).toHaveBeenCalledTimes(1);
+    expect(pluginB.runInitialize).toHaveBeenCalledWith(
+      { startContextOf: 'pluginB' },
+      { pluginA: 'contract-pluginA' },
+      expect.any(Function)
+    );
+    expect((pluginA.runInitialize as jest.Mock).mock.invocationCallOrder[0]).toBeGreaterThan(
+      (pluginB.start as jest.Mock).mock.invocationCallOrder[0]
+    );
+  });
+
+  it('does not wait for initialize() to finish', async () => {
+    const pluginA = createStartablePlugin('pluginA');
+    (pluginA.runInitialize as jest.Mock).mockImplementation(() => {});
+
+    await pluginsSystem.setupPlugins(setupDeps);
+    const contracts = await pluginsSystem.startPlugins(startDeps);
+
+    expect(contracts.get('pluginA')).toBe('contract-pluginA');
+  });
+
+  it('lets a call made during start() wait for an initialization that runs after the start loop', async () => {
+    const pluginA = createStartablePlugin('pluginA');
+    const pluginB = createStartablePlugin('pluginB', { required: ['pluginA'] });
+    const waitedInStart = jest.fn();
+    (pluginB.start as jest.Mock).mockImplementation(() => {
+      pluginA.params.initialization.promise.then(waitedInStart);
+      return 'contract-pluginB';
+    });
+
+    await pluginsSystem.setupPlugins(setupDeps);
+    await pluginsSystem.startPlugins(startDeps);
+    await pluginA.params.initialization.promise;
+
+    expect(waitedInStart).toHaveBeenCalledTimes(1);
+    expect(waitedInStart.mock.invocationCallOrder[0]).toBeGreaterThan(
+      (pluginA.runInitialize as jest.Mock).mock.invocationCallOrder[0]
+    );
   });
 });
 
