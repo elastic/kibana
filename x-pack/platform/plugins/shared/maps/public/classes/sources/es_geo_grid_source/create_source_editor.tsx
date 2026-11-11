@@ -6,11 +6,11 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
 import { i18n } from '@kbn/i18n';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 
 import { EuiFormRow, EuiPanel } from '@elastic/eui';
 import {
@@ -20,29 +20,38 @@ import {
   supportsGeoTileAgg,
 } from '../../../index_pattern_util';
 import { RenderAsSelect } from './render_as_select';
+import type { RENDER_AS } from '../../../../common/constants';
+import type { ESGeoGridSourceDescriptor } from '../../../../common/descriptor_types';
 
-function doesNotSupportGeoTileAgg(field) {
+function doesNotSupportGeoTileAgg(field: DataViewField) {
   return !supportsGeoTileAgg(field);
 }
 
-export class CreateSourceEditor extends Component {
-  static propTypes = {
-    onSourceConfigChange: PropTypes.func.isRequired,
-  };
+interface Props {
+  requestType: RENDER_AS;
+  onSourceConfigChange: (sourceConfig: Partial<ESGeoGridSourceDescriptor> | null) => void;
+}
 
-  state = {
+interface State {
+  indexPattern: DataView | null;
+  geoField: string;
+  requestType: RENDER_AS;
+}
+
+export class CreateSourceEditor extends Component<Props, State> {
+  state: State = {
     indexPattern: null,
     geoField: '',
     requestType: this.props.requestType,
   };
 
-  onIndexPatternSelect = (indexPattern) => {
+  onIndexPatternSelect = (indexPattern: DataView) => {
     this.setState(
       {
         indexPattern,
       },
       () => {
-        //make default selection
+        // make default selection
         const geoFieldsWithGeoTileAgg = getFieldsWithGeoTileAgg(indexPattern.fields);
         if (geoFieldsWithGeoTileAgg[0]) {
           this._onGeoFieldSelect(geoFieldsWithGeoTileAgg[0].name);
@@ -51,16 +60,16 @@ export class CreateSourceEditor extends Component {
     );
   };
 
-  _onGeoFieldSelect = (geoFieldName) => {
+  _onGeoFieldSelect = (geoFieldName?: string) => {
     this.setState(
       {
-        geoField: geoFieldName,
+        geoField: geoFieldName ?? '',
       },
       this.previewLayer
     );
   };
 
-  _onRequestTypeSelect = (newValue) => {
+  _onRequestTypeSelect = (newValue: RENDER_AS) => {
     this.setState(
       {
         requestType: newValue,
@@ -73,7 +82,9 @@ export class CreateSourceEditor extends Component {
     const { indexPattern, geoField, requestType } = this.state;
 
     const sourceConfig =
-      indexPattern && geoField ? { indexPatternId: indexPattern.id, geoField, requestType } : null;
+      indexPattern && indexPattern.id && geoField
+        ? { indexPatternId: indexPattern.id, geoField, requestType }
+        : null;
     this.props.onSourceConfigChange(sourceConfig);
   };
 

@@ -41,21 +41,55 @@
 
 import assert from 'assert';
 
-function createImage(image, { width, height }, channels, data) {
-  if (!data) {
-    data = new Uint8Array(width * height * channels);
-  } else if (data instanceof Uint8ClampedArray) {
-    data = new Uint8Array(data.buffer);
-  } else if (data.length !== width * height * channels) {
-    throw new RangeError('mismatched image size');
-  }
-  image.width = width;
-  image.height = height;
-  image.data = data;
-  return image;
+interface Size {
+  width: number;
+  height: number;
 }
 
-function resizeImage(image, { width, height }, channels) {
+interface Point {
+  x: number;
+  y: number;
+}
+
+interface ImageLike {
+  width: number;
+  height: number;
+  data: Uint8Array;
+}
+
+type ImageData8 = Uint8Array | Uint8ClampedArray;
+
+// source images are only read from, so any array-like pixel buffer (including ImageData) is accepted
+interface ReadableImage {
+  width: number;
+  height: number;
+  data: ArrayLike<number>;
+}
+
+function createImage<T extends Partial<ImageLike>>(
+  image: T,
+  { width, height }: Size,
+  channels: number,
+  data?: ImageData8
+): T & ImageLike {
+  let imageData: Uint8Array;
+  if (!data) {
+    imageData = new Uint8Array(width * height * channels);
+  } else if (data instanceof Uint8ClampedArray) {
+    imageData = new Uint8Array(data.buffer);
+  } else if (data.length !== width * height * channels) {
+    throw new RangeError('mismatched image size');
+  } else {
+    imageData = data;
+  }
+  const result = image as T & ImageLike;
+  result.width = width;
+  result.height = height;
+  result.data = imageData;
+  return result;
+}
+
+function resizeImage(image: ImageLike, { width, height }: Size, channels: number) {
   if (width === image.width && height === image.height) {
     return;
   }
@@ -79,7 +113,14 @@ function resizeImage(image, { width, height }, channels) {
   image.data = newImage.data;
 }
 
-function copyImage(srcImg, dstImg, srcPt, dstPt, size, channels) {
+function copyImage(
+  srcImg: ReadableImage,
+  dstImg: ImageLike,
+  srcPt: Point,
+  dstPt: Point,
+  size: Size,
+  channels: number
+) {
   if (size.width === 0 || size.height === 0) {
     return dstImg;
   }
@@ -118,12 +159,16 @@ function copyImage(srcImg, dstImg, srcPt, dstPt, size, channels) {
   return dstImg;
 }
 
-export class AlphaImage {
-  constructor(size, data) {
+export class AlphaImage implements ImageLike {
+  width!: number;
+  height!: number;
+  data!: Uint8Array;
+
+  constructor(size: Size, data?: ImageData8) {
     createImage(this, size, 1, data);
   }
 
-  resize(size) {
+  resize(size: Size) {
     resizeImage(this, size, 1);
   }
 
@@ -131,26 +176,30 @@ export class AlphaImage {
     return new AlphaImage({ width: this.width, height: this.height }, new Uint8Array(this.data));
   }
 
-  static copy(srcImg, dstImg, srcPt, dstPt, size) {
+  static copy(srcImg: ReadableImage, dstImg: ImageLike, srcPt: Point, dstPt: Point, size: Size) {
     copyImage(srcImg, dstImg, srcPt, dstPt, size, 1);
   }
 }
 
 // Not premultiplied, because ImageData is not premultiplied.
 // UNPACK_PREMULTIPLY_ALPHA_WEBGL must be used when uploading to a texture.
-export class RGBAImage {
+export class RGBAImage implements ImageLike {
+  width!: number;
+  height!: number;
+  data!: Uint8Array;
+
   // data must be a Uint8Array instead of Uint8ClampedArray because texImage2D does not
   // support Uint8ClampedArray in all browsers
 
-  constructor(size, data) {
+  constructor(size: Size, data?: ImageData8) {
     createImage(this, size, 4, data);
   }
 
-  resize(size) {
+  resize(size: Size) {
     resizeImage(this, size, 4);
   }
 
-  replace(data, copy) {
+  replace(data: ImageData8, copy?: boolean) {
     if (copy) {
       this.data.set(data);
     } else if (data instanceof Uint8ClampedArray) {
@@ -164,7 +213,7 @@ export class RGBAImage {
     return new RGBAImage({ width: this.width, height: this.height }, new Uint8Array(this.data));
   }
 
-  static copy(srcImg, dstImg, srcPt, dstPt, size) {
+  static copy(srcImg: ReadableImage, dstImg: ImageLike, srcPt: Point, dstPt: Point, size: Size) {
     copyImage(srcImg, dstImg, srcPt, dstPt, size, 4);
   }
 }

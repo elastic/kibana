@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-// @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
 import { ESGeoGridSource, clustersTitle } from './es_geo_grid_source';
 import type { LayerWizard, RenderWizardArguments } from '../../layers';
@@ -45,7 +44,7 @@ export const clustersLayerWizardConfig: LayerWizard = {
   }),
   icon: ClustersLayerIcon,
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {
-    const onSourceConfigChange = (sourceConfig: Partial<ESGeoGridSourceDescriptor>) => {
+    const onSourceConfigChange = (sourceConfig: Partial<ESGeoGridSourceDescriptor> | null) => {
       if (!sourceConfig) {
         previewLayers([]);
         return;

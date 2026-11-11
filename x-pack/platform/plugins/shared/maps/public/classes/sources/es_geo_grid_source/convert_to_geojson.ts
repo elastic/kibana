@@ -6,6 +6,7 @@
  */
 
 import _ from 'lodash';
+import type { Feature, Geometry, Position } from 'geojson';
 import {
   RENDER_AS,
   GEOTILE_GRID_AGG_NAME,
@@ -16,34 +17,39 @@ import { clamp, extractPropertiesFromBucket } from '../../../../common/elasticse
 
 const GRID_BUCKET_KEYS_TO_IGNORE = ['key', GEOCENTROID_AGG_NAME];
 
-export function convertCompositeRespToGeoJson(esResponse, renderAs) {
+export function convertCompositeRespToGeoJson(esResponse: any, renderAs: RENDER_AS): Feature[] {
   return convertToGeoJson(
     esResponse,
     renderAs,
-    (esResponse) => {
+    (esResponse: any) => {
       return _.get(esResponse, 'aggregations.compositeSplit.buckets', []);
     },
-    (gridBucket) => {
+    (gridBucket: any) => {
       return gridBucket.key[GEOTILE_GRID_AGG_NAME];
     }
   );
 }
 
-export function convertRegularRespToGeoJson(esResponse, renderAs) {
+export function convertRegularRespToGeoJson(esResponse: any, renderAs: RENDER_AS): Feature[] {
   return convertToGeoJson(
     esResponse,
     renderAs,
-    (esResponse) => {
+    (esResponse: any) => {
       return _.get(esResponse, `aggregations.${GEOTILE_GRID_AGG_NAME}.buckets`, []);
     },
-    (gridBucket) => {
+    (gridBucket: any) => {
       return gridBucket.key;
     }
   );
 }
 
-function convertToGeoJson(esResponse, renderAs, pluckGridBuckets, pluckGridKey) {
-  const features = [];
+function convertToGeoJson(
+  esResponse: any,
+  renderAs: RENDER_AS,
+  pluckGridBuckets: (esResponse: any) => any[],
+  pluckGridKey: (gridBucket: any) => string
+): Feature[] {
+  const features: Feature[] = [];
 
   const gridBuckets = pluckGridBuckets(esResponse);
   for (let i = 0; i < gridBuckets.length; i++) {
@@ -64,7 +70,15 @@ function convertToGeoJson(esResponse, renderAs, pluckGridBuckets, pluckGridKey) 
   return features;
 }
 
-function rowToGeometry({ gridKey, gridCentroid, renderAs }) {
+function rowToGeometry({
+  gridKey,
+  gridCentroid,
+  renderAs,
+}: {
+  gridKey: string;
+  gridCentroid: any;
+  renderAs: RENDER_AS;
+}): Geometry {
   const { top, bottom, right, left } = getTileBoundingBox(gridKey);
 
   if (renderAs === RENDER_AS.GRID) {
@@ -83,7 +97,7 @@ function rowToGeometry({ gridKey, gridCentroid, renderAs }) {
   }
 
   // see https://github.com/elastic/elasticsearch/issues/24694 for why clamp is used
-  const pointCoordinates = [
+  const pointCoordinates: Position = [
     clamp(gridCentroid.location.lon, left, right),
     clamp(gridCentroid.location.lat, bottom, top),
   ];

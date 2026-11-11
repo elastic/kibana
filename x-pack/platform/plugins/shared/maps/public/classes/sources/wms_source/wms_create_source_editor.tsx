@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { ChangeEvent } from 'react';
 import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiComboBox,
@@ -17,6 +19,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { KbnWarningCallout } from '@kbn/ui-callout';
+import type { WMSSourceDescriptor } from '../../../../common/descriptor_types';
+import type { GroupedCapabilities } from './wms_client';
 import { WmsClient } from './wms_client';
 import _ from 'lodash';
 
@@ -27,8 +31,27 @@ const STYLES_LABEL = i18n.translate('xpack.maps.source.wms.stylesLabel', {
   defaultMessage: 'Styles',
 });
 
-export class WMSCreateSourceEditor extends Component {
-  state = {
+interface Props {
+  onSourceConfigChange: (sourceConfig: Partial<WMSSourceDescriptor> | null) => void;
+}
+
+interface State {
+  serviceUrl: string;
+  layers: string;
+  styles: string;
+  isLoadingCapabilities: boolean;
+  getCapabilitiesError: string | null;
+  hasAttemptedToLoadCapabilities: boolean;
+  layerOptions: GroupedCapabilities;
+  styleOptions: GroupedCapabilities;
+  selectedLayerOptions: Array<EuiComboBoxOptionOption<string>>;
+  selectedStyleOptions: Array<EuiComboBoxOptionOption<string>>;
+}
+
+export class WMSCreateSourceEditor extends Component<Props, State> {
+  private _isMounted = false;
+
+  state: State = {
     serviceUrl: '',
     layers: '',
     styles: '',
@@ -40,6 +63,7 @@ export class WMSCreateSourceEditor extends Component {
     selectedLayerOptions: [],
     selectedStyleOptions: [],
   };
+
   componentDidMount() {
     this._isMounted = true;
   }
@@ -75,14 +99,14 @@ export class WMSCreateSourceEditor extends Component {
 
     const wmsClient = new WmsClient({ serviceUrl: this.state.serviceUrl });
 
-    let capabilities;
+    let capabilities: Awaited<ReturnType<WmsClient['getCapabilities']>>;
     try {
       capabilities = await wmsClient.getCapabilities();
     } catch (error) {
       if (this._isMounted) {
         this.setState({
           isLoadingCapabilities: false,
-          getCapabilitiesError: error.message,
+          getCapabilitiesError: error instanceof Error ? error.message : String(error),
         });
       }
       return;
@@ -99,7 +123,7 @@ export class WMSCreateSourceEditor extends Component {
     });
   };
 
-  _handleServiceUrlChange = (e) => {
+  _handleServiceUrlChange = (e: ChangeEvent<HTMLInputElement>) => {
     this.setState(
       {
         serviceUrl: e.target.value,
@@ -115,11 +139,11 @@ export class WMSCreateSourceEditor extends Component {
     );
   };
 
-  _handleLayersChange = (e) => {
+  _handleLayersChange = (e: ChangeEvent<HTMLInputElement>) => {
     this.setState({ layers: e.target.value }, this._previewIfPossible);
   };
 
-  _handleLayerOptionsChange = (selectedOptions) => {
+  _handleLayerOptionsChange = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
     this.setState(
       {
         selectedLayerOptions: selectedOptions,
@@ -133,11 +157,11 @@ export class WMSCreateSourceEditor extends Component {
     );
   };
 
-  _handleStylesChange = (e) => {
+  _handleStylesChange = (e: ChangeEvent<HTMLInputElement>) => {
     this.setState({ styles: e.target.value }, this._previewIfPossible);
   };
 
-  _handleStyleOptionsChange = (selectedOptions) => {
+  _handleStyleOptionsChange = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
     this.setState(
       {
         selectedStyleOptions: selectedOptions,

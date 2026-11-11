@@ -20,7 +20,6 @@ import {
   WIZARD_ID,
 } from '../../../../common/constants';
 import { NUMERICAL_COLOR_PALETTES } from '../../styles/color_palettes';
-// @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
 import type { LayerWizard, RenderWizardArguments } from '../../layers';
 import type {
@@ -39,7 +38,7 @@ export const point2PointLayerWizardConfig: LayerWizard = {
   }),
   icon: Point2PointLayerIcon,
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {
-    const onSourceConfigChange = (sourceConfig: Partial<ESPewPewSourceDescriptor>) => {
+    const onSourceConfigChange = (sourceConfig: Partial<ESPewPewSourceDescriptor> | null) => {
       if (!sourceConfig) {
         previewLayers([]);
         return;

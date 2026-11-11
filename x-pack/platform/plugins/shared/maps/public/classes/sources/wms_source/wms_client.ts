@@ -9,16 +9,40 @@ import _ from 'lodash';
 import { parseXmlString } from '../../../../common/parse_xml_string';
 import { parse, format } from 'url';
 
+interface LayerOption {
+  path: string[];
+  value: string;
+}
+
+interface Capabilities {
+  layers: LayerOption[];
+  styles: LayerOption[];
+}
+
+export interface CapabilitiesOption {
+  label: string;
+  value: string;
+}
+
+export interface CapabilitiesOptionGroup {
+  label: string;
+  options: CapabilitiesOption[];
+}
+
+export type GroupedCapabilities = Array<CapabilitiesOption | CapabilitiesOptionGroup>;
+
 export class WmsClient {
-  constructor({ serviceUrl }) {
+  private readonly _serviceUrl: string;
+
+  constructor({ serviceUrl }: { serviceUrl: string }) {
     this._serviceUrl = serviceUrl;
   }
 
-  async _fetch(url) {
+  async _fetch(url: string) {
     return fetch(url);
   }
 
-  _createUrl(defaultQueryParams) {
+  _createUrl(defaultQueryParams: Record<string, string>) {
     const serviceUrl = parse(this._serviceUrl, true);
     const queryParams = {
       ...serviceUrl.query,
@@ -33,7 +57,7 @@ export class WmsClient {
     });
   }
 
-  getUrlTemplate(layers, styles) {
+  getUrlTemplate(layers: string, styles: string) {
     const urlTemplate = this._createUrl({
       format: 'image/png',
       service: 'WMS',
@@ -74,14 +98,17 @@ export class WmsClient {
       })
     );
     if (resp.status >= 400) {
-      throw new Error(`Unable to access ${this.state.serviceUrl}`);
+      throw new Error(`Unable to access ${this._serviceUrl}`);
     }
     const body = await resp.text();
 
     return await parseXmlString(body);
   }
 
-  async getCapabilities() {
+  async getCapabilities(): Promise<{
+    layers: GroupedCapabilities;
+    styles: GroupedCapabilities;
+  }> {
     const rawCapabilities = await this._fetchCapabilities();
 
     const { layers, styles } = reduceLayers(
@@ -96,19 +123,23 @@ export class WmsClient {
   }
 }
 
-function reduceLayers(path, layers) {
-  const emptyCapabilities = {
+function reduceLayers(path: string[], layers: any[]): Capabilities {
+  const emptyCapabilities: Capabilities = {
     layers: [],
     styles: [],
   };
-  function createOption(optionPath, optionTitle, optionName) {
+  function createOption(
+    optionPath: string[],
+    optionTitle: string,
+    optionName: string
+  ): LayerOption {
     return {
       path: [...optionPath, optionTitle],
       value: optionName,
     };
   }
 
-  return layers.reduce((accumulatedCapabilities, layer) => {
+  return layers.reduce((accumulatedCapabilities: Capabilities, layer: any) => {
     // Layer is hierarchical, continue traversing
     if (layer.Layer) {
       const hierarchicalCapabilities = reduceLayers([...path, layer.Title[0]], layer.Layer);
@@ -140,7 +171,7 @@ function reduceLayers(path, layers) {
 
 // Avoid filling select box option label with text that is all the same
 // Create a single group from common parts of Layer hierarchy
-function groupCapabilities(list) {
+function groupCapabilities(list: LayerOption[]): GroupedCapabilities {
   if (list.length === 0) {
     return [];
   }
@@ -173,7 +204,7 @@ function groupCapabilities(list) {
     }
   }
 
-  const labelMap = new Map();
+  const labelMap = new Map<string, number>();
   const options = list.map(({ path, value }) => {
     const title = path[path.length - 1];
     const hierachyWithTitle =
@@ -183,9 +214,9 @@ function groupCapabilities(list) {
     const label = title === value ? hierachyWithTitle : `${hierachyWithTitle} (${value})`;
 
     // labels are used as keys in react elements so uniqueness must be guaranteed
-    let uniqueLabel;
+    let uniqueLabel: string;
     if (labelMap.has(label)) {
-      const counter = labelMap.get(label);
+      const counter = labelMap.get(label)!;
       const nextCounter = counter + 1;
       labelMap.set(label, nextCounter);
       uniqueLabel = `${label}:${nextCounter}`;

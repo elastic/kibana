@@ -7,25 +7,36 @@
 
 import _ from 'lodash';
 import React, { Fragment, Component } from 'react';
-import PropTypes from 'prop-types';
 
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { getIndexPatternService, getIndexPatternSelectComponent } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { EuiFormRow, EuiPanel } from '@elastic/eui';
 import { getFieldsWithGeoTileAgg } from '../../../index_pattern_util';
 import { getDataViewLabel, getDataViewSelectPlaceholder } from '../../../../common/i18n_getters';
-import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
+import type { ESPewPewSourceDescriptor } from '../../../../common/descriptor_types';
 
-export class CreateSourceEditor extends Component {
-  static propTypes = {
-    onSourceConfigChange: PropTypes.func.isRequired,
-  };
+interface Props {
+  onSourceConfigChange: (sourceConfig: Partial<ESPewPewSourceDescriptor> | null) => void;
+}
 
-  state = {
+interface State {
+  isLoadingIndexPattern: boolean;
+  indexPattern?: DataView;
+  indexPatternId?: string;
+  sourceGeoField?: string;
+  destGeoField?: string;
+  indexPatternHasMultipleGeoFields: boolean;
+}
+
+export class CreateSourceEditor extends Component<Props, State> {
+  private _isMounted = false;
+
+  state: State = {
     isLoadingIndexPattern: false,
     indexPattern: undefined,
     indexPatternId: undefined,
@@ -42,7 +53,7 @@ export class CreateSourceEditor extends Component {
     this._isMounted = true;
   }
 
-  onIndexPatternSelect = (indexPatternId) => {
+  onIndexPatternSelect = (indexPatternId?: string) => {
     this.setState(
       {
         indexPatternId,
@@ -51,7 +62,7 @@ export class CreateSourceEditor extends Component {
     );
   };
 
-  loadIndexPattern = (indexPatternId) => {
+  loadIndexPattern = (indexPatternId?: string) => {
     this.setState(
       {
         isLoadingIndexPattern: true,
@@ -64,12 +75,12 @@ export class CreateSourceEditor extends Component {
     );
   };
 
-  debouncedLoad = _.debounce(async (indexPatternId) => {
+  debouncedLoad = _.debounce(async (indexPatternId?: string) => {
     if (!indexPatternId || indexPatternId.length === 0) {
       return;
     }
 
-    let indexPattern;
+    let indexPattern: DataView;
     try {
       indexPattern = await getIndexPatternService().get(indexPatternId);
     } catch (err) {
@@ -95,7 +106,7 @@ export class CreateSourceEditor extends Component {
     });
   }, 300);
 
-  _onSourceGeoSelect = (sourceGeoField) => {
+  _onSourceGeoSelect = (sourceGeoField?: string) => {
     this.setState(
       {
         sourceGeoField,
@@ -104,7 +115,7 @@ export class CreateSourceEditor extends Component {
     );
   };
 
-  _onDestGeoSelect = (destGeoField) => {
+  _onDestGeoSelect = (destGeoField?: string) => {
     this.setState(
       {
         destGeoField,
@@ -142,7 +153,7 @@ export class CreateSourceEditor extends Component {
             placeholder={i18n.translate('xpack.maps.source.pewPew.sourceGeoFieldPlaceholder', {
               defaultMessage: 'Select source geo field',
             })}
-            value={this.state.sourceGeoField}
+            value={this.state.sourceGeoField ?? null}
             onChange={this._onSourceGeoSelect}
             fields={fields}
           />
@@ -157,7 +168,7 @@ export class CreateSourceEditor extends Component {
             placeholder={i18n.translate('xpack.maps.source.pewPew.destGeoFieldPlaceholder', {
               defaultMessage: 'Select destination geo field',
             })}
-            value={this.state.destGeoField}
+            value={this.state.destGeoField ?? null}
             onChange={this._onDestGeoSelect}
             fields={fields}
           />
@@ -172,10 +183,9 @@ export class CreateSourceEditor extends Component {
     return (
       <EuiFormRow label={getDataViewLabel()}>
         <IndexPatternSelect
-          indexPatternId={this.state.indexPatternId}
+          indexPatternId={this.state.indexPatternId ?? ''}
           onChange={this.onIndexPatternSelect}
           placeholder={getDataViewSelectPlaceholder()}
-          fieldTypes={[ES_GEO_FIELD_TYPE.GEO_POINT]}
         />
       </EuiFormRow>
     );
