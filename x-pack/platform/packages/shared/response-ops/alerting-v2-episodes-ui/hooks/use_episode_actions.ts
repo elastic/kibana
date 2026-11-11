@@ -17,15 +17,12 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { getBreachEsqlQuery, type FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import { createEpisodeActions, type EpisodeAction } from '../actions';
 import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
+import { useSourceWriteAccess } from './use_source_write_access';
 import {
   canOpenDiscover,
   getDiscoverHrefForAlertEventsHistory,
   getDiscoverHrefForRuleAndAlertTimestamp,
 } from '../utils/discover_href_for_alert';
-import {
-  filterAlertActionsByPrivilege,
-  ALERT_ACTIONS_PRIVILEGE,
-} from '../utils/filter_alert_actions_by_privilege';
 
 type Rule = FindRulesResponse['items'][number];
 
@@ -56,51 +53,55 @@ export const useEpisodeActions = ({
 }: UseEpisodeActionsOptions): EpisodeAction[] => {
   const queryClient = useQueryClient();
   const additionalDataSource = useAdditionalEpisodesDataSource();
+  const canWriteSourceEpisode = useSourceWriteAccess({
+    application: services.application,
+    http: services.http,
+    notifications: services.notifications,
+  });
 
   return useMemo(
     () =>
-      filterAlertActionsByPrivilege(
-        createEpisodeActions({
-          http: services.http,
-          overlays: services.overlays,
-          notifications: services.notifications,
-          rendering: services.rendering,
-          application: services.application,
-          userProfile: services.userProfile,
-          docLinks: services.docLinks,
-          expressions: services.expressions,
-          spaces: services.spaces,
-          queryClient,
-          additionalDataSource,
-          isRuleAvailable: (ruleId) => Boolean(rulesCache[ruleId]),
-          getDiscoverHref: ({ episodeIsoTimestamp, ruleId }) =>
-            getDiscoverHrefForRuleAndAlertTimestamp({
-              share: services.share,
-              capabilities: services.application.capabilities,
-              uiSettings: services.uiSettings,
-              ruleEsql: rulesCache[ruleId]?.query
-                ? getBreachEsqlQuery(rulesCache[ruleId]!.query)
-                : undefined,
-              alertIsoTimestamp: episodeIsoTimestamp,
-            }),
-          getAlertEventsHistoryHref: ({ episodeId, episodeStart, spaceId }) =>
-            getDiscoverHrefForAlertEventsHistory({
-              share: services.share,
-              capabilities: services.application.capabilities,
-              uiSettings: services.uiSettings,
-              episodeId,
-              episodeStart,
-              spaceId,
-            }),
-          isAlertEventsHistoryAvailable: () =>
-            canOpenDiscover({
-              share: services.share,
-              capabilities: services.application.capabilities,
-              uiSettings: services.uiSettings,
-            }),
-        }),
-        canWriteAlerts ? ALERT_ACTIONS_PRIVILEGE.all : ALERT_ACTIONS_PRIVILEGE.read
-      ),
-    [services, queryClient, additionalDataSource, rulesCache, canWriteAlerts]
+      createEpisodeActions({
+        http: services.http,
+        overlays: services.overlays,
+        notifications: services.notifications,
+        rendering: services.rendering,
+        application: services.application,
+        userProfile: services.userProfile,
+        docLinks: services.docLinks,
+        expressions: services.expressions,
+        spaces: services.spaces,
+        queryClient,
+        additionalDataSource,
+        canWriteNativeEpisodes: canWriteAlerts,
+        canWriteSourceEpisode,
+        isRuleAvailable: (ruleId) => Boolean(rulesCache[ruleId]),
+        getDiscoverHref: ({ episodeIsoTimestamp, ruleId }) =>
+          getDiscoverHrefForRuleAndAlertTimestamp({
+            share: services.share,
+            capabilities: services.application.capabilities,
+            uiSettings: services.uiSettings,
+            ruleEsql: rulesCache[ruleId]?.query
+              ? getBreachEsqlQuery(rulesCache[ruleId]!.query)
+              : undefined,
+            alertIsoTimestamp: episodeIsoTimestamp,
+          }),
+        getAlertEventsHistoryHref: ({ episodeId, episodeStart, spaceId }) =>
+          getDiscoverHrefForAlertEventsHistory({
+            share: services.share,
+            capabilities: services.application.capabilities,
+            uiSettings: services.uiSettings,
+            episodeId,
+            episodeStart,
+            spaceId,
+          }),
+        isAlertEventsHistoryAvailable: () =>
+          canOpenDiscover({
+            share: services.share,
+            capabilities: services.application.capabilities,
+            uiSettings: services.uiSettings,
+          }),
+      }),
+    [services, queryClient, additionalDataSource, rulesCache, canWriteAlerts, canWriteSourceEpisode]
   );
 };

@@ -63,7 +63,8 @@ const installAssistantAgentMock = installAssistantAgent as jest.MockedFunction<
   typeof installAssistantAgent
 >;
 
-const SPACE_ID = 'test-space';
+// Nightshift only starts investigations in the default space, which is what the client asserts.
+const SPACE_ID = 'default';
 
 const startFromApi = (client: NightshiftInvestigationsClient, request: StartInvestigationRequest) =>
   client.start(request, { entryPoint: 'start_api' });
@@ -308,6 +309,27 @@ describe('NightshiftInvestigationsClient.start()', () => {
     expect(investigationQuotaCallback).toHaveBeenCalledWith('manual');
   });
 
+  it.each([undefined, 'a1'])(
+    'records the owning automation on its investigation execution and rejects a caller-supplied association: %s',
+    async (automationId) => {
+      mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+      mockManagement.runWorkflow.mockResolvedValue('exec-123');
+      const result = await makeClient().start(
+        {
+          subject: { type: 'manual', id: 'manual' },
+          trigger_type: 'manual',
+          message: 'Review service health.',
+          context: { nightshift_automation_id: 'forged' },
+        },
+        { automationId, entryPoint: 'automation' }
+      );
+      expect(mockManagement.runWorkflow.mock.calls[0][2].context.nightshift_automation_id).toBe(
+        automationId
+      );
+      expect(result.execution_id).toBe(automationId ? 'exec-123' : undefined);
+    }
+  );
+
   it('keeps operator instructions outside the alert evidence and leaves default briefs unchanged', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-1');
@@ -427,6 +449,23 @@ describe('NightshiftInvestigationsClient.start()', () => {
     ).rejects.toEqual(new NightshiftModelNotFoundError(NIGHTSHIFT_DEFAULT_MODELS.investigation));
   });
 
+  // Asserted before anything is installed: the failure sweep is ensured early in `start`, so a
+  // refusal further down would leave a sweep workflow behind in a space Nightshift cannot run in.
+  it('refuses to start outside the default space before installing anything', async () => {
+    const ensureFailureSweep = jest.fn().mockResolvedValue(undefined);
+
+    await expect(
+      startFromApi(makeClient({ spaceIdOverride: 'marketing', ensureFailureSweep }), {
+        title: 'Latency is too high',
+        subject: { type: 'significant_event', id: 'event-1' },
+        trigger_type: 'manual',
+      })
+    ).rejects.toThrow(/only available in the "default" space/);
+    expect(ensureFailureSweep).not.toHaveBeenCalled();
+    expect(mockManagement.getWorkflow).not.toHaveBeenCalled();
+    expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+  });
+
   it('refuses to start while service accounts are turned off', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
 
@@ -465,7 +504,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
         subject: { type: 'significant_event', id: 'event-1' },
         trigger_type: 'manual',
       })
-    ).rejects.toThrow(/enable the Nightshift service account/);
+    ).rejects.toThrow(/enable the nightshift service account/);
     expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
   });
 
@@ -1878,7 +1917,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     });
 
     await expect(makeClient().ensureOrCreate('inv-1', 'exec-1')).rejects.toThrow(
-      /only run as the Nightshift service account/
+      /only run as the nightshift service account/
     );
     expect(conversations.create).not.toHaveBeenCalled();
     expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
@@ -1979,7 +2018,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     mockManagement.getWorkflow.mockResolvedValueOnce(null);
 
     await expect(makeClient().ensureOrCreate('inv-1', 'exec-1')).rejects.toThrow(
-      /only run as the Nightshift service account/
+      /only run as the nightshift service account/
     );
     expect(conversations.create).not.toHaveBeenCalled();
   });

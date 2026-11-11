@@ -41,6 +41,7 @@ import {
 } from '@kbn/agentic-investigations-plugin/common';
 import { assertNever } from '@kbn/std';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
+import { assertNightshiftSpace } from '../lib/assert_nightshift_space';
 import { installAssistantAgent } from '../lib/install_assistant_agent';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import {
@@ -327,7 +328,7 @@ const toNotifiableInvestigation = (
 });
 
 const SERVICE_ACCOUNT_REQUIRED_MESSAGE =
-  'Nightshift is not set up in this space. An admin with manage_security must enable the Nightshift service account.';
+  'Nightshift is not set up in this space. An admin with manage_security must enable the nightshift service account.';
 
 /**
  * Whether a run executes as the space's Nightshift agent account: the account its entry point is
@@ -343,7 +344,7 @@ const runsAsInvestigator = (
   effectiveIdentity.id === agentServiceAccountId;
 
 const NOT_RUN_AS_INVESTIGATOR_MESSAGE =
-  'Investigations only run as the Nightshift service account, through the entry point of the space.';
+  'Investigations only run as the nightshift service account, through the entry point of the space.';
 type StoredWorkflow = NonNullable<
   Awaited<ReturnType<WorkflowsServerPluginSetup['management']['getWorkflow']>>
 >;
@@ -510,6 +511,10 @@ export class NightshiftInvestigationsClient {
       entryPoint: InvestigationEntryPoint;
     }
   ): Promise<StartInvestigationResponse> {
+    // First, before anything is installed: the failure sweep workflow is ensured below, and the
+    // agent installers further down would otherwise be what refuses, leaving a sweep workflow
+    // behind in a space that cannot run an investigation anyway.
+    assertNightshiftSpace(this.getSpaceId());
     if (instructions !== undefined && instructions.length > MAX_AUTOMATION_INSTRUCTIONS_LENGTH) {
       throw badRequest(
         `Instructions must be at most ${MAX_AUTOMATION_INSTRUCTIONS_LENGTH} characters.`
@@ -638,6 +643,7 @@ export class NightshiftInvestigationsClient {
           : {}),
         context: {
           ...prepared.context,
+          nightshift_automation_id: automationId,
           is_follow_up: isFollowUp,
           source: resolvedSubject.type,
           [`${resolvedSubject.type}_id`]: resolvedSubject.id,
@@ -666,7 +672,10 @@ export class NightshiftInvestigationsClient {
       }/${subject.id}, execution_id=${executionId}`
     );
 
-    return { investigation_id: investigationId };
+    return {
+      investigation_id: investigationId,
+      ...(automationId ? { execution_id: executionId } : {}),
+    };
   }
 
   /**
@@ -748,7 +757,7 @@ export class NightshiftInvestigationsClient {
     );
     if (!workflow?.definition || !isEntryPointReady(workflow)) {
       this.logger.warn(
-        `Investigation workflow "${workflowId}" is not set up in space "${spaceId}"; an admin must enable the Nightshift service account`
+        `Investigation workflow "${workflowId}" is not set up in space "${spaceId}"; an admin must enable the nightshift service account`
       );
       throw new InvestigationUnavailableError(SERVICE_ACCOUNT_REQUIRED_MESSAGE);
     }

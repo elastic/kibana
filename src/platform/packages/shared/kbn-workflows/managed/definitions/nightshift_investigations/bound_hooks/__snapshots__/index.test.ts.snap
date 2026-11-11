@@ -58,6 +58,11 @@ Object {
             "description": "The user message that started this round.",
             "type": "string",
           },
+          "replay": Object {
+            "description": "True when the round is a recorded transcript an evaluation replays. Decision-tree reinforcement learns from tool_calls and tool_results instead of reading the conversation.
+",
+            "type": "boolean",
+          },
           "response": Object {
             "description": "The assistant's final response for this round.",
             "type": "string",
@@ -72,7 +77,7 @@ Object {
             "type": "string",
           },
           "tool_calls": Object {
-            "description": "Tool calls from the completed round (parameters). Shows the Cortex and Semantic Memory optimizers which services, indices, and integrations the investigator queried, and decision-tree reinforcement which decision-tree files the investigator actually opened.
+            "description": "Tool calls from the completed round (parameters). Shows the Wiki and Semantic Memory optimizers which services, indices, and integrations the investigator queried, and decision-tree reinforcement which decision-tree files the investigator actually opened.
 ",
             "items": Object {
               "additionalProperties": true,
@@ -81,7 +86,7 @@ Object {
             "type": "array",
           },
           "tool_results": Object {
-            "description": "Results of the completed round's tool calls, keyed by tool_call_id. Shows the Cortex and Semantic Memory optimizers what each query returned.
+            "description": "Results of the completed round's tool calls, keyed by tool_call_id. Shows the Wiki and Semantic Memory optimizers what each query returned.
 ",
             "items": Object {
               "additionalProperties": true,
@@ -125,7 +130,7 @@ Object {
       "type": "manual",
     },
   ],
-  "version": 2,
+  "version": 3,
 }
 `;
 

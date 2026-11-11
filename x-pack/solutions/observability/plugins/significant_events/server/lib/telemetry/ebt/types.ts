@@ -48,6 +48,8 @@ interface AgentBuilderKnowledgeIndicatorCreatedProps {
   tool_id: 'ki_feature_create' | 'ki_query_create';
   success: boolean;
   source_id: string;
+  space_id: string;
+  knowledge_indicator_id?: string;
   error_message?: string;
 }
 
@@ -57,13 +59,28 @@ interface AgentToolKnowledgeIndicatorIdentificationStartedProps {
   error_message?: string;
 }
 
-interface AgentToolEventCreateProps {
+/** Identity used to join telemetry to `.rule-events`; a failed operation may have no row. */
+interface ExistingAlertIdentityProps {
+  alert_source: string;
+  fingerprint: string;
+  space_id: string;
+}
+
+/** `fingerprint` is absent for an unpersisted server-generated id; `group_hash` only on create. */
+interface AlertCreationAttemptIdentityProps {
+  alert_source: string;
+  space_id: string;
+  fingerprint?: string;
+  group_hash?: string;
+}
+
+interface AgentToolEventCreateProps extends AlertCreationAttemptIdentityProps {
   success: boolean;
   source_ids: string[];
   error_message?: string;
 }
 
-interface AgentToolEventStatusUpdateProps {
+interface AgentToolEventStatusUpdateProps extends ExistingAlertIdentityProps {
   success: boolean;
   /**
    * @deprecated Superseded by `event_id`. Kept optional for schema continuity with events sent by
@@ -75,7 +92,7 @@ interface AgentToolEventStatusUpdateProps {
   error_message?: string;
 }
 
-interface AgentToolEventInvestigationAttachProps {
+interface AgentToolEventInvestigationAttachProps extends ExistingAlertIdentityProps {
   success: boolean;
   /**
    * @deprecated Superseded by `event_id`. Kept optional for schema continuity with pre-#1517
@@ -131,7 +148,7 @@ interface KnowledgeIndicatorOnboardingScheduledProps {
   skip_queries: boolean;
 }
 
-interface AgentToolEventWriteProps {
+interface AgentToolEventWriteProps extends AlertCreationAttemptIdentityProps {
   success: boolean;
   event_id: string;
   /** Absent when no status was decided for the item (it was rejected or skipped earlier). */
@@ -155,6 +172,8 @@ interface AgentToolEventSearchProps {
 }
 
 export {
+  type AlertCreationAttemptIdentityProps,
+  type ExistingAlertIdentityProps,
   type AgentBuilderKnowledgeIndicatorCreatedProps,
   type AgentToolKnowledgeIndicatorIdentificationStartedProps,
   type AgentToolEventCreateProps,

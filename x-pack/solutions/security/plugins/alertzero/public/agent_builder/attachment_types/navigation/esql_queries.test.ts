@@ -11,6 +11,7 @@ import {
   buildEventLookupEsql,
   buildEventsLookupEsql,
   getAlertsIndex,
+  buildIocMatchEsql,
 } from './esql_queries';
 
 describe('esql_queries', () => {
@@ -93,6 +94,36 @@ describe('esql_queries', () => {
         '(kibana.alert.uuid IN ("alert-1", "alert-2") OR _id IN ("alert-1", "alert-2")))'
     );
     expect(buildAlertsLookupEsql({ alerts: [], spaceId: 'soc' })).toBeUndefined();
+  });
+
+  it('folds case for hash and domain IOC pivots, matching Tier 1, and not for others', () => {
+    expect(
+      buildIocMatchEsql({
+        indices: ['logs-endpoint.events.process-default'],
+        field: 'process.hash.sha256',
+        value: 'ABCDEF0123',
+        iocType: 'hash',
+      })
+    ).toBe(
+      'FROM "logs-endpoint.events.process-default" | WHERE TO_LOWER(process.hash.sha256) == "abcdef0123"'
+    );
+    expect(
+      buildIocMatchEsql({
+        indices: ['logs-dns-default'],
+        field: 'dns.question.name',
+        value: 'Evil.Example',
+        iocType: 'domain',
+      })
+    ).toBe('FROM "logs-dns-default" | WHERE TO_LOWER(dns.question.name) == "evil.example"');
+    expect(
+      buildIocMatchEsql({
+        indices: ['logs-*'],
+        field: 'url.full',
+        value: 'https://Evil.Example/A',
+        iocType: 'url',
+      })
+    ).toBe('FROM "logs-*" | WHERE url.full == "https://Evil.Example/A"');
+    expect(buildIocMatchEsql({ indices: [], field: 'url.full', value: 'x' })).toBeUndefined();
   });
 
   it('builds entity lookup ES|QL on the exact ECS field', () => {

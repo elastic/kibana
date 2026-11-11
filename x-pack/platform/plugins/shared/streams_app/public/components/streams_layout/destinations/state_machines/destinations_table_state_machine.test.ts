@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { TimeState } from '@kbn/es-query';
 import { EMPTY } from 'rxjs';
@@ -45,6 +46,7 @@ describe('destinationsTableStateMachine', () => {
         toasts: coreMock.createStart().notifications.toasts,
         apiKeyGenerationDeps: {
           streamsRepositoryClient: { fetch },
+          unitId: STREAMS_DEFAULT_UNIT_ID,
         } as unknown as DestinationApiKeyGenerationDeps,
         timeState,
         timeState$: EMPTY,
