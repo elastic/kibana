@@ -308,7 +308,7 @@ const enabledSchema = lazySchema(() =>
     .boolean()
     .optional()
     .describe(
-      'Whether the action policy is enabled. On create, defaults to `true` when omitted. On replace, omitting this field preserves the existing enabled state.'
+      'Whether the action policy is enabled. Defaults to `true` when omitted. A disabled policy is saved but is not applied to alerts until you enable it.'
     )
 );
 
