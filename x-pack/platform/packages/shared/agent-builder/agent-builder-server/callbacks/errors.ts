@@ -41,26 +41,27 @@ export const parseRetryAfter = (
     return undefined;
   }
 
-  if (/^\d+$/.test(trimmed)) {
-    return Number(trimmed) * 1000;
+  const seconds = Number(trimmed);
+
+  if (!Number.isNaN(seconds)) {
+    return Number.isInteger(seconds) && seconds >= 0 ? seconds * 1000 : undefined;
   }
 
-  // HTTP-dates always name the day or month; this keeps Date.parse from reading bare numbers.
-  const date = /[a-z]/i.test(trimmed) ? Date.parse(trimmed) : NaN;
+  const date = Date.parse(trimmed);
 
   return Number.isNaN(date) ? undefined : Math.max(0, date - now);
 };
 
 /**
  * Throws for a non-2xx response status; a 5xx or 429 is retryable, any other is not. A retryable
- * error carries the delay its `Retry-After` header asks for.
+ * error carries the delay the receiver asked for.
  */
 export const throwIfNotDelivered = ({
   status,
-  retryAfter,
+  retryAfterMs,
 }: {
   status: number;
-  retryAfter?: string | null;
+  retryAfterMs?: number;
 }): void => {
   if (status >= 200 && status < 300) {
     return;
@@ -70,6 +71,6 @@ export const throwIfNotDelivered = ({
 
   throw new CallbackDeliveryError(`Callback delivery failed with status ${status}`, {
     retryable,
-    retryAfterMs: retryable ? parseRetryAfter(retryAfter) : undefined,
+    retryAfterMs: retryable ? retryAfterMs : undefined,
   });
 };

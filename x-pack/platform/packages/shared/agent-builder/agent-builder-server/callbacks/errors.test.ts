@@ -7,9 +7,9 @@
 
 import { isCallbackDeliveryError, parseRetryAfter, throwIfNotDelivered } from './errors';
 
-const errorFor = (status: number, retryAfter?: string) => {
+const errorFor = (status: number, retryAfterMs?: number) => {
   try {
-    throwIfNotDelivered({ status, retryAfter });
+    throwIfNotDelivered({ status, retryAfterMs });
   } catch (error) {
     return error;
   }
@@ -28,14 +28,14 @@ describe('throwIfNotDelivered', () => {
     expect(error).toHaveProperty('retryAfterMs', undefined);
   });
 
-  it.each([429, 503])('carries the Retry-After delay of a %p response', (status) => {
-    expect(errorFor(status, '30')).toHaveProperty('retryAfterMs', 30_000);
+  it.each([429, 503])('carries the requested retry delay of a %p response', (status) => {
+    expect(errorFor(status, 30_000)).toHaveProperty('retryAfterMs', 30_000);
   });
 
   it.each([301, 400, 404])(
     'throws a delivery error that is not retryable for a %p response',
     (status) => {
-      const error = errorFor(status, '30');
+      const error = errorFor(status, 30_000);
 
       expect(isCallbackDeliveryError(error) && !error.retryable).toBe(true);
       expect(error).toHaveProperty('retryAfterMs', undefined);

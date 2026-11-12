@@ -519,7 +519,7 @@ describe('makeCallbackRequest response classification', () => {
       isRelayOrigin: jest.fn().mockReturnValue(true),
       postCallback: jest
         .fn()
-        .mockResolvedValueOnce({ status: 429, retryAfter: '5' })
+        .mockResolvedValueOnce({ status: 429, retryAfterMs: 5_000 })
         .mockResolvedValueOnce({ status: 204 }),
     };
 

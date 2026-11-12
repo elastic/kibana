@@ -825,23 +825,51 @@ describe('RelayClient', () => {
     );
   });
 
-  it.each([
-    ['a string', '17'],
-    ['an array', ['17', '30']],
-  ])('returns the Retry-After header of a callback response given as %s', async (_, header) => {
-    requestMock.mockResolvedValue({
-      status: 429,
-      data: undefined,
-      headers: { 'retry-after': header },
-    } as never);
+  describe('callback Retry-After', () => {
+    const postThrottled = (header: unknown) => {
+      requestMock.mockResolvedValue({
+        status: 429,
+        data: undefined,
+        headers: { 'retry-after': header },
+      } as never);
 
-    await expect(
-      createClient().postCallback(
+      return createClient().postCallback(
         'https://relay.test/relay-provided/callback?token=abc',
         { execution_id: 'execution-1' },
         new AbortController().signal
-      )
-    ).resolves.toEqual({ status: 429, retryAfter: '17' });
+      );
+    };
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it.each([
+      ['delta-seconds', '17'],
+      ['an array', ['17', '30']],
+    ])('returns the delay of a header given as %s', async (_, header) => {
+      await expect(postThrottled(header)).resolves.toEqual({ status: 429, retryAfterMs: 17_000 });
+    });
+
+    it('returns the delay of an HTTP-date header, floored at 0', async () => {
+      jest.useFakeTimers({ now: Date.parse('Wed, 21 Oct 2026 07:28:00 GMT') });
+
+      await expect(postThrottled('Wed, 21 Oct 2026 07:28:45 GMT')).resolves.toEqual({
+        status: 429,
+        retryAfterMs: 45_000,
+      });
+      await expect(postThrottled('Wed, 21 Oct 2026 07:27:00 GMT')).resolves.toEqual({
+        status: 429,
+        retryAfterMs: 0,
+      });
+    });
+
+    it.each([undefined, '', 'soon', '-5', '1.5'])(
+      'returns no delay for a header of %p',
+      async (header) => {
+        await expect(postThrottled(header)).resolves.toEqual({ status: 429 });
+      }
+    );
   });
 
   it('rejects callback URLs outside the configured Relay origin', async () => {

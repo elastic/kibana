@@ -18,7 +18,11 @@ import type {
   CallbacksSetup,
   CallbackTransportDefinition,
 } from '@kbn/agent-builder-server';
-import { isCallbackDeliveryError, throwIfNotDelivered } from '@kbn/agent-builder-server';
+import {
+  isCallbackDeliveryError,
+  parseRetryAfter,
+  throwIfNotDelivered,
+} from '@kbn/agent-builder-server';
 import type { ChatCallbackResponse } from '../../../../common/http_api/chat_callback';
 import type { ConversationClient } from '../../conversation';
 
@@ -230,7 +234,7 @@ export class CallbackDeliveryService {
 
         throwIfNotDelivered({
           status: response.status,
-          retryAfter: response.headers.get('retry-after'),
+          retryAfterMs: parseRetryAfter(response.headers.get('retry-after')),
         });
       },
     };
