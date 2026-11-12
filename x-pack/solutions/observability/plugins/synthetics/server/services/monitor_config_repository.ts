@@ -179,7 +179,6 @@ export class MonitorConfigRepository {
 
     const opts: SavedObjectsCreateOptions = {
       id,
-      ...(id && { overwrite: true }),
       ...(!isEmpty(spaces) && { initialNamespaces: spaces }),
       references,
     };

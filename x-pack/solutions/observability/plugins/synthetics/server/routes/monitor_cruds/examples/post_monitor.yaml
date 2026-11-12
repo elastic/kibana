@@ -91,6 +91,40 @@ responses:
               message: Browser Monitor timeout is invalid
               attributes:
                 details: Invalid timeout 20 seconds supplied. Minimum timeout for browser monitors is 30 seconds.
+  409:
+    description: >
+      Conflict.
+      Returned when the `id` already belongs to an existing monitor. The existing monitor is left unchanged.
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            statusCode:
+              type: integer
+              example: 409
+            error:
+              type: string
+              example: Conflict
+            message:
+              type: string
+              example: Monitor with id "existing-monitor-id" already exists.
+            attributes:
+              type: object
+              properties:
+                details:
+                  type: string
+                  example: Monitor with id "existing-monitor-id" already exists.
+        examples:
+          duplicateMonitorId:
+            summary: Duplicate monitor ID
+            description: A 409 error when the supplied `id` already belongs to an existing monitor.
+            value:
+              statusCode: 409
+              error: Conflict
+              message: Monitor with id "existing-monitor-id" already exists.
+              attributes:
+                details: Monitor with id "existing-monitor-id" already exists.
 x-codeSamples:
   - lang: curl
     source: |
