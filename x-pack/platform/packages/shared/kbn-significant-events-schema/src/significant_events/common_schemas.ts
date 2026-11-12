@@ -359,13 +359,12 @@ export const SEVERITY_CONTRACT_RULE = dedent`
  * skill and the eval judge point to it.
  */
 export const CONFIDENCE_CONTRACT_RULE = dedent`
-    Confidence is how strongly the evidence you hold supports what this event states: the symptom it reports and the tier rated.
+    Confidence is how strongly the evidence you hold supports the symptom this event reports.
     Check each of these in the confirming descriptions, and name in the assessment_note the ones they do not show:
     - the rows show the failure itself (an error signature or a stated outcome), not only log-line volume;
     - it is still happening in the latest hour the descriptions give;
-    - the signals agree with each other and with the knowledge-base topology where both speak;
-    - the descriptions say where it fails (a service, operation or scope);
-    - the evidence the rated tier needs is stated, as the severity rules name it for that tier.
+    - the signals agree with each other and with the knowledge-base topology where both speak (an edge no row shows is context, not a disagreement);
+    - the descriptions say where it fails (a service, operation or scope).
     Every check the descriptions show keeps confidence high. Each one they do not show lowers it, and several that are not shown make it low.
     These never lower confidence, whatever the tier: a reach, outcome or rate that was not measured and so set a lower tier; a cause that is not established; a service or dependency the knowledge base does not cover; an empty blast_radius (unknown, not none).
     An event written without signals is rated on the evidence its author holds. Confidence reflects the evidence held, never how strong or unusual the detection was.

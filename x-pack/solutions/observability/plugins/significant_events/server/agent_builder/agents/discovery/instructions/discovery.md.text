@@ -482,9 +482,7 @@ finalized topology, and the onset timing from `<incident_matching>` Gather conte
      component the `blast_radius` shows other services depending on;
    - the mechanism the evidence supports, or "not established";
    - what the descriptions leave unresolved;
-   - credibility: whether timing (the onset, how long it has lasted, and whether it is still
-     happening) and scope each align with what the descriptions state (aligned / not aligned / not
-     established), and any contradiction between descriptions;
+   - symptom support: each check of the confidence contract, shown / not shown;
    - impact support: whether the descriptions state the outcome of the operation (stated / not
      stated), the reach (at request, attempt or user level / log lines only / not measured), and
      the strength (a rate against the operation's own normal, or how long it has lasted; stated /
@@ -529,16 +527,15 @@ For each event candidate, decide from all signals that will appear in the final 
      accepted continuation, the stored signals read from the `full` event view.
    - Before applying the ladder, list every cue the confirming descriptions state about the outcome
      and the conditions, whichever way it points.
-   - Rate against the impact-support line of your picture, in the order the `severity` field
-     description gives, and weigh each cue you listed against it.
+   - Rate with the `severity` field description and its application rule, filling the outcome,
+     reach and strength entries of your picture, and weigh each cue you listed against them.
    - Record a service the knowledge base does not cover as a knowledge gap in sentence 2 of the note.
    - A continuation that carries only `refutes` signals has nothing new to rate: set `severity` to
      the stored value read from the `full` view.
    - On a continuation with new `confirms` signals, rate the stored and the new confirming
      descriptions together. The stored tier stands unless a description contradicts the evidence that
      set it or shows the failure ended.
-4. Set `confidence` from the Step 4 picture and the tier you rated: how strongly the evidence
-   supports the symptom and that tier.
+4. Set `confidence` from the Step 4 picture: how strongly the evidence supports the symptom.
    - **No new `confirms` signal in the item.** Write the stored `confidence` and skip the rest of
      this item. This covers an unchanged continuation (`<chronic_and_recurring>` rule 2) and a
      recovery accepted under the checklist in `<eligibility>`: a recovery says the failure ended,
@@ -546,11 +543,10 @@ For each event candidate, decide from all signals that will appear in the final 
    - Otherwise (a new event, a reopen, which is a new episode rated like a new event, or an item
      with any new `confirms` signal), rate the signals you hold: this cycle's, and for a
      continuation the stored confirming signals read from the `full` view.
-   - Apply the `confidence` field description to the credibility line (symptom support) and the
-     impact-support line (tier support). When a check of the contract is not shown, write one line in
-     your message naming that check, what it follows from and how far it lowers the value, then set
-     the value. When every check is shown, name the evidence that supports the value and set it high;
-     an unmeasured reach, a cause not established and a knowledge gap are not limiters.
+   - Apply the `confidence` field description to the symptom-support line of the picture. When a
+     check of the contract is not shown, write one line in your message naming that check, what it
+     follows from and how far it lowers the value, then set the value. When every check is shown,
+     name the evidence that supports the value and set it high.
 
 ### Step 6: Emit output
 
@@ -651,9 +647,9 @@ Write it the way a careful engineer reports findings to a colleague:
 - **Lead with the finding, in plain concrete words.** Name the exact service, operation, or error
   and what happened to it, not a generic category such as "a connectivity issue".
 - **Evidence before verdict.** State the observed outcome, then what you infer.
-- **Match language to confidence.** State findings plainly when the picture establishes timing,
-  scope and mechanism; hedge ("the evidence points to", "plausible but unconfirmed") in proportion
-  to what is not established. Never sound more certain in prose than the `confidence` you recorded.
+- **Match language to confidence.** State findings plainly when every check of the confidence
+  contract is shown; hedge ("the evidence points to", "plausible but unconfirmed") only for a check
+  that is not shown. A cause that is not established is stated as not established, not hedged. Never sound more certain in prose than the `confidence` you recorded.
 - **Narrative matches the tier.** Describe the observed impact in outcome language that fits the
   tier you chose: do not use low-impact phrasing for a `high` or `critical` event, or alarm language
   for a `medium` or `low` one. Hedged wording records uncertainty in `confidence` and

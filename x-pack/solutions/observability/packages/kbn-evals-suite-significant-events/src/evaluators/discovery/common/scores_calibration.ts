@@ -50,12 +50,12 @@ const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'under_escalation_is_fail',
-    text: 'Under-escalation is a FAIL. When the descriptions state a failed outcome for the operation together with a reach (a numerator and denominator at attempt, request or user level), a rate clearly above the operation’s own normal, or a dependent’s own operation stated failing because of a named dependency or component, assign the tier the severity rules support. Do not assign `medium` or `low` solely because topology is sparse, the component is internal, narratives use cautious wording, or detection metadata looks weak — unless a contained-failure cue lowers the tier per the discovery application rule. The `critical` conditions are met by their structural facts, without a share. Grade `title`, `symptom_hypothesis`, and `summary` together: the tier must be evident in the narratives.',
+    text: 'Under-escalation is a FAIL: the descriptions support a higher tier under the severity rules above and the event is rated lower. Sparse topology, an internal component, cautious narrative wording or weak detection metadata are not reasons to rate lower. Grade `title`, `symptom_hypothesis`, and `summary` together: the tier must be evident in the narratives.',
     score: 2,
   },
   {
     id: 'over_escalation_is_fail',
-    text: 'Over-escalation is a FAIL. An event rated `high` without a stated failed outcome, or without a reach, a rate clearly above the operation’s own normal, or a dependent’s own operation stated failing because of a named dependency or component, scores 0 on this criterion. An error line, a count or share of log lines, or an unresolved completion rates `medium`, and the assessment note names the missing outcome or reach.',
+    text: 'Over-escalation is a FAIL: the event is rated higher than the severity rules above support, and scores 0 on this criterion. The assessment note names the missing outcome or reach.',
     score: 2,
   },
 ];
@@ -75,13 +75,8 @@ const CONFIDENCE_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
     score: 2,
   },
   {
-    id: 'severity_confidence_pairing',
-    text: 'A `high` or `critical` tier with low confidence is a warning sign: the symptom evidence is weak, or the tier rests on thin evidence. When the doubt is about the impact itself (reach, completion, strength) the event is rated at the lower tier instead, and a tier already lowered for a missing requirement does not also carry a low confidence for the same gap. A cause that is not established is not a reason for low confidence.',
-    score: 2,
-  },
-  {
     id: 'kb_gap_not_a_penalty',
-    text: 'A missing knowledge-base edge, an empty `blast_radius` or a knowledge gap (a service or call target the rows name that no knowledge record covers) neither lowers the severity nor the confidence. The rows outrank the knowledge base; the note records the gap as unverified in sentence 2 and says "none found in the knowledge base", never "no dependency edges".',
+    text: 'A missing knowledge-base edge, an empty `blast_radius` or a knowledge gap (a service or call target the rows name that no knowledge record covers) never lowers confidence, and lowers severity only where the severity rules say so. The rows outrank the knowledge base; the note records the gap as unverified in sentence 2.',
     score: 2,
   },
   {
