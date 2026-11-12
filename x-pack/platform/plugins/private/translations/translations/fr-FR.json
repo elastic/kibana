@@ -18927,7 +18927,6 @@
     "xpack.alertingV2.signalOverview.statTotalFirings": "Total des événements",
     "xpack.alertingV2.signalOverview.title": "Événements de règle",
     "xpack.alertingV2.sourceRuleSummaryFlyout.classicRulesBadge": "Classic",
-    "xpack.alertingV2.sourceRuleSummaryFlyout.close": "Fermer",
     "xpack.alertingV2.sourceRuleSummaryFlyout.closeButton": "Fermer",
     "xpack.alertingV2.sourceRuleSummaryFlyout.createdBy": "Créé par",
     "xpack.alertingV2.sourceRuleSummaryFlyout.createdDate": "Date de création",
