@@ -9801,7 +9801,6 @@
     "responseOpsRuleForm.actionForm.actionGroupRecoveredMessage": "Wiederhergestellt",
     "responseOpsRuleForm.components.ruleTypeModal.allRuleTypes": "Alle",
     "responseOpsRuleForm.components.ruleTypeModal.classicBadge": "Classic",
-    "responseOpsRuleForm.components.ruleTypeModal.cpsSupportComingSoon": "CPS-Unterstützung demnächst verfügbar",
     "responseOpsRuleForm.components.ruleTypeModal.loadingRuleTypes": "Regeltypen werden geladen",
     "responseOpsRuleForm.components.ruleTypeModal.loadingTemplates": "Vorlagen werden geladen",
     "responseOpsRuleForm.components.ruleTypeModal.minimumRequiredLicenseMessage": "Für diese Regel ist eine {minimumLicenseRequired}-Lizenz erforderlich.",
