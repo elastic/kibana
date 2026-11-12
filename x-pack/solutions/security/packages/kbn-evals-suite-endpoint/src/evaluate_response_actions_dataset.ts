@@ -16,12 +16,14 @@ import {
   type Example,
   type TaskOutput,
 } from '@kbn/evals';
-import { converseQuestionToTaskOutput } from './converse_task';
+import { converseQuestionToTaskOutput, type FollowUpTurn } from './converse_task';
 import { createEndpointCriteriaEvaluator } from './evaluate_dataset';
 
 export interface ResponseActionsDatasetExample extends Example {
   input: {
     question: string;
+    /** Turns sent after `question` in the same conversation (approve, decline or reply). */
+    follow_ups?: FollowUpTurn[];
   };
   output: {
     criteria: string[];
@@ -174,6 +176,7 @@ export function createEvaluateResponseActionsDataset({
         task: async ({ input }) =>
           converseQuestionToTaskOutput(agentBuilderClient, input.question, {
             includePendingConfirmations: true,
+            followUps: input.follow_ups,
           }),
       },
       buildResponseActionsEvaluators({ evaluators })

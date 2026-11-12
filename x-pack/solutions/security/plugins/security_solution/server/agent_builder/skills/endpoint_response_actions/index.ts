@@ -97,8 +97,11 @@ from chat: say so and point the analyst to the Response Actions UI.
      \`ambiguous_hostname\` hosts still needing an agent ID, and anything not
      available from chat
 
-   List only what the tool results reported; leave out any host or action that
-   was never dispatched rather than implying it happened.
+   Report each action's outcome only as the tool results or the analyst's
+   decisions showed it, and never invent an action or host the analyst did not
+   ask for. Keep every action the analyst did ask for in the summary even when it
+   was declined, cancelled, or could not be dispatched (\`endpoint_not_found\`,
+   \`ambiguous_hostname\`): list it as not done, never as performed.
 
 ## Guardrails
 

@@ -438,6 +438,60 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
                 ],
               },
             },
+            {
+              input: {
+                question:
+                  'Contain this incident: isolate eval-host-isolate, then isolate eval-host-release.',
+                follow_ups: [{ confirm: true }],
+              },
+              output: {
+                criteria: [
+                  `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
+                  'After the analyst approved the first isolation, called endpoint-response-actions.isolate_host for "eval-host-release"',
+                  'Across the whole conversation the output lists exactly two isolate_host calls under pending_confirmations: one for "eval-host-isolate" and one for "eval-host-release", and eval-host-isolate was not requested a second time',
+                  'Did not claim eval-host-release was already isolated before the analyst confirmed it',
+                ],
+                tool_sequence: [
+                  'endpoint-response-actions.isolate_host',
+                  'endpoint-response-actions.isolate_host',
+                ],
+              },
+              metadata: {
+                golden_id: 'era-011b-sequential-multi-host-approved',
+                row_type: 'happy',
+                forbidden_tools: [
+                  'endpoint-response-actions.unisolate_host',
+                  'endpoint-response-actions.scan_host',
+                ],
+              },
+            },
+            {
+              input: {
+                question:
+                  'Contain this incident: isolate eval-host-isolate, then isolate eval-host-release.',
+                follow_ups: [{ confirm: false }],
+              },
+              output: {
+                criteria: [
+                  `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
+                  'After the analyst declined the first isolation, did not request isolation of "eval-host-isolate" again, and called endpoint-response-actions.isolate_host for "eval-host-release" exactly once',
+                  'Across the whole conversation the output lists exactly two isolate_host calls under pending_confirmations: one for "eval-host-isolate" and one for "eval-host-release"',
+                  'Did not claim eval-host-isolate was isolated after the analyst declined it',
+                ],
+                tool_sequence: [
+                  'endpoint-response-actions.isolate_host',
+                  'endpoint-response-actions.isolate_host',
+                ],
+              },
+              metadata: {
+                golden_id: 'era-011c-sequential-multi-host-declined',
+                row_type: 'happy',
+                forbidden_tools: [
+                  'endpoint-response-actions.unisolate_host',
+                  'endpoint-response-actions.scan_host',
+                ],
+              },
+            },
           ],
         },
       });

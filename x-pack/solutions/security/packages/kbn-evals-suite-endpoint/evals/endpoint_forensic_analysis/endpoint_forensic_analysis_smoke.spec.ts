@@ -18,6 +18,7 @@ const FORENSIC_ESQL_TRAJECTORY = [
 ] as const;
 
 const EXTRACT_IOCS_TOOL_ID = 'security.endpoint_forensic.extract_iocs';
+const FORENSIC_SKILL_PATH = 'skills/security/endpoint/endpoint-forensic-analysis/SKILL.md';
 const ERA_SKILL_PATH = 'skills/security/endpoint/endpoint-response-actions/SKILL.md';
 
 evaluate.describe('Endpoint Forensic Analysis — smoke', { tag: tags.stateful.classic }, () => {
@@ -213,21 +214,23 @@ evaluate.describe('Endpoint Forensic Analysis — smoke', { tag: tags.stateful.c
         dataset: {
           name: 'security: endpoint-forensic-analysis-smoke-handoff-response-actions',
           description:
-            'Smoke: a containment request after forensic findings is handed to endpoint-response-actions rather than refused or redirected to the Security UI. WKSTN-RECV01 is seeded as telemetry only, so the response-actions tool may report endpoint_not_found; either outcome shows the handoff happened.',
+            'Smoke: a two-turn conversation. Forensic reconstruction first, then a containment request in the same conversation that is handed to endpoint-response-actions rather than refused or redirected to the Security UI. WKSTN-RECV01 is seeded as telemetry only, so the response-actions tool may report endpoint_not_found; either outcome shows the handoff happened.',
           examples: [
             {
               input: {
                 question:
-                  'WKSTN-RECV01 was patient zero for the ransomware outbreak. Isolate WKSTN-RECV01 now to contain it.',
+                  'Reconstruct the ransomware outbreak: which host was patient zero? Do not take any action yet.',
+                follow_ups: [{ message: 'Isolate that host now to contain it.' }],
               },
               output: {
                 criteria: [
-                  `Activated the endpoint response actions skill by reading ${ERA_SKILL_PATH}`,
+                  `In the first turn, activated the endpoint forensic analysis skill by reading ${FORENSIC_SKILL_PATH} and identified WKSTN-RECV01 as patient zero`,
+                  `Only after the analyst asked for containment, activated the endpoint response actions skill by reading ${ERA_SKILL_PATH} (the forensic skill was read before it)`,
                   'Called endpoint-response-actions.isolate_host for WKSTN-RECV01 — the output lists the call under pending_confirmations, or the tool reported endpoint_not_found for that host',
                   'Did not answer only by telling the analyst to use Endpoint response actions in Security',
                   'Did not claim WKSTN-RECV01 was already isolated (any statement about the outcome must say it is awaiting confirmation or that the host was not found)',
                 ],
-                tool_sequence: ['endpoint-response-actions.isolate_host'],
+                tool_sequence: [...FORENSIC_ESQL_TRAJECTORY, 'endpoint-response-actions.isolate_host'],
               },
               metadata: {
                 golden_id: 'ef-012-handoff-response-actions',

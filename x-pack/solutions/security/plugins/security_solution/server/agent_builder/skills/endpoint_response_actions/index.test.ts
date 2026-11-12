@@ -145,6 +145,8 @@ describe('createEndpointResponseActionsSkill', () => {
       expect(skill.content).toContain('Closing incident summary');
       expect(skill.content).toContain('actions declined or cancelled');
       expect(skill.content).toContain('outstanding items');
+      expect(skill.content).not.toMatch(/leave out any host or action/i);
+      expect(skill.content).toMatch(/Keep every action the analyst did ask for in the summary/);
       expect(reference).toContain('one tool call per host per action');
       expect(reference).toContain('incident summary');
     });

@@ -38,6 +38,29 @@ const toPendingConfirmations = (prompts: unknown[]): PendingConfirmation[] =>
       : [];
   });
 
+/**
+ * A turn after the first, sent in the same conversation:
+ * - `{ confirm }` answers every confirmation the previous turn paused on with
+ *   `allow: confirm`, the way the UI's Approve / Decline buttons do.
+ * - `{ message }` sends another user message.
+ */
+export type FollowUpTurn = { confirm: boolean } | { message: string };
+
+export interface ConfirmationDecision extends PendingConfirmation {
+  allow: boolean;
+}
+
+const confirmationPromptIds = (prompts: unknown[]): string[] =>
+  prompts.flatMap((prompt) => {
+    const id = isRecord(prompt) && typeof prompt.id === 'string' ? prompt.id : '';
+    return CONFIRMATION_ID_PATTERN.test(id) ? [id] : [];
+  });
+
+const toDecision = (promptId: string, allow: boolean): ConfirmationDecision => {
+  const [confirmation] = toPendingConfirmations([{ id: promptId }]);
+  return { ...confirmation, allow };
+};
+
 export const converseQuestionToTaskOutput = async (
   agentBuilderClient: AgentBuilderClient,
   question: string,
@@ -51,20 +74,86 @@ export const converseQuestionToTaskOutput = async (
      * judged output unchanged.
      */
     includePendingConfirmations?: boolean;
+    /**
+     * Turns sent after the first, in the same conversation. Steps, messages and
+     * pending confirmations from every turn accumulate in the output, so a
+     * criterion can check what happened after an approval or a decline, not just
+     * the first request. A `{ confirm }` turn with nothing pending ends the
+     * conversation and records an error instead of sending an unanswerable turn.
+     */
+    followUps?: readonly FollowUpTurn[];
   } = {}
 ) => {
-  const response = await agentBuilderClient.converse({
+  const { followUps = [], includePendingConfirmations } = options;
+
+  let response = await agentBuilderClient.converse({
     agentId: agentBuilderDefaultAgentId,
     input: question,
   });
 
+  const messages: Array<{ message: string }> = [
+    { message: question },
+    { message: response.message },
+  ];
+  const steps = [...response.steps];
+  const errors: unknown[] = [];
+  const pendingConfirmations = toPendingConfirmations(response.prompts ?? []);
+  const confirmationDecisions: ConfirmationDecision[] = [];
+
+  for (const followUp of followUps) {
+    const { conversationId } = response;
+    if (!conversationId) {
+      errors.push({ message: 'Cannot continue: the first turn returned no conversation id.' });
+      break;
+    }
+
+    let next: Awaited<ReturnType<AgentBuilderClient['converse']>>;
+    if ('confirm' in followUp) {
+      const promptIds = confirmationPromptIds(response.prompts ?? []);
+      if (promptIds.length === 0) {
+        errors.push({
+          message: `Cannot ${
+            followUp.confirm ? 'approve' : 'decline'
+          }: the previous turn left no pending confirmation.`,
+        });
+        break;
+      }
+
+      const { confirm: allow } = followUp;
+      confirmationDecisions.push(...promptIds.map((id) => toDecision(id, allow)));
+      messages.push({ message: allow ? '[approved]' : '[declined]' });
+      next = await agentBuilderClient.converse({
+        agentId: agentBuilderDefaultAgentId,
+        conversationId,
+        promptResponses: Object.fromEntries(promptIds.map((id) => [id, { allow }])),
+      });
+    } else {
+      messages.push({ message: followUp.message });
+      next = await agentBuilderClient.converse({
+        agentId: agentBuilderDefaultAgentId,
+        conversationId,
+        input: followUp.message,
+      });
+    }
+
+    response = next;
+    messages.push({ message: response.message });
+    steps.push(...response.steps);
+    pendingConfirmations.push(...toPendingConfirmations(response.prompts ?? []));
+  }
+
   return {
-    messages: [{ message: question }, { message: response.message }],
-    steps: response.steps,
-    errors: [] as unknown[],
+    messages,
+    steps,
+    errors,
     traceId: response.traceId,
-    ...(options.includePendingConfirmations
-      ? { pending_confirmations: toPendingConfirmations(response.prompts ?? []) }
+    ...(includePendingConfirmations
+      ? {
+          pending_confirmations: pendingConfirmations,
+          ...(confirmationDecisions.length > 0
+            ? { confirmation_decisions: confirmationDecisions }
+            : {}),
+        }
       : {}),
   };
 };

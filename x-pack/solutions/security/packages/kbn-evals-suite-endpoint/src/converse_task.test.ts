@@ -160,4 +160,132 @@ describe('converse_task', () => {
       ]);
     });
   });
+
+  describe('follow-up turns in the same conversation', () => {
+    const secondPrompt = {
+      type: 'confirmation',
+      id: 'tools.endpoint-response-actions.isolate_host.confirmation.call-2',
+    };
+    const secondStep = {
+      type: 'tool_call',
+      tool_id: 'endpoint-response-actions.isolate_host',
+      tool_call_id: 'call-2',
+      params: { hostName: 'eval-host-release' },
+    };
+
+    const sequentialClient = (): AgentBuilderClient => ({
+      createConversation: jest.fn(),
+      getConversation: jest.fn(),
+      converse: jest
+        .fn()
+        .mockResolvedValueOnce({
+          message: '',
+          steps: [isolateStep],
+          traceId: 'trace-1',
+          conversationId: 'conv-1',
+          prompts: [confirmationPrompt],
+        })
+        .mockResolvedValueOnce({
+          message: 'Next: eval-host-release.',
+          steps: [secondStep],
+          traceId: 'trace-2',
+          conversationId: 'conv-1',
+          prompts: [secondPrompt],
+        }),
+    });
+
+    it('answers the pending confirmation by prompt id in the same conversation and accumulates both turns', async () => {
+      const client = sequentialClient();
+
+      const result = await converseQuestionToTaskOutput(client, 'isolate both', {
+        includePendingConfirmations: true,
+        followUps: [{ confirm: true }],
+      });
+
+      expect(client.converse).toHaveBeenNthCalledWith(2, {
+        agentId: agentBuilderDefaultAgentId,
+        conversationId: 'conv-1',
+        promptResponses: { [confirmationPrompt.id]: { allow: true } },
+      });
+      expect(result.steps).toEqual([isolateStep, secondStep]);
+      expect(result.pending_confirmations).toEqual([
+        { tool_id: 'endpoint-response-actions.isolate_host', tool_call_id: 'call-1' },
+        { tool_id: 'endpoint-response-actions.isolate_host', tool_call_id: 'call-2' },
+      ]);
+      expect(result.confirmation_decisions).toEqual([
+        {
+          tool_id: 'endpoint-response-actions.isolate_host',
+          tool_call_id: 'call-1',
+          allow: true,
+        },
+      ]);
+      expect(result.traceId).toBe('trace-2');
+      expect(result.errors).toEqual([]);
+    });
+
+    it('sends allow: false for a decline', async () => {
+      const client = sequentialClient();
+
+      const result = await converseQuestionToTaskOutput(client, 'isolate both', {
+        includePendingConfirmations: true,
+        followUps: [{ confirm: false }],
+      });
+
+      expect(client.converse).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ promptResponses: { [confirmationPrompt.id]: { allow: false } } })
+      );
+      expect(result.confirmation_decisions).toEqual([
+        expect.objectContaining({ tool_call_id: 'call-1', allow: false }),
+      ]);
+    });
+
+    it('sends a message follow-up as input on the same conversation', async () => {
+      const client = createClient({
+        message: 'patient zero is WKSTN-RECV01',
+        steps: [],
+        traceId: 'trace-1',
+        conversationId: 'conv-9',
+        prompts: [],
+      });
+
+      await converseQuestionToTaskOutput(client, 'who is patient zero?', {
+        followUps: [{ message: 'Isolate that host.' }],
+      });
+
+      expect(client.converse).toHaveBeenNthCalledWith(2, {
+        agentId: agentBuilderDefaultAgentId,
+        conversationId: 'conv-9',
+        input: 'Isolate that host.',
+      });
+    });
+
+    it('records an error instead of sending when there is nothing to confirm', async () => {
+      const client = createClient({
+        message: 'ok',
+        steps: [],
+        traceId: 'trace-1',
+        conversationId: 'conv-1',
+        prompts: [],
+      });
+
+      const result = await converseQuestionToTaskOutput(client, 'q', {
+        followUps: [{ confirm: true }],
+      });
+
+      expect(client.converse).toHaveBeenCalledTimes(1);
+      expect(result.errors).toHaveLength(1);
+    });
+
+    it('records an error when the first turn returned no conversation id', async () => {
+      const client = createClient({ message: 'ok', steps: [], traceId: 't', prompts: [] });
+
+      const result = await converseQuestionToTaskOutput(client, 'q', {
+        followUps: [{ message: 'more' }],
+      });
+
+      expect(client.converse).toHaveBeenCalledTimes(1);
+      expect(result.errors).toHaveLength(1);
+    });
+  });
 });
