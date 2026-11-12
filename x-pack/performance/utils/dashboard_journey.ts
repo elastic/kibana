@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
 import type { KibanaServer } from '@kbn/ftr-common-functional-services';
 import type { Journey } from '@kbn/journeys';
 import type { KibanaPage } from '@kbn/journeys/services/page/kibana_page';
@@ -45,13 +44,7 @@ export function setupDashboardJourney(config: DashboardJourneyConfig): Journey<{
       await kibanaPage.waitForListViewTable();
     })
     .step(`Go to ${config.dashboardTitle}`, async ({ page, kibanaPage }) => {
-      await page
-        .locator(subj(CONTENT_LIST_TEST_SUBJECTS.table))
-        .getByRole('link', {
-          name: config.dashboardTitle,
-          exact: true,
-        })
-        .click();
+      await kibanaPage.listViewItemLink(config.dashboardTitle).click();
       await waitForDashboardLoad(page, kibanaPage);
     })
     .step('Return to listing page', async ({ page, kibanaPage }) => {
@@ -59,13 +52,7 @@ export function setupDashboardJourney(config: DashboardJourneyConfig): Journey<{
       await kibanaPage.waitForListViewTable();
     })
     .step(`Return to dashboard`, async ({ page, kibanaPage }) => {
-      await page
-        .locator(subj(CONTENT_LIST_TEST_SUBJECTS.table))
-        .getByRole('link', {
-          name: config.dashboardTitle,
-          exact: true,
-        })
-        .click();
+      await kibanaPage.listViewItemLink(config.dashboardTitle).click();
       await waitForDashboardLoad(page, kibanaPage);
     })
     .step('Refresh dashboard', async ({ page, kibanaPage }) => {

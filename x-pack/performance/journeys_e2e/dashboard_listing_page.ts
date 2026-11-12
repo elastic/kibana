@@ -6,7 +6,6 @@
  */
 
 import {
-  CONTENT_LIST_TEST_SUBJECTS,
   getContentListSelectionBarSubjects,
   getContentListToolbarSubjects,
 } from '@kbn/content-list-common';
@@ -28,14 +27,11 @@ export const journey = new Journey({
     await page.goto(kbnUrl.get(`/app/dashboards`));
     await kibanaPage.waitForListViewTable();
   })
-  .step('Search dashboards', async ({ page, inputDelays }) => {
+  .step('Search dashboards', async ({ page, inputDelays, kibanaPage }) => {
     // Free-text search is debounced, so the table can still be showing unfiltered
     // results when typing returns. Waiting for it to look idle would then pass on
     // the pre-search table; wait for a row that cannot match to go instead.
-    const filteredOut = page.locator(subj(CONTENT_LIST_TEST_SUBJECTS.table)).getByRole('link', {
-      name: '[Flights] Global Flight Dashboard',
-      exact: true,
-    });
+    const filteredOut = kibanaPage.listViewItemLink('[Flights] Global Flight Dashboard');
 
     const searchBox = page.locator(subj(toolbarSubjects.searchBox));
     await searchBox.pressSequentially('Web', {
@@ -44,12 +40,8 @@ export const journey = new Journey({
     await filteredOut.waitFor({ state: 'detached' });
   })
   .step('Delete dashboard', async ({ page, kibanaPage }) => {
-    const deletedDashboard = page
-      .locator(subj(CONTENT_LIST_TEST_SUBJECTS.table))
-      .getByRole('link', {
-        name: '[Logs] Web Traffic',
-        exact: true,
-      })
+    const deletedDashboard = kibanaPage
+      .listViewItemLink('[Logs] Web Traffic')
       .locator('xpath=ancestor::tr');
     await deletedDashboard.getByRole('checkbox').click();
     await page.click(subj(selectionBarSubjects.deleteButton));

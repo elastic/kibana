@@ -50,6 +50,17 @@ export class KibanaPage {
     );
   }
 
+  /**
+   * Locator for a listing item's link, scoped to the Content List table so a
+   * recently-viewed entry with the same name elsewhere on the page (solution
+   * navigation's Recent section) can't make this ambiguous.
+   */
+  listViewItemLink(title: string) {
+    return this.page
+      .locator(subj(CONTENT_LIST_TEST_SUBJECTS.table))
+      .getByRole('link', { name: title, exact: true });
+  }
+
   async backToDashboardListing() {
     await this.page.click(subj('breadcrumb dashboardListingBreadcrumb first'));
   }
