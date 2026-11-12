@@ -1,6 +1,6 @@
 version: '1'
 name: __NAME__
-description: 'Extracts long-term facts and entities from one batch of agent rounds, for trace dreaming, which runs the batches of a read one after another.'
+description: 'Extracts long-term facts and entities from one batch of agent rounds, for trace dreaming, which runs the batches of a read at once.'
 enabled: false
 tags:
   - context-engine
@@ -11,7 +11,6 @@ settings:
   timeout: '25m'
 consts:
   ai_index_id: __AI_INDEX_ID__
-  memories_index: __MEMORIES_INDEX__
   connector_id: __CONNECTOR_ID__
   instructions: __INSTRUCTIONS__
   fact_types: __FACT_TYPES__
@@ -42,57 +41,6 @@ triggers:
           default: false
           description: Report what the batch would write and reject, and write nothing.
 steps:
-  - name: read_existing
-    type: elasticsearch.search
-    with:
-      index: '{{ consts.memories_index }}'
-      ignore_unavailable: true
-      size: 300
-      sort:
-        - updated_at: desc
-      collapse:
-        field: id
-      _source:
-        - id
-        - type
-        - title
-        - description
-        - content
-        - attributes
-        - references
-        - permissions
-        - governance.lifecycle.status
-      query:
-        bool:
-          should:
-            - prefix:
-                type: 'fact.'
-            - prefix:
-                type: 'entity.'
-          minimum_should_match: 1
-          filter:
-            - bool:
-                should:
-                  - bool:
-                      must_not:
-                        nested:
-                          path: permissions.kibana.privileges
-                          query:
-                            match_all: {}
-                          ignore_unmapped: true
-                  - nested:
-                      path: permissions.kibana.privileges
-                      ignore_unmapped: true
-                      query:
-                        bool:
-                          should:
-                            - term:
-                                permissions.kibana.privileges.space: '{{ workflow.spaceId }}'
-                            - term:
-                                permissions.kibana.privileges.space: '*'
-                          minimum_should_match: 1
-                minimum_should_match: 1
-
   - name: extract
     type: ai.prompt
     connector-id: '{{ consts.connector_id }}'
@@ -111,17 +59,15 @@ steps:
         - entities: the things the conversations are about, each with a summary of what is known about it.
         {%- endif %}
 
-        You are given ROUNDS (transcripts of agent rounds rebuilt from traces), whole conversations at a time, and EXISTING long-term items.
+        You are given ROUNDS (transcripts of agent rounds rebuilt from traces), whole conversations at a time.
 
         A round is one exchange: a user message, the tools the agent called with what they returned, and the agent's answer. Each line starts with who it is from: User, Assistant, "Assistant called <tool>" or "Tool result". Take from a round what it states or settles: what the user says about themselves, their work, their preferences and their data, and what the tool results and the answer establish. What the user mentions in passing while asking for something else, such as what they own, a count, a price or something they did, counts as much as what they say on purpose. When the INSTRUCTIONS or the types call for it, also record what the agent's answer gave the user that they may come back to, such as a recommendation, a list, a schedule or a figure, as what the agent told the user. Do not record what the agent only guessed or asked, small talk, the one-off request itself (but do record what it reveals), or a step of a task that does not stay true afterwards. A tool result is evidence; a failed or empty one establishes nothing.
 
         Record every piece of knowledge in the ROUNDS that a configured type covers, the small ones too, not only the main topic of a conversation: a later question can be about any of them.
 
-        Return only changes. Update an existing item by repeating its id as ref with the new values; create one with a new key like "new:1"; delete one with delete: true.
+        Return each item with a new key like "new:1", unique in your answer.
 
-        Merge rather than duplicate: if a round restates or refines an existing item, update that item. When a round shows an existing item is no longer true, update or delete it. When a round changes a value an item holds, such as a count, an amount, a measurement or a goal, write the new value and keep the earlier one with when it held, such as "gets 28 miles per gallon as of May 2023, down from 30 in February 2023"; do the same when later ROUNDS change a value earlier ones gave.
-
-        When a round restates or confirms an existing item, return its ref with that round in source_memory_ids even if nothing else changes: that records that it was seen again. Each EXISTING item shows attributes["memory.number_of_occurrences"], how many sources it was seen in, and attributes["memory.last_seen_at"], when it was last seen.
+        Write one item per piece of knowledge: when ROUNDS restate or refine it, write it once, with the refined values and every round that states it in source_memory_ids. When later ROUNDS change a value an item holds, such as a count, an amount, a measurement or a goal, write the latest value and keep the earlier ones with when they held, such as "gets 28 miles per gallon as of May 2023, down from 30 in February 2023". When later ROUNDS show it is no longer true, write what holds now.
         {%- if consts.fact_types.size > 0 %}
 
         Facts are read on their own, without the conversation, so write each one to stand alone: name what it is about in its title and content, keep every name, number, code and date exactly as stated, and give dates in full rather than as "yesterday" or "next week", working them out from when the round ended.
@@ -130,7 +76,7 @@ steps:
         {%- endif %}
         {%- if consts.entity_types.size > 0 %}
 
-        Give every entity a content summary of what is known about it: its attribute values and the main facts about it.
+        Give every entity a content summary of what is known about it: its attribute values and the main facts about it. Name each entity by its canonical name, the same way every time: an entity is kept by its type and name, so one named the same in other ROUNDS is the same entity.
         {%- endif %}
 
         Give an entity or fact access_patterns when the ROUNDS show how to query the raw data about it: up to 5 distinct questions a later agent could answer from that data. Build them only from indices, fields, values and queries that appear in the ROUNDS, such as a query a tool ran that returned rows; return none rather than invent an index or field. Each has:
@@ -143,13 +89,10 @@ steps:
         - Quote string literals with double quotes; do not quote numbers or booleans. Write dates in ISO 8601.
         - Boolean fields take COUNT(*) WHERE field == true, never SUM()/AVG()/MIN()/MAX(). Only use AVG()/SUM() on numeric fields.
         - Keep it cheap: end it with a small | LIMIT n (n <= 20).
-        An item's existing access_patterns are shown with it. Return access_patterns only to change them; the list you return replaces them.
 
-        Every created or updated item must list the ids of the ROUNDS it is based on in source_memory_ids.
+        Every item must list the ids of the ROUNDS it is based on in source_memory_ids.
 
-        Ignore rounds that hold nothing worth remembering. An empty change set is a valid answer.
-
-        How to read EXISTING: an item's type is its kind followed by its configured type: fact.<fact type> or entity.<entity type>.
+        Ignore rounds that hold nothing worth remembering. An empty answer is valid.
 
         FACT TYPES:
         {%- for fact_type in consts.fact_types %}
@@ -172,30 +115,18 @@ steps:
         {%- for round in inputs.memories %}
         {{ round | json }}
         {%- endfor %}
-
-        EXISTING (one item per line, none when empty):
-        {%- assign audience = inputs.memories.first.permissions | json %}
-        {%- for hit in steps.read_existing.output.hits.hits %}
-        {%- assign item_audience = hit._source.permissions | json %}
-        {%- unless hit._source.governance.lifecycle.status == 'deleted' or hit._source.governance.lifecycle.status == 'verification_failed' or item_audience != audience %}
-        {{ hit._source | json }}
-        {%- endunless %}
-        {%- endfor %}
       schema:
         type: object
         properties:
           entities:
             type: array
-            description: Entities to create, update, or delete. Leave out entities that do not change.
+            description: The entities the ROUNDS hold.
             items:
               type: object
               properties:
                 ref:
                   type: string
-                  description: An id from EXISTING, or a new key like "new:1" to create something.
-                delete:
-                  type: boolean
-                  description: True deletes an existing entity.
+                  description: A new key like "new:1", unique in your answer.
                 type:
                   type: string
                   description: One of the configured entity types.
@@ -223,7 +154,7 @@ steps:
                       - value
                 access_patterns:
                   type: array
-                  description: Replaces the existing access patterns; leave out to keep them.
+                  description: Questions a later agent could answer from the raw data about it.
                   items:
                     type: object
                     properties:
@@ -249,16 +180,13 @@ steps:
                 - ref
           facts:
             type: array
-            description: Facts to create, update, or delete. Leave out facts that do not change.
+            description: The facts the ROUNDS hold.
             items:
               type: object
               properties:
                 ref:
                   type: string
-                  description: An id from EXISTING, or a new key like "new:1" to create something.
-                delete:
-                  type: boolean
-                  description: True deletes an existing fact.
+                  description: A new key like "new:1", unique in your answer.
                 type:
                   type: string
                   description: One of the configured fact types.
@@ -270,7 +198,7 @@ steps:
                   description: The fact, stated so it can be used on its own, naming what it is about and keeping exact values.
                 access_patterns:
                   type: array
-                  description: Replaces the existing access patterns; leave out to keep them.
+                  description: Questions a later agent could answer from the raw data about it.
                   items:
                     type: object
                     properties:

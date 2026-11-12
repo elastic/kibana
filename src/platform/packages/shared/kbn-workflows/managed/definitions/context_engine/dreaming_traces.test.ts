@@ -167,18 +167,18 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW', () => {
     );
   });
 
-  it('reads up to a token budget, and runs the batches the read packed one at a time, in order', () => {
+  it('reads up to a token budget, and runs the batches the read packed, 4 at a time', () => {
     const { steps } = render();
 
     expect(findStep(steps, 'read_traces').with).toEqual(
-      expect.objectContaining({ size: 1000, max_tokens: 600000, batch_tokens: 50000 })
+      expect.objectContaining({ size: 1000, max_tokens: 1000000, batch_tokens: 100000 })
     );
     expect(findStep(steps, 'active').with?.batches).toBe('${{ steps.read_traces.output.batches }}');
     expect(batches()).toEqual(
       expect.objectContaining({
         type: 'parallel',
         foreach: '{{ variables.batches | json }}',
-        concurrency: 1,
+        concurrency: 4,
       })
     );
     expect(batches().steps).toEqual([
@@ -196,7 +196,7 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW', () => {
     ]);
   });
 
-  it('adds up what the batches wrote once they are all done', () => {
+  it('adds up what the batches wrote once they are all done, as they run at once', () => {
     const engine = createWorkflowLiquidEngine();
     const evaluate = (expression: unknown, scope: Record<string, unknown>) =>
       engine.evalValueSync(String(expression).slice(3, -2).trim(), scope);

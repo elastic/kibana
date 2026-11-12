@@ -140,9 +140,9 @@ export type ContextEngineTraceDreamingBatchWorkflowTemplateValues =
   ContextEngineDreamingWorkflowTemplateValues;
 
 /**
- * Extracts long-term facts and entities from one batch of agent rounds. Trace dreaming runs a
- * read's batches one after another, each with this workflow, as a parallel step can only run
- * straight-line steps.
+ * Extracts long-term facts and entities from one batch of agent rounds, without reading the AI
+ * index's existing ones. Trace dreaming runs a read's batches at once, each with this workflow, as
+ * a parallel step can only run straight-line steps.
  */
 export const CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW = {
   id: CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
@@ -153,7 +153,6 @@ export const CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW = {
     renderJsonTemplate(TRACE_DREAMING_BATCH_YAML, {
       __NAME__: `Trace dreaming batch: ${values.aiIndexId}`,
       __AI_INDEX_ID__: values.aiIndexId,
-      __MEMORIES_INDEX__: values.memoriesIndex,
       __CONNECTOR_ID__: values.connectorId,
       __INSTRUCTIONS__: values.instructions,
       __FACT_TYPES__: values.factTypes,
