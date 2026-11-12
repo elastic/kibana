@@ -93,6 +93,23 @@ describe('createSignificantEventAttachmentType', () => {
     ).resolves.toEqual(updatedEvent);
   });
 
+  it('resolves the event with the severity its investigation gave it', async () => {
+    const server = createSignificantEventsServer({ featurePrivilege: 'read' });
+    server.severitySync = {
+      reconcileRows: async ({ rows }: { rows: SignificantEvent[] }) =>
+        rows.map((row) => ({ ...row, severity: 'critical' as const })),
+    } as unknown as typeof server.severitySync;
+    const type = createSignificantEventAttachmentType({
+      logger: loggingSystemMock.createLogger(),
+      getScopedClients: createGetScopedClients([event]),
+      server,
+    });
+
+    await expect(
+      type.resolve?.('payment-outage', agentBuilderMocks.attachments.createResolveContextMock())
+    ).resolves.toEqual({ ...event, severity: 'critical' });
+  });
+
   it('reports stale when the latest event differs from the stored snapshot', async () => {
     // Every events_write sets a new @timestamp; changing event_uuid alone (same timestamp)
     // cannot happen in production. Use a realistic update that bumps @timestamp.

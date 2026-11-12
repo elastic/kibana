@@ -8,6 +8,7 @@
 import { eventsWriteBulkHandler, eventsWriteHandler } from './handler';
 import type { EventsWriteInput } from './types';
 import type {
+  Severity,
   SignificantEvent,
   SignalEntry,
   BlastRadiusEntry,
@@ -337,6 +338,67 @@ describe('eventsWriteHandler', () => {
         })
       ).rejects.toMatchObject({ code: 'outcome_unknown' });
     });
+  });
+});
+
+describe('eventsWriteBulkHandler, severity resolved from investigations', () => {
+  const stored = (severity: Severity) => makeStoredEvent('checkout-stable', { severity });
+  const clientWith = (latest: SignificantEvent) =>
+    makeEventSearchClient({ findByEventId: jest.fn().mockResolvedValue({ hits: [latest] }) });
+  const write = (
+    eventClient: ReturnType<typeof makeEventSearchClient>,
+    resolved: Map<string, Severity> | undefined
+  ) =>
+    eventsWriteBulkHandler({
+      eventSearchClient: eventClient,
+      inputs: [{ ...baseInput, event_id: 'checkout-stable', severity: 'high' }],
+      resolveSeverities: resolved ? jest.fn().mockResolvedValue(resolved) : undefined,
+    });
+
+  it("stores the resolved severity, not the agent's", async () => {
+    await write(clientWith(stored('low')), new Map([['checkout-stable', 'medium']]));
+
+    expect(writtenDocs()[0].severity).toBe('medium');
+  });
+
+  it('writes nothing when the agent only disagrees with the resolved severity (no churn)', async () => {
+    const [result] = await write(
+      clientWith(stored('medium')),
+      new Map([['checkout-stable', 'medium']])
+    );
+
+    expect(result).toMatchObject({ written: false, reason: 'unchanged_outcome' });
+    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+  });
+
+  it.each<[string, Map<string, Severity> | undefined]>([
+    ['nothing is resolved for the event', new Map()],
+    ['no resolver is given', undefined],
+  ])("keeps the agent's severity when %s", async (_name, resolved) => {
+    await write(clientWith(stored('low')), resolved);
+
+    expect(writtenDocs()[0].severity).toBe('high');
+  });
+
+  it("hands an existing event's stored severity to the resolver, but not a new event", async () => {
+    // The shape of the resolver while investigations are unreadable: it gives the stored severity back.
+    const keepStored = async (events: Array<{ eventId: string; storedSeverity: Severity }>) =>
+      new Map(events.map(({ eventId, storedSeverity }) => [eventId, storedSeverity]));
+
+    const [existing] = await eventsWriteBulkHandler({
+      eventSearchClient: clientWith(stored('low')),
+      inputs: [{ ...baseInput, event_id: 'checkout-stable', severity: 'high' }],
+      resolveSeverities: keepStored,
+    });
+    expect(existing).toMatchObject({ written: false, reason: 'unchanged_outcome' });
+
+    const [created] = await eventsWriteBulkHandler({
+      eventSearchClient: makeEventSearchClient(),
+      inputs: [{ ...baseInput, severity: 'high' }],
+      resolveSeverities: keepStored,
+    });
+    expect(created).toMatchObject({ written: true });
+    expect(writtenDocs()[0].severity).toBe('high');
   });
 });
 

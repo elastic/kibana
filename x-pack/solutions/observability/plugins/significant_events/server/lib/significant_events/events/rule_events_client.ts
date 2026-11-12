@@ -98,6 +98,10 @@ const getAlertActionErrorCode = (error: unknown): string | undefined => {
 /** `.rule-events` groups a series of writes by `group_hash`, not `event_id` (unavailable as a column). */
 const GROUP_HASH_FIELD = 'group_hash';
 
+const SYNC_SEVERITY_MAX_RETRIES = 2;
+
+const SORT_RANK_COLUMN = 'sort_rank';
+
 export interface CreateEventResult {
   groupHash: string;
   alertId: string;
@@ -366,8 +370,6 @@ const withInvestigationState = (
   }
   return query.pipe`EVAL ${stateCol} = ${notStarted}`;
 };
-
-const SORT_RANK_COLUMN = 'sort_rank';
 
 /** Orders the latest revisions for the paginated list; ties fall back to newest first. */
 const applySort = (
@@ -1054,6 +1056,86 @@ export class RuleEventsClient {
       if (event.event_id) map.set(event.event_id, event);
     }
     return map;
+  }
+
+  /** The event ids each episode (`alert.id`) belongs to. Unknown episodes are absent. */
+  async findEventIdsByEpisodeIds(episodeIds: string[]): Promise<Map<string, string[]>> {
+    const eventIdsByEpisode = new Map<string, string[]>();
+    if (!episodeIds.length) return eventIdsByEpisode;
+
+    const query = buildBaseQuery(this.clients.space).where`${esql.col(
+      'alert.id'
+    )} IN (${episodeIds.map((id) => esql.str(id))})`.pipe`EVAL ${esql.col(
+      'episode_id'
+    )} = ${esql.col('alert.id')}, ${esql.col('event_id')} = FIELD_EXTRACT(${esql.col(
+      'data'
+    )}, ${esql.str('event_id')})`.pipe`STATS n = COUNT(*) BY ${esql.col('episode_id')}, ${esql.col(
+      'event_id'
+    )}`;
+
+    try {
+      const rows = esqlToObjects<{ episode_id: string; event_id: string }>(
+        await queryEsql({ esClient: this.clients.esClient, query })
+      );
+      for (const { episode_id: episodeId, event_id: eventId } of rows) {
+        if (!episodeId || !eventId) continue;
+        eventIdsByEpisode.set(episodeId, [...(eventIdsByEpisode.get(episodeId) ?? []), eventId]);
+      }
+      return eventIdsByEpisode;
+    } catch (error) {
+      if (isIndexNotFoundError(error)) return eventIdsByEpisode;
+      throw error;
+    }
+  }
+
+  /** Writes a severity as a new version through the head guard, retrying a moved head. */
+  async syncSeverity({
+    eventId,
+    severity,
+  }: {
+    eventId: string;
+    severity: Severity;
+  }): Promise<'updated' | 'unchanged' | 'superseded' | 'not_found'> {
+    for (let attempt = 0; attempt <= SYNC_SEVERITY_MAX_RETRIES; attempt++) {
+      const latest = (await this.findLatestByEventIds([eventId])).get(eventId);
+      if (!latest) return 'not_found';
+      if (latest.severity === severity) return 'unchanged';
+      const written = await this.updateEvent({
+        event: { ...latest, '@timestamp': new Date().toISOString(), severity },
+        prior: latest,
+        // The status stays as it is, so the write reports no status change.
+        origin: { actor: 'agent_tool' },
+      });
+      if (written.updated) return 'updated';
+    }
+    return 'superseded';
+  }
+
+  /** Every episode (`alert.id`) each event has carried. An event with none is absent. */
+  async findEpisodeIdsByEventIds(eventIds: string[]): Promise<Map<string, string[]>> {
+    const episodeIdsByEvent = new Map<string, string[]>();
+    if (!eventIds.length) return episodeIdsByEvent;
+
+    const query = buildBaseQuery(this.clients.space).where`${eventIdIn(eventIds)}`
+      .pipe`EVAL ${esql.col('event_id')} = FIELD_EXTRACT(${esql.col('data')}, ${esql.str(
+      'event_id'
+    )}), ${esql.col('episode_id')} = ${esql.col('alert.id')}`.pipe`STATS n = COUNT(*) BY ${esql.col(
+      'event_id'
+    )}, ${esql.col('episode_id')}`;
+
+    try {
+      const rows = esqlToObjects<{ episode_id: string | null; event_id: string }>(
+        await queryEsql({ esClient: this.clients.esClient, query })
+      );
+      for (const { episode_id: episodeId, event_id: eventId } of rows) {
+        if (!episodeId || !eventId) continue;
+        episodeIdsByEvent.set(eventId, [...(episodeIdsByEvent.get(eventId) ?? []), episodeId]);
+      }
+      return episodeIdsByEvent;
+    } catch (error) {
+      if (isIndexNotFoundError(error)) return episodeIdsByEvent;
+      throw error;
+    }
   }
 
   /** Writes the first version of an event; unguarded, as there is no prior version to compare. */

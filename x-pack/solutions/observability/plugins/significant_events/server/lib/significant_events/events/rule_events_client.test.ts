@@ -1012,7 +1012,142 @@ describe('RuleEventsClient', () => {
         expect(q).not.toContain('IN ()');
       });
     });
+  });
 
+  describe('syncSeverity', () => {
+    const stored = createStatusEvent({ severity: 'low' });
+    const setup = ({
+      latest = stored as SignificantEvent | undefined,
+      updates = [{ updated: true }] as Array<{ updated: boolean }>,
+    } = {}) => {
+      const findLatestByEventIds = jest.fn(
+        async () => new Map(latest ? [[latest.event_id, latest]] : [])
+      );
+      const updateEvent = jest.fn();
+      updates.forEach((update) => updateEvent.mockResolvedValueOnce(update));
+      return {
+        client: asRuleEventsClient({ findLatestByEventIds, updateEvent }),
+        findLatestByEventIds,
+        updateEvent,
+      };
+    };
+
+    it('writes a new version with the severity and everything else copied', async () => {
+      const { client, updateEvent } = setup();
+
+      expect(await client.syncSeverity({ eventId: stored.event_id, severity: 'high' })).toBe(
+        'updated'
+      );
+      expect(updateEvent).toHaveBeenCalledWith({
+        event: { ...stored, severity: 'high', '@timestamp': expect.any(String) },
+        prior: stored,
+        origin: { actor: 'agent_tool' },
+      });
+    });
+
+    it('writes nothing when the severity already matches, or the event is unknown', async () => {
+      const matching = setup();
+      const unknown = setup({ latest: undefined });
+
+      expect(
+        await matching.client.syncSeverity({ eventId: stored.event_id, severity: 'low' })
+      ).toBe('unchanged');
+      expect(await unknown.client.syncSeverity({ eventId: 'gone', severity: 'low' })).toBe(
+        'not_found'
+      );
+      expect(matching.updateEvent).not.toHaveBeenCalled();
+      expect(unknown.updateEvent).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['succeeds on a retry', [{ updated: false }, { updated: true }], 'updated', 2],
+      [
+        'gives up after two retries',
+        [{ updated: false }, { updated: false }, { updated: false }],
+        'superseded',
+        3,
+      ],
+    ])('re-reads a moved head and %s', async (_name, updates, expected, writes) => {
+      const { client, updateEvent } = setup({ updates });
+
+      expect(await client.syncSeverity({ eventId: stored.event_id, severity: 'high' })).toBe(
+        expected
+      );
+      expect(updateEvent).toHaveBeenCalledTimes(writes);
+    });
+  });
+
+  describe('findEpisodeIdsByEventIds', () => {
+    it('maps each event to every episode it has carried, and leaves an event with no episode out', async () => {
+      const { client } = createClient(
+        async () =>
+          ({
+            columns: [
+              { name: 'n', type: 'long' },
+              { name: 'event_id', type: 'keyword' },
+              { name: 'episode_id', type: 'keyword' },
+            ],
+            values: [
+              [2, 'event-1', 'episode-1'],
+              [1, 'event-1', 'episode-2'],
+              [1, 'event-2', null],
+            ],
+          } as unknown as ESQLSearchResponse)
+      );
+
+      const episodeIdsByEvent = await client.findEpisodeIdsByEventIds(['event-1', 'event-2']);
+
+      expect(Object.fromEntries(episodeIdsByEvent)).toEqual({
+        'event-1': ['episode-1', 'episode-2'],
+      });
+    });
+
+    it.each(['findEpisodeIdsByEventIds', 'findEventIdsByEpisodeIds'] as const)(
+      '%s reads nothing for no ids, and nothing when the index does not exist yet',
+      async (method) => {
+        const { client, query } = createClient(async () => {
+          throw new Error('verification_exception: Unknown index [.rule-events]');
+        });
+
+        expect((await client[method]([])).size).toBe(0);
+        expect(query).not.toHaveBeenCalled();
+        expect((await client[method](['id-1'])).size).toBe(0);
+      }
+    );
+  });
+
+  describe('findEventIdsByEpisodeIds', () => {
+    it('maps each episode to the event ids that carry it, and leaves an unknown episode out', async () => {
+      const { client } = createClient(
+        async () =>
+          ({
+            columns: [
+              { name: 'n', type: 'long' },
+              { name: 'episode_id', type: 'keyword' },
+              { name: 'event_id', type: 'keyword' },
+            ],
+            values: [
+              [2, 'episode-1', 'event-1'],
+              [1, 'episode-2', 'event-2'],
+              [1, 'episode-2', 'event-3'],
+            ],
+          } as unknown as ESQLSearchResponse)
+      );
+
+      const eventIdsByEpisode = await client.findEventIdsByEpisodeIds([
+        'episode-1',
+        'episode-2',
+        'unknown',
+      ]);
+
+      expect(Object.fromEntries(eventIdsByEpisode)).toEqual({
+        'episode-1': ['event-1'],
+        'episode-2': ['event-2', 'event-3'],
+      });
+    });
+  });
+
+  describe('countFacets', () => {
     it('counts each dimension without its own filter and fills missing options with zero', async () => {
       const { client, query } = createClient(async (request) => {
         if (request.query.includes('BY severity')) {

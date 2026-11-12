@@ -25,6 +25,9 @@ jest.mock('../../utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
 }));
 
+// Reading the investigations is covered with `createSeveritySync`: here the rows pass through.
+const severitySync = { reconcileRows: async ({ rows }: { rows: unknown[] }) => rows };
+
 const eventsSearchRoute = internalEventsRoutes['GET /internal/significant_events/events'];
 const eventsFacetsRoute = internalEventsRoutes['GET /internal/significant_events/events/_facets'];
 const lifecycleRoute =
@@ -64,7 +67,7 @@ const listHandlerParams = ({
         licensing: {},
         getEventSearchClient: () => ({ findLatestByCurrentStatePaginated, countFacets }),
       }),
-      server,
+      server: { severitySync, ...(server as object) },
       logger,
     } as never,
   };
@@ -122,7 +125,7 @@ describe('GET /internal/significant_events/events', () => {
       const resources = {
         params: { query: { unassigned_entities: true, topology_feature_id: selected } },
         request: { spaceId: 'default' },
-        server: {},
+        server: { severitySync },
         logger,
         getScopedClients: jest.fn().mockResolvedValue({
           licensing: {},
@@ -219,7 +222,7 @@ describe('GET /internal/significant_events/events', () => {
         licensing: {},
         getEventSearchClient: () => ({ findLatestByCurrentStatePaginated }),
       }),
-      server: {},
+      server: { severitySync },
       logger,
     } as never);
 
@@ -264,6 +267,7 @@ describe('GET /internal/significant_events/events', () => {
       }),
       server: {
         agenticInvestigations: createInvestigationsReader({ investigations: [] }),
+        severitySync,
       },
       logger,
     } as never);
@@ -312,7 +316,7 @@ describe('GET /internal/significant_events/events', () => {
         licensing: {},
         getEventSearchClient: () => ({ findLatestByCurrentStatePaginated }),
       }),
-      server: {},
+      server: { severitySync },
       logger,
     } as never);
 
@@ -936,5 +940,37 @@ describe('POST /internal/significant_events/events/{id}/update — body schema',
 
   it('rejects recovering, which only the lifecycle state machine writes', () => {
     expect(bodySchema.safeParse({ status: 'recovering' }).success).toBe(false);
+  });
+});
+
+describe('GET /internal/significant_events/events, severity from investigations', () => {
+  it('returns the page with the severities the investigations give, from the rows it read', async () => {
+    // The stub changes the rows it is given, so the page proves they went through it.
+    const reconcileRows = jest.fn(async ({ rows }: { rows: Array<{ severity: string }> }) =>
+      rows.map((row) => ({ ...row, severity: 'high' }))
+    );
+    const stored = { event_id: 'event-1', severity: 'low' };
+    const findLatestByCurrentStatePaginated = jest
+      .fn()
+      .mockResolvedValue({ hits: [stored], page: 1, perPage: 25, total: 1 });
+    const eventClient = { findLatestByCurrentStatePaginated };
+
+    const response = await eventsSearchRoute.handler({
+      params: { query: {} },
+      request: {},
+      server: { severitySync: { reconcileRows } },
+      logger,
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        getEventSearchClient: jest.fn().mockResolvedValue(eventClient),
+      }),
+    } as never);
+
+    expect(response).toEqual({
+      hits: [{ event_id: 'event-1', severity: 'high', investigation_state: 'not_started' }],
+      page: 1,
+      perPage: 25,
+      total: 1,
+    });
   });
 });

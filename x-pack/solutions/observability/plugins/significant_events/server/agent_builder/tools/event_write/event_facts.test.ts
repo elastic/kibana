@@ -154,14 +154,17 @@ describe('computeEventFacts', () => {
     signals,
     candidateOverrides,
     stored,
+    resolvedSeverity,
   }: {
     signals: SignalEntry[];
     candidateOverrides?: Partial<EventsWriteInput>;
     stored?: SignificantEvent;
+    resolvedSeverity?: Severity;
   }) => {
     return computeEventFacts({
       candidate: makeCandidate(signals, candidateOverrides, stored),
       timestamp: TS_NOW,
+      resolvedSeverity,
     });
   };
 
@@ -273,5 +276,23 @@ describe('computeEventFacts', () => {
     });
 
     expect(result.severity).toBe('medium');
+  });
+
+  describe('a resolved severity', () => {
+    const resolved: Severity = 'medium';
+    const signal = makeSignal();
+    const stored = () => makeStored([signal], { severity: resolved });
+    it.each<[string, Parameters<typeof facts>[0]]>([
+      [
+        'a later high from the agent',
+        { signals: [signal], candidateOverrides: { severity: 'high' }, stored: stored() },
+      ],
+      [
+        'a resolution, which would otherwise floor to low',
+        { signals: [signal], candidateOverrides: { status: 'inactive' }, stored: stored() },
+      ],
+    ])('is the stored severity for %s', (_name, options) => {
+      expect(facts({ ...options, resolvedSeverity: resolved }).severity).toBe(resolved);
+    });
   });
 });

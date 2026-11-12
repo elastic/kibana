@@ -24,7 +24,7 @@ import type { SignificantEventsServer } from '../../types';
 interface CreateSignificantEventAttachmentTypeOptions {
   logger: Logger;
   getScopedClients: GetScopedClients;
-  server: Pick<SignificantEventsServer, 'security'>;
+  server: Pick<SignificantEventsServer, 'security' | 'severitySync'>;
 }
 
 const formatList = (values: string[] | undefined): string => {
@@ -67,7 +67,17 @@ export const createSignificantEventAttachmentType = ({
     const { getEventSearchClient } = await getScopedClients({ request: context.request });
     const eventClient = await getEventSearchClient();
 
-    return eventClient.findLatestByEventId(eventId);
+    const event = await eventClient.findLatestByEventId(eventId);
+    if (!event) {
+      return undefined;
+    }
+    // The card shows the event as it is now, so it carries the severity its investigation gave it.
+    const [reconciled] = await server.severitySync.reconcileRows({
+      rows: [event],
+      request: context.request,
+      eventClient,
+    });
+    return reconciled;
   };
 
   return {

@@ -169,7 +169,14 @@ export const createSignificantEventsServer = ({
       hasAllRequested: [kibana].flat().every((action) => grantedActions.has(action)),
     }))
   );
-  const server: Pick<SignificantEventsServer, 'security'> = { security };
+  // Reading the investigations is covered with `createSeveritySync`: here the rows pass through.
+  const severitySync = {
+    reconcileRows: async ({ rows }: { rows: unknown[] }) => rows,
+  } as unknown as SignificantEventsServer['severitySync'];
+  const server: Pick<SignificantEventsServer, 'security' | 'severitySync'> = {
+    security,
+    severitySync,
+  };
   return server as SignificantEventsServer;
 };
 

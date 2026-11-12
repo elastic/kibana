@@ -21,7 +21,7 @@ export const registerAgentBuilderAttachments = ({
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
-  server: Pick<SignificantEventsServer, 'security'>;
+  server: Pick<SignificantEventsServer, 'security' | 'severitySync'>;
   logger: Logger;
 }): void => {
   agentBuilder.attachments.registerType(
