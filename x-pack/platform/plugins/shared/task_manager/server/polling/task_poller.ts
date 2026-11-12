@@ -32,6 +32,17 @@ interface Opts<H> {
   backpressure$?: Observable<boolean>;
   getCapacity: () => number;
   work: WorkFn<H>;
+  /** Called after every claim cycle with its timing and result (perf instrumentation). */
+  onCycleComplete?: (cycle: PollCycleInfo<H>) => void;
+}
+
+export interface PollCycleInfo<H> {
+  startedAt: number;
+  finishedAt: number;
+  nudged: boolean;
+  pollInterval: number;
+  capacityAvailable: number;
+  result?: H;
 }
 
 export interface TaskPoller<T, H> {
@@ -59,8 +70,8 @@ export function createTaskPoller<T, H>({
   backpressure$,
   getCapacity,
   work,
+  onCycleComplete,
 }: Opts<H>): TaskPoller<T, H> {
-  const hasCapacity = () => getCapacity() > 0;
   let running: boolean = false;
   let isCycleRunning: boolean = false;
   let nudgePending = false;
@@ -116,10 +127,13 @@ export function createTaskPoller<T, H>({
     lastCycleStart = start;
     isCycleRunning = true;
     claimCycleStart$.next();
+    let capacityAvailable = 0;
+    let cycleResult: H | undefined;
     try {
-      if (hasCapacity()) {
-        const result = await work();
-        subject.next(asOk(result));
+      capacityAvailable = getCapacity();
+      if (capacityAvailable > 0) {
+        cycleResult = await work();
+        subject.next(asOk(cycleResult));
       } else {
         logger.debug('Skipping polling cycle because there is no capacity available');
       }
@@ -128,6 +142,14 @@ export function createTaskPoller<T, H>({
     } finally {
       isCycleRunning = false;
     }
+    onCycleComplete?.({
+      startedAt: start,
+      finishedAt: Date.now(),
+      nudged: !cycleDue,
+      pollInterval,
+      capacityAvailable,
+      result: cycleResult,
+    });
 
     if (running) {
       scheduleNextCycle();
