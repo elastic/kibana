@@ -20,7 +20,7 @@ export const connectorFolder = (connector: string): string =>
 
 /**
  * What the emulator answers a connector with in these suites, in place of values sampled from its
- * spec: the connector's `emulator/responses.json`, which `node scripts/connector_emulate --fixtures
+ * spec: the connector's `vendor_api/emulator_responses.json`, which `node scripts/connector_emulate --fixtures
  * <connector>=<that file>` serves too. `connector` is the name of its folder in `src/specs`.
  */
 export const loadScenario = async (
@@ -29,7 +29,7 @@ export const loadScenario = async (
 ): Promise<ResponseFixture[]> => {
   try {
     return await readResponseFixtures(
-      path.join(connectorFolder(connector), 'emulator/responses.json')
+      path.join(connectorFolder(connector), 'vendor_api/emulator_responses.json')
     );
   } catch (error) {
     // Without a scenario, the emulator answers with values sampled from the spec.

@@ -14,13 +14,13 @@ import { readResponseFixtures } from './load_responses';
 import { loadVendorSpecs, SILENT_LOG } from './load_vendor_specs';
 
 const SPECS = path.resolve(__dirname, '../../specs');
-const SCENARIO = path.join('emulator', 'responses.json');
+const SCENARIO = path.join('vendor_api', 'emulator_responses.json');
 
 const connectorsWithScenario = fs
   .readdirSync(SPECS)
   .filter((connector) => fs.existsSync(path.join(SPECS, connector, SCENARIO)));
 
-describe('the emulator responses of connectors (emulator/responses.json)', () => {
+describe('the emulator responses of connectors (vendor_api/emulator_responses.json)', () => {
   it('exist for the connectors the Scout suites run against the emulator', () => {
     expect(connectorsWithScenario).toStrictEqual(
       expect.arrayContaining([
