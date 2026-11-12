@@ -60,48 +60,69 @@ export function inferGroupsFromCalls({
   if (services.length === 0) {
     return new Map();
   }
-  const runs = INFERENCE_RESOLUTIONS.map((resolution) =>
-    measureRun({
-      groups: absorbTinyGroups({
-        groups: detectCommunities({ services, edges, resolution }),
+  const picked = pickRun({
+    serviceCount: services.length,
+    runAt: (resolution) =>
+      measureRun({
+        groups: absorbTinyGroups({
+          groups: detectCommunities({ services, edges, resolution }),
+          edges,
+        }),
         edges,
       }),
-      edges,
-    })
-  );
-
-  const picked = pickRun({ runs, serviceCount: services.length });
+  });
   return splitLargeGroups({ groups: picked.groups, edges });
 }
 
-/** Picks one run, from runs ordered from the coarsest resolution to the finest. */
-function pickRun({ runs, serviceCount }: { runs: readonly Run[]; serviceCount: number }): Run {
-  const eligible = runs.filter(({ inTinyParts }) => inTinyParts <= MAX_TINY_PART_SHARE);
+/**
+ * Runs community detection from the finest resolution to the coarsest and picks one run, stopping
+ * as soon as the runs left can't change the pick.
+ *
+ * - The first readable run whose groups are mostly self-contained is the pick: no coarser run is
+ *   finer, and splitting a real team breaks self-containment.
+ * - Once an eligible run kept every group within the size limit, a run beyond it ends the sweep.
+ *   Every pick but the last resort needs groups within the limit, and coarser runs only merge
+ *   groups further. That is how Louvain behaves on every estate tried, not a guarantee: if a
+ *   coarser run came back within the limit, the pick would miss it, for another valid run.
+ *
+ * Without a self-contained run, the pick is made among the runs computed.
+ */
+function pickRun({
+  serviceCount,
+  runAt,
+}: {
+  serviceCount: number;
+  runAt: (resolution: number) => Run;
+}): Run {
+  const finestFirst: Run[] = [];
+  for (const resolution of INFERENCE_RESOLUTIONS) {
+    const run = runAt(resolution);
+    if (isReadable({ run, serviceCount }) && isSelfContained(run)) {
+      return run;
+    }
+    const withinLimitBefore = finestFirst.some(
+      (earlier) => isEligible(earlier) && earlier.largest <= MAX_GROUP_SIZE
+    );
+    finestFirst.push(run);
+    if (withinLimitBefore && run.largest > MAX_GROUP_SIZE) {
+      break;
+    }
+  }
+
+  // from the coarsest to the finest, so ties go to the coarser run
+  const runs = finestFirst.reverse();
+  const eligible = runs.filter(isEligible);
   if (eligible.length === 0) {
     // Every resolution broke the services into fragments: the coarsest is the least broken
     return runs[0];
   }
   const byModularity = (a: Run, b: Run) => b.modularity - a.modularity;
 
-  const readable = eligible.filter(
-    ({ groupCount, largest }) =>
-      groupCount >= READABLE_MIN_GROUPS &&
-      groupCount <= READABLE_MAX_GROUPS &&
-      largest <= MAX_GROUP_SIZE &&
-      largest <= READABLE_MAX_LARGEST_GROUP_SHARE * serviceCount
-  );
-
-  // The finest readable run whose groups are mostly self-contained: splitting a real team breaks it
-  const finestSelfContained = [...readable]
-    .reverse()
-    .find(({ selfContained }) => selfContained >= SELF_CONTAINED_GROUP_SHARE);
-  if (finestSelfContained) {
-    return finestSelfContained;
-  }
-
   // The readable run the calls fit best. Self-containment would favour the coarsest run, since
   // larger groups keep more calls inside almost by default; modularity discounts what chance gives.
-  const [bestReadable] = [...readable].sort(byModularity);
+  const [bestReadable] = eligible
+    .filter((run) => isReadable({ run, serviceCount }))
+    .sort(byModularity);
   if (bestReadable) {
     return bestReadable;
   }
@@ -120,6 +141,25 @@ function pickRun({ runs, serviceCount }: { runs: readonly Run[]; serviceCount: n
     (a, b) => a.largest - b.largest || byModularity(a, b)
   );
   return smallestLargest;
+}
+
+function isEligible({ inTinyParts }: Run): boolean {
+  return inTinyParts <= MAX_TINY_PART_SHARE;
+}
+
+function isReadable({ run, serviceCount }: { run: Run; serviceCount: number }): boolean {
+  const { groupCount, largest } = run;
+  return (
+    isEligible(run) &&
+    groupCount >= READABLE_MIN_GROUPS &&
+    groupCount <= READABLE_MAX_GROUPS &&
+    largest <= MAX_GROUP_SIZE &&
+    largest <= READABLE_MAX_LARGEST_GROUP_SHARE * serviceCount
+  );
+}
+
+function isSelfContained({ selfContained }: Run): boolean {
+  return selfContained >= SELF_CONTAINED_GROUP_SHARE;
 }
 
 function measureRun({

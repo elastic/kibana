@@ -6,6 +6,7 @@
  */
 
 import { MAX_GROUP_SIZE } from './constants';
+import { detectCommunities } from './detect_communities';
 import { inferGroupsFromCalls } from './infer_groups_from_calls';
 import {
   adjustedRandIndex,
@@ -15,6 +16,25 @@ import {
   syntheticEstate,
 } from './test_helpers';
 import type { WeightedEdge } from './types';
+
+// community detection runs as is; the wrapper only records which resolutions were tried
+jest.mock('./detect_communities', () => {
+  const actual = jest.requireActual('./detect_communities');
+  return { ...actual, detectCommunities: jest.fn(actual.detectCommunities) };
+});
+const detectCommunitiesMock = jest.mocked(detectCommunities);
+
+/** The resolutions tried on all the services, leaving out those splitting a single group. */
+function resolutionsTried(serviceCount: number): number[] {
+  return detectCommunitiesMock.mock.calls
+    .map(([{ services, resolution }]) => ({ services, resolution }))
+    .filter(({ services }) => services.length === serviceCount)
+    .map(({ resolution = 1 }) => resolution);
+}
+
+beforeEach(() => {
+  detectCommunitiesMock.mockClear();
+});
 
 function star(leaves: number): { services: string[]; edges: WeightedEdge[] } {
   const services = ['hub', ...Array.from({ length: leaves }, (_, index) => `leaf-${index}`)];
@@ -112,6 +132,26 @@ describe('inferGroupsFromCalls', () => {
     expect(new Set(chain.map((service) => groups.get(service))).size).toBe(1);
     expect(new Set(idle.map((service) => groups.get(service))).size).toBe(idle.length);
     expect(idle.map((service) => groups.get(service))).not.toContain(groups.get(chain[0]));
+  });
+
+  it('stops at the finest resolution when its groups already read well', () => {
+    // 30 teams of 20: the finest resolution finds them, so no coarser run is needed
+    const { services, edges } = syntheticEstate({ teams: 30, servicesPerTeam: 20, seed: 5 });
+
+    inferGroupsFromCalls({ services, edges });
+
+    expect(resolutionsTried(services.length)).toEqual([4]);
+  });
+
+  it(`stops once a coarser run has a group above ${MAX_GROUP_SIZE} services`, () => {
+    // 250 teams of 20: too many groups to read well at any resolution, so the run the calls fit
+    // best within the size limit wins. At 0.5 the largest group passes the limit, which ends the
+    // sweep: 0.25 and 0.1 only merge further.
+    const { services, edges } = syntheticEstate({ teams: 250, servicesPerTeam: 20, seed: 5 });
+
+    inferGroupsFromCalls({ services, edges });
+
+    expect(resolutionsTried(services.length)).toEqual([4, 2, 1, 0.5]);
   });
 
   it('groups nothing when given no services', () => {

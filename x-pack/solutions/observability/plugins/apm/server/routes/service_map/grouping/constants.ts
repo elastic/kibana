@@ -34,8 +34,11 @@ export const SHARED_MAX_SHARE = 0.05;
 /** A piece of the call graph this small, cut off from the rest, is not connected. */
 export const NOT_CONNECTED_MAX_PIECE_SIZE = 3;
 
-/** Resolutions tried when inferring groups. Higher values give more, smaller groups. */
-export const INFERENCE_RESOLUTIONS = [0.1, 0.25, 0.5, 1, 2, 4] as const;
+/**
+ * Resolutions tried when inferring groups, from the finest to the coarsest: the order the sweep
+ * runs them in, so it can stop early. Higher values give more, smaller groups.
+ */
+export const INFERENCE_RESOLUTIONS = [4, 2, 1, 0.5, 0.25, 0.1] as const;
 /** Fewer groups than this read as too coarse. */
 export const READABLE_MIN_GROUPS = 7;
 /** More groups than this stop being readable as groups. */
