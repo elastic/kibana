@@ -10,7 +10,12 @@
 import type { KbnClient } from '@kbn/scout';
 import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { VEGA_TEST_DATA_VIEW_ARCHIVE, VEGA_TEST_INDEX } from '../fixtures/constants';
+import {
+  VEGA_TEST_DATA_VIEW_ARCHIVE,
+  VEGA_TEST_INDEX,
+  VEGA_TEST_SPEC,
+  VEGA_VIEW_SELECTOR,
+} from '../fixtures/constants';
 
 const VEGA_API_VERSION = '2023-10-31';
 
@@ -24,7 +29,7 @@ const seedItem = async (kbnClient: KbnClient, spaceId: string, title: string) =>
     method: 'POST',
     path: `/s/${spaceId}/api/vega`,
     headers: { 'elastic-api-version': VEGA_API_VERSION },
-    body: { title, spec: { format: 'hjson', value: '{ mark: point }' } },
+    body: { title, spec: VEGA_TEST_SPEC },
   });
   return data;
 };
@@ -64,13 +69,17 @@ spaceTest.describe('Vega library editor', { tag: '@local-stateful-classic' }, ()
       await pageObjects.visualize.goto();
       await pageObjects.visualize.clickSavedVisualization(title);
       await expect(page.testSubj.locator('vegaLibraryEditorFlyout')).toBeVisible();
+      await expect(
+        page.testSubj.locator('embeddableEditorPreviewFlyout').locator(VEGA_VIEW_SELECTOR)
+      ).toBeVisible();
 
       // Nothing changed yet, so there is nothing to save.
       await expect(page.testSubj.locator('vegaLibraryEditorSaveButtonPrimary')).toBeDisabled();
 
       // The search bar puts its test subject on the query input itself.
       const queryInput = page.testSubj.locator('editorFlyoutSearchBar');
-      await queryInput.fill('status:active');
+      await queryInput.clear();
+      await queryInput.pressSequentially('status:active');
       await queryInput.press('Enter');
       await expect(page.testSubj.locator('vegaLibraryEditorSaveButtonPrimary')).toBeEnabled();
 
@@ -134,7 +143,8 @@ spaceTest.describe('Vega library editor', { tag: '@local-stateful-classic' }, ()
 
       // The search bar puts its test subject on the query input itself.
       const queryInput = page.testSubj.locator('editorFlyoutSearchBar');
-      await queryInput.fill('status:active');
+      await queryInput.clear();
+      await queryInput.pressSequentially('status:active');
       await queryInput.press('Enter');
       await page.testSubj.click('vegaLibraryEditorCancelButton');
 

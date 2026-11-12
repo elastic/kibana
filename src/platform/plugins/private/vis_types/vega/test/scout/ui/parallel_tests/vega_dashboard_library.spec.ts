@@ -10,7 +10,12 @@
 import type { KbnClient } from '@kbn/scout';
 import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { VEGA_TEST_DATA_VIEW_ARCHIVE, VEGA_TEST_INDEX } from '../fixtures/constants';
+import {
+  VEGA_TEST_DATA_VIEW_ARCHIVE,
+  VEGA_TEST_INDEX,
+  VEGA_TEST_SPEC,
+  VEGA_VIEW_SELECTOR,
+} from '../fixtures/constants';
 
 const VEGA_API_VERSION = '2023-10-31';
 
@@ -24,10 +29,7 @@ const seedItem = async (kbnClient: KbnClient, spaceId: string, title: string) =>
     method: 'POST',
     path: `/s/${spaceId}/api/vega`,
     headers: { 'elastic-api-version': VEGA_API_VERSION },
-    body: {
-      title,
-      spec: { format: 'hjson', value: '{ data: { values: [{ a: 1 }] }, mark: point }' },
-    },
+    body: { title, spec: VEGA_TEST_SPEC },
   });
   return data;
 };
@@ -68,7 +70,7 @@ spaceTest.describe('Vega panels linked to the library', { tag: '@local-stateful-
 
   spaceTest(
     'adds a library item, unlinks it and saves it back to the library',
-    async ({ browserAuth, kbnClient, pageObjects, scoutSpace }) => {
+    async ({ browserAuth, kbnClient, page, pageObjects, scoutSpace }) => {
       const title = getTitle('added');
       const newTitle = getTitle('saved');
       await seedItem(kbnClient, scoutSpace.id, title);
@@ -77,6 +79,10 @@ spaceTest.describe('Vega panels linked to the library', { tag: '@local-stateful-
       await pageObjects.dashboard.openNewDashboard();
       await pageObjects.dashboard.addPanelFromLibrary(title);
       await pageObjects.dashboard.expectLinkedToLibrary(title);
+      // The panel draws the library item's spec.
+      await expect(
+        page.testSubj.locator('embeddablePanel').locator(VEGA_VIEW_SELECTOR)
+      ).toBeVisible();
 
       await pageObjects.dashboard.unlinkFromLibrary(title);
       await pageObjects.dashboard.saveToLibrary(newTitle, title);
@@ -102,7 +108,8 @@ spaceTest.describe('Vega panels linked to the library', { tag: '@local-stateful-
 
       // The search bar puts its test subject on the query input itself.
       const queryInput = page.testSubj.locator('editorFlyoutSearchBar');
-      await queryInput.fill('a:1');
+      await queryInput.clear();
+      await queryInput.pressSequentially('a:1');
       await queryInput.press('Enter');
       await page.testSubj.click('vegaLibraryEditorSaveButton');
 
