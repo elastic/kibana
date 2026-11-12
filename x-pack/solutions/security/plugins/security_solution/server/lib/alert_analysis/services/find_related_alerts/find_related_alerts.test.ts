@@ -224,7 +224,13 @@ describe('findRelatedAlerts', () => {
       2,
       expect.objectContaining({
         size: 25,
-        _source: expect.arrayContaining(['@timestamp', 'message', 'host.name']),
+        _source: expect.arrayContaining([
+          '@timestamp',
+          'message',
+          'host.name',
+          'process.command_line',
+          'process.parent.command_line',
+        ]),
       })
     );
 
@@ -236,6 +242,94 @@ describe('findRelatedAlerts', () => {
       expect(result.message).toBe(
         'Found 1 of 99 related alerts sharing entities with alert alert-1.'
       );
+    }
+  });
+
+  it('truncates long command lines in returned related alerts', async () => {
+    mockSourceAlert({ 'host.name': 'host-a' });
+    (esClient.search as jest.Mock).mockResolvedValueOnce({
+      hits: {
+        total: { value: 1, relation: 'eq' },
+        hits: [
+          {
+            _id: 'related-1',
+            _index: '.alerts-security.alerts-default',
+            _source: { process: { command_line: 'x'.repeat(5000) } },
+          },
+        ],
+      },
+    });
+
+    const result = await findRelatedAlerts(esClient, {
+      alertId: 'alert-1',
+      alertsIndex: '.alerts-security.alerts-default',
+      timeWindowHours: 24,
+      hostNames: ['host-a'],
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      const processDoc = result.relatedAlerts[0].process as { command_line: string };
+      expect(processDoc.command_line.length).toBeLessThan(1000);
+      expect(processDoc.command_line).toContain('[truncated]');
+    }
+  });
+
+  it('strips MITRE references from threat in returned related alerts but keeps ids and names', async () => {
+    mockSourceAlert({ 'host.name': 'host-a' });
+    (esClient.search as jest.Mock).mockResolvedValueOnce({
+      hits: {
+        total: { value: 1, relation: 'eq' },
+        hits: [
+          {
+            _id: 'related-1',
+            _index: '.alerts-security.alerts-default',
+            _source: {
+              'kibana.alert.rule.threat': [
+                {
+                  framework: 'MITRE ATT&CK',
+                  tactic: { id: 'TA0002', name: 'Execution', reference: 'https://t' },
+                  technique: [
+                    {
+                      id: 'T1059',
+                      name: 'Command and Scripting Interpreter',
+                      reference: 'https://t/1059',
+                      subtechnique: [
+                        { id: 'T1059.001', name: 'PowerShell', reference: 'https://s' },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    const result = await findRelatedAlerts(esClient, {
+      alertId: 'alert-1',
+      alertsIndex: '.alerts-security.alerts-default',
+      timeWindowHours: 24,
+      hostNames: ['host-a'],
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.relatedAlerts[0]._id).toBe('related-1');
+      expect(result.relatedAlerts[0]['kibana.alert.rule.threat']).toEqual([
+        {
+          framework: 'MITRE ATT&CK',
+          tactic: { id: 'TA0002', name: 'Execution' },
+          technique: [
+            {
+              id: 'T1059',
+              name: 'Command and Scripting Interpreter',
+              subtechnique: [{ id: 'T1059.001', name: 'PowerShell' }],
+            },
+          ],
+        },
+      ]);
     }
   });
 });

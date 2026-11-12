@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+import { cloneDeep, get } from 'lodash';
 import { RELATED_ALERT_ENTITY_LIST_MAX_LENGTH } from '../../../../../../common/api/alert_analysis/related_alerts';
 
 export interface SourceEntities {
@@ -15,6 +15,8 @@ export interface SourceEntities {
   destIps: string[];
 }
 
+// Command lines, messages and rule descriptions are attacker-controllable free text that reaches the
+// model verbatim; the skill prompt tells it to treat them as data, never as instructions.
 export const RELATED_ALERT_SOURCE_ALLOWLIST = [
   '@timestamp',
   'kibana.alert.rule.name',
@@ -29,10 +31,28 @@ export const RELATED_ALERT_SOURCE_ALLOWLIST = [
   'destination.ip',
   'process.name',
   'process.executable',
+  'process.command_line',
+  'process.parent.command_line',
+  'kibana.alert.rule.description',
   'file.name',
   'file.path',
   'message',
 ] as const;
+
+// `_source` filtering cannot truncate, so these long fields are capped after the search.
+export const RELATED_ALERT_TRUNCATED_FIELD_MAX_LENGTHS: Readonly<Record<string, number>> = {
+  'process.command_line': 300,
+  'process.parent.command_line': 300,
+  message: 300,
+  'kibana.alert.reason': 300,
+  'kibana.alert.rule.name': 200,
+  'kibana.alert.rule.description': 200,
+  'process.executable': 200,
+  'file.path': 200,
+};
+
+// Multi-valued capped fields keep only their first values so total payload stays bounded.
+const CAPPED_FIELD_MAX_ARRAY_ITEMS = 5;
 
 export const RELATED_ALERT_ENTITY_SOURCE_INCLUDES = [
   'host.name',
@@ -85,3 +105,60 @@ export function normalizeToStringArray(value: unknown): string[] {
   }
   return [];
 }
+
+const TRUNCATION_SUFFIX = '… [truncated]';
+
+const truncateString = (value: string, maxLength: number): string => {
+  if (value.length <= maxLength) {
+    return value;
+  }
+  const lastCode = value.charCodeAt(maxLength - 1);
+  // Don't end on a lone high surrogate: that would emit an invalid UTF-16 string.
+  const cut = lastCode >= 0xd800 && lastCode <= 0xdbff ? maxLength - 1 : maxLength;
+  return `${value.slice(0, cut)}${TRUNCATION_SUFFIX}`;
+};
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+// MITRE `reference` URLs are ~29% of a typical related-alerts payload and add nothing the model needs.
+const THREAT_PATH = 'kibana.alert.rule.threat';
+const isThreatReferencePath = (path: string): boolean =>
+  path.startsWith(`${THREAT_PATH}.`) && path.endsWith('.reference');
+
+const truncateNode = (node: Record<string, unknown>, prefix: string): void => {
+  const truncateValue = (value: unknown, path: string): unknown => {
+    const isCapped = Object.hasOwn(RELATED_ALERT_TRUNCATED_FIELD_MAX_LENGTHS, path);
+    if (typeof value === 'string') {
+      return isCapped
+        ? truncateString(value, RELATED_ALERT_TRUNCATED_FIELD_MAX_LENGTHS[path])
+        : value;
+    }
+    if (Array.isArray(value)) {
+      const items = isCapped ? value.slice(0, CAPPED_FIELD_MAX_ARRAY_ITEMS) : value;
+      return items.map((item) => truncateValue(item, path));
+    }
+    if (isPlainObject(value)) {
+      truncateNode(value, path);
+    }
+    return value;
+  };
+
+  for (const [key, value] of Object.entries(node)) {
+    const path = prefix ? `${prefix}.${key}` : key;
+    if (isThreatReferencePath(path)) {
+      delete node[key];
+    } else {
+      node[key] = truncateValue(value, path);
+    }
+  }
+};
+
+// Matches the joined path of each leaf (and drops threat `reference` keys), so dotted, nested and mixed `_source` shapes all work.
+export const truncateRelatedAlertLongFields = (
+  source: Record<string, unknown>
+): Record<string, unknown> => {
+  const result = cloneDeep(source);
+  truncateNode(result, '');
+  return result;
+};
