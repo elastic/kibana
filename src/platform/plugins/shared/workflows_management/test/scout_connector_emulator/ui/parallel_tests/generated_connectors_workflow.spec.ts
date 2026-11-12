@@ -37,9 +37,9 @@ interface GeneratedConnector {
  * Connectors whose workflow is generated from their specs: one step per action the emulator
  * can answer, with inputs from the action's schema, and the emulator answers with the connector's
  * `emulator/responses.json` if it has one. A connector has to be enabled for Workflows
- * (its `supportedFeatureIds`) for the editor to accept its steps. To test another connector, add it here (with
- * the config it needs to be created, and nothing else) and to the connectors the emulator serves
- * (CONNECTORS in .buildkite/scripts/steps/test/connector_emulator_scout.sh). Connectors that need
+ * (its `supportedFeatureIds`) for the editor to accept its steps. To test another connector, add it
+ * here, with the config it needs to be created and nothing else: the CI step serves every connector
+ * with a vendor API manifest. Connectors that need
  * more, such as chaining a step's result into the next or checking what it returned, have a spec of
  * their own in this folder, as Firecrawl does.
  *

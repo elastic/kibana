@@ -33,7 +33,7 @@ const crawlStatus = (status: string) => ({
  * Runs every action of the Firecrawl connector through Kibana's actions API against the connector
  * emulator, which stands in for the vendor, using only the `connector_emulator` server config set:
  *
- *   node scripts/connector_emulate --connector firecrawl
+ *   node scripts/connector_emulate --all
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet connector_emulator
  *   node scripts/scout run-tests --arch stateful --domain classic --config <this folder>/../playwright.config.ts
  *

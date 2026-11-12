@@ -53,8 +53,8 @@ export const connectToEmulator = async (connectorName: string): Promise<Emulator
   } catch (error) {
     throw new Error(
       `The connector emulator isn't answering at ${proxyUrl}: ${error}. Start it with ` +
-        `"node scripts/connector_emulate --connector .${connectorName}" (add the other connectors ` +
-        'these suites test, separated by commas) before the Scout servers.'
+        `"node scripts/connector_emulate --connector .${connectorName}", or with --all to serve every ` +
+        'connector, before the Scout servers.'
     );
   }
   return control;

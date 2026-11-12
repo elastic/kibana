@@ -65,8 +65,8 @@ const header = (name: string, field: string) => ({
   [field]: `emulate-${name}`,
 });
 
-// A connector to test is added here, with the config it needs to be created, and to the connectors
-// the emulator serves (CONNECTORS in .buildkite/scripts/steps/test/connector_emulator_scout.sh).
+// A connector to test is added here, with the config it needs to be created. The CI step serves
+// every connector with a vendor API manifest, so nothing else needs to change.
 const CONNECTORS: readonly ConventionConnector[] = [
   { folder: 'firecrawl', title: 'Firecrawl', id: '.firecrawl', secrets: bearer('firecrawl') },
   {

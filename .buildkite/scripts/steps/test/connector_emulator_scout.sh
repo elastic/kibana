@@ -12,8 +12,8 @@ set -euo pipefail
 #
 # On pull requests this runs against the Kibana build the pipeline made. The weekly connector
 # pipeline has no build, so it sets CONNECTOR_EMULATOR_SCOUT_FROM_SOURCE=true to run Kibana from
-# source, and CONNECTOR_EMULATOR_SPEC=latest to serve the vendors' current specs instead of the
-# committed snapshots, which is what finds a vendor change that breaks a connector.
+# source. Both serve the committed vendor specs; vendor drift is found by the connector vendor API
+# drift step, which compares them with the vendors' current specs.
 
 if [[ "${CONNECTOR_EMULATOR_SCOUT_FROM_SOURCE:-}" == "true" ]]; then
   source .buildkite/scripts/common/util.sh
@@ -31,10 +31,8 @@ CONFIG_PATHS=(
   "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/playwright.config.ts"
   "src/platform/plugins/shared/workflows_management/test/scout_connector_emulator/ui/parallel.playwright.config.ts"
 )
-# The connectors those suites run, by the emulator's name for them: the connector id without the
-# dot. Add a connector here when adding a suite for it.
-CONNECTORS="firecrawl,brave-search,shodan,censys,jina,figma,sentry,grafana,sublime_security"
-EMULATOR_SPEC="${CONNECTOR_EMULATOR_SPEC:-snapshot}"
+# The emulator serves every connector that has a vendor API manifest (--all), so a suite for a
+# connector needs nothing here.
 EMULATOR_LOG="target/connector_emulator.log"
 
 mkdir -p "$(dirname "$EMULATOR_LOG")"
@@ -77,8 +75,8 @@ stop_emulator() {
   buildkite-agent artifact upload "$EMULATOR_LOG" || true
 }
 
-echo "--- Start the connector emulator ($CONNECTORS, $EMULATOR_SPEC specs)"
-node scripts/connector_emulate --connector "$CONNECTORS" --spec "$EMULATOR_SPEC" > "$EMULATOR_LOG" 2>&1 &
+echo "--- Start the connector emulator (all connectors)"
+node scripts/connector_emulate --all > "$EMULATOR_LOG" 2>&1 &
 EMULATOR_PID=$!
 trap stop_emulator EXIT
 

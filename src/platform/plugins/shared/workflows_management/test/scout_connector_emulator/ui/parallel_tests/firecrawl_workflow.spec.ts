@@ -62,7 +62,7 @@ const STEP_NAMES = STEPS.map(([name]) => name);
  * connector emulator standing in for the vendor, using only the `connector_emulator` server config
  * set:
  *
- *   node scripts/connector_emulate --connector .firecrawl,.brave-search,.shodan,.censys,.jina
+ *   node scripts/connector_emulate --all
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet connector_emulator
  *   node scripts/playwright test --config <this folder>/parallel.playwright.config.ts --project local --headed
  *
