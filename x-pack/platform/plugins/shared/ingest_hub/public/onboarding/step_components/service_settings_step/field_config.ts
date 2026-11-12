@@ -6,6 +6,7 @@
  */
 
 import type { RegistryVarGroup, RegistryVarsEntry } from '@kbn/fleet-plugin/common';
+import { GENERIC_DATASET_NAME } from '@kbn/fleet-plugin/common';
 import {
   getVarsControlledByVarGroups,
   isVarRequiredByVarGroup,
@@ -304,9 +305,6 @@ export function getDefaultInput(service: AwsServiceMatrixEntry | undefined): str
 }
 
 export const DATASET_VAR_NAME = 'data_stream.dataset';
-
-/** Fleet's name for the dataset of an input package that takes no dataset of its own. */
-export const GENERIC_DATASET_NAME = 'generic';
 
 /**
  * Whether Fleet offers the dedicated index template switch for `input`: the dataset is set and,
