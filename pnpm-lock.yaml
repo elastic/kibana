@@ -319,8 +319,6 @@ overrides:
   vega-util: 2.1.0
   vscode-languageserver-types: 3.17.5
 
-pnpmfileChecksum: sha256-JL9Z/8IecLxwanP1rhrhbsvFTvupuyak+iLixXT5Rmk=
-
 importers:
 
   .:
@@ -4890,13 +4888,13 @@ importers:
         version: 2.6.5
       redux-devtools-extension:
         specifier: 2.13.8
-        version: 2.13.8
+        version: 2.13.8(redux@5.0.1)
       redux-saga:
         specifier: 1.3.0
         version: 1.3.0
       redux-thunk-v2:
         specifier: npm:redux-thunk@2.4.2
-        version: redux-thunk@2.4.2
+        version: redux-thunk@2.4.2(redux@5.0.1)
       redux-toolkit-v1:
         specifier: npm:@reduxjs/toolkit@1.9.7
         version: '@reduxjs/toolkit@1.9.7(react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1))(react@18.2.0)'
@@ -6099,8 +6097,8 @@ importers:
         specifier: 0.6.2
         version: 0.6.2(react-refresh@0.18.0)(type-fest@4.41.0)(webpack-hot-middleware@2.26.1)(webpack@5.96.1)
       '@redocly/cli':
-        specifier: 2.64.1
-        version: 2.64.1
+        specifier: 2.72.1
+        version: 2.72.1
       '@rsdoctor/rspack-plugin':
         specifier: 1.6.1
         version: 1.6.1(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@rspack/core@2.1.8(@swc/helpers@0.5.19))(supports-color@10.2.2)(webpack@5.96.1)
@@ -6504,8 +6502,8 @@ importers:
         specifier: 1.8.1
         version: 1.8.1(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
       bump-cli:
-        specifier: 2.11.0
-        version: 2.11.0(supports-color@10.2.2)
+        specifier: 2.12.0
+        version: 2.12.0(supports-color@10.2.2)
       cache-manager:
         specifier: 7.0.0
         version: 7.0.0
@@ -13868,8 +13866,8 @@ packages:
       yauzl:
         optional: true
 
-  '@redocly/cli@2.64.1':
-    resolution: {integrity: sha512-SkCnNexidfvHmkOCqRZ29oaHh1nVbpnQEF5Qweu8M2cUfVEh1/jSAvd5+LX+D/uNbPnhL6v03AamXHeeB2AwsQ==}
+  '@redocly/cli@2.72.1':
+    resolution: {integrity: sha512-eARHR2ZsqIlrnV4mcKA+CK3ptV0u2d74xOhNQMlrmixMEbV4RfrnAdwNyIcGhO+3A6B3YzzG6nj5kZRKKCiGLw==}
     engines: {node: '>=22.12.0 || >=20.19.0 <21.0.0', npm: '>=10'}
     hasBin: true
 
@@ -16463,8 +16461,8 @@ packages:
   builtin-status-codes@3.0.0:
     resolution: {integrity: sha512-HpGFw18DgFWlncDfjTa2rcQ4W88O1mC8e8yZ2AvQY5KDaktSTwo+KRf6nHK6FRI5FyRyb/5T6+TSxfP7QyGsmQ==}
 
-  bump-cli@2.11.0:
-    resolution: {integrity: sha512-EMJembvmPobVt39y7s1mqqJeRZ08hN/UECJlxZS5FZeoSgbXWo1Qhd+UK1lDWCgDNViyVFV190Lo/IbnOJwi/w==}
+  bump-cli@2.12.0:
+    resolution: {integrity: sha512-AbzZeUn0GRgHnmjSmjf9XZX96fiNwz3hbjpVY80bvAJKEasJUt+fDtaO8v+WszZfvccsoJcpkQWZ9cuG9mlRYA==}
     engines: {node: '>=20.0.0'}
     hasBin: true
 
@@ -22834,12 +22832,16 @@ packages:
   redux-devtools-extension@2.13.8:
     resolution: {integrity: sha512-8qlpooP2QqPtZHQZRhx3x3OP5skEV1py/zUdMY28WNAocbafxdG2tRD1MWE7sp8obGMNYuLWanhhQ7EQvT1FBg==}
     deprecated: Package moved to @redux-devtools/extension.
+    peerDependencies:
+      redux: ^3.1.0 || ^4.0.0
 
   redux-saga@1.3.0:
     resolution: {integrity: sha512-J9RvCeAZXSTAibFY0kGw6Iy4EdyDNW7k6Q+liwX+bsck7QVsU78zz8vpBRweEfANxnnlG/xGGeOvf6r8UXzNJQ==}
 
   redux-thunk@2.4.2:
     resolution: {integrity: sha512-+P3TjtnP0k/FEjcBL5FZpoovtvrTNT/UXd4/sluaSyrURlSlhLSzEdfsTBW7WsKB6yPvgd7q/iZPICFjW4o57Q==}
+    peerDependencies:
+      redux: ^4
 
   redux-thunk@3.1.0:
     resolution: {integrity: sha512-NW2r5T6ksUKXCabzhL9z+h206HQw/NJkcLm1GPImRQ8IzfXwRGqjVhKJGauHirT0DAuyy6hjdnMZaRoAcy0Klw==}
@@ -30270,7 +30272,7 @@ snapshots:
       proxy-agent: 8.0.2(supports-color@10.2.2)
       yauzl: 3.4.0
 
-  '@redocly/cli@2.64.1': {}
+  '@redocly/cli@2.72.1': {}
 
   '@redux-saga/core@1.3.0':
     dependencies:
@@ -30301,7 +30303,7 @@ snapshots:
     dependencies:
       immer: 9.0.21
       redux: 4.2.1
-      redux-thunk: 2.4.2
+      redux-thunk: 2.4.2(redux@4.2.1)
       reselect: 4.1.8
     optionalDependencies:
       react: 18.2.0
@@ -33264,7 +33266,7 @@ snapshots:
 
   builtin-status-codes@3.0.0: {}
 
-  bump-cli@2.11.0(supports-color@10.2.2):
+  bump-cli@2.12.0(supports-color@10.2.2):
     dependencies:
       '@apidevtools/json-schema-ref-parser': 11.9.3
       '@asyncapi/specs': 6.11.1
@@ -41023,17 +41025,21 @@ snapshots:
       reduce-reducers: 0.4.3
       to-camel-case: 1.0.0
 
-  redux-devtools-extension@2.13.8:
+  redux-devtools-extension@2.13.8(redux@5.0.1):
     dependencies:
-      redux: 4.2.1
+      redux: 5.0.1
 
   redux-saga@1.3.0:
     dependencies:
       '@redux-saga/core': 1.3.0
 
-  redux-thunk@2.4.2:
+  redux-thunk@2.4.2(redux@4.2.1):
     dependencies:
       redux: 4.2.1
+
+  redux-thunk@2.4.2(redux@5.0.1):
+    dependencies:
+      redux: 5.0.1
 
   redux-thunk@3.1.0(redux@5.0.1):
     dependencies:
