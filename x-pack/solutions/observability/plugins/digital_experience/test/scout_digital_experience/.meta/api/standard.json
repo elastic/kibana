@@ -1,5 +1,5 @@
 {
-  "sha1": "30d3f662d2707330c770ac3c697a85f866c4ca92",
+  "sha1": "ce3b3b6904f5d0f17bbcc2c96cafee324b06347c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -363,8 +363,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/api/tests/sessions_task.spec.ts",
-        "line": 203,
-        "column": 3
+        "line": 207,
+        "column": 5
       }
     },
     {
