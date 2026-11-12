@@ -42,7 +42,7 @@ import { AlertActionEventPublisher } from '../events/alert_action_event_publishe
 import { type QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
-import { StorageServiceScopedToken } from '../services/storage_service/tokens';
+import { StorageServiceInternalToken } from '../services/storage_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
@@ -158,7 +158,7 @@ const isLifecycleActionType = (actionType: EpisodeAlertActionType): boolean =>
 export class AlertActionsClient {
   constructor(
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
-    @inject(StorageServiceScopedToken) private readonly storageService: StorageServiceContract,
+    @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract,
     @inject(UserService) private readonly userService: UserServiceContract,
     @inject(Request) private readonly request: KibanaRequest,
     @inject(RequestSpaceIdToken) private readonly spaceId: string,

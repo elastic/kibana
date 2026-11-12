@@ -269,6 +269,7 @@ export class SignificantEventsPlugin
           request,
           logger: this.logger,
         }),
+        telemetry: this.ebtTelemetryService.getClient(),
       });
 
       const getAlertingV2RulesClient = async () =>

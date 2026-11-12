@@ -8,6 +8,7 @@
  */
 
 import {
+  evaluatesProvidedInputExpressions,
   getEventDrivenWorkflowTriggerEvidence,
   isEventDrivenWorkflowTriggerSource,
   isWellKnownWorkflowTriggerSource,
@@ -172,5 +173,19 @@ describe('getEventDrivenWorkflowTriggerEvidence', () => {
       eventTriggerId: 'cases.updated',
       eventId: 'nested-id',
     });
+  });
+});
+
+describe('evaluatesProvidedInputExpressions', () => {
+  it.each([
+    ['manual', true],
+    ['page', false],
+    ['workflow-step', false],
+    ['scheduled', false],
+    ['alert', false],
+    ['cases.caseCreated', false],
+    [undefined, false],
+  ])('returns %s → %s', (triggeredBy, expected) => {
+    expect(evaluatesProvidedInputExpressions(triggeredBy)).toBe(expected);
   });
 });
