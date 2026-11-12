@@ -108,6 +108,15 @@ export const runNamedSubqueriesValidationSuite = (setup: Setup) => {
           ]
         );
       });
+
+      it('uses the requested METADATA order when validating an IN tuple', async () => {
+        const { expectErrors } = await setup();
+
+        await expectErrors(
+          'LET a = (ROW value = 1); ROW x = 1, s = "x", n = TO_LONG(1) | WHERE (x, s, n) IN (FROM a METADATA _index, _version)',
+          []
+        );
+      });
     });
 
     describe('LOOKUP JOIN references', () => {

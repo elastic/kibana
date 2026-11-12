@@ -155,7 +155,7 @@ describe('named subquery columns', () => {
       getColumnsFor
     );
 
-    expect(columns.map(({ name }) => name)).toEqual(['message', ...METADATA_FIELDS]);
+    expect(columns.map(({ name }) => name)).toEqual(['message', ...[...METADATA_FIELDS].sort()]);
   });
 
   it('keeps a subquery column named like a METADATA field', async () => {

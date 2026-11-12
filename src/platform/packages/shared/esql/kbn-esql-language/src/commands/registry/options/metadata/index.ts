@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import { uniq } from 'lodash';
 import type { ESQLFieldWithMetadata, EsqlFieldType } from '@kbn/esql-types';
 import type { ESQLCommandOption, ESQLAstAllCommands } from '@elastic/esql/types';
 import { isColumn, isOptionNode } from '@elastic/esql';
@@ -70,24 +71,19 @@ export const isValidMetadataField = (name: string, isServerless?: boolean): bool
 export const getMetadataColumns = (
   metadataOptions: ESQLCommandOption[]
 ): ESQLFieldWithMetadata[] => {
-  const patterns = metadataOptions.flatMap(({ args }) =>
-    args.filter(isColumn).map(({ name }) => name)
-  );
-  const projectTags = patterns.filter(
-    (pattern) => pattern.startsWith(PROJECT_TAG_PREFIX) && !pattern.includes('*')
-  );
-  const metadataFields = METADATA_FIELDS.filter((field) =>
-    patterns.some((pattern) => matchesWildcardPattern(pattern, field))
-  );
+  const metadataFields = metadataOptions
+    .flatMap(({ args }) => args.filter(isColumn))
+    .flatMap(({ name }) =>
+      name.startsWith(PROJECT_TAG_PREFIX) && !name.includes('*')
+        ? [name]
+        : METADATA_FIELDS.filter((field) => matchesWildcardPattern(name, field)).sort()
+    );
 
-  return [
-    ...metadataFields.map((name) => ({
-      name,
-      type: METADATA_FIELD_TYPES[name],
-      userDefined: false as const,
-    })),
-    ...projectTags.map((name) => ({ name, type: 'keyword', userDefined: false as const })),
-  ];
+  return uniq(metadataFields).map((name) => ({
+    name,
+    type: name.startsWith(PROJECT_TAG_PREFIX) ? 'keyword' : METADATA_FIELD_TYPES[name],
+    userDefined: false as const,
+  }));
 };
 
 export const metadataSuggestion: ISuggestionItem = withAutoSuggest({
