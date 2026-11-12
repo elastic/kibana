@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/native-vuln-scanner-plugin",
+  "owner": ["@elastic/security-defend-workflows"],
+  "group": "security",
+  "visibility": "private",
+  "description": "Matches osquery software inventory against vendor security advisories and writes vulnerability findings",
+  "plugin": {
+    "id": "nativeVulnScanner",
+    "browser": false,
+    "server": true,
+    "configPath": ["xpack", "nativeVulnScanner"],
+    "requiredPlugins": [],
+    "optionalPlugins": []
+  }
+}

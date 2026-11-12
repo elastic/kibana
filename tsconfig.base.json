@@ -1965,6 +1965,8 @@
       "@kbn/monitoring-plugin/*": ["./x-pack/platform/plugins/private/monitoring/*"],
       "@kbn/moon": ["./packages/kbn-moon"],
       "@kbn/moon/*": ["./packages/kbn-moon/*"],
+      "@kbn/native-vuln-scanner-plugin": ["./x-pack/solutions/security/plugins/native_vuln_scanner"],
+      "@kbn/native-vuln-scanner-plugin/*": ["./x-pack/solutions/security/plugins/native_vuln_scanner/*"],
       "@kbn/navigation-customization-components": ["./src/platform/packages/shared/navigation-customization-components"],
       "@kbn/navigation-customization-components/*": ["./src/platform/packages/shared/navigation-customization-components/*"],
       "@kbn/navigation-plugin": ["./src/platform/plugins/shared/navigation"],

@@ -2858,6 +2858,9 @@ importers:
       '@kbn/monitoring-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/monitoring
+      '@kbn/native-vuln-scanner-plugin':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/plugins/native_vuln_scanner
       '@kbn/navigation-customization-components':
         specifier: workspace:*
         version: link:src/platform/packages/shared/navigation-customization-components
@@ -9915,6 +9918,8 @@ importers:
   x-pack/solutions/security/plugins/lists: {}
 
   x-pack/solutions/security/plugins/mitre_attack: {}
+
+  x-pack/solutions/security/plugins/native_vuln_scanner: {}
 
   x-pack/solutions/security/plugins/security_solution: {}
 

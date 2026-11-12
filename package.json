@@ -977,6 +977,7 @@
     "@kbn/monaco": "workspace:*",
     "@kbn/monitoring-collection-plugin": "workspace:*",
     "@kbn/monitoring-plugin": "workspace:*",
+    "@kbn/native-vuln-scanner-plugin": "workspace:*",
     "@kbn/navigation-customization-components": "workspace:*",
     "@kbn/navigation-plugin": "workspace:*",
     "@kbn/newsfeed-plugin": "workspace:*",
