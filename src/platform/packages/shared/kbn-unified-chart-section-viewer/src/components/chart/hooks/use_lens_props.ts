@@ -181,7 +181,7 @@ export const useLensProps = ({
     }).pipe(
       distinctUntilChanged(),
       tap((isIntersecting) => onChartVisibleChangeRef.current?.(isIntersecting)),
-      shareReplay(1)
+      shareReplay({ bufferSize: 1, refCount: true })
     );
 
     // load lens props when any trigger emits;
