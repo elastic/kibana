@@ -19,9 +19,9 @@ actions:
 
         ## Stability
 
-        | 9.4 | 9.5 | Serverless |
-        | --- | --- | --- |
-        | Experimental | Generally available ¹ | Generally available ² |
+        | 9.4 | 9.5 | 9.6 | Serverless |
+        | --- | --- | --- | --- |
+        | Experimental | Generally available ¹ | Generally available | Generally available ² |
 
         ¹ This version introduces breaking changes. Refer to the [Kibana release notes](https://www.elastic.co/docs/release-notes/kibana/breaking-changes).
 
