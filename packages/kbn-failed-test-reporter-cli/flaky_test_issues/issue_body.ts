@@ -889,29 +889,31 @@ const withLastFailed = (numbers: string, latest: BuildCounts | undefined): strin
 
 type FlakySuiteTest = FlakySuite['tests'][number];
 
-/** The test's counts on the branches given, in their order, where it failed. */
-const failingOn = (test: FlakySuiteTest, branches: readonly string[]) =>
-  branches.flatMap((branch) =>
-    test.byBranch.filter((stats) => stats.branch === branch && stats.failedBuilds > 0)
-  );
+/**
+ * The test's counts on those of the branches given where it is flaky itself, highest rate first,
+ * as in the body's tests table: a stray failure on another branch is left out.
+ */
+const flakyOn = (test: FlakySuiteTest, branches: readonly string[], thresholds: BranchThresholds) =>
+  test.byBranch
+    .filter((stats) => branches.includes(stats.branch) && isFlakyBranch(stats, thresholds))
+    .sort((a, b) => b.buildFailRate - a.buildFailRate);
 
 /**
  * `` - `sorts by status` (newly flaky): 10% of builds (49 / 509), last failed [9 Sep](…) ``: the
- * test's own numbers on the branches given, each named when there are several, and its newest
- * failure on them.
+ * test's own numbers on the branches it is flaky on, each named when the comment covers several,
+ * and its newest failure on them.
  */
 const testLine = (
   test: FlakySuiteTest,
-  branches: readonly string[],
+  flakyStats: ReturnType<typeof flakyOn>,
+  nameBranches: boolean,
   newlyFlaky: boolean
 ): string => {
   const name = `${inlineCode(test.title)}${newlyFlaky ? ' (newly flaky)' : ''}`;
-  const failing = failingOn(test, branches);
-  const numbers =
-    branches.length === 1
-      ? buildNumbers(failing[0])
-      : failing.map((stats) => `${buildNumbers(stats)} on ${inlineCode(stats.branch)}`).join(', ');
-  const latest = failing.reduce<BuildCounts | undefined>(
+  const numbers = nameBranches
+    ? flakyStats.map((stats) => `${buildNumbers(stats)} on ${inlineCode(stats.branch)}`).join(', ')
+    : buildNumbers(flakyStats[0]);
+  const latest = flakyStats.reduce<BuildCounts | undefined>(
     (newest, stats) =>
       stats.lastFailedAt && (!newest?.lastFailedAt || stats.lastFailedAt > newest.lastFailedAt)
         ? stats
@@ -952,14 +954,18 @@ export const renderFlakySuiteIssueComment = (
 
   const newlyFlaky = newlyFlakyTestIds(suite, previous);
   const branchNames = branches.map(({ worst }) => worst.branch);
-  const listed = suite.tests.filter((test) => failingOn(test, branchNames).length > 0);
+  const listed = suite.tests
+    .map((test) => ({ test, stats: flakyOn(test, branchNames, report.thresholds) }))
+    .filter(({ stats }) => stats.length > 0);
   const rest = listed.length - MAX_TEST_ROWS;
   return [
     `${leadFor(listed.length)}${where}:`,
     '',
     ...listed
       .slice(0, MAX_TEST_ROWS)
-      .map((test) => testLine(test, branchNames, !first && newlyFlaky.has(test.testId))),
+      .map(({ test, stats }) =>
+        testLine(test, stats, branches.length > 1, !first && newlyFlaky.has(test.testId))
+      ),
     ...(rest > 0 ? ['', `and ${plural(rest, 'more test')}.`] : []),
   ].join('\n');
 };

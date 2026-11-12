@@ -813,6 +813,43 @@ describe('refreshing a suite issue', () => {
     );
   });
 
+  it('names on each line only the branches that test is flaky on, highest rate first', () => {
+    const failedOn = (branch: string, builds: number, failedBuilds: number, day: number) => ({
+      branch,
+      builds,
+      failedBuilds,
+      buildFailRate: failedBuilds / builds,
+      lastFailedAt: new Date(Date.UTC(2026, 8, day)),
+      lastFailedBuildUrl: `https://buildkite.com/elastic/kibana-on-merge/builds/${day}`,
+    });
+    const report = flakyReport([
+      // a single failure on 8.19 is not flaky there
+      flakyTest({
+        testId: 'a',
+        title: 'flaky on main',
+        byBranch: [failedOn('main', 400, 20, 9), failedOn('8.19', 60, 1, 7)],
+      }),
+      flakyTest({
+        testId: 'b',
+        title: 'flaky on 8.19',
+        byBranch: [
+          { branch: 'main', builds: 400, failedBuilds: 0, buildFailRate: 0 },
+          failedOn('8.19', 60, 5, 8),
+        ],
+      }),
+    ]);
+    const [suite] = groupIntoSuites(report.flaky, report.files);
+
+    expect(renderFlakySuiteIssueComment(suite, { report, reopened: false })).toBe(
+      [
+        '2 tests still flaky:',
+        '',
+        '- `flaky on main`: 5% of builds (20 / 400) on `main`, last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/9)',
+        '- `flaky on 8.19`: 8% of builds (5 / 60) on `8.19`, last failed [8 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/8)',
+      ].join('\n')
+    );
+  });
+
   it('leaves out the branches every test of the suite is skipped on, and the tests that only failed there', () => {
     const { suite, report } = multiTestReport();
     const skippedOnMain = {

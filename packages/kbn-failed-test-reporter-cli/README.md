@@ -127,8 +127,8 @@ whole file. A closed one isn't reopened for a block: the block gets an issue of 
 - A short comment on where the suite is still flaky is posted when the suite failed since the
   last one, or since the issue was filed, and at least `--comment-cooldown-days` later (default
   3). Failures in between are covered by the next comment. It has one line per test that failed
-  there, even a single one, with the test's own numbers on each branch ("`sorts by status`: 4% of
-  builds (18 / 441), last failed […]"), and marks the tests the issue has not shown yet, in its
+  there, even a single one, with the test's own numbers on each branch it's flaky on ("`sorts by
+  status`: 4% of builds (18 / 441), last failed […]"), and marks the tests the issue has not shown yet, in its
   body or an earlier comment, as "(newly flaky)". On an issue no report has found flaky before, a
   consistently failing one, the first comment says "Now flaky" and lists every flaky test. How to
   skip the test is at the end of the body.
