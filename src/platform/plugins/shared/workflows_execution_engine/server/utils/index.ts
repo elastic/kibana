@@ -21,7 +21,6 @@ export { generateExecutionTaskScope } from './generate_execution_task_scope';
 export { TimeoutAbortedError, abortableTimeout } from './abortable_timeout/abortable_timeout';
 export { isTemplateExpression } from './templates';
 export { renderDuration } from './render_duration/render_duration';
-export { isTextContentType, readResponseStream } from './http_response';
 export type { ReadStreamResult } from './http_response';
 export { extractTokenUsage, extractConnectorId, sumTokenUsage } from './token_usage/token_usage';
 export { hasExecutionChain, toExecutionChainHop } from './workflow_lineage_guards';

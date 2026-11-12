@@ -1031,11 +1031,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "fd9a661b3216f97227d6c57a5e8125b5b5781af8cca14fcabf0fac1ba20b81fd"
+      "sha256": "b4c89382a054b1f0f4484708e5c1987eb5a923d143e98122c9bedaa651b3cb21"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "0a586f9e431ff86f6f55597e82121650331ab1aadc851cf88e62295361f20428"
+      "sha256": "73e9e720cb30b77cebd7341691f178c3d70908faf57144e788775312ad641725"
     }
   }
 }

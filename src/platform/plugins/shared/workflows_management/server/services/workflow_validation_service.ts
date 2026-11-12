@@ -9,7 +9,6 @@
 
 import { once } from 'lodash';
 import pLimit from 'p-limit';
-import { firstValueFrom } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core/server';
 import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import type { ESQLCallbacks } from '@kbn/esql-types';
@@ -17,7 +16,6 @@ import {
   type ConnectorContractUnion,
   toCustomTriggerSchemaConfigs,
   type ValidateWorkflowResponseDto,
-  WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG,
 } from '@kbn/workflows';
 import type { GetAvailableConnectorsResponse } from '@kbn/workflows/types/v1';
 import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
@@ -139,15 +137,9 @@ export class WorkflowValidationService {
       toCustomTriggerSchemaConfigs(triggerDefinitions),
       { includePageTrigger: this.deps.pagesEnabled }
     );
-    const warnIgnoredKibanaFetcher = await firstValueFrom(
-      this.deps
-        .getCoreStart()
-        .featureFlags.getBooleanValue$(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, true)
-    );
     const esql = includeEsqlRules ? this.createEsqlCallbacks(request) : undefined;
     const result = await validateWorkflowYaml(yaml, zodSchema, {
       triggerDefinitions,
-      warnIgnoredKibanaFetcher,
       ...(includeVariableRules && {
         variableValidationRegistry: this.createContextRegistry(allConnectors),
       }),

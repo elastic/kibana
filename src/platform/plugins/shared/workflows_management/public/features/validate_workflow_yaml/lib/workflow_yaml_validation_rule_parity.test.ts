@@ -210,10 +210,9 @@ const ruleParityCases: RuleParityCase[] = [
       if (!workflowLookup || !yamlLineCounter) {
         throw new Error('Expected kibana fetcher fixture to parse');
       }
-      return getClientRuleIds(validateIgnoredFetcherSetting(workflowLookup, yamlLineCounter, true));
+      return getClientRuleIds(validateIgnoredFetcherSetting(workflowLookup, yamlLineCounter));
     },
-    getServerRuleIds: () =>
-      getServerRuleIds(KIBANA_FETCHER_YAML, { warnIgnoredKibanaFetcher: true }),
+    getServerRuleIds: () => getServerRuleIds(KIBANA_FETCHER_YAML),
   },
 ];
 

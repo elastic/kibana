@@ -37,12 +37,6 @@ export interface IgnoredKibanaFetcherOccurrence {
   stepName?: string;
 }
 
-/** Core self-client ignores YAML `fetcher` for every `kibana.*` step. */
-export const shouldWarnIgnoredKibanaFetcher = (
-  stepType: string,
-  warnKibanaFetcher: boolean
-): boolean => warnKibanaFetcher && isKibanaWorkflowStepType(stepType);
-
 const ON_FAILURE_STEP_KEYS = ['on-failure', 'iteration-on-failure'] as const;
 
 const asStepArray = (value: unknown): WorkflowYaml['steps'] | undefined =>
