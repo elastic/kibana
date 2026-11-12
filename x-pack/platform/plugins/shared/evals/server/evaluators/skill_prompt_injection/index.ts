@@ -58,7 +58,7 @@ const INJECTION_PATTERNS: InjectionPattern[] = [
   {
     name: 'tool-exfiltration',
     pattern:
-      /\b(?:send|post|curl|fetch|upload|transmit|exfiltrate)\s+[^.\n]{0,80}?\b(?:to|at|via)\s+https?:\/\/(?!(?:localhost|127\.0\.0\.1|elastic\.co|elastic-cloud\.com|github\.com|github-enterprise)(?:[/:?#]|$))/gi,
+      /\b(?:send|post|curl|fetch|upload|transmit|exfiltrate)\s+[^.\n]{0,80}?\b(?:to|at|via)\s+https?:\/\/(?!(?:localhost|127\.0\.0\.1|elastic\.co|elastic-cloud\.com|github\.com|github-enterprise)(?:[/:?#\s,;)'"\]>]|\.(?![\w-])|$))/gi,
     severity: 'high',
     reason: 'References sending data to an external URL',
   },

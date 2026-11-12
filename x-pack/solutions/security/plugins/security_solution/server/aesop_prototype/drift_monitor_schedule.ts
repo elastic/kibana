@@ -78,17 +78,26 @@ interface AesopDriftMonitorEnableParams {
   lookbackMinutes?: number;
 }
 
+// Both values are rendered raw into a single-quoted YAML const and ES|QL string literals.
+const SAFE_SKILL_ID = /^[A-Za-z0-9._-]+$/;
+const SAFE_SKILL_NAME = /^[A-Za-z0-9 ._-]+$/;
+
 export const buildTemplateValues = ({
   skillId,
   skillName,
   intervalMinutes,
   lookbackMinutes,
-}: AesopDriftMonitorEnableParams): AesopDriftMonitorWorkflowTemplateValues => ({
-  skillId,
-  skillName: skillName || skillId,
-  intervalMinutes: intervalMinutes ?? AESOP_DRIFT_MONITOR_INTERVAL_MINUTES,
-  lookbackMinutes: lookbackMinutes ?? AESOP_DRIFT_MONITOR_LOOKBACK_MINUTES,
-});
+}: AesopDriftMonitorEnableParams): AesopDriftMonitorWorkflowTemplateValues => {
+  if (!SAFE_SKILL_ID.test(skillId)) {
+    throw new Error(`Invalid skill id for the AESOP drift monitor: '${skillId}'`);
+  }
+  return {
+    skillId,
+    skillName: skillName && SAFE_SKILL_NAME.test(skillName) ? skillName : skillId,
+    intervalMinutes: intervalMinutes ?? AESOP_DRIFT_MONITOR_INTERVAL_MINUTES,
+    lookbackMinutes: lookbackMinutes ?? AESOP_DRIFT_MONITOR_LOOKBACK_MINUTES,
+  };
+};
 
 /**
  * The monitor finds a skill's traces through the load_skill span's arguments, which Agent Builder

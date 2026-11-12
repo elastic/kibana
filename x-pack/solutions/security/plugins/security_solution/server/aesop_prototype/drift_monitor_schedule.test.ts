@@ -61,6 +61,16 @@ describe('buildTemplateValues', () => {
   it('falls back to the skill id when the name is unknown', () => {
     expect(buildTemplateValues({ skillId: 'triage' }).skillName).toBe('triage');
   });
+
+  it('falls back to the skill id when the name would break the rendered YAML or ES|QL', () => {
+    expect(buildTemplateValues({ skillId: 'triage', skillName: `Alert's "triage"` }).skillName).toBe(
+      'triage'
+    );
+  });
+
+  it('rejects a skill id that cannot be rendered safely', () => {
+    expect(() => buildTemplateValues({ skillId: `x' OR "1"` })).toThrow(/Invalid skill id/);
+  });
 });
 
 describe('getAesopDriftMonitorTracingWarnings', () => {

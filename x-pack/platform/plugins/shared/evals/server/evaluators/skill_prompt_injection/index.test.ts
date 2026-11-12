@@ -115,6 +115,10 @@ describe('skill-prompt-injection', () => {
     'https://elastic.co/docs',
     'http://localhost:5601/api',
     'https://github.com?x=1',
+    'https://elastic.co now',
+    'https://elastic.co.',
+    'https://github.com, then',
+    'https://elastic.co) and stop',
   ])('allows exfil-pattern text to allowlisted host %s', async (url) => {
     const result = await skillPromptInjectionEvaluator.evaluate({
       trace,

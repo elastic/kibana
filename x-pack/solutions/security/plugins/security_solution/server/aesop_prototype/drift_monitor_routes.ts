@@ -42,7 +42,14 @@ const LICENSE_ERROR_MESSAGE = i18n.translate(
 );
 
 const bodySchema = schema.object({
-  skill_id: schema.string({ minLength: 1, maxLength: 128 }),
+  skill_id: schema.string({
+    minLength: 1,
+    maxLength: 128,
+    validate: (value) =>
+      /^[A-Za-z0-9._-]+$/.test(value)
+        ? undefined
+        : 'skill_id may only contain letters, digits, dots, hyphens and underscores',
+  }),
   interval_minutes: schema.number({ min: 5, max: 1440, defaultValue: 60 }),
   lookback_minutes: schema.number({ min: 5, max: 10080, defaultValue: 120 }),
 });
