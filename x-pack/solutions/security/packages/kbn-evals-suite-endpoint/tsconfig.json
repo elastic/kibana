@@ -21,6 +21,7 @@
     "@kbn/test",
     "@kbn/security-solution-plugin",
     "@kbn/fleet-plugin",
-    "@kbn/securitysolution-list-constants"
+    "@kbn/securitysolution-list-constants",
+    "@kbn/repo-info"
   ]
 }
