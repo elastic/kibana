@@ -47502,7 +47502,6 @@
     "xpack.nightshift.investigations.cardCopyLinkLabel": "复制链接",
     "xpack.nightshift.investigations.cardOpenInChatLabel": "在聊天中打开",
     "xpack.nightshift.investigations.cardOpenMenuLabel": "打开操作菜单",
-    "xpack.nightshift.investigations.emptyDescription": "未找到调查",
     "xpack.nightshift.investigations.inProgressSectionTitle": "进行中",
     "xpack.nightshift.investigations.loadingErrorTitle": "无法加载调查",
     "xpack.nightshift.investigations.notRatedSectionTitle": "未评分",
