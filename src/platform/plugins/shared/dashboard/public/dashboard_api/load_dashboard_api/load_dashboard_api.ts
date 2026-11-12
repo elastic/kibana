@@ -27,6 +27,7 @@ import { getDashboardApi } from '../get_dashboard_api';
 import { DASHBOARD_DURATION_START_MARK } from '../telemetry/dashboard_duration_start_mark';
 import { startTrackingDashboardLoadTelemetry } from '../telemetry/dashboard_load_telemetry';
 import type { DashboardCreationOptions } from '../types';
+import { getDuplicate, type PanelsCache } from './get_duplicate';
 import { getUserAccessControlData } from './get_user_access_control_data';
 import { showWarningToast } from './show_warning_toast';
 import { transformPanels } from './transform_panels';
@@ -43,16 +44,6 @@ export async function loadDashboardApi({
   panelFlyoutType?: EuiFlyoutProps['type'];
 }) {
   const creationOptions = await getCreationOptions?.();
-
-  // --------------------------------------------------------------------------------------
-  // Determine sizes of incoming embeddables. Done here due to async fetching.
-  // --------------------------------------------------------------------------------------
-  const incomingEmbeddables = creationOptions?.getIncomingEmbeddables?.();
-  await asyncForEach(incomingEmbeddables ?? [], async (embeddable) => {
-    if (!embeddable.size) {
-      embeddable.size = await getPlacementHints(embeddable.type, embeddable.serializedState);
-    }
-  });
 
   const [readResult, user, isAccessControlEnabled] = savedObjectId
     ? await Promise.all([
@@ -90,15 +81,33 @@ export async function loadDashboardApi({
     getDashboardBackupService().storeViewMode(viewMode);
   }
 
+  const initialState = {
+    ...getLastSavedState(readResult),
+    ...unsavedChanges,
+    ...overrideState,
+  };
+
+  // --------------------------------------------------------------------------------------
+  // Prepare incoming embeddables. Done here due to async fetching.
+  // --------------------------------------------------------------------------------------
+  const incomingEmbeddables = creationOptions?.getIncomingEmbeddables?.();
+  const panelsCache: PanelsCache = new Map();
+  await asyncForEach(incomingEmbeddables ?? [], async (embeddable) => {
+    const duplicate = await getDuplicate(embeddable, initialState, panelsCache);
+    if (duplicate?.id) {
+      embeddable.embeddableId = duplicate.id;
+    }
+
+    if (!embeddable.size) {
+      embeddable.size = await getPlacementHints(embeddable.type, embeddable.serializedState);
+    }
+  });
+
   const { api, cleanup, internalApi } = getDashboardApi({
     creationOptions,
     panelFlyoutType,
     incomingEmbeddables,
-    initialState: {
-      ...getLastSavedState(readResult),
-      ...unsavedChanges,
-      ...overrideState,
-    },
+    initialState,
     readResult,
     savedObjectId,
     user,

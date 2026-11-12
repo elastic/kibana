@@ -237,7 +237,7 @@ describe('layout manager', () => {
     });
   });
 
-  describe('addIncomingEmbeddables ES|QL control deduplication', () => {
+  describe('addIncomingEmbeddables existing and pinned panel updates', () => {
     const pinnedEsqlControl = {
       ...DEFAULT_PINNED_CONTROL_STATE,
       id: 'pinnedEsqlControl',
@@ -249,58 +249,6 @@ describe('layout manager', () => {
         selected_options: ['US'],
       },
     } as NonNullable<DashboardState['pinned_panels']>[number];
-
-    const gridEsqlControl = {
-      id: 'gridEsqlControl',
-      type: ESQL_CONTROL,
-      grid: { w: 1, h: 1, x: 0, y: 0 },
-      config: {
-        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
-        variable_name: 'geo_dest',
-        variable_type: ESQLVariableType.VALUES,
-        selected_options: ['US'],
-      },
-    } as DashboardState['panels'][number];
-
-    test('should skip an incoming ES|QL control whose variable_name already exists on a pinned control and keep the existing selection', () => {
-      const layoutManager = initializeLayoutManager(
-        viewModeManagerMock,
-        [panel1],
-        [pinnedEsqlControl],
-        trackPanelMock
-      );
-
-      layoutManager.api.addIncomingEmbeddables([
-        {
-          embeddableId: 'lensPanel',
-          type: 'lens',
-          serializedState: { title: 'Chart' },
-          size: { width: 1, height: 1 },
-        },
-        {
-          embeddableId: 'duplicateControl',
-          type: ESQL_CONTROL,
-          serializedState: {
-            ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
-            variable_name: 'geo_dest',
-            variable_type: ESQLVariableType.VALUES,
-            selected_options: ['CN'],
-          },
-          size: { width: 1, height: 1 },
-        },
-      ]);
-
-      const layout = layoutManager.api.layout$.value;
-      expect(Object.keys(layout.panels)).toEqual([PANEL_ONE_ID, 'lensPanel']);
-      expect(layout.panels.duplicateControl).toBeUndefined();
-      expect(Object.keys(layout.pinnedPanels)).toEqual(['pinnedEsqlControl']);
-      expect(layoutManager.internalApi.getSerializedStateForPanel('pinnedEsqlControl')).toEqual({
-        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
-        variable_name: 'geo_dest',
-        variable_type: ESQLVariableType.VALUES,
-        selected_options: ['US'],
-      });
-    });
 
     test('should update an existing pinned ES|QL control in place when incoming control has the same id', () => {
       const layoutManager = initializeLayoutManager(
@@ -474,108 +422,6 @@ describe('layout manager', () => {
 
       expect(trackPanelMock.setScrollToPanelId).toHaveBeenCalledWith(PANEL_ONE_ID);
       expect(trackPanelMock.setHighlightPanelId).toHaveBeenCalledWith(PANEL_ONE_ID);
-    });
-
-    test('should add an incoming ES|QL control when its variable_name is not yet on the dashboard', () => {
-      const layoutManager = initializeLayoutManager(
-        viewModeManagerMock,
-        [panel1],
-        [pinnedEsqlControl],
-        trackPanelMock
-      );
-
-      layoutManager.api.addIncomingEmbeddables([
-        {
-          embeddableId: 'newControl',
-          type: ESQL_CONTROL,
-          serializedState: {
-            ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
-            variable_name: 'geo_src',
-            variable_type: ESQLVariableType.VALUES,
-            selected_options: ['FR'],
-          },
-          size: { width: 1, height: 1 },
-        },
-      ]);
-
-      const layout = layoutManager.api.layout$.value;
-      expect(Object.keys(layout.panels)).toEqual([PANEL_ONE_ID, 'newControl']);
-      expect(layoutManager.internalApi.getSerializedStateForPanel('newControl')).toEqual({
-        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
-        variable_name: 'geo_src',
-        variable_type: ESQLVariableType.VALUES,
-        selected_options: ['FR'],
-      });
-    });
-
-    test('should anchor placement, scroll, and highlight to the first accepted package when the first incoming control is skipped', () => {
-      const layoutManager = initializeLayoutManager(
-        viewModeManagerMock,
-        [panel1],
-        [pinnedEsqlControl],
-        trackPanelMock
-      );
-
-      layoutManager.api.addIncomingEmbeddables([
-        {
-          embeddableId: 'skippedControl',
-          type: ESQL_CONTROL,
-          serializedState: {
-            ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
-            variable_name: 'geo_dest',
-            variable_type: ESQLVariableType.VALUES,
-            selected_options: ['CN'],
-          },
-          size: { width: 1, height: 1 },
-        },
-        {
-          embeddableId: 'lensPanel',
-          type: 'lens',
-          serializedState: { title: 'Chart' },
-          size: { width: 1, height: 1 },
-        },
-      ]);
-
-      const layout = layoutManager.api.layout$.value;
-      expect(layout.panels.skippedControl).toBeUndefined();
-      expect(layout.panels.lensPanel).toEqual({
-        grid: { w: 1, h: 1, x: 1, y: 0 },
-        type: 'lens',
-      });
-      expect(trackPanelMock.setScrollToPanelId).toHaveBeenCalledWith('lensPanel');
-      expect(trackPanelMock.setHighlightPanelId).toHaveBeenCalledWith('lensPanel');
-    });
-
-    test('should not scroll or highlight when every incoming package is skipped', () => {
-      const layoutManager = initializeLayoutManager(
-        viewModeManagerMock,
-        [gridEsqlControl],
-        [],
-        trackPanelMock
-      );
-
-      layoutManager.api.addIncomingEmbeddables([
-        {
-          embeddableId: 'duplicateControl',
-          type: ESQL_CONTROL,
-          serializedState: {
-            ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
-            variable_name: 'geo_dest',
-            variable_type: ESQLVariableType.VALUES,
-            selected_options: ['CN'],
-          },
-        },
-      ]);
-
-      expect(Object.keys(layoutManager.api.layout$.value.panels)).toEqual(['gridEsqlControl']);
-      expect(layoutManager.internalApi.getSerializedStateForPanel('gridEsqlControl')).toEqual({
-        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
-        variable_name: 'geo_dest',
-        variable_type: ESQLVariableType.VALUES,
-        selected_options: ['US'],
-      });
-      expect(trackPanelMock.setScrollToPanelId).not.toHaveBeenCalled();
-      expect(trackPanelMock.setHighlightPanelId).not.toHaveBeenCalled();
     });
   });
 

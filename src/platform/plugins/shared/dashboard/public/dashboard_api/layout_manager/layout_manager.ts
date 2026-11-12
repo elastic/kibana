@@ -76,7 +76,6 @@ import {
   arePinnedPanelLayoutsEqual,
 } from './are_layouts_equal';
 import { deserializeLayout } from './deserialize_layout';
-import { removeDuplicateEsqlControls } from './remove_duplicate_esql_controls';
 import { serializeLayout } from './serialize_layout';
 import {
   isDashboardLayoutPanel,
@@ -249,15 +248,10 @@ export function initializeLayoutManager(
     if (!embeddables?.length) return;
     const first = embeddables[0];
     if (!first.embeddableId) first.embeddableId = v4(); // give first panel an ID so we can place others around it
-    const incomingEmbeddables = removeDuplicateEsqlControls(
-      embeddables,
-      layout$.value,
-      currentChildState
-    );
     const applyStatePromises: Array<Promise<void>> = [];
     let anchorId: string | undefined;
 
-    for (const incomingEmbeddable of incomingEmbeddables) {
+    for (const incomingEmbeddable of embeddables) {
       const { serializedState, size, type } = incomingEmbeddable;
       const uuid = incomingEmbeddable.embeddableId ?? v4();
       const existingPanel: DashboardLayoutPanel | undefined = layout$.value.panels[uuid];
@@ -290,7 +284,7 @@ export function initializeLayoutManager(
         continue;
       }
 
-      // Anchor on the first grid panel that lands, so nothing is placed beside or scrolled to a skipped or pinned control.
+      // Anchor on the first grid panel that lands, so nothing is placed beside or scrolled to a pinned control.
       anchorId ??= uuid;
 
       const updatedLayout = existingPanel
@@ -313,7 +307,7 @@ export function initializeLayoutManager(
             },
             /**
              * We can assume that all panels being sent as a single package are related; so,
-             * place them close together by grouping them around the first accepted embeddable.
+             * place them close together by grouping them around the first grid embeddable.
              */
             beside: uuid === anchorId ? undefined : anchorId,
           });

@@ -10,6 +10,7 @@
 import { Subject } from 'rxjs';
 import type { DashboardChangeSource } from '../../../common/change_sources';
 import { DEFAULT_DASHBOARD_STATE } from '../../../common/default_dashboard_state';
+import { embeddableService } from '../../services/kibana_services';
 import { DASHBOARD_DURATION_START_MARK } from '../telemetry/dashboard_duration_start_mark';
 import { startTrackingDashboardLoadTelemetry } from '../telemetry/dashboard_load_telemetry';
 import { loadDashboardApi } from './load_dashboard_api';
@@ -238,6 +239,47 @@ describe('loadDashboardApi', () => {
       });
       expect(nextSpy).toHaveBeenCalledTimes(1);
       expect(nextSpy).toHaveBeenCalledWith(expect.objectContaining({ type: 'view' }));
+    });
+
+    test('gives a duplicate incoming embeddable the id of the panel it duplicates and does not count a view', async () => {
+      const nextSpy = jest.spyOn(userActivity$, 'next');
+      jest.spyOn(embeddableService, 'getEmbeddableDefinition').mockResolvedValue({
+        type: 'customControl',
+        buildEmbeddable: jest.fn(),
+        isDuplicate: (incomingState: { key?: string }, existingState: { key?: string }) =>
+          Boolean(incomingState.key && incomingState.key === existingState.key),
+      });
+
+      const duplicateIncoming = [
+        {
+          type: 'customControl',
+          serializedState: { key: 'region' },
+        },
+      ];
+
+      await loadDashboardApi({
+        getCreationOptions: async () => ({
+          useSessionStorageIntegration: false,
+          getIncomingEmbeddables: () => duplicateIncoming,
+          getInitialInput: () => ({
+            panels: [
+              {
+                id: 'existingControl',
+                type: 'customControl',
+                grid: { w: 1, h: 1, x: 0, y: 0 },
+                config: { key: 'region' },
+              },
+            ],
+          }),
+        }),
+        savedObjectId: '12345',
+      });
+
+      const [{ incomingEmbeddables }] = getDashboardApiMock.mock.calls[0];
+      expect(incomingEmbeddables).toEqual([
+        expect.objectContaining({ embeddableId: 'existingControl', type: 'customControl' }),
+      ]);
+      expect(nextSpy).not.toHaveBeenCalled();
     });
   });
 });
