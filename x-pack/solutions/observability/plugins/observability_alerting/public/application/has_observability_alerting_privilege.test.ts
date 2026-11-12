@@ -10,6 +10,7 @@ import {
   hasObservabilityAlertingCapabilities,
   hasObservabilityAlertsV1Capability,
   hasObservabilityRulesV1Capability,
+  hasObservabilityV2RulesWriteCapability,
 } from './has_observability_alerting_privilege';
 
 const capabilities = (features: Record<string, unknown>): Capabilities =>
@@ -63,6 +64,26 @@ describe('hasObservabilityRulesV1Capability', () => {
 
   it('returns false without any observability capability', () => {
     expect(hasObservabilityRulesV1Capability(capabilities({}))).toBe(false);
+  });
+});
+
+describe('hasObservabilityV2RulesWriteCapability', () => {
+  it('returns true for alerting_v2_rules all', () => {
+    expect(
+      hasObservabilityV2RulesWriteCapability(
+        capabilities({ alerting_v2_rules: { read: true, all: true } })
+      )
+    ).toBe(true);
+  });
+
+  it('returns false for alerting_v2_rules read only', () => {
+    expect(
+      hasObservabilityV2RulesWriteCapability(capabilities({ alerting_v2_rules: { read: true } }))
+    ).toBe(false);
+  });
+
+  it('returns false without alerting v2 capabilities', () => {
+    expect(hasObservabilityV2RulesWriteCapability(capabilities({}))).toBe(false);
   });
 });
 

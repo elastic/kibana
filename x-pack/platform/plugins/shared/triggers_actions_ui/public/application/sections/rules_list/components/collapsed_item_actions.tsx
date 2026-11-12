@@ -66,6 +66,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
 }: ComponentOpts) => {
   const {
     ruleTypeRegistry,
+    ruleMigration,
     notifications: { toasts },
   } = useKibana().services;
 
@@ -227,6 +228,22 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
     ),
   });
 
+  const migratePanelItem = ruleMigration?.ruleTypeIds.includes(item.ruleTypeId)
+    ? [
+        {
+          'data-test-subj': 'migrateRule',
+          onClick: () => {
+            setIsPopoverOpen(false);
+            ruleMigration.onMigrate(item.id);
+          },
+          name: i18n.translate(
+            'xpack.triggersActionsUI.sections.rulesList.collapsedItemActions.migrateRule',
+            { defaultMessage: 'Migrate rule' }
+          ),
+        },
+      ]
+    : [];
+
   const getDisablePanelItem = (testId: string) => ({
     disabled: !item.isEditable || !item.enabledInLicense,
     'data-test-subj': testId,
@@ -300,6 +317,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
                 { defaultMessage: 'Run rule' }
               ),
             },
+            ...migratePanelItem,
             {
               disabled: !item.isEditable,
               className: 'collapsedItemActions__deleteButton',

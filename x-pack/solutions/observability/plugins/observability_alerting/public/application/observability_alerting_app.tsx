@@ -30,6 +30,7 @@ import { EuiPageSection } from '@elastic/eui';
 import { ALERTING_V2_RULES_TAB_ID } from '@kbn/alerting-v2-constants';
 import { OBSERVABILITY_OWNER } from '@kbn/cases-plugin/common';
 import { AlertingNavPromo } from '@kbn/observability-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
   OBSERVABILITY_ALERTING_ALERTS_PATH,
@@ -40,6 +41,7 @@ import {
 } from '../constants';
 import type { ObservabilityAlertingCases } from '../types';
 import { createInvestigateEpisodeAction } from '../actions/investigate_episode_action';
+import { useClassicRuleMigration } from '../actions/use_classic_rule_migration';
 import { createViewInAppAction } from '../actions/view_in_app';
 import { useInvestigateEpisodeHeaderMenuItems } from '../actions/use_investigate_episode_header_menu_items';
 import {
@@ -74,6 +76,7 @@ interface ObservabilityAlertingAppProps {
     'getClassicRulesPage' | 'getAlertFormatter'
   >;
   cases?: ObservabilityAlertingCases;
+  agentBuilder?: AgentBuilderPluginStart;
   ObservabilityPageTemplate: ObservabilitySharedPluginStart['navigation']['PageTemplate'];
   history: ScopedHistory;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
@@ -131,6 +134,7 @@ const ClassicRulesV1Route = ({
   setBreadcrumbs,
   tabs,
   showClassicBadge,
+  agentBuilder,
 }: {
   coreStart: CoreStart;
   getClassicRulesPage: TriggersAndActionsUIPublicPluginStart['getClassicRulesPage'];
@@ -138,11 +142,16 @@ const ClassicRulesV1Route = ({
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   tabs: AppHeaderTab[];
   showClassicBadge?: boolean;
+  agentBuilder?: AgentBuilderPluginStart;
 }) => {
   const classicRulesHistory = useMemo(
     () => history.createSubHistory(OBSERVABILITY_ALERTING_RULES_V1_PATH),
     [history]
   );
+  const ruleMigration = useClassicRuleMigration({
+    agentBuilder,
+    capabilities: coreStart.application.capabilities,
+  });
 
   return getClassicRulesPage({
     coreStart,
@@ -155,6 +164,7 @@ const ClassicRulesV1Route = ({
     },
     tabs,
     showClassicBadge,
+    ruleMigration,
   });
 };
 
@@ -163,6 +173,7 @@ export const ObservabilityAlertingApp = ({
   alertingVTwo,
   triggersActionsUi,
   cases,
+  agentBuilder,
   ObservabilityPageTemplate,
   history,
   setBreadcrumbs,
@@ -260,6 +271,7 @@ export const ObservabilityAlertingApp = ({
               setBreadcrumbs={setBreadcrumbs}
               tabs={rulesV1Tabs}
               showClassicBadge={hasV2Rules}
+              agentBuilder={agentBuilder}
             />
           </EuiPageSection>
         </Route>

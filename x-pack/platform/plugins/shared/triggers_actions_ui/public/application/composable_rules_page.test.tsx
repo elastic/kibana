@@ -116,6 +116,24 @@ describe('ComposableClassicRulesPage', () => {
     });
   });
 
+  it('forwards ruleMigration onto RulesPageApp deps', async () => {
+    const getFeatures = jest.fn().mockResolvedValue([]);
+    const ruleMigration = { ruleTypeIds: ['.es-query'], onMigrate: jest.fn() };
+
+    render(
+      <ComposableClassicRulesPage
+        coreStart={coreStart}
+        setBreadcrumbs={setBreadcrumbs}
+        ruleMigration={ruleMigration}
+        internalDeps={createInternalDeps(getFeatures)}
+      />
+    );
+
+    await waitFor(() => {
+      expect(getLatestDeps().ruleMigration).toBe(ruleMigration);
+    });
+  });
+
   it('forwards hideListBackButton onto RulesPageApp deps', async () => {
     const getFeatures = jest.fn().mockResolvedValue([]);
 

@@ -23,7 +23,9 @@
     "@kbn/alerts-ui-shared",
     "@kbn/cases-plugin",
     "@kbn/security-plugin",
-    "@kbn/kibana-utils-plugin"
+    "@kbn/kibana-utils-plugin",
+    "@kbn/agent-builder-browser",
+    "@kbn/agent-builder-plugin"
   ],
   "exclude": ["target/**/*"]
 }

@@ -37,6 +37,10 @@ export const hasObservabilityAlertingCapabilities = (
   return { v1, v2 };
 };
 
+/** Capability-based check: can the user create and edit alerting v2 (universal) rules? */
+export const hasObservabilityV2RulesWriteCapability = (capabilities: Capabilities): boolean =>
+  capabilities[ALERTING_V2_FEATURE_IDS.rules]?.all === true;
+
 /** Rules page tabs the user can open; with both, the page renders the Universal and Classic tabs. */
 export const getObservabilityRulesTabVisibility = (
   capabilities: Capabilities
