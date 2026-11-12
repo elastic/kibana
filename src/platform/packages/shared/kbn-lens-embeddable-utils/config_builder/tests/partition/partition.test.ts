@@ -172,6 +172,50 @@ describe('Partition', () => {
       expect(apiOutput.group_by?.[0].color).toEqual(DEFAULT_CATEGORICAL_COLOR_MAPPING);
     });
 
+    it('should store the default categorical color mapping when the first active group has no color in pie chart', () => {
+      const config = {
+        type: 'pie',
+        title: 'Pie group_by color default in state',
+        data_source: baseDataSource,
+        metrics: [{ operation: 'count', empty_as_null: false }],
+        group_by: [
+          { operation: 'terms', fields: ['tags.keyword'], limit: 3, collapse_by: 'sum' },
+          { operation: 'terms', fields: ['agent.keyword'], limit: 3 },
+        ],
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies PieConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const vizState = lensState.state.visualization as LensPartitionVisualizationState;
+
+      expect(vizState.layers[0].colorMapping).toEqual({
+        colorMode: { type: 'categorical' },
+        paletteId: 'default',
+        assignments: [],
+        specialAssignments: [{ rules: [{ type: 'other' }], color: { type: 'loop' } }],
+      });
+    });
+
+    it('should not store a color mapping when every group is collapsed in pie chart', () => {
+      const config = {
+        type: 'pie',
+        title: 'Pie with every group collapsed',
+        data_source: baseDataSource,
+        metrics: [{ operation: 'count', empty_as_null: false }],
+        group_by: [{ operation: 'terms', fields: ['tags.keyword'], limit: 3, collapse_by: 'sum' }],
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies PieConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const vizState = lensState.state.visualization as LensPartitionVisualizationState;
+
+      expect(vizState.layers[0].colorMapping).toBeUndefined();
+    });
+
     it('should emit AUTO_COLOR on treemap metric when no group_by is present', () => {
       const config = {
         type: 'treemap',

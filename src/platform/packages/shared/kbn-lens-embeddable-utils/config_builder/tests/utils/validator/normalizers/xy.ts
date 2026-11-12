@@ -211,11 +211,13 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
         // without a breakdown there is nothing to collapse — transform drops it
         if (layer.collapseFn === '' || !layer.splitAccessors?.length) delete layer.collapseFn;
 
-        // colorMapping/palette: only preserved through the round-trip when there's a breakdown.
+        // colorMapping/palette: only preserved through the round-trip while the breakdown is active
+        // (not collapsed): the runtime ignores them otherwise and the transforms leave them out.
         // Legacy palette (palette field, no colorMapping) round-trips back as palette, not colorMapping.
         // If colorMapping is present it overrides palette; default colorMapping is only added when
-        // neither colorMapping nor palette is set and a breakdown is present.
-        if (!layer.splitAccessors?.length) {
+        // neither colorMapping nor palette is set and the breakdown is active.
+        const hasActiveBreakdown = (layer.splitAccessors?.length ?? 0) > 0 && !layer.collapseFn;
+        if (!hasActiveBreakdown) {
           delete layer.colorMapping;
           delete layer.palette;
         } else if (layer.colorMapping) {
@@ -236,7 +238,6 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
           (layer.yConfig ?? []).map((yc: any) => [yc.forAccessor, yc])
         );
         const allAccessors: string[] = layer.accessors ?? [];
-        const hasActiveBreakdown = (layer.splitAccessors?.length ?? 0) > 0 && !layer.collapseFn;
         layer.yConfig = allAccessors
           .map((acc) => {
             const existing = configuredAccessors.get(acc);

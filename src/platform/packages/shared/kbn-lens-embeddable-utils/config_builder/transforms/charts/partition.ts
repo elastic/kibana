@@ -316,7 +316,10 @@ function convertCollapseAPItoCollapseFns<P extends 'group_by' | 'group_breakdown
 
 function computeSharedPartitionLayerState(config: PartitionConfig) {
   // Only the first non-collapsed group is colored, as in `fromLensStateToAPIGroups`.
-  const groupColouring = config.group_by?.find(groupIsNotCollapsed)?.color;
+  const coloredGroup = config.group_by?.find(groupIsNotCollapsed);
+  const groupColouring = coloredGroup
+    ? coloredGroup.color ?? DEFAULT_CATEGORICAL_COLOR_MAPPING
+    : undefined;
   const hasColorMapping = groupColouring != null && !('type' in groupColouring);
   const collapseFns = Object.fromEntries(
     convertCollapseAPItoCollapseFns(config, 'group_by').concat(
