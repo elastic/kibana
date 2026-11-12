@@ -1,5 +1,5 @@
 {
-  "sha1": "69e356e1b3f405039815cfbe3c880ad9d2f984c9",
+  "sha1": "36dad87d0735c6593b652569fcdb4ae88da9691c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -346,6 +346,34 @@
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/07_date_picker_refresh.spec.ts",
         "line": 38,
         "column": 5
+      }
+    },
+    {
+      "id": "432807e68fb5283-e05e04375ebeee1",
+      "title": "Service map - accessibility with node stats axe stays clean and metrics are named for screen readers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/08_service_map_a11y_node_stats.spec.ts",
+        "line": 68,
+        "column": 18
+      }
+    },
+    {
+      "id": "432807e68fb5283-08146ae46dded31",
+      "title": "Service map - accessibility with node stats faded low-traffic service stays focusable and named",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/08_service_map_a11y_node_stats.spec.ts",
+        "line": 93,
+        "column": 11
       }
     }
   ]
