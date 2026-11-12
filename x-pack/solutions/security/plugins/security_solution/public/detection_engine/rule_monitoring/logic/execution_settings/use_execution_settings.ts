@@ -36,11 +36,11 @@ export const useRuleExecutionSettings = (): RuleExecutionSettings => {
 
 const useAdvancedSettingSafely = <T>(key: string, defaultValue: T): T => {
   // Unlike `useUiSetting$`, fall back to the default instead of throwing when the Kibana
-  // context has no settings service.
+  // context has no settings service or the setting isn't registered (feature flag off).
   const { settings } = useKibana().services;
   const value$ = useMemo(
-    () => (settings ? settings.client.get$<T>(key) : of(defaultValue)),
+    () => (settings ? settings.client.get$<T>(key, defaultValue) : of(defaultValue)),
     [settings, key, defaultValue]
   );
-  return useObservable(value$, settings ? settings.client.get<T>(key) : defaultValue);
+  return useObservable(value$, settings ? settings.client.get<T>(key, defaultValue) : defaultValue);
 };
