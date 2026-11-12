@@ -17,6 +17,9 @@ import {
   type MatchedIssue,
 } from './match_issues';
 
+const errorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
 /** The label `/skip` adds; such an issue stays open until its test is unskipped. */
 export const SKIPPED_TEST_LABEL = 'skipped-test';
 
@@ -54,6 +57,11 @@ export const perTestIssuesToHandOver = (
   return [...byNumber.values()];
 };
 
+/** The comment on a per-test issue closed as a duplicate of its suite's issue. */
+export const handOverComment = (suiteIssueNumber: number): string =>
+  `Now tracked in #${suiteIssueNumber}, together with the other tests of its suite. New ` +
+  'failures will be reported there, so this issue is closed as a duplicate.';
+
 export interface HandOverOptions {
   github: GithubApi;
   log: ToolingLog;
@@ -63,10 +71,12 @@ export interface HandOverOptions {
 }
 
 /**
- * Closes each per-test issue as a duplicate of the suite issue, rather than commenting: the
- * failed-test Slack alert would take the reporter's comment on a per-test issue for a new failure.
- * Each issue closed is marked so in place, so that later suites of the run see it closed. A failed
- * close is logged and the issue left open for the next run. Returns the issues closed.
+ * Closes each per-test issue as a duplicate of the suite issue, then says so in a comment. The
+ * close comes first: the failed-test Slack alert and investigator skip comments on closed issues,
+ * and would take the reporter's comment on an open per-test issue for a new failure. Each issue
+ * closed is marked so in place, so that later suites of the run see it closed. A failed close is
+ * logged and the issue left open for the next run; a failed comment is only logged. Returns the
+ * issues closed.
  */
 export const handOver = async ({
   github,
@@ -81,9 +91,9 @@ export const handOver = async ({
       await github.closeAsDuplicate(issue.number, suiteIssue.id);
     } catch (error) {
       log.warning(
-        `failed to close #${issue.number} as a duplicate of #${suiteIssue.number}: ${
-          error instanceof Error ? error.message : String(error)
-        }`
+        `failed to close #${issue.number} as a duplicate of #${suiteIssue.number}: ${errorMessage(
+          error
+        )}`
       );
       continue;
     }
@@ -94,6 +104,11 @@ export const handOver = async ({
       }`
     );
     closed.push(issue);
+    try {
+      await github.addIssueComment(issue.number, handOverComment(suiteIssue.number));
+    } catch (error) {
+      log.warning(`failed to comment on #${issue.number}: ${errorMessage(error)}`);
+    }
   }
   return closed;
 };

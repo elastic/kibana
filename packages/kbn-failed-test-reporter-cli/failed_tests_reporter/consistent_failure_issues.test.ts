@@ -9,6 +9,7 @@
 
 import { computeTestID } from '@kbn/scout-reporting';
 import { ToolingLog } from '@kbn/tooling-log';
+import { handOverComment } from '../flaky_test_issues/hand_over';
 import {
   MAX_NEW_ISSUES_PER_JOB,
   reportConsistentFailureIssues,
@@ -498,8 +499,10 @@ describe('reportConsistentFailureIssues', () => {
         [1, 1500],
         [2, 1500],
       ]);
-      // a comment would set off the failed-test Slack alert
-      expect(addIssueComment).not.toHaveBeenCalled();
+      expect(addIssueComment.mock.calls).toEqual([
+        [1, handOverComment(500)],
+        [2, handOverComment(500)],
+      ]);
       expect(summary.tracked).toEqual([]);
       expect(summary.handedOver).toEqual([
         'https://github.com/elastic/appex-qa-ai/issues/1',
@@ -523,7 +526,8 @@ describe('reportConsistentFailureIssues', () => {
       });
 
       expect(createIssue).not.toHaveBeenCalled();
-      expect(addIssueComment).not.toHaveBeenCalled();
+      // the break was posted 2 hours ago: the only comment is the one closing the per-test issue
+      expect(addIssueComment.mock.calls).toEqual([[3, handOverComment(42)]]);
       expect(closeAsDuplicate).toHaveBeenCalledWith(3, 1042);
       expect(summary.tracked).toEqual([{ filePath: SPEC, url: existing.html_url }]);
       expect(summary.handedOver).toEqual(['https://github.com/elastic/appex-qa-ai/issues/3']);

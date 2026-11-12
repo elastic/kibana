@@ -7,8 +7,11 @@ on:
 jobs:
   issue_alert:
     name: Alert on failed test
+    # The failed test reporter reopens an issue before commenting on a failure; a comment on a
+    # closed issue is the one it posts when closing a per-test issue in favor of a suite issue
     if: |
       !github.event.issue.pull_request
+      && github.event.issue.state == 'open'
       && (github.event.comment.user.login == 'kibanamachine' || github.event.comment.user.login == 'elasticmachine' || github.event.comment.user.login == 'infra-vault-gh-plugin-prod[bot]')
     runs-on: ubuntu-latest
     steps:

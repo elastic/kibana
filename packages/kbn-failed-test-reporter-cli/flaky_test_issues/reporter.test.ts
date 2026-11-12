@@ -14,6 +14,7 @@ import type {
   ListIssuesOptions,
 } from '../failed_tests_reporter/github_api';
 import { updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
+import { handOverComment } from './hand_over';
 import { readFlakySuiteIssueMetadata, renderFlakySuiteIssueBody } from './issue_body';
 import {
   issueLabels,
@@ -531,8 +532,15 @@ describe('reportFlakySuiteIssues', () => {
       expect(body).toContain('Possibly related: #7.');
       expect(github.closeAsDuplicate).toHaveBeenCalledTimes(1);
       expect(github.closeAsDuplicate).toHaveBeenCalledWith(43, 1900);
-      // a comment would set off the failed-test Slack alert
-      expect(github.addIssueComment).not.toHaveBeenCalled();
+      expect(github.addIssueComment).toHaveBeenCalledWith(
+        43,
+        'Now tracked in #900, together with the other tests of its suite. New failures will be ' +
+          'reported there, so this issue is closed as a duplicate.'
+      );
+      // closed first: the failed-test Slack alert and investigator skip comments on closed issues
+      expect(github.closeAsDuplicate.mock.invocationCallOrder[0]).toBeLessThan(
+        github.addIssueComment.mock.invocationCallOrder[0]
+      );
       expect(summary.actions).toEqual([
         {
           action: 'created',
@@ -554,6 +562,7 @@ describe('reportFlakySuiteIssues', () => {
       expect(github.createIssue).not.toHaveBeenCalled();
       expect(github.editIssue).toHaveBeenCalledWith(42, expect.anything());
       expect(github.closeAsDuplicate).toHaveBeenCalledWith(43, 1042);
+      expect(github.addIssueComment).toHaveBeenCalledWith(43, handOverComment(42));
       expect(summary.actions[0]).toMatchObject({
         action: 'updated',
         issue: { number: 42 },
@@ -616,6 +625,7 @@ describe('reportFlakySuiteIssues', () => {
 
       expect(summary.counts).toMatchObject({ created: 1, failed: 0 });
       expect(summary.actions[0]).not.toHaveProperty('handedOver');
+      expect(github.addIssueComment).not.toHaveBeenCalled();
     });
   });
 
