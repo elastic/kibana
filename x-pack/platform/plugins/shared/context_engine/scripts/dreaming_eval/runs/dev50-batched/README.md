@@ -22,6 +22,21 @@ Dreaming wrote 1,619 KIs (facts and entities; trace dreaming builds no relations
 
 single-session-assistant scores 0: those questions ask about what the assistant said, and the dreaming instructions keep what the user says.
 
+## Cost
+
+Dreaming's tokens come from the workflow step executions, and the answer agent's from its Agent Builder traces. The judges' tokens are estimated from their prompts, as the eval wrote them, at 3.5 characters a token. Costs are at list prices: Gemini 3.8 Flash $0.75 / $3.75 per million input / output tokens ($0.075 cached; the introductory price, doubling on January 1, 2027), Claude Opus 5.5 $4 / $20 ($0.20 cache reads; cache writes are not in the traces, so up to about $1 more), Claude Sonnet 4.6 $3 / $15, Claude Haiku 4.5 $1 / $5.
+
+| Stage | Model | LLM calls | Input tokens | Output tokens | Cost |
+| --- | --- | --- | --- | --- | --- |
+| Dreaming | Gemini 3.8 Flash | 50 | 7.97M (0.16M cached) | 0.85M | $9.07 |
+| Ask: answer agent | Claude Opus 5.5 (Agent Builder's default) | 215 | 4.06M (2.96M cache reads) | 42k | $5.84 |
+| Ask: conversation titles | Claude Haiku 4.5 | 50 | 45k | 2k | $0.06 |
+| Evaluate: KI judge | Claude Sonnet 4.6 | 50 | about 44k | about 3k | $0.18 |
+| Ask: answer judge | Claude Sonnet 4.6 | 50 | about 14k | about 2k | $0.08 |
+| **Total** | | | | | **about $15.20** |
+
+Per question: about 159k input and 17k output tokens of dreaming ($0.18), $0.12 for the answer agent and half a cent of judging. The reranker runs in the local Elasticsearch.
+
 ## How it ran
 
 On a local stack with Gemini 3.8 Flash dreaming (Kibana's default for Context Engine prompts), with trace dreaming batching rounds by conversation, up to 500k tokens a batch, run in parallel ([#304972](https://github.com/elastic/kibana/pull/304972) at `3936a6ff3bbd`). The eval script is the one of [#304953](https://github.com/elastic/kibana/pull/304953).
