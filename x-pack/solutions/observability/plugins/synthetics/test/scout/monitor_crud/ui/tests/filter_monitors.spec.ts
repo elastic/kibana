@@ -59,6 +59,17 @@ test.describe(
         await selectTagOption(FIRST_TAG);
         await selectTagOption(SECOND_TAG);
 
+        // Both picks must still be checked before Apply, otherwise Apply submits
+        // only the surviving tag and "Showing 1 Monitor" passes for the wrong reason.
+        await expect(page.getByRole('option', { name: FIRST_TAG })).toHaveAttribute(
+          'aria-checked',
+          'true'
+        );
+        await expect(page.getByRole('option', { name: SECOND_TAG })).toHaveAttribute(
+          'aria-checked',
+          'true'
+        );
+
         await page.testSubj.click('tagsLogicalOperatorSwitch');
         await page.testSubj.click('o11yFieldValueSelectionApplyButton');
         await expect(page.getByLabel('expands filter group for Tags filter')).toBeVisible();
