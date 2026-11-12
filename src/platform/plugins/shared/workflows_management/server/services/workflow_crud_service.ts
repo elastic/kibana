@@ -345,6 +345,8 @@ export class WorkflowCrudService {
     const operationWriteIndexes: number[] = [];
 
     for (const [writeIndex, { id, document, previous }] of writes.entries()) {
+      // Backstop for any caller. ManagedWorkflowsService is the main guard: it refuses bound
+      // workflows before writing.
       if (document.definition?.settings?.run_as || previous?.source.definition?.settings?.run_as) {
         results[writeIndex] = {
           status: 'failed',

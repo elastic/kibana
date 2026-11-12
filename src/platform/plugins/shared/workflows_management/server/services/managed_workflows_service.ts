@@ -640,6 +640,8 @@ export class ManagedWorkflowsService {
       existing: previous?.source,
     });
     // Static workflows install without a user request, and a binding can only change with one.
+    // This is the main guard, with a clear error per workflow. The check in
+    // bulkWriteWorkflowDocuments is a backstop.
     if (document.definition?.settings?.run_as || previous?.source.definition?.settings?.run_as) {
       throw new Error(
         `Managed workflow '${id}' as '${workflowDocumentId}' is bound to a service account (settings.run_as). Static workflows cannot be bound, because a binding needs a user request.`
