@@ -34,6 +34,7 @@ import type {
   EsWorkflowStepExecution,
   GetAvailableConnectorsResponse,
   ResumeWorkflowExecutionResponseDto,
+  TriggerSchemaOptions,
   UpdatedWorkflowResponseDto,
   ValidateWorkflowResponseDto,
   WorkflowAccessControlRole,
@@ -1734,6 +1735,11 @@ export class WorkflowsManagementApi {
 
   public async getRegisteredTriggers(): Promise<ServerTriggerDefinition[]> {
     return this.workflowsService.getRegisteredCustomTriggerDefinitions();
+  }
+
+  /** Trigger schema options from `workflowsManagement.pages.enabled`. */
+  public getTriggerSchemaOptions(): TriggerSchemaOptions {
+    return this.workflowsService.getTriggerSchemaOptions();
   }
 
   public async getWorkflowJsonSchema(

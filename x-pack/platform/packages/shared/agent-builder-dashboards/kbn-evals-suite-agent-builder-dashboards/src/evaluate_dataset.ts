@@ -8,7 +8,8 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { Conversation } from '@kbn/agent-builder-common';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
+import { DASHBOARD_ATTACHMENT_TYPE, isSection } from '@kbn/agent-builder-dashboards-common';
+import { VISUALIZATION_ATTACHMENT_TYPE } from '@kbn/agent-builder-visualizations-common';
 import {
   createTrajectoryEvaluator,
   getStringMeta,
@@ -31,6 +32,7 @@ import {
   dashboardCompositionOrderEvaluator,
   dashboardControlsEvaluator,
   dashboardLayoutRulesEvaluator,
+  dashboardPanelTitlesEvaluator,
   dashboardTitlesEvaluator,
 } from './evaluators/dashboard_rule_evaluators';
 import { dashboardRoutingEvaluator } from './evaluators/dashboard_routing';
@@ -42,7 +44,12 @@ import {
   enhanceModeQuestionEvaluator,
   enhanceNoRegressionEvaluator,
 } from './evaluators/enhance_evaluators';
+import { enhanceScopeEvaluator } from './evaluators/enhance_scope_evaluator';
 import { dashboardLayoutEditEvaluator } from './evaluators/layout_edit';
+import { dashboardPanelEditsEvaluator } from './evaluators/panel_edits';
+import { dashboardReplaceConfirmationEvaluator } from './evaluators/replace_confirmation';
+import { createReplyEvaluator } from './evaluators/reply_judge';
+import { createUnavailableRequestsEvaluator } from './evaluators/unavailable_requests';
 import {
   combineTurnSteps,
   findAskUserQuestionPrompt,
@@ -96,26 +103,35 @@ const useAgentTraceIds = (evaluator: Evaluator): DashboardAgentEvaluator => ({
   },
 });
 
-/** Answers an `ask_user_question` prompt with the option for `mode`, or free text if none fits. */
+/**
+ * Answers an `ask_user_question` prompt with the option for a mode, or free
+ * text when the answer is text or no option fits the mode.
+ */
 const answerModeQuestion = (
   prompt: AskUserQuestionPrompt,
-  mode: EnhanceMode
+  answer: EnhanceMode | { text: string }
 ): Record<string, unknown> => ({
   [prompt.id]: {
     answers: prompt.questions.map(({ options }, index) => {
       if (index > 0) {
         return { skipped: true };
       }
-      const choice = findModeOptionIndex(options, mode);
+      if (typeof answer !== 'string') {
+        return { custom: answer.text };
+      }
+      const choice = findModeOptionIndex(options, answer);
       return choice === -1
-        ? { custom: mode === 'appearance' ? 'Appearance only' : 'Appearance and content' }
+        ? { custom: answer === 'appearance' ? 'Appearance only' : 'Appearance and content' }
         : { choice: [choice] };
     }),
   },
 });
 
+/** Whether the turn must write a dashboard: not when nothing can be built, nor before the user confirms a replacement. */
 const expectsDashboard = (expected: DashboardDatasetExample['output']): boolean =>
-  expected?.route === 'dashboard' || expected?.enhance !== undefined;
+  (expected?.route === 'dashboard' && !expected.noDashboard && !expected.replaceConfirmation) ||
+  expected?.enhance !== undefined ||
+  expected?.scopedEnhance !== undefined;
 
 export function createEvaluateDataset({
   agentBuilderClient,
@@ -162,7 +178,13 @@ export function createEvaluateDataset({
     const seededDashboard = input?.dashboard;
     const seededResults = input?.esqlResults;
     const screenContext = input?.screenContext;
+    const visualizations = input?.visualizations ?? [];
     const attachments = [
+      ...visualizations.map(({ id, data }) => ({
+        id,
+        type: VISUALIZATION_ATTACHMENT_TYPE,
+        data: { ...data },
+      })),
       ...(seededDashboard
         ? [{ id: SEEDED_DASHBOARD_ID, type: DASHBOARD_ATTACHMENT_TYPE, data: seededDashboard }]
         : []),
@@ -191,7 +213,7 @@ export function createEvaluateDataset({
       ...(attachments.length > 0 ? { attachments } : {}),
     });
 
-    // Enhance examples answer the mode question the way a user would, by picking an option.
+    // Enhance examples answer the mode question the way a user would, by picking an option or typing.
     const modeQuestion = findAskUserQuestionPrompt(opening.prompts);
     const modeAnswer = input?.modeAnswer;
     const answer =
@@ -235,25 +257,67 @@ export function createEvaluateDataset({
       'Routing example; this evaluator scores produced dashboards only.'
     );
 
+  // A scoped enhance must leave the rest of the seeded dashboard, defects
+  // included, untouched; Enhance Scope scores it instead.
+  const wholeDashboardOnly = (evaluator: DashboardAgentEvaluator) =>
+    onlyWhen(
+      positiveOnly(evaluator),
+      (expected) => expected?.scopedEnhance === undefined,
+      'Scoped enhance example; this evaluator scores the whole dashboard.'
+    );
+
+  // On a scoped enhance, chart presentation is scored on the named panels only,
+  // by `scopedEvaluator` when the dashboard-level rules must not apply.
+  const namedPanelsWhenScoped = (
+    evaluator: DashboardAgentEvaluator,
+    scopedEvaluator: DashboardAgentEvaluator = evaluator
+  ): DashboardAgentEvaluator =>
+    positiveOnly({
+      ...evaluator,
+      evaluate: async (params) => {
+        const scope = params.expected?.scopedEnhance;
+        const { dashboard } = params.output;
+        if (!scope || !dashboard) {
+          return evaluator.evaluate(params);
+        }
+        const named = new Set(scope.panelIds);
+        const panels = dashboard.panels.flatMap((widget) => {
+          if (isSection(widget)) {
+            return widget.panels.filter(({ id }) => named.has(id));
+          }
+          return named.has(widget.id) ? [widget] : [];
+        });
+        return scopedEvaluator.evaluate({
+          ...params,
+          output: { ...params.output, dashboard: { ...dashboard, panels } },
+        });
+      },
+    });
+
   // Quality evaluators score 0..1 and get low-score logging; trace-based
   // evaluators report counts and seconds, so a "low" value means nothing there.
   const qualityEvaluators = [
     dashboardRoutingEvaluator,
-    positiveOnly(dashboardStructureEvaluator),
-    positiveOnly(dashboardTimeRangeEvaluator),
-    positiveOnly(dashboardLayoutRulesEvaluator),
-    positiveOnly(dashboardCompositionOrderEvaluator),
-    positiveOnly(dashboardTitlesEvaluator),
-    positiveOnly(dashboardChartStylingEvaluator),
-    positiveOnly(dashboardColorFormatEvaluator),
-    positiveOnly(dashboardControlsEvaluator),
-    positiveOnly(dashboardControlSourcingEvaluator),
-    positiveOnly(createControlQueriesEvaluator(esClient)),
+    wholeDashboardOnly(dashboardStructureEvaluator),
+    wholeDashboardOnly(dashboardTimeRangeEvaluator),
+    wholeDashboardOnly(dashboardLayoutRulesEvaluator),
+    wholeDashboardOnly(dashboardCompositionOrderEvaluator),
+    namedPanelsWhenScoped(dashboardTitlesEvaluator, dashboardPanelTitlesEvaluator),
+    namedPanelsWhenScoped(dashboardChartStylingEvaluator),
+    namedPanelsWhenScoped(dashboardColorFormatEvaluator),
+    wholeDashboardOnly(dashboardControlsEvaluator),
+    wholeDashboardOnly(dashboardControlSourcingEvaluator),
+    wholeDashboardOnly(createControlQueriesEvaluator(esClient)),
     enhanceModeQuestionEvaluator,
     enhanceModeComplianceEvaluator,
     enhanceDefectResolutionEvaluator,
     enhanceNoRegressionEvaluator,
+    enhanceScopeEvaluator,
     dashboardLayoutEditEvaluator,
+    dashboardPanelEditsEvaluator,
+    dashboardReplaceConfirmationEvaluator,
+    createUnavailableRequestsEvaluator(esClient),
+    createReplyEvaluator(evaluators),
     positiveOnly(trajectoryEvaluator),
   ].map((evaluator) => withLowScoreLogging(evaluator, log));
 

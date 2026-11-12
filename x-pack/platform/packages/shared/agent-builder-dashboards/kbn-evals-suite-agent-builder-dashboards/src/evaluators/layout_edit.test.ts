@@ -16,7 +16,7 @@ import {
   SECTIONED_LOGS_DASHBOARD_VISITORS_COLLAPSED,
 } from '../fixtures/sectioned_logs_dashboard';
 import { metric, panel } from '../test_helpers';
-import { TOP_LEVEL, type LayoutEditGold } from '../types';
+import { TOP_LEVEL, type ControlsGold, type LayoutEditGold } from '../types';
 import { dashboardLayoutEditEvaluator } from './layout_edit';
 
 const WRITE_STEP = {
@@ -47,11 +47,19 @@ const withoutPanel = (id: string) => (panels: AttachmentPanel[]) =>
 const evaluateEdit = (
   layoutEdit: LayoutEditGold | undefined,
   dashboard: DashboardAttachmentData,
-  { before = SECTIONED_LOGS_DASHBOARD, steps = [WRITE_STEP] } = {}
+  {
+    before = SECTIONED_LOGS_DASHBOARD,
+    steps = [WRITE_STEP],
+    controls,
+  }: {
+    before?: DashboardAttachmentData;
+    steps?: Array<Record<string, unknown>>;
+    controls?: ControlsGold;
+  } = {}
 ) =>
   dashboardLayoutEditEvaluator.evaluate({
     input: { question: 'q' },
-    expected: { layoutEdit },
+    expected: { layoutEdit, ...(controls ? { controls } : {}) },
     metadata: undefined,
     output: { errors: [], messages: [], steps, before, dashboard },
   });
@@ -113,6 +121,25 @@ describe('dashboard layout edit evaluator', () => {
       before: SECTIONED_LOGS_DASHBOARD_VISITORS_COLLAPSED,
     });
     expect(expanded.explanation).toBe('collapsed: expanded [visitors]');
+  });
+
+  it('fails controls the edit dropped or changed', async () => {
+    const [, ...rest] = SECTIONED_LOGS_DASHBOARD.pinned_panels ?? [];
+    const result = await evaluateEdit(removeTopUrls, {
+      ...edit(inSection('traffic', withoutPanel('top-urls'))),
+      pinned_panels: rest,
+    });
+    expect(result.explanation).toContain('controls: controls [machine.os.keyword-options_list, ');
+  });
+
+  it('leaves controls to the control evaluators when the prompt edits them', async () => {
+    const [, ...rest] = SECTIONED_LOGS_DASHBOARD.pinned_panels ?? [];
+    const result = await evaluateEdit(
+      { changes: [] },
+      { ...SECTIONED_LOGS_DASHBOARD, pinned_panels: rest },
+      { controls: { requested: true, mappedFields: [], mustExclude: ['machine.os.keyword'] } }
+    );
+    expect(result.score).toBe(1);
   });
 
   it('checks where the prompt puts an added panel', async () => {

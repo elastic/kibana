@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 
 const nightshiftPageTitle = i18n.translate('xpack.nightshift.pageTitle', {
-  defaultMessage: 'Nightshift',
+  defaultMessage: 'Elastic nightshift',
 });
 
 const automationsLabel = i18n.translate('xpack.nightshift.automationsLabel', {
@@ -137,6 +137,7 @@ export function NightshiftAppHeader({
   back,
 }: NightshiftAppHeaderProps): React.ReactElement {
   const isLandingPage = page === 'landing';
+  const isAutomationsPage = page === 'automations';
   const isDetectionPage = page === 'detection';
   const menu = useMemo<AppMenuConfig>(
     () => ({
@@ -174,7 +175,7 @@ export function NightshiftAppHeader({
               {
                 id: 'nightshiftDetections',
                 label: detectionsLabel,
-                iconType: 'visGauge' as const,
+                iconType: 'radar' as const,
                 href: detectionsHref,
                 run: (params?: AppMenuRunActionParams) => {
                   applyEbtProps(detectionsEbtProps, params);
@@ -218,7 +219,7 @@ export function NightshiftAppHeader({
             ]
           : []),
 
-        // Detections: Sources and Settings as buttons.
+        // Detections: Sources as a button.
         ...(isDetectionPage && onSourcesClick && sourcesHref
           ? [
               {
@@ -234,7 +235,8 @@ export function NightshiftAppHeader({
               },
             ]
           : []),
-        ...(isDetectionPage && onSettingsClick && settingsHref
+        // Detections and Automations: Settings as a button.
+        ...((isDetectionPage || isAutomationsPage) && onSettingsClick && settingsHref
           ? [
               {
                 id: 'nightshiftSettings',
@@ -256,6 +258,7 @@ export function NightshiftAppHeader({
     [
       automationsHref,
       detectionsHref,
+      isAutomationsPage,
       isDetectionPage,
       isLandingPage,
       knowledgeHref,

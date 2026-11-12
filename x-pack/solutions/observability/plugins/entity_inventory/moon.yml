@@ -18,17 +18,24 @@ project:
   sourceRoot: x-pack/solutions/observability/plugins/entity_inventory
 dependsOn:
   - '@kbn/core'
+  - '@kbn/core-security-server'
   - '@kbn/config-schema'
   - '@kbn/entity-store'
   - '@kbn/es-types'
+  - '@kbn/logging-mocks'
+  - '@kbn/scout-oblt'
+  - '@kbn/server-route-repository'
+  - '@kbn/zod'
 tags:
   - plugin
   - prod
   - group-observability
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - server/**/*
+    - test/scout*/**/*
     - '!target/**/*'
 tasks: {}

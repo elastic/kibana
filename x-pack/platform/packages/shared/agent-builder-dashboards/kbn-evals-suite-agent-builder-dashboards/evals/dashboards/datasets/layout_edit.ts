@@ -118,6 +118,13 @@ export const DASHBOARD_LAYOUT_EDIT_EXAMPLES: DashboardDatasetExample[] = [
   layoutEditExample({
     question: 'make the requests over time chart red and rename it to "Requests"',
     layoutEdit: { changes: [], changed: ['requests-over-time'] },
+    panelEdits: [
+      {
+        panel: 'requests-over-time',
+        config: { type: 'xy', title: 'Requests' },
+        color: 'red',
+      },
+    ],
   }),
   layoutEditExample({
     question:
@@ -127,6 +134,10 @@ export const DASHBOARD_LAYOUT_EDIT_EXAMPLES: DashboardDatasetExample[] = [
       changed: ['intro'],
       placements: [{ item: 'response-codes', kind: 'data_table' }],
     },
+    panelEdits: [
+      { panel: 'response-codes', config: { type: 'data_table' } },
+      { panel: 'intro', type: 'markdown', bulletList: true },
+    ],
   }),
   layoutEditExample({
     question:
