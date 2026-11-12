@@ -19,6 +19,29 @@ export const capAtMaxLogsPerWindow = (value: number, maxLogsPerWindow: number): 
   maxLogsPerWindow > 0 ? Math.min(value, maxLogsPerWindow) : value;
 
 /**
+ * Raw-log page target for a slice sampled at `rate`, scaled by `1 / rate` so the slice retains
+ * about `maxLogsPerPage` rows at any rate and slice count stops depending on the rate.
+ *
+ * The window cap counts retained rows, so it is converted to the same raw denomination before
+ * clamping, or it would clamp the scaling away. A rate that is not a real fraction (1 included,
+ * which emits no `SAMPLE` stage) returns the unscaled limit.
+ */
+export const scaleMaxLogsPerPageForRate = (
+  maxLogsPerPage: number,
+  maxLogsPerWindow: number,
+  rate: number
+): number => {
+  if (!(rate > 0) || rate >= 1) {
+    return capAtMaxLogsPerWindow(maxLogsPerPage, maxLogsPerWindow);
+  }
+
+  return capAtMaxLogsPerWindow(
+    Math.round(maxLogsPerPage / rate),
+    maxLogsPerWindow > 0 ? Math.round(maxLogsPerWindow / rate) : maxLogsPerWindow
+  );
+};
+
+/**
  * Minimum number of retained (sampled) rows needed for the probe's accuracy guarantee to hold —
  * relative boundary error ≈ 1/√k. See `probe_benchmark/report.html` ("Choosing the sampling
  * probability p") for the validation behind this value.
