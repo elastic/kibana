@@ -18,30 +18,47 @@ import {
 
 const logger = loggingSystemMock.createLogger();
 
+type CspAdditionalConfig = ConstructorParameters<typeof CspConfig>[1];
+
+// What core adds to the traditional build when no `csp.img_src` is configured. The
+// "treats the build flavor defaults as unchanged" test fails if this drifts from core.
+const TRADITIONAL_DEFAULTS: CspAdditionalConfig = {
+  font_src: [`'self'`, 'data:'],
+  img_src: ['data:', 'blob:', 'https:', 'http:'],
+  media_src: [`'self'`, 'kibana.estccdn.com'],
+};
+
 describe('csp collector', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createSetupContract>;
   // changed for consistency with expected implementation
   const mockedFetchContext = createCollectorFetchContextMock();
 
-  function updateCsp(config: Partial<ICspConfig> & { img_src?: string[] }) {
-    httpMock.csp = new CspConfig({
-      ...CspConfig.DEFAULT,
-      form_action: [],
-      worker_src: [],
-      script_src: [],
-      style_src: [],
-      connect_src: [],
-      default_src: [],
-      font_src: [],
-      frame_src: [],
-      img_src: [],
-      object_src: [],
-      media_src: [],
-      frame_ancestors: [],
-      report_uri: [],
-      report_to: [],
-      ...config,
-    });
+  // Builds the config the way `HttpConfig` does: the `csp.*` settings plus the build flavor additions
+  function updateCsp(
+    config: Partial<ICspConfig> & { img_src?: string[] },
+    ...moreConfigs: CspAdditionalConfig[]
+  ) {
+    httpMock.csp = new CspConfig(
+      {
+        ...CspConfig.DEFAULT,
+        form_action: [],
+        worker_src: [],
+        script_src: [],
+        style_src: [],
+        connect_src: [],
+        default_src: [],
+        font_src: [],
+        frame_src: [],
+        img_src: [],
+        object_src: [],
+        media_src: [],
+        frame_ancestors: [],
+        report_uri: [],
+        report_to: [],
+        ...config,
+      },
+      ...moreConfigs
+    );
   }
 
   beforeEach(() => {
@@ -72,23 +89,26 @@ describe('csp collector', () => {
 
     expect((await collector.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(false);
 
-    updateCsp({ disableEmbedding: true });
+    updateCsp({ disableEmbedding: true }, TRADITIONAL_DEFAULTS);
     expect((await collector.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(true);
   });
 
   test('treats the build flavor defaults as unchanged', async () => {
-    const serverless = new Collector(logger, createCspCollector(httpMock, 'serverless'));
-    httpMock.csp = CspConfig.forBuildFlavor('serverless');
-    expect((await serverless.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(false);
-
     const traditional = new Collector(logger, createCspCollector(httpMock, 'traditional'));
+    updateCsp({}, TRADITIONAL_DEFAULTS);
+    expect((await traditional.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(false);
+
+    const serverless = new Collector(logger, createCspCollector(httpMock, 'serverless'));
+    updateCsp({});
+    expect((await serverless.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(false);
     expect((await traditional.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(true);
   });
 
   test('flags a configured csp.img_src as changed from the default', async () => {
     const collector = new Collector(logger, createCspCollector(httpMock, 'traditional'));
 
-    updateCsp({ img_src: ['logos.example.test'] });
+    // With `csp.img_src` set, core drops its img-src defaults and keeps the font and media ones
+    updateCsp({ img_src: ['logos.example.test'] }, { ...TRADITIONAL_DEFAULTS, img_src: [] });
     expect((await collector.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(true);
   });
 
