@@ -9,17 +9,29 @@ import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { TAIL_SAMPLING_SAVED_OBJECT_TYPE } from '../../common/apm_saved_object_constants';
 
+// Long enough for processor names such as 'adaptive_tail_sampling'.
+const MAX_PROCESSOR_LENGTH = 64;
+
 /**
  * These schemas only check that the stored keys exist and have the right type.
- * Rules such as "sample rate is between 0 and 100" belong to the route validator:
- * a rule here could make an already stored document fail on read.
+ * Allowed processors and the contents of the config are checked by the route
+ * validator: a rule here could make an already stored document fail on read.
  */
 const tailSamplingAttributes = {
   enabled: schema.boolean(),
-  // The ordered policy list, serialized as JSON.
-  policiesJson: schema.string(),
-  // Hash of `policiesJson`, used as the ETag when the collector polls.
-  policiesHash: schema.string(),
+  /**
+   * The tail-sampling processor the project uses, for example 'tail_sampling'.
+   * A project uses exactly one processor at a time. Kept as a plain string, so a
+   * new processor (such as 'adaptive_tail_sampling') needs no model version.
+   */
+  processor: schema.string({ maxLength: MAX_PROCESSOR_LENGTH }),
+  /**
+   * The processor's config as JSON, for example {"policies":[...]} for 'tail_sampling'.
+   * Stored in normalized form: object keys sorted, array order kept.
+   */
+  configJson: schema.string(),
+  // Hash of the config, compared with the rollout status hashes.
+  configHash: schema.string(),
   updatedBy: schema.maybe(schema.string()),
 };
 
@@ -30,8 +42,8 @@ export const tailSamplingForwardCompatibilitySchema = schema.object(tailSampling
 });
 
 /**
- * One document for the whole project, not one per Kibana space, because the
- * collector that polls it has no space to choose. Hence `agnostic`.
+ * One document for the whole project, not one per Kibana space: the sampler runs
+ * once per project and traces have no space. Hence `agnostic`.
  */
 export const tailSampling: SavedObjectsType = {
   name: TAIL_SAMPLING_SAVED_OBJECT_TYPE,

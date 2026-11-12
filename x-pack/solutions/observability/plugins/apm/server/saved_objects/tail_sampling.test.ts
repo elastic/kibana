@@ -13,8 +13,9 @@ import {
 
 const validAttributes = {
   enabled: true,
-  policiesJson: JSON.stringify([{ name: 'keep-errors', type: 'status_code' }]),
-  policiesHash: 'abc123',
+  processor: 'tail_sampling',
+  configJson: JSON.stringify({ policies: [{ name: 'keep-errors', type: 'status_code' }] }),
+  configHash: 'abc123',
 };
 
 describe('tailSampling saved object type', () => {
@@ -36,9 +37,28 @@ describe('tailSampling saved object type', () => {
       ).not.toThrow();
     });
 
-    it.each(['enabled', 'policiesJson', 'policiesHash'])('rejects a missing %s', (key) => {
-      const { [key]: _removed, ...rest } = validAttributes as Record<string, unknown>;
-      expect(() => tailSamplingCreateSchema.validate(rest)).toThrow();
+    it.each(['enabled', 'processor', 'configJson', 'configHash'])(
+      'rejects a missing %s',
+      (key) => {
+        const { [key]: _removed, ...rest } = validAttributes as Record<string, unknown>;
+        expect(() => tailSamplingCreateSchema.validate(rest)).toThrow();
+      }
+    );
+
+    it('accepts any processor name, so a new processor needs no model version', () => {
+      expect(() =>
+        tailSamplingCreateSchema.validate({
+          ...validAttributes,
+          processor: 'adaptive_tail_sampling',
+          configJson: JSON.stringify({ rules: [] }),
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects a processor name over the length limit', () => {
+      expect(() =>
+        tailSamplingCreateSchema.validate({ ...validAttributes, processor: 'p'.repeat(65) })
+      ).toThrow();
     });
 
     it('rejects unknown keys', () => {
