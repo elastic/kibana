@@ -1009,6 +1009,34 @@ describe('ui settings', () => {
         expect(soClientA.get).toHaveBeenCalledTimes(1);
         expect(soClientB.get).toHaveBeenCalledTimes(1);
       });
+
+      it('does not share a forbidden in-flight read with another caller', async () => {
+        const sharedCache = new NamespacedCache<Record<string, any>>();
+        const { uiSettings: clientA, savedObjectsClient: soClientA } = setupWithSharedCache({
+          sharedCache,
+        });
+        const { uiSettings: clientB, savedObjectsClient: soClientB } = setupWithSharedCache({
+          sharedCache,
+          esDocSource: { foo: 'from-b' },
+        });
+
+        let rejectReadA: (error: Error) => void = () => {};
+        soClientA.get.mockReturnValue(
+          new Promise((_resolve, reject) => {
+            rejectReadA = reject;
+          }) as any
+        );
+
+        const readA = clientA.getUserProvided();
+        expect(sharedCache.getInflightRead('default')).not.toBeNull();
+        const readB = clientB.getUserProvided();
+        rejectReadA(SavedObjectsClient.errors.decorateForbiddenError(new Error()));
+
+        await expect(readA).resolves.toStrictEqual({});
+        await expect(readB).resolves.toEqual({ foo: { userValue: 'from-b' } });
+        expect(soClientA.get).toHaveBeenCalledTimes(1);
+        expect(soClientB.get).toHaveBeenCalledTimes(1);
+      });
     });
 
     describe('ignorable read errors', () => {
