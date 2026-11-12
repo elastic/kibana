@@ -3,6 +3,11 @@
 set -euo pipefail
 
 # Usage: trigger_from_pr.sh <pipeline-slug>
+#
+# Starts a build of a *-from-pr pipeline for the current PR, e.g. to run work that needs
+# credentials only that pipeline is granted. Unlike a native `trigger` step, this sets the
+# build's pull request fields (so fork PRs check out refs/pull/<N>/head) and forwards the
+# GITHUB_PR_* context (labels, PR number) the child pipeline uses to decide what to run.
 PIPELINE_SLUG="$1"
 
 echo "--- Trigger $PIPELINE_SLUG"
