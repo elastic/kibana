@@ -79,9 +79,41 @@ const SESSIONS_LIST_LABEL = i18n.translate(
   { defaultMessage: 'Sessions list' }
 );
 
-/** Whether the sessions list shows beside a session, kept across visits. */
+/**
+ * Where the sessions list shows beside a session, kept across visits. A value stored before the
+ * list could move, `open`, falls back to the left, where it was.
+ */
 const RAIL_STORAGE_KEY = 'digitalExperience.sessionDetail.rail';
-const RAIL_STATES = ['open', 'hidden'] as const;
+const RAIL_PLACEMENTS = ['left', 'right', 'hidden'] as const;
+type RailPlacement = (typeof RAIL_PLACEMENTS)[number];
+
+const RAIL_PLACEMENT_OPTIONS: ReadonlyArray<{
+  placement: RailPlacement;
+  label: string;
+  iconType: string;
+}> = [
+  {
+    placement: 'left',
+    label: i18n.translate('xpack.digitalExperience.sessionDetail.sessionsList.showLeft', {
+      defaultMessage: 'Show on the left',
+    }),
+    iconType: 'transitionLeftIn',
+  },
+  {
+    placement: 'right',
+    label: i18n.translate('xpack.digitalExperience.sessionDetail.sessionsList.showRight', {
+      defaultMessage: 'Show on the right',
+    }),
+    iconType: 'transitionRightIn',
+  },
+  {
+    placement: 'hidden',
+    label: i18n.translate('xpack.digitalExperience.sessionDetail.sessionsList.hide', {
+      defaultMessage: 'Hide',
+    }),
+    iconType: 'eyeSlash',
+  },
+];
 
 const OPEN_IN_DISCOVER_LABEL = i18n.translate(
   'xpack.digitalExperience.sessionDetail.openInDiscoverLabel',
@@ -320,8 +352,13 @@ export function SessionDetailPage({
   const { query } = useDigitalExperienceParams('/{serviceName}/sessions/{sessionId}');
   const { overviewHref, sessionsHref } = useApplicationLinks(serviceName, query.source);
   const backHref = sessionsHref(pickSessionsListQuery(query));
-  const [railState, setRailState] = usePersistedChoice(RAIL_STORAGE_KEY, RAIL_STATES, 'open');
-  const railOpen = railState === 'open';
+  const [railPlacement, setRailPlacement] = usePersistedChoice(
+    RAIL_STORAGE_KEY,
+    RAIL_PLACEMENTS,
+    'left'
+  );
+  const railOpen = railPlacement !== 'hidden';
+  const railSide = railPlacement === 'right' ? 'right' : 'left';
   // The list takes the width of the side navigation while it shows.
   useHideSideNav(railOpen);
 
@@ -471,12 +508,14 @@ export function SessionDetailPage({
   return (
     <SessionSplitView
       railOpen={railOpen}
+      railSide={railSide}
       rail={
         <SessionsRail
           serviceName={serviceName}
           sessionId={sessionId}
           source={query.source}
-          onHide={() => setRailState('hidden')}
+          side={railSide}
+          onHide={() => setRailPlacement('hidden')}
           headerHeight={headerHeight || undefined}
         />
       }
@@ -498,11 +537,24 @@ export function SessionDetailPage({
                   id: 'sessionsList',
                   order: 1,
                   label: SESSIONS_LIST_LABEL,
-                  iconType: railOpen ? 'transitionLeftOut' : 'transitionLeftIn',
+                  iconType: railSide === 'right' ? 'transitionRightIn' : 'transitionLeftIn',
                   isSelected: railOpen,
-                  run: () => setRailState(railOpen ? 'hidden' : 'open'),
                   testId: 'digitalExperienceSessionsListToggle',
-                  ebt: { action: DIGITAL_EXPERIENCE_EBT_ACTIONS.TOGGLE_SESSIONS_LIST },
+                  popoverTestId: 'digitalExperienceSessionsListPlacement',
+                  // Where the list shows, or that it doesn't.
+                  items: RAIL_PLACEMENT_OPTIONS.map(({ placement, label, iconType }, index) => ({
+                    id: `sessionsList-${placement}`,
+                    order: index + 1,
+                    label,
+                    iconType,
+                    isSelected: railPlacement === placement,
+                    run: () => setRailPlacement(placement),
+                    testId: `digitalExperienceSessionsListPlacement-${placement}`,
+                    ebt: {
+                      action: DIGITAL_EXPERIENCE_EBT_ACTIONS.TOGGLE_SESSIONS_LIST,
+                      detail: placement,
+                    },
+                  })),
                 },
                 ...(discoverHref
                   ? [

@@ -212,12 +212,15 @@ export function SessionsRail({
   serviceName,
   sessionId,
   source,
+  side,
   onHide,
   headerHeight,
 }: {
   serviceName: string;
   sessionId: string;
   source: ApplicationSource;
+  /** The side of the session the list shows on, which its hide button points to. */
+  side: 'left' | 'right';
   onHide: () => void;
   /** The height of the session's page header, which the list's header matches. */
   headerHeight?: number;
@@ -293,7 +296,7 @@ export function SessionsRail({
           <EuiFlexItem grow={false}>
             <EuiToolTip content={HIDE_LABEL} disableScreenReaderOutput>
               <EuiButtonIcon
-                iconType="transitionLeftOut"
+                iconType={side === 'right' ? 'transitionRightOut' : 'transitionLeftOut'}
                 aria-label={HIDE_LABEL}
                 onClick={onHide}
                 data-test-subj="digitalExperienceSessionsRailHide"

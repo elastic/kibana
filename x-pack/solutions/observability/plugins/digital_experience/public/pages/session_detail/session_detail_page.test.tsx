@@ -199,6 +199,15 @@ const mockChrome = {
 };
 const mockGetRedirectUrl = jest.fn(() => '/app/discover#/?esql');
 
+/** Opens the header's Sessions list menu, which may sit in the menu's overflow. */
+const openSessionsListMenu = async () => {
+  if (!screen.queryByTestId('digitalExperienceSessionsListToggle')) {
+    await openAppMenuOverflow();
+  }
+  fireEvent.click(screen.getByTestId('digitalExperienceSessionsListToggle'));
+  await screen.findByTestId('digitalExperienceSessionsListPlacement-left');
+};
+
 /** The page as its route renders it, with the session from the URL. */
 function SessionRoute() {
   const {
@@ -588,9 +597,47 @@ describe('SessionDetailPage', () => {
     expect(screen.queryByTestId('digitalExperienceSessionsRail')).not.toBeInTheDocument();
     expect(window.localStorage.getItem('digitalExperience.sessionDetail.rail')).toBe('"hidden"');
 
-    await openAppMenuOverflow();
-    fireEvent.click(screen.getByTestId('digitalExperienceSessionsListToggle'));
+    await openSessionsListMenu();
+    fireEvent.click(screen.getByTestId('digitalExperienceSessionsListPlacement-left'));
     expect(await screen.findByTestId('digitalExperienceSessionsRail')).toBeInTheDocument();
+  });
+
+  it('shows the sessions list on the right when asked, and remembers it', async () => {
+    mockDetail.mockResolvedValue(detail());
+    renderPage();
+
+    await screen.findByTestId('digitalExperienceSessionsRail');
+    expect(screen.getByTestId('digitalExperienceSessionSplitView')).toHaveAttribute(
+      'data-rail-side',
+      'left'
+    );
+
+    await openSessionsListMenu();
+    fireEvent.click(screen.getByTestId('digitalExperienceSessionsListPlacement-right'));
+
+    expect(screen.getByTestId('digitalExperienceSessionSplitView')).toHaveAttribute(
+      'data-rail-side',
+      'right'
+    );
+    // After the session, in the layout.
+    expect(
+      screen
+        .getByTestId('digitalExperienceSessionPage')
+        .compareDocumentPosition(await screen.findByTestId('digitalExperienceSessionsRail'))
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(window.localStorage.getItem('digitalExperience.sessionDetail.rail')).toBe('"right"');
+  });
+
+  it('shows the list on the left for a choice stored before it could move', async () => {
+    window.localStorage.setItem('digitalExperience.sessionDetail.rail', '"open"');
+    mockDetail.mockResolvedValue(detail());
+    renderPage();
+
+    await screen.findByTestId('digitalExperienceSessionsRail');
+    expect(screen.getByTestId('digitalExperienceSessionSplitView')).toHaveAttribute(
+      'data-rail-side',
+      'left'
+    );
   });
 
   it('collapses the project side navigation while the list shows, and restores it', async () => {

@@ -34,10 +34,13 @@ const containerCss = css({
  */
 export function SessionSplitView({
   railOpen,
+  railSide,
   rail,
   children,
 }: {
   railOpen: boolean;
+  /** The side of the session the list shows on. */
+  railSide: 'left' | 'right';
   rail: ReactNode;
   children: ReactNode;
 }) {
@@ -53,12 +56,15 @@ export function SessionSplitView({
 
   return (
     <EuiResizableContainer
+      // Panels register in order, so moving the list to the other side lays them out anew.
+      key={railSide}
       css={containerCss}
       data-test-subj="digitalExperienceSessionSplitView"
+      data-rail-side={railSide}
       onPanelWidthChange={(sizes) => setSavedWidth(clampWidth(sizes[RAIL_PANEL_ID]))}
     >
-      {(EuiResizablePanel, EuiResizableButton) => (
-        <>
+      {(EuiResizablePanel, EuiResizableButton) => {
+        const railPanel = (
           <EuiResizablePanel
             id={RAIL_PANEL_ID}
             size={railWidth}
@@ -68,7 +74,8 @@ export function SessionSplitView({
           >
             {rail}
           </EuiResizablePanel>
-          <EuiResizableButton />
+        );
+        const detailPanel = (
           <EuiResizablePanel
             id={DETAIL_PANEL_ID}
             size={100 - railWidth}
@@ -77,8 +84,21 @@ export function SessionSplitView({
           >
             {children}
           </EuiResizablePanel>
-        </>
-      )}
+        );
+        return railSide === 'right' ? (
+          <>
+            {detailPanel}
+            <EuiResizableButton />
+            {railPanel}
+          </>
+        ) : (
+          <>
+            {railPanel}
+            <EuiResizableButton />
+            {detailPanel}
+          </>
+        );
+      }}
     </EuiResizableContainer>
   );
 }
