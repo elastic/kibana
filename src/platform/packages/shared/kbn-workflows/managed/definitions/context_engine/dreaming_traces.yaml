@@ -93,7 +93,7 @@ steps:
       after: '{% if inputs.since == blank %}{{ steps.last_output.output.context.output.resume_after }}{% endif %}'
       size: 1000
       max_tokens: 600000
-      batch_tokens: 100000
+      batch_tokens: 50000
 
   - name: active
     type: data.set
