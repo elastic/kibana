@@ -1,6 +1,6 @@
 version: '1'
 name: __NAME__
-description: 'Extracts long-term facts and entities from one batch of agent rounds, for trace dreaming, which runs the batches of a read at once.'
+description: 'Extracts long-term facts and entities from one batch of agent rounds, for trace dreaming, which runs the batches of a read one after another.'
 enabled: false
 tags:
   - context-engine
@@ -113,11 +113,13 @@ steps:
 
         You are given ROUNDS (transcripts of agent rounds rebuilt from traces), whole conversations at a time, and EXISTING long-term items.
 
-        A round is one exchange: a user message, the tools the agent called with what they returned, and the agent's answer. Each line starts with who it is from: User, Assistant, "Assistant called <tool>" or "Tool result". Take from a round only what it states or settles: what the user says about themselves, their work, their preferences and their data, and what the tool results and the answer establish. Do not record what the agent only suggested, guessed or asked, small talk, a one-off request, or a step of a task that does not stay true afterwards. A tool result is evidence; a failed or empty one establishes nothing.
+        A round is one exchange: a user message, the tools the agent called with what they returned, and the agent's answer. Each line starts with who it is from: User, Assistant, "Assistant called <tool>" or "Tool result". Take from a round what it states or settles: what the user says about themselves, their work, their preferences and their data, and what the tool results and the answer establish. What the user mentions in passing while asking for something else, such as what they own, a count, a price or something they did, counts as much as what they say on purpose. When the INSTRUCTIONS or the types call for it, also record what the agent's answer gave the user that they may come back to, such as a recommendation, a list, a schedule or a figure, as what the agent told the user. Do not record what the agent only guessed or asked, small talk, the one-off request itself (but do record what it reveals), or a step of a task that does not stay true afterwards. A tool result is evidence; a failed or empty one establishes nothing.
+
+        Record every piece of knowledge in the ROUNDS that a configured type covers, the small ones too, not only the main topic of a conversation: a later question can be about any of them.
 
         Return only changes. Update an existing item by repeating its id as ref with the new values; create one with a new key like "new:1"; delete one with delete: true.
 
-        Merge rather than duplicate: if a round restates or refines an existing item, update that item. When a round shows an existing item is no longer true, update or delete it.
+        Merge rather than duplicate: if a round restates or refines an existing item, update that item. When a round shows an existing item is no longer true, update or delete it. When a round changes a value an item holds, such as a count, an amount, a measurement or a goal, write the new value and keep the earlier one with when it held, such as "gets 28 miles per gallon as of May 2023, down from 30 in February 2023"; do the same when later ROUNDS change a value earlier ones gave.
 
         When a round restates or confirms an existing item, return its ref with that round in source_memory_ids even if nothing else changes: that records that it was seen again. Each EXISTING item shows attributes["memory.number_of_occurrences"], how many sources it was seen in, and attributes["memory.last_seen_at"], when it was last seen.
         {%- if consts.fact_types.size > 0 %}
