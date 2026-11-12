@@ -37,7 +37,7 @@ const serverPlugin = Package.fromManifest(
   repoRoot,
   Path.resolve(
     repoRoot,
-    'x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client/kibana.jsonc'
+    'x-pack/platform/test_plugins/plugin_api_integration/elasticsearch_client/kibana.jsonc'
   )
 );
 
