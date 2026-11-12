@@ -15,6 +15,7 @@ An entry with `unreadable: true` is a parent the user's `gh` cannot read (privat
      - The title is a bucket: "milestones", "Meta Task", "GA tasks", "tasks before GA", "phases", a release or version, "roadmap", "tracking".
      - The type is `Initiative`, or the body only says it tracks other work.
      - Its `children` are different functionalities that would each get their own plan (for example EQL support, notes, pinned events and flyouts under one parent).
+   - **Not a functionality:** the ancestor itself matches N1 or N2 in `rules.md` (for example a "Tech debt" or "Bug fixes" epic whose other children are refactors and bugs). Stop, and do not suggest it or anything above it.
    - **Unclear:** stop climbing, show the whole chain, and ask the user which level they want (rule A4).
    - **Unreadable:** stop climbing. You cannot tell what it is, so never suggest it; say the chain continues above it and that you could not read it.
 3. The suggested level is the last ancestor you reached before stopping. If you stopped at the first ancestor, there is no suggested level: the target stands on its own.
@@ -32,12 +33,12 @@ An entry with `unreadable: true` is a parent the user's `gh` cannot read (privat
 | Yes | none | the target |
 | Yes | an ancestor | only the ancestor; say its plan covers the target, so labeling both would make two overlapping plans |
 | No (N4) | an ancestor | only the ancestor |
-| No (N4) | none (the parent is already an umbrella) | none; say the slice has no level to attach to and ask whether the target should get its own plan after all |
+| No (N4) | none (the parent is already an umbrella or not a functionality) | none; say the slice has no level to attach to and ask whether the target should get its own plan after all |
 | No (N3, the issue is the testing work) | an ancestor | only the ancestor: the plan belongs to the work being tested |
 | No (N1, N2, N5) | any | none; a bug, a chore or a flag says nothing about whether its parent needs a plan |
 | Need your input | any | none until the question is answered |
 
-In **Hierarchy**, show every ancestor from the root down to the target, mark umbrellas with "(umbrella)", closed ones with "(closed)", labeled ones with "(labeled)", and unreadable ones with "(unreadable)".
+In **Hierarchy**, show every ancestor from the root down to the target, mark umbrellas with "(umbrella)", ancestors that are not a functionality with "(not a functionality)", closed ones with "(closed)", labeled ones with "(labeled)", and unreadable ones with "(unreadable)".
 
 ## Example
 

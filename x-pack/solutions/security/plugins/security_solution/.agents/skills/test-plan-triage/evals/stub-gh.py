@@ -3,7 +3,8 @@
 
 Serves GET requests for issues, sub-issues and comments from fixtures/issues.json
 (STUB_FIXTURES overrides the path). Every other request fails, so a stray write
-cannot succeed.
+cannot succeed. When TEST_PLAN_TRIAGE_WRITE_LOG is set, every request path is also
+appended to requests.log next to it, for score.py.
 """
 import json
 import os
@@ -42,8 +43,16 @@ def to_api(ref, data, fixtures):
     return issue
 
 
+def log_request(args):
+    write_log = os.environ.get("TEST_PLAN_TRIAGE_WRITE_LOG")
+    if write_log:
+        with open(Path(write_log).parent / "requests.log", "a", encoding="utf-8") as log:
+            log.write(" ".join(args[1:]) + "\n")
+
+
 def main():
     args = sys.argv[1:]
+    log_request(args)
     if not args or args[0] != "api" or "--method" in args or "-X" in args:
         fail("stub-gh: only `gh api` GET requests are simulated (read-only)")
     path = args[-1]

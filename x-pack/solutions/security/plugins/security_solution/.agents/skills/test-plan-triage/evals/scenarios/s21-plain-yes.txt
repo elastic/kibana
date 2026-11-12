@@ -1,0 +1,14 @@
+(Context: earlier in this conversation the user asked whether elastic/security-team#912101 needs a test plan. You ran `context`, and you showed this decision and stopped:
+
+**Issue:** [elastic/security-team#912101](https://github.com/elastic/security-team/issues/912101) — [Endpoint] Restrict response actions to selected roles per policy
+**Decision:** Yes — S1: adds a role picker per response action in the Elastic Defend policy, disables the actions in the response console and returns 403 from the API
+**Hierarchy:** standalone
+**Suggested level for a test plan:** none — standalone
+**Proposed label changes:**
+- add `Needs Test Plan` to [elastic/security-team#912101](https://github.com/elastic/security-team/issues/912101)
+**Recorded on the issue:** none — the decision is Yes, not a No
+
+Reply "yes" to apply the label changes above, or tell me which ones to apply.)
+
+The user's new message is:
+yes

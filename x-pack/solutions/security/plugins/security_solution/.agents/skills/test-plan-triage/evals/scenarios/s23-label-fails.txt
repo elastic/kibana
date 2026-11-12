@@ -1,0 +1,14 @@
+(Context: earlier in this conversation the user asked whether elastic/kibana#912301 needs a test plan. You ran `context`, and you showed this decision and stopped:
+
+**Issue:** [elastic/kibana#912301](https://github.com/elastic/kibana/issues/912301) — [Cases] Create a case from a template
+**Decision:** Yes — S1: adds a template picker to the create case form that fills the form and records the template on the saved case
+**Hierarchy:** [elastic/kibana#912300](https://github.com/elastic/kibana/issues/912300) › **[elastic/kibana#912301](https://github.com/elastic/kibana/issues/912301)**
+**Suggested level for a test plan:** [elastic/kibana#912300](https://github.com/elastic/kibana/issues/912300) — one functionality: case templates; its plan covers this issue
+**Proposed label changes:**
+- add `Needs Test Plan` to [elastic/kibana#912300](https://github.com/elastic/kibana/issues/912300)
+**Recorded on the issue:** none — the decision is Yes, not a No
+
+Reply "yes" to apply the label changes above, or tell me which ones to apply.)
+
+The user's new message is:
+go ahead

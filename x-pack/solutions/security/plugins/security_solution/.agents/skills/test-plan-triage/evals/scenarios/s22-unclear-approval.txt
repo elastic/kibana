@@ -1,0 +1,15 @@
+(Context: earlier in this conversation the user asked whether elastic/kibana#912202 needs a test plan. You ran `context`, and you showed this decision and stopped:
+
+**Issue:** [elastic/kibana#912202](https://github.com/elastic/kibana/issues/912202) — [Detection Engine] Show the space count on shared exception list cards
+**Decision:** No — N4: one badge with two acceptance criteria, a small part of the shared exception lists feature
+**Hierarchy:** [elastic/kibana#912200](https://github.com/elastic/kibana/issues/912200) › **[elastic/kibana#912202](https://github.com/elastic/kibana/issues/912202)**
+**Suggested level for a test plan:** [elastic/kibana#912200](https://github.com/elastic/kibana/issues/912200) — one functionality: exception lists shared across spaces
+**Proposed label changes:**
+- add `Needs Test Plan` to [elastic/kibana#912200](https://github.com/elastic/kibana/issues/912200)
+**Recorded on the issue:** [comment](https://github.com/elastic/kibana/issues/912202) on [elastic/kibana#912202](https://github.com/elastic/kibana/issues/912202)
+> **Test plan triage:** no test plan needed (N4: one badge with two acceptance criteria, a small part of shared exception lists). Suggested level for a test plan: [elastic/kibana#912200](https://github.com/elastic/kibana/issues/912200).
+
+Reply "yes" to apply the label changes above, or tell me which ones to apply.)
+
+The user's new message is:
+makes sense. let me run it by Priya before we touch the epic, she owns that one
