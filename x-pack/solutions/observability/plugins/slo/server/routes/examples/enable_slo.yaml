@@ -10,50 +10,72 @@ responses:
     content:
       application/json:
         schema:
-          $ref: ../oas_schemas.yaml#/400_response
+          $ref: ../oas_error_schemas.yaml#/400_response
         examples:
-          badRequestExample:
-            summary: Bad request
+          badRequestIdExample:
+            summary: Invalid SLO id
             value:
               statusCode: 400
               error: Bad Request
-              message: 'Invalid value ''foo'' supplied to: id'
+              message: |-
+                [
+                  {
+                    "origin": "string",
+                    "code": "too_small",
+                    "minimum": 8,
+                    "inclusive": true,
+                    "path": [
+                      "id"
+                    ],
+                    "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                  },
+                  {
+                    "origin": "string",
+                    "code": "invalid_format",
+                    "format": "regex",
+                    "pattern": "/^[a-z0-9-_]+$/",
+                    "path": [
+                      "id"
+                    ],
+                    "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                  }
+                ]
   '401':
     description: Unauthorized response
     content:
       application/json:
         schema:
-          $ref: ../oas_schemas.yaml#/401_response
+          $ref: ../oas_error_schemas.yaml#/401_response
         examples:
           unauthorizedExample:
             summary: Unauthorized
             value:
               statusCode: 401
               error: Unauthorized
-              message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+              message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
   '403':
     description: Forbidden response
     content:
       application/json:
         schema:
-          $ref: ../oas_schemas.yaml#/403_response
+          $ref: ../oas_error_schemas.yaml#/403_response
         examples:
           forbiddenExample:
             summary: Forbidden
             value:
               statusCode: 403
               error: Forbidden
-              message: 'security_exception: action [slo_write] is unauthorized for user'
+              message: 'API [POST /api/observability/slos/8853df00-ae2e-11ed-90af-09bb6422b258/enable] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]'
   '404':
     description: Not found response
     content:
       application/json:
         schema:
-          $ref: ../oas_schemas.yaml#/404_response
+          $ref: ../oas_error_schemas.yaml#/404_response
         examples:
           notFoundExample:
             summary: Not found
             value:
               statusCode: 404
               error: Not Found
-              message: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
+              message: 'SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found'

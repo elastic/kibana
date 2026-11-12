@@ -418,7 +418,7 @@ export function CustomContextFlyout({
           <p>
             {i18n.translate('xpack.nightshift.customContext.description', {
               defaultMessage:
-                'Notes that Nightshift adds to its system prompt for every investigation and chat in this space.',
+                'Notes that nightshift adds to its system prompt for every investigation and chat in this space.',
             })}
           </p>
         </EuiText>

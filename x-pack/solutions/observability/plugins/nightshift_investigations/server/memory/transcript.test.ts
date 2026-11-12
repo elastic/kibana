@@ -235,10 +235,10 @@ describe('stepsFromToolCalls', () => {
 
 describe('readsSeededKnowledge', () => {
   it.each([
-    [SANDBOX_VIEW_FILE_TOOL_ID, { file_path: '/workspace/cortex/topics/checkout.md' }],
+    [SANDBOX_VIEW_FILE_TOOL_ID, { file_path: '/workspace/wiki/topics/checkout.md' }],
     [SANDBOX_VIEW_FILE_TOOL_ID, { file_path: 'decision-trees/checkout-redis-lag.md' }],
-    ['nightshift_sandbox_bash', { command: 'cat /workspace/cortex/INDEX.md' }],
-    ['nightshift_sandbox_bash', { command: 'grep -r redis cortex/ decision-trees/' }],
+    ['nightshift_sandbox_bash', { command: 'cat /workspace/wiki/INDEX.md' }],
+    ['nightshift_sandbox_bash', { command: 'grep -r redis wiki/ decision-trees/' }],
     ['nightshift_sandbox_bash', { command: 'ls /workspace/decision-trees' }],
     ['nightshift_sandbox_bash', { command: 'cat /workspace/.connector-docs/elastic.md' }],
     [SANDBOX_VIEW_FILE_TOOL_ID, { file_path: '.connector-docs/github.md' }],
@@ -251,10 +251,10 @@ describe('readsSeededKnowledge', () => {
 
   it.each([
     [SANDBOX_VIEW_FILE_TOOL_ID, { file_path: '/workspace/memories/checkout-redis.md' }],
-    [SANDBOX_VIEW_FILE_TOOL_ID, { file_path: '/workspace/cortex-notes.md' }],
+    [SANDBOX_VIEW_FILE_TOOL_ID, { file_path: '/workspace/wiki-notes.md' }],
     [
       'nightshift_sandbox_bash',
-      { command: 'esql "FROM traces-* | WHERE service.name == \\"cortex\\""' },
+      { command: 'esql "FROM traces-* | WHERE service.name == \\"wiki\\""' },
     ],
     ['nightshift_sandbox_bash', { command: 'cat /workspace/elastic.mdx' }],
     [SANDBOX_VIEW_FILE_TOOL_ID, { file_path: '/workspace/.connector-docs-notes.md' }],
@@ -267,8 +267,8 @@ describe('renderMemoryTranscript with evidenceOnly', () => {
   const investigation = [
     tool(
       SANDBOX_VIEW_FILE_TOOL_ID,
-      { file_path: '/workspace/cortex/topics/checkout.md' },
-      'CORTEX_PAGE'
+      { file_path: '/workspace/wiki/topics/checkout.md' },
+      'WIKI_PAGE'
     ),
     tool('nightshift_sandbox_bash', { command: 'cat /workspace/decision-trees/x.md' }, 'TREE_BODY'),
     tool(SET_HYPOTHESES_TOOL_ID, { hypotheses: [{ candidate: 'PROGRESS_SUMMARY' }] }, 'ok'),
@@ -282,7 +282,7 @@ describe('renderMemoryTranscript with evidenceOnly', () => {
       toolCalls: [],
       evidenceOnly: true,
     });
-    expect(text).not.toContain('CORTEX_PAGE');
+    expect(text).not.toContain('WIKI_PAGE');
     expect(text).not.toContain('TREE_BODY');
     expect(text).not.toContain('PROGRESS_SUMMARY');
     expect(text).toContain('1. nightshift_sandbox_bash: esql "FROM metrics-redis*"');
@@ -291,7 +291,7 @@ describe('renderMemoryTranscript with evidenceOnly', () => {
 
   it('keeps seeded reads by default', () => {
     const text = renderMemoryTranscript({ task: 't', investigation, toolCalls: [] });
-    expect(text).toContain('CORTEX_PAGE');
+    expect(text).toContain('WIKI_PAGE');
     expect(text).toContain('TREE_BODY');
     expect(text).toContain('PROGRESS_SUMMARY');
   });

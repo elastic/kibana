@@ -14,7 +14,6 @@ export const journey = setupDashboardJourney({
     esArchives: ['x-pack/performance/es_archives/sample_data_ecommerce_many_fields'],
     kbnArchives: ['x-pack/performance/kbn_archives/ecommerce_tsvb_gauge_only_dashboard'],
   }),
-  dashboardName: 'Ecommerce Dashboard with TSVB Gauge only',
-  dashboardLinkSubj: 'dashboardListingTitleLink-[eCommerce]-TSVB-Gauge-Only-Dashboard',
+  dashboardTitle: '[eCommerce] TSVB Gauge Only Dashboard',
   visualizationCount: 1,
 });

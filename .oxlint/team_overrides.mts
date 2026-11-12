@@ -405,6 +405,8 @@ export const teamOverrides: OxlintOverride[] = [
     excludeFiles: ['x-pack/solutions/security/plugins/lists/public/**/*.test.{js,mjs,ts,tsx}'],
     rules: {
       'react-perf/jsx-no-new-function-as-prop': 'error',
+      'react-perf/jsx-no-new-object-as-prop': 'error',
+      'react-perf/jsx-no-new-array-as-prop': 'error',
       '@kbn/compat/react-jsx-no-bind': 'error',
     },
   },
@@ -793,6 +795,8 @@ export const teamOverrides: OxlintOverride[] = [
     excludeFiles: ['x-pack/platform/plugins/shared/osquery/public/**/*.test.{js,mjs,ts,tsx}'],
     rules: {
       'react-perf/jsx-no-new-function-as-prop': 'error',
+      'react-perf/jsx-no-new-object-as-prop': 'error',
+      'react-perf/jsx-no-new-array-as-prop': 'error',
       '@kbn/compat/react-jsx-no-bind': 'error',
     },
   },

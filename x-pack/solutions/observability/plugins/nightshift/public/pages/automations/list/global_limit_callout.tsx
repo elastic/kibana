@@ -9,20 +9,27 @@ import React from 'react';
 import { getEbtProps } from '@kbn/ebt-click';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import type { AutomationBlockingLimit } from '../utils/filter_automations';
 import { globalLimitLabels } from './translations';
 
 export const GlobalLimitCallout = ({
+  group,
   limit,
   settingsHref,
 }: {
+  group: AutomationBlockingLimit;
   limit: number;
   settingsHref?: string;
 }) => (
   <KbnWarningCallout
     announceOnMount
     size="s"
-    title={globalLimitLabels.getTitle(limit)}
-    text={globalLimitLabels.body}
+    title={
+      group === 'total_investigation'
+        ? globalLimitLabels.getTotalTitle(limit)
+        : globalLimitLabels.getTitle(limit)
+    }
+    text={group === 'total_investigation' ? globalLimitLabels.totalBody : globalLimitLabels.body}
     actionProps={
       settingsHref
         ? {

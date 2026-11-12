@@ -34,6 +34,7 @@
     "@kbn/agent-builder-common",
     "@kbn/core",
     "@kbn/alertzero-common",
-    "@kbn/proposals-common"
+    "@kbn/proposals-common",
+    "@kbn/deeplinks-security"
   ]
 }

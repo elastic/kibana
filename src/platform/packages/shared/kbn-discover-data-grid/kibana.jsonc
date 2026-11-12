@@ -1,0 +1,8 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/discover-data-grid",
+  "owner": "@elastic/kibana-discover",
+  "group": "platform",
+  "visibility": "shared",
+  "description": "A generic, virtualized data grid foundation incubated by Discover."
+}

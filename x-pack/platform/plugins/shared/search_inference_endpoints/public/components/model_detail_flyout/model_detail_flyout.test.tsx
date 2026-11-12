@@ -8,10 +8,15 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import type { EisInferenceEndpoint } from '../../../common/types';
+import { TASK_TYPE_DESCRIPTIONS } from '@kbn/inference-endpoint-ui-common';
 import { ModelDetailFlyout } from './model_detail_flyout';
 import { useKibana } from '../../hooks/use_kibana';
 
 jest.mock('../../hooks/use_kibana');
+jest.mock('@kbn/inference-endpoint-ui-common', () => ({
+  ...jest.requireActual('@kbn/inference-endpoint-ui-common'),
+  useInferenceEndpointMutation: () => ({ mutate: jest.fn(), isLoading: false }),
+}));
 
 const mockUseKibana = useKibana as jest.Mock;
 
@@ -33,7 +38,12 @@ describe('ModelDetailFlyout', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseKibana.mockReturnValue({ services: {} });
+    mockUseKibana.mockReturnValue({
+      services: {
+        http: {},
+        notifications: { toasts: { addSuccess: jest.fn(), addDanger: jest.fn() } },
+      },
+    });
   });
 
   const renderFlyout = (
@@ -141,6 +151,16 @@ describe('ModelDetailFlyout', () => {
 
     expect(screen.getByText('endpoint-a')).toBeInTheDocument();
     expect(screen.getByText('endpoint-b')).toBeInTheDocument();
+  });
+
+  it('describes the decision task type in the add endpoint modal', async () => {
+    renderFlyout(MODEL_ID, [
+      createEndpoint({ task_type: 'decision' as EisInferenceEndpoint['task_type'] }),
+    ]);
+    fireEvent.click(screen.getByTestId('modelDetailFlyoutAddEndpointButton'));
+    expect(await screen.findByTestId('addEndpointModal')).toHaveTextContent(
+      TASK_TYPE_DESCRIPTIONS.decision as string
+    );
   });
 
   it('calls onClose when close button is clicked', () => {

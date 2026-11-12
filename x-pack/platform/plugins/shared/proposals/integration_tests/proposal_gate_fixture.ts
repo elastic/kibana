@@ -8,6 +8,7 @@
 import { parse } from 'yaml';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { analyticsServiceMock } from '@kbn/core/server/mocks';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import {
@@ -263,6 +264,7 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
   const service = new ProposalsService({
     storage: client,
     logger: loggerMock.create(),
+    analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     getWorkflowsApi: () => workflowsApi as never,
     // The gate's behaviour does not depend on the conversation card, so the
     // attachment write is stubbed rather than simulated.
