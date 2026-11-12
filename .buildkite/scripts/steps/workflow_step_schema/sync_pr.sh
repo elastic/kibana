@@ -51,9 +51,23 @@ git commit -m "$COMMIT_MESSAGE"
 if [[ "$existing_pr_title" == "$PR_TITLE" ]]; then
   existing_branch="$(jq -r '.[0].headRefName // empty' <<<"$existing_pr_json")"
   existing_number="$(jq -r '.[0].number // empty' <<<"$existing_pr_json")"
+  pr_url="https://github.com/elastic/kibana/pull/$existing_number"
+
+  # While a sync PR is open the target branch keeps the old schema, so every on-merge
+  # build reports drift and lands here. Each run commits anew (new SHA, same content);
+  # pushing it would restart the PR's CI and drop it from the merge queue for nothing.
+  existing_tree=""
+  if git fetch --quiet origin "$existing_branch"; then
+    existing_tree="$(git rev-parse "FETCH_HEAD:$GENERATED_DIR" 2>/dev/null || true)"
+  fi
+  if [[ -n "$existing_tree" && "$existing_tree" == "$(git rev-parse "HEAD:$GENERATED_DIR")" ]]; then
+    echo "Open sync PR #$existing_number already carries this schema. Not pushing."
+    buildkite-agent annotate "Workflow step schema sync PR is already up to date: $pr_url" --style info --context workflow-step-schema-sync || true
+    exit 0
+  fi
+
   echo "Open sync PR #$existing_number found (branch: $existing_branch). Force-updating it."
   git push origin "$BRANCH_NAME:$existing_branch" --force
-  pr_url="https://github.com/elastic/kibana/pull/$existing_number"
 else
   echo "--- Opening a new sync PR (base: $TARGET_BRANCH)"
   git push origin "$BRANCH_NAME"

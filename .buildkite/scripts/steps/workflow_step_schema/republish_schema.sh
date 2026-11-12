@@ -37,6 +37,12 @@ esac
 echo "--- Republishing the workflow step schema of ${BUILDKITE_COMMIT:-HEAD} to the ${CHANNEL} channel"
 .buildkite/scripts/steps/workflow_step_schema/publish_schema.sh "$CHANNEL"
 
-buildkite-agent annotate \
-  "Republished the workflow step schema of \`${BUILDKITE_COMMIT:-HEAD}\` to the ${CHANNEL} channel${BASE_VERSION:+ (${BASE_VERSION})}." \
-  --style success --context workflow-schema-republish || true
+if [[ "${DRY_RUN:-false}" == "true" ]]; then
+  buildkite-agent annotate \
+    "Dry run: verified and staged the workflow step schema of \`${BUILDKITE_COMMIT:-HEAD}\` for the ${CHANNEL} channel${BASE_VERSION:+ (${BASE_VERSION})}. Nothing was uploaded." \
+    --style info --context workflow-schema-republish || true
+else
+  buildkite-agent annotate \
+    "Republished the workflow step schema of \`${BUILDKITE_COMMIT:-HEAD}\` to the ${CHANNEL} channel${BASE_VERSION:+ (${BASE_VERSION})}." \
+    --style success --context workflow-schema-republish || true
+fi

@@ -106,15 +106,12 @@ if [[ "${open_sync_prs:-0}" != "0" ]]; then
 fi
 
 if [[ -z "$pending_sync" && -n "${BUILDKITE_TOKEN:-}" && -n "$BUILD_BRANCH" ]]; then
-  for pipeline in "$SYNC_PIPELINE" kibana-on-merge; do
-    active_builds="$(curl -gsf -H "Authorization: Bearer ${BUILDKITE_TOKEN}" \
-      "https://api.buildkite.com/v2/organizations/elastic/pipelines/${pipeline}/builds?branch=${BUILD_BRANCH}&state[]=running&state[]=scheduled" \
-      2>/dev/null | jq 'length' 2>/dev/null || true)"
-    if [[ "${active_builds:-0}" != "0" ]]; then
-      pending_sync="a running ${pipeline} build"
-      break
-    fi
-  done
+  active_builds="$(curl -gsf -H "Authorization: Bearer ${BUILDKITE_TOKEN}" \
+    "https://api.buildkite.com/v2/organizations/elastic/pipelines/${SYNC_PIPELINE}/builds?branch=${BUILD_BRANCH}&state[]=running&state[]=scheduled" \
+    2>/dev/null | jq 'length' 2>/dev/null || true)"
+  if [[ "${active_builds:-0}" != "0" ]]; then
+    pending_sync="a running ${SYNC_PIPELINE} build"
+  fi
 fi
 
 if [[ -n "$pending_sync" ]]; then
