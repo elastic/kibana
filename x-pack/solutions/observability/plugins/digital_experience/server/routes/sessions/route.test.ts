@@ -8,11 +8,20 @@
 import { isBoom } from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { getSession } from '../../sessions/get_session';
-import { listSessions } from '../../sessions/list_sessions';
-import { enableSessions, getSessionsStatus } from '../../sessions/sessions_setup';
-import { SessionsPrivilegesError } from '../../sessions/sessions_privileges_error';
-import { SessionsRestrictedReadError } from '../../sessions/sessions_restricted_read_error';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { SESSIONS_LOOKBACK_DAYS, type SessionsStatus } from '../../../common/sessions';
+import {
+  NO_ENCRYPTION_KEY_MESSAGE,
+  SessionsEnableError,
+  enableSessions,
+  type SessionsEnableStep,
+} from '../../services/sessions/enable_sessions';
+import { SessionsPrivilegesError } from '../../services/sessions/sessions_privileges_error';
+import { SessionsRestrictedReadError } from '../../services/sessions/sessions_restricted_read_error';
+import { getSessionsStatus } from '../../services/sessions/sessions_status';
+import type { SessionsServices } from '../create_digital_experience_server_route';
+import { getSession } from './get_session';
+import { listSessions } from './list_sessions';
 import {
   SESSIONS_ENABLE_ENDPOINT,
   SESSIONS_LIST_ENDPOINT,
@@ -21,17 +30,37 @@ import {
   sessionsRouteRepository,
 } from './route';
 
-jest.mock('../../sessions/get_session');
-jest.mock('../../sessions/list_sessions');
-jest.mock('../../sessions/sessions_setup', () => ({
-  ...jest.requireActual('../../sessions/sessions_setup'),
+jest.mock('./get_session');
+jest.mock('./list_sessions');
+jest.mock('../../services/sessions/sessions_status');
+jest.mock('../../services/sessions/enable_sessions', () => ({
+  ...jest.requireActual('../../services/sessions/enable_sessions'),
   enableSessions: jest.fn(),
-  getSessionsStatus: jest.fn(),
 }));
 
 type Endpoint = keyof typeof sessionsRouteRepository;
 
-const status = { installed: true };
+const settings = { frequency: '1m' };
+
+const status: SessionsStatus = {
+  installed: true,
+  health: 'healthy',
+  installedVersion: 1,
+  currentVersion: 1,
+  rebuilding: false,
+  apiKeyInvalid: false,
+  reason: null,
+  lagSeconds: 90,
+  summarizedUntil: '2026-10-27T11:58:30.000Z',
+  lastRunAt: '2026-10-27T11:59:30.000Z',
+  lastSuccessAt: '2026-10-27T11:59:30.000Z',
+  lastError: null,
+  enabledBy: 'ana',
+  retentionDays: SESSIONS_LOOKBACK_DAYS,
+};
+
+const LOAD_FAILED_MESSAGE =
+  'Could not load the sessions. Check the Kibana server logs for details.';
 
 const START = '2026-10-27T10:00:00.000Z';
 const END = '2026-10-28T10:00:00.000Z';
@@ -47,22 +76,32 @@ const esError = (statusCode: number) =>
 
 const runHandler = (
   endpoint: Endpoint,
-  { params = {} }: { params?: Record<string, unknown> } = {}
+  {
+    params = {},
+    authzResult,
+    services = { taskManager: taskManagerMock.createStart(), canEncrypt: true },
+  }: {
+    params?: Record<string, unknown>;
+    authzResult?: Record<string, boolean>;
+    services?: SessionsServices;
+  } = {}
 ) => {
   const coreContext = coreMock.createRequestHandlerContext();
   const logger = loggingSystemMock.createLogger();
   const handler = sessionsRouteRepository[endpoint].handler as unknown as (
     resources: unknown
   ) => Promise<unknown>;
-  const request = {};
+  const request = { authzResult };
   const result = handler({
     params,
     context: { core: Promise.resolve(coreContext) },
     request,
     logger,
+    sessionsSettings: settings,
+    getSessionsServices: async () => services,
     isServerless: true,
   });
-  return { result, coreContext, logger, request };
+  return { result, coreContext, logger, request, services };
 };
 
 /** The client error a handler threw: status code, message and attributes. */
@@ -101,7 +140,6 @@ describe('sessions routes', () => {
 
   it.each<[Endpoint, string]>([
     [SESSIONS_ENABLE_ENDPOINT, 'manage_digital_experience_sessions'],
-    [SESSIONS_STATUS_ENDPOINT, 'read_digital_experience'],
     [SESSIONS_LIST_ENDPOINT, 'read_digital_experience'],
     [SESSION_DETAIL_ENDPOINT, 'read_digital_experience'],
   ])('%s requires %s', (endpoint, privilege) => {
@@ -110,96 +148,204 @@ describe('sessions routes', () => {
     });
   });
 
-  describe('status', () => {
-    it('reports whether sessions are set up, read as the internal user', async () => {
-      const { result, coreContext } = runHandler(SESSIONS_STATUS_ENDPOINT);
+  it('requires read for status, and checks the manage sessions privilege to show the enabler', () => {
+    expect(sessionsRouteRepository[SESSIONS_STATUS_ENDPOINT].security).toEqual({
+      authz: {
+        requiredPrivileges: ['read_digital_experience'],
+        extendedPrivileges: ['manage_digital_experience_sessions'],
+      },
+    });
+  });
 
-      expect(await result).toEqual(status);
-      expect(getSessionsStatus).toHaveBeenCalledWith(
-        coreContext.elasticsearch.client.asInternalUser
-      );
+  describe('status', () => {
+    it.each([true, false])(
+      'reads the details of the status only for managers (manage sessions: %s)',
+      async (canManage) => {
+        // The router fills `authzResult` from the route's extended privileges.
+        const { result, services } = runHandler(SESSIONS_STATUS_ENDPOINT, {
+          authzResult: { manage_digital_experience_sessions: canManage },
+        });
+
+        expect(await result).toEqual(status);
+        expect(getSessionsStatus).toHaveBeenCalledWith({
+          taskManager: services.taskManager,
+          settings,
+          withDetails: canManage,
+        });
+      }
+    );
+
+    it('reads the status without Task Manager, which reports sessions missing', async () => {
+      const { result } = runHandler(SESSIONS_STATUS_ENDPOINT, {
+        services: { taskManager: undefined, canEncrypt: true },
+      });
+
+      await result;
+
+      expect(getSessionsStatus).toHaveBeenCalledWith({
+        taskManager: undefined,
+        settings,
+        withDetails: false,
+      });
     });
 
-    it('answers 500 without the Elasticsearch details when the status read fails', async () => {
+    it('answers 500 without the details when the status read fails', async () => {
       jest.mocked(getSessionsStatus).mockRejectedValue(esError(500));
       const { result, logger } = runHandler(SESSIONS_STATUS_ENDPOINT);
 
       expect(await clientErrorOf(result)).toEqual(
-        expect.objectContaining({
-          statusCode: 500,
-          message: 'Could not load the sessions. Check the Kibana server logs for details.',
-        })
+        expect.objectContaining({ statusCode: 500, message: LOAD_FAILED_MESSAGE })
       );
-      expect(logger.error).toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Could not read the sessions status')
+      );
     });
   });
 
   describe('enable', () => {
     it('enables sessions for the current user, audits it and returns the status', async () => {
-      const { result, coreContext } = runHandler(SESSIONS_ENABLE_ENDPOINT);
+      const { result, coreContext, request, logger, services } =
+        runHandler(SESSIONS_ENABLE_ENDPOINT);
       // The handler reads the user after awaiting the request context.
       coreContext.security.authc.getCurrentUser.mockReturnValue({ username: 'ana' } as never);
 
       expect(await result).toEqual(status);
       expect(enableSessions).toHaveBeenCalledWith({
         esClient: coreContext.elasticsearch.client,
+        request,
+        taskManager: services.taskManager,
+        canEncrypt: true,
+        settings,
         isServerless: true,
+        logger,
       });
-      expect(coreContext.security.audit.logger.log).toHaveBeenCalledWith(
+      expect(getSessionsStatus).toHaveBeenCalledWith({
+        taskManager: services.taskManager,
+        settings,
+        withDetails: true,
+      });
+      expect(coreContext.security.audit.logger.log).toHaveBeenCalledWith({
+        message: 'User [ana] enabled Digital Experience sessions',
+        event: {
+          action: 'digital_experience_sessions_enable',
+          category: ['configuration'],
+          type: ['change'],
+          outcome: 'success',
+        },
+      });
+      expect(logger.info).toHaveBeenCalledWith('Sessions enabled by [ana]');
+    });
+
+    it('passes on whether Kibana can store the API key', async () => {
+      const { result } = runHandler(SESSIONS_ENABLE_ENDPOINT, {
+        services: { taskManager: taskManagerMock.createStart(), canEncrypt: false },
+      });
+
+      await result;
+
+      expect(enableSessions).toHaveBeenCalledWith(expect.objectContaining({ canEncrypt: false }));
+    });
+
+    it('answers 500 without Task Manager, which builds the session summaries', async () => {
+      const { result } = runHandler(SESSIONS_ENABLE_ENDPOINT, {
+        services: { taskManager: undefined, canEncrypt: true },
+      });
+
+      expect(await clientErrorOf(result)).toEqual(
         expect.objectContaining({
-          message: 'User [ana] enabled Digital Experience sessions',
-          event: expect.objectContaining({
-            action: 'digital_experience_sessions_enable',
-            outcome: 'success',
-          }),
+          statusCode: 500,
+          message: expect.stringContaining('need the Task Manager plugin'),
         })
       );
+      expect(enableSessions).not.toHaveBeenCalled();
     });
 
     it.each([
       [
         'missing privileges',
-        new SessionsPrivilegesError(['cluster:manage_index_templates']),
-        403,
-        { missingPrivileges: ['cluster:manage_index_templates'] },
+        new SessionsPrivilegesError(['index:logs-*.otel-*:read']),
+        { missingPrivileges: ['index:logs-*.otel-*:read'] },
       ],
       [
         'a filtered source read',
         new SessionsRestrictedReadError(['logs-*.otel-*'], 'filtered'),
-        403,
         { restrictedIndices: ['logs-*.otel-*'], reason: 'filtered' },
       ],
-    ])('answers %s with its reason, and audits the failure', async (_name, error, code, data) => {
-      jest.mocked(enableSessions).mockRejectedValue(error);
-      const { result, coreContext } = runHandler(SESSIONS_ENABLE_ENDPOINT);
+    ])(
+      'answers %s with a 403 and its reason, and audits the failure',
+      async (_name, error, data) => {
+        jest.mocked(enableSessions).mockRejectedValue(error);
+        const { result, coreContext } = runHandler(SESSIONS_ENABLE_ENDPOINT);
+        coreContext.security.authc.getCurrentUser.mockReturnValue({ username: 'ana' } as never);
 
-      expect(await clientErrorOf(result)).toEqual({
-        statusCode: code,
-        message: error.message,
-        data,
+        expect(await clientErrorOf(result)).toEqual({
+          statusCode: 403,
+          message: error.message,
+          data,
+        });
+        expect(coreContext.security.audit.logger.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: 'Failed attempt by user [ana] to enable Digital Experience sessions',
+            event: expect.objectContaining({ outcome: 'failure' }),
+            error: { code: error.name, message: error.message },
+          })
+        );
+      }
+    );
+
+    it.each<[SessionsEnableStep, string]>([
+      ['credentials', NO_ENCRYPTION_KEY_MESSAGE],
+      ['template', 'putting the sessions index template failed'],
+      ['index', 'creating the sessions index failed'],
+      ['task', 'scheduling the summaries task with an API key on your behalf failed'],
+    ])('answers a failed %s step with a 500 naming it', async (step, message) => {
+      jest
+        .mocked(enableSessions)
+        .mockRejectedValue(new SessionsEnableError(step, new Error('security_exception: [ana]')));
+      const { result, logger, coreContext } = runHandler(SESSIONS_ENABLE_ENDPOINT);
+
+      const error = await clientErrorOf(result);
+
+      expect(error).toEqual({
+        statusCode: 500,
+        message: expect.stringContaining(message),
+        data: { step },
       });
+      expect(error.message).not.toContain('security_exception');
+      expect(logger.error).toHaveBeenCalledWith(
+        `Could not enable sessions: Enabling sessions failed at the ${step} step: security_exception: [ana]`
+      );
       expect(coreContext.security.audit.logger.log).toHaveBeenCalledWith(
         expect.objectContaining({ event: expect.objectContaining({ outcome: 'failure' }) })
       );
     });
 
-    it('answers other failures with a 500 that hides the Elasticsearch details', async () => {
+    it('answers other failures with a 500 that hides the details', async () => {
       jest.mocked(enableSessions).mockRejectedValue(new Error('security_exception: user [ana]'));
       const { result, logger } = runHandler(SESSIONS_ENABLE_ENDPOINT);
 
-      const error = await clientErrorOf(result);
-
-      expect(error.statusCode).toBe(500);
-      expect(error.message).toBe(
-        'Could not enable sessions. Check the Kibana server logs for details.'
-      );
+      expect(await clientErrorOf(result)).toEqual({
+        statusCode: 500,
+        message: 'Could not enable sessions. Check the Kibana server logs for details.',
+        data: null,
+      });
       expect(logger.error).toHaveBeenCalledWith(
         'Could not enable sessions: security_exception: user [ana]'
       );
     });
+
+    it('answers 403 when the user cannot read the status after enabling', async () => {
+      jest.mocked(getSessionsStatus).mockRejectedValue(esError(403));
+      const { result, coreContext } = runHandler(SESSIONS_ENABLE_ENDPOINT);
+
+      expect((await clientErrorOf(result)).statusCode).toBe(403);
+      expect(coreContext.security.audit.logger.log).toHaveBeenCalledWith(
+        expect.objectContaining({ event: expect.objectContaining({ outcome: 'success' }) })
+      );
+    });
   });
 
-  it('lists sessions as the current user with facet selections', async () => {
+  it('lists sessions as the current user with the environment, facets and filters', async () => {
     jest.mocked(listSessions).mockResolvedValue({ sessions: [] } as never);
     const { result, coreContext } = runHandler(SESSIONS_LIST_ENDPOINT, {
       params: {
@@ -207,8 +353,10 @@ describe('sessions routes', () => {
         query: {
           start: START,
           end: END,
+          environment: 'production',
           browser: 'Chrome',
-          hasErrors: true,
+          withJsErrors: true,
+          withFailedRequests: false,
           minDurationMs: 10_000,
           sortField: 'start_time',
           sortDirection: 'desc',
@@ -223,12 +371,18 @@ describe('sessions routes', () => {
       serviceName: 'web',
       start: START,
       end: END,
+      environment: 'production',
       sortField: 'start_time',
       sortDirection: 'desc',
       page: 0,
       perPage: 25,
       facets: { browsers: 'Chrome', os: undefined, countries: undefined, entryPages: undefined },
-      filters: { hasErrors: true, minDurationMs: 10_000, maxDurationMs: undefined },
+      filters: {
+        withJsErrors: true,
+        withFailedRequests: false,
+        minDurationMs: 10_000,
+        maxDurationMs: undefined,
+      },
     });
   });
 
@@ -271,17 +425,30 @@ describe('sessions routes', () => {
       expect(querySchemaOf().safeParse({ start: range.end, end: range.start }).success).toBe(false);
     });
 
-    it('parses the errors and duration filters', () => {
+    it('parses the error and duration filters', () => {
       expect(
         querySchemaOf().parse({
           ...range,
-          hasErrors: 'true',
+          withJsErrors: 'true',
+          withFailedRequests: 'false',
           minDurationMs: '10000',
           maxDurationMs: '60000',
         })
-      ).toMatchObject({ hasErrors: true, minDurationMs: 10_000, maxDurationMs: 60_000 });
-      expect(querySchemaOf().parse({ ...range, hasErrors: 'false' }).hasErrors).toBe(false);
-      expect(querySchemaOf().safeParse({ ...range, hasErrors: 'yes please' }).success).toBe(false);
+      ).toMatchObject({
+        withJsErrors: true,
+        withFailedRequests: false,
+        minDurationMs: 10_000,
+        maxDurationMs: 60_000,
+      });
+      expect(querySchemaOf().safeParse({ ...range, withJsErrors: 'yes please' }).success).toBe(
+        false
+      );
+      expect(querySchemaOf().safeParse({ ...range, hasErrors: 'true' })).toEqual(
+        expect.objectContaining({ success: true })
+      );
+      expect(querySchemaOf().parse({ ...range, hasErrors: 'true' })).not.toHaveProperty(
+        'hasErrors'
+      );
       expect(querySchemaOf().safeParse({ ...range, minDurationMs: '-1' }).success).toBe(false);
       expect(
         querySchemaOf().safeParse({ ...range, minDurationMs: '60000', maxDurationMs: '60000' })
@@ -289,10 +456,23 @@ describe('sessions routes', () => {
       ).toBe(false);
     });
 
+    it('accepts an environment up to 1024 characters', () => {
+      const withEnvironment = (length: number) =>
+        querySchemaOf().safeParse({ ...range, environment: 'x'.repeat(length) }).success;
+
+      expect(withEnvironment(1024)).toBe(true);
+      expect(withEnvironment(1025)).toBe(false);
+      expect(withEnvironment(0)).toBe(false);
+    });
+
     it('only accepts the shared sort fields, and bounded paging', () => {
-      expect(querySchemaOf().parse({ ...range, sortField: 'error_count' }).sortField).toBe(
-        'error_count'
+      expect(querySchemaOf().parse({ ...range, sortField: 'js_error_count' }).sortField).toBe(
+        'js_error_count'
       );
+      expect(
+        querySchemaOf().parse({ ...range, sortField: 'http_failed_request_count' }).sortField
+      ).toBe('http_failed_request_count');
+      expect(querySchemaOf().safeParse({ ...range, sortField: 'error_count' }).success).toBe(false);
       expect(querySchemaOf().safeParse({ ...range, sortField: 'user.key' }).success).toBe(false);
       expect(querySchemaOf().safeParse({ ...range, perPage: '101' }).success).toBe(false);
       expect(querySchemaOf().safeParse({ ...range, page: '1.5' }).success).toBe(false);

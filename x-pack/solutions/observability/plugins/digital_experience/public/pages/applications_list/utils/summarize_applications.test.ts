@@ -83,16 +83,16 @@ describe('summarizeApplications', () => {
       ).toBe(7);
     });
 
-    it('has no total when an EDOT Browser application was read from the raw events', () => {
+    it('has no total when the applications were read from the raw events', () => {
       expect(
         summarizeApplications([
-          app({ serviceName: 'shop', sessions: 7 }),
+          app({ serviceName: 'shop', sessions: null }),
           app({ serviceName: 'docs', sessions: null }),
         ]).sessions
       ).toBeNull();
     });
 
-    it('has no total without an EDOT Browser application', () => {
+    it('has no total without applications, or with Classic RUM ones only', () => {
       expect(summarizeApplications([]).sessions).toBeNull();
       expect(summarizeApplications([app({ source: 'classic' })]).sessions).toBeNull();
     });

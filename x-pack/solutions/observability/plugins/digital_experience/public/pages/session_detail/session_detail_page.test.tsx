@@ -7,21 +7,24 @@
 
 import React from 'react';
 import type { ComponentProps } from 'react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { EuiProvider } from '@elastic/eui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import {
   emptyWebVitals,
   type SessionDetailResponse,
+  type SessionRequest,
   type SessionTimelineEvent,
 } from '../../../common/sessions';
 import { useRouteBreadcrumb } from '../../breadcrumbs/use_route_breadcrumb';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { useTimeRange } from '../../hooks/use_time_range';
+import { useDigitalExperienceParams } from '../../hooks/use_digital_experience_params';
 import { useDigitalExperienceRouter } from '../../hooks/use_digital_experience_router';
 import { digitalExperienceRouter } from '../../routes';
 import { createUiSettingsMock } from '../../test_utils/ui_settings_mock';
@@ -33,6 +36,10 @@ jest.mock('../../hooks/use_time_range');
 jest.mock('../../hooks/use_digital_experience_router');
 
 const mockFetch = jest.fn();
+const mockDetail = jest.fn();
+const mockList = jest.fn();
+const DETAIL_ENDPOINT =
+  'GET /internal/digital_experience/applications/{serviceName}/sessions/{sessionId}';
 jest.mock('@kbn/server-route-repository-client', () => ({
   createRepositoryClient: jest.fn(() => ({ fetch: (...args: unknown[]) => mockFetch(...args) })),
 }));
@@ -45,7 +52,8 @@ const event = (
   kind: SessionTimelineEvent['kind'],
   offsetMs: number,
   name: string,
-  detail: string | null = null
+  detail: string | null = null,
+  stacktrace: string | null = null
 ): SessionTimelineEvent => ({
   kind,
   name,
@@ -54,8 +62,35 @@ const event = (
   durationMs: null,
   page: null,
   detail,
+  stacktrace,
   traceId: null,
   spanId: null,
+});
+
+const request = (
+  url: string,
+  offsetMs: number,
+  visitIndex: number,
+  overrides: Partial<SessionRequest> = {}
+): SessionRequest => ({
+  url,
+  initiatorType: 'script',
+  method: null,
+  statusCode: null,
+  failed: false,
+  startTime: at(offsetMs),
+  durationMs: 120,
+  phases: { queued: 2, dns: 10, connect: 30, tls: 20, waiting: 60, download: 18 },
+  timingWithheld: false,
+  cached: false,
+  transferSize: 2048,
+  decodedBodySize: 8192,
+  renderBlocking: false,
+  protocol: 'h2',
+  traceId: null,
+  spanId: null,
+  visitIndex,
+  ...overrides,
 });
 
 const detail = (overrides: Partial<SessionDetailResponse> = {}): SessionDetailResponse => ({
@@ -67,12 +102,16 @@ const detail = (overrides: Partial<SessionDetailResponse> = {}): SessionDetailRe
     durationMs: 60_000,
     eventCount: 12,
     pageViewCount: 2,
+    pageLoadCount: 1,
     clickCount: 3,
-    errorCount: 1,
+    jsErrorCount: 1,
+    httpRequestCount: 8,
+    failedRequestCount: 2,
     bounced: false,
     entryPage: '/',
     exitPage: '/cart',
     journey: ['/', '/cart'],
+    environment: 'production',
     user: 'jane@example.com',
     userAgent: { browser: 'Firefox', browserVersion: '131', os: 'Linux', device: null },
     geo: { countryIso: 'NL', region: 'North Holland', city: 'Amsterdam' },
@@ -83,7 +122,13 @@ const detail = (overrides: Partial<SessionDetailResponse> = {}): SessionDetailRe
     event('click', 5_000, 'click', 'button#add'),
     event('span', 6_000, 'GET /api/cart'),
     event('page_view', 30_000, 'navigation', 'https://shop.example.com/cart'),
-    event('error', 45_000, 'TypeError', 'cart is undefined'),
+    event(
+      'error',
+      45_000,
+      'TypeError',
+      'cart is undefined',
+      'TypeError: cart is undefined\n    at render (cart.js:12:3)'
+    ),
     event('web_vital', 50_000, 'INP', '120'),
   ],
   timelineTruncated: false,
@@ -97,6 +142,12 @@ const detail = (overrides: Partial<SessionDetailResponse> = {}): SessionDetailRe
       clickCount: 1,
       errorCount: 0,
       webVitals: { ...emptyWebVitals(), lcp: 1800 },
+      load: {
+        navigationStart: START,
+        responseStartMs: 150,
+        domContentLoadedMs: 700,
+        loadMs: 1_200,
+      },
     },
     {
       page: '/cart',
@@ -107,8 +158,34 @@ const detail = (overrides: Partial<SessionDetailResponse> = {}): SessionDetailRe
       clickCount: 0,
       errorCount: 1,
       webVitals: { ...emptyWebVitals(), cls: 0.3 },
+      load: null,
     },
   ],
+  requests: [
+    request('https://shop.example.com/', 2, 0, { initiatorType: 'navigation', durationMs: 300 }),
+    request('https://shop.example.com/app.js', 320, 0, { renderBlocking: true }),
+    request('https://cdn.example.net/font.woff2', 400, 0, {
+      initiatorType: 'css',
+      phases: null,
+      timingWithheld: true,
+      transferSize: null,
+      decodedBodySize: null,
+    }),
+    request('https://shop.example.com/api/cart', 5_010, 0, {
+      initiatorType: 'fetch',
+      method: 'POST',
+      statusCode: 201,
+      traceId: 'trace-1',
+      spanId: 'span-1',
+    }),
+    request('https://shop.example.com/api/recommendations', 40_000, 1, {
+      initiatorType: 'fetch',
+      method: 'GET',
+      statusCode: 503,
+      failed: true,
+    }),
+  ],
+  requestsTruncated: false,
   ...overrides,
 });
 
@@ -116,25 +193,59 @@ const httpError = (status: number, message: string) =>
   Object.assign(new Error(message), { response: { status } });
 
 const mockAddSuccess = jest.fn();
+const mockChrome = {
+  getChromeStyle: jest.fn(() => 'classic'),
+  sideNav: { getIsCollapsed: jest.fn(() => false), setIsCollapsed: jest.fn() },
+};
+const mockGetRedirectUrl = jest.fn(() => '/app/discover#/?esql');
+
+/** Opens the header's Sessions list menu, which may sit in the menu's overflow. */
+const openSessionsListMenu = async () => {
+  if (!screen.queryByTestId('digitalExperienceSessionsListToggle')) {
+    await openAppMenuOverflow();
+  }
+  fireEvent.click(screen.getByTestId('digitalExperienceSessionsListToggle'));
+  await screen.findByTestId('digitalExperienceSessionsListPlacement-left');
+};
+
+/** The page as its route renders it, with the session from the URL. */
+function SessionRoute() {
+  const {
+    path: { sessionId },
+  } = useDigitalExperienceParams('/{serviceName}/sessions/{sessionId}');
+  return <SessionDetailPage serviceName="shop" sessionId={sessionId} />;
+}
 
 const renderPage = () => {
   jest.mocked(useKibanaServices).mockReturnValue({
     notifications: { toasts: { addSuccess: mockAddSuccess } },
+    chrome: mockChrome,
+    share: {
+      url: {
+        locators: {
+          get: (id: string) =>
+            id === 'DISCOVER_APP_LOCATOR' ? { getRedirectUrl: mockGetRedirectUrl } : undefined,
+        },
+      },
+    },
     application: {
+      capabilities: { apm: { show: true }, discover_v2: { show: true } },
       getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
     },
     http: {},
     uiSettings: createUiSettingsMock(),
   } as unknown as ReturnType<typeof useKibanaServices>);
   const history = createMemoryHistory({
-    initialEntries: [`/shop/sessions/abcdef123456?${TIME_QUERY}&source=otel&hasErrors=true&page=2`],
+    initialEntries: [
+      `/shop/sessions/abcdef123456?${TIME_QUERY}&source=otel&withJsErrors=true&page=2`,
+    ],
   });
   render(
     <RouterProvider
       history={history}
       router={digitalExperienceRouter as unknown as ComponentProps<typeof RouterProvider>['router']}
     >
-      <SessionDetailPage serviceName="shop" sessionId="abcdef123456" />
+      <SessionRoute />
     </RouterProvider>,
     {
       wrapper: ({ children }) => (
@@ -146,12 +257,34 @@ const renderPage = () => {
       ),
     }
   );
+  return history;
 };
 
-const SESSIONS_HREF = `/app/digital_experience/shop/sessions?hasErrors=true&page=2&${TIME_QUERY}&source=otel`;
+const SESSIONS_HREF = `/app/digital_experience/shop/sessions?page=2&${TIME_QUERY}&source=otel&withJsErrors=true`;
+
+const listedSession = (sessionId: string, user: string | null, jsErrorCount = 0) => ({
+  ...detail().session,
+  sessionId,
+  user,
+  jsErrorCount,
+});
 
 beforeEach(() => {
   jest.clearAllMocks();
+  window.localStorage.clear();
+  // The session, and the sessions list beside it.
+  mockFetch.mockImplementation((endpoint: string, options: unknown) =>
+    endpoint === DETAIL_ENDPOINT ? mockDetail(endpoint, options) : mockList(endpoint, options)
+  );
+  mockList.mockResolvedValue({
+    sessions: [
+      listedSession('first111', 'sam@example.com', 2),
+      listedSession('abcdef123456', 'jane@example.com', 1),
+    ],
+    total: 2,
+    page: 0,
+    perPage: 25,
+  });
   jest.mocked(useTimeRange).mockReturnValue({
     timeRange: { rangeFrom: 'now-15m', rangeTo: 'now' },
     isTimeRangeInUrl: true,
@@ -162,7 +295,7 @@ beforeEach(() => {
 
 describe('SessionDetailPage', () => {
   it('leads back to the sessions list it was opened from', async () => {
-    mockFetch.mockResolvedValue(detail());
+    mockDetail.mockResolvedValue(detail());
     renderPage();
 
     await screen.findByTestId('digitalExperienceSessionSummary');
@@ -185,29 +318,42 @@ describe('SessionDetailPage', () => {
   });
 
   it('copies the session ID from the header', async () => {
-    mockFetch.mockResolvedValue(detail());
+    mockDetail.mockResolvedValue(detail());
     document.execCommand = jest.fn().mockReturnValue(true);
     renderPage();
 
-    fireEvent.click(await screen.findByTestId('digitalExperienceSessionIdCopy'));
+    // The header swaps its items once the session loads, so copy from the loaded header.
+    await screen.findByTestId('digitalExperienceSessionUser');
+    fireEvent.click(screen.getByTestId('digitalExperienceSessionIdCopy'));
     expect(document.execCommand).toHaveBeenCalledWith('copy');
     expect(mockAddSuccess).toHaveBeenCalledWith('Session ID copied');
   });
 
   it('summarizes the session', async () => {
-    mockFetch.mockResolvedValue(detail());
+    mockDetail.mockResolvedValue(detail());
     renderPage();
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Session');
-    expect(await screen.findByTestId('digitalExperienceSessionId')).toHaveTextContent(
-      'Session ID abcdef123456'
+    // Who and when are in the header once the session loads, its ID in the summary.
+    expect(await screen.findByTestId('digitalExperienceSessionUser')).toHaveTextContent(
+      'jane@example.com'
     );
+    expect(screen.getByTestId('digitalExperienceSessionStarted')).toHaveTextContent('1 min 0 s');
     expect(screen.getByTestId('digitalExperienceSessionStat-duration')).toHaveTextContent(
       '1 min 0 s'
     );
-    expect(screen.getByTestId('digitalExperienceSessionStat-errors')).toHaveTextContent('1');
+    const stat = (id: string) => within(screen.getByTestId(`digitalExperienceSessionStat-${id}`));
+    // Page views count in-app navigations too, page loads only full loads.
+    expect(stat('pages').getByText('Page views')).toBeInTheDocument();
+    expect(stat('pages').getByText('2')).toBeInTheDocument();
+    expect(stat('pageLoads').getByText('Page loads')).toBeInTheDocument();
+    expect(stat('pageLoads').getByText('1')).toBeInTheDocument();
+    expect(stat('jsErrors').getByText('JS errors')).toBeInTheDocument();
+    expect(stat('jsErrors').getByText('1')).toBeInTheDocument();
+    expect(stat('failedRequests').getByText('Failed requests of 8')).toBeInTheDocument();
+    expect(stat('failedRequests').getByText('2')).toBeInTheDocument();
     const metadata = screen.getByTestId('digitalExperienceSessionMetadata');
-    expect(metadata).toHaveTextContent('jane@example.com');
+    expect(metadata).toHaveTextContent('Session IDabcdef123456');
     expect(metadata).toHaveTextContent('Firefox 131 · Linux');
     expect(metadata).toHaveTextContent('Amsterdam, North Holland, NL');
     expect(metadata).toHaveTextContent('/ → /cart');
@@ -220,8 +366,40 @@ describe('SessionDetailPage', () => {
     );
   });
 
+  it('shows the outcome of the session in the header, and opens its raw events in Discover', async () => {
+    mockDetail.mockResolvedValue(detail());
+    renderPage();
+
+    expect(await screen.findByTestId('digitalExperienceSessionBadge-jsErrors')).toHaveTextContent(
+      '1 JS error'
+    );
+    expect(screen.getByTestId('digitalExperienceSessionBadge-failedRequests')).toHaveTextContent(
+      '2 failed requests'
+    );
+    expect(screen.getByTestId('digitalExperienceSessionBadge-environment')).toHaveTextContent(
+      'production'
+    );
+    expect(screen.queryByTestId('digitalExperienceSessionBadge-bounced')).not.toBeInTheDocument();
+
+    expect(mockGetRedirectUrl).toHaveBeenLastCalledWith({
+      query: {
+        esql: [
+          'FROM traces-*.otel-*, logs-*.otel-*',
+          '| WHERE session.id == "abcdef123456" AND service.name == "shop"',
+          '| SORT @timestamp ASC',
+        ].join('\n'),
+      },
+      timeRange: { from: '2026-10-20T09:59:00.000Z', to: '2026-10-20T10:06:00.000Z' },
+    });
+    await openAppMenuOverflow();
+    expect(screen.getByTestId('digitalExperienceSessionOpenInDiscover')).toHaveAttribute(
+      'href',
+      '/app/discover#/?esql'
+    );
+  });
+
   it('draws a waterfall segment per page visit with error markers', async () => {
-    mockFetch.mockResolvedValue(detail());
+    mockDetail.mockResolvedValue(detail());
     renderPage();
 
     const waterfall = await screen.findByTestId('digitalExperienceSessionWaterfall');
@@ -243,7 +421,7 @@ describe('SessionDetailPage', () => {
   });
 
   it('lists what happened on each page, without spans and logs', async () => {
-    mockFetch.mockResolvedValue(detail());
+    mockDetail.mockResolvedValue(detail());
     const scrollIntoView = jest.fn();
     window.HTMLElement.prototype.scrollIntoView = scrollIntoView;
     renderPage();
@@ -251,7 +429,14 @@ describe('SessionDetailPage', () => {
     const visits = await screen.findAllByTestId('digitalExperiencePageVisit');
     expect(visits).toHaveLength(2);
     expect(visits[0]).toHaveTextContent('/');
-    expect(visits[0]).toHaveTextContent('50% of the session');
+    expect(within(visits[0]).getByTestId('digitalExperienceVisitLoad')).toHaveTextContent(
+      'Loaded in 1.20 s'
+    );
+    expect(within(visits[0]).getByTestId('digitalExperienceVisitRequests')).toHaveTextContent(
+      '4 requests · 6 KB'
+    );
+    expect(visits[1]).toHaveTextContent('In-app navigation');
+    expect(visits[1]).toHaveTextContent('1 failed');
     // Page views and clicks read by kind, not by their raw event names.
     const click = within(visits[0]).getByTestId('digitalExperienceSessionEvent-click');
     expect(click).toHaveTextContent('Click');
@@ -262,7 +447,8 @@ describe('SessionDetailPage', () => {
     expect(visits[0]).not.toHaveTextContent('documentLoad');
     expect(visits[0]).not.toHaveTextContent('GET /api/cart');
     const error = within(visits[1]).getByTestId('digitalExperienceSessionEvent-error');
-    expect(error).toHaveTextContent('0:45');
+    // From the start of the page, precise to a hundredth of a second below 10s.
+    expect(error).toHaveTextContent('15.0 s');
     expect(error).toHaveTextContent('TypeError');
     expect(error).toHaveTextContent('cart is undefined');
     expect(visits[1]).toHaveTextContent('1 error');
@@ -273,17 +459,296 @@ describe('SessionDetailPage', () => {
         'digitalExperienceWebVital-inp'
       )
     ).toHaveAttribute('data-rating', 'good');
-    expect(within(visits[1]).getByRole('region', { name: 'Events on /cart' })).toHaveAttribute(
-      'tabindex',
-      '0'
+    // No scroll box of its own: the page scrolls as a whole.
+    expect(within(visits[1]).getByRole('region', { name: 'Events on /cart' })).not.toHaveAttribute(
+      'tabindex'
     );
 
+    // The sessions list scrolls its current session into view too.
+    scrollIntoView.mockClear();
     fireEvent.click(screen.getAllByTestId('digitalExperienceSessionWaterfallSegment')[1]);
     expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
+  });
+
+  it('draws the requests of each page as a waterfall, with the click that fired one before it', async () => {
+    mockDetail.mockResolvedValue(detail());
+    renderPage();
+
+    const [home, cart] = await screen.findAllByTestId('digitalExperiencePageVisit');
+    const rows = within(home).getAllByTestId(/^digitalExperience(ActivityRequest|SessionEvent-)/);
+    expect(rows.map((row) => row.getAttribute('data-test-subj'))).toEqual([
+      'digitalExperienceSessionEvent-page_view',
+      'digitalExperienceActivityRequest',
+      'digitalExperienceActivityRequest',
+      'digitalExperienceActivityRequest',
+      'digitalExperienceSessionEvent-click',
+      'digitalExperienceActivityRequest',
+    ]);
+    // Paths on the page's own origin, the host for other origins.
+    expect(rows[2]).toHaveTextContent('JS/app.js');
+    expect(rows[2]).toHaveTextContent('blocking');
+    expect(rows[3]).toHaveTextContent('cdn.example.net/font.woff2');
+    expect(rows[5]).toHaveTextContent('POST /api/cart');
+    expect(within(home).getByTestId('digitalExperienceMilestone-load')).toHaveTextContent(
+      'Load 1.20 s'
+    );
+    expect(within(cart).getByTestId('digitalExperienceActivityRequest')).toHaveTextContent(
+      '503 · 120 ms'
+    );
+
+    fireEvent.click(within(rows[5]).getByRole('button'));
+    const details = within(home).getByTestId('digitalExperienceRequestDetails');
+    expect(details).toHaveTextContent('Waiting for the server 60 ms');
+    expect(within(details).getByTestId('digitalExperienceRequestTraceLink')).toHaveAttribute(
+      'href',
+      '/app/apm/link-to/trace/trace-1'
+    );
+
+    fireEvent.click(within(rows[3]).getByRole('button'));
+    expect(within(home).getByTestId('digitalExperienceRequestDetails')).toHaveTextContent(
+      'Timing-Allow-Origin'
+    );
+  });
+
+  it('shows the stack trace of an error on demand', async () => {
+    mockDetail.mockResolvedValue(detail());
+    renderPage();
+
+    const error = await screen.findByTestId('digitalExperienceSessionEvent-error');
+    fireEvent.click(within(error).getByRole('button'));
+    expect(within(error).getByTestId('digitalExperienceErrorStacktrace')).toHaveTextContent(
+      'at render (cart.js:12:3)'
+    );
+  });
+
+  it('filters the journey by kind and by text', async () => {
+    mockDetail.mockResolvedValue(detail());
+    renderPage();
+
+    await screen.findAllByTestId('digitalExperiencePageVisit');
+    expect(screen.getByTestId('digitalExperienceActivityFilter-request')).toHaveTextContent('5');
+    fireEvent.click(screen.getByTestId('digitalExperienceActivityFilter-request'));
+    expect(screen.queryAllByTestId('digitalExperienceActivityRequest')).toHaveLength(0);
+    expect(screen.getByTestId('digitalExperienceSessionEvent-click')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('digitalExperienceActivityFilter-request'));
+    fireEvent.change(screen.getByTestId('digitalExperienceActivitySearch'), {
+      target: { value: 'api/cart' },
+    });
+    expect(screen.getAllByTestId('digitalExperienceActivityRequest')).toHaveLength(1);
+    expect(screen.queryByTestId('digitalExperienceSessionEvent-click')).not.toBeInTheDocument();
+    expect(screen.getAllByTestId('digitalExperienceActivityEmpty')).toHaveLength(1);
+  });
+
+  it('shows the first rows of a busy page, and all of them on demand', async () => {
+    const polls = Array.from({ length: 20 }, (_, index) =>
+      request(`https://shop.example.com/img/${index}.png`, 31_000 + index * 100, 1, {
+        initiatorType: 'img',
+      })
+    );
+    mockDetail.mockResolvedValue(detail({ requests: polls }));
+    renderPage();
+
+    const [, cart] = await screen.findAllByTestId('digitalExperiencePageVisit');
+    expect(within(cart).getAllByTestId('digitalExperienceActivityRequest')).toHaveLength(14);
+    const showAll = within(cart).getByTestId('digitalExperienceActivityShowAll');
+    expect(showAll).toHaveTextContent('Show all 23 rows (8 more)');
+
+    fireEvent.click(showAll);
+    expect(within(cart).getAllByTestId('digitalExperienceActivityRequest')).toHaveLength(20);
+    expect(showAll).toHaveTextContent('Show the first 15 rows');
+  });
+
+  it('lists the sessions beside it, with the same list query, the current one marked', async () => {
+    mockDetail.mockResolvedValue(detail());
+    renderPage();
+
+    const rail = await screen.findByTestId('digitalExperienceSessionsRail');
+    const current = await within(rail).findByTestId(
+      'digitalExperienceSessionsRailItem-abcdef123456'
+    );
+    expect(current).toHaveAttribute('aria-current', 'page');
+    expect(current).toHaveTextContent('jane@example.com');
+    // Links keep the list's query, so the next session's Back leads to the same list.
+    expect(within(rail).getByTestId('digitalExperienceSessionsRailItem-first111')).toHaveAttribute(
+      'href',
+      `/app/digital_experience/shop/sessions/first111?page=2&${TIME_QUERY}&source=otel&withJsErrors=true`
+    );
+    expect(mockList).toHaveBeenCalledWith(
+      'GET /internal/digital_experience/applications/{serviceName}/sessions',
+      expect.objectContaining({
+        params: expect.objectContaining({
+          query: expect.objectContaining({ withJsErrors: 'true', page: 2 }),
+        }),
+      })
+    );
+    expect(within(rail).getByTestId('digitalExperienceSessionsRailEditFilters')).toHaveAttribute(
+      'href',
+      SESSIONS_HREF
+    );
+  });
+
+  it('titles a session in the list by its user, else by the pages it went through', async () => {
+    mockList.mockResolvedValue({
+      sessions: [
+        listedSession('abcdef123456', 'jane@example.com', 1),
+        { ...listedSession('feed0000beef', null), journey: ['/', '/cart', '/checkout', '/pay'] },
+      ],
+      total: 2,
+      page: 0,
+      perPage: 25,
+    });
+    mockDetail.mockResolvedValue(detail());
+    renderPage();
+
+    const known = await screen.findByTestId('digitalExperienceSessionsRailItem-abcdef123456');
+    expect(within(known).getByTestId('digitalExperienceSessionsRailItemTitle')).toHaveTextContent(
+      'jane@example.com'
+    );
+    expect(within(known).getByTestId('digitalExperienceSessionsRailItemId')).toHaveTextContent(
+      'abcdef12'
+    );
+
+    const anonymous = screen.getByTestId('digitalExperienceSessionsRailItem-feed0000beef');
+    expect(
+      within(anonymous).getByTestId('digitalExperienceSessionsRailItemTitle')
+    ).toHaveTextContent('/ → /cart → /checkout +1');
+    expect(anonymous).toHaveTextContent('Anonymous');
+    expect(within(anonymous).getByTestId('digitalExperienceSessionsRailItemId')).toHaveTextContent(
+      'feed0000'
+    );
+  });
+
+  it('searches the sessions list as the user types, once they pause', async () => {
+    mockDetail.mockResolvedValue(detail());
+    renderPage();
+    await screen.findByTestId('digitalExperienceSessionsRailItem-abcdef123456');
+    expect(mockList).toHaveBeenCalledTimes(1);
+
+    fireEvent.change(screen.getByTestId('digitalExperienceSessionsRailSearch'), {
+      target: { value: 'jane' },
+    });
+
+    await waitFor(() => expect(mockList).toHaveBeenCalledTimes(2));
+    expect(mockList).toHaveBeenLastCalledWith(
+      'GET /internal/digital_experience/applications/{serviceName}/sessions',
+      expect.objectContaining({
+        params: expect.objectContaining({
+          // A new search starts on the first page.
+          query: expect.objectContaining({ query: 'jane', page: 0 }),
+        }),
+      })
+    );
+    expect(mockList).toHaveBeenCalledTimes(2);
+  });
+
+  it('hides the sessions list, and shows it again from the header', async () => {
+    mockDetail.mockResolvedValue(detail());
+    renderPage();
+
+    fireEvent.click(await screen.findByTestId('digitalExperienceSessionsRailHide'));
+    expect(screen.queryByTestId('digitalExperienceSessionsRail')).not.toBeInTheDocument();
+    expect(window.localStorage.getItem('digitalExperience.sessionDetail.rail')).toBe('"hidden"');
+
+    await openSessionsListMenu();
+    fireEvent.click(screen.getByTestId('digitalExperienceSessionsListPlacement-left'));
+    expect(await screen.findByTestId('digitalExperienceSessionsRail')).toBeInTheDocument();
+  });
+
+  it('shows the sessions list on the right when asked, and remembers it', async () => {
+    mockDetail.mockResolvedValue(detail());
+    renderPage();
+
+    await screen.findByTestId('digitalExperienceSessionsRail');
+    expect(screen.getByTestId('digitalExperienceSessionSplitView')).toHaveAttribute(
+      'data-rail-side',
+      'left'
+    );
+
+    await openSessionsListMenu();
+    fireEvent.click(screen.getByTestId('digitalExperienceSessionsListPlacement-right'));
+
+    expect(screen.getByTestId('digitalExperienceSessionSplitView')).toHaveAttribute(
+      'data-rail-side',
+      'right'
+    );
+    // After the session, in the layout.
+    expect(
+      screen
+        .getByTestId('digitalExperienceSessionPage')
+        .compareDocumentPosition(await screen.findByTestId('digitalExperienceSessionsRail'))
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(window.localStorage.getItem('digitalExperience.sessionDetail.rail')).toBe('"right"');
+  });
+
+  it('shows the list on the left for a choice stored before it could move', async () => {
+    window.localStorage.setItem('digitalExperience.sessionDetail.rail', '"open"');
+    mockDetail.mockResolvedValue(detail());
+    renderPage();
+
+    await screen.findByTestId('digitalExperienceSessionsRail');
+    expect(screen.getByTestId('digitalExperienceSessionSplitView')).toHaveAttribute(
+      'data-rail-side',
+      'left'
+    );
+  });
+
+  it('collapses the project side navigation while the list shows, and restores it', async () => {
+    mockChrome.getChromeStyle.mockReturnValue('project');
+    mockDetail.mockResolvedValue(detail());
+    renderPage();
+
+    await screen.findByTestId('digitalExperienceSessionsRail');
+    expect(mockChrome.sideNav.setIsCollapsed).toHaveBeenLastCalledWith(true);
+
+    fireEvent.click(screen.getByTestId('digitalExperienceSessionsRailHide'));
+    expect(mockChrome.sideNav.setIsCollapsed).toHaveBeenLastCalledWith(false);
+    mockChrome.getChromeStyle.mockReturnValue('classic');
+  });
+
+  it('moves to another session without loading the list again, keeping the previous one until it loads', async () => {
+    let resolveNext: (value: SessionDetailResponse) => void = () => {};
+    mockDetail
+      .mockResolvedValueOnce(detail())
+      .mockReturnValueOnce(new Promise((resolve) => (resolveNext = resolve)));
+    const history = renderPage();
+    await screen.findByTestId('digitalExperienceSessionsRailItem-abcdef123456');
+
+    act(() => {
+      history.push(`/shop/sessions/first111?${TIME_QUERY}&source=otel&withJsErrors=true&page=2`);
+    });
+
+    expect(mockList).toHaveBeenCalledTimes(1);
+    expect(mockDetail).toHaveBeenCalledTimes(2);
+    // The previous session stays, with a progress bar, instead of a blank loading page.
+    expect(screen.getByTestId('digitalExperienceSessionSummary')).toBeInTheDocument();
+    expect(screen.getByTestId('digitalExperienceSessionLoadingNext')).toBeInTheDocument();
+    expect(screen.queryByTestId('digitalExperienceSessionLoading')).not.toBeInTheDocument();
+
+    await act(async () => {
+      resolveNext(
+        detail({ session: { ...detail().session, sessionId: 'first111', user: 'sam@example.com' } })
+      );
+    });
+    expect(await screen.findByTestId('digitalExperienceSessionUser')).toHaveTextContent(
+      'sam@example.com'
+    );
+    expect(screen.queryByTestId('digitalExperienceSessionLoadingNext')).not.toBeInTheDocument();
+    expect(mockList).toHaveBeenCalledTimes(1);
+  });
+
+  it('says when the requests are cut short', async () => {
+    mockDetail.mockResolvedValue(detail({ requestsTruncated: true }));
+    renderPage();
+
+    expect(
+      await screen.findByTestId('digitalExperienceSessionRequestsTruncated')
+    ).toBeInTheDocument();
   });
 
   it('says when the timeline is cut short', async () => {
-    mockFetch.mockResolvedValue(detail({ timelineTruncated: true }));
+    mockDetail.mockResolvedValue(detail({ timelineTruncated: true }));
     renderPage();
 
     expect(
@@ -292,7 +757,7 @@ describe('SessionDetailPage', () => {
   });
 
   it('explains a session without page views', async () => {
-    mockFetch.mockResolvedValue(detail({ pageVisits: [], timeline: [] }));
+    mockDetail.mockResolvedValue(detail({ pageVisits: [], timeline: [] }));
     renderPage();
 
     expect(await screen.findByTestId('digitalExperienceSessionNoPageVisits')).toBeInTheDocument();
@@ -300,7 +765,7 @@ describe('SessionDetailPage', () => {
   });
 
   it('leads back to the list when the session does not exist', async () => {
-    mockFetch.mockRejectedValue(httpError(404, 'Session [abcdef123456] not found'));
+    mockDetail.mockRejectedValue(httpError(404, 'Session [abcdef123456] not found'));
     renderPage();
 
     expect(await screen.findByTestId('digitalExperienceSessionNotFoundBack')).toHaveAttribute(
@@ -310,13 +775,13 @@ describe('SessionDetailPage', () => {
   });
 
   it('retries a failed load', async () => {
-    mockFetch.mockRejectedValueOnce(httpError(500, 'Could not load the sessions.'));
+    mockDetail.mockRejectedValueOnce(httpError(500, 'Could not load the sessions.'));
     renderPage();
 
     expect(await screen.findByTestId('digitalExperienceSessionError')).toHaveTextContent(
       'Could not load the sessions.'
     );
-    mockFetch.mockResolvedValue(detail());
+    mockDetail.mockResolvedValue(detail());
     fireEvent.click(screen.getByTestId('digitalExperienceSessionRetry'));
 
     expect(await screen.findByTestId('digitalExperienceSessionSummary')).toBeInTheDocument();

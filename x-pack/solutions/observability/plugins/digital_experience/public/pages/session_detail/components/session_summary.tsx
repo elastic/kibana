@@ -22,7 +22,6 @@ import type { Formatters } from '../../../hooks/use_formatters';
 import { formatSessionDuration } from '../../../utils/format_session_duration';
 import { clientOf, locationOf } from '../../../utils/describe_session';
 import { WebVitalBadges } from '../../../components/web_vital_badges';
-import { ANONYMOUS_USER } from '../../../labels';
 
 const UNKNOWN = i18n.translate('xpack.digitalExperience.sessionDetail.summary.unknownValue', {
   defaultMessage: 'Unknown',
@@ -47,8 +46,16 @@ export function SessionSummary({
     {
       id: 'pages',
       title: formatNumber(session.pageViewCount),
+      // Page views, not page loads: in-app navigations count too.
       description: i18n.translate('xpack.digitalExperience.sessionDetail.summary.pagesLabel', {
         defaultMessage: 'Page views',
+      }),
+    },
+    {
+      id: 'pageLoads',
+      title: formatNumber(session.pageLoadCount),
+      description: i18n.translate('xpack.digitalExperience.sessionDetail.summary.pageLoadsLabel', {
+        defaultMessage: 'Page loads',
       }),
     },
     {
@@ -59,33 +66,40 @@ export function SessionSummary({
       }),
     },
     {
-      id: 'errors',
-      title: formatNumber(session.errorCount),
-      titleColor: session.errorCount > 0 ? ('danger' as const) : undefined,
-      description: i18n.translate('xpack.digitalExperience.sessionDetail.summary.errorsLabel', {
-        defaultMessage: 'Errors',
+      id: 'jsErrors',
+      title: formatNumber(session.jsErrorCount),
+      titleColor: session.jsErrorCount > 0 ? ('danger' as const) : undefined,
+      description: i18n.translate('xpack.digitalExperience.sessionDetail.summary.jsErrorsLabel', {
+        defaultMessage: 'JS errors',
       }),
+    },
+    {
+      id: 'failedRequests',
+      title: formatNumber(session.failedRequestCount),
+      titleColor: session.failedRequestCount > 0 ? ('danger' as const) : undefined,
+      description: i18n.translate(
+        'xpack.digitalExperience.sessionDetail.summary.failedRequestsLabel',
+        {
+          defaultMessage: 'Failed requests of {count}',
+          values: { count: formatNumber(session.httpRequestCount) },
+        }
+      ),
     },
   ];
 
+  // The user, start, environment and outcome are in the page header.
   const metadata = [
     {
-      title: i18n.translate('xpack.digitalExperience.sessionDetail.summary.startTimeLabel', {
-        defaultMessage: 'Started',
+      title: i18n.translate('xpack.digitalExperience.sessionDetail.summary.sessionIdLabel', {
+        defaultMessage: 'Session ID',
       }),
-      description: formatDate(session.startTime),
+      description: session.sessionId,
     },
     {
       title: i18n.translate('xpack.digitalExperience.sessionDetail.summary.endTimeLabel', {
         defaultMessage: 'Last activity',
       }),
       description: formatDate(session.endTime),
-    },
-    {
-      title: i18n.translate('xpack.digitalExperience.sessionDetail.summary.userLabel', {
-        defaultMessage: 'User',
-      }),
-      description: session.user ?? ANONYMOUS_USER,
     },
     {
       title: i18n.translate('xpack.digitalExperience.sessionDetail.summary.clientLabel', {
