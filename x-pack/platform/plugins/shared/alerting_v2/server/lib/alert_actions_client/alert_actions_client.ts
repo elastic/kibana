@@ -66,7 +66,6 @@ import {
   loadSeriesActionStatesBySeries,
   type SeriesActionState,
 } from './context_loaders/load_series_action_states';
-import { AlertActionsStorageToken } from './tokens';
 import type { AlertEventRecord } from './types';
 import type { PreparedAction } from './handler';
 import {
