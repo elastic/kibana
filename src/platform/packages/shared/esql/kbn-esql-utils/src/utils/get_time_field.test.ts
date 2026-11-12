@@ -43,4 +43,31 @@ describe('getESQLTimeField', () => {
 
     expect(http.post).toHaveBeenCalledTimes(1);
   });
+
+  it('does not reuse the direct-source time field for a LET with the same indices', async () => {
+    const http = createHttp();
+    jest
+      .mocked(http.post)
+      .mockResolvedValueOnce({ timeField: '@timestamp' })
+      .mockResolvedValueOnce({});
+    const source = 'FROM logs-timefield-let-*, ecommerce-timefield-let-*';
+    const query = `LET selected = (${source}); FROM selected`;
+
+    expect(await getESQLTimeField({ query: source, http })).toBe('@timestamp');
+    expect(await getESQLTimeField({ query, http })).toBeUndefined();
+    expect(await getESQLTimeField({ query: `${query} | LIMIT 10`, http })).toBeUndefined();
+
+    expect(http.post).toHaveBeenCalledTimes(2);
+  });
+
+  it('reuses the cache when only the pipeline of a shared LET binding changes', async () => {
+    const http = createHttp();
+    const query =
+      'LET base = (FROM logs-timefield-shared-* | LIMIT 1); LET selected = (FROM base, base); FROM selected';
+
+    await getESQLTimeField({ query, http });
+    await getESQLTimeField({ query: query.replace('LIMIT 1', 'LIMIT 2'), http });
+
+    expect(http.post).toHaveBeenCalledTimes(1);
+  });
 });

@@ -6,8 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { BasicPrettyPrinter, isSource, isSubQuery, synth } from '@elastic/esql';
-import { esqlCommandRegistry, getIndexFromPromQLParams } from '@kbn/esql-language';
+import { BasicPrettyPrinter, Builder, isSource, isSubQuery, synth } from '@elastic/esql';
+import {
+  esqlCommandRegistry,
+  getIndexFromPromQLParams,
+  getNamedSubqueries,
+  resolveNamedSubquerySources,
+} from '@kbn/esql-language';
 import type { ESQLSource, ESQLCommand, ESQLAstPromqlCommand } from '@elastic/esql/types';
 import { parseEsqlCached } from './parse_esql_cached';
 
@@ -32,34 +37,6 @@ function getPromQLSources(commands: ESQLCommand[]): string[] {
   return index ? [index] : [];
 }
 
-function getDirectIndexSources(commands: ESQLCommand[]): ESQLSource[] {
-  const sourceCommand = commands.find(({ name }) => INDEX_SOURCE_COMMANDS.has(name.toUpperCase()));
-  if (!sourceCommand) {
-    return [];
-  }
-
-  return (sourceCommand.args as ESQLSource[]).filter(
-    (arg): arg is ESQLSource => arg.sourceType === 'index'
-  );
-}
-
-function getIndexSources(commands: ESQLCommand[]): ESQLSource[] {
-  const sourceCommand = commands.find(({ name }) => INDEX_SOURCE_COMMANDS.has(name.toUpperCase()));
-  if (!sourceCommand) {
-    return [];
-  }
-
-  const directSources = (sourceCommand.args as ESQLSource[]).filter(
-    (arg): arg is ESQLSource => arg.sourceType === 'index'
-  );
-
-  const subquerySources = sourceCommand.args
-    .filter(isSubQuery)
-    .flatMap((subquery) => getDirectIndexSources(subquery.child.commands));
-
-  return [...directSources, ...subquerySources];
-}
-
 function getSourceNameWithoutRemoteClusterPrefix(source: ESQLSource): string {
   if (!source.prefix || !source.index) {
     return source.name;
@@ -76,7 +53,10 @@ export function getIndexPatternsFromESQLQuery(esql?: string): ESQLIndexPatterns 
   }
 
   const { root } = parseEsqlCached(esql);
-  const indexSources = getIndexSources(root.commands);
+  const sourceCommand = root.commands.find(({ name }) =>
+    INDEX_SOURCE_COMMANDS.has(name.toUpperCase())
+  );
+  const indexSources = resolveNamedSubquerySources(sourceCommand, getNamedSubqueries(root.header));
   const promqlSources = getPromQLSources(root.commands);
 
   const indexPattern = [...indexSources.map((source) => source.name), ...promqlSources];
@@ -145,10 +125,11 @@ const reduceSubqueriesToSource = (command: ESQLCommand): ESQLCommand => ({
 });
 
 /**
- * Returns the FROM or TS command alone (with METADATA, and each subquery reduced to its source
+ * Returns the FROM or TS command (with METADATA, and each subquery reduced to its source
  * command), whose columns are the schema of the queried dataset; for PROMQL, `FROM <index>` of
  * its index parameter. `SET project_routing` is left out, so the text matches the ES|QL editor's
  * fields query; pass the routing separately. Empty string if there is no such command.
+ * The LET bindings come first, with their bodies reduced to their source command.
  */
 export function getSourceCommandQueryFromESQLQuery(esql: string | undefined): string {
   if (!esql?.trim()) {
@@ -163,7 +144,25 @@ export function getSourceCommandQueryFromESQLQuery(esql: string | undefined): st
   if (sourceCommand) {
     // Nothing to describe yet, e.g. `FROM ` while typing.
     const hasSources = sourceCommand.args.some((arg) => isSource(arg) || isSubQuery(arg));
-    return hasSources ? BasicPrettyPrinter.command(reduceSubqueriesToSource(sourceCommand)) : '';
+    if (!hasSources) {
+      return '';
+    }
+
+    const header = getNamedSubqueries(root.header).map(({ identifier, query }) => {
+      const [bodySource] = query.commands;
+      const body = Builder.expression.query(
+        bodySource ? [reduceSubqueriesToSource(bodySource)] : []
+      );
+      return Builder.header.command.let([
+        Builder.expression.func.binary('=', [identifier, Builder.expression.parens(body)]),
+      ]);
+    });
+
+    return BasicPrettyPrinter.print({
+      ...root,
+      header,
+      commands: [reduceSubqueriesToSource(sourceCommand)],
+    });
   }
 
   const [promqlIndex] = getPromQLSources(root.commands);

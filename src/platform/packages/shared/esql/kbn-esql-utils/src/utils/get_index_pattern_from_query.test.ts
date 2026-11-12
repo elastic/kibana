@@ -151,6 +151,24 @@ describe('getIndexPatternsFromESQLQuery', () => {
       indexPatternWithoutRemoteClusterPrefix: '',
     });
   });
+
+  it('should resolve LET references to the indices of their bodies', () => {
+    expect(
+      getIndexPatternsFromESQLQuery(
+        'LET base = (FROM logs-*, remote_cluster:metrics-*::data); LET selected = (FROM base | WHERE a > 1); LET unused = (FROM other); FROM selected, (FROM traces), index1'
+      )
+    ).toEqual({
+      indexPattern: 'logs-*,remote_cluster:metrics-*::data,traces,index1',
+      indexPatternWithoutRemoteClusterPrefix: 'logs-*,metrics-*::data,traces,index1',
+    });
+  });
+
+  it('should return no index pattern for a LET without indices', () => {
+    expect(getIndexPatternsFromESQLQuery('LET numbers = (ROW a = 1); FROM numbers')).toEqual({
+      indexPattern: '',
+      indexPatternWithoutRemoteClusterPrefix: '',
+    });
+  });
 });
 
 describe('getSourceCommandQueryFromESQLQuery', () => {
@@ -191,6 +209,29 @@ describe('getSourceCommandQueryFromESQLQuery', () => {
         'FROM index1, (FROM index2, (FROM index3 | KEEP b) | DROP c) | LIMIT 5'
       )
     ).toBe('FROM index1, (FROM index2, (FROM index3))');
+  });
+
+  it('keeps the LET bindings with their bodies reduced to the source command', () => {
+    expect(
+      getSourceCommandQueryFromESQLQuery(
+        'SET project_routing = "_alias:*"; LET base = (FROM logs-* METADATA _id | KEEP a); LET selected = (FROM base | WHERE a > 1); LET unused = (FROM other); FROM selected, index1 | STATS count()'
+      )
+    ).toBe(
+      'LET base = (FROM logs-* METADATA _id); LET selected = (FROM base); LET unused = (FROM other); FROM selected, index1'
+    );
+  });
+
+  it('keeps shared LET dependencies compact', () => {
+    const bindings = [
+      'LET a0 = (FROM logs);',
+      ...Array.from(
+        { length: 12 },
+        (_, index) => `LET a${index + 1} = (FROM a${index}, a${index});`
+      ),
+    ];
+    const query = `${bindings.join(' ')} FROM a12`;
+
+    expect(getSourceCommandQueryFromESQLQuery(query)).toBe(query);
   });
 
   it('uses the index parameter of a PROMQL query, as the ES|QL editor does', () => {

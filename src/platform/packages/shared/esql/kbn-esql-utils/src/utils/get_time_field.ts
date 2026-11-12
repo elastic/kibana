@@ -10,7 +10,7 @@ import type { HttpStart } from '@kbn/core/public';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 import { LRUCache } from 'lru-cache';
 import { parseTimeFieldFromESQLQuery } from './query_parsing_helpers';
-import { getIndexPatternFromESQLQuery } from './get_index_pattern_from_query';
+import { getSourceCommandQueryFromESQLQuery } from './get_index_pattern_from_query';
 import { getProjectRoutingFromEsqlQuery } from './set_instructions_helpers';
 
 // Caches the in-flight or resolved TIMEFIELD_ROUTE promise by query + routing.
@@ -44,7 +44,7 @@ export async function getESQLTimeField({
   projectRouting?: string;
 }): Promise<string | undefined> {
   const hasTimeParams = parseTimeFieldFromESQLQuery(query) !== undefined;
-  const cacheSegment = hasTimeParams ? query : getIndexPatternFromESQLQuery(query);
+  const cacheSegment = hasTimeParams ? query : getSourceCommandQueryFromESQLQuery(query);
   const cacheKey = JSON.stringify([
     cacheSegment,
     getProjectRoutingFromEsqlQuery(query) ?? projectRouting ?? null,

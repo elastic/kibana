@@ -18,8 +18,8 @@ jest.mock('@kbn/esql-utils', () => ({
 }));
 
 jest.mock('@elastic/esql', () => ({
+  ...jest.requireActual('@elastic/esql'),
   Parser: { parse: jest.fn().mockReturnValue({ root: { commands: [] } }) },
-  isSubQuery: jest.fn().mockReturnValue(false),
 }));
 
 jest.mock('@kbn/esql-server-utils', () => ({
@@ -255,6 +255,51 @@ describe('registerGetTimeFieldRoute', () => {
         expect.stringContaining('fieldCaps check failed'),
         expect.anything()
       );
+    });
+  });
+
+  describe('LET named subqueries', () => {
+    const setup = async (indexPattern: string) => {
+      const mocks = buildMocks();
+      Parser.parse.mockImplementationOnce(jest.requireActual('@elastic/esql').Parser.parse);
+      getIndexPatternFromESQLQuery.mockReturnValueOnce(indexPattern);
+      registerGetTimeFieldRoute(mocks.router, mocks.context);
+      const core = await mocks.requestHandlerContext.core;
+      const run = (query: string) =>
+        mocks.handler(mocks.requestHandlerContext, { body: { query } }, mocks.response);
+      return { ...mocks, run, client: core.elasticsearch.client.asCurrentUser };
+    };
+
+    it('checks the indices of a referenced LET separately', async () => {
+      const { client, response, run } = await setup('logs,ecommerce');
+      client.fieldCaps.mockImplementation(async ({ index }: { index: string }) => ({
+        fields: index === 'ecommerce' ? {} : { '@timestamp': {} },
+      }));
+
+      await run('LET a = (FROM logs, ecommerce); FROM a');
+
+      expect(client.fieldCaps).toHaveBeenCalledTimes(2);
+      expect(response.ok).toHaveBeenCalledWith({ body: { timeField: undefined } });
+    });
+
+    it('does not call fieldCaps for a LET without indices', async () => {
+      const { client, response, run } = await setup('');
+
+      await run('LET a = (ROW x = 1); FROM a');
+
+      expect(client.fieldCaps).not.toHaveBeenCalled();
+      expect(response.ok).toHaveBeenCalledWith({ body: { timeField: undefined } });
+    });
+
+    it('checks the sources together when no LET is referenced', async () => {
+      const { client, response, run } = await setup('logs,ecommerce');
+
+      await run('LET unused = (FROM other); FROM logs, ecommerce');
+
+      expect(client.fieldCaps).toHaveBeenCalledWith(
+        expect.objectContaining({ index: 'logs,ecommerce' })
+      );
+      expect(response.ok).toHaveBeenCalledWith({ body: { timeField: '@timestamp' } });
     });
   });
 
