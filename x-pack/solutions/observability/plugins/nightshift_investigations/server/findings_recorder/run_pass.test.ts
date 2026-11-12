@@ -344,7 +344,7 @@ describe('runFindingsPass', () => {
     const unconfirmed = {
       ...output,
       verdict: 'Cause not confirmed: a bad deploy.',
-      outcome: 'cause_not_confirmed',
+      self_assessed_result: 'cause_not_identified',
       missing_data: [
         { what: 'SLO definition', why: 'no_access', would_decide: 'if 499s count' },
         { what: 'client app versions' },
@@ -366,7 +366,7 @@ describe('runFindingsPass', () => {
     expect(final.saveBlindSpots).toHaveBeenCalledWith({
       conversation_id: 'c1',
       '@timestamp': expect.any(String),
-      outcome: 'cause_not_confirmed',
+      self_assessed_result: 'cause_not_identified',
       missing_data: [
         { what: 'SLO definition', why: 'no_access', would_decide: 'if 499s count' },
         { what: 'client app versions' },
@@ -388,24 +388,26 @@ describe('runFindingsPass', () => {
   });
 
   it('records an empty gap list when the cause is found, and survives a failed index write', async () => {
-    const found = setup({ answers: [answerWith({ ...output, outcome: 'cause_found' })] });
+    const found = setup({
+      answers: [answerWith({ ...output, self_assessed_result: 'cause_identified' })],
+    });
     found.saveBlindSpots.mockRejectedValue(new Error('index unavailable'));
     await run(found.deps, found.memory, { answer: 'done' });
 
     expect(found.saveBlindSpots).toHaveBeenCalledWith(
-      expect.objectContaining({ outcome: 'cause_found', missing_data: [] })
+      expect.objectContaining({ self_assessed_result: 'cause_identified', missing_data: [] })
     );
     expect(found.patchMetadata).toHaveBeenCalled();
     expect(found.writer.setHypotheses).toHaveBeenCalled();
   });
 
-  it('stores the outcome the recorder chose, not one read from the verdict text', async () => {
+  it('stores the result the recorder chose, not one read from the verdict text', async () => {
     const calm = setup({
       answers: [
         answerWith({
           ...output,
           verdict: 'No incident in 03:00-06:00Z: all services were healthy.',
-          outcome: 'no_incident',
+          self_assessed_result: 'nothing_abnormal',
         }),
       ],
     });
@@ -416,10 +418,10 @@ describe('runFindingsPass', () => {
     await run(silent.deps, silent.memory, { answer: 'Cause not confirmed' });
 
     expect(calm.saveBlindSpots).toHaveBeenCalledWith(
-      expect.objectContaining({ outcome: 'no_incident', missing_data: [] })
+      expect.objectContaining({ self_assessed_result: 'nothing_abnormal', missing_data: [] })
     );
-    // No outcome from the recorder means none is stored: it is not guessed from the text.
-    expect(silent.saveBlindSpots.mock.calls[0][0]).not.toHaveProperty('outcome');
+    // No result from the recorder means none is stored: it is not guessed from the text.
+    expect(silent.saveBlindSpots.mock.calls[0][0]).not.toHaveProperty('self_assessed_result');
   });
 
   it('asks a live pass for the live schema and a final pass for the full one', async () => {
@@ -434,7 +436,7 @@ describe('runFindingsPass', () => {
     expect(Object.keys(schemaOf(final.chatComplete))).toEqual(
       expect.arrayContaining([
         'verdict',
-        'outcome',
+        'self_assessed_result',
         'severity',
         'impact_summary',
         'impact_entities',

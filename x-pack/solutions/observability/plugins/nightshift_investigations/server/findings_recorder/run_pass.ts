@@ -579,7 +579,11 @@ export const runFindingsPass = async (
     ],
   ];
   if (final && record) {
-    const { missing_data: gaps = [], hypotheses, outcome } = record;
+    const {
+      missing_data: gaps = [],
+      hypotheses,
+      self_assessed_result: selfAssessedResult,
+    } = record;
     writes.push([
       'blind spots',
       async () => {
@@ -593,7 +597,7 @@ export const runFindingsPass = async (
         await deps.getBlindSpots?.(request)?.save({
           conversation_id: conversationId,
           '@timestamp': new Date().toISOString(),
-          ...(outcome ? { outcome } : {}),
+          ...(selfAssessedResult ? { self_assessed_result: selfAssessedResult } : {}),
           missing_data: gaps,
           hypotheses: hypotheses.map(({ candidate, status, settled_by: settledBy }) => ({
             candidate,

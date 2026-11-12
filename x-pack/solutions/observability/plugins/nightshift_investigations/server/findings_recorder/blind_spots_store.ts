@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { NIGHTSHIFT_BLIND_SPOTS_INDEX } from '@kbn/nightshift-shared';
 import type { HypothesisStatus } from '@kbn/agentic-investigations-plugin/common';
-import type { FindingsOutcome, MissingDataItem } from '../../common/missing_data';
+import type { SelfAssessedResult, MissingDataItem } from '../../common/missing_data';
 
 /**
  * Where the findings recorder keeps what an investigation could not settle. Written as the user of
@@ -27,7 +27,8 @@ const MAPPINGS = {
     conversation_id: { type: 'keyword' },
     space_id: { type: 'keyword' },
     '@timestamp': { type: 'date' },
-    outcome: { type: 'keyword' },
+    /** The recorder's own reading of the conversation, not a verified result. */
+    self_assessed_result: { type: 'keyword' },
     missing_data: {
       properties: {
         what: { type: 'text' },
@@ -51,7 +52,7 @@ export interface BlindSpotsDocument {
   space_id: string;
   '@timestamp': string;
   /** Left out when the recorder did not say how the investigation ended. */
-  outcome?: FindingsOutcome;
+  self_assessed_result?: SelfAssessedResult;
   missing_data: MissingDataItem[];
   hypotheses: Array<{ candidate: string; status: HypothesisStatus; settled_by?: string }>;
 }

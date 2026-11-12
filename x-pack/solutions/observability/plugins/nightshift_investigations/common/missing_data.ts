@@ -15,10 +15,14 @@ export const MISSING_DATA_REASONS = [
 
 export type MissingDataReason = (typeof MISSING_DATA_REASONS)[number];
 
-/** How an investigation ended, as the recorder judged it from the conversation. */
-export const FINDINGS_OUTCOMES = ['cause_found', 'cause_not_confirmed', 'no_incident'] as const;
+/** How the recorder judged, from the conversation alone, that an investigation ended. Not verified. */
+export const SELF_ASSESSED_RESULTS = [
+  'cause_identified',
+  'cause_not_identified',
+  'nothing_abnormal',
+] as const;
 
-export type FindingsOutcome = (typeof FINDINGS_OUTCOMES)[number];
+export type SelfAssessedResult = (typeof SELF_ASSESSED_RESULTS)[number];
 
 /** A gap in the data that kept an investigation from confirming its cause. */
 export interface MissingDataItem {

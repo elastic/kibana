@@ -32,7 +32,7 @@ import {
   proposalImpactSchema,
 } from '@kbn/proposals-common';
 import {
-  FINDINGS_OUTCOMES,
+  SELF_ASSESSED_RESULTS,
   isMissingDataReason,
   MAX_MISSING_DATA,
   MAX_MISSING_DATA_TEXT_LENGTH,
@@ -93,8 +93,8 @@ export const findingsOutputSchema = lazySchema(() => {
   return z.object({
     summary: z.string().min(1),
     verdict: z.string().optional(),
-    // Only the final pass says how the investigation ended.
-    outcome: z.enum(FINDINGS_OUTCOMES).optional(),
+    // Only the final pass says how the investigation ended, by its own reading of the conversation.
+    self_assessed_result: z.enum(SELF_ASSESSED_RESULTS).optional(),
     severity: z.enum(FINDINGS_SEVERITIES).optional(),
     impact_summary: z.string().min(1).optional(),
     // `null` retracts the stored impact evidence; omitting the field keeps it.
@@ -414,11 +414,11 @@ export const FINDINGS_JSON_SCHEMA = {
       description:
         'What we saw and since when, not the cause. At most 60 words of Markdown: a lead sentence of at most 25 words, then at most three short bullets.',
     },
-    outcome: {
+    self_assessed_result: {
       type: 'string',
-      enum: FINDINGS_OUTCOMES,
+      enum: SELF_ASSESSED_RESULTS,
       description:
-        'Only when the agent has given its final answer: cause_found when a hypothesis is confirmed as the cause, cause_not_confirmed when there was something to explain and none is confirmed, no_incident when the investigated window shows nothing abnormal, so there is no cause to find. Omit while the investigation is still running.',
+        'Only when the agent has given its final answer: your own reading of the conversation, not a verified result: cause_identified when you name a cause, cause_not_identified when there was something to explain and you could not confirm one, nothing_abnormal when the investigated window shows nothing abnormal, so there is no cause to find. Omit while the investigation is still running.',
     },
     verdict: {
       type: 'string',
@@ -487,7 +487,7 @@ export const FINDINGS_JSON_SCHEMA = {
     missing_data: {
       type: 'array',
       description:
-        'Only when the outcome is cause_not_confirmed: at most 3 gaps in the data that kept the cause from being confirmed, the most decisive first. Only gaps the conversation shows (a failed query, a 403, an empty result, a source never checked). Never guess.',
+        'Only when self_assessed_result is cause_not_identified: at most 3 gaps in the data that kept the cause from being confirmed, the most decisive first. Only gaps the conversation shows (a failed query, a 403, an empty result, a source never checked). Never guess.',
       items: {
         type: 'object',
         properties: {
