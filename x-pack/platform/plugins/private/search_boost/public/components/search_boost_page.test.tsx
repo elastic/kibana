@@ -7,28 +7,20 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { SearchBoostPage } from './search_boost_page';
-
-// The page header lives in Kibana's chrome, so a stand-in renders the props it receives.
-jest.mock('@kbn/app-header', () => {
-  const { createElement } = jest.requireActual('react');
-  return {
-    AppHeader: ({ title, description }: { title: string; description: string }) =>
-      createElement(
-        'div',
-        null,
-        createElement('h1', null, title),
-        createElement('p', { 'data-test-subj': 'appHeaderDescription' }, description)
-      ),
-  };
-});
 
 describe('SearchBoostPage', () => {
   it('shows the title and description', () => {
-    render(<SearchBoostPage />);
+    render(
+      <MockAppHeaderProvider>
+        <SearchBoostPage />
+      </MockAppHeaderProvider>
+    );
 
-    expect(screen.getByRole('heading', { name: 'Search boost' })).toBeInTheDocument();
-    expect(screen.getByTestId('appHeaderDescription')).toHaveTextContent(
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Search boost');
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.description)).toHaveTextContent(
       'Balance search performance and cost for the indices and data streams in this project.'
     );
   });

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const PLUGIN_ID = 'search_boost';
+export const SEARCH_BOOST_APP_ID = 'search_boost';

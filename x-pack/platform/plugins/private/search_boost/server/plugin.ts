@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup, Plugin } from '@kbn/core/server';
-import { PLUGIN_ID } from '../common/constants';
+import { SEARCH_BOOST_APP_ID } from '../common/constants';
 import type { SearchBoostSetupDependencies } from './types';
 
 export class SearchBoostPlugin implements Plugin<void, void, SearchBoostSetupDependencies> {
@@ -14,9 +14,9 @@ export class SearchBoostPlugin implements Plugin<void, void, SearchBoostSetupDep
     // The `_boost` APIs are `cluster:admin/boost/*` for writes and `cluster:monitor/boost/*` for
     // reads, which `manage` and `monitor` cover; there is no boost-specific privilege.
     features.registerElasticsearchFeature({
-      id: PLUGIN_ID,
+      id: SEARCH_BOOST_APP_ID,
       management: {
-        data: [PLUGIN_ID],
+        data: [SEARCH_BOOST_APP_ID],
       },
       privileges: [
         {
