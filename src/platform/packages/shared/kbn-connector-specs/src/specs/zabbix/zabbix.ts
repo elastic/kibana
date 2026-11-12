@@ -202,6 +202,10 @@ export const Zabbix: ConnectorSpec = {
     })
   ),
 
+  validateUrls: {
+    fields: ['baseUrl'],
+  },
+
   actions: {
     getProblems: {
       isTool: true,

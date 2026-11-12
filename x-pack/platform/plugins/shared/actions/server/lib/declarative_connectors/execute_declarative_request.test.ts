@@ -458,12 +458,16 @@ describe('executeDeclarativeRequest', () => {
     ).rejects.toThrow('Response path "data" not found');
   });
 
-  it('returns the raw Link header with mapped response data after one request', async () => {
+  it('maps data and raw Link headers without adding rate limit metadata', async () => {
     const rawLink = '<https://api.example/items?page=2>; rel="next"';
     const response = createRecordingAxiosClient({}, () => ({
-      data: [{ id: 1 }],
+      data: { data: [{ id: 1 }] },
       status: 200,
-      headers: { Link: rawLink },
+      headers: {
+        Link: rawLink,
+        'x-ratelimit-remaining': '5',
+        'x-ratelimit-reset': '60',
+      },
     }));
     await expect(
       executeDeclarativeRequest({
@@ -471,7 +475,11 @@ describe('executeDeclarativeRequest', () => {
         request: {
           method: 'GET',
           url: 'https://api.example/items',
-          response: { outputKey: 'users', linkHeader: { outputKey: 'link' } },
+          response: {
+            dataPath: 'data',
+            outputKey: 'users',
+            linkHeader: { outputKey: 'link' },
+          },
         },
         input: {},
         config: {},
@@ -511,50 +519,5 @@ describe('executeDeclarativeRequest', () => {
         config: {},
       })
     ).resolves.toEqual({ events: [], link: undefined });
-  });
-
-  it('attaches rate limit metadata and omits it when headers are missing', async () => {
-    const withHeaders = createRecordingAxiosClient({}, () => ({
-      data: { ok: true },
-      status: 200,
-      headers: { 'x-ratelimit-remaining': '5', 'x-ratelimit-reset': '60' },
-    }));
-    await expect(
-      executeDeclarativeRequest({
-        client: withHeaders.client,
-        request: {
-          method: 'GET',
-          url: 'https://api.example/items',
-          response: {
-            rateLimitHeaders: { remaining: 'x-ratelimit-remaining', reset: 'x-ratelimit-reset' },
-          },
-        },
-        input: {},
-        config: {},
-      })
-    ).resolves.toEqual({
-      ok: true,
-      _meta: { rateLimit: { remaining: 5, reset: 60 } },
-    });
-
-    const withoutHeaders = createRecordingAxiosClient({}, () => ({
-      data: { ok: true },
-      status: 200,
-      headers: {},
-    }));
-    await expect(
-      executeDeclarativeRequest({
-        client: withoutHeaders.client,
-        request: {
-          method: 'GET',
-          url: 'https://api.example/items',
-          response: {
-            rateLimitHeaders: { remaining: 'x-ratelimit-remaining', reset: 'x-ratelimit-reset' },
-          },
-        },
-        input: {},
-        config: {},
-      })
-    ).resolves.toEqual({ ok: true });
   });
 });

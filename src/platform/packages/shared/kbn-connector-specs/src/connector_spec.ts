@@ -196,6 +196,7 @@ export type ActionScope = 'read' | 'write' | 'destroy';
 export interface ActionDefinition<TInput = unknown, TOutput = unknown> {
   isTool?: boolean;
   input: z.ZodSchema<TInput>;
+  output?: z.ZodSchema<TOutput>;
   handler: (ctx: ActionContext, input: TInput) => Promise<TOutput>;
   description?: string;
   /**
@@ -315,6 +316,10 @@ export interface ConnectorSpec {
   // Single unified schema for all connector fields (config + secrets)
   // Mark sensitive fields with withUIMeta({ sensitive: true })
   schema?: z.ZodObject;
+
+  validateUrls?: {
+    fields?: string[];
+  };
 
   // Hosts a sandbox command may send this connector's auth headers to. Required when an
   // auth type sets supportsSandbox; a connector that resolves to no hosts cannot be used

@@ -266,3 +266,20 @@ export const ReplyMessageInputSchema = lazySchema(() =>
   })
 );
 export type ReplyMessageInput = z.infer<typeof ReplyMessageInputSchema>;
+
+// ===== Shared outputs =====
+
+// Shared shape for all Gmail message mutation responses (modify, trash, send, reply).
+const GmailMessageResultSchema = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    threadId: z.string(),
+    labelIds: z.array(z.string()),
+  })
+);
+
+export const ModifyMessageOutputSchema = GmailMessageResultSchema;
+export type ModifyMessageOutput = z.infer<typeof GmailMessageResultSchema>;
+
+export const SendMessageOutputSchema = GmailMessageResultSchema;
+export type SendMessageOutput = z.infer<typeof GmailMessageResultSchema>;

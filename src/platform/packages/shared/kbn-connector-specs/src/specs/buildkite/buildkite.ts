@@ -167,6 +167,10 @@ export const Buildkite: ConnectorSpec = {
     })
   ),
 
+  validateUrls: {
+    fields: ['serverUrl'],
+  },
+
   actions: {
     createBuild: {
       isTool: true,

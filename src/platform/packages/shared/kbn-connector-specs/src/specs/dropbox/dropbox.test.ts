@@ -121,6 +121,12 @@ describe('Dropbox', () => {
     });
   });
 
+  describe('validateUrls', () => {
+    it('validates the serverUrl field', () => {
+      expect(Dropbox.validateUrls?.fields).toContain('serverUrl');
+    });
+  });
+
   describe('whoAmI action', () => {
     it('is exposed as a tool', () => {
       expect(Dropbox.actions.whoAmI.isTool).toBe(true);

@@ -107,6 +107,8 @@ export const Elasticsearch: ConnectorSpec = {
     })
   ),
 
+  validateUrls: { fields: ['url'] },
+
   sandbox: { hostsFromConfig: ['url'] },
 
   actions: {

@@ -162,6 +162,10 @@ export const Databricks: ConnectorSpec = {
     })
   ),
 
+  validateUrls: {
+    fields: ['serverUrl'],
+  },
+
   actions: {
     // ── Read-only SQL queries (exposed to AI agents) ──────────────────────────
     runQuery: {

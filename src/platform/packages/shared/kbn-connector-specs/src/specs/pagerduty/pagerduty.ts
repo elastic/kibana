@@ -138,6 +138,10 @@ export const PagerdutyConnector: ConnectorSpec = {
     })
   ),
 
+  validateUrls: {
+    fields: ['serverUrl'],
+  },
+
   actions: {
     browseUsers: {
       isTool: true,

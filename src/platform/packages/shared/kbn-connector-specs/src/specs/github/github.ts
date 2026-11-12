@@ -157,6 +157,10 @@ export const GithubConnector: ConnectorSpec = {
     })
   ),
 
+  validateUrls: {
+    fields: ['serverUrl'],
+  },
+
   sandbox: {
     hosts: ['api.github.com', 'api.githubcopilot.com'],
     hostsFromConfig: ['serverUrl'],

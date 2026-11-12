@@ -203,6 +203,10 @@ export const Misp: ConnectorSpec = {
     })
   ),
 
+  validateUrls: {
+    fields: ['url'],
+  },
+
   actions: {
     searchAttributes: {
       isTool: true,

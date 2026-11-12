@@ -56,7 +56,6 @@ export interface DeclarativeResponseMapping {
   dataPath?: string;
   outputKey?: string;
   linkHeader?: { header?: string; outputKey: string };
-  rateLimitHeaders?: { remaining?: string; reset?: string };
 }
 
 export interface DeclarativeRequest {

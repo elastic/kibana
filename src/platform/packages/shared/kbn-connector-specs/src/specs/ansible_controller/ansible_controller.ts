@@ -657,6 +657,13 @@ export const AnsibleControllerConnector: ConnectorSpec = {
       scope: 'read',
       description: `Retrieve job stdout (format=txt by default). Output is capped to the last ${MAX_STDOUT_CHARS} characters. html format is not supported.`,
       input: GetJobStdoutInputSchema,
+      output: lazySchema(() =>
+        z.object({
+          jobId: z.union([z.string(), z.number()]),
+          content: z.string(),
+          truncated: z.boolean(),
+        })
+      ),
       handler: async (ctx, input: GetJobStdoutInput) => {
         const format = input.format ?? 'txt';
         if (format === ('html' as string)) {

@@ -235,6 +235,10 @@ export const Unifi: ConnectorSpec = {
     })
   ),
 
+  validateUrls: {
+    fields: ['consoleUrl'],
+  },
+
   actions: {
     // ------------------------------------------------------------------
     // UniFi Network — discovery and reads

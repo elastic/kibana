@@ -216,6 +216,10 @@ export const Prometheus: ConnectorSpec = {
     })
   ),
 
+  validateUrls: {
+    fields: ['baseUrl', 'prometheusUrl'],
+  },
+
   actions: {
     listAlerts: {
       isTool: true,

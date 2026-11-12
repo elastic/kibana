@@ -638,6 +638,12 @@ export const Jenkins: ConnectorSpec = {
         'Fetch the console output of a build, for triage or attaching failure detail to a case. ' +
         `Output is capped to the last ${MAX_CONSOLE_LOG_CHARS} characters.`,
       input: GetConsoleLogInputSchema,
+      output: lazySchema(() =>
+        z.object({
+          content: z.string().describe('The (possibly truncated) console output.'),
+          truncated: z.boolean().describe('Whether the output was truncated to fit the size cap.'),
+        })
+      ),
       handler: async (ctx, input: GetConsoleLogInput) => {
         const response = await jenkinsRequest(ctx, {
           method: 'GET',

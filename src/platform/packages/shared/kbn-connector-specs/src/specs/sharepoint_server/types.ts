@@ -17,6 +17,12 @@ const SHAREPOINT_MAX_PATH_LENGTH = 1024;
 const SHAREPOINT_MAX_API_PATH_LENGTH = 4096;
 const SHAREPOINT_MAX_KQL_LENGTH = 4096;
 
+export const ODataCollectionOutputSchema = lazySchema(() =>
+  z.object({
+    value: z.array(z.any()).describe('Array of items returned from the API'),
+  })
+);
+
 export const GetListItemsInputSchema = lazySchema(() =>
   z.object({
     listTitle: z
@@ -39,6 +45,13 @@ export const GetFolderContentsInputSchema = lazySchema(() =>
   })
 );
 
+export const GetFolderContentsOutputSchema = lazySchema(() =>
+  z.object({
+    files: z.array(z.any()).describe('Files in the folder'),
+    folders: z.array(z.any()).describe('Subfolders in the folder'),
+  })
+);
+
 export const DownloadFileInputSchema = lazySchema(() =>
   z.object({
     path: z
@@ -47,6 +60,14 @@ export const DownloadFileInputSchema = lazySchema(() =>
       .describe(
         "Server-relative URL of the file: starts with '/', no hostname. Get this from the ServerRelativeUrl field in getFolderContents results. Example: '/sites/mysite/Shared Documents/report.txt'"
       ),
+  })
+);
+
+export const DownloadFileOutputSchema = lazySchema(() =>
+  z.object({
+    contentType: z.string().optional().describe('Content-Type header'),
+    contentLength: z.string().optional().describe('Content-Length header'),
+    text: z.string().describe('File content as UTF-8 text'),
   })
 );
 

@@ -302,6 +302,10 @@ export const Snowflake: ConnectorSpec = {
     })
   ),
 
+  validateUrls: {
+    fields: ['accountUrl'],
+  },
+
   actions: {
     runQuery: {
       isTool: true,

@@ -67,9 +67,6 @@ actions:
         outputKey: users
         linkHeader:
           outputKey: link
-        rateLimitHeaders:
-          remaining: x-rate-limit-remaining
-          reset: x-rate-limit-reset
   getLogs:
     description: Read one page of recent Okta System Log events and return the Link header.
     isTool: true
@@ -110,9 +107,6 @@ actions:
         outputKey: events
         linkHeader:
           outputKey: link
-        rateLimitHeaders:
-          remaining: x-rate-limit-remaining
-          reset: x-rate-limit-reset
 test:
   description: Verify connectivity by listing one user.
   request:

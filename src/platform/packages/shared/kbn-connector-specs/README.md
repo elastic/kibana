@@ -277,6 +277,7 @@ actions: {
   actionName: {
     isTool?: boolean,              // Whether this action is a tool (for AI workflows)
     input: z.ZodSchema,            // Input validation schema
+    output?: z.ZodSchema,          // Output schema (not validated at runtime)
     handler: async (ctx, input) => {
       // Action implementation
       return result;

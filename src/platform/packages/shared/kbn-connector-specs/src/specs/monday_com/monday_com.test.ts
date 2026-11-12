@@ -122,6 +122,12 @@ describe('MondayCom', () => {
     });
   });
 
+  describe('validateUrls', () => {
+    it('validates the serverUrl field', () => {
+      expect(MondayCom.validateUrls?.fields).toContain('serverUrl');
+    });
+  });
+
   describe('whoAmI action', () => {
     it('is exposed as a tool', () => {
       expect(MondayCom.actions.whoAmI.isTool).toBe(true);

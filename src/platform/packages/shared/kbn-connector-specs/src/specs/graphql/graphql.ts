@@ -312,6 +312,10 @@ export const GraphQLConnector: ConnectorSpec = {
     })
   ),
 
+  validateUrls: {
+    fields: ['url'],
+  },
+
   actions: {
     // ── Schema discovery ──────────────────────────────────────────────────────
     introspect: {

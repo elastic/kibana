@@ -158,13 +158,6 @@ const httpRequestSchema = lazySchema(() =>
             .object({ header: z.string().optional(), outputKey: z.string().min(1) })
             .strict()
             .optional(),
-          rateLimitHeaders: z
-            .object({
-              remaining: z.string().optional(),
-              reset: z.string().optional(),
-            })
-            .strict()
-            .optional(),
         })
         .strict()
         .optional(),

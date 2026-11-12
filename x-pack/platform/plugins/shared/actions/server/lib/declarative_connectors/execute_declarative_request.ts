@@ -22,15 +22,6 @@ interface ClientResponse {
   data: unknown;
 }
 
-interface RateLimitMetadata {
-  remaining?: number;
-  reset?: number;
-}
-
-export interface DeclarativeRequestResult extends Record<string, unknown> {
-  _meta?: { rateLimit?: RateLimitMetadata };
-}
-
 interface RequestConfig {
   method: string;
   url: string;
@@ -250,39 +241,6 @@ const applyResponseMapping = (
   return mapping.outputKey ? { [mapping.outputKey]: selected.value } : selected.value;
 };
 
-const parseHeaderNumber = (
-  response: ClientResponse,
-  headerName: string | undefined
-): number | undefined => {
-  if (!headerName) {
-    return undefined;
-  }
-  const raw = getHeader(response.headers, headerName);
-  if (raw === undefined) {
-    return undefined;
-  }
-  const parsed = Number(raw);
-  return Number.isFinite(parsed) ? parsed : undefined;
-};
-
-const getRateLimitMetadata = (
-  response: ClientResponse,
-  headers: DeclarativeResponseMapping['rateLimitHeaders']
-): RateLimitMetadata | undefined => {
-  if (!headers) {
-    return undefined;
-  }
-  const remaining = parseHeaderNumber(response, headers.remaining);
-  const reset = parseHeaderNumber(response, headers.reset);
-  if (remaining === undefined && reset === undefined) {
-    return undefined;
-  }
-  return {
-    ...(remaining !== undefined ? { remaining } : {}),
-    ...(reset !== undefined ? { reset } : {}),
-  };
-};
-
 const toFormBody = (value: unknown): URLSearchParams => {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
     throw new Error('Declarative form request bodies must be objects.');
@@ -331,11 +289,6 @@ const toResult = (data: unknown): Record<string, unknown> => {
   return { data };
 };
 
-const withRateLimit = (
-  result: Record<string, unknown>,
-  rateLimit: RateLimitMetadata | undefined
-): DeclarativeRequestResult => (rateLimit ? { ...result, _meta: { rateLimit } } : result);
-
 const withLinkHeader = (
   result: Record<string, unknown>,
   response: ClientResponse,
@@ -354,7 +307,7 @@ export const executeDeclarativeRequest = async ({
   request,
   input,
   config,
-}: ExecuteDeclarativeRequestOptions): Promise<DeclarativeRequestResult> => {
+}: ExecuteDeclarativeRequestOptions): Promise<Record<string, unknown>> => {
   const context: TemplateContext = { input, config: config ?? {} };
   const url = buildUrl(request, context);
   const renderedHeaders = toHeaderRecord(renderTemplateValue(request.headers ?? {}, context));
@@ -381,5 +334,5 @@ export const executeDeclarativeRequest = async ({
     response,
     request.response?.linkHeader
   );
-  return withRateLimit(mapped, getRateLimitMetadata(response, request.response?.rateLimitHeaders));
+  return mapped;
 };

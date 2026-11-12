@@ -19,9 +19,11 @@ import {
   ListMessagesInputSchema,
   MessageIdInputSchema,
   ModifyLabelsInputSchema,
+  ModifyMessageOutputSchema,
   ReplyMessageInputSchema,
   SearchMessagesInputSchema,
   SendMessageInputSchema,
+  SendMessageOutputSchema,
   type GetAttachmentInput,
   type GetMessageInput,
   type ListMessagesInput,
@@ -368,6 +370,7 @@ export const GmailConnector: ConnectorSpec = {
       description:
         'Add or remove Gmail labels on a message. This is the quarantine primitive: pass the quarantine label ID in addLabelIds and ["INBOX"] in removeLabelIds to move a message out of the inbox. Call listLabels first to resolve a label name to its ID. Roll back by swapping addLabelIds and removeLabelIds. At least one of addLabelIds or removeLabelIds is required. Not available with Elastic managed authentication.',
       input: ModifyLabelsInputSchema,
+      output: ModifyMessageOutputSchema,
       handler: async (ctx, input) => {
         const typedInput: ModifyLabelsInput = ModifyLabelsInputSchema.parse(input);
         return modifyMessageLabels(ctx, 'modifyLabels', typedInput);
@@ -380,6 +383,7 @@ export const GmailConnector: ConnectorSpec = {
       description:
         'Mark a Gmail message as read by removing its UNREAD label. Reversible with markAsUnread. Returns the message id, threadId, and updated labelIds. Not available with Elastic managed authentication.',
       input: MessageIdInputSchema,
+      output: ModifyMessageOutputSchema,
       handler: async (ctx, input) => {
         const typedInput: MessageIdInput = MessageIdInputSchema.parse(input);
         return modifyMessageLabels(ctx, 'markAsRead', {
@@ -395,6 +399,7 @@ export const GmailConnector: ConnectorSpec = {
       description:
         'Mark a Gmail message as unread by adding its UNREAD label. Reversible with markAsRead. Returns the message id, threadId, and updated labelIds. Not available with Elastic managed authentication.',
       input: MessageIdInputSchema,
+      output: ModifyMessageOutputSchema,
       handler: async (ctx, input) => {
         const typedInput: MessageIdInput = MessageIdInputSchema.parse(input);
         return modifyMessageLabels(ctx, 'markAsUnread', {
@@ -414,6 +419,7 @@ export const GmailConnector: ConnectorSpec = {
       description:
         'Move a Gmail message to Trash. Reversible with untrashMessage within 30 days; after that Gmail permanently deletes trashed mail. Distinct from a permanent delete, which is not supported by this connector. Not available with Elastic managed authentication.',
       input: MessageIdInputSchema,
+      output: ModifyMessageOutputSchema,
       handler: async (ctx, input) => {
         const typedInput: MessageIdInput = MessageIdInputSchema.parse(input);
         return postMessageAction(ctx, 'trashMessage', typedInput.messageId, 'trash');
@@ -427,6 +433,7 @@ export const GmailConnector: ConnectorSpec = {
       description:
         'Restore a Gmail message from Trash. Rolls back a trashMessage call. Only effective within 30 days — Gmail permanently removes trashed mail after that period. Not available with Elastic managed authentication.',
       input: MessageIdInputSchema,
+      output: ModifyMessageOutputSchema,
       handler: async (ctx, input) => {
         const typedInput: MessageIdInput = MessageIdInputSchema.parse(input);
         return postMessageAction(ctx, 'untrashMessage', typedInput.messageId, 'untrash');
@@ -447,6 +454,7 @@ export const GmailConnector: ConnectorSpec = {
       description:
         "Send an email from the authenticated user's Gmail account. Irreversible once accepted by the receiving mail server. Supports plain text and HTML bodies. No attachments in v1. Not available with Elastic managed authentication.",
       input: SendMessageInputSchema,
+      output: SendMessageOutputSchema,
       handler: async (ctx, input) => {
         const typedInput: SendMessageInput = SendMessageInputSchema.parse(input);
         assertWriteCapableAuth(ctx, 'sendMessage');
@@ -484,6 +492,7 @@ export const GmailConnector: ConnectorSpec = {
       description:
         'Send a reply to an existing Gmail message, preserving the thread. The handler fetches the original message to extract threading headers (In-Reply-To, References) and to determine the default reply-to address from Reply-To or From. Pass "to" explicitly to override the recipient. Not available with Elastic managed authentication.',
       input: ReplyMessageInputSchema,
+      output: SendMessageOutputSchema,
       handler: async (ctx, input) => {
         const typedInput: ReplyMessageInput = ReplyMessageInputSchema.parse(input);
         assertWriteCapableAuth(ctx, 'replyMessage');

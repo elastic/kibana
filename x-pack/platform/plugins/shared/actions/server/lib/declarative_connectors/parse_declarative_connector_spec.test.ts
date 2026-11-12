@@ -140,6 +140,16 @@ describe('parseDeclarativeConnectorSpec', () => {
     expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(DeclarativeConnectorSpecError);
   });
 
+  it('rejects removed rateLimitHeaders response mapping', () => {
+    const raw = minimalSpec(`      method: GET
+      url: https://example.com/users
+      response:
+        rateLimitHeaders:
+          remaining: x-rate-limit-remaining`);
+
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(DeclarativeConnectorSpecError);
+  });
+
   describe('JSON schema validation', () => {
     const specWithInput = (inputYaml: string): string =>
       minimalSpec(`      method: GET

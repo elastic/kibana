@@ -307,6 +307,13 @@ export const ServicenowSearch: ConnectorSpec = {
         'use listRecords with table=sys_attachment and encodedQuery=table_name=<table>^table_sys_id=<record_sys_id>. ' +
         'WARNING: This action returns raw base64-encoded binary data. Only call it when you have a concrete plan to process the data (e.g. via an Elasticsearch ingest pipeline attachment processor); do not call it speculatively or store the raw base64 in a case or alert without further processing.',
       input: GetAttachmentInputSchema,
+      output: lazySchema(() =>
+        z.object({
+          fileName: z.string().describe('Name of the attachment file'),
+          contentType: z.string().describe('MIME type of the attachment'),
+          base64: z.string().describe('Base64-encoded attachment content'),
+        })
+      ),
       handler: async (ctx, input: GetAttachmentInput) => {
         const { instanceUrl } = ctx.config as { instanceUrl: string };
 
