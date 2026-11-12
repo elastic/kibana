@@ -168,7 +168,7 @@ const goalSection = ({ id, description }: AiIndexEvalConfig): string[] => [
   '',
   'Read the transcripts and produce that memory yourself, as the pipeline should if it worked perfectly: the high-level, lasting knowledge the transcripts establish, matching the AI index config. That is who and what they are about (entities), what is true of them (facts), and how they relate (relationships). It is not a summary of each conversation or a record of every message.',
   '',
-  'We then run the pipeline on the same transcripts and compare its memory with yours by code, without an LLM. A memory you write that the pipeline does not counts as a miss; a memory the pipeline writes that you do not counts against it. So be complete, be exact, and write only what the config asks for.',
+  'We then run the pipeline on the same transcripts and compare its memory with yours by code, without an LLM. A memory you write that the pipeline does not counts as a miss; a memory the pipeline writes that you do not counts against it. So be exact, and write only and EVERYTHING the config asks for: every entity, fact and relationship of the types it defines that is found in the transcripts.',
 ];
 
 const configSection = (aiIndex: AiIndexEvalConfig, dreaming: AiIndexDreamingConfig): string[] => [
