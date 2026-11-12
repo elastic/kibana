@@ -1,5 +1,5 @@
 {
-  "sha1": "a81d8b5432009959c0e88856e36389ee53bb3a77",
+  "sha1": "a507ce52942bcadd500afd6f7e7589bd046245b6",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -28,6 +28,19 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout_connector_emulator/ui/parallel_tests/censys_workflow.spec.ts",
         "line": 65,
         "column": 13
+      }
+    },
+    {
+      "id": "79438fd84caba2c-2176fdcc977983f",
+      "title": "a Figma workflow through the Workflows app against the connector emulator runs a step per action with the access token, and the emulator answers each request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_connector_emulator/ui/parallel_tests/figma_workflow.spec.ts",
+        "line": 116,
+        "column": 15
       }
     },
     {

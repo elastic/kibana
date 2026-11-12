@@ -32,10 +32,8 @@ const indent = (lines: string, by: number) =>
 
 const toYaml = (value: Record<string, Param>) =>
   Object.entries(value)
-    .map(
-      ([key, item]) =>
-        `${key}: ${typeof item === 'string' && item.includes('{{') ? `"${item}"` : item}`
-    )
+    // Strings are quoted, as YAML would read some bare ones as other types (`0:1` as a number).
+    .map(([key, item]) => `${key}: ${typeof item === 'string' ? JSON.stringify(item) : item}`)
     .join('\n');
 
 /**
@@ -56,9 +54,13 @@ export const getConnectorWorkflowYaml = ({
   const yamlSteps = steps.flatMap(([name, type, params]) => [
     `  - name: ${name}
     type: ${type}
-    connector-id: ${connectorId}
+    connector-id: ${connectorId}${
+      Object.keys(params).length === 0
+        ? ''
+        : `
     with:
-${indent(toYaml(params), 6)}
+${indent(toYaml(params), 6)}`
+    }
 `,
     ...(pauseSeconds > 0
       ? [

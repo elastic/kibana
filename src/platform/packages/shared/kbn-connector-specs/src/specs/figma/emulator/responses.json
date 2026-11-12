@@ -1,0 +1,132 @@
+[
+  {
+    "source": "rest",
+    "method": "GET",
+    "path": "/v1/me",
+    "status": 200,
+    "body": {
+      "id": "1234567890",
+      "handle": "Ada Lovelace",
+      "email": "ada@example.com",
+      "img_url": "https://example.com/avatars/ada.png"
+    }
+  },
+  {
+    "source": "rest",
+    "method": "GET",
+    "path": "/v1/teams/{team_id}/projects",
+    "status": 200,
+    "body": {
+      "name": "Design Systems",
+      "projects": [
+        {
+          "id": "55123",
+          "name": "Mobile app"
+        },
+        {
+          "id": "55124",
+          "name": "Marketing site"
+        }
+      ]
+    }
+  },
+  {
+    "source": "rest",
+    "method": "GET",
+    "path": "/v1/projects/{project_id}/files",
+    "status": 200,
+    "body": {
+      "name": "Mobile app",
+      "files": [
+        {
+          "key": "aB3dEf9GhIjKlMnOpQrStU",
+          "name": "Onboarding flow",
+          "thumbnail_url": "https://example.com/thumbnails/onboarding.png",
+          "last_modified": "2026-11-10T09:30:00Z"
+        },
+        {
+          "key": "zY9xWvUtSrQpOnMlKjIhGf",
+          "name": "Settings",
+          "thumbnail_url": "https://example.com/thumbnails/settings.png",
+          "last_modified": "2026-11-03T14:05:00Z"
+        }
+      ]
+    }
+  },
+  {
+    "source": "rest",
+    "method": "GET",
+    "path": "/v1/files/{file_key}",
+    "status": 200,
+    "body": {
+      "name": "Onboarding flow",
+      "role": "owner",
+      "lastModified": "2026-11-10T09:30:00Z",
+      "editorType": "figma",
+      "thumbnailUrl": "https://example.com/thumbnails/onboarding.png",
+      "version": "4821",
+      "document": {
+        "id": "0:0",
+        "name": "Document",
+        "type": "DOCUMENT",
+        "scrollBehavior": "SCROLLS",
+        "children": [
+          {
+            "id": "0:1",
+            "name": "Welcome",
+            "type": "CANVAS",
+            "children": [],
+            "scrollBehavior": "SCROLLS",
+            "backgroundColor": {
+              "r": 0.96,
+              "g": 0.96,
+              "b": 0.96,
+              "a": 1
+            },
+            "flowStartingPoints": [],
+            "prototypeStartNodeID": null,
+            "prototypeDevice": {
+              "type": "NONE",
+              "rotation": "NONE"
+            }
+          },
+          {
+            "id": "0:2",
+            "name": "Sign up",
+            "type": "CANVAS",
+            "children": [],
+            "scrollBehavior": "SCROLLS",
+            "backgroundColor": {
+              "r": 0.96,
+              "g": 0.96,
+              "b": 0.96,
+              "a": 1
+            },
+            "flowStartingPoints": [],
+            "prototypeStartNodeID": null,
+            "prototypeDevice": {
+              "type": "NONE",
+              "rotation": "NONE"
+            }
+          }
+        ]
+      },
+      "components": {},
+      "componentSets": {},
+      "schemaVersion": 0,
+      "styles": {}
+    }
+  },
+  {
+    "source": "rest",
+    "method": "GET",
+    "path": "/v1/images/{file_key}",
+    "status": 200,
+    "body": {
+      "err": null,
+      "images": {
+        "0:1": "https://example.com/renders/welcome.png"
+      }
+    }
+  }
+]

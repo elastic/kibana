@@ -90,3 +90,51 @@ export const setFixtures = async (
     throw new Error(`The emulator rejected the fixtures: ${JSON.stringify(rejected, null, 2)}`);
   }
 };
+
+/**
+ * Authorizes an OAuth connector the way its user's browser would, minus the vendor's consent page:
+ * starts the flow, then calls Kibana's callback with a code, which the emulator accepts and Kibana
+ * trades for tokens at the vendor. Starting the flow and the callback are routes of a signed-in
+ * user, so they take that user's session cookie.
+ */
+export const authorizeConnector = async ({
+  kibanaUrl,
+  spaceId,
+  connectorId,
+  cookieHeader,
+}: {
+  kibanaUrl: string;
+  spaceId: string;
+  connectorId: string;
+  cookieHeader: Record<string, string>;
+}): Promise<void> => {
+  const headers = {
+    ...cookieHeader,
+    'kbn-xsrf': 'scout',
+    'x-elastic-internal-origin': 'kibana',
+    'content-type': 'application/json',
+  };
+  const space = `${kibanaUrl}/s/${spaceId}`;
+
+  const start = await fetch(
+    `${space}/internal/actions/connector/${connectorId}/_start_oauth_flow`,
+    {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ returnUrl: `${kibanaUrl}/app/connectors` }),
+    }
+  );
+  if (!start.ok) {
+    throw new Error(`Starting the OAuth flow failed with ${start.status}: ${await start.text()}`);
+  }
+  const { state } = (await start.json()) as { state: string };
+
+  const callback = await fetch(
+    `${space}/api/actions/connector/_oauth_callback?code=a-code-the-emulator-accepts&state=${state}`,
+    { headers, redirect: 'manual' }
+  );
+  const location = callback.headers.get('location') ?? '';
+  if (callback.status !== 302 || !location.includes('oauth_authorization=success')) {
+    throw new Error(`The OAuth callback answered ${callback.status} ${location}`);
+  }
+};

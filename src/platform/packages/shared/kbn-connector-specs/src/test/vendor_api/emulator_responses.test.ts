@@ -23,7 +23,7 @@ const connectorsWithScenario = fs
 describe('the emulator responses of connectors (emulator/responses.json)', () => {
   it('exist for the connectors the Scout suites run against the emulator', () => {
     expect(connectorsWithScenario).toStrictEqual(
-      expect.arrayContaining(['brave_search', 'censys', 'firecrawl', 'jina', 'shodan'])
+      expect.arrayContaining(['brave_search', 'censys', 'figma', 'firecrawl', 'jina', 'shodan'])
     );
   });
 
