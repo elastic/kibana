@@ -139,17 +139,6 @@ const jsonSchema: z.ZodType<DeclarativeJsonSchema> = z.lazy(() =>
     })
 );
 
-const retrySchema = lazySchema(() =>
-  z
-    .object({
-      statusCodes: z.array(z.number().int().min(100).max(599)).min(1),
-      maxAttempts: z.number().int().min(1).max(5),
-      initialDelayMs: z.number().int().nonnegative().max(30_000).optional(),
-      maxDelayMs: z.number().int().positive().max(60_000).optional(),
-    })
-    .strict()
-);
-
 const httpRequestSchema = lazySchema(() =>
   z
     .object({
@@ -161,21 +150,14 @@ const httpRequestSchema = lazySchema(() =>
       headers: z.record(z.string(), z.unknown()).optional(),
       body: z.unknown().optional(),
       bodyType: z.enum(['json', 'form', 'text']).optional(),
-      retry: retrySchema.optional(),
-      pagination: z
-        .object({
-          strategy: z.literal('link_header'),
-          header: z.string().optional(),
-          maxPages: z.number().int().min(1).max(100),
-          itemsPath: z.string().optional(),
-          outputKey: z.string().min(1),
-        })
-        .strict()
-        .optional(),
       response: z
         .object({
           dataPath: z.string().optional(),
           outputKey: z.string().optional(),
+          linkHeader: z
+            .object({ header: z.string().optional(), outputKey: z.string().min(1) })
+            .strict()
+            .optional(),
           rateLimitHeaders: z
             .object({
               remaining: z.string().optional(),

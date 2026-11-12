@@ -118,6 +118,28 @@ describe('parseDeclarativeConnectorSpec', () => {
     expect(() => parseDeclarativeConnectorSpec(raw)).not.toThrow();
   });
 
+  it('parses a raw Link response header mapping', () => {
+    const raw = minimalSpec(`      method: GET
+      url: https://example.com/users
+      response:
+        outputKey: users
+        linkHeader:
+          outputKey: link`);
+
+    expect(parseDeclarativeConnectorSpec(raw).actions.ping.request.response).toEqual({
+      outputKey: 'users',
+      linkHeader: { outputKey: 'link' },
+    });
+  });
+
+  it.each(['retry', 'pagination'])('rejects removed request option %s', (option) => {
+    const raw = minimalSpec(`      method: GET
+      url: https://example.com/users
+      ${option}: {}`);
+
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(DeclarativeConnectorSpecError);
+  });
+
   describe('JSON schema validation', () => {
     const specWithInput = (inputYaml: string): string =>
       minimalSpec(`      method: GET

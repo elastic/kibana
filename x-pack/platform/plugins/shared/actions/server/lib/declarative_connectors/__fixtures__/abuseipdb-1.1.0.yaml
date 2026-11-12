@@ -76,13 +76,6 @@ actions:
         maxAgeInDays: "{{ input.maxAgeInDays }}"
         verbose: "{{ input.verbose }}"
         someOtherParam: "{{ input.someOtherParam? }}"
-      retry:
-        statusCodes:
-          - 429
-          - 503
-        maxAttempts: 3
-        initialDelayMs: 200
-        maxDelayMs: 5000
       response:
         dataPath: data
         rateLimitHeaders:

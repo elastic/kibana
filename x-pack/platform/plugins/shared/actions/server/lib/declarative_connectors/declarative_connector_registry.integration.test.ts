@@ -127,7 +127,7 @@ describe('declarative connector registry', () => {
     createSpy.mockRestore();
   });
 
-  it('lets the executor set a Retry-After date after declarative retries are exhausted', async () => {
+  it('lets the executor set a Retry-After date after one declarative request', async () => {
     const { client, requests } = createRecordingAxiosClient({}, () => ({
       data: { error: 'rate' },
       status: 429,
@@ -144,13 +144,7 @@ describe('declarative connector registry', () => {
       getClientLeasePool: jest.fn().mockReturnValue({ acquire: jest.fn(), lease: jest.fn() }),
       getRelayClient: jest.fn(),
     } as unknown as ActionsPluginSetupContract);
-    const setTimeoutSpy = jest.spyOn(global, 'setTimeout').mockImplementation((handler) => {
-      if (typeof handler === 'function') {
-        handler();
-      }
-      return 0 as unknown as NodeJS.Timeout;
-    });
-
+    const beforeRequest = Date.now();
     const result = await actionType.executor!({
       actionId: 'connector-1',
       config: { baseUrl: 'https://api.abuseipdb.com' },
@@ -165,10 +159,11 @@ describe('declarative connector registry', () => {
       services: {} as never,
     } as Parameters<NonNullable<typeof actionType.executor>>[0]);
 
-    expect(requests).toHaveLength(3);
+    expect(requests).toHaveLength(1);
     expect(result.status).toBe('error');
     expect(result.retry).toBeInstanceOf(Date);
-    setTimeoutSpy.mockRestore();
+    expect((result.retry as Date).getTime()).toBeGreaterThanOrEqual(beforeRequest + 2000);
+    expect((result.retry as Date).getTime()).toBeLessThanOrEqual(Date.now() + 2000);
   });
 
   it('runs the test action and returns the unwrapped data', async () => {

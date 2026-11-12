@@ -52,24 +52,10 @@ export type DeclarativeTemplateRoot = 'input' | 'config';
 
 export type DeclarativeHttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
-export interface DeclarativeRetry {
-  statusCodes: number[];
-  maxAttempts: number;
-  initialDelayMs?: number;
-  maxDelayMs?: number;
-}
-
-export interface DeclarativePagination {
-  strategy: 'link_header';
-  header?: string;
-  maxPages: number;
-  itemsPath?: string;
-  outputKey: string;
-}
-
 export interface DeclarativeResponseMapping {
   dataPath?: string;
   outputKey?: string;
+  linkHeader?: { header?: string; outputKey: string };
   rateLimitHeaders?: { remaining?: string; reset?: string };
 }
 
@@ -82,8 +68,6 @@ export interface DeclarativeRequest {
   headers?: Record<string, unknown>;
   body?: unknown;
   bodyType?: 'json' | 'form' | 'text';
-  retry?: DeclarativeRetry;
-  pagination?: DeclarativePagination;
   response?: DeclarativeResponseMapping;
 }
 

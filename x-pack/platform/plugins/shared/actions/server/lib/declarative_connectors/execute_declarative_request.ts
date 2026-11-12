@@ -6,7 +6,7 @@
  */
 
 import type { ActionContext } from '@kbn/connector-specs';
-import type { DeclarativeRequest, DeclarativeResponseMapping, DeclarativeRetry } from './types';
+import type { DeclarativeRequest, DeclarativeResponseMapping } from './types';
 import { renderTemplateValue, renderUrlTemplate, type TemplateContext } from './render_template';
 
 export interface ExecuteDeclarativeRequestOptions {
@@ -14,7 +14,6 @@ export interface ExecuteDeclarativeRequestOptions {
   request: DeclarativeRequest;
   input: Record<string, unknown>;
   config?: Record<string, unknown>;
-  sleep?: (ms: number) => Promise<void>;
 }
 
 interface ClientResponse {
@@ -47,13 +46,6 @@ interface HttpError extends Error {
     data: unknown;
   };
 }
-
-const DEFAULT_INITIAL_DELAY_MS = 200;
-const DEFAULT_MAX_DELAY_MS = 5000;
-
-const defaultSleep = async (milliseconds: number): Promise<void> => {
-  await new Promise((resolve) => setTimeout(resolve, milliseconds));
-};
 
 const toHeaderRecord = (value: unknown): Record<string, string> => {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
@@ -233,60 +225,6 @@ const toHttpError = (response: ClientResponse): HttpError => {
   return error;
 };
 
-const readStatus = (error: unknown): number | undefined => {
-  const status = (error as HttpError | undefined)?.response?.status;
-  return typeof status === 'number' ? status : undefined;
-};
-
-const getRetryDelay = (error: unknown, attempt: number, retry: DeclarativeRetry): number => {
-  const maxDelayMs = retry.maxDelayMs ?? DEFAULT_MAX_DELAY_MS;
-  const initialDelayMs = retry.initialDelayMs ?? DEFAULT_INITIAL_DELAY_MS;
-  const retryAfter = getHeader((error as HttpError).response?.headers, 'retry-after');
-  if (retryAfter !== undefined) {
-    const seconds = Number(retryAfter);
-    if (Number.isFinite(seconds) && seconds >= 0) {
-      return Math.min(seconds * 1000, maxDelayMs);
-    }
-    const date = Date.parse(retryAfter);
-    if (Number.isFinite(date)) {
-      return Math.min(Math.max(date - Date.now(), 0), maxDelayMs);
-    }
-  }
-  return Math.min(initialDelayMs * 2 ** Math.max(attempt - 1, 0), maxDelayMs);
-};
-
-const requestWithRetry = async (
-  client: ActionContext['client'],
-  config: RequestConfig,
-  retry: DeclarativeRetry | undefined,
-  sleep: (ms: number) => Promise<void>
-): Promise<ClientResponse> => {
-  const maxAttempts = retry?.maxAttempts ?? 1;
-  let lastError: unknown;
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    try {
-      const response = (await client.request(config)) as ClientResponse;
-      if (response.status >= 400) {
-        throw toHttpError(response);
-      }
-      return response;
-    } catch (error) {
-      lastError = error;
-      const status = readStatus(error);
-      const shouldRetry =
-        retry !== undefined &&
-        attempt < maxAttempts &&
-        status !== undefined &&
-        retry.statusCodes.includes(status);
-      if (!shouldRetry) {
-        throw error;
-      }
-      await sleep(getRetryDelay(error, attempt, retry));
-    }
-  }
-  throw lastError;
-};
-
 const getPath = (value: unknown, path: string): { found: boolean; value: unknown } => {
   let current = value;
   for (const segment of path.split('.')) {
@@ -310,26 +248,6 @@ const applyResponseMapping = (
     throw new Error(`Response path "${mapping.dataPath}" not found`);
   }
   return mapping.outputKey ? { [mapping.outputKey]: selected.value } : selected.value;
-};
-
-const getNextLink = (response: ClientResponse, headerName: string): string | undefined => {
-  const value = getHeader(response.headers, headerName);
-  if (!value) {
-    return undefined;
-  }
-  for (const part of value.split(',')) {
-    const match = part.match(/<([^>]+)>\s*;\s*rel="?next"?/i);
-    if (match) {
-      return match[1];
-    }
-  }
-  return undefined;
-};
-
-const assertSameOrigin = (firstUrl: string, nextUrl: string): void => {
-  if (new URL(nextUrl).origin !== new URL(firstUrl).origin) {
-    throw new Error('Declarative pagination cannot follow a cross-origin next link.');
-  }
 };
 
 const parseHeaderNumber = (
@@ -418,16 +336,27 @@ const withRateLimit = (
   rateLimit: RateLimitMetadata | undefined
 ): DeclarativeRequestResult => (rateLimit ? { ...result, _meta: { rateLimit } } : result);
 
-/** Runs a declarative HTTP request, including retry, pagination, and response mapping. */
+const withLinkHeader = (
+  result: Record<string, unknown>,
+  response: ClientResponse,
+  mapping: DeclarativeResponseMapping['linkHeader']
+): Record<string, unknown> => {
+  if (!mapping) {
+    return result;
+  }
+  const header = getHeader(response.headers, mapping.header ?? 'link');
+  return { ...result, [mapping.outputKey]: header || undefined };
+};
+
+/** Runs one declarative HTTP request and applies its response mappings. */
 export const executeDeclarativeRequest = async ({
   client,
   request,
   input,
   config,
-  sleep = defaultSleep,
 }: ExecuteDeclarativeRequestOptions): Promise<DeclarativeRequestResult> => {
   const context: TemplateContext = { input, config: config ?? {} };
-  const firstUrl = buildUrl(request, context);
+  const url = buildUrl(request, context);
   const renderedHeaders = toHeaderRecord(renderTemplateValue(request.headers ?? {}, context));
   const renderedQuery = renderTemplateValue(request.query ?? {}, context);
   const renderedBody =
@@ -435,59 +364,22 @@ export const executeDeclarativeRequest = async ({
   const data =
     renderedBody === undefined ? undefined : toRequestBody(renderedBody, request.bodyType);
   const headers = withContentType(renderedHeaders, request.bodyType, data !== undefined);
-  const firstConfig: RequestConfig = {
+  const requestConfig: RequestConfig = {
     method: request.method,
-    url: firstUrl,
+    url,
     params: renderedQuery,
     headers,
     ...(data !== undefined ? { data } : {}),
   };
 
-  if (!request.pagination) {
-    const response = await requestWithRetry(client, firstConfig, request.retry, sleep);
-    return withRateLimit(
-      toResult(applyResponseMapping(response.data, request.response)),
-      getRateLimitMetadata(response, request.response?.rateLimitHeaders)
-    );
+  const response = (await client.request(requestConfig)) as ClientResponse;
+  if (response.status >= 400) {
+    throw toHttpError(response);
   }
-
-  const items: unknown[] = [];
-  let currentUrl = firstUrl;
-  let currentConfig = firstConfig;
-  let response: ClientResponse | undefined;
-  let nextUrl: string | undefined;
-  const maxPages = request.pagination.maxPages;
-
-  for (let page = 0; page < maxPages; page++) {
-    response = await requestWithRetry(client, currentConfig, request.retry, sleep);
-    const pageItems = request.pagination.itemsPath
-      ? getPath(response.data, request.pagination.itemsPath)
-      : { found: true, value: response.data };
-    if (!pageItems.found || !Array.isArray(pageItems.value)) {
-      throw new Error('Declarative paginated responses must resolve to an array.');
-    }
-    items.push(...pageItems.value);
-    nextUrl = getNextLink(response, request.pagination.header ?? 'link');
-    if (!nextUrl || page + 1 >= maxPages) {
-      break;
-    }
-    const resolvedNextUrl = new URL(nextUrl, currentUrl).toString();
-    assertSameOrigin(firstUrl, resolvedNextUrl);
-    currentUrl = resolvedNextUrl;
-    currentConfig = {
-      method: request.method,
-      url: currentUrl,
-      headers,
-      ...(data !== undefined ? { data } : {}),
-    };
-  }
-
-  if (!response) {
-    throw new Error('Declarative request did not produce a response.');
-  }
-
-  return withRateLimit(
-    { [request.pagination.outputKey]: items },
-    getRateLimitMetadata(response, request.response?.rateLimitHeaders)
+  const mapped = withLinkHeader(
+    toResult(applyResponseMapping(response.data, request.response)),
+    response,
+    request.response?.linkHeader
   );
+  return withRateLimit(mapped, getRateLimitMetadata(response, request.response?.rateLimitHeaders));
 };

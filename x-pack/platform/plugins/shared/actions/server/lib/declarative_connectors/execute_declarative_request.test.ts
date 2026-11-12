@@ -382,36 +382,7 @@ describe('executeDeclarativeRequest', () => {
     expect(requests).toHaveLength(0);
   });
 
-  it('retries a 429 and then returns the success response', async () => {
-    const sleep = jest.fn(async () => undefined);
-    let calls = 0;
-    const { client, requests } = createRecordingAxiosClient({}, () => {
-      calls += 1;
-      if (calls === 1) {
-        return { data: {}, status: 429, headers: {} };
-      }
-      return { data: { ok: true }, status: 200, headers: {} };
-    });
-
-    await expect(
-      executeDeclarativeRequest({
-        client,
-        request: {
-          method: 'GET',
-          url: 'https://api.example/items',
-          retry: { statusCodes: [429], maxAttempts: 3, initialDelayMs: 200, maxDelayMs: 5000 },
-        },
-        input: {},
-        config: {},
-        sleep,
-      })
-    ).resolves.toEqual({ ok: true });
-    expect(requests).toHaveLength(2);
-    expect(sleep).toHaveBeenCalledWith(200);
-  });
-
-  it('rethrows the last 429 after maxAttempts', async () => {
-    const sleep = jest.fn(async () => undefined);
+  it('makes one request and preserves Retry-After response headers for Actions retry handling', async () => {
     const { client, requests } = createRecordingAxiosClient({}, () => ({
       data: { error: 'rate' },
       status: 429,
@@ -421,93 +392,14 @@ describe('executeDeclarativeRequest', () => {
     await expect(
       executeDeclarativeRequest({
         client,
-        request: {
-          method: 'GET',
-          url: 'https://api.example/items',
-          retry: { statusCodes: [429], maxAttempts: 3, initialDelayMs: 200, maxDelayMs: 5000 },
-        },
+        request: { method: 'GET', url: 'https://api.example/items' },
         input: {},
         config: {},
-        sleep,
       })
-    ).rejects.toMatchObject({ response: { status: 429 } });
-    expect(requests).toHaveLength(3);
-  });
-
-  it('sleeps for Retry-After seconds', async () => {
-    const sleep = jest.fn(async () => undefined);
-    let calls = 0;
-    const { client } = createRecordingAxiosClient({}, () => {
-      calls += 1;
-      if (calls === 1) {
-        return { data: {}, status: 429, headers: { 'retry-after': '2' } };
-      }
-      return { data: { ok: true }, status: 200, headers: {} };
+    ).rejects.toMatchObject({
+      response: { status: 429, headers: { 'retry-after': '2' }, data: { error: 'rate' } },
     });
-
-    await executeDeclarativeRequest({
-      client,
-      request: {
-        method: 'GET',
-        url: 'https://api.example/items',
-        retry: { statusCodes: [429], maxAttempts: 3, initialDelayMs: 200, maxDelayMs: 5000 },
-      },
-      input: {},
-      config: {},
-      sleep,
-    });
-
-    expect(sleep).toHaveBeenCalledWith(2000);
-  });
-
-  it('does not retry a status that is not configured', async () => {
-    const sleep = jest.fn(async () => undefined);
-    const { client, requests } = createRecordingAxiosClient({}, () => ({
-      data: {},
-      status: 500,
-      headers: {},
-    }));
-
-    await expect(
-      executeDeclarativeRequest({
-        client,
-        request: {
-          method: 'GET',
-          url: 'https://api.example/items',
-          retry: { statusCodes: [429], maxAttempts: 3, initialDelayMs: 200 },
-        },
-        input: {},
-        config: {},
-        sleep,
-      })
-    ).rejects.toMatchObject({ response: { status: 500 } });
     expect(requests).toHaveLength(1);
-    expect(sleep).not.toHaveBeenCalled();
-  });
-
-  it('caps backoff at maxDelayMs', async () => {
-    const sleep = jest.fn(async () => undefined);
-    let calls = 0;
-    const { client } = createRecordingAxiosClient({}, () => {
-      calls += 1;
-      return calls < 3
-        ? { data: {}, status: 429, headers: {} }
-        : { data: { ok: true }, status: 200, headers: {} };
-    });
-
-    await executeDeclarativeRequest({
-      client,
-      request: {
-        method: 'GET',
-        url: 'https://api.example/items',
-        retry: { statusCodes: [429], maxAttempts: 3, initialDelayMs: 1000, maxDelayMs: 1500 },
-      },
-      input: {},
-      config: {},
-      sleep,
-    });
-
-    expect(sleep.mock.calls).toEqual([[1000], [1500]]);
   });
 
   it('unwraps dataPath, wraps outputKey, and throws when the path is missing', async () => {
@@ -566,82 +458,59 @@ describe('executeDeclarativeRequest', () => {
     ).rejects.toThrow('Response path "data" not found');
   });
 
-  it('follows same-origin link pagination and stops at maxPages', async () => {
-    const paginated = createRecordingAxiosClient({}, (url) =>
-      url?.includes('page=2')
-        ? { data: [{ id: 2 }], status: 200, headers: {} }
-        : {
-            data: [{ id: 1 }],
-            status: 200,
-            headers: { link: '<https://api.example/items?page=2>; rel="next"' },
-          }
-    );
+  it('returns the raw Link header with mapped response data after one request', async () => {
+    const rawLink = '<https://api.example/items?page=2>; rel="next"';
+    const response = createRecordingAxiosClient({}, () => ({
+      data: [{ id: 1 }],
+      status: 200,
+      headers: { Link: rawLink },
+    }));
     await expect(
       executeDeclarativeRequest({
-        client: paginated.client,
+        client: response.client,
         request: {
           method: 'GET',
           url: 'https://api.example/items',
-          pagination: { strategy: 'link_header', maxPages: 3, outputKey: 'items' },
+          response: { outputKey: 'users', linkHeader: { outputKey: 'link' } },
         },
         input: {},
         config: {},
       })
-    ).resolves.toEqual({ items: [{ id: 1 }, { id: 2 }] });
-    expect(paginated.requests).toHaveLength(2);
+    ).resolves.toEqual({ users: [{ id: 1 }], link: rawLink });
+    expect(response.requests).toHaveLength(1);
 
-    const onePage = createRecordingAxiosClient({}, () => ({
-      data: [{ id: 1 }],
-      status: 200,
-      headers: { link: '<https://api.example/items?page=2>; rel="next"' },
-    }));
-    await executeDeclarativeRequest({
-      client: onePage.client,
-      request: {
-        method: 'GET',
-        url: 'https://api.example/items',
-        pagination: { strategy: 'link_header', maxPages: 1, outputKey: 'items' },
-      },
-      input: {},
-      config: {},
-    });
-    expect(onePage.requests).toHaveLength(1);
-
-    const crossOrigin = createRecordingAxiosClient({}, () => ({
-      data: [{ id: 1 }],
-      status: 200,
-      headers: { link: '<https://evil.example/items?page=2>; rel="next"' },
-    }));
+    const noLink = createRecordingAxiosClient({}, () => ({ data: [], status: 200, headers: {} }));
     await expect(
       executeDeclarativeRequest({
-        client: crossOrigin.client,
+        client: noLink.client,
         request: {
           method: 'GET',
           url: 'https://api.example/items',
-          pagination: { strategy: 'link_header', maxPages: 3, outputKey: 'items' },
+          response: { outputKey: 'events', linkHeader: { outputKey: 'link' } },
         },
         input: {},
         config: {},
       })
-    ).rejects.toThrow(/cross-origin/);
-    expect(crossOrigin.requests).toHaveLength(1);
-
-    const noLink = createRecordingAxiosClient({}, () => ({
-      data: [{ id: 1 }],
-      status: 200,
-      headers: {},
-    }));
-    await executeDeclarativeRequest({
-      client: noLink.client,
-      request: {
-        method: 'GET',
-        url: 'https://api.example/items',
-        pagination: { strategy: 'link_header', maxPages: 3, outputKey: 'items' },
-      },
-      input: {},
-      config: {},
-    });
+    ).resolves.toEqual({ events: [], link: undefined });
     expect(noLink.requests).toHaveLength(1);
+
+    const emptyLink = createRecordingAxiosClient({}, () => ({
+      data: [],
+      status: 200,
+      headers: { link: '' },
+    }));
+    await expect(
+      executeDeclarativeRequest({
+        client: emptyLink.client,
+        request: {
+          method: 'GET',
+          url: 'https://api.example/items',
+          response: { outputKey: 'events', linkHeader: { outputKey: 'link' } },
+        },
+        input: {},
+        config: {},
+      })
+    ).resolves.toEqual({ events: [], link: undefined });
   });
 
   it('attaches rate limit metadata and omits it when headers are missing', async () => {
