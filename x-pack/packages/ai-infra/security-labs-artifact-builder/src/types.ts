@@ -21,15 +21,19 @@ export interface TaskConfig {
   embeddingClusterUsername: string;
   /** Password for the embedding cluster */
   embeddingClusterPassword: string;
-  /** GitHub repository URL for Security Labs content (e.g. https://github.com/elastic/security-labs-elastic-co) */
-  githubRepoUrl: string;
-  /** Git ref (branch, tag, or commit) to fetch content from. Defaults to `main`. */
-  githubRef: string;
-  /** Repository-relative path that holds the article markdown (e.g. `_content/articles`). */
-  contentSubPath: string;
-  /** GitHub token for accessing the repository (required for internal repos). */
-  githubToken?: string;
-  /** Local path to Security Labs content (alternative to GitHub fetch) */
+  /** Contentstack Content Delivery API host for the Security Labs stack (e.g. `cdn.contentstack.io`). */
+  contentstackHost: string;
+  /** API key of the Contentstack stack that hosts Security Labs (required unless `localContentPath` is set). */
+  contentstackApiKey?: string;
+  /** Read-only Contentstack delivery token (required unless `localContentPath` is set). */
+  contentstackDeliveryToken?: string;
+  /** Contentstack publishing environment to read published entries from. */
+  contentstackEnvironment: string;
+  /** Contentstack locale to read entries in. */
+  contentstackLocale: string;
+  /** Contentstack content type UIDs whose published entries are indexed. */
+  contentstackContentTypes: string[];
+  /** Local path to Security Labs markdown content (alternative to the Contentstack fetch) */
   localContentPath?: string;
   /** Inference endpoint used to generate the semantic_text embeddings. */
   inferenceId: string;

@@ -11,7 +11,6 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { isValidSecurityLabsVersion } from '@kbn/product-doc-common';
 import {
   fetchContent,
-  parseMarkdownFiles,
   createTargetIndex,
   indexDocuments,
   createChunkFiles,
@@ -61,17 +60,10 @@ export const buildArtifact = async (config: TaskConfig) => {
   await cleanupFolders({ folders: [config.buildFolder] });
 
   try {
-    // Step 1: Fetch content from GitHub or local path
+    // Steps 1-2: Fetch published entries from Contentstack (or parse a local markdown checkout)
     log.info('Fetching Security Labs content...');
-    const contentPath = await fetchContent({
+    const documents = await fetchContent({
       config,
-      log,
-    });
-
-    // Step 2: Parse markdown files with frontmatter
-    log.info('Parsing markdown files...');
-    const documents = await parseMarkdownFiles({
-      contentPath,
       log,
     });
 

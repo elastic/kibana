@@ -94,7 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
         const child = spawn(nodeBin, args, {
           cwd: REPO_ROOT,
           stdio: 'inherit',
-          // Inherit env so GITHUB_TOKEN / SECURITY_LABS_REPO_REF reach the fetch step.
+          // Inherit env so SECURITY_LABS_CONTENTSTACK_* settings reach the fetch step.
           env: process.env,
         });
 
