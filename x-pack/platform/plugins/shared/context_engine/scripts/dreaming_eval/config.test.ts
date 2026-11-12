@@ -161,4 +161,12 @@ ai_indices:
       expect(resolved.entities?.nodes.length).toBeGreaterThan(0);
     }
   });
+
+  it('ships dev_50 as 50 different questions, the 10 of dev among them', () => {
+    const config = loadConfig(DEFAULT_CONFIG_PATH, path.resolve(__dirname, '../../../../../../..'));
+    const { dev, dev_50: dev50 } = config.datasets.longmemeval_s.presets;
+
+    expect(new Set(dev50).size).toBe(50);
+    expect(dev50).toEqual(expect.arrayContaining(dev));
+  });
 });

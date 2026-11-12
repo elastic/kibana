@@ -13,6 +13,7 @@ node scripts/context_engine_dreaming_eval.js --dataset longmemeval_v2_enterprise
 node scripts/context_engine_dreaming_eval.js --dataset longmemeval_s --all-samples
 node scripts/context_engine_dreaming_eval.js --stage evaluate --run-id 2026-11-12T08-00-00-000
 node scripts/context_engine_dreaming_eval.js --stage ask              # answer agents, on the latest run's KIs
+node scripts/context_engine_dreaming_eval.js --stage cleanup          # delete the traces, AI indices and agents
 ```
 
 It needs a local Elasticsearch and Kibana from this branch. It uses `elastic:changeme` and reads the Kibana URL from `config/kibana.dev.yml` unless you pass `--es-url`, `--kibana-url`, `--es-username` and `--es-password`.
@@ -30,6 +31,7 @@ Each stage reads what the previous one wrote, so you can rerun any of them on it
 | `evaluate` | Per target: ranks the dumped KIs with a reranker, then asks an LLM whether the top ones hold the target knowledge. Writes scores by dataset and category. |
 | `load` (optional) | Loads KIs someone else dreamed (`--from`): copies their dumps into a local run and writes them to the AI index. See [Sharing memories](#sharing-memories). |
 | `ask` (optional) | Restores the run's dumped KIs to the AI index, puts each target's question to the AI index's answer agent, and asks an LLM whether its answer gives the reference answer. Runs when named, or with the others when `ask.enabled` is set. |
+| `cleanup` (optional) | Deletes what the other stages created: the datasets' imported spans, the AI indices with their KIs and workflows, and the answer agents with their conversations. Keeps the files: downloads, extracts, and every run's dumps and results. Runs only when named. |
 
 ## Answer agents
 
@@ -41,7 +43,7 @@ A dataset is a benchmark; a sample is one of its questions with the conversation
 
 `run_datasets` in the config, or `--dataset`, picks the datasets; the stages work on the AI indices that dream on only those (`--ai-index` picks AI indices instead). Per dataset, the listed `samples` run, else those of the `preset`, else every sample with `all_samples`, else the first `sample_count`. `--samples`, `--preset`, `--sample-count` and `--all-samples` override them. By default one LongMemEval S sample runs.
 
-**Presets** are named lists of sample ids in the config, so runs across the team compare. `longmemeval_s` has `dev`: 10 fixed questions across its 6 question types.
+**Presets** are named lists of sample ids in the config, so runs across the team compare. `longmemeval_s` has `dev`, 10 fixed questions across its 6 question types, and `dev_50`, those 10 and 40 more in proportion to the question types of the benchmark.
 
 **One sample at a time.** With `per_sample` (the default for `longmemeval_s`, whose questions each have their own haystack; `--per-sample` turns it on), the run stage takes the samples in turn: it imports only that sample's conversations, deletes the dreamed KIs, dreams, and dumps the KIs to `runs/<run id>/<AI index>/samples/<sample>/kis.json`. A sample the run already dumped is skipped, so an interrupted run continues where it stopped when started again with the same `--run-id`. The evaluate stage judges each sample's targets against its own KIs, and the ask stage restores each sample's KIs before asking its questions.
 

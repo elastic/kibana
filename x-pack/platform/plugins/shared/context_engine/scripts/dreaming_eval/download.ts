@@ -114,7 +114,9 @@ const READ_CHUNK_BYTES = 1024 * 1024;
 
 /** The elements of a JSON array file, read as a stream. */
 export const streamJsonArrayFile = <T>(file: string): AsyncGenerator<T> =>
-  streamJsonArray<T>(fs.createReadStream(file, { encoding: 'utf8', highWaterMark: READ_CHUNK_BYTES }));
+  streamJsonArray<T>(
+    fs.createReadStream(file, { encoding: 'utf8', highWaterMark: READ_CHUNK_BYTES })
+  );
 
 export const readJson = <T>(file: string): T => JSON.parse(fs.readFileSync(file, 'utf8')) as T;
 

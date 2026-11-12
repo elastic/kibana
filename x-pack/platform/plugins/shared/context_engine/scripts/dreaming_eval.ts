@@ -23,6 +23,7 @@ import {
 import type { StageContext } from './dreaming_eval/context';
 import { createKibanaCall } from './dreaming_eval/context';
 import { runAsk } from './dreaming_eval/stages/ask';
+import { runCleanup } from './dreaming_eval/stages/cleanup';
 import { runConfigure } from './dreaming_eval/stages/configure';
 import { runEvaluate } from './dreaming_eval/stages/evaluate';
 import { runExtract } from './dreaming_eval/stages/extract';
@@ -38,12 +39,13 @@ const STAGES = {
   load: runLoad,
   evaluate: runEvaluate,
   ask: runAsk,
+  cleanup: runCleanup,
 } as const;
 
 type Stage = keyof typeof STAGES;
 const STAGE_NAMES = Object.keys(STAGES) as Stage[];
 /** Stages that run only when named, or turned on in the config. */
-const OPTIONAL_STAGES: Stage[] = ['load', 'ask'];
+const OPTIONAL_STAGES: Stage[] = ['load', 'ask', 'cleanup'];
 
 const parseStages = (value: unknown, optional: Stage[]): Stage[] => {
   if (value === undefined || value === '' || value === true) {
@@ -194,10 +196,12 @@ run(
       traces, configures AI indices that dream on them, runs their workflows from a clean slate,
       dumps the KIs they write, and judges them against target knowledge.
 
-      Stages, in order: ${STAGE_NAMES.join(', ')}. Without --stage, all of them run but load and
-      ask. Load writes KIs someone else dreamed (--from) to the AI index, to try retrieval on
-      them without dreaming. Ask puts the targets' questions to an agent that has only the AI
-      index, and judges its answers; it also runs when ask.enabled is set in the config.
+      Stages, in order: ${STAGE_NAMES.join(', ')}. Without --stage, all of them run but load,
+      ask and cleanup. Load writes KIs someone else dreamed (--from) to the AI index, to try
+      retrieval on them without dreaming. Ask puts the targets' questions to an agent that has
+      only the AI index, and judges its answers; it also runs when ask.enabled is set in the
+      config. Cleanup deletes the imported traces, the AI indices with their KIs and workflows,
+      and the answer agents with their conversations; it keeps the files, runs included.
 
       A sample is a benchmark question with the conversations it is asked over. By default one
       LongMemEval S sample runs; the config picks the datasets and samples, and the flags below
@@ -225,7 +229,7 @@ run(
       help: `
         --stage <names>         Comma-separated stages to run: ${STAGE_NAMES.join(
           ', '
-        )} (default: all but load and ask)
+        )} (default: all but load, ask and cleanup)
         --config <file>         Eval config (default: ${path.relative(
           process.cwd(),
           DEFAULT_CONFIG_PATH
