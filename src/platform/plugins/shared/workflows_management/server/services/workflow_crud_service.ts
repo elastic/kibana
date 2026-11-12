@@ -1249,9 +1249,7 @@ export class WorkflowCrudService {
           );
           if (executions.total > 0) {
             throw new WorkflowConflictError(
-              `Cannot ${
-                force ? 'force-delete' : 'delete'
-              } workflow with running executions: ${id}`,
+              `Cannot ${force ? 'force-delete' : 'delete'} workflow with running executions: ${id}`,
               id
             );
           }

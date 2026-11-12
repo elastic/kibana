@@ -783,7 +783,7 @@ export class WorkflowsService {
   }
 
   public getTriggerSchemaOptions(): TriggerSchemaOptions {
-    return { includePageTrigger: this.pagesEnabled };
+    return { includePageTrigger: this.pagesService !== undefined };
   }
 
   public async getRegisteredCustomTriggerDefinitions(): Promise<ServerTriggerDefinition[]> {
