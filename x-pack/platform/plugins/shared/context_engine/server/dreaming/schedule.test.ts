@@ -10,6 +10,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+  CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
@@ -20,6 +21,7 @@ import type { DreamingWorkflowsApi } from './schedule';
 import {
   createDreamingScheduleService,
   dreamingWorkflowIdFor,
+  relationshipsWorkflowIdFor,
   shouldDream,
   traceDreamingBatchWorkflowIdFor,
   traceDreamingWorkflowIdFor,
@@ -246,6 +248,28 @@ describe('createDreamingScheduleService', () => {
       });
     });
 
+    it('installs and attaches the relationships workflow last, to link what dreaming wrote', async () => {
+      await createService(workflowsManagement).reconcile({
+        aiIndex: aiIndex(),
+        spaceId: SPACE,
+        request,
+      });
+
+      const relationshipsWorkflowId = relationshipsWorkflowIdFor('support', SPACE);
+      expect(relationshipsWorkflowId).toBe(`${CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID}-${suffix}`);
+      expect(client.install.mock.calls.map(([definitionId]) => definitionId)).toEqual([
+        CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+        CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
+        CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+        CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
+      ]);
+      expect(aiIndexService.addAutomation.mock.calls.map(([, , { value }]) => value)).toEqual([
+        `${CONTEXT_ENGINE_DREAMING_WORKFLOW_ID}-${suffix}`,
+        traceWorkflowId,
+        relationshipsWorkflowId,
+      ]);
+    });
+
     it('is installed whether or not the AI index has trace sources yet', async () => {
       await createService(workflowsManagement).reconcile({
         aiIndex: aiIndex({ traces: [] }),
@@ -326,8 +350,9 @@ describe('createDreamingScheduleService', () => {
       SPACE,
       request
     );
-    // Three attempts for dreaming, then one each for the trace dreaming batch and trace dreaming.
-    expect(client.uninstall).toHaveBeenCalledTimes(5);
+    // Three attempts for dreaming, then one each for the trace dreaming batch, trace dreaming and
+    // relationships.
+    expect(client.uninstall).toHaveBeenCalledTimes(6);
   });
 
   it('does not cancel runs when the uninstall fails for another reason', async () => {

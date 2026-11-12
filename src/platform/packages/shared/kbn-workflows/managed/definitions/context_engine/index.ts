@@ -11,6 +11,7 @@ import DREAMING_YAML from './dreaming.yaml';
 import TRACE_DREAMING_YAML from './dreaming_traces.yaml';
 import TRACE_DREAMING_BATCH_YAML from './dreaming_traces_batch.yaml';
 import FEEDBACK_ANALYSIS_YAML from './feedback_analysis.yaml';
+import RELATIONSHIPS_YAML from './relationships.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../types';
 
 export const CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID =
@@ -84,11 +85,11 @@ const renderJsonTemplate = (template: string, values: Record<string, unknown>): 
       : token
   );
 
-/** Consolidates the memories of one AI index into long-term facts, entities and relationships. */
+/** Consolidates the memories of one AI index into long-term facts and entities. */
 export const CONTEXT_ENGINE_DREAMING_WORKFLOW = {
   id: CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 4,
+  version: 5,
   billable: false,
   yamlTemplate: (values) =>
     renderJsonTemplate(DREAMING_YAML, {
@@ -101,7 +102,6 @@ export const CONTEXT_ENGINE_DREAMING_WORKFLOW = {
       __INSTRUCTIONS__: values.instructions,
       __FACT_TYPES__: values.factTypes,
       __ENTITY_TYPES__: values.entityTypes,
-      __RELATIONSHIP_TYPES__: values.relationshipTypes,
     }),
   management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition<ContextEngineDreamingWorkflowTemplateValues>;
@@ -161,3 +161,32 @@ export const CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW = {
     }),
   management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition<ContextEngineTraceDreamingBatchWorkflowTemplateValues>;
+
+export const CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID = 'system-context-engine-relationships';
+
+/** The same config as dreaming, which the relationships workflow runs alongside. */
+export type ContextEngineRelationshipsWorkflowTemplateValues =
+  ContextEngineDreamingWorkflowTemplateValues;
+
+/**
+ * Links the long-term facts and entities of one AI index with the relationship types of its
+ * dreaming config, as they change: creates, updates and deletes their relationships.
+ */
+export const CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW = {
+  id: CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
+  pluginId: 'contextEngine',
+  version: 1,
+  billable: false,
+  yamlTemplate: (values) =>
+    renderJsonTemplate(RELATIONSHIPS_YAML, {
+      __NAME__: `Relationships: ${values.aiIndexId}`,
+      __AI_INDEX_ID__: values.aiIndexId,
+      __CONCURRENCY_KEY__: `context-engine-relationships-${values.instanceKey}`,
+      __MEMORIES_INDEX__: values.memoriesIndex,
+      __INTERVAL_MINUTES__: values.intervalMinutes,
+      __CONNECTOR_ID__: values.connectorId,
+      __INSTRUCTIONS__: values.instructions,
+      __RELATIONSHIP_TYPES__: values.relationshipTypes,
+    }),
+  management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
+} as const satisfies ManagedWorkflowDefinition<ContextEngineRelationshipsWorkflowTemplateValues>;

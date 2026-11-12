@@ -43,6 +43,8 @@ export interface ResolveRelationshipsContext {
   ends: ReadonlyMap<string, DreamedKi>;
   /** The current relationships the change set refers to, by id. */
   existing: ReadonlyMap<string, DreamedKi>;
+  /** When linking stored facts and entities: their ids. Every relationship has an end among them. */
+  items?: ReadonlySet<string>;
 }
 
 export const relationshipTypesOf = (config: AiIndexDreamingConfig): ReadonlySet<string> =>
@@ -71,7 +73,7 @@ const reject: (reason: string) => never = (reason) => {
  */
 export const resolveRelationships = (
   { relationships }: DreamRelationshipChangeSet,
-  { relationshipTypes, memoryPermissions, ends, existing }: ResolveRelationshipsContext
+  { relationshipTypes, memoryPermissions, ends, existing, items }: ResolveRelationshipsContext
 ): ResolvedRelationships => {
   const operations: RelationshipOperation[] = [];
   const rejected: ResolvedRelationships['rejected'] = [];
@@ -111,6 +113,9 @@ export const resolveRelationships = (
       }
       const from = endOf(fromRef);
       const to = endOf(toRef);
+      if (items && !items.has(from.id) && !items.has(to.id)) {
+        reject('neither end is one of the items being linked');
+      }
       if (isAbout && (kindOf(from) !== 'fact' || kindOf(to) !== 'entity')) {
         reject(`'${ABOUT_RELATIONSHIP_TYPE}' links a fact to an entity`);
       }

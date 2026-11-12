@@ -45,9 +45,18 @@ export type DreamRelationshipChangeSet = z.infer<typeof dreamRelationshipChangeS
 export const applyDreamRelationshipsInputSchema = lazySchema(() =>
   z.object({
     ai_index_id: aiIndexIdSchema,
-    memories: dreamingMemoriesSchema.describe(
-      'The memories of the batch, as read from the AI index. They must all have the same permissions. A relationship is based on the ones its two ends cite, and is skipped when neither end cites any.'
-    ),
+    memories: dreamingMemoriesSchema
+      .optional()
+      .describe(
+        'The memories of the batch, as read from the AI index. They must all have the same permissions. A relationship is based on the ones its two ends cite, and is skipped when neither end cites any. Omit them to link stored facts and entities, listed in items.'
+      ),
+    items: z
+      .array(refSchema)
+      .max(MAX_DREAMING_CHANGE_SET_ITEMS)
+      .optional()
+      .describe(
+        'Without memories: the ids of the stored facts and entities being linked, which share permissions. Every relationship has an end among them, is based on the memories its ends cite, and takes the permissions of its ends.'
+      ),
     changes: dreamRelationshipChangeSetSchema.describe(
       'The relationship changes the dreaming model returned'
     ),
