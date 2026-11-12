@@ -90,6 +90,7 @@ plugins:
     - saved_objects_management
     - saved_objects_tagging
     - searchExamples
+    - search_boost
     - search_getting_started
     - search_homepage
     - search_inference_endpoints
@@ -121,6 +122,7 @@ plugins:
     - vegaSandboxExample
     - vis_types/timeseries
     - vis_types/vega
+    - visualizations
     - watcher
     - workflows_extensions
     - workflows_management
