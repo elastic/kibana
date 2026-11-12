@@ -86,7 +86,6 @@ describe('ObservablesTable', () => {
 
     expect(screen.getByTestId('cases-observables-table')).toBeInTheDocument();
 
-    expect(screen.getByText('Showing 2 observables')).toBeInTheDocument();
     expect(screen.getByText('Type')).toBeInTheDocument();
     expect(screen.getByText('Name')).toBeInTheDocument();
   });
@@ -139,7 +138,6 @@ describe('ObservablesTable', () => {
       mockPage(mockObservables, { total: 47_552, cursor: 'cursor-1' });
       renderWithTestingProviders(<ObservablesTable {...props} />);
 
-      expect(screen.getByText('Showing 47552 observables')).toBeInTheDocument();
       expect(screen.getByTestId('cases-observables-table-page-range')).toHaveTextContent(
         '1–2 of 47552'
       );
@@ -228,14 +226,11 @@ describe('ObservablesTable', () => {
   });
 
   describe('limit', () => {
-    it('shows how close the case is to the limit', () => {
+    it('does not warn when the case is far from the limit', () => {
       renderWithTestingProviders(
         <ObservablesTable {...props} caseData={{ ...props.caseData, totalObservables: 120 }} />
       );
 
-      expect(screen.getByTestId('cases-observables-limit-usage')).toHaveTextContent(
-        `120 of ${MAX_STORED_OBSERVABLES_PER_CASE} observables`
-      );
       expect(screen.queryByTestId('cases-observables-limit-near')).not.toBeInTheDocument();
       expect(screen.queryByTestId('cases-observables-limit-reached')).not.toBeInTheDocument();
     });

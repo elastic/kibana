@@ -425,7 +425,6 @@ export const ObservablesTable = ({
       <ObservablesLimitCallout totalObservables={caseData.totalObservables ?? 0} />
       <ObservablesUtilityBar
         caseData={caseData}
-        totalObservables={total}
         isLoading={isLoading}
         onExtractObservablesChanged={onExtractObservablesChanged}
         selectedObservables={selected}

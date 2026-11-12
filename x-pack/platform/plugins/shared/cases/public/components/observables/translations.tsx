@@ -22,13 +22,6 @@ export const NO_OBSERVABLES = i18n.translate(
   }
 );
 
-export const SHOWING_OBSERVABLES = (totalObservables: number) =>
-  i18n.translate('xpack.cases.caseView.observables.showingObservablesTitle', {
-    values: { totalObservables },
-    defaultMessage:
-      'Showing {totalObservables} {totalObservables, plural, =1 {observable} other {observables}}',
-  });
-
 export const OBSERVABLES_TABLE = i18n.translate(
   'xpack.cases.caseView.observables.observablesTable',
   {
@@ -268,18 +261,6 @@ export const OBSERVABLES_ROWS_PER_PAGE = i18n.translate(
     defaultMessage: 'Rows per page',
   }
 );
-
-export const OBSERVABLES_LIMIT_USAGE = (total: number, max: number) =>
-  i18n.translate('xpack.cases.caseView.observables.limitUsage', {
-    values: { total, max },
-    defaultMessage: '{total} of {max} observables',
-  });
-
-export const OBSERVABLES_LIMIT_USAGE_TOOLTIP = (max: number) =>
-  i18n.translate('xpack.cases.caseView.observables.limitUsageTooltip', {
-    values: { max },
-    defaultMessage: 'A case holds up to {max} observables.',
-  });
 
 export const OBSERVABLES_LIMIT_REACHED_TITLE = i18n.translate(
   'xpack.cases.caseView.observables.limitReachedTitle',

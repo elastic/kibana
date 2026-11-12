@@ -24018,7 +24018,6 @@
     "xpack.cases.caseView.observables.save": "保存可观察对象",
     "xpack.cases.caseView.observables.searchPlaceholder": "搜索可观察对象",
     "xpack.cases.caseView.observables.selectedObservables": "{count} 个已选定",
-    "xpack.cases.caseView.observables.showingObservablesTitle": "正在显示 {totalObservables} 个可观察对象",
     "xpack.cases.caseView.observables.type": "类型",
     "xpack.cases.caseView.observables.updated": "可观察对象已更新",
     "xpack.cases.caseView.observables.updatedObservables": "更新了 {totalObservables, plural, =1 {an} other {{totalObservables}}} {totalObservables, plural, =1 {observable} other {可观察对象}}",
