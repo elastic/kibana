@@ -61,7 +61,7 @@ A dataset is a benchmark; a sample is one of its questions with the conversation
 
 `run_datasets` in the config, or `--dataset`, picks the datasets; the stages work on the AI indices that dream on only those (`--ai-index` picks AI indices instead). Per dataset, the listed `samples` run, else those of the `preset`, else every sample with `all_samples`, else the first `sample_count`. `--samples`, `--preset`, `--sample-count` and `--all-samples` override them. By default one LongMemEval S sample runs.
 
-**Presets** are named lists of sample ids in the config, so runs across the team compare. `longmemeval_s` has `dev`, 10 fixed questions across its 6 question types, and `dev_50`, those 10 and 40 more in proportion to the question types of the benchmark.
+**Presets** are named lists of sample ids in the config, so runs across the team compare. `longmemeval_s` has `dev`, 10 fixed questions across its 6 question types, and `dev_50`, those 10 and 40 more in proportion to the question types of the benchmark. `longmemeval_v2_enterprise` has `dev`: 10 fixed questions across its 3 text question types.
 
 **One sample at a time.** With `per_sample` (the default for `longmemeval_s`, whose questions each have their own haystack; `--per-sample` turns it on), the run stage takes the samples in turn: it imports only that sample's conversations, deletes the dreamed KIs, dreams, and dumps the KIs to `runs/<run id>/<AI index>/samples/<sample>/kis.json`. A sample the run already dumped is skipped, so an interrupted run continues where it stopped when started again with the same `--run-id`. The evaluate stage judges each sample's targets against its own KIs, and the ask stage restores each sample's KIs before asking its questions.
 
