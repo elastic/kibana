@@ -242,7 +242,7 @@ const AlertsListPageContent = () => {
         display: flex;
         flex-direction: column;
         flex-grow: 1;
-        ${logicalCSS('min-height')}: 0;
+        ${logicalCSS('min-height', '0')}
         min-width: 0;
         ${largeMediaQuery} {
           block-size: calc(
@@ -266,7 +266,7 @@ const AlertsListPageContent = () => {
         css={css`
           flex: 1;
           min-width: 0;
-          ${logicalCSS('min-height')}: 0;
+          ${logicalCSS('min-height', '0')}
           overflow-y: auto;
         `}
       >
@@ -314,14 +314,14 @@ const AlertsListPageContent = () => {
             responsive={false}
             css={css`
               flex-grow: 1;
-              ${logicalCSS('min-height')}: 0;
+              ${logicalCSS('min-height', '0')}
             `}
           >
             <EuiFlexItem
               grow
               css={css`
                 min-width: 0;
-                ${logicalCSS('min-height')}: 0;
+                ${logicalCSS('min-height', '0')}
               `}
             >
               <EpisodesTable
