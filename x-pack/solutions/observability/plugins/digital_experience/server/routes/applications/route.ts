@@ -36,7 +36,7 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
     plugins,
     isServerless,
     isUxEnabled,
-    sessionsSettings,
+    getSessionsSettings,
     getSessionsServices,
     logger,
   }): Promise<ApplicationsResponse> => {
@@ -100,7 +100,7 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
         getOtelApplicationsFromBestSource({
           esClient,
           taskManager,
-          sessionsSettings,
+          getSessionsSettings,
           sessionsReadable,
           start,
           end,

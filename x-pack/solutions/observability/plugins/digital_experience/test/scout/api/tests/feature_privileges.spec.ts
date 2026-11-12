@@ -86,6 +86,7 @@ apiTest.describe('Digital Experience feature privileges', { tag: DIGITAL_EXPERIE
                   includeIn: 'none',
                   api: ['manage_digital_experience_sessions'],
                   ui: ['manageSessions'],
+                  savedObject: { all: ['digital-experience-sessions-settings'], read: [] },
                 },
               ],
             },
