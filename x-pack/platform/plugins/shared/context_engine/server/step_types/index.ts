@@ -21,6 +21,7 @@ import { getApplyDreamChangesStepDefinition } from './apply_dream_changes';
 import { getApplyDreamRelationshipsStepDefinition } from './apply_dream_relationships';
 import { getDreamingStatusStepDefinition } from './get_dreaming_status';
 import { getReadTraceTranscriptsStepDefinition } from './read_trace_transcripts';
+import { getGatherMaintenanceStepDefinition } from './gather_maintenance';
 
 /** Registers the KI, feedback analysis and dreaming workflow steps. */
 export const registerStepDefinitions = ({
@@ -44,4 +45,5 @@ export const registerStepDefinitions = ({
   workflowsExtensions.registerStepDefinition(getReadTraceTranscriptsStepDefinition(dreaming));
   workflowsExtensions.registerStepDefinition(getApplyDreamChangesStepDefinition(deps));
   workflowsExtensions.registerStepDefinition(getApplyDreamRelationshipsStepDefinition(deps));
+  workflowsExtensions.registerStepDefinition(getGatherMaintenanceStepDefinition(deps));
 };
