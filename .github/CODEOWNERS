@@ -3293,6 +3293,8 @@ x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analy
 /x-pack/solutions/security/plugins/alertzero/common/hunt_coordinator_result_attachment_schema.ts @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/common/step_types/package_report.ts @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/common/step_types/package_report.test.ts @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/common/telemetry/workers/continuous_threat_hunt.ts @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/common/telemetry/workers/continuous_threat_hunt.fixture.ts @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/public/hooks/hunt @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/public/pages/watches/components/threat_intel_supply_section.tsx @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/public/pages/watches/components/threat_intel_supply_section.test.tsx @elastic/security-investigations
@@ -3303,9 +3305,11 @@ x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analy
 /x-pack/solutions/security/plugins/alertzero/server/services/threat_intel_supply @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/server/services/watches/hunt @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/server/step_types/package_report @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/server/step_types/report_worker_outcome/shipped_yaml_contract.hunt.fixture.ts @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/server/step_types/report_worker_outcome/shipped_yaml_contract.hunt.test.ts @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/server/telemetry/workers/hunt.md @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/server/step_types/report_worker_outcome/shipped_yaml_contract.continuous_threat_hunt.fixture.ts @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/server/step_types/report_worker_outcome/shipped_yaml_contract.continuous_threat_hunt.test.ts @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/server/telemetry/workers/continuous_threat_hunt.md @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/server/telemetry/workers/continuous_threat_hunt.ts @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/server/telemetry/workers/continuous_threat_hunt.fixture.ts @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui/pages/alert_analysis_workflow @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/server/workflows/alert_analysis_workflow @elastic/security-investigations
 

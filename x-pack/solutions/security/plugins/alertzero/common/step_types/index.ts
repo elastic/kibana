@@ -8,6 +8,7 @@
 export {
   MAX_REPORTED_COUNT,
   REPORT_WORKER_OUTCOME_EVENTS,
+  REPORTABLE_WORKER_EVENTS,
   ReportWorkerOutcomeStepId,
   reportWorkerOutcomeStepCommonDefinition,
   reportWorkerOutcomeStepInputSchema,

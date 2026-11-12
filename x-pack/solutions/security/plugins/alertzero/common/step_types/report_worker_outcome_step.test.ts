@@ -9,26 +9,55 @@ import { parse as parseYaml, parseDocument } from 'yaml';
 import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import {
-  AD_WORKER_ANALYSIS_VERDICTS,
-  AD_WORKER_HANDOFF_OUTCOMES,
-  AD_WORKER_RUN_OUTCOMES,
-  ALERT_TRIAGE_CLOSURE_OUTCOMES,
-  ENDPOINT_ANALYSIS_OUTCOMES,
-  HUNT_REPORT_HUNT_STATUSES,
-  HUNT_REPORT_MINT_SUPPRESSIONS,
-  HUNT_REPORT_PACKAGE_STATUSES,
   INVESTIGATION_CLOSE_REASONS,
-  RULE_COVERAGE_PROPOSAL_KINDS,
-  RULE_COVERAGE_VERDICTS,
-  RULE_TUNING_CHANGE_TYPES,
   RULE_REVIEW_ENTRY_GATES,
   WORKER_DEGRADED_REASONS,
   WORKER_RECOMMENDATION_CONFIDENCES,
   WORKER_REVIEW_DECISIONS,
   WORKER_RUN_OUTCOMES,
 } from '../telemetry/constants';
+import {
+  ALERT_TRIAGE_CLOSURE_OUTCOMES,
+  ALERT_TRIAGE_REPORTABLE_EVENTS,
+} from '../telemetry/workers/alert_triage';
+import { ALERT_TRIAGE_INPUT_FIXTURES } from '../telemetry/workers/alert_triage.fixture';
+import {
+  AD_WORKER_ANALYSIS_VERDICTS,
+  AD_WORKER_HANDOFF_OUTCOMES,
+  AD_WORKER_RUN_OUTCOMES,
+  ATTACK_DISCOVERY_REPORTABLE_EVENTS,
+} from '../telemetry/workers/attack_discovery';
+import { ATTACK_DISCOVERY_INPUT_FIXTURES } from '../telemetry/workers/attack_discovery.fixture';
+import {
+  RULE_COVERAGE_PROPOSAL_KINDS,
+  RULE_COVERAGE_VERDICTS,
+  RULE_COVERAGE_REPORTABLE_EVENTS,
+} from '../telemetry/workers/rule_coverage';
+import { RULE_COVERAGE_INPUT_FIXTURES } from '../telemetry/workers/rule_coverage.fixture';
+import {
+  RULE_TUNING_CHANGE_TYPES,
+  RULE_TUNING_REPORTABLE_EVENTS,
+} from '../telemetry/workers/rule_tuning';
+import { RULE_TUNING_INPUT_FIXTURES } from '../telemetry/workers/rule_tuning.fixture';
+import {
+  ENDPOINT_ANALYSIS_OUTCOMES,
+  ENDPOINT_ANALYSIS_REPORTABLE_EVENTS,
+} from '../telemetry/workers/endpoint_analysis';
+import { ENDPOINT_ANALYSIS_INPUT_FIXTURES } from '../telemetry/workers/endpoint_analysis.fixture';
+import {
+  HUNT_REPORT_HUNT_STATUSES,
+  HUNT_REPORT_MINT_SUPPRESSIONS,
+  HUNT_REPORT_PACKAGE_STATUSES,
+  CONTINUOUS_THREAT_HUNT_REPORTABLE_EVENTS,
+} from '../telemetry/workers/continuous_threat_hunt';
+import { CONTINUOUS_THREAT_HUNT_INPUT_FIXTURES } from '../telemetry/workers/continuous_threat_hunt.fixture';
+import {
+  INVESTIGATION_ID_FIXTURE,
+  UUID_V5_INVESTIGATION_ID_FIXTURE,
+} from '../telemetry/report_step_input_fields.fixture';
 import type { ReportWorkerOutcomeEvent } from './report_worker_outcome_step';
 import {
+  ANY_WORKER_REPORTABLE_EVENTS,
   MAX_REPORTED_COUNT,
   REPORT_WORKER_OUTCOME_EVENTS,
   ReportWorkerOutcomeStepId,
@@ -37,124 +66,13 @@ import {
   reportWorkerOutcomeStepOutputSchema,
 } from './report_worker_outcome_step';
 
-const INVESTIGATION_ID = '0b9f4a3e-1c2d-8e3f-8a4b-5c6d7e8f9a0b';
-
-/** A UUID v5, as the Hunt Worker mints for its Investigations. */
-const UUID_V5_INVESTIGATION_ID = '3f1c2b4a-5d6e-5f70-8a9b-0c1d2e3f4a5b';
-
 type Override = Readonly<Record<string, unknown>>;
 
-/**
- * The fields of a valid payload per event, without `event`. The complete payloads parse unchanged;
- * the `ad_worker_analysis_completed` entry is the minimal input its cases build on.
- */
 const VALID_FIELDS: Readonly<Record<ReportWorkerOutcomeEvent, Override>> = {
-  ad_worker_analysis_completed: { verdict: 'false_positive' },
-  ad_worker_handoff_resolved: {
-    auto_approve_requested: false,
-    outcome: 'approved',
-    verdict: 'true_positive',
-  },
-  ad_worker_review_started: { investigation_id: INVESTIGATION_ID, is_rereview: false },
-  ad_worker_run_completed: {
-    alerts_analyzed: 120,
-    attacks_generated: 4,
-    attacks_persisted: 3,
-    batches_failed: 1,
-    batches_total: 6,
-    run_outcome: 'produced',
-  },
-  alert_triage_batch_classified: {
-    alerts_total: 40,
-    alerts_without_verdict: 2,
-    fp_below_floor: 3,
-    fp_candidates: 20,
-    investigation_id: INVESTIGATION_ID,
-    verdicts_false_positive: 23,
-    verdicts_inconclusive: 5,
-    verdicts_true_positive: 10,
-  },
-  alert_triage_batch_grouped: {
-    alerts_joined: 0,
-    alerts_pooled: 0,
-    alerts_with_strict_key: 36,
-    conversation_created: false,
-    fp_candidates_on_fallback: 4,
-    grouping: 'on',
-    proposals_created: 0,
-    strict_keys: 12,
-    strict_keys_single_alert: 5,
-    wide_keys: 8,
-    wide_keys_single_alert: 3,
-  },
-  alert_triage_closure_resolved: {
-    alerts_proposed: 20,
-    alerts_retag_failed: 0,
-    revisions: 1,
-    auto_approve_requested: false,
-    investigation_id: INVESTIGATION_ID,
-    outcome: 'dismissed',
-    proposal_read_failed: false,
-  },
-  endpoint_analysis_completed: {
-    actions_recommended: 2,
-    agent_failed: false,
-    analysis_outcome: 'processed',
-    auto_approve_requested: false,
-    findings_attached: true,
-    host_resolved: true,
-    iocs_found: true,
-    proposals_dispatch_failed: 0,
-    proposals_dispatched: 2,
-    reused_prior_assessment: false,
-    timeline_found: true,
-  },
-  hunt_report_completed: {
-    closed_clean: false,
-    coverage_kis_skipped: 1,
-    coverage_kis_written: 2,
-    has_confirmed_hit: true,
-    hunt_status: 'success',
-    investigation_id: UUID_V5_INVESTIGATION_ID,
-    mint_suppression: 'none',
-    package_status: 'success',
-    proposals_dispatch_failed: 0,
-    proposals_prepared: 3,
-    tier2_invoked: true,
-  },
-  rule_coverage_review_completed: {
-    applied: false,
-    approved_not_applied: false,
-    check_failed: false,
-    creation_failed: false,
-    creation_skipped: false,
-    decision: 'approved',
-    entry_gate: 'skipped',
-    investigation_id: INVESTIGATION_ID,
-    ki_processed: true,
-    proposal_kind: 'create_rule',
-    rule_created: true,
-    rule_source: 'custom',
-    rule_type: 'esql',
-    verdict: 'no_coverage',
-  },
-  rule_tuning_review_completed: {
-    applied: true,
-    approved_not_applied: false,
-    backtest_ran: true,
-    backtest_reduced_alerts: true,
-    change_type: 'query',
-    confidence: 'high',
-    decision: 'approved',
-    entry_gate: 'skipped',
-    investigation_id: INVESTIGATION_ID,
-    rule_source: 'prebuilt',
-    rule_type: 'query',
-    rule_unavailable: false,
-  },
+  ...ATTACK_DISCOVERY_INPUT_FIXTURES,
   worker_investigation_closed: {
     close_reason: 'false_positive',
-    investigation_id: INVESTIGATION_ID,
+    investigation_id: INVESTIGATION_ID_FIXTURE,
   },
   worker_run_completed: {
     candidates_found: 12,
@@ -166,6 +84,11 @@ const VALID_FIELDS: Readonly<Record<ReportWorkerOutcomeEvent, Override>> = {
     run_outcome: 'degraded_partial',
     source_read_failed: false,
   },
+  ...ALERT_TRIAGE_INPUT_FIXTURES,
+  ...RULE_TUNING_INPUT_FIXTURES,
+  ...RULE_COVERAGE_INPUT_FIXTURES,
+  ...CONTINUOUS_THREAT_HUNT_INPUT_FIXTURES,
+  ...ENDPOINT_ANALYSIS_INPUT_FIXTURES,
 };
 
 /** The valid payload for `event`, with `override` applied on top (which may replace `event`). */
@@ -290,22 +213,19 @@ describe('alertzero.reportWorkerOutcome common definition', () => {
     });
   });
 
-  it('covers the Attack Discovery events, the two Worker-generic events and each Worker item event', () => {
-    expect(REPORT_WORKER_OUTCOME_EVENTS).toEqual([
-      'ad_worker_run_completed',
-      'ad_worker_review_started',
-      'ad_worker_analysis_completed',
-      'ad_worker_handoff_resolved',
-      'worker_investigation_closed',
-      'worker_run_completed',
-      'alert_triage_batch_classified',
-      'alert_triage_batch_grouped',
-      'alert_triage_closure_resolved',
-      'rule_tuning_review_completed',
-      'rule_coverage_review_completed',
-      'hunt_report_completed',
-      'endpoint_analysis_completed',
-    ]);
+  it('declares each event for one Worker only', () => {
+    const declared = [
+      ATTACK_DISCOVERY_REPORTABLE_EVENTS,
+      ANY_WORKER_REPORTABLE_EVENTS,
+      ALERT_TRIAGE_REPORTABLE_EVENTS,
+      RULE_TUNING_REPORTABLE_EVENTS,
+      RULE_COVERAGE_REPORTABLE_EVENTS,
+      CONTINUOUS_THREAT_HUNT_REPORTABLE_EVENTS,
+      ENDPOINT_ANALYSIS_REPORTABLE_EVENTS,
+    ].flatMap((events) => Object.keys(events));
+
+    expect(declared.filter((event, index) => declared.indexOf(event) !== index)).toEqual([]);
+    expect(REPORT_WORKER_OUTCOME_EVENTS).toHaveLength(declared.length);
   });
 
   it('outputs only `reported`', () => {
@@ -327,24 +247,14 @@ describe('alertzero.reportWorkerOutcome input schema', () => {
     }
   );
 
-  it.each<ReportWorkerOutcomeEvent>([
-    'ad_worker_run_completed',
-    'ad_worker_review_started',
-    'ad_worker_handoff_resolved',
-    'worker_investigation_closed',
-    'worker_run_completed',
-    'alert_triage_batch_classified',
-    'alert_triage_batch_grouped',
-    'alert_triage_closure_resolved',
-    'rule_tuning_review_completed',
-    'rule_coverage_review_completed',
-    'hunt_report_completed',
-    'endpoint_analysis_completed',
-  ])('parses a complete %s payload unchanged', (event) => {
-    const input = inputFor(event);
+  it.each(REPORT_WORKER_OUTCOME_EVENTS.filter((event) => event !== 'ad_worker_analysis_completed'))(
+    'parses a complete %s payload unchanged',
+    (event) => {
+      const input = inputFor(event);
 
-    expect(parse(input)).toEqual({ data: input, success: true });
-  });
+      expect(parse(input)).toEqual({ data: input, success: true });
+    }
+  );
 
   it.each<[ReportWorkerOutcomeEvent, string, readonly string[]]>([
     ['ad_worker_run_completed', 'run_outcome', AD_WORKER_RUN_OUTCOMES],
@@ -427,7 +337,7 @@ describe('alertzero.reportWorkerOutcome input schema', () => {
     [
       'worker_investigation_closed',
       'a UUID v5 Investigation id, as the Hunt Worker mints',
-      { investigation_id: UUID_V5_INVESTIGATION_ID },
+      { investigation_id: UUID_V5_INVESTIGATION_ID_FIXTURE },
     ],
   ])('%s accepts %s', (event, _label, override) => {
     expect(parse(inputFor(event, override)).success).toBe(true);
@@ -560,7 +470,7 @@ describe('alertzero.reportWorkerOutcome input schema', () => {
     [
       'ad_worker_review_started',
       'an id the schema does not declare',
-      { execution_id: INVESTIGATION_ID },
+      { execution_id: INVESTIGATION_ID_FIXTURE },
     ],
     ['ad_worker_analysis_completed', 'an unknown verdict', { verdict: 'maybe' }],
     [

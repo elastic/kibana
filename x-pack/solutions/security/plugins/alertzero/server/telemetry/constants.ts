@@ -6,25 +6,27 @@
  */
 
 import type { SystemSecurityWorkerCatalogEntry, WatchAutonomyLevel } from '@kbn/alertzero-common';
+import { ALERTZERO_TELEMETRY_PREFIX } from './worker_event_fields';
+import { ALERT_TRIAGE_TELEMETRY_EVENTS } from './workers/alert_triage';
+import { ATTACK_DISCOVERY_TELEMETRY_EVENTS } from './workers/attack_discovery';
+import { ENDPOINT_ANALYSIS_TELEMETRY_EVENTS } from './workers/endpoint_analysis';
+import { RULE_COVERAGE_TELEMETRY_EVENTS } from './workers/rule_coverage';
+import { RULE_TUNING_TELEMETRY_EVENTS } from './workers/rule_tuning';
+import { CONTINUOUS_THREAT_HUNT_TELEMETRY_EVENTS } from './workers/continuous_threat_hunt';
 
-export const ALERTZERO_TELEMETRY_PREFIX = 'alertzero';
+export { ALERTZERO_TELEMETRY_PREFIX };
 
 /** Every AlertZero EBT event type, named `<plugin>_<object>_<verb>`. */
 export const ALERTZERO_TELEMETRY_EVENTS = {
-  AdWorkerRunCompleted: `${ALERTZERO_TELEMETRY_PREFIX}_ad_worker_run_completed`,
-  AdWorkerReviewStarted: `${ALERTZERO_TELEMETRY_PREFIX}_ad_worker_review_started`,
-  AdWorkerAnalysisCompleted: `${ALERTZERO_TELEMETRY_PREFIX}_ad_worker_analysis_completed`,
-  AdWorkerHandoffResolved: `${ALERTZERO_TELEMETRY_PREFIX}_ad_worker_handoff_resolved`,
+  ...ATTACK_DISCOVERY_TELEMETRY_EVENTS,
   WorkerInvestigationClosed: `${ALERTZERO_TELEMETRY_PREFIX}_worker_investigation_closed`,
   WorkerInvestigationReopened: `${ALERTZERO_TELEMETRY_PREFIX}_worker_investigation_reopened`,
   WorkerRunCompleted: `${ALERTZERO_TELEMETRY_PREFIX}_worker_run_completed`,
-  AlertTriageBatchClassified: `${ALERTZERO_TELEMETRY_PREFIX}_alert_triage_batch_classified`,
-  AlertTriageBatchGrouped: `${ALERTZERO_TELEMETRY_PREFIX}_alert_triage_batch_grouped`,
-  AlertTriageClosureResolved: `${ALERTZERO_TELEMETRY_PREFIX}_alert_triage_closure_resolved`,
-  RuleTuningReviewCompleted: `${ALERTZERO_TELEMETRY_PREFIX}_rule_tuning_review_completed`,
-  RuleCoverageReviewCompleted: `${ALERTZERO_TELEMETRY_PREFIX}_rule_coverage_review_completed`,
-  HuntReportCompleted: `${ALERTZERO_TELEMETRY_PREFIX}_hunt_report_completed`,
-  EndpointAnalysisCompleted: `${ALERTZERO_TELEMETRY_PREFIX}_endpoint_analysis_completed`,
+  ...ALERT_TRIAGE_TELEMETRY_EVENTS,
+  ...RULE_TUNING_TELEMETRY_EVENTS,
+  ...RULE_COVERAGE_TELEMETRY_EVENTS,
+  ...CONTINUOUS_THREAT_HUNT_TELEMETRY_EVENTS,
+  ...ENDPOINT_ANALYSIS_TELEMETRY_EVENTS,
 } as const;
 
 export type AlertZeroTelemetryEventType =

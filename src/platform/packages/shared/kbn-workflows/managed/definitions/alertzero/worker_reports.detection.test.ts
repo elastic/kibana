@@ -28,9 +28,9 @@ import type { YamlStep } from './worker_reports.test_helpers';
 
 /**
  * The Rule Tuning and Rule Coverage Workers' reports (`alertzero.reportWorkerOutcome`), rendered
- * the way the engine renders them. The plugin's `shipped_yaml_contract.detection.test.ts` validates
- * the same `with` blocks against the step's real input schema; these tests pin the values each
- * scenario renders.
+ * the way the engine renders them. The plugin's `shipped_yaml_contract.rule_tuning.test.ts` and
+ * `shipped_yaml_contract.rule_coverage.test.ts` validate the same `with` blocks against the step's
+ * real input schema; these tests pin the values each scenario renders.
  */
 
 describe('Rule Tuning and Rule Coverage close reports', () => {

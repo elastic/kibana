@@ -17,7 +17,7 @@ import {
   reportOnDevModeClient,
   reportStepsOf,
 } from './shipped_yaml_contract.test_helpers';
-import { SHIPPED_YAML_CONTRACTS } from './shipped_yaml_contract.forensics.fixture';
+import { SHIPPED_YAML_CONTRACTS } from './shipped_yaml_contract.endpoint_analysis.fixture';
 
 describe('shipped Endpoint Analysis Worker YAML and the reportWorkerOutcome schema', () => {
   describeWorkerWorkflowContracts(SHIPPED_YAML_CONTRACTS);

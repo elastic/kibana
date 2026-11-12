@@ -26,7 +26,7 @@ import {
 
 /**
  * The Continuous Threat Hunt Worker's reports (`alertzero.reportWorkerOutcome`), rendered the way
- * the engine renders them. The plugin's `shipped_yaml_contract.hunt.test.ts` validates the same
+ * the engine renders them. The plugin's `shipped_yaml_contract.continuous_threat_hunt.test.ts` validates the same
  * `with` blocks against the step's real input schema; these tests pin the values each scenario
  * renders.
  */
