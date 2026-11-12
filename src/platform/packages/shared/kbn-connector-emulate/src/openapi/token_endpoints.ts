@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createHash } from 'crypto';
+
 import type { ContractRequest, ContractResponse } from '../contract/types';
+import { AUTHORIZATION_URL as GOOGLE_AUTHORIZATION_URL } from './convert_discovery';
 import { compileUrlMatcher } from './match_operation';
 import { isRecord } from './schema_walk';
 import type { ContractOperation, OpenApiDocument, OperationServer, Violation } from './types';
@@ -16,6 +19,7 @@ import type { ContractOperation, OpenApiDocument, OperationServer, Violation } f
 const ACCESS_TOKEN = 'contract-mock-access-token';
 const REFRESH_TOKEN = 'contract-mock-refresh-token';
 const ID_TOKEN = 'contract-mock-id-token';
+const AUTHORIZATION_CODE = 'contract-mock-authorization-code';
 
 /** Space-delimited scopes, as OAuth 2 requests and JWT claims carry them (RFC 6749 §3.3). */
 const parseScopes = (value: unknown): string[] =>
@@ -124,14 +128,17 @@ const uniqueServers = (operations: readonly ContractOperation[]): OperationServe
   return [...new Map(servers.map((server) => [JSON.stringify(server), server])).values()];
 };
 
-/**
- * Collects the token and refresh URLs of the OAuth 2 flows declared by the operations' specs.
- * Relative ones resolve against every server of the spec, and `include` keeps only some of the
- * resolved URLs. Throws on URLs that can't be parsed.
- */
-export const findTokenEndpoints = (
+// Collects the URLs `urlsOf` picks from the OAuth 2 flows declared by the operations' specs, each
+// as the field holding it and what that URL accepts. Relative ones resolve against every server
+// of the spec, and `include` keeps only some of the resolved URLs. Throws on URLs that can't be
+// parsed.
+const findFlowEndpoints = (
   operations: readonly ContractOperation[],
-  { include = () => true }: { include?: (endpoint: OperationServer) => boolean } = {}
+  urlsOf: (
+    flow: string,
+    settings: Record<string, unknown>
+  ) => ReadonlyArray<readonly [field: string, accepts: string]>,
+  include: (endpoint: OperationServer) => boolean
 ): TokenEndpoints => {
   const endpoints = new Map<string, { matches: (url: URL) => boolean; grants: Set<string> }>();
   const operationsBySpec = new Map<OpenApiDocument, ContractOperation[]>();
@@ -180,13 +187,9 @@ export const findTokenEndpoints = (
         }
         const describe = (field: string) => () =>
           `The ${field} of the ${flow} flow of security scheme ${name}`;
-        if (flow in FLOW_GRANTS) {
-          add(settings.tokenUrl, FLOW_GRANTS[flow], describe('tokenUrl'));
-          // OpenAPI has no flow for it, but token URLs commonly accept it too.
-          add(settings.tokenUrl, JWT_BEARER, describe('tokenUrl'));
+        for (const [field, accepts] of urlsOf(flow, settings)) {
+          add(settings[field], accepts, describe(field));
         }
-        const refreshField = settings.refreshUrl === undefined ? 'tokenUrl' : 'refreshUrl';
-        add(settings[refreshField], 'refresh_token', describe(refreshField));
       }
     }
   }
@@ -197,6 +200,53 @@ export const findTokenEndpoints = (
       .flatMap(({ grants: set }) => [...set]);
     return grants.length > 0 ? new Set(grants) : undefined;
   };
+};
+
+/**
+ * Collects the token and refresh URLs of the OAuth 2 flows declared by the operations' specs.
+ * Relative ones resolve against every server of the spec, and `include` keeps only some of the
+ * resolved URLs. Throws on URLs that can't be parsed.
+ */
+export const findTokenEndpoints = (
+  operations: readonly ContractOperation[],
+  { include = () => true }: { include?: (endpoint: OperationServer) => boolean } = {}
+): TokenEndpoints =>
+  findFlowEndpoints(
+    operations,
+    (flow, { refreshUrl }) => [
+      ...(flow in FLOW_GRANTS
+        ? ([
+            ['tokenUrl', FLOW_GRANTS[flow]],
+            // OpenAPI has no flow for it, but token URLs commonly accept it too.
+            ['tokenUrl', JWT_BEARER],
+          ] as const)
+        : []),
+      [refreshUrl === undefined ? 'tokenUrl' : 'refreshUrl', 'refresh_token'],
+    ],
+    include
+  );
+
+// Google's current authorization URL, which its connectors use. Discovery documents don't name
+// one, so specs converted from them, and the snapshots cut from those, declare the original.
+const GOOGLE_V2_AUTHORIZATION_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
+
+/**
+ * Finds whether a URL is the `authorizationUrl` of an authorization code flow declared by the
+ * operations' specs, resolved like token URLs. Throws on URLs that can't be parsed.
+ */
+export const findAuthorizationEndpoints = (
+  operations: readonly ContractOperation[],
+  { include = () => true }: { include?: (endpoint: OperationServer) => boolean } = {}
+): ((url: URL) => boolean) => {
+  const endpoints = findFlowEndpoints(
+    operations,
+    (flow) => (flow === 'authorizationCode' ? [['authorizationUrl', 'code']] : []),
+    include
+  );
+  return (url) =>
+    endpoints(url) !== undefined ||
+    (`${url.origin}${url.pathname}` === GOOGLE_V2_AUTHORIZATION_URL &&
+      endpoints(new URL(GOOGLE_AUTHORIZATION_URL)) !== undefined);
 };
 
 /** A token URL's response, with the OAuth error of a rejected request as a violation. */
@@ -262,6 +312,154 @@ const jwtClaims = (jwt: string): Record<string, unknown> | undefined => {
   }
 };
 
+// What an authorization request asked for. The code carries it, so the mock keeps no state for it.
+interface AuthorizationGrant {
+  readonly redirectUri: string;
+  readonly scope?: string;
+  readonly codeChallenge?: string;
+  readonly codeChallengeMethod?: string;
+}
+
+const encodeCode = (grant: AuthorizationGrant): string =>
+  `${AUTHORIZATION_CODE}.${Buffer.from(JSON.stringify(grant)).toString('base64url')}`;
+
+const isAuthorizationGrant = (value: unknown): value is AuthorizationGrant =>
+  isRecord(value) && typeof value.redirectUri === 'string';
+
+// Undefined for codes the mock didn't issue, which aren't checked.
+const decodeCode = (code: string): AuthorizationGrant | undefined => {
+  if (!code.startsWith(`${AUTHORIZATION_CODE}.`)) {
+    return undefined;
+  }
+  try {
+    const grant: unknown = JSON.parse(
+      Buffer.from(code.slice(AUTHORIZATION_CODE.length + 1), 'base64url').toString('utf8')
+    );
+    return isAuthorizationGrant(grant) ? grant : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+// RFC 7636 §4.2.
+const PKCE_VALUE = /^[A-Za-z\d\-._~]{43,128}$/;
+
+const pkceProblem = (query: URLSearchParams): string | undefined => {
+  const challenge = query.get('code_challenge');
+  const method = query.get('code_challenge_method');
+  if (challenge === null) {
+    return method === null ? undefined : 'code_challenge_method needs a code_challenge';
+  }
+  if (method !== null && method !== 'S256' && method !== 'plain') {
+    return `Unsupported code_challenge_method ${method}`;
+  }
+  return PKCE_VALUE.test(challenge)
+    ? undefined
+    : 'code_challenge must be 43 to 128 unreserved characters';
+};
+
+const usableRedirectUri = (redirectUri: string | null): URL | undefined => {
+  if (redirectUri === null || !ABSOLUTE_URL.test(redirectUri)) {
+    return undefined;
+  }
+  try {
+    const url = new URL(redirectUri);
+    return url.hash === '' ? url : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+/**
+ * Answers a request to an authorization URL as an OAuth 2 authorization server would (RFC 6749
+ * §4.1), without a consent page: a valid request redirects straight back with a code. Errors go
+ * back the same way, except when the client or its redirect URI can't be trusted (§4.1.2.1).
+ */
+export const respondToAuthorizationRequest = ({ url }: ContractRequest): TokenExchange => {
+  const { searchParams: query } = url;
+  const redirectUri = query.get('redirect_uri');
+  const target = usableRedirectUri(redirectUri);
+  if (redirectUri === null || !target) {
+    const message = 'redirect_uri must be an absolute URL without a fragment';
+    return oauthError(400, 'invalid_request', message, ['query', 'redirect_uri']);
+  }
+  if (!query.get('client_id')) {
+    return oauthError(400, 'invalid_request', 'Missing client_id', ['query', 'client_id']);
+  }
+  const redirect = (params: Record<string, string>, violations: TokenExchange['violations']) => {
+    const state = query.get('state');
+    Object.entries({ ...params, ...(state === null ? {} : { state }) }).forEach(([name, value]) =>
+      target.searchParams.set(name, value)
+    );
+    return {
+      response: {
+        statusCode: 302,
+        headers: { location: target.toString(), 'cache-control': 'no-store' },
+      },
+      violations,
+    };
+  };
+  const refuse = (error: string, message: string, parameter: string) =>
+    redirect({ error, error_description: message }, [
+      { path: ['query', parameter], code: error, message },
+    ]);
+
+  const responseType = query.get('response_type');
+  if (responseType === null) {
+    return refuse('invalid_request', 'Missing response_type', 'response_type');
+  }
+  if (responseType !== 'code') {
+    const message = 'Expected response_type code';
+    return refuse('unsupported_response_type', message, 'response_type');
+  }
+  const problem = pkceProblem(query);
+  if (problem) {
+    return refuse('invalid_request', problem, 'code_challenge');
+  }
+  const code = encodeCode({
+    redirectUri,
+    ...(query.has('scope') ? { scope: query.get('scope') ?? '' } : {}),
+    ...(query.has('code_challenge')
+      ? {
+          codeChallenge: query.get('code_challenge') ?? '',
+          // RFC 7636 §4.3: `plain` unless the request says otherwise.
+          codeChallengeMethod: query.get('code_challenge_method') ?? 'plain',
+        }
+      : {}),
+  });
+  return redirect({ code }, []);
+};
+
+const verifierMatches = (
+  verifier: string | null,
+  { codeChallenge, codeChallengeMethod }: AuthorizationGrant
+): boolean =>
+  verifier !== null &&
+  (codeChallengeMethod === 'S256'
+    ? createHash('sha256').update(verifier).digest('base64url')
+    : verifier) === codeChallenge;
+
+// RFC 6749 §4.1.3 and RFC 7636 §4.6: what the token request must repeat from the authorization.
+const rejectCode = (
+  grant: AuthorizationGrant,
+  form: URLSearchParams
+): TokenExchange | undefined => {
+  if (form.get('redirect_uri') !== grant.redirectUri) {
+    const message = "redirect_uri doesn't match the authorization request";
+    return oauthError(400, 'invalid_grant', message, ['body', 'redirect_uri']);
+  }
+  const verifier = form.get('code_verifier');
+  if (grant.codeChallenge !== undefined && verifier !== null && !PKCE_VALUE.test(verifier)) {
+    const message = 'code_verifier must be 43 to 128 unreserved characters';
+    return oauthError(400, 'invalid_grant', message, ['body', 'code_verifier']);
+  }
+  if (grant.codeChallenge !== undefined && !verifierMatches(verifier, grant)) {
+    const message = "code_verifier doesn't match the code_challenge";
+    return oauthError(400, 'invalid_grant', message, ['body', 'code_verifier']);
+  }
+  return undefined;
+};
+
 /**
  * Answers a request to a token URL as an OAuth 2 authorization server would (RFC 6749): a
  * form-encoded POST with a grant type of a declared flow and the parameters it requires gets
@@ -318,7 +516,14 @@ export const respondToTokenRequest = (
         : { access_token: withScopes(ACCESS_TOKEN, scopes), token_type: 'Bearer' };
     return issued({ ...token, expires_in: 3600 });
   }
-  const requested = parseScopes(form.get('scope'));
+  const authorization =
+    grant === 'authorization_code' ? decodeCode(form.get('code') ?? '') : undefined;
+  const rejected = authorization && rejectCode(authorization, form);
+  if (rejected) {
+    return rejected;
+  }
+  // A code grants what its authorization request asked for.
+  const requested = parseScopes(authorization?.scope ?? form.get('scope'));
   if (grant === 'refresh_token') {
     return refresh(scopesOf(form.get('refresh_token') ?? '', REFRESH_TOKEN), requested);
   }
