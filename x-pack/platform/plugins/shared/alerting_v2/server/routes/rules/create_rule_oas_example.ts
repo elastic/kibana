@@ -10,7 +10,6 @@ import { ALERTING_ERROR_CODES } from '../../lib/errors/error_codes';
 import { getRuleAlreadyExistsMessage } from '../../lib/errors/rule_error_messages';
 import { buildOasOperation, invalidResponseExample } from '../oas_utils';
 import type { AlertingOasOperationObject, OasExampleEntry } from '../oas_types';
-import { RULE_ALREADY_EXISTS_DESCRIPTION } from './rule_response_descriptions';
 import {
   CREATE_RULE_REQUEST,
   RULE_RESPONSE,
@@ -25,7 +24,7 @@ const INVALID_CREATE_RULE_RESPONSE = invalidResponseExample({
 
 const RULE_ALREADY_EXISTS_RESPONSE: OasExampleEntry = {
   name: 'ruleAlreadyExists',
-  summary: RULE_ALREADY_EXISTS_DESCRIPTION,
+  summary: 'A rule with the requested ID already exists',
   value: {
     code: ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS,
     error: 'Conflict',

@@ -912,18 +912,14 @@ export const ruleIdSchema = lazySchema(() =>
   entityIdSchema.describe(`A rule identifier. ${ENTITY_ID_NOTE}`)
 );
 
-const createRuleIdSchema = lazySchema(() =>
-  ruleIdSchema
-    .optional()
-    .describe(
-      'Optional rule ID. If omitted, Kibana generates one. If a rule with this ID already exists, it is not changed and its create fails.'
-    )
-);
-
 export const createRuleDataSchema = lazySchema(() =>
   applyCreateRuleRefinements(
     createRuleDataBaseSchema.extend({
-      id: createRuleIdSchema,
+      id: ruleIdSchema
+        .optional()
+        .describe(
+          `Optional rule ID. If omitted, Kibana generates one. If a rule with this ID already exists, the request fails with HTTP 409 and the existing rule is not changed. ${ENTITY_ID_NOTE}`
+        ),
     })
   ).meta({
     id: 'alerting_new_rule',
@@ -1181,7 +1177,11 @@ export type BulkGetRulesResponse = z.infer<typeof bulkGetRulesResponseSchema>;
 export const bulkCreateRuleItemSchema = lazySchema(() =>
   applyCreateRuleRefinements(
     createRuleDataBaseSchema.extend({
-      id: createRuleIdSchema,
+      id: ruleIdSchema
+        .optional()
+        .describe(
+          `Optional rule ID. If omitted, Kibana generates one. IDs must be unique within the request. If a rule with this ID already exists, that item is reported in \`errors\` with the code \`RULE_ALREADY_EXISTS\` and the existing rule is not changed. ${ENTITY_ID_NOTE}`
+        ),
       enabled: z
         .boolean()
         .default(true)

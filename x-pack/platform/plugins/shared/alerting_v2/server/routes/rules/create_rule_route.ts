@@ -37,7 +37,7 @@ export class CreateRuleRoute extends BaseAlertingRoute {
     availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Create a rule',
     description:
-      'Creates a rule. The request can include a client-supplied `id`. Kibana generates an identifier when `id` is omitted. If a rule with the supplied `id` already exists, the request fails with HTTP 409 and the existing rule is not changed. To replace an existing rule, use PUT /api/alerting/v2/rules/{id}/.',
+      'Creates a rule. You can supply your own `id`; if you omit it, Kibana generates one. If a rule with that `id` already exists, the request fails with HTTP 409 and the existing rule is not changed. To create or replace a rule at a specific ID, use PUT /api/alerting/v2/rules/{id}.',
     oasOperationObject: createRuleOasExamples,
   } as const;
   static schemas = {
