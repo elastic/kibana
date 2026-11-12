@@ -25,8 +25,6 @@ export interface CpsTelemetryContextConfig {
 export type EbtTelemetryContextResult = EbtTelemetryContext | Promise<EbtTelemetryContext>;
 
 export class CpsTelemetryContextProvider {
-  private readonly linkedProjectIds = new WeakMap<KibanaRequest, Promise<string[] | undefined>>();
-
   constructor(private readonly config: CpsTelemetryContextConfig) {}
 
   public get(
@@ -50,17 +48,14 @@ export class CpsTelemetryContextProvider {
       };
     }
 
-    let linkedIds = this.linkedProjectIds.get(request);
-    if (!linkedIds) {
-      linkedIds = this.config.getLinkedProjectIds(request).catch(() => undefined);
-      this.linkedProjectIds.set(request, linkedIds);
-    }
-
-    return linkedIds.then((resolvedLinkedIds) => ({
-      space_id: spaceId,
-      target_cluster_scope: targetClusterScope,
-      target_cluster_ids: Array.from(new Set([...originIds, ...(resolvedLinkedIds ?? [])])),
-      target_cluster_ids_complete: originIds.length === 1 && resolvedLinkedIds !== undefined,
-    }));
+    return this.config
+      .getLinkedProjectIds(request)
+      .catch(() => undefined)
+      .then((linkedIds) => ({
+        space_id: spaceId,
+        target_cluster_scope: targetClusterScope,
+        target_cluster_ids: Array.from(new Set([...originIds, ...(linkedIds ?? [])])),
+        target_cluster_ids_complete: originIds.length === 1 && linkedIds !== undefined,
+      }));
   }
 }

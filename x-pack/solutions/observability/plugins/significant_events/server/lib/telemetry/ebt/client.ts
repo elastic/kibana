@@ -166,7 +166,7 @@ export class EbtTelemetryClient {
     params: TrackParams<DetectionScanProps>,
     request: KibanaRequest
   ) {
-    this.report(SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE, params, request, 'all');
+    this.report(SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE, params, request, 'origin');
   }
 
   public trackAgentToolEventsWrite(
@@ -196,7 +196,7 @@ export class EbtTelemetryClient {
     if (context instanceof Promise) {
       void context
         .then(report)
-        .catch((error) => this.logger.debug('Failed to report CPS telemetry', { error }));
+        .catch((error) => this.logger.error('Failed to report CPS telemetry', { error }));
       return;
     }
 

@@ -12,6 +12,7 @@ import { EbtTelemetryClient } from './client';
 import {
   SIGNIFICANT_EVENTS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_DISCOVERY_STARTED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
 } from './constants';
 import { CpsTelemetryContextProvider } from './cps_telemetry_context';
@@ -99,7 +100,7 @@ describe('EbtTelemetryClient', () => {
   });
 
   describe('trackSignificantEventsDetectionScan', () => {
-    it('adds every CPS target to a cross-project event', async () => {
+    it('reports origin scope without resolving linked projects', () => {
       const getLinkedProjectIds = jest.fn().mockResolvedValue(['linked-project']);
       client = new EbtTelemetryClient(
         analyticsService,
@@ -129,30 +130,69 @@ describe('EbtTelemetryClient', () => {
         request
       );
 
+      expect(getLinkedProjectIds).not.toHaveBeenCalled();
+      expect(analyticsService.reportEvent).toHaveBeenCalledWith(
+        SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
+        expect.objectContaining({
+          target_cluster_scope: 'origin',
+          target_cluster_ids: ['origin-project'],
+          target_cluster_ids_complete: true,
+        })
+      );
+    });
+  });
+
+  describe('cross-project events', () => {
+    const discoveryStarted = {
+      workflow_execution_id: 'discovery-run-1',
+      alert_source: '.rule-events',
+    };
+    let logger: ReturnType<typeof loggerMock.create>;
+    let getLinkedProjectIds: jest.Mock;
+
+    beforeEach(() => {
+      logger = loggerMock.create();
+      getLinkedProjectIds = jest.fn().mockResolvedValue(['linked-project']);
+      client = new EbtTelemetryClient(
+        analyticsService,
+        new CpsTelemetryContextProvider({
+          cpsEnabled: true,
+          originProjectId: 'origin-project',
+          getLinkedProjectIds,
+        }),
+        logger
+      );
+    });
+
+    it('adds every CPS target', async () => {
+      client.trackSignificantEventsDiscoveryStarted(discoveryStarted, request);
+
       await getLinkedProjectIds.mock.results[0].value;
       await new Promise(setImmediate);
 
       expect(analyticsService.reportEvent).toHaveBeenCalledWith(
-        SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
+        SIGNIFICANT_EVENTS_DISCOVERY_STARTED_EVENT_TYPE,
         expect.objectContaining({
-          took_ms: 42,
-          duration_ms: 120,
-          rules_requested: 24,
-          rules_scanned: 18,
-          critical_rule_count: 4,
-          default_rule_count: 20,
-          alerting_engine: 'v2',
-          alerts_source_index: '.rule-events',
-          lookback: 'now-40m',
-          bucket_interval: '1m',
-          default_lookback: 'now-125m',
-          default_bucket_interval: '5m',
-          space_id: 'space-a',
+          ...discoveryStarted,
           target_cluster_scope: 'all',
           target_cluster_ids: ['origin-project', 'linked-project'],
           target_cluster_ids_complete: true,
         })
       );
+    });
+
+    it('logs report failures as errors', async () => {
+      const error = new Error('unregistered event type');
+      analyticsService.reportEvent.mockImplementation(() => {
+        throw error;
+      });
+
+      client.trackSignificantEventsDiscoveryStarted(discoveryStarted, request);
+
+      await getLinkedProjectIds.mock.results[0].value;
+      await new Promise(setImmediate);
+
+      expect(logger.error).toHaveBeenCalledWith('Failed to report CPS telemetry', { error });
     });
   });
 

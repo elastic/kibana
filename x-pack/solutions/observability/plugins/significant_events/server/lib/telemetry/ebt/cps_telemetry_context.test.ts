@@ -35,14 +35,13 @@ describe('CpsTelemetryContextProvider', () => {
     });
   });
 
-  it('deduplicates all CPS target projects and caches them per request', async () => {
-    const getLinkedProjectIds = jest
-      .fn()
-      .mockResolvedValue(['linked-project', 'origin-project', 'linked-project']);
+  it('deduplicates all CPS target projects', async () => {
     const provider = new CpsTelemetryContextProvider({
       cpsEnabled: true,
       originProjectId: 'origin-project',
-      getLinkedProjectIds,
+      getLinkedProjectIds: jest
+        .fn()
+        .mockResolvedValue(['linked-project', 'origin-project', 'linked-project']),
     });
 
     await expect(provider.get(request, 'all')).resolves.toEqual({
@@ -51,9 +50,6 @@ describe('CpsTelemetryContextProvider', () => {
       target_cluster_ids: ['origin-project', 'linked-project'],
       target_cluster_ids_complete: true,
     });
-    await provider.get(request, 'all');
-
-    expect(getLinkedProjectIds).toHaveBeenCalledTimes(1);
   });
 
   it('marks the target set incomplete when linked projects cannot be resolved', async () => {
