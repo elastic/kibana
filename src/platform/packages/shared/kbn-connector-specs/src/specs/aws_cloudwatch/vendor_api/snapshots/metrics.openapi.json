@@ -1,0 +1,2007 @@
+{
+  "components": {
+    "schemas": {
+      "ActionConfiguration": {
+        "properties": {
+          "AlarmTagsPropagation": {
+            "$ref": "#/components/schemas/AlarmTagsPropagation"
+          }
+        },
+        "type": "object"
+      },
+      "ActionsSuppressedBy": {
+        "enum": [
+          "WaitPeriod",
+          "ExtensionPeriod",
+          "Alarm"
+        ],
+        "type": "string"
+      },
+      "AlarmHistoryItem": {
+        "properties": {
+          "AlarmContributorAttributes": {
+            "additionalProperties": {
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxProperties": 150,
+            "minProperties": 0,
+            "type": "object"
+          },
+          "AlarmContributorId": {
+            "maxLength": 16,
+            "minLength": 1,
+            "type": "string"
+          },
+          "AlarmName": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "AlarmType": {
+            "$ref": "#/components/schemas/AlarmType"
+          },
+          "HistoryData": {
+            "maxLength": 4095,
+            "minLength": 1,
+            "type": "string"
+          },
+          "HistoryItemType": {
+            "$ref": "#/components/schemas/HistoryItemType"
+          },
+          "HistorySummary": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Timestamp": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "AlarmPromQLCriteria": {
+        "properties": {
+          "PendingPeriod": {
+            "format": "int32",
+            "maximum": 86400,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "Query": {
+            "maxLength": 10000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "RecoveryPeriod": {
+            "format": "int32",
+            "maximum": 86400,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AlarmTagsPropagation": {
+        "properties": {
+          "Enabled": {
+            "type": "boolean"
+          },
+          "ExcludedTagKeys": {
+            "items": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 50,
+            "minItems": 1,
+            "type": "array"
+          },
+          "IncludedTagKeys": {
+            "items": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 50,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AlarmType": {
+        "enum": [
+          "CompositeAlarm",
+          "MetricAlarm",
+          "LogAlarm"
+        ],
+        "type": "string"
+      },
+      "ComparisonOperator": {
+        "enum": [
+          "GreaterThanOrEqualToThreshold",
+          "GreaterThanThreshold",
+          "LessThanThreshold",
+          "LessThanOrEqualToThreshold",
+          "LessThanLowerOrGreaterThanUpperThreshold",
+          "LessThanLowerThreshold",
+          "GreaterThanUpperThreshold"
+        ],
+        "type": "string"
+      },
+      "CompositeAlarm": {
+        "properties": {
+          "ActionConfiguration": {
+            "$ref": "#/components/schemas/ActionConfiguration"
+          },
+          "ActionsEnabled": {
+            "type": "boolean"
+          },
+          "ActionsSuppressedBy": {
+            "$ref": "#/components/schemas/ActionsSuppressedBy"
+          },
+          "ActionsSuppressedReason": {
+            "maxLength": 1024,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ActionsSuppressor": {
+            "maxLength": 1600,
+            "minLength": 1,
+            "type": "string"
+          },
+          "ActionsSuppressorExtensionPeriod": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ActionsSuppressorWaitPeriod": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "AlarmActions": {
+            "items": {
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 5,
+            "minItems": 0,
+            "type": "array"
+          },
+          "AlarmArn": {
+            "maxLength": 1600,
+            "minLength": 1,
+            "type": "string"
+          },
+          "AlarmConfigurationUpdatedTimestamp": {
+            "format": "double",
+            "type": "number"
+          },
+          "AlarmDescription": {
+            "maxLength": 1024,
+            "minLength": 0,
+            "type": "string"
+          },
+          "AlarmName": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "AlarmRule": {
+            "maxLength": 10240,
+            "minLength": 1,
+            "type": "string"
+          },
+          "InsufficientDataActions": {
+            "items": {
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 5,
+            "minItems": 0,
+            "type": "array"
+          },
+          "OKActions": {
+            "items": {
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 5,
+            "minItems": 0,
+            "type": "array"
+          },
+          "StateReason": {
+            "maxLength": 1023,
+            "minLength": 0,
+            "type": "string"
+          },
+          "StateReasonData": {
+            "maxLength": 4000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "StateTransitionedTimestamp": {
+            "format": "double",
+            "type": "number"
+          },
+          "StateUpdatedTimestamp": {
+            "format": "double",
+            "type": "number"
+          },
+          "StateValue": {
+            "$ref": "#/components/schemas/StateValue"
+          }
+        },
+        "type": "object"
+      },
+      "DescribeAlarmHistoryRequestContent": {
+        "properties": {
+          "AlarmContributorId": {
+            "maxLength": 16,
+            "minLength": 1,
+            "type": "string"
+          },
+          "AlarmName": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "AlarmTypes": {
+            "items": {
+              "$ref": "#/components/schemas/AlarmType"
+            },
+            "type": "array"
+          },
+          "EndDate": {
+            "format": "double",
+            "type": "number"
+          },
+          "HistoryItemType": {
+            "$ref": "#/components/schemas/HistoryItemType"
+          },
+          "MaxRecords": {
+            "format": "int32",
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "NextToken": {
+            "type": "string"
+          },
+          "ScanBy": {
+            "$ref": "#/components/schemas/ScanBy"
+          },
+          "StartDate": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "DescribeAlarmHistoryResponseContent": {
+        "properties": {
+          "AlarmHistoryItems": {
+            "items": {
+              "$ref": "#/components/schemas/AlarmHistoryItem"
+            },
+            "type": "array"
+          },
+          "NextToken": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DescribeAlarmsRequestContent": {
+        "properties": {
+          "ActionPrefix": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "AlarmNamePrefix": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "AlarmNames": {
+            "items": {
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 100,
+            "minItems": 0,
+            "type": "array"
+          },
+          "AlarmTypes": {
+            "items": {
+              "$ref": "#/components/schemas/AlarmType"
+            },
+            "type": "array"
+          },
+          "ChildrenOfAlarmName": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "MaxRecords": {
+            "format": "int32",
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "NextToken": {
+            "type": "string"
+          },
+          "ParentsOfAlarmName": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "StateValue": {
+            "$ref": "#/components/schemas/StateValue"
+          }
+        },
+        "type": "object"
+      },
+      "DescribeAlarmsResponseContent": {
+        "properties": {
+          "CompositeAlarms": {
+            "items": {
+              "$ref": "#/components/schemas/CompositeAlarm"
+            },
+            "type": "array"
+          },
+          "LogAlarms": {
+            "items": {
+              "$ref": "#/components/schemas/LogAlarm"
+            },
+            "type": "array"
+          },
+          "MetricAlarms": {
+            "items": {
+              "$ref": "#/components/schemas/MetricAlarm"
+            },
+            "type": "array"
+          },
+          "NextToken": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Dimension": {
+        "properties": {
+          "Name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Value": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DimensionFilter": {
+        "properties": {
+          "Name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Value": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DisableAlarmActionsRequestContent": {
+        "properties": {
+          "AlarmNames": {
+            "items": {
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 100,
+            "minItems": 0,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "DisableAlarmActionsResponseContent": {
+        "properties": {},
+        "type": "object"
+      },
+      "EnableAlarmActionsRequestContent": {
+        "properties": {
+          "AlarmNames": {
+            "items": {
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 100,
+            "minItems": 0,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "EnableAlarmActionsResponseContent": {
+        "properties": {},
+        "type": "object"
+      },
+      "EvaluationCriteria": {
+        "oneOf": [
+          {
+            "properties": {
+              "PromQLCriteria": {
+                "$ref": "#/components/schemas/AlarmPromQLCriteria"
+              }
+            },
+            "required": [
+              "PromQLCriteria"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "EvaluationState": {
+        "enum": [
+          "PARTIAL_DATA",
+          "EVALUATION_FAILURE",
+          "EVALUATION_ERROR"
+        ],
+        "type": "string"
+      },
+      "EvaluationWindow": {
+        "oneOf": [
+          {
+            "properties": {
+              "WallClockWindow": {
+                "$ref": "#/components/schemas/WallClockWindow"
+              }
+            },
+            "required": [
+              "WallClockWindow"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "SlidingWindow": {
+                "$ref": "#/components/schemas/SlidingWindow"
+              }
+            },
+            "required": [
+              "SlidingWindow"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "GetMetricDataRequestContent": {
+        "properties": {
+          "EndTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "LabelOptions": {
+            "$ref": "#/components/schemas/LabelOptions"
+          },
+          "MaxDatapoints": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "MetricDataQueries": {
+            "items": {
+              "$ref": "#/components/schemas/MetricDataQuery"
+            },
+            "type": "array"
+          },
+          "NextToken": {
+            "type": "string"
+          },
+          "ScanBy": {
+            "$ref": "#/components/schemas/ScanBy"
+          },
+          "StartTime": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "GetMetricDataResponseContent": {
+        "properties": {
+          "Messages": {
+            "items": {
+              "$ref": "#/components/schemas/MessageData"
+            },
+            "type": "array"
+          },
+          "MetricDataResults": {
+            "items": {
+              "$ref": "#/components/schemas/MetricDataResult"
+            },
+            "type": "array"
+          },
+          "NextToken": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GetMetricWidgetImageRequestContent": {
+        "properties": {
+          "MetricWidget": {
+            "type": "string"
+          },
+          "OutputFormat": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GetMetricWidgetImageResponseContent": {
+        "properties": {
+          "MetricWidgetImage": {
+            "format": "byte",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "HistoryItemType": {
+        "enum": [
+          "ConfigurationUpdate",
+          "StateUpdate",
+          "Action",
+          "AlarmContributorStateUpdate",
+          "AlarmContributorAction"
+        ],
+        "type": "string"
+      },
+      "InternalServiceFaultResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidFormatFaultResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidNextTokenResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidParameterValueExceptionResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LabelOptions": {
+        "properties": {
+          "Timezone": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LimitExceededFaultResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ListMetricsRequestContent": {
+        "properties": {
+          "Dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/DimensionFilter"
+            },
+            "maxItems": 10,
+            "minItems": 0,
+            "type": "array"
+          },
+          "IncludeLinkedAccounts": {
+            "type": "boolean"
+          },
+          "MetricName": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Namespace": {
+            "maxLength": 255,
+            "minLength": 1,
+            "pattern": "^[^:]",
+            "type": "string"
+          },
+          "NextToken": {
+            "type": "string"
+          },
+          "OwningAccount": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "RecentlyActive": {
+            "$ref": "#/components/schemas/RecentlyActive"
+          }
+        },
+        "type": "object"
+      },
+      "ListMetricsResponseContent": {
+        "properties": {
+          "Metrics": {
+            "items": {
+              "$ref": "#/components/schemas/Metric"
+            },
+            "type": "array"
+          },
+          "NextToken": {
+            "type": "string"
+          },
+          "OwningAccounts": {
+            "items": {
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "LogAlarm": {
+        "properties": {
+          "ActionConfiguration": {
+            "$ref": "#/components/schemas/ActionConfiguration"
+          },
+          "ActionLogLineCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ActionLogLineRoleArn": {
+            "type": "string"
+          },
+          "ActionsEnabled": {
+            "type": "boolean"
+          },
+          "AlarmActions": {
+            "items": {
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 5,
+            "minItems": 0,
+            "type": "array"
+          },
+          "AlarmArn": {
+            "maxLength": 1600,
+            "minLength": 1,
+            "type": "string"
+          },
+          "AlarmConfigurationUpdatedTimestamp": {
+            "format": "double",
+            "type": "number"
+          },
+          "AlarmDescription": {
+            "maxLength": 1024,
+            "minLength": 0,
+            "type": "string"
+          },
+          "AlarmName": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "ComparisonOperator": {
+            "$ref": "#/components/schemas/ComparisonOperator"
+          },
+          "EvaluationState": {
+            "$ref": "#/components/schemas/EvaluationState"
+          },
+          "InsufficientDataActions": {
+            "items": {
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 5,
+            "minItems": 0,
+            "type": "array"
+          },
+          "OKActions": {
+            "items": {
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 5,
+            "minItems": 0,
+            "type": "array"
+          },
+          "QueryResultsToAlarm": {
+            "format": "int32",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "QueryResultsToEvaluate": {
+            "format": "int32",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "ScheduledQueryConfiguration": {
+            "$ref": "#/components/schemas/ScheduledQueryConfiguration"
+          },
+          "StateReason": {
+            "maxLength": 1023,
+            "minLength": 0,
+            "type": "string"
+          },
+          "StateReasonData": {
+            "maxLength": 4000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "StateTransitionedTimestamp": {
+            "format": "double",
+            "type": "number"
+          },
+          "StateUpdatedTimestamp": {
+            "format": "double",
+            "type": "number"
+          },
+          "StateValue": {
+            "$ref": "#/components/schemas/StateValue"
+          },
+          "Threshold": {
+            "anyOf": [
+              {
+                "format": "double",
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "NaN",
+                  "Infinity",
+                  "-Infinity"
+                ],
+                "type": "string"
+              }
+            ]
+          },
+          "TreatMissingData": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "WarmUpConfiguration": {
+            "$ref": "#/components/schemas/WarmUpConfiguration"
+          }
+        },
+        "type": "object"
+      },
+      "MessageData": {
+        "properties": {
+          "Code": {
+            "type": "string"
+          },
+          "Value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Metric": {
+        "properties": {
+          "Dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/Dimension"
+            },
+            "maxItems": 30,
+            "minItems": 0,
+            "type": "array"
+          },
+          "MetricName": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Namespace": {
+            "maxLength": 255,
+            "minLength": 1,
+            "pattern": "^[^:]",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MetricAlarm": {
+        "properties": {
+          "ActionConfiguration": {
+            "$ref": "#/components/schemas/ActionConfiguration"
+          },
+          "ActionsEnabled": {
+            "type": "boolean"
+          },
+          "AlarmActions": {
+            "items": {
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 5,
+            "minItems": 0,
+            "type": "array"
+          },
+          "AlarmArn": {
+            "maxLength": 1600,
+            "minLength": 1,
+            "type": "string"
+          },
+          "AlarmConfigurationUpdatedTimestamp": {
+            "format": "double",
+            "type": "number"
+          },
+          "AlarmDescription": {
+            "maxLength": 1024,
+            "minLength": 0,
+            "type": "string"
+          },
+          "AlarmName": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "ComparisonOperator": {
+            "$ref": "#/components/schemas/ComparisonOperator"
+          },
+          "DatapointsToAlarm": {
+            "format": "int32",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "Dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/Dimension"
+            },
+            "maxItems": 30,
+            "minItems": 0,
+            "type": "array"
+          },
+          "EvaluateLowSampleCountPercentile": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "EvaluationCriteria": {
+            "$ref": "#/components/schemas/EvaluationCriteria"
+          },
+          "EvaluationInterval": {
+            "format": "int32",
+            "maximum": 3600,
+            "minimum": 10,
+            "type": "integer"
+          },
+          "EvaluationPeriods": {
+            "format": "int32",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "EvaluationState": {
+            "$ref": "#/components/schemas/EvaluationState"
+          },
+          "EvaluationWindow": {
+            "$ref": "#/components/schemas/EvaluationWindow"
+          },
+          "ExtendedStatistic": {
+            "type": "string"
+          },
+          "InsufficientDataActions": {
+            "items": {
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 5,
+            "minItems": 0,
+            "type": "array"
+          },
+          "MetricName": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Metrics": {
+            "items": {
+              "$ref": "#/components/schemas/MetricDataQuery"
+            },
+            "type": "array"
+          },
+          "Namespace": {
+            "maxLength": 255,
+            "minLength": 1,
+            "pattern": "^[^:]",
+            "type": "string"
+          },
+          "OKActions": {
+            "items": {
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 5,
+            "minItems": 0,
+            "type": "array"
+          },
+          "Period": {
+            "format": "int32",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "StateReason": {
+            "maxLength": 1023,
+            "minLength": 0,
+            "type": "string"
+          },
+          "StateReasonData": {
+            "maxLength": 4000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "StateTransitionedTimestamp": {
+            "format": "double",
+            "type": "number"
+          },
+          "StateUpdatedTimestamp": {
+            "format": "double",
+            "type": "number"
+          },
+          "StateValue": {
+            "$ref": "#/components/schemas/StateValue"
+          },
+          "Statistic": {
+            "$ref": "#/components/schemas/Statistic"
+          },
+          "Threshold": {
+            "anyOf": [
+              {
+                "format": "double",
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "NaN",
+                  "Infinity",
+                  "-Infinity"
+                ],
+                "type": "string"
+              }
+            ]
+          },
+          "ThresholdMetricId": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "TreatMissingData": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Unit": {
+            "$ref": "#/components/schemas/StandardUnit"
+          },
+          "WarmUpConfiguration": {
+            "$ref": "#/components/schemas/WarmUpConfiguration"
+          }
+        },
+        "type": "object"
+      },
+      "MetricDataQuery": {
+        "properties": {
+          "AccountId": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Expression": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Id": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Label": {
+            "type": "string"
+          },
+          "MetricStat": {
+            "$ref": "#/components/schemas/MetricStat"
+          },
+          "Period": {
+            "format": "int32",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "ReturnData": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "MetricDataResult": {
+        "properties": {
+          "Id": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Label": {
+            "type": "string"
+          },
+          "Messages": {
+            "items": {
+              "$ref": "#/components/schemas/MessageData"
+            },
+            "type": "array"
+          },
+          "StatusCode": {
+            "$ref": "#/components/schemas/StatusCode"
+          },
+          "Timestamps": {
+            "items": {
+              "format": "double",
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "Values": {
+            "items": {
+              "anyOf": [
+                {
+                  "format": "double",
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "NaN",
+                    "Infinity",
+                    "-Infinity"
+                  ],
+                  "type": "string"
+                }
+              ]
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "MetricStat": {
+        "properties": {
+          "Metric": {
+            "$ref": "#/components/schemas/Metric"
+          },
+          "Period": {
+            "format": "int32",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "Stat": {
+            "type": "string"
+          },
+          "Unit": {
+            "$ref": "#/components/schemas/StandardUnit"
+          }
+        },
+        "type": "object"
+      },
+      "PutMetricAlarmRequestContent": {
+        "properties": {
+          "ActionConfiguration": {
+            "$ref": "#/components/schemas/ActionConfiguration"
+          },
+          "ActionsEnabled": {
+            "type": "boolean"
+          },
+          "AlarmActions": {
+            "items": {
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 5,
+            "minItems": 0,
+            "type": "array"
+          },
+          "AlarmDescription": {
+            "maxLength": 1024,
+            "minLength": 0,
+            "type": "string"
+          },
+          "AlarmName": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "ComparisonOperator": {
+            "$ref": "#/components/schemas/ComparisonOperator"
+          },
+          "DatapointsToAlarm": {
+            "format": "int32",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "Dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/Dimension"
+            },
+            "maxItems": 30,
+            "minItems": 0,
+            "type": "array"
+          },
+          "EvaluateLowSampleCountPercentile": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "EvaluationCriteria": {
+            "$ref": "#/components/schemas/EvaluationCriteria"
+          },
+          "EvaluationInterval": {
+            "format": "int32",
+            "maximum": 3600,
+            "minimum": 10,
+            "type": "integer"
+          },
+          "EvaluationPeriods": {
+            "format": "int32",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "EvaluationWindow": {
+            "$ref": "#/components/schemas/EvaluationWindow"
+          },
+          "ExtendedStatistic": {
+            "type": "string"
+          },
+          "InsufficientDataActions": {
+            "items": {
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 5,
+            "minItems": 0,
+            "type": "array"
+          },
+          "MetricName": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Metrics": {
+            "items": {
+              "$ref": "#/components/schemas/MetricDataQuery"
+            },
+            "type": "array"
+          },
+          "Namespace": {
+            "maxLength": 255,
+            "minLength": 1,
+            "pattern": "^[^:]",
+            "type": "string"
+          },
+          "OKActions": {
+            "items": {
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 5,
+            "minItems": 0,
+            "type": "array"
+          },
+          "Period": {
+            "format": "int32",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "Statistic": {
+            "$ref": "#/components/schemas/Statistic"
+          },
+          "Tags": {
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            },
+            "type": "array"
+          },
+          "Threshold": {
+            "anyOf": [
+              {
+                "format": "double",
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "NaN",
+                  "Infinity",
+                  "-Infinity"
+                ],
+                "type": "string"
+              }
+            ]
+          },
+          "ThresholdMetricId": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "TreatMissingData": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Unit": {
+            "$ref": "#/components/schemas/StandardUnit"
+          },
+          "WarmUpConfiguration": {
+            "$ref": "#/components/schemas/WarmUpConfiguration"
+          }
+        },
+        "type": "object"
+      },
+      "PutMetricAlarmResponseContent": {
+        "properties": {},
+        "type": "object"
+      },
+      "RecentlyActive": {
+        "enum": [
+          "PT3H"
+        ],
+        "type": "string"
+      },
+      "ResourceNotFoundResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ScanBy": {
+        "enum": [
+          "TimestampDescending",
+          "TimestampAscending"
+        ],
+        "type": "string"
+      },
+      "ScheduleConfiguration": {
+        "properties": {
+          "EndTimeOffset": {
+            "format": "int64",
+            "maximum": 2592000,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "ScheduleExpression": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "StartTimeOffset": {
+            "format": "int64",
+            "maximum": 2592000,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ScheduledQueryConfiguration": {
+        "properties": {
+          "AggregationExpression": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "type": "string"
+          },
+          "LogGroupIdentifiers": {
+            "items": {
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 50,
+            "minItems": 1,
+            "type": "array"
+          },
+          "QueryARN": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "QueryString": {
+            "maxLength": 10000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ScheduleConfiguration": {
+            "$ref": "#/components/schemas/ScheduleConfiguration"
+          },
+          "ScheduledQueryRoleARN": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Tags": {
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "SetAlarmStateRequestContent": {
+        "properties": {
+          "AlarmName": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "StateReason": {
+            "maxLength": 1023,
+            "minLength": 0,
+            "type": "string"
+          },
+          "StateReasonData": {
+            "maxLength": 4000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "StateValue": {
+            "$ref": "#/components/schemas/StateValue"
+          }
+        },
+        "type": "object"
+      },
+      "SetAlarmStateResponseContent": {
+        "properties": {},
+        "type": "object"
+      },
+      "SlidingWindow": {
+        "properties": {},
+        "type": "object"
+      },
+      "StandardUnit": {
+        "enum": [
+          "Seconds",
+          "Microseconds",
+          "Milliseconds",
+          "Bytes",
+          "Kilobytes",
+          "Megabytes",
+          "Gigabytes",
+          "Terabytes",
+          "Bits",
+          "Kilobits",
+          "Megabits",
+          "Gigabits",
+          "Terabits",
+          "Percent",
+          "Count",
+          "Bytes/Second",
+          "Kilobytes/Second",
+          "Megabytes/Second",
+          "Gigabytes/Second",
+          "Terabytes/Second",
+          "Bits/Second",
+          "Kilobits/Second",
+          "Megabits/Second",
+          "Gigabits/Second",
+          "Terabits/Second",
+          "Count/Second",
+          "None"
+        ],
+        "type": "string"
+      },
+      "StateValue": {
+        "enum": [
+          "OK",
+          "ALARM",
+          "INSUFFICIENT_DATA"
+        ],
+        "type": "string"
+      },
+      "Statistic": {
+        "enum": [
+          "SampleCount",
+          "Average",
+          "Sum",
+          "Minimum",
+          "Maximum"
+        ],
+        "type": "string"
+      },
+      "StatusCode": {
+        "enum": [
+          "Complete",
+          "InternalError",
+          "PartialData",
+          "Forbidden"
+        ],
+        "type": "string"
+      },
+      "Tag": {
+        "properties": {
+          "Key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Value": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "WallClockWindow": {
+        "properties": {
+          "Timezone": {
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "WarmUpConfiguration": {
+        "properties": {
+          "OnlyStartEvaluatingAfterWarmUpPeriodEnds": {
+            "type": "boolean"
+          },
+          "WarmUpPeriodDurationInMinutes": {
+            "format": "int32",
+            "maximum": 2880,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "aws.auth.sigv4": {
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "title": "Amazon CloudWatch"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/DescribeAlarmHistory": {
+      "post": {
+        "operationId": "DescribeAlarmHistory",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DescribeAlarmHistoryRequestContent"
+              }
+            },
+            "application/x-amz-json-1.0": {
+              "schema": {
+                "$ref": "#/components/schemas/DescribeAlarmHistoryRequestContent"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DescribeAlarmHistoryResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/DescribeAlarmHistoryResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidNextTokenResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidNextTokenResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/DescribeAlarms": {
+      "post": {
+        "operationId": "DescribeAlarms",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DescribeAlarmsRequestContent"
+              }
+            },
+            "application/x-amz-json-1.0": {
+              "schema": {
+                "$ref": "#/components/schemas/DescribeAlarmsRequestContent"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DescribeAlarmsResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/DescribeAlarmsResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidNextTokenResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidNextTokenResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/DisableAlarmActions": {
+      "post": {
+        "operationId": "DisableAlarmActions",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DisableAlarmActionsRequestContent"
+              }
+            },
+            "application/x-amz-json-1.0": {
+              "schema": {
+                "$ref": "#/components/schemas/DisableAlarmActionsRequestContent"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisableAlarmActionsResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisableAlarmActionsResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/EnableAlarmActions": {
+      "post": {
+        "operationId": "EnableAlarmActions",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnableAlarmActionsRequestContent"
+              }
+            },
+            "application/x-amz-json-1.0": {
+              "schema": {
+                "$ref": "#/components/schemas/EnableAlarmActionsRequestContent"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnableAlarmActionsResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnableAlarmActionsResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GetMetricData": {
+      "post": {
+        "operationId": "GetMetricData",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetMetricDataRequestContent"
+              }
+            },
+            "application/x-amz-json-1.0": {
+              "schema": {
+                "$ref": "#/components/schemas/GetMetricDataRequestContent"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMetricDataResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMetricDataResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidNextTokenResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidNextTokenResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GetMetricWidgetImage": {
+      "post": {
+        "operationId": "GetMetricWidgetImage",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetMetricWidgetImageRequestContent"
+              }
+            },
+            "application/x-amz-json-1.0": {
+              "schema": {
+                "$ref": "#/components/schemas/GetMetricWidgetImageRequestContent"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMetricWidgetImageResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMetricWidgetImageResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ListMetrics": {
+      "post": {
+        "operationId": "ListMetrics",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListMetricsRequestContent"
+              }
+            },
+            "application/x-amz-json-1.0": {
+              "schema": {
+                "$ref": "#/components/schemas/ListMetricsRequestContent"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListMetricsResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListMetricsResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidParameterValueExceptionResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidParameterValueExceptionResponseContent"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServiceFaultResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServiceFaultResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/PutMetricAlarm": {
+      "post": {
+        "operationId": "PutMetricAlarm",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutMetricAlarmRequestContent"
+              }
+            },
+            "application/x-amz-json-1.0": {
+              "schema": {
+                "$ref": "#/components/schemas/PutMetricAlarmRequestContent"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PutMetricAlarmResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/PutMetricAlarmResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LimitExceededFaultResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/LimitExceededFaultResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SetAlarmState": {
+      "post": {
+        "operationId": "SetAlarmState",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetAlarmStateRequestContent"
+              }
+            },
+            "application/x-amz-json-1.0": {
+              "schema": {
+                "$ref": "#/components/schemas/SetAlarmStateRequestContent"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetAlarmStateResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetAlarmStateResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidFormatFaultResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidFormatFaultResponseContent"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceNotFoundResponseContent"
+                }
+              },
+              "application/x-amz-json-1.0": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceNotFoundResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "aws.auth.sigv4": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://monitoring.{region}.amazonaws.com",
+      "variables": {
+        "region": {
+          "default": "us-east-1"
+        }
+      }
+    }
+  ],
+  "x-amz-json": {
+    "endpointPrefix": "monitoring",
+    "targetPrefix": "GraniteServiceVersion20100801",
+    "version": "1.0"
+  }
+}

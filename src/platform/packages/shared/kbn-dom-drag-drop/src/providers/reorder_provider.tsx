@@ -159,6 +159,7 @@ export function ReorderProvider({
   return (
     <div
       data-test-subj={`${dataTestSubj}-reorderableGroup`}
+      data-dnd-reorder-active={state.isReorderOn}
       className={classNames(className, 'domDragDrop-group', {
         'domDragDrop-isActiveGroup': state.isReorderOn && React.Children.count(children) > 1,
       })}

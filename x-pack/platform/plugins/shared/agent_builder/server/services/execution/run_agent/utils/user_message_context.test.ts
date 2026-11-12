@@ -23,7 +23,7 @@ import {
   eventsForContext,
   groupTimelineEntries,
   groupTimelineRounds,
-  isTimelineCustomEvent,
+  isTimelineStandaloneEvent,
   type TimelineEntry,
   type ContextTimelineEvent,
 } from './context_timeline';
@@ -31,7 +31,7 @@ import { prepareConversation } from './prepare_conversation';
 import { prepareMessages } from './to_langchain_messages';
 
 const entryId = (entry: TimelineEntry<ContextTimelineEvent>): string =>
-  isTimelineCustomEvent(entry) ? entry.event.id : entry.userMessage.id;
+  isTimelineStandaloneEvent(entry) ? entry.event.id : entry.userMessage.id;
 
 const message = (id: string, text = id): UserMessageEvent => ({
   id,

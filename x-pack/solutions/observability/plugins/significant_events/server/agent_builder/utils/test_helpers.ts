@@ -9,7 +9,10 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { IUiSettingsClient } from '@kbn/core/server';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type {
+  BuiltinToolDefinition,
+  DynamicSchemaBuiltinToolDefinition,
+} from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
@@ -103,7 +106,10 @@ export const mockSourcesClient = (slugs: readonly string[]) => ({
 export const createMockRequest = () => httpServerMock.createKibanaRequest();
 
 export const invokeHandler = async <TSchema extends ZodObject<any>>(
-  tool: BuiltinSkillBoundedTool<TSchema> | BuiltinToolDefinition<TSchema>,
+  tool:
+    | BuiltinSkillBoundedTool<TSchema>
+    | BuiltinToolDefinition<TSchema>
+    | DynamicSchemaBuiltinToolDefinition<TSchema>,
   input: z.infer<TSchema>,
   context: ToolHandlerContext
 ) => {
@@ -124,13 +130,21 @@ export const createMockToolContext = (): ToolHandlerContext => {
   return toolHandlerContext;
 };
 
-/** Nightshift feature privilege of a role: `all` always includes `read`, so manage never comes without read. */
-export type NightshiftFeaturePrivilege = 'none' | 'read' | 'all';
+/**
+ * Nightshift feature privilege of a role: `all` always includes `read`, so manage never comes
+ * without read. `all_and_manage_engines` adds the Manage engines sub-feature, which grants configure.
+ */
+export type NightshiftFeaturePrivilege = 'none' | 'read' | 'all' | 'all_and_manage_engines';
 
 const API_PRIVILEGES_BY_FEATURE_PRIVILEGE: Record<NightshiftFeaturePrivilege, readonly string[]> = {
   none: [],
   read: [NIGHTSHIFT_API_PRIVILEGES.read],
   all: [NIGHTSHIFT_API_PRIVILEGES.read, NIGHTSHIFT_API_PRIVILEGES.manage],
+  all_and_manage_engines: [
+    NIGHTSHIFT_API_PRIVILEGES.read,
+    NIGHTSHIFT_API_PRIVILEGES.manage,
+    NIGHTSHIFT_API_PRIVILEGES.configure,
+  ],
 };
 
 /**

@@ -58,8 +58,9 @@ const createContext = (overrides: Record<string, unknown> = {}) => {
     experimentalFeatures: {
       skills: false,
       aiIndices: false,
+      sml: false,
       relevantSkills: false,
-      todos: false,
+      backgroundWake: false,
       bash: false,
       apiDiscovery: false,
       dynamicTools: false,
@@ -71,7 +72,6 @@ const createContext = (overrides: Record<string, unknown> = {}) => {
     agentRegistry: {},
     filesystemService: {},
     bashService: undefined,
-    todoStateManager: {},
     selfClient: {},
     parentExecutionId: undefined,
     conversationAccess: 'readWrite',
@@ -177,6 +177,19 @@ describe('registerInternalTools - subagents', () => {
       );
     }
   );
+
+  it.each([true, false])(
+    'passes the background wake setting (%s) to run_subagent',
+    async (backgroundWake) => {
+      const { context } = createContext({ experimentalFeatures: { backgroundWake } });
+
+      await register(context);
+
+      expect(createSubagentTool).toHaveBeenCalledWith(
+        expect.objectContaining({ backgroundWakeEnabled: backgroundWake })
+      );
+    }
+  );
 });
 
 describe('registerInternalTools - execute_dynamic_tool', () => {
@@ -200,7 +213,7 @@ describe('registerInternalTools - execute_dynamic_tool', () => {
         skills: false,
         aiIndices: false,
         relevantSkills: false,
-        todos: false,
+        backgroundWake: false,
         bash: false,
         apiDiscovery: false,
         dynamicTools: true,

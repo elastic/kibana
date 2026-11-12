@@ -22,7 +22,6 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -94,7 +93,6 @@ export const EntitiesPanel = ({
   knowledgeHref?: string;
   onKnowledgeClick?: () => void;
 }): React.ReactElement => {
-  const { euiTheme } = useEuiTheme();
   const query = useDetectionEntities(timeRange);
   const [search, setSearch] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -199,6 +197,7 @@ export const EntitiesPanel = ({
     },
   ];
   const hasAttributeFilter = haveRules !== noRules || withEvents;
+  const canClear = selected.length > 0 || unassigned || attributeFilters.length > 0;
   const filterButton = (
     <EuiPopover
       isOpen={isFilterOpen}
@@ -238,7 +237,16 @@ export const EntitiesPanel = ({
   );
 
   return (
-    <EuiPanel hasBorder paddingSize="m" data-test-subj="nightshiftDetectionEntitiesPanel">
+    <EuiPanel
+      hasBorder
+      paddingSize="m"
+      data-test-subj="nightshiftDetectionEntitiesPanel"
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: 0,
+      }}
+    >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
@@ -249,28 +257,31 @@ export const EntitiesPanel = ({
           <EuiNotificationBadge color="subdued">{entities.length}</EuiNotificationBadge>
         </EuiFlexItem>
         <EuiFlexItem />
-        {selected.length > 0 || unassigned || attributeFilters.length > 0 ? (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="nightshiftEntitiesPanelButton"
-              size="xs"
-              onClick={() => {
-                clear();
-                setAttributeFilters([]);
-                setSearch('');
-              }}
-            >
-              {CLEAR_LABEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        ) : null}
+        {/* Always mounted so the header height stays stable when filters toggle. */}
+        <EuiFlexItem grow={false} css={{ visibility: canClear ? 'visible' : 'hidden' }}>
+          <EuiButtonEmpty
+            data-test-subj="nightshiftEntitiesPanelButton"
+            size="xs"
+            flush="right"
+            iconType="cross"
+            tabIndex={canClear ? undefined : -1}
+            onClick={() => {
+              clear();
+              setAttributeFilters([]);
+              setSearch('');
+            }}
+          >
+            {CLEAR_LABEL}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiSelectable
         aria-label={ENTITIES_TITLE}
         searchable
         isPreFiltered
-        height={euiTheme.base * 30}
+        height="full"
+        css={{ minHeight: 0 }}
         options={options}
         renderOption={(option) => option.searchableLabel ?? option.label}
         searchProps={{

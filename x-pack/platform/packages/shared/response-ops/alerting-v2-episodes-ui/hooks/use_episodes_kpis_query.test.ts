@@ -16,6 +16,7 @@ import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import type { GetUserProfileResponse } from '@kbn/core-user-profile-browser';
 import { useEpisodesKpisQuery } from './use_episodes_kpis_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
+import { buildEpisodesKpisQuery } from '../queries/episodes_query';
 import { createTestEpisodeSource } from '../types/episode_data_source.mock';
 import type { EpisodeSourceKpis } from '../types/episode_data_source';
 import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
@@ -23,8 +24,14 @@ import { useSpaceId } from './use_space_id';
 
 jest.mock('../utils/execute_esql_query');
 jest.mock('./use_space_id');
+// The first ES|QL composer call costs ~1s locally and several seconds under CI load.
+jest.mock('../queries/episodes_query', () => ({
+  ...jest.requireActual('../queries/episodes_query'),
+  buildEpisodesKpisQuery: jest.fn(() => 'FROM .alerts | STATS alerts_count = COUNT(*)'),
+}));
 
 const mockExecuteEsqlQuery = jest.mocked(executeEsqlQuery);
+const mockBuildEpisodesKpisQuery = jest.mocked(buildEpisodesKpisQuery);
 const mockUseSpaceId = jest.mocked(useSpaceId);
 mockUseSpaceId.mockReturnValue('default');
 
@@ -188,8 +195,7 @@ describe('useEpisodesKpisQuery', () => {
     );
 
     await waitFor(() => expect(mockExecuteEsqlQuery).toHaveBeenCalled());
-    const queryArg = mockExecuteEsqlQuery.mock.calls[0][0].query;
-    expect(queryArg).toContain('specific-user-uid');
+    expect(mockBuildEpisodesKpisQuery).toHaveBeenCalledWith('default', 'specific-user-uid', {});
   });
 
   it('still fetches KPIs when the user has no profile', async () => {

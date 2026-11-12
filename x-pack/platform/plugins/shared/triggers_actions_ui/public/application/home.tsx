@@ -20,7 +20,6 @@ import {
   getCreateRuleFromTemplateRoute,
   getTriggersActionsManagementPath,
 } from '@kbn/rule-data-utils';
-import { RulesSettingsLink } from './components/rules_setting/rules_settings_link';
 import { RulesListDocLink } from './sections/rules_list/components/rules_list_doc_link';
 import { CreateRuleButton } from './sections/rules_list/components/create_rule_button';
 import type { Section } from './constants';
@@ -54,8 +53,8 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     notifications: { toasts },
     ruleTypeRegistry,
     application: { navigateToApp },
-    cps,
     setBreadcrumbs,
+    showClassicBadge,
   } = useKibana().services;
   const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
     http,
@@ -96,9 +95,6 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
 
   const headerActions = [
     ...(authorizedToCreateAnyRules ? [<CreateRuleButton openFlyout={openRuleTypeModal} />] : []),
-    <RulesSettingsLink
-      alertDeleteCategoryIds={['management', 'observability', 'securitySolution']}
-    />,
     <RulesListDocLink />,
   ];
 
@@ -179,9 +175,9 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
           }}
           http={http}
           toasts={toasts}
-          cps={cps}
           registeredRuleTypes={ruleTypeRegistry.list()}
           filteredRuleTypes={[]}
+          showClassicBadge={showClassicBadge}
         />
       )}
     </>

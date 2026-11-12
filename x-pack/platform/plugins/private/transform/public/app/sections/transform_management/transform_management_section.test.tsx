@@ -23,9 +23,15 @@ const queryClient = new QueryClient();
 const mockUseTransformCapabilities = jest.fn();
 const mockUseGetTransformNodes = jest.fn();
 const mockUseGetTransforms = jest.fn();
+const mockUseEnabledFeatures = jest.fn();
+const mockRefreshTransformList = jest.fn();
 
 jest.mock('../../hooks', () => ({
-  useDocumentationLinks: () => ({ esTransform: 'https://example.test' }),
+  useDocumentationLinks: () => ({
+    esNodeRoles: 'https://example.test/node-roles',
+    esTransform: 'https://example.test',
+  }),
+  useRefreshTransformList: () => mockRefreshTransformList,
   useTransformCapabilities: () => mockUseTransformCapabilities(),
   useGetTransformNodes: () => mockUseGetTransformNodes(),
   useGetTransforms: () => mockUseGetTransforms(),
@@ -40,7 +46,7 @@ jest.mock('../../hooks/use_get_transform_stats', () => ({
 }));
 
 jest.mock('../../serverless_context', () => ({
-  useEnabledFeatures: () => ({ showNodeInfo: false }),
+  useEnabledFeatures: () => mockUseEnabledFeatures(),
 }));
 
 jest.mock('../../../alerting/transform_alerting_flyout', () => {
@@ -52,10 +58,6 @@ jest.mock('../../../alerting/transform_alerting_flyout', () => {
     TransformAlertFlyoutWrapper: () => null,
   };
 });
-
-jest.mock('./components/transform_list/transforms_stats_bar', () => ({
-  TransformStatsBar: () => null,
-}));
 
 jest.mock('./components/dangling_task_warning/dangling_task_warning', () => ({
   DanglingTasksWarning: () => null,
@@ -89,6 +91,7 @@ const renderSection = () => {
 
 describe('Transform: <TransformManagementSection />', () => {
   beforeEach(() => {
+    mockUseEnabledFeatures.mockReturnValue({ showNodeInfo: false });
     mockUseGetTransformNodes.mockReturnValue({
       isInitialLoading: false,
       error: null,
@@ -132,6 +135,29 @@ describe('Transform: <TransformManagementSection />', () => {
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Transforms');
     expect(screen.queryByTestId('transformButtonCreate')).not.toBeInTheDocument();
+  });
+
+  test('shows the no-transform-nodes warning when the list is unavailable', () => {
+    mockUseTransformCapabilities.mockReturnValue({
+      canGetTransform: true,
+      canCreateTransform: true,
+      canPreviewTransform: true,
+      canStartStopTransform: true,
+    });
+    mockUseEnabledFeatures.mockReturnValue({ showNodeInfo: true });
+
+    renderSection();
+
+    expect(screen.getByText('There are no transform nodes available.')).toBeInTheDocument();
+    expect(
+      screen.getByText(/You will not be able to create or run transforms/)
+    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Learn more/ })).toHaveAttribute(
+      'href',
+      'https://example.test/node-roles'
+    );
+    expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument();
+    expect(screen.queryByTestId('mockedTransformList')).not.toBeInTheDocument();
   });
 
   test('keeps AppHeader mounted on an empty list and hides Create', () => {
@@ -182,6 +208,11 @@ describe('Transform: <TransformManagementSection />', () => {
     renderSection();
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Transforms');
+    expect(
+      screen.queryByText(
+        'Use transforms to pivot existing Elasticsearch indices into summarized entity-centric indices or to create an indexed view of the latest documents for fast access.'
+      )
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId('transformButtonCreate')).toBeInTheDocument();
     expect(screen.getByTestId('mockedTransformList')).toBeInTheDocument();
   });

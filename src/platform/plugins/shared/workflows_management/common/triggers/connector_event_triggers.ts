@@ -10,6 +10,7 @@
 import { connectorSpecHasEvents, connectorsSpecs } from '@kbn/connector-specs';
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
+import { HITL_SLACK_ACTION_EVENT_ID } from '@kbn/workflows';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { z } from '@kbn/zod/v4';
 
@@ -19,6 +20,23 @@ type ConnectorSpecWithEvents = ConnectorSpec & {
 
 const isConnectorSpecWithEvents = (spec: ConnectorSpec): spec is ConnectorSpecWithEvents =>
   connectorSpecHasEvents(spec);
+
+/**
+ * Connector catalogs append ` (v2)` so a new type can sit next to a legacy one.
+ * The trigger menu has a single entry per connector, so that suffix is omitted.
+ */
+const connectorTriggerDisplayName = (displayName: string): string =>
+  displayName.replace(/ \(v\d+\)$/, '');
+
+/**
+ * Menu groups and autocomplete read this title. The ` - ` separator is the same
+ * one the actions menu uses to name a trigger group
+ */
+const formatConnectorEventTriggerTitle = (displayName: string, eventTitle: string): string =>
+  i18n.translate('workflows.triggers.connectorEvent.displayNameLabel', {
+    defaultMessage: '{displayName} - {eventTitle}',
+    values: { displayName: connectorTriggerDisplayName(displayName), eventTitle },
+  });
 
 /**
  * Hub/bridge fields always present on connector-event payloads at emit time.
@@ -64,14 +82,17 @@ export const getConnectorEventTriggerDefinitions = ({
   }
 
   return specs.filter(isConnectorSpecWithEvents).flatMap((spec) =>
-    Object.values(spec.events.definitions).map((eventDefinition) => ({
-      id: eventDefinition.eventId,
-      title: eventDefinition.title,
-      description: eventDefinition.description,
-      eventSchema: toConnectorEventTriggerSchema(eventDefinition.eventSchema),
-      stability: 'tech_preview' as const,
-      requiresConnectorId: true,
-    }))
+    Object.values(spec.events.definitions)
+      // HITL interactivity resumes a paused step; it must not start workflows.
+      .filter((eventDefinition) => eventDefinition.eventId !== HITL_SLACK_ACTION_EVENT_ID)
+      .map((eventDefinition) => ({
+        id: eventDefinition.eventId,
+        title: formatConnectorEventTriggerTitle(spec.metadata.displayName, eventDefinition.title),
+        description: eventDefinition.description,
+        eventSchema: toConnectorEventTriggerSchema(eventDefinition.eventSchema),
+        stability: 'tech_preview' as const,
+        requiresConnectorId: true,
+      }))
   );
 };
 

@@ -19,6 +19,12 @@ export interface ArtifactsFolderUsage {
 export const resolveArtifactsFolderPath = (artifactsFolder: string): string =>
   Path.dirname(getSafePath(`${artifactsFolder}/artifact.zip`).fullPath);
 
+/** Whether `filePath` is a file inside the artifacts folder (never the folder itself or a path outside it). */
+export const isInArtifactsFolder = (folderPath: string, filePath: string): boolean => {
+  const relative = Path.relative(folderPath, filePath);
+  return relative !== '' && !relative.startsWith('..') && !Path.isAbsolute(relative);
+};
+
 const isNotFound = (error: unknown): boolean =>
   (error as NodeJS.ErrnoException | undefined)?.code === 'ENOENT';
 

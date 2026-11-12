@@ -1198,6 +1198,21 @@ const createProposals = async (
       (await listProposals(client, conversationId)).length > before ? true : undefined
     );
   }
+
+  // The gate workflow writes the proposal, and its inputs carry no waiver, so the flag the real
+  // Nightshift producer sets (`findings_recorder`) is stamped on afterwards — without it a
+  // seeded investigation would ask for a decline reason the product no longer asks for.
+  if (proposals.length > 0) {
+    await client.es(
+      'POST',
+      `/${PROPOSALS_INDEX_NAME}/_update_by_query?refresh=true`,
+      {
+        query: { term: { conversationId } },
+        script: { source: 'ctx._source.skipDiscardReason = true', lang: 'painless' },
+      },
+      [409]
+    );
+  }
   // The gate's create step indexes the proposal, then attaches its card.
   await waitFor(`the proposal cards of ${conversationId}`, async () => {
     const { body } = await client.publicApi<{ attachments?: Array<{ type: string }> }>(

@@ -26,9 +26,13 @@ jest.mock('./hooks/url_categories', () => ({
   useUrlDefaultCategories: () => mockUseUrlDefaultCategories(),
 }));
 
+const mockUseAutomaticImportAuthz = jest.fn();
+const mockUseAuthz = jest.fn();
 jest.mock('../../../../hooks', () => ({
   useStartServices: () => mockUseStartServices(),
   useBreadcrumbs: jest.fn(),
+  useAuthz: () => mockUseAuthz(),
+  useAutomaticImportAuthz: () => mockUseAutomaticImportAuthz(),
 }));
 
 const mockUseLocation = jest.fn();
@@ -47,7 +51,20 @@ jest.mock('./components/responsive_package_grid', () => ({
   },
 }));
 jest.mock('./components/search_and_filters_bar', () => ({ SearchAndFiltersBar: () => null }));
-jest.mock('./components/side_bar', () => ({ Sidebar: () => null }));
+// Capture the sidebar props so tests can assert which create entry point is offered.
+interface CapturedSidebarProps {
+  CreateIntegrationCardButton?: unknown;
+  canCreateIntegration?: boolean;
+  canUploadIntegrationPackage?: boolean;
+  showCreatedIntegrations?: boolean;
+}
+let capturedSidebarProps: CapturedSidebarProps = {};
+jest.mock('./components/side_bar', () => ({
+  Sidebar: (props: CapturedSidebarProps) => {
+    capturedSidebarProps = props;
+    return null;
+  },
+}));
 jest.mock('./components/no_data_prompt', () => ({ NoDataPrompt: () => null }));
 jest.mock('./components/manage_integrations_table', () => ({
   ManageIntegrationsTable: () => null,
@@ -55,6 +72,7 @@ jest.mock('./components/manage_integrations_table', () => ({
 jest.mock('../../components/no_epr_callout', () => ({ NoEprCallout: () => null }));
 
 import { OBLT_DEFAULT_CATEGORIES } from '../../../../../../../common/constants';
+
 import { BrowseIntegrationsPage } from '.';
 
 const ALL_CATEGORY = { id: '', title: 'All categories', count: 10 };
@@ -85,6 +103,30 @@ const observabilityStartServices = {
   automaticImport: undefined,
 };
 
+const NO_AUTHZ = {
+  canView: false,
+  canCreate: false,
+  canEdit: false,
+  canDelete: false,
+  canApprove: false,
+};
+
+const CreateIntegrationSideCardButton = () => null;
+const automaticImportStartServices = {
+  ...observabilityStartServices,
+  automaticImport: {
+    hooks: {
+      useGetAllIntegrations: () => ({
+        integrations: [],
+        isInitialLoading: false,
+        isError: false,
+        refetch: jest.fn(),
+      }),
+    },
+    components: { CreateIntegrationSideCardButton },
+  },
+};
+
 describe('BrowseIntegrationsPage', () => {
   const mockSetUrlDefaultCategoriesFn = jest.fn();
   const mockSetUrlCategoryFn = jest.fn();
@@ -92,6 +134,9 @@ describe('BrowseIntegrationsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedFilteredCards = [];
+    capturedSidebarProps = {};
+    mockUseAutomaticImportAuthz.mockReturnValue(NO_AUTHZ);
+    mockUseAuthz.mockReturnValue({ integrations: { uploadPackages: false } });
     mockUseBrowseIntegrationHook.mockReturnValue(makeDefaultHookReturn());
     mockUseSetUrlDefaultCategories.mockReturnValue(mockSetUrlDefaultCategoriesFn);
     mockUseSetUrlCategory.mockReturnValue(mockSetUrlCategoryFn);
@@ -179,10 +224,8 @@ describe('BrowseIntegrationsPage', () => {
         pathname: '/app/integrations/browse',
         search: '?view=manage',
       });
-      mockUseStartServices.mockReturnValue({
-        ...observabilityStartServices,
-        application: { capabilities: { automatic_import: { view: true } } },
-      });
+      mockUseStartServices.mockReturnValue(automaticImportStartServices);
+      mockUseAutomaticImportAuthz.mockReturnValue({ ...NO_AUTHZ, canView: true });
       renderPage();
       await waitFor(() => {
         expect(mockSetUrlDefaultCategoriesFn).not.toHaveBeenCalled();
@@ -348,6 +391,67 @@ describe('BrowseIntegrationsPage', () => {
       expect(mockHistoryReplace).toHaveBeenCalledWith(
         expect.objectContaining({ search: expect.stringContaining('collection=nginx') })
       );
+    });
+  });
+
+  describe('Automatic Import create entry point', () => {
+    beforeEach(() => {
+      mockUseStartServices.mockReturnValue(automaticImportStartServices);
+      mockUseLocation.mockReturnValue({ pathname: '/app/integrations/browse', search: '' });
+    });
+
+    it('offers the Create integration card when the user can create', async () => {
+      mockUseAutomaticImportAuthz.mockReturnValue({ ...NO_AUTHZ, canView: true, canCreate: true });
+      renderPage();
+
+      await waitFor(() => {
+        expect(capturedSidebarProps.CreateIntegrationCardButton).toBe(
+          CreateIntegrationSideCardButton
+        );
+      });
+    });
+
+    it('does not offer the Create integration card to a read-only user who cannot upload packages', async () => {
+      mockUseAutomaticImportAuthz.mockReturnValue({ ...NO_AUTHZ, canView: true });
+      renderPage();
+
+      await waitFor(() => {
+        expect(capturedSidebarProps).toHaveProperty('CreateIntegrationCardButton');
+      });
+      expect(capturedSidebarProps.CreateIntegrationCardButton).toBeUndefined();
+    });
+
+    it('offers the card with upload only to a read-only user who can upload packages', async () => {
+      mockUseAutomaticImportAuthz.mockReturnValue({ ...NO_AUTHZ, canView: true });
+      mockUseAuthz.mockReturnValue({ integrations: { uploadPackages: true } });
+      renderPage();
+
+      await waitFor(() => {
+        expect(capturedSidebarProps.CreateIntegrationCardButton).toBe(
+          CreateIntegrationSideCardButton
+        );
+      });
+      expect(capturedSidebarProps.canCreateIntegration).toBe(false);
+      expect(capturedSidebarProps.canUploadIntegrationPackage).toBe(true);
+    });
+
+    it('still lets a read-only user reach Manage my integrations', async () => {
+      mockUseAutomaticImportAuthz.mockReturnValue({ ...NO_AUTHZ, canView: true });
+      renderPage();
+
+      await waitFor(() => {
+        expect(capturedSidebarProps.showCreatedIntegrations).toBe(true);
+      });
+    });
+
+    it('hides created integrations entirely without the view capability', async () => {
+      mockUseAutomaticImportAuthz.mockReturnValue(NO_AUTHZ);
+      renderPage();
+
+      await waitFor(() => {
+        expect(capturedSidebarProps).toHaveProperty('showCreatedIntegrations');
+      });
+      expect(capturedSidebarProps.showCreatedIntegrations).toBe(false);
     });
   });
 });

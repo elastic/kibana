@@ -228,7 +228,7 @@ describe('WorkflowExecutionFlyout details', () => {
       setExecution({ effectiveIdentity: { type: 'service_account', id: 'sa-1' } });
       renderFlyout();
 
-      expect(screen.getByTestId('workflowExecutionFlyoutRunAs')).toHaveTextContent('Run as: sa-1');
+      expect(screen.getByTestId('workflowExecutionFlyoutRunAs')).toHaveTextContent('Run assa-1');
     });
 
     it('labels an inherited service account', () => {
@@ -242,7 +242,7 @@ describe('WorkflowExecutionFlyout details', () => {
       renderFlyout();
 
       expect(screen.getByTestId('workflowExecutionFlyoutRunAs')).toHaveTextContent(
-        'Run as (inherited from parent): sa-1'
+        'Run as (inherited from parent)sa-1'
       );
     });
   });

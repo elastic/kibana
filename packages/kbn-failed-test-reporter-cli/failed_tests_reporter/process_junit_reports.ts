@@ -8,7 +8,7 @@
  */
 
 import { addMessagesToReport } from './add_messages_to_report';
-import { getFailures } from './get_failures';
+import { getFailures, type TestFailure } from './get_failures';
 import type { ProcessReportsParams } from './process_reports_types';
 import { createFailureIssue, updateFailureIssue, updateSuiteIssue } from './report_failure';
 import { reportFailuresToEs } from './report_failures_to_es';
@@ -29,10 +29,12 @@ import { getRootMetadata, readTestReport } from './test_report';
 // Mocha timeout forced to fail on its way out, so they all describe the same event. Only the
 // failure that caused the abort reaches GitHub, the rest are listed on its report.
 
+/** Returns the failures considered for an issue: not irrelevant, not cascading, no duplicates. */
 export async function processJUnitReports(
   reportPaths: string[],
   params: ProcessReportsParams
-): Promise<void> {
+): Promise<TestFailure[]> {
+  const considered: TestFailure[] = [];
   const {
     log,
     existingIssues,
@@ -42,6 +44,8 @@ export async function processJUnitReports(
     pipeline,
     prependTitle,
     updateGithub,
+    perTestIssues,
+    suiteIssueComments,
     indexInEs,
     reportUpdate,
     bkMeta,
@@ -73,9 +77,19 @@ export async function processJUnitReports(
       };
 
       if (failure.likelyIrrelevant) {
+        const { infraReason } = failure;
+        if (infraReason) {
+          log.info(
+            `FTR failure is likely an infrastructure issue (${infraReason.category}): ` +
+              `${failure.classname} - ${failure.name}`
+          );
+        }
         pushMessage(
-          'Failure is likely irrelevant' +
-            (updateGithub ? ', so an issue was not created or updated' : '')
+          (infraReason
+            ? `Failure is likely an infrastructure issue (${infraReason.category})`
+            : 'Failure is likely irrelevant') +
+            (updateGithub ? ', so an issue was not created or updated' : '') +
+            (infraReason ? `. ${infraReason.message}` : '')
         );
         continue;
       }
@@ -97,17 +111,16 @@ export async function processJUnitReports(
         continue;
       }
       seenNewIssueKeys.add(key);
+      considered.push(failure);
 
-      // a test tracked by a flaky suite issue gets its failures recorded there, not on an issue of its own
+      // a test tracked by a suite issue gets its failures counted there, not on an issue of its own;
+      // the daily report and the consistent failure check comment on it, or this job without the check
       const suiteIssue = existingIssues.getSuiteIssueForFailure(failure);
       if (suiteIssue) {
         const { newBody, newCount } = await updateSuiteIssue(
-          buildUrl,
           suiteIssue,
           githubApi,
-          branch,
-          pipeline,
-          failure
+          suiteIssueComments ? { buildUrl, branch, pipeline, failure } : undefined
         );
         const url = suiteIssue.github.htmlUrl;
         // in dry-run nothing was written, so the next failure of the suite counts from the same body
@@ -147,6 +160,12 @@ export async function processJUnitReports(
         if (updateGithub) {
           pushMessage(`Updated existing issue: ${url} (fail count: ${newCount})`);
         }
+        continue;
+      }
+
+      if (!perTestIssues) {
+        pushMessage('No failed-test issue tracks this test yet');
+        failure.failureCount = 0;
         continue;
       }
 
@@ -206,4 +225,6 @@ export async function processJUnitReports(
 
     await reportFailuresToFile(log, failures, bkMeta, getRootMetadata(report));
   }
+
+  return considered;
 }

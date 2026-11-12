@@ -26,7 +26,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  CreateCommentsArray,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   ENDPOINT_ARTIFACT_OPERATORS,
   hasWrongOperatorWithWildcard,
@@ -82,7 +85,7 @@ const ENDPOINT_EVENT_FILTERS_LIST_ID = ENDPOINT_ARTIFACT_LISTS.eventFilters.id;
 
 import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
-import { ExceptionItemComments } from '../../../../../detection_engine/rule_exceptions/components/item_comments';
+import { ArtifactFormComments } from '../../../../components/artifact_form_comments';
 import { EventFiltersApiClient } from '../../service/api_client';
 import { ShowValueListModal } from '../../../../../value_list/components/show_value_list_modal';
 import type { ExceptionEntries } from '../../../../../../common/endpoint/types/exception_list_items';
@@ -135,7 +138,6 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     const autocompleteSuggestions = useSuggestions(getSuggestionsFn);
     const [hasFormChanged, setHasFormChanged] = useState(false);
     const [hasNameError, toggleHasNameError] = useState<boolean>(!exception.name);
-    const [newComment, setNewComment] = useState('');
     const [hasCommentError, setHasCommentError] = useState(false);
     const [hasBeenInputNameVisited, setHasBeenInputNameVisited] = useState(false);
     const [hasDuplicateFields, setHasDuplicateFields] = useState<boolean>(false);
@@ -165,10 +167,6 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     );
 
     const [areConditionsValid, setAreConditionsValid] = useState(!!exception.entries.length);
-
-    const [existingComments, _] = useState<ExceptionListItemSchema['comments']>(
-      (exception as ExceptionListItemSchema)?.comments
-    );
 
     const showAssignmentSection = useCanAssignArtifactPerPolicy(exception, mode, hasFormChanged);
 
@@ -335,25 +333,22 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     );
 
     // comments and handler
-    const handleOnChangeComment = useCallback(
-      (value: string) => {
-        if (!exception) return;
-        setNewComment(value);
-        processChanged({ comments: [{ comment: value }] });
+    const handleOnChangeComments = useCallback(
+      (comments: CreateCommentsArray) => {
+        processChanged({ comments });
         if (!hasFormChanged) setHasFormChanged(true);
       },
-      [exception, hasFormChanged, processChanged]
+      [hasFormChanged, processChanged]
     );
     const commentsInputMemo = useMemo(
       () => (
-        <ExceptionItemComments
-          exceptionItemComments={existingComments}
-          newCommentValue={newComment}
-          newCommentOnChange={handleOnChangeComment}
-          setCommentError={setHasCommentError}
+        <ArtifactFormComments
+          item={exception}
+          onChange={handleOnChangeComments}
+          onErrorChange={setHasCommentError}
         />
       ),
-      [existingComments, handleOnChangeComment, newComment]
+      [exception, handleOnChangeComments]
     );
 
     // comments
