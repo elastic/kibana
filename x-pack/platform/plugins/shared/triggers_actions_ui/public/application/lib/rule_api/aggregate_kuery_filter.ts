@@ -19,6 +19,7 @@ export async function loadRuleAggregationsWithKueryFilter({
   tagsFilter,
   ruleTypeIds,
   consumers,
+  kueryNode,
 }: LoadRuleAggregationsProps): Promise<AggregateRulesResponse> {
   const filtersKueryNode = mapFiltersToKueryNode({
     actionTypesFilter,
@@ -26,6 +27,7 @@ export async function loadRuleAggregationsWithKueryFilter({
     ruleExecutionStatusesFilter,
     ruleStatusesFilter,
     searchText,
+    kueryNode,
   });
 
   const res = await http.post<AggregateRulesResponseBody>(

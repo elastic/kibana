@@ -19,6 +19,7 @@ import { getInternalRuleRoute } from './rule/apis/get/internal/get_internal_rule
 import { updateRuleRoute } from './rule/apis/update/update_rule_route';
 import { deleteRuleRoute, internalDeleteRuleRoute } from './rule/apis/delete/delete_rule_route';
 import { aggregateRulesRoute } from './rule/apis/aggregate/aggregate_rules_route';
+import { ruleHealthRoute } from './rule/apis/health/rule_health_route';
 import { disableRuleRoute } from './rule/apis/disable/disable_rule_route';
 import { enableRuleRoute } from './rule/apis/enable/enable_rule_route';
 import { findRulesRoute } from './rule/apis/find/external/find_rules_route';
@@ -92,6 +93,7 @@ import { updateAutoFillSchedulerRoute } from './gaps/apis/gap_auto_fill_schedule
 import { deleteAutoFillSchedulerRoute } from './gaps/apis/gap_auto_fill_schedule/delete/delete_auto_fill_scheduler_route';
 import { findAutoFillSchedulerLogsRoute } from './gaps/apis/gap_auto_fill_schedule/logs/find_auto_fill_scheduler_logs_route';
 import { getGlobalExecutionSummaryRoute } from './get_global_execution_summary';
+import { getGlobalExecutionTrendsRoute } from './get_global_execution_trends';
 import type { AlertingPluginsStart } from '../plugin';
 import { getInternalRuleTemplateRoute } from './rule_templates/apis/get/get_rule_template_route';
 import { findInternalRuleTemplatesRoute } from './rule_templates/apis/find/find_rule_template_route';
@@ -133,6 +135,7 @@ export function defineRoutes(opts: RouteOptions) {
   deleteRuleRoute(router, licenseState);
   internalDeleteRuleRoute(router, licenseState);
   aggregateRulesRoute(router, licenseState);
+  ruleHealthRoute(router, licenseState, usageCounter);
   disableRuleRoute(router, licenseState);
   enableRuleRoute(router, licenseState);
   findRulesRoute(router, licenseState, usageCounter);
@@ -213,4 +216,5 @@ export function defineRoutes(opts: RouteOptions) {
   healthRoute(router, licenseState, encryptedSavedObjects);
   getGlobalExecutionKPIRoute(router, licenseState);
   getGlobalExecutionSummaryRoute(router, licenseState);
+  getGlobalExecutionTrendsRoute(router, licenseState);
 }

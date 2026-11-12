@@ -103,6 +103,8 @@ import type { DisableRuleParams } from '../application/rule/methods/disable';
 import type { EnableRuleParams } from '../application/rule/methods/enable_rule';
 import type { GetGlobalExecutionSummaryParams } from './methods/get_execution_summary';
 import { getGlobalExecutionSummaryWithAuth } from './methods/get_execution_summary';
+import type { GetGlobalExecutionTrendsParams } from './methods/get_execution_trends';
+import { getGlobalExecutionTrendsWithAuth } from './methods/get_execution_trends';
 import type { GetRuleTypesByQueryParams } from '../application/rule/methods/get_rule_types_by_query/types';
 import type { FindRuleTemplatesParams } from '../application/rule_template/methods/find/types';
 import { getRuleTypesByQuery } from '../application/rule/methods/get_rule_types_by_query/get_rule_types_by_query';
@@ -203,6 +205,8 @@ export class RulesClient {
     getGlobalExecutionKpiWithAuth(this.context, params);
   public getGlobalExecutionSummaryWithAuth = (params: GetGlobalExecutionSummaryParams) =>
     getGlobalExecutionSummaryWithAuth(this.context, params);
+  public getGlobalExecutionTrendsWithAuth = (params: GetGlobalExecutionTrendsParams) =>
+    getGlobalExecutionTrendsWithAuth(this.context, params);
   public getActionErrorLog = (params: GetActionErrorLogByIdParams) =>
     getActionErrorLog(this.context, params);
   public getActionErrorLogWithAuth = (params: GetActionErrorLogByIdParams) =>

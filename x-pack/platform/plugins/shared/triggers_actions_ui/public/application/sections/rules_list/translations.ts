@@ -147,6 +147,34 @@ export const ALERT_ERROR_VALIDATE_REASON = i18n.translate(
   }
 );
 
+export const ALERT_ERROR_UNAUTHORIZED_REASON = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.ruleErrorReasonUnauthorized',
+  {
+    defaultMessage: 'Elasticsearch rejected the API key stored with the rule.',
+  }
+);
+
+export const ALERT_ERROR_FORBIDDEN_REASON = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.ruleErrorReasonForbidden',
+  {
+    defaultMessage: 'The API key stored with the rule lacks the required privileges.',
+  }
+);
+
+export const ALERT_ERROR_NOT_FOUND_REASON = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.ruleErrorReasonNotFound',
+  {
+    defaultMessage: 'A data source the rule depends on could not be found.',
+  }
+);
+
+export const ALERT_ERROR_UNAVAILABLE_REASON = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.ruleErrorReasonUnavailable',
+  {
+    defaultMessage: 'Elasticsearch was unavailable during the last run.',
+  }
+);
+
 export const ALERT_WARNING_MAX_EXECUTABLE_ACTIONS_REASON = i18n.translate(
   'xpack.triggersActionsUI.sections.rulesList.ruleWarningReasonMaxExecutableActions',
   {
@@ -191,6 +219,10 @@ export const rulesErrorReasonTranslationsMapping = {
   timeout: ALERT_ERROR_TIMEOUT_REASON,
   disabled: ALERT_ERROR_DISABLED_REASON,
   validate: ALERT_ERROR_VALIDATE_REASON,
+  unauthorized: ALERT_ERROR_UNAUTHORIZED_REASON,
+  forbidden: ALERT_ERROR_FORBIDDEN_REASON,
+  notFound: ALERT_ERROR_NOT_FOUND_REASON,
+  unavailable: ALERT_ERROR_UNAVAILABLE_REASON,
 };
 
 export const rulesWarningReasonTranslationsMapping = {

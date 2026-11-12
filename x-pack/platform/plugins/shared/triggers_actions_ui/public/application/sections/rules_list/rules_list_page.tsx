@@ -16,6 +16,7 @@ import { useHistory } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { AppStatus } from '@kbn/core/public';
 import { useKibana } from '../../../common/lib/kibana';
+import { routeToHealth } from '../../constants';
 import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../lib/doc_title';
 import { RulesPageHeader } from '../rules_page/rules_page_header';
@@ -99,6 +100,16 @@ export const RulesListContainer = () => {
               iconType: 'table' as const,
               run: () => history.push('/logs'),
               testId: 'rulesLogsLink',
+            },
+            {
+              id: 'rulesHealth',
+              order: 300,
+              label: i18n.translate('xpack.triggersActionsUI.rulesPage.healthLink.title', {
+                defaultMessage: 'Health',
+              }),
+              iconType: 'heart' as const,
+              run: () => history.push(routeToHealth),
+              testId: 'rulesHealthLink',
             },
           ]
         : [];

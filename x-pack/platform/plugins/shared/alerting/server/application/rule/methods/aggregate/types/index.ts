@@ -22,6 +22,23 @@ export interface DefaultRuleAggregationParams {
   maxTags?: number;
 }
 
+export interface RuleHealthAggregationParams {
+  maxReasons?: number;
+  maxMessagesPerReason?: number;
+}
+
+export interface RuleHealthFormattedResult {
+  total: number;
+  byOutcome: Record<string, number>;
+  byStatus: Record<string, number>;
+  byErrorReason: Array<{ reason: string; count: number }>;
+  byWarningReason: Array<{ reason: string; count: number }>;
+  topErrorMessages: Array<{ reason: string; message: string; count: number }>;
+  /** Rules whose last run failed because their API key was rejected, with the distinct messages seen. */
+  apiKeyError: { count: number; messages: string[] };
+  missingApiKey: { count: number };
+}
+
 export interface RuleAggregationFormattedResult {
   ruleExecutionStatus: Record<string, number>;
   ruleLastRunOutcome: Record<string, number>;

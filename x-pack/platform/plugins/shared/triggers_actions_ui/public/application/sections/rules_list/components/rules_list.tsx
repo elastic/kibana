@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import type { KueryNode } from '@kbn/es-query';
+import { nodeBuilder } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -80,6 +81,8 @@ import { ALERT_STATUS_LICENSE_ERROR, getConfirmDeletionModalWarningText } from '
 import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
 import { BulkSnoozeScheduleModalWithApi as BulkSnoozeScheduleModal } from './bulk_snooze_schedule_modal';
 import { ManageLicenseModal } from './manage_license_modal';
+import { RuleDiagnoseFlyout } from './rule_diagnose_flyout';
+import type { RuleDiagnosisActionId } from '../../../../common/lib/rule_diagnostics';
 import { RulesListClearRuleFilterBanner } from './rules_list_clear_rule_filter_banner';
 import { RulesListLoadErrorsBanner } from './rules_list_load_errors_banner';
 import { RulesListPrompts } from './rules_list_prompts';
@@ -105,6 +108,8 @@ export interface RulesListProps {
   ruleTypeIds?: string[];
   consumers?: string[];
   filteredRuleTypes?: string[];
+  /** Extra KQL constraint applied to every query; not persisted to URL or local storage. */
+  kueryNodeFilter?: KueryNode;
   lastResponseFilter?: string[];
   lastRunOutcomeFilter?: string[];
   refresh?: Date;
@@ -149,6 +154,7 @@ export const RulesList = ({
   ruleTypeIds,
   consumers,
   filteredRuleTypes = EMPTY_ARRAY,
+  kueryNodeFilter,
   lastResponseFilter,
   lastRunOutcomeFilter,
   refresh,
@@ -213,6 +219,7 @@ export const RulesList = ({
     licenseType: string;
     ruleTypeId: string;
   } | null>(null);
+  const [ruleToDiagnose, setRuleToDiagnose] = useState<RuleTableItem | null>(null);
 
   const [isEnablingRules, setIsEnablingRules] = useState<boolean>(false);
   const [isDisablingRules, setIsDisablingRules] = useState<boolean>(false);
@@ -267,11 +274,20 @@ export const RulesList = ({
   const hasDefaultRuleTypesFiltersOn = isEmpty(filters.types);
 
   const computedFilter = useMemo(() => {
+    const kueryNodes = [filters.kueryNode, kueryNodeFilter].filter(
+      (node): node is KueryNode => Boolean(node) && !isEmpty(node)
+    );
     return {
       ...filters,
       types: rulesTypesFilter,
+      kueryNode:
+        kueryNodes.length > 1
+          ? nodeBuilder.and(kueryNodes)
+          : kueryNodes.length === 1
+          ? kueryNodes[0]
+          : undefined,
     };
-  }, [filters, rulesTypesFilter]);
+  }, [filters, kueryNodeFilter, rulesTypesFilter]);
 
   const canLoadRules = isLoadRuleTypesSuccess && hasAnyAuthorizedRuleType;
 
@@ -641,6 +657,36 @@ export const RulesList = ({
     []
   );
 
+  const onDiagnosisAction = async (action: RuleDiagnosisActionId, rule: RuleTableItem) => {
+    switch (action) {
+      case 'editRule':
+        onRuleEdit(rule);
+        return;
+      case 'updateApiKey':
+        updateRulesToBulkEdit({ action: 'updateApiKey', rules: [rule] });
+        return;
+      case 'enableRule':
+        await onEnableRule(rule);
+        await refreshRules();
+        return;
+      case 'runRule':
+        await onRunRule(rule.id);
+        return;
+      case 'manageLicense': {
+        const licenseType = ruleTypesState.data.get(rule.ruleTypeId)?.minimumLicenseRequired;
+        if (licenseType) {
+          setManageLicenseModalOpts({ licenseType, ruleTypeId: rule.ruleTypeId });
+        }
+        return;
+      }
+      case 'viewRuleDetails': {
+        const detailsRoute = ruleDetailsRoute ? ruleDetailsRoute : commonRuleDetailsRoute;
+        history.push(detailsRoute.replace(`:ruleId`, rule.id));
+        return;
+      }
+    }
+  };
+
   const clearRulesToBulkEdit = useCallback(() => {
     if (bulkEditAction === 'delete') {
       setIsDeleteModalVisibility(false);
@@ -929,12 +975,7 @@ export const RulesList = ({
                   rules: [rule],
                 })
               }
-              onManageLicenseClick={(rule) =>
-                setManageLicenseModalOpts({
-                  licenseType: ruleTypesState.data.get(rule.ruleTypeId)?.minimumLicenseRequired!,
-                  ruleTypeId: rule.ruleTypeId,
-                })
-              }
+              onDiagnoseClick={setRuleToDiagnose}
               onPercentileOptionsChange={setPercentileOptions}
               onDisableRule={onDisableRule}
               onEnableRule={onEnableRule}
@@ -1025,6 +1066,17 @@ export const RulesList = ({
               numberOfFilters={numberOfFiltersStore}
               resetFilters={resetFiltersStore}
             />
+            {ruleToDiagnose && (
+              <RuleDiagnoseFlyout
+                rule={ruleToDiagnose}
+                canEditRule={
+                  ruleToDiagnose.isEditable &&
+                  isRuleTypeEditableInContext(ruleToDiagnose.ruleTypeId)
+                }
+                onClose={() => setRuleToDiagnose(null)}
+                onAction={onDiagnosisAction}
+              />
+            )}
             {manageLicenseModalOpts && (
               <ManageLicenseModal
                 licenseType={manageLicenseModalOpts.licenseType}

@@ -16,6 +16,7 @@ import {
 import {
   OBSERVABILITY_ALERTING_APP_ID,
   OBSERVABILITY_ALERTING_BASE_PATH,
+  OBSERVABILITY_ALERTING_RULE_HEALTH_PATH,
   type ObservabilityAlertingLinkId,
 } from '@kbn/deeplinks-observability';
 import { hasObservabilityCapabilities } from '@kbn/observability-shared-plugin/public';
@@ -46,12 +47,16 @@ const getAlertsIsActive: NonNullable<RootNodeDefinition['getIsActive']> = ({
   pathNameSerialized.startsWith(prepend('/app/observability/alerting')) ||
   pathNameSerialized.startsWith(prepend('/app/observability/alerts'));
 
-// The visible `Rules` link points to Universal rules, so it also has to cover the Classic pages
-// (list, logs and settings), whose own link is hidden from the side nav.
+// The `Rules` link has to cover every Classic page under `/rules` (list, logs and settings), except
+// Health, which has its own visible link.
 const getRulesIsActive: NonNullable<PanelOpenerChildDefinition['getIsActive']> = ({
   pathNameSerialized,
   prepend,
-}) => pathNameSerialized.startsWith(prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}/rules`));
+}) =>
+  pathNameSerialized.startsWith(prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}/rules`)) &&
+  !pathNameSerialized.startsWith(
+    prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULE_HEALTH_PATH}`)
+  );
 
 const hasManagementCapability = (core: CoreStart, capabilityId: string): boolean =>
   core.application.capabilities.management?.insightsAndAlerting?.[capabilityId] === true;
@@ -114,16 +119,23 @@ const getRuleManagementSection = (core: CoreStart): PanelOpenerChildDefinition[]
   }
 
   const rulesChildren: PanelOpenerChildDefinition[] = [];
+  // Classic rules health sits between Rules and Rule Library; it is served by the Classic mount.
+  const healthChildren: PanelOpenerChildDefinition[] = canReadClassicRules
+    ? [{ link: obsAlertingLink('rule-health') }]
+    : [];
 
   if (canReadV2Rules) {
     rulesChildren.push({ link: obsAlertingLink('rules-v2'), getIsActive: getRulesIsActive });
+    rulesChildren.push(...healthChildren);
     rulesChildren.push({ link: obsAlertingLink('rule-library') });
     rulesChildren.push({ link: obsAlertingLink('rules-v1'), sideNavStatus: 'hidden' });
   } else {
     rulesChildren.push({
       link: obsAlertingLink('rules-v1'),
       title: i18n.translate('xpack.observability.nav.rulesV1', { defaultMessage: 'Rules' }),
+      getIsActive: getRulesIsActive,
     });
+    rulesChildren.push(...healthChildren);
   }
 
   return maybeSection(rulesChildren, {

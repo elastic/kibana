@@ -641,7 +641,8 @@ describe('rules_list ', () => {
         'Error: test'
       );
       expect(screen.getAllByTestId('rulesListAutoRefresh')[0]).toBeInTheDocument();
-      expect(screen.getAllByTestId('ruleStatus-error-license-fix')).toHaveLength(1);
+      // two failed rules + one warning rule are diagnosable
+      expect(screen.getAllByTestId('ruleDiagnoseButton')).toHaveLength(3);
       expect(screen.getAllByTestId('ruleStatus-failed')[0]).toHaveTextContent('Failed');
       const failedElements = screen.getAllByTestId('ruleStatus-failed');
       expect(failedElements[failedElements.length - 1]).toHaveTextContent('License Error'); // last element
@@ -809,13 +810,21 @@ describe('rules_list ', () => {
       );
     });
 
-    it('renders license errors and manage license modal on click', async () => {
+    it('renders license errors and manage license modal from the diagnose flyout', async () => {
       global.open = jest.fn();
       renderWithProviders(<RulesList />);
-      await waitFor(() => screen.getByTestId('ruleStatus-error-license-fix'));
-      fireEvent.click(screen.getByTestId('ruleStatus-error-license-fix'));
+      const licenseErrorRow = (await screen.findByText('License Error')).closest(
+        'tr'
+      ) as HTMLElement;
+      fireEvent.click(within(licenseErrorRow).getByTestId('ruleDiagnoseButton'));
 
-      expect(screen.queryAllByTestId('manageLicenseModal').length).toBeGreaterThan(0);
+      expect(await screen.findByTestId('ruleDiagnoseFlyout')).toBeInTheDocument();
+      expect(screen.getByTestId('ruleDiagnosis-license')).toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('ruleDiagnosis-license-manageLicense'));
+
+      await waitFor(() =>
+        expect(screen.queryAllByTestId('manageLicenseModal').length).toBeGreaterThan(0)
+      );
       expect(screen.getByTestId('confirmModalConfirmButton')).toHaveTextContent('Manage license');
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
       expect(global.open).toHaveBeenCalled();

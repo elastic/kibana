@@ -6,20 +6,10 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiHealth,
-  EuiToolTip,
-  EuiStat,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiHealth, EuiToolTip, EuiStat, useEuiTheme } from '@elastic/eui';
 import type { RuleTableItem } from '../../../../types';
 import {
   getRuleHealthColor,
-  getIsLicenseError,
   getRuleStatusMessage,
 } from '../../../../common/lib/rule_status_helpers';
 import {
@@ -30,15 +20,12 @@ import {
 
 export interface RulesListTableStatusCellProps {
   rule: RuleTableItem;
-  onManageLicenseClick: (rule: RuleTableItem) => void;
 }
 
-export const RulesListTableStatusCell = (props: RulesListTableStatusCellProps) => {
+export const RulesListTableStatusCell = ({ rule }: RulesListTableStatusCellProps) => {
   const { euiTheme } = useEuiTheme();
-  const { rule, onManageLicenseClick } = props;
   const { lastRun } = rule;
 
-  const isLicenseError = getIsLicenseError(rule);
   const healthColor = getRuleHealthColor(rule, euiTheme);
   const statusMessage = getRuleStatusMessage({
     rule,
@@ -68,31 +55,11 @@ export const RulesListTableStatusCell = (props: RulesListTableStatusCellProps) =
     </EuiHealth>
   );
 
-  const healthWithTooltip = tooltipMessage ? (
+  return tooltipMessage ? (
     <EuiToolTip data-test-subj="ruleStatus-error-tooltip" position="top" content={tooltipMessage}>
       {health}
     </EuiToolTip>
   ) : (
     health
-  );
-
-  return (
-    <EuiFlexGroup gutterSize="none">
-      <EuiFlexItem>{healthWithTooltip}</EuiFlexItem>
-      {isLicenseError && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="xs"
-            data-test-subj="ruleStatus-error-license-fix"
-            onClick={() => onManageLicenseClick(rule)}
-          >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.rulesList.fixLicenseLink"
-              defaultMessage="Fix"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
   );
 };

@@ -119,6 +119,7 @@ export type ObservabilityAlertingLinkId =
   | 'alerts'
   | 'rules-v1'
   | 'rules-v2'
+  | 'rule-health'
   | 'rule-library'
   | 'action-policies'
   | 'execution-history';

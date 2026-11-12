@@ -155,12 +155,17 @@ export type {
   IExecutionErrorsResult,
   IExecutionLogResult,
   IExecutionKPIResult,
+  IExecutionTrendsBucket,
+  IExecutionTrendsFailingRule,
+  IExecutionTrendsSlowRule,
+  IExecutionTrendsResult,
 } from './execution_log_types';
 export {
   executionLogSortableColumns,
   actionErrorLogSortableColumns,
   EMPTY_EXECUTION_KPI_RESULT,
   EMPTY_EXECUTION_SUMMARY_RESULT,
+  EMPTY_EXECUTION_TRENDS_RESULT,
 } from './execution_log_types';
 export type { RuleSnoozeSchedule, RuleSnooze } from './rule_snooze_type';
 export type { RRuleParams, RRuleRecord } from './rrule_type';
@@ -188,6 +193,13 @@ export type { GapAutoFillStatus } from './constants';
 export { backfillInitiator } from './constants';
 export type { BackfillInitiator } from './constants';
 export { MISSING_UIAM_API_KEY_TAG, LEGACY_MISSING_UIAM_API_KEY_TAG } from './constants';
+export {
+  API_KEY_AUTH_ERROR_CODES,
+  API_KEY_AUTH_ERROR_MARKERS,
+  API_KEY_AUTH_ERROR_MESSAGE_REGEX,
+  getApiKeyAuthErrorKind,
+} from './constants';
+export type { ApiKeyAuthErrorKind } from './constants';
 export {
   mappingFromFieldMap,
   getComponentTemplateFromFieldMap,

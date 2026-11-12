@@ -58,6 +58,7 @@ export type {
   GetRuleExecutionKPIParams,
 } from './methods/get_execution_kpi';
 export type { GetGlobalExecutionSummaryParams } from './methods/get_execution_summary';
+export type { GetGlobalExecutionTrendsParams } from './methods/get_execution_trends';
 export type { GetActionErrorLogByIdParams } from './methods/get_action_error_log';
 export type {
   GetRuleHistoryParams,

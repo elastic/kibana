@@ -56,6 +56,8 @@ export const OBSERVABILITY_ALERTING_BASE_PATH = `/app/${OBSERVABILITY_ALERTING_A
 export const OBSERVABILITY_ALERTING_ALERTS_PATH = '/alerts';
 export const OBSERVABILITY_ALERTING_INBOX_PATH = '/inbox';
 export const OBSERVABILITY_ALERTING_RULES_V1_PATH = '/rules/classic';
+/** Classic rules health page, served by the Classic rules mount. */
+export const OBSERVABILITY_ALERTING_RULE_HEALTH_PATH = `${OBSERVABILITY_ALERTING_RULES_V1_PATH}/health`;
 export const OBSERVABILITY_ALERTING_RULES_V2_PATH = '/rules/universal';
 export const OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH = '/rule-library';
 export const OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH = '/action-policies';

@@ -66,6 +66,7 @@ import { RuleTagBadge } from './rule_tag_badge';
 import { RuleStatusDropdown } from './rule_status_dropdown';
 import { RulesListNotifyBadge } from './notify_badge';
 import { RulesListTableStatusCell } from './rules_list_table_status_cell';
+import { RulesListTableDiagnoseCell } from './rules_list_table_diagnose_cell';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import type { RulesListColumns } from './rules_list_column_selector';
 import { useRulesListColumnSelector } from './rules_list_column_selector';
@@ -126,7 +127,7 @@ export interface RulesListTableProps {
   onRuleClick?: (rule: RuleTableItem) => void;
   onRuleEditClick?: (rule: RuleTableItem) => void;
   onRuleDeleteClick?: (rule: RuleTableItem) => void;
-  onManageLicenseClick?: (rule: RuleTableItem) => void;
+  onDiagnoseClick?: (rule: RuleTableItem) => void;
   onTagClick?: (rule: RuleTableItem) => void;
   onTagClose?: (rule: RuleTableItem) => void;
   onPercentileOptionsChange?: (options: EuiSelectableOption[]) => void;
@@ -226,7 +227,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
     onRuleClick = EMPTY_HANDLER,
     onRuleEditClick = EMPTY_HANDLER,
     onRuleDeleteClick = EMPTY_HANDLER,
-    onManageLicenseClick = EMPTY_HANDLER,
+    onDiagnoseClick = EMPTY_HANDLER,
     onPercentileOptionsChange = EMPTY_HANDLER,
     onRuleChanged,
     onEnableRule,
@@ -791,9 +792,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
         width: '120px',
         'data-test-subj': 'rulesTableCell-lastResponse',
         render: (_executionStatus: RuleExecutionStatus, rule: RuleTableItem) => {
-          return (
-            <RulesListTableStatusCell rule={rule} onManageLicenseClick={onManageLicenseClick} />
-          );
+          return <RulesListTableStatusCell rule={rule} />;
         },
       },
       {
@@ -809,6 +808,18 @@ export const RulesListTable = (props: RulesListTableProps) => {
         'data-test-subj': 'rulesTableCell-status',
         render: (_enabled: boolean | undefined, rule: RuleTableItem) => {
           return renderRuleStatusDropdown(rule);
+        },
+      },
+      {
+        name: i18n.translate(
+          'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.diagnoseTitle',
+          { defaultMessage: 'Diagnose' }
+        ),
+        width: '80px',
+        align: 'center',
+        'data-test-subj': 'rulesTableCell-diagnose',
+        render(rule: RuleTableItem) {
+          return <RulesListTableDiagnoseCell rule={rule} onDiagnoseClick={onDiagnoseClick} />;
         },
       },
       {
@@ -907,7 +918,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
     onRuleEditClick,
     onSnoozeRule,
     onUnsnoozeRule,
-    onManageLicenseClick,
+    onDiagnoseClick,
     renderCollapsedItemActions,
     renderPercentileCellValue,
     renderPercentileColumnName,

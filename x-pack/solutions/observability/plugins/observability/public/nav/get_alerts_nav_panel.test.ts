@@ -67,22 +67,27 @@ const getSectionByTitle = (core: CoreStart, title?: string) =>
 type SectionChildren = NonNullable<ReturnType<typeof getSectionByTitle>>['children'];
 
 const RULES_V2_LINK = 'observabilityAlerting:rules-v2';
+const RULES_V1_LINK = 'observabilityAlerting:rules-v1';
+const RULE_HEALTH_LINK = 'observabilityAlerting:rule-health';
 const RULES_BASE_PATH = '/app/observability/alerting/rules';
+const RULE_HEALTH_PATH = `${RULES_BASE_PATH}/classic/health`;
 
 const isRulesLinkActive = (
   children: SectionChildren,
   pathNameSerialized: string,
-  prepend = (path: string) => path
+  prepend = (path: string) => path,
+  rulesLink: string = RULES_V2_LINK
 ) =>
   children
-    ?.find(({ link }) => link === RULES_V2_LINK)
+    ?.find(({ link }) => link === rulesLink)
     ?.getIsActive?.({
       pathNameSerialized,
       prepend,
       location: createLocation(pathNameSerialized),
     });
 
-// The visible v2 Rules link must also stay active on the Classic pages, whose own link is hidden.
+// The visible v2 Rules link must also stay active on the Classic pages, whose own link is hidden,
+// but not on Health, which has its own visible link.
 const expectRulesLinkActiveOnClassicPages = (children: SectionChildren) => {
   [
     `${RULES_BASE_PATH}/universal`,
@@ -91,6 +96,7 @@ const expectRulesLinkActiveOnClassicPages = (children: SectionChildren) => {
     `${RULES_BASE_PATH}/classic/settings`,
   ].forEach((path) => expect(isRulesLinkActive(children, path)).toBe(true));
   expect(isRulesLinkActive(children, '/app/observability/alerting/rule-library')).toBe(false);
+  expect(isRulesLinkActive(children, RULE_HEALTH_PATH)).toBe(false);
 };
 
 describe('getObservabilityAlertsLinkTitle', () => {
@@ -163,8 +169,9 @@ describe('getAlertsNavPanel', () => {
         title: 'Rule Management',
         children: [
           expect.objectContaining({ link: RULES_V2_LINK }),
+          { link: RULE_HEALTH_LINK },
           { link: 'observabilityAlerting:rule-library' },
-          { link: 'observabilityAlerting:rules-v1', sideNavStatus: 'hidden' },
+          { link: RULES_V1_LINK, sideNavStatus: 'hidden' },
         ],
       }),
       expect.objectContaining({
@@ -336,6 +343,7 @@ describe('getAlertsNavPanel', () => {
       });
 
       it.each([
+        RULE_HEALTH_PATH,
         '/app/observability/alerting/rule-library',
         '/app/observability/alerting/alerts',
         '/app/observability/overview',
@@ -348,22 +356,37 @@ describe('getAlertsNavPanel', () => {
 
         expect(isActiveOn(`/s/my-space${RULES_BASE_PATH}/classic/logs`, prepend)).toBe(true);
         expect(isActiveOn(`${RULES_BASE_PATH}/classic`, prepend)).toBe(false);
+        expect(isActiveOn(`/s/my-space${RULE_HEALTH_PATH}`, prepend)).toBe(false);
       });
     });
 
-    it('shows a visible v1 Rules link when the user only has v1 rules read', () => {
+    it('shows visible v1 Rules and Health links when the user only has v1 rules read', () => {
       setCapabilities(core, {
         management: { insightsAndAlerting: { triggersActionsRules: true } },
       });
 
       const children = getSectionByTitle(core, 'Rule Management')?.children;
 
-      expect(children).toEqual([{ link: 'observabilityAlerting:rules-v1', title: 'Rules' }]);
-      // Its own path already prefix-matches the Classic pages, so it needs no custom active state.
-      expect(children?.[0]).not.toHaveProperty('getIsActive');
+      expect(children).toEqual([
+        expect.objectContaining({ link: RULES_V1_LINK, title: 'Rules' }),
+        { link: RULE_HEALTH_LINK },
+      ]);
+      // Health lives under the Classic rules path, so the Rules link must not stay active on it.
+      expect(
+        isRulesLinkActive(children, `${RULES_BASE_PATH}/classic`, undefined, RULES_V1_LINK)
+      ).toBe(true);
+      expect(isRulesLinkActive(children, RULE_HEALTH_PATH, undefined, RULES_V1_LINK)).toBe(false);
     });
 
-    it('prefers the v2 Rules link when the user has both v1 and v2 rules read', () => {
+    it('does not show the Health link to a v2-only rules user', () => {
+      setCapabilities(core, { alerting_v2_rules: { read: true } });
+
+      expect(getSectionByTitle(core, 'Rule Management')?.children).not.toEqual(
+        expect.arrayContaining([{ link: RULE_HEALTH_LINK }])
+      );
+    });
+
+    it('prefers the v2 Rules link and places Health before Rule Library when the user has both v1 and v2 rules read', () => {
       setCapabilities(core, {
         alerting_v2_rules: { read: true },
         management: { insightsAndAlerting: { triggersActionsRules: true } },
@@ -371,8 +394,9 @@ describe('getAlertsNavPanel', () => {
 
       expect(getSectionByTitle(core, 'Rule Management')?.children).toEqual([
         expect.objectContaining({ link: RULES_V2_LINK }),
+        { link: RULE_HEALTH_LINK },
         { link: 'observabilityAlerting:rule-library' },
-        { link: 'observabilityAlerting:rules-v1', sideNavStatus: 'hidden' },
+        { link: RULES_V1_LINK, sideNavStatus: 'hidden' },
       ]);
       expectRulesLinkActiveOnClassicPages(getSectionByTitle(core, 'Rule Management')?.children);
     });

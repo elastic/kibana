@@ -36,6 +36,15 @@ export const getClassicTabs = (
       onClick: () => history.push('/logs'),
       'data-test-subj': 'logsTab',
     });
+    result.push({
+      id: 'health',
+      label: i18n.translate('xpack.triggersActionsUI.home.healthTabTitle', {
+        defaultMessage: 'Health',
+      }),
+      isSelected: selectedSection === 'health',
+      onClick: () => history.push('/health'),
+      'data-test-subj': 'healthTab',
+    });
   }
   return result;
 };

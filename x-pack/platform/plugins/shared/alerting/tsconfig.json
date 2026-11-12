@@ -61,6 +61,7 @@
     "@kbn/core-execution-context-server-mocks",
     "@kbn/search-types",
     "@kbn/alerting-state-types",
+    "@kbn/core-security-common",
     "@kbn/core-security-server",
     "@kbn/core-user-profile-server",
     "@kbn/security-plugin-types-server",

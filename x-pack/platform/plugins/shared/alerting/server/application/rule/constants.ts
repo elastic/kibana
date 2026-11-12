@@ -35,6 +35,10 @@ export const ruleExecutionStatusErrorReason = {
   TIMEOUT: 'timeout',
   DISABLED: 'disabled',
   VALIDATE: 'validate',
+  UNAUTHORIZED: 'unauthorized',
+  FORBIDDEN: 'forbidden',
+  NOT_FOUND: 'notFound',
+  UNAVAILABLE: 'unavailable',
 } as const;
 
 export const ruleExecutionStatusWarningReason = {

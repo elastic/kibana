@@ -23,6 +23,7 @@ import {
   rawRuleSchemaV14,
   rawRuleSchemaV15,
   rawRuleSchemaV16,
+  rawRuleSchemaV17,
 } from '../schemas/raw_rule';
 
 export const ruleModelVersions: SavedObjectsModelVersionMap = {
@@ -207,6 +208,15 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: rawRuleSchemaV16.extends({}, { unknowns: 'ignore' }),
       create: rawRuleSchemaV16,
+    },
+  },
+  // Widens `executionStatus.error.reason` / `lastRun.warning` with the unauthorized, forbidden,
+  // notFound and unavailable reasons. No mapping change: the fields are already keywords.
+  '17': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV17.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV17,
     },
   },
 };

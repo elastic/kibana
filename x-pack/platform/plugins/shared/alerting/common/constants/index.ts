@@ -30,3 +30,10 @@ export {
   MISSING_UIAM_API_KEY_TAG,
   LEGACY_MISSING_UIAM_API_KEY_TAG,
 } from './missing_uiam_api_key_tag';
+export {
+  API_KEY_AUTH_ERROR_CODES,
+  API_KEY_AUTH_ERROR_MARKERS,
+  API_KEY_AUTH_ERROR_MESSAGE_REGEX,
+  getApiKeyAuthErrorKind,
+} from './api_key_auth_errors';
+export type { ApiKeyAuthErrorKind } from './api_key_auth_errors';
