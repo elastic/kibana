@@ -186987,6 +186987,7 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarSolid'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarGradient'
       title: Datatable metric progress bar (ES|QL)
+      x-state: ''
     Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarGradient:
       additionalProperties: false
       properties:
@@ -187245,6 +187246,7 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLRowProgressBarSolid'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLRowProgressBarGradient'
       title: Datatable row progress bar (ES|QL)
+      x-state: ''
     Kibana_HTTP_APIs_visDatatableESQLRowProgressBarGradient:
       additionalProperties: false
       properties:
@@ -187667,6 +187669,7 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarSolid'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarGradient'
       title: Datatable metric progress bar
+      x-state: ''
     Kibana_HTTP_APIs_visDatatableProgressBarGradient:
       additionalProperties: false
       properties:
