@@ -138,6 +138,7 @@ packages:
     - kbn-streamlang-tests
   disabled:
     - kbn-scout-release-testing # Release tests will run separately as part of the release process
+    - kbn-connector-specs # Its Scout suite needs the connector emulator running before the servers start; the Tier B CI job (#295694) will run it
 
 # Define test configs to be excluded from automatic discovery & execution in CI environment (process.env.CI=true)
 excluded_configs:
