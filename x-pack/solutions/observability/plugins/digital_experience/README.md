@@ -23,11 +23,18 @@ The monitored applications in the selected time range, served by
 `GET /internal/digital_experience/applications`, which requires the Digital Experience and APM
 privileges like the app.
 
-- **Summary:** applications, page loads, JS errors per page load, failed HTTP requests and the
-  applications with a poor Core Web Vital. Like the chart, it covers the selected environment and
-  source; the search narrows only the table.
+- **Summary:** applications, sessions, page loads, JS errors per page load, failed HTTP requests and
+  the applications with a poor Core Web Vital. Like the chart, it covers the selected environment and
+  source; the search narrows only the table. The sessions are the total of the EDOT Browser
+  applications, which only the sessions index counts, so it shows a dash while they are read from
+  the raw events (sessions not set up, a range past their lookback, no access to them) and for Classic
+  RUM, which has no sessions.
 - **Partial data:** when one source fails to load, a warning above the summary names it.
-- **Page loads chart:** page loads over time; drag over it to zoom into that range.
+- **Chart:** page loads over time, or the sessions that started, picked with a toggle whose choice
+  is kept in local storage; drag over it to zoom into that range. The sessions are counted only
+  while the applications are read from the sessions index, so the toggle disables **Sessions**, and
+  says why, when they are not or when only Classic RUM is selected. The choice is kept until they are
+  back, the chart showing page loads meanwhile.
 - **Filters:** environment and source (kept in the URL), and a search on the name.
 - **Table:** per application, its source, page loads, JS errors per page load, LCP / INP / CLS / FCP /
   TTFB p75 colored by rating (with the good / needs improvement / poor shares in the tooltip), JS
@@ -37,6 +44,43 @@ privileges like the app.
   selected environment, a button to show all environments.
 - With all sources, a name with data in both shows its EDOT Browser row with a "+ Classic RUM" hint
   that switches the list to the Classic RUM rows.
+
+**Where the EDOT Browser rows come from:** the sessions index (see [Sessions](#sessions)) when it can
+answer, which takes one cheap search over session summaries instead of aggregating every raw event,
+and the raw OTel events otherwise. The response has the same shape either way, and Classic RUM
+always reads its own indices. The sessions are read when all of these hold, which is checked on every
+request with the index's metadata, read as the internal user:
+
+- sessions are set up;
+- the time range starts within the sessions' 30 day lookback (from the start of that day, in UTC);
+- the user can read `digital-experience-sessions-*`, otherwise the raw events are read quietly;
+- the sessions hold at least one application, so applications that send no `session.id`, which the
+  sessions skip, still appear when no application sends one.
+
+A failing sessions search falls back to the raw events too, with a warning in the server log. The
+counts (page loads, JS errors, HTTP requests, failed requests, web vital samples and their ratings)
+are the sums of what each session counted with the list's own filters, so both sources count the same
+events of a session, and the environments are the sessions'. What differs when the sessions are read:
+
+- **Time range:** a session that overlaps the range counts in full, with its events outside the range,
+  as in the Sessions tab. The page loads chart puts a session's page loads at its start, in the same
+  buckets, and leaves out the sessions that started before the range, so its shape differs and its
+  total is a little lower than the table's.
+- **Percentiles:** the p75 of a web vital is the p75 of the sessions' own p75s, as the summaries keep
+  no samples. It is exact when a session has at most one sample of that vital, and higher than the
+  p75 of the samples otherwise: on 3 hours of the synthtrace EDOT Browser data, with about seven
+  samples of a vital per session, it was 2% to 8% higher for LCP, INP, FCP and TTFB and 3% to 18%
+  higher for CLS. The sample counts and the good, needs improvement and poor shares are sums over the
+  sessions, so they only differ by the events below. The Overview, whose figures need samples, always
+  reads the raw events.
+- **Freshness:** the sessions are as fresh as what builds them.
+- **Access:** the sessions hold what the user who enabled them could read, not what the current user
+  can read in the raw indices (see the security note under [Sessions](#sessions)).
+- **Events without `session.id`:** the sessions skip them, so they are not counted. In the
+  synthtrace data that is 8.7% of the HTTP requests and 3.8% of the exceptions (every page load and
+  web vital carried one), so the JS errors and HTTP requests of the list are that much lower than
+  from the raw events. An application that sends none is missing while others have sessions.
+- **Last seen:** the end of the application's latest session, which any event can extend.
 
 Numbers, percents, dates and the chart's time zone follow the Advanced Settings.
 
@@ -96,7 +140,7 @@ it is kept in the URL (`browser`, `os`, `device`, `country`, `pageUrl`, `percent
   Sessions list's **Entry page** facet is its page filter; it is a different question from the
   Overview's page (a session's first page against the URL of a page load), so it stays separate.
 - **Fields:** the raw documents have no field per dimension, so browser, OS, device and country read
-  the alternatives the sessions transform reads (`SESSION_ATTRIBUTE_FIELDS` in
+  the alternatives the sessions read (`SESSION_ATTRIBUTE_FIELDS` in
   `common/session_attribute_fields.ts`, shared by both) and take the first non-empty one, with a
   runtime field. The page is `attributes.url.full`.
 - **Scope:** browser, OS, device, country, app version and the KQL query narrow every panel of the Overview: the
@@ -123,11 +167,7 @@ A tab of EDOT Browser applications only, as sessions are built from EDOT Browser
 [Sessions](#sessions)).
 
 - **Status:** before sessions are set up, the tab shows a **Set up sessions** button to users with the
-  manage sessions privilege and tells everyone else whom to ask. Once set up, a callout flags sessions
-  that need an update (with an **Update sessions** button for those users, or a note that the update
-  applies by itself when the transforms run with a stored API key), a failing transform, an
-  invalidated API key, or one that is behind. While the sessions index is first built, after setup
-  or a version update, an empty list says sessions are being built.
+  manage sessions privilege and tells everyone else whom to ask.
 - **KPIs:** sessions, sessions with errors, median duration, pages per session and bounce rate, over
   the listed sessions, so they follow the search and filters.
 - **Filters:** a debounced search (session ID, user, pages, browser, OS, location), **Has errors**,
@@ -139,7 +179,7 @@ A tab of EDOT Browser applications only, as sessions are built from EDOT Browser
   kept in the URL, and links to a session carry them so its **Sessions** breadcrumb leads back to
   the same list.
 - **Empty states:** with no sessions, how they get there; with none matching, a button to clear the
-  filters. A callout counts sessions the transform could not summarize.
+  filters.
 
 ### Session (`/{serviceName}/sessions/{sessionId}`)
 
@@ -153,20 +193,26 @@ A tab of EDOT Browser applications only, as sessions are built from EDOT Browser
 
 ## Sessions
 
-An Elasticsearch continuous transform summarizes EDOT Browser sessions from
-`traces-*.otel-*,logs-*.otel-*` into `digital-experience-sessions-<version>`, one document per
-`service.name` + `session.id`: start/end time and duration, page views with entry/exit page and
-journey, click and error counts, p75 Core Web Vitals, and user, browser, OS and geo attributes.
-Like the applications list, it only reads browser SDK data (`telemetry.sdk.language: webjs`), and
-it skips events with an empty `service.name` or `session.id`. User, user agent and geo each come
-from their own latest event that carries them.
+Sessions are summarized from the EDOT Browser data in `traces-*.otel-*,logs-*.otel-*` into
+`digital-experience-sessions-<version>`, one document per `service.name` + `session.id`: start/end
+time and duration, page views with entry/exit page and journey, click and error counts, p75 Core Web
+Vitals, and user, browser, OS and geo attributes. The Sessions tab, the session detail and the
+applications list read that index.
 
-The journey lists distinct pages in first-view order (revisits are not repeated), from the first 30
-page-view URLs. The OTel templates map `url.*` fields as `wildcard`, which `top_metrics` cannot
-collect, and `scripted_metric` is not available on serverless, so the pages come from `terms`
-buckets with first/last view times. If the dest pipeline fails on a summary, the session is still
-indexed, with the failure in `error.message`. Its counts are missing, so the list and its KPIs leave
-it out and report how many there are (`failedSummaries`).
+**Nothing in this plugin builds the summaries at the moment.** The Elasticsearch transform that did,
+with its destination pipeline and the health task and stored API key that kept it current, is
+removed, and a Task Manager task is to replace it. Enabling sessions only creates the index and its
+template, so the index stays empty until then. Unreleased setups that enabled sessions with the
+transform keep their transforms and index: delete the `digital-experience-sessions-*` transforms by
+hand.
+
+The document also holds what the applications list counts, so the list can read it instead of the
+raw events: the environment, `page_load_count` (`browser.navigation_timing` events),
+`js_error_count` (`exception` events), the HTTP request and failed request counts, and per Core Web
+Vital its samples and how many are good, need improvement or poor (`web_vital_samples`, which add up
+across sessions, unlike the p75). `page_view_count` and `error_count` keep the Sessions tab's
+definitions: they include soft navigations and `event.outcome: failure`, which the list leaves out.
+The mappings are in `server/sessions/sessions_spec.ts`.
 
 A session bounced when it has exactly one page view. Sessions without a captured page view (only
 clicks or errors) aren't bounces, and the bounce rate is over sessions with at least one page view.
@@ -175,135 +221,55 @@ clicks or errors) aren't bounces, and the bounce rate is over sessions with at l
 
 Sessions are set up by an explicit action, `POST /internal/digital_experience/sessions/enable`,
 which requires the `manage_digital_experience_sessions` API privilege. Only the **Sessions → Set up
-and update session summaries** sub-feature privilege grants it. It is not part of **All**, as setting
-sessions up runs the transforms with the user's data access for every reader, and it can only be
-granted in all spaces, as the transforms and index serve every space. The transform, its
-destination ingest pipeline, and the destination index template are created **with the enabling
-user's credentials**
-(secondary authorization, like SLO transforms), never as the Kibana internal user. The user also
-needs these Elasticsearch privileges; when any is missing the request fails with a 403 listing them,
-before anything is written:
+and update session summaries** sub-feature privilege grants it. It is not part of **All**, as
+sessions are set up with the user's data access for every reader, and it can only be granted in all
+spaces, as the index serves every space. The index template and the index are created **with the
+enabling user's credentials**, never as the Kibana internal user. The user also needs these
+Elasticsearch privileges; when any is missing the request fails with a 403 listing them, before
+anything is written:
 
-- Cluster: `manage_transform`, `manage_ingest_pipelines`, `manage_index_templates`, and on
-  serverless also `read_security` (the predefined `admin` role has it; custom roles may not)
+- Cluster: `manage_index_templates`, and on serverless also `read_security` (the predefined `admin`
+  role has it; custom roles may not)
 - `traces-*.otel-*`, `logs-*.otel-*`: `read`, `view_index_metadata`
 - `digital-experience-sessions-*`: `read`, `index`, `create_index`, `delete`, `delete_index`
 
 The read on `traces-*.otel-*` and `logs-*.otel-*` must also be unrestricted: no document- or
-field-level security. Otherwise the transforms would only see that user's slice of the data, so
-every other application's sessions (or fields) would silently stop updating for everyone, and
-retention would then delete them. `has_privileges` doesn't report these restrictions, so enabling
-also reads the user's index privileges and fails with a 403 naming the affected patterns. It reads
-them with `GET _security/user/_privileges`, which serverless only allows operator users; for
-everyone else there it reads the user's roles with `_security/_authenticate` and the Query Role
-API, hence `read_security`. A pattern is refused when a role's read that could apply to it has a
-`query` or field restriction, unless another role provably reads all of it: one role with
-unrestricted read on a pattern is enough, even if another role filters it. Roles that grant read
-through a regular expression, like serverless `editor`, pass when unfiltered, as `has_privileges`
-already checked the read, but never lift another role's filter. Elasticsearch can't report the
-privileges of an API key with its own role descriptors, nor of any API key on serverless, so such
-keys are refused too; enable sessions as a user.
+field-level security. Otherwise the summaries would only hold that user's slice of the data, so
+every other application's sessions (or fields) would silently be missing for everyone.
+`has_privileges` doesn't report these restrictions, so enabling also reads the user's index
+privileges and fails with a 403 naming the affected patterns. It reads them with
+`GET _security/user/_privileges`, which serverless only allows operator users; for everyone else
+there it reads the user's roles with `_security/_authenticate` and the Query Role API, hence
+`read_security`. A pattern is refused when a role's read that could apply to it has a `query` or
+field restriction, unless another role provably reads all of it: one role with unrestricted read on
+a pattern is enough, even if another role filters it. Roles that grant read through a regular
+expression, like serverless `editor`, pass when unfiltered, as `has_privileges` already checked the
+read, but never lift another role's filter. Elasticsearch can't report the privileges of an API key
+with its own role descriptors, nor of any API key on serverless, so such keys are refused too;
+enable sessions as a user.
 
-Each enable records the username and time on the transforms (`_meta.enabled_by`,
-`_meta.enabled_at`) and writes a `digital_experience_sessions_enable` audit event, successful or
-not. The status route reports who last enabled sessions, and the roles or API key the transforms
-run with, only to users who can set sessions up.
+Every enable writes a `digital_experience_sessions_enable` audit event, successful or not. Enabling
+again is safe: it puts the template again and keeps the index. The index template is marked
+`managed`, so Index Management warns before anyone edits or deletes it there. There is no disable
+action in Digital Experience.
 
-When `xpack.encryptedSavedObjects.encryptionKey` is set and Task Manager is available (it runs the
-health task that uses the key), enabling also grants an API key on the user's behalf and the transforms run with that key instead of the user's own credentials. Its role
-descriptors only allow what transform secondary credentials need: `read` and `view_index_metadata`
-on `traces-*.otel-*` and `logs-*.otel-*`, and the `digital-experience-sessions-*` privileges above.
-Like any granted key, it keeps the access the user had when it was granted, and it has no
-expiration: an expiring key would stop automatic updates on a fixed date. The key is stored in an
-encrypted saved object (`digital-experience-sessions-api-key`, one per cluster), with its name, id
-and who granted it bound to the encrypted key. Enabling again grants a new key, applies it, and
-invalidates the previous one. The saved object is replaced only if nothing replaced it since it was
-read, so when two enables run at the same time, the key stored first is kept and the other is
-invalidated; the health task moves any transform left on it to the stored key. Without an
-encryption key, when security or API keys are disabled, or when the user can't grant a key (for
-example when authenticated with an API key), the transforms run with the user's credentials as
-before, and any stored key is deleted and invalidated, so it can't be put back. A grant that fails
-because Elasticsearch is unavailable fails the enable instead, and changes nothing.
+The status route, `GET /internal/digital_experience/sessions/status`, reports whether sessions are
+set up: whether the index exists. It reads index metadata as the internal user.
 
-Enabling again is safe. It refreshes the transforms' stored credentials to the enabling user,
-restarts failed transforms, replaces transforms left over from an older version, and applies a
-changed `frequency` or partition count. It never replaces transforms from a newer version (after a
-Kibana rollback, or from an older node during a rolling upgrade): that would delete the newer
-summaries, so enabling fails with a 409 and the status asks to upgrade Kibana instead.
-
-The transforms, pipeline and index template are marked `managed`, so the Transforms and Index
-Management UIs warn before anyone edits or deletes them there. There is no disable action in
-Digital Experience; a user with Elasticsearch's `manage_transform` privilege can still stop or
-delete the transforms directly.
-
-### Scaling and freshness
-
-Each checkpoint re-aggregates every session that received new events over its full history, so
-cost grows with active sessions × events per session. Two settings trade cost for freshness and
-throughput:
-
-```yaml
-xpack.digital_experience.sessions:
-  frequency: 1m   # 1s–1h. Longer means fewer re-aggregations of each active session: cheaper, but staler.
-  partitions: 1   # 1–32. Splits sessions by session.id range across that many transforms.
-```
-
-- **`frequency`**: an active session is re-read and rewritten once per checkpoint. Going from `1m`
-  to `2m`–`5m` cuts background work roughly 2–5× for long sessions, and adds about the same time to
-  the session list's lag. Session detail reads raw events with no upper time bound, so its
-  timeline stays current; its summary figures are as fresh as the last checkpoint.
-- **`partitions`**: transforms run one request at a time, so partitions are how the work spreads
-  across transform nodes. They share the sessions index, document ids depend only on
-  `service.name` + `session.id`, and each partition's retention policy prunes the whole index, so
-  changing the count rewrites documents in place without emptying the list. EDOT Browser session
-  ids are random UUIDs, so the slices are even.
-
-Settings changes take effect on the health task's next run when the transforms run with a stored
-API key, and otherwise after a user with that privilege enables sessions again. The status route
-reports the drift until then.
-
-A background task (`digital_experience:sessions-health`, every 5 minutes) reads transform health,
-version and lag. It logs when transforms become degraded or lagging (more than three missed
-checkpoints plus the sync delay behind, at least 5 minutes), recover, need an update, or come from a
-newer Kibana: once per change, not on every run. When an update is needed (a new sessions version
-after a Kibana upgrade, or changed settings) and the transforms run with the stored API key, it
-applies the update with that same key, so they keep running with the same access, and writes a
-`digital_experience_sessions_auto_update` audit event naming the key and who granted it.
-`_meta.enabled_by` and `enabled_at` keep their enable-time values. If the update fails, the next
-runs retry it, and status stops saying it applies by itself and asks a user with the manage
-sessions privilege to update sessions instead. New transforms are created before the ones they
-replace are removed, so a failure part-way leaves the old ones running. A version update drops the old
-sessions index and rebuilds it from up to 30 days of data. The task never updates transforms from a
-newer Kibana, and never updates a transform as the internal user: an update re-stamps the transform
-with the updater's privileges, which as the internal user would bypass the enabling user's index
-privileges. Elasticsearch can't protect an API key from deletion: anyone with `manage_api_key` or
-`manage_security`, or the enabling user with `manage_own_api_key`, can invalidate it. The key is
-named "Digital Experience sessions (used by the sessions transforms)" and marked managed, so the API
-keys page warns before deleting it. A deleted key doesn't stop the transforms: they keep the
-identity they were last created or updated with, and keep summarizing sessions. It only stops
-Kibana from updating them without a user, so an upgrade or settings change then needs **Update
-sessions**. The health task checks the key until it finds it deleted, then logs it once, as a
-warning, and doesn't authenticate with that key again. Status checks it for users with the manage
-sessions privilege, and shows the others what the health task found. When one of those users opens
-the Sessions tab, it grants a new key automatically, as the **Update sessions** button would. If the
-key or the health task's state can't be read, status still loads, without automatic updates. If
-transforms fall behind under peak traffic, they lag and then catch up; no data is lost.
-
-There is no disable action yet. One must invalidate the stored API key and delete its saved object.
-
-> **Security note:** the sessions index contains summaries of everything the enabling user could
-> read in the source indices, regardless of the document- and field-level security or index
+> **Security note:** the sessions index is meant to hold summaries of everything the enabling user
+> could read in the source indices, regardless of the document- and field-level security or index
 > privileges of the people who later read it. Enable sessions with a user whose source access is
 > appropriate for every reader of `digital-experience-sessions-*`.
 
 ### Reading sessions
 
-Session routes require `read_digital_experience` and query Elasticsearch as the current user, so
+The applications list reads the sessions index as the current user too, and without `read` on it the
+raw events answer instead (see [Applications](#applications-)). Session routes require
+`read_digital_experience` and query Elasticsearch as the current user, so
 readers also need `read` on `digital-experience-sessions-*` (and on the source indices for the
 session detail timeline). Without it they answer 403 naming those privileges; other failures are
 logged and answer 500 without Elasticsearch details:
 
-- `GET /internal/digital_experience/sessions/status`
 - `GET /internal/digital_experience/applications/{serviceName}/sessions`: search, facets (browser,
   OS, country, entry page), the `hasErrors` and `minDurationMs` / `maxDurationMs` filters, sorting,
   pagination, and KPIs. Facets count their values without their own selection; the other filters
@@ -317,8 +283,8 @@ logged and answer 500 without Elasticsearch details:
 - `server/routes/applications/`: the list's route, its merge step and one folder per source (`otel/`,
   `classic/`); `server/routes/overview/` is the EDOT Browser Overview's route. Helpers shared across
   features are in `server/lib/` (`helpers/`, and `otel/` for the OTel queries).
-- `server/sessions/`: the sessions transform spec, setup, status and health task, with its routes in
-  `server/routes/sessions/`.
+- `server/sessions/`: the sessions index template, setup and status, and the list and detail
+  searches, with their routes in `server/routes/sessions/`.
 - `public/pages/`: one folder per page (`applications_list/`, `application_details/`, `sessions/`,
   `session_detail/`) with its own components, hooks and utils; what several pages share is in
   `public/components/`, `public/hooks/` and `public/utils/`. `public/application/` is the app shell.

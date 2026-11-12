@@ -6,6 +6,8 @@
  */
 
 export const AUTOMATIONS_QUERY_KEY = ['nightshift.automations'] as const;
+export const automationDetailQueryKey = (id: string) =>
+  [...AUTOMATIONS_QUERY_KEY, id, 'detail'] as const;
 export const RUN_QUOTAS_QUERY_KEY = ['nightshiftRunQuotas'] as const;
 
 export const automationRunActivityQueryKey = (id: string) =>
@@ -14,6 +16,7 @@ export const automationRunActivityQueryKey = (id: string) =>
 export const DISCOVERY_QUERIES_QUERY_KEY = ['discoveryQueries'] as const;
 export const SOURCES_QUERY_KEY = ['nightshiftSources'] as const;
 export const FEATURES_QUERY_KEY = ['features'] as const;
+export const TOPOLOGY_QUERY_KEY = ['nightshiftTopology'] as const;
 export const NIGHTSHIFT_ONBOARDING_QUERY_KEY = ['nightshift.onboarding'] as const;
 
 export const INVESTIGATION_AVAILABILITY_QUERY_KEY = [

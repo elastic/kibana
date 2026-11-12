@@ -10,15 +10,15 @@ import { css } from '@emotion/react';
 import { EuiButton, EuiEmptyPrompt, EuiIllustration, EuiText } from '@elastic/eui';
 import { aerospace } from '@elastic/eui-illustrations';
 import { i18n } from '@kbn/i18n';
-import { useOnboardingLink } from '../../../../hooks/use_onboarding_link';
+import { useCanvasReadOnly } from './canvas_read_only_context';
 
 /**
  * Overlay shown when the canvas has nothing to draw. Sits above the grid rather
  * than replacing it so the surface still reads as a canvas and the floating
  * toolbar, zoom, and minimap stay usable.
  */
-export function CanvasEmptyState() {
-  const onboardingLink = useOnboardingLink();
+export function CanvasEmptyState({ onAddSource }: { onAddSource: () => void }) {
+  const readOnly = useCanvasReadOnly();
 
   return (
     <div
@@ -67,27 +67,35 @@ export function CanvasEmptyState() {
           body={
             <EuiText size="s">
               <p>
-                {i18n.translate('xpack.streams.canvas.emptyState.body', {
+                {i18n.translate('xpack.streams.canvas.emptyState.description', {
                   defaultMessage:
-                    'Streams represent how your logs and metrics travel from sources through pipelines to destinations. Connect sources, shape data, route it anywhere, and inspect the full flow as an interactive graph. Start by onboarding data into Elastic.',
+                    'The Map draws every source, processing step and destination in one view, so you can trace a document from the agent that sent it to the index it landed in.',
+                })}
+              </p>
+              <p>
+                {i18n.translate('xpack.streams.canvas.emptyState.technicalPreviewNote', {
+                  defaultMessage: 'Technical preview. Changes made here apply to live ingest.',
                 })}
               </p>
             </EuiText>
           }
           actions={
-            <EuiButton
-              color="primary"
-              fill
-              href={onboardingLink}
-              data-test-subj="streamsCanvasEmptyStateAddData"
-              css={css`
-                pointer-events: auto;
-              `}
-            >
-              {i18n.translate('xpack.streams.canvas.emptyState.addDataButton', {
-                defaultMessage: 'Add data',
-              })}
-            </EuiButton>
+            readOnly ? undefined : (
+              <EuiButton
+                color="primary"
+                fill
+                iconType="plus"
+                onClick={onAddSource}
+                data-test-subj="streamsCanvasEmptyStateAddSource"
+                css={css`
+                  pointer-events: auto;
+                `}
+              >
+                {i18n.translate('xpack.streams.canvas.emptyState.addSourceButton', {
+                  defaultMessage: 'Add source',
+                })}
+              </EuiButton>
+            )
           }
         />
       </div>
