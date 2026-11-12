@@ -6,8 +6,6 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useQueryClient } from '@kbn/react-query';
-import type { Conversation } from '@kbn/agent-builder-common';
 import type { PromptResponse } from '@kbn/agent-builder-common/agents';
 import { useConversationContext } from '../context/conversation/conversation_context';
 import { useConversationId } from '../context/conversation/use_conversation_id';
@@ -15,7 +13,6 @@ import { useAgentId, useConversation } from './use_conversation';
 import { useConnectorSelection } from './chat/use_connector_selection';
 import { useAgentModel } from './agents/use_agent_model';
 import { useStreamingContext, useStreamRecord } from '../context/streaming/streaming_context';
-import { queryKeys } from '../query_keys';
 
 /**
  * Per-conversation scoped slice of the streaming state machine.
@@ -36,7 +33,6 @@ export const useConversationStream = () => {
   const conversationId = useConversationId();
   const agentId = useAgentId();
   const { conversation } = useConversation();
-  const queryClient = useQueryClient();
   const { attachments, removeAttachments, browserApiTools, onSubmit } = useConversationContext();
   const { selectedConnector } = useConnectorSelection();
   const { isLocked: isModelSetByAgent } = useAgentModel(agentId);
@@ -67,20 +63,13 @@ export const useConversationStream = () => {
         throw new Error('agentId is required to send a message');
       }
       onSubmit?.();
-      // A conversation made before Send (a new chat with a document) is not the current one yet.
-      const conversationAttachments =
-        targetConversationId === conversationId
-          ? conversation?.attachments
-          : queryClient.getQueryData<Conversation>(
-              queryKeys.conversations.byId(targetConversationId)
-            )?.attachments;
       mutateSendMessage({
         message,
         conversationId: targetConversationId,
         agentId,
         connectorId,
         attachments,
-        conversationAttachments,
+        conversationAttachments: conversation?.attachments,
         removeAttachments,
         browserApiTools,
       });
@@ -90,9 +79,7 @@ export const useConversationStream = () => {
       agentId,
       connectorId,
       attachments,
-      conversationId,
       conversation?.attachments,
-      queryClient,
       removeAttachments,
       browserApiTools,
       onSubmit,

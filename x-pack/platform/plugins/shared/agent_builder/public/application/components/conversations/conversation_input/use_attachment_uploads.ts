@@ -32,7 +32,6 @@ import { useSupportedBinaryTypes } from '../../../hooks/use_supported_binary_typ
 export interface UseAttachmentUploadsParams {
   addErrorToast: (input: ToastInput) => void;
   messageEditorController: MessageEditorController;
-  createConversation: (agentId: string) => Promise<{ id: string }>;
   /**
    * False turns off PDF paste. A PDF is stored in a conversation on paste, so an input whose
    * host sends the message to its own chat (the embeddable input) would leave an extra conversation.
@@ -57,7 +56,6 @@ const getAddedFileNames = (attachments: readonly ConversationAttachment[] = []):
 export const useAttachmentUploads = ({
   addErrorToast,
   messageEditorController,
-  createConversation,
   isBinaryUploadEnabled = true,
 }: UseAttachmentUploadsParams) => {
   const { attachments } = useConversationContext();
@@ -80,16 +78,10 @@ export const useAttachmentUploads = ({
 
   const {
     loadingBinaryNames,
-    pendingConversationId,
     handlePasteBinary: handlePasteBinaryFile,
     handleAfterInput: handleAfterBinaryInput,
     handleRemoveBinary,
-    handleSubmitted: handleBinarySubmitted,
-  } = useBinaryUpload({
-    addErrorToast,
-    messageEditorController,
-    createConversation,
-  });
+  } = useBinaryUpload({ addErrorToast, messageEditorController });
 
   const handlePasteBinary = isBinaryUploadEnabled ? handlePasteBinaryFile : undefined;
 
@@ -212,12 +204,10 @@ export const useAttachmentUploads = ({
     uploadingChipNames,
     isUploading: uploadingNames.size > 0 || loadingFiles.length > 0,
     acceptedFileMimeTypes,
-    pendingConversationId,
     handlePasteFile,
     handleUnsupportedFile,
     handleAfterInput,
     handleRemoveAttachment,
     handleRemoveLoadingFile,
-    handleSubmitted: handleBinarySubmitted,
   };
 };

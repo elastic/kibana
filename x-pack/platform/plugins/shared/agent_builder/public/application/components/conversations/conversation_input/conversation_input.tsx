@@ -33,7 +33,6 @@ import { labels } from '../../../utils/i18n';
 import { useInputDraft } from '../../../hooks/use_input_draft';
 import { useActiveSpaceId } from '../../../context/active_space_context';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
-import { useCreateConversation } from '../../../hooks/use_create_conversation';
 import { useSendUserMessage } from '../../../hooks/use_send_user_message';
 import { ChatTriggerMode } from '../../../../../common/http_api/chat';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
@@ -322,8 +321,6 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     resetInitialMessage,
   } = useConversationContext();
   const { submitMessage, isCreatingConversation } = useSubmitMessage();
-  // Its own call, so a PDF paste in a new chat does not lock the editor.
-  const { createConversation: createUploadConversation } = useCreateConversation();
   const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
 
   const {
@@ -332,17 +329,14 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     uploadingChipNames,
     isUploading,
     acceptedFileMimeTypes,
-    pendingConversationId,
     handlePasteFile,
     handleUnsupportedFile,
     handleAfterInput,
     handleRemoveAttachment,
     handleRemoveLoadingFile,
-    handleSubmitted: handleUploadsSubmitted,
   } = useAttachmentUploads({
     addErrorToast,
     messageEditorController,
-    createConversation: createUploadConversation,
     isBinaryUploadEnabled: !onSubmitOverride,
   });
 
@@ -516,7 +510,6 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
       sendUserMessage(content)
         .then(() => {
           lastEditorContentRef.current = '';
-          handleUploadsSubmitted();
           clearDraft();
           messageEditorController.clear();
           markSent();
@@ -529,11 +522,10 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
       return;
     }
     lastEditorContentRef.current = '';
-    handleUploadsSubmitted();
     if (onSubmitOverride) {
       onSubmitOverride(content);
     } else {
-      submitMessage(content, { conversationId: pendingConversationId });
+      submitMessage(content);
     }
     clearDraft();
     messageEditorController.clear();

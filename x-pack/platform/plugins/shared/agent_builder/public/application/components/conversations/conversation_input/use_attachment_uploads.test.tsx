@@ -22,7 +22,6 @@ jest.mock('../../../hooks/use_agent_builder_service', () => ({
   useAgentBuilderServices: () => ({
     filesClient: {},
     binaryFilesClient: {},
-    attachmentsService: { delete: jest.fn().mockResolvedValue(undefined) },
   }),
 }));
 jest.mock('../../../hooks/use_kibana', () => ({
@@ -68,7 +67,6 @@ const renderUploads = ({ isBinaryUploadEnabled }: { isBinaryUploadEnabled?: bool
       uploads: useAttachmentUploads({
         addErrorToast,
         messageEditorController: messageEditorController as never,
-        createConversation: jest.fn(),
         isBinaryUploadEnabled,
       }),
       attachments: useConversationContext().attachments,
@@ -105,7 +103,6 @@ describe('useAttachmentUploads', () => {
     jest.mocked(readTextFile).mockResolvedValue({ status: 'done', content: 'x' });
     jest.mocked(uploadBinary).mockImplementation(async ({ name }) => ({
       status: 'done',
-      attachment: { id: `att-${name}`, type: 'binary', versions: [] } as never,
       fileId: `file-${name}`,
     }));
     jest.mocked(processImageFile).mockImplementation(async ({ name, upsertAttachments }) => {

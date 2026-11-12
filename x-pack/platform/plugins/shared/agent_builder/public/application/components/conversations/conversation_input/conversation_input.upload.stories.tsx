@@ -10,7 +10,6 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { EuiGlobalToastList } from '@elastic/eui';
 import type { EuiGlobalToastListToast } from '@elastic/eui';
 import { fn, userEvent, within } from '@storybook/test';
-import type { VersionedAttachment } from '@kbn/agent-builder-common';
 import type {
   ConversationAttachment,
   SupportedBinaryMimeType,
@@ -238,73 +237,28 @@ export const ImageMultipleWithTrickyFilenames: Story = {
   },
 };
 
-const createStoryBinaryAttachment = (
-  id: string,
-  name: string,
-  mimeType: SupportedBinaryMimeType
-): VersionedAttachment => ({
-  id,
-  type: 'binary',
-  current_version: 1,
-  versions: [
-    {
-      version: 1,
-      data: { file_id: 'story-binary-file', name, mime_type: mimeType, text: 'Hello' },
-      created_at: '2026-10-09T10:00:00.000Z',
-      content_hash: 'story-binary-hash',
-    },
-  ],
-});
-
-const STORY_CONVERSATION = {
-  id: 'story-conversation',
-  agent_id: 'elastic-ai-agent',
-  user: { id: 'story-user', username: 'story-user' },
-  title: 'New conversation',
-  created_at: '2026-10-09T10:00:00.000Z',
-  updated_at: '2026-10-09T10:00:00.000Z',
-  rounds: [],
-  attachments: [],
-};
-
-const READING_TIME_MS = 800;
-let storyBinaryCount = 0;
-// Each PDF gets its own attachment id, so a second PDF does not replace the first pill.
-const readsBinary = () => {
-  storyBinaryCount += 1;
-  const attachment = createStoryBinaryAttachment(
-    `story-binary-attachment-${storyBinaryCount}`,
-    'invoice.pdf',
-    'application/pdf'
-  );
-  return new Promise<VersionedAttachment>((resolve) =>
-    setTimeout(() => resolve(attachment), READING_TIME_MS)
-  );
-};
-const neverReadsBinary = () => new Promise<VersionedAttachment>(() => {});
-
 const createBinaryStoryServices = ({
-  create = readsBinary,
   supportedMimeTypes = [...SUPPORTED_BINARY_MIME_TYPES],
   filesClient,
 }: {
-  create?: () => Promise<VersionedAttachment>;
   supportedMimeTypes?: SupportedBinaryMimeType[];
   filesClient?: unknown;
 }) => {
   const defaults = createStorybookAgentBuilderServices();
   // Keeps the real attachment types of the storybook service and replaces only the calls.
   const binaryAttachmentsService = Object.assign(Object.create(defaults.attachmentsService), {
-    create,
-    delete: () => Promise.resolve(),
     getSupportedBinaryMimeTypes: () => Promise.resolve(supportedMimeTypes),
   });
   return {
     binaryFilesClient: (filesClient ?? defaults.filesClient) as typeof defaults.binaryFilesClient,
     attachmentsService: binaryAttachmentsService,
-    conversationsService: { create: () => Promise.resolve(STORY_CONVERSATION) } as never,
   };
 };
+
+const failingFilesClient = {
+  ...(neverResolvingFilesClient as object),
+  create: () => Promise.reject(new Error('Upload failed')),
+} as never;
 
 /** Shows toasts in a file story. */
 const BinaryStoryProvider: React.FC<{
@@ -349,10 +303,7 @@ const withBinaryServices = (options: Parameters<typeof createBinaryStoryServices
 
 export const PdfLoading: Story = {
   name: 'PDF - Loading',
-  decorators: withBinaryServices({
-    create: neverReadsBinary,
-    filesClient: neverResolvingFilesClient,
-  }),
+  decorators: withBinaryServices({ filesClient: neverResolvingFilesClient }),
   play: async ({ canvasElement }) => {
     await pasteFile(canvasElement, { name: 'invoice.pdf' });
   },
@@ -422,11 +373,9 @@ export const PdfTooLarge: Story = {
   },
 };
 
-export const PdfServerError: Story = {
-  name: 'PDF - Server error',
-  decorators: withBinaryServices({
-    create: () => Promise.reject(new Error('Could not read the PDF. Try again later.')),
-  }),
+export const PdfUploadError: Story = {
+  name: 'PDF - Upload error',
+  decorators: withBinaryServices({ filesClient: failingFilesClient }),
   play: async ({ canvasElement }) => {
     await pasteFile(canvasElement, { name: 'invoice.pdf' });
   },

@@ -58,6 +58,27 @@ describe('useUserMessageFiles', () => {
     ]);
   });
 
+  it('shows a PDF of a pending message by its description, before the server has read it', () => {
+    const { result } = renderHook(() =>
+      useUserMessageFiles({
+        attachmentRefs: [userRef('pending-attachment-0')],
+        fallbackAttachments: [
+          {
+            id: 'pending-attachment-0',
+            type: AttachmentType.binary,
+            data: {},
+            origin: 'file-1',
+            description: 'invoice.pdf',
+          },
+        ],
+      })
+    );
+
+    expect(result.current).toEqual([
+      expect.objectContaining({ attachmentId: 'pending-attachment-0', name: 'invoice.pdf' }),
+    ]);
+  });
+
   it('returns a text attachment that has a name, without a mime type', () => {
     const { result } = renderHook(() =>
       useUserMessageFiles({

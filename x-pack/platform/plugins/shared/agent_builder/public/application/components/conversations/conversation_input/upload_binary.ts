@@ -6,14 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
-import type { VersionedAttachment } from '@kbn/agent-builder-common';
-import {
-  AttachmentType,
-  type SupportedBinaryMimeType,
-} from '@kbn/agent-builder-common/attachments';
+import type { SupportedBinaryMimeType } from '@kbn/agent-builder-common/attachments';
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
-import type { AttachmentsService } from '../../../../services/attachments';
 
 const labels = {
   uploadError: i18n.translate('xpack.agentBuilder.uploadBinary.uploadError', {
@@ -22,30 +16,25 @@ const labels = {
 };
 
 export type UploadBinaryResult =
-  | { status: 'done'; attachment: VersionedAttachment; fileId: string }
+  | { status: 'done'; fileId: string }
   | { status: 'aborted' }
   | { status: 'failed'; message: string };
 
 /**
- * Uploads the file to the Files service, then asks the server to read it into a binary
- * attachment. Aborting stops either step: Files deletes a half-uploaded file, and the server
- * stops reading. The file stays in Files after a stopped read. Never throws.
+ * Uploads the file to the Files service. The server reads it when the message is sent.
+ * Aborting deletes the file. Never throws.
  */
 export const uploadBinary = async ({
   file,
   name,
   mimeType,
-  conversationId,
   binaryFilesClient,
-  attachmentsService,
   signal,
 }: {
   file: File;
   name: string;
   mimeType: SupportedBinaryMimeType;
-  conversationId: string;
   binaryFilesClient: ScopedFilesClient;
-  attachmentsService: AttachmentsService;
   signal: AbortSignal;
 }): Promise<UploadBinaryResult> => {
   let fileId: string;
@@ -66,22 +55,10 @@ export const uploadBinary = async ({
   }
 
   if (signal.aborted) {
-    // Aborted between the two steps: nothing else owns this file yet.
+    // Aborted right after the upload finished: nothing else owns this file yet.
     await binaryFilesClient.delete({ id: fileId }).catch(() => {});
     return { status: 'aborted' };
   }
 
-  try {
-    const attachment = await attachmentsService.create({
-      conversationId,
-      type: AttachmentType.binary,
-      origin: fileId,
-      signal,
-    });
-    return { status: 'done', attachment, fileId };
-  } catch (error) {
-    return signal.aborted
-      ? { status: 'aborted' }
-      : { status: 'failed', message: formatAgentBuilderErrorMessage(error) };
-  }
+  return { status: 'done', fileId };
 };

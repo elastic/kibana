@@ -6,25 +6,24 @@
  */
 
 import { useCallback } from 'react';
+import { useMutation, useQueryClient } from '@kbn/react-query';
+import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { useConversationContext } from '../context/conversation/conversation_context';
 import { useConversationId } from '../context/conversation/use_conversation_id';
+import { mutationKeys } from '../mutation_keys';
+import { queryKeys } from '../query_keys';
+import { useAgentBuilderServices } from './use_agent_builder_service';
 import { useAgentId } from './use_conversation';
 import { useConversationStream } from './use_conversation_stream';
-import { useCreateConversation } from './use_create_conversation';
 import { useNavigation } from './use_navigation';
+import { useToasts } from './use_toasts';
 import { appPaths } from '../utils/app_paths';
-
-interface SubmitMessageOptions {
-  conversationId?: string;
-}
 
 /**
  * Single source of truth for "send this message". A new conversation is created on the server
  * first, so it exists, is cached and is in the sidebar before anything streams into it; then the
  * user is moved to it, by URL in the routed app or by state in the embeddable.
  * `isCreatingConversation` is true while that request is in flight, so the input can hold submits.
- * A new conversation that already exists (made earlier by `createConversation`, for example when
- * a document was pasted) is passed as `conversationId`, so it is reused instead of created again.
  */
 export const useSubmitMessage = () => {
   const conversationId = useConversationId();
@@ -32,13 +31,22 @@ export const useSubmitMessage = () => {
   const { isEmbeddedContext, setConversationId } = useConversationContext();
   const agentId = useAgentId();
   const { navigateToAgentBuilderUrl } = useNavigation();
-  const { createConversation, isCreatingConversation } = useCreateConversation();
+  const { conversationsService } = useAgentBuilderServices();
+  const queryClient = useQueryClient();
+  const { addErrorToast } = useToasts();
+
+  const { mutateAsync: createConversation, isLoading: isCreatingConversation } = useMutation({
+    mutationKey: mutationKeys.createConversation,
+    mutationFn: (id: string) => conversationsService.create({ agentId: id }),
+    onSuccess: (created) => {
+      queryClient.setQueryData(queryKeys.conversations.byId(created.id), created);
+      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.list });
+    },
+    onError: (error) => addErrorToast({ title: formatAgentBuilderErrorMessage(error) }),
+  });
 
   const submitMessage = useCallback(
-    async (
-      message: string,
-      { conversationId: pendingConversationId }: SubmitMessageOptions = {}
-    ) => {
+    async (message: string) => {
       if (conversationId) {
         sendMessage({ message, conversationId });
         return;
@@ -47,22 +55,20 @@ export const useSubmitMessage = () => {
         throw new Error('agentId is required to start a conversation');
       }
 
-      let newConversationId = pendingConversationId;
-      if (!newConversationId) {
-        try {
-          ({ id: newConversationId } = await createConversation(agentId));
-        } catch {
-          return;
-        }
+      let created;
+      try {
+        created = await createConversation(agentId);
+      } catch {
+        return;
       }
 
-      sendMessage({ message, conversationId: newConversationId });
+      sendMessage({ message, conversationId: created.id });
 
       if (isEmbeddedContext) {
-        setConversationId?.(newConversationId);
+        setConversationId?.(created.id);
       } else {
         navigateToAgentBuilderUrl(
-          appPaths.agent.conversations.byId({ agentId, conversationId: newConversationId })
+          appPaths.agent.conversations.byId({ agentId, conversationId: created.id })
         );
       }
     },

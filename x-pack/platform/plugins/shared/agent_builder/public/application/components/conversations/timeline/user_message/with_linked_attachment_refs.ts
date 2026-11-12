@@ -18,7 +18,7 @@ import {
   ATTACHMENT_KINDS,
 } from '../../conversation_input/message_editor/attachment_placeholder';
 
-// The query of a chip link, e.g. `id=abc` in `[a.pdf](binary://a.pdf?id=abc)`.
+// The query of a chip link, e.g. `id=abc` in `[a.md](text://a.md?id=abc)`.
 const CHIP_LINK_QUERY_PATTERN = new RegExp(
   `\\]\\((?:${ATTACHMENT_KINDS.join('|')}):\\/\\/[^?)]*\\?([^)]*)\\)`,
   'g'
@@ -32,8 +32,8 @@ export const getLinkedAttachmentIds = (text: string): string[] =>
   });
 
 /**
- * Adds a ref for each attachment the message text links to: a PDF added on paste, or a text file
- * the conversation already had. Such an attachment has no `chat_input` event tied to the message,
+ * Adds a ref for each attachment the message text links to: a text file the conversation
+ * already had. Such an attachment has no `chat_input` event tied to the message,
  * so the link is what ties it to the message.
  */
 export const withLinkedAttachmentRefs = ({

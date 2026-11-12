@@ -159,6 +159,28 @@ describe('useSendMessageMutation', () => {
     });
   });
 
+  it('sends a pasted PDF as its file id only, and shows it with the pending message', async () => {
+    const { bindings, result } = setup();
+    const pdf = { type: 'binary', origin: 'file-1', description: 'invoice.pdf' };
+
+    act(() => result.current.mutate({ ...vars, attachments: [pdf] }));
+    await waitFor(() => expect(mockChat).toHaveBeenCalled());
+
+    // The server reads the file on Send, so the request carries no data.
+    expect(mockChat.mock.calls[0][0].attachments[0]).toEqual(pdf);
+    expect(bindings.setPendingMessage).toHaveBeenCalledWith(conversationId, 'hello', {
+      fallbackAttachments: [
+        expect.objectContaining({
+          type: 'binary',
+          origin: 'file-1',
+          description: 'invoice.pdf',
+          data: {},
+        }),
+      ],
+      attachmentRefs: [expect.objectContaining({ version: 1 })],
+    });
+  });
+
   it('releases the pending message and live events once the refetch has their saved copies', async () => {
     const { bindings, source, result, conversationStreamService } = setup();
     mockGet.mockResolvedValue(savedConversation([savedUserMessage, started, terminated]));

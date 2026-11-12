@@ -28,7 +28,6 @@ import { useIsAwaitingPrompt } from '../../../hooks/use_is_awaiting_prompt';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
-import { useCreateConversation } from '../../../hooks/use_create_conversation';
 import { useSendUserMessage } from '../../../hooks/use_send_user_message';
 import { useToasts } from '../../../hooks/use_toasts';
 import { useMessageEditor } from './message_editor';
@@ -78,9 +77,6 @@ jest.mock('../../../context/conversation/conversation_context', () => ({
 }));
 jest.mock('../../../hooks/use_submit_message', () => ({
   useSubmitMessage: jest.fn(),
-}));
-jest.mock('../../../hooks/use_create_conversation', () => ({
-  useCreateConversation: jest.fn(),
 }));
 jest.mock('../../../hooks/use_send_user_message', () => ({
   useSendUserMessage: jest.fn(),
@@ -236,20 +232,16 @@ const mockedUseTextFileUpload = jest.mocked(useTextFileUpload);
 const mockedUseSupportedBinaryTypes = jest.mocked(useSupportedBinaryTypes);
 
 const submitMessage = jest.fn();
-const createConversation = jest.fn();
 const handlePasteBinary = jest.fn();
 const handleAfterBinaryInput = jest.fn();
 const handleRemoveBinary = jest.fn();
-const handleBinarySubmitted = jest.fn();
 const binaryUploadState = (
   overrides: Partial<ReturnType<typeof useBinaryUpload>> = {}
 ): ReturnType<typeof useBinaryUpload> => ({
   loadingBinaryNames: new Set(),
-  pendingConversationId: undefined,
   handlePasteBinary,
   handleAfterInput: handleAfterBinaryInput,
   handleRemoveBinary,
-  handleSubmitted: handleBinarySubmitted,
   ...overrides,
 });
 const handlePasteTextFile = jest.fn();
@@ -333,10 +325,6 @@ describe('ConversationInput', () => {
       submitMessage,
       isCreatingConversation: false,
     });
-    jest.mocked(useCreateConversation).mockReturnValue({
-      createConversation,
-      isCreatingConversation: false,
-    } as never);
     mockedUseSupportedBinaryTypes.mockReturnValue(['application/pdf']);
     mockedUseBinaryUpload.mockReturnValue(binaryUploadState());
     mockedUseTextFileUpload.mockReturnValue(textFileUploadState());
@@ -375,7 +363,7 @@ describe('ConversationInput', () => {
     fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 
     expect(submitMessage).toHaveBeenCalledTimes(1);
-    expect(submitMessage).toHaveBeenCalledWith('hello agent', { conversationId: undefined });
+    expect(submitMessage).toHaveBeenCalledWith('hello agent');
     expect(editorController.clear).toHaveBeenCalledTimes(1);
   });
 
@@ -530,7 +518,7 @@ describe('ConversationInput', () => {
 
       fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 
-      expect(submitMessage).toHaveBeenCalledWith('hello agent', { conversationId: undefined });
+      expect(submitMessage).toHaveBeenCalledWith('hello agent');
       expect(sendUserMessage).not.toHaveBeenCalled();
     });
 
@@ -582,34 +570,12 @@ describe('ConversationInput', () => {
       expect(editorController.clear).not.toHaveBeenCalled();
     });
 
-    it('marks the pasted files as sent when talking to users, so they are not deleted later', async () => {
-      renderInput(<ConversationInput />);
-
-      selectTalkToUsers();
-      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
-
-      await waitFor(() => expect(editorController.clear).toHaveBeenCalledTimes(1));
-      expect(handleBinarySubmitted).toHaveBeenCalledTimes(1);
-    });
-
-    it('keeps the pasted files unsent when talking to users fails', async () => {
-      sendUserMessage.mockRejectedValue(new Error('boom'));
-
-      renderInput(<ConversationInput />);
-
-      selectTalkToUsers();
-      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
-
-      await waitFor(() => expect(addErrorToast).toHaveBeenCalledWith({ title: 'boom' }));
-      expect(handleBinarySubmitted).not.toHaveBeenCalled();
-    });
-
     it('runs the agent when talking to agent and users', () => {
       renderInput(<ConversationInput />);
 
       fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 
-      expect(submitMessage).toHaveBeenCalledWith('hello agent', { conversationId: undefined });
+      expect(submitMessage).toHaveBeenCalledWith('hello agent');
       expect(sendUserMessage).not.toHaveBeenCalled();
     });
   });
@@ -1154,55 +1120,6 @@ describe('ConversationInput', () => {
 
       expect(handleRemoveTextFile).toHaveBeenCalledWith('notes.md');
       expect(removeAttachment).not.toHaveBeenCalled();
-    });
-
-    it('sends into the conversation made for the PDF, then tells the binary upload it was sent', () => {
-      mockedUseBinaryUpload.mockReturnValue(
-        binaryUploadState({ pendingConversationId: 'pending-conv' })
-      );
-
-      renderInput(<ConversationInput />);
-      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
-
-      expect(submitMessage).toHaveBeenCalledWith('hello agent', {
-        conversationId: 'pending-conv',
-      });
-      expect(handleBinarySubmitted).toHaveBeenCalledTimes(1);
-    });
-
-    it('tells the binary upload it was sent before the submit moves to the new conversation', () => {
-      mockedUseBinaryUpload.mockReturnValue(
-        binaryUploadState({ pendingConversationId: 'pending-conv' })
-      );
-
-      renderInput(<ConversationInput />);
-      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
-
-      expect(handleBinarySubmitted.mock.invocationCallOrder[0]).toBeLessThan(
-        submitMessage.mock.invocationCallOrder[0]
-      );
-    });
-
-    it('gives the binary upload its own create conversation call', () => {
-      renderInput(<ConversationInput />);
-
-      expect(mockedUseBinaryUpload).toHaveBeenCalledWith(
-        expect.objectContaining({ createConversation })
-      );
-    });
-
-    it('keeps the input enabled while the upload creates a conversation', () => {
-      jest.mocked(useCreateConversation).mockReturnValue({
-        createConversation,
-        isCreatingConversation: true,
-      } as never);
-
-      renderInput(<ConversationInput />);
-
-      expect(screen.getByTestId('agentBuilderConversationInputForm')).not.toHaveAttribute(
-        'aria-disabled',
-        'true'
-      );
     });
   });
 

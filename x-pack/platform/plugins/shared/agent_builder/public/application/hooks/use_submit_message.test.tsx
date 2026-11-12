@@ -126,38 +126,6 @@ describe('useSubmitMessage', () => {
     expect(navigateToAgentBuilderUrl).not.toHaveBeenCalled();
   });
 
-  it('reuses a conversation made before Send: no second create, sends and navigates', async () => {
-    setState({});
-    const { result } = renderHook(() => useSubmitMessage(), { wrapper });
-
-    await act(() => result.current.submitMessage('hello', { conversationId: 'pending-1' }));
-
-    expect(create).not.toHaveBeenCalled();
-    expect(sendMessage).toHaveBeenCalledWith({ message: 'hello', conversationId: 'pending-1' });
-    expect(navigateToAgentBuilderUrl).toHaveBeenCalledWith(
-      expect.stringContaining('/agents/agent-1/conversations/pending-1')
-    );
-  });
-
-  it('switches the embedded conversation to the one made before Send', async () => {
-    setState({ isEmbeddedContext: true });
-    const { result } = renderHook(() => useSubmitMessage(), { wrapper });
-
-    await act(() => result.current.submitMessage('hello', { conversationId: 'pending-1' }));
-
-    expect(setConversationId).toHaveBeenCalledWith('pending-1');
-    expect(create).not.toHaveBeenCalled();
-  });
-
-  it('ignores the pending id when the conversation already exists', async () => {
-    setState({ conversationId: 'existing' });
-    const { result } = renderHook(() => useSubmitMessage(), { wrapper });
-
-    await act(() => result.current.submitMessage('hello', { conversationId: 'pending-1' }));
-
-    expect(sendMessage).toHaveBeenCalledWith({ message: 'hello', conversationId: 'existing' });
-  });
-
   it('shows an error and sends nothing when the conversation cannot be created', async () => {
     setState({});
     create.mockRejectedValue(new Error('boom'));

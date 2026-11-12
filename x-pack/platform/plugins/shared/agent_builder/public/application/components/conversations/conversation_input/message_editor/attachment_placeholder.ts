@@ -20,7 +20,7 @@ export type PlaceholderKind = (typeof ATTACHMENT_KINDS)[number];
 export const isPlaceholderKind = (value: string | null | undefined): value is PlaceholderKind =>
   ATTACHMENT_KINDS.some((kind) => kind === value);
 
-/** Query parameter of a serialized attachment link that holds the attachment id, e.g. `binary://a.pdf?id=<id>`. */
+/** Query parameter of a serialized attachment link that holds the attachment id, e.g. `text://a.md?id=<id>`. */
 export const ATTACHMENT_ID_PARAM = 'id';
 
 // Mirrors the EUI `image` icon (packages/eui/src/components/icon/assets/image.tsx).
