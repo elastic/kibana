@@ -175,7 +175,9 @@ export const regressionGateCmd = {
     const evaluationsKbnUrl =
       flagsReader.string('kbn-url') ?? profileEnv.EVAL_KBN_URL ?? process.env.EVAL_KBN_URL;
     if (!evaluationsKbnUrl) {
-      log.warning(`EVAL_KBN_URL not set; defaulting to ${DEFAULT_EVALUATIONS_KBN_URL}.`);
+      log.warning(
+        `EVAL_KBN_URL not set; defaulting to ${sanitizeKbnUrlForLog(DEFAULT_EVALUATIONS_KBN_URL)}.`
+      );
     }
     const evaluationsKbnApiKey =
       flagsReader.string('kbn-api-key') ??

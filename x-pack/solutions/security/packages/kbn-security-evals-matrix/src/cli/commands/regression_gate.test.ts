@@ -30,7 +30,7 @@ jest.mock('../../matrix/matrix_evals_client', () => ({
     return mockMatrixEvalsClient(...(args as []));
   },
   createEvaluationsKbnClient: jest.fn(() => ({})),
-  DEFAULT_EVALUATIONS_KBN_URL: 'http://localhost:5601',
+  DEFAULT_EVALUATIONS_KBN_URL: 'http://elastic:changeme@localhost:5601',
 }));
 jest.mock('@kbn/evals', () => ({
   ...jest.requireActual('@kbn/evals'),
@@ -120,6 +120,21 @@ describe('regressionGateCmd exit codes', () => {
 
   afterAll(() => {
     process.env = env;
+  });
+
+  it('keeps credentials out of the log when it falls back to the default Kibana URL', async () => {
+    const lines: string[] = [];
+    const log = new ToolingLog({
+      level: 'verbose',
+      writeTo: { write: (line) => lines.push(line) },
+    });
+    const flags = getFlags([TARGET, BASELINE], regressionGateCmd.flags);
+
+    await regressionGateCmd.run({ log, flags, flagsReader: new FlagsReader(flags) } as RunContext);
+
+    const output = lines.join('');
+    expect(output).toContain('EVAL_KBN_URL not set; defaulting to http://localhost:5601/');
+    expect(output).not.toContain('changeme');
   });
 
   it('keeps the documented exit-code contract stable for CI callers', () => {
