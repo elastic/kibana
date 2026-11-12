@@ -222,7 +222,7 @@ groups:
       - setting: xpack.actions.email.services.enabled
         id: action-config-email-services-enabled
         description: |
-          An array of strings indicating all email services that are enabled. Available options are `elastic-cloud`, `google-mail`, `microsoft-outlook`, `amazon-ses`, `microsoft-exchange`, and `other`. If the array is empty, no email services are enabled. The default value is `["*"]`, which enables all email services.
+          An array of strings indicating all email services that are enabled. Available options are `elastic-cloud`, `google-mail`, `microsoft-outlook`, `amazon-ses`, `microsoft-exchange`, and `other`. The default value is `["*"]`, which enables all email services.
         datatype: string
         default: '["*"]'
         applies_to:
