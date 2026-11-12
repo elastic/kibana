@@ -124,14 +124,15 @@ whole file. A closed one isn't reopened for a block: the block gets an issue of 
 - The body text stays as filed. Only the hidden metadata is updated (report count, history, last
   report); the test ids and branches recorded before are kept, so `/skip` still covers a branch
   the suite stopped failing on this week.
-- A short comment on where the suite is still flaky ("Still flaky on `main`: 4% of builds
-  (18 / 441), last failed […]", one line per branch when there are several) is posted when the
-  suite failed since the last one, or since the issue was filed, and at least
-  `--comment-cooldown-days` later (default 3). Failures in between are covered by the next
-  comment. It ends with a "Newly flaky tests:" list of the flaky tests the issue has not shown yet, in
-  its body or an earlier comment, one bullet each. On an issue no report has found flaky before,
-  a consistently failing one, the first comment says "Now flaky" and lists every flaky test. How
-  to skip the test is at the end of the body.
+- A short comment on where the suite is still flaky is posted when the suite failed since the
+  last one, or since the issue was filed, and at least `--comment-cooldown-days` later (default
+  3). Failures in between are covered by the next comment. For a single test the issue has
+  already shown, it's one sentence ("Still flaky on `main`: 4% of builds (18 / 441), last failed
+  […]"), one line per branch when there are several. Otherwise, it has one line per test that
+  failed there, with the test's own numbers on each branch, and marks the tests the issue has not
+  shown yet, in its body or an earlier comment, as "(newly flaky)". On an issue no report has
+  found flaky before, a consistently failing one, the first comment says "Now flaky" and lists
+  every flaky test. How to skip the test is at the end of the body.
 - A closed issue is reopened, with a comment, when the suite failed after it was closed. It stays
   closed when it was closed as a duplicate, or when the suite has not failed since: the report
   window can still hold the failures a fix was merged for.

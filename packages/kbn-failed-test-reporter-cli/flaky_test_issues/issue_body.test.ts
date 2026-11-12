@@ -792,7 +792,25 @@ describe('refreshing a suite issue', () => {
     );
   });
 
-  it('leaves out the branches every test of the suite is skipped on', () => {
+  it('lists the branches of a single test, one per line', () => {
+    const { suite, report } = multiTestReport();
+
+    expect(
+      renderFlakySuiteIssueComment(
+        { ...suite, tests: [suite.tests[0]] },
+        { report, reopened: false }
+      )
+    ).toBe(
+      [
+        'Still flaky:',
+        '',
+        '- `main`: 10% of builds (20 / 200)',
+        '- `9.2`: 5% of builds (3 / 64), last failed [7 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200)',
+      ].join('\n')
+    );
+  });
+
+  it('leaves out the branches every test of the suite is skipped on, and the tests that only failed there', () => {
     const { suite, report } = multiTestReport();
     const skippedOnMain = {
       ...suite,
@@ -805,25 +823,30 @@ describe('refreshing a suite issue', () => {
     };
 
     expect(renderFlakySuiteIssueComment(skippedOnMain, { report, reopened: false })).toBe(
-      '3 tests still flaky on `9.2`: 5% of builds (3 / 64), last failed [7 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200).'
-    );
-  });
-
-  it('lists the branches, counts the tests and says the suite is flaky again when the issue is reopened', () => {
-    const { suite, report } = multiTestReport();
-
-    // the worst test's numbers on each branch, as the body's branch table; the clean 9.1 left out
-    expect(renderFlakySuiteIssueComment(suite, { report, reopened: true })).toBe(
       [
-        '3 tests flaky again after this issue was closed:',
+        'Still flaky on `9.2`:',
         '',
-        '- `main`: 10% of builds (49 / 509), last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)',
-        '- `9.2`: 5% of builds (3 / 64), last failed [7 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200)',
+        '- `does not keep a hidden histogram after visiting Dashboard`: 5% of builds (3 / 64), last failed [7 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200)',
       ].join('\n')
     );
   });
 
-  it('names the flaky tests the issue has not shown yet', () => {
+  it("lists each test's own numbers on each branch, and says the suite is flaky again when the issue is reopened", () => {
+    const { suite, report } = multiTestReport();
+
+    // the clean 9.1 left out
+    expect(renderFlakySuiteIssueComment(suite, { report, reopened: true })).toBe(
+      [
+        '3 tests flaky again after this issue was closed:',
+        '',
+        '- `does not keep a hidden histogram after visiting Dashboard`: 10% of builds (20 / 200) on `main`, 5% of builds (3 / 64) on `9.2`, last failed [7 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200)',
+        '- `reverts breakdown, interval, and visibility on a saved session`: 10% of builds (49 / 509) on `main`, last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)',
+        '- `persists hide/show of the histogram on a saved session`: 10% of builds (49 / 509) on `main`, last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)',
+      ].join('\n')
+    );
+  });
+
+  it('names the flaky tests the issue has not shown yet, and marks them as newly flaky', () => {
     const single = singleTestReport();
     const multi = multiTestReport();
     const shown = (ids: string[]) => ({ ...previous, 'report.shownTestIds': ids });
@@ -836,25 +859,26 @@ describe('refreshing a suite issue', () => {
       })
     ).toBe(
       [
-        'Still flaky on `main`: 10% of builds (49 / 509), last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd).',
+        'Still flaky on `main`:',
         '',
-        'Newly flaky tests:',
-        '',
-        '- creates default alert, triggers on down status, and recovers',
+        '- `creates default alert, triggers on down status, and recovers` (newly flaky): 10% of builds (49 / 509), last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)',
       ].join('\n')
     );
-    expect(
-      renderFlakySuiteIssueComment(multi.suite, {
-        report: multi.report,
-        reopened: false,
-        previous: shown(['a']),
-      })
-    ).toMatch(
-      /\n- `9\.2`: [^\n]+\n\nNewly flaky tests:\n\n- reverts breakdown, interval, and visibility on a saved session\n- persists hide\/show of the histogram on a saved session$/
+    const lines = renderFlakySuiteIssueComment(multi.suite, {
+      report: multi.report,
+      reopened: false,
+      previous: shown(['a']),
+    }).split('\n');
+    expect(lines[2]).toMatch(/^- `does not keep a hidden histogram after visiting Dashboard`: /);
+    expect(lines[3]).toMatch(
+      /^- `reverts breakdown, interval, and visibility on a saved session` \(newly flaky\): /
+    );
+    expect(lines[4]).toMatch(
+      /^- `persists hide\/show of the histogram on a saved session` \(newly flaky\): /
     );
   });
 
-  it('lists as many newly flaky tests as the body does, then counts the rest', () => {
+  it('lists as many tests as the body does, then counts the rest', () => {
     const { suite, report } = singleTestReport();
     const [test] = suite.tests;
     const many = {
@@ -872,8 +896,8 @@ describe('refreshing a suite issue', () => {
       previous: { ...previous, 'report.shownTestIds': [] },
     });
 
-    expect(comment).toContain('\n- test 14\n\nand 2 more tests.');
-    expect(comment).not.toContain('- test 15');
+    expect(comment).toMatch(/\n- `test 14` \(newly flaky\): [^\n]+\n\nand 2 more tests\.$/);
+    expect(comment).not.toContain('`test 15`');
   });
 
   describe('on an issue no report has found flaky yet, such as a consistently failing one', () => {
@@ -892,16 +916,14 @@ describe('refreshing a suite issue', () => {
         renderFlakySuiteIssueComment(suite, { report, reopened: false, previous: failing })
       ).toBe(
         [
-          'Now flaky on `main`: 10% of builds (49 / 509), last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd).',
+          'Now flaky on `main`:',
           '',
-          'Newly flaky tests:',
-          '',
-          '- creates default alert, triggers on down status, and recovers',
+          '- `creates default alert, triggers on down status, and recovers`: 10% of builds (49 / 509), last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)',
         ].join('\n')
       );
       expect(
         renderFlakySuiteIssueComment(suite, { report, reopened: true, previous: failing })
-      ).toMatch(/^Now flaky, after this issue was closed, on `main`: 10% of builds/);
+      ).toMatch(/^Now flaky, after this issue was closed, on `main`:\n\n- `creates default alert/);
     });
 
     it('counts the report as the first one, and records the tests it named', () => {
@@ -921,7 +943,7 @@ describe('refreshing a suite issue', () => {
     });
   });
 
-  it('names no test when the issue has shown them all, or does not record which it has shown', () => {
+  it('marks no test as newly flaky when the issue has shown them all, or does not record which it has shown', () => {
     const { suite, report } = multiTestReport();
 
     for (const shownTestIds of [['a', 'b', 'c'], undefined]) {
@@ -931,7 +953,7 @@ describe('refreshing a suite issue', () => {
           reopened: false,
           previous: { ...previous, 'report.shownTestIds': shownTestIds },
         })
-      ).not.toContain('Newly flaky');
+      ).not.toContain('newly flaky');
     }
   });
 });

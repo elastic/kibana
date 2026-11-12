@@ -857,28 +857,17 @@ const neverFlaky = (previous: RecordedFlakySuiteIssueMetadata | undefined): bool
   previous !== undefined && previous['report.history'].length === 0;
 
 /**
- * `Newly flaky tests:` and a bullet per flaky test the issue has not shown, as many as the body's tests
- * table, when it records the ones it has, or every flaky test when it has never been flaky.
+ * The flaky tests the issue has not shown, when it records the ones it has, or every flaky test
+ * when it has never been flaky.
  */
-const newlyFlakyList = (
+const newlyFlakyTestIds = (
   suite: FlakySuite,
   previous: RecordedFlakySuiteIssueMetadata | undefined
-): string | undefined => {
+): Set<string> => {
   const shown = previous?.['report.shownTestIds'] ?? (neverFlaky(previous) ? [] : undefined);
-  if (!shown) {
-    return undefined;
-  }
-  const newTests = suite.tests.filter(({ testId }) => !shown.includes(testId));
-  if (newTests.length === 0) {
-    return undefined;
-  }
-  const rest = newTests.length - MAX_TEST_ROWS;
-  return [
-    'Newly flaky tests:',
-    '',
-    ...newTests.slice(0, MAX_TEST_ROWS).map(({ title }) => `- ${title}`),
-    ...(rest > 0 ? ['', `and ${plural(rest, 'more test')}.`] : []),
-  ].join('\n');
+  return new Set(
+    shown ? suite.tests.map(({ testId }) => testId).filter((id) => !shown.includes(id)) : []
+  );
 };
 
 /** `still flaky`, or `now flaky` on an issue that has never been flaky, when it was closed too. */
@@ -889,58 +878,103 @@ const flakyState = (reopened: boolean, first: boolean): string => {
   return reopened ? 'flaky again after this issue was closed' : 'still flaky';
 };
 
-/** Where the suite is still flaky, with the worst test's numbers on each branch. */
-const whereStillFlaky = (
+/** `10% of builds (49 / 509)` */
+const buildNumbers = ({ buildFailRate, failedBuilds, builds }: BuildCounts): string =>
+  `${formatPercent(buildFailRate)} of builds (${failedBuilds} / ${builds})`;
+
+const withLastFailed = (numbers: string, latest: BuildCounts | undefined): string => {
+  const lastFailed = latest ? lastFailedLink(latest) : undefined;
+  return lastFailed ? `${numbers}, last failed ${lastFailed}` : numbers;
+};
+
+type FlakySuiteTest = FlakySuite['tests'][number];
+
+/** The test's counts on the branches given, in their order, where it failed. */
+const failingOn = (test: FlakySuiteTest, branches: readonly string[]) =>
+  branches.flatMap((branch) =>
+    test.byBranch.filter((stats) => stats.branch === branch && stats.failedBuilds > 0)
+  );
+
+/**
+ * `` - `sorts by status` (newly flaky): 10% of builds (49 / 509), last failed [9 Sep](…) ``: the
+ * test's own numbers on the branches given, each named when there are several, and its newest
+ * failure on them.
+ */
+const testLine = (
+  test: FlakySuiteTest,
+  branches: readonly string[],
+  newlyFlaky: boolean
+): string => {
+  const name = `${inlineCode(test.title)}${newlyFlaky ? ' (newly flaky)' : ''}`;
+  const failing = failingOn(test, branches);
+  const numbers =
+    branches.length === 1
+      ? buildNumbers(failing[0])
+      : failing.map((stats) => `${buildNumbers(stats)} on ${inlineCode(stats.branch)}`).join(', ');
+  const latest = failing.reduce<BuildCounts | undefined>(
+    (newest, stats) =>
+      stats.lastFailedAt && (!newest?.lastFailedAt || stats.lastFailedAt > newest.lastFailedAt)
+        ? stats
+        : newest,
+    undefined
+  );
+  return `- ${name}: ${withLastFailed(numbers, latest)}`;
+};
+
+/**
+ * The comment of a refresh that found new failures: where the suite is flaky and not skipped. A
+ * single test the issue has shown gets one sentence for a single branch, or one line per branch.
+ * Otherwise, a line per test that failed there, as many as the body's tests table, with its own
+ * numbers and newest failure, and the tests the issue has not shown marked as newly flaky. The
+ * body keeps the full tables.
+ */
+export const renderFlakySuiteIssueComment = (
   suite: FlakySuite,
   { report, reopened, previous }: FlakySuiteIssueCommentContext
 ): string => {
-  const state = flakyState(reopened, neverFlaky(previous));
-  const lead =
-    suite.tests.length > 1
-      ? `${plural(suite.tests.length, 'test')} ${state}`
-      : `${state[0].toUpperCase()}${state.slice(1)}`;
+  const first = neverFlaky(previous);
+  const state = flakyState(reopened, first);
+  const leadFor = (count: number) =>
+    count > 1 ? `${plural(count, 'test')} ${state}` : `${state[0].toUpperCase()}${state.slice(1)}`;
   const flaky = flakyBranches(suite, report.thresholds);
   const skipped = branchSkips(suite);
   const branches = worstPerKey(
     suite,
     (test) => test.byBranch,
     (stats) => stats.branch
-  )
-    .filter(({ worst }) => flaky.has(worst.branch) && !skipped.has(worst.branch))
-    .map(({ worst, latest }) => {
-      const lastFailed = latest ? lastFailedLink(latest) : undefined;
-      return {
-        branch: inlineCode(worst.branch),
-        numbers:
-          `${formatPercent(worst.buildFailRate)} of builds ` +
-          `(${worst.failedBuilds} / ${worst.builds})${
-            lastFailed ? `, last failed ${lastFailed}` : ''
-          }`,
-      };
-    });
+  ).filter(({ worst }) => flaky.has(worst.branch) && !skipped.has(worst.branch));
+  const where =
+    branches.length === 1
+      ? `${reopened ? ',' : ''} on ${inlineCode(branches[0].worst.branch)}`
+      : '';
+  const newlyFlaky = newlyFlakyTestIds(suite, previous);
   if (branches.length === 0) {
-    return `${lead}.`;
+    return `${leadFor(suite.tests.length)}.`;
   }
-  if (branches.length === 1) {
-    const [{ branch, numbers }] = branches;
-    return `${lead}${reopened ? ',' : ''} on ${branch}: ${numbers}.`;
-  }
-  return `${lead}:\n\n${branches
-    .map(({ branch, numbers }) => `- ${branch}: ${numbers}`)
-    .join('\n')}`;
-};
 
-/**
- * The comment of a refresh that found new failures: where the suite is flaky and not skipped, with
- * the worst test's numbers and its newest failure on each branch, in one sentence for a single
- * branch and one line per branch otherwise, then a bullet per flaky test the issue has not shown
- * yet. The body keeps the full tables.
- */
-export const renderFlakySuiteIssueComment = (
-  suite: FlakySuite,
-  context: FlakySuiteIssueCommentContext
-): string => {
-  const where = whereStillFlaky(suite, context);
-  const newlyFlaky = newlyFlakyList(suite, context.previous);
-  return newlyFlaky ? `${where}\n\n${newlyFlaky}` : where;
+  if (suite.tests.length === 1 && newlyFlaky.size === 0) {
+    const lead = leadFor(1);
+    if (branches.length === 1) {
+      const [{ worst, latest }] = branches;
+      return `${lead}${where}: ${withLastFailed(buildNumbers(worst), latest)}.`;
+    }
+    return `${lead}:\n\n${branches
+      .map(
+        ({ worst, latest }) =>
+          `- ${inlineCode(worst.branch)}: ${withLastFailed(buildNumbers(worst), latest)}`
+      )
+      .join('\n')}`;
+  }
+
+  const branchNames = branches.map(({ worst }) => worst.branch);
+  const listed = suite.tests.filter((test) => failingOn(test, branchNames).length > 0);
+  const rest = listed.length - MAX_TEST_ROWS;
+  return [
+    `${leadFor(listed.length)}${where}:`,
+    '',
+    ...listed
+      .slice(0, MAX_TEST_ROWS)
+      .map((test) => testLine(test, branchNames, !first && newlyFlaky.has(test.testId))),
+    ...(rest > 0 ? ['', `and ${plural(rest, 'more test')}.`] : []),
+  ].join('\n');
 };

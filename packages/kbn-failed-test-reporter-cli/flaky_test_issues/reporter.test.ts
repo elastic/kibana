@@ -744,10 +744,9 @@ describe('reportFlakySuiteIssues', () => {
       expect(github.addIssueComment).toHaveBeenCalledTimes(1);
       expect(github.addIssueComment.mock.calls[0][1]).toMatch(
         new RegExp(
-          '^2 tests now flaky on `main`: 10% of builds \\(49 / 509\\), last failed \\[9 Sep\\]\\(.*\\)\\.\\n\\n' +
-            'Newly flaky tests:\\n\\n' +
-            '- Default status alert creates default alert, triggers on down status, and recovers\\n' +
-            '- another describe does b$'
+          '^2 tests now flaky on `main`:\\n\\n' +
+            '- `Default status alert creates default alert, triggers on down status, and recovers`: 10% of builds \\(49 / 509\\), last failed \\[9 Sep\\]\\(.*\\)\\n' +
+            '- `another describe does b`: 10% of builds \\(49 / 509\\), last failed \\[9 Sep\\]\\(.*\\)$'
         )
       );
       expect(
