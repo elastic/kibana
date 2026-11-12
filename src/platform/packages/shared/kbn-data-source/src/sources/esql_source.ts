@@ -311,6 +311,22 @@ export class EsqlSource implements DataSourceBase {
     return { datasetId, title, timeFieldName, projectRouting };
   }
 
+  /**
+   * The source of the dataset a query reads, for consumers that only need the dataset: its fields and
+   * time field (see {@link toFilterableSource}). The time field is read from the whole query, since
+   * `?_tstart` or `TBUCKET` can name it, and the schema from the source command alone, so the query
+   * itself is never run.
+   */
+  public static async forDataset(args: EsqlDatasetArgs): Promise<EsqlSource> {
+    const { timeFieldName } = await EsqlSource.resolveDataset(args);
+    return EsqlSource.create({
+      query: getSourceCommandQueryFromESQLQuery(args.query) || args.query,
+      http: args.http,
+      projectRouting: getProjectRoutingFromEsqlQuery(args.query) ?? args.projectRouting,
+      timeFieldName,
+    });
+  }
+
   public static clearCache(): void {
     EsqlSource.instanceCache.clear();
   }

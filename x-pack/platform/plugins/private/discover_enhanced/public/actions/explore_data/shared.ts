@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEsqlFilterableSource } from '@kbn/data-source';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiPublishesDataSources } from '@kbn/presentation-publishing';
 
@@ -13,7 +14,8 @@ export const getDataViews = (embeddable: EmbeddableApiContext['embeddable']): st
 
   const dataSources = embeddable.dataSources$.getValue() ?? [];
   return dataSources.reduce(
-    (prev: string[], current) => (current.id ? [...prev, current.id] : prev),
+    (prev: string[], current) =>
+      current.id && !isEsqlFilterableSource(current) ? [...prev, current.id] : prev,
     []
   );
 };

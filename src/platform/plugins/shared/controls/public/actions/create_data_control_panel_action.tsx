@@ -8,6 +8,7 @@
  */
 
 import { apiHasEditorConfig } from '@kbn/control-group-renderer';
+import { isEsqlFilterableSource } from '@kbn/data-source';
 import type { DataControlState } from '@kbn/controls-schemas';
 import { i18n } from '@kbn/i18n';
 import {
@@ -39,7 +40,7 @@ export const createDataControlPanelAction = (): ActionDefinition<EmbeddableApiCo
       ? embeddable.getEditorConfig()?.defaultDataViewId
       : undefined;
     const publishedDataViewId = apiPublishesDataSources(embeddable)
-      ? embeddable.dataSources$.value?.[0]?.id
+      ? embeddable.dataSources$.value?.find((source) => !isEsqlFilterableSource(source))?.id
       : undefined;
     const parentDataViewId =
       defaultDataViewId ??

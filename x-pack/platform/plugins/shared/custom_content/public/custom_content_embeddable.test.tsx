@@ -9,7 +9,7 @@ import React from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { RequestAdapter, apiHasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import { render, screen, act, waitFor } from '@testing-library/react';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FilterableSource } from '@kbn/data-source';
 import { ChatEventType, TimelineEventType } from '@kbn/agent-builder-common';
 import { customContentEmbeddableFactory } from './custom_content_embeddable';
 import type { CustomContentApi } from './custom_content_embeddable';
@@ -122,10 +122,14 @@ const mockTelemetry = {
 
 jest.mock('./telemetry', () => ({ getTelemetry: () => mockTelemetry }));
 
-const mockGetESQLAdHocDataview = jest.fn();
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
-  getESQLAdHocDataview: (...args: unknown[]) => mockGetESQLAdHocDataview(...args),
+const mockGetEsqlFilterableSource = jest.fn();
+jest.mock('@kbn/data-source', () => ({
+  ...jest.requireActual('@kbn/data-source'),
+  EsqlSource: {
+    forDataset: async (args: unknown) => ({
+      toFilterableSource: async () => mockGetEsqlFilterableSource(args),
+    }),
+  },
 }));
 
 jest.mock('./services', () => ({
@@ -254,33 +258,35 @@ describe('customContentEmbeddableFactory', () => {
     });
   });
 
-  describe('data views', () => {
-    // One fake data view per index and time field, like the real ad-hoc ones (their id is made of
-    // both): `FROM logs | …` is the data view of `logs`, and a query that uses `?_tstart` on
-    // `sale_date` gives it that time field.
+  describe('data sources', () => {
+    // One fake source per index and time field, like the real ones (their id is made of both):
+    // `FROM logs | …` is the source of `logs`, and a query that uses `?_tstart` on `sale_date`
+    // gives it that time field.
     const indexOf = (query: string) => query.replace(/^FROM (\S+).*$/, '$1');
     const timeFieldOf = (query: string) => (query.includes('?_tstart') ? 'sale_date' : undefined);
     const titles = (embeddable: { api: { dataSources$: { getValue: () => unknown } } }) =>
-      ((embeddable.api.dataSources$.getValue() as DataView[] | undefined) ?? []).map((dataView) =>
-        dataView.getIndexPattern()
+      ((embeddable.api.dataSources$.getValue() as FilterableSource[] | undefined) ?? []).map(
+        ({ title }) => title
       );
 
     beforeEach(() => {
-      mockGetESQLAdHocDataview.mockReset();
-      mockGetESQLAdHocDataview.mockImplementation(async ({ query }: { query: string }) => {
+      mockGetEsqlFilterableSource.mockReset();
+      mockGetEsqlFilterableSource.mockImplementation(async ({ query }: { query: string }) => {
         if (query.startsWith('FROM broken')) throw new Error('cannot resolve');
         const timeFieldName = timeFieldOf(query);
         return {
           id: [indexOf(query), timeFieldName].filter(Boolean).join('-'),
+          title: indexOf(query),
+          fields: [],
           timeFieldName,
-          getIndexPattern: () => indexOf(query),
+          isTimeBased: () => timeFieldName !== undefined,
         };
       });
     });
 
     // The dashboard uses these for the filter bar's field suggestions and to decide whether to
     // offer its time picker, and every query is fetched with the dashboard's time range.
-    it('publishes a data view for every query, not only the main one', async () => {
+    it('publishes a source for every query, not only the main one', async () => {
       const { embeddable } = await buildEmbeddable({
         ...baseState,
         esql_query: ['FROM logs | LIMIT 1', 'FROM metrics | LIMIT 1', 'FROM traces | LIMIT 1'],
@@ -289,7 +295,7 @@ describe('customContentEmbeddableFactory', () => {
       await waitFor(() => expect(titles(embeddable)).toEqual(['logs', 'metrics', 'traces']));
     });
 
-    it('publishes a data view once when several queries read the same index', async () => {
+    it('publishes a source once when several queries read the same index', async () => {
       const { embeddable } = await buildEmbeddable({
         ...baseState,
         esql_query: ['FROM logs | STATS a = COUNT(*)', 'FROM logs | STATS b = COUNT(*) BY host'],
@@ -298,9 +304,9 @@ describe('customContentEmbeddableFactory', () => {
       await waitFor(() => expect(titles(embeddable)).toEqual(['logs']));
     });
 
-    // A time field is what makes the dashboard offer its time picker, so a data view that has one
-    // must not be dropped because another query on the same index has none.
-    it('publishes both data views when queries on one index resolve different time fields', async () => {
+    // A time field is what makes the dashboard offer its time picker, so a source that has one must
+    // not be dropped because another query on the same index has none.
+    it('publishes both sources when queries on one index resolve different time fields', async () => {
       const { embeddable } = await buildEmbeddable({
         ...baseState,
         esql_query: [
@@ -310,13 +316,23 @@ describe('customContentEmbeddableFactory', () => {
       });
 
       await waitFor(() => expect(titles(embeddable)).toEqual(['sales', 'sales']));
-      const timeFields = (embeddable.api.dataSources$.getValue() as DataView[]).map(
+      const timeFields = (embeddable.api.dataSources$.getValue() as FilterableSource[]).map(
         ({ timeFieldName }) => timeFieldName
       );
       expect(timeFields).toEqual([undefined, 'sale_date']);
     });
 
-    it('keeps the data views of the other queries when one cannot be resolved', async () => {
+    it('resolves the sources with the project routing of the dashboard', async () => {
+      await buildEmbeddable(baseState, { projectRouting$: new BehaviorSubject('_alias:*') });
+
+      await waitFor(() =>
+        expect(mockGetEsqlFilterableSource).toHaveBeenCalledWith(
+          expect.objectContaining({ projectRouting: '_alias:*' })
+        )
+      );
+    });
+
+    it('keeps the sources of the other queries when one cannot be resolved', async () => {
       const { embeddable } = await buildEmbeddable({
         ...baseState,
         esql_query: ['FROM broken | LIMIT 1', 'FROM metrics | LIMIT 1'],
@@ -330,7 +346,7 @@ describe('customContentEmbeddableFactory', () => {
 
       await act(async () => {});
       expect(embeddable.api.dataSources$.getValue()).toBeUndefined();
-      expect(mockGetESQLAdHocDataview).not.toHaveBeenCalled();
+      expect(mockGetEsqlFilterableSource).not.toHaveBeenCalled();
     });
 
     it('follows the additional queries when they change', async () => {
@@ -346,13 +362,13 @@ describe('customContentEmbeddableFactory', () => {
       await waitFor(() => expect(titles(embeddable)).toEqual(['logs', 'metrics']));
     });
 
-    it('does not resolve the data views again when nothing about the queries changed', async () => {
+    it('does not resolve the sources again when nothing about the queries changed', async () => {
       const { embeddable } = await buildEmbeddable({
         ...baseState,
         esql_query: ['FROM logs | LIMIT 1', 'FROM metrics | LIMIT 1'],
       });
       await waitFor(() => expect(titles(embeddable)).toEqual(['logs', 'metrics']));
-      const calls = mockGetESQLAdHocDataview.mock.calls.length;
+      const calls = mockGetEsqlFilterableSource.mock.calls.length;
 
       act(() => {
         embeddable.api.applySerializedState({
@@ -362,7 +378,7 @@ describe('customContentEmbeddableFactory', () => {
       });
       await act(async () => {});
 
-      expect(mockGetESQLAdHocDataview).toHaveBeenCalledTimes(calls);
+      expect(mockGetEsqlFilterableSource).toHaveBeenCalledTimes(calls);
     });
   });
 

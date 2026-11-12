@@ -30,7 +30,6 @@ describe('getDataViewIdFromESQLQuery', () => {
 
   it('returns a matching parent-published data view id before checking saved data views', async () => {
     dataViewsService.find = jest.fn();
-    dataViewsService.get = jest.fn().mockResolvedValue({ id: 'published-data-view' });
     const parentApi = {
       dataSources$: new BehaviorSubject<DataView[] | undefined>([
         { id: 'published-data-view', title: 'logs-*', getIndexPattern: () => 'logs-*' },
@@ -43,15 +42,14 @@ describe('getDataViewIdFromESQLQuery', () => {
       })
     ).resolves.toBe('published-data-view');
 
-    expect(dataViewsService.get).toHaveBeenCalledWith('published-data-view', false);
     expect(dataViewsService.find).not.toHaveBeenCalled();
     expect(mockGetESQLAdHocDataview).not.toHaveBeenCalled();
   });
 
   it('does not use the id of a parent-published ES|QL source, which is not a data view', async () => {
-    dataViewsService.get = jest.fn().mockRejectedValue(new Error('Saved object not found'));
     dataViewsService.find = jest.fn().mockResolvedValue([{ id: 'saved-data-view' }]);
     const esqlSource: FilterableSource = {
+      kind: 'esql',
       id: 'esql-dataset-id',
       title: 'logs-*',
       fields: [],
@@ -65,7 +63,6 @@ describe('getDataViewIdFromESQLQuery', () => {
       getDataViewIdFromESQLQuery('FROM logs-* | STATS BY service.name', { parentApi })
     ).resolves.toBe('saved-data-view');
 
-    expect(dataViewsService.get).toHaveBeenCalledWith('esql-dataset-id', false);
     expect(dataViewsService.find).toHaveBeenCalledWith('logs-*');
   });
 
