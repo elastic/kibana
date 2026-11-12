@@ -6,7 +6,7 @@
  */
 
 import type { TraceTranscriptMemory } from '../../common/step_types/read_trace_transcripts';
-import { batchByConversation, estimateTokens } from './trace_batches';
+import { batchByConversation, estimateTokens, splitRound } from './trace_batches';
 
 /** A round of `tokens` estimated tokens: its title and content are 4 characters a token. */
 const round = (
@@ -59,16 +59,58 @@ describe('batchByConversation', () => {
     ]);
   });
 
-  it('splits a conversation larger than the budget into consecutive parts, and a huge round stays alone', () => {
+  it('splits a conversation larger than the budget between its rounds, and a round larger than it into parts', () => {
     const rounds = [
       round('a1', 'a', 60),
       round('a2', 'a', 60),
       round('a3', 'a', 30),
-      round('b1', 'b', 500),
+      {
+        ...round('b1', 'b', 0),
+        content: Array.from({ length: 10 }, (_, i) => `${i}`.repeat(150)).join('\n'),
+      },
       round('c1', 'c', 10),
     ];
+    const batches = batchByConversation(rounds, 100);
 
-    expect(ids(batchByConversation(rounds, 100))).toEqual([['a1'], ['a2', 'a3'], ['b1'], ['c1']]);
+    const batchIds = ids(batches);
+
+    const parts = batchIds.flat().filter((id) => id === 'b1').length;
+
+    expect(batchIds.slice(0, 2)).toEqual([['a1'], ['a2', 'a3']]);
+    expect(parts).toBeGreaterThan(1);
+    expect(batchIds.flat()).toEqual(['a1', 'a2', 'a3', ...Array(parts).fill('b1'), 'c1']);
+    expect(batches.flat().every((part) => estimateTokens(part) <= 100)).toBe(true);
+  });
+
+  it('splits a long round between lines, each part saying which it is and how the round began', () => {
+    const lines = [
+      'User: order a laptop',
+      ...Array.from({ length: 30 }, (_, i) => `Tool result: page ${i} ${'x'.repeat(40)}`),
+      'Assistant: done',
+    ];
+    const long = { ...round('r1', 'a', 0), content: lines.join('\n') };
+    const parts = splitRound(long, 200);
+
+    expect(parts.length).toBeGreaterThan(1);
+    expect(parts.every(({ id }) => id === 'r1')).toBe(true);
+    expect(parts.every((part) => estimateTokens(part) <= 200)).toBe(true);
+    expect(
+      parts[0].content.startsWith(`[Part 1 of ${parts.length} of this round]\nUser: order a laptop`)
+    ).toBe(true);
+    expect(
+      parts[1].content.startsWith(
+        `[Part 2 of ${parts.length} of this round, which began: User: order a laptop]`
+      )
+    ).toBe(true);
+    expect(parts.map(({ content }) => content.split('\n').slice(1).join('\n')).join('\n')).toBe(
+      long.content
+    );
+    expect(splitRound(round('s', 'a', 10), 200)).toEqual([round('s', 'a', 10)]);
+    expect(
+      splitRound({ ...round('w', 'a', 0), content: 'y'.repeat(3000) }, 200)
+        .map(({ content }) => content.split('\n')[1])
+        .join('')
+    ).toBe('y'.repeat(3000));
   });
 
   it('never batches rounds with different permissions, and keeps rounds without a conversation apart', () => {
