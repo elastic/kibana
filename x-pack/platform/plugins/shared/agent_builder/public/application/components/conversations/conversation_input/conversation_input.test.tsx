@@ -75,8 +75,9 @@ jest.mock('../../../context/conversation/conversation_context', () => ({
 jest.mock('../../../hooks/use_submit_message', () => ({
   useSubmitMessage: jest.fn(),
 }));
+const mockSendSteer = jest.fn();
 jest.mock('../../../hooks/use_send_steer', () => ({
-  useSendSteer: () => ({ sendSteer: jest.fn().mockResolvedValue(true), isSending: false }),
+  useSendSteer: () => ({ sendSteer: mockSendSteer, isSending: false }),
 }));
 jest.mock('../../../hooks/use_send_user_message', () => ({
   useSendUserMessage: jest.fn(),
@@ -271,6 +272,7 @@ describe('ConversationInput', () => {
     } as never);
     mockedUseSubmitMessage.mockReturnValue({ submitMessage, isCreatingConversation: false });
     sendUserMessage.mockResolvedValue({ id: 'conv-1' });
+    mockSendSteer.mockResolvedValue(true);
     mockedUseSendUserMessage.mockReturnValue({
       mutateAsync: sendUserMessage,
       isLoading: false,
@@ -519,6 +521,52 @@ describe('ConversationInput', () => {
 
       expect(submitMessage).toHaveBeenCalledWith('hello agent');
       expect(sendUserMessage).not.toHaveBeenCalled();
+    });
+
+    describe('while the agent runs', () => {
+      beforeEach(() => {
+        mockedUseConversationStream.mockReturnValue({
+          pendingMessage: undefined,
+          isResuming: false,
+          isResponseLoading: true,
+          canCancel: true,
+        } as never);
+      });
+
+      it('posts to the team instead of steering the running agent when skipping the agent', async () => {
+        renderInput(<ConversationInput />);
+
+        selectTalkToUsers();
+        fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+        expect(sendUserMessage).toHaveBeenCalledWith('hello agent');
+        expect(mockSendSteer).not.toHaveBeenCalled();
+        expect(submitMessage).not.toHaveBeenCalled();
+        await waitFor(() => expect(editorController.clear).toHaveBeenCalledTimes(1));
+      });
+
+      it('steers the running agent when asking the agent', async () => {
+        renderInput(<ConversationInput />);
+
+        fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+        expect(mockSendSteer).toHaveBeenCalledWith('hello agent', {
+          onUnsent: expect.any(Function),
+        });
+        expect(sendUserMessage).not.toHaveBeenCalled();
+        expect(submitMessage).not.toHaveBeenCalled();
+        await waitFor(() => expect(editorController.clear).toHaveBeenCalledTimes(1));
+      });
+
+      it('puts the text back when the steer fails after the submit', () => {
+        renderInput(<ConversationInput />);
+
+        fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+        const { onUnsent } = mockSendSteer.mock.calls[0][1];
+        onUnsent('hello agent');
+
+        expect(editorController.setContent).toHaveBeenCalledWith('hello agent');
+      });
     });
   });
 

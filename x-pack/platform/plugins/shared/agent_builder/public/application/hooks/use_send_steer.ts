@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { EventActorType, TimelineEventType } from '@kbn/agent-builder-common';
+import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
+import {
+  AgentBuilderErrorCode,
+  EventActorType,
+  TimelineEventType,
+} from '@kbn/agent-builder-common';
 import type { UserMessageEvent } from '@kbn/agent-builder-common';
 import { i18n } from '@kbn/i18n';
-import type { SteerConversationErrorBody } from '../../../common/http_api/conversations';
+import type {
+  SteerConversationErrorBody,
+  SteerConversationResponse,
+} from '../../../common/http_api/conversations';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useConversationStreamService } from '../context/streaming/streaming_context';
 import { useAgentBuilderServices } from './use_agent_builder_service';
@@ -43,6 +51,40 @@ const steerErrorBody = (error: unknown): SteerConversationErrorBody | undefined 
     : undefined;
 };
 
+/** A 4xx without a steer code (not found, forbidden, invalid): refused before anything was written. */
+const isAnsweredRefusal = (error: unknown): boolean => {
+  const status = (error as IHttpFetchError)?.response?.status;
+  return typeof status === 'number' && status >= 400 && status < 500;
+};
+
+/** Whether the ordinary send was refused because a run holds the conversation. */
+const isConversationBusyRejection = (error: unknown): boolean => {
+  const body = (error as IHttpFetchError<{ attributes?: { code?: string } }>)?.body;
+  return body?.attributes?.code === AgentBuilderErrorCode.conversationBusy;
+};
+
+/** A steer request that got no answer; its id is reused so the retry stores nothing twice. */
+interface UnansweredSteer {
+  conversationId: string;
+  message: string;
+  eventId: string;
+}
+
+type SteerOutcome =
+  /** Stored by this request or an earlier one. */
+  | { kind: 'stored' }
+  /** No run holds the conversation and nothing is stored: the message starts a run instead. */
+  | { kind: 'converse' }
+  /** Refused by the server, with the reason to show. */
+  | { kind: 'refused'; title: string }
+  /** No answer: the request may or may not have landed. */
+  | { kind: 'unanswered' };
+
+export interface SendSteerOptions {
+  /** Called with the message when a failure settles after the submit already resolved as sent. */
+  onUnsent?: (message: string) => void;
+}
+
 /**
  * Sends a message to the agent running on the current conversation. Stored first by the `_steer`
  * route, then shown in the timeline as waiting until the run's `message_delivered` event moves it
@@ -57,61 +99,122 @@ export const useSendSteer = () => {
   const { currentUser } = useCurrentUser();
   const { addErrorToast } = useToasts();
   const [isSending, setIsSending] = useState(false);
+  const unansweredRef = useRef<UnansweredSteer | undefined>(undefined);
+
+  const attemptSteer = useCallback(
+    async ({
+      targetConversationId,
+      message,
+      eventId,
+    }: {
+      targetConversationId: string;
+      message: string;
+      eventId: string;
+    }): Promise<SteerOutcome> => {
+      let result: SteerConversationResponse;
+      try {
+        result = await conversationsService.steer({
+          conversationId: targetConversationId,
+          message,
+          eventId,
+        });
+      } catch (error) {
+        const body = steerErrorBody(error);
+        if (body?.error === 'no_active_execution') {
+          return body.already_stored ? { kind: 'stored' } : { kind: 'converse' };
+        }
+        if (body?.error === 'awaiting_prompt') {
+          return { kind: 'refused', title: labels.awaitingPrompt };
+        }
+        if (body?.error === 'not_steerable') {
+          return { kind: 'refused', title: labels.notSteerable };
+        }
+        if (body?.error === 'too_many_pending') {
+          return { kind: 'refused', title: labels.tooManyPending };
+        }
+        if (isAnsweredRefusal(error)) {
+          return { kind: 'refused', title: formatAgentBuilderErrorMessage(error) };
+        }
+        return { kind: 'unanswered' };
+      }
+      const stored: UserMessageEvent = {
+        id: result.event_id,
+        type: TimelineEventType.userMessage,
+        created_at: result.created_at,
+        actor: {
+          type: EventActorType.user,
+          id: currentUser?.uid ?? '',
+          ...(currentUser?.user.username ? { username: currentUser.user.username } : {}),
+        },
+        data: { message, steer: { execution_id: result.execution_id } },
+      };
+      conversationStreamService.recordSteer(targetConversationId, stored);
+      return { kind: 'stored' };
+    },
+    [conversationsService, conversationStreamService, currentUser]
+  );
 
   const sendSteer = useCallback(
-    async (message: string): Promise<boolean> => {
+    async (message: string, { onUnsent }: SendSteerOptions = {}): Promise<boolean> => {
       if (!conversationId) {
         return false;
       }
-      const eventId = uuidv4();
+      // The same text after an unanswered request is a retry of it, under the same id.
+      const unanswered = unansweredRef.current;
+      const eventId =
+        unanswered?.conversationId === conversationId && unanswered.message === message
+          ? unanswered.eventId
+          : uuidv4();
+      unansweredRef.current = undefined;
       setIsSending(true);
       try {
-        const result = await conversationsService.steer({ conversationId, message, eventId });
-        const stored: UserMessageEvent = {
-          id: result.event_id,
-          type: TimelineEventType.userMessage,
-          created_at: result.created_at,
-          actor: {
-            type: EventActorType.user,
-            id: currentUser?.uid ?? '',
-            ...(currentUser?.user.username ? { username: currentUser.user.username } : {}),
-          },
-          data: { message, steer: { execution_id: result.execution_id } },
-        };
-        conversationStreamService.recordSteer(conversationId, stored);
-        return true;
-      } catch (error) {
-        const body = steerErrorBody(error);
-        if (body?.error === 'no_active_execution' && !body.already_stored) {
-          // The run finished between the two requests: the message starts the next one.
-          sendMessage({ message, conversationId });
-          return true;
+        const outcome = await attemptSteer({
+          targetConversationId: conversationId,
+          message,
+          eventId,
+        });
+        switch (outcome.kind) {
+          case 'stored':
+            return true;
+          case 'unanswered':
+            unansweredRef.current = { conversationId, message, eventId };
+            addErrorToast({ title: labels.failed });
+            return false;
+          case 'refused':
+            addErrorToast({ title: outcome.title });
+            return false;
+          case 'converse':
+            // The run finished between the two requests: the message starts the next one.
+            sendMessage({
+              message,
+              conversationId,
+              onRejected: (error) => {
+                if (!isConversationBusyRejection(error)) {
+                  return false;
+                }
+                // Another run took the conversation meanwhile: it is steered once, under the same
+                // id, so the earlier attempts and this one still amount to one stored message.
+                void attemptSteer({ targetConversationId: conversationId, message, eventId }).then(
+                  (retry) => {
+                    if (retry.kind === 'stored') {
+                      return;
+                    }
+                    addErrorToast({
+                      title: retry.kind === 'refused' ? retry.title : labels.failed,
+                    });
+                    onUnsent?.(message);
+                  }
+                );
+                return true;
+              },
+            });
+            return true;
         }
-        if (body?.error === 'no_active_execution') {
-          return true;
-        }
-        const title =
-          body?.error === 'awaiting_prompt'
-            ? labels.awaitingPrompt
-            : body?.error === 'not_steerable'
-            ? labels.notSteerable
-            : body?.error === 'too_many_pending'
-            ? labels.tooManyPending
-            : labels.failed;
-        addErrorToast({ title });
-        return false;
       } finally {
         setIsSending(false);
       }
     },
-    [
-      conversationId,
-      conversationsService,
-      conversationStreamService,
-      sendMessage,
-      currentUser,
-      addErrorToast,
-    ]
+    [conversationId, attemptSteer, sendMessage, addErrorToast]
   );
 
   return { sendSteer, isSending };

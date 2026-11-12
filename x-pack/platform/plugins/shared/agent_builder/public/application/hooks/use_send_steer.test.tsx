@@ -1,0 +1,359 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { AgentBuilderErrorCode, TimelineEventType } from '@kbn/agent-builder-common';
+import type { SteerConversationErrorBody } from '../../../common/http_api/conversations';
+import { useSendSteer } from './use_send_steer';
+
+jest.mock('./use_agent_builder_service');
+jest.mock('../context/conversation/use_conversation_id');
+jest.mock('../context/streaming/streaming_context', () => ({
+  useConversationStreamService: jest.fn(),
+}));
+jest.mock('./use_conversation_stream', () => ({
+  useConversationStream: jest.fn(),
+}));
+jest.mock('./use_current_user', () => ({
+  useCurrentUser: jest.fn(),
+}));
+jest.mock('./use_toasts', () => ({
+  useToasts: jest.fn(),
+}));
+jest.mock('@kbn/agent-builder-browser', () => ({
+  formatAgentBuilderErrorMessage: (error: Error) => error.message,
+}));
+
+const { useAgentBuilderServices } = jest.requireMock('./use_agent_builder_service');
+const { useConversationId } = jest.requireMock('../context/conversation/use_conversation_id');
+const { useConversationStreamService } = jest.requireMock('../context/streaming/streaming_context');
+const { useConversationStream } = jest.requireMock('./use_conversation_stream');
+const { useCurrentUser } = jest.requireMock('./use_current_user');
+const { useToasts } = jest.requireMock('./use_toasts');
+
+const conversationId = 'conv-1';
+
+const httpError = ({
+  status,
+  message = 'Refused',
+  attributes,
+}: {
+  status: number;
+  message?: string;
+  attributes?: Record<string, unknown>;
+}) =>
+  Object.assign(new Error(message), {
+    name: 'HttpFetchError',
+    request: {},
+    response: { status },
+    body: { statusCode: status, message, ...(attributes ? { attributes } : {}) },
+  });
+
+const steerRefusal = (attributes: SteerConversationErrorBody, status = 409) =>
+  httpError({ status, attributes: { ...attributes } });
+
+const networkError = () => new Error('Failed to fetch');
+
+const busyRejection = () =>
+  httpError({
+    status: 409,
+    message: 'Conversation busy',
+    attributes: { code: AgentBuilderErrorCode.conversationBusy },
+  });
+
+const storedResponse = (eventId: string) => ({
+  event_id: eventId,
+  execution_id: 'exec-1',
+  created_at: '2026-11-12T10:00:00.000Z',
+});
+
+describe('useSendSteer', () => {
+  let steer: jest.Mock;
+  let recordSteer: jest.Mock;
+  let sendMessage: jest.Mock;
+  let addErrorToast: jest.Mock;
+
+  const steerIdOfCall = (call: number): string => steer.mock.calls[call][0].eventId;
+
+  beforeEach(() => {
+    steer = jest.fn();
+    recordSteer = jest.fn();
+    sendMessage = jest.fn();
+    addErrorToast = jest.fn();
+    useAgentBuilderServices.mockReturnValue({ conversationsService: { steer } });
+    useConversationId.mockReturnValue(conversationId);
+    useConversationStreamService.mockReturnValue({ recordSteer });
+    useConversationStream.mockReturnValue({ sendMessage });
+    useCurrentUser.mockReturnValue({ currentUser: { uid: 'user-1', user: { username: 'sid' } } });
+    useToasts.mockReturnValue({ addErrorToast });
+  });
+
+  it('stores the message and shows it waiting in the live stream', async () => {
+    steer.mockImplementation(({ eventId }) => Promise.resolve(storedResponse(eventId)));
+    const { result } = renderHook(() => useSendSteer());
+
+    let sent: boolean | undefined;
+    await act(async () => {
+      sent = await result.current.sendSteer('use a table');
+    });
+
+    expect(sent).toBe(true);
+    expect(steer).toHaveBeenCalledWith({
+      conversationId,
+      message: 'use a table',
+      eventId: expect.any(String),
+    });
+    expect(recordSteer).toHaveBeenCalledWith(conversationId, {
+      id: steerIdOfCall(0),
+      type: TimelineEventType.userMessage,
+      created_at: '2026-11-12T10:00:00.000Z',
+      actor: { type: 'user', id: 'user-1', username: 'sid' },
+      data: { message: 'use a table', steer: { execution_id: 'exec-1' } },
+    });
+    expect(sendMessage).not.toHaveBeenCalled();
+    expect(addErrorToast).not.toHaveBeenCalled();
+  });
+
+  it('does nothing without a conversation', async () => {
+    useConversationId.mockReturnValue(undefined);
+    const { result } = renderHook(() => useSendSteer());
+
+    let sent: boolean | undefined;
+    await act(async () => {
+      sent = await result.current.sendSteer('hello');
+    });
+
+    expect(sent).toBe(false);
+    expect(steer).not.toHaveBeenCalled();
+  });
+
+  it('starts a run through the ordinary send when no run holds the conversation', async () => {
+    steer.mockRejectedValue(steerRefusal({ error: 'no_active_execution', already_stored: false }));
+    const { result } = renderHook(() => useSendSteer());
+
+    let sent: boolean | undefined;
+    await act(async () => {
+      sent = await result.current.sendSteer('hello');
+    });
+
+    expect(sent).toBe(true);
+    expect(sendMessage).toHaveBeenCalledWith({
+      message: 'hello',
+      conversationId,
+      onRejected: expect.any(Function),
+    });
+    expect(addErrorToast).not.toHaveBeenCalled();
+  });
+
+  it('sends nothing more when an earlier request already stored the message', async () => {
+    steer.mockRejectedValue(steerRefusal({ error: 'no_active_execution', already_stored: true }));
+    const { result } = renderHook(() => useSendSteer());
+
+    let sent: boolean | undefined;
+    await act(async () => {
+      sent = await result.current.sendSteer('hello');
+    });
+
+    expect(sent).toBe(true);
+    expect(sendMessage).not.toHaveBeenCalled();
+    expect(addErrorToast).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['awaiting_prompt', /waiting for your answer/],
+    ['not_steerable', /public conversation/],
+    ['too_many_pending', /unread messages/],
+  ] as const)('keeps the text and explains a %s refusal', async (error, title) => {
+    steer.mockRejectedValue(steerRefusal({ error }));
+    const { result } = renderHook(() => useSendSteer());
+
+    let sent: boolean | undefined;
+    await act(async () => {
+      sent = await result.current.sendSteer('hello');
+    });
+
+    expect(sent).toBe(false);
+    expect(addErrorToast).toHaveBeenCalledWith({ title: expect.stringMatching(title) });
+    expect(sendMessage).not.toHaveBeenCalled();
+  });
+
+  it('shows the server message for a refusal without a steer code and does not keep its id', async () => {
+    steer.mockRejectedValueOnce(httpError({ status: 404, message: 'Conversation not found' }));
+    steer.mockImplementationOnce(({ eventId }) => Promise.resolve(storedResponse(eventId)));
+    const { result } = renderHook(() => useSendSteer());
+
+    await act(async () => {
+      await result.current.sendSteer('hello');
+    });
+    expect(addErrorToast).toHaveBeenCalledWith({ title: 'Conversation not found' });
+
+    await act(async () => {
+      await result.current.sendSteer('hello');
+    });
+
+    expect(steer).toHaveBeenCalledTimes(2);
+    expect(steerIdOfCall(1)).not.toBe(steerIdOfCall(0));
+  });
+
+  describe('a request that got no answer', () => {
+    it('reports the failure, keeps the text, and retries the same text under the same id', async () => {
+      steer.mockRejectedValueOnce(networkError());
+      steer.mockImplementationOnce(({ eventId }) => Promise.resolve(storedResponse(eventId)));
+      const { result } = renderHook(() => useSendSteer());
+
+      let sent: boolean | undefined;
+      await act(async () => {
+        sent = await result.current.sendSteer('hello');
+      });
+      expect(sent).toBe(false);
+      expect(addErrorToast).toHaveBeenCalledWith({
+        title: expect.stringMatching(/could not be sent/),
+      });
+
+      await act(async () => {
+        sent = await result.current.sendSteer('hello');
+      });
+
+      expect(sent).toBe(true);
+      expect(steer).toHaveBeenCalledTimes(2);
+      expect(steerIdOfCall(1)).toBe(steerIdOfCall(0));
+    });
+
+    it('treats the message as stored when the retry finds it there', async () => {
+      steer.mockRejectedValueOnce(networkError());
+      steer.mockRejectedValueOnce(
+        steerRefusal({ error: 'no_active_execution', already_stored: true })
+      );
+      const { result } = renderHook(() => useSendSteer());
+
+      await act(async () => {
+        await result.current.sendSteer('hello');
+      });
+      let sent: boolean | undefined;
+      await act(async () => {
+        sent = await result.current.sendSteer('hello');
+      });
+
+      expect(sent).toBe(true);
+      expect(steerIdOfCall(1)).toBe(steerIdOfCall(0));
+      expect(sendMessage).not.toHaveBeenCalled();
+    });
+
+    it('uses a new id for different text', async () => {
+      steer.mockRejectedValueOnce(networkError());
+      steer.mockImplementationOnce(({ eventId }) => Promise.resolve(storedResponse(eventId)));
+      const { result } = renderHook(() => useSendSteer());
+
+      await act(async () => {
+        await result.current.sendSteer('hello');
+      });
+      await act(async () => {
+        await result.current.sendSteer('hello again');
+      });
+
+      expect(steerIdOfCall(1)).not.toBe(steerIdOfCall(0));
+    });
+
+    it('forgets the id once a request was answered', async () => {
+      steer.mockRejectedValueOnce(networkError());
+      steer.mockRejectedValueOnce(steerRefusal({ error: 'too_many_pending' }, 429));
+      steer.mockImplementationOnce(({ eventId }) => Promise.resolve(storedResponse(eventId)));
+      const { result } = renderHook(() => useSendSteer());
+
+      for (let attempt = 0; attempt < 3; attempt++) {
+        await act(async () => {
+          await result.current.sendSteer('hello');
+        });
+      }
+
+      expect(steerIdOfCall(1)).toBe(steerIdOfCall(0));
+      expect(steerIdOfCall(2)).not.toBe(steerIdOfCall(0));
+    });
+  });
+
+  describe('when the ordinary send is refused because a run took the conversation', () => {
+    const fallBackToConverse = async () => {
+      steer.mockRejectedValueOnce(
+        steerRefusal({ error: 'no_active_execution', already_stored: false })
+      );
+      const onUnsent = jest.fn();
+      const { result } = renderHook(() => useSendSteer());
+      await act(async () => {
+        await result.current.sendSteer('hello', { onUnsent });
+      });
+      const { onRejected } = sendMessage.mock.calls[0][0];
+      return { onRejected, onUnsent };
+    };
+
+    it('steers the new run once, under the same id, and handles the rejection', async () => {
+      const { onRejected, onUnsent } = await fallBackToConverse();
+      steer.mockImplementationOnce(({ eventId }) => Promise.resolve(storedResponse(eventId)));
+
+      let handled: boolean | undefined;
+      act(() => {
+        handled = onRejected(busyRejection());
+      });
+
+      expect(handled).toBe(true);
+      await waitFor(() => expect(recordSteer).toHaveBeenCalledTimes(1));
+      expect(steer).toHaveBeenCalledTimes(2);
+      expect(steerIdOfCall(1)).toBe(steerIdOfCall(0));
+      expect(addErrorToast).not.toHaveBeenCalled();
+      expect(onUnsent).not.toHaveBeenCalled();
+    });
+
+    it('gives the text back with the reason when the second steer is refused too', async () => {
+      const { onRejected, onUnsent } = await fallBackToConverse();
+      steer.mockRejectedValueOnce(steerRefusal({ error: 'too_many_pending' }, 429));
+
+      act(() => {
+        onRejected(busyRejection());
+      });
+
+      await waitFor(() =>
+        expect(addErrorToast).toHaveBeenCalledWith({
+          title: expect.stringMatching(/unread messages/),
+        })
+      );
+      expect(onUnsent).toHaveBeenCalledWith('hello');
+      expect(steer).toHaveBeenCalledTimes(2);
+    });
+
+    it('gives the text back when the new run is gone again rather than racing a third time', async () => {
+      const { onRejected, onUnsent } = await fallBackToConverse();
+      steer.mockRejectedValueOnce(
+        steerRefusal({ error: 'no_active_execution', already_stored: false })
+      );
+
+      act(() => {
+        onRejected(busyRejection());
+      });
+
+      await waitFor(() =>
+        expect(addErrorToast).toHaveBeenCalledWith({
+          title: expect.stringMatching(/could not be sent/),
+        })
+      );
+      expect(onUnsent).toHaveBeenCalledWith('hello');
+      expect(sendMessage).toHaveBeenCalledTimes(1);
+    });
+
+    it('leaves any other rejection to the send path', async () => {
+      const { onRejected, onUnsent } = await fallBackToConverse();
+
+      let handled: boolean | undefined;
+      act(() => {
+        handled = onRejected(httpError({ status: 403, message: 'Forbidden' }));
+      });
+
+      expect(handled).toBe(false);
+      expect(steer).toHaveBeenCalledTimes(1);
+      expect(addErrorToast).not.toHaveBeenCalled();
+      expect(onUnsent).not.toHaveBeenCalled();
+    });
+  });
+});

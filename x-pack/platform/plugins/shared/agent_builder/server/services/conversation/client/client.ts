@@ -883,7 +883,6 @@ class ConversationClientImpl implements ConversationClient {
     { source }: ConversationWriteOptions
   ): Promise<AppendSteerResult> {
     const createdAt = new Date().toISOString();
-    // `fields` may run more than once on OCC retry; the last run is the one that was written.
     let written: UserMessageEvent | undefined;
     let holderId: string | undefined;
 

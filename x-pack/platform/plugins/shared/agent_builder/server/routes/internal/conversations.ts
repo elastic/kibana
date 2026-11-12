@@ -82,69 +82,6 @@ export function registerInternalConversationRoutes({
     })
   );
 
-  // steer: a message for the agent currently running on the conversation
-  router.post(
-    {
-      path: `${internalApiPath}/conversations/{conversation_id}/_steer`,
-      validate: {
-        params: schema.object({
-          conversation_id: schema.string({ maxLength: CONVERSATION_ID_MAX_LENGTH }),
-        }),
-        body: schema.object({
-          message: schema.string({ minLength: 1, maxLength: STEER_MESSAGE_MAX_LENGTH }),
-          // An idempotency key the client mints; its format is not validated.
-          event_id: schema.string({ minLength: 1, maxLength: 64 }),
-        }),
-      },
-      options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
-    },
-    wrapHandler(async (ctx, request, response) => {
-      const { conversations: conversationsService } = getInternalServices();
-      const { conversation_id: conversationId } = request.params;
-      const { message, event_id: eventId } = request.body;
-
-      const client = await conversationsService.getScopedClient({ request });
-      // Core's error body is `{ message, attributes }`; the typed refusal rides `attributes`.
-      const refuse = (statusCode: number, body: SteerConversationErrorBody) =>
-        response.customError({ statusCode, body: { message: body.error, attributes: body } });
-      try {
-        const result = await client.appendSteer(
-          { id: conversationId, message, eventId, actor: currentUserActor(client.getUser()) },
-          { source: 'http_api' }
-        );
-        return response.ok<SteerConversationResponse>({
-          body: {
-            event_id: result.eventId,
-            execution_id: result.executionId,
-            created_at: result.createdAt,
-            ...(result.alreadyStored ? { already_stored: true } : {}),
-          },
-        });
-      } catch (error) {
-        // The client branches on these bodies; the generic wrapper would hide the code.
-        if (isConversationNotSteerableError(error)) {
-          return refuse(409, { error: 'not_steerable' });
-        }
-        if (isConversationAwaitingPromptError(error)) {
-          return refuse(409, { error: 'awaiting_prompt' });
-        }
-        if (isNoActiveExecutionError(error)) {
-          return refuse(409, {
-            error: 'no_active_execution',
-            already_stored: Boolean(error.meta?.alreadyStored),
-          });
-        }
-        if (isTooManyPendingSteersError(error)) {
-          return refuse(429, { error: 'too_many_pending' });
-        }
-        throw error;
-      }
-    })
-  );
-
   router.post(
     {
       path: `${internalApiPath}/conversations/{conversation_id}/_apply_template`,
@@ -394,6 +331,66 @@ export function registerInternalConversationRoutes({
           results,
         },
       });
+    })
+  );
+
+  router.post(
+    {
+      path: `${internalApiPath}/conversations/{conversation_id}/_steer`,
+      validate: {
+        params: schema.object({
+          conversation_id: schema.string({ maxLength: CONVERSATION_ID_MAX_LENGTH }),
+        }),
+        body: schema.object({
+          message: schema.string({ minLength: 1, maxLength: STEER_MESSAGE_MAX_LENGTH }),
+          // An idempotency key the client mints; its format is not validated.
+          event_id: schema.string({ minLength: 1, maxLength: 64 }),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { conversations: conversationsService } = getInternalServices();
+      const { conversation_id: conversationId } = request.params;
+      const { message, event_id: eventId } = request.body;
+
+      const client = await conversationsService.getScopedClient({ request });
+      const refuse = (statusCode: number, body: SteerConversationErrorBody) =>
+        response.customError({ statusCode, body: { message: body.error, attributes: body } });
+      try {
+        const result = await client.appendSteer(
+          { id: conversationId, message, eventId, actor: currentUserActor(client.getUser()) },
+          { source: 'http_api' }
+        );
+        return response.ok<SteerConversationResponse>({
+          body: {
+            event_id: result.eventId,
+            execution_id: result.executionId,
+            created_at: result.createdAt,
+            ...(result.alreadyStored ? { already_stored: true } : {}),
+          },
+        });
+      } catch (error) {
+        if (isConversationNotSteerableError(error)) {
+          return refuse(409, { error: 'not_steerable' });
+        }
+        if (isConversationAwaitingPromptError(error)) {
+          return refuse(409, { error: 'awaiting_prompt' });
+        }
+        if (isNoActiveExecutionError(error)) {
+          return refuse(409, {
+            error: 'no_active_execution',
+            already_stored: Boolean(error.meta?.alreadyStored),
+          });
+        }
+        if (isTooManyPendingSteersError(error)) {
+          return refuse(429, { error: 'too_many_pending' });
+        }
+        throw error;
+      }
     })
   );
 }

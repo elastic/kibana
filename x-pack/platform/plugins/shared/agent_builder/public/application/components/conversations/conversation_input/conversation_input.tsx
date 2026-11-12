@@ -500,30 +500,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
       saveDraftDebounceRef.current = null;
     }
 
-    if (canSteer) {
-      if (content.length > STEER_MESSAGE_MAX_LENGTH) {
-        addErrorToast(
-          i18n.translate('xpack.agentBuilder.conversationInput.steer.tooLong', {
-            defaultMessage:
-              'A message to a running agent can be at most {max} characters. Shorten it, or wait for the agent to finish.',
-            values: { max: STEER_MESSAGE_MAX_LENGTH },
-          })
-        );
-        return;
-      }
-      sendSteer(content).then((sent) => {
-        if (!sent) {
-          lastEditorContentRef.current = content;
-          return;
-        }
-        lastEditorContentRef.current = '';
-        clearDraft();
-        messageEditorController.clear();
-        onSubmit?.();
-      });
-      return;
-    }
-
+    // A message meant for the participants is posted, never steered, whether or not a run is active.
     if (triggerMode === ChatTriggerMode.Never) {
       sendUserMessage(content)
         .then(() => {
@@ -537,6 +514,36 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
           lastEditorContentRef.current = content;
           addErrorToast({ title: formatAgentBuilderErrorMessage(sendError) });
         });
+      return;
+    }
+
+    if (canSteer) {
+      if (content.length > STEER_MESSAGE_MAX_LENGTH) {
+        addErrorToast(
+          i18n.translate('xpack.agentBuilder.conversationInput.steer.tooLong', {
+            defaultMessage:
+              'A message to a running agent can be at most {max} characters. Shorten it, or wait for the agent to finish.',
+            values: { max: STEER_MESSAGE_MAX_LENGTH },
+          })
+        );
+        return;
+      }
+      sendSteer(content, {
+        // A failure settled after the submit: the composer has moved on, so the text is put back.
+        onUnsent: (unsent) => {
+          lastEditorContentRef.current = unsent;
+          messageEditorController.setContent(unsent);
+        },
+      }).then((sent) => {
+        if (!sent) {
+          lastEditorContentRef.current = content;
+          return;
+        }
+        lastEditorContentRef.current = '';
+        clearDraft();
+        messageEditorController.clear();
+        onSubmit?.();
+      });
       return;
     }
     lastEditorContentRef.current = '';
