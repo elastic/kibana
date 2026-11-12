@@ -228,9 +228,9 @@ describe('createCheckTimeline', () => {
 
     getCheck(FROM + 60 * 3 * MINUTE);
 
-    expect(
-      Array.from({ length: 10 }, (_, index) => getCheck(FROM + index * 3 * MINUTE))
-    ).toEqual(laidOut);
+    expect(Array.from({ length: 10 }, (_, index) => getCheck(FROM + index * 3 * MINUTE))).toEqual(
+      laidOut
+    );
   });
 
   it('keeps the outcomes of a flapping monitor varying after the range', () => {

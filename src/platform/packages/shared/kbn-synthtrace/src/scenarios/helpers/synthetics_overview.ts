@@ -15,7 +15,11 @@ import type {
 import { getMonitorConfigId } from '../../lib/synthetics/synthetics_monitors_api';
 import { getBooleanOpt, getNumberOpt, getStringOpt } from './scenario_opts_helpers';
 import type { CheckOutcome, OutcomePattern } from './synthetics_check_outcomes';
-import { getCheckDurationUs, getCheckOutcomes, nextCheckOutcome } from './synthetics_check_outcomes';
+import {
+  getCheckDurationUs,
+  getCheckOutcomes,
+  nextCheckOutcome,
+} from './synthetics_check_outcomes';
 
 export const SYNTHETICS_OVERVIEW_TAG = 'synthtrace-synthetics_overview';
 
