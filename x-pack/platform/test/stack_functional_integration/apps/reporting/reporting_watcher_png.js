@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getWatcher, deleteWatcher, putWatcher } from './util';
+import { getWatcher, deleteWatcher, putWatcher, waitForReports } from './util';
 
-export default ({ getService, getPageObjects }) => {
+export default ({ getService }) => {
   describe('watcher app', () => {
     const config = getService('config');
     const servers = config.get('servers');
@@ -22,7 +22,6 @@ export default ({ getService, getPageObjects }) => {
     const STARTEDBY = process.env.STARTEDBY;
     const REPORTING_TEST_EMAILS = process.env.REPORTING_TEST_EMAILS;
 
-    const PageObjects = getPageObjects(['common']);
     describe('PNG Reporting watch', () => {
       let id = 'watcher_png_report-';
       id = id + new Date().getTime(); // For debugging.
@@ -36,7 +35,7 @@ export default ({ getService, getPageObjects }) => {
         servers.kibana.port +
         '/api/reporting/generate/pngV2?jobParams=%28browserTimezone%3AAmerica%2FNew_York%2Clayout%3A%28dimensions%3A%28height%3A2024%2Cwidth%3A1920%29%2Cid%3Apreserve_layout%29%2ClocatorParams%3A%28id%3ADASHBOARD_APP_LOCATOR%2Cparams%3A%28dashboardId%3A%27722b74f0-b882-11e8-a6d9-e546fe2bba5f%27%2CpreserveSavedFilters%3A%21t%2CtimeRange%3A%28from%3Anow-7d%2Cto%3Anow%29%2CuseHash%3A%21f%2CviewMode%3Aview%29%29%2CobjectType%3Adashboard%2Ctitle%3A%27%5BeCommerce%5D%20Revenue%20Dashboard%27%2Cversion%3A%278.6.0-SNAPSHOT%27%29';
       const emails = REPORTING_TEST_EMAILS.split(',');
-      const interval = 10;
+      const interval = 30;
       const body = {
         trigger: {
           schedule: {
@@ -63,6 +62,8 @@ export default ({ getService, getPageObjects }) => {
                 'test_report.png': {
                   reporting: {
                     url: reportingUrl,
+                    interval: '2s',
+                    retries: 300,
                     auth: {
                       basic: {
                         username: servers.elasticsearch.username,
@@ -82,10 +83,15 @@ export default ({ getService, getPageObjects }) => {
       });
 
       it('should be successful and increment revision', async () => {
-        await getWatcher(watch, id, client, log, PageObjects.common, retry.tryForTime.bind(retry));
+        await getWatcher(watch, id, client, log, retry.tryForTime.bind(retry));
       });
       it('should delete watch and update revision', async () => {
         await deleteWatcher(watch, id, client, log);
+      });
+
+      after(async function () {
+        this.timeout(660000);
+        await waitForReports(client, retry, log);
       });
     });
   });

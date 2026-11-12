@@ -51,9 +51,9 @@ describe('createActionPolicyAttachmentDefinition', () => {
   });
 
   describe('getIcon', () => {
-    it('returns reporter', () => {
+    it('returns tablePlay', () => {
       const definition = createActionPolicyAttachmentDefinition(createMockServices());
-      expect(definition.getIcon!()).toBe('reporter');
+      expect(definition.getIcon!()).toBe('tablePlay');
     });
   });
 

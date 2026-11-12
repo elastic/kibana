@@ -175,7 +175,7 @@ export const ActionPolicyCanvasContent = ({
           defaultMessage: 'View in Policies',
         }),
         icon: 'external',
-        type: ActionButtonType.OVERFLOW,
+        type: ActionButtonType.SECONDARY,
         handler: () => {
           getAlertingV2Locators(share).actionPolicyLocators.navigateSync({
             page: 'edit',
@@ -198,7 +198,7 @@ export const ActionPolicyCanvasContent = ({
   ]);
 
   return (
-    <EuiPanel paddingSize="l" hasShadow={false}>
+    <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
       <EuiTitle size="s">
         <h2>{data.name ?? EMPTY_VALUE}</h2>
       </EuiTitle>

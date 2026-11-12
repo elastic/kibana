@@ -410,7 +410,7 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
                       )}
                       button={
                         <EuiFilterButton
-                          iconType="arrowDown"
+                          iconType="chevronSingleDown"
                           iconSide="right"
                           onClick={() => setIsScopePopoverOpen((o) => !o)}
                           isSelected={isScopePopoverOpen}

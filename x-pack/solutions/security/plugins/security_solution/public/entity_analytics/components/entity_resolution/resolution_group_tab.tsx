@@ -9,14 +9,8 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { useQueryClient } from '@kbn/react-query';
 import type { EntityType } from '@kbn/entity-store/public';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { API_VERSIONS } from '../../../../common/entity_analytics/constants';
 import { useOnResolutionGroupUpdatedToolEvent } from '../../hooks/use_on_resolution_group_updated_tool_event';
-import {
-  EntityPanelKeyByType,
-  EntityPanelParamByType,
-} from '../../../flyout/entity_details/shared/constants';
-import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import type { EntityType as SecurityEntityType } from '../../../../common/entity_analytics/types';
@@ -54,7 +48,7 @@ interface ResolutionGroupTabProps {
   scopeId: string;
   /**
    * When provided, clicking a related entity name is delegated to this callback (used by the
-   * new EUI system flyout). When omitted, the legacy expandable-flyout `openFlyout` is used.
+   * new EUI system flyout). When omitted, the entity flyout is opened via `openEntityFlyout`.
    */
   onShowEntity?: (params: {
     engineType: string | undefined;
@@ -77,8 +71,6 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
 }) => {
   const { http } = useKibana().services;
   const { addError } = useAppToasts();
-  const enableNewFlyout = useIsNewFlyoutEnabled();
-  const { openFlyout } = useExpandableFlyoutApi();
   const { openEntityFlyout } = useFlyoutApi();
   const { data: group, isLoading, isFetching, isError } = useResolutionGroup(entityId);
   const linkEntities = useLinkEntities();
@@ -133,28 +125,16 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
         return;
       }
 
-      const secEntityType = entityType as SecurityEntityType;
-      const sharedParams = { entityId: clickedEntityId, contextID: scopeId, scopeId };
-
-      if (enableNewFlyout) {
-        openEntityFlyout({
-          engineType: secEntityType,
-          entityName: clickedEntityName,
-          origin: FLYOUT_ORIGIN.RESOLUTION_ENTITY_LINK,
-          ...sharedParams,
-        });
-        return;
-      }
-
-      const panelKey = EntityPanelKeyByType[secEntityType];
-      const paramName = EntityPanelParamByType[secEntityType];
-      if (panelKey && paramName) {
-        openFlyout({
-          right: { id: panelKey, params: { [paramName]: clickedEntityName, ...sharedParams } },
-        });
-      }
+      openEntityFlyout({
+        engineType: entityType as SecurityEntityType,
+        entityName: clickedEntityName,
+        origin: FLYOUT_ORIGIN.RESOLUTION_ENTITY_LINK,
+        entityId: clickedEntityId,
+        contextID: scopeId,
+        scopeId,
+      });
     },
-    [onShowEntity, enableNewFlyout, openFlyout, openEntityFlyout, entityType, scopeId]
+    [onShowEntity, openEntityFlyout, entityType, scopeId]
   );
 
   const handleRemoveEntity = useCallback(

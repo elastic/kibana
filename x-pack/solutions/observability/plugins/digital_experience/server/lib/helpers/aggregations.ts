@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+const P75 = 75;
+const P95 = 95;
+
 export interface TermsAggregation {
   buckets: Array<{ key: string | number }>;
 }
@@ -16,12 +19,38 @@ export interface PercentilesAggregation {
 export const bucketKeys = (aggregation?: TermsAggregation): string[] =>
   (aggregation?.buckets ?? []).map(({ key }) => String(key));
 
-export const getP75 = ({ values }: PercentilesAggregation): number | null =>
-  values[0]?.value ?? null;
+/** The key of a `size: 1` terms aggregation, e.g. a resource's initiator type; `null` without. */
+export const firstBucketKey = (aggregation?: TermsAggregation): string | null => {
+  return bucketKeys(aggregation)[0] ?? null;
+};
 
-export const p75Of = (field: string) => ({
-  percentiles: { field, percents: [75], keyed: false },
-});
+/** The value of a single-percentile aggregation, `null` without samples. */
+export const getPercentile = ({ values }: PercentilesAggregation): number | null => {
+  return values[0]?.value ?? null;
+};
+
+export const getP75 = getPercentile;
+
+export const percentileOf = (field: string, percent: number) => {
+  return {
+    percentiles: { field, percents: [percent], keyed: false as const },
+  };
+};
+
+export const p75Of = (field: string) => {
+  return percentileOf(field, P75);
+};
+
+export const p95Of = (field: string) => {
+  return percentileOf(field, P95);
+};
+
+/** Orders terms buckets by their `p75Of` sub-aggregation named `aggregationName`, highest first. */
+export const byP75Descending = (aggregationName: string) => {
+  return {
+    [`${aggregationName}.${P75}`]: 'desc' as const,
+  };
+};
 
 export interface ValueCountAggregation {
   value: number;

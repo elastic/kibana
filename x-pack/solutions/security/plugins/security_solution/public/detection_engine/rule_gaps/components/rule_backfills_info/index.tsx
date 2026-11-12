@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import { EuiButton, EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import type { EuiBasicTableColumn, CriteriaWithPagination } from '@elastic/eui';
 import { backfillInitiator, type BackfillInitiator } from '@kbn/alerting-plugin/common';
+import { getLastUpdated } from '@kbn/securitysolution-timeline-components';
 import { useFindBackfillsForRules } from '../../api/hooks/use_find_backfills_for_rules';
 import { StopBackfill } from './stop_backfill';
 import { BackfillStatusInfo } from './backfill_status';
@@ -18,7 +19,6 @@ import * as i18n from '../../translations';
 import { getBackfillRowsFromResponse } from './utils';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { TableHeaderTooltipCell } from '../../../rule_management_ui/components/rules_table/table_header_tooltip_cell';
-import { useKibana } from '../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -146,7 +146,6 @@ export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
-  const { timelines } = useKibana().services;
   const { data, isLoading, isError, refetch, dataUpdatedAt } = useFindBackfillsForRules({
     ruleIds: [ruleId],
     page: pageIndex + 1,
@@ -198,7 +197,7 @@ export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => 
 
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          {timelines.getLastUpdated({
+          {getLastUpdated({
             showUpdating: isLoading,
             updatedAt: dataUpdatedAt,
           })}

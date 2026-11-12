@@ -1,0 +1,21 @@
+{
+  "sha1": "c485e5545071f7ea0bc62cb0d8147b451849da54",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "48200cbe74a1f99-a10f9d4ee0c8bb4",
+      "title": "Snapshot and Restore - repositories (on-prem) returns the on-prem repository types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/snapshot_restore/test/scout_onprem/api/tests/repositories.spec.ts",
+        "line": 21,
+        "column": 50
+      }
+    }
+  ]
+}

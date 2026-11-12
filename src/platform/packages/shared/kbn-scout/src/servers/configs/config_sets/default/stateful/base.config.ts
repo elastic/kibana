@@ -22,6 +22,7 @@ import {
   MOCK_IDP_UIAM_ORGANIZATION_ID,
 } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { PRODUCT_DOC_STUB_REPOSITORY_URL } from '@kbn/test-kibana-server';
 import {
   defineDockerServersConfig,
   fleetPackageRegistryDockerImage,
@@ -136,11 +137,13 @@ export const defaultConfig: ScoutServerConfig = {
       '--telemetry.optIn=false',
       // These are *very* important to have them pointing to staging
       '--telemetry.sendUsageTo=staging',
+      // Keeps test servers from downloading the real product documentation artifacts
+      `--xpack.productDocBase.artifactRepositoryUrl=${PRODUCT_DOC_STUB_REPOSITORY_URL}`,
       `--server.maxPayload=1679958`,
       // newsfeed mock service
       `--plugin-path=${join(REPO_ROOT, '/src/platform/test/common/plugins/newsfeed')}`,
       // otel mock service
-      `--plugin-path=${join(REPO_ROOT, '/src/platform/test/common/plugins/otel_metrics')}`,
+      `--plugin-path=${join(REPO_ROOT, '/src/platform/test_plugins/otel_metrics')}`,
       `--newsfeed.service.urlRoot=${kbnUrl}`,
       `--newsfeed.service.pathTemplate=/api/_newsfeed-FTS-external-service-simulators/kibana/v{VERSION}.json`,
       `--logging.appenders.deprecation=${JSON.stringify({
