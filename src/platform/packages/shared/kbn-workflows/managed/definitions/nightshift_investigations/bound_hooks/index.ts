@@ -121,9 +121,6 @@ const management = {
   enablement: 'restorable',
 } as const;
 
-// The definition hash of a template is the hash of its function source, which does not change
-// when the hook's inputs do. Bump `version` whenever a hook's trigger block changes; the
-// `bound_hooks` test pins each version to the hook's triggers to catch that.
 export const NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW = {
   id: NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
