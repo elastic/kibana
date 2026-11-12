@@ -28,7 +28,7 @@ jest.mock('@kbn/typed-react-router-config', () => ({
   BreadcrumbsContextProvider: passThrough,
   RouteRenderer: () => <MockClassicTabProbe />,
 }));
-jest.mock('@kbn/ebt-tools', () => ({ PerformanceContextProvider: passThrough }));
+jest.mock('@kbn/ebt-tools/react', () => ({ PerformanceContextProvider: passThrough }));
 jest.mock('../streams_app_context_provider', () => ({ StreamsAppContextProvider: passThrough }));
 jest.mock('../../routes/config', () => ({ streamsAppRouter: {} }));
 jest.mock('../../util/kbn_url_state_context', () => ({
