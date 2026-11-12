@@ -115,7 +115,7 @@ export const assertEnterpriseLicense = async (kibana: JsonRequest): Promise<void
         type ?? 'none'
       } (${
         license?.status ?? 'unknown'
-      }). Start Elasticsearch with \`yarn es snapshot --license trial\`.`
+      }). Start Elasticsearch with \`pnpm es snapshot --eis\`, which includes a trial license.`
     );
   }
 };

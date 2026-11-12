@@ -22,14 +22,20 @@ sandbox-service or a personal sandbox credential.
 
 ## Setup
 
-Needs only dev Vault access (no VPN, GCP or sandbox-service checkout), a stateful Kibana in dev mode
-on a trial or enterprise license (the `yarn es snapshot` default), and an LLM connector.
+Needs only dev Vault access (no VPN, GCP or sandbox-service checkout) and a stateful Kibana in dev
+mode with Elasticsearch connected to the Elastic Inference Service (EIS). The default investigation
+model, `.anthropic-claude-5.5-sonnet-chat_completion`, is an EIS endpoint, so without EIS
+investigations report `available:false`. `--eis` also sets the trial license the ORCA connector
+needs.
 
 ```bash
-yarn es snapshot          # terminal 1
-yarn start                # terminal 2
+pnpm es snapshot --eis    # terminal 1, reads the EIS key from Vault
+pnpm start                # terminal 2
 node x-pack/solutions/observability/plugins/nightshift_investigations/scripts/setup_local_dev.js
 ```
+
+`pnpm es snapshot` starts an empty cluster each time, so run the script again after restarting
+Elasticsearch.
 
 The script logs in to Vault when your token is missing or expired, then:
 
@@ -89,8 +95,11 @@ Poll `GET /internal/investigations/investigations/<id>` with `elastic-api-versio
 
 ## Troubleshooting
 
-- **`available:false`**: a plugin is disabled, there is no LLM connector, or the space isn't bound.
-  Re-run the script; its last step says which check fails.
+- **`available:false`**: usually Elasticsearch runs without EIS, so the default model
+  `.anthropic-claude-5.5-sonnet-chat_completion` doesn't exist (the Kibana log says
+  `NightshiftModelNotFoundError`). Restart it with `pnpm es snapshot --eis` and re-run the script.
+  Otherwise a plugin is disabled or the space isn't bound; the script's last step says which check
+  fails.
 - **Sandbox `Unauthenticated`**: the credential was rotated. Re-run the script.
 - **Connector secret errors after a restart**: Kibana has no persistent
   `xpack.encryptedSavedObjects.encryptionKey`. Re-run the script, or set one, and re-save the

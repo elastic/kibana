@@ -5,7 +5,8 @@ This plugin provides the domain API for starting and reading investigations, ind
 ## Local development
 
 To run investigations on a local Kibana against the ORCA-bench telemetry cluster, with the shared
-eval sandbox, start Elasticsearch and Kibana, then run:
+eval sandbox, start Elasticsearch with EIS (`pnpm es snapshot --eis`) and Kibana (`pnpm start`),
+then run:
 
 ```bash
 node x-pack/solutions/observability/plugins/nightshift_investigations/scripts/setup_local_dev.js

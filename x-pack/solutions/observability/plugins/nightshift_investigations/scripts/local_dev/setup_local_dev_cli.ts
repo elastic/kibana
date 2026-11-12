@@ -179,7 +179,7 @@ const setUpKibana = async ({
     ...(available
       ? []
       : [
-          'Investigations are not available (GET /internal/nightshift/investigations/availability). Check that Kibana has an LLM connector, and the Kibana log for sandbox errors.',
+          'Investigations are not available (GET /internal/nightshift/investigations/availability). The default model is an EIS endpoint: start Elasticsearch with `pnpm es snapshot --eis`. Otherwise check the Kibana log for model and sandbox errors.',
         ]),
     ...(connectorListed ? [] : [`${ORCA_CONNECTOR_ID} is not among the sandbox connectors.`]),
     ...(connectorOnInvestigator
@@ -282,7 +282,7 @@ run(
       }
       if (rawFlags['skip-connector']) {
         log.info(
-          'Start Kibana (yarn start), then finish with: node x-pack/solutions/observability/plugins/nightshift_investigations/scripts/setup_local_dev.js --connector-only'
+          'Start Kibana (pnpm start), then finish with: node x-pack/solutions/observability/plugins/nightshift_investigations/scripts/setup_local_dev.js --connector-only'
         );
         return;
       }
