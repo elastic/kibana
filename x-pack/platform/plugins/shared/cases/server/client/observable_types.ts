@@ -6,16 +6,18 @@
  */
 
 import type { ObservableType } from '../../common/types/domain';
-import { OBSERVABLE_TYPES_BUILTIN } from '../../common/constants';
+import { OBSERVABLE_TYPES_BUILTIN, OBSERVABLE_TYPES_BUILTIN_KEYS } from '../../common/constants';
 import type { CasesClient } from './client';
 
 export const getAvailableObservableTypes = async (casesClient: CasesClient, owner: string) => {
   const configurations = await casesClient.configure.get({
     owner,
   });
-  const observableTypes = configurations?.[0]?.observableTypes ?? [];
+  const customObservableTypes = (configurations?.[0]?.observableTypes ?? []).filter(
+    ({ key }) => !OBSERVABLE_TYPES_BUILTIN_KEYS.includes(key)
+  );
 
-  return [...observableTypes, ...OBSERVABLE_TYPES_BUILTIN];
+  return [...customObservableTypes, ...OBSERVABLE_TYPES_BUILTIN];
 };
 
 export const getAvailableObservableTypesMap = async (
