@@ -78,6 +78,18 @@ const actionFixtureSchema = z
     queries: z.array(queryOperationSchema).optional(),
     /** Served by the mock for this action's runs, in place of sampled responses. */
     responses: z.array(responseOverrideSchema).optional(),
+    /**
+     * Opts the action out of a response check, each with the reason its handler behaves
+     * differently on purpose, e.g. an action that deliberately returns only the first page.
+     */
+    responseChecks: z
+      .object({
+        boundary: z.string().min(1).optional(),
+        pagination: z.string().min(1).optional(),
+        errors: z.string().min(1).optional(),
+      })
+      .strict()
+      .optional(),
   })
   .strict();
 
