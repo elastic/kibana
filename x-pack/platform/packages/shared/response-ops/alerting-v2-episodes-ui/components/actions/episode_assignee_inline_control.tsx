@@ -62,7 +62,11 @@ export const EpisodeAssigneeInlineControl = ({
   );
 
   const anchor = assigneeUid ? (
-    <EuiToolTip content={i18n.ASSIGNEE_CHANGE_BUTTON_TOOLTIP} disableScreenReaderOutput>
+    <EuiToolTip
+      content={i18n.ASSIGNEE_CHANGE_BUTTON_TOOLTIP}
+      display="block"
+      disableScreenReaderOutput
+    >
       <EuiButtonEmpty
         size="xs"
         flush="both"
@@ -96,6 +100,7 @@ export const EpisodeAssigneeInlineControl = ({
 
   return (
     <EuiPopover
+      display="block"
       panelPaddingSize="none"
       anchorPosition="downLeft"
       initialFocus={`[id="${searchInputId}"]`}
