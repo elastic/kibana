@@ -126,13 +126,17 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
     if (pendingCleanups.size > 0) {
       await Promise.allSettled([...pendingCleanups].map((cleanup) => cleanup()));
     }
-    await teardownWorkerChainHarness({ ctx: ctxOf(fetch), state: harness, log });
-    await restoreEntityExtraction?.().catch((error: Error) =>
-      log.warning(`Could not restart Entity Store extraction: ${error.message}`)
-    );
-    await restoreInferenceSettings?.().catch((error: Error) =>
-      log.warning(`Could not restore inference settings: ${error.message}`)
-    );
+    // A failed teardown still fails the suite, but must not skip the restores.
+    try {
+      await teardownWorkerChainHarness({ ctx: ctxOf(fetch), state: harness, log });
+    } finally {
+      await restoreEntityExtraction?.().catch((error: Error) =>
+        log.warning(`Could not restart Entity Store extraction: ${error.message}`)
+      );
+      await restoreInferenceSettings?.().catch((error: Error) =>
+        log.warning(`Could not restore inference settings: ${error.message}`)
+      );
+    }
   });
 
   evaluate(

@@ -36,6 +36,17 @@ describe('summarizeReps', () => {
     expect(report.verdictAgreement.n).toBe(2);
   });
 
+  it('counts a rep with no verdict against agreement', () => {
+    const report = summarizeReps([
+      rep(1, 'true_positive'),
+      rep(2, 'true_positive'),
+      rep(3, undefined),
+      rep(4, undefined),
+    ]);
+    expect(report.verdictAgreement.modal).toBe('true_positive');
+    expect(report.verdictAgreement.share).toBe(0.5);
+  });
+
   it('safety agreement fails on one violating rep (zero tolerance, never averaged)', () => {
     const report = summarizeReps([
       rep(1, 'true_positive'),

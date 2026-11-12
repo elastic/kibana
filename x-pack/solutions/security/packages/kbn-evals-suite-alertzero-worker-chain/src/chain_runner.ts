@@ -250,25 +250,30 @@ interface InvestigationConversation {
  * `ChildWorkflowExecutionItem[]` (get_children_executions.ts) whose id field is
  * `executionId`. It lists only SYNC `workflow.execute` children one level down.
  */
-const listChildExecutions = async (
+const fetchChildExecutions = async (
   ctx: KbnRequestContext,
   workflowExecutionId: string
 ): Promise<ChildWorkflowExecutionItem[]> => {
-  const body = (await ctx
-    .fetch(
-      spacePath(
-        ctx.spaceId,
-        `/api/workflows/executions/${encodeURIComponent(workflowExecutionId)}/children`
-      ),
-      {
-        method: 'GET',
-        version: PUBLIC_API_VERSION,
-        headers: { 'elastic-api-version': PUBLIC_API_VERSION },
-      }
-    )
-    .catch(() => undefined)) as ChildWorkflowExecutionItem[] | undefined;
+  const body = (await ctx.fetch(
+    spacePath(
+      ctx.spaceId,
+      `/api/workflows/executions/${encodeURIComponent(workflowExecutionId)}/children`
+    ),
+    {
+      method: 'GET',
+      version: PUBLIC_API_VERSION,
+      headers: { 'elastic-api-version': PUBLIC_API_VERSION },
+    }
+  )) as ChildWorkflowExecutionItem[] | undefined;
   return Array.isArray(body) ? body : [];
 };
+
+/** Best-effort listing, for failure descriptions only; grading reads use fetchChildExecutions. */
+const listChildExecutions = (
+  ctx: KbnRequestContext,
+  workflowExecutionId: string
+): Promise<ChildWorkflowExecutionItem[]> =>
+  fetchChildExecutions(ctx, workflowExecutionId).catch(() => []);
 
 const readExecution = async (
   ctx: KbnRequestContext,
@@ -522,14 +527,28 @@ const collectReviewExecutionIds = async (
 ): Promise<{
   reviews: Array<{ reviewId: string; runnerExecutionId: string }>;
   generationFailures: string[];
+  /** Reads that failed: the reviews and generation failures above may be incomplete. */
+  readErrors: string[];
 }> => {
-  const children = await listChildExecutions(ctx, floorExecutionId);
   const reviews: Array<{ reviewId: string; runnerExecutionId: string }> = [];
   const generationFailures: string[] = [];
+  const readErrors: string[] = [];
+  const describeError = (error: unknown) =>
+    error instanceof Error ? error.message : String(error);
+  let children: ChildWorkflowExecutionItem[];
+  try {
+    children = await fetchChildExecutions(ctx, floorExecutionId);
+  } catch (error) {
+    readErrors.push(`children of ${floorExecutionId}: ${describeError(error)}`);
+    return { reviews, generationFailures, readErrors };
+  }
   for (const runner of children.filter(
     (child) => child.workflowId === WORKFLOW_IDS.attackDiscoveryRunner
   )) {
-    const runnerExecution = await readExecution(ctx, runner.executionId).catch(() => undefined);
+    const runnerExecution = await readExecution(ctx, runner.executionId).catch((error) => {
+      readErrors.push(`runner ${runner.executionId}: ${describeError(error)}`);
+      return undefined;
+    });
     const generationFailure = readGenerationFailure(runnerExecution);
     if (generationFailure !== undefined) generationFailures.push(generationFailure);
     for (const step of runnerExecution?.stepExecutions ?? []) {
@@ -543,7 +562,7 @@ const collectReviewExecutionIds = async (
       }
     }
   }
-  return { reviews, generationFailures };
+  return { reviews, generationFailures, readErrors };
 };
 
 /** The runner step that runs batched generation (attack_discovery_runner.yaml). */
@@ -933,10 +952,11 @@ const runChainUnserialized = async ({
     const triggeredBy = asTriageTrigger(adExecution?.triggeredBy) ?? 'manual';
     // Read the runner before recording the hop: a runner that ended `completed` after its
     // generation batches failed must not grade as a clean hop.
-    const { reviews: dispatchedReviews, generationFailures } = await collectReviewExecutionIds(
-      ctx,
-      executionId
-    );
+    const {
+      reviews: dispatchedReviews,
+      generationFailures,
+      readErrors: reviewReadErrors,
+    } = await collectReviewExecutionIds(ctx, executionId);
     const adHopStatus =
       !overrun && status === ExecutionStatus.COMPLETED && generationFailures.length > 0
         ? GENERATION_FAILED_HOP_STATUS
@@ -957,6 +977,10 @@ const runChainUnserialized = async ({
       adAutonomy
     );
     if (overrun) markInterference('floor_attack_discovery overran its per-hop timeout');
+    // A failed read would otherwise grade as a clean hop with no reviews.
+    if (reviewReadErrors.length > 0) {
+      markInterference(`AD reviews could not be read: ${reviewReadErrors.join('; ')}`);
+    }
 
     // Verdict origin is each review's own verdict, read back from the
     // product — never scenario.goldVerdict. The reviews are async grandchildren

@@ -39,16 +39,12 @@ const targetsRule = (proposal: TuningProposal, ruleId: string): boolean => {
 const errorText = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
-const errorStatus = (error: unknown): number | undefined => {
-  const e = error as
-    | { response?: { status?: number }; body?: { statusCode?: number }; statusCode?: number }
-    | undefined;
-  return e?.response?.status ?? e?.body?.statusCode ?? e?.statusCode;
-};
-
-/** Approve lost the race with the review: it has not reached its wait yet, so retry on the next poll. */
+/**
+ * Approve lost the race with the review: it has not reached its wait yet, so retry on the next
+ * poll. Only that 409 is a race; any other conflict (e.g. an already decided proposal) surfaces.
+ */
 export const isApproveRace = (error: unknown): boolean =>
-  errorStatus(error) === 409 || /not waiting for input/i.test(errorText(error));
+  /not waiting for input/i.test(errorText(error));
 
 /** The proposals index answers 500 for a moment after the stack boots. */
 export const isTransientProposalsRead = (error: unknown): boolean =>

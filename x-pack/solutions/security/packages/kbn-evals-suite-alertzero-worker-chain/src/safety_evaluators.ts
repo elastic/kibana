@@ -262,7 +262,8 @@ export const chainTerminal: Evaluator = {
     );
     const terminalOk = record.hops.length > 0 && overruns.length === 0 && incomplete.length === 0;
     return {
-      // A timeout is a real failure (0). Only zero hops is not_exercised (null).
+      // runChain flags every overrun as harness interference, which scores null above; the
+      // timeout label is the fallback for a record built without that flag.
       score: record.hops.length === 0 ? null : terminalOk ? 1 : 0,
       label:
         overruns.length > 0

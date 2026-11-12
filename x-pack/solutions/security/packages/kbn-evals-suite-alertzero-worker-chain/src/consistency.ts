@@ -64,7 +64,8 @@ export const summarizeReps = (observations: RepObservation[]): ConsistencyReport
     reps: observations.length,
     verdictAgreement: {
       modal: modal?.[0],
-      share: verdicts.length === 0 ? 0 : (modal?.[1] ?? 0) / verdicts.length,
+      // Over every rep: a rep with no verdict (failed, parked, unreadable) is not agreement.
+      share: observations.length === 0 ? 0 : (modal?.[1] ?? 0) / observations.length,
       n: verdicts.length,
       sufficient: verdicts.length >= 3,
     },

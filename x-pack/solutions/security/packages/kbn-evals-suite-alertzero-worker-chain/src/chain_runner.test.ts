@@ -509,6 +509,32 @@ describe('runChain AD review collection (async grandchildren, real /children sha
     expect(record.harnessInterference).toMatch(/overran its per-hop timeout/);
   });
 
+  it.each([
+    ['children', '/executions/exec-floor/children'],
+    ['runner', '/executions/exec-runner'],
+  ])(
+    'flags an unreadable %s read as interference, not a hop with no reviews',
+    async (_, failing) => {
+      const { fetch: base } = makeAdFetch([
+        { id: 'rev-1', investigationId: 'inv-1', verdict: 'true_positive' },
+      ]);
+      const call = base as unknown as (p: string, ...r: unknown[]) => Promise<unknown>;
+      const fetch = (async (path: string, ...rest: unknown[]) => {
+        if (path.endsWith(failing)) throw new Error('503 Service Unavailable');
+        return call(path, ...rest);
+      }) as unknown as HttpHandler;
+      const record = await runChain({
+        ...params(fetch, ['attack-discovery']),
+        maxWaitMs: { perActionProposal: 1, attackDiscoveryReview: 50 },
+      });
+
+      expect(record.hops.filter((h) => h.hop === 'attack_discovery_review')).toHaveLength(0);
+      expect(record.harnessInterference).toMatch(
+        /AD reviews could not be read: .*503 Service Unavailable/
+      );
+    }
+  );
+
   it('waits for at most WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN reviews and flags the rest', async () => {
     const reviews = Array.from({ length: WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN + 1 }, (_, i) => ({
       id: `rev-${i + 1}`,
@@ -1523,12 +1549,19 @@ describe('runChain proposal read-back', () => {
   };
 
   it('encodes the conversation id in the proposals query', async () => {
-    const { fetch } = triageFetch(() => []);
+    const { fetch: base } = triageFetch(() => []);
+    const call = base as unknown as (p: string, ...r: unknown[]) => Promise<unknown>;
+    const reads: string[] = [];
+    const fetch = (async (path: string, ...rest: unknown[]) => {
+      if (path.startsWith('/internal/proposals')) reads.push(path);
+      const body = await call(path, ...rest);
+      // Give the Investigation an id with query-reserved characters.
+      return path.includes('/api/workflows/executions/')
+        ? JSON.parse(JSON.stringify(body).replace('"conv-1"', '"conv/1 &x=y"'))
+        : body;
+    }) as unknown as HttpHandler;
     await runChain({ ...params(fetch, ['alert-triage']), maxWaitMs: { perActionProposal: 0 } });
-    const reads = (fetch as unknown as jest.Mock).mock.calls
-      .map(([path]) => path as string)
-      .filter((path) => path.startsWith('/internal/proposals'));
-    expect(reads).toContain('/internal/proposals?conversationId=conv-1');
+    expect(reads).toContain('/internal/proposals?conversationId=conv%2F1%20%26x%3Dy');
   });
 
   it('a proposals read that keeps failing is harness interference, never "no proposals"', async () => {

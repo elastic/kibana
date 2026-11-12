@@ -43,6 +43,8 @@ interface FixtureOptions {
   approveConflicts?: number;
   /** Approve fails with this HTTP status (not a race). */
   approveFailure?: number;
+  /** Approve answers a 409 that is not the review race (e.g. an already decided proposal). */
+  approveOtherConflict?: boolean;
   /** The first proposals list answers the post-boot 500. */
   transientListFailures?: number;
   /** Connector the review's diagnose_rule step reports; `null` reports none. */
@@ -58,6 +60,7 @@ const fixture = (autonomy: 'manual' | 'assisted', options: FixtureOptions = {}) 
     siblingReview = false,
     action = 'edit',
     approveConflicts = 0,
+    approveOtherConflict = false,
     approveFailure,
     transientListFailures = 0,
     connectorId = CANDIDATE,
@@ -158,6 +161,11 @@ const fixture = (autonomy: 'manual' | 'assisted', options: FixtureOptions = {}) 
     if (path.endsWith('/approve') && init?.method === 'POST') {
       if (approveFailure) {
         throw Object.assign(new Error('Forbidden'), { response: { status: approveFailure } });
+      }
+      if (approveOtherConflict) {
+        throw Object.assign(new Error('Proposal prop-1 is already decided'), {
+          response: { status: 409 },
+        });
       }
       if (conflicts > 0) {
         conflicts -= 1;
@@ -312,6 +320,12 @@ describe('Rule Tuning proposal scenario', () => {
     it('does not swallow other approve failures', async () => {
       const { operator } = fixture('assisted', { approveFailure: 403 });
       await expect(runRuleTuningScenario(operator, input)).rejects.toThrow('Forbidden');
+    });
+
+    it('surfaces a 409 that is not the review race instead of retrying it', async () => {
+      const { operator, fetch } = fixture('assisted', { approveOtherConflict: true });
+      await expect(runRuleTuningScenario(operator, input)).rejects.toThrow('already decided');
+      expect(calls(fetch, '/approve')).toHaveLength(1);
     });
 
     it('survives the transient no_shard_available 500 on the proposals list', async () => {
