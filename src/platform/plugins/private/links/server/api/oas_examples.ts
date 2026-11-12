@@ -101,7 +101,7 @@ export const createLinksOASOperationObject = {
       lang: 'Console',
       source:
         `POST kbn:${LINKS_API_PATH}\n` +
-        JSON.stringify(linksCreateRequestExamples.createLinks, null, 2) +
+        JSON.stringify(linksCreateRequestExamples.createLinks.value, null, 2) +
         '\n',
     },
   ],
