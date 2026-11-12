@@ -51,7 +51,7 @@ export const apiTest = baseApiTest.extend<
 
   // Depends on `fleetServer` because the Endpoint package must be installed first.
   protectedPolicies: [
-    async ({ kbnClient, log, fleetServer }, use) => {
+    async ({ kbnClient, log, fleetServer: _fleetServer }, use) => {
       const suffix = Date.now();
       const created: Partial<ProtectedPolicies> = {};
 
