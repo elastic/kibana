@@ -64,12 +64,50 @@ interface MonitorsListResponse {
   total: number;
 }
 
+interface MonitorDeleteResult {
+  id: string;
+  deleted: boolean;
+  error?: string;
+}
+
+/** `POST /monitors/_bulk_delete` answers 200 even when a monitor was not removed. */
+interface BulkDeleteMonitorsResponse {
+  result?: MonitorDeleteResult[];
+  /** Sync errors from the location services. An empty list, or absent, when the sync succeeded. */
+  errors?: unknown;
+}
+
 export interface SyntheticsMonitorsApi {
   /** Creates the monitors; fails if one of the ids already exists. */
   createMonitors(configs: SyntheticsMonitorConfig[]): Promise<void>;
   /** Deletes every monitor that carries this API's tag and returns how many were deleted. */
   deleteMonitors(): Promise<number>;
 }
+
+const deletedCount = (
+  ids: string[],
+  response: BulkDeleteMonitorsResponse | undefined,
+  tag: string
+): number => {
+  const results = response?.result ?? [];
+  const deleted = results.filter((result) => result.deleted);
+  const notDeleted = results.filter((result) => !result.deleted);
+  const syncErrors = Array.isArray(response?.errors) ? response.errors : [];
+
+  if (deleted.length === ids.length && notDeleted.length === 0 && syncErrors.length === 0) {
+    return deleted.length;
+  }
+
+  const failed = notDeleted
+    .map((result) => (result.error ? `${result.id} (${result.error})` : result.id))
+    .join(', ');
+
+  throw new Error(
+    `Failed to delete every monitor tagged ${tag}: ${deleted.length} of ${ids.length} deleted` +
+      (failed ? `; not deleted: ${failed}` : '') +
+      (syncErrors.length > 0 ? `; service sync errors: ${JSON.stringify(syncErrors)}` : '')
+  );
+};
 
 const getTargetFields = ({ type, target, script }: SyntheticsMonitorConfig) => {
   switch (type) {
@@ -165,12 +203,15 @@ export const createSyntheticsMonitorsApi = ({
         return 0;
       }
 
-      await kibana.fetch(`${withSpace(MONITORS_PATH)}/_bulk_delete`, {
-        method: 'POST',
-        body: JSON.stringify({ ids }),
-      });
+      const response = await kibana.fetch<BulkDeleteMonitorsResponse>(
+        `${withSpace(MONITORS_PATH)}/_bulk_delete`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ ids }),
+        }
+      );
 
-      return ids.length;
+      return deletedCount(ids, response, tag);
     },
   };
 };

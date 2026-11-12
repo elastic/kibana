@@ -152,7 +152,12 @@ describe('createSyntheticsMonitorsApi', () => {
           monitors: [{ id: 'a' }, { id: 'b', config_id: 'b-config' }],
           total: 2,
         })
-        .mockResolvedValueOnce({});
+        .mockResolvedValueOnce({
+          result: [
+            { id: 'a', deleted: true },
+            { id: 'b-config', deleted: true },
+          ],
+        });
 
       const deleted = await api.deleteMonitors();
 
@@ -178,7 +183,13 @@ describe('createSyntheticsMonitorsApi', () => {
       fetch
         .mockResolvedValueOnce({ monitors: [{ id: 'a' }, { id: 'b' }], total: 3 })
         .mockResolvedValueOnce({ monitors: [{ id: 'c' }], total: 3 })
-        .mockResolvedValueOnce({});
+        .mockResolvedValueOnce({
+          result: [
+            { id: 'a', deleted: true },
+            { id: 'b', deleted: true },
+            { id: 'c', deleted: true },
+          ],
+        });
 
       expect(await api.deleteMonitors()).toBe(3);
       expect(fetch.mock.calls[0][0]).toContain('perPage=2&page=1');
@@ -188,12 +199,42 @@ describe('createSyntheticsMonitorsApi', () => {
 
     it('prefixes the paths with the space for non-default spaces', async () => {
       const { api, fetch } = setup({ spaceId: 'team-a' });
-      fetch.mockResolvedValueOnce({ monitors: [{ id: 'a' }], total: 1 }).mockResolvedValueOnce({});
+      fetch
+        .mockResolvedValueOnce({ monitors: [{ id: 'a' }], total: 1 })
+        .mockResolvedValueOnce({ result: [{ id: 'a', deleted: true }] });
 
       await api.deleteMonitors();
 
       expect(fetch.mock.calls[0][0]).toMatch(/^\/s\/team-a\/api\/synthetics\/monitors\?/);
       expect(fetch.mock.calls[1][0]).toBe('/s/team-a/api/synthetics/monitors/_bulk_delete');
+    });
+
+    it('fails when a monitor is reported as not deleted', async () => {
+      const { api, fetch } = setup();
+      fetch
+        .mockResolvedValueOnce({ monitors: [{ id: 'a' }, { id: 'b' }], total: 2 })
+        .mockResolvedValueOnce({
+          result: [
+            { id: 'a', deleted: true },
+            { id: 'b', deleted: false, error: 'Monitor id b not found!' },
+          ],
+        });
+
+      await expect(api.deleteMonitors()).rejects.toThrow(
+        'Failed to delete every monitor tagged synthtrace-test: 1 of 2 deleted; not deleted: b (Monitor id b not found!)'
+      );
+    });
+
+    it('fails when the location sync reports errors', async () => {
+      const { api, fetch } = setup();
+      fetch
+        .mockResolvedValueOnce({ monitors: [{ id: 'a' }], total: 1 })
+        .mockResolvedValueOnce({
+          result: [{ id: 'a', deleted: true }],
+          errors: [{ location: 'us_central', error: 'timeout' }],
+        });
+
+      await expect(api.deleteMonitors()).rejects.toThrow('service sync errors');
     });
   });
 });
