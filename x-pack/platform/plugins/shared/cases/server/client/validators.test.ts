@@ -169,6 +169,22 @@ describe('validators', () => {
         })
       ).not.toThrow();
     });
+
+    it('does not throw for an override entry that carries the label of a read', () => {
+      const { key, label } = OBSERVABLE_TYPES_BUILTIN[0];
+
+      expect(() =>
+        validateDuplicatedObservableTypesInRequest({ requestFields: [{ key, label }] })
+      ).not.toThrow();
+    });
+
+    it('throws for a built-in key with a label other than the built-in label', () => {
+      const { key } = OBSERVABLE_TYPES_BUILTIN[0];
+
+      expect(() =>
+        validateDuplicatedObservableTypesInRequest({ requestFields: [{ key, label: 'Renamed' }] })
+      ).toThrow('Invalid duplicated observable types in request: renamed');
+    });
   });
 
   describe('validateObservableTypePathsInRequest', () => {
@@ -206,6 +222,26 @@ describe('validators', () => {
       ).toThrowErrorMatchingInlineSnapshot(
         `"Invalid observable types in request: built-in observable type observable-type-agent-id has more than one entry"`
       );
+    });
+
+    it('throws for two override entries when one carries the label of a read', () => {
+      const { key, label } = OBSERVABLE_TYPES_BUILTIN[0];
+
+      expect(() =>
+        validateObservableTypePathsInRequest({ requestFields: [{ key }, { key, label }] })
+      ).toThrow(`built-in observable type ${key} has more than one entry`);
+    });
+
+    it('does not count overrides that carry the label of a read as custom types', () => {
+      const overrides = OBSERVABLE_TYPES_BUILTIN.map(({ key, label }) => ({ key, label }));
+      const customTypes = Array.from({ length: 10 }, (_, index) => ({
+        key: `custom-${index}`,
+        label: `Custom ${index}`,
+      }));
+
+      expect(() =>
+        validateObservableTypePathsInRequest({ requestFields: [...overrides, ...customTypes] })
+      ).not.toThrow();
     });
 
     it('throws for a value pattern on a built-in type', () => {

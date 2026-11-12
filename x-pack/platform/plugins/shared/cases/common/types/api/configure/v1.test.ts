@@ -730,6 +730,20 @@ describe('configure', () => {
       expect(result.success).toBe(false);
     });
 
+    it('should invalidate an empty path', () => {
+      const result = ObservableTypesConfigurationSchema.safeParse([
+        { key: 'observable_key_1', label: 'label', paths: [{ path: '', enabled: true }] },
+      ]);
+      expect(result.success).toBe(false);
+    });
+
+    it('should invalidate an empty value pattern', () => {
+      const result = ObservableTypesConfigurationSchema.safeParse([
+        { key: 'observable_key_1', label: 'label', valuePattern: '' },
+      ]);
+      expect(result.success).toBe(false);
+    });
+
     it('should accept excluded values on a path', () => {
       const result = ObservableTypesConfigurationSchema.safeParse([
         {
