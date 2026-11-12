@@ -93,14 +93,20 @@ const listItems: ChangeHistoryListItem[] = [
   },
 ];
 
-const createAdapter = (): ChangeHistoryAdapter => ({
+const toDetail = (changeId: string): ChangeHistoryDetail => {
+  const item = listItems.find(({ id }) => id === changeId);
+  return {
+    ...item,
+    snapshot: { title: `Title ${changeId}`, panels: [] },
+  } as unknown as ChangeHistoryDetail;
+};
+
+const createAdapter = (
+  getChangeOverride?: (changeId: string) => Promise<ChangeHistoryDetail> | undefined
+): ChangeHistoryAdapter => ({
   listChanges: jest.fn().mockResolvedValue({ items: listItems, total: listItems.length }),
   getChange: jest.fn().mockImplementation(({ changeId }: { changeId: string }) => {
-    const item = listItems.find(({ id }) => id === changeId);
-    return Promise.resolve({
-      ...item,
-      snapshot: { title: `Title ${changeId}`, panels: [] },
-    } as unknown as ChangeHistoryDetail);
+    return getChangeOverride?.(changeId) ?? Promise.resolve(toDetail(changeId));
   }),
 });
 
@@ -220,6 +226,83 @@ describe('DashboardChangeHistoryProvider', () => {
       fireEvent.click(row('v1'));
 
       await expectDashboardPreview('v1');
+    });
+  });
+
+  describe('while the comparison is loading or has failed', () => {
+    // comparing v2 against the previous version needs v1, which is not loaded until requested
+    const requestCompareV2ToPrevious = () =>
+      fireEvent.click(within(row('v2')).getByTestId('changeHistoryItemChanges'));
+
+    const expectNoPreviewOrComparison = () => {
+      expect(screen.queryByTestId('dashboardPreview')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('jsonComparison')).not.toBeInTheDocument();
+    };
+
+    it('keeps the dashboard preview unmounted while the comparison loads, then shows it', async () => {
+      let resolveBaseline: (detail: ChangeHistoryDetail) => void = () => {};
+      const baseline = new Promise<ChangeHistoryDetail>((resolve) => {
+        resolveBaseline = resolve;
+      });
+      mockAdapter.current = createAdapter((id) => (id === 'v1' ? baseline : undefined));
+      await renderOpenModal();
+
+      requestCompareV2ToPrevious();
+
+      await waitFor(() =>
+        expect(screen.getByTestId('dashboardCompareLoading')).toBeInTheDocument()
+      );
+      expectNoPreviewOrComparison();
+      expect(screen.queryByTestId('dashboardCompareError')).not.toBeInTheDocument();
+
+      resolveBaseline(toDetail('v1'));
+
+      await waitFor(() => expect(screen.getByTestId('jsonComparison')).toBeInTheDocument());
+      expect(screen.queryByTestId('dashboardCompareLoading')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('dashboardPreview')).not.toBeInTheDocument();
+    });
+
+    it('returns to the rendered preview when a row is selected while the comparison loads', async () => {
+      mockAdapter.current = createAdapter((id) =>
+        id === 'v1' ? new Promise<ChangeHistoryDetail>(() => {}) : undefined
+      );
+      await renderOpenModal();
+      requestCompareV2ToPrevious();
+      await waitFor(() =>
+        expect(screen.getByTestId('dashboardCompareLoading')).toBeInTheDocument()
+      );
+
+      fireEvent.click(row('v3'));
+
+      await expectDashboardPreview('v3');
+      expect(screen.queryByTestId('dashboardCompareLoading')).not.toBeInTheDocument();
+    });
+
+    it('shows an error and keeps the dashboard preview unmounted when the comparison fails to load', async () => {
+      mockAdapter.current = createAdapter((id) =>
+        id === 'v1' ? Promise.reject(new Error('boom')) : undefined
+      );
+      await renderOpenModal();
+
+      requestCompareV2ToPrevious();
+
+      await waitFor(() => expect(screen.getByTestId('dashboardCompareError')).toBeInTheDocument());
+      expectNoPreviewOrComparison();
+      expect(screen.queryByTestId('dashboardCompareLoading')).not.toBeInTheDocument();
+    });
+
+    it('returns to the rendered preview when a row is selected after the comparison failed', async () => {
+      mockAdapter.current = createAdapter((id) =>
+        id === 'v1' ? Promise.reject(new Error('boom')) : undefined
+      );
+      await renderOpenModal();
+      requestCompareV2ToPrevious();
+      await waitFor(() => expect(screen.getByTestId('dashboardCompareError')).toBeInTheDocument());
+
+      fireEvent.click(row('v3'));
+
+      await expectDashboardPreview('v3');
+      expect(screen.queryByTestId('dashboardCompareError')).not.toBeInTheDocument();
     });
   });
 
