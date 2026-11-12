@@ -131,9 +131,11 @@ describe('WorkflowExecutionQueryService', () => {
         executionDocument('run-other', 'wf-2', 'uid-other'),
       ];
       mockEsClient.search.mockImplementation(async (request) => {
-        const matched = executions.filter((execution) =>
-          matchesExecutionQuery(execution, request.query)
-        );
+        const query = request?.query;
+        if (!query) {
+          throw new Error('search was called without a query');
+        }
+        const matched = executions.filter((execution) => matchesExecutionQuery(execution, query));
         return {
           hits: {
             hits: matched.map((execution) => ({ _id: execution.id, _source: execution })),
