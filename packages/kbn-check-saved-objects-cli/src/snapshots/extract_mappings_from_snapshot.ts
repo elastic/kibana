@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsTypeMappingDefinition } from '@kbn/core-saved-objects-server';
 import { unflattenObject } from '@kbn/object-utils';
 import type { MigrationSnapshot } from '../types';
 
@@ -15,8 +15,8 @@ const isFlattenedMapping = (mappings: Record<string, unknown>): boolean =>
   Object.keys(mappings).some((key) => key.includes('.'));
 
 const normalizeRootMappingProperties = (
-  mappings: SavedObjectsTypeMappingDefinitions[string]
-): SavedObjectsTypeMappingDefinitions[string] => {
+  mappings: SavedObjectsTypeMappingDefinition
+): SavedObjectsTypeMappingDefinition => {
   if (!Object.hasOwn(mappings, 'properties')) {
     return { ...mappings, properties: {} };
   }
@@ -25,21 +25,20 @@ const normalizeRootMappingProperties = (
 
 export const unflattenSnapshotMappings = (
   mappings: Record<string, unknown>
-): SavedObjectsTypeMappingDefinitions[string] => {
+): SavedObjectsTypeMappingDefinition => {
   const nestedMappings = isFlattenedMapping(mappings)
-    ? (unflattenObject(mappings) as unknown as SavedObjectsTypeMappingDefinitions[string])
-    : (mappings as unknown as SavedObjectsTypeMappingDefinitions[string]);
+    ? (unflattenObject(mappings) as unknown as SavedObjectsTypeMappingDefinition)
+    : (mappings as unknown as SavedObjectsTypeMappingDefinition);
 
   return normalizeRootMappingProperties(nestedMappings);
 };
 
 export const extractMappingsFromSnapshot = (
   snapshot: MigrationSnapshot
-): SavedObjectsTypeMappingDefinitions =>
-  Object.entries(snapshot.typeDefinitions).reduce<SavedObjectsTypeMappingDefinitions>(
-    (mappings, [typeName, typeDefinition]) => {
-      mappings[typeName] = unflattenSnapshotMappings(typeDefinition.mappings);
-      return mappings;
-    },
-    {}
-  );
+): Record<string, SavedObjectsTypeMappingDefinition> =>
+  Object.entries(snapshot.typeDefinitions).reduce<
+    Record<string, SavedObjectsTypeMappingDefinition>
+  >((mappings, [typeName, typeDefinition]) => {
+    mappings[typeName] = unflattenSnapshotMappings(typeDefinition.mappings);
+    return mappings;
+  }, {});

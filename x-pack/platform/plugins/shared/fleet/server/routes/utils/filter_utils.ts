@@ -7,9 +7,13 @@
 
 import { get } from 'lodash';
 import * as esKuery from '@kbn/es-query';
-import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsMappingProperties } from '@kbn/core-saved-objects-server';
 
 type KueryNode = any;
+
+interface IndexMapping {
+  properties: SavedObjectsMappingProperties;
+}
 
 const astFunctionType = ['is', 'range', 'nested'];
 const allowedTerms = ['_exists_'];

@@ -8,8 +8,7 @@
  */
 
 import assert from 'assert';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
+import type { CoreStart, ElasticsearchClient } from '@kbn/core/server';
 import type { createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
@@ -39,7 +38,7 @@ describe('FileService', () => {
   let fileService: FileServiceStart;
   let blobStorageService: BlobStorageService;
   let esClient: ElasticsearchClient;
-  let coreStart: InternalCoreStart;
+  let coreStart: Pick<CoreStart, 'elasticsearch' | 'savedObjects'>;
   let fileServiceFactory: FileServiceFactory;
   let security: ReturnType<typeof securityMock.createSetup>;
   let auditLogger: AuditLogger;

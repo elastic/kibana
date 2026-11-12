@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import type { AnalyticsServiceSetup, CoreSetup, SavedObjectsClient } from '@kbn/core/server';
-import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
+import type {
+  AnalyticsServiceSetup,
+  CoreSetup,
+  CoreStart,
+  SavedObjectsClient,
+} from '@kbn/core/server';
 import {
   createRootWithCorePlugins,
   createTestServers,
@@ -30,7 +34,7 @@ import {
 describe('AutomaticImportService Integration Tests', () => {
   let manageES: TestElasticsearchUtils;
   let kbnRoot: ReturnType<typeof createRootWithCorePlugins>;
-  let coreStart: InternalCoreStart;
+  let coreStart: Pick<CoreStart, 'elasticsearch' | 'savedObjects'>;
   let automaticImportService: AutomaticImportService;
 
   const taskManagerSetupStub = {

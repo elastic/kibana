@@ -8,8 +8,10 @@
  */
 
 import type { ListrTask } from 'listr2';
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
+import type {
+  SavedObjectsType,
+  SavedObjectsTypeMappingDefinition,
+} from '@kbn/core-saved-objects-server';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { Root } from '@kbn/core-root-server-internal';
 import type {
@@ -45,7 +47,7 @@ export interface TaskContext {
   wipTypes: string[];
   currentRemovedTypes: string[];
   newRemovedTypes: string[];
-  baselineMappings?: SavedObjectsTypeMappingDefinitions;
+  baselineMappings?: Record<string, SavedObjectsTypeMappingDefinition>;
   fixtures: {
     previous: FixtureMap;
     current: FixtureMap;
