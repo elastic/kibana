@@ -186,18 +186,41 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
                   </EuiButtonEmpty>
                 }
               >
-                <EuiColorPicker
-                  color={tag.color}
+                <EuiFieldText
+                  value={tag.color}
                   fullWidth={true}
-                  onChange={(text) => setColor(text)}
-                  format="hex"
+                  onChange={(event) => setColor(event.target.value)}
+                  icon={{ type: 'swatchInput', side: 'left', color: previewTag.color }}
+                  append={
+                    <EuiColorPicker
+                      color={tag.color}
+                      onChange={(text) => setColor(text)}
+                      format="hex"
+                      button={
+                        <EuiButtonEmpty
+                          iconType="chevronSingleDown"
+                          color="text"
+                          size="s"
+                          aria-label={i18n.translate(
+                            'xpack.savedObjectsTagging.management.createModal.color.openPaletteAriaLabel',
+                            { defaultMessage: 'Open color palette' }
+                          )}
+                        />
+                      }
+                      data-test-subj="createModalColorPaletteButton"
+                    />
+                  }
                   isInvalid={!!validation.errors.color}
                   data-test-subj="createModalField-color"
                 />
               </EuiFormRow>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer size="s" />
+          {/* Reserve the 18px validation message above the usual 8px field spacing. */}
+          <EuiSpacer
+            size={validation.errors.name || validation.errors.color ? 's' : 'l'}
+            css={validation.errors.name || validation.errors.color ? undefined : { height: '26px' }}
+          />
           <EuiFormRow
             data-test-subj="createModalRow-description"
             fullWidth={true}
@@ -231,7 +254,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="baseline">
               <EuiFlexItem grow={false}>
@@ -248,7 +271,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty onClick={onClose} data-test-subj="createModalCancelButton">
                   <FormattedMessage
