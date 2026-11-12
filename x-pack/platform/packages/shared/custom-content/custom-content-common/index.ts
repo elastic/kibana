@@ -26,8 +26,7 @@ export {
   customContentPanelUpdateSchema,
   customContentDataQueriesSchema,
   REMOVE_ALL_QUERIES_DESCRIPTION,
-  readEsqlQuery,
-  toEsqlQueryState,
+  rejectRemovedQueryFields,
 } from './schema';
 export type {
   CustomContentState,
@@ -41,4 +40,9 @@ export {
 } from './esql_queries_total_length';
 
 export { stripMarkdownFences } from './strip_markdown_fences';
+export {
+  CUSTOM_CONTENT_QUERY_PROMPT_LENGTH,
+  fenceCode,
+  truncateQueryForPrompt,
+} from './prompt_text';
 export { CUSTOM_CONTENT_LIQUID_OPTIONS } from './liquid_options';

@@ -18,6 +18,7 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
+import { truncateQueryForPrompt } from '@kbn/custom-content-common';
 import {
   withLensReferences,
   toLensApiConfig,
@@ -35,12 +36,13 @@ const describeQueries = (data: VisualizationAttachmentData): string[] => {
   const queries = readCustomContentQueries(data);
   // Custom content is the only renderer that can be static.
   if (queries.length === 0) return ['ES|QL: none (static content)'];
-  if (queries.length === 1) return [`ES|QL: ${queries[0]}`];
+  // A stored query can be very long, and this goes into the prompt on every turn.
+  if (queries.length === 1) return [`ES|QL: ${truncateQueryForPrompt(queries[0])}`];
   return queries.map(
     (query, position) =>
       `ES|QL, read by the template as ${
         position === 0 ? 'rows' : `queries[${position}].rows`
-      }: ${query}`
+      }: ${truncateQueryForPrompt(query)}`
   );
 };
 

@@ -121,6 +121,16 @@ export const EditCustomContentFlyout = ({
     queriesToSave.length !== esqlQueries.length ||
     queriesToSave.some((text, index) => text !== esqlQueries[index]);
 
+  // The buttons that act on the draft are off while a blank query has others after it; the callout
+  // that says so is inside the data accordion, which may be closed.
+  const blockedTooltip =
+    emptyQueryPosition === undefined
+      ? undefined
+      : i18n.translate('xpack.customContent.editFlyout.emptyQueryBlocked', {
+          defaultMessage: 'Query {position} is empty. Fill it in to continue.',
+          values: { position: emptyQueryPosition },
+        });
+
   const handleSave = useCallback(() => {
     getTelemetry().trackPanelSaved({
       isNewPanel: isNewPanel ?? false,
@@ -250,20 +260,22 @@ export const EditCustomContentFlyout = ({
           </EuiFlexItem>
           {isAiAvailable && (
             <EuiFlexItem grow={false}>
-              <AiButton
-                size="s"
-                iconType="sparkles"
-                isDisabled={emptyQueryPosition !== undefined}
-                onClick={handleGenerateWithChat}
-              >
-                {draftTemplate
-                  ? i18n.translate('xpack.customContent.editFlyout.refineWithChatButton', {
-                      defaultMessage: 'Refine with chat',
-                    })
-                  : i18n.translate('xpack.customContent.editFlyout.generateWithChatButton', {
-                      defaultMessage: 'Generate with chat',
-                    })}
-              </AiButton>
+              <EuiToolTip content={blockedTooltip}>
+                <AiButton
+                  size="s"
+                  iconType="sparkles"
+                  isDisabled={emptyQueryPosition !== undefined}
+                  onClick={handleGenerateWithChat}
+                >
+                  {draftTemplate
+                    ? i18n.translate('xpack.customContent.editFlyout.refineWithChatButton', {
+                        defaultMessage: 'Refine with chat',
+                      })
+                    : i18n.translate('xpack.customContent.editFlyout.generateWithChatButton', {
+                        defaultMessage: 'Generate with chat',
+                      })}
+                </AiButton>
+              </EuiToolTip>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -363,29 +375,33 @@ export const EditCustomContentFlyout = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  color="text"
-                  isLoading={isRenderLoading}
-                  disabled={!draftTemplate.trim() || emptyQueryPosition !== undefined}
-                  onClick={handleRender}
-                  data-test-subj="customContentRunPreviewButton"
-                >
-                  {i18n.translate('xpack.customContent.editFlyout.runPreviewButton', {
-                    defaultMessage: 'Run preview',
-                  })}
-                </EuiButton>
+                <EuiToolTip content={blockedTooltip}>
+                  <EuiButton
+                    color="text"
+                    isLoading={isRenderLoading}
+                    disabled={!draftTemplate.trim() || emptyQueryPosition !== undefined}
+                    onClick={handleRender}
+                    data-test-subj="customContentRunPreviewButton"
+                  >
+                    {i18n.translate('xpack.customContent.editFlyout.runPreviewButton', {
+                      defaultMessage: 'Run preview',
+                    })}
+                  </EuiButton>
+                </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  onClick={handleSave}
-                  disabled={!hasChanges || emptyQueryPosition !== undefined}
-                  data-test-subj="customContentApplyButton"
-                >
-                  {i18n.translate('xpack.customContent.editFlyout.applyButton', {
-                    defaultMessage: 'Apply and close',
-                  })}
-                </EuiButton>
+                <EuiToolTip content={blockedTooltip}>
+                  <EuiButton
+                    fill
+                    onClick={handleSave}
+                    disabled={!hasChanges || emptyQueryPosition !== undefined}
+                    data-test-subj="customContentApplyButton"
+                  >
+                    {i18n.translate('xpack.customContent.editFlyout.applyButton', {
+                      defaultMessage: 'Apply and close',
+                    })}
+                  </EuiButton>
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

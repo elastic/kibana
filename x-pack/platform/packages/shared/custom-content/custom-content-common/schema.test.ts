@@ -16,8 +16,6 @@ import {
   customContentStateSchema,
   customContentPanelUpdateSchema,
   customContentDataQueriesSchema,
-  readEsqlQuery,
-  toEsqlQueryState,
 } from './schema';
 
 describe('customContentStateSchema', () => {
@@ -125,6 +123,22 @@ describe('customContentPanelUpdateSchema', () => {
     ).toBe(false);
   });
 
+  it.each([
+    [{ esqlQuery: 'FROM logs' }],
+    [{ esqlQuery: null, prompt: 'x' }],
+    [{ regenerateEsql: true }],
+    [{ index: 'logs' }],
+  ])('rejects the removed fields instead of dropping them: %j', (extra) => {
+    const result = customContentPanelUpdateSchema.safeParse({
+      embeddable_id: 'p1',
+      prompt: 'Show it',
+      ...extra,
+    });
+
+    expect(result.success).toBe(false);
+    expect(JSON.stringify(result)).toContain('is no longer accepted');
+  });
+
   it('rejects a prompt exceeding CUSTOM_CONTENT_MAX_PROMPT_LENGTH', () => {
     expect(
       customContentPanelUpdateSchema.safeParse({
@@ -178,6 +192,23 @@ describe('customContentDataQueriesSchema', () => {
   });
 });
 
+describe('customContentDataQueriesSchema entries that would do nothing', () => {
+  it.each([
+    [[{ index: 'metrics-*' }]],
+    [[{ description: '   ' }]],
+    [[{ esql: '  ' }]],
+    [[{ esql: 'FROM logs', index: 'logs' }]],
+  ])('are rejected, so the call does not succeed on a no-op: %j', (entries) => {
+    expect(customContentDataQueriesSchema.safeParse(entries).success).toBe(false);
+  });
+
+  it('still accepts an empty entry, which keeps the query at its position', () => {
+    expect(customContentDataQueriesSchema.safeParse([{}, { description: 'totals' }]).success).toBe(
+      true
+    );
+  });
+});
+
 describe('customContentPanelUpdateSchema data queries', () => {
   const parse = (input: Record<string, unknown>) =>
     customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1', ...input });
@@ -196,24 +227,5 @@ describe('customContentPanelUpdateSchema data queries', () => {
     const result = parse({ dataQueries: [{ description: 'totals' }] });
     expect(result.success).toBe(false);
     expect(JSON.stringify(result)).toContain('needs a prompt');
-  });
-});
-
-describe('esql_query accessors', () => {
-  it('round-trips a single query', () => {
-    expect(readEsqlQuery({ esql_query: toEsqlQueryState('FROM logs') })).toBe('FROM logs');
-  });
-
-  it('maps no query to an absent field rather than an empty array', () => {
-    expect(toEsqlQueryState(undefined)).toBeUndefined();
-  });
-
-  it('reads undefined from a panel with no query', () => {
-    expect(readEsqlQuery({})).toBeUndefined();
-    expect(readEsqlQuery({ esql_query: [] })).toBeUndefined();
-  });
-
-  it('reads the first query of a panel with several as the main one', () => {
-    expect(readEsqlQuery({ esql_query: ['FROM a', 'FROM b', 'FROM c'] })).toBe('FROM a');
   });
 });

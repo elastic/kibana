@@ -68,15 +68,16 @@ export const isCustomContentVisualization = (
 ): data is CustomContentVisualizationAttachmentData => data.renderer === 'custom_content';
 
 /**
- * The ES|QL queries of an attachment, in the order its template reads them, whatever shape it was
- * saved in: a chart has one query, and a custom content attachment saved before a panel could have
- * several has a single string.
+ * The queries of an attachment's `esql`, whichever shape it was saved in: a chart has one string,
+ * a custom content attachment saved before a panel could have several does too, and one saved
+ * since holds a list. An absent or empty value is no queries; the entries of a list are kept as
+ * they are, blanks included, so each stays at its position.
  */
-/** The queries of an attachment's `esql`, whichever shape it was saved in; a blank one is no query. */
 export const toQueryList = (esql: string | readonly string[] | undefined): string[] => {
   if (!esql) return [];
   return typeof esql === 'string' ? [esql] : [...esql];
 };
 
+/** The ES|QL queries of an attachment, in the order its template reads them. */
 export const readCustomContentQueries = (data: VisualizationAttachmentData): string[] =>
   toQueryList(data.esql);

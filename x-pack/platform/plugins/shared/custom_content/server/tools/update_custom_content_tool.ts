@@ -105,6 +105,15 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
     let built: Awaited<ReturnType<typeof buildCustomContentConfig>>;
     try {
       const existingQueries = currentData ? readContextQueries(currentData) : [];
+      // The template only learns how to use a new `queries[n]` from the prompt, as on the dashboard tool.
+      if (
+        prompt === undefined &&
+        dataQueries?.some((_, position) => position >= existingQueries.length)
+      ) {
+        throw new Error(
+          'A data query that adds a query needs a "prompt" saying how the panel should now use the data.'
+        );
+      }
       built = await buildCustomContentConfig({
         nlQuery: prompt,
         dataQueries,

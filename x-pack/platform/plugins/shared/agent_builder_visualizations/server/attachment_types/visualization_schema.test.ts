@@ -136,6 +136,19 @@ describe('visualizationAttachmentDataSchema', () => {
       expect(result.success).toBe(true);
     });
 
+    it('stores a query saved as a single string, as before a panel could have several, as a list', () => {
+      const result = visualizationAttachmentDataSchema.safeParse({
+        renderer: 'custom_content',
+        query: 'a status board per host',
+        visualization: { template: '<div>x</div>' },
+        esql: 'FROM logs | STATS count() BY host',
+      });
+
+      expect(result.success && result.data).toMatchObject({
+        esql: ['FROM logs | STATS count() BY host'],
+      });
+    });
+
     // The tools and the panel itself accept a query this long, so the attachment must keep it.
     it('accepts a query as long as the tools allow', () => {
       const result = visualizationAttachmentDataSchema.safeParse({

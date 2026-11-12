@@ -23,6 +23,8 @@ import {
 import {
   REMOVE_ALL_QUERIES_DESCRIPTION,
   customContentDataQueriesSchema,
+  rejectRemovedQueryFields,
+  truncateQueryForPrompt,
 } from '@kbn/custom-content-common';
 import {
   ToolResultType,
@@ -123,39 +125,45 @@ const vegaTargetSchema = z.object({
 });
 
 const customContentTargetSchema = lazySchema(() =>
-  z.object({
-    type: z
-      .literal('custom_content')
-      .describe(
-        'A new HTML/CSS layout, as a last resort when neither chart grammar fits — KPI scorecards with status badges, health boards, panels mixing narrative text with live values. The markup is generated server-side from "query"; never author it yourself.'
-      ),
-    dataQueries: dataQueriesField,
-    removeAllQueries: removeAllQueriesField,
-  })
+  z
+    .looseObject({
+      type: z
+        .literal('custom_content')
+        .describe(
+          'A new HTML/CSS layout, as a last resort when neither chart grammar fits — KPI scorecards with status badges, health boards, panels mixing narrative text with live values. The markup is generated server-side from "query"; never author it yourself.'
+        ),
+      dataQueries: dataQueriesField,
+      removeAllQueries: removeAllQueriesField,
+    })
+    .superRefine(
+      rejectRemovedQueryFields(['esql', 'has_data', 'regenerate_esql'], { ignoreNull: true })
+    )
 );
 
 const attachmentTargetSchema = lazySchema(() =>
-  z.object({
-    type: z
-      .literal('attachment')
-      .describe(
-        'Update an existing visualization attachment in place. The attachment must exist; edits keep its renderer.'
-      ),
-    attachment_id: z
-      .string()
-      .min(1)
-      .max(256)
-      .describe('ID of the visualization attachment to update.'),
-    chartType: z
-      .nativeEnum(SupportedChartType)
-      .optional()
-      .describe(
-        '(optional) For Lens: pass a new chart type when the request changes the chart family (e.g. xy to pie); omit it to keep the current one. For Vega it is only a styling hint. Ignored for custom content.'
-      ),
-    esql: optionalEsqlField,
-    dataQueries: dataQueriesField,
-    removeAllQueries: removeAllQueriesField,
-  })
+  z
+    .looseObject({
+      type: z
+        .literal('attachment')
+        .describe(
+          'Update an existing visualization attachment in place. The attachment must exist; edits keep its renderer.'
+        ),
+      attachment_id: z
+        .string()
+        .min(1)
+        .max(256)
+        .describe('ID of the visualization attachment to update.'),
+      chartType: z
+        .nativeEnum(SupportedChartType)
+        .optional()
+        .describe(
+          '(optional) For Lens: pass a new chart type when the request changes the chart family (e.g. xy to pie); omit it to keep the current one. For Vega it is only a styling hint. Ignored for custom content.'
+        ),
+      esql: optionalEsqlField,
+      dataQueries: dataQueriesField,
+      removeAllQueries: removeAllQueriesField,
+    })
+    .superRefine(rejectRemovedQueryFields(['has_data', 'regenerate_esql'], { ignoreNull: true }))
 );
 
 const targetSchema = lazySchema(() =>
@@ -503,7 +511,9 @@ Ground first: make sure the target index exists and every field you reference is
               renderer: 'custom_content',
               visualization: { prompt: nlQuery },
               // The first query, as before: the model described the others itself.
-              ...(visualizationData.esql?.[0] ? { esql: visualizationData.esql[0] } : {}),
+              ...(visualizationData.esql?.[0]
+                ? { esql: truncateQueryForPrompt(visualizationData.esql[0]) }
+                : {}),
               ...(visualizationData.time_range && { time_range: visualizationData.time_range }),
               ...attachmentRef,
             }

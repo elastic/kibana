@@ -6,6 +6,7 @@
  */
 
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import { fenceCode, truncateQueryForPrompt } from '@kbn/custom-content-common';
 import {
   CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
   customContentContextAttachmentDataSchema,
@@ -18,18 +19,19 @@ const formatPanelContext = (data: CustomContentContextAttachmentData): string =>
 
   const [esqlQuery, ...additionalQueries] = readContextQueries(data);
   if (esqlQuery) {
-    parts.push(`\nES|QL Query:\n\`\`\`esql\n${esqlQuery}\n\`\`\``);
+    parts.push(`\nES|QL Query:\n${fenceCode(truncateQueryForPrompt(esqlQuery), 'esql')}`);
   }
   additionalQueries.forEach((query, index) => {
     parts.push(
-      `\nAdditional ES|QL query, read by the template as queries[${
-        index + 1
-      }]:\n\`\`\`esql\n${query}\n\`\`\``
+      `\nAdditional ES|QL query, read by the template as queries[${index + 1}]:\n${fenceCode(
+        truncateQueryForPrompt(query),
+        'esql'
+      )}`
     );
   });
 
   const templateDisplay = data.panel_template
-    ? `\`\`\`html\n${data.panel_template}\n\`\`\``
+    ? fenceCode(data.panel_template, 'html')
     : '(empty — no template generated yet)';
   parts.push(`\nHTML Template:\n${templateDisplay}`);
 

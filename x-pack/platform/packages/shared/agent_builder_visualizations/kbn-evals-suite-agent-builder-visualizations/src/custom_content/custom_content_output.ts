@@ -19,7 +19,7 @@ import { extractVisualizations, type ExtractedVisualization } from '../extract_v
 
 /** A custom content panel as stored in the visualization attachment. */
 export interface StoredCustomContent {
-  /** Absent for a static panel. */
+  /** The main query, the one the template reads as `rows`. Absent for a static panel. */
   esql?: string;
   template?: string;
   height?: number;
@@ -71,8 +71,11 @@ export const toStoredCustomContent = (data: unknown): StoredCustomContent | unde
   if (!isRecord(data) || data.renderer !== 'custom_content') {
     return undefined;
   }
-  const { esql, visualization } = data;
+  const { visualization } = data;
   const stored: StoredCustomContent = {};
+  // A list since a panel can have several queries, a string in attachments saved before that. As
+  // for a dashboard panel, the evaluators judge the first one, the one the template reads as `rows`.
+  const [esql] = Array.isArray(data.esql) ? data.esql : [data.esql];
   if (typeof esql === 'string' && esql.trim().length > 0) {
     stored.esql = esql;
   }

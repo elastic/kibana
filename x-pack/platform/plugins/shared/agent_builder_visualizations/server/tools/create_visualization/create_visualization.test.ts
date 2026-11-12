@@ -167,6 +167,34 @@ describe('createVisualizationTool schema', () => {
     }
   });
 
+  it.each([
+    ['a new custom content panel', 'esql', { type: 'custom_content', esql: 'FROM x' }],
+    ['a new custom content panel', 'has_data', { type: 'custom_content', has_data: false }],
+    [
+      'an attachment update',
+      'regenerate_esql',
+      { type: 'attachment', attachment_id: 'a', regenerate_esql: true },
+    ],
+    [
+      'an attachment update',
+      'has_data',
+      { type: 'attachment', attachment_id: 'a', has_data: true },
+    ],
+  ])('rejects the removed field on %s: %s', (_what, name, target) => {
+    const result = schema.safeParse({ query: 'x', target });
+
+    expect(result.success).toBe(false);
+    expect(result.error?.issues.map(({ message }) => message).join()).toContain(
+      `"${name}" is no longer accepted`
+    );
+  });
+
+  it('still treats esql: null on a custom content target as omitted', () => {
+    expect(
+      schema.safeParse({ query: 'x', target: { ...customContentTarget(), esql: null } }).success
+    ).toBe(true);
+  });
+
   it('strips leftover contentMode instead of failing the call', () => {
     const lens = schema.safeParse({
       query: 'errors over time',
@@ -746,6 +774,24 @@ describe('createVisualizationTool handler', () => {
       const [{ data }] = result.results;
       expect(data.visualization).toEqual({ prompt: 'a status board per host' });
       expect(JSON.stringify(data)).not.toContain('row["host"]');
+    });
+
+    it('returns only the start of a very long query to the model, and stores all of it', async () => {
+      const longQuery = `FROM logs | WHERE x == "${'a'.repeat(50000)}"`;
+      mockBuildCustomContent.mockResolvedValue({
+        esqlQueries: [longQuery],
+        template: '<div>x</div>',
+        height: 200,
+      });
+
+      const { result, attachments } = await runHandler({
+        query: 'a status board',
+        target: customContentTarget(),
+      });
+
+      expect(result.results[0].data.esql).toContain('truncated, ');
+      expect(result.results[0].data.esql.length).toBeLessThan(5000);
+      expect(attachments.add.mock.calls[0][0].data.esql).toEqual([longQuery]);
     });
 
     describe('data queries', () => {

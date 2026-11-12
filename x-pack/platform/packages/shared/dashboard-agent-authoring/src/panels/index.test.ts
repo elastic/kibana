@@ -40,14 +40,13 @@ describe('upsert panel content schema', () => {
     ).toBe(false);
   });
 
-  it('keeps dataQueries and removeAllQueries and drops Lens-only fields on custom_content', () => {
+  it('keeps dataQueries and removeAllQueries on custom_content', () => {
     const result = upsertPanelContentSchema.safeParse({
       source: 'request',
       renderer: 'custom_content',
       query: 'Show a KPI card for total errors',
       dataQueries: [{ description: 'total errors', index: 'logs-*' }],
       removeAllQueries: false,
-      chartType: 'metric',
     });
 
     expect(result.success).toBe(true);
@@ -55,7 +54,6 @@ describe('upsert panel content schema', () => {
       dataQueries: [{ description: 'total errors', index: 'logs-*' }],
       removeAllQueries: false,
     });
-    expect(result.data).not.toHaveProperty('chartType');
   });
 
   it.each([

@@ -260,6 +260,28 @@ describe('createUpdateCustomContentTool handler', () => {
       expect(mockBuild.mock.calls[0][0].resolveEsqlVariables).toBeUndefined();
     });
 
+    it('needs a prompt when a data query adds a query, since the template must learn how to use it', async () => {
+      const { results, ctx } = await callHandler(
+        { embeddable_id: 'p1', dataQueries: [{}, { esql: 'FROM metrics-*' }] },
+        existing
+      );
+
+      const result = results[0] as ToolResult;
+      if (!isErrorResult(result)) throw new Error('Expected error result');
+      expect(result.data.message).toContain('needs a "prompt"');
+      expect(mockBuild).not.toHaveBeenCalled();
+      expect(ctx.update).not.toHaveBeenCalled();
+    });
+
+    it('lets data queries that only replace existing queries go without a prompt', async () => {
+      await callHandler(
+        { embeddable_id: 'p1', dataQueries: [{ esql: 'FROM metrics-*' }] },
+        existing
+      );
+
+      expect(mockBuild).toHaveBeenCalled();
+    });
+
     it('forwards removeAllQueries, which removes the queries, and stores none', async () => {
       mockBuild.mockResolvedValue({
         esqlQueries: [],

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { ComponentProps } from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MockedCodeEditor } from '@kbn/code-editor-mock';
 import type { MockedMonacoEditor } from '@kbn/code-editor-mock/monaco_mock';
@@ -169,6 +169,25 @@ describe('EditCustomContentFlyout', () => {
     expect(screen.getByRole('button', { name: 'Apply and close' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Run preview' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Refine with chat' })).toBeDisabled();
+  });
+
+  it('says why the buttons are off when hovering one of them', async () => {
+    mockUseEditFlyoutState.mockReturnValue({
+      ...baseFlyoutState,
+      draftQueries: drafts('FROM logs', '', 'FROM c'),
+      draftTemplate: '<p>hi</p>',
+      emptyQueryPosition: 2,
+    });
+    render(<EditCustomContentFlyout {...defaultProps} esqlQueries={['FROM logs']} />);
+
+    // A disabled button gets no pointer events; the tooltip listens on the element around it.
+    const anchor = screen.getByRole('button', { name: 'Refine with chat' }).parentElement!;
+    fireEvent.mouseOver(anchor);
+    fireEvent.focus(anchor);
+
+    expect(
+      await screen.findByText('Query 2 is empty. Fill it in to continue.')
+    ).toBeInTheDocument();
   });
 
   it('hands the queries of the panel to the state, so a preview can fetch them all', () => {

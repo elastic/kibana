@@ -38,13 +38,8 @@ export const customContentStateSchema = lazySchema(() =>
 
 export type CustomContentState = z.output<typeof customContentStateSchema>;
 
-/** The panel's main ES|QL query, or `undefined` when it has none. */
-export const readEsqlQuery = (state: Pick<CustomContentState, 'esql_query'>): string | undefined =>
-  state.esql_query?.[0];
-
-/** Builds the persisted `esql_query` field from a single query, omitting it when there is none. */
-export const toEsqlQueryState = (esqlQuery: string | undefined): string[] | undefined =>
-  esqlQuery === undefined ? undefined : [esqlQuery];
+const isNotBlank = (value: string) => value.trim().length > 0;
+const BLANK_MESSAGE = 'Must not be blank. Leave it out to keep the query at this position.';
 
 /**
  * A panel's queries as an agent asks for them, by position. Shared by the chat tool, the
@@ -53,31 +48,38 @@ export const toEsqlQueryState = (esqlQuery: string | undefined): string[] | unde
 export const customContentDataQueriesSchema = lazySchema(() =>
   z
     .array(
-      z.object({
-        description: z
-          .string()
-          .min(1)
-          .max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH)
-          .optional()
-          .describe(
-            'What this query returns, in words: the data, not the layout (for example "total requests and the number of 5xx errors, as one row" or "the five hosts with the most requests"). The server generates the ES|QL query from it; do not write one yourself. On an existing panel this regenerates the query at this position, keeping what the description does not change.'
-          ),
-        esql: z
-          .string()
-          .min(1)
-          .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
-          .optional()
-          .describe(
-            'An ES|QL query the user supplied for this position, to use as it is. It wins over "description" and, on an existing panel, replaces the query at this position.'
-          ),
-        index: z
-          .string()
-          .max(256)
-          .optional()
-          .describe(
-            'Exact index, alias, or data stream this query reads from. Pass it with "description" whenever known.'
-          ),
-      })
+      z
+        .object({
+          description: z
+            .string()
+            .min(1)
+            .max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH)
+            .refine(isNotBlank, { message: BLANK_MESSAGE })
+            .optional()
+            .describe(
+              'What this query returns, in words: the data, not the layout (for example "total requests and the number of 5xx errors, as one row" or "the five hosts with the most requests"). The server generates the ES|QL query from it; do not write one yourself. On an existing panel this regenerates the query at this position, keeping what the description does not change.'
+            ),
+          esql: z
+            .string()
+            .min(1)
+            .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
+            .refine(isNotBlank, { message: BLANK_MESSAGE })
+            .optional()
+            .describe(
+              'An ES|QL query the user supplied for this position, to use as it is. It wins over "description" and, on an existing panel, replaces the query at this position.'
+            ),
+          index: z
+            .string()
+            .max(256)
+            .optional()
+            .describe(
+              'Exact index, alias, or data stream this query reads from. Pass it with "description" whenever known.'
+            ),
+        })
+        .refine(({ index, description }) => index === undefined || description !== undefined, {
+          message:
+            'An "index" only applies to an entry with a "description", which is generated from it. Put the "description" on the entry, or drop the "index".',
+        })
     )
     .min(1)
     .max(CUSTOM_CONTENT_MAX_ESQL_QUERIES)
@@ -96,6 +98,29 @@ export interface CustomContentQueryChanges {
 }
 /** One of a panel's queries, as an agent asks for it. */
 export type CustomContentDataQuery = CustomContentDataQueries[number];
+
+/**
+ * Rejects the single-query fields that `dataQueries` and `removeAllQueries` replaced. The tool
+ * schemas drop unknown keys, so without this a model that still sends one would see its call
+ * succeed with the field ignored: a supplied query would be lost, and a data change would never
+ * happen. A leftover that says nothing (`undefined` or an empty string) is let through, and so
+ * is `null` when `ignoreNull` is set: it means "omitted" where the tool never used it to remove a
+ * query. Use it on a loose object, which keeps the keys to look at.
+ */
+export const rejectRemovedQueryFields =
+  (removed: readonly string[], { ignoreNull = false }: { ignoreNull?: boolean } = {}) =>
+  (value: Record<string, unknown>, ctx: z.RefinementCtx): void => {
+    removed
+      .filter((name) => value[name] !== undefined && value[name] !== '')
+      .filter((name) => !(ignoreNull && value[name] === null))
+      .forEach((name) => {
+        ctx.addIssue({
+          code: 'custom',
+          path: [name],
+          message: `"${name}" is no longer accepted: describe the panel's queries in "dataQueries" (one entry per query, by position), or pass "removeAllQueries": true for a panel with no data.`,
+        });
+      });
+  };
 
 /** Says that a panel shows static content, which is what leaves it with no queries. */
 export const REMOVE_ALL_QUERIES_DESCRIPTION =
@@ -147,7 +172,7 @@ const removeAllExcludesDataQueries = {
  */
 export const customContentPanelUpdateSchema = lazySchema(() =>
   z
-    .object({
+    .looseObject({
       embeddable_id: z
         .string()
         .min(1)
@@ -157,6 +182,7 @@ export const customContentPanelUpdateSchema = lazySchema(() =>
         ),
       ...updateFields(),
     })
+    .superRefine(rejectRemovedQueryFields(['esqlQuery', 'regenerateEsql', 'index']))
     .refine(hasSomethingToChange, atLeastOneChange)
     .refine(
       ({ dataQueries, removeAllQueries }) => !(dataQueries && removeAllQueries),

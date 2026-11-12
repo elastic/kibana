@@ -14,7 +14,6 @@ import { ChatEventType, TimelineEventType } from '@kbn/agent-builder-common';
 import { customContentEmbeddableFactory } from './custom_content_embeddable';
 import type { CustomContentApi } from './custom_content_embeddable';
 import type { CustomContentEmbeddableState } from '../server';
-import { readEsqlQuery } from '@kbn/custom-content-common';
 import { CUSTOM_CONTENT_UPDATED_UI_EVENT } from '../common/ui_events';
 import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import type { openLazyFlyout } from '@kbn/presentation-util';
@@ -215,9 +214,9 @@ describe('customContentEmbeddableFactory', () => {
           esql_query: ['FROM metrics | STATS avg = AVG(value)'],
         });
       });
-      expect(readEsqlQuery(embeddable.api.serializeState())).toBe(
-        'FROM metrics | STATS avg = AVG(value)'
-      );
+      expect(embeddable.api.serializeState().esql_query).toEqual([
+        'FROM metrics | STATS avg = AVG(value)',
+      ]);
     });
   });
 
@@ -550,7 +549,7 @@ describe('customContentEmbeddableFactory', () => {
       await act(async () => render(<embeddable.Component />));
 
       const el = screen.getByTestId('mockCustomContentComponent');
-      expect(el).toHaveAttribute('data-esql-query', readEsqlQuery(baseState));
+      expect(el).toHaveAttribute('data-esql-query', baseState.esql_query?.[0]);
       expect(el).toHaveAttribute('data-saved-template', '<div>static html</div>');
     });
   });

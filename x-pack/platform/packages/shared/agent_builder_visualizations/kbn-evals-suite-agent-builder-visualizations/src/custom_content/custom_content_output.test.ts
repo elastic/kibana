@@ -57,6 +57,13 @@ describe('toStoredCustomContent', () => {
       'esql'
     );
     expect(toStoredCustomContent(customContentData({ esql: '  ' }))).not.toHaveProperty('esql');
+    expect(toStoredCustomContent(customContentData({ esql: [] }))).not.toHaveProperty('esql');
+  });
+
+  it('reads the main query of a panel stored as a list of queries, as the tools write it', () => {
+    expect(
+      toStoredCustomContent(customContentData({ esql: ['FROM logs | LIMIT 1', 'FROM other'] }))
+    ).toMatchObject({ esql: 'FROM logs | LIMIT 1' });
   });
 
   it('ignores panels of other renderers', () => {

@@ -10,6 +10,7 @@ import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   REMOVE_ALL_QUERIES_DESCRIPTION,
+  rejectRemovedQueryFields,
   customContentDataQueriesSchema,
   type CustomContentQueryChanges,
 } from '@kbn/custom-content-common';
@@ -55,33 +56,35 @@ export type CustomContentPanelResolutionRequest =
 
 /** Creates or edits a custom content panel. */
 const customContentPanelContentSchema = lazySchema(() =>
-  z.object({
-    source: z.literal('request'),
-    renderer: z
-      .literal('custom_content')
-      .describe(
-        'Render an HTML/CSS layout generated server-side. A last resort for content Lens and Vega cannot express. Required to edit a custom content panel; it is not inferred from the panel.'
-      ),
-    query: z
-      .string()
-      .min(1)
-      .max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH)
-      .optional()
-      .describe(
-        'Natural language description of what to display. The HTML template is generated server-side from it — do not supply markup yourself. Required for new panels; on an existing panel, what to change, preserving layout and design where possible. On an edit, omit it only when the edit just replaces queries with ES|QL the user supplied or removes them.'
-      ),
-    dataQueries: customContentDataQueriesSchema
-      .optional()
-      .describe(
-        'The panel\'s queries by position, for a panel that shows live data: one entry per query. A new panel needs this or removeAllQueries. "query" says how the panel looks and how it uses each query; each data query says what one query returns. On an edit, list only the queries you change; a description needs "query" saying how the panel should now use the data. Always set "index" on an entry when known.'
-      ),
-    removeAllQueries: z
-      .boolean()
-      .optional()
-      .describe(
-        `${REMOVE_ALL_QUERIES_DESCRIPTION} A new panel needs this (a banner, a legend, a note) or dataQueries; always state which.`
-      ),
-  })
+  z
+    .looseObject({
+      source: z.literal('request'),
+      renderer: z
+        .literal('custom_content')
+        .describe(
+          'Render an HTML/CSS layout generated server-side. A last resort for content Lens and Vega cannot express. Required to edit a custom content panel; it is not inferred from the panel.'
+        ),
+      query: z
+        .string()
+        .min(1)
+        .max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH)
+        .optional()
+        .describe(
+          'Natural language description of what to display. The HTML template is generated server-side from it — do not supply markup yourself. Required for new panels; on an existing panel, what to change, preserving layout and design where possible. On an edit, omit it only when the edit just replaces queries with ES|QL the user supplied or removes them.'
+        ),
+      dataQueries: customContentDataQueriesSchema
+        .optional()
+        .describe(
+          'The panel\'s queries by position, for a panel that shows live data: one entry per query. A new panel needs this or removeAllQueries. "query" says how the panel looks and how it uses each query; each data query says what one query returns. On an edit, list only the queries you change; a description needs "query" saying how the panel should now use the data. Always set "index" on an entry when known.'
+        ),
+      removeAllQueries: z
+        .boolean()
+        .optional()
+        .describe(
+          `${REMOVE_ALL_QUERIES_DESCRIPTION} A new panel needs this (a banner, a legend, a note) or dataQueries; always state which.`
+        ),
+    })
+    .superRefine(rejectRemovedQueryFields(['esql', 'hasData', 'regenerateESQL', 'index']))
 );
 
 export const customContentPanelKind = defineRequestPanelKind({
