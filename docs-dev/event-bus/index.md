@@ -7,7 +7,7 @@ description: "A node-local pub/sub service so plugins can publish and subscribe 
 
 The in-process event bus lets one plugin publish a domain event and another plugin react, without the two importing each other.
 
-Phase 1 is an in-memory bus on a single {{kib}} node. It is the first slice of a longer event-bus plan. Delivery is best effort and at-most-once: the bus does not retry, does not persist events, and does not deliver to other nodes.
+The in-process event bus is an in-memory service on a single {{kib}} node. Delivery is best effort and at-most-once: the bus does not retry, does not persist events, and does not deliver to other nodes.
 
 A working example lives in `examples/pubsub_example`. Start {{kib}} with `yarn start --run-examples` to load it.
 
