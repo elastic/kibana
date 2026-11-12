@@ -219,8 +219,9 @@ async function runConfigs(
   // cache (data/jest-cache) with common imports (EUI, React, etc.) before
   // launching the remaining processes. This avoids redundant cold compilations
   // when multiple processes start simultaneously with an empty cache.
-  // Set JEST_WARMUP_DELAY_MS=0 to disable.
-  const warmupDelayMs = parseInt(process.env.JEST_WARMUP_DELAY_MS || '120000', 10);
+  // Off unless JEST_WARMUP_DELAY_MS is set: SWC fills a cold cache in seconds, so the idle
+  // processes cost more than the duplicate compilations they avoid.
+  const warmupDelayMs = parseInt(process.env.JEST_WARMUP_DELAY_MS || '0', 10);
   const useWarmup = maxParallel > 1 && configs.length > 1 && warmupDelayMs > 0;
   let warmupComplete = !useWarmup;
 

@@ -211,6 +211,8 @@ export class WorkflowSearchService {
           { [ES_SORT_FIELDS[sortField]]: { order: sortOrder } },
           { updated_at: { order: 'desc' as const } },
         ]
+      : query
+      ? ['_score' as const, { updated_at: { order: 'desc' as const } }]
       : [{ updated_at: { order: 'desc' as const } }];
 
     const searchResponse = await this.deps.workflowStorage.getClient().search({

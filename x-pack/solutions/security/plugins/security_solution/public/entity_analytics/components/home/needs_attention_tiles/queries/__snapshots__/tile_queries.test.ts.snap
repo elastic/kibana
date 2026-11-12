@@ -6,7 +6,7 @@ FROM .alerts-security.alerts-default, .entities.v2.latest.default-00001 METADATA
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND @timestamp >= NOW() - 1 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND \`entity.relationships.resolution.resolved_to\` IS NOT NULL)
 | FORK (
     WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
-    | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
+    | EVAL _ea_entity_id = \`kibana.alert.entity.id\`::KEYWORD
     | KEEP _ea_entity_id, \`kibana.alert.severity\`
   )
   (
@@ -95,7 +95,7 @@ FROM .alerts-security.alerts-default, .entities.v2.latest.default-00001 METADATA
 
 exports[`needs attention tile queries over 24h without entity filters builds the entities with anomalies query 1`] = `
 "SET unmapped_fields=\\"nullify\\";
-FROM .ml-anomalies-shared*
+FROM .ml-anomalies-*
 | WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND @timestamp >= NOW() - 1 days AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
@@ -240,7 +240,7 @@ FROM .alerts-security.alerts-default, .entities.v2.latest.default-00001 METADATA
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND @timestamp >= NOW() - 30 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND \`entity.relationships.resolution.resolved_to\` IS NOT NULL)
 | FORK (
     WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
-    | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
+    | EVAL _ea_entity_id = \`kibana.alert.entity.id\`::KEYWORD
     | KEEP _ea_entity_id, \`kibana.alert.severity\`
   )
   (
@@ -332,7 +332,7 @@ FROM .alerts-security.alerts-default, .entities.v2.latest.default-00001 METADATA
 
 exports[`needs attention tile queries over 30d with a criticality filter builds the entities with anomalies query 1`] = `
 "SET unmapped_fields=\\"nullify\\";
-FROM .ml-anomalies-shared*
+FROM .ml-anomalies-*
 | WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND @timestamp >= NOW() - 30 days AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),

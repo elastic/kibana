@@ -104,6 +104,22 @@ describe('#setup()', () => {
       );
     });
 
+    it('applies hideChrome from an AppUpdater before start resolves', async () => {
+      const setup = service.setup(setupDeps);
+      const updater$ = new BehaviorSubject<AppUpdater>(() => ({ hideChrome: true }));
+      setup.register(Symbol('plugin'), createApp({ id: 'app1', updater$ }));
+
+      const { applications$ } = await service.start(startDeps);
+
+      let applications = await firstValueFrom(applications$);
+      expect(applications.get('app1')).toEqual(expect.objectContaining({ hideChrome: true }));
+
+      updater$.next(() => ({ hideChrome: false }));
+
+      applications = await firstValueFrom(applications$);
+      expect(applications.get('app1')).toEqual(expect.objectContaining({ hideChrome: false }));
+    });
+
     it('allows to register an AppUpdater for the application', async () => {
       const setup = service.setup(setupDeps);
 

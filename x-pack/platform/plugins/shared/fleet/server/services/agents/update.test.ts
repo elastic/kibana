@@ -10,7 +10,7 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { buildPolicyBaseIdWithFallbackKuery } from '../../../common/services/version_specific_policies_utils';
 
-import { getAgentsByKuery } from './crud';
+import { getAgentsByKuery, updateAgent } from './crud';
 import { unenrollAgent } from './unenroll';
 import { unenrollForAgentPolicyId } from './update';
 
@@ -55,6 +55,70 @@ describe('unenrollForAgentPolicyId', () => {
     expect(unenrollAgent).toHaveBeenCalledWith(soClient, esClient, 'agent-1', {
       force: true,
       revoke: true,
+      unenrolledReason: undefined,
+      skipAgentlessValidation: true,
+    });
+  });
+
+  it('also selects the already unenrolled agents when an unenrolled reason is given', async () => {
+    await unenrollForAgentPolicyId(soClient, esClient, 'policy-1', {
+      revoke: true,
+      unenrolledReason: 'agentless',
+    });
+
+    const { kuery } = jest.mocked(getAgentsByKuery).mock.calls[0][2];
+    expect(kuery).toBe(
+      `(${buildPolicyBaseIdWithFallbackKuery(
+        'policy-1',
+        'fleet-agents.policy_base_id',
+        'fleet-agents.policy_id'
+      )}) AND status:*`
+    );
+  });
+
+  it('only sets the unenrolled reason of the already unenrolled agents', async () => {
+    jest.mocked(getAgentsByKuery).mockReset();
+    jest
+      .mocked(getAgentsByKuery)
+      .mockResolvedValueOnce({
+        agents: [
+          { id: 'agent-1', status: 'online' },
+          { id: 'agent-2', status: 'unenrolled' },
+        ],
+        total: 2,
+        page: 1,
+        perPage: 1000,
+      } as any)
+      .mockResolvedValue({ agents: [], total: 0, page: 2, perPage: 1000 } as any);
+
+    await unenrollForAgentPolicyId(soClient, esClient, 'policy-1', {
+      revoke: true,
+      unenrolledReason: 'agentless',
+    });
+
+    expect(unenrollAgent).toHaveBeenCalledTimes(1);
+    expect(unenrollAgent).toHaveBeenCalledWith(
+      soClient,
+      esClient,
+      'agent-1',
+      expect.objectContaining({ unenrolledReason: 'agentless' })
+    );
+    expect(updateAgent).toHaveBeenCalledTimes(1);
+    expect(updateAgent).toHaveBeenCalledWith(esClient, 'agent-2', {
+      unenrolled_reason: 'agentless',
+    });
+  });
+
+  it('passes the unenrolled reason to the unenrolled agents', async () => {
+    await unenrollForAgentPolicyId(soClient, esClient, 'policy-1', {
+      revoke: true,
+      unenrolledReason: 'agentless',
+    });
+
+    expect(unenrollAgent).toHaveBeenCalledWith(soClient, esClient, 'agent-1', {
+      force: true,
+      revoke: true,
+      unenrolledReason: 'agentless',
       skipAgentlessValidation: true,
     });
   });

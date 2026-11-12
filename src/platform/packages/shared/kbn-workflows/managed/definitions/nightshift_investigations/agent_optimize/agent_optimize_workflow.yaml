@@ -1,7 +1,7 @@
 version: '1'
 name: Nightshift Agent Optimize
 description: >
-  Post-round workflow that reuses the conversation sandbox, runs Cortex and
+  Post-round workflow that reuses the conversation sandbox, runs Wiki and
   Semantic Memory optimize in parallel, then distills the round into the decision
   tree. Both writers receive the same sandbox_id obtain produced so they address the
   workspace hydrate and the bash tools used. Authorization to execute this managed
@@ -12,7 +12,7 @@ tags:
   - observability
   - nightshift
   - investigation
-  - cortex
+  - wiki
   - semantic-memory
   - decision-tree
 
@@ -59,10 +59,14 @@ triggers:
                       type: array
                       items:
                         type: string
+                    materialize_execution_id:
+                      type: string
+                    background_trace_id:
+                      type: string
         tool_calls:
           type: array
           description: >
-            Tool calls from the completed round (parameters). Shows the Cortex and
+            Tool calls from the completed round (parameters). Shows the Wiki and
             Semantic Memory optimizers which services, indices, and integrations the
             investigator queried, and decision-tree reinforcement which
             decision-tree files the investigator actually opened.
@@ -73,10 +77,16 @@ triggers:
           type: array
           description: >
             Results of the completed round's tool calls, keyed by tool_call_id.
-            Shows the Cortex and Semantic Memory optimizers what each query returned.
+            Shows the Wiki and Semantic Memory optimizers what each query returned.
           items:
             type: object
             additionalProperties: true
+        replay:
+          type: boolean
+          description: >
+            True when the round is a recorded transcript an evaluation replays.
+            Decision-tree reinforcement learns from tool_calls and tool_results
+            instead of reading the conversation.
       additionalProperties: false
 
 steps:
@@ -98,10 +108,10 @@ steps:
     timeout: 150s
     branch-timeout: 120s
     branches:
-      - name: cortex
+      - name: wiki
         steps:
-          - name: optimize_cortex
-            type: nightshift.cortexOptimize
+          - name: optimize_wiki
+            type: nightshift.wikiOptimize
             with:
               prompt: '{{ inputs.prompt }}'
               response: '{{ inputs.response }}'
@@ -111,6 +121,7 @@ steps:
               conversation_id: '{{ inputs.conversation_id }}'
               round_id: '{{ inputs.round_id }}'
               sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
+              background_trace_id: '{{ inputs.workflow_context["nightshift.semantic_memory.recall"].data.background_trace_id }}'
               # ${{ }} keeps the array. Liquid `{{ }}` stringifies it as "[object Object]…".
               tool_calls: '${{ inputs.tool_calls }}'
               tool_results: '${{ inputs.tool_results }}'
@@ -127,6 +138,7 @@ steps:
               conversation_id: '{{ inputs.conversation_id }}'
               round_id: '{{ inputs.round_id }}'
               sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
+              background_trace_id: '{{ inputs.workflow_context["nightshift.semantic_memory.recall"].data.background_trace_id }}'
               # Preserve the array for the step's bounded Zod schema.
               recalled_ids: '${{ inputs.workflow_context["nightshift.semantic_memory.recall"].data.recalled_ids }}'
               # ${{ }} keeps the array. Liquid `{{ }}` stringifies it as "[object Object]…".
@@ -143,12 +155,20 @@ steps:
   # cannot abort the investigation, so swallowing a failure here would report a green round
   # that silently reinforced nothing. The reinforcement agent runs in its own conversation,
   # so a failure is visible without taking the investigation down with it.
+  #
+  # A follow-up with trees to edit gets one causal check here, on the model the round used. A
+  # failed or timed-out check only means the follow-up extends the tree without claiming a cause.
   - name: prepare_turn
     type: nightshift.decisionTreePrepare
     with:
+      prompt: '{{ inputs.prompt }}'
       response: '{{ inputs.response }}'
+      connector_id: '{{ inputs.connector_id }}'
+      round_connector_id: '{{ inputs.round_connector_id }}'
       conversation_id: '{{ inputs.conversation_id }}'
+      round_id: '{{ inputs.round_id }}'
       agent_id: '{{ inputs.agent_id }}'
+      background_trace_id: '{{ inputs.workflow_context["nightshift.semantic_memory.recall"].data.background_trace_id }}'
       # ${{ }} keeps the array. Liquid `{{ }}` stringifies it as "[object Object]…"
       # and JSON.parse in preprocess falls back to [], so every round distills from scratch.
       tool_calls: '${{ inputs.tool_calls }}'
@@ -186,8 +206,11 @@ steps:
       response: '{{ inputs.response }}'
       conversation_id: '{{ inputs.conversation_id }}'
       round_id: '{{ inputs.round_id }}'
+      background_trace_id: '{{ inputs.workflow_context["nightshift.semantic_memory.recall"].data.background_trace_id }}'
       message: '{{ steps.prepare_turn.output.message }}'
       turn_kind: '{{ steps.prepare_turn.output.turn_kind }}'
       connector_id: '{{ steps.resolve_model.output.connector_id }}'
       tool_calls: '${{ inputs.tool_calls }}'
       tool_results: '${{ inputs.tool_results }}'
+      # ${{ }} keeps the boolean. Liquid `{{ }}` would render it as the string "true".
+      replay: '${{ inputs.replay }}'

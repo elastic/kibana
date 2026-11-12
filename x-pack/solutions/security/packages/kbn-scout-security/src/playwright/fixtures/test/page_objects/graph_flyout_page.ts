@@ -14,46 +14,40 @@ import type { Locator, ScoutPage } from '@kbn/scout';
 const GRAPH_INVESTIGATION_TEST_ID = 'cloudSecurityGraphGraphInvestigation' as const;
 const GRAPH_ENTITY_NODE_ID = `${GRAPH_INVESTIGATION_TEST_ID}EntityNode` as const;
 
-const EXPAND_DETAILS_BUTTON_TEST_ID = 'securitySolutionFlyoutNavigationExpandDetailButton' as const;
-const VISUALIZE_TAB_TEST_ID = 'securitySolutionFlyoutVisualizeTab' as const;
-const VISUALIZE_TAB_GRAPH_BUTTON_TEST_ID =
-  'securitySolutionFlyoutVisualizeTabGraphVisualizationButton' as const;
+const VISUALIZATIONS_SECTION_HEADER_TEST_ID = 'securitySolutionFlyoutVisualizationsHeader' as const;
+const GRAPH_PREVIEW_TITLE_LINK_TEST_ID = 'securitySolutionFlyoutGraphPreviewTitleLink' as const;
 
 /**
- * Page object for the Graph Visualization tab inside the alert/event details left panel.
- * Mirrors the navigation in `flyout/document_details/left/components/graph_visualization.tsx`:
- *   right panel → Expand → left panel → Visualize tab → Graph view subtab.
+ * Page object for the graph tool of the v2 document flyout (alert / event).
+ * Mirrors the navigation in `flyout_v2/document/main/components/visualizations_section.tsx`:
+ *   document flyout → Visualizations section → graph preview title link → graph tool flyout.
  */
 export class GraphFlyoutPage {
-  public expandDetailsButton: Locator;
-  public visualizeTab: Locator;
-  public graphSubtab: Locator;
+  public visualizationsSectionHeader: Locator;
+  public graphPreviewTitleLink: Locator;
   public graphInvestigation: Locator;
   public entityNodes: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.expandDetailsButton = this.page.testSubj.locator(EXPAND_DETAILS_BUTTON_TEST_ID);
-    this.visualizeTab = this.page.testSubj.locator(VISUALIZE_TAB_TEST_ID);
-    this.graphSubtab = this.page.testSubj.locator(VISUALIZE_TAB_GRAPH_BUTTON_TEST_ID);
+    this.visualizationsSectionHeader = this.page.testSubj.locator(
+      VISUALIZATIONS_SECTION_HEADER_TEST_ID
+    );
+    this.graphPreviewTitleLink = this.page.testSubj.locator(GRAPH_PREVIEW_TITLE_LINK_TEST_ID);
     this.graphInvestigation = this.page.testSubj.locator(GRAPH_INVESTIGATION_TEST_ID);
     this.entityNodes = this.page.testSubj.locator(GRAPH_ENTITY_NODE_ID);
   }
 
   /**
-   * Walks the flyout from the right panel to the Graph tab inside the left panel.
-   * Assumes the right panel is already open (alert flyout expanded from the alerts table).
+   * Opens the graph tool from the document flyout's graph preview.
+   * Assumes the document flyout is already open (alert flyout expanded from the alerts table).
    */
-  async openGraphTab(): Promise<void> {
-    await this.expandDetailsButton.waitFor({ state: 'visible', timeout: 20_000 });
-    await this.expandDetailsButton.click();
+  async openGraphTool(): Promise<void> {
+    // The Visualizations section is collapsed by default.
+    await this.visualizationsSectionHeader.waitFor({ state: 'visible', timeout: 20_000 });
+    await this.visualizationsSectionHeader.click();
 
-    // Visualize tab is the default left-panel tab after expand, but click defensively
-    // in case a stored last-tab preference points elsewhere.
-    await this.visualizeTab.waitFor({ state: 'visible', timeout: 15_000 });
-    await this.visualizeTab.click();
-
-    await this.graphSubtab.waitFor({ state: 'visible', timeout: 15_000 });
-    await this.graphSubtab.click();
+    await this.graphPreviewTitleLink.waitFor({ state: 'visible', timeout: 15_000 });
+    await this.graphPreviewTitleLink.click();
   }
 
   /**

@@ -151,6 +151,34 @@ describe('recordActions', () => {
     );
   });
 
+  it('generates the inputs once per fixture input of a list', async () => {
+    const exclusive: ConnectorSpec = {
+      ...connector,
+      actions: {
+        repair: action(
+          z
+            .object({ ids: z.array(z.string()).optional(), all: z.boolean().optional() })
+            .refine(
+              ({ ids, all }) =>
+                (ids !== undefined && all !== true) || (ids === undefined && all === true)
+            ),
+          async ({ client }, { ids }) =>
+            (await client.get(ids ? `${V1}/items/${ids[0]}` : `${V1}/items`)).data
+        ),
+      },
+    };
+    const record = (input: Record<string, unknown> | Array<Record<string, unknown>>) =>
+      recordActions({ connector: exclusive, specs, fixtures: { repair: { input } } });
+
+    expect((await record({ all: true })).operations.repair).toEqual([
+      { source: 'v1', method: 'get', path: '/items' },
+    ]);
+    expect((await record([{ all: true }, { all: false }])).operations.repair).toEqual([
+      { source: 'v1', method: 'get', path: '/items' },
+      { source: 'v1', method: 'get', path: '/items/{id}' },
+    ]);
+  });
+
   it("allows 'read' scoped actions only safe methods and the queries their fixtures list", async () => {
     const searching: ConnectorSpec = {
       ...connector,
@@ -377,6 +405,96 @@ describe('recordActions', () => {
           secrets: { username: '' },
         })
       ).rejects.toThrow(/Auth type basic/);
+    });
+  });
+
+  describe('with OAuth scopes', () => {
+    const scopedSpecs = {
+      v1: {
+        ...specFor('v1', {
+          '/items': {
+            post: {
+              security: [{ oauth: ['items:write'] }],
+              requestBody: { content: { 'application/json': { schema: item } } },
+              responses: { '201': ok(item) },
+            },
+          },
+          '/items/{id}': {
+            get: {
+              parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+              responses: { '200': ok(item) },
+            },
+          },
+        }),
+        security: [{ oauth: ['items:read'] }],
+        components: {
+          securitySchemes: {
+            oauth: {
+              type: 'oauth2',
+              flows: {
+                clientCredentials: { tokenUrl: 'https://api.example.com/token', scopes: {} },
+              },
+            },
+          },
+        },
+      },
+    };
+    const scopedConnector = (scope: string): ConnectorSpec => ({
+      ...connector,
+      auth: {
+        types: [
+          {
+            type: 'oauth_client_credentials',
+            defaults: { tokenUrl: 'https://api.example.com/token', scope },
+          },
+        ],
+      },
+      actions: {
+        createItem: action(
+          z.object({}),
+          async ({ client }) => {
+            await client.post(`${V1}/items`, { name: 'created' });
+            return (await client.get(`${V1}/items/created`)).data;
+          },
+          'write'
+        ),
+      },
+    });
+
+    it('reports operations the requested scopes miss, and still records what follows', async () => {
+      const { operations, findings } = await recordActions({
+        connector: scopedConnector('items:read'),
+        specs: scopedSpecs,
+      });
+
+      expect(operations.createItem).toEqual([
+        { source: 'v1', method: 'post', path: '/items' },
+        { source: 'v1', method: 'get', path: '/items/{id}' },
+      ]);
+      expect(findings).toEqual([
+        {
+          kind: 'insufficient-scope',
+          action: 'createItem',
+          authType: 'oauth_client_credentials',
+          operation: 'POST /items',
+          violations: [
+            {
+              path: ['security'],
+              code: 'insufficient_scope',
+              message: 'Token was granted items:read, but the operation needs one of items:write',
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('reports nothing when the requested scopes cover every operation', async () => {
+      const { findings } = await recordActions({
+        connector: scopedConnector('items:read items:write'),
+        specs: scopedSpecs,
+      });
+
+      expect(findings).toEqual([]);
     });
   });
 });

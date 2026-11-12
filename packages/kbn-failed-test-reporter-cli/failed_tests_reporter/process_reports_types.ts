@@ -22,6 +22,18 @@ export interface ProcessReportsParams {
   pipeline: string;
   prependTitle: string;
   updateGithub: boolean;
+  /**
+   * Whether a failure no `failed-test` issue tracks yet gets a per-test issue. Tracked issues are
+   * updated either way. Off once the daily flaky suite reporter files the issues instead, see
+   * `REPORT_FAILED_TESTS_PER_TEST_ISSUES`.
+   */
+  perTestIssues: boolean;
+  /**
+   * Whether a failure counted on a suite issue also reopens it and gets a "New failure" comment.
+   * Off when the job runs the consistent failure check on the issues' repository, which posts
+   * breaks on suite issues instead.
+   */
+  suiteIssueComments: boolean;
   indexInEs: boolean;
   reportUpdate: boolean;
   bkMeta: BuildkiteMetadata;

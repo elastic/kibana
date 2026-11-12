@@ -34,7 +34,6 @@ export function validateIgnoreAboveNewType(name: string, to: MigrationInfoRecord
         ', '
       )}.`,
       fixHint: `Add 'ignore_above: 1024' (or another appropriate limit) to each affected field to prevent Elasticsearch from silently dropping strings that exceed the limit.`,
-      docsAnchor: '#defining-model-versions',
     });
   }
 }
@@ -64,7 +63,6 @@ export function validateNameTitleFieldTypesNewType(
         .map(({ description }) => description)
         .join(', ')}.`,
       fixHint: `These fields must be of type 'text' for Search API compatibility.`,
-      docsAnchor: '#defining-model-versions',
     });
   }
 }

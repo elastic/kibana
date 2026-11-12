@@ -207,8 +207,7 @@ export const getAutomaticImportConnectorReadRole = (): KibanaRole => ({
 
 /**
  * Role definition for the manage integrations table view.
- * Requires explicit `automatic_import: ['all']` because the feature uses
- * `excludeFromBasePrivileges: true` — base `all` does NOT grant it.
+ * Grants `automatic_import: ['all']` explicitly because the role has no base privilege.
  */
 export const getManageIntegrationsRole = (): KibanaRole => ({
   elasticsearch: {

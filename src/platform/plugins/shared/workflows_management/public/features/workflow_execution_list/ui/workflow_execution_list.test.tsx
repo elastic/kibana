@@ -9,7 +9,7 @@
 
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
-import { ExecutionStatus, type WorkflowExecutionListDto } from '@kbn/workflows';
+import { ExecutionStatus, ExecutionType, type WorkflowExecutionListDto } from '@kbn/workflows';
 import { WorkflowExecutionList, type WorkflowExecutionListProps } from './workflow_execution_list';
 import { createStartServicesMock, type StartServicesMock } from '../../../mocks';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
@@ -96,6 +96,33 @@ describe('WorkflowExecutionList', () => {
     expect(screen.getByText('Execution history')).toBeInTheDocument();
   });
 
+  it('hides the execution name column when runs do not use execution names', () => {
+    renderComponent();
+    expect(screen.queryByRole('columnheader', { name: 'Execution name' })).not.toBeInTheDocument();
+  });
+
+  it('shows the execution name column when an execution has a name', () => {
+    renderComponent({
+      executions: {
+        ...mockExecutions,
+        hasNamedExecution: true,
+        results: [{ ...mockExecutions.results[0], runName: 'Deploy staging' }],
+      },
+    });
+    expect(screen.getByRole('columnheader', { name: 'Execution name' })).toBeInTheDocument();
+    expect(screen.getByText('Deploy staging')).toBeInTheDocument();
+  });
+
+  it('shows the execution name column when an unloaded run has a name', () => {
+    renderComponent({
+      executions: {
+        ...mockExecutions,
+        hasNamedExecution: true,
+      },
+    });
+    expect(screen.getByRole('columnheader', { name: 'Execution name' })).toBeInTheDocument();
+  });
+
   it('renders the container with the data-test-subj attribute', () => {
     renderComponent();
     expect(screen.getByTestId('workflowExecutionList')).toBeInTheDocument();
@@ -134,6 +161,27 @@ describe('WorkflowExecutionList', () => {
       });
       expect(screen.getByText('No executions found')).toBeInTheDocument();
     });
+
+    it.each([
+      { statuses: [ExecutionStatus.FAILED] },
+      { executionTypes: [ExecutionType.TEST] },
+      { runName: 'deploy' },
+    ])('says that no executions match the active filters: %j', (activeFilter) => {
+      renderComponent({
+        executions: { results: [], page: 1, size: 100, total: 0 },
+        filters: { ...defaultFilters, ...activeFilter },
+      });
+      expect(screen.getByText('No executions match the filters.')).toBeInTheDocument();
+      expect(screen.queryByText('Workflow has not been executed yet.')).not.toBeInTheDocument();
+    });
+
+    it('ignores a blank execution name filter', () => {
+      renderComponent({
+        executions: { results: [], page: 1, size: 100, total: 0 },
+        filters: { ...defaultFilters, runName: '   ' },
+      });
+      expect(screen.getByText('Workflow has not been executed yet.')).toBeInTheDocument();
+    });
   });
 
   describe('with execution data', () => {
@@ -141,6 +189,9 @@ describe('WorkflowExecutionList', () => {
       renderComponent();
       const table = screen.getByTestId('workflowExecutionListTable');
       expect(table).toBeInTheDocument();
+      expect(
+        screen.queryByRole('columnheader', { name: 'Execution name' })
+      ).not.toBeInTheDocument();
       expect(screen.getByText('Status')).toBeInTheDocument();
       expect(screen.getByText('Started')).toBeInTheDocument();
       expect(screen.getByText('Triggered by')).toBeInTheDocument();

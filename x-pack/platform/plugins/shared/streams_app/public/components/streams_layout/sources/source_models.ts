@@ -33,14 +33,19 @@ export type SourceSignal = StreamsV2.OtlpSignal;
 /** Logs, metrics, and traces. Spec also has docs/profiles; those are not ingest choices here. */
 export const SOURCE_SIGNALS: SourceSignal[] = ['logs', 'metrics', 'traces'];
 
+/** Docs shows as a badge but is never picked, so it stays out of `SourceSignal`. */
+export type SourceDisplaySignal = SourceSignal | 'docs';
+
+export const SOURCE_DISPLAY_SIGNALS: SourceDisplaySignal[] = ['logs', 'metrics', 'traces', 'docs'];
+
 const DEFAULT_SUPPORTED_TELEMETRY: Record<SourceType, UnitSource['supported_telemetry']> = {
   otlp: [...SOURCE_SIGNALS],
   es_otlp: [...SOURCE_SIGNALS],
   // Prometheus Remote Write v1 decodes only to OTel metrics.
   prometheus_remote_write: ['metrics'],
   es_prometheus_remote_write: ['metrics'],
-  // Async bulk is the ECS path for logs, metrics, and traces.
-  async_bulk: [...SOURCE_SIGNALS],
+  // Managed _bulk carries documents only (streams-spec async_bulk.schema.yaml).
+  async_bulk: ['docs'],
   bulk: ['docs'],
 };
 
@@ -160,24 +165,51 @@ export const toConfiguredSource = (source: UnitSource): ConfiguredSource | undef
   }
 };
 
-/** Destination names each configured source currently forwards to. */
-export const connectedDestinationLabels = (unit: Unit): Record<string, string[]> => {
+export interface ConnectedDestination {
+  id: string;
+  label: string;
+}
+
+const connectedDestinationsByUnit = new WeakMap<Unit, Record<string, ConnectedDestination[]>>();
+
+/**
+ * The destinations each configured source currently forwards to, through processing and route
+ * delegation. The result is kept per unit object, so the nodes of one canvas share one build.
+ */
+export const connectedDestinations = (unit: Unit): Record<string, ConnectedDestination[]> => {
+  const cached = connectedDestinationsByUnit.get(unit);
+  if (cached) {
+    return cached;
+  }
   const sources = getConfiguredSources(unit);
   const destinations = unit.unit.destinations ?? [];
   const nameById = new Map(
     destinations.map((destination) => [destination.id, destination.name?.trim() || destination.id])
   );
-  const labels: Record<string, string[]> = {};
-  for (const connection of getUnitConnections(
+  const connected: Record<string, ConnectedDestination[]> = {};
+  for (const { sourceId, destinationId } of getUnitConnections(
     unit,
     new Set(sources.map(({ id }) => id)),
     new Set(destinations.map(({ id }) => id))
   )) {
-    const label = nameById.get(connection.destinationId) ?? connection.destinationId;
-    labels[connection.sourceId] = [...(labels[connection.sourceId] ?? []), label];
+    connected[sourceId] = [
+      ...(connected[sourceId] ?? []),
+      { id: destinationId, label: nameById.get(destinationId) ?? destinationId },
+    ];
   }
-  return labels;
+  connectedDestinationsByUnit.set(unit, connected);
+
+  return connected;
 };
+
+/** Destination names each configured source currently forwards to. */
+export const connectedDestinationLabels = (unit: Unit): Record<string, string[]> =>
+  Object.fromEntries(
+    Object.entries(connectedDestinations(unit)).map(([sourceId, items]) => [
+      sourceId,
+      items.map(({ label }) => label),
+    ])
+  );
 
 export const createRuntimeMetadata = (
   source: ConfiguredSource,
@@ -213,19 +245,18 @@ export const createSourceViewModel = ({
   supportedTelemetry,
 });
 
-/** Logs, metrics, and traces this source accepts, for badges and similar UI. */
 export const getSourceDisplaySignals = (
   source: ConfiguredSource,
   supportedTelemetry?: UnitSource['supported_telemetry']
-): SourceSignal[] => {
+): SourceDisplaySignal[] => {
   const configured = readConfiguredOtlpSignals(source);
   if (configured && configured.length > 0) {
     return SOURCE_SIGNALS.filter((signal) => configured.includes(signal));
   }
   if (supportedTelemetry !== undefined) {
-    return SOURCE_SIGNALS.filter((signal) => supportedTelemetry.includes(signal));
+    return SOURCE_DISPLAY_SIGNALS.filter((signal) => supportedTelemetry.includes(signal));
   }
-  return SOURCE_SIGNALS.filter((signal) =>
+  return SOURCE_DISPLAY_SIGNALS.filter((signal) =>
     DEFAULT_SUPPORTED_TELEMETRY[source.type].includes(signal)
   );
 };

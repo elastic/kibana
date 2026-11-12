@@ -200,7 +200,7 @@ describe('SlackAppService', () => {
             },
             {
               names: [
-                'ai-index-idx-nightshift-cortex',
+                'ai-index-idx-nightshift-wiki',
                 'ai-index-idx-nightshift-semantic-memory',
                 'ai-index-idx-nightshift-decision-trees',
               ],
@@ -214,7 +214,7 @@ describe('SlackAppService', () => {
             spaces: ['*'],
             feature: {
               nightshift: ['minimal_all'],
-              agentBuilder: ['minimal_all'],
+              agentBuilder: ['minimal_all', 'invoke_bound_agents'],
               actions: ['read'],
               workflowsManagement: ['read'],
             },
@@ -695,7 +695,9 @@ describe('SlackAppService', () => {
   describe('getStatus', () => {
     it('reports unavailable when the relay client is not configured', async () => {
       const { server } = createHarness({ hasRelayClient: false });
-      await expect(new SlackAppService(server).getStatus(request)).resolves.toEqual({
+      await expect(
+        new SlackAppService(server).getStatus(request, { canAdvanceInstall: true })
+      ).resolves.toEqual({
         available: false,
         status: RELAY_APP_CONNECTION_STATUS.notConnected,
       });
@@ -703,7 +705,9 @@ describe('SlackAppService', () => {
 
     it('reports unavailable when the feature flag is disabled', async () => {
       const { server, getBooleanValue$ } = createHarness({ featureFlagEnabled: false });
-      await expect(new SlackAppService(server).getStatus(request)).resolves.toEqual({
+      await expect(
+        new SlackAppService(server).getStatus(request, { canAdvanceInstall: true })
+      ).resolves.toEqual({
         available: false,
         status: RELAY_APP_CONNECTION_STATUS.notConnected,
       });
@@ -712,7 +716,9 @@ describe('SlackAppService', () => {
 
     it('reports not_connected when no connection exists', async () => {
       const { server } = createHarness();
-      await expect(new SlackAppService(server).getStatus(request)).resolves.toEqual({
+      await expect(
+        new SlackAppService(server).getStatus(request, { canAdvanceInstall: true })
+      ).resolves.toEqual({
         available: true,
         status: RELAY_APP_CONNECTION_STATUS.notConnected,
       });
@@ -728,7 +734,9 @@ describe('SlackAppService', () => {
         },
       });
 
-      const result = await new SlackAppService(server).getStatus(request);
+      const result = await new SlackAppService(server).getStatus(request, {
+        canAdvanceInstall: true,
+      });
 
       expect(fetchClaim).not.toHaveBeenCalled();
       expect(result).toEqual({
@@ -750,7 +758,9 @@ describe('SlackAppService', () => {
         },
       });
 
-      await expect(new SlackAppService(server).getStatus(request)).resolves.toEqual({
+      await expect(
+        new SlackAppService(server).getStatus(request, { canAdvanceInstall: true })
+      ).resolves.toEqual({
         available: true,
         status: RELAY_APP_CONNECTION_STATUS.connected,
         workspace: { tenantKey: 'tenant-A' },
@@ -771,7 +781,9 @@ describe('SlackAppService', () => {
         },
       });
 
-      const result = await new SlackAppService(server).getStatus(request);
+      const result = await new SlackAppService(server).getStatus(request, {
+        canAdvanceInstall: true,
+      });
 
       expect(fetchClaim).not.toHaveBeenCalled();
       expect(result).toEqual({
@@ -790,7 +802,9 @@ describe('SlackAppService', () => {
         },
       });
 
-      const result = await new SlackAppService(server).getStatus(request);
+      const result = await new SlackAppService(server).getStatus(request, {
+        canAdvanceInstall: true,
+      });
       expect(result).toEqual({
         available: true,
         status: RELAY_APP_CONNECTION_STATUS.error,
@@ -809,10 +823,37 @@ describe('SlackAppService', () => {
       });
       fetchClaim.mockResolvedValue({ status: 'pending' });
 
-      const result = await new SlackAppService(server).getStatus(request);
+      const result = await new SlackAppService(server).getStatus(request, {
+        canAdvanceInstall: true,
+      });
 
       expect(fetchClaim).toHaveBeenCalledWith('claim-1');
       expect(soClient.create).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        available: true,
+        status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
+      });
+    });
+
+    it('does not advance an in-progress install for callers who cannot manage the connection', async () => {
+      const { server, soClient, deleteServiceAccount, invalidateAsInternalUser } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
+          apiKeyId: 'key-1',
+          serviceAccountId: 'sa-1',
+          claimId: 'claim-1',
+        },
+      });
+
+      const result = await new SlackAppService(server).getStatus(request, {
+        canAdvanceInstall: false,
+      });
+
+      expect(fetchClaim).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(invalidateAsInternalUser).not.toHaveBeenCalled();
+      expect(deleteServiceAccount).not.toHaveBeenCalled();
       expect(result).toEqual({
         available: true,
         status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
@@ -828,7 +869,9 @@ describe('SlackAppService', () => {
         },
       });
 
-      const result = await new SlackAppService(server).getStatus(request);
+      const result = await new SlackAppService(server).getStatus(request, {
+        canAdvanceInstall: true,
+      });
 
       expect(fetchClaim).not.toHaveBeenCalled();
       expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
@@ -866,7 +909,9 @@ describe('SlackAppService', () => {
         new RelayRequestError('/v1/slack/install/claim', 400, 'claim expired')
       );
 
-      const result = await new SlackAppService(server).getStatus(request);
+      const result = await new SlackAppService(server).getStatus(request, {
+        canAdvanceInstall: true,
+      });
 
       expect(deleteServiceAccount).toHaveBeenCalledWith(request, 'sa-1', { force: true });
       expect(invalidateAsInternalUser).not.toHaveBeenCalled();
@@ -900,7 +945,9 @@ describe('SlackAppService', () => {
         new RelayRequestError('/v1/slack/install/claim', 400, 'claim expired')
       );
 
-      const result = await new SlackAppService(server).getStatus(request);
+      const result = await new SlackAppService(server).getStatus(request, {
+        canAdvanceInstall: true,
+      });
 
       expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
       expect(soClient.create).toHaveBeenCalledWith(
@@ -930,7 +977,9 @@ describe('SlackAppService', () => {
       });
       fetchClaim.mockRejectedValue(new RelayRequestError('/v1/slack/install/claim', 502));
 
-      const result = await new SlackAppService(server).getStatus(request);
+      const result = await new SlackAppService(server).getStatus(request, {
+        canAdvanceInstall: true,
+      });
 
       expect(invalidateAsInternalUser).not.toHaveBeenCalled();
       expect(soClient.create).not.toHaveBeenCalled();
@@ -955,7 +1004,9 @@ describe('SlackAppService', () => {
         tenant_url: 'https://acme.slack.com/',
       });
 
-      const result = await new SlackAppService(server).getStatus(request);
+      const result = await new SlackAppService(server).getStatus(request, {
+        canAdvanceInstall: true,
+      });
 
       expect(soClient.create).toHaveBeenCalledWith(
         RELAY_APP_CONNECTION_SO_TYPE,
@@ -989,7 +1040,9 @@ describe('SlackAppService', () => {
       });
       fetchClaim.mockResolvedValue({ status: 'complete', tenant_key: 'T0123ABC' });
 
-      const result = await new SlackAppService(server).getStatus(request);
+      const result = await new SlackAppService(server).getStatus(request, {
+        canAdvanceInstall: true,
+      });
 
       expect(result).toEqual({
         available: true,
@@ -1009,7 +1062,9 @@ describe('SlackAppService', () => {
       });
       fetchClaim.mockResolvedValue({ status: 'complete', tenant_key: undefined });
 
-      const result = await new SlackAppService(server).getStatus(request);
+      const result = await new SlackAppService(server).getStatus(request, {
+        canAdvanceInstall: true,
+      });
 
       expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
       expect(soClient.create).toHaveBeenCalledWith(
@@ -1484,6 +1539,7 @@ describe('SlackAppService', () => {
   describe('bindChannel / unbindChannel', () => {
     const bind = jest.fn();
     const unbindChannel = jest.fn();
+    const listAvailableChannels = jest.fn();
 
     function createHarnessWithChannelOps(opts?: HarnessOptions) {
       const harness = createHarness(opts);
@@ -1494,6 +1550,7 @@ describe('SlackAppService', () => {
         listBindings: jest.fn(),
         bind,
         unbindChannel,
+        listAvailableChannels,
       };
       return harness;
     }
@@ -1501,6 +1558,7 @@ describe('SlackAppService', () => {
     beforeEach(() => {
       bind.mockReset();
       unbindChannel.mockReset();
+      listAvailableChannels.mockReset();
     });
 
     it('bindChannel calls relay bind with tenantKey and channelId', async () => {
@@ -1550,6 +1608,38 @@ describe('SlackAppService', () => {
 
       expect(unbindChannel).toHaveBeenCalledWith('tenant-A', 'C123');
     });
+
+    it('listAvailableChannels maps the relay channels and keeps truncated', async () => {
+      const { server, soClient } = createHarnessWithChannelOps();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.connected,
+          tenantKey: 'tenant-A',
+        },
+      });
+      listAvailableChannels.mockResolvedValue({
+        channels: [{ scope_id: 'C1', display_name: 'alerts' }],
+        truncated: true,
+      });
+
+      await expect(new SlackAppService(server).listAvailableChannels(request)).resolves.toEqual({
+        channels: [{ channel: 'C1', displayName: 'alerts' }],
+        truncated: true,
+      });
+      expect(listAvailableChannels).toHaveBeenCalledWith('tenant-A');
+    });
+
+    it('listAvailableChannels throws when the connection is not connected', async () => {
+      const { server, soClient } = createHarnessWithChannelOps();
+      soClient.get.mockResolvedValue({
+        attributes: { status: RELAY_APP_CONNECTION_STATUS.notConnected },
+      });
+
+      await expect(new SlackAppService(server).listAvailableChannels(request)).rejects.toThrow(
+        'Connection is not in a connected state'
+      );
+      expect(listAvailableChannels).not.toHaveBeenCalled();
+    });
   });
 
   describe('elastic slack connector registration', () => {
@@ -1574,7 +1664,7 @@ describe('SlackAppService', () => {
       });
       fetchClaim.mockResolvedValue({ status: 'complete', tenant_key: 'tenant-A' });
 
-      await new SlackAppService(server).getStatus(request);
+      await new SlackAppService(server).getStatus(request, { canAdvanceInstall: true });
 
       expect(registerDynamicConnector).not.toHaveBeenCalled();
     });
@@ -1605,7 +1695,7 @@ describe('SlackAppService', () => {
       });
       fetchClaim.mockResolvedValue({ status: 'pending' });
 
-      await new SlackAppService(server).getStatus(request);
+      await new SlackAppService(server).getStatus(request, { canAdvanceInstall: true });
 
       expect(registerDynamicConnector).not.toHaveBeenCalled();
     });
@@ -1616,7 +1706,7 @@ describe('SlackAppService', () => {
         attributes: { status: RELAY_APP_CONNECTION_STATUS.oauthInProgress, apiKeyId: 'key-1' },
       });
 
-      await new SlackAppService(server).getStatus(request);
+      await new SlackAppService(server).getStatus(request, { canAdvanceInstall: true });
 
       expect(unregisterDynamicConnector).toHaveBeenCalledWith(ELASTIC_APPS_SLACK_CONNECTOR_ID);
     });

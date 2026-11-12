@@ -22,7 +22,10 @@ import {
 } from '../../significant_events/latest_source_query';
 import { RevisionReader } from './revision_reader';
 import { IndicatorReader } from './indicator_reader';
-import type { StoredQueryKnowledgeIndicator } from '../data_stream';
+import type {
+  StoredFeatureKnowledgeIndicator,
+  StoredQueryKnowledgeIndicator,
+} from '../data_stream';
 import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../fields';
 
 const IS_NOT_EXPIRED_FRAGMENT = 'expires_at IS NULL OR expires_at >= NOW()';
@@ -290,6 +293,56 @@ describe('IndicatorReader.getFeatures', () => {
     expect(query).toContain('"payment"');
     expect(query).toContain('feature.type');
     expect(query).toContain('"entity"');
+  });
+});
+
+describe('IndicatorReader.getTopologyFeaturesPage', () => {
+  const featureDoc = (
+    sourceId: string,
+    id: string,
+    slug: string
+  ): StoredFeatureKnowledgeIndicator => ({
+    '@timestamp': '2026-01-01T00:00:00.000Z',
+    id,
+    revision_id: `${id}:2026-01-01T00:00:00.000Z`,
+    type: KI_TYPE_FEATURE,
+    'source.id': sourceId,
+    description: slug,
+    feature: { slug, type: 'entity', properties: { name: slug }, confidence: 80 },
+  });
+
+  it('paginates latest revisions at a fixed time', async () => {
+    const { reader, runEsql } = makeReader();
+    runEsql.mockResolvedValueOnce({
+      hits: [
+        featureDoc('src-a', 'uuid-1', 'one'),
+        featureDoc('src-a', 'uuid-2', 'two'),
+        featureDoc('src-b', 'uuid-3', 'three'),
+      ],
+    });
+
+    const result = await reader.getTopologyFeaturesPage({
+      sourceIds: ['src-a', 'src-b'],
+      featureTypes: ['entity', 'dependency'],
+      asOf: '2026-02-01T00:00:00.000Z',
+      after: { sourceId: 'src-0', type: KI_TYPE_FEATURE, id: 'uuid-0' },
+      size: 2,
+    });
+
+    const query = capturedQueryString(runEsql);
+    expect(query).toContain('@timestamp <= TO_DATETIME("2026-02-01T00:00:00.000Z")');
+    expect(query).toContain('expires_at >= TO_DATETIME("2026-02-01T00:00:00.000Z")');
+    expect(query).toContain('`source.id` > "src-0"');
+    expect(query).toContain('id > "uuid-0"');
+    expect(query).toContain('SORT `source.id` ASC, type ASC, id ASC');
+    expect(query).toContain('LIMIT 3');
+    expect(query.indexOf('`source.id` > "src-0"')).toBeLessThan(query.indexOf('INLINE STATS'));
+    expect(result.hits.map(({ id }) => id)).toEqual(['one', 'two']);
+    expect(result.nextCursor).toEqual({
+      sourceId: 'src-a',
+      type: KI_TYPE_FEATURE,
+      id: 'uuid-2',
+    });
   });
 });
 
