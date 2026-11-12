@@ -162,6 +162,25 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
         const warn = (what: string, error: unknown) =>
           logger.warn(`${what}: ${error instanceof Error ? error.message : error}`);
 
+        /**
+         * Whether the decision is still in force right now. The decisions were read before the
+         * candidates were matched, so a revoke that lands in between would otherwise be undone by
+         * the tags and closes that follow. A read that fails throws, so the caller acts on nothing.
+         */
+        const stillActive = async (id: string): Promise<boolean> => {
+          try {
+            const es = contextManager.getScopedEsClient();
+            const { _source } = await es.get<Record<string, unknown>>({
+              index: TRIAGE_DECISIONS_AI_INDEX_DEST.value,
+              id,
+            });
+            return readActiveDecision({ id, source: _source, now: Date.now() }) !== undefined;
+          } catch (error) {
+            if (statusCodeOf(error) === 404) return false;
+            throw error;
+          }
+        };
+
         /** Tags the alerts of each decision. A decision that cannot be tagged is counted and skipped. */
         const tag = async (prefix: string, byDecision: Map<string, string[]>) => {
           for (const [id, alertIds] of byDecision) {
@@ -231,6 +250,12 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
             }
             let tagged: string[] = [];
             try {
+              if (!(await stillActive(id))) {
+                logger.info(
+                  `Decision ${id} was revoked or expired during the sweep: it closes nothing`
+                );
+                continue;
+              }
               if (!room.has(id)) {
                 room.set(
                   id,
@@ -281,6 +306,12 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
               continue;
             }
             try {
+              if (!(await stillActive(id))) {
+                logger.info(
+                  `Decision ${id} was revoked or expired during the sweep: it skips nothing`
+                );
+                continue;
+              }
               await tagInChunks(write, {
                 alertIds,
                 add: [VERDICT_INCONCLUSIVE_TAG, `${TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX}${id}`],

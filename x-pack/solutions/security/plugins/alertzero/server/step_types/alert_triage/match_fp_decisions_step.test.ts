@@ -55,6 +55,8 @@ const setup = ({
   closeError,
   noteError,
   movedOn = [],
+  revokedDuringSweep = [],
+  getError,
 }: {
   alerts: Array<[string, Record<string, unknown>]>;
   /** Stored decisions by document id. */
@@ -69,6 +71,10 @@ const setup = ({
   noteError?: Error;
   /** Alerts an analyst acknowledged after the search: the close leaves them alone. */
   movedOn?: string[];
+  /** Decisions an analyst revokes after the sweep read them, before it acts on them. */
+  revokedDuringSweep?: string[];
+  /** Fails the re-read of a decision made just before acting on it. */
+  getError?: Error & { statusCode?: number };
 }) => {
   const callKibanaApi = jest.fn(
     async ({ path, body }: { path: string; body?: Record<string, any> }) => {
@@ -110,6 +116,16 @@ const setup = ({
       })),
     };
   });
+  const get = jest.fn(async ({ id }: { id: string }) => {
+    if (getError) throw getError;
+    const current = decisions[id];
+    if (current === undefined) throw Object.assign(new Error('not found'), { statusCode: 404 });
+    return {
+      _source: revokedDuringSweep.includes(id)
+        ? { ...current, governance: { lifecycle: { status: 'deleted' } } }
+        : current,
+    };
+  });
   const run = () =>
     getTriageMatchFpDecisionsStepDefinition({
       isContextEngineEnabled: async () => enabled,
@@ -126,9 +142,9 @@ const setup = ({
       contextManager: {
         callKibanaApi,
         getFakeRequest: () => ({}),
-        getScopedEsClient: () => ({ mget }),
+        getScopedEsClient: () => ({ mget, get }),
       },
-      logger: { warn: jest.fn() },
+      logger: { warn: jest.fn(), info: jest.fn() },
     } as unknown as StepHandlerContext<unknown, unknown>);
   const closes = () =>
     callKibanaApi.mock.calls
@@ -153,7 +169,7 @@ const setup = ({
         ([{ body }]) =>
           (body as { note: { eventId: string; note: string; timelineId: string } }).note
       );
-  return { run, callKibanaApi, mget, tags, closes, notes };
+  return { run, callKibanaApi, mget, get, tags, closes, notes };
 };
 
 describe('triage match decisions step', () => {
@@ -642,6 +658,50 @@ describe('triage match decisions step in on mode', () => {
       { tags_to_add: [tag], tags_to_remove: [] },
       { tags_to_add: [], tags_to_remove: [tag] },
     ]);
+  });
+
+  it('closes nothing for a decision that was revoked after the sweep read it', async () => {
+    const { run, tags, closes } = setup({
+      mode: 'on',
+      alerts: [['a', source('C:\\x.exe')]],
+      decisions: approved('C:\\x.exe'),
+      revokedDuringSweep: [idOf('C:\\x.exe')],
+    });
+
+    const { output } = await run();
+
+    expect(output).toEqual(expect.objectContaining({ status: 'ok', would_close: 1, closed: 0 }));
+    expect(tags()).toEqual([]);
+    expect(closes()).toEqual([]);
+  });
+
+  it('keeps nothing out of analysis for a dismissal that was revoked after the sweep read it', async () => {
+    const id = decisionId('do_not_propose', hashOf('C:\\x.exe'));
+    const { run, tags } = setup({
+      mode: 'on',
+      alerts: [['a', source('C:\\x.exe')]],
+      decisions: { [id]: stored('do_not_propose') },
+      revokedDuringSweep: [id],
+    });
+
+    const { output } = await run();
+
+    expect(output).toEqual(expect.objectContaining({ would_skip: 1, skipped: 0 }));
+    expect(tags()).toEqual([]);
+  });
+
+  it('closes nothing, and counts a failed close, when the decision cannot be read again', async () => {
+    const { run, closes } = setup({
+      mode: 'on',
+      alerts: [['a', source('C:\\x.exe')]],
+      decisions: approved('C:\\x.exe'),
+      getError: Object.assign(new Error('unavailable'), { statusCode: 503 }),
+    });
+
+    const { output } = await run();
+
+    expect(output).toEqual(expect.objectContaining({ closed: 0, close_failures: 1 }));
+    expect(closes()).toEqual([]);
   });
 
   it('keeps the alerts of a dismissed pattern out of analysis and closes none', async () => {
