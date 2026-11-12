@@ -83,4 +83,7 @@ fileGroups:
   src:
     - '**/*'
     - '!target/**/*'
-tasks: {}
+tasks:
+  test-source-upstream:
+    inputs:
+      - '!config/services/detections_response/**/*'

@@ -24,8 +24,8 @@ tasks:
       - target: 'jest-tooling:hash'
         cacheStrategy: hash
     inputs:
+      # Docs stay as inputs: some unit tests read their own README or markdown files.
       - '@group(default)'
-      - '!README*'
       # Other runners own specs and configs; support files can be shared with Jest.
       - '!**/*.spec.{js,mjs,ts,tsx}'
       - '!test/{functional,ftr}/**/*'

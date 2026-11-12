@@ -21,7 +21,10 @@ tasks:
     command: noop
     inputs:
       - '@group(default)'
-      - '!README*'
+      # Docs never change runtime behavior for downstream consumers.
+      - '!**/README*'
+      - '!**/CHANGELOG*'
+      - '!**/*.md'
       - '!jest.config.{js,cjs,json}'
       - '!**/*.test.{js,mjs,ts,tsx}'
       - '!**/*.spec.{js,mjs,ts,tsx}'

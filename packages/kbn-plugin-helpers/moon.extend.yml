@@ -1,0 +1,4 @@
+# The build integration tests run generate_plugin from @kbn/plugin-generator without importing it.
+# Keep in sync with .buildkite/pipeline-utils/ci-stats/pick_test_group_run_order/jest_implicit_consumers.ts
+dependsOn:
+  - '@kbn/plugin-generator'
