@@ -23,6 +23,8 @@ export const COMMON_API_HEADERS = {
  * - autoImportBaseAll:  has only the base `all` Kibana privilege → automatic_import follows the base
  *   privilege, so it is granted both manage + read API tags
  * - autoImportBaseRead: has only the base `read` Kibana privilege → granted only the read API tag
+ * - autoImportPipelineEditor: the manager plus the cluster privileges that simulating ingest
+ *   pipelines and index templates needs, so field type and pipeline edits can be saved
  *
  * Note: if SAML login fails for manager/reader (some setups require base access to authenticate),
  * add `base: ['all']` alongside the feature entry. The feature-level grant still controls
@@ -90,5 +92,19 @@ export const AUTO_IMPORT_USERS: Record<string, KibanaRole> = {
       },
     ],
     elasticsearch: { cluster: [], indices: [] },
+  },
+
+  autoImportPipelineEditor: {
+    kibana: [
+      {
+        base: [],
+        feature: { automatic_import: ['all'], fleet: ['all'], integrations: ['all'] },
+        spaces: ['*'],
+      },
+    ],
+    elasticsearch: {
+      cluster: ['monitor_inference', 'manage_ingest_pipelines', 'manage_index_templates'],
+      indices: [],
+    },
   },
 };

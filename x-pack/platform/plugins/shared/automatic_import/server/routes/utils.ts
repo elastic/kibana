@@ -6,6 +6,7 @@
  */
 
 import type {
+  Headers,
   KibanaResponseFactory,
   CustomHttpResponseOptions,
   HttpResponsePayload,
@@ -92,6 +93,16 @@ const getEsError = (err: unknown): ErrorCause | undefined => {
  * `security_exception`) when the given value is an Elasticsearch client error.
  */
 export const getEsErrorType = (err: unknown): string | undefined => getEsError(err)?.type;
+
+const MAX_SESSION_ID_LENGTH = 64;
+
+/** Returns the browser telemetry session ID sent in the `x-session-id` header, if any. */
+export const getSessionIdHeader = (headers: Headers): string | undefined => {
+  const sessionId = headers['x-session-id'];
+  return typeof sessionId === 'string' && sessionId.length > 0
+    ? sessionId.slice(0, MAX_SESSION_ID_LENGTH)
+    : undefined;
+};
 
 /**
  * Detects whether an error represents an Elasticsearch authorization failure.

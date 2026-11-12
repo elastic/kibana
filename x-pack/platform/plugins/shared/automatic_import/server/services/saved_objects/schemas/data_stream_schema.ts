@@ -7,6 +7,13 @@
 
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import type { SupportedFieldType } from '../../../../common/field_type_compatibility';
+import {
+  MAX_FIELD_NAME_LENGTH,
+  MAX_FIELD_TYPE_LENGTH,
+  MAX_FIELD_TYPE_OVERRIDES,
+  SUPPORTED_FIELD_TYPES,
+} from '../../../../common/field_type_compatibility';
 import { INPUT_TYPES, TASK_STATUSES } from '../constants';
 import { MAX_ID_LENGTH, MAX_VERSION_LENGTH, MIN_VERSION_LENGTH } from './constants';
 
@@ -85,3 +92,46 @@ export const dataStreamSchemaV1 = schema.object({
     })
   ),
 });
+
+export const fieldTypeOverrideSchema = schema.object({
+  name: schema.string({ minLength: 1, maxLength: MAX_FIELD_NAME_LENGTH }),
+  type: schema.oneOf(
+    SUPPORTED_FIELD_TYPES.map((type) => schema.literal(type)) as [Type<SupportedFieldType>]
+  ),
+  original_type: schema.string({ minLength: 1, maxLength: MAX_FIELD_TYPE_LENGTH }),
+});
+
+export const approvedFieldTypeSchema = schema.object({
+  name: schema.string({ minLength: 1, maxLength: MAX_FIELD_NAME_LENGTH }),
+  type: schema.string({ minLength: 1, maxLength: MAX_FIELD_TYPE_LENGTH }),
+});
+
+const MAX_APPROVED_FIELD_TYPES = 10_000;
+
+export const dataStreamSchemaV2 = dataStreamSchemaV1.extends({
+  field_type_overrides: schema.maybe(
+    schema.arrayOf(fieldTypeOverrideSchema, { maxSize: MAX_FIELD_TYPE_OVERRIDES })
+  ),
+  approved_field_types: schema.maybe(
+    schema.arrayOf(approvedFieldTypeSchema, { maxSize: MAX_APPROVED_FIELD_TYPES })
+  ),
+});
+
+/**
+ * Reads documents written by newer versions, which may store field types this version doesn't
+ * support yet.
+ */
+export const dataStreamForwardCompatibilitySchemaV2 = dataStreamSchemaV2.extends(
+  {
+    field_type_overrides: schema.maybe(
+      schema.arrayOf(
+        fieldTypeOverrideSchema.extends(
+          { type: schema.string({ minLength: 1, maxLength: MAX_FIELD_TYPE_LENGTH }) },
+          { unknowns: 'ignore' }
+        ),
+        { maxSize: MAX_FIELD_TYPE_OVERRIDES }
+      )
+    ),
+  },
+  { unknowns: 'ignore' }
+);

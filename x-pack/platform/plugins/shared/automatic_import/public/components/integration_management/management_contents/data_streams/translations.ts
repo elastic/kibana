@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+const MAX_LISTED_FIELDS = 10;
+
 export const ADD_DATA_STREAM_BUTTON = i18n.translate(
   'xpack.automaticImport.dataStreams.addDataStreamButton',
   {
@@ -230,6 +232,9 @@ export const TABLE_COLUMN_HEADERS = Object.freeze({
   field: i18n.translate('xpack.automaticImport.dataStreams.table.fieldColumnHeader', {
     defaultMessage: 'Field',
   }),
+  type: i18n.translate('xpack.automaticImport.dataStreams.table.typeColumnHeader', {
+    defaultMessage: 'Type',
+  }),
   value: i18n.translate('xpack.automaticImport.dataStreams.table.valueColumnHeader', {
     defaultMessage: 'Value',
   }),
@@ -322,7 +327,7 @@ export const EDIT_PIPELINE_FLYOUT = Object.freeze({
   filterPlaceholder: i18n.translate(
     'xpack.automaticImport.dataStreams.editPipelineFlyout.filterPlaceholder',
     {
-      defaultMessage: 'Filter by field, value',
+      defaultMessage: 'Filter by field, type, value',
     }
   ),
   errorTitle: i18n.translate('xpack.automaticImport.dataStreams.editPipelineFlyout.errorTitle', {
@@ -337,16 +342,134 @@ export const EDIT_PIPELINE_FLYOUT = Object.freeze({
   saveButton: i18n.translate('xpack.automaticImport.dataStreams.editPipelineFlyout.saveButton', {
     defaultMessage: 'Save',
   }),
+  resetButton: i18n.translate('xpack.automaticImport.dataStreams.editPipelineFlyout.resetButton', {
+    defaultMessage: 'Reset',
+  }),
   saveErrorTitle: i18n.translate(
-    'xpack.automaticImport.dataStreams.editPipelineFlyout.saveErrorTitle',
+    'xpack.automaticImport.dataStreams.editPipelineFlyout.applyErrorTitle',
     {
-      defaultMessage: 'Unable to save ingest pipeline',
+      defaultMessage: 'Unable to apply changes',
     }
   ),
-  saveErrorMessage: i18n.translate(
-    'xpack.automaticImport.dataStreams.editPipelineFlyout.saveErrorMessage',
+  pipelineNotObjectError: i18n.translate(
+    'xpack.automaticImport.dataStreams.editPipelineFlyout.pipelineNotObjectError',
     {
-      defaultMessage: 'Failed to save ingest pipeline. Please fix errors and try again.',
+      defaultMessage: 'The ingest pipeline must be a JSON object with a processors array.',
+    }
+  ),
+  pipelineRegressionTitle: i18n.translate(
+    'xpack.automaticImport.dataStreams.editPipelineFlyout.pipelineRegressionTitle',
+    {
+      defaultMessage: 'The edited ingest pipeline fails on more sample documents',
+    }
+  ),
+  pipelineRegressionDescription: (failedSamples: number, baselineFailedSamples: number) =>
+    i18n.translate(
+      'xpack.automaticImport.dataStreams.editPipelineFlyout.pipelineRegressionDescription',
+      {
+        defaultMessage:
+          '{failedSamples, plural, one {# sample fails} other {# samples fail}} with your changes, compared with {baselineFailedSamples} with the saved pipeline. Fix the errors below to continue.',
+        values: { failedSamples, baselineFailedSamples },
+      }
+    ),
+  pipelineErrorGroup: (error: string, count: number) =>
+    i18n.translate('xpack.automaticImport.dataStreams.editPipelineFlyout.pipelineErrorGroup', {
+      defaultMessage: '{error} ({count, plural, one {# sample} other {# samples}})',
+      values: { error, count },
+    }),
+  fieldErrorsTitle: i18n.translate(
+    'xpack.automaticImport.dataStreams.editPipelineFlyout.fieldErrorsTitle',
+    {
+      defaultMessage: 'Some field types do not work with this ingest pipeline',
+    }
+  ),
+  droppedFieldTypesTitle: i18n.translate(
+    'xpack.automaticImport.dataStreams.editPipelineFlyout.droppedFieldTypesTitle',
+    {
+      defaultMessage: 'Some field type changes were removed',
+    }
+  ),
+  droppedFieldTypesDescription: (fieldNames: string[]) =>
+    i18n.translate(
+      'xpack.automaticImport.dataStreams.editPipelineFlyout.droppedFieldTypesDescription',
+      {
+        defaultMessage:
+          '{count, plural, one {The ingest pipeline no longer produces {fieldNames}, so its field type change will be removed when you save.} other {The ingest pipeline no longer produces {fieldNames}, so their field type changes will be removed when you save.}}',
+        values: {
+          fieldNames: i18n.formatList('conjunction', fieldNames),
+          count: fieldNames.length,
+        },
+      }
+    ),
+  checkingPipeline: i18n.translate(
+    'xpack.automaticImport.dataStreams.editPipelineFlyout.checkingPipeline',
+    {
+      defaultMessage: 'Checking the ingest pipeline…',
+    }
+  ),
+  goToLine: (line: number) =>
+    i18n.translate('xpack.automaticImport.dataStreams.editPipelineFlyout.goToLine', {
+      defaultMessage: 'Go to line {line}',
+      values: { line },
+    }),
+  breakingChangesTitle: i18n.translate(
+    'xpack.automaticImport.dataStreams.editPipelineFlyout.breakingChangesTitle',
+    {
+      defaultMessage: 'This could introduce breaking changes',
+    }
+  ),
+  breakingChangesDescription: (fieldNames: string[]) =>
+    i18n.translate(
+      'xpack.automaticImport.dataStreams.editPipelineFlyout.breakingChangesDescription',
+      {
+        defaultMessage:
+          '{count, plural, one {{fieldNames} was in an approved version, and the ingest pipeline no longer produces it for the sample documents. Searches, dashboards, and rules that use it may stop finding new data.} other {{fieldNames} were in an approved version, and the ingest pipeline no longer produces them for the sample documents. Searches, dashboards, and rules that use them may stop finding new data.}}',
+        values: {
+          fieldNames:
+            fieldNames.length <= MAX_LISTED_FIELDS
+              ? i18n.formatList('conjunction', fieldNames)
+              : i18n.translate(
+                  'xpack.automaticImport.dataStreams.editPipelineFlyout.breakingChangesFieldList',
+                  {
+                    defaultMessage: '{fieldNames}, and {count} more',
+                    values: {
+                      fieldNames: i18n.formatList('unit', fieldNames.slice(0, MAX_LISTED_FIELDS)),
+                      count: fieldNames.length - MAX_LISTED_FIELDS,
+                    },
+                  }
+                ),
+          count: fieldNames.length,
+        },
+      }
+    ),
+  breakingChangesConfirmTitle: i18n.translate(
+    'xpack.automaticImport.dataStreams.editPipelineFlyout.breakingChangesConfirmTitle',
+    {
+      defaultMessage: 'Save changes that could break existing data?',
+    }
+  ),
+  breakingChangesConfirmSave: i18n.translate(
+    'xpack.automaticImport.dataStreams.editPipelineFlyout.breakingChangesConfirmSave',
+    {
+      defaultMessage: 'Save anyway',
+    }
+  ),
+  breakingChangesConfirmCancel: i18n.translate(
+    'xpack.automaticImport.dataStreams.editPipelineFlyout.breakingChangesConfirmCancel',
+    {
+      defaultMessage: 'Cancel',
+    }
+  ),
+  notEditableNotice: i18n.translate(
+    'xpack.automaticImport.dataStreams.editPipelineFlyout.notEditableNotice',
+    {
+      defaultMessage: 'The ingest pipeline can be edited when the data stream is ready for review.',
+    }
+  ),
+  readOnlyNotice: i18n.translate(
+    'xpack.automaticImport.dataStreams.editPipelineFlyout.readOnlyNotice',
+    {
+      defaultMessage: 'You have view-only access, so the ingest pipeline cannot be edited.',
     }
   ),
   closeConfirmTitle: i18n.translate(
@@ -358,7 +481,7 @@ export const EDIT_PIPELINE_FLYOUT = Object.freeze({
   closeConfirmBody: i18n.translate(
     'xpack.automaticImport.dataStreams.editPipelineFlyout.closeConfirmBody',
     {
-      defaultMessage: 'You have unsaved changes in the ingest pipeline editor.',
+      defaultMessage: 'You have unsaved changes in this editor.',
     }
   ),
   closeConfirmCancel: i18n.translate(

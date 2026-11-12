@@ -11,6 +11,8 @@ import {
   flattenPipelineObject,
   isValidIp,
   diffPipelineLines,
+  unwrapPipelineDocument,
+  getFlyoutFooterState,
 } from './utils';
 
 describe('data stream utils', () => {
@@ -47,8 +49,9 @@ describe('data stream utils', () => {
       expect(getIconFromType('geo_point')).toBe('tokenGeo');
     });
 
-    it('should return tokenQuestion for object type', () => {
-      expect(getIconFromType('object')).toBe('tokenQuestion');
+    it('should return tokenObject for object and group types', () => {
+      expect(getIconFromType('object')).toBe('tokenObject');
+      expect(getIconFromType('group')).toBe('tokenObject');
     });
 
     it('should return tokenNested for nested type', () => {
@@ -57,6 +60,23 @@ describe('data stream utils', () => {
 
     it('should return tokenBoolean for boolean type', () => {
       expect(getIconFromType('boolean')).toBe('tokenBoolean');
+    });
+
+    it.each([
+      ['constant_keyword', 'tokenConstant'],
+      ['wildcard', 'tokenString'],
+      ['text', 'tokenString'],
+      ['match_only_text', 'tokenString'],
+      ['byte', 'tokenNumber'],
+      ['short', 'tokenNumber'],
+      ['integer', 'tokenNumber'],
+      ['unsigned_long', 'tokenNumber'],
+      ['half_float', 'tokenNumber'],
+      ['double', 'tokenNumber'],
+      ['date_nanos', 'tokenDate'],
+      ['version', 'tokenTag'],
+    ])('should map %s to %s', (type, icon) => {
+      expect(getIconFromType(type)).toBe(icon);
     });
 
     it('should return tokenQuestion for undefined type', () => {
@@ -98,10 +118,16 @@ describe('data stream utils', () => {
       expect(getFieldType(false)).toBe('boolean');
     });
 
-    it('should return "nested" for arrays', () => {
-      expect(getFieldType([])).toBe('nested');
-      expect(getFieldType([1, 2, 3])).toBe('nested');
-      expect(getFieldType(['a', 'b'])).toBe('nested');
+    it('should return the type of the first populated element for arrays', () => {
+      expect(getFieldType([1, 2, 3])).toBe('long');
+      expect(getFieldType(['a', 'b'])).toBe('string');
+      expect(getFieldType([null, '192.0.2.1'])).toBe('ip');
+      expect(getFieldType([[1.5], [2]])).toBe('float');
+    });
+
+    it('should return "null" for empty arrays', () => {
+      expect(getFieldType([])).toBe('null');
+      expect(getFieldType([null])).toBe('null');
     });
 
     it('should return "object" for objects', () => {
@@ -187,6 +213,27 @@ describe('data stream utils', () => {
     });
   });
 
+  describe('unwrapPipelineDocument', () => {
+    it('returns the document unchanged when it is already a source object', () => {
+      const document = { message: 'hello', 'source.ip': '10.0.0.1' };
+      expect(unwrapPipelineDocument(document)).toEqual(document);
+    });
+
+    it('unwraps an ingest _source document', () => {
+      expect(unwrapPipelineDocument({ _source: { message: 'hello' } })).toEqual({
+        message: 'hello',
+      });
+    });
+
+    it('unwraps a simulate wrapper document', () => {
+      expect(
+        unwrapPipelineDocument({
+          doc: { _id: '1', _source: { message: 'hello', status: 200 } },
+        })
+      ).toEqual({ message: 'hello', status: 200 });
+    });
+  });
+
   describe('flattenPipelineObject', () => {
     it('should flatten a simple object', () => {
       const input = {
@@ -229,8 +276,47 @@ describe('data stream utils', () => {
       const result = flattenPipelineObject(input);
 
       expect(result).toEqual([
-        { field: 'arrayField', value: '[1,2,3]', type: 'nested' },
-        { field: 'mixedArray', value: '["a","b","c"]', type: 'nested' },
+        { field: 'arrayField', value: '[1,2,3]', type: 'long' },
+        { field: 'mixedArray', value: '["a","b","c"]', type: 'string' },
+      ]);
+    });
+
+    it('should expand arrays of objects into the union of their fields in place', () => {
+      const input = {
+        before: 'a',
+        rules: [
+          { name: 'block-ssh', id: 22 },
+          { name: 'allow-web', id: 443, zone: 'dmz' },
+        ],
+        after: 'b',
+      };
+
+      const result = flattenPipelineObject(input);
+
+      expect(result.map(({ field }) => field)).toEqual([
+        'before',
+        'rules.name',
+        'rules.id',
+        'rules.zone',
+        'after',
+      ]);
+      expect(result).toContainEqual({ field: 'rules.zone', value: 'dmz', type: 'string' });
+    });
+
+    it('should expand arrays of objects nested inside array elements', () => {
+      const input = { rules: [{ targets: [{ host: 'a' }, { port: 80 }] }] };
+
+      expect(flattenPipelineObject(input).map(({ field }) => field)).toEqual([
+        'rules.targets.host',
+        'rules.targets.port',
+      ]);
+    });
+
+    it('should prefer objects over scalars when array elements disagree', () => {
+      const input = { rules: [{ value: 'x' }, { value: { a: 1 } }] };
+
+      expect(flattenPipelineObject(input)).toEqual([
+        { field: 'rules.value.a', value: '1', type: 'long' },
       ]);
     });
 
@@ -277,7 +363,7 @@ describe('data stream utils', () => {
       expect(result).toContainEqual({
         field: 'user.roles',
         value: '["admin","user"]',
-        type: 'nested',
+        type: 'string',
       });
       expect(result).toContainEqual({
         field: 'metadata.source.ip',
@@ -390,6 +476,48 @@ describe('data stream utils', () => {
       expect(result.linesAdded).toBe(1);
       expect(result.linesRemoved).toBe(1);
       expect(result.netLineChange).toBe(0);
+    });
+  });
+
+  describe('getFlyoutFooterState', () => {
+    const base = {
+      isDirty: false,
+      isBusy: false,
+      pipelineText: '{ "processors": [] }',
+    };
+
+    it('enables save and reset on either tab when the draft is dirty', () => {
+      expect(getFlyoutFooterState({ ...base, isTableTab: true, isDirty: true })).toEqual({
+        isResetDisabled: false,
+        isSaveDisabled: false,
+        saveTestSubj: 'mappingEditorApplyButton',
+      });
+      expect(getFlyoutFooterState({ ...base, isTableTab: false, isDirty: true })).toEqual({
+        isResetDisabled: false,
+        isSaveDisabled: false,
+        saveTestSubj: 'editPipelineFlyoutSaveButton',
+      });
+    });
+
+    it('disables save and reset when the draft is clean or a request is running', () => {
+      expect(getFlyoutFooterState({ ...base, isTableTab: true })).toMatchObject({
+        isResetDisabled: true,
+        isSaveDisabled: true,
+      });
+      expect(
+        getFlyoutFooterState({ ...base, isTableTab: false, isDirty: true, isBusy: true })
+      ).toMatchObject({ isResetDisabled: true, isSaveDisabled: true });
+    });
+
+    it('disables save when the pipeline text is empty', () => {
+      const state = getFlyoutFooterState({
+        ...base,
+        isTableTab: false,
+        isDirty: true,
+        pipelineText: '  ',
+      });
+      expect(state.isSaveDisabled).toBe(true);
+      expect(state.isResetDisabled).toBe(false);
     });
   });
 });

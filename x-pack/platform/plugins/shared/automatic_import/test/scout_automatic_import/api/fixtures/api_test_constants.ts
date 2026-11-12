@@ -14,10 +14,15 @@ export const NON_EXISTENT_INTEGRATION_ID = 'non_existent_scout_test_id';
 
 export const DATA_STREAMS_INTEGRATION_ID = 'scout_ds_test_integration';
 
-/** Dedicated integration for manager happy-path data stream flow (upload → patch → results → delete). */
+/** Dedicated integration for manager happy-path data stream flow (upload → rejected edits → delete). */
 export const MANAGER_DS_FLOW_INTEGRATION_ID = 'scout_ds_manager_flow';
 
 export const MANAGER_DS_FLOW_DATA_STREAM_ID = 'scout_ds_manager_flow_ds';
+
+/** Integration with a seeded, completed data stream for saving field type and pipeline edits. */
+export const EDITS_INTEGRATION_ID = 'scout_ds_edits';
+
+export const EDITS_DATA_STREAM_ID = 'scout_ds_edits_ds';
 
 export const dataStreamsApiBasePath = (integrationId: string): string =>
   `api/automatic_import/integrations/${integrationId}/data_streams`;

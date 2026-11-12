@@ -9,9 +9,20 @@ import type { KbnClient } from '@kbn/scout/src/common';
 
 const BASE_PATH = '/api/automatic_import/integrations';
 const VERSION_HEADER = { 'elastic-api-version': '1' };
+const DATA_STREAM_SAVED_OBJECT_TYPE = 'data_stream-config';
+
+export interface CompletedDataStreamParams {
+  integrationId: string;
+  dataStreamId: string;
+  samples: string[];
+  ingestPipeline: { processors: Array<Record<string, unknown>> };
+  fieldMapping: Array<{ name: string; type: string; is_ecs: boolean }>;
+}
 
 export interface AutoImportApiService {
   createIntegration: (integrationId: string, title: string) => Promise<void>;
+  /** Creates an integration with a data stream whose analysis already completed, without running it. */
+  createCompletedDataStream: (params: CompletedDataStreamParams) => Promise<void>;
   createIntegrationWithDataStream: (
     integrationId: string,
     title: string,
@@ -36,6 +47,42 @@ export function getAutoImportApiService(kbnClient: KbnClient): AutoImportApiServ
           title,
           description: `Scout test integration: ${integrationId}`,
         },
+      });
+    },
+
+    async createCompletedDataStream({
+      integrationId,
+      dataStreamId,
+      samples,
+      ingestPipeline,
+      fieldMapping,
+    }) {
+      await this.createIntegration(integrationId, `Scout integration ${integrationId}`);
+      await kbnClient.savedObjects.create({
+        type: DATA_STREAM_SAVED_OBJECT_TYPE,
+        id: `${integrationId}-${dataStreamId}`,
+        overwrite: true,
+        attributes: {
+          integration_id: integrationId,
+          data_stream_id: dataStreamId,
+          created_by: 'scout',
+          title: `Scout data stream ${dataStreamId}`,
+          description: `Scout test data stream: ${dataStreamId}`,
+          input_types: ['filestream'],
+          job_info: { job_id: `${dataStreamId}-job`, job_type: 'autoImport', status: 'completed' },
+          metadata: { sample_count: samples.length, created_at: new Date().toISOString() },
+          result: {
+            ingest_pipeline: ingestPipeline,
+            field_mapping: fieldMapping,
+            pipeline_docs: [],
+          },
+        },
+      });
+      await kbnClient.request({
+        method: 'POST',
+        path: `${BASE_PATH}/${integrationId}/data_streams/${dataStreamId}/upload`,
+        headers: VERSION_HEADER,
+        body: { samples, originalSource: { sourceType: 'file', sourceValue: 'scout.log' } },
       });
     },
 

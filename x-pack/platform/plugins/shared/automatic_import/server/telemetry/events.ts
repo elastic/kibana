@@ -9,6 +9,9 @@ import type { EventTypeOpts } from '@kbn/core/server';
 
 import { AutomaticImportTelemetryEventType } from '../../common';
 
+export const MAX_TELEMETRY_TYPE_CHANGES = 50;
+export const MAX_TELEMETRY_FIELD_ERROR_ISSUES = 20;
+
 /**
  * Server-side EBT event schemas.
  * These are used by server/plugin.ts to register event types.
@@ -106,6 +109,102 @@ export const telemetryEventsSchemas: Partial<
       dataStreamName: {
         type: 'keyword',
         _meta: { description: 'Data stream name (dataset) for this event', optional: false },
+      },
+    },
+  },
+
+  // A save (not a preview) of field type and pipeline edits that got a response or a version conflict
+  [AutomaticImportTelemetryEventType.DataStreamEditsSubmitted]: {
+    eventType: AutomaticImportTelemetryEventType.DataStreamEditsSubmitted,
+    schema: {
+      sessionId: {
+        type: 'keyword',
+        _meta: {
+          description: 'The ID to identify all the events in the same session',
+          optional: false,
+        },
+      },
+      integrationId: {
+        type: 'keyword',
+        _meta: { description: 'Integration ID', optional: false },
+      },
+      dataStreamId: {
+        type: 'keyword',
+        _meta: { description: 'Data stream ID', optional: false },
+      },
+      outcome: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'saved, field_errors, pipeline_errors, breaking_changes_unacknowledged, or conflict',
+          optional: false,
+        },
+      },
+      dataStreamApproved: {
+        type: 'boolean',
+        _meta: {
+          description: 'Whether the data stream is in the last approved version',
+          optional: false,
+        },
+      },
+      pipelineChanged: {
+        type: 'boolean',
+        _meta: {
+          description:
+            'Whether the pipeline differs from the saved one, ignoring generated field type processors',
+          optional: false,
+        },
+      },
+      fieldTypeChangeCount: {
+        type: 'long',
+        _meta: { description: 'Number of field type changes in the save', optional: false },
+      },
+      typeChanges: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: { description: 'A field type change as from:to, e.g. long:keyword' },
+        },
+        _meta: {
+          description: `Field type changes as from:to pairs, without field names (at most ${MAX_TELEMETRY_TYPE_CHANGES})`,
+          optional: false,
+        },
+      },
+      fieldTypeOverrideCount: {
+        type: 'long',
+        _meta: {
+          description: 'Field type edits on the data stream after the save',
+          optional: false,
+        },
+      },
+      removedApprovedFieldCount: {
+        type: 'long',
+        _meta: {
+          description: 'Fields from an approved version the pipeline no longer produces',
+          optional: false,
+        },
+      },
+      breakingChangesAcknowledged: {
+        type: 'boolean',
+        _meta: { description: 'Whether the user chose Save anyway', optional: false },
+      },
+      approvalReset: {
+        type: 'boolean',
+        _meta: {
+          description: 'Whether the save sent an approved integration back for approval',
+          optional: false,
+        },
+      },
+      fieldErrorIssues: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: { description: 'A field error issue code, e.g. not_numeric' },
+        },
+        _meta: {
+          description: `Distinct field error issue codes (at most ${MAX_TELEMETRY_FIELD_ERROR_ISSUES})`,
+          optional: false,
+        },
       },
     },
   },

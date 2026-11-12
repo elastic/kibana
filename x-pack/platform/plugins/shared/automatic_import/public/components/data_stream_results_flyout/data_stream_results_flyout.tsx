@@ -8,16 +8,41 @@
 import React from 'react';
 import { UIStateProvider } from '../integration_management/contexts';
 import { EditPipelineFlyout } from '../integration_management/management_contents/data_streams/edit_pipeline_flyout';
+import { useGetIntegrationById } from '../../common';
+import { getDataStreamEditState } from '../../../common';
 import type { DataStreamResultsFlyoutProps } from './types';
 
-export const DataStreamResultsFlyout = ({
+const DataStreamResultsFlyoutContent = ({
   integrationId,
   dataStream,
   onClose,
 }: DataStreamResultsFlyoutProps) => {
+  const {
+    integration,
+    isLoading: isIntegrationLoading,
+    isError: isIntegrationError,
+  } = useGetIntegrationById(integrationId);
+  const editState = getDataStreamEditState({
+    integration,
+    dataStream,
+    isLoading: isIntegrationLoading,
+    isError: isIntegrationError,
+  });
+
+  return (
+    <EditPipelineFlyout
+      integrationId={integrationId}
+      dataStream={dataStream}
+      onClose={onClose}
+      editState={editState}
+    />
+  );
+};
+
+export const DataStreamResultsFlyout = (props: DataStreamResultsFlyoutProps) => {
   return (
     <UIStateProvider>
-      <EditPipelineFlyout integrationId={integrationId} dataStream={dataStream} onClose={onClose} />
+      <DataStreamResultsFlyoutContent {...props} />
     </UIStateProvider>
   );
 };

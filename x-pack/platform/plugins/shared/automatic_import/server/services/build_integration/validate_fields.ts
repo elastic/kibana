@@ -12,6 +12,8 @@ import type { FieldMappingEntry } from '../saved_objects/saved_objects_service';
 export interface FieldValidationResult {
   valid: boolean;
   errors: string[];
+  /** The error thrown by Elasticsearch when the simulation request failed. */
+  cause?: unknown;
 }
 
 const VALID_ES_TYPES = new Set([
@@ -134,6 +136,6 @@ export const validateFieldMappings = async (
     }
     const errorMessage = error instanceof Error ? error.message : 'Unknown validation error';
     logger.warn(`Field mapping validation failed: ${errorMessage}`);
-    return { valid: false, errors: [errorMessage] };
+    return { valid: false, errors: [errorMessage], cause: error };
   }
 };

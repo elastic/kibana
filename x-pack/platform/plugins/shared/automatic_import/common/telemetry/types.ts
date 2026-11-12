@@ -29,6 +29,7 @@ export enum AutomaticImportTelemetryEventType {
   // Server events
   DataStreamCreationComplete = 'automatic_import_data_stream_creation_complete',
   IntegrationInstalled = 'automatic_import_integration_installed',
+  DataStreamEditsSubmitted = 'automatic_import_data_stream_edits_submitted',
 
   // Fleet Events
   ManageIntegrationsTableViewed = 'automatic_import_manage_integrations_table_viewed',
@@ -159,6 +160,29 @@ export interface PipelineEditedPayload {
   netLineChange: number;
 }
 
+export type DataStreamEditsOutcome =
+  | 'saved'
+  | 'field_errors'
+  | 'pipeline_errors'
+  | 'breaking_changes_unacknowledged'
+  | 'conflict';
+
+export interface DataStreamEditsSubmittedPayload {
+  sessionId: string;
+  integrationId: string;
+  dataStreamId: string;
+  outcome: DataStreamEditsOutcome;
+  dataStreamApproved: boolean;
+  pipelineChanged: boolean;
+  fieldTypeChangeCount: number;
+  typeChanges: string[];
+  fieldTypeOverrideCount: number;
+  removedApprovedFieldCount: number;
+  breakingChangesAcknowledged: boolean;
+  approvalReset: boolean;
+  fieldErrorIssues: string[];
+}
+
 export type AutomaticImportTelemetryEventPayload<T extends AutomaticImportTelemetryEventType> =
   T extends AutomaticImportTelemetryEventType.CreateIntegrationPageLoaded
     ? CreateIntegrationPageLoadedPayload
@@ -202,4 +226,6 @@ export type AutomaticImportTelemetryEventPayload<T extends AutomaticImportTeleme
     ? DataStreamRefreshConfirmedPayload
     : T extends AutomaticImportTelemetryEventType.PipelineEdited
     ? PipelineEditedPayload
+    : T extends AutomaticImportTelemetryEventType.DataStreamEditsSubmitted
+    ? DataStreamEditsSubmittedPayload
     : never;
