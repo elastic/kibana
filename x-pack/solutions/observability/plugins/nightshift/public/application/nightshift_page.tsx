@@ -539,9 +539,7 @@ export function NightshiftPage(): React.ReactElement | null {
             ) : (
               <NightshiftApp
                 hideDetectionSetupBanner={onboardingFinishedThisLoad}
-                onStartInvestigation={
-                  canStartInvestigation ? toggleStartInvestigation : undefined
-                }
+                onStartInvestigation={canStartInvestigation ? toggleStartInvestigation : undefined}
                 onCreateAutomation={
                   canUseAutomations && canManage ? navigateToAutomations : undefined
                 }

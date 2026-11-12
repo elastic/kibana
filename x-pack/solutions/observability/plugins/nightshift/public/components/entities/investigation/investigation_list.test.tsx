@@ -142,9 +142,7 @@ describe('InvestigationList', () => {
       'No open investigations found'
     );
     expect(screen.getByTestId('nightshiftInvestigationsEmptyInvestigate')).toBeInTheDocument();
-    expect(
-      screen.getByTestId('nightshiftInvestigationsEmptyCreateAutomation')
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftInvestigationsEmptyCreateAutomation')).toBeInTheDocument();
   });
 
   it('renders in progress first and not rated last', () => {
