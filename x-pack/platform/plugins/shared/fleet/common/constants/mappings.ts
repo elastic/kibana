@@ -581,3 +581,9 @@ export const ENROLLMENT_API_KEY_MAPPINGS = {
     },
   },
 } as const;
+
+// Agent fields that exist on the underlying index but are intentionally omitted from
+// `AGENT_MAPPINGS`. Sort, filter, and export parameters are validated against the agent mappings,
+// so these fields are rejected for consistency. Kept as a single source of truth shared by the
+// route schemas and the agent query service.
+export const AGENT_FIELDS_NOT_IN_MAPPINGS = ['default_api_key', 'access_api_key'] as const;

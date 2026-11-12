@@ -20,13 +20,19 @@ import {
 
 import { NewAgentActionSchema } from '../models';
 
-import { validateKuery } from '../../routes/utils/filter_utils';
+import { isAgentFieldNotInMappings, validateKuery } from '../../routes/utils/filter_utils';
 import { ListResponseSchema } from '../../routes/schema/utils';
 
 const validateAgentsKueryField = (value: string) => {
   const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
   if (validationObj?.error) {
     return validationObj?.error;
+  }
+};
+
+const validateAgentFieldIsMapped = (value: string) => {
+  if (isAgentFieldNotInMappings(value)) {
+    return `Field '${value}' is not supported`;
   }
 };
 
@@ -121,6 +127,7 @@ export const GetAgentsRequestSchema = {
         schema.querySortField.warn({
           label: 'fleet.agents.sortField',
           meta: { description: 'Field to sort results by' },
+          validate: validateAgentFieldIsMapped,
         })
       ),
       sortOrder: schema.maybe(
@@ -1303,11 +1310,13 @@ export const PostGenerateAgentsReportRequestSchema = {
         },
       }),
     ]),
-    fields: schema.arrayOf(schema.string(), { maxSize: 100 }),
+    fields: schema.arrayOf(schema.string({ validate: validateAgentFieldIsMapped }), {
+      maxSize: 100,
+    }),
     timezone: schema.maybe(schema.string()),
     sort: schema.maybe(
       schema.object({
-        field: schema.maybe(schema.string()),
+        field: schema.maybe(schema.string({ validate: validateAgentFieldIsMapped })),
         direction: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
       })
     ),

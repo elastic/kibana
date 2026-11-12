@@ -277,6 +277,48 @@ describe('Agents CRUD test', () => {
   });
 
   describe('getAgentsByKuery', () => {
+    it.each(['default_api_key', 'access_api_key'])(
+      'rejects sorting by the non-queryable field %s before searching',
+      async (sortField) => {
+        await expect(
+          getAgentsByKuery(esClientMock, soClientMock, {
+            showAgentless: true,
+            showInactive: false,
+            sortField,
+          })
+        ).rejects.toThrow(/is not supported/);
+        expect(searchMock).not.toHaveBeenCalled();
+      }
+    );
+
+    it.each([
+      'default_api_key:d*',
+      'agent.id:1 and access_api_key:a*',
+      'agent.id:1 and default_api*:d*',
+    ])('rejects a kuery that names a non-queryable field (%s) before searching', async (kuery) => {
+      await expect(
+        getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
+          showInactive: false,
+          kuery,
+        })
+      ).rejects.toThrow(/is not supported/);
+      expect(searchMock).not.toHaveBeenCalled();
+    });
+
+    it('allows a field-less kuery term and a queryable sort field', async () => {
+      searchMock.mockResolvedValueOnce(getEsResponse(['1'], 1, 'online'));
+      await expect(
+        getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
+          showInactive: false,
+          sortField: 'enrolled_at',
+          kuery: 'agent.id:1 and d*',
+        })
+      ).resolves.toBeDefined();
+      expect(searchMock).toHaveBeenCalled();
+    });
+
     it('should roll forward PIT id from search responses', async () => {
       searchMock.mockResolvedValueOnce(getEsResponse(['1'], 1, 'online', () => ({}), 'pit-2'));
 
