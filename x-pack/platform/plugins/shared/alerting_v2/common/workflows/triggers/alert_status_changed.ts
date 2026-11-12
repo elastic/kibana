@@ -183,7 +183,7 @@ export const alertStatusChangedTriggerCommonDefinition: CommonTriggerDefinition<
   }),
   description: i18n.translate('xpack.alertingV2.workflowTriggers.alertStatusChanged.description', {
     defaultMessage:
-      'Fires once per alert each time its status changes. Technical preview: events are only sent after an integration, for example Nightshift, has opted in.',
+      'Fires once per alert each time its status changes. Technical preview: events are only sent after an integration, for example nightshift, has opted in.',
   }),
   documentation: {
     details: i18n.translate(
@@ -195,7 +195,7 @@ export const alertStatusChangedTriggerCommonDefinition: CommonTriggerDefinition<
           'For the latter, event.rule and event.execution are null, and event.source always says where the alert came from. ' +
           'For rule-produced alerts, severity is the highest among the stored events for the alert and status in the first batch that publishes the change. Later batches do not revise it. ' +
           'Alerts a user has manually activated produce no events while they are held active. ' +
-          'Events are only published after an integration, for example Nightshift, has opted in, and only for the spaces it enables. Until then no events are sent. ' +
+          'Events are only published after an integration, for example nightshift, has opted in, and only for the spaces it enables. Until then no events are sent. ' +
           'Workflows started from a rule run use the API key of the rule, and workflows started from an alert events client write use the request of the writer, not the workflow author. Anyone who can create workflows in the space can subscribe to this trigger. ' +
           'Rule names, tags, and ids from each event are also written to the workflow trigger log, which users with workflow execution read access in the space can view.',
       }

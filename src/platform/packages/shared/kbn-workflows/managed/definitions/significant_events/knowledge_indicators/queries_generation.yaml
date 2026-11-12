@@ -43,7 +43,7 @@ triggers:
         description: "Slug of the target source. Together with the source id it keys concurrency."
       - name: connectorId
         type: string
-        description: "Optional connector ID override. When omitted the code-owned Nightshift default is used."
+        description: "Optional connector ID override. When omitted the code-owned nightshift default is used."
       - name: maxExistingQueriesForContext
         type: number
         description: "Max number of existing queries to include as LLM context. When omitted the server-side default is used."

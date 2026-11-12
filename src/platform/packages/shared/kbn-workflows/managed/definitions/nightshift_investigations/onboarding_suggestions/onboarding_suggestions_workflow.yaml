@@ -1,7 +1,7 @@
 version: '1'
 name: Nightshift Onboarding Suggestions
 description: >
-  Runs the Nightshift investigation agent once to explore what a new user's space can see from
+  Runs the nightshift investigation agent once to explore what a new user's space can see from
   its sandbox (cluster telemetry, plus any tools reachable with the space's sandbox secrets) and
   to suggest their first investigations. The execution is the onboarding state: its output carries
   the suggestions.
@@ -55,7 +55,7 @@ steps:
       metadata:
         workflow_execution_id: '{{ execution.id }}'
       message: |
-        This is not an investigation. A user just set up Nightshift and is waiting for you to
+        This is not an investigation. A user just set up nightshift and is waiting for you to
         suggest their first investigations. Explore quickly and broadly, do not dig into any single
         problem, and do not report investigation progress.
 

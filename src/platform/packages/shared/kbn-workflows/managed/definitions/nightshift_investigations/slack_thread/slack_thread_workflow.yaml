@@ -1,7 +1,7 @@
 version: '1'
 name: Nightshift Slack Thread Investigation
 description: >
-  Keeps one Nightshift investigation per Slack thread. Every human reply in a thread that already
+  Keeps one nightshift investigation per Slack thread. Every human reply in a thread that already
   has an investigation re-runs it in the same conversation. The thread has one status
   message: the first run posts it, and every run edits it with the findings or the failure. A
   later run leaves it showing the previous findings until its own are ready.
@@ -50,7 +50,7 @@ steps:
         type: workflow.fail
         with:
           message: >-
-            This workflow continues Nightshift investigations from Slack thread replies. Only a
+            This workflow continues nightshift investigations from Slack thread replies. Only a
             Slack message event may start it. This run was started by {{ execution.triggeredBy }}.
 
   # A reply only continues an existing investigation; this workflow never creates one. Delivery

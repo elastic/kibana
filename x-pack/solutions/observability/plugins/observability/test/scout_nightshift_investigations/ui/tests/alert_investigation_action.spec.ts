@@ -91,7 +91,7 @@ test.describe(
       });
 
       await pageObjects.toasts.waitForToastWithText('Investigation started');
-      expect(await pageObjects.toasts.getMessageText()).toContain('You will find it in Nightshift');
+      expect(await pageObjects.toasts.getMessageText()).toContain('You will find it in nightshift');
       await pageObjects.alertPage.viewStartedInvestigation();
       await expect(page).toHaveURL(/\/app\/nightshift\?investigationId=investigation-1$/);
     });
@@ -118,7 +118,7 @@ test.describe(
         subject: { type: 'alert', ids: [alertId] },
       });
       await pageObjects.toasts.waitForToastWithText('Investigation started');
-      expect(await pageObjects.toasts.getMessageText()).toContain('You will find it in Nightshift');
+      expect(await pageObjects.toasts.getMessageText()).toContain('You will find it in nightshift');
       await expect(page.testSubj.locator('alertDetailsViewInvestigation')).toBeVisible();
       await expect(page.testSubj.locator('alertDetailsInvestigate')).toBeHidden();
       expect(new URL(page.url()).pathname).toContain(`/observability/alerts/${alertId}`);

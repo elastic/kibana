@@ -22,7 +22,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   // Matches the `agenticInvestigations.description` / `proposals.description` overrides in
   // config/serverless.oblt.complete.yml.
   const previewDescription =
-    'Technical preview. Requires the Nightshift private preview to be enabled on this project.';
+    'Technical preview. Requires the nightshift private preview to be enabled on this project.';
 
   describe('privileges', function () {
     this.tags(['failsOnMKI']);

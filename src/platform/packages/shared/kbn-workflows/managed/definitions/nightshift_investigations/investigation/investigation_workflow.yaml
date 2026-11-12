@@ -55,7 +55,7 @@ triggers:
             type: string
             maxLength: 255
           description: >
-            Optional Nightshift source ids to scope observability queries. The workflow resolves
+            Optional nightshift source ids to scope observability queries. The workflow resolves
             them to slug and ES|QL view for the investigator.
         context:
           type: object

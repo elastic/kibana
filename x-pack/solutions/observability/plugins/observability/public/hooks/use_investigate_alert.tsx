@@ -230,7 +230,7 @@ export const useInvestigateAlert = ({
                   <p>
                     <FormattedMessage
                       id="xpack.observability.alerts.investigationStartedDescription"
-                      defaultMessage="You will find it in Nightshift"
+                      defaultMessage="You will find it in nightshift"
                     />
                   </p>
                 </EuiText>
