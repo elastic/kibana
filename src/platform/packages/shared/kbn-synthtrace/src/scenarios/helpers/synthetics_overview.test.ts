@@ -167,8 +167,18 @@ describe('createCheckTimeline', () => {
   it('returns the check index and the streak of the outcome', () => {
     const getCheck = timeline(FROM + 60 * MINUTE);
 
-    expect(getCheck(FROM + 3 * 3 * MINUTE)).toEqual({ index: 3, outcome: 'up', streak: 0 });
-    expect(getCheck(FROM + 18 * 3 * MINUTE)).toEqual({ index: 18, outcome: 'down', streak: 1 });
+    expect(getCheck(FROM + 3 * 3 * MINUTE)).toEqual({
+      index: 3,
+      outcome: 'up',
+      streak: 0,
+      streakStartedAt: FROM,
+    });
+    expect(getCheck(FROM + 18 * 3 * MINUTE)).toEqual({
+      index: 18,
+      outcome: 'down',
+      streak: 1,
+      streakStartedAt: FROM + 17 * 3 * MINUTE,
+    });
   });
 
   it('clamps timestamps before the range to the first check', () => {
@@ -288,7 +298,8 @@ describe('buildCheck', () => {
     monitor: typeof httpMonitor,
     outcome: 'up' | 'down',
     streak = 0,
-    spaceId = 'default'
+    spaceId = 'default',
+    streakStartedAt = timestamp
   ) =>
     buildCheck({
       config: monitor.config,
@@ -297,6 +308,7 @@ describe('buildCheck', () => {
       timestamp,
       outcome,
       streak,
+      streakStartedAt,
       random: createSeededRandom('random'),
     }).flatMap((monitorDocument) => monitorDocument.serialize());
 
@@ -326,6 +338,8 @@ describe('buildCheck', () => {
       'summary.down': 0,
       'state.status': 'up',
       'state.id': `${httpMonitor.config.id}-2`,
+      'state.started_at': new Date(timestamp).toISOString(),
+      'state.duration_ms': 0,
     });
     expect(documents[0]).not.toHaveProperty(['error.message']);
   });
@@ -374,6 +388,23 @@ describe('buildCheck', () => {
       'url.full': 'db-2.example.com:5432',
     });
     expect(document['monitor.duration.us']).toBeGreaterThanOrEqual(5_000_000);
+  });
+
+  it('keeps the start and the elapsed time of a streak that began before this check', () => {
+    const startedAt = timestamp - 15 * MINUTE;
+    const [http] = check(httpMonitor, 'down', 1, 'default', startedAt);
+    const browser = check(browserMonitor, 'down', 1, 'default', startedAt);
+    const summary = browser[browser.length - 1];
+
+    expect(http).toMatchObject({
+      'state.started_at': new Date(startedAt).toISOString(),
+      'state.duration_ms': 15 * MINUTE,
+    });
+    expect(summary).toMatchObject({
+      'synthetics.type': 'heartbeat/summary',
+      'state.started_at': new Date(startedAt).toISOString(),
+      'state.duration_ms': 15 * MINUTE,
+    });
   });
 
   it('builds a whole journey run for a browser check', () => {

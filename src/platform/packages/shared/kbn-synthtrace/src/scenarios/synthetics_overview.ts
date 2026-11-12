@@ -122,7 +122,7 @@ const scenario: Scenario<SyntheticsMonitorDocument> = async (initOptions) => {
                 return [];
               }
 
-              const { index, outcome, streak } = getCheck(timestamp);
+              const { index, outcome, streak, streakStartedAt } = getCheck(timestamp);
 
               return buildCheck({
                 config,
@@ -131,6 +131,7 @@ const scenario: Scenario<SyntheticsMonitorDocument> = async (initOptions) => {
                 timestamp,
                 outcome,
                 streak,
+                streakStartedAt,
                 random: createSeededRandom(`${seed}:${id}:${index}`),
               });
             });

@@ -225,12 +225,23 @@ export const createCheckTimeline = ({
 
   let { outcomes, streaks } = layOut(Math.max(1, Math.ceil((to - from) / intervalMs)));
 
-  return (timestamp: number): { index: number; outcome: CheckOutcome; streak: number } => {
+  return (
+    timestamp: number
+  ): { index: number; outcome: CheckOutcome; streak: number; streakStartedAt: number } => {
     const index = Math.max(Math.floor((timestamp - from) / intervalMs), 0);
     if (index >= outcomes.length) {
       ({ outcomes, streaks } = layOut(index + 1));
     }
-    return { index, outcome: outcomes[index], streak: streaks[index] };
+    const streak = streaks[index];
+    // Streak numbers only increase, so the first check with this number is where it started.
+    const streakStartIndex = streaks.indexOf(streak);
+
+    return {
+      index,
+      outcome: outcomes[index],
+      streak,
+      streakStartedAt: from + streakStartIndex * intervalMs,
+    };
   };
 };
 
@@ -242,6 +253,7 @@ export const buildCheck = ({
   timestamp,
   outcome,
   streak,
+  streakStartedAt,
   random,
 }: {
   config: SyntheticsMonitorConfig;
@@ -250,10 +262,16 @@ export const buildCheck = ({
   timestamp: number;
   outcome: CheckOutcome;
   streak: number;
+  /** Timestamp of the first check of this up or down streak. */
+  streakStartedAt: number;
   random: () => number;
 }): Array<ReturnType<typeof syntheticsMonitor.create>> => {
   const { id, type, name, target, scheduleMinutes, tags = [] } = config;
-  const stateId = `${id}-${streak}`;
+  const stateFields = {
+    'state.id': `${id}-${streak}`,
+    'state.started_at': new Date(streakStartedAt).toISOString(),
+    'state.duration_ms': timestamp - streakStartedAt,
+  };
   const checkGroup = `${id}-${timestamp}`;
   const isUp = outcome === 'up';
 
@@ -292,7 +310,7 @@ export const buildCheck = ({
       checkGroup,
       steps,
     });
-    documents[documents.length - 1].overrides({ 'state.id': stateId });
+    documents[documents.length - 1].overrides(stateFields);
 
     return documents;
   }
@@ -313,7 +331,7 @@ export const buildCheck = ({
   } else {
     monitor.down().error({ message: ERROR_MESSAGES[type], type: 'io' });
   }
-  monitor.overrides({ 'state.id': stateId });
+  monitor.overrides(stateFields);
 
   return [monitor];
 };
