@@ -9,6 +9,7 @@ import {
   SHARED_MAX_SHARE,
   SHARED_MIN_CALLER_SHARE,
   SHARED_MIN_NEIGHBOURS,
+  SHARED_MIN_NEIGHBOURS_MEDIAN_MULTIPLE,
   SHARED_NEIGHBOUR_STANDARD_DEVIATIONS,
 } from './constants';
 import type { ServiceCallStats } from './types';
@@ -21,9 +22,13 @@ import { compareNames } from './utils';
  * The second rule counts neighbours, services it calls and services that call it.
  * A service that is both called and calls a lot is as much a hub as one that only calls.
  *
- * Shares and the typical number of neighbours are over every service on the map, including those
- * with no calls. At most a small share of the map is shared, those with the most neighbours. Ties
- * are arbitrarily broken by name.
+ * Shares are over every service on the map, including those with no calls. The typical number of
+ * neighbours is over the same services, except those already shared for their callers: a few
+ * services called by hundreds would otherwise raise the bar so far that a gateway calling dozens
+ * stays under it. Neighbour counts are skewed, so by chance a few ordinary services sit above the
+ * mean plus 3 standard deviations: a service also needs at least 3 times the median, and at least
+ * 10. At most a small share of the map is shared, those with the most neighbours. Ties are
+ * arbitrarily broken by name.
  *
  * Both rules count distinct services, not calls, so a stray call (a health check, a script run
  * once in the day) counts as much as a real dependency. Grouping by calls weighs those down, but
@@ -40,20 +45,39 @@ export function findSharedServices({
   if (serviceCount === 0) {
     return new Set();
   }
-  const neighbourCounts = [...stats.values()].map(({ neighbours }) => neighbours);
-  const mean = neighbourCounts.reduce((sum, count) => sum + count, 0) / serviceCount;
-  const variance =
-    neighbourCounts.reduce((sum, count) => sum + (count - mean) ** 2, 0) / serviceCount;
+  const minCallers = SHARED_MIN_CALLER_SHARE * serviceCount;
+  const calledByMany = (callers: number) => callers >= minCallers;
+
+  const neighbourCounts = [...stats.values()]
+    .filter(({ callers }) => !calledByMany(callers))
+    .map(({ neighbours }) => neighbours);
+  const mean = average(neighbourCounts);
+  const variance = average(neighbourCounts.map((count) => (count - mean) ** 2));
   const minNeighbours = Math.max(
     mean + SHARED_NEIGHBOUR_STANDARD_DEVIATIONS * Math.sqrt(variance),
+    SHARED_MIN_NEIGHBOURS_MEDIAN_MULTIPLE * median(neighbourCounts),
     SHARED_MIN_NEIGHBOURS
   );
-  const minCallers = SHARED_MIN_CALLER_SHARE * serviceCount;
 
   const shared = [...stats]
-    .filter(([, { callers, neighbours }]) => callers >= minCallers || neighbours >= minNeighbours)
+    .filter(([, { callers, neighbours }]) => calledByMany(callers) || neighbours >= minNeighbours)
     .sort(([a, statsA], [b, statsB]) => statsB.neighbours - statsA.neighbours || compareNames(a, b))
     .slice(0, Math.floor(SHARED_MAX_SHARE * serviceCount))
     .map(([service]) => service);
   return new Set(shared);
+}
+
+/** The mean, 0 for no values. */
+function average(values: readonly number[]): number {
+  return values.length === 0 ? 0 : values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+/** The middle value, the mean of the two middle ones for an even count, 0 for no values. */
+function median(values: readonly number[]): number {
+  if (values.length === 0) {
+    return 0;
+  }
+  const sorted = [...values].sort((a, b) => a - b);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 1 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
 }

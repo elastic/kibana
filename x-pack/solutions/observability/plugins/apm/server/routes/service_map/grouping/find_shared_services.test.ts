@@ -46,6 +46,32 @@ describe('findSharedServices', () => {
     expect(findSharedServices({ stats })).toEqual(new Set(['gateway']));
   });
 
+  it('shares a gateway even when services called by most of the map have far more neighbours', () => {
+    // Counted with the platform services, neighbours average 7.5 with a standard deviation of 7.7,
+    // so the gateway's 30 would fall under the bar. Without them, the bar is about 13.
+    const stats = new Map([
+      ...servicesLike('svc', 100, { callers: 3, neighbours: 6 }),
+      ...servicesLike('platform', 3, { callers: 50, neighbours: 50 }),
+      ['gateway', stat(0, 30)],
+    ]);
+
+    expect(findSharedServices({ stats })).toEqual(
+      new Set(['platform-0', 'platform-1', 'platform-2', 'gateway'])
+    );
+  });
+
+  it('needs at least 3 times the median, so an ordinary busy service stays in its group', () => {
+    // neighbours cluster tightly around 7, so 15 is far above the mean plus 3 standard deviations,
+    // but not 3 times the typical service
+    const stats = new Map([
+      ...servicesLike('svc', 100, { callers: 3, neighbours: 7 }),
+      ['busy', stat(8, 15)],
+      ['gateway', stat(0, 30)],
+    ]);
+
+    expect(findSharedServices({ stats })).toEqual(new Set(['gateway']));
+  });
+
   it('needs at least 10 neighbours, however few the rest have', () => {
     // the typical service has 1 neighbour, so 9 is far above the mean plus 3 standard deviations
     const stats = new Map([

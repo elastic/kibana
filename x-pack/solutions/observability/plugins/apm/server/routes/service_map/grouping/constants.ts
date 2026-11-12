@@ -17,7 +17,16 @@ export const NOT_CONNECTED_GROUP_ID = 'notConnected';
 export const SHARED_MIN_CALLER_SHARE = 0.25;
 /** A service with more neighbours than the mean plus this many standard deviations is shared. */
 export const SHARED_NEIGHBOUR_STANDARD_DEVIATIONS = 3;
-/** ...and at least this many neighbours. */
+/**
+ * A service needs at least this many times the median number of neighbours to be shared for its
+ * neighbours. Neighbour counts are skewed, so by chance a few ordinary services sit above the mean
+ * plus a few standard deviations.
+ */
+export const SHARED_MIN_NEIGHBOURS_MEDIAN_MULTIPLE = 3;
+/**
+ * A service needs at least this many neighbours to be shared for its neighbours, however few the
+ * rest have.
+ */
 export const SHARED_MIN_NEIGHBOURS = 10;
 /** At most this share of the estate is shared. */
 export const SHARED_MAX_SHARE = 0.05;

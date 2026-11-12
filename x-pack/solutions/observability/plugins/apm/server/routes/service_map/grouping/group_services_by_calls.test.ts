@@ -44,6 +44,23 @@ describe('groupServicesByCalls', () => {
     ).toBeGreaterThan(0.9);
   });
 
+  it('puts a gateway in the shared group alongside the services every team calls', () => {
+    const estate = syntheticEstate({
+      teams: 30,
+      servicesPerTeam: 20,
+      sharedServices: 3,
+      seed: 5,
+      namedByTeam: true,
+      extraServices: ['gateway'],
+      extraCalls: Array.from({ length: 30 }, (_, team) => ['gateway', `t${team}-s0`] as const),
+    });
+    const { groupOf } = group(estate);
+
+    for (const service of [...estate.shared, 'gateway']) {
+      expect(groupOf.get(service)?.kind).toBe('shared');
+    }
+  });
+
   it('puts a gateway that calls into every team in the shared group, and still finds the teams', () => {
     const estate = syntheticEstate({
       teams: 30,
