@@ -41,6 +41,7 @@ import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback_to_transactions_fetcher';
 import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { isFailure, isPending } from '../../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import type { ApmRoutes } from '../../../routing/apm_route_config';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
 import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
@@ -85,6 +86,7 @@ export function getServiceColumns({
   serviceOverflowCount,
   onSloBadgeClick,
   locators,
+  rangeEnd,
 }: {
   query: TypeOf<ApmRoutes, '/services'>['query'];
   showTransactionTypeColumn: boolean;
@@ -98,6 +100,9 @@ export function getServiceColumns({
   serviceOverflowCount: number;
   onSloBadgeClick: (serviceName: string, agentName?: AgentName) => void;
   locators: SharePluginStart['url']['locators'] | undefined;
+  // Range end (epoch ms), forwarded to the sparkline columns so they trim the
+  // partial trailing bucket. Undefined disables trimming.
+  rangeEnd?: number;
 }): Array<ITableColumn<ServiceListItem>> {
   const { isSmall, isLarge, isXl } = breakpoints;
   const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
@@ -326,6 +331,7 @@ export function getServiceColumns({
             color={currentPeriodColor}
             valueLabel={asMillisecondDuration(latency || 0)}
             comparisonSeriesColor={previousPeriodColor}
+            end={rangeEnd}
           />
         );
       },
@@ -351,6 +357,7 @@ export function getServiceColumns({
             color={currentPeriodColor}
             valueLabel={asTransactionRate(throughput)}
             comparisonSeriesColor={previousPeriodColor}
+            end={rangeEnd}
           />
         );
       },
@@ -376,6 +383,7 @@ export function getServiceColumns({
             color={currentPeriodColor}
             valueLabel={valueLabel}
             comparisonSeriesColor={previousPeriodColor}
+            end={rangeEnd}
           />
         );
       },
@@ -434,7 +442,10 @@ export function ApmServicesTable({
     ({ transactionType }) => transactionType && !isDefaultTransactionType(transactionType)
   );
   const { query } = useApmParams('/services');
-  const { kuery, environment } = query;
+  const { kuery, environment, rangeFrom, rangeTo } = query;
+
+  const { end } = useTimeRange({ rangeFrom, rangeTo });
+  const rangeEnd = Date.parse(end);
 
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
@@ -530,6 +541,7 @@ export function ApmServicesTable({
       serviceOverflowCount,
       onSloBadgeClick: openSloOverviewFlyout,
       locators,
+      rangeEnd,
     });
   }, [
     query,
@@ -544,6 +556,7 @@ export function ApmServicesTable({
     serviceOverflowCount,
     openSloOverviewFlyout,
     locators,
+    rangeEnd,
   ]);
 
   const isTableSearchBarEnabled = core?.uiSettings?.get<boolean>(

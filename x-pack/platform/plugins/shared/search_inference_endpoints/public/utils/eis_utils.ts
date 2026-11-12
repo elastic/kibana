@@ -46,11 +46,11 @@ export const isTemplateRequiredEisEndpoint = (endpoint: {
   metadata?: EisInferenceEndpointMetadata;
 }): boolean => isTemplateRequiredConnector(endpoint);
 
-export type TaskTypeCategory = 'LLM' | 'Embedding' | 'Rerank' | 'Decision';
+export type TaskTypeCategory = 'Generative' | 'Embedding' | 'Rerank' | 'Decision';
 
 export const TASK_TYPE_CATEGORY: Partial<Record<EisTaskType, TaskTypeCategory>> = {
-  chat_completion: 'LLM',
-  completion: 'LLM',
+  chat_completion: 'Generative',
+  completion: 'Generative',
   text_embedding: 'Embedding',
   sparse_embedding: 'Embedding',
   embedding: 'Embedding',
@@ -235,9 +235,9 @@ export const groupEndpointsByModel = (endpoints: EisInferenceEndpoint[]): Groupe
 
 export const MODEL_TYPE_FILTERS: Array<{ key: TaskTypeCategory; label: string }> = [
   {
-    key: 'LLM',
-    label: i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.filter.llm', {
-      defaultMessage: 'LLM',
+    key: 'Generative',
+    label: i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.filter.generative', {
+      defaultMessage: 'Generative',
     }),
   },
   {
@@ -259,6 +259,9 @@ export const MODEL_TYPE_FILTERS: Array<{ key: TaskTypeCategory; label: string }>
     }),
   },
 ];
+
+export const getTaskTypeCategoryLabel = (category: TaskTypeCategory): string =>
+  MODEL_TYPE_FILTERS.find(({ key }) => key === category)?.label ?? category;
 
 export const getProviderOptions = (models: GroupedModel[]): MultiSelectFilterOption[] => {
   const unique = [...new Set(models.map((m) => m.modelCreator))].sort();

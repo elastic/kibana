@@ -32,7 +32,7 @@ const model = (
   modelCreator,
   modelStatus: EisModelStatus.GA,
   taskTypes: ['chat_completion'],
-  categories: ['LLM'],
+  categories: ['Generative'],
   endpoints: [
     {
       inference_id: `${modelName}-endpoint`,
@@ -117,7 +117,7 @@ describe('createEisFindItems', () => {
 
     expect(items.map((item) => toGroupedModel(item).categories.join(', '))).toEqual([
       'Embedding',
-      'LLM',
+      'Generative',
       'Rerank',
     ]);
   });
@@ -129,7 +129,7 @@ describe('createEisFindItems', () => {
 
     expect(items.map((item) => toGroupedModel(item).categories.join(', '))).toEqual([
       'Rerank',
-      'LLM',
+      'Generative',
       'Embedding',
     ]);
   });
@@ -322,7 +322,7 @@ describe('createEisFindItems', () => {
         searchQuery: 'chat',
         filters: {
           [EIS_REGION_FILTER_ID]: { include: ['geo-us'] },
-          [EIS_CATEGORY_FILTER_ID]: { include: ['LLM'] },
+          [EIS_CATEGORY_FILTER_ID]: { include: ['Generative'] },
         },
       })
     );
@@ -340,7 +340,7 @@ describe('createEisFindItems', () => {
 
   it('excludes models by the task-type category dimension', async () => {
     const { items } = await findItems(
-      findParams({ filters: { [EIS_CATEGORY_FILTER_ID]: { exclude: ['LLM'] } } })
+      findParams({ filters: { [EIS_CATEGORY_FILTER_ID]: { exclude: ['Generative'] } } })
     );
 
     expect(items.map(({ title }) => title)).toEqual(['Alpha Embedder', 'Jina Reranker v2']);

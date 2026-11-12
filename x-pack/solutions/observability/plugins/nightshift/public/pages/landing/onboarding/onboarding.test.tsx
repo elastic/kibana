@@ -19,9 +19,6 @@ const mockStartSuggestions = jest.fn();
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({ services: {} }),
 }));
-jest.mock('../../../hooks/use_current_user_name', () => ({
-  useCurrentUserName: () => 'Kate',
-}));
 jest.mock('../../../components/ui/flyout_share_url_button', () => ({
   useFlyoutShareUrlCustomAction: () => ({}),
 }));

@@ -14,19 +14,32 @@ const findSloDefinitionsParamsSchema = lazySchema(() =>
   z.object({
     query: z
       .object({
-        search: z.string().optional().describe('Filters the SLOs by name'),
-        includeOutdatedOnly: BooleanFromString.optional().describe(
-          'Indicates if the API returns only outdated SLO or all SLO definitions'
-        ),
-        includeHealth: BooleanFromString.optional().describe(
-          'Indicates if the API returns SLO health data with definitions'
-        ),
-        tags: z.string().optional().describe('Filters the SLOs by tag'),
+        search: z
+          .string()
+          .meta({ example: 'checkout' })
+          .optional()
+          .describe('Filters the SLOs by name'),
+        includeOutdatedOnly: BooleanFromString.meta({ example: 'true' })
+          .optional()
+          .describe('Indicates if the API returns only outdated SLO or all SLO definitions'),
+        includeHealth: BooleanFromString.meta({ example: 'true' })
+          .optional()
+          .describe('Indicates if the API returns SLO health data with definitions'),
+        tags: z
+          .string()
+          .meta({ example: 'production' })
+          .optional()
+          .describe('Filters the SLOs by tag'),
         page: z
           .string()
+          .meta({ example: '1' })
           .optional()
           .describe('The page to use for pagination, must be greater or equal than 1'),
-        perPage: z.string().optional().describe('Number of SLOs returned by page'),
+        perPage: z
+          .string()
+          .meta({ example: '100' })
+          .optional()
+          .describe('Number of SLOs returned by page'),
       })
       .optional(),
   })
