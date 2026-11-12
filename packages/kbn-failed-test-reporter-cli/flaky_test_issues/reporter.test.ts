@@ -556,7 +556,7 @@ describe('reportFlakySuiteIssues', () => {
   describe('suites with an issue of their own in the target repository', () => {
     const report = () => flakyReport([flakyTest()]);
 
-    it("brings the issue's metadata up to the report, then comments with its numbers, the text left as filed", async () => {
+    it("brings the issue's metadata up to the report, then comments with where it is still flaky, the text left as filed", async () => {
       const issue = suiteIssue(42);
       const github = createGithubApi([issue]);
 
@@ -579,7 +579,7 @@ describe('reportFlakySuiteIssues', () => {
       expect(github.addIssueComment).toHaveBeenCalledWith(
         42,
         expect.stringMatching(
-          /^This test suite still appears to be flaky, with 1 flaky test over 2–9 Sep 2026:\n\n\| Test \|[\s\S]*49 \/ 509[\s\S]*> \[!TIP\]/
+          /^Still flaky on `main`: 10% of builds \(49 \/ 509\), last failed \[9 Sep\]\(.*\)\.$/
         )
       );
       // The failed-test alert a comment runs reads the metadata, so the body goes first
@@ -661,7 +661,7 @@ describe('reportFlakySuiteIssues', () => {
       });
       expect(github.addIssueComment).toHaveBeenCalledWith(
         42,
-        expect.stringContaining('appears to be flaky again after this issue was closed')
+        expect.stringContaining('Flaky again after this issue was closed, on `main`: ')
       );
       expect(summary.actions[0]).toMatchObject({
         action: 'updated',
