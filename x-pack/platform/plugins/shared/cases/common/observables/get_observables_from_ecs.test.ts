@@ -397,6 +397,31 @@ describe('getObservablesFromEcsDataArray', () => {
       ).toEqual([{ typeKey: 'employee-id', value: 'E000001', description }]);
     });
 
+    it('reads the enabled paths of a type and skips the disabled paths', () => {
+      const observableTypes = {
+        'employee-id': {
+          key: 'employee-id',
+          label: 'Employee ID',
+          paths: [
+            { path: 'user.employee_id', enabled: true },
+            { path: 'user.old_employee_id', enabled: false },
+          ],
+        },
+      };
+
+      expect(
+        getObservablesFromEcs(
+          [
+            [
+              { field: 'user.employee_id', value: ['E000001'] },
+              { field: 'user.old_employee_id', value: ['E000002'] },
+            ],
+          ],
+          observableTypes
+        )
+      ).toEqual([{ typeKey: 'employee-id', value: 'E000001', description }]);
+    });
+
     it('skips a type with a value pattern that does not compile', () => {
       const observableTypes = {
         broken: {
