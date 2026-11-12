@@ -1685,6 +1685,30 @@ describe('createLlmProposeWikiEdits prompt', () => {
     });
 
     expect(input).not.toContain('[this investigation]');
+    expect(input).not.toContain('[confirmed by this investigation]');
+  });
+
+  it('marks a page this conversation only corroborated as confirmed on a follow-up', async () => {
+    const { input } = await run({
+      messages: [],
+      roundKind: 'follow_up',
+      currentConversationId: 'conversation-1',
+      catalog: [
+        {
+          id: 'wiki_service_orders-consumer',
+          title: 'orders-consumer',
+          entity_type: 'service',
+          status: 'tentative',
+          corroborations: 1,
+          updated_at: '2026-03-02T09:00:00.000Z',
+          conversation_id: 'conversation-1',
+          authored_by: ['conversation-2'],
+        },
+      ],
+    });
+
+    expect(input).toContain('orders-consumer (1x) [confirmed by this investigation]');
+    expect(input).not.toContain('[this investigation]');
   });
 
   it('shows the content of the pages the round may rewrite', async () => {
