@@ -301,7 +301,7 @@ export function NightshiftPage(): React.ReactElement | null {
       {
         href: basePath.prepend(NIGHTSHIFT_APP_ROUTE),
         text: i18n.translate('xpack.nightshift.breadcrumbs.linkText', {
-          defaultMessage: 'Nightshift',
+          defaultMessage: 'nightshift',
         }),
         deepLinkId: NIGHTSHIFT_APP_ID,
       },
@@ -537,7 +537,13 @@ export function NightshiftPage(): React.ReactElement | null {
                 <EuiLoadingSpinner size="xl" />
               </EuiFlexGroup>
             ) : (
-              <NightshiftApp hideDetectionSetupBanner={onboardingFinishedThisLoad} />
+              <NightshiftApp
+                hideDetectionSetupBanner={onboardingFinishedThisLoad}
+                onStartInvestigation={canStartInvestigation ? toggleStartInvestigation : undefined}
+                onCreateAutomation={
+                  canUseAutomations && canManage ? navigateToAutomations : undefined
+                }
+              />
             )}
           </EuiPageTemplate.Section>
         </>

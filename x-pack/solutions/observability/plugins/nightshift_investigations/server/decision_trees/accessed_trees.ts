@@ -58,6 +58,35 @@ export const extractAccessedTreeIdsFromRounds = (
   ),
 ];
 
+/** HTML comment carrying the investigator's ids, so telemetry from the hydrate hook can join to it. */
+const RUN_MARKER_PREFIX = '<!-- nightshift-run:';
+const RUN_MARKER_RE = /<!-- nightshift-run:conversation=([\w-]*);round=([\w-]*) -->/;
+
+/**
+ * The hydrate hook may run on another Kibana node than the reinforcement step, so the ids travel in
+ * the prompt rather than in a process-local registry.
+ */
+export const embedRunMarker = ({
+  conversationId,
+  roundId,
+}: {
+  conversationId: string;
+  roundId?: string;
+}): string => `${RUN_MARKER_PREFIX}conversation=${conversationId};round=${roundId ?? ''} -->`;
+
+export const parseRunMarker = (
+  prompt: string | undefined
+): { conversationId?: string; roundId?: string } | undefined => {
+  const match = prompt ? RUN_MARKER_RE.exec(prompt) : null;
+  if (!match) {
+    return undefined;
+  }
+  return {
+    ...(match[1] ? { conversationId: match[1] } : {}),
+    ...(match[2] ? { roundId: match[2] } : {}),
+  };
+};
+
 /** First line of the reinforcement message; hydrate uses it to restrict the sandbox. */
 export const embedAccessedTreesMarker = (treeIds: string[]): string => {
   const slugs = treeIds.map((treeId) => treeId.replace(/^symptom:/, '')).join(',');

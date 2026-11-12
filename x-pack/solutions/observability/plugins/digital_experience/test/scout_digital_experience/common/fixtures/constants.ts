@@ -38,7 +38,7 @@ export const OTEL_SHOP_PAGE_LOADS = '5';
 /**
  * Of the page loads of `OTEL_APPS.shop`, three are from Chrome on macOS in Germany, one from Safari
  * on iOS in France, and one has no browser. The OS is in `browser.platform`, one of the
- * alternatives the sessions transform reads too.
+ * alternatives the sessions read too.
  */
 export const OTEL_SHOP_CHROME_PAGE_LOADS = '3';
 export const OTEL_SHOP_SAFARI_PAGE_LOADS = '1';

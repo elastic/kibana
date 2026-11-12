@@ -21,6 +21,7 @@ import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import type { ExecutionInterruption } from '@kbn/agent-builder-common/chat/events';
 import {
   TimelineEventType,
+  isMessageEvent,
   interruptionOfTerminal,
   isExecutionTerminalEvent,
   pendingPromptRequest,
@@ -29,7 +30,7 @@ import {
   type ExecutionTerminatedEvent,
   type PromptResponseEvent,
   type TimelineEvent,
-  type UserMessageEvent,
+  type MessageEvent,
 } from '@kbn/agent-builder-common/chat/timeline_events';
 import { eventsToRounds } from '../../../conversation/client/events_to_rounds';
 import { sourceEvents } from '../../../conversation/client/source_events';
@@ -39,7 +40,7 @@ import { applyStepUpdates, stepUpdates, type RunStepUpdate } from '../step_state
 export interface ConversationTurn {
   /** The round id: `parseExecutionId(executionId)?.roundId`, or the execution id itself for ids outside the derived scheme. */
   id: string;
-  userMessage: UserMessageEvent;
+  userMessage: MessageEvent;
   /** The logical steps after folding every resume, successful or interrupted. */
   steps: ConversationRoundStep[];
   /** The latest execution's terminated event; absent when the latest execution was interrupted. */
@@ -176,7 +177,7 @@ export const foldConversationTurns = (events: TimelineEvent[]): ConversationTurn
     const steps = executionSteps(bucket);
     const fields = terminalFields(bucket.terminal);
 
-    if (trigger.type === TimelineEventType.userMessage) {
+    if (isMessageEvent(trigger)) {
       const turn: ConversationTurn = {
         id: parseExecutionId(bucket.executionId)?.roundId ?? bucket.executionId,
         userMessage: trigger,
