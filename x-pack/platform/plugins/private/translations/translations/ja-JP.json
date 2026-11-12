@@ -21743,7 +21743,6 @@
     "xpack.apm.subFeatureRegistry.modifySettings": "設定を修正する機能",
     "xpack.apm.subFeatureRegistry.settings": "設定",
     "xpack.apm.suggestionsSelect.comboBox.ariaLabel": "値を選択",
-    "xpack.apm.technicalPreviewBadge.ariaLabel": "この機能はテクニカルプレビュー中であり、将来のリリースでは変更されたり完全に削除されたりする場合があります。Elasticはすべての問題の修正に努めますが、テクニカルプレビュー中の機能には正式なGA機能のサポートSLAが適用されません。",
     "xpack.apm.technicalPreviewBadgeDescription": "この機能はテクニカルプレビュー中であり、将来のリリースでは変更されたり完全に削除されたりする場合があります。Elasticはすべての問題の修正に努めますが、テクニカルプレビュー中の機能には正式なGA機能のサポートSLAが適用されません。",
     "xpack.apm.technicalPreviewBadgeLabel": "テクニカルプレビュー",
     "xpack.apm.templateDescription.clearBundleButtonLabel": "バンドルをクリア",
