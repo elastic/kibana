@@ -15,6 +15,14 @@ import { apiTest, FILTER_VALUES_PATH, INTERNAL_HEADERS } from '../fixtures';
 const WINDOW = { from: '2026-11-01T09:00:00.000Z', to: '2026-11-01T11:00:00.000Z' };
 const BASE = { types: ['k8s.deployment'], ...WINDOW };
 
+// 13:00 to 15:00 on 2026-11-05 holds only the time-series index's `timeseries/ts-window` documents
+// (14:00:00 and 14:01:00): the standard indices have none, so only the `TS` plan can answer.
+const TS_ONLY = {
+  types: ['k8s.deployment'],
+  from: '2026-11-05T13:00:00.000Z',
+  to: '2026-11-05T15:00:00.000Z',
+};
+
 // The two suggested filters of `k8s.deployment`: an attribute and an identity field.
 const CLUSTER = 'k8s.cluster.name';
 const NAMESPACE = 'kubernetes.namespace';
@@ -70,6 +78,21 @@ apiTest.describe(
       expect(body.values).toStrictEqual(['checkout', 'platform']);
       expect(body.errors).toStrictEqual([]);
     });
+
+    apiTest(
+      'lists the values of documents that live only in the time-series index, through the TS plan',
+      async ({ apiClient }) => {
+        const namespaces = await postValues(apiClient, { ...TS_ONLY, attribute: NAMESPACE });
+        const clusters = await postValues(apiClient, { ...TS_ONLY, attribute: CLUSTER });
+
+        expect(namespaces).toHaveStatusCode(200);
+        expect(namespaces.body.values).toStrictEqual(['timeseries']);
+        expect(namespaces.body.errors).toStrictEqual([]);
+        expect(clusters).toHaveStatusCode(200);
+        expect(clusters.body.values).toStrictEqual(['scout-cluster']);
+        expect(clusters.body.errors).toStrictEqual([]);
+      }
+    );
 
     apiTest('narrows the values by the selections of the other filters', async ({ apiClient }) => {
       const inCluster = await postValues(apiClient, {
