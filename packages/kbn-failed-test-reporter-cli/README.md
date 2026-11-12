@@ -36,7 +36,9 @@ For every failure the reporter asks ci-stats which `failed-test` issue tracks th
 file or Scout test id, and links it from the failure's HTML report, the Buildkite annotation and
 the Slack message. If that issue is a suite issue, flaky or failing (see below), only its count
 goes up, without a comment or a reopen: the daily report posts where the suite is still flaky and
-reopens it, and `--report-failing-suites` posts breaks. The count is kept in the issue's
+reopens it, and `--report-failing-suites` posts breaks. A job that doesn't run that check on the
+same repository, `elastic/kibana`, reopens the issue and comments on it as on a per-test issue,
+naming the test, as nothing else would post its breaks. The count is kept in the issue's
 `failed-test` metadata; the daily report's body and `flaky-test-suite` metadata are left alone.
 
 ## `node scripts/report_flaky_test_issues`

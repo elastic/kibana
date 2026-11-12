@@ -96,6 +96,7 @@ const createParams = (
     prependTitle: '',
     updateGithub: true,
     perTestIssues: true,
+    suiteIssueComments: false,
     indexInEs: true,
     reportUpdate: true,
     bkMeta: {},
@@ -246,6 +247,8 @@ describe('processJUnitReports flaky suite issues', () => {
 
     expect(updateSuiteIssue).toHaveBeenCalledTimes(1);
     expect(updateSuiteIssue.mock.calls[0][0]).toBe(suiteIssue);
+    // the consistent failure check of the job posts breaks on it
+    expect(updateSuiteIssue.mock.calls[0][2]).toBeUndefined();
     expect(updateFailureIssue).not.toHaveBeenCalled();
     expect(failures[0].githubIssue).toBe('https://github.com/issues/7');
     expect(failures[0].failureCount).toBe(5);
@@ -254,6 +257,22 @@ describe('processJUnitReports flaky suite issues', () => {
     // the suite-tracked failure does not use up the one new issue per report
     expect(createFailureIssue).toHaveBeenCalledTimes(1);
     expect(createFailureIssue.mock.calls[0][1]).toBe(failures[1]);
+  });
+
+  it('comments on the suite issue about the failure in a job without the consistent failure check', async () => {
+    const failures = [makeFailure(0)];
+    getFailures.mockReturnValue(failures);
+    const suiteIssue = createSuiteIssue(failures[0]);
+    const { params } = createParams([], [[failures[0], suiteIssue]]);
+
+    await processJUnitReports(['report.xml'], { ...params, suiteIssueComments: true });
+
+    expect(updateSuiteIssue.mock.calls[0][2]).toEqual({
+      buildUrl: 'https://build-url',
+      branch: 'main',
+      pipeline: 'kibana-on-merge',
+      failure: failures[0],
+    });
   });
 
   it('shows the count the suite issue had without bumping it when GitHub updates are off', async () => {

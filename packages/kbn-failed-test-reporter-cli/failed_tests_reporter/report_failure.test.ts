@@ -10,6 +10,7 @@
 import dedent from 'dedent';
 
 import type { FlakySuiteIssue } from './existing_failed_test_issues';
+import type { TestFailure } from './get_failures';
 import {
   createFailureIssue,
   extractErrorMessage,
@@ -1213,5 +1214,74 @@ describe('updateSuiteIssue()', () => {
 
     expect(newCount).toBe(8);
     expect(newBody).toContain('"test.failCount":8');
+  });
+
+  describe('in a job without the consistent failure check', () => {
+    const ftrFailure: TestFailure = {
+      classname: `Chrome X-Pack UI Functional Tests.${FTR_FILE.replace(/\./g, '·')}`,
+      name: 'maps app sample data ecommerce should load the layers',
+      testType: 'ftr',
+      time: '1',
+      failure: 'Error: expected 3 layers, got 2',
+      likelyIrrelevant: false,
+    };
+
+    it('also reopens the issue and names the test in the comment', async () => {
+      const api = createGithubApi();
+
+      const { newCount } = await updateSuiteIssue(
+        suiteIssue(`Flaky suite\n\n<!-- kibanaCiData = ${SUITE_METADATA} -->`),
+        api,
+        {
+          buildUrl: 'https://build-url',
+          branch: 'main',
+          pipeline: 'kibana-fips-daily',
+          failure: ftrFailure,
+        }
+      );
+
+      expect(newCount).toBe(1);
+      const [number, body] = api.editIssueBodyAndEnsureOpen.mock.calls[0];
+      expect(number).toBe(9000);
+      expect(body).toContain('"failed-test":{"test.failCount":1}');
+      expect(body).not.toContain('Test history:');
+      expect(api.editIssue).not.toHaveBeenCalled();
+      const [, comment] = api.addIssueComment.mock.calls[0];
+      expect(comment.split('\n')[0]).toBe(
+        'New failure of `maps app sample data ecommerce should load the layers`: [kibana-fips-daily - main](https://build-url)'
+      );
+      // the per-test history link belongs in the comment, not in the suite's body
+      expect(comment).toContain('Test history: [passes and failures over time](');
+      expect(comment).toContain('New error message:\n```\nError: expected 3 layers, got 2\n```');
+    });
+
+    it('names a Scout test by its describe block and title, with the target', async () => {
+      const api = createGithubApi();
+
+      await updateSuiteIssue(suiteIssue('Flaky suite'), api, {
+        buildUrl: 'https://build-url',
+        branch: '8.19',
+        pipeline: 'kibana-fips-daily',
+        failure: {
+          classname: 'Attachments',
+          name: 'uploads a file',
+          failure: 'test failure',
+          errorMessage: 'Error: upload timed out',
+          time: '2018-01-01T01:00:00Z',
+          likelyIrrelevant: false,
+          id: 'test-id-123',
+          target: 'stateful',
+          location: 'x-pack/test/scout/ui/tests/attachments.spec.ts',
+          duration: 5000,
+          owners: 'team:test',
+          commandLine: 'node scripts/playwright test --config=config.ts',
+        },
+      });
+
+      expect(api.addIssueComment.mock.calls[0][1]).toBe(
+        'New failure of `Attachments uploads a file` for "stateful" target: [kibana-fips-daily - 8.19](https://build-url)\n\n' +
+          'New error message:\n```\nError: upload timed out\n```'
+      );
+    });
   });
 });
