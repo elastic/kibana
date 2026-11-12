@@ -11,7 +11,6 @@ import React from 'react';
 import { TimelineDataTable } from '.';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types';
 import { DataLoadingState } from '@kbn/unified-data-table';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { getColumnHeaders } from '../../body/column_headers/helpers';
@@ -43,6 +42,7 @@ const refetchMock = jest.fn();
 const onFetchMoreRecordsMock = jest.fn();
 
 const mockOpenSystemFlyout = jest.fn();
+const mockCloseSystemFlyout = jest.fn();
 const mockUiSettingsGet = jest.fn().mockReturnValue(false);
 const mockPaginatedDocumentFlyout = jest.fn((_props?: unknown) => (
   <div>{'MockPaginatedDocumentFlyout'}</div>
@@ -50,7 +50,6 @@ const mockPaginatedDocumentFlyout = jest.fn((_props?: unknown) => (
 
 const updateSampleSizeSpy = jest.spyOn(timelineActions, 'updateSampleSize');
 
-jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../../flyout_v2/shared/components/flyout_provider', () => ({
   flyoutProviders: ({ children }: { children: React.ReactNode }) => children,
 }));
@@ -152,15 +151,12 @@ describe('unified data table', () => {
   let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
 
   beforeEach(() => {
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
-      closeFlyout: jest.fn(),
-    });
     mockUiSettingsGet.mockReturnValue(false);
     flyoutApi = createFlyoutApiMock();
     jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
     jest
       .mocked(useOpenFlyout)
-      .mockReturnValue(mockOpenSystemFlyout.mockReturnValue({ close: jest.fn() }));
+      .mockReturnValue(mockOpenSystemFlyout.mockReturnValue({ close: mockCloseSystemFlyout }));
   });
   afterEach(() => {
     updateSampleSizeSpy.mockClear();
@@ -259,6 +255,31 @@ describe('unified data table', () => {
       await waitFor(() => {
         expect(expandButtons[0].firstChild).toHaveAttribute('data-euiicon-type', 'maximize');
         expect(expandButtons[1].firstChild).toHaveAttribute('data-euiicon-type', 'minimize');
+      });
+    },
+    SPECIAL_TEST_TIMEOUT
+  );
+
+  it(
+    'closes the document flyout when the expanded row is collapsed',
+    async () => {
+      render(<TestComponent />);
+      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+      const expandButtons = screen.getAllByTestId('docTableExpandToggleColumn');
+      fireEvent.click(expandButtons[0]);
+
+      await waitFor(() => {
+        expect(expandButtons[0].firstChild).toHaveAttribute('data-euiicon-type', 'minimize');
+      });
+      // The previous test's flyout closes when it unmounts, so start counting from here.
+      mockCloseSystemFlyout.mockClear();
+
+      fireEvent.click(expandButtons[0]);
+
+      await waitFor(() => {
+        expect(mockCloseSystemFlyout).toHaveBeenCalledTimes(1);
+        expect(expandButtons[0].firstChild).toHaveAttribute('data-euiicon-type', 'maximize');
       });
     },
     SPECIAL_TEST_TIMEOUT

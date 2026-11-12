@@ -404,37 +404,10 @@ export const createSkillAttachmentDefinition = ({
 
       const actionButtons: ActionButton[] = [];
       const createSkill = async () => {
+        let response: CreateSkillResponse;
         try {
-          const response = await http.post<CreateSkillResponse>(SKILLS_API_PATH, {
+          response = await http.post<CreateSkillResponse>(SKILLS_API_PATH, {
             body: JSON.stringify(skill),
-          });
-          await updateOrigin(response.id);
-          if (agentId) {
-            try {
-              await agents.addSkillToAgent({ agentId, skillId: response.id });
-            } catch (error) {
-              notifications.toasts.addError(error as Error, {
-                title: i18n.translate(
-                  'xpack.agentBuilderPlatform.attachments.skill.addToAgentErrorToast',
-                  {
-                    defaultMessage:
-                      'Skill "{skillId}" created, but could not be added to this agent',
-                    values: { skillId: response.id },
-                  }
-                ),
-              });
-              return;
-            }
-          }
-
-          notifications.toasts.addSuccess({
-            title: i18n.translate(
-              'xpack.agentBuilderPlatform.attachments.skill.createSuccessToast',
-              {
-                defaultMessage: 'Skill "{skillId}" created.',
-                values: { skillId: response.id },
-              }
-            ),
           });
         } catch (error) {
           notifications.toasts.addError(error as Error, {
@@ -442,7 +415,57 @@ export const createSkillAttachmentDefinition = ({
               defaultMessage: 'Could not create skill from draft',
             }),
           });
+          return;
         }
+        let addToAgentError: Error | undefined;
+        if (agentId) {
+          try {
+            await agents.addSkillToAgent({ agentId, skillId: response.id });
+          } catch (error) {
+            addToAgentError = error as Error;
+          }
+        }
+        try {
+          await updateOrigin(response.id);
+        } catch (error) {
+          if (addToAgentError) {
+            notifications.toasts.addError(addToAgentError, {
+              title: i18n.translate(
+                'xpack.agentBuilderPlatform.attachments.skill.addToAgentErrorToast',
+                {
+                  defaultMessage: 'Skill "{skillId}" created, but could not be added to this agent',
+                  values: { skillId: response.id },
+                }
+              ),
+            });
+          }
+          notifications.toasts.addError(error as Error, {
+            title: i18n.translate('xpack.agentBuilderPlatform.attachments.skill.createErrorToast', {
+              defaultMessage: 'Could not create skill from draft',
+            }),
+          });
+          return;
+        }
+
+        if (addToAgentError) {
+          notifications.toasts.addError(addToAgentError, {
+            title: i18n.translate(
+              'xpack.agentBuilderPlatform.attachments.skill.addToAgentErrorToast',
+              {
+                defaultMessage: 'Skill "{skillId}" created, but could not be added to this agent',
+                values: { skillId: response.id },
+              }
+            ),
+          });
+          return;
+        }
+
+        notifications.toasts.addSuccess({
+          title: i18n.translate('xpack.agentBuilderPlatform.attachments.skill.createSuccessToast', {
+            defaultMessage: 'Skill "{skillId}" created.',
+            values: { skillId: response.id },
+          }),
+        });
       };
 
       const saveChanges = async () => {

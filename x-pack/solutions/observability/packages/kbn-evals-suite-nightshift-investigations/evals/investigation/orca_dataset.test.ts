@@ -25,7 +25,11 @@ const example = {
   id: 'example',
   input: { question: 'Investigate the incident.' },
   output: { reference_answer: 'The cause.' },
-  metadata: { case_id: 'incident', current_time: '2026-04-19T16:22:00.000Z' },
+  metadata: {
+    case_id: 'incident',
+    current_time: '2026-04-19T16:22:00.000Z',
+    telemetry_snapshot_time: '2026-04-19T16:27:11Z',
+  },
 };
 const dataset = {
   id: 'dataset',
@@ -63,6 +67,14 @@ describe('pinned ORCA release', () => {
     expect(() => validateOrcaDataset({ ...dataset, examples: [broken] }, brokenRelease)).toThrow(
       /current_time/
     );
+  });
+  it('rejects an example without the telemetry snapshot ORCA serves it', () => {
+    const { telemetry_snapshot_time: _, ...metadata } = example.metadata;
+    const unbounded = { ...example, metadata };
+    const unboundedRelease = { ...release, sha256: getOrcaDatasetHash([unbounded]) };
+    expect(() =>
+      validateOrcaDataset({ ...dataset, examples: [unbounded] }, unboundedRelease)
+    ).toThrow(/telemetry_snapshot_time/);
   });
   it('ignores object key order while retaining all payload values', () => {
     const reordered = {
@@ -228,6 +240,7 @@ describe('ORCA telemetry evidence', () => {
   it.each([
     { ...call, tool_id: 'execute_api' },
     { ...call, params: { ...call.params, connector_id: 'another-cluster' } },
+    { ...call, params: { ...call.params, connector_id: 'orcabench-es-0123456789ab' } },
     {
       ...call,
       results: [{ ...call.results[0], data: { stdout: '{"values":[[0]]}', exit_code: 0 } }],
@@ -262,19 +275,16 @@ describe('ORCA telemetry evidence', () => {
 });
 
 describe('ORCA source preflight', () => {
-  const env = {
-    NIGHTSHIFT_ES_URL: 'https://orca.example',
-    NIGHTSHIFT_ES_API_KEY: 'private-key',
-    NIGHTSHIFT_CONNECTOR_SET: 'orcabench',
-  };
+  const source = { url: 'https://orca.example/', apiKey: 'private-key', variant: 'full' } as const;
   it('checks all three historical signals with the read key', async () => {
     const request = jest.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>();
     request
       .mockResolvedValueOnce(new Response(JSON.stringify({ values: [[14268]] })))
       .mockResolvedValueOnce(new Response(JSON.stringify({ values: [[11864]] })))
       .mockResolvedValueOnce(new Response(JSON.stringify({ values: [[117594]] })));
-    await expect(assertOrcaSource(request, env)).resolves.toBeUndefined();
+    await expect(assertOrcaSource(source, request)).resolves.toBeUndefined();
     expect(request).toHaveBeenCalledTimes(3);
+    expect(request.mock.calls[0][0]).toBe('https://orca.example/_query');
     expect(request.mock.calls[0][1]?.headers).toEqual({
       Authorization: 'ApiKey private-key',
       'Content-Type': 'application/json',
@@ -290,7 +300,7 @@ describe('ORCA source preflight', () => {
       // Each in-flight request needs its own body. Cancelling clones of one response deadlocks the tee.
       const body = await response.text();
       const request = jest.fn(async () => new Response(body, { status: response.status }));
-      await expect(assertOrcaSource(request, env)).rejects.toThrow('ORCA');
+      await expect(assertOrcaSource(source, request)).rejects.toThrow('ORCA');
     }
   );
 
@@ -302,14 +312,14 @@ describe('ORCA source preflight', () => {
     return request;
   };
   it('accepts a flag-ablation key only when the run asks for that variant', async () => {
-    const noFlags = { ...env, NIGHTSHIFT_ORCA_TELEMETRY_VARIANT: 'no-flags' };
+    const noFlags = { ...source, variant: 'no-flags' } as const;
     await expect(
-      assertOrcaSource(answering(13182, 11136, 115056), noFlags)
+      assertOrcaSource(noFlags, answering(13182, 11136, 115056))
     ).resolves.toBeUndefined();
-    await expect(assertOrcaSource(answering(13182, 11136, 115056), env)).rejects.toThrow(
+    await expect(assertOrcaSource(source, answering(13182, 11136, 115056))).rejects.toThrow(
       'pinned full snapshot'
     );
-    await expect(assertOrcaSource(answering(14268, 11864, 117594), noFlags)).rejects.toThrow(
+    await expect(assertOrcaSource(noFlags, answering(14268, 11864, 117594))).rejects.toThrow(
       'pinned no-flags snapshot'
     );
   });
