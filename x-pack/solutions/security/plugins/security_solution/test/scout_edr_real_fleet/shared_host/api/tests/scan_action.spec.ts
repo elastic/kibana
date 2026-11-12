@@ -8,15 +8,15 @@
 import type { ApiClientFixture, KibanaRole } from '@kbn/scout-security';
 import { getPlaywrightTagsFor, PUBLIC_API_HEADERS } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import { ACTION_DETAILS_ROUTE, SCAN_ROUTE } from '../../../../common/endpoint/constants';
+import { ACTION_DETAILS_ROUTE, SCAN_ROUTE } from '../../../../../common/endpoint/constants';
 import type {
   ActionDetails,
   ActionDetailsApiResponse,
   ResponseActionScanOutputContent,
   ResponseActionScanParameters,
-} from '../../../../common/endpoint/types';
-import { getEndpointOperationsAnalyst } from '../../../../scripts/endpoint/common/roles_users/endpoint_operations_analyst';
-import { getHostVmClient } from '../../../../scripts/endpoint/common/vm_services';
+} from '../../../../../common/endpoint/types';
+import { getEndpointOperationsAnalyst } from '../../../../../scripts/endpoint/common/roles_users/endpoint_operations_analyst';
+import { getHostVmClient } from '../../../../../scripts/endpoint/common/vm_services';
 import { apiTest } from '../fixtures';
 
 const ACTION_TIMEOUT_MS = 180_000;

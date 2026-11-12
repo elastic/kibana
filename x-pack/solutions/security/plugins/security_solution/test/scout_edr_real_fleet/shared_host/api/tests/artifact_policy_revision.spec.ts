@@ -11,9 +11,9 @@ import { getEndpointArtifactsApiService, PUBLIC_API_HEADERS } from '@kbn/scout-s
 import { expect } from '@kbn/scout-security/api';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
-import { HOST_METADATA_GET_ROUTE } from '../../../../common/endpoint/constants';
-import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts';
-import type { HostInfo } from '../../../../common/endpoint/types';
+import { HOST_METADATA_GET_ROUTE } from '../../../../../common/endpoint/constants';
+import { GLOBAL_ARTIFACT_TAG } from '../../../../../common/endpoint/service/artifacts';
+import type { HostInfo } from '../../../../../common/endpoint/types';
 import { apiTest } from '../fixtures';
 
 const TRUSTED_APPS_LIST_ID = ENDPOINT_ARTIFACT_LISTS.trustedApps.id;

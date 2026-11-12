@@ -8,7 +8,7 @@
 import { mkdir } from 'fs/promises';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { getHostVmClient } from '../../../../scripts/endpoint/common/vm_services';
+import { getHostVmClient } from '../../../../../scripts/endpoint/common/vm_services';
 
 /**
  * Writes an Elastic Agent diagnostics archive under `target/agent_diagnostics`
