@@ -385,7 +385,7 @@ const getProgressBarSchema = <Shape extends z.ZodRawShape, Config extends z.core
         })
         .meta({ id: `${id}Gradient`, title: `${title} (gradient fill)` }),
     ])
-    .meta({ id, title });
+    .meta({ id, title, openapi: { availability: { since: '9.6.1' } } });
 };
 
 const datatableMetricOptionsSchema = lazySchema(() =>
