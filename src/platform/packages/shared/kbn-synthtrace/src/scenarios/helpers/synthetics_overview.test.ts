@@ -338,7 +338,6 @@ describe('buildCheck', () => {
   const check = (
     monitor: typeof httpMonitor,
     outcome: 'up' | 'down',
-    streak = 0,
     spaceId = 'default',
     streakStartedAt = timestamp
   ) =>
@@ -348,13 +347,12 @@ describe('buildCheck', () => {
       spaceId,
       timestamp,
       outcome,
-      streak,
       streakStartedAt,
       random: createSeededRandom('random'),
     }).flatMap((monitorDocument) => monitorDocument.serialize());
 
   it('builds one document for an http check, with the fields the Synthetics UI reads', () => {
-    const documents = check(httpMonitor, 'up', 2, 'team-a');
+    const documents = check(httpMonitor, 'up', 'team-a');
 
     expect(documents).toHaveLength(1);
     expect(documents[0]).toMatchObject({
@@ -378,7 +376,7 @@ describe('buildCheck', () => {
       'summary.up': 1,
       'summary.down': 0,
       'state.status': 'up',
-      'state.id': `${httpMonitor.config.id}-2`,
+      'state.id': `${httpMonitor.config.id}-${LOCATION.id}-${timestamp}`,
       'state.started_at': new Date(timestamp).toISOString(),
       'state.duration_ms': 0,
     });
@@ -433,8 +431,8 @@ describe('buildCheck', () => {
 
   it('keeps the start and the elapsed time of a streak that began before this check', () => {
     const startedAt = timestamp - 15 * MINUTE;
-    const [http] = check(httpMonitor, 'down', 1, 'default', startedAt);
-    const browser = check(browserMonitor, 'down', 1, 'default', startedAt);
+    const [http] = check(httpMonitor, 'down', 'default', startedAt);
+    const browser = check(browserMonitor, 'down', 'default', startedAt);
     const summary = browser[browser.length - 1];
 
     expect(http).toMatchObject({
@@ -448,8 +446,19 @@ describe('buildCheck', () => {
     });
   });
 
+  it('gives each streak its own state id from its start, not from its number in the run', () => {
+    const startedAt = timestamp - 15 * MINUTE;
+    const [first] = check(httpMonitor, 'down', 'default', startedAt);
+    const [sameStreak] = check(httpMonitor, 'down', 'default', startedAt);
+    const [otherStreak] = check(httpMonitor, 'up', 'default', startedAt - 3 * MINUTE);
+
+    expect(first['state.id']).toBe(`${httpMonitor.config.id}-${LOCATION.id}-${startedAt}`);
+    expect(sameStreak['state.id']).toBe(first['state.id']);
+    expect(otherStreak['state.id']).not.toBe(first['state.id']);
+  });
+
   it('builds a whole journey run for a browser check', () => {
-    const documents = check(browserMonitor, 'up', 1);
+    const documents = check(browserMonitor, 'up');
 
     expect(documents.map((document) => document['synthetics.type'])).toEqual([
       'journey/start',
@@ -461,7 +470,7 @@ describe('buildCheck', () => {
       'data_stream.dataset': 'browser',
       'monitor.status': 'up',
       'monitor.type': 'browser',
-      'state.id': `${browserMonitor.config.id}-1`,
+      'state.id': `${browserMonitor.config.id}-${LOCATION.id}-${timestamp}`,
     });
   });
 

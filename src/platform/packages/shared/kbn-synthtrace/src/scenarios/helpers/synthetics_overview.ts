@@ -259,7 +259,6 @@ export const buildCheck = ({
   spaceId,
   timestamp,
   outcome,
-  streak,
   streakStartedAt,
   random,
 }: {
@@ -268,14 +267,15 @@ export const buildCheck = ({
   spaceId: string;
   timestamp: number;
   outcome: CheckOutcome;
-  streak: number;
   /** Timestamp of the first check of this up or down streak. */
   streakStartedAt: number;
   random: () => number;
 }): Array<ReturnType<typeof syntheticsMonitor.create>> => {
   const { id, type, name, target, scheduleMinutes, tags = [] } = config;
+  // The streak number restarts at zero on every run, so two backfills would share it.
+  // The start time does not: it is the same for every worker of one run.
   const stateFields = {
-    'state.id': `${id}-${streak}`,
+    'state.id': `${id}-${location.id}-${streakStartedAt}`,
     'state.started_at': new Date(streakStartedAt).toISOString(),
     'state.duration_ms': timestamp - streakStartedAt,
   };
