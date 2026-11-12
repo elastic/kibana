@@ -640,7 +640,7 @@ steps:
       fetcher:
         skip_ssl_verification: true
 `;
-      const result = await validateWorkflowYaml(yaml, schema, { warnIgnoredKibanaFetcher: true });
+      const result = await validateWorkflowYaml(yaml, schema);
 
       expect(result.valid).toBe(true);
       expect(result.diagnostics).toEqual([
@@ -653,7 +653,7 @@ steps:
       ]);
     });
 
-    it('does not warn on generated kibana.* fetcher when the self-client flag is off', async () => {
+    it('warns on generated kibana.* fetcher settings', async () => {
       const yaml = `
 version: '1'
 name: kibana-generated-fetcher
@@ -670,33 +670,7 @@ steps:
 `;
       const result = await validateWorkflowYaml(yaml, schema);
 
-      expect(result.diagnostics.some((diag) => diag.ruleId === 'ignoredFetcherSetting')).toBe(
-        false
-      );
-    });
-
-    it('does not warn when the self-client path is off', async () => {
-      const yaml = `
-version: '1'
-name: kibana-fetcher
-enabled: true
-triggers:
-  - type: manual
-steps:
-  - name: status
-    type: kibana.request
-    with:
-      method: GET
-      path: /api/status
-      fetcher:
-        skip_ssl_verification: true
-`;
-      const result = await validateWorkflowYaml(yaml, schema);
-
-      expect(result.valid).toBe(true);
-      expect(result.diagnostics.some((diag) => diag.ruleId === 'ignoredFetcherSetting')).toBe(
-        false
-      );
+      expect(result.diagnostics.some((diag) => diag.ruleId === 'ignoredFetcherSetting')).toBe(true);
     });
 
     it('does not warn on http connector fetcher settings', async () => {

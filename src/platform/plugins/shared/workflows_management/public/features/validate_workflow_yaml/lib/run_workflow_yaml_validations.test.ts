@@ -172,7 +172,7 @@ describe('runWorkflowYamlValidations', () => {
     model.dispose();
   });
 
-  it('warns about kibana fetcher only when the self-client path is on', () => {
+  it('warns about kibana fetcher', () => {
     const yaml = [
       "version: '1'",
       'name: kibana-fetcher',
@@ -191,7 +191,7 @@ describe('runWorkflowYamlValidations', () => {
 
     const computed = performComputation(yaml);
     const model = monaco.editor.createModel(yaml, 'yaml');
-    const shared = {
+    const results = runWorkflowYamlValidations({
       registry: emptyRegistry,
       yamlString: yaml,
       model,
@@ -200,16 +200,9 @@ describe('runWorkflowYamlValidations', () => {
       workflowLookup: computed.workflowLookup,
       workflowGraph: computed.workflowGraph,
       workflowDefinition: computed.workflowDefinition ?? undefined,
-    };
+    });
 
-    expect(
-      runWorkflowYamlValidations(shared).some((result) => result.ruleId === 'ignoredFetcherSetting')
-    ).toBe(false);
-    expect(
-      runWorkflowYamlValidations({ ...shared, warnIgnoredKibanaFetcher: true }).some(
-        (result) => result.ruleId === 'ignoredFetcherSetting'
-      )
-    ).toBe(true);
+    expect(results.some((result) => result.ruleId === 'ignoredFetcherSetting')).toBe(true);
 
     model.dispose();
   });
