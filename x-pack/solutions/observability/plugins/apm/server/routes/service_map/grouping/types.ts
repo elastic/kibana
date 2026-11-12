@@ -11,3 +11,13 @@ export interface WeightedEdge {
   target: string;
   weight: number;
 }
+
+/** How a service takes part in the calls between the map's services. */
+export interface ServiceCallStats {
+  /** Distinct services that call it. */
+  callers: number;
+  /** Distinct services it calls or that call it. */
+  neighbours: number;
+  /** Calls it made and received over the last day. */
+  traffic: number;
+}

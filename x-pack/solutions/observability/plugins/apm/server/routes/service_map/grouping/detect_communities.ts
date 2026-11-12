@@ -18,7 +18,7 @@ import {
   COMMUNITY_DETECTION_MAX_LEVELS,
   COMMUNITY_DETECTION_MAX_PASSES,
 } from './constants';
-import { compareNames } from './utils';
+import { compareNames, verifyEdges } from './utils';
 
 interface Level {
   /** Each node's neighbours and the weight between them. A node is a service, then a group. */
@@ -32,7 +32,8 @@ interface Level {
  * by name. Higher resolutions give more, smaller groups.
  *
  * Expects clean edges, as `getCallGraphEdges` and `edgesBetween` give: one per pair, positive
- * weights, no service calling itself, both services among those being grouped. Throws otherwise.
+ * weights, no service calling itself, both services among those being grouped. Throws otherwise,
+ * see `verifyEdges`.
  */
 export function detectCommunities({
   services,
@@ -44,6 +45,7 @@ export function detectCommunities({
   resolution?: number;
 }): Map<string, number> {
   const sorted = [...new Set(services)].sort(compareNames);
+  verifyEdges({ edges, services: new Set(sorted) });
   const original = buildLevel({ services: sorted, edges });
 
   let level = original;
@@ -75,12 +77,13 @@ function buildLevel({
   services: readonly string[];
   edges: readonly WeightedEdge[];
 }): Level {
-  const indexOf = new Map(services.map((service, index) => [service, index]));
+  const indexMap = new Map(services.map((service, index) => [service, index]));
   const neighbours = services.map(() => new Map<number, number>());
-  for (const edge of edges) {
-    const { a, b } = extractAndValidateEdgeServices({ edge, indexOf });
-    neighbours[a].set(b, (neighbours[a].get(b) ?? 0) + edge.weight);
-    neighbours[b].set(a, (neighbours[b].get(a) ?? 0) + edge.weight);
+  for (const { source, target, weight } of edges) {
+    const a = indexOf({ indexMap, service: source });
+    const b = indexOf({ indexMap, service: target });
+    neighbours[a].set(b, (neighbours[a].get(b) ?? 0) + weight);
+    neighbours[b].set(a, (neighbours[b].get(a) ?? 0) + weight);
   }
   // Weights are added up in this order later. Floating point sums depend on their order, so a
   // fixed one keeps the result independent of the order the edges arrived in.
@@ -90,37 +93,20 @@ function buildLevel({
   };
 }
 
-/**
- * Checks an edge is one community detection can use, and returns the indexes of its services.
- *
- * Edges should reach this function already clean: `getCallGraphEdges` drops calls to the service itself
- * and pairs with no calls, and callers keep only the edges between the services they group with
- * `edgesBetween`. A bad edge here means a caller has a bug, not that the data is unusual.
- *
- * Such an edge wouldn't fail on its own. One to a service not being grouped gives `NaN` gains, one
- * from a service to itself counts it as its own neighbour, and one with no weight joins services
- * that never call each other into the same connected group. In the end, each would silently give wrong groups,
- * so this throws instead, to make the bug loud: grouping fails and the map shows ungrouped.
- */
-function extractAndValidateEdgeServices({
-  edge: { source, target, weight },
-  indexOf,
+function indexOf({
+  indexMap,
+  service,
 }: {
-  edge: WeightedEdge;
-  indexOf: ReadonlyMap<string, number>;
-}): { a: number; b: number } {
-  const a = indexOf.get(source);
-  const b = indexOf.get(target);
-  if (a === undefined || b === undefined) {
-    throw new Error(`Edge ${source} - ${target} has a service that isn't being grouped`);
+  indexMap: ReadonlyMap<string, number>;
+  service: string;
+}): number {
+  const found = indexMap.get(service);
+  // verifyEdges has already checked every edge's services are being grouped, so this never
+  // throws. The check is only there because a Map lookup can return undefined.
+  if (found === undefined) {
+    throw new Error(`${service} isn't being grouped, which verifyEdges should have caught`);
   }
-  if (a === b) {
-    throw new Error(`Edge ${source} - ${target} connects a service to itself`);
-  }
-  if (!(weight > 0)) {
-    throw new Error(`Edge ${source} - ${target} has weight ${weight}, not a positive number`);
-  }
-  return { a, b };
+  return found;
 }
 
 function totalWeight(level: Level): number {
@@ -210,8 +196,8 @@ function aggregate({ level, community }: { level: Level; community: number[] }):
   index: number[];
 } {
   const ids = [...new Set(community)].sort((a, b) => a - b);
-  const indexOf = new Map(ids.map((id, index) => [id, index]));
-  const index = community.map((id) => indexOf.get(id) ?? 0);
+  const indexMap = new Map(ids.map((id, position) => [id, position]));
+  const index = community.map((id) => indexMap.get(id) ?? 0);
   const adjacency = ids.map(() => new Map<number, number>());
   const selfLoops = ids.map(() => 0);
   level.adjacency.forEach((neighbours, node) => {

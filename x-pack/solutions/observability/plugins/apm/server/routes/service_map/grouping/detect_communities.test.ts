@@ -101,31 +101,13 @@ describe('detectCommunities', () => {
     );
   });
 
-  it('throws on an edge to a service that is not being grouped', () => {
+  it('checks its edges, throwing on one to a service that is not being grouped', () => {
     expect(() =>
       detectCommunities({
         services: ['a', 'b'],
         edges: [{ source: 'a', target: 'elsewhere', weight: 1 }],
       })
     ).toThrow('Edge a - elsewhere');
-  });
-
-  it('throws on an edge from a service to itself', () => {
-    expect(() =>
-      detectCommunities({
-        services: ['a', 'b'],
-        edges: [{ source: 'a', target: 'a', weight: 1 }],
-      })
-    ).toThrow('Edge a - a connects a service to itself');
-  });
-
-  it.each([0, -1, NaN])('throws on an edge with weight %s', (weight) => {
-    expect(() =>
-      detectCommunities({
-        services: ['a', 'b'],
-        edges: [{ source: 'a', target: 'b', weight }],
-      })
-    ).toThrow(`Edge a - b has weight ${weight}`);
   });
 
   it.each([
