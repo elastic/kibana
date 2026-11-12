@@ -411,7 +411,8 @@ function registerOne({
           return coreStart.executionContext.withContext(
             buildEaExecutionContext(
               EA_EXECUTION_CONTEXT_NAMES.ENTITY_STORE_EXTRACT_TASK,
-              taskInstance.id
+              taskInstance.id,
+              type
             ),
             () =>
               wrapTaskRun({

@@ -31,12 +31,12 @@ import {
 } from './extract_entity_task';
 import type * as types from '../types';
 import type { EntityStoreCoreSetup } from '../types';
-import { EXTRACTION_MODE } from '../../common/domain/definitions/entity_schema';
+import type { EntityType } from '../../common/domain/definitions/entity_schema';
+import { ALL_ENTITY_TYPES, EXTRACTION_MODE } from '../../common/domain/definitions/entity_schema';
 import { ENGINE_STATUS } from '../domain/constants';
 import { EngineDescriptorTypeName } from '../domain/saved_objects';
 import { entityStoreMetrics } from '../monitor/metrics';
 import { EntityStoreNotRunningError, NonPriorityExtractionDisabledError } from '../domain/errors';
-import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from './execution_context';
 
 const createTaskInstance = (schedule?: ConcreteTaskInstance['schedule']): ConcreteTaskInstance =>
   ({
@@ -560,7 +560,7 @@ describe('bootstrapNonPriorityTask', () => {
 });
 
 describe('registerExtractEntityTasks — execution context wrap', () => {
-  it('invokes coreStart.executionContext.withContext with the extract-task label and taskInstance.id', async () => {
+  const runRegisteredTask = async (entityType: EntityType) => {
     const mockIsDualProcessEnabled = isDualProcessEnabled as jest.MockedFunction<
       typeof isDualProcessEnabled
     >;
@@ -592,11 +592,12 @@ describe('registerExtractEntityTasks — execution context wrap', () => {
     registerExtractEntityTasks({
       taskManager,
       logger,
-      entityTypes: ['host'],
+      entityTypes: [entityType],
       core,
       isServerless: false,
     });
 
+    // The first registration is the shared single/priority task for the type.
     const [defs] = registerTaskDefinitions.mock.calls[0];
     const [taskType] = Object.keys(defs);
     const runner = defs[taskType].createTaskRunner({
@@ -609,9 +610,24 @@ describe('registerExtractEntityTasks — execution context wrap', () => {
 
     await runner.run();
 
-    expect(withContextSpy).toHaveBeenCalledWith(
-      buildEaExecutionContext(EA_EXECUTION_CONTEXT_NAMES.ENTITY_STORE_EXTRACT_TASK, 'task-1'),
-      expect.any(Function)
-    );
-  });
+    return withContextSpy;
+  };
+
+  /** The entity type is part of the name, not only of the task instance id, so each type's
+   * extraction can be attributed by name alone. */
+  it.each(ALL_ENTITY_TYPES)(
+    'wraps the %s task in an execution context named after its entity type',
+    async (entityType) => {
+      const withContextSpy = await runRegisteredTask(entityType);
+
+      expect(withContextSpy).toHaveBeenCalledWith(
+        {
+          type: 'security_solution',
+          name: `entity_analytics:entity_store_extract_task:${entityType}`,
+          id: 'task-1',
+        },
+        expect.any(Function)
+      );
+    }
+  );
 });
