@@ -155,8 +155,9 @@ describe('useLensProps', () => {
         };
       }) as unknown as typeof IntersectionObserver;
 
-    const chartRef = createMockChartRef();
-    chartRef.current = document.createElement('div');
+    const chartRef = {
+      current: document.createElement('div'),
+    } as React.MutableRefObject<HTMLDivElement | null>;
     const onChartVisibleChange = jest.fn();
 
     renderHook(() =>
