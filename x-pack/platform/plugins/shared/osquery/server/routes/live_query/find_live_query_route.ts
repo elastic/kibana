@@ -131,7 +131,9 @@ export const findLiveQueryRoute = (
                 integrationNamespaces =
                   osqueryNamespaces && osqueryNamespaces.length > 0 ? osqueryNamespaces : undefined;
 
-                logger.debug(`Retrieved integration namespaces: ${JSON.stringify(namespaceMap)}`);
+                logger.debug(
+                  () => `Retrieved integration namespaces: ${JSON.stringify(namespaceMap)}`
+                );
               }
 
               const allActionIds: string[] = [];

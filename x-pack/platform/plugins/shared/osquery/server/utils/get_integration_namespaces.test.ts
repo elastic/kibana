@@ -93,4 +93,35 @@ describe('getIntegrationNamespaces', () => {
     expect(result.osquery_manager).toHaveLength(2);
     expect(result.other).toEqual(['custom']);
   });
+
+  it('logs the resolved namespaces lazily at debug level', async () => {
+    mockPackagePolicyService.list.mockResolvedValue({
+      items: [
+        {
+          ...createPackagePolicyMock(),
+          package: { name: 'osquery_manager', title: 'Osquery Manager', version: '1.0.0' },
+          namespace: 'default',
+          policy_ids: [],
+        },
+      ],
+      total: 1,
+      page: 1,
+      perPage: 10000,
+    });
+
+    const result = await getIntegrationNamespaces({
+      logger: mockLogger,
+      soClient: mockSoClient,
+      packagePolicyService: mockPackagePolicyService,
+      agentPolicyService: mockAgentPolicyService,
+      integrationNames: ['osquery_manager'],
+    });
+
+    const lazyMessages = mockLogger.debug.mock.calls
+      .map(([message]) => message)
+      .filter((message): message is () => string => typeof message === 'function');
+
+    expect(lazyMessages).toHaveLength(1);
+    expect(lazyMessages[0]()).toBe(`Integration namespaces in use: ${JSON.stringify(result)}`);
+  });
 });
