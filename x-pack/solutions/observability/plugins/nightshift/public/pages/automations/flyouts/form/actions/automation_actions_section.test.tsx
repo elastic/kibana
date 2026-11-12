@@ -11,6 +11,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { AutomationActionsSection } from './automation_actions_section';
 import type { SlackActionFormValues } from '../automation_form_values';
 
+jest.mock('../../../../../hooks/use_kibana', () => ({
+  useKibana: () => ({ services: { application: { getUrlForApp: () => '' } } }),
+}));
+
 jest.mock('../../../../../data/relay_apps/use_relay_app_bindings', () => ({
   ...jest.requireActual('../../../../../data/relay_apps/use_relay_app_bindings'),
   useAllRelayAppBindings: () => ({

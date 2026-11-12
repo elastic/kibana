@@ -24,6 +24,7 @@ import {
 import {
   getMaxSignalsWarning as getMaxAlertsWarning,
   getMissingIdFieldWarning,
+  getReservedMetadataColumnsWarning,
 } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
   EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
@@ -1970,6 +1971,75 @@ export default ({ getService }: FtrProviderContext) => {
 
         const previewAlerts = await getPreviewAlerts({ es, previewId });
         expect(previewAlerts).toHaveLength(1);
+      });
+    });
+
+    describe('reserved metadata columns', () => {
+      it('generates alerts without the metadata column and a warning when the query returns _source', async () => {
+        const id = uuidv4();
+        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+        const doc1 = { agent: { name: 'test-1' } };
+
+        await indexEnhancedDocuments({ documents: [doc1], interval, id });
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant metadata _id, _source ${internalIdPipe(
+            id
+          )} | where agent.name=="test-1"`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { logs, previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        expect(logs[0].errors).toEqual([]);
+        expect(logs[0].warnings).toEqual(
+          expect.arrayContaining([getReservedMetadataColumnsWarning(['_source'])])
+        );
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts).toHaveLength(1);
+        expect(previewAlerts[0]._source).toHaveProperty(['agent.name'], 'test-1');
+        expect(previewAlerts[0]._source).not.toHaveProperty('_source');
+      });
+
+      it('names every metadata column removed from the alerts in a single warning', async () => {
+        const id = uuidv4();
+        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+        const doc1 = { agent: { name: 'test-1' } };
+
+        await indexEnhancedDocuments({ documents: [doc1], interval, id });
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant metadata _id, _source, _index_mode ${internalIdPipe(
+            id
+          )} | where agent.name=="test-1" | keep _id, _source, _index_mode, agent.name`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { logs, previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        expect(logs[0].errors).toEqual([]);
+        expect(logs[0].warnings).toEqual(
+          expect.arrayContaining([getReservedMetadataColumnsWarning(['_source', '_index_mode'])])
+        );
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts).toHaveLength(1);
+        expect(previewAlerts[0]._source).toHaveProperty(['agent.name'], 'test-1');
+        expect(previewAlerts[0]._source).not.toHaveProperty('_source');
+        expect(previewAlerts[0]._source).not.toHaveProperty('_index_mode');
       });
     });
 

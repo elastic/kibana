@@ -12,7 +12,7 @@ export interface ExpectedTransformRow {
   description?: string;
   type?: string;
   status?: string;
-  mode?: string;
+  execution?: string;
   /** `null` asserts the row has no progress bar (continuous transforms). */
   progress?: number | null;
   health?: string;
@@ -31,7 +31,7 @@ export const assertTransformRow = async (
 ) => {
   await expect(async () => {
     await transformManagement.refreshList();
-    const cell = (column: 'Description' | 'Type' | 'Status' | 'Mode') =>
+    const cell = (column: 'Description' | 'Type' | 'Status' | 'Execution') =>
       transformManagement.getRowCell(transformId, column);
 
     if (expected.description !== undefined) {
@@ -45,8 +45,10 @@ export const assertTransformRow = async (
     if (expected.status !== undefined) {
       await expect(cell('Status')).toContainText(expected.status, { timeout: CELL_TIMEOUT_MS });
     }
-    if (expected.mode !== undefined) {
-      await expect(cell('Mode')).toContainText(expected.mode, { timeout: CELL_TIMEOUT_MS });
+    if (expected.execution !== undefined) {
+      await expect(cell('Execution')).toContainText(expected.execution, {
+        timeout: CELL_TIMEOUT_MS,
+      });
     }
     if (expected.progress === null) {
       await expect(transformManagement.getRowProgress(transformId)).toHaveCount(0, {

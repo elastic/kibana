@@ -23,7 +23,7 @@ const notifyMode = process.env.EVAL_NOTIFY_MODE || '';
 if (!suiteId || !failingProjectsArg || (!slackOutputPath && !githubOutputPath)) {
   console.error(
     'Usage: set EVAL_SUITE_ID, EVAL_FAILING_PROJECTS (comma-separated), and at least one of\n' +
-      '  EVAL_TRIAGE_SLACK_OUT / EVAL_TRIAGE_GITHUB_OUT. Optional: EVAL_NOTIFY_MODE=on-demand|weekly.'
+      '  EVAL_TRIAGE_SLACK_OUT / EVAL_TRIAGE_GITHUB_OUT. Optional: EVAL_NOTIFY_MODE=on-demand|daily|weekly.'
   );
   process.exit(1);
 }
@@ -45,7 +45,8 @@ const suite = suites.find((entry) => entry?.id === suiteId) ?? null;
 const suiteName = suite?.name ?? suiteId;
 const buildUrl = process.env.BUILDKITE_BUILD_URL || '';
 
-const headerLabel = notifyMode === 'on-demand' ? 'On-demand LLM eval' : 'Weekly LLM evals';
+const HEADER_LABELS = { 'on-demand': 'On-demand LLM eval', daily: 'Daily LLM evals' };
+const headerLabel = HEADER_LABELS[notifyMode] ?? 'Weekly LLM evals';
 const headerEmoji = notifyMode === 'on-demand' ? ':test_tube:' : ':rotating_light:';
 const githubHeaderLabel = 'LLM eval (PR)';
 const githubHeaderEmoji = ':test_tube:';

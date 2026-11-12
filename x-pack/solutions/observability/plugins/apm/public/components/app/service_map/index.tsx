@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import {
   EuiCallOut,
   EuiFlexGroup,

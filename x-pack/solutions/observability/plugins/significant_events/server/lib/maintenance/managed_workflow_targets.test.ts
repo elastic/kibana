@@ -7,7 +7,6 @@
 
 import { asSpaceId } from '@kbn/core-spaces-common';
 import {
-  SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
@@ -33,10 +32,7 @@ describe('managed_workflow_targets registry', () => {
   });
 
   it('keeps Significant Events core and lifecycle workflows in the global maintenance set', () => {
-    expect(GLOBAL_MAINTENANCE_WORKFLOW_IDS).toEqual([
-      ...GLOBAL_CORE_WORKFLOW_IDS,
-      SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
-    ]);
+    expect(GLOBAL_MAINTENANCE_WORKFLOW_IDS).toEqual([...GLOBAL_CORE_WORKFLOW_IDS]);
   });
 
   it('tracks continuous onboarding and sync as per-space scheduled workflows', () => {

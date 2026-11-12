@@ -202,6 +202,60 @@ describe('destination form', () => {
     ).toBeUndefined();
   });
 
+  it('rejects a name whose local API key credential is already referenced', () => {
+    const existingUnit: StreamsUnit.GetResponse = {
+      ...unitDefinition,
+      unit: {
+        ...unitDefinition.unit,
+        destinations: [
+          {
+            id: 'es-prod',
+            type: 'elasticsearch',
+            supported_telemetry: ['logs'],
+            config: [
+              {
+                name: 'api_key',
+                value: { credential: 'streams-full-dev-api-key' },
+              },
+            ],
+          },
+          {
+            id: 'es-dev',
+            type: 'elasticsearch',
+            supported_telemetry: ['logs'],
+            config: [
+              {
+                name: 'api_key',
+                value: { credential: 'streams-full-dev-api-key' },
+              },
+            ],
+          },
+        ],
+      },
+    };
+    const formData = {
+      ...elasticsearchForm({}),
+      destinationName: 'Streams full dev',
+    };
+
+    expect(
+      getDestinationCreationFormErrors({ formData, unitDefinition: existingUnit }).destinationName
+    ).toBe('credentialConflict');
+    expect(canSubmitDestinationForm({ formData, unitDefinition: existingUnit })).toBe(false);
+  });
+
+  it('rejects a name whose local API key credential exceeds 256 characters', () => {
+    const formData = {
+      ...elasticsearchForm({}),
+      destinationName: 'a'.repeat(249),
+    };
+
+    expect(getDestinationCreationFormErrors({ formData, unitDefinition }).destinationName).toBe(
+      'tooLong'
+    );
+    expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(false);
+  });
+
   it('allows custom auto write patterns for the selected signals', () => {
     const formData = {
       storageKind: 'local_elasticsearch' as const,
