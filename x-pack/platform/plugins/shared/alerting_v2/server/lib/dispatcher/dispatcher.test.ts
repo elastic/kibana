@@ -59,7 +59,7 @@ import {
 import {
   createAlert,
   createAlertSuppressionRow,
-  createDispatcherConfigAccessor,
+  createDispatcherConfigService,
   createWorkflowDetailDto,
   MOCK_KIBANA_BASE_URL,
 } from './fixtures/test_utils';
@@ -166,7 +166,7 @@ function buildDispatcherService(deps: {
   loggerService?: LoggerServiceContract;
 }): DispatcherService {
   const pipeline = new DispatcherPipeline([
-    new FetchAlertsStep(deps.queryService, MOCK_KIBANA_BASE_URL, createDispatcherConfigAccessor()),
+    new FetchAlertsStep(deps.queryService, MOCK_KIBANA_BASE_URL, createDispatcherConfigService()),
     new FetchSuppressionsStep(deps.queryService),
     new ApplySuppressionStep(),
     new HydrateAlertDataStep(deps.queryService),
@@ -188,7 +188,7 @@ function buildDispatcherService(deps: {
     pipeline,
     deps.storageService,
     deps.loggerService ?? createLoggerService().loggerService,
-    createDispatcherConfigAccessor()
+    createDispatcherConfigService()
   );
 }
 
@@ -624,7 +624,7 @@ describe('DispatcherService', () => {
           group_hash: 'rule-005-series-1',
           alert_id: 'rule-005-series-1-alert-1',
           should_suppress: true,
-          last_deactivate_action: 'deactivate',
+          last_lifecycle_action: 'deactivate',
         },
       ];
 
@@ -963,7 +963,7 @@ describe('DispatcherService', () => {
         mockPipeline,
         noopStorage,
         createLoggerService().loggerService,
-        createDispatcherConfigAccessor()
+        createDispatcherConfigService()
       );
 
       await service.run({
@@ -997,7 +997,7 @@ describe('DispatcherService', () => {
         mockPipeline,
         noopStorage,
         loggerService,
-        createDispatcherConfigAccessor()
+        createDispatcherConfigService()
       );
 
       await service.run({ taskId: 'task-1' });
@@ -1014,7 +1014,7 @@ describe('DispatcherService', () => {
         mockPipeline,
         noopStorage,
         loggerService,
-        createDispatcherConfigAccessor()
+        createDispatcherConfigService()
       );
 
       await service.run({
@@ -1034,7 +1034,7 @@ describe('DispatcherService', () => {
         mockPipeline,
         noopStorage,
         loggerService,
-        createDispatcherConfigAccessor()
+        createDispatcherConfigService()
       );
 
       await service.run({ eventWatermark: new Date('invalid'), taskId: 'task-1' });
@@ -1089,7 +1089,7 @@ describe('DispatcherService', () => {
         mockPipeline,
         noopStorage,
         createLoggerService().loggerService,
-        createDispatcherConfigAccessor()
+        createDispatcherConfigService()
       );
 
       const result = await service.run({
@@ -1146,7 +1146,7 @@ describe('DispatcherService', () => {
         mockPipeline,
         noopStorage,
         createLoggerService().loggerService,
-        createDispatcherConfigAccessor()
+        createDispatcherConfigService()
       );
 
       const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
@@ -1172,7 +1172,7 @@ describe('DispatcherService', () => {
         mockPipeline,
         noopStorage,
         createLoggerService().loggerService,
-        createDispatcherConfigAccessor({ run: { timeout: '3m' } })
+        createDispatcherConfigService({ run: { timeout: '3m' } })
       );
 
       const resultPromise = service.run({
@@ -1198,7 +1198,7 @@ describe('DispatcherService', () => {
         mockPipeline,
         noopStorage,
         loggerService,
-        createDispatcherConfigAccessor()
+        createDispatcherConfigService()
       );
 
       const resultPromise = service.run({
@@ -1224,7 +1224,7 @@ describe('DispatcherService', () => {
         mockPipeline,
         noopStorage,
         loggerService,
-        createDispatcherConfigAccessor()
+        createDispatcherConfigService()
       );
 
       const tmController = new AbortController();
@@ -1475,7 +1475,7 @@ describe('DispatcherService', () => {
           mockPipeline,
           noopStorage,
           createLoggerService().loggerService,
-          createDispatcherConfigAccessor()
+          createDispatcherConfigService()
         );
 
         const result = await service.run({ eventWatermark, stuckTicks: 4, taskId: 'task-1' });
@@ -1517,7 +1517,7 @@ describe('DispatcherService', () => {
         advancingPipeline,
         noopStorage,
         createLoggerService().loggerService,
-        createDispatcherConfigAccessor()
+        createDispatcherConfigService()
       );
 
       // Had 5 stuck ticks before, but this tick advances → reset
@@ -1544,7 +1544,7 @@ describe('DispatcherService', () => {
         mockPipeline,
         escapeStorage,
         createLoggerService().loggerService,
-        createDispatcherConfigAccessor()
+        createDispatcherConfigService()
       );
 
       // Pass stuckTicks = STUCK_TICK_LIMIT - 1 so this tick pushes over the limit
@@ -1590,7 +1590,7 @@ describe('DispatcherService', () => {
         mockPipeline,
         escapeStorage,
         loggerService,
-        createDispatcherConfigAccessor()
+        createDispatcherConfigService()
       );
 
       await service.run({
@@ -1621,7 +1621,7 @@ describe('DispatcherService', () => {
           mockPipeline,
           escapeStorage,
           loggerService,
-          createDispatcherConfigAccessor()
+          createDispatcherConfigService()
         );
 
         const result = await service.run({
@@ -1659,7 +1659,7 @@ describe('DispatcherService', () => {
           mockPipeline,
           escapeStorage,
           loggerService,
-          createDispatcherConfigAccessor()
+          createDispatcherConfigService()
         );
 
         const result = await service.run({

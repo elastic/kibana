@@ -13,6 +13,7 @@ import {
   ALERT_EPISODE_STATUS,
   type AlertEpisodeStatus,
   type AlertEventSeverity,
+  type CreateAlertEventResponse,
 } from '@kbn/alerting-v2-schemas';
 import {
   SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
@@ -26,6 +27,7 @@ import {
   type Severity,
   type SignalVerdict,
   type SignificantEventStatus,
+  type SignificantEventCloseReason,
 } from '@kbn/significant-events-schema';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import {
@@ -43,6 +45,7 @@ import {
   isIndexNotFoundError,
   pickLatestPerGroup,
   queryEsql,
+  resolveTimeBound,
 } from '../latest_source_query';
 import {
   SIGNIFICANT_EVENT_INVESTIGATION_STATES,
@@ -51,7 +54,11 @@ import {
   type SignificantEventsSortOrder,
 } from '../../../../common/events_list';
 import { RULE_EVENTS_INDEX } from '../alerting/rule_events_metric_series';
-import type { EventsFilterOptions, EventsPaginatedSearchOptions } from './types';
+import type {
+  EventsFilterOptions,
+  EventsPaginatedSearchOptions,
+  InvestigationEpisodes,
+} from './types';
 import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 import {
   decideStatusChange,
@@ -60,10 +67,21 @@ import {
   type LifecycleSkipReason,
 } from './lifecycle/lifecycle_controller';
 import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
+import {
+  reportEventStatusChange,
+  type EventStatusChangeReporter,
+  type WriteOrigin,
+} from './event_status_change_telemetry';
+import type { SignificantEventActor } from '../../telemetry/ebt';
 import { toRuleEvent } from './to_rule_event';
 
 /** `.rule-events` groups a series of writes by `group_hash`, not `event_id` (unavailable as a column). */
 const GROUP_HASH_FIELD = 'group_hash';
+
+export interface CreateEventResult {
+  groupHash: string;
+  alertId: string;
+}
 
 export type UpdateEventResult =
   | { updated: true }
@@ -180,10 +198,12 @@ const normalizeSourceIds = (value: unknown): string[] => {
  * Decodes a `.rule-events` row into a `SignificantEvent`.
  */
 const decodeSignificantEvent = (row: RuleEventSourceRow): SignificantEvent => {
-  const data = JSON.parse(row.data_json || '{}') as Omit<
-    SignificantEvent,
-    '@timestamp' | 'status' | 'severity'
-  >;
+  // Legacy rows still carry `investigations`; it is no longer read.
+  const { investigations: _legacyInvestigations, ...data } = JSON.parse(
+    row.data_json || '{}'
+  ) as Omit<SignificantEvent, '@timestamp' | 'status' | 'severity'> & {
+    investigations?: unknown;
+  };
   const alertStatus = row.alert?.status ?? ALERT_EPISODE_STATUS.ACTIVE;
   const severity = row.severity ?? 'medium';
   return {
@@ -276,40 +296,55 @@ const ruleUuidsIntersects = (values: string[]): ESQLAstExpression =>
   )}), [${values.map((value) => esql.str(value))}])`;
 
 /**
- * Topology feature filter: an event matches when either
- * `causal_features.feature_id` or `blast_radius.feature_id` contains any requested ID, both read
- * through `FIELD_EXTRACT` since they live in the flattened `data` column. Verified live against
- * `.rule-events` on nightshift-program#1517.
+ * Topology feature filter: an event matches when any requested ID appears in
+ * `causal_features.feature_id`, `blast_radius.feature_id`, or a dependency blast-radius entry's
+ * `source` or `target`. All four are read through `FIELD_EXTRACT` since they live in the flattened
+ * `data` column. `FIELD_EXTRACT` loses the pairing with `type`, but `source` and `target` exist
+ * only on dependency rows. The two `feature_id` paths were verified live against `.rule-events`
+ * on nightshift-program#1517.
  */
 const topologyFeatureIdsIntersects = (values: string[]): ESQLAstExpression => {
   const literals = values.map((value) => esql.str(value));
   const dataCol = esql.col('data');
-  return esql.exp`(MV_INTERSECTS(FIELD_EXTRACT(${dataCol}, ${esql.str(
-    'causal_features.feature_id'
-  )}), [${literals}]) OR MV_INTERSECTS(FIELD_EXTRACT(${dataCol}, ${esql.str(
+  const intersects = (path: string) =>
+    esql.exp`MV_INTERSECTS(FIELD_EXTRACT(${dataCol}, ${esql.str(path)}), [${literals}])`;
+  return esql.exp`(${intersects('causal_features.feature_id')} OR ${intersects(
     'blast_radius.feature_id'
-  )}), [${literals}]))`;
+  )} OR ${intersects('blast_radius.source')} OR ${intersects('blast_radius.target')})`;
 };
 
 const INVESTIGATION_STATE_COLUMN = 'investigation_state';
 
 /**
- * Derives `not_started` / `in_progress` / `completed` from the flattened `investigations` entries:
- * an entry without `completed_at` means a run is still open. Mirrors the browser's
- * `getInvestigationState` so the filter and the list agree. `FIELD_EXTRACT` drops duplicate
- * values, so two runs finishing in the same millisecond would read as in progress (verified live).
+ * Derives `not_started` / `in_progress` / `completed` from the episode id (`alert.id`) of the
+ * current revision: the episodes of a running investigation, then the ones of a finished one, and
+ * `not_started` for any other. An empty list is left out because `IN ()` is not valid ES|QL.
  */
-const withInvestigationState = (query: ComposerQuery): ComposerQuery => {
-  const dataCol = esql.col('data');
-  const started = esql.exp`COALESCE(MV_COUNT(FIELD_EXTRACT(${dataCol}, ${esql.str(
-    'investigations.workflow_execution_id'
-  )})), 0)`;
-  const completed = esql.exp`COALESCE(MV_COUNT(FIELD_EXTRACT(${dataCol}, ${esql.str(
-    'investigations.completed_at'
-  )})), 0)`;
-  return query.pipe`EVAL ${esql.col(INVESTIGATION_STATE_COLUMN)} = CASE(${started} == 0, ${esql.str(
-    'not_started'
-  )}, ${completed} < ${started}, ${esql.str('in_progress')}, ${esql.str('completed')})`;
+const withInvestigationState = (
+  query: ComposerQuery,
+  { inProgress, completed }: InvestigationEpisodes
+): ComposerQuery => {
+  const stateCol = esql.col(INVESTIGATION_STATE_COLUMN);
+  const episode = esql.col('alert.id');
+  const ids = (episodeIds: string[]) => episodeIds.map((id) => esql.str(id));
+  const notStarted = esql.str('not_started');
+
+  if (inProgress.length && completed.length) {
+    return query.pipe`EVAL ${stateCol} = CASE(${episode} IN (${ids(inProgress)}), ${esql.str(
+      'in_progress'
+    )}, ${episode} IN (${ids(completed)}), ${esql.str('completed')}, ${notStarted})`;
+  }
+  if (inProgress.length) {
+    return query.pipe`EVAL ${stateCol} = CASE(${episode} IN (${ids(inProgress)}), ${esql.str(
+      'in_progress'
+    )}, ${notStarted})`;
+  }
+  if (completed.length) {
+    return query.pipe`EVAL ${stateCol} = CASE(${episode} IN (${ids(completed)}), ${esql.str(
+      'completed'
+    )}, ${notStarted})`;
+  }
+  return query.pipe`EVAL ${stateCol} = ${notStarted}`;
 };
 
 const SORT_RANK_COLUMN = 'sort_rank';
@@ -324,6 +359,8 @@ const applySort = (
   switch (sortField) {
     case 'created_at':
       return query.sort(['created_at', direction], ['@timestamp', 'DESC'], ['_id', 'ASC']);
+    case 'updated_at':
+      return query.sort(['@timestamp', direction], ['created_at', 'DESC'], ['_id', 'ASC']);
     case 'severity':
       return query.pipe`EVAL ${esql.col(SORT_RANK_COLUMN)} = CASE(${esql.col(
         'severity'
@@ -390,7 +427,7 @@ const isLaterAction = (candidate: ActionRow, current: ActionRow): boolean => {
 
 /**
  * `.rule-events` client used by agent-side call sites (`event_search`, `event_write`'s dedup scan,
- * `attach_investigation`, SML): reads, plus `createEvent` / `updateEvent` / `updateEventStatus` to
+ * SML): reads, plus `createEvent` / `updateEvent` / `updateEventStatus` to
  * write versions. Query strategy (which ES|QL extraction form to use per field) is validated
  * per-shape on nightshift-program#1492 and #1517 before this client's output is trusted in
  * production.
@@ -405,6 +442,7 @@ export class RuleEventsClient {
       space: string;
       getAlertEventsClient?: () => Promise<AlertEventsClientApi>;
       emitTrigger?: TriggerEmitter;
+      telemetry?: EventStatusChangeReporter;
       /** Reads `.alert-actions`, a private Alerting v2 index; falls back to `esClient`. */
       internalEsClient?: ElasticsearchClient;
       logger?: Logger;
@@ -470,10 +508,10 @@ export class RuleEventsClient {
     if (entityFilter && options.unassignedEntityIds?.length !== 0) {
       query = query.where`${entityFilter}`;
     }
-    if (options.investigationStates?.length) {
-      query = withInvestigationState(query).where`${esql.col(
+    if (options.investigation?.states.length) {
+      query = withInvestigationState(query, options.investigation.episodes).where`${esql.col(
         INVESTIGATION_STATE_COLUMN
-      )} IN (${options.investigationStates.map((state) => esql.str(state))})`;
+      )} IN (${options.investigation.states.map((state) => esql.str(state))})`;
     }
 
     return query;
@@ -538,10 +576,17 @@ export class RuleEventsClient {
     };
   }
 
-  /** Counts the latest revisions per severity, status and investigation state. */
-  async countFacets(
-    options: RuleEventsCurrentStateSearchOptions
-  ): Promise<SignificantEventsFacets> {
+  /**
+   * Counts the latest revisions per severity, status and investigation state. The investigation
+   * counts wait for `investigationEpisodes`, so a slow listing does not hold back the other two,
+   * and are left out when it resolves to `undefined` (the episodes could not be read).
+   */
+  async countFacets({
+    investigationEpisodes,
+    ...options
+  }: RuleEventsCurrentStateSearchOptions & {
+    investigationEpisodes?: Promise<InvestigationEpisodes | undefined>;
+  } = {}): Promise<SignificantEventsFacets> {
     const { esClient } = this.clients;
     const [severity, status, investigation] = await Promise.all([
       countBy({
@@ -557,17 +602,22 @@ export class RuleEventsClient {
         column: 'event_status',
         keys: SIGNIFICANT_EVENT_STATUS_OPTIONS,
       }),
-      countBy({
-        esClient,
-        query: withInvestigationState(
-          this.buildLatestByCurrentStateQuery({ ...options, investigationStates: undefined })
-        ),
-        column: INVESTIGATION_STATE_COLUMN,
-        keys: SIGNIFICANT_EVENT_INVESTIGATION_STATES,
-      }),
+      investigationEpisodes?.then((episodes) =>
+        episodes
+          ? countBy({
+              esClient,
+              query: withInvestigationState(
+                this.buildLatestByCurrentStateQuery({ ...options, investigation: undefined }),
+                episodes
+              ),
+              column: INVESTIGATION_STATE_COLUMN,
+              keys: SIGNIFICANT_EVENT_INVESTIGATION_STATES,
+            })
+          : undefined
+      ),
     ]);
 
-    return { severity, status, investigation };
+    return { severity, status, ...(investigation ? { investigation } : {}) };
   }
 
   async countActiveEventsByEntity(
@@ -576,9 +626,12 @@ export class RuleEventsClient {
   ): Promise<{ entities: Record<string, number>; unassigned: number }> {
     const { esClient } = this.clients;
     const base = this.buildLatestByCurrentStateQuery({ ...options, status: ['active'] });
-    // CASE preserves events whose causal features or blast radius is absent.
-    const entitiesQuery = base.pipe`EVAL a = FIELD_EXTRACT(data, "causal_features.feature_id"), b = FIELD_EXTRACT(data, "blast_radius.feature_id")`
-      .pipe`EVAL fid = MV_DEDUPE(CASE(a IS NULL, b, b IS NULL, a, MV_APPEND(a, b)))`
+    // CASE preserves a side when the other extract is null: MV_APPEND(null, x) would drop x.
+    // Dependency endpoints live only on source and target, so they join the same id set the
+    // topology filter matches.
+    const entitiesQuery = base.pipe`EVAL a = FIELD_EXTRACT(data, "causal_features.feature_id"), b = FIELD_EXTRACT(data, "blast_radius.feature_id"), s = FIELD_EXTRACT(data, "blast_radius.source"), t = FIELD_EXTRACT(data, "blast_radius.target")`
+      .pipe`EVAL ab = CASE(a IS NULL, b, b IS NULL, a, MV_APPEND(a, b)), st = CASE(s IS NULL, t, t IS NULL, s, MV_APPEND(s, t))`
+      .pipe`EVAL fid = MV_DEDUPE(CASE(ab IS NULL, st, st IS NULL, ab, MV_APPEND(ab, st)))`
       .pipe`MV_EXPAND fid`;
     try {
       const [rows, unassigned] = await Promise.all([
@@ -800,29 +853,36 @@ export class RuleEventsClient {
    * Reads, in one query, the live series (`active` or `recovering`) the requested rules are members
    * of, with each member's latest stored signal. A rule in none is absent from the map.
    *
-   * `from` bounds the read on a series' latest version, applied after `created_at` is computed over
-   * the whole lineage: bounding earlier would clip `created_at` and make an old series look young.
-   * A live series with no write since `from` is read as "not a live member", which sends its
-   * detections to the agent. Capped at MAX_DEDUP_SCAN_LIMIT series, newest first; a space with more
-   * can omit older ones, which callers must read the same way.
+   * `lookback` (ISO or date math) bounds which versions can establish membership, after
+   * `created_at` is computed over the full lineage; `from` bounds a series' latest version. A
+   * series outside either bound reads as "not a live member". Capped at MAX_DEDUP_SCAN_LIMIT live
+   * series, newest first.
    */
   async findLiveMemberships({
     ruleUuids,
+    lookback,
     from,
   }: {
     ruleUuids: string[];
-    from: string;
+    lookback?: string;
+    from?: string;
   }): Promise<Map<string, LiveRuleMembership[]>> {
     const live = new Map<string, LiveRuleMembership[]>();
     if (ruleUuids.length === 0) return live;
 
     const requested = new Set(ruleUuids);
-    const lineage = buildBaseQuery(this.clients.space)
-      .pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(GROUP_HASH_FIELD)}`;
-    const query = applyTimeRange({
-      query: pickLatestPerGroup(lineage, GROUP_HASH_FIELD),
-      from,
-    }).where`${ruleUuidsIntersects(ruleUuids)}`;
+    const base = buildBaseQuery(this.clients.space);
+    const lookbackIso = lookback === undefined ? undefined : resolveTimeBound(lookback);
+    let lineage = base.pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(
+      GROUP_HASH_FIELD
+    )}`;
+    if (lookbackIso !== undefined) {
+      lineage = lineage.where`@timestamp >= TO_DATETIME(${{ lookbackIso }})`;
+    }
+    let query = applyTimeRange({ query: pickLatestPerGroup(lineage, GROUP_HASH_FIELD), from });
+    query = query.where`${eventStatus()} IN (${SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.map((status) =>
+      esql.str(status)
+    )})`.where`${ruleUuidsIntersects(ruleUuids)}`;
     const rows = await executeEsqlQuery<RuleEventSourceRowWithCreatedAt>({
       esClient: this.clients.esClient,
       query: withDataJsonProjection(query)
@@ -975,17 +1035,26 @@ export class RuleEventsClient {
   }
 
   /** Writes the first version of an event; unguarded, as there is no prior version to compare. */
-  async createEvent({ event }: { event: SignificantEvent }): Promise<void> {
-    await this.writeVersion({ event });
+  async createEvent({
+    event,
+    origin,
+  }: {
+    event: SignificantEvent;
+    origin: WriteOrigin;
+  }): Promise<CreateEventResult> {
+    const { group_hash: groupHash, alert_id: alertId } = await this.writeVersion({ event, origin });
+    return { groupHash, alertId };
   }
 
   /** Writes the next version only while `prior` is still the head (best effort, not atomic). */
   async updateEvent({
     event,
     prior,
+    origin,
   }: {
     event: SignificantEvent;
     prior: SignificantEvent;
+    origin: WriteOrigin;
   }): Promise<UpdateEventResult> {
     // A head that cannot be read back is not a version to build on.
     const head = await this.findLatestByEventId(event.event_id);
@@ -993,7 +1062,7 @@ export class RuleEventsClient {
       return { updated: false, head };
     }
 
-    await this.writeVersion({ event, prior });
+    await this.writeVersion({ event, prior, origin });
     return { updated: true };
   }
 
@@ -1001,14 +1070,21 @@ export class RuleEventsClient {
   async updateEventStatus({
     eventId,
     change,
+    actor,
+    closeReason,
     assessmentNote,
     expectedTimestamp,
+    workflowExecutionId,
   }: {
     eventId: string;
     change: StatusChange;
+    /** Not derived from `change`: a `byOperator` change comes from the update route or from a chat tool. */
+    actor: SignificantEventActor;
+    closeReason?: SignificantEventCloseReason;
     assessmentNote?: string;
     /** Skips the write when the latest version's `@timestamp` differs (the event changed since). */
     expectedTimestamp?: string;
+    workflowExecutionId?: string;
   }): Promise<UpdateEventStatusResult> {
     const latest = await this.findLatestByEventId(eventId);
     if (!latest) {
@@ -1032,7 +1108,11 @@ export class RuleEventsClient {
       return { updated: 0, ignored: 1, status: decision.status, reason: decision.reason };
     }
 
-    const written = await this.updateEvent({ event: decision.event, prior: latest });
+    const written = await this.updateEvent({
+      event: { ...decision.event, workflow_execution_id: workflowExecutionId },
+      prior: latest,
+      origin: { actor, change, closeReason },
+    });
     if (!written.updated) {
       return {
         updated: 0,
@@ -1048,22 +1128,26 @@ export class RuleEventsClient {
   private async writeVersion({
     event,
     prior,
+    origin,
   }: {
     event: SignificantEvent;
     prior?: SignificantEvent;
-  }): Promise<void> {
-    const { getAlertEventsClient, emitTrigger } = this.clients;
+    origin: WriteOrigin;
+  }): Promise<CreateAlertEventResponse> {
+    const { getAlertEventsClient, emitTrigger, telemetry, logger, space } = this.clients;
     if (!getAlertEventsClient) {
       throw new Error('RuleEventsClient was created without a writer, so it cannot write events');
     }
 
     const alertEventsClient = await getAlertEventsClient();
     // `createAlertEvent` waits for a refresh, so the new version is readable immediately.
-    await alertEventsClient.createAlertEvent(toRuleEvent(event));
+    const response = await alertEventsClient.createAlertEvent(toRuleEvent(event));
     emitSignificantEventWriteTriggers({
       emitTrigger,
       significantEvent: event,
       priorSignificantEvent: prior,
     });
+    reportEventStatusChange({ telemetry, logger, event, prior, origin, spaceId: space });
+    return response;
   }
 }

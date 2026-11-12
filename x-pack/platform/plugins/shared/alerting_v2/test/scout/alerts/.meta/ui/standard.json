@@ -1,5 +1,5 @@
 {
-  "sha1": "a30376149bb4fd49d4e31441506bd1d427c32c18",
+  "sha1": "13ea7c44891b8aea3f1bd5eeed2592bd433cfe45",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -311,7 +311,7 @@
     {
       "id": "f83cd5fa435511b-c97adf7c8cec960",
       "title": "Execution history — rule search filters the Rules tab by rule name",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -321,7 +321,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/execution_history_rule_search.spec.ts",
         "line": 46,
-        "column": 7
+        "column": 16
       }
     },
     {

@@ -400,6 +400,32 @@ steps:
         with:
           failed_retag_count: "${{ steps.retag_approved_leftovers.output.failed | default: 0 }}"
 
+      # The proposal API does not expose the close action's output, so the comment cannot read how
+      # many alerts were already closed. The close sets `false_positive`, so a live alert that is
+      # closed with another reason was closed by an analyst first. The comment about them is
+      # posted only when there are some. If this search fails the comment is left out.
+      - name: count_analyst_closed
+        type: elasticsearch.search
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+          continue: true
+        with:
+          index: ".alerts-security.alerts-{{ workflow.spaceId }}"
+          size: 0
+          track_total_hits: true
+          query:
+            bool:
+              filter:
+                - terms:
+                    _id: "${{ variables.live_alert_ids }}"
+                - term:
+                    kibana.alert.workflow_status: closed
+              must_not:
+                - term:
+                    kibana.alert.workflow_reason: false_positive
+
       # Everything the analyst approved has already happened by this point: the alerts are
       # closed and the proposal is `succeeded`. Failing the run on the bookkeeping patch
       # would report a successful triage as a failure, so the patch is allowed to fail.
@@ -435,15 +461,32 @@ steps:
           investigation_id: "{{ inputs.conversation_id }}"
           close_reason: false_positive
 
-      - name: post_comment_outcome_approved
+      # The Investigation and the proposal card already show who approved and what closed, so
+      # the only thing worth a comment is a re-tag that did not finish: some alerts may still
+      # carry az:false_positive although the approval did not close them.
+      - name: post_comment_retag_incomplete_approved
         type: ai.conversation.add_user_message
+        if: "${{ steps.retag_approved_leftovers.error != blank or variables.failed_retag_count > 0 }}"
         on-failure:
           continue: true
         with:
           author_name: "{{ consts.author_name }}"
           conversation_id: "{{ inputs.conversation_id }}"
           message: >-
-            Proposal {{ steps.get_proposal.output.decision | default: 'approved' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %}. {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} closed as false positive.{% if steps.retag_approved_leftovers.output.matched > 0 %} {{ steps.retag_approved_leftovers.output.matched }} open alert{% if steps.retag_approved_leftovers.output.matched != 1 %}s{% endif %} that {% if steps.retag_approved_leftovers.output.matched != 1 %}were{% else %}was{% endif %} not part of the approved closure {% if steps.retag_approved_leftovers.output.matched != 1 %}were{% else %}was{% endif %} re-tagged az:inconclusive.{% endif %}{% if steps.retag_approved_leftovers.error != blank or variables.failed_retag_count > 0 %} ⚠️ Re-tagging the alerts that were not part of the approved closure did not fully succeed, so some may still be tagged az:false_positive.{% endif %}
+            ⚠️ Re-tagging the alerts that were not part of the approved closure did not fully succeed, so some may still be tagged az:false_positive.
+
+      # The approval closes the Investigation as a false positive, so say when some of the alerts
+      # were not closed by it. They kept the reason the analyst gave. The approver is not named.
+      - name: post_comment_already_closed_approved
+        type: ai.conversation.add_user_message
+        if: "${{ steps.count_analyst_closed.output.hits.total.value > 0 }}"
+        on-failure:
+          continue: true
+        with:
+          author_name: "{{ consts.author_name }}"
+          conversation_id: "{{ inputs.conversation_id }}"
+          message: >-
+            {{ steps.count_analyst_closed.output.hits.total.value }} of {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if steps.count_analyst_closed.output.hits.total.value == 1 %}was{% else %}were{% endif %} already closed by an analyst before this proposal was approved, so the approval did not change {% if steps.count_analyst_closed.output.hits.total.value == 1 %}it{% else %}them{% endif %}. {% if steps.count_analyst_closed.output.hits.total.value == 1 %}It keeps{% else %}They keep{% endif %} the close reason the analyst chose, not false positive.
 
   - name: handle_dismissed
     type: if
@@ -526,7 +569,7 @@ steps:
               author_name: "{{ consts.author_name }}"
               conversation_id: "{{ inputs.conversation_id }}"
               message: >-
-                Proposal {{ steps.get_proposal.output.decision | default: 'dismissed' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %} (reason: {{ steps.get_proposal.output.dismissReason | default: 'not specified' }}). {% if variables.failed_retag_count > 0 %}{{ variables.fp_candidate_count | minus: variables.failed_retag_count }} of {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} re-tagged {{ variables.dismissed_tag }}; {{ variables.failed_retag_count }} failed after retries and {% if variables.failed_retag_count == 1 %}needs{% else %}need{% endif %} manual re-tagging.{% else %}{{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} re-tagged {{ variables.dismissed_tag }}.{% endif %}{% if steps.get_proposal.output.rationale != blank %} Rationale: "{{ steps.get_proposal.output.rationale | truncate: 500 | escape }}".{% endif %}{% if steps.get_live_revision.error != blank %} The live revision could not be read, so joined alerts may still be tagged az:false_positive; this Investigation stays open.{% endif %}
+                Proposal {{ steps.get_proposal.output.decision | default: 'dismissed' }} (reason: {{ steps.get_proposal.output.dismissReason | default: 'not specified' }}). {% if variables.failed_retag_count > 0 %}{{ variables.fp_candidate_count | minus: variables.failed_retag_count }} of {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} re-tagged {{ variables.dismissed_tag }}; {{ variables.failed_retag_count }} failed after retries and {% if variables.failed_retag_count == 1 %}needs{% else %}need{% endif %} manual re-tagging.{% else %}{{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} re-tagged {{ variables.dismissed_tag }}.{% endif %}{% if steps.get_proposal.output.rationale != blank %} Rationale: "{{ steps.get_proposal.output.rationale | truncate: 500 | escape }}".{% endif %}{% if steps.get_live_revision.error != blank %} The live revision could not be read, so joined alerts may still be tagged az:false_positive; this Investigation stays open.{% endif %}
         else:
           - name: retag_dismissed_read_failed
             type: alertzero.triage.retagProposalAlerts

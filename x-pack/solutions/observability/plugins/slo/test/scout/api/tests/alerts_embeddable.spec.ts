@@ -24,7 +24,6 @@ apiTest.describe(
     let sloId: string;
 
     apiTest.beforeAll(async ({ requestAuth, sloData }) => {
-      await sloData.generateSloData();
       const sloResult = await sloData.addSLO();
       if (!sloResult || typeof sloResult !== 'object' || !('id' in sloResult)) {
         throw new Error(`addSLO failed or returned invalid data: ${JSON.stringify(sloResult)}`);

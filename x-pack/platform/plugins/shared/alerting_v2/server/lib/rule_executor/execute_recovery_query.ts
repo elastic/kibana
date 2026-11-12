@@ -61,7 +61,7 @@ export const executeRecoveryQuery = async ({
   });
 
   try {
-    const esqlResponse = await queryService.executeQuery({
+    const rows = await queryService.executeQuery<Record<string, unknown>>({
       query: effectiveQuery,
       filter: queryPayload.filter,
       params: queryPayload.params,
@@ -76,7 +76,7 @@ export const executeRecoveryQuery = async ({
       ruleAttributes: rule,
       activeGroupHashes,
       breachedGroupHashes,
-      esqlResponse,
+      rows,
       scheduledTimestamp: input.scheduledAt,
       type: resolveAlertEventType(rule),
     });

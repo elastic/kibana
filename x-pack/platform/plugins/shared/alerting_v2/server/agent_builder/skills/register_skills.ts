@@ -11,6 +11,7 @@ import {
   ACTION_POLICY_AUTHORING_SKILL_ID,
   RULE_AUTHORING_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
+import type { AttachActionPolicyToolDeps } from '../tools/attach_action_policy';
 import type { AttachRuleToolDeps } from '../tools/attach_rule';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
 import type { ManageRuleToolDeps } from '../tools/manage_rule';
@@ -20,7 +21,8 @@ import { createRuleAuthoringSkill } from './rule_authoring_skill';
 
 export type RegisterSkillsDeps = ManageRuleToolDeps &
   AttachRuleToolDeps &
-  ManageActionPolicyToolDeps & {
+  ManageActionPolicyToolDeps &
+  AttachActionPolicyToolDeps & {
     availability: AvailabilityConfig;
   };
 

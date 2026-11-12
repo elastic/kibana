@@ -17,10 +17,13 @@ project:
   owner: '@elastic/kibana-core'
   sourceRoot: src/core/packages/threads/server-internal
 dependsOn:
+  - '@kbn/core-logging-common-internal'
   - '@kbn/logging'
+  - '@kbn/logging-ecs'
   - '@kbn/logging-mocks'
   - '@kbn/repo-info'
   - '@kbn/setup-node-env'
+  - '@kbn/std'
 tags:
   - shared-server
   - package

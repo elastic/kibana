@@ -5,46 +5,23 @@
  * 2.0.
  */
 
-import { ALERTZERO_ENABLED_SETTING_ID } from '@kbn/alertzero-common';
 import { tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
-import { test, testData } from '../fixtures';
+import {
+  createInvestigation,
+  deleteInvestigation,
+  enableAlertZero,
+  test,
+  testData,
+} from '../fixtures';
 
 test.describe('AlertZero queue page width', { tag: tags.stateful.classic }, () => {
-  // AlertZero works only in a Security solution space, and the default space may be Classic.
-  let restoreDefaultSolutionView: (() => Promise<void>) | undefined;
+  let restoreAlertZero: (() => Promise<void>) | undefined;
   let investigationId: string | undefined;
 
   test.beforeAll(async ({ apiServices, kbnClient }) => {
-    const {
-      data: { solution = 'classic' },
-    } = await kbnClient.request<{ solution?: string }>({
-      method: 'GET',
-      path: '/api/spaces/space/default',
-    });
-    if (solution !== 'security') {
-      await apiServices.spaces.setSolutionView({ id: 'default', solution: 'security' });
-      restoreDefaultSolutionView = () =>
-        apiServices.spaces.setSolutionView({
-          id: 'default',
-          solution: solution as 'classic' | 'oblt' | 'es',
-        });
-    }
-    await kbnClient.uiSettings.update({ [ALERTZERO_ENABLED_SETTING_ID]: true });
-
-    // Without an enabled Worker or an investigation, AlertZero shows onboarding, not the queue.
-    const created = await kbnClient.request<{ id: string }>({
-      method: 'POST',
-      path: '/api/agent_builder/conversations',
-      headers: { 'elastic-api-version': '2023-10-31' },
-      body: {
-        title: 'Scout trend chart width',
-        template_id: 'investigation',
-        access_control: { access_mode: 'public' },
-        metadata: { status: 'open' },
-      },
-    });
-    investigationId = created.data.id;
+    restoreAlertZero = await enableAlertZero({ apiServices, kbnClient });
+    investigationId = await createInvestigation(kbnClient, 'Scout trend chart width');
   });
 
   test.beforeEach(async ({ browserAuth }) => {
@@ -53,14 +30,9 @@ test.describe('AlertZero queue page width', { tag: tags.stateful.classic }, () =
 
   test.afterAll(async ({ kbnClient }) => {
     if (investigationId) {
-      await kbnClient.request({
-        method: 'DELETE',
-        path: `/api/agent_builder/conversations/${investigationId}`,
-        headers: { 'elastic-api-version': '2023-10-31' },
-      });
+      await deleteInvestigation(kbnClient, investigationId);
     }
-    await kbnClient.uiSettings.unset(ALERTZERO_ENABLED_SETTING_ID);
-    await restoreDefaultSolutionView?.();
+    await restoreAlertZero?.();
   });
 
   test('keeps the trend charts within the window and resizes them when it narrows', async ({

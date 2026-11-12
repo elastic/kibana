@@ -17,6 +17,7 @@ const GET_FILE_DOWNLOAD_LINK = 'getFile-actionResult-getFileResults-getFileDownl
  */
 export class ResponseConsolePage {
   readonly commandInput: Locator;
+  readonly helpOutput: Locator;
   readonly submitButton: Locator;
   readonly getFilePending: Locator;
   readonly getFileSuccess: Locator;
@@ -39,6 +40,7 @@ export class ResponseConsolePage {
   constructor(private readonly page: ScoutPage) {
     this.commandInput = page.testSubj.locator(`${CONSOLE_PREFIX}-inputCapture`);
     this.submitButton = page.testSubj.locator(`${CONSOLE_PREFIX}-inputTextSubmitButton`);
+    this.helpOutput = page.testSubj.locator(`${CONSOLE_PREFIX}-helpOutput`);
     this.getFilePending = page.testSubj.locator('getFile-pending');
     this.getFileSuccess = page.testSubj.locator('getFile-success');
     this.getFilePendingHostStatus = this.getFilePending.getByTestId(
@@ -59,7 +61,8 @@ export class ResponseConsolePage {
     this.overlay = page.testSubj.locator('consolePageOverlay');
     this.respondAction = page.testSubj.locator('endpointResponseActions-action-item');
     this.userMenu = page.testSubj.locator('userMenuButton');
-    this.backLink = page.testSubj.locator('consolePageOverlay-header-back-link');
+    // Scoped to the overlay: the page underneath can render its own app header back button
+    this.backLink = this.overlay.getByTestId('appHeaderBack');
     this.actionLogButton = page.testSubj.locator('responderShowActionLogButton');
     this.actionLogFlyout = page.testSubj.locator('responderActionLogFlyout');
     this.actionLogDateQuickMenuButton = this.actionLogFlyout.getByTestId(

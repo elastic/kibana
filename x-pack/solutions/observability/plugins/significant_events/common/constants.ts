@@ -29,17 +29,6 @@ export const SIGNIFICANT_EVENT_TIERED_FEATURES = [SIGNIFICANT_EVENTS_TIERED_FEAT
  * tasks, and polls their status until completion or timeout.
  */
 
-// Legacy workflow identity.
-//
-// The continuous extraction workflow used to be a normal workflow created at
-// this hardcoded id in the default space. It is now a managed workflow
-// (`system-streams-ki-continuous-onboarding`). This constant is retained so the
-// legacy workflow can be deleted at startup.
-// TODO: remove with the legacy default-space cleanup.
-// https://github.com/elastic/kibana/issues/294271
-export const LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID =
-  'workflow-ad83678a-dba7-55d1-8caa-3010f6f46b81';
-
 // Scheduling: the workflow runs every COORDINATOR_INTERVAL_MINUTES with a
 // timeout 1 minute shorter to avoid overlapping with the next run.
 //

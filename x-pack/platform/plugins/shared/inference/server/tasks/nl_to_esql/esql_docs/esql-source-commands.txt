@@ -4,12 +4,18 @@ A source command produces a table, typically with data from Elasticsearch. A que
 
 ## Syntax
 
-`<source-command>`
+`FROM`
 
-Supported source commands:
+`PROMQL` Elastic Stack: Preview since 9.4 Elastic Stack: Generally available since 9.5
 
-- `FROM`
-- `PROMQL` Applies to: Elastic Stack: Preview since 9.4 Applies to: Elastic Stack: Generally available since 9.5
-- `ROW`
-- `SHOW`
-- `TS` Applies to: Elastic Stack: Preview since 9.2 Applies to: Elastic Cloud Serverless: Preview
+`ROW`
+
+`SHOW`
+
+`TS` Elastic Stack: Preview since 9.2 Elastic Cloud Serverless: Preview
+
+### Parameters
+
+Source commands do not share parameters. Each source command defines its own parameters.
+
+## Examples

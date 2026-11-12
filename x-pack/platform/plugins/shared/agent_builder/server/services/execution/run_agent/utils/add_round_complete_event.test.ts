@@ -597,7 +597,7 @@ describe('addRoundCompleteEvent', () => {
     ]);
   });
 
-  it('drops runtime-only tool calls and keeps the todos step from the final graph state', async () => {
+  it('drops runtime-only tool calls and keeps the other steps from the final graph state', async () => {
     const serverCall: ToolCallStep = {
       type: ConversationRoundStepType.toolCall,
       tool_call_id: 'srv',
@@ -627,10 +627,6 @@ describe('addRoundCompleteEvent', () => {
         prompt_id: 'q1',
         questions: [{ question: 'why?', options: [{ label: 'a' }], multi_select: false }],
       }),
-      stepUpdates.setTodos({
-        type: ConversationRoundStepType.updateTodos,
-        todos: [{ content: 'x', status: 'pending' }],
-      }),
     ];
     const run = freshRun();
     run.apply(updates);
@@ -658,11 +654,7 @@ describe('addRoundCompleteEvent', () => {
       round?.steps.map((s) =>
         s.type === ConversationRoundStepType.toolCall ? s.tool_call_id : s.type
       )
-    ).toEqual([
-      'srv',
-      ConversationRoundStepType.askUserQuestion,
-      ConversationRoundStepType.updateTodos,
-    ]);
+    ).toEqual(['srv', ConversationRoundStepType.askUserQuestion]);
   });
 
   it('persists the final graph steps: the tracker holds no mirror of the run', async () => {

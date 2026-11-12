@@ -1,0 +1,642 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import {
+  WIKI_AI_INDEX_DEST,
+  WIKI_ENTITY_TYPES,
+  WIKI_PAGE_STATUSES,
+  WIKI_PROMOTION_CORROBORATIONS,
+  type WikiEntityType,
+  type WikiPage,
+  type WikiPageStatus,
+  type WikiPageSummary,
+  type WikiStats,
+} from '../../common/wiki';
+
+const MAX_LIST_SIZE = 500;
+const WIKI_TAG = 'wiki';
+const SPACE_ID_FIELD = 'attributes.space_id';
+
+interface WikiKiSource {
+  '@timestamp'?: string;
+  type?: string;
+  title?: string;
+  description?: string;
+  content?: string;
+  tags?: string[];
+  attributes?: {
+    status?: string;
+    corroborations?: number | string;
+    slug?: string;
+    space_id?: string;
+    version?: number | string;
+    conversation_id?: string;
+    round_id?: string;
+    workflow_execution_id?: string;
+    authored_by?: string[] | string;
+  };
+}
+
+/** Keeps the page document small: the most recent authors are the ones a later round asks about. */
+const MAX_AUTHORED_BY = 20;
+
+const toAuthoredBy = (value: string[] | string | undefined): string[] =>
+  (Array.isArray(value) ? value : value ? [value] : []).filter(
+    (entry): entry is string => typeof entry === 'string' && entry.length > 0
+  );
+
+interface WikiPageWrite {
+  entityType: WikiEntityType;
+  slug: string;
+  title: string;
+  description?: string;
+  content: string;
+  status: WikiPageStatus;
+  corroborations?: number;
+  /** When set, the write fails with a version conflict if the stored page has changed since. */
+  version?: string;
+  docVersion?: number;
+  conversationId?: string;
+  roundId?: string;
+  workflowExecutionId?: string;
+  /** Replaces the stored list of authoring conversations; omit it to keep the stored one. */
+  authoredBy?: string[];
+}
+
+export interface WikiPageStore {
+  list: (options?: { status?: WikiPageStatus; entityType?: WikiEntityType }) => Promise<{
+    pages: WikiPageSummary[];
+    stats: WikiStats;
+  }>;
+  get: (id: string) => Promise<WikiPage | undefined>;
+  upsert: (page: WikiPageWrite) => Promise<WikiPage>;
+  /** Writes a new page atomically; resolves undefined when the page already exists. */
+  create: (page: WikiPageWrite) => Promise<WikiPage | undefined>;
+  corroborate: (
+    id: string,
+    provenance?: { conversationId?: string; roundId?: string; workflowExecutionId?: string }
+  ) => Promise<WikiPage | undefined>;
+  archive: (
+    id: string,
+    version?: string,
+    provenance?: { conversationId?: string; roundId?: string; workflowExecutionId?: string }
+  ) => Promise<WikiPage | undefined>;
+  pruneDuplicates: () => Promise<number>;
+}
+
+const normalizeSlugText = (slug: string): string =>
+  slug
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+/**
+ * Optimizer proposals often copy the document id (`wiki_service_email-service`)
+ * or a `wiki-<type>-` prefix into `slug`, which used to create a second page
+ * for the same entity.
+ */
+export const canonicalizeSlug = (entityType: WikiEntityType, slug: string): string => {
+  // Only strip the full id-shaped prefix (`wiki-service-`), so real slugs such as
+  // `service-mesh` or `wiki-api` stay intact.
+  const idPrefix = `wiki-${entityType}-`;
+  const normalized = normalizeSlugText(slug);
+  const stripped = normalized.startsWith(idPrefix) ? normalized.slice(idPrefix.length) : normalized;
+  return stripped.replace(/^-+|-+$/g, '').slice(0, 80);
+};
+
+export const toWikiKiId = (entityType: WikiEntityType, slug: string): string => {
+  const normalizedSlug = canonicalizeSlug(entityType, slug);
+  return `wiki_${entityType}_${normalizedSlug}`.slice(0, 512);
+};
+
+/** Id a page write stores for this slug; matches the id returned on the written page. */
+export const toWikiPageId = (entityType: WikiEntityType, slug: string): string =>
+  toWikiKiId(entityType, canonicalizeSlug(entityType, slug));
+
+export const slugFromWikiId = (id: string, entityType: WikiEntityType): string => {
+  const prefix = `wiki_${entityType}_`;
+  if (id.startsWith(prefix)) {
+    return id.slice(prefix.length);
+  }
+  return id;
+};
+
+export const canonicalWikiId = (entityType: WikiEntityType, idOrSlug: string): string =>
+  toWikiKiId(entityType, slugFromWikiId(idOrSlug, entityType));
+
+const getStatusCode = (error: unknown): number | undefined =>
+  typeof error === 'object' && error !== null && 'statusCode' in error
+    ? (error as { statusCode?: number }).statusCode
+    : undefined;
+
+/** True when a versioned write lost to a concurrent change of the same page. */
+export const isVersionConflict = (error: unknown): boolean => getStatusCode(error) === 409;
+
+const toVersion = (seqNo: number | undefined, primaryTerm: number | undefined) =>
+  seqNo !== undefined && primaryTerm !== undefined ? `${seqNo}:${primaryTerm}` : undefined;
+
+const toConcurrencyParams = (version: string | undefined) => {
+  if (version === undefined) {
+    return {};
+  }
+  const [seqNo, primaryTerm] = version.split(':').map(Number);
+  return { if_seq_no: seqNo, if_primary_term: primaryTerm };
+};
+
+const isEntityType = (value: string | undefined): value is WikiEntityType =>
+  value !== undefined && (WIKI_ENTITY_TYPES as readonly string[]).includes(value);
+
+const isStatus = (value: string | undefined): value is WikiPageStatus =>
+  value !== undefined && (WIKI_PAGE_STATUSES as readonly string[]).includes(value);
+
+const toCorroborations = (value: number | string | undefined): number => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return Math.max(0, Math.floor(value));
+  }
+  if (typeof value === 'string') {
+    const parsed = Number.parseInt(value, 10);
+    return Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
+  }
+  return 0;
+};
+
+/** Status a page moves to when a run confirms it and its count reaches `corroborations`. */
+export const statusAfterCorroboration = (
+  status: WikiPageStatus,
+  corroborations: number
+): WikiPageStatus => {
+  // Corroborating a retired fact brings it back, but only as tentative: one mention should not
+  // restore something to established that the optimizer deliberately archived.
+  if (status === 'archived') {
+    return 'tentative';
+  }
+  if (status === 'tentative' && corroborations >= WIKI_PROMOTION_CORROBORATIONS) {
+    return 'established';
+  }
+  return status;
+};
+
+const toSummary = (id: string, source: WikiKiSource): WikiPageSummary | undefined => {
+  if (!isEntityType(source.type) || source.title === undefined || source.title.length === 0) {
+    return undefined;
+  }
+
+  const status = isStatus(source.attributes?.status) ? source.attributes.status : 'tentative';
+  const docVersion =
+    source.attributes?.version !== undefined
+      ? toCorroborations(source.attributes.version)
+      : undefined;
+
+  return {
+    id,
+    title: source.title,
+    entity_type: source.type,
+    status,
+    corroborations: toCorroborations(source.attributes?.corroborations),
+    updated_at: source['@timestamp'] ?? new Date().toISOString(),
+    ...(source.description !== undefined && source.description.length > 0
+      ? { description: source.description }
+      : {}),
+    ...(source.attributes?.conversation_id
+      ? { conversation_id: source.attributes.conversation_id }
+      : {}),
+    ...(source.attributes?.round_id ? { round_id: source.attributes.round_id } : {}),
+    ...(source.attributes?.workflow_execution_id
+      ? { workflow_execution_id: source.attributes.workflow_execution_id }
+      : {}),
+    ...(toAuthoredBy(source.attributes?.authored_by).length > 0
+      ? { authored_by: toAuthoredBy(source.attributes?.authored_by) }
+      : {}),
+    ...(docVersion && docVersion > 0 ? { doc_version: docVersion } : {}),
+  };
+};
+
+const toPage = (id: string, source: WikiKiSource, version?: string): WikiPage | undefined => {
+  const summary = toSummary(id, source);
+  if (!summary) {
+    return undefined;
+  }
+
+  const slug =
+    typeof source.attributes?.slug === 'string' && source.attributes.slug.length > 0
+      ? canonicalizeSlug(summary.entity_type, source.attributes.slug)
+      : canonicalizeSlug(summary.entity_type, slugFromWikiId(id, summary.entity_type));
+
+  return {
+    ...summary,
+    slug,
+    content: source.content ?? '',
+    ...(version !== undefined ? { version } : {}),
+  };
+};
+
+const buildStats = (pages: WikiPageSummary[]): WikiStats => {
+  const established = pages.filter((page) => page.status === 'established').length;
+  const totalCorroborations = pages.reduce((sum, page) => sum + page.corroborations, 0);
+  const lastUpdated = pages.reduce<string | undefined>((latest, page) => {
+    if (latest === undefined || page.updated_at > latest) {
+      return page.updated_at;
+    }
+    return latest;
+  }, undefined);
+
+  return {
+    total: pages.length,
+    established,
+    total_corroborations: totalCorroborations,
+    ...(lastUpdated !== undefined ? { last_updated: lastUpdated } : {}),
+  };
+};
+
+const collapseDuplicatePages = (pages: WikiPageSummary[]): WikiPageSummary[] => {
+  const groups = new Map<string, WikiPageSummary[]>();
+  for (const page of pages) {
+    const key = canonicalWikiId(page.entity_type, page.id);
+    const group = groups.get(key) ?? [];
+    group.push(page);
+    groups.set(key, group);
+  }
+
+  return [...groups.values()]
+    .map((group) => {
+      const canonicalId = canonicalWikiId(group[0].entity_type, group[0].id);
+      return (
+        group.find((page) => page.id === canonicalId) ??
+        group.slice().sort((left, right) => {
+          if (right.corroborations !== left.corroborations) {
+            return right.corroborations - left.corroborations;
+          }
+          return left.updated_at < right.updated_at ? 1 : -1;
+        })[0]
+      );
+    })
+    .sort((left, right) => (left.updated_at < right.updated_at ? 1 : -1));
+};
+
+export const createWikiPageStore = ({
+  esClient,
+  logger,
+  spaceId,
+  signal,
+  destValue = WIKI_AI_INDEX_DEST,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  spaceId: string;
+  /** Aborts in-flight Elasticsearch requests when the calling step times out. */
+  signal?: AbortSignal;
+  destValue?: string;
+}): WikiPageStore => {
+  // Every space keeps its own wiki in the shared AI index. Page ids are stable per space
+  // (`wiki_<type>_<slug>`), so the space has to live in the stored `_id` as well: without it two
+  // spaces writing the same entity would overwrite each other's page. Ids stay logical everywhere
+  // outside this module — callers, the optimizer and the UI never see the prefix.
+  const toStoredId = (pageId: string): string => `${spaceId}:${pageId}`;
+  const toPageId = (storedId: string): string =>
+    storedId.startsWith(`${spaceId}:`) ? storedId.slice(spaceId.length + 1) : storedId;
+
+  const listAllRaw = async (): Promise<WikiPageSummary[]> => {
+    const response = await esClient.search<WikiKiSource>(
+      {
+        index: destValue,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        size: MAX_LIST_SIZE,
+        track_total_hits: false,
+        // `attributes` is a flattened field, so its leaves are keywords and need no mapping change.
+        query: {
+          bool: {
+            filter: [{ term: { tags: WIKI_TAG } }, { term: { [SPACE_ID_FIELD]: spaceId } }],
+          },
+        },
+        sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
+      },
+      { signal }
+    );
+
+    return response.hits.hits.flatMap((hit) => {
+      if (hit._id === undefined || hit._source === undefined) {
+        return [];
+      }
+      const summary = toSummary(toPageId(hit._id), hit._source);
+      return summary ? [summary] : [];
+    });
+  };
+
+  const listAll = async (): Promise<WikiPageSummary[]> =>
+    collapseDuplicatePages(await listAllRaw());
+
+  const preferredStatus = (pages: WikiPageSummary[]): WikiPageStatus => {
+    if (pages.some((page) => page.status === 'established')) {
+      return 'established';
+    }
+    if (pages.some((page) => page.status === 'tentative')) {
+      return 'tentative';
+    }
+    return 'archived';
+  };
+
+  const getSource = async (
+    id: string
+  ): Promise<{ id: string; source: WikiKiSource; version?: string } | undefined> => {
+    try {
+      const response = await esClient.get<WikiKiSource>(
+        {
+          index: destValue,
+          id: toStoredId(id),
+        },
+        { signal }
+      );
+      if (!response.found || response._source === undefined) {
+        return undefined;
+      }
+      return {
+        id: toPageId(response._id),
+        source: response._source,
+        version: toVersion(response._seq_no, response._primary_term),
+      };
+    } catch (error) {
+      if (getStatusCode(error) === 404) {
+        return undefined;
+      }
+      throw error;
+    }
+  };
+
+  const buildDocument = (
+    {
+      entityType,
+      slug,
+      title,
+      description,
+      content,
+      status,
+      docVersion,
+      conversationId,
+      roundId,
+      workflowExecutionId,
+      authoredBy,
+    }: WikiPageWrite,
+    corroborations: number,
+    existingSource?: WikiKiSource
+  ): { id: string; document: WikiKiSource } => {
+    const canonicalSlug = canonicalizeSlug(entityType, slug);
+    const existingAttrs = existingSource?.attributes;
+    const resolvedVersion =
+      docVersion ??
+      (typeof existingAttrs?.version === 'number' && Number.isFinite(existingAttrs.version)
+        ? existingAttrs.version + 1
+        : 1);
+    const resolvedConversationId = conversationId ?? existingAttrs?.conversation_id;
+    const resolvedRoundId = roundId ?? existingAttrs?.round_id;
+    const resolvedWorkflowExecutionId = workflowExecutionId ?? existingAttrs?.workflow_execution_id;
+    const resolvedAuthoredBy = (authoredBy ?? toAuthoredBy(existingAttrs?.authored_by)).slice(
+      -MAX_AUTHORED_BY
+    );
+    return {
+      id: toWikiPageId(entityType, slug),
+      document: {
+        '@timestamp': new Date().toISOString(),
+        type: entityType,
+        title,
+        ...(description !== undefined ? { description } : {}),
+        content,
+        tags: [WIKI_TAG, entityType],
+        attributes: {
+          status,
+          corroborations,
+          slug: canonicalSlug,
+          space_id: spaceId,
+          version: resolvedVersion,
+          ...(resolvedConversationId ? { conversation_id: resolvedConversationId } : {}),
+          ...(resolvedRoundId ? { round_id: resolvedRoundId } : {}),
+          ...(resolvedWorkflowExecutionId
+            ? { workflow_execution_id: resolvedWorkflowExecutionId }
+            : {}),
+          ...(resolvedAuthoredBy.length > 0 ? { authored_by: resolvedAuthoredBy } : {}),
+        },
+      },
+    };
+  };
+
+  const toWrittenPage = (
+    id: string,
+    document: WikiKiSource,
+    { _seq_no: seqNo, _primary_term: primaryTerm }: { _seq_no?: number; _primary_term?: number }
+  ): WikiPage => {
+    const page = toPage(id, document, toVersion(seqNo, primaryTerm));
+    if (!page) {
+      throw new Error(`Failed to normalize Wiki page ${id}`);
+    }
+    return page;
+  };
+
+  return {
+    async list({ status, entityType } = {}) {
+      const allPages = await listAll();
+      const pages = allPages.filter((page) => {
+        if (status !== undefined && page.status !== status) {
+          return false;
+        }
+        if (entityType !== undefined && page.entity_type !== entityType) {
+          return false;
+        }
+        return true;
+      });
+
+      return { pages, stats: buildStats(allPages) };
+    },
+
+    async get(id) {
+      const found = await getSource(id);
+      if (found) {
+        return toPage(found.id, found.source, found.version);
+      }
+
+      for (const entityType of WIKI_ENTITY_TYPES) {
+        if (!id.startsWith(`wiki_${entityType}_`)) {
+          continue;
+        }
+        const canonicalId = canonicalWikiId(entityType, id);
+        if (canonicalId === id) {
+          return undefined;
+        }
+        const redirected = await getSource(canonicalId);
+        return redirected
+          ? toPage(redirected.id, redirected.source, redirected.version)
+          : undefined;
+      }
+      return undefined;
+    },
+
+    async upsert(page) {
+      const id = toWikiPageId(page.entityType, page.slug);
+      const existing = await getSource(id);
+      const { document } = buildDocument(
+        page,
+        page.corroborations ?? toCorroborations(existing?.source.attributes?.corroborations),
+        existing?.source
+      );
+
+      const response = await esClient.index(
+        {
+          index: destValue,
+          id: toStoredId(id),
+          document,
+          refresh: 'wait_for',
+          ...toConcurrencyParams(page.version),
+        },
+        { signal }
+      );
+
+      logger.debug(`Upserted Wiki page ${id}`);
+      return toWrittenPage(id, document, response);
+    },
+
+    async create(page) {
+      const { id, document } = buildDocument(page, page.corroborations ?? 0);
+      try {
+        const response = await esClient.create(
+          {
+            index: destValue,
+            id: toStoredId(id),
+            document,
+            refresh: 'wait_for',
+          },
+          { signal }
+        );
+        logger.debug(`Created Wiki page ${id}`);
+        return toWrittenPage(id, document, response);
+      } catch (error) {
+        if (getStatusCode(error) === 409) {
+          return undefined;
+        }
+        throw error;
+      }
+    },
+
+    async corroborate(id, provenance) {
+      const found = await getSource(id);
+      if (!found) {
+        return undefined;
+      }
+      const page = toPage(found.id, found.source);
+      if (!page) {
+        return undefined;
+      }
+      const corroborations = page.corroborations + 1;
+      const hasProvenance = Boolean(
+        provenance?.conversationId || provenance?.roundId || provenance?.workflowExecutionId
+      );
+      return this.upsert({
+        entityType: page.entity_type,
+        slug: page.slug,
+        title: page.title,
+        description: page.description,
+        content: page.content,
+        status: statusAfterCorroboration(page.status, corroborations),
+        corroborations,
+        ...(hasProvenance || page.doc_version !== undefined
+          ? { docVersion: (page.doc_version ?? 0) + 1 }
+          : {}),
+        conversationId: provenance?.conversationId ?? page.conversation_id,
+        roundId: provenance?.roundId ?? page.round_id,
+        workflowExecutionId: provenance?.workflowExecutionId ?? page.workflow_execution_id,
+      });
+    },
+
+    async archive(id, version, provenance) {
+      const found = await getSource(id);
+      if (!found) {
+        return undefined;
+      }
+      const page = toPage(found.id, found.source);
+      if (!page) {
+        return undefined;
+      }
+      const hasProvenance = Boolean(
+        provenance?.conversationId || provenance?.roundId || provenance?.workflowExecutionId
+      );
+      return this.upsert({
+        entityType: page.entity_type,
+        slug: page.slug,
+        title: page.title,
+        description: page.description,
+        content: page.content,
+        status: 'archived',
+        corroborations: page.corroborations,
+        version,
+        ...(hasProvenance || page.doc_version !== undefined
+          ? { docVersion: (page.doc_version ?? 0) + 1 }
+          : {}),
+        conversationId: provenance?.conversationId ?? page.conversation_id,
+        roundId: provenance?.roundId ?? page.round_id,
+        workflowExecutionId: provenance?.workflowExecutionId ?? page.workflow_execution_id,
+      });
+    },
+
+    async pruneDuplicates() {
+      const rawPages = await listAllRaw();
+      const groups = new Map<string, WikiPageSummary[]>();
+      for (const page of rawPages) {
+        const key = canonicalWikiId(page.entity_type, page.id);
+        const group = groups.get(key) ?? [];
+        group.push(page);
+        groups.set(key, group);
+      }
+
+      let removed = 0;
+      for (const [canonicalId, group] of groups) {
+        const extras = group.filter((page) => page.id !== canonicalId);
+        if (extras.length === 0 && group[0].id === canonicalId) {
+          continue;
+        }
+
+        const newest = group.slice().sort((left, right) => {
+          return left.updated_at < right.updated_at ? 1 : -1;
+        })[0];
+        const newestPage = await this.get(newest.id);
+        if (!newestPage) {
+          continue;
+        }
+
+        const canonicalSlug = canonicalizeSlug(
+          newestPage.entity_type,
+          slugFromWikiId(canonicalId, newestPage.entity_type)
+        );
+        await this.upsert({
+          entityType: newestPage.entity_type,
+          slug: canonicalSlug,
+          title: newestPage.title,
+          description: newestPage.description,
+          content: newestPage.content,
+          status: preferredStatus(group),
+          corroborations: Math.max(...group.map((page) => page.corroborations)),
+        });
+
+        for (const extra of extras) {
+          await esClient.delete(
+            {
+              index: destValue,
+              id: toStoredId(extra.id),
+              refresh: 'wait_for',
+            },
+            { signal }
+          );
+          removed += 1;
+        }
+
+        logger.info(`Pruned ${extras.length} duplicate Wiki page(s)`);
+        logger.debug(`Wiki duplicate prune canonical=${canonicalId}`);
+      }
+
+      return removed;
+    },
+  };
+};

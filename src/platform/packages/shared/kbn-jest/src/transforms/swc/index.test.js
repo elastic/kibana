@@ -623,6 +623,18 @@ throw new Error('after');`,
       expect(code).toMatch(/"color:red",\s*";label:plainNoSemi"/);
       expect(code).toMatch(/"px;",\s*"label:withSemi"/);
     });
+
+    it('labels styled components', () => {
+      const code = getCode(
+        `
+          import styled from '@emotion/styled';
+          export const Panel = styled.div\`color: red;\`;
+        `,
+        '/repo/panel.ts'
+      );
+
+      expect(code).toContain('label: "Panel"');
+    });
   });
 
   describe('source maps', () => {

@@ -46,12 +46,22 @@ const SEARCH_FIELDS = [
   'geo.city',
 ] as const;
 
+/** Narrow the list and every count; unlike facets, they have no values to pick from. */
+export interface SessionListFilters {
+  hasErrors?: boolean;
+  /** Inclusive lower bound of the session duration. */
+  minDurationMs?: number;
+  /** Exclusive upper bound of the session duration. */
+  maxDurationMs?: number;
+}
+
 export interface ListSessionsParams {
   serviceName: string;
   start: string;
   end: string;
   query?: string;
   facets?: Partial<Record<FacetName, string>>;
+  filters?: SessionListFilters;
   sortField: SessionSortField;
   sortDirection: 'asc' | 'desc';
   page: number;
@@ -125,15 +135,34 @@ const facetFilters = (
     .filter((name) => name !== exclude && facets[name])
     .map((name) => ({ term: { [SESSION_FACET_FIELDS[name]]: facets[name] } }));
 
-const allOf = (filters: QueryDslQueryContainer[]): QueryDslQueryContainer =>
-  filters.length > 0 ? { bool: { filter: filters } } : { match_all: {} };
+const durationRange = (
+  field: string,
+  { minDurationMs, maxDurationMs }: SessionListFilters = {}
+): QueryDslQueryContainer[] =>
+  minDurationMs !== undefined || maxDurationMs !== undefined
+    ? [
+        {
+          range: {
+            [field]: {
+              ...(minDurationMs !== undefined ? { gte: minDurationMs } : {}),
+              ...(maxDurationMs !== undefined ? { lt: maxDurationMs } : {}),
+            },
+          },
+        },
+      ]
+    : [];
 
-/** Set by the dest pipeline when it couldn't summarize a session; its counts are missing. */
-const FAILED_SUMMARY: QueryDslQueryContainer = { exists: { field: 'error.message' } };
+const sessionFilters = (filters: SessionListFilters = {}): QueryDslQueryContainer[] => [
+  ...(filters.hasErrors ? [{ term: { has_error: true } }] : []),
+  ...durationRange('duration_ms', filters),
+];
 
-/** The listed sessions: selected facets, and only summaries the pipeline completed. */
-const listedFilter = (facets: ListSessionsParams['facets'], exclude?: FacetName) => ({
-  bool: { filter: facetFilters(facets, exclude), must_not: [FAILED_SUMMARY] },
+/** The listed sessions: the selected filters and facets, except `exclude`'s facet. */
+const listedFilter = (
+  { facets, filters }: Pick<ListSessionsParams, 'facets' | 'filters'>,
+  exclude?: FacetName
+) => ({
+  bool: { filter: [...sessionFilters(filters), ...facetFilters(facets, exclude)] },
 });
 
 export const buildListSessionsRequest = (params: ListSessionsParams): SearchRequest => {
@@ -145,7 +174,7 @@ export const buildListSessionsRequest = (params: ListSessionsParams): SearchRequ
       name,
       {
         // Each facet ignores its own selection so its other values stay selectable.
-        filter: listedFilter(params.facets, name),
+        filter: listedFilter(params, name),
         aggs: { values: { terms: { field: SESSION_FACET_FIELDS[name], size: FACET_SIZE } } },
       },
     ])
@@ -174,13 +203,10 @@ export const buildListSessionsRequest = (params: ListSessionsParams): SearchRequ
     size,
     sort: [{ [params.sortField]: params.sortDirection }, { 'session.id': 'asc' }],
     query: { bool: { filter: [...sessionScopeFilters(params), ...searchFilter(params.query)] } },
-    post_filter: listedFilter(params.facets),
+    post_filter: listedFilter(params),
     aggs: {
       ...facetAggs,
-      kpis: { filter: listedFilter(params.facets), aggs: kpiAggs },
-      failed_summaries: {
-        filter: allOf([...facetFilters(params.facets), FAILED_SUMMARY]),
-      },
+      kpis: { filter: listedFilter(params), aggs: kpiAggs },
     },
   };
 };
@@ -242,7 +268,6 @@ export interface ListSessionsAggs {
     bounced?: { doc_count: number };
     with_errors?: { doc_count: number };
   } & Record<string, unknown>;
-  failed_summaries?: { doc_count: number };
   [facet: string]: unknown;
 }
 
@@ -272,14 +297,13 @@ export const parseListSessionsResponse = (
   }
 
   return {
-    // A summary without ids can't be opened; the transform skips empty ids, so this is defensive.
+    // A summary without ids can't be opened, so it is left out.
     sessions: response.hits.hits.flatMap(({ _source: doc }) =>
       doc?.session?.id && doc.service?.name ? [toSessionSummary(doc)] : []
     ),
     total,
     page,
     perPage,
-    failedSummaries: aggs.failed_summaries?.doc_count ?? 0,
     facets: {
       browsers: facetBuckets(aggs.browsers),
       os: facetBuckets(aggs.os),

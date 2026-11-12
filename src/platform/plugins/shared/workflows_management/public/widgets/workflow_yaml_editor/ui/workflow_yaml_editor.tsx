@@ -48,7 +48,6 @@ import { StepActions } from './step_actions';
 import { WorkflowStepMinimap } from './workflow_step_minimap';
 import { WorkflowYamlValidationAccordion } from './workflow_yaml_validation_accordion';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
-import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import type { StepInfo } from '../../../entities/workflows/store';
 import {
   selectEditorFocusedStepInfo,
@@ -83,6 +82,8 @@ import type {
   EditorCommand,
   JumpToStepEntry,
 } from '../../../features/actions_menu_popover/types';
+import { useDisableWorkflowsConfirmation } from '../../../features/linked_rules/model/use_disable_workflows_confirmation';
+import { useSaveYamlWithConfirmation } from '../../../features/linked_rules/model/use_save_yaml_with_confirmation';
 import { useMonacoMarkersChangedInterceptor } from '../../../features/validate_workflow_yaml/lib/use_monaco_markers_changed_interceptor';
 import { useYamlValidation } from '../../../features/validate_workflow_yaml/lib/use_yaml_validation';
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
@@ -234,7 +235,8 @@ export const WorkflowYAMLEditor = ({
     setStabilityBadgeThemeContext(euiThemeContext);
   }, [euiThemeContext]);
 
-  const saveYaml = useSaveYaml();
+  const { confirmDisable, confirmModal: disableConfirmModal } = useDisableWorkflowsConfirmation();
+  const saveYaml = useSaveYamlWithConfirmation(confirmDisable);
   const isSaving = useSelector(selectIsSavingYaml);
   const dispatch = useDispatch();
   const workflow = useSelector(selectWorkflow);
@@ -389,11 +391,21 @@ export const WorkflowYAMLEditor = ({
     [customValidationResults, interceptorValidationErrors]
   );
 
+  // The executions tab shows a historical snapshot. Publishing "no errors" from that
+  // snapshot turns the enable switch on for a workflow whose saved YAML is invalid.
+  const workflowValidationErrors = useMemo(
+    () => (isExecutionYaml ? [] : validationErrors),
+    [isExecutionYaml, validationErrors]
+  );
+
   // Sync validation error state to Redux so sibling components (e.g. header toggle) can react
   useEffect(() => {
+    if (isExecutionYaml) {
+      return;
+    }
     const hasErrors = validationErrors.some((e) => e.severity === 'error');
     dispatch(setHasYamlSchemaValidationErrors(hasErrors));
-  }, [validationErrors, dispatch]);
+  }, [validationErrors, dispatch, isExecutionYaml]);
 
   const workflowTabYaml = useSelector(selectYamlString);
 
@@ -403,7 +415,7 @@ export const WorkflowYAMLEditor = ({
     isEditorMounted,
     workflowId: workflow?.id,
     workflowName: getWorkflowName(workflow, workflowDefinition),
-    validationErrors,
+    validationErrors: workflowValidationErrors,
     readOnlyReason,
     // The store catches up with the URL tab one render later, so wait for both.
     canApplyProposals: !isReadOnlyYaml && !isExecutionYaml,
@@ -477,7 +489,7 @@ export const WorkflowYAMLEditor = ({
           if (isSavingRef.current || isReadOnlyYamlRef.current) {
             return;
           }
-          saveYaml().then(() => dispatch(setIsTestModalOpen(true)));
+          saveYaml().then((confirmed) => confirmed && dispatch(setIsTestModalOpen(true)));
         },
       };
     },
@@ -951,6 +963,7 @@ export const WorkflowYAMLEditor = ({
         onJumpToStep={handleJumpToStep}
       />
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
+      {disableConfirmModal}
       {/* Floating Elasticsearch step actions — anchored to the focused
           step's line in the Monaco editor, so they're meaningless (and
           visually orphaned) when the graph view replaces the editor body. */}
@@ -973,7 +986,7 @@ export const WorkflowYAMLEditor = ({
           >
             <WorkflowStepMinimap
               editor={mountedEditor}
-              validationErrors={validationErrors}
+              validationErrors={workflowValidationErrors}
               scrollContainerRef={minimapContainerRef}
             />
           </div>
@@ -1005,7 +1018,7 @@ export const WorkflowYAMLEditor = ({
             isMounted={isEditorMounted}
             isLoading={isLoadingValidation}
             error={errorValidating}
-            validationErrors={validationErrors}
+            validationErrors={workflowValidationErrors}
             onErrorClick={handleErrorClick}
             onFixWithAi={onFixWithAi}
             extraAction={hideEditorTools ? undefined : extraActionElement}
