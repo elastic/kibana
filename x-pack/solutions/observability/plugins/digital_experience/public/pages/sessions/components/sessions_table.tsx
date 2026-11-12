@@ -29,7 +29,8 @@ import type { SessionSortField, SessionSummary } from '../../../../common/sessio
 import { WebVitalBadge } from '../../../components/web_vital_badges';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../ebt_constants';
 import type { Formatters } from '../../../hooks/use_formatters';
-import { ANONYMOUS_USER } from '../../../labels';
+import { TruncatedCode } from '../../../components/truncated_code';
+import { ANONYMOUS_USER, DEVICE_LABEL } from '../../../labels';
 import { clientOf, locationOf } from '../../../utils/describe_session';
 import { formatSessionDuration } from '../../../utils/format_session_duration';
 import type { SessionsListState } from '../hooks/use_sessions_list_query';
@@ -99,9 +100,7 @@ const COLUMN_LABELS: Record<SessionsOptionalColumnId, string> = {
   exitPage: i18n.translate('xpack.digitalExperience.sessions.table.exitPageColumn', {
     defaultMessage: 'Exit page',
   }),
-  device: i18n.translate('xpack.digitalExperience.sessions.table.deviceColumn', {
-    defaultMessage: 'Device',
-  }),
+  device: DEVICE_LABEL,
   sessionId: i18n.translate('xpack.digitalExperience.sessions.table.sessionIdColumn', {
     defaultMessage: 'Session ID',
   }),
@@ -164,15 +163,8 @@ const NO = i18n.translate('xpack.digitalExperience.sessions.table.noValue', {
   defaultMessage: 'No',
 });
 
-/** A page path in code font, truncated with the full path in its title. */
 const renderPage = (page: string | null) =>
-  page ? (
-    <EuiText size="xs" className="eui-textTruncate" title={page}>
-      <EuiCode transparentBackground>{page}</EuiCode>
-    </EuiText>
-  ) : (
-    <EmptyCellValue />
-  );
+  page ? <TruncatedCode value={page} /> : <EmptyCellValue />;
 
 const renderText = (text: string | null) =>
   text ? (

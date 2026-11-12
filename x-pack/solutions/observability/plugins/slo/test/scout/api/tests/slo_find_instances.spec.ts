@@ -27,8 +27,8 @@ apiTest.describe(
     let sloId: string;
     let headers: Record<string, string>;
 
-    apiTest.beforeAll(async ({ apiServices, requestAuth, sloHostsDataForge }) => {
-      await sloHostsDataForge.setup();
+    apiTest.beforeAll(async ({ apiServices, requestAuth }) => {
+      await apiServices.slo.deleteAllSLOs();
       const { apiKeyHeader } = await requestAuth.getApiKey('admin');
       headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
       const response = await apiServices.slo.create({ ...DEFAULT_SLO, groupBy: 'host' });
@@ -40,8 +40,8 @@ apiTest.describe(
       await cleanupSloSummaryDocs(esClient);
     });
 
-    apiTest.afterAll(async ({ sloHostsDataForge }) => {
-      await sloHostsDataForge.teardown();
+    apiTest.afterAll(async ({ apiServices }) => {
+      await apiServices.slo.deleteAllSLOs();
     });
 
     apiTest('returns all instances for a given SLO id', async ({ apiClient, esClient }) => {

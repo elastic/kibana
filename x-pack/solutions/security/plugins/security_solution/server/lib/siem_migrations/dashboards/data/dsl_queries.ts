@@ -10,10 +10,10 @@ import { dsl as genericDsl } from '../../common/data/dsl_queries';
 
 export const dsl = {
   matchElasticTitle(title: string): QueryDslQueryContainer {
-    return { match: { 'elastic_dashboard.title': { query: title, operator: 'and' } } };
+    return genericDsl.keywordMatch('elastic_dashboard.title', title);
   },
   matchOriginalTitle(title: string): QueryDslQueryContainer {
-    return { match: { 'original_dashboard.title': { query: title, operator: 'and' } } };
+    return genericDsl.keywordMatch('original_dashboard.title', title);
   },
   matchTitle(title: string): QueryDslQueryContainer {
     return {

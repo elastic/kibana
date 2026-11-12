@@ -8,22 +8,29 @@
 import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import type { IRetryService } from '../retry_service/alerting_retry_service';
+import type { IRetryService, RetryOptions } from '../retry_service/types';
 import { LoggerService } from '../logger_service/logger_service';
 import { ResourceManager } from './resource_manager';
 import type { IResourceInitializer } from './resource_manager';
 
+class RetryServiceMock implements IRetryService {
+  public readonly calls: RetryOptions[] = [];
+
+  public async retry<T>(callback: () => Promise<T>, options: RetryOptions): Promise<T> {
+    this.calls.push(options);
+    return callback();
+  }
+}
+
 describe('ResourceManager', () => {
   let mockLogger: jest.Mocked<Logger>;
   let loggerService: LoggerService;
+  let retryService: RetryServiceMock;
 
   function createManager() {
     mockLogger = loggerMock.create();
     loggerService = new LoggerService(mockLogger);
-
-    const retryService: IRetryService = {
-      retry: async (cb) => await cb(),
-    };
+    retryService = new RetryServiceMock();
 
     return new ResourceManager(loggerService, retryService);
   }
@@ -55,6 +62,25 @@ describe('ResourceManager', () => {
 
     expect(manager.isReady('r1')).toBe(true);
     expect(manager.isReady('r2')).toBe(true);
+  });
+
+  it('retries each initializer through the resources logger labelled with the resource', async () => {
+    const manager = createManager();
+
+    manager.registerResource(
+      'r1',
+      createInitializer(async () => {})
+    );
+    manager.startInitialization();
+    await manager.waitUntilReady();
+
+    expect(retryService.calls).toHaveLength(1);
+    const [{ logger }] = retryService.calls;
+
+    logger.info({ message: 'probe' });
+
+    expect(mockLogger.get).toHaveBeenCalledWith('resources');
+    expect(mockLogger.info).toHaveBeenCalledWith('probe', { labels: { resource: 'r1' } });
   });
 
   it('fails fast for consumers when a resource permanently fails (and does not retry on subsequent waits)', async () => {

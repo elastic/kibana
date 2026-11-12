@@ -6,13 +6,10 @@
  */
 
 import type { DeepReadonly } from 'utility-types';
-import { closeAllToasts } from '../tasks/toasts';
-import { APP_ENDPOINTS_PATH } from '../../../../common/constants';
 import type { EndpointManagementPageMap } from './page_reference';
 import { getEndpointManagementPageMap } from './page_reference';
 import type { UserAuthzAccessLevel } from './types';
 import { getNoPrivilegesPage } from './common';
-import { waitForPageToBeLoaded } from '../tasks/common';
 
 interface ListRowOptions {
   endpointId?: string;
@@ -90,25 +87,4 @@ export const getUnIsolateActionMenuItem = (): Cypress.Chainable => {
 
 export const getConsoleActionMenuItem = (): Cypress.Chainable => {
   return cy.getByTestSubj('tableRowActionsMenuPanel').findByTestSubj('console');
-};
-
-/**
- * Navigate to the Endpoint List page without reloading the entire page (thus perservind in memory state through out app)
- */
-export const navigateToEndpointList = (
-  /** If defined, we'll wait until that host name appears on the list (assumes its on page 1) */
-  endpointHostName?: string
-): void => {
-  cy.getByTestSubj('kbnChromeHeader-searchButton').click();
-  cy.getByTestSubj('nav-search-input').type('endpoints');
-  cy.getByTestSubj('nav-search-option', { timeout: 20000 })
-    .parent()
-    .find(`[url="${APP_ENDPOINTS_PATH}"]`)
-    .click();
-  waitForPageToBeLoaded();
-  closeAllToasts();
-
-  if (endpointHostName) {
-    cy.contains(endpointHostName, { timeout: 20000 }).should('exist');
-  }
 };

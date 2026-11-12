@@ -9,8 +9,8 @@ import type { CoreStart, ElasticsearchClient, KibanaRequest, Logger } from '@kbn
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import { i18n } from '@kbn/i18n';
+import type { AuditedSandboxSession } from '../sandbox_audit';
 import { MEMORY_AI_INDEX_ID, MEMORY_INDEX } from '../../common/memory';
 import {
   createInvestigationMemoryTelemetry,
@@ -77,7 +77,7 @@ export const hydrateMemoryWorkspace = async ({
   signal,
   logger,
 }: {
-  session: SandboxSession;
+  session: AuditedSandboxSession;
   esClient: ElasticsearchClient;
   spaceId: string;
   agentId: string;

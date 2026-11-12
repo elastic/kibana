@@ -166,13 +166,19 @@ const validateCondition = (
     typeof expr === 'string' ? expr : typeof expr === 'boolean' ? String(expr) : undefined;
   const errors = conditionValidator(normalized);
   if (!errors.length) return null;
-  return errors.map(({ line, column, message }) =>
+  return formatAgentConditionErrors(errors);
+};
+
+/** Error messages for the syntax errors of an agent condition, as the condition fields show them. */
+export const formatAgentConditionErrors = (
+  errors: ReturnType<NonNullable<ValidatePackagePolicyDeps['conditionValidator']>>
+): string[] =>
+  errors.map(({ line, column, message }) =>
     i18n.translate('xpack.fleet.packagePolicyValidation.conditionSyntaxErrorMessage', {
       defaultMessage: 'Line {line}, column {col}: {message}',
       values: { line, col: column + 1, message },
     })
   );
-};
 
 const validatePackageRequiredVars = (
   streamOrInput: Pick<NewPackagePolicyInputStream | PackagePolicyInput, 'vars' | 'enabled'>,

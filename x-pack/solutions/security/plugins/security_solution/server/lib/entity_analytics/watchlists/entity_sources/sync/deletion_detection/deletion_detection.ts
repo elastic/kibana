@@ -11,10 +11,8 @@ import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { WatchlistsByEuid } from '../../../entities/service';
 import type { MonitoringEntitySource } from '../../../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import type { WatchlistEntityDoc } from '../../../entities/types';
-import type { WatchlistEntitySourceClient } from '../../infra';
 import type { StaleEntity } from '../../bulk/soft_delete';
 import { applyBulkRemoveSource } from '../../bulk/soft_delete';
-import { createWatchlistSyncMarkersService } from '../sync_markers';
 
 export type DeletionDetectionService = ReturnType<typeof createDeletionDetectionService>;
 
@@ -22,17 +20,13 @@ export const createDeletionDetectionService = ({
   esClient,
   crudClient,
   logger,
-  descriptorClient,
   watchlist,
 }: {
   esClient: ElasticsearchClient;
   crudClient: CRUDClient;
   logger: Logger;
-  descriptorClient: WatchlistEntitySourceClient;
   watchlist: { name: string; id: string; index: string };
 }) => {
-  const syncMarkersService = createWatchlistSyncMarkersService(descriptorClient, esClient);
-
   const findStaleEntities = async (
     sourceId: string,
     currentEuids: string[],
@@ -97,10 +91,17 @@ export const createDeletionDetectionService = ({
     source: MonitoringEntitySource,
     currentEuids: string[],
     watchlistsByEuid: WatchlistsByEuid,
-    range?: { gt?: string; lte?: string }
+    range?: { gt?: string; lte?: string },
+    hasNewFullSync?: boolean
   ): Promise<void> => {
     if (source.type === 'entity_analytics_integration') {
-      const hasNewFullSync = await syncMarkersService.detectNewFullSync(source);
+      if (!source.integrations?.syncMarkerIndex) {
+        logger.warn(
+          `[WatchlistSync] Source ${source.id} (${source.name}) has no integrations.syncMarkerIndex configured; deletion detection cannot run for it and removed entities will never be cleaned up from this source.`
+        );
+        return;
+      }
+
       if (!hasNewFullSync) {
         logger.debug(
           `[WatchlistSync] No new full sync for source ${source.id}; skipping deletion detection.`

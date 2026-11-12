@@ -208,7 +208,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     return firstValueFrom(
       this.stepExecutionRuntime.contextManager
         .getCoreStart()
-        .featureFlags.getBooleanValue$(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false)
+        .featureFlags.getBooleanValue$(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, true)
     );
   }
 

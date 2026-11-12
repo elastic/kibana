@@ -246,3 +246,4 @@ if (result.success) {
 |----------|-------------|
 | `KBN_HMR=false` | Disable HMR (alternative to `--no-hmr`) |
 | `KBN_HMR_PORT=5678` | Override the HMR SSE server port (default: 5678) |
+| `KBN_HMR_HOST=0.0.0.0` | Bind address of the HMR SSE server (default: `127.0.0.1`). Set it when the browser reaches Kibana over a LAN, VPN, VM or container address; the client connects to the HMR port on the same hostname it loaded Kibana from. |
