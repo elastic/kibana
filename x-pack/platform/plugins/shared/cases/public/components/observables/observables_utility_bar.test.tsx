@@ -70,4 +70,52 @@ describe('ObservablesUtilityBar', () => {
     expect(screen.queryByTestId('extract-observables-switch')).not.toBeInTheDocument();
     expect(screen.queryByTestId('default-observable-types-modal-body')).not.toBeInTheDocument();
   });
+
+  it('renders the extract observables button next to the add button', () => {
+    (useCasesFeatures as jest.Mock).mockReturnValue({
+      isExtractObservablesEnabled: true,
+      observablesAuthorized: true,
+    });
+    renderWithTestingProviders(
+      <ObservablesUtilityBar
+        {...props}
+        caseData={{
+          ...props.caseData,
+          settings: { ...props.caseData.settings, extractObservables: true },
+        }}
+      />
+    );
+
+    expect(screen.getByTestId('cases-observables-extract')).toBeEnabled();
+    expect(screen.getByTestId('cases-observables-add')).toBeInTheDocument();
+  });
+
+  it('disables the extract observables button while the case is loading', () => {
+    (useCasesFeatures as jest.Mock).mockReturnValue({
+      isExtractObservablesEnabled: true,
+      observablesAuthorized: true,
+    });
+    renderWithTestingProviders(
+      <ObservablesUtilityBar
+        {...props}
+        isLoading
+        caseData={{
+          ...props.caseData,
+          settings: { ...props.caseData.settings, extractObservables: true },
+        }}
+      />
+    );
+
+    expect(screen.getByTestId('cases-observables-extract')).toBeDisabled();
+  });
+
+  it('does not render the extract observables button when extraction is not available', () => {
+    (useCasesFeatures as jest.Mock).mockReturnValue({
+      isExtractObservablesEnabled: false,
+      observablesAuthorized: true,
+    });
+    renderWithTestingProviders(<ObservablesUtilityBar {...props} />);
+
+    expect(screen.queryByTestId('cases-observables-extract')).not.toBeInTheDocument();
+  });
 });

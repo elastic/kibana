@@ -11,6 +11,7 @@ import {
   CASES_FIELD_DEFINITION_DELETED_EVENT_TYPE,
   CASES_FIELD_DEFINITION_UPDATED_EVENT_TYPE,
   CASES_OBSERVABLES_DELETED_EVENT_TYPE,
+  CASES_OBSERVABLES_EXTRACTED_EVENT_TYPE,
 } from '../../common/constants';
 import { registerAnalytics } from '.';
 
@@ -45,6 +46,11 @@ describe('registerAnalytics', () => {
       (analyticsService.registerEventType as jest.Mock).mock.calls.map(
         ([options]) => options.eventType
       )
-    ).toEqual(expect.arrayContaining([CASES_OBSERVABLES_DELETED_EVENT_TYPE]));
+    ).toEqual(
+      expect.arrayContaining([
+        CASES_OBSERVABLES_DELETED_EVENT_TYPE,
+        CASES_OBSERVABLES_EXTRACTED_EVENT_TYPE,
+      ])
+    );
   });
 });
