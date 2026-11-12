@@ -138,6 +138,10 @@ export function createChromeApi({
       get$: () => state.globalSearch.$,
       set: (config) => state.globalSearch.set(config),
     },
+    headerLogo: {
+      get$: () => state.headerLogo.$,
+      set: state.headerLogo.set,
+    },
     contextSwitcher: {
       get$: () => state.contextSwitcher.$,
       set: state.contextSwitcher.set,
@@ -153,6 +157,10 @@ export function createChromeApi({
     userMenu: {
       get$: () => state.userMenu.$,
       set: (content) => state.userMenu.set(content),
+    },
+    userMenuAction: {
+      get$: () => state.userMenuAction.$,
+      set: state.userMenuAction.set,
     },
   };
 

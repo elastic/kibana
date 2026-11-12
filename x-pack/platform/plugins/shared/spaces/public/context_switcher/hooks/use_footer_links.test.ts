@@ -36,7 +36,9 @@ const createApplication = (
   } as unknown as CoreStart['application']);
 
 const createCloud = (
-  overrides: Partial<Pick<CloudStart, 'isCloudEnabled' | 'serverless' | 'getPrivilegedUrls'>> = {}
+  overrides: Partial<
+    Pick<CloudStart, 'isCloudEnabled' | 'serverless' | 'getPrivilegedUrls' | 'deploymentUrl'>
+  > = {}
 ): CloudStart =>
   ({
     isCloudEnabled: true,

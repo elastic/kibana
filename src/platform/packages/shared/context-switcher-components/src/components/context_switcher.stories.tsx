@@ -10,9 +10,10 @@
 import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { EuiAvatar, EuiBadge, EuiPanel } from '@elastic/eui';
+import { EuiAvatar, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 
 import { ContextSwitcher } from './context_switcher';
+import { ProjectMenu } from './project_menu';
 import type { SpaceItem, LinksListItem } from './types';
 
 interface StoryArgs {
@@ -131,33 +132,33 @@ const CloudScenario = ({ searchThreshold }: { searchThreshold: number }) => {
 
   return (
     <EuiPanel color="subdued" paddingSize="m" hasBorder hasShadow={false}>
-      <ContextSwitcher
-        spaces={spaces}
-        environmentContext={{
-          environmentType: 'deployment',
-          name: 'My Favorite Deployment',
-          submenuItems: [
-            {
-              id: 'manage-discovery-insights',
-              label: 'Manage this deployment',
-              iconType: 'gear',
-              onClick: () => action('manage-discovery-insights')(),
-            },
-            {
-              id: 'view-all-deployments',
-              label: 'View all deployments',
-              iconType: 'grid',
-              onClick: () => action('view-all-deployments')(),
-            },
-          ],
-          submenuFooterAction: {
-            id: 'create-deployment',
-            label: 'Create deployment',
-            onClick: () => action('create-deployment')(),
-          },
-        }}
-        footerLinks={MOCK_FOOTER_LINKS}
-      />
+      <EuiFlexGroup alignItems="center" gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <ProjectMenu
+            icon="logoElastic"
+            name="My Favorite Deployment"
+            description="Deployment"
+            actions={[
+              {
+                id: 'manage-deployment',
+                label: 'Manage this deployment',
+                iconType: 'gear',
+                onClick: () => action('manage-deployment')(),
+              },
+              {
+                id: 'create-deployment',
+                label: 'Create deployment',
+                iconType: 'plus',
+                onClick: () => action('create-deployment')(),
+              },
+            ]}
+            footerLinks={MOCK_FOOTER_LINKS}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ContextSwitcher spaces={spaces} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPanel>
   );
 };
@@ -167,33 +168,33 @@ const ServerlessScenario = ({ searchThreshold }: { searchThreshold: number }) =>
 
   return (
     <EuiPanel color="subdued" paddingSize="m" hasBorder hasShadow={false}>
-      <ContextSwitcher
-        spaces={spaces}
-        environmentContext={{
-          environmentType: 'project',
-          name: 'My Favorite Project',
-          submenuItems: [
-            {
-              id: 'manage-insightful-analytics',
-              label: 'Manage this project',
-              iconType: 'gear',
-              onClick: () => action('manage-insightful-analytics')(),
-            },
-            {
-              id: 'view-all-projects',
-              label: 'View all projects',
-              iconType: 'grid',
-              onClick: () => action('view-all-projects')(),
-            },
-          ],
-          submenuFooterAction: {
-            id: 'create-project',
-            label: 'Create project',
-            onClick: () => action('create-project')(),
-          },
-        }}
-        footerLinks={MOCK_FOOTER_LINKS}
-      />
+      <EuiFlexGroup alignItems="center" gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <ProjectMenu
+            icon="logoSecurity"
+            name="Acme Production"
+            description="Security project"
+            actions={[
+              {
+                id: 'manage-project',
+                label: 'Manage this project',
+                iconType: 'gear',
+                onClick: () => action('manage-project')(),
+              },
+              {
+                id: 'create-project',
+                label: 'Create project',
+                iconType: 'plus',
+                onClick: () => action('create-project')(),
+              },
+            ]}
+            footerLinks={MOCK_FOOTER_LINKS}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ContextSwitcher spaces={spaces} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPanel>
   );
 };

@@ -35,6 +35,7 @@ import {
   useProjectPicker,
   useSubscriptionBadge,
   useUserMenu,
+  useUserMenuAction,
 } from '../shared/chrome_hooks';
 import { SearchButton } from '../shared/search_button';
 import { AiButtonSlot } from '../shared/ai_button_slot';
@@ -54,6 +55,7 @@ export const ClassicHeader = React.memo(() => {
   const hasAppMenuConfig = useHasAppMenuConfig();
   const hasInlineAppHeader = useHasInlineAppHeader();
   const userMenu = useUserMenu();
+  const userMenuAction = useUserMenuAction();
   const contextSwitcher = useContextSwitcher();
   const projectPicker = useProjectPicker();
   const subscriptionBadge = useSubscriptionBadge();
@@ -64,6 +66,7 @@ export const ClassicHeader = React.memo(() => {
       search={isSmall ? search : undefined}
       help={dark(<HelpButton />)}
       actions={<AiButtonSlot />}
+      userMenuAction={userMenuAction}
       userMenu={userMenu}
     />
   );

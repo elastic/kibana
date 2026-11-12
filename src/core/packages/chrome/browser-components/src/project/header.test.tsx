@@ -18,6 +18,10 @@ import { ChromeHeader } from './header';
 import { CHROME_HEADER_TEST_SUBJECTS } from '../test_subjects';
 
 describe('ChromeHeader', () => {
+  afterEach(() => {
+    sessionStorage.removeItem('kbn.contextSwitcherProposal');
+  });
+
   it('renders the project picker beside the context switcher', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.controls.contextSwitcher.set(<span>Context switcher</span>);
@@ -38,6 +42,7 @@ describe('ChromeHeader', () => {
   });
 
   it('renders the subscription badge only once it is set', () => {
+    sessionStorage.setItem('kbn.contextSwitcherProposal', 'proposal3');
     const chrome = chromeServiceMock.createStartContract();
 
     renderWithI18n(
@@ -57,6 +62,22 @@ describe('ChromeHeader', () => {
     expect(screen.getByTestId(CHROME_HEADER_TEST_SUBJECTS.subscriptionBadge)).toHaveTextContent(
       'Trial'
     );
+  });
+
+  it('hides the subscription badge unless proposal 3 is selected', () => {
+    sessionStorage.setItem('kbn.contextSwitcherProposal', 'proposal1');
+    const chrome = chromeServiceMock.createStartContract();
+    chrome.controls.subscriptionBadge.set(<span>Trial</span>);
+
+    renderWithI18n(
+      <TestChromeProviders chrome={chrome}>
+        <ChromeHeader />
+      </TestChromeProviders>
+    );
+
+    expect(
+      screen.queryByTestId(CHROME_HEADER_TEST_SUBJECTS.subscriptionBadge)
+    ).not.toBeInTheDocument();
   });
 
   it('renders the help menu button', async () => {
