@@ -25,8 +25,6 @@ export interface StoredKi {
     provenance?: {
       created_by?: KiWriter;
       updated_by?: KiWriter;
-      /** The person who last edited what the KI says, through the KI update API. */
-      edited_by?: KiWriter;
     };
     lifecycle?: { status?: KiLifecycleStatus };
   };
@@ -46,7 +44,7 @@ export interface KiRevision {
 export interface KiRevisionChanges {
   updated_at: string;
   governance: {
-    provenance: { updated_by: KiWriter; edited_by?: KiWriter };
+    provenance: { updated_by: KiWriter };
     lifecycle?: { status: KiLifecycleStatus };
   };
   [key: string]: unknown;

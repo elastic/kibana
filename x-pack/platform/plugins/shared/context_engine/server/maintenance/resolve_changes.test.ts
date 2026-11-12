@@ -15,7 +15,7 @@ import { relationshipId, relationshipKey } from '../dreaming/ids';
 import { toMaintenanceItem } from './gather';
 import { resolveMaintenanceChanges, type ResolvedMaintenance } from './resolve_changes';
 
-const person = { uri: 'api://context_engine.ki.update', metadata: {} };
+const personEdited = { 'memory.edited_by': 'api://context_engine.ki.update' };
 const restricted = { kibana: { privileges: [{ space: 'default', name: ['a'], count: 1 }] } };
 const derivedFrom = (...ids: string[]) =>
   ids.map((id) => ({ uri: `ki://${id}`, relation: 'derived_from' as const }));
@@ -181,11 +181,68 @@ describe('resolveMaintenanceChanges', () => {
       ]);
     });
 
+    it('moves relationships to what another change keeps of their other end, with new titles', () => {
+      const kis = [
+        entity('e-1'),
+        entity('e-2'),
+        entity('e-3'),
+        entity('e-4'),
+        entity('e-gone', { governance: { lifecycle: { status: 'deleted' } } }),
+        fact('f-old', { attributes: { 'memory.last_seen_at': '2026-01-01T00:00:00.000Z' } }),
+        fact('f-new', { attributes: { 'memory.last_seen_at': '2026-05-01T00:00:00.000Z' } }),
+      ];
+      const toAbsorbed = link('e-2', 'knows', 'e-4');
+      const toDeleted = link('e-2', 'knows', 'e-gone');
+      const toLoser = link('e-2', 'about', 'f-old');
+
+      const resolved = resolve(
+        kis,
+        {
+          merges: [
+            { survivor: 'e-1', absorbed: ['e-2'], title: 'Bob', reason: 'Same' },
+            { survivor: 'e-3', absorbed: ['e-4'], title: 'Alex', reason: 'Same' },
+          ],
+          contradictions: [{ ids: ['f-old', 'f-new'], label: 'conflict', reason: 'Both claim' }],
+        },
+        {
+          items: ['e-1', 'e-2', 'e-3', 'e-4', 'f-old', 'f-new'],
+          links: { 'e-2': [toAbsorbed, toDeleted, toLoser], 'e-4': [toAbsorbed] },
+        }
+      );
+
+      const moved = relationshipId(relationshipKey('e-1', 'knows', 'e-3'));
+      expect(resolved.groups[0].moves).toEqual([
+        { id: moved, document: expect.objectContaining({ title: 'Bob knows Alex' }) },
+      ]);
+      expect(resolved.groups[1].moves.map(({ id }) => id)).toEqual([moved]);
+    });
+
+    it('counts a memory that more than one merged item came from once', () => {
+      const kis = [
+        entity('e-1', {
+          references: derivedFrom('m-1', 'm-2'),
+          attributes: { 'memory.number_of_occurrences': 2 },
+        }),
+        entity('e-2', {
+          references: derivedFrom('m-2', 'm-3'),
+          attributes: { 'memory.number_of_occurrences': 2 },
+        }),
+      ];
+
+      const resolved = resolve(kis, {
+        merges: [{ survivor: 'e-1', absorbed: ['e-2'], reason: 'Same' }],
+      });
+
+      expect(build(resolved, kis)?.attributes).toEqual(
+        expect.objectContaining({ 'memory.number_of_occurrences': 3 })
+      );
+    });
+
     it('keeps the person-edited item, and leaves a group with two for review', () => {
       const kis = [
         entity('e-1'),
-        entity('e-2', { governance: { provenance: { edited_by: person } } }),
-        entity('e-3', { governance: { provenance: { edited_by: person } } }),
+        entity('e-2', { attributes: personEdited }),
+        entity('e-3', { attributes: personEdited }),
       ];
 
       const swapped = resolve(kis, {
@@ -270,6 +327,20 @@ describe('resolveMaintenanceChanges', () => {
       );
     });
 
+    it('rejects a value that changed without what the newer fact now says', () => {
+      const resolved = resolve([older, newer], {
+        contradictions: [{ ids: ['f-old', 'f-new'], label: 'changed', reason: 'Upgraded' }],
+      });
+
+      expect(resolved.groups).toEqual([]);
+      expect(resolved.rejected).toEqual([
+        {
+          item: 'contradiction between f-old and f-new',
+          reason: 'a changed fact needs the content the newer one keeps',
+        },
+      ]);
+    });
+
     it('keeps the fact seen last in a conflict, with only its own text and sources', () => {
       const resolved = resolve([older, newer], {
         contradictions: [{ ids: ['f-new', 'f-old'], label: 'conflict', reason: 'Both claim' }],
@@ -288,7 +359,7 @@ describe('resolveMaintenanceChanges', () => {
     });
 
     it('never lets a person-edited fact lose, leaving the pair for review', () => {
-      const edited = { ...older, governance: { provenance: { edited_by: person } } };
+      const edited = { ...older, attributes: { ...older.attributes, ...personEdited } };
 
       const resolved = resolve([edited, newer], {
         contradictions: [{ ids: ['f-old', 'f-new'], label: 'conflict', reason: 'Both claim' }],
@@ -335,10 +406,7 @@ describe('resolveMaintenanceChanges', () => {
   });
 
   it('refreshes the summary of a reviewed entity that no person edited', () => {
-    const kis = [
-      entity('e-1'),
-      entity('e-2', { governance: { provenance: { edited_by: person } } }),
-    ];
+    const kis = [entity('e-1'), entity('e-2', { attributes: personEdited })];
 
     const resolved = resolve(kis, {
       summaries: [

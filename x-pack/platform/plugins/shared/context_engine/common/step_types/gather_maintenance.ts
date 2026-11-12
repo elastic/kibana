@@ -23,7 +23,10 @@ export const MAX_MAINTENANCE_REMAINING_MEMORIES = 10;
 export const MAX_MAINTENANCE_ABOUT_FACTS = 50;
 export const MAX_MAINTENANCE_BATCHES = 100;
 export const MAX_MAINTENANCE_LISTED_CHANGES = 1000;
-const MAX_BATCH_RELATED = 500;
+/** Neighbors, facts and relationships one batch shows, at most, of each. */
+export const MAX_BATCH_RELATED = 500;
+/** Facts and entities one run may tombstone, however few it reviews. */
+export const MIN_MAINTENANCE_TOMBSTONES = 3;
 const MAX_TIMESTAMP_LENGTH = 64;
 
 export const MAINTENANCE_REVIEW_REASONS = [
@@ -34,7 +37,7 @@ export const MAINTENANCE_REVIEW_REASONS = [
 ] as const;
 export type MaintenanceReviewReason = (typeof MAINTENANCE_REVIEW_REASONS)[number];
 
-const idSchema = z.string().max(MAX_KI_ID_LENGTH);
+const idSchema = lazySchema(() => z.string().max(MAX_KI_ID_LENGTH));
 
 /** A fact or entity as the maintenance model reads it. */
 export const maintenanceItemSchema = lazySchema(() =>
@@ -151,6 +154,9 @@ export const gatherMaintenanceInputSchema = lazySchema(() =>
 export const gatherMaintenanceOutputSchema = lazySchema(() =>
   z.object({
     reviewed: z.number().describe('Items in the batches'),
+    max_tombstones: z
+      .number()
+      .describe('Facts and entities this run may tombstone before it stops for review'),
     batches: z.array(maintenanceBatchSchema).max(MAX_MAINTENANCE_BATCHES),
     fixes: z
       .array(maintenanceChangeSchema)

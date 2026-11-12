@@ -163,10 +163,12 @@ const DreamingEditor = ({ aiIndexId, dreaming }: DreamingEditorProps) => {
       ...(trimmed && { instructions: trimmed }),
       ...typesOfDraft(draft),
       ...(editedMaintenance && {
-        maintenance: {
-          ...editedMaintenance,
-          schedule: { interval: editedMaintenance.schedule.interval.trim() },
-        },
+        maintenance: editedMaintenance.enabled
+          ? {
+              ...editedMaintenance,
+              schedule: { interval: editedMaintenance.schedule.interval.trim() },
+            }
+          : { ...savedMaintenance, enabled: false },
       }),
     };
     if (await saveConfig({ aiIndexId, config })) {

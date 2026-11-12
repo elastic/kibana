@@ -92,6 +92,21 @@ const withText = (current: DreamedKi, { title, description, content }: Text) => 
   ...(content !== undefined && { content: renderContent(content, accessPatternsOf(current)) }),
 });
 
+const memoryUrisOf = (ki: DreamedKi): string[] =>
+  (ki.references ?? []).filter(({ relation }) => relation === 'derived_from').map(({ uri }) => uri);
+
+/** Sums the sightings, counting a memory more than one of them came from only once. */
+const mergedOccurrences = (current: DreamedKi, absorbed: readonly DreamedKi[]): number => {
+  const seen = new Set(memoryUrisOf(current));
+  let total = occurrencesOf(current);
+  for (const ki of absorbed) {
+    const uris = memoryUrisOf(ki);
+    total += Math.max(occurrencesOf(ki) - uris.filter((uri) => seen.has(uri)).length, 0);
+    uris.forEach((uri) => seen.add(uri));
+  }
+  return total;
+};
+
 /** The kept item takes the memories and sightings of the others, and supersedes each. */
 const mergeInto =
   (absorbed: readonly DreamedKi[], text: Text): BuildDocument =>
@@ -109,10 +124,7 @@ const mergeInto =
           ...absorbed.map(({ attributes }) => withoutAccessPatternAttributes(attributes))
         ),
         ...current.attributes,
-        [OCCURRENCES_ATTRIBUTE]: absorbed.reduce(
-          (total, ki) => total + occurrencesOf(ki),
-          occurrencesOf(current)
-        ),
+        [OCCURRENCES_ATTRIBUTE]: mergedOccurrences(current, absorbed),
         ...(lastSeenAt !== undefined && { [LAST_SEEN_AT_ATTRIBUTE]: lastSeenAt }),
       },
       references: addReferences(current.references, [
@@ -193,22 +205,41 @@ export const resolveMaintenanceChanges = (
 
   const kiOf = (id: string): DreamedKi => kis.get(id) as DreamedKi;
 
-  const movesOf = (survivor: DreamedKi, absorbed: readonly DreamedKi[]) => {
-    const absorbedIds = new Set(absorbed.map(({ id }) => id));
+  const absorbedInto = new Map<string, string>();
+  const retitled = new Map<string, string>();
+  const discarded = new Set<string>();
+  const pendingMoves: Array<{ group: MaintenanceGroup; absorbed: readonly DreamedKi[] }> = [];
+
+  /** Relationships of the absorbed items, re-pointed at what is kept of each end. */
+  const movesOf = (absorbed: readonly DreamedKi[]) => {
     const moves = new Map<string, Omit<DreamedKi, 'governance'>>();
+    const keptKiOf = (id: string): DreamedKi | undefined => {
+      const ki = kis.get(id);
+      const title = retitled.get(id);
+      return ki && title !== undefined ? { ...ki, title } : ki;
+    };
     for (const link of absorbed.flatMap(({ id }) => links.get(id) ?? [])) {
       const parsed = parseRelationship(link);
       if (!parsed) {
         continue;
       }
-      const endOf = (id: string) => (absorbedIds.has(id) ? survivor.id : id);
-      const fromId = endOf(parsed.from);
-      const toId = endOf(parsed.to);
-      const from = fromId === survivor.id ? survivor : kis.get(fromId);
-      const to = toId === survivor.id ? survivor : kis.get(toId);
+      const fromId = absorbedInto.get(parsed.from) ?? parsed.from;
+      const toId = absorbedInto.get(parsed.to) ?? parsed.to;
+      const from = keptKiOf(fromId);
+      const to = keptKiOf(toId);
       const key = relationshipKey(fromId, parsed.relation, toId);
       const id = relationshipId(key);
-      if (fromId === toId || !from || !to || id === link.id || moves.has(id)) {
+      if (
+        fromId === toId ||
+        !from ||
+        !to ||
+        isKiDeleted(from) ||
+        isKiDeleted(to) ||
+        discarded.has(fromId) ||
+        discarded.has(toId) ||
+        id === link.id ||
+        moves.has(id)
+      ) {
         continue;
       }
       const title = relationshipTitle({ from, relation: parsed.relation, to });
@@ -241,10 +272,14 @@ export const resolveMaintenanceChanges = (
     reason: string
   ) => {
     [survivor, ...absorbed].forEach(({ id }) => claimed.add(id));
-    groups.push({
+    absorbed.forEach(({ id }) => absorbedInto.set(id, survivor.id));
+    if (text.title !== undefined) {
+      retitled.set(survivor.id, text.title);
+    }
+    const group: MaintenanceGroup = {
       item,
       writes: [{ id: survivor.id, build: mergeInto(absorbed, text) }],
-      moves: movesOf(survivor, absorbed),
+      moves: [],
       tombstones: absorbed.map(({ id }) => id),
       changes: [
         { id: survivor.id, change: 'merged', reason },
@@ -256,7 +291,9 @@ export const resolveMaintenanceChanges = (
           })
         ),
       ],
-    });
+    };
+    groups.push(group);
+    pendingMoves.push({ group, absorbed });
   };
 
   const leaveForReview = (ids: readonly string[], reason: string) => {
@@ -320,11 +357,16 @@ export const resolveMaintenanceChanges = (
       continue;
     }
     if (label === 'changed') {
+      if (content === undefined) {
+        rejected.push({ item, reason: 'a changed fact needs the content the newer one keeps' });
+        continue;
+      }
       merge(item, winner, [loser], { content }, reason);
       continue;
     }
     claimed.add(winner.id);
     claimed.add(loser.id);
+    discarded.add(loser.id);
     groups.push({
       item,
       writes: [{ id: winner.id, build: supersede(loser) }],
@@ -406,6 +448,10 @@ export const resolveMaintenanceChanges = (
       tombstones: [id],
       changes: [{ id, change: 'tombstoned', reason }],
     });
+  }
+
+  for (const { group, absorbed } of pendingMoves) {
+    group.moves = movesOf(absorbed);
   }
 
   return { groups, needsReview, rejected };

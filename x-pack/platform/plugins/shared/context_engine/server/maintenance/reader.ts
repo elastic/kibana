@@ -55,11 +55,19 @@ const kindTypes = (kind: 'fact' | 'entity'): QueryDslQueryContainer => ({
   prefix: { type: kind === 'fact' ? FACT_TYPE_PREFIX : ENTITY_TYPE_PREFIX },
 });
 
+/** A position in the changes, after which a run reads on. */
+export interface ChangeCursor {
+  from: string;
+  afterId: string;
+}
+
 export interface ChangedPage {
   /** The newest revision of each fact, entity, relationship and memory changed after the cursor. */
   kis: DreamedKi[];
+  /** The cursor just past each of `kis`, in the same order. */
+  cursors: ChangeCursor[];
   /** Where the next run continues, when this page was full. */
-  resume?: { from: string; afterId: string };
+  resume?: ChangeCursor;
 }
 
 /** What memory maintenance reads from an AI index. */
@@ -76,10 +84,7 @@ export interface MaintenanceReader {
 }
 
 const neighborText = ({ title, content }: DreamedKi): string =>
-  [title, baseContent(content)]
-    .filter(Boolean)
-    .join('\n')
-    .slice(0, MAX_NEIGHBOR_QUERY_LENGTH);
+  [title, baseContent(content)].filter(Boolean).join('\n').slice(0, MAX_NEIGHBOR_QUERY_LENGTH);
 
 export const createMaintenanceReader = ({
   esClient,
@@ -101,34 +106,42 @@ export const createMaintenanceReader = ({
     return response.hits.hits;
   };
 
+  /** Hits per item; with `tolerateBadRequest`, undefined where the AI index rejects the query. */
   const similarBy = async (
     items: readonly DreamedKi[],
     size: number,
-    match: (ki: DreamedKi) => QueryDslQueryContainer
+    match: (ki: DreamedKi) => QueryDslQueryContainer,
+    tolerateBadRequest: boolean
   ): Promise<Array<Hit[] | undefined>> => {
-    const results: Array<Hit[] | undefined> = [];
-    for (const part of chunk(items, MSEARCH_CHUNK_SIZE)) {
-      const searches: MsearchRequestItem[] = part.flatMap((ki) => [
-        { index: dest.value, ignore_unavailable: true },
-        {
-          size: size * NEIGHBOR_OVERFETCH,
-          _source: false,
-          collapse: { field: 'id', inner_hits: LATEST },
-          query: {
-            bool: {
-              must: [match(ki)],
-              filter: [kindTypes(kindOf(ki) ?? 'fact'), spaceFilter],
-              must_not: [{ term: { id: ki.id } }],
-            },
+    const searches: MsearchRequestItem[] = items.flatMap((ki) => [
+      { index: dest.value, ignore_unavailable: true },
+      {
+        size: size * NEIGHBOR_OVERFETCH,
+        _source: false,
+        collapse: { field: 'id', inner_hits: LATEST },
+        query: {
+          bool: {
+            must: [match(ki)],
+            filter: [kindTypes(kindOf(ki) ?? 'fact'), spaceFilter],
+            must_not: [{ term: { id: ki.id } }],
           },
         },
-      ]);
-      const { responses } = await esClient.msearch({ searches }, { signal: abortSignal });
-      for (const response of responses) {
-        results.push('error' in response ? undefined : response.hits.hits);
+      },
+    ]);
+    const { responses } = await esClient.msearch({ searches }, { signal: abortSignal });
+    return responses.map((response) => {
+      if (!('error' in response)) {
+        return response.hits.hits;
       }
-    }
-    return results;
+      if (response.status === 400 && tolerateBadRequest) {
+        return undefined;
+      }
+      throw new Error(
+        `Could not look up similar items (${response.status}): ${
+          response.error.reason ?? response.error.type
+        }`
+      );
+    });
   };
 
   return {
@@ -176,12 +189,21 @@ export const createMaintenanceReader = ({
           },
         },
       });
-      const last = hits.at(-1)?._source as { id?: string; updated_at?: string } | undefined;
+      const kis: DreamedKi[] = [];
+      const cursors: ChangeCursor[] = [];
+      for (const hit of hits) {
+        const position = hit._source as { id?: string; updated_at?: string } | undefined;
+        const [latest] = latestOf([hit]);
+        if (latest && position?.id !== undefined && position.updated_at !== undefined) {
+          kis.push(latest);
+          cursors.push({ from: position.updated_at, afterId: position.id });
+        }
+      }
+      const last = cursors.at(-1);
       return {
-        kis: latestOf(hits),
-        ...(hits.length === MAINTENANCE_CHANGED_PAGE_SIZE &&
-          last?.updated_at !== undefined &&
-          last.id !== undefined && { resume: { from: last.updated_at, afterId: last.id } }),
+        kis,
+        cursors,
+        ...(hits.length === MAINTENANCE_CHANGED_PAGE_SIZE && last && { resume: last }),
       };
     },
 
@@ -235,21 +257,33 @@ export const createMaintenanceReader = ({
       ),
 
     similar: async (items, size) => {
-      const semantic = await similarBy(items, size, (ki) => ({
-        semantic: { field: 'content.semantic', query: neighborText(ki) },
-      }));
-      const missing = items.filter((_, position) => semantic[position] === undefined);
-      const lexical = missing.length
-        ? await similarBy(missing, size, (ki) => ({
-            multi_match: { query: neighborText(ki), fields: ['title', 'content'] },
-          }))
-        : [];
-      const neighbors = new Map<string, DreamedKi[]>();
-      let fallback = 0;
-      items.forEach((ki, position) => {
-        const hits = semantic[position] ?? lexical[fallback++] ?? [];
-        neighbors.set(ki.id, latestOf(hits));
+      const lexical = (ki: DreamedKi): QueryDslQueryContainer => ({
+        multi_match: { query: neighborText(ki), fields: ['title', 'content'] },
       });
+      const hybrid = (ki: DreamedKi): QueryDslQueryContainer => ({
+        bool: {
+          should: [
+            { semantic: { field: 'content.semantic', query: neighborText(ki) } },
+            lexical(ki),
+          ],
+          minimum_should_match: 1,
+        },
+      });
+      const neighbors = new Map<string, DreamedKi[]>();
+      let semantic = true;
+      for (const part of chunk(items, MSEARCH_CHUNK_SIZE)) {
+        const first = await similarBy(part, size, semantic ? hybrid : lexical, semantic);
+        const unsuited = part.filter((_, position) => first[position] === undefined);
+        if (unsuited.length > 0) {
+          semantic = false;
+        }
+        const retried = unsuited.length > 0 ? await similarBy(unsuited, size, lexical, false) : [];
+        let next = 0;
+        part.forEach((ki, position) => {
+          const hits = first[position] ?? retried[next++] ?? [];
+          neighbors.set(ki.id, latestOf(hits));
+        });
+      }
       return neighbors;
     },
   };

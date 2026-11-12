@@ -27,6 +27,7 @@ import {
   type MaintenanceMode,
   type ResolvedMaintenanceConfig,
 } from '../../../../common/dreaming';
+import { MIN_MAINTENANCE_TOMBSTONES } from '../../../../common/step_types/gather_maintenance';
 import { validateDreamingInterval } from '../../../../common/validation';
 
 type MaintenanceField = 'interval' | 'neighbors' | 'sweep_size' | 'max_tombstone_share';
@@ -40,7 +41,7 @@ const wholeNumberError = (min: number, max: number) =>
 const inRange = (value: number, min: number, max: number): boolean =>
   Number.isInteger(value) && value >= min && value <= max;
 
-const toPercent = (share: number): number => Math.round(share * 100);
+const toPercent = (share: number): number => Number((share * 100).toFixed(6));
 
 const fieldValue = (value: number): number | '' => (Number.isNaN(value) ? '' : value);
 
@@ -218,7 +219,11 @@ export const MaintenanceSettings = ({ maintenance, onChange }: MaintenanceSettin
                   )}
                   helpText={i18n.translate(
                     'xpack.contextEngine.aiIndexDetail.dreaming.maintenance.maxTombstoneShareHelp',
-                    { defaultMessage: 'Over it, the run changes nothing.' }
+                    {
+                      defaultMessage:
+                        'A run may always remove {min}. Over it, the run changes nothing.',
+                      values: { min: MIN_MAINTENANCE_TOMBSTONES },
+                    }
                   )}
                   isInvalid={errors.max_tombstone_share !== undefined}
                   error={errors.max_tombstone_share}

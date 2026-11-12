@@ -125,7 +125,6 @@ describe('createDreamingScheduleService', () => {
         relationshipTypes: dreaming.relationships,
         maintenanceIntervalMinutes: 1440,
         maintenanceMode: 'report',
-        maxTombstoneShare: 0.1,
       },
     });
   });

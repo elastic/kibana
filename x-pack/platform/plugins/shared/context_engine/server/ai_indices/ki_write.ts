@@ -7,7 +7,7 @@
 
 import { isEqual } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { isDreamedKiType } from '../../common/dreaming';
+import { EDITED_AT_ATTRIBUTE, EDITED_BY_ATTRIBUTE, isDreamedKiType } from '../../common/dreaming';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import type { KiLifecycleStatus, KiPartialFields } from '../../common/step_types/ki';
 import { KiDeletedError, KiNotFoundError } from './errors';
@@ -31,14 +31,25 @@ const KI_API_UPDATE_URI = buildKiApiWriter('update', '').uri;
 
 const PERSON_EDITED_FIELDS = ['type', 'title', 'description', 'content', 'attributes'] as const;
 
-/** Whether a person edited what the KI says, so automation must leave its text alone. */
-export const isPersonEdited = (ki: StoredKi | undefined): boolean => {
-  const provenance = ki?.governance?.provenance;
-  return provenance?.edited_by !== undefined || provenance?.updated_by?.uri === KI_API_UPDATE_URI;
+const attributesOf = (ki: StoredKi | undefined): Record<string, unknown> | undefined => {
+  const attributes = ki?.attributes;
+  return typeof attributes === 'object' && attributes !== null && !Array.isArray(attributes)
+    ? (attributes as Record<string, unknown>)
+    : undefined;
 };
 
+/**
+ * Whether a person edited what the KI says, so automation must leave its text alone. KIs edited
+ * before the marker existed count when the KI update API wrote their current revision.
+ */
+export const isPersonEdited = (ki: StoredKi | undefined): boolean =>
+  attributesOf(ki)?.[EDITED_BY_ATTRIBUTE] !== undefined ||
+  ki?.governance?.provenance?.updated_by?.uri === KI_API_UPDATE_URI;
+
 const changesWhatItSays = (source: StoredKi, ki: KiPartialFields): boolean =>
-  PERSON_EDITED_FIELDS.some((field) => ki[field] !== undefined && !isEqual(source[field], ki[field]));
+  PERSON_EDITED_FIELDS.some(
+    (field) => ki[field] !== undefined && !isEqual(source[field], ki[field])
+  );
 
 /** Whether every field in `ki` (and the lifecycle status) matches the stored KI.
  * It doesn't compare other governance fields like provenance.
@@ -61,7 +72,7 @@ export interface UpdateKiOptions {
   kiId: string;
   ki: KiPartialFields;
   writer: KiWriter;
-  /** Records the writer as the person who edited the KI when the update changes what it says. */
+  /** Marks the KI as edited by a person when the update changes what it says. */
   personEdit?: boolean;
   backingIndex?: string;
   /** Bypasses the deleted-KI guard, allowing updates to an already soft-deleted KI. */
@@ -108,12 +119,19 @@ export const updateKi = async (
   }
 
   const now = new Date().toISOString();
-  const editedBy = personEdit && changesWhatItSays(revision.source, ki) ? writer : undefined;
+  const edited = personEdit && changesWhatItSays(revision.source, ki);
   const changes = {
     ...ki,
+    ...(edited && {
+      attributes: {
+        ...ki.attributes,
+        [EDITED_BY_ATTRIBUTE]: writer.uri,
+        [EDITED_AT_ATTRIBUTE]: now,
+      },
+    }),
     updated_at: now,
     governance: {
-      provenance: { updated_by: writer, ...(editedBy && { edited_by: editedBy }) },
+      provenance: { updated_by: writer },
       ...(lifecycle && { lifecycle }),
     },
   };

@@ -75,7 +75,8 @@ describe('isPersonEdited', () => {
   it('is true once a person edited the KI, even if automation wrote it since', () => {
     expect(
       isPersonEdited({
-        governance: { provenance: { updated_by: workflowWriter, edited_by: apiWriter } },
+        attributes: { 'memory.edited_by': apiWriter.uri },
+        governance: { provenance: { updated_by: workflowWriter } },
       })
     ).toBe(true);
   });
@@ -251,7 +252,7 @@ describe('updateKi', () => {
     expect(esClient.index).not.toHaveBeenCalled();
   });
 
-  it('records a person edit when the update changes what the KI says', async () => {
+  it('marks a person edit in the attributes when the update changes what the KI says', async () => {
     const esClient = {
       search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
       update: jest.fn().mockResolvedValue({ result: 'updated' }),
@@ -261,13 +262,17 @@ describe('updateKi', () => {
       aiIndexId: 'my-ai-index',
       dest: indexDest,
       kiId: 'ki-1',
-      ki: { title: 'Renamed', tags: ['ops'] },
+      ki: { title: 'Renamed', tags: ['ops'], attributes: { tier: 'gold' } },
       writer: apiWriter,
       personEdit: true,
     });
 
-    expect((esClient.update as jest.Mock).mock.calls[0][0].doc.governance).toEqual({
-      provenance: { updated_by: apiWriter, edited_by: apiWriter },
+    const { doc } = (esClient.update as jest.Mock).mock.calls[0][0];
+    expect(doc.governance).toEqual({ provenance: { updated_by: apiWriter } });
+    expect(doc.attributes).toEqual({
+      tier: 'gold',
+      'memory.edited_by': apiWriter.uri,
+      'memory.edited_at': doc.updated_at,
     });
   });
 
@@ -286,9 +291,9 @@ describe('updateKi', () => {
       personEdit: true,
     });
 
-    expect((esClient.update as jest.Mock).mock.calls[0][0].doc.governance).toEqual({
-      provenance: { updated_by: apiWriter },
-    });
+    const { doc } = (esClient.update as jest.Mock).mock.calls[0][0];
+    expect(doc.governance).toEqual({ provenance: { updated_by: apiWriter } });
+    expect(doc).not.toHaveProperty('attributes');
   });
 
   it('writes when an array field is narrowed, not treating it as a noop', async () => {

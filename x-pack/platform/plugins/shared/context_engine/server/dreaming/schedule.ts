@@ -14,7 +14,10 @@ import {
   CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
-import type { ContextEngineMaintenanceWorkflowTemplateValues } from '@kbn/workflows/managed';
+import type {
+  ContextEngineDreamingWorkflowTemplateValues,
+  ContextEngineMaintenanceWorkflowTemplateValues,
+} from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import {
   DEFAULT_DREAMING_INTERVAL,
@@ -95,7 +98,7 @@ export const dreamingTemplateValuesFor = (
   aiIndex: AiIndexItem,
   dreaming: AiIndexDreamingConfig,
   spaceId: string
-): ContextEngineMaintenanceWorkflowTemplateValues => {
+): ContextEngineDreamingWorkflowTemplateValues & ContextEngineMaintenanceWorkflowTemplateValues => {
   const { facts, entities, relationships } = dreamingTypesOf(dreaming);
   const maintenance = maintenanceConfigOf(dreaming.maintenance);
   return {
@@ -113,7 +116,6 @@ export const dreamingTemplateValuesFor = (
     maintenanceIntervalMinutes:
       parseIntervalMinutes(maintenance.schedule.interval) ?? MIN_DREAMING_INTERVAL_MINUTES,
     maintenanceMode: maintenance.mode,
-    maxTombstoneShare: maintenance.max_tombstone_share,
   };
 };
 

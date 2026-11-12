@@ -51,16 +51,33 @@ const relationship = (from: string, relation: string, to: string, overrides = {}
   ...overrides,
 });
 
+const restrictedTo = (name: string) => ({
+  kibana: { privileges: [{ space: 'default', name: [name], count: 1 }] },
+});
+
+const cursorAt = (position: number) => ({
+  from: `2026-11-02T00:00:00.${String(position).padStart(3, '0')}Z`,
+  afterId: `cursor-${position}`,
+});
+
 const fakeReader = (
   stored: DreamedKi[],
-  { changed = [], resume, similar = {} }: Partial<ChangedPage> & {
+  {
+    changed = [],
+    resume,
+    similar = {},
+  }: Partial<Omit<ChangedPage, 'cursors'>> & {
     changed?: DreamedKi[];
     similar?: Record<string, string[]>;
   } = {}
 ): MaintenanceReader => {
   const byId = new Map(stored.map((ki) => [ki.id, ki]));
   return {
-    changedSince: async () => ({ kis: changed, ...(resume && { resume }) }),
+    changedSince: async () => ({
+      kis: changed,
+      cursors: changed.map((_, position) => cursorAt(position)),
+      ...(resume && { resume }),
+    }),
     latestByIds: async (ids) =>
       new Map(ids.flatMap((id) => (byId.has(id) ? [[id, byId.get(id)!] as const] : []))),
     citing: async (uris, kind) =>
@@ -84,6 +101,7 @@ const options: GatherOptions = {
   writerUri: WRITER,
   neighbors: 5,
   sweepSize: 0,
+  maxTombstoneShare: 0.1,
   since: '2026-11-01T00:00:00.000Z',
 };
 
@@ -285,14 +303,126 @@ describe('gatherMaintenance', () => {
     const stored = [
       memory('m-1'),
       fact('fact-a', {
-        governance: {
-          provenance: { edited_by: { uri: 'api://context_engine.ki.update', metadata: {} } },
-        },
+        attributes: { 'memory.edited_by': 'api://context_engine.ki.update' },
       }),
     ];
 
     const output = await gatherMaintenance(fakeReader(stored, { changed: [stored[1]] }), options);
 
     expect(output.batches[0].items[0].person_edited).toBe(true);
+  });
+
+  it('never shows an entity the facts about it that its audience cannot see', async () => {
+    const secret = restrictedTo('a');
+    const stored = [
+      memory('m-1'),
+      entity('entity-a'),
+      fact('fact-secret', { permissions: secret }),
+      fact('fact-open'),
+      relationship('fact-secret', 'about', 'entity-a', { permissions: secret }),
+      relationship('fact-open', 'about', 'entity-a'),
+    ];
+
+    const onlySecret = await gatherMaintenance(
+      fakeReader(stored, { changed: [stored[2]] }),
+      options
+    );
+    const both = await gatherMaintenance(
+      fakeReader(stored, { changed: [stored[2], stored[3]] }),
+      options
+    );
+
+    expect(onlySecret.counts.about_facts_changed).toBe(0);
+    expect(onlySecret.batches.flatMap(({ items }) => items.map(({ id }) => id))).toEqual([
+      'fact-secret',
+    ]);
+    const open = both.batches.find(({ audience }) => audience === 'open');
+    expect(open?.items.map(({ id }) => id)).toEqual(['fact-open', 'entity-a']);
+    expect(open?.items[1].about_fact_ids).toEqual(['fact-open']);
+    expect(open?.about_facts).toEqual([]);
+    expect(open?.relationships.map(({ id }) => id)).toEqual(['rel-fact-open-about-entity-a']);
+  });
+
+  it('caps the facts and relationships one batch shows', async () => {
+    const entities = Array.from({ length: 20 }, (_, index) => entity(`entity-${index}`));
+    const facts = entities.flatMap(({ id }) =>
+      Array.from({ length: 50 }, (_, index) => fact(`fact-${id}-${index}`))
+    );
+    const links = facts.map(({ id }, index) =>
+      relationship(id, 'about', entities[Math.floor(index / 50)].id)
+    );
+
+    const output = await gatherMaintenance(
+      fakeReader([memory('m-1'), ...entities, ...facts, ...links], { changed: entities }),
+      options
+    );
+
+    const [batch] = output.batches;
+    expect(batch.about_facts).toHaveLength(500);
+    expect(batch.relationships).toHaveLength(500);
+    const shown = new Set(batch.about_facts.map(({ id }) => id));
+    expect(
+      batch.items.every(({ about_fact_ids: aboutFactIds = [] }) =>
+        aboutFactIds.every((id) => shown.has(id))
+      )
+    ).toBe(true);
+  });
+
+  it('only looks up similar items for what fits, and resumes at the first change left out', async () => {
+    const changed = Array.from({ length: 101 }, (_, index) =>
+      fact(`fact-${String(index).padStart(3, '0')}`, { permissions: restrictedTo(`r${index}`) })
+    );
+    const reader = fakeReader([memory('m-1'), ...changed], {
+      changed,
+      resume: cursorAt(300),
+    });
+    const similar = jest.spyOn(reader, 'similar');
+
+    const output = await gatherMaintenance(reader, options);
+
+    expect(output.batches).toHaveLength(100);
+    expect(output.reviewed).toBe(100);
+    expect(output.counts.changed).toBe(100);
+    expect(similar.mock.calls[0][0]).toHaveLength(100);
+    expect(output.resume_from).toBe(cursorAt(99).from);
+    expect(output.resume_after_id).toBe(cursorAt(99).afterId);
+  });
+
+  it('sweeps on from the last swept item that fit', async () => {
+    const changed = Array.from({ length: 99 }, (_, index) =>
+      fact(`c-${String(index).padStart(3, '0')}`, { permissions: restrictedTo(`r${index}`) })
+    );
+    const swept = Array.from({ length: 25 }, (_, index) =>
+      fact(`s-${String(index).padStart(3, '0')}`)
+    );
+
+    const output = await gatherMaintenance(
+      fakeReader([memory('m-1'), ...changed, ...swept], { changed }),
+      { ...options, sweepSize: 25, sweepAfterId: 'r' }
+    );
+
+    expect(output.batches).toHaveLength(100);
+    expect(output.counts.sweep).toBe(20);
+    expect(output.sweep_after_id).toBe('s-019');
+    expect(output.resume_from).toBe('');
+  });
+
+  it('allows a share of the reviewed items to be tombstoned, and at least a few', async () => {
+    const stored = [
+      memory('m-1'),
+      ...Array.from({ length: 30 }, (_, index) => fact(`fact-${String(index).padStart(2, '0')}`)),
+    ];
+
+    const few = await gatherMaintenance(fakeReader(stored), { ...options, sweepSize: 2 });
+    const exact = await gatherMaintenance(fakeReader(stored), { ...options, sweepSize: 30 });
+    const share = await gatherMaintenance(fakeReader(stored), {
+      ...options,
+      sweepSize: 30,
+      maxTombstoneShare: 0.15,
+    });
+
+    expect(few.max_tombstones).toBe(3);
+    expect(exact.max_tombstones).toBe(3);
+    expect(share.max_tombstones).toBe(5);
   });
 });

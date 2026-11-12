@@ -118,9 +118,7 @@ describe('applyMaintenanceGroups', () => {
     stored.set(
       'e-2',
       entity('e-2', {
-        governance: {
-          provenance: { edited_by: { uri: 'api://context_engine.ki.update', metadata: {} } },
-        },
+        attributes: { 'memory.edited_by': 'api://context_engine.ki.update' },
       })
     );
 

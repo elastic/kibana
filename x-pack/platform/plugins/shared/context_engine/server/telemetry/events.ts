@@ -211,7 +211,9 @@ const memoryMaintenanceRunEventSchema: RootSchema<ReportMemoryMaintenanceRunEven
   superseded: count('Items merged into another, or that lost a contradiction.'),
   rewritten: count('Items rewritten after some of their memories were deleted.'),
   summarized: count('Entities whose summary was refreshed.'),
-  tombstoned: count('Items and relationships tombstoned without a model.'),
+  tombstoned: count(
+    'Items whose memories were all deleted, and relationships that were broken, duplicate or inverse.'
+  ),
   needs_review: count('Changes left for a person.'),
   rejected: count('Changes that broke a rule.'),
 };
