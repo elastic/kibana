@@ -28,12 +28,20 @@ export const journey = new Journey({
     await page.goto(kbnUrl.get(`/app/dashboards`));
     await kibanaPage.waitForListViewTable();
   })
-  .step('Search dashboards', async ({ page, inputDelays, kibanaPage }) => {
+  .step('Search dashboards', async ({ page, inputDelays }) => {
+    // Free-text search is debounced, so the table can still be showing unfiltered
+    // results when typing returns. Waiting for it to look idle would then pass on
+    // the pre-search table; wait for a row that cannot match to go instead.
+    const filteredOut = page.locator(subj(CONTENT_LIST_TEST_SUBJECTS.table)).getByRole('link', {
+      name: '[Flights] Global Flight Dashboard',
+      exact: true,
+    });
+
     const searchBox = page.locator(subj(toolbarSubjects.searchBox));
     await searchBox.pressSequentially('Web', {
       delay: inputDelays.TYPING,
     });
-    await kibanaPage.waitForListViewTable();
+    await filteredOut.waitFor({ state: 'detached' });
   })
   .step('Delete dashboard', async ({ page, kibanaPage }) => {
     const deletedDashboard = page
