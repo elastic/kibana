@@ -21766,7 +21766,6 @@
     "xpack.apm.subFeatureRegistry.modifySettings": "Capacidade de modificar configurações",
     "xpack.apm.subFeatureRegistry.settings": "Configurações",
     "xpack.apm.suggestionsSelect.comboBox.ariaLabel": "Selecione um valor",
-    "xpack.apm.technicalPreviewBadge.ariaLabel": "Essa funcionalidade está em prévia técnica e pode ser alterada ou removida completamente em uma versão futura. A Elastic se empenhará para corrigir quaisquer problemas, mas os recursos em versão prévia técnica não estão sujeitos ao SLA de suporte dos recursos GA oficiais.",
     "xpack.apm.technicalPreviewBadgeDescription": "Essa funcionalidade está em prévia técnica e pode ser alterada ou removida completamente em uma versão futura. A Elastic se empenhará para corrigir quaisquer problemas, mas os recursos em versão prévia técnica não estão sujeitos ao SLA de suporte dos recursos GA oficiais.",
     "xpack.apm.technicalPreviewBadgeLabel": "Prévia técnica",
     "xpack.apm.templateDescription.clearBundleButtonLabel": "Limpar pacote",
