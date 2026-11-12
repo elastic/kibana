@@ -15,6 +15,7 @@ import {
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown-schemas';
 import { DASHBOARD_FAILURE_TYPES } from '../failure_types';
+import type { PanelHeightHint } from '../resolve_panel';
 import { getErrorMessage, type DashboardFailure } from '../utils';
 import {
   type ArrangeDashboardLayout,
@@ -24,6 +25,7 @@ import {
   type LayoutPanelKind,
   type LayoutRequest,
 } from './types';
+import { getGridRowsForHeight } from './panel_height';
 
 /** Long content is cut, since its start is enough to judge the height it needs. */
 const MAX_CONTENT_LENGTH = 2000;
@@ -93,6 +95,22 @@ const getPanelsById = (widgets: Widgets): Map<string, AttachmentPanel> =>
       .map((panel) => [panel.id, panel])
   );
 
+/** The grid height of every custom content panel of the dashboard that has a declared content height. */
+const getHeightRowsById = (
+  widgets: Widgets,
+  heightHints: readonly PanelHeightHint[]
+): Map<string, number> => {
+  const panelsById = getPanelsById(widgets);
+  return new Map(
+    heightHints.flatMap(({ panelId, heightPx }): Array<[string, number]> => {
+      const panel = panelsById.get(panelId);
+      return panel?.type === CUSTOM_CONTENT_EMBEDDABLE_TYPE
+        ? [[panelId, getGridRowsForHeight(heightPx, typeof panel.config.title === 'string')]]
+        : [];
+    })
+  );
+};
+
 /** The previous kind of every panel whose kind changed, e.g. a donut edited into a table. */
 const getPreviousKinds = (
   widgets: Widgets,
@@ -114,17 +132,25 @@ const getPreviousKinds = (
   );
 };
 
-/** The ids of the markdown panels whose text changed, which may need another height. */
+/**
+ * The ids of the markdown panels whose text changed and of the custom content panels whose template
+ * changed, which may need another height.
+ */
 const getChangedTextIds = (widgets: Widgets, originalWidgets: Widgets): Set<string> => {
   const originalPanelsById = getPanelsById(originalWidgets);
   return new Set(
     [...getPanelsById(widgets).values()]
       .filter((panel) => {
         const originalPanel = originalPanelsById.get(panel.id);
+        if (originalPanel?.type !== panel.type) {
+          return false;
+        }
+        if (panel.type === MARKDOWN_EMBEDDABLE_TYPE) {
+          return originalPanel.config.content !== panel.config.content;
+        }
         return (
-          panel.type === MARKDOWN_EMBEDDABLE_TYPE &&
-          originalPanel?.type === MARKDOWN_EMBEDDABLE_TYPE &&
-          originalPanel.config.content !== panel.config.content
+          panel.type === CUSTOM_CONTENT_EMBEDDABLE_TYPE &&
+          originalPanel.config.template !== panel.config.template
         );
       })
       .map(({ id }) => id)
@@ -166,7 +192,8 @@ const aliasInstructions = (instructions: string, aliasById: ReadonlyMap<string, 
  * The dashboard with short ids. Panels new to their container (added or moved) are sent without a
  * grid and new sections without a row, since their placeholder positions are for the call to set.
  * Moved panels keep their size. Retyped panels name the kind their grid was sized for, and markdown
- * panels whose text changed are flagged. Each changed container lists the space its removed and
+ * panels whose text changed are flagged, and custom content panels carry the grid height their
+ * declared content height needs. Each changed container lists the space its removed and
  * moved-out panels left.
  */
 const toLayoutRequest = (
@@ -174,6 +201,7 @@ const toLayoutRequest = (
   originalWidgets: Widgets,
   previousKinds: ReadonlyMap<string, LayoutPanelKind>,
   changedTextIds: ReadonlySet<string>,
+  heightRowsById: ReadonlyMap<string, number>,
   aliasById: ReadonlyMap<string, string>,
   instructions: string | undefined
 ): LayoutRequest => {
@@ -203,6 +231,7 @@ const toLayoutRequest = (
         ...getPlacementHint(panel, sectionId),
         ...(previousKind ? { retypedFrom: previousKind } : {}),
         ...(changedTextIds.has(id) ? { textChanged: true as const } : {}),
+        ...(heightRowsById.has(id) ? { heightRows: heightRowsById.get(id) } : {}),
       };
     });
   return {
@@ -233,6 +262,8 @@ interface ArrangeLayoutParams {
   dashboardData: DashboardAttachmentData;
   /** Where panels and sections go, from the user or the authoring agent. */
   instructions?: string;
+  /** The height that panels resolved in this call need, which sizes those that are custom content. */
+  heightHints?: readonly PanelHeightHint[];
   arrangeLayout: ArrangeDashboardLayout;
   logger: Logger;
 }
@@ -255,6 +286,7 @@ export const arrangeDashboardLayout = async ({
   originalPanels,
   dashboardData,
   instructions,
+  heightHints = [],
   arrangeLayout,
   logger,
 }: ArrangeLayoutParams): Promise<ArrangeLayoutResult> => {
@@ -265,10 +297,12 @@ export const arrangeDashboardLayout = async ({
   const aliasById = createAliases(dashboardData.panels);
   const previousKinds = getPreviousKinds(dashboardData.panels, originalPanels);
   const changedTextIds = getChangedTextIds(dashboardData.panels, originalPanels);
+  const heightRowsById = getHeightRowsById(dashboardData.panels, heightHints);
   if (
     instructions === undefined &&
     previousKinds.size === 0 &&
     changedTextIds.size === 0 &&
+    heightRowsById.size === 0 &&
     !hasContainerChanges(dashboardData.panels, originalPanels)
   ) {
     return { dashboardData };
@@ -278,6 +312,7 @@ export const arrangeDashboardLayout = async ({
     originalPanels,
     previousKinds,
     changedTextIds,
+    heightRowsById,
     aliasById,
     instructions
   );

@@ -11,6 +11,7 @@ import type {
   DashboardAttachmentData,
   DashboardSection,
 } from '@kbn/agent-builder-dashboards-common';
+import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown-schemas';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { DASHBOARD_FAILURE_TYPES } from '../failure_types';
@@ -294,6 +295,84 @@ describe('arrangeDashboardLayout', () => {
         textChanged: true,
       })
     );
+  });
+
+  describe('custom content panels', () => {
+    const createCustomContentPanel = (template: string, title?: string): AttachmentPanel => ({
+      type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+      id: 'card',
+      config: { template, ...(title ? { title } : {}) },
+      grid: { x: 0, y: 0, w: 24, h: 9 },
+    });
+    const arrangeLayout = jest.fn(async () => ({
+      plan: '',
+      panels: [{ id: 'p1', x: 0, y: 0, w: 24, h: 14 }],
+      sections: [],
+    }));
+    const getSentPanels = () => {
+      const [[{ panels }]] = arrangeLayout.mock.calls as unknown as [[LayoutRequest]];
+      return panels;
+    };
+
+    beforeEach(() => arrangeLayout.mockClear());
+
+    it('flags a panel whose template changed in place, so its height is looked at again', async () => {
+      await arrangeDashboardLayout({
+        originalPanels: [createCustomContentPanel('<p>old</p>')],
+        dashboardData: { title: 'Dashboard', panels: [createCustomContentPanel('<p>new</p>')] },
+        arrangeLayout,
+        logger,
+      });
+
+      expect(getSentPanels()[0]).toEqual(
+        expect.objectContaining({ grid: { x: 0, y: 0, w: 24, h: 9 }, textChanged: true })
+      );
+    });
+
+    it('skips the layout call when the template did not change and no height was declared', async () => {
+      const panels = [createCustomContentPanel('<p>same</p>')];
+
+      await arrangeDashboardLayout({
+        originalPanels: panels,
+        dashboardData: { title: 'Dashboard', panels },
+        arrangeLayout,
+        logger,
+      });
+
+      expect(arrangeLayout).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['without a title', undefined, 13],
+      ['with a title, which adds the title bar', 'Flights', 15],
+    ])(
+      'sends the grid height that the declared content height needs %s',
+      async (_, title, rows) => {
+        const panels = [createCustomContentPanel('<p>same</p>', title)];
+
+        await arrangeDashboardLayout({
+          originalPanels: panels,
+          dashboardData: { title: 'Dashboard', panels },
+          heightHints: [{ panelId: 'card', heightPx: 352 }],
+          arrangeLayout,
+          logger,
+        });
+
+        expect(getSentPanels()[0]).toEqual(expect.objectContaining({ heightRows: rows }));
+      }
+    );
+
+    it('ignores a height declared for a panel that is not custom content', async () => {
+      await arrangeDashboardLayout({
+        originalPanels: originalDashboardData.panels,
+        dashboardData: originalDashboardData,
+        heightHints: [{ panelId: 'existing', heightPx: 352 }],
+        arrangeLayout,
+        logger,
+      });
+
+      expect(arrangeLayout).not.toHaveBeenCalled();
+    });
   });
 
   it.each<[string, LayoutArrangement, string]>([
