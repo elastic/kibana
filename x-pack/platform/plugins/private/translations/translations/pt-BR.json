@@ -9845,7 +9845,6 @@
     "responseOpsRuleForm.actionForm.actionGroupRecoveredMessage": "Recuperado",
     "responseOpsRuleForm.components.ruleTypeModal.allRuleTypes": "Todos",
     "responseOpsRuleForm.components.ruleTypeModal.classicBadge": "Clássico",
-    "responseOpsRuleForm.components.ruleTypeModal.cpsSupportComingSoon": "Suporte a CPS em breve",
     "responseOpsRuleForm.components.ruleTypeModal.loadingRuleTypes": "Carregando tipos de regra",
     "responseOpsRuleForm.components.ruleTypeModal.loadingTemplates": "Carregando modelos",
     "responseOpsRuleForm.components.ruleTypeModal.minimumRequiredLicenseMessage": "Esta regra requer uma licença {minimumLicenseRequired}.",
