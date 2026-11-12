@@ -36,6 +36,15 @@ describe('investigateRuleSkill', () => {
       expect(investigateRuleSkill.content.length).toBeGreaterThan(0);
     });
 
+    // Why: the closed-alerts query names fields (process, file, investigation fields) that only the
+    // full detail returns. With the summary detail, the exception candidates would be missing.
+    it('asks for full detail on the confirmed dispositions query', () => {
+      const { content } = investigateRuleSkill;
+      const query = content.slice(content.indexOf('**Confirmed dispositions query'));
+
+      expect(query).toMatch(/\`detail\`[^.]*\`full\`/);
+    });
+
     it('routes plural noisy-rule list requests away from this skill', () => {
       expect(investigateRuleSkill.content).toContain('**specific** detection rule');
       expect(investigateRuleSkill.content).toContain('plural list/rank/count requests');
