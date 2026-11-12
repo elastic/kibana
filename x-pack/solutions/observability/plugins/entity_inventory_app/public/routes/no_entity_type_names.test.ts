@@ -10,8 +10,8 @@ import { join, relative } from 'path';
 
 const PUBLIC_DIR = join(__dirname, '..');
 
-// `routes/config.tsx` holds the page-to-type map until definitions carry a category (#6239).
-// `mock_inventory_api/` is the filters' stand-in for the routes, replaced by #6355.
+// `routes/config.tsx` holds the page-to-type map until entity definitions carry a category.
+// `mock_inventory_api/` is the filters' stand-in for the routes until the filters read the routes.
 const ALLOWED_FILES: readonly string[] = ['routes/config.tsx'];
 const ALLOWED_DIRECTORIES: readonly string[] = ['mock_inventory_api', '__fixtures__'];
 const TEST_ONLY_FILE = /(\.test\.tsx?$)|(^mocks\.tsx$)/;

@@ -17,7 +17,7 @@ import type { EntityInventoryEntityCategory } from '../types';
 /**
  * The entity types each page lists, one section per type; a page without an entry, All resources,
  * lists every type of the `types` response. The only place in the app that names a type: it is
- * replaced by filtering the `types` response by category when definitions carry one (#6239).
+ * replaced by filtering the `types` response by category when entity definitions carry one.
  */
 const ENTITY_TYPES_BY_CATEGORY: Readonly<
   Partial<Record<EntityInventoryEntityCategory, readonly string[]>>

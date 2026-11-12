@@ -38,7 +38,7 @@ const SKELETON_BAR_WIDTHS = ['40%', '85%', '60%', '70%', '50%'] as const;
 const SKELETON_FIRST_COLUMN_WIDTH = '14%';
 const SKELETON_ROW_COUNT = 8;
 
-/** Shown while the page's `types` request is running. */
+/** Shown while the app's `types` request is running. */
 export const EntityTableLoading = () => (
   <EuiEmptyPrompt
     icon={<EuiLoadingSpinner size="xl" />}
