@@ -611,4 +611,22 @@ describe('ExpressionRow', () => {
     expect(comparatorOptionValues).toContain(COMPARATORS.BETWEEN_INCLUSIVE);
     expect(comparatorOptionValues).toContain(COMPARATORS.NOT_BETWEEN_INCLUSIVE);
   });
+
+  it('exposes the expanded state of the row toggle to assistive technology', async () => {
+    const { wrapper, update } = await setup(expression as InventoryMetricConditions);
+    const findToggle = () => wrapper.find('button[data-test-subj="infraExpressionRowButton"]');
+
+    expect(findToggle().prop('aria-expanded')).toBe(true);
+    expect(findToggle().prop('aria-label')).toBe('Collapse row.');
+    const contentId = findToggle().prop('aria-controls');
+    expect(wrapper.find(`div#${contentId}`).exists()).toBe(true);
+
+    findToggle().simulate('click');
+    await update();
+
+    expect(findToggle().prop('aria-expanded')).toBe(false);
+    expect(findToggle().prop('aria-label')).toBe('Expand row.');
+    expect(findToggle().prop('aria-controls')).toBeUndefined();
+    expect(wrapper.find(`div#${contentId}`).exists()).toBe(false);
+  });
 });
