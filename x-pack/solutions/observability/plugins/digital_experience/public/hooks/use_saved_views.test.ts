@@ -7,7 +7,7 @@
 
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useApiClient } from './use_api_client';
-import { messageOfRequestError, useSavedViews } from './use_saved_views';
+import { useSavedViews } from './use_saved_views';
 
 jest.mock('./use_api_client');
 
@@ -87,15 +87,5 @@ describe('useSavedViews', () => {
     await expect(result.current.create({ name: 'dup' })).rejects.toThrow('Conflict');
 
     expect(fetch).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe('messageOfRequestError', () => {
-  it('prefers what the server said, then the error’s own message', () => {
-    expect(
-      messageOfRequestError(Object.assign(new Error('Conflict'), { body: { message: 'Taken' } }))
-    ).toBe('Taken');
-    expect(messageOfRequestError(new Error('Network down'))).toBe('Network down');
-    expect(messageOfRequestError('plain')).toBe('plain');
   });
 });

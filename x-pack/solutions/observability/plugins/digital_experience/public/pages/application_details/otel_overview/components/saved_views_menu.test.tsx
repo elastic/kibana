@@ -191,10 +191,13 @@ describe('SavedViewsMenu', () => {
       expect(screen.getByTestId('digitalExperienceSavedViewName')).toHaveValue('Safari');
     });
 
-    it('saves a view again with the current filters, keeping its name and what it keeps of the time', async () => {
+    it('asks before it saves a view again, and then keeps its name and what it keeps of the time', async () => {
       await open();
 
       fireEvent.click(screen.getByTestId('digitalExperienceSavedViewUpdate-Safari'));
+      // Everyone in the space shares the view, so nothing is saved over it on one click.
+      expect(update).not.toHaveBeenCalled();
+      fireEvent.click(screen.getByTestId('digitalExperienceSavedViewConfirmUpdate-Safari'));
       await waitFor(() =>
         expect(update).toHaveBeenLastCalledWith('a', {
           name: 'Safari',
@@ -203,7 +206,8 @@ describe('SavedViewsMenu', () => {
         })
       );
 
-      fireEvent.click(screen.getByTestId('digitalExperienceSavedViewUpdate-checkout'));
+      fireEvent.click(await screen.findByTestId('digitalExperienceSavedViewUpdate-checkout'));
+      fireEvent.click(screen.getByTestId('digitalExperienceSavedViewConfirmUpdate-checkout'));
       await waitFor(() =>
         expect(update).toHaveBeenLastCalledWith('b', {
           name: 'checkout',
@@ -211,6 +215,35 @@ describe('SavedViewsMenu', () => {
           ...CURRENT.state,
           ...CURRENT.timeRange,
         })
+      );
+    });
+
+    it('keeps the view as it is when saving it again is cancelled', async () => {
+      await open();
+
+      fireEvent.click(screen.getByTestId('digitalExperienceSavedViewUpdate-Safari'));
+      fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+      expect(update).not.toHaveBeenCalled();
+      expect(screen.getByTestId('digitalExperienceSavedViewUpdate-Safari')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('digitalExperienceSavedViewConfirmUpdate-Safari')
+      ).not.toBeInTheDocument();
+    });
+
+    it('shows what the server said when saving a view again fails', async () => {
+      update.mockRejectedValue(
+        Object.assign(new Error('Conflict'), {
+          body: { message: 'View [a] was changed or deleted by someone else. Reload the views.' },
+        })
+      );
+      await open();
+
+      fireEvent.click(screen.getByTestId('digitalExperienceSavedViewUpdate-Safari'));
+      fireEvent.click(screen.getByTestId('digitalExperienceSavedViewConfirmUpdate-Safari'));
+
+      expect(await screen.findByTestId('digitalExperienceSavedViewError')).toHaveTextContent(
+        'changed or deleted by someone else'
       );
     });
 

@@ -16,8 +16,15 @@ export const DIGITAL_EXPERIENCE_EBT_ACTIONS = {
   SET_FILTER: 'setFilter',
   /** The user applies a saved view of filters, query and percentile. */
   APPLY_VIEW: 'applyView',
-  /** The user saves the filters, query and percentile as a view, or saves a view again. */
+  /** The user opens the list of saved views. */
+  OPEN_VIEWS: 'openViews',
+  /**
+   * The user saves the filters, query and percentile as a view, or asks to save a view again, and
+   * then confirms it.
+   */
   SAVE_VIEW: 'saveView',
+  /** The user keeps a saved view as it is, rather than saving the current filters in it. */
+  CANCEL_UPDATE_VIEW: 'cancelUpdateView',
   /** The user asks to delete a saved view, and then confirms it. */
   DELETE_VIEW: 'deleteView',
   /** The user keeps a saved view they were about to delete. */
@@ -77,6 +84,8 @@ export const APPLICATION_OVERVIEW_EBT_ELEMENTS = {
   DEVICE_FILTER: 'overviewDeviceFilter',
   COUNTRY_FILTER: 'overviewCountryFilter',
   SAVED_VIEWS: 'overviewSavedViews',
+  SAVED_VIEW_UPDATE: 'overviewSavedViewUpdate',
+  SAVED_VIEW_UPDATE_CONFIRM: 'overviewSavedViewUpdateConfirm',
   SAVED_VIEW_DELETE: 'overviewSavedViewDelete',
   SAVED_VIEW_DELETE_CONFIRM: 'overviewSavedViewDeleteConfirm',
   APP_VERSION_FILTER: 'overviewAppVersionFilter',
