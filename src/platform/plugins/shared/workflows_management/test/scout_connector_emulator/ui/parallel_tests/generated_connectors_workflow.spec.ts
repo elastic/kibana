@@ -19,6 +19,8 @@ import {
   connectToEmulator,
   createConnectorInSpace,
   deleteConnectorInSpace,
+  loadScenario,
+  setFixtures,
 } from '../fixtures/emulator';
 import { generateSteps } from '../fixtures/generated_steps';
 
@@ -33,7 +35,8 @@ interface GeneratedConnector {
 
 /**
  * Connectors whose workflow is generated from their specs: one step per action the emulator
- * can answer, with inputs from the action's schema. A connector has to be enabled for Workflows
+ * can answer, with inputs from the action's schema, and the emulator answers with the connector's
+ * `emulator/responses.json` if it has one. A connector has to be enabled for Workflows
  * (its `supportedFeatureIds`) for the editor to accept its steps. To test another connector, add it here (with
  * the config it needs to be created, and nothing else) and to the connectors the emulator serves
  * (CONNECTORS in .buildkite/scripts/steps/test/connector_emulator_scout.sh). Connectors that need
@@ -110,6 +113,9 @@ test.describe(
             control,
             action: probe,
           });
+
+          // The connector's realistic responses, when it has them; otherwise the spec's samples.
+          await setFixtures(control, await loadScenario(folder, { optional: true }));
 
           await runWorkflow(
             { page, pageObjects },

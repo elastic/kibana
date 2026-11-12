@@ -128,5 +128,46 @@
         "0:1": "https://example.com/renders/welcome.png"
       }
     }
+  },
+  {
+    "source": "rest",
+    "method": "GET",
+    "path": "/v1/files/{file_key}/nodes",
+    "status": 200,
+    "body": {
+      "name": "Onboarding flow",
+      "editorType": "figma",
+      "lastModified": "2026-11-10T09:30:00Z",
+      "role": "owner",
+      "thumbnailUrl": "https://example.com/thumbnails/onboarding.png",
+      "version": "4821",
+      "nodes": {
+        "0:1": {
+          "document": {
+            "id": "0:1",
+            "name": "Welcome",
+            "type": "CANVAS",
+            "children": [],
+            "scrollBehavior": "SCROLLS",
+            "backgroundColor": {
+              "r": 0.96,
+              "g": 0.96,
+              "b": 0.96,
+              "a": 1
+            },
+            "flowStartingPoints": [],
+            "prototypeStartNodeID": null,
+            "prototypeDevice": {
+              "type": "NONE",
+              "rotation": "NONE"
+            }
+          },
+          "components": {},
+          "componentSets": {},
+          "schemaVersion": 0,
+          "styles": {}
+        }
+      }
+    }
   }
 ]

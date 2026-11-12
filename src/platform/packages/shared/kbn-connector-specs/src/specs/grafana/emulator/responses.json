@@ -1,0 +1,535 @@
+[
+  {
+    "source": "alerting",
+    "method": "GET",
+    "path": "/alertmanager/grafana/api/v2/alerts",
+    "status": 200,
+    "body": [
+      {
+        "annotations": {
+          "summary": "CPU above 90% for 5 minutes"
+        },
+        "endsAt": "2026-11-12T12:00:00.000Z",
+        "fingerprint": "b4f1a7e9c2d30a51",
+        "generatorURL": "https://your-stack.grafana.net/alerting/grafana/a1b2c3d4/view",
+        "labels": {
+          "alertname": "HighCPU",
+          "severity": "critical"
+        },
+        "receivers": [
+          {
+            "name": "oncall-pagerduty"
+          }
+        ],
+        "startsAt": "2026-11-12T10:00:00.000Z",
+        "status": {
+          "inhibitedBy": [],
+          "silencedBy": [],
+          "state": "[unprocessed active suppressed]"
+        },
+        "updatedAt": "2026-11-12T10:01:00.000Z"
+      }
+    ]
+  },
+  {
+    "source": "alerting",
+    "method": "GET",
+    "path": "/alertmanager/grafana/api/v2/silence/{SilenceId}",
+    "status": 200,
+    "body": {
+      "accessControl": {},
+      "comment": "Planned maintenance window",
+      "createdBy": "ada",
+      "endsAt": "2026-11-12T12:00:00.000Z",
+      "id": "f3a9c2d4-7b1e-4c8a-9d02-6e5f4a3b2c1d",
+      "matchers": [
+        {
+          "isEqual": true,
+          "isRegex": false,
+          "name": "alertname",
+          "value": "HighCPU"
+        }
+      ],
+      "metadata": {
+        "folder_uid": "obs",
+        "rule_title": "High CPU usage",
+        "rule_uid": "a1b2c3d4"
+      },
+      "startsAt": "2026-11-12T10:00:00.000Z",
+      "status": {
+        "state": "[expired active pending]"
+      },
+      "updatedAt": "2026-11-12T10:01:00.000Z"
+    }
+  },
+  {
+    "source": "alerting",
+    "method": "DELETE",
+    "path": "/alertmanager/grafana/api/v2/silence/{SilenceId}",
+    "status": 200,
+    "body": {}
+  },
+  {
+    "source": "alerting",
+    "method": "GET",
+    "path": "/alertmanager/grafana/api/v2/silences",
+    "status": 200,
+    "body": [
+      {
+        "accessControl": {},
+        "comment": "Planned maintenance window",
+        "createdBy": "ada",
+        "endsAt": "2026-11-12T12:00:00.000Z",
+        "id": "f3a9c2d4-7b1e-4c8a-9d02-6e5f4a3b2c1d",
+        "matchers": [
+          {
+            "isRegex": false,
+            "name": "alertname",
+            "value": "HighCPU"
+          }
+        ],
+        "metadata": {
+          "folder_uid": "obs",
+          "rule_title": "High CPU usage",
+          "rule_uid": "a1b2c3d4"
+        },
+        "startsAt": "2026-11-12T10:00:00.000Z",
+        "status": {
+          "state": "[expired active pending]"
+        },
+        "updatedAt": "2026-11-12T10:01:00.000Z"
+      }
+    ]
+  },
+  {
+    "source": "alerting",
+    "method": "POST",
+    "path": "/alertmanager/grafana/api/v2/silences",
+    "status": 202,
+    "body": {
+      "silenceID": "f3a9c2d4-7b1e-4c8a-9d02-6e5f4a3b2c1d"
+    }
+  },
+  {
+    "source": "http",
+    "method": "GET",
+    "path": "/annotations",
+    "status": 200,
+    "body": [
+      {
+        "alertId": 0,
+        "alertName": "High CPU usage",
+        "avatarUrl": "https://your-stack.grafana.net/avatar/6d3a9c",
+        "created": 1762941600000,
+        "dashboardId": 7,
+        "dashboardUID": "svc-overview",
+        "data": {},
+        "email": "ada@example.com",
+        "id": 101,
+        "login": "ada",
+        "newState": "Alerting",
+        "panelId": 2,
+        "prevState": "Normal",
+        "tags": [
+          "deploy"
+        ],
+        "text": "Deployed web-frontend 2026.11.1",
+        "time": 1762941600000,
+        "timeEnd": 1762945200000,
+        "updated": 1762941600000,
+        "userId": 1,
+        "userUID": "example user uid"
+      }
+    ]
+  },
+  {
+    "source": "http",
+    "method": "POST",
+    "path": "/annotations",
+    "status": 200,
+    "body": {
+      "id": 102,
+      "message": "Annotation added"
+    }
+  },
+  {
+    "source": "http",
+    "method": "DELETE",
+    "path": "/annotations/{annotation_id}",
+    "status": 200,
+    "body": {
+      "message": "Annotation deleted"
+    }
+  },
+  {
+    "source": "http",
+    "method": "PATCH",
+    "path": "/annotations/{annotation_id}",
+    "status": 200,
+    "body": {
+      "message": "Annotation patched"
+    }
+  },
+  {
+    "source": "http",
+    "method": "GET",
+    "path": "/dashboards/uid/{uid}",
+    "status": 200,
+    "body": {
+      "dashboard": {
+        "uid": "svc-overview",
+        "title": "Service overview",
+        "tags": [],
+        "timezone": "browser",
+        "schemaVersion": 39,
+        "version": 3,
+        "panels": [
+          {
+            "id": 1,
+            "type": "timeseries",
+            "title": "Request latency"
+          }
+        ]
+      },
+      "meta": {
+        "annotationsPermissions": {
+          "dashboard": {
+            "uid": "svc-overview",
+            "title": "Service overview",
+            "tags": [],
+            "timezone": "browser",
+            "schemaVersion": 39,
+            "version": 3,
+            "panels": [
+              {
+                "id": 1,
+                "type": "timeseries",
+                "title": "Request latency"
+              }
+            ]
+          }
+        },
+        "apiVersion": "v1",
+        "canAdmin": true,
+        "canDelete": true,
+        "canEdit": true,
+        "canSave": true,
+        "canStar": true,
+        "created": "2026-10-01T10:00:00Z",
+        "createdBy": "ada",
+        "expires": "2026-11-12T10:00:00Z",
+        "folderId": 3,
+        "folderTitle": "Observability",
+        "folderUid": "obs",
+        "folderUrl": "/dashboards/f/obs/observability",
+        "hasAcl": true,
+        "isFolder": true,
+        "isSnapshot": true,
+        "provisioned": true,
+        "provisionedExternalId": "example provisioned external id",
+        "publicDashboardEnabled": true,
+        "slug": "service-overview",
+        "type": "dash-db",
+        "updated": "2026-11-12T10:00:00Z",
+        "updatedBy": "ada",
+        "url": "/d/svc-overview/service-overview",
+        "version": 0
+      }
+    }
+  },
+  {
+    "source": "http",
+    "method": "GET",
+    "path": "/search",
+    "status": 200,
+    "body": [
+      {
+        "description": "Latency, traffic and errors for the checkout service",
+        "folderId": 3,
+        "folderTitle": "Observability",
+        "folderUid": "obs",
+        "folderUrl": "/dashboards/f/obs/observability",
+        "id": 101,
+        "isDeleted": false,
+        "isStarred": false,
+        "orgId": 1,
+        "permanentlyDeleteDate": "2026-11-12T10:00:00Z",
+        "slug": "service-overview",
+        "sortMeta": 0,
+        "sortMetaName": "",
+        "tags": [
+          "deploy"
+        ],
+        "title": "Service overview",
+        "type": "dash-db",
+        "uid": "svc-overview",
+        "uri": "db/service-overview",
+        "url": "/d/svc-overview/service-overview"
+      },
+      {
+        "description": "Latency, traffic and errors for the checkout service",
+        "folderId": 3,
+        "folderTitle": "Observability",
+        "folderUid": "obs",
+        "folderUrl": "/dashboards/f/obs/observability",
+        "id": 101,
+        "isDeleted": false,
+        "isStarred": false,
+        "orgId": 1,
+        "permanentlyDeleteDate": "2026-11-12T10:00:00Z",
+        "slug": "service-overview",
+        "sortMeta": 0,
+        "sortMetaName": "",
+        "tags": [
+          "deploy"
+        ],
+        "title": "Service overview",
+        "type": "dash-db",
+        "uid": "svc-overview",
+        "uri": "db/service-overview",
+        "url": "/d/svc-overview/service-overview"
+      },
+      {
+        "description": "Latency, traffic and errors for the checkout service",
+        "folderId": 3,
+        "folderTitle": "Observability",
+        "folderUid": "obs",
+        "folderUrl": "/dashboards/f/obs/observability",
+        "id": 101,
+        "isDeleted": false,
+        "isStarred": false,
+        "orgId": 1,
+        "permanentlyDeleteDate": "2026-11-12T10:00:00Z",
+        "slug": "service-overview",
+        "sortMeta": 0,
+        "sortMetaName": "",
+        "tags": [
+          "deploy"
+        ],
+        "title": "Service overview",
+        "type": "dash-db",
+        "uid": "svc-overview",
+        "uri": "db/service-overview",
+        "url": "/d/svc-overview/service-overview"
+      }
+    ]
+  },
+  {
+    "source": "http",
+    "method": "GET",
+    "path": "/v1/provisioning/alert-rules",
+    "status": 200,
+    "body": [
+      {
+        "annotations": {
+          "summary": "CPU above 90% for 5 minutes"
+        },
+        "condition": "C",
+        "data": [
+          {}
+        ],
+        "execErrState": "OK",
+        "folderUID": "obs",
+        "for": "PT5M",
+        "id": 101,
+        "isPaused": false,
+        "keep_firing_for": "PT0S",
+        "labels": {
+          "alertname": "HighCPU",
+          "severity": "critical"
+        },
+        "missingSeriesEvalsToResolve": 0,
+        "noDataState": "Alerting",
+        "notification_settings": {
+          "active_time_intervals": [],
+          "group_by": [
+            "alertname",
+            "grafana_folder"
+          ],
+          "group_interval": "5m",
+          "group_wait": "30s",
+          "mute_time_intervals": [],
+          "policy": "example policy",
+          "receiver": "oncall-pagerduty",
+          "repeat_interval": "4h"
+        },
+        "orgID": 1,
+        "provenance": "",
+        "record": {
+          "from": "example from",
+          "metric": "example metric",
+          "target_datasource_uid": "example target datasource uid"
+        },
+        "ruleGroup": "cpu",
+        "title": "Service overview",
+        "uid": "a",
+        "updated": "2026-11-12T10:00:00Z"
+      }
+    ]
+  },
+  {
+    "source": "http",
+    "method": "GET",
+    "path": "/v1/provisioning/alert-rules/{UID}",
+    "status": 200,
+    "body": {
+      "annotations": {
+        "summary": "CPU above 90% for 5 minutes"
+      },
+      "condition": "C",
+      "data": [
+        {
+          "datasourceUid": "prometheus",
+          "model": {},
+          "queryType": "",
+          "refId": "A",
+          "relativeTimeRange": {}
+        }
+      ],
+      "execErrState": "OK",
+      "folderUID": "obs",
+      "for": "PT5M",
+      "id": 101,
+      "isPaused": false,
+      "keep_firing_for": "PT0S",
+      "labels": {
+        "alertname": "HighCPU",
+        "severity": "critical"
+      },
+      "missingSeriesEvalsToResolve": 0,
+      "noDataState": "Alerting",
+      "notification_settings": {
+        "active_time_intervals": [
+          ""
+        ],
+        "group_by": [
+          "alertname",
+          "grafana_folder"
+        ],
+        "group_interval": "5m",
+        "group_wait": "30s",
+        "mute_time_intervals": [
+          "weekends"
+        ],
+        "policy": "example policy",
+        "receiver": "oncall-pagerduty",
+        "repeat_interval": "4h"
+      },
+      "orgID": 1,
+      "provenance": "",
+      "record": {
+        "from": "example from",
+        "metric": "example metric",
+        "target_datasource_uid": "example target datasource uid"
+      },
+      "ruleGroup": "cpu",
+      "title": "Service overview",
+      "uid": "a",
+      "updated": "2026-11-12T10:00:00Z"
+    }
+  },
+  {
+    "source": "http",
+    "method": "GET",
+    "path": "/v1/provisioning/contact-points",
+    "status": 200,
+    "body": [
+      {
+        "disableResolveMessage": false,
+        "name": "oncall-pagerduty",
+        "provenance": "",
+        "settings": {
+          "url": "https://events.pagerduty.com/v2/enqueue"
+        },
+        "type": "alertmanager",
+        "uid": "a"
+      }
+    ]
+  },
+  {
+    "source": "http",
+    "method": "GET",
+    "path": "/v1/provisioning/mute-timings",
+    "status": 200,
+    "body": [
+      {
+        "name": "oncall-pagerduty",
+        "time_intervals": [
+          {
+            "weekdays": [
+              "saturday",
+              "sunday"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "source": "http",
+    "method": "GET",
+    "path": "/v1/provisioning/policies",
+    "status": 200,
+    "body": {
+      "active_time_intervals": [
+        ""
+      ],
+      "continue": false,
+      "group_by": [
+        "alertname"
+      ],
+      "group_interval": "5m",
+      "group_wait": "30s",
+      "match": {
+        "severity": "critical"
+      },
+      "match_re": {},
+      "matchers": [
+        {
+          "Name": "severity",
+          "Type": 0,
+          "Value": "critical"
+        }
+      ],
+      "mute_time_intervals": [
+        "weekends"
+      ],
+      "object_matchers": [
+        [
+          "example object matchers"
+        ]
+      ],
+      "provenance": "",
+      "receiver": "oncall-pagerduty",
+      "repeat_interval": "4h",
+      "routes": [
+        {
+          "active_time_intervals": [
+            ""
+          ],
+          "continue": false,
+          "group_by": [
+            "alertname"
+          ],
+          "group_interval": "5m",
+          "group_wait": "30s",
+          "match": {
+            "severity": "critical"
+          },
+          "match_re": {},
+          "matchers": [],
+          "mute_time_intervals": [
+            "weekends"
+          ],
+          "object_matchers": [],
+          "provenance": "",
+          "receiver": "oncall-pagerduty",
+          "repeat_interval": "4h",
+          "routes": [
+            {}
+          ]
+        }
+      ]
+    }
+  }
+]

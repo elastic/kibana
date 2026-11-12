@@ -1,5 +1,5 @@
 {
-  "sha1": "828c936ae38acb3fc7c6a5d92e548a4d228d082a",
+  "sha1": "1b6da06ef439dcb5499d15d993c9aac7dc4bbdba",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -65,7 +65,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_connector_emulator/ui/parallel_tests/generated_connectors_workflow.spec.ts",
-        "line": 82,
+        "line": 85,
         "column": 47
       }
     },
@@ -78,7 +78,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_connector_emulator/ui/parallel_tests/generated_connectors_workflow.spec.ts",
-        "line": 82,
+        "line": 85,
         "column": 47
       }
     },
@@ -91,7 +91,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_connector_emulator/ui/parallel_tests/generated_connectors_workflow.spec.ts",
-        "line": 82,
+        "line": 85,
         "column": 47
       }
     },

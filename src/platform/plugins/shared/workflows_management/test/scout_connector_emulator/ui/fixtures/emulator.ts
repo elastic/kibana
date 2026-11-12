@@ -23,8 +23,22 @@ export const connectorFolder = (connector: string): string =>
  * spec: the connector's `emulator/responses.json`, which `node scripts/connector_emulate --fixtures
  * <connector>=<that file>` serves too. `connector` is the name of its folder in `src/specs`.
  */
-export const loadScenario = async (connector: string): Promise<ResponseFixture[]> =>
-  readResponseFixtures(path.join(connectorFolder(connector), 'emulator/responses.json'));
+export const loadScenario = async (
+  connector: string,
+  { optional = false }: { optional?: boolean } = {}
+): Promise<ResponseFixture[]> => {
+  try {
+    return await readResponseFixtures(
+      path.join(connectorFolder(connector), 'emulator/responses.json')
+    );
+  } catch (error) {
+    // Without a scenario, the emulator answers with values sampled from the spec.
+    if (optional && (error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return [];
+    }
+    throw error;
+  }
+};
 
 /**
  * The control client of the connector emulator, scoped to a connector (its connector id without
