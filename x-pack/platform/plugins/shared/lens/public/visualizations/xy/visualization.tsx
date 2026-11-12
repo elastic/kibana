@@ -1073,24 +1073,43 @@ export const getXyVisualization = ({
 
     const warnings: UserMessage[] = [];
 
-    for (const layer of getReferenceLayers(state.layers)) {
-      if (!datasourceLayers[layer.layerId]?.isTextBasedLanguage()) continue;
+    const referenceLayers = getReferenceLayers(state.layers);
+    for (const layer of referenceLayers) {
+      const datasource = datasourceLayers[layer.layerId];
+      if (!datasource?.isTextBasedLanguage()) continue;
       const table = activeData?.[layer.layerId];
       if (!table) continue;
+      const layerNumber = state.layers.findIndex(({ layerId }) => layerId === layer.layerId) + 1;
+      const columnToLabel = getColumnToLabelMap(layer, datasource);
+      const getAccessorLabel = (accessor: string) =>
+        columnToLabel[accessor] ||
+        table.columns.find(({ id }) => id === accessor)?.name ||
+        accessor;
+
       if (table.rows.length > 1) {
+        const message = i18n.translate(
+          'xpack.lens.xyVisualization.referenceLayerMultipleRowsDescription',
+          {
+            defaultMessage:
+              'The reference line query for layer {layerNumber} ({accessors}) returned multiple rows. Only the first row is used.',
+            values: {
+              layerNumber,
+              accessors:
+                i18n.formatList('conjunction', layer.accessors.map(getAccessorLabel)) ||
+                layer.layerId,
+            },
+          }
+        );
         warnings.push({
-          uniqueId: 'xy_esql_reference_multiple_rows',
+          uniqueId:
+            referenceLayers.length === 1
+              ? 'xy_esql_reference_multiple_rows'
+              : `xy_esql_reference_multiple_rows_${layer.layerId}`,
           severity: 'warning',
           fixableInEditor: true,
-          displayLocations: [{ id: 'visualization' }],
-          shortMessage: i18n.translate(
-            'xpack.lens.xyVisualization.referenceMultipleRowsDescription',
-            {
-              defaultMessage:
-                'The reference line query returned multiple rows. Only the first row is used.',
-            }
-          ),
-          longMessage: '',
+          displayLocations: [{ id: 'visualization' }, { id: 'embeddableBadge' }],
+          shortMessage: message,
+          longMessage: message,
         });
       }
       for (const accessor of layer.accessors) {
@@ -1098,19 +1117,28 @@ export const getXyVisualization = ({
         const value = table.rows[0]?.[accessor];
         if (column?.meta.type === 'number' && typeof value === 'number' && Number.isFinite(value))
           continue;
+        const message = i18n.translate(
+          'xpack.lens.xyVisualization.referenceLayerInvalidValueDescription',
+          {
+            defaultMessage:
+              'The reference line "{accessor}" in layer {layerNumber} requires a finite numeric value in the first result row. This line is not displayed.',
+            values: { accessor: getAccessorLabel(accessor), layerNumber },
+          }
+        );
         warnings.push({
-          uniqueId: 'xy_esql_reference_invalid_value',
+          uniqueId:
+            referenceLayers.length === 1 && layer.accessors.length === 1
+              ? 'xy_esql_reference_invalid_value'
+              : `xy_esql_reference_invalid_value_${JSON.stringify([layer.layerId, accessor])}`,
           severity: 'warning',
           fixableInEditor: true,
-          displayLocations: [{ id: 'dimensionButton', dimensionId: accessor }],
-          shortMessage: i18n.translate(
-            'xpack.lens.xyVisualization.referenceInvalidValueDescription',
-            {
-              defaultMessage:
-                'The reference line requires a numeric value in the first result row.',
-            }
-          ),
-          longMessage: '',
+          displayLocations: [
+            { id: 'dimensionButton', dimensionId: accessor },
+            { id: 'visualization' },
+            { id: 'embeddableBadge' },
+          ],
+          shortMessage: message,
+          longMessage: message,
         });
       }
     }
