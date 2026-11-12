@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with, at
- * your election, the Elastic License 2.0, the GNU Affero General Public License
- * v3.0 only, or the Server Side Public License v 1".
- */
-
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EvaluatorDefinition } from '../types';
-import { collectRoundText } from '../round_text';
+import { collectRoundTextWithToolResults } from '../round_text';
 
 const ESQL_BLOCK_PATTERN = /```(?:esql|ES\|QL|esql-query)\s*\n([\s\S]*?)```/gi;
 // Inline ES|QL: starts with FROM, ends at blank line or end of input.
@@ -96,7 +88,7 @@ export const esqlCompileEvaluator: EvaluatorDefinition = {
   description:
     'Executes each ES|QL query in the round output with LIMIT 0 to verify it parses and the referenced indices/columns exist.',
   async evaluate({ round, trace }) {
-    const content = collectRoundText(round);
+    const content = collectRoundTextWithToolResults(round);
     const queries = extractEsqlQueries(content);
 
     if (queries.length === 0) {

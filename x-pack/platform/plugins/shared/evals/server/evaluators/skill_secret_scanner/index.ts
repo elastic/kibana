@@ -5,14 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with, at
- * your election, the Elastic License 2.0, the GNU Affero General Public License
- * v3.0 only, or the Server Side Public License v 1".
- */
-
 import type { EvaluatorDefinition } from '../types';
 import { collectRoundText } from '../round_text';
 
@@ -135,10 +127,14 @@ export const skillSecretScannerEvaluator: EvaluatorDefinition = {
       pattern.lastIndex = 0;
       let match = pattern.exec(content);
       while (match) {
-        const value = match[0];
+        const fullMatch = match[0];
+        // Judge the secret value itself, not the surrounding key name/quotes,
+        // which would inflate entropy and can carry placeholder words.
+        const value = match[1] ?? fullMatch;
         if (!isPlaceholder(value) && (!validate || validate(value))) {
           // Truncate the match in the report so we don't re-leak the secret.
-          const redacted = value.length > 8 ? `${value.slice(0, 4)}…${value.slice(-2)}` : '***';
+          const redacted =
+            fullMatch.length > 8 ? `${fullMatch.slice(0, 4)}…${fullMatch.slice(-2)}` : '***';
           findings.push({ type: name, match: redacted });
         }
         match = pattern.exec(content);

@@ -5,24 +5,31 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with, at
- * your election, the Elastic License 2.0, the GNU Affero General Public License
- * v3.0 only, or the Server Side Public License v 1".
- */
-
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EvaluatorDefinition } from '../types';
-import { collectRoundText } from '../round_text';
+import { collectRoundTextWithToolResults } from '../round_text';
 
-// Capture every index pattern referenced in the round output. We look for:
-//   - Bare references like `logs-*`, `.alerts-security.alerts-default`
+// Index patterns are only extracted where the text signals an index context:
 //   - ES|QL `FROM <pattern>, <pattern>` clauses
-const FROM_CLAUSE_PATTERN = /\bFROM\s+([\w.*,\s-]+?)(?:\s+\||\s*$|\s*\n)/gi;
-const INLINE_INDEX_PATTERN =
-  /(?:^|[\s`'"(\[])((?:\.?[a-z][\w.-]*(?:-[\w.*-]+)?)(?:\*|-\*)?)(?=[\s`'")\].,;]|$)/gim;
+//   - `index:` / `index pattern <x>` mentions
+//   - backticked tokens
+//   - bare tokens that match a recognisable index shape (`logs-*`, `.alerts-*`)
+const FROM_CLAUSE_PATTERN =
+  /\bFROM\s+([\w.*-]+(?:\s*,\s*[\w.*-]+)*)(?=\s*(?:\||\r?\n|$)|\s+METADATA\b)/gi;
+const INDEX_CONTEXT_PATTERN =
+  /\bindex(?:es)?(?:\s+pattern)?s?\s*[:=]\s*[`'"]?([\w.*-]+(?:\s*,\s*[\w.*-]+)*)|\bindex\s+pattern\s+[`'"]?([\w.*-]+)/gi;
+const BACKTICKED_PATTERN = /`([^`\s]+)`/g;
+
+const WILDCARD_SUFFIX_SHAPE = /^\.?[a-z0-9][\w.-]*-\*$/;
+const KIBANA_HIDDEN_PREFIX_SHAPE =
+  /^\.(?:alerts|internal|ds|kibana|fleet|items|lists|siem)[\w.*-]*$/;
+const DATA_STREAM_SHAPE = /^(?:logs|metrics|traces|synthetics)-(?=[\w.-]*[.*])[\w.*-]+$/;
+
+const FILE_EXTENSION =
+  /\.(?:txt|json|ya?ml|md|jsx?|tsx?|py|log|csv|xml|html?|png|jpe?g|conf|cfg|ini|sh|exe|dll|pdf|zip|gz)$/i;
+
+const stripPunctuation = (token: string): string =>
+  token.replace(/^[(\[{'"`]+/, '').replace(/[.,;:!?)\]}'"`]+$/, '');
 
 // Common words / keywords / schema terms that match the index regex but are
 // obviously not index patterns. Keeping this list short — the real filter is
@@ -56,39 +63,43 @@ const NON_INDEX_KEYWORDS = new Set([
 ]);
 
 const looksLikeIndexPattern = (candidate: string): boolean => {
+  if (!candidate) return false;
   const lower = candidate.toLowerCase();
   if (NON_INDEX_KEYWORDS.has(lower)) return false;
-  // Must contain a `-`, `*`, `.`, or the characteristic Kibana `.alerts`/`.ds`
-  // prefix; a bare identifier like "foo" is almost always not an index.
+  // Must contain a `-`, `*`, or `.`; a bare identifier like "foo" is almost
+  // always not an index.
   if (!/[-.*]/.test(candidate)) return false;
   // Version strings like "8.11.0" — skip.
   if (/^\d[\d.]*$/.test(candidate)) return false;
+  if (FILE_EXTENSION.test(candidate)) return false;
   return true;
 };
+
+const hasKnownIndexShape = (candidate: string): boolean =>
+  WILDCARD_SUFFIX_SHAPE.test(candidate) ||
+  KIBANA_HIDDEN_PREFIX_SHAPE.test(candidate) ||
+  DATA_STREAM_SHAPE.test(candidate);
 
 const extractIndexPatterns = (content: string): string[] => {
   const found = new Set<string>();
 
-  FROM_CLAUSE_PATTERN.lastIndex = 0;
-  let m = FROM_CLAUSE_PATTERN.exec(content);
-  while (m) {
-    for (const piece of m[1].split(',')) {
-      const trimmed = piece.trim();
-      if (trimmed && looksLikeIndexPattern(trimmed)) {
-        found.add(trimmed);
-      }
+  const addContextual = (list: string | undefined) => {
+    if (!list) return;
+    for (const piece of list.split(',')) {
+      const candidate = stripPunctuation(piece.trim());
+      if (looksLikeIndexPattern(candidate)) found.add(candidate);
     }
-    m = FROM_CLAUSE_PATTERN.exec(content);
-  }
+  };
 
-  INLINE_INDEX_PATTERN.lastIndex = 0;
-  m = INLINE_INDEX_PATTERN.exec(content);
-  while (m) {
-    const candidate = m[1].trim();
-    if (looksLikeIndexPattern(candidate)) {
+  for (const m of content.matchAll(FROM_CLAUSE_PATTERN)) addContextual(m[1]);
+  for (const m of content.matchAll(INDEX_CONTEXT_PATTERN)) addContextual(m[1] ?? m[2]);
+  for (const m of content.matchAll(BACKTICKED_PATTERN)) addContextual(m[1]);
+
+  for (const token of content.split(/[\s,;]+/)) {
+    const candidate = stripPunctuation(token);
+    if (looksLikeIndexPattern(candidate) && hasKnownIndexShape(candidate)) {
       found.add(candidate);
     }
-    m = INLINE_INDEX_PATTERN.exec(content);
   }
 
   return Array.from(found);
@@ -151,7 +162,7 @@ export const indexResolvesEvaluator: EvaluatorDefinition = {
   description:
     'Verifies every index/data-stream pattern referenced in the round output resolves on the active cluster.',
   async evaluate({ round, trace }) {
-    const content = collectRoundText(round);
+    const content = collectRoundTextWithToolResults(round);
     const patterns = extractIndexPatterns(content);
 
     if (patterns.length === 0) {

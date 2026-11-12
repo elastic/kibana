@@ -5,14 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with, at
- * your election, the Elastic License 2.0, the GNU Affero General Public License
- * v3.0 only, or the Server Side Public License v 1".
- */
-
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { esqlCompileEvaluator } from '.';
 import type { EvidenceRound } from '../evidence/types';
@@ -65,7 +57,7 @@ describe('esql-compile', () => {
     });
   });
 
-  it('compiles fenced ES|QL blocks and appends LIMIT 0', async () => {
+  it('compiles fenced ES|QL blocks and leaves an existing LIMIT untouched', async () => {
     const { esClient, requestMock } = createEsClient();
     await esqlCompileEvaluator.evaluate({
       trace: { traceId, esClient },
@@ -77,6 +69,21 @@ describe('esql-compile', () => {
         method: 'POST',
         path: '/_query',
         body: { query: 'FROM logs-*\n| LIMIT 10' },
+      })
+    );
+  });
+
+  it('appends LIMIT 0 when the query has no LIMIT', async () => {
+    const { esClient, requestMock } = createEsClient();
+    await esqlCompileEvaluator.evaluate({
+      trace: { traceId, esClient },
+      round: round('```esql\nFROM logs-*\n| WHERE x > 1\n```'),
+      log,
+    });
+    expect(requestMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: '/_query',
+        body: { query: 'FROM logs-*\n| WHERE x > 1 | LIMIT 0' },
       })
     );
   });

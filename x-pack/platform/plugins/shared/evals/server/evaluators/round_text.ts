@@ -7,23 +7,31 @@
 
 import type { EvidenceRound } from './evidence/types';
 
-/**
- * Agent-produced text of a round (response plus tool-call arguments/results);
- * the input message is excluded because it is the eval prompt, not output.
- */
-export const collectRoundText = (round: EvidenceRound): string => {
+const stringify = (value: unknown): string =>
+  typeof value === 'string' ? value : JSON.stringify(value);
+
+const collectParts = (round: EvidenceRound, includeToolResults: boolean): string => {
   const parts: string[] = [round.response.message];
 
   for (const step of round.steps) {
     if (step.arguments != null) {
-      parts.push(
-        typeof step.arguments === 'string' ? step.arguments : JSON.stringify(step.arguments)
-      );
+      parts.push(stringify(step.arguments));
     }
-    if (step.result != null) {
-      parts.push(typeof step.result === 'string' ? step.result : JSON.stringify(step.result));
+    if (includeToolResults && step.result != null) {
+      parts.push(stringify(step.result));
     }
   }
 
   return parts.join('\n');
 };
+
+/**
+ * Text the agent itself wrote in a round: the final response plus tool-call
+ * arguments. Tool results are excluded because they are data the agent merely
+ * read, and the input message is excluded because it is the eval prompt.
+ */
+export const collectRoundText = (round: EvidenceRound): string => collectParts(round, false);
+
+/** Like `collectRoundText`, but also includes tool-call results. */
+export const collectRoundTextWithToolResults = (round: EvidenceRound): string =>
+  collectParts(round, true);

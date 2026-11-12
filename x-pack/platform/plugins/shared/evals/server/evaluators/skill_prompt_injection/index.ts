@@ -5,14 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with, at
- * your election, the Elastic License 2.0, the GNU Affero General Public License
- * v3.0 only, or the Server Side Public License v 1".
- */
-
 import type { EvaluatorDefinition } from '../types';
 import { collectRoundText } from '../round_text';
 
@@ -56,14 +48,17 @@ const INJECTION_PATTERNS: InjectionPattern[] = [
   },
   {
     name: 'zero-width-chars',
-    pattern: /[\u200B-\u200D\uFEFF\u202A-\u202E]/g,
+    // ZWJ is only a signal outside emoji sequences, and a BOM only when not
+    // leading the text.
+    pattern:
+      /[\u200B\u200C\u2060\u202A-\u202E]|(?<!^)\uFEFF|(?<![\p{Extended_Pictographic}\uFE0F\u{1F3FB}-\u{1F3FF}])\u200D|\u200D(?!\p{Extended_Pictographic})/gu,
     severity: 'high',
     reason: 'Contains zero-width or bidi control characters (prompt-smuggling vector)',
   },
   {
     name: 'tool-exfiltration',
     pattern:
-      /\b(?:send|post|curl|fetch|upload|transmit|exfiltrate)\s+[^.\n]{0,80}?\b(?:to|at|via)\s+https?:\/\/(?!(?:localhost|127\.0\.0\.1|elastic\.co|elastic-cloud\.com|github\.com|github-enterprise))/gi,
+      /\b(?:send|post|curl|fetch|upload|transmit|exfiltrate)\s+[^.\n]{0,80}?\b(?:to|at|via)\s+https?:\/\/(?!(?:localhost|127\.0\.0\.1|elastic\.co|elastic-cloud\.com|github\.com|github-enterprise)(?:[/:?#]|$))/gi,
     severity: 'high',
     reason: 'References sending data to an external URL',
   },

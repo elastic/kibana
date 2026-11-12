@@ -982,6 +982,36 @@ describe('POST /internal/evals/_evaluate', () => {
     ]);
   });
 
+  it.each([
+    ['null', null],
+    ['undefined', undefined],
+  ])('reports an item error when an evaluator throws %s', async (label, thrown) => {
+    const groundedness = buildEvaluator({
+      name: 'groundedness',
+      kind: 'code',
+      evaluate: jest.fn().mockRejectedValue(thrown),
+    });
+    const { handler } = setup({
+      evaluatorRegistry: buildEvaluatorRegistry([groundedness]),
+    });
+
+    const response = await handler(
+      buildContext() as unknown as Parameters<typeof handler>[0],
+      {
+        body: {
+          subject: { traces: [{ trace_id: '0af7651916cd43dd8448eb211c80319c' }] },
+          evaluators: [{ name: 'groundedness' }],
+        },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.payload.results).toEqual([
+      expect.objectContaining({ status: 'error', error: { message: label } }),
+    ]);
+  });
+
   it('reports the model resolved from each llm evaluator own connector, and none for code', async () => {
     const groundedness = buildEvaluator({ name: 'groundedness', kind: 'llm' });
     const correctness = buildEvaluator({

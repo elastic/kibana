@@ -5,14 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with, at
- * your election, the Elastic License 2.0, the GNU Affero General Public License
- * v3.0 only, or the Server Side Public License v 1".
- */
-
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { indexResolvesEvaluator } from '.';
 import type { EvidenceRound } from '../evidence/types';
@@ -70,7 +62,7 @@ describe('skill-index-resolves', () => {
     );
   });
 
-  it('warns when a pattern resolves to nothing', async () => {
+  it('fails when the only referenced pattern resolves to nothing', async () => {
     const { esClient } = createEsClient(async () => ({ indices: [] }));
     const result = await indexResolvesEvaluator.evaluate({
       trace: { traceId, esClient },
@@ -81,5 +73,81 @@ describe('skill-index-resolves', () => {
     // Single-pattern soft-fail threshold: 0 < 0.7 → fail
     expect(result.scores[0].label).toBe('fail');
     expect(result.scores[0].explanation).toContain('logs-endpoint.events.process-*');
+  });
+
+  it('warns when at least 70% of patterns resolve', async () => {
+    const { esClient } = createEsClient(async ({ name }) => ({
+      indices: name === 'missing-*' ? [] : [{}],
+    }));
+    const result = await indexResolvesEvaluator.evaluate({
+      trace: { traceId, esClient },
+      round: round(
+        'FROM a-*, b-*, c-*, d-*, e-*, f-*, g-*, h-*, i-*, missing-*\n| LIMIT 1 on those'
+      ),
+      log,
+    });
+    expect(result.scores[0].score).toBeCloseTo(0.9);
+    expect(result.scores[0].label).toBe('warn');
+  });
+
+  it.each(['well-known', 'file.txt', 'skill-pii', 'word.'])(
+    'does not treat the bare token %j as an index pattern',
+    async (token) => {
+      const { esClient, resolveIndexMock } = createEsClient();
+      await indexResolvesEvaluator.evaluate({
+        trace: { traceId, esClient },
+        round: round(`This is a ${token} thing, see ${token}`),
+        log,
+      });
+      expect(resolveIndexMock).not.toHaveBeenCalled();
+    }
+  );
+
+  it('does not treat a hyphenated word at the end of a sentence as an index', async () => {
+    const { esClient, resolveIndexMock } = createEsClient();
+    await indexResolvesEvaluator.evaluate({
+      trace: { traceId, esClient },
+      round: round('The skill is well-known. Edit file.txt and skill-pii.'),
+      log,
+    });
+    expect(resolveIndexMock).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['bare wildcard shape', 'Data lives in logs-* today', 'logs-*'],
+    [
+      'hidden alerts index',
+      'Check .alerts-security.alerts-default now',
+      '.alerts-security.alerts-default',
+    ],
+    [
+      'name-* shape with trailing punctuation',
+      'Search metrics-system.cpu-*.',
+      'metrics-system.cpu-*',
+    ],
+    ['index: context', 'index: my-custom-index', 'my-custom-index'],
+    ['backticked token', 'Use `well-known` here', 'well-known'],
+  ])('extracts a pattern from %s', async (_label, text, expected) => {
+    const { esClient, resolveIndexMock } = createEsClient();
+    await indexResolvesEvaluator.evaluate({
+      trace: { traceId, esClient },
+      round: round(text),
+      log,
+    });
+    expect(resolveIndexMock).toHaveBeenCalledWith(expect.objectContaining({ name: expected }));
+  });
+
+  it('still resolves patterns found only in tool results', async () => {
+    const { esClient, resolveIndexMock } = createEsClient();
+    await indexResolvesEvaluator.evaluate({
+      trace: { traceId, esClient },
+      round: {
+        input: { message: 'query' },
+        steps: [{ tool_id: 'x', arguments: {}, result: 'FROM logs-foo-*\n| LIMIT 1' }],
+        response: { message: 'done' },
+      },
+      log,
+    });
+    expect(resolveIndexMock).toHaveBeenCalledWith(expect.objectContaining({ name: 'logs-foo-*' }));
   });
 });

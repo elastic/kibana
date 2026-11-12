@@ -229,7 +229,8 @@ export const executeEvaluators = async ({
     } catch (error) {
       const errorDetail = error instanceof Error ? error.stack ?? error.message : String(error);
       // Tool-validation errors carry the zod issues in `meta.errorsText`, not in the message.
-      const validationDetail = (error as { meta?: { errorsText?: string } }).meta?.errorsText;
+      const validationDetail = (error as { meta?: { errorsText?: string } } | null | undefined)
+        ?.meta?.errorsText;
       logger.error(
         `Failed to execute evaluator "${definition.name}": ${errorDetail}${
           validationDetail ? ` (validation: ${validationDetail})` : ''
