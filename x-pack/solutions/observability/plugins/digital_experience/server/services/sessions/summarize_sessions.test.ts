@@ -9,6 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { SESSIONS_INDEX } from '../../../common/sessions';
 import {
+  IDS_PER_QUERY,
   INITIAL_WINDOW_MS,
   MAX_SESSIONS_PER_WINDOW,
   MAX_WINDOW_MS,
@@ -63,10 +64,12 @@ const setUp = ({
     if (query.includes('COUNT_DISTINCT')) {
       return result(['sessions'], [[changed(named)]]);
     }
-    if (query.includes('STATS BY session_id')) {
+    if (query.includes('VALUES(session_id)')) {
+      // One bucket row; ES|QL returns a single id as is and several as an array.
+      const bucketIds = ids(named);
       return result(
-        ['session_id'],
-        ids(named).map((id) => [id])
+        ['session_ids', 'bucket'],
+        [[bucketIds.length === 1 ? bucketIds[0] : bucketIds, '000']]
       );
     }
     return result(SUMMARY_COLUMNS, summaryRows(query));
@@ -171,22 +174,20 @@ describe('summarizeSessions', () => {
     ]);
   });
 
-  it('splits a hash range whose ids fill an ES|QL response', async () => {
+  it('fetches the changed ids in a query per IDS_PER_QUERY sessions', async () => {
     const esClient = setUp({
-      changed: () => 10,
-      // The whole hash space fills a response; each half holds one session.
-      ids: (params) =>
-        paramOf(params, 'hash_from') || paramOf(params, 'hash_to')
-          ? [`${paramOf(params, 'hash_from') ?? 'first'}`]
-          : Array.from({ length: 10_000 }, (_, index) => `s${index}`),
+      changed: () => 2 * IDS_PER_QUERY + 1,
+      // A single id per hash range, named after where the range starts.
+      ids: (params) => [`from-${paramOf(params, 'hash_from') ?? 'start'}`],
     });
 
     await run(esClient);
 
-    const summaryQuery = esClient.esql.query.mock.calls
-      .map(([{ query }]) => query)
-      .find((query) => query.includes('page_view_count = COUNT'));
-    expect(summaryQuery).toContain('IN ("first", "80000000")');
+    const queries = esClient.esql.query.mock.calls.map(([{ query }]) => query);
+    expect(queries.filter((query) => query.includes('VALUES(session_id)'))).toHaveLength(3);
+    expect(queries.find((query) => query.includes('page_view_count = COUNT'))).toContain(
+      'IN ("from-start", "from-55555555", "from-aaaaaaaa")'
+    );
   });
 
   it('splits a batch whose summaries fill an ES|QL response', async () => {

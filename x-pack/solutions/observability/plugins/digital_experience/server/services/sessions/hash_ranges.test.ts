@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HASH_SPACE, hashPrefix, hashRanges, splitHashRange } from './hash_ranges';
+import { HASH_SPACE, hashPrefix, hashRanges } from './hash_ranges';
 
 describe('hashRanges', () => {
   it('covers every hash with adjacent ranges of about the same size', () => {
@@ -20,19 +20,6 @@ describe('hashRanges', () => {
   it('makes at least one range', () => {
     expect(hashRanges(0)).toEqual([{ from: 0, to: HASH_SPACE }]);
     expect(hashRanges(0.4)).toEqual([{ from: 0, to: HASH_SPACE }]);
-  });
-});
-
-describe('splitHashRange', () => {
-  it('splits a range into two halves that meet', () => {
-    expect(splitHashRange({ from: 0, to: HASH_SPACE })).toEqual([
-      { from: 0, to: HASH_SPACE / 2 },
-      { from: HASH_SPACE / 2, to: HASH_SPACE },
-    ]);
-  });
-
-  it('does not split a single hash prefix', () => {
-    expect(splitHashRange({ from: 5, to: 6 })).toBeUndefined();
   });
 });
 

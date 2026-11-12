@@ -33,13 +33,18 @@ describe('changedSessionsCountQuery', () => {
 });
 
 describe('changedSessionIdsQuery', () => {
-  it('lists the ids of the sessions with an event in the window, up to the row limit', () => {
+  it('lists the ids of the sessions with an event in the window, a row per hash bucket', () => {
     const { query, params } = changedSessionIdsQuery(WINDOW, FULL_HASH_RANGE);
 
     expect(query).toContain('@timestamp >= ?changed_from AND @timestamp < ?changed_to');
     expect(query).toContain('STATS BY session_id = attributes.session.id');
+    expect(query).toContain('EVAL session_hash = HASH("sha256", session_id)');
+    // 4,096 buckets of ids stay under the row limit however many sessions changed.
+    expect(query).toContain(
+      'STATS session_ids = VALUES(session_id) BY bucket = SUBSTRING(session_hash, 1, 3)'
+    );
     expect(query).toContain('LIMIT 10000');
-    expect(query).not.toContain('HASH(');
+    expect(query).not.toContain('?hash_from');
     expect(params).toEqual([
       { changed_from: WINDOW.changedFrom },
       { changed_to: WINDOW.changedTo },
@@ -52,9 +57,7 @@ describe('changedSessionIdsQuery', () => {
       to: HASH_SPACE / 2,
     });
 
-    expect(query).toContain(
-      'WHERE HASH("sha256", session_id) >= ?hash_from AND HASH("sha256", session_id) < ?hash_to'
-    );
+    expect(query).toContain('WHERE session_hash >= ?hash_from AND session_hash < ?hash_to');
     expect(params).toEqual(
       expect.arrayContaining([{ hash_from: '40000000' }, { hash_to: '80000000' }])
     );

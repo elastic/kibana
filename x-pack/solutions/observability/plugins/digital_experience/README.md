@@ -217,10 +217,13 @@ skips events with an empty `service.name` or `session.id`.
 Each run:
 
 1. Takes the events since its checkpoint, up to a minute ago (the sync delay), in windows.
-2. Counts the sessions with an event in the window, and fetches their ids in ranges of the SHA-256
-   of their `session.id`, about 5,000 a range, as ES|QL returns at most 10,000 rows. A range that
-   still fills a response is split again. Hashing keeps the ranges even whatever the ids look like
-   (EDOT iOS writes them in uppercase). The task relies on that default of
+2. Counts the sessions with an event in the window, and fetches their ids with one query per
+   100,000 of them. ES|QL returns at most 10,000 rows, but a row can hold any number of ids, so
+   each query aggregates the window once and returns the ids in 4,096 buckets of the SHA-256 of
+   their `session.id`, a row each; more sessions take ranges of that hash. Querying ranges of 5,000
+   instead made 28 queries for 137,000 sessions, 13s of Elasticsearch time against 0.6s. Hashing
+   keeps the ranges even whatever the ids look like (EDOT iOS writes them in uppercase). The task
+   relies on that default of
    `esql.query.result_truncation_max_size`: a cluster that lowers it below 10,000 truncates the
    responses without saying so, and the sessions past the cap are missing.
 3. Rebuilds the sessions, 5,000 at a time, from their events of the last 24 hours, the longest a

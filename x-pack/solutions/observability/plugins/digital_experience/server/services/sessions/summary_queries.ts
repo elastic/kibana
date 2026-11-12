@@ -98,22 +98,31 @@ ${browserSessionEvents('changed_from', 'changed_to')}
 });
 
 const SESSION_ID = 'session_id';
+const SESSION_HASH = 'session_hash';
+/** The column of the changed session ids query: the ids of one hash bucket, multi-valued. */
+export const SESSION_IDS_COLUMN = 'session_ids';
+/** Hex digits of the hash that name a bucket: 4,096 buckets, well under the row limit. */
+const BUCKET_DIGITS = 3;
 
 /**
- * The ids of the sessions of `range` with an event in the window. The rebuild then filters on them
- * as literals, which Elasticsearch looks up in the index: a subquery would scan the whole lookback.
+ * The ids of the sessions of `range` with an event in the window, a row per bucket of their hash:
+ * ES|QL returns at most 10,000 rows, but a row can hold any number of ids, so one aggregation of
+ * the window returns them all. The rebuild then filters on them as literals, which Elasticsearch
+ * looks up in the index: a subquery would scan the whole lookback.
  */
 export const changedSessionIdsQuery = (window: ChangedWindow, range: HashRange): SummaryQuery => {
   const conditions = [
-    ...(range.from > 0 ? [`HASH("sha256", ${SESSION_ID}) >= ?hash_from`] : []),
-    ...(range.to < HASH_SPACE ? [`HASH("sha256", ${SESSION_ID}) < ?hash_to`] : []),
+    ...(range.from > 0 ? [`${SESSION_HASH} >= ?hash_from`] : []),
+    ...(range.to < HASH_SPACE ? [`${SESSION_HASH} < ?hash_to`] : []),
   ];
   return {
     query: `${NULLIFY_UNMAPPED_FIELDS}
 ${browserSessionEvents('changed_from', 'changed_to')}
-| STATS BY ${SESSION_ID} = ${SOURCE_SESSION_ID_FIELD}${
+| STATS BY ${SESSION_ID} = ${SOURCE_SESSION_ID_FIELD}
+| EVAL ${SESSION_HASH} = HASH("sha256", ${SESSION_ID})${
       conditions.length > 0 ? `\n| WHERE ${conditions.join(' AND ')}` : ''
     }
+| STATS ${SESSION_IDS_COLUMN} = VALUES(${SESSION_ID}) BY bucket = SUBSTRING(${SESSION_HASH}, 1, ${BUCKET_DIGITS})
 | LIMIT ${ESQL_MAX_ROWS}`,
     params: [
       ...windowParams(window),

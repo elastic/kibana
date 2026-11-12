@@ -30,18 +30,6 @@ export const hashRanges = (count: number): HashRange[] => {
   }));
 };
 
-/** The two halves of `range`, or `undefined` when it can't be split any further. */
-export const splitHashRange = (range: HashRange): [HashRange, HashRange] | undefined => {
-  if (range.to - range.from < 2) {
-    return undefined;
-  }
-  const middle = Math.floor((range.from + range.to) / 2);
-  return [
-    { from: range.from, to: middle },
-    { from: middle, to: range.to },
-  ];
-};
-
 /**
  * A bound as a hash prefix. A hash is longer than its prefix, so it compares as greater than or
  * equal to its own prefix and less than the next one, which keeps the ranges half-open.

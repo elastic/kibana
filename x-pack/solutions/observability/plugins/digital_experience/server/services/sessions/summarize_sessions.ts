@@ -15,10 +15,11 @@ import {
   SESSIONS_MAX_SESSION_HOURS,
   SESSIONS_SYNC_DELAY_SECONDS,
 } from '../../../common/sessions';
-import { hashRanges, splitHashRange, type HashRange } from './hash_ranges';
+import { hashRanges } from './hash_ranges';
 import type { SessionDocument } from './sessions_index';
 import {
   ESQL_MAX_ROWS,
+  SESSION_IDS_COLUMN,
   changedSessionIdsQuery,
   changedSessionsCountQuery,
   sessionSummaryQuery,
@@ -36,8 +37,13 @@ const MINUTE_MS = 60 * 1000;
 const HOUR_MS = 60 * MINUTE_MS;
 const DAY_MS = 24 * HOUR_MS;
 
-/** Half the ES|QL row limit, so an uneven hash range or a reused session id still fits. */
+/** Sessions rebuilt per summary query: half the ES|QL row limit, so reused session ids still fit. */
 export const SESSIONS_PER_QUERY = ESQL_MAX_ROWS / 2;
+/**
+ * Changed session ids fetched per query. Each query aggregates the whole window, so fewer and larger
+ * ones are cheaper: at 137,000 changed sessions, one query took 0.6s against 13s for one per 5,000.
+ */
+export const IDS_PER_QUERY = 100_000;
 /** More changed sessions than this, and the window is halved: a run must finish its windows. */
 export const MAX_SESSIONS_PER_WINDOW = 64 * SESSIONS_PER_QUERY;
 export const MIN_WINDOW_MS = MINUTE_MS;
@@ -140,29 +146,24 @@ const writeSessions = async (
   }
 };
 
-/**
- * The ids of the sessions with an event in the window, in hash ranges that each fit an ES|QL
- * response. A range that still fills one is split in two and queried again.
- */
+/** The ids of a bucket row: ES|QL returns a single value as is, and several as an array. */
+const bucketIds = (value: EsqlRow[string] | undefined): string[] =>
+  (Array.isArray(value) ? value : [value]).filter(
+    (id): id is string => typeof id === 'string' && id.length > 0
+  );
+
+/** The ids of the sessions with an event in the window, `IDS_PER_QUERY` hash range at a time. */
 const changedSessionIds = async (
   esClient: ElasticsearchClient,
   window: ChangedWindow,
   changedSessions: number,
   signal: AbortSignal
 ): Promise<string[]> => {
-  const ranges: HashRange[] = hashRanges(Math.ceil(changedSessions / SESSIONS_PER_QUERY));
-  const ids: string[] = [];
-  for (let range = ranges.shift(); range; range = ranges.shift()) {
+  let ids: string[] = [];
+  for (const range of hashRanges(Math.ceil(changedSessions / IDS_PER_QUERY))) {
     const rows = await runEsql(esClient, changedSessionIdsQuery(window, range), signal);
-    if (rows.length >= ESQL_MAX_ROWS) {
-      const halves = splitHashRange(range);
-      if (!halves) {
-        throw new Error(`Too many sessions share one hash prefix after ${window.changedFrom}`);
-      }
-      ranges.push(...halves);
-    } else {
-      ids.push(...rows.flatMap(({ session_id: id }) => (typeof id === 'string' && id ? [id] : [])));
-    }
+    // `concat`, as spreading 100,000 ids into `push` can overflow the call stack.
+    ids = ids.concat(...rows.map((row) => bucketIds(row[SESSION_IDS_COLUMN])));
   }
   return ids;
 };
