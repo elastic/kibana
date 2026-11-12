@@ -90,13 +90,16 @@ const convertLeaf = (definition: DeclarativeJsonSchema): z.ZodType => {
     result = applyIpv4Format(result as z.ZodString);
   }
   if (enumValues !== undefined) {
-    const enumSchema = fromJSONSchema({ type: definition.type, enum: enumValues });
+    // Keep only enum values accepted by the converted type schema. The enum
+    // then represents the intersection without emitting an unsupported allOf.
+    const allowedEnumValues = enumValues.filter((value) => result.safeParse(value).success);
+    const enumSchema = fromJSONSchema({ type: definition.type, enum: allowedEnumValues });
     if (enumSchema === undefined) {
       throw new DeclarativeConnectorSpecError(
         `Could not convert declarative JSON Schema enum of type "${definition.type}" to Zod.`
       );
     }
-    result = z.intersection(result, enumSchema);
+    result = enumSchema;
   }
   return result;
 };

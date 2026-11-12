@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { getMeta } from '@kbn/connector-specs';
+import { fromConnectorSpecSchema, getMeta } from '@kbn/connector-specs';
+import { serializeConnectorSpec } from '@kbn/connector-specs/src/lib/serialize_connector_spec';
 import { z } from '@kbn/zod/v4';
-import type { DeclarativeJsonSchema } from './types';
+import type { DeclarativeConnectorSpec, DeclarativeJsonSchema } from './types';
 import { loadFixture } from './__fixtures__/load_fixture';
 import { declarativeJsonSchemaToZod } from './json_schema_to_zod';
+import { materializeDeclarativeConnectorSpec } from './materialize_declarative_connector_spec';
 import { parseDeclarativeConnectorSpec } from './parse_declarative_connector_spec';
 
 describe('declarativeJsonSchemaToZod', () => {
@@ -78,7 +80,16 @@ describe('declarativeJsonSchemaToZod', () => {
     expect(() => schema.parse({ name: 'a', count: 5 })).toThrow();
     expect(() => schema.parse({ name: 'abc', count: 1 })).toThrow();
     expect(() => schema.parse({ name: 'toolong', count: 5 })).toThrow();
-    expect(JSON.stringify(z.toJSONSchema(schema))).toContain('"enum":["a","abc"]');
+    const enumWithoutAllowedValues = declarativeJsonSchemaToZod({
+      type: 'string',
+      enum: ['too-long'],
+      maxLength: 4,
+    });
+    expect(enumWithoutAllowedValues.safeParse('too-long').success).toBe(false);
+    expect(enumWithoutAllowedValues.safeParse('short').success).toBe(false);
+    const jsonSchema = JSON.stringify(z.toJSONSchema(schema));
+    expect(jsonSchema).toContain('"enum":["abc"]');
+    expect(jsonSchema).not.toContain('"allOf"');
   });
 
   it('combines URI, IPv4, and date-time formats with supported constraints', () => {
@@ -156,6 +167,42 @@ describe('declarativeJsonSchemaToZod', () => {
       extra: 'preserved',
       nested: { known: true, other: 42 },
     });
+  });
+
+  it('round-trips constrained enum config fields as enums with metadata and defaults', () => {
+    const connectorWithEnum: DeclarativeConnectorSpec = {
+      ...connector,
+      config: {
+        ...connector.config,
+        properties: {
+          ...connector.config.properties,
+          environment: {
+            type: 'string',
+            enum: ['dev', 'prod', 'production'],
+            minLength: 3,
+            maxLength: 4,
+            default: 'dev',
+            description: 'Deployment environment',
+            meta: { label: 'Environment' },
+          } satisfies DeclarativeJsonSchema,
+        },
+      },
+    };
+    const materialized = materializeDeclarativeConnectorSpec(connectorWithEnum);
+    const serialized = serializeConnectorSpec(materialized);
+    const restored = fromConnectorSpecSchema(JSON.parse(JSON.stringify(serialized.schema)));
+
+    expect(restored).toBeDefined();
+    if (!restored) {
+      throw new Error('Connector spec schema did not restore.');
+    }
+    const configSchema = restored.shape.config;
+    const environmentSchema = (configSchema.shape.environment as z.ZodDefault).unwrap();
+    expect(environmentSchema).toBeInstanceOf(z.ZodEnum);
+    expect((environmentSchema as z.ZodEnum).options).toEqual(['dev', 'prod']);
+    expect(getMeta(environmentSchema as z.ZodType).label).toBe('Environment');
+    expect(configSchema.parse({})).toEqual(expect.objectContaining({ environment: 'dev' }));
+    expect(() => configSchema.parse({ environment: 'production' })).toThrow();
   });
 
   it('converts reportIp categories to an array of integers', () => {
