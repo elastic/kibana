@@ -497,8 +497,8 @@ Good (baseline, no isolating scope):
 Good (trend):
   FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | WHERE {failure} | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, 1 hour) | SORT bucket ASC
 Good (examples):
-  FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | WHERE {failure} | STATS n = COUNT(*), example = SAMPLE(`{text}`, 1) BY category = CATEGORIZE(`{text}`, {"output_format": "tokens"}) | SORT n DESC | LIMIT 5
-  (The `{"output_format": "tokens"}` map above is literal ES|QL; a Good query substitutes only its named placeholders.)
+  FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | WHERE {failure} | STATS n = COUNT(*), example = SAMPLE(`{text}`, 1) BY category = CATEGORIZE(`{text}`, {"output_format": "tokens", "similarity_threshold": 90}) | SORT n DESC | LIMIT 5
+  (The `{"output_format": "tokens", "similarity_threshold": 90}` map above is literal ES|QL; the higher threshold keeps messages that differ only by a field value, such as the target of a failed call, in separate categories; a Good query substitutes only its named placeholders.)
 Good (breakdown):
   FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | STATS n = COUNT(*) WHERE {failure}, lines = COUNT(*) BY `{field}` | WHERE n > 0 | SORT n DESC | LIMIT 8
 
