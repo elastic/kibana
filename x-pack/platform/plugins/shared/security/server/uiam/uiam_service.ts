@@ -39,6 +39,7 @@ import type {
   ClientAuthentication,
   GrantUiamAPIKeyParams,
 } from '@kbn/security-plugin-types-server';
+import { timeoutSignal } from '@kbn/std';
 import { lazySchema, z } from '@kbn/zod';
 
 import {
@@ -227,6 +228,9 @@ export interface GetUiamApiKeyCreatorParams {
 const API_KEY_CREATOR_CACHE_MAX_SIZE = 1000;
 const API_KEY_CREATOR_CACHE_TTL_MS = 5 * 60 * 1000;
 
+/** The creator only enriches a request that is already authenticated, so it must not hold it up. */
+const API_KEY_CREATOR_REQUEST_TIMEOUT_MS = 5 * 1000;
+
 /**
  * Response containing a list of OAuth clients.
  */
@@ -328,8 +332,8 @@ export interface UiamServicePublic {
    * external (user-created) key, resolves to `undefined` without asking UIAM: the lookup carries
    * the client authentication the request already has, which UIAM rejects for external keys.
    * Results are cached per key, so the caller must have authenticated the key: a cached creator
-   * outlives a revoked or expired key. A failed request is thrown for the caller to log and is
-   * not cached, while a response without a supported creator resolves to `undefined`.
+   * outlives a revoked or expired key. A failed or slow request is thrown for the caller to log
+   * and is not cached, while a response without a supported creator resolves to `undefined`.
    */
   getApiKeyCreator(params: GetUiamApiKeyCreatorParams): Promise<UiamApiKeyCreator | undefined>;
 
@@ -925,31 +929,37 @@ export class UiamService implements UiamServicePublic {
   }
 
   async #fetchApiKeyCreator(request: KibanaRequest): Promise<UiamApiKeyCreator | undefined> {
-    const requestOptions: RequestInit & { dispatcher?: Agent } = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': this.#userAgentHeader,
-        // Whatever client authentication already speaks for the key is kept, as for every other
-        // call made for a request, because the key may be bound to another client.
-        ...this.#getRequestAuthenticationHeaders(request),
-      },
-      dispatcher: this.#dispatcher,
-    };
+    const deadline = timeoutSignal(API_KEY_CREATOR_REQUEST_TIMEOUT_MS);
+    try {
+      const requestOptions: RequestInit & { dispatcher?: Agent } = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': this.#userAgentHeader,
+          // Whatever client authentication already speaks for the key is kept, as for every other
+          // call made for a request, because the key may be bound to another client.
+          ...this.#getRequestAuthenticationHeaders(request),
+        },
+        signal: deadline,
+        dispatcher: this.#dispatcher,
+      };
 
-    const response = await UiamService.#parseUiamResponse(
-      await fetch(`${this.#config.url}/uiam/api/v1/authentication/_authenticate`, requestOptions)
-    );
-
-    const parsed = apiKeyAuthenticateResponseSchema.safeParse(response);
-    if (!parsed.success) {
-      this.#logger.debug(
-        `UIAM did not report a supported creator for the API key: ${parsed.error.message}`
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(`${this.#config.url}/uiam/api/v1/authentication/_authenticate`, requestOptions)
       );
-      return undefined;
-    }
 
-    return parsed.data.credentials.creator;
+      const parsed = apiKeyAuthenticateResponseSchema.safeParse(response);
+      if (!parsed.success) {
+        this.#logger.debug(
+          `UIAM did not report a supported creator for the API key: ${parsed.error.message}`
+        );
+        return undefined;
+      }
+
+      return parsed.data.credentials.creator;
+    } finally {
+      deadline.dispose();
+    }
   }
 
   /**

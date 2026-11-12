@@ -1634,6 +1634,7 @@ describe('UiamService', () => {
             [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
             Authorization: 'ApiKey essu_api_key',
           },
+          signal: expect.any(AbortSignal),
           dispatcher: AGENT_MOCK,
         }
       );
@@ -1668,6 +1669,17 @@ describe('UiamService', () => {
 
         expect(lastRequestHeaders()).not.toHaveProperty(ES_CLIENT_AUTHENTICATION_HEADER);
       });
+    });
+
+    it('gives up when UIAM takes too long, and does not keep the failure', async () => {
+      fetchSpy.mockRejectedValueOnce(
+        new DOMException('The operation was aborted due to timeout', 'TimeoutError')
+      );
+      await expect(getCreator()).rejects.toThrow('aborted due to timeout');
+
+      respondWith({ type: 'user', user_id: 12345 });
+      await expect(getCreator()).resolves.toEqual({ type: 'user', user_id: 12345 });
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
     });
 
     it.each([
