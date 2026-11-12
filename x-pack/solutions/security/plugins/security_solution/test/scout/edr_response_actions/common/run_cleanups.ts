@@ -8,10 +8,7 @@
 /** A teardown step; `undefined` entries are skipped so optional steps can be listed inline. */
 export type CleanupStep = (() => Promise<unknown> | undefined) | undefined;
 
-/**
- * Runs every cleanup step in order, even when an earlier one fails. A single failure is
- * rethrown as is; several are rethrown together as an `AggregateError` with `errorMessage`.
- */
+/** Runs every step even if one fails, then rethrows the only failure or an `AggregateError`. */
 export const runCleanups = async (
   steps: readonly CleanupStep[],
   errorMessage: string
