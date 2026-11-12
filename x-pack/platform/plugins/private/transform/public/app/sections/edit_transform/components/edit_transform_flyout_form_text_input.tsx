@@ -39,9 +39,11 @@ export const EditTransformFlyoutFormTextInput: FC<EditTransformFlyoutFormTextInp
       helpText={helpText}
       isInvalid={errorMessages.length > 0}
       error={errorMessages}
+      fullWidth
     >
       <EuiFieldText
         data-test-subj={`transformEditFlyout${upperCaseField}Input`}
+        fullWidth
         placeholder={
           placeHolder
             ? i18n.translate('xpack.transform.transformList.editFlyoutFormPlaceholderText', {

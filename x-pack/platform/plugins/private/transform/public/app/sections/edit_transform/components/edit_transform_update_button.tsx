@@ -36,12 +36,12 @@ export const EditTransformUpdateButton: FC<EditTransformUpdateButtonProps> = ({ 
 
   const { setApiError } = useEditTransformFlyoutActions();
 
-  const updateTransfrom = useUpdateTransform(config.id, requestConfig);
+  const updateTransform = useUpdateTransform(config.id, requestConfig);
 
   async function submitFormHandler() {
     setApiError(undefined);
 
-    updateTransfrom(undefined, {
+    updateTransform(undefined, {
       onError: (error) => setApiError(getErrorMessage(error)),
       onSuccess: () => closeFlyout(),
     });
@@ -55,7 +55,7 @@ export const EditTransformUpdateButton: FC<EditTransformUpdateButtonProps> = ({ 
       isDisabled={isUpdateButtonDisabled}
     >
       {i18n.translate('xpack.transform.transformList.editFlyoutUpdateButtonText', {
-        defaultMessage: 'Update',
+        defaultMessage: 'Save',
       })}
     </EuiButton>
   );

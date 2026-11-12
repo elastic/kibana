@@ -11,8 +11,9 @@ import { EuiAccordion, EuiForm, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
+import { EditTransformDurationInput } from './edit_transform_duration_input';
 import { EditTransformFlyoutFormTextArea } from './edit_transform_flyout_form_text_area';
+import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 import { EditTransformRetentionPolicy } from './edit_transform_retention_policy';
 import { EditTransformIngestPipeline } from './edit_transform_ingest_pipeline';
 import {
@@ -27,7 +28,7 @@ interface EditTransformFlyoutFormProps {
 export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
   onOpenProjectScope,
 }) => (
-  <EuiForm>
+  <EuiForm fullWidth>
     <EditTransformProjectScope onOpenProjectScope={onOpenProjectScope} />
 
     <EditTransformFlyoutFormTextArea
@@ -36,7 +37,8 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
         defaultMessage: 'Description',
       })}
     />
-    <EditTransformFlyoutFormTextInput
+    <EditTransformDurationInput
+      defaultUnit="m"
       field="frequency"
       label={i18n.translate('xpack.transform.transformList.editFlyoutFormFrequencyLabel', {
         defaultMessage: 'Frequency',
@@ -45,6 +47,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
         defaultMessage:
           'The interval to check for changes in source indices when the transform runs continuously.',
       })}
+      units={['s', 'm', 'h']}
     />
 
     <EuiSpacer size="l" />
@@ -62,7 +65,10 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
           defaultMessage: 'Destination configuration',
         }
       )}
-      paddingSize="s"
+      arrowDisplay="right"
+      borders="horizontal"
+      buttonProps={{ paddingSize: 'm' }}
+      paddingSize="m"
     >
       <div data-test-subj="transformEditAccordionDestinationContent">
         <EditTransformFlyoutFormTextInput
@@ -83,8 +89,6 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
       </div>
     </EuiAccordion>
 
-    <EuiSpacer size="l" />
-
     <EuiAccordion
       data-test-subj="transformEditAccordionAdvancedSettings"
       id="transformEditAccordionAdvancedSettings"
@@ -94,7 +98,10 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
           defaultMessage: 'Advanced settings',
         }
       )}
-      paddingSize="s"
+      arrowDisplay="right"
+      borders="horizontal"
+      buttonProps={{ paddingSize: 'm' }}
+      paddingSize="m"
     >
       <div data-test-subj="transformEditAccordionAdvancedSettingsContent">
         <EditTransformFlyoutFormTextInput

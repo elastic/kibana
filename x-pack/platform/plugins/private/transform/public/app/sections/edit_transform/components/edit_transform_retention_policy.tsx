@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState, type FC } from 'react';
+import React, { useEffect, useMemo, type FC } from 'react';
 
-import { EuiFormRow, EuiSelect, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiCheckbox, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { PROJECT_ROUTING } from '@kbn/cps-utils';
@@ -31,33 +31,8 @@ import {
 import { useFormSections } from '../state_management/selectors/form_sections';
 import { useRetentionPolicyField } from '../state_management/selectors/retention_policy_field';
 
+import { EditTransformDurationInput } from './edit_transform_duration_input';
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
-
-export const getRetentionPolicyHelpText = ({
-  isRetentionPolicyAvailable,
-  isSourceIndexUnavailable,
-}: {
-  isRetentionPolicyAvailable: boolean;
-  isSourceIndexUnavailable: boolean;
-}): string => {
-  if (isRetentionPolicyAvailable) {
-    return '';
-  }
-
-  if (isSourceIndexUnavailable) {
-    return i18n.translate(
-      'xpack.transform.transformList.editFlyoutFormRetentionPolicySourceUnavailableError',
-      {
-        defaultMessage:
-          'Retention policy settings are unavailable because no source indices match this transform project scope.',
-      }
-    );
-  }
-
-  return i18n.translate('xpack.transform.transformList.editFlyoutFormRetentionPolicyError', {
-    defaultMessage: 'Retention policy settings are not available for indices without date fields.',
-  });
-};
 
 export const EditTransformRetentionPolicy: FC = () => {
   const { cps } = useAppDependencies();
@@ -69,7 +44,6 @@ export const EditTransformRetentionPolicy: FC = () => {
   const formSections = useFormSections();
   const retentionPolicyField = useRetentionPolicyField();
   const { setFormField, setFormSection } = useEditTransformFlyoutActions();
-  const [isSourceIndexUnavailable, setIsSourceIndexUnavailable] = useState(false);
 
   const previewRequest: PostTransformsPreviewRequestSchema = useMemo(() => {
     return {
@@ -96,7 +70,6 @@ export const EditTransformRetentionPolicy: FC = () => {
 
   useEffect(() => {
     if (transformsPreviewError === null) {
-      setIsSourceIndexUnavailable(false);
       return;
     }
 
@@ -116,18 +89,14 @@ export const EditTransformRetentionPolicy: FC = () => {
     );
 
     if (!isProjectScopedSourceIndexError) {
-      setIsSourceIndexUnavailable(false);
       addPreviewErrorToast();
       return;
     }
 
     if (projectRouting === PROJECT_ROUTING.ORIGIN) {
-      setIsSourceIndexUnavailable(false);
       addPreviewErrorToast();
       return;
     }
-
-    setIsSourceIndexUnavailable(false);
 
     if (!cpsManager) {
       addPreviewErrorToast();
@@ -144,10 +113,6 @@ export const EditTransformRetentionPolicy: FC = () => {
           projectRouting,
           projectsData?.origin?._id
         );
-
-        if (isMounted) {
-          setIsSourceIndexUnavailable(shouldSuppressErrorToast);
-        }
 
         if (isMounted && !shouldSuppressErrorToast) {
           addPreviewErrorToast();
@@ -166,38 +131,36 @@ export const EditTransformRetentionPolicy: FC = () => {
   }, [transformsPreviewError]);
 
   const isRetentionPolicyAvailable = destIndexAvailableTimeFields.length > 0;
-  const retentionPolicyHelpText = getRetentionPolicyHelpText({
-    isRetentionPolicyAvailable,
-    isSourceIndexUnavailable,
-  });
   const retentionDateFieldOptions = useMemo(() => {
     return Array.isArray(destIndexAvailableTimeFields)
       ? destIndexAvailableTimeFields.map((text: string) => ({ text, value: text }))
       : [];
   }, [destIndexAvailableTimeFields]);
 
+  if (!isRetentionPolicyAvailable) {
+    return null;
+  }
+
   return (
     <>
-      <EuiFormRow helpText={retentionPolicyHelpText}>
-        <EuiSwitch
-          name="transformEditRetentionPolicySwitch"
-          label={i18n.translate(
-            'xpack.transform.transformList.editFlyoutFormRetentionPolicySwitchLabel',
-            {
-              defaultMessage: 'Retention policy',
-            }
-          )}
-          checked={formSections.retentionPolicy.enabled}
-          onChange={(e) =>
-            setFormSection({
-              section: 'retentionPolicy',
-              enabled: e.target.checked,
-            })
+      <EuiCheckbox
+        id="transformEditRetentionPolicyCheckbox"
+        name="transformEditRetentionPolicyCheckbox"
+        label={i18n.translate(
+          'xpack.transform.transformList.editFlyoutFormRetentionPolicySwitchLabel',
+          {
+            defaultMessage: 'Retention policy',
           }
-          disabled={!isRetentionPolicyAvailable}
-          data-test-subj="transformEditRetentionPolicySwitch"
-        />
-      </EuiFormRow>
+        )}
+        checked={formSections.retentionPolicy.enabled}
+        onChange={(event) =>
+          setFormSection({
+            section: 'retentionPolicy',
+            enabled: event.target.checked,
+          })
+        }
+        data-test-subj="transformEditRetentionPolicySwitch"
+      />
       {formSections.retentionPolicy.enabled && (
         <div data-test-subj="transformEditRetentionPolicyContent">
           <EuiSpacer size="m" />
@@ -214,6 +177,7 @@ export const EditTransformRetentionPolicy: FC = () => {
                 )}
                 isInvalid={retentionPolicyField.errorMessages.length > 0}
                 error={retentionPolicyField.errorMessages}
+                fullWidth
                 helpText={i18n.translate(
                   'xpack.transform.transformList.editFlyoutFormRetentionPolicyDateFieldHelpText',
                   {
@@ -231,6 +195,7 @@ export const EditTransformRetentionPolicy: FC = () => {
                     }
                   )}
                   data-test-subj="transformEditFlyoutRetentionPolicyFieldSelect"
+                  fullWidth
                   options={retentionDateFieldOptions}
                   value={retentionPolicyField.value}
                   onChange={(e) =>
@@ -255,7 +220,8 @@ export const EditTransformRetentionPolicy: FC = () => {
               />
             )
           }
-          <EditTransformFlyoutFormTextInput
+          <EditTransformDurationInput
+            defaultUnit="d"
             field="retentionPolicyMaxAge"
             label={i18n.translate(
               'xpack.transform.transformList.editFlyoutFormRetentionPolicyMaxAgeLabel',
@@ -263,6 +229,7 @@ export const EditTransformRetentionPolicy: FC = () => {
                 defaultMessage: 'Max age',
               }
             )}
+            units={['nanos', 'micros', 'ms', 's', 'm', 'h', 'd']}
           />
         </div>
       )}

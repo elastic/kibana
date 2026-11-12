@@ -28,7 +28,6 @@ import type { EditAction } from '../../transform_management/components/action_ed
 import { EditTransformFlyoutProvider } from '../state_management/edit_transform_flyout_state';
 
 import { EditTransformApiErrorCallout } from './edit_transform_api_error_callout';
-import { EditTransformFlyoutCallout } from './edit_transform_flyout_callout';
 import { EditTransformFlyoutForm } from './edit_transform_flyout_form';
 import { EditTransformProjectScopeFlyout } from './edit_transform_project_scope_flyout';
 import type { LoadedTransformProjectScopeProjects } from './edit_transform_project_scope';
@@ -63,14 +62,13 @@ export const EditTransformFlyout: FC<EditAction> = ({
     <EditTransformFlyoutProvider config={config} dataViewId={dataViewId}>
       <EuiFlyout
         onClose={closeEditFlyout}
-        hideCloseButton
         aria-labelledby={
           isProjectScopeFlyoutVisible
             ? 'transformEditProjectScopeFlyoutTitle'
             : 'transformEditFlyoutTitle'
         }
         data-test-subj="transformEditFlyout"
-        size="m"
+        size="s"
       >
         {isProjectScopeFlyoutVisible ? (
           <EditTransformProjectScopeFlyout
@@ -93,20 +91,17 @@ export const EditTransformFlyout: FC<EditAction> = ({
             </EuiFlyoutHeader>
             <EuiFlyoutBody
               banner={
-                <>
-                  {isManagedTransform({ config }) ? (
-                    <ManagedTransformsWarningCallout
-                      count={1}
-                      action={i18n.translate(
-                        'xpack.transform.transformList.editManagedTransformsDescription',
-                        {
-                          defaultMessage: 'editing',
-                        }
-                      )}
-                    />
-                  ) : null}
-                  <EditTransformFlyoutCallout />
-                </>
+                isManagedTransform({ config }) ? (
+                  <ManagedTransformsWarningCallout
+                    count={1}
+                    action={i18n.translate(
+                      'xpack.transform.transformList.editManagedTransformsDescription',
+                      {
+                        defaultMessage: 'editing',
+                      }
+                    )}
+                  />
+                ) : undefined
               }
             >
               <EditTransformFlyoutForm onOpenProjectScope={setProjectScopeProjects} />
