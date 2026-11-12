@@ -6,7 +6,12 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { computeValidationLookback } from './validate_ki_queries';
+import type { Feature } from '@kbn/significant-events-schema';
+import {
+  computeValidationLookback,
+  validateKIQueries,
+  type CandidateKIQuery,
+} from './validate_ki_queries';
 
 const createEsClient = () => {
   const query = jest.fn();
@@ -29,6 +34,15 @@ const countResponse = (total: number) => ({
 });
 
 const signal = new AbortController().signal;
+const NOW = Date.parse('2026-11-05T16:00:00.000Z');
+
+beforeEach(() => {
+  jest.spyOn(Date, 'now').mockReturnValue(NOW);
+});
+
+afterEach(() => {
+  jest.restoreAllMocks();
+});
 
 describe('computeValidationLookback', () => {
   beforeEach(() => {
@@ -48,12 +62,12 @@ describe('computeValidationLookback', () => {
 
     expect(query).toHaveBeenCalledWith(
       {
-        query: 'FROM logs-a, logs-a.* | STATS total = COUNT(*)',
-        filter: { range: { '@timestamp': { gte: 'now-10m', lte: 'now' } } },
+        query:
+          'FROM logs-a, logs-a.* | WHERE @timestamp >= "2026-11-05T15:50:00.000Z" AND @timestamp <= "2026-11-05T16:00:00.000Z" | STATS total = COUNT(*)',
       },
       { signal, requestTimeout: 5_000 }
     );
-    expect(result).toBe('now-10m');
+    expect(result).toBe(10);
   });
 
   it('widens the window for a sparse stream', async () => {
@@ -67,7 +81,7 @@ describe('computeValidationLookback', () => {
       logger,
     });
 
-    expect(result).toBe('now-10000m');
+    expect(result).toBe(10_000);
   });
 
   it('uses the max window for an empty stream', async () => {
@@ -81,7 +95,7 @@ describe('computeValidationLookback', () => {
       logger,
     });
 
-    expect(result).toBe('now-10080m');
+    expect(result).toBe(10_080);
   });
 
   it('falls back to the probe window when the probe fails', async () => {
@@ -95,6 +109,89 @@ describe('computeValidationLookback', () => {
       logger,
     });
 
-    expect(result).toBe('now-10m');
+    expect(result).toBe(10);
+  });
+});
+
+describe('validateKIQueries full-text argument gate', () => {
+  const features = [{ id: 'feature-1', run_id: 'run-1' } as Feature];
+  const context = {
+    targetSources: ['logs-test'],
+    validationLookbackMinutes: 10,
+    conflictingFields: new Set<string>(),
+    normalizedStoredEsqls: new Set<string>(),
+  };
+
+  const candidate = (where: string): CandidateKIQuery => ({
+    title: 'Kafka timeouts',
+    description: 'Upsert timeouts',
+    category: 'error',
+    severity_score: 60,
+    feature_ids: ['feature-1'],
+    esql: `FROM logs-test | WHERE ${where} | STATS metric_value = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)`,
+  });
+
+  const validate = (queries: CandidateKIQuery[]) => {
+    const { esClient, query } = createEsClient();
+    // The ES mock accepts everything, so any rejection below comes from the static gate.
+    query.mockResolvedValue({ columns: [], values: [] });
+    return {
+      query,
+      run: validateKIQueries({ queries, features, context, esClient, signal, logger }),
+    };
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('rejects a cast inside MATCH_PHRASE before reaching Elasticsearch', async () => {
+    const { query, run } = validate([
+      candidate('MATCH_PHRASE(exception.message::keyword, "i/o timeout")'),
+    ]);
+    const result = await run;
+
+    expect(query).not.toHaveBeenCalled();
+    expect(result.acceptedQueries).toEqual([]);
+    expect(result.hasNonIntentFailures).toBe(true);
+    expect(result.results[0]).toMatchObject({
+      valid: false,
+      status: 'Failed to add',
+      failureReason: 'validation_error',
+    });
+    expect(result.results[0].error).toContain('MATCH_PHRASE(exception.message::KEYWORD, ...)');
+  });
+
+  it('accepts a bare-field MATCH_PHRASE', async () => {
+    const { query, run } = validate([candidate('MATCH_PHRASE(exception.message, "i/o timeout")')]);
+    const result = await run;
+
+    expect(query).toHaveBeenCalledTimes(1);
+    expect(query).toHaveBeenCalledWith(
+      {
+        query:
+          'FROM logs-test | WHERE @timestamp >= "2026-11-05T15:50:00.000Z" AND @timestamp <= "2026-11-05T16:00:00.000Z" | WHERE MATCH_PHRASE(exception.message, "i/o timeout") | STATS metric_value = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)\n| LIMIT 0',
+        format: 'json',
+      },
+      { signal, requestTimeout: 15_000 }
+    );
+    expect(result.acceptedQueries).toHaveLength(1);
+    expect(result.hasNonIntentFailures).toBe(false);
+  });
+
+  it('accepts an exact comparison on a cast field', async () => {
+    const { query, run } = validate([candidate('exception.message::keyword == "timeout"')]);
+    const result = await run;
+
+    expect(query).toHaveBeenCalledTimes(1);
+    expect(result.acceptedQueries).toHaveLength(1);
+    expect(result.results[0].valid).toBe(true);
+  });
+
+  it('accepts a LIKE on a cast field', async () => {
+    const { run } = validate([candidate('exception.message::keyword LIKE "*i/o timeout*"')]);
+    const result = await run;
+
+    expect(result.acceptedQueries).toHaveLength(1);
   });
 });

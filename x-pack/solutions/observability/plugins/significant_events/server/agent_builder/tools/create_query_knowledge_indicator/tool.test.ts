@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
@@ -14,6 +15,7 @@ import {
   createMockToolContext,
   createSignificantEventsServer,
   invokeHandler,
+  sourceWithSlug,
 } from '../../utils/test_helpers';
 import {
   createQueryKnowledgeIndicatorTool,
@@ -35,7 +37,7 @@ describe('ki_query_create tool', () => {
   } as unknown as EbtTelemetryClient;
 
   const queryParams = {
-    stream_name: 'logs.test',
+    slug: 'logs.test',
     title: 'suspicious query',
     description: 'desc',
     esql: { query: 'FROM logs.test | stats c = count()' },
@@ -45,15 +47,10 @@ describe('ki_query_create tool', () => {
   const createScopedClients = (kiClient: object) =>
     jest.fn(async () => {
       return {
-        streamsClient: {
-          getStream: jest.fn().mockResolvedValue({
-            name: 'logs.test',
-            ingest: {
-              classic: { field_overrides: {} },
-              processing: [],
-              lifecycle: { inherit: {} },
-              failure_store: { inherit: {} },
-            },
+        sourcesClient: {
+          list: jest.fn().mockResolvedValue({
+            sources: [sourceWithSlug('logs.test', { view_name: 'logs.test' })],
+            total: 1,
           }),
         },
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
@@ -92,7 +89,7 @@ describe('ki_query_create tool', () => {
 
     const confirmation = await tool.confirmation?.getConfirmation?.({
       toolParams: {
-        stream_name: 'logs.test',
+        slug: 'logs.test',
         title: 'Checkout 5xx burst detector',
         description: 'Detects 5xx bursts',
         esql: {
@@ -109,7 +106,7 @@ describe('ki_query_create tool', () => {
         cancel_text: 'Cancel',
       })
     );
-    expect(confirmation?.message).toContain('stream "logs.test"');
+    expect(confirmation?.message).toContain('source "logs.test"');
     expect(confirmation?.message).toContain('title: "Checkout 5xx burst detector"');
     expect(confirmation?.message).toContain(
       'esql: "FROM logs.test, logs.test.* | WHERE http.response.status_code >= 500"'
@@ -169,17 +166,57 @@ describe('ki_query_create tool', () => {
     });
 
     const context = createMockToolContext();
+    context.request = httpServerMock.createKibanaRequest({ spaceId: 'space-a' });
     await invokeHandler(tool as never, queryParams, context);
 
-    expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
+    const [[reported]] = jest.mocked(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).mock
+      .calls;
+    expect(reported).toEqual(
       expect.objectContaining({
         ki_kind: 'query',
         tool_id: 'ki_query_create',
         success: true,
-        stream_name: 'logs.test',
-        stream_type: 'classic',
+        source_id: 'logs.test',
+        space_id: 'space-a',
+        knowledge_indicator_id: expect.any(String),
       })
     );
+    expect(queryClient.upsertQuery).toHaveBeenCalledWith(
+      'logs.test',
+      expect.objectContaining({ id: reported.knowledge_indicator_id })
+    );
+  });
+
+  it.each([
+    [
+      'acknowledges a write',
+      { upsertQuery: jest.fn().mockResolvedValue(undefined) },
+      { acknowledged: true },
+    ],
+    [
+      'keeps the write error',
+      { upsertQuery: jest.fn().mockRejectedValue(new Error('upsert failed')) },
+      { message: 'Failed to create query knowledge indicator: upsert failed' },
+    ],
+  ])('%s when telemetry throws', async (_name, kiClient, expected) => {
+    jest.mocked(assertSignificantEventsAccess).mockResolvedValue(undefined);
+    jest.mocked(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).mockImplementationOnce(() => {
+      throw new Error('telemetry down');
+    });
+    const tool = createQueryKnowledgeIndicatorTool({
+      getScopedClients: createScopedClients(kiClient),
+      server,
+      logger,
+      telemetry,
+    });
+
+    const result = await invokeHandler(tool as never, queryParams, createMockToolContext());
+
+    if (!('results' in result)) {
+      throw new Error('expected a tool result');
+    }
+
+    expect(result.results[0].data).toEqual(expect.objectContaining(expected));
   });
 
   it('tracks failure telemetry when query KI creation fails', async () => {
@@ -199,17 +236,39 @@ describe('ki_query_create tool', () => {
     });
 
     const context = createMockToolContext();
+    context.request = httpServerMock.createKibanaRequest({ spaceId: 'space-a' });
     await invokeHandler(tool as never, queryParams, context);
 
-    expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
+    const [[reported]] = jest.mocked(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).mock
+      .calls;
+    expect(reported).toEqual(
       expect.objectContaining({
         ki_kind: 'query',
         tool_id: 'ki_query_create',
         success: false,
-        stream_name: 'logs.test',
-        stream_type: 'classic',
+        source_id: 'logs.test',
+        space_id: 'space-a',
         error_message: 'upsert failed',
       })
+    );
+    expect(reported).not.toHaveProperty('knowledge_indicator_id');
+  });
+
+  it('keeps a caller-supplied id in failure telemetry', async () => {
+    jest.mocked(assertSignificantEventsAccess).mockResolvedValue(undefined);
+    const tool = createQueryKnowledgeIndicatorTool({
+      getScopedClients: createScopedClients({
+        upsertQuery: jest.fn().mockRejectedValue(new Error('upsert failed')),
+      }),
+      server,
+      logger,
+      telemetry,
+    });
+
+    await invokeHandler(tool as never, { ...queryParams, id: 'query-1' }, createMockToolContext());
+
+    expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, knowledge_indicator_id: 'query-1' })
     );
   });
 

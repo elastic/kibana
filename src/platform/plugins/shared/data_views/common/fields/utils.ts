@@ -9,11 +9,12 @@
 
 import { getFilterableKbnTypeNames } from '@kbn/field-types';
 import type { DataViewFieldBase, IFieldSubTypeNested, IFieldSubTypeMulti } from '@kbn/es-query';
-import type { DataViewField } from '.';
 
 const filterableTypes = getFilterableKbnTypeNames();
 
-export function isFilterable(field: DataViewField): boolean {
+export function isFilterable(
+  field: Pick<DataViewFieldBase, 'name' | 'type' | 'scripted'> & { searchable?: boolean }
+): boolean {
   return (
     field.name === '_id' ||
     field.scripted ||

@@ -831,6 +831,7 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
     nodeClick,
     ipClickHandler,
   } = props.data as EntityNodeViewModel;
+  const isOrigin = Boolean((props.data as Record<string, unknown>).isOrigin);
 
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('m');
@@ -918,8 +919,9 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
           `}
         >
           {/* Toolbar: anchored to the card's own top edge via position:absolute +
-              bottom:100% on this relative wrapper, giving a consistent 4px gap
-              above the card for both single and grouped nodes.  This avoids
+              bottom:100% on this relative wrapper. The offset clears the origin
+              highlight ring (inset -size.s) plus a size.xs gap, and is applied to
+              every node so the toolbar position never shifts.  This avoids
               using ReactFlow's NodeToolbar portal (which positions relative to
               the full 240px NodeShapeContainer, not the card). */}
           {interactive && (toolbarItems.length > 0 || !isGrouped) && (
@@ -930,7 +932,7 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
               onMouseLeave={handleToolbarMouseLeave}
               extraCss={css`
                 position: absolute;
-                bottom: calc(100% + 4px);
+                bottom: calc(100% + ${euiTheme.size.s} + ${euiTheme.size.xs});
                 left: 50%;
                 transform: translateX(-50%);
                 z-index: ${euiTheme.levels.content};
@@ -978,6 +980,21 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
             )}
           </EntityCardWrapper>
 
+          {/* Origin highlight — solid blue ring with a gap outside the card edge,
+              placed as a sibling of EntityCardWrapper so overflow:hidden doesn't clip it */}
+          {isOrigin && globalOpts.highlightOrigin && (
+            <div
+              aria-hidden="true"
+              css={css`
+                position: absolute;
+                inset: -${euiTheme.size.s};
+                border-radius: calc(${NODE_BORDER_RADIUS}px + ${euiTheme.size.s});
+                border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.primary};
+                pointer-events: none;
+              `}
+            />
+          )}
+
           {/* Single stacked card peeking from the bottom edge — always shown for grouped nodes */}
           {showStackedShape(count) && (
             <StackedCard
@@ -1001,10 +1018,9 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
                 height={ENTITY_CARD_HEADER_HEIGHT}
                 onClick={(e) => nodeClick?.(e, props)}
               />
-              {/* Expand button — hidden when toolbar items are wired, but always present in
-                   the DOM so that tests can click it to open the popover.
-                   FTR tests use the toolbar items directly when available. */}
-              {toolbarItems.length === 0 && (
+              {/* Only for consumers without a toolbar: a wired toolbar with no items means the
+                   node has no actions (e.g. Unknown targets). */}
+              {!toolbarItemsFn && (
                 <NodeExpandButton
                   color={color}
                   onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}

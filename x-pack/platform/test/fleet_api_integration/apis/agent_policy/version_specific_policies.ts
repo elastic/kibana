@@ -6,6 +6,7 @@
  */
 import semver from 'semver';
 import expect from '@kbn/expect';
+import { hasSentinelVersionSuffix } from '@kbn/fleet-plugin/common/services';
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/fleet-plugin/server/constants';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
@@ -162,9 +163,11 @@ export default function (providerContext: FtrProviderContext) {
           index: '.fleet-policies',
           _source: ['data.inputs', 'policy_id'],
         });
+        // `#sentinel` docs are written while the policy has no version conditions yet, before the package policy is added
         const versionedPolicies = policies.hits.hits.filter(
           (hit) =>
             (hit._source as any).policy_id.includes('#') &&
+            !hasSentinelVersionSuffix((hit._source as any).policy_id) &&
             (hit._source as any).policy_id.startsWith(agentPolicyWithPPId)
         );
         expect(versionedPolicies.length).to.eql(3);
@@ -360,9 +363,11 @@ export default function (providerContext: FtrProviderContext) {
           index: '.fleet-policies',
           _source: ['data.inputs', 'policy_id'],
         });
+        // `#sentinel` docs are written while the policy has no version conditions yet, before the package policy is added
         const versionedPolicies = policies.hits.hits.filter(
           (hit) =>
             (hit._source as any).policy_id.includes('#') &&
+            !hasSentinelVersionSuffix((hit._source as any).policy_id) &&
             (hit._source as any).policy_id.startsWith(agentPolicyWithPPId)
         );
         expect(versionedPolicies.length).to.eql(3);

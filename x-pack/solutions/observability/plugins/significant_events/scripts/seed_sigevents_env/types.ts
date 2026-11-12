@@ -27,16 +27,16 @@ export function getSynthtraceDefaultStream(): string {
 }
 
 /**
- * Builds the required ESQL FROM preamble for wired streams.
- * Both the stream and its wildcard child pattern are required
- * (validated server-side by validateEsqlQueryForStreamOrThrow).
+ * Builds the ESQL FROM preamble for a source view.
+ * `PUT /internal/significant_events/queries/{queryId}` validates that the query's
+ * `FROM` is exactly the view of the source it belongs to.
  */
-export const fromStream = (streamName: string) => `FROM ${streamName}, ${streamName}.*`;
+export const fromView = (viewName: string) => `FROM ${viewName}`;
 
 export interface SeedQuery {
   title: string;
-  /** Receives streamName at seed time — never hardcoded. */
-  esql: (streamName: string) => string;
+  /** Receives the seed source view name at seed time — never hardcoded. */
+  esql: (viewName: string) => string;
   severityScore?: number;
   description?: string;
 }
@@ -61,11 +61,13 @@ export interface SeededQuery {
   description?: string;
 }
 
-export interface SeedContext {
+/** Everything known before the seed source exists. */
+export interface SeedBaseContext {
   esUrl: string;
   kibanaUrl: string;
   username: string;
   password: string;
+  /** The synthtrace data stream that receives the seeded logs. */
   streamName: string;
   scenarioName: string;
   seed: number;
@@ -73,4 +75,11 @@ export interface SeedContext {
   space: string;
   /** ISO timestamp computed once at run start; threaded to all steps that store generated_at. */
   generatedAt: string;
+}
+
+export interface SeedContext extends SeedBaseContext {
+  /** Id of the seed source that features, queries, detections and events are keyed by. */
+  sourceId: string;
+  /** ES|QL view of the seed source; queries select `FROM` this. */
+  viewName: string;
 }

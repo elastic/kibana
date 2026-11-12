@@ -7,61 +7,65 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID } from '@kbn/workflows/managed';
-
-// The sync workflow is installed and scheduled in the default space, matching the
-// continuous onboarding precedent (streams/KIs are global).
-const MANAGED_WORKFLOW_SPACE_ID = DEFAULT_SPACE_ID;
+import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 
 export interface SyncWorkflowService {
   /**
-   * Ensures the managed KI sync (groundedness) sweep workflow is enabled.
+   * Ensures the per-space managed KI sync (groundedness) sweep workflow is
+   * installed and enabled.
    *
    * Enabling schedules the workflow's trigger task under the API key minted from
-   * the given request (the startup install path only writes the document and
-   * never schedules the trigger). Idempotent: a single `getWorkflow` read short-
+   * the given request (the install path only writes the document and never
+   * schedules the trigger). Idempotent: a single `getWorkflow` read short-
    * circuits when the workflow is already enabled, so it is cheap to call from
-   * the hot extraction path. Once enabled, the persisted Task Manager task keeps
-   * firing on its own schedule, independent of extraction.
+   * the hot extraction path, while a missing workflow is installed with the space
+   * ID suffix. Once enabled, the persisted Task Manager task keeps firing on its
+   * own schedule, independent of extraction.
    */
-  ensureEnabled(params: { request: KibanaRequest }): Promise<void>;
+  ensureEnabled(params: { request: KibanaRequest; spaceId: string }): Promise<void>;
 }
 
 export const createSyncWorkflowService = ({
   logger,
   managementApi,
+  getManagedWorkflowsClient,
 }: {
   logger: Logger;
   managementApi: WorkflowsServerPluginSetup['management'];
+  getManagedWorkflowsClient: () => Promise<PluginScopedManagedWorkflowsApi>;
 }): SyncWorkflowService => {
   const log = logger.get('ki-sync-workflow');
 
   return {
-    async ensureEnabled({ request }) {
-      const existing = await managementApi
+    async ensureEnabled({ request, spaceId }) {
+      const workflowDocumentId = `${SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID}-${spaceId}`;
+      let existing = await managementApi
         .getClient(request)
-        .getWorkflow(SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID, MANAGED_WORKFLOW_SPACE_ID);
+        .getWorkflow(workflowDocumentId, spaceId);
 
       if (!existing) {
-        log.warn(
-          `Managed KI sync workflow ${SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID} is not installed yet; skipping enablement`
-        );
-        return;
+        const managedWorkflowsClient = await getManagedWorkflowsClient();
+        await managedWorkflowsClient.install(SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID, {
+          spaceId,
+          workflowIdSuffix: spaceId,
+        });
+        existing = await managementApi.getClient(request).getWorkflow(workflowDocumentId, spaceId);
+        if (!existing) {
+          log.warn(
+            `Managed KI sync workflow ${workflowDocumentId} was not installed; skipping enablement`
+          );
+          return;
+        }
       }
 
       if (existing.enabled ?? false) {
         return;
       }
 
-      await managementApi.updateWorkflow(
-        SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
-        { enabled: true },
-        MANAGED_WORKFLOW_SPACE_ID,
-        request
-      );
+      await managementApi.updateWorkflow(workflowDocumentId, { enabled: true }, spaceId, request);
 
-      log.info(`Enabled KI sync workflow`);
+      log.info(`Enabled KI sync workflow in space ${spaceId}`);
     },
   };
 };

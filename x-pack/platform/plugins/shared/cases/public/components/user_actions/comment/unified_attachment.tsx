@@ -27,7 +27,15 @@ type BuilderArgs = Pick<
 > & {
   attachment: SnakeToCamelCase<UnifiedAttachment>;
   isLoading: boolean;
+  isDeleted?: boolean;
+  /** The ids the create user action added, when a partial removal dropped some of them. */
+  addedReferences?: AddedReferences;
 };
+
+export interface AddedReferences {
+  attachmentId: string | string[];
+  metadata?: UnifiedAttachment['metadata'];
+}
 
 export const createUnifiedAttachmentUserActionBuilder = ({
   userAction,
@@ -37,13 +45,17 @@ export const createUnifiedAttachmentUserActionBuilder = ({
   permissions,
   caseData,
   isLoading,
+  isDeleted,
   handleDeleteComment,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
   loadingCommentIds,
   appId,
   euiTheme,
+  addedReferences,
 }: BuilderArgs): ReturnType<UserActionBuilder> => {
+  const liveAttachmentId = 'attachmentId' in attachment ? attachment.attachmentId : null;
+
   return createRegisteredAttachmentUserActionBuilder({
     userAction,
     userProfiles,
@@ -53,19 +65,24 @@ export const createUnifiedAttachmentUserActionBuilder = ({
     caseData,
     handleDeleteComment,
     isLoading,
+    isDeleted,
     getId: () =>
       toUnifiedAttachmentType(
         attachment.type,
         Array.isArray(caseData.owner) ? caseData.owner[0] : caseData.owner
       ),
+    getDeleteViewProps: addedReferences
+      ? () => ({ attachmentId: liveAttachmentId, metadata: attachment.metadata })
+      : undefined,
     getAttachmentViewProps: () => {
-      const attachmentId = 'attachmentId' in attachment ? attachment.attachmentId : null;
       return {
-        attachmentId,
+        attachmentId: liveAttachmentId,
         data: attachment.data,
         metadata: attachment.metadata,
+        ...addedReferences,
         createdBy: attachment.createdBy,
         version: attachment.version,
+        isDeleted: isDeleted ?? false,
         caseData: { id: caseData.id, title: caseData.title },
         rowContext: {
           manageMarkdownEditIds,

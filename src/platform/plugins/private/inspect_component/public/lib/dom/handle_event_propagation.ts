@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isInsideDeveloperToolbar } from './is_inside_developer_toolbar';
+import { isInsideOverlay } from './is_inside_overlay';
+
 /**
  * Options for {@link handleEventPropagation}
  */
@@ -30,11 +33,32 @@ export const handleEventPropagation = ({
   event,
   callback,
 }: HandleEventPropagationOptions): void => {
+  const isOverlayTarget = isInsideOverlay(event.target);
+
+  /**
+   * The developer toolbar keeps working, so its buttons and dialogs can be used in any mode.
+   * The overlay is rendered by one of its items, hence it is told apart first.
+   */
+  if (!isOverlayTarget && isInsideDeveloperToolbar(event.target)) {
+    return;
+  }
+
+  /**
+   * Presses on the overlay itself (the draggable highlight box) are stopped so that outside click
+   * detectors (popovers, focus traps) don't close what is being inspected, but not cancelled,
+   * as a cancelled 'pointerdown' suppresses native drag and drop.
+   */
+  if (isOverlayTarget && event.type !== 'click') {
+    event.stopPropagation();
+    return;
+  }
+
   event.stopPropagation();
   event.preventDefault();
   const eventTarget = event.target as HTMLElement;
   const isTargetDisabled = eventTarget?.hasAttribute && eventTarget.hasAttribute('disabled');
   const isClickEvent = event.type === 'click';
+  const isPointerDownEvent = event.type === 'pointerdown';
 
   /**
    * Blocks propagation of click events to stop triggering 'onClick' behavior and at the same time
@@ -43,7 +67,7 @@ export const handleEventPropagation = ({
    * for them. Blocking 'onClick' behavior is not possible for 'pointerdown' event, so for this event type
    * we allow event propagation only if the inspected HTML element is disabled.
    */
-  if (isClickEvent || isTargetDisabled) {
+  if (isClickEvent || (isPointerDownEvent && isTargetDisabled)) {
     callback(event);
   }
 };

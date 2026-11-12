@@ -26,7 +26,6 @@ describe('gold query factories', () => {
         groupBy: 'url.keyword',
       })
     ).toBe(`FROM kibana_sample_data_logs
-| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
 | STATS \`Request Count\` = COUNT(*), \`Total Bytes\` = SUM(bytes) BY url.keyword
 | SORT \`Request Count\` DESC
 | LIMIT 10`);
@@ -57,7 +56,6 @@ describe('gold query factories', () => {
   it('builds a single-row totals query', () => {
     expect(totalsQuery({ index: 'kibana_sample_data_logs', metrics: [REQUEST_COUNT] })).toBe(
       `FROM kibana_sample_data_logs
-| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
 | STATS \`Request Count\` = COUNT(*)`
     );
   });

@@ -129,7 +129,7 @@ describe('useFetchHistogramBounds', () => {
     mockExecuteEsqlQuery.mockImplementation(() => resolved([{ min_value: 1, max_value: 5 }]));
   });
 
-  it('runs one request per chart in parallel and keeps only min < max', async () => {
+  it('runs one request per chart in parallel and keeps a point where min equals max', async () => {
     mockExecuteEsqlQuery
       .mockImplementationOnce(() => resolved([{ min_value: 1, max_value: 5 }]))
       .mockImplementationOnce(() => resolved([{ min_value: 3, max_value: 3 }]));
@@ -137,11 +137,15 @@ describe('useFetchHistogramBounds', () => {
     const { result } = renderBoundsHook(createProps());
 
     await waitFor(() =>
-      expect(result.current.bounds.get('metrics-a::latency.exp')).toEqual({ min: 1, max: 5 })
+      expect(result.current.bounds.get('metrics-a::latency.exp')).toEqual({
+        bounds: { min: 1, max: 5 },
+      })
     );
 
     expect(getQueriedSources()).toEqual(['TS metrics-a', 'TS metrics-b']);
-    expect(result.current.bounds.has('metrics-b::latency.exp')).toBe(false);
+    expect(result.current.bounds.get('metrics-b::latency.exp')).toEqual({
+      bounds: { min: 3, max: 3 },
+    });
     expect(result.current.loading).toBe(false);
   });
 
@@ -181,6 +185,19 @@ describe('useFetchHistogramBounds', () => {
       expect.stringContaining('MIN(latency.tdigest)'),
     ]);
     expect(mockExecuteEsqlQuery.mock.calls[0][0].esqlQuery).not.toContain('latency.tdigest');
+  });
+
+  it('declares the metadata fields that the WHERE clauses use in each chart source', async () => {
+    renderBoundsHook(
+      createProps({ whereStatements: ['_ignored IS NULL'], metadataFields: ['_ignored'] })
+    );
+
+    await waitFor(() => expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2));
+
+    expect(getQueriedSources()).toEqual([
+      'TS metrics-a METADATA _ignored',
+      'TS metrics-b METADATA _ignored',
+    ]);
   });
 
   it('passes the relative time range, filters, variables, and bounds execution context, without approximation', async () => {
@@ -234,7 +251,9 @@ describe('useFetchHistogramBounds', () => {
     const { result } = renderBoundsHook(createProps());
 
     await waitFor(() =>
-      expect(result.current.bounds.get('metrics-b::latency.exp')).toEqual({ min: 2, max: 8 })
+      expect(result.current.bounds.get('metrics-b::latency.exp')).toEqual({
+        bounds: { min: 2, max: 8 },
+      })
     );
 
     expect(result.current.bounds.get('metrics-a::latency.exp')).toEqual({
@@ -272,7 +291,9 @@ describe('useFetchHistogramBounds', () => {
 
     rerender({ ...initialProps, metricItems: [histogramB] });
     await waitFor(() =>
-      expect(result.current.bounds.get('metrics-b::latency.exp')).toEqual({ min: 1, max: 5 })
+      expect(result.current.bounds.get('metrics-b::latency.exp')).toEqual({
+        bounds: { min: 1, max: 5 },
+      })
     );
 
     expect(mockReportError).not.toHaveBeenCalled();
@@ -284,7 +305,9 @@ describe('useFetchHistogramBounds', () => {
     const { result, rerender } = renderBoundsHook(initialProps);
 
     await waitFor(() =>
-      expect(result.current.bounds.get('metrics-a::latency.exp')).toEqual({ min: 1, max: 5 })
+      expect(result.current.bounds.get('metrics-a::latency.exp')).toEqual({
+        bounds: { min: 1, max: 5 },
+      })
     );
     const previousBounds = result.current.bounds;
 
@@ -307,8 +330,7 @@ describe('useFetchHistogramBounds', () => {
 
     expect(result.current.loading).toBe(false);
     expect(result.current.bounds.get('metrics-a::latency.exp')).toEqual({
-      min: 9,
-      max: 11,
+      bounds: { min: 9, max: 11 },
     });
   });
 

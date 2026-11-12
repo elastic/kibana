@@ -56,6 +56,7 @@ export interface RuleFormServices {
     hideVisor?: boolean;
     hideRecommendedQueries?: boolean;
     onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
+    onPrettifyQuery?: () => void;
     docsFlyoutSize?: EuiFlyoutProps['size'];
   }>;
   /** Context provider the injected {@link esqlMenu} needs; injected alongside it. */

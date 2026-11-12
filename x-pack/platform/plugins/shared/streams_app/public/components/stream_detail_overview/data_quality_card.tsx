@@ -37,17 +37,40 @@ import { TopFailureReasons } from './top_failure_reasons';
 
 export function DataQualityCard() {
   const { definition } = useStreamDetail();
+  const router = useStreamsAppRouter();
+  const { rangeFrom, rangeTo } = useTimeRange();
 
   if (!Streams.ingest.all.GetResponse.is(definition)) {
     return null;
   }
 
-  return <DataQualityCardContent definition={definition} />;
+  const streamName = definition.stream.name;
+
+  return (
+    <DataQualityCardContent
+      streamName={streamName}
+      canReadFailureStore={definition.privileges.read_failure_store}
+      failureStoreEnabled={isEnabledFailureStore(definition.effective_failure_store)}
+      qualityHref={router.link('/{key}/management/{tab}', {
+        path: { key: streamName, tab: 'dataQuality' },
+        query: { rangeFrom, rangeTo },
+      })}
+    />
+  );
 }
 
-function DataQualityCardContent({ definition }: { definition: Streams.ingest.all.GetResponse }) {
-  const router = useStreamsAppRouter();
-  const { rangeFrom, rangeTo } = useTimeRange();
+export function DataQualityCardContent({
+  streamName,
+  canReadFailureStore,
+  failureStoreEnabled,
+  qualityHref,
+}: {
+  streamName: string;
+  canReadFailureStore: boolean;
+  failureStoreEnabled: boolean;
+  /** Target of the "View all" link; the link is hidden when omitted. */
+  qualityHref?: string;
+}) {
   const {
     core: { application, uiSettings },
     dependencies: {
@@ -58,10 +81,7 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
     },
   } = useKibana();
 
-  const canReadFailureStore = definition.privileges.read_failure_store;
-  const failureStoreEnabled = isEnabledFailureStore(definition.effective_failure_store);
   const canQueryFailureStore = canReadFailureStore && failureStoreEnabled;
-  const streamName = definition.stream.name;
 
   const dataSourceForTimeRange = canQueryFailureStore
     ? `${streamName},${streamName}::failures`
@@ -166,11 +186,6 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
   const degradedColor =
     degradedPercentage === 0 ? 'success' : degradedPercentage <= 3 ? 'warning' : 'danger';
 
-  const dataQualityTabHref = router.link('/{key}/management/{tab}', {
-    path: { key: streamName, tab: 'dataQuality' as const },
-    query: { rangeFrom, rangeTo },
-  });
-
   const formatPct = (value: number) => `${formatNumber(value, '0.[00]')}%`;
 
   return (
@@ -186,25 +201,27 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem />
-        <EuiFlexItem grow={false}>
-          <EuiLink
-            href={dataQualityTabHref}
-            data-test-subj="streamsOverviewDataQualityLink"
-            onMouseDown={(e: React.MouseEvent) => {
-              // Only handle plain left clicks; let modifier combos (Ctrl/Cmd+click etc.) use the href.
-              if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-              // Prevent focus-on-mousedown. Without this, focus triggers a connector
-              // re-fetch → React re-render → inner scroll container resets → mouseup
-              // lands on a different element → the browser never fires the click event.
-              e.preventDefault();
-              application.navigateToUrl(dataQualityTabHref);
-            }}
-          >
-            {i18n.translate('xpack.streams.streamOverview.dataQualityCard.viewAll', {
-              defaultMessage: 'View all',
-            })}
-          </EuiLink>
-        </EuiFlexItem>
+        {qualityHref && (
+          <EuiFlexItem grow={false}>
+            <EuiLink
+              href={qualityHref}
+              data-test-subj="streamsOverviewDataQualityLink"
+              onMouseDown={(e: React.MouseEvent) => {
+                // Only handle plain left clicks; let modifier combos (Ctrl/Cmd+click etc.) use the href.
+                if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                // Prevent focus-on-mousedown. Without this, focus triggers a connector
+                // re-fetch → React re-render → inner scroll container resets → mouseup
+                // lands on a different element → the browser never fires the click event.
+                e.preventDefault();
+                application.navigateToUrl(qualityHref);
+              }}
+            >
+              {i18n.translate('xpack.streams.streamOverview.dataQualityCard.viewAll', {
+                defaultMessage: 'View all',
+              })}
+            </EuiLink>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />

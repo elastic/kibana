@@ -26,15 +26,6 @@ it('requires the workspace, since channel ids repeat across workspaces', () => {
   expect(params?.safeParse({ body: BODY }).success).toBe(true);
 });
 
-it('requires the execution handling an event, and an event to release', () => {
-  const parse = (body: object) => params?.safeParse({ body: { ...BODY, ...body } }).success;
-  expect(parse({ event_id: 'Ev1' })).toBe(false);
-  expect(parse({ execution_id: 'exec-1' })).toBe(false);
-  expect(parse({ release_event: true })).toBe(false);
-  expect(parse({ event_id: 'Ev1', execution_id: 'exec-1' })).toBe(true);
-  expect(parse({ event_id: 'Ev1', execution_id: 'exec-1', release_event: true })).toBe(true);
-});
-
 it('passes the status message and the delivered event to the client', async () => {
   findOrCreateSlackThread.mockResolvedValue({
     investigation_id: 'inv-1',
@@ -44,10 +35,15 @@ it('passes the status message and the delivered event to the client', async () =
 
   await expect(
     handler({
-      request: {},
+      request: { spaceId: 'default' },
       getInvestigationsClient,
       params: {
-        body: { ...BODY, status_message_ts: '1700.0002', event_id: 'Ev1', execution_id: 'exec-1' },
+        body: {
+          ...BODY,
+          status_message_ts: '1700.0002',
+          event_id: 'Ev1',
+          execution_id: 'exec-1',
+        },
       },
     } as never)
   ).resolves.toEqual({ investigation_id: 'inv-1', title: 'Checkout errors', duplicate: true });
@@ -69,7 +65,7 @@ it('passes a release of the event to the client', async () => {
   });
 
   await handler({
-    request: {},
+    request: { spaceId: 'default' },
     getInvestigationsClient,
     params: {
       body: { ...BODY, event_id: 'Ev1', execution_id: 'exec-1', release_event: true },
@@ -84,10 +80,41 @@ it('passes a release of the event to the client', async () => {
   );
 });
 
+it('requires the execution with the event, and the event with a release', () => {
+  expect(params?.safeParse({ body: { ...BODY, event_id: 'Ev1' } }).success).toBe(false);
+  expect(params?.safeParse({ body: { ...BODY, execution_id: 'exec-1' } }).success).toBe(false);
+  expect(params?.safeParse({ body: { ...BODY, release_event: true } }).success).toBe(false);
+  expect(
+    params?.safeParse({
+      body: { ...BODY, event_id: 'Ev1', execution_id: 'exec-1', release_event: true },
+    }).success
+  ).toBe(true);
+});
+
+it.each([
+  ['workspace', 129],
+  ['channel', 257],
+  ['thread_ts', 65],
+  ['status_message_ts', 65],
+  ['event_id', 257],
+  ['execution_id', 257],
+])('bounds %s so the thread key and the recorded event fit the thread subject', (field, length) => {
+  const body =
+    field === 'event_id' || field === 'execution_id'
+      ? { ...BODY, event_id: 'Ev1', execution_id: 'exec-1' }
+      : BODY;
+  expect(params?.safeParse({ body }).success).toBe(true);
+  expect(params?.safeParse({ body: { ...body, [field]: 'x'.repeat(length) } }).success).toBe(false);
+});
+
 it('returns an empty body for a thread without an investigation', async () => {
   findOrCreateSlackThread.mockResolvedValue(undefined);
 
   await expect(
-    handler({ request: {}, getInvestigationsClient, params: { body: BODY } } as never)
+    handler({
+      request: { spaceId: 'default' },
+      getInvestigationsClient,
+      params: { body: BODY },
+    } as never)
   ).resolves.toEqual({});
 });

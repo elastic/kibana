@@ -5,36 +5,23 @@
  * 2.0.
  */
 
+import { forbidden } from '@hapi/boom';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { Streams } from '@kbn/streams-schema';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../../routes/types';
 import {
   createMockToolContext,
   createSignificantEventsServer,
   invokeHandler,
+  mockSourcesClient,
 } from '../../../utils/test_helpers';
 import { createGetFeaturesTool } from './tool';
 
 describe('ki_features_get tool', () => {
   const logger = loggingSystemMock.createLogger();
-  const stream: Streams.WiredStream.Definition = {
-    name: 'logs.test',
-    description: 'Test logs',
-    updated_at: new Date().toISOString(),
-    type: 'wired',
-    ingest: {
-      lifecycle: { inherit: {} },
-      processing: { steps: [], updated_at: new Date().toISOString() },
-      settings: {},
-      failure_store: { inherit: {} },
-      wired: { fields: {}, routing: [] },
-    },
-  };
-  const getStream = jest.fn().mockResolvedValue(stream);
   const getFeatures = jest.fn();
   const getScopedClients = jest.fn(async () => {
     return {
-      streamsClient: { getStream },
+      sourcesClient: mockSourcesClient(['logs.test']),
       getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
     } as unknown as RouteHandlerScopedClients;
   }) as unknown as jest.MockedFunction<GetScopedClients>;
@@ -46,7 +33,7 @@ describe('ki_features_get tool', () => {
         {
           id: 'feature-1',
           run_id: 'run-1',
-          stream_name: 'logs.test',
+          source_id: 'logs.test',
           type: 'entity',
           title: 'Checkout',
           description: 'Checkout service',
@@ -70,15 +57,15 @@ describe('ki_features_get tool', () => {
       throw new Error('Expected a schema-backed tool registration');
     }
 
-    expect(tool.schema.safeParse({ target_id: 'logs.test', limit: 100 }).success).toBe(true);
-    expect(tool.schema.safeParse({ target_id: 'logs.test', limit: 101 }).success).toBe(false);
+    expect(tool.schema.safeParse({ slug: 'logs.test', limit: 100 }).success).toBe(true);
+    expect(tool.schema.safeParse({ slug: 'logs.test', limit: 101 }).success).toBe(false);
   });
 
   it('loads features for an authorized target', async () => {
     const result = await invokeHandler(
       createTool(),
       {
-        target_id: 'logs.test',
+        slug: 'logs.test',
         feature_types: ['entity'],
         min_confidence: 70,
         limit: 25,
@@ -89,7 +76,6 @@ describe('ki_features_get tool', () => {
       throw new Error('Expected a standard tool result');
     }
 
-    expect(getStream).toHaveBeenCalledWith('logs.test');
     expect(getFeatures).toHaveBeenCalledWith('logs.test', {
       type: ['entity'],
       minConfidence: 70,
@@ -101,6 +87,9 @@ describe('ki_features_get tool', () => {
         type: 'other',
         data: {
           count: 1,
+          slug: 'logs.test',
+          title: 'logs.test',
+          view_name: '$.nightshift.sources.default.logs.test',
           features: [
             expect.objectContaining({
               id: 'feature-1',
@@ -113,24 +102,6 @@ describe('ki_features_get tool', () => {
     ]);
   });
 
-  it('does not read internally stored features when target authorization fails', async () => {
-    getStream.mockRejectedValueOnce(new Error('insufficient privileges'));
-
-    const result = await invokeHandler(
-      createTool(),
-      { target_id: 'logs.restricted' },
-      createMockToolContext()
-    );
-    if (!('results' in result)) {
-      throw new Error('Expected a standard tool result');
-    }
-
-    expect(getFeatures).not.toHaveBeenCalled();
-    expect(result.results).toEqual([
-      { type: 'error', data: { message: 'insufficient privileges' } },
-    ]);
-  });
-
   it('does not load features without the Nightshift read privilege', async () => {
     const tool = createGetFeaturesTool({
       getScopedClients,
@@ -138,9 +109,27 @@ describe('ki_features_get tool', () => {
       logger,
     });
 
-    const result = await invokeHandler(tool, { target_id: 'logs.test' }, createMockToolContext());
+    const result = await invokeHandler(tool, { slug: 'logs.test' }, createMockToolContext());
 
-    expect(getStream).not.toHaveBeenCalled();
+    expect(getFeatures).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ results: [{ type: 'error' }] });
+  });
+
+  it('does not load stored features when the caller cannot read the source data', async () => {
+    const sourcesClient = mockSourcesClient(['logs.test']);
+    sourcesClient.assertReadable.mockRejectedValue(forbidden('Cannot read source logs.test'));
+    getScopedClients.mockResolvedValueOnce({
+      sourcesClient,
+      getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
+    } as unknown as RouteHandlerScopedClients);
+
+    const result = await invokeHandler(
+      createTool(),
+      { slug: 'logs.test' },
+      createMockToolContext()
+    );
+
+    expect(sourcesClient.assertReadable).toHaveBeenCalledWith('logs.test');
     expect(getFeatures).not.toHaveBeenCalled();
     expect(result).toMatchObject({ results: [{ type: 'error' }] });
   });

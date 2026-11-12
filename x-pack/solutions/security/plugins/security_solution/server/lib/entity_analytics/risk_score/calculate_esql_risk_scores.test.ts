@@ -15,9 +15,12 @@ import {
   getEuidCompositeQuery,
   getResolutionCompositeQuery,
   getResolutionScoreESQLByIds,
+  getResolutionScoreESQLByRange,
 } from './calculate_esql_risk_scores';
 import type { RiskScoreBucket } from '../types';
-import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
+import { DEFAULT_ALERT_SAMPLE_SIZE, RIEMANN_ZETA_S_VALUE, getRiemannZetaValue } from './constants';
+
+const RIEMANN_ZETA_VALUE = getRiemannZetaValue(DEFAULT_ALERT_SAMPLE_SIZE);
 
 describe('Calculate risk scores with ESQL', () => {
   describe('getEuidCompositeQuery', () => {
@@ -35,6 +38,7 @@ describe('Calculate risk scores with ESQL', () => {
 
     it('builds resolution composite query for lookup index pagination', () => {
       const query = getResolutionCompositeQuery(
+        EntityType.user,
         '.entity_analytics.risk_score.lookup-default',
         1000,
         {
@@ -46,8 +50,11 @@ describe('Calculate risk scores with ESQL', () => {
         index: '.entity_analytics.risk_score.lookup-default',
         size: 0,
         query: {
-          term: {
-            relationship_type: 'entity.relationships.resolution.resolved_to',
+          bool: {
+            filter: [
+              { term: { relationship_type: 'entity.relationships.resolution.resolved_to' } },
+              { prefix: { resolution_target_id: 'user:' } },
+            ],
           },
         },
         aggs: {
@@ -64,6 +71,7 @@ describe('Calculate risk scores with ESQL', () => {
 
     it('scopes query to targetEntityIds when they are provided', () => {
       const query = getResolutionCompositeQuery(
+        EntityType.user,
         '.entity_analytics.risk_score.lookup-default',
         1000,
         undefined,
@@ -75,14 +83,33 @@ describe('Calculate risk scores with ESQL', () => {
       });
     });
 
-    it('falls back to relationship_type term query when targetEntityIds is undefined', () => {
-      const query = getResolutionCompositeQuery(
+    it('limits resolution pages to targets of the entity type being scored', () => {
+      const hostQuery = getResolutionCompositeQuery(
+        EntityType.host,
+        '.entity_analytics.risk_score.lookup-default',
+        1000
+      );
+      const userQuery = getResolutionCompositeQuery(
+        EntityType.user,
         '.entity_analytics.risk_score.lookup-default',
         1000
       );
 
-      expect(query.query).toEqual({
-        term: { relationship_type: 'entity.relationships.resolution.resolved_to' },
+      expect(hostQuery.query).toEqual({
+        bool: {
+          filter: [
+            { term: { relationship_type: 'entity.relationships.resolution.resolved_to' } },
+            { prefix: { resolution_target_id: 'host:' } },
+          ],
+        },
+      });
+      expect(userQuery.query).toEqual({
+        bool: {
+          filter: [
+            { term: { relationship_type: 'entity.relationships.resolution.resolved_to' } },
+            { prefix: { resolution_target_id: 'user:' } },
+          ],
+        },
       });
     });
 
@@ -102,6 +129,105 @@ describe('Calculate risk scores with ESQL', () => {
       expect(query).toContain('resolution_target_id IN ("user:target-a", "user:target-z")');
       expect(query).toContain('BY resolution_target_id');
       expect(query).toContain('contributing_entities_raw = VALUES(entity_with_rel)');
+    });
+
+    it('keeps the alert timestamp when joining lookup rows that have their own', () => {
+      const query = getResolutionScoreESQLByIds(
+        EntityType.user,
+        ['user:target-a'],
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      const renameIndex = query.indexOf('| RENAME @timestamp as time');
+      expect(renameIndex).toBeGreaterThan(-1);
+      expect(renameIndex).toBeLessThan(query.indexOf('| LOOKUP JOIN'));
+    });
+
+    it("selects a page of resolution groups by target range and this run's lookup rows", () => {
+      const query = getResolutionScoreESQLByRange(
+        EntityType.user,
+        { lower: 'user:target-a', upper: 'user:target-m' },
+        'run-1',
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      expect(query).toContain(
+        '| WHERE calculation_run_id == "run-1" AND resolution_target_id > "user:target-a" AND resolution_target_id <= "user:target-m"'
+      );
+      expect(query).not.toContain('resolution_target_id IN (');
+      expect(query).toContain('BY resolution_target_id');
+      expect(query.indexOf('| RENAME @timestamp as time')).toBeLessThan(
+        query.indexOf('| LOOKUP JOIN')
+      );
+    });
+
+    it('omits the lower bound on the first page of resolution groups', () => {
+      const query = getResolutionScoreESQLByRange(
+        EntityType.user,
+        { upper: 'user:target-m' },
+        'run-1',
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      expect(query).toContain(
+        '| WHERE calculation_run_id == "run-1" AND resolution_target_id <= "user:target-m"'
+      );
+      expect(query).not.toContain('resolution_target_id >');
+    });
+
+    it("keeps only this run's lookup rows, so a previous run's leftover rows form no groups", () => {
+      // The lookup index is pruned after scoring, so while a run scores, a target whose aliases
+      // have all moved elsewhere still has the row the previous run wrote for it.
+      const query = getResolutionScoreESQLByRange(
+        EntityType.user,
+        { upper: 'user:target-m' },
+        'run-2',
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      expect(query).toContain('| WHERE calculation_run_id == "run-2" AND');
+      expect(query).not.toContain('resolution_target_id IS NOT NULL');
+    });
+
+    it('escapes quote and backslash characters in resolution target bounds', () => {
+      const query = getResolutionScoreESQLByRange(
+        EntityType.user,
+        { lower: 'user:with"quote', upper: 'user:with\\slash' },
+        'run-1',
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      expect(query).toContain('resolution_target_id > "user:with\\"quote"');
+      expect(query).toContain('resolution_target_id <= "user:with\\\\slash"');
+    });
+
+    it('throws when resolution target bounds contain a control character', () => {
+      expect(() =>
+        getResolutionScoreESQLByRange(
+          EntityType.user,
+          { lower: 'user:target-a', upper: 'user:bad\u000A' },
+          'run-1',
+          5000,
+          1000,
+          '.alerts-security.alerts-default',
+          '.entity_analytics.risk_score.lookup-default'
+        )
+      ).toThrow('Entity ID contains an unsupported control character');
     });
 
     it('escapes quote and backslash characters in resolution target ID list', () => {
@@ -166,6 +292,66 @@ describe('Calculate risk scores with ESQL', () => {
           '.alerts-security.alerts-default'
         )
       ).toThrow('Entity ID contains an unsupported control character');
+    });
+
+    it.each([
+      ['whitespace/METADATA injection', '.alerts-security.alerts-default METADATA _index'],
+      ['pipe injection', '.alerts-security.alerts-default | LIMIT 0'],
+      ['comment injection', '.alerts-security.alerts-default,zz* | LIMIT 0 //'],
+      [
+        'report payload A',
+        '.alerts-security.alerts-alpha,.alerts-security.alerts-beta,zz* METADATA _index,/* * */_source',
+      ],
+    ])('throws when the source index is not a valid index expression (%s)', (_label, index) => {
+      const message = `Risk scoring source index ${index} is not a valid index expression`;
+
+      expect(() =>
+        getESQL(EntityType.host, { lower: 'abel', upper: 'zuzanna' }, 10000, 3500, index)
+      ).toThrow(message);
+      expect(() =>
+        getBaseScoreESQL(
+          EntityType.host,
+          { lower: 'host:abel', upper: 'host:zuzanna' },
+          10000,
+          3500,
+          index
+        )
+      ).toThrow(message);
+      expect(() =>
+        getResolutionScoreESQLByIds(
+          EntityType.host,
+          ['host:target-a'],
+          10000,
+          3500,
+          index,
+          '.entity_analytics.risk_score.lookup-default'
+        )
+      ).toThrow(message);
+    });
+
+    it('ranks risk inputs by the numeric risk score in every scoring query', () => {
+      const queries = [
+        getESQL(EntityType.host, { lower: 'abel', upper: 'zuzanna' }, 10000, 3500),
+        getBaseScoreESQL(
+          EntityType.host,
+          { lower: 'host:abel', upper: 'host:zuzanna' },
+          10000,
+          3500,
+          '.alerts-security.alerts-default'
+        ),
+        getResolutionScoreESQLByIds(
+          EntityType.host,
+          ['host:target-a'],
+          10000,
+          3500,
+          '.alerts-security.alerts-default',
+          '.entity_analytics.risk_score.lookup-default'
+        ),
+      ];
+
+      for (const query of queries) {
+        expect(query).toContain('risk_inputs = TOP(risk_score, 10, "desc", input)');
+      }
     });
   });
 
@@ -277,7 +463,8 @@ describe('Calculate risk scores with ESQL', () => {
 
       const bucket = buildRiskScoreBucket(
         EntityType.host,
-        '.alerts-security.alerts-default'
+        '.alerts-security.alerts-default',
+        DEFAULT_ALERT_SAMPLE_SIZE
       )(esqlResultRow as FieldValue[]);
 
       const expected: RiskScoreBucket = {
@@ -363,7 +550,8 @@ describe('Calculate risk scores with ESQL', () => {
 
         const bucket = buildRiskScoreBucket(
           EntityType.host,
-          '.alerts-security.alerts-default'
+          '.alerts-security.alerts-default',
+          DEFAULT_ALERT_SAMPLE_SIZE
         )(esqlResultRow as FieldValue[]);
 
         expect(bucket.top_inputs.risk_details.value.risk_inputs[0].rule_name).toBe(
@@ -385,7 +573,8 @@ describe('Calculate risk scores with ESQL', () => {
         const esqlResultRow = [1, 80, inputs, 'hostname'];
         const bucket = buildRiskScoreBucket(
           EntityType.host,
-          '.alerts-security.alerts-default'
+          '.alerts-security.alerts-default',
+          DEFAULT_ALERT_SAMPLE_SIZE
         )(esqlResultRow as FieldValue[]);
 
         expect(bucket.top_inputs.risk_details.value.risk_inputs[0].rule_name).toBe(ruleName);
@@ -402,7 +591,8 @@ describe('Calculate risk scores with ESQL', () => {
         const esqlResultRow = [1, 90, inputs, 'hostname'];
         const bucket = buildRiskScoreBucket(
           EntityType.host,
-          '.alerts-security.alerts-default'
+          '.alerts-security.alerts-default',
+          DEFAULT_ALERT_SAMPLE_SIZE
         )(esqlResultRow as FieldValue[]);
 
         expect(bucket.top_inputs.risk_details.value.risk_inputs[0].rule_name).toBe(ruleName);
@@ -419,7 +609,8 @@ describe('Calculate risk scores with ESQL', () => {
         const esqlResultRow = [1, 85, inputs, 'hostname'];
         const bucket = buildRiskScoreBucket(
           EntityType.host,
-          '.alerts-security.alerts-default'
+          '.alerts-security.alerts-default',
+          DEFAULT_ALERT_SAMPLE_SIZE
         )(esqlResultRow as FieldValue[]);
 
         expect(bucket.top_inputs.risk_details.value.risk_inputs[0].rule_name).toBe(ruleName);
@@ -438,7 +629,8 @@ describe('Calculate risk scores with ESQL', () => {
         const esqlResultRow = [1, 95, inputs, 'hostname'];
         const bucket = buildRiskScoreBucket(
           EntityType.host,
-          '.alerts-security.alerts-default'
+          '.alerts-security.alerts-default',
+          DEFAULT_ALERT_SAMPLE_SIZE
         )(esqlResultRow as FieldValue[]);
 
         expect(bucket.top_inputs.risk_details.value.risk_inputs[0].rule_name).toBe(ruleName);
@@ -456,7 +648,8 @@ describe('Calculate risk scores with ESQL', () => {
         const esqlResultRow = [1, 70, inputs, 'hostname'];
         const bucket = buildRiskScoreBucket(
           EntityType.host,
-          '.alerts-security.alerts-default'
+          '.alerts-security.alerts-default',
+          DEFAULT_ALERT_SAMPLE_SIZE
         )(esqlResultRow as FieldValue[]);
 
         expect(bucket.top_inputs.risk_details.value.risk_inputs[0].rule_name).toBe(ruleName);
@@ -476,7 +669,8 @@ describe('Calculate risk scores with ESQL', () => {
 
         const bucket = buildRiskScoreBucket(
           EntityType.host,
-          '.alerts-security.alerts-default'
+          '.alerts-security.alerts-default',
+          DEFAULT_ALERT_SAMPLE_SIZE
         )(esqlResultRow as FieldValue[]);
 
         expect(bucket.top_inputs.risk_details.value.risk_inputs[0].rule_name).toBe(
@@ -496,7 +690,8 @@ describe('Calculate risk scores with ESQL', () => {
         const esqlResultRow = [1, 60, inputs, 'hostname'];
         const bucket = buildRiskScoreBucket(
           EntityType.host,
-          '.alerts-security.alerts-default'
+          '.alerts-security.alerts-default',
+          DEFAULT_ALERT_SAMPLE_SIZE
         )(esqlResultRow as FieldValue[]);
 
         expect(bucket.top_inputs.risk_details.value.risk_inputs[0].rule_name).toBe(correctRuleName);
@@ -515,7 +710,8 @@ describe('Calculate risk scores with ESQL', () => {
         const esqlResultRow = [2, 125, inputs, 'hostname'];
         const bucket = buildRiskScoreBucket(
           EntityType.host,
-          '.alerts-security.alerts-default'
+          '.alerts-security.alerts-default',
+          DEFAULT_ALERT_SAMPLE_SIZE
         )(esqlResultRow as FieldValue[]);
 
         expect(bucket.top_inputs.risk_details.value.risk_inputs).toHaveLength(2);

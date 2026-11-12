@@ -17,6 +17,11 @@ import {
   deleteServiceAccounts,
   type ServiceAccountPrincipal,
 } from '../fixtures/service_account_cleanup';
+import {
+  bindWorkload,
+  type TestWorkload,
+  unbindWorkloads,
+} from '../fixtures/service_account_workloads';
 
 /**
  * Local only: this suite needs the `service_accounts` custom server config set, and custom config
@@ -45,9 +50,20 @@ const uniqueName = (prefix: string) => `${prefix}-${Date.now()}-${Math.floor(Mat
 
 const getPath = (id: string) => `${SERVICE_ACCOUNT_ENDPOINT}/${encodeURIComponent(id)}`;
 
+/** The creator the directory reports for an account. */
+interface DirectoryCreator {
+  type: string;
+  username?: string;
+  userProfileId?: string;
+  displayName?: string;
+  variant?: string;
+  apiKeyId?: string;
+  apiKeyName?: string;
+}
+
 /**
- * What this suite expects back. No `createdBy`, which is UIAM-only for now while this suite
- * exercises the Elasticsearch backend, and no creation time, which neither backend reports.
+ * What this suite expects back. No creation time: Elasticsearch reports `created_at`, but UIAM
+ * reports no timestamp of any kind, so the directory leaves it out.
  */
 interface DirectoryEntry {
   id: string;
@@ -56,6 +72,9 @@ interface DirectoryEntry {
   enabled: boolean;
   assumable: boolean;
   description?: string;
+  createdBy?: DirectoryCreator;
+  /** Reported by the list only. */
+  workloadCount?: number;
 }
 
 interface ListResponse {
@@ -65,36 +84,73 @@ interface ListResponse {
 
 apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONLY }, () => {
   const created: ServiceAccountPrincipal[] = [];
+  const boundWorkloads: TestWorkload[] = [];
+  const createdSpaces: string[] = [];
 
   let adminHeaders: Record<string, string>;
   /** Created through Kibana, so Kibana holds a token and can assume it. */
   let kibanaManaged: ServiceAccountPrincipal;
   /** Created straight through Elasticsearch, so Kibana holds nothing to assume it with. */
   let foreign: ServiceAccountPrincipal;
+  /** The admin `kibanaManaged` is created as, named the way the directory should name them. */
+  let adminCreator: DirectoryCreator;
+  /** The Elasticsearch user `foreign` is created as. */
+  let esClientUsername: string;
+  /** How the directory names the admin as the owner of an API key: full name, else username. */
+  let adminOwnerName: string;
+  /** API keys this suite created, invalidated on the way out. */
+  const createdApiKeyIds: string[] = [];
 
   const idOf = ({ namespace, name }: ServiceAccountPrincipal) => `${namespace}/${name}`;
 
   /**
    * The account created through Kibana in `beforeAll`, as the directory reports it.
    *
-   * Asserted whole, which pins the absence of a creator as much as the rest: Elasticsearch does
-   * not record who created an account yet, and Kibana deliberately does not answer with the
-   * creator of the credential it stored instead. A followup reports both fields once
-   * Elasticsearch has them, and this assertion is what will catch that change.
+   * Asserted whole. The creator is what Elasticsearch recorded for the admin's request, named by
+   * the admin's user profile.
+   *
+   * Only the list counts the workloads bound to an account, so `listed` adds that count.
    */
-  const expectKibanaManagedEntry = (entry: DirectoryEntry | undefined) => {
+  const expectKibanaManagedEntry = (
+    entry: DirectoryEntry | undefined,
+    { listed }: { listed: boolean }
+  ) => {
     expect(entry).toStrictEqual({
       id: idOf(kibanaManaged),
       name: kibanaManaged.name,
       roles: ['viewer'],
       enabled: true,
       assumable: true,
+      createdBy: adminCreator,
+      ...(listed && { workloadCount: 0 }),
     });
   };
 
   apiTest.beforeAll(async ({ apiClient, esClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     adminHeaders = { ...cookieHeader, ...REQUEST_HEADERS };
+
+    const me = await apiClient.get('internal/security/me', {
+      headers: adminHeaders,
+      responseType: 'json',
+    });
+    const profile = await apiClient.get('internal/security/user_profile', {
+      headers: adminHeaders,
+      responseType: 'json',
+    });
+    const { username, profile_uid: userProfileId } = me.body as {
+      username: string;
+      profile_uid: string;
+    };
+    const fullName = (profile.body as { user: { full_name?: string } }).user.full_name;
+    adminOwnerName = fullName ?? username;
+    adminCreator = {
+      type: 'user',
+      username,
+      userProfileId,
+      ...(fullName && { displayName: fullName }),
+    };
+    ({ username: esClientUsername } = await esClient.security.authenticate());
 
     kibanaManaged = { namespace: ES_SERVICE_ACCOUNT_NAMESPACE, name: uniqueName('directory') };
     created.push(kibanaManaged);
@@ -115,8 +171,33 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
     });
   });
 
-  apiTest.afterAll(async ({ esClient, config }) => {
-    await deleteServiceAccounts(esClient, config, created);
+  apiTest.afterAll(async ({ esClient, kbnClient, config }) => {
+    // Every step runs, even when an earlier one fails, so one failure doesn't leave the rest behind.
+    const failures: Error[] = [];
+    const cleanup = [
+      async () => unbindWorkloads(kbnClient, boundWorkloads),
+      async () => {
+        if (createdApiKeyIds.length) {
+          await esClient.security.invalidateApiKey({ ids: createdApiKeyIds });
+        }
+      },
+      async () => {
+        for (const spaceId of createdSpaces) {
+          await kbnClient.spaces.delete(spaceId);
+        }
+      },
+      async () => deleteServiceAccounts(esClient, config, created),
+    ];
+    for (const remove of cleanup) {
+      try {
+        await remove();
+      } catch (error) {
+        failures.push(error instanceof Error ? error : new Error('Directory cleanup failed.'));
+      }
+    }
+    if (failures.length) {
+      throw new AggregateError(failures, 'Service account directory cleanup failed.');
+    }
   });
 
   /**
@@ -163,18 +244,25 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
     async ({ apiClient }) => {
       const accounts = await listAllServiceAccounts(apiClient, adminHeaders);
 
-      expectKibanaManagedEntry(accounts.find(({ id }) => id === idOf(kibanaManaged)));
+      expectKibanaManagedEntry(
+        accounts.find(({ id }) => id === idOf(kibanaManaged)),
+        { listed: true }
+      );
 
       // Kibana can describe an account it did not create, but holds no token to act as it with.
       // `assumable` is how the UI tells the two apart.
-      const notManaged = accounts.find(({ id }) => id === idOf(foreign));
+      const [{ createdBy, ...notManaged }] = accounts.filter(({ id }) => id === idOf(foreign));
       expect(notManaged).toStrictEqual({
         id: idOf(foreign),
         name: foreign.name,
         roles: ['monitoring_user'],
         enabled: false,
         assumable: false,
+        workloadCount: 0,
       });
+      // Whoever wrote the account is its creator, even outside Kibana. Whether that user has a
+      // profile depends on the cluster, so only the username is pinned.
+      expect(createdBy).toMatchObject({ type: 'user', username: esClientUsername });
 
       // Built-in accounts are Elasticsearch's own and never appear in the directory.
       expect(accounts.map(({ id }) => id)).not.toContain('elastic/kibana');
@@ -216,8 +304,50 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
     });
 
     expect(response.statusCode).toBe(200);
-    expectKibanaManagedEntry(response.body as DirectoryEntry);
+    expectKibanaManagedEntry(response.body as DirectoryEntry, { listed: false });
   });
+
+  apiTest(
+    'names an account created with an API key by the key and its owner',
+    async ({ apiClient }) => {
+      // No role descriptors, so the key carries the admin's own privileges.
+      const keyName = uniqueName('creator-key');
+      const keyResponse = await apiClient.post('internal/security/api_key', {
+        headers: adminHeaders,
+        responseType: 'json',
+        body: { name: keyName, role_descriptors: {} },
+      });
+      expect(keyResponse.statusCode).toBe(200);
+      const { id: apiKeyId, encoded } = keyResponse.body as { id: string; encoded: string };
+      createdApiKeyIds.push(apiKeyId);
+
+      const viaKey = { namespace: ES_SERVICE_ACCOUNT_NAMESPACE, name: uniqueName('via-key') };
+      created.push(viaKey);
+      const createResponse = await apiClient.post(SERVICE_ACCOUNT_ENDPOINT, {
+        headers: { ...REQUEST_HEADERS, authorization: `ApiKey ${encoded}` },
+        responseType: 'json',
+        body: { name: viaKey.name, roles: ['viewer'] },
+      });
+      expect(createResponse.statusCode).toBe(200);
+
+      const response = await apiClient.get(getPath(idOf(viaKey)), {
+        headers: adminHeaders,
+        responseType: 'json',
+      });
+
+      expect(response.statusCode).toBe(200);
+      // Elasticsearch records the key and resolves its owner's profile, so the directory names
+      // both the key and the person behind it.
+      expect((response.body as DirectoryEntry).createdBy).toStrictEqual({
+        type: 'api_key',
+        variant: 'stack',
+        apiKeyId,
+        apiKeyName: keyName,
+        userProfileId: adminCreator.userProfileId,
+        displayName: adminOwnerName,
+      });
+    }
+  );
 
   apiTest('gets an account this Kibana cannot assume', async ({ apiClient }) => {
     const response = await apiClient.get(getPath(idOf(foreign)), {
@@ -226,13 +356,15 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
     });
 
     expect(response.statusCode).toBe(200);
-    expect(response.body).toStrictEqual({
+    const { createdBy, ...entry } = response.body as DirectoryEntry;
+    expect(entry).toStrictEqual({
       id: idOf(foreign),
       name: foreign.name,
       roles: ['monitoring_user'],
       enabled: false,
       assumable: false,
     });
+    expect(createdBy).toMatchObject({ type: 'user', username: esClientUsername });
   });
 
   apiTest(
@@ -331,13 +463,52 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
 
       expect(after.statusCode).toBe(200);
       // The stored token cannot authenticate this account, so Kibana can no longer act as it.
-      expect(after.body).toStrictEqual({
+      const { createdBy, ...entry } = after.body as DirectoryEntry;
+      expect(entry).toStrictEqual({
         id: idOf(recreated),
         name: recreated.name,
         roles: ['monitoring_user'],
         enabled: true,
         assumable: false,
       });
+      // The recreated account names whoever recreated it, not who asked Kibana for the original.
+      expect(createdBy).toMatchObject({ type: 'user', username: esClientUsername });
+    }
+  );
+
+  apiTest(
+    'counts the workloads bound to an account across every space',
+    async ({ apiClient, kbnClient }) => {
+      const bound = { namespace: ES_SERVICE_ACCOUNT_NAMESPACE, name: uniqueName('bound') };
+      created.push(bound);
+      const createResponse = await apiClient.post(SERVICE_ACCOUNT_ENDPOINT, {
+        headers: adminHeaders,
+        responseType: 'json',
+        body: { name: bound.name, roles: ['viewer'] },
+      });
+      expect(createResponse.statusCode).toBe(200);
+
+      const spaceId = uniqueName('space');
+      createdSpaces.push(spaceId);
+      await kbnClient.spaces.create({ id: spaceId, name: spaceId, disabledFeatures: [] });
+
+      const workloadId = uniqueName('workload');
+      for (const workloadSpaceId of [undefined, spaceId]) {
+        boundWorkloads.push({ workloadId, spaceId: workloadSpaceId });
+        await bindWorkload(kbnClient, workloadId, idOf(bound), workloadSpaceId);
+      }
+
+      const accounts = await listAllServiceAccounts(apiClient, adminHeaders);
+      expect(accounts.find(({ id }) => id === idOf(bound))?.workloadCount).toBe(2);
+      expect(accounts.find(({ id }) => id === idOf(kibanaManaged))?.workloadCount).toBe(0);
+
+      // Get reports one account, and leaves counting to the list.
+      const get = await apiClient.get(getPath(idOf(bound)), {
+        headers: adminHeaders,
+        responseType: 'json',
+      });
+      expect(get.statusCode).toBe(200);
+      expect((get.body as DirectoryEntry).workloadCount).toBeUndefined();
     }
   );
 
@@ -371,39 +542,29 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
   });
 
   apiTest(
-    'allows a caller with `read_security` to read but not to create',
-    async ({ apiClient, requestAuth }) => {
+    'refuses a caller with only `read_security`, since reading takes `manage_security` too',
+    async ({ apiClient, samlAuth }) => {
       // Kibana access is granted, so any refusal below is attributable to the cluster privilege
-      // rather than to the key having no Kibana access.
-      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole({
+      // rather than to the user having no Kibana access. A user rather than an API key, because
+      // the key would embed this Kibana-format role and lose its cluster privilege.
+      const { cookieHeader } = await samlAuth.asInteractiveUser({
         kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
         elasticsearch: { cluster: ['read_security'] },
       });
-      const headers = { ...apiKeyHeader, ...REQUEST_HEADERS };
+      const headers = { ...cookieHeader, ...REQUEST_HEADERS };
 
       const list = await apiClient.get(SERVICE_ACCOUNT_ENDPOINT, { headers, responseType: 'json' });
-      expect(list.statusCode).toBe(200);
+      expect(list.statusCode).toBe(403);
 
       const get = await apiClient.get(getPath(idOf(kibanaManaged)), {
         headers,
         responseType: 'json',
       });
-      expect(get.statusCode).toBe(200);
-
-      // Registered up front even though the request is expected to fail: if the authorization
-      // check ever regresses, the account it creates has to be cleaned up like any other.
-      const name = uniqueName('read-only');
-      created.push({ namespace: ES_SERVICE_ACCOUNT_NAMESPACE, name });
-      const create = await apiClient.post(SERVICE_ACCOUNT_ENDPOINT, {
-        headers,
-        responseType: 'json',
-        body: { name, roles: ['viewer'] },
-      });
-      expect(create.statusCode).toBe(403);
+      expect(get.statusCode).toBe(403);
     }
   );
 
-  apiTest('refuses a caller without `read_security`', async ({ apiClient, samlAuth }) => {
+  apiTest('refuses a caller without `manage_security`', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
     const headers = { ...cookieHeader, ...REQUEST_HEADERS };
 

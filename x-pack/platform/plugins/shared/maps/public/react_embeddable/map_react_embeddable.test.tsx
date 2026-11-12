@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { render } from '@testing-library/react';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
 import { BehaviorSubject } from 'rxjs';
 import type { MapApi } from './types';
@@ -49,9 +50,13 @@ jest.mock('../kibana_services', () => {
   };
 });
 
-jest.mock('../connected_components/map_container', () => {
-  return () => <div>MockMapContainer</div>;
-});
+const mockMapContainer = jest.fn();
+jest.mock('../connected_components/map_container', () => ({
+  MapContainer: (props: Record<string, unknown>) => {
+    mockMapContainer(props);
+    return <div>MockMapContainer</div>;
+  },
+}));
 
 jest.mock('../licensed_features', () => {
   return {
@@ -105,6 +110,38 @@ describe('map embeddable', () => {
         done();
       });
       embeddableApi.setTitle('cute puppies');
+    });
+  });
+
+  describe('isInteractive', () => {
+    it('passes isInteractive=false to MapContainer when viewMode is non-interactive', (done) => {
+      const viewMode$ = new BehaviorSubject<'non-interactive'>('non-interactive');
+      const parentApi = { viewMode$ };
+      const uuid = 'preview-map-1';
+      const finalizeApi = (api: any) => ({
+        ...api,
+        uuid,
+        parent: parentApi,
+        type: MAP_SAVED_OBJECT_TYPE,
+        phase$: new BehaviorSubject(undefined),
+      });
+
+      mapEmbeddableFactory
+        .buildEmbeddable({
+          initializeDrilldownsManager,
+          initialState: { attributes: { title: 'preview map' } },
+          finalizeApi,
+          uuid,
+          parentApi,
+        })
+        .then(({ Component }) => {
+          mockMapContainer.mockClear();
+          render(<Component />);
+          const lastProps = mockMapContainer.mock.calls.at(-1)?.[0];
+          expect(lastProps?.isInteractive).toBe(false);
+          done();
+        })
+        .catch(done);
     });
   });
 });

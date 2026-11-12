@@ -199,6 +199,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'vis_type_vislib.readOnly (boolean?|never)',
         'vis_type_xy.readOnly (boolean?|never)',
         'vis_type_vega.enableExternalUrls (boolean?)',
+        'workflowsManagement.pages.enabled (boolean?)',
         'xpack.actions.email.domain_allowlist (array?)',
         'xpack.actions.email.services.enabled (array?)',
         'xpack.actions.webhook.ssl.pfx.enabled (boolean?)',
@@ -232,11 +233,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.deployments_url (string?)',
         'xpack.cloud.is_elastic_staff_owned (boolean?)',
         'xpack.cloud.trial_end_date (string?)',
-        // Commented because it's inside a schema conditional, and the test is not able to resolve it. But it's shared.
-        // Added here for documentation purposes.
-        // 'xpack.cloud_integrations.experiments.launch_darkly.client_id (string)',
-        // 'xpack.cloud_integrations.experiments.launch_darkly.client_log_level (string)',
-        'xpack.cloud_integrations.experiments.metadata_refresh_interval (duration?)',
         'xpack.cloud_integrations.full_story.org_id (string|string?)',
         // No PII. Just the list of event types we want to forward to FullStory.
         'xpack.cloud_integrations.full_story.eventTypesAllowlist (array?)',
@@ -253,7 +249,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // can't be used to infer urls or customer id from the outside
         'xpack.cloud.serverless.project_id (string?)',
         'xpack.cloud.serverless.project_name (string?)',
-        'xpack.cloud.serverless.project_type (observability?|security?|search?|workplaceai?|vectordb?)',
+        'xpack.cloud.serverless.project_type (observability?|security?|search?|vectordb?)',
         'xpack.cloud.serverless.product_tier (never|complete?|essentials?|search_ai_lake?|logs_essentials?)',
         'xpack.cloud.serverless.orchestrator_target (string?)',
         'xpack.cloud.serverless.in_trial (boolean?)',
@@ -380,6 +376,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.upgrade_assistant.featureSet.reindexCorrectiveActions (boolean?)',
         'xpack.upgrade_assistant.featureSet.migrateDataStreams (boolean?)',
         'xpack.upgrade_assistant.ui.enabled (boolean?)',
+        'xpack.synthetics.secretConnections.enabled (boolean?)',
         'xpack.observability.unsafe.alertDetails.metrics.enabled (boolean?)',
         'xpack.observability.unsafe.alertDetails.logs.enabled (boolean?)',
         'xpack.observability.unsafe.alertDetails.uptime.enabled (boolean?)',

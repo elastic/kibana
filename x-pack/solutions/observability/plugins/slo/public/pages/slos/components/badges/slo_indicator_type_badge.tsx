@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
   ALL_VALUE,
+  is,
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
 } from '@kbn/slo-schema';
@@ -65,8 +66,8 @@ export function SloIndicatorTypeBadge({ slo }: Props) {
           {toIndicatorTypeLabel(slo.indicator.type)}
         </EuiBadge>
       </EuiFlexItem>
-      {(apmTransactionDurationIndicatorSchema.is(slo.indicator) ||
-        apmTransactionErrorRateIndicatorSchema.is(slo.indicator)) &&
+      {(is(apmTransactionDurationIndicatorSchema, slo.indicator) ||
+        is(apmTransactionErrorRateIndicatorSchema, slo.indicator)) &&
         slo.indicator.params.service !== '' &&
         slo.indicator.params.service !== ALL_VALUE && (
           <EuiFlexItem grow={false} css={{ maxWidth: 100 }}>

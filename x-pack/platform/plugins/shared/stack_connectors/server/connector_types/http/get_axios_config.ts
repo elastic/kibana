@@ -17,7 +17,7 @@ import {
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import type { Logger } from '@kbn/logging/src/logger';
 import type { SSLSettings } from '@kbn/actions-utils';
-import type { Services } from '@kbn/actions-plugin/server/types';
+import type { ConnectorTokenClientContract, Services } from '@kbn/actions-plugin/server/types';
 import type {
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
@@ -80,15 +80,25 @@ const buildOAuthAxiosConfig = async ({
   };
 };
 
-const getOAuth2AxiosConfig = async ({
+interface GetOAuthAccessTokenParams {
+  connectorId: string;
+  config: ConnectorTypeConfigType;
+  secrets: ConnectorTypeSecretsType;
+  connectorTokenClient?: ConnectorTokenClientContract;
+  configurationUtilities: ActionsConfigurationUtilities;
+  logger: Logger;
+}
+
+/** Returns the cached or freshly fetched access token (scheme included) for the OAuth2 client credentials grant. */
+export const getClientCredentialsAccessToken = async ({
   connectorId,
   config,
   secrets,
-  services: { connectorTokenClient },
+  connectorTokenClient,
   logger,
   configurationUtilities,
-}: GetOAuth2AxiosConfigParams) => {
-  const { accessTokenUrl, clientId, scope, additionalFields, headers } = config;
+}: GetOAuthAccessTokenParams): Promise<string | null | undefined> => {
+  const { accessTokenUrl, clientId, scope, additionalFields } = config;
   const { clientSecret } = secrets;
 
   // `additionalFields` should be parseable, we do check API schema validation and in
@@ -100,31 +110,70 @@ const getOAuth2AxiosConfig = async ({
     logger.error(`Connector ${connectorId}: error parsing additional fields`);
   }
 
-  return buildOAuthAxiosConfig({
+  return getOAuthClientCredentialsAccessToken({
     connectorId,
-    headers,
+    logger,
+    configurationUtilities,
+    oAuthScope: scope,
+    credentials: {
+      type: 'client_secret',
+      secrets: { clientSecret: clientSecret! },
+      config: {
+        clientId: clientId!,
+        ...(parsedAdditionalFields ? { additionalFields: parsedAdditionalFields } : {}),
+      },
+    },
+    tokenUrl: accessTokenUrl!,
+    connectorTokenClient,
+  });
+};
+
+/** Returns the cached or freshly fetched access token (scheme included) for the OAuth2 password grant. */
+export const getPasswordAccessToken = async ({
+  connectorId,
+  config,
+  secrets,
+  connectorTokenClient,
+  logger,
+  configurationUtilities,
+}: GetOAuthAccessTokenParams): Promise<string | null | undefined> => {
+  const { user, password } = secrets;
+
+  return getOAuthPasswordAccessToken({
+    connectorId,
+    logger,
+    configurationUtilities,
+    username: user!,
+    password: password!,
+    tokenUrl: config.accessTokenUrl!,
+    connectorTokenClient,
+  });
+};
+
+const getOAuth2AxiosConfig = async ({
+  connectorId,
+  config,
+  secrets,
+  services: { connectorTokenClient },
+  logger,
+  configurationUtilities,
+}: GetOAuth2AxiosConfigParams) =>
+  buildOAuthAxiosConfig({
+    connectorId,
+    headers: config.headers,
     secretQueryParams: secrets.secretQueryParams,
     connectorTokenClient,
     logger,
     getAccessToken: () =>
-      getOAuthClientCredentialsAccessToken({
+      getClientCredentialsAccessToken({
         connectorId,
+        config,
+        secrets,
+        connectorTokenClient,
         logger,
         configurationUtilities,
-        oAuthScope: scope,
-        credentials: {
-          type: 'client_secret',
-          secrets: { clientSecret: clientSecret! },
-          config: {
-            clientId: clientId!,
-            ...(parsedAdditionalFields ? { additionalFields: parsedAdditionalFields } : {}),
-          },
-        },
-        tokenUrl: accessTokenUrl!,
-        connectorTokenClient,
       }),
   });
-};
 
 const getOAuthPasswordAxiosConfig = async ({
   connectorId,
@@ -133,28 +182,23 @@ const getOAuthPasswordAxiosConfig = async ({
   services: { connectorTokenClient },
   logger,
   configurationUtilities,
-}: GetOAuth2AxiosConfigParams) => {
-  const { accessTokenUrl, headers } = config;
-  const { user, password } = secrets;
-
-  return buildOAuthAxiosConfig({
+}: GetOAuth2AxiosConfigParams) =>
+  buildOAuthAxiosConfig({
     connectorId,
-    headers,
+    headers: config.headers,
     secretQueryParams: secrets.secretQueryParams,
     connectorTokenClient,
     logger,
     getAccessToken: () =>
-      getOAuthPasswordAccessToken({
+      getPasswordAccessToken({
         connectorId,
+        config,
+        secrets,
+        connectorTokenClient,
         logger,
         configurationUtilities,
-        username: user!,
-        password: password!,
-        tokenUrl: accessTokenUrl!,
-        connectorTokenClient,
       }),
   });
-};
 
 interface GetDefaultAxiosConfig {
   config: ConnectorTypeConfigType;

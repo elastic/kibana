@@ -31,7 +31,7 @@ export async function seedFeatures(
   const res = await kibanaRequest(
     config,
     'POST',
-    `/internal/streams/${encodeURIComponent(ctx.streamName)}/features/_bulk`,
+    `/internal/streams/${encodeURIComponent(ctx.sourceId)}/features/_bulk`,
     { operations },
     ctx.space
   );
@@ -39,5 +39,5 @@ export async function seedFeatures(
     throw new Error(`Failed to bulk-index features (HTTP ${res.status})`);
   }
 
-  log.info(`Posted ${operations.length} feature operations for stream "${ctx.streamName}".`);
+  log.info(`Posted ${operations.length} feature operations for source "${ctx.sourceId}".`);
 }

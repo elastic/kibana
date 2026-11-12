@@ -91,14 +91,17 @@ export function parseInlineFunctionCalls({ logger }: { logger: Logger }) {
               return;
             }
 
-            const { type, content } = event;
+            const { type, content, reasoning } = event;
+            let pendingReasoning = reasoning;
 
             function next(contentToEmit: string) {
               subscriber.next({
                 type,
                 content: contentToEmit,
+                reasoning: pendingReasoning,
                 tool_calls: [],
               });
+              pendingReasoning = undefined;
             }
 
             const match = matchOnSignalStart(functionCallBuffer + content);
@@ -119,11 +122,16 @@ export function parseInlineFunctionCalls({ logger }: { logger: Logger }) {
                   next(afterEndSignal);
                 } catch (error) {
                   subscriber.error(error);
+                  return;
                 }
               }
             } else {
               functionCallBuffer = '';
               next(content);
+            }
+
+            if (pendingReasoning) {
+              next('');
             }
           },
           complete: () => {

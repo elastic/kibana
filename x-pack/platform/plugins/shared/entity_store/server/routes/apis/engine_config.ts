@@ -111,11 +111,14 @@ export function registerEngineConfig(router: EntityStorePluginRouter) {
       summary: 'Update the log extraction configuration of one entity type',
       description:
         'Set per entity-type log extraction overrides. `logExtraction` applies to both extraction ' +
-        'processes, except the volume and throughput fields (`maxLogsPerPage`, ' +
-        '`maxTimeWindowSize`, `maxLogsPerWindow`, `maxLogsPerWindowCapBehavior`, `docsLimit`), ' +
-        'which the non-priority process ignores. Set those for the non-priority process with ' +
-        '`nonPriorityOverride`, which requires dual-process log extraction to be enabled. ' +
-        'Omitting a field leaves it unchanged. Sending `null` clears it and falls back to the layer below.',
+        'processes, except `maxLogsPerWindowCapBehavior`, which the non-priority process ignores ' +
+        '(it always defers for priority and drops for non-priority, by design). Set that field for ' +
+        'the non-priority process with `nonPriorityOverride`, which requires dual-process log ' +
+        'extraction to be enabled. `nonPriorityOverride` can also give non-priority a different ' +
+        'value than `logExtraction` for any other field, including the volume and throughput ' +
+        'fields (`maxLogsPerPage`, `maxTimeWindowSize`, `maxLogsPerWindow`, `docsLimit`), which it ' +
+        'otherwise inherits from `logExtraction` like any other field. Omitting a field leaves it ' +
+        'unchanged. Sending `null` clears it and falls back to the layer below.',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },

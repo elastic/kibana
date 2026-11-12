@@ -23,41 +23,15 @@ const CREATE_WITH_AGENT_MISSING_PRIVILEGE_TOOLTIP = i18n.translate(
       'To create action policies with the AI Agent, you need the "Agent Builder: Read" privilege.',
   }
 );
-const CREATE_WITH_AGENT_MISSING_SETTING_TOOLTIP = i18n.translate(
-  'xpack.alertingV2.actionPolicyCreateOptions.createWithAgentMissingSettingTooltip',
-  {
-    defaultMessage:
-      'To create action policies with the AI Agent, enable the "Elastic Agent Builder: Experimental Features" advanced setting.',
-  }
-);
-const CREATE_WITH_AGENT_MISSING_ALL_TOOLTIP = i18n.translate(
-  'xpack.alertingV2.actionPolicyCreateOptions.createWithAgentMissingAllTooltip',
-  {
-    defaultMessage:
-      'To create action policies with the AI Agent, you need the "Agent Builder: Read" privilege and the "Elastic Agent Builder: Experimental Features" advanced setting enabled.',
-  }
-);
 
 /**
- * Builds the tooltip shown on the disabled "Create with agent" entry point, naming the specific
- * prerequisite(s) the user is missing. Returns `undefined` when the skill is fully available (the
- * option should then be enabled).
+ * Builds the tooltip shown on the disabled "Create with agent" entry point. Returns `undefined`
+ * when the skill is available (the option should then be enabled).
  */
 export const getCreateActionPolicyWithAgentTooltipText = ({
   hasAgentBuilderCapability,
-  isExperimentalFeaturesEnabled,
-}: AgentBuilderSkillsRequirements): string | undefined => {
-  if (hasAgentBuilderCapability && isExperimentalFeaturesEnabled) {
-    return undefined;
-  }
-  if (!hasAgentBuilderCapability && !isExperimentalFeaturesEnabled) {
-    return CREATE_WITH_AGENT_MISSING_ALL_TOOLTIP;
-  }
-  if (!hasAgentBuilderCapability) {
-    return CREATE_WITH_AGENT_MISSING_PRIVILEGE_TOOLTIP;
-  }
-  return CREATE_WITH_AGENT_MISSING_SETTING_TOOLTIP;
-};
+}: AgentBuilderSkillsRequirements): string | undefined =>
+  hasAgentBuilderCapability ? undefined : CREATE_WITH_AGENT_MISSING_PRIVILEGE_TOOLTIP;
 
 interface ActionPolicyCreateOptionsPanelProps {
   options: ActionPolicyCreateOption[];

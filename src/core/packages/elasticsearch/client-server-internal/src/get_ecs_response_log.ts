@@ -19,6 +19,11 @@ const FORBIDDEN_HEADERS = [
   'set-cookie',
   'x-elastic-app-auth',
   'es-client-authentication',
+  'x-client-authentication',
+  'es-secondary-x-client-authentication',
+  // One-time token a CloudFormation stack presents to Fleet's provisioning callback route
+  // (`PROVISIONING_CALLBACK_TOKEN_HEADER` in the fleet plugin).
+  'x-elastic-callback-token',
 ];
 const REDACTED_HEADER_TEXT = '[REDACTED]';
 

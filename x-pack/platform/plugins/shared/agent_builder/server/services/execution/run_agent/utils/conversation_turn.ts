@@ -10,12 +10,7 @@ import type {
   ConversationRound,
   ConversationRoundStep,
 } from '@kbn/agent-builder-common';
-import {
-  isAskUserQuestionStep,
-  isTodosStep,
-  isToolCallStep,
-  parseExecutionId,
-} from '@kbn/agent-builder-common';
+import { isAskUserQuestionStep, isToolCallStep, parseExecutionId } from '@kbn/agent-builder-common';
 import {
   isAskUserQuestionPromptResponse,
   type PromptRequest,
@@ -26,6 +21,7 @@ import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import type { ExecutionInterruption } from '@kbn/agent-builder-common/chat/events';
 import {
   TimelineEventType,
+  isMessageEvent,
   interruptionOfTerminal,
   isExecutionTerminalEvent,
   pendingPromptRequest,
@@ -34,7 +30,7 @@ import {
   type ExecutionTerminatedEvent,
   type PromptResponseEvent,
   type TimelineEvent,
-  type UserMessageEvent,
+  type MessageEvent,
 } from '@kbn/agent-builder-common/chat/timeline_events';
 import { eventsToRounds } from '../../../conversation/client/events_to_rounds';
 import { sourceEvents } from '../../../conversation/client/source_events';
@@ -44,7 +40,7 @@ import { applyStepUpdates, stepUpdates, type RunStepUpdate } from '../step_state
 export interface ConversationTurn {
   /** The round id: `parseExecutionId(executionId)?.roundId`, or the execution id itself for ids outside the derived scheme. */
   id: string;
-  userMessage: UserMessageEvent;
+  userMessage: MessageEvent;
   /** The logical steps after folding every resume, successful or interrupted. */
   steps: ConversationRoundStep[];
   /** The latest execution's terminated event; absent when the latest execution was interrupted. */
@@ -93,23 +89,15 @@ const bucketExecutions = (events: TimelineEvent[]): ExecutionBucket[] => {
   return [...buckets.values()];
 };
 
-/**
- * Same rule as `eventsToRounds`: dedupe by event id, order by `sequence`, fall back to the terminal
- * snapshot. The result goes through the reducer with no updates so it carries the reducer's todos
- * invariant (a single trailing todos step): a legacy round that was resumed carries one todos step
- * per execution (`mergeRounds` concatenates steps) and `roundsToEvents` projects all of them into a
- * single bucket.
- */
+/** Same rule as `eventsToRounds`: dedupe by event id, order by `sequence`, fall back to the terminal snapshot. */
 const executionSteps = ({ stepEvents, terminal }: ExecutionBucket): ConversationRoundStep[] => {
   const terminated =
     terminal?.type === TimelineEventType.executionTerminated ? terminal : undefined;
-  const raw =
-    stepEvents.length === 0
-      ? terminated?.data.steps ?? []
-      : [...new Map(stepEvents.map((event) => [event.id, event])).values()]
-          .sort((a, b) => a.data.sequence - b.data.sequence)
-          .map((event) => event.data.step);
-  return applyStepUpdates(raw, []);
+  return stepEvents.length === 0
+    ? terminated?.data.steps ?? []
+    : [...new Map(stepEvents.map((event) => [event.id, event])).values()]
+        .sort((a, b) => a.data.sequence - b.data.sequence)
+        .map((event) => event.data.step);
 };
 
 /** Converts a resume execution's persisted (execution-owned) steps into updates over the turn's steps. */
@@ -128,9 +116,6 @@ const stepsToUpdates = (
             progression: step.progression ?? [],
           })
         : stepUpdates.appendToolCall(step);
-    }
-    if (isTodosStep(step)) {
-      return stepUpdates.setTodos(step);
     }
     if (isAskUserQuestionStep(step)) {
       return stepUpdates.upsertQuestion(step);
@@ -192,7 +177,7 @@ export const foldConversationTurns = (events: TimelineEvent[]): ConversationTurn
     const steps = executionSteps(bucket);
     const fields = terminalFields(bucket.terminal);
 
-    if (trigger.type === TimelineEventType.userMessage) {
+    if (isMessageEvent(trigger)) {
       const turn: ConversationTurn = {
         id: parseExecutionId(bucket.executionId)?.roundId ?? bucket.executionId,
         userMessage: trigger,

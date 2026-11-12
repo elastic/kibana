@@ -35,9 +35,10 @@ describe('useInvalidateEpisodeQueries', () => {
         queryKeys.listAll(),
         queryKeys.episodeAll(),
         queryKeys.episodeEventsAll(),
-        queryKeys.episodeEventDataAll(),
+        queryKeys.episodeDataAll(),
         queryKeys.tagSuggestionsAll(),
         queryKeys.tagOptionsAll(),
+        queryKeys.connectorSourcesAll(),
         queryKeys.histogramAll(),
         queryKeys.kpisAll(),
       ])

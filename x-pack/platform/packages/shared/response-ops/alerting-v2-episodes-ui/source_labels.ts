@@ -7,6 +7,7 @@
 
 import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { NATIVE_EPISODE_SOURCE } from '@kbn/alerting-v2-common-queries';
 import { ALERTING_V2_EPISODE_SOURCE_ID } from './constants';
 import { CLASSIC_EPISODE_SOURCE_ID } from './classic_alerts/constants';
 import { useAdditionalEpisodesDataSource } from './context/episode_data_source_context';
@@ -32,15 +33,16 @@ export const UNIVERSAL_ALERTING_LABEL = i18n.translate(
   { defaultMessage: 'Universal Alerting' }
 );
 
-export const CLASSIC_ALERTING_SYSTEM_NAME = i18n.translate(
-  'xpack.alertingV2EpisodesUi.source.classicAlertingSystemName',
-  { defaultMessage: 'Kibana Classic Alerting' }
-);
+/** `source` written on events of native v2 rules; it carries no information worth showing. */
+export const NATIVE_RULE_SOURCE = NATIVE_EPISODE_SOURCE;
 
-export const UNIVERSAL_ALERTING_SYSTEM_NAME = i18n.translate(
-  'xpack.alertingV2EpisodesUi.source.universalAlertingSystemName',
-  { defaultMessage: 'Kibana Universal Alerting' }
-);
+/**
+ * The connector an alert came from (e.g. `zabbix`), or `undefined` for native
+ * Universal alerts. Only empty and `internal` are hidden: `v1` and `v2` are
+ * valid connector slugs.
+ */
+export const getConnectorSource = (source: string | null | undefined): string | undefined =>
+  source && source !== NATIVE_RULE_SOURCE ? source : undefined;
 
 const resolve = <T>(
   sourceId: string | undefined,
@@ -62,13 +64,6 @@ export const getEpisodeSourceLabel = (
   sourceId?: string,
   sources?: ReadonlyArray<Pick<EpisodeDataSource, 'id' | 'label'>>
 ): string => resolve(sourceId, sources, UNIVERSAL_SOURCE_LABEL, CLASSIC_SOURCE_LABEL);
-
-/** Full system name for the alert details flyout badge. */
-export const getEpisodeSourceSystemName = (
-  sourceId?: string,
-  sources?: ReadonlyArray<Pick<EpisodeDataSource, 'id' | 'label'>>
-): string =>
-  resolve(sourceId, sources, UNIVERSAL_ALERTING_SYSTEM_NAME, CLASSIC_ALERTING_SYSTEM_NAME);
 
 /** Short system name used where a sentence names the failing system. */
 export const getEpisodeSourceAlertingName = (
@@ -93,14 +88,11 @@ export const getEpisodeSourceIcon = (
     : undefined;
 };
 
-export const useEpisodeSource = (
-  sourceId?: string
-): { label: string; systemName: string; icon?: IconType } => {
+export const useEpisodeSource = (sourceId?: string): { label: string; icon?: IconType } => {
   const dataSource = useAdditionalEpisodesDataSource();
   const sources = dataSource ? [dataSource] : undefined;
   return {
     label: getEpisodeSourceLabel(sourceId, sources),
-    systemName: getEpisodeSourceSystemName(sourceId, sources),
     icon: getEpisodeSourceIcon(sourceId, sources),
   };
 };

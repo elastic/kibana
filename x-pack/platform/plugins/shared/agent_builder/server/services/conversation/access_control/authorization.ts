@@ -26,6 +26,8 @@ export const isConversationOwner = ({
     return owner.userId === user.id;
   }
 
+  // Only for conversations stored without an owner profile uid: legacy ones, and ones created by
+  // callers without a profile. Never used when the conversation has a profile uid.
   if (owner.userId === undefined && user.username !== undefined) {
     return owner.username === user.username;
   }

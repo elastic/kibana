@@ -9,7 +9,7 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Map as MbMap, MapMouseEvent } from '@kbn/mapbox-gl';
+import type { Map as MbMap, MapWheelEvent } from '@kbn/mapbox-gl';
 import { isMac } from '@kbn/shared-ux-utility';
 interface Props {
   mbMap: MbMap;
@@ -37,7 +37,7 @@ export class KeydownScrollZoom extends Component<Props, State> {
     this.props.mbMap.off('wheel', this._onWheel);
   }
 
-  _onWheel = (event: MapMouseEvent) => {
+  _onWheel = (event: MapWheelEvent) => {
     if (this._hideTimeout) {
       clearTimeout(this._hideTimeout);
       this._hideTimeout = undefined;

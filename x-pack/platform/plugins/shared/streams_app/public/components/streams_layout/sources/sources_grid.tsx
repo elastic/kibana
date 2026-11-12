@@ -50,25 +50,6 @@ export const SOURCE_GRID_COLUMNS: EuiDataGridColumn[] = [
     }),
   },
   {
-    id: 'status',
-    displayAsText: i18n.translate('xpack.streams.sources.table.statusColumnLabel', {
-      defaultMessage: 'Status',
-    }),
-    defaultSortDirection: 'asc',
-  },
-  {
-    id: 'throughput',
-    displayAsText: i18n.translate('xpack.streams.sources.table.throughputColumnLabel', {
-      defaultMessage: 'Throughput',
-    }),
-  },
-  {
-    id: 'lastEvent',
-    displayAsText: i18n.translate('xpack.streams.sources.table.lastEventColumnLabel', {
-      defaultMessage: 'Last event',
-    }),
-  },
-  {
     id: 'destinations',
     displayAsText: i18n.translate('xpack.streams.sources.table.destinationsColumnLabel', {
       defaultMessage: 'Destinations',
@@ -90,7 +71,8 @@ interface SourcesGridProps {
   onSelectionChange: (sources: SourceViewModel[]) => void;
   onOpenSource: (sourceId: string) => void;
   onShowOnCanvas: (source: SourceViewModel) => void;
-  onRequestDelete: (sources: SourceViewModel[]) => void;
+  /** Omitted for users who cannot edit the unit, which hides selection and deletion. */
+  onRequestDelete?: (sources: SourceViewModel[]) => void;
 }
 
 export const SourcesGrid = ({
@@ -177,7 +159,7 @@ export const SourcesGrid = ({
               buttonTestSubj="streamsSourceRowActionsButton"
               deleteTestSubj="streamsSourceDeleteAction"
               onShowOnCanvas={() => onShowOnCanvas(source)}
-              onDelete={() => onRequestDelete([source])}
+              onDelete={onRequestDelete ? () => onRequestDelete([source]) : undefined}
             />
           ) : null;
         },
@@ -201,7 +183,7 @@ export const SourcesGrid = ({
       showSortSelector: false,
       showFullScreenSelector: false,
       additionalControls:
-        selectedSources.length > 0 ? (
+        onRequestDelete && selectedSources.length > 0 ? (
           <EuiButtonEmpty
             color="danger"
             size="xs"
@@ -279,7 +261,7 @@ export const SourcesGrid = ({
           setVisibleColumns: onVisibleColumnsChange,
           canDragAndDropColumns: false,
         }}
-        leadingControlColumns={leadingControlColumns}
+        leadingControlColumns={onRequestDelete ? leadingControlColumns : undefined}
         trailingControlColumns={trailingControlColumns}
         rowCount={sources.length}
         renderCellValue={renderCellValue}

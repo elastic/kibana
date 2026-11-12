@@ -9,6 +9,7 @@
 
 import type { XYDataLayerConfig, XYLayerConfig, XYPersistedLayerConfig } from '@kbn/lens-common';
 import type { AvailableAnnotationIcon } from '@kbn/event-annotation-common';
+import { AvailableAnnotationIcons } from '@kbn/event-annotation-common';
 import type {
   AnnotationLayerType,
   DataLayerType,
@@ -80,9 +81,12 @@ export function isLensStateDataLayer(
   return layer.layerType === 'data' || !('layerType' in layer);
 }
 
-type XYApiIconName = NonNullable<ReferenceLineLayerType['thresholds'][number]['icon']>;
+type AnnotationIconAPIName = NonNullable<ReferenceLineLayerType['thresholds'][number]['icon']>;
 
-export const xyIconCompat = getReversibleMappings<XYApiIconName, AvailableAnnotationIcon>([
+export const annotationIconCompat = getReversibleMappings<
+  AnnotationIconAPIName,
+  AvailableAnnotationIcon
+>([
   ['alert', 'alert'],
   ['asterisk', 'asterisk'],
   ['bell', 'bell'],
@@ -99,3 +103,10 @@ export const xyIconCompat = getReversibleMappings<XYApiIconName, AvailableAnnota
   ['tag', 'tag'],
   ['triangle', 'triangle'],
 ]);
+
+export const getAnnotationIconAPIName = (
+  icon: string | undefined
+): AnnotationIconAPIName | undefined => {
+  const annotationIcon = Object.values(AvailableAnnotationIcons).find((i) => i === icon);
+  return annotationIcon ? annotationIconCompat.toAPI(annotationIcon) : undefined;
+};

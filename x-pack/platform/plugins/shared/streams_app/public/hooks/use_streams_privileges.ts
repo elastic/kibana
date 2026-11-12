@@ -12,7 +12,8 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_CANVAS,
 } from '@kbn/management-settings-ids';
-import type { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
+import { STREAMS_V2_FEATURE_ID } from '@kbn/streams-plugin/public';
+import type { STREAMS_UI_PRIVILEGES, STREAMS_V2_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from './use_kibana';
 
@@ -23,7 +24,7 @@ export function useStreamsPrivileges() {
   const {
     core: {
       application: {
-        capabilities: { streams },
+        capabilities: { streams, [STREAMS_V2_FEATURE_ID]: streamsV2 },
       },
       uiSettings,
     },
@@ -47,10 +48,23 @@ export function useStreamsPrivileges() {
   const draftStreamsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS, false);
   const canvasEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_CANVAS, false);
 
+  const ui = streams as {
+    [STREAMS_UI_PRIVILEGES.manage]: boolean;
+    [STREAMS_UI_PRIVILEGES.show]: boolean;
+  };
+  // The V2 feature is only registered when the canvas is enabled in kibana.yml.
+  const v2 = {
+    show: Boolean(streamsV2?.show),
+    manage: Boolean(streamsV2?.manage),
+  } satisfies Record<keyof typeof STREAMS_V2_UI_PRIVILEGES, boolean>;
+
   return {
-    ui: streams as {
-      [STREAMS_UI_PRIVILEGES.manage]: boolean;
-      [STREAMS_UI_PRIVILEGES.show]: boolean;
+    ui,
+    v2,
+    /** Which experiences the user may open: legacy stream pages, and the unit map and tables. */
+    access: {
+      legacy: Boolean(ui?.show),
+      v2: canvasEnabled && v2.show,
     },
     features: {
       ui: {

@@ -11,13 +11,13 @@ import { proposalDecisionSignal } from './proposal_decision_signal';
 import { queryKeys } from '../query_keys';
 
 /**
- * Invalidates this hook's own `QueryClient` whenever a decision is recorded anywhere else —
- * bridging the gap between hosts that each mount proposals hooks under an isolated `QueryClient`.
- * Called from every read hook in this file, so any consumer gets the bridge for free.
+ * Invalidates this `QueryClient` when a decision is recorded anywhere else.
+ * Some hosts mount the proposals hooks under their own `QueryClient`. This signal connects them.
+ * Every read hook in this file calls it, so each consumer gets the link.
  *
- * Skips the mount render so it only reacts to a genuine post-mount bump. A decision recorded by
- * this same tree already invalidates itself directly (see `invalidateProposals`); the extra
- * invalidation this causes here is a harmless repeat, not a correctness issue.
+ * It skips the mount render and reacts only to a bump after mount. A decision made in this same
+ * tree already invalidates itself (see `invalidateProposals`). The extra invalidation here is a
+ * harmless repeat.
  */
 export function useProposalDecisionSignal(): void {
   const queryClient = useQueryClient();
@@ -33,6 +33,13 @@ export function useProposalDecisionSignal(): void {
     if (prev === null || prev === version) {
       return; // skip mount, or no change
     }
-    void queryClient.invalidateQueries({ queryKey: queryKeys.proposals.all });
+    // Join a refetch that is already running. Do not cancel it.
+    // Many observers run this effect after one bump, and the decide mutation waits for its own
+    // refetch. A cancelled refetch ends at once. Then the mutation ends before the new data
+    // arrives, and the row stops showing "Applying" too early.
+    void queryClient.invalidateQueries(
+      { queryKey: queryKeys.proposals.all },
+      { cancelRefetch: false }
+    );
   }, [version, queryClient]);
 }

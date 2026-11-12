@@ -53,6 +53,17 @@ describe('TimelineLink', () => {
     );
   });
 
+  it('uses the removal wording and suffixed test subjects when deleted', () => {
+    render(<TimelineLink {...baseProps} isDeleted />);
+
+    expect(screen.getByTestId('timeline-user-action-attachment-so-1-deleted')).toHaveTextContent(
+      'removed timeline'
+    );
+    expect(screen.getByTestId('timeline-attachment-link-timeline-id-1-deleted')).toHaveTextContent(
+      'My investigation'
+    );
+  });
+
   it('invokes handleTimelineClick on click when enabled', async () => {
     render(<TimelineLink {...baseProps} />);
 

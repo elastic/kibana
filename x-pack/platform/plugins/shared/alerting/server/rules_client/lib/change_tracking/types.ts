@@ -10,6 +10,7 @@ import type {
   ElasticsearchClient,
   KibanaRequest,
 } from '@kbn/core/server';
+import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
 import type {
   ObjectChange,
@@ -51,6 +52,7 @@ export interface RuleChange extends Omit<ObjectChange, 'snapshot'> {
 export interface ChangeTrackingServiceInitializeParams {
   elasticsearchClient: ElasticsearchClient;
   authService: CoreAuthenticationService;
+  userProfileService: UserProfileServiceStart;
 }
 
 export interface IChangeTrackingService {

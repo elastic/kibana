@@ -10,6 +10,7 @@
 import { expect } from '@kbn/scout/ui';
 import {
   spaceTest,
+  createNonLogsDiscoverSession,
   LOGS,
   LOGS_EXPERIENCE_TAGS,
   setupLogsExperience,
@@ -94,6 +95,41 @@ spaceTest.describe(
         expect(formattedValue).toBeDefined();
 
         expect(summaryText).toContain(formattedValue);
+      }
+    );
+
+    spaceTest(
+      'should NOT render the summary in ES|QL mode if the source does not match logs',
+      async ({ pageObjects }) => {
+        const { dataGrid, logsExperience } = pageObjects;
+
+        // These documents have a `message` field of their own, so the absence below is down to the
+        // profile not claiming the source rather than to there being nothing to summarize.
+        await logsExperience.gotoEsqlQuery(LOGS.NON_LOGS_FIELDS_ESQL_QUERY);
+
+        expect(await dataGrid.getDocTableRowCount()).toBeGreaterThan(0);
+        await expect(logsExperience.summaryMessageValues).toHaveCount(0);
+      }
+    );
+
+    spaceTest(
+      'should NOT render the summary in data view mode if the source does not match logs',
+      async ({ apiServices, scoutSpace, pageObjects }) => {
+        const { dataGrid, discover, logsExperience } = pageObjects;
+
+        const sessionId = await createNonLogsDiscoverSession(
+          apiServices,
+          scoutSpace.id,
+          'non-logs-summary',
+          LOGS.NON_LOGS_FIELDS_DATA_VIEW
+        );
+
+        // Opened by id: the "Open search" flyout filters via a saved-object search, which lags the write.
+        await discover.goto({ queryMode: 'classic', savedSearchId: sessionId });
+        await discover.waitUntilTabIsLoaded();
+
+        expect(await dataGrid.getDocTableRowCount()).toBeGreaterThan(0);
+        await expect(logsExperience.summaryMessageValues).toHaveCount(0);
       }
     );
   }

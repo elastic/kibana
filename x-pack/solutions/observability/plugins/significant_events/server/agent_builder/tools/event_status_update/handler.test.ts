@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { asRuleEventsClient } from '../../../lib/significant_events/events/rule_events_client.mock';
 import { updateEventStatusToolHandler } from './handler';
 
 describe('updateEventStatusToolHandler', () => {
@@ -18,8 +19,9 @@ describe('updateEventStatusToolHandler', () => {
     const alertEventsClient = { createAlertEvent: jest.fn().mockResolvedValue(undefined) };
 
     const result = await updateEventStatusToolHandler({
-      eventSearchClient: eventClient as never,
-      alertEventsClient: alertEventsClient as never,
+      eventSearchClient: asRuleEventsClient(eventClient, {
+        getAlertEventsClient: async () => alertEventsClient as never,
+      }),
       eventId: 'event-id-1',
       status: 'inactive',
     });
@@ -41,8 +43,7 @@ describe('updateEventStatusToolHandler', () => {
       findLatestByEventId: jest.fn().mockResolvedValue(undefined),
     };
     const missing = await updateEventStatusToolHandler({
-      eventSearchClient: eventClientMissing as never,
-      alertEventsClient: { createAlertEvent: jest.fn() } as never,
+      eventSearchClient: asRuleEventsClient(eventClientMissing),
       eventId: 'event-id-1',
       status: 'inactive',
     });
@@ -51,6 +52,7 @@ describe('updateEventStatusToolHandler', () => {
       updated: 0,
       ignored: 1,
       status: 'inactive',
+      reason: 'not_found',
     });
 
     const eventClientSame = {
@@ -60,8 +62,7 @@ describe('updateEventStatusToolHandler', () => {
       }),
     };
     const same = await updateEventStatusToolHandler({
-      eventSearchClient: eventClientSame as never,
-      alertEventsClient: { createAlertEvent: jest.fn() } as never,
+      eventSearchClient: asRuleEventsClient(eventClientSame),
       eventId: 'event-id-1',
       status: 'inactive',
     });
@@ -70,6 +71,7 @@ describe('updateEventStatusToolHandler', () => {
       updated: 0,
       ignored: 1,
       status: 'inactive',
+      reason: 'already_in_state',
     });
   });
 });

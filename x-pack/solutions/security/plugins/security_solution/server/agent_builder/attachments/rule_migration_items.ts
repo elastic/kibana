@@ -17,7 +17,8 @@ import {
   SIEM_MIGRATION_GET_MISSING_RULE_MIGRATION_RESOURCES_TOOL_ID,
   SIEM_MIGRATION_UPDATE_TRANSLATED_RULE_TOOL_ID,
 } from '../tools/siem_migrations';
-import { RULE_MIGRATION_SKILLS } from '../skills/siem_migration/rules/skill_ids';
+import { RULE_MIGRATION_SKILLS } from '../skills/siem_migration/rules/skill_catalog';
+import { RULE_MIGRATION_SKILL_LIST } from '../skills/siem_migration/rules/content';
 
 const ruleMigrationItemsDataSchema = z.object({
   migration_id: MigrationId,
@@ -67,7 +68,8 @@ The payload contains the migration id and the specific rule ids.
 ## Available Tools
 
 - \`${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}\` — Rule details: original query, vendor,
-  translation result, translated ES|QL, comments. Filter by the attached rule ids.
+  translation result, translated ES|QL, comments. Filter by the attached rule ids and pass
+  \`detail: "full"\` (the default summary has no queries or comments).
 - \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\` — Task-progress stats for the migration
   (status, pending / processing / completed / failed counts).
 - \`${SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID}\` — Translation breakdown
@@ -83,18 +85,11 @@ The payload contains the migration id and the specific rule ids.
 
 ## Available Skills (sibling workflows)
 
-- \`${RULE_MIGRATION_SKILLS.UPDATE_TRANSLATED_RULE}\` — Guided correction of a translated rule:
-  fix the query, prebuilt rule match, or integration → confirm → apply.
-- \`${RULE_MIGRATION_SKILLS.SUMMARIZE}\` — Overview of all migrations (status, rule counts).
-  Switch to this skill when the user shifts from individual rules to broader migration management.
-- \`${RULE_MIGRATION_SKILLS.START}\` — Start, reprocess, or resume a migration's translation run.
-- \`${RULE_MIGRATION_SKILLS.STOP}\` — Stop a running migration.
-- \`${RULE_MIGRATION_SKILLS.UPDATE}\` — Rename a migration.
-- \`${RULE_MIGRATION_SKILLS.DELETE}\` — Permanently delete a migration and all its rule items.
+${RULE_MIGRATION_SKILL_LIST}
 
 ## Approach
 
-1. You can directly route to skill \`${RULE_MIGRATION_SKILLS.UPDATE_TRANSLATED_RULE}\` and in case user requests something else, you can
+1. You can directly route to skill \`${RULE_MIGRATION_SKILLS.UPDATE_TRANSLATED_RULE.id}\` and in case user requests something else, you can
 switch to sibling workflows/skills
 `.trim(),
   };
