@@ -18,6 +18,7 @@ settings:
     max: 1
 consts:
   SKILL_ID: '__SKILL_ID__'
+  SKILL_NAME: '__SKILL_NAME__'
   # LiquidJS has no array literal, so `| default: []` does not produce one.
   EMPTY_ARRAY: []
 outputs:
@@ -35,15 +36,18 @@ triggers:
 steps:
   # Traces that invoked the skill in the lookback window. Spans carry no
   # skill attribute, so the join is the load_skill tool call: a trace
-  # belongs to the skill when a load_skill span's arguments name it. The
-  # skill match runs inside KQL(), not raw column refs: attributes.* is
-  # dynamic and unmapped on fresh clusters, where ES|QL rejects unknown
-  # columns at compile time while KQL() just matches nothing (same reason
-  # the online-evals generator wraps its gen_ai filters in KQL). The STATS
-  # BY dedupes a trace that loaded the skill more than once. One row per
-  # trace, first column the trace id. `unmapped_fields` nullifies trace_id
-  # until the first agent trace creates the data stream; otherwise every
-  # tick on a trace-less cluster fails with `Unknown column [trace_id]`.
+  # belongs to the skill when a load_skill span's `skill` argument names it.
+  # The model passes the skill's display name, its id, or a SKILL.md path,
+  # so the GROK'd reference matches any of the three. Tool-call arguments
+  # are only on spans when `agentBuilder:tracing:includeToolDetails` is on;
+  # with it off this finds nothing (the enable route warns about that).
+  # The operation/tool filter runs inside KQL(), not raw column refs:
+  # attributes.* is dynamic and unmapped on fresh clusters, where ES|QL
+  # rejects unknown columns at compile time while KQL() just matches
+  # nothing. `unmapped_fields` nullifies the remaining columns until the
+  # first agent trace creates the data stream; otherwise every tick on a
+  # trace-less cluster fails with `Unknown column [trace_id]`. The STATS BY
+  # dedupes a trace that loaded the skill more than once; newest first.
   - name: find_traces
     type: elasticsearch.esql.query
     timeout: '60s'
@@ -58,16 +62,19 @@ steps:
       query: |-
         SET unmapped_fields="nullify";
         FROM traces-agent_builder.otel-*
-        | WHERE KQL("attributes.gen_ai.operation.name:execute_tool AND attributes.gen_ai.tool.name:load_skill AND attributes.gen_ai.tool.call.arguments:*{{ consts.SKILL_ID }}*")
-        | STATS loads = COUNT(*) BY trace_id
-        | SORT trace_id ASC
+        | WHERE KQL("attributes.gen_ai.operation.name:execute_tool AND attributes.gen_ai.tool.name:load_skill")
+        | GROK attributes.gen_ai.tool.call.arguments "\"skill\"\\s*:\\s*\"%{DATA:skill_ref}\""
+        | EVAL skill_ref = REPLACE(skill_ref, "/SKILL\\.md$", "")
+        | WHERE skill_ref == "{{ consts.SKILL_ID }}" OR skill_ref == "{{ consts.SKILL_NAME }}" OR ENDS_WITH(skill_ref, "/{{ consts.SKILL_NAME }}")
+        | STATS last_seen = MAX(@timestamp) BY trace_id
+        | SORT last_seen DESC
         | LIMIT 25
         | KEEP trace_id
 
   # Each row is `[trace_id]`; the loop reads the first column. A trace whose
-  # evaluate/persist exhausts its retries is skipped (iteration-on-failure),
-  # and the failure is counted by `evaluator_failures` — matching the online
-  # evals generator's failure model. `foreach` has no aggregated output and
+  # evaluate/persist exhausts its retries is skipped (iteration-on-failure);
+  # finalize_counts below counts every trace that was found but not graded
+  # as a failure, matching the online evals generator's failure model. `foreach` has no aggregated output and
   # inner outputs are evicted per iteration, so the totals accumulate in
   # variables (`data.set` is exempt from output eviction; each iteration's
   # `data.set` reads the snapshot written by the previous iteration).
@@ -122,19 +129,31 @@ steps:
 
       # Runs only when persist ran, so `steps.persist.output.created` is
       # always defined here. Reads the totals the previous iteration wrote.
-      # A trace that failed outright (evaluate error → has_results false)
-      # still counts as an evaluator failure.
+      # Ungraded traces are counted after the loop, not here: an evaluate
+      # error skips the rest of the iteration.
       - name: accumulate
         type: data.set
         if: '${{ steps.resolve_iteration.output.has_results == true }}'
         with:
+          traces_graded: '${{ variables.traces_graded | default: 0 | plus: 1 }}'
           scores_persisted: '${{ variables.scores_persisted | default: 0 | plus: steps.persist.output.created }}'
           evaluator_failures: '${{ variables.evaluator_failures | default: 0 | plus: steps.resolve_iteration.output.errors_size }}'
+
+  # Pins every total to a number so emit_result is a plain left-to-right
+  # filter chain: evaluator_failures = per-evaluator errors on graded traces
+  # plus one per trace that was found but not graded.
+  - name: finalize_counts
+    type: data.set
+    with:
+      traces_found: '${{ steps.find_traces.output.values | size | default: 0 }}'
+      traces_graded: '${{ variables.traces_graded | default: 0 }}'
+      scores_persisted: '${{ variables.scores_persisted | default: 0 }}'
+      evaluator_failures: '${{ variables.evaluator_failures | default: 0 }}'
 
   - name: emit_result
     type: workflow.output
     status: completed
     with:
-      traces_graded: '${{ steps.find_traces.output.values | size | default: 0 }}'
-      scores_persisted: '${{ variables.scores_persisted | default: 0 }}'
-      evaluator_failures: '${{ variables.evaluator_failures | default: 0 }}'
+      traces_graded: '${{ variables.traces_graded }}'
+      scores_persisted: '${{ variables.scores_persisted }}'
+      evaluator_failures: '${{ variables.evaluator_failures | plus: variables.traces_found | minus: variables.traces_graded }}'

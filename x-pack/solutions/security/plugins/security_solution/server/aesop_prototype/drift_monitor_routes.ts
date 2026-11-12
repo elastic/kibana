@@ -21,7 +21,11 @@ import type {
   AesopDriftMonitorEnablementApi,
   AesopDriftMonitorRequestDeps,
 } from './drift_monitor_schedule';
-import { enableAesopDriftMonitor, uninstallAesopDriftMonitor } from './drift_monitor_schedule';
+import {
+  enableAesopDriftMonitor,
+  getAesopDriftMonitorTracingWarnings,
+  uninstallAesopDriftMonitor,
+} from './drift_monitor_schedule';
 
 /**
  * AESOP prototype: internal routes the A/B compare workflow calls after a
@@ -72,6 +76,22 @@ export const registerAesopDriftMonitorRoutes = ({
     };
   };
 
+  // Agents load skills by display name more often than by id, so the monitor matches traces on
+  // both. An unknown skill (or no Agent Builder) falls back to matching the id alone.
+  const resolveSkillName = async (
+    request: KibanaRequest,
+    skillId: string
+  ): Promise<string | undefined> => {
+    const [, pluginsStart] = await getStartServices();
+    try {
+      const registry = await pluginsStart.agentBuilder?.skills.getRegistry({ request });
+      return (await registry?.get(skillId))?.name;
+    } catch (error) {
+      logger.debug(() => `AESOP drift monitor: could not resolve skill '${skillId}': ${error}`);
+      return undefined;
+    }
+  };
+
   router.versioned
     .post({
       path: AESOP_DRIFT_MONITOR_ROUTE_PATH,
@@ -95,12 +115,18 @@ export const registerAesopDriftMonitorRoutes = ({
           return response.forbidden({ body: LICENSE_ERROR_MESSAGE });
         }
         try {
+          const { skill_id: skillId } = request.body;
           const { documentId } = await enableAesopDriftMonitor(await resolveDeps(request), {
-            skillId: request.body.skill_id,
+            skillId,
+            skillName: await resolveSkillName(request, skillId),
             intervalMinutes: request.body.interval_minutes,
             lookbackMinutes: request.body.lookback_minutes,
           });
-          return response.ok({ body: { document_id: documentId } });
+          const { uiSettings } = await context.core;
+          const warnings = await getAesopDriftMonitorTracingWarnings((settingId) =>
+            uiSettings.client.get<boolean>(settingId)
+          );
+          return response.ok({ body: { document_id: documentId, warnings } });
         } catch (error) {
           logger.warn('Failed to enable the AESOP drift monitor', { error });
           return response.customError({

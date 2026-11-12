@@ -32,6 +32,8 @@ export const AESOP_AB_COMPARE_WORKFLOW = {
 export interface AesopDriftMonitorWorkflowTemplateValues extends ManagedWorkflowTemplateValues {
   /** The skill whose deployed traffic the monitor grades. */
   skillId: string;
+  /** The skill's display name; agents usually load skills by name, so traces match on either. */
+  skillName: string;
   /** How often the monitor runs. */
   intervalMinutes: number;
   /** How far back each run looks for traces to grade. */
@@ -48,14 +50,16 @@ const renderTemplate = (template: string, values: Record<string, string | number
 export const AESOP_DRIFT_MONITOR_WORKFLOW = {
   id: AESOP_DRIFT_MONITOR_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  // Version 3 nullifies unmapped fields so trace-less clusters stop failing.
-  // yamlTemplate hashing does not see the imported YAML, so installed
-  // instances only re-render on a version bump.
-  version: 3,
+  // Version 4 matches traces by the skill's name as well as its id, and
+  // reports traces_graded as the traces actually graded. yamlTemplate
+  // hashing does not see the imported YAML, so installed instances only
+  // re-render on a version bump.
+  version: 4,
   billable: false,
-  yamlTemplate: ({ skillId, intervalMinutes, lookbackMinutes }) =>
+  yamlTemplate: ({ skillId, skillName, intervalMinutes, lookbackMinutes }) =>
     renderTemplate(AESOP_DRIFT_MONITOR_YAML, {
       __SKILL_ID__: skillId,
+      __SKILL_NAME__: skillName,
       __INTERVAL_MINUTES__: intervalMinutes,
       __LOOKBACK_MINUTES__: lookbackMinutes,
     }),

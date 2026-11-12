@@ -5,7 +5,12 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import {
+  AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
+  AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID,
+} from '@kbn/management-settings-ids';
 import {
   AESOP_DRIFT_MONITOR_WORKFLOW_ID,
   type AesopDriftMonitorWorkflowTemplateValues,
@@ -36,17 +41,23 @@ export interface AesopDriftMonitorEnablementApi {
   ): Promise<unknown>;
 }
 
-const SUFFIX_MAX_LENGTH = 64;
+const SLUG_MAX_LENGTH = 48;
+const SKILL_ID_HASH_LENGTH = 12;
 
-/** Per-skill instance suffix, stable and filesystem-safe. */
+/**
+ * Per-skill instance suffix: a readable slug plus a hash of the raw skill id. The slug alone is
+ * lossy (`Foo.Bar`, `foo-bar` and `foo_bar` collapse, long ids truncate to one prefix), so the
+ * hash keeps distinct skills on distinct workflow documents and stays deterministic across calls.
+ */
 export const aesopDriftMonitorWorkflowIdSuffix = (skillId: string): string => {
   const slug = skillId
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-  const suffix = `skill-${slug}`.slice(0, SUFFIX_MAX_LENGTH);
-  // A skill id of only punctuation collapses to the bare prefix; keep instances distinct.
-  return suffix === 'skill' ? `skill-${Date.now()}` : suffix;
+    .replace(/^-+|-+$/g, '')
+    .slice(0, SLUG_MAX_LENGTH)
+    .replace(/-+$/g, '');
+  const hash = createHash('sha256').update(skillId).digest('hex').slice(0, SKILL_ID_HASH_LENGTH);
+  return slug ? `skill-${slug}-${hash}` : `skill-${hash}`;
 };
 
 export const aesopDriftMonitorDocumentId = (skillId: string): string =>
@@ -59,28 +70,52 @@ export interface AesopDriftMonitorDeps {
   logger: Logger;
 }
 
-const buildTemplateValues = ({
-  skillId,
-  intervalMinutes,
-  lookbackMinutes,
-}: {
+interface AesopDriftMonitorEnableParams {
   skillId: string;
+  /** Display name the agent loads the skill by; falls back to the id. */
+  skillName?: string;
   intervalMinutes?: number;
   lookbackMinutes?: number;
-}): AesopDriftMonitorWorkflowTemplateValues => ({
+}
+
+export const buildTemplateValues = ({
   skillId,
+  skillName,
+  intervalMinutes,
+  lookbackMinutes,
+}: AesopDriftMonitorEnableParams): AesopDriftMonitorWorkflowTemplateValues => ({
+  skillId,
+  skillName: skillName || skillId,
   intervalMinutes: intervalMinutes ?? AESOP_DRIFT_MONITOR_INTERVAL_MINUTES,
   lookbackMinutes: lookbackMinutes ?? AESOP_DRIFT_MONITOR_LOOKBACK_MINUTES,
 });
 
+/**
+ * The monitor finds a skill's traces through the load_skill span's arguments, which Agent Builder
+ * records only with tracing on and tool details included (off by default). Returns one warning per
+ * setting that would leave the monitor grading nothing.
+ */
+export const getAesopDriftMonitorTracingWarnings = async (
+  getSetting: (settingId: string) => Promise<boolean>
+): Promise<string[]> => {
+  const warnings: string[] = [];
+  if (!(await getSetting(AGENT_BUILDER_TRACING_ENABLED_SETTING_ID))) {
+    warnings.push(
+      `Agent Builder tracing is off ('${AGENT_BUILDER_TRACING_ENABLED_SETTING_ID}'), so the drift monitor has no traces to grade.`
+    );
+  }
+  if (!(await getSetting(AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID))) {
+    warnings.push(
+      `Tool details are not traced ('${AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID}'), so the drift monitor cannot tell which traces loaded the skill.`
+    );
+  }
+  return warnings;
+};
+
 /** Install (disabled) + enable the monitor instance for one skill. */
 export const enableAesopDriftMonitor = async (
   deps: AesopDriftMonitorRequestDeps,
-  {
-    skillId,
-    intervalMinutes,
-    lookbackMinutes,
-  }: { skillId: string; intervalMinutes?: number; lookbackMinutes?: number }
+  { skillId, skillName, intervalMinutes, lookbackMinutes }: AesopDriftMonitorEnableParams
 ): Promise<{ documentId: string }> => {
   const { workflowsManagement, logger, spaceId } = deps;
   if (!workflowsManagement) {
@@ -96,7 +131,7 @@ export const enableAesopDriftMonitor = async (
   await client.install(AESOP_DRIFT_MONITOR_WORKFLOW_ID, {
     spaceId,
     workflowIdSuffix,
-    values: buildTemplateValues({ skillId, intervalMinutes, lookbackMinutes }),
+    values: buildTemplateValues({ skillId, skillName, intervalMinutes, lookbackMinutes }),
   });
 
   // Installing writes the workflow document and stops there. Enabling is what puts the
