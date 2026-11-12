@@ -336,7 +336,7 @@ describe('reportConsistentFailureIssues', () => {
     expect(createIssue).not.toHaveBeenCalled();
     expect(addIssueComment).toHaveBeenCalledWith(
       42,
-      '`Discover ES|QL mode shows results` failed every attempt of `kibana-on-merge` builds ' +
+      '🔴 `Discover ES|QL mode shows results` failed every attempt of `kibana-on-merge` builds ' +
         '[#101](https://buildkite.com/elastic/kibana-on-merge/builds/101) and ' +
         '[#102](https://buildkite.com/elastic/kibana-on-merge/builds/102) on `main`, after passing ' +
         'in [#100](https://buildkite.com/elastic/kibana-on-merge/builds/100). Changes in between: ' +

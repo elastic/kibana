@@ -251,7 +251,8 @@ const listOf = (items: readonly string[]): string =>
 /**
  * The comment on an issue that already tracks the suite, when the check finds its tests failing
  * every attempt: which tests, in which builds of the pipeline and branch, since when, and the
- * commits between the last pass and the first failure.
+ * commits between the last pass and the first failure. The red circle tells it apart from the
+ * daily report's flaky comments at a glance.
  */
 export const renderFailingSuiteComment = (
   suite: FailingSuite,
@@ -265,7 +266,7 @@ export const renderFailingSuiteComment = (
       : `${plural(tests.length, 'test')} failed every attempt of ${where}, ${before}: ${listOf(
           tests
         )}`;
-  return `${lead}.${compare ? ` Changes in between: ${compare}.` : ''}`;
+  return `🔴 ${lead}.${compare ? ` Changes in between: ${compare}.` : ''}`;
 };
 
 /** Full issue body for a new failing suite issue, including the hidden metadata. */
