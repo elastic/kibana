@@ -126,14 +126,16 @@ describe('ConversationSearchModal', () => {
     );
   });
 
-  it('falls back to "Chat" when the template is not registered', () => {
-    mockLists({ cached: [buildConversation({ id: 'unknown', template_id: 'unregistered' })] });
+  it('shows a readable template id when the template is not registered', () => {
+    mockLists({
+      cached: [buildConversation({ id: 'unknown', template_id: 'security_escalation' })],
+    });
 
     renderModal();
 
     expect(
       screen.getByTestId('agentBuilderConversationSearchResultType-unknown')
-    ).toHaveTextContent('Chat');
+    ).toHaveTextContent('Security escalation');
   });
 
   it('marks public chats as public and everything else as private', () => {

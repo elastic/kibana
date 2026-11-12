@@ -21,6 +21,7 @@ import { AGENT_BUILDER_UI_EBT, ConversationAccessControlMode } from '@kbn/agent-
 import type { ListConversationsResponseItem } from '../../../../common/http_api/conversations';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { formatConversationDate } from '../../utils/format_conversation_date';
+import { getTemplateDisplayName } from './activity_log/to_activity_items';
 import {
   createActiveConversationListItemStyles,
   createConversationListItemStyles,
@@ -64,7 +65,10 @@ export const ConversationSearchResult: React.FC<ConversationSearchResultProps> =
     conversation.access_control?.access_mode === ConversationAccessControlMode.Public;
   const accessLabel = isPublic ? labels.public : labels.private;
   const typeLabel = templateId
-    ? conversationTemplatesService.getTemplateUIDefinition(templateId)?.name ?? labels.defaultType
+    ? getTemplateDisplayName(
+        templateId,
+        conversationTemplatesService.getTemplateUIDefinition(templateId)?.name
+      )
     : labels.defaultType;
 
   return (
@@ -96,22 +100,26 @@ export const ConversationSearchResult: React.FC<ConversationSearchResultProps> =
           <EuiTextTruncate text={title || id} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText
-            size="xs"
-            color="subdued"
-            data-test-subj={`agentBuilderConversationSearchResultType-${id}`}
-          >
-            {typeLabel}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText
-            size="xs"
-            color="subdued"
-            data-test-subj={`agentBuilderConversationSearchResultDate-${id}`}
-          >
-            {formatConversationDate(updatedAt)}
-          </EuiText>
+          <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText
+                size="xs"
+                color="subdued"
+                data-test-subj={`agentBuilderConversationSearchResultType-${id}`}
+              >
+                {typeLabel}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText
+                size="xs"
+                color="subdued"
+                data-test-subj={`agentBuilderConversationSearchResultDate-${id}`}
+              >
+                {formatConversationDate(updatedAt)}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </button>
