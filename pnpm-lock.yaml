@@ -1842,7 +1842,7 @@ importers:
         version: link:x-pack/platform/plugins/shared/data_quality
       '@kbn/data-search-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/data_search
+        version: link:src/platform/test_plugins/data_search
       '@kbn/data-service':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-data-service
@@ -2353,6 +2353,9 @@ importers:
       '@kbn/generate-csv':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-generate-csv
+      '@kbn/geo-precision':
+        specifier: workspace:*
+        version: link:src/platform/packages/private/geo/kbn-geo-precision
       '@kbn/global-redirect-app-links':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-global-redirect-app-links
@@ -2556,7 +2559,7 @@ importers:
         version: link:src/platform/test/plugin_functional/plugins/kbn_top_nav
       '@kbn/kbn-tp-custom-visualizations-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations
+        version: link:src/platform/test_plugins/kbn_tp_custom_visualizations
       '@kbn/kbn-tp-run-pipeline-plugin':
         specifier: workspace:*
         version: link:src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline
@@ -3384,7 +3387,7 @@ importers:
         version: link:x-pack/platform/plugins/shared/search_inference_endpoints
       '@kbn/search-inference-endpoints-fixture-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/search_inference_endpoints/plugins/search_inference_endpoints_fixture
+        version: link:x-pack/platform/test_plugins/search_inference_endpoints_fixtures
       '@kbn/search-navigation':
         specifier: workspace:*
         version: link:x-pack/solutions/search/plugins/search_navigation
@@ -7684,6 +7687,8 @@ importers:
 
   src/platform/packages/private/dashboard/dashboard-navigation-options-schema: {}
 
+  src/platform/packages/private/geo/kbn-geo-precision: {}
+
   src/platform/packages/private/kbn-ambient-common-types: {}
 
   src/platform/packages/private/kbn-ambient-ftr-types: {}
@@ -8866,15 +8871,11 @@ importers:
 
   src/platform/test/plugin_functional/plugins/core_provider_plugin: {}
 
-  src/platform/test/plugin_functional/plugins/data_search: {}
-
   src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin: {}
 
   src/platform/test/plugin_functional/plugins/hardening: {}
 
   src/platform/test/plugin_functional/plugins/kbn_top_nav: {}
-
-  src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations: {}
 
   src/platform/test/plugin_functional/plugins/rendering_plugin: {}
 
@@ -8899,6 +8900,10 @@ importers:
   src/platform/test/server_integration/plugins/status_plugin_b: {}
 
   src/platform/test/user_storage/plugins/user_storage_test: {}
+
+  src/platform/test_plugins/data_search: {}
+
+  src/platform/test_plugins/kbn_tp_custom_visualizations: {}
 
   src/platform/test_plugins/otel_metrics: {}
 
@@ -9600,8 +9605,6 @@ importers:
 
   x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin: {}
 
-  x-pack/platform/test/search_inference_endpoints/plugins/search_inference_endpoints_fixture: {}
-
   x-pack/platform/test/security_api_integration/packages/helpers: {}
 
   x-pack/platform/test/security_api_integration/plugins/audit_log: {}
@@ -9653,6 +9656,8 @@ importers:
   x-pack/platform/test_plugins/response_ops/reporting_api_integration/reporting_test_routes: {}
 
   x-pack/platform/test_plugins/response_ops/task_manager/service_accounts: {}
+
+  x-pack/platform/test_plugins/search_inference_endpoints_fixtures: {}
 
   x-pack/platform/test_plugins/security_investigations/cases_api_integration/cases: {}
 

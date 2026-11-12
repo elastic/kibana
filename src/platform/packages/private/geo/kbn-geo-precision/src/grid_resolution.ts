@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializer } from '@kbn/core/server';
-import type { TestPluginSetup, TestPluginStart } from './plugin';
-import { DataSearchTestPlugin } from './plugin';
-
-export const plugin: PluginInitializer<TestPluginSetup, TestPluginStart> = async () =>
-  new DataSearchTestPlugin();
+export enum GRID_RESOLUTION {
+  COARSE = 'COARSE',
+  FINE = 'FINE',
+  MOST_FINE = 'MOST_FINE',
+  SUPER_FINE = 'SUPER_FINE',
+}
