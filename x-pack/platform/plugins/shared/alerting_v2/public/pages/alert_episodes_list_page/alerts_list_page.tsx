@@ -53,9 +53,9 @@ import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyou
 import { CLASSIC_ALERTS_DATA_SOURCE } from '../../alert_sources';
 import { UserCapabilities } from '../../services/user_capabilities';
 
-/*
- * The table has a fixed height, independent of the KPIs and the histogram above it, so the grid
- * always measures a definite height and virtualizes rows.
+/**
+ * Fixed table height below the `m` breakpoint, minimum height above it. Either way the grid gets a
+ * definite height, so it virtualizes rows.
  */
 const TABLE_HEIGHT = 400;
 
@@ -303,6 +303,9 @@ const AlertsListPageContent = () => {
             min-width: 0;
             flex-shrink: 0;
             ${logicalCSS('height', `${TABLE_HEIGHT}px`)}
+            ${largeMediaQuery} {
+              flex-grow: 1;
+            }
           `}
         >
           <EuiFlexGroup
