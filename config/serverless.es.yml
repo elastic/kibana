@@ -5,7 +5,8 @@ plugins.allowlistPluginGroups: ['platform', 'search']
 
 xpack.search.enabled: false
 xpack.osquery.enabled: false
-xpack.alerting_v2.enabled: false
+# TEMPORARY (benchmark deploy for https://github.com/elastic/kibana/pull/304613, revert before merge): alerting v2 on so the ES|QL rule workload runs on an Elasticsearch project
+xpack.alerting_v2.enabled: true
 
 # Enable fleet on search projects for agentless features
 xpack.fleet.enabled: true
