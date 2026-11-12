@@ -196,7 +196,7 @@ An item fails when its definition is dynamic, belongs to another plugin, appears
 
 `installMany` does not accept templated workflows (`yamlTemplate`) yet. This is a typing limit, not a runtime one: the batch install renders `values` the same way `install` does. TypeScript infers one type for the whole array, so it cannot check each item's `values` against that item's id, and typing the items as a union of every workflow stops compiling past 25 ids.
 
-Until a static templated workflow needs a batch install, install it with `install`, which checks its `values`. To support it in `installMany`, add a generic per-item helper, such as `managedInstallItem(id, options)`, that types each item by its own id, and accept its items next to the plain ones, so existing callers do not change.
+Until a static templated workflow needs a batch install, install it with `install`, which checks its `values`. The way to support it in `installMany` is a generic helper function that builds one item per call, so each item is typed by its own id.
 
 ## 4) Space-scoped vs global installs
 

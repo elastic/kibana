@@ -53,11 +53,10 @@ export type ManagedWorkflowServiceInstallOptions = ManagedWorkflowOperationBaseO
   };
 
 /**
- * One static workflow in an `installMany` batch. Templated workflows are left out of this type,
- * not of the batch install: the service renders `values` like `install()` does. TypeScript can't
- * check each item's `values` against its own id inside one array, so until a static templated
- * workflow needs a batch install, use `install()` for it. To support it here, add a generic
- * per-item helper, such as `managedInstallItem(id, options)`, and accept its items next to these.
+ * One static workflow in an `installMany` batch. Templated workflows are not supported here yet;
+ * install them with `install()`. It's a typing limit, not a runtime one: one array can't type each
+ * item's `values` by its own id. A generic helper function that builds one item per call would
+ * solve it.
  */
 export type ManagedWorkflowInstallManyItem = ManagedWorkflowOperationBaseOptions & {
   id: Exclude<ManagedWorkflowId, TemplatedManagedWorkflowId>;
