@@ -171,7 +171,7 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW', () => {
     const { steps } = render();
 
     expect(findStep(steps, 'read_traces').with).toEqual(
-      expect.objectContaining({ size: 1000, max_tokens: 1000000, batch_tokens: 100000 })
+      expect.objectContaining({ size: 1000, max_tokens: 600000, batch_tokens: 100000 })
     );
     expect(findStep(steps, 'active').with?.batches).toBe('${{ steps.read_traces.output.batches }}');
     expect(batches()).toEqual(
