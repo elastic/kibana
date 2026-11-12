@@ -131,6 +131,12 @@ export interface WorkflowValidationRules {
     defaultSeverity: 'error';
     values: { workflowId: string };
   };
+  /** A `steps.<step>.output.<field>` reference to an output the called workflow does not declare. */
+  unknownOutputReference: {
+    owner: 'workflow-inputs-validation';
+    defaultSeverity: 'error';
+    values: { field: string; workflowName: string };
+  };
 
   // -- workflow outputs ---------------------------------------------------------
   invalidWorkflowOutput: {
@@ -278,6 +284,7 @@ export const WORKFLOW_VALIDATION_RULES: {
   invalidInputType: { owner: 'workflow-inputs-validation', defaultSeverity: 'error' },
   missingRequiredInput: { owner: 'workflow-inputs-validation', defaultSeverity: 'error' },
   targetWorkflowNotFound: { owner: 'workflow-inputs-validation', defaultSeverity: 'error' },
+  unknownOutputReference: { owner: 'workflow-inputs-validation', defaultSeverity: 'error' },
 
   invalidWorkflowOutput: { owner: 'workflow-output-validation', defaultSeverity: 'error' },
 

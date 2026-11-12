@@ -19,6 +19,8 @@ export interface WorkflowsMap {
     name: string;
     managed?: boolean;
     inputsSchema?: JsonModelSchemaType;
+    /** Names of the outputs the workflow declares; undefined when it declares none. */
+    outputNames?: string[];
   };
 }
 

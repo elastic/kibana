@@ -21,6 +21,7 @@ import { validateGraphBuild } from './validate_graph_build';
 import { validateStepProperties } from './validate_step_properties';
 import { validateWorkflowExecutionIdentity } from './validate_workflow_execution_identity';
 import { validateWorkflowInputs } from './validate_workflow_inputs';
+import { validateWorkflowOutputReferences } from './validate_workflow_output_references';
 import type { WorkflowsResponse } from '../../../entities/workflows/model/types';
 import type { GraphBuildErrorInfo } from '../../../entities/workflows/store/workflow_detail/types';
 import type { WorkflowLookup } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
@@ -122,6 +123,9 @@ export async function collectFullWorkflowYamlValidationResults({
       ...validateWorkflowExecutionIdentity(workflowLookup, lineCounter, context.isManaged)
     );
     results.push(...validateWorkflowInputs(workflowLookup, workflows, lineCounter));
+    results.push(
+      ...validateWorkflowOutputReferences(workflowLookup, workflows, yamlString, lineCounter)
+    );
 
     const esqlSignal = signal ?? new AbortController().signal;
     results.push(
