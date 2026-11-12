@@ -482,7 +482,7 @@ export const reportFlakySuiteIssues = async (
       if (comment) {
         await github.addIssueComment(
           issue.number,
-          renderFlakySuiteIssueComment(suite, { report, reopened: reopen })
+          renderFlakySuiteIssueComment(suite, { report, reopened: reopen, previous })
         );
       }
       log.info(
