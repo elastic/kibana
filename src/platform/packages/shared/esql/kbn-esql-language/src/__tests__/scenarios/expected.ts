@@ -8,10 +8,24 @@
  */
 
 import type { EsqlFieldType } from '@kbn/esql-types';
-import type { FunctionDefinition, FunctionReturnType } from '../../commands/definitions/types';
-import { getSafeInsertText } from '../../commands/definitions/utils';
+import {
+  arithmeticOperators,
+  comparisonFunctions,
+  inOperators,
+  logicalOperators,
+  matchOperators,
+  nullCheckOperators,
+  patternMatchOperators,
+} from '../../commands/definitions/all_operators';
+import type {
+  FunctionDefinition,
+  FunctionParameterType,
+  FunctionReturnType,
+} from '../../commands/definitions/types';
+import { getDateLiterals, getSafeInsertText } from '../../commands/definitions/utils';
 import type { Location } from '../../commands/registry/types';
 import {
+  DATE_DIFF_TIME_UNITS,
   getFieldNamesByType,
   getFunctionSignaturesByReturnType,
   getOperatorSuggestions,
@@ -20,18 +34,38 @@ import {
 type ColumnType = EsqlFieldType | 'any';
 type ReturnType = FunctionReturnType | 'any';
 
+const OPERATOR_GROUPS = {
+  arithmetic: arithmeticOperators,
+  comparison: comparisonFunctions,
+  in: inOperators,
+  logical: logicalOperators,
+  match: matchOperators,
+  nullCheck: nullCheckOperators,
+  patternMatch: patternMatchOperators,
+} as const satisfies Record<string, FunctionDefinition[]>;
+
+export type OperatorGroup = keyof typeof OPERATOR_GROUPS;
+
 interface ExpectedFunctions {
   /** Where the functions are available, as the function definitions name it. */
   readonly availableIn: `${Location}`;
-  readonly returning?: ReturnType | ReturnType[];
+  readonly returning?: ReturnType | readonly ReturnType[];
   readonly scalar?: boolean;
   readonly aggregation?: boolean;
   readonly timeseriesAggregation?: boolean;
   readonly grouping?: boolean;
+  /** Includes the operators. */
+  readonly operators?: boolean;
+  /** Leaves the assignment operators out of the operators. */
+  readonly withoutAssignment?: boolean;
+  /** Keeps the functions and operators that accept these types as their first parameters. */
+  readonly accepting?: readonly FunctionParameterType[];
+  /** Function and operator names to leave out. */
+  readonly except?: readonly string[];
 }
 
 interface ExpectedColumns {
-  readonly types?: ColumnType | ColumnType[];
+  readonly types?: ColumnType | readonly ColumnType[];
   /** The position inserts a space after the column, so the next suggestions open. */
   readonly followedBySpace?: boolean;
 }
@@ -41,7 +75,7 @@ export const columns = ({
   types = 'any',
   followedBySpace = false,
 }: ExpectedColumns = {}): string[] =>
-  getFieldNamesByType(types).map(
+  getFieldNamesByType(typeof types === 'string' ? types : [...types]).map(
     (name) => `${getSafeInsertText(name)}${followedBySpace ? ' ' : ''}`
   );
 
@@ -53,14 +87,32 @@ export const functions = ({
   aggregation,
   timeseriesAggregation,
   grouping,
+  operators: withOperators,
+  withoutAssignment,
+  accepting,
+  except,
 }: ExpectedFunctions): string[] =>
-  getFunctionSignaturesByReturnType(availableIn as Location, returning, {
-    scalar,
-    agg: aggregation,
-    timeseriesAgg: timeseriesAggregation,
-    grouping,
-  });
+  getFunctionSignaturesByReturnType(
+    availableIn as Location,
+    typeof returning === 'string' ? returning : [...returning],
+    {
+      scalar,
+      agg: aggregation,
+      timeseriesAgg: timeseriesAggregation,
+      grouping,
+      operators: withOperators,
+      skipAssign: withoutAssignment,
+    },
+    accepting,
+    except ? [...except] : undefined
+  );
 
-/** The texts of the given operators. */
-export const operators = (...groups: FunctionDefinition[][]): string[] =>
-  getOperatorSuggestions(groups.flat());
+/** The texts of the operators in the given groups. */
+export const operators = (...groups: OperatorGroup[]): string[] =>
+  getOperatorSuggestions(groups.flatMap((group) => OPERATOR_GROUPS[group]));
+
+/** The texts of the date literals. */
+export const dateLiterals = (): string[] => getDateLiterals().map(({ text }) => text);
+
+/** The time units DATE_DIFF accepts as its first argument, as inserted. */
+export const dateDiffUnits = (): string[] => [...DATE_DIFF_TIME_UNITS];

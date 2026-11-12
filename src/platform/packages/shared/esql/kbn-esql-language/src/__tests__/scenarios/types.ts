@@ -11,6 +11,7 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type {
   ESQLCallbacks,
+  ESQLControlVariable,
   ESQLFieldWithMetadata,
   ESQLSourceResult,
   IndexAutocompleteItem,
@@ -56,6 +57,11 @@ export interface ScenarioWorld {
   readonly license: LicenseType;
   readonly activeProduct?: PricingProduct;
   readonly isServerless: boolean;
+  /** The editor can create controls. */
+  readonly supportsControls: boolean;
+  readonly variables: readonly ESQLControlVariable[];
+  /** Answers the suggestions inside a KQL string. Absent when the editor has no KQL provider. */
+  readonly getKqlSuggestions?: ESQLCallbacks['getKqlSuggestions'];
 }
 
 /** A suggestion expected by its text, optionally with more item properties to match. */
