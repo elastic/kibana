@@ -12,6 +12,7 @@ import {
   ConfigurationAttributesSchema,
   ConfigurationSchema,
   ObservableTypesConfigurationSchema,
+  ObservableTypeSettingsConfigurationSchema,
   CustomFieldConfigurationWithoutTypeSchema,
   TemplateConfigurationSchema,
   TextCustomFieldConfigurationSchema,
@@ -392,35 +393,43 @@ describe('configure', () => {
     });
   });
 
-  describe('ObservableTypesConfigurationSchema', () => {
-    it('accepts a custom type with fields, excluded values, and a value pattern', () => {
-      const observableTypes = [
+  describe('ObservableTypeSettingsConfigurationSchema', () => {
+    it('accepts the settings of a built-in type and of a custom type', () => {
+      const observableTypeSettings = [
+        { key: 'observable-type-agent-id', paths: [{ path: 'agent.id', enabled: false }] },
         {
           key: 'employee-id',
-          label: 'Employee ID',
           valuePattern: '^E\\d{6}$',
           paths: [{ path: 'user.employee_id', enabled: true, excludedValues: ['E000000'] }],
         },
       ];
 
-      const result = ObservableTypesConfigurationSchema.safeParse(observableTypes);
+      const result = ObservableTypeSettingsConfigurationSchema.safeParse(observableTypeSettings);
       expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(observableTypes);
+      expect(result.data).toStrictEqual(observableTypeSettings);
     });
 
     it('accepts a type without fields', () => {
       expect(
-        ObservableTypesConfigurationSchema.safeParse([{ key: 'ticket-ref', label: 'Ticket ref' }])
-          .success
+        ObservableTypeSettingsConfigurationSchema.safeParse([{ key: 'ticket-ref' }]).success
       ).toBe(true);
     });
 
     it('rejects a field without the enabled flag', () => {
       expect(
-        ObservableTypesConfigurationSchema.safeParse([
-          { key: 'employee-id', label: 'Employee ID', paths: [{ path: 'user.employee_id' }] },
+        ObservableTypeSettingsConfigurationSchema.safeParse([
+          { key: 'employee-id', paths: [{ path: 'user.employee_id' }] },
         ]).success
       ).toBe(false);
+    });
+  });
+
+  describe('ObservableTypesConfigurationSchema', () => {
+    it('strips the settings fields from an observable type', () => {
+      const result = ObservableTypesConfigurationSchema.safeParse([
+        { key: 'employee-id', label: 'Employee ID', paths: [] },
+      ]);
+      expect(result.data).toStrictEqual([{ key: 'employee-id', label: 'Employee ID' }]);
     });
   });
 });

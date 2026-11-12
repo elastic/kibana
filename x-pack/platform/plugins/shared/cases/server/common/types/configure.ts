@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 
 import type { SavedObject } from '@kbn/core/server';
 import type {
@@ -33,6 +33,7 @@ export interface ConfigurationPersistedAttributes {
   customFields?: PersistedCustomFieldsConfiguration;
   templates?: PersistedTemplatesConfiguration;
   observableTypes?: PersistedObservableTypesConfiguration;
+  observableTypeSettings?: PersistedObservableTypeSettingsConfiguration;
   extractObservables?: boolean;
   workflowTags?: string[];
   legacyTemplatesMigrated?: boolean;
@@ -48,7 +49,11 @@ export interface ConfigurationPersistedAttributes {
 
 type PersistedObservableTypesConfiguration = Array<{
   key: string;
-  label?: string;
+  label: string;
+}>;
+
+type PersistedObservableTypeSettingsConfiguration = Array<{
+  key: string;
   paths?: Array<{ path: string; enabled: boolean; excludedValues?: string[] }>;
   valuePattern?: string;
 }>;
@@ -89,37 +94,3 @@ export const ConfigurationPartialAttributesSchema = ConfigurationBasicWithoutOwn
   .merge(z.object({ owner: z.string() }).partial());
 
 export const ConfigurationTransformedAttributesSchema = ConfigurationAttributesSchema;
-
-/**
- * The stored form of observable types: an entry without a label overrides a built-in type.
- * The read path fills the label, so the transformed attributes always have one.
- */
-const PersistedObservableTypesSchema = lazySchema(() =>
-  z.array(
-    z.object({
-      key: z.string(),
-      label: z.string().optional(),
-      paths: z
-        .array(
-          z.object({
-            path: z.string(),
-            enabled: z.boolean(),
-            excludedValues: z.array(z.string()).optional(),
-          })
-        )
-        .optional(),
-      valuePattern: z.string().optional(),
-    })
-  )
-);
-
-export const ConfigurationWriteAttributesSchema = ConfigurationAttributesSchema.extend({
-  observableTypes: PersistedObservableTypesSchema,
-});
-
-export const ConfigurationPartialWriteAttributesSchema =
-  ConfigurationPartialAttributesSchema.extend({
-    observableTypes: lazySchema(() => PersistedObservableTypesSchema.optional()),
-  });
-
-export type ConfigurationWriteAttributes = z.infer<typeof ConfigurationWriteAttributesSchema>;
