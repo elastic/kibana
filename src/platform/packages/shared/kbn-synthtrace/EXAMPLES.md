@@ -1096,7 +1096,7 @@ node scripts/synthtrace synthetics_overview --from=now-24h --to=now \
 
 **Cleaning up:**
 
-The scenario leaves two things behind: the monitors in Kibana and the check documents in Elasticsearch. Both carry the tag `synthtrace-synthetics_overview`, so you can remove them without touching other Synthetics data. The private location, its agent policy and any agent are not created by the scenario, and are not removed.
+The scenario leaves two things behind: the monitors in Kibana and the check documents in Elasticsearch. Both carry the tag `synthtrace-synthetics_overview`. The monitors of a run live in its Kibana space, and the check documents carry `meta.space_id`, so cleanup is limited to that space. The private location, its agent policy and any agent are not created by the scenario, and are not removed.
 
 Nothing is deleted unless you ask for it, so you can look at the data after a run. A new run replaces the monitors of the previous one (same IDs, no duplicates) but keeps the documents, which pile up until you delete them. If an Elastic Agent is enrolled in the agent policy of the private location, it runs the monitors for real, against their made-up targets, and its results mix with the generated ones.
 
@@ -1105,26 +1105,27 @@ To have the monitors deleted automatically when a historical run (`--from` and `
 Otherwise, and after every live run, clean up in this order:
 
 1. Stop any live run, so that nothing is written after the documents are deleted.
-2. Delete the monitors with the API (this needs `jq`), unless the run did it when it ended:
+2. Delete the monitors with the API (this needs `jq`), unless the run did it when it ended. `SPACE` is the `spaceId` of the run (`default` when you did not set one). The default space has no path prefix; any other space is under `/s/$SPACE`:
 
    ```sh
-   KBN=http://localhost:5601; AUTH=elastic:changeme
-   IDS=$(curl -s -u "$AUTH" "$KBN/api/synthetics/monitors?tags=synthtrace-synthetics_overview&perPage=1000" \
+   KBN=http://localhost:5601; AUTH=elastic:changeme; SPACE=default
+   PREFIX=; [ "$SPACE" = default ] || PREFIX=/s/$SPACE
+   IDS=$(curl -s -u "$AUTH" "$KBN$PREFIX/api/synthetics/monitors?tags=synthtrace-synthetics_overview&perPage=1000" \
      -H 'elastic-api-version: 2023-10-31' | jq -c '{ids: [.monitors[] | (.config_id // .id)]}')
-   curl -s -u "$AUTH" -X POST "$KBN/api/synthetics/monitors/_bulk_delete" \
+   curl -s -u "$AUTH" -X POST "$KBN$PREFIX/api/synthetics/monitors/_bulk_delete" \
      -H 'elastic-api-version: 2023-10-31' -H 'kbn-xsrf: true' \
      -H 'Content-Type: application/json' -d "$IDS"
    ```
 
-3. Delete the check documents. The response has the number of deleted documents:
+3. Delete the check documents of that space. The tag is the same in every space, so the query also filters on `meta.space_id`. The response has the number of deleted documents:
 
    ```sh
    curl -s -u elastic:changeme -X POST "http://localhost:9200/synthetics-*/_delete_by_query?refresh=true" \
      -H 'Content-Type: application/json' \
-     -d '{ "query": { "term": { "tags": "synthtrace-synthetics_overview" } } }'
+     -d "{\"query\":{\"bool\":{\"filter\":[{\"term\":{\"tags\":\"synthtrace-synthetics_overview\"}},{\"term\":{\"meta.space_id\":\"$SPACE\"}}]}}}"
    ```
 
-To check the result, `GET <kibana>/api/synthetics/monitors?tags=synthtrace-synthetics_overview` should report a `total` of `0`, and `POST <elasticsearch>/synthetics-*/_count` with the same query should return a `count` of `0`.
+To check the result, `GET <kibana>/api/synthetics/monitors?tags=synthtrace-synthetics_overview` in that space should report a `total` of `0`, and `POST <elasticsearch>/synthetics-*/_count` with the same query should return a `count` of `0`.
 
 ### SRE Incident Scenarios
 
