@@ -36,8 +36,8 @@ import { buildProcessorSumsQuery } from './query_builders/build_processor_stats_
 import { buildSourceRateQuery } from './query_builders/build_source_stats_queries';
 import { buildStreamProbeQuery } from './query_builders/build_stream_probe_query';
 import type { StatsQueryBaseParams } from './query_builders/filters';
+import { defaultResults, resolveQueryRefs } from './query_refs';
 import { getSeriesBucketMs } from './utils/series_bucket';
-import { validateDestination, validateProcessor, validateSource } from './validate_components';
 
 /** The results of one kind, and the error when its queries failed. */
 interface KindOutcome<TResult> {
@@ -72,45 +72,16 @@ export class UnitStatsClient {
     const bucketMs = getSeriesBucketMs(Date.parse(window.end) - Date.parse(window.start));
     const baseParams: StatsQueryBaseParams = { unitId, window, configHash };
 
-    const destinationConfigs = new Map((unit.destinations ?? []).map((d) => [d.id, d]));
-    const processorConfigs = new Map((unit.processors ?? []).map((p) => [p.id, p]));
-    const sourceConfigs = new Map((unit.sources ?? []).map((s) => [s.id, s]));
-
     // Omitted: every destination, processor and source in the unit, if one request can hold them. A
     // list, even an empty one, names exactly the components to answer for.
     const refs = request.components ?? this.getAllUnitRefs(unit);
 
-    const destinations: Record<string, StreamsUnit.StatsDestinationResult> = {};
-    const processors: Record<string, StreamsUnit.StatsProcessorResult> = {};
-    const sources: Record<string, StreamsUnit.StatsSourceResult> = {};
-    const queryableRefs: StreamsUnit.StatsComponentRef[] = [];
-
-    for (const ref of refs) {
-      if (ref.kind === 'destination') {
-        const { result, queryable } = validateDestination({
-          config: destinationConfigs.get(ref.id),
-          bucketMs,
-        });
-        destinations[ref.id] = result;
-        if (queryable) queryableRefs.push(ref);
-      } else if (ref.kind === 'processor') {
-        const { result, queryable } = validateProcessor({
-          config: processorConfigs.get(ref.id),
-        });
-        processors[ref.id] = result;
-        if (queryable) queryableRefs.push(ref);
-      } else {
-        const { result, queryable } = validateSource({
-          config: sourceConfigs.get(ref.id),
-        });
-        sources[ref.id] = result;
-        if (queryable) queryableRefs.push(ref);
-      }
-    }
+    const { queryable, unqueryable } = resolveQueryRefs({ refs, unit });
+    const { destinations, processors, sources } = defaultResults({ refs, unqueryable, bucketMs });
 
     const [destinationOutcome, processorOutcome, sourceOutcome] = await this.getComponentStats({
       baseParams,
-      refs: queryableRefs,
+      refs: queryable,
       bucketMs,
     });
     Object.assign(destinations, destinationOutcome?.results);
