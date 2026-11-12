@@ -144,7 +144,7 @@ describe('NightshiftInvestigationsPlugin setup', () => {
         'nightshift_rca_reward@1.0.0',
         'nightshift_investigation_process@1.0.0',
         'nightshift_conclusion_quality@1.0.0',
-        'nightshift_alert_outcome_rca_accuracy@1.0.0',
+        'nightshift_alert_outcome_rca_accuracy@1.1.0',
         'nightshift_alert_outcome_benign_classification@1.0.0',
         'nightshift_alert_outcome_rca_reporting_gap@1.0.0',
         'nightshift_wiki_pages_read@1.0.0',
