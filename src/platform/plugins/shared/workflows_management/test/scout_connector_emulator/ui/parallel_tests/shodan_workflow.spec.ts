@@ -8,7 +8,6 @@
  */
 
 import type { EmulatorControl } from '@kbn/connector-emulate';
-import { getShodanFixtures } from '@kbn/connector-specs/src/specs/shodan/vendor_api/emulator_responses';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../../../scout/ui/fixtures';
 import type { ConnectorStep } from '../fixtures/connector_workflow';
@@ -21,6 +20,7 @@ import {
   connectToEmulator,
   createConnectorInSpace,
   deleteConnectorInSpace,
+  loadScenario,
   setFixtures,
 } from '../fixtures/emulator';
 
@@ -70,7 +70,7 @@ test.describe(
       pageObjects,
     }) => {
       await control.reset();
-      await setFixtures(control, [...getShodanFixtures()]);
+      await setFixtures(control, await loadScenario('shodan'));
 
       const resultOf = await runWorkflow(
         { page, pageObjects },

@@ -7,16 +7,45 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'path';
 import type { EmulatorControl, ResponseFixture } from '@kbn/connector-emulate';
 import { createEmulatorControl, resolveEmulatorLocation } from '@kbn/connector-emulate';
+import { readResponseFixtures } from '@kbn/connector-specs/src/test/vendor_api/load_responses';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { KbnClient } from '@kbn/scout';
 
-export {
-  FIRECRAWL_CRAWL_ID as CRAWL_ID,
-  FIRECRAWL_VENDOR_URL as VENDOR,
-  getFirecrawlFixtures,
-} from '@kbn/connector-specs/src/specs/firecrawl/vendor_api/emulator_responses';
+/** Where Firecrawl's API lives; the emulator answers requests to it. */
+export const VENDOR = 'https://api.firecrawl.dev/v2';
+
+/**
+ * What the emulator answers a connector with in these suites, in place of values sampled from its
+ * spec: the connector's `emulator/responses.json`, which `node scripts/connector_emulate --fixtures
+ * <connector>=<that file>` serves too. `connector` is the name of its folder in `src/specs`.
+ */
+export const loadScenario = async (connector: string): Promise<ResponseFixture[]> =>
+  readResponseFixtures(
+    path.join(
+      REPO_ROOT,
+      'src/platform/packages/shared/kbn-connector-specs/src/specs',
+      connector,
+      'emulator/responses.json'
+    )
+  );
+
+/** The id of the crawl that Firecrawl's scenario starts, which its status requests ask about. */
+export const crawlIdOf = (scenario: readonly ResponseFixture[]): string => {
+  for (const { operation, response } of scenario) {
+    const startsCrawl =
+      'method' in operation &&
+      operation.method.toLowerCase() === 'post' &&
+      operation.path === '/crawl';
+    const body = response?.body;
+    if (startsCrawl && typeof body === 'object' && body !== null && 'id' in body) {
+      return String(body.id);
+    }
+  }
+  throw new Error("Firecrawl's scenario has no response to POST /crawl with an id");
+};
 
 /** What the emulator calls `.firecrawl`: its connector id without the dot. */
 export const EMULATOR_NAME = 'firecrawl';

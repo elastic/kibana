@@ -14,13 +14,12 @@ import type { ApiClientFixture, RoleApiCredentials } from '@kbn/scout';
 import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { setFixtures } from '../fixtures/emulated_connector';
-import {
-  FIRECRAWL_CRAWL_ID as CRAWL_ID,
-  FIRECRAWL_VENDOR_URL as VENDOR,
-} from '../../../../src/specs/firecrawl/vendor_api/emulator_responses';
 
 // What the emulator calls `.firecrawl`: its connector id without the dot.
 const EMULATOR_NAME = 'firecrawl';
+
+const VENDOR = 'https://api.firecrawl.dev/v2';
+const CRAWL_ID = '0b8e1c52-6a1f-4c3e-9d7a-2f4b5c6d7e8f';
 
 const crawlStatus = (status: string) => ({
   status,

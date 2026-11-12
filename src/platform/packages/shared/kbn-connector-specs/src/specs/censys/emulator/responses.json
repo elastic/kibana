@@ -1,0 +1,90 @@
+[
+  {
+    "source": "platform",
+    "method": "GET",
+    "path": "/v3/global/asset/host/{host_id}",
+    "status": 200,
+    "headers": {
+      "content-type": "application/vnd.censys.api.v3.host.v1+json"
+    },
+    "body": {
+      "result": {
+        "extensions": {},
+        "resource": {
+          "ip": "8.8.8.8",
+          "location": {
+            "city": "Mountain View",
+            "country": "United States",
+            "country_code": "US"
+          },
+          "autonomous_system": {
+            "asn": 15169,
+            "name": "GOOGLE",
+            "country_code": "US"
+          },
+          "dns": {
+            "reverse_dns": {
+              "names": [
+                "dns.google"
+              ]
+            }
+          },
+          "services": [
+            {
+              "port": 53,
+              "protocol": "DNS"
+            },
+            {
+              "port": 443,
+              "protocol": "HTTP"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "source": "platform",
+    "method": "GET",
+    "path": "/v3/global/asset/enrichment/host/{host_ip}",
+    "status": 200,
+    "headers": {
+      "content-type": "application/vnd.censys.api.v3.host-enrichment.v1+json"
+    },
+    "body": {
+      "result": {
+        "extensions": {},
+        "resource": {
+          "ip": "8.8.8.8",
+          "location": {
+            "city": "Mountain View",
+            "country": "United States",
+            "country_code": "US"
+          },
+          "autonomous_system": {
+            "asn": 15169,
+            "name": "GOOGLE",
+            "country_code": "US"
+          },
+          "dns": {
+            "reverse_dns": {
+              "names": [
+                "dns.google"
+              ]
+            }
+          },
+          "services": [
+            {
+              "port": 53,
+              "protocol": "DNS"
+            },
+            {
+              "port": 443,
+              "protocol": "HTTP"
+            }
+          ]
+        }
+      }
+    }
+  }
+]

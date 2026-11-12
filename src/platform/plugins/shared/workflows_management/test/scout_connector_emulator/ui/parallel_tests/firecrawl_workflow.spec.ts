@@ -13,10 +13,10 @@ import { spaceTest as test } from '../../../scout/ui/fixtures';
 import { PAUSE_SECONDS, runWorkflow } from '../fixtures/connector_workflow';
 import {
   connectToEmulator,
-  CRAWL_ID,
+  crawlIdOf,
   createConnectorInSpace,
   deleteConnectorInSpace,
-  getFirecrawlFixtures,
+  loadScenario,
   setFixtures,
   VENDOR,
 } from '../fixtures/emulator';
@@ -68,7 +68,9 @@ test.describe(
       pageObjects,
     }) => {
       await control.reset();
-      await setFixtures(control, [...getFirecrawlFixtures()]);
+      const scenario = await loadScenario('firecrawl');
+      const crawlId = crawlIdOf(scenario);
+      await setFixtures(control, scenario);
 
       const resultOf = await runWorkflow(
         { page, pageObjects },
@@ -101,8 +103,8 @@ test.describe(
       expect(mapped.links.map(({ url }) => url)).toContain('https://example.com/docs/api');
 
       // The id the crawl step returned is what the next step asked the status of.
-      expect(await resultOf('crawl')).toMatchObject({ id: CRAWL_ID });
-      expect(await resultOf('get_crawl_status', 'input')).toMatchObject({ id: CRAWL_ID });
+      expect(await resultOf('crawl')).toMatchObject({ id: crawlId });
+      expect(await resultOf('get_crawl_status', 'input')).toMatchObject({ id: crawlId });
 
       // The crawl had finished two pages when crawlAndWait polled for the last time.
       expect(await resultOf('crawl_and_wait')).toMatchObject({
@@ -122,7 +124,7 @@ test.describe(
       expect(countOf(`POST ${VENDOR}/search`)).toBe(1);
       expect(countOf(`POST ${VENDOR}/map`)).toBe(1);
       expect(countOf(`POST ${VENDOR}/crawl`)).toBe(2);
-      expect(countOf(`GET ${VENDOR}/crawl/${CRAWL_ID}`)).toBe(3);
+      expect(countOf(`GET ${VENDOR}/crawl/${crawlId}`)).toBe(3);
       expect(calls.filter((call) => call.requestViolations.length > 0)).toStrictEqual([]);
     });
   }

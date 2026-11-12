@@ -8,7 +8,6 @@
  */
 
 import type { EmulatorControl } from '@kbn/connector-emulate';
-import { getJinaFixtures } from '@kbn/connector-specs/src/specs/jina/vendor_api/emulator_responses';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../../../scout/ui/fixtures';
 import type { ConnectorStep } from '../fixtures/connector_workflow';
@@ -21,6 +20,7 @@ import {
   connectToEmulator,
   createConnectorInSpace,
   deleteConnectorInSpace,
+  loadScenario,
   setFixtures,
 } from '../fixtures/emulator';
 
@@ -67,7 +67,7 @@ test.describe(
       pageObjects,
     }) => {
       await control.reset();
-      await setFixtures(control, [...getJinaFixtures()]);
+      await setFixtures(control, await loadScenario('jina'));
 
       const resultOf = await runWorkflow(
         { page, pageObjects },
