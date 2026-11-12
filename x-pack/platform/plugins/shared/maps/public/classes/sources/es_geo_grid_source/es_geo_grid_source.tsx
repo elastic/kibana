@@ -23,6 +23,12 @@ import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
 import { type Filter, type ProjectRouting, buildExistsFilter } from '@kbn/es-query';
+import {
+  getGeohexPrecisionDelta,
+  getGeotilePrecision,
+  getGeotilePrecisionDelta,
+  GRID_RESOLUTION,
+} from '@kbn/geo-precision';
 import { makeESBbox } from '../../../../common/elasticsearch_util';
 import { convertCompositeRespToGeoJson, convertRegularRespToGeoJson } from './convert_to_geojson';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -31,7 +37,6 @@ import {
   ES_GEO_FIELD_TYPE,
   GEOCENTROID_AGG_NAME,
   GEOTILE_GRID_AGG_NAME,
-  GRID_RESOLUTION,
   MVT_GETGRIDTILE_API_PATH,
   RENDER_AS,
   SOURCE_TYPES,
@@ -69,8 +74,6 @@ type ESGeoGridSourceSyncMeta = ESAggsSourceSyncMeta &
   Pick<ESGeoGridSourceDescriptor, 'requestType' | 'resolution'> & {
     geogridPrecision: number;
   };
-
-const MAX_GEOTILE_LEVEL = 29;
 
 export const clustersTitle = i18n.translate('xpack.maps.source.esGridClustersTitle', {
   defaultMessage: 'Clusters',
@@ -225,61 +228,9 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
   }
 
   getGeoGridPrecision(zoom: number): number {
-    if (this.isMvt()) {
-      // The target-precision needs to be determined server side.
-      return 0;
-    }
-
-    const targetGeotileLevel = Math.ceil(zoom) + this._getGeoGridPrecisionResolutionDelta();
-    return Math.min(targetGeotileLevel, MAX_GEOTILE_LEVEL);
-  }
-
-  _getGeoGridPrecisionResolutionDelta() {
-    // Hexagon resolutions do not scale evenly to zoom levels.
-    // zoomX and zoomX + 1 may result in the same hexagon resolution.
-    // To avoid FINE and MOST_FINE providing potenitally the same resolution,
-    // use 3 level resolution system that increases zoom + 3 per resolution step.
-    if (this._descriptor.requestType === RENDER_AS.HEX) {
-      if (this._descriptor.resolution === GRID_RESOLUTION.COARSE) {
-        return 2;
-      }
-
-      if (
-        this._descriptor.resolution === GRID_RESOLUTION.FINE ||
-        this._descriptor.resolution === GRID_RESOLUTION.MOST_FINE
-      ) {
-        return 5;
-      }
-
-      if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
-        return 8;
-      }
-    }
-
-    if (this._descriptor.resolution === GRID_RESOLUTION.COARSE) {
-      return 2;
-    }
-
-    if (this._descriptor.resolution === GRID_RESOLUTION.FINE) {
-      return 3;
-    }
-
-    if (this._descriptor.resolution === GRID_RESOLUTION.MOST_FINE) {
-      return 4;
-    }
-
-    if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
-      return 8;
-    }
-
-    throw new Error(
-      i18n.translate('xpack.maps.source.esGrid.resolutionParamErrorMessage', {
-        defaultMessage: `Grid resolution param not recognized: {resolution}`,
-        values: {
-          resolution: this._descriptor.resolution,
-        },
-      })
-    );
+    // Precision is determined server side for MVT sources
+    // (heatmap, hex, and point/grid at super-fine resolution).
+    return this.isMvt() ? 0 : getGeotilePrecision(zoom, this._descriptor.resolution);
   }
 
   async _compositeAggRequest({
@@ -582,7 +533,10 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     const tileUrlParams = getTileUrlParams({
       geometryFieldName: this._descriptor.geoField,
       index: dataView.getIndexPattern(),
-      gridPrecision: this._getGeoGridPrecisionResolutionDelta(),
+      gridPrecision:
+        this._descriptor.requestType === RENDER_AS.HEX
+          ? getGeohexPrecisionDelta(this._descriptor.resolution)
+          : getGeotilePrecisionDelta(this._descriptor.resolution),
       hasLabels,
       buffer,
       requestBody: _.pick(searchSource.getSearchRequestBody(), [

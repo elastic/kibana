@@ -355,7 +355,9 @@ export class SlackAppService {
               spaces: ['*'],
               feature: {
                 nightshift: ['minimal_all'],
-                agentBuilder: ['minimal_all'],
+                // `minimal_all` leaves out the sub-feature that starts a conversation with an
+                // agent bound to a service account, like the Nightshift assistant.
+                agentBuilder: ['minimal_all', 'invoke_bound_agents'],
                 actions: ['read'],
                 workflowsManagement: ['read'],
               },
@@ -468,10 +470,10 @@ export class SlackAppService {
           return agentId;
         }
       }
-      this.logger.debug('No Nightshift agent is available, Slack turns will use the default agent');
+      this.logger.debug('No nightshift agent is available, Slack turns will use the default agent');
     } catch (error) {
       this.logger.warn(
-        `Failed to look up the Nightshift agents, Slack turns will use the default agent: ${this.toErrorMessage(
+        `Failed to look up the nightshift agents, Slack turns will use the default agent: ${this.toErrorMessage(
           error
         )}`
       );

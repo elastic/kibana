@@ -41,6 +41,14 @@ const WELL_KNOWN_SET: ReadonlySet<string> = new Set<WellKnownWorkflowTriggerSour
 ]);
 
 /**
+ * True when the engine evaluates a provided `${{ }}` input value as an expression: only when the
+ * execution's `triggeredBy` is `manual`. The engine records `manual` for a caller that does not set
+ * `triggeredBy`, so a plugin caller that passes untrusted values must set its own `triggeredBy`.
+ */
+export const evaluatesProvidedInputExpressions = (triggeredBy: string | undefined): boolean =>
+  triggeredBy === 'manual';
+
+/**
  * Execution fields used to classify event-driven runs. Callers may pass a full
  * execution document or a subset (`triggeredBy` + `context`).
  */
