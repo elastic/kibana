@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import pMap from 'p-map';
 import type { ObjectChange } from '@kbn/change-history';
 import type { Logger } from '@kbn/core/server';
 import { DEFAULT_MAX_RETRIES, DEFAULT_RETRY_DELAY_MS, delayMs } from '@kbn/occ';
@@ -209,21 +210,28 @@ export const logWorkflowChanges = async ({
       workflowsByUid.set(workflowUid, group);
     }
 
-    for (const [workflowUid, uidWorkflows] of workflowsByUid) {
-      const changes = toObjectChanges(uidWorkflows, timestamp, logger);
-      await logWorkflowChangesForAction({
-        changes,
-        action: groupAction,
-        scopedChangeHistory,
-        spaceId,
-        correlationId,
-        restoreMetadata:
-          groupAction === WorkflowChangeHistoryAction.workflowRestore ? restoreMetadata : undefined,
-        workflowUid,
-        logger,
-        maxRetries,
-        retryDelayMs,
-      });
-    }
+    // One request per workflowUid, up to 10 at a time.
+    await pMap(
+      [...workflowsByUid],
+      async ([workflowUid, uidWorkflows]) => {
+        const changes = toObjectChanges(uidWorkflows, timestamp, logger);
+        await logWorkflowChangesForAction({
+          changes,
+          action: groupAction,
+          scopedChangeHistory,
+          spaceId,
+          correlationId,
+          restoreMetadata:
+            groupAction === WorkflowChangeHistoryAction.workflowRestore
+              ? restoreMetadata
+              : undefined,
+          workflowUid,
+          logger,
+          maxRetries,
+          retryDelayMs,
+        });
+      },
+      { concurrency: 10 }
+    );
   }
 };

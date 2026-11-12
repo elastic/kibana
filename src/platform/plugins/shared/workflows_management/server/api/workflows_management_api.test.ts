@@ -1004,7 +1004,9 @@ steps:
           },
           mockRequest
         );
-        expect(engine.executeWorkflow.mock.calls[0][0]).not.toHaveProperty('workflowUid');
+        expect(mockWorkflowsExecutionEngine.executeWorkflow.mock.calls[0][0]).not.toHaveProperty(
+          'workflowUid'
+        );
       });
 
       it('should throw error when YAML validation fails', async () => {

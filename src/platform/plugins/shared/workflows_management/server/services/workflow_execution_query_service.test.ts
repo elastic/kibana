@@ -124,6 +124,40 @@ describe('WorkflowExecutionQueryService', () => {
       expect(call.query.bool.must).toContainEqual({ term: { workflowId: 'wf-1' } });
     });
 
+    it('hides the previous document runs from the editor and keeps them in the global list', async () => {
+      const executions = [
+        executionDocument('run-previous', 'wf-1', 'uid-previous'),
+        executionDocument('run-current', 'wf-1', 'uid-current'),
+        executionDocument('run-other', 'wf-2', 'uid-other'),
+      ];
+      mockEsClient.search.mockImplementation(async (request) => {
+        const matched = executions.filter((execution) =>
+          matchesExecutionQuery(execution, request.query)
+        );
+        return {
+          hits: {
+            hits: matched.map((execution) => ({ _id: execution.id, _source: execution })),
+            total: { value: matched.length },
+          },
+        } as any;
+      });
+
+      const editor = await service.getWorkflowExecutions(
+        { workflowId: 'wf-1', workflowUid: 'uid-current' },
+        'my-space'
+      );
+      const global = await service.searchExecutionsView(
+        { query: { term: { workflowId: 'wf-1' } }, includeManagedExecutions: true },
+        'my-space'
+      );
+
+      expect(editor.results.map((execution) => execution.id)).toEqual(['run-current']);
+      expect(global.results.map((execution) => execution.id)).toEqual([
+        'run-previous',
+        'run-current',
+      ]);
+    });
+
     it('adds status filter when statuses provided', async () => {
       mockEsClient.search.mockResolvedValue(emptyResponse as any);
 
@@ -280,6 +314,26 @@ describe('WorkflowExecutionQueryService', () => {
       ]);
       expect(result.hasNamedExecution).toBe(true);
       expect(result.results).toEqual([]);
+    });
+
+    it('checks named executions for the current document, not the reused workflow id', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+        aggregations: {
+          [NAMED_EXECUTION_AGGREGATION]: { doc_count: 0, matching: { doc_count: 1 } },
+        },
+      } as any);
+
+      const result = await service.getWorkflowExecutions(
+        { workflowId: 'wf-1', workflowUid: 'uid-current' },
+        'my-space'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      const namedMust = call.aggs[NAMED_EXECUTION_AGGREGATION].aggs.matching.filter.bool.must;
+      expect(namedMust[0]).toEqual({ term: { workflowUid: 'uid-current' } });
+      expect(JSON.stringify(namedMust)).not.toContain('workflowId');
+      expect(result.hasNamedExecution).toBe(true);
     });
 
     it('counts named executions across the workflow, ignoring date range and other list filters', async () => {
@@ -1966,3 +2020,70 @@ describe('WorkflowExecutionQueryService', () => {
     });
   });
 });
+
+interface ExecutionFixture {
+  id: string;
+  workflowId: string;
+  workflowUid: string;
+  spaceId: string;
+  status: string;
+  startedAt: string;
+}
+
+const executionDocument = (
+  id: string,
+  workflowId: string,
+  workflowUid: string
+): ExecutionFixture => ({
+  id,
+  workflowId,
+  workflowUid,
+  spaceId: 'my-space',
+  status: 'completed',
+  startedAt: '2026-01-01T00:00:00.000Z',
+});
+
+const asClauses = (value: unknown): unknown[] => {
+  if (value == null) return [];
+  return Array.isArray(value) ? value : [value];
+};
+
+/** Applies the document-identity clauses these tests build. Unknown clauses fail the test. */
+const matchesExecutionQuery = (execution: ExecutionFixture, query: unknown): boolean => {
+  if (query == null || typeof query !== 'object') {
+    throw new Error(`Unsupported execution query: ${JSON.stringify(query)}`);
+  }
+  const clause = query as Record<string, unknown>;
+  if ('term' in clause && clause.term && typeof clause.term === 'object') {
+    return Object.entries(clause.term as Record<string, unknown>).every(([field, expected]) => {
+      const value =
+        expected != null && typeof expected === 'object' && 'value' in expected
+          ? (expected as { value: unknown }).value
+          : expected;
+      return execution[field as keyof ExecutionFixture] === value;
+    });
+  }
+  if ('exists' in clause && clause.exists && typeof clause.exists === 'object') {
+    const field = (clause.exists as { field?: string }).field;
+    return field != null && execution[field as keyof ExecutionFixture] != null;
+  }
+  if ('bool' in clause && clause.bool && typeof clause.bool === 'object') {
+    const bool = clause.bool as {
+      must?: unknown;
+      must_not?: unknown;
+      should?: unknown;
+      minimum_should_match?: number;
+    };
+    const must = asClauses(bool.must);
+    const mustNot = asClauses(bool.must_not);
+    const should = asClauses(bool.should);
+    const minimumShouldMatch = bool.minimum_should_match ?? (should.length > 0 ? 1 : 0);
+    return (
+      must.every((entry) => matchesExecutionQuery(execution, entry)) &&
+      mustNot.every((entry) => !matchesExecutionQuery(execution, entry)) &&
+      should.filter((entry) => matchesExecutionQuery(execution, entry)).length >=
+        minimumShouldMatch
+    );
+  }
+  throw new Error(`Unsupported execution query: ${JSON.stringify(query)}`);
+};
