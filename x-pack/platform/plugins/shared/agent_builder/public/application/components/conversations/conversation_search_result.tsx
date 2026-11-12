@@ -38,6 +38,8 @@ const labels = {
   }),
 };
 
+const lockIconProps = { tabIndex: -1 };
+
 const titleStyles = css`
   min-width: 0;
 `;
@@ -62,7 +64,7 @@ export const ConversationSearchResult: React.FC<ConversationSearchResultProps> =
     conversation.access_control?.access_mode === ConversationAccessControlMode.Public;
   const accessLabel = isPublic ? labels.public : labels.private;
   const typeLabel = templateId
-    ? conversationTemplatesService.getTemplateUIDefinition(templateId)?.name ?? templateId
+    ? conversationTemplatesService.getTemplateUIDefinition(templateId)?.name ?? labels.defaultType
     : labels.defaultType;
 
   return (
@@ -86,6 +88,8 @@ export const ConversationSearchResult: React.FC<ConversationSearchResultProps> =
             color={isPublic ? euiTheme.colors.textParagraph : euiTheme.colors.textDisabled}
             content={accessLabel}
             aria-label={accessLabel}
+            iconProps={lockIconProps}
+            disableScreenReaderOutput
           />
         </EuiFlexItem>
         <EuiFlexItem css={titleStyles}>

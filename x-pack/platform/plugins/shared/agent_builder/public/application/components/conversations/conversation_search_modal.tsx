@@ -42,7 +42,9 @@ const labels = {
   }),
 };
 
-const MODAL_WIDTH = 768;
+const modalStyles = css`
+  width: 768px;
+`;
 const LIST_MAX_HEIGHT = 290;
 
 interface ConversationSearchModalProps {
@@ -173,7 +175,7 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
       aria-labelledby={modalTitleId}
       onClose={onClose}
       outsideClickCloses={true}
-      style={{ width: MODAL_WIDTH }}
+      css={modalStyles}
       data-test-subj="agentBuilderConversationSearchModal"
     >
       <EuiModalHeader>

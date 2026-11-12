@@ -19,6 +19,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  euiFontSize,
   useEuiTheme,
   type UseEuiTheme,
 } from '@elastic/eui';
@@ -96,9 +97,9 @@ const pinnedSectionCss = css`
   max-block-size: 40%;
 `;
 
-const sectionLabelCss = ({ euiTheme }: UseEuiTheme) => css`
-  font-size: ${euiTheme.size.m};
-  padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+const sectionLabelCss = (euiThemeContext: UseEuiTheme) => css`
+  font-size: ${euiFontSize(euiThemeContext, 'xs').fontSize};
+  padding: ${euiThemeContext.euiTheme.size.xs} ${euiThemeContext.euiTheme.size.s};
 `;
 
 export const ConversationSidebarView: React.FC = () => {

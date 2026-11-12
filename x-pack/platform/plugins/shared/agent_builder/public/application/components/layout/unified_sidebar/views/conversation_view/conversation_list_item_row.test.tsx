@@ -32,7 +32,13 @@ const renderRow = (
     status,
     read,
     openMenu = true,
-  }: { status?: ConversationDisplayStatus; read?: boolean; openMenu?: boolean } = {}
+    showActionsMenu,
+  }: {
+    status?: ConversationDisplayStatus;
+    read?: boolean;
+    openMenu?: boolean;
+    showActionsMenu?: boolean;
+  } = {}
 ) => {
   render(
     <IntlProvider locale="en">
@@ -45,6 +51,7 @@ const renderRow = (
           routeConversationId={conversationId}
           status={status}
           read={read}
+          showActionsMenu={showActionsMenu}
           permissions={{
             rename: false,
             delete: false,
@@ -126,6 +133,17 @@ describe('ConversationListItemRow', () => {
     expect(
       within(link).queryByText(/^(New|Working|Waiting for input|Error)$/)
     ).not.toBeInTheDocument();
+  });
+
+  it('keeps the actions slot but hides the menu while the agent is responding', () => {
+    renderRow({ rename: true, delete: true }, { showActionsMenu: false, openMenu: false });
+
+    expect(
+      screen.queryByTestId(`agentBuilderSidebarConversationMenu-${conversationId}`)
+    ).not.toBeInTheDocument();
+    expect(
+      document.querySelector('.agentBuilderSidebarConversationListRowActions')
+    ).toBeInTheDocument();
   });
 
   describe('actions menu', () => {
