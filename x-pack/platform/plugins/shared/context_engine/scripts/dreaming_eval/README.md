@@ -27,6 +27,7 @@ Each stage reads what the previous one wrote, so you can rerun any of them on it
 | `configure` | Turns on Context Engine and memory, and creates or updates the AI indices of the config: an ES\|QL trace source over the datasets' agents, and their dreaming config. Creates or updates each AI index's answer agent too. |
 | `run` | Per AI index: deletes the facts, entities and relationships dreaming wrote, runs each of its workflows until they have read everything (the first run from the earliest imported round), and dumps the KIs they wrote. A run that fails is run again (`run.retries`), from where the last completed run stopped. With `per_sample`, it does this once per sample (below). |
 | `evaluate` | Per target: ranks the dumped KIs with a reranker, then asks an LLM whether the top ones hold the target knowledge. Writes scores by dataset and category. |
+| `load` (optional) | Loads KIs someone else dreamed (`--from`): copies their dumps into a local run and writes them to the AI index. See [Sharing memories](#sharing-memories). |
 | `ask` (optional) | Restores the run's dumped KIs to the AI index, puts each target's question to the AI index's answer agent, and asks an LLM whether its answer gives the reference answer. Runs when named, or with the others when `ask.enabled` is set. |
 
 ## Answer agents
@@ -51,6 +52,16 @@ A dataset is a benchmark; a sample is one of its questions with the conversation
 ## Config
 
 [`config/default.yaml`](config/default.yaml) lists what to import and the AI indices that dream on it. Copy it and pass it with `--config` to try other dreaming configs or subsets without changing code. An AI index names its `datasets` and a `dreaming` config: a built-in `template` (from `public/assets/dreaming_templates`), its own `instructions`, `facts`, `entities` and `relationships`, or both.
+
+## Sharing memories
+
+Dreaming takes long; retrieval can be tuned on memories someone already dreamed. Share a run's folder, `data/context_engine_dreaming_eval/runs/<run id>/` (or one AI index's folder of it): it holds the KIs as whole documents and the targets the run was made for. Whoever gets it runs:
+
+```sh
+node scripts/context_engine_dreaming_eval.js --stage configure,load,ask --from ~/Downloads/dev-full-1
+```
+
+The optional `load` stage copies the dumps into a run of the same id (or `--run-id`), so `evaluate` and `ask` work on them, and writes the KIs to the AI index, visible in the config's space. A single AI index's dumps load into the single AI index the run works on, whatever its name was; otherwise they load by AI index id. Samples that ran one at a time are written by the ask stage, each before its questions, or by `load` with `--samples <sample>` to look at one in Agent Builder. Neither `load` nor `ask` dreams, and neither needs the datasets downloaded.
 
 ## Output
 

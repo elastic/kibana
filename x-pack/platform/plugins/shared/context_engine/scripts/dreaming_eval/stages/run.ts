@@ -15,6 +15,7 @@ import { destOf, runDirOf } from '../config';
 import type { StageContext } from '../context';
 import { writeJson } from '../download';
 import type { DumpedKi, ImportManifest, KiDump, WorkflowRunSummary } from '../types';
+import { runTargetsFileOf, targetsOf } from '../targets';
 import { runUntilDone } from '../workflow_runner';
 import { getAiIndex } from './configure';
 import { isPerSample, readExtracted, readImportManifest, writeDatasetSpans } from './import';
@@ -102,18 +103,50 @@ export const dumpDreamedKis = async (esClient: Client, dest: string): Promise<Du
   }
 };
 
-/** Replaces the dreamed KIs of an AI index with dumped ones, as dreaming left them. */
+interface Privileges {
+  kibana?: { privileges?: Array<{ space?: string; [key: string]: unknown }> };
+}
+
+/** A KI made visible in `space`: its space privileges, from where it was dumped, moved there. */
+export const inSpace = (ki: DumpedKi, space: string): DumpedKi => {
+  const permissions = ki.permissions as Privileges | undefined;
+  const privileges = permissions?.kibana?.privileges;
+  if (!privileges) {
+    return ki;
+  }
+  return {
+    ...ki,
+    permissions: {
+      ...permissions,
+      kibana: {
+        ...permissions?.kibana,
+        privileges: privileges.map((privilege) =>
+          privilege.space && privilege.space !== '*' ? { ...privilege, space } : privilege
+        ),
+      },
+    },
+  };
+};
+
+/**
+ * Replaces the dreamed KIs of an AI index with dumped ones, as dreaming left them, visible in
+ * `space` whichever space they were dumped from.
+ */
 export const restoreDreamedKis = async (
   esClient: Client,
   dest: string,
-  kis: DumpedKi[]
+  kis: DumpedKi[],
+  space: string
 ): Promise<void> => {
   await cleanDreamedKis(esClient, dest);
   for (let start = 0; start < kis.length; start += RESTORE_BATCH) {
     const batch = kis.slice(start, start + RESTORE_BATCH);
     const response = await esClient.bulk({
       refresh: start + RESTORE_BATCH >= kis.length ? 'wait_for' : false,
-      operations: batch.flatMap((ki) => [{ index: { _index: dest, _id: ki.id } }, ki]),
+      operations: batch.flatMap((ki) => [
+        { index: { _index: dest, _id: ki.id } },
+        inSpace(ki, space),
+      ]),
     });
     if (response.errors) {
       const failed = response.items.find((item) => item.index?.error)?.index?.error;
@@ -257,6 +290,7 @@ export const runRun = async (context: StageContext): Promise<void> => {
     if (!stored) {
       throw new Error(`AI index '${aiIndex.id}' does not exist: run the configure stage first`);
     }
+    writeJson(runTargetsFileOf(runDirOf(config, runId, aiIndex.id)), targetsOf(context, aiIndex));
     const perSample = aiIndex.datasets.filter((dataset) => isPerSample(context, dataset));
     if (perSample.length > 0) {
       if (aiIndex.datasets.length > 1) {

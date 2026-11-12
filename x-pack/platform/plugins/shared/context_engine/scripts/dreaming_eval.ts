@@ -26,6 +26,7 @@ import { runConfigure } from './dreaming_eval/stages/configure';
 import { runEvaluate } from './dreaming_eval/stages/evaluate';
 import { runExtract } from './dreaming_eval/stages/extract';
 import { runImport } from './dreaming_eval/stages/import';
+import { runIdOfShared, runLoad } from './dreaming_eval/stages/load';
 import { hasKiDump, runRun } from './dreaming_eval/stages/run';
 
 const STAGES = {
@@ -33,6 +34,7 @@ const STAGES = {
   import: runImport,
   configure: runConfigure,
   run: runRun,
+  load: runLoad,
   evaluate: runEvaluate,
   ask: runAsk,
 } as const;
@@ -40,7 +42,7 @@ const STAGES = {
 type Stage = keyof typeof STAGES;
 const STAGE_NAMES = Object.keys(STAGES) as Stage[];
 /** Stages that run only when named, or turned on in the config. */
-const OPTIONAL_STAGES: Stage[] = ['ask'];
+const OPTIONAL_STAGES: Stage[] = ['load', 'ask'];
 
 const parseStages = (value: unknown, optional: Stage[]): Stage[] => {
   if (value === undefined || value === '' || value === true) {
@@ -120,10 +122,18 @@ run(
       perSample: flags['per-sample'] === true,
     });
 
+    const loadFrom = flags.from ? path.resolve(process.cwd(), String(flags.from)) : undefined;
+    if (stages.includes('load') && !loadFrom) {
+      throw new Error(
+        'The load stage needs --from: a run folder, an AI index folder or a kis.json'
+      );
+    }
     const runId = flags['run-id']
       ? String(flags['run-id'])
       : stages.includes('run')
       ? newRunId()
+      : stages.includes('load') && loadFrom
+      ? runIdOfShared(loadFrom)
       : latestRunId(config, aiIndexIds);
     if (!runId && stages.includes('evaluate')) {
       throw new Error('No run to evaluate: run the run stage first, or pass --run-id');
@@ -143,13 +153,14 @@ run(
       aiIndexIds,
       forceDownload: flags['force-download'] === true,
       judgeConnectorId: flags['judge-connector'] ? String(flags['judge-connector']) : undefined,
+      loadFrom,
     };
 
     log.info(
       `Stages ${stages.join(', ')} for ${aiIndexIds.join(', ')} on ${usedDatasets.join(
         ', '
       )} (config ${path.relative(process.cwd(), configPath)}${
-        ['run', 'evaluate', 'ask'].some((stage) => stages.includes(stage as Stage))
+        ['run', 'load', 'evaluate', 'ask'].some((stage) => stages.includes(stage as Stage))
           ? `, run ${context.runId}`
           : ''
       })`
@@ -166,9 +177,10 @@ run(
       traces, configures AI indices that dream on them, runs their workflows from a clean slate,
       dumps the KIs they write, and judges them against target knowledge.
 
-      Stages, in order: ${STAGE_NAMES.join(', ')}. Without --stage, all of them run but ask, which
-      runs when named or when ask.enabled is set in the config. Ask puts the targets' questions
-      to an agent that has only the AI index, and judges its answers.
+      Stages, in order: ${STAGE_NAMES.join(', ')}. Without --stage, all of them run but load and
+      ask. Load writes KIs someone else dreamed (--from) to the AI index, to try retrieval on
+      them without dreaming. Ask puts the targets' questions to an agent that has only the AI
+      index, and judges its answers; it also runs when ask.enabled is set in the config.
 
       A sample is a benchmark question with the conversations it is asked over. By default one
       LongMemEval S sample runs; the config picks the datasets and samples, and the flags below
@@ -185,6 +197,7 @@ run(
         'sample-count',
         'run-id',
         'judge-connector',
+        'from',
         'es-url',
         'es-username',
         'es-password',
@@ -194,7 +207,7 @@ run(
       help: `
         --stage <names>         Comma-separated stages to run: ${STAGE_NAMES.join(
           ', '
-        )} (default: all but ask)
+        )} (default: all but load and ask)
         --config <file>         Eval config (default: ${path.relative(
           process.cwd(),
           DEFAULT_CONFIG_PATH
@@ -213,6 +226,9 @@ run(
                                 run for the run stage, else the latest one
         --judge-connector <id>  AI connector that judges the KIs (default: evaluate.connector_id,
                                 then Kibana's default AI connector)
+        --from <path>           What the load stage loads: a run folder someone shared
+                                (data/context_engine_dreaming_eval/runs/<run id>), one AI index's
+                                folder of it, or a kis.json
         --force-download        Download the datasets again
         --es-url <url>          Elasticsearch URL (default: http://localhost:9200)
         --es-username <user>    Username for Elasticsearch and Kibana (default: elastic)

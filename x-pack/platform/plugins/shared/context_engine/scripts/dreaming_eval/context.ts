@@ -29,6 +29,8 @@ export interface StageContext {
   aiIndexIds: string[];
   forceDownload: boolean;
   judgeConnectorId?: string;
+  /** What the load stage loads: a shared run folder, an AI index folder, or a `kis.json`. */
+  loadFrom?: string;
 }
 
 /** Calls Kibana in the config's space, and throws on a status the caller does not expect. */

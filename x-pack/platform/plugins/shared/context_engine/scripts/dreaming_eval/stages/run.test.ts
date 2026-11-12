@@ -16,6 +16,7 @@ import {
   DREAMED_KIS_QUERY,
   dumpedSamplesOf,
   hasKiDump,
+  inSpace,
   kiDumpFileOf,
   restoreDreamedKis,
   sampleDirOf,
@@ -99,10 +100,12 @@ describe('restoreDreamedKis', () => {
       bulk: jest.fn().mockResolvedValue({ errors: false, items: [] }),
     };
 
-    await restoreDreamedKis(esClient as unknown as Client, 'ai-index-idx-eval', [
-      ki('fact-a'),
-      ki('entity-b'),
-    ]);
+    await restoreDreamedKis(
+      esClient as unknown as Client,
+      'ai-index-idx-eval',
+      [ki('fact-a'), ki('entity-b')],
+      'default'
+    );
 
     expect(esClient.deleteByQuery).toHaveBeenCalledWith(
       expect.objectContaining({ index: 'ai-index-idx-eval', query: DREAMED_KIS_QUERY }),
@@ -119,6 +122,30 @@ describe('restoreDreamedKis', () => {
     });
   });
 
+  it('makes the KIs visible in the space they are restored to', async () => {
+    const esClient = {
+      deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+      bulk: jest.fn().mockResolvedValue({ errors: false, items: [] }),
+    };
+    const everywhere = {
+      ...ki('fact-b'),
+      permissions: { kibana: { privileges: [{ space: '*' }] } },
+    };
+
+    await restoreDreamedKis(
+      esClient as unknown as Client,
+      'ai-index-idx-eval',
+      [ki('fact-a'), everywhere, { id: 'fact-c', type: 'fact.preference' }],
+      'team-a'
+    );
+
+    const [, restored, , kept, , bare] = esClient.bulk.mock.calls[0][0].operations;
+    expect(restored.permissions).toEqual({ kibana: { privileges: [{ space: 'team-a' }] } });
+    expect(kept).toEqual(everywhere);
+    expect(bare).toEqual({ id: 'fact-c', type: 'fact.preference' });
+    expect(inSpace(ki('fact-a'), 'default')).toEqual(ki('fact-a'));
+  });
+
   it('fails when a KI cannot be written back', async () => {
     const esClient = {
       deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
@@ -129,7 +156,12 @@ describe('restoreDreamedKis', () => {
     };
 
     await expect(
-      restoreDreamedKis(esClient as unknown as Client, 'ai-index-idx-eval', [ki('fact-a')])
+      restoreDreamedKis(
+        esClient as unknown as Client,
+        'ai-index-idx-eval',
+        [ki('fact-a')],
+        'default'
+      )
     ).rejects.toThrow('Restoring KIs to ai-index-idx-eval failed');
   });
 });

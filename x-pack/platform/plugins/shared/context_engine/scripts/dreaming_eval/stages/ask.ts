@@ -22,7 +22,8 @@ import { askJudge, resolveJudgeConnectorId } from '../llm';
 import type { Scores } from '../report';
 import { describeScore, scoresOf, scoreTables, shortQuestion } from '../report';
 import type { EvalTarget } from '../types';
-import { kiSetsOf, targetsOf } from './evaluate';
+import { targetsOfRun } from '../targets';
+import { kiSetsOf } from './evaluate';
 import { restoreDreamedKis } from './run';
 
 const DYNAMIC_TOOL = /execute_dynamic_tool$/;
@@ -182,7 +183,7 @@ export const runAsk = async (context: StageContext): Promise<void> => {
     }
     const agent = answerAgentOf(aiIndex);
     const dir = runDirOf(config, runId, aiIndex.id);
-    const sets = kiSetsOf(dir, targetsOf(context, aiIndex));
+    const sets = kiSetsOf(dir, targetsOfRun(context, aiIndex, dir));
     const total = sets.reduce((sum, { targets }) => sum + targets.length, 0);
     log.info(`${aiIndex.id}: asking ${agent.id} ${total} questions`);
     let done = 0;
@@ -191,7 +192,7 @@ export const runAsk = async (context: StageContext): Promise<void> => {
       if (targets.length === 0) {
         continue;
       }
-      await restoreDreamedKis(esClient, destOf(aiIndex.id), kis);
+      await restoreDreamedKis(esClient, destOf(aiIndex.id), kis, config.space);
       log.info(
         `  restored the ${kis.length} KIs of ${sample ? `sample ${sample}` : `run ${runId}`}`
       );

@@ -15,10 +15,10 @@ import type { LongMemEvalRecord } from '../datasets/longmemeval_s';
 import * as longMemEvalS from '../datasets/longmemeval_s';
 import type { LmeV2Haystack, LmeV2Question, LmeV2Trajectory } from '../datasets/longmemeval_v2';
 import * as longMemEvalV2 from '../datasets/longmemeval_v2';
+import { generatedTargetsFileOf } from '../targets';
 import type { ExtractedDataset } from '../types';
 
 export const extractedFileOf = (dir: string): string => path.join(dir, 'extracted.json');
-export const generatedTargetsFileOf = (dir: string): string => path.join(dir, 'targets.json');
 
 const extractLongMemEvalS = async (context: StageContext): Promise<ExtractedDataset> => {
   const { config, log, forceDownload } = context;

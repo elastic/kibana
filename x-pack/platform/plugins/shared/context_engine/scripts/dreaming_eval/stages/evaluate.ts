@@ -8,8 +8,7 @@
 import fs from 'fs';
 import path from 'path';
 import pLimit from 'p-limit';
-import type { AiIndexEvalConfig } from '../config';
-import { datasetDirOf, runDirOf } from '../config';
+import { runDirOf } from '../config';
 import type { StageContext } from '../context';
 import { readJson, writeJson } from '../download';
 import type { Judgement } from '../judge';
@@ -25,8 +24,8 @@ import {
 import { askJudge, resolveJudgeConnectorId } from '../llm';
 import type { Scores } from '../report';
 import { describeScore, scoresOf, scoreTables, shortQuestion } from '../report';
+import { sampleOfTarget, targetsOfRun } from '../targets';
 import type { DumpedKi, EvalTarget, KiDump } from '../types';
-import { generatedTargetsFileOf } from './extract';
 import { dumpedSamplesOf, kiDumpFileOf, sampleDirOf } from './run';
 
 export interface TargetResult extends Judgement {
@@ -48,8 +47,6 @@ export interface Evaluation extends Scores {
 
 export const evaluationFileOf = (dir: string): string => path.join(dir, 'evaluation.json');
 
-export const sampleOfTarget = ({ sample, id }: EvalTarget): string => sample ?? id;
-
 /** The KIs a run dumped for an AI index: one set, or one per sample with that sample's targets. */
 export const kiSetsOf = (
   runDir: string,
@@ -68,22 +65,6 @@ export const kiSetsOf = (
     kis: readJson<KiDump>(kiDumpFileOf(sampleDirOf(runDir, sample))).kis,
     targets: targets.filter((target) => sampleOfTarget(target) === sample),
   }));
-};
-
-/** The targets of an AI index: its own target files, else those extracted for its datasets. */
-export const targetsOf = (context: StageContext, aiIndex: AiIndexEvalConfig): EvalTarget[] => {
-  const files =
-    aiIndex.targets.length > 0
-      ? aiIndex.targets.map((file) => path.resolve(process.cwd(), file))
-      : aiIndex.datasets.map((dataset) =>
-          generatedTargetsFileOf(datasetDirOf(context.config, dataset))
-        );
-  return files.flatMap((file) => {
-    if (!fs.existsSync(file)) {
-      throw new Error(`No targets at ${file}: run the extract stage, or fix the targets path`);
-    }
-    return readJson<EvalTarget[]>(file);
-  });
 };
 
 export const summaryMarkdown = (evaluation: Evaluation): string => {
@@ -112,7 +93,7 @@ export const runEvaluate = async (context: StageContext): Promise<void> => {
   const limit = pLimit(config.evaluate.concurrency);
   for (const aiIndex of config.ai_indices.filter(({ id }) => context.aiIndexIds.includes(id))) {
     const dir = runDirOf(config, runId, aiIndex.id);
-    const sets = kiSetsOf(dir, targetsOf(context, aiIndex));
+    const sets = kiSetsOf(dir, targetsOfRun(context, aiIndex, dir));
 
     let useReranker = true;
     const rank = async (target: EvalTarget, kis: DumpedKi[]): Promise<DumpedKi[]> => {
