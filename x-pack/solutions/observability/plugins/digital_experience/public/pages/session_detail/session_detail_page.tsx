@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiEmptyPrompt,
   EuiLoadingLogo,
   EuiPageSection,
   EuiPanel,
+  EuiProgress,
+  useResizeObserver,
   EuiSpacer,
   EuiTitle,
   copyToClipboard,
@@ -323,6 +325,19 @@ export function SessionDetailPage({
   // The list takes the width of the side navigation while it shows.
   useHideSideNav(railOpen);
 
+  // Another session opens at its top, whether the page or the panel beside the list scrolls.
+  const pageRef = useRef<HTMLDivElement>(null);
+  // Measured, so that the sessions list's header can line up with it.
+  const [headerElement, setHeaderElement] = useState<HTMLDivElement | null>(null);
+  const { height: headerHeight } = useResizeObserver(headerElement, 'height');
+  const shownSessionId = useRef(sessionId);
+  useEffect(() => {
+    if (shownSessionId.current !== sessionId) {
+      shownSessionId.current = sessionId;
+      pageRef.current?.scrollIntoView?.({ block: 'start' });
+    }
+  }, [sessionId]);
+
   useRouteBreadcrumb([
     { text: serviceName, href: overviewHref },
     { text: SESSIONS_LABEL, href: backHref },
@@ -395,10 +410,12 @@ export function SessionDetailPage({
         />
       );
     }
-    if (loading || !detail) {
+    // While the next session loads, the previous one stays, under a progress bar.
+    if (!detail) {
       return loadingPrompt;
     }
-    return <SessionDetail detail={detail} formatters={formatters} />;
+    // Keyed, so that what the user expanded or filtered on one session doesn't carry to the next.
+    return <SessionDetail key={detail.session.sessionId} detail={detail} formatters={formatters} />;
   };
 
   const copySessionId = () => {
@@ -460,48 +477,61 @@ export function SessionDetailPage({
           sessionId={sessionId}
           source={query.source}
           onHide={() => setRailState('hidden')}
+          headerHeight={headerHeight || undefined}
         />
       }
     >
-      <div data-test-subj="digitalExperienceSessionPage">
+      <div data-test-subj="digitalExperienceSessionPage" ref={pageRef}>
         {/* The header's back is the way to the list, so there is no in-page back button, and Chrome
       Next shows a single back control. */}
-        <AppHeader
-          title={i18n.translate('xpack.digitalExperience.sessionDetail.title', {
-            defaultMessage: 'Session',
-          })}
-          back={{ href: backHref, label: SESSIONS_LABEL }}
-          badges={session ? sessionBadges(session) : undefined}
-          metadata={metadata}
-          menu={{
-            items: [
-              {
-                id: 'sessionsList',
-                order: 1,
-                label: SESSIONS_LIST_LABEL,
-                iconType: railOpen ? 'transitionLeftOut' : 'transitionLeftIn',
-                isSelected: railOpen,
-                run: () => setRailState(railOpen ? 'hidden' : 'open'),
-                testId: 'digitalExperienceSessionsListToggle',
-                ebt: { action: DIGITAL_EXPERIENCE_EBT_ACTIONS.TOGGLE_SESSIONS_LIST },
-              },
-              ...(discoverHref
-                ? [
-                    {
-                      id: 'openInDiscover',
-                      order: 2,
-                      label: OPEN_IN_DISCOVER_LABEL,
-                      iconType: 'discoverApp',
-                      href: discoverHref,
-                      testId: 'digitalExperienceSessionOpenInDiscover',
-                      ebt: { action: DIGITAL_EXPERIENCE_EBT_ACTIONS.OPEN_IN_DISCOVER },
-                    },
-                  ]
-                : []),
-            ],
-          }}
-        />
+        <div ref={setHeaderElement}>
+          <AppHeader
+            title={i18n.translate('xpack.digitalExperience.sessionDetail.title', {
+              defaultMessage: 'Session',
+            })}
+            back={{ href: backHref, label: SESSIONS_LABEL }}
+            badges={session ? sessionBadges(session) : undefined}
+            metadata={metadata}
+            menu={{
+              items: [
+                {
+                  id: 'sessionsList',
+                  order: 1,
+                  label: SESSIONS_LIST_LABEL,
+                  iconType: railOpen ? 'transitionLeftOut' : 'transitionLeftIn',
+                  isSelected: railOpen,
+                  run: () => setRailState(railOpen ? 'hidden' : 'open'),
+                  testId: 'digitalExperienceSessionsListToggle',
+                  ebt: { action: DIGITAL_EXPERIENCE_EBT_ACTIONS.TOGGLE_SESSIONS_LIST },
+                },
+                ...(discoverHref
+                  ? [
+                      {
+                        id: 'openInDiscover',
+                        order: 2,
+                        label: OPEN_IN_DISCOVER_LABEL,
+                        iconType: 'discoverApp',
+                        href: discoverHref,
+                        testId: 'digitalExperienceSessionOpenInDiscover',
+                        ebt: { action: DIGITAL_EXPERIENCE_EBT_ACTIONS.OPEN_IN_DISCOVER },
+                      },
+                    ]
+                  : []),
+              ],
+            }}
+          />
+        </div>
         {/* The app shell is unpadded, so the header spans the page; the content pads itself. */}
+        <div css={{ position: 'relative' }}>
+          {loading && detail && (
+            <EuiProgress
+              size="xs"
+              color="accent"
+              position="absolute"
+              data-test-subj="digitalExperienceSessionLoadingNext"
+            />
+          )}
+        </div>
         <EuiPageSection paddingSize="m" restrictWidth={false}>
           {renderContent()}
         </EuiPageSection>

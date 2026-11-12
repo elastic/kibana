@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { ComponentProps } from 'react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { EuiProvider } from '@elastic/eui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
@@ -24,6 +24,7 @@ import {
 import { useRouteBreadcrumb } from '../../breadcrumbs/use_route_breadcrumb';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { useTimeRange } from '../../hooks/use_time_range';
+import { useDigitalExperienceParams } from '../../hooks/use_digital_experience_params';
 import { useDigitalExperienceRouter } from '../../hooks/use_digital_experience_router';
 import { digitalExperienceRouter } from '../../routes';
 import { createUiSettingsMock } from '../../test_utils/ui_settings_mock';
@@ -198,6 +199,14 @@ const mockChrome = {
 };
 const mockGetRedirectUrl = jest.fn(() => '/app/discover#/?esql');
 
+/** The page as its route renders it, with the session from the URL. */
+function SessionRoute() {
+  const {
+    path: { sessionId },
+  } = useDigitalExperienceParams('/{serviceName}/sessions/{sessionId}');
+  return <SessionDetailPage serviceName="shop" sessionId={sessionId} />;
+}
+
 const renderPage = () => {
   jest.mocked(useKibanaServices).mockReturnValue({
     notifications: { toasts: { addSuccess: mockAddSuccess } },
@@ -227,7 +236,7 @@ const renderPage = () => {
       history={history}
       router={digitalExperienceRouter as unknown as ComponentProps<typeof RouterProvider>['router']}
     >
-      <SessionDetailPage serviceName="shop" sessionId="abcdef123456" />
+      <SessionRoute />
     </RouterProvider>,
     {
       wrapper: ({ children }) => (
@@ -239,6 +248,7 @@ const renderPage = () => {
       ),
     }
   );
+  return history;
 };
 
 const SESSIONS_HREF = `/app/digital_experience/shop/sessions?page=2&${TIME_QUERY}&source=otel&withJsErrors=true`;
@@ -594,6 +604,37 @@ describe('SessionDetailPage', () => {
     fireEvent.click(screen.getByTestId('digitalExperienceSessionsRailHide'));
     expect(mockChrome.sideNav.setIsCollapsed).toHaveBeenLastCalledWith(false);
     mockChrome.getChromeStyle.mockReturnValue('classic');
+  });
+
+  it('moves to another session without loading the list again, keeping the previous one until it loads', async () => {
+    let resolveNext: (value: SessionDetailResponse) => void = () => {};
+    mockDetail
+      .mockResolvedValueOnce(detail())
+      .mockReturnValueOnce(new Promise((resolve) => (resolveNext = resolve)));
+    const history = renderPage();
+    await screen.findByTestId('digitalExperienceSessionsRailItem-abcdef123456');
+
+    act(() => {
+      history.push(`/shop/sessions/first111?${TIME_QUERY}&source=otel&withJsErrors=true&page=2`);
+    });
+
+    expect(mockList).toHaveBeenCalledTimes(1);
+    expect(mockDetail).toHaveBeenCalledTimes(2);
+    // The previous session stays, with a progress bar, instead of a blank loading page.
+    expect(screen.getByTestId('digitalExperienceSessionSummary')).toBeInTheDocument();
+    expect(screen.getByTestId('digitalExperienceSessionLoadingNext')).toBeInTheDocument();
+    expect(screen.queryByTestId('digitalExperienceSessionLoading')).not.toBeInTheDocument();
+
+    await act(async () => {
+      resolveNext(
+        detail({ session: { ...detail().session, sessionId: 'first111', user: 'sam@example.com' } })
+      );
+    });
+    expect(await screen.findByTestId('digitalExperienceSessionUser')).toHaveTextContent(
+      'sam@example.com'
+    );
+    expect(screen.queryByTestId('digitalExperienceSessionLoadingNext')).not.toBeInTheDocument();
+    expect(mockList).toHaveBeenCalledTimes(1);
   });
 
   it('says when the requests are cut short', async () => {

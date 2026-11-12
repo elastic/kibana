@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiLoadingSpinner,
+  EuiProgress,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -34,6 +35,7 @@ import { useApiClient } from '../../../hooks/use_api_client';
 import { useApplicationLinks } from '../../../hooks/use_application_links';
 import { useDigitalExperienceParams } from '../../../hooks/use_digital_experience_params';
 import { useEnvironment } from '../../../hooks/use_environment';
+import { useEqualValue } from '../../../hooks/use_equal_value';
 import { useFormatters } from '../../../hooks/use_formatters';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useUpdateUrlQuery } from '../../../hooks/use_update_url_query';
@@ -211,11 +213,14 @@ export function SessionsRail({
   sessionId,
   source,
   onHide,
+  headerHeight,
 }: {
   serviceName: string;
   sessionId: string;
   source: ApplicationSource;
   onHide: () => void;
+  /** The height of the session's page header, which the list's header matches. */
+  headerHeight?: number;
 }) {
   const { euiTheme } = useEuiTheme();
   const apiClient = useApiClient();
@@ -224,7 +229,9 @@ export function SessionsRail({
   const { environment } = useEnvironment();
   const updateUrlQuery = useUpdateUrlQuery();
   const { query } = useDigitalExperienceParams('/{serviceName}/sessions/{sessionId}');
-  const sessionsQuery = useMemo(() => pickSessionsListQuery(query), [query]);
+  // The route gives a new query object on each navigation; moving to another session must not
+  // load the list again.
+  const sessionsQuery = useEqualValue(pickSessionsListQuery(query));
   const state = useMemo(() => sessionsListStateOf(sessionsQuery), [sessionsQuery]);
   const { sessionHref, sessionsHref } = useApplicationLinks(serviceName, source);
 
@@ -257,7 +264,18 @@ export function SessionsRail({
       data-test-subj="digitalExperienceSessionsRail"
       css={css({ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 })}
     >
-      <div css={css({ padding: euiTheme.size.m, borderBottom: euiTheme.border.thin })}>
+      {/* As tall as the session's header, so that their bottom borders line up. */}
+      <div
+        css={css({
+          boxSizing: 'border-box',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          minHeight: headerHeight,
+          padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
+          borderBottom: euiTheme.border.thin,
+        })}
+      >
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="xxs">
@@ -304,27 +322,45 @@ export function SessionsRail({
           }
           data-test-subj="digitalExperienceSessionsRailSearch"
         />
-        {hasSessionsListFilters({ ...state, search: undefined }) && (
-          <EuiText size="xs" color="subdued" css={css({ marginTop: euiTheme.size.xs })}>
-            {i18n.translate('xpack.digitalExperience.sessionDetail.rail.filtered', {
-              defaultMessage: 'Filtered like the sessions list.',
-            })}{' '}
-            <EuiLink
-              href={sessionsHref(sessionsQuery)}
-              data-test-subj="digitalExperienceSessionsRailEditFilters"
-              {...getEbtProps({
-                action: DIGITAL_EXPERIENCE_EBT_ACTIONS.BACK_TO_SESSIONS,
-                element: SESSIONS_EBT_ELEMENTS.RAIL_EDIT_FILTERS,
-              })}
-            >
-              {i18n.translate('xpack.digitalExperience.sessionDetail.rail.editFilters', {
-                defaultMessage: 'Edit filters',
-              })}
-            </EuiLink>
-          </EuiText>
-        )}
       </div>
 
+      {hasSessionsListFilters({ ...state, search: undefined }) && (
+        <EuiText
+          size="xs"
+          color="subdued"
+          css={css({
+            padding: `${euiTheme.size.xs} ${euiTheme.size.m}`,
+            borderBottom: euiTheme.border.thin,
+          })}
+        >
+          {i18n.translate('xpack.digitalExperience.sessionDetail.rail.filtered', {
+            defaultMessage: 'Filtered like the sessions list.',
+          })}{' '}
+          <EuiLink
+            href={sessionsHref(sessionsQuery)}
+            data-test-subj="digitalExperienceSessionsRailEditFilters"
+            {...getEbtProps({
+              action: DIGITAL_EXPERIENCE_EBT_ACTIONS.BACK_TO_SESSIONS,
+              element: SESSIONS_EBT_ELEMENTS.RAIL_EDIT_FILTERS,
+            })}
+          >
+            {i18n.translate('xpack.digitalExperience.sessionDetail.rail.editFilters', {
+              defaultMessage: 'Edit filters',
+            })}
+          </EuiLink>
+        </EuiText>
+      )}
+
+      {/* A new search or page keeps the current sessions until the next ones arrive. */}
+      <div css={css({ position: 'relative', height: 2 })}>
+        {loading && response && (
+          <EuiProgress
+            size="xs"
+            color="accent"
+            data-test-subj="digitalExperienceSessionsRailLoading"
+          />
+        )}
+      </div>
       <div
         css={css({ flex: 1, minHeight: 0, overflowY: 'auto' })}
         role="navigation"
@@ -341,7 +377,7 @@ export function SessionsRail({
             error={error}
             onRetry={refresh}
           />
-        ) : !response || loading ? (
+        ) : !response ? (
           <EuiFlexGroup justifyContent="center" css={css({ padding: euiTheme.size.l })}>
             <EuiLoadingSpinner size="l" />
           </EuiFlexGroup>
