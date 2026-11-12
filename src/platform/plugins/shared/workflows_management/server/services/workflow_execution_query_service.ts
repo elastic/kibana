@@ -36,6 +36,7 @@ import { WORKFLOWS_INDEX } from '../../common';
 import { buildTimeRangeFilter } from '../api/lib/build_time_range_filter';
 import {
   buildManagedWorkflowExecutionsFilter,
+  buildWorkflowDocumentFilter,
   buildWorkflowExecutionsSpaceFilter,
 } from '../api/lib/build_workflow_executions_search_query';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
@@ -196,8 +197,9 @@ export class WorkflowExecutionQueryService {
     params: SearchWorkflowExecutionsParams,
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
+    const documentFilter = buildWorkflowDocumentFilter(params);
     const must: estypes.QueryDslQueryContainer[] = [
-      ...(params.workflowId ? [{ term: { workflowId: params.workflowId } }] : []),
+      ...(documentFilter ? [documentFilter] : []),
       buildWorkflowExecutionsSpaceFilter(spaceId),
       ...(params.accessControlFilter ? [params.accessControlFilter] : []),
     ];
@@ -282,12 +284,14 @@ export class WorkflowExecutionQueryService {
       searchAfter: params.searchAfter,
       collapse: params.collapse ? { field: params.collapse } : undefined,
       // First page only. Later pages reuse this flag. List filters stay off this query.
+      // The name column follows the same document as the list, so a previous install's
+      // named runs cannot turn it on for an empty history.
       namedExecutionQuery:
-        params.workflowId && !params.searchAfter?.length
+        documentFilter && !params.searchAfter?.length
           ? {
               bool: {
                 must: [
-                  { term: { workflowId: params.workflowId } },
+                  documentFilter,
                   buildWorkflowExecutionsSpaceFilter(spaceId),
                   ...(params.accessControlFilter ? [params.accessControlFilter] : []),
                   { wildcard: { runName: { value: '?*' } } },
@@ -407,7 +411,8 @@ export class WorkflowExecutionQueryService {
     return searchStepExecutions({
       stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
       logger: this.deps.logger,
-      workflowId: params.workflowId,
+      workflowId: params.workflowUid ? undefined : params.workflowId,
+      workflowUid: params.workflowUid,
       stepId: params.stepId,
       stepType: params.stepType,
       additionalQuery: workflowRunFilter || undefined,

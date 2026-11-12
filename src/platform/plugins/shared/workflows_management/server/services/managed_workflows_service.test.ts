@@ -814,6 +814,77 @@ describe('ManagedWorkflowsService', () => {
       });
     });
 
+    it('keeps the existing workflowUid when a managed update rewrites the document', async () => {
+      const definition = createDefinition({
+        version: 2,
+        yaml: workflowYaml({ name: 'Managed Workflow - Updated' }),
+      });
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      mockPrepareReturnsInitialVersion(crudService);
+      const previous = crudService.prepareWorkflowDocumentForStorage.getMockImplementation();
+      if (!previous) {
+        throw new Error('prepareWorkflowDocumentForStorage mock is missing');
+      }
+      crudService.prepareWorkflowDocumentForStorage.mockImplementation(async (params) => {
+        const prepared = await previous(params);
+        return {
+          ...prepared,
+          workflowData: { ...prepared.workflowData, workflowUid: 'uid-generated' },
+        };
+      });
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
+        createVersionedDocument(
+          createWorkflowSource({
+            version: 5,
+            workflowUid: 'uid-kept',
+            definitionHash: 'old-hash',
+            managedVersion: 1,
+            yaml: workflowYaml({ name: 'Managed Workflow - Original' }),
+          })
+        )
+      );
+
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
+
+      expect(getIndexedDocument(crudService).workflowUid).toBe('uid-kept');
+    });
+
+    it('does not assign a workflowUid when a managed update rewrites a document that has none', async () => {
+      const definition = createDefinition({
+        version: 2,
+        yaml: workflowYaml({ name: 'Managed Workflow - Updated' }),
+      });
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      mockPrepareReturnsInitialVersion(crudService);
+      const previous = crudService.prepareWorkflowDocumentForStorage.getMockImplementation();
+      if (!previous) {
+        throw new Error('prepareWorkflowDocumentForStorage mock is missing');
+      }
+      crudService.prepareWorkflowDocumentForStorage.mockImplementation(async (params) => {
+        const prepared = await previous(params);
+        return {
+          ...prepared,
+          workflowData: { ...prepared.workflowData, workflowUid: 'uid-generated' },
+        };
+      });
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
+        createVersionedDocument(
+          createWorkflowSource({
+            version: 5,
+            definitionHash: 'old-hash',
+            managedVersion: 1,
+            yaml: workflowYaml({ name: 'Managed Workflow - Original' }),
+          })
+        )
+      );
+
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
+
+      expect(getIndexedDocument(crudService).workflowUid).toBeUndefined();
+    });
+
     it('preserves document.version and skips history when managed update YAML is unchanged', async () => {
       const definition = createDefinition({ version: 2 });
       mockManagedWorkflowDefinitions = [definition];
@@ -2729,6 +2800,7 @@ describe('ManagedWorkflowsService', () => {
       crudService.getWorkflowDocumentSource.mockResolvedValue(
         createWorkflowSource({
           spaceId: '*',
+          workflowUid: 'uid-current',
           definition: { name: 'Managed Workflow', enabled: true } as WorkflowYaml,
         })
       );
@@ -2756,6 +2828,7 @@ describe('ManagedWorkflowsService', () => {
           managedBy: PLUGIN_ID,
           originManagedWorkflowId: WORKFLOW_ID,
           managedVersion: 1,
+          workflowUid: 'uid-current',
         }),
         {
           spaceId: SPACE_ID,

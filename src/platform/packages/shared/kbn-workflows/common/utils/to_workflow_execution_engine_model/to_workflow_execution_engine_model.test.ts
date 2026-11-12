@@ -35,6 +35,13 @@ describe('toWorkflowExecutionEngineModel', () => {
     expect(toWorkflowExecutionEngineModel(baseSource).version).toBeUndefined();
   });
 
+  it('copies workflowUid and omits it when the document has none', () => {
+    expect(
+      toWorkflowExecutionEngineModel({ ...baseSource, workflowUid: 'uid-current' }).workflowUid
+    ).toBe('uid-current');
+    expect(toWorkflowExecutionEngineModel(baseSource).workflowUid).toBeUndefined();
+  });
+
   it('passes through managed workflow fields and execution options', () => {
     expect(
       toWorkflowExecutionEngineModel(

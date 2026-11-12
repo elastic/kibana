@@ -18,6 +18,7 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS = {
     id: mappings.keyword(),
     runName: mappings.wildcard({ ignore_above: WORKFLOW_RUN_NAME_MAX_LENGTH }),
     workflowId: mappings.keyword(),
+    workflowUid: mappings.keyword(),
     managed: mappings.boolean(),
     managedBy: mappings.keyword(),
     originManagedWorkflowId: mappings.keyword(),

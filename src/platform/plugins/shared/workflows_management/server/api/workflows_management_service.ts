@@ -138,6 +138,8 @@ export interface SearchWorkflowExecutionsParams {
   request?: KibanaRequest;
   accessControlFilter?: estypes.QueryDslQueryContainer;
   workflowId?: string;
+  /** History identity of the current workflow document. Operational reads leave this unset and filter on `workflowId`. */
+  workflowUid?: string;
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];

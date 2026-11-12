@@ -18,6 +18,23 @@ export const buildWorkflowExecutionsSpaceFilter = (
   },
 });
 
+/** Current document when it has a uid; otherwise the workflow id, including history from before uids existed. */
+export const buildWorkflowDocumentFilter = ({
+  workflowId,
+  workflowUid,
+}: {
+  workflowId?: string;
+  workflowUid?: string;
+}): estypes.QueryDslQueryContainer | undefined => {
+  if (workflowUid) {
+    return { term: { workflowUid } };
+  }
+  if (workflowId) {
+    return { term: { workflowId } };
+  }
+  return undefined;
+};
+
 export const buildManagedWorkflowExecutionsFilter = (): estypes.QueryDslQueryContainer => ({
   term: { managed: true },
 });

@@ -35,7 +35,7 @@ describe('searchStepExecutions', () => {
         stepExecutionsDataClient: mockStepDataClient,
         logger: mockLogger,
       })
-    ).rejects.toThrow('Either workflowExecutionId or workflowId must be provided');
+    ).rejects.toThrow('Either workflowExecutionId, workflowId, or workflowUid must be provided');
     expect(mockStepDataClient.search).not.toHaveBeenCalled();
   });
 
@@ -117,6 +117,26 @@ describe('searchStepExecutions', () => {
         track_total_hits: true,
       })
     );
+  });
+
+  it('filters by workflowUid and ignores workflowId when both are provided', async () => {
+    mockStepDataClient.search.mockResolvedValue({
+      hits: { hits: [], total: { value: 0 } },
+    } as any);
+
+    await searchStepExecutions({
+      ...baseParams,
+      stepExecutionsDataClient: mockStepDataClient,
+      logger: mockLogger,
+      workflowId: 'wf-1',
+      workflowUid: 'uid-current',
+    });
+
+    const query = mockStepDataClient.search.mock.calls[0][0].query as {
+      bool: { must: Array<Record<string, unknown>> };
+    };
+    expect(query.bool.must).toContainEqual({ term: { workflowUid: 'uid-current' } });
+    expect(query.bool.must).not.toContainEqual({ term: { workflowId: 'wf-1' } });
   });
 
   it('paginates and tracks total hits when workflowExecutionId is used with page and size', async () => {

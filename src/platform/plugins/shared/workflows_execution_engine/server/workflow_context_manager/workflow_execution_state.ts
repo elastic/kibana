@@ -381,6 +381,9 @@ export class WorkflowExecutionState {
       stepExecutionIndex: previousExecutionCount,
       workflowRunId: this.workflowExecution.id,
       workflowId: this.workflowExecution.workflowId,
+      ...(this.workflowExecution.workflowUid
+        ? { workflowUid: this.workflowExecution.workflowUid }
+        : {}),
       spaceId: this.workflowExecution.spaceId,
       isTestRun: Boolean(this.workflowExecution.isTestRun),
       managed: Boolean(this.workflowExecution.managed),

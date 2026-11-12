@@ -1024,12 +1024,12 @@ describe('WorkflowCrudService', () => {
       client.search
         .mockResolvedValueOnce({
           hits: {
-            hits: [occSearchHit('wf-1', { version: 4 }, 7, 2)],
+            hits: [occSearchHit('wf-1', { version: 4, workflowUid: 'uid-kept' }, 7, 2)],
           },
         })
         .mockResolvedValueOnce({
           hits: {
-            hits: [occSearchHit('wf-1', { version: 4 }, 7, 2)],
+            hits: [occSearchHit('wf-1', { version: 4, workflowUid: 'uid-kept' }, 7, 2)],
           },
         });
       client.index.mockResolvedValue({ result: 'updated', _seq_no: 8, _primary_term: 2 });
@@ -1054,9 +1054,36 @@ describe('WorkflowCrudService', () => {
           refresh: true,
           if_seq_no: 7,
           if_primary_term: 2,
-          document: expect.objectContaining({ version: 5 }),
+          document: expect.objectContaining({ version: 5, workflowUid: 'uid-kept' }),
         })
       );
+    });
+
+    it('overwrite=true does not assign a workflowUid when the stored document has none', async () => {
+      const { deps, client } = makeDeps();
+      client.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [occSearchHit('wf-1', { version: 4 }, 7, 2)],
+          },
+        })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [occSearchHit('wf-1', { version: 4 }, 7, 2)],
+          },
+        });
+      client.index.mockResolvedValue({ result: 'updated', _seq_no: 8, _primary_term: 2 });
+
+      const service = new WorkflowCrudService(deps);
+      await service.bulkCreateWorkflows(
+        [{ id: 'wf-1', yaml: validYaml('A') }],
+        'default',
+        request,
+        { overwrite: true }
+      );
+
+      const indexed = client.index.mock.calls[0][0].document;
+      expect(indexed.workflowUid).toBeUndefined();
     });
 
     it('overwrite=true resurrects a soft-deleted tombstone in the same space', async () => {
@@ -4390,7 +4417,7 @@ describe('managed orphan cleanup without a request', () => {
     };
 
     it('deletes the observed revision of a bound orphan and leaves its binding', async () => {
-      const { core, bindings, client, service } = setup();
+      const { core, bindings, client, deps, service } = setup();
 
       await expect(service.deleteManagedOrphan('system-orphan', 'default', ORPHAN)).resolves.toBe(
         true
@@ -4404,6 +4431,8 @@ describe('managed orphan cleanup without a request', () => {
       );
       expectBindingUntouched(bindings);
       expect(core.elasticsearch.client.asScoped).not.toHaveBeenCalled();
+      expect(deps.workflowExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
+      expect(deps.stepExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
     });
 
     it('deletes an unbound orphan', async () => {

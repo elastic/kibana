@@ -96,6 +96,7 @@ export const buildWorkflowExecutionDocument = (
     id: generateUuid(),
     spaceId,
     workflowId: workflow.id,
+    ...(workflow.workflowUid ? { workflowUid: workflow.workflowUid } : {}),
     ...pickManagedWorkflowFields(workflow),
     isTestRun: workflow.isTestRun,
     isEphemeral: workflow.isEphemeral,

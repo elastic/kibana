@@ -62,6 +62,7 @@ describe('get_workflow_change_history', () => {
     yaml: 'name: My workflow',
     valid: true,
     spaceId: 'default',
+    workflowUid: undefined as string | undefined,
   };
 
   const createDeps = ({
@@ -159,6 +160,23 @@ describe('get_workflow_change_history', () => {
       expect(changeHistoryService.getHistory).toHaveBeenCalledWith('default', 'wf-1', {
         from: 0,
         size: 20,
+      });
+    });
+
+    it('filters history by the current document workflowUid', async () => {
+      const { deps, changeHistoryService } = createDeps({
+        workflowResult: { ...workflow, workflowUid: 'uid-current' },
+      });
+
+      await getHistoryForWorkflow(deps, {
+        workflowId: 'wf-1',
+        spaceId: 'default',
+      });
+
+      expect(changeHistoryService.getHistory).toHaveBeenCalledWith('default', 'wf-1', {
+        from: 0,
+        size: 20,
+        additionalFilters: [{ term: { 'metadata.workflowUid': 'uid-current' } }],
       });
     });
 

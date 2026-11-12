@@ -24,7 +24,10 @@ const DEFAULT_PER_PAGE = 20;
 
 export interface GetWorkflowChangeHistoryDeps {
   changeHistoryService: IWorkflowChangeHistoryService;
-  getWorkflowSource: (id: string, spaceId: string) => Promise<{ spaceId: string } | null>;
+  getWorkflowSource: (
+    id: string,
+    spaceId: string
+  ) => Promise<{ spaceId: string; workflowUid?: string } | null>;
 }
 
 export interface GetHistoryForWorkflowParams {
@@ -75,6 +78,9 @@ export const getHistoryForWorkflow = async (
   const result = await deps.changeHistoryService.getHistory(historySpaceId, workflowId, {
     from: (page - 1) * perPage,
     size: perPage,
+    ...(workflow.workflowUid
+      ? { additionalFilters: [{ term: { 'metadata.workflowUid': workflow.workflowUid } }] }
+      : {}),
   });
 
   return {

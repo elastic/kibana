@@ -327,6 +327,26 @@ describe('WorkflowsManagementApi', () => {
       expect(access.assertAccess).not.toHaveBeenCalled();
     });
 
+    it('filters editor history by the current document uid', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        ...workflow,
+        workflowUid: 'uid-current',
+      });
+      const params = { workflowId: workflow.id, request: mockRequest };
+
+      await api.getWorkflowExecutions(params, 'default');
+      expect(mockWorkflowsService.getWorkflowExecutions).toHaveBeenCalledWith(
+        { ...params, accessControlFilter: undefined, workflowUid: 'uid-current' },
+        'default'
+      );
+
+      await api.searchStepExecutions(params, 'default');
+      expect(mockWorkflowsService.searchStepExecutions).toHaveBeenCalledWith(
+        { ...params, workflowUid: 'uid-current' },
+        'default'
+      );
+    });
+
     it('keeps the space filter for cross-workflow history', async () => {
       const access = await mockWorkflowsService.getAccessControl();
       const filter = { bool: { must_not: [{ terms: { workflowId: ['hidden'] } }] } };
@@ -984,6 +1004,9 @@ steps:
           },
           mockRequest
         );
+        expect(mockWorkflowsExecutionEngine.executeWorkflow.mock.calls[0][0]).not.toHaveProperty(
+          'workflowUid'
+        );
       });
 
       it('should throw error when YAML validation fails', async () => {
@@ -1115,6 +1138,7 @@ steps:
       it('should fetch workflow YAML by ID and execute it', async () => {
         mockWorkflowsService.getWorkflow.mockResolvedValue({
           ...mockWorkflowDetailDto,
+          workflowUid: 'uid-current',
           managed: true,
           managedBy: 'workflowsExtensionsExample',
           originManagedWorkflowId: 'system-example-greeting',
@@ -1138,6 +1162,7 @@ steps:
           expect.objectContaining({
             id: 'existing-workflow-id',
             yaml: mockWorkflowYaml,
+            workflowUid: 'uid-current',
             managed: true,
             managedBy: 'workflowsExtensionsExample',
             originManagedWorkflowId: 'system-example-greeting',
@@ -1151,6 +1176,7 @@ steps:
       it('should preserve managed metadata when testing provided YAML for a saved workflow', async () => {
         mockWorkflowsService.getWorkflow.mockResolvedValue({
           ...mockWorkflowDetailDto,
+          workflowUid: 'uid-current',
           managed: true,
           managedBy: 'workflowsExtensionsExample',
           originManagedWorkflowId: 'system-example-greeting',
@@ -1169,6 +1195,7 @@ steps:
         expect(engine.executeWorkflow).toHaveBeenCalledWith(
           expect.objectContaining({
             id: 'existing-workflow-id',
+            workflowUid: 'uid-current',
             managed: true,
             managedBy: 'workflowsExtensionsExample',
             originManagedWorkflowId: 'system-example-greeting',
@@ -1363,6 +1390,52 @@ steps:
           id: 'internal-test-workflow',
           isTestRun: true,
           isEphemeral: true,
+        }),
+        'step1',
+        undefined,
+        {},
+        mockRequest
+      );
+      expect(mockWorkflowsExecutionEngine.executeWorkflowStep.mock.calls[0][0]).not.toHaveProperty(
+        'workflowUid'
+      );
+    });
+
+    it('links a step test of a saved workflow to that document', async () => {
+      mockWorkflowsService.validateWorkflow.mockResolvedValue({
+        valid: true,
+        diagnostics: [],
+        parsedWorkflow: {
+          version: '1',
+          name: 'Test Workflow',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [{ name: 'step1', type: 'console' }],
+        },
+      });
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'existing-workflow-id',
+        workflowUid: 'uid-current',
+      } as WorkflowDetailDto);
+      mockWorkflowsExecutionEngine.executeWorkflowStep.mockResolvedValue({
+        workflowExecutionId: 'test-step-exec-id',
+      });
+
+      await api.testStep(
+        'name: Test Workflow',
+        'step1',
+        'existing-workflow-id',
+        undefined,
+        {},
+        'default',
+        mockRequest
+      );
+
+      expect(mockWorkflowsExecutionEngine.executeWorkflowStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'existing-workflow-id',
+          workflowUid: 'uid-current',
+          isTestRun: true,
         }),
         'step1',
         undefined,

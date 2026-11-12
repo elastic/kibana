@@ -81,6 +81,16 @@ describe('transformStorageDocumentToWorkflowDto', () => {
     });
   });
 
+  it('maps workflowUid when the document has one', () => {
+    const source = makeSource({ workflowUid: 'uid-current' });
+
+    expect(transformStorageDocumentToWorkflowDto('wf-1', source).workflowUid).toBe('uid-current');
+    expect(transformStoragePartialToWorkflowDto('wf-1', { workflowUid: 'uid-current' })).toEqual({
+      id: 'wf-1',
+      workflowUid: 'uid-current',
+    });
+  });
+
   it('maps created_at to createdAt and updated_at to lastUpdatedAt', () => {
     const source = makeSource({
       created_at: '2025-03-01T00:00:00.000Z',

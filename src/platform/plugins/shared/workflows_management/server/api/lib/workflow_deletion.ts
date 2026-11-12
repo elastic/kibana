@@ -485,10 +485,11 @@ export const cleanupDeletedWorkflows = async (
     | 'workflowExecutionsDataClient'
     | 'stepExecutionsDataClient'
     | 'logger'
+    | 'purgeExecutions'
   >
 ): Promise<void> => {
   await unscheduleWorkflowTasks(ids, params.taskScheduler);
-  if (params.force) {
+  if (params.force && params.purgeExecutions !== false) {
     await purgeWorkflowRelatedData(
       ids,
       params.spaceId,
@@ -556,7 +557,7 @@ const deleteBoundWorkflow = async (
           id
         );
       }
-      if (isPrivate) {
+      if (isPrivate && params.purgeExecutions !== false) {
         retainPrivateAcl = true;
         await purgeWorkflowRelatedData(
           [id],
@@ -602,6 +603,8 @@ export const deleteWorkflows = async (params: {
   ids: string[];
   spaceId: string;
   force: boolean;
+  /** When false, the workflow document is removed and its executions are left in place. */
+  purgeExecutions?: boolean;
   acknowledgeAclLoss?: boolean;
   assertCanDelete?: (workflow: WorkflowProperties, id: string) => void;
   guardedDelete?: GuardedWorkflowDeletion;
