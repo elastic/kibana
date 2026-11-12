@@ -420,14 +420,14 @@ Reading `trend`:
   many hours that is (the listed hours minus the latest), and N is how many of them are above 0. End
   the entry with the lowest, highest and latest counts already written as Numbers says, and copy
   them as they stand.
-- In the description, give the count range an hour (380–455) over "every hour from START to END"
-  when all M hours had a failure, otherwise "on N of the M hours from START to END" (END is the hour
-  before the latest complete hour), then the latest complete hour in parentheses (396 at 09:00;
-  `0 at 09:00` when its row is missing). "Complete hours" and "earlier hours" are working terms:
-  never write them. With no failing hour before the latest, say "no failing line in the M hours
-  before 09:00"; with no hour before it, state only the latest count. Leave the direction to the
-  reader and omit the partial current hour unless the latest complete hour had no failing line or
-  it is the only data.
+- In the description, open with the latest complete hour: "still failing at 09:00 (396 failing
+  lines that hour)", or "no failing lines at 09:00" when its row is missing. Then the hours before
+  it: "after 380–455 an hour in each of the M hours before it" when all M had a failure, otherwise
+  "after 380–455 an hour on N of the M hours before it"; with no failing hour among them, "after no
+  failing line in the M hours before it"; with no hour before it, state only the latest hour.
+  "Complete hours" and "earlier hours" are working terms: never write them. Leave the direction to
+  the reader and omit the partial current hour unless the latest complete hour had no failing line
+  or it is the only data.
 
 Reading `baseline` (the onset always goes in the description; the days and daily shares only when
 sentence 3 allows them):
@@ -440,10 +440,10 @@ sentence 3 allows them):
   03-05), and leave the comparison to the reader. With no earlier complete day, state only its
   `share`.
 - (Both shapes) Onset: `earliest` of the first day with a failure (MM-DD HH:MM). Use the qualified
-  wording "the first failing line in the 7-day window from {window start} is at {earliest}" whenever
+  wording "first seen {earliest}, the earliest in the 7 days checked" whenever
   no earlier day with data is in the window: always when the scope has no total, and in the isolating
-  shape when the failure starts on the first day with data. Use the bare "its first failing line is
-  at {earliest}" only when earlier complete days with data had no failure; it is the only form that
+  shape when the failure starts on the first day with data. Use "first seen {earliest}, with no
+  failures on the earlier days" only when earlier complete days with data had no failure; it is the only form that
   implies the failure started then. Write the year only when it differs from the window's. The
   qualified form claims nothing about earlier data, which the window may not hold.
 - (Isolating shape) Say "failure on N of N days with data" when every day with data has a failing
@@ -647,8 +647,9 @@ Each entry:
      states them: the field, then its top groups with their shares, then "and N others". When
      `present_{field} < rows`, state that
      coverage and make no all-failing-rows claim.
-  3. **How long and whether it continues**, short, in this order: the `trend` clause, the onset
-     (Reading `trend`, `baseline`) and the not-measured clause. Add daily shares or the days with a
+  3. **Whether it continues, how steady it has been, and since when**, short, in this order: the
+     `trend` clause (the latest hour first, then the hours before it), the onset (Reading `trend`,
+     `baseline`) and the not-measured clause. Add daily shares or the days with a
      failure only when they change the reading (a rate clearly different from earlier days); never
      list days or give first and last times per service or dataset.
   - Causes belong elsewhere: no dependency chains or upstream causes in the description; those go in
@@ -660,7 +661,7 @@ Each entry:
     found instead>."`
   - Example of a match, with illustrative values (the value is the text between the double quotes):
     ```
-    "The export-renderer job fails with `status = 504` on the `endpoint` field; a sampled row shows `region = eu-1` and `retries = 0`. Between 09:41 and 10:41 UTC on 2026-03-07, 412 of 6,880 log lines (6.0%) in the export-renderer scope failed, all with `retries = 0` and the same timeout message, by `region`: `eu-1` (76% of its lines) and `us-2` (31%). Failing lines ran 380–455 an hour in every hour from 03-06 11:00 to 03-07 08:00 (396 at 09:00); the first failing line in the 7-day window from 02-28 10:41 is at 02-28 11:20; not measured: the breakdown by `zone` (it timed out)."
+    "The export-renderer job fails with `status = 504` on the `endpoint` field; a sampled row shows `region = eu-1` and `retries = 0`. Between 09:41 and 10:41 UTC on 2026-03-07, 412 of 6,880 log lines (6.0%) in the export-renderer scope failed, all with `retries = 0` and the same timeout message, by `region`: `eu-1` (76% of its lines) and `us-2` (31%). Still failing at 09:00 (396 failing lines that hour), after 380–455 an hour in each of the 22 hours before it; first seen 02-28 11:20, the earliest in the 7 days checked; not measured: the breakdown by `zone` (it timed out)."
     ```
   - Opening of sentence 1 when `examples` returned categories, with illustrative values:
     ```
@@ -669,7 +670,7 @@ Each entry:
   - Sentence 3 for a rule with no isolating scope (no totals, so no share and no count of days with
     data), after a sentence 2 that gave the window and its date:
     ```
-    "Failing lines ran 2.5–4.1k an hour, on 20 of the 22 hours from 11-03 10:00 to 11-04 07:00 (3.9k at 08:00); the first failing line in the 7-day window from 10-28 09:20 is at 10-28 11:05."
+    "Still failing at 08:00 (3.9k failing lines that hour), after 2.5–4.1k an hour on 20 of the 22 hours before it; first seen 10-28 11:05, the earliest in the 7 days checked."
     ```
 - `verdict`: `confirms` | `refutes` | `off_topic` | `inconclusive` | `not_checked`, per `<verdicts>`.
 - `collected_at`: ISO-8601 query timestamp. Omit for quiet-rule entries.
