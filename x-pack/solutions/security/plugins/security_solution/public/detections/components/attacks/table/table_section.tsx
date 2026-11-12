@@ -14,8 +14,6 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { GroupingSort, ParsedGroupingAggregation, RawBucket } from '@kbn/grouping/src';
 import { isGroupingBucket } from '@kbn/grouping/src';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { AttackDetailsRightPanelKey } from '../../../../flyout/attack_details/constants/panel_keys';
 import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
@@ -24,7 +22,6 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../common/store/inputs';
 import { useKibana } from '../../../../common/lib/kibana';
 import { AttacksEventTypes, FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
-import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { useUserData } from '../../user_info';
 import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
@@ -146,7 +143,6 @@ export const TableSection = React.memo(
     const { to, from } = useGlobalTime();
 
     const { telemetry } = useKibana().services;
-    const enableNewFlyout = useIsNewFlyoutEnabled();
     const { openAttackFlyout } = useFlyoutApi();
 
     const [{ loading: userInfoLoading }] = useUserData();
@@ -180,36 +176,23 @@ export const TableSection = React.memo(
     const [attackIds, setAttackIds] = useState<string[] | undefined>(undefined);
     const { getAttack, isLoading: isAttacksLoading } = useAttackGroupHandler({ attackIds });
 
-    const { openFlyout } = useExpandableFlyoutApi();
     const openAttackDetailsFlyout = useCallback(
       (selectedGroup: string, bucket: RawBucket<AlertsGroupingAggregation>) => {
         const attack = getAttack(selectedGroup, bucket);
         if (attack) {
-          if (enableNewFlyout) {
-            openAttackFlyout({
-              attackId: attack.id,
-              indexName: dataView.getIndexPattern(),
-              origin: FLYOUT_ORIGIN.ATTACKS_TABLE,
-              attackTitle: attack.title,
-            });
-          } else {
-            openFlyout({
-              right: {
-                id: AttackDetailsRightPanelKey,
-                params: {
-                  attackId: attack.id,
-                  indexName: dataView.getIndexPattern(),
-                },
-              },
-            });
-          }
+          openAttackFlyout({
+            attackId: attack.id,
+            indexName: dataView.getIndexPattern(),
+            origin: FLYOUT_ORIGIN.ATTACKS_TABLE,
+            attackTitle: attack.title,
+          });
           telemetry.reportEvent(AttacksEventTypes.DetailsFlyoutOpened, {
             id: attack.id,
             source: 'attacks_page_table',
           });
         }
       },
-      [dataView, enableNewFlyout, getAttack, openAttackFlyout, openFlyout, telemetry]
+      [dataView, getAttack, openAttackFlyout, telemetry]
     );
 
     const { defaultGroupTitleRenderers } = useGetDefaultGroupTitleRenderers({

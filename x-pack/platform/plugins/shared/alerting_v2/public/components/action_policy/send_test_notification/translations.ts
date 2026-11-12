@@ -76,6 +76,33 @@ export const PAYLOAD_TITLE = i18n.translate(
   { defaultMessage: 'Payload' }
 );
 
+export const PAYLOAD_EDITOR_HELP = i18n.translate(
+  'xpack.alertingV2.actionPolicy.sendTestNotification.payload.helpText',
+  { defaultMessage: 'Edit the payload to test other values. It is sent as is.' }
+);
+
+export const RESET_PAYLOAD = i18n.translate(
+  'xpack.alertingV2.actionPolicy.sendTestNotification.payload.reset',
+  { defaultMessage: 'Reset' }
+);
+
+export const RESET_PAYLOAD_ARIA = i18n.translate(
+  'xpack.alertingV2.actionPolicy.sendTestNotification.payload.resetAriaLabel',
+  { defaultMessage: 'Reset the payload to the generated one' }
+);
+
+export const invalidJson = (message: string) =>
+  i18n.translate('xpack.alertingV2.actionPolicy.sendTestNotification.payload.invalidJson', {
+    defaultMessage: 'Invalid JSON: {message}',
+    values: { message },
+  });
+
+export const payloadIssue = (path: string, message: string) =>
+  i18n.translate('xpack.alertingV2.actionPolicy.sendTestNotification.payload.issue', {
+    defaultMessage: '{path}: {message}',
+    values: { path, message },
+  });
+
 export const NO_PAYLOAD = i18n.translate(
   'xpack.alertingV2.actionPolicy.sendTestNotification.payload.empty',
   { defaultMessage: 'No payload to preview.' }

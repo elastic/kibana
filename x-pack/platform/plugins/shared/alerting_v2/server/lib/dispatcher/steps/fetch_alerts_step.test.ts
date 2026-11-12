@@ -14,7 +14,7 @@ import { createLoggerService } from '../../services/logger_service/logger_servic
 import { createDispatchableAlertEventsResponse } from '../fixtures/dispatcher';
 import {
   createAlert,
-  createDispatcherConfigAccessor,
+  createDispatcherConfigService,
   createDispatcherPipelineState,
   createStepLogger,
   MOCK_KIBANA_BASE_URL,
@@ -39,7 +39,7 @@ describe('FetchAlertsStep', () => {
     const { queryService } = createQueryService();
 
     expect(
-      new FetchAlertsStep(queryService, MOCK_KIBANA_BASE_URL, createDispatcherConfigAccessor()).name
+      new FetchAlertsStep(queryService, MOCK_KIBANA_BASE_URL, createDispatcherConfigService()).name
     ).toBe('fetch_alerts');
   });
 
@@ -48,7 +48,7 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigAccessor()
+      createDispatcherConfigService()
     );
 
     const alerts = [
@@ -71,7 +71,7 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigAccessor()
+      createDispatcherConfigService()
     );
 
     mockEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse([]));
@@ -87,7 +87,7 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigAccessor()
+      createDispatcherConfigService()
     );
 
     mockEsClient.esql.query.mockResolvedValueOnce(
@@ -116,7 +116,7 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigAccessor({ run: { alerts: { max: 1000 } } })
+      createDispatcherConfigService({ run: { alerts: { max: 1000 } } })
     );
 
     const alerts = Array.from({ length: 1000 }, (_, i) =>
@@ -138,7 +138,7 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigAccessor()
+      createDispatcherConfigService()
     );
 
     const maxAlerts = Array.from({ length: ESQL_QUERY_ROW_LIMIT }, (_, i) =>
@@ -159,7 +159,7 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigAccessor()
+      createDispatcherConfigService()
     );
 
     const alerts = Array.from({ length: ESQL_QUERY_ROW_LIMIT - 1 }, (_, i) =>
@@ -180,7 +180,7 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigAccessor()
+      createDispatcherConfigService()
     );
 
     mockEsClient.esql.query.mockRejectedValueOnce(new Error('ES error'));
@@ -194,7 +194,7 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigAccessor()
+      createDispatcherConfigService()
     );
 
     mockEsClient.esql.query.mockRejectedValueOnce(makeSubPlanError());
@@ -211,7 +211,7 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigAccessor()
+      createDispatcherConfigService()
     );
 
     mockEsClient.esql.query.mockRejectedValueOnce(makeSubPlanError());
@@ -235,7 +235,7 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigAccessor()
+      createDispatcherConfigService()
     );
 
     const otherError = new errors.ResponseError({

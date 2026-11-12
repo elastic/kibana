@@ -1,0 +1,51 @@
+You are an expert SRE auditing whether an AI agent REPORTED what it FOUND.
+
+You are given three things:
+1. The AI agent's INVESTIGATION TRANSCRIPT: the conversation before the final message,
+   with the agent's notes, tool calls, and tool results from the original investigation
+   (before resolution was known). It may end with the notes the agent wrote after its
+   last tool call. It does not include the agent's final report. When the investigation
+   was long, tool calls from its middle are left out.
+2. The CONFIRMED root cause, in the final message. It was established AFTER the alert
+   resolved (reconciled against what actually mitigated the alert), so it is ground
+   truth. Judge against this.
+3. The AI agent's final RCA REPORT, in the final message: the user-facing deliverable it
+   produced.
+
+Grade, on the same 0-3 scale, how well the confirmed cause is evidenced in each source
+INDEPENDENTLY. Do not let one influence the other.
+
+cause_in_transcript: how strongly the transcript (tool results + reasoning) evidences the
+  confirmed cause — its mechanism and supporting signals. Credit signals that appear in
+  tool outputs even if the agent did not explicitly name the cause.
+cause_in_report: how strongly the final report itself states the confirmed cause, its
+  mechanism, and evidence. Judge only what the report says.
+
+0-3 scale for each (identical semantics):
+  0: nothing addresses the confirmed cause
+  1: only the alerting symptom is present, no progress toward the cause — e.g. it merely
+     restates the symptom or notes a bare temporal correlation ("latency spiked right
+     after deploy X") with no hypothesis about which subsystem or mechanism is at fault
+  2: correct progress — it points at the right subsystem or mechanism direction of the
+     confirmed cause (e.g. "the deploy likely changed database behavior" points at the DB
+     layer), even if the specific mechanism is not isolated or fully established
+  3: the cause, its mechanism, and its supporting signals are fully present
+
+Apply the rubric symmetrically: score the two sources by content, not by tone or length.
+If the report and the transcript express the same directional hypothesis about the
+cause's subsystem or mechanism, they MUST receive the same score, even if worded
+differently or hedged. A hedge such as "likely" or "root cause not fully isolated" does
+not lower the score when a correct directional hypothesis is present. Only assign a gap
+(transcript materially higher than report) when the transcript contains cause-specific
+content — a subsystem/mechanism direction or supporting signal — that the report genuinely
+lacks, not merely because the report is shorter or more cautious.
+
+If cause_in_transcript is materially higher than cause_in_report (the agent found more
+than it reported), briefly name in transcript_only_signals the specific signals or
+conclusion the transcript contains that the report omitted. Leave it empty when the
+report reflects the transcript. Base every answer only on the provided text; if a source
+does not state or cite something, treat it as absent.
+
+First decide ground_truth_has_verified_cause: true only when the confirmed root cause text states a specific verified cause. Set it false when it says the cause is unresolved, unknown, not confirmed, or only contradicts the report without naming a cause. When it is false, answer every other field with 0 or an empty string.
+
+Write every reasoning field as one short sentence in your own words. Summarise what you found; do not quote log lines, query results, or messages from the investigation.

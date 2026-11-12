@@ -35,13 +35,15 @@ suite_name="${EVAL_SUITE_NAME:-$EVAL_SUITE_ID}"
 
 if [[ "${KBN_EVALS_WEEKLY:-}" =~ ^(1|true)$ ]]; then
   EVAL_NOTIFY_MODE="weekly"
+elif [[ "${KBN_EVALS_DAILY:-}" =~ ^(1|true)$ ]]; then
+  EVAL_NOTIFY_MODE="daily"
 else
   EVAL_NOTIFY_MODE="on-demand"
 fi
 
 # --- Resolve destinations -------------------------------------------------
 # Slack: weekly -> the suite's team channel; otherwise -> EVAL_SLACK_NOTIFICATION_CHANNEL
-# (so on-demand/PR runs never auto-post to a team channel).
+# (so daily/on-demand/PR runs never auto-post to a team channel).
 slack_channel=""
 if [[ "${EVAL_NOTIFY_MODE}" == "weekly" ]]; then
   slack_channel="${EVAL_SUITE_SLACK_CHANNEL:-}"
@@ -99,6 +101,8 @@ if ! EVAL_SUITE_ID="$EVAL_SUITE_ID" \
   echo "--- build_suite_owner_slack_message crashed; writing static fallback summary"
   if [[ "${EVAL_NOTIFY_MODE}" == "weekly" ]]; then
     header_label="Weekly LLM evals"
+  elif [[ "${EVAL_NOTIFY_MODE}" == "daily" ]]; then
+    header_label="Daily LLM evals"
   else
     header_label="On-demand LLM eval"
   fi

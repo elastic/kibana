@@ -16,6 +16,10 @@ export interface KibanaRole {
       names: string[];
       privileges: string[];
       allow_restricted_indices?: boolean | undefined;
+      /** Document-level security: a query the readable documents must match. */
+      query?: string;
+      /** Field-level security. */
+      field_security?: { grant?: string[]; except?: string[] };
     }>;
   };
   kibana: Array<{
@@ -31,6 +35,10 @@ export interface ElasticsearchRoleDescriptor {
     names: string[];
     privileges: string[];
     allow_restricted_indices?: boolean;
+    /** Document-level security: a query the readable documents must match. */
+    query?: string;
+    /** Field-level security. */
+    field_security?: { grant?: string[]; except?: string[] };
   }>;
   applications?: Array<{
     application: string;
