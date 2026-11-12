@@ -9,7 +9,7 @@ import { mapsPack } from '@kbn/isomer-primitives-maps';
 
 import { corpusObjects } from './corpus.test_helpers';
 import type { EsqlRequestOptions } from './esql_response';
-import { basemapId, lowerMap, type LowerMapOptions, viewExtent } from './map_panels';
+import { basemapId, fitView, lowerMap, type LowerMapOptions, viewExtent } from './map_panels';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Json = Record<string, any>;
@@ -124,7 +124,56 @@ const mapOf = (layers: Json[], mapState: Json = { center: { lat: 0, lon: 0 }, zo
 
 const mapSchema = mapsPack.primitives.find(({ type }) => type === 'map')!.schema;
 
+describe('fitView', () => {
+  const view = { lat: 42.16, lon: -88.92, zoom: 3.64 };
+  const shown = { width: 1100, height: 450 };
+
+  it('contains the area Kibana showed in a smaller box', () => {
+    const size = { width: 662, height: 450 };
+    const live = viewExtent(view, shown);
+    const drawn = viewExtent(fitView(view, shown, size), size);
+    expect(drawn.minLon).toBeCloseTo(live.minLon, 6);
+    expect(drawn.maxLon).toBeCloseTo(live.maxLon, 6);
+    expect(drawn.maxLat).toBeGreaterThanOrEqual(live.maxLat);
+    expect(drawn.minLat).toBeLessThanOrEqual(live.minLat);
+  });
+
+  it('keeps the view when the boxes match', () => {
+    expect(fitView(view, shown, shown)).toEqual(view);
+  });
+});
+
 describe('lowerMap', () => {
+  it('draws the area Kibana showed, querying its extent', async () => {
+    const requests: Json[] = [];
+    const map = mapOf([
+      {
+        id: 'grid',
+        type: 'GEOJSON_VECTOR',
+        sourceDescriptor: {
+          type: 'ES_GEO_GRID',
+          geoField: 'geo',
+          requestType: 'point',
+          indexPatternRefName: 'dv',
+        },
+      },
+    ]);
+    const lowered = await lowerMap(
+      options(map, {
+        search: fakeSearch(requests),
+        view: { lat: 0, lon: 0, zoom: 3 },
+        size: { width: 600, height: 400 },
+        shownSize: { width: 1200, height: 400 },
+      })
+    );
+    expect(lowered.node?.view).toEqual({ lat: 0, lon: 0, zoom: 2 });
+    const box = requests[0].query.bool.filter.find((clause: Json) => clause.geo_bounding_box)
+      .geo_bounding_box.geo;
+    const live = viewExtent({ lat: 0, lon: 0, zoom: 3 }, { width: 1200, height: 400 });
+    expect(box.top_left.lon).toBeLessThanOrEqual(live.minLon);
+    expect(box.bottom_right.lon).toBeGreaterThanOrEqual(live.maxLon);
+  });
+
   it('colors an EMS boundary file by its join metric, keyed on the join’s left field', async () => {
     const requests: Json[] = [];
     const lowered = await lowerMap(

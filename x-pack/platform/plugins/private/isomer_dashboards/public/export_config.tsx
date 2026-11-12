@@ -19,6 +19,7 @@ import {
   EuiImage,
   EuiLoadingChart,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -32,7 +33,7 @@ import {
   useShareTypeContext,
 } from '@kbn/share-plugin/public';
 
-import { API_BASE, type DashboardLayout, DRAW_MAX_BYTES, VIEW_BASE } from '../common';
+import { API_BASE, type DashboardLayout, DRAW_MAX_BYTES, PAGE_WIDTH, VIEW_BASE } from '../common';
 
 interface PinnedPanel {
   id?: string;
@@ -56,11 +57,20 @@ const currentControls = (pinned: PinnedPanel[] | undefined) =>
       id ?? uid ? [{ id: (id ?? uid)!, type, config: config ?? {} }] : []
     );
 
-/** A composition from the composition route, kept with the layout it was made for. */
+/** The on-screen dashboard's width, within the routes' page bounds; undefined when it isn't on screen. */
+const screenWidth = (): number | undefined => {
+  const width = document
+    .querySelector('[data-test-subj="dshDashboardViewport"]')
+    ?.getBoundingClientRect().width;
+  return width ? Math.round(Math.min(PAGE_WIDTH.max, Math.max(PAGE_WIDTH.min, width))) : undefined;
+};
+
+/** A composition from the composition route, kept with the layout and page width it was made for. */
 interface Spec {
   composition: Record<string, unknown>;
   hints: Record<string, unknown>;
   layout: DashboardLayout;
+  width?: number;
 }
 
 class TooLargeError extends Error {}
@@ -87,11 +97,11 @@ const gzipped = async (json: string): Promise<{ body: BodyInit; encoding?: strin
 /** Draws a kept composition through the draw route, as a PNG or a PDF. */
 const draw = async (
   core: CoreStart,
-  { composition, hints, layout }: Spec,
+  { composition, hints, layout, width }: Spec,
   format: 'png' | 'pdf',
   title: string
 ): Promise<Blob> => {
-  const json = JSON.stringify({ composition, hints, layout, format, title });
+  const json = JSON.stringify({ composition, hints, layout, width, format, title });
   if (json.length > DRAW_MAX_BYTES) {
     throw new TooLargeError();
   }
@@ -153,6 +163,10 @@ const IsomerExportFlyout = ({
     return { ...(timeRange ? { timeRange } : {}), ...(controls?.length ? { controls } : {}) };
   });
   const [layout, setLayout] = useState<DashboardLayout>('grid');
+  // Measured once: the flyout doesn't resize the dashboard behind it.
+  const [onScreenWidth] = useState(screenWidth);
+  const [matchScreen, setMatchScreen] = useState(false);
+  const width = layout === 'grid' && matchScreen ? onScreenWidth : undefined;
   const [spec, setSpec] = useState<Spec>();
   const [preview, setPreview] = useState<string>();
   const [busy, setBusy] = useState<'preview' | 'pdf'>();
@@ -171,13 +185,18 @@ const IsomerExportFlyout = ({
     setError(undefined);
     setBusy('preview');
     (async () => {
-      const made = await core.http.post<Omit<Spec, 'layout'>>(path, {
-        body: JSON.stringify({ layout, ...onScreen }),
+      const made = await core.http.post<Omit<Spec, 'layout' | 'width'>>(path, {
+        body: JSON.stringify({
+          layout,
+          ...(width ? { width } : {}),
+          ...(onScreenWidth ? { screenWidth: onScreenWidth } : {}),
+          ...onScreen,
+        }),
       });
       if (!current) {
         return;
       }
-      const kept = { ...made, layout };
+      const kept = { ...made, layout, ...(width ? { width } : {}) };
       setSpec(kept);
       const png = await draw(core, kept, 'png', title);
       if (current) {
@@ -193,7 +212,7 @@ const IsomerExportFlyout = ({
         URL.revokeObjectURL(url);
       }
     };
-  }, [core, path, layout, onScreen, title]);
+  }, [core, path, layout, width, onScreenWidth, onScreen, title]);
 
   const downloadPdf = async () => {
     if (!spec) {
@@ -270,7 +289,7 @@ const IsomerExportFlyout = ({
             <EuiSpacer size="m" />
           </>
         )}
-        {objectId ? (
+        {objectId && (
           <EuiFormRow
             label={i18n.translate('xpack.isomerDashboards.flyout.layout', {
               defaultMessage: 'Layout',
@@ -286,7 +305,27 @@ const IsomerExportFlyout = ({
               buttonSize="compressed"
             />
           </EuiFormRow>
-        ) : (
+        )}
+        {objectId && layout === 'grid' && onScreenWidth ? (
+          <EuiFormRow
+            helpText={i18n.translate('xpack.isomerDashboards.flyout.matchScreenHelp', {
+              defaultMessage:
+                'Lays the grid out {width} pixels wide, as on screen, so panels keep their proportions. Otherwise the page is a fixed width.',
+              values: { width: onScreenWidth },
+            })}
+          >
+            <EuiSwitch
+              label={i18n.translate('xpack.isomerDashboards.flyout.matchScreen', {
+                defaultMessage: 'Match on-screen width',
+              })}
+              checked={matchScreen}
+              onChange={(e) => setMatchScreen(e.target.checked)}
+              compressed
+              data-test-subj="isomerDashboardsMatchScreen"
+            />
+          </EuiFormRow>
+        ) : null}
+        {!objectId && (
           <KbnWarningCallout
             size="s"
             title={i18n.translate('xpack.isomerDashboards.flyout.unsaved', {

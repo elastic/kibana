@@ -80,6 +80,8 @@ export interface ConvertDashboardOptions {
    * Content whose data depends on its size, such as a map's extent, is lowered at that size.
    */
   panelSize?: (grid: GridData, layout: { titled: boolean }) => { width: number; height: number };
+  /** The box Kibana showed a panel's content in on screen; a map draws the area Kibana showed there. */
+  liveSize?: (grid: GridData, layout: { titled: boolean }) => { width: number; height: number };
 }
 
 interface PanelJson {
@@ -136,6 +138,7 @@ export const convertDashboard = async ({
   esQueryConfig,
   mapServices,
   panelSize,
+  liveSize,
 }: ConvertDashboardOptions): Promise<ConvertedDashboard> => {
   const objects = parseSavedObjectNdjson(ndjson) as unknown as Array<Record<string, any>>; // eslint-disable-line @typescript-eslint/no-explicit-any
   const saved = objects.find(({ type, id }) => type === 'dashboard' && id === dashboardId);
@@ -162,14 +165,16 @@ export const convertDashboard = async ({
   if (context.timeslice) {
     planned = plan(context.timeslice);
   }
-  const sizeOf: PanelSize | undefined = panelSize
-    ? (panelId) => {
-        const panel = panelJson.find(({ panelIndex }) => panelIndex === panelId);
-        return panel
-          ? panelSize(panel.gridData, { titled: !panel.embeddableConfig?.hidePanelTitles })
-          : undefined;
-      }
-    : undefined;
+  const byPanel =
+    (size: ConvertDashboardOptions['panelSize']): PanelSize | undefined =>
+    (panelId) => {
+      const panel = panelJson.find(({ panelIndex }) => panelIndex === panelId);
+      return panel && size
+        ? size(panel.gridData, { titled: !panel.embeddableConfig?.hidePanelTitles })
+        : undefined;
+    };
+  const sizeOf = panelSize ? byPanel(panelSize) : undefined;
+  const liveSizeOf = liveSize ? byPanel(liveSize) : undefined;
   const dashboardFilter = { bool: context.bool } as unknown as Record<string, unknown>;
   const executeFor = (panel: (typeof planned.panels)[number]): ExecuteEsql => {
     const window = panel.timeRange ?? planned.timeRange;
@@ -214,6 +219,7 @@ export const convertDashboard = async ({
       ...(mapServices ? { services: mapServices } : {}),
       ...(esQueryConfig ? { esQueryConfig } : {}),
       ...(sizeOf ? { panelSize: sizeOf } : {}),
+      ...(liveSizeOf ? { liveSize: liveSizeOf } : {}),
     }),
   ]);
 

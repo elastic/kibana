@@ -58,6 +58,8 @@ export interface MapLoweringOptions {
   search: ExecuteSearch;
   /** Each panel's body box; without it, Kibana's grid at a 1600-pixel viewport. */
   panelSize?: PanelSize;
+  /** The box Kibana showed each panel in on screen; without it, Kibana's grid at a 1600-pixel viewport. */
+  liveSize?: PanelSize;
   /** Runs an ES|QL layer's statement; without it, ES|QL layers refuse. */
   executeEsql?: ExecuteEsql;
   services?: MapServices;
@@ -130,6 +132,16 @@ export const viewExtent = (
     maxLat: yToLat(Math.max(0, (cy - height / 2) / world)),
   };
 };
+
+/** The view that draws everything `view` shows in a `shown` box inside a `size` box: same center, zoomed to contain. */
+export const fitView = (
+  view: { lat: number; lon: number; zoom: number },
+  shown: { width: number; height: number },
+  size: { width: number; height: number }
+): { lat: number; lon: number; zoom: number } => ({
+  ...view,
+  zoom: view.zoom + Math.log2(Math.min(size.width / shown.width, size.height / shown.height)),
+});
 
 /** Kibana's `expandToTileBoundaries`: the extent grown to whole geotiles at `precision`. */
 const expandToTiles = (extent: Extent, precision: number): Extent => {
@@ -224,7 +236,10 @@ export interface MapDataView {
 /** One map's state on a dashboard panel. */
 export interface MapPanelState {
   view: { lat: number; lon: number; zoom: number };
+  /** The box the map draws in. */
   size: { width: number; height: number };
+  /** The box Kibana showed the map in, whose extent the queries cover and the drawing contains; without it, `size`. */
+  shownSize?: { width: number; height: number };
   hiddenLayers?: readonly string[];
 }
 
@@ -244,6 +259,7 @@ export const lowerMap = async ({
   dataView,
   view,
   size,
+  shownSize = size,
   hiddenLayers = [],
   timeRange,
   context = {},
@@ -253,7 +269,8 @@ export const lowerMap = async ({
   esQueryConfig,
 }: LowerMapOptions): Promise<LoweredMap> => {
   const mapState = JSON.parse(map.attributes.mapStateJSON ?? '{}');
-  const extent = viewExtent(view, size);
+  const extent = viewExtent(view, shownSize);
+  const drawView = fitView(view, shownSize, size);
   const hidden = new Set(hiddenLayers);
   const out: Lowering = { drawn: [], refused: [], notes: [], layers: [] };
   let basemap: MapBasemap | undefined;
@@ -364,7 +381,7 @@ export const lowerMap = async ({
           if (basemap) throw new Refusal(`${label}: a second basemap over the first`);
           const id = basemapId(source, services.darkMode);
           const tiles = services.basemap
-            ? await services.basemap(id, { ...view, ...size })
+            ? await services.basemap(id, { ...drawView, ...size })
             : undefined;
           if (!tiles) {
             out.notes.push(
@@ -423,7 +440,7 @@ export const lowerMap = async ({
       type: 'map',
       width: size.width,
       height: size.height,
-      view: { lat: view.lat, lon: view.lon, zoom: view.zoom },
+      view: { lat: drawView.lat, lon: drawView.lon, zoom: drawView.zoom },
       ...(out.layers.length ? { layers: out.layers } : {}),
       ...(basemap ? { basemap } : {}),
     } as MapNode,
@@ -1036,6 +1053,7 @@ export const bindMapPanels = async (
         map,
         view,
         size: options.panelSize?.(panelId) ?? mapChartArea(panel.gridData),
+        shownSize: options.liveSize?.(panelId) ?? mapChartArea(panel.gridData),
         hiddenLayers: panel.embeddableConfig?.hiddenLayers ?? [],
         ...(timeRange ? { timeRange } : {}),
         context,

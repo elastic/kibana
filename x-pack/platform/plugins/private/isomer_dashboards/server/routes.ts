@@ -49,6 +49,8 @@ const pdfBody = schema.object({
   timeRange: schema.maybe(schema.object({ from: time, to: time })),
   layout: layoutSchema('grid'),
   width: widthSchema,
+  // The on-screen dashboard grid's width, so maps draw the area Kibana showed.
+  screenWidth: widthSchema,
   controls: controlsSchema,
 });
 // A composition from the composition route, gzipped by the flyout; DRAW_MAX_BYTES bounds it.
@@ -74,6 +76,7 @@ interface RenderRequest {
   timeRange?: { from: string; to: string };
   layout: DashboardLayout;
   width?: number;
+  screenWidth?: number;
   controls?: PinnedControl[];
 }
 
@@ -131,7 +134,7 @@ export const registerRoutes = (
   const prepare = async (
     context: RequestHandlerContext,
     request: KibanaRequest,
-    { id, timeRange, layout, width, controls }: RenderRequest
+    { id, timeRange, layout, width, screenWidth, controls }: RenderRequest
   ) => {
     const [, { isomer, dataViews }] = await getStartServices();
     const drawing = await isomer.getDrawing();
@@ -175,6 +178,12 @@ export const registerRoutes = (
       // Every panel's content is lowered at the box the dashboard draws it in.
       panelSize: (grid, { titled }) =>
         panelBodySize({ grid, titled }, { width: gridWidth, layout }),
+      ...(screenWidth
+        ? {
+            liveSize: (grid, { titled }) =>
+              panelBodySize({ grid, titled }, { width: screenWidth, layout: 'grid' }),
+          }
+        : {}),
       esQueryConfig: {
         ignoreFilterIfFieldNotInIndex,
         allowLeadingWildcards,
@@ -228,13 +237,16 @@ export const registerRoutes = (
     },
     async (context, request, response) => {
       const { id } = request.params;
-      const { timeRange, layout, width, controls } = request.body as TypeOf<typeof pdfBody>;
+      const { timeRange, layout, width, screenWidth, controls } = request.body as TypeOf<
+        typeof pdfBody
+      >;
       try {
         const { converted, composition, hints } = await prepare(context, request, {
           id,
           ...(timeRange ? { timeRange } : {}),
           layout,
           ...(width ? { width } : {}),
+          ...(screenWidth ? { screenWidth } : {}),
           ...(controls ? { controls: controls as PinnedControl[] } : {}),
         });
         // What the PDF draws: the composition, as `render_composition` takes it, and the Lens hints by node id.
@@ -273,13 +285,16 @@ export const registerRoutes = (
     },
     async (context, request, response) => {
       const { id } = request.params;
-      const { timeRange, layout, width, controls } = request.body as TypeOf<typeof pdfBody>;
+      const { timeRange, layout, width, screenWidth, controls } = request.body as TypeOf<
+        typeof pdfBody
+      >;
       try {
         const { drawing, converted, composition, options } = await prepare(context, request, {
           id,
           ...(timeRange ? { timeRange } : {}),
           layout,
           ...(width ? { width } : {}),
+          ...(screenWidth ? { screenWidth } : {}),
           ...(controls ? { controls: controls as PinnedControl[] } : {}),
         });
         const pdf = await drawing.drawPdf(composition as never, {
