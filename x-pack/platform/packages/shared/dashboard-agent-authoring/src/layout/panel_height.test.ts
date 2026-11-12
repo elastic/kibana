@@ -17,15 +17,11 @@ describe('getGridRowsForHeight', () => {
   });
 
   it('adds the title bar when the panel has one', () => {
-    expect(getGridRowsForHeight(292, { ...withMargins, hasTitleBar: true })).toBe(13);
+    // The title bar is 32 px, so 292 + 32 + 8 = 332 px needs 12 rows.
+    expect(getGridRowsForHeight(292, { ...withMargins, hasTitleBar: true })).toBe(12);
   });
 
   it('uses rows of the bare row height when the dashboard has no margins', () => {
     expect(getGridRowsForHeight(292, { hasTitleBar: false, useMargins: false })).toBe(15);
-  });
-
-  it('keeps a panel from collapsing or growing without bound', () => {
-    expect(getGridRowsForHeight(0, withMargins)).toBe(4);
-    expect(getGridRowsForHeight(100_000, withMargins)).toBe(80);
   });
 });

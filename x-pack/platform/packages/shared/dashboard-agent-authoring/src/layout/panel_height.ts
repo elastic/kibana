@@ -8,13 +8,11 @@
 import {
   DASHBOARD_GRID_MARGIN_SIZE,
   DASHBOARD_GRID_ROW_HEIGHT,
-} from '@kbn/as-code-dashboard-schema';
+} from '@kbn/dashboard-grid-constants';
+import { euiLightVars } from '@kbn/ui-theme';
 
-/** What the title bar takes from the panel; a panel without a title has no bar. */
-const PANEL_TITLE_BAR_PX = 40;
-
-const MIN_GRID_ROWS = 4;
-const MAX_GRID_ROWS = 80;
+/** What the title bar takes from the panel, which sets its height to `euiTheme.size.xl`; a panel without a title has no bar. */
+const PANEL_TITLE_BAR_PX = parseInt(euiLightVars.euiSizeXL, 10);
 
 interface PanelFrame {
   /** Whether the panel shows a title bar above its content. */
@@ -34,8 +32,5 @@ export const getGridRowsForHeight = (
 ): number => {
   const gutterPx = useMargins ? DASHBOARD_GRID_MARGIN_SIZE : 0;
   const titleBarPx = hasTitleBar ? PANEL_TITLE_BAR_PX : 0;
-  const rows = Math.ceil(
-    (contentPx + titleBarPx + gutterPx) / (DASHBOARD_GRID_ROW_HEIGHT + gutterPx)
-  );
-  return Math.min(Math.max(rows, MIN_GRID_ROWS), MAX_GRID_ROWS);
+  return Math.ceil((contentPx + titleBarPx + gutterPx) / (DASHBOARD_GRID_ROW_HEIGHT + gutterPx));
 };

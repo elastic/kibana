@@ -624,6 +624,7 @@
     "@kbn/custom-integrations-plugin": "workspace:*",
     "@kbn/dag-layout": "workspace:*",
     "@kbn/dashboard-agent-authoring": "workspace:*",
+    "@kbn/dashboard-grid-constants": "workspace:*",
     "@kbn/dashboard-markdown": "workspace:*",
     "@kbn/dashboard-markdown-schemas": "workspace:*",
     "@kbn/dashboard-navigation-options-common": "workspace:*",

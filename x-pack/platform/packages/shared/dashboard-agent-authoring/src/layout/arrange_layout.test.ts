@@ -345,7 +345,7 @@ describe('arrangeDashboardLayout', () => {
 
     it.each<[string, string | undefined, boolean, number]>([
       ['without a title', undefined, false, 13],
-      ['with a title, which adds the title bar', 'Flights', false, 15],
+      ['with a title, which adds the title bar', 'Flights', false, 14],
       ['with a title that the dashboard hides', 'Flights', true, 13],
     ])(
       'sends the grid height that the declared content height needs %s',

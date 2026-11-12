@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const DASHBOARD_GRID_HEIGHT = 20;
-export const DASHBOARD_MARGIN_SIZE = 8;
+import {
+  DASHBOARD_GRID_MARGIN_SIZE,
+  DASHBOARD_GRID_ROW_HEIGHT,
+} from '@kbn/dashboard-grid-constants';
+
+export const DASHBOARD_GRID_HEIGHT = DASHBOARD_GRID_ROW_HEIGHT;
+export const DASHBOARD_MARGIN_SIZE = DASHBOARD_GRID_MARGIN_SIZE;
 export const DEFAULT_DASHBOARD_DRAG_TOP_OFFSET = 200;
