@@ -113,7 +113,9 @@ describe('createEndpointResponseActionsSkill', () => {
     });
 
     it('requires one confirmation per host by issuing write calls one at a time', () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService, {
+        automaticTroubleshootingUniversalSkill: false,
+      });
       const process = skill.content.slice(
         skill.content.indexOf('## Process'),
         skill.content.indexOf('## Guardrails')
