@@ -338,7 +338,6 @@ describe('buildCustomContentConfig', () => {
           nlQuery: 'totals',
           index: 'logs',
           existingQueries: [],
-          isDataset: true,
         })
       );
       expect(mockResolveTemplate).toHaveBeenCalledWith(

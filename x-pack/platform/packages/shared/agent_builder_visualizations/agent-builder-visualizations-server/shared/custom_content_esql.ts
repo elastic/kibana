@@ -49,8 +49,8 @@ type GenerateCustomContentEsqlParams = Omit<
   Parameters<typeof generateVisualizationEsql>[0],
   'extraInstructions'
 > & {
-  /** True when the query is one of several that feed the panel, not its only one. */
-  isDataset?: boolean;
+  /** How many queries the panel will have. Each one feeds one part of the template when there are several. */
+  queryCount?: number;
 };
 
 const NO_QUERY_HINT =
@@ -63,14 +63,15 @@ const NO_QUERY_HINT =
  * is produced.
  */
 export const generateCustomContentEsql = async ({
-  isDataset = false,
+  queryCount = 1,
   ...params
 }: GenerateCustomContentEsqlParams): Promise<string> => {
   const { query, error } = await generateVisualizationEsql({
     ...params,
-    extraInstructions: isDataset
-      ? `${CUSTOM_CONTENT_ESQL_INSTRUCTIONS}${CUSTOM_CONTENT_DATASET_INSTRUCTIONS}`
-      : CUSTOM_CONTENT_ESQL_INSTRUCTIONS,
+    extraInstructions:
+      queryCount > 1
+        ? `${CUSTOM_CONTENT_ESQL_INSTRUCTIONS}${CUSTOM_CONTENT_DATASET_INSTRUCTIONS}`
+        : CUSTOM_CONTENT_ESQL_INSTRUCTIONS,
   });
   if (!query) {
     throw new Error(

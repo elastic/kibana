@@ -35,7 +35,7 @@ interface BuildCustomContentConfigParams {
    */
   datasets?: readonly CustomContentDataset[];
   /** Remove every query, for a panel with static content. Wins over `datasets`. */
-  clearQueries?: boolean;
+  removeAllQueries?: boolean;
   /**
    * The panel being edited. Absent for a new panel. Its queries are in the order the template reads
    * them: the first is the main query (`rows`), the others `queries[1]`, `queries[2]`, ...
@@ -73,7 +73,7 @@ interface BuildCustomContentConfigResult {
 export const buildCustomContentConfig = async ({
   nlQuery,
   datasets,
-  clearQueries,
+  removeAllQueries,
   existing,
   timeRange,
   resolveEsqlVariables,
@@ -96,41 +96,38 @@ export const buildCustomContentConfig = async ({
   const generateQuery = async (params: {
     nlQuery: string;
     index?: string;
-    existingQueries: string[];
-    /** True when the query is one of several that feed the panel. */
-    isDataset: boolean;
-  }) =>
-    generateCustomContentEsql({
+    /** The query stored at this position, to modify. */
+    storedQuery?: string;
+    /** How many queries the panel will have. */
+    queryCount: number;
+  }) => {
+    const storedQueries = params.storedQuery ? [params.storedQuery] : [];
+    return generateCustomContentEsql({
       nlQuery: params.nlQuery,
       index: params.index,
-      existingQueries: params.existingQueries,
-      isDataset: params.isDataset,
-      esqlVariables: await getEsqlVariables(params.existingQueries, { anyVariable: true }),
+      existingQueries: storedQueries,
+      queryCount: params.queryCount,
+      esqlVariables: await getEsqlVariables(storedQueries, { anyVariable: true }),
       modelProvider,
       events,
       logger,
       esClient,
       ...(timeRange ? { timeRange } : {}),
     });
+  };
 
   let esqlQueries: string[] = [...existingQueries];
   // Per position: whether the query is new or changing, so it is sampled for the template.
   let changedQueries: boolean[] = existingQueries.map(() => false);
-  if (clearQueries) {
+  if (removeAllQueries) {
     esqlQueries = [];
     changedQueries = [];
   } else if (datasets) {
-    const isDataset = Math.max(datasets.length, existingQueries.length) > 1;
     const resolved = await resolveDatasets({
       datasets,
       existingQueries,
-      generate: ({ description, index }, existingForPosition) =>
-        generateQuery({
-          nlQuery: description,
-          index,
-          existingQueries: existingForPosition,
-          isDataset,
-        }),
+      generate: ({ description, index }, storedQuery, _position, queryCount) =>
+        generateQuery({ nlQuery: description, index, storedQuery, queryCount }),
     });
     esqlQueries = resolved.queries;
     changedQueries = resolved.changed;

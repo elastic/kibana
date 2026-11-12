@@ -48,7 +48,7 @@ describe('generateCustomContentEsql', () => {
   });
 
   it('adds the dataset instructions when the query is one of several', async () => {
-    await generateCustomContentEsql({ ...params, isDataset: true });
+    await generateCustomContentEsql({ ...params, queryCount: 2 });
 
     expect(mockGenerate).toHaveBeenCalledWith({
       ...params,
@@ -56,10 +56,10 @@ describe('generateCustomContentEsql', () => {
     });
   });
 
-  it('does not pass isDataset on to the generator', async () => {
-    await generateCustomContentEsql({ ...params, isDataset: true });
+  it('does not pass queryCount on to the generator', async () => {
+    await generateCustomContentEsql({ ...params, queryCount: 2 });
 
-    expect(mockGenerate.mock.calls[0][0]).not.toHaveProperty('isDataset');
+    expect(mockGenerate.mock.calls[0][0]).not.toHaveProperty('queryCount');
   });
 
   it('throws with the reason and the caller hint when no query is produced', async () => {

@@ -17,11 +17,15 @@ export interface ResolveDatasetsParams {
   datasets: readonly CustomContentDataset[];
   /** The queries the panel holds now, main query first. Empty for a new panel. */
   existingQueries: readonly string[];
-  /** Generates a query from a description. Receives the stored query at that position to modify, when there is one. */
+  /**
+   * Generates a query from a description. Receives the stored query at that position to modify, when
+   * there is one, and how many queries the panel will have.
+   */
   generate: (
     dataset: { description: string; index?: string },
-    existingQueries: string[],
-    position: number
+    storedQuery: string | undefined,
+    position: number,
+    queryCount: number
   ) => Promise<string>;
 }
 
@@ -68,8 +72,9 @@ export const resolveDatasets = async ({
       if (dataset?.description?.trim()) {
         return generate(
           { description: dataset.description, index: dataset.index },
-          existing ? [existing] : [],
-          position
+          existing || undefined,
+          position,
+          total
         );
       }
       if (existing) return existing;

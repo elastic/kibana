@@ -917,7 +917,7 @@ describe('createVisualizationTool handler', () => {
       });
 
       expect(mockBuildCustomContent).toHaveBeenCalledWith(
-        expect.objectContaining({ clearQueries: true })
+        expect.objectContaining({ removeAllQueries: true })
       );
       expect(attachments.add.mock.calls[0][0].data).not.toHaveProperty('esql');
       expect(result.results[0].data.esql).toBeUndefined();

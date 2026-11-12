@@ -281,7 +281,7 @@ describe('createUpdateCustomContentTool handler', () => {
 
       const { ctx } = await callHandler({ embeddable_id: 'p1', esqlQuery: null }, existing);
 
-      expect(mockBuild).toHaveBeenCalledWith(expect.objectContaining({ clearQueries: true }));
+      expect(mockBuild).toHaveBeenCalledWith(expect.objectContaining({ removeAllQueries: true }));
       expect(ctx.update).toHaveBeenCalledWith(
         'att-1',
         expect.objectContaining({

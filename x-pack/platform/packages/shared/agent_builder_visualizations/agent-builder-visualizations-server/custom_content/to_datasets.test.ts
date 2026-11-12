@@ -24,7 +24,7 @@ describe('toCustomContentQueryChanges', () => {
     });
 
     it('is data-free when hasData is false, unless a query is supplied', () => {
-      expect(changes({ isNewPanel: true, hasData: false })).toEqual({ clearQueries: true });
+      expect(changes({ isNewPanel: true, hasData: false })).toEqual({ removeAllQueries: true });
       expect(changes({ isNewPanel: true, hasData: false, esql: 'FROM a' })).toEqual({
         datasets: [{ esql: 'FROM a' }],
       });
@@ -46,8 +46,8 @@ describe('toCustomContentQueryChanges', () => {
     });
 
     it('removes the queries when esql is null or hasData is false', () => {
-      expect(changes({ existingQueries, esql: null })).toEqual({ clearQueries: true });
-      expect(changes({ existingQueries, hasData: false })).toEqual({ clearQueries: true });
+      expect(changes({ existingQueries, esql: null })).toEqual({ removeAllQueries: true });
+      expect(changes({ existingQueries, hasData: false })).toEqual({ removeAllQueries: true });
     });
 
     it('regenerates the first query, or generates one when the panel has none and has data', () => {

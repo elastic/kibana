@@ -47,12 +47,19 @@ describe('resolveDatasets', () => {
         'FROM generated | /* top hosts */ LIMIT 1',
       ]);
       expect(changed).toEqual([true, true]);
-      expect(generate).toHaveBeenNthCalledWith(1, { description: 'totals', index: 'logs' }, [], 0);
+      expect(generate).toHaveBeenNthCalledWith(
+        1,
+        { description: 'totals', index: 'logs' },
+        undefined,
+        0,
+        2
+      );
       expect(generate).toHaveBeenNthCalledWith(
         2,
         { description: 'top hosts', index: undefined },
-        [],
-        1
+        undefined,
+        1,
+        2
       );
     });
 
@@ -147,8 +154,9 @@ describe('resolveDatasets', () => {
       expect(generate).toHaveBeenCalledTimes(1);
       expect(generate).toHaveBeenCalledWith(
         { description: 'top 10 hosts', index: undefined },
-        ['FROM second'],
-        1
+        'FROM second',
+        1,
+        3
       );
     });
 
@@ -182,7 +190,12 @@ describe('resolveDatasets', () => {
       expect(queries).toHaveLength(4);
       expect(queries[3]).toContain('a fourth');
       expect(changed).toEqual([false, false, false, true]);
-      expect(generate).toHaveBeenCalledWith({ description: 'a fourth', index: undefined }, [], 3);
+      expect(generate).toHaveBeenCalledWith(
+        { description: 'a fourth', index: undefined },
+        undefined,
+        3,
+        4
+      );
     });
 
     it('rejects a new position with nothing to build a query from', async () => {

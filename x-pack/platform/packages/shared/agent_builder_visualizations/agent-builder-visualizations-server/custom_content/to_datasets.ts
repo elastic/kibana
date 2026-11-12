@@ -29,7 +29,7 @@ export interface CustomContentQueryChanges {
   /** What each position should become; positions it does not reach are kept. */
   datasets?: CustomContentDataset[];
   /** Remove every query, which leaves a panel with static content. */
-  clearQueries?: boolean;
+  removeAllQueries?: boolean;
 }
 
 /**
@@ -63,7 +63,7 @@ export const toCustomContentQueryChanges = ({
   }
 
   if (esql?.trim()) return { datasets: [{ esql }] };
-  if (esql === null || hasData === false) return { clearQueries: true };
+  if (esql === null || hasData === false) return { removeAllQueries: true };
 
   const generate = isNewPanel || regenerateESQL || (hasData === true && !existingQueries[0]);
   return generate ? { datasets: [{ description: nlQuery ?? '', index }] } : {};
