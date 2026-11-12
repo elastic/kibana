@@ -65,6 +65,9 @@ export const getChartSectionConfiguration =
         return <TraceMetricsGridWrapper {...props} actions={toolkit.actions} />;
       },
       replaceDefaultChart: true,
-      defaultTopPanelHeight: 300,
+      // Its own key: without one the section would read the regular histogram's saved
+      // height ('discover:histogramHeight'), sized for a different chart.
+      localStorageKeyPrefix: 'discover:tracesExperience',
+      defaultTopPanelHeight: 'max-content',
     };
   };
