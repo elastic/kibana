@@ -13,7 +13,7 @@ import { useFetchWorkflow } from '../../../hooks/use_fetch_workflow';
 import {
   getWorkflowConnectorTypes,
   WorkflowConnectorIcons,
-} from '../details_flyout/workflow_connector_icons';
+} from '../destination_card/workflow_connector_icons';
 import * as labels from './translations';
 
 /**

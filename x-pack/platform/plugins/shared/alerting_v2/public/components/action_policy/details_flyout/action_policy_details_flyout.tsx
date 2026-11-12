@@ -37,7 +37,7 @@ import {
 } from '../labels';
 import { AffectedRulesFlyout } from './affected_rules_flyout';
 import { ACTION_POLICY_MENU_ARIA_LABEL, useActionPolicyMenu } from '../use_action_policy_menu';
-import { DestinationCard } from './destination_card';
+import { DestinationCardList } from '../destination_card/destination_card_list';
 import { POLICY_SCOPE_LABEL, PolicyScopeSummary, getPolicyScopeKind } from './policy_scope_summary';
 import { Column, SubsectionColumns } from './subsection_columns';
 
@@ -330,13 +330,7 @@ export const ActionPolicyDetailsFlyout = ({
                 <p>-</p>
               </EuiText>
             ) : (
-              <EuiFlexGroup direction="column" gutterSize="s">
-                {policy.destinations.map((destination) => (
-                  <EuiFlexItem key={`${destination.type}-${destination.id}`}>
-                    <DestinationCard destination={destination} />
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
+              <DestinationCardList destinations={policy.destinations} />
             )}
           </Body.Section>
         </Body>

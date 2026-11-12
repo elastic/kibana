@@ -10,6 +10,7 @@ import { useService, CoreStart } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowDetailDto } from '@kbn/workflows';
 import { WorkflowApi } from '@kbn/workflows-ui';
+import { retryUnlessNotFound } from '../utils/is_not_found_error';
 import { workflowKeys } from './query_key_factory';
 
 export const useFetchWorkflow = (
@@ -25,6 +26,7 @@ export const useFetchWorkflow = (
     queryFn: () => workflowsApi.getWorkflow(id!),
     enabled: !!id && isEnabled,
     refetchOnWindowFocus: false,
+    retry: retryUnlessNotFound,
     onError: (error: Error) => {
       if (!notifyOnError) {
         return;

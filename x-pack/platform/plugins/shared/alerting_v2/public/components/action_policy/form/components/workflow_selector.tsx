@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiComboBox, EuiFormErrorText, EuiFormRow, EuiLink } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiComboBox,
+  EuiFormErrorText,
+  EuiFormRow,
+  EuiLink,
+  EuiSpacer,
+} from '@elastic/eui';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { i18n } from '@kbn/i18n';
@@ -16,6 +23,7 @@ import type { UseControllerProps } from 'react-hook-form';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import { useFetchWorkflows } from '../../../../hooks/use_fetch_workflows';
+import { DestinationCardList } from '../../destination_card/destination_card_list';
 import type { ActionPolicyFormState } from '../types';
 
 interface SelectedWorkflow {
@@ -115,54 +123,67 @@ export const WorkflowSelector = () => {
   const createWorkflowUrl = application.getUrlForApp(WORKFLOWS_APP_ID, { path: '/create' });
 
   return (
-    <Controller
-      name="destinations"
-      control={control}
-      rules={DESTINATIONS_RULES}
-      render={({ field, fieldState: { error } }) => (
-        <EuiFormRow
-          label={i18n.translate('xpack.alertingV2.actionPolicy.form.destination.workflows', {
-            defaultMessage: 'Workflows',
-          })}
-          fullWidth
-          isInvalid={!!error}
-          error={error?.message}
-          labelAppend={
-            <EuiLink
-              href={createWorkflowUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              data-test-subj="createWorkflowLink"
-            >
-              {i18n.translate('xpack.alertingV2.actionPolicy.form.destination.createWorkflow', {
-                defaultMessage: 'Create a workflow',
-              })}
-            </EuiLink>
-          }
-        >
-          <EuiComboBox
+    <>
+      <Controller
+        name="destinations"
+        control={control}
+        rules={DESTINATIONS_RULES}
+        render={({ field, fieldState: { error } }) => (
+          <EuiFormRow
+            label={i18n.translate('xpack.alertingV2.actionPolicy.form.destination.workflows', {
+              defaultMessage: 'Workflows',
+            })}
             fullWidth
-            async
-            isLoading={isLoading}
             isInvalid={!!error}
-            data-test-subj="destinationsInput"
-            placeholder={i18n.translate(
-              'xpack.alertingV2.actionPolicy.form.destination.placeholder',
-              { defaultMessage: 'Search and select workflows' }
-            )}
-            selectedOptions={selectedWorkflows.map((w) => ({ label: w.name, value: w.id }))}
-            onFocus={() => refetch()}
-            onSearchChange={setSearchQuery}
-            onChange={(options) => {
-              setSelectedWorkflows(options.map((o) => ({ id: o.value as string, name: o.label })));
-              field.onChange(
-                options.map((o) => ({ type: 'workflow' as const, id: o.value as string }))
-              );
-            }}
-            options={workflowOptions}
+            error={error?.message}
+            labelAppend={
+              <EuiLink
+                href={createWorkflowUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-test-subj="createWorkflowLink"
+              >
+                {i18n.translate('xpack.alertingV2.actionPolicy.form.destination.createWorkflow', {
+                  defaultMessage: 'Create a workflow',
+                })}
+              </EuiLink>
+            }
+          >
+            <EuiComboBox
+              fullWidth
+              async
+              isLoading={isLoading}
+              isInvalid={!!error}
+              data-test-subj="destinationsInput"
+              placeholder={i18n.translate(
+                'xpack.alertingV2.actionPolicy.form.destination.placeholder',
+                { defaultMessage: 'Search and select workflows' }
+              )}
+              selectedOptions={selectedWorkflows.map((w) => ({ label: w.name, value: w.id }))}
+              onFocus={() => refetch()}
+              onSearchChange={setSearchQuery}
+              onChange={(options) => {
+                setSelectedWorkflows(
+                  options.map((o) => ({ id: o.value as string, name: o.label }))
+                );
+                field.onChange(
+                  options.map((o) => ({ type: 'workflow' as const, id: o.value as string }))
+                );
+              }}
+              options={workflowOptions}
+            />
+          </EuiFormRow>
+        )}
+      />
+      {destinations.length > 0 && (
+        <>
+          <EuiSpacer size="s" />
+          <DestinationCardList
+            destinations={destinations}
+            data-test-subj="actionPolicyFormDestinationCards"
           />
-        </EuiFormRow>
+        </>
       )}
-    />
+    </>
   );
 };
