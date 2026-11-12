@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
 import { WorkflowSettingsFlyout } from './workflow_settings_flyout';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
@@ -20,7 +20,14 @@ import {
 import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
 
 jest.mock('../../../entities/workflows/model/use_workflow_stats', () => ({
-  useWorkflowFiltersOptions: () => ({ data: { tags: [{ label: 'shared', key: 'shared' }] } }),
+  useWorkflowFiltersOptions: () => ({
+    data: {
+      tags: [
+        { label: 'shared', key: 'shared' },
+        { label: 'shared-team', key: 'shared-team' },
+      ],
+    },
+  }),
   useWorkflowStats: () => ({ data: undefined }),
 }));
 
@@ -92,6 +99,44 @@ describe('WorkflowSettingsFlyout', () => {
       'A short description'
     );
     expect(screen.getByTestId('workflowSettingsTagsInput')).toBeInTheDocument();
+  });
+
+  it('adds a typed tag that is also part of another suggestion', () => {
+    const { store } = renderFlyout();
+    const input = within(screen.getByTestId('workflowSettingsTagsInput')).getByTestId(
+      'comboBoxSearchInput'
+    );
+
+    // "shared" is an existing tag and a part of "shared-team", so two suggestions match it.
+    fireEvent.change(input, { target: { value: 'shared' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(selectYamlString(store.getState())).toMatch(/tags:\n\s+- alpha\n\s+- shared\n/);
+  });
+
+  it('adds a typed tag that matches no suggestion', () => {
+    const { store } = renderFlyout();
+    const input = within(screen.getByTestId('workflowSettingsTagsInput')).getByTestId(
+      'comboBoxSearchInput'
+    );
+
+    fireEvent.change(input, { target: { value: 'brand-new' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(selectYamlString(store.getState())).toMatch(/- alpha\n\s+- brand-new\n/);
+  });
+
+  it('does not add a tag twice, whatever its case', () => {
+    const { store } = renderFlyout();
+    const input = within(screen.getByTestId('workflowSettingsTagsInput')).getByTestId(
+      'comboBoxSearchInput'
+    );
+
+    fireEvent.change(input, { target: { value: 'ALPHA' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(selectYamlString(store.getState())).not.toMatch(/ALPHA/);
+    expect(selectYamlString(store.getState()).match(/- alpha/g)).toHaveLength(1);
   });
 
   it('updates the draft YAML when the name changes', () => {

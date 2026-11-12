@@ -56,6 +56,8 @@ export interface FormVariant {
   readonly schema: z.ZodType;
   /** An object variant's keys (with their real paths), or the one control of a scalar variant. */
   readonly fields: readonly StepFormField[];
+  /** The key every variant fixes to its own literal (`type: 'host'`): choosing the variant sets it. */
+  readonly discriminator?: { readonly key: string; readonly value: string };
 }
 
 export interface StepFormField {
@@ -470,6 +472,30 @@ const SCALAR_LABELS: Readonly<Record<ScalarClass, string>> = {
   }),
 };
 
+const literalOfKey = (member: z.ZodObject, key: string): string | undefined => {
+  const field = (member.shape as Record<string, z.ZodType | undefined>)[key];
+  const inner = field ? unwrapSchema(field) : undefined;
+  return inner instanceof z.ZodLiteral && typeof inner.value === 'string' ? inner.value : undefined;
+};
+
+/**
+ * The key that every object variant fixes to a different string literal (`type: 'host'`, `type:
+ * 'webproperty'`), when each variant is one member and there is such a key.
+ */
+const findDiscriminatorKey = (
+  groups: readonly z.ZodType[][],
+  objectGroups: readonly z.ZodType[][]
+): string | undefined => {
+  const members = objectGroups.map((group) => group[0]);
+  if (objectGroups.length !== groups.length || members.length === 0) return undefined;
+  if (!objectGroups.every((group) => group.length === 1)) return undefined;
+  const [first] = members as z.ZodObject[];
+  return Object.keys(first.shape).find((key) => {
+    const values = (members as z.ZodObject[]).map((member) => literalOfKey(member, key));
+    return values.every((value) => value !== undefined) && new Set(values).size === values.length;
+  });
+};
+
 /**
  * The variants of a union field, or undefined when it isn't one. Object members that require the
  * same keys are one variant (their fields combined), so "close by IDs" and "set status by IDs"
@@ -499,6 +525,7 @@ const buildVariants = (
   const requiredOfGroup = (group: z.ZodType[]): string[] =>
     group[0] instanceof z.ZodObject ? requiredKeysOf(group[0]) : [];
   const objectGroups = grouped.filter((group) => group[0] instanceof z.ZodObject);
+  const discriminatorKey = findDiscriminatorKey(grouped, objectGroups);
 
   return grouped.map((group, index): FormVariant => {
     const [first] = group;
@@ -522,12 +549,18 @@ const buildVariants = (
         )
       );
       const keys = distinguishing.length > 0 ? distinguishing : mine;
+      const discriminatorValue = discriminatorKey
+        ? literalOfKey(first, discriminatorKey)
+        : undefined;
       return {
         id: `variant-${index}`,
-        label: title ?? keys.map(prettifyFieldKey).join(' + '),
+        label: title ?? discriminatorValue ?? keys.map(prettifyFieldKey).join(' + '),
         kind: 'object',
         schema: variantSchema,
         fields: Array.from(merged.values()),
+        ...(discriminatorKey && discriminatorValue !== undefined
+          ? { discriminator: { key: discriminatorKey, value: discriminatorValue } }
+          : {}),
       };
     }
 

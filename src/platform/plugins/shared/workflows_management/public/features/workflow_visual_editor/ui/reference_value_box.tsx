@@ -50,6 +50,7 @@ export function ReferenceValueBox({
   onBlur,
   ariaLabel,
   keepTypeFor = 'any',
+  onExpand,
   'data-test-subj': dataTestSubj,
 }: {
   readonly catalog: DataReferenceCatalog;
@@ -65,6 +66,8 @@ export function ReferenceValueBox({
    * reference known to be a list or record is flagged.
    */
   readonly keepTypeFor?: 'any' | 'containers';
+  /** When set, shows a control that opens the expanded field editor (reference tree + run data). */
+  readonly onExpand?: () => void;
   readonly 'data-test-subj': string;
 }) {
   const { euiTheme } = useEuiTheme();
@@ -111,6 +114,11 @@ export function ReferenceValueBox({
   });
   const clearLabel = i18n.translate('workflows.stepConfigPanel.referenceBox.clear', {
     defaultMessage: 'Clear data reference for {field}',
+    values: { field: ariaLabel },
+  });
+
+  const expandLabel = i18n.translate('workflows.stepConfigPanel.referenceBox.expand', {
+    defaultMessage: 'Open expanded editor for {field}',
     values: { field: ariaLabel },
   });
 
@@ -206,6 +214,18 @@ export function ReferenceValueBox({
           data-test-subj={`${dataTestSubj}-pick`}
         />
       </EuiToolTip>
+      {onExpand ? (
+        <EuiToolTip content={expandLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="fullScreen"
+            size="xs"
+            color="text"
+            aria-label={expandLabel}
+            onClick={onExpand}
+            data-test-subj={`${dataTestSubj}-expand`}
+          />
+        </EuiToolTip>
+      ) : null}
     </div>
   );
 

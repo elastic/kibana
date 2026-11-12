@@ -1721,6 +1721,112 @@ with:
       );
     });
 
+    describe('expanded editor from the Data side', () => {
+      const openExpanded = (field: string) => {
+        fireEvent.click(screen.getByTestId(`workflowStepConfigField-with.${field}-source-data`));
+        fireEvent.click(screen.getByTestId(`workflowStepConfigField-with.${field}-expand`));
+        return screen.getByTestId('workflowFieldEditorSubFlyoutTextarea') as HTMLTextAreaElement;
+      };
+
+      it('is offered on Data for numbers, yes/no and dropdowns, never on Fixed', () => {
+        renderSwitchy(
+          'name: s\ntype: switchy\nwith:\n  retries: 3\n  debug: true\n  method: GET\n'
+        );
+        for (const field of ['retries', 'debug', 'method']) {
+          expect(
+            screen.queryByTestId(`workflowStepConfigField-with.${field}-expand`)
+          ).not.toBeInTheDocument();
+          fireEvent.click(screen.getByTestId(`workflowStepConfigField-with.${field}-source-data`));
+          expect(
+            screen.getByTestId(`workflowStepConfigField-with.${field}-expand`)
+          ).toBeInTheDocument();
+        }
+      });
+
+      it('shows the reference and writes a changed one in the value form for a number', () => {
+        const { onFragmentChange } = renderSwitchy(
+          'name: s\ntype: switchy\nwith:\n  retries: ${{ consts.limit }}\n'
+        );
+        fireEvent.click(screen.getByTestId('workflowStepConfigField-with.retries-expand'));
+        const textarea = screen.getByTestId(
+          'workflowFieldEditorSubFlyoutTextarea'
+        ) as HTMLTextAreaElement;
+        expect(screen.getByTestId('workflowFieldEditorSubFlyoutTitle')).toHaveTextContent(
+          'Retries'
+        );
+        expect(textarea).toHaveValue('${{ consts.limit }}');
+
+        fireEvent.change(textarea, { target: { value: '${{ consts.other }}' } });
+        expect(savedFragments(onFragmentChange).pop()).toMatch(
+          /retries: ["']?\$\{\{ consts\.other \}\}["']?/
+        );
+
+        fireEvent.click(screen.getByTestId('workflowFieldEditorSubFlyoutBack'));
+        expect(screen.getByTestId('workflowStepConfigField-with.retries-chip')).toHaveTextContent(
+          'consts.other'
+        );
+      });
+
+      it('starts empty when the typed value kept on Data is not a reference', () => {
+        const { onFragmentChange } = renderSwitchy(
+          'name: s\ntype: switchy\nwith:\n  retries: 3\n  debug: false\n'
+        );
+        for (const field of ['retries', 'debug']) {
+          fireEvent.click(screen.getByTestId(`workflowStepConfigField-with.${field}-source-data`));
+          fireEvent.click(screen.getByTestId(`workflowStepConfigField-with.${field}-expand`));
+          expect(screen.getByTestId('workflowFieldEditorSubFlyoutTextarea')).toHaveValue('');
+          fireEvent.click(screen.getByTestId('workflowFieldEditorSubFlyoutBack'));
+        }
+        // Opening the editor alone changes nothing.
+        expect(savedFragments(onFragmentChange).every((f) => /retries: 3/.test(f))).toBe(true);
+        expect(savedFragments(onFragmentChange).every((f) => /debug: false/.test(f))).toBe(true);
+      });
+
+      it('does not write a typed or half-written draft into a number or yes/no field', () => {
+        const { onFragmentChange } = renderSwitchy(
+          'name: s\ntype: switchy\nwith:\n  debug: ${{ consts.flag }}\n'
+        );
+        fireEvent.click(screen.getByTestId('workflowStepConfigField-with.debug-expand'));
+        const textarea = screen.getByTestId(
+          'workflowFieldEditorSubFlyoutTextarea'
+        ) as HTMLTextAreaElement;
+        const before = savedFragments(onFragmentChange).length;
+
+        fireEvent.change(textarea, { target: { value: 'yes' } });
+        fireEvent.change(textarea, { target: { value: '${{ consts.fl' } });
+        expect(savedFragments(onFragmentChange).slice(before).join('')).not.toMatch(
+          /yes|consts\.fl\b/
+        );
+        expect(savedFragments(onFragmentChange).pop()).toMatch(/consts\.flag/);
+      });
+
+      it('clearing the editor removes the key and stays on Data', () => {
+        const { onFragmentChange } = renderSwitchy(
+          'name: s\ntype: switchy\nwith:\n  retries: ${{ consts.limit }}\n'
+        );
+        fireEvent.click(screen.getByTestId('workflowStepConfigField-with.retries-expand'));
+        fireEvent.change(screen.getByTestId('workflowFieldEditorSubFlyoutTextarea'), {
+          target: { value: '' },
+        });
+        expect(savedFragments(onFragmentChange).pop()).not.toMatch(/retries/);
+        fireEvent.click(screen.getByTestId('workflowFieldEditorSubFlyoutBack'));
+        expect(screen.getByTestId('workflowStepConfigField-with.retries')).toHaveTextContent(
+          'Select data from an earlier step'
+        );
+      });
+
+      it('keeps a dropdown reference in the text form', () => {
+        const { onFragmentChange } = renderSwitchy(
+          'name: s\ntype: switchy\nwith:\n  method: GET\n'
+        );
+        const textarea = openExpanded('method');
+        fireEvent.change(textarea, { target: { value: '{{ inputs.method }}' } });
+        expect(savedFragments(onFragmentChange).pop()).toMatch(
+          /method: ["']?\{\{ inputs\.method \}\}["']?/
+        );
+      });
+    });
+
     it('offers no references or switch for a fixed-only loop cap', () => {
       renderPanel({
         stepType: 'while',
@@ -2583,6 +2689,59 @@ with:
       );
       expect(screen.queryByTestId('workflowStepConfigField-with.query')).not.toBeInTheDocument();
       expect(screen.getByText('Query')).toBeInTheDocument();
+    });
+
+    describe('when each way is named by a `type`', () => {
+      // Shaped like the Censys targets: the `type` of a way is a literal only that way accepts.
+      const targetConnector = {
+        type: 'target',
+        hasConnectorId: false,
+        paramsSchema: z.discriminatedUnion('type', [
+          z.object({ type: z.literal('host'), host: z.string() }),
+          z.object({ type: z.literal('webproperty'), hostname: z.string(), port: z.number() }),
+          z.object({ type: z.literal('certificate'), certificate: z.string() }),
+        ]),
+        outputSchema: z.unknown(),
+        summary: null,
+        description: null,
+      } as unknown as ConnectorContractUnion;
+      const target = (extra = '') =>
+        renderPanel({
+          stepType: 'target',
+          connectors: [targetConnector],
+          initialFragment: `name: t\ntype: target\n${extra}`,
+        });
+      const targetGroup = 'workflowStepConfigField-with-variantGroup';
+      const targetWay = (index: number) =>
+        screen.getByTestId(`${targetGroup}-variant-variant-${index}`);
+
+      it('labels the ways by their `type`', () => {
+        target();
+        expect([0, 1, 2].map((index) => targetWay(index).textContent?.trim())).toEqual([
+          'host',
+          'webproperty',
+          'certificate',
+        ]);
+      });
+
+      it('writes the `type` when a way is chosen, without asking to replace anything', () => {
+        const { onFragmentChange } = target();
+        fireEvent.click(targetWay(2));
+        expect(screen.queryByTestId(`${targetGroup}-confirm`)).not.toBeInTheDocument();
+        expect(lastFragment(onFragmentChange)).toMatch(/type: certificate/);
+        expect(targetWay(2).getAttribute('aria-pressed')).toBe('true');
+        expect(screen.getByTestId('workflowStepConfigField-with.certificate')).toBeInTheDocument();
+      });
+
+      it('stays on the chosen way once its `type` is the only thing written', () => {
+        target('with:\n  type: webproperty\n');
+        expect(targetWay(1).getAttribute('aria-pressed')).toBe('true');
+        expect(screen.getByTestId('workflowStepConfigField-with.hostname')).toBeInTheDocument();
+        // Only the `type` is there, so switching has nothing to replace.
+        fireEvent.click(targetWay(0));
+        expect(screen.queryByTestId(`${targetGroup}-confirm`)).not.toBeInTheDocument();
+        expect(targetWay(0).getAttribute('aria-pressed')).toBe('true');
+      });
     });
   });
 });

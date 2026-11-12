@@ -213,15 +213,13 @@ export const WorkflowSettingsFlyout = ({
   );
 
   const handleCreateTag = useCallback(
-    (searchValue: string, flattenedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+    (searchValue: string) => {
       const normalized = searchValue.trim();
       if (!normalized) {
         return;
       }
-      const exists = flattenedOptions.some((option) => option.label === normalized);
-      if (exists) {
-        return;
-      }
+      // The combo box already refuses a tag that is selected. A tag that equals a suggestion is
+      // created here too when other suggestions contain it, so it must not be skipped.
       const next = [...tagOptions, { label: normalized }];
       setTagOptions(next);
       applyYamlPatch({ tags: next.map((option) => option.label) });

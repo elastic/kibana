@@ -420,6 +420,35 @@ describe('step_form_schema', () => {
       ]);
     });
 
+    it('names the variants of a union keyed on a literal `type` by that `type`', () => {
+      const targetConnector = {
+        type: 'target',
+        hasConnectorId: false,
+        paramsSchema: z.discriminatedUnion('type', [
+          z.object({ type: z.literal('host'), host: z.string() }),
+          z.object({ type: z.literal('webproperty'), hostname: z.string(), port: z.number() }),
+        ]),
+        outputSchema: z.unknown(),
+        summary: null,
+        description: null,
+      } as unknown as ConnectorContractUnion;
+      const field = getStepFormSchema('target', [targetConnector])?.fields.find(
+        (f) => f.key === 'with'
+      );
+      expect(field?.variants?.map((v) => v.label)).toEqual(['host', 'webproperty']);
+      expect(field?.variants?.map((v) => v.discriminator)).toEqual([
+        { key: 'type', value: 'host' },
+        { key: 'type', value: 'webproperty' },
+      ]);
+    });
+
+    it('does not invent a discriminator when no key is a different literal in every variant', () => {
+      const field = getStepFormSchema('kibana.SetAlertsStatus', [
+        SET_ALERTS_STATUS_CONTRACT as unknown as ConnectorContractUnion,
+      ])?.fields.find((f) => f.key === 'with');
+      expect(field?.variants?.every((v) => v.discriminator === undefined)).toBe(true);
+    });
+
     it('leaves nullable objects, lists and maps alone: they are not a choice of shape', () => {
       const oddConnectors = [
         {

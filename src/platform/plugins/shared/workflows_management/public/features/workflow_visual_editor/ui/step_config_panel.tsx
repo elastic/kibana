@@ -439,6 +439,13 @@ export function StepConfigPanel({
     if (!expandedField) return '';
     const raw = toJs(readFragmentValue(fragment, expandedField.path));
     if (raw === undefined || raw === null) return '';
+    // Like the Data box, which hides a typed value kept while the switch sits on Data.
+    if (
+      (expandedField.kind === 'boolean' || expandedField.kind === 'number') &&
+      !isReferenceValue(raw)
+    ) {
+      return '';
+    }
     if (
       expandedField.kind === 'code' &&
       (expandedField.language === 'json' || expandedField.language === 'json-liquid') &&
@@ -452,6 +459,13 @@ export function StepConfigPanel({
   const handleExpandedFieldChange = useCallback(
     (next: string) => {
       if (!expandedField) return;
+      if (expandedField.kind === 'boolean' || expandedField.kind === 'number') {
+        // Only the Data side expands these: the editor holds one whole reference. A typed or
+        // half-written draft is not a value for them, so the last valid one is kept.
+        if (next.trim() === '') handleFieldChange(expandedField, undefined);
+        else if (isReferenceValue(next)) handleFieldChange(expandedField, next);
+        return;
+      }
       if (expandedField.kind === 'code' && expandedField.language === 'json') {
         if (next.trim() === '') {
           handleFieldChange(expandedField, undefined);
@@ -1141,7 +1155,12 @@ export function StepConfigPanel({
             catalog={referenceCatalog}
             runControls={runControls}
             language={expandedField.kind === 'code' ? expandedField.language : undefined}
-            valueFormWhenWhole={expandedField.valueFormWhenWhole}
+            // Numbers and yes/no keep their type, so a whole pick is written as a value.
+            valueFormWhenWhole={
+              expandedField.valueFormWhenWhole === true ||
+              expandedField.kind === 'boolean' ||
+              expandedField.kind === 'number'
+            }
             onBack={handleFieldEditorBack}
             onCloseStack={attemptClose}
           />
@@ -1660,6 +1679,11 @@ function StepFieldRow({
     setForcedData(true);
     onChange(next);
   };
+  // The expanded editor writes straight to the field, so stay on Data if it empties the value.
+  const expandFromData = () => {
+    setForcedData(true);
+    onExpand();
+  };
   // The whole-list side means "this reference is the list". A field that needs a list (no single
   // value allowed) cannot take a single value that way, so a pick known to be one value is added
   // as an entry instead (`["{{ x }}"]`), after the entries already there, and the field goes back
@@ -1836,6 +1860,7 @@ function StepFieldRow({
               isInvalid={isInvalid}
               onBlur={accuseIfInvalid}
               ariaLabel={field.label}
+              onExpand={expandFromData}
               data-test-subj={testSubj}
             />
           </StepValidatedFormRow>
@@ -1995,6 +2020,7 @@ function StepFieldRow({
               isInvalid={isInvalid}
               onBlur={accuseIfInvalid}
               ariaLabel={field.label}
+              onExpand={expandFromData}
               data-test-subj={testSubj}
             />
           ) : (
@@ -2026,6 +2052,7 @@ function StepFieldRow({
               isInvalid={isInvalid}
               onBlur={accuseIfInvalid}
               ariaLabel={field.label}
+              onExpand={expandFromData}
               data-test-subj={testSubj}
             />
           ) : (
