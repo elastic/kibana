@@ -277,7 +277,7 @@ One sample per rule proves whether its failure is happening now. Apply `<query_r
   |---|---|---|
   | `spread` | every rule except an aggregate KI | the Profile step's `spread` on the KI's own `{failure}`, in its variant, over the Profile table's window; the rule's only `spread`, except the `off_topic` rule's second one (Definitions) |
   | `sample` | every rule | always `LIMIT 1`; an aggregate KI gets `LIMIT 2`; an authored KI limit of 3 or fewer rows stays instead of ours; `time_range.from` is the rule's `sample_from` (`<query_rules>` rule 3) |
-  | `re-sample` | once, when the sample row does not show the rule's failure (healthy, or `off_topic`) or the rule has a text field and the sample result has no usable column for it (Definitions) | `LIMIT 3`, a new query, not a re-run; row-level KIs only. Never after an empty or errored sample or an authored limit of 3 or less, and never just to get a text column that an authored projection omits |
+  | `re-sample` | once, when the sample row does not show the rule's failure (healthy, or `off_topic`), or the rule has a text field and the sample result has no usable column for it (Definitions), or the `sample` failed with a verification or syntax error (an unknown column or function, a malformed condition) | `LIMIT 3`, a new query rebuilt from the KI's query under `<query_rules>`, not a re-run; row-level KIs only. Never after an empty sample, a timeout or any other error, or an authored limit of 3 or less, and never just to get a text column that an authored projection omits |
   | `dimensions` | the rule's `affected` is above 0 and it has 2 or more candidates | one query over the candidates |
   | `examples` | the rule's `affected` is above 0, and has a usable text field | up to 5 message categories, one sampled message each |
   | `trend`, `baseline` | every rule, except an `off_topic` rule with no isolating observed-error condition | |
@@ -402,7 +402,7 @@ Reading `breakdown`:
 - The rows are the top groups, not all of them: say so when the result has as many rows as its limit.
 - Name the field ("by `service.name`"), then the top 3 groups that matter: each value in backticks
   (as the returned-text bullet allows) with the whole percent of its own lines that fail, in log
-  lines, never requests ("`edge` 91% of its lines"), and "and N others" for the rest. The share shows
+  lines, never requests ("`{value}` 91% of its lines"), and "and N others" for the rest. The share shows
   how concentrated the failure is in a value: near zero is background. Give no first or last time
   per group, and do not infer group presence from the `baseline` onset.
 
@@ -416,7 +416,9 @@ Reading `trend`:
   count in time order (`03-06 11:00 396, 03-06 12:00 0, ...`, a missing hour as 0), the latest complete
   hour last. Take every figure below from that entry, never from memory of the rows: the lowest and
   highest are the smallest and largest counts above 0 among the hours before the latest one, M is how
-  many hours that is (the listed hours minus the latest), and N is how many of them are above 0.
+  many hours that is (the listed hours minus the latest), and N is how many of them are above 0. End
+  the entry with the lowest, highest and latest counts already written as Numbers says, and copy
+  them as they stand.
 - In the description, give the count range an hour (380–455) over "every hour from START to END"
   when all M hours had a failure, otherwise "on N of the M hours from START to END" (END is the hour
   before the latest complete hour), then the latest complete hour in parentheses (396 at 09:00;
@@ -639,8 +641,9 @@ Each entry:
      Services: when `{scope}` pins the service, say the rule is scoped to it (not "the number of
      services is not measured"); otherwise follow Reading `dimensions`. A service field with `f = a`
      and `present_{field} = rows` states that the failure reaches `f` of `a` measured services even
-     when the field is otherwise non-informative, with its `breakdown` groups: "across 7
-     `service.name` values: `edge` 91% of its lines, …". When `present_{field} < rows`, state that
+     when the field is otherwise non-informative, with its `breakdown` groups as Reading `breakdown`
+     states them: the field, then its top groups with their shares, then "and N others". When
+     `present_{field} < rows`, state that
      coverage and make no all-failing-rows claim.
   3. **How long and whether it continues**, short, in this order: the `trend` clause, the onset
      (Reading `trend`, `baseline`) and the not-measured clause. Add daily shares or the days with a

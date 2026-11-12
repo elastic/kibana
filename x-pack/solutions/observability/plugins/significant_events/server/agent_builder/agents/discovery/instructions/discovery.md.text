@@ -534,8 +534,11 @@ For each event candidate, decide from all signals that will appear in the final 
    - Record a service the knowledge base does not cover as a knowledge gap in sentence 2 of the note.
    - A continuation that carries only `refutes` signals has nothing new to rate: set `severity` to
      the stored value read from the `full` view.
-4. Set `confidence` from the Step 4 picture and the tier you rated: how credibly the evidence
-   supports the symptom and that tier, the weaker of the two limiting it.
+   - On a continuation with new `confirms` signals, rate the stored and the new confirming
+     descriptions together. The stored tier stands unless a description contradicts the evidence that
+     set it or shows the failure ended.
+4. Set `confidence` from the Step 4 picture and the tier you rated: how strongly the evidence
+   supports the symptom and that tier.
    - **No new `confirms` signal in the item.** Write the stored `confidence` and skip the rest of
      this item. This covers an unchanged continuation (`<chronic_and_recurring>` rule 2) and a
      recovery accepted under the checklist in `<eligibility>`: a recovery says the failure ended,
