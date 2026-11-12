@@ -16,6 +16,7 @@ import {
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_SUPPORTED_CONNECTORS_RETURNED,
   MAX_TEMPLATES_LENGTH,
+  OBSERVABLE_TYPE_AGENT_ID,
   OBSERVABLE_TYPE_IPV4,
 } from '../../../common/constants';
 import { ConnectorTypes } from '../../../common';
@@ -1310,6 +1311,78 @@ describe('client', () => {
             'Failed to get patch configure in route: Error: Invalid duplicated observable types in request: ipv4'
           );
         });
+
+        it('throws when a custom observable type has no label', async () => {
+          clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(true);
+
+          await expect(
+            update(
+              'test-id',
+              { version: 'test-version', observableTypes: [{ key: 'employee-id' }] },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            'Failed to get patch configure in route: Error: Invalid observable types in request: custom observable type employee-id needs a label'
+          );
+        });
+
+        it('throws when a built-in observable type has a value pattern', async () => {
+          await expect(
+            update(
+              'test-id',
+              {
+                version: 'test-version',
+                observableTypes: [{ key: OBSERVABLE_TYPE_IPV4.key, valuePattern: '^a$' }],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            `Failed to get patch configure in route: Error: Invalid observable types in request: built-in observable type ${OBSERVABLE_TYPE_IPV4.key} cannot have a value pattern`
+          );
+        });
+
+        it('stores the fields of an override and of a custom type', async () => {
+          clientArgs.services.caseConfigureService.get.mockResolvedValue({
+            attributes: {
+              connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
+              customFields: [],
+              templates: [],
+              closure_type: 'close-by-user',
+              owner: 'cases',
+              extractObservables: true,
+              observableTypes: [],
+            },
+            id: 'test-id',
+            version: 'test-version',
+          } as never);
+          const observableTypes = [
+            {
+              key: OBSERVABLE_TYPE_AGENT_ID.key,
+              paths: [{ path: 'agent.id', enabled: false, excludedValues: ['static-id'] }],
+            },
+            {
+              key: 'employee-id',
+              label: 'Employee ID',
+              valuePattern: '^E\\d{6}$',
+              paths: [{ path: 'user.employee_id', enabled: true }],
+            },
+          ];
+
+          await update(
+            'test-id',
+            { version: 'test-version', observableTypes },
+            clientArgs,
+            casesClientInternal
+          );
+
+          expect(clientArgs.services.caseConfigureService.patch).toHaveBeenCalledWith(
+            expect.objectContaining({
+              updatedAttributes: expect.objectContaining({ observableTypes }),
+            })
+          );
+        });
       });
 
       describe('global field definitions', () => {
@@ -2196,6 +2269,79 @@ describe('client', () => {
             )
           ).rejects.toThrow(
             'Failed to create case configuration: Error: Invalid duplicated observable types in request: ipv4'
+          );
+        });
+
+        it('throws when a custom observable type has no label', async () => {
+          clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(true);
+
+          await expect(
+            create(
+              { ...baseRequest, observableTypes: [{ key: 'employee-id' }] },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            'Failed to create case configuration: Error: Invalid observable types in request: custom observable type employee-id needs a label'
+          );
+        });
+
+        it('throws when two entries override the same built-in type', async () => {
+          await expect(
+            create(
+              {
+                ...baseRequest,
+                observableTypes: [
+                  { key: OBSERVABLE_TYPE_AGENT_ID.key, paths: [] },
+                  { key: OBSERVABLE_TYPE_AGENT_ID.key, paths: [] },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            `Failed to create case configuration: Error: Invalid observable types in request: built-in observable type ${OBSERVABLE_TYPE_AGENT_ID.key} has more than one entry`
+          );
+        });
+
+        it('stores the fields of an override and of a custom type', async () => {
+          clientArgs.services.caseConfigureService.find.mockResolvedValue({
+            saved_objects: [],
+          } as never);
+          clientArgs.services.caseConfigureService.post.mockResolvedValue({
+            id: 'test-id',
+            type: 'cases-configure',
+            version: 'test-version',
+            attributes: {
+              connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
+              closure_type: 'close-by-user',
+              owner: 'securitySolutionFixture',
+              customFields: [],
+              templates: [],
+              observableTypes: [],
+              extractObservables: true,
+              workflowTags: [],
+              created_at: '2019-11-25T21:54:48.952Z',
+              created_by: { full_name: 'elastic', email: 'test@test.com', username: 'elastic' },
+              updated_at: null,
+              updated_by: null,
+            },
+          } as never);
+          const observableTypes = [
+            { key: OBSERVABLE_TYPE_AGENT_ID.key, paths: [{ path: 'agent.id', enabled: false }] },
+            {
+              key: 'employee-id',
+              label: 'Employee ID',
+              paths: [{ path: 'user.employee_id', enabled: true }],
+            },
+          ];
+
+          await create({ ...baseRequest, observableTypes }, clientArgs, casesClientInternal);
+
+          expect(clientArgs.services.caseConfigureService.post).toHaveBeenCalledWith(
+            expect.objectContaining({
+              attributes: expect.objectContaining({ observableTypes }),
+            })
           );
         });
       });
