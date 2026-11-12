@@ -62,9 +62,15 @@ import { triggerInvestigationStepDefinition } from './step_definitions/trigger_i
 import { followUpRecoveredAlertStepDefinition } from './step_definitions/follow_up_recovered_alert';
 import { classifyOnlineEvalsRoundStepDefinition } from './step_definitions/classify_online_evals_round';
 import { scoreOnlineEvalsRoundStepDefinition } from './step_definitions/score_online_evals_round';
+import { scoreMemoryOnlineEvalsStepDefinition } from './step_definitions/score_memory_online_evals';
 import { createIsOnlineEvalsPaused } from './online_evals/is_online_evals_paused';
 import { createShouldIncludeExplanations } from './online_evals/should_include_explanations';
-import { alertOutcomeJudges, wikiJudges, referenceFreeJudges } from './online_evals/judges';
+import {
+  alertOutcomeJudges,
+  memoryJudges,
+  referenceFreeJudges,
+  wikiJudges,
+} from './online_evals/judges';
 import { obtainSandboxStepDefinition } from './step_definitions/obtain_sandbox';
 import { composeHydrateNotificationsStepDefinition } from './step_definitions/compose_hydrate_notifications';
 import { resolveModelStepDefinition } from './step_definitions/resolve_model';
@@ -232,7 +238,12 @@ export class NightshiftInvestigationsPlugin
       logger: this.logger.get('telemetry'),
     });
     this.telemetry = telemetry;
-    for (const judge of [...referenceFreeJudges, ...alertOutcomeJudges, ...wikiJudges]) {
+    for (const judge of [
+      ...referenceFreeJudges,
+      ...alertOutcomeJudges,
+      ...wikiJudges,
+      ...memoryJudges,
+    ]) {
       plugins.evals?.registerEvaluator(judge);
     }
 
@@ -530,6 +541,7 @@ export class NightshiftInvestigationsPlugin
           followUpRecoveredAlertStepDefinition(this.getInvestigationsClient)
         );
         const isOnlineEvalsPaused = createIsOnlineEvalsPaused(core.getStartServices);
+        const shouldIncludeExplanations = createShouldIncludeExplanations(core.getStartServices);
         plugins.workflowsExtensions.registerStepDefinition(
           classifyOnlineEvalsRoundStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
@@ -555,7 +567,7 @@ export class NightshiftInvestigationsPlugin
               });
             },
             isPaused: isOnlineEvalsPaused,
-            shouldIncludeExplanations: createShouldIncludeExplanations(core.getStartServices),
+            shouldIncludeExplanations,
             telemetry,
           })
         );
@@ -699,6 +711,21 @@ export class NightshiftInvestigationsPlugin
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
             isEnabled: () => this.decisionTreesEnabled,
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          scoreMemoryOnlineEvalsStepDefinition({
+            getAgentBuilder: () => this.agentBuilder,
+            getEvaluate: () => this.evals?.evaluate,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
+            isPaused: isOnlineEvalsPaused,
+            shouldIncludeExplanations,
+            telemetry,
+            logger: this.logger.get('online_evals'),
+            isEnabled: () => this.wikiEnabled || this.memoryEnabled || this.decisionTreesEnabled,
+            isWikiEnabled: () => this.wikiEnabled,
+            isDecisionTreesEnabled: () => this.decisionTreesEnabled,
           })
         );
       }
