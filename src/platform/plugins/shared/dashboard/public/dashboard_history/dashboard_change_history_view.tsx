@@ -9,9 +9,10 @@
 
 import React, { lazy, Suspense, useEffect } from 'react';
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import { i18n } from '@kbn/i18n';
 import type { ChangeHistoryPreviewRenderFn } from '@kbn/change-history-ui';
 import { ChangeHistoryPreview } from '@kbn/change-history-ui';
 
@@ -35,9 +36,10 @@ export const DashboardChangeHistoryView = ({
   setPreviewTitle,
   inheritedTimeRange,
 }: DashboardChangeHistoryViewProps): JSX.Element => {
-  const { compareSpec, compareMode, diffTelemetry } = previewProps;
+  const { compareSpec, compareMode, diffTelemetry, isLoadingCompareContext } = previewProps;
 
-  const isShowingComparison = Boolean(compareMode && compareSpec);
+  // stay on the comparison for as long as it is requested, even while loading or after a failed load
+  const isShowingComparison = Boolean(compareMode);
   const { title } = previewProps.change.snapshot as DashboardState;
 
   // dashboardPreview sets the title when mounted; the JSON comparison doesn't mount it
@@ -45,14 +47,47 @@ export const DashboardChangeHistoryView = ({
     if (isShowingComparison) setPreviewTitle(title);
   }, [isShowingComparison, title, setPreviewTitle]);
 
-  if (isShowingComparison && compareSpec) {
+  if (isShowingComparison) {
+    if (compareSpec) {
+      return (
+        <ChangeHistoryPreview
+          baseline={compareSpec.baseline.snapshot as object}
+          target={compareSpec.target.snapshot as object}
+          compareSpec={compareSpec}
+          diffTelemetry={diffTelemetry}
+          language="json"
+        />
+      );
+    }
+
+    if (isLoadingCompareContext) {
+      return (
+        <div css={contentStyles}>
+          <EuiLoadingSpinner size="xl" data-test-subj="dashboardCompareLoading" />
+        </div>
+      );
+    }
+
     return (
-      <ChangeHistoryPreview
-        baseline={compareSpec.baseline.snapshot as object}
-        target={compareSpec.target.snapshot as object}
-        compareSpec={compareSpec}
-        diffTelemetry={diffTelemetry}
-        language="json"
+      <EuiEmptyPrompt
+        color="danger"
+        iconType="warning"
+        data-test-subj="dashboardCompareError"
+        title={
+          <h2>
+            {i18n.translate('dashboard.changeHistory.compareErrorTitle', {
+              defaultMessage: 'Unable to load the comparison',
+            })}
+          </h2>
+        }
+        body={
+          <p>
+            {i18n.translate('dashboard.changeHistory.compareErrorBody', {
+              defaultMessage:
+                'The version to compare against could not be loaded. Try again, or select a different version.',
+            })}
+          </p>
+        }
       />
     );
   }
