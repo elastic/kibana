@@ -19,6 +19,7 @@ import type {
 } from '../lib/list_sandbox_connectors';
 import type { SandboxAllowlistClient } from '../sandbox_allowlist';
 import type { CustomContextClient } from '../custom_context';
+import type { InvestigationQuotaClient } from '../lib/investigation_quotas';
 import type { OnboardingClient } from '../onboarding/onboarding_client';
 import type { DecisionTreeStore } from '../decision_trees/store';
 import type { MemoryPageStore } from '../memory/page_store';
@@ -74,6 +75,7 @@ export interface NightshiftInvestigationsRouteHandlerResources
   listSandboxConnectorTypes: ListSandboxConnectorTypes;
   sandboxAllowlistClient: SandboxAllowlistClient;
   customContextClient: CustomContextClient;
+  investigationQuotaClient: InvestigationQuotaClient;
   onboardingClient: OnboardingClient;
   getDecisionTreeStore: GetDecisionTreeStore;
   isDecisionTreesEnabled: () => boolean;
