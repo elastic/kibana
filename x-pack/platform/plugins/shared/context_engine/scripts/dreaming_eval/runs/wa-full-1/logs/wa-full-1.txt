@@ -1,0 +1,90 @@
+ info Stages extract, import, configure, run, evaluate, ask for dreaming-eval-workarena on longmemeval_v2_enterprise (config x-pack/platform/plugins/shared/context_engine/scripts/dreaming_eval/config/default.yaml, run wa-full-1)
+ info ── extract
+ info Reading 100 trajectories of the small haystack from trajectories.jsonl
+ succ longmemeval_v2_enterprise: 141 samples (01307e07, 025db8ef, 057a2d4d, 07ffeedf, 080b0218, …), 100 conversations, 100 rounds, 141 targets → data/context_engine_dreaming_eval/longmemeval_v2_enterprise
+ info ── import
+ succ longmemeval_v2_enterprise: wrote 3558 spans of 100 rounds to traces-agent_builder.otel-default (2026-01-05T09:00:00.000Z to 2026-01-09T12:00:00.000Z)
+ info ── configure
+ info Turned on contextEngine:enabled in space 'default' and contextEngine:memoryEnabled
+ succ Updated AI index 'dreaming-eval-workarena' (ai-index-idx-dreaming-eval-workarena), dreaming over longmemeval_v2_enterprise; workflows: system-context-engine-dreaming-dreaming-eval-workarena-37a8eec1ce19687d, system-context-engine-trace-dreaming-dreaming-eval-workarena-37a8eec1ce19687d
+ succ Updated agent 'dreaming-eval-workarena-answerer' with AI index 'dreaming-eval-workarena' and tools platform.context_engine.list_ai_indices, platform.context_engine.describe_ai_index, platform.context_engine.query_ai_indices
+ info ── run
+ info dreaming-eval-workarena: deleted 517 dreamed KIs from ai-index-idx-dreaming-eval-workarena
+ info dreaming-eval-workarena: running system-context-engine-dreaming-dreaming-eval-workarena-37a8eec1ce19687d since 2026-01-05T08:59:00.000Z
+ info   run 1: completed in 0s: memories 0, created 0, updated 0, deleted 0, rejected 0, relationships_created 0, relationships_rejected 0
+ info dreaming-eval-workarena: running system-context-engine-trace-dreaming-dreaming-eval-workarena-37a8eec1ce19687d since 2026-01-05T08:59:00.000Z
+ info   run 1: completed in 127s: rounds 17, created 59, updated 2, deleted 0, rejected 0
+ info   run 2: completed in 96s: rounds 6, created 42, updated 9, deleted 0, rejected 1
+ info   run 3: completed in 96s: rounds 9, created 49, updated 12, deleted 0, rejected 0
+ info   run 4: completed in 96s: rounds 8, created 56, updated 12, deleted 0, rejected 0
+ info   run 5: completed in 114s: rounds 11, created 49, updated 16, deleted 0, rejected 1
+ info   run 6: completed in 98s: rounds 11, created 44, updated 19, deleted 0, rejected 0
+ info   run 7: completed in 42s: rounds 2, created 21, updated 10, deleted 0, rejected 0
+ info   run 8: completed in 149s: rounds 6, created 24, updated 12, deleted 0, rejected 1
+ info   run 9: completed in 67s: rounds 3, created 17, updated 7, deleted 0, rejected 0
+ info   run 10: completed in 127s: rounds 8, created 49, updated 18, deleted 0, rejected 0
+ info   run 11: completed in 93s: rounds 9, created 42, updated 13, deleted 0, rejected 2
+ info   run 12: completed in 98s: rounds 9, created 47, updated 18, deleted 0, rejected 1
+ info   run 13: completed in 33s: rounds 1, created 5, updated 3, deleted 0, rejected 0
+ info   run 14: completed in 0s: rounds 0, created 0, updated 0, deleted 0, rejected 0
+ succ dreaming-eval-workarena: 504 KIs (entity.catalog_item 33, entity.module 24, entity.page 45, entity.protocol 9, fact.gotcha 67, fact.ui_location 65, fact.form_field 98, fact.procedure 59, fact.page_layout 60, fact.record_value 19, fact.side_effect 12, fact.company_rule 13) → data/context_engine_dreaming_eval/runs/wa-full-1/dreaming-eval-workarena/kis.json
+ info ── evaluate
+ info dreaming-eval-workarena: judging 141 targets against 504 KIs with .anthropic-claude-4.6-sonnet-chat_completion
+ info   10/141 judged
+ info   20/141 judged
+ info   30/141 judged
+ info   40/141 judged
+ info   50/141 judged
+ info   60/141 judged
+ info   70/141 judged
+ info   80/141 judged
+ warn Reranking with .rerank-v1-elasticsearch failed (status_exception
+      	Root causes:
+      		status_exception: timeout [30s] waiting for inference result); ranking by shared words instead
+ info   90/141 judged
+ info   100/141 judged
+ info   110/141 judged
+ info   120/141 judged
+ info   130/141 judged
+ info   140/141 judged
+ info   141/141 judged
+ succ dreaming-eval-workarena: KIs hold 61.0% (64 covered, 44 partial, 33 missing of 141) → data/context_engine_dreaming_eval/runs/wa-full-1/dreaming-eval-workarena/summary.md
+ info   dynamic-environment: 48.6% (13 covered, 8 partial, 14 missing of 35)
+ info   procedure: 75.0% (19 covered, 10 partial, 3 missing of 32)
+ info   static-environment: 60.8% (32 covered, 26 partial, 16 missing of 74)
+ info ── ask
+ info dreaming-eval-workarena: asking dreaming-eval-workarena-answerer 141 questions
+ info   restored the 504 KIs of run wa-full-1
+ info   5/141 answered
+ info   10/141 answered
+ info   15/141 answered
+ info   20/141 answered
+ info   25/141 answered
+ info   30/141 answered
+ info   35/141 answered
+ info   40/141 answered
+ info   45/141 answered
+ info   50/141 answered
+ info   55/141 answered
+ info   60/141 answered
+ info   65/141 answered
+ info   70/141 answered
+ info   75/141 answered
+ info   80/141 answered
+ info   85/141 answered
+ info   90/141 answered
+ info   95/141 answered
+ info   100/141 answered
+ info   105/141 answered
+ info   110/141 answered
+ info   115/141 answered
+ info   120/141 answered
+ info   125/141 answered
+ info   130/141 answered
+ info   135/141 answered
+ info   140/141 answered
+ info   141/141 answered
+ succ dreaming-eval-workarena: dreaming-eval-workarena-answerer answered 67.0% (91 correct, 7 partial, 43 incorrect of 141) → data/context_engine_dreaming_eval/runs/wa-full-1/dreaming-eval-workarena/answers.md
+ info   dynamic-environment: 41.4% (13 correct, 3 partial, 19 incorrect of 35)
+ info   procedure: 78.1% (25 correct, 7 incorrect of 32)
+ info   static-environment: 74.3% (53 correct, 4 partial, 17 incorrect of 74)

@@ -1,0 +1,989 @@
+[
+  {
+    "id": "01307e07",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal. On the Incidents list page, when I open the \"Filters\" dropdown, excluding \"Edit personal filters\" and \"-- None --\", which filter option labels contain the substring \"Incident\"?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Incident Mobile, Incident Portal, My Open Incidents"
+  },
+  {
+    "id": "025db8ef",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. My boss asked me to rebalance workload between several agents by reassigning problems with a specific tag. What are the two modules that our company's workflow typically use in order to accomplish this task? Tell me the first module's name and the second module's name in order, separated by a semicolon. Mark your final answer (should be two short phrases separated by a semicolon) in \\boxed{}.",
+    "answer": "Reports;Problems"
+  },
+  {
+    "id": "057a2d4d",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with our ServiceNow portal. When we order a Dell XPS as the developer laptop, what is the extra dollar amount if we choose the largest SSD option?\n\nMark your final answer (should be a single integer indicating the amount) in \\boxed{}.",
+    "answer": "300"
+  },
+  {
+    "id": "07ffeedf",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. For the task of navigating and creating problem requests from incident-report results, which option contains only fields that are both (i) present on the Problem table in this environment and (ii) unimportant in our typical workflow?\n\nA. Problem Statement, Description, Category\nB. Problem Statement, Impact/Priority/Urgency, Assignment Group\nC. Subcategory, Routing Cluster, State\nD. Assignment Group, State, Escalation Tier\nE. Category, Subcategory, Configuration Item\nF. Description, Problem Statement, Workstream Code\nG. Subcategory, Assignment Group, State\nH. Configuration Item, Priority, Urgency\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "G"
+  },
+  {
+    "id": "080b0218",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with our ServiceNow portal. When we order a Dell XPS as the developer laptop, what is the extra dollar amount if we choose a Windows operating system?\n\nMark your final answer (should be a single integer indicating the dollar amount) in \\boxed{}.",
+    "answer": "100"
+  },
+  {
+    "id": "0b50ca0d",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. In our company's typical workflow, if I am told to create extra device item requests for agents selected from incident-report criteria, which form should I go to?\n\nA. IT Services > Device Purchase Request\nB. Open Records > Items (Item Requests)\nC. Manager Resources > Order Hardware for Employee\nD. Service Catalog > Request a New Device\nE. Employee Center > New Hardware / Peripheral Request\nF. Departmental Services > Agent Equipment Upgrade\nG. Procurement > Employee Device Requisition\nH. Service Catalog > Order Hardware\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "B"
+  },
+  {
+    "id": "0cf979c4",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with our ServiceNow portal. In the Service Catalog, the Mac and PC developer laptop items use similar but non-identical names. What are the exact two item names? Separate them with semicolons.\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Developer Laptop (Mac); Development Laptop (PC)"
+  },
+  {
+    "id": "0d07143c",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal while sorting the All Assets list. Before selecting the target field, what default sort field is initially shown in the sort row?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Acquisition method"
+  },
+  {
+    "id": "0f8c85a6",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working in our ServiceNow based portal. On an `Expense Line` record page, which field has a checkbox next to it?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Inherited"
+  },
+  {
+    "id": "0f970f01",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with our ServiceNow portal. In the Catalog Items list view, which column header sits between \"Price\" and \"Delivery time\"?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Class"
+  },
+  {
+    "id": "100ff132",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. My boss asks me to find a report with a specific title that shows agents' performance and then create and assign problems based on it. Before assigning new problems, which single procedure is the most appropriate for locating the relevant incident report?\n\nA. Navigate to Performance Analytics > Dashboards -> open the Incident Management dashboard -> review MTTR, SLA breaches, and workload distribution -> use the dashboard insights to decide who gets new problems.\nB. Navigate to Reports > Create New -> choose table = Incident -> group by Assigned to -> add metrics (resolution time, open count, reassignment count) -> Run -> analyze results to identify underperforming agents.\nC. Navigate to Reports > View/Run -> click the All (or Global) tab -> search Open Incidents by Assigned to -> open the closest match -> review current workload levels per agent.\nD. Use the All filter in the left navigator -> type reports -> click View/Run -> locate and open the incident-related performance report.\nE. Navigate to Reports > View/Run -> filter the report list to the Incident table -> use a contains search for #INC -> open the first result -> apply date range + Assignment group/Assigned to filters -> review the report data.\nF. Navigate to Analytics Hub (or Performance Analytics) -> Dashboards -> open a Service Desk/Incident dashboard -> add a breakdown by Assigned to and a time period -> drill down into specific incidents to find bottlenecks.\nG. Navigate to Reports > View/Run -> search Incident + Performance/Assignment/Resolved -> open the closest match -> then pivot/group by Assigned to and filter to Resolved/Closed in the last X days.\nH. Navigate to Reports > Create New -> table = Incident -> choose Bar or Pivot -> group by Assigned to (optionally add State/Resolution time) -> set filters (Resolved/Closed + last X days + assignment group) -> Save and Run.\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "D"
+  },
+  {
+    "id": "106c321b",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with our ServiceNow portal. When we order an iPad Pro, how many total possible (color, storage) combinations are there? Answer with an English word (e.g., one/two/three, etc.).\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "six"
+  },
+  {
+    "id": "14a823df",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal. I am filling out the form to create a new problem record. If I change the \"Impact\" field to \"Low\" and the \"Urgency\" field to \"Low\", what value does the \"Priority\" field automatically change to?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "5 - Planning"
+  },
+  {
+    "id": "17a03f9b",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working in our ServiceNow based portal. On the `Data Management Delete Job` form, what checkbox label appears directly above the `Run at` field?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Run business rules and engines"
+  },
+  {
+    "id": "19367bc7",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Among these five forms (change request/problem/incident/hardware/user), do you remember a page that intergrates with Outlook calendar?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "User"
+  },
+  {
+    "id": "1bfd2eac",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Among these five forms (change request/problem/incident/hardware/user), do you remember which page has the least number of required fields?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Change-request"
+  },
+  {
+    "id": "1cf04706",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. According to company protocol \"Problem List Cleanup\", in our company's typical workflow, how should we handle the description field of the duplicated problems we want to remove?\n\nA. Refer to the internal knowledge base and decide case-by-case for each duplicate\nB. Set it to `duplicate of [target id]` so reviewers can trace the link from description text\nC. Do not overwrite the existing description because it may contain root-cause context\nD. Clear the description field entirely to avoid conflicting notes\nE. Copy the full description from the retained (non-duplicate) problem\nF. Set the description field to `duplicate`\nG. Set it to `resolved as duplicate` and include timestamp + assignee initials\nH. Prefix the original description with `[DUPLICATE]` and keep the rest unchanged\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "F"
+  },
+  {
+    "id": "229675cd",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Create Change Request vs Incident. What is the additional button at the top right of the incident page that does not appear in the change-request form?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Resolve"
+  },
+  {
+    "id": "233f9f09",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow service catalog and comparing the order pages for the `Standard Laptop`, `Developer Laptop (Mac)`, and `Sales Laptop`. Which page has the largest number of optional software checkbox choices?\n\nA. Standard Laptop\nB. Developer Laptop (Mac)\nC. Sales Laptop\nD. Standard Laptop and Developer Laptop (Mac) are tied\nE. Developer Laptop (Mac) and Sales Laptop are tied\nF. All three are tied\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "C"
+  },
+  {
+    "id": "237d2cc5",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Among these five forms (change request/problem/incident/hardware/user), do you remember a page that has a remainder/system message about how to fill the form?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "User"
+  },
+  {
+    "id": "23c3e290",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Create Change Request vs Incident. Both forms mark short-description as a required field, true or false?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "false"
+  },
+  {
+    "id": "25b00876",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. In our company's typical workflow, if I am told to allocate investments to maximize returns by managing the items in Expense Lines, which field can I find the returns of each item?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "short description"
+  },
+  {
+    "id": "2721ca7f",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal. After you place an order for a MacBook, how many stages remain, excluding in-progress ones, before the order pipeline is fully complete? Answer in English (e.g., zero, one, two, three, etc.).\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "seven"
+  },
+  {
+    "id": "2975030d",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working in our ServiceNow based portal. On a `Report` record page, what is the only entry under `Related Links`?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Launch Dependency Assessment"
+  },
+  {
+    "id": "2b96f402",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with our ServiceNow portal. How many knowledge bases do we have right now in our system? Answer in English (one/two/three/four/five/...).\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "four"
+  },
+  {
+    "id": "2d4e08b9",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal. In `Personalize List Columns`, look at the default `Selected` pane for the Assets list, Users list, and Catalog Items list. What is the bottom-most selected label on each page? Give the three labels in this order: Assets, Users, Catalog Items. Put the three short phrases in \\boxed{} separated by semicolons.",
+    "answer": "Warranty expiration; Business phone; Fulfillment automation level"
+  },
+  {
+    "id": "2e90de97",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working in our ServiceNow based portal. On the `Data Management Delete Job` form, which fields are shown but not modifiable? Answer as a comma-separated list.\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Number, State"
+  },
+  {
+    "id": "32909aa1",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow Portal. I am tasked with balancing the workload for problems with a specific hashtag. Which of the modules should I try to use first? Mark your final answer (should be a short phrase with optional arrow labels) in \\boxed{}.",
+    "answer": "Reports"
+  },
+  {
+    "id": "32d04f31",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal. After you place an order for a loaner laptop, how many stages remain before the order pipeline is fully complete? Answer in English (e.g., zero, one, two, three, etc.).\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "one"
+  },
+  {
+    "id": "32e719c2",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with our ServiceNow portal. When we order a Macbook developer laptop, we can opt for Google Chrome as an optional software, true or false?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "false"
+  },
+  {
+    "id": "38726e61",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with our ServiceNow portal. In Reports > View/Run, incident-assignment dashboard report links begin with \"Incidents with hashtag #...\". What prefix is used for inventory/order dashboard report links?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Catalog with hashtag"
+  },
+  {
+    "id": "3a131a42",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Create Change Request vs Incident. There is only one single-word non-prepopulated mandatory field that appears in the incident form but not in the change request form, true or false?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "true"
+  },
+  {
+    "id": "3a2e9368",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. For the task of filtering and removing duplicated problems, which fields are the most important in our typical workflow?\n\nA. Category, Related incidents\nB. Ownership, Category, Impact, Related incidents\nC. Priority, Impact\nD. Priority, Problem statement\nE. Problem statement, Configuration item\nF. Scope, Ownership\nG. Impact, Configuration item, Related incidents, Scope\nH. Configuration item, Scope\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "D"
+  },
+  {
+    "id": "3b375e30",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Create Change Request vs Problem vs Incident. Among the three, which one has the most number of fields with drop-down lists?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Incident"
+  },
+  {
+    "id": "3fd81278",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal. When ordering a Dell XPS 13 from the Service Catalog, if I change the operating system from the default Ubuntu to Windows 8, what dollar amount appears in brackets next to Ubuntu?\n\nMark your final answer (should be a single integer indicating the amount) in \\boxed{}.",
+    "answer": "100"
+  },
+  {
+    "id": "41a18e5c",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal. After opening a Hardware Asset record and clicking \"Personalize Form\", the dialog shows many \"Form Fields\" checkboxes. Which three checkbox labels contain the word \"Depreciat\" (i.e., depreciation-related)?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Depreciated amount, Depreciation, Depreciation effective date"
+  },
+  {
+    "id": "42a55762",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Create Incident vs Problem, in which form(s) is the field \"Number\" mutable?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Incident"
+  },
+  {
+    "id": "4755f316",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with our ServiceNow portal. For the Hardware form, what are the current model categories we can fill in? Separate them with semicolons in your answer.\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "computer; computer peripheral"
+  },
+  {
+    "id": "4c6d1eb7",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal. On the Users list page, after clicking \"Personalize List Columns\", the dialog shows several settings checkboxes. Which two settings checkboxes are unchecked by default?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Compact rows, Active row highlighting"
+  },
+  {
+    "id": "4df5e6b4",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. I want to compare two workflows: balancing the workload for problems with a specific hashtag, and restocking items that are low in quantity. What shared application or module family do they both involve?\n\nMark your final answer (should be a short phrase) in \\boxed{}.",
+    "answer": "Reports"
+  },
+  {
+    "id": "4dffe641",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal. In the Service Catalog, after submitting a Loaner Laptop order and reaching the Order Status page, what value is shown in the right-side Total box? Select ONE.\n\nA. $0.00\nB. empty\nC. -\nD. the full purchase price of the laptop\nE. a calculated depreciation/decay value\nF. the selected quantity multiplied by a unit rental price\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "C"
+  },
+  {
+    "id": "4ed01379",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Create Change Request vs Problem vs Incident vs Hardware vs User. Among create-request, problem, incident, hardware, and user forms, how many forms have the ability to send an email directly after entering the field? What are they? Say the number in English (one/two/three/four) and then say their names.\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "One; User"
+  },
+  {
+    "id": "50711c52",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal. When ordering a Dell XPS 13 from the Service Catalog, if I change the operating system from the default 250GB solid-state-drive (SSD) to 500GB, what dollar amount appears in brackets next to 250GB?\n\nMark your final answer (should be a single integer indicating the amount) in \\boxed{}.",
+    "answer": "300"
+  },
+  {
+    "id": "507a0fe8",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. When we create a user record, which option contains only important fields that are present in the form and typically required for manual entry in our workflow?\n\nA. Locked out, Mobile phone, Business phone\nB. Title, Department, Language\nC. Date format, Active, Password needs reset\nD. Photo, Active, Lock out\nE. Lock out, Active, Language\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "A"
+  },
+  {
+    "id": "52dd33bb",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. My boss asks me to allocate investments to expense lines that meet specific criteria so we can maximize returns within a given budget. Before the final action that completes the task (clicking the Update button), which meaningful action is most likely required?\n\nA. Set the State of expense line item(s) to Closed - Complete.\nB. Fill the Additional comments field and mark it as customer-visible.\nC. Explain the investment methodology in the Description field.\nD. Fill the Work notes field to document internal progress.\nE. Set the State field expense line item(s) from Pending to Processed.\nF. Set the Investment field on every expense line item.\nG. Export the filtered expense lines to CSV and attach the file to the record.\nH. Reassign each selected expense line to the Finance approvals queue before saving.\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "A"
+  },
+  {
+    "id": "58c34839",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. Compare the onboarding and offboarding workflows in the cited successful runs. Counting only the major non-task work surfaces where the core action happens, and counting a user form, a catalog item page, or a hardware record page as one surface each, which statement is correct?\n\nA. Onboarding requires one more major work surface than offboarding.\nB. Offboarding requires one more major work surface than onboarding.\nC. Onboarding and offboarding require the same number of major work surfaces.\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "A"
+  },
+  {
+    "id": "5aaf0f61",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Create Change Request vs Incident. Which one -- incident and change-request -- supports the related search feature?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Incident"
+  },
+  {
+    "id": "5b249b5c",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working in our ServiceNow based portal. On the `Private Task` form page, what is the name of the mandatory field in this form?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Owner"
+  },
+  {
+    "id": "5edd2533",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working in our ServiceNow portal on requesting an item for an employee. In the form, the internal stage value is set to waiting_for_approval. After submitting the form, what value does it translate to in the Approval column in the requested items list? Select ONE.\n\nA. Requested\nB. Pending Approval\nC. Approved\nD. Awaiting Approval\nE. Approval Requested\nF. Not Requested\nG. No Approval Required\nH. Not Yet Requested\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "H"
+  },
+  {
+    "id": "5f100f22",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Create Incident vs Problem. In both forms, the default value for the field \"Priority\" is 5, true or false?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "true"
+  },
+  {
+    "id": "616c238d",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow Portal. I am tasked with balancing the workload for problems with a specific hashtag. Which of the modules should I try to use first?\n\nA. Advanced Work Assignment\nB. System Policy -> Assignment Rules\nC. Queue Groups\nD. Flow Designer\nE. Reports\nF. Problem -> All (with grouped list view)\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "E"
+  },
+  {
+    "id": "634973c3",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working in our ServiceNow based portal. On an `Expense Line` record form, what are the three business options in the `Summary type` dropdown besides `-- None --`? Answer in dropdown order and separate them with semicolons.\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Grow Business; Run Business; Transform Business"
+  },
+  {
+    "id": "658fa827",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow service catalog and comparing the order pages for the `Standard Laptop` and the `Developer Laptop (Mac)`. Which optional software choice appears on the `Developer Laptop (Mac)` page but not on the `Standard Laptop` page?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Eclipse IDE"
+  },
+  {
+    "id": "668f7b74",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working in our ServiceNow based portal. On an `Expense Line` record page, what are the two buttons in the `Source` section? Separate them with semicolons.\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Update; Delete"
+  },
+  {
+    "id": "679111c6",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Create Change Request vs Problem vs Incident vs Hardware vs User. Among them, which forms have unchangeable/fixed fields on the initial load? List all that apply and separate them with semicolon.\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "problem; incident; change request; hardware"
+  },
+  {
+    "id": "68107cba",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with our ServiceNow portal. On the page where you manage and filter the list of users, the avatar field shows the user's initials when no image is uploaded, true or false?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "false"
+  },
+  {
+    "id": "6a7808c5",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with our ServiceNow portal. \"Peripherals\" is a valid value in the Category column when we are filtering service catalog, true or false?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "true"
+  },
+  {
+    "id": "6cb8ce37",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal. In the Create Incident form, after you enter \"Problem CoordinatorATF\" in the \"Caller\" field, how many additional icons appear to the right of that field? Answer in English (e.g., one, two, three, etc.).\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "two"
+  },
+  {
+    "id": "71e61e15",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Create Change Request vs Problem vs Incident. What is the form among create-request, problem, and incident forms that has the most number of fields to enter in the first section (main form, above the tabs)? Count in required fields, optional fields, and prepopulated fields, but do not count in immutable ones.\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Incident"
+  },
+  {
+    "id": "73b6738b",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Create Incident vs Problem, which form has more fields that are immutable?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Problem"
+  },
+  {
+    "id": "73cbefdc",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. In our company's tight-window, priority-aware change-request rescheduling workflow, which combined rule is correct?\n\nA. Schedule higher-risk changes first, and keep the gap between consecutive changes to at most 1 day while honoring risk-based durations.\nB. Keep the original change order and only resize durations by risk, even if adjacent changes overlap.\nC. Schedule higher-impact changes first, and keep the gap between consecutive changes to at most 1 day while honoring risk-based durations.\nD. Schedule lower-impact changes first so high-impact requests can use spare time at the end of the window.\nE. Schedule higher-impact changes first, keep the gap between consecutive changes to at most 1 hour, and still honor risk-based durations.\nF. Ignore the gap-limit requirement and only ensure non-overlap plus risk-based durations.\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "E"
+  },
+  {
+    "id": "756a7434",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. My manager asks me to onboard an employee to our company. Which of the following shows the correct sequence of major steps?\n\nA. Create/submit an Employee Onboarding request in Employee Center -> Assign/route and approve onboarding case/tasks in HR Agent Workspace -> Fulfill tasks (IT accounts/equipment, Facilities access, HR forms) and update statuses -> Verify completion and close the onboarding case\nB. Navigate to Service Portal -> Open New Hire Onboarding form (or Order Guide) -> Fill employee and equipment details -> Submit to trigger workflow\nC. Create user profile -> Order device -> Create hardware profile\nD. Order device -> Create hardware profile -> Create user profile\nE. Create user profile -> Create hardware profile -> Order device\nF. Create user profile -> Submit onboarding case -> Assign queue group\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "C"
+  },
+  {
+    "id": "75816b26",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow Portal. I need to offboard a user. What should I do on that user's hardware asset record?\n\nA. Set `Department` to `IT Storage` and set `Managed by` to `IT Manager`.\nB. Set `Substate` to `Available` and clear `Assigned to`.\nC. Replace the value of field `Assigned to` with an empty value (`\"\"`).\nD. Set `Stockroom` to `IT Storage Room` and set `State` to `In stock`.\nE. Clear `Assigned to`, then set `State` to `In stock`, then set `Substate` to `Available`.\nF. Set `Managed by` to `IT Manager`, set `Stockroom` to `IT Storage Room`, and add note `returned by [user]`.\nG. Set `State` to `In stock`.\nH. Add note `returned by [user]` and set `Substate` to `Available`.\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "C"
+  },
+  {
+    "id": "767e4106",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. For the task of filtering and removing duplicated problems, besides problem description, which field is the most important in our typical workflow?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "priority"
+  },
+  {
+    "id": "78686f4e",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal. When we remove a user record, which option exactly matches the other record types that might be automatically affected? Select ONE.\n\nA. Notification device; Expense line\nB. User preference; Time Card\nC. Notification device; Expense line; User preference; Subscription\nD. Notification device; Expense line; User preference\nE. Expense line; User preference; Live Profile; Report Viewer\nF. Notification device; User preference; Bookmark; Skill\nG. Expense line; Notification message\nH. Notification device; Expense line; User Delegation; User preference\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "D"
+  },
+  {
+    "id": "7a07e9a0",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Among these five forms (change request/problem/incident/hardware/user), four pages support optionally linking a configuration item, true or false?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "false"
+  },
+  {
+    "id": "7e32e4a2",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. I want to compare the hardware order procedures for several catalog items. Starting from the catalog item pages and counting each visible change from the default page state before `Order Now` as one step, which item page can require the most such steps for a valid configuration?\n\nA. Apple Watch\nB. Loaner Laptop\nC. Developer Laptop (Mac)\nD. Sales Laptop\nE. Standard Laptop\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "D"
+  },
+  {
+    "id": "7ea13f14",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal. When marking a problem as duplicate, a popup appears to collect additional information. Which field(s) are actually in that popup? Select ONE.\n\nA. Duplicate of\nB. Duplicate of; Resolution code\nC. Duplicate of; Resolution code; Close notes\nD. Duplicate of; Resolution code; Work notes / internal comments\nE. Duplicate of; Resolution code; Customer-facing comments / additional information\nF. Duplicate of; Resolution code; Parent\nG. Duplicate of; Resolution code; Canonical problem; Notes\nH. Duplicate of; Resolution code; Reason for marking as duplicate (short explanation)\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "A"
+  },
+  {
+    "id": "82cdfcc3",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working in our ServiceNow portal on assigning incidents to agents with specific expertise. After clicking into an incident item in the incident list and clicking on the Assigned to search box, a small box sometimes pops up beneath it before any input is entered. What is the title of that box?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "recent selections"
+  },
+  {
+    "id": "83c35034",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Create Incident vs Problem. In both forms, all the fields that have a suggestion button beside them are mandatory, true or false?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "true"
+  },
+  {
+    "id": "85251f36",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Create Change Request vs Hardware vs Incident, which one has the most clickable tabs under the main form body?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Hardware"
+  },
+  {
+    "id": "85fc5722",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working in our ServiceNow portal. When I am sorting inside the Catalog Items list, the full button label is \"Show / Hide Filter.\" In our use case, the filter is currently hidden, so clicking it effectively shows the filter. Before selecting the target field, what is the default sort field shown in the sort row?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "access type"
+  },
+  {
+    "id": "876c720a",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal. When you delete multiple records using Data Management Deletion Jobs and the job completes successfully, what is the name of the new field that pops up on the progress page and its value? Separate the two using a comma.\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "completion code, success"
+  },
+  {
+    "id": "87711b62",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal. On the Change Request list page, when building a filter condition and browsing the field list in alphabetical order, what is the second field whose name contains the word \"type\"?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "task type"
+  },
+  {
+    "id": "882965b7",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal. In the field-picker search dropdown used for list filters, typing `Type` on the Change Requests page and on the Catalog Items page reveals four extra matches besides the plain `Type` entry across the two pages. Give all four extra matches; order does not matter. Put the four short phrases in \\boxed{} separated by semicolons.",
+    "answer": "Access Type; Classic Mobile Picture Type; Contact type; Task type"
+  },
+  {
+    "id": "89439d62",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Among these five forms (change request/problem/incident/hardware/user), four of them display a prepopulated, system-generated case number, true or false?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "false"
+  },
+  {
+    "id": "8b09f378",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Create Change Request vs Hardware. Which form has more mandatory fields among the two forms?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Hardware"
+  },
+  {
+    "id": "8b2a9dd3",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with our ServiceNow portal. For the Hardware form, how many different options are there for the model categories field? Answer in English (one/two/three/four/five, etc.).\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "two"
+  },
+  {
+    "id": "8e320e42",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working in our ServiceNow based portal. On the `Private Task` form page, which two fields on the page have a checkbox next to them? Answer as a comma-separated list.\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Active, Work notes"
+  },
+  {
+    "id": "8f752563",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Create Change Request vs Hardware. Which form(s) out of the two forms -- hardware and create-request -- enable the calendar plugin when you need to enter a field's value as a date?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Hardware"
+  },
+  {
+    "id": "901b7d17",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working in our ServiceNow portal. After opening a knowledge article from the Knowledge search results list, what is the label of the new header action button that appears on the article page and was not present on the search-results list page?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Attach to Private Task"
+  },
+  {
+    "id": "90df8253",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working in our ServiceNow based portal. On the `Private Task` form page, which field is marked externally visible to customers?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Additional comments"
+  },
+  {
+    "id": "927c65a2",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Create Change Request vs Problem vs Incident vs Hardware vs User. Among these five forms, which form (s) doesn't share the same subtab named \"Notes\"? List all that apply and separate them with semicolon.\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "User; Hardware"
+  },
+  {
+    "id": "95ae824f",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. Compare the onboarding and offboarding workflows in the cited successful runs. Counting only the major non-task work surfaces where the core action happens, how many such surfaces appear in onboarding, and how many appear in offboarding? Count a user form, a catalog item page, or a hardware record page as one surface each. Answer onboarding first and offboarding second, in English (for example, one; two), separated by a semicolon. Mark your final answer in \\boxed{}.",
+    "answer": "three; two"
+  },
+  {
+    "id": "9680f077",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Create Change Request vs Hardware. In both forms -- hardware and create-request -- what is the name of the field that is mandatory yet non-mutable for only one of the two forms?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Quantity"
+  },
+  {
+    "id": "984022b1",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal. On Users > New, before I change anything in the form, I open the \"Date format\" dropdown for the first time. Which value is selected by default in our company environment?\n\nA. dd-MM-yyyy\nB. MM-dd-yyyy\nC. System (yyyy-MM-dd)\nD. System (MM/dd/yyyy)\nE. yyyy/MM/dd\nF. ISO-8601\nG. Locale default\nH. Blank\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "C"
+  },
+  {
+    "id": "9c074855",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with our ServiceNow portal. On the Loaner Laptop page, what is the default value shown for \"How long do you need it for?\"\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "1 day"
+  },
+  {
+    "id": "9c24f41e",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working in our ServiceNow portal to balance workload across problems with the same tag. I reassign the lowest-priority problem from the user with the most assigned problems to the user with the fewest assigned problems. After filtering for that problem and opening it, what stage is the problem on, as shown in the progress bar at the top?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "assess"
+  },
+  {
+    "id": "9c32bca6",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working in our ServiceNow based portal. On the `Data Management Delete Job` form, what are the two entries under `Related Links`? Separate them with semicolons.\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Preview Cascade; Execute Now"
+  },
+  {
+    "id": "9e05978c",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. My boss asks me to manage expenses whose short descriptions contain the hashtag tag `#SERIES-df9c3c1e-3`. What is the correct step to find the matching expenses on the Expense Line page?\n\nA. Click `Show Filter` on the Expense Line list, add condition `Short description` `contains` `#SERIES-df9c3c1e-3`, then click `Run`.\nB. Use the list search dropdown, choose `Short description`, enter `#SERIES-df9c3c1e-3`, and press Enter.\nC. Use the list search dropdown, choose `Short description`, enter `*#SERIES-df9c3c1e-3`, and press Enter.\nD. Use the Short Description column search box and enter `#SERIES-df9c3c1e-3` directly.\nE. Open filter builder and set `Short description` `starts with` `#SERIES-df9c3c1e-3`.\nF. Open filter builder and set `Short description` `is` `#SERIES-df9c3c1e-3`.\nG. Use global search for `#SERIES-df9c3c1e-3`, then filter results to Expense Lines.\nH. Right-click a Short description value and choose `Filter Out` to narrow results.\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "A"
+  },
+  {
+    "id": "a3a7b079",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Among these five forms (change request/problem/incident/hardware/user), do you remember a page who category field is \"Other\" on the initial load?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "change-request"
+  },
+  {
+    "id": "a444cec8",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Create Change Request vs Hardware. The default value of the \"state\" field is \"New\" for change request and \"In use\" for hardware, true or false?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "true"
+  },
+  {
+    "id": "a45edf3e",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with our ServiceNow portal. When we order a Macbook developer laptop, we can choose the solid state drive size, true or false?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "false"
+  },
+  {
+    "id": "a482c0d9",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Among these five forms (change request/problem/incident/hardware/user), two of them they display a pre-populated non-editable Priority field, true or false?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "true"
+  },
+  {
+    "id": "a7edfb7a",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Create Change Request vs Problem vs Incident. What is the subtab name shared by all the three forms?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Notes"
+  },
+  {
+    "id": "aa4a4b7b",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Create Change Request vs Hardware. Which form(s) out of the two forms -- hardware and change request -- enable using \"lookup using list\" when you need to enter a field's value? Write the name and separate two names with semicolon if the answer is both.\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "change request; hardware"
+  },
+  {
+    "id": "aa64a8bd",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal. After a problem is marked as Duplicate and the progress changes from \"Assess\" to \"Closed\", which field replaces \"Impact\" directly below the \"State\" field on the problem form?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "resolution code"
+  },
+  {
+    "id": "aca57021",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. My boss asked me to order the item Eric requested. What is the application and the two modules in it that I have to use in order?\n\nA. Service Catalog; Catalog Items; Cart\nB. Self-Service; Requested Items; My Requests\nC. Procurement; Purchase Orders; Sourcing\nD. Self-Service; My Requests; Service Catalog\nE. Procurement; Sourcing Workspace; Purchase Orders\nF. Self-Service; Requested Items; Service Catalog\nG. Service Catalog; Open Search; Requested Items\nH. Self Service; Service Catalog; Requested Items\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "F"
+  },
+  {
+    "id": "ad903be2",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with our ServiceNow portal. If I order an Apple Watch, how long does the delivery take by default? Express the duration in English, e.g., \"4 days\", \"7 days\".\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "2 days"
+  },
+  {
+    "id": "adddeaa5",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Create Change Request vs Problem vs Incident, what form(s) among them have the feature that could allow you to search/filter knowledge and inspect the result? List all that apply and separate your answers with a semicolon.\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "problem; incident"
+  },
+  {
+    "id": "aedd338d",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Among these five forms (change request/problem/incident/hardware/user), which form has the most subform tabs under the main fields?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Hardware"
+  },
+  {
+    "id": "aef57896",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working in our ServiceNow based portal. On the Service Catalog search results page, how many results are displayed per page by default?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "20"
+  },
+  {
+    "id": "b54161f8",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow service catalog and comparing the order pages for the `Standard Laptop` and the `Sales Laptop`. Which optional software choices appear on the `Sales Laptop` page but not on the `Standard Laptop` page? Give the two labels separated by semicolons in \\boxed{}.",
+    "answer": "Microsoft Powerpoint; Siebel Client"
+  },
+  {
+    "id": "b7cc4da2",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. My boss asked me to order the item Eric requested. What is the two modules in it that I have to use in logical order in the Self-Service application to accomplish this task? Tell me the first module's name and the second module's name in order, separated by a semicolon.\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Requested Items; Service Catalog"
+  },
+  {
+    "id": "b8cabd09",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal. After I create a new User record and submit it successfully, which automatic action is confirmed by the top-page popup message? Select ONE.\n\nA. Record inserted\nB. Update successful\nC. User created successfully\nD. HR Profile Created\nE. Email device created\nF. Customer Contact Created\nG. Welcome email sent\nH. Password generated\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "E"
+  },
+  {
+    "id": "bdb825a3",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal. When filtering the Hardware list by the \"Assigned to\" field, what is the default comparator? Select ONE.\n\nA. is\nB. >=\nC. ==\nD. =\nE. contains\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "B"
+  },
+  {
+    "id": "bf98bb38",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with our ServiceNow portal. When we order a Dell XPS as the developer laptop, we can choose the solid state drive size, true or false?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "true"
+  },
+  {
+    "id": "bfb3bcc4",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. My manager asks me to offboard a user named Gail-David Walker-Saunders. According to our typical workflow, what are the necessary steps?\n\nA. Navigate to the user profile -> Unassign all hardware assets from the user -> Delete the user profile -> Mark the task as Closed - Complete.\nB. Navigate to the user profile -> Delete the user profile -> Manually clear the Assigned To field on all related hardware assets -> Mark the task as Closed - Complete.\nC. Navigate to Hardware Assets -> Transfer all assigned assets to Available status -> Delete the user profile -> Mark the task as Closed - Complete.\nD. Delete the user profile -> Verify related incidents and tasks are reassigned -> Mark the task as Closed - Complete.\nE. Navigate to the user profile -> Lock the account -> Delete the user profile -> Mark the task as Closed - Complete.\nF. Navigate to the user profile -> Unassign hardware assets -> Update related records (incidents, approvals, requests) -> Delete the user profile -> Mark the task as Closed - Complete.\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "A"
+  },
+  {
+    "id": "c0593d69",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Create Change Request vs Problem vs Incident vs Hardware vs User. Among create-request, problem, incident, hardware, and user forms, how many forms have subtabs on the page, in addition to the field-entering section? Answer in English (zero/one/two/three/four/five)\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "four"
+  },
+  {
+    "id": "c0696888",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal. In the Change Request form, after you enter \"IP-Router-3\" in the \"Configuration item\" field, how many additional icons appear to the right of that field? Answer in English (e.g., one, two, three, etc.).\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "three"
+  },
+  {
+    "id": "c1c000eb",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with our ServiceNow portal. After navigating to Change > All, clicking New, and viewing the change model cards, how many preapproved model cards have 100% success rate? Answer in English (one, two, three, etc.).\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "four"
+  },
+  {
+    "id": "c3dbec17",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working in our ServiceNow based portal. On the `Data Management Delete Job` form, besides `AND` and `OR`, what are the names of the two buttons in the `Condition` section? Answer as a comma-separated list.\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Preview, New Criteria"
+  },
+  {
+    "id": "c60f4681",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. My manager asks me to assign N incidents to agents using predefined matching rules to ensure each incident is handled by the most suitable agent.\n\nWhich of the following shows the correct steps in order?\n\nA. Open the Incident list -> Apply matching filters -> Assign randomly -> Close records\nB. Open the correct Incident list -> Clear existing filters -> Apply matching rules -> Enable Show Related Fields -> Verify results -> Bulk edit assignments -> Validate\nC. Export incidents -> Edit in Excel -> Re-import -> Notify agents\nD. Find and open one incident that needs edits -> Apply matching rules -> Edit assignments -> Repeat for all N incidents\nE. Ask another agent to assign incidents -> Review later -> Update if needed\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "D"
+  },
+  {
+    "id": "c80ca967",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working in our ServiceNow based portal. On the `Sales Laptop` item page under `Service Catalog > Hardware`, what are the names of the two sections shown on the right side of the page? Separate them with semicolons.\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Order this Item; Shopping Cart"
+  },
+  {
+    "id": "c9568c9b",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow Portal. In our company's workflow, when we disperse change requests so they do not overlap, what field do we typically use to decide the time span length allocated to each change request?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "risk level"
+  },
+  {
+    "id": "c9c6a06a",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with our ServiceNow portal. When we order an iPad mini, how many total possible (color, storage) combinations are there? Answer with an English word (e.g., one/two/three, etc.).\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "eight"
+  },
+  {
+    "id": "ca8e070b",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with our ServiceNow portal. When we order a loaner laptop, we are able to choose from preset choices (like \"1 day\") for \"How long do you need it for\" and select a specific date for \"When do you need it\", true or false?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "false"
+  },
+  {
+    "id": "ccf29914",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. For the task of removing duplicated existing expenses on the Expenses Line page, which fields are the most important in our typical workflow?\n\nA. Task, Vendor\nB. Amount, Employee, Vendor, Expense Date\nC. Merchant, Date\nD. Short description, Expense Date, Merchant, Vendor\nE. Employee, Task\nF. Amount, Vendor, Expense Date, Merchant\nG. Amount, Task, Short description, Date\nH. Merchant, Vendor\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "G"
+  },
+  {
+    "id": "cdd0e687",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. In our company's `Managing Your Existing Expenses` workflow, after filtering Expense Lines by the target hashtag and determining which duplicate rows should be removed while keeping the most expensive duplicate, what should I do next?\n\nA. Use a list-level bulk delete on all filtered rows.\nB. Use a list-level bulk delete only on the rows chosen for removal.\nC. Open each expense line chosen for removal and delete it from its record page.\nD. Export the filtered rows, remove duplicates offline, and re-import them.\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "C"
+  },
+  {
+    "id": "cf62efad",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working in our ServiceNow based portal. On an `Expense Line` record page, which field has a pencil icon next to it?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Amount"
+  },
+  {
+    "id": "d0d61088",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal. When deleting multiple records using Data Management Deletion Jobs, what is the exact name of the initial state highlighted in yellow on the progress page right after you proceed with the job?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Starting"
+  },
+  {
+    "id": "d3d7ec75",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Among these five forms (change request/problem/incident/hardware/user), which one displays a prepopulated read-only case number at the top?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Problem"
+  },
+  {
+    "id": "d63e8a7f",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. My boss asks me to onboard a new user. After creating the new user profile, I navigate to order an Apple Mac Book Pro for this user and complete the order. What step remains? (Select ONE.)\n\nA. Return to the onboarding task -> add the MacBook Request (REQ) / Request Item (RITM) number in Work notes for traceability -> change the task state from Open to Closed - Complete.\nB. Navigate back to the onboarding task -> write a brief summary in Additional comments for the hiring manager/requester -> click Close Task (or set state to Closed - Complete).\nC. Verify the Request Item (RITM) was successfully created -> link it to the parent onboarding ticket -> then mark the onboarding task as Complete/Closed - Complete to trigger the next workflow phase.\nD. Create a new hardware record -> then return to the onboarding task page and change the status/state from Open to Closed - Complete.\nE. Return to the new user profile (sys_user) -> confirm the MacBook request is associated with the user/asset context -> validate provisioning details (delivery location/approvals) -> then close the onboarding task as Closed - Complete.\nF. Open the created MacBook request -> verify it is submitted and assigned to the correct fulfillment group -> notify the requester/manager with the tracking details -> then close the onboarding task as Closed - Complete.\nG. Return to the onboarding task -> reassign/hand off the task to the next fulfillment team -> set the task state to In Progress (so they can continue fulfillment).\nH. Create a new hardware record -> open the MacBook request and attach the hardware record -> then send the new user a completion message and close the onboarding task as Closed - Complete.\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "D"
+  },
+  {
+    "id": "d83c4bf7",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal while creating a hardware asset record. After clicking New and loading the blank Hardware form, what default value is shown in the State dropdown?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "in use"
+  },
+  {
+    "id": "dd53ab77",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal. When you delete multiple records using Data Management Deletion Jobs and the job completes successfully, what are the two next steps you are able to perform, as indicated by the two hyperlinks that appear below the successful condition code? Tell me their names, separated by comma.\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Check execution results, Go back to list view"
+  },
+  {
+    "id": "e033e796",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal. After placing a hardware order for a few developer laptops and reaching the final confirmation page, which set of additional fields is shown?\n\nA. Asset Tag Number; Requested For; Approval Status\nB. Request Number; Requested For; Request Stage; Approval Status\nC. Cost Center; Charge Account; Asset Tag; Requested For\nD. Asset Tag; Cost Center; Charge Account; Shipping address\nE. Requested For; Cost Center\nF. Request Number; Delivery Date; Approval Status\nG. Asset Tag Number; Shipping address\nH. Request Number; Delivery Date; Request Stage\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "H"
+  },
+  {
+    "id": "e334d5c6",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow Portal. If I am told to allocate investments to maximize returns, which module should I work in first?\n\nA. Portfolio Planning > Investment Portfolio\nB. Demand Management > Demands\nC. Investment Planning > Funding Plans\nD. Strategic Planning Workspace > Initiatives\nE. Cost > Expense Lines\nF. Scenario Planning > Plan Comparison\nG. Investment Funding > Allocation Rules\nH. Portfolio Workspace > Capital Plans\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "E"
+  },
+  {
+    "id": "e7292dab",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Create Change Request vs Problem vs Incident vs Hardware vs User. Among these four forms, how many forms have clickable boxes/ticks as one of the valid values in the main form's fields (not counting the tabs at the bottom)? What are they? Say the number in English (one/two/three/four) and then say their names.\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "One; User"
+  },
+  {
+    "id": "e823a94a",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working in our ServiceNow portal. Create change request vs. create hardware asset: how many more subform tabs containing mandatory fields whose values are not pre-populated does the hardware form have compared to the change request form?\n\nMake sure you wrap your final answer in English (e.g., one, two, three) inside \\boxed{}.",
+    "answer": "two"
+  },
+  {
+    "id": "e9fde9fe",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with our ServiceNow portal. On the asset management page, what class is typically assigned to mice and keyboards?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "consumable"
+  },
+  {
+    "id": "eb3cfd03",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. In our company's typical workflow, what are the modules we need to visit in order to restock items that are low in quantity?\nNote: within each option, the listed modules are not in order.\n\nA. Request Management > Requests, Inventory > Stockroom\nB. Approvals > My Approvals, Procurement > Sourcing\nC. Request Management > Requests, Stockroom > Stock Rules\nD. Approvals > My Approvals, Reports > View, Self-Service > Service Catalog\nE. Self-Service > Service Catalog, Approvals > My Approvals\nF. Procurement > Sourcing, Request Management > Requests, Stockroom > Transfer Orders\nG. Approvals > My Approvals, Inventory > Stockroom, Procurement > Sourcing\nH. Self-Service > Service Catalog, Reports > View\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "H"
+  },
+  {
+    "id": "ecdb7d5e",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow portal. I am tasked with updating records associated with the hashtag tag `#SERIES-df9c3c1e-3`. After updating the affected records, what should I do to return to the original task record and mark it as completed?\n\nA. Use global search with the task name, press Enter (the system will take you directly to the task record).\nB. Use global search with the full task number, press Enter, then click the exact-match result.\nC. Use global search with the full task number, do not press Enter, and click the exact-match suggestion in the dropdown.\nD. Use global search with the task name, do not press Enter, and click View results from the dropdown.\nE. Use global search for \"Managing Your Existing Expenses\" and press Enter, then click the exact-match option.\nF. Use global search for the full task number and press Enter (the system will take you straight to the record).\nG. Use global search for the full task number and click the exact-match option.\nH. Use global search for the full task number and click the View results option.\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "B"
+  },
+  {
+    "id": "f0882f6e",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Among these five forms (change request/problem/incident/hardware/user), which form has a subform tab that contains a mandatory field?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Hardware"
+  },
+  {
+    "id": "f1d8a168",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Among these five forms (change request/problem/incident/hardware/user), three forms have a process flow at the top, true or false?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "false"
+  },
+  {
+    "id": "f1f9de44",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Create Change Request vs Incident. Both of the two fields -- the \"Priority\" field in the incident form and the \"Conflict status\" field in the change-request form -- are immutable, true or false?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "true"
+  },
+  {
+    "id": "f3496ca5",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with our ServiceNow portal. Compared to ordering a Macbook Pro developer laptop, how many software options are available only when ordering a Sales Laptop? Answer in English (e.g., one/two/three, etc.).\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "two"
+  },
+  {
+    "id": "f35bac4a",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "dynamic-environment",
+    "question": "I am working with our ServiceNow portal. I am filling out the form to create a new problem record. If I change the \"Impact\" field to \"High\" and the \"Urgency\" field to \"Low\", what value does the \"Priority\" field automatically change to?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "3 - Moderate"
+  },
+  {
+    "id": "f4b2b1fb",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with our ServiceNow portal. On the Knowledge Search results page, what sorting options are listed next to \"Sort by\"? Separate them with semicolons.\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "Relevance; Views; Newest; Alphabetical"
+  },
+  {
+    "id": "f9c65fe6",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "procedure",
+    "question": "I am working with our ServiceNow Portal. Which applications do I need to visit if I would like to offboard a user?\n\nA. Self-Service, User Administration, Task\nB. HR Case Management, Lifecycle Events\nC. User Administration, System Security, Task\nD. Assets, Task\nE. Assets, System Security\nF. Lifecycle Events, Task, Self-Service\nG. HR Case Management, User Administration\nH. Self-Service, Lifecycle Events, HR Case Management\n\nPut your final answer into \\boxed{} format like \\boxed{A}.",
+    "answer": "E"
+  },
+  {
+    "id": "fe41b553",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Create Incident vs Problem. How many form(s) among them have the \"Related Search\" feature at the bottom of the page? Answer in English (zero, one, or two).\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "two"
+  },
+  {
+    "id": "ff311d07",
+    "dataset": "longmemeval_v2_enterprise",
+    "category": "static-environment",
+    "question": "I am working with a few forms in our ServiceNow portal. Among these five forms (change request/problem/incident/hardware/user), there is a page where a field where some form of \"plans\" is mandatory, true or false?\n\nMark your final answer (should be one or more short phrases) in \\boxed{}.",
+    "answer": "false"
+  }
+]
