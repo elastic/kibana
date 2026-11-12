@@ -114,7 +114,7 @@ export function fromStoredScriptedFields(
   const scriptedFields: Record<string, AsCodeSavedScriptedField> = {};
 
   for (const field of Object.values(fields)) {
-    if (!field.scripted || field.script === undefined) continue;
+    if (!field.scripted || !field.script) continue;
     scriptedFields[field.name] = {
       ...getCommonProperties(field.name, fieldAttrs, fieldFormats, true),
       type: field.type,

@@ -319,6 +319,18 @@ describe('fromStoredDataViewToAsCodeSavedSchema', () => {
       });
     });
 
+    it('ignores scripted fields without a script', () => {
+      const result = fromStoredDataViewToAsCodeSavedSchema({
+        title: 'logs-*',
+        fields: {
+          empty: { ...doubleBytes, name: 'empty', script: '' },
+          missing: { ...doubleBytes, name: 'missing', script: undefined },
+        },
+      });
+
+      expect(result).not.toHaveProperty('scripted_fields');
+    });
+
     it('ignores non scripted fields', () => {
       const result = fromStoredDataViewToAsCodeSavedSchema({
         title: 'logs-*',
