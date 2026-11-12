@@ -825,6 +825,25 @@ describe('RelayClient', () => {
     );
   });
 
+  it.each([
+    ['a string', '17'],
+    ['an array', ['17', '30']],
+  ])('returns the Retry-After header of a callback response given as %s', async (_, header) => {
+    requestMock.mockResolvedValue({
+      status: 429,
+      data: undefined,
+      headers: { 'retry-after': header },
+    } as never);
+
+    await expect(
+      createClient().postCallback(
+        'https://relay.test/relay-provided/callback?token=abc',
+        { execution_id: 'execution-1' },
+        new AbortController().signal
+      )
+    ).resolves.toEqual({ status: 429, retryAfter: '17' });
+  });
+
   it('rejects callback URLs outside the configured Relay origin', async () => {
     await expect(
       createClient().postCallback(

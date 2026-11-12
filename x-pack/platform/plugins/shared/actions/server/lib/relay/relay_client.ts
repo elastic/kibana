@@ -95,6 +95,11 @@ const parseRetryAfterSeconds = (value: unknown): number | undefined => {
   return Number.isFinite(seconds) && seconds >= 0 ? seconds : undefined;
 };
 
+const firstHeaderValue = (value: unknown): string | undefined => {
+  const first = Array.isArray(value) ? value[0] : value;
+  return first === undefined || first === null ? undefined : String(first);
+};
+
 export class RelayClient implements RelayClientContract {
   private readonly axios = axios.create();
   private readonly baseUrl: URL;
@@ -332,7 +337,10 @@ export class RelayClient implements RelayClientContract {
     }
 
     const response = await this.sendRequest(url, body, 'post', signal);
-    return { status: response.status };
+    return {
+      status: response.status,
+      retryAfter: firstHeaderValue(response.headers?.['retry-after']),
+    };
   }
 
   private async post(path: string, body: unknown): Promise<AxiosResponse> {

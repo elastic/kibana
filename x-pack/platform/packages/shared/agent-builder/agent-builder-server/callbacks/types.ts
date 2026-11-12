@@ -43,6 +43,9 @@ export type OnBeforeNewConversationHook = (
 export interface CallbackTransportDefinition {
   /** Whether this transport delivers to the given callback URL. */
   handles(callbackUrl: string): boolean;
-  /** Resolves once delivered; throws a `CallbackDeliveryError` to say whether to retry. */
+  /**
+   * Resolves once delivered; throws a `CallbackDeliveryError` to say whether to retry, and after
+   * how long when the receiver asked for a delay.
+   */
   send(callbackUrl: string, payload: ChatCallbackResponse, signal: AbortSignal): Promise<void>;
 }

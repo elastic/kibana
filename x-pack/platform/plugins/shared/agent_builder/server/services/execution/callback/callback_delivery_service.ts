@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import pRetry, { AbortError } from 'p-retry';
+import { defer, lastValueFrom, retry as rxRetry, timer } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
 import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server';
 import { isConversationNotFoundError } from '@kbn/agent-builder-common';
@@ -28,12 +28,14 @@ export interface ConversationResolution {
   agentId?: string;
 }
 
-const callbackRetryOptions = {
-  retries: 2,
-  minTimeout: 200,
-  factor: 2.5,
-  randomize: false,
-} as const;
+const CALLBACK_RETRIES = 2;
+const CALLBACK_RETRY_MIN_DELAY_MS = 200;
+const CALLBACK_RETRY_BACKOFF_FACTOR = 2.5;
+/** The longest a receiver's `Retry-After` can hold back the next attempt. */
+const MAX_CALLBACK_RETRY_AFTER_MS = 60_000;
+
+const getBackoffDelay = (retryCount: number): number =>
+  CALLBACK_RETRY_MIN_DELAY_MS * CALLBACK_RETRY_BACKOFF_FACTOR ** (retryCount - 1);
 
 export class CallbackDeliveryService {
   private readonly actions: ActionsPluginSetup;
@@ -157,25 +159,52 @@ export class CallbackDeliveryService {
     const transport = this.getTransport(callbackUrl);
     const { timeout } = this.actions.getActionsConfigurationUtilities().getResponseSettings();
 
-    await pRetry(
-      async () => {
-        const abortController = new AbortController();
-        const timeoutId = setTimeout(() => abortController.abort(), timeout);
+    const attempt = async () => {
+      const abortController = new AbortController();
+      const timeoutId = setTimeout(() => abortController.abort(), timeout);
 
-        try {
-          await transport.send(callbackUrl, payload, abortController.signal);
-        } catch (error) {
-          if (isCallbackDeliveryError(error) && !error.retryable) {
-            throw new AbortError(error);
-          }
+      try {
+        await transport.send(callbackUrl, payload, abortController.signal);
+      } catch (error) {
+        throw error instanceof Error ? error : new Error(String(error));
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    };
 
-          throw error instanceof Error ? error : new Error(String(error));
-        } finally {
-          clearTimeout(timeoutId);
-        }
-      },
-      retry ? callbackRetryOptions : { retries: 0 }
+    await lastValueFrom(
+      defer(attempt).pipe(
+        rxRetry({
+          count: retry ? CALLBACK_RETRIES : 0,
+          delay: (error, retryCount) => timer(this.getRetryDelay(error, retryCount)),
+        })
+      )
     );
+  }
+
+  /**
+   * The wait before the next attempt: the receiver's `Retry-After`, capped, else the backoff.
+   * Throws the error back when it is not retryable.
+   */
+  private getRetryDelay(error: Error, retryCount: number): number {
+    if (!isCallbackDeliveryError(error)) {
+      return getBackoffDelay(retryCount);
+    }
+
+    if (!error.retryable) {
+      throw error;
+    }
+
+    if (error.retryAfterMs === undefined) {
+      return getBackoffDelay(retryCount);
+    }
+
+    const delay = Math.min(error.retryAfterMs, MAX_CALLBACK_RETRY_AFTER_MS);
+    this.logger.debug(
+      `Callback receiver asked to retry after ${error.retryAfterMs}ms; waiting ${delay}ms`
+    );
+
+    return delay;
   }
 
   /** The first transport that handles the URL, else one that delivers with fetch. */
@@ -199,7 +228,10 @@ export class CallbackDeliveryService {
           signal,
         });
 
-        throwIfNotDelivered(response);
+        throwIfNotDelivered({
+          status: response.status,
+          retryAfter: response.headers.get('retry-after'),
+        });
       },
     };
   }

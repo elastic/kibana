@@ -56,6 +56,8 @@ export type RelayClaimResponse =
 
 export interface RelayCallbackResponse {
   status: number;
+  /** The raw `Retry-After` response header, when Relay sent one. */
+  retryAfter?: string;
 }
 
 /**
