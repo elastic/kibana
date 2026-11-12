@@ -170,7 +170,7 @@ function mockCoreStatusAvailability({
 }: {
   elasticsearch: boolean;
   savedObjects: boolean;
-}) {
+}): CoreStatus {
   return {
     elasticsearch: {
       level: elasticsearch ? ServiceStatusLevels.available : ServiceStatusLevels.unavailable,
@@ -178,6 +178,10 @@ function mockCoreStatusAvailability({
     },
     savedObjects: {
       level: savedObjects ? ServiceStatusLevels.available : ServiceStatusLevels.unavailable,
+      summary: '',
+    },
+    server: {
+      level: ServiceStatusLevels.available,
       summary: '',
     },
   };

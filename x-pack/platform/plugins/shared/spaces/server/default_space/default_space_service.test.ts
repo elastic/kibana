@@ -39,7 +39,7 @@ interface SetupOpts {
 const setup = ({ elasticsearchStatus, savedObjectsStatus, license }: SetupOpts) => {
   const core = coreMock.createSetup();
   const { status } = core;
-  status.core$ = new Rx.BehaviorSubject({
+  status.core$ = new Rx.BehaviorSubject<CoreStatus>({
     elasticsearch: {
       level: elasticsearchStatus,
       summary: '',
@@ -48,7 +48,11 @@ const setup = ({ elasticsearchStatus, savedObjectsStatus, license }: SetupOpts) 
       level: savedObjectsStatus,
       summary: '',
     },
-  }) as unknown as Rx.Observable<CoreStatus>;
+    server: {
+      level: ServiceStatusLevels.available,
+      summary: '',
+    },
+  });
 
   const { savedObjects } = coreMock.createStart();
   const repository = savedObjects.createInternalRepository() as jest.Mocked<SavedObjectsRepository>;
@@ -172,6 +176,10 @@ test(`initializes once all dependencies are met`, async () => {
       summary: '',
     },
     savedObjects: {
+      level: ServiceStatusLevels.available,
+      summary: '',
+    },
+    server: {
       level: ServiceStatusLevels.available,
       summary: '',
     },
