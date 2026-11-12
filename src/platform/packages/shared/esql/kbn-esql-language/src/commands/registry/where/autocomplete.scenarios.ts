@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { KQL_TYPE_TO_KIND_MAP } from '@kbn/esql-types';
 import {
   columns,
   dateDiffUnits,
@@ -55,10 +56,11 @@ const negatableOperators = operators('patternMatch', 'in').filter(
 const doubleFunctions = functions({ availableIn: 'where', scalar: true, returning: 'double' });
 const doubleColumns = columns({ types: 'double', followedBySpace: true });
 
-const kqlItems = [
-  { text: 'field_name', label: 'field_name', kind: 'Field' as const },
-  { text: 'other_field', label: 'other_field', kind: 'Field' as const },
-];
+const kqlItems = ['field_name', 'other_field'].map((name) => ({
+  text: name,
+  label: name,
+  kind: KQL_TYPE_TO_KIND_MAP.field,
+}));
 
 // Mimics the KQL provider: each suggestion replaces the current word, from the last space to the cursor.
 const getKqlSuggestions = async (kqlQuery: string) =>
