@@ -8,6 +8,7 @@
 import pMap from 'p-map';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
+import { withSpan } from '@kbn/apm-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
   ExceptionListSchema,
@@ -102,6 +103,7 @@ export const validatePreDeleteListResponse = (
   return undefined;
 };
 
+// Per-list cascade (run under pMap concurrency 10): delete container SO, then stream items.
 const deleteListWithItems = async ({
   list,
   namespaceType,
@@ -112,173 +114,184 @@ const deleteListWithItems = async ({
   namespaceType: NamespaceType;
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectType: SavedObjectType;
-}): Promise<ListOperationResult> => {
-  // Delete the container first so detection rules can no longer reference the
-  // list. Orphaned items left behind by a subsequent cleanup failure are inert
-  // (unreachable without a container) and preferable to a half-emptied list
-  // that rules still execute against.
-  try {
-    await savedObjectsClient.delete(savedObjectType, list.id);
-  } catch (err) {
-    const { message, statusCode } = transformError(err);
-    return {
-      error: {
-        lists: [{ id: list.id, list_id: list.list_id }],
-        message,
-        status_code: statusCode,
-      },
-      list,
-    };
-  }
+}): Promise<ListOperationResult> =>
+  withSpan(
+    {
+      labels: { listId: list.list_id },
+      name: 'exceptionLists.deleteListWithItems',
+      type: 'lists',
+    },
+    async () => {
+      // Delete the container first so detection rules can no longer reference the
+      // list. Orphaned items left behind by a subsequent cleanup failure are inert
+      // (unreachable without a container) and preferable to a half-emptied list
+      // that rules still execute against.
+      try {
+        await savedObjectsClient.delete(savedObjectType, list.id);
+      } catch (err) {
+        const { message, statusCode } = transformError(err);
+        return {
+          error: {
+            lists: [{ id: list.id, list_id: list.list_id }],
+            message,
+            status_code: statusCode,
+          },
+          list,
+        };
+      }
 
-  try {
-    await deleteExceptionListItemsByListStreamed({
-      listId: list.list_id,
-      namespaceType,
-      savedObjectsClient,
-    });
-  } catch (err) {
-    const { message, statusCode } = transformError(err);
-    return {
-      error: {
-        lists: [{ id: list.id, list_id: list.list_id }],
-        message,
-        status_code: statusCode,
-      },
-      list,
-    };
-  }
+      try {
+        await deleteExceptionListItemsByListStreamed({
+          listId: list.list_id,
+          namespaceType,
+          savedObjectsClient,
+        });
+      } catch (err) {
+        const { message, statusCode } = transformError(err);
+        return {
+          error: {
+            lists: [{ id: list.id, list_id: list.list_id }],
+            message,
+            status_code: statusCode,
+          },
+          list,
+        };
+      }
 
-  return { list };
-};
+      return { list };
+    }
+  );
 
 const checkPreDeleteListHook = async (
   lists: ExceptionListSchema[],
   preDeleteListHook: PreDeleteListHook
-): Promise<{ deletableLists: ExceptionListSchema[]; refused: ListOperationResult[] }> => {
-  let blockedLists: ExceptionListPreDeleteListBlocker[];
+): Promise<{ deletableLists: ExceptionListSchema[]; refused: ListOperationResult[] }> =>
+  withSpan({ name: 'exceptionLists.preDeleteListHook', type: 'lists' }, async () => {
+    let blockedLists: ExceptionListPreDeleteListBlocker[];
 
-  try {
-    blockedLists = await preDeleteListHook(lists);
-  } catch (err) {
-    const { message, statusCode } = transformError(err);
-    return {
-      deletableLists: [],
-      refused: lists.map((list) => ({
+    try {
+      blockedLists = await preDeleteListHook(lists);
+    } catch (err) {
+      const { message, statusCode } = transformError(err);
+      return {
+        deletableLists: [],
+        refused: lists.map((list) => ({
+          error: {
+            lists: [{ id: list.id, list_id: list.list_id }],
+            message,
+            status_code: statusCode,
+          },
+          list,
+        })),
+      };
+    }
+
+    const blockedListIds = new Set(blockedLists.map(({ id }) => id));
+    const deletableLists: ExceptionListSchema[] = [];
+    const refused: ListOperationResult[] = [];
+
+    lists.forEach((list) => {
+      if (!blockedListIds.has(list.id)) {
+        deletableLists.push(list);
+        return;
+      }
+      refused.push({
         error: {
           lists: [{ id: list.id, list_id: list.list_id }],
-          message,
-          status_code: statusCode,
+          message: `Exception list "${list.name}" cannot be deleted because it is referenced by one or more detection rules. Unlink the list from all rules before retrying.`,
+          status_code: 409,
         },
         list,
-      })),
-    };
-  }
-
-  const blockedListIds = new Set(blockedLists.map(({ id }) => id));
-  const deletableLists: ExceptionListSchema[] = [];
-  const refused: ListOperationResult[] = [];
-
-  lists.forEach((list) => {
-    if (!blockedListIds.has(list.id)) {
-      deletableLists.push(list);
-      return;
-    }
-    refused.push({
-      error: {
-        lists: [{ id: list.id, list_id: list.list_id }],
-        message: `Exception list "${list.name}" cannot be deleted because it is referenced by one or more detection rules. Unlink the list from all rules before retrying.`,
-        status_code: 409,
-      },
-      list,
+      });
     });
+
+    return { deletableLists, refused };
   });
 
-  return { deletableLists, refused };
-};
-
+/** Bulk exception-list delete: bulkGet → optional preDelete hook → pMap deleteListWithItems. */
 export const bulkDeleteExceptionList = async ({
   ids,
   namespaceType,
   savedObjectsClient,
   preDeleteListHook,
-}: BulkDeleteExceptionListOptions): Promise<BulkDeleteExceptionListResult> => {
-  const uniqueIds = [...new Set(ids)];
-  const skippedCount = ids.length - uniqueIds.length;
+}: BulkDeleteExceptionListOptions): Promise<BulkDeleteExceptionListResult> =>
+  withSpan({ name: 'exceptionLists.bulkDeleteExceptionList', type: 'lists' }, async () => {
+    const uniqueIds = [...new Set(ids)];
+    const skippedCount = ids.length - uniqueIds.length;
 
-  if (uniqueIds.length === 0) {
+    if (uniqueIds.length === 0) {
+      return {
+        errors: [],
+        results: [],
+        success: true,
+        summary: { failed: 0, skipped: skippedCount, succeeded: 0, total: ids.length },
+      };
+    }
+
+    const savedObjectType = getSavedObjectType({ namespaceType });
+
+    const { saved_objects: savedObjects } = await savedObjectsClient.bulkGet<ExceptionListSoSchema>(
+      uniqueIds.map((id) => ({ id, type: savedObjectType }))
+    );
+
+    const validationErrors: BulkDeleteExceptionListError[] = [];
+    const foundLists: ExceptionListSchema[] = [];
+
+    savedObjects.forEach((savedObject) => {
+      const { id } = savedObject;
+      if (isSavedObjectErrorResult(savedObject)) {
+        validationErrors.push({
+          lists: [{ id }],
+          message:
+            savedObject.error.statusCode === 404
+              ? getErrorMessageExceptionList({ id, listId: undefined })
+              : savedObject.error.message,
+          status_code: savedObject.error.statusCode ?? 500,
+        });
+      } else if (savedObject.attributes.list_type !== 'list') {
+        validationErrors.push({
+          lists: [{ id }],
+          message: `exception list id: "${id}" is not an exception list container`,
+          status_code: 404,
+        });
+      } else {
+        foundLists.push(transformSavedObjectToExceptionList({ savedObject }));
+      }
+    });
+
+    const { deletableLists, refused } =
+      preDeleteListHook && foundLists.length > 0
+        ? await checkPreDeleteListHook(foundLists, preDeleteListHook)
+        : { deletableLists: foundLists, refused: [] };
+
+    const deleteResults = await pMap(
+      deletableLists,
+      (list) => deleteListWithItems({ list, namespaceType, savedObjectType, savedObjectsClient }),
+      { concurrency: BULK_DELETE_LIST_CONCURRENCY }
+    );
+
+    const results: ExceptionListSchema[] = [];
+    const deleteErrors: BulkDeleteExceptionListError[] = [];
+
+    [...refused, ...deleteResults].forEach(({ list, error }) => {
+      if (error) {
+        deleteErrors.push(error);
+      } else {
+        results.push(list);
+      }
+    });
+
+    const allErrors = [...validationErrors, ...deleteErrors];
+
     return {
-      errors: [],
-      results: [],
-      success: true,
-      summary: { failed: 0, skipped: skippedCount, succeeded: 0, total: ids.length },
+      errors: allErrors,
+      results,
+      success: allErrors.length === 0,
+      summary: {
+        failed: allErrors.length,
+        skipped: skippedCount,
+        succeeded: results.length,
+        total: ids.length,
+      },
     };
-  }
-
-  const savedObjectType = getSavedObjectType({ namespaceType });
-
-  const { saved_objects: savedObjects } = await savedObjectsClient.bulkGet<ExceptionListSoSchema>(
-    uniqueIds.map((id) => ({ id, type: savedObjectType }))
-  );
-
-  const validationErrors: BulkDeleteExceptionListError[] = [];
-  const foundLists: ExceptionListSchema[] = [];
-
-  savedObjects.forEach((savedObject) => {
-    const { id } = savedObject;
-    if (isSavedObjectErrorResult(savedObject)) {
-      validationErrors.push({
-        lists: [{ id }],
-        message:
-          savedObject.error.statusCode === 404
-            ? getErrorMessageExceptionList({ id, listId: undefined })
-            : savedObject.error.message,
-        status_code: savedObject.error.statusCode ?? 500,
-      });
-    } else if (savedObject.attributes.list_type !== 'list') {
-      validationErrors.push({
-        lists: [{ id }],
-        message: `exception list id: "${id}" is not an exception list container`,
-        status_code: 404,
-      });
-    } else {
-      foundLists.push(transformSavedObjectToExceptionList({ savedObject }));
-    }
   });
-
-  const { deletableLists, refused } =
-    preDeleteListHook && foundLists.length > 0
-      ? await checkPreDeleteListHook(foundLists, preDeleteListHook)
-      : { deletableLists: foundLists, refused: [] };
-
-  const deleteResults = await pMap(
-    deletableLists,
-    (list) => deleteListWithItems({ list, namespaceType, savedObjectType, savedObjectsClient }),
-    { concurrency: BULK_DELETE_LIST_CONCURRENCY }
-  );
-
-  const results: ExceptionListSchema[] = [];
-  const deleteErrors: BulkDeleteExceptionListError[] = [];
-
-  [...refused, ...deleteResults].forEach(({ list, error }) => {
-    if (error) {
-      deleteErrors.push(error);
-    } else {
-      results.push(list);
-    }
-  });
-
-  const allErrors = [...validationErrors, ...deleteErrors];
-
-  return {
-    errors: allErrors,
-    results,
-    success: allErrors.length === 0,
-    summary: {
-      failed: allErrors.length,
-      skipped: skippedCount,
-      succeeded: results.length,
-      total: ids.length,
-    },
-  };
-};

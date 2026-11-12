@@ -9,12 +9,16 @@ export {
   DEFAULT_RUN_LIMITS,
   DEFAULT_RUN_QUOTA_SETTINGS,
   DEFAULT_RUN_QUOTA_TIME_ZONE,
+  INVESTIGATION_RUN_QUOTA_GROUPS,
+  isInvestigationRunQuotaGroup,
   isRunQuotaReached,
   MAX_RUN_LIMIT,
   MIN_RUN_LIMIT,
   RUN_QUOTA_GROUPS,
 } from './types';
 export type {
+  InvestigationRunLimitsUpdate,
+  InvestigationRunQuotaGroup,
   RunQuotaConsumeRequest,
   RunQuotaConsumeResponse,
   RunQuotaGroup,

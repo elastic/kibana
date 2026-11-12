@@ -64,6 +64,7 @@ dependsOn:
   - '@kbn/rule-data-utils'
   - '@kbn/securitysolution-t-grid'
   - '@kbn/securitysolution-timeline-common'
+  - '@kbn/securitysolution-timeline-components'
   - '@kbn/rule-registry-plugin'
   - '@kbn/securitysolution-utils'
   - '@kbn/securitysolution-list-constants'
@@ -324,6 +325,7 @@ dependsOn:
   - '@kbn/css-utils'
   - '@kbn/custom-content-common'
   - '@kbn/custom-content-renderer'
+  - '@kbn/securitysolution-timeline-search-strategy'
 tags:
   - plugin
   - prod

@@ -7,7 +7,7 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { globalTeardownHook } from '../fixtures';
-import { METRICS_AND_LOGS_INDEX_PATTERNS } from '../fixtures/constants';
+import { LOGS_ML_INDEX, METRICS_AND_LOGS_INDEX_PATTERNS } from '../fixtures/constants';
 import { cleanNonTsdsSystemTemplate } from '../fixtures/sequential_hosts_synthtrace';
 import { deleteMetricsAnomaliesMlData } from '../fixtures/metrics_anomalies_ml';
 
@@ -58,5 +58,15 @@ globalTeardownHook(
       .delete({ index: METRICS_AND_LOGS_INDEX_PATTERNS, ignore_unavailable: true })
       .catch(() => undefined);
     log.info('metrics_and_logs archive removed');
+  }
+);
+
+// Drop the empty index created for the Logs ML page specs.
+globalTeardownHook(
+  'Clean up the Logs ML pages index',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  async ({ esClient, log }) => {
+    await esClient.indices.delete({ index: LOGS_ML_INDEX, ignore_unavailable: true });
+    log.info(`${LOGS_ML_INDEX} index removed`);
   }
 );

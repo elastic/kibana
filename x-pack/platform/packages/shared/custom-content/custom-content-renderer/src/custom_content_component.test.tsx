@@ -21,7 +21,7 @@ const mockUseCustomContentHtml = useCustomContentHtml as jest.MockedFunction<
 const defaultProps = {
   services: {} as CustomContentRendererServices,
   embeddableId: 'panel-1',
-  esqlQuery: undefined,
+  esqlQueries: [],
   timeRange: undefined,
   generationVersion: 0,
   savedTemplate: '<p>hi</p>',

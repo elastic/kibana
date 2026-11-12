@@ -12,7 +12,8 @@ import { recordMetricRenderErrors } from '../fixtures/metric_render_errors';
 
 const TRENDLINE_TIMEOUT_MS = 30_000;
 
-spaceTest.describe('Lens ES|QL metric EVAL maximum', { tag: tags.stateful.classic }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/297873
+spaceTest.describe.skip('Lens ES|QL metric EVAL maximum', { tag: tags.stateful.classic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.uiSettings.set({
       'dateFormat:tz': 'UTC',

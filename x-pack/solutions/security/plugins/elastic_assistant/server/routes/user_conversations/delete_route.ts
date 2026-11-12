@@ -10,6 +10,7 @@ import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
   DeleteConversationRequestParams,
   API_VERSIONS,
+  getIsConversationOwner,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import type { ElasticAssistantPluginRouter } from '../../types';
@@ -59,6 +60,17 @@ export const deleteConversationRoute = (router: ElasticAssistantPluginRouter) =>
             return assistantResponse.error({
               body: `conversation id: "${id}" not found`,
               statusCode: 404,
+            });
+          }
+          if (
+            !getIsConversationOwner(existingConversation, {
+              name: authenticatedUser?.username,
+              id: authenticatedUser?.profile_uid,
+            })
+          ) {
+            return assistantResponse.error({
+              body: `conversation id: "${id}". Deleting a conversation is only allowed for the owner of the conversation.`,
+              statusCode: 403,
             });
           }
           await dataClient?.deleteConversation(id);

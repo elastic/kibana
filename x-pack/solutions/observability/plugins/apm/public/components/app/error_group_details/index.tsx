@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
 import type { APIReturnType } from '@kbn/apm-api-shared';
 import { isOpenTelemetryAgentName, isRumAgentName } from '../../../../common/agent_name';

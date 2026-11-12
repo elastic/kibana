@@ -57,14 +57,14 @@ const renderTimeline = (
   );
 
 describe('EventTimeline', () => {
-  it('interleaves detections and the raised entry by time, falling back to the event when the lineage is empty', () => {
+  it('interleaves detections and the raised entry newest first, falling back to the event when the lineage is empty', () => {
     renderTimeline();
 
     const items = screen.getAllByRole('listitem');
     expect(items.map((item) => within(item).getByRole('button').textContent)).toEqual([
-      'Earlier detection',
-      event.title,
       'Later detection',
+      event.title,
+      'Earlier detection',
     ]);
     expect(items[1].querySelector('time')).toHaveAttribute('dateTime', event.created_at);
     expect(screen.getAllByText('Significant event raised')).toHaveLength(1);
