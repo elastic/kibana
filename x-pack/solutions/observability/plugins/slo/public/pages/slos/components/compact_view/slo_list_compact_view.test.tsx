@@ -6,12 +6,18 @@
  */
 
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { encode } from '@kbn/rison';
+import { rulesLocatorID } from '@kbn/rule-data-utils';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
+import { ActionModalProvider } from '../../../../context/action_modal';
 import { buildHealthySummary } from '../../../../data/slo/common';
 import { buildSlo } from '../../../../data/slo/slo';
 import { ActiveAlerts } from '../../../../hooks/active_alerts';
-import { useActionModal } from '../../../../context/action_modal';
+import { useDeleteSlo } from '../../../../hooks/use_delete_slo';
+import { useDeleteSloInstance } from '../../../../hooks/use_delete_slo_instance';
 import { useFetchActiveAlerts } from '../../../../hooks/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../../../hooks/use_fetch_historical_summary';
 import { useFetchRulesForSlo } from '../../../../hooks/use_fetch_rules_for_slo';
@@ -19,6 +25,7 @@ import { useGetFilteredRuleTypes } from '../../../../hooks/use_get_filtered_rule
 import { useKibana } from '../../../../hooks/use_kibana';
 import { usePermissions } from '../../../../hooks/use_permissions';
 import { useSpace } from '../../../../hooks/use_space';
+import { transformSloToCloneState } from '../../../slo_edit/helpers/transform_slo_to_clone_state';
 import { render } from '../../../../utils/test_helper';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import { SloListCompactView } from './slo_list_compact_view';
@@ -29,11 +36,12 @@ jest.mock('@kbn/response-ops-rule-form/flyout', () => ({
 
 jest.mock('../../../../hooks/use_kibana');
 jest.mock('../../../../hooks/use_permissions');
+jest.mock('../../../../hooks/use_delete_slo');
+jest.mock('../../../../hooks/use_delete_slo_instance');
 jest.mock('../../../../hooks/use_fetch_active_alerts');
 jest.mock('../../../../hooks/use_fetch_rules_for_slo');
 jest.mock('../../../../hooks/use_fetch_historical_summary');
 jest.mock('../../../../hooks/use_get_filtered_rule_types');
-jest.mock('../../../../context/action_modal');
 jest.mock('../../hooks/use_url_search_state');
 jest.mock('../../../../hooks/use_space');
 jest.mock('../slo_sparkline', () => ({
@@ -42,13 +50,31 @@ jest.mock('../slo_sparkline', () => ({
 
 const useKibanaMock = useKibana as jest.Mock;
 const usePermissionsMock = usePermissions as jest.Mock;
+const useDeleteSloMock = useDeleteSlo as jest.Mock;
+const useDeleteSloInstanceMock = useDeleteSloInstance as jest.Mock;
 const useFetchActiveAlertsMock = useFetchActiveAlerts as jest.Mock;
 const useFetchRulesForSloMock = useFetchRulesForSlo as jest.Mock;
 const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
 const useGetFilteredRuleTypesMock = useGetFilteredRuleTypes as jest.Mock;
-const useActionModalMock = useActionModal as jest.Mock;
 const useUrlSearchStateMock = useUrlSearchState as jest.Mock;
 const useSpaceMock = useSpace as jest.Mock;
+
+const mockNavigate = jest.fn();
+const mockLocatorGet = jest.fn();
+const mockDeleteSlo = jest.fn();
+const mockDeleteSloInstance = jest.fn();
+
+const renderCompactView = (sloList: SLOWithSummaryResponse[]) =>
+  render(
+    <ActionModalProvider>
+      <SloListCompactView sloList={sloList} loading={false} error={false} />
+    </ActionModalProvider>
+  );
+
+const openRowActionsMenu = async () => {
+  fireEvent.click(screen.getByLabelText('All actions, row 1'));
+  await waitForEuiPopoverOpen();
+};
 
 describe('SloListCompactView', () => {
   beforeEach(() => {
@@ -56,7 +82,7 @@ describe('SloListCompactView', () => {
 
     useKibanaMock.mockReturnValue({
       services: {
-        application: { navigateToUrl: jest.fn() },
+        application: { navigateToUrl: mockNavigate },
         http: {
           basePath: {
             prepend: (url: string) => url,
@@ -68,7 +94,7 @@ describe('SloListCompactView', () => {
         share: {
           url: {
             locators: {
-              get: jest.fn(),
+              get: mockLocatorGet,
             },
           },
         },
@@ -80,11 +106,12 @@ describe('SloListCompactView', () => {
     });
 
     usePermissionsMock.mockReturnValue({ data: { hasAllWriteRequested: true } });
+    useDeleteSloMock.mockReturnValue({ mutate: mockDeleteSlo });
+    useDeleteSloInstanceMock.mockReturnValue({ mutate: mockDeleteSloInstance });
     useFetchActiveAlertsMock.mockReturnValue({ data: new ActiveAlerts() });
     useFetchRulesForSloMock.mockReturnValue({ data: {} });
     useFetchHistoricalSummaryMock.mockReturnValue({ isLoading: false, data: [] });
     useGetFilteredRuleTypesMock.mockReturnValue([]);
-    useActionModalMock.mockReturnValue({ triggerAction: jest.fn() });
     useUrlSearchStateMock.mockReturnValue({ onStateChange: jest.fn() });
     useSpaceMock.mockReturnValue('default');
   });
@@ -99,7 +126,7 @@ describe('SloListCompactView', () => {
         }),
       });
 
-      render(<SloListCompactView sloList={[slo]} loading={false} error={false} />);
+      renderCompactView([slo]);
 
       expect(screen.getByText('Burn rate (5m)')).toBeInTheDocument();
     });
@@ -113,7 +140,7 @@ describe('SloListCompactView', () => {
         }),
       });
 
-      render(<SloListCompactView sloList={[slo]} loading={false} error={false} />);
+      renderCompactView([slo]);
 
       expect(screen.getByText('1.2x')).toBeInTheDocument();
     });
@@ -127,7 +154,7 @@ describe('SloListCompactView', () => {
         }),
       });
 
-      render(<SloListCompactView sloList={[slo]} loading={false} error={false} />);
+      renderCompactView([slo]);
 
       fireEvent.click(screen.getByText('Burn rate (5m)'));
       await waitForEuiPopoverOpen();
@@ -146,7 +173,7 @@ describe('SloListCompactView', () => {
         }),
       });
 
-      render(<SloListCompactView sloList={[slo]} loading={false} error={false} />);
+      renderCompactView([slo]);
 
       fireEvent.click(screen.getByText('Burn rate (5m)'));
       await waitForEuiPopoverOpen();
@@ -168,9 +195,62 @@ describe('SloListCompactView', () => {
         },
       });
 
-      render(<SloListCompactView sloList={[slo]} loading={false} error={false} />);
+      renderCompactView([slo]);
 
       expect(screen.getAllByText('N/A').length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('row actions', () => {
+    it('allows editing an SLO', async () => {
+      const slo = buildSlo();
+      renderCompactView([slo]);
+      await openRowActionsMenu();
+
+      fireEvent.click(screen.getByTestId('sloActionsEdit'));
+
+      expect(mockNavigate).toHaveBeenCalledWith(paths.sloEdit(slo.id));
+    });
+
+    it('allows creating a new rule for an SLO', async () => {
+      renderCompactView([buildSlo()]);
+      await openRowActionsMenu();
+
+      fireEvent.click(screen.getByTestId('sloActionsCreateRule'));
+
+      expect(screen.getByTestId('add-rule-flyout')).toBeInTheDocument();
+    });
+
+    it('allows managing rules for an SLO', async () => {
+      renderCompactView([buildSlo()]);
+      await openRowActionsMenu();
+
+      fireEvent.click(screen.getByTestId('sloActionsManageRules'));
+
+      expect(mockLocatorGet).toHaveBeenCalledWith(rulesLocatorID);
+    });
+
+    it('allows deleting an SLO', async () => {
+      const slo = buildSlo();
+      renderCompactView([slo]);
+      await openRowActionsMenu();
+
+      fireEvent.click(screen.getByTestId('sloActionsDelete'));
+      fireEvent.click(screen.getByTestId('observabilitySolutionSloDeleteModalConfirmButton'));
+
+      expect(mockDeleteSlo).toHaveBeenCalledWith({ id: slo.id, name: slo.name });
+    });
+
+    it('allows cloning an SLO', async () => {
+      const slo = buildSlo();
+      renderCompactView([slo]);
+      await openRowActionsMenu();
+
+      fireEvent.click(screen.getByTestId('sloActionsClone'));
+
+      expect(mockNavigate).toHaveBeenCalledWith(
+        paths.sloCreateWithEncodedForm(encodeURIComponent(encode(transformSloToCloneState(slo))))
+      );
     });
   });
 });
