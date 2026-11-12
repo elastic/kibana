@@ -93,8 +93,10 @@
  * - sessionLength (`typical`, `long` or `marathon`, default: `typical`): 1 to 5 page views of seconds
  *   to a few minutes, 15 to 40 page views over mostly 15 to 40 minutes, or 60 to 120 page views over
  *   mostly 30 minutes to 2 hours. Replay grows with it: a marathon session has about 4,000 to 14,000
- *   replay events at `light` and up to 8 times that at `heavy`. A session ends at the time it is
- *   generated for, so use a range longer than the session (`--from=now-3h` for marathon)
+ *   replay events at `light` and up to 8 times that at `heavy`. A session's replay is built in
+ *   memory before it is written, and a `heavy` marathon session weighs 90 MB at the median and up to
+ *   175 MB: use `light` or `typical` with long sessions, or fewer `--workers`. A session ends at the
+ *   time it is generated for, so use a range longer than the session (`--from=now-3h` for marathon)
  * - scale (number, default: 1): multiplies the number of sessions per minute of every app
  * - seed (string or number, default: the run's `from` in milliseconds): makes the data
  *   reproducible

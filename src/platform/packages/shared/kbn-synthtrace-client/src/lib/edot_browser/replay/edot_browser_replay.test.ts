@@ -390,6 +390,32 @@ describe('edotBrowser.replaySession', () => {
         expect(attribute(segment.start, 'elastic.replay.trigger')).toBe('error');
       });
     });
+
+    it('exports the buffered records when the error happens, not before', () => {
+      const session = Array.from({ length: 60 }, (_, seed) =>
+        simulate(seed, { pageViews: 6 })
+      ).find(({ documents }) => documents.length >= 2 && documents[0].exceptionTimes.length > 0)!;
+      expect(session).toBeDefined();
+      const [errorTime] = [...session.documents[0].exceptionTimes].sort((a, b) => a - b);
+      const docs = replay(session, { trigger: 'error' });
+      const firstSegmentId = attribute(docs[0], 'elastic.replay.segment.id');
+      const firstSegment = docs.filter(
+        (doc) => attribute(doc, 'elastic.replay.segment.id') === firstSegmentId
+      );
+      expect(firstSegment.length).toBeGreaterThan(1);
+      firstSegment.forEach((doc) =>
+        expect(Number(doc.observed_timestamp)).toBeGreaterThanOrEqual(errorTime)
+      );
+      // Records from before the error exist: they were buffered and exported late
+      expect(firstSegment.some((doc) => Number(doc['@timestamp']) < errorTime)).toBe(true);
+    });
+
+    it('ignores starting after the first page load, since recording starts at the error', () => {
+      const session = simulate(7, { pageViews: 4 });
+      expect(replay(session, { trigger: 'error', startsAfterFirstPage: true }, 3)).toEqual(
+        replay(session, { trigger: 'error' }, 3)
+      );
+    });
   });
 
   describe('edge cases', () => {
@@ -410,6 +436,43 @@ describe('edotBrowser.replaySession', () => {
       segments
         .filter((segment) => !broken.includes(segment))
         .forEach((segment) => segment.events.forEach(({ event }) => expect(event).toBeDefined()));
+    });
+
+    it('only loses a chunk of a segment long enough to get a second FullSnapshot', () => {
+      const session = simulate(9, { pageViews: 4 });
+      const withDuration = (durations: number[]): SimulatedSession => ({
+        ...session,
+        visits: [
+          {
+            client: session.visits[0].client,
+            documents: session.documents.map((document, index) => ({
+              ...document,
+              end: document.start + durations[index % durations.length],
+            })),
+          },
+        ],
+      });
+      const incomplete = (segments: ReturnType<typeof reassemble>) =>
+        segments.filter(({ events }) => events.some(({ event }) => !event));
+
+      // Every segment is too short to recover: none of them loses a chunk
+      [1, 2, 3].forEach((seed) =>
+        expect(
+          incomplete(reassemble(replay(withDuration([1_500]), { missingChunk: true }, seed)))
+        ).toHaveLength(0)
+      );
+
+      // With a short one among them, the chunk is lost from one that can recover
+      [1, 2, 3, 4, 5, 6].forEach((seed) => {
+        const segments = reassemble(
+          replay(withDuration([1_500, 20_000]), { missingChunk: true }, seed)
+        );
+        const broken = incomplete(segments);
+        expect(broken).toHaveLength(1);
+        expect(
+          broken[0].events.filter(({ eventType, event }) => eventType === 2 && event).length
+        ).toBeGreaterThan(0);
+      });
     });
 
     it('starts recording with the second page load', () => {

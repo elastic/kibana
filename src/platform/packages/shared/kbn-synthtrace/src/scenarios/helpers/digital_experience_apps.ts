@@ -95,6 +95,8 @@ export interface DigitalExperienceScenarioOpts {
    * 40 page views, mostly 15 to 40 minutes) or `marathon` (60 to 120 page views, mostly 30 minutes
    * to 2 hours). A session ends at the time it is generated for, so a range shorter than the
    * session cuts off its start, and replay leaves out the page loads that started before the range.
+   * A session's replay is built in memory before it is written: with `marathon` its bodies weigh
+   * about 2 MB (`light`), 15 MB (`typical`) or 90 MB (`heavy`) at the median, and up to 175 MB.
    */
   sessionLength: SessionLength;
   /**
@@ -1299,7 +1301,8 @@ export const generateEdotBrowserSessions = (
                   random: replayRandom,
                   packEvents: packDraw < PACKED_SESSION_RATE,
                   missingChunk: withEdgeCases && missingChunkDraw < MISSING_CHUNK_SESSION_RATE,
-                  startsAfterFirstPage: withEdgeCases && lateDraw < LATE_REPLAY_SESSION_RATE,
+                  startsAfterFirstPage:
+                    withEdgeCases && trigger === 'sampled' && lateDraw < LATE_REPLAY_SESSION_RATE,
                   notBefore: from,
                 });
               }),

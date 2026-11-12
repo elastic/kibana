@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createHash } from 'crypto';
 import { timerange, type EdotBrowserDocument, type ReplaySize } from '@kbn/synthtrace-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
@@ -227,7 +228,10 @@ describe('digital experience session replay', () => {
       const docs = generate({ errorReplayRate: 1 }, { from: WIDE_FROM });
       const errorDocs = docs.filter(isReplay);
       const sessionsWithErrors = new Set(
-        docs.filter((doc) => eventNameOf(doc) === 'exception').map(sessionIdOf)
+        docs
+          .filter((doc) => eventNameOf(doc) === 'exception')
+          .map(sessionIdOf)
+          .filter(Boolean)
       );
       expect(errorDocs.length).toBeGreaterThan(0);
       errorDocs.forEach((doc) => expect(sessionsWithErrors.has(sessionIdOf(doc))).toBe(true));
@@ -236,6 +240,9 @@ describe('digital experience session replay', () => {
       );
       // Sessions without an exception have nothing, so there are fewer than with replayRate 1
       expect(new Set(errorDocs.map(sessionIdOf)).size).toBeLessThanOrEqual(sessionsWithErrors.size);
+      // Exceptions that failed requests throw count as well as the ones of the page: every
+      // session with an exception records
+      expect(new Set(errorDocs.map(sessionIdOf))).toEqual(sessionsWithErrors);
     });
 
     it('records sessions of the share left by replayRate with errorReplayRate', () => {
@@ -275,8 +282,24 @@ describe('digital experience session replay', () => {
         return { longestMs: longest, maxReplayEvents: Math.max(0, ...replayEvents.values()) };
       };
 
-      it('is the same as before with typical sessions', () => {
-        expect(generate({ replayRate: 0.3, sessionLength: 'typical' })).toEqual(withReplay);
+      it('keeps typical sessions as they were before the option existed', () => {
+        // Taken from the output of the scenario before `sessionLength` was added
+        const docs = generate(
+          { replaySize: 'light', seed: 'fingerprint-seed', sessionLength: 'typical' },
+          { from: FROM }
+        );
+        const times = docs.map((doc) => Number(doc['@timestamp']));
+        expect({
+          count: docs.length,
+          first: Math.min(...times),
+          last: Math.max(...times),
+          sha: createHash('sha256').update(JSON.stringify(docs)).digest('hex'),
+        }).toEqual({
+          count: 6035,
+          first: 1792152000326,
+          last: 1792152599999,
+          sha: '86b04dce0083098ac1b024eebfefb918cbff00dd0aa2a3c293093807e9380009',
+        });
       });
 
       it('makes long sessions run for minutes, with more replay events than typical ones', () => {

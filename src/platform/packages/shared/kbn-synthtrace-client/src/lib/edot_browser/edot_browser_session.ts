@@ -508,7 +508,9 @@ const sendRequest = (
   { timeOrigin }: Pick<DocumentState, 'timeOrigin'>,
   request: EdotBrowserRequest,
   requestedTime: number,
-  latestEnd: number
+  latestEnd: number,
+  /** Called with the time of the uncaught exception that a failure throws, if it throws one. */
+  onException?: (time: number) => void
 ): EdotBrowserEvent[] => {
   // The request, and with it its 1ms minimum duration, must end within the page view
   const time = Math.min(requestedTime, latestEnd - 1);
@@ -589,6 +591,7 @@ const sendRequest = (
           stacks: [REQUEST_FAILURE_STACK],
         };
     events.push(exceptionEvent(ctx, exception).timestamp(endTime));
+    onException?.(endTime);
   }
   return events;
 };
@@ -799,11 +802,13 @@ const interactWithPage = (
   const { client, site, health, random, reportExceptions } = ctx;
   const events: EdotBrowserEvent[] = [];
   const clickTimes: number[] = [];
+  // Uncaught exceptions come from failed requests as well as from the page itself
   const exceptionTimes: number[] = [];
+  const onException = (time: number) => exceptionTimes.push(time);
 
   (page.requests ?? []).forEach((request) => {
     const time = Math.min(from + Math.floor(between(random, 5, 50)), slotEnd);
-    events.push(...sendRequest(ctx, document, request, time, slotEnd));
+    events.push(...sendRequest(ctx, document, request, time, slotEnd, onException));
   });
 
   const clickCount = Math.floor(between(random, 0, 4));
@@ -823,7 +828,7 @@ const interactWithPage = (
     );
     if (request) {
       const time = Math.min(clickTime + Math.floor(between(random, 1, 20)), slotEnd);
-      events.push(...sendRequest(ctx, document, request, time, slotEnd));
+      events.push(...sendRequest(ctx, document, request, time, slotEnd, onException));
     }
   }
 

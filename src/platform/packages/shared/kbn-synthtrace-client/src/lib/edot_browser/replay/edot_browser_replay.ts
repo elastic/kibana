@@ -31,6 +31,12 @@ export const DEFAULT_MAX_CHUNK_BYTES = 262_144;
  */
 const ERROR_BUFFER_MS = 5_000;
 
+/**
+ * The shortest segment that can lose a chunk of its first FullSnapshot and still recover: the
+ * second FullSnapshot goes in the middle of the segment, at least this far after its start.
+ */
+const MIN_RECOVERABLE_SEGMENT_MS = 4_000;
+
 /** A visit of a session: the tab it happened in and the documents it loaded. */
 export interface EdotBrowserReplayVisit {
   /** The browser tab's client, with the session and tab IDs the records carry. */
@@ -59,7 +65,10 @@ export interface EdotBrowserReplayOptions {
    * FullSnapshot later on, where the player can pick it up. Needs `packEvents` to be off.
    */
   missingChunk?: boolean;
-  /** Recording starts with the second page load, as when the recorder failed to load on the first. */
+  /**
+   * Recording starts with the second page load, as when the recorder failed to load on the first.
+   * Only for `sampled` sessions: in error mode recording starts at the error either way.
+   */
   startsAfterFirstPage?: boolean;
   /**
    * Leaves out the segments that start before this time: with their first events cut off, they
@@ -112,6 +121,8 @@ interface PlannedSegment {
   document: EdotBrowserSessionDocument;
   start: number;
   trigger: 'sampled' | 'error';
+  /** Records buffered before this time are only exported at it: the error that starts the export. */
+  exportedFrom?: number;
 }
 
 /** Where the session records, in time order: one segment for every page load that records. */
@@ -143,6 +154,7 @@ const planSegments = (
     document,
     start: index === 0 ? Math.max(document.start, errorTime - ERROR_BUFFER_MS) : document.start,
     trigger,
+    exportedFrom: index === 0 ? errorTime : undefined,
   }));
 };
 
@@ -166,16 +178,20 @@ export const replaySession = ({
   const segments = planSegments(visits, trigger, startsAfterFirstPage).filter(
     ({ start }) => start >= notBefore
   );
-  // The segment that loses a chunk is drawn from the ones that exist. Packed events deflate far
-  // below the chunk size, so none of them is ever split.
+  // The segment that loses a chunk is drawn from the ones long enough to get a second FullSnapshot.
+  // Packed events deflate far below the chunk size, so none of them is ever split.
+  const recoverable = segments.flatMap(({ start, document }, index) =>
+    document.end - start >= MIN_RECOVERABLE_SEGMENT_MS ? [index] : []
+  );
   const brokenSegment =
     missingChunk && !packEvents && segments.length > 0
-      ? Math.floor(random() * segments.length)
+      ? recoverable[Math.floor(random() * recoverable.length)] ?? -1
       : -1;
   const desktopViewport = pick(random, DESKTOP_VIEWPORTS);
 
   return segments.flatMap(({ client, document, start, trigger: segmentTrigger }, index) => {
     const { end } = document;
+    const { exportedFrom = -Infinity } = segments[index];
     const isBroken = index === brokenSegment;
     const segmentId = uuid(random);
     const viewport = client.isMobile ? MOBILE_VIEWPORT : desktopViewport;
@@ -191,12 +207,13 @@ export const replaySession = ({
       exceptionTimes: document.exceptionTimes.filter((time) => time >= start),
       // A chunk can only go missing from an event that was split
       minSnapshotBytes: isBroken ? maxChunkBytes * 2.5 : 0,
-      checkoutAt: isBroken ? start + Math.max(Math.floor((end - start) / 2), 2_000) : undefined,
+      checkoutAt: isBroken ? start + Math.floor((end - start) / 2) : undefined,
     });
 
-    // The SDK flushes its batches every second
+    // The SDK flushes its batches every second, and in error mode it holds on to the buffer until
+    // the error happens
     const observedAt = (time: number) =>
-      Math.min(time + Math.floor(between(random, 0, 1_000)), end);
+      Math.min(Math.max(time, exportedFrom) + Math.floor(between(random, 0, 1_000)), end);
     const records: EdotBrowserEvent[] = [
       client
         .replayStart({ segmentId, trigger: segmentTrigger })
