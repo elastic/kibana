@@ -1135,7 +1135,7 @@ export class RuleEventsClient {
     if (change.kind === 'operator') {
       return this.applyOperatorChange({
         latest,
-        event: decision.event,
+        event: { ...decision.event, workflow_execution_id: workflowExecutionId },
         change,
         assessmentNote,
         origin: { actor, change, closeReason },

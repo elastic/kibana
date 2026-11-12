@@ -581,6 +581,26 @@ describe('RuleEventsClient', () => {
       });
     });
 
+    it('attributes an operator transition to the calling workflow, not the prior writer', async () => {
+      const existing = withEpisode({ status: 'active', workflow_execution_id: 'discovery-run' });
+
+      await withTelemetry(existing).updateEventStatus({
+        eventId: existing.event_id,
+        change: DEACTIVATE_STATUS,
+        actor: 'agent_tool',
+        workflowExecutionId: 'caller-run',
+      });
+      await withTelemetry(existing).updateEventStatus({
+        eventId: existing.event_id,
+        change: DEACTIVATE_STATUS,
+        actor: 'rest_api',
+      });
+
+      const [[viaWorkflow], [viaUi]] = telemetry.trackEventStatusChanged.mock.calls;
+      expect(viaWorkflow).toMatchObject({ workflow_execution_id: 'caller-run' });
+      expect(viaUi).not.toHaveProperty('workflow_execution_id');
+    });
+
     it('reports a created version without a prior status and keeps the assessment outcome', async () => {
       await withTelemetry(undefined).createEvent({
         event: createStatusEvent(),
