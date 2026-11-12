@@ -35,7 +35,7 @@ const specs = {
         get: {
           parameters: [
             { name: 'cursor', in: 'query', schema: { type: 'string' } },
-            { name: 'limit', in: 'query', schema: { type: 'integer', maximum: 1000 } },
+            { name: 'limit', in: 'query', schema: { type: 'integer', maximum: 5000 } },
           ],
           responses: {
             '200': json({
@@ -53,7 +53,7 @@ const specs = {
         get: {
           parameters: [
             { name: 'offset', in: 'query', schema: { type: 'integer' } },
-            { name: 'limit', in: 'query', schema: { type: 'integer', maximum: 1000 } },
+            { name: 'limit', in: 'query', schema: { type: 'integer', maximum: 5000 } },
           ],
           responses: { '200': json({ type: 'array', items: item }) },
         },
@@ -263,6 +263,47 @@ const connector: ConnectorSpec = {
       },
       'destroy'
     ),
+    // Calls another operation for each value of an enum input, as GCP IAM's getIamPolicy does for
+    // its resource types. Broken for the second one: it reads an error body the vendor doesn't send.
+    getEither: action(z.object({ kind: z.enum(['item', 'tag']) }), async ({ client }, { kind }) => {
+      try {
+        return (await client.get(kind === 'item' ? `${V1}/items/1` : `${V1}/tags`)).data;
+      } catch (error) {
+        const { response } = error as { response: { data: { message?: string; error?: unknown } } };
+        if (kind === 'tag') {
+          throw new Error((response.data.error as { message: string }).message);
+        }
+        throw new Error(response.data.message ?? 'failed');
+      }
+    }),
+    // Broken like listDropsLast, for pages too large for two and a half of them to be built.
+    listDropsLastHuge: action(noInput, async ({ client }) => {
+      const all: Page['items'] = [];
+      let cursor: string | undefined;
+      for (;;) {
+        const { data } = await client.get<Page>(`${V1}/items`, { params: { cursor, limit: 2000 } });
+        if (!data.next) {
+          return all;
+        }
+        all.push(...data.items);
+        cursor = data.next;
+      }
+    }),
+    // Only works with the response its fixture gives it, and fails on a sampled item.
+    getItemNeedsOverride: action(idInput, async ({ client }, { id }) => {
+      const { data } = await client.get<{ name: string }>(`${V1}/items/${id}`);
+      if (data.name !== 'needed') {
+        throw new Error(`Unexpected item ${data.name}`);
+      }
+      return data;
+    }),
+    listNeedsOverride: action(noInput, async ({ client }) => {
+      const { data } = await client.get<Page>(`${V1}/items`, { params: { limit: 5 } });
+      if (data.items.length !== 1 || data.items[0].name !== 'needed') {
+        throw new Error('Unexpected items');
+      }
+      return data.items;
+    }),
     // Broken: asks again for as long as the name is longer than usual, which only a response at
     // the schema's bounds is.
     getItemLooping: action(idInput, async ({ client }, { id }) => {
@@ -402,6 +443,8 @@ describe('checkResponseHandling', () => {
         listDropsFirst: { responseChecks: { pagination: reason } },
         listDropsLastBig: { responseChecks: { pagination: reason } },
         getItemLooping: { responseChecks: { boundary: reason } },
+        getEither: { responseChecks: { errors: reason } },
+        listDropsLastHuge: { responseChecks: { pagination: reason } },
         listDropsLast: { responseChecks: { pagination: reason } },
         getItemCrashing: { responseChecks: { errors: reason } },
         getItemSwallowing: { responseChecks: { errors: reason } },
@@ -508,5 +551,126 @@ describe('checkResponseHandling', () => {
     expect(underAuth).toContainEqual(
       expect.objectContaining({ kind: 'error-crash', action: 'getItemNeedsBearer', status: 400 })
     );
+  });
+
+  it('finds the operations an action calls with every generated input', () => {
+    // The default input calls only one of the two.
+    expect(findings).toContainEqual(
+      expect.objectContaining({
+        kind: 'error-crash',
+        action: 'getEither',
+        operation: 'v1 GET /tags',
+        status: 400,
+      })
+    );
+    expect(
+      findings.some(
+        (finding) =>
+          finding.action === 'getEither' &&
+          'operation' in finding &&
+          finding.operation === 'v1 GET /items/{id}'
+      )
+    ).toBe(false);
+  });
+
+  it('builds a collection of one page and a bit where pages are too large for more', () => {
+    expect(findings).toContainEqual(
+      expect.objectContaining({
+        kind: 'pagination-dropped-items',
+        action: 'listDropsLastHuge',
+        collectionSize: 2001,
+        missing: 1,
+      })
+    );
+  });
+
+  describe('opting out only some operations', () => {
+    const reason = 'Deliberately different';
+    const scoped = (path: string) => ({
+      errors: { reason, operations: [{ source: 'v1', method: 'get', path }] },
+    });
+
+    it('skips the operations it names', async () => {
+      const result = await check({
+        modes: ['errors'],
+        fixtures: { getEither: { responseChecks: scoped('/tags') } },
+      });
+      expect(result.filter(({ action: name }) => name === 'getEither')).toEqual([]);
+    });
+
+    it('still checks the action for the operations it does not name', async () => {
+      const result = await check({
+        modes: ['errors'],
+        fixtures: { getEither: { responseChecks: scoped('/items/{id}') } },
+      });
+      expect(result).toContainEqual(
+        expect.objectContaining({ action: 'getEither', operation: 'v1 GET /tags' })
+      );
+    });
+  });
+
+  describe('an action that needs the responses in its fixture to run', () => {
+    const responses = [
+      {
+        method: 'get',
+        path: '/items/{id}',
+        status: 200,
+        body: { id: '1', name: 'needed' },
+      },
+    ];
+    const pageResponse = [
+      {
+        method: 'get',
+        path: '/items',
+        status: 200,
+        body: { items: [{ id: '1', name: 'needed' }], next: null },
+      },
+    ];
+
+    it('reports that the boundary check can not vary its responses', async () => {
+      const result = await check({
+        modes: ['boundary'],
+        fixtures: { getItemNeedsOverride: { responses } },
+      });
+      expect(result).toContainEqual({
+        kind: 'check-skipped',
+        action: 'getItemNeedsOverride',
+        check: 'boundary',
+      });
+    });
+
+    it('reports that the pagination check can not vary them either', async () => {
+      const result = await check({
+        modes: ['pagination'],
+        fixtures: { listNeedsOverride: { responses: pageResponse } },
+      });
+      expect(result).toContainEqual({
+        kind: 'check-skipped',
+        action: 'listNeedsOverride',
+        check: 'pagination',
+        operation: 'v1 GET /items',
+      });
+    });
+
+    it('says nothing once the action opts out, with a reason', async () => {
+      const result = await check({
+        modes: ['boundary'],
+        fixtures: {
+          getItemNeedsOverride: {
+            responses,
+            responseChecks: { boundary: 'Needs its fixture to run' },
+          },
+        },
+      });
+      expect(result.filter(({ action: name }) => name === 'getItemNeedsOverride')).toEqual([]);
+    });
+
+    it('reports nothing for an action that runs without its fixture', async () => {
+      const result = await check({
+        modes: ['boundary'],
+        fixtures: { getItem: { responses } },
+      });
+      expect(result.filter(({ kind }) => kind === 'check-skipped')).toEqual([]);
+    });
   });
 });

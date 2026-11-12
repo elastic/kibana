@@ -51,6 +51,13 @@ const CRASH_ERRORS: ReadonlyArray<abstract new (...args: never[]) => Error> = [
 
 /** A way a handler mishandles a response the spec allows, with the response that caused it. */
 export type ResponseHandlingFinding =
+  /** The check can't vary the responses, as the action needs its fixture's `responses` to run. */
+  | {
+      readonly kind: 'check-skipped';
+      readonly action: string;
+      readonly check: 'boundary' | 'pagination';
+      readonly operation?: string;
+    }
   /** The handler threw on a response at the schema's bounds. */
   | { readonly kind: 'boundary-failure'; readonly action: string; readonly message: string }
   /** The handler kept requesting pages after the collection ended. */
@@ -267,8 +274,22 @@ export const checkResponseHandling = async ({
 
   for (const action of Object.keys(connector.actions).sort()) {
     const fixture = fixtures[action] ?? {};
+    // A reason opts the action out of the check; `{ reason, operations }` only those operations.
     const enabled = (mode: ResponseCheckMode) =>
-      modes.includes(mode) && fixture.responseChecks?.[mode] === undefined;
+      modes.includes(mode) && typeof fixture.responseChecks?.[mode] !== 'string';
+    const isOptedOut = (mode: 'pagination' | 'errors', operation: CalledOperation) => {
+      const optOut = fixture.responseChecks?.[mode];
+      return (
+        typeof optOut === 'object' &&
+        optOut.operations.some(
+          (ref) =>
+            ref.method.toLowerCase() === operation.method &&
+            ref.path === operation.path &&
+            (ref.source === undefined || ref.source === operation.source)
+        )
+      );
+    };
+    const hasOverrides = (fixture.responses?.length ?? 0) > 0;
     if (!ALL_MODES.some(enabled)) {
       continue;
     }
@@ -334,6 +355,12 @@ export const checkResponseHandling = async ({
 
     if (enabled('boundary')) {
       const messages = new Set<string>();
+      let boundarySkipped = false;
+      const runsWithOverrides = async (input: unknown) =>
+        (await open(authTypeToRun)).runAction(action, input).then(
+          () => true,
+          () => false
+        );
       for (const input of inputs) {
         // A run that fails with typical responses has a problem of its own: its input, its
         // config or the transport, which the recorder reports.
@@ -343,6 +370,10 @@ export const checkResponseHandling = async ({
           () => false
         );
         if (!works) {
+          // An action that needs its fixture's `responses` to run can't have them left out.
+          if (hasOverrides && (await runsWithOverrides(input))) {
+            boundarySkipped = true;
+          }
           continue;
         }
         const { runAction, exceeded, mock } = await open(authTypeToRun, {
@@ -370,6 +401,9 @@ export const checkResponseHandling = async ({
       }
       for (const message of messages) {
         findings.push({ kind: 'boundary-failure', action, message });
+      }
+      if (boundarySkipped) {
+        findings.push({ kind: 'check-skipped', action, check: 'boundary' });
       }
     }
 
@@ -415,11 +449,13 @@ export const checkResponseHandling = async ({
             entry.operation.path === operation.path &&
             (entry.operation.source === undefined || entry.operation.source === operation.source)
         );
-        if (!paginated) {
+        if (!paginated || isOptedOut('pagination', operation)) {
           continue;
         }
         const pageSize = pageSizeOf(paginated, asked);
-        const sizes = [...new Set([0, 1, pageSize, pageSize * 2 + 1])].filter(
+        // Two and a half pages, or one and a bit where pages are too large for that.
+        const several = pageSize * 2 + 1 <= MAX_COLLECTION_SIZE ? pageSize * 2 + 1 : pageSize + 1;
+        const sizes = [...new Set([0, 1, pageSize, several])].filter(
           (size) => size <= MAX_COLLECTION_SIZE
         );
         // A handler that fails with typical responses too has a problem other than paging.
@@ -428,6 +464,22 @@ export const checkResponseHandling = async ({
           () => false,
           () => true
         );
+        if (baselineFailed && hasOverrides) {
+          const withOverrides = await open(authTypeToRun);
+          const works = await withOverrides.runAction(action, input).then(
+            () => true,
+            () => false
+          );
+          if (works) {
+            findings.push({
+              kind: 'check-skipped',
+              action,
+              check: 'pagination',
+              operation: describe(operation),
+            });
+            continue;
+          }
+        }
         const { itemsPath } = paginated.pagination.response;
         for (const collectionSize of sizes) {
           const bound = Math.ceil(collectionSize / pageSize) + EXTRA_REQUESTS;
@@ -498,6 +550,9 @@ export const checkResponseHandling = async ({
     if (enabled('errors')) {
       const { mock } = await open(authTypeToRun);
       for (const { operation, input } of discovered.values()) {
+        if (isOptedOut('errors', operation)) {
+          continue;
+        }
         const target = mock.operations.find(
           (candidate) =>
             candidate.protocol === 'openapi' &&
@@ -548,6 +603,12 @@ export const checkResponseHandling = async ({
 export const describeResponseFinding = (finding: ResponseHandlingFinding): string => {
   const { action } = finding;
   switch (finding.kind) {
+    case 'check-skipped':
+      return `${action}: needs the responses in its fixture to run, so the ${
+        finding.check
+      } check can't vary the responses${
+        finding.operation === undefined ? '' : ` of ${finding.operation}`
+      }`;
     case 'boundary-failure':
       return `${action}: failed on a response at the schema's bounds: ${finding.message}`;
     case 'pagination-unbounded':
@@ -614,10 +675,12 @@ export const describeResponseFindings = (
   ];
 };
 
-const modeOf = ({ kind }: ResponseHandlingFinding): ResponseCheckMode =>
-  kind === 'boundary-failure'
+const modeOf = (finding: ResponseHandlingFinding): ResponseCheckMode =>
+  finding.kind === 'check-skipped'
+    ? finding.check
+    : finding.kind === 'boundary-failure'
     ? 'boundary'
-    : kind.startsWith('pagination')
+    : finding.kind.startsWith('pagination')
     ? 'pagination'
     : 'errors';
 

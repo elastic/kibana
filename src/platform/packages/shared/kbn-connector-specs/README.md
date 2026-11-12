@@ -665,7 +665,7 @@ The recorder answers every request with one sampled success, so it can't see how
 - **Pagination**: for each operation with a `pagination` descriptor, against collections of no items, one, exactly one page and several pages. A handler that pages must stop within a bounded number of requests and return every item. One that sends a single request is taken to leave paging to the caller.
 - **Failures**: each operation an action calls is answered with 400, 401, 429 and 500 whether its spec declares them or not, and with every other error status it declares. The handler has to throw an explanatory error, so that Workflows fails the step (and can retry it) and Agent Builder gives the agent guidance for the status. It must not crash, as on a missing field in an error body, or return a result. A 404 is left out for `read` actions, where "no such resource" can be an answer, such as `{ found: false }`.
 
-Each action runs under the first of its auth types that it sends a request under, as an auth type may refuse the action before any request. Its operations are found with every generated input. The boundary and pagination runs don't serve the action's `responses` from `fixtures.json`, since those take precedence over the responses being tested. A collection is at most 2,500 items, so a multi-page check is skipped for a vendor whose pages are larger than that.
+Each action runs under the first of its auth types that it sends a request under, as an auth type may refuse the action before any request. Its operations are found with every generated input. The boundary and pagination runs don't serve the action's `responses` from `fixtures.json`, since those take precedence over the responses being tested. An action that can't run without them, such as one that polls until a fixture says a job is `completed`, is reported as skipped, so that lost coverage is visible: opt it out of the check with a reason. A collection is at most 2,500 items, so the multi-page check is skipped for a vendor whose pages hold more than 2,499 items.
 
 A failure names the action, the status or collection size and what the handler did. If an action behaves this way on purpose, opt it out of a check with a reason in its `fixtures.json` entry. Reviewers should read the reason:
 
@@ -677,7 +677,20 @@ A failure names the action, the status or collection size and what the handler d
 }
 ```
 
-`responseChecks` takes `boundary`, `pagination` and `errors`.
+`responseChecks` takes `boundary`, `pagination` and `errors`. `pagination` and `errors` also take `{ "reason": "…", "operations": [{ "source": "v1", "method": "post", "path": "/notes/batch/read" }] }`, which opts out only those operations, so the action's others are still checked:
+
+```json
+{
+  "getCrmObject": {
+    "responseChecks": {
+      "errors": {
+        "reason": "A ticket's notes are optional, so failing to look them up returns the ticket without them.",
+        "operations": [{ "source": "notes_v3", "method": "POST", "path": "/crm/v3/objects/notes/batch/read" }]
+      }
+    }
+  }
+}
+```
 
 ### `manifest.json`
 
@@ -738,7 +751,7 @@ Per action:
 - `config`: merged into the connector config for the action's runs. Recording samples only the required config fields, so use this to set an optional field the action needs, such as a second server URL.
 - `queries`: for a `read` action, operations that use another method but only query, such as a search sent as `POST`. Each entry states that the operation changes no vendor state, so reviewers should check it. A `source` restricts an entry to one spec. Requests that match no operation (those in `"unmatched"`, such as calls to a vendor's MCP server) are matched by their path, where a `{name}` segment matches any segment.
 - `responses`: served by the mock for the action's runs instead of sampled responses, so handlers that branch on a response take the intended path. A `source` restricts an override to one spec, and a `when` (`path`, `query` and `headers` by value, and the `body` fields it lists) to the requests with those values. Overrides that break the spec, or name an operation it lacks, are reported.
-- `responseChecks`: opts the action out of a response handling check (`boundary`, `pagination` or `errors`), with the reason it behaves differently on purpose.
+- `responseChecks`: opts the action out of a response handling check (`boundary`, `pagination` or `errors`), with the reason it behaves differently on purpose. For `pagination` and `errors`, it can name the operations to opt out.
 
 `vendorApiFixturesSchema` is the schema.
 

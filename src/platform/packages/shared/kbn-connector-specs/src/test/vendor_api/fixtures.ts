@@ -60,6 +60,18 @@ const queryOperationSchema = z
   })
   .strict();
 
+const scopedOptOutSchema = z
+  .object({
+    reason: z.string().min(1),
+    /** The operations the check doesn't apply to; it still runs for the action's others. */
+    operations: z
+      .array(
+        z.object({ source: z.string().optional(), method: z.string(), path: z.string() }).strict()
+      )
+      .min(1),
+  })
+  .strict();
+
 const actionFixtureSchema = z
   .object({
     /**
@@ -80,13 +92,14 @@ const actionFixtureSchema = z
     responses: z.array(responseOverrideSchema).optional(),
     /**
      * Opts the action out of a response check, each with the reason its handler behaves
-     * differently on purpose, e.g. an action that deliberately returns only the first page.
+     * differently on purpose, e.g. an action that deliberately returns only the first page. For
+     * `pagination` and `errors`, `{ reason, operations }` opts out only the operations it names.
      */
     responseChecks: z
       .object({
         boundary: z.string().min(1).optional(),
-        pagination: z.string().min(1).optional(),
-        errors: z.string().min(1).optional(),
+        pagination: z.union([z.string().min(1), scopedOptOutSchema]).optional(),
+        errors: z.union([z.string().min(1), scopedOptOutSchema]).optional(),
       })
       .strict()
       .optional(),
