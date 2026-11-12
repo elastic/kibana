@@ -92,7 +92,7 @@ steps:
       since: '{{ inputs.since | default: steps.last_output.output.context.output.resume_from | default: steps.last_run.output.since }}'
       after: '{% if inputs.since == blank %}{{ steps.last_output.output.context.output.resume_after }}{% endif %}'
       size: 1000
-      max_tokens: 1000000
+      max_tokens: 600000
       batch_tokens: 100000
 
   - name: active
