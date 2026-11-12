@@ -6,7 +6,7 @@
  */
 
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { PerformanceContextProvider } from '@kbn/ebt-tools/react';
 import { useLocation } from 'react-router-dom';
 import { useMetricsExplorerState } from './use_metric_explorer_state';
 import { MetricsExplorerOptionsContainer } from './use_metrics_explorer_options';
