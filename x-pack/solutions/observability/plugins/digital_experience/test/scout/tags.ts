@@ -7,8 +7,8 @@
 
 import { tags } from '@kbn/scout-oblt';
 
-// Flag-on specs. Local only: they ingest mock data and set up sessions transforms, which haven't
-// been tried against Cloud deployments yet.
+// Flag-on specs. Local only: they ingest mock data and set up sessions, which haven't been tried
+// against Cloud deployments yet.
 export const DIGITAL_EXPERIENCE_TAGS = [
   '@local-stateful-classic',
   '@local-serverless-observability_complete',
