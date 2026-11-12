@@ -36,8 +36,12 @@ steps:
   # Traces that invoked the skill in the lookback window. Spans carry no
   # skill attribute, so the join is the load_skill tool call: a trace
   # belongs to the skill when a load_skill span's arguments name it. The
-  # STATS BY dedupes a trace that loaded the skill more than once. One row
-  # per trace, first column the trace id.
+  # skill match runs inside KQL(), not raw column refs: attributes.* is
+  # dynamic and unmapped on fresh clusters, where ES|QL rejects unknown
+  # columns at compile time while KQL() just matches nothing (same reason
+  # the online-evals generator wraps its gen_ai filters in KQL). The STATS
+  # BY dedupes a trace that loaded the skill more than once. One row per
+  # trace, first column the trace id.
   - name: find_traces
     type: elasticsearch.esql.query
     timeout: '60s'
@@ -51,7 +55,7 @@ steps:
                   gte: 'now-__LOOKBACK_MINUTES__m'
       query: |-
         FROM traces-agent_builder.otel-*
-        | WHERE attributes.gen_ai.operation.name == "execute_tool" AND attributes.gen_ai.tool.name == "load_skill" AND TO_LOWER(attributes.gen_ai.tool.call.arguments) LIKE("*{{ consts.SKILL_ID }}*")
+        | WHERE KQL("attributes.gen_ai.operation.name:execute_tool AND attributes.gen_ai.tool.name:load_skill AND attributes.gen_ai.tool.call.arguments:*{{ consts.SKILL_ID }}*")
         | STATS loads = COUNT(*) BY trace_id
         | SORT trace_id ASC
         | LIMIT 25
