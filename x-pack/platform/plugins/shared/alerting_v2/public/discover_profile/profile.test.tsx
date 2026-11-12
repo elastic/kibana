@@ -7,7 +7,9 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Filter } from '@kbn/es-query';
+import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { createDiscoverProfile } from './profile';
 
 const mockCreateEpisodeActions = jest.fn().mockReturnValue([
@@ -34,7 +36,20 @@ jest.mock('@kbn/alerting-v2-episodes-ui/actions/create_episode_actions', () => (
 }));
 
 jest.mock('../kibana_services', () => ({
-  untilPluginStartServicesReady: () => Promise.resolve({ container: { get: () => ({}) } }),
+  // Every service is an empty stub, except the share URL service the links are built with.
+  untilPluginStartServicesReady: () =>
+    Promise.resolve({
+      expressions: { execute: jest.fn() },
+      container: { get: () => ({ url: { locators: { get: () => ({}) } } }) },
+    }),
+}));
+
+// Shows whether the episodes UI finds our services in the Kibana context.
+jest.mock('./episode_overview_doc_view', () => ({
+  EpisodeOverviewDocView: () => {
+    const { services } = useKibana<{ expressions?: object }>();
+    return <div>{services.expressions ? 'has expressions' : 'no expressions'}</div>;
+  },
 }));
 
 const mockRootContext = { profileId: 'root' } as any;
@@ -215,67 +230,52 @@ describe('createDiscoverProfile', () => {
       docViewsRegistry: (r: any) => r,
     });
 
-    it('registers four doc viewer sections', () => {
+    const mockTableRender = jest.fn(() => <div />);
+    const createMockRegistry = () =>
+      new DocViewsRegistry([
+        { id: 'doc_view_table', title: 'Table', order: 10, render: mockTableRender },
+        { id: 'doc_view_source', title: 'JSON', order: 20, render: () => <div /> },
+      ]);
+
+    const getRegistry = (): DocViewsRegistry => {
       const provider = createDiscoverProfile();
       const extension = provider.profile.getDocViewer!(
         mockPrev,
-
         {} as any
       )({
         record: mockRecord,
-
         actions: {} as any,
       });
+      return extension.docViewsRegistry(createMockRegistry());
+    };
 
-      const mockRegistry = { add: jest.fn(), getAll: jest.fn().mockReturnValue([]) };
+    it('adds the episode tabs before the Discover ones', () => {
+      const titles = getRegistry()
+        .getAll()
+        .map(({ title }) => title);
 
-      extension.docViewsRegistry(mockRegistry as any);
-
-      expect(mockRegistry.add).toHaveBeenCalledTimes(4);
+      expect(titles).toEqual(['Overview', 'Timeline', 'Table', 'JSON']);
     });
 
-    it('registers sections with titles: Overview, Related, Metadata, Runbook', () => {
-      const provider = createDiscoverProfile();
-      const extension = provider.profile.getDocViewer!(
-        mockPrev,
+    it('gives the episode tabs our services through the Kibana context', async () => {
+      const overviewDocView = getRegistry()
+        .getAll()
+        .find(({ id }) => id === 'alerting_v2_overview');
 
-        {} as any
-      )({
-        record: mockRecord,
+      render(overviewDocView!.render({ hit: mockRecord, dataView: {} as any }));
 
-        actions: {} as any,
-      });
-
-      const mockRegistry = { add: jest.fn(), getAll: jest.fn().mockReturnValue([]) };
-
-      extension.docViewsRegistry(mockRegistry as any);
-
-      const titles = (mockRegistry.add.mock.calls as Array<[{ title: string }]>).map(
-        ([section]) => section.title
-      );
-      expect(titles).toEqual(['Overview', 'Related', 'Metadata', 'Runbook']);
+      expect(await screen.findByText('has expressions')).toBeInTheDocument();
     });
 
-    it('registers sections with ascending order values', () => {
-      const provider = createDiscoverProfile();
-      const extension = provider.profile.getDocViewer!(
-        mockPrev,
+    it('replaces the Table tab content and keeps its id, title and order', () => {
+      const tableDocView = getRegistry()
+        .getAll()
+        .find(({ id }) => id === 'doc_view_table');
 
-        {} as any
-      )({
-        record: mockRecord,
-
-        actions: {} as any,
-      });
-
-      const mockRegistry = { add: jest.fn(), getAll: jest.fn().mockReturnValue([]) };
-
-      extension.docViewsRegistry(mockRegistry as any);
-
-      const orders = (mockRegistry.add.mock.calls as Array<[{ order: number }]>).map(
-        ([section]) => section.order
+      expect(tableDocView).toEqual(
+        expect.objectContaining({ id: 'doc_view_table', title: 'Table', order: 10 })
       );
-      expect(orders).toEqual([0, 10, 20, 30]);
+      expect(tableDocView!.render).not.toBe(mockTableRender);
     });
   });
 

@@ -35,10 +35,6 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
 import { buildAlertEventsTimeRangeFilter } from '@kbn/alerting-v2-episodes-ui/utils/build_alert_events_time_range_filter';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { AlertEpisodeOverviewListSection } from '@kbn/alerting-v2-episodes-ui/components/details/overview_list_section';
-import { AlertEpisodesRelatedSection } from '@kbn/alerting-v2-episodes-ui/components/details/related_section';
-import { AlertEpisodeMetadataSection } from '@kbn/alerting-v2-episodes-ui/components/details/metadata_section';
-import { AlertEpisodeRunbookSection } from '@kbn/alerting-v2-episodes-ui/components/details/runbook_section';
 import { createEpisodeActions } from '@kbn/alerting-v2-episodes-ui/actions/create_episode_actions';
 import type { EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions/types';
 import type { AlertEpisode } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
@@ -48,12 +44,30 @@ import { CoreStart } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
+import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { AlertEpisodeTimelineSection } from '@kbn/alerting-v2-episodes-ui/components/details/timeline_section';
+import {
+  FLYOUT_TAB_OVERVIEW,
+  FLYOUT_TAB_TIMELINE,
+} from '@kbn/alerting-v2-episodes-ui/components/details/translations';
+import { OBSERVABILITY_ALERTING_HOST } from '../../common/locators';
+import { bindLocatorsToHost, getAlertingV2Locators } from '../application/bind_locators_to_host';
+import type { AlertingV2Locators } from '../application/locator_context';
+import { EpisodeOverviewDocView } from './episode_overview_doc_view';
 import {
   EpisodeRuleCellWithFetch,
   type EpisodeRuleCellWithFetchProps,
 } from './rule_cell_with_fetch';
+import { EpisodeDocViewerHeader } from './episode_doc_viewer_header';
+import { EpisodeTableDocView, type EpisodeTableDocViewProps } from './episode_table_doc_view';
 import { untilPluginStartServicesReady, type AlertingV2KibanaServices } from '../kibana_services';
 import type { AlertingV2DiscoverProfileProvider } from '../types';
+
+// Discover's Table tab. The doc viewer plugin registers it with this literal id.
+const DOC_VIEW_TABLE_ID = 'doc_view_table';
 
 // DataSourceCategory.Default has value 'default'.
 // We use the literal to avoid importing from the Discover plugin (circular dep).
@@ -63,6 +77,8 @@ type DiscoverProfileServices = AlertingV2KibanaServices &
   Pick<AlertEpisodeDetailsServices, 'spaces' | 'unifiedDocViewer' | 'userProfile'> &
   Pick<CoreStartContract, 'overlays' | 'rendering' | 'docLinks'> & {
     fieldFormats: FieldFormatsStart;
+    charts: ChartsPluginStart;
+    locators: AlertingV2Locators;
   };
 
 let profileServicesPromise: Promise<DiscoverProfileServices> | undefined;
@@ -80,6 +96,12 @@ const getProfileServices = (): Promise<DiscoverProfileServices> => {
       spaces: container.get(PluginStart('spaces')) as SpacesPluginStart,
       unifiedDocViewer: container.get(PluginStart('unifiedDocViewer')) as UnifiedDocViewerStart,
       fieldFormats: container.get(PluginStart('fieldFormats')) as FieldFormatsStart,
+      charts: container.get(PluginStart('charts')) as ChartsPluginStart,
+      // Links go to the alerting pages in Observability, like the agent builder attachments.
+      locators: bindLocatorsToHost(
+        getAlertingV2Locators(container.get(PluginStart('share')) as SharePluginStart),
+        OBSERVABILITY_ALERTING_HOST
+      ),
     };
   });
   return profileServicesPromise;
@@ -91,6 +113,23 @@ const useAlertingV2Services = () => {
     getProfileServices().then(setServices);
   }, []);
   return services;
+};
+
+interface EpisodeServicesProviderProps {
+  queryClient: QueryClient;
+  children: (services: DiscoverProfileServices) => React.ReactNode;
+}
+
+// Some episodes UI components read their services from the Kibana context, which holds
+// Discover's services here, so ours replace them for our own components.
+const EpisodeServicesProvider = ({ queryClient, children }: EpisodeServicesProviderProps) => {
+  const services = useAlertingV2Services();
+  if (!services) return null;
+  return (
+    <KibanaContextProvider services={services}>
+      <QueryClientProvider client={queryClient}>{children(services)}</QueryClientProvider>
+    </KibanaContextProvider>
+  );
 };
 
 interface EpisodeActionControlProps {
@@ -166,6 +205,12 @@ const DurationCellRenderer: React.FC<React.ComponentProps<typeof EpisodeDuration
     return (durationMs: number) => formatter.convertToText(durationMs);
   }, [services]);
   return <EpisodeDurationCell {...props} formatDuration={formatDuration} />;
+};
+
+const TableSection: React.FC<Omit<EpisodeTableDocViewProps, 'services'>> = (props) => {
+  const services = useAlertingV2Services();
+  if (!services) return null;
+  return <EpisodeTableDocView {...props} services={services} />;
 };
 
 // ES|QL returns a single value of a multi-value field as a plain string.
@@ -324,109 +369,107 @@ export const createDiscoverProfile = (): AlertingV2DiscoverProfileProvider => {
           return [...prevControls, ...episodeColumns];
         },
 
-      getDocViewer: (prev: any) => (params: any) => {
-        const episodeId = params.record.flattened['episode.id'] as string;
-        const groupHash = params.record.flattened.group_hash as string | undefined;
-        const prevValue = prev(params);
+      getDocViewer:
+        (prev: any, { toolkit }) =>
+        (params: any) => {
+          const episodeId = params.record.flattened['episode.id'] as string;
+          const groupHash = params.record.flattened.group_hash as string | undefined;
+          const prevValue = prev(params);
 
-        const OverviewSection: React.FC = () => {
-          const services = useAlertingV2Services();
-          if (!services) return null;
-          return (
-            <>
-              <EuiSpacer size="m" />
-              <QueryClientProvider client={queryClient}>
-                <AlertEpisodeOverviewListSection
+          const onActionSuccess = () => {
+            toolkit.actions.refreshData?.();
+            queryClient.invalidateQueries();
+          };
+
+          // Discover renders it at the top of the flyout body, so it scrolls with the tabs.
+          const HeaderSection: React.FC = () => (
+            <EpisodeServicesProvider queryClient={queryClient}>
+              {(services) => (
+                <EpisodeDocViewerHeader
                   episodeId={episodeId}
                   groupHash={groupHash}
                   services={services}
+                  actions={resolvedEpisodeActions}
+                  onActionSuccess={onActionSuccess}
                 />
-              </QueryClientProvider>
-            </>
+              )}
+            </EpisodeServicesProvider>
           );
-        };
 
-        const RelatedSection: React.FC = () => {
-          const services = useAlertingV2Services();
-          if (!services) return null;
-          return (
-            <>
-              <EuiSpacer size="m" />
-              <QueryClientProvider client={queryClient}>
-                <AlertEpisodesRelatedSection
-                  episodeId={episodeId}
-                  services={services}
-                  getEpisodeDetailsHref={() => '#'}
-                  showHeading={false}
-                  compressed
-                />
-              </QueryClientProvider>
-            </>
+          const OverviewSection: React.FC = () => (
+            <EpisodeServicesProvider queryClient={queryClient}>
+              {(services) => {
+                const { rulesLocators, episodesLocators } = services.locators;
+                return (
+                  <EpisodeOverviewDocView
+                    episodeId={episodeId}
+                    groupHash={groupHash}
+                    services={services}
+                    getRuleDetailsHref={(ruleId) => rulesLocators.getRedirectUrl({ ruleId })}
+                    getEpisodeDetailsHref={(id) =>
+                      episodesLocators.getRedirectUrl({ episodeId: id })
+                    }
+                  />
+                );
+              }}
+            </EpisodeServicesProvider>
           );
-        };
 
-        const MetadataSection: React.FC = () => {
-          const services = useAlertingV2Services();
-          if (!services) return null;
-          return (
-            <>
-              <EuiSpacer size="m" />
-              <QueryClientProvider client={queryClient}>
-                <AlertEpisodeMetadataSection episodeId={episodeId} services={services} />
-              </QueryClientProvider>
-            </>
+          const TimelineSection: React.FC = () => (
+            <EpisodeServicesProvider queryClient={queryClient}>
+              {(services) => (
+                <>
+                  <EuiSpacer size="m" />
+                  <AlertEpisodeTimelineSection
+                    episodeId={episodeId}
+                    seriesId={(params.record.flattened.series_id as string | undefined) ?? null}
+                    groupHash={groupHash}
+                    services={services}
+                  />
+                </>
+              )}
+            </EpisodeServicesProvider>
           );
-        };
 
-        const RunbookSection: React.FC = () => {
-          const services = useAlertingV2Services();
-          if (!services) return null;
-          return (
-            <>
-              <EuiSpacer size="m" />
-              <QueryClientProvider client={queryClient}>
-                <AlertEpisodeRunbookSection episodeId={episodeId} services={services} />
-              </QueryClientProvider>
-            </>
-          );
-        };
+          return {
+            title: prevValue.title,
+            renderHeader: () => <HeaderSection />,
 
-        return {
-          title: prevValue.title,
+            docViewsRegistry: (registry: DocViewsRegistry) => {
+              // The row holds the last event data as one JSON string, so Discover's table
+              // shows it with one row per value instead.
+              const tableDocView = registry.getAll().find(({ id }) => id === DOC_VIEW_TABLE_ID);
+              if (tableDocView) {
+                registry.removeById(DOC_VIEW_TABLE_ID);
+                registry.add({
+                  ...tableDocView,
+                  render: (props) => (
+                    <QueryClientProvider client={queryClient}>
+                      <TableSection renderTable={tableDocView.render} renderProps={props} />
+                    </QueryClientProvider>
+                  ),
+                });
+              }
 
-          docViewsRegistry: (registry: any) => {
-            registry.add({
-              id: 'alerting_v2_overview',
-              title: 'Overview',
-              order: 0,
-              render: OverviewSection,
-            });
+              // Discover's tabs start at order 10, so ours come first.
+              registry.add({
+                id: 'alerting_v2_overview',
+                title: FLYOUT_TAB_OVERVIEW,
+                order: 0,
+                render: () => <OverviewSection />,
+              });
 
-            registry.add({
-              id: 'alerting_v2_related',
-              title: 'Related',
-              order: 10,
-              render: RelatedSection,
-            });
+              registry.add({
+                id: 'alerting_v2_timeline',
+                title: FLYOUT_TAB_TIMELINE,
+                order: 1,
+                render: () => <TimelineSection />,
+              });
 
-            registry.add({
-              id: 'alerting_v2_metadata',
-              title: 'Metadata',
-              order: 20,
-              render: MetadataSection,
-            });
-
-            registry.add({
-              id: 'alerting_v2_runbook',
-              title: 'Runbook',
-              order: 30,
-              render: RunbookSection,
-            });
-
-            return registry;
-          },
-        };
-      },
+              return registry;
+            },
+          };
+        },
     },
 
     resolve: async ({ query }) => {
