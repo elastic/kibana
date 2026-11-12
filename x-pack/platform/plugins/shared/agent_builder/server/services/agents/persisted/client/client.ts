@@ -194,6 +194,8 @@ export interface SystemAgentClient {
   ensureAgent(profile: AgentCreateRequest): Promise<void>;
 }
 
+type StoredAgentDocument = Document & { _seq_no?: number; _primary_term?: number };
+
 const getAgentDocument = async ({
   storage,
   space,
@@ -202,11 +204,12 @@ const getAgentDocument = async ({
   storage: AgentProfileStorage;
   space: string;
   agentId: string;
-}): Promise<Document | undefined> => {
+}): Promise<StoredAgentDocument | undefined> => {
   const response = await storage.getClient().search({
     track_total_hits: false,
     size: 1,
     terminate_after: 1,
+    seq_no_primary_term: true,
     query: {
       bool: {
         filter: [
@@ -223,13 +226,24 @@ const getAgentDocument = async ({
     },
   });
 
-  return response.hits.hits.length > 0 ? (response.hits.hits[0] as Document) : undefined;
+  return response.hits.hits.length > 0 ? (response.hits.hits[0] as StoredAgentDocument) : undefined;
 };
+
+const isUntouchedSystemAgent = (source: AgentProperties): boolean =>
+  source.created_by_id === undefined &&
+  source.created_by_name === SYSTEM_USER_ID &&
+  source.updated_by_id === undefined &&
+  (source.updated_by_name === undefined || source.updated_by_name === SYSTEM_USER_ID) &&
+  source.service_account_id === undefined;
 
 /**
  * Ensures a system agent exists, treating a concurrent create as success. Guarantees
  * existence, not searchability: the document may not be visible to searches yet when
  * this resolves.
+ *
+ * When a system-installed agent has never been edited by a user or bound to a service
+ * account, reconciles its baseline `access_control.access_mode` if the code-defined
+ * mode changed across releases (for example `private` -> `shared`).
  */
 const ensureSystemAgent = async ({
   storage,
@@ -255,6 +269,38 @@ const ensureSystemAgent = async ({
       throw createBadRequestError(
         `Cannot ensure agent "${profile.id}": the id is already used by an agent of type "${existingType}"`
       );
+    }
+
+    const source = existingAgent._source;
+    const desiredMode = profile.access_control?.access_mode;
+    if (source && desiredMode !== undefined && isUntouchedSystemAgent(source)) {
+      const currentAccessControl = normalizeAccessControl(source);
+      if (
+        currentAccessControl.entries.length === 0 &&
+        currentAccessControl.access_mode !== desiredMode
+      ) {
+        const { visibility: _visibility, acl: _acl, ...restSource } = source;
+        const occ =
+          existingAgent._seq_no !== undefined && existingAgent._primary_term !== undefined
+            ? { if_seq_no: existingAgent._seq_no, if_primary_term: existingAgent._primary_term }
+            : {};
+        try {
+          await storage.getClient().index({
+            id: existingAgent._id,
+            ...occ,
+            document: {
+              ...restSource,
+              access_control: { access_mode: desiredMode, entries: [] },
+              updated_by_name: SYSTEM_USER_ID,
+              updated_at: new Date().toISOString(),
+            },
+          });
+        } catch (error) {
+          if (!isVersionConflictError(error)) {
+            throw error;
+          }
+        }
+      }
     }
     return;
   }

@@ -848,6 +848,108 @@ describe('SystemAgentClient', () => {
     expect(mockEsClient.index).not.toHaveBeenCalled();
   });
 
+  it('reconciles access_mode on an untouched system agent when its code-defined mode changed', async () => {
+    const existing = {
+      ...buildDoc(),
+      _seq_no: 4,
+      _primary_term: 2,
+      _source: {
+        ...buildDoc()._source,
+        updated_by_name: 'system',
+        access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+      },
+    };
+    mockEsClient.search.mockResolvedValue({ hits: { hits: [existing] } });
+    mockEsClient.index.mockResolvedValue({});
+
+    await createSystemAgentClient().ensureAgent({
+      ...profile,
+      access_control: { access_mode: AgentAccessControlMode.Shared },
+    });
+
+    expect(mockEsClient.index).toHaveBeenCalledWith({
+      id: existing._id,
+      if_seq_no: 4,
+      if_primary_term: 2,
+      document: expect.objectContaining({
+        id: profile.id,
+        config: profile.configuration,
+        created_by_name: 'system',
+        updated_by_name: 'system',
+        access_control: { access_mode: AgentAccessControlMode.Shared, entries: [] },
+      }),
+    });
+  });
+
+  it('treats a concurrent edit during access_mode reconciliation as a no-op', async () => {
+    const conflictError = Object.assign(new Error('version_conflict_engine_exception'), {
+      statusCode: 409,
+    });
+    mockEsClient.search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            ...buildDoc(),
+            _seq_no: 4,
+            _primary_term: 2,
+            _source: {
+              ...buildDoc()._source,
+              access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+            },
+          },
+        ],
+      },
+    });
+    mockEsClient.index.mockRejectedValue(conflictError);
+
+    await expect(
+      createSystemAgentClient().ensureAgent({
+        ...profile,
+        access_control: { access_mode: AgentAccessControlMode.Shared },
+      })
+    ).resolves.toBeUndefined();
+  });
+
+  it.each([
+    [
+      'already at the desired access_mode',
+      { access_control: { access_mode: 'shared', entries: [] } },
+    ],
+    ['edited by a user', { updated_by_id: 'u_admin', updated_by_name: 'admin' }],
+    ['bound to a service account', { service_account_id: 'kibana/nightshift_agent' }],
+    [
+      'carrying explicit ACL entries',
+      {
+        access_control: {
+          access_mode: 'private',
+          entries: [{ type: 'user', id: 'u_alice', role: 'user' }],
+        },
+      },
+    ],
+  ])('does not overwrite an existing system agent %s', async (_case, overrides) => {
+    mockEsClient.search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            ...buildDoc(),
+            _source: {
+              ...buildDoc()._source,
+              access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+              ...overrides,
+            },
+          },
+        ],
+      },
+    });
+
+    await createSystemAgentClient().ensureAgent({
+      ...profile,
+      access_control: { access_mode: AgentAccessControlMode.Shared },
+    });
+
+    expect(mockEsClient.index).not.toHaveBeenCalled();
+  });
+
   it('rejects an existing agent with a different type', async () => {
     mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc('chat')] } });
 
