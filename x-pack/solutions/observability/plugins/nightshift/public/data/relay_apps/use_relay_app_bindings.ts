@@ -198,7 +198,7 @@ export interface UseBindChannel {
 /** Mutation hook for binding a channel to this deployment. */
 export function useBindChannel(): UseBindChannel {
   const {
-    services: { http },
+    services: { http, notifications },
   } = useKibana();
   const queryClient = useQueryClient();
 
@@ -209,7 +209,24 @@ export function useBindChannel(): UseBindChannel {
   });
 
   return {
-    bind: (channelId: string) => mutation.mutateAsync(channelId).then(() => undefined),
+    bind: async (channelId: string) => {
+      await mutation.mutateAsync(channelId);
+      // The name comes from the bindings cache; the id is shown when that page isn't cached.
+      const connected = queryClient
+        .getQueriesData<{ bindings: SlackChannelBinding[] }>(RELAY_APP_BINDINGS_QUERY_KEY)
+        .flatMap(([, data]) => data?.bindings ?? [])
+        .find(({ channel }) => channel === channelId);
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.nightshift.settings.apps.bindChannelSuccessTitle', {
+          defaultMessage: '{channel} connected',
+          values: { channel: connected ? formatChannelLabel(connected) : channelId },
+        }),
+        text: i18n.translate('xpack.nightshift.settings.apps.bindChannelSuccessText', {
+          defaultMessage:
+            '@Elastic posted a confirmation in the channel and will answer mentions there.',
+        }),
+      });
+    },
     isLoading: mutation.isLoading,
     failure: mutation.error ? toBindFailure(mutation.error) : undefined,
     clearFailure: mutation.reset,
