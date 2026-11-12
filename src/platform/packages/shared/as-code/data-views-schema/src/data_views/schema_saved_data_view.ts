@@ -79,7 +79,7 @@ export const savedDataViewSpecWithScriptedFieldsSchema = lazySchema(() =>
         .meta({
           title: 'Scripted fields',
           description:
-            'Deprecated scripted fields, keyed by field name. This property is returned for backwards compatibility and is ignored when creating or updating a data view.',
+            'Deprecated scripted fields, keyed by field name. This property is read-only: it is only returned in responses, and sending it in a create or update request fails with a 400.',
         }),
     })
     .strict()

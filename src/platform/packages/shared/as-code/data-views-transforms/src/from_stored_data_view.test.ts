@@ -285,7 +285,7 @@ describe('fromStoredDataViewToAsCodeSavedSchema', () => {
       });
     });
 
-    it('moves the format, attributes and popularity of a scripted field into its entry', () => {
+    it('includes the format, attributes and popularity in the scripted field entry', () => {
       const result = fromStoredDataViewToAsCodeSavedSchema({
         title: 'logs-*',
         fields: { double_bytes: doubleBytes },
@@ -307,7 +307,14 @@ describe('fromStoredDataViewToAsCodeSavedSchema', () => {
         format: { type: 'bytes', params: { pattern: '0,0.0b' } },
         popularity: 2,
       });
+      // The overrides are stored by field name, so they are kept in `field_settings` too
       expect(result.field_settings).toEqual({
+        double_bytes: {
+          custom_label: 'Double',
+          custom_description: 'Bytes x2',
+          format: { type: 'bytes', params: { pattern: '0,0.0b' } },
+          popularity: 2,
+        },
         other: { format: { type: 'number', params: { pattern: '0,0' } } },
       });
     });

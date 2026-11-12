@@ -91,7 +91,7 @@ apiTest.describe(
       }
     );
 
-    apiTest('does not repeat scripted fields in field_settings', async ({ apiClient }) => {
+    apiTest('keeps the stored field overrides in field_settings', async ({ apiClient }) => {
       const response = await apiClient.get(`${BASE_PATH}/${SCRIPTED_DATA_VIEW.id}`, {
         headers: {
           ...COMMON_HEADERS,
@@ -101,7 +101,12 @@ apiTest.describe(
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.data.field_settings?.[SCRIPTED_FIELD_NAME]).toBeUndefined();
+      expect(response.body.data.field_settings?.[SCRIPTED_FIELD_NAME]).toStrictEqual({
+        custom_label: 'Double bytes',
+        custom_description: 'The bytes, twice',
+        format: { type: 'bytes', params: { pattern: '0,0.0b' } },
+        popularity: 3,
+      });
     });
   }
 );

@@ -14,7 +14,6 @@ import {
   AS_CODE_DATA_VIEW_SPEC_TYPE,
   type AsCodeDataView,
 } from '@kbn/as-code-data-views-schema';
-import { omit } from 'lodash';
 import { fromStoredFields, fromStoredScriptedFields } from './from_stored_fields';
 
 /**
@@ -58,16 +57,10 @@ export function fromStoredDataViewToAsCodeSavedSchema(
     index.fieldFormats,
     index.fieldAttrs
   );
-  const scriptedFieldNames = new Set(
-    Object.values(index.fields ?? {})
-      .filter((field) => field.scripted)
-      .map((field) => field.name)
-  );
-  // Scripted fields carry their own format and attributes, so they're not repeated in `field_settings`
   const fieldSettings = fromStoredFields(
     index.runtimeFieldMap,
-    omit(index.fieldFormats, [...scriptedFieldNames]),
-    omit(index.fieldAttrs, [...scriptedFieldNames]),
+    index.fieldFormats,
+    index.fieldAttrs,
     true
   );
 

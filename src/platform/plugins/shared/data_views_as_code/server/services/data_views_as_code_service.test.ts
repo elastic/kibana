@@ -334,6 +334,14 @@ describe('DataViewsAsCodeService', () => {
 
       expect(result.data).toEqual({
         index_pattern: 'logs-*',
+        // The overrides are stored by field name, so they are returned in `field_settings` as well
+        field_settings: {
+          double_bytes: {
+            custom_label: 'Double bytes',
+            format: { type: 'bytes', params: { pattern: '0,0.0b' } },
+            popularity: 3,
+          },
+        },
         scripted_fields: {
           double_bytes: {
             type: 'number',
