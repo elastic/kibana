@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { lazySchema, z } from '@kbn/zod/v4';
+import { lazySchema, savedObjectId, z } from '@kbn/zod/v4';
 import { DIGITAL_EXPERIENCE_API_PRIVILEGES } from '../../../common/feature';
 import { OVERVIEW_PERCENTILE_PARAMS } from '../../../common/overview_filters';
 import {
@@ -42,7 +42,7 @@ const WRITE_SECURITY = {
   authz: { requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.manage] },
 };
 
-const idParams = () => z.object({ id: z.string().min(1).max(SAVED_VIEW_NAME_MAX_LENGTH) });
+const idParams = () => z.object({ id: savedObjectId() });
 
 /**
  * A view as it is saved: a name, and what the Overview's routes take of the filters and the query,

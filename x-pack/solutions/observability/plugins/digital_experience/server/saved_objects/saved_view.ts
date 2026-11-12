@@ -40,14 +40,24 @@ const viewAttributesV1 = schema.object({
 });
 
 /**
+ * The attributes of a stored view, as the routes read them. What an older or newer version did not
+ * know is ignored, and what a person put there through the generic saved objects API, which does
+ * not check an update against the type, fails it.
+ */
+export const savedViewAttributesSchema = viewAttributesV1.extends({}, { unknowns: 'ignore' });
+
+/**
  * A named view of the Overview, shared with everyone who can read the space's views. Nothing is
  * searched or sorted on in Elasticsearch, as a space holds few views and the routes read them
  * whole, so no field is mapped.
+ *
+ * A view lives in one space, like a single-space type does, but as `multiple-isolated`: Kibana does
+ * not let a shipped single-space type become shareable later, and this one can.
  */
 export const savedViewSavedObjectType: SavedObjectsType = {
   name: SAVED_VIEW_TYPE,
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
   management: {
     displayName: 'Digital experience view',
     getTitle: (savedObject) => String(savedObject.attributes.name),
@@ -62,7 +72,7 @@ export const savedViewSavedObjectType: SavedObjectsType = {
     1: {
       changes: [],
       schemas: {
-        forwardCompatibility: viewAttributesV1.extends({}, { unknowns: 'ignore' }),
+        forwardCompatibility: savedViewAttributesSchema,
         create: viewAttributesV1,
       },
     },
