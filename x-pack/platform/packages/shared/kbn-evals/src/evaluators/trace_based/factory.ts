@@ -12,6 +12,14 @@ import pRetry from 'p-retry';
 import type { Direction } from '@kbn/evals-common';
 import type { Evaluator } from '../../types';
 
+// The trace id OpenTelemetry's no-op tracer hands out when no tracer provider is registered.
+const NOOP_TRACE_ID = '00000000000000000000000000000000';
+
+const NOOP_TRACE_ID_EXPLANATION =
+  'Invalid traceId: all zeros, so the task ran without an active tracer and no spans were recorded. ' +
+  'Configure TRACING_EXPORTERS (e.g. run with --export-profile local) and make sure an OTLP collector ' +
+  'is listening before running the suite.';
+
 interface EsqlResponse {
   columns: Array<{ name: string; type: string }>;
   values: any[][];
@@ -74,6 +82,16 @@ export function createTraceBasedEvaluator({
           score: null,
           label: 'unavailable',
           explanation: `No traceId available for ${name} evaluation`,
+          metadata: undefined,
+        };
+      }
+
+      if (traceId === NOOP_TRACE_ID) {
+        log.error(`No active tracer for ${name} (traceId: ${traceId})`);
+        return {
+          score: null,
+          label: 'error',
+          explanation: NOOP_TRACE_ID_EXPLANATION,
           metadata: undefined,
         };
       }
