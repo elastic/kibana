@@ -1978,6 +1978,9 @@ importers:
       '@kbn/discover-customization-examples-plugin':
         specifier: workspace:*
         version: link:examples/discover_customization_examples
+      '@kbn/discover-data-grid':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-discover-data-grid
       '@kbn/discover-enhanced-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/discover_enhanced
@@ -3559,6 +3562,9 @@ importers:
       '@kbn/securitysolution-timeline-components':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/timeline-components
+      '@kbn/securitysolution-timeline-search-strategy':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/timeline-search-strategy
       '@kbn/securitysolution-utils':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-securitysolution-utils
@@ -8123,6 +8129,8 @@ importers:
 
   src/platform/packages/shared/kbn-discover-contextual-components: {}
 
+  src/platform/packages/shared/kbn-discover-data-grid: {}
+
   src/platform/packages/shared/kbn-discover-utils: {}
 
   src/platform/packages/shared/kbn-doc-links: {}
@@ -9924,6 +9932,8 @@ importers:
   x-pack/solutions/security/packages/timeline-common: {}
 
   x-pack/solutions/security/packages/timeline-components: {}
+
+  x-pack/solutions/security/packages/timeline-search-strategy: {}
 
   x-pack/solutions/security/packages/upselling: {}
 

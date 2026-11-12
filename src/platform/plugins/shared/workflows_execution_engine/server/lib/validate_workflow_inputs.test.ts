@@ -174,6 +174,28 @@ describe('validateWorkflowInputs', () => {
     });
   });
 
+  it('refreshes a failed concurrency-group execution so the next admission does not count it', async () => {
+    setInputsSchema({
+      properties: {
+        name: { type: 'string' },
+      },
+      required: ['name'],
+    });
+
+    const result = await callValidate(
+      createWorkflowExecution({ inputs: {} }, { concurrencyGroupKey: 'group-a' })
+    );
+
+    expect(result).toBe(false);
+    expect(mockRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: executionId,
+        status: ExecutionStatus.FAILED,
+      }),
+      { refresh: true }
+    );
+  });
+
   it('should return false and mark execution as FAILED on type mismatch', async () => {
     setInputsSchema({
       properties: {
