@@ -16,14 +16,6 @@ export const EMULATOR_NAME = 'firecrawl';
 export const VENDOR = 'https://api.firecrawl.dev/v2';
 export const CRAWL_ID = '0b8e1c52-6a1f-4c3e-9d7a-2f4b5c6d7e8f';
 
-export const crawlStatus = (status: string) => ({
-  status,
-  total: 0,
-  completed: 0,
-  creditsUsed: 0,
-  data: [],
-});
-
 /**
  * The control client of the connector emulator, scoped to Firecrawl. It fails with what to do when
  * the emulator isn't running, as Kibana trusts the emulator's CA only if it exists when Kibana

@@ -11,10 +11,17 @@ import type { EmulatorControl } from '@kbn/connector-emulate';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../../../scout/ui/fixtures';
 import { LONG_EXECUTION_TIMEOUT } from '../../../scout/ui/fixtures/constants';
-import { connectToEmulator, crawlStatus, CRAWL_ID, VENDOR } from '../fixtures/emulator';
-import { getFirecrawlWorkflowYaml } from '../fixtures/firecrawl_workflow';
+import { connectToEmulator, CRAWL_ID, VENDOR } from '../fixtures/emulator';
+import { getFirecrawlFixtures } from '../fixtures/firecrawl_responses';
+import { FIRECRAWL_STEP_NAMES, getFirecrawlWorkflowYaml } from '../fixtures/firecrawl_workflow';
 
-const STEPS = ['scrape', 'search', 'map', 'crawl', 'get_crawl_status', 'crawl_and_wait'];
+/**
+ * For a demo, CONNECTOR_EMULATOR_DEMO_PAUSE_SECONDS makes the workflow wait that long after each
+ * step, and the test stay that long on each step's result once it has completed, so what each step
+ * returned can be read. Without it nothing waits.
+ */
+const parsedPause = Number(process.env.CONNECTOR_EMULATOR_DEMO_PAUSE_SECONDS);
+const PAUSE_SECONDS = Number.isFinite(parsedPause) && parsedPause > 0 ? parsedPause : 0;
 
 /**
  * Runs a workflow with a step per action of the Firecrawl connector from the Workflows app, with the
@@ -24,6 +31,9 @@ const STEPS = ['scrape', 'search', 'map', 'crawl', 'get_crawl_status', 'crawl_an
  *   node scripts/connector_emulate --connector firecrawl
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet connector_emulator
  *   node scripts/playwright test --config <this folder>/parallel.playwright.config.ts --project local --headed
+ *
+ * To watch it with time to read each step's result, start the emulator with --log-responses to see
+ * what it answers, and run the test with CONNECTOR_EMULATOR_DEMO_PAUSE_SECONDS=4.
  *
  * The tests share the emulator's calls and runtime fixtures, so they run one at a time (one worker).
  */
@@ -64,56 +74,69 @@ test.describe(
     });
 
     test('runs a step per action, and the emulator answers each request', async ({
+      page,
       pageObjects,
     }) => {
       await control.reset();
-      // The crawl is still running for the first two requests for its status, and has completed
-      // at the third: the status step takes the first, crawlAndWait polls for the others.
-      await control.setFixtures([
-        {
-          operation: { source: 'v2', method: 'post', path: '/crawl' },
-          response: {
-            status: 200,
-            body: { success: true, id: CRAWL_ID, url: `${VENDOR}/crawl/${CRAWL_ID}` },
-          },
-        },
-        {
-          operation: { source: 'v2', method: 'get', path: '/crawl/{id}' },
-          responses: [
-            { status: 200, body: crawlStatus('scraping') },
-            { status: 200, body: crawlStatus('scraping') },
-            { status: 200, body: crawlStatus('completed') },
-          ],
-        },
-      ]);
+      await control.setFixtures([...getFirecrawlFixtures()]);
 
       await pageObjects.workflowEditor.gotoNewWorkflow();
-      await pageObjects.workflowEditor.setYamlEditorValue(getFirecrawlWorkflowYaml(connectorId));
+      await pageObjects.workflowEditor.setYamlEditorValue(
+        getFirecrawlWorkflowYaml(connectorId, { pauseSeconds: PAUSE_SECONDS })
+      );
       await pageObjects.workflowEditor.saveWorkflow();
 
       await pageObjects.workflowEditor.clickRunButton();
       await pageObjects.workflowExecution.waitForExecutionStatus(
         'completed',
-        LONG_EXECUTION_TIMEOUT
+        LONG_EXECUTION_TIMEOUT + PAUSE_SECONDS * FIRECRAWL_STEP_NAMES.length * 1000
       );
       await pageObjects.workflowExecution.expandStepsTree();
 
-      for (const step of STEPS) {
+      // Opens a step's result, and stays on it for a demo.
+      const resultOf = async <T>(step: string, type: 'input' | 'output' = 'output'): Promise<T> => {
+        await (await pageObjects.workflowExecution.getStep(step)).click();
+        const result = await pageObjects.workflowExecution.getStepResultJson<T>(type);
+        if (PAUSE_SECONDS > 0) {
+          await page.waitForTimeout(PAUSE_SECONDS * 1000);
+        }
+        return result;
+      };
+
+      for (const step of FIRECRAWL_STEP_NAMES) {
         await expect(await pageObjects.workflowExecution.getStep(step)).toHaveCount(1);
       }
 
+      const scraped = await resultOf<{ data: { markdown: string; metadata: { title: string } } }>(
+        'scrape'
+      );
+      expect(scraped.data.metadata.title).toBe('Example Domain');
+      expect(scraped.data.markdown).toContain('illustrative examples');
+
+      const searched = await resultOf<{ data: { web: Array<{ title: string; url: string }> } }>(
+        'search'
+      );
+      expect(searched.data.web.map(({ url }) => url)).toEqual([
+        'https://www.elastic.co/kibana',
+        'https://www.elastic.co/guide/en/kibana/current/index.html',
+        'https://github.com/elastic/kibana',
+      ]);
+
+      const mapped = await resultOf<{ links: Array<{ url: string }> }>('map');
+      expect(mapped.links.map(({ url }) => url)).toContain('https://example.com/docs/api');
+
       // The id the crawl step returned is what the next step asked the status of.
-      await (await pageObjects.workflowExecution.getStep('crawl')).click();
-      expect(await pageObjects.workflowExecution.getStepResultJson('output')).toMatchObject({
-        id: CRAWL_ID,
-      });
-      await (await pageObjects.workflowExecution.getStep('get_crawl_status')).click();
-      expect(await pageObjects.workflowExecution.getStepResultJson('input')).toMatchObject({
-        id: CRAWL_ID,
-      });
-      await (await pageObjects.workflowExecution.getStep('crawl_and_wait')).click();
-      expect(await pageObjects.workflowExecution.getStepResultJson('output')).toMatchObject({
+      expect(await resultOf('crawl')).toMatchObject({ id: CRAWL_ID });
+      expect(await resultOf('get_crawl_status', 'input')).toMatchObject({ id: CRAWL_ID });
+
+      // The crawl had finished two pages when crawlAndWait polled for the last time.
+      expect(await resultOf('crawl_and_wait')).toMatchObject({
         status: 'completed',
+        total: 2,
+        data: [
+          { url: 'https://example.com', title: 'Example Domain' },
+          { url: 'https://example.com/docs', title: 'Documentation' },
+        ],
       });
 
       // What the emulator saw: one request per vendor operation, all valid against the vendor's

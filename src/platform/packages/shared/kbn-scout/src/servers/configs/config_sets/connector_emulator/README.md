@@ -34,6 +34,12 @@ Two suites use this set, both for Firecrawl:
   node scripts/playwright test --config src/platform/plugins/shared/workflows_management/test/scout_connector_emulator/ui/parallel.playwright.config.ts --project local --headed
   ```
 
+  The suite sets realistic Firecrawl responses on the emulator for its run. For a demo, start the emulator with `--log-responses` to see what it answers each request with, and set `CONNECTOR_EMULATOR_DEMO_PAUSE_SECONDS`: the workflow then waits that long after each step, and the test stays that long on each step's result once it has completed, so you can read it.
+
+  ```sh
+  CONNECTOR_EMULATOR_DEMO_PAUSE_SECONDS=4 node scripts/playwright test --config src/platform/plugins/shared/workflows_management/test/scout_connector_emulator/ui/parallel.playwright.config.ts --project local --headed
+  ```
+
 In CI, the `Connector Emulator Scout` step runs it (`.buildkite/scripts/steps/test/connector_emulator_scout.sh`): on pull requests that change `kbn-connector-specs`, `kbn-connector-emulate` or this set, and weekly in the connector pipeline, with the committed vendor specs and with the vendors' latest ones. The step starts the emulator for the connectors it lists, so add a connector there when adding a suite for it. The Scout lanes don't run this package's suites, as they have no emulator.
 
 ## Running tests in parallel
