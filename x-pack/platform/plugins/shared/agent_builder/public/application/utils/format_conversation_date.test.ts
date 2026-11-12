@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { formatConversationDate } from './format_conversation_date';
 
 describe('formatConversationDate', () => {
   const now = moment('2026-11-11T12:00:00.000Z');
+
+  afterEach(() => {
+    moment.tz.setDefault();
+  });
 
   it('shows month and day for dates in the current year', () => {
     expect(formatConversationDate('2026-06-03T10:00:00.000Z', now, 'en')).toBe('Jun 03');
@@ -21,5 +25,11 @@ describe('formatConversationDate', () => {
 
   it('follows the active locale', () => {
     expect(formatConversationDate('2025-06-03T10:00:00.000Z', now, 'de-DE')).toBe('03. Juni 2025');
+  });
+
+  it('uses the Kibana time zone instead of the browser one', () => {
+    moment.tz.setDefault('Asia/Tokyo');
+
+    expect(formatConversationDate('2026-06-03T18:00:00.000Z', moment(), 'en')).toBe('Jun 04');
   });
 });
