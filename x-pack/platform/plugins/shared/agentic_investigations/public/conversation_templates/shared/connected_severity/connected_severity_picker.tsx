@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -42,10 +42,19 @@ export const ConnectedSeverityPicker: React.FC<SeveritySlotRenderProps> = ({
   const { data } = useInvestigation(conversationId);
   const { mutate, isLoading } = useSetInvestigationSeverity();
 
-  const severity = data?.metadata.severity ?? conversationSeverity;
+  const [pendingSeverity, setPendingSeverity] = useState<InvestigationSeverityLevel>();
+  const serverSeverity = data?.metadata.severity ?? conversationSeverity;
+  const severity = pendingSeverity ?? serverSeverity;
+
+  useEffect(() => {
+    if (pendingSeverity && serverSeverity === pendingSeverity) {
+      setPendingSeverity(undefined);
+    }
+  }, [pendingSeverity, serverSeverity]);
 
   const handleChange = useCallback(
     (next: InvestigationSeverityLevel) => {
+      setPendingSeverity(next);
       mutate(
         { investigationId: conversationId, body: { severity: next } },
         {
@@ -55,6 +64,7 @@ export const ConnectedSeverityPicker: React.FC<SeveritySlotRenderProps> = ({
             void refetchConversation?.();
           },
           onError: () => {
+            setPendingSeverity(undefined);
             notifications.toasts.addDanger(SEVERITY_CHANGE_ERROR);
           },
         }

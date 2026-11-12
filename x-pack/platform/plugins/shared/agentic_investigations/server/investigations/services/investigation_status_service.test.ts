@@ -411,7 +411,7 @@ describe('InvestigationStatusService.setSeverity', () => {
     expect(client.patchMetadata).toHaveBeenCalledWith(
       'conv-1',
       { severity: 'low' },
-      { access: 'converse' }
+      { access: 'converse', refresh: 'wait_for' }
     );
     expect(client.addEvents).toHaveBeenCalledWith({
       conversationId: 'conv-1',
