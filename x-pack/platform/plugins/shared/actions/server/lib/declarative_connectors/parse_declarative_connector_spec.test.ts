@@ -10,7 +10,7 @@ import { parseDeclarativeConnectorSpec } from './parse_declarative_connector_spe
 import { DeclarativeConnectorSpecError } from './types';
 
 const minimalSpec = (requestYaml: string): string => `schemaVersion: 1
-id: .declarative-test
+id: .test
 version: 1.0.0
 metadata:
   displayName: Test
@@ -41,7 +41,7 @@ describe('parseDeclarativeConnectorSpec', () => {
   it('parses the AbuseIPDB catalog contract', () => {
     const parsed = parseDeclarativeConnectorSpec(loadFixture('abuseipdb-1.1.0.yaml'));
 
-    expect(parsed.id).toBe('.declarative-abuseipdb');
+    expect(parsed.id).toBe('.abuseipdb');
     expect(parsed.version).toBe('1.1.0');
     expect(Object.keys(parsed.actions).sort()).toEqual(['checkIp', 'reportIp']);
     expect(parsed.auth.types[0]).toEqual({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -42,19 +42,33 @@ export const ConnectedSeverityPicker: React.FC<SeveritySlotRenderProps> = ({
   const { data } = useInvestigation(conversationId);
   const { mutate, isLoading } = useSetInvestigationSeverity();
 
-  const severity = data?.metadata.severity ?? conversationSeverity;
+  const [pendingSeverity, setPendingSeverity] = useState<InvestigationSeverityLevel>();
+  const latestRequest = useRef(0);
+  const serverSeverity = data?.metadata.severity ?? conversationSeverity;
+  const severity = pendingSeverity ?? serverSeverity;
 
   const handleChange = useCallback(
     (next: InvestigationSeverityLevel) => {
+      const request = ++latestRequest.current;
+      const settle = () => {
+        if (latestRequest.current === request) {
+          setPendingSeverity(undefined);
+        }
+      };
+      setPendingSeverity(next);
       mutate(
         { investigationId: conversationId, body: { severity: next } },
         {
-          onSuccess: () => {
+          onSuccess: async () => {
             // Lists, counts and cards all show the severity, so every investigation read is stale.
-            void queryClient.invalidateQueries({ queryKey: investigationQueryKeys.all });
-            void refetchConversation?.();
+            await Promise.all([
+              queryClient.invalidateQueries({ queryKey: investigationQueryKeys.all }),
+              refetchConversation?.(),
+            ]);
+            settle();
           },
           onError: () => {
+            settle();
             notifications.toasts.addDanger(SEVERITY_CHANGE_ERROR);
           },
         }
