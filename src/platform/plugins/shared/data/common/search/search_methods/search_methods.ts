@@ -89,13 +89,18 @@ export class SearchMethodsService implements ISearchMethods {
       'esql_async' as typeof ESQL_ASYNC_SEARCH_STRATEGY
     );
 
-    const requestResponder = options?.inspector?.adapter.start(options.inspector.title, {
-      description: options.inspector.description,
-    });
+    // A request that was aborted while its context was being resolved (e.g. superseded by a newer one,
+    // which already reset the adapter) must not log a stale entry.
+    const requestResponder = options?.abortSignal?.aborted
+      ? undefined
+      : options?.inspector?.adapter.start(options.inspector.title, {
+          description: options.inspector.description,
+        });
 
     requestResponder?.json({
       ...((request.params ?? {}) as Record<string, unknown>),
       ...(params.approximation !== undefined && { approximation: params.approximation }),
+      ...(params.projectRouting !== undefined && { project_routing: params.projectRouting }),
     });
 
     try {
