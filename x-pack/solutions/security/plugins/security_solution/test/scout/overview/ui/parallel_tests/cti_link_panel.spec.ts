@@ -14,7 +14,13 @@ const THREAT_INDEX_SETTING = 'securitySolution:defaultThreatIndex';
 const FEED_NAME = 'AbuseCH malware';
 // Flashpoint labels its raw copies with `labels.is_transform_source`, not `labels.is_ioc_transform_source`.
 const ALT_LABEL_FEED_NAME = 'Flashpoint';
+const PREVIOUS_INDICATOR_TIMESTAMP = '2021-03-09T10:00:00.000Z';
 const INDICATOR_TIMESTAMP = '2021-03-10T14:51:05.766Z';
+const UNLABELED_INDICATOR = {
+  feedName: FEED_NAME,
+  dataset: 'ti_abusech.malware',
+  timestamp: INDICATOR_TIMESTAMP,
+} as const;
 const RANGE_WITH_INDICATOR = {
   from: '2021-03-01T00:00:00.000Z',
   to: '2021-03-31T23:59:59.999Z',
@@ -37,71 +43,15 @@ const indexNames = (spaceId: string) => {
   } as const;
 };
 
-const createIndexWithDocuments = async (
+const createIndexWithDocument = async (
   esClient: EsClient,
   index: string,
   properties: Record<string, object>,
-  documents: Array<Record<string, unknown>>
+  document: Record<string, unknown>
 ): Promise<void> => {
   await esClient.indices.delete({ index, ignore_unavailable: true });
   await esClient.indices.create({ index, mappings: { properties } });
-  await esClient.bulk({
-    index,
-    operations: documents.flatMap((document) => [{ index: {} }, document]),
-    refresh: 'wait_for',
-  });
-};
-
-const threatIndexProperties = {
-  '@timestamp': { type: 'date' },
-  event: { properties: { dataset: { type: 'keyword' }, id: { type: 'keyword' } } },
-  threat: { properties: { feed: { properties: { name: { type: 'keyword' } } } } },
-};
-
-const createThreatIndex = (esClient: EsClient, spaceId: string): Promise<void> =>
-  createIndexWithDocuments(esClient, indexNames(spaceId).threat, threatIndexProperties, [
-    {
-      '@timestamp': INDICATOR_TIMESTAMP,
-      event: { dataset: 'ti_abusech.malware' },
-      threat: { feed: { name: FEED_NAME } },
-    },
-  ]);
-
-interface TransformFeed {
-  /** The label the integration uses to mark raw copies (`"true"`) and latest copies (`"false"`). */
-  label: 'is_ioc_transform_source' | 'is_transform_source';
-  dataset: string;
-  feedName: string;
-  rawIndex: string;
-  latestIndex: string;
-}
-
-// Mirrors an integration with a latest transform: every ingested version lands in the raw index
-// and the transform keeps one copy per indicator in the latest index.
-const createTransformThreatIndices = async (
-  esClient: EsClient,
-  { label, dataset, feedName, rawIndex, latestIndex }: TransformFeed
-): Promise<void> => {
-  const transformIndicator = (isTransformSource: 'true' | 'false', timestamp: string) => ({
-    '@timestamp': timestamp,
-    event: { dataset, id: `scout-${dataset}-indicator` },
-    threat: { feed: { name: feedName } },
-    labels: { [label]: isTransformSource },
-  });
-  const labelProperties = (value: 'true' | 'false') => ({
-    ...threatIndexProperties,
-    labels: {
-      properties: { [label]: { type: 'constant_keyword', value } },
-    },
-  });
-
-  await createIndexWithDocuments(esClient, rawIndex, labelProperties('true'), [
-    transformIndicator('true', '2021-03-09T10:00:00.000Z'),
-    transformIndicator('true', INDICATOR_TIMESTAMP),
-  ]);
-  await createIndexWithDocuments(esClient, latestIndex, labelProperties('false'), [
-    transformIndicator('false', INDICATOR_TIMESTAMP),
-  ]);
+  await esClient.index({ index, document, refresh: 'wait_for' });
 };
 
 spaceTest.describe(
@@ -148,11 +98,11 @@ spaceTest.describe(
       'shows the disabled module when there are no threat intel sources',
       async ({ esClient, scoutSpace, pageObjects }) => {
         // Overview shows an empty prompt until the Security data view matches an index.
-        await createIndexWithDocuments(
+        await createIndexWithDocument(
           esClient,
           indexNames(scoutSpace.id).events,
           { '@timestamp': { type: 'date' } },
-          [{ '@timestamp': new Date().toISOString() }]
+          { '@timestamp': new Date().toISOString() }
         );
 
         const { securityOverviewPage } = pageObjects;
@@ -171,8 +121,10 @@ spaceTest.describe(
 
     spaceTest(
       'shows zero indicators when the time range has no events',
-      async ({ esClient, scoutSpace, pageObjects }) => {
-        await createThreatIndex(esClient, scoutSpace.id);
+      async ({ apiServices, scoutSpace, pageObjects }) => {
+        await apiServices.threatIntelligence.createIndicators(indexNames(scoutSpace.id).threat, [
+          UNLABELED_INDICATOR,
+        ]);
 
         const { securityOverviewPage } = pageObjects;
         await securityOverviewPage.navigate(RANGE_WITHOUT_INDICATOR);
@@ -189,8 +141,10 @@ spaceTest.describe(
 
     spaceTest(
       'lists the feed and counts indicators in the time range',
-      async ({ esClient, scoutSpace, pageObjects }) => {
-        await createThreatIndex(esClient, scoutSpace.id);
+      async ({ apiServices, scoutSpace, pageObjects }) => {
+        await apiServices.threatIntelligence.createIndicators(indexNames(scoutSpace.id).threat, [
+          UNLABELED_INDICATOR,
+        ]);
 
         const { securityOverviewPage } = pageObjects;
         await securityOverviewPage.navigate(RANGE_WITH_INDICATOR);
@@ -207,25 +161,29 @@ spaceTest.describe(
 
     spaceTest(
       'counts each transform indicator once alongside indicators without the transform label',
-      async ({ esClient, scoutSpace, pageObjects }) => {
-        const { threatRaw, threatLatest, threatAltLabelRaw, threatAltLabelLatest } = indexNames(
-          scoutSpace.id
-        );
-        await createTransformThreatIndices(esClient, {
+      async ({ apiServices, scoutSpace, pageObjects }) => {
+        const { threat, threatRaw, threatLatest, threatAltLabelRaw, threatAltLabelLatest } =
+          indexNames(scoutSpace.id);
+        const { threatIntelligence } = apiServices;
+        await threatIntelligence.createTransformIndicators({
           label: 'is_ioc_transform_source',
-          dataset: 'ti_abusech.malware',
           feedName: FEED_NAME,
+          dataset: 'ti_abusech.malware',
           rawIndex: threatRaw,
           latestIndex: threatLatest,
+          previousTimestamp: PREVIOUS_INDICATOR_TIMESTAMP,
+          latestTimestamp: INDICATOR_TIMESTAMP,
         });
-        await createTransformThreatIndices(esClient, {
+        await threatIntelligence.createTransformIndicators({
           label: 'is_transform_source',
-          dataset: 'ti_flashpoint.indicator',
           feedName: ALT_LABEL_FEED_NAME,
+          dataset: 'ti_flashpoint.indicator',
           rawIndex: threatAltLabelRaw,
           latestIndex: threatAltLabelLatest,
+          previousTimestamp: PREVIOUS_INDICATOR_TIMESTAMP,
+          latestTimestamp: INDICATOR_TIMESTAMP,
         });
-        await createThreatIndex(esClient, scoutSpace.id);
+        await threatIntelligence.createIndicators(threat, [UNLABELED_INDICATOR]);
 
         const { securityOverviewPage } = pageObjects;
         await securityOverviewPage.navigate(RANGE_WITH_INDICATOR);
@@ -236,13 +194,10 @@ spaceTest.describe(
         await expect(securityOverviewPage.threatIntelIndicatorCount).toHaveText(
           'Showing: 3 indicators'
         );
-        // Each feed's indicator count is the only number in its row.
-        await expect(securityOverviewPage.threatIntelFeedRow(FEED_NAME)).toHaveText(
-          new RegExp(`^${FEED_NAME}\\D*2\\D*$`)
-        );
-        await expect(securityOverviewPage.threatIntelFeedRow(ALT_LABEL_FEED_NAME)).toHaveText(
-          new RegExp(`^${ALT_LABEL_FEED_NAME}\\D*1\\D*$`)
-        );
+        await expect(securityOverviewPage.threatIntelFeedIndicatorCount(FEED_NAME)).toHaveText('2');
+        await expect(
+          securityOverviewPage.threatIntelFeedIndicatorCount(ALT_LABEL_FEED_NAME)
+        ).toHaveText('1');
       }
     );
   }

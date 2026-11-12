@@ -37,9 +37,12 @@ export class SecurityOverviewPage {
     this.threatIntelEnableModuleButton = this.page.testSubj.locator('cti-enable-module-button');
   }
 
-  /** Threat intelligence panel row for a feed, holding its name and indicator count. */
-  threatIntelFeedRow(feedName: string): Locator {
-    return this.threatIntelPanel.getByRole('row').filter({ hasText: feedName });
+  /** Indicator count cell in the threat intelligence panel row for a feed. */
+  threatIntelFeedIndicatorCount(feedName: string): Locator {
+    return this.threatIntelPanel
+      .getByRole('row')
+      .filter({ hasText: feedName })
+      .getByTestId('cti-feed-indicator-count');
   }
 
   /** Opens Overview, optionally with an absolute global time range instead of the default. */

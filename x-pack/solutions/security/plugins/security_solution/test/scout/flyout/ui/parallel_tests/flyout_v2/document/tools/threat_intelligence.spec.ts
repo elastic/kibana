@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-import type { EsClient } from '@kbn/scout-security';
-import { spaceTest, tags, CUSTOM_QUERY_RULE } from '@kbn/scout-security';
+import type { EsClient, SecurityApiServicesFixture } from '@kbn/scout-security';
+import { spaceTest, tags, CUSTOM_QUERY_RULE, THREAT_INDICATOR_IP } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
 const THREAT_INDEX_SETTING = 'securitySolution:defaultThreatIndex';
-const INDICATOR_IP = '203.0.113.7';
 
 const indexNames = (spaceId: string) => {
   const suffix = spaceId.replace(/[^a-z0-9]/gi, '').toLowerCase();
@@ -26,88 +24,38 @@ const indexNames = (spaceId: string) => {
   } as const;
 };
 
-/** The two labels integrations use to mark raw copies (`"true"`) and latest copies (`"false"`). */
-type TransformSourceLabel = 'is_ioc_transform_source' | 'is_transform_source';
-
-const indicatorProperties: Record<string, estypes.MappingProperty> = {
-  '@timestamp': { type: 'date' },
-  event: { properties: { type: { type: 'keyword' }, id: { type: 'keyword' } } },
-  threat: {
-    properties: {
-      feed: { properties: { name: { type: 'keyword' } } },
-      indicator: { properties: { ip: { type: 'ip' }, type: { type: 'keyword' } } },
-    },
-  },
-};
-
-const indicator = (feedName: string, eventId: string, timestamp: string) => ({
-  '@timestamp': timestamp,
-  event: { type: 'indicator', id: eventId },
-  threat: { feed: { name: feedName }, indicator: { ip: INDICATOR_IP, type: 'ipv4-addr' } },
-});
-
-const createIndicatorIndex = async (
-  esClient: EsClient,
-  index: string,
-  transformSource: { label: TransformSourceLabel; value: 'true' | 'false' } | undefined,
-  documents: Array<Record<string, unknown>>
-): Promise<void> => {
-  const labels: Record<string, estypes.MappingProperty> = transformSource
-    ? {
-        labels: {
-          properties: {
-            [transformSource.label]: { type: 'constant_keyword', value: transformSource.value },
-          },
-        },
-      }
-    : {};
-
-  await esClient.indices.delete({ index, ignore_unavailable: true });
-  await esClient.indices.create({
-    index,
-    mappings: { properties: { ...indicatorProperties, ...labels } },
-  });
-  await esClient.bulk({
-    index,
-    operations: documents.flatMap((document) => [{ index: {} }, document]),
-    refresh: 'wait_for',
-  });
-};
-
 // One indicator from each of two integrations with a latest transform (two raw versions plus the
 // latest copy), one per transform label, and one indicator from a feed without a transform label.
-const createThreatIntelFixture = async (esClient: EsClient, spaceId: string): Promise<void> => {
+const createThreatIntelFixture = async (
+  esClient: EsClient,
+  { threatIntelligence }: SecurityApiServicesFixture,
+  spaceId: string
+): Promise<void> => {
   const { source, unlabeled, raw, latest, altLabelRaw, altLabelLatest } = indexNames(spaceId);
   const now = Date.now();
-  const earlier = new Date(now - 60 * 60 * 1000).toISOString();
+  const previousTimestamp = new Date(now - 60 * 60 * 1000).toISOString();
   const latestTimestamp = new Date(now - 60 * 1000).toISOString();
 
-  const transformFeeds = [
-    {
-      label: 'is_ioc_transform_source',
-      feedName: 'Transform feed',
-      rawIndex: raw,
-      latestIndex: latest,
-    },
-    {
-      label: 'is_transform_source',
-      feedName: 'Alternate label transform feed',
-      rawIndex: altLabelRaw,
-      latestIndex: altLabelLatest,
-    },
-  ] as const;
-  for (const { label, feedName, rawIndex, latestIndex } of transformFeeds) {
-    const eventId = `${label}-indicator`;
-    await createIndicatorIndex(esClient, rawIndex, { label, value: 'true' }, [
-      indicator(feedName, eventId, earlier),
-      indicator(feedName, eventId, latestTimestamp),
-    ]);
-    await createIndicatorIndex(esClient, latestIndex, { label, value: 'false' }, [
-      indicator(feedName, eventId, latestTimestamp),
-    ]);
-  }
-  await createIndicatorIndex(esClient, unlabeled, undefined, [
-    indicator('Custom feed', 'custom-indicator', latestTimestamp),
+  await threatIntelligence.createTransformIndicators({
+    label: 'is_ioc_transform_source',
+    feedName: 'Transform feed',
+    dataset: 'ti_abusech.malware',
+    rawIndex: raw,
+    latestIndex: latest,
+    previousTimestamp,
+    latestTimestamp,
+  });
+  await threatIntelligence.createTransformIndicators({
+    label: 'is_transform_source',
+    feedName: 'Alternate label transform feed',
+    dataset: 'ti_flashpoint.indicator',
+    rawIndex: altLabelRaw,
+    latestIndex: altLabelLatest,
+    previousTimestamp,
+    latestTimestamp,
+  });
+  await threatIntelligence.createIndicators(unlabeled, [
+    { feedName: 'Custom feed', dataset: 'ti_custom.indicator', timestamp: latestTimestamp },
   ]);
 
   await esClient.indices.delete({ index: source, ignore_unavailable: true });
@@ -115,7 +63,7 @@ const createThreatIntelFixture = async (esClient: EsClient, spaceId: string): Pr
     index: source,
     document: {
       '@timestamp': new Date(now).toISOString(),
-      source: { ip: INDICATOR_IP },
+      source: { ip: THREAT_INDICATOR_IP },
       host: { name: 'scout-ti-host' },
       event: { kind: 'event' },
     },
@@ -138,7 +86,7 @@ spaceTest.describe(
     });
 
     spaceTest.beforeEach(async ({ browserAuth, apiServices, esClient, scoutSpace }) => {
-      await createThreatIntelFixture(esClient, scoutSpace.id);
+      await createThreatIntelFixture(esClient, apiServices, scoutSpace.id);
 
       ruleName = `${CUSTOM_QUERY_RULE.name}_${scoutSpace.id}_${Date.now()}`;
       await apiServices.detectionRule.createCustomQueryRule({
