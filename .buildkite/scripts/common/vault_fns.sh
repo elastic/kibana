@@ -66,8 +66,8 @@ load_project_deploy_credentials() {
 # Prints a legacy Vault token; must run while VAULT_TOKEN is still the ci-prod token
 legacy_vault_token() {
   local role_id secret_id
-  role_id="$(retry 5 5 vault kv get -field=role_id "$PR_DEPLOY_VAULT_PATH/legacy-vault-approle")"
-  secret_id="$(retry 5 5 vault kv get -field=secret_id "$PR_DEPLOY_VAULT_PATH/legacy-vault-approle")"
+  role_id="$(retry 5 5 vault kv get -field=role_id "$PR_DEPLOY_VAULT_PATH/legacy-vault-approle")" || return 1
+  secret_id="$(retry 5 5 vault kv get -field=secret_id "$PR_DEPLOY_VAULT_PATH/legacy-vault-approle")" || return 1
   VAULT_ADDR=$LEGACY_VAULT_ADDR vault write -field=token auth/approle/login role_id="$role_id" secret_id="$secret_id"
 }
 
