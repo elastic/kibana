@@ -46,6 +46,11 @@ export interface CampaignOptions {
    * the last round against the incumbent the campaign started from. Empty skips the holdout.
    */
   holdoutTasks: OrcaTask[];
+  /**
+   * Counted runs per holdout incident. Higher than the gate's: the holdout runs once per campaign
+   * and decides whether the campaign's result ships.
+   */
+  holdoutRollouts?: number;
   /** Debug only: run the final holdout even when nothing was promoted. */
   holdoutAlways?: boolean;
   log: ToolingLog;
@@ -151,6 +156,7 @@ export const runCampaign = async ({
   candidateSearch = false,
   acceptAny = false,
   holdoutTasks,
+  holdoutRollouts = 5,
   holdoutAlways = false,
   log,
 }: CampaignOptions): Promise<void> => {
@@ -403,12 +409,14 @@ export const runCampaign = async ({
       label: 'start-holdout',
       variant: start,
       tasks: holdoutTasks,
+      rollouts: holdoutRollouts,
       outputDir: holdoutOutput,
     });
     const finalHoldout = await pool.measureHoldout({
       label: 'final-holdout',
       variant: incumbent,
       tasks: holdoutTasks,
+      rollouts: holdoutRollouts,
       outputDir: holdoutOutput,
     });
     const holdout = checkHoldout({ incumbent: startHoldout, candidate: finalHoldout });
@@ -423,11 +431,19 @@ export const runCampaign = async ({
     log.info(
       `[harness-opt] holdout ${start.hash} → ${incumbent.hash}: ${
         holdout.passed ? 'passed' : "FAILED — do not ship this campaign's incumbent"
-      }; Δ ${holdout.meanDelta.toFixed(3)} [${holdout.ciLow.toFixed(3)}, ${holdout.ciHigh.toFixed(
+      }; reward Δ ${holdout.meanDelta.toFixed(3)} [${holdout.ciLow.toFixed(
         3
-      )}] over ${holdout.incidents} incidents, leaked ${holdout.incumbentLeaked} → ${
-        holdout.candidateLeaked
-      }${holdout.reasons.length ? ` (${holdout.reasons.join('; ')})` : ''}`
+      )}, ${holdout.ciHigh.toFixed(3)}], goal_pass ${holdout.incumbentGoal?.toFixed(
+        3
+      )} → ${holdout.candidateGoal?.toFixed(3)} Δ ${holdout.goalDelta.toFixed(
+        3
+      )} [${holdout.goalCiLow.toFixed(3)}, ${holdout.goalCiHigh.toFixed(3)}] over ${
+        holdout.incidents
+      } incidents (${holdout.incumbentRuns} / ${holdout.candidateRuns} counted runs, ${
+        holdout.incumbentLeaked
+      } / ${holdout.candidateLeaked} leaked attempts dropped)${
+        holdout.reasons.length ? ` (${holdout.reasons.join('; ')})` : ''
+      }`
     );
   } else if (holdoutTasks.length > 0) {
     log.info('[harness-opt] nothing was promoted; holdout skipped');

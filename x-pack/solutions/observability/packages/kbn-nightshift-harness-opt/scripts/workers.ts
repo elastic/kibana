@@ -323,62 +323,121 @@ export const createWorkerPool = ({
       });
     });
 
-  /** customer0 holdout tasks (one run each) for one variant, spread over the workers. */
+  /**
+   * customer0 holdout: \`rollouts\` counted runs per incident for one variant, spread over the
+   * workers. Stored attempts are reused. An attempt that read post-incident evidence (anti-leakage
+   * judge) is kept on record but not counted, and another attempt is run in its place, up to
+   * \`maxAttempts\` per incident; it says the retrospective setup let evidence in, not that the agent
+   * is worse at the incident.
+   */
   const measureHoldout = ({
     label,
     variant,
     outputDir,
     tasks,
-  }: MeasureOptions & { tasks: OrcaTask[] }): Promise<RunSummary> =>
+    rollouts = 1,
+    maxAttempts = rollouts * 2,
+  }: MeasureOptions & {
+    tasks: OrcaTask[];
+    rollouts?: number;
+    maxAttempts?: number;
+  }): Promise<RunSummary> =>
     exclusive(async () => {
       const traceDir = Path.join(outputDir, label, 'traces');
       Fs.mkdirSync(traceDir, { recursive: true, mode: 0o700 });
       const cache = cacheFor('customer0', variant);
-      const cached: TaskRun[] = [];
-      const pending = tasks.filter((task) => {
-        const hit = cache.get(task.id, 0);
-        if (!hit) return true;
-        const tracePath = Path.join(traceDir, `${task.caseId}.json`);
-        Fs.writeFileSync(tracePath, hit.trace, { mode: 0o600 });
-        cached.push({ ...hit.run, tracePath, cached: true });
-        return false;
+      // Attempts per incident, by attempt number; filled from the cache, then by running.
+      const attempts = new Map<string, Map<number, TaskRun>>(
+        tasks.map((task) => [task.id, new Map()])
+      );
+      let fromCache = 0;
+      for (const task of tasks) {
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+          const hit = cache.get(task.id, attempt);
+          if (!hit) continue;
+          const tracePath = Path.join(traceDir, `${task.caseId}-a${attempt}.json`);
+          Fs.writeFileSync(tracePath, hit.trace, { mode: 0o600 });
+          attempts
+            .get(task.id)
+            ?.set(attempt, { ...hit.run, rollout: attempt, tracePath, cached: true });
+          fromCache++;
+        }
+      }
+      const countedFor = (task: OrcaTask) =>
+        [...(attempts.get(task.id)?.values() ?? [])].filter((run) => !run.leaked).length;
+
+      for (let pass = 0; ; pass++) {
+        // Next free attempt numbers for every incident still short of counted runs.
+        const work: Array<{ task: OrcaTask; rollout: number }> = [];
+        for (const task of tasks) {
+          const taken = attempts.get(task.id) ?? new Map();
+          let missing = rollouts - countedFor(task);
+          for (let attempt = 0; attempt < maxAttempts && missing > 0; attempt++) {
+            if (taken.has(attempt)) continue;
+            work.push({ task, rollout: attempt });
+            missing--;
+          }
+        }
+        log.info(
+          `[holdout] "${label}" (variant ${variant.hash}) pass ${pass}: ${tasks.length} incidents × ${rollouts}, ${fromCache} attempts cached, ${work.length} to run`
+        );
+        if (work.length === 0 || pass > maxAttempts) break;
+        const shards = workers.map((worker, i) =>
+          work.filter((item, j) => j % workers.length === i)
+        );
+        await activate(
+          variant,
+          workers.filter((worker, i) => shards[i].length > 0)
+        );
+        const fresh = (
+          await settleAll(
+            workers.map(async (worker, i) => {
+              const runs = await runHoldoutWorkOnLane({
+                label,
+                lane: worker,
+                work: shards[i],
+                concurrency,
+                agentConnectorId,
+                judgeConnectorId,
+                traceDir,
+                log,
+              });
+              for (const run of runs) {
+                if (!isInfrastructureFailure(run)) cache.put(run.exampleId, run);
+              }
+              return runs;
+            })
+          )
+        ).flat();
+        // Infrastructure-broken attempts free their number again; the agent never really ran.
+        for (const run of fresh) {
+          if (!isInfrastructureFailure(run)) attempts.get(run.exampleId)?.set(run.rollout, run);
+        }
+      }
+
+      // The first \`rollouts\` unleaked attempts count; leaked ones stay on record, unscored.
+      const runs: TaskRun[] = tasks.flatMap((task) => {
+        const all = [...(attempts.get(task.id)?.values() ?? [])].sort(
+          (x, y) => x.rollout - y.rollout
+        );
+        const counted = all.filter((run) => !run.leaked).slice(0, rollouts);
+        const leaked = all
+          .filter((run) => run.leaked)
+          .map((run) => ({ ...run, reward: null, rcaAccuracy: null }));
+        return [...counted, ...leaked];
       });
-      const shards = workers.map((worker, i) =>
-        pending.filter((task, j) => j % workers.length === i)
-      );
-      log.info(
-        `[holdout] "${label}" (variant ${variant.hash}): ${tasks.length} customer0 incidents, ${cached.length} cached, ${pending.length} to run`
-      );
-      await activate(
-        variant,
-        workers.filter((worker, i) => shards[i].length > 0)
-      );
-      const fresh = (
-        await settleAll(
-          workers.map(async (worker, i) => {
-            const runs = await runHoldoutWorkOnLane({
-              label,
-              lane: worker,
-              tasks: shards[i],
-              concurrency,
-              agentConnectorId,
-              judgeConnectorId,
-              traceDir,
-              log,
-            });
-            for (const run of runs) {
-              if (!isInfrastructureFailure(run)) cache.put(run.exampleId, run);
-            }
-            return runs;
-          })
-        )
-      ).flat();
+      const short = tasks.filter((task) => countedFor(task) < rollouts).map(({ caseId }) => caseId);
+      if (short.length > 0) {
+        log.warning(
+          `[holdout] "${label}": fewer than ${rollouts} counted runs for ${short.join(', ')}`
+        );
+      }
       return summarize({
         label,
         variant,
         telemetryVariant: 'full',
         agentConnectorId,
-        runs: [...cached, ...fresh],
+        runs,
         outputDir,
         log,
       });

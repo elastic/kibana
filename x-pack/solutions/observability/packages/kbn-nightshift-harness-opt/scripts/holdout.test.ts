@@ -82,7 +82,7 @@ describe('checkHoldout', () => {
     expect(result.reasons.join()).toMatch(/execution success/);
   });
 
-  it('fails when the candidate leaks on two more incidents', () => {
+  it('does not count leaked attempts against the candidate', () => {
     const result = checkHoldout({
       incumbent: summary(
         'a',
@@ -90,10 +90,32 @@ describe('checkHoldout', () => {
       ),
       candidate: summary(
         'b',
-        seeds.map((seed, i) => run(seed, 0.5, true, i < 2))
+        seeds.flatMap((seed, i) =>
+          i < 3
+            ? [run(seed, 0.5), { ...run(seed, null, true, true), rcaAccuracy: null }]
+            : [run(seed, 0.5)]
+        )
       ),
     });
-    expect(result.passed).toBe(false);
-    expect(result.reasons.join()).toMatch(/leakage/);
+    expect(result.passed).toBe(true);
+    expect(result.candidateLeaked).toBe(3);
+    expect(result.candidateRuns).toBe(10);
+  });
+
+  it('reports goal_pass separately from the holdout reward', () => {
+    const withGoal = (seed: string, reward: number, goal: number) =>
+      ({ ...run(seed, reward), rcaAccuracy: goal } as TaskRun);
+    const result = checkHoldout({
+      incumbent: summary(
+        'a',
+        seeds.map((seed) => withGoal(seed, 0.1, 0.2))
+      ),
+      candidate: summary(
+        'b',
+        seeds.map((seed) => withGoal(seed, 0.15, 0.3))
+      ),
+    });
+    expect(result.goalDelta).toBeCloseTo(0.1);
+    expect(result.meanDelta).toBeCloseTo(0.05);
   });
 });

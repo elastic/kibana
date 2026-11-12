@@ -16,7 +16,7 @@ import {
   loadCustomer0Tasks,
   tasksForSplit,
 } from './dataset';
-import { holdoutDir } from './holdout';
+import { checkHoldout, holdoutDir } from './holdout';
 import type { Split } from './dataset';
 import { defaultWorkers, harnessPaths } from './paths';
 import { exportOrcaUserForSuite, readOrcaUser } from './secrets';
@@ -134,6 +134,48 @@ export const cli = () =>
           log.info(`[harness-opt] output: ${outputDir}`);
           return;
         }
+        case 'holdout': {
+          // The customer0 holdout for the stored incumbent against the unedited files.
+          exportOrcaUserForSuite(readOrcaUser());
+          const holdoutTasks = loadCustomer0Tasks({ limit: asNumber(flags.limit) });
+          const outputDir = Path.join(holdoutDir(), `check-${Date.now()}`);
+          const baseline = await pool.measureHoldout({
+            label: 'base-holdout',
+            variant: variantOf(pool.workers, [], ''),
+            tasks: holdoutTasks,
+            rollouts: asNumber(flags.rollouts, 5),
+            outputDir,
+          });
+          const incumbent = loadIncumbent(pool);
+          const candidate = await pool.measureHoldout({
+            label: 'incumbent-holdout',
+            variant: incumbent,
+            tasks: holdoutTasks,
+            rollouts: asNumber(flags.rollouts, 5),
+            outputDir,
+          });
+          const result = checkHoldout({ incumbent: baseline, candidate });
+          Fs.writeFileSync(Path.join(outputDir, 'holdout.json'), JSON.stringify(result, null, 2));
+          log.info(
+            [
+              `[harness-opt] holdout base → ${incumbent.hash}: ${
+                result.passed ? 'passed' : 'FAILED'
+              }`,
+              `reward ${result.incumbentReward.toFixed(3)} → ${result.candidateReward.toFixed(3)}`,
+              `Δ ${result.meanDelta.toFixed(3)} [${result.ciLow.toFixed(
+                3
+              )}, ${result.ciHigh.toFixed(3)}]`,
+              `goal_pass ${result.incumbentGoal?.toFixed(3)} → ${result.candidateGoal?.toFixed(3)}`,
+              `Δ ${result.goalDelta.toFixed(3)} [${result.goalCiLow.toFixed(
+                3
+              )}, ${result.goalCiHigh.toFixed(3)}]`,
+              `${result.incidents} incidents, ${result.incumbentRuns} / ${result.candidateRuns} counted runs`,
+              `${result.incumbentLeaked} / ${result.candidateLeaked} leaked attempts dropped`,
+              ...result.reasons,
+            ].join('; ')
+          );
+          return;
+        }
         case 'dry-round': {
           // Propose → review → validate on an existing measurement, without measuring anything.
           const from = str(flags.from);
@@ -189,6 +231,7 @@ export const cli = () =>
             holdoutTasks: flags['skip-holdout']
               ? []
               : loadCustomer0Tasks({ limit: asNumber(flags['holdout-limit']) }),
+            holdoutRollouts: asNumber(flags['holdout-rollouts'], 5),
             holdoutAlways: Boolean(flags['holdout-always']),
             log,
           });
@@ -208,6 +251,7 @@ unedited files with --base.
   splits [--split search --limit 4]     print the incident splits / a selection
   restart | prepare [--base]            put the incumbent on every worker
   run --split search|gate|sealed|customer0 [--limit N] [--case <id,...>] [--rollouts N] [--base]
+  holdout [--limit N] [--rollouts 5]    customer0 holdout: stored incumbent vs unedited files
   dry-round --from <runs/.../label.json>  propose, review and validate only
   report [--serve --port 7712] [--ledger ledger.json]   HTML report of runs and rounds
   campaign --rounds 1 --search-limit 12 --gate-limit 12 --gate-rollouts 5
@@ -234,6 +278,7 @@ unedited files with --base.
           'port',
           'holdout-limit',
           'gate-confidence',
+          'holdout-rollouts',
         ],
         boolean: [
           'candidate-search',

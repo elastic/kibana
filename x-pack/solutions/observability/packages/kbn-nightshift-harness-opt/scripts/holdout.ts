@@ -61,7 +61,7 @@ export const holdoutReward = ({
 export const runHoldoutWorkOnLane = ({
   label,
   lane,
-  tasks,
+  work,
   concurrency = 16,
   agentConnectorId,
   judgeConnectorId,
@@ -70,7 +70,8 @@ export const runHoldoutWorkOnLane = ({
 }: {
   label: string;
   lane: LaneSettings;
-  tasks: OrcaTask[];
+  /** Incidents with their attempt number (stored as the run's rollout). */
+  work: Array<{ task: OrcaTask; rollout: number }>;
   concurrency?: number;
   agentConnectorId: string;
   judgeConnectorId: string;
@@ -80,9 +81,8 @@ export const runHoldoutWorkOnLane = ({
   withLane(lane, async () => {
     const fetch = createLaneFetch(lane);
     Fs.mkdirSync(traceDir, { recursive: true, mode: 0o700 });
-    log.info(`[${label}] ${lane.lane}: ${tasks.length} customer0 incidents`);
-    if (tasks.length === 0) return [];
-    const pending = tasks;
+    log.info(`[${label}] ${lane.lane}: ${work.length} customer0 runs`);
+    if (work.length === 0) return [];
     await applyCustomer0Space({
       fetch,
       kbnClient: createLaneKbnClient(lane, log),
@@ -101,11 +101,12 @@ export const runHoldoutWorkOnLane = ({
     ];
 
     // A plain pool: customer0 has no telemetry cutoff to group by.
-    const outputs: Array<{ task: OrcaTask; output: InvestigationTaskOutput }> = [];
-    const queue = [...pending];
+    const outputs: Array<{ task: OrcaTask; rollout: number; output: InvestigationTaskOutput }> = [];
+    const queue = [...work];
     await Promise.all(
-      Array.from({ length: Math.min(concurrency, pending.length) }, async () => {
-        for (let task = queue.shift(); task; task = queue.shift()) {
+      Array.from({ length: Math.min(concurrency, work.length) }, async () => {
+        for (let item = queue.shift(); item; item = queue.shift()) {
+          const { task, rollout } = item;
           const output = await runInvestigation(fetch, task.example, { id: agentConnectorId });
           if (
             output.investigation_id &&
@@ -113,13 +114,13 @@ export const runHoldoutWorkOnLane = ({
           ) {
             throw new Error(`Investigation ${output.investigation_id} outlived its timeout`);
           }
-          outputs.push({ task, output });
+          outputs.push({ task, rollout, output });
         }
       })
     );
 
     const runs = await Promise.all(
-      outputs.map(async ({ task, output }): Promise<TaskRun> => {
+      outputs.map(async ({ task, rollout, output }): Promise<TaskRun> => {
         const { example } = task;
         const [goal, cause, leakage] = await Promise.all(
           evaluators.map(async (evaluator) => {
@@ -142,7 +143,7 @@ export const runHoldoutWorkOnLane = ({
         const leaked = asScore(leakage.score) === 0;
         const reward = holdoutReward({ goalPass, causeCompleteness });
         const usage = output.usage;
-        const tracePath = Path.join(traceDir, `${task.caseId}.json`);
+        const tracePath = Path.join(traceDir, `${task.caseId}-a${rollout}.json`);
         Fs.writeFileSync(
           tracePath,
           JSON.stringify(
@@ -178,7 +179,7 @@ export const runHoldoutWorkOnLane = ({
           seedId: task.incident,
           control: false,
           tier: task.tier,
-          rollout: 0,
+          rollout,
           question: example.input.question,
           plausibleFlags: [],
           // goal_pass in the accuracy slot and leakage in the hallucination slot, so the shared
@@ -234,36 +235,54 @@ export interface HoldoutResult {
   ciHigh: number;
   incumbentReward: number;
   candidateReward: number;
+  /** goal_pass alone, paired the same way: the part of the reward that moves on Haiku. */
+  goalDelta: number;
+  goalCiLow: number;
+  goalCiHigh: number;
+  incumbentGoal: number | null;
+  candidateGoal: number | null;
+  /** Scored runs per side, after leaked attempts were dropped. */
+  incumbentRuns: number;
+  candidateRuns: number;
   incumbentExecutionSuccess: number;
   candidateExecutionSuccess: number;
+  /** Attempts dropped (and replaced) because they read post-incident evidence. */
   incumbentLeaked: number;
   candidateLeaked: number;
   reasons: string[];
 }
 
+/** The same runs, scored by goal_pass instead of the holdout reward. */
+const byGoal = (summary: RunSummary): RunSummary => ({
+  ...summary,
+  runs: summary.runs.map((run) => ({ ...run, reward: run.rcaAccuracy })),
+});
+
 /**
  * Non-inferiority on the holdout: the gate already showed the candidate is better on ORCA, so here
- * it only must not be clearly worse. Paired bootstrap over incidents (one run each); fails when the
- * CI's low end is below `-margin`, when more than one extra incident ends without an answer, or
- * when the candidate reads post-incident evidence on `maxExtraLeaks` or more extra incidents.
+ * it only must not be clearly worse. Paired bootstrap over incidents (all counted rollouts of an
+ * incident averaged); fails when the CI's low end is below `-margin`, or when more than one extra
+ * incident's worth of runs ends without an answer. Leaked attempts do not count either way: they
+ * say the retrospective setup let post-incident evidence in, not that the agent is worse.
  */
 export const checkHoldout = ({
   incumbent,
   candidate,
   margin = 0.1,
-  maxExtraLeaks = 2,
 }: {
   incumbent: RunSummary;
   candidate: RunSummary;
   margin?: number;
-  maxExtraLeaks?: number;
 }): HoldoutResult => {
-  const leaks = ({ runs }: RunSummary) =>
-    new Set(runs.filter((r) => r.leaked).map((r) => r.seedId));
-  const incumbentLeaked = leaks(incumbent).size;
-  const candidateLeaked = leaks(candidate).size;
+  const leaked = ({ runs }: RunSummary) => runs.filter((r) => r.leaked).length;
+  const counted = ({ runs }: RunSummary) => runs.filter((r) => r.reward !== null).length;
   // Pinned, not the gate's default: loosening the gate must not loosen the production backstop.
   const paired = gateCandidate({ incumbent, candidate, confidence: HOLDOUT_CONFIDENCE });
+  const goal = gateCandidate({
+    incumbent: byGoal(incumbent),
+    candidate: byGoal(candidate),
+    confidence: HOLDOUT_CONFIDENCE,
+  });
   const incidents = paired.seeds || 1;
   const reasons: string[] = [];
   if (paired.seeds === 0) reasons.push('no holdout incident was scored on both lanes');
@@ -282,23 +301,25 @@ export const checkHoldout = ({
       )} to ${candidate.executionSuccessRate.toFixed(2)}`
     );
   }
-  if (candidateLeaked - incumbentLeaked >= maxExtraLeaks) {
-    reasons.push(
-      `holdout leakage rose from ${incumbentLeaked} to ${candidateLeaked} incidents (post-incident evidence)`
-    );
-  }
   return {
     passed: reasons.length === 0,
-    incumbentLeaked,
-    candidateLeaked,
     incidents: paired.seeds,
     meanDelta: paired.meanDelta,
     ciLow: paired.ciLow,
     ciHigh: paired.ciHigh,
     incumbentReward: incumbent.meanReward,
     candidateReward: candidate.meanReward,
+    goalDelta: goal.meanDelta,
+    goalCiLow: goal.ciLow,
+    goalCiHigh: goal.ciHigh,
+    incumbentGoal: incumbent.meanRcaAccuracy,
+    candidateGoal: candidate.meanRcaAccuracy,
+    incumbentRuns: counted(incumbent),
+    candidateRuns: counted(candidate),
     incumbentExecutionSuccess: incumbent.executionSuccessRate,
     candidateExecutionSuccess: candidate.executionSuccessRate,
+    incumbentLeaked: leaked(incumbent),
+    candidateLeaked: leaked(candidate),
     reasons,
   };
 };
