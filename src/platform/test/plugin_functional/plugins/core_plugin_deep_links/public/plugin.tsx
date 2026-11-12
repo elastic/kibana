@@ -7,14 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AppDeepLinkLocations, Plugin, CoreSetup } from '@kbn/core/public';
+import { DEFAULT_APP_VISIBILITY } from '@kbn/core-application-browser-internal';
+import type { Plugin, CoreSetup } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-
-const DEFAULT_APP_VISIBILITY: AppDeepLinkLocations[] = [
-  'globalSearch',
-  'classicSideNav',
-  'projectSideNav',
-];
 
 export class CorePluginDeepLinksPlugin
   implements Plugin<CorePluginDeepLinksPluginSetup, CorePluginDeepLinksPluginStart>

@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/shared-ux-router'
+  - '@kbn/core-application-browser-internal'
   - '@kbn/react-kibana-context-render'
 tags:
   - plugin
