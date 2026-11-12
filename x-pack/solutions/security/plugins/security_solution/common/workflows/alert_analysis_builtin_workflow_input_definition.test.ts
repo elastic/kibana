@@ -98,8 +98,17 @@ describe('AlertAnalysisCallerAlerts', () => {
     expect(AlertAnalysisCallerAlerts.parse([alert])).toEqual([alert]);
   });
 
-  // A real rule execution stores `_index` as the concrete data stream backing index
-  // (`.ds-` prefix, date + generation suffix), not the alias.
+  const jsonSchemaIndexPattern = (): RegExp => {
+    const { items } = builtinWorkflowInputDefinitions[
+      SECURITY_ALERT_ANALYSIS_CALLER_ALERTS_INPUT_DEFINITION_ID
+    ] as { items?: { properties?: { _index?: { pattern?: string } } } };
+    const pattern = items?.properties?._index?.pattern;
+    expect(pattern).toEqual(expect.any(String));
+    return new RegExp(pattern ?? '');
+  };
+
+  // Aliases, the legacy internal index, and the concrete data stream backing index
+  // (`.ds-` prefix, date + generation suffix) that a real rule execution stores.
   it.each([
     '.alerts-security.alerts-default',
     '.internal.alerts-security.alerts-default-000001',
@@ -108,20 +117,16 @@ describe('AlertAnalysisCallerAlerts', () => {
     '.ds-.preview.alerts-security.alerts-default-2026.10.09-000001',
   ])('accepts the Security alerts index %s in the Zod schema and the JSON schema', (_index) => {
     expect(AlertAnalysisCallerAlerts.safeParse([{ ...alert, _index }]).success).toBe(true);
-    const items = (
-      builtinWorkflowInputDefinitions[
-        SECURITY_ALERT_ANALYSIS_CALLER_ALERTS_INPUT_DEFINITION_ID
-      ] as { items?: { properties?: { _index?: { pattern?: string } } } }
-    ).items;
-    expect(new RegExp(items?.properties?._index?.pattern as string).test(_index)).toBe(true);
+    expect(jsonSchemaIndexPattern().test(_index)).toBe(true);
   });
 
   it.each([
     '.ds-logs-endpoint.events.process-default-2026.10.09-000001',
     '.ds-.alerts-other-default',
     'alerts-security.alerts-default',
-  ])('rejects the non-Security-alerts index %s', (_index) => {
+  ])('rejects the non-Security-alerts index %s in the Zod schema and the JSON schema', (_index) => {
     expect(AlertAnalysisCallerAlerts.safeParse([{ ...alert, _index }]).success).toBe(false);
+    expect(jsonSchemaIndexPattern().test(_index)).toBe(false);
   });
 
   it.each(['not-a-date', '2026-09-23', '2026-09-23T12:00:00.000+02:00'])(
