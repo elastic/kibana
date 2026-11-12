@@ -685,6 +685,13 @@ describe('rule template create-rule schema coupling', () => {
                 },
               ],
             },
+            "id": Object {
+              "description": "Optional rule ID. If omitted, Kibana generates one. If a rule with this ID already exists, it is not changed and its create fails.",
+              "maxLength": 150,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_-]+$",
+              "type": "string",
+            },
             "kind": Object {
               "anyOf": Array [
                 Object {

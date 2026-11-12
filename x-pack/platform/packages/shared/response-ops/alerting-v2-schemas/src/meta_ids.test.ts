@@ -8,7 +8,6 @@
 import type { z } from '@kbn/zod/v4';
 import {
   createRuleDataSchema,
-  createRuleRequestSchema,
   updateRuleDataSchema,
   ruleResponseSchema,
   findRulesResponseSchema,
@@ -106,7 +105,6 @@ const getMetaId = (schema: z.ZodType): string | undefined => getMeta(schema).id;
 const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
   // rules
   [createRuleDataSchema, 'alerting_new_rule'],
-  [createRuleRequestSchema, 'alerting_create_rule_request'],
   [updateRuleDataSchema, 'alerting_update_rule'],
   [ruleResponseSchema, 'alerting_rule_response'],
   [findRulesResponseSchema, 'alerting_rule_list_response'],

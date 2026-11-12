@@ -9,11 +9,11 @@ import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
 import {
-  createRuleRequestSchema,
+  createRuleDataSchema,
   errorResponseSchema,
   ruleResponseSchema,
 } from '@kbn/alerting-v2-schemas';
-import type { CreateRuleRequest, RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
@@ -42,7 +42,7 @@ export class CreateRuleRoute extends BaseAlertingRoute {
   } as const;
   static schemas = {
     request: {
-      body: createRuleRequestSchema,
+      body: createRuleDataSchema,
     },
     response: {
       201: {
@@ -65,17 +65,15 @@ export class CreateRuleRoute extends BaseAlertingRoute {
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
-    private readonly request: KibanaRequest<unknown, unknown, CreateRuleRequest>,
+    private readonly request: KibanaRequest<unknown, unknown, CreateRuleData>,
     @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {
     super(ctx);
   }
 
   protected async execute() {
-    const { id, ...data } = this.request.body;
     const created: RuleResponse = await this.rulesClient.createRule({
-      data,
-      options: { id },
+      data: this.request.body,
     });
 
     return this.ctx.response.created({ body: created });

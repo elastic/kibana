@@ -188,8 +188,7 @@ describe('RulesClient', () => {
       const client = createClient();
 
       const res = await client.createRule({
-        data: baseCreateData,
-        options: { id: 'rule-id-1' },
+        data: { ...baseCreateData, id: 'rule-id-1' },
       });
 
       expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
@@ -231,8 +230,8 @@ describe('RulesClient', () => {
       const client = createClient();
 
       const res = await client.createRule({
-        data: baseCreateData,
-        options: { id: 'rule-id-template', template: { id: 'template-1' } },
+        data: { ...baseCreateData, id: 'rule-id-template' },
+        options: { template: { id: 'template-1' } },
       });
 
       expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
@@ -262,8 +261,8 @@ describe('RulesClient', () => {
       const client = createClient();
 
       const res = await client.createRule({
-        data: baseCreateData,
-        options: { id: 'rule-id-disabled', enabled: false },
+        data: { ...baseCreateData, id: 'rule-id-disabled' },
+        options: { enabled: false },
       });
 
       expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
@@ -280,8 +279,7 @@ describe('RulesClient', () => {
       const client = createClient();
 
       const res = await client.createRule({
-        data: baseCreateData,
-        options: { id: 'rule-id-default-enabled' },
+        data: { ...baseCreateData, id: 'rule-id-default-enabled' },
       });
 
       expect(res).toEqual(
@@ -298,8 +296,8 @@ describe('RulesClient', () => {
           artifacts: [
             { id: 'dash-1', type: 'dashboard', data: { dashboard_id: 'so-dashboard-1' } },
           ],
+          id: 'rule-id-dash',
         },
-        options: { id: 'rule-id-dash' },
       });
 
       expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
@@ -359,8 +357,7 @@ describe('RulesClient', () => {
 
       await expect(
         client.createRule({
-          data: baseCreateData,
-          options: { id: 'rule-id-3' },
+          data: { ...baseCreateData, id: 'rule-id-3' },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 500 },
@@ -378,8 +375,7 @@ describe('RulesClient', () => {
 
       await expect(
         client.createRule({
-          data: baseCreateData,
-          options: { id: 'rule-id-orphan' },
+          data: { ...baseCreateData, id: 'rule-id-orphan' },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 500 },
@@ -413,8 +409,7 @@ describe('RulesClient', () => {
 
       await expect(
         client.createRule({
-          data: baseCreateData,
-          options: { id: 'rule-id-4' },
+          data: { ...baseCreateData, id: 'rule-id-4' },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 409 },
@@ -432,8 +427,7 @@ describe('RulesClient', () => {
 
       await expect(
         client.createRule({
-          data: baseCreateData,
-          options: { id: 'rule-id-forbidden' },
+          data: { ...baseCreateData, id: 'rule-id-forbidden' },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 403 },
@@ -448,8 +442,7 @@ describe('RulesClient', () => {
 
       await expect(
         client.createRule({
-          data: baseCreateData,
-          options: { id: 'rule-id-es' },
+          data: { ...baseCreateData, id: 'rule-id-es' },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 503 },
@@ -463,8 +456,8 @@ describe('RulesClient', () => {
         data: {
           ...baseCreateData,
           metadata: { name: 'rule-with-desc', description: 'My description' },
+          id: 'rule-id-desc',
         },
-        options: { id: 'rule-id-desc' },
       });
 
       expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
@@ -490,8 +483,8 @@ describe('RulesClient', () => {
           data: {
             ...baseCreateData,
             query: { base: 'FROM |' },
+            id: 'rule-id-5',
           },
-          options: { id: 'rule-id-5' },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 400 },
@@ -4090,7 +4083,7 @@ describe('RulesClient', () => {
       ]);
 
       await expect(
-        client.createRule({ data: baseCreateData, options: { id: 'rule-dup' } })
+        client.createRule({ data: { ...baseCreateData, id: 'rule-dup' } })
       ).rejects.toMatchObject({
         output: { statusCode: 409 },
         data: {
@@ -4286,7 +4279,7 @@ describe('RulesClient', () => {
       it('emits ruleCreated after createRule', async () => {
         const client = createClient();
 
-        await client.createRule({ data: workflowCreateData, options: { id: 'rule-id-wf-1' } });
+        await client.createRule({ data: { ...workflowCreateData, id: 'rule-id-wf-1' } });
 
         expect(ruleEventPublisher.emitRuleCreated).toHaveBeenCalledWith(
           { request, origin: { actor: 'user', channel: 'api' } },
@@ -4305,7 +4298,7 @@ describe('RulesClient', () => {
         });
         const client = createClient(undefined, { clientRequest: uiRequest });
 
-        await client.createRule({ data: workflowCreateData, options: { id: 'rule-id-wf-ui' } });
+        await client.createRule({ data: { ...workflowCreateData, id: 'rule-id-wf-ui' } });
 
         expect(ruleEventPublisher.emitRuleCreated).toHaveBeenCalledWith(
           { request: uiRequest, origin: { actor: 'user', channel: 'ui', app: 'discover' } },
@@ -4316,7 +4309,7 @@ describe('RulesClient', () => {
       it('emits ruleCreated with the app configured by the calling plugin', async () => {
         const client = createClient(undefined, { rulesClientOptions: { app: 'nightshift' } });
 
-        await client.createRule({ data: workflowCreateData, options: { id: 'rule-id-wf-app' } });
+        await client.createRule({ data: { ...workflowCreateData, id: 'rule-id-wf-app' } });
 
         expect(ruleEventPublisher.emitRuleCreated).toHaveBeenCalledWith(
           { request, origin: { actor: 'user', channel: 'api', app: 'nightshift' } },
@@ -4328,7 +4321,7 @@ describe('RulesClient', () => {
         const fakeRequest = { ...request, isFakeRequest: true };
         const client = createClient(undefined, { clientRequest: fakeRequest });
 
-        await client.createRule({ data: workflowCreateData, options: { id: 'rule-id-wf-sys' } });
+        await client.createRule({ data: { ...workflowCreateData, id: 'rule-id-wf-sys' } });
 
         expect(ruleEventPublisher.emitRuleCreated).toHaveBeenCalledWith(
           { request: fakeRequest, origin: { actor: 'user', channel: 'system' } },
@@ -4814,7 +4807,7 @@ describe('RulesClient', () => {
     it('emits ruleCreated carrying the created rule with sequence 1', async () => {
       const client = createClient();
 
-      await client.createRule({ data: baseCreateData, options: { id: 'rule-ch-create' } });
+      await client.createRule({ data: { ...baseCreateData, id: 'rule-ch-create' } });
 
       expect(firstEmit(ruleEventPublisher.emitRuleCreated as jest.Mock)).toEqual([
         expect.objectContaining({
