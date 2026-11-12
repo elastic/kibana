@@ -117,16 +117,9 @@ export const CASES_TABLE_CAPTION = i18n.translate(
 export const CASES_LIST_CAPPED_TITLE = (count: number) =>
   i18n.translate('xpack.cases.caseView.observables.flyout.casesListCappedTitle', {
     values: { count },
-    defaultMessage: 'Showing {count, plural, one {# case} other {# cases}}, not all of them',
-  });
-
-export const CASES_LIST_CAPPED_DESCRIPTION = i18n.translate(
-  'xpack.cases.caseView.observables.flyout.casesListCappedDescription',
-  {
     defaultMessage:
-      'More cases have this observable than the list can hold. It keeps the cases that added it most recently.',
-  }
-);
+      'Showing the {count, plural, one {# case} other {# cases}} that added this observable most recently',
+  });
 
 export const NO_CASES = i18n.translate('xpack.cases.caseView.observables.flyout.noCases', {
   defaultMessage: 'No other cases have this observable.',

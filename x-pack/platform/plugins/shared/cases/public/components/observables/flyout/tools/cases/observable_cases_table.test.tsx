@@ -127,7 +127,7 @@ describe('ObservableCasesTable', () => {
     renderTable();
 
     expect(screen.getByTestId('cases-observable-cases-capped')).toHaveTextContent(
-      'Showing 10,000 cases, not all of them'
+      /^Showing the 10,000 cases that added this observable most recently$/
     );
   });
 

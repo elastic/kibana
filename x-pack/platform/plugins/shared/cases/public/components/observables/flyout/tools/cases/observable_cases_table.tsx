@@ -135,7 +135,6 @@ export const ObservableCasesTable = ({
           <KbnInfoCallout
             size="s"
             title={i18n.CASES_LIST_CAPPED_TITLE(data.total)}
-            text={i18n.CASES_LIST_CAPPED_DESCRIPTION}
             data-test-subj="cases-observable-cases-capped"
           />
           <EuiSpacer size="s" />
