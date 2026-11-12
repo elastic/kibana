@@ -193,6 +193,8 @@ ai_indices:
 
         Learn from failed runs as well as successful ones: a step that failed is a gotcha, and what worked instead is the procedure.
 
+        The pages the agent sees are knowledge too. For each form and page, record what holds beyond one task: its sections and subtabs, in order; its fields, which are mandatory, read-only or filled in by default and with what; and the options of its dropdowns. For each action, record what it changes beyond the field it sets: the fields it fills in, the popup it opens and what that asks for, and the other records it updates or deletes.
+
         Skip:
         - Record numbers and agent names that only matter to one task.
         - Page layout details that are the same on every page, such as the navigation bar.
@@ -207,13 +209,19 @@ ai_indices:
           description: A value of a record or catalog item, such as "a Dell XPS developer laptop costs $300 more with the largest SSD".
         - type: company_rule
           description: A rule from a company protocol, such as "incidents are assigned to network or software agents by category".
+        - type: page_layout
+          description: What a page or form shows, in order, such as "the Reports list has the tabs My reports, Group, Global and All, and a New button at the top right".
+        - type: form_field
+          description: A field of a form and how it behaves, such as "on the Incident form, Caller is mandatory, Number is read-only and filled in, and Impact defaults to 3 - Low".
+        - type: side_effect
+          description: What an action changes beyond what it was for, such as "resolving an incident sets its State to Resolved and fills in Resolved by".
       entities:
         nodes:
           - type: module
             description: A ServiceNow application or module, such as Incidents, Problems, Reports or Service Catalog.
           - type: page
             description: A list, form or dashboard page in the portal.
-            attributes: [module]
+            attributes: [module, sections, tabs]
           - type: catalog_item
             description: Something that can be ordered from the service catalog.
             attributes: [base_price]

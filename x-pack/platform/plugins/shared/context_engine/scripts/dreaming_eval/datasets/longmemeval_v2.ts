@@ -96,12 +96,29 @@ export const selectQuestions = (
 export const trajectoryIdOfLine = (line: string): string | undefined =>
   /^\{\s*"id"\s*:\s*"([^"]+)"/.exec(line)?.[1];
 
-/** The labelled elements of an accessibility tree, as role and label without ids and states. */
+/**
+ * An element line of an accessibility tree: its id (a letter prefix for elements in an iframe,
+ * such as `[b194]`), role, label, then its properties.
+ */
+const ELEMENT = /^\s*(?:\[[A-Za-z]*\d+\]\s*)?([\w-]+) '([^']*)'(.*)$/;
+/** The properties that say what a field holds or allows, rather than how the page draws it. */
+const STATE_PROPERTIES = /\b(value='[^']*'|(?:selected|checked|disabled|required|readonly)=True)/g;
+
+/**
+ * The labelled elements of an accessibility tree, as role and label with the properties that hold
+ * state, such as a field's value, a selected option or a read-only field, without ids.
+ */
 export const pageElements = (tree: string | null | undefined): string[] =>
-  (tree ?? '')
-    .split('\n')
-    .map((line) => /^\s*(?:\[\d+\]\s*)?([\w-]+) '([^']*)'/.exec(line))
-    .flatMap((match) => (match && match[2].trim() ? [`${match[1]} '${match[2].trim()}'`] : []));
+  (tree ?? '').split('\n').flatMap((line) => {
+    const match = ELEMENT.exec(line);
+    if (!match || !match[2].trim()) {
+      return [];
+    }
+    const state = (match[3].match(STATE_PROPERTIES) ?? []).map((property) =>
+      property.replace(/=True$/, '')
+    );
+    return [[`${match[1]} '${match[2].trim()}'`, ...state].join(' ')];
+  });
 
 /** Share of a trajectory's pages an element is on to count as chrome, such as the navigation bar. */
 const CHROME_SHARE = 0.8;

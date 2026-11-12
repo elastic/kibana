@@ -145,6 +145,29 @@ describe('LongMemEval-V2', () => {
     ]);
   });
 
+  it('keeps the elements of iframes, and the properties that say what a field holds', () => {
+    expect(
+      pageElements(
+        [
+          "RootWebArea 'Hardware | ServiceNow', focused",
+          "\t[a310] combobox 'State' value='In use', clickable, visible, hasPopup='menu', expanded=False",
+          "\t\t[a314] option 'In use', selected=True",
+          "\t\t[a315] option 'In stock', selected=False",
+          "\t[b211] textbox 'Quantity' value='1', disabled=True, required=True",
+          "\t[b198] heading 'Order this Item', visible",
+          "\t[b199] generic '', visible",
+        ].join('\n')
+      )
+    ).toEqual([
+      "RootWebArea 'Hardware | ServiceNow'",
+      "combobox 'State' value='In use'",
+      "option 'In use' selected",
+      "option 'In stock'",
+      "textbox 'Quantity' value='1' disabled required",
+      "heading 'Order this Item'",
+    ]);
+  });
+
   it('reads the haystack file of each tier', () => {
     expect(haystackFileOf('small')).toBe('lme_v2_small.json');
     expect(haystackFileOf('medium')).toBe('lme_v2_medium.json');
