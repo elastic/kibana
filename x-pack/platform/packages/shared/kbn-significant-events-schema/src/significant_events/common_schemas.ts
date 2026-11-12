@@ -359,15 +359,15 @@ export const SEVERITY_CONTRACT_RULE = dedent`
  * skill and the eval judge point to it.
  */
 export const CONFIDENCE_CONTRACT_RULE = dedent`
-    Confidence is how strongly the evidence you hold supports the symptom this event reports.
-    Check each of these in the confirming descriptions, and name in the assessment_note the ones they do not show:
+    Confidence is a score from 0.0 to 1.0 for how strongly the evidence you hold supports the symptom this event reports. It rates the evidence, not the impact: severity rates the impact, and neither is set from the other.
+    Check these in the confirming descriptions:
     - the rows show the failure itself (an error signature or a stated outcome), not only log-line volume;
     - it is still happening in the latest hour the descriptions give;
     - the signals agree with each other and with the knowledge-base topology where both speak (an edge no row shows is context, not a disagreement);
     - the descriptions say where it fails (a service, operation or scope).
-    Every check the descriptions show keeps the confidence score near the top of the 0.0–1.0 range. Each one they do not show lowers the score, and several that are not shown put it in the lower half of the range.
-    These never lower the confidence score: a reach, outcome or rate that was not measured; a cause that is not established; a service or dependency the knowledge base does not cover; an empty blast_radius (unknown, not none).
-    An event written without signals is rated on the evidence its author holds. Confidence reflects the evidence held, never how strong or unusual the detection was.
+    With every check shown the score is near the top of the range. Each check not shown lowers it, and several put it in the lower half.
+    These never lower the score: a reach, outcome or rate that was not measured; a cause that is not established; a service or dependency the knowledge base does not cover; an empty blast_radius (unknown, not none).
+    An event written without signals is rated on the evidence its author holds. The score never reflects how strong or unusual the detection was.
   `;
 
 /** Canonical severity used by storage, APIs, and tools. */

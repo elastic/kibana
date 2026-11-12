@@ -62,9 +62,9 @@ export const SUMMARY_ROLE_RULE = dedent`
 
 export const ASSESSMENT_NOTE_ROLE_RULE = dedent`
   Reader: the operator deciding whether to trust the severity and confidence. This is judgement, not a recap. At most three short sentences.
-  Sentence 1: the severity rung that decided the tier, the measured figures that put it there with their scope (a share of log lines is not a share of requests), what the descriptions state about whether the affected operation completes (or that they state none), the other cues they state that bore on the tier whichever way they point (reading every signal, not the strongest), and the blast_radius for how far the paths reach. For medium, name the missing outcome or reach; for low, whether it recovered or was never an issue; for an inactive or recovering event, give the recovery, false-alarm, or benign-change rationale instead. Name the operations and dependency paths the tier covers rather than restating the log row: "<named operations or paths>; <measured breadth> meets the <tier> condition".
-  Sentence 2: what was ruled out or left unverified. For an adjacent tier you rejected, name the operations, paths or cues you weighed and why they fall short. A count or share that could not be measured is a caveat here. A service or call target the descriptions state that the knowledge base does not cover is a knowledge gap: record it as unverified, because a knowledge gap or an empty blast_radius means unknown, not none.
-  Sentence 3: why this confidence, as a percentage: the confidence field times 100, with one decimal and a % sign (confidence 0.5 is "50.0%", 0.45 is "45.0%"). Name a check of the confidence contract only when the descriptions do not show it: the evidence behind it and how far it lowers the value; when every check is shown, name the evidence that supports the value. When the confidence is carried over from the stored event, say so instead.
+  Sentence 1: what decided the tier: the operations or dependency paths it covers, by name, and the evidence that meets the tier's condition, with its scope (a share of log lines is not a share of requests). For an inactive or recovering event, give the recovery, false-alarm, or benign-change rationale instead.
+  Sentence 2: what would move it: for the tier above, the outcome, reach or block the descriptions do not state; anything left unverified, including a service or call target the knowledge base does not cover (unknown, not none).
+  Sentence 3: the confidence as a percentage (the field times 100, with one decimal and a % sign: 0.45 is "45.0%"), the evidence behind it, and each check of the confidence contract the descriptions do not show. When the confidence is carried over from the stored event, say so instead.
   ${NARRATIVE_AGREEMENT_RULE}
   Not here: the observed failure or impact (summary), the mechanism (symptom_hypothesis), signal descriptions, investigation steps, or detection metadata.
 `;
@@ -74,16 +74,11 @@ export const ASSESSMENT_NOTE_ROLE_RULE = dedent`
  * state. It is attached to discovery's write tool only: the investigator keeps its own ladder.
  */
 export const DISCOVERY_SEVERITY_APPLICATION_RULE = dedent`
-  How discovery applies this contract to what the confirming signal descriptions state. When a higher tier is not supported, say in the assessment_note which of outcome or reach is missing. Work through these in order:
-  1. The critical check comes first and stops the walk when it matches: the descriptions must state one of the contract's critical conditions, the block included; no share is needed.
-  2. Weigh every cue the descriptions state about the outcome and the conditions, whichever way it points. A cue that the failure was contained (caught, absorbed, or retried or recovered successfully by the system) leaves the outcome unstated and the reach limited, unless a description separately states the operation's final failure to complete; retries that ran out are a final failure, not containment; demonstrated tolerance is what "low" needs. A cue that the failure is spreading or blocking points the other way.
-  3. Outcome. A stated failed outcome is one the descriptions state for the operation: it failed, was rejected, was refused, timed out or did not complete. Unless a containment cue applies, an error, rejection, refusal, timeout or other expiry a description reports for the operation is one. A caller's call to a named dependency or component that timed out, was refused or failed is the caller's operation failing. When no outcome is stated, completion is unresolved.
-  4. Strength. For "high", discovery needs a stated failed outcome that is still happening and one of these, checked in this order:
-     - the failing operation is a caller's call to a named dependency or component (step 3): enough on its own, with no share and no total;
-     - a reach: a numerator and denominator in operations, attempts, requests or users;
-     - a rate clearly above the operation's own normal for the same period, citing its prior-period figure.
-     Without one of them the tier is "medium": a count or share of log lines is volume, not attempts or users, and an unmeasured reach never raises the tier.
-  5. Rows and the knowledge base. The rows outrank the knowledge base; an edge no failing row shows is context only. An edge, an empty blast_radius or a knowledge gap never raises or lowers the tier by itself, apart from identifying a mandatory component for the critical check.
+  How discovery reads the confirming signal descriptions against this contract. Weigh every cue they state, whichever way it points.
+  - Outcome. A stated failed outcome is the operation stated to fail, be rejected or refused, time out or not complete. A caller's call to a named dependency or component that ended that way is the caller's operation failing. A cue that the failure was absorbed (caught, or retried or recovered successfully) leaves the outcome unstated; retries that ran out are a final failure. Demonstrated tolerance is what "low" needs.
+  - "critical" needs one of its conditions stated, the block included: operations failing is not the same as operations blocked.
+  - "high" needs a stated failed outcome that is still happening, and one of: the failing operation is a caller's call to a named dependency or component; a reach in operations, attempts, requests or users (a numerator and a denominator); a rate clearly above the operation's own normal, citing that normal. Otherwise the tier is "medium": a count or share of log lines is volume, and an unmeasured reach never raises the tier.
+  - The rows outrank the knowledge base. An edge, an empty blast_radius or a knowledge gap never sets the tier by itself, apart from identifying a mandatory component for "critical".
 `;
 
 /** Shared narrative-field rule: never let evidence-derived text reproduce a raw sensitive value. */

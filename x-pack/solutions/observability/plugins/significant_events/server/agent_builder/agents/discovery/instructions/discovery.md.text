@@ -481,15 +481,10 @@ finalized topology, and the onset timing from `<incident_matching>` Gather conte
    - the reach: the services named in its description, the dimensions the failing rows carry, by their values, and any
      component the `blast_radius` shows other services depending on;
    - the mechanism the evidence supports, or "not established";
-   - what the descriptions leave unresolved;
-   - symptom support: each check of the confidence contract, shown / not shown;
-   - impact support: whether the descriptions state the outcome of the operation (stated / not
-     stated), the reach (at request, attempt or user level / log lines only / not measured), and
-     the strength (a rate against the operation's own normal, or how long it has lasted; stated /
-     not stated).
+   - what the descriptions leave unresolved.
 
-   The severity and every field you write for the event come from this picture, so they name the
-   same things and agree. Never state an absence (no edge, no row, no service record) from a result
+   Every field you write for the event comes from this picture, so they name the same things and
+   agree. Never state an absence (no edge, no row, no service record) from a result
    you did not read: read the whole result first. An empty `blast_radius` means
    none found in the knowledge base, not none.
 2. **5 Whys.** Refine the symptom hypothesis one evidence-backed step at a time and stop at the
@@ -509,7 +504,7 @@ finalized topology, and the onset timing from `<incident_matching>` Gather conte
    `<chronic_and_recurring>` rule 2. When the event's evidence now refutes it, record what replaced
    it in `assessment_note`; the stored `symptom_hypothesis` changes only with a new rule UUID.
 
-### Step 5: Decide severity
+### Step 5: Rate severity and confidence
 
 For each event candidate, decide from all signals that will appear in the final emit `signals[]`.
 
@@ -521,32 +516,18 @@ For each event candidate, decide from all signals that will appear in the final 
    severity from that row's observed error and what it affects. Prior-cycle signals copied unchanged
    keep their stored verdict and still count.
 2. Apply `<chronic_and_recurring>` rule 1 when any assigned detection has `flaky_probe: true`.
-3. **Rate `severity`** under the `severity` field contract on `platform_sig_events_events_write`.
-   - Rate from your event picture and the descriptions of the confirming signals (verdict
-     `confirms`, plus an `off_topic` signal with a concrete observed error), including, for an
-     accepted continuation, the stored signals read from the `full` event view.
-   - Before applying the ladder, list every cue the confirming descriptions state about the outcome
-     and the conditions, whichever way it points.
-   - Rate with the `severity` field description and its application rule, filling the outcome,
-     reach and strength entries of your picture, and weigh each cue you listed against them.
-   - Record a service the knowledge base does not cover as a knowledge gap in sentence 2 of the note.
-   - A continuation that carries only `refutes` signals has nothing new to rate: set `severity` to
-     the stored value read from the `full` view.
-   - On a continuation with new `confirms` signals, rate the stored and the new confirming
-     descriptions together. The stored tier stands unless a description contradicts the evidence that
-     set it or shows the failure ended.
-4. Set `confidence` from the Step 4 picture: how strongly the evidence supports the symptom.
-   - **No new `confirms` signal in the item.** Write the stored `confidence` and skip the rest of
-     this item. This covers an unchanged continuation (`<chronic_and_recurring>` rule 2) and a
-     recovery accepted under the checklist in `<eligibility>`: a recovery says the failure ended,
-     not that the hypothesis lacked support.
-   - Otherwise (a new event, a reopen, which is a new episode rated like a new event, or an item
-     with any new `confirms` signal), rate the signals you hold: this cycle's, and for a
-     continuation the stored confirming signals read from the `full` view.
-   - Apply the `confidence` field description to the symptom-support line of the picture. When a
-     check of the contract is not shown, write one line in your message naming that check, what it
-     follows from and how far it lowers the value, then set the value. When every check is shown,
-     name the evidence that supports the value.
+3. **Rate `severity` and `confidence`** with their field descriptions on
+   `platform_sig_events_events_write`, from the descriptions of the confirming signals (verdict
+   `confirms`, plus an `off_topic` signal with a concrete observed error) and, for an accepted
+   continuation, the stored confirming signals read from the `full` event view. Rate each on its own:
+   neither is set from the other.
+   - **Continuation.** With only `refutes` signals, keep the stored `severity`. With new `confirms`
+     signals, the stored tier stands unless a description contradicts the evidence that set it or
+     shows the failure ended.
+   - **No new `confirms` signal in the item** (an unchanged continuation, `<chronic_and_recurring>`
+     rule 2, or a recovery accepted under the checklist in `<eligibility>`): write the stored
+     `confidence`. A recovery says the failure ended, not that the hypothesis lacked support. A
+     reopen is a new episode, rated like a new event.
 
 ### Step 6: Emit output
 
