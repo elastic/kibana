@@ -655,6 +655,27 @@ Other handler errors, auth types that can't be used against the contract mock, a
 - a connector has both a `vendor_api/manifest.json` and an exemption, or an exemption names no connector;
 - coverage shrinks since the merge base (`GITHUB_PR_MERGE_BASE` in CI, otherwise the merge base with `upstream/main` or `origin/main`): a connector that had a `vendor_api/manifest.json` there no longer has one, or a new connector has neither a `vendor_api/manifest.json` nor an exemption. Without a merge base, this check is skipped;
 - re-recording a connector against its committed snapshots finds a problem from the list above, or would change `manifest.json` or a snapshot. This catches actions added or changed without rerunning the script.
+- an action mishandles a response its vendor can send (see "Response handling checks" below).
+
+### Response handling checks
+
+The recorder answers every request with one sampled success, so it can't see how handlers cope with other responses. The contract test also runs each action of every connector with a `vendor_api/` folder against three kinds of response (`checkResponseHandling` in `src/test/vendor_api/check_response_handling.ts`):
+
+- **Boundary responses**: values at the schema's bounds (longest strings, fullest arrays, last enum values). A handler that works with typical responses but throws on these fails. Requests the mock refuses are the recorder's concern, so they aren't reported here.
+- **Pagination**: for each operation with a `pagination` descriptor, against collections of no items, one, exactly one page and several pages. A handler that pages must stop within a bounded number of requests and return every item. One that sends a single request is taken to leave paging to the caller.
+- **Failures**: each operation an action calls is answered with 400, 401, 429 and 500 whether its spec declares them or not, and with every other error status it declares. The handler has to throw an explanatory error, so that Workflows fails the step (and can retry it) and Agent Builder gives the agent guidance for the status. It must not crash, as on a missing field in an error body, or return a result. A 404 is left out for `read` actions, where "no such resource" can be an answer, such as `{ found: false }`.
+
+A failure names the action, the status or collection size and what the handler did. If an action behaves this way on purpose, opt it out of a check with a reason in its `fixtures.json` entry. Reviewers should read the reason:
+
+```json
+{
+  "cancelStatement": {
+    "responseChecks": { "errors": "A repeated cancel answers 422, which the action returns as a result." }
+  }
+}
+```
+
+`responseChecks` takes `boundary`, `pagination` and `errors`.
 
 ### `manifest.json`
 
@@ -715,6 +736,7 @@ Per action:
 - `config`: merged into the connector config for the action's runs. Recording samples only the required config fields, so use this to set an optional field the action needs, such as a second server URL.
 - `queries`: for a `read` action, operations that use another method but only query, such as a search sent as `POST`. Each entry states that the operation changes no vendor state, so reviewers should check it. A `source` restricts an entry to one spec. Requests that match no operation (those in `"unmatched"`, such as calls to a vendor's MCP server) are matched by their path, where a `{name}` segment matches any segment.
 - `responses`: served by the mock for the action's runs instead of sampled responses, so handlers that branch on a response take the intended path. A `source` restricts an override to one spec, and a `when` (`path`, `query` and `headers` by value, and the `body` fields it lists) to the requests with those values. Overrides that break the spec, or name an operation it lacks, are reported.
+- `responseChecks`: opts the action out of a response handling check (`boundary`, `pagination` or `errors`), with the reason it behaves differently on purpose.
 
 `vendorApiFixturesSchema` is the schema.
 

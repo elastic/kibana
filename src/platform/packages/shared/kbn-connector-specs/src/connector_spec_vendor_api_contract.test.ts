@@ -15,6 +15,8 @@ import type { CoverageAtBase } from './test/vendor_api/exemptions';
 import { findLostCoverage, vendorApiExemptionsSchema } from './test/vendor_api/exemptions';
 import type { FoundConnector } from './test/vendor_api/find_connector';
 import { listConnectors } from './test/vendor_api/find_connector';
+import { checkRecordedConnector } from './test/vendor_api/check_recorded_connector';
+import { formatResponseFindings } from './test/vendor_api/check_response_handling';
 import { updateVendorApi } from './test/vendor_api/update_vendor_api';
 
 const PACKAGE_DIR = path.resolve(__dirname, '..');
@@ -27,6 +29,18 @@ const readExemptions = (json: string) => vendorApiExemptionsSchema.parse(JSON.pa
 const hasManifest = ({ directory }: FoundConnector) =>
   fs.existsSync(path.join(directory, 'manifest.json'));
 const relative = (file: string) => path.relative(REPO_ROOT, file);
+
+// Listed synchronously for it.each, and recursively, since connectors can be nested (atlassian/jira-cloud).
+const listRecorded = (): string[] =>
+  fs
+    .readdirSync(SPECS_DIR, { recursive: true, encoding: 'utf8' })
+    .filter(
+      (file) =>
+        path.basename(file) === 'manifest.json' &&
+        path.basename(path.dirname(file)) === 'vendor_api'
+    )
+    .map((file) => path.dirname(path.dirname(file)))
+    .sort();
 
 const git = (...args: string[]): string | undefined => {
   try {
@@ -109,16 +123,7 @@ describe('vendor API contract', () => {
   );
 
   describe('recorded artifacts', () => {
-    // Listed synchronously for it.each, and recursively, since connectors can be nested (atlassian/jira-cloud).
-    const recorded = fs
-      .readdirSync(SPECS_DIR, { recursive: true, encoding: 'utf8' })
-      .filter(
-        (file) =>
-          path.basename(file) === 'manifest.json' &&
-          path.basename(path.dirname(file)) === 'vendor_api'
-      )
-      .map((file) => path.dirname(path.dirname(file)))
-      .sort();
+    const recorded = listRecorded();
 
     it.each(recorded)(
       '%s re-records offline without problems or changes',
@@ -150,6 +155,40 @@ describe('vendor API contract', () => {
             (file) => `${file}: out of date; run ${SCRIPT} --connector ${id} and commit the result`
           ),
         }).toEqual({ problems: [], outOfDate: [] });
+      },
+      RECORDING_TIMEOUT
+    );
+  });
+  describe('response handling', () => {
+    // Handlers that retry a 429 or a 5xx back off with real timers, so waits are cut to nothing.
+    beforeAll(() => {
+      const { setTimeout: wait } = global;
+      jest
+        .spyOn(global, 'setTimeout')
+        .mockImplementation(((handler: () => void, _delay?: number, ...args: unknown[]) =>
+          wait(handler, 0, ...args)) as unknown as typeof setTimeout);
+    });
+
+    afterAll(() => {
+      jest.restoreAllMocks();
+    });
+
+    it.each(listRecorded())(
+      '%s handles boundary, paginated and error responses',
+      async (name) => {
+        const found = connectors.find(
+          ({ directory }) => directory === path.join(SPECS_DIR, name, 'vendor_api')
+        );
+        if (!found) {
+          throw new Error(`specs/${name}/vendor_api belongs to no connector in all_specs.ts`);
+        }
+        const { connector, directory } = found;
+        const findings = await checkRecordedConnector({ connector, directory });
+        if (findings.length > 0) {
+          throw new Error(
+            formatResponseFindings(findings, relative(path.join(directory, 'fixtures.json')))
+          );
+        }
       },
       RECORDING_TIMEOUT
     );
