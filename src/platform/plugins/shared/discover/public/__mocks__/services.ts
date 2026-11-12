@@ -344,6 +344,11 @@ export function createDiscoverServicesMock(): DiscoverServices {
       ActionPoliciesPage: jest.fn(() => null),
       ExecutionHistoryPage: jest.fn(() => null),
       createAlertingV2HostApp: jest.fn(),
+      createDiscoverProfile: jest.fn(() => ({
+        profileId: 'alerting-v2-data-source-profile',
+        profile: {},
+        resolve: jest.fn().mockResolvedValue({ isMatch: false }),
+      })),
     },
     trackUiMetric: jest.fn(),
     logger: { get: jest.fn(() => loggerMock.create()) },

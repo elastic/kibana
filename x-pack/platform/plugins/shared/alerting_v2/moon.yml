@@ -166,6 +166,7 @@ dependsOn:
   - '@kbn/ftr-llm-proxy'
   - '@kbn/code-editor'
   - '@kbn/code-editor-mock'
+  - '@kbn/core-lifecycle-browser'
 tags:
   - plugin
   - prod

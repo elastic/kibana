@@ -284,6 +284,7 @@ describe('getAlertsAppMenuItem', () => {
         ActionPoliciesPage: jest.fn(() => null),
         ExecutionHistoryPage: jest.fn(() => null),
         createAlertingV2HostApp: jest.fn(),
+        createDiscoverProfile: jest.fn(),
       };
       const { createRuleOptionsAppMenuItem } = await setupCreateRuleOptionsMenuItem({
         services,
