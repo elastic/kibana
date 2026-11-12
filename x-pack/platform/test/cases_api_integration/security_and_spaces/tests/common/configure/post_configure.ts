@@ -13,7 +13,11 @@ import {
 } from '@kbn/cases-plugin/common/types/domain';
 import {
   MAX_CUSTOM_FIELD_LABEL_LENGTH,
+  MAX_OBSERVABLE_TYPE_ENTRIES,
+  MAX_OBSERVABLE_TYPE_EXCLUDED_VALUES,
+  MAX_OBSERVABLE_TYPE_PATHS,
   MAX_WORKFLOW_TAGS_PER_CONFIGURATION,
+  OBSERVABLE_TYPE_AGENT_ID,
 } from '@kbn/cases-plugin/common/constants';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -161,6 +165,123 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(configuration.extractObservables).to.be(true);
         });
       });
+    });
+
+    describe('observable type fields', () => {
+      const override = {
+        key: OBSERVABLE_TYPE_AGENT_ID.key,
+        paths: [{ path: 'agent.id', enabled: false, excludedValues: ['static-id'] }],
+      };
+      const customType = {
+        key: 'employee-id',
+        label: 'Employee ID',
+        valuePattern: '^E\\d{6}$',
+        paths: [{ path: 'user.employee_id', enabled: true }],
+      };
+
+      it('should create a configuration with an override and a custom type with fields', async () => {
+        const configuration = await createConfiguration(
+          supertest,
+          getConfigurationRequest({ overrides: { observableTypes: [override, customType] } })
+        );
+
+        const expected = [{ ...override, label: OBSERVABLE_TYPE_AGENT_ID.label }, customType];
+        expect(configuration.observableTypes).to.eql(expected);
+
+        const [persisted] = await getConfiguration({ supertest });
+        expect(persisted.observableTypes).to.eql(expected);
+      });
+
+      it('should keep the fields when a configuration is created again for the same owner', async () => {
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({ overrides: { observableTypes: [customType] } })
+        );
+        const configuration = await createConfiguration(
+          supertest,
+          getConfigurationRequest({ overrides: { observableTypes: [override, customType] } })
+        );
+
+        expect(configuration.observableTypes.map(({ key }) => key)).to.eql([
+          OBSERVABLE_TYPE_AGENT_ID.key,
+          'employee-id',
+        ]);
+      });
+
+      const rejectedRequests: Array<[string, Record<string, unknown>[]]> = [
+        ['a custom type without a label', [{ key: 'employee-id' }]],
+        [
+          'two overrides for one built-in type',
+          [
+            { key: OBSERVABLE_TYPE_AGENT_ID.key, paths: [] },
+            { key: OBSERVABLE_TYPE_AGENT_ID.key, paths: [] },
+          ],
+        ],
+        [
+          'a value pattern on a built-in type',
+          [{ key: OBSERVABLE_TYPE_AGENT_ID.key, valuePattern: '^a$' }],
+        ],
+        ['a value pattern that does not compile', [{ ...customType, valuePattern: '(' }]],
+        [
+          'duplicated fields in one entry',
+          [
+            {
+              ...customType,
+              paths: [
+                { path: 'user.employee_id', enabled: true },
+                { path: 'user.employee_id', enabled: false },
+              ],
+            },
+          ],
+        ],
+        [
+          `more than ${MAX_OBSERVABLE_TYPE_PATHS} fields in one entry`,
+          [
+            {
+              ...customType,
+              paths: Array.from({ length: MAX_OBSERVABLE_TYPE_PATHS + 1 }, (_, i) => ({
+                path: `user.field_${i}`,
+                enabled: true,
+              })),
+            },
+          ],
+        ],
+        [
+          `more than ${MAX_OBSERVABLE_TYPE_EXCLUDED_VALUES} excluded values in one field`,
+          [
+            {
+              ...override,
+              paths: [
+                {
+                  path: 'agent.id',
+                  enabled: true,
+                  excludedValues: Array.from(
+                    { length: MAX_OBSERVABLE_TYPE_EXCLUDED_VALUES + 1 },
+                    (_, i) => `value-${i}`
+                  ),
+                },
+              ],
+            },
+          ],
+        ],
+        [
+          `more than ${MAX_OBSERVABLE_TYPE_ENTRIES} entries`,
+          Array.from({ length: MAX_OBSERVABLE_TYPE_ENTRIES + 1 }, (_, i) => ({
+            key: `type-${i}`,
+            label: `Type ${i}`,
+          })),
+        ],
+      ];
+
+      for (const [name, observableTypes] of rejectedRequests) {
+        it(`should not create a configuration with ${name}`, async () => {
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({ overrides: { observableTypes } }),
+            400
+          );
+        });
+      }
     });
 
     it('should create a configuration with workflowTags', async () => {
