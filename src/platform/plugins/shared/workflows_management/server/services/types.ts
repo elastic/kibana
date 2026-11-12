@@ -78,4 +78,10 @@ export interface WorkflowValidationDeps {
   getCoreStart: () => CoreStart;
   licensing: LicensingPluginStart;
   logger: Logger;
+  /** Reads the workflows with these ids that the request may see, for their outputs. */
+  getWorkflowsForOutputs: (
+    ids: string[],
+    spaceId: string,
+    request: KibanaRequest
+  ) => Promise<Array<{ id: string; name?: string; definition?: unknown }>>;
 }

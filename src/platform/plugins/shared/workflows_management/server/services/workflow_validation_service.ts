@@ -21,11 +21,14 @@ import {
 } from '@kbn/workflows';
 import type { GetAvailableConnectorsResponse } from '@kbn/workflows/types/v1';
 import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
-import type { WorkflowContextRegistry } from '@kbn/workflows-yaml';
+import type { CalledWorkflowOutputs, WorkflowContextRegistry } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 
 import type { WorkflowValidationDeps } from './types';
-import { toRegisteredStepOutput } from '../../common/lib/create_workflow_context_registry';
+import {
+  toCalledWorkflowOutputs,
+  toRegisteredStepOutput,
+} from '../../common/lib/create_workflow_context_registry';
 import { validateWorkflowYaml } from '../../common/lib/validate_workflow_yaml';
 import {
   getAllConnectorsWithDynamic,
@@ -149,6 +152,8 @@ export class WorkflowValidationService {
       warnIgnoredKibanaFetcher,
       ...(includeVariableRules && {
         variableValidationRegistry: this.createContextRegistry(allConnectors),
+        loadCalledWorkflowOutputs: (workflowIds: string[]) =>
+          this.loadCalledWorkflowOutputs(workflowIds, spaceId, request),
       }),
       ...(esql && { esqlCallbacks: esql.callbacks, esqlMaxSteps: MAX_VALIDATED_ESQL_STEPS }),
     });
@@ -214,6 +219,19 @@ export class WorkflowValidationService {
       },
       skippedSources: columns?.skippedSources ?? new Set(),
     };
+  }
+
+  private async loadCalledWorkflowOutputs(
+    workflowIds: string[],
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<ReadonlyMap<string, CalledWorkflowOutputs>> {
+    const workflows = await this.deps.getWorkflowsForOutputs(workflowIds, spaceId, request);
+    return new Map(
+      workflows.flatMap(({ id, name, definition }) =>
+        name === undefined ? [] : [[id, toCalledWorkflowOutputs({ name, definition })] as const]
+      )
+    );
   }
 
   private createContextRegistry(allConnectors: ConnectorContractUnion[]): WorkflowContextRegistry {

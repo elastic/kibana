@@ -36,11 +36,13 @@ interface MakeDepsOptions {
   listedConnectorTypes?: Array<Record<string, unknown>>;
   /** Registered step definitions, keyed by step type. */
   stepDefinitions?: Record<string, { outputSchema?: z.ZodType }>;
+  /** Workflows the request can see, as `getWorkflowsForOutputs` returns them. */
+  workflows?: Array<{ id: string; name: string; definition: unknown }>;
 }
 
 const makeDeps = (
   listedTriggers: CustomTriggerSchemaConfig[] = [],
-  { listedConnectorTypes = [], stepDefinitions = {} }: MakeDepsOptions = {}
+  { listedConnectorTypes = [], stepDefinitions = {}, workflows = [] }: MakeDepsOptions = {}
 ): {
   deps: WorkflowValidationDeps;
   actionsClient: { getAll: jest.Mock };
@@ -72,6 +74,9 @@ const makeDeps = (
         } as any),
       licensing: licensingMock.createStart(),
       logger: loggingSystemMock.createLogger(),
+      getWorkflowsForOutputs: jest.fn(async (ids: string[]) =>
+        workflows.filter(({ id }) => ids.includes(id))
+      ),
     },
     actionsClient,
     actionsClientWithRequest,
@@ -249,6 +254,70 @@ describe('WorkflowValidationService', () => {
       });
 
       expect(result.diagnostics.filter(({ source }) => source === 'variable')).toEqual([]);
+    });
+
+    it('checks references to the outputs of a called workflow', async () => {
+      const { deps } = makeDeps([], {
+        workflows: [
+          {
+            id: 'alert-context',
+            name: 'Alert context',
+            definition: {
+              outputs: [
+                { name: 'severity', type: 'string' },
+                { name: 'summary', type: 'string' },
+              ],
+              steps: [
+                {
+                  name: 'done',
+                  type: 'workflow.output',
+                  with: { severity: 'high', summary: 'ok', legacy_score: 1 },
+                },
+              ],
+            },
+          },
+        ],
+      });
+      const service = new WorkflowValidationService(deps);
+      const callerYaml = (reference: string) =>
+        [
+          'name: caller',
+          'enabled: true',
+          'triggers:',
+          '  - type: manual',
+          'steps:',
+          '  - name: ctx',
+          '    type: workflow.execute',
+          '    with:',
+          '      workflow-id: alert-context',
+          '  - name: log',
+          '    type: console',
+          '    with:',
+          `      message: "${reference}"`,
+          '',
+        ].join('\n');
+      const variableDiagnostics = async (reference: string) =>
+        (
+          await service.validateWorkflow(callerYaml(reference), 'default', {} as any, {
+            includeVariableRules: true,
+            includeEsqlRules: false,
+          })
+        ).diagnostics.filter(({ source }) => source === 'variable');
+
+      expect(await variableDiagnostics('{{ steps.ctx.output.sumary }}')).toEqual([
+        expect.objectContaining({
+          severity: 'error',
+          ruleId: 'invalidVariableReference',
+          message:
+            'Workflow "Alert context" doesn’t return an output named "sumary". It returns: severity, summary, legacy_score',
+        }),
+      ]);
+      expect(await variableDiagnostics('{{ steps.ctx.output.legacy_score }}')).toEqual([]);
+      expect(deps.getWorkflowsForOutputs).toHaveBeenCalledWith(
+        ['alert-context'],
+        'default',
+        expect.anything()
+      );
     });
 
     it('resolves a reference against a registered step output', async () => {

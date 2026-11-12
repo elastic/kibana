@@ -8,14 +8,66 @@
  */
 
 import { getBuiltInStepDefinition, hitlAuditOutputFields } from '@kbn/workflows';
-import type { GraphNodeUnion } from '@kbn/workflows/graph';
-import { isAtomic } from '@kbn/workflows/graph';
+import type { GraphNodeUnion, WorkflowExecuteGraphNode } from '@kbn/workflows/graph';
+import { isAtomic, isWorkflowExecute } from '@kbn/workflows/graph';
+import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
+import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
 import { z } from '@kbn/zod/v4';
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 import type { WorkflowContextRegistry } from './registry';
 import { structuralStepOutputSchemas } from './structural_step_output_schemas';
+import { withUnknownPropertyMessage } from './unknown_property_message';
+import { isDynamicValue } from '../../regex';
 
 const waitForInputFallbackSchema: z.ZodSchema = z.record(z.string(), z.unknown());
+
+const getUnknownOutputMessage = (
+  workflowName: string,
+  outputNames: readonly string[],
+  field: string
+): string =>
+  outputNames.length > 0
+    ? `Workflow "${workflowName}" doesn’t return an output named "${field}". It returns: ${outputNames.join(
+        ', '
+      )}`
+    : `Workflow "${workflowName}" doesn’t return an output named "${field}". It returns no outputs`;
+
+/**
+ * The output of the workflow a `workflow.execute` step runs: what it declares, plus undeclared
+ * values its completing `workflow.output` steps set, which the run passes on too. Undefined when
+ * the called workflow isn't known, declares no outputs, or any field may come back.
+ */
+const getCalledWorkflowOutputSchema = (
+  registry: WorkflowContextRegistry,
+  node: WorkflowExecuteGraphNode
+): z.ZodType | undefined => {
+  const workflowId = node.configuration.with?.['workflow-id'];
+  if (typeof workflowId !== 'string' || !workflowId || isDynamicValue(workflowId)) {
+    return undefined;
+  }
+  const calledWorkflow = registry.getCalledWorkflowOutputs?.(workflowId);
+  const declaredOutputs = normalizeFieldsToJsonSchema(calledWorkflow?.outputs);
+  if (!calledWorkflow?.returnedOutputNames || !declaredOutputs?.properties) {
+    return undefined;
+  }
+
+  const declaredNames = Object.keys(declaredOutputs.properties);
+  const undeclaredNames = calledWorkflow.returnedOutputNames.filter(
+    (name) => !declaredNames.includes(name)
+  );
+  const declaredSchema = buildFieldsZodValidator(declaredOutputs);
+  if (undeclaredNames.length > 0 && !(declaredSchema instanceof z.ZodObject)) {
+    return undefined;
+  }
+  const outputSchema =
+    declaredSchema instanceof z.ZodObject && undeclaredNames.length > 0
+      ? declaredSchema.extend(Object.fromEntries(undeclaredNames.map((name) => [name, z.any()])))
+      : declaredSchema;
+  const outputNames = [...declaredNames, ...undeclaredNames];
+  return withUnknownPropertyMessage(outputSchema, (field) =>
+    getUnknownOutputMessage(calledWorkflow.name, outputNames, field)
+  );
+};
 
 export const getOutputSchemaForStepType = (
   registry: WorkflowContextRegistry,
@@ -51,6 +103,13 @@ export const getOutputSchemaForStepType = (
       response: waitForInputFallbackSchema,
       ...hitlAuditOutputFields,
     });
+  }
+
+  if (isWorkflowExecute(node)) {
+    const calledWorkflowOutputSchema = getCalledWorkflowOutputSchema(registry, node);
+    if (calledWorkflowOutputSchema) {
+      return calledWorkflowOutputSchema;
+    }
   }
 
   if (node.stepType === 'waitForApproval') {

@@ -267,6 +267,12 @@ export class WorkflowsService {
       getCoreStart: () => this.coreStart,
       licensing: pluginsStart.licensing,
       logger: this.logger,
+      getWorkflowsForOutputs: async (ids, spaceId, request) => {
+        const access = await this.getAccessControl();
+        return this.crudService.getWorkflowsSourceByIds(ids, spaceId, ['name', 'definition'], {
+          accessControlFilter: await access.readFilter(request),
+        });
+      },
     });
 
     const { workflowExecutionsDataClient, stepExecutionsDataClient } =

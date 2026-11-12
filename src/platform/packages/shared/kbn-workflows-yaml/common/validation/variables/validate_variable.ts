@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
+import {
+  getSchemaAtPath,
+  LIQUID_DYNAMIC_KEY_SEGMENT,
+  parsePath,
+} from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 import type { DynamicStepContextSchema } from '@kbn/workflows/spec/schema';
 import { z } from '@kbn/zod/v4';
 import type { VariableItem, YamlValidationResult } from '../types';
@@ -18,6 +22,28 @@ import {
   FOREACH_ITEM_SCHEMA_DESC,
   getForeachItemSchema,
 } from '../context/get_foreach_state_schema';
+import { getUnknownPropertyMessage } from '../context/unknown_property_message';
+
+// The message of the deepest schema on the path that resolves, for the property it doesn't have.
+const getUnresolvedPathMessage = (
+  context: typeof DynamicStepContextSchema,
+  propertyPath: string
+): string | undefined => {
+  const segments = parsePath(propertyPath);
+  const { schema: resolvedSchema, scopedToPath } = getSchemaAtPath(context, propertyPath, {
+    partial: true,
+  });
+  if (!segments || !resolvedSchema || scopedToPath === null) {
+    return undefined;
+  }
+  const resolvedCount = segments.findIndex(
+    (_, index) => segments.slice(0, index).join('.') === scopedToPath
+  );
+  const property = resolvedCount === -1 ? undefined : segments[resolvedCount];
+  return property === undefined || property === LIQUID_DYNAMIC_KEY_SEGMENT
+    ? undefined
+    : getUnknownPropertyMessage(resolvedSchema, property);
+};
 
 export interface VariableValidationOptions {
   /**
@@ -119,7 +145,9 @@ export function validateVariable(
   if (!refSchema) {
     return {
       ...variableItem,
-      message: `Variable ${parsedPath.propertyPath} is invalid`,
+      message:
+        getUnresolvedPathMessage(context, parsedPath.propertyPath) ??
+        `Variable ${parsedPath.propertyPath} is invalid`,
       severity: 'error',
       owner: 'variable-validation',
       ruleId: 'invalidVariableReference',

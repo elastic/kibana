@@ -8,16 +8,13 @@
  */
 
 import { createAsyncThunk } from 'redux-toolkit-v1';
-import {
-  getInputsFromDefinition,
-  normalizeFieldsToJsonSchema,
-} from '@kbn/workflows/spec/lib/field_conversion';
+import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import { WorkflowApi } from '@kbn/workflows-ui';
+import { getReturnedOutputNames } from '../../../../../../common/lib/get_returned_output_names';
 import type { WorkflowsServices } from '../../../../../types';
 import type { WorkflowsResponse } from '../../../model/types';
 import type { RootState } from '../../types';
 import { initialWorkflowsState, setWorkflows } from '../slice';
-import { getReturnedOutputNames } from '../utils/get_returned_output_names';
 
 /**
  * Maximum number of workflows to fetch for autocomplete/lookup.
@@ -48,16 +45,13 @@ export const loadWorkflowsThunk = createAsyncThunk<
       const workflowsMap: WorkflowsResponse['workflows'] = {};
       response.results.forEach((workflow) => {
         const inputsSchema = getInputsFromDefinition(workflow.definition);
-        const outputsSchema = normalizeFieldsToJsonSchema(workflow.definition?.outputs);
 
         workflowsMap[workflow.id] = {
           id: workflow.id,
           name: workflow.name,
           managed: workflow.managed,
           inputsSchema,
-          outputNames: outputsSchema?.properties
-            ? Object.keys(outputsSchema.properties)
-            : undefined,
+          outputs: workflow.definition?.outputs,
           returnedOutputNames: getReturnedOutputNames(workflow.definition),
         };
       });

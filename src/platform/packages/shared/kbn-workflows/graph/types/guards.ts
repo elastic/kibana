@@ -16,6 +16,7 @@ import type {
   WaitForApprovalGraphNode,
   WaitForInputGraphNode,
   WaitGraphNode,
+  WorkflowExecuteGraphNode,
   WorkflowOutputGraphNode,
 } from './nodes/base';
 import type {
@@ -80,6 +81,9 @@ export const isDataSet = (node: GraphNodeUnion): node is DataSetGraphNode =>
 
 export const isWorkflowOutput = (node: GraphNodeUnion): node is WorkflowOutputGraphNode =>
   node.type === 'workflow.output';
+
+export const isWorkflowExecute = (node: GraphNodeUnion): node is WorkflowExecuteGraphNode =>
+  node.type === 'workflow.execute';
 
 export const isEnterIf = (node: GraphNodeUnion): node is EnterIfNode => node.type === 'enter-if';
 

@@ -9,6 +9,7 @@
 
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import {
+  collectAllSteps,
   collectIgnoredKibanaFetcherOccurrences,
   IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
   shouldWarnIgnoredKibanaFetcher,
@@ -17,10 +18,12 @@ import {
 import type { ValidateWorkflowResponseDto, WorkflowYaml } from '@kbn/workflows';
 import { isGraphBuildError, WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowDiagnostic } from '@kbn/workflows/types/v1';
-import type { WorkflowContextRegistry } from '@kbn/workflows-yaml';
+import type { CalledWorkflowOutputs, WorkflowContextRegistry } from '@kbn/workflows-yaml';
 import {
   InvalidYamlSchemaError,
   InvalidYamlSyntaxError,
+  isDynamicValue,
+  isRecord,
   parseWorkflowYamlToJSON,
   validateLiquidTemplate,
 } from '@kbn/workflows-yaml';
@@ -53,6 +56,14 @@ export interface ValidateWorkflowYamlOptions {
    */
   variableValidationRegistry?: WorkflowContextRegistry;
   /**
+   * Loads the outputs of the workflows the definition runs, by id, so the
+   * `variable-validation` rule group checks references to them. Only used with
+   * `variableValidationRegistry`, which it adds them to.
+   */
+  loadCalledWorkflowOutputs?: (
+    workflowIds: string[]
+  ) => Promise<ReadonlyMap<string, CalledWorkflowOutputs>>;
+  /**
    * Callbacks for the ES|QL validator. Passing them runs the `esql` rule group
    * over every `elasticsearch.esql.query` step: grammar, plus indices and
    * fields when `getSources` / `getColumnsFor` are set.
@@ -68,6 +79,34 @@ export interface ValidateWorkflowYamlOptions {
    */
   esqlMaxSteps?: number;
 }
+
+// Ids of the workflows `workflow.execute` steps run, when written out rather than templated.
+const getStaticCalledWorkflowIds = (workflow: WorkflowYaml): string[] => {
+  const ids = collectAllSteps(workflow.steps ?? []).flatMap((step) => {
+    const stepWith: unknown = 'with' in step ? step.with : undefined;
+    if (step.type !== 'workflow.execute' || !isRecord(stepWith)) {
+      return [];
+    }
+    const workflowId = stepWith['workflow-id'];
+    return typeof workflowId === 'string' && workflowId !== '' && !isDynamicValue(workflowId)
+      ? [workflowId]
+      : [];
+  });
+  return [...new Set(ids)];
+};
+
+const withCalledWorkflowOutputs = async (
+  registry: WorkflowContextRegistry,
+  workflow: WorkflowYaml,
+  loadCalledWorkflowOutputs: ValidateWorkflowYamlOptions['loadCalledWorkflowOutputs']
+): Promise<WorkflowContextRegistry> => {
+  const workflowIds = loadCalledWorkflowOutputs ? getStaticCalledWorkflowIds(workflow) : [];
+  if (!loadCalledWorkflowOutputs || workflowIds.length === 0) {
+    return registry;
+  }
+  const outputsById = await loadCalledWorkflowOutputs(workflowIds);
+  return { ...registry, getCalledWorkflowOutputs: (workflowId) => outputsById.get(workflowId) };
+};
 
 export async function validateWorkflowYaml(
   yaml: string,
@@ -185,7 +224,11 @@ export async function validateWorkflowYaml(
     // runs once the graph builds. Same guard the editor applies.
     if (options?.variableValidationRegistry && workflowGraph) {
       const variableValidation = collectVariableDiagnostics(
-        options.variableValidationRegistry,
+        await withCalledWorkflowOutputs(
+          options.variableValidationRegistry,
+          parsedWorkflow,
+          options.loadCalledWorkflowOutputs
+        ),
         yaml,
         parsedWorkflow,
         workflowGraph
