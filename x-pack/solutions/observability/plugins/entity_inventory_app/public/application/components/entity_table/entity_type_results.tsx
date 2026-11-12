@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
@@ -22,23 +22,33 @@ import { useEntityTablePreferences } from '../../context/entity_table_preference
 import type { UseEntityListResult } from '../../hooks/use_entity_list';
 import { useEntityList } from '../../hooks/use_entity_list';
 import { EntityTable } from './entity_table';
-import {
-  EntityTableDiagnosticsCallout,
-  EntityTableTruncationCallout,
-} from './entity_table_callouts';
+import { EntityTableDiagnosticsCallout } from './entity_table_callouts';
 import { EntityTableEmpty, EntityTableLoadError, EntityTableSkeleton } from './entity_table_states';
 import { ENTITY_COUNT_LABEL, getEntityCountValue } from './translations';
+
+export interface EntityTypeResultsProps {
+  entityType: InventoryType;
+  /** Called with `true` while the section shows a truncated list with rows, else `false`. */
+  onTruncatedChange: (type: string, truncated: boolean) => void;
+}
 
 /**
  * One entity type as a collapsible section: its name from the `types` entry, the number of listed
  * entities once its `_list` response arrives, and its results below. Each section loads and fails
  * on its own.
  */
-export const EntityTypeResults = ({ entityType }: { entityType: InventoryType }) => {
+export const EntityTypeResults = ({ entityType, onTruncatedChange }: EntityTypeResultsProps) => {
   const { type, name } = entityType;
   const accordionId = useGeneratedHtmlId({ prefix: 'entityInventoryTypeSection' });
   const listResult = useEntityList(type);
-  const { list } = listResult;
+  const { list, error } = listResult;
+  // A failed load replaces the list with an error, so the list no longer counts as shown.
+  const isTruncated = list !== undefined && !error && list.truncated && list.rows.length > 0;
+
+  useEffect(() => {
+    onTruncatedChange(type, isTruncated);
+    return () => onTruncatedChange(type, false);
+  }, [type, isTruncated, onTruncatedChange]);
 
   return (
     <EuiPanel
@@ -100,7 +110,7 @@ const EntityTypeListResults = ({ entityType, listResult }: EntityTypeListResults
     return <EntityTableSkeleton />;
   }
 
-  const { rows, truncated, errors, unavailableColumns } = list;
+  const { rows, errors, unavailableColumns } = list;
   const isEmpty = rows.length === 0;
 
   return (
@@ -113,12 +123,6 @@ const EntityTypeListResults = ({ entityType, listResult }: EntityTypeListResults
       {(errors.length > 0 || unavailableColumns.length > 0) && (
         <EuiFlexItem grow={false}>
           <EntityTableDiagnosticsCallout errors={errors} unavailableColumns={unavailableColumns} />
-        </EuiFlexItem>
-      )}
-      {/* With no rows the empty state says enough; "showing the 0 most recent" would not help. */}
-      {truncated && !isEmpty && (
-        <EuiFlexItem grow={false}>
-          <EntityTableTruncationCallout returned={rows.length} />
         </EuiFlexItem>
       )}
       <EuiFlexItem>

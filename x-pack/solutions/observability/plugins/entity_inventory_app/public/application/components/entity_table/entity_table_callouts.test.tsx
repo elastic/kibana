@@ -11,27 +11,18 @@ import {
   EntityTableDiagnosticsCallout,
   EntityTableTruncationCallout,
 } from './entity_table_callouts';
-import {
-  DIAGNOSTICS_TITLE,
-  TRUNCATION_BODY,
-  getSourceErrorText,
-  getTruncationTitle,
-  getUnavailableColumnText,
-} from './translations';
+import { DIAGNOSTICS_TITLE, getSourceErrorText, getUnavailableColumnText } from './translations';
 
 describe('EntityTableTruncationCallout', () => {
-  it('names the returned count and says more match', () => {
-    render(<EntityTableTruncationCallout returned={250} />);
+  it('names the row limit with thousands separators and every truncated type', () => {
+    render(<EntityTableTruncationCallout typeNames={['Host', 'K8s Deployment']} />);
 
     const callout = screen.getByTestId('entityInventoryTruncationCallout');
-    expect(callout).toHaveTextContent(getTruncationTitle({ returned: 250 }));
-    expect(callout).toHaveTextContent(TRUNCATION_BODY);
-  });
-
-  it('separates the thousands in the count', () => {
-    render(<EntityTableTruncationCallout returned={2_500} />);
-
-    expect(screen.getByTestId('entityInventoryTruncationCallout')).toHaveTextContent('2,500');
+    expect(callout).toHaveTextContent('9,999 entity limit');
+    expect(callout).toHaveTextContent(
+      'We can only show 9,999 entities at a time. Use filters to slice and dice further your data.'
+    );
+    expect(callout).toHaveTextContent('Host, K8s Deployment');
   });
 });
 

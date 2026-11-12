@@ -6,7 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { InventoryTypeColumn, OutputColumnKind, SourceError, UnavailableColumn } from '@kbn/entity-inventory-plugin/common';
+import type {
+  InventoryTypeColumn,
+  OutputColumnKind,
+  SourceError,
+  UnavailableColumn,
+} from '@kbn/entity-inventory-plugin/common';
 
 export const getTableAriaLabel = (typeName: string) =>
   i18n.translate('xpack.entityInventoryApp.entityTable.ariaLabel', {
@@ -36,19 +41,24 @@ export const RESET_TO_DEFAULT_LABEL = i18n.translate(
   { defaultMessage: 'Reset to default' }
 );
 
-export const getTruncationTitle = ({ returned }: { returned: number }) =>
-  i18n.translate('xpack.entityInventoryApp.entityTable.truncation.moreMatchTitle', {
-    defaultMessage: 'Showing the {returned, number} most recently seen entities; more match.',
-    values: { returned },
+export const getTruncationTitle = (limit: number) =>
+  i18n.translate('xpack.entityInventoryApp.entityTable.truncation.limitTitle', {
+    defaultMessage: '{limit, number} entity limit',
+    values: { limit },
   });
 
-export const TRUNCATION_BODY = i18n.translate(
-  'xpack.entityInventoryApp.entityTable.truncation.narrowTimeRangeBody',
-  {
+export const getTruncationBody = (limit: number) =>
+  i18n.translate('xpack.entityInventoryApp.entityTable.truncation.limitBody', {
     defaultMessage:
-      'Only the returned entities are listed, and sorting covers only them. Narrow the time range to see the rest.',
-  }
-);
+      'We can only show {limit, number} entities at a time. Use filters to slice and dice further your data.',
+    values: { limit },
+  });
+
+export const getTruncatedTypesText = (typeNames: readonly string[]) =>
+  i18n.translate('xpack.entityInventoryApp.entityTable.truncation.truncatedTypes', {
+    defaultMessage: 'Entity types over the limit: {typeNames}',
+    values: { typeNames: typeNames.join(', ') },
+  });
 
 export const DIAGNOSTICS_TITLE = i18n.translate(
   'xpack.entityInventoryApp.entityTable.diagnostics.title',

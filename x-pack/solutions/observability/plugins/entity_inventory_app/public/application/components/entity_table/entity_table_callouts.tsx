@@ -7,21 +7,28 @@
 
 import React from 'react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
+import { MAX_LIST_LIMIT } from '@kbn/entity-inventory-plugin/common';
 import type { SourceError, UnavailableColumn } from '@kbn/entity-inventory-plugin/common';
 import {
   DIAGNOSTICS_TITLE,
-  TRUNCATION_BODY,
   getSourceErrorText,
+  getTruncatedTypesText,
+  getTruncationBody,
   getTruncationTitle,
   getUnavailableColumnText,
 } from './translations';
 
-/** Warns that only the most recently seen entities were returned. */
-export const EntityTableTruncationCallout = ({ returned }: { returned: number }) => (
+/** Warns that the lists of `typeNames` hold only the `MAX_LIST_LIMIT` most recently seen entities. */
+export const EntityTableTruncationCallout = ({ typeNames }: { typeNames: readonly string[] }) => (
   <KbnWarningCallout
     size="s"
-    title={getTruncationTitle({ returned })}
-    text={<p>{TRUNCATION_BODY}</p>}
+    title={getTruncationTitle(MAX_LIST_LIMIT)}
+    text={
+      <>
+        <p>{getTruncationBody(MAX_LIST_LIMIT)}</p>
+        <p>{getTruncatedTypesText(typeNames)}</p>
+      </>
+    }
     data-test-subj="entityInventoryTruncationCallout"
   />
 );

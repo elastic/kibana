@@ -33,7 +33,6 @@ import {
   EMPTY_WITH_FAILURES_BODY,
   getEmptyTitle,
   getEmptyWithFailuresTitle,
-  getTruncationTitle,
   getTypeNotAvailableTitle,
 } from './translations';
 
@@ -124,13 +123,68 @@ describe('EntityCategoryResults', () => {
     expect(screen.queryByTestId('entityInventoryTableSkeleton')).not.toBeInTheDocument();
   });
 
-  it('warns that a truncated list holds only the most recent entities', async () => {
-    renderScenario('truncated');
+  describe('truncation', () => {
+    const truncateTypes =
+      (truncatedTypes: readonly string[], rowsWhenTruncated: 'rows' | 'noRows' = 'rows') =>
+      async (...args: Parameters<EntityInventoryApiClient['getEntities']>) => {
+        const [type] = args;
+        const scenario: FixtureScenario = !truncatedTypes.includes(type)
+          ? 'normal'
+          : rowsWhenTruncated === 'rows'
+          ? 'truncated'
+          : 'empty';
+        const list = await createScenarioEntityInventoryApiClient({ scenario }).getEntities(
+          ...args
+        );
+        return { ...list, truncated: list.truncated || truncatedTypes.includes(type) };
+      };
 
-    expect(await screen.findByTestId('entityInventoryTruncationCallout')).toHaveTextContent(
-      getTruncationTitle({ returned: 250 })
-    );
-    expect(screen.getByTestId('entityInventoryTable')).toBeInTheDocument();
+    it('shows one callout above the sections naming the row limit and the truncated type', async () => {
+      const fixtureClient = createFixtureEntityInventoryApiClient();
+      renderResults({ ...fixtureClient, getEntities: truncateTypes(['host']) }, [
+        'host',
+        'k8s.deployment',
+      ]);
+
+      const callout = await screen.findByTestId('entityInventoryTruncationCallout');
+      expect(callout).toHaveTextContent('9,999 entity limit');
+      expect(callout).toHaveTextContent(
+        'We can only show 9,999 entities at a time. Use filters to slice and dice further your data.'
+      );
+      expect(callout).toHaveTextContent(HOST_TYPE_FIXTURE.name);
+      expect(callout).not.toHaveTextContent(K8S_DEPLOYMENT_TYPE_FIXTURE.name);
+      const [firstShown] = document.querySelectorAll(
+        '[data-test-subj="entityInventoryTruncationCallout"], [data-test-subj="entityInventoryTypeSection"]'
+      );
+      expect(firstShown).toBe(callout);
+      await waitFor(() => expect(screen.getAllByTestId('entityInventoryTable')).toHaveLength(2));
+    });
+
+    it('shows a single callout naming every truncated type', async () => {
+      const fixtureClient = createFixtureEntityInventoryApiClient();
+      renderResults({ ...fixtureClient, getEntities: truncateTypes(['host', 'k8s.deployment']) }, [
+        'host',
+        'k8s.deployment',
+      ]);
+
+      await waitFor(() =>
+        expect(screen.getByTestId('entityInventoryTruncationCallout')).toHaveTextContent(
+          K8S_DEPLOYMENT_TYPE_FIXTURE.name
+        )
+      );
+      expect(screen.getAllByTestId('entityInventoryTruncationCallout')).toHaveLength(1);
+      expect(screen.getByTestId('entityInventoryTruncationCallout')).toHaveTextContent(
+        HOST_TYPE_FIXTURE.name
+      );
+    });
+
+    it('shows no callout when a truncated list has no rows', async () => {
+      const fixtureClient = createFixtureEntityInventoryApiClient();
+      renderResults({ ...fixtureClient, getEntities: truncateTypes(['host'], 'noRows') });
+
+      expect(await screen.findByTestId('entityInventoryTableEmpty')).toBeInTheDocument();
+      expect(screen.queryByTestId('entityInventoryTruncationCallout')).not.toBeInTheDocument();
+    });
   });
 
   it('lists source errors and unavailable columns above the table', async () => {

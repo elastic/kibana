@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useEntityTypes } from '../../context/entity_types_context';
 import { EntityTypeResults } from './entity_type_results';
+import { EntityTableTruncationCallout } from './entity_table_callouts';
 import {
   EntityTableLoadError,
   EntityTableLoading,
@@ -21,9 +22,25 @@ const TYPES_EBT_DETAIL = 'types';
 /**
  * One section per entity type of the page, in the order of the `types` response. A type the page
  * asks for that the response does not have gets a "not available" prompt instead of a section.
+ * One truncation callout above the sections names every type whose shown list was truncated.
  */
 export const EntityCategoryResults = ({ entityTypes }: { entityTypes: readonly string[] }) => {
   const { types, loading, error, refresh } = useEntityTypes();
+  const [truncatedTypes, setTruncatedTypes] = useState<ReadonlySet<string>>(() => new Set());
+  const onTruncatedChange = useCallback((type: string, truncated: boolean) => {
+    setTruncatedTypes((previous) => {
+      if (previous.has(type) === truncated) {
+        return previous;
+      }
+      const next = new Set(previous);
+      if (truncated) {
+        next.add(type);
+      } else {
+        next.delete(type);
+      }
+      return next;
+    });
+  }, []);
 
   if (error && !loading) {
     return (
@@ -40,12 +57,20 @@ export const EntityCategoryResults = ({ entityTypes }: { entityTypes: readonly s
 
   const pageTypes = types.filter(({ type }) => entityTypes.includes(type));
   const missingTypes = entityTypes.filter((id) => !types.some(({ type }) => type === id));
+  const truncatedTypeNames = pageTypes
+    .filter(({ type }) => truncatedTypes.has(type))
+    .map(({ name }) => name);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
+      {truncatedTypeNames.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <EntityTableTruncationCallout typeNames={truncatedTypeNames} />
+        </EuiFlexItem>
+      )}
       {pageTypes.map((entityType) => (
         <EuiFlexItem key={entityType.type} grow={false}>
-          <EntityTypeResults entityType={entityType} />
+          <EntityTypeResults entityType={entityType} onTruncatedChange={onTruncatedChange} />
         </EuiFlexItem>
       ))}
       {missingTypes.map((id) => (
