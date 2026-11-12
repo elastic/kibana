@@ -63,8 +63,14 @@ const INVESTIGATIONS_SEARCH_DEBOUNCE_MS = 300;
 
 export function NightshiftApp({
   hideDetectionSetupBanner = false,
+  onStartInvestigation,
+  onCreateAutomation,
 }: {
   hideDetectionSetupBanner?: boolean;
+  /** Opens the start-investigation modal from the empty investigations prompt. */
+  onStartInvestigation?: () => void;
+  /** Opens the automations page from the empty investigations prompt. */
+  onCreateAutomation?: () => void;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const { analytics, application, nightshiftInvestigations, agenticInvestigations, agentBuilder } =
@@ -79,6 +85,9 @@ export function NightshiftApp({
   );
   const hasReportedHomepageView = useRef(false);
   const reportedSearchQuery = useRef<string | undefined>(undefined);
+  // Filtered totals go to zero on a no-match search; remember unfiltered availability so clearing
+  // that query does not unmount the search input (and drop focus) before the unfiltered list returns.
+  const hadUnfilteredInvestigationsRef = useRef(false);
 
   // Read filter state from URL so it survives navigation and is shareable.
   const searchQuery = useMemo(() => getNightshiftSearchQueryFromSearch(search), [search]);
@@ -101,6 +110,22 @@ export function NightshiftApp({
     loadedCount,
     refetchAll,
   } = useInvestigationSections({ query: debouncedSearchQuery });
+
+  useEffect(() => {
+    if (debouncedSearchQuery || isInitialLoading || isFetching) {
+      return;
+    }
+    if (sections.some((section) => section.isPreviousData)) {
+      return;
+    }
+    hadUnfilteredInvestigationsRef.current = totalCount > 0;
+  }, [debouncedSearchQuery, isFetching, isInitialLoading, sections, totalCount]);
+
+  const showInvestigationsSearch =
+    Boolean(searchQuery) ||
+    Boolean(debouncedSearchQuery) ||
+    totalCount > 0 ||
+    hadUnfilteredInvestigationsRef.current;
 
   // A tile scrolls to its section, so it is only actionable while the list is rendering that
   // section — which the list, not the count, decides.
@@ -374,19 +399,23 @@ export function NightshiftApp({
         </>
       )}
 
-      <EuiFieldSearch
-        data-test-subj="nightshiftInvestigationsSearchInput"
-        placeholder={i18n.translate('xpack.nightshift.investigations.searchPlaceholder', {
-          defaultMessage: 'Search',
-        })}
-        value={searchQuery ?? ''}
-        onChange={handleSearchChange}
-        isClearable
-        fullWidth
-        compressed
-      />
-
-      <EuiSpacer size="m" />
+      {/* Hide only when the space has no open investigations; keep mounted through filtered-empty clears. */}
+      {showInvestigationsSearch && (
+        <>
+          <EuiFieldSearch
+            data-test-subj="nightshiftInvestigationsSearchInput"
+            placeholder={i18n.translate('xpack.nightshift.investigations.searchPlaceholder', {
+              defaultMessage: 'Search',
+            })}
+            value={searchQuery ?? ''}
+            onChange={handleSearchChange}
+            isClearable
+            fullWidth
+            compressed
+          />
+          <EuiSpacer size="l" />
+        </>
+      )}
 
       <InvestigationSeverityTiles
         severityCounts={severityCounts}
@@ -402,6 +431,9 @@ export function NightshiftApp({
         sections={sections}
         selectedInvestigationId={selectedInvestigationId}
         onInvestigationClick={handleInvestigationClick}
+        onStartInvestigation={onStartInvestigation}
+        onCreateAutomation={onCreateAutomation}
+        hasActiveSearch={Boolean(searchQuery)}
       />
     </EuiFlexGroup>
   );

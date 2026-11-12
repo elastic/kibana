@@ -428,8 +428,8 @@ importers:
         specifier: 2.0.2
         version: 2.0.2
       '@elastic/monaco-esql':
-        specifier: 4.37.0
-        version: 4.37.0(monaco-editor@0.56.0)
+        specifier: 4.38.0
+        version: 4.38.0(monaco-editor@0.56.0)
       '@elastic/node-crypto':
         specifier: 1.2.3
         version: 1.2.3
@@ -1978,6 +1978,9 @@ importers:
       '@kbn/discover-customization-examples-plugin':
         specifier: workspace:*
         version: link:examples/discover_customization_examples
+      '@kbn/discover-data-grid':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-discover-data-grid
       '@kbn/discover-enhanced-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/discover_enhanced
@@ -3559,6 +3562,9 @@ importers:
       '@kbn/securitysolution-timeline-components':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/timeline-components
+      '@kbn/securitysolution-timeline-search-strategy':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/timeline-search-strategy
       '@kbn/securitysolution-utils':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-securitysolution-utils
@@ -8123,6 +8129,8 @@ importers:
 
   src/platform/packages/shared/kbn-discover-contextual-components: {}
 
+  src/platform/packages/shared/kbn-discover-data-grid: {}
+
   src/platform/packages/shared/kbn-discover-utils: {}
 
   src/platform/packages/shared/kbn-doc-links: {}
@@ -9925,6 +9933,8 @@ importers:
 
   x-pack/solutions/security/packages/timeline-components: {}
 
+  x-pack/solutions/security/packages/timeline-search-strategy: {}
+
   x-pack/solutions/security/packages/upselling: {}
 
   x-pack/solutions/security/plugins/alertzero: {}
@@ -11287,8 +11297,8 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  '@elastic/monaco-esql@4.37.0':
-    resolution: {integrity: sha512-eHmJU+SSqtAopMs2VPrBRyc381W/giNJEa6ZfAdjhg0Ye0hOmQnXDhqFTXDLn5v0ObWmtDUTzKptwodnGFVjIg==}
+  '@elastic/monaco-esql@4.38.0':
+    resolution: {integrity: sha512-bKvBxq9/u+QWg7HvLsrJphKhi34eKqxiSWSfeJ8O5Cgp1lca10pzCsBqelobzcJd2hQLVAb8EPCK7IySc4vbnA==}
     peerDependencies:
       monaco-editor: '>=0.30.0'
 
@@ -27335,7 +27345,7 @@ snapshots:
 
   '@elastic/micro-jq@2.0.2': {}
 
-  '@elastic/monaco-esql@4.37.0(monaco-editor@0.56.0)':
+  '@elastic/monaco-esql@4.38.0(monaco-editor@0.56.0)':
     dependencies:
       '@elastic/esql-definitions': 4.38.0
       monaco-editor: 0.56.0

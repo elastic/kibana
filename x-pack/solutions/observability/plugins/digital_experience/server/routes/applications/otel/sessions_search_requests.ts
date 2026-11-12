@@ -37,7 +37,7 @@ const vitalAggs = (vital: CoreWebVital) => ({
 /**
  * The applications' metrics, the page loads over time and the environments, from the sessions
  * index in one search: the numbers `logsSearch` and `spansSearch` find in the raw events, which the
- * sessions transform adds up per session. A session that overlaps the time range counts in full,
+ * session summaries add up per session. A session that overlaps the time range counts in full,
  * and its page loads are charted at its start.
  */
 export const sessionsSearch = ({
