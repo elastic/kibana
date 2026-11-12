@@ -6,7 +6,7 @@
  */
 import { createCallApmApiV2 } from '@kbn/apm-api-shared';
 import type { CoreStart } from '@kbn/core/public';
-import { PerformanceContext } from '@kbn/ebt-tools';
+import { PerformanceContext } from '@kbn/ebt-tools/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';

@@ -90,6 +90,7 @@ plugins:
     - saved_objects_management
     - saved_objects_tagging
     - searchExamples
+    - search_boost
     - search_getting_started
     - search_homepage
     - search_inference_endpoints

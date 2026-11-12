@@ -35,7 +35,7 @@ const DecisionTreesTab = React.lazy(() =>
 );
 
 const nightshiftLabel = i18n.translate('xpack.nightshift.knowledgePage.backToNightshiftLabel', {
-  defaultMessage: 'Nightshift',
+  defaultMessage: 'nightshift',
 });
 
 export type KnowledgePageHeaderProps = Record<string, never>;
