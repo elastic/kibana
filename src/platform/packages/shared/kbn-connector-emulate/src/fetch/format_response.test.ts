@@ -34,13 +34,19 @@ describe('formatResponse', () => {
         call({ responseSource: 'runtime-fixture', captured: captured({ success: true, id: 'a' }) })
       )
     ).toBe(
-      ['← 200 [runtime-fixture]', '  {', '    "success": true,', '    "id": "a"', '  }'].join('\n')
+      [
+        'Responding with: 200 [runtime-fixture]',
+        '  {',
+        '    "success": true,',
+        '    "id": "a"',
+        '  }',
+      ].join('\n')
     );
   });
 
   it('shows a text body as it is', () => {
     expect(formatResponse(call({ captured: captured('plain text') }))).toBe(
-      ['← 200', '  plain text'].join('\n')
+      ['Responding with: 200', '  plain text'].join('\n')
     );
   });
 
@@ -49,7 +55,7 @@ describe('formatResponse', () => {
       formatResponse(
         call({ status: 204, responseSource: 'generated', captured: captured(undefined) })
       )
-    ).toBe('← 204 [generated]');
+    ).toBe('Responding with: 204 [generated]');
   });
 
   it('shows the first lines of a long body, and says how many it left out', () => {
@@ -59,7 +65,14 @@ describe('formatResponse', () => {
     );
 
     expect(shown).toBe(
-      ['← 200', '  {', '    "items": [', '      "a",', '      "b",', '  … 5 more lines'].join('\n')
+      [
+        'Responding with: 200',
+        '  {',
+        '    "items": [',
+        '      "a",',
+        '      "b",',
+        '  … 5 more lines',
+      ].join('\n')
     );
   });
 
@@ -77,7 +90,11 @@ describe('formatResponse', () => {
 
   it('says the capture cut a body that was too long to keep', () => {
     expect(formatResponse(call({ captured: captured('{"items": [1, 2,', true) }))).toBe(
-      ['← 200', '  {"items": [1, 2,', '  … the capture cut the rest of the body'].join('\n')
+      [
+        'Responding with: 200',
+        '  {"items": [1, 2,',
+        '  … the capture cut the rest of the body',
+      ].join('\n')
     );
   });
 

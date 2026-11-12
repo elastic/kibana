@@ -32,7 +32,7 @@ export const formatResponse = (
     return undefined;
   }
   const { body, bodyTruncated } = captured.response;
-  const header = `← ${status}${responseSource ? ` [${responseSource}]` : ''}`;
+  const header = `Responding with: ${status}${responseSource ? ` [${responseSource}]` : ''}`;
   if (body === undefined) {
     return header;
   }
