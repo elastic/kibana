@@ -1800,22 +1800,25 @@ export class WorkflowCrudService {
 
     // An import over a soft-deleted workflow keeps its created_at, so the sync would keep pages
     // that a failed retire left behind. The import starts without them.
-    const revivedIds = new Set<string>();
+    const revivedIds: string[] = [];
     if (inSpaceUpdateEntries.length > 0) {
       for (const entry of inSpaceUpdateEntries) {
         const prepared = entry.workflowData;
         try {
           let previousVersion: number | undefined;
+          // Set by the attempt that wrote, so a denied, failed, or retried write retires nothing.
+          let revived = false;
           const document = await this.readModifyWriteWorkflowDocument(entry.id, spaceId, {
             getOptions: bulkOverwriteGetOptions,
             request: params.request,
             mutate: (existing) => {
               previousVersion = existing.version;
-              if (existing.deleted_at) revivedIds.add(entry.id);
               this.assertCanOverwrite(existing, entry.id, spaceId, profileId, params.request);
+              revived = Boolean(existing.deleted_at);
               return this.buildBulkOverwriteDocument(prepared, existing);
             },
           });
+          if (revived) revivedIds.push(entry.id);
           created.push(transformStorageDocumentToWorkflowDto(entry.id, document));
           successfullyWritten.push({ ...entry, workflowData: document });
           if (document.version !== previousVersion) {
@@ -1835,7 +1838,7 @@ export class WorkflowCrudService {
       }
     }
 
-    await this.retireWorkflowPages([...revivedIds], spaceId);
+    await this.retireWorkflowPages(revivedIds, spaceId);
 
     if (crossSpaceOverwriteEntries.length > 0) {
       for (const { entry, occHit } of crossSpaceOverwriteEntries) {

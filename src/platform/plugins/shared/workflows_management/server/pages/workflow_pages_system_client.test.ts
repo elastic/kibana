@@ -107,7 +107,7 @@ describe('WorkflowPagesSystemClient', () => {
       expect(storedPage({ ...ref, pageId: 'intake' })).toBeDefined();
     });
 
-    it('keeps the page and its secret across an invalid save', async () => {
+    it('keeps the page and its secret across an invalid save without the trigger', async () => {
       const { client, storedPage, sync } = setup();
       await sync(pageDefinition());
       const secretHash = storedPage()?.attributes.secretHash;
@@ -116,9 +116,10 @@ describe('WorkflowPagesSystemClient', () => {
         workflowId: ref.workflowId,
         workflowCreatedAt: WORKFLOW_CREATED_AT,
         spaceId: ref.spaceId,
-        definition: null,
+        definition: noPageDefinition,
         valid: false,
       });
+      expect(storedPage()?.attributes.secretHash).toBe(secretHash);
       await sync(pageDefinition());
 
       expect(storedPage()?.attributes.secretHash).toBe(secretHash);

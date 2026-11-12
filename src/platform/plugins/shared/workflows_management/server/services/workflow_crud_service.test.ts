@@ -4904,6 +4904,26 @@ describe('workflow page lifecycle', () => {
     );
   });
 
+  it('keeps the pages when an import over a soft-deleted workflow fails to write', async () => {
+    const { service, client, pagesService, request } = setup();
+    const stored = storeWrites(client);
+    stored.set(
+      'revived',
+      makeSource({ created_at: '2024-01-01T00:00:00.000Z', enabled: false, deleted_at: new Date() })
+    );
+    client.index.mockRejectedValue(new Error('write failed'));
+
+    const { failed } = await service.bulkCreateWorkflows(
+      [{ id: 'revived', yaml: pageYaml }],
+      'default',
+      request,
+      { overwrite: true }
+    );
+
+    expect(failed).toHaveLength(1);
+    expect(pagesService.retireWorkflowPages).not.toHaveBeenCalled();
+  });
+
   it('keeps the pages when an import overwrites a live workflow', async () => {
     const { service, client, pagesService, request } = setup();
     const stored = storeWrites(client);
