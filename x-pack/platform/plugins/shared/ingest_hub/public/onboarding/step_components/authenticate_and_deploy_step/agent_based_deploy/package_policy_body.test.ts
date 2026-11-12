@@ -218,3 +218,54 @@ describe('buildGroupPackagePolicy — output', () => {
     expect(await buildWithOutput('')).not.toHaveProperty('output_id');
   });
 });
+
+describe('buildGroupPackagePolicy — condition', () => {
+  const buildWithCondition = (condition?: string) =>
+    buildGroupPackagePolicy(group, pkgInfo, {
+      namespace: '',
+      globalRegion: 'us-east-1',
+      storedServiceVars: withInputs(['aws-s3']),
+      authenticateAndDeployStep: {},
+      pkgVersion: '1.0.0',
+      policySettings: { condition },
+    } as BuildPackagePolicyOpts);
+
+  it('sends the condition', async () => {
+    expect((await buildWithCondition('${host.platform} == "linux"')).condition).toBe(
+      '${host.platform} == "linux"'
+    );
+  });
+
+  it('leaves a blank condition out', async () => {
+    expect(await buildWithCondition(undefined)).not.toHaveProperty('condition');
+    expect(await buildWithCondition('  ')).not.toHaveProperty('condition');
+  });
+});
+
+describe('buildGroupPackagePolicy — proxy URL', () => {
+  const buildWithProxy = (proxyUrl: string | undefined, declared = true) =>
+    buildGroupPackagePolicy(
+      group,
+      { ...pkgInfo, vars: declared ? [{ name: 'proxy_url' }] : [] } as PkgInfo,
+      {
+        namespace: '',
+        globalRegion: '',
+        storedServiceVars: withInputs(['aws-s3']),
+        authenticateAndDeployStep: {},
+        pkgVersion: '1.0.0',
+        policySettings: { proxy_url: proxyUrl },
+      } as BuildPackagePolicyOpts
+    );
+
+  it('sends the proxy as a package var, not a top-level field', async () => {
+    const body = await buildWithProxy('http://proxy:3128');
+    expect(body.vars).toEqual({ proxy_url: 'http://proxy:3128' });
+    expect(body).not.toHaveProperty('proxy_url');
+  });
+
+  it('leaves it out when empty or when the package does not declare the var', async () => {
+    expect((await buildWithProxy('')).vars).toBeUndefined();
+    expect((await buildWithProxy(undefined)).vars).toBeUndefined();
+    expect((await buildWithProxy('http://proxy:3128', false)).vars).toBeUndefined();
+  });
+});

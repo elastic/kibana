@@ -1,0 +1,39 @@
+openapi: 3.0.0
+info:
+  title: Watchlists Entity Source Update API Key Schema
+  description: Schema for re-granting the API key of watchlist entity sources as the calling user.
+  version: "2023-10-31"
+
+paths:
+  /api/entity_analytics/watchlists/{watchlist_id}/entity_source/{id}/_update_api_key:
+    post:
+      operationId: UpdateWatchlistEntitySourceApiKey
+      x-codegen-enabled: true
+      summary: Update the API key of an entity source
+      description: >-
+        Replace the API key of an index entity source with a new one owned by the user making this request,
+        for example after the user who created the source is removed or loses access to the index.
+        The new key is created and saved first; the previous key is invalidated only afterwards,
+        so a failure leaves the source with its previous key.
+        The user must be able to read the source's index pattern.
+      parameters:
+        - name: watchlist_id
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 256
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 256
+      responses:
+        "200":
+          description: The API key was updated
+          content:
+            application/json:
+              schema:
+                $ref: "./common.schema.yaml#/components/schemas/MonitoringEntitySource"
+

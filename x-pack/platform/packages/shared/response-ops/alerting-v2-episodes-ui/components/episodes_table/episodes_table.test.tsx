@@ -10,6 +10,7 @@ import { act, render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { UnifiedDataTable, getRowHeight } from '@kbn/unified-data-table';
+import { createEpisodeActions } from '../../actions';
 import { useFetchAlertingEpisodesQuery } from '../../hooks/use_fetch_alerting_episodes_query';
 import { AlertHostProvider, type AlertHostContextValue } from '../../context/alert_host_context';
 import { EpisodeRuleCell } from '../episodes_table_cell_renderers';
@@ -241,22 +242,31 @@ describe('EpisodesTable', () => {
     expect(lastGridProps().customBulkActions.length).toBeGreaterThan(0);
   });
 
-  it('drops mutating actions when the host reports read-only', () => {
+  it('builds the actions with write privilege when the host reports it', () => {
+    setEpisodes([episode('a')]);
+    renderTable();
+
+    expect(jest.mocked(createEpisodeActions)).toHaveBeenCalledWith(
+      expect.objectContaining({ canWriteNativeEpisodes: true })
+    );
+  });
+
+  it('builds the actions without write privilege when the host reports read-only', () => {
     setEpisodes([episode('a')]);
     renderTable({}, { canWriteAlerts: false });
 
-    expect(lastGridProps().rowAdditionalLeadingControls.map((c: { id: string }) => c.id)).toEqual([
-      'DISCOVER',
-    ]);
+    expect(jest.mocked(createEpisodeActions)).toHaveBeenCalledWith(
+      expect.objectContaining({ canWriteNativeEpisodes: false })
+    );
   });
 
-  it('offers only self-authorizing actions when the host supplies no privilege', () => {
+  it('builds the actions without write privilege when the host supplies none', () => {
     setEpisodes([episode('a')]);
     renderTable({}, {});
 
-    expect(lastGridProps().rowAdditionalLeadingControls.map((c: { id: string }) => c.id)).toEqual([
-      'DISCOVER',
-    ]);
+    expect(jest.mocked(createEpisodeActions)).toHaveBeenCalledWith(
+      expect.objectContaining({ canWriteNativeEpisodes: undefined })
+    );
   });
 
   it('says results are capped when the host shows the limited-results notice', () => {

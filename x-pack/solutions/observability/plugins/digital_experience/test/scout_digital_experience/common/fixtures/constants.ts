@@ -66,8 +66,8 @@ export const OTEL_SHOP_USAGE = {
       { name: 'iOS', pageLoads: 1 },
     ],
     devices: [
-      { name: 'desktop', pageLoads: 3 },
-      { name: 'mobile', pageLoads: 1 },
+      { name: 'MacBook Pro', pageLoads: 3 },
+      { name: 'iPhone', pageLoads: 1 },
     ],
   },
   topClicks: [

@@ -27,6 +27,7 @@ export interface BuildkiteClientConfig {
   baseUrl?: string;
   token?: string;
   exec?: ExecType;
+  timeoutMs?: number;
 }
 
 export type BuildkiteStep =
@@ -203,6 +204,7 @@ export class BuildkiteClient {
         Authorization: `Bearer ${BUILDKITE_TOKEN}`,
       },
       allowAbsoluteUrls: false,
+      timeout: config.timeoutMs,
     });
 
     this.exec = config.exec ?? execSync;
@@ -255,9 +257,13 @@ export class BuildkiteClient {
   getFinishedBuildsForBranch = async (
     pipelineSlug: string,
     branch: string,
-    numberOfBuilds: number
+    numberOfBuilds: number,
+    { excludeJobs = false }: { excludeJobs?: boolean } = {}
   ): Promise<Build[]> => {
     const params = new URLSearchParams({ branch, per_page: String(numberOfBuilds) });
+    if (excludeJobs) {
+      params.append('exclude_jobs', 'true');
+    }
     params.append('state[]', 'passed');
     params.append('state[]', 'failed');
     params.append('state[]', 'canceled');

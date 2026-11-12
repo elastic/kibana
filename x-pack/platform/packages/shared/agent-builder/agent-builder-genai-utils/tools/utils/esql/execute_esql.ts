@@ -12,6 +12,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { isMaximumResponseSizeExceededError, isRequestAbortedError } from '@kbn/es-errors';
+import { timeoutSignal } from '@kbn/std';
 import { MAX_ES_RESPONSE_SIZE_BYTES } from '../../constants';
 import { applyFrozenTierExclusion } from '../data_tiers';
 import { applyLimit } from './apply_limit';
@@ -90,7 +91,7 @@ export const executeEsql = async ({
 }): Promise<EsqlResponse> => {
   const effectiveQuery = limit !== undefined ? applyLimit(query, limit) : query;
   const effectiveFilter = applyFrozenTierExclusion(filter, includeFrozen);
-  const timeoutSignal = timeoutMs !== undefined ? AbortSignal.timeout(timeoutMs) : undefined;
+  const deadline = timeoutMs !== undefined ? timeoutSignal(timeoutMs) : undefined;
 
   try {
     const response = await esClient.esql.query(
@@ -103,7 +104,7 @@ export const executeEsql = async ({
       },
       {
         maxResponseSize: MAX_ES_RESPONSE_SIZE_BYTES,
-        ...(timeoutSignal ? { signal: timeoutSignal } : {}),
+        ...(deadline ? { signal: deadline } : {}),
       }
     );
     return {
@@ -117,8 +118,8 @@ export const executeEsql = async ({
           `Try narrowing your query with tighter filters, a LIMIT clause, or fewer fields.`
       );
     }
-    if (timeoutSignal) {
-      const deadlineHit = timeoutSignal.aborted && isRequestAbortedError(err);
+    if (deadline) {
+      const deadlineHit = deadline.aborted && isRequestAbortedError(err);
       if (deadlineHit || isTimeoutError(err)) {
         throw new EsqlExecutionTimeoutError(
           buildTimeoutMessage(deadlineHit ? timeoutMs : undefined)
@@ -126,5 +127,9 @@ export const executeEsql = async ({
       }
     }
     throw err;
+  } finally {
+    if (deadline) {
+      deadline.dispose();
+    }
   }
 };
