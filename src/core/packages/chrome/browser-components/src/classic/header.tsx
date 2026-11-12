@@ -92,17 +92,18 @@ export const ClassicHeader = React.memo(() => {
               },
               ...(!isSmall ? [{ items: [search] }] : []),
               {
-                items: subscriptionBadge
-                  ? [
-                      <div
-                        css={{ marginInlineEnd: euiTheme.size.s }}
-                        data-test-subj={CHROME_HEADER_TEST_SUBJECTS.subscriptionBadge}
-                      >
-                        {subscriptionBadge}
-                      </div>,
-                      rightGroup,
-                    ]
-                  : [rightGroup],
+                // EuiHeader keys items by index: drop the empty badge slot and rightGroup remounts
+                items: [
+                  subscriptionBadge ? (
+                    <div
+                      css={{ marginInlineEnd: euiTheme.size.s }}
+                      data-test-subj={CHROME_HEADER_TEST_SUBJECTS.subscriptionBadge}
+                    >
+                      {subscriptionBadge}
+                    </div>
+                  ) : null,
+                  rightGroup,
+                ],
               },
             ]}
           />
