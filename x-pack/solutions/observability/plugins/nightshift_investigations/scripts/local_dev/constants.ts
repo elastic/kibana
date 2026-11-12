@@ -28,5 +28,16 @@ export const ORCA_INDEX_PATTERNS = [
   'metrics-orcabench.otel-*',
 ] as const;
 
+/**
+ * The custom context the ORCA evals give their space (`ORCA_CUSTOM_CONTEXT` in the
+ * nightshift-investigations eval suite), so local runs see the same pointer to the demo's source.
+ * Kept here because plugin code must not depend on the eval suite.
+ */
+const ORCA_DEMO_COMMIT = 'fc77a6cbc0bf36ff52f21e4d59fa7b8a0f5d6733';
+export const ORCA_SOURCE_CODE_CONTEXT = `Source code: the system is the OpenTelemetry Astronomy Shop demo, and its source is public: github.com/open-telemetry/opentelemetry-demo at commit ${ORCA_DEMO_COMMIT} (blobless clone in the sandbox with \`git clone --filter=blob:none\`, then \`git checkout ${ORCA_DEMO_COMMIT}\`; find files with \`git ls-tree\`/\`git grep\`, don't guess paths).`;
+
+/** Sandbox egress the source code context needs: cloning the demo from GitHub. */
+export const ORCA_SANDBOX_ALLOWED_HOSTS: readonly string[] = ['github.com'];
+
 export const MANAGED_BLOCK_START = '# >>> nightshift local-dev (managed by setup_local_dev.js) >>>';
 export const MANAGED_BLOCK_END = '# <<< nightshift local-dev (managed by setup_local_dev.js) <<<';

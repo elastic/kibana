@@ -17,6 +17,7 @@ import {
   LOCAL_DEV_VAULT_SECRET,
   ORCA_CONNECTOR_ID,
   ORCA_INDEX_PATTERNS,
+  ORCA_SANDBOX_ALLOWED_HOSTS,
   ORCA_VAULT_SECRET,
 } from './constants';
 import {
@@ -35,7 +36,6 @@ import {
 } from './secrets';
 import { probeSandboxCredential } from './sandbox_probe';
 import { createJsonClient, resolveKibanaBaseUrl } from './http_client';
-import { ORCA_SANDBOX_ALLOWED_HOSTS } from '../../common';
 import {
   addOrcaSpaceContext,
   assertEnterpriseLicense,

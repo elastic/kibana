@@ -8,8 +8,6 @@
 import type { HttpHandler } from '@kbn/core/public';
 import {
   CUSTOM_CONTEXT_API_PATH,
-  ORCA_DEMO_COMMIT,
-  ORCA_SOURCE_CODE_CONTEXT,
   type GetCustomContextResponse,
   type PutCustomContextRequest,
 } from '@kbn/nightshift-investigations-plugin/common';
@@ -30,10 +28,17 @@ export const CUSTOMER0_CUSTOM_CONTEXT: readonly string[] = [
 export const RETROSPECTIVE_GUARDRAIL_CONTEXT =
   "Evaluation guardrail: this alert fired in the past and has since been resolved. Investigate it as if it is the alert's timestamp now, using only evidence that existed then. Bound every telemetry query to end no later than one hour after the alert's timestamp. Do not read human discussion of this incident (Slack or chat threads, including replies under the alert, incident or ticket records, status-page post-mortems, post-incident reviews), and do not use GitHub issues, pull requests, commits or comments created after the alert's timestamp. Code, commits, deploys and config changes from before the alert are fair game.";
 
-export { ORCA_DEMO_COMMIT };
+/** ORCA's environment is built on the upstream demo at this commit (paper, Appendix I). */
+export const ORCA_DEMO_COMMIT = 'fc77a6cbc0bf36ff52f21e4d59fa7b8a0f5d6733';
 
-/** Source code for ORCA tasks, as the paper's agents get it; local dev setup adds the same snippet. */
-export const ORCA_CUSTOM_CONTEXT: readonly string[] = [ORCA_SOURCE_CODE_CONTEXT];
+/**
+ * Source code for ORCA tasks, as the paper's agents get it. They find it checked out next to the
+ * telemetry; here it is the same public repository at the same commit, pointed to the way the
+ * customer0 space points at Elastic's repositories.
+ */
+export const ORCA_CUSTOM_CONTEXT: readonly string[] = [
+  `Source code: the system is the OpenTelemetry Astronomy Shop demo, and its source is public: github.com/open-telemetry/opentelemetry-demo at commit ${ORCA_DEMO_COMMIT} (blobless clone in the sandbox with \`git clone --filter=blob:none\`, then \`git checkout ${ORCA_DEMO_COMMIT}\`; find files with \`git ls-tree\`/\`git grep\`, don't guess paths).`,
+];
 
 /**
  * The custom context snippets an investigation dataset runs with. Stored datasets are not named

@@ -15,8 +15,6 @@ import {
 import {
   CUSTOM_CONTEXT_API_PATH,
   NIGHTSHIFT_INVESTIGATION_AGENT_ID,
-  ORCA_SANDBOX_ALLOWED_HOSTS,
-  ORCA_SOURCE_CODE_CONTEXT,
   SANDBOX_ALLOWLIST_API_PATH,
   type GetCustomContextResponse,
   type GetSandboxAllowlistResponse,
@@ -24,7 +22,12 @@ import {
 } from '../../common';
 import { SANDBOX_CONNECTORS_API_PATH } from '../../common/sandbox_connectors';
 import type { GetSandboxConnectorsResponse } from '../../common/sandbox_connectors';
-import { ORCA_CONNECTOR_ID, ORCA_CONNECTOR_NAME } from './constants';
+import {
+  ORCA_CONNECTOR_ID,
+  ORCA_CONNECTOR_NAME,
+  ORCA_SANDBOX_ALLOWED_HOSTS,
+  ORCA_SOURCE_CODE_CONTEXT,
+} from './constants';
 import { getHttpStatus, type JsonRequest } from './http_client';
 import type { OrcaConnection } from './secrets';
 
