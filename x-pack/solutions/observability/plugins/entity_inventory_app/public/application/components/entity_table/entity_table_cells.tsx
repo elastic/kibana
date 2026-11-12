@@ -15,7 +15,7 @@ import { NO_VALUE_LABEL } from './translations';
 /** Placeholder for a cell without a value; screen readers hear "No value". */
 export const EmptyCellValue = () => (
   <EuiText color="subdued" size="s">
-    <span aria-hidden={true}>—</span>
+    <span aria-hidden={true}>-</span>
     <EuiScreenReaderOnly>
       <span>{NO_VALUE_LABEL}</span>
     </EuiScreenReaderOnly>

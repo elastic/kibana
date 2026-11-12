@@ -19,7 +19,7 @@ describe('EmptyCellValue', () => {
   it('shows a dash to sighted users and "No value" to screen readers', () => {
     render(<EmptyCellValue />);
 
-    expect(screen.getByText('—')).toHaveAttribute('aria-hidden', 'true');
+    expect(screen.getByText('-')).toHaveAttribute('aria-hidden', 'true');
     expect(screen.getByText(NO_VALUE_LABEL)).toBeInTheDocument();
   });
 });

@@ -15,7 +15,11 @@ import type {
 import { EuiButtonEmpty, EuiDataGrid, EuiPanel } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { UI_SETTINGS } from '@kbn/data-service';
-import type { InventoryType, ListResponse } from '@kbn/entity-inventory-plugin/common';
+import type {
+  InventoryType,
+  ListResponse,
+  OutputColumnKind,
+} from '@kbn/entity-inventory-plugin/common';
 import {
   ENTITY_INVENTORY_EBT_ACTIONS,
   ENTITY_INVENTORY_EBT_ELEMENTS,
@@ -38,6 +42,16 @@ const GRID_STYLE: EuiDataGridStyle = {
 
 /** Wide enough for the full timestamp, which the grid would otherwise truncate. */
 const LAST_SEEN_COLUMN_WIDTH = 230;
+
+/** Wide enough for a typical entity id such as `host:<host.id>`, which the grid would otherwise truncate. */
+const ENTITY_ID_COLUMN_WIDTH = 300;
+
+const getInitialColumnWidth = (kind: OutputColumnKind): number | undefined => {
+  if (kind === 'id') {
+    return ENTITY_ID_COLUMN_WIDTH;
+  }
+  return kind === 'last_seen' ? LAST_SEEN_COLUMN_WIDTH : undefined;
+};
 
 export interface EntityTableProps {
   entityType: InventoryType;
@@ -91,7 +105,7 @@ export const EntityTable = ({
         id: column.name,
         displayAsText: getColumnLabel(column),
         isSortable: true,
-        initialWidth: column.kind === 'last_seen' ? LAST_SEEN_COLUMN_WIDTH : undefined,
+        initialWidth: getInitialColumnWidth(column.kind),
       })),
     [list.columns]
   );
