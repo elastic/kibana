@@ -149,7 +149,7 @@ export function AnimatedEdge({
     sourceX,
     sourceY,
     targetX,
-    targetY,
+    targetY: Math.abs(sourceY - targetY) < 1 ? sourceY : targetY,
     sourcePosition,
     targetPosition,
     borderRadius: 12,

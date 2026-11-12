@@ -55,6 +55,14 @@ import { applyCanvasSearch, resolveCanvasSearch } from './canvas_search';
 import { CanvasSearchBar } from './canvas_search_bar';
 import { CanvasSearchOverlay } from './canvas_search_overlay';
 import { CanvasShell, getCanvasContainerStyles } from './canvas_shell';
+import { STRAIGHT_SNAP_THRESHOLD } from './canvas_constants';
+import { HandleOffsetReader, readNoHandleOffset } from './handle_offset_reader';
+import {
+  getStraightSnapDelta,
+  keepHandlesOnResize,
+  straightenFlow,
+  type ReadHandleOffset,
+} from './straight_edges';
 import { ConnectionTargetsProvider } from './nodes/connection_handle';
 import { CanvasToolbar } from './canvas_toolbar';
 import { CanvasReadOnlyProvider } from './canvas_read_only_context';
@@ -390,6 +398,50 @@ function StreamsCanvasInner() {
   // Each staged unit counts as an edit once, so undo or redo back to it does not.
   const seenRoutingStagedUnitRef = useRef<Unit>();
 
+  // Where React Flow measured each handle, so lines can be made straight whatever
+  // the height of the cards at their ends.
+  const readHandleOffsetRef = useRef<ReadHandleOffset>(readNoHandleOffset);
+  // Nodes placed before they were measured, to straighten once they are.
+  const unstraightenedNodeIdsRef = useRef(new Set<string>());
+  const measuredHeightsRef = useRef(new Map<string, number>());
+
+  useEffect(() => {
+    const anchored = keepHandlesOnResize(nodes, measuredHeightsRef.current);
+    const unstraightened = unstraightenedNodeIdsRef.current;
+    const canStraighten =
+      unstraightened.size > 0 &&
+      nodes.every(({ id, measured }) => !unstraightened.has(id) || measured?.height !== undefined);
+    const straightened = canStraighten
+      ? straightenFlow(anchored, edges, readHandleOffsetRef.current, {
+          onlyIds: new Set(unstraightened),
+        })
+      : anchored;
+    if (canStraighten) {
+      unstraightened.clear();
+    }
+    if (straightened === nodes) {
+      return;
+    }
+    const movedPositions = new Map(
+      straightened.flatMap(({ id, position }, index) =>
+        position === nodes[index].position ? [] : [[id, position] as const]
+      )
+    );
+    setNodes((current) =>
+      current.map((node) => {
+        const position = movedPositions.get(node.id);
+        return position ? { ...node, position } : node;
+      })
+    );
+    // Stored positions follow, or the next graph change would bring the old ones back.
+    const storedPositions = Object.fromEntries(
+      [...movedPositions].filter(([id]) => nodePositionsRef.current[id] !== undefined)
+    );
+    if (Object.keys(storedPositions).length > 0) {
+      updateNodePositions(storedPositions);
+    }
+  }, [nodes, edges, setNodes, updateNodePositions]);
+
   const graphNodeIdsRef = useRef('');
   const graphEdgeIdsRef = useRef('');
   const knownNodeIdsRef = useRef<ReadonlySet<string>>(new Set());
@@ -425,7 +477,14 @@ function StreamsCanvasInner() {
 
     const positionedNodes = graph.nodes.map((node) => {
       const storedPosition = nodePositionsRef.current[node.id];
-      return storedPosition ? { ...node, position: storedPosition } : node;
+      if (storedPosition) {
+        return { ...node, position: storedPosition };
+      }
+      // Laid out with the height reserved for its type: once it is measured, it is
+      // centred on its real height and its lines are straightened.
+      unstraightenedNodeIdsRef.current.add(node.id);
+      measuredHeightsRef.current.delete(node.id);
+      return node;
     });
     setEdges(graph.edges);
 
@@ -460,10 +519,17 @@ function StreamsCanvasInner() {
     });
     const flowNodeIds = getConnectedNodeIds(placedNodeIds, graph.edges);
     // The placed node is not on screen yet, so keep the flow where its other nodes are.
-    const tidiedNodes = applyLayout(liveNodes, graph.edges, {
-      onlyIds: flowNodeIds,
-      anchorIds: new Set([...flowNodeIds].filter((id) => !placedNodeIds.has(id))),
-    });
+    const tidiedNodes = straightenFlow(
+      applyLayout(liveNodes, graph.edges, {
+        onlyIds: flowNodeIds,
+        anchorIds: new Set([...flowNodeIds].filter((id) => !placedNodeIds.has(id))),
+      }),
+      graph.edges,
+      readHandleOffsetRef.current,
+      { onlyIds: flowNodeIds }
+    );
+    // The placed node has no handles yet, so the flow is straightened again once it has.
+    flowNodeIds.forEach((id) => unstraightenedNodeIdsRef.current.add(id));
     setNodes(tidiedNodes);
     // Store the tidied positions so the next graph change does not undo them.
     updateNodePositions(
@@ -494,6 +560,33 @@ function StreamsCanvasInner() {
       const isDragEnd = positionChanges.some(
         (change) => 'dragging' in change && change.dragging === false
       );
+      // A pointer drag snaps to the grid, which rarely levels two handles. Close to
+      // a straight line it snaps to that instead. Keyboard moves keep the grid.
+      const straightDelta =
+        isDragStart || isPointerDraggingRef.current
+          ? getStraightSnapDelta({
+              moved: new Map(
+                positionChanges.flatMap((change) =>
+                  change.position ? [[change.id, change.position] as const] : []
+                )
+              ),
+              nodes: liveNodesRef.current,
+              edges,
+              readHandleOffset: readHandleOffsetRef.current,
+              threshold: STRAIGHT_SNAP_THRESHOLD,
+            })
+          : 0;
+      const straightChanges =
+        straightDelta === 0
+          ? changes
+          : changes.map((change) =>
+              change.type === 'position' && change.position
+                ? {
+                    ...change,
+                    position: { x: change.position.x, y: change.position.y + straightDelta },
+                  }
+                : change
+            );
 
       let shouldRecord = false;
       if (isDragStart) {
@@ -516,8 +609,8 @@ function StreamsCanvasInner() {
         record();
       }
       const completedPositions = Object.fromEntries(
-        positionChanges.flatMap((change) =>
-          'position' in change && change.position && change.dragging === false
+        straightChanges.flatMap((change) =>
+          change.type === 'position' && change.position && change.dragging === false
             ? [[change.id, change.position]]
             : []
         )
@@ -525,9 +618,9 @@ function StreamsCanvasInner() {
       if (Object.keys(completedPositions).length > 0) {
         updateNodePositions(completedPositions);
       }
-      applyNodesChange(changes);
+      applyNodesChange(straightChanges);
     },
-    [applyNodesChange, record, updateNodePositions]
+    [applyNodesChange, edges, record, updateNodePositions]
   );
 
   const closeContextMenu = useCallback(() => setContextMenu(null), []);
@@ -767,10 +860,15 @@ function StreamsCanvasInner() {
     record();
     setNodes((current) => {
       if (target === 'pane') {
-        return applyLayout(current, edges);
+        return straightenFlow(applyLayout(current, edges), edges, readHandleOffsetRef.current);
       }
       const selectedIds = new Set(current.filter((node) => node.selected).map((node) => node.id));
-      return applyLayout(current, edges, { onlyIds: selectedIds });
+      return straightenFlow(
+        applyLayout(current, edges, { onlyIds: selectedIds }),
+        edges,
+        readHandleOffsetRef.current,
+        { onlyIds: selectedIds }
+      );
     });
     closeContextMenu();
   }, [contextMenu, record, setNodes, edges, closeContextMenu]);
@@ -969,6 +1067,7 @@ function StreamsCanvasInner() {
               )}
               {nodes.length === 0 && <CanvasEmptyState onAddSource={addSource} />}
               <CanvasSearchOverlay flow={searchedFlow} />
+              <HandleOffsetReader readerRef={readHandleOffsetRef} />
               {flyoutDestination ? (
                 <UnitDestinationFlyout
                   destination={flyoutDestination}
