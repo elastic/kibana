@@ -49,6 +49,18 @@ describe('ConnectedSeverityPicker', () => {
     expect(screen.getByTestId('connectedSeverityPicker')).toHaveTextContent('Low');
   });
 
+  it('drops the picked value once the refetch finishes, even when the server holds another severity', async () => {
+    renderPicker();
+    pick();
+
+    const [, { onSuccess }] = mockMutate.mock.calls[0];
+    await act(async () => {
+      await onSuccess();
+    });
+
+    expect(screen.getByTestId('connectedSeverityPicker')).toHaveTextContent('High');
+  });
+
   it('reverts to the stored severity and reports it when the request fails', () => {
     renderPicker();
     pick();
