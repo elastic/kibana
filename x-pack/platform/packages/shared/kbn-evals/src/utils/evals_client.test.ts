@@ -379,6 +379,32 @@ describe('EvalsClient', () => {
       ).rejects.toThrow('exceeds MAX_SCORES_PER_QUERY');
     });
 
+    it('rethrows a full page, which the route reports with total equal to its length', async () => {
+      const kbnClient = createMockKbnClient();
+      const scores = Array.from({ length: MAX_SCORES_PER_QUERY }, (_, i) =>
+        createScoreDocument(`example-${i}`)
+      );
+      kbnClient.request.mockResolvedValue(asKbnResponse({ scores, total: scores.length }));
+      const client = new EvalsClient(kbnClient, createLog());
+
+      await expect(
+        client.getExperimentScores('experiment-123', undefined, { throwOnError: true })
+      ).rejects.toThrow('the read may be truncated');
+    });
+
+    it('keeps returning a full page to non-strict callers', async () => {
+      const kbnClient = createMockKbnClient();
+      const scores = Array.from({ length: MAX_SCORES_PER_QUERY }, (_, i) =>
+        createScoreDocument(`example-${i}`)
+      );
+      kbnClient.request.mockResolvedValue(asKbnResponse({ scores, total: scores.length }));
+      const client = new EvalsClient(kbnClient, createLog());
+
+      await expect(client.getExperimentScores('experiment-123')).resolves.toHaveLength(
+        MAX_SCORES_PER_QUERY
+      );
+    });
+
     it('names a non-Error rejection in the message', async () => {
       const kbnClient = createMockKbnClient();
       kbnClient.request.mockRejectedValue('connection refused');

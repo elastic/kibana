@@ -48,12 +48,7 @@ export {
   PARAMETRIC_UPGRADE_MIN_PAIRS,
 } from './impl/statistics';
 export type { PairedScore } from './impl/statistics';
-export {
-  holmBonferroniAdjust,
-  countHolmFamily,
-  applyHolmCorrection,
-  getEffectivePValue,
-} from './impl/statistics';
+export { holmBonferroniAdjust, applyHolmCorrection, getEffectivePValue } from './impl/statistics';
 export type { CorrectableComparisonResult } from './impl/statistics';
 export { averageMatchedRepetitions } from './impl/statistics';
 export type { AveragedRepetitions } from './impl/statistics';

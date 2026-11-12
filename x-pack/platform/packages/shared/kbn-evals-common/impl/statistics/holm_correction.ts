@@ -41,10 +41,6 @@ export const holmBonferroniAdjust = (pValues: readonly number[]): number[] => {
   return adjusted;
 };
 
-/** Number of rows that take part in the Holm family: those with a finite p-value. */
-export const countHolmFamily = (results: readonly ComparisonResult[]): number =>
-  results.filter((result) => isUsablePValue(result.pValue)).length;
-
 /**
  * Adds `adjustedPValue` to every row. The family is all rows with a usable p-value; rows whose
  * test could not run get `null` and do not count towards the family size.

@@ -6,12 +6,7 @@
  */
 
 import type { ComparisonResult } from '../schemas/experiments/compare_experiments_route.gen';
-import {
-  applyHolmCorrection,
-  countHolmFamily,
-  getEffectivePValue,
-  holmBonferroniAdjust,
-} from './holm_correction';
+import { applyHolmCorrection, getEffectivePValue, holmBonferroniAdjust } from './holm_correction';
 
 const makeResult = (overrides: Partial<ComparisonResult> = {}): ComparisonResult => ({
   datasetId: 'ds-1',
@@ -111,18 +106,5 @@ describe('getEffectivePValue', () => {
       getEffectivePValue({ ...makeResult({ pValue: 0.01 }), adjustedPValue: null })
     ).toBeNull();
     expect(getEffectivePValue(makeResult({ pValue: 0.01 }))).toBe(0.01);
-  });
-});
-
-describe('countHolmFamily', () => {
-  it('counts only rows with a finite p-value', () => {
-    expect(
-      countHolmFamily([
-        makeResult({ pValue: 0.01 }),
-        makeResult({ pValue: null }),
-        makeResult({ pValue: NaN }),
-        makeResult({ pValue: 0.5 }),
-      ])
-    ).toBe(2);
   });
 });

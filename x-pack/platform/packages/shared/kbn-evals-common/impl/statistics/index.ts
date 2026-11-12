@@ -13,12 +13,7 @@ export type { PairedTestOutcome } from './run_test';
 export { selectTest, PARAMETRIC_UPGRADE_MIN_PAIRS, NORMALITY_ALPHA } from './select_test';
 export { inferMetricType } from './metric_type';
 export type { MetricType } from './metric_type';
-export {
-  holmBonferroniAdjust,
-  countHolmFamily,
-  applyHolmCorrection,
-  getEffectivePValue,
-} from './holm_correction';
+export { holmBonferroniAdjust, applyHolmCorrection, getEffectivePValue } from './holm_correction';
 export type { CorrectableComparisonResult } from './holm_correction';
 export { averageMatchedRepetitions } from './average_repetitions';
 export type { AveragedRepetitions } from './average_repetitions';

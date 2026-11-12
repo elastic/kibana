@@ -220,6 +220,10 @@ export const regressionGateCmd = {
         exitCode: GATE_INCONCLUSIVE_EXIT_CODE,
       });
 
+    // A build ID with no experiment for this suite means the suite produced nothing to grade.
+    const unresolvedBuildId = (id: string, suite: string): Error =>
+      nothingToCompare(`Could not resolve build ID "${id}" to an experiment for suite ${suite}.`);
+
     // A failed read has to stay an error (exit 1): read as "no baseline" or "no scores" it would
     // turn an outage into an inconclusive gate.
     const readOptions = { throwOnError: true };
@@ -239,12 +243,9 @@ export const regressionGateCmd = {
           baseExecutionId: targetExperimentId,
           ...readOptions,
         });
-        if (resolved) {
-          log.info(`Resolved PR experiment: ${targetExperimentId} → ${resolved.executionId}`);
-          targetExperimentId = resolved.executionId;
-        } else {
-          log.warning(`Could not resolve base ID "${targetExperimentId}"; using raw ID.`);
-        }
+        if (!resolved) throw unresolvedBuildId(targetExperimentId, suiteId);
+        log.info(`Resolved PR experiment: ${targetExperimentId} → ${resolved.executionId}`);
+        targetExperimentId = resolved.executionId;
       }
 
       // Match the baseline to the target's model so one model is never gated against another.
@@ -285,12 +286,9 @@ export const regressionGateCmd = {
             baseExecutionId: id,
             ...readOptions,
           });
-          if (resolved) {
-            log.info(`Resolved experiment ${id} → ${resolved.executionId}`);
-            return resolved.executionId;
-          }
-          log.warning(`Could not resolve experiment for base ID "${id}"; using raw ID.`);
-          return id;
+          if (!resolved) throw unresolvedBuildId(id, suiteId);
+          log.info(`Resolved experiment ${id} → ${resolved.executionId}`);
+          return resolved.executionId;
         };
         [targetExperimentId, baselineExperimentId] = await Promise.all([
           resolveIfNeeded(targetExperimentId),

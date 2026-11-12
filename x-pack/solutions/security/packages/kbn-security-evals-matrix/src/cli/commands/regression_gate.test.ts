@@ -140,11 +140,27 @@ describe('regressionGateCmd exit codes', () => {
     expect('error' in outcome && outcome.error.message).toContain('Regression gate tripped');
   });
 
-  it('rejects a non-integer --min-pairs', async () => {
-    const outcome = await runGate([TARGET, BASELINE, '--min-pairs', '10abc']);
-    expect('error' in outcome && outcome.error.message).toContain(
-      '--min-pairs must be a positive integer.'
-    );
+  it.each(['10abc', '0', '-1', '1.5', '9007199254740993'])(
+    'rejects --min-pairs %s',
+    async (value) => {
+      const outcome = await runGate([TARGET, BASELINE, `--min-pairs=${value}`]);
+      expect(outcome.exitCode).toBe(1);
+      expect('error' in outcome && outcome.error.message).toContain(
+        '--min-pairs must be a positive integer.'
+      );
+    }
+  );
+
+  // The runner exits 1 for any error without its own exit code.
+  const processExitCode = (outcome: Outcome) => outcome.exitCode ?? 1;
+
+  it('exits 1, not inconclusive, when a score read fails', async () => {
+    mockEvalsClient.getExperimentScores.mockRejectedValue(new Error('socket hang up'));
+
+    const outcome = await runGate([TARGET, BASELINE]);
+
+    expect(processExitCode(outcome)).toBe(1);
+    expect('error' in outcome && outcome.error.message).toContain('socket hang up');
   });
 
   it('rejects a missing experiment ID', async () => {
@@ -385,6 +401,47 @@ describe('regressionGateCmd exit codes', () => {
       expect(outcome.exitCode).toBe(GATE_INCONCLUSIVE_EXIT_CODE);
       expect('error' in outcome && outcome.error.message).toContain('No baseline experiment found');
       expect(mockEvalsClient.getExperimentScores).not.toHaveBeenCalled();
+    });
+
+    it(`exits ${GATE_INCONCLUSIVE_EXIT_CODE} without reading scores when a build ID does not resolve`, async () => {
+      const outcome = await runGate(['bk-123', '--baseline-branch', 'main', '--suite', SUITE]);
+
+      expect(outcome.exitCode).toBe(GATE_INCONCLUSIVE_EXIT_CODE);
+      expect('error' in outcome && outcome.error.message).toContain(
+        'Could not resolve build ID "bk-123"'
+      );
+      expect(mockEvalsClient.findLatestBaselineExperiment).not.toHaveBeenCalled();
+      expect(mockEvalsClient.getExperimentScores).not.toHaveBeenCalled();
+    });
+
+    it(`exits ${GATE_INCONCLUSIVE_EXIT_CODE} when a positional build ID does not resolve`, async () => {
+      const outcome = await runGate(['bk-1', 'bk-2', '--suite', SUITE]);
+
+      expect(outcome.exitCode).toBe(GATE_INCONCLUSIVE_EXIT_CODE);
+      expect('error' in outcome && outcome.error.message).toContain('Could not resolve build ID');
+      expect(mockEvalsClient.getExperimentScores).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      [
+        'the baseline lookup',
+        () =>
+          mockEvalsClient.findLatestBaselineExperiment.mockRejectedValue(new Error('lookup down')),
+        [TARGET_COMPOSITE, '--baseline-branch', 'main', '--suite', SUITE],
+      ],
+      [
+        'the build ID lookup',
+        () =>
+          mockEvalsClient.findLatestExperimentForBuild.mockRejectedValue(new Error('lookup down')),
+        ['bk-123', '--baseline-branch', 'main', '--suite', SUITE],
+      ],
+    ])('exits 1, not inconclusive, when %s fails', async (_label, arrange, argv) => {
+      arrange();
+
+      const outcome = await runGate(argv);
+
+      expect(processExitCode(outcome)).toBe(1);
+      expect('error' in outcome && outcome.error.message).toContain('lookup down');
     });
   });
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ComparisonResult, StatisticalTestId } from '@kbn/evals-common';
+import type { StatisticalTestId } from '@kbn/evals-common';
 
 const TEST_LABELS: Record<StatisticalTestId, string> = {
   paired_t: 't-test',
@@ -15,12 +15,4 @@ const TEST_LABELS: Record<StatisticalTestId, string> = {
 
 export function getTestLabel(id: StatisticalTestId): string {
   return TEST_LABELS[id];
-}
-
-export function formatDiscordantPairs(hypothesisTest: ComparisonResult['hypothesisTest']): string {
-  const { discordantPairs } = hypothesisTest;
-  if (!discordantPairs) {
-    return '';
-  }
-  return ` (${discordantPairs.targetOnly} target only, ${discordantPairs.baselineOnly} baseline only)`;
 }

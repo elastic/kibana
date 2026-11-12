@@ -301,9 +301,12 @@ export class EvalsClient {
       });
       const parsed = GetEvaluationExperimentScoresResponse.parse(getResponseData(response));
 
-      if (parsed.total > MAX_SCORES_PER_QUERY) {
+      // The route caps its search at MAX_SCORES_PER_QUERY and reports `total` as the number of
+      // hits it returned, so a capped read looks complete; strict callers treat a full page as cut off.
+      const atCap = throwOnError && parsed.scores.length >= MAX_SCORES_PER_QUERY;
+      if (parsed.total > MAX_SCORES_PER_QUERY || atCap) {
         throw new Error(
-          `Experiment ${experimentId} returned ${parsed.total} scores, which exceeds MAX_SCORES_PER_QUERY (${MAX_SCORES_PER_QUERY})`
+          `Experiment ${experimentId} returned ${parsed.total} scores, which reaches or exceeds MAX_SCORES_PER_QUERY (${MAX_SCORES_PER_QUERY}); the read may be truncated`
         );
       }
 

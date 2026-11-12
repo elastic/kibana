@@ -51,7 +51,10 @@ Environment: `EVAL_KBN_URL`, `EVAL_KBN_API_KEY` (target Kibana and auth) and
 | `--space-ids` | `EVAL_SPACE_IDS` | Comma-separated spaces the experiments were run in (same value as `evals run`). `*` is rejected. |
 | `--min-pairs` | `10` | Minimum paired examples for an evaluator to be gated. Fewer pairs are reported as "insufficient pairs" and cannot trip the gate. |
 | `--regression-evaluators` | all | Comma-separated evaluator names that can trip the gate. Names absent from the comparison warn; if none match, the run fails. |
-| `--no-multiplicity-correction` | off | Judge significance on raw p-values. Holm-Bonferroni adjustment across all comparisons in the run is on by default. |
+| `--[no-]multiplicity-correction` | on | Holm-Bonferroni adjust p-values across all comparisons in the run. `--no-multiplicity-correction` judges significance on raw p-values. |
+| `--profile` | none | Golden-cluster config profile providing `EVAL_KBN_URL` / `EVAL_KBN_API_KEY`. |
+| `--kbn-url` | `EVAL_KBN_URL` | Kibana URL override. |
+| `--kbn-api-key` | `EVAL_KBN_API_KEY` | Kibana API key override. |
 
 ### Exit codes
 
@@ -59,8 +62,10 @@ Environment: `EVAL_KBN_URL`, `EVAL_KBN_API_KEY` (target Kibana and auth) and
 | --- | --- |
 | `0` | Passed — no evaluator got significantly worse. |
 | `1` | Usage error or unexpected error. |
-| `2` | Inconclusive — no baseline, no scores or pairs, nothing checkable, or no evaluator matched: regressions can be neither confirmed nor ruled out. |
+| `2` | Inconclusive — no baseline, a build ID with no experiment for the suite, no scores or pairs, nothing checkable, or no evaluator matched: regressions can be neither confirmed nor ruled out. |
 | `3` | Significant regression. |
 
-Score reads are strict: a failed read stays exit 1 instead of degrading into
-an inconclusive gate, so a Kibana outage cannot hide behind exit 2.
+Reads are strict: a failed score read, a read that hits the 10,000-score cap
+(and may be truncated), or a failed experiment lookup stays exit 1 instead of
+degrading into an inconclusive gate or a pass, so a Kibana outage cannot hide
+behind exit 2.
