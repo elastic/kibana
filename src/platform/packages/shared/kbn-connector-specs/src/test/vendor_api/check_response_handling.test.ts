@@ -35,7 +35,7 @@ const specs = {
         get: {
           parameters: [
             { name: 'cursor', in: 'query', schema: { type: 'string' } },
-            { name: 'limit', in: 'query', schema: { type: 'integer', maximum: 100 } },
+            { name: 'limit', in: 'query', schema: { type: 'integer', maximum: 1000 } },
           ],
           responses: {
             '200': json({
@@ -47,6 +47,15 @@ const specs = {
               },
             }),
           },
+        },
+      },
+      '/tags': {
+        get: {
+          parameters: [
+            { name: 'offset', in: 'query', schema: { type: 'integer' } },
+            { name: 'limit', in: 'query', schema: { type: 'integer', maximum: 1000 } },
+          ],
+          responses: { '200': json({ type: 'array', items: item }) },
         },
       },
       '/items/{id}': {
@@ -72,6 +81,15 @@ const pagination = [
       request: { cursorParam: 'cursor', sizeParam: 'limit' },
       response: { itemsPath: 'items', nextPath: 'next' },
       end: 'null',
+    },
+  },
+  {
+    // The body is the collection.
+    operation: { method: 'get', path: '/tags', source: 'v1' },
+    pagination: {
+      style: 'offset',
+      request: { offsetParam: 'offset', sizeParam: 'limit' },
+      response: { itemsPath: '' },
     },
   },
 ] as const;
@@ -132,6 +150,44 @@ const connector: ConnectorSpec = {
       let cursor: string | undefined;
       for (;;) {
         const { data } = await client.get<Page>(`${V1}/items`, { params: { cursor, limit: 5 } });
+        if (!data.next) {
+          return all;
+        }
+        all.push(...data.items);
+        cursor = data.next;
+      }
+    }),
+    // Pages a body that is the collection by offset until a short page.
+    listTags: action(noInput, async ({ client }) => {
+      const all: Page['items'] = [];
+      for (let offset = 0; ; offset += 5) {
+        const { data } = await client.get<Page['items']>(`${V1}/tags`, {
+          params: { offset, limit: 5 },
+        });
+        all.push(...data);
+        if (data.length < 5) {
+          return all;
+        }
+      }
+    }),
+    // Broken: drops the first item when it joins the pages, which items 10 and 11 hide from a
+    // search for a part of "string-1".
+    listDropsFirst: action(noInput, async ({ client }) => {
+      const all: Page['items'] = [];
+      let cursor: string | undefined;
+      do {
+        const { data } = await client.get<Page>(`${V1}/items`, { params: { cursor, limit: 5 } });
+        all.push(...data.items);
+        cursor = data.next ?? undefined;
+      } while (cursor);
+      return all.slice(1);
+    }),
+    // Broken like listDropsLast, with a page size that only several pages of 500 exercise.
+    listDropsLastBig: action(noInput, async ({ client }) => {
+      const all: Page['items'] = [];
+      let cursor: string | undefined;
+      for (;;) {
+        const { data } = await client.get<Page>(`${V1}/items`, { params: { cursor, limit: 500 } });
         if (!data.next) {
           return all;
         }
@@ -207,6 +263,15 @@ const connector: ConnectorSpec = {
       },
       'destroy'
     ),
+    // Broken: asks again for as long as the name is longer than usual, which only a response at
+    // the schema's bounds is.
+    getItemLooping: action(idInput, async ({ client }, { id }) => {
+      const { data } = await client.get<{ name: string }>(`${V1}/items/${id}`);
+      while (data.name.length > 100) {
+        await client.get(`${V1}/items/${id}`);
+      }
+      return data;
+    }),
     // Broken: can't handle a name at the vendor's limit.
     getItemShortName: action(idInput, async ({ client }, { id }) => {
       const { data } = await client.get<{ name: string }>(`${V1}/items/${id}`);
@@ -323,12 +388,9 @@ describe('checkResponseHandling', () => {
 
   it('runs only the modes it is given', async () => {
     const onlyBoundary = await check({ modes: ['boundary'] });
-    expect(onlyBoundary).toEqual([
-      {
-        kind: 'boundary-failure',
-        action: 'getItemShortName',
-        message: 'The name is 255 characters long',
-      },
+    expect(onlyBoundary.map(({ action: name, kind }) => `${name} ${kind}`).sort()).toEqual([
+      'getItemLooping boundary-failure',
+      'getItemShortName boundary-failure',
     ]);
   });
 
@@ -337,6 +399,9 @@ describe('checkResponseHandling', () => {
     const optedOut = await check({
       fixtures: {
         listLooping: { responseChecks: { pagination: reason } },
+        listDropsFirst: { responseChecks: { pagination: reason } },
+        listDropsLastBig: { responseChecks: { pagination: reason } },
+        getItemLooping: { responseChecks: { boundary: reason } },
         listDropsLast: { responseChecks: { pagination: reason } },
         getItemCrashing: { responseChecks: { errors: reason } },
         getItemSwallowing: { responseChecks: { errors: reason } },
@@ -365,6 +430,83 @@ describe('checkResponseHandling', () => {
     );
     expect(message).toContain(
       '    "getItemCrashing": { "responseChecks": { "errors": "<why it differs on purpose>" } }'
+    );
+  });
+
+  it('finds a handler that loops only on a response at the schema bounds', () => {
+    expect(findings).toContainEqual({
+      kind: 'boundary-failure',
+      action: 'getItemLooping',
+      message: 'Sent more than 100 requests',
+    });
+  });
+
+  it('pages a body that is the collection, so such a handler is correct', () => {
+    expect(kindsOf(findings, 'listTags')).toEqual([]);
+  });
+
+  it('finds a dropped first item whose id is a part of the ids of others', () => {
+    expect(findings).toContainEqual(
+      expect.objectContaining({
+        kind: 'pagination-dropped-items',
+        action: 'listDropsFirst',
+        collectionSize: 11,
+        missing: 1,
+      })
+    );
+  });
+
+  it('builds collections as large as the pages the handler asks for', () => {
+    expect(findings).toContainEqual(
+      expect.objectContaining({
+        kind: 'pagination-dropped-items',
+        action: 'listDropsLastBig',
+        collectionSize: 1001,
+        missing: 1,
+      })
+    );
+  });
+
+  it('perturbs responses the action has overrides for', async () => {
+    const overridden = await check({
+      modes: ['boundary'],
+      fixtures: {
+        getItemShortName: {
+          responses: [
+            { method: 'get', path: '/items/{id}', status: 200, body: { id: '1', name: 'short' } },
+          ],
+        },
+      },
+    });
+    expect(overridden).toContainEqual({
+      kind: 'boundary-failure',
+      action: 'getItemShortName',
+      message: 'The name is 255 characters long',
+    });
+  });
+
+  it('runs an action under the first auth type it sends a request under', async () => {
+    const needsBearer: ConnectorSpec = {
+      ...connector,
+      auth: { types: ['basic', 'bearer'] },
+      actions: {
+        // Refuses the first auth type before it sends a request, as Gmail's `ears` does.
+        getItemNeedsBearer: action(idInput, async (ctx, { id }) => {
+          if (ctx.secrets?.authType === 'basic') {
+            throw new Error('This action needs a bearer token');
+          }
+          try {
+            return (await ctx.client.get(`${V1}/items/${id}`)).data;
+          } catch (error) {
+            const { response } = error as { response: { data: { error: { message: string } } } };
+            throw new Error(response.data.error.message);
+          }
+        }),
+      },
+    };
+    const underAuth = await checkResponseHandling({ connector: needsBearer, specs, pagination });
+    expect(underAuth).toContainEqual(
+      expect.objectContaining({ kind: 'error-crash', action: 'getItemNeedsBearer', status: 400 })
     );
   });
 });

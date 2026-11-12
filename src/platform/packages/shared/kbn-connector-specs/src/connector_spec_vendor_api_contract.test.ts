@@ -165,8 +165,8 @@ describe('vendor API contract', () => {
       const { setTimeout: wait } = global;
       jest
         .spyOn(global, 'setTimeout')
-        .mockImplementation(((handler: () => void, _delay?: number, ...args: unknown[]) =>
-          wait(handler, 0, ...args)) as unknown as typeof setTimeout);
+        .mockImplementation(((handler: () => void, ...rest: unknown[]) =>
+          wait(handler, 0, ...rest.slice(1))) as unknown as typeof setTimeout);
     });
 
     afterAll(() => {

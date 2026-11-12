@@ -665,6 +665,8 @@ The recorder answers every request with one sampled success, so it can't see how
 - **Pagination**: for each operation with a `pagination` descriptor, against collections of no items, one, exactly one page and several pages. A handler that pages must stop within a bounded number of requests and return every item. One that sends a single request is taken to leave paging to the caller.
 - **Failures**: each operation an action calls is answered with 400, 401, 429 and 500 whether its spec declares them or not, and with every other error status it declares. The handler has to throw an explanatory error, so that Workflows fails the step (and can retry it) and Agent Builder gives the agent guidance for the status. It must not crash, as on a missing field in an error body, or return a result. A 404 is left out for `read` actions, where "no such resource" can be an answer, such as `{ found: false }`.
 
+Each action runs under the first of its auth types that it sends a request under, as an auth type may refuse the action before any request. Its operations are found with every generated input. The boundary and pagination runs don't serve the action's `responses` from `fixtures.json`, since those take precedence over the responses being tested. A collection is at most 2,500 items, so a multi-page check is skipped for a vendor whose pages are larger than that.
+
 A failure names the action, the status or collection size and what the handler did. If an action behaves this way on purpose, opt it out of a check with a reason in its `fixtures.json` entry. Reviewers should read the reason:
 
 ```json

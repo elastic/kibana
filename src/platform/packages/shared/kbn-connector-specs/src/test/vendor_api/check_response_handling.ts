@@ -30,7 +30,9 @@ const ALL_MODES: readonly ResponseCheckMode[] = ['boundary', 'pagination', 'erro
 
 // The mock's page size when a request names none.
 const DEFAULT_PAGE_SIZE = 10;
-const MAX_PAGE_SIZE = 100;
+// The largest collection a check builds, so a vendor with a big default page size isn't
+// answered with an enormous one; larger multi-page checks are skipped.
+const MAX_COLLECTION_SIZE = 2500;
 // Requests one run may send, so a handler that loops can't run for ever.
 const MAX_REQUESTS = 100;
 // Requests to a paginated operation beyond the pages its collection has.
@@ -107,7 +109,7 @@ export interface CheckResponseHandlingOptions {
   /** The paginated operations, from the manifest's `pagination` descriptors. */
   readonly pagination?: readonly PaginatedOperation[];
   readonly config?: Readonly<Record<string, unknown>>;
-  /** The auth type to run under; defaults to the connector's first one. */
+  /** The auth type to run under; defaults to the first one each action sends a request under. */
   readonly authType?: string;
   /** Defaults to all of them. */
   readonly modes?: readonly ResponseCheckMode[];
@@ -189,6 +191,20 @@ const identifiersOf = (items: readonly unknown[]): Array<readonly string[]> => {
   return perItem.map((leaves) => [...leaves].filter((leaf) => occurrences.get(leaf) === 1));
 };
 
+// Every string and number in a value, as strings, so whole values can be compared.
+const scalarsOf = (value: unknown): Set<string> => {
+  const scalars = new Set<string>();
+  const visit = (node: unknown) => {
+    if (typeof node === 'string' || typeof node === 'number') {
+      scalars.add(String(node));
+    } else if (node !== null && typeof node === 'object') {
+      Object.values(node).forEach(visit);
+    }
+  };
+  visit(value);
+  return scalars;
+};
+
 const isCrash = (error: unknown): boolean =>
   CRASH_ERRORS.some((crash) => error instanceof crash) ||
   (error instanceof Error && error.message.trim() === '');
@@ -214,7 +230,7 @@ const pageSizeOf = (
   );
   const size = asked.find((candidate) => Number.isInteger(candidate) && candidate > 0);
   const declared = 'defaultSize' in pagination ? pagination.defaultSize : undefined;
-  return Math.min(size ?? declared ?? DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
+  return size ?? declared ?? DEFAULT_PAGE_SIZE;
 };
 
 /**
@@ -230,6 +246,10 @@ const pageSizeOf = (
  *   make the handler fail with an explanatory error, not crash or return a result. A 404 is left
  *   out for `read` actions, which may answer it with a result.
  *
+ * Each action runs under the first auth type it sends a request under, and its operations are
+ * found with every generated input. Fixture `responses` aren't served to the boundary and
+ * pagination runs, as they would take precedence over the responses those perturb.
+ *
  * An action opts out of a mode with a reason in its fixture's `responseChecks`.
  */
 export const checkResponseHandling = async ({
@@ -243,7 +263,7 @@ export const checkResponseHandling = async ({
 }: CheckResponseHandlingOptions): Promise<ResponseHandlingFinding[]> => {
   const findings: ResponseHandlingFinding[] = [];
   const connectorConfig = config ?? (await sampleConfig(connector));
-  const selectedAuthType = authType ?? authTypeIdsOf(connector)[0];
+  const authTypes = authType === undefined ? authTypeIdsOf(connector) : [authType];
 
   for (const action of Object.keys(connector.actions).sort()) {
     const fixture = fixtures[action] ?? {};
@@ -256,31 +276,68 @@ export const checkResponseHandling = async ({
     if (inputs.length === 0) {
       continue;
     }
-    const open = async (overrides: {
-      readonly respond?: Responder;
-      readonly sampling?: 'boundary';
-      readonly collectionSize?: number;
-    }): Promise<ContractContext & { readonly exceeded: () => boolean }> => {
-      const { respond, exceeded } = capRequests(overrides.respond);
+    const open = async (
+      selectedAuthType: string,
+      {
+        respond: inner,
+        sampling,
+        collectionSize,
+        overrides = true,
+      }: {
+        readonly respond?: Responder;
+        readonly sampling?: 'boundary';
+        readonly collectionSize?: number;
+        /** Whether the fixture's `responses` are served. */
+        readonly overrides?: boolean;
+      } = {}
+    ): Promise<ContractContext & { readonly exceeded: () => boolean }> => {
+      const { respond, exceeded } = capRequests(inner);
       const context = await createContractContext({
         connector,
         authType: selectedAuthType,
         config: { ...connectorConfig, ...fixture.config },
         specs,
-        fixtures: toResponseFixtures(fixture.responses),
+        fixtures: overrides ? toResponseFixtures(fixture.responses) : [],
         pagination,
-        ...overrides,
+        sampling,
+        collectionSize,
         respond,
       });
       return { ...context, exceeded };
     };
+
+    // An auth type may refuse the action before it sends a request, as Gmail's `ears` does with
+    // every write action, so the first one the action sends a request under is the one to run.
+    let selected: string | undefined;
+    let fallback: string | undefined;
+    let creationError: unknown;
+    for (const candidate of authTypes) {
+      let probe: ContractContext;
+      try {
+        probe = await open(candidate);
+      } catch (error) {
+        creationError ??= error;
+        continue;
+      }
+      fallback ??= candidate;
+      await probe.runAction(action, inputs[0]).catch(() => undefined);
+      if (probe.mock.calls.some(({ token }) => !token)) {
+        selected = candidate;
+        break;
+      }
+    }
+    selected ??= fallback;
+    if (selected === undefined) {
+      throw creationError instanceof Error ? creationError : new Error(String(creationError));
+    }
+    const authTypeToRun = selected;
 
     if (enabled('boundary')) {
       const messages = new Set<string>();
       for (const input of inputs) {
         // A run that fails with typical responses has a problem of its own: its input, its
         // config or the transport, which the recorder reports.
-        const typical = await open({});
+        const typical = await open(authTypeToRun, { overrides: false });
         const works = await typical.runAction(action, input).then(
           () => true,
           () => false
@@ -288,18 +345,27 @@ export const checkResponseHandling = async ({
         if (!works) {
           continue;
         }
-        const { runAction, exceeded, mock } = await open({ sampling: 'boundary' });
+        const { runAction, exceeded, mock } = await open(authTypeToRun, {
+          sampling: 'boundary',
+          overrides: false,
+        });
+        let failure: unknown;
+        let failed = false;
         try {
           await runAction(action, input);
         } catch (error) {
+          failed = true;
+          failure = error;
+        }
+        if (exceeded()) {
+          messages.add(`Sent more than ${MAX_REQUESTS} requests`);
+        } else if (
+          failed &&
           // The mock refused a request the handler built from the response: the recorder's
           // domain, as the mock can't tell a handler's bug from its own limits.
-          if (mock.calls.some(({ token, status }) => !token && status >= 400)) {
-            continue;
-          }
-          messages.add(
-            exceeded() ? `Sent more than ${MAX_REQUESTS} requests` : errorMessage(error)
-          );
+          !mock.calls.some(({ token, status }) => !token && status >= 400)
+        ) {
+          messages.add(errorMessage(failure));
         }
       }
       for (const message of messages) {
@@ -310,31 +376,39 @@ export const checkResponseHandling = async ({
     if (!enabled('pagination') && !enabled('errors')) {
       continue;
     }
-    // The operations the action calls, found with the first input and typical responses. A
-    // handler that throws on them still counts for the requests it made first.
-    const seen: Array<{ operation: ContractOperation; request: ContractRequest }> = [];
-    const baseline = await open({
-      respond: (operation, request, context) => {
-        seen.push({ operation, request });
-        return context.next();
-      },
-    });
-    const baselineFailed = await baseline.runAction(action, inputs[0]).then(
-      () => false,
-      () => true
-    );
-    const baselineCalls = baseline.mock.calls.filter(({ token }) => !token);
-    const called = [
-      ...new Map(
-        baselineCalls.flatMap((call) => {
-          const operation = toCalledOperation(call);
-          return operation ? [[describe(operation), operation] as const] : [];
-        })
-      ).values(),
-    ];
+    // The operations the action calls, found with every input and typical responses, each with
+    // the first input that reaches it and the requests it got. A handler that throws on them
+    // still counts for the requests it made first.
+    const discovered = new Map<
+      string,
+      { operation: CalledOperation; input: unknown; requests: ContractRequest[] }
+    >();
+    for (const input of inputs) {
+      const seen: Array<{ operation: ContractOperation; request: ContractRequest }> = [];
+      const probe = await open(authTypeToRun, {
+        respond: (operation, request, context) => {
+          seen.push({ operation, request });
+          return context.next();
+        },
+      });
+      await probe.runAction(action, input).catch(() => undefined);
+      for (const call of probe.mock.calls.filter(({ token }) => !token)) {
+        const operation = toCalledOperation(call);
+        const key = operation && describe(operation);
+        if (operation && key !== undefined && !discovered.has(key)) {
+          discovered.set(key, {
+            operation,
+            input,
+            requests: seen
+              .filter((entry) => isOperation(entry.operation, operation))
+              .map(({ request }) => request),
+          });
+        }
+      }
+    }
 
     if (enabled('pagination')) {
-      for (const operation of called) {
+      for (const { operation, input, requests: asked } of discovered.values()) {
         const paginated = pagination.find(
           (entry) =>
             entry.operation.method.toLowerCase() === operation.method &&
@@ -344,19 +418,23 @@ export const checkResponseHandling = async ({
         if (!paginated) {
           continue;
         }
-        const pageSize = pageSizeOf(
-          paginated,
-          seen
-            .filter((entry) => isOperation(entry.operation, operation))
-            .map(({ request }) => request)
+        const pageSize = pageSizeOf(paginated, asked);
+        const sizes = [...new Set([0, 1, pageSize, pageSize * 2 + 1])].filter(
+          (size) => size <= MAX_COLLECTION_SIZE
         );
-        const sizes = [...new Set([0, 1, pageSize, pageSize * 2 + 1])];
+        // A handler that fails with typical responses too has a problem other than paging.
+        const typical = await open(authTypeToRun, { overrides: false });
+        const baselineFailed = await typical.runAction(action, input).then(
+          () => false,
+          () => true
+        );
+        const { itemsPath } = paginated.pagination.response;
         for (const collectionSize of sizes) {
           const bound = Math.ceil(collectionSize / pageSize) + EXTRA_REQUESTS;
           let requests = 0;
           let exceeded = false;
           const served: unknown[] = [];
-          const respond: Responder = async (target, request, context) => {
+          const respond: Responder = async (target, _request, context) => {
             if (!isOperation(target, operation)) {
               return context.next();
             }
@@ -370,16 +448,21 @@ export const checkResponseHandling = async ({
               };
             }
             const response = await context.next();
-            const items = get(response.body, paginated.pagination.response.itemsPath);
+            // An empty path means the body is the collection.
+            const items = itemsPath === '' ? response.body : get(response.body, itemsPath);
             served.push(...(Array.isArray(items) ? items : []));
             return response;
           };
-          const { runAction } = await open({ respond, collectionSize });
+          const { runAction } = await open(authTypeToRun, {
+            respond,
+            collectionSize,
+            overrides: false,
+          });
           const base = { action, operation: describe(operation), collectionSize };
           let result: unknown;
           let failure: string | undefined;
           try {
-            result = await runAction(action, inputs[0]);
+            result = await runAction(action, input);
           } catch (error) {
             failure = errorMessage(error);
           }
@@ -388,7 +471,6 @@ export const checkResponseHandling = async ({
             continue;
           }
           if (failure !== undefined) {
-            // A handler that fails with typical responses too has a problem other than paging.
             if (!baselineFailed) {
               findings.push({ kind: 'pagination-failure', ...base, message: failure });
             }
@@ -399,12 +481,13 @@ export const checkResponseHandling = async ({
             findings.push({ kind: 'pagination-incomplete', ...base, served: served.length });
           }
           // Only a result that has some of the items but not all counts, as a handler may
-          // transform items until none of their values are left to find.
-          const text = JSON.stringify(result) ?? '';
+          // transform items until none of their values are left to find. Whole values are
+          // compared, as `item-1` isn't in a result that has only `item-10`.
+          const present = scalarsOf(result);
           const found = identifiersOf(served)
             .filter((identifiers) => identifiers.length > 0)
-            .map((identifiers) => identifiers.some((identifier) => text.includes(identifier)));
-          const missing = found.some(Boolean) ? found.filter((present) => !present).length : 0;
+            .map((identifiers) => identifiers.some((identifier) => present.has(identifier)));
+          const missing = found.some(Boolean) ? found.filter((here) => !here).length : 0;
           if (missing > 0) {
             findings.push({ kind: 'pagination-dropped-items', ...base, missing });
           }
@@ -413,8 +496,9 @@ export const checkResponseHandling = async ({
     }
 
     if (enabled('errors')) {
-      for (const operation of called) {
-        const target = baseline.mock.operations.find(
+      const { mock } = await open(authTypeToRun);
+      for (const { operation, input } of discovered.values()) {
+        const target = mock.operations.find(
           (candidate) =>
             candidate.protocol === 'openapi' &&
             candidate.method.toLowerCase() === operation.method &&
@@ -423,7 +507,7 @@ export const checkResponseHandling = async ({
         );
         const described =
           target?.protocol === 'openapi'
-            ? baseline.mock.describeOperation(target.id, { source: target.source })
+            ? mock.describeOperation(target.id, { source: target.source })
             : undefined;
         const declared = declaredErrorStatuses(
           (described?.responses ?? []).map(({ status }) => status)
@@ -439,14 +523,14 @@ export const checkResponseHandling = async ({
         ].sort((a, b) => a - b);
         for (const status of statuses) {
           const body = { message: `contract-mock: ${status} from the vendor` };
-          const respond: Responder = async (candidate, request, context) =>
+          const respond: Responder = async (candidate, _request, context) =>
             isOperation(candidate, operation)
               ? { statusCode: status, headers: JSON_HEADERS, body }
               : context.next();
-          const { runAction } = await open({ respond });
+          const { runAction } = await open(authTypeToRun, { respond });
           const base = { action, operation: describe(operation), status };
           try {
-            await runAction(action, inputs[0]);
+            await runAction(action, input);
             findings.push({ kind: 'error-swallowed', ...base });
           } catch (error) {
             if (isCrash(error)) {
