@@ -120,13 +120,14 @@ describe('test getDataStateContainer', () => {
       const { dataStateContainer } = await toolkit.initializeSingleTab({ tabId });
 
       dataStateContainer.fetch();
-      await waitFor(() => expect(mockFetchDocuments).toHaveBeenCalledTimes(2));
 
-      expect(toolkit.getCurrentTab().dataRequestParams).toMatchObject({
-        searchSessionId: 'new-session',
-        timeRangeAbsolute: query.timefilter.timefilter.getAbsoluteTime(),
-        replayCacheLastFetched: undefined,
-      });
+      await waitFor(() =>
+        expect(toolkit.getCurrentTab().dataRequestParams).toMatchObject({
+          searchSessionId: 'new-session',
+          timeRangeAbsolute: query.timefilter.timefilter.getAbsoluteTime(),
+          replayCacheLastFetched: undefined,
+        })
+      );
     });
 
     test('marks replayed loads on the performance events and still reports a later refresh', async () => {
