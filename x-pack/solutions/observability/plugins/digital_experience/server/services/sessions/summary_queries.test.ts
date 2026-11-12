@@ -98,25 +98,34 @@ describe('sessionSummaryQuery', () => {
     );
     expect(query).toContain('exit = LAST(page_url, last_view) WHERE page_url IS NOT NULL');
     expect(query).not.toContain('CONCAT(');
-    expect(query).toMatch(/BY service, session\n\| LIMIT 10000$/);
+    expect(query).toMatch(/BY service, session\n\| EVAL [^|]+\n\| DROP raw_\*\n\| LIMIT 10000$/);
   });
 
-  it('reads every attribute field, latest per group, in both stages', () => {
+  it('reads every attribute field from its group’s latest event, in both stages', () => {
     const { query } = sessionSummaryQuery(REBUILD, ['a']);
 
-    Object.values(SESSION_ATTRIBUTE_FIELDS)
-      .flat()
-      .forEach((field) => expect(query).toContain(field));
     Object.entries(SESSION_ATTRIBUTE_GROUPS).forEach(([group, attributes]) => {
-      attributes.forEach((attribute) =>
-        expect(
-          query.split(
-            `${attributeColumn(attribute)} = LAST(${attributeColumn(attribute)}, seen_${group})`
-          )
-        ).toHaveLength(3)
-      );
+      attributes
+        .flatMap((attribute) => SESSION_ATTRIBUTE_FIELDS[attribute])
+        .forEach((field) => {
+          const raw = `raw_${field.replace(/\./g, '_')}`;
+          expect(query).toContain(`${raw} = LAST(TO_STRING(${field}), seen_${group})`);
+          expect(query).toContain(`${raw} = LAST(${raw}, seen_${group})`);
+        });
       expect(query.split(`seen_${group} = MAX(seen_${group})`)).toHaveLength(3);
     });
+  });
+
+  it('cleans the attributes once per session, after the last stage', () => {
+    const { query } = sessionSummaryQuery(REBUILD, ['a']);
+    const lastStage = query.lastIndexOf('BY service, session');
+
+    expect(query.slice(0, lastStage)).not.toContain('TRIM(');
+    expect(query.slice(lastStage)).toContain(
+      `${attributeColumn(
+        'browser'
+      )} = COALESCE(CASE(TRIM(TO_STRING(raw_resource_attributes_browser_name))`
+    );
   });
 
   it('rates the web vitals against the thresholds as floats store them, and adds up their counts', () => {

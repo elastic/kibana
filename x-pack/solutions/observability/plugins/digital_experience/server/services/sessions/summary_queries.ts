@@ -140,34 +140,45 @@ const cleaned = (field: string): string =>
 export const attributeColumn = (attribute: SessionAttribute): string =>
   `attribute_${snakeCase(attribute)}`;
 const seenColumn = (group: string): string => `seen_${group}`;
-
-const ATTRIBUTE_EVALS = [
-  ...Object.entries(SESSION_ATTRIBUTE_FIELDS).map(
-    ([attribute, fields]) =>
-      `${attributeColumn(attribute as SessionAttribute)} = COALESCE(${fields
-        .map(cleaned)
-        .join(', ')})`
-  ),
-  // A group's timestamp only on the events that carry any of its fields, which LAST() then picks
-  // from: it skips rows without a timestamp, and keeps a null value of the latest one.
-  ...Object.entries(SESSION_ATTRIBUTE_GROUPS).map(
-    ([group, attributes]) =>
-      `${seenColumn(group)} = CASE(${attributes
-        .flatMap((attribute) => SESSION_ATTRIBUTE_FIELDS[attribute])
-        .map((field) => `${field} IS NOT NULL`)
-        .join(' OR ')}, @timestamp, null)`
-  ),
+/** The column of a source field's value on the latest event of its group, e.g. `raw_attributes_user_id`. */
+const RAW_PREFIX = 'raw_';
+const rawColumn = (field: string): string => `${RAW_PREFIX}${field.replace(/\./g, '_')}`;
+const groupFields = (attributes: readonly SessionAttribute[]): string[] => [
+  ...new Set(attributes.flatMap((attribute) => SESSION_ATTRIBUTE_FIELDS[attribute])),
 ];
 
-/** The latest attributes of each group, then the group's latest time, for the next stage. */
-const attributeStats = (): string[] =>
+// A group's timestamp only on the events that carry any of its fields, which LAST() then picks
+// from: it skips rows without a timestamp, and keeps a null value of the latest one.
+const SEEN_EVALS = Object.entries(SESSION_ATTRIBUTE_GROUPS).map(
+  ([group, attributes]) =>
+    `${seenColumn(group)} = CASE(${groupFields(attributes)
+      .map((field) => `${field} IS NOT NULL`)
+      .join(' OR ')}, @timestamp, null)`
+);
+
+/**
+ * Each source field of a group as it is on the group's latest event, then the group's latest time.
+ * The fields are cleaned into attributes only once per session, after the last stage: cleaning
+ * every event's fields took about 40% of the query.
+ */
+const attributeStats = (stage: 'events' | 'pages'): string[] =>
   Object.entries(SESSION_ATTRIBUTE_GROUPS).flatMap(([group, attributes]) => [
-    ...attributes.map(
-      (attribute: SessionAttribute) =>
-        `${attributeColumn(attribute)} = LAST(${attributeColumn(attribute)}, ${seenColumn(group)})`
+    ...groupFields(attributes).map(
+      (field) =>
+        `${rawColumn(field)} = LAST(${
+          stage === 'events' ? `TO_STRING(${field})` : rawColumn(field)
+        }, ${seenColumn(group)})`
     ),
     `${seenColumn(group)} = MAX(${seenColumn(group)})`,
   ]);
+
+/** Each attribute from its group's latest event: the first of its fields with a value. */
+const ATTRIBUTE_EVALS = Object.entries(SESSION_ATTRIBUTE_FIELDS).map(
+  ([attribute, fields]) =>
+    `${attributeColumn(attribute as SessionAttribute)} = COALESCE(${fields
+      .map((field) => cleaned(rawColumn(field)))
+      .join(', ')})`
+);
 
 /**
  * The thresholds as `float` fields store them: EDOT Browser's `browser.web_vital.value` is a float,
@@ -233,7 +244,7 @@ ${browserSessionEvents('rebuild_from', 'changed_to')}
     EVENT_WEB_VITAL
   )}) AND ${SOURCE_WEB_VITAL_VALUE_FIELD} IS NOT NULL, TO_LOWER(${SOURCE_WEB_VITAL_NAME_FIELD}), null),
        vital_value = ${SOURCE_WEB_VITAL_VALUE_FIELD},
-       ${ATTRIBUTE_EVALS.join(',\n       ')}
+       ${SEEN_EVALS.join(',\n       ')}
 | EVAL page_url = CASE(is_page_view, ${SOURCE_URL_FIELD}, null)
 | STATS start_time = MIN(@timestamp),
         end_time = MAX(@timestamp),
@@ -246,15 +257,17 @@ ${browserSessionEvents('rebuild_from', 'changed_to')}
         http_failed_request_count = COUNT(*) WHERE is_http_request AND (COALESCE(${HTTP_RESPONSE_STATUS_CODE} >= 400, false) OR no_response),
         first_view = MIN(@timestamp) WHERE is_page_view,
         last_view = MAX(@timestamp) WHERE is_page_view,
-        ${[...attributeStats(), ...CORE_WEB_VITALS.flatMap(vitalStats)].join(',\n        ')}
+        ${[...attributeStats('events'), ...CORE_WEB_VITALS.flatMap(vitalStats)].join(',\n        ')}
   BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD}, page_url
 | STATS start_time = MIN(start_time),
         end_time = MAX(end_time),
         ${COUNTS.map((count) => `${count} = SUM(${count})`).join(',\n        ')},
         pages = TOP(first_view, ${SESSIONS_JOURNEY_URL_CANDIDATES}, "asc", page_url) WHERE page_url IS NOT NULL,
         exit = LAST(page_url, last_view) WHERE page_url IS NOT NULL,
-        ${[...attributeStats(), ...CORE_WEB_VITALS.flatMap(vitalTotals)].join(',\n        ')}
+        ${[...attributeStats('pages'), ...CORE_WEB_VITALS.flatMap(vitalTotals)].join(',\n        ')}
   BY service, session
+| EVAL ${ATTRIBUTE_EVALS.join(',\n       ')}
+| DROP ${RAW_PREFIX}*
 | LIMIT ${ESQL_MAX_ROWS}`,
   params: [{ rebuild_from: rebuildFrom }, { changed_to: changedTo }],
 });
