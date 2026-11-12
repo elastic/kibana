@@ -166,6 +166,29 @@ interface DiscoveryTriggeredProps extends EbtTelemetryContext, WorkflowExecution
   execution_id: string;
 }
 
+interface DiscoveryRunIdentityProps
+  extends EbtTelemetryContext,
+    WorkflowExecutionTelemetryProps,
+    ParentWorkflowExecutionTelemetryProps {
+  alert_source: string;
+}
+
+type DiscoveryStartedProps = DiscoveryRunIdentityProps;
+
+interface DiscoveryCompletedProps extends DiscoveryRunIdentityProps {
+  outcome: 'completed' | 'failed' | 'timed_out';
+  duration_ms?: number;
+  has_work?: boolean;
+  budget_denied?: boolean;
+  processed_count?: number;
+  skipped_count?: number;
+  held_back_count?: number;
+  needs_agent_count?: number;
+  written_rule_count?: number;
+  classifier_failed?: boolean;
+  error_message?: string;
+}
+
 interface DetectionScanProps extends EbtTelemetryContext, OptionalWorkflowExecutionTelemetryProps {
   /** ES `took` (ms) reported by the alerts-source search itself. */
   took_ms: number;
@@ -244,6 +267,8 @@ export {
   type AgentToolEventStatusUpdateProps,
   type AgentToolEventWriteProps,
   type DetectionScanProps,
+  type DiscoveryCompletedProps,
+  type DiscoveryStartedProps,
   type DiscoveryTriggeredProps,
   type EventStatusChangedProps,
   type SignificantEventActor,

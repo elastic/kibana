@@ -18,6 +18,8 @@ import type {
   KnowledgeIndicatorQueriesGeneratedProps,
   KnowledgeIndicatorOnboardingScheduledProps,
   DetectionScanProps,
+  DiscoveryCompletedProps,
+  DiscoveryStartedProps,
   DiscoveryTriggeredProps,
   EventStatusChangedProps,
   AgentToolEventWriteProps,
@@ -33,6 +35,8 @@ import {
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_SEARCH_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_INVESTIGATION_ATTACH_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_DISCOVERY_COMPLETED_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_DISCOVERY_STARTED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
   SIGNIFICANT_EVENTS_ONBOARDING_SCHEDULED_EVENT_TYPE,
@@ -121,6 +125,20 @@ export class EbtTelemetryClient {
       request,
       'origin'
     );
+  }
+
+  public trackSignificantEventsDiscoveryStarted(
+    params: TrackParams<DiscoveryStartedProps>,
+    request: KibanaRequest
+  ) {
+    this.report(SIGNIFICANT_EVENTS_DISCOVERY_STARTED_EVENT_TYPE, params, request, 'all');
+  }
+
+  public trackSignificantEventsDiscoveryCompleted(
+    params: TrackParams<DiscoveryCompletedProps>,
+    request: KibanaRequest
+  ) {
+    this.report(SIGNIFICANT_EVENTS_DISCOVERY_COMPLETED_EVENT_TYPE, params, request, 'all');
   }
 
   public trackEventStatusChanged(

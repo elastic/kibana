@@ -10,14 +10,21 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiConfirmModal,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiDescriptionList,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLoadingSpinner,
+  EuiPopover,
   EuiSpacer,
   EuiText,
-  EuiTextColor,
+  EuiToolTip,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -30,9 +37,11 @@ import {
   type SlackAppWorkspace,
 } from '@kbn/significant-events-plugin/common';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../../common/ebt_constants';
+import { useAllRelayAppBindings } from '../../../../data/relay_apps/use_relay_app_bindings';
 import { SettingsSection } from '../settings_section';
 import { useRelayAppConnection } from './use_relay_app_connection';
 import { SlackConnectionBindings } from './slack_connection_bindings';
+import { WorkspaceAffectedAutomationsWarning } from './affected_automations';
 
 interface SlackChannelsSectionProps {
   canEdit: boolean;
@@ -70,27 +79,33 @@ export function SlackChannelsSection({ canEdit }: SlackChannelsSectionProps) {
     <>
       <EuiSpacer />
       <SettingsSection
-        title={i18n.translate('xpack.nightshift.settings.apps.slackChannelsSectionTitle', {
-          defaultMessage: 'Slack channels',
-        })}
+        title={
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} component="span">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="logoSlack" aria-hidden={true} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {isConnected
+                ? i18n.translate('xpack.nightshift.settings.apps.slackChannelsSectionTitle', {
+                    defaultMessage: 'Slack channels',
+                  })
+                : i18n.translate('xpack.nightshift.settings.apps.slackSectionTitle', {
+                    defaultMessage: 'Slack',
+                  })}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
         titleAdornment={
           isConnected ? (
-            <EuiBadge
-              color="success"
-              iconType="check"
-              data-test-subj="nightshiftSlackConnectedBadge"
-            >
-              {i18n.translate('xpack.nightshift.settings.apps.slackConnected', {
-                defaultMessage: 'Connected',
-              })}
-            </EuiBadge>
+            <WorkspaceBadge workspace={workspace} createdBy={createdBy} createdAt={createdAt} />
           ) : undefined
         }
         headerAction={
           isConnected ? (
-            <DisconnectWorkspaceButton
+            <WorkspaceMenu
               canEdit={canEdit}
               isMutating={isMutating}
+              workspaceName={workspace?.name}
               onDisconnect={disconnect}
             />
           ) : undefined
@@ -215,41 +230,40 @@ function SlackConnectionBody({
   }
 
   if (status === RELAY_APP_CONNECTION_STATUS.connected) {
-    return (
-      <>
-        {workspace && <WorkspaceLabel workspace={workspace} />}
-        {createdAt && <ConnectedByLabel createdBy={createdBy} createdAt={createdAt} />}
-        {(workspace || createdAt) && <EuiSpacer size="m" />}
-        <SlackConnectionBindings canEdit={canEdit} />
-      </>
-    );
+    return <SlackConnectionBindings canEdit={canEdit} />;
   }
 
   // not_connected or error
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
-      {error && (
-        <EuiFlexItem grow={false}>
-          <KbnDangerCallout announceOnMount size="s" title={error} />
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem grow={false}>
-        <EuiText size="s" data-test-subj="streamsSlackAppDescription">
-          {i18n.translate('xpack.nightshift.settings.apps.slackDescription', {
-            defaultMessage:
-              'Connect the Elastic Slack App to get investigation updates in Slack and ask nightshift for help from a channel.',
+    <EuiEmptyPrompt
+      iconType="logoSlack"
+      paddingSize="m"
+      titleSize="xs"
+      title={
+        <h4>
+          {i18n.translate('xpack.nightshift.settings.apps.slackConnectTitle', {
+            defaultMessage: 'Connect Slack to @Elastic',
           })}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued" data-test-subj="streamsSlackAppPrivateChannelsNote">
-          {i18n.translate('xpack.nightshift.settings.apps.slackPrivateChannelsNote', {
-            defaultMessage:
-              'To use private channels, allow private channel access when authorizing Slack. It applies to the whole workspace, including every Elastic deployment connected to it.',
-          })}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+        </h4>
+      }
+      body={
+        <>
+          {error && <KbnDangerCallout announceOnMount size="s" title={error} />}
+          <p data-test-subj="streamsSlackAppDescription">
+            {i18n.translate('xpack.nightshift.settings.apps.slackConnectDescription', {
+              defaultMessage:
+                'So @Elastic can answer in channels you connect to this project, and automations can post updates to Slack.',
+            })}
+          </p>
+          <EuiText size="xs" color="subdued" data-test-subj="streamsSlackAppPrivateChannelsNote">
+            {i18n.translate('xpack.nightshift.settings.apps.slackPrivateChannelsAccessNote', {
+              defaultMessage:
+                'To use private channels, allow private channel access when authorizing Slack.',
+            })}
+          </EuiText>
+        </>
+      }
+      actions={
         <EuiButton
           size="s"
           fill
@@ -266,8 +280,8 @@ function SlackConnectionBody({
             defaultMessage: 'Connect Slack',
           })}
         </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      }
+    />
   );
 }
 
@@ -279,39 +293,64 @@ const toHost = (url: string): string => {
   }
 };
 
-function WorkspaceLabel({ workspace: { tenantKey, name, url } }: { workspace: SlackAppWorkspace }) {
-  const host = url ? toHost(url) : undefined;
-  return (
-    <EuiText size="s" data-test-subj="streamsSlackAppWorkspace">
-      <strong>
-        {i18n.translate('xpack.nightshift.settings.apps.slackWorkspaceLabel', {
-          defaultMessage: 'Workspace:',
-        })}
-      </strong>{' '}
-      {name ?? host ?? tenantKey}
-      {name && host && <EuiTextColor color="subdued">{` (${host})`}</EuiTextColor>}
-    </EuiText>
-  );
-}
-
-function ConnectedByLabel({ createdBy, createdAt }: { createdBy?: string; createdAt: string }) {
+function WorkspaceBadge({
+  workspace,
+  createdBy,
+  createdAt,
+}: {
+  workspace?: SlackAppWorkspace;
+  createdBy?: string;
+  createdAt?: string;
+}) {
+  const host = workspace?.url ? toHost(workspace.url) : undefined;
+  const label =
+    workspace?.name ??
+    host ??
+    workspace?.tenantKey ??
+    i18n.translate('xpack.nightshift.settings.apps.slackConnected', {
+      defaultMessage: 'Connected',
+    });
   const date = <FormattedDate value={createdAt} year="numeric" month="short" day="numeric" />;
+  const connectedBy = createdAt ? (
+    createdBy ? (
+      <FormattedMessage
+        id="xpack.nightshift.settings.apps.slackConnectedByOn"
+        defaultMessage="Connected by {user} on {date}"
+        values={{ user: createdBy, date }}
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.nightshift.settings.apps.slackConnectedOn"
+        defaultMessage="Connected on {date}"
+        values={{ date }}
+      />
+    )
+  ) : undefined;
+  const badge = (
+    <EuiBadge
+      color="hollow"
+      iconType="info"
+      iconSide="right"
+      tabIndex={0}
+      data-test-subj="nightshiftSlackConnectedBadge"
+    >
+      {label}
+    </EuiBadge>
+  );
+
+  if (!host && !connectedBy) return badge;
   return (
-    <EuiText size="s" color="subdued" data-test-subj="streamsSlackAppConnectedBy">
-      {createdBy ? (
-        <FormattedMessage
-          id="xpack.nightshift.settings.apps.slackSetUpByOn"
-          defaultMessage="Set up by {user} on {date}"
-          values={{ user: createdBy, date }}
-        />
-      ) : (
-        <FormattedMessage
-          id="xpack.nightshift.settings.apps.slackSetUpOn"
-          defaultMessage="Set up on {date}"
-          values={{ date }}
-        />
-      )}
-    </EuiText>
+    <EuiToolTip
+      content={
+        <span data-test-subj="nightshiftSlackWorkspaceTooltip">
+          {host}
+          {host && connectedBy && ' · '}
+          {connectedBy}
+        </span>
+      }
+    >
+      {badge}
+    </EuiToolTip>
   );
 }
 
@@ -404,43 +443,80 @@ function ConfirmWorkspaceCallout({
   );
 }
 
-interface DisconnectWorkspaceButtonProps {
+interface WorkspaceMenuProps {
   canEdit: boolean;
   isMutating: boolean;
+  workspaceName?: string;
   onDisconnect: () => Promise<void>;
 }
 
-function DisconnectWorkspaceButton({
-  canEdit,
-  isMutating,
-  onDisconnect,
-}: DisconnectWorkspaceButtonProps) {
+function WorkspaceMenu({ canEdit, isMutating, workspaceName, onDisconnect }: WorkspaceMenuProps) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const { euiTheme } = useEuiTheme();
   const modalTitleId = useGeneratedHtmlId();
+  const menuLabel = i18n.translate('xpack.nightshift.settings.apps.slackWorkspaceMenu', {
+    defaultMessage: 'Slack workspace actions',
+  });
+  const workspaceLabel =
+    workspaceName ??
+    i18n.translate('xpack.nightshift.settings.apps.slackDisconnectThisWorkspace', {
+      defaultMessage: 'this Slack workspace',
+    });
 
   return (
     <>
-      <EuiButtonEmpty
-        size="s"
-        color="danger"
-        onClick={() => setConfirmOpen(true)}
-        isLoading={isMutating}
-        isDisabled={!canEdit || isMutating}
-        data-test-subj="streamsSlackAppDisconnectButton"
-        {...getEbtProps({
-          action: NIGHTSHIFT_EBT_ACTIONS.DISCONNECT_SLACK,
-          element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
-        })}
+      <EuiPopover
+        aria-label={menuLabel}
+        isOpen={isMenuOpen}
+        closePopover={() => setIsMenuOpen(false)}
+        panelPaddingSize="none"
+        anchorPosition="downRight"
+        button={
+          <EuiToolTip content={menuLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="ellipsis"
+              color="text"
+              isDisabled={!canEdit || isMutating}
+              onClick={() => setIsMenuOpen((open) => !open)}
+              aria-label={menuLabel}
+              data-test-subj="streamsSlackAppWorkspaceMenuButton"
+            />
+          </EuiToolTip>
+        }
       >
-        {i18n.translate('xpack.nightshift.settings.apps.slackDisconnect', {
-          defaultMessage: 'Disconnect workspace',
-        })}
-      </EuiButtonEmpty>
+        <EuiContextMenuPanel
+          items={[
+            <EuiContextMenuItem
+              key="disconnect"
+              icon="linkSlash"
+              css={{ color: euiTheme.colors.textDanger }}
+              onClick={() => {
+                setIsMenuOpen(false);
+                setConfirmOpen(true);
+              }}
+              data-test-subj="streamsSlackAppDisconnectButton"
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.DISCONNECT_SLACK,
+                element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+              })}
+            >
+              {i18n.translate('xpack.nightshift.settings.apps.slackDisconnect', {
+                defaultMessage: 'Disconnect workspace',
+              })}
+            </EuiContextMenuItem>,
+          ]}
+        />
+      </EuiPopover>
       {confirmOpen && (
         <EuiConfirmModal
-          title={i18n.translate('xpack.nightshift.settings.apps.slackDisconnectConfirmTitle', {
-            defaultMessage: 'Disconnect Slack App?',
-          })}
+          title={i18n.translate(
+            'xpack.nightshift.settings.apps.slackDisconnectWorkspaceConfirmTitle',
+            {
+              defaultMessage: 'Disconnect {workspace} from this project?',
+              values: { workspace: workspaceLabel },
+            }
+          )}
           onCancel={() => setConfirmOpen(false)}
           onConfirm={() => {
             // Failure is surfaced via a toast in useRelayAppConnection; swallow here so the
@@ -462,14 +538,34 @@ function DisconnectWorkspaceButton({
           titleProps={{ id: modalTitleId }}
           data-test-subj="streamsSlackAppDisconnectConfirmModal"
         >
-          <EuiText size="s">
-            {i18n.translate('xpack.nightshift.settings.apps.slackDisconnectConfirmBody', {
-              defaultMessage:
-                'This removes all Slack channel connections for this deployment. If you connect again, you will need to reconnect each channel. If the Elastic app asks for new permissions, such as private channel access, a Slack workspace admin may need to approve it.',
-            })}
-          </EuiText>
+          <DisconnectWorkspaceBody workspaceName={workspaceLabel} />
+          <WorkspaceAffectedAutomationsWarning />
         </EuiConfirmModal>
       )}
     </>
+  );
+}
+
+function DisconnectWorkspaceBody({ workspaceName }: { workspaceName?: string }) {
+  const { bindings, isLoading, isError, isComplete } = useAllRelayAppBindings();
+  if (isLoading) return null;
+  // A failed or cut-off list must not read as "no channels".
+  const hasNoChannels = !isError && isComplete && bindings.length === 0;
+
+  return (
+    <EuiText size="s" data-test-subj="streamsSlackAppDisconnectConfirmBody">
+      {hasNoChannels ? (
+        <FormattedMessage
+          id="xpack.nightshift.settings.apps.slackDisconnectConfirmBodyNoChannels"
+          defaultMessage="No channels are connected to this project. Other Elastic projects that use {workspace} aren't affected."
+          values={{ workspace: <strong>{workspaceName}</strong> }}
+        />
+      ) : (
+        i18n.translate('xpack.nightshift.settings.apps.slackDisconnectConfirmBodyChannels', {
+          defaultMessage:
+            '@Elastic stops answering in the connected channels for this project. The bot stays in the channels until a Slack workspace admin removes it.',
+        })
+      )}
+    </EuiText>
   );
 }
