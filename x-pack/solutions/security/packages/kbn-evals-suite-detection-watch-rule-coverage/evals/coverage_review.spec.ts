@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { DatasetRunResult } from '@kbn/evals';
 import { evaluate, tags } from '../src/evaluate';
 import { createCoverageEvaluators } from '../src/evaluators';
 import { installFixtureRules } from '../src/fixture_rules';
 import { createJudgeCalibrationEvaluator } from '../src/judge_calibration';
+import { assertScoreGate } from '../src/score_gate';
 import { prebuiltSuggestionDataset } from '../datasets/prebuilt_suggestion';
 import { rationaleCalibrationDataset } from '../datasets/rationale_calibration';
 import { FIXTURE_RULES, verdictDataset } from '../datasets/verdicts';
@@ -20,8 +22,8 @@ const RATIONALE_CALIBRATION = 'detection-watch-rule-coverage: rationale judge ca
 evaluate.describe('Detection Coverage Review', { tag: tags.serverless.security.complete }, () => {
   evaluate(
     'suggests the prebuilt rule that covers the gap',
-    async ({ executorClient, coverageReviewClient, evaluators, fetch }) => {
-      await executorClient.runExperiment(
+    async ({ executorClient, coverageReviewClient, evaluators, fetch, log }) => {
+      const results = await executorClient.runExperiment(
         {
           name: PREBUILT_SUGGESTION,
           datasets: [
@@ -37,6 +39,7 @@ evaluate.describe('Detection Coverage Review', { tag: tags.serverless.security.c
         },
         createCoverageEvaluators({ evaluators, fetch })
       );
+      assertScoreGate(results, log);
     }
   );
 
@@ -44,8 +47,9 @@ evaluate.describe('Detection Coverage Review', { tag: tags.serverless.security.c
     'returns the cheapest fix when rules are installed',
     async ({ executorClient, coverageReviewClient, evaluators, fetch, log }) => {
       const removeFixtureRules = await installFixtureRules({ fetch, log, rules: FIXTURE_RULES });
+      let results: DatasetRunResult[];
       try {
-        await executorClient.runExperiment(
+        results = await executorClient.runExperiment(
           {
             name: VERDICTS,
             datasets: [
@@ -64,11 +68,12 @@ evaluate.describe('Detection Coverage Review', { tag: tags.serverless.security.c
       } finally {
         await removeFixtureRules();
       }
+      assertScoreGate(results, log);
     }
   );
 
   // Calibration of the Rationale judge: written answers, no workflow run. The judge must pass the
-  // correct answers and fail each bad one. A judge that passes everything would score 0 here.
+  // correct answers and fail each bad one. A judge that passes everything scores 0 on each bad answer.
   evaluate(
     'the rationale judge fails bad answers',
     async ({ executorClient, evaluators, fetch, log }) => {

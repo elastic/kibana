@@ -131,7 +131,9 @@ export const createRuleMatchEvaluator = (rules: RuleLookup): CoverageEvaluator =
     return {
       score: match === 'primary' || match === 'alternate' ? 1 : 0,
       label: match,
-      explanation: `rule_id ${output.ruleId} is "${read.rule.name}". Primary is "${primaryRule.name}".`,
+      explanation: `rule_id ${output.ruleId} is "${read.rule.name}". The answer names "${
+        output.ruleName ?? ''
+      }". Primary is "${primaryRule.name}".`,
       metadata: {
         nameMatchesId: normalizeName(read.rule.name) === normalizeName(output.ruleName ?? ''),
       },

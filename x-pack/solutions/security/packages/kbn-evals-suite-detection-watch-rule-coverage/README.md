@@ -33,6 +33,19 @@ The judge sees the gap, the answer, and the rule that the answer names. It does 
 answer key. It cannot see the other rules in the space, so it does not catch a false "no installed
 rule detects this". Verdict catches that case.
 
+## When a test fails
+
+After each workflow dataset, `src/score_gate.ts` fails the test in these cases:
+
+- An answer would make the proposal act on the wrong rule: `rule_id` and `rule_name` name two
+  different rules, `rule_id` points to no rule, or a `prebuilt_available` answer cannot be
+  installed.
+- The `Verdict` or `Rule Match` mean of the dataset is below 0.8. A check that returned no answer
+  scores 0.
+
+The LLM judge scores are reported only. `CAPABILITY_PROFILE.md` gives the reasons for these
+thresholds.
+
 ## Datasets
 
 - `prebuilt suggestion` (20 examples): Linux gaps from the product answer key. Only a prebuilt rule
@@ -42,7 +55,7 @@ rule detects this". Verdict catches that case.
 - `rationale judge calibration` (7 examples): written answers, no workflow run. 2 are correct
   and 5 have one known fault each. The `Judge Calibration` evaluator scores 1 when the judge
   passes a correct answer, or fails a bad answer on the question that the fault breaks. A judge
-  that passes everything scores 0 here.
+  that passes everything scores 0 on each bad answer, so 2 of 7 in total.
 
 ## Model under test
 
@@ -66,6 +79,9 @@ anything on the stack.
 - Before the first example, the suite deletes the indicators that a killed run left behind. They
   carry the tag `eval:detection-watch-rule-coverage`. A pending indicator would otherwise start real
   reviews when the Detection Watch sweep runs on this stack.
+- Run one eval at a time on a stack. The cleanup deletes every indicator with the eval tag, and the
+  model pin changes a setting for the whole stack, so a second run on the same stack breaks the
+  first. On CI, each step has its own stack.
 - The conversation of the check step is private. With basic authentication, the delete API answers
   404 for it, so it can stay on a local stack.
 
