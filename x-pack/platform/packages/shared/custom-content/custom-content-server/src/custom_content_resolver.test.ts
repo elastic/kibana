@@ -420,6 +420,31 @@ describe('createCustomContentTemplateResolver — several queries', () => {
     );
   });
 
+  it('shows only the start of the text of a very long query after the first, even on a restyle', async () => {
+    await resolve({
+      prompt: 'Restyle',
+      existingTemplate: '<div>{{ queries[1].rows.size }}</div>',
+      esqlQueries: ['FROM main', `FROM a | WHERE x IN (${'1, '.repeat(50000)})`],
+      changedQueries: [false, false],
+    });
+
+    const content = contentOf();
+    expect(content).toContain('(truncated)');
+    expect(content.length).toBeLessThan(15000);
+  });
+
+  it('shows a query that fits in full', async () => {
+    await resolve({
+      prompt: 'Restyle',
+      existingTemplate: '<div>{{ queries[1].rows.size }}</div>',
+      esqlQueries: ['FROM main', 'FROM metrics | LIMIT 5'],
+      changedQueries: [false, false],
+    });
+
+    expect(contentOf()).toContain('FROM metrics | LIMIT 5');
+    expect(contentOf()).not.toContain('(truncated)');
+  });
+
   it('gives the columns of a changing query after the first even when the first is not changing', async () => {
     mockEsqlQuery.mockResolvedValue(columnsFor('p95'));
 

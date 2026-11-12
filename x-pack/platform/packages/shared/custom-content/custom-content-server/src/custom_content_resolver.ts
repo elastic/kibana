@@ -88,6 +88,10 @@ LIQUID SYNTAX:
 import { sanitizeCellValue } from './sanitize_cell_value';
 
 const SAMPLE_ROW_COUNT = 3;
+// How much of a query's text the model is shown: the longest query a visualization attachment can
+// hold. A panel on a dashboard can store far more, and every query is in the prompt, even for a
+// restyle.
+const MAX_QUERY_TEXT_LENGTH = 4096;
 const SAMPLE_TIME_RANGE = { from: 'now-5y', to: 'now' };
 
 const getEsErrorReason = (error: unknown): string => {
@@ -253,9 +257,13 @@ function describeData({ columns, values }: SampledData): string {
 /** A query after the first: its text always, and its data when it is new or changing. */
 function describeOtherQuery(query: string, position: number, data: SampledData | undefined) {
   const name = queryName(position);
+  const text =
+    query.length > MAX_QUERY_TEXT_LENGTH
+      ? `${query.slice(0, MAX_QUERY_TEXT_LENGTH)}… (truncated)`
+      : query;
   const header = `${name} — the template reads this query's rows as ${name}.rows${
     data ? '' : ' (not changing)'
-  }:\n\`\`\`esql\n${query}\n\`\`\``;
+  }:\n\`\`\`esql\n${text}\n\`\`\``;
   return data && data.columns.length > 0 ? `${header}\n${describeData(data)}` : header;
 }
 
