@@ -7,8 +7,8 @@
 
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { ImpactPill } from '@kbn/agentic-investigations-common';
+import { entityStoreIdType } from '@kbn/agentic-investigations-impact';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
-import { entityStoreIdType } from '../../../common/impact/entity_store_id';
 import type {
   ImpactPillsPageQuery,
   ImpactPillsResponse,

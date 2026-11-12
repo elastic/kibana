@@ -1303,6 +1303,7 @@ packages:
   - 'x-pack/platform/packages/shared/isomer/isomer-components'
   - 'x-pack/platform/packages/shared/isomer/isomer-theme'
   - 'x-pack/platform/packages/shared/kbn-agentic-investigations-common'
+  - 'x-pack/platform/packages/shared/kbn-agentic-investigations-impact'
   - 'x-pack/platform/packages/shared/kbn-ai-assistant'
   - 'x-pack/platform/packages/shared/kbn-ai-tools'
   - 'x-pack/platform/packages/shared/kbn-alerting-comparators'
