@@ -27,7 +27,7 @@ import {
 import { useKibana } from '../../../hooks/use_kibana';
 import { sortEntityRows } from '../../utils/sort_entity_rows';
 import { EntityCell } from './entity_table_cells';
-import { RESET_TO_DEFAULT_LABEL, getColumnLabel, getTableAriaLabel } from './translations';
+import { RESET_TO_DEFAULT_LABEL, getTableAriaLabel } from './translations';
 import type { EntityTablePreferences } from './use_entity_table_state';
 import { PAGE_SIZE_OPTIONS, useEntityTableState } from './use_entity_table_state';
 
@@ -43,15 +43,8 @@ const GRID_STYLE: EuiDataGridStyle = {
 /** Wide enough for the full timestamp, which the grid would otherwise truncate. */
 const LAST_SEEN_COLUMN_WIDTH = 230;
 
-/** Wide enough for a typical entity id such as `host:<host.id>`, which the grid would otherwise truncate. */
-const ENTITY_ID_COLUMN_WIDTH = 300;
-
-const getInitialColumnWidth = (kind: OutputColumnKind): number | undefined => {
-  if (kind === 'id') {
-    return ENTITY_ID_COLUMN_WIDTH;
-  }
-  return kind === 'last_seen' ? LAST_SEEN_COLUMN_WIDTH : undefined;
-};
+const getInitialColumnWidth = (kind: OutputColumnKind): number | undefined =>
+  kind === 'last_seen' ? LAST_SEEN_COLUMN_WIDTH : undefined;
 
 export interface EntityTableProps {
   entityType: InventoryType;
@@ -62,7 +55,8 @@ export interface EntityTableProps {
 }
 
 /**
- * One entity type's results as a data grid, with the columns of the response in response order.
+ * One entity type's results as a data grid, with the columns of the response in response order,
+ * except the entity id column, which is not shown.
  * Sorting and pagination run over the loaded rows.
  */
 export const EntityTable = ({
@@ -77,7 +71,11 @@ export const EntityTable = ({
   const { type, name: typeName } = entityType;
   const dateFormat: string = uiSettings.get(UI_SETTINGS.DATE_FORMAT);
 
-  const defaultVisibleColumns = useMemo(() => list.columns.map(({ name }) => name), [list.columns]);
+  const shownColumns = useMemo(
+    () => list.columns.filter(({ kind }) => kind !== 'id'),
+    [list.columns]
+  );
+  const defaultVisibleColumns = useMemo(() => shownColumns.map(({ name }) => name), [shownColumns]);
   const {
     visibleColumns,
     setVisibleColumns,
@@ -96,18 +94,17 @@ export const EntityTable = ({
   });
 
   const columnKinds = useMemo(
-    () => new Map(list.columns.map(({ name, kind }) => [name, kind])),
-    [list.columns]
+    () => new Map(shownColumns.map(({ name, kind }) => [name, kind])),
+    [shownColumns]
   );
   const columns = useMemo<EuiDataGridColumn[]>(
     () =>
-      list.columns.map((column) => ({
+      shownColumns.map((column) => ({
         id: column.name,
-        displayAsText: getColumnLabel(column),
         isSortable: true,
         initialWidth: getInitialColumnWidth(column.kind),
       })),
-    [list.columns]
+    [shownColumns]
   );
   // A kept choice can name a column that a later response of the type does not have.
   const knownVisibleColumns = useMemo(

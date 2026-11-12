@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { MAX_LIST_LIMIT } from '../../../common';
 import { ENTITY_ID_COLUMN } from '../generator';
 import type { OutputColumn } from '../generator';
 import { lastSeenInstant } from './utils';
@@ -39,8 +38,8 @@ export const orderRows = (rows: InventoryRow[]): InventoryRow[] =>
 export const applyLimit = (rows: InventoryRow[], limit: number): InventoryRow[] =>
   rows.slice(0, Math.max(0, limit));
 
-// Every plan asks for one row more than the request allows, so a plan returns at most `MAX_LIST_LIMIT + 1` rows.
-export const MAX_PLAN_ROWS = MAX_LIST_LIMIT + 1;
+// Every plan asks for one row more than the request, so a request may ask for at most `MAX_PLAN_ROWS - 1`.
+export const MAX_PLAN_ROWS = 10_000;
 
 /** The `LIMIT` of every plan's list query: one row more than requested, so a cut plan shows. */
 export const planRowLimit = (requested: number): number => {

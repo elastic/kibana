@@ -10,13 +10,13 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import { EntityTableTruncationCallout } from './entity_table_callouts';
 
 describe('EntityTableTruncationCallout', () => {
-  it('names the row limit with thousands separators and every truncated type', () => {
+  it('names the limit and every truncated type', () => {
     render(<EntityTableTruncationCallout typeNames={['Host', 'K8s Deployment']} />);
 
     const callout = screen.getByTestId('entityInventoryTruncationCallout');
-    expect(callout).toHaveTextContent('9,999 entity limit');
+    expect(callout).toHaveTextContent('Entity limit reached');
     expect(callout).toHaveTextContent(
-      'We can only show 9,999 entities at a time. Use filters to slice and dice further your data.'
+      'We can only show a limited number of entities at a time. Use filters to slice and dice further your data.'
     );
     expect(callout).toHaveTextContent('Entity types over the limit: Host and K8s Deployment');
   });
@@ -34,7 +34,7 @@ describe('EntityTableTruncationCallout', () => {
 
     const callout = screen.getByTestId('entityInventoryTruncationCallout');
     await waitFor(() =>
-      expect(within(callout).getByRole('status')).toHaveTextContent('9,999 entity limit')
+      expect(within(callout).getByRole('status')).toHaveTextContent('Entity limit reached')
     );
     expect(within(callout).getByRole('status')).toHaveTextContent(
       'Entity types over the limit: Host'

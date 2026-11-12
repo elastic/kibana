@@ -147,7 +147,7 @@ describe('EntityCategoryResults', () => {
         return { ...list, truncated: list.truncated || truncatedTypes.includes(type) };
       };
 
-    it('shows one callout above the sections naming the row limit and the truncated type', async () => {
+    it('shows one callout above the sections naming the limit and the truncated type', async () => {
       const fixtureClient = createFixtureEntityInventoryApiClient();
       renderResults({ ...fixtureClient, getEntities: truncateTypes(['host']) }, [
         'host',
@@ -155,9 +155,9 @@ describe('EntityCategoryResults', () => {
       ]);
 
       const callout = await screen.findByTestId('entityInventoryTruncationCallout');
-      expect(callout).toHaveTextContent('9,999 entity limit');
+      expect(callout).toHaveTextContent('Entity limit reached');
       expect(callout).toHaveTextContent(
-        'We can only show 9,999 entities at a time. Use filters to slice and dice further your data.'
+        'We can only show a limited number of entities at a time. Use filters to slice and dice further your data.'
       );
       expect(callout).toHaveTextContent(HOST_TYPE_FIXTURE.name);
       expect(callout).not.toHaveTextContent(K8S_DEPLOYMENT_TYPE_FIXTURE.name);

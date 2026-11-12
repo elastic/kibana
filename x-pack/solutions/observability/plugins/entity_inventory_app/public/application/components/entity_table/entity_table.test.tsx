@@ -152,25 +152,23 @@ const openColumnActions = (columnId: string) => {
 
 describe('EntityTable', () => {
   describe('for a type the app has never seen', () => {
-    it('shows every column of the response in response order', () => {
+    it('shows every column of the response in response order, except the entity id', () => {
       renderWidgetTable();
 
-      expect(getHeaderIds()).toEqual(['entity.id', 'widget.name', 'widget.size', 'last_seen']);
+      expect(getHeaderIds()).toEqual(['widget.name', 'widget.size', 'last_seen']);
     });
 
-    it('labels the id and last seen columns by kind and the others by their name', () => {
+    it('labels every column by its name', () => {
       renderWidgetTable();
 
-      expect(screen.getByTestId('dataGridHeaderCell-entity.id')).toHaveTextContent('Entity ID');
       expect(screen.getByTestId('dataGridHeaderCell-widget.name')).toHaveTextContent('widget.name');
       expect(screen.getByTestId('dataGridHeaderCell-widget.size')).toHaveTextContent('widget.size');
-      expect(screen.getByTestId('dataGridHeaderCell-last_seen')).toHaveTextContent('Last seen');
+      expect(screen.getByTestId('dataGridHeaderCell-last_seen')).toHaveTextContent('last_seen');
     });
 
     it('renders the cells as returned, with last seen in the date format', () => {
       renderWidgetTable();
 
-      expect(getCell(0, 'entity.id')).toHaveTextContent('widget:sprocket');
       expect(getCell(0, 'widget.name')).toHaveTextContent('sprocket');
       expect(getCell(0, 'widget.size')).toHaveTextContent('3');
       expect(getCell(0, 'last_seen')).toHaveTextContent('2026-10-30');
@@ -178,9 +176,9 @@ describe('EntityTable', () => {
     });
 
     it('shows the columns the user chose and ignores a chosen column the response lacks', () => {
-      renderWidgetTable({ visibleColumns: ['widget.size', 'widget.color', 'entity.id'] });
+      renderWidgetTable({ visibleColumns: ['widget.size', 'widget.color', 'last_seen'] });
 
-      expect(getHeaderIds()).toEqual(['widget.size', 'entity.id']);
+      expect(getHeaderIds()).toEqual(['widget.size', 'last_seen']);
     });
 
     it('keeps the response order when the user sorted by a column the response lacks', () => {
@@ -188,23 +186,22 @@ describe('EntityTable', () => {
       const list: ListResponse = {
         ...WIDGET_LIST,
         rows: [
-          { ...sprocket, 'entity.id': 'widget:b' },
-          { ...sprocket, 'entity.id': 'widget:a' },
+          { ...sprocket, 'widget.name': 'b' },
+          { ...sprocket, 'widget.name': 'a' },
         ],
       };
 
       renderWidgetTable({ sortingColumns: [{ id: 'constructor', direction: 'asc' }] }, list);
 
-      expect(getCell(0, 'entity.id')).toHaveTextContent('widget:b');
-      expect(getCell(1, 'entity.id')).toHaveTextContent('widget:a');
+      expect(getCell(0, 'widget.name')).toHaveTextContent('b');
+      expect(getCell(1, 'widget.name')).toHaveTextContent('a');
     });
   });
 
-  it('shows every column of the response by default', () => {
+  it('shows every column of the response by default, except the entity id', () => {
     renderTable(getFixture('normal'));
 
     expect(getHeaderIds()).toEqual([
-      'entity.id',
       'host.id',
       'host.name',
       'host.hostname',

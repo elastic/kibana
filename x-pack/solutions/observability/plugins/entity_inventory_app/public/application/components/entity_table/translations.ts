@@ -6,30 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type {
-  InventoryTypeColumn,
-  OutputColumnKind,
-  SourceError,
-} from '@kbn/entity-inventory-plugin/common';
+import type { SourceError } from '@kbn/entity-inventory-plugin/common';
 
 export const getTableAriaLabel = (typeName: string) =>
   i18n.translate('xpack.entityInventoryApp.entityTable.ariaLabel', {
     defaultMessage: '{typeName} entities',
     values: { typeName },
   });
-
-const COLUMN_LABEL_BY_KIND: Readonly<Partial<Record<OutputColumnKind, string>>> = {
-  id: i18n.translate('xpack.entityInventoryApp.entityTable.columns.entityId', {
-    defaultMessage: 'Entity ID',
-  }),
-  last_seen: i18n.translate('xpack.entityInventoryApp.entityTable.columns.lastSeen', {
-    defaultMessage: 'Last seen',
-  }),
-};
-
-/** The header of a column: "Entity ID" for kind `id`, "Last seen" for `last_seen`, else its name. */
-export const getColumnLabel = ({ name, kind }: InventoryTypeColumn): string =>
-  COLUMN_LABEL_BY_KIND[kind] ?? name;
 
 export const NO_VALUE_LABEL = i18n.translate('xpack.entityInventoryApp.entityTable.noValue', {
   defaultMessage: 'No value',
@@ -40,18 +23,18 @@ export const RESET_TO_DEFAULT_LABEL = i18n.translate(
   { defaultMessage: 'Reset to default' }
 );
 
-export const getTruncationTitle = (limit: number) =>
-  i18n.translate('xpack.entityInventoryApp.entityTable.truncation.limitTitle', {
-    defaultMessage: '{limit, number} entity limit',
-    values: { limit },
-  });
+export const TRUNCATION_TITLE = i18n.translate(
+  'xpack.entityInventoryApp.entityTable.truncation.limitTitle',
+  { defaultMessage: 'Entity limit reached' }
+);
 
-export const getTruncationBody = (limit: number) =>
-  i18n.translate('xpack.entityInventoryApp.entityTable.truncation.limitBody', {
+export const TRUNCATION_BODY = i18n.translate(
+  'xpack.entityInventoryApp.entityTable.truncation.limitBody',
+  {
     defaultMessage:
-      'We can only show {limit, number} entities at a time. Use filters to slice and dice further your data.',
-    values: { limit },
-  });
+      'We can only show a limited number of entities at a time. Use filters to slice and dice further your data. ',
+  }
+);
 
 export const getTruncatedTypesText = (typeNames: readonly string[]) =>
   i18n.translate('xpack.entityInventoryApp.entityTable.truncation.truncatedTypes', {

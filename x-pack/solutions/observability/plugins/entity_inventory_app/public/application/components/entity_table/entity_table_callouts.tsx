@@ -7,19 +7,18 @@
 
 import React from 'react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import { MAX_LIST_LIMIT } from '@kbn/entity-inventory-plugin/common';
-import { getTruncatedTypesText, getTruncationBody, getTruncationTitle } from './translations';
+import { TRUNCATION_BODY, TRUNCATION_TITLE, getTruncatedTypesText } from './translations';
 
-/** Warns that the lists of `typeNames` hold only the `MAX_LIST_LIMIT` most recently seen entities. */
+/** Warns that the lists of `typeNames` hold only the most recently seen entities. */
 export const EntityTableTruncationCallout = ({ typeNames }: { typeNames: readonly string[] }) => (
   // Rendered only once a section shows a truncated list, so it announces itself when it appears.
   <KbnWarningCallout
     announceOnMount
     size="s"
-    title={getTruncationTitle(MAX_LIST_LIMIT)}
+    title={TRUNCATION_TITLE}
     text={
       <>
-        <p>{getTruncationBody(MAX_LIST_LIMIT)}</p>
+        <p>{TRUNCATION_BODY}</p>
         <p>{getTruncatedTypesText(typeNames)}</p>
       </>
     }
