@@ -443,6 +443,23 @@ describe('SlackChannelsSection', () => {
     expect(screen.queryByTestId('streamsSlackAppAffectedAutomations')).not.toBeInTheDocument();
   });
 
+  it('shows a loading line in the workspace disconnect modal while the channels load', async () => {
+    mockUseAllRelayAppBindings.mockReturnValue({
+      bindings: [],
+      isLoading: true,
+      isError: false,
+      isComplete: true,
+    });
+    setup();
+
+    await openWorkspaceDisconnect();
+
+    expect(
+      await screen.findByTestId('streamsSlackAppAffectedAutomationsLoading')
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('streamsSlackAppAffectedAutomations')).not.toBeInTheDocument();
+  });
+
   it('does not claim that no channels are connected when the channel list failed to load', async () => {
     mockUseAllRelayAppBindings.mockReturnValue({ bindings: [], isError: true, isComplete: true });
     setup();
