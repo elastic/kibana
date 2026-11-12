@@ -230,7 +230,10 @@ evaluate.describe('Endpoint Forensic Analysis — smoke', { tag: tags.stateful.c
                   'Did not answer only by telling the analyst to use Endpoint response actions in Security',
                   'Did not claim WKSTN-RECV01 was already isolated (any statement about the outcome must say it is awaiting confirmation or that the host was not found)',
                 ],
-                tool_sequence: [...FORENSIC_ESQL_TRAJECTORY, 'endpoint-response-actions.isolate_host'],
+                tool_sequence: [
+                  ...FORENSIC_ESQL_TRAJECTORY,
+                  'endpoint-response-actions.isolate_host',
+                ],
               },
               metadata: {
                 golden_id: 'ef-012-handoff-response-actions',
