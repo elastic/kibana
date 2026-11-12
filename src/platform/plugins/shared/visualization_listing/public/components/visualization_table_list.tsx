@@ -13,7 +13,6 @@ import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import type { Reference } from '@kbn/content-management-utils';
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
@@ -38,7 +37,6 @@ import {
 interface VisualizationTableListProps {
   core: CoreStart;
   visualizations: VisualizationsStart;
-  contentManagement: ContentManagementPublicStart;
   embeddable: EmbeddableStart;
   parentProps: TableListTabParentProps;
 }
@@ -46,7 +44,6 @@ interface VisualizationTableListProps {
 export const VisualizationTableList = ({
   core,
   visualizations,
-  contentManagement,
   embeddable,
   parentProps,
 }: VisualizationTableListProps) => {
@@ -189,12 +186,10 @@ export const VisualizationTableList = ({
   const deleteItems = useCallback(
     async (items: object[]) => {
       await Promise.all(
-        (items as VisualizeUserContent[]).map(async (item) => {
-          await contentManagement.client.delete({
-            contentTypeId: item.savedObjectType,
-            id: item.id,
-          });
-        })
+        // Goes through each type's own client, since not every type is a content management type.
+        (items as VisualizeUserContent[]).map(({ id, savedObjectType }) =>
+          visualizations.deleteVisualizationLibraryItem(id, savedObjectType)
+        )
       ).catch((error) => {
         core.notifications.toasts.addError(error, {
           title: i18n.translate('visualizationListing.visualizeListingDeleteErrorTitle', {
@@ -203,7 +198,7 @@ export const VisualizationTableList = ({
         });
       });
     },
-    [contentManagement, core.notifications.toasts]
+    [visualizations, core.notifications.toasts]
   );
 
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);
