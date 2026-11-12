@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import type { EntityDefinitionWithoutId } from '@kbn/entity-store/common';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
@@ -21,7 +22,8 @@ import { apiTest } from '../fixtures';
 // labelled attribute, built by the real generator, against Elasticsearch on a throwaway index, to
 // check what only Elasticsearch decides, such as how a multi-value field is grouped and mapped.
 // Move the cases to the route spec when a registered definition uses `valueLabels`.
-const INDEX = 'scout-entity-inventory-value-labels';
+// A name of its own per run, so runs that share a deployment never delete each other's index.
+const INDEX = `scout-entity-inventory-value-labels-${randomUUID()}`;
 const WINDOW = { from: '2026-11-01T09:00:00.000Z', to: '2026-11-01T11:00:00.000Z' };
 
 const definition: EntityDefinitionWithoutId = {
@@ -50,7 +52,6 @@ apiTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest.beforeAll(async ({ esClient }) => {
-      await esClient.indices.delete({ index: INDEX, ignore_unavailable: true });
       await esClient.indices.create({
         index: INDEX,
         mappings: {
