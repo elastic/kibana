@@ -323,6 +323,8 @@ steps:
         x-nightshift-source-revision: "{{ inputs.sourceRevision }}"
       body:
         lastRefreshedBefore: "${{ variables.cycleStartedAt }}"
+    on-failure:
+      continue: true
 
   # -----------------------------------------------------------------------
   # Step 6: Output summary

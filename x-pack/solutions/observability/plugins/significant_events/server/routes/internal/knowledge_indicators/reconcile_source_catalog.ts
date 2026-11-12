@@ -171,7 +171,7 @@ export async function retireDeletedSource({
   });
 }
 
-/** Invalidates an unapplied query revision before scheduling its replacement onboarding. */
+/** Invalidates an unapplied query revision and defers onboarding until reconciliation finishes. */
 export async function reconcileSourceRevision({
   source,
   sourcesClient,
@@ -188,8 +188,8 @@ export async function reconcileSourceRevision({
   sourceKnowledgeState: SourceKnowledgeStateClient;
   scheduleSourceOnboarding?: (source: NightshiftSource) => Promise<boolean>;
   request: KibanaRequest;
-}): Promise<void> {
-  await sourceKnowledgeState.runExclusive({
+}): Promise<(() => Promise<void>) | undefined> {
+  const sourceToSchedule = await sourceKnowledgeState.runExclusive({
     sourceId: source.id,
     run: async (state, checkpoint) => {
       // Another edit may have committed while this event was waiting for a write to finish.
@@ -203,22 +203,68 @@ export async function reconcileSourceRevision({
         }
         await checkpoint({ revision: current.esql_updated_at, onboardingScheduled: false });
       }
-      if (
-        current.enabled &&
-        (isRevisionChanged || !state.onboardingScheduled) &&
-        scheduleSourceOnboarding
-      ) {
-        const runningSources = await loadRunningSources(onboardingClient, request);
-        if (runningSources.has(current.id)) {
-          throw new StatusError('Waiting for the previous onboarding execution to finish', 409);
+      return current.enabled && (isRevisionChanged || !state.onboardingScheduled)
+        ? current
+        : undefined;
+    },
+  });
+  if (!sourceToSchedule || !scheduleSourceOnboarding) {
+    return;
+  }
+
+  return async () => {
+    const runningSources = await loadRunningSources(onboardingClient, request);
+    if (runningSources.has(sourceToSchedule.id)) {
+      throw new StatusError('Waiting for the previous onboarding execution to finish', 409);
+    }
+    const reserved = await sourceKnowledgeState.runExclusive({
+      sourceId: sourceToSchedule.id,
+      run: async (state, checkpoint) => {
+        if (
+          state.revision !== sourceToSchedule.esql_updated_at ||
+          state.onboardingScheduled === true
+        ) {
+          return false;
         }
-        if (await scheduleSourceOnboarding(current)) {
-          await checkpoint({ onboardingScheduled: true });
-        }
+        await checkpoint({ onboardingScheduled: true });
+        return true;
+      },
+    });
+    if (!reserved) {
+      return;
+    }
+
+    try {
+      if (await scheduleSourceOnboarding(sourceToSchedule)) {
+        return;
+      }
+    } catch (error) {
+      await clearOnboardingReservation({
+        source: sourceToSchedule,
+        sourceKnowledgeState,
+      });
+      throw error;
+    }
+    await clearOnboardingReservation({ source: sourceToSchedule, sourceKnowledgeState });
+  };
+}
+
+const clearOnboardingReservation = async ({
+  source,
+  sourceKnowledgeState,
+}: {
+  source: NightshiftSource;
+  sourceKnowledgeState: SourceKnowledgeStateClient;
+}): Promise<void> => {
+  await sourceKnowledgeState.runExclusive({
+    sourceId: source.id,
+    run: async (state, checkpoint) => {
+      if (state.revision === source.esql_updated_at && state.onboardingScheduled === true) {
+        await checkpoint({ onboardingScheduled: false });
       }
     },
   });
-}
+};
 
 /**
  * Applies the enabled flag of one source to its onboarding and owned rules. A disabled source has
@@ -417,8 +463,9 @@ export async function reconcileSourceCatalog({
   const failures: unknown[] = [];
   for (const source of sources) {
     try {
+      let scheduleOnboarding: (() => Promise<void>) | undefined;
       if (sourceKnowledgeState) {
-        await reconcileSourceRevision({
+        scheduleOnboarding = await reconcileSourceRevision({
           source,
           sourcesClient,
           kiClient,
@@ -438,6 +485,7 @@ export async function reconcileSourceCatalog({
         skipCancel: !runningSources.has(source.id),
         skipRuleToggle: !ownedRuleSourceIds.has(source.id),
       });
+      await scheduleOnboarding?.();
     } catch (error) {
       if (!isRetryableConflict(error)) {
         failures.push(error);

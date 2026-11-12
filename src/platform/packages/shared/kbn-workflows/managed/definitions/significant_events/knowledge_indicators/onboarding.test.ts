@@ -17,6 +17,7 @@ interface WorkflowStep {
   condition?: string;
   steps?: WorkflowStep[];
   else?: WorkflowStep[];
+  'on-failure'?: { continue?: boolean };
   with?: {
     path?: string;
     'workflow-id'?: string;
@@ -109,6 +110,9 @@ describe('KI onboarding workflow metrics branch', () => {
       metricsEntitiesMultiNamespaceWorkloads:
         '${{ variables.metricsEntitiesMultiNamespaceWorkloads }}',
       metricsEntitiesDroppedOverflow: '${{ variables.metricsEntitiesDroppedOverflow }}',
+    });
+    expect(workflow.steps.find(({ name }) => name === 'keep_alive_persistent')).toMatchObject({
+      'on-failure': { continue: true },
     });
     expect(
       conditionMatches(metricsBranch, {

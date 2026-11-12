@@ -759,8 +759,8 @@ describe('durable source revision reconciliation', () => {
       getNonTerminalExecutions: jest.fn().mockResolvedValue([]),
     };
     const sourcesClient = { get: jest.fn(async () => ({ source })) } as unknown as SourcesClient;
-    const reconcile = () =>
-      reconcileSourceRevision({
+    const reconcile = async () => {
+      const scheduleOnboarding = await reconcileSourceRevision({
         source,
         sourcesClient,
         kiClient,
@@ -769,6 +769,8 @@ describe('durable source revision reconciliation', () => {
         scheduleSourceOnboarding,
         request,
       });
+      await scheduleOnboarding?.();
+    };
     return {
       reconcile,
       source,
