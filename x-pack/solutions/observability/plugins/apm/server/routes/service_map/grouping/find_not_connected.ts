@@ -14,6 +14,10 @@ import { verifyEdges } from './utils';
  * the services left once shared ones are out, with the edges between them, so a service that only
  * calls shared services is not connected: it has nothing left to be grouped by.
  *
+ * Any call connects two services, whatever its weight, so a single stray call (a health check, a
+ * script run once in the day) is enough to take a service out of the not connected group. Left for
+ * the later issue on keeping groups steady as calls change.
+ *
  * Expects clean edges, see `verifyEdges`.
  */
 export function findNotConnected({

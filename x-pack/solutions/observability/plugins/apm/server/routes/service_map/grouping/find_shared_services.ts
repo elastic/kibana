@@ -24,6 +24,11 @@ import { compareNames } from './utils';
  * Shares and the typical number of neighbours are over every service on the map, including those
  * with no calls. At most a small share of the map is shared, those with the most neighbours. Ties
  * are arbitrarily broken by name.
+ *
+ * Both rules count distinct services, not calls, so a stray call (a health check, a script run
+ * once in the day) counts as much as a real dependency. Grouping by calls weighs those down, but
+ * here they can still push a service over a threshold. Left for the later issue on keeping groups
+ * steady as calls change.
  */
 export function findSharedServices({
   stats,
