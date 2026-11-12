@@ -8,6 +8,8 @@
  */
 
 import { createHash } from 'crypto';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 
 import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
 import { grantedScopes } from './token_endpoints';
@@ -357,6 +359,70 @@ describe('token endpoints', () => {
       );
 
       expect(response.status).toBe(302);
+    });
+
+    it("serves Google's current authorization URL for the committed Gmail snapshot", async () => {
+      const gmail = JSON.parse(
+        readFileSync(
+          resolve(
+            __dirname,
+            '../../../kbn-connector-specs/src/specs/gmail/vendor_api/snapshots/v1.openapi.json'
+          ),
+          'utf8'
+        )
+      );
+      const { fetch: gmailFetch } = createEmulatorFetch({ specs: [gmail] });
+
+      const response = await gmailFetch(
+        `https://accounts.google.com/o/oauth2/v2/auth?${new URLSearchParams(VALID)}`
+      );
+
+      expect(response.status).toBe(302);
+      expect(response.headers.get('location')).toMatch(/^https:\/\/kibana\/cb\?code=/);
+    });
+
+    it('serves an authorization URL a spec declares as the v2 URL, not only the alias', async () => {
+      const v2Url = 'https://accounts.google.com/o/oauth2/v2/auth';
+      const declared = {
+        ...withFlow,
+        components: {
+          securitySchemes: {
+            oauth: {
+              type: 'oauth2',
+              flows: {
+                authorizationCode: { authorizationUrl: v2Url, tokenUrl: TOKEN_URL, scopes: {} },
+              },
+            },
+          },
+        },
+      };
+      const { fetch: declaredFetch } = createEmulatorFetch({ specs: [declared] });
+
+      const response = await declaredFetch(`${v2Url}?${new URLSearchParams(VALID)}`);
+
+      expect(response.status).toBe(302);
+    });
+
+    it('rejects a code_verifier that is not 43 to 128 unreserved characters', async () => {
+      const short = 'short';
+      const code = await codeFor({
+        code_challenge: createHash('sha256').update(short).digest('base64url'),
+        code_challenge_method: 'S256',
+      });
+
+      const response = await exchange({
+        code,
+        redirect_uri: REDIRECT_URI,
+        code_verifier: short,
+      });
+
+      expect(response).toEqual({
+        status: 400,
+        body: expect.objectContaining({
+          error: 'invalid_grant',
+          error_description: 'code_verifier must be 43 to 128 unreserved characters',
+        }),
+      });
     });
 
     it('throws on authorization URLs that cannot be parsed', () => {

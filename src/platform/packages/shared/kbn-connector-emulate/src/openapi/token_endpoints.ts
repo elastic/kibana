@@ -244,11 +244,9 @@ export const findAuthorizationEndpoints = (
     include
   );
   return (url) =>
-    endpoints(
-      `${url.origin}${url.pathname}` === GOOGLE_V2_AUTHORIZATION_URL
-        ? new URL(GOOGLE_AUTHORIZATION_URL)
-        : url
-    ) !== undefined;
+    endpoints(url) !== undefined ||
+    (`${url.origin}${url.pathname}` === GOOGLE_V2_AUTHORIZATION_URL &&
+      endpoints(new URL(GOOGLE_AUTHORIZATION_URL)) !== undefined);
 };
 
 /** A token URL's response, with the OAuth error of a rejected request as a violation. */
@@ -344,7 +342,7 @@ const decodeCode = (code: string): AuthorizationGrant | undefined => {
 };
 
 // RFC 7636 §4.2.
-const CODE_CHALLENGE = /^[A-Za-z\d\-._~]{43,128}$/;
+const PKCE_VALUE = /^[A-Za-z\d\-._~]{43,128}$/;
 
 const pkceProblem = (query: URLSearchParams): string | undefined => {
   const challenge = query.get('code_challenge');
@@ -355,7 +353,7 @@ const pkceProblem = (query: URLSearchParams): string | undefined => {
   if (method !== null && method !== 'S256' && method !== 'plain') {
     return `Unsupported code_challenge_method ${method}`;
   }
-  return CODE_CHALLENGE.test(challenge)
+  return PKCE_VALUE.test(challenge)
     ? undefined
     : 'code_challenge must be 43 to 128 unreserved characters';
 };
@@ -450,7 +448,12 @@ const rejectCode = (
     const message = "redirect_uri doesn't match the authorization request";
     return oauthError(400, 'invalid_grant', message, ['body', 'redirect_uri']);
   }
-  if (grant.codeChallenge !== undefined && !verifierMatches(form.get('code_verifier'), grant)) {
+  const verifier = form.get('code_verifier');
+  if (grant.codeChallenge !== undefined && verifier !== null && !PKCE_VALUE.test(verifier)) {
+    const message = 'code_verifier must be 43 to 128 unreserved characters';
+    return oauthError(400, 'invalid_grant', message, ['body', 'code_verifier']);
+  }
+  if (grant.codeChallenge !== undefined && !verifierMatches(verifier, grant)) {
     const message = "code_verifier doesn't match the code_challenge";
     return oauthError(400, 'invalid_grant', message, ['body', 'code_verifier']);
   }
