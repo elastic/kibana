@@ -26,19 +26,6 @@ responses:
                 - id: d077e940-1515-11ee-9c50-9d096392f520
                   success: false
                   error: SLO [d077e940-1515-11ee-9c50-9d096392f520] not found
-  '400':
-    description: Bad request
-    content:
-      application/json:
-        schema:
-          $ref: ../oas_error_schemas.yaml#/400_response
-        examples:
-          badRequestExample:
-            summary: Bad request
-            value:
-              statusCode: 400
-              error: Bad Request
-              message: 'Invalid value ''foo'' supplied to: taskId'
   '401':
     description: Unauthorized response
     content:
@@ -51,7 +38,7 @@ responses:
             value:
               statusCode: 401
               error: Unauthorized
-              message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+              message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
   '403':
     description: Forbidden response
     content:
@@ -64,4 +51,4 @@ responses:
             value:
               statusCode: 403
               error: Forbidden
-              message: 'security_exception: action [slo_write] is unauthorized for user'
+              message: 'API [GET /api/observability/slos/_bulk_delete/abc] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]'

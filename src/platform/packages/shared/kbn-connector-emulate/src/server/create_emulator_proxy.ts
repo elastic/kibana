@@ -14,12 +14,19 @@ import type { Duplex } from 'stream';
 import type { SecureContext } from 'tls';
 import { createSecureContext, TLSSocket } from 'tls';
 import type { CertificateAuthority } from './certificate_authority';
+import type { EmulatorControlHandler } from './emulator_control';
+import { isControlPath, MAX_CONTROL_BODY_BYTES } from './emulator_control';
 
 export interface EmulatorProxyOptions {
   /** Answers every request the proxy receives, typically a contract mock's `fetch`. */
   readonly fetch: typeof fetch;
   /** Issues the certificates presented for HTTPS hosts; clients must trust its certificate. */
   readonly certificateAuthority: CertificateAuthority;
+  /**
+   * Answers requests sent to the proxy itself under `/_mock`, typically
+   * `createEmulatorControlHandler`. Requests through the proxy never reach it.
+   */
+  readonly control?: EmulatorControlHandler;
 }
 
 export interface EmulatorProxy {
@@ -49,6 +56,23 @@ const readBody = async (request: IncomingMessage): Promise<Buffer> => {
     chunks.push(chunk);
   }
   return Buffer.concat(chunks);
+};
+
+// Reads the body unless it is over `limit` bytes; then drains the rest without keeping it, so
+// the response can still be sent, and returns undefined.
+const readBoundedBody = async (
+  request: IncomingMessage,
+  limit: number
+): Promise<Buffer | undefined> => {
+  const chunks: Buffer[] = [];
+  let size = 0;
+  for await (const chunk of request) {
+    size += chunk.length;
+    if (size <= limit) {
+      chunks.push(chunk);
+    }
+  }
+  return size > limit ? undefined : Buffer.concat(chunks);
 };
 
 const toFetchRequest = (target: URL, request: IncomingMessage, body: Buffer): Request => {
@@ -95,14 +119,19 @@ const sendError = (response: ServerResponse, statusCode: number, title: string, 
   response.end(JSON.stringify({ title, detail }));
 };
 
+// Control requests are addressed to the proxy itself, so their URL is only a path.
+const CONTROL_ORIGIN = 'http://emulator.invalid';
+
 /**
  * Creates an HTTP forward proxy that answers requests with `fetch` instead of forwarding them.
  * Plain HTTP requests arrive in absolute form; HTTPS ones through `CONNECT` tunnels, whose TLS
  * the proxy terminates with a certificate for the requested host issued by `certificateAuthority`.
+ * Requests to the proxy itself under `/_mock` go to `control`.
  */
 export const createEmulatorProxy = ({
   fetch: answer,
   certificateAuthority,
+  control,
 }: EmulatorProxyOptions): EmulatorProxy => {
   const tunnelOrigins = new WeakMap<Socket, string>();
   const secureContexts = new Map<string, SecureContext>();
@@ -144,8 +173,42 @@ export const createEmulatorProxy = ({
       }
     };
 
-  const proxy = createServer(
-    handle(({ url = '' }) => (/^https?:\/\//i.test(url) ? new URL(url) : undefined))
+  const forward = handle(({ url = '' }) => (/^https?:\/\//i.test(url) ? new URL(url) : undefined));
+  const answerControl = async (
+    handler: EmulatorControlHandler,
+    request: IncomingMessage,
+    response: ServerResponse
+  ): Promise<void> => {
+    try {
+      const body = await readBoundedBody(request, MAX_CONTROL_BODY_BYTES);
+      if (body === undefined) {
+        sendError(
+          response,
+          413,
+          'Body too large',
+          `${request.method} ${request.url}: the body is over ${MAX_CONTROL_BODY_BYTES} bytes`
+        );
+        return;
+      }
+      const target = new URL(request.url ?? '/', CONTROL_ORIGIN);
+      await sendResponse(
+        response,
+        await handler(toFetchRequest(target, request, body)),
+        request.method
+      );
+    } catch (error) {
+      sendError(
+        response,
+        500,
+        'Control endpoint failed',
+        `${request.method} ${request.url}: ${error}`
+      );
+    }
+  };
+  const proxy = createServer((request, response) =>
+    control && isControlPath(request.url ?? '')
+      ? answerControl(control, request, response)
+      : forward(request, response)
   );
   const tunnel = createServer(
     handle(({ socket, url = '/' }) => {

@@ -27,6 +27,7 @@ const canUnresolve = (ep: AlertEpisode): boolean => episodeSupportsActions(ep) &
 export const createUnresolveAction = (deps: UnresolveActionDeps): EpisodeAction => ({
   id: 'ALERTING_V2_UNRESOLVE_EPISODE',
   order: 31,
+  enforcesOwnPrivileges: false,
   displayName: i18n.UNRESOLVE,
   iconType: 'cross',
   isCompatible: ({ episodes }: EpisodeActionContext) => episodes.some(canUnresolve),

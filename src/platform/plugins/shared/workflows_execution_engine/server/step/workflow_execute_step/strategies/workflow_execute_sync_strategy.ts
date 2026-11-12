@@ -62,7 +62,7 @@ export class WorkflowExecuteSyncStrategy {
       | SubWorkflowWaitState
       | undefined;
 
-    if (!currentState) {
+    if (!currentState?.executionId) {
       return this.initiateSubWorkflowExecution(
         workflow,
         inputs,

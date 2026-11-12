@@ -77,6 +77,7 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useAwsIdentityFederationEnabled } from '../use_aws_identity_federation_enabled';
 import { useIsSelfManaged } from '../use_is_self_managed';
 import { AuthenticateAndDeployStep } from './authenticate_and_deploy_step';
+import * as applyDedicatedTemplates from './authenticate_and_deploy_step/use_apply_dedicated_templates';
 import * as driftDetection from './authenticate_and_deploy_step/use_onboarding_drift_detection';
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
@@ -456,13 +457,43 @@ describe('AuthenticateAndDeployStep', () => {
     });
   });
 
+  describe('applying the dedicated index templates on its own', () => {
+    const spyOnApply = () =>
+      jest
+        .spyOn(applyDedicatedTemplates, 'useApplyDedicatedTemplates')
+        .mockReturnValue(jest.fn().mockResolvedValue(undefined));
+    const lastIsDeployDone = (spy: jest.SpyInstance) =>
+      spy.mock.calls[spy.mock.calls.length - 1][0].isDeployDone;
+
+    it('does not treat a reopened deployment as a finished deploy, however long its drift check takes', () => {
+      mockUseDeploy.mockReturnValue(makeDeployReturn({ isAlreadyDeployed: true }));
+      const spy = spyOnApply();
+      renderStep();
+
+      expect(spy.mock.calls.every(([params]) => params.isDeployDone === false)).toBe(true);
+      spy.mockRestore();
+    });
+
+    it('treats the deploy as finished once one was attempted here and succeeded', () => {
+      const spy = spyOnApply();
+      renderStep();
+      expect(lastIsDeployDone(spy)).toBe(false);
+
+      fireEvent.click(screen.getByTestId('mock-deploy-btn'));
+
+      expect(lastIsDeployDone(spy)).toBe(true);
+      spy.mockRestore();
+    });
+  });
+
   describe('Next calls onContinue', () => {
-    it('invokes onContinue when Next clicked after successful deploy', () => {
+    it('invokes onContinue when Next clicked after successful deploy', async () => {
       const onContinue = jest.fn();
       renderStep(onContinue);
       fireEvent.click(screen.getByTestId('mock-deploy-btn'));
       fireEvent.click(screen.getByTestId('authenticateAndDeployStep-nextButton'));
-      expect(onContinue).toHaveBeenCalledTimes(1);
+      // Next first applies the dedicated templates switch, which is asynchronous.
+      await waitFor(() => expect(onContinue).toHaveBeenCalledTimes(1));
     });
   });
 
