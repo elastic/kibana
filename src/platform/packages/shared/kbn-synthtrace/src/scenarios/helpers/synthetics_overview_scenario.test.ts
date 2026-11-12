@@ -15,7 +15,7 @@ import type { SynthtraceClients } from '../../cli/utils/clients_manager';
 import { getServiceUrls } from '../../cli/utils/get_service_urls';
 import { KibanaClient } from '../../lib/shared/base_kibana_client';
 import { discoverPrivateLocation } from '../../lib/synthetics/synthetics_private_locations_api';
-import scenario from '../synthetics_overview';
+import scenario, { clearDiscoveredPrivateLocations } from '../synthetics_overview';
 import { SYNTHETICS_OVERVIEW_TAG, getOverviewMonitors } from './synthetics_overview';
 
 jest.mock('../../cli/utils/get_service_urls', () => ({ getServiceUrls: jest.fn() }));
@@ -65,6 +65,7 @@ const createKibanaClient = () => {
 describe('synthetics_overview scenario', () => {
   describe('private location', () => {
     beforeEach(() => {
+      clearDiscoveredPrivateLocations();
       jest.mocked(getServiceUrls).mockReset();
       jest.mocked(discoverPrivateLocation).mockReset();
       jest.mocked(getServiceUrls).mockResolvedValue({
@@ -97,6 +98,24 @@ describe('synthetics_overview scenario', () => {
       expect(discoverPrivateLocation).toHaveBeenCalledWith(
         expect.objectContaining({ spaceId: 'default' })
       );
+    });
+
+    it('looks the location up once, however many times the scenario runs', async () => {
+      await init({ monitors: 4 });
+      await init({ monitors: 4 });
+
+      expect(discoverPrivateLocation).toHaveBeenCalledTimes(1);
+    });
+
+    it('tries again after a lookup fails', async () => {
+      jest
+        .mocked(discoverPrivateLocation)
+        .mockRejectedValueOnce(new Error('No private location found'))
+        .mockResolvedValueOnce(LOCATION);
+
+      await expect(init({ monitors: 4 })).rejects.toThrow('No private location found');
+      await expect(init({ monitors: 4 })).resolves.toHaveProperty('generate');
+      expect(discoverPrivateLocation).toHaveBeenCalledTimes(2);
     });
 
     it('looks in the space of the scenario', async () => {

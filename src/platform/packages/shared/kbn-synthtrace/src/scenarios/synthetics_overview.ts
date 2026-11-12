@@ -49,21 +49,49 @@ import {
   getCheckTimestamp,
   getOverviewMonitors,
   parseSyntheticsOverviewOpts,
+  type PrivateLocation,
 } from './helpers/synthetics_overview';
 
-// Every worker runs the scenario factory, and none of them sees what `bootstrap` found, so the
-// private location is looked up here, in the factory, when the options don't name one.
-const findPrivateLocation = async (options: ScenarioInitOptions, spaceId: string) => {
-  const { kibanaUrl, username, password, apiKey } = await getServiceUrls(options);
-  const kibana = getKibanaClient({
-    target: kibanaUrl,
-    username,
-    password,
-    apiKey,
-    logger: options.logger,
-  });
+// Every worker runs this factory and none of them sees what `bootstrap` found, so the location
+// is looked up here when the options don't name one. The live worker runs the factory once per
+// bucket, so a location that was found is kept: it does not change during a run, and a lookup
+// that fails on a later bucket stops the worker.
+const discoveredPrivateLocations = new Map<string, Promise<PrivateLocation>>();
 
-  return discoverPrivateLocation({ kibana, spaceId });
+/** Forgets private locations found in this process, so the next run looks them up again. */
+export const clearDiscoveredPrivateLocations = (): void => {
+  discoveredPrivateLocations.clear();
+};
+
+const findPrivateLocation = (
+  options: ScenarioInitOptions,
+  spaceId: string
+): Promise<PrivateLocation> => {
+  const cached = discoveredPrivateLocations.get(spaceId);
+  if (cached) {
+    return cached;
+  }
+
+  const lookup = (async () => {
+    try {
+      const { kibanaUrl, username, password, apiKey } = await getServiceUrls(options);
+      const kibana = getKibanaClient({
+        target: kibanaUrl,
+        username,
+        password,
+        apiKey,
+        logger: options.logger,
+      });
+
+      return await discoverPrivateLocation({ kibana, spaceId });
+    } catch (error) {
+      discoveredPrivateLocations.delete(spaceId);
+      throw error;
+    }
+  })();
+
+  discoveredPrivateLocations.set(spaceId, lookup);
+  return lookup;
 };
 
 const scenario: Scenario<SyntheticsMonitorDocument> = async (initOptions) => {
