@@ -415,4 +415,53 @@ describe('chunksIntoMessage', () => {
       type: ChatCompletionEventType.ChatCompletionMessage,
     });
   });
+
+  it('gives a tool call the provider sent without an id the same id on its chunk and on the message', async () => {
+    const events = await lastValueFrom(
+      chunksIntoMessage({
+        logger,
+        toolOptions: {
+          toolChoice: ToolChoiceType.auto,
+          tools: {
+            myFunction: {
+              description: 'myFunction',
+              schema: { type: 'object', properties: { foo: { type: 'string' } } },
+            },
+          },
+        },
+      })(
+        fromEvents({
+          content: '',
+          type: ChatCompletionEventType.ChatCompletionChunk,
+          tool_calls: [
+            {
+              index: 0,
+              toolCallId: '',
+              function: { name: 'myFunction', arguments: '{"foo":"bar"}' },
+            },
+          ],
+        })
+      ).pipe(toArray())
+    );
+
+    const chunkToolCallIds = events.flatMap((event) =>
+      event.type === ChatCompletionEventType.ChatCompletionChunk
+        ? event.tool_calls.map((toolCall) => toolCall.toolCallId)
+        : []
+    );
+    const message = events[events.length - 1];
+
+    expect(chunkToolCallIds).toHaveLength(1);
+    expect(chunkToolCallIds[0]).not.toBe('');
+    expect(message).toEqual({
+      content: '',
+      toolCalls: [
+        {
+          function: { name: 'myFunction', arguments: { foo: 'bar' } },
+          toolCallId: chunkToolCallIds[0],
+        },
+      ],
+      type: ChatCompletionEventType.ChatCompletionMessage,
+    });
+  });
 });
