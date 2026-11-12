@@ -11,6 +11,7 @@ import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
 import type { ConnectorSpec } from '../../connector_spec';
+import { checkEmulatorResponses } from './check_emulator_responses';
 import { loadVendorSpec } from './load_vendor_spec';
 import { MANIFEST, OVERLAY, readOptional, snapshotFile } from './load_vendor_specs';
 import type { VendorApiManifest } from './manifest';
@@ -64,6 +65,11 @@ export interface ConnectorDrift {
   readonly verdict: DriftVerdict;
   /** Overlay actions that no longer apply to the latest specs. */
   readonly overlayFindings: readonly string[];
+  /**
+   * What in the connector's `emulator_responses.json` doesn't fit the latest specs. Those are
+   * written by hand, so they need an edit rather than a refresh.
+   */
+  readonly responsesFindings: readonly string[];
   readonly outcome: DriftOutcome;
 }
 
@@ -133,6 +139,7 @@ const outcomeOf = (drift: Omit<ConnectorDrift, 'outcome'>): DriftOutcome => {
   const needsIssue =
     drift.verdict !== 'healthy' ||
     drift.overlayFindings.length > 0 ||
+    drift.responsesFindings.length > 0 ||
     sources.some(
       ({ status, changes }) =>
         status === 'unreachable' ||
@@ -152,6 +159,7 @@ interface LatestComparison {
   readonly operationsChanged: boolean;
   readonly problems: readonly string[];
   readonly overlayFindings: readonly string[];
+  readonly responsesFindings: readonly string[];
 }
 
 // Regenerates the artifacts from the latest specs in a temporary copy of the folder, and
@@ -190,6 +198,9 @@ const compareWithLatest = async ({
       (error) => [message(error)]
     );
     const refreshed = await readOptional(path.join(copy, MANIFEST));
+    // The copy now holds the latest specs, which the responses the Scout suites make the emulator
+    // answer with, copied along with them, have to fit.
+    const responsesFindings = await checkEmulatorResponses(copy);
     const sources: Record<string, SourceDrift> = {};
     for (const name of Object.keys(manifest.sources)) {
       const [committed, current] = await Promise.all(
@@ -211,6 +222,7 @@ const compareWithLatest = async ({
         refreshed !== undefined && callsOf(parseManifest(refreshed)) !== callsOf(manifest),
       problems,
       overlayFindings,
+      responsesFindings,
     };
   } finally {
     await fs.rm(copy, { recursive: true, force: true });
@@ -285,6 +297,7 @@ export const detectDrift = async ({
     ...(latest ? { latestProblems: latest.problems } : {}),
     verdict: verdictOf(snapshot, latest?.problems),
     overlayFindings: latest?.overlayFindings ?? [],
+    responsesFindings: latest?.responsesFindings ?? [],
   };
   return { ...drift, outcome: outcomeOf(drift) };
 };

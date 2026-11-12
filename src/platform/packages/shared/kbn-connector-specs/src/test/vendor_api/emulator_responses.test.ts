@@ -9,20 +9,19 @@
 
 import fs from 'fs';
 import path from 'path';
-import { createEmulatorFetch } from '@kbn/connector-emulate';
-import { readResponseFixtures } from './load_responses';
-import { loadVendorSpecs, SILENT_LOG } from './load_vendor_specs';
+import { checkEmulatorResponses, EMULATOR_RESPONSES } from './check_emulator_responses';
 
 const SPECS = path.resolve(__dirname, '../../specs');
-const SCENARIO = path.join('vendor_api', 'emulator_responses.json');
 
-const connectorsWithScenario = fs
+const connectorsWithResponses = fs
   .readdirSync(SPECS)
-  .filter((connector) => fs.existsSync(path.join(SPECS, connector, SCENARIO)));
+  .filter((connector) =>
+    fs.existsSync(path.join(SPECS, connector, 'vendor_api', EMULATOR_RESPONSES))
+  );
 
 describe('the emulator responses of connectors (vendor_api/emulator_responses.json)', () => {
   it('exist for the connectors the Scout suites run against the emulator', () => {
-    expect(connectorsWithScenario).toStrictEqual(
+    expect(connectorsWithResponses).toStrictEqual(
       expect.arrayContaining([
         'brave_search',
         'censys',
@@ -37,23 +36,11 @@ describe('the emulator responses of connectors (vendor_api/emulator_responses.js
     );
   });
 
-  // A scenario the vendor's spec has outgrown (after a refresh of the snapshots) shows up here
-  // rather than as a Scout failure.
-  it.each(connectorsWithScenario)('%s: every response fits the vendor spec', async (connector) => {
-    const { specs, pagination } = await loadVendorSpecs({
-      directory: path.join(SPECS, connector, 'vendor_api'),
-      fetchText: () => Promise.reject(new Error('The committed snapshots are enough')),
-      log: SILENT_LOG,
-    });
-    const fixtures = await readResponseFixtures(path.join(SPECS, connector, SCENARIO));
-
-    // Set the way the Scout suites set them: the emulator serves the fixtures it is started with as
-    // written, but checks the ones set while it runs, which it drops all if one doesn't fit.
-    const rejectedResponses = createEmulatorFetch({ specs, pagination }).runtimeFixtures.set(
-      fixtures
+  // The weekly drift check does the same against the vendors' latest specs. This one is for the
+  // committed ones, so a response written or a spec refreshed here is caught before it is merged.
+  it.each(connectorsWithResponses)('%s: every response fits the vendor spec', async (connector) => {
+    expect(await checkEmulatorResponses(path.join(SPECS, connector, 'vendor_api'))).toStrictEqual(
+      []
     );
-
-    expect(fixtures.length).toBeGreaterThan(0);
-    expect(rejectedResponses).toStrictEqual([]);
   });
 });

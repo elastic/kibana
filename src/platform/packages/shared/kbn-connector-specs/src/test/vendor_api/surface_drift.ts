@@ -162,6 +162,10 @@ export const renderDriftIssue = (
       'Overlay actions that no longer apply to the latest specs',
       drift.overlayFindings
     ),
+    ...problemSection(
+      'Responses in `vendor_api/emulator_responses.json` that no longer fit the latest specs',
+      drift.responsesFindings
+    ),
     '### What to do',
     '',
     `- Fix it with the \`update-connector\` skill (\`src/platform/packages/shared/kbn-connector-specs/.claude/skills\`), for example \`/update-connector ${id} <this issue>\` in Claude Code. It reproduces the drift, fixes the connector, refreshes its artifacts and opens a draft PR.`,
