@@ -7,7 +7,7 @@
 
 import { randomUUID } from 'crypto';
 import type { EntityDefinitionWithoutId } from '@kbn/entity-store/common';
-import { tags } from '@kbn/scout-oblt';
+import { apiTest, tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { executeEsql } from '../../../../server/inventory/executor';
 import {
@@ -15,7 +15,6 @@ import {
   generateAttributeValuesQueries,
   planSources,
 } from '../../../../server/inventory/generator';
-import { apiTest } from '../fixtures';
 
 // Unlike the other specs, this one does not call the route: no registered definition labels an
 // attribute yet, so the route cannot reach the labels. It runs the generated values query of a
