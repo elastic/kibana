@@ -551,7 +551,7 @@ test.describe(
       );
     });
 
-    test('hides Rules when the user only has Actions and Connectors read', async ({
+    test('hides Rules and Alerts when the user only has Actions and Connectors read', async ({
       browserAuth,
       pageObjects,
       kbnClient,
