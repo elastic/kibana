@@ -31,6 +31,7 @@ import type { AlertsByStatus } from '../../../overview/components/detection_resp
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import {
   OPEN_IN_ALERTS_TITLE_HOSTNAME,
+  OPEN_IN_ALERTS_TITLE_SERVICENAME,
   OPEN_IN_ALERTS_TITLE_STATUS,
   OPEN_IN_ALERTS_TITLE_USERNAME,
 } from '../../../overview/components/detection_response/translations';
@@ -110,7 +111,7 @@ export const AlertsDetailsTable = memo(
     value: string;
     /** Canonical entity store id (`host.entity.id` / `user.entity.id`); when set with Entity Store v2, identity is loaded from the store for EUID DSL. */
     entityId?: string;
-    entityType?: 'host' | 'user';
+    entityType?: 'host' | 'user' | 'service';
     /** Entity-store lookup mode; in `resolved` mode alerts of the entities resolving to `entityId` are included. */
     mode?: EntityViewMode;
     /** Callback executed after opening the alert details for a row. */
@@ -165,8 +166,9 @@ export const AlertsDetailsTable = memo(
     const { from, to } = useAlertTimeRange(scopeId);
 
     const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
-    const entityTypeResolved: 'host' | 'user' =
-      entityType ?? (field === 'user.name' ? 'user' : 'host');
+    const entityTypeResolved: 'host' | 'user' | 'service' =
+      entityType ??
+      (field === 'user.name' ? 'user' : field === 'service.name' ? 'service' : 'host');
 
     const {
       entityRecord,
@@ -423,6 +425,8 @@ export const AlertsDetailsTable = memo(
               title:
                 field === 'host.name'
                   ? OPEN_IN_ALERTS_TITLE_HOSTNAME
+                  : field === 'service.name'
+                  ? OPEN_IN_ALERTS_TITLE_SERVICENAME
                   : OPEN_IN_ALERTS_TITLE_USERNAME,
               selected_options: [value],
               field_name: field,

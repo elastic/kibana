@@ -6,6 +6,7 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
+import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import type { TimeState } from '@kbn/es-query';
 import { Subject, type ObservedValueOf } from 'rxjs';
 import { createActor, waitFor, type Actor, type AnyActorRef } from 'xstate';
@@ -30,7 +31,12 @@ import {
 
 type DestinationsActor = Actor<typeof destinationsStateMachine>;
 
-const apiKeyResponse = { id: 'k', name: 'k', createdAt: 'now', encodedApiKey: 'enc' };
+const apiKeyResponse = {
+  id: 'k',
+  name: 'k',
+  createdAt: 'now',
+  encodedApiKey: 'encoded-secret-value',
+};
 const REMOTE_KEY = 'remote-key-value-1';
 
 describe('destinationsStateMachine', () => {
@@ -116,6 +122,7 @@ describe('destinationsStateMachine', () => {
           toasts: coreMock.createStart().notifications.toasts,
           apiKeyGenerationDeps: {
             streamsRepositoryClient: { fetch },
+            unitId: STREAMS_DEFAULT_UNIT_ID,
           } as unknown as DestinationApiKeyGenerationDeps,
           timeState,
           timeState$,
@@ -128,6 +135,30 @@ describe('destinationsStateMachine', () => {
 
   afterEach(() => {
     actor.stop();
+  });
+
+  it('resolves indices for the unit in apiKeyGenerationDeps', async () => {
+    const unitActor = createActor(
+      destinationsStateMachine.provide(
+        createDestinationsMachineImplementations({
+          toasts: coreMock.createStart().notifications.toasts,
+          apiKeyGenerationDeps: {
+            streamsRepositoryClient: { fetch },
+            unitId: 'edge',
+          } as unknown as DestinationApiKeyGenerationDeps,
+          timeState,
+          timeState$,
+        })
+      ),
+      { input: { unitDefinition, parentRef: { send: jest.fn() } as unknown as AnyActorRef } }
+    ).start();
+    await waitFor(unitActor, (snapshot) => snapshot.matches({ resolvedIndices: 'ready' }));
+
+    expect(fetch).toHaveBeenCalledWith(
+      'GET /internal/streams/unit/{id}/_resolve_indices',
+      expect.objectContaining({ params: { path: { id: 'edge' } } })
+    );
+    unitActor.stop();
   });
 
   it('ignores an invalid form', () => {
@@ -335,6 +366,7 @@ describe('destinationsStateMachine', () => {
           toasts,
           apiKeyGenerationDeps: {
             streamsRepositoryClient: { fetch },
+            unitId: STREAMS_DEFAULT_UNIT_ID,
           } as unknown as DestinationApiKeyGenerationDeps,
           timeState,
           timeState$,
@@ -442,7 +474,7 @@ describe('destinationsStateMachine', () => {
     expect(actor.getSnapshot().context.destinationDetailRefs).toBe(context.destinationDetailRefs);
   });
 
-  it('still mints a key for a local Elasticsearch create and sends no secrets', async () => {
+  it('mints a key for a local Elasticsearch create and sends it only as a secret', async () => {
     actor.send({ type: 'modal.openCreate' });
     actor.send({
       type: 'destination.create',
@@ -453,8 +485,27 @@ describe('destinationsStateMachine', () => {
       'POST /internal/streams/destinations/api_key',
     ]);
     expect(parentSend).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'unit.changed', intent: 'create', secrets: undefined })
+      expect.objectContaining({
+        type: 'unit.changed',
+        intent: 'create',
+        secrets: { 'logs-api-key': 'encoded-secret-value' },
+      })
     );
+    const [[sent]] = parentSend.mock.calls;
+    const node = sent.unitDefinition.unit.destinations?.find(
+      ({ id }: UnitDestination) => id === 'logs'
+    );
+    expect(node?.config).toEqual(
+      expect.arrayContaining([{ name: 'api_key', value: { credential: 'logs-api-key' } }])
+    );
+    expect(JSON.stringify(sent.unitDefinition)).not.toContain('encoded-secret-value');
+
+    actor.send({
+      type: 'unit.persisted',
+      destinationIds: ['logs'],
+      unitDefinition: sent.unitDefinition,
+    });
+    expect(JSON.stringify(actor.getSnapshot().context)).not.toContain('encoded-secret-value');
   });
 
   it('revokes only the minted key when a local Elasticsearch create fails to save', async () => {
@@ -482,6 +533,7 @@ describe('destinationsStateMachine', () => {
         }),
       ],
     ]);
+    expect(JSON.stringify(actor.getSnapshot().context)).not.toContain('encoded-secret-value');
   });
 
   describe('remote Elasticsearch', () => {

@@ -170,7 +170,7 @@ export class AgentBuilderPlugin
       type: AGENT_WORKLOAD_TYPE,
       name: 'Agent',
       description: 'Agent Builder agent that runs every conversation as the bound service account',
-      resolveWorkloads: async (workloads) => {
+      resolveWorkloads: async (workloads, { signal }) => {
         const [coreStart] = await coreSetup.getStartServices();
         return resolveAgentWorkloads({
           storage: createAgentStorage({
@@ -178,6 +178,7 @@ export class AgentBuilderPlugin
             esClient: coreStart.elasticsearch.client.asInternalUser,
           }),
           workloads,
+          signal,
         });
       },
     });
@@ -361,6 +362,7 @@ export class AgentBuilderPlugin
       },
       callbacks: {
         registerConversationResolver: serviceSetups.callbacks.registerConversationResolver,
+        registerOnBeforeNewConversation: serviceSetups.callbacks.registerOnBeforeNewConversation,
         registerTransport: serviceSetups.callbacks.registerTransport,
       },
       topSnippets: this.config.topSnippets,
@@ -421,6 +423,7 @@ export class AgentBuilderPlugin
       }),
       deductiveRegister: this.config.deductive?.register ?? false,
       isomer,
+      getSmlTypeDefinition: startDeps.agentBuilderSml.getTypeDefinition,
       cloud: this.cloudSetup,
       conversationEventBus: this.conversationEventBus,
     });

@@ -33,7 +33,7 @@ steps:
       machineType: n2-highmem-4
       preemptible: true
       diskType: pd-balanced
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     # UI stack, then API stack. Serverless is a separate step.
     timeout_in_minutes: 120
     retry:
@@ -54,7 +54,7 @@ steps:
       machineType: n2-highmem-4
       preemptible: true
       diskType: pd-balanced
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     # UI stack, then API stack. ECH is a separate step.
     timeout_in_minutes: 120
     retry:

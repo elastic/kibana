@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import { isSharedConversation } from '@kbn/agent-builder-common';
+import { isSharedConversation, type Conversation } from '@kbn/agent-builder-common';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ConversationPermissions } from '../../../common/http_api/conversations';
 import type { ErrorPromptType } from '../components/common/prompt/error_prompt';
@@ -18,6 +18,24 @@ import { useLastAgentId } from './use_last_agent_id';
 import { useIsCurrentConversationStreaming } from './use_is_current_conversation_streaming';
 
 const POLL_INTERVAL_MS = 5_000;
+// The longest a background sub-agent can still report after the conversation was last written: the
+// run task's 20 minute timeout (`agent-builder:run-agent` in the server's task definitions) plus a
+// margin for claim delays and wake retries. Past that, a leftover entry or lock never clears by itself.
+const BACKGROUND_WORK_POLL_WINDOW_MS = 30 * 60 * 1000;
+
+const hasBackgroundWork = (conversation?: Conversation): boolean => {
+  if (!conversation) {
+    return false;
+  }
+  const pending =
+    Boolean(conversation.active_execution) ||
+    Object.keys(conversation.state?.background_executions ?? {}).length > 0;
+  if (!pending) {
+    return false;
+  }
+  const updatedAt = Date.parse(conversation.updated_at);
+  return Number.isNaN(updatedAt) || Date.now() - updatedAt < BACKGROUND_WORK_POLL_WINDOW_MS;
+};
 
 export const useConversation = () => {
   const conversationId = useConversationId();
@@ -55,9 +73,11 @@ export const useConversation = () => {
     // Refetching an errored query (no cached success) resets status `error` → `loading`,
     // which would clear `errorType` and flip `Conversation`'s conditional rendering. Resulting in a loop of unmounts/remounts.
     retryOnMount: false,
-    // Shared conversations can be written to by other participants, so poll for their rounds.
+    // Other participants and finished background sub-agents add rounds this client did not start.
     refetchInterval: (data) =>
-      isSharedConversation(data?.access_control) ? POLL_INTERVAL_MS : false,
+      isSharedConversation(data?.access_control) || hasBackgroundWork(data)
+        ? POLL_INTERVAL_MS
+        : false,
   });
 
   return { conversation, isLoading, isFetching, isFetched, isError, error };

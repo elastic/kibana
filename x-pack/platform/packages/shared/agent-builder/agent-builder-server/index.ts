@@ -229,6 +229,9 @@ export type {
   ConversationAddEventsRequest,
 } from './conversations';
 export type {
+  OnBeforeNewConversationHook,
+  OnBeforeNewConversationContext,
+  OnBeforeNewConversationRelease,
   CallbackConversationResolver,
   CallbackConversationResolverContext,
   CallbackTransportDefinition,

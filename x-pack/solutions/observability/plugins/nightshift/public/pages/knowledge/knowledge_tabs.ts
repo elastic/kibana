@@ -10,7 +10,7 @@ import type { FeatureAvailability } from './feature_availability';
 
 export const KNOWLEDGE_TAB_IDS = [
   'knowledge_indicators',
-  'cortex',
+  'wiki',
   'memory',
   'decision_trees',
 ] as const;
@@ -22,8 +22,8 @@ export const KNOWLEDGE_TAB_LABELS: Record<KnowledgeTabId, string> = {
   knowledge_indicators: i18n.translate('xpack.nightshift.knowledgePage.tabs.knowledgeIndicators', {
     defaultMessage: 'Knowledge Indicators',
   }),
-  cortex: i18n.translate('xpack.nightshift.knowledgePage.tabs.cortex', {
-    defaultMessage: 'Cortex',
+  wiki: i18n.translate('xpack.nightshift.knowledgePage.tabs.wiki', {
+    defaultMessage: 'Wiki',
   }),
   memory: i18n.translate('xpack.nightshift.knowledgePage.tabs.memory', {
     defaultMessage: 'Memory',

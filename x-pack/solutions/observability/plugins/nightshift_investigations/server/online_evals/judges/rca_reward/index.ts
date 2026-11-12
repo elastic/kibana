@@ -43,7 +43,7 @@ export const rcaRewardJudge: RegisteredEvaluatorDefinition = {
   kind: 'llm',
   direction: 'maximize',
   description:
-    'Reference-free: whether a Nightshift investigation found evidence, how close its cause is to the alert onset, and whether its timeline, sources and stated confidence hold up.',
+    'Reference-free: whether a nightshift investigation found evidence, how close its cause is to the alert onset, and whether its timeline, sources and stated confidence hold up.',
   evidenceSchema: roundEvidenceSchema,
   async evaluate({ round, inferenceClient }) {
     if (!inferenceClient) {

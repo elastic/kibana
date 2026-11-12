@@ -6,17 +6,39 @@
  */
 
 import { useMemo } from 'react';
-import { pick } from 'lodash';
+import { singleIncludedValue } from '../../common/filter_values';
+import { SESSIONS_LIST_MAX_FACET_LENGTHS } from '../../common/sessions';
 import { SHARED_FILTER_NAMES } from '../utils/overview_filters_query';
-import { useDigitalExperienceParams } from './use_digital_experience_params';
+import type { SharedFilterName } from '../utils/overview_filters_query';
+import { filterValueRt } from '../utils/sessions_list_query';
+import type { SessionsListUrlQuery } from '../utils/sessions_list_query';
+import { useOverviewFilters } from './use_overview_filters';
+
+type SharedFilters = Pick<SessionsListUrlQuery, SharedFilterName>;
+
+/** What the Sessions list accepts of each shared filter. */
+export const SESSIONS_FILTER_RTS = {
+  browser: filterValueRt(SESSIONS_LIST_MAX_FACET_LENGTHS.browser),
+  os: filterValueRt(SESSIONS_LIST_MAX_FACET_LENGTHS.os),
+  country: filterValueRt(SESSIONS_LIST_MAX_FACET_LENGTHS.country),
+};
 
 /**
- * The filters of the Overview that the Sessions list has too (`browser`, `os` and `country`),
- * for links between the two tabs. Only the ones set are returned: the router removes empty and
- * invalid values from the URL.
+ * The filters of the Overview that the Sessions list has too (`browser`, `os` and `country`), for
+ * links between the two tabs. The Sessions list takes one value, so a filter carries over only
+ * when it is exactly one included value, and not when it has several values or an exclusion.
  */
-export const useSharedFilters = () => {
-  const { query } = useDigitalExperienceParams('/');
+export const useSharedFilters = (): SharedFilters => {
+  const { filters } = useOverviewFilters();
 
-  return useMemo(() => pick(query, SHARED_FILTER_NAMES), [query]);
+  return useMemo(() => {
+    const shared: SharedFilters = {};
+    for (const name of SHARED_FILTER_NAMES) {
+      const value = singleIncludedValue(filters[name]);
+      if (value !== undefined && SESSIONS_FILTER_RTS[name].is(value)) {
+        shared[name] = value;
+      }
+    }
+    return shared;
+  }, [filters]);
 };
