@@ -8,33 +8,46 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreStart, Logger } from '@kbn/core/server';
 import { isConversationNotFoundError } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { MAX_KEYWORD_LENGTH } from '../../common';
 import { usesDecisionTrees } from '../agents/agent_policy';
 import {
   extractAccessedTreeIdsFromRounds,
   roundsBefore,
   type InvestigationToolCall,
 } from '../decision_trees/accessed_trees';
+import {
+  NO_CAUSAL_VERDICT,
+  buildCausalCheckTranscript,
+  createLlmCausalCheck,
+  type CausalCheckResult,
+} from '../decision_trees/causal_check';
 import { prepareReinforcementTurn } from '../decision_trees/register_decision_trees';
-import { withToolResults } from '../investigation_round';
+import {
+  createInvestigationMemoryTelemetry,
+  createOptimizeModel,
+} from '../lib/create_optimize_model';
+import { investigationRoundInputsSchema, withToolResults } from '../investigation_round';
 import { withNightshiftBackgroundSpan } from '../tracing';
 import { toolCallsSchema, toolResultsSchema } from './tool_calls_schema';
+import { withTimeout } from './with_timeout';
+
+/** Matches Deductive's causal check, which gives the call 90s. */
+const CAUSAL_CHECK_TIMEOUT_MS = 90_000;
 
 export const decisionTreePrepareStepDefinition = ({
-  getTelemetryConnectorId,
   getAgentBuilder,
+  getInference,
   getSavedObjects,
   getUiSettings,
   logger,
   isEnabled,
 }: {
-  getTelemetryConnectorId: (
-    request: KibanaRequest,
-    conversationId?: string
-  ) => string | undefined | Promise<string | undefined>;
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
+  getInference?: () => InferenceServerStart | undefined;
   getSavedObjects?: () => CoreStart['savedObjects'] | undefined;
   getUiSettings?: () => CoreStart['uiSettings'] | undefined;
   logger: Logger;
@@ -47,8 +60,22 @@ export const decisionTreePrepareStepDefinition = ({
     description:
       'Builds the closing reinforcement message for a completed investigation round: the decision ' +
       'trees available to edit, the learnings already on file, and the turn script. A follow-up ' +
-      'round only edits the trees of its own investigation, and is skipped when there are none.',
+      'round only edits the trees of its own investigation, and is skipped when there are none. ' +
+      'A follow-up that has trees gets one LLM causal check: only a cause the investigation data ' +
+      'shows reinforces a path.',
     inputSchema: z.object({
+      prompt: investigationRoundInputsSchema.prompt.optional(),
+      response: investigationRoundInputsSchema.response.optional(),
+      connector_id: z
+        .string()
+        .max(MAX_KEYWORD_LENGTH)
+        .optional()
+        .describe('Strict model override for a direct run.'),
+      round_connector_id: z
+        .string()
+        .max(MAX_KEYWORD_LENGTH)
+        .optional()
+        .describe('Inference connector the triggering agent used for this round.'),
       conversation_id: z
         .string()
         .max(512)
@@ -83,6 +110,17 @@ export const decisionTreePrepareStepDefinition = ({
         .enum(['initial_investigation', 'feedback_reinforcement'])
         .describe('Whether this round seeds the trees or follows up on them.'),
       skipped: z.boolean().describe('True when this round is not eligible for reinforcement.'),
+      causal_check: z
+        .object({
+          is_feedback: z.boolean().describe('The human message speaks to the root cause.'),
+          causal_confirmed: z
+            .boolean()
+            .describe('The investigation data shows the cause the message states.'),
+          causal_summary: z.string().describe('What was confirmed, or which evidence is missing.'),
+          learning: z.string().describe('What the human taught the investigator.'),
+        })
+        .optional()
+        .describe('For a follow-up with trees to edit: what its causal check found.'),
     }),
     handler: async (context) => {
       const {
@@ -91,6 +129,10 @@ export const decisionTreePrepareStepDefinition = ({
         agent_id: agentId,
         tool_calls: toolCalls,
         tool_results: toolResults,
+        prompt,
+        response,
+        connector_id: requestedConnectorId,
+        round_connector_id: roundConnectorId,
       } = context.input;
       const skippedOutput = {
         output: {
@@ -101,8 +143,8 @@ export const decisionTreePrepareStepDefinition = ({
         },
       };
 
-      // The combined optimize workflow installs with Cortex or Memory, so this step runs even
-      // when the tree feature is off. `skipped` also gates the reinforcement agent steps.
+      // The combined optimize workflow also installs with Wiki or Memory alone, so this step runs
+      // even when the tree feature is off. `skipped` also gates the reinforcement agent steps.
       if (isEnabled && !isEnabled()) {
         context.logger.info('Skipped decision tree prepare (flag off)');
         return skippedOutput;
@@ -131,21 +173,73 @@ export const decisionTreePrepareStepDefinition = ({
       const conversations = await agentBuilder.conversations.getScopedClient({ request });
       // A chat's conversation is only saved with its first round, so a missing one has no
       // earlier rounds. Any other failure must not be read as a first round.
-      const rounds = await conversations.get(conversationId).then(
-        (conversation) => conversation.rounds,
-        (error) => {
-          if (isConversationNotFoundError(error)) {
-            return [];
-          }
-          throw error;
+      const conversation = await conversations.get(conversationId).catch((error) => {
+        if (isConversationNotFoundError(error)) {
+          return undefined;
         }
-      );
+        throw error;
+      });
+      const rounds = conversation?.rounds ?? [];
       const earlierRounds = roundsBefore(rounds, roundId);
+      const roundToolCalls = withToolResults(
+        (toolCalls ?? []) as InvestigationToolCall[],
+        toolResults ?? []
+      );
 
-      const telemetryConnectorId = await getTelemetryConnectorId(request, conversationId);
       const workflowContext = context.contextManager.getContext();
       const { spaceId } = workflowContext.workflow;
       const executionId = workflowContext.execution?.id;
+
+      // A lost verdict leaves the tree where it was before causal checks existed: extended, with
+      // no cause claimed. Failing here would also stop the reinforcement run.
+      const checkCausal = async (): Promise<CausalCheckResult> => {
+        try {
+          const verdict = await withTimeout(
+            async (signal) => {
+              const model = await createOptimizeModel({
+                request,
+                requestedConnectorId: requestedConnectorId || undefined,
+                roundConnectorId: roundConnectorId || undefined,
+                agentBuilder,
+                inference: getInference?.(),
+                savedObjects: getSavedObjects?.(),
+                uiSettings: getUiSettings?.(),
+                telemetryMetadata: createInvestigationMemoryTelemetry(executionId ?? ''),
+                logger,
+              });
+              if (!model) {
+                throw new Error('No model is available for the causal check');
+              }
+              const startedAt = rounds.find((round) => round.id === roundId)?.started_at;
+              return createLlmCausalCheck({ inferenceClient: model.inferenceClient, signal })(
+                buildCausalCheckTranscript({
+                  earlierRounds,
+                  attachments: conversation?.attachments,
+                  ...(startedAt ? { latestStartedAt: Date.parse(startedAt) } : {}),
+                  // The hook can run before the round is saved, so this round comes from its inputs.
+                  prompt: prompt ?? '',
+                  response: response ?? '',
+                  toolCalls: roundToolCalls,
+                })
+              );
+            },
+            CAUSAL_CHECK_TIMEOUT_MS,
+            `Causal check timed out after ${CAUSAL_CHECK_TIMEOUT_MS}ms`,
+            context.abortSignal
+          );
+          context.logger.info(
+            `Round "${roundId}" of "${conversationId}" causal check: feedback=${verdict.isFeedback} confirmed=${verdict.causalConfirmed}`
+          );
+          return verdict;
+        } catch (error) {
+          context.logger.warn(
+            `Round "${roundId}" of "${conversationId}" has no causal verdict: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+          return NO_CAUSAL_VERDICT;
+        }
+      };
       const turn = await withNightshiftBackgroundSpan(
         {
           name: 'nightshift.decisionTreePrepare',
@@ -163,14 +257,12 @@ export const decisionTreePrepareStepDefinition = ({
               earlierRounds.length === 0 ? 'initial_investigation' : 'feedback_reinforcement',
             investigationId: conversationId,
             earlierAccessedTreeIds: extractAccessedTreeIdsFromRounds(earlierRounds),
-            connectorNames: telemetryConnectorId ? [telemetryConnectorId] : [],
+            connectorNames: [],
             esClient: context.contextManager.getScopedEsClient(),
             logger,
             spaceId,
-            toolCalls: withToolResults(
-              (toolCalls ?? []) as InvestigationToolCall[],
-              toolResults ?? []
-            ),
+            toolCalls: roundToolCalls,
+            checkCausal,
           });
           if (res.skipped) {
             span?.setAttribute('nightshift.skipped', true);
@@ -179,6 +271,10 @@ export const decisionTreePrepareStepDefinition = ({
           span?.setAttribute('nightshift.tree_count', res.treeCount);
           span?.setAttribute('nightshift.turn_kind', res.turnKind);
           span?.setAttribute('nightshift.opened_tree_ids', JSON.stringify(res.openedTreeIds));
+          if (res.verdict) {
+            span?.setAttribute('nightshift.causal_check.is_feedback', res.verdict.isFeedback);
+            span?.setAttribute('nightshift.causal_check.confirmed', res.verdict.causalConfirmed);
+          }
           return res;
         }
       );
@@ -193,6 +289,16 @@ export const decisionTreePrepareStepDefinition = ({
           turn_kind: turn.turnKind,
           skipped: false,
           ...(turn.openedTreeIds.length > 0 ? { opened_ids: turn.openedTreeIds } : {}),
+          ...(turn.verdict
+            ? {
+                causal_check: {
+                  is_feedback: turn.verdict.isFeedback,
+                  causal_confirmed: turn.verdict.causalConfirmed,
+                  causal_summary: turn.verdict.causalSummary,
+                  learning: turn.verdict.learning,
+                },
+              }
+            : {}),
         },
       };
     },

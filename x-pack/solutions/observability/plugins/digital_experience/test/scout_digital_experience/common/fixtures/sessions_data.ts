@@ -66,6 +66,12 @@ const summaryOf = (sessionsStartMs: number, index: number) => {
     duration_ms: durationMs,
     event_count: 10,
     page_view_count: journey.length,
+    // What the applications list counts: a page load per page, and two requests, some failed.
+    page_load_count: journey.length,
+    js_error_count: errorCount,
+    http_request_count: 2,
+    http_failed_request_count: index % 4 === 0 ? 1 : 0,
+    environment: 'production',
     // The detailed session's raw events have one click.
     click_count: isDetailed ? 1 : index,
     error_count: errorCount,
@@ -80,6 +86,10 @@ const summaryOf = (sessionsStartMs: number, index: number) => {
       : { browser: 'Chrome', browser_version: '130', os: 'macOS' },
     geo: { country_iso: 'NL', city: 'Amsterdam' },
     web_vitals: { lcp: 1800, cls: 0.05 },
+    web_vital_samples: {
+      lcp: { count: 1, good: 1, needs_improvement: 0, poor: 0 },
+      cls: { count: 1, good: 1, needs_improvement: 0, poor: 0 },
+    },
   };
 };
 

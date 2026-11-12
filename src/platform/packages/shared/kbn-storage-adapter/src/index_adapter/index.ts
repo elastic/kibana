@@ -46,6 +46,7 @@ import type {
   StorageTransportOptions,
 } from '../..';
 import { getSchemaVersion } from '../get_schema_version';
+import { retryTransientEsErrors } from './retry_transient_es_errors';
 import type { StorageMappingProperty } from '../../types';
 import { BulkOperationError } from '../errors';
 
@@ -242,7 +243,7 @@ export class StorageIndexAdapter<
     };
 
     const putTemplate = (includeSettings: boolean) =>
-      wrapEsCall(
+      this.retryBootstrap('index template creation', () =>
         this.esClient.indices.putIndexTemplate({
           name: getIndexTemplateName(this.storage.name),
           create: false,
@@ -281,7 +282,7 @@ export class StorageIndexAdapter<
   }
 
   private async getExistingIndexTemplate(): Promise<IndicesIndexTemplate | undefined> {
-    return await wrapEsCall(
+    return await this.retryBootstrap('index template lookup', () =>
       this.esClient.indices.getIndexTemplate({
         name: getIndexTemplateName(this.storage.name),
       })
@@ -295,19 +296,37 @@ export class StorageIndexAdapter<
       });
   }
 
+  /**
+   * Resolves the write index behind the storage alias from a single `indices.get` call, so the
+   * index name and its state always come from the same cluster state. Deriving them from separate
+   * `getAlias` + `get` calls let a concurrent index creation return an index name with no state.
+   */
   private async getCurrentWriteIndex(): Promise<
     { name: string; state: IndicesIndexState } | undefined
   > {
-    const [writeIndex, indices] = await Promise.all([
-      this.getCurrentWriteIndexName(),
-      this.getExistingIndices(),
-    ]);
+    const aliasName = getAliasName(this.storage.name);
 
-    return writeIndex ? { name: writeIndex, state: indices[writeIndex] } : undefined;
+    const indices = await this.retryBootstrap('write index lookup', () =>
+      this.esClient.indices.get({
+        // An alias resolves to its indices, hidden or not, without any wildcard expansion.
+        index: aliasName,
+      })
+    ).catch((error) => {
+      if (isNotFoundError(error)) {
+        return {};
+      }
+      throw error;
+    });
+
+    const writeIndex = Object.entries(indices).find(
+      ([, state]) => state.aliases?.[aliasName]?.is_write_index === true
+    );
+
+    return writeIndex ? { name: writeIndex[0], state: writeIndex[1] } : undefined;
   }
 
   private async getExistingIndices() {
-    return wrapEsCall(
+    return this.retryBootstrap('index listing', () =>
       this.esClient.indices.get({
         index: getIndexPattern(this.storage.name),
         allow_no_indices: true,
@@ -315,43 +334,24 @@ export class StorageIndexAdapter<
     );
   }
 
-  private async getCurrentWriteIndexName(): Promise<string | undefined> {
-    const aliasName = getAliasName(this.storage.name);
-
-    const aliases = await wrapEsCall(
-      this.esClient.indices.getAlias({
-        name: getAliasName(this.storage.name),
-      })
-    ).catch((error) => {
-      if (isResponseError(error) && error.statusCode === 404) {
-        return {};
-      }
-      throw error;
-    });
-
-    const writeIndex = Object.entries(aliases)
-      .map(([name, alias]) => {
-        return {
-          name,
-          isWriteIndex: alias.aliases[aliasName]?.is_write_index === true,
-        };
-      })
-      .find(({ isWriteIndex }) => {
-        return isWriteIndex;
-      });
-
-    return writeIndex?.name;
+  /**
+   * Wraps a bootstrap call with the shared error context and a retry of transient Elasticsearch
+   * errors. Only index management runs through this: document reads and writes stay with the
+   * caller, which owns their retry semantics.
+   */
+  private retryBootstrap<T>(operation: string, esCall: () => Promise<T>): Promise<T> {
+    return wrapEsCall(retryTransientEsErrors(operation, esCall, { logger: this.logger }));
   }
 
   private async createIndex(): Promise<void> {
-    const writeIndex = await this.getCurrentWriteIndexName();
+    const writeIndex = await this.getCurrentWriteIndex();
 
     const indexName = getIndexName(
       this.storage.name,
-      writeIndex ? parseInt(last(writeIndex.split('-'))!, 10) : 1
+      writeIndex ? parseInt(last(writeIndex.name.split('-'))!, 10) : 1
     );
 
-    await wrapEsCall(
+    await this.retryBootstrap('index creation', () =>
       this.esClient.indices.create({
         index: indexName,
       })
@@ -359,15 +359,19 @@ export class StorageIndexAdapter<
   }
 
   private async updateMappingsOfExistingIndex({ name }: { name: string }) {
-    const simulateIndexTemplateResponse = await this.esClient.indices.simulateIndexTemplate({
-      name: getIndexName(this.storage.name, 999999),
-    });
+    const simulateIndexTemplateResponse = await this.retryBootstrap(
+      'index template simulation',
+      () =>
+        this.esClient.indices.simulateIndexTemplate({
+          name: getIndexName(this.storage.name, 999999),
+        })
+    );
 
     if (simulateIndexTemplateResponse.template.mappings) {
-      await this.esClient.indices.putMapping({
-        index: name,
-        ...simulateIndexTemplateResponse.template.mappings,
-      });
+      const mappings = simulateIndexTemplateResponse.template.mappings;
+      await this.retryBootstrap('mapping update', () =>
+        this.esClient.indices.putMapping({ index: name, ...mappings })
+      );
     }
   }
 

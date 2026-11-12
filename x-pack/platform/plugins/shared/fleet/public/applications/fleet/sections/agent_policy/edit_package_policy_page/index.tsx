@@ -73,7 +73,7 @@ import { useAgentless } from '../create_package_policy_page/single_page_layout/h
 
 import { useIncompatibleAgentVersionStatus } from '../../../hooks/use_incompatible_agent_version_status';
 
-import { UpgradeStatusCallout } from './components';
+import { ManagedByOnboardingCallout, UpgradeStatusCallout } from './components';
 import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
 import { getNewSecrets } from './utils';
 import { usePackagePolicySteps } from './hooks';
@@ -663,6 +663,22 @@ export const EditPackagePolicyForm = memo<{
               })
             }
           />
+        ) : originalPackagePolicy?.onboarding_deployment_id ? (
+          // Covers direct links to the edit and upgrade pages: the policy can only be changed from
+          // the onboarding flow, and the server rejects changes made here.
+          <>
+            <Breadcrumb
+              agentPolicyName={agentPolicyBreadcrumb.name}
+              from={from}
+              packagePolicyName={packagePolicy.name}
+              pkgkey={pkgKeyFromPackageInfo(packageInfo)}
+              pkgTitle={packageInfo.title}
+              policyId={agentPolicyBreadcrumb.id}
+            />
+            <ManagedByOnboardingCallout
+              onboardingDeploymentId={originalPackagePolicy.onboarding_deployment_id}
+            />
+          </>
         ) : (
           <>
             <Breadcrumb

@@ -9,13 +9,14 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { CoreStart, Logger } from '@kbn/core/server';
-import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
+import type { NightshiftSandboxStart } from '../sandbox_audit';
 import { hydrateDecisionTreeWorkspace } from '../decision_trees/register_decision_trees';
 import { DECISION_TREE_WORKSPACE_ROOT } from '../decision_trees/materialize';
 import { degradeOnWriterFailure } from '../lib/hydrate_notification';
 import { withNightshiftBackgroundSpan } from '../tracing';
 import { unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { usesDecisionTrees } from '../agents/agent_policy';
+import { getSandboxStepCaller } from './sandbox_caller';
 import { withTimeout } from './with_timeout';
 
 /** Caps beforeAgent so a stuck sandbox write cannot stall the reinforcement round. */
@@ -28,7 +29,7 @@ export const decisionTreeHydrateStepDefinition = ({
   logger,
   isEnabled,
 }: {
-  getSandboxStart: () => SandboxPluginStart | undefined;
+  getSandboxStart: () => NightshiftSandboxStart | undefined;
   getSavedObjects?: () => CoreStart['savedObjects'] | undefined;
   getUiSettings?: () => CoreStart['uiSettings'] | undefined;
   logger: Logger;
@@ -90,8 +91,8 @@ export const decisionTreeHydrateStepDefinition = ({
       const executionId = workflowContext.execution?.id;
       const conversationId = unscopeConversationId(spaceId, sandboxId);
 
-      // The combined materialize workflow installs with Cortex or Memory, so this step is
-      // registered even when the tree feature is off. Fail closed without touching the sandbox.
+      // The combined materialize workflow also installs with Wiki or Memory alone, so this step
+      // is registered even when the tree feature is off. Fail closed without touching the sandbox.
       // It is also every knowledge agent's before-agent hook, but only the investigator reads
       // the trees.
       const flagOff = Boolean(isEnabled && !isEnabled());
@@ -123,7 +124,11 @@ export const decisionTreeHydrateStepDefinition = ({
 
       // getSessionForSpace scopes internally, so the space-scoped sandbox_id must be unscoped first.
       // This resolves the same session obtain_sandbox already allocated for this conversation.
-      const session = sandboxStart.getSessionForSpace(spaceId, conversationId);
+      const session = sandboxStart.getSessionForSpace(
+        spaceId,
+        conversationId,
+        getSandboxStepCaller(context)
+      );
 
       context.logger.info(`Hydrating decision trees into sandbox ${sandboxId} (space ${spaceId})`);
 

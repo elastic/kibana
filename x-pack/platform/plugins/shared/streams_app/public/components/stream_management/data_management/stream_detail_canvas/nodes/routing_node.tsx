@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiPanel,
   EuiToolTip,
   useEuiTheme,
@@ -30,6 +31,37 @@ import { DESTINATION_SIGNAL_LABELS } from '../../../../streams_layout/destinatio
 const copyLabel = i18n.translate('xpack.streams.canvas.routingNode.copyBadgeLabel', {
   defaultMessage: 'copy',
 });
+
+const diagnosticsTitle = i18n.translate('xpack.streams.canvas.routingNode.diagnosticsTitle', {
+  defaultMessage: 'The last save rejected this routing. Open it to fix the rules.',
+});
+
+function RoutingDiagnosticsIcon({
+  diagnostics,
+  dataTestSubj,
+}: {
+  diagnostics: string[];
+  dataTestSubj: string;
+}) {
+  return (
+    <EuiIconTip
+      type="error"
+      color="danger"
+      size="m"
+      anchorProps={{ 'data-test-subj': dataTestSubj }}
+      content={
+        <>
+          <p>{diagnosticsTitle}</p>
+          <ul>
+            {diagnostics.map((message, index) => (
+              <li key={index}>{message}</li>
+            ))}
+          </ul>
+        </>
+      }
+    />
+  );
+}
 
 const getRoutingRowStyle = (euiTheme: UseEuiTheme['euiTheme']) => css`
   padding-left: ${euiTheme.size.xs};
@@ -90,6 +122,14 @@ function RoutingRuleRow({ rule }: { rule: RoutingNodeRule }) {
             </EuiText>
           </EuiToolTip>
         </EuiFlexItem>
+        {rule.diagnostics ? (
+          <EuiFlexItem grow={false}>
+            <RoutingDiagnosticsIcon
+              diagnostics={rule.diagnostics}
+              dataTestSubj="streamsCanvasRoutingRuleDiagnostics"
+            />
+          </EuiFlexItem>
+        ) : null}
         {rule.action === 'copy' ? (
           <EuiFlexItem grow={false}>
             <EuiText color="subdued">
@@ -114,7 +154,7 @@ export function RoutingNode({ data, selected, dragging }: NodeProps<RoutingNodeT
 
   return (
     <>
-      <ConnectionHandle type="target" position={Position.Left} isConnectable={false} />
+      <ConnectionHandle type="target" position={Position.Left} isConnectable />
       <EuiPanel
         // `nokey` stops React Flow from arming a marquee when a Shift+drag starts
         // on the card, so Shift+click multi-select stays stable.
@@ -127,6 +167,7 @@ export function RoutingNode({ data, selected, dragging }: NodeProps<RoutingNodeT
           width: ROUTING_NODE_WIDTH,
           selected,
           dragging,
+          danger: data.diagnostics !== undefined,
         })}
       >
         <EuiFlexGroup gutterSize="none" alignItems="stretch" responsive={false}>
@@ -137,7 +178,7 @@ export function RoutingNode({ data, selected, dragging }: NodeProps<RoutingNodeT
               border-right: 2px solid ${euiTheme.border.color};
             `}
           >
-            <EuiFlexGroup alignItems="center">
+            <EuiFlexGroup alignItems="center" direction="column" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiIcon
                   type="branch"
@@ -149,6 +190,14 @@ export function RoutingNode({ data, selected, dragging }: NodeProps<RoutingNodeT
                   `}
                 />
               </EuiFlexItem>
+              {data.diagnostics ? (
+                <EuiFlexItem grow={false}>
+                  <RoutingDiagnosticsIcon
+                    diagnostics={data.diagnostics}
+                    dataTestSubj="streamsCanvasRoutingNodeDiagnostics"
+                  />
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow>

@@ -10,7 +10,6 @@ import { useDynamicEntityFlyout } from './use_dynamic_entity_flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useKibana } from '../../common/lib/kibana';
 import { useOnExpandableFlyoutClose } from '../../flyout/shared/hooks/use_on_expandable_flyout_close';
-import { useIsNewFlyoutEnabled } from '../../common/hooks/use_is_new_flyout_enabled';
 import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 
@@ -26,16 +25,11 @@ jest.mock('../../flyout/shared/hooks/use_on_expandable_flyout_close', () => ({
   useOnExpandableFlyoutClose: jest.fn(),
 }));
 
-jest.mock('../../common/hooks/use_is_new_flyout_enabled', () => ({
-  useIsNewFlyoutEnabled: jest.fn(),
-}));
-
 jest.mock('../../flyout_v2/use_flyout_api', () => ({
   useFlyoutApi: jest.fn(),
 }));
 
 describe('useDynamicEntityFlyout', () => {
-  let openFlyoutMock: jest.Mock;
   let closeFlyoutMock: jest.Mock;
   let openHostFlyoutMock: jest.Mock;
   let openUserFlyoutMock: jest.Mock;
@@ -45,7 +39,6 @@ describe('useDynamicEntityFlyout', () => {
   let onFlyoutCloseMock: jest.Mock;
 
   beforeEach(() => {
-    openFlyoutMock = jest.fn();
     closeFlyoutMock = jest.fn();
     openHostFlyoutMock = jest.fn();
     openUserFlyoutMock = jest.fn();
@@ -55,10 +48,8 @@ describe('useDynamicEntityFlyout', () => {
     onFlyoutCloseMock = jest.fn();
 
     (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
-      openFlyout: openFlyoutMock,
       closeFlyout: closeFlyoutMock,
     });
-    (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(true);
     (useFlyoutApi as jest.Mock).mockReturnValue({
       openHostFlyout: openHostFlyoutMock,
       openUserFlyout: openUserFlyoutMock,
@@ -165,38 +156,6 @@ describe('useDynamicEntityFlyout', () => {
       contextID: 'context1',
       origin: FLYOUT_ORIGIN.ASSET_INVENTORY,
     });
-  });
-
-  it('should open the legacy generic entity panel when the new flyout is disabled', () => {
-    (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(false);
-
-    const { result } = renderHook(() =>
-      useDynamicEntityFlyout({ onFlyoutClose: onFlyoutCloseMock })
-    );
-
-    act(() => {
-      result.current.openDynamicFlyout({
-        entityDocId: '123',
-        entityId: '123',
-        entityType: 'container',
-        scopeId: 'scope1',
-        contextId: 'context1',
-      });
-    });
-
-    expect(openFlyoutMock).toHaveBeenCalledWith({
-      right: {
-        id: 'generic-entity-panel',
-        params: {
-          entityDocId: '123',
-          entityId: '123',
-          contextID: 'context1',
-          scopeId: 'scope1',
-          isEngineMetadataExist: true,
-        },
-      },
-    });
-    expect(openGenericEntityFlyoutMock).not.toHaveBeenCalled();
   });
 
   it('should show an error toast if entity name is missing for user, host, or service entities', () => {

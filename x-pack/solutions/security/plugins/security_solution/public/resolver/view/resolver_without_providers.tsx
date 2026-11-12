@@ -7,7 +7,7 @@
 
 import React, { useCallback, useContext } from 'react';
 import { useSelector, useStore } from 'react-redux-v7';
-import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -33,6 +33,7 @@ import { ResolverNoProcessEvents } from './resolver_no_process_events';
 import { useAutotuneTimerange } from './use_autotune_timerange';
 import type { State } from '../../common/store/types';
 import { DocumentDetailsAnalyzerPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
+import { FlyoutBody } from '../../flyout/shared/components/flyout_body';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import { useDefaultDocumentFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
@@ -169,13 +170,13 @@ export const ResolverWithoutProviders = React.memo(
             store,
             history,
             children: (
-              <EuiPanel>
+              <FlyoutBody panelProps={{ paddingSize: 'none' }}>
                 <PanelRouter
                   id={resolverComponentInstanceID}
                   nodeEventOnClick={onShowEvent}
                   renderCellActions={renderCellActions}
                 />
-              </EuiPanel>
+              </FlyoutBody>
             ),
           }),
           {

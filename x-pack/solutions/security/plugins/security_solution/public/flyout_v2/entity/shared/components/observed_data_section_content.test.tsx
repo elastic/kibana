@@ -31,9 +31,6 @@ jest.mock('../../../../common/components/ml/criteria/get_criteria_from_users_typ
 jest.mock('../../../../common/components/ml/anomaly/anomaly_table_euid', () => ({
   buildAnomaliesTableInfluencersFilterQuery: () => undefined,
 }));
-jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
-  useIsNewFlyoutEnabled: () => false,
-}));
 jest.mock('../../host/main/hooks/use_observed_host_fields', () => ({
   useObservedHostFields: () => [],
 }));

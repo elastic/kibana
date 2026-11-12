@@ -7,10 +7,16 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { EuiProvider } from '@elastic/eui';
+import { EuiProvider, useResizeObserver } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationSummary } from '../../../../common';
 import { InvestigationCard } from './card';
+
+// jsdom has no ResizeObserver, so the card's actions width is supplied here.
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  useResizeObserver: jest.fn(() => ({ width: 0, height: 0 })),
+}));
 
 const investigation = (overrides: Partial<InvestigationSummary> = {}): InvestigationSummary => ({
   id: 'conv-1',
@@ -155,5 +161,19 @@ describe('InvestigationCard', () => {
     fireEvent.click(screen.getByTestId('cardAction'));
 
     expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('reserves the measured width of the actions so they do not cover the age', () => {
+    jest.mocked(useResizeObserver).mockReturnValue({ width: 184, height: 32 });
+
+    renderCard({
+      investigation: investigation(),
+      actions: <button type="button">Action</button>,
+    });
+
+    expect(screen.getByTestId('investigationCardActionsSpacer')).toHaveStyleRule(
+      'inline-size',
+      '184px'
+    );
   });
 });

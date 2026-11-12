@@ -37,7 +37,7 @@ const makeHandlerParams = () => {
       return { executionId: 'execution-1', isNew: true };
     }
   );
-  const request = {};
+  const request = { spaceId: 'default' };
   const server = {
     agentBuilder: {},
     inference: {},
@@ -96,6 +96,11 @@ it('passes a strict connector override and request-scoped resolver to the discov
     uiSettings: server.core.uiSettings,
     step: 'discovery',
     requestedId: 'model-alias',
+  });
+  expect(handlerParams.telemetry.trackSignificantEventsDiscoveryTriggered).toHaveBeenCalledWith({
+    workflow_execution_id: 'execution-1',
+    execution_id: 'execution-1',
+    space_id: 'space-a',
   });
 });
 

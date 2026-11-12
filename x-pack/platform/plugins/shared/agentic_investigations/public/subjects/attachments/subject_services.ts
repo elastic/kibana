@@ -19,7 +19,10 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
+import type { ComponentType } from 'react';
+import type { AlertSubjectSnapshot } from '../../../common/subjects/subject';
 import { isUniversalAlertSnapshot } from '../../../common/subjects/subject';
+import type { AlertFlyoutProps } from '../../types';
 
 /** The services a subject row reads. Every entry is optional: without one the row degrades. */
 export interface SubjectServices {
@@ -36,6 +39,14 @@ export interface SubjectServices {
   expressions?: ExpressionsStart;
   spaces?: SpacesPluginStart;
   unifiedDocViewer?: UnifiedDocViewerStart;
+  /**
+   * The flyout a solution registered for the alerts of a `source`, if any. A getter, because the
+   * solution registers after this plugin starts.
+   */
+  getAlertFlyout?: (
+    source?: string,
+    snapshot?: AlertSubjectSnapshot
+  ) => ComponentType<AlertFlyoutProps> | undefined;
 }
 
 /** The services the alerting v2 episode flyout requires, all present. */
@@ -83,7 +94,15 @@ export const hasEpisodeFlyoutServices = (
  * the episode flyout's services, a classic alert only needs `http`. Lives here, not next to the
  * flyout, so a row can ask without loading the flyout's bundle.
  */
-export const canOpenSubjectFlyout = (services: SubjectServices, source?: string): boolean =>
-  isUniversalAlertSnapshot({ source })
+export const canOpenSubjectFlyout = (
+  services: SubjectServices,
+  source?: string,
+  snapshot?: AlertSubjectSnapshot
+): boolean => {
+  if (services.getAlertFlyout?.(source, snapshot)) {
+    return true;
+  }
+  return isUniversalAlertSnapshot({ source })
     ? hasEpisodeFlyoutServices(services)
     : services.http !== undefined;
+};

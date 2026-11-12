@@ -397,6 +397,62 @@ describe('runDefaultAgentMode', () => {
     });
   });
 
+  describe('attachment_tools capability', () => {
+    const setupBase = (context: ReturnType<typeof createAgentHandlerContextMock>) => {
+      jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+        connector: { name: 'test-connector' },
+        chatModel: {} as any,
+      } as any);
+      context.toolManager.getToolIdMapping.mockReturnValue(new Map());
+      context.toolManager.getDynamicToolIds.mockReturnValue([]);
+      getPendingTurnMock.mockReturnValue(undefined);
+      selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
+      prepareConversationMock.mockResolvedValue({
+        timeline: [],
+        nextInput: { message: 'hello', attachments: [] },
+        attachments: [],
+        attachmentTypes: [],
+        attachmentStateManager: context.attachmentStateManager,
+      } as any);
+      extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
+      createAgentGraphMock.mockReturnValue({ streamEvents: jest.fn(() => []) } as any);
+    };
+
+    it('passes the resolved "off" value to selectTools', async () => {
+      const context = createAgentHandlerContextMock();
+      setupBase(context);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: {
+            tools: [],
+            capabilities: { attachment_tools: { enabled: false } },
+          },
+        },
+        context
+      );
+
+      expect(selectToolsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ capabilities: { attachmentTools: false } })
+      );
+    });
+
+    it('passes "on" to selectTools when the agent has no capabilities', async () => {
+      const context = createAgentHandlerContextMock();
+      setupBase(context);
+
+      await runDefaultAgentMode(
+        { nextInput: { message: 'hello' }, agentConfiguration: { tools: [] } },
+        context
+      );
+
+      expect(selectToolsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ capabilities: { attachmentTools: true } })
+      );
+    });
+  });
+
   describe('threaded roundId', () => {
     const setupBase = async (context: ReturnType<typeof createAgentHandlerContextMock>) => {
       jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
@@ -740,7 +796,6 @@ describe('runDefaultAgentMode', () => {
       expect(streamOptions(streamEvents).streamMode).toBe('values');
       // a sub-agent run must not inherit the checkpoint namespace of the parent node it runs in
       expect(streamOptions(streamEvents).configurable).toStrictEqual({ checkpoint_ns: '' });
-      expect(graphParams.todoStateManager).toBe(context.todoStateManager);
       // fresh run: starts at init with no pending calls
       const command = initialCommand(streamEvents);
       expect(command.goto).toEqual([nodeNames.init]);

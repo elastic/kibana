@@ -10,6 +10,7 @@ import {
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_INVESTIGATION_ATTACH_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_EVENT_STATUS_CHANGED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE,
@@ -29,6 +30,7 @@ import {
   agentToolKnowledgeIndicatorIdentificationStartedSchema,
   detectionScanSchema,
   discoveryTriggeredSchema,
+  eventStatusChangedSchema,
   knowledgeIndicatorFeaturesIdentifiedSchema,
   knowledgeIndicatorQueriesGeneratedSchema,
   onboardingScheduledSchema,
@@ -69,6 +71,11 @@ const agentToolEventInvestigationAttachEventType = {
   schema: agentToolEventInvestigationAttachSchema,
 };
 
+const eventStatusChangedEventType = {
+  eventType: SIGNIFICANT_EVENTS_EVENT_STATUS_CHANGED_EVENT_TYPE,
+  schema: eventStatusChangedSchema,
+};
+
 const discoveryTriggeredEventType = {
   eventType: SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE,
   schema: discoveryTriggeredSchema,
@@ -104,6 +111,7 @@ export {
   agentToolKiIdentificationStartedEventType,
   detectionScanEventType,
   discoveryTriggeredEventType,
+  eventStatusChangedEventType,
   knowledgeIndicatorEventsGeneratedEventType,
   knowledgeIndicatorFeaturesIdentifiedEventType,
   onboardingScheduledEventType,

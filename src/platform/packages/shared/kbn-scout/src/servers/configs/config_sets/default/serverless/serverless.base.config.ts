@@ -11,7 +11,14 @@ import { resolve, join } from 'path';
 import { format as formatUrl } from 'url';
 import Fs from 'fs';
 
-import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
+import {
+  CA_CERT_PATH,
+  KBN_CERT_PATH,
+  KBN_KEY_PATH,
+  KBN_SERVERLESS_UIAM_CERTS,
+  kibanaDevServiceAccount,
+} from '@kbn/dev-utils';
+import type { KbnServerlessProjectType } from '@kbn/dev-utils';
 import {
   fleetPackageRegistryDockerImage,
   defineDockerServersConfig,
@@ -68,6 +75,25 @@ const servers = {
     password: 'changeme',
   },
 };
+
+const UIAM_CERT_ARG_PREFIXES = [
+  '--xpack.security.uiam.ssl.certificate=',
+  '--xpack.security.uiam.ssl.key=',
+];
+
+/**
+ * Swaps the UIAM client certificate of the base config, which names a search project, for the one
+ * of the given project type. UIAM reads Kibana's project type from the certificate, and refuses to
+ * let Kibana assume the service accounts of a project of another type.
+ */
+export const withUiamCertOfProject = (
+  serverArgs: string[],
+  projectType: KbnServerlessProjectType
+): string[] => [
+  ...serverArgs.filter((arg) => !UIAM_CERT_ARG_PREFIXES.some((prefix) => arg.startsWith(prefix))),
+  `--xpack.security.uiam.ssl.certificate=${KBN_SERVERLESS_UIAM_CERTS[projectType].certPath}`,
+  `--xpack.security.uiam.ssl.key=${KBN_SERVERLESS_UIAM_CERTS[projectType].keyPath}`,
+];
 
 export const defaultConfig: ScoutServerConfig = {
   serverless: true,

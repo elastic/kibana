@@ -19,6 +19,7 @@ import {
   EVENT_DOCUMENT_LOAD,
   EVENT_EXCEPTION,
   EVENT_NAVIGATION,
+  EVENT_NAVIGATION_TIMING,
   EVENT_USER_ACTION_CLICK,
   EVENT_WEB_VITAL,
   OTEL_SPAN_NAME,
@@ -39,6 +40,14 @@ import {
   SESSIONS_VERSION,
   sessionsTransformId,
 } from '../../common/sessions';
+import { SESSION_ATTRIBUTE_FIELDS } from '../../common/session_attribute_fields';
+import { vitalStatsAggs } from '../lib/helpers/web_vitals';
+import {
+  eventCount,
+  failedRequests,
+  httpRequestDocuments,
+  requestsWithOutcome,
+} from '../lib/otel/queries';
 import { partitionFilters, type SessionsPartition } from './partitions';
 import {
   SOURCE_EVENT_OUTCOME_FIELD,
@@ -71,51 +80,6 @@ export const ERROR_FILTER = anyOf(eventNamed(EVENT_EXCEPTION), {
 });
 export const WEB_VITAL_FILTER = eventNamed(EVENT_WEB_VITAL);
 
-/**
- * Candidate source fields per summarized attribute, in priority order. The dest
- * pipeline keeps the first non-empty value, so the same attribute can come from
- * the event or resource scope.
- */
-export const SESSION_ATTRIBUTE_FIELDS = {
-  user: [
-    'attributes.user.email',
-    'resource.attributes.user.email',
-    'attributes.user.id',
-    'resource.attributes.user.id',
-    'attributes.user.name',
-    'resource.attributes.user.name',
-  ],
-  browser: [
-    'resource.attributes.browser.name',
-    'attributes.browser.name',
-    'resource.attributes.user_agent.name',
-    'attributes.user_agent.name',
-  ],
-  browserVersion: [
-    'resource.attributes.browser.version',
-    'attributes.browser.version',
-    'resource.attributes.user_agent.version',
-    'attributes.user_agent.version',
-  ],
-  os: [
-    'resource.attributes.os.name',
-    'attributes.os.name',
-    'resource.attributes.browser.platform',
-    'attributes.browser.platform',
-  ],
-  device: [
-    'resource.attributes.device.model.name',
-    'attributes.device.model.name',
-    'resource.attributes.device.type',
-  ],
-  countryIso: [
-    'attributes.client.geo.country_iso_code',
-    'resource.attributes.client.geo.country_iso_code',
-  ],
-  region: ['attributes.client.geo.region_name', 'resource.attributes.client.geo.region_name'],
-  city: ['attributes.client.geo.city_name', 'resource.attributes.client.geo.city_name'],
-} as const;
-
 type SessionAttribute = keyof typeof SESSION_ATTRIBUTE_FIELDS;
 
 const fieldsOf = (...attributes: SessionAttribute[]): readonly string[] =>
@@ -126,6 +90,7 @@ const fieldsOf = (...attributes: SessionAttribute[]): readonly string[] =>
  * fields, so user agent and geo still resolve when different events carry them.
  */
 export const SESSION_ATTRIBUTE_GROUPS = {
+  environment_seen: fieldsOf('environment'),
   user_seen: fieldsOf('user'),
   user_agent_seen: fieldsOf('browser', 'browserVersion', 'os', 'device'),
   geo_seen: fieldsOf('countryIso', 'region', 'city'),
@@ -166,19 +131,27 @@ const pageUrls = (size: number, order: { first: 'asc' } | { last: 'desc' }) => (
   },
 });
 
-// Names match in any case: semconv writes `cls`, the web-vitals library `CLS`.
+// Names match in any case: semconv writes `cls`, the web-vitals library `CLS`. Besides the p75 it
+// counts the samples, and those up to each rating threshold, as the applications list does.
 const webVitalAgg = (name: CoreWebVital) => ({
   filter: {
     bool: {
       filter: [
         WEB_VITAL_FILTER,
         { term: { [SOURCE_WEB_VITAL_NAME_FIELD]: { value: name, case_insensitive: true } } },
+        { exists: { field: SOURCE_WEB_VITAL_VALUE_FIELD } },
       ],
     },
   },
   aggs: {
-    p75: { percentiles: { field: SOURCE_WEB_VITAL_VALUE_FIELD, percents: [75] } },
+    ...vitalStatsAggs(SOURCE_WEB_VITAL_VALUE_FIELD, name),
+    samples: { value_count: { field: SOURCE_WEB_VITAL_VALUE_FIELD } },
   },
+});
+
+/** The HTTP requests the browser made that `outcome` matches, e.g. the failed ones. */
+const httpRequestsAgg = (outcome: { filter: QueryDslQueryContainer }) => ({
+  filter: { bool: { filter: [...httpRequestDocuments(), outcome.filter] } },
 });
 
 export const sessionsIndexMappings = {
@@ -191,6 +164,12 @@ export const sessionsIndexMappings = {
     duration_ms: { type: 'long' },
     event_count: { type: 'long' },
     page_view_count: { type: 'long' },
+    // Page loads (`browser.navigation_timing`), JS errors (`exception`) and HTTP requests count
+    // what the applications list counts, which differs from the page views and errors above.
+    page_load_count: { type: 'long' },
+    js_error_count: { type: 'long' },
+    http_request_count: { type: 'long' },
+    http_failed_request_count: { type: 'long' },
     click_count: { type: 'long' },
     error_count: { type: 'long' },
     bounced: { type: 'boolean' },
@@ -198,6 +177,7 @@ export const sessionsIndexMappings = {
     entry_page: { type: 'keyword' },
     exit_page: { type: 'keyword' },
     journey: { type: 'keyword' },
+    environment: { type: 'keyword' },
     error: { properties: { message: { type: 'keyword', ignore_above: 1024 } } },
     user: { properties: { key: { type: 'keyword' } } },
     user_agent: {
@@ -215,9 +195,27 @@ export const sessionsIndexMappings = {
         city: { type: 'keyword' },
       },
     },
+    // The p75 of each vital's samples in the session.
     web_vitals: {
       properties: Object.fromEntries(
         CORE_WEB_VITALS.map((name) => [name, { type: 'double' as const }])
+      ),
+    },
+    // The samples of each vital and how many are good, need improvement or are poor, which add up
+    // across sessions, unlike the p75.
+    web_vital_samples: {
+      properties: Object.fromEntries(
+        CORE_WEB_VITALS.map((name) => [
+          name,
+          {
+            properties: {
+              count: { type: 'long' as const },
+              good: { type: 'long' as const },
+              needs_improvement: { type: 'long' as const },
+              poor: { type: 'long' as const },
+            },
+          },
+        ])
       ),
     },
   },
@@ -340,6 +338,10 @@ export const sessionsDestPipeline: IngestPutPipelineRequest = {
           long end = millisOf(ctx.end_time);
           ctx.duration_ms = start >= 0 && end >= start ? end - start : 0L;
           ctx.page_view_count = countOf(ctx.page_view_count);
+          ctx.page_load_count = countOf(ctx.page_load_count);
+          ctx.js_error_count = countOf(ctx.js_error_count);
+          ctx.http_request_count = countOf(ctx.http_request_count);
+          ctx.http_failed_request_count = countOf(ctx.http_failed_request_count);
           ctx.click_count = countOf(ctx.click_count);
           ctx.error_count = countOf(ctx.error_count);
           ctx.has_error = ctx.error_count > 0;
@@ -366,9 +368,11 @@ export const sessionsDestPipeline: IngestPutPipelineRequest = {
           ctx.entry_page = journey.isEmpty() ? exitPage : journey[0];
           ctx.exit_page = exitPage != null ? exitPage : (journey.isEmpty() ? null : journey[journey.size() - 1]);
 
+          def environmentBag = firstMetrics(ctx.environment_seen);
           def userBag = firstMetrics(ctx.user_seen);
           def userAgentBag = firstMetrics(ctx.user_agent_seen);
           def geoBag = firstMetrics(ctx.geo_seen);
+          ctx.environment = firstOf(environmentBag, fields.environment);
           ctx.user = ['key': firstOf(userBag, fields.user)];
           ctx.user_agent = [
             'browser': firstOf(userAgentBag, fields.browser),
@@ -383,14 +387,27 @@ export const sessionsDestPipeline: IngestPutPipelineRequest = {
           ];
 
           def vitals = new HashMap();
+          def vitalSamples = new HashMap();
           for (name in params.vitals) {
-            vitals[name] = p75Of(ctx[name]);
+            def agg = ctx[name];
+            long samples = agg instanceof Map ? countOf(agg.samples) : 0L;
+            long upToGood = agg instanceof Map ? countOf(agg.upToGood) : 0L;
+            long upToNeedsImprovement = agg instanceof Map ? countOf(agg.upToNeedsImprovement) : 0L;
+            vitals[name] = p75Of(agg);
+            vitalSamples[name] = [
+              'count': samples,
+              'good': upToGood,
+              'needs_improvement': upToNeedsImprovement - upToGood,
+              'poor': samples - upToNeedsImprovement
+            ];
             ctx.remove(name);
           }
           ctx.web_vitals = vitals;
+          ctx.web_vital_samples = vitalSamples;
 
           ctx.remove('pages');
           ctx.remove('exit');
+          ctx.remove('environment_seen');
           ctx.remove('user_seen');
           ctx.remove('user_agent_seen');
           ctx.remove('geo_seen');
@@ -406,6 +423,10 @@ export const sessionsDestPipeline: IngestPutPipelineRequest = {
       remove: {
         field: [
           'page_view_count',
+          'page_load_count',
+          'js_error_count',
+          'http_request_count',
+          'http_failed_request_count',
           'click_count',
           'error_count',
           'pages',
@@ -470,6 +491,11 @@ export const buildSessionsTransform = ({
       end_time: { max: { field: '@timestamp' } },
       event_count: { value_count: { field: '@timestamp' } },
       page_view_count: { filter: PAGE_VIEW_FILTER },
+      // The applications list's own definitions, so both count the same events.
+      page_load_count: eventCount(EVENT_NAVIGATION_TIMING),
+      js_error_count: eventCount(EVENT_EXCEPTION),
+      http_request_count: httpRequestsAgg(requestsWithOutcome()),
+      http_failed_request_count: httpRequestsAgg(failedRequests()),
       click_count: { filter: CLICK_FILTER },
       error_count: { filter: ERROR_FILTER },
       pages: pageUrls(SESSIONS_JOURNEY_URL_CANDIDATES, { first: 'asc' }),
