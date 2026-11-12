@@ -16,6 +16,7 @@ import {
   LAST_SEEN_COLUMN,
 } from '../inventory/generator';
 import type { GeneratedQuery, QueryPlan } from '../inventory/generator';
+import { noReadableIndexReason, partialValuesReason } from '../inventory/reasons';
 import type { ListAttributeValuesRequest } from '../inventory/types';
 import type { AttributeValuesResponse } from '../routes/types';
 import { probeAndPlanSources, toTypeDefinitionError } from './planning';
@@ -37,10 +38,6 @@ interface AttributeValuesPlan {
   /** One entry per source whose probe failed. */
   probeErrors: SourceError[];
 }
-
-// The `errors[]` reason for a values query whose response has `is_partial: true`.
-const PARTIAL_VALUES_REASON =
-  'partial result: some shards or clusters did not answer, so values may be missing';
 
 const uniqueErrors = (errors: SourceError[]): SourceError[] => [
   ...new Map(errors.map((error) => [JSON.stringify(error), error])).values(),
@@ -154,7 +151,7 @@ export const listAttributeValues = async (
       errors.push({
         indexPattern: plan.indexPattern,
         status: null,
-        reason: `no readable index behind "${plan.indexPattern}" maps @timestamp`,
+        reason: noReadableIndexReason(plan.indexPattern),
       });
       return;
     }
@@ -162,7 +159,7 @@ export const listAttributeValues = async (
       errors.push({
         indexPattern: plan.indexPattern,
         status: null,
-        reason: PARTIAL_VALUES_REASON,
+        reason: partialValuesReason(),
       });
     }
     const labels = plan.attributes.find(({ name }) => name === attribute)?.valueLabels;

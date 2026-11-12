@@ -245,6 +245,7 @@
     "xpack.serverlessWorkplaceAI": "solutions/workplaceai/plugins/serverless_workplace_ai",
     "xpack.sloShared": "platform/plugins/shared/slo_shared",
     "xpack.workplaceai": "solutions/workplaceai/plugins/workplace_ai_app",
+    "xpack.entityInventory": "solutions/observability/plugins/entity_inventory",
     "xpack.entityInventoryApp": ["solutions/observability/plugins/entity_inventory_app"],
     "xpack.agentBuilderDashboards": "platform/plugins/shared/agent_builder_dashboards",
     "xpack.alertingV2EpisodesUi": "platform/packages/shared/response-ops/alerting-v2-episodes-ui",

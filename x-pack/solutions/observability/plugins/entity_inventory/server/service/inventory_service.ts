@@ -45,6 +45,7 @@ import type {
   ListResponse,
   UnavailableColumn,
 } from '../routes/types';
+import { partialRowsReason } from '../inventory/reasons';
 import { listAttributeValues } from './list_attribute_values';
 import { probeAndPlanSources, toTypeDefinitionError } from './planning';
 
@@ -57,10 +58,6 @@ interface ListPlan {
   /** One entry per source whose probe failed; its plans are left out of `plans` and `queries`. */
   probeErrors: SourceError[];
 }
-
-// The `errors[]` reason for a plan whose response has `is_partial: true`.
-const PARTIAL_RESULT_REASON =
-  'partial result: some shards or clusters did not answer, so rows may be missing';
 
 const toUnavailableColumns = (
   { index, indexPattern }: QueryPlan,
@@ -177,7 +174,7 @@ export class InventoryService {
         errors.push({
           indexPattern: plan.indexPattern,
           status: null,
-          reason: PARTIAL_RESULT_REASON,
+          reason: partialRowsReason(),
         });
       }
       const { usable, reason, unavailableFields } = interpretPlanResult(result, identity, columns);
