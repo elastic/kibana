@@ -43,6 +43,6 @@ describe('createBlindSpotsStore', () => {
         outcome: 'cause_not_confirmed',
       }),
     });
-    expect(BLIND_SPOTS_INDEX).toBe('.nightshift-blind-spots');
+    expect(BLIND_SPOTS_INDEX).toBe('.chat-nightshift-blind-spots');
   });
 });

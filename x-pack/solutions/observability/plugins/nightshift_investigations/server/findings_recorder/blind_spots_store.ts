@@ -6,16 +6,17 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { chatSystemIndex } from '@kbn/agent-builder-server';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import type { HypothesisStatus } from '@kbn/agentic-investigations-plugin/common';
 import type { MissingDataItem } from '../../common/missing_data';
 
 /**
- * Where the findings recorder keeps what an investigation could not settle. Dot-prefixed, like the
- * chat system indices, and read-only for now: nothing in the product reads it, so the data can be checked across clusters first.
+ * Where the findings recorder keeps what an investigation could not settle. A chat system index, as
+ * Elasticsearch lets Kibana's internal user create those, and read-only for now: nothing in the product reads it, so the data can be checked across clusters first.
  */
-export const BLIND_SPOTS_INDEX = '.nightshift-blind-spots';
+export const BLIND_SPOTS_INDEX = chatSystemIndex('nightshift-blind-spots');
 
 const storageSettings = {
   name: BLIND_SPOTS_INDEX,
