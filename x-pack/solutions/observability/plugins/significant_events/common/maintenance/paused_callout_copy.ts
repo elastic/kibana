@@ -17,7 +17,7 @@ export const getDetectionPausedCalloutTitle = (
 ): string => {
   if (isPausedByFeatureFlag(status)) {
     return i18n.translate('xpack.significantEvents.maintenance.pausedCallout.featureFlagTitle', {
-      defaultMessage: 'Paused automatically because Nightshift was turned off',
+      defaultMessage: 'Paused automatically because nightshift was turned off',
     });
   }
 
@@ -54,7 +54,7 @@ export const getDetectionPausedCalloutBody = ({
         'xpack.significantEvents.maintenance.pausedCallout.featureFlagReadOnlyBody',
         {
           defaultMessage:
-            '{activityScope} Manual triggers are blocked. Turning Nightshift back on does not resume activity. An administrator with the Nightshift Manage engines privilege must resume activity from settings.',
+            '{activityScope} Manual triggers are blocked. Turning nightshift back on does not resume activity. An administrator with the nightshift Manage engines privilege must resume activity from settings.',
           values: { activityScope },
         }
       );
@@ -62,7 +62,7 @@ export const getDetectionPausedCalloutBody = ({
 
     return i18n.translate('xpack.significantEvents.maintenance.pausedCallout.readOnlyBody', {
       defaultMessage:
-        '{activityScope} Manual triggers are blocked. An administrator with the Nightshift Manage engines privilege must resume activity from settings.',
+        '{activityScope} Manual triggers are blocked. An administrator with the nightshift Manage engines privilege must resume activity from settings.',
       values: { activityScope },
     });
   }
@@ -70,7 +70,7 @@ export const getDetectionPausedCalloutBody = ({
   if (isPausedByFeatureFlag(status)) {
     return i18n.translate('xpack.significantEvents.maintenance.pausedCallout.featureFlagBody', {
       defaultMessage:
-        '{activityScope} Manual triggers are blocked. Turning Nightshift back on does not resume activity. Resume from settings.',
+        '{activityScope} Manual triggers are blocked. Turning nightshift back on does not resume activity. Resume from settings.',
       values: { activityScope },
     });
   }
@@ -91,7 +91,7 @@ export const getDetectionPausedSettingsCalloutBody = (
       'xpack.significantEvents.maintenance.pausedCallout.settingsFeatureFlagBody',
       {
         defaultMessage:
-          '{activityScope} Manual triggers are blocked. Turning Nightshift back on does not resume activity.',
+          '{activityScope} Manual triggers are blocked. Turning nightshift back on does not resume activity.',
         values: { activityScope },
       }
     );

@@ -74,6 +74,7 @@ const suppressedEventData: EventDrivenExecutionSuppressedParams = {
   isManaged: false,
   isTestRun: false,
   logTriggerEventsEnabled: false,
+  runAs: 'user',
   spaceId: 'default',
   triggerType: 'event',
   workflowExecutionId: 'exec-id',
@@ -180,6 +181,33 @@ describe('workflowExecutionEventSchemas', () => {
         );
         const [[, eventData]] = reportEventSpy.mock.calls;
         expect(reportedFieldsAmong(eventData, ALL_LINEAGE_FIELDS)).toEqual([]);
+      }
+    );
+
+    it.each([ExecutionStatus.COMPLETED, ExecutionStatus.FAILED, ExecutionStatus.CANCELLED])(
+      'accepts the %s event of an execution that inherited a service account',
+      (finalStatus) => {
+        const client = new WorkflowExecutionTelemetryClient(analytics, logger);
+        const reportEventSpy = jest.spyOn(analytics, 'reportEvent');
+
+        client.reportWorkflowExecutionTerminated({
+          finalStatus,
+          stepExecutions: [],
+          workflowExecution: {
+            ...createChildWorkflowExecution(finalStatus),
+            effectiveIdentity: {
+              type: 'service_account',
+              id: 'sa-parent',
+              inheritedFrom: { workloadId: 'parent-wf-id' },
+            },
+          },
+        });
+
+        expect(logger.error).not.toHaveBeenCalled();
+        expect(reportEventSpy).toHaveBeenCalledWith(
+          expect.any(String),
+          expect.objectContaining({ runAs: 'service_account', runAsInherited: true })
+        );
       }
     );
 

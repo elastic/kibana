@@ -43,8 +43,8 @@ penalty is applied downstream, so do NOT lower ``score`` yourself.
 
 Materially-wrong-claim flag: if the report ALSO makes a materially wrong or misleading
 claim (e.g. invents an unrelated additional cause, or asserts a mechanism contradicted by
-the confirmed cause), set materially_wrong_claim=true and quote or paraphrase the offending
-text in offending_claim (this later costs the report one point). Naming several plausible
+the confirmed cause), set materially_wrong_claim=true and paraphrase the offending
+claim in offending_claim (this later costs the report one point). Naming several plausible
 candidate causes is NOT by itself a materially wrong claim. Do not set
 materially_wrong_claim=true without naming the offending claim.
 

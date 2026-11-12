@@ -23,14 +23,17 @@ jest.mock('./services/doc_install_status');
 jest.mock('./services/doc_manager');
 jest.mock('./routes');
 jest.mock('./tasks');
+jest.mock('./artifact_repository');
 import { registerRoutes } from './routes';
 import { PackageInstaller } from './services/package_installer';
 import { registerTaskDefinitions, scheduleEnsureUpToDateTask } from './tasks';
 import { DocumentationManager } from './services/doc_manager';
+import { resolveArtifactRepositoryUrl } from './artifact_repository';
 
 const PackageInstallMock = PackageInstaller as jest.Mock;
 const DocumentationManagerMock = DocumentationManager as jest.Mock;
 const LockManagerServiceMock = LockManagerService as jest.Mock;
+const resolveArtifactRepositoryUrlMock = resolveArtifactRepositoryUrl as jest.Mock;
 
 const callOrderOf = (fn: jest.Mock): number => fn.mock.invocationCallOrder[0];
 
@@ -38,6 +41,9 @@ const callOrderOf = (fn: jest.Mock): number => fn.mock.invocationCallOrder[0];
 const createInitContext = (autoInstallEnabled = true) =>
   coreMock.createPluginInitializerContext({
     autoInstallEnabled,
+    artifactRepositoryUrl: 'https://artifacts.example',
+    artifactRepositoryProxyUrl: 'http://proxy.example',
+    useBundledArtifacts: true,
   } as ProductDocBaseConfig);
 
 const mockEisAvailable = (coreStart: ReturnType<typeof coreMock.createStart>) => {
@@ -86,6 +92,8 @@ describe('ProductDocBasePlugin', () => {
     PackageInstallMock.mockReturnValue({
       purgeArtifactsFolder: jest.fn().mockResolvedValue(undefined),
     });
+    resolveArtifactRepositoryUrlMock.mockReset();
+    resolveArtifactRepositoryUrlMock.mockReturnValue('file:///bundled/artifacts');
     LockManagerServiceMock.mockReset();
     LockManagerServiceMock.mockImplementation(() => ({
       withLock: jest.fn((_lockId: string, callback: () => Promise<unknown>) => callback()),
@@ -154,6 +162,23 @@ describe('ProductDocBasePlugin', () => {
         },
         search: expect.any(Function),
       });
+    });
+
+    it('creates the package installer with the resolved artifact repository', () => {
+      plugin.setup(coreMock.createSetup(), pluginSetupDeps);
+      plugin.start(coreMock.createStart(), pluginStartDeps);
+
+      expect(resolveArtifactRepositoryUrlMock).toHaveBeenCalledWith({
+        config: initContext.config.get(),
+        isServerless: false,
+        logger: expect.anything(),
+      });
+      expect(PackageInstallMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          artifactRepositoryUrl: 'file:///bundled/artifacts',
+          artifactRepositoryProxyUrl: 'http://proxy.example',
+        })
+      );
     });
 
     it('schedules ensureDefaultProductDocumentation and updateAll on startup when AI and EIS are enabled', async () => {
@@ -261,6 +286,15 @@ describe('ProductDocBasePlugin', () => {
         serverlessContext = createInitContext();
         (serverlessContext.env.packageInfo as Record<string, unknown>).buildFlavor = 'serverless';
         serverlessPlugin = new ProductDocBasePlugin(serverlessContext);
+      });
+
+      it('resolves the artifact repository for serverless', () => {
+        serverlessPlugin.setup(coreMock.createSetup(), pluginSetupDeps);
+        serverlessPlugin.start(coreMock.createStart(), pluginStartDeps);
+
+        expect(resolveArtifactRepositoryUrlMock).toHaveBeenCalledWith(
+          expect.objectContaining({ isServerless: true })
+        );
       });
 
       it('calls ensureDefaultSecurityLabs and updateSecurityLabsAll in serverless security projects', async () => {

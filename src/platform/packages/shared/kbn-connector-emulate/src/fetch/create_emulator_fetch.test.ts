@@ -76,9 +76,124 @@ describe('createEmulatorFetch', () => {
         request: 'GET https://api.example.com/v1/items',
         operation: 'listItems',
         matched: { method: 'get', path: '/items' },
+        responseSource: 'responder',
         status: 200,
         requestViolations: [],
         responseViolations: [],
+      },
+    ]);
+  });
+
+  it('records whether a fixture, a recording or the responder answered each call', async () => {
+    const { fetch, calls } = createEmulatorFetch({
+      specs: [spec],
+      fixtures: [
+        { operation: { method: 'GET', path: '/items' }, response: { status: 200, body: [] } },
+      ],
+      recordings: [
+        {
+          exchanges: [
+            {
+              operation: { method: 'POST', path: '/items' },
+              response: { status: 201, body: { name: 'recorded' } },
+            },
+          ],
+        },
+      ],
+    });
+
+    await fetch(`${BASE_URL}/items`);
+    await fetch(`${BASE_URL}/items`, postJson({ name: 'a' }));
+    await fetch(`${BASE_URL}/items?limit=500`);
+
+    expect(calls.map(({ operation, responseSource }) => ({ operation, responseSource }))).toEqual([
+      { operation: 'listItems', responseSource: 'fixture' },
+      { operation: 'createItem', responseSource: 'recording' },
+      // Rejected requests get no response from any source.
+      { operation: 'listItems', responseSource: undefined },
+    ]);
+  });
+
+  it('records a fixture with `when` as the source only of the requests it matches', async () => {
+    const { fetch, calls } = createEmulatorFetch({
+      specs: [spec],
+      fixtures: [
+        {
+          operation: { method: 'GET', path: '/items' },
+          when: { query: { limit: '1' } },
+          response: { status: 200, body: [{ name: 'one' }] },
+        },
+      ],
+    });
+
+    await fetch(`${BASE_URL}/items?limit=1`);
+    await fetch(`${BASE_URL}/items?limit=2`);
+
+    expect(calls.map(({ responseSource }) => responseSource)).toEqual(['fixture', 'generated']);
+  });
+
+  it('reports each call to onCall as it is recorded', async () => {
+    const onCall = jest.fn();
+    const { fetch, calls } = createEmulatorFetch({ specs: [spec], respond: listResponder, onCall });
+
+    await fetch(`${BASE_URL}/items`);
+    await fetch(`${BASE_URL}/unknown`);
+
+    expect(onCall.mock.calls.map(([call]) => call)).toEqual(calls);
+    expect(calls).toHaveLength(2);
+  });
+
+  it('empties calls on reset, keeping the array that tests hold', async () => {
+    const emulator = createEmulatorFetch({ specs: [spec], respond: listResponder });
+    const { calls } = emulator;
+
+    await emulator.fetch(`${BASE_URL}/items`);
+    emulator.reset();
+    await emulator.fetch(`${BASE_URL}/unknown`);
+
+    expect(emulator.calls).toBe(calls);
+    expect(calls).toEqual([expect.objectContaining({ status: 404 })]);
+  });
+
+  it('lists the operations it answers, for OpenAPI and protocol specs', () => {
+    const graphql = {
+      format: 'graphql' as const,
+      sdl: 'type Query { boards: [String] } type Mutation { createBoard(name: String): String }',
+      endpoints: ['https://api.example.com/graphql'],
+    };
+
+    const { operations } = createEmulatorFetch({ specs: { rest: spec, graphql } });
+
+    expect(operations).toEqual([
+      {
+        protocol: 'openapi',
+        id: 'listItems',
+        method: 'GET',
+        path: '/items',
+        servers: [BASE_URL],
+        source: 'rest',
+      },
+      {
+        protocol: 'openapi',
+        id: 'createItem',
+        method: 'POST',
+        path: '/items',
+        servers: [BASE_URL],
+        source: 'rest',
+      },
+      {
+        protocol: 'graphql',
+        name: 'query boards',
+        readOnly: true,
+        endpoints: ['https://api.example.com/graphql'],
+        source: 'graphql',
+      },
+      {
+        protocol: 'graphql',
+        name: 'mutation createBoard',
+        readOnly: false,
+        endpoints: ['https://api.example.com/graphql'],
+        source: 'graphql',
       },
     ]);
   });
@@ -172,7 +287,7 @@ describe('createEmulatorFetch', () => {
 
     it('sees requests the default chain would answer, which next() then answers', async () => {
       const seen: string[] = [];
-      const { fetch } = createEmulatorFetch({
+      const { fetch, calls } = createEmulatorFetch({
         specs: [spec],
         fixtures: [
           {
@@ -190,6 +305,7 @@ describe('createEmulatorFetch', () => {
 
       expect(seen).toEqual(['listItems']);
       expect(await response.json()).toEqual([{ name: 'fixture' }]);
+      expect(calls[0].responseSource).toBe('fixture');
     });
 
     it('gives each next() its own copy, so changing it leaves later requests alone', async () => {
@@ -295,5 +411,148 @@ describe('createEmulatorFetch', () => {
         expect.objectContaining({ source: 'recording', operation: 'GET /items', spec: 'v2' }),
       ]);
     });
+  });
+});
+
+describe('createEmulatorFetch with capture', () => {
+  const sendItem = (fetch: typeof globalThis.fetch, name: string) =>
+    fetch(`${BASE_URL}/items`, {
+      method: 'POST',
+      headers: { ...json, authorization: 'Bearer abc', 'x-api-key': 'key' },
+      body: JSON.stringify({ name, apiToken: 't', client_secret: 's', private_key: 'pem' }),
+    });
+
+  it('adds the redacted headers, query and bodies to each call', async () => {
+    const { fetch, calls } = createEmulatorFetch({ specs: [spec], capture: true });
+
+    await sendItem(fetch, 'a');
+    await fetch(`${BASE_URL}/items?limit=10&refresh_token=r`);
+
+    expect(calls[0].captured).toEqual({
+      request: {
+        headers: expect.objectContaining({
+          'content-type': 'application/json',
+          authorization: 'Bearer [redacted]',
+          'x-api-key': '[redacted]',
+        }),
+        query: {},
+        body: {
+          name: 'a',
+          apiToken: '[redacted]',
+          client_secret: '[redacted]',
+          private_key: '[redacted]',
+        },
+      },
+      response: { headers: json, body: { name: expect.any(String) } },
+    });
+    // An undeclared parameter is a violation, and the capture still shows what was sent.
+    expect(calls[1]).toMatchObject({
+      status: 422,
+      captured: { request: { query: { limit: '10', refresh_token: '[redacted]' } } },
+    });
+  });
+
+  it('passes calls with their capture to onCall', async () => {
+    const onCall = jest.fn();
+    const { fetch } = createEmulatorFetch({ specs: [spec], capture: true, onCall });
+
+    await sendItem(fetch, 'a');
+
+    expect(onCall).toHaveBeenCalledWith(
+      expect.objectContaining({ captured: expect.objectContaining({ request: expect.anything() }) })
+    );
+  });
+
+  it('keeps captures on the latest maxCalls calls, and every call', async () => {
+    const { fetch, calls, reset } = createEmulatorFetch({
+      specs: [spec],
+      capture: { maxCalls: 2 },
+    });
+
+    for (const name of ['a', 'b', 'c']) {
+      await sendItem(fetch, name);
+    }
+    expect(calls).toHaveLength(3);
+    expect(calls.map(({ captured }) => captured?.request.body)).toEqual([
+      undefined,
+      expect.objectContaining({ name: 'b' }),
+      expect.objectContaining({ name: 'c' }),
+    ]);
+
+    reset();
+    await sendItem(fetch, 'd');
+    await sendItem(fetch, 'e');
+    expect(calls.map(({ captured }) => captured?.request.body)).toEqual([
+      expect.objectContaining({ name: 'd' }),
+      expect.objectContaining({ name: 'e' }),
+    ]);
+  });
+
+  it('cuts bodies longer than maxBodyBytes and flags them', async () => {
+    const { fetch, calls } = createEmulatorFetch({
+      specs: [spec],
+      capture: { maxBodyBytes: 12 },
+      respond: listResponder,
+    });
+
+    await fetch(`${BASE_URL}/items`);
+
+    expect(calls[0].captured?.response).toEqual({
+      headers: json,
+      body: '[{"name":"a"',
+      bodyTruncated: true,
+    });
+  });
+
+  it('leaves calls without a capture by default', async () => {
+    const { fetch, calls, maxCapturedCalls } = createEmulatorFetch({ specs: [spec] });
+
+    await sendItem(fetch, 'a');
+
+    expect(calls[0]).not.toHaveProperty('captured');
+    expect(maxCapturedCalls).toBeUndefined();
+  });
+
+  it('redacts the API key parameters the spec declares, such as Figma’s header and Trello’s key', async () => {
+    const securedSpec = {
+      ...spec,
+      components: {
+        securitySchemes: {
+          figma: { type: 'apiKey', in: 'header', name: 'X-Figma-Token' },
+          // Camel-cased, as fetch lowercases the header it arrives in to x-docusign-authentication.
+          docusign: { type: 'apiKey', in: 'header', name: 'X-DocuSign-Authentication' },
+          trello: { type: 'apiKey', in: 'query', name: 'key' },
+        },
+      },
+      security: [{ figma: [], docusign: [], trello: [] }],
+    };
+    const { fetch, calls } = createEmulatorFetch({
+      specs: [securedSpec],
+      capture: true,
+      respond: listResponder,
+    });
+
+    await fetch(`${BASE_URL}/items?key=k`, {
+      headers: { 'X-Figma-Token': 'f', 'x-docusign-AUTHENTICATION': 'd' },
+    });
+
+    expect(calls[0]).toMatchObject({
+      status: 200,
+      captured: {
+        request: {
+          headers: {
+            'x-figma-token': '[redacted]',
+            'x-docusign-authentication': '[redacted]',
+          },
+          query: { key: '[redacted]' },
+        },
+      },
+    });
+  });
+
+  it.each([-1, 1.5])('refuses maxCalls %p when created', (maxCalls) => {
+    expect(() => createEmulatorFetch({ specs: [spec], capture: { maxCalls } })).toThrow(
+      'capture.maxCalls must be a whole number of at least 0'
+    );
   });
 });
