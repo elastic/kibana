@@ -9,7 +9,17 @@
       { "source": "notes_v3", "method": "POST", "path": "/crm/v3/objects/notes/batch/read" }
     ],
     "responseChecks": {
-      "errors": "A ticket's notes are optional: when the associations or notes lookup fails, for example for a missing scope, the action returns the ticket with notes: [] on purpose (see its description and the catch in hubspot.ts). The lookup of the object itself still throws."
+      "errors": {
+        "reason": "A ticket's notes are optional: when the associations or notes lookup fails, for example for a missing scope, the action returns the ticket with notes: [] on purpose (see its description and the catch in hubspot.ts). The lookup of the object itself is still checked.",
+        "operations": [
+          {
+            "source": "associations_v4",
+            "method": "POST",
+            "path": "/crm/v4/associations/{fromObjectType}/{toObjectType}/batch/read"
+          },
+          { "source": "notes_v3", "method": "POST", "path": "/crm/v3/objects/notes/batch/read" }
+        ]
+      }
     }
   },
   "searchBroad": {
