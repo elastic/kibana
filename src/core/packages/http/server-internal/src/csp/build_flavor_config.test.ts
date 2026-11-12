@@ -20,7 +20,7 @@ describe('getBuildFlavorCspConfig', () => {
 
   it('returns the enforced img-src, font-src and media-src sources for traditional', () => {
     expect(getBuildFlavorCspConfig('traditional', noConfig)).toEqual({
-      font_src: ['data:'],
+      font_src: [`'self'`, 'data:'],
       img_src: ['data:', 'blob:', 'https:', 'http:'],
       media_src: [`'self'`, 'kibana.estccdn.com'],
     });
@@ -30,7 +30,7 @@ describe('getBuildFlavorCspConfig', () => {
     const configured = cspConfig.schema.validate({ img_src: ['logos.example.test'] });
 
     expect(getBuildFlavorCspConfig('traditional', configured)).toEqual({
-      font_src: ['data:'],
+      font_src: [`'self'`, 'data:'],
       img_src: [],
       media_src: [`'self'`, 'kibana.estccdn.com'],
     });

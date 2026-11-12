@@ -35,7 +35,7 @@ export const getBuildFlavorCspConfig = (
   }
   const hasConfiguredImgSrc = configuredImgSrc.length > 0;
   return {
-    font_src: ['data:'],
+    font_src: [`'self'`, 'data:'],
     img_src: hasConfiguredImgSrc ? [] : ['data:', 'blob:', 'https:', 'http:'],
     media_src: [`'self'`, 'kibana.estccdn.com'],
   };
