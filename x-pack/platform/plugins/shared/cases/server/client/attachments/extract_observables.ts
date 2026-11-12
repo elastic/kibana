@@ -65,31 +65,25 @@ const toFlattedEcsData = (flatDoc: Record<string, unknown>): FlattedEcsData[] =>
     value: toStringArray(value),
   }));
 
+// A failed read throws, so the caller skips the extraction. Defaults would re-enable the fields and values that the owner turned off.
 const getObservableTypesForOwner = async (
   owner: string,
-  { unsecuredSavedObjectsClient, services: { caseConfigureService }, logger }: CasesClientArgs
+  { unsecuredSavedObjectsClient, services: { caseConfigureService } }: CasesClientArgs
 ) => {
-  try {
-    const configurations = await caseConfigureService.find({
-      unsecuredSavedObjectsClient,
-      options: {
-        filter: buildFilter({
-          filters: owner,
-          field: 'owner',
-          operator: 'or',
-          type: CASE_CONFIGURE_SAVED_OBJECT,
-        }),
-      },
-    });
-    const storedTypes = configurations.saved_objects[0]?.attributes.observableTypes ?? [];
+  const configurations = await caseConfigureService.find({
+    unsecuredSavedObjectsClient,
+    options: {
+      filter: buildFilter({
+        filters: owner,
+        field: 'owner',
+        operator: 'or',
+        type: CASE_CONFIGURE_SAVED_OBJECT,
+      }),
+    },
+  });
+  const storedTypes = configurations.saved_objects[0]?.attributes.observableTypes ?? [];
 
-    return resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, storedTypes);
-  } catch (error) {
-    logger.debug(
-      `[extractAndAddObservables] Using the default observable types for owner ${owner}: ${error}`
-    );
-    return DEFAULT_OBSERVABLE_TYPES;
-  }
+  return resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, storedTypes);
 };
 
 /**

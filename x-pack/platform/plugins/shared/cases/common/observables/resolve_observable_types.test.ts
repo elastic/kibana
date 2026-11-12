@@ -104,6 +104,26 @@ describe('resolveObservableTypes', () => {
 
     expect(resolved['ticket-ref'].paths).toEqual([]);
   });
+
+  it.each(['constructor', '__proto__', 'toString', 'hasOwnProperty'])(
+    'treats the custom key "%s" as a custom type',
+    (key) => {
+      const resolved = resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, [
+        { key, label: 'Custom', paths: [{ path: 'custom.field', enabled: true }] },
+        { key: 'observable-type-agent-id', paths: [{ path: 'agent.id', enabled: false }] },
+      ]);
+
+      expect(Object.getOwnPropertyDescriptor(resolved, key)?.value).toEqual({
+        key,
+        label: 'Custom',
+        paths: [{ path: 'custom.field', enabled: true }],
+        valuePattern: undefined,
+      });
+      expect(resolved['observable-type-agent-id'].paths).toEqual([
+        { path: 'agent.id', enabled: false },
+      ]);
+    }
+  );
 });
 
 describe('getCustomObservableTypes', () => {

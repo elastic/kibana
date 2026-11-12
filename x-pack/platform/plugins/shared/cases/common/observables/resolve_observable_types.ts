@@ -35,10 +35,14 @@ export const resolveObservableTypes = (
   defaultTypes: Readonly<Record<string, DefaultObservableType>>,
   storedTypes: readonly StoredObservableType[]
 ): Record<string, DefaultObservableType> => {
-  const resolvedTypes: Record<string, DefaultObservableType> = { ...defaultTypes };
+  // Keys of custom types are free text. Without a prototype, a key such as `__proto__` is an ordinary key.
+  const resolvedTypes: Record<string, DefaultObservableType> = Object.assign(
+    Object.create(null),
+    defaultTypes
+  );
 
   for (const { key, label, paths = [], valuePattern } of storedTypes) {
-    const defaultType = defaultTypes[key];
+    const defaultType = Object.hasOwn(defaultTypes, key) ? defaultTypes[key] : undefined;
 
     resolvedTypes[key] = defaultType
       ? { ...defaultType, paths: mergePaths(defaultType.paths, paths) }

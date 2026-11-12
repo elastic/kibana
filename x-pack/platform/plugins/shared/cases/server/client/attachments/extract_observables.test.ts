@@ -5,9 +5,15 @@
  * 2.0.
  */
 
+import { toKqlExpression } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import { type Case, type Observable } from '../../../common/types/domain';
-import { OBSERVABLE_TYPE_IPV4, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import {
+  CASE_CONFIGURE_SAVED_OBJECT,
+  OBSERVABLE_TYPE_IPV4,
+  SECURITY_SOLUTION_OWNER,
+} from '../../../common/constants';
 import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
 import {
   COMMENT_ATTACHMENT_TYPE,
@@ -71,6 +77,11 @@ describe('extractAndAddObservables', () => {
 
     clientArgs.services.licensingService = licensingService;
     clientArgs.services.caseService = caseService;
+    jest
+      .mocked(clientArgs.services.caseConfigureService.find)
+      .mockResolvedValue({ saved_objects: [] } as unknown as Awaited<
+        ReturnType<typeof clientArgs.services.caseConfigureService.find>
+      >);
   });
 
   describe('gating on extractObservables setting', () => {
@@ -404,10 +415,9 @@ describe('extractAndAddObservables', () => {
 
       await extractAndAddObservables('case-1', [alertAttachment], makeCase(true), clientArgs);
 
-      expect(clientArgs.services.caseConfigureService.find).toHaveBeenCalledWith(
-        expect.objectContaining({
-          options: { filter: expect.objectContaining({ type: 'function' }) },
-        })
+      const [[{ options }]] = jest.mocked(clientArgs.services.caseConfigureService.find).mock.calls;
+      expect(toKqlExpression(options?.filter as KueryNode)).toBe(
+        `${CASE_CONFIGURE_SAVED_OBJECT}.attributes.owner: ${SECURITY_SOLUTION_OWNER}`
       );
       const [[{ updatedAttributes }]] = caseService.patchCase.mock.calls;
       expect(updatedAttributes.observables).toEqual([
@@ -415,16 +425,28 @@ describe('extractAndAddObservables', () => {
       ]);
     });
 
-    it('extracts with the default observable types when the configuration read fails', async () => {
+    it('skips the extraction and logs a warning when the configuration read fails', async () => {
       jest
         .mocked(clientArgs.services.caseConfigureService.find)
         .mockRejectedValue(new Error('read failed'));
 
+      const result = await extractAndAddObservables(
+        'case-1',
+        [alertAttachment],
+        makeCase(true),
+        clientArgs
+      );
+
+      expect(result).toBeUndefined();
+      expect(caseService.patchCase).not.toHaveBeenCalled();
+      expect(clientArgs.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to extract observables for case case-1')
+      );
+    });
+
+    it('extracts with the default observable types when the owner has no configuration', async () => {
       await extractAndAddObservables('case-1', [alertAttachment], makeCase(true), clientArgs);
 
-      expect(clientArgs.logger.debug).toHaveBeenCalledWith(
-        expect.stringContaining('Using the default observable types')
-      );
       const [[{ updatedAttributes }]] = caseService.patchCase.mock.calls;
       expect(updatedAttributes.observables).toEqual([
         expect.objectContaining({ typeKey: 'observable-type-agent-id', value: 'agent-1' }),
