@@ -1075,6 +1075,22 @@ describe('RuleEventsClient', () => {
       );
       expect(updateEvent).toHaveBeenCalledTimes(writes);
     });
+
+    it('leaves a head whose severity another writer changed meanwhile', async () => {
+      const findLatestByEventIds = jest
+        .fn()
+        .mockResolvedValueOnce(new Map([[stored.event_id, stored]]))
+        .mockResolvedValueOnce(
+          new Map([[stored.event_id, { ...stored, severity: 'critical' as const }]])
+        );
+      const updateEvent = jest.fn().mockResolvedValue({ updated: false });
+      const client = asRuleEventsClient({ findLatestByEventIds, updateEvent });
+
+      expect(await client.syncSeverity({ eventId: stored.event_id, severity: 'high' })).toBe(
+        'superseded'
+      );
+      expect(updateEvent).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('findEpisodeIdsByEventIds', () => {
@@ -1112,6 +1128,26 @@ describe('RuleEventsClient', () => {
         expect((await client[method]([])).size).toBe(0);
         expect(query).not.toHaveBeenCalled();
         expect((await client[method](['id-1'])).size).toBe(0);
+      }
+    );
+
+    it.each(['findEpisodeIdsByEventIds', 'findEventIdsByEpisodeIds'] as const)(
+      '%s throws rather than return a truncated mapping',
+      async (method) => {
+        const { client, query } = createClient(
+          async () =>
+            ({
+              columns: [
+                { name: 'n', type: 'long' },
+                { name: 'event_id', type: 'keyword' },
+                { name: 'episode_id', type: 'keyword' },
+              ],
+              values: Array.from({ length: 10_000 }, (_, index) => [1, 'event-1', `ep-${index}`]),
+            } as unknown as ESQLSearchResponse)
+        );
+
+        await expect(client[method](['id-1'])).rejects.toThrow('10000 event-episode pairs');
+        expect(lastQuery(query)).toContain('LIMIT 10000');
       }
     );
   });

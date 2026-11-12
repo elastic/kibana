@@ -23,6 +23,7 @@ import type { ZodObject } from '@kbn/zod/v4';
 import type { z } from '@kbn/zod/v4';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { KnowledgeIndicatorClient } from '../../lib/knowledge_indicators';
+import type { SeveritySync } from '../../lib/significant_events/events/severity';
 import type { RouteHandlerScopedClients, GetScopedClients } from '../../routes/types';
 import type { SignificantEventsServer } from '../../types';
 import type { SourceToolDeps } from '../tools/sources/source_tool_deps';
@@ -170,9 +171,11 @@ export const createSignificantEventsServer = ({
     }))
   );
   // Reading the investigations is covered with `createSeveritySync`: here the rows pass through.
-  const severitySync = {
-    reconcileRows: async ({ rows }: { rows: unknown[] }) => rows,
-  } as unknown as SignificantEventsServer['severitySync'];
+  const severitySync: SeveritySync = {
+    reconcileRows: async ({ rows }) => rows,
+    syncEvents: async () => ({ status: 'available', outcomes: new Map() }),
+    resolveSeverities: async () => new Map(),
+  };
   const server: Pick<SignificantEventsServer, 'security' | 'severitySync'> = {
     security,
     severitySync,

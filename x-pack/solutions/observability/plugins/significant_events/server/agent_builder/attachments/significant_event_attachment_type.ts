@@ -115,9 +115,14 @@ export const createSignificantEventAttachmentType = ({
 
       try {
         const latestEvent = await fetchByEventId(attachment.origin, context);
-        // Compare @timestamp only: it reflects the latest write regardless of how `.rule-events`
-        // identifies a version (group_hash rather than a stored version id).
-        return !latestEvent || latestVersion.data['@timestamp'] !== latestEvent['@timestamp'];
+        // @timestamp reflects the latest write regardless of how `.rule-events` identifies a version
+        // (group_hash rather than a stored version id). The severity can change with no new write,
+        // when the investigation's differs from the stored copy.
+        return (
+          !latestEvent ||
+          latestVersion.data['@timestamp'] !== latestEvent['@timestamp'] ||
+          latestVersion.data.severity !== latestEvent.severity
+        );
       } catch (error) {
         logger.warn(
           `Failed to check staleness for significant event attachment "${attachment.origin}": ${error}`

@@ -96,9 +96,10 @@ describe('createSignificantEventAttachmentType', () => {
   it('resolves the event with the severity its investigation gave it', async () => {
     const server = createSignificantEventsServer({ featurePrivilege: 'read' });
     server.severitySync = {
-      reconcileRows: async ({ rows }: { rows: SignificantEvent[] }) =>
-        rows.map((row) => ({ ...row, severity: 'critical' as const })),
-    } as unknown as typeof server.severitySync;
+      ...server.severitySync,
+      reconcileRows: async ({ rows }) =>
+        rows.map((row) => Object.assign({}, row, { severity: 'critical' as const })),
+    };
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([event]),
@@ -138,6 +139,27 @@ describe('createSignificantEventAttachmentType', () => {
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([updatedEvent]),
       server: createSignificantEventsServer({ featurePrivilege: 'read' }),
+    });
+
+    await expect(
+      type.isStale?.(
+        createVersionedAttachment(event),
+        agentBuilderMocks.attachments.createResolveContextMock()
+      )
+    ).resolves.toBe(true);
+  });
+
+  it('reports stale when the investigation gave the event another severity', async () => {
+    const server = createSignificantEventsServer({ featurePrivilege: 'read' });
+    server.severitySync = {
+      ...server.severitySync,
+      reconcileRows: async ({ rows }) =>
+        rows.map((row) => Object.assign({}, row, { severity: 'critical' as const })),
+    };
+    const type = createSignificantEventAttachmentType({
+      logger: loggingSystemMock.createLogger(),
+      getScopedClients: createGetScopedClients([event]),
+      server,
     });
 
     await expect(

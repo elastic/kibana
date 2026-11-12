@@ -102,6 +102,16 @@ const SYNC_SEVERITY_MAX_RETRIES = 2;
 
 const SORT_RANK_COLUMN = 'sort_rank';
 
+/** ES|QL's maximum result size; an episode lookup that reaches it throws rather than drop pairs. */
+const MAX_EPISODE_PAIRS = 10_000;
+
+const assertEpisodePairsComplete = <T>(rows: T[]): T[] => {
+  if (rows.length >= MAX_EPISODE_PAIRS) {
+    throw new Error(`Episode lookup reached ${MAX_EPISODE_PAIRS} event-episode pairs`);
+  }
+  return rows;
+};
+
 export interface CreateEventResult {
   groupHash: string;
   alertId: string;
@@ -1058,7 +1068,7 @@ export class RuleEventsClient {
     return map;
   }
 
-  /** The event ids each episode (`alert.id`) belongs to. Unknown episodes are absent. */
+  /** The event ids that have carried each episode (`alert.id`). Unknown episodes are absent. */
   async findEventIdsByEpisodeIds(episodeIds: string[]): Promise<Map<string, string[]>> {
     const eventIdsByEpisode = new Map<string, string[]>();
     if (!episodeIds.length) return eventIdsByEpisode;
@@ -1071,11 +1081,13 @@ export class RuleEventsClient {
       'data'
     )}, ${esql.str('event_id')})`.pipe`STATS n = COUNT(*) BY ${esql.col('episode_id')}, ${esql.col(
       'event_id'
-    )}`;
+    )}`.limit(MAX_EPISODE_PAIRS);
 
     try {
-      const rows = esqlToObjects<{ episode_id: string; event_id: string }>(
-        await queryEsql({ esClient: this.clients.esClient, query })
+      const rows = assertEpisodePairsComplete(
+        esqlToObjects<{ episode_id: string; event_id: string }>(
+          await queryEsql({ esClient: this.clients.esClient, query })
+        )
       );
       for (const { episode_id: episodeId, event_id: eventId } of rows) {
         if (!episodeId || !eventId) continue;
@@ -1088,7 +1100,10 @@ export class RuleEventsClient {
     }
   }
 
-  /** Writes a severity as a new version through the head guard, retrying a moved head. */
+  /**
+   * Writes a severity as a new version through the head guard, retrying a head moved by another
+   * change. A head whose severity another writer changed is left alone: that writer resolved it later.
+   */
   async syncSeverity({
     eventId,
     severity,
@@ -1096,10 +1111,13 @@ export class RuleEventsClient {
     eventId: string;
     severity: Severity;
   }): Promise<'updated' | 'unchanged' | 'superseded' | 'not_found'> {
+    let firstSeverity: Severity | undefined;
     for (let attempt = 0; attempt <= SYNC_SEVERITY_MAX_RETRIES; attempt++) {
       const latest = (await this.findLatestByEventIds([eventId])).get(eventId);
       if (!latest) return 'not_found';
       if (latest.severity === severity) return 'unchanged';
+      firstSeverity ??= latest.severity;
+      if (latest.severity !== firstSeverity) return 'superseded';
       const written = await this.updateEvent({
         event: { ...latest, '@timestamp': new Date().toISOString(), severity },
         prior: latest,
@@ -1121,11 +1139,13 @@ export class RuleEventsClient {
       'event_id'
     )}), ${esql.col('episode_id')} = ${esql.col('alert.id')}`.pipe`STATS n = COUNT(*) BY ${esql.col(
       'event_id'
-    )}, ${esql.col('episode_id')}`;
+    )}, ${esql.col('episode_id')}`.limit(MAX_EPISODE_PAIRS);
 
     try {
-      const rows = esqlToObjects<{ episode_id: string | null; event_id: string }>(
-        await queryEsql({ esClient: this.clients.esClient, query })
+      const rows = assertEpisodePairsComplete(
+        esqlToObjects<{ episode_id: string | null; event_id: string }>(
+          await queryEsql({ esClient: this.clients.esClient, query })
+        )
       );
       for (const { episode_id: episodeId, event_id: eventId } of rows) {
         if (!episodeId || !eventId) continue;
