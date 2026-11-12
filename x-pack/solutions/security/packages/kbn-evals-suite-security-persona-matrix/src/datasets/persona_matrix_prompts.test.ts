@@ -27,18 +27,21 @@ const byId = (id: string) => {
 describe('PERSONA_MATRIX_EXAMPLES prompt/annotation parity', () => {
   // Each dataset example is its own conversation (PersonaMatrixChatClient.query sends no
   // conversation id), so a question that points back at an earlier incident needs an attachment.
-  it('detection-rule-edit-c supplies the confirmed-threat context through an attachment', () => {
-    const { input } = byId('detection-rule-edit-c');
-    expect(input.question).toContain('this threat');
-    expect(input.attachment).toBeDefined();
-    expect(input.attachment).toContain('srv-win-defend-01');
-    expect(input.attachment).toContain('BluetoothService.exe');
-    expect(input.attachment).toContain('log.dll');
-    expect(input.attachment).toContain(
-      '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'
-    );
-    expect(input.attachment).toContain('C:\\Users\\Public\\');
-  });
+  it.each(['detection-rule-edit-b', 'detection-rule-edit-c'])(
+    '%s supplies the earlier-hunt/confirmed-threat context through an attachment',
+    (id) => {
+      const { input } = byId(id);
+      expect(input.question).toMatch(/this threat|we just hunted down/);
+      expect(input.attachment).toBeDefined();
+      expect(input.attachment).toContain('srv-win-defend-01');
+      expect(input.attachment).toContain('BluetoothService.exe');
+      expect(input.attachment).toContain('log.dll');
+      expect(input.attachment).toContain(
+        '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'
+      );
+      expect(input.attachment).toContain('C:\\Users\\Public\\');
+    }
+  );
 
   describe.each([
     ['multi-step-a', ['virustotal_lookup', 'on_call_lookup']],
@@ -159,6 +162,44 @@ const BUILTIN_TOOL_IDS: readonly string[] = [
   'security.security_labs_search',
   'security.create_detection_rule',
   'security.get_entity',
-  'security.entity_risk_score',
+  'security.get_entity_risk_score_history',
   'security.search_entities',
 ];
+
+describe('PERSONA_MATRIX_EXAMPLES expectation contracts', () => {
+  // Point-in-time profile prompts must not demand the risk-over-time tool: its
+  // description reserves it for trend questions, so an agent following the tool
+  // contract would fail ExpectedToolCalled.
+  it('entity-analytics-a does not require the risk score history tool', () => {
+    expect(byId('entity-analytics-a').metadata.expectedTools).toEqual(['security.get_entity']);
+    expect(byId('entity-analytics-c').metadata.expectedTools).toContain(
+      'security.get_entity_risk_score_history'
+    );
+  });
+
+  it('every example whose question names a connector id declares that expectedConnectorId', () => {
+    const uuid = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/g;
+    const mismatches = PERSONA_MATRIX_EXAMPLES.flatMap((example) => {
+      const named: string[] = example.input.question.match(uuid) ?? [];
+      if (named.length === 0) return [];
+      return named.includes(example.metadata.expectedConnectorId ?? '')
+        ? []
+        : [`${example.id}: names ${named.join(',')}`];
+    });
+    expect(mismatches).toEqual([]);
+  });
+
+  // The correctness judge reads the reference. A clause excusing an unconfirmed
+  // connector or a non-http step would let Factuality pass what the
+  // deterministic ConnectorInvoked check (connector id + step type) fails.
+  it('references never excuse a missing connector or a different step type', () => {
+    const excusing = PERSONA_MATRIX_EXAMPLES.filter(
+      ({ metadata, output }) =>
+        (metadata.expectedConnectorId || metadata.expectedStepType) &&
+        /could not be confirmed|is unknown|instead of a raw|does not contradict|not contradict/i.test(
+          output.reference ?? ''
+        )
+    ).map(({ id }) => id);
+    expect(excusing).toEqual([]);
+  });
+});

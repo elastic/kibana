@@ -516,6 +516,34 @@ const isModuleScopeDeclarator = (node, ancestors) => {
 };
 
 /**
+ * A lazySchema proxy rejects the custom property added to this schema.
+ * @param {VariableDeclarator} node
+ * @param {import('eslint').SourceCode} sourceCode
+ * @returns {boolean}
+ */
+const hasDefinedProperty = (node, sourceCode) =>
+  node.id.type === esTypes.Identifier &&
+  Boolean(
+    sourceCode
+      .getScope(node)
+      .set.get(node.id.name)
+      ?.references.some(({ identifier }) => {
+        const call = identifier.parent;
+        const callee = call?.type === esTypes.CallExpression && unwrapExpression(call.callee);
+        return (
+          call?.type === esTypes.CallExpression &&
+          call.arguments[0] === identifier &&
+          callee?.type === esTypes.MemberExpression &&
+          !callee.computed &&
+          callee.object.type === esTypes.Identifier &&
+          callee.object.name === 'Object' &&
+          callee.property.type === esTypes.Identifier &&
+          callee.property.name === 'defineProperty'
+        );
+      })
+  );
+
+/**
  * @param {Node[]} ancestors
  * @param {FileState} state
  * @returns {boolean}
@@ -720,6 +748,11 @@ module.exports = {
         }
         const ancestors = sourceCode.getAncestors(node);
         if (!isModuleScopeDeclarator(declarator, ancestors)) {
+          return;
+        }
+
+        if (hasDefinedProperty(declarator, sourceCode)) {
+          recordSchemaBinding(declarator, state, sourceCode);
           return;
         }
 

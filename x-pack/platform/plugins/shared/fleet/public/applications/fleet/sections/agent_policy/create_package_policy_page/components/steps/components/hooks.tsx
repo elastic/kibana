@@ -41,6 +41,9 @@ export function useOutputs(
   const canUseOutputPerIntegration =
     licenseService.hasAtLeast(LICENCE_FOR_OUTPUT_PER_INTEGRATION) &&
     !packagePolicy.supports_agentless;
+  // `hasAtLeast` is also falsy while the license is not known (not received yet, or the licensing
+  // request failed), so a falsy `canUseOutputPerIntegration` alone does not mean the license is too low.
+  const isLicenseKnown = !!licenseService.getLicenseInformation()?.isAvailable;
   const { data: outputsData, isLoading } = useGetOutputs();
   const allowedOutputTypes = getAllowedOutputTypesForPackagePolicy(packagePolicy);
   const allowedOutputs = useMemo(() => {
@@ -75,6 +78,7 @@ export function useOutputs(
   return {
     isLoading,
     canUseOutputPerIntegration,
+    isLicenseKnown,
     allowedOutputs,
     inheritedOutputName,
   };
@@ -158,15 +162,22 @@ export function useVarGroupSelections({
     return deriveSelections();
   }, [savedSelections, deriveSelections]);
 
-  // Initialize on mount if not already set
+  // Initialize on mount if not already set. The default selection must apply the
+  // same policy effects as a user selection: a required var_group makes the selected
+  // option's vars required, and the support flag var (e.g. supports_identity_federation)
+  // is only ever populated by those effects. Without them a fresh agentless policy
+  // fails validation until the user toggles the selector away and back.
   useEffect(() => {
     if (varGroups && varGroups.length > 0 && !savedSelections) {
       const derived = deriveSelections();
       if (Object.keys(derived).length > 0) {
-        onSelectionsChange({ var_group_selections: derived });
+        const policyEffects = packagePolicy
+          ? buildVarGroupPolicyUpdates(packagePolicy, derived, varGroups)
+          : null;
+        onSelectionsChange({ var_group_selections: derived, ...(policyEffects || {}) });
       }
     }
-  }, [varGroups, savedSelections, onSelectionsChange, deriveSelections]);
+  }, [varGroups, savedSelections, onSelectionsChange, deriveSelections, packagePolicy]);
 
   // Handle selection change with policy effects computation
   const handleSelectionChange = useCallback(

@@ -7,11 +7,6 @@
 
 export type { EditUser, GetUserDisplayNameParams } from './user';
 export type { GetUserProfileResponse } from './user_profile';
-export {
-  getUserAvatarColor,
-  getUserAvatarInitials,
-  USER_AVATAR_MAX_INITIALS,
-} from './user_profile';
 export { getUserDisplayName } from './user';
 export { canUserChangePassword, canUserChangeDetails } from './authenticated_user';
 export { shouldProviderUseLoginForm } from './authentication_provider';

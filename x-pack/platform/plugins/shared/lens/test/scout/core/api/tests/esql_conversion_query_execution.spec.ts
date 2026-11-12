@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -71,6 +72,7 @@ const EXECUTABLE_CASES = Object.entries(buildEsqlConversionCasesByGroup()).flatM
               group,
               conversionCase,
               expectedEsql: conversionCase.expected.esql,
+              expectedLastRow: conversionCase.expected.expectedLastRow ?? {},
               columnNamesMatcher: conversionCase.expected.allowAdditionalColumns
                 ? expect.arrayContaining([...conversionCase.expected.columnNames])
                 : [...conversionCase.expected.columnNames],
@@ -79,6 +81,19 @@ const EXECUTABLE_CASES = Object.entries(buildEsqlConversionCasesByGroup()).flatM
         : []
     )
 );
+
+// Resolved outside the test body so a renamed case fails at load time without a conditional.
+const getOtherBucketRankedByMetricCase = (): EsqlConversionCase => {
+  const found = EXECUTABLE_CASES.find(
+    ({ conversionCase }) =>
+      conversionCase.description === 'single terms with other bucket ranked by metric DESC'
+  );
+  if (!found) {
+    throw new Error('Missing Other bucket conversion case');
+  }
+  return found.conversionCase;
+};
+const OTHER_BUCKET_RANKED_BY_METRIC_CASE = getOtherBucketRankedByMetricCase();
 
 apiTest.describe(
   'Lens form-based → ES|QL conversion query execution',
@@ -140,6 +155,129 @@ apiTest.describe(
       }
     });
 
+    apiTest(
+      'aggregates the Other bucket over the remaining documents like the DSL terms query',
+      async ({ esClient }) => {
+        const index = `lens-esql-other-bucket-${randomUUID()}`;
+        const hostField = 'host.keyword';
+        const bytesField = 'bytes';
+        const size = 3;
+        const baseCase = OTHER_BUCKET_RANKED_BY_METRIC_CASE;
+        // Adds Count of records next to the case's average, so the Other row checks two
+        // aggregates computed over every remaining document.
+        const conversionCase: EsqlConversionCase = {
+          ...baseCase,
+          dataset: { ...baseCase.dataset, index, timeField: undefined },
+          columns: {
+            ...baseCase.columns,
+            col3: {
+              operationType: 'count',
+              sourceField: '___records___',
+              label: 'Count of records',
+              dataType: 'number',
+              isBucketed: false,
+            },
+          },
+          columnOrder: [...baseCase.columnOrder, 'col3'],
+        };
+
+        // Top 3 by average bytes: a (100), b (90), c (70). Other groups d, e and f, so its
+        // average (18) is not any single value's. The two documents without a host carry
+        // large bytes to show they are left out of every bucket, Other included.
+        const documents: Array<Record<string, string | number>> = [
+          { [hostField]: 'a', [bytesField]: 100 },
+          { [hostField]: 'a', [bytesField]: 100 },
+          { [hostField]: 'a', [bytesField]: 100 },
+          { [hostField]: 'b', [bytesField]: 90 },
+          { [hostField]: 'b', [bytesField]: 90 },
+          { [hostField]: 'c', [bytesField]: 80 },
+          { [hostField]: 'c', [bytesField]: 60 },
+          { [hostField]: 'd', [bytesField]: 40 },
+          { [hostField]: 'd', [bytesField]: 20 },
+          { [hostField]: 'e', [bytesField]: 10 },
+          { [hostField]: 'f', [bytesField]: 2 },
+          { [bytesField]: 5000 },
+          { [bytesField]: 5000 },
+        ];
+
+        await esClient.indices.create({
+          index,
+          settings: { number_of_shards: 1 },
+          mappings: {
+            properties: { [hostField]: { type: 'keyword' }, [bytesField]: { type: 'long' } },
+          },
+        });
+        try {
+          await esClient.bulk({
+            refresh: 'wait_for',
+            operations: documents.flatMap((document) => [{ index: { _index: index } }, document]),
+          });
+          const query = generateQueryForCase(conversionCase);
+          const converted = await esClient.esql.query({ query });
+
+          // Same ranking as the chart's esaggs request: top values by average, with
+          // `sum_other_doc_count` holding the documents that fall into Other.
+          const topValues = await esClient.search<
+            never,
+            {
+              hosts: {
+                sum_other_doc_count: number;
+                buckets: Array<{ key: string; doc_count: number; avg_bytes: { value: number } }>;
+              };
+            }
+          >({
+            index,
+            size: 0,
+            aggs: {
+              hosts: {
+                terms: { field: hostField, size, order: { avg_bytes: 'desc' } },
+                aggs: { avg_bytes: { avg: { field: bytesField } } },
+              },
+            },
+          });
+          const { buckets, sum_other_doc_count: otherCount } = topValues.aggregations?.hosts ?? {
+            buckets: [],
+            sum_other_doc_count: 0,
+          };
+          const remaining = await esClient.search<never, { avg_bytes: { value: number } }>({
+            index,
+            size: 0,
+            query: {
+              bool: {
+                filter: { exists: { field: hostField } },
+                must_not: { terms: { [hostField]: buckets.map(({ key }) => key) } },
+              },
+            },
+            aggs: { avg_bytes: { avg: { field: bytesField } } },
+          });
+          const otherAverage = remaining.aggregations?.avg_bytes.value;
+
+          expect(converted.columns.map(({ name }) => name)).toStrictEqual([
+            'AVG(bytes)',
+            'COUNT(*)',
+            hostField,
+          ]);
+          expect(converted.values).toStrictEqual([
+            ...buckets.map(({ key, doc_count: docCount, avg_bytes: avg }) => [
+              avg.value,
+              docCount,
+              key,
+            ]),
+            [otherAverage, otherCount, 'Other'],
+          ]);
+          // Pins the baseline itself, so a regression in both queries cannot go unnoticed.
+          expect(converted.values).toStrictEqual([
+            [100, 3, 'a'],
+            [90, 2, 'b'],
+            [70, 2, 'c'],
+            [18, 4, 'Other'],
+          ]);
+        } finally {
+          await esClient.indices.delete({ index });
+        }
+      }
+    );
+
     // playwright/max-nested-describe allows only one level, so groups become
     // test-title prefixes instead of nested describe blocks.
     for (const queryCase of EXECUTABLE_CASES) {
@@ -148,7 +286,7 @@ apiTest.describe(
         async ({ apiClient }) => {
           // Keep the exact query assertion close to execution so this layer verifies
           // the converter output that it sends to Elasticsearch.
-          const { conversionCase, expectedEsql, columnNamesMatcher } = queryCase;
+          const { conversionCase, expectedEsql, expectedLastRow, columnNamesMatcher } = queryCase;
           const { timeField } = conversionCase.dataset;
           const esql = generateQueryForCase(conversionCase);
           expect(esql).toBe(expectedEsql);
@@ -190,7 +328,13 @@ apiTest.describe(
             ({ name }: { name: string }) => name
           );
           expect(responseColumnNames).toStrictEqual(columnNamesMatcher);
-          expect(response.body.rawResponse.values.length).toBeGreaterThan(0);
+          const { values } = response.body.rawResponse;
+          expect(values.length).toBeGreaterThan(0);
+
+          const lastRow = Object.fromEntries(
+            responseColumnNames.map((name: string, index: number) => [name, values.at(-1)[index]])
+          );
+          expect(lastRow).toMatchObject(expectedLastRow);
         }
       );
     }

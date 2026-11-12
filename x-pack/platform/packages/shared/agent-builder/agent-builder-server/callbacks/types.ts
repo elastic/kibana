@@ -21,6 +21,24 @@ export type CallbackConversationResolver = (
   context: CallbackConversationResolverContext
 ) => Promise<{ conversationId: string } | undefined>;
 
+/** A turn from an external conversation that no existing conversation continues. */
+export interface OnBeforeNewConversationContext extends CallbackConversationResolverContext {
+  /** The agent the new conversation runs on. */
+  agentId: string;
+}
+
+/** Gives back what a hook took, when the turn it allowed writes no conversation after all. */
+export type OnBeforeNewConversationRelease = () => Promise<void>;
+
+/**
+ * Throws to refuse a turn that would open a new conversation; the error is returned to the caller.
+ * Runs after the caller is authorized to run the agent and never for a replayed delivery. Resolves
+ * to a release when it took something that a turn which writes no conversation must give back.
+ */
+export type OnBeforeNewConversationHook = (
+  context: OnBeforeNewConversationContext
+) => Promise<OnBeforeNewConversationRelease | undefined>;
+
 /** Delivers callback payloads to the callback URLs it handles. */
 export interface CallbackTransportDefinition {
   /** Whether this transport delivers to the given callback URL. */

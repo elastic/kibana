@@ -44,13 +44,18 @@ export const ESQL_QUERY_ROW_LIMIT = 10_000;
  * Only the action types that feed `last_fired` are read. The others (`notified`, episode
  * actions) carry an `alert_id` and are never window-capped, so each one would add a
  * `BY subject, group_hash, alert_id` bucket that grows with the whole `.alert-actions` history.
+ *
+ * `limit` is `xpack.alerting_v2.dispatcher.run.alerts.max` (at most `ESQL_QUERY_ROW_LIMIT`),
+ * inlined as a literal like every other dispatcher `LIMIT`.
  */
 export const getDispatchableAlertEventsQuery = ({
   gte,
   lte,
+  limit,
 }: {
   gte: string;
   lte: string;
+  limit: number;
 }): EsqlRequest => {
   return esql`FROM ${ALERT_EVENTS_DATA_STREAM},${ALERT_ACTIONS_DATA_STREAM}
       | WHERE type == ${ALERT_EVENT_TYPE} OR action_type IN ("fire", "suppress", "unmatched")
@@ -76,7 +81,7 @@ export const getDispatchableAlertEventsQuery = ({
       | KEEP last_event_timestamp, rule_id, source, space_id, group_hash, alert_id, last_alert_status, severity
       | RENAME last_alert_status AS alert_status
       | SORT last_event_timestamp asc
-      | LIMIT ${ESQL_QUERY_ROW_LIMIT}`.toRequest();
+      | LIMIT ${limit}`.toRequest();
 };
 
 const PAIR_SEPARATOR = '::';
@@ -213,17 +218,17 @@ export const getAlertSuppressionsQueries = (alerts: readonly Alert[]): EsqlReque
       | WHERE subject IS NOT NULL
       | STATS
           last_ack_action = LAST(action_type, @timestamp) WHERE action_type IN ("ack", "unack"),
-          last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
+          last_lifecycle_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
           source = LAST(source, @timestamp),
           space_id = LAST(space_id, @timestamp),
           rule_id = LAST(rule_id, @timestamp)
         BY subject, group_hash, alert_id
       | EVAL should_suppress = CASE(
           last_ack_action == "ack", true,
-          last_deactivate_action == "deactivate", true,
+          last_lifecycle_action == "deactivate", true,
           false
         )
-      | KEEP rule_id, group_hash, alert_id, should_suppress, last_ack_action, last_deactivate_action, source, space_id
+      | KEEP rule_id, group_hash, alert_id, should_suppress, last_ack_action, last_lifecycle_action, source, space_id
       | LIMIT ${ESQL_QUERY_ROW_LIMIT}`.toRequest();
   });
 };

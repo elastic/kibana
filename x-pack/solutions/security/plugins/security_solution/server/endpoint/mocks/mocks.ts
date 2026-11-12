@@ -182,6 +182,7 @@ export const createMockEndpointAppContextService = (
     getExceptionListsClient: jest.fn().mockReturnValue(exceptionListsClient!),
     getMessageSigningService: jest.fn().mockReturnValue(messageSigningService),
     getFleetActionsClient: jest.fn(async () => fleetActionsClientMock),
+    getFleetAgentService: jest.fn(() => fleetStartServices.agentService),
     getTelemetryService: jest.fn().mockReturnValue(telemetryServiceMock),
     getCloudSetup: jest.fn().mockReturnValue(cloudMock.createSetup()),
     getTelemetryConfigProvider: jest.fn().mockReturnValue(telemetryConfigProvider),

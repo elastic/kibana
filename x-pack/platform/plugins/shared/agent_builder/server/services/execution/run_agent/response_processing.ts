@@ -22,7 +22,7 @@ import {
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import {
   extractTextContent,
-  extractToolCallsWithReasoning,
+  extractToolCallsWithIntent,
   toolIdentifierFromToolCall,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
@@ -98,8 +98,8 @@ export const processResearchResponse = (
     };
   }
 
-  // strips `_reasoning` out of the args into `reasoning`
-  const toolCalls = extractToolCallsWithReasoning(message);
+  // strips `_intent` out of the args into `intent`
+  const toolCalls = extractToolCallsWithIntent(message);
   const toolCallGroupId = uuidv4();
   const updates: RunStepUpdate[] = [];
   const renderState: ToolRenderStateUpdate = {};
@@ -124,18 +124,6 @@ export const processResearchResponse = (
     const isBrowser = toolId.startsWith(BROWSER_TOOL_PREFIX);
     const isDedicated = TOOLS_WITH_DEDICATED_STEP_LIFECYCLE.has(toolId);
 
-    if (toolCall.reasoning && toolCall.reasoning.trim().length > 0) {
-      updates.push(
-        stepUpdates.append(
-          reasoningStep({
-            reasoning: toolCall.reasoning,
-            tool_call_id: toolCall.toolCallId,
-            tool_call_group_id: toolCallGroupId,
-          })
-        )
-      );
-    }
-
     // Every call gets a step so the ToolNode reply — including a schema-validation error for a
     // dedicated-lifecycle tool such as ask_user_question — always has something to resolve and
     // render back to the model. `kind` decides whether the step is durable (see `persistableSteps`).
@@ -157,6 +145,7 @@ export const processResearchResponse = (
       tool_call_group_id: toolCallGroupId,
       tool_origin: meta?.origin,
       tool_type: meta?.type,
+      ...(toolCall.intent ? { intent: toolCall.intent } : {}),
     };
     updates.push(stepUpdates.appendToolCall(step));
 

@@ -72,6 +72,97 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(configuration.extractObservables).to.be(false);
     });
 
+    describe('extractObservables owner rule', () => {
+      const ownersThatCannotAutoExtract = ['cases', 'observability'];
+      const getExpectedError = (owner: string) => ({
+        error: 'Bad Request',
+        message: `Setting extractObservables to true is not allowed for the "${owner}" owner. Only owners that support automatic observable extraction can enable it.`,
+        statusCode: 400,
+      });
+
+      const getTemplate = (extractObservables: boolean) => ({
+        key: 'template_1',
+        name: 'Template 1',
+        caseFields: { settings: { syncAlerts: true, extractObservables } },
+      });
+
+      for (const owner of ownersThatCannotAutoExtract) {
+        describe(`owner ${owner}`, () => {
+          it('rejects extractObservables true with a 400 and creates no configuration', async () => {
+            const response = await createConfiguration(
+              supertest,
+              getConfigurationRequest({ overrides: { owner, extractObservables: true } }),
+              400
+            );
+
+            expect(response).to.eql(getExpectedError(owner));
+            expect(await getConfiguration({ supertest, query: { owner } })).to.have.length(0);
+          });
+
+          it('rejects a template with extractObservables true with a 400', async () => {
+            const response = await createConfiguration(
+              supertest,
+              getConfigurationRequest({ overrides: { owner, templates: [getTemplate(true)] } }),
+              400
+            );
+
+            expect(response).to.eql(getExpectedError(owner));
+            expect(await getConfiguration({ supertest, query: { owner } })).to.have.length(0);
+          });
+
+          it('keeps the existing configuration when the replacement is rejected', async () => {
+            const existing = await createConfiguration(
+              supertest,
+              getConfigurationRequest({ overrides: { owner } })
+            );
+
+            await createConfiguration(
+              supertest,
+              getConfigurationRequest({ overrides: { owner, extractObservables: true } }),
+              400
+            );
+
+            const configurations = await getConfiguration({ supertest, query: { owner } });
+            expect(configurations).to.have.length(1);
+            expect(configurations[0].id).to.be(existing.id);
+          });
+
+          it('accepts extractObservables false and an omitted value', async () => {
+            const withFalse = await createConfiguration(
+              supertest,
+              getConfigurationRequest({
+                overrides: { owner, extractObservables: false, templates: [getTemplate(false)] },
+              })
+            );
+            expect(withFalse.extractObservables).to.be(false);
+
+            const omitted = await createConfiguration(
+              supertest,
+              getConfigurationRequest({ overrides: { owner } })
+            );
+            expect(omitted.extractObservables).to.be(false);
+          });
+        });
+      }
+
+      describe('owner securitySolution', () => {
+        it('accepts extractObservables true, also in a template', async () => {
+          const configuration = await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: {
+                owner: 'securitySolution',
+                extractObservables: true,
+                templates: [getTemplate(true)],
+              },
+            })
+          );
+
+          expect(configuration.extractObservables).to.be(true);
+        });
+      });
+    });
+
     it('should create a configuration with workflowTags', async () => {
       const configuration = await createConfiguration(
         supertest,

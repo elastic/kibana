@@ -6,6 +6,7 @@
  */
 
 import { Parser, Walker } from '@elastic/esql';
+import { isIndexExclusion } from '../../../../../common/remote_cluster';
 import { isIndexPatternAllowed } from '../common/matches_required';
 
 export type AssertEsqlSourcesAllowedResult = { ok: true } | { ok: false; reason: string };
@@ -19,15 +20,18 @@ export type AssertEsqlSourcesAllowedResult = { ok: true } | { ok: false; reason:
  * name a target too, so a query opening with an allowed `FROM` could still reach
  * outside the scope. Every command is checked instead of the `FROM` list alone,
  * and because each one names its target as a `source` node, a command ES|QL adds
- * later is covered by default rather than silently exempt. An `ENRICH` policy is
- * refused on the same grounds: it resolves to an index this hunt never allowed.
+ * later is covered by default rather than silently exempt. `ENRICH` is refused by
+ * command, whatever its policy is named: a policy resolves to an enrich index this
+ * hunt never allowed, so a policy name that happens to match the allowlist is no
+ * reason to let it through.
  *
  * Queries that fail to parse, do not start with FROM, have no sources, or
  * name a source outside the allowlist are refused.
  */
 export const assertEsqlSourcesAllowed = (
   query: string,
-  allowedPatterns: string[]
+  allowedPatterns: string[],
+  options: { crossProjectSearch?: boolean } = {}
 ): AssertEsqlSourcesAllowedResult => {
   if (allowedPatterns.length === 0) {
     return { ok: false, reason: 'no allowed index patterns' };
@@ -38,19 +42,47 @@ export const assertEsqlSourcesAllowed = (
     return { ok: false, reason: 'query must start with a valid FROM' };
   }
 
+  // A quoted source can hold a whole multi-target expression (`"-unused*,private-*"`), which
+  // Elasticsearch splits on commas, so each part is judged on its own.
   const sourcesOf = (node: Parameters<typeof Walker.walk>[0]): string[] => {
     const names: string[] = [];
-    Walker.walk(node, { visitSource: ({ name }) => names.push(name) });
+    Walker.walk(node, {
+      visitSource: ({ name }) =>
+        names.push(
+          ...name
+            .split(',')
+            .map((part) => part.trim())
+            .filter((part) => part !== '')
+        ),
+    });
     return names;
   };
 
-  if (sourcesOf(root.commands[0]).length === 0) {
+  // An exclusion (`-*secret*`) only narrows what a FROM reads, so it needs no allowlist entry;
+  // the sources it narrows do. A FROM naming nothing but exclusions reads nothing useful.
+  const positiveSources = sourcesOf(root.commands[0]).filter((name) => !isIndexExclusion(name));
+  if (positiveSources.length === 0) {
     return { ok: false, reason: 'FROM has no sources' };
+  }
+
+  // Walk the whole tree, not just top-level commands, so an `ENRICH` nested in a `FORK`
+  // branch is refused too.
+  let enrichPolicy: string | undefined;
+  Walker.walk(root, {
+    visitCommand: (command) => {
+      if (command.name === 'enrich' && enrichPolicy === undefined) {
+        enrichPolicy = sourcesOf(command)[0] ?? '';
+      }
+    },
+  });
+  if (enrichPolicy !== undefined) {
+    return { ok: false, reason: `ENRICH policy "${enrichPolicy}" is not allowed in a hunt query` };
   }
 
   for (const command of root.commands) {
     for (const source of sourcesOf(command)) {
-      if (!isIndexPatternAllowed(source, allowedPatterns)) {
+      if (isIndexExclusion(source)) continue;
+      if (!isIndexPatternAllowed(source, allowedPatterns, options)) {
         return {
           ok: false,
           reason: `${command.name.toUpperCase()} source "${source}" is outside the hunt index scope`,

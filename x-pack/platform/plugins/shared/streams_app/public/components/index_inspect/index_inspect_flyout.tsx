@@ -29,6 +29,7 @@ import { isEnabledFailureStore } from '@kbn/streams-schema';
 import { LifecycleBadge, useDiscoverStreamLink } from '../stream_badges';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useTimeRange } from '../../hooks/use_time_range';
+import { useUnitId } from '../../hooks/use_unit_id';
 import { IndexInspectPanels } from './index_inspect_panels';
 import { IndexQualityBadge } from './index_quality_badge';
 import {
@@ -57,6 +58,7 @@ export function IndexInspectFlyout({
 }) {
   const { push } = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
+  const unitId = useUnitId();
   const headerId = useGeneratedHtmlId();
   const [uncontrolledTab, setUncontrolledTab] =
     useState<IndexInspectTabId>(DEFAULT_INDEX_INSPECT_TAB);
@@ -78,14 +80,14 @@ export function IndexInspectFlyout({
           defaultMessage: 'Go to index details',
         }),
         onClick: () => {
-          push('/new-experience/indices/{indexName}/{tab}', {
+          push('/v2/indices/{indexName}/{tab}', {
             path: { indexName, tab: selectedTab },
-            query: { rangeFrom, rangeTo },
+            query: { rangeFrom, rangeTo, unitId },
           });
         },
       },
     ],
-    [indexName, push, rangeFrom, rangeTo, selectedTab]
+    [indexName, push, rangeFrom, rangeTo, selectedTab, unitId]
   );
 
   return (

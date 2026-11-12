@@ -55,7 +55,7 @@ const createSearchResources = (links: ReturnType<typeof queryLink>[]) => {
     assertReadable: jest.fn().mockResolvedValue(undefined),
   };
   const resources = {
-    request: {},
+    request: { spaceId: 'default' },
     server: {},
     getScopedClients: jest.fn().mockResolvedValue({
       licensing: {},
@@ -70,7 +70,7 @@ const createSearchResources = (links: ReturnType<typeof queryLink>[]) => {
 const createDetectionByIdResources = (hits: Array<typeof detection>) => {
   const findById = jest.fn().mockResolvedValue({ hits });
   const resources = {
-    request: {},
+    request: { spaceId: 'default' },
     server: {},
     getScopedClients: jest.fn().mockResolvedValue({
       licensing: {},
@@ -349,7 +349,7 @@ describe('while Significant Events is paused', () => {
   const createResources = (state: string) => {
     const bulkCreate = jest.fn().mockResolvedValue(undefined);
     const resources = {
-      request: {},
+      request: { spaceId: 'default' },
       server: {},
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},

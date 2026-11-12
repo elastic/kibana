@@ -288,6 +288,35 @@ describe('fetchEsqlData', () => {
       );
     });
 
+    it('names the request by the title it is given, else "Data"', async () => {
+      const requestAdapter = new RequestAdapter();
+
+      await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, {
+        requestAdapter,
+      });
+      await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, {
+        requestAdapter,
+        requestTitle: 'Data (query 2)',
+      });
+
+      expect(mockEsql.mock.calls.map(([, options]) => options?.inspector?.title)).toEqual([
+        'Data',
+        'Data (query 2)',
+      ]);
+    });
+
+    it("leaves the adapter's earlier requests in place when keepRequests is set", async () => {
+      const requestAdapter = new RequestAdapter();
+      const resetSpy = jest.spyOn(requestAdapter, 'reset');
+
+      await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, {
+        requestAdapter,
+        keepRequests: true,
+      });
+
+      expect(resetSpy).not.toHaveBeenCalled();
+    });
+
     it('does not pass an inspector without an adapter', async () => {
       await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal);
 

@@ -15,7 +15,9 @@ import {
   EuiTitle,
   EuiToolTip,
   EuiWrappingPopover,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { type FC, useCallback, useMemo, useRef, useState } from 'react';
 
 import type { CPSPluginStart } from '@kbn/cps/public';
@@ -41,6 +43,11 @@ export const CustomizeCps: FC<Props> = ({ space, onChange }) => {
   const {
     services: { cps, application },
   } = useKibana<KibanaServices>();
+  const { euiTheme } = useEuiTheme();
+
+  // EuiFormRow top-aligns its label. Giving the label text the same height as the
+  // (extra small) icon button in `labelAppend` vertically centers the two.
+  const labelStyles = css({ lineHeight: euiTheme.size.l });
 
   const contextMenuTriggerButtonRef = useRef<HTMLButtonElement>(null);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
@@ -82,6 +89,7 @@ export const CustomizeCps: FC<Props> = ({ space, onChange }) => {
       ),
     [cps?.cpsManager]
   );
+  const hasConfigurationLinks = configurationLinks.length > 0;
 
   return (
     <SectionPanel dataTestSubj="cpsDefaultScopePanel">
@@ -108,11 +116,15 @@ export const CustomizeCps: FC<Props> = ({ space, onChange }) => {
       >
         <EuiFormRow
           fullWidth
-          label={i18n.translate('xpack.spaces.management.manageSpacePage.cpsDefaultScopeLabel', {
-            defaultMessage: 'Cross-project search default scope',
-          })}
+          label={
+            <span css={hasConfigurationLinks ? labelStyles : undefined}>
+              {i18n.translate('xpack.spaces.management.manageSpacePage.cpsDefaultScopeLabel', {
+                defaultMessage: 'Cross-project search default scope',
+              })}
+            </span>
+          }
           labelAppend={
-            Boolean(configurationLinks.length) ? (
+            hasConfigurationLinks ? (
               <EuiToolTip disableScreenReaderOutput>
                 <EuiButtonIcon
                   buttonRef={contextMenuTriggerButtonRef}

@@ -35,7 +35,10 @@ spaceTest.describe(
         await rulesManagementPage.disableAutoRefresh();
         await rulesManagementPage.duplicateRuleFromRowActions(RULE_NAME);
         // The app opens the duplicate once it has been created
-        await expect(pageObjects.ruleDetailsPage.backToRuleDetailsLink).toBeVisible();
+        await expect(pageObjects.ruleDetailsPage.backToRuleDetailsLink).toHaveAttribute(
+          'aria-label',
+          `Back to ${DUPLICATE_RULE_NAME}`
+        );
 
         await rulesManagementPage.goto({ kbnUrl, spaceId: scoutSpace.id });
         await expect(rulesManagementPage.ruleRow(DUPLICATE_RULE_NAME)).toBeVisible();
@@ -70,7 +73,10 @@ spaceTest.describe(
         await rulesManagementPage.openRuleDetails(RULE_NAME);
         await expect(ruleDetailsPage.header).toContainText(RULE_NAME);
         await ruleDetailsPage.duplicateFromActionsMenu();
-        await expect(ruleDetailsPage.backToRuleDetailsLink).toBeVisible();
+        await expect(ruleDetailsPage.backToRuleDetailsLink).toHaveAttribute(
+          'aria-label',
+          `Back to ${DUPLICATE_RULE_NAME}`
+        );
 
         await rulesManagementPage.goto({ kbnUrl, spaceId: scoutSpace.id });
         await expect(rulesManagementPage.ruleRow(DUPLICATE_RULE_NAME)).toBeVisible();

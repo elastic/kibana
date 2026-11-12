@@ -35,6 +35,10 @@ export interface FetchEsqlOptions {
   esqlVariables?: ESQLControlVariable[];
   /** Records the request so the panel's Inspect action can show it. */
   requestAdapter?: RequestAdapter;
+  /** Leaves the adapter's earlier requests in place, for a caller that fetches several queries at once. */
+  keepRequests?: boolean;
+  /** Names the request in the Inspect action, to tell it from the others when several are fetched at once. */
+  requestTitle?: string;
 }
 
 const INSPECTOR_REQUEST_TITLE = i18n.translate('xpack.customContent.inspector.requestTitle', {
@@ -64,11 +68,13 @@ export async function fetchEsqlData(
     esQueryConfig,
     esqlVariables,
     requestAdapter,
+    keepRequests,
+    requestTitle = INSPECTOR_REQUEST_TITLE,
   } = options ?? {};
 
   // One request per fetch, so the Requests view shows the latest query instead of a growing list.
   // A superseded fetch is dropped by the newer fetch's reset, so it never leaves a stale entry.
-  requestAdapter?.reset();
+  if (!keepRequests) requestAdapter?.reset();
 
   let timeRangeFilter: estypes.QueryDslQueryContainer | undefined;
   if (timeRange) {
@@ -117,7 +123,7 @@ export async function fetchEsqlData(
         ? {
             inspector: {
               adapter: requestAdapter,
-              title: INSPECTOR_REQUEST_TITLE,
+              title: requestTitle,
               description: INSPECTOR_REQUEST_DESCRIPTION,
             },
           }

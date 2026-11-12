@@ -152,18 +152,16 @@ describe('streams unit stats request schema', () => {
     expect(streamsUnitStatsRequestSchema.safeParse({ components: [] }).success).toBe(true);
   });
 
-  it('accepts destination and processor components and rejects other kinds', () => {
+  it('accepts destination, processor and source components and rejects other kinds', () => {
     expect(
       streamsUnitStatsRequestSchema.safeParse({
         components: [
           { kind: 'destination', id: 'es-prod' },
           { kind: 'processor', id: 'add-env' },
+          { kind: 'source', id: 'otlp-input' },
         ],
       }).success
     ).toBe(true);
-    expect(
-      streamsUnitStatsRequestSchema.safeParse({ components: [{ kind: 'source', id: 'a' }] }).success
-    ).toBe(false);
     expect(
       streamsUnitStatsRequestSchema.safeParse({ components: [{ kind: 'step', id: 'a' }] }).success
     ).toBe(false);
@@ -213,13 +211,17 @@ describe('streams unit stats response schema', () => {
   it('parses null values, empty series points and empty component maps', () => {
     expect(
       streamsUnitStatsResponseSchema.safeParse({
-        components: { destinations: { 'es-prod': noDataDestination }, processors: {} },
+        components: {
+          destinations: { 'es-prod': noDataDestination },
+          processors: {},
+          sources: {},
+        },
         meta,
       }).success
     ).toBe(true);
     expect(
       streamsUnitStatsResponseSchema.safeParse({
-        components: { destinations: {}, processors: {} },
+        components: { destinations: {}, processors: {}, sources: {} },
         meta,
       }).success
     ).toBe(true);
@@ -228,7 +230,7 @@ describe('streams unit stats response schema', () => {
   it('requires a unit on a value with no data, and a time unit on a rate', () => {
     const parse = (destination: object) =>
       streamsUnitStatsResponseSchema.safeParse({
-        components: { destinations: { 'es-prod': destination }, processors: {} },
+        components: { destinations: { 'es-prod': destination }, processors: {}, sources: {} },
         meta,
       }).success;
 
@@ -246,6 +248,62 @@ describe('streams unit stats response schema', () => {
     ).toBe(false);
   });
 
+  it('parses processor instances with a route position or none, and none when it has no data', () => {
+    const stats = {
+      processing_duration: { average: { value: null, unit: 's' } },
+      events: {
+        incoming: { rate: { value: null, unit: '{item}', time_unit: 's' } },
+        failed: { rate: { value: null, unit: '{item}', time_unit: 's' } },
+      },
+    };
+    const parse = (processor: object) =>
+      streamsUnitStatsResponseSchema.safeParse({
+        components: { destinations: {}, processors: { 'add-tags': processor }, sources: {} },
+        meta,
+      }).success;
+
+    expect(parse({ instances: [] })).toBe(true);
+    expect(
+      parse({
+        instances: [
+          { pipeline_id: 'main', route_index: null, ...stats },
+          { pipeline_id: 'main', route_index: 0, ...stats },
+        ],
+      })
+    ).toBe(true);
+    expect(parse({ instances: [{ pipeline_id: 'main', route_index: -1, ...stats }] })).toBe(false);
+    expect(parse({ instances: [{ pipeline_id: 'main', route_index: 1.5, ...stats }] })).toBe(false);
+    expect(parse({})).toBe(false);
+  });
+
+  it('parses a source with an accepted rate, none, and an error, and requires the sources map', () => {
+    const accepted = (value: number | null) => ({
+      events: { accepted: { rate: { value, unit: '{item}', time_unit: 's' } } },
+    });
+    const parse = (source: object) =>
+      streamsUnitStatsResponseSchema.safeParse({
+        components: { destinations: {}, processors: {}, sources: { 'otlp-input': source } },
+        meta,
+      }).success;
+
+    expect(parse(accepted(120.5))).toBe(true);
+    expect(parse(accepted(0))).toBe(true);
+    expect(parse(accepted(null))).toBe(true);
+    expect(parse({ ...accepted(null), error: { code: 'not_found', reason: 'Not in unit.' } })).toBe(
+      true
+    );
+    expect(parse({})).toBe(false);
+    expect(
+      parse({ events: { accepted: { rate: { value: 1, unit: '{item}', time_unit: null } } } })
+    ).toBe(false);
+    expect(
+      streamsUnitStatsResponseSchema.safeParse({
+        components: { destinations: {}, processors: {} },
+        meta,
+      }).success
+    ).toBe(false);
+  });
+
   it('parses a component-level error with an unknown code', () => {
     expect(
       streamsUnitStatsResponseSchema.safeParse({
@@ -257,6 +315,7 @@ describe('streams unit stats response schema', () => {
             },
           },
           processors: {},
+          sources: {},
         },
         meta,
       }).success

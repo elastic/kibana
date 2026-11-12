@@ -14,7 +14,7 @@ import {
   ENTITY_STORE_TAGS,
   LATEST_INDEX,
 } from '../../../common/fixtures/constants';
-import { forceLogExtraction } from '../../../common/fixtures/helpers';
+import { forceLogExtraction, taskExists } from '../../../common/fixtures/helpers';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
 
 type ApiWorkerFixtures = Parameters<Parameters<typeof apiTest>[2]>[0];
@@ -66,36 +66,24 @@ apiTest.describe('Entity Store uninstall', { tag: ENTITY_STORE_TAGS }, () => {
     expect(response.statusCode).toBe(200);
   };
 
-  const assertTaskGone = async (kbnClient: ApiWorkerFixtures['kbnClient'], taskId: string) => {
-    await expect(kbnClient.savedObjects.get({ type: 'task', id: taskId })).rejects.toThrow('404');
-  };
-
   apiTest('stops the history snapshot task on uninstall', async ({ apiClient, kbnClient }) => {
     await install(apiClient, { historySnapshot: { frequency: '24h' } });
 
-    const task = await kbnClient.savedObjects.get({
-      type: 'task',
-      id: HISTORY_SNAPSHOT_TASK_ID,
-    });
-    expect(task.id).toBe(HISTORY_SNAPSHOT_TASK_ID);
+    expect(await taskExists(kbnClient, HISTORY_SNAPSHOT_TASK_ID)).toBe(true);
 
     await uninstall(apiClient);
 
-    await assertTaskGone(kbnClient, HISTORY_SNAPSHOT_TASK_ID);
+    expect(await taskExists(kbnClient, HISTORY_SNAPSHOT_TASK_ID)).toBe(false);
   });
 
   apiTest('stops the status report task on uninstall', async ({ apiClient, kbnClient }) => {
     await install(apiClient);
 
-    const task = await kbnClient.savedObjects.get({
-      type: 'task',
-      id: STATUS_REPORT_TASK_ID,
-    });
-    expect(task.id).toBe(STATUS_REPORT_TASK_ID);
+    expect(await taskExists(kbnClient, STATUS_REPORT_TASK_ID)).toBe(true);
 
     await uninstall(apiClient);
 
-    await assertTaskGone(kbnClient, STATUS_REPORT_TASK_ID);
+    expect(await taskExists(kbnClient, STATUS_REPORT_TASK_ID)).toBe(false);
   });
 
   apiTest('stops extract entity tasks on uninstall', async ({ apiClient, kbnClient }) => {
@@ -103,15 +91,13 @@ apiTest.describe('Entity Store uninstall', { tag: ENTITY_STORE_TAGS }, () => {
     await install(apiClient, { entityTypes });
 
     for (const entityType of entityTypes) {
-      const taskId = getExtractEntityTaskId(entityType);
-      const task = await kbnClient.savedObjects.get({ type: 'task', id: taskId });
-      expect(task.id).toBe(taskId);
+      expect(await taskExists(kbnClient, getExtractEntityTaskId(entityType))).toBe(true);
     }
 
     await uninstall(apiClient, { entityTypes });
 
     for (const entityType of entityTypes) {
-      await assertTaskGone(kbnClient, getExtractEntityTaskId(entityType));
+      expect(await taskExists(kbnClient, getExtractEntityTaskId(entityType))).toBe(false);
     }
   });
 

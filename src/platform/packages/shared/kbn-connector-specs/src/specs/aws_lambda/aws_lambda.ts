@@ -264,7 +264,7 @@ export const AwsLambdaConnector: ConnectorSpec = {
           queryParams.Marker = typedInput.marker;
         }
 
-        const { data } = await callLambdaApi(ctx, 'GET', '/2015-03-31/functions/', queryParams);
+        const { data } = await callLambdaApi(ctx, 'GET', '/2015-03-31/functions', queryParams);
         const body = data as Record<string, unknown>;
 
         return {
@@ -339,7 +339,7 @@ export const AwsLambdaConnector: ConnectorSpec = {
 
   test: {
     handler: async (ctx) => {
-      await callLambdaApi(ctx, 'GET', '/2015-03-31/functions/', { MaxItems: '1' });
+      await callLambdaApi(ctx, 'GET', '/2015-03-31/functions', { MaxItems: '1' });
       return {};
     },
     description: i18n.translate('connectorSpecs.awsLambda.test.description', {

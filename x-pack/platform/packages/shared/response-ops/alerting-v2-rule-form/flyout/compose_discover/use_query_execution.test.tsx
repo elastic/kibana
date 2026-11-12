@@ -9,6 +9,7 @@ import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClientProvider } from '@kbn/react-query';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { cpsPluginMock } from '@kbn/cps/public/mocks';
 import { createTestQueryClient } from '../../test_utils';
 import { useQueryExecution } from './use_query_execution';
 
@@ -35,6 +36,61 @@ describe('useQueryExecution', () => {
     );
 
     expect(result.current.hasRun).toBe(false);
+  });
+
+  it('runs the query with the rule project routing', async () => {
+    mockEsql.mockResolvedValue({ rawResponse: { columns: [], values: [] } });
+    const mockCps = cpsPluginMock.createStartContract();
+
+    const { result } = renderHook(
+      () =>
+        useQueryExecution({
+          query: 'FROM logs-*',
+          timeField: '@timestamp',
+          timeRange,
+          data,
+          cps: mockCps,
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    act(() => result.current.run());
+
+    await waitFor(() =>
+      expect(mockEsql).toHaveBeenCalledWith(expect.objectContaining({ projectRouting: '_alias:*' }))
+    );
+  });
+
+  it('uses the latest space default routing when run again', async () => {
+    mockEsql.mockResolvedValue({ rawResponse: { columns: [], values: [] } });
+    const mockCps = cpsPluginMock.createStartContract();
+    const mockGetDefaultProjectRouting = jest.mocked(mockCps.cpsManager!.getDefaultProjectRouting);
+
+    const { result } = renderHook(
+      () =>
+        useQueryExecution({
+          query: 'FROM logs-*',
+          timeField: '@timestamp',
+          timeRange,
+          data,
+          cps: mockCps,
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    act(() => result.current.run());
+    await waitFor(() => expect(mockEsql).toHaveBeenCalledTimes(1));
+
+    // CPS finishes loading the space default after the first run, without a re-render
+    mockGetDefaultProjectRouting.mockReturnValue('_alias:_origin');
+    act(() => result.current.run());
+
+    await waitFor(() =>
+      expect(mockEsql).toHaveBeenLastCalledWith(
+        expect.objectContaining({ projectRouting: '_alias:_origin' })
+      )
+    );
+    expect(mockEsql).toHaveBeenCalledTimes(2);
   });
 
   it("keeps a tab's own error when switching away and back, without re-running or clearing it", async () => {
