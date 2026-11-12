@@ -204,6 +204,7 @@ export class CallbackDeliveryService {
     }
 
     const delay = Math.min(error.retryAfterMs, MAX_CALLBACK_RETRY_AFTER_MS);
+
     this.logger.debug(
       `Callback receiver asked to retry after ${error.retryAfterMs}ms; waiting ${delay}ms`
     );
@@ -251,9 +252,12 @@ export class CallbackDeliveryService {
           throw new Error('The Relay client is not available');
         }
 
-        const { status, retryAfter } = await relayClient.postCallback(callbackUrl, payload, signal);
+        const { status, headers } = await relayClient.postCallback(callbackUrl, payload, signal);
 
-        throwIfNotDelivered({ status, retryAfterMs: parseRetryAfterMs(retryAfter) });
+        throwIfNotDelivered({
+          status,
+          retryAfterMs: parseRetryAfterMs(headers.get('retry-after')),
+        });
       },
     };
   }

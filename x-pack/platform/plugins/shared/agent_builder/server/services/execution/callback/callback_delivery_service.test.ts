@@ -108,7 +108,7 @@ describe('transport selection', () => {
     const fetchMock = jest.spyOn(global, 'fetch');
     const relayClient = {
       isRelayOrigin: jest.fn().mockReturnValue(true),
-      postCallback: jest.fn().mockResolvedValue({ status: 204 }),
+      postCallback: jest.fn().mockResolvedValue({ status: 204, headers: new Headers() }),
     };
 
     await deliver(createCallbackDeliveryService(jest.fn(), relayClient));
@@ -519,8 +519,8 @@ describe('makeCallbackRequest response classification', () => {
       isRelayOrigin: jest.fn().mockReturnValue(true),
       postCallback: jest
         .fn()
-        .mockResolvedValueOnce({ status: 429, retryAfter: '5' })
-        .mockResolvedValueOnce({ status: 204 }),
+        .mockResolvedValueOnce({ status: 429, headers: new Headers({ 'Retry-After': '5' }) })
+        .mockResolvedValueOnce({ status: 204, headers: new Headers() }),
     };
 
     const delivery = createCallbackDeliveryService(jest.fn(), relayClient).makeCallbackRequest({

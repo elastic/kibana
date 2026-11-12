@@ -95,9 +95,18 @@ const parseRetryAfterSeconds = (value: unknown): number | undefined => {
   return Number.isFinite(seconds) && seconds >= 0 ? seconds : undefined;
 };
 
-const firstHeaderValue = (value: unknown): string | undefined => {
-  const first = Array.isArray(value) ? value[0] : value;
-  return typeof first === 'string' ? first : undefined;
+const toHeaders = (axiosHeaders: Record<string, unknown> = {}): Headers => {
+  const headers = new Headers();
+
+  for (const [name, value] of Object.entries(axiosHeaders)) {
+    for (const item of Array.isArray(value) ? value : [value]) {
+      if (item !== undefined && item !== null) {
+        headers.append(name, String(item));
+      }
+    }
+  }
+
+  return headers;
 };
 
 export class RelayClient implements RelayClientContract {
@@ -337,10 +346,7 @@ export class RelayClient implements RelayClientContract {
     }
 
     const response = await this.sendRequest(url, body, 'post', signal);
-    return {
-      status: response.status,
-      retryAfter: firstHeaderValue(response.headers?.['retry-after']),
-    };
+    return { status: response.status, headers: toHeaders(response.headers) };
   }
 
   private async post(path: string, body: unknown): Promise<AxiosResponse> {

@@ -813,7 +813,7 @@ describe('RelayClient', () => {
         { execution_id: 'execution-1' },
         signal
       )
-    ).resolves.toEqual({ status: 204 });
+    ).resolves.toEqual(expect.objectContaining({ status: 204 }));
 
     expect(requestMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -825,23 +825,22 @@ describe('RelayClient', () => {
     );
   });
 
-  it.each([
-    ['a string', '17'],
-    ['an array', ['17', '30']],
-  ])('returns the Retry-After header of a callback response given as %s', async (_, header) => {
+  it('returns the callback response headers, joining repeated values', async () => {
     requestMock.mockResolvedValue({
       status: 429,
       data: undefined,
-      headers: { 'retry-after': header },
+      headers: { 'retry-after': '17', 'x-relay': ['a', 'b'] },
     } as never);
 
-    await expect(
-      createClient().postCallback(
-        'https://relay.test/relay-provided/callback?token=abc',
-        { execution_id: 'execution-1' },
-        new AbortController().signal
-      )
-    ).resolves.toEqual({ status: 429, retryAfter: '17' });
+    const { status, headers } = await createClient().postCallback(
+      'https://relay.test/relay-provided/callback?token=abc',
+      { execution_id: 'execution-1' },
+      new AbortController().signal
+    );
+
+    expect(status).toBe(429);
+    expect(headers.get('Retry-After')).toBe('17');
+    expect(headers.get('x-relay')).toBe('a, b');
   });
 
   it('rejects callback URLs outside the configured Relay origin', async () => {
