@@ -22,21 +22,29 @@ import { defer, map } from 'rxjs';
  * deltas by index. The resolver keys tool calls by `toolCallId` instead:
  * - a chunk with a new `toolCallId` gets the next available index
  * - a chunk without `toolCallId` is a continuation of the most recent tool call at that source index
- *
- * Returns `undefined` for a continuation chunk whose tool call was never started.
+ * - a chunk without `toolCallId` at a source index that has no tool call yet (some gateways drop
+ *   the id, e.g. GPT-OSS via EIS) starts a new tool call, which later id-less chunks at that
+ *   source index continue
  */
 export const createToolCallIndexResolver = () => {
   const indexByToolCallId = new Map<string, number>();
   const currentIndexBySourceIndex = new Map<number, number>();
+  let nextIndex = 0;
 
-  return (toolCall: ChatCompletionChunkToolCall): number | undefined => {
+  return (toolCall: ChatCompletionChunkToolCall): number => {
     if (!toolCall.toolCallId) {
-      return currentIndexBySourceIndex.get(toolCall.index);
+      const currentIndex = currentIndexBySourceIndex.get(toolCall.index);
+      if (currentIndex !== undefined) {
+        return currentIndex;
+      }
+      const startedIndex = nextIndex++;
+      currentIndexBySourceIndex.set(toolCall.index, startedIndex);
+      return startedIndex;
     }
 
     let index = indexByToolCallId.get(toolCall.toolCallId);
     if (index === undefined) {
-      index = indexByToolCallId.size;
+      index = nextIndex++;
       indexByToolCallId.set(toolCall.toolCallId, index);
     }
     currentIndexBySourceIndex.set(toolCall.index, index);
@@ -66,7 +74,7 @@ export function normalizeToolCallIndexes<
             ...event,
             tool_calls: event.tool_calls.map((toolCall) => {
               const index = resolveIndex(toolCall);
-              return index === undefined || index === toolCall.index
+              return index === toolCall.index
                 ? toolCall
                 : { ...toolCall, index };
             }),

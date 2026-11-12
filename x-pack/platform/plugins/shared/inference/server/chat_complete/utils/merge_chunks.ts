@@ -20,7 +20,8 @@ interface UnvalidatedMessage {
  * Merge logic:
  * - `toolCallId` and `function.name` appear in the first chunk and should be set once
  * - `function.arguments` is streamed across multiple chunks and should be accumulated
- * - When `toolCallId` is empty, it's a continuation chunk for the most recent tool call at that index
+ * - When `toolCallId` is empty, it's a continuation chunk for the most recent tool call at that index,
+ *   or the start of a new tool call if none exists yet at that index
  */
 const mergeToolCalls = (chunks: ChatCompletionChunkEvent[]): UnvalidatedToolCall[] => {
   // Map to store tool calls by their resolved index
@@ -30,11 +31,6 @@ const mergeToolCalls = (chunks: ChatCompletionChunkEvent[]): UnvalidatedToolCall
   for (const chunk of chunks) {
     chunk.tool_calls?.forEach((toolCall) => {
       const key = resolveIndex(toolCall);
-      if (key === undefined) {
-        throw new Error(
-          `Tool call key is missing for index ${toolCall.index} in chunk ${JSON.stringify(chunk)}`
-        );
-      }
 
       const existingToolCall = toolCallsMap.get(key);
       const updatedToolCall: UnvalidatedToolCall = {
