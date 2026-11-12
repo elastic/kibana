@@ -26,9 +26,13 @@ export const GetFileRouteRequestBody = lazySchema(() =>
     z.object({
       parameters: z.object({
         /**
-         * The full file path to retrieve from the endpoint.
+         * The full file path to retrieve from the endpoint. Either `path` or `paths` must be defined, but not both.
          */
-        path: z.string(),
+        path: z.string().optional(),
+        /**
+         * The list of file paths to retrieve from the endpoint. Either `path` or `paths` must be defined, but not both. Valid for the Elastic Defend Endpoint agent type only, and requires an Endpoint that supports the `get_file_multi_path` capability.
+         */
+        paths: z.array(z.string().min(1).max(4096)).min(1).max(100).optional(),
         /**
          * Read a file locked by the OS from a volume snapshot. Endpoint on Windows only.
          */
