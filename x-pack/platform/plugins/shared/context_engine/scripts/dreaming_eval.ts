@@ -24,20 +24,24 @@ import type { StageContext } from './dreaming_eval/context';
 import { createKibanaCall } from './dreaming_eval/context';
 import { runAsk } from './dreaming_eval/stages/ask';
 import { runCleanup } from './dreaming_eval/stages/cleanup';
+import { runCompare } from './dreaming_eval/stages/compare';
 import { runConfigure } from './dreaming_eval/stages/configure';
 import { runEvaluate } from './dreaming_eval/stages/evaluate';
 import { runExtract } from './dreaming_eval/stages/extract';
 import { runImport } from './dreaming_eval/stages/import';
 import { runIdOfShared, runLoad } from './dreaming_eval/stages/load';
+import { runReference } from './dreaming_eval/stages/reference';
 import { hasKiDump, runRun } from './dreaming_eval/stages/run';
 
 const STAGES = {
   extract: runExtract,
   import: runImport,
   configure: runConfigure,
+  reference: runReference,
   run: runRun,
   load: runLoad,
   evaluate: runEvaluate,
+  compare: runCompare,
   ask: runAsk,
   cleanup: runCleanup,
 } as const;
@@ -45,7 +49,7 @@ const STAGES = {
 type Stage = keyof typeof STAGES;
 const STAGE_NAMES = Object.keys(STAGES) as Stage[];
 /** Stages that run only when named, or turned on in the config. */
-const OPTIONAL_STAGES: Stage[] = ['load', 'ask', 'cleanup'];
+const OPTIONAL_STAGES: Stage[] = ['reference', 'load', 'compare', 'ask', 'cleanup'];
 
 const parseStages = (value: unknown, optional: Stage[]): Stage[] => {
   if (value === undefined || value === '' || value === true) {
@@ -91,7 +95,10 @@ run(
   async ({ log, flags }) => {
     const configPath = path.resolve(process.cwd(), String(flags.config || DEFAULT_CONFIG_PATH));
     const loaded = loadConfig(configPath, process.cwd());
-    const stages = parseStages(flags.stage, loaded.ask.enabled ? ['ask'] : []);
+    const stages = parseStages(flags.stage, [
+      ...(loaded.ask.enabled ? (['ask'] as const) : []),
+      ...(loaded.compare.enabled ? (['compare'] as const) : []),
+    ]);
 
     const datasets = listFlag(flags.dataset);
     const unknownDatasets = (datasets ?? []).filter(
@@ -154,7 +161,7 @@ run(
       : stages.includes('load') && loadFrom
       ? runIdOfShared(loadFrom)
       : latestRunId(config, aiIndexIds);
-    if (!runId && stages.includes('evaluate')) {
+    if (!runId && (stages.includes('evaluate') || stages.includes('compare'))) {
       throw new Error('No run to evaluate: run the run stage first, or pass --run-id');
     }
 
@@ -179,7 +186,9 @@ run(
       `Stages ${stages.join(', ')} for ${aiIndexIds.join(', ')} on ${usedDatasets.join(
         ', '
       )} (config ${path.relative(process.cwd(), configPath)}${
-        ['run', 'load', 'evaluate', 'ask'].some((stage) => stages.includes(stage as Stage))
+        ['run', 'load', 'evaluate', 'compare', 'ask'].some((stage) =>
+          stages.includes(stage as Stage)
+        )
           ? `, run ${context.runId}`
           : ''
       })`
@@ -196,12 +205,15 @@ run(
       Agent Builder OTel traces, configures AI indices that dream on them, runs their workflows
       from a clean slate, dumps the KIs they write, and judges them against target knowledge.
 
-      Stages, in order: ${STAGE_NAMES.join(', ')}. Without --stage, all of them run but load,
-      ask and cleanup. Load writes KIs someone else dreamed (--from) to the AI index, to try
-      retrieval on them without dreaming. Ask puts the targets' questions to an agent that has
-      only the AI index, and judges its answers; it also runs when ask.enabled is set in the
-      config. Cleanup deletes the imported traces, the AI indices with their KIs and workflows,
-      and the answer agents with their conversations; it keeps the files, runs included.
+      Stages, in order: ${STAGE_NAMES.join(', ')}. Without --stage, all of them run but the
+      optional reference, load, compare, ask and cleanup. Reference writes the conversations as
+      transcripts and prompts for a coding agent to write the memories dreaming should produce.
+      Load writes KIs someone else dreamed (--from) to the AI index, to try retrieval on them
+      without dreaming. Compare matches a run's KIs against those reference memories by code,
+      without an LLM. Ask puts the targets' questions to an agent that has only the AI index, and
+      judges its answers. Compare and ask also run when compare.enabled or ask.enabled is set in
+      the config. Cleanup deletes the imported traces, the AI indices with their KIs and
+      workflows, and the answer agents with their conversations; it keeps the files.
 
       A sample is a benchmark question with the conversations it is asked over. By default one
       LongMemEval S sample runs; the config picks the datasets and samples, and the flags below
@@ -229,7 +241,7 @@ run(
       help: `
         --stage <names>         Comma-separated stages to run: ${STAGE_NAMES.join(
           ', '
-        )} (default: all but load, ask and cleanup)
+        )} (default: all but reference, load, compare, ask and cleanup)
         --config <file>         Eval config (default: ${path.relative(
           process.cwd(),
           DEFAULT_CONFIG_PATH
@@ -246,8 +258,8 @@ run(
         --all-samples           Evaluate every sample
         --per-sample            Run the samples one at a time, each with only its own conversations
                                 (the default for longmemeval_s), dumping each sample's KIs
-        --run-id <id>           Run to write (run stage) or read (evaluate stage); default: a new
-                                run for the run stage, else the latest one
+        --run-id <id>           Run to write (run stage) or read (evaluate, compare and ask
+                                stages); default: a new run for the run stage, else the latest one
         --judge-connector <id>  AI connector that judges the KIs (default: evaluate.connector_id,
                                 then Kibana's default AI connector)
         --from <path>           What the load stage loads: a run folder someone shared

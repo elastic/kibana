@@ -14,6 +14,8 @@ node scripts/context_engine_dreaming_eval.js --dataset longmemeval_v2_web --samp
 node scripts/context_engine_dreaming_eval.js --dataset longmemeval_s --all-samples
 node scripts/context_engine_dreaming_eval.js --stage evaluate --run-id 2026-11-12T08-00-00-000
 node scripts/context_engine_dreaming_eval.js --stage ask              # answer agents, on the latest run's KIs
+node scripts/context_engine_dreaming_eval.js --stage extract,reference --preset dev   # prompts for reference memories
+node scripts/context_engine_dreaming_eval.js --stage compare --run-id <id>             # KIs against them, no LLM
 node scripts/context_engine_dreaming_eval.js --stage cleanup          # delete the traces, AI indices and agents
 ```
 
@@ -28,11 +30,26 @@ Each stage reads what the previous one wrote, so you can rerun any of them on it
 | `extract` | Downloads the datasets, picks the conversations the config asks for, and writes them with targets generated from the benchmark's questions. |
 | `import` | Writes each round as Agent Builder OTel spans to `traces-agent_builder.otel-<space>`. A re-import replaces the dataset's earlier spans. |
 | `configure` | Turns on Context Engine and memory, and creates or updates the AI indices of the config: an ES\|QL trace source over the datasets' agents, and their dreaming config. Creates or updates each AI index's answer agent too. |
+| `reference` (optional) | Writes each AI index's conversations as transcripts, and prompts for a coding agent to write the memories dreaming should produce from them. See [Reference memories](#reference-memories). |
 | `run` | Per AI index: deletes the facts, entities and relationships dreaming wrote, runs each of its workflows until they have read everything (the first run from the earliest imported round), and dumps the KIs they wrote. A run that fails is run again (`run.retries`), from where the last completed run stopped. With `per_sample`, it does this once per sample (below). |
 | `evaluate` | Per target: ranks the dumped KIs with a reranker, then asks an LLM whether the top ones hold the target knowledge. Writes scores by dataset and category. |
+| `compare` (optional) | Matches the run's KIs against the reference memories by code, without an LLM, and writes recall, precision and F1 per kind and type. Runs when named, or with the others when `compare.enabled` is set. |
 | `load` (optional) | Loads KIs someone else dreamed (`--from`): copies their dumps into a local run and writes them to the AI index. See [Sharing memories](#sharing-memories). |
 | `ask` (optional) | Restores the run's dumped KIs to the AI index, puts each target's question to the AI index's answer agent, and asks an LLM whether its answer gives the reference answer. Runs when named, or with the others when `ask.enabled` is set. |
 | `cleanup` (optional) | Deletes what the other stages created: the datasets' imported spans, the AI indices with their KIs and workflows, and the answer agents with their conversations. Keeps the files: downloads, extracts, and every run's dumps and results. Runs only when named. |
+
+## Reference memories
+
+Judging KIs with an LLM costs a call per target. Reference memories are the other way round: the memories a pipeline that worked well would write from a sample's conversations, whatever the benchmark asks. With them, the compare stage scores a run by code, as often as you like.
+
+**Writing them.** `--stage reference` (after `extract`, and `configure` if the AI index should come from Kibana) reads the AI index's dreaming config (its instructions, fact types, entity types with their attributes, and relationship types) from Kibana, or from the eval config when Kibana does not have the AI index. It writes to `references/<AI index>/` (`references` on the AI index sets another folder, such as one in the repo to share):
+
+- `transcripts/<conversation>.md`: each conversation, round by round, with the time, what the user sent, the tool calls with their results, and the answer.
+- `prompts/<sample>.md`: per sample (or `prompts/all.md` when the samples dream together): what to record, as dreaming is told; the types; the dreaming instructions; the transcript files; and the JSON file to write, `samples/<sample>.json` (or `memories.json`), with its shape. Each memory carries `keywords` (exact names, numbers and dates any correct KI contains), `evidence`, and `optional` for one a good pipeline might fairly skip.
+- `PROMPT.md`: the prompts to run, one subagent per sample. Give it to Claude Code or another coding agent. `reference.prompt_prefix` lines start each prompt, such as model and effort commands.
+- `manifest.json`: which conversations each sample's reference is made from, and the dataset options they were extracted with.
+
+**Comparing.** `--stage compare --run-id <id>` matches each sample's KIs one to one with its reference memories, best match first: entities by name or alias (`compare.entity_threshold`), facts by their keywords and how much of their wording the KI holds (`compare.fact_threshold`), relationships by type and their matched ends. A KI of another type of the same kind still matches, and counts against "same type". It writes `comparison.json` and `comparison.md` to the run: per kind and per type, how many memories are required and optional, how many KIs were produced, recall of the required ones, precision of the KIs, and F1; then the reference memories missed and the KIs that match none. Samples without a reference file are skipped with a warning.
 
 ## Answer agents
 
@@ -77,6 +94,8 @@ Everything goes to `data/context_engine_dreaming_eval/` (`data_dir`), which git 
 - `runs/<run id>/<AI index>/kis.json`, or `samples/<sample>/kis.json` per sample: the KIs a run wrote (whole documents), with the workflow runs and what each read and wrote.
 - `runs/<run id>/<AI index>/evaluation.json` and `summary.md`: each target's verdict, the KIs that hold it, and scores.
 - `runs/<run id>/<AI index>/answers.json` and `answers.md`: the answer agent's answer to each question, its tool calls and queries, the verdict, and scores.
+- `runs/<run id>/<AI index>/comparison.json` and `comparison.md`: the KIs matched against the reference memories.
+- `references/<AI index>/`: the transcripts, prompts and reference memories (above).
 
 ## Targets
 

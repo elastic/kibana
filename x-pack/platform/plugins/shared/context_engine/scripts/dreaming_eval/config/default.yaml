@@ -144,6 +144,20 @@ ask:
   # connector_id: .anthropic-claude-4.6-sonnet-chat_completion   # what the agents answer with
   concurrency: 2
 
+# The reference stage writes each AI index's conversations as transcripts, and prompts for a coding
+# agent (such as Claude Code) to write the memories dreaming should produce from them, to
+# <data_dir>/references/<AI index id> unless the AI index sets references: <folder>.
+reference:
+  # Lines each prompt starts with, such as the coding agent's model and effort commands.
+  prompt_prefix: ['/model fable', '/effort ultra']
+
+# The compare stage matches a run's KIs against those reference memories, by code: no LLM. It runs
+# when named with --stage, or with the other stages when enabled here.
+compare:
+  enabled: false
+  fact_threshold: 0.5    # keywords (0.6 of the score) and wording (0.4)
+  entity_threshold: 0.6  # name or alias: 1 when equal, 0.8 when one is within the other
+
 # Each AI index also gets an answer agent (answer_agent), which the configure stage creates: it has
 # only this AI index, the AI index tools, and instructions to answer from it. Set
 # answer_agent: { enabled: false } to skip it, or give it an id, instructions or tools of its own.

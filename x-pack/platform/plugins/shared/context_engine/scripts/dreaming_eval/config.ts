@@ -175,6 +175,11 @@ const aiIndexSchema = z.object({
   dreaming: dreamingSchema,
   /** Target files to evaluate against; when empty, the targets extracted for its datasets. */
   targets: z.array(z.string()).default([]),
+  /**
+   * The folder of its reference memories, which the compare stage matches its KIs against;
+   * defaults to `<data_dir>/references/<id>`. The reference stage writes the prompts there.
+   */
+  references: z.string().optional(),
   answer_agent: answerAgentSchema.default(answerAgentSchema.parse({})),
 });
 
@@ -231,6 +236,22 @@ const configSchema = z.object({
       timeout_minutes: z.number().min(1).default(10),
     })
     .default({ enabled: false, concurrency: 2, timeout_minutes: 10 }),
+  reference: z
+    .object({
+      /** Lines the prompts start with, such as the model and effort for the coding agent. */
+      prompt_prefix: z.array(z.string()).default([]),
+    })
+    .default({ prompt_prefix: [] }),
+  compare: z
+    .object({
+      /** Runs the compare stage with the others when no --stage is given. */
+      enabled: z.boolean().default(false),
+      /** Least score (0 to 1) for a KI to match a reference fact: keywords, then wording. */
+      fact_threshold: z.number().min(0).max(1).default(0.5),
+      /** Least score (0 to 1) for a KI to match a reference entity, by name. */
+      entity_threshold: z.number().min(0).max(1).default(0.6),
+    })
+    .default({ enabled: false, fact_threshold: 0.5, entity_threshold: 0.6 }),
 });
 
 export type EvalConfigFile = z.infer<typeof configSchema>;
