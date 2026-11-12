@@ -10,9 +10,7 @@ import { errors } from '@elastic/elasticsearch';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { getSession } from '../../sessions/get_session';
 import { listSessions } from '../../sessions/list_sessions';
-import { enableSessionsForUser, getApiKeyStatus } from '../../sessions/sessions_auto_update';
-import { getSessionsStatus } from '../../sessions/sessions_setup';
-import { SessionsNewerVersionError } from '../../sessions/sessions_newer_version_error';
+import { enableSessions, getSessionsStatus } from '../../sessions/sessions_setup';
 import { SessionsPrivilegesError } from '../../sessions/sessions_privileges_error';
 import { SessionsRestrictedReadError } from '../../sessions/sessions_restricted_read_error';
 import {
@@ -25,28 +23,15 @@ import {
 
 jest.mock('../../sessions/get_session');
 jest.mock('../../sessions/list_sessions');
-jest.mock('../../sessions/sessions_auto_update');
 jest.mock('../../sessions/sessions_setup', () => ({
   ...jest.requireActual('../../sessions/sessions_setup'),
+  enableSessions: jest.fn(),
   getSessionsStatus: jest.fn(),
 }));
 
 type Endpoint = keyof typeof sessionsRouteRepository;
 
-const settings = { frequency: '1m', partitions: 1 };
-
-const status = {
-  installed: true,
-  health: 'healthy',
-  state: 'started',
-  installedVersion: 1,
-  currentVersion: 1,
-  needsUpdate: false,
-  reason: null,
-};
-
-const sessionsApiKeys = { available: true };
-const getSessionsAutoUpdateState = async () => ({ autoUpdateError: 'unable to authenticate' });
+const status = { installed: true };
 
 const START = '2026-10-27T10:00:00.000Z';
 const END = '2026-10-28T10:00:00.000Z';
@@ -62,25 +47,19 @@ const esError = (statusCode: number) =>
 
 const runHandler = (
   endpoint: Endpoint,
-  {
-    params = {},
-    authzResult,
-  }: { params?: Record<string, unknown>; authzResult?: Record<string, boolean> } = {}
+  { params = {} }: { params?: Record<string, unknown> } = {}
 ) => {
   const coreContext = coreMock.createRequestHandlerContext();
   const logger = loggingSystemMock.createLogger();
   const handler = sessionsRouteRepository[endpoint].handler as unknown as (
     resources: unknown
   ) => Promise<unknown>;
-  const request = { authzResult };
+  const request = {};
   const result = handler({
     params,
     context: { core: Promise.resolve(coreContext) },
     request,
     logger,
-    sessionsSettings: settings,
-    sessionsApiKeys,
-    getSessionsAutoUpdateState,
     isServerless: true,
   });
   return { result, coreContext, logger, request };
@@ -112,9 +91,8 @@ const querySchemaOf = () =>
 
 describe('sessions routes', () => {
   beforeEach(() => {
-    jest.mocked(getSessionsStatus).mockResolvedValue(status as never);
-    jest.mocked(getApiKeyStatus).mockImplementation(async (s) => ({ status: s, keyId: null }));
-    jest.mocked(enableSessionsForUser).mockResolvedValue(null);
+    jest.mocked(getSessionsStatus).mockResolvedValue(status);
+    jest.mocked(enableSessions).mockResolvedValue();
   });
 
   afterEach(() => {
@@ -123,6 +101,7 @@ describe('sessions routes', () => {
 
   it.each<[Endpoint, string]>([
     [SESSIONS_ENABLE_ENDPOINT, 'manage_digital_experience_sessions'],
+    [SESSIONS_STATUS_ENDPOINT, 'read_digital_experience'],
     [SESSIONS_LIST_ENDPOINT, 'read_digital_experience'],
     [SESSION_DETAIL_ENDPOINT, 'read_digital_experience'],
   ])('%s requires %s', (endpoint, privilege) => {
@@ -131,81 +110,13 @@ describe('sessions routes', () => {
     });
   });
 
-  it('requires read for status, and checks the manage sessions privilege to show the enabler', () => {
-    expect(sessionsRouteRepository[SESSIONS_STATUS_ENDPOINT].security).toEqual({
-      authz: {
-        requiredPrivileges: ['read_digital_experience'],
-        extendedPrivileges: ['manage_digital_experience_sessions'],
-      },
-    });
-  });
-
   describe('status', () => {
-    const enabled = {
-      ...status,
-      enabledBy: 'ana',
-      enabledAt: '2026-10-27T11:00:00.000Z',
-      authorization: { roles: ['superuser'], apiKeyName: null, serviceAccount: null },
-      transforms: [
-        {
-          id: 'digital-experience-sessions-1',
-          enabledBy: 'ana',
-          enabledAt: '2026-10-27T11:00:00.000Z',
-          authorization: { roles: ['superuser'], apiKeyName: null, serviceAccount: null },
-        },
-      ],
-    };
+    it('reports whether sessions are set up, read as the internal user', async () => {
+      const { result, coreContext } = runHandler(SESSIONS_STATUS_ENDPOINT);
 
-    it.each([
-      [true, enabled],
-      [
-        false,
-        {
-          ...enabled,
-          enabledBy: null,
-          enabledAt: null,
-          authorization: null,
-          transforms: [
-            {
-              id: 'digital-experience-sessions-1',
-              enabledBy: null,
-              enabledAt: null,
-              authorization: null,
-            },
-          ],
-        },
-      ],
-    ])(
-      'shows who enabled sessions only to managers (manage sessions: %s)',
-      async (canManage, body) => {
-        jest.mocked(getSessionsStatus).mockResolvedValue(enabled as never);
-        // The router fills `authzResult` from the route's extended privileges.
-        const { result } = runHandler(SESSIONS_STATUS_ENDPOINT, {
-          authzResult: { manage_digital_experience_sessions: canManage },
-        });
-
-        expect(await result).toEqual(body);
-        // Only users who can grant a new key pay for checking it; the others see what the health
-        // task found.
-        expect(getApiKeyStatus).toHaveBeenCalledWith(enabled, sessionsApiKeys, {
-          checkKey: canManage,
-          logger: expect.anything(),
-          getAutoUpdateState: getSessionsAutoUpdateState,
-        });
-      }
-    );
-
-    it('adds what the stored API key means for the status', async () => {
-      jest.mocked(getApiKeyStatus).mockImplementation(async (s) => ({
-        status: { ...s, needsUpdate: true, autoUpdate: true },
-        keyId: 'key-1',
-      }));
-      const { result } = runHandler(SESSIONS_STATUS_ENDPOINT, {
-        authzResult: { manage_digital_experience_sessions: true },
-      });
-
-      expect(await result).toEqual(
-        expect.objectContaining({ needsUpdate: true, autoUpdate: true })
+      expect(await result).toEqual(status);
+      expect(getSessionsStatus).toHaveBeenCalledWith(
+        coreContext.elasticsearch.client.asInternalUser
       );
     });
 
@@ -224,22 +135,16 @@ describe('sessions routes', () => {
   });
 
   describe('enable', () => {
-    it('enables sessions for the current user, records them, audits it and returns the status', async () => {
-      const { result, coreContext, request } = runHandler(SESSIONS_ENABLE_ENDPOINT);
+    it('enables sessions for the current user, audits it and returns the status', async () => {
+      const { result, coreContext } = runHandler(SESSIONS_ENABLE_ENDPOINT);
       // The handler reads the user after awaiting the request context.
       coreContext.security.authc.getCurrentUser.mockReturnValue({ username: 'ana' } as never);
 
       expect(await result).toEqual(status);
-      expect(enableSessionsForUser).toHaveBeenCalledWith(
-        expect.objectContaining({
-          esClient: coreContext.elasticsearch.client,
-          apiKeys: sessionsApiKeys,
-          request,
-          settings,
-          enabledBy: 'ana',
-          isServerless: true,
-        })
-      );
+      expect(enableSessions).toHaveBeenCalledWith({
+        esClient: coreContext.elasticsearch.client,
+        isServerless: true,
+      });
       expect(coreContext.security.audit.logger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           message: 'User [ana] enabled Digital Experience sessions',
@@ -251,29 +156,12 @@ describe('sessions routes', () => {
       );
     });
 
-    it('names the new API key in the audit event', async () => {
-      jest
-        .mocked(enableSessionsForUser)
-        .mockResolvedValue({ id: 'key-1', name: 'Digital Experience sessions' } as never);
-      const { result, coreContext } = runHandler(SESSIONS_ENABLE_ENDPOINT);
-      coreContext.security.authc.getCurrentUser.mockReturnValue({ username: 'ana' } as never);
-
-      await result;
-
-      expect(coreContext.security.audit.logger.log).toHaveBeenCalledWith(
-        expect.objectContaining({
-          message:
-            'User [ana] enabled Digital Experience sessions with a new API key [Digital Experience sessions] (key-1)',
-        })
-      );
-    });
-
     it.each([
       [
         'missing privileges',
-        new SessionsPrivilegesError(['cluster:manage_transform']),
+        new SessionsPrivilegesError(['cluster:manage_index_templates']),
         403,
-        { missingPrivileges: ['cluster:manage_transform'] },
+        { missingPrivileges: ['cluster:manage_index_templates'] },
       ],
       [
         'a filtered source read',
@@ -281,14 +169,8 @@ describe('sessions routes', () => {
         403,
         { restrictedIndices: ['logs-*.otel-*'], reason: 'filtered' },
       ],
-      [
-        'transforms from a newer version',
-        new SessionsNewerVersionError(2, 1),
-        409,
-        { installedVersion: 2, currentVersion: 1 },
-      ],
     ])('answers %s with its reason, and audits the failure', async (_name, error, code, data) => {
-      jest.mocked(enableSessionsForUser).mockRejectedValue(error);
+      jest.mocked(enableSessions).mockRejectedValue(error);
       const { result, coreContext } = runHandler(SESSIONS_ENABLE_ENDPOINT);
 
       expect(await clientErrorOf(result)).toEqual({
@@ -302,9 +184,7 @@ describe('sessions routes', () => {
     });
 
     it('answers other failures with a 500 that hides the Elasticsearch details', async () => {
-      jest
-        .mocked(enableSessionsForUser)
-        .mockRejectedValue(new Error('security_exception: user [ana]'));
+      jest.mocked(enableSessions).mockRejectedValue(new Error('security_exception: user [ana]'));
       const { result, logger } = runHandler(SESSIONS_ENABLE_ENDPOINT);
 
       const error = await clientErrorOf(result);

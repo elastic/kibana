@@ -38,6 +38,7 @@ export interface DownloadSourceFormInputsType {
   defaultDownloadSourceInput: ReturnType<typeof useSwitchInput>;
   hostInput: ReturnType<typeof useInput>;
   proxyIdInput: ReturnType<typeof useInput>;
+  reserveDiskspaceInput: ReturnType<typeof useSwitchInput>;
   sslCertificateInput: ReturnType<typeof useInput>;
   sslKeyInput: ReturnType<typeof useInput>;
   sslKeySecretInput: ReturnType<typeof useSecretInput>;
@@ -79,6 +80,12 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
   const hostInput = useInput(downloadSource?.host ?? '', validateHost, isEditDisabled);
 
   const proxyIdInput = useInput(downloadSource?.proxy_id ?? '', () => undefined, isEditDisabled);
+
+  // agent reserves disk space by default when the setting is not set
+  const reserveDiskspaceInput = useSwitchInput(
+    downloadSource?.reserve_diskspace ?? true,
+    isEditDisabled
+  );
 
   const sslCertificateAuthoritiesInput = useComboInput(
     'sslCertificateAuthoritiesComboxBox',
@@ -145,6 +152,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     hostInput,
     defaultDownloadSourceInput,
     proxyIdInput,
+    reserveDiskspaceInput,
     sslCertificateInput,
     sslKeyInput,
     sslCertificateAuthoritiesInput,
@@ -328,6 +336,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
         host: hostInput.value.trim(),
         is_default: defaultDownloadSourceInput.value,
         proxy_id: proxyIdInput.value || null,
+        reserve_diskspace: reserveDiskspaceInput.value,
         ssl: {
           certificate: sslCertificateInput.value,
           key: sslKeyInput.value || undefined,
@@ -373,6 +382,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     notifications.toasts,
     onSuccess,
     proxyIdInput.value,
+    reserveDiskspaceInput.value,
     sslCertificateAuthoritiesInput.value,
     sslCertificateInput.value,
     sslKeyInput.value,
