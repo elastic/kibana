@@ -37,7 +37,7 @@ export const INFERRED_FEATURE_TYPES = [
 // route (or tool) it was submitted through. See `featureSchema` for the read shape.
 export const baseFeatureSchema = lazySchema(() =>
   z.object({
-    id: z.string().max(MAX_ID_LENGTH),
+    id: z.string().overwrite(normalizeFeatureSlug).max(MAX_ID_LENGTH),
     type: z.string().max(MAX_ID_LENGTH),
     subtype: z.string().max(MAX_ID_LENGTH).optional(),
     title: z.string().max(MAX_TITLE_LENGTH).optional(),

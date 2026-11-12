@@ -8,6 +8,7 @@
 import { sendCreateAgentlessPolicy, sendGetPackageInfoByKey } from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import { getDefaultEnabledDataStreams } from '../../aws_service_matrix';
 import type {
   AuthenticateAndDeployStepState,
   ServiceChipState,
@@ -21,7 +22,11 @@ import {
   deriveGroupPolicyName,
   DEFAULT_NAMESPACE,
 } from './deploy_group_helpers';
-import { getPolicySettings, type PolicySettings } from '../../common/policy_settings';
+import {
+  getPolicySettings,
+  getPolicyVarSettings,
+  type PolicySettings,
+} from '../../common/policy_settings';
 export { collectDeployResults } from './deploy_group_helpers';
 
 /**
@@ -175,13 +180,18 @@ export async function deployGroup(
   const serviceVarsMap: Record<string, ServiceVars> = {};
   for (const { instance, service } of group.members) {
     serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ?? {
-      enabledDataStreams: service.dataStreams,
+      enabledDataStreams: getDefaultEnabledDataStreams(service),
       varsByDataStream: {},
     };
   }
 
   const services = group.members.map(({ service }) => service);
-  const inputs = buildPackageInputs(services, serviceVarsMap, globalRegion);
+  const inputs = buildPackageInputs(
+    services,
+    serviceVarsMap,
+    globalRegion,
+    getPolicyVarSettings(policySettings, 'managed_integration')
+  );
 
   // Explicitly disable all package inputs not in our selection to avoid Fleet defaulting
   // enabled inputs that would cause "not allowed for agentless" errors.
@@ -211,7 +221,8 @@ export async function deployGroup(
     staticKeys,
     pkgVarNames,
     undefined,
-    connectorId ? undefined : authenticateAndDeployStep.existingSecretRefs
+    connectorId ? undefined : authenticateAndDeployStep.existingSecretRefs,
+    getPolicyVarSettings(policySettings, 'managed_integration', pkgVarNames)
   );
 
   const response = await sendCreateAgentlessPolicy({

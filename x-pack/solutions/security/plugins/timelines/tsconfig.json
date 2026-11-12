@@ -16,7 +16,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
-    "@kbn/cases-plugin",
     "@kbn/alerting-plugin",
     "@kbn/utility-types",
     "@kbn/es-query",

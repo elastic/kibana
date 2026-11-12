@@ -60,7 +60,7 @@ export class FetchAlertsStep implements DispatcherStep {
 
     let result: RawAlert[];
     try {
-      result = await this.queryService.executeQueryRows<RawAlert>({
+      result = await this.queryService.executeQuery<RawAlert>({
         query: getDispatchableAlertEventsQuery({ gte, lte, limit: this.alertsPerTick }).query,
         // Lucene push-down is lower-bounded only. An `lte: windowEnd` here would
         // drop action docs stamped with `now` (after the settle buffer) and

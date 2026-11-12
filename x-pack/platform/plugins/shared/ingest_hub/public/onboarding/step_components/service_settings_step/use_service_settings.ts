@@ -17,7 +17,7 @@ import {
 import { sendGetPackagePolicies } from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import { makeDsView } from '../../aws_service_matrix';
+import { getDefaultEnabledDataStreams, makeDsView } from '../../aws_service_matrix';
 import { getOnboardingSessionKey } from '../../core/onboarding_session_storage';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { DUPLICATE_INSTANCE_ID_SEPARATOR, reconcileInstances } from './instances';
@@ -27,6 +27,7 @@ import {
   getMissingSourceGroup,
   getRequiredTextFields,
   resolveFieldMeta,
+  resolveVarGroupSelections,
   toTyped,
 } from './field_config';
 import type { SignalFilter } from '../services_step/use_services_step';
@@ -37,10 +38,12 @@ import {
   isMainPackageName,
 } from '../authenticate_and_deploy_step/deploy_group_helpers';
 import { getNamespaceError } from './instance_namespace_field';
-import type { PolicySettings } from '../../common/policy_settings';
+import { supportsPolicySetting, type PolicySettings } from '../../common/policy_settings';
 import {
+  getConditionErrors,
   getDescriptionError,
   getIntegrationNameError,
+  getProxyUrlError,
   supportsIntegrationSettings,
 } from './integration_settings';
 
@@ -52,6 +55,12 @@ export interface ServiceDataStreamVars {
    * e.g. { 'aws-s3': { bucket_arn: 'arn:...' } }
    */
   varsByInput: Record<string, Record<string, string | string[]>>;
+  /**
+   * Selected option per stream-level var_group, keyed by input type then group name,
+   * e.g. { 'aws-cloudwatch': { log_group_source: 'log_group_arn' } }. Absent → manifest default
+   * (the group's first option), resolved by `resolveVarGroupSelections`.
+   */
+  varGroupSelectionsByInput?: Record<string, Record<string, string>>;
 }
 
 export interface ServiceVars {
@@ -100,6 +109,11 @@ export interface ServiceSettingsPersistedState {
    */
   namespace?: string;
   /**
+   * Whether the global namespace uses dedicated index templates. Applied to the installed
+   * packages after a deploy; never applies to a duplicate's own namespace.
+   */
+  dedicatedNamespaceTemplates?: boolean;
+  /**
    * Package policy fields every policy of the onboarding gets (e.g. the output), keyed by Fleet
    * field name. Each deployment method applies only the ones it supports. An empty value is the
    * Fleet default; an absent one was never chosen.
@@ -135,7 +149,21 @@ function mergeVarsByDataStream(
     for (const [input, fields] of Object.entries(dsVars.varsByInput)) {
       mergedByInput[input] = { ...(mergedByInput[input] ?? {}), ...fields };
     }
-    result[dsId] = { enabledInputs: dsVars.enabledInputs, varsByInput: mergedByInput };
+    // Stream-level var_group selections merge the same way; an input the incoming draft did not
+    // touch keeps its stored choice.
+    const mergedSelections: Record<string, Record<string, string>> = {
+      ...(existing.varGroupSelectionsByInput ?? {}),
+    };
+    for (const [input, selections] of Object.entries(dsVars.varGroupSelectionsByInput ?? {})) {
+      mergedSelections[input] = { ...(mergedSelections[input] ?? {}), ...selections };
+    }
+    result[dsId] = {
+      enabledInputs: dsVars.enabledInputs,
+      varsByInput: mergedByInput,
+      ...(Object.keys(mergedSelections).length > 0 && {
+        varGroupSelectionsByInput: mergedSelections,
+      }),
+    };
   }
   return result;
 }
@@ -170,17 +198,23 @@ export function isServiceConfigIncomplete(
       activeInputs = activeInputs.filter((input) => supportedInputs.includes(input));
       if (activeInputs.length === 0) return true;
     }
-    return activeInputs.some(
-      (inp) =>
+    return activeInputs.some((inp) => {
+      const selections = resolveVarGroupSelections(
+        dsView,
+        inp,
+        dsVars.varGroupSelectionsByInput?.[inp]
+      );
+      return (
         getMissingSourceGroup(dsView, inp, dsVars.varsByInput?.[inp]) !== undefined ||
-        getRequiredTextFields(dsView, inp).some((f) => {
+        getRequiredTextFields(dsView, inp, selections).some((f) => {
           const meta = resolveFieldMeta(dsView, inp, f);
           const raw = dsVars.varsByInput?.[inp]?.[f];
           const effective = meta ? toTyped(raw, meta) : raw ?? '';
           if (Array.isArray(effective)) return effective.length === 0;
           return typeof effective === 'string' && effective.trim() === '';
         })
-    );
+      );
+    });
   });
 }
 
@@ -195,7 +229,7 @@ export function getIncompleteInstances(
     // An absent key means never configured: default to every data stream. An explicitly stored
     // empty array means the user disabled all inputs — respect it.
     const config: ServiceVars = serviceVars[inst.instanceId] ?? {
-      enabledDataStreams: service.dataStreams,
+      enabledDataStreams: getDefaultEnabledDataStreams(service),
       varsByDataStream: {},
     };
     return isServiceConfigIncomplete(service, config);
@@ -241,6 +275,27 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       });
     },
     [persisted, setPersisted]
+  );
+
+  // The switch means nothing without a namespace, so it reads as off while there is none.
+  const dedicatedNamespaceTemplates =
+    !!persisted?.dedicatedNamespaceTemplates && !!namespace.trim();
+
+  const setDedicatedNamespaceTemplates = useCallback(
+    (value: boolean) => {
+      setPersisted({
+        ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+        dedicatedNamespaceTemplates: value,
+      });
+      // Turning it off changes nothing on the package, so nothing else would save it, and a saved
+      // "on" would come back when the deployment is reopened. Turning it on is saved once it was
+      // applied, so that it stays paired with the namespace it was applied for.
+      const deploymentId = detectAndReviewStep?.onboardingDeploymentId;
+      if (!value && deploymentId) {
+        updateDeployment(deploymentId, { dedicatedNamespaceTemplates: false });
+      }
+    },
+    [persisted, setPersisted, detectAndReviewStep?.onboardingDeploymentId, updateDeployment]
   );
 
   const policySettings = useMemo(
@@ -419,7 +474,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       const inst = instances.find((i) => i.instanceId === instanceId);
       const service = inst ? awsServicesMap?.get(inst.serviceId) : undefined;
       return {
-        enabledDataStreams: service?.dataStreams ?? [],
+        enabledDataStreams: service ? getDefaultEnabledDataStreams(service) : [],
         varsByDataStream: {},
       };
     },
@@ -550,6 +605,35 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   const integrationNameError = getIntegrationNameError(integrationName);
   const descriptionError = getDescriptionError(description);
   const namespaceError = getNamespaceError(namespace);
+  // Only where the condition is offered: one kept from another deployment method is never sent,
+  // and could not be fixed from a hidden field.
+  const condition = policySettings.condition ?? '';
+  const conditionErrors = useMemo(
+    () =>
+      supportsPolicySetting('condition', deploymentMethod)
+        ? getConditionErrors(condition)
+        : undefined,
+    [condition, deploymentMethod]
+  );
+
+  // The proxy URL reaches only the policies of services whose package declares the var, and only
+  // for the deployment methods that send it. Elsewhere the field is hidden, so a value left over
+  // from another method or selection must not block Continue.
+  const isProxyUrlSupported = useMemo(
+    () =>
+      supportsPolicySetting('proxy_url', deploymentMethod) &&
+      instances.some((inst) => {
+        const service = awsServicesMap?.get(inst.serviceId);
+        return (
+          !!service &&
+          supportsIntegrationSettings(service, deploymentMethod) &&
+          !!service.declaresProxyUrl
+        );
+      }),
+    [instances, awsServicesMap, deploymentMethod]
+  );
+  const proxyUrl = policySettings.proxy_url ?? '';
+  const proxyUrlError = isProxyUrlSupported ? getProxyUrlError(proxyUrl) : undefined;
 
   const isReady = useMemo(
     () =>
@@ -557,8 +641,18 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       incompleteInstances.length === 0 &&
       !integrationNameError &&
       !descriptionError &&
-      !namespaceError,
-    [globalRegion, incompleteInstances, integrationNameError, descriptionError, namespaceError]
+      !namespaceError &&
+      !proxyUrlError &&
+      !conditionErrors,
+    [
+      globalRegion,
+      incompleteInstances,
+      integrationNameError,
+      descriptionError,
+      namespaceError,
+      proxyUrlError,
+      conditionErrors,
+    ]
   );
 
   const [globalRegionTouched, setGlobalRegionTouched] = useState(false);
@@ -598,8 +692,13 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     namespace,
     setNamespace,
     namespaceError,
+    dedicatedNamespaceTemplates,
+    setDedicatedNamespaceTemplates,
     policySettings,
     setPolicySetting,
+    isProxyUrlSupported,
+    proxyUrlError,
+    conditionErrors,
     bareNamePackage,
     instances,
     filteredInstances,

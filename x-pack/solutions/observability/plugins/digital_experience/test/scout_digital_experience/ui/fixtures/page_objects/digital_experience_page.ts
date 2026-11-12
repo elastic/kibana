@@ -16,6 +16,15 @@ import { TIME_RANGE } from '../../../common/fixtures/constants';
 
 const APP_PATH = '/app/digital_experience';
 
+type OverviewFilterName =
+  | 'browser'
+  | 'os'
+  | 'device'
+  | 'country'
+  | 'appVersion'
+  | 'pageUrl'
+  | 'pageContains';
+
 export class DigitalExperiencePage {
   public readonly mainContainer: Locator;
   public readonly applicationsTable: EuiBasicTableObject;
@@ -28,17 +37,32 @@ export class DigitalExperiencePage {
   public readonly pageLoadsChart: Locator;
   public readonly otelOverviewKpis: Locator;
   public readonly otelOverviewVitals: Locator;
+  public readonly otelOverviewTrends: Locator;
+  public readonly otelOverviewLoadTimeTrend: Locator;
   public readonly otelOverviewPageLoads: Locator;
   public readonly otelOverviewTopPages: Locator;
   public readonly otelOverviewBreakdowns: Locator;
   public readonly errorsTab: Locator;
   public readonly errorsPanel: Locator;
+  /** The errors panel once it has loaded and has no error to list; not while it is loading. */
+  public readonly errorsPanelEmpty: Locator;
   public readonly errorFlyout: Locator;
   public readonly errorsViewAll: Locator;
   public readonly networkTab: Locator;
   public readonly networkHttpRequests: Locator;
   public readonly networkSlowestResources: Locator;
   public readonly otelOverviewTopClicks: Locator;
+  public readonly overviewClearFilters: Locator;
+  public readonly overviewAllFilters: Locator;
+  public readonly overviewFiltersFlyout: Locator;
+  public readonly overviewFiltersApply: Locator;
+  public readonly overviewFiltersCancel: Locator;
+  public readonly overviewFiltersReset: Locator;
+  public readonly overviewPercentile: Locator;
+  public readonly overviewKuery: Locator;
+  public readonly overviewKueryError: Locator;
+  public readonly overviewLoadTime: Locator;
+  public readonly overviewDatePicker: Locator;
   public readonly overviewEmpty: Locator;
   public readonly overviewTab: Locator;
   public readonly sessionsTab: Locator;
@@ -76,17 +100,32 @@ export class DigitalExperiencePage {
     this.pageLoadsChart = page.getByTestId('digitalExperiencePageLoadsChart');
     this.otelOverviewKpis = page.getByTestId('digitalExperienceOverviewKpis');
     this.otelOverviewVitals = page.getByTestId('digitalExperienceOverviewVitals');
+    this.otelOverviewTrends = page.getByTestId('digitalExperienceOverviewTrends');
+    this.otelOverviewLoadTimeTrend = page.getByTestId('digitalExperienceOverviewLoadTimeTrend');
     this.otelOverviewPageLoads = page.getByTestId('digitalExperienceOverviewPageLoads');
     this.otelOverviewTopPages = page.getByTestId('digitalExperienceOverviewTopPages');
     this.otelOverviewBreakdowns = page.getByTestId('digitalExperienceOverviewBreakdowns');
     this.errorsTab = page.getByTestId('digitalExperienceTab-errors');
     this.errorsPanel = page.getByTestId('digitalExperienceErrorsPanel');
+    this.errorsPanelEmpty = page.getByTestId('digitalExperienceErrorsPanelEmpty');
     this.errorFlyout = page.getByTestId('digitalExperienceErrorFlyout');
     this.errorsViewAll = page.getByTestId('digitalExperienceErrorsViewAll');
     this.networkTab = page.getByTestId('digitalExperienceTab-network');
     this.networkHttpRequests = page.getByTestId('digitalExperienceNetworkHttpRequests');
     this.networkSlowestResources = page.getByTestId('digitalExperienceNetworkSlowestResources');
     this.otelOverviewTopClicks = page.getByTestId('digitalExperienceOverviewTopClicks');
+    this.overviewClearFilters = page.getByTestId('digitalExperienceOverviewClearFilters');
+    this.overviewAllFilters = page.getByTestId('digitalExperienceOverviewAllFilters');
+    this.overviewFiltersFlyout = page.getByTestId('digitalExperienceOverviewFiltersFlyout');
+    this.overviewFiltersApply = page.getByTestId('digitalExperienceOverviewFiltersApply');
+    this.overviewFiltersCancel = page.getByTestId('digitalExperienceOverviewFiltersCancel');
+    this.overviewFiltersReset = page.getByTestId('digitalExperienceOverviewFiltersReset');
+    this.overviewPercentile = page.getByTestId('digitalExperienceOverviewPercentile');
+    // The KQL bar's text area carries the bar's test subject.
+    this.overviewKuery = page.getByTestId('digitalExperienceOverviewSearchBar');
+    this.overviewKueryError = page.getByTestId('digitalExperienceOverviewKueryError');
+    this.overviewLoadTime = page.getByTestId('digitalExperienceOverviewLoadTime');
+    this.overviewDatePicker = page.getByTestId('dateRangePickerControlButton');
     this.overviewEmpty = page.getByTestId('digitalExperienceOverviewEmpty');
     this.overviewTab = page.getByTestId('digitalExperienceTab-overview');
     this.sessionsTab = page.getByTestId('digitalExperienceTab-sessions');
@@ -165,6 +204,93 @@ export class DigitalExperiencePage {
   async selectEnvironment(label: string): Promise<void> {
     await this.environmentFilter.click();
     await this.environmentList.selectOption(label);
+  }
+
+  /** The button of an Overview filter, e.g. `browser`; its list opens on click. */
+  overviewFilter(name: OverviewFilterName): Locator {
+    return this.page.getByTestId(`digitalExperienceOverviewFilter-${name}`);
+  }
+
+  /** The list of an Overview filter's popover, with the values and their page loads. */
+  overviewFilterList(name: OverviewFilterName): Locator {
+    return this.page.getByTestId(`digitalExperienceOverviewFilter-${name}List`);
+  }
+
+  /** The checkbox of a value in an Overview filter's popover; open the popover first. */
+  overviewFilterOption(name: OverviewFilterName, value: string): Locator {
+    return this.page.getByTestId(`digitalExperienceOverviewFilter-${name}Option-${value}`);
+  }
+
+  /** The pill of a selected value, e.g. `('browser', 'Firefox')`; its cross removes the value. */
+  overviewPill(name: OverviewFilterName, value: string): Locator {
+    return this.page.getByTestId(`digitalExperienceOverviewPill-${name}-${value}`);
+  }
+
+  /** The button that excludes a value in an Overview filter's popover. */
+  overviewFilterExclude(name: OverviewFilterName, value: string): Locator {
+    return this.page.getByTestId(`digitalExperienceOverviewFilter-${name}Option-${value}-exclude`);
+  }
+
+  /** The row of the breakdowns that filters the Overview by a value, e.g. `('browser', 'Safari')`. */
+  overviewBreakdownFilter(name: 'browser' | 'os' | 'device', value: string): Locator {
+    return this.page.getByTestId(`digitalExperienceOverviewBreakdownFilter-${name}-${value}`);
+  }
+
+  /** The row of the top pages that filters the Overview by a page, found by its path. */
+  overviewTopPageFilter(path: string): Locator {
+    return this.page
+      .getByTestId('digitalExperienceOverviewTopPageFilter')
+      .filter({ hasText: path });
+  }
+
+  /** Includes one value of a filter, e.g. `('browser', 'Firefox')`, and closes the popover. */
+  async selectOverviewFilter(name: OverviewFilterName, value: string): Promise<void> {
+    await this.overviewFilter(name).click();
+    await this.overviewFilterOption(name, value).click();
+    await this.page.keyboard.press('Escape');
+  }
+
+  /** Excludes one value of a filter, e.g. `('browser', 'Firefox')`, and closes the popover. */
+  async excludeOverviewFilter(name: OverviewFilterName, value: string): Promise<void> {
+    await this.overviewFilter(name).click();
+    await this.overviewFilterExclude(name, value).click();
+    await this.page.keyboard.press('Escape');
+  }
+
+  /** The checkbox of a value in the "All filters" flyout. */
+  overviewFlyoutOption(name: OverviewFilterName, value: string): Locator {
+    return this.overviewFiltersFlyout.getByTestId(
+      `digitalExperienceOverviewFiltersFlyout-${name}Option-${value}`
+    );
+  }
+
+  /** The button that excludes a value in the "All filters" flyout. */
+  overviewFlyoutExclude(name: OverviewFilterName, value: string): Locator {
+    return this.overviewFiltersFlyout.getByTestId(
+      `digitalExperienceOverviewFiltersFlyout-${name}Option-${value}-exclude`
+    );
+  }
+
+  /** Writes text the page URL contains in the "All filters" flyout, and adds it. */
+  async addOverviewFlyoutText(text: string): Promise<void> {
+    await this.overviewFiltersFlyout
+      .getByTestId('digitalExperienceOverviewFiltersFlyout-pageContainsTextInput')
+      .fill(text);
+    await this.overviewFiltersFlyout
+      .getByTestId('digitalExperienceOverviewFiltersFlyout-pageContainsTextAdd')
+      .click();
+  }
+
+  /** Types a KQL query in the Overview's bar and submits it. */
+  async submitOverviewKuery(kuery: string): Promise<void> {
+    // Clicking moves the pointer onto the bar, off the suggestions that open under it: a hovered
+    // suggestion is the one Enter would pick.
+    await this.overviewKuery.click();
+    // The bar submits the query it holds as a prop, which a fill() that Enter follows at once can
+    // race with: type it, as the shared query bar helper does.
+    await this.overviewKuery.clear();
+    await this.overviewKuery.pressSequentially(kuery);
+    await this.overviewKuery.press('Enter');
   }
 
   /** Shows one source, e.g. `Classic RUM`, or `All sources`. */

@@ -11,6 +11,7 @@ export const WRAPPER_MARGIN_TOKENS = 4_000;
 
 export const ENVELOPE_TOKEN_BUDGET = MAX_TOOL_RESULT_TOKENS - WRAPPER_MARGIN_TOKENS;
 
+export const ELLIPSIS = '…';
 export const EXCERPT_MAX_CHARS = 300;
 export const MAX_INPUT_STRING_CHARS = 256;
 export const MAX_ITEM_IDS = 50;

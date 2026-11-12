@@ -67,7 +67,7 @@ const EntityTypeResultsOfType = ({
     return <EntityTableLoading />;
   }
 
-  const { rows, total, truncated, errors, unavailableColumns } = list;
+  const { rows, truncated, errors, unavailableColumns } = list;
   const isEmpty = rows.length === 0;
 
   return (
@@ -85,15 +85,12 @@ const EntityTypeResultsOfType = ({
       {/* With no rows the empty state says enough; "showing the 0 most recent" would not help. */}
       {truncated && !isEmpty && (
         <EuiFlexItem grow={false}>
-          <EntityTableTruncationCallout returned={rows.length} total={total} />
+          <EntityTableTruncationCallout returned={rows.length} />
         </EuiFlexItem>
       )}
       <EuiFlexItem>
         {isEmpty ? (
-          <EntityTableEmpty
-            typeName={description.name}
-            isIncomplete={errors.length > 0 || total === null}
-          />
+          <EntityTableEmpty typeName={description.name} isIncomplete={errors.length > 0} />
         ) : (
           <EntityTable
             entityType={description}

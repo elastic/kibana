@@ -25,10 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataStreamOptions } from '../../../../../../../common/types/data_streams';
 import type { ComponentTemplateDeserialized } from '../../../shared_imports';
 import { serializers, serializeComponentTemplate } from '../../../shared_imports';
-import {
-  formatDlmLifecycleSummary,
-  resolveLifecycleForSummary,
-} from '../../../../../lib/data_streams';
+import { formatDlmLifecycleSummary } from '../../../../../lib/data_streams';
 import { useAppContext } from '../../../../../app_context';
 const { stripEmptyFields } = serializers;
 
@@ -79,9 +76,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
     const areDatastreamsVisible =
       Boolean(dataStreams?.length) && (componentTemplate.name.endsWith('@custom') || canRollover);
 
-    const lifecycle = resolveLifecycleForSummary(serializedTemplate?.lifecycle, {
-      hasDataStream: true,
-    });
+    const lifecycle = serializedTemplate?.lifecycle;
 
     const SummaryTab = () => (
       <div data-test-subj="summaryTab">
@@ -137,17 +132,21 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
               </EuiDescriptionListDescription>
 
               {/* Data lifecycle */}
-              <EuiDescriptionListTitle>
-                <FormattedMessage
-                  id="xpack.idxMgmt.componentTemplateForm.stepReview.summaryTab.dataLifecycleLabel"
-                  defaultMessage="Data lifecycle"
-                />
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                {formatDlmLifecycleSummary(lifecycle, {
-                  includePhaseCount: dlmTiersLayoutEnabled,
-                })}
-              </EuiDescriptionListDescription>
+              {lifecycle && (
+                <>
+                  <EuiDescriptionListTitle data-test-subj="dataLifecycleTitle">
+                    <FormattedMessage
+                      id="xpack.idxMgmt.componentTemplateForm.stepReview.summaryTab.dataLifecycleLabel"
+                      defaultMessage="Data lifecycle"
+                    />
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription>
+                    {formatDlmLifecycleSummary(lifecycle, {
+                      includePhaseCount: dlmTiersLayoutEnabled,
+                    })}
+                  </EuiDescriptionListDescription>
+                </>
+              )}
             </EuiDescriptionList>
           </EuiFlexItem>
           {areDatastreamsVisible && dataStreams && (
