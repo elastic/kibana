@@ -118,6 +118,7 @@ describe('skill-prompt-injection', () => {
     'https://elastic.co now',
     'https://elastic.co.',
     'https://github.com, then',
+    'https://github-enterprise.corp.example/repo',
     'https://elastic.co) and stop',
   ])('allows exfil-pattern text to allowlisted host %s', async (url) => {
     const result = await skillPromptInjectionEvaluator.evaluate({
