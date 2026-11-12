@@ -8,7 +8,7 @@
  */
 
 import { getTeamByGithubHandle } from '@kbn/code-owners';
-import type { FlakyTestReport } from '@kbn/scout-reporting';
+import { rankTests, type FlakyTestReport } from '@kbn/scout-reporting';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   DEFAULT_GITHUB_REPO,
@@ -171,6 +171,41 @@ const sameSuite = (a: FlakySuite, b: FlakySuite): boolean =>
 const isOwnSuiteIssue = ({ issue, match }: MatchedIssue, suite: FlakySuite): boolean =>
   match === 'suite' &&
   readFlakySuiteIssueMetadata(issue.body)?.['suite.title'] === suite.suiteTitle;
+
+/** An issue about a whole test file rather than one `describe` block of it. */
+const isWholeFileIssue = ({ body }: GithubIssue): boolean =>
+  readFlakySuiteIssueMetadata(body)?.['suite.title'] === undefined;
+
+/**
+ * The issue the report refreshes for the suite: its own issue, open or closed, else an open issue
+ * about its whole file, such as a consistently failing issue for tests in several blocks of the
+ * file, which CI failures of the suite's tests are already counted on. A closed one is not
+ * reopened for a block of the file: the block gets an issue of its own.
+ */
+const refreshedIssue = (
+  suite: FlakySuite,
+  matches: readonly MatchedIssue[]
+): MatchedIssue | undefined =>
+  matches.find((matched) => isOwnSuiteIssue(matched, suite)) ??
+  matches.find(
+    ({ issue, match }) => match === 'suite' && issue.state === 'open' && isWholeFileIssue(issue)
+  );
+
+/**
+ * The suites of a file that share its whole-file issue, as the one suite the issue is about: their
+ * tests named after their `describe` block and ranked together, and no suite title, so the issue
+ * stays about the whole file.
+ */
+const asWholeFileSuite = (members: readonly FlakySuite[]): FlakySuite => ({
+  ...members[0],
+  suiteTitle: undefined,
+  owners: [...new Set(members.flatMap(({ owners }) => owners))],
+  tests: rankTests(
+    members.flatMap(({ suiteTitle, tests }) =>
+      suiteTitle ? tests.map((test) => ({ ...test, title: `${suiteTitle} ${test.title}` })) : tests
+    )
+  ),
+});
 
 /** The suite's newest failure on a branch of the report scope, pull requests left out. */
 const lastFailedAt = (suite: FlakySuite): Date | undefined => {
@@ -484,9 +519,11 @@ export const reportFlakySuiteIssues = async (
   const update = async (
     suite: FlakySuite,
     issue: GithubIssue,
-    { previous, comment, reopen }: Refresh
+    { previous, comment, reopen }: Refresh,
+    members: readonly FlakySuite[] = [suite]
   ) => {
-    const ref = suiteRef(suite);
+    const recordEach = (action: (ref: SuiteRef) => FlakySuiteAction) =>
+      members.forEach((member) => record(action(suiteRef(member))));
     const body = refreshFlakySuiteIssueMetadata(issue.body, suite, { report, previous, comment });
     try {
       await github.editIssue(issue.number, { body, ...(reopen ? { state: 'open' } : {}) });
@@ -500,38 +537,57 @@ export const reportFlakySuiteIssues = async (
         `${reopen ? 'reopened' : 'updated'} #${issue.number}${comment ? ' with a comment' : ''}: ` +
           describeSuite(suite)
       );
-      record({
+      recordEach((ref) => ({
         action: 'updated',
         ...ref,
         issue: { ...issueRef(issue), state: 'open' },
         commented: comment,
         reopened: reopen,
-      });
+      }));
     } catch (error) {
       log.error(
         `failed to update #${issue.number} for ${describeSuite(suite)}: ${errorMessage(error)}`
       );
-      record({
+      recordEach((ref) => ({
         action: 'failed',
         ...ref,
         attempted: 'update',
         error: errorMessage(error),
         issue: issueRef(issue),
-      });
+      }));
     }
   };
 
+  /** The suites of `suite`'s file whose own issue is `issue`, `suite` included, in ranking order. */
+  const suitesSharing = (suite: FlakySuite, issue: GithubIssue): FlakySuite[] =>
+    suites.filter(
+      (other) =>
+        other.framework === suite.framework &&
+        other.filePath === suite.filePath &&
+        refreshedIssue(other, findMatchingIssues(other, candidateIssues(other, index)))?.issue
+          .number === issue.number
+    );
+
+  /** Suites refreshed with an earlier suite of their file, on the file's whole-file issue. */
+  const refreshedTogether = new Set<FlakySuite>();
+
   for (const suite of suites) {
+    if (refreshedTogether.has(suite)) {
+      continue;
+    }
     const ref = suiteRef(suite);
     const matches = findMatchingIssues(suite, candidateIssues(suite, index));
     const { tracked, superseded } = coverage(suite, index);
-    const refresh =
-      updateIssues && tracked && isOwnSuiteIssue(tracked, suite)
-        ? planRefresh(suite, tracked.issue, report, commentCooldownDays)
-        : undefined;
-    if (tracked && refresh) {
-      await update(suite, tracked.issue, refresh);
-      continue;
+    const own = updateIssues ? refreshedIssue(suite, matches) : undefined;
+    if (own) {
+      const members = isWholeFileIssue(own.issue) ? suitesSharing(suite, own.issue) : [suite];
+      const ownSuite = isWholeFileIssue(own.issue) ? asWholeFileSuite(members) : suite;
+      const refresh = planRefresh(ownSuite, own.issue, report, commentCooldownDays);
+      if (refresh) {
+        members.forEach((member) => refreshedTogether.add(member));
+        await update(ownSuite, own.issue, refresh, members);
+        continue;
+      }
     }
     if (tracked) {
       const { issue, match } = tracked;
