@@ -9,9 +9,11 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
 import type { Conversation } from '@kbn/agent-builder-common';
 import { createFlyoutGroupedAttachmentsRegistry } from '@kbn/agentic-investigations-common';
-import type { Investigation } from '../../../../../common';
+import type { Investigation, InvestigationProposalSummary } from '../../../../../common';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
 import { InvestigationOverview } from './overview_tab';
 
@@ -67,17 +69,23 @@ const emptyInvestigation: Investigation = {
   hypotheses: undefined,
 };
 
-const renderOverview = (overviewConversation: Conversation = conversation) =>
-  render(
-    <EuiProvider>
-      <I18nProvider>
+const overviewElement = (overviewConversation: Conversation, queryClient: QueryClient) => (
+  <EuiProvider>
+    <I18nProvider>
+      <QueryClientProvider client={queryClient}>
         <InvestigationOverview
           conversation={overviewConversation}
           groupedAttachments={groupedAttachments}
         />
-      </I18nProvider>
-    </EuiProvider>
-  );
+      </QueryClientProvider>
+    </I18nProvider>
+  </EuiProvider>
+);
+
+const renderOverview = (
+  overviewConversation: Conversation = conversation,
+  queryClient: QueryClient = new QueryClient()
+) => render(overviewElement(overviewConversation, queryClient));
 
 describe('InvestigationOverview', () => {
   it('renders the subjects, what happened, impact, conclusion, and hypothesis tree from the query API', () => {
@@ -159,5 +167,69 @@ describe('InvestigationOverview', () => {
     renderOverview();
 
     expect(screen.queryByTestId('investigationOverviewLoadingSection')).not.toBeInTheDocument();
+  });
+
+  describe('proposed actions refresh', () => {
+    const proposal: InvestigationProposalSummary = {
+      id: 'proposal-1',
+      title: 'Review the rule by hand',
+      comment: 'No safe exception was found.',
+      status: 'pending',
+      impact: 'low',
+      confidence: 'high',
+      created_at: 'x',
+    };
+
+    const withProposals = (proposals?: InvestigationProposalSummary[]) => ({
+      data: proposals && { ...investigation, hypotheses: undefined, proposals },
+    });
+
+    const renderAndPoll = (initial?: InvestigationProposalSummary[]) => {
+      const queryClient = new QueryClient();
+      const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+      mockUseInvestigation.mockReturnValue(withProposals(initial));
+      const { rerender } = renderOverview(conversation, queryClient);
+      const poll = (next?: InvestigationProposalSummary[]) => {
+        mockUseInvestigation.mockReturnValue(withProposals(next));
+        rerender(overviewElement(conversation, queryClient));
+      };
+      return { invalidateQueries, poll };
+    };
+
+    it('should refetch the proposed actions list when the investigation shows a new proposal', () => {
+      const { invalidateQueries, poll } = renderAndPoll([]);
+
+      poll([proposal]);
+
+      expect(invalidateQueries).toHaveBeenCalledTimes(1);
+      expect(invalidateQueries).toHaveBeenCalledWith(
+        { queryKey: platformQueryKeys.proposals.forConversation('conv-1') },
+        { cancelRefetch: false }
+      );
+    });
+
+    it('should refetch the proposed actions list when a proposal changes status', () => {
+      const { invalidateQueries, poll } = renderAndPoll([proposal]);
+
+      poll([{ ...proposal, status: 'no_action' }]);
+
+      expect(invalidateQueries).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not refetch the proposed actions list when the proposals are unchanged', () => {
+      const { invalidateQueries, poll } = renderAndPoll([proposal]);
+
+      poll([{ ...proposal }]);
+
+      expect(invalidateQueries).not.toHaveBeenCalled();
+    });
+
+    it('should not refetch the proposed actions list when the first investigation read arrives', () => {
+      const { invalidateQueries, poll } = renderAndPoll(undefined);
+
+      poll([proposal]);
+
+      expect(invalidateQueries).not.toHaveBeenCalled();
+    });
   });
 });
