@@ -6,13 +6,14 @@
  */
 
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import { OnSetup, OnStart, PluginSetup } from '@kbn/core-di';
+import { OnSetup, OnStart, PluginSetup, PluginStart } from '@kbn/core-di';
 import { CoreStart } from '@kbn/core-di-server';
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import type { Container, ContainerModuleLoadOptions } from 'inversify';
 import { createActionPolicyAttachmentType } from '../agent_builder/attachments/action_policy_attachment_type';
 import { createAlertAttachmentType } from '../agent_builder/attachments/alert_attachment_type';
 import { createRuleAttachmentType } from '../agent_builder/attachments/rule_attachment_type';
+import { createGetClassicRuleTypeMigration } from '../agent_builder/common/classic_rule_type_migration';
 import { resolveRequestScoped } from '../agent_builder/resolve_request_scoped';
 import { registerSkills } from '../agent_builder/skills/register_skills';
 import { createAlertingV2Availability } from '../agent_builder/skills/alerting_v2_availability';
@@ -30,7 +31,7 @@ import {
   type LoggerServiceContract,
 } from '../lib/services/logger_service/logger_service';
 import { UiSettingsClientToken } from '../lib/services/settings_service/tokens';
-import type { AlertingServerSetupDependencies } from '../types';
+import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 
 type AgentBuilderSetup = NonNullable<AlertingServerSetupDependencies['agentBuilder']>;
 
@@ -140,6 +141,9 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
     const workflowsManagementApi = container.get(WorkflowsManagementApiToken);
     const agentBuilderLogger = container.get(LoggerServiceToken).forSubsystem('agentBuilder');
     const spacesService = container.get(SpacesService);
+    const classicAlerting = container.get(
+      PluginStart<AlertingServerStartDependencies['alerting']>('alerting')
+    );
     const cloudToken = PluginSetup<NonNullable<AlertingServerSetupDependencies['cloud']>>('cloud');
     const projectType = container.isBound(cloudToken)
       ? container.get(cloudToken).serverless.projectType
@@ -159,6 +163,8 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
         projectType,
       }),
       validateWorkflow: (yaml, sid, req) => workflowsManagementApi.validateWorkflow(yaml, sid, req),
+      getClassicRulesClient: (request) => classicAlerting.getRulesClientWithRequest(request),
+      getClassicRuleTypeMigration: createGetClassicRuleTypeMigration(classicAlerting),
     });
   });
 }

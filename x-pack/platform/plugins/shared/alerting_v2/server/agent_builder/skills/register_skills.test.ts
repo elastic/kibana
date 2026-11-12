@@ -7,6 +7,7 @@
 
 import {
   ACTION_POLICY_AUTHORING_SKILL_ID,
+  CLASSIC_TO_UNIVERSAL_RULE_MIGRATION_SKILL_ID,
   RULE_AUTHORING_SKILL_ID,
   UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
@@ -14,6 +15,7 @@ import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import { createActionPolicyAuthoringSkill } from './action_policy_authoring_skill';
+import { createClassicToUniversalRuleMigrationSkill } from './classic_to_universal_rule_migration_skill';
 import { createRuleAuthoringSkill } from './rule_authoring_skill';
 import { createUniversalAlertingFailureDiagnosisSkill } from './universal_alerting_failure_diagnosis_skill';
 import { registerSkills } from './register_skills';
@@ -30,6 +32,10 @@ jest.mock('./universal_alerting_failure_diagnosis_skill', () => ({
   createUniversalAlertingFailureDiagnosisSkill: jest.fn(),
 }));
 
+jest.mock('./classic_to_universal_rule_migration_skill', () => ({
+  createClassicToUniversalRuleMigrationSkill: jest.fn(),
+}));
+
 const createRuleAuthoringSkillMock = createRuleAuthoringSkill as jest.MockedFunction<
   typeof createRuleAuthoringSkill
 >;
@@ -38,6 +44,11 @@ const createActionPolicyAuthoringSkillMock =
 const createUniversalAlertingFailureDiagnosisSkillMock =
   createUniversalAlertingFailureDiagnosisSkill as jest.MockedFunction<
     typeof createUniversalAlertingFailureDiagnosisSkill
+  >;
+
+const createClassicToUniversalRuleMigrationSkillMock =
+  createClassicToUniversalRuleMigrationSkill as jest.MockedFunction<
+    typeof createClassicToUniversalRuleMigrationSkill
   >;
 
 const createLogger = (): jest.Mocked<
@@ -58,6 +69,10 @@ const universalAlertingFailureDiagnosisSkill = {
   id: UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID,
 } as ReturnType<typeof createUniversalAlertingFailureDiagnosisSkill>;
 
+const migrationSkill = { id: CLASSIC_TO_UNIVERSAL_RULE_MIGRATION_SKILL_ID } as ReturnType<
+  typeof createClassicToUniversalRuleMigrationSkill
+>;
+
 describe('registerSkills', () => {
   let agentBuilder: ReturnType<typeof agentBuilderMocks.createSetup>;
   let logger: ReturnType<typeof createLogger>;
@@ -68,11 +83,13 @@ describe('registerSkills', () => {
     createRuleAuthoringSkillMock.mockReset();
     createActionPolicyAuthoringSkillMock.mockReset();
     createUniversalAlertingFailureDiagnosisSkillMock.mockReset();
+    createClassicToUniversalRuleMigrationSkillMock.mockReset();
     createRuleAuthoringSkillMock.mockReturnValue(ruleSkill);
     createActionPolicyAuthoringSkillMock.mockReturnValue(actionPolicySkill);
     createUniversalAlertingFailureDiagnosisSkillMock.mockReturnValue(
       universalAlertingFailureDiagnosisSkill
     );
+    createClassicToUniversalRuleMigrationSkillMock.mockReturnValue(migrationSkill);
   });
 
   const deps = () =>
@@ -83,22 +100,25 @@ describe('registerSkills', () => {
       getRulesClient: jest.fn(),
       getActionPolicyClient: jest.fn(),
       getPrivilegeChecker: jest.fn(),
+      getClassicRulesClient: jest.fn(),
+      getClassicRuleTypeMigration: jest.fn(),
       availability: {
         cacheMode: 'none',
         handler: jest.fn().mockResolvedValue({ status: 'available' }),
       },
     } as const);
 
-  it('registers all skills and logs success at debug', () => {
+  it('registers every skill and logs success at debug', () => {
     registerSkills(agentBuilder, deps());
 
-    expect(agentBuilder.skills.register).toHaveBeenCalledTimes(3);
+    expect(agentBuilder.skills.register).toHaveBeenCalledTimes(4);
     expect(agentBuilder.skills.register).toHaveBeenNthCalledWith(1, ruleSkill);
     expect(agentBuilder.skills.register).toHaveBeenNthCalledWith(2, actionPolicySkill);
     expect(agentBuilder.skills.register).toHaveBeenNthCalledWith(
       3,
       universalAlertingFailureDiagnosisSkill
     );
+    expect(agentBuilder.skills.register).toHaveBeenNthCalledWith(4, migrationSkill);
 
     expect(logger.debug).toHaveBeenNthCalledWith(1, {
       message: expect.any(Function),
@@ -112,6 +132,10 @@ describe('registerSkills', () => {
       message: expect.any(Function),
       labels: { skill_id: UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID },
     });
+    expect(logger.debug).toHaveBeenNthCalledWith(4, {
+      message: expect.any(Function),
+      labels: { skill_id: CLASSIC_TO_UNIVERSAL_RULE_MIGRATION_SKILL_ID },
+    });
     const debugMessages = (logger.debug as jest.Mock).mock.calls.map(
       ([{ message }]) => (typeof message === 'function' ? message() : message) as string
     );
@@ -119,6 +143,7 @@ describe('registerSkills', () => {
       `${RULE_AUTHORING_SKILL_ID} agent builder skill registered`,
       `${ACTION_POLICY_AUTHORING_SKILL_ID} agent builder skill registered`,
       `${UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID} agent builder skill registered`,
+      `${CLASSIC_TO_UNIVERSAL_RULE_MIGRATION_SKILL_ID} agent builder skill registered`,
       'Agent builder skills and attachments registered',
     ]);
     expect(logger.error).not.toHaveBeenCalled();
@@ -133,7 +158,7 @@ describe('registerSkills', () => {
 
     registerSkills(agentBuilder, deps());
 
-    expect(agentBuilder.skills.register).toHaveBeenCalledTimes(3);
+    expect(agentBuilder.skills.register).toHaveBeenCalledTimes(4);
     expect(logger.error).toHaveBeenCalledWith({
       message: `Failed to register agent builder skill. Id: ${ACTION_POLICY_AUTHORING_SKILL_ID}`,
       code: ALERTING_LOG_CODES.AGENT_BUILDER_SKILL_REGISTER_FAILED,
@@ -147,6 +172,7 @@ describe('registerSkills', () => {
     expect(debugMessages).toEqual([
       `${RULE_AUTHORING_SKILL_ID} agent builder skill registered`,
       `${UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID} agent builder skill registered`,
+      `${CLASSIC_TO_UNIVERSAL_RULE_MIGRATION_SKILL_ID} agent builder skill registered`,
       'Agent builder skills partially registered',
     ]);
     expect(logger.debug).toHaveBeenCalledWith({
@@ -165,11 +191,14 @@ describe('registerSkills', () => {
     createUniversalAlertingFailureDiagnosisSkillMock.mockImplementation(() => {
       throw new Error('diagnosis failed');
     });
+    createClassicToUniversalRuleMigrationSkillMock.mockImplementation(() => {
+      throw new Error('migration failed');
+    });
 
     registerSkills(agentBuilder, deps());
 
     expect(agentBuilder.skills.register).not.toHaveBeenCalled();
-    expect(logger.error).toHaveBeenCalledTimes(3);
+    expect(logger.error).toHaveBeenCalledTimes(4);
     expect(logger.error).toHaveBeenCalledWith(
       expect.objectContaining({
         code: ALERTING_LOG_CODES.AGENT_BUILDER_SKILL_REGISTER_FAILED,
@@ -186,6 +215,12 @@ describe('registerSkills', () => {
       expect.objectContaining({
         code: ALERTING_LOG_CODES.AGENT_BUILDER_SKILL_REGISTER_FAILED,
         labels: { skill_id: ACTION_POLICY_AUTHORING_SKILL_ID },
+      })
+    );
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.objectContaining({
+        code: ALERTING_LOG_CODES.AGENT_BUILDER_SKILL_REGISTER_FAILED,
+        labels: { skill_id: CLASSIC_TO_UNIVERSAL_RULE_MIGRATION_SKILL_ID },
       })
     );
     expect(logger.debug).not.toHaveBeenCalled();

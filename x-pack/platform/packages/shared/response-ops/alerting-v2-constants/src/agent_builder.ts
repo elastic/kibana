@@ -12,7 +12,8 @@ const alertingTool = (name: string) => `${ALERTING_NAMESPACE}.${name}`;
 
 /**
  * Tool ids exposed by the Alerting V2 Agent Builder skills
- * (`rule-authoring` and `action-policy-authoring`).
+ * (`rule-authoring`, `action-policy-authoring`, `universal-alerting-failure-diagnosis`,
+ * and `classic-to-universal-rule-migration`).
  */
 export const ALERTING_TOOL_IDS = {
   manageRule: alertingTool('manage_rule'),
@@ -20,6 +21,8 @@ export const ALERTING_TOOL_IDS = {
   findActionPolicies: alertingTool('find_action_policies'),
   attachRule: alertingTool('attach_rule'),
   attachActionPolicy: alertingTool('attach_action_policy'),
+  getClassicRule: alertingTool('get_classic_rule'),
+  getMigrationDraft: alertingTool('get_migration_draft'),
 } as const;
 
 /**
@@ -34,6 +37,7 @@ export const ALERTING_API_IDS = {
 export const RULE_AUTHORING_SKILL_ID = 'rule-authoring';
 export const ACTION_POLICY_AUTHORING_SKILL_ID = 'action-policy-authoring';
 export const UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID = 'universal-alerting-failure-diagnosis';
+export const CLASSIC_TO_UNIVERSAL_RULE_MIGRATION_SKILL_ID = 'classic-to-universal-rule-migration';
 
 /**
  * Markdown skill badge that invokes the `universal-alerting-failure-diagnosis` skill. The Agent Builder chat

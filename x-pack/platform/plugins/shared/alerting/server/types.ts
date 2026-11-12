@@ -45,6 +45,7 @@ import type { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_regis
 import type { AlertingServerSetup, AlertingServerStart } from './plugin';
 import type { RulesClient } from './rules_client';
 import type { RuleQueryInspectorFn } from './rule_query_inspector/types';
+import type { RuleTypeV2Migration } from './rule_type_v2_migration/types';
 import type {
   RulesSettingsClient,
   RulesSettingsFlappingClient,
@@ -436,6 +437,11 @@ export interface RuleType<
    * for debugging and investigation purposes.
    */
   queryInspector?: RuleQueryInspectorFn;
+  /**
+   * Opts the rule type in to migration to alerting v2. When provided, classic rules of this
+   * type can be converted into an alerting v2 rule draft.
+   */
+  alertingV2Migration?: RuleTypeV2Migration<Params>;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,
