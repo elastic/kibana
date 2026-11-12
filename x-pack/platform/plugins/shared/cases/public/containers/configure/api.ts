@@ -32,10 +32,9 @@ import type { StoredObservableType } from '../../../common/observables/resolve_o
 /**
  * The observable types in a save request can be overrides of built-in types, which have no label.
  */
-type WithStoredObservableTypes<T extends { observableTypes?: unknown }> = Omit<
-  T,
-  'observableTypes'
-> & { observableTypes?: StoredObservableType[] };
+type WithStoredObservableTypes<T> = Omit<T, 'observableTypes'> & {
+  observableTypes?: StoredObservableType[];
+};
 
 export type CaseConfigurationRequest = WithStoredObservableTypes<ConfigurationRequest>;
 export type CaseConfigurationPatchRequest = WithStoredObservableTypes<ConfigurationPatchRequest>;
