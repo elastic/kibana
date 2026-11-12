@@ -22,6 +22,11 @@ const retryMessages = ['no_shard_available_action_exception'];
 interface RetryOptions {
   logger?: Logger;
   attempt?: number;
+  /**
+   * Upper bound on retries, for a caller that is itself on a retry loop or has less time than the
+   * default backoff takes. Defaults to `MAX_ATTEMPTS`; `0` disables retrying.
+   */
+  maxAttempts?: number;
   additionalResponseStatuses?: number[];
   additionalRetryMessages?: string[];
 }
@@ -47,6 +52,7 @@ export const retryTransientEsErrors = async <T>(
   {
     logger,
     attempt = 0,
+    maxAttempts = MAX_ATTEMPTS,
     additionalResponseStatuses = [],
     additionalRetryMessages = [],
   }: RetryOptions = {}
@@ -55,7 +61,7 @@ export const retryTransientEsErrors = async <T>(
     return await esCall();
   } catch (e) {
     if (
-      attempt < MAX_ATTEMPTS &&
+      attempt < maxAttempts &&
       isRetryableError(e, additionalResponseStatuses, additionalRetryMessages)
     ) {
       const retryCount = attempt + 1;
@@ -71,6 +77,7 @@ export const retryTransientEsErrors = async <T>(
       return retryTransientEsErrors(esCall, {
         logger,
         attempt: retryCount,
+        maxAttempts,
         additionalResponseStatuses,
         additionalRetryMessages,
       });
