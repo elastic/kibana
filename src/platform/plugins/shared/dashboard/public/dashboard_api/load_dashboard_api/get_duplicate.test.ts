@@ -208,4 +208,42 @@ describe('getDuplicate', () => {
       )
     ).resolves.toBe(cachedPanel);
   });
+
+  test('returns undefined when loading the embeddable definition rejects', async () => {
+    jest
+      .spyOn(embeddableService, 'getEmbeddableDefinition')
+      .mockRejectedValueOnce(new Error('ChunkLoadError'));
+
+    await expect(
+      getDuplicate(
+        {
+          type: ESQL_CONTROL,
+          serializedState: createControlState('geo_dest', ['CN']),
+        },
+        initialState,
+        new Map()
+      )
+    ).resolves.toBeUndefined();
+  });
+
+  test('returns undefined when isDuplicate throws', async () => {
+    jest.spyOn(embeddableService, 'getEmbeddableDefinition').mockResolvedValueOnce({
+      type: ESQL_CONTROL,
+      buildEmbeddable: jest.fn(),
+      isDuplicate: () => {
+        throw new Error('Unexpected state');
+      },
+    });
+
+    await expect(
+      getDuplicate(
+        {
+          type: ESQL_CONTROL,
+          serializedState: createControlState('geo_dest', ['CN']),
+        },
+        initialState,
+        new Map()
+      )
+    ).resolves.toBeUndefined();
+  });
 });

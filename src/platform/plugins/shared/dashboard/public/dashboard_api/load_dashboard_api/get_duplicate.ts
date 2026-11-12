@@ -31,23 +31,28 @@ export const getDuplicate = async (
     return undefined;
   }
 
-  const embeddableDefinition = await embeddableService.getEmbeddableDefinition(type);
-  if (!embeddableDefinition?.isDuplicate) {
+  // A failed definition load or isDuplicate error means no duplicate, so the dashboard still opens.
+  try {
+    const embeddableDefinition = await embeddableService.getEmbeddableDefinition(type);
+    if (!embeddableDefinition?.isDuplicate) {
+      return undefined;
+    }
+
+    let panels = cache.get(type);
+    if (!panels) {
+      panels = [
+        ...(initialState.pinned_panels ?? []),
+        ...(initialState.panels ?? []).flatMap((widget) =>
+          isDashboardSection(widget) ? widget.panels : [widget]
+        ),
+      ]
+        .filter((panel) => panel.type === type)
+        .map(({ type: panelType, id, config }) => ({ type: panelType, id, state: config }));
+      cache.set(type, panels);
+    }
+
+    return panels.find(({ state }) => embeddableDefinition.isDuplicate?.(serializedState, state));
+  } catch {
     return undefined;
   }
-
-  let panels = cache.get(type);
-  if (!panels) {
-    panels = [
-      ...(initialState.pinned_panels ?? []),
-      ...(initialState.panels ?? []).flatMap((widget) =>
-        isDashboardSection(widget) ? widget.panels : [widget]
-      ),
-    ]
-      .filter((panel) => panel.type === type)
-      .map(({ type: panelType, id, config }) => ({ type: panelType, id, state: config }));
-    cache.set(type, panels);
-  }
-
-  return panels.find(({ state }) => embeddableDefinition.isDuplicate?.(serializedState, state));
 };
