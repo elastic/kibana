@@ -489,6 +489,8 @@ describe('Detection Coverage review', () => {
       expect(attachInstalled?.type).toBe('ai.attachment.add');
       expect(attachInstalled?.if).toContain("steps.propose_install.output.status == 'succeeded'");
       expect(attachInstalled?.with?.id).toBe('coverage-rule');
+      expect(attachInstalled?.with?.origin).toBe('{{ steps.refetch_rule.output.id }}');
+      expect(attachInstalled?.if).toContain('steps.refetch_rule.output.id != null');
       expect(attachInstalled?.with?.render_inline).toBe(true);
     });
 

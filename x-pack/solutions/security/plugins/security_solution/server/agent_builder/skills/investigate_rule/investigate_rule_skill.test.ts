@@ -194,6 +194,21 @@ describe('investigateRuleSkill', () => {
       expect(ctx.attachments.add).not.toHaveBeenCalled();
     });
 
+    it('returns an error result and adds no attachment when the rule is not found', async () => {
+      const ctx = makeCtx();
+      (ctx.attachments.get as jest.Mock).mockReturnValueOnce(undefined);
+      readRulesMock.mockResolvedValueOnce(null);
+
+      const result = (await tool.handler(
+        { rule_id: 'missing-rule' },
+        ctx
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results[0].type).toBe(ToolResultType.error);
+      expect((result.results[0].data as { message: string }).message).toContain('was not found');
+      expect(ctx.attachments.add).not.toHaveBeenCalled();
+    });
+
     it('returns an error result when resolution throws', async () => {
       const ctx = makeCtx();
       (ctx.attachments.get as jest.Mock).mockReturnValueOnce(undefined);
