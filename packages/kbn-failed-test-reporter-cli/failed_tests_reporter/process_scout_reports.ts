@@ -10,11 +10,8 @@
 import fs from 'fs';
 import { escape } from 'he';
 import Path from 'path';
-import {
-  getScoutFailures,
-  type ScoutInfraFailureReason,
-  type ScoutTestFailureExtended,
-} from './get_scout_failures';
+import { getScoutFailures, type ScoutTestFailureExtended } from './get_scout_failures';
+import type { InfraFailureReason } from './infra_failure_rules';
 import type { ProcessReportsParams } from './process_reports_types';
 import { createFailureIssue, updateFailureIssue, updateSuiteIssue } from './report_failure';
 import { reportFailuresToEs } from './report_failures_to_es';
@@ -26,7 +23,7 @@ export const SCOUT_GITHUB_ISSUES_FILENAME = 'github-issues.json';
 export interface ScoutGithubIssueDetails {
   githubIssue?: string;
   failureCount?: number;
-  infraReason?: ScoutInfraFailureReason;
+  infraReason?: InfraFailureReason;
 }
 
 const getTrackedBranchesStatus = (failure: ScoutTestFailureExtended): string | undefined => {
@@ -104,6 +101,7 @@ export async function processScoutReports(
     prependTitle,
     updateGithub,
     perTestIssues,
+    suiteIssueComments,
     indexInEs,
     reportUpdate,
   } = params;
@@ -148,16 +146,14 @@ export async function processScoutReports(
       }
       considered.push(failure);
 
-      // a test tracked by a flaky suite issue gets its failures recorded there, not on an issue of its own
+      // a test tracked by a suite issue gets its failures counted there, not on an issue of its own;
+      // the daily report and the consistent failure check comment on it, or this job without the check
       const suiteIssue = existingIssues.getSuiteIssueForFailure(failure);
       if (suiteIssue) {
         const { newBody, newCount } = await updateSuiteIssue(
-          buildUrl,
           suiteIssue,
           githubApi,
-          branch,
-          pipeline,
-          failure
+          suiteIssueComments ? { buildUrl, branch, pipeline, failure } : undefined
         );
         const url = suiteIssue.github.htmlUrl;
         // in dry-run nothing was written, so the next failure of the suite counts from the same body

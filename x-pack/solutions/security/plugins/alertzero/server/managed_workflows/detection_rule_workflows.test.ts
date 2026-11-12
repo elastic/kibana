@@ -1336,8 +1336,8 @@ describe('detection rule workflows', () => {
       });
 
       // The rule card reads `origin` as the saved-object id, and the agent's edits keep
-      // `origin` but drop the ids from `text`. Resolving by origin looks the rule up by
-      // rule_id, so the content comes by value from the same fetch.
+      // `origin` but drop the ids from `text`. The content comes by value from fetch_rule,
+      // so the rule is not read a second time.
       it('links the rule attachment by saved-object id and snapshots fetch_rule', () => {
         const attach = reviewSteps.find(({ name }) => name === 'attach_rule')!;
 
