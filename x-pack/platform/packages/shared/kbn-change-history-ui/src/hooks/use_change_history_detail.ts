@@ -36,7 +36,7 @@ export const useChangeHistoryDetail = ({
   const pendingChange = resolveChangeHistoryPendingChange(adapter, supports.unsavedChanges);
   const isPendingSelection = Boolean(pendingChange && changeId === pendingChange.id);
 
-  const { data, error, isLoading, isPreviousData } = useQuery<ChangeHistoryDetail, Error>(
+  const { data, error, isLoading } = useQuery<ChangeHistoryDetail, Error>(
     changeHistoryDetailQueryKey({
       objectId,
       changeId: changeId ?? '__none__',
@@ -65,9 +65,7 @@ export const useChangeHistoryDetail = ({
 
   return {
     change,
-    // keepPreviousData leaves `isLoading` false while a new id loads; `isPreviousData` is true
-    // for exactly that window (`change` is still the previous id's data), so count it as loading.
-    isLoading: isPendingSelection ? false : isLoading || isPreviousData,
+    isLoading: isPendingSelection ? false : isLoading,
     error: error ?? undefined,
   };
 };

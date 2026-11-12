@@ -61,19 +61,28 @@ export const useChangeHistoryCompare = ({
     Boolean(selectedChangeId) &&
     targetChangeId !== selectedChangeId;
 
-  const { change: loadedBaselineChange, isLoading: isLoadingBaseline } = useChangeHistoryDetail({
+  const { change: loadedBaselineChange, isLoading: isFetchingBaseline } = useChangeHistoryDetail({
     adapter,
     objectId,
     changeId: baselineChangeId,
     enabled: shouldLoadBaseline,
   });
 
-  const { change: loadedTargetChange, isLoading: isLoadingTarget } = useChangeHistoryDetail({
+  const { change: loadedTargetChange, isLoading: isFetchingTarget } = useChangeHistoryDetail({
     adapter,
     objectId,
     changeId: targetChangeId,
     enabled: shouldLoadTarget,
   });
+
+  // keepPreviousData keeps `isLoading` false while a new id loads, so data for a different id
+  // also counts as loading.
+  const isLoadingBaseline =
+    isFetchingBaseline ||
+    (loadedBaselineChange !== undefined && loadedBaselineChange.id !== baselineChangeId);
+  const isLoadingTarget =
+    isFetchingTarget ||
+    (loadedTargetChange !== undefined && loadedTargetChange.id !== targetChangeId);
 
   // keepPreviousData can leave a detail for a different id here; ignore it.
   const baselineChange =
