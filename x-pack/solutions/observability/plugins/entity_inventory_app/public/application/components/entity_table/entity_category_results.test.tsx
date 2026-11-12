@@ -400,6 +400,57 @@ describe('EntityCategoryResults', () => {
     );
     expect(screen.queryByTestId('entityInventoryTable')).not.toBeInTheDocument();
   });
+
+  it('shows no count and no source errors of the previous results after a failed reload', async () => {
+    const diagnosticsClient = createScenarioEntityInventoryApiClient({
+      scenario: 'withDiagnostics',
+    });
+    const getEntities = jest
+      .fn(diagnosticsClient.getEntities)
+      .mockImplementationOnce(diagnosticsClient.getEntities)
+      .mockRejectedValueOnce(new Error('Request failed'));
+    renderResults({ ...diagnosticsClient, getEntities });
+    expect(await screen.findByTestId('entityInventoryTypeSectionCount')).toBeInTheDocument();
+    expect(screen.getByTestId('entityInventorySourceErrorsIndicator')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: NEW_RANGE_LABEL }));
+
+    expect(await screen.findByTestId('entityInventoryTableError')).toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTypeSectionCount')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventorySourceErrorsIndicator')).not.toBeInTheDocument();
+  });
+
+  it('shows the table skeleton, not the previous rows, while a retry after a failed reload loads', async () => {
+    const fixtureClient = createFixtureEntityInventoryApiClient();
+    let finishRetry: () => void = () => {};
+    const getEntities = jest
+      .fn(fixtureClient.getEntities)
+      .mockImplementationOnce(fixtureClient.getEntities)
+      .mockRejectedValueOnce(new Error('Request failed'))
+      .mockImplementationOnce(
+        (...args) =>
+          new Promise((resolve) => {
+            finishRetry = () => resolve(fixtureClient.getEntities(...args));
+          })
+      );
+    renderResults({ ...fixtureClient, getEntities });
+    expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: NEW_RANGE_LABEL }));
+    expect(await screen.findByTestId('entityInventoryTableError')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: RETRY_LABEL }));
+
+    expect(await screen.findByTestId('entityInventoryTableSkeleton')).toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTable')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTypeSectionCount')).not.toBeInTheDocument();
+
+    finishRetry();
+
+    expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
+    expect(screen.getByTestId('entityInventoryTypeSectionCount')).toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTableSkeleton')).not.toBeInTheDocument();
+  });
+
   describe('sections', () => {
     it('renders one section per type in the order of the types response, titled by its name', async () => {
       renderResults(createFixtureEntityInventoryApiClient(), ['k8s.deployment', 'host']);

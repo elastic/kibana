@@ -65,9 +65,10 @@ export const EntityTypeResults = ({ entityType, onTruncatedChange }: EntityTypeR
   const { type, name } = entityType;
   const accordionId = useGeneratedHtmlId({ prefix: 'entityInventoryTypeSection' });
   const listResult = useEntityList(type);
-  const { list, error } = listResult;
-  // A failed load replaces the list with an error, so the list no longer counts as shown.
-  const isTruncated = list !== undefined && !error && list.truncated && list.rows.length > 0;
+  // `list` is `undefined` after a failed load and during its retry, so nothing of the previous
+  // response shows beside the error.
+  const { list } = listResult;
+  const isTruncated = list !== undefined && list.truncated && list.rows.length > 0;
 
   useEffect(() => {
     onTruncatedChange(type, isTruncated);

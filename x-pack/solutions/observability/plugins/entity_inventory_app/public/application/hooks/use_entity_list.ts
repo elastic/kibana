@@ -36,7 +36,9 @@ export const useEntityList = (entityType: string): UseEntityListResult => {
       return inventoryApi.getEntities(entityType, range, { signal });
     },
     [inventoryApi, entityType, dateRange],
-    { clearValueOnNext: false }
+    // A successful reload keeps the previous `list` until the new one arrives; a failed one sets
+    // `list` to `undefined`, so a retry shows the first-load skeleton rather than the old rows.
+    { clearValueOnNext: false, unsetValueOnError: true }
   );
 
   return { list: value, loading, error, refresh };
