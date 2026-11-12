@@ -13,9 +13,17 @@ import {
   MAX_SESSIONS_PER_WINDOW,
   MAX_WINDOW_MS,
   MIN_WINDOW_MS,
+  ROWS_PER_TICK,
   lookbackStart,
   summarizeSessions,
 } from './summarize_sessions';
+import { toSessionDocuments } from './summary_documents';
+
+const { toSessionDocuments: buildDocuments } = jest.requireActual('./summary_documents');
+jest.mock('./summary_documents', () => {
+  const actual = jest.requireActual('./summary_documents');
+  return { ...actual, toSessionDocuments: jest.fn(actual.toSessionDocuments) };
+});
 
 const NOW = Date.parse('2026-11-11T12:00:00.000Z');
 const UNTIL = NOW - 60_000;
@@ -197,6 +205,38 @@ describe('summarizeSessions', () => {
       .filter((query) => query.includes('page_view_count = COUNT'))
       .map((query) => query.match(/IN \(([^)]*)\)/)?.[1]);
     expect(batches).toEqual(['"a", "b"', '"a"', '"b"']);
+  });
+
+  it('builds the summaries of a large response a chunk per event loop turn', async () => {
+    const rows = 2 * ROWS_PER_TICK + 1;
+    const esClient = setUp({
+      summaryRows: () => Array.from({ length: rows }, (_, index) => summaryRow(`s${index}`)),
+    });
+    // Each chunk queues work for the next event loop turn; it runs before the next chunk only if
+    // the run yields in between (mocked queries resolve without a turn).
+    const events: string[] = [];
+    jest.mocked(toSessionDocuments).mockImplementation((chunkRows) => {
+      events.push(`chunk of ${chunkRows.length}`);
+      setImmediate(() => events.push('other work'));
+      return buildDocuments(chunkRows);
+    });
+
+    const progress = await run(esClient).finally(() => {
+      jest.mocked(toSessionDocuments).mockImplementation(buildDocuments);
+    });
+
+    expect(progress.sessions).toBe(rows);
+    expect(events.slice(0, 5)).toEqual([
+      `chunk of ${ROWS_PER_TICK}`,
+      'other work',
+      `chunk of ${ROWS_PER_TICK}`,
+      'other work',
+      'chunk of 1',
+    ]);
+    const [{ operations }] = esClient.bulk.mock.calls[0];
+    expect(operations).toHaveLength(2 * rows);
+    expect(operations?.[1]).toMatchObject({ session: { id: 's0' } });
+    expect(operations?.[2 * rows - 1]).toMatchObject({ session: { id: `s${rows - 1}` } });
   });
 
   it('keeps the checkpoint before a window that fails to write', async () => {

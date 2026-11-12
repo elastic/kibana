@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { setImmediate as yieldToEventLoop } from 'timers/promises';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { chunk } from 'lodash';
 import {
@@ -43,6 +45,11 @@ export const MAX_WINDOW_MS = DAY_MS;
 /** The first window of a backfill; it then grows or shrinks with the sessions found. */
 export const INITIAL_WINDOW_MS = HOUR_MS;
 const BULK_SIZE = 2000;
+/**
+ * Summary rows turned into documents per tick. Mapping a full batch at once blocked a small Kibana's
+ * event loop for about half a second, delaying its other requests and tasks.
+ */
+export const ROWS_PER_TICK = 500;
 
 export interface SummarizeSessionsParams {
   esClient: ElasticsearchClient;
@@ -71,15 +78,33 @@ export const lookbackStart = (now: number): number => {
   return Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate());
 };
 
-const runEsql = async (
+const queryEsql = (
   esClient: ElasticsearchClient,
   { query, params }: SummaryQuery,
   signal: AbortSignal
-): Promise<EsqlRow[]> =>
-  toEsqlRows(
-    // A shard that fails fails the query, so a failure never writes partial summaries.
-    await esClient.esql.query({ query, params, allow_partial_results: false }, { signal })
-  );
+): Promise<estypes.EsqlEsqlResult> =>
+  // A shard that fails fails the query, so a failure never writes partial summaries.
+  esClient.esql.query({ query, params, allow_partial_results: false }, { signal });
+
+const runEsql = async (
+  esClient: ElasticsearchClient,
+  query: SummaryQuery,
+  signal: AbortSignal
+): Promise<EsqlRow[]> => toEsqlRows(await queryEsql(esClient, query, signal));
+
+/** The summaries of a summary query's rows, `ROWS_PER_TICK` at a time between event loop turns. */
+const toSessionDocumentsInChunks = async ({
+  columns,
+  values,
+}: estypes.EsqlEsqlResult): Promise<SessionDocument[]> => {
+  const documents: SessionDocument[] = [];
+  for (let start = 0; start < values.length; start += ROWS_PER_TICK) {
+    await yieldToEventLoop();
+    const rows = toEsqlRows({ columns, values: values.slice(start, start + ROWS_PER_TICK) });
+    documents.push(...toSessionDocuments(rows));
+  }
+  return documents;
+};
 
 const countChangedSessions = async (
   esClient: ElasticsearchClient,
@@ -155,12 +180,12 @@ const summarizeSessionIds = async (
   const batches = chunk(ids, SESSIONS_PER_QUERY);
   let written = 0;
   for (let batch = batches.shift(); batch; batch = batches.shift()) {
-    const rows = await runEsql(esClient, sessionSummaryQuery(window, batch), signal);
-    if (rows.length >= ESQL_MAX_ROWS && batch.length > 1) {
+    const response = await queryEsql(esClient, sessionSummaryQuery(window, batch), signal);
+    if (response.values.length >= ESQL_MAX_ROWS && batch.length > 1) {
       const half = Math.ceil(batch.length / 2);
       batches.push(batch.slice(0, half), batch.slice(half));
     } else {
-      const documents = toSessionDocuments(rows);
+      const documents = await toSessionDocumentsInChunks(response);
       await writeSessions(esClient, documents, signal);
       written += documents.length;
     }

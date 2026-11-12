@@ -227,8 +227,10 @@ Each run:
    session lasts, with their ids as a literal `IN` list, which Elasticsearch looks up in the index:
    an `IN (subquery)` scanned the whole lookback. One query aggregates per session and page URL,
    then per session, for the counts, times, latest attributes, web vitals and journey.
-4. Writes one summary per session, keyed by a hash of `service.name` + `session.id`, and moves the
-   checkpoint past the window.
+4. Turns the rows into summaries 500 at a time, letting the event loop run between chunks, as a
+   whole batch at once blocked a small Kibana for about half a second. Writes one summary per
+   session, keyed by a hash of `service.name` + `session.id`, and moves the checkpoint past the
+   window.
 
 A run starts no window after 45 seconds, and runs again right away while it is behind. On the first
 run after sessions are enabled, it starts from 30 days ago, at the start of that day in UTC, so it
