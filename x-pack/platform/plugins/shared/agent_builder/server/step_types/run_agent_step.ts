@@ -13,6 +13,8 @@ import {
   ConversationRoundStatus,
   DEFAULT_CONVERSATION_TITLE,
   normalizeConversationAccessControl,
+  createRequestAbortedError,
+  isConversationBusyError,
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
   isRoundCompleteEvent,
@@ -34,6 +36,7 @@ import {
   resolveConnectorIdFromFeatures,
 } from '@kbn/search-inference-endpoints/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import pRetry from 'p-retry';
 import { firstValueFrom, tap, toArray } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import type { ServiceManager } from '../services';
@@ -49,6 +52,13 @@ import {
   EPHEMERAL_WITH_CREATE_CONVERSATION_MESSAGE,
   runAgentStepCommonDefinition,
 } from '../../common/step_types/run_agent_step';
+
+export const CONVERSATION_BUSY_RETRY_OPTIONS = {
+  retries: 150,
+  minTimeout: 2000,
+  maxTimeout: 10000,
+  maxRetryTime: 5 * 60 * 1000,
+};
 
 const assertTemplateMatchesSchema = (value: unknown, schema: unknown): Record<string, unknown> => {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
@@ -430,48 +440,66 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           agentId: effectiveAgentId,
         });
 
-        const { events$ } = await executionService.executeAgent({
-          mode: AgentExecutionMode.conversation,
-          request,
-          abortSignal: context.abortSignal,
-          metadata,
-          interactive: createNonInteractiveConfig(
-            approvals?.auto_approved_apis && toAutoApprovedApis(approvals.auto_approved_apis)
-          ),
-          params: {
-            agentId: effectiveAgentId,
-            connectorId: effectiveConnectorId,
-            conversationId,
-            ...(authorName ? { author: { full_name: authorName } } : {}),
-            autoCreateConversationWithId: createConversation,
-            storeConversation,
-            accessControl,
-            structuredOutput: !!schema,
-            outputSchema: schema,
-            configurationOverrides,
-            nextInput: {
-              message,
-              attachments,
+        const executeAgentOnce = () =>
+          executionService.executeAgent({
+            mode: AgentExecutionMode.conversation,
+            request,
+            abortSignal: context.abortSignal,
+            metadata,
+            interactive: createNonInteractiveConfig(
+              approvals?.auto_approved_apis && toAutoApprovedApis(approvals.auto_approved_apis)
+            ),
+            params: {
+              agentId: effectiveAgentId,
+              connectorId: effectiveConnectorId,
+              conversationId,
+              ...(authorName ? { author: { full_name: authorName } } : {}),
+              autoCreateConversationWithId: createConversation,
+              storeConversation,
+              accessControl,
+              structuredOutput: !!schema,
+              outputSchema: schema,
+              configurationOverrides,
+              nextInput: {
+                message,
+                attachments,
+              },
+              ...(maxContentLength !== undefined ? { maxContentLength } : {}),
+              ...(reasoningLevel !== undefined ? { reasoningLevel } : {}),
+              // The single source of the workflow run: the execution reports it on its round events
+              // and sends it to EIS as `interactionId`, with or without a `plugin-id`.
+              workflowExecutionId: context.contextManager.getContext().execution.id,
+              ...(pluginId
+                ? {
+                    telemetryMetadata: {
+                      pluginId,
+                      aggregateBy,
+                      productSolution,
+                      productFeature,
+                    },
+                  }
+                : {}),
             },
-            ...(maxContentLength !== undefined ? { maxContentLength } : {}),
-            ...(reasoningLevel !== undefined ? { reasoningLevel } : {}),
-            // The single source of the workflow run: the execution reports it on its round events
-            // and sends it to EIS as `interactionId`, with or without a `plugin-id`.
-            workflowExecutionId: context.contextManager.getContext().execution.id,
-            ...(pluginId
-              ? {
-                  telemetryMetadata: {
-                    pluginId,
-                    aggregateBy,
-                    productSolution,
-                    productFeature,
-                  },
-                }
-              : {}),
+            // workflows already run as scheduled tasks
+            useTaskManager: false,
+          });
+
+        const { events$ } = await pRetry(
+          async (attempt) => {
+            if (attempt > 1 && context.abortSignal.aborted) {
+              throw new pRetry.AbortError(createRequestAbortedError());
+            }
+            return executeAgentOnce();
           },
-          // workflows already run as scheduled tasks
-          useTaskManager: false,
-        });
+          {
+            ...CONVERSATION_BUSY_RETRY_OPTIONS,
+            onFailedAttempt: (error) => {
+              if (!isConversationBusyError(error) || context.abortSignal.aborted) {
+                throw error;
+              }
+            },
+          }
+        );
 
         const events = await firstValueFrom(
           events$.pipe(
