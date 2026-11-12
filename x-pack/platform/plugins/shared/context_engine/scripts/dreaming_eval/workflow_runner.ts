@@ -107,13 +107,16 @@ export const sourcesReadBy = (output: Record<string, unknown> | undefined): numb
 
 /**
  * Runs a dreaming workflow until it has read everything: the first run from `since`, each later
- * run from where the previous one stopped, until one reads nothing or does not complete.
+ * run from where the last completed one stopped, until one reads nothing. A run that does not
+ * complete is run again, `retries` times in a row at most: dreaming resumes from the last
+ * completed run, and what a failed run wrote is updated rather than written twice.
  */
 export const runUntilDone = async ({
   kibana,
   workflowId,
   since,
   maxRuns,
+  retries,
   timeoutMs,
   pollIntervalMs = POLL_INTERVAL_MS,
   onRun,
@@ -122,18 +125,30 @@ export const runUntilDone = async ({
   workflowId: string;
   since?: string;
   maxRuns: number;
+  retries: number;
   timeoutMs: number;
   pollIntervalMs?: number;
   onRun: (summary: WorkflowRunSummary, run: number) => void;
 }): Promise<WorkflowRunSummary[]> => {
   const runs: WorkflowRunSummary[] = [];
+  let completed = 0;
+  let failuresInARow = 0;
   for (let run = 1; run <= maxRuns; run++) {
     await waitForIdle(kibana, workflowId, timeoutMs, pollIntervalMs);
-    const inputs = run === 1 && since ? { since } : {};
+    const inputs = completed === 0 && since ? { since } : {};
     const summary = await runWorkflow(kibana, workflowId, inputs, timeoutMs, pollIntervalMs);
     runs.push(summary);
     onRun(summary, run);
-    if (summary.status !== 'completed' || sourcesReadBy(summary.output) === 0) {
+    if (summary.status !== 'completed') {
+      failuresInARow++;
+      if (failuresInARow > retries) {
+        break;
+      }
+      continue;
+    }
+    completed++;
+    failuresInARow = 0;
+    if (sourcesReadBy(summary.output) === 0) {
       break;
     }
   }

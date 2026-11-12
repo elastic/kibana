@@ -7,6 +7,7 @@
 
 import type { LongMemEvalV2Config } from '../config';
 import type { EvalConversation, EvalStep, EvalTarget } from '../types';
+import { pickSamples } from './samples';
 
 export const LONGMEMEVAL_V2_ENTERPRISE_DATASET = 'longmemeval_v2_enterprise';
 
@@ -50,33 +51,41 @@ const TRAJECTORY_SPACING_MINUTES = 60;
 const TOOL_NAME = 'browser';
 
 /**
- * The trajectories of the enterprise haystack, in order: the union of the enterprise questions'
- * haystacks (in the small tier they all share one), cut to `trajectories`.
+ * The trajectories of the selected samples, in order and once: the union of their haystacks (in
+ * the small tier every enterprise question shares one), cut to `max_trajectories` when set.
  */
 export const selectTrajectoryIds = (
   questions: LmeV2Question[],
   haystack: LmeV2Haystack,
-  { trajectories: limit }: LongMemEvalV2Config
+  { max_trajectories: limit }: LongMemEvalV2Config
 ): string[] => {
   const ids = new Set<string>();
   for (const question of questions) {
-    if (question.domain === DOMAIN) {
-      for (const id of haystack[question.id] ?? []) {
-        ids.add(id);
-      }
+    for (const id of haystack[question.id] ?? []) {
+      ids.add(id);
     }
   }
   return [...ids].slice(0, limit);
 };
 
+/** The samples to evaluate: enterprise questions, each asked over its haystack of trajectories. */
 export const selectQuestions = (
   questions: LmeV2Question[],
-  { include_abstention: abstention, include_image_questions: images }: LongMemEvalV2Config
-): LmeV2Question[] =>
-  questions.filter(
-    ({ domain, question_type: type, image }) =>
-      domain === DOMAIN && (abstention || !type.endsWith('-abs')) && (images || image === null)
+  options: LongMemEvalV2Config
+): LmeV2Question[] => {
+  const enterprise = questions.filter(({ domain }) => domain === DOMAIN);
+  return pickSamples(
+    enterprise.filter(
+      ({ question_type: type, image }) =>
+        (options.include_abstention || !type.endsWith('-abs')) &&
+        (options.include_image_questions || image === null)
+    ),
+    enterprise,
+    ({ id }) => id,
+    options,
+    LONGMEMEVAL_V2_ENTERPRISE_DATASET
   );
+};
 
 /** The id at the start of a trajectories line, read without parsing a line of a megabyte or more. */
 export const trajectoryIdOfLine = (line: string): string | undefined =>

@@ -21,8 +21,11 @@ import {
 const options: LongMemEvalV2Config = {
   base_url: 'https://example.com',
   agent: { id: 'workarena-agent', name: 'ServiceNow agent' },
+  samples: [],
+  sample_count: 1,
+  all_samples: true,
   haystack: 'small',
-  trajectories: 3,
+  max_trajectories: 3,
   max_observation_chars: 600,
   include_abstention: false,
   include_image_questions: false,
@@ -51,11 +54,29 @@ const tree = (title: string, content: string[]) =>
   ].join('\n');
 
 describe('LongMemEval-V2 enterprise', () => {
-  it('imports the enterprise haystack, in order and once, up to the configured count', () => {
-    const questions = [question('a'), question('b'), question('w', { domain: 'web' })];
-    const haystack = { a: ['t1', 't2'], b: ['t2', 't3', 't4'], w: ['web-1'] };
+  it("imports the samples' haystacks, in order and once, up to max_trajectories", () => {
+    const haystack = { a: ['t1', 't2'], b: ['t2', 't3', 't4'] };
+    const samples = [question('a'), question('b')];
 
-    expect(selectTrajectoryIds(questions, haystack, options)).toEqual(['t1', 't2', 't3']);
+    expect(selectTrajectoryIds(samples, haystack, options)).toEqual(['t1', 't2', 't3']);
+    expect(
+      selectTrajectoryIds(samples, haystack, { ...options, max_trajectories: undefined })
+    ).toEqual(['t1', 't2', 't3', 't4']);
+    expect(selectTrajectoryIds([question('a')], haystack, options)).toEqual(['t1', 't2']);
+  });
+
+  it('picks the first samples, or the listed ones, among the enterprise questions', () => {
+    const questions = [question('a'), question('b'), question('w', { domain: 'web' })];
+
+    expect(
+      selectQuestions(questions, { ...options, all_samples: false }).map(({ id }) => id)
+    ).toEqual(['a']);
+    expect(selectQuestions(questions, { ...options, samples: ['b'] }).map(({ id }) => id)).toEqual([
+      'b',
+    ]);
+    expect(() => selectQuestions(questions, { ...options, samples: ['w'] })).toThrow(
+      'longmemeval_v2_enterprise has no samples w'
+    );
   });
 
   it('targets enterprise questions without images or abstention unless asked', () => {

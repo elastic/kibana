@@ -7,6 +7,7 @@
 
 import type { LongMemEvalSConfig } from '../config';
 import type { EvalConversation, EvalRound, EvalTarget } from '../types';
+import { pickSamples } from './samples';
 
 export const LONGMEMEVAL_S_DATASET = 'longmemeval_s';
 
@@ -40,36 +41,18 @@ export const parseLongMemEvalDate = (value: string): string => {
 
 const isAbstention = ({ question_id: id }: LongMemEvalRecord): boolean => id.endsWith('_abs');
 
-/** The questions to evaluate: the listed ones, else the first few of each question type. */
+/** The samples to evaluate: each is a question and its haystack of sessions. */
 export const selectQuestions = (
   records: LongMemEvalRecord[],
-  {
-    question_ids: ids,
-    questions_per_type: perType,
-    include_abstention: abstention,
-  }: LongMemEvalSConfig
-): LongMemEvalRecord[] => {
-  if (ids.length > 0) {
-    const byId = new Map(records.map((record) => [record.question_id, record]));
-    const missing = ids.filter((id) => !byId.has(id));
-    if (missing.length > 0) {
-      throw new Error(`LongMemEval has no questions ${missing.join(', ')}`);
-    }
-    return ids.flatMap((id) => byId.get(id) ?? []);
-  }
-  const taken = new Map<string, number>();
-  return records.filter((record) => {
-    if (isAbstention(record) && !abstention) {
-      return false;
-    }
-    const count = taken.get(record.question_type) ?? 0;
-    if (count >= perType) {
-      return false;
-    }
-    taken.set(record.question_type, count + 1);
-    return true;
-  });
-};
+  options: LongMemEvalSConfig
+): LongMemEvalRecord[] =>
+  pickSamples(
+    records.filter((record) => options.include_abstention || !isAbstention(record)),
+    records,
+    ({ question_id: id }) => id,
+    options,
+    LONGMEMEVAL_S_DATASET
+  );
 
 /** Splits a session into rounds: each user message with the assistant messages that answer it. */
 export const sessionToRounds = (
@@ -96,12 +79,12 @@ export const sessionToRounds = (
 };
 
 /**
- * The sessions behind the selected questions, each once, in time order: every session that holds
- * an answer, and `distractor_sessions` more per question from its haystack.
+ * The sessions of the selected samples, each once, in time order: their whole haystacks, or with
+ * `sessions: answers` the sessions that hold an answer and `distractor_sessions` more per sample.
  */
 export const selectConversations = (
   questions: LongMemEvalRecord[],
-  { distractor_sessions: distractors }: LongMemEvalSConfig
+  { sessions: mode, distractor_sessions: distractors }: LongMemEvalSConfig
 ): EvalConversation[] => {
   const sessions = new Map<string, { startedAt: string; conversation: EvalConversation }>();
   for (const question of questions) {
@@ -109,7 +92,7 @@ export const selectConversations = (
     let addedDistractors = 0;
     question.haystack_session_ids.forEach((sessionId, index) => {
       const isAnswer = answers.has(sessionId);
-      if (!isAnswer && addedDistractors >= distractors) {
+      if (mode === 'answers' && !isAnswer && addedDistractors >= distractors) {
         return;
       }
       if (!isAnswer) {

@@ -18,9 +18,11 @@ import {
 const options: LongMemEvalSConfig = {
   url: 'https://example.com/longmemeval_s.json',
   agent: { id: 'longmemeval-assistant', name: 'Personal assistant' },
-  question_ids: [],
-  questions_per_type: 1,
+  samples: [],
+  sample_count: 1,
+  all_samples: false,
   include_abstention: false,
+  sessions: 'haystack',
   distractor_sessions: 1,
 };
 
@@ -51,30 +53,35 @@ describe('LongMemEval S', () => {
     expect(() => parseLongMemEvalDate('May 20')).toThrow("Unrecognized LongMemEval date 'May 20'");
   });
 
-  it('takes the first questions of each type, leaving out abstention ones unless asked', () => {
+  it('takes the first samples, or all of them, leaving out abstention questions unless asked', () => {
     const records = [
       record('a_abs', 'single-session-user', []),
       record('a', 'single-session-user', []),
       record('b', 'single-session-user', []),
       record('c', 'multi-session', []),
     ];
+    const ids = (selected: LongMemEvalRecord[]) => selected.map((q) => q.question_id);
 
-    expect(selectQuestions(records, options).map((q) => q.question_id)).toEqual(['a', 'c']);
+    expect(ids(selectQuestions(records, options))).toEqual(['a']);
+    expect(ids(selectQuestions(records, { ...options, sample_count: 2 }))).toEqual(['a', 'b']);
+    expect(ids(selectQuestions(records, { ...options, all_samples: true }))).toEqual([
+      'a',
+      'b',
+      'c',
+    ]);
     expect(
-      selectQuestions(records, { ...options, include_abstention: true, questions_per_type: 2 }).map(
-        (q) => q.question_id
-      )
-    ).toEqual(['a_abs', 'a', 'c']);
+      ids(selectQuestions(records, { ...options, all_samples: true, include_abstention: true }))
+    ).toEqual(['a_abs', 'a', 'b', 'c']);
   });
 
-  it('takes the listed questions, in their order, and fails on one it does not have', () => {
-    const records = [record('a', 'x', []), record('b', 'y', [])];
+  it('takes the listed samples, in their order, and fails on one it does not have', () => {
+    const records = [record('a', 'x', []), record('b_abs', 'y', [])];
 
     expect(
-      selectQuestions(records, { ...options, question_ids: ['b', 'a'] }).map((q) => q.question_id)
-    ).toEqual(['b', 'a']);
-    expect(() => selectQuestions(records, { ...options, question_ids: ['z'] })).toThrow(
-      'LongMemEval has no questions z'
+      selectQuestions(records, { ...options, samples: ['b_abs', 'a'] }).map((q) => q.question_id)
+    ).toEqual(['b_abs', 'a']);
+    expect(() => selectQuestions(records, { ...options, samples: ['z'] })).toThrow(
+      'longmemeval_s has no samples z'
     );
   });
 
@@ -101,18 +108,27 @@ describe('LongMemEval S', () => {
     ]);
   });
 
-  it('imports the sessions that hold answers and a distractor per question, each once and in time order', () => {
-    const first = record('a', 'x', [
-      { id: 'noise-1', date: '2023/05/02 (Tue) 10:00' },
-      { id: 'noise-2', date: '2023/05/03 (Wed) 10:00' },
-      { id: 'answer-a', date: '2023/05/01 (Mon) 10:00', answer: true },
-    ]);
-    const second = record('b', 'y', [
-      { id: 'noise-1', date: '2023/05/02 (Tue) 10:00' },
-      { id: 'answer-b', date: '2023/05/04 (Thu) 10:00', answer: true },
-    ]);
+  const first = record('a', 'x', [
+    { id: 'noise-1', date: '2023/05/02 (Tue) 10:00' },
+    { id: 'noise-2', date: '2023/05/03 (Wed) 10:00' },
+    { id: 'answer-a', date: '2023/05/01 (Mon) 10:00', answer: true },
+  ]);
+  const second = record('b', 'y', [
+    { id: 'noise-1', date: '2023/05/02 (Tue) 10:00' },
+    { id: 'answer-b', date: '2023/05/04 (Thu) 10:00', answer: true },
+  ]);
 
-    const conversations = selectConversations([first, second], options);
+  it("imports each sample's whole haystack, each session once and in time order", () => {
+    expect(selectConversations([first, second], options).map(({ id }) => id)).toEqual([
+      'answer-a',
+      'noise-1',
+      'noise-2',
+      'answer-b',
+    ]);
+  });
+
+  it('imports only the sessions that hold answers and a distractor per sample, when asked', () => {
+    const conversations = selectConversations([first, second], { ...options, sessions: 'answers' });
 
     expect(conversations.map(({ id }) => id)).toEqual(['answer-a', 'noise-1', 'answer-b']);
     expect(conversations[0]).toEqual({

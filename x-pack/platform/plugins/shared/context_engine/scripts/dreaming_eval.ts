@@ -10,8 +10,15 @@ import path from 'path';
 import { Client } from '@elastic/elasticsearch';
 import { run } from '@kbn/dev-cli-runner';
 import { getConnectionConfig } from './seed_ki_sample_data/lib/connection_config';
-import type { EvalConfig } from './dreaming_eval/config';
-import { DEFAULT_CONFIG_PATH, loadConfig, runDirOf } from './dreaming_eval/config';
+import type { DatasetName, EvalConfig } from './dreaming_eval/config';
+import {
+  DATASET_NAMES,
+  DEFAULT_CONFIG_PATH,
+  loadConfig,
+  runDirOf,
+  selectAiIndexIds,
+  withSampleOverrides,
+} from './dreaming_eval/config';
 import type { StageContext } from './dreaming_eval/context';
 import { createKibanaCall } from './dreaming_eval/context';
 import { runConfigure } from './dreaming_eval/stages/configure';
@@ -46,6 +53,14 @@ const parseStages = (value: unknown): Stage[] => {
   return STAGE_NAMES.filter((stage) => requested.includes(stage));
 };
 
+const listFlag = (value: unknown): string[] | undefined =>
+  typeof value === 'string' && value.trim()
+    ? value
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean)
+    : undefined;
+
 const newRunId = (): string => new Date().toISOString().replace(/[:.]/g, '-').replace(/Z$/, '');
 
 /** The most recent run that dumped KIs for every selected AI index. */
@@ -67,18 +82,37 @@ run(
   async ({ log, flags }) => {
     const stages = parseStages(flags.stage);
     const configPath = path.resolve(process.cwd(), String(flags.config || DEFAULT_CONFIG_PATH));
-    const config = loadConfig(configPath, process.cwd());
+    const loaded = loadConfig(configPath, process.cwd());
 
-    const allIds = config.ai_indices.map(({ id }) => id);
-    const aiIndexIds = flags['ai-index']
-      ? String(flags['ai-index'])
-          .split(',')
-          .map((id) => id.trim())
-      : allIds;
-    const unknownIds = aiIndexIds.filter((id) => !allIds.includes(id));
-    if (unknownIds.length > 0) {
-      throw new Error(`${configPath} has no AI index ${unknownIds.join(', ')}`);
+    const datasets = listFlag(flags.dataset);
+    const unknownDatasets = (datasets ?? []).filter(
+      (dataset) => !(DATASET_NAMES as readonly string[]).includes(dataset)
+    );
+    if (unknownDatasets.length > 0) {
+      throw new Error(
+        `Unknown dataset ${unknownDatasets.join(', ')}; datasets: ${DATASET_NAMES.join(', ')}`
+      );
     }
+    const aiIndexIds = selectAiIndexIds(loaded, {
+      aiIndexIds: listFlag(flags['ai-index']),
+      datasets: datasets as DatasetName[] | undefined,
+    });
+    const usedDatasets = [
+      ...new Set(
+        loaded.ai_indices
+          .filter(({ id }) => aiIndexIds.includes(id))
+          .flatMap((aiIndex) => aiIndex.datasets)
+      ),
+    ];
+    const sampleCount = flags['sample-count'] ? Number(flags['sample-count']) : undefined;
+    if (sampleCount !== undefined && (!Number.isInteger(sampleCount) || sampleCount < 1)) {
+      throw new Error('--sample-count must be a positive integer');
+    }
+    const config = withSampleOverrides(loaded, usedDatasets, {
+      samples: listFlag(flags.samples),
+      sampleCount,
+      allSamples: flags['all-samples'] === true,
+    });
 
     const runId = flags['run-id']
       ? String(flags['run-id'])
@@ -106,10 +140,11 @@ run(
     };
 
     log.info(
-      `Stages ${stages.join(', ')} for ${aiIndexIds.join(', ')} (config ${path.relative(
-        process.cwd(),
-        configPath
-      )}${stages.includes('run') || stages.includes('evaluate') ? `, run ${context.runId}` : ''})`
+      `Stages ${stages.join(', ')} for ${aiIndexIds.join(', ')} on ${usedDatasets.join(
+        ', '
+      )} (config ${path.relative(process.cwd(), configPath)}${
+        stages.includes('run') || stages.includes('evaluate') ? `, run ${context.runId}` : ''
+      })`
     );
     for (const stage of stages) {
       log.info(`── ${stage}`);
@@ -124,12 +159,19 @@ run(
       dumps the KIs they write, and judges them against target knowledge.
 
       Stages, in order: ${STAGE_NAMES.join(', ')}. Without --stage, all of them run.
+
+      A sample is a benchmark question with the conversations it is asked over. By default one
+      LongMemEval S sample runs; the config picks the datasets and samples, and the flags below
+      override it.
     `,
     flags: {
       string: [
         'stage',
         'config',
+        'dataset',
         'ai-index',
+        'samples',
+        'sample-count',
         'run-id',
         'judge-connector',
         'es-url',
@@ -137,7 +179,7 @@ run(
         'es-password',
         'kibana-url',
       ],
-      boolean: ['force-download'],
+      boolean: ['force-download', 'all-samples'],
       help: `
         --stage <names>         Comma-separated stages to run: ${STAGE_NAMES.join(
           ', '
@@ -146,7 +188,13 @@ run(
           process.cwd(),
           DEFAULT_CONFIG_PATH
         )})
-        --ai-index <ids>        Comma-separated AI indices of the config to work on (default: all)
+        --dataset <names>       Comma-separated datasets to evaluate: ${DATASET_NAMES.join(
+          ', '
+        )}; the stages work on the AI indices that dream on only these (default: run_datasets)
+        --ai-index <ids>        Comma-separated AI indices of the config instead (default: by dataset)
+        --samples <ids>         Samples (question ids) to evaluate, of the one dataset in use
+        --sample-count <n>      Evaluate the first n samples
+        --all-samples           Evaluate every sample
         --run-id <id>           Run to write (run stage) or read (evaluate stage); default: a new
                                 run for the run stage, else the latest one
         --judge-connector <id>  AI connector that judges the KIs (default: evaluate.connector_id,

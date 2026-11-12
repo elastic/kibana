@@ -48,6 +48,8 @@ export interface EvalTarget {
 /** The conversations and targets the extract stage writes for one dataset. */
 export interface ExtractedDataset {
   dataset: string;
+  /** Ids of the samples (questions) the conversations and targets are for. */
+  samples: string[];
   agent: { id: string; name: string };
   conversations: EvalConversation[];
   targets: EvalTarget[];

@@ -6,7 +6,14 @@
  */
 
 import path from 'path';
-import { DEFAULT_CONFIG_PATH, loadConfig, parseConfig, resolveDreaming } from './config';
+import {
+  DEFAULT_CONFIG_PATH,
+  loadConfig,
+  parseConfig,
+  resolveDreaming,
+  selectAiIndexIds,
+  withSampleOverrides,
+} from './config';
 
 const REPO_ROOT = '/repo';
 
@@ -25,12 +32,19 @@ describe('dreaming eval config', () => {
     expect(config.dataDir).toBe('/repo/data/context_engine_dreaming_eval');
     expect(config.configDir).toBe('/repo/configs');
     expect(config.tracesIndex).toBe('traces-agent_builder.otel-default');
+    expect(config.run_datasets).toEqual(['longmemeval_s']);
     expect(config.datasets.longmemeval_s).toEqual(
-      expect.objectContaining({ questions_per_type: 1, distractor_sessions: 1 })
+      expect.objectContaining({
+        samples: [],
+        sample_count: 1,
+        all_samples: false,
+        sessions: 'haystack',
+      })
     );
     expect(config.datasets.longmemeval_v2_enterprise).toEqual(
-      expect.objectContaining({ haystack: 'small', trajectories: 100 })
+      expect.objectContaining({ haystack: 'small', all_samples: true })
     );
+    expect(config.datasets.longmemeval_v2_enterprise.max_trajectories).toBeUndefined();
     expect(config.ai_indices[0].targets).toEqual([]);
     expect(config.evaluate.rerank_inference_id).toBe('.rerank-v1-elasticsearch');
   });
@@ -79,6 +93,57 @@ describe('dreaming eval config', () => {
       instructions: 'From the template.',
       facts: [{ type: 'plan' }],
       entities: { nodes: [{ type: 'person' }] },
+    });
+  });
+
+  describe('choosing what to run', () => {
+    const config = parseConfig(
+      `
+ai_indices:
+  - { id: chats, datasets: [longmemeval_s], dreaming: { template: personal_assistant } }
+  - { id: portal, datasets: [longmemeval_v2_enterprise], dreaming: { facts: [{ type: procedure }] } }
+  - { id: both, datasets: [longmemeval_s, longmemeval_v2_enterprise], dreaming: { facts: [{ type: x }] } }
+`,
+      '/repo/eval.yaml',
+      REPO_ROOT
+    );
+
+    it('works on the AI indices that dream on only the chosen datasets, or on the listed ones', () => {
+      expect(selectAiIndexIds(config, {})).toEqual(['chats']);
+      expect(selectAiIndexIds(config, { datasets: ['longmemeval_v2_enterprise'] })).toEqual([
+        'portal',
+      ]);
+      expect(
+        selectAiIndexIds(config, { datasets: ['longmemeval_s', 'longmemeval_v2_enterprise'] })
+      ).toEqual(['chats', 'portal', 'both']);
+      expect(selectAiIndexIds(config, { aiIndexIds: ['both'] })).toEqual(['both']);
+      expect(() => selectAiIndexIds(config, { aiIndexIds: ['nope'] })).toThrow(
+        'The config has no AI index nope'
+      );
+    });
+
+    it('overrides the samples of the datasets in use', () => {
+      const overridden = withSampleOverrides(config, ['longmemeval_s'], { sampleCount: 3 });
+
+      expect(overridden.datasets.longmemeval_s).toEqual(
+        expect.objectContaining({ sample_count: 3, all_samples: false })
+      );
+      expect(overridden.datasets.longmemeval_v2_enterprise).toBe(
+        config.datasets.longmemeval_v2_enterprise
+      );
+      expect(
+        withSampleOverrides(config, ['longmemeval_s'], { allSamples: true }).datasets.longmemeval_s
+          .all_samples
+      ).toBe(true);
+      expect(
+        withSampleOverrides(config, ['longmemeval_s'], { samples: ['e47becba'] }).datasets
+          .longmemeval_s.samples
+      ).toEqual(['e47becba']);
+      expect(() =>
+        withSampleOverrides(config, ['longmemeval_s', 'longmemeval_v2_enterprise'], {
+          samples: ['e47becba'],
+        })
+      ).toThrow('Sample ids belong to one dataset');
     });
   });
 

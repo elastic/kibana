@@ -34,6 +34,7 @@ const extractLongMemEvalS = async (context: StageContext): Promise<ExtractedData
   const questions = longMemEvalS.selectQuestions(records, options);
   return {
     dataset: longMemEvalS.LONGMEMEVAL_S_DATASET,
+    samples: questions.map(({ question_id: id }) => id),
     agent: options.agent,
     conversations: longMemEvalS.selectConversations(questions, options),
     targets: longMemEvalS.targetsOf(questions),
@@ -96,23 +97,26 @@ const extractLongMemEvalV2 = async (context: StageContext): Promise<ExtractedDat
   const haystack = readJson<LmeV2Haystack>(
     await download(`haystacks/lme_v2_${options.haystack}.json`)
   );
-  const ids = longMemEvalV2.selectTrajectoryIds(questions, haystack, options);
+  const selectedQuestions = longMemEvalV2.selectQuestions(questions, options);
+  const ids = longMemEvalV2.selectTrajectoryIds(selectedQuestions, haystack, options);
+  const haystackSize = longMemEvalV2.selectTrajectoryIds(selectedQuestions, haystack, {
+    ...options,
+    max_trajectories: undefined,
+  }).length;
+  if (ids.length < haystackSize) {
+    log.warning(
+      `Importing ${ids.length} of the ${haystackSize} trajectories the samples are asked over (max_trajectories): some targets may not be learnable.`
+    );
+  }
   const trajectories = await readTrajectories(
     context,
     `${options.base_url}/trajectories.jsonl`,
     ids,
     path.join(dir, 'trajectories.selected.json')
   );
-  const selectedQuestions = longMemEvalV2.selectQuestions(questions, options);
-  const haystackSize = new Set(selectedQuestions.flatMap((question) => haystack[question.id] ?? []))
-    .size;
-  if (ids.length < haystackSize) {
-    log.warning(
-      `Importing ${ids.length} of the ${haystackSize} trajectories the questions are asked over: some targets may not be learnable.`
-    );
-  }
   return {
     dataset: longMemEvalV2.LONGMEMEVAL_V2_ENTERPRISE_DATASET,
+    samples: selectedQuestions.map(({ id }) => id),
     agent: options.agent,
     conversations: trajectories.map((trajectory, order) =>
       longMemEvalV2.trajectoryToConversation(trajectory, order, options)
@@ -142,8 +146,11 @@ export const runExtract = async (context: StageContext): Promise<void> => {
     writeJson(extractedFileOf(dir), extracted);
     writeJson(generatedTargetsFileOf(dir), extracted.targets);
     const rounds = extracted.conversations.reduce((sum, { rounds: r }) => sum + r.length, 0);
+    const { samples } = extracted;
     context.log.success(
-      `${dataset}: ${extracted.conversations.length} conversations, ${rounds} rounds, ${
+      `${dataset}: ${samples.length} samples (${samples.slice(0, 5).join(', ')}${
+        samples.length > 5 ? ', …' : ''
+      }), ${extracted.conversations.length} conversations, ${rounds} rounds, ${
         extracted.targets.length
       } targets → ${path.relative(process.cwd(), dir)}`
     );

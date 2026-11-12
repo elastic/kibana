@@ -20,6 +20,17 @@ const agentSchema = z.object({
   name: z.string().min(1),
 });
 
+/**
+ * Which samples to evaluate. A sample is a question with the conversations it is asked over: its
+ * haystack. The listed `samples` win; else every sample with `all_samples`; else the first
+ * `sample_count`.
+ */
+const sampleSelectionShape = (allSamples: boolean) => ({
+  samples: z.array(z.string()).default([]),
+  sample_count: z.number().int().min(1).default(1),
+  all_samples: z.boolean().default(allSamples),
+});
+
 const longMemEvalSSchema = z.object({
   url: z
     .string()
@@ -27,11 +38,13 @@ const longMemEvalSSchema = z.object({
       'https://huggingface.co/datasets/xiaowu0162/longmemeval-cleaned/resolve/main/longmemeval_s_cleaned.json'
     ),
   agent: agentSchema.default({ id: 'longmemeval-assistant', name: 'Personal assistant' }),
-  /** Questions to take; when empty, `questions_per_type` of each question type are taken. */
-  question_ids: z.array(z.string()).default([]),
-  questions_per_type: z.number().int().min(0).default(1),
+  ...sampleSelectionShape(false),
   include_abstention: z.boolean().default(false),
-  /** Sessions without the answer added per question, taken in haystack order. */
+  /**
+   * The sessions imported per sample: its whole haystack (about 50), or only those that hold the
+   * answer and `distractor_sessions` more, for a quicker run.
+   */
+  sessions: z.enum(['haystack', 'answers']).default('haystack'),
   distractor_sessions: z.number().int().min(0).default(1),
 });
 
@@ -40,9 +53,11 @@ const longMemEvalV2Schema = z.object({
     .string()
     .default('https://huggingface.co/datasets/xiaowu0162/longmemeval-v2/resolve/main'),
   agent: agentSchema.default({ id: 'workarena-agent', name: 'ServiceNow agent' }),
+  /** In the small tier every enterprise question shares one haystack, so all of them cost no more. */
+  ...sampleSelectionShape(true),
   haystack: z.enum(['small', 'medium']).default('small'),
-  /** The first trajectories of the enterprise haystack to import. */
-  trajectories: z.number().int().min(1).default(100),
+  /** Imports only the first trajectories of the samples' haystacks, for a quicker run. */
+  max_trajectories: z.number().int().min(1).optional(),
   /** Characters kept of each page the agent saw. */
   max_observation_chars: z.number().int().min(0).default(600),
   include_abstention: z.boolean().default(false),
@@ -94,6 +109,8 @@ const configSchema = z.object({
   traces_index: z.string().optional(),
   /** Dreaming schedule of the eval AI indices; long, so scheduled runs stay out of the way. */
   schedule_interval: z.string().default('7d'),
+  /** The datasets to evaluate: the stages work on the AI indices that dream on only these. */
+  run_datasets: z.array(z.enum(DATASET_NAMES)).min(1).default(['longmemeval_s']),
   datasets: z
     .object({
       longmemeval_s: longMemEvalSSchema.default(longMemEvalSSchema.parse({})),
@@ -108,9 +125,11 @@ const configSchema = z.object({
     .object({
       /** Runs of one workflow at most, each reading the next batch of rounds or memories. */
       max_runs_per_workflow: z.number().int().min(1).default(50),
+      /** Times in a row a run that fails is run again; it resumes from the last completed run. */
+      retries: z.number().int().min(0).default(2),
       execution_timeout_minutes: z.number().min(1).default(40),
     })
-    .default({ max_runs_per_workflow: 50, execution_timeout_minutes: 40 }),
+    .default({ max_runs_per_workflow: 50, retries: 2, execution_timeout_minutes: 40 }),
   evaluate: z
     .object({
       /** The connector of the judge; else Kibana's default AI connector, else the first one. */
@@ -176,6 +195,74 @@ export const resolveDreaming = (
     ...overrides,
     enabled: true,
     schedule: overrides.schedule ?? { interval: scheduleInterval },
+  };
+};
+
+/**
+ * The AI indices to work on: the listed ones, else those whose datasets are all among `datasets`
+ * (the config's `run_datasets` unless given).
+ */
+export const selectAiIndexIds = (
+  config: EvalConfig,
+  {
+    aiIndexIds,
+    datasets = config.run_datasets,
+  }: { aiIndexIds?: string[]; datasets?: DatasetName[] }
+): string[] => {
+  const all = config.ai_indices.map(({ id }) => id);
+  if (aiIndexIds && aiIndexIds.length > 0) {
+    const unknown = aiIndexIds.filter((id) => !all.includes(id));
+    if (unknown.length > 0) {
+      throw new Error(`The config has no AI index ${unknown.join(', ')}`);
+    }
+    return aiIndexIds;
+  }
+  const selected = config.ai_indices
+    .filter((aiIndex) => aiIndex.datasets.every((dataset) => datasets.includes(dataset)))
+    .map(({ id }) => id);
+  if (selected.length === 0) {
+    throw new Error(`No AI index of the config dreams on only ${datasets.join(', ')}`);
+  }
+  return selected;
+};
+
+/** Sample overrides from the command line, applied to every dataset the run uses. */
+export interface SampleOverrides {
+  samples?: string[];
+  sampleCount?: number;
+  allSamples?: boolean;
+}
+
+export const withSampleOverrides = (
+  config: EvalConfig,
+  datasets: DatasetName[],
+  { samples, sampleCount, allSamples }: SampleOverrides
+): EvalConfig => {
+  if (samples && datasets.length > 1) {
+    throw new Error(
+      `Sample ids belong to one dataset: pick it with --dataset (the run uses ${datasets.join(
+        ', '
+      )})`
+    );
+  }
+  const override = <T extends { samples: string[]; sample_count: number; all_samples: boolean }>(
+    selection: T
+  ): T => ({
+    ...selection,
+    ...(samples && { samples }),
+    ...(sampleCount !== undefined && { sample_count: sampleCount, all_samples: false }),
+    ...(allSamples && { all_samples: true }),
+  });
+  return {
+    ...config,
+    datasets: {
+      longmemeval_s: datasets.includes('longmemeval_s')
+        ? override(config.datasets.longmemeval_s)
+        : config.datasets.longmemeval_s,
+      longmemeval_v2_enterprise: datasets.includes('longmemeval_v2_enterprise')
+        ? override(config.datasets.longmemeval_v2_enterprise)
+        : config.datasets.longmemeval_v2_enterprise,
+    },
   };
 };
 

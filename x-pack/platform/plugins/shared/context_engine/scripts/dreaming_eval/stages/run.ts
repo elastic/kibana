@@ -142,6 +142,7 @@ export const runRun = async (context: StageContext): Promise<void> => {
         workflowId,
         since: isDreaming ? since : undefined,
         maxRuns: isDreaming ? config.run.max_runs_per_workflow : 1,
+        retries: isDreaming ? config.run.retries : 0,
         timeoutMs,
         onRun: (summary, run) => log.info(`  run ${run}: ${describeRun(summary)}`),
       });

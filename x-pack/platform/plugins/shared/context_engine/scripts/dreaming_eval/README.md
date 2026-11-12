@@ -3,9 +3,12 @@
 Measures what Context Engine dreaming learns from agent conversations. It imports benchmark conversations as Agent Builder traces, lets AI indices dream on them, and judges the KIs they write against a list of target knowledge.
 
 ```sh
-node scripts/context_engine_dreaming_eval.js                      # every stage
+node scripts/context_engine_dreaming_eval.js                      # every stage, one LongMemEval S sample
 node scripts/context_engine_dreaming_eval.js --stage extract,import
-node scripts/context_engine_dreaming_eval.js --stage run,evaluate --ai-index dreaming-eval-workarena
+node scripts/context_engine_dreaming_eval.js --samples e47becba,0a995998
+node scripts/context_engine_dreaming_eval.js --sample-count 5
+node scripts/context_engine_dreaming_eval.js --dataset longmemeval_v2_enterprise
+node scripts/context_engine_dreaming_eval.js --dataset longmemeval_s --all-samples
 node scripts/context_engine_dreaming_eval.js --stage evaluate --run-id 2026-11-12T08-00-00-000
 ```
 
@@ -20,13 +23,17 @@ Each stage reads what the previous one wrote, so you can rerun any of them on it
 | `extract` | Downloads the datasets, picks the conversations the config asks for, and writes them with targets generated from the benchmark's questions. |
 | `import` | Writes each round as Agent Builder OTel spans to `traces-agent_builder.otel-<space>`. A re-import replaces the dataset's earlier spans. |
 | `configure` | Turns on Context Engine and memory, and creates or updates the AI indices of the config: an ES\|QL trace source over the datasets' agents, and their dreaming config. |
-| `run` | Per AI index: deletes the facts, entities and relationships dreaming wrote, runs each of its workflows until they have read everything (the first run from the earliest imported round), and dumps the KIs they wrote. |
+| `run` | Per AI index: deletes the facts, entities and relationships dreaming wrote, runs each of its workflows until they have read everything (the first run from the earliest imported round), and dumps the KIs they wrote. A run that fails is run again (`run.retries`), from where the last completed run stopped. |
 | `evaluate` | Per target: ranks the dumped KIs with a reranker, then asks an LLM whether the top ones hold the target knowledge. Writes scores by dataset and category. |
 
-## Datasets
+## Datasets and samples
 
-- **`longmemeval_s`:** [LongMemEval](https://github.com/xiaowu0162/LongMemEval) S, a personal assistant's chats with its user. It downloads `longmemeval_s_cleaned.json` (277 MB) once. By default it takes the first non-abstention question of each of the 6 question types, the sessions that hold their answers, and one other session per question. Each user message and the assistant's answer is a round, at the session's date.
-- **`longmemeval_v2_enterprise`:** [LongMemEval-V2](https://github.com/xiaowu0162/LongMemEval-V2), the enterprise domain: a web agent's runs in a ServiceNow portal (WorkArena). It streams `trajectories.jsonl` (1.2 GB) once and keeps only the trajectories of the enterprise haystack (100 in the small tier). Each trajectory is one round: the goal is what the user sent, each action is a `browser` tool call whose result is the page it led to, and the answer is how the task ended. Pages are cut to `max_observation_chars`, without the elements on most of the trajectory's pages, such as the navigation bar.
+A dataset is a benchmark; a sample is one of its questions with the conversations it is asked over, its haystack. The extract stage imports the haystacks of the selected samples (each conversation once) and makes a target of each sample's question.
+
+`run_datasets` in the config, or `--dataset`, picks the datasets; the stages work on the AI indices that dream on only those (`--ai-index` picks AI indices instead). Per dataset, the listed `samples` run, else every sample with `all_samples`, else the first `sample_count`. `--samples`, `--sample-count` and `--all-samples` override them. By default one LongMemEval S sample runs.
+
+- **`longmemeval_s`:** [LongMemEval](https://github.com/xiaowu0162/LongMemEval) S, a personal assistant's chats with its user. It downloads `longmemeval_s_cleaned.json` (277 MB) once. Each of its 500 questions has its own haystack of about 50 sessions, about 250 rounds; abstention questions are left out unless `include_abstention` is set. With `sessions: answers`, only the sessions that hold the answer and `distractor_sessions` more are imported, for a quicker run. Each user message and the assistant's answer is a round, at the session's date.
+- **`longmemeval_v2_enterprise`:** [LongMemEval-V2](https://github.com/xiaowu0162/LongMemEval-V2), the enterprise domain: a web agent's runs in a ServiceNow portal (WorkArena). In the small tier every enterprise question shares one haystack of 100 trajectories, so it runs all samples by default. It streams `trajectories.jsonl` (1.2 GB) once and keeps only the samples' trajectories (up to `max_trajectories`). Each trajectory is one round: the goal is what the user sent, each action is a `browser` tool call whose result is the page it led to, and the answer is how the task ended. Pages are cut to `max_observation_chars`, without the elements on most of the trajectory's pages, such as the navigation bar.
 
 ## Config
 

@@ -39,6 +39,7 @@ const run = (kibana: KibanaCall, since?: string) =>
     workflowId: 'system-context-engine-trace-dreaming-eval-0123',
     since,
     maxRuns: 5,
+    retries: 1,
     timeoutMs: 10_000,
     pollIntervalMs: 1,
     onRun: () => {},
@@ -62,17 +63,43 @@ describe('runUntilDone', () => {
     ]);
   });
 
-  it('stops at a run that does not complete', async () => {
+  it('runs a failed run again, from the given time until one completes', async () => {
+    const { kibana, started } = fakeKibana([
+      { status: 'failed' },
+      { output: { rounds: 50 } },
+      { status: 'failed' },
+      { output: { rounds: 0 } },
+    ]);
+
+    const runs = await run(kibana, '2023-01-01T00:00:00.000Z');
+
+    expect(started).toEqual([
+      { since: '2023-01-01T00:00:00.000Z' },
+      { since: '2023-01-01T00:00:00.000Z' },
+      {},
+      {},
+    ]);
+    expect(runs.map(({ status }) => status)).toEqual([
+      'failed',
+      'completed',
+      'failed',
+      'completed',
+    ]);
+  });
+
+  it('stops after `retries` failed runs in a row', async () => {
     const { kibana, started } = fakeKibana([
       { output: { rounds: 50 } },
-      { status: 'failed', output: { rounds: 50 } },
+      { status: 'failed' },
+      { status: 'timed_out' },
+      { status: 'failed' },
       { output: { rounds: 50 } },
     ]);
 
     const runs = await run(kibana);
 
-    expect(started).toEqual([{}, {}]);
-    expect(runs[1].status).toBe('failed');
+    expect(started).toHaveLength(3);
+    expect(runs.map(({ status }) => status)).toEqual(['completed', 'failed', 'timed_out']);
   });
 
   it('counts what a dreaming run read, whichever source it dreams on', () => {

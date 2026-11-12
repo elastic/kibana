@@ -6,23 +6,37 @@ data_dir: data/context_engine_dreaming_eval
 # traces_index: traces-agent_builder.otel-default
 schedule_interval: 7d
 
+# The datasets to evaluate (--dataset overrides it): the stages work on the AI indices below that
+# dream on only these.
+run_datasets: [longmemeval_s]
+
+# A sample is a question with the conversations it is asked over (its haystack). Per dataset, the
+# listed `samples` (question ids) run; else every sample with `all_samples: true`; else the first
+# `sample_count`. --samples, --sample-count and --all-samples override these.
 datasets:
-  # Personal assistant chats (https://github.com/xiaowu0162/LongMemEval). Each question has a
-  # haystack of about 50 sessions; only the sessions that hold its answer, and a few others, are
-  # imported.
+  # Personal assistant chats (https://github.com/xiaowu0162/LongMemEval). Each question has its
+  # own haystack of about 50 sessions, about 250 rounds.
   longmemeval_s:
     agent: { id: longmemeval-assistant, name: Personal assistant }
-    question_ids: []
-    questions_per_type: 1
+    samples: []
+    sample_count: 1
+    all_samples: false
     include_abstention: false
+    # haystack: every session of each sample. answers: only those that hold the answer, and
+    # distractor_sessions more per sample, for a quicker run.
+    sessions: haystack
     distractor_sessions: 1
 
-  # ServiceNow agent trajectories (https://github.com/xiaowu0162/LongMemEval-V2, WorkArena).
-  # All enterprise questions share one haystack of 100 trajectories in the small tier.
+  # ServiceNow agent trajectories (https://github.com/xiaowu0162/LongMemEval-V2, WorkArena). In the
+  # small tier all enterprise questions share one haystack of 100 trajectories, so every sample
+  # costs no more than one.
   longmemeval_v2_enterprise:
     agent: { id: workarena-agent, name: ServiceNow agent }
+    samples: []
+    sample_count: 1
+    all_samples: true
     haystack: small
-    trajectories: 100
+    # max_trajectories: 20
     max_observation_chars: 600
     include_abstention: false
     include_image_questions: false
