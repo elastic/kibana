@@ -170,6 +170,54 @@ describe('pie_visualization', () => {
     });
   });
 
+  describe('#toExpression', () => {
+    it('passes a single supported legend stat to the waffle expression', () => {
+      const state = getExampleState();
+      state.shape = 'waffle';
+      state.layers[0].metrics = ['metric'];
+      state.layers[0].primaryGroups = ['bucket'];
+      // `percent` is allowed by the type but not supported by the waffle legend
+      state.layers[0].legendStats = [LegendValue.Value, LegendValue.Percent];
+      const datasourceLayers = {
+        [LAYER_ID]: createMockDatasource(LAYER_ID).publicAPIMock,
+      };
+
+      const ast = pieVisualization.toExpression(state, datasourceLayers, {}, {});
+      if (!ast || typeof ast === 'string') {
+        throw new Error('Expected an expression AST');
+      }
+      const waffleVis = ast.chain.find(({ function: fn }) => fn === 'waffleVis');
+
+      expect(waffleVis?.arguments.legendStats).toEqual([LegendValue.Value]);
+    });
+  });
+
+  describe('#switchVisualizationType', () => {
+    it('strips legend stats when switching to a shape without legend stats', () => {
+      const state = getExampleState();
+      state.shape = 'waffle';
+      state.layers[0].legendStats = [LegendValue.Value];
+
+      const switched = pieVisualization.switchVisualizationType!('pie', state);
+
+      expect(switched.shape).toBe('pie');
+      expect('legendStats' in switched.layers[0]).toBe(false);
+    });
+
+    it('keeps only the supported legend stats when switching to waffle', () => {
+      const state = getExampleState();
+      // stats carried over from another chart, outside the partition legend values
+      state.layers[0].legendStats = [
+        LegendValue.Value,
+        LegendValue.Average,
+      ] as unknown as (typeof state.layers)[0]['legendStats'];
+
+      const switched = pieVisualization.switchVisualizationType!('waffle', state);
+
+      expect(switched.layers[0].legendStats).toEqual([LegendValue.Value]);
+    });
+  });
+
   describe('#initialize', () => {
     describe('converting to legendStats', () => {
       it('loads a chart with `legendStats` property', () => {
