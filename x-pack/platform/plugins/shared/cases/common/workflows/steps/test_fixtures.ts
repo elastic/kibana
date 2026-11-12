@@ -354,6 +354,18 @@ export const bulkDeleteObservablesOutputFixture = {
   observable_ids: ['obs-id-1'],
 };
 
+export const extractObservablesInputFixture = {
+  case_id: caseIdFixture,
+};
+
+export const extractObservablesOutputFixture = {
+  case: createCaseResponseFixture,
+  status: 'extracted',
+  new_observables_count: 1,
+  alerts_requested: 1,
+  alerts_found: 1,
+};
+
 export const getCasesInputFixture = {
   case_ids: [caseIdFixture, 'case-2'],
 };
