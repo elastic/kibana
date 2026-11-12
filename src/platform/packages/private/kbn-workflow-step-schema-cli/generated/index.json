@@ -1099,11 +1099,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "42d3708be0922975fde8b9ebc92b63f0b4eae0a5014f04cb1366674f8abe887a"
+      "sha256": "4d8b16ca0c42eefd36736e4b7e958de041a193ac9b103436da13fdbdc87a0a0c"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "fa2f6cbf1f627fac3fddce7c044a26dbaf306243d88301c3823315356ee669c3"
+      "sha256": "816a0461aa0003e70d4f2749d7cf372c51bd63dc6c079220e8081b49cd7dd710"
     }
   }
 }
