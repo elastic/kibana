@@ -163505,7 +163505,7 @@ components:
           minItems: 1
           type: array
         enabled:
-          description: Whether the action policy is enabled. Defaults to `true` when omitted. A disabled policy is saved but is not applied to alerts until you enable it.
+          description: Whether the action policy is enabled. When you omit this field, a new policy defaults to `true` and an existing policy keeps its current enabled state. A disabled policy is saved but is not applied to alerts until you enable it.
           type: boolean
         grouping:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping'
@@ -163552,7 +163552,7 @@ components:
           minItems: 1
           type: array
         enabled:
-          description: Whether the rule is enabled. Defaults to `true` when omitted. A disabled rule is saved but does not run until you enable it.
+          description: Whether the rule is enabled. When you omit this field, a new rule defaults to `true` and an existing rule keeps its current enabled state. A disabled rule is saved but does not run until you enable it.
           type: boolean
         grouping:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
