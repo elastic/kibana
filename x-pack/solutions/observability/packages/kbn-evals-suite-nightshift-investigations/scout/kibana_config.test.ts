@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -28,7 +28,7 @@ it('resolves credentials from the environment and preserves other preconfigured 
     SANDBOX_CLIENT_KEY_PATH: '/certs/tls.key',
     SANDBOX_CA_CERT_PATH: '',
     NIGHTSHIFT_TRACING_EXPORTERS: JSON.stringify(exporters),
-    NIGHTSHIFT_ES_URL: 'https://orca.example.com',
+    NIGHTSHIFT_ES_URL: 'https://es.example.com',
     NIGHTSHIFT_ES_API_KEY: 'remote-key',
   };
   try {
@@ -39,14 +39,14 @@ it('resolves credentials from the environment and preserves other preconfigured 
         'src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_nightshift_investigations/kibana.tracing.yml'
       ),
       Path.join(__dirname, 'kibana.sandbox.yml'),
-      Path.join(__dirname, 'connector_sets/orcabench.yml'),
+      Path.join(__dirname, 'connector_sets/default.yml'),
     ]);
     expect(config.xpack.actions.preconfigured).toEqual({
       existing: { name: 'Existing connector' },
-      'orcabench-es': {
-        name: 'orcabench_es',
+      elasticsearch: {
+        name: 'elasticsearch',
         actionTypeId: '.elasticsearch',
-        config: { url: 'https://orca.example.com', selectedActions: ['_test'] },
+        config: { url: 'https://es.example.com', selectedActions: ['_test'] },
         secrets: { authType: 'api_key_header', Authorization: 'ApiKey remote-key' },
       },
     });
@@ -76,7 +76,9 @@ it('resolves credentials from the environment and preserves other preconfigured 
   }
 });
 
-it.each(Object.entries(CONNECTOR_SETS))(
+const connectorSets = Object.entries(CONNECTOR_SETS);
+
+it.each(connectorSets.filter(([, connectorIds]) => connectorIds.length > 0))(
   'connector set %s preconfigures exactly the connectors the eval saves',
   (connectorSet, connectorIds) => {
     const originalEnv = process.env;
@@ -95,5 +97,13 @@ it.each(Object.entries(CONNECTOR_SETS))(
     } finally {
       process.env = originalEnv;
     }
+  }
+);
+
+// The eval creates ORCA's connectors itself, one per cutoff space, so nothing unbounded is preconfigured.
+it.each(connectorSets.filter(([, connectorIds]) => connectorIds.length === 0))(
+  'connector set %s preconfigures no connector',
+  (connectorSet) => {
+    expect(existsSync(Path.join(__dirname, `connector_sets/${connectorSet}.yml`))).toBe(false);
   }
 );

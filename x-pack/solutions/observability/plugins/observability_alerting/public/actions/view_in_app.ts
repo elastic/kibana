@@ -16,8 +16,9 @@ import { CLASSIC_EPISODE_SOURCE_ID } from '@kbn/alerting-v2-episodes-ui/classic_
 import type { ClassicAlertActionContext } from '@kbn/alerting-v2-episodes-ui/classic_alerts/utils/map_alert';
 import { fetchClassicAlertById } from '@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_alert_by_id';
 import { getErrorMessage } from '@kbn/alerting-v2-episodes-ui/actions/helpers';
+import { VIEW_V1_ALERT_IN_APP_ACTION_ID } from './view_in_app_action_id';
 
-export const VIEW_V1_ALERT_IN_APP_ACTION_ID = 'VIEW_V1_ALERT_IN_APP';
+export { VIEW_V1_ALERT_IN_APP_ACTION_ID };
 
 export const VIEW_IN_APP = i18n.translate(
   'xpack.observabilityAlerting.actions.viewInAppDisplayName',

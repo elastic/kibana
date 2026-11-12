@@ -19,7 +19,9 @@ import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { docLinksServiceMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
+import { fromKueryExpression } from '@kbn/es-query';
 import { hasTimestampFields } from '../utils/utils';
+import { getFilter } from '../utils/get_filter';
 import { createMockEndpointAppContextService } from '../../../../endpoint/mocks';
 
 jest.mock('@kbn/data-views-plugin/server', () => ({
@@ -45,6 +47,11 @@ jest.mock('@kbn/alerting-plugin/server', () => ({
   ...jest.requireActual('@kbn/alerting-plugin/server'),
   shouldCreateAlertsInAllSpaces: jest.fn().mockReturnValue(false),
 }));
+
+jest.mock('../utils/get_filter', () => {
+  const actual = jest.requireActual('../utils/get_filter');
+  return { ...actual, getFilter: jest.fn(actual.getFilter) };
+});
 
 jest.mock('../utils/get_list_client', () => ({
   getListClient: jest.fn().mockReturnValue({
@@ -380,6 +387,45 @@ describe('Custom Query Alerts', () => {
         expect.stringContaining('Check for indices to search failed.')
       );
       expect(mockedStatusLogger.close).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('when the rule query fails to parse', () => {
+    const registerAndRun = async () => {
+      const queryAlertType = securityRuleTypeWrapper(
+        createQueryAlertType({
+          id: QUERY_RULE_TYPE_ID,
+          name: 'Custom Query Rule',
+        })
+      );
+
+      alerting.registerType(queryAlertType);
+
+      await executor({ params: getQueryRuleParams() });
+    };
+
+    it('reports a KQL syntax error as a user error', async () => {
+      (getFilter as jest.Mock).mockImplementationOnce(() =>
+        fromKueryExpression('host.name: (a or')
+      );
+
+      await registerAndRun();
+
+      expect(mockedStatusLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Expected'),
+        expect.objectContaining({ userError: true })
+      );
+    });
+
+    it('does not report other errors thrown while running the rule as user errors', async () => {
+      (getFilter as jest.Mock).mockRejectedValueOnce(new Error('Unexpected failure'));
+
+      await registerAndRun();
+
+      expect(mockedStatusLogger.error).toHaveBeenCalledWith(
+        'Unexpected failure',
+        expect.objectContaining({ userError: false })
+      );
     });
   });
 });

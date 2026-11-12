@@ -7,62 +7,64 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { NightshiftMarkIcon } from '@kbn/observability-shared-plugin/public';
+import { GreetingTitle } from '../../components/ui/greeting_title';
+import {
+  getHeroMarkSeverity,
+  HeroMark,
+  type HeroMarkSeverity,
+} from '../../components/ui/hero_mark';
 
 export interface NightshiftHeaderProps {
   isLoading?: boolean;
-  hasActiveInvestigations?: boolean;
+  /** Finished open counts failed to load — show unavailable copy instead of a zero backlog. */
+  hasSeverityCountsError?: boolean;
+  /** In-progress investigations currently being worked. */
+  activeInvestigationCount?: number;
+  /** Finished investigations with a severity (critical / high / medium / low). */
+  needsYouCount?: number;
+  /** Finished severity counts; drives the hero-mark status dot. */
+  severityCounts?: {
+    critical: number;
+    high: number;
+    medium: number;
+    low: number;
+  };
   /** Replaces the status-derived hero title. */
   title?: string;
-  /** Puts the greeting in front of the title on one line ("Good morning! Meet Nightshift"). */
-  isGreetingInline?: boolean;
-  /** Addresses the user by name ("Good morning, Kate!"). */
-  greetingName?: string;
 }
 
-const getGreeting = (name?: string): string => {
+const getGreeting = (): string => {
   const hour = new Date().getHours();
 
   if (hour < 12) {
-    return name
-      ? i18n.translate('xpack.nightshift.hero.morningGreetingWithName', {
-          defaultMessage: 'Good morning, {name}!',
-          values: { name },
-        })
-      : i18n.translate('xpack.nightshift.hero.morningGreetingDescription', {
-          defaultMessage: 'Good morning!',
-        });
+    return i18n.translate('xpack.nightshift.hero.morningGreetingDescription', {
+      defaultMessage: 'Good morning!',
+    });
   }
 
   if (hour < 18) {
-    return name
-      ? i18n.translate('xpack.nightshift.hero.afternoonGreetingWithName', {
-          defaultMessage: 'Good afternoon, {name}!',
-          values: { name },
-        })
-      : i18n.translate('xpack.nightshift.hero.afternoonGreetingDescription', {
-          defaultMessage: 'Good afternoon!',
-        });
+    return i18n.translate('xpack.nightshift.hero.afternoonGreetingDescription', {
+      defaultMessage: 'Good afternoon!',
+    });
   }
 
-  return name
-    ? i18n.translate('xpack.nightshift.hero.eveningGreetingWithName', {
-        defaultMessage: 'Good evening, {name}!',
-        values: { name },
-      })
-    : i18n.translate('xpack.nightshift.hero.eveningGreetingDescription', {
-        defaultMessage: 'Good evening!',
-      });
+  return i18n.translate('xpack.nightshift.hero.eveningGreetingDescription', {
+    defaultMessage: 'Good evening!',
+  });
 };
 
 const getHeroTitle = ({
   isLoading,
-  hasActiveInvestigations,
+  hasSeverityCountsError,
+  activeInvestigationCount,
+  needsYouCount,
 }: {
   isLoading: boolean;
-  hasActiveInvestigations: boolean;
+  hasSeverityCountsError: boolean;
+  activeInvestigationCount: number;
+  needsYouCount: number;
 }): string => {
   if (isLoading) {
     return i18n.translate('xpack.nightshift.hero.checkingTitle', {
@@ -70,27 +72,54 @@ const getHeroTitle = ({
     });
   }
 
-  if (hasActiveInvestigations) {
-    return i18n.translate('xpack.nightshift.hero.investigationsRunningTitle', {
-      defaultMessage: 'Investigations are underway',
+  if (activeInvestigationCount > 0) {
+    return i18n.translate('xpack.nightshift.hero.investigatingProblemsTitle', {
+      defaultMessage:
+        'Investigating {activeInvestigationCount, plural, one {# new problem} other {# new problems}}',
+      values: { activeInvestigationCount },
     });
   }
 
-  return i18n.translate('xpack.nightshift.hero.allClearTitle', {
-    defaultMessage: "You're all caught up",
+  // Failed counts arrive as zeros — do not claim the backlog is clear.
+  if (hasSeverityCountsError) {
+    return i18n.translate('xpack.nightshift.hero.countUnavailableTitle', {
+      defaultMessage: "Your investigation count couldn't be loaded",
+    });
+  }
+
+  if (needsYouCount === 0) {
+    return i18n.translate('xpack.nightshift.hero.allClearTitle', {
+      defaultMessage: 'Nothing urgent so far',
+    });
+  }
+
+  return i18n.translate('xpack.nightshift.hero.needsYouTitle', {
+    defaultMessage:
+      '{needsYouCount, plural, one {# investigation needs you} other {# investigations need you}}',
+    values: { needsYouCount },
   });
 };
 
 export function NightshiftHeader({
   isLoading = false,
-  hasActiveInvestigations = false,
+  hasSeverityCountsError = false,
+  activeInvestigationCount = 0,
+  needsYouCount = 0,
+  severityCounts,
   title: titleOverride,
-  isGreetingInline = false,
-  greetingName,
 }: NightshiftHeaderProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
-
-  const title = titleOverride ?? getHeroTitle({ isLoading, hasActiveInvestigations });
+  const title =
+    titleOverride ??
+    getHeroTitle({
+      isLoading,
+      hasSeverityCountsError,
+      activeInvestigationCount,
+      needsYouCount,
+    });
+  // Hide the status dot when counts failed — zeros are not a trustworthy "all clear".
+  const markSeverity: HeroMarkSeverity | undefined =
+    !hasSeverityCountsError && severityCounts ? getHeroMarkSeverity(severityCounts) : undefined;
 
   return (
     <EuiFlexItem
@@ -107,60 +136,21 @@ export function NightshiftHeader({
         responsive={false}
       >
         <EuiFlexItem grow>
-          <EuiFlexGroup alignItems="center" direction="row" gutterSize="m" responsive={false}>
+          <EuiFlexGroup
+            alignItems="center"
+            direction="row"
+            gutterSize="none"
+            responsive={false}
+            css={css`
+              /* 4px tighter than gutter m (16px → 12px). */
+              gap: calc(${euiTheme.size.m} - ${euiTheme.size.xs});
+            `}
+          >
             <EuiFlexItem grow={false}>
-              <div
-                aria-label={i18n.translate('xpack.nightshift.hero.nightshiftIconAriaLabel', {
-                  defaultMessage: 'Nightshift',
-                })}
-                role="img"
-                css={css`
-                  align-items: center;
-                  background: linear-gradient(
-                    99.4deg,
-                    ${euiTheme.colors.backgroundLightPrimary} 3.97%,
-                    ${euiTheme.colors.backgroundLightAssistance} 65.6%
-                  );
-                  border-radius: 50%;
-                  color: ${euiTheme.colors.textAssistance};
-                  display: inline-flex;
-                  height: calc(${euiTheme.size.xxl} + ${euiTheme.size.m});
-                  justify-content: center;
-                  width: calc(${euiTheme.size.xxl} + ${euiTheme.size.m});
-                `}
-              >
-                <NightshiftMarkIcon />
-              </div>
+              <HeroMark severity={markSeverity} />
             </EuiFlexItem>
             <EuiFlexItem>
-              {!isGreetingInline && (
-                <EuiText color="subdued" size="s" textAlign="left">
-                  <p>{getGreeting(greetingName)}</p>
-                </EuiText>
-              )}
-              <EuiTitle
-                size="m"
-                css={css`
-                  font-size: calc(${euiTheme.size.l} + ${euiTheme.size.xxs});
-                  font-weight: ${euiTheme.font.weight.medium};
-                  line-height: ${euiTheme.size.xl};
-                  text-align: left;
-                  white-space: nowrap;
-                `}
-              >
-                <h2>
-                  {isGreetingInline && (
-                    <span
-                      css={css`
-                        color: ${euiTheme.colors.textSubdued};
-                      `}
-                    >
-                      {`${getGreeting(greetingName)} `}
-                    </span>
-                  )}
-                  {title}
-                </h2>
-              </EuiTitle>
+              <GreetingTitle greeting={getGreeting()} title={title} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

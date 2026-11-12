@@ -28,6 +28,10 @@ import {
   NIGHTSHIFT_MISSING_DATA_RECORDED_EVENT,
   type MissingDataRecordedEvent,
 } from './missing_data_recorded_event';
+import {
+  NIGHTSHIFT_INVESTIGATION_STARTED_EVENT,
+  type InvestigationStartedEvent,
+} from './investigation_started_event';
 
 export class NightshiftTelemetryClient {
   constructor(private readonly analytics: AnalyticsServiceSetup, private readonly logger: Logger) {}
@@ -54,6 +58,10 @@ export class NightshiftTelemetryClient {
 
   reportMissingDataRecorded(event: MissingDataRecordedEvent): void {
     this.report(NIGHTSHIFT_MISSING_DATA_RECORDED_EVENT, event);
+  }
+
+  reportInvestigationStarted(event: InvestigationStartedEvent): void {
+    this.report(NIGHTSHIFT_INVESTIGATION_STARTED_EVENT, event);
   }
 
   private report(eventType: string, event: object): void {

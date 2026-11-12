@@ -11,8 +11,17 @@ import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
+import {
+  NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
+  NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID,
+  NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import { NIGHTSHIFT_INVESTIGATION_LOCATOR_ID } from '../common/locators';
-import type { InvestigationQuotaCallback, NightshiftInvestigationsSetupDeps } from './types';
+import type {
+  InvestigationQuotaCallback,
+  NightshiftInvestigationsSetupDeps,
+  NightshiftInvestigationsStartDeps,
+} from './types';
 import { NightshiftInvestigationsPlugin } from './plugin';
 
 const createPlugin = (memoryEnabled = false) =>
@@ -137,6 +146,7 @@ describe('NightshiftInvestigationsPlugin setup', () => {
         'nightshift_conclusion_quality@1.0.0',
         'nightshift_alert_outcome_rca_accuracy@1.0.0',
         'nightshift_alert_outcome_benign_classification@1.0.0',
+        'nightshift_alert_outcome_rca_reporting_gap@1.0.0',
         'nightshift_wiki_pages_read@1.0.0',
         'nightshift_wiki_page_influence@1.0.0',
       ]
@@ -171,5 +181,71 @@ describe('NightshiftInvestigationsPlugin setup', () => {
         'nightshift.memoryOptimize',
       ])
     );
+  });
+});
+
+describe('NightshiftInvestigationsPlugin start', () => {
+  /** Starts the plugin with only the given knowledge systems on and returns the workflows it installed. */
+  const installedWorkflows = async ({
+    wiki = false,
+    memory = false,
+    decisionTrees = false,
+  }: {
+    wiki?: boolean;
+    memory?: boolean;
+    decisionTrees?: boolean;
+  }): Promise<string[]> => {
+    const plugin = new NightshiftInvestigationsPlugin(
+      coreMock.createPluginInitializerContext({
+        enabled: true,
+        wiki: { enabled: wiki },
+        decision_trees: { enabled: decisionTrees },
+        memory: { enabled: memory },
+        learning: { enabled: true },
+        findings_recorder: { enabled: false },
+      })
+    );
+    plugin.setup(coreMock.createSetup(), { ...createSetupDeps(), sandbox: { isAvailable: true } });
+    const install = jest.fn().mockResolvedValue(undefined);
+    let ready = (): void => {};
+    const installed = new Promise<void>((resolve) => {
+      ready = resolve;
+    });
+    plugin.start(coreMock.createStart(), {
+      workflowsExtensions: {
+        initManagedWorkflowsClient: () => Promise.resolve({ install, ready }),
+      },
+    } as unknown as NightshiftInvestigationsStartDeps);
+    await installed;
+    return install.mock.calls.map(([workflowId]) => workflowId);
+  };
+
+  const KNOWLEDGE_WORKFLOWS = [
+    NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
+    NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
+  ];
+
+  // Decision trees do not require Wiki or Memory, so they alone must install the combined
+  // workflows that hydrate and reinforce them.
+  it('installs the combined knowledge workflows with only decision trees on', async () => {
+    const installed = await installedWorkflows({ decisionTrees: true });
+    expect(installed).toEqual(expect.arrayContaining(KNOWLEDGE_WORKFLOWS));
+    expect(installed).toContain(NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID);
+  });
+
+  it('installs the combined knowledge workflows with only Wiki on', async () => {
+    const installed = await installedWorkflows({ wiki: true });
+    expect(installed).toEqual(expect.arrayContaining(KNOWLEDGE_WORKFLOWS));
+    expect(installed).not.toContain(NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID);
+  });
+
+  it('installs no knowledge workflow with every knowledge system off', async () => {
+    const installed = await installedWorkflows({});
+    for (const workflowId of [
+      ...KNOWLEDGE_WORKFLOWS,
+      NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID,
+    ]) {
+      expect(installed).not.toContain(workflowId);
+    }
   });
 });

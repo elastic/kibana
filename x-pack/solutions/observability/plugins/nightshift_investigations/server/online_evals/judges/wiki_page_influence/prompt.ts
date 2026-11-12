@@ -94,7 +94,7 @@ export const buildScoringRequest = ({
   [
     'The conversation above is the investigation to evaluate.',
     omittedToolCalls > 0
-      ? `${omittedToolCalls} later tool calls were left out to fit your context.`
+      ? `${omittedToolCalls} tool calls from the middle of the investigation were left out to fit your context.`
       : undefined,
     `The agent opened these Wiki pages. Their text is in the tool results above:\n${pageIds
       .map((id) => `- ${id}`)
