@@ -90,7 +90,9 @@ export const getDocumentCountStats = async (
     intervalMs !== undefined &&
     intervalMs > 0;
 
-  const getSearchParams = (aggregations: unknown, trackTotalHits = false) => ({
+  const numDocs = minimumRandomSamplerDocCount ?? MINIMUM_RANDOM_SAMPLER_DOC_COUNT;
+
+  const getSearchParams = (aggregations: unknown, trackTotalHits: boolean | number = false) => ({
     index,
     query,
     ...(hasTimeField ? { aggs: aggregations } : {}),
@@ -104,8 +106,9 @@ export const getDocumentCountStats = async (
       {
         params: getSearchParams(
           getAggsWithRandomSampling(initialDefaultProbability),
-          // Track total hits if time field is not defined
-          !hasTimeField
+          // Track total hits if time field is not defined, else cap the count at the sampling
+          // threshold: that is all the sampling decision below needs, and it keeps counting cheap.
+          hasTimeField ? (isDefined(probability) ? false : numDocs) : true
         ),
       },
       searchOptions
@@ -147,15 +150,20 @@ export const getDocumentCountStats = async (
 
   // @ts-expect-error ES types needs to be updated with doc_count as part random sampler aggregation
   const numSampled = firstResp.rawResponse.aggregations?.sampler?.doc_count;
-  const numDocs = minimumRandomSamplerDocCount ?? MINIMUM_RANDOM_SAMPLER_DOC_COUNT;
+  const matchedDocCount = firstResp.rawResponse.hits.total;
+  // An `eq` relation means the count was not capped, so it is the authoritative number of matches.
+  const isBelowSamplingThreshold =
+    typeof matchedDocCount === 'number'
+      ? matchedDocCount < numDocs
+      : matchedDocCount?.relation === 'eq' && matchedDocCount.value < numDocs;
   if (firstResp !== undefined && numSampled < numDocs) {
     const newProbability =
       (initialDefaultProbability * numDocs) / (numSampled - 2 * Math.sqrt(numSampled));
 
-    // If the number of docs is < 3 million
-    // proceed to make a vanilla aggregation without any sampling (probability = 1)
-    // Minimum of 4 docs (3e6 * 0.000001 + 1) sampled gives us 90% confidence interval # docs is within
-    if (newProbability === Infinity || numSampled <= 4) {
+    // Proceed to make a vanilla aggregation without any sampling (probability = 1) when the data set
+    // is known to hold fewer than `numDocs` documents, or when the probe sampled too few documents
+    // (3e6 * 0.000001 + 1) to derive a probability from with 90% confidence.
+    if (isBelowSamplingThreshold || newProbability === Infinity || numSampled <= 4) {
       const vanillaAggResp = await search
         .search(
           {
