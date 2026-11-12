@@ -21907,7 +21907,6 @@
     "xpack.apm.subFeatureRegistry.modifySettings": "Möglichkeit, Einstellungen zu bearbeiten",
     "xpack.apm.subFeatureRegistry.settings": "Einstellungen",
     "xpack.apm.suggestionsSelect.comboBox.ariaLabel": "Wert auswählen",
-    "xpack.apm.technicalPreviewBadge.ariaLabel": "Diese Funktionalität befindet sich in der technischen Vorschau und kann in einer zukünftigen Version geändert oder vollständig entfernt werden. Elastic wird sich bemühen, alle Probleme zu beheben, aber die Features in der technischen Vorschau unterliegen nicht dem Support-SLA der offiziellen GA-Features.",
     "xpack.apm.technicalPreviewBadgeDescription": "Diese Funktionalität befindet sich in der technischen Vorschau und kann in einer zukünftigen Version geändert oder vollständig entfernt werden. Elastic wird sich bemühen, alle Probleme zu beheben, aber die Features in der technischen Vorschau unterliegen nicht dem Support-SLA der offiziellen GA-Features.",
     "xpack.apm.technicalPreviewBadgeLabel": "Technische Vorschau",
     "xpack.apm.templateDescription.clearBundleButtonLabel": "Bündel löschen",

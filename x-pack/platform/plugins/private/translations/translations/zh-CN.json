@@ -21944,7 +21944,6 @@
     "xpack.apm.subFeatureRegistry.modifySettings": "能够修改设置",
     "xpack.apm.subFeatureRegistry.settings": "设置",
     "xpack.apm.suggestionsSelect.comboBox.ariaLabel": "选择值",
-    "xpack.apm.technicalPreviewBadge.ariaLabel": "此功能处于技术预览阶段，在未来版本中可能会更改或完全移除。Elastic 将努力修复任何问题，但处于技术预览状态的功能不受正式 GA 功能支持 SLA 的约束。",
     "xpack.apm.technicalPreviewBadgeDescription": "此功能处于技术预览阶段，在未来版本中可能会更改或完全移除。Elastic 将努力修复任何问题，但处于技术预览状态的功能不受正式 GA 功能支持 SLA 的约束。",
     "xpack.apm.technicalPreviewBadgeLabel": "技术预览",
     "xpack.apm.templateDescription.clearBundleButtonLabel": "清除包",
