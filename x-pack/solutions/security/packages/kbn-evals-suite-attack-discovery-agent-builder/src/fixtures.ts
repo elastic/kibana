@@ -51,62 +51,74 @@ interface FixtureDocument {
   source: Record<string, unknown>;
 }
 
-const createDocuments = (): FixtureDocument[] => {
-  const now = Date.now();
-  return [
-    {
-      _id: fixtureAlertIds[0],
-      source: {
-        '@timestamp': new Date(now - 5 * 60 * 1000).toISOString(),
-        event: { kind: 'signal', category: ['process'], type: ['start'] },
-        host: { name: 'finance-ws-01' },
-        process: { name: 'powershell.exe', command_line: 'powershell.exe -enc SQBFAFgA' },
-        kibana: {
-          alert: {
-            rule: {
-              name: 'AD2 encoded PowerShell fixture',
-              uuid: `${attackDiscoveryFixtureMarker}-rule`,
-            },
-            severity: 'high',
-            reason: `Encoded PowerShell execution marker ${attackDiscoveryFixtureMarker}`,
-            risk_score: 75,
-            workflow_status: 'open',
-            building_block_type: null,
-            tags: [attackDiscoveryFixtureMarker],
-            workflow_tags: [attackDiscoveryFixtureMarker],
+/**
+ * The marker is seeded into `message` because the AD default retrieval query
+ * matches it against `kibana.alert.rule.name`, `message`,
+ * `kibana.alert.rule.description` and `process.command_line` — not `tags` —
+ * so a correct `WHERE message LIKE "*<marker>*"` retrieval must find both alerts.
+ *
+ * `kibana.alert.uuid` is the alert's own identity: a retrieval that keeps no
+ * `_id` metadata still returns it, so the observed population stays countable
+ * by identity (`extractAgentAlertRetrievalPopulation`). Each alert also has its
+ * own rule uuid, because the skill requires a chain to span more than one rule.
+ */
+const createDocuments = (now: number = Date.now()): FixtureDocument[] => [
+  {
+    _id: fixtureAlertIds[0],
+    source: {
+      '@timestamp': new Date(now - 5 * 60 * 1000).toISOString(),
+      event: { kind: 'signal', category: ['process'], type: ['start'] },
+      host: { name: 'finance-ws-01' },
+      process: { name: 'powershell.exe', command_line: 'powershell.exe -enc SQBFAFgA' },
+      message: `Encoded PowerShell execution marker ${attackDiscoveryFixtureMarker}`,
+      kibana: {
+        alert: {
+          uuid: fixtureAlertIds[0],
+          rule: {
+            name: 'AD2 encoded PowerShell fixture',
+            uuid: `${attackDiscoveryFixtureMarker}-powershell-rule`,
           },
+          severity: 'high',
+          reason: `Encoded PowerShell execution marker ${attackDiscoveryFixtureMarker}`,
+          risk_score: 75,
+          workflow_status: 'open',
+          building_block_type: null,
+          tags: [attackDiscoveryFixtureMarker],
+          workflow_tags: [attackDiscoveryFixtureMarker],
         },
-        tags: [attackDiscoveryFixtureMarker],
       },
+      tags: [attackDiscoveryFixtureMarker],
     },
-    {
-      _id: fixtureAlertIds[1],
-      source: {
-        '@timestamp': new Date(now - 4 * 60 * 1000).toISOString(),
-        event: { kind: 'signal', category: ['process'], type: ['access'] },
-        host: { name: 'finance-ws-01' },
-        process: { name: 'rundll32.exe' },
-        target: { process: { name: 'lsass.exe' } },
-        kibana: {
-          alert: {
-            rule: {
-              name: 'AD2 LSASS access fixture',
-              uuid: `${attackDiscoveryFixtureMarker}-rule`,
-            },
-            severity: 'critical',
-            reason: `LSASS access marker ${attackDiscoveryFixtureMarker}`,
-            risk_score: 99,
-            workflow_status: 'open',
-            building_block_type: null,
-            tags: [attackDiscoveryFixtureMarker],
-            workflow_tags: [attackDiscoveryFixtureMarker],
+  },
+  {
+    _id: fixtureAlertIds[1],
+    source: {
+      '@timestamp': new Date(now - 4 * 60 * 1000).toISOString(),
+      event: { kind: 'signal', category: ['process'], type: ['access'] },
+      host: { name: 'finance-ws-01' },
+      process: { name: 'rundll32.exe' },
+      target: { process: { name: 'lsass.exe' } },
+      message: `LSASS access marker ${attackDiscoveryFixtureMarker}`,
+      kibana: {
+        alert: {
+          uuid: fixtureAlertIds[1],
+          rule: {
+            name: 'AD2 LSASS access fixture',
+            uuid: `${attackDiscoveryFixtureMarker}-lsass-rule`,
           },
+          severity: 'critical',
+          reason: `LSASS access marker ${attackDiscoveryFixtureMarker}`,
+          risk_score: 99,
+          workflow_status: 'open',
+          building_block_type: null,
+          tags: [attackDiscoveryFixtureMarker],
+          workflow_tags: [attackDiscoveryFixtureMarker],
         },
-        tags: [attackDiscoveryFixtureMarker],
       },
+      tags: [attackDiscoveryFixtureMarker],
     },
-  ];
-};
+  },
+];
 
 export const seedAttackDiscoveryFixtures = async (
   esClient: EsClient,

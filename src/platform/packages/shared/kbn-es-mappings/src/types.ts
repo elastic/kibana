@@ -25,6 +25,7 @@ export type StrictMappingTypeMapping = Strict<api.MappingTypeMapping>;
 
 export type AnyMapping = Strict<api.MappingProperty>;
 export type KeywordMapping = Strict<api.MappingKeywordProperty>;
+export type WildcardMapping = Strict<api.MappingWildcardProperty>;
 export type TextMapping = Strict<api.MappingTextProperty>;
 export type MatchOnlyTextMapping = Strict<api.MappingMatchOnlyTextProperty>;
 export type SemanticTextMapping = Strict<api.MappingSemanticTextProperty>;
@@ -54,6 +55,7 @@ type SupportedMappingPropertyType = AllMappingPropertyType &
     | 'semantic_text'
     | 'integer'
     | 'keyword'
+    | 'wildcard'
     | 'boolean'
     | 'date'
     | 'short'
@@ -102,6 +104,8 @@ export type ToPrimitives<O extends { properties: Record<string, MappingProperty>
               ? TEnum
               : never
             : string
+          : T extends 'wildcard'
+          ? string
           : T extends 'text'
           ? string
           : T extends 'match_only_text'

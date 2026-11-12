@@ -33,23 +33,34 @@ type StatusRuntimeMapping = NonNullable<estypes.MappingRuntimeFields> & {
   };
 };
 
+// Painless equivalent of `buildPolicyBaseIdWithFallbackEsFilter`: `getInactivityTimeouts()` only ever
+// returns base policy ids, so an agent moved to a version-specific variant (`<id>#sentinel`) has to be
+// matched on `policy_base_id`, falling back to `policy_id` for documents that pre-date that field.
+const _buildPolicyBaseIdDeclaration = (opts: {
+  field: (path: string) => string;
+  fieldPath: (path: string) => string;
+}): string => {
+  const { field, fieldPath } = opts;
+
+  return `String agentPolicyBaseId = doc.containsKey(${fieldPath('policy_base_id')}) && ${field(
+    'policy_base_id'
+  )}.size() > 0
+      ? ${field('policy_base_id')}.value
+      : (
+          doc.containsKey(${fieldPath('policy_id')}) && ${field('policy_id')}.size() > 0
+          ? ${field('policy_id')}.value
+          : ''
+        );`;
+};
+
 let inactivityTimeoutsDisabled = false;
 const _buildInactiveCondition = (opts: {
   now: number;
   inactivityTimeouts: InactivityTimeouts;
   maxAgentPoliciesWithInactivityTimeout: number;
-  field: (path: string) => string;
-  fieldPath: (path: string) => string;
   logger?: Logger;
 }): string | null => {
-  const {
-    now,
-    inactivityTimeouts,
-    maxAgentPoliciesWithInactivityTimeout,
-    field,
-    fieldPath,
-    logger,
-  } = opts;
+  const { now, inactivityTimeouts, maxAgentPoliciesWithInactivityTimeout, logger } = opts;
   // if there are no policies with inactivity timeouts, then no agents are inactive
   if (inactivityTimeouts.length === 0) {
     return null;
@@ -85,15 +96,13 @@ const _buildInactiveCondition = (opts: {
       const inactivityTimeoutMs = inactivityTimeout * 1000;
       const policyIdMatches = `[${policyIds
         .map((id) => `'${escapePainlessString(id)}'`)
-        .join(',')}].contains(${field('policy_id')}.value)`;
+        .join(',')}].contains(agentPolicyBaseId)`;
 
       return `${policyIdMatches} && lastCheckinMillis < ${now - inactivityTimeoutMs}L`;
     })
     .join(' || ');
 
-  return `lastCheckinMillis > 0 && doc.containsKey(${fieldPath('policy_id')}) && ${field(
-    'policy_id'
-  )}.size() > 0 && (${policyClauses})`;
+  return `lastCheckinMillis > 0 && agentPolicyBaseId.length() > 0 && (${policyClauses})`;
 };
 
 function _buildSource(
@@ -110,8 +119,6 @@ function _buildSource(
     now,
     inactivityTimeouts,
     maxAgentPoliciesWithInactivityTimeout,
-    field,
-    fieldPath,
     logger,
   });
 
@@ -125,6 +132,7 @@ function _buildSource(
           ? ${field('enrolled_at')}.value.toInstant().toEpochMilli()
           : -1
         );
+    ${agentIsInactiveCondition ? _buildPolicyBaseIdDeclaration({ field, fieldPath }) : ''}
     if (!doc.containsKey(${fieldPath('active')}) || (${field('active')}.size() > 0 && ${field(
     'active'
   )}.value == false)) {

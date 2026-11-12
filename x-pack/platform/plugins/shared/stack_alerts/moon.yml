@@ -69,6 +69,7 @@ dependsOn:
   - '@kbn/alerting-v2-constants'
   - '@kbn/alerting-v2-utils'
   - '@kbn/deeplinks-observability'
+  - '@kbn/cps'
 tags:
   - plugin
   - prod

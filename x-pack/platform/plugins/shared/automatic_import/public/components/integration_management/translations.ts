@@ -41,6 +41,21 @@ export const GO_BACK_BUTTON = i18n.translate(
   }
 );
 
+export const INSUFFICIENT_PRIVILEGES_TITLE = i18n.translate(
+  'xpack.automaticImport.integrationManagement.insufficientPrivilegesTitle',
+  {
+    defaultMessage: 'Insufficient privileges',
+  }
+);
+
+export const INSUFFICIENT_PRIVILEGES_DESCRIPTION = i18n.translate(
+  'xpack.automaticImport.integrationManagement.insufficientPrivilegesDescription',
+  {
+    defaultMessage:
+      'You need the Automatic Import "All" Kibana privilege to create or edit integrations. Contact your administrator for access.',
+  }
+);
+
 export const DELETE_INTEGRATION_MODAL_TITLE = i18n.translate(
   'xpack.automaticImport.integrationManagement.deleteIntegrationModal.title',
   {

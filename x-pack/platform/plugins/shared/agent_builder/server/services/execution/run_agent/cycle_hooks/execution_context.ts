@@ -10,7 +10,7 @@ import type { AgentConfiguration, ExecutionTerminalEvent } from '@kbn/agent-buil
 import {
   TimelineEventType,
   isExecutionTerminalEvent,
-  isUserMessageEvent,
+  isMessageEvent,
 } from '@kbn/agent-builder-common';
 import type {
   AgentHandlerContext,
@@ -71,6 +71,7 @@ export const buildCycleHookExecutionContext = ({
     input: cloneDeep(processedConversation.nextInput),
     conversation: {
       id: conversationId,
+      access: context.conversationAccess,
       get events() {
         return getHistory().events;
       },
@@ -116,7 +117,7 @@ const summarizeExecution = (
   if (!terminal) {
     return undefined;
   }
-  const userMessage = execution.triggers.find(isUserMessageEvent);
+  const userMessage = execution.triggers.find(isMessageEvent);
   return {
     id: execution.id,
     input: userMessage?.data,

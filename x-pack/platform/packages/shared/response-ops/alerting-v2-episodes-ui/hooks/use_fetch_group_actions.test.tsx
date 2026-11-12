@@ -48,11 +48,11 @@ describe('useFetchGroupActions', () => {
       {
         group_hash: 'gh-1',
         rule_id: 'rule-1',
-        last_deactivate_action: 'deactivate',
+        last_lifecycle_action: 'deactivate',
         last_snooze_action: 'snooze',
         snoozed_until: '2035-01-02T12:00:00.000Z',
         last_snooze_actor: 'actor-snooze',
-        last_deactivate_actor: 'actor-deactivate',
+        last_lifecycle_actor: 'actor-deactivate',
       },
     ];
     fetchGroupActionsMock.mockResolvedValue(rows);
@@ -84,20 +84,20 @@ describe('useFetchGroupActions', () => {
       {
         group_hash: 'dup',
         rule_id: 'r1',
-        last_deactivate_action: null,
+        last_lifecycle_action: null,
         last_snooze_action: 'snooze',
         snoozed_until: null,
         last_snooze_actor: null,
-        last_deactivate_actor: null,
+        last_lifecycle_actor: null,
       },
       {
         group_hash: 'dup',
         rule_id: 'r2',
-        last_deactivate_action: 'deactivate',
+        last_lifecycle_action: 'deactivate',
         last_snooze_action: null,
         snoozed_until: null,
         last_snooze_actor: null,
-        last_deactivate_actor: null,
+        last_lifecycle_actor: null,
       },
     ];
     fetchGroupActionsMock.mockResolvedValue(rows);

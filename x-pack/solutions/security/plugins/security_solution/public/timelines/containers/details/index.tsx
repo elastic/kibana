@@ -11,8 +11,8 @@ import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
 import { isRunningResponse } from '@kbn/data-plugin/common';
-import type { TimelineEventsDetailsRequestOptionsInput } from '@kbn/timelines-plugin/common';
-import { EntityType } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsRequestOptionsInput } from '@kbn/securitysolution-timeline-search-strategy';
+import { EntityType } from '@kbn/securitysolution-timeline-search-strategy';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useKibana } from '../../../common/lib/kibana';
 import type {

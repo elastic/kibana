@@ -9,13 +9,30 @@ import { lazySchema, z, isoDateTime } from '@kbn/zod/v4';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import dedent from 'dedent';
+import { i18n } from '@kbn/i18n';
 import { significantEventBaseSchema } from '../common_schemas';
 import {
-  MAX_ID_LENGTH,
   MAX_TEXT_LENGTH,
   ASSESSMENT_NOTE_ROLE_RULE,
   NO_RAW_SENSITIVE_VALUES_RULE,
 } from '../constants';
+
+/** Alerting v2 `deactivate` accepts a reason of 1 to 1024 characters. */
+export const MAX_DEACTIVATION_REASON_LENGTH = 1024;
+
+/**
+ * How long a closed series stays reusable by an exact-identity batch. The server reads it as its
+ * default lookback; the operator UI quotes it, so the two cannot drift.
+ */
+// TODO: Move this to detection settings when the recurrence lookback becomes configurable.
+export const INACTIVE_SERIES_LOOKBACK_HOURS = 48;
+
+/** Note recorded when an operator changes status without giving a reason. */
+export const operatorFallbackAssessmentNote = (status: 'active' | 'inactive'): string =>
+  i18n.translate('xpack.significantEvents.events.operatorFallbackAssessmentNote', {
+    defaultMessage: 'Manually set to {status} by an operator. No reason was given.',
+    values: { status },
+  });
 
 export const SIGNIFICANT_EVENT_STATUS_OPTIONS = [
   ALERT_EPISODE_STATUS.ACTIVE,
@@ -51,48 +68,27 @@ export const significantEventManualStatusSchema = z
     `"${ALERT_EPISODE_STATUS.ACTIVE}" = a current failure is confirmed or remains plausibly unverified; "${ALERT_EPISODE_STATUS.INACTIVE}" = the event is no longer active (record the rationale in "assessment_note").`
   );
 
+export const significantEventCloseReasonSchema = lazySchema(() =>
+  z
+    .enum(['resolved', 'dismissed'])
+    .describe(
+      `Why the event is set to "${ALERT_EPISODE_STATUS.INACTIVE}": "resolved" = it was a real problem that is over; "dismissed" = it was noise or not worth surfacing. Ignored for "${ALERT_EPISODE_STATUS.ACTIVE}".`
+    )
+);
+
+export type SignificantEventCloseReason = z.infer<typeof significantEventCloseReasonSchema>;
+
 /**
  * Statuses that represent an unresolved / ongoing event. Deduplication uses this set to find a
  * prior event for the same issue so successive write cycles dedup against it — a recovering event
  * is still the live episode, so a re-firing rule continues it instead of creating a duplicate. An
- * inactive issue that recurs should create a fresh event.
+ * inactive series is not live: it is reopened only when a batch matches its identity exactly, which
+ * starts a new episode under the same event_id.
  */
 export const SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS = [
   ALERT_EPISODE_STATUS.ACTIVE,
   ALERT_EPISODE_STATUS.RECOVERING,
 ] as const;
-
-/**
- * One investigation run attached to this significant event.
- * `workflow_execution_id` holds the investigation id, which is its Agent Builder conversation id;
- * the shared investigations API (`GET /internal/investigations/investigations/{id}`) is the
- * single source of truth for the investigation's content; this entry records the run's timestamps
- * and terminal outcome. Entries written before investigations were conversations hold a workflow
- * execution id, which that API does not know. The field keeps its name so stored events stay
- * valid.
- */
-export const significantEventInvestigationSchema = lazySchema(() =>
-  z.object({
-    workflow_execution_id: z
-      .string()
-      .max(MAX_ID_LENGTH)
-      .describe('ID of the investigation (its Agent Builder conversation id).'),
-    started_at: isoDateTime({ offset: true }).describe('When this investigation run started.'),
-    completed_at: isoDateTime({ offset: true })
-      .optional()
-      .describe(
-        'When this investigation run finished. Absent while the investigation is still running.'
-      ),
-    outcome: z
-      .enum(['completed', 'failed'])
-      .optional()
-      .describe('Terminal outcome of this run. Absent while running or on older attachments.'),
-  })
-);
-export type SignificantEventInvestigation = z.infer<typeof significantEventInvestigationSchema>;
-
-/** Status of a significant event's investigation, as the significant events API reports it. */
-export type InvestigationRunStatus = 'pending' | 'complete' | 'failed' | 'unavailable';
 
 export const significantEventSchema = lazySchema(() =>
   significantEventBaseSchema.extend({
@@ -111,7 +107,6 @@ export const significantEventSchema = lazySchema(() =>
         ${NO_RAW_SENSITIVE_VALUES_RULE}
         `
       ),
-    investigations: z.array(significantEventInvestigationSchema).max(100).optional(),
   })
 );
 
@@ -124,4 +119,13 @@ export type SignificantEvent = z.infer<typeof significantEventSchema>;
  */
 export interface SignificantEventResponse extends SignificantEvent {
   created_at: string;
+  /** The `alert.id` of the series' latest version: the episode an operator deactivation addresses. */
+  episode_id?: string;
+  /**
+   * Where the investigation of this event's alert stands, set by the events list. `unknown` means
+   * the lookup failed, not that there is no investigation.
+   */
+  investigation_state?: 'not_started' | 'in_progress' | 'completed' | 'unknown';
+  /** The investigation `investigation_state` refers to, when the list resolved one. */
+  investigation_id?: string;
 }

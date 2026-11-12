@@ -9,7 +9,7 @@ import type { ConversationTemplate } from '@kbn/agent-builder-common';
 
 export const investigationTemplate: ConversationTemplate = {
   id: 'investigation',
-  version: 2,
+  version: 5,
   name: 'Investigation',
   description: 'Use for investigations',
   fields: {

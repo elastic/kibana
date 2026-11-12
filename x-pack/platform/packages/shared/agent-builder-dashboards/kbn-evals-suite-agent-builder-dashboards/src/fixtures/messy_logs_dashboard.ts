@@ -11,6 +11,7 @@ import type {
 } from '@kbn/agent-builder-dashboards-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { EnhanceDefectId } from '../evaluators/seed_defects';
+import { dataViewBarPanel, mlSwimlanePanel, vegaPanel } from './non_esql_panels';
 
 const LOGS = 'kibana_sample_data_logs';
 const TIME_WINDOW = '| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend';
@@ -61,10 +62,12 @@ const barByResponsePanel = (id: string, grid: AttachmentPanel['grid']) =>
  * titles and a right-hand legend, a solid area fill, a static series color, a
  * legacy pie palette and a pie legend, a metric colored on the background, a
  * percent format on a 0–100 column, and markdown with edit notes to rewrite.
- * Content: the same bar chart twice and no controls. Every chart is an ES|QL
- * Lens config over `kibana_sample_data_logs`, so appearance mode can enhance
- * all of them in place. The narrating markdown may be rewritten or deleted
- * in either mode.
+ * Content: the same bar chart twice and no controls. The defects sit on ES|QL
+ * Lens configs over `kibana_sample_data_logs`, so appearance mode can enhance
+ * them in place. A data-view Lens chart, a Vega chart and an ML swim lane
+ * carry no defect: the agent cannot edit the first, and must keep all three
+ * in either mode. The narrating markdown may be rewritten or deleted in
+ * either mode.
  */
 export const MESSY_LOGS_DASHBOARD: DashboardAttachmentData = {
   title: 'Untitled dashboard',
@@ -149,10 +152,13 @@ ${TIME_WINDOW}
         metrics: [{ type: 'primary', column: 'Error rate', format: { type: 'percent' } }],
       }
     ),
+    dataViewBarPanel('requests-by-extension', { x: 0, y: 45, w: 24, h: 10 }),
+    vegaPanel('requests-by-os-vega', { x: 24, y: 45, w: 24, h: 10 }),
+    mlSwimlanePanel('request-rate-anomalies', { x: 0, y: 55, w: 48, h: 10 }),
     {
       type: 'markdown',
       id: 'notes',
-      grid: { x: 0, y: 45, w: 48, h: 4 },
+      grid: { x: 0, y: 65, w: 48, h: 4 },
       config: { content: 'I rearranged the panels and added a pie chart for operating systems.' },
     },
   ],
@@ -166,6 +172,7 @@ ${TIME_WINDOW}
 export const MESSY_LOGS_DASHBOARD_DEFECTS: EnhanceDefectId[] = [
   'title_not_rewritten',
   'full_width_kpi',
+  'layout_gap',
   'summary_not_first',
   'summary_panel_titled',
   'chart_panel_untitled',

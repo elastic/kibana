@@ -8,6 +8,7 @@
 import { createServerRouteFactory } from '@kbn/server-route-repository';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository-utils';
 import type { ApmDataAccessPluginSetup } from '@kbn/apm-data-access-plugin/server';
+import { describeError, toClientError } from '../lib/helpers/errors';
 
 export interface DigitalExperienceRouteHandlerResources extends DefaultRouteHandlerResources {
   /** Optional: only the Classic source needs it. */
@@ -17,7 +18,27 @@ export interface DigitalExperienceRouteHandlerResources extends DefaultRouteHand
   isUxEnabled: boolean;
 }
 
-export const createDigitalExperienceServerRoute = createServerRouteFactory<
+const createServerRoute = createServerRouteFactory<
   DigitalExperienceRouteHandlerResources,
   undefined
 >();
+
+/** Creates a route whose errors are logged and answered without the Elasticsearch details. */
+export const createDigitalExperienceServerRoute: typeof createServerRoute = ({
+  handler,
+  ...route
+}) =>
+  createServerRoute({
+    ...route,
+    handler: async (resources) => {
+      try {
+        return await handler(resources);
+      } catch (error) {
+        const clientError = toClientError(error);
+        if (clientError !== error) {
+          resources.logger.error(`${route.endpoint} failed: ${describeError(error)}`);
+        }
+        throw clientError;
+      }
+    },
+  });
