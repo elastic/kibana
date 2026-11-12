@@ -1,5 +1,5 @@
 {
-  "sha1": "5e7d99f69d4528b5859b982e552ae1c0a232f973",
+  "sha1": "029a6bd16fd2d543db4c2116942f2a4bd4fcdfee",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -93,6 +93,58 @@
         "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/censys_actions.spec.ts",
         "line": 94,
         "column": 24
+      }
+    },
+    {
+      "id": "3242e40420acdbf-1ec485d22021c05",
+      "title": "the Figma OAuth flow through Kibana against the connector emulator an action fails before the connector is authorized, without calling the vendor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/figma_oauth_actions.spec.ts",
+        "line": 74,
+        "column": 24
+      }
+    },
+    {
+      "id": "3242e40420acdbf-b91fbf8000fd820",
+      "title": "the Figma OAuth flow through Kibana against the connector emulator starting the flow sends the user to Figma with the client and a PKCE challenge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/figma_oauth_actions.spec.ts",
+        "line": 83,
+        "column": 7
+      }
+    },
+    {
+      "id": "3242e40420acdbf-b8113bcb64a31f3",
+      "title": "the Figma OAuth flow through Kibana against the connector emulator the callback trades the code for tokens at the vendor, and the action uses them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/figma_oauth_actions.spec.ts",
+        "line": 105,
+        "column": 60
+      }
+    },
+    {
+      "id": "3242e40420acdbf-ad894d66e63ec33",
+      "title": "the Figma OAuth flow through Kibana against the connector emulator an authorized connector keeps its token for the next action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/figma_oauth_actions.spec.ts",
+        "line": 135,
+        "column": 16
       }
     },
     {
