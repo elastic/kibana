@@ -114,6 +114,18 @@ class ContextTests(unittest.TestCase):
         self.assertEqual(result["ancestors"][0]["ref"], "elastic/security-team#2")
         self.assertTrue(result["ancestors"][0]["allowed_repo"])
 
+    def test_unreadable_parent_is_marked_and_stops_the_walk(self):
+        issues = {
+            "elastic/kibana#1": api_issue("elastic/kibana", 1, parent="elastic/kibana#2"),
+            "elastic/kibana#2": api_issue("elastic/kibana", 2, parent="elastic/security-team#3", children=1),
+        }
+        result = triage.context(FakeGh(issues), triage.IssueRef("elastic/kibana", 1))
+        self.assertEqual(
+            result["ancestors"][1:],
+            [{"ref": "elastic/security-team#3", "unreadable": True}],
+        )
+        self.assertEqual(result["ancestors"][0]["ref"], "elastic/kibana#2")
+
     def test_parent_cycle_fails(self):
         issues = {
             "elastic/kibana#1": api_issue("elastic/kibana", 1, parent="elastic/kibana#2", children=1),
@@ -241,18 +253,23 @@ class StubCliTests(unittest.TestCase):
         return completed.returncode, json.loads(completed.stdout)
 
     def test_context_walks_the_fixture_chain(self):
-        code, payload = self.run_cli("context", "--issue", "elastic/kibana#900305")
+        code, payload = self.run_cli("context", "--issue", "elastic/kibana#910404")
         self.assertEqual(code, 0, payload)
-        self.assertEqual(payload["ancestors"][-1]["ref"], "elastic/kibana#900300")
-        self.assertEqual(len(payload["ancestors"]), 5)
+        self.assertEqual(payload["ancestors"][-1]["ref"], "elastic/security-team#910400")
+        self.assertEqual(len(payload["ancestors"]), 4)
+
+    def test_context_marks_a_parent_missing_from_the_fixtures_as_unreadable(self):
+        code, payload = self.run_cli("context", "--issue", "elastic/kibana#911201")
+        self.assertEqual(code, 0, payload)
+        self.assertEqual(payload["ancestors"], [{"ref": "elastic/security-team#911200", "unreadable": True}])
 
     def test_label_never_writes_through_the_stub(self):
         with tempfile.TemporaryDirectory() as tmp:
             log = Path(tmp) / "writes.log"
-            code, payload = self.run_cli("label", "--issue", "elastic/kibana#900101", extra_env={triage.WRITE_LOG_ENV: str(log)})
+            code, payload = self.run_cli("label", "--issue", "elastic/kibana#910101", extra_env={triage.WRITE_LOG_ENV: str(log)})
             self.assertEqual(code, 0, payload)
             self.assertTrue(payload["simulated"])
-            self.assertEqual(log.read_text(encoding="utf-8"), "elastic/kibana#900101\n")
+            self.assertEqual(log.read_text(encoding="utf-8"), "elastic/kibana#910101\n")
 
 
 if __name__ == "__main__":

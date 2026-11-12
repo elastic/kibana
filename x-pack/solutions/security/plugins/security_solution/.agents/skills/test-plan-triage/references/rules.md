@@ -2,18 +2,18 @@
 
 Decide on the issue passed in (the `target` in the `context` JSON). Use its title, type, labels, body and comments. If it has sub-issues, decide on the whole: its body plus the titles, types and labels in `descendants`.
 
-Apply the rules **in this order** and stop at the first one that matches. Quote the rule ID in the answer.
+Apply the rules **in this order** and stop at the first one that matches. Quote the rule ID in the answer. If you cannot tell whether a rule matches, do not skip it: stop there with A4.
 
 | Order | ID | Matches when | Decision |
 |---|---|---|---|
 | 1 | N1 | It is a bug: type `Bug`, a `bug` label, `[Bug]` in the title, or a body that reports broken behavior (steps, current vs expected) | No |
 | 2 | N3 | The issue is itself the testing work: "Test plan for …", "Create test plan", upgrade testing, a manual test pass | No |
-| 3 | A1 | Not enough to decide: the body is empty or one line, and neither it nor the sub-issue titles say what changes for users | Need your input: ask what the issue changes |
-| 4 | N5 | It only adds, flips or removes a feature flag; the behavior behind the flag is tracked elsewhere | No |
-| 5 | N2 | It is not a functionality: refactor, technical debt, telemetry, CI, automated test coverage (Scout, Cypress, Jest), cleanup, dependency bump, CODEOWNERS, docs or a docs request, research, spike, "discuss", design-only work | No |
+| 3 | N5 | It only adds, flips or removes a feature flag; the behavior behind the flag is tracked elsewhere | No |
+| 4 | N2 | It is not a functionality: refactor, technical debt, telemetry, CI, automated test coverage (Scout, Cypress, Jest), cleanup, dependency bump, CODEOWNERS, docs or a docs request, research, spike, "discuss", design-only work | No |
+| 5 | A1 | Not enough to decide: the body is empty or one line, and neither it nor the sub-issue titles say what changes for users | Need your input: ask what the issue changes |
 | 6 | A3 | Internal performance or reliability work with no behavior change users can see (batching, refresh policy, caching) | Need your input: ask whether there is a user-visible change to test |
 | 7 | S1 / S2 / S3 | It is a functionality (see below) | Go to the granularity check |
-| 8 | A4 | Nothing above matches, or two rules point different ways | Need your input: say which rules conflict |
+| 8 | A4 | Nothing above matches, or you cannot tell whether one of the rules above matches | Need your input: name the rule you are unsure about and quote the text that leaves it open |
 
 ## Functionality (S1, S2, S3)
 
@@ -39,6 +39,7 @@ Apply the rules **in this order** and stop at the first one that matches. Quote 
 | Bug report with steps to reproduce | N1 | No |
 | "Test plan for the native Dashboards migration" sub-issue | N3 | No |
 | Title only, empty body ("Dashboard Studio 2.0 support") | A1 | Ask |
+| Title only, empty body ("Bump the charts library") | N2 | No |
 | "Feature flag for the native Dashboards migration" | N5 | No |
 | "Add Scout coverage for the new flyout" | N2 | No |
 | "Install managed workflows with `_bulk`, one refresh per chunk" | A3 | Ask |

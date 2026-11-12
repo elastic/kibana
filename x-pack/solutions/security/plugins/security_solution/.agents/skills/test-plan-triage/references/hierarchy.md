@@ -2,7 +2,9 @@
 
 `ancestors` in the `context` JSON lists every parent from the nearest (index 0) to the root (last). Each one has its title, type, state, labels, a body excerpt, `has_test_plan`, and `children` (its direct sub-issues; `on_chain: true` marks the one on the path to the target). There is no depth limit: walk the whole list.
 
-`test-plan-generator`, run on an issue, reads all of its sub-issues recursively. So one plan high in the chain covers the small slices below it. The goal is the **highest ancestor that is still one functionality**.
+An entry with `unreadable: true` is a parent the user's `gh` cannot read (private repo, deleted, no access). It has only `ref`, and the script stopped climbing there.
+
+`test-plan-generator`, run on an issue, reads all of its sub-issues recursively (its `references/gathering-context.md`). So one plan high in the chain covers everything below it, and a second plan lower in the same chain would overlap it. The goal is the **highest ancestor that is still one functionality**.
 
 ## Steps
 
@@ -14,6 +16,7 @@
      - The type is `Initiative`, or the body only says it tracks other work.
      - Its `children` are different functionalities that would each get their own plan (for example EQL support, notes, pinned events and flyouts under one parent).
    - **Unclear:** stop climbing, show the whole chain, and ask the user which level they want (rule A4).
+   - **Unreadable:** stop climbing. You cannot tell what it is, so never suggest it; say the chain continues above it and that you could not read it.
 3. The suggested level is the last ancestor you reached before stopping. If you stopped at the first ancestor, there is no suggested level: the target stands on its own.
 4. Adjust for state:
    - A **closed** ancestor is never suggested. If the one you reached is closed, suggest the highest **open** one-functionality ancestor below it, and mention the closed one.
@@ -27,14 +30,14 @@
 | Target decision | Suggested level | Proposed label changes |
 |---|---|---|
 | Yes | none | the target |
-| Yes | an ancestor | the target, and the ancestor as a separate line the user may approve or not |
+| Yes | an ancestor | only the ancestor; say its plan covers the target, so labeling both would make two overlapping plans |
 | No (N4) | an ancestor | only the ancestor |
 | No (N4) | none (the parent is already an umbrella) | none; say the slice has no level to attach to and ask whether the target should get its own plan after all |
 | No (N3, the issue is the testing work) | an ancestor | only the ancestor: the plan belongs to the work being tested |
 | No (N1, N2, N5) | any | none; a bug, a chore or a flag says nothing about whether its parent needs a plan |
 | Need your input | any | none until the question is answered |
 
-In **Hierarchy**, show every ancestor from the root down to the target, mark umbrellas with "(umbrella)", closed ones with "(closed)", and labeled ones with "(labeled)".
+In **Hierarchy**, show every ancestor from the root down to the target, mark umbrellas with "(umbrella)", closed ones with "(closed)", labeled ones with "(labeled)", and unreadable ones with "(unreadable)".
 
 ## Example
 

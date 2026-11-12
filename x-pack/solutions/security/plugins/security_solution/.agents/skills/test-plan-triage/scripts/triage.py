@@ -28,6 +28,7 @@ from typing import Any, Optional
 
 ALLOWED_REPOS = ("elastic/kibana", "elastic/security-team")
 LABEL = "Needs Test Plan"
+# Written by test-plan-generator (scripts/publish_test_plan.sh); if you change it, change both skills.
 TEST_PLAN_MARKER = "<!-- test-plan-generated -->"
 GH_ENV = "TEST_PLAN_TRIAGE_GH"
 WRITE_LOG_ENV = "TEST_PLAN_TRIAGE_WRITE_LOG"
@@ -214,7 +215,7 @@ def fetch_issue(gh: Gh, ref: IssueRef) -> dict:
 
 
 def collect_ancestors(gh: Gh, issue: dict) -> list[dict]:
-    """Walk parent links until there is none; no fixed depth."""
+    """Walk parent links until there is none or a parent cannot be read; no fixed depth."""
     ancestors: list[dict] = []
     seen = {str(_ref(issue))}
     current = issue
@@ -226,7 +227,11 @@ def collect_ancestors(gh: Gh, issue: dict) -> list[dict]:
         if str(parent_ref) in seen:
             raise TriageError(f"parent cycle at {parent_ref}")
         seen.add(str(parent_ref))
-        parent = gh.get(f"repos/{parent_ref.repo}/issues/{parent_ref.number}")
+        try:
+            parent = gh.get(f"repos/{parent_ref.repo}/issues/{parent_ref.number}")
+        except NotFound:
+            ancestors.append({"ref": str(parent_ref), "unreadable": True})
+            break
         entry = summarize(parent, body_limit=ANCESTOR_BODY_LIMIT)
         entry["has_test_plan"] = has_test_plan(gh, parent_ref)
         entry["children"] = [
