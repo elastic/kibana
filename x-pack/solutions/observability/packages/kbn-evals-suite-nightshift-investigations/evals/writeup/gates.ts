@@ -98,6 +98,29 @@ export const knownNumbers = (corpus: string): Set<string> =>
     ...(corpus.match(/\d+(\.\d+)?/g) ?? []),
   ]);
 
+/**
+ * True when `n` is a number the agent can work out from ones it saw: one of them rounded, or, when
+ * it's a percentage or has decimals, the ratio of two ("9.3%" from 30 of 321). Sums and
+ * differences aren't counted: with a few thousand numbers in the results, almost any integer is one.
+ */
+export const isDerivedNumber = (
+  n: string,
+  known: Set<string>,
+  { percent = false }: { percent?: boolean } = {}
+): boolean => {
+  const x = Number(n);
+  if (!Number.isFinite(x)) return false;
+  const decimals = n.split('.')[1]?.length ?? 0;
+  const tolerance = 0.5 * 10 ** -decimals + 1e-9;
+  const near = (v: number) => Math.abs(v - x) <= tolerance;
+  const values = [...new Set([...known].map(Number).filter(Number.isFinite))];
+  if (values.some(near)) return true;
+  if (!percent && !decimals) return false;
+  return values.some((a) =>
+    values.some((b) => b !== 0 && (percent ? near((a / b) * 100) : near(a / b)))
+  );
+};
+
 export const runReplyGates = (reply: string, type: ReplyType, known: Set<string>): ReplyGates => {
   const long = isLongReplyType(type);
   const all = reply
@@ -125,10 +148,21 @@ export const runReplyGates = (reply: string, type: ReplyType, known: Set<string>
   const mentions = tables ? reply.replace(/\bthe table above\b/gi, '') : reply;
   const attachmentUnshown = !attachmentShown && MENTIONS_ATTACHMENT.test(mentions);
   const method = [...new Set([...reply.matchAll(METHOD)].map((m) => m[0]))];
-  const numbers = (plain(reply).match(NUMBER) ?? [])
+  const plainReply = plain(reply);
+  const numbers = (plainReply.match(NUMBER) ?? [])
     .map(normalizeNumber)
     .filter((n) => n.replace(/\D/g, '').length >= 2);
-  const ungroundedNumbers = [...new Set(numbers.filter((n) => !known.has(n)))];
+  const ungroundedNumbers = [
+    ...new Set(
+      numbers.filter(
+        (n) =>
+          !known.has(n) &&
+          !isDerivedNumber(n, known, {
+            percent: new RegExp(`${n.replace('.', '\\.')}\\s?%`).test(plainReply),
+          })
+      )
+    ),
+  ];
 
   const metrics: ReplyGateMetrics = {
     words: countWords(plain(lines.join('\n'))),

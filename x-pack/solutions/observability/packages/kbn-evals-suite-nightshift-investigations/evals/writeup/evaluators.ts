@@ -16,6 +16,7 @@ import {
   panelText,
   recordedAttachments,
   replayCorpus,
+  withExtraTurns,
 } from './replay';
 import type { WriteupEvaluator, WriteupExample, WriteupTaskOutput } from './types';
 
@@ -110,10 +111,13 @@ export const createReplyFaithfulnessEvaluator = (deps: JudgeDeps): WriteupEvalua
     if (!output.reply) return NO_REPLY;
     const replay = buildReplay(input.rounds, input.round_index, '');
     // Check what the reader sees, attachments included, the same way the pairwise judge does.
-    const reply = expandAttachments(output.reply, [
-      ...(output.attachments ?? []),
-      ...recordedAttachments(input.rounds, input.round_index),
-    ]);
+    const reply = withExtraTurns(
+      expandAttachments(output.reply, [
+        ...(output.attachments ?? []),
+        ...recordedAttachments(input.rounds, input.round_index),
+      ]),
+      output.extra_turns
+    );
     const result = await judgeFaithfulness(deps.inferenceClient, reply, replay, deps.log);
     if (!result) return { score: null, label: 'failed', explanation: 'The judge did not answer.' };
     return {
@@ -133,7 +137,12 @@ const pairEvaluator = (
   other: (
     expected: WriteupExample['output'],
     output: WriteupTaskOutput
-  ) => { text?: string; attachments?: WriteupTaskOutput['attachments']; missing: string }
+  ) => {
+    text?: string;
+    attachments?: WriteupTaskOutput['attachments'];
+    extraTurns?: WriteupTaskOutput['extra_turns'];
+    missing: string;
+  }
 ): WriteupEvaluator => ({
   name,
   kind: 'LLM',
@@ -141,15 +150,18 @@ const pairEvaluator = (
   getModel: getModelFactory(deps.evaluationConnector),
   evaluate: async ({ input, output, expected }) => {
     if (!output.reply) return NO_REPLY;
-    const { text, attachments, missing } = other(expected, output);
+    const { text, attachments, extraTurns, missing } = other(expected, output);
     if (!text) return { score: null, label: 'n/a', explanation: missing };
     // A reply may show an attachment the recorded rounds created, or one it made itself.
     const recorded = recordedAttachments(input.rounds, input.round_index);
     const tally = await comparePair(deps.inferenceClient, {
       replay: buildReplay(input.rounds, input.round_index, ''),
       panel: panelText(input.rounds, input.round_index),
-      a: expandAttachments(output.reply, [...(output.attachments ?? []), ...recorded]),
-      b: expandAttachments(text, [...(attachments ?? []), ...recorded]),
+      a: withExtraTurns(
+        expandAttachments(output.reply, [...(output.attachments ?? []), ...recorded]),
+        output.extra_turns
+      ),
+      b: withExtraTurns(expandAttachments(text, [...(attachments ?? []), ...recorded]), extraTurns),
       votes: deps.votes,
       log: deps.log,
     });
@@ -176,6 +188,7 @@ export const createReplyVsBaselineEvaluator = (deps: JudgeDeps) =>
   pairEvaluator(deps, REPLY_VS_BASELINE_EVALUATOR, (_expected, output) => ({
     text: output.baseline?.reply,
     attachments: output.baseline?.attachments,
+    extraTurns: output.baseline?.extra_turns,
     missing: output.baseline
       ? `The baseline prompt produced no reply: ${output.baseline.error}`
       : 'No NIGHTSHIFT_WRITEUP_BASELINE_PROMPT was set.',

@@ -23,6 +23,7 @@ import {
 import { RECORDING_TOOL, buildReplay, safeToolName, type Replay } from './replay';
 import {
   defaultReplyType,
+  type ExtraTurn,
   type GeneratedReply,
   type ReplyAttachment,
   type WriteupExample,
@@ -31,22 +32,25 @@ import {
 
 export const INVESTIGATOR_PROMPT_PATH =
   'x-pack/solutions/observability/plugins/nightshift_investigations/server/agents/investigation/instructions/investigator.md.text';
-export const KNOWLEDGE_CORTEX_SECTION_PATH =
-  'x-pack/solutions/observability/plugins/nightshift_investigations/server/agents/investigation/instructions/knowledge_cortex.text';
+const INSTRUCTIONS_DIR =
+  'x-pack/solutions/observability/plugins/nightshift_investigations/server/agents/investigation/instructions';
+/** The knowledge section, by the name a prompt's placeholder uses: `wiki` now, `cortex` before #303544. */
+export const knowledgeSectionPath = (name: 'wiki' | 'cortex') =>
+  `${INSTRUCTIONS_DIR}/knowledge_${name}.text`;
 
 /** As the agent type fills `{{cortex_load_step}}` when Cortex is enabled (`agents/investigation/index.ts`). */
 export const CORTEX_LOAD_STEP = ' Also read the Knowledge Cortex — see <knowledge_cortex>.';
 
 /**
- * Fills the context placeholders the way the agent type does with Cortex enabled and Semantic
- * Memory and decision trees off. The recorded investigations ran with Cortex on, so their replays
- * should too; the other two are left out of every arm alike. A prompt from before the placeholders
- * existed has the section inline and passes through unchanged.
+ * Fills the context placeholders the way the agent type does with its knowledge section (the Wiki,
+ * formerly the Cortex) enabled and Semantic Memory and decision trees off. The recorded
+ * investigations ran with the Cortex on, so their replays should too; the other two are left out of
+ * every arm alike. A prompt from before the placeholders existed passes through unchanged.
  */
-export const fillCortex = (prompt: string, section: string): string =>
+export const fillKnowledge = (prompt: string, section: string): string =>
   prompt
     .replace('{{cortex_load_step}}', CORTEX_LOAD_STEP)
-    .replace('{{knowledge_cortex_section}}', `\n${section.trimEnd()}\n`)
+    .replace(/\{\{knowledge_(wiki|cortex)_section\}\}/, `\n${section.trimEnd()}\n`)
     .replace(/\{\{(semantic_memory|decision_trees)_(section|load_step)\}\}/g, '');
 
 /** Generations are cached here (gitignored), so a re-run with another judge only makes judge calls. */
@@ -74,7 +78,7 @@ export const loadPromptArm = (spec?: string, repoRoot = REPO_ROOT): PromptArm =>
   let label = 'current';
   let prompt: string;
   // The Cortex section comes from the same place as the prompt; a prompt file uses the checkout's.
-  let section = () => fromTree(KNOWLEDGE_CORTEX_SECTION_PATH);
+  let section = (name: 'wiki' | 'cortex') => fromTree(knowledgeSectionPath(name));
   if (!spec) {
     prompt = fromTree(INVESTIGATOR_PROMPT_PATH);
   } else if (existsSync(resolve(spec))) {
@@ -83,15 +87,18 @@ export const loadPromptArm = (spec?: string, repoRoot = REPO_ROOT): PromptArm =>
   } else {
     label = spec;
     prompt = fromRef(spec, INVESTIGATOR_PROMPT_PATH);
-    section = () => fromRef(spec, KNOWLEDGE_CORTEX_SECTION_PATH);
+    section = (name) => fromRef(spec, knowledgeSectionPath(name));
   }
-  if (prompt.includes('{{knowledge_cortex_section}}')) prompt = fillCortex(prompt, section());
+  const knowledge = prompt.match(/\{\{knowledge_(wiki|cortex)_section\}\}/)?.[1] as
+    | 'wiki'
+    | 'cortex'
+    | undefined;
+  if (knowledge) prompt = fillKnowledge(prompt, section(knowledge));
   return { label, prompt, hash: hashText(prompt) };
 };
 
 const MAX_EXTRA_CALLS = 6;
 const MAX_FAILURES = 3;
-const countWords = (text: string) => text.split(/\s+/).filter(Boolean).length;
 
 /** Agent Builder offers this on every conversation, whether or not the recorded run used it. */
 const ATTACHMENTS_ADD = safeToolName('attachments.add');
@@ -150,6 +157,7 @@ export const replayReply = async (
   ) as Record<string, { description: string; schema: { type: 'object'; properties: {} } }>;
   const messages: Message[] = [...replay.messages];
   const extraCalls: string[] = [];
+  const extraTurns: ExtraTurn[] = [];
   const attachments: ReplyAttachment[] = [];
   let lastError = '';
   for (let calls = 0, failures = 0; calls < MAX_EXTRA_CALLS && failures < MAX_FAILURES; ) {
@@ -163,14 +171,16 @@ export const replayReply = async (
       const text = String(response.content ?? '').trim();
       const toolCalls: ToolCall[] = response.toolCalls ?? [];
       if (!toolCalls.length) {
-        if (countWords(text) >= 8 || /render_attachment/.test(text)) {
+        // Length is the gates' call: a short answer can be the right one.
+        if (text) {
           return {
             reply: text,
             extra_calls: extraCalls,
+            ...(extraTurns.length ? { extra_turns: extraTurns } : {}),
             ...(attachments.length ? { attachments } : {}),
           };
         }
-        lastError = text ? `short reply: ${text}` : 'empty reply';
+        lastError = 'empty reply';
         failures++;
         continue;
       }
@@ -183,11 +193,13 @@ export const replayReply = async (
             ? JSON.parse(call.function.arguments || '{}')
             : call.function.arguments ?? {}
         ) as Record<string, unknown>;
+        const result = replayToolResult(call.function.name, args, attachments);
+        extraTurns.push({ name: call.function.name, args, result });
         messages.push({
           role: MessageRole.Tool,
           name: call.function.name,
           toolCallId: call.toolCallId,
-          response: replayToolResult(call.function.name, args, attachments),
+          response: result,
         });
       }
     } catch (error) {
@@ -204,7 +216,7 @@ export const replayReply = async (
 
 /** A JSON file cache keyed by content hash. Failed generations aren't cached. */
 export const createGenerationCache = (dir = join(WRITEUP_DATA_DIR, 'cache')) => ({
-  key: (parts: string[]) => hashText(['v2', ...parts].join('\n')),
+  key: (parts: string[]) => hashText(['v3', ...parts].join('\n')),
   read(key: string): GeneratedReply | undefined {
     const file = join(dir, `${key}.json`);
     return existsSync(file)

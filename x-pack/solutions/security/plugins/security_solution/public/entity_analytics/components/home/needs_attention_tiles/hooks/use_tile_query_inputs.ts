@@ -51,7 +51,10 @@ export const useTileQueryInputs = (spaceId: string, entityFilters: EntityFilters
     ['tileEntityFilterOverrides', spaceId, indexName, entityExpression],
     ({ signal }) =>
       runWithTileTimeout(signal, (tileSignal) =>
-        fetchResolvedEntityFilterOverrides(overridesArgs, createEsqlRunner(data.search, tileSignal))
+        fetchResolvedEntityFilterOverrides(
+          overridesArgs,
+          createEsqlRunner(data.search, 'needs_attention_tile_filter_overrides', tileSignal)
+        )
       ),
     {
       enabled: needsOverrides && Boolean(indexName),

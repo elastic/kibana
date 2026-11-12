@@ -16,11 +16,14 @@ import { allToolsSelection, allToolsSelectionWildcard } from '@kbn/agent-builder
  * The managed base configuration carried by an agent type. Fields set here are the
  * floor for every agent of that type; fields left unset keep the agent's own value
  * (including legacy "undefined means all" semantics for skill_ids / connector_ids).
+ * `capabilities` is not a floor: the agent's value wins per key.
  *
  * Excludes `approvals`, which are not merged. An agent's defaults come only from its
- * own configuration.
+ * own configuration. Adds back `capabilities`, which `AgentConfigurationInput` leaves out
+ * because only code can set it.
  */
-export type AgentBaseConfiguration = Partial<Omit<AgentConfigurationInput, 'approvals'>>;
+export type AgentBaseConfiguration = Partial<Omit<AgentConfigurationInput, 'approvals'>> &
+  Pick<AgentConfiguration, 'capabilities'>;
 
 /**
  * Delimiter inserted between a type's base instructions and the agent's own
@@ -63,6 +66,7 @@ const mergeToolSelections = (base: ToolSelection[], delta: ToolSelection[]): Too
  * - tools / skill_ids / plugin_ids / workflow_ids / post_execution_workflow_ids / connector_ids / ai_indices / subagent_ids: union, base-first,
  *   deduplicated. A base that sets `connector_ids: []` pins the floor to "no connectors".
  * - enable_elastic_capabilities: the delta overrides the base when set.
+ * - capabilities: merged one level deep, per key; the delta's value wins.
  */
 export const mergeAgentConfiguration = (
   base: AgentBaseConfiguration | undefined,
@@ -106,6 +110,9 @@ export const mergeAgentConfiguration = (
   if (base.enable_elastic_capabilities !== undefined) {
     result.enable_elastic_capabilities =
       delta.enable_elastic_capabilities ?? base.enable_elastic_capabilities;
+  }
+  if (base.capabilities !== undefined) {
+    result.capabilities = { ...base.capabilities, ...delta.capabilities };
   }
 
   return result;

@@ -65,6 +65,19 @@ export class TimeToVisualizePageObject extends FtrService {
     });
   }
 
+  private async setDashboardOption(option: DashboardPickerOption) {
+    this.log.debug('save modal dashboard selector, choosing option:', option);
+
+    const dashboardSelector = await this.testSubjects.find('add-to-dashboard-options');
+    const label = await dashboardSelector.findByCssSelector(`label[for="${option}"]`);
+    await label.click();
+
+    await this.retry.waitForWithTimeout(`${option} to be selected`, 10000, async () => {
+      const radio = await this.find.byCssSelector(`#${option}`);
+      return await radio.isSelected();
+    });
+  }
+
   private async setAddToLibrary(addToLibrary: boolean) {
     const state = addToLibrary ? 'checked' : 'unchecked';
     this.log.debug('save to library checkbox exists. Setting its state to', state);
@@ -116,20 +129,21 @@ export class TimeToVisualizePageObject extends FtrService {
       await this.testSubjects.setEuiSwitch('saveAsNewCheckbox', state);
     }
 
-    const hasDashboardSelector = await this.testSubjects.exists('add-to-dashboard-options');
-    if (hasDashboardSelector && addToDashboard !== undefined) {
-      let option: DashboardPickerOption = 'add-to-library-option';
-      if (addToDashboard) {
-        option = dashboardId ? 'existing-dashboard-option' : 'new-dashboard-option';
-      }
-      this.log.debug('save modal dashboard selector, choosing option:', option);
-      const dashboardSelector = await this.testSubjects.find('add-to-dashboard-options');
-      const label = await dashboardSelector.findByCssSelector(`label[for="${option}"]`);
-      await label.click();
+    if (addToDashboard) {
+      await this.testSubjects.existOrFail('add-to-dashboard-options', { timeout: 10000 });
+      await this.setDashboardOption(
+        dashboardId ? 'existing-dashboard-option' : 'new-dashboard-option'
+      );
 
       if (dashboardId) {
         await this.selectDashboard(dashboardId);
       }
+    } else if (
+      addToDashboard === null &&
+      // Absent only for users who cannot add to a dashboard, which already means "library only".
+      (await this.testSubjects.waitForExists('add-to-dashboard-options'))
+    ) {
+      await this.setDashboardOption('add-to-library-option');
     }
 
     if (saveToLibrary) {

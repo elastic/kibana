@@ -105,6 +105,12 @@ export interface ReplyAttachment {
   content: string;
 }
 
+export interface ExtraTurn {
+  name: string;
+  args: Record<string, unknown>;
+  result: Record<string, unknown>;
+}
+
 /** A reply one prompt produced for a replayed round. */
 export interface GeneratedReply {
   reply?: string;
@@ -112,6 +118,8 @@ export interface GeneratedReply {
   attachments?: ReplyAttachment[];
   /** Tools the model called before it replied, in order. */
   extra_calls: string[];
+  /** Those calls with their arguments and replayed results, so a judge sees what the reply did. */
+  extra_turns?: ExtraTurn[];
   error?: string;
   /** Read from the generation cache rather than the model. */
   cached?: boolean;

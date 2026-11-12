@@ -44,6 +44,7 @@ describe('ActionableSummary', () => {
   };
 
   const mockOpenRightPanel = jest.fn();
+  const flyoutApi = createFlyoutApiMock();
   const mockUseExpandableFlyoutApi = useExpandableFlyoutApi as jest.MockedFunction<
     typeof useExpandableFlyoutApi
   >;
@@ -60,7 +61,7 @@ describe('ActionableSummary', () => {
       ...createExpandableFlyoutApiMock(),
       openRightPanel: mockOpenRightPanel,
     });
-    jest.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
+    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
   });
 
   describe('when entities with replacements are provided', () => {
@@ -83,10 +84,14 @@ describe('ActionableSummary', () => {
       expect(screen.getAllByTestId('entityButton')[1]).toHaveTextContent('bar.username');
     });
 
-    it('opens the right panel when an entity badge is clicked', () => {
+    it('opens the host flyout when an entity badge is clicked', () => {
       const entityButton = screen.getAllByTestId('entityButton')[0];
       fireEvent.click(entityButton);
-      expect(mockOpenRightPanel).toHaveBeenCalledTimes(1);
+      expect(flyoutApi.openHostFlyout).toHaveBeenCalledTimes(1);
+      expect(flyoutApi.openHostFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({ hostName: 'foo.hostname' })
+      );
+      expect(mockOpenRightPanel).not.toHaveBeenCalled();
     });
   });
 

@@ -22,7 +22,7 @@
 
 import { MessageRole, type Message, type ToolCall } from '@kbn/inference-common';
 import { stepsFromRound } from '@kbn/nightshift-investigations-plugin/server/investigation_round/round_loader';
-import type { RecordedRound, ReplyAttachment } from './types';
+import type { ExtraTurn, RecordedRound, ReplyAttachment } from './types';
 
 export interface Replay {
   system: string;
@@ -64,11 +64,13 @@ const REPLAYED_ROUND_CAPS = [8_000, 3_000];
 export const questionOf = (message: string): string => message.split('\n\n\n')[0].trim();
 
 /** A tool result as the model reads it: the first result's data, as text. */
-export const resultText = (results: unknown[] | undefined): string => {
-  const first = results?.[0] as { data?: unknown } | undefined;
-  if (!first) return '';
-  return typeof first.data === 'string' ? first.data : JSON.stringify(first.data ?? null);
-};
+export const resultText = (results: unknown[] | undefined): string =>
+  (results ?? [])
+    .map((r) => {
+      const { data } = (r ?? {}) as { data?: unknown };
+      return typeof data === 'string' ? data : JSON.stringify(data ?? null);
+    })
+    .join('\n\n');
 
 const clip = (text: string, cap: number) =>
   text.length > cap ? `${text.slice(0, cap)} …[truncated]` : text;
@@ -187,8 +189,9 @@ export const panelText = (rounds: readonly RecordedRound[], roundIndex: number):
   const calls = rounds
     .slice(0, roundIndex + 1)
     .flatMap((round) => stepsFromRound(round.steps))
+    // A call that failed never reached the panel.
     .flatMap((s) =>
-      s.kind === 'tool' ? [{ id: s.toolId, params: (s.params ?? {}) as Params }] : []
+      s.kind === 'tool' && !s.isError ? [{ id: s.toolId, params: (s.params ?? {}) as Params }] : []
     );
   const last = (pattern: RegExp) => [...calls].reverse().find((c) => pattern.test(c.id))?.params;
   // Metadata and impact calls may set one field at a time, so merge them in order. As in the
@@ -241,6 +244,29 @@ export const recordedAttachments = (
     });
 
 /**
+ * What a reply did before it was sent, written ahead of it for a judge: a confirmation that the
+ * severity was updated is supported by the update call the replay acknowledged.
+ */
+export const withExtraTurns = (reply: string, turns: readonly ExtraTurn[] | undefined): string =>
+  turns?.length
+    ? `[Before this reply, the agent made these calls:\n${turns
+        .map(
+          (t) =>
+            `- ${t.name} ${JSON.stringify(t.args).slice(0, 2_000)} → ${JSON.stringify(t.result)}`
+        )
+        .join('\n')}\n]\n\n${reply}`
+    : reply;
+
+/** Generous enough for any table an answer shows; past it, the judge is told what it didn't see. */
+const ATTACHMENT_CAP = 30_000;
+const clipAttachment = (content: string) =>
+  content.length > ATTACHMENT_CAP
+    ? `${content.slice(0, ATTACHMENT_CAP)}\n…[${
+        content.length - ATTACHMENT_CAP
+      } more characters of this attachment not shown; don't judge what you can't see]`
+    : content;
+
+/**
  * A reply as a judge reads it: each attachment it shows written out where its tag sits, so a reply
  * that shows a table or chart isn't read as empty, and a tag with nothing behind it reads as such.
  */
@@ -248,6 +274,6 @@ export const expandAttachments = (reply: string, attachments: readonly ReplyAtta
   reply.replace(/<render_attachment\s+id="([^"]+)"[^>]*\/?>/g, (_tag, id: string) => {
     const attachment = attachments.find((a) => a.id === id);
     return attachment
-      ? `[Attachment shown inline (${attachment.type}):\n${attachment.content.slice(0, 3_000)}\n]`
+      ? `[Attachment shown inline (${attachment.type}):\n${clipAttachment(attachment.content)}\n]`
       : '[Attachment tag with no attachment behind it]';
   });

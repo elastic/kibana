@@ -70,6 +70,14 @@ describe('runReplyGates', () => {
     ).toEqual([]);
   });
 
+  it('accepts a number worked out from ones the agent saw, but not any integer', () => {
+    const seen = knownNumbers('30 of 321 requests failed over 150 min; 60 retries.');
+    const ungrounded = (reply: string) =>
+      runReplyGates(reply, 'answer', seen).metrics.ungroundedNumbers;
+    expect(ungrounded('About 9.3% of requests failed, 30 in all, over 2.5 hours.')).toEqual([]);
+    expect(ungrounded('Requests failed for 351 minutes across the whole window.')).toEqual(['351']);
+  });
+
   it('rejects a reply too short to answer anything', () => {
     expect(runReplyGates('Yes, fixed.', 'answer', known).failed).toContain('only 2 words');
   });

@@ -154,6 +154,29 @@ describe('panelText', () => {
     expect(panel).toContain('Impact: Checkout failed for 40 minutes.');
   });
 
+  it('leaves out a call that failed, which never reached the panel', () => {
+    const [round] = impactRounds({ summary: 'Checkout failed for 40 minutes.' });
+    const failed = {
+      ...toolStep('i9', 'agentic_investigations.set_impact', { success: false }),
+      params: { summary: 'Never saved.' },
+    };
+    const panel = panelText([{ ...round, steps: [...(round.steps ?? []), failed] }], 0);
+    expect(panel).toContain('Impact: Checkout failed for 40 minutes.');
+  });
+
+  it('keeps every result of a call', () => {
+    const step = {
+      ...toolStep('m1', 'nightshift_sandbox_bash', 'first part'),
+      results: [
+        { type: 'other', data: 'first part' },
+        { type: 'other', data: 'second part' },
+      ],
+    };
+    const [round] = impactRounds();
+    const text = replayText(buildReplay([{ ...round, steps: [step] }], 0, 'p'));
+    expect(text).toContain('first part\n\nsecond part');
+  });
+
   it('drops the impact summary when a later call clears it', () => {
     const panel = panelText(
       impactRounds({ summary: 'Checkout failed for 40 minutes.' }, { summary: null }),

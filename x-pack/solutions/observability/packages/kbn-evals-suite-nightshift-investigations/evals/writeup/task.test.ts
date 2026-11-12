@@ -14,7 +14,7 @@ import {
   INVESTIGATOR_PROMPT_PATH,
   createGenerationCache,
   createWriteupTask,
-  fillCortex,
+  fillKnowledge,
   loadPromptArm,
   replayReply,
 } from './task';
@@ -79,6 +79,19 @@ describe('replayReply', () => {
     expect(out).toEqual({
       reply: REPLY,
       extra_calls: ['agentic_investigations_set_hypotheses', 'nightshift_sandbox_bash'],
+      // Kept with their results, so a judge sees what the reply did before it was sent.
+      extra_turns: [
+        {
+          name: 'agentic_investigations_set_hypotheses',
+          args: expect.any(Object),
+          result: { result: 'ok' },
+        },
+        {
+          name: 'nightshift_sandbox_bash',
+          args: expect.any(Object),
+          result: { result: 'No new results.' },
+        },
+      ],
     });
     const { messages } = client.chatComplete.mock.calls[2][0];
     const toolMessages = messages.filter((m: { role: string }) => m.role === MessageRole.Tool);
@@ -105,8 +118,16 @@ describe('replayReply', () => {
     });
   });
 
-  it('retries a short reply and a failed call, then gives up with the last error', async () => {
-    const client = fakeClient([reply('ok'), new Error('gateway 502'), reply('')]);
+  it('takes a short reply as it is; the gates judge its length', async () => {
+    const client = fakeClient([reply('No customers were charged.')]);
+    await expect(replayReply(client, replay)).resolves.toEqual({
+      reply: 'No customers were charged.',
+      extra_calls: [],
+    });
+  });
+
+  it('retries an empty reply and a failed call, then gives up with the last error', async () => {
+    const client = fakeClient([reply(''), new Error('gateway 502'), reply('')]);
     await expect(replayReply(client, replay, { retryDelayMs: 0 })).resolves.toEqual({
       extra_calls: [],
       error: 'empty reply',
@@ -183,14 +204,26 @@ describe('createWriteupTask', () => {
   });
 });
 
-describe('fillCortex', () => {
-  it('fills Cortex as the agent type does with it on, and leaves memory and decision trees out', () => {
-    const prompt =
-      '1. Read the guide.{{cortex_load_step}}{{decision_trees_load_step}} Then start.\n</x>\n' +
-      '{{knowledge_cortex_section}}{{semantic_memory_section}}{{decision_trees_section}}';
-    expect(fillCortex(prompt, '<knowledge_cortex>\nRead it.\n</knowledge_cortex>\n\n')).toBe(
+describe('fillKnowledge', () => {
+  const section = '<knowledge_wiki>\nRead it.\n</knowledge_wiki>\n\n';
+  it('fills the knowledge section and leaves memory and decision trees out', () => {
+    expect(
+      fillKnowledge(
+        'Start.\n{{knowledge_wiki_section}}{{semantic_memory_section}}{{decision_trees_section}}',
+        section
+      )
+    ).toBe('Start.\n\n<knowledge_wiki>\nRead it.\n</knowledge_wiki>\n');
+  });
+
+  it('fills a prompt from before the Wiki rename, load step included', () => {
+    expect(
+      fillKnowledge(
+        '1. Read the guide.{{cortex_load_step}}{{decision_trees_load_step}} Then start.\n</x>\n{{knowledge_cortex_section}}',
+        section
+      )
+    ).toBe(
       '1. Read the guide. Also read the Knowledge Cortex — see <knowledge_cortex>. Then start.\n</x>\n' +
-        '\n<knowledge_cortex>\nRead it.\n</knowledge_cortex>\n'
+        '\n<knowledge_wiki>\nRead it.\n</knowledge_wiki>\n'
     );
   });
 });

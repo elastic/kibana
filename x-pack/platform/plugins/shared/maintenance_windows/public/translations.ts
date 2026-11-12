@@ -287,6 +287,10 @@ export const CANCEL = i18n.translate('xpack.maintenanceWindows.createForm.cancel
   defaultMessage: 'Cancel',
 });
 
+export const BACK = i18n.translate('xpack.maintenanceWindows.createForm.back', {
+  defaultMessage: 'Back',
+});
+
 export const TABLE_ALERTS = i18n.translate('xpack.maintenanceWindows.table.alerts', {
   defaultMessage: 'Alerts',
 });

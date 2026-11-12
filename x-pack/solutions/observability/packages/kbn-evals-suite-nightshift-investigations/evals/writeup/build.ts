@@ -48,14 +48,19 @@ const reduceStep = (step: Record<string, unknown>, resultCap: number, lost: Set<
     tool_id: step.tool_id,
     ...(typeof step.tool_call_id === 'string' ? { tool_call_id: step.tool_call_id } : {}),
     params: (step.params as Record<string, unknown>) ?? {},
-    results: first
-      ? [
-          {
-            ...(first.type ? { type: first.type } : {}),
-            data: text.length > resultCap ? `${text.slice(0, resultCap)} …[truncated]` : first.data,
-          },
-        ]
-      : [],
+    // Every result is kept; only when together they pass the cap are they joined and clipped.
+    results:
+      text.length > resultCap
+        ? [
+            {
+              ...(first?.type ? { type: first.type } : {}),
+              data: `${text.slice(0, resultCap)} …[truncated]`,
+            },
+          ]
+        : results.map((r) => {
+            const { type, data } = (r ?? {}) as { type?: string; data?: unknown };
+            return { ...(type ? { type } : {}), data };
+          }),
   };
 };
 
