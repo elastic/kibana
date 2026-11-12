@@ -50,6 +50,84 @@ const makeSuccess = (
 });
 
 describe('alertAnalysisSkill', () => {
+  describe('content guardrails', () => {
+    it('short-circuits re-fetching when the alert or entity values are already in context', () => {
+      expect(alertAnalysisSkill.content).toContain('do NOT re-fetch them');
+      expect(alertAnalysisSkill.content).toContain(
+        'call a tool only for information you do not already have'
+      );
+    });
+
+    it('forbids speculative platform.core and workflow tools for steps with a dedicated security tool', () => {
+      expect(alertAnalysisSkill.content).toContain('platform.core.search');
+      expect(alertAnalysisSkill.content).toContain('platform.core.generate_esql');
+      expect(alertAnalysisSkill.content).toContain('platform.core.execute_esql');
+      expect(alertAnalysisSkill.content).toContain('workflow tools');
+      expect(alertAnalysisSkill.content).toMatch(/Do NOT use[^\n]*platform\.core/);
+      expect(alertAnalysisSkill.content).toContain('no speculative index discovery');
+    });
+
+    it('bounds corroboration to one call per evidence source with a single window widening', () => {
+      expect(alertAnalysisSkill.content).toContain('Bound corroboration');
+      // One initial lookup at the default window plus at most one widened retry at
+      // 168h — the retry must be an allowed second call, not a contradiction of
+      // the per-call budget (the old text said "at most one call (widen ... once)").
+      expect(alertAnalysisSkill.content).toContain(
+        "at most one 'security.alert-analysis.get-related-alerts' call at the default time window, plus at most one widened retry at 168h"
+      );
+      expect(alertAnalysisSkill.content).not.toContain('168h at most once');
+      expect(alertAnalysisSkill.content).toContain(
+        'Stop corroborating as soon as the evidence supports a disposition'
+      );
+    });
+
+    it('forbids tool calls after the final analysis is written', () => {
+      expect(alertAnalysisSkill.content).toContain('make no further tool calls');
+    });
+
+    it('requires the answer to lead with the direct answer', () => {
+      expect(alertAnalysisSkill.content).toContain('## Answer Shape');
+      expect(alertAnalysisSkill.content).toContain(
+        'the first sentence gives the answer to the question that was asked'
+      );
+      expect(alertAnalysisSkill.content).toContain(
+        'Lead with the direct answer to the question that was asked'
+      );
+    });
+
+    it('keeps supporting detail to what the question asks for', () => {
+      expect(alertAnalysisSkill.content).toContain('Stay in scope');
+      expect(alertAnalysisSkill.content).toContain(
+        'belongs in the answer only when the question requires it'
+      );
+      // The old mandate to compile a comprehensive analysis is what puts
+      // peripheral claims (per-host counts, alert-by-alert listings) in the
+      // answer, where the claim-level rubrics score them against Relevance.
+      expect(alertAnalysisSkill.content).not.toContain(
+        'Compile a comprehensive analysis with supporting evidence'
+      );
+      expect(alertAnalysisSkill.content).toContain(
+        'Keep supporting detail to what the question asks for'
+      );
+    });
+
+    it('requires assessment and interpretation to be marked as inference', () => {
+      expect(alertAnalysisSkill.content).toContain('Separate fact from interpretation');
+      expect(alertAnalysisSkill.content).toContain(
+        "'could indicate', 'is consistent with', 'suggests'"
+      );
+      expect(alertAnalysisSkill.content).toContain("never as 'is', 'proves', or 'confirms'");
+    });
+
+    it('ends on the answer instead of a follow-up offer', () => {
+      expect(alertAnalysisSkill.content).toContain('Do not close with an offer to help further');
+      expect(alertAnalysisSkill.content).toContain('keep it to one short sentence');
+      expect(alertAnalysisSkill.content).not.toContain(
+        'Recommend specific next steps based on disposition'
+      );
+    });
+  });
+
   describe('get-related-alerts inline tool', () => {
     it('schema exposes alertId, timeWindowHours, and optional entity shortcut params', async () => {
       const inlineTools = await alertAnalysisSkill.getInlineTools?.();
