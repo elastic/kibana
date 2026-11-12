@@ -14,6 +14,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { ensureVaultAuth, getKbnEvalsVaultPath, readVaultSecret } from '@kbn/evals';
 import {
+  DEFAULT_KIBANA_AUTH,
   LOCAL_DEV_VAULT_SECRET,
   ORCA_CONNECTOR_ID,
   ORCA_INDEX_PATTERNS,
@@ -36,11 +37,13 @@ import {
 } from './secrets';
 import { probeSandboxCredential } from './sandbox_probe';
 import { createJsonClient, resolveKibanaBaseUrl } from './http_client';
+import { createServerlessAdminCookie } from './serverless_session';
 import {
   addOrcaSpaceContext,
   assertEnterpriseLicense,
   deleteOrcaConnector,
   enableNightshiftSpace,
+  getKibanaStatus,
   removeOrcaSpaceContext,
   isServerless,
   saveOrcaConnector,
@@ -53,10 +56,13 @@ const DEFAULT_KIBANA_CONFIG = Path.join(REPO_ROOT, 'config', 'kibana.dev.yml');
 
 interface Flags {
   kibanaUrl: string;
-  kibanaAuth: string;
+  kibanaAuth?: string;
   esUrl: string;
   kibanaConfig: string;
 }
+
+const getKibanaAuths = ({ kibanaAuth }: Flags): readonly string[] =>
+  kibanaAuth ? [kibanaAuth] : DEFAULT_KIBANA_AUTH;
 
 const readSecrets = async (
   log: ToolingLog,
@@ -89,10 +95,7 @@ const writeKibanaConfig = async (
   { dryRun }: { dryRun: boolean }
 ): Promise<boolean> => {
   const current = await readConfigFile(configPath);
-  const { content, alreadySet, addsEncryptionKey } = planManagedBlock(
-    current,
-    getLocalDevSettings(sandbox)
-  );
+  const { content, alreadySet } = planManagedBlock(current, getLocalDevSettings(sandbox));
   const relativePath = Path.relative(REPO_ROOT, configPath);
   if (alreadySet.length > 0) {
     log.info(`Already set in ${relativePath}, left out of the block: ${alreadySet.join(', ')}`);
@@ -106,11 +109,7 @@ const writeKibanaConfig = async (
     return false;
   }
   await writeConfigFile(configPath, content);
-  log.success(
-    `Wrote the Nightshift block to ${relativePath}${
-      addsEncryptionKey ? ', with an encryption key so saved connectors survive restarts' : ''
-    }`
-  );
+  log.success(`Wrote the Nightshift block to ${relativePath}`);
   return true;
 };
 
@@ -143,23 +142,30 @@ const setUpKibana = async ({
   configChangedAt?: number;
 }) => {
   const kibanaUrl = await resolveKibanaBaseUrl(flags.kibanaUrl).catch(() => flags.kibanaUrl);
-  const kibana = createJsonClient({ baseUrl: kibanaUrl, auth: flags.kibanaAuth, redactor });
-  const status = await waitForKibana(kibana, log, { startedAfter: configChangedAt });
+  const auths = getKibanaAuths(flags);
+  const clients = auths.map((basic) =>
+    createJsonClient({ baseUrl: kibanaUrl, credentials: { basic }, redactor })
+  );
+  const { status, kibana: basicKibana } = await waitForKibana(clients, log, {
+    startedAfter: configChangedAt,
+  });
   log.success(`Kibana ${status.version?.number} is available on ${kibanaUrl}`);
-  await assertEnterpriseLicense(kibana);
+  await assertEnterpriseLicense(basicKibana);
 
-  if (isServerless(status)) {
-    log.warning(
-      'Serverless Kibana: open the Nightshift app and finish its setup to bind the space to the service accounts.'
-    );
-  } else {
-    const elasticsearch = createJsonClient({
-      baseUrl: flags.esUrl.replace(/\/+$/, ''),
-      auth: flags.kibanaAuth,
-      redactor,
-    });
-    await enableNightshiftSpace({ kibana, elasticsearch, log });
-  }
+  const isServerlessProject = isServerless(status);
+  const kibana = isServerlessProject
+    ? createJsonClient({
+        baseUrl: kibanaUrl,
+        credentials: { cookie: await createServerlessAdminCookie(kibanaUrl, log) },
+        redactor,
+      })
+    : basicKibana;
+  const elasticsearch = createJsonClient({
+    baseUrl: flags.esUrl.replace(/\/+$/, ''),
+    credentials: { basic: auths[clients.indexOf(basicKibana)] },
+    redactor,
+  });
+  await enableNightshiftSpace({ kibana, elasticsearch, isServerlessProject, log });
 
   const saved = await saveOrcaConnector(kibana, orca);
   log.success(`ORCA connector ${ORCA_CONNECTOR_ID} ${saved}`);
@@ -219,7 +225,12 @@ const remove = async ({
 }) => {
   try {
     const kibanaUrl = await resolveKibanaBaseUrl(flags.kibanaUrl);
-    const kibana = createJsonClient({ baseUrl: kibanaUrl, auth: flags.kibanaAuth, redactor });
+    const { kibana } = await getKibanaStatus(
+      getKibanaAuths(flags).map((basic) =>
+        createJsonClient({ baseUrl: kibanaUrl, credentials: { basic }, redactor })
+      )
+    );
+    if (!kibana) throw new Error('Kibana rejects the --kibana-auth credentials');
     await removeOrcaSpaceContext(kibana).then(
       () => log.info('Removed the ORCA source code context and its egress from the space'),
       (error: Error) => log.warning(`Could not update the space context: ${error.message}`)
@@ -254,12 +265,12 @@ run(
   async ({ log, flags: rawFlags }) => {
     const flags: Flags = {
       kibanaUrl: String(rawFlags['kibana-url']),
-      kibanaAuth: String(rawFlags['kibana-auth']),
+      kibanaAuth: typeof rawFlags['kibana-auth'] === 'string' ? rawFlags['kibana-auth'] : undefined,
       esUrl: String(rawFlags['es-url']),
       kibanaConfig: Path.resolve(String(rawFlags['kibana-config'])),
     };
     const redactor = createRedactor();
-    redactor.add(flags.kibanaAuth);
+    if (flags.kibanaAuth) redactor.add(flags.kibanaAuth);
     try {
       if (rawFlags.remove) {
         await remove({ log, flags, redactor });
@@ -298,6 +309,7 @@ run(
       the shared eval sandbox. Reads the credentials from the dev Vault (and logs in when needed),
       writes a managed block to config/kibana.dev.yml, waits for Kibana to restart, binds the default
       space to the Nightshift service accounts and saves the ORCA connector on the investigator.
+      On a local Serverless project it binds the space as an admin of the mock IdP.
       Re-run it to pick up a rotated credential.
     `,
     flags: {
@@ -305,7 +317,6 @@ run(
       string: ['kibana-url', 'kibana-auth', 'es-url', 'kibana-config'],
       default: {
         'kibana-url': 'http://localhost:5601',
-        'kibana-auth': 'elastic:changeme',
         'es-url': 'http://localhost:9200',
         'kibana-config': DEFAULT_KIBANA_CONFIG,
       },
@@ -315,7 +326,7 @@ run(
         --connector-only  Only set Kibana up (space, connector), for after --skip-connector
         --remove          Delete the ORCA connector and remove the config block
         --kibana-url      Kibana URL; a dev base path is detected (default: http://localhost:5601)
-        --kibana-auth     user:password of a superuser (default: elastic:changeme)
+        --kibana-auth     user:password of a superuser (default: elastic:changeme, then elastic_serverless:changeme)
         --es-url          Elasticsearch URL, for the service account roles (default: http://localhost:9200)
         --kibana-config   Kibana config to write (default: config/kibana.dev.yml)
       `,

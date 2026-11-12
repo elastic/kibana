@@ -58,27 +58,42 @@ const poll = async <T>(
 };
 
 /**
- * Waits until Kibana answers as available. With `startedAfter`, it also waits for a server process
- * that started after that time: `kibana --dev` restarts when its config changes, and the old
- * process can answer for a while after the change.
+ * The status Kibana answers, with the first of `clients` it authenticates. Without valid credentials
+ * Kibana answers with the overall level only, and no `kibana`.
+ */
+export const getKibanaStatus = async (
+  clients: readonly JsonRequest[]
+): Promise<{ status: KibanaStatus; kibana?: JsonRequest }> => {
+  let status: KibanaStatus | undefined;
+  for (const kibana of clients) {
+    status = await kibana<KibanaStatus>('/api/status');
+    if (status.version) return { status, kibana };
+  }
+  if (!status) throw new Error('No Kibana credentials to try');
+  return { status };
+};
+
+/**
+ * Waits until Kibana answers as available, and returns the first of `clients` it authenticates.
+ * With `startedAfter`, it also waits for a server process that started after that time:
+ * `kibana --dev` restarts when its config changes, and the old process can answer for a while after
+ * the change.
  */
 export const waitForKibana = async (
-  kibana: JsonRequest,
+  clients: readonly JsonRequest[],
   log: ToolingLog,
   { startedAfter, timeoutMs = 10 * 60_000 }: { startedAfter?: number; timeoutMs?: number } = {}
-): Promise<KibanaStatus> => {
+): Promise<{ status: KibanaStatus; kibana: JsonRequest }> => {
   log.info(
     startedAfter
       ? 'Waiting for Kibana to restart with the new config...'
       : 'Waiting for Kibana to be available...'
   );
-  const status = await poll(
+  const answer = await poll(
     async () => {
-      const current = await kibana<KibanaStatus>('/api/status');
-      if (current.status.overall.level !== 'available') return undefined;
-      // Without credentials Kibana answers with the overall level only, and no uptime.
-      if (!current.version) return current;
-      const uptime = current.metrics?.process?.uptime_in_millis;
+      const current = await getKibanaStatus(clients);
+      if (current.status.status.overall.level !== 'available') return undefined;
+      const uptime = current.status.metrics?.process?.uptime_in_millis;
       // A few seconds of slack: the restart begins right after the write.
       if (startedAfter && uptime !== undefined && Date.now() - uptime < startedAfter - 5_000) {
         return undefined;
@@ -87,17 +102,18 @@ export const waitForKibana = async (
     },
     { timeoutMs, intervalMs: 3_000 }
   );
-  if (!status) {
+  if (!answer) {
     throw new Error(
       startedAfter
         ? 'Kibana did not restart with the new config in time. Is it running in dev mode? Start it, then re-run with --connector-only.'
         : 'Kibana is not available. Start it, then re-run with --connector-only.'
     );
   }
-  if (!status.version) {
+  const { status, kibana } = answer;
+  if (!kibana) {
     throw new Error('Kibana rejects the --kibana-auth credentials');
   }
-  return status;
+  return { status, kibana };
 };
 
 export const isServerless = ({ version }: KibanaStatus): boolean =>
@@ -122,32 +138,37 @@ export const assertEnterpriseLicense = async (kibana: JsonRequest): Promise<void
 
 /**
  * Sets the default space up for Nightshift as the app's onboarding does: the service account
- * roles (stateful only), the service accounts, and the bound investigation workflow.
+ * roles (stateful only; Serverless predefines them), the service accounts, and the bound
+ * investigation workflow.
  */
 export const enableNightshiftSpace = async ({
   kibana,
   elasticsearch,
+  isServerlessProject,
   log,
 }: {
   kibana: JsonRequest;
   elasticsearch: JsonRequest;
+  isServerlessProject: boolean;
   log: ToolingLog;
 }): Promise<void> => {
-  await ensureNightshiftServiceAccountRoles(
-    {
-      security: {
-        putRole: ({ name, ...role }) =>
-          elasticsearch(`/_security/role/${encodeURIComponent(name)}`, {
-            method: 'PUT',
-            body: role,
-          }),
+  if (!isServerlessProject) {
+    await ensureNightshiftServiceAccountRoles(
+      {
+        security: {
+          putRole: ({ name, ...role }) =>
+            elasticsearch(`/_security/role/${encodeURIComponent(name)}`, {
+              method: 'PUT',
+              body: role,
+            }),
+        },
       },
-    },
-    { isServerless: false }
-  );
+      { isServerless: false }
+    );
+  }
   const serviceAccountIds = await ensureNightshiftServiceAccounts(
     createHttpServiceAccountsApi({ request: kibana, getStatus: getHttpStatus }),
-    { isServerless: false }
+    { isServerless: isServerlessProject }
   );
   let lastError: unknown;
   const enabled = await poll(

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { randomBytes } from 'crypto';
 import { parse, stringify } from 'yaml';
 import { getFlattenedObject } from '@kbn/std';
 import { MANAGED_BLOCK_END, MANAGED_BLOCK_START } from './constants';
@@ -13,7 +12,6 @@ import type { SandboxConnection } from './secrets';
 
 type SettingValue = string | number | boolean;
 
-export const ENCRYPTION_KEY_SETTING = 'xpack.encryptedSavedObjects.encryptionKey';
 const SANDBOX_API_KEY_SETTING = 'xpack.sandbox.api_key';
 
 /** The settings a local Kibana needs to run Nightshift investigations in the eval sandbox. */
@@ -82,25 +80,19 @@ export interface PlannedBlock {
   content: string;
   /** Settings the file already sets to the same value elsewhere, left out of the block. */
   alreadySet: string[];
-  /** Whether the block adds an encryption key. */
-  addsEncryptionKey: boolean;
 }
 
 /**
  * Writes `settings` into the managed block of `content`, replacing an earlier block. A setting set
  * to the same value outside the block is left out; one set to another value stops the setup, since
- * YAML cannot hold the key twice and Kibana would silently pick one. The encryption key is only
- * added when the file sets none, and an earlier block's key is kept, so saved connectors stay
- * readable.
+ * YAML cannot hold the key twice and Kibana would silently pick one.
  */
 export const planManagedBlock = (
   content: string,
-  settings: Record<string, SettingValue>,
-  generateKey: () => string = () => randomBytes(32).toString('hex')
+  settings: Record<string, SettingValue>
 ): PlannedBlock => {
   const { before, block, after } = splitManagedBlock(content);
   const outside = readSettings(`${before}\n${after}`);
-  const previous = block ? readSettings(block) : {};
 
   const conflicts: string[] = [];
   const alreadySet: string[] = [];
@@ -124,13 +116,6 @@ export const planManagedBlock = (
     );
   }
 
-  const addsEncryptionKey = !(ENCRYPTION_KEY_SETTING in outside);
-  if (addsEncryptionKey) {
-    const previousKey = previous[ENCRYPTION_KEY_SETTING];
-    managed[ENCRYPTION_KEY_SETTING] =
-      typeof previousKey === 'string' && previousKey.length >= 32 ? previousKey : generateKey();
-  }
-
   const rendered = [
     MANAGED_BLOCK_START,
     '# Re-run setup_local_dev.js to refresh it, or run it with --remove to undo it.',
@@ -146,7 +131,6 @@ export const planManagedBlock = (
   return {
     content: `${head}${rendered}\n${after}`,
     alreadySet,
-    addsEncryptionKey,
   };
 };
 
@@ -161,7 +145,7 @@ export const removeManagedBlock = (content: string): string => {
 export const redactManagedBlock = (content: string): string => {
   const { block } = splitManagedBlock(content);
   return (block ?? '').replace(
-    new RegExp(`^(${[SANDBOX_API_KEY_SETTING, ENCRYPTION_KEY_SETTING].join('|')}): .*$`, 'gm'),
+    new RegExp(`^(${SANDBOX_API_KEY_SETTING}): .*$`, 'gm'),
     '$1: <redacted>'
   );
 };

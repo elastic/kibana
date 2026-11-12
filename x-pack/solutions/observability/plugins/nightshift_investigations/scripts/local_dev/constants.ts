@@ -8,6 +8,16 @@
 /** The shared sandbox account of local Kibanas, minted on the eval sandbox cluster. */
 export const LOCAL_DEV_SANDBOX_USERNAME = 'kibana-local-dev';
 
+/** The default superusers of a local stack, tried in turn when `--kibana-auth` is not passed. */
+export const DEFAULT_KIBANA_AUTH = ['elastic:changeme', 'elastic_serverless:changeme'] as const;
+
+/**
+ * The organization of a local Serverless project with UIAM, which the admin session must name. Must
+ * match `MOCK_IDP_UIAM_ORGANIZATION_ID` in `@kbn/mock-idp-utils`, which `kibana --dev --serverless`
+ * configures; that package is private to the platform group.
+ */
+export const LOCAL_SERVERLESS_UIAM_ORGANIZATION_ID = 'org1234567890';
+
 /** The eval sandbox-api, which local Kibanas share with the eval runs. */
 export const EVAL_SANDBOX_HOST = 'eval-sandbox-api.elastic-observability-ocp.elastic.dev';
 export const EVAL_SANDBOX_PORT = 9090;

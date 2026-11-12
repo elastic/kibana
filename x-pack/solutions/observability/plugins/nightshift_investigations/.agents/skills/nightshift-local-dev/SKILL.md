@@ -44,9 +44,9 @@ The script logs in to Vault when your token is missing or expired, then:
    the credential against sandbox-api.
 2. Writes a block between `# >>> nightshift local-dev ... >>>` markers to `config/kibana.dev.yml`
    (mode `0600`): the `nightshift.enabled` feature flag, the investigations, agentic investigations
-   and proposals plugins, service accounts, the eval sandbox and its key, and an encryption key
-   when the file sets none. A setting the file already sets to the same value is left out; one set
-   to another value stops the script, which names it.
+   and proposals plugins, service accounts, and the eval sandbox and its key. A setting the file
+   already sets to the same value is left out; one set to another value stops the script, which
+   names it.
 3. Waits for Kibana to restart, checks the license, and binds the default space to the Nightshift
    service accounts (creating their roles in Elasticsearch), as the app's onboarding does.
 4. Creates the `.elasticsearch` connector `orcabench-es` (named `orcabench_es`, as in the evals) and
@@ -62,10 +62,20 @@ Re-running changes nothing, unless the credential was rotated. Flags: `--dry-run
 secrets redacted), `--skip-connector` (only the config, Kibana not running yet), `--connector-only`
 (only the Kibana steps), `--remove` (delete the connector, the snippet, the `github.com` egress and the block), `--kibana-url`
 (default `http://localhost:5601`; a dev base path is detected), `--kibana-auth` (default
-`elastic:changeme`), `--es-url` (default `http://localhost:9200`), `--kibana-config`.
+`elastic:changeme`, then `elastic_serverless:changeme`), `--es-url` (default
+`http://localhost:9200`), `--kibana-config`.
 
-On Serverless the script writes the config and the connector, but you finish the space setup in the
-Nightshift app.
+On a local Serverless observability project with UIAM, the same script works:
+
+```bash
+pnpm es serverless --projectType observability --productTier complete --eis    # terminal 1
+pnpm start --serverless=oblt --no-base-path --server.publicBaseUrl=http://localhost:5601  # terminal 2
+node x-pack/solutions/observability/plugins/nightshift_investigations/scripts/setup_local_dev.js
+```
+
+UIAM rejects basic auth for creating service accounts, so the script binds the space as the mock
+IdP's `admin`, as Scout does. That login doesn't support a dev base path, hence `--no-base-path`;
+`publicBaseUrl` keeps the investigation's `kibana.request` steps on the local Kibana.
 
 ## Run an investigation
 
@@ -101,9 +111,6 @@ Poll `GET /internal/investigations/investigations/<id>` with `elastic-api-versio
   Otherwise a plugin is disabled or the space isn't bound; the script's last step says which check
   fails.
 - **Sandbox `Unauthenticated`**: the credential was rotated. Re-run the script.
-- **Connector secret errors after a restart**: Kibana has no persistent
-  `xpack.encryptedSavedObjects.encryptionKey`. Re-run the script, or set one, and re-save the
-  connector.
 - **"already set outside the managed block"**: remove or comment out the named settings, for
   example a personal sandbox key, and re-run.
 

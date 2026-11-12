@@ -24,21 +24,27 @@ export interface RequestOptions {
 
 export type JsonRequest = <T>(path: string, options?: RequestOptions) => Promise<T>;
 
+/** `user:password` for basic auth, or the `Cookie` header of a Kibana session. */
+export type Credentials = { basic: string } | { cookie: string };
+
 /**
- * A JSON client for Kibana or Elasticsearch with basic auth. Kibana's internal routes need the
- * internal origin header, which Elasticsearch ignores. Failures name the method, path and status,
- * with the response body redacted.
+ * A JSON client for Kibana or Elasticsearch. Kibana's internal routes need the internal origin
+ * header, which Elasticsearch ignores. Failures name the method, path and status, with the response
+ * body redacted.
  */
 export const createJsonClient = ({
   baseUrl,
-  auth,
+  credentials,
   redactor,
 }: {
   baseUrl: string;
-  auth: string;
+  credentials: Credentials;
   redactor: Redactor;
 }): JsonRequest => {
-  const authorization = `Basic ${Buffer.from(auth).toString('base64')}`;
+  const authHeader: Record<string, string> =
+    'basic' in credentials
+      ? { Authorization: `Basic ${Buffer.from(credentials.basic).toString('base64')}` }
+      : { Cookie: credentials.cookie };
   return async <T>(path: string, { method = 'GET', query, body, version }: RequestOptions = {}) => {
     const search = query
       ? `?${new URLSearchParams(
@@ -48,7 +54,7 @@ export const createJsonClient = ({
     const response = await fetch(`${baseUrl}${path}${search}`, {
       method,
       headers: {
-        Authorization: authorization,
+        ...authHeader,
         'Content-Type': 'application/json',
         'kbn-xsrf': 'nightshift-local-dev',
         'x-elastic-internal-origin': 'kibana',
