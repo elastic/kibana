@@ -89,7 +89,10 @@ export const getObservablesFromEcs = (
   const rulesByPath = getRulesByPath(observableTypes);
 
   for (const ecsData of ecsDataArray) {
-    for (const { field, value } of ecsData) {
+    // Most alert fields have no rule. Select the fields with a rule before their values are copied.
+    const fieldsWithRules = ecsData.filter(({ field }) => rulesByPath.has(field));
+
+    for (const { field, value } of fieldsWithRules) {
       const rules = rulesByPath.get(field) ?? [];
       const items = value ? castArray(value).filter(Boolean) : [];
 
