@@ -32,6 +32,11 @@ export const LAYOUT = {
   handleHitRadius: 7,
   /** Smallest drag that moves or resizes the selection rather than clicking a cell. */
   dragThresholdPx: 4,
+  /**
+   * How far above the chart a drag may start and still draw, clamped to the top row: the gap
+   * under the header, so the slowest row is easy to catch from the top.
+   */
+  grabAbovePx: 8,
 };
 
 /**

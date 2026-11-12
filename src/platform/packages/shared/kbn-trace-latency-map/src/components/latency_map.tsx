@@ -114,6 +114,12 @@ export interface LatencyMapProps {
 
 const withoutFailedOnly = ({ failedOnly, ...selection }: LatencyMapSelection) => selection;
 
+/** A window pointer event in the pixels of the chart, whose box the layer shares. */
+const toLayerPoint = (event: globalThis.PointerEvent, box: DOMRect): Point => ({
+  x: event.clientX - box.left,
+  y: event.clientY - box.top,
+});
+
 /** Until the chart tells where its cells are, the pixels of the geometry mean nothing. */
 const UNCALIBRATED: PlotArea = { left: 0, top: 0, colWidth: 1, rowHeight: 1 };
 
@@ -217,8 +223,9 @@ export function LatencyMap({
   const [draft, setDraft] = useState<CellRange>();
   const [keyboard, setKeyboard] = useState<KeyboardState>();
   const [hoverCell, setHoverCell] = useState<Cell>();
-  // A press on the chart starts a brush, a press on the selection's own grip or handles a move.
-  const [isBrushing, setIsBrushing] = useState(false);
+  // A press on the map draws a new region, a press on the selection's own grip or handles
+  // moves or resizes it.
+  const [isDrawing, setIsDrawing] = useState(false);
   const [isMoving, setIsMoving] = useState(false);
 
   // A new grid (the map resized, or its range changed) puts cells elsewhere: a cursor, an anchor or
@@ -230,7 +237,7 @@ export function LatencyMap({
     setHoverCell(undefined);
     gestureRef.current = undefined;
     setIsMoving(false);
-    setIsBrushing(false);
+    setIsDrawing(false);
   }, [gridKey]);
 
   const committedRange = useMemo(
@@ -336,12 +343,14 @@ export function LatencyMap({
     gestureRef.current = undefined;
     setDraft(undefined);
     setIsMoving(false);
+    setIsDrawing(false);
   };
 
   const onOverlayPointerDown = (event: PointerEvent<SVGSVGElement>) => {
     if (!geometry || !plot || event.button !== 0) return;
     const gesture = startGesture(getPoint(event), geometry, committedRange);
-    if (!gesture) return;
+    // Only the grip and the handles reach the overlay; drawing starts on the layer below.
+    if (gesture.kind === 'drawing') return;
     gestureRef.current = gesture;
     setIsMoving(true);
     (event.target as Element).setPointerCapture?.(event.pointerId);
@@ -438,28 +447,124 @@ export function LatencyMap({
     const handleFocusOut = (event: FocusEvent) => {
       if (!layer.contains(event.relatedTarget as Node | null)) setKeyboard(undefined);
     };
-    // Capturing, so that the chart below cannot stop it. A press anywhere but on the selection's
-    // own controls is the chart's brush, which draws a new region while the old one lets go.
-    const handlePointerDown = (event: Event) => {
-      setKeyboard(undefined);
-      if (!(event.target as Element).closest?.(`[${OVERLAY_CONTROL_ATTRIBUTE}]`)) {
-        setIsBrushing(true);
-      }
-    };
-    const handlePointerEnd = () => setIsBrushing(false);
     layer.addEventListener('keydown', handleKeyDown);
     layer.addEventListener('focusout', handleFocusOut);
-    layer.addEventListener('pointerdown', handlePointerDown, true);
-    window.addEventListener('pointerup', handlePointerEnd);
-    window.addEventListener('pointercancel', handlePointerEnd);
     return () => {
       layer.removeEventListener('keydown', handleKeyDown);
       layer.removeEventListener('focusout', handleFocusOut);
-      layer.removeEventListener('pointerdown', handlePointerDown, true);
-      window.removeEventListener('pointerup', handlePointerEnd);
-      window.removeEventListener('pointercancel', handlePointerEnd);
     };
   }, [layer]);
+
+  // Drawing a region is the map's own gesture, not the chart's brush: it then also starts on
+  // the margins and just above the chart (clamped to the plot, so the top row is easy to catch
+  // from the top), and an existing selection never swallows it mid-drag. The chart's brush
+  // stays wired as the fallback until its first cell calibrates the geometry. Capturing on the
+  // wrapper, so that the chart below cannot stop it.
+  const latestDraw = useRef({
+    geometry,
+    plot,
+    layer,
+    committedRange,
+    commitRange,
+    clickCell,
+    width,
+    height,
+  });
+  latestDraw.current = {
+    geometry,
+    plot,
+    layer,
+    committedRange,
+    commitRange,
+    clickCell,
+    width,
+    height,
+  };
+  useEffect(() => {
+    if (!container) return;
+    const handlePointerDown = (event: globalThis.PointerEvent) => {
+      // Any press takes the keyboard cursor away, as a click takes the focus.
+      setKeyboard(undefined);
+      const target = event.target as Element;
+      if (event.button !== 0 || target.closest?.(`[${OVERLAY_CONTROL_ATTRIBUTE}], button, a`)) {
+        return;
+      }
+      const latest = latestDraw.current;
+      if (!latest.geometry || !latest.plot || !latest.layer) return;
+      // The chart's own box (the layer), and the grab band just above it, under the header.
+      const point = toLayerPoint(event, latest.layer.getBoundingClientRect());
+      if (
+        point.x < 0 ||
+        point.x > latest.width ||
+        point.y < -LAYOUT.grabAbovePx ||
+        point.y > latest.height
+      ) {
+        return;
+      }
+      const gesture = startGesture(point, latest.geometry, latest.committedRange);
+      // The grip and the handles take their presses on the overlay instead.
+      if (gesture.kind !== 'drawing') return;
+      gestureRef.current = gesture;
+      setIsDrawing(true);
+      // The chart reads mouse events for its own brush and click: swallow this press's
+      // compatibility mousedown, which follows the pointer event, so only one of us draws.
+      const suppress = (mouseEvent: Event) => mouseEvent.stopPropagation();
+      container.addEventListener('mousedown', suppress, true);
+      setTimeout(() => container.removeEventListener('mousedown', suppress, true));
+    };
+    container.addEventListener('pointerdown', handlePointerDown, true);
+    return () => container.removeEventListener('pointerdown', handlePointerDown, true);
+  }, [container]);
+
+  // The drawing pointer may leave the map, so its moves and its release are the window's.
+  useEffect(() => {
+    const handlePointerMove = (event: globalThis.PointerEvent) => {
+      const gesture = gestureRef.current;
+      const { geometry: current, layer: layerEl } = latestDraw.current;
+      if (gesture?.kind !== 'drawing' || !current || !layerEl) return;
+      const range = moveGesture(
+        gesture,
+        toLayerPoint(event, layerEl.getBoundingClientRect()),
+        current
+      );
+      setDraft((previous) => (previous && isSameRange(previous, range) ? previous : range));
+    };
+    const handlePointerUp = (event: globalThis.PointerEvent) => {
+      const gesture = gestureRef.current;
+      const {
+        geometry: current,
+        layer: layerEl,
+        commitRange: commitDrawn,
+        clickCell: click,
+      } = latestDraw.current;
+      if (gesture?.kind !== 'drawing') return;
+      gestureRef.current = undefined;
+      setDraft(undefined);
+      setIsDrawing(false);
+      if (!current || !layerEl) return;
+      const end = endGesture(
+        gesture,
+        toLayerPoint(event, layerEl.getBoundingClientRect()),
+        current
+      );
+      if (end.type === 'range') commitDrawn(end.range);
+      else if (end.type === 'click') click(end.cell);
+    };
+    const handlePointerCancel = () => {
+      if (gestureRef.current?.kind !== 'drawing') return;
+      gestureRef.current = undefined;
+      setDraft(undefined);
+      setIsDrawing(false);
+    };
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+    window.addEventListener('pointercancel', handlePointerCancel);
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+      window.removeEventListener('pointercancel', handlePointerCancel);
+    };
+  }, []);
 
   const keyboardCell = geometry && keyboard ? describeCell(keyboard.cursor) : undefined;
   const summary = stats
@@ -528,7 +633,7 @@ export function LatencyMap({
   } else {
     body = (
       <>
-        {/* The map is the widget: the chart brushes, the keys select. Announced as one. */}
+        {/* The map is the widget: the pointer draws, the keys select. Announced as one. */}
         <div
           ref={setLayer}
           role="application"
@@ -541,6 +646,9 @@ export function LatencyMap({
           css={css`
             position: relative;
             opacity: ${isLoading ? 0.5 : 1};
+            /* While a region is being drawn the chart keeps its hands off the pointer:
+               no tooltip trailing the drag, and no brush of its own. */
+            ${isDrawing ? `[data-test-subj='traceLatencyMapChart'] { pointer-events: none; }` : ''}
             &:focus-visible {
               outline: ${euiTheme.focus.width} solid ${euiTheme.colors.primary};
             }
@@ -570,7 +678,7 @@ export function LatencyMap({
               geometry={geometry}
               rect={overlayRange && geometry.rangeToRect(overlayRange)}
               hoverRect={
-                hoverCell && !draft && !isBrushing && !isMoving
+                hoverCell && !draft && !isDrawing && !isMoving
                   ? geometry.rangeToRect({
                       x0: hoverCell.xi,
                       x1: hoverCell.xi + 1,
@@ -582,7 +690,7 @@ export function LatencyMap({
               colors={colors}
               width={width}
               height={height}
-              showHandles={!isBrushing}
+              showHandles={!isDrawing}
               isMoving={isMoving}
               onPointerDown={onOverlayPointerDown}
               onPointerMove={onOverlayPointerMove}

@@ -99,6 +99,16 @@ spaceTest.describe(
             .toBe(LATENCY_TRACE.ESQL_QUERY);
           await expect(charts.latencyMapSelectionBar).toBeHidden();
         });
+
+        await spaceTest.step('a drag starting above the map catches the top rows', async () => {
+          // The press lands in the gap under the header, where a drag aiming at the
+          // slowest row naturally starts; it draws from the top edge of the plot.
+          await charts.dragLatencyMapSelection({ x: 0.25, y: -0.02 }, { x: 0.75, y: 0.4 });
+          await expect(charts.latencyMapSelectionBar).toBeVisible();
+          await expect
+            .poll(async () => discover.getEsqlQueryValue())
+            .toMatch(/WHERE @timestamp >= TO_DATETIME\(".+"\) AND @timestamp < TO_DATETIME/);
+        });
       }
     );
 

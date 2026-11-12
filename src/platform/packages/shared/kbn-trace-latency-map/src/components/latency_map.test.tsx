@@ -483,6 +483,64 @@ describe('LatencyMap', () => {
       expect(p90Selection.minDuration).toBeLessThanOrEqual(stats.p90);
       expect(p90Selection.minDuration).toBeLessThan(onSelectionCommit.mock.calls[1][0].minDuration);
     });
+
+    it('draws a region with the pointer once the plot is known, in either direction', async () => {
+      const { onSelectionCommit } = renderMap();
+      await waitForChart();
+      hover(4, 5);
+      const layer = screen.getByTestId('traceLatencyMapLayer');
+
+      fireEvent.pointerDown(layer, { ...centerOf(3, 2), button: 0, pointerId: 1 });
+      fireEvent.pointerMove(window, { ...centerOf(6, 5), pointerId: 1 });
+      // The chart draws the region as it grows.
+      expect(mockChart.heatmap.highlightedData).toEqual(
+        rangeToHighlight({ x0: 3, x1: 7, y0: 2, y1: 6 }, timeGrid)
+      );
+      fireEvent.pointerUp(window, { ...centerOf(6, 5), pointerId: 1 });
+      expect(onSelectionCommit.mock.calls[0][0]).toEqual(
+        geometry.rangeToSelection({ x0: 3, x1: 7, y0: 2, y1: 6 })
+      );
+
+      // The same drag from the slow corner down commits the same region.
+      fireEvent.pointerDown(layer, { ...centerOf(6, 5), button: 0, pointerId: 1 });
+      fireEvent.pointerMove(window, { ...centerOf(3, 2), pointerId: 1 });
+      fireEvent.pointerUp(window, { ...centerOf(3, 2), pointerId: 1 });
+      expect(onSelectionCommit.mock.calls[1][0]).toEqual(onSelectionCommit.mock.calls[0][0]);
+    });
+
+    it('draws from above the plot, clamped to the top row', async () => {
+      const { onSelectionCommit } = renderMap();
+      await waitForChart();
+      hover(4, 5);
+      const layer = screen.getByTestId('traceLatencyMapLayer');
+
+      // The press lands in the gap above the chart, aiming at the slowest row.
+      fireEvent.pointerDown(layer, {
+        clientX: centerOf(3, 0).clientX,
+        clientY: -4,
+        button: 0,
+        pointerId: 1,
+      });
+      fireEvent.pointerMove(window, { ...centerOf(6, 20), pointerId: 1 });
+      fireEvent.pointerUp(window, { ...centerOf(6, 20), pointerId: 1 });
+      expect(onSelectionCommit.mock.calls[0][0]).toEqual(
+        geometry.rangeToSelection({ x0: 3, x1: 7, y0: 20, y1: 24 })
+      );
+    });
+
+    it('treats a pointer press that does not travel as a click on the cell', async () => {
+      const onCellClick = jest.fn();
+      const { onSelectionCommit } = renderMap({ onCellClick });
+      await waitForChart();
+      hover(4, 5);
+      const layer = screen.getByTestId('traceLatencyMapLayer');
+      fireEvent.pointerDown(layer, { ...centerOf(3, 5), button: 0, pointerId: 1 });
+      fireEvent.pointerUp(window, { ...centerOf(3, 5), pointerId: 1 });
+      expect(onCellClick).toHaveBeenCalledWith(
+        expect.objectContaining({ spans: 40, failed: 10, from: '2026-10-26T10:04:30.000Z' })
+      );
+      expect(onSelectionCommit).not.toHaveBeenCalled();
+    });
   });
 
   describe('moving and resizing', () => {
