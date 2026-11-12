@@ -6,7 +6,15 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiSkeletonLoading,
+  EuiSkeletonRectangle,
+} from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import {
   ENTITY_INVENTORY_EBT_ACTIONS,
@@ -23,12 +31,40 @@ import {
   getTypeNotAvailableTitle,
 } from './translations';
 
-/** Shown while the first load of a type is running. */
+/** Shown while the page's `types` request is running. */
 export const EntityTableLoading = () => (
   <EuiEmptyPrompt
     icon={<EuiLoadingSpinner size="xl" />}
     title={<h2>{LOADING_ENTITIES_LABEL}</h2>}
     data-test-subj="entityInventoryTableLoading"
+  />
+);
+
+const SKELETON_COLUMN_COUNT = 4;
+const SKELETON_ROW_COUNT = 5;
+
+/** Shown in a type's section while its first list loads: placeholder rows, no column headers. */
+export const EntityTableSkeleton = () => (
+  <EuiSkeletonLoading
+    isLoading
+    contentAriaLabel={LOADING_ENTITIES_LABEL}
+    data-test-subj="entityInventoryTableSkeleton"
+    loadedContent={null}
+    loadingContent={
+      <EuiFlexGroup direction="column" gutterSize="s">
+        {Array.from({ length: SKELETON_ROW_COUNT }, (_, row) => (
+          <EuiFlexItem key={row} grow={false}>
+            <EuiFlexGroup gutterSize="m" responsive={false}>
+              {Array.from({ length: SKELETON_COLUMN_COUNT }, (__, column) => (
+                <EuiFlexItem key={column}>
+                  <EuiSkeletonRectangle width="100%" height={16} />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    }
   />
 );
 

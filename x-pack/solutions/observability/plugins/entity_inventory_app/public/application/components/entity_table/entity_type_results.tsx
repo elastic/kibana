@@ -26,7 +26,7 @@ import {
   EntityTableDiagnosticsCallout,
   EntityTableTruncationCallout,
 } from './entity_table_callouts';
-import { EntityTableEmpty, EntityTableLoadError, EntityTableLoading } from './entity_table_states';
+import { EntityTableEmpty, EntityTableLoadError, EntityTableSkeleton } from './entity_table_states';
 import { ENTITY_COUNT_LABEL, getEntityCountValue } from './translations';
 
 /**
@@ -97,7 +97,7 @@ const EntityTypeListResults = ({ entityType, listResult }: EntityTypeListResults
     return <EntityTableLoadError ebtDetail={type} message={error.message} onRetry={refresh} />;
   }
   if (!list) {
-    return <EntityTableLoading />;
+    return <EntityTableSkeleton />;
   }
 
   const { rows, truncated, errors, unavailableColumns } = list;

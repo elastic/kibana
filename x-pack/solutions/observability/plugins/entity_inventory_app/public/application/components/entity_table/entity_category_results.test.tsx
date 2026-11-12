@@ -92,6 +92,38 @@ describe('EntityCategoryResults', () => {
     expect(screen.queryByTestId('entityInventoryDiagnosticsCallout')).not.toBeInTheDocument();
   });
 
+  it('shows a spinner and no section while the types load', async () => {
+    const fixtureClient = createFixtureEntityInventoryApiClient();
+    const getTypes = jest.fn(() => new Promise<never>(() => {}));
+    renderResults({ ...fixtureClient, getTypes });
+
+    expect(screen.getByTestId('entityInventoryTableLoading')).toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTypeSection')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTableSkeleton')).not.toBeInTheDocument();
+  });
+
+  it('shows a table skeleton while a section loads its first list, then the table', async () => {
+    const fixtureClient = createFixtureEntityInventoryApiClient();
+    let finishLoad: () => void = () => {};
+    const getEntities = jest.fn(
+      (...args: Parameters<EntityInventoryApiClient['getEntities']>) =>
+        new Promise<Awaited<ReturnType<EntityInventoryApiClient['getEntities']>>>((resolve) => {
+          finishLoad = () => resolve(fixtureClient.getEntities(...args));
+        })
+    );
+    renderResults({ ...fixtureClient, getEntities });
+
+    const section = await screen.findByTestId('entityInventoryTypeSection');
+    expect(within(section).getByTestId('entityInventoryTableSkeleton')).toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTableLoading')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTable')).not.toBeInTheDocument();
+
+    finishLoad();
+
+    expect(await within(section).findByTestId('entityInventoryTable')).toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTableSkeleton')).not.toBeInTheDocument();
+  });
+
   it('warns that a truncated list holds only the most recent entities', async () => {
     renderScenario('truncated');
 
