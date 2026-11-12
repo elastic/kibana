@@ -22,18 +22,20 @@ export type OtelDataStreamNameError =
   | 'hyphen'
   | 'invalidCharacter'
   | 'invalidName'
-  | 'partTooLong'
-  | 'tooLong';
+  | 'typeSuffix'
+  | 'partTooLong';
 
 export const OTEL_TYPE_SEPARATOR = '.otel-';
 export const PROMETHEUS_TYPE_SEPARATOR = '.prometheus-';
 /** Elasticsearch cuts Prometheus remote write path parts to 100 characters. */
 export const MAX_OTEL_DATA_STREAM_PART_LENGTH = 100;
-/** Backing indices are `.ds-<name>-yyyy.MM.dd-000001`, 22 bytes longer, and index names cap at 255 bytes. */
-export const MAX_OTEL_DATA_STREAM_NAME_BYTES = 233;
+/** The Elasticsearch exporter keeps 100 bytes of each part, and a dataset's `.otel` comes out of that. */
+export const MAX_OTEL_DATASET_BYTES = 95;
+export const MAX_OTEL_NAMESPACE_BYTES = 100;
+// Streams adds the suffix of the data model, so a dataset ending in one would get it twice.
+const DATASET_TYPE_SUFFIXES = ['.otel', '.prometheus'];
 
-const exceedsIndexNameBytes = (name: string): boolean =>
-  new TextEncoder().encode(name).length > MAX_OTEL_DATA_STREAM_NAME_BYTES;
+const byteLength = (part: string): number => new TextEncoder().encode(part).length;
 const TEMPLATE_PATTERN = /\{\{|\$\{/;
 // Format and default-ignorable characters, like a zero-width space, make a name you can't see.
 const WHITESPACE_CONTROL_OR_INVISIBLE_CHARS =
@@ -64,7 +66,7 @@ export const parseOtelDataStreamName = (
   };
 };
 
-const validatePart = (part: string): OtelDataStreamNameError | undefined => {
+const validatePart = (part: string, maxBytes: number): OtelDataStreamNameError | undefined => {
   if (TEMPLATE_PATTERN.test(part)) {
     return 'template';
   }
@@ -83,34 +85,35 @@ const validatePart = (part: string): OtelDataStreamNameError | undefined => {
   if (RESERVED_STREAM_NAMES.includes(part)) {
     return 'invalidName';
   }
-  if (part.length > MAX_OTEL_DATA_STREAM_PART_LENGTH) {
+  if (byteLength(part) > maxBytes) {
     return 'partTooLong';
   }
   return undefined;
 };
 
-/** Checks the parts of an OTel data stream name. They are checked as given, so trim them first. */
-export const validateOtelDataStreamName = (
-  signal: OtelDataStreamSignal,
-  name: OtelDataStreamName
-): OtelDataStreamNameError | undefined => {
-  const { dataset, namespace } = name;
+/**
+ * Checks the parts of an OTel data stream name as given, so trim them first. Mirrors streams-transpiler
+ * `checkDataset` and `checkNamespace`, and also keeps `-` out of the namespace, as Fleet does.
+ */
+export const validateOtelDataStreamName = ({
+  dataset,
+  namespace,
+}: OtelDataStreamName): OtelDataStreamNameError | undefined => {
   if (!dataset.trim()) {
     return 'datasetRequired';
   }
   if (!namespace.trim()) {
     return 'namespaceRequired';
   }
-  const partError = validatePart(dataset) ?? validatePart(namespace);
+  const partError =
+    validatePart(dataset, MAX_OTEL_DATASET_BYTES) ??
+    validatePart(namespace, MAX_OTEL_NAMESPACE_BYTES);
   if (partError) {
     return partError;
   }
-  // Prometheus remote write for a metrics name lands in the longer `.prometheus-` data stream.
-  const tooLong =
-    exceedsIndexNameBytes(composeOtelDataStreamName(signal, name)) ||
-    (signal === 'metrics' &&
-      exceedsIndexNameBytes(`metrics-${dataset}${PROMETHEUS_TYPE_SEPARATOR}${namespace}`));
-  return tooLong ? 'tooLong' : undefined;
+  return DATASET_TYPE_SUFFIXES.some((suffix) => dataset.endsWith(suffix))
+    ? 'typeSuffix'
+    : undefined;
 };
 
 /**
@@ -122,5 +125,5 @@ export const validateOtelDataStreamIndex = (
   index: string
 ): OtelDataStreamNameError | 'shape' | undefined => {
   const name = parseOtelDataStreamName(signal, index);
-  return name ? validateOtelDataStreamName(signal, name) : 'shape';
+  return name ? validateOtelDataStreamName(name) : 'shape';
 };

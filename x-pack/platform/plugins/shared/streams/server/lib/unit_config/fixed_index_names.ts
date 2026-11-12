@@ -6,7 +6,8 @@
  */
 
 import {
-  MAX_OTEL_DATA_STREAM_NAME_BYTES,
+  MAX_OTEL_DATASET_BYTES,
+  MAX_OTEL_NAMESPACE_BYTES,
   readUnitDestinationConfigValue,
   validateOtelDataStreamIndex,
   type OtelDataStreamNameError,
@@ -106,8 +107,8 @@ const REASONS: Record<OtelDataStreamNameError, string> = {
   hyphen: 'the dataset and namespace cannot contain "-"',
   invalidCharacter: 'it cannot contain whitespace, invisible characters or \\ / * ? " < > | , # :',
   invalidName: 'the dataset and namespace cannot be "." or ".."',
-  partTooLong: 'the dataset and namespace are limited to 100 characters',
-  tooLong: `the data stream name, or for metrics the metrics-<dataset>.prometheus-<namespace> name, is longer than ${MAX_OTEL_DATA_STREAM_NAME_BYTES} bytes`,
+  typeSuffix: 'the dataset cannot end in .otel or .prometheus, which are added to it',
+  partTooLong: `the dataset can be at most ${MAX_OTEL_DATASET_BYTES} bytes and the namespace at most ${MAX_OTEL_NAMESPACE_BYTES}`,
 };
 
 export const describeInvalidFixedIndex = ({

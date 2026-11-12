@@ -72,14 +72,14 @@ export const composeOtelIndex = (
   name: OtelDataStreamName
 ): string => (name.dataset.trim() ? composeOtelDataStreamName(signal, name) : '');
 
-export const validateOtelName = (
-  signal: PrefixedDestinationSignal,
-  { dataset, namespace }: OtelDataStreamName
-): OtelNameValidationError | undefined => {
+export const validateOtelName = ({
+  dataset,
+  namespace,
+}: OtelDataStreamName): OtelNameValidationError | undefined => {
   if (!dataset.trim()) {
     return undefined;
   }
-  const error = validateOtelDataStreamName(signal, {
+  const error = validateOtelDataStreamName({
     dataset: dataset.trim(),
     namespace: namespace.trim(),
   });

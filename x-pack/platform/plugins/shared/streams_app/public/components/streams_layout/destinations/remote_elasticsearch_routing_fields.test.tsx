@@ -85,7 +85,7 @@ describe('RemoteElasticsearchRoutingFields', () => {
     });
     expect(
       screen.getByText(
-        'Saved as logs-billing.otel-prod, metrics-billing.otel-prod and traces-billing.otel-prod.'
+        'Saved as logs-billing.otel-prod, metrics-billing.otel-prod and traces-billing.otel-prod. Prometheus remote write metrics go to metrics-billing.prometheus-prod.'
       )
     ).toBeInTheDocument();
     expect(getValues().elasticsearch).toEqual(EMPTY_DESTINATION_CREATION_FORM.elasticsearch);

@@ -548,11 +548,11 @@ describe('validateOtelName', () => {
     [{ dataset: '  ', namespace: 'a b' }, undefined],
     [{ dataset: 'billing', namespace: 'default' }, undefined],
     [{ dataset: ' billing ', namespace: ' prod ' }, undefined],
-    [{ dataset: 'billing.otel', namespace: 'default' }, undefined],
+    [{ dataset: 'billing.otel', namespace: 'default' }, 'typeSuffix'],
     [{ dataset: 'billing', namespace: ' ' }, 'namespaceRequired'],
     [{ dataset: 'my-app', namespace: 'default' }, 'hyphen'],
     [{ dataset: 'billing', namespace: 'a b' }, 'invalidCharacter'],
   ])('%j -> %s', (name, expected) => {
-    expect(validateOtelName('logs', name)).toBe(expected);
+    expect(validateOtelName(name)).toBe(expected);
   });
 });

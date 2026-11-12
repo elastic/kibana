@@ -6,10 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  MAX_OTEL_DATA_STREAM_NAME_BYTES,
-  MAX_OTEL_DATA_STREAM_PART_LENGTH,
-} from '@kbn/streams-schema';
+import { MAX_OTEL_DATASET_BYTES, MAX_OTEL_NAMESPACE_BYTES } from '@kbn/streams-schema';
 import { MAX_RESOLVE_INDEX_PATTERNS } from '@kbn/streams-plugin/common';
 import { MAX_INDEX_NAME_BYTES } from './destination_models';
 import { DESTINATION_SIGNAL_LABELS } from './destination_type_config';
@@ -60,16 +57,15 @@ export const otelNameErrorText = (
       return i18n.translate('xpack.streams.destinations.otelNameInvalidNameErrorMessage', {
         defaultMessage: 'Dataset and namespace cannot be "." or "..".',
       });
+    case 'typeSuffix':
+      return i18n.translate('xpack.streams.destinations.otelNameTypeSuffixErrorMessage', {
+        defaultMessage: 'Dataset cannot end in .otel or .prometheus. Those are added for you.',
+      });
     case 'partTooLong':
       return i18n.translate('xpack.streams.destinations.otelNamePartTooLongErrorMessage', {
-        defaultMessage: 'Dataset and namespace can be at most {max} characters each.',
-        values: { max: MAX_OTEL_DATA_STREAM_PART_LENGTH },
-      });
-    case 'tooLong':
-      return i18n.translate('xpack.streams.destinations.otelNameTooLongErrorMessage', {
         defaultMessage:
-          'Dataset and namespace are too long. Each data stream name, including the Prometheus one for metrics, can be at most {max} bytes.',
-        values: { max: MAX_OTEL_DATA_STREAM_NAME_BYTES },
+          'Dataset can be at most {datasetMax} bytes and namespace at most {namespaceMax} bytes.',
+        values: { datasetMax: MAX_OTEL_DATASET_BYTES, namespaceMax: MAX_OTEL_NAMESPACE_BYTES },
       });
     default:
       return undefined;

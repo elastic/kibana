@@ -12,15 +12,12 @@ import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eu
 import { i18n } from '@kbn/i18n';
 import {
   OTEL_TYPE_SEPARATOR,
+  PROMETHEUS_TYPE_SEPARATOR,
   composeOtelDataStreamName,
   validateOtelDataStreamName,
   type OtelDataStreamName,
 } from '@kbn/streams-schema';
-import {
-  PREFIXED_DESTINATION_SIGNALS,
-  SIGNAL_INDEX_FIELDS,
-  composeOtelIndex,
-} from './destination_models';
+import { SIGNAL_INDEX_FIELDS, composeOtelIndex } from './destination_models';
 import { DESTINATION_SIGNAL_LABELS } from './destination_type_config';
 import type { DestinationCreationFormData, PrefixedDestinationSignal } from './types';
 import { INDEX_NAME_PREPEND, SignalPrepend } from './writing_mode_panel';
@@ -55,28 +52,52 @@ const getAriaLabels = (signal: PrefixedDestinationSignal | undefined) =>
         }),
       };
 
-/** The index a name is saved as, with a placeholder for each empty part, for help text. */
-export const getSavedAsName = (
-  signal: PrefixedDestinationSignal,
-  { dataset, namespace }: OtelDataStreamName
-): string =>
-  composeOtelDataStreamName(signal, {
-    dataset: dataset.trim() || '<dataset>',
-    namespace: namespace.trim() || '<namespace>',
-  });
+const withPlaceholders = ({ dataset, namespace }: OtelDataStreamName): OtelDataStreamName => ({
+  dataset: dataset.trim() || '<dataset>',
+  namespace: namespace.trim() || '<namespace>',
+});
+
+/** Where a name's data lands, with a placeholder for each empty part. */
+const getSavedAsHelpText = (
+  signal: PrefixedDestinationSignal | undefined,
+  name: OtelDataStreamName
+): string | undefined => {
+  const parts = withPlaceholders(name);
+  const prometheus = `metrics-${parts.dataset}${PROMETHEUS_TYPE_SEPARATOR}${parts.namespace}`;
+  if (!signal) {
+    return i18n.translate('xpack.streams.destinations.sharedIndexSavedAsHelp', {
+      defaultMessage:
+        'Saved as {logs}, {metrics} and {traces}. Prometheus remote write metrics go to {prometheus}.',
+      values: {
+        logs: composeOtelDataStreamName('logs', parts),
+        metrics: composeOtelDataStreamName('metrics', parts),
+        traces: composeOtelDataStreamName('traces', parts),
+        prometheus,
+      },
+    });
+  }
+  if (!name.dataset.trim()) {
+    return undefined;
+  }
+  const index = composeOtelDataStreamName(signal, parts);
+  return signal === 'metrics'
+    ? i18n.translate('xpack.streams.destinations.metricsIndexSavedAsHelp', {
+        defaultMessage: 'Saved as {index}. Prometheus remote write metrics go to {prometheus}.',
+        values: { index, prometheus },
+      })
+    : i18n.translate('xpack.streams.destinations.signalIndexSavedAsHelp', {
+        defaultMessage: 'Saved as {index}.',
+        values: { index },
+      });
+};
 
 /** Empty parts read as placeholders in the help text, so only a filled part can make it wrong. */
-const hasInvalidFilledPart = (
-  signal: PrefixedDestinationSignal | undefined,
-  { dataset, namespace }: OtelDataStreamName
-): boolean =>
-  (signal ? [signal] : PREFIXED_DESTINATION_SIGNALS).some((nameSignal) =>
-    Boolean(
-      validateOtelDataStreamName(nameSignal, {
-        dataset: dataset.trim() || 'x',
-        namespace: namespace.trim() || 'x',
-      })
-    )
+const hasInvalidFilledPart = ({ dataset, namespace }: OtelDataStreamName): boolean =>
+  Boolean(
+    validateOtelDataStreamName({
+      dataset: dataset.trim() || 'x',
+      namespace: namespace.trim() || 'x',
+    })
   );
 
 // A long name has no hyphen to break at.
@@ -87,7 +108,6 @@ interface OtelNameFieldsProps {
   signal?: PrefixedDestinationSignal;
   value: OtelDataStreamName;
   errorText?: string;
-  helpText?: string;
   disabled: boolean;
   testSubjPrefix: string;
   onChange: (name: OtelDataStreamName) => void;
@@ -105,7 +125,7 @@ const OtelNameInputs = ({
   testSubjPrefix,
   onChange,
   onBlur,
-}: Omit<OtelNameFieldsProps, 'helpText'> & { id?: string; 'aria-describedby'?: string }) => {
+}: OtelNameFieldsProps & { id?: string; 'aria-describedby'?: string }) => {
   const ariaLabels = getAriaLabels(signal);
   const isInvalid = Boolean(errorText);
   return (
@@ -150,14 +170,16 @@ const OtelNameInputs = ({
 };
 
 /** Dataset and namespace inputs for an OTel data stream name, `<signal>-<dataset>.otel-<namespace>`. */
-export const OtelNameFields = ({ helpText, ...props }: OtelNameFieldsProps) => {
+export const OtelNameFields = (props: OtelNameFieldsProps) => {
   // Errors wait for blur, so the help text would name an invalid index while typing.
-  const showHelpText =
-    helpText && !props.errorText && !hasInvalidFilledPart(props.signal, props.value);
+  const helpText =
+    props.errorText || hasInvalidFilledPart(props.value)
+      ? undefined
+      : getSavedAsHelpText(props.signal, props.value);
   return (
     <EuiFormRow
       fullWidth
-      helpText={showHelpText ? <span css={helpTextStyles}>{helpText}</span> : undefined}
+      helpText={helpText && <span css={helpTextStyles}>{helpText}</span>}
       isInvalid={Boolean(props.errorText)}
       error={props.errorText}
     >

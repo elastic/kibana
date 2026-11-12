@@ -188,11 +188,16 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
         })
       : undefined;
   const createError = apiKeyError ?? persistenceError;
-  // Create sits below the details step, so the body is usually scrolled past the callout.
-  const scrollToCreateError = useCallback(
+  // Create sits below the details step, so the body is usually scrolled past the callout. Create is
+  // also disabled while it runs, which drops focus to the body, so the callout takes it.
+  const revealCreateError = useCallback(
     (callout: HTMLDivElement | null) => {
-      if (createError) {
-        callout?.scrollIntoView({ block: 'nearest' });
+      if (!createError || !callout) {
+        return;
+      }
+      callout.scrollIntoView({ block: 'nearest' });
+      if (document.activeElement === document.body) {
+        callout.focus({ preventScroll: true });
       }
     },
     [createError]
@@ -228,7 +233,7 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
       </EuiModalHeader>
       <EuiModalBody>
         {createError && (
-          <div ref={scrollToCreateError}>
+          <div ref={revealCreateError} tabIndex={-1}>
             <KbnDangerCallout
               announceOnMount
               title={

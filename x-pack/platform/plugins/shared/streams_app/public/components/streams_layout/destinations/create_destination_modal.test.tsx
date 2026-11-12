@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createDefaultUnit } from '../../../services/unit_repository';
 import { CreateDestinationModal } from './create_destination_modal';
@@ -23,7 +23,7 @@ const SIGNAL_NAME_REQUIRED = 'Name at least one signal.';
 const HYPHEN_ERROR = 'Dataset and namespace cannot contain "-".';
 const UPPERCASE_ERROR = 'Dataset and namespace must be lowercase.';
 const SAVED_AS_BILLING =
-  'Saved as logs-billing.otel-default, metrics-billing.otel-default and traces-billing.otel-default.';
+  'Saved as logs-billing.otel-default, metrics-billing.otel-default and traces-billing.otel-default. Prometheus remote write metrics go to metrics-billing.prometheus-default.';
 const SHARED_DATASET = 'streamsCreateDestinationIndexDataset';
 const SHARED_NAMESPACE = 'streamsCreateDestinationIndexNamespace';
 const signalDataset = (signal: PrefixedDestinationSignal) =>
@@ -39,26 +39,31 @@ const savedConfig = (elasticsearch: ElasticsearchDestinationFormData) =>
     ...getDestinationCreateSpec(elasticsearch),
   }).config;
 
-const renderModal = (
-  overrides: Partial<React.ComponentProps<typeof CreateDestinationModal>['destinations']> = {}
-) => {
+type ModalDestinations = React.ComponentProps<typeof CreateDestinationModal>['destinations'];
+
+const renderModal = (overrides: Partial<ModalDestinations> = {}) => {
   const createDestination = jest.fn();
-  render(
+  const unitDefinition = createDefaultUnit();
+  const modal = (destinationOverrides: Partial<ModalDestinations>) => (
     <I18nProvider>
       <CreateDestinationModal
         destinations={{
           createDestination,
-          unitDefinition: createDefaultUnit(),
+          unitDefinition,
           isUnitSaving: false,
           isCreatingDestination: false,
           isCreateFailed: false,
-          ...overrides,
+          ...destinationOverrides,
         }}
         onClose={jest.fn()}
       />
     </I18nProvider>
   );
-  return { createDestination };
+  const { rerender } = render(modal(overrides));
+  return {
+    createDestination,
+    rerenderWith: (next: Partial<ModalDestinations>) => rerender(modal(next)),
+  };
 };
 
 const click = (testSubject: string) => fireEvent.click(screen.getByTestId(testSubject));
@@ -128,21 +133,44 @@ describe('CreateDestinationModal', () => {
     ).toBeChecked();
   });
 
-  it('scrolls a create error into view', () => {
-    // jsdom has no scrollIntoView.
+  describe('create errors', () => {
     const scrollIntoView = jest.fn();
-    Object.defineProperty(Element.prototype, 'scrollIntoView', {
-      configurable: true,
-      value: scrollIntoView,
-    });
-    try {
-      renderModal({ apiKeyError: 'Missing privileges' });
+    const errorCallout = () =>
+      screen.getByText('Missing privileges').closest<HTMLElement>('[tabindex="-1"]');
 
-      expect(screen.getByText('Missing privileges')).toBeInTheDocument();
-      expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest' });
-    } finally {
+    beforeEach(() => {
+      scrollIntoView.mockClear();
+      // jsdom has no scrollIntoView.
+      Object.defineProperty(Element.prototype, 'scrollIntoView', {
+        configurable: true,
+        value: scrollIntoView,
+      });
+    });
+
+    afterEach(() => {
       Reflect.deleteProperty(Element.prototype, 'scrollIntoView');
-    }
+    });
+
+    it('scrolls the error into view and takes the focus a disabled Create button dropped', () => {
+      const { rerenderWith } = renderModal();
+      act(() => (document.activeElement as HTMLElement | null)?.blur());
+
+      rerenderWith({ apiKeyError: 'Missing privileges' });
+
+      expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest' });
+      expect(errorCallout()).toHaveFocus();
+    });
+
+    it('leaves the focus where the user put it', () => {
+      const { rerenderWith } = renderModal();
+      const name = screen.getByTestId('streamsCreateDestinationName');
+      act(() => name.focus());
+
+      rerenderWith({ apiKeyError: 'Missing privileges' });
+
+      expect(scrollIntoView).toHaveBeenCalled();
+      expect(name).toHaveFocus();
+    });
   });
 
   it('submits the form values', async () => {
@@ -222,7 +250,7 @@ describe('CreateDestinationModal', () => {
       chooseFixed();
       expect(
         screen.getByText(
-          'Saved as logs-<dataset>.otel-default, metrics-<dataset>.otel-default and traces-<dataset>.otel-default.'
+          'Saved as logs-<dataset>.otel-default, metrics-<dataset>.otel-default and traces-<dataset>.otel-default. Prometheus remote write metrics go to metrics-<dataset>.prometheus-default.'
         )
       ).toBeInTheDocument();
 
@@ -265,7 +293,11 @@ describe('CreateDestinationModal', () => {
       setFieldValue(signalNamespace('logs'), 'prod');
       setFieldValue(signalDataset('metrics'), 'app');
       setFieldValue(signalNamespace('metrics'), 'prod');
-      expect(screen.getByText('Saved as metrics-app.otel-prod.')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Saved as metrics-app.otel-prod. Prometheus remote write metrics go to metrics-app.prometheus-prod.'
+        )
+      ).toBeInTheDocument();
       setFieldValue('streamsCreateDestinationName', 'Billing');
       click('streamsCreateDestinationSubmit');
 
@@ -314,7 +346,11 @@ describe('CreateDestinationModal', () => {
       fireEvent.blur(screen.getByTestId(signalDataset('logs')));
 
       expect(screen.getAllByText(HYPHEN_ERROR)).toHaveLength(1);
-      expect(screen.getByText('Saved as metrics-app.otel-default.')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Saved as metrics-app.otel-default. Prometheus remote write metrics go to metrics-app.prometheus-default.'
+        )
+      ).toBeInTheDocument();
     });
 
     it('hides the shared help text while a filled part is invalid', () => {
@@ -399,7 +435,9 @@ describe('CreateDestinationModal', () => {
       expect(fieldValue(SHARED_DATASET)).toBe('a');
       expect(fieldValue(SHARED_NAMESPACE)).toBe('prod');
       expect(
-        screen.getByText('Saved as logs-a.otel-prod, metrics-a.otel-prod and traces-a.otel-prod.')
+        screen.getByText(
+          'Saved as logs-a.otel-prod, metrics-a.otel-prod and traces-a.otel-prod. Prometheus remote write metrics go to metrics-a.prometheus-prod.'
+        )
       ).toBeInTheDocument();
 
       click('streamsCreateDestinationIndexNaming-perSignal');
@@ -444,6 +482,17 @@ describe('CreateDestinationModal', () => {
   });
 
   describe('Documents', () => {
+    it('swaps the write patterns help text for their errors', () => {
+      renderModal();
+      useCustomIndexNames();
+      const docsHelp = 'Documents must start with logs-, metrics- or traces-.';
+      expect(screen.getByText(docsHelp)).toBeInTheDocument();
+
+      addDocsPattern(docsPatternsInput(), 'logs-Orders');
+
+      expect(screen.queryByText(docsHelp)).not.toBeInTheDocument();
+    });
+
     it('splits a pasted list into one entry per pattern and marks only the invalid one', () => {
       renderModal();
       useCustomIndexNames();

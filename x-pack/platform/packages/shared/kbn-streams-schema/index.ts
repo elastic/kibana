@@ -53,9 +53,10 @@ export {
   type UnitDestinationSignalTargets,
 } from './src/helpers/unit_destination_targets';
 export {
-  MAX_OTEL_DATA_STREAM_NAME_BYTES,
-  MAX_OTEL_DATA_STREAM_PART_LENGTH,
+  MAX_OTEL_DATASET_BYTES,
+  MAX_OTEL_NAMESPACE_BYTES,
   OTEL_TYPE_SEPARATOR,
+  PROMETHEUS_TYPE_SEPARATOR,
   composeOtelDataStreamName,
   parseOtelDataStreamName,
   validateOtelDataStreamIndex,

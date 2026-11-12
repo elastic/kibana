@@ -46,7 +46,9 @@ describe('validateOtelDataStreamName', () => {
   it.each([
     [{ dataset: 'billing', namespace: 'default' }, undefined],
     [{ dataset: 'nginx.access', namespace: 'prod' }, undefined],
-    [{ dataset: 'billing.otel', namespace: 'default' }, undefined],
+    [{ dataset: 'otel', namespace: 'default' }, undefined],
+    [{ dataset: 'billing.otel', namespace: 'default' }, 'typeSuffix'],
+    [{ dataset: 'node.prometheus', namespace: 'default' }, 'typeSuffix'],
     [{ dataset: ' ', namespace: 'default' }, 'datasetRequired'],
     [{ dataset: 'billing', namespace: ' ' }, 'namespaceRequired'],
     [{ dataset: '{{x}}', namespace: 'default' }, 'template'],
@@ -61,25 +63,16 @@ describe('validateOtelDataStreamName', () => {
     [{ dataset: 'billing', namespace: 'de\u00adfault' }, 'invalidCharacter'],
     [{ dataset: '..', namespace: 'default' }, 'invalidName'],
     [{ dataset: 'billing', namespace: '.' }, 'invalidName'],
-    [{ dataset: 'a'.repeat(100), namespace: 'default' }, undefined],
-    [{ dataset: 'a'.repeat(101), namespace: 'default' }, 'partTooLong'],
+    [{ dataset: 'a'.repeat(95), namespace: 'default' }, undefined],
+    [{ dataset: 'a'.repeat(96), namespace: 'default' }, 'partTooLong'],
+    [{ dataset: 'é'.repeat(47), namespace: 'default' }, undefined],
+    [{ dataset: 'é'.repeat(48), namespace: 'default' }, 'partTooLong'],
     [{ dataset: 'billing', namespace: 'a'.repeat(100) }, undefined],
     [{ dataset: 'billing', namespace: 'a'.repeat(101) }, 'partTooLong'],
-    [{ dataset: 'é'.repeat(100), namespace: 'a'.repeat(22) }, undefined],
-    [{ dataset: 'é'.repeat(100), namespace: 'a'.repeat(23) }, 'tooLong'],
-    [{ dataset: 'é'.repeat(100), namespace: 'é'.repeat(100) }, 'tooLong'],
+    [{ dataset: 'billing', namespace: 'é'.repeat(50) }, undefined],
+    [{ dataset: 'billing', namespace: 'é'.repeat(51) }, 'partTooLong'],
   ])('%j -> %s', (name, expected) => {
-    expect(validateOtelDataStreamName('logs', name)).toBe(expected);
-  });
-
-  it('keeps the derived Prometheus remote write name of metrics within 233 bytes', () => {
-    // 200 + 14 bytes: the otel name is 228 bytes, the prometheus name 234.
-    const name = { dataset: 'é'.repeat(100), namespace: 'a'.repeat(14) };
-    expect(validateOtelDataStreamName('logs', name)).toBeUndefined();
-    expect(validateOtelDataStreamName('metrics', name)).toBe('tooLong');
-    expect(
-      validateOtelDataStreamName('metrics', { dataset: 'é'.repeat(100), namespace: 'a'.repeat(13) })
-    ).toBeUndefined();
+    expect(validateOtelDataStreamName(name)).toBe(expected);
   });
 });
 
@@ -97,6 +90,7 @@ describe('validateOtelDataStreamIndex', () => {
     ['logs', 'logs-Billing.otel-default', 'uppercase'],
     ['logs', 'logs-.otel-default', 'datasetRequired'],
     ['logs', 'logs-billing.otel-', 'namespaceRequired'],
+    ['logs', 'logs-billing.otel.otel-default', 'typeSuffix'],
   ] as const)('%s %s -> %s', (signal, index, expected) => {
     expect(validateOtelDataStreamIndex(signal, index)).toBe(expected);
   });

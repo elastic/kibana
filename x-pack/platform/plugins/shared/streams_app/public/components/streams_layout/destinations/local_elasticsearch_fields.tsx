@@ -18,7 +18,7 @@ import type { OtelDataStreamName } from '@kbn/streams-schema';
 import { PREFIXED_DESTINATION_SIGNALS, SIGNAL_INDEX_FIELDS } from './destination_models';
 import { DESTINATION_SIGNAL_LABELS } from './destination_type_config';
 import { DocsIndexField, DocsWritePatternsField } from './docs_target_fields';
-import { OtelNameFields, getSavedAsName, useSetOtelName } from './otel_name_fields';
+import { OtelNameFields, useSetOtelName } from './otel_name_fields';
 import {
   EMPTY_ELASTICSEARCH_DESTINATION_FORM,
   EMPTY_STATIC_NAMES,
@@ -281,14 +281,6 @@ const StaticFields = ({
           <OtelNameFields
             value={staticNames.logs}
             errorText={sharedError}
-            helpText={i18n.translate('xpack.streams.destinations.sharedIndexSavedAsHelp', {
-              defaultMessage: 'Saved as {logs}, {metrics} and {traces}.',
-              values: {
-                logs: getSavedAsName('logs', staticNames.logs),
-                metrics: getSavedAsName('metrics', staticNames.logs),
-                traces: getSavedAsName('traces', staticNames.logs),
-              },
-            })}
             disabled={disabled}
             testSubjPrefix="streamsCreateDestinationIndex"
             onChange={setSharedName}
@@ -306,31 +298,20 @@ const StaticFields = ({
           help={requiredError ?? UNNAMED_SIGNALS_HELP}
           isHelpError={Boolean(requiredError)}
         >
-          {PREFIXED_DESTINATION_SIGNALS.map((signal) => {
-            const index = elasticsearch[SIGNAL_INDEX_FIELDS[signal]];
-            return (
-              <React.Fragment key={signal}>
-                <OtelNameFields
-                  signal={signal}
-                  value={staticNames[signal]}
-                  errorText={otelNameErrorText(errors[SIGNAL_INDEX_FIELDS[signal]])}
-                  helpText={
-                    index
-                      ? i18n.translate('xpack.streams.destinations.signalIndexSavedAsHelp', {
-                          defaultMessage: 'Saved as {index}.',
-                          values: { index },
-                        })
-                      : undefined
-                  }
-                  disabled={disabled}
-                  testSubjPrefix={`streamsCreateDestination-${signal}-index`}
-                  onChange={(name) => setOtelName(signal, name)}
-                  onBlur={indexFields[signal].onBlur}
-                />
-                <EuiSpacer size="s" />
-              </React.Fragment>
-            );
-          })}
+          {PREFIXED_DESTINATION_SIGNALS.map((signal) => (
+            <React.Fragment key={signal}>
+              <OtelNameFields
+                signal={signal}
+                value={staticNames[signal]}
+                errorText={otelNameErrorText(errors[SIGNAL_INDEX_FIELDS[signal]])}
+                disabled={disabled}
+                testSubjPrefix={`streamsCreateDestination-${signal}-index`}
+                onChange={(name) => setOtelName(signal, name)}
+                onBlur={indexFields[signal].onBlur}
+              />
+              <EuiSpacer size="s" />
+            </React.Fragment>
+          ))}
           {docsIndexRow}
         </SignalFieldsBox>
       )}

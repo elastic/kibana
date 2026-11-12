@@ -171,7 +171,7 @@ const getRemoteElasticsearchErrors = (
     errors.staticIndexes = 'required';
   }
   for (const signal of PREFIXED_DESTINATION_SIGNALS) {
-    const error = validateOtelName(signal, remoteElasticsearch.staticNames[signal]);
+    const error = validateOtelName(remoteElasticsearch.staticNames[signal]);
     if (error) {
       errors[SIGNAL_INDEX_FIELDS[signal]] = error;
     }
@@ -241,7 +241,7 @@ const getLocalElasticsearchErrors = (
     errors.staticIndexes = 'required';
   }
   for (const signal of PREFIXED_DESTINATION_SIGNALS) {
-    const error = validateOtelName(signal, elasticsearch.staticNames[signal]);
+    const error = validateOtelName(elasticsearch.staticNames[signal]);
     if (error) {
       errors[SIGNAL_INDEX_FIELDS[signal]] = error;
     }
