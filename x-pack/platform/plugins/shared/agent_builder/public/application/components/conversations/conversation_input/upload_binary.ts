@@ -37,15 +37,23 @@ export const uploadBinary = async ({
   binaryFilesClient: ScopedFilesClient;
   signal: AbortSignal;
 }): Promise<UploadBinaryResult> => {
+  const deleteFile = (id: string) => binaryFilesClient.delete({ id }).catch(() => {});
+
   let fileId: string;
   try {
     const { file: fileEntry } = await binaryFilesClient.create({ name, mimeType });
     fileId = fileEntry.id;
+    if (signal.aborted) {
+      // Aborted while the file was created: the upload never starts, so nothing deletes it.
+      await deleteFile(fileId);
+      return { status: 'aborted' };
+    }
     await binaryFilesClient.upload({
       id: fileId,
       body: file,
       contentType: mimeType,
       abortSignal: signal,
+      // Aborted during the upload: Files deletes the file.
       selfDestructOnAbort: true,
     });
   } catch {
@@ -56,7 +64,7 @@ export const uploadBinary = async ({
 
   if (signal.aborted) {
     // Aborted right after the upload finished: nothing else owns this file yet.
-    await binaryFilesClient.delete({ id: fileId }).catch(() => {});
+    await deleteFile(fileId);
     return { status: 'aborted' };
   }
 

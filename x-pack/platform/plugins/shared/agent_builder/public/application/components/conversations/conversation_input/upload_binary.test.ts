@@ -96,6 +96,18 @@ describe('uploadBinary', () => {
     expect(binaryFilesClient.delete).not.toHaveBeenCalled();
   });
 
+  it('deletes the file and skips the upload when aborted while the file is created', async () => {
+    const { binaryFilesClient, controller, run } = setup();
+    binaryFilesClient.create.mockImplementation(async () => {
+      controller.abort();
+      return { file: { id: 'file-1' } };
+    });
+
+    await expect(run()).resolves.toEqual({ status: 'aborted' });
+    expect(binaryFilesClient.upload).not.toHaveBeenCalled();
+    expect(binaryFilesClient.delete).toHaveBeenCalledWith({ id: 'file-1' });
+  });
+
   it('deletes the file itself when aborted right after the upload', async () => {
     const { binaryFilesClient, controller, run } = setup();
     binaryFilesClient.upload.mockImplementation(async () => {

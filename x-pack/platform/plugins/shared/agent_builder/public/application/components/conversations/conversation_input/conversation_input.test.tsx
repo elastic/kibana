@@ -854,11 +854,16 @@ describe('ConversationInput', () => {
       type: 'text',
       data: { content: '# Notes', name: 'notes.md' },
     };
-    const setAttachments = (attachments: unknown[], removeAttachment = jest.fn()) =>
+    const setAttachments = (
+      attachments: unknown[],
+      removeAttachment = jest.fn(),
+      removeAttachments = jest.fn()
+    ) =>
       mockedUseConversationContext.mockReturnValue({
         attachments,
         upsertAttachments: jest.fn(),
         removeAttachment,
+        removeAttachments,
         resetAttachments: jest.fn(),
         isEmbeddedContext: false,
         conversationActions: {} as never,
@@ -1102,12 +1107,15 @@ describe('ConversationInput', () => {
 
     it('removes an added PDF through the binary upload, not as a plain attachment', () => {
       const removeAttachment = jest.fn();
-      setAttachments([binaryAttachment], removeAttachment);
+      const removeAttachments = jest.fn();
+      setAttachments([binaryAttachment], removeAttachment, removeAttachments);
 
       renderInput(<ConversationInput />);
       fireEvent.click(screen.getByTestId('mock-remove-attachment-pdf-1'));
 
       expect(handleRemoveBinary).toHaveBeenCalledWith('invoice.pdf');
+      // A host may have added the PDF, so the pill removes that exact attachment too.
+      expect(removeAttachments).toHaveBeenCalledWith([binaryAttachment]);
       expect(removeAttachment).not.toHaveBeenCalled();
     });
 

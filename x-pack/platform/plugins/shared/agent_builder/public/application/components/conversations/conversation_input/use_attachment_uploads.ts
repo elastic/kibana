@@ -52,7 +52,7 @@ export const useAttachmentUploads = ({
   addErrorToast,
   messageEditorController,
 }: UseAttachmentUploadsParams) => {
-  const { attachments } = useConversationContext();
+  const { attachments, removeAttachments } = useConversationContext();
 
   const {
     uploadingNames,
@@ -160,7 +160,10 @@ export const useAttachmentUploads = ({
     (attachment: ConversationAttachment) => {
       if (!('items' in attachment)) {
         if (attachment.type === AttachmentType.binary) {
-          if (attachment.description) handleRemoveBinary(attachment.description);
+          const binaryName = getFileAttachmentInfo(attachment)?.name;
+          if (binaryName) handleRemoveBinary(binaryName);
+          // The hook removes only the PDFs it added; a host may have added this one.
+          removeAttachments?.([attachment]);
           return;
         }
         const textFileName = getTextFileName(attachment);
@@ -171,7 +174,7 @@ export const useAttachmentUploads = ({
       }
       handleRemoveImageAttachment?.(attachment);
     },
-    [handleRemoveBinary, handleRemoveTextFile, handleRemoveImageAttachment]
+    [handleRemoveBinary, removeAttachments, handleRemoveTextFile, handleRemoveImageAttachment]
   );
 
   const handleRemoveLoadingFile = useCallback(

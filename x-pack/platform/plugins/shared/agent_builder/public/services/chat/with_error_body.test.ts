@@ -41,6 +41,27 @@ describe('withErrorBody', () => {
     expect(thrown.body).toBeNull();
   });
 
+  it('keeps a body that is already read', async () => {
+    const error = Object.assign(httpError(jsonResponse({ message: 'from the response' })), {
+      body: { message: 'already read' },
+    });
+
+    const thrown = await withErrorBody(Promise.reject(error)).catch((e) => e);
+
+    expect(thrown.body).toEqual({ message: 'already read' });
+  });
+
+  it('keeps the error when the response body was used', async () => {
+    const response = jsonResponse({ message: 'gone' });
+    await response.text();
+    const error = httpError(response);
+
+    const thrown = await withErrorBody(Promise.reject(error)).catch((e) => e);
+
+    expect(thrown).toBe(error);
+    expect(thrown.body).toBeNull();
+  });
+
   it('keeps an error without a response, so a cut connection can still reattach', async () => {
     const error = httpError(undefined, 'Failed to fetch');
 

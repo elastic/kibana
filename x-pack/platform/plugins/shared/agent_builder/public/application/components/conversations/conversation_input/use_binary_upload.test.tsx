@@ -34,7 +34,6 @@ const addErrorToast = jest.fn();
 const messageEditorController = {
   getPlaceholderNames: jest.fn(),
   removePlaceholderByName: jest.fn(),
-  setPlaceholderAttachmentId: jest.fn(),
 };
 
 const setContext = ({
@@ -112,8 +111,6 @@ describe('useBinaryUpload', () => {
 
       expect(result.current.loadingBinaryNames.size).toBe(0);
       expect(upsertAttachments).toHaveBeenCalledWith([binaryAttachmentInput]);
-      // The server reads the file on Send, so the chip has no stored attachment to link to.
-      expect(messageEditorController.setPlaceholderAttachmentId).not.toHaveBeenCalled();
     }
   );
 
@@ -209,6 +206,22 @@ describe('useBinaryUpload', () => {
       expect(removeAttachments).not.toHaveBeenCalled();
     });
 
+    it('keeps a PDF with the same name that another feature added', async () => {
+      const hostAttachment = { type: 'binary', origin: 'host-file', description: 'invoice.pdf' };
+      const { result, rerender } = renderBinaryUpload();
+      paste(result);
+      await act(async () => {});
+      setContext({
+        conversationId: 'conv-1',
+        attachments: [hostAttachment, binaryAttachmentInput],
+      });
+      rerender();
+
+      act(() => result.current.handleAfterInput());
+
+      expect(removeAttachments).toHaveBeenCalledWith([binaryAttachmentInput]);
+    });
+
     it('keeps a binary attachment that another feature added', () => {
       const hostAttachment = { type: 'binary', origin: 'host-file', description: 'report.pdf' };
       setContext({ conversationId: 'conv-1', attachments: [hostAttachment] });
@@ -242,8 +255,21 @@ describe('useBinaryUpload', () => {
 
       expect(signalOfCall(0).aborted).toBe(true);
       expect(result.current.loadingBinaryNames.size).toBe(0);
-      await upload.resolve({ status: 'aborted' });
+      // The upload finished on the server before the abort arrived.
+      await upload.resolve(doneResult);
       expect(upsertAttachments).not.toHaveBeenCalled();
+    });
+
+    it('forgets the PDFs it added, so the next conversation keeps its attachments', async () => {
+      const { result, rerender } = renderBinaryUpload();
+      paste(result);
+      await act(async () => {});
+
+      setContext({ conversationId: 'conv-2', attachments: [binaryAttachmentInput] });
+      rerender();
+      act(() => result.current.handleAfterInput());
+
+      expect(removeAttachments).not.toHaveBeenCalled();
     });
 
     it('aborts the uploads in flight when the input unmounts', () => {

@@ -43,8 +43,8 @@ export const useBinaryUpload = ({
   ] = useSet<string>();
   // Uploads in flight, by file name.
   const controllers = useRef<Map<string, AbortController>>(new Map());
-  // Names of the PDFs this hook added, so binary attachments from other features stay.
-  const addedNames = useRef<Set<string>>(new Set());
+  // File id of each PDF this hook added, by name, so binary attachments from other features stay.
+  const addedFileIds = useRef<Map<string, string>>(new Map());
 
   const attachmentsRef = useRef(attachments);
   attachmentsRef.current = attachments;
@@ -52,11 +52,13 @@ export const useBinaryUpload = ({
   // Leaving the conversation or the agent stops the uploads. Uploaded files stay in Files.
   useEffect(() => {
     const inFlight = controllers.current;
+    const added = addedFileIds.current;
     return () => {
       for (const controller of inFlight.values()) {
         controller.abort();
       }
       inFlight.clear();
+      added.clear();
       clearLoadingNames();
     };
   }, [conversationId, agentId, clearLoadingNames]);
@@ -72,14 +74,15 @@ export const useBinaryUpload = ({
 
   const removeAttachmentsByName = useCallback(
     (names: readonly string[]) => {
-      if (names.length === 0) return;
-      for (const name of names) addedNames.current.delete(name);
+      const fileIds = new Set(names.flatMap((name) => addedFileIds.current.get(name) ?? []));
+      for (const name of names) addedFileIds.current.delete(name);
+      if (fileIds.size === 0) return;
       const toRemove = (attachmentsRef.current ?? []).filter(
         (attachment) =>
           !('items' in attachment) &&
           attachment.type === AttachmentType.binary &&
-          attachment.description !== undefined &&
-          names.includes(attachment.description)
+          attachment.origin !== undefined &&
+          fileIds.has(attachment.origin)
       );
       if (toRemove.length > 0) removeAttachments?.(toRemove);
     },
@@ -106,7 +109,7 @@ export const useBinaryUpload = ({
             messageEditorController.removePlaceholderByName(name, 'binary');
             return;
           }
-          addedNames.current.add(name);
+          addedFileIds.current.set(name, result.fileId);
           upsertAttachments([
             { type: AttachmentType.binary, origin: result.fileId, description: name },
           ]);
@@ -129,7 +132,9 @@ export const useBinaryUpload = ({
     for (const name of [...controllers.current.keys()]) {
       if (!chipNames.has(name)) stopUpload(name);
     }
-    removeAttachmentsByName([...addedNames.current].filter((name) => !chipNames.has(name)));
+    removeAttachmentsByName(
+      [...addedFileIds.current.keys()].filter((name) => !chipNames.has(name))
+    );
   }, [messageEditorController, stopUpload, removeAttachmentsByName]);
 
   const handleRemoveBinary = useCallback(

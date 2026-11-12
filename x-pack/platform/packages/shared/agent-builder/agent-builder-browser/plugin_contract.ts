@@ -149,7 +149,8 @@ export interface PublicEmbeddableConversationInputProps {
    * input calls this handler with the message and its attachments (e.g. pasted
    * images) instead of navigating to the Agent Builder app. Use this when
    * embedding the input in a host UI that handles the message locally (e.g.
-   * via `openChat`).
+   * via `openChat`). A pasted PDF comes as `{ type: 'binary', origin: <file id> }`
+   * with no `data`: pass it on as it is, the server reads the file when the message is sent.
    */
   onSubmit?: (message: string, attachments: ConversationAttachment[]) => void;
 }

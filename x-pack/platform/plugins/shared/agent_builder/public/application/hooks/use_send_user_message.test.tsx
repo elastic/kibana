@@ -91,6 +91,19 @@ describe('useSendUserMessage', () => {
     expect(resetAttachments).not.toHaveBeenCalled();
   });
 
+  it('sends a pasted PDF as its file id only, for the server to read', async () => {
+    const pdf = { type: AttachmentType.binary, origin: 'file-1', description: 'invoice.pdf' };
+    useConversationContext.mockReturnValue({ attachments: [pdf], removeAttachments });
+    const { result } = renderHook(() => useSendUserMessage(), { wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync('hello');
+    });
+
+    expect(sendUserMessage).toHaveBeenCalledWith(expect.objectContaining({ attachments: [pdf] }));
+    expect(removeAttachments).toHaveBeenCalledWith([pdf]);
+  });
+
   it('rejects without a conversation id and leaves the cache alone', async () => {
     useConversationId.mockReturnValue(undefined);
     const { result } = renderHook(() => useSendUserMessage(), { wrapper });

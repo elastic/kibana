@@ -68,13 +68,16 @@ describe('EmbeddableConversationInputInternal', () => {
       description: 'invoice.pdf',
     } as ConversationAttachment;
     mockAttachments.push(pdf);
-    const onSubmit = jest.fn();
-    renderInput(onSubmit);
+    try {
+      const onSubmit = jest.fn();
+      renderInput(onSubmit);
 
-    fireEvent.click(screen.getByText('Submit'));
+      fireEvent.click(screen.getByText('Submit'));
 
-    expect(onSubmit).toHaveBeenCalledWith('Build a workflow', expect.arrayContaining([pdf]));
-    mockAttachments.pop();
+      expect(onSubmit).toHaveBeenCalledWith('Build a workflow', expect.arrayContaining([pdf]));
+    } finally {
+      mockAttachments.pop();
+    }
   });
 
   it('navigates to Agent Builder with the attachments when onSubmit is not set', () => {
