@@ -14,8 +14,14 @@ import { aiIndexIdSchema } from './ki';
 export const READ_TRACE_TRANSCRIPTS_STEP_ID = 'context-engine.readTraceTranscripts' as const;
 
 /** The most rounds one read returns: each becomes a transcript the model reads. */
-export const MAX_TRACE_TRANSCRIPTS_READ_SIZE = 200;
+export const MAX_TRACE_TRANSCRIPTS_READ_SIZE = 2000;
 export const DEFAULT_TRACE_TRANSCRIPTS_READ_SIZE = 50;
+/** The most a read holds, in estimated tokens, across all its batches. */
+export const MAX_TRACE_TRANSCRIPTS_READ_TOKENS = 10_000_000;
+export const DEFAULT_TRACE_TRANSCRIPTS_READ_TOKENS = 2_000_000;
+/** The most one batch holds, in estimated tokens: what one model call reads. */
+export const MAX_TRACE_TRANSCRIPTS_BATCH_TOKENS = 1_000_000;
+export const DEFAULT_TRACE_TRANSCRIPTS_BATCH_TOKENS = 500_000;
 /** Rounds that ended this recently are left for the next run: their spans may still be exporting. */
 export const DEFAULT_TRACE_SETTLE_MINUTES = 5;
 const MAX_TIMESTAMP_LENGTH = 64;
@@ -44,6 +50,24 @@ export const readTraceTranscriptsInputSchema = lazySchema(() =>
       .optional()
       .describe(
         `How many rounds to read, oldest first. Defaults to ${DEFAULT_TRACE_TRANSCRIPTS_READ_SIZE}.`
+      ),
+    max_tokens: z
+      .number()
+      .int()
+      .min(1)
+      .max(MAX_TRACE_TRANSCRIPTS_READ_TOKENS)
+      .optional()
+      .describe(
+        `Stop the read before its transcripts exceed this many estimated tokens. Defaults to ${DEFAULT_TRACE_TRANSCRIPTS_READ_TOKENS}.`
+      ),
+    batch_tokens: z
+      .number()
+      .int()
+      .min(1)
+      .max(MAX_TRACE_TRANSCRIPTS_BATCH_TOKENS)
+      .optional()
+      .describe(
+        `The most estimated tokens of one batch: what one model call reads. Defaults to ${DEFAULT_TRACE_TRANSCRIPTS_BATCH_TOKENS}.`
       ),
     settle_minutes: z
       .number()
@@ -81,15 +105,20 @@ export const readTraceTranscriptsOutputSchema = lazySchema(() =>
       .describe(
         'One transcript per round, oldest first, shaped as the memories applyDreamChanges takes'
       ),
+    batches: z
+      .array(z.array(traceTranscriptMemorySchema))
+      .describe(
+        'The memories in batches for the model, a call each: rounds that share permissions, each conversation together and in order, whole conversations up to batch_tokens'
+      ),
     resume_from: z
       .string()
       .describe(
-        'Where the next read starts: the end of the last round read when size cut the read, else the end of the window read'
+        'Where the next read starts: the end of the last round read when size or max_tokens cut the read, else the end of the window read'
       ),
     resume_after: z
       .string()
       .optional()
-      .describe('Set when size cut the read: the trace id to pass as after'),
+      .describe('Set when size or max_tokens cut the read: the trace id to pass as after'),
     sources: z
       .array(
         z.object({
