@@ -32,6 +32,8 @@ import type {
   BulkDeleteObservablesRequest,
   FindObservablesRequest,
   FindObservablesResponse,
+  GetObservableMetadataRequest,
+  GetObservableMetadataResponse,
   FindCasesByObservableRequest,
   FindCasesByObservableResponse,
   CountCasesByObservablesRequest,
@@ -77,7 +79,7 @@ import {
   deleteObservable,
   updateObservable,
 } from './observables';
-import { findObservables, getObservablesByIds } from './find_observables';
+import { findObservables, getObservableMetadata, getObservablesByIds } from './find_observables';
 import { countByObservables, findByObservable } from './find_by_observable';
 import type { GetApplicableFieldsParams } from './applicable_fields';
 import { getApplicableFields } from './applicable_fields';
@@ -205,6 +207,14 @@ export interface CasesSubClient {
    */
   getObservablesByIds(caseId: string, ids: string[]): Promise<Observable[]>;
   /**
+   * Returns the shared metadata of a type key and value in the case's space and owner, whether or
+   * not the case holds the value
+   */
+  getObservableMetadata(
+    caseId: string,
+    params: GetObservableMetadataRequest
+  ): Promise<GetObservableMetadataResponse>;
+  /**
    * Returns a page of the cases of an owner holding an observable with the exact type key and
    * value, in either store
    */
@@ -253,6 +263,7 @@ const usageCounterByMethod = {
   bulkCreateObservables: 'bulk_create_observables',
   findObservables: null,
   getObservablesByIds: null,
+  getObservableMetadata: null,
   findByObservable: null,
   countByObservables: null,
   bulkDeleteObservables: 'bulk_delete_observables',
@@ -341,6 +352,8 @@ export const createCasesSubClient = (
       findObservables(caseId, params, clientArgs),
     getObservablesByIds: (caseId: string, ids: string[]) =>
       getObservablesByIds(caseId, ids, clientArgs),
+    getObservableMetadata: (caseId: string, params: GetObservableMetadataRequest) =>
+      getObservableMetadata(caseId, params, clientArgs),
     findByObservable: (params: FindCasesByObservableRequest) =>
       findByObservable(params, clientArgs),
     countByObservables: (params: CountCasesByObservablesRequest) =>

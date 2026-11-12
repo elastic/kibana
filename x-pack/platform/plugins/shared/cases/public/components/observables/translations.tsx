@@ -319,6 +319,10 @@ export const METADATA_HELP_TEXT = (max: number) =>
       'Metadata is shared by every case in this space that holds this value. Add up to {max} key and value pairs.',
   });
 
+export const METADATA_LOADING = i18n.translate('xpack.cases.caseView.observables.metadataLoading', {
+  defaultMessage: 'Loading the metadata of this value',
+});
+
 export const ADD_METADATA = i18n.translate('xpack.cases.caseView.observables.addMetadata', {
   defaultMessage: 'Add metadata',
 });

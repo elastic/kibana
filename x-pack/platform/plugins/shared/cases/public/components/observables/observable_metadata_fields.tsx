@@ -11,6 +11,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -90,15 +91,33 @@ const valueValidations: Array<{ validator: ValidationFunc }> = [
   },
 ];
 
+export interface ObservableMetadataFieldsProps {
+  /** The metadata of a new value is loading; the rows are replaced once it loads. */
+  isLoading?: boolean;
+}
+
 /**
  * Edits the free-form metadata of an observable value: up to 20 key and value pairs, shared by
  * every case of the space that holds the value.
  */
-export const ObservableMetadataFields = () => (
+export const ObservableMetadataFields = ({ isLoading = false }: ObservableMetadataFieldsProps) => (
   <>
-    <EuiTitle size="xxs">
-      <h4>{i18n.OBSERVABLE_METADATA}</h4>
-    </EuiTitle>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="xxs">
+          <h4>{i18n.OBSERVABLE_METADATA}</h4>
+        </EuiTitle>
+      </EuiFlexItem>
+      {isLoading && (
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner
+            size="s"
+            aria-label={i18n.METADATA_LOADING}
+            data-test-subj="observable-metadata-loading"
+          />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
     <EuiText size="xs" color="subdued">
       <p>{i18n.METADATA_HELP_TEXT(MAX_OBSERVABLE_METADATA_PAIRS)}</p>
     </EuiText>
@@ -126,6 +145,7 @@ export const ObservableMetadataFields = () => (
                       euiFieldProps: {
                         'data-test-subj': 'observable-metadata-key',
                         compressed: true,
+                        disabled: isLoading,
                       },
                     }}
                   />
@@ -139,6 +159,7 @@ export const ObservableMetadataFields = () => (
                       euiFieldProps: {
                         'data-test-subj': 'observable-metadata-value',
                         compressed: true,
+                        disabled: isLoading,
                       },
                     }}
                   />
@@ -150,6 +171,7 @@ export const ObservableMetadataFields = () => (
                       iconType="minusCircle"
                       aria-label={i18n.REMOVE_METADATA}
                       onClick={() => removeItem(item.id)}
+                      isDisabled={isLoading}
                       data-test-subj="observable-metadata-remove"
                       css={{ marginTop: 24 }}
                     />
@@ -166,6 +188,7 @@ export const ObservableMetadataFields = () => (
                 size="xs"
                 iconType="plusCircle"
                 onClick={addItem}
+                isDisabled={isLoading}
                 data-test-subj="observable-metadata-add"
               >
                 {i18n.ADD_METADATA}

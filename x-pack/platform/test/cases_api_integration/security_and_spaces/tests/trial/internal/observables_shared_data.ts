@@ -19,6 +19,7 @@ import {
   createCase,
   deleteAllCaseItems,
   findObservables,
+  getObservableMetadata,
   updateObservable,
 } from '../../../../common/lib/api';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -121,6 +122,36 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(await metadataOf(otherOwner.id, ipv4(8).value)).to.be(undefined);
         expect(await metadataOf(otherSpace.id, ipv4(8).value, 'space1')).to.be(undefined);
+      });
+
+      it('reads the metadata of a value from a case that does not hold it, in the case owner', async () => {
+        const source = await createCase(supertest, getPostCaseRequest());
+        const other = await createCase(supertest, getPostCaseRequest());
+        const otherOwner = await createCase(
+          supertest,
+          getPostCaseRequest({ owner: 'observabilityFixture' })
+        );
+
+        await addObservable({
+          supertest,
+          caseId: source.id,
+          params: { observable: { ...ipv4(8), metadata: { triage: 'confirmed' } } },
+        });
+
+        const params = { typeKey: ipv4(8).typeKey, value: ipv4(8).value };
+        expect(await getObservableMetadata({ supertest, caseId: other.id, params })).to.eql({
+          metadata: { triage: 'confirmed' },
+        });
+        expect(
+          await getObservableMetadata({
+            supertest,
+            caseId: other.id,
+            params: { ...params, value: ipv4(9).value },
+          })
+        ).to.eql({ metadata: {} });
+        expect(await getObservableMetadata({ supertest, caseId: otherOwner.id, params })).to.eql({
+          metadata: {},
+        });
       });
     });
 

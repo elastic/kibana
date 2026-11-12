@@ -50,6 +50,8 @@ import type {
   BulkCreateObservablesResponse,
   FindObservablesRequest,
   FindObservablesResponse,
+  GetObservableMetadataRequest,
+  GetObservableMetadataResponse,
   FindCasesByObservableRequest,
   FindCasesByObservableResponse,
   CountCasesByObservablesRequest,
@@ -71,6 +73,7 @@ import type {
 import {
   getCaseBulkCreateObservablesUrl,
   getCaseFindObservablesUrl,
+  getCaseObservableMetadataUrl,
   getCaseBulkDeleteObservablesUrl,
   getCaseCreateObservableUrl,
   getCaseDeleteObservableUrl,
@@ -1239,6 +1242,33 @@ export const findObservables = async ({
 }): Promise<FindObservablesResponse> => {
   const apiCall = supertest.post(
     `${getSpaceUrlPrefix(auth?.space)}${getCaseFindObservablesUrl(caseId)}`
+  );
+  void setupAuth({ apiCall, headers: {}, auth });
+
+  const { body } = await apiCall
+    .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
+    .send(params)
+    .expect(expectedHttpCode);
+
+  return body;
+};
+
+export const getObservableMetadata = async ({
+  supertest,
+  caseId,
+  params,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  params: GetObservableMetadataRequest;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null } | null;
+}): Promise<GetObservableMetadataResponse> => {
+  const apiCall = supertest.post(
+    `${getSpaceUrlPrefix(auth?.space)}${getCaseObservableMetadataUrl(caseId)}`
   );
   void setupAuth({ apiCall, headers: {}, auth });
 

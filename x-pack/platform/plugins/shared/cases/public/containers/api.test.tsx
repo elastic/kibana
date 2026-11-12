@@ -50,6 +50,7 @@ import {
   bulkDeleteObservables,
   findCasesByObservable,
   countCasesByObservables,
+  getObservableMetadata,
 } from './api';
 
 import {
@@ -1497,6 +1498,26 @@ describe('Cases API', () => {
         signal: abortCtrl.signal,
       });
       expect(resp).toEqual({ counts });
+    });
+  });
+
+  describe('getObservableMetadata', () => {
+    it('posts the type key and value to the internal route of the case', async () => {
+      const params = { typeKey: 'observable-type-ipv4', value: '10.0.0.8' };
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue({ metadata: { triage: 'confirmed' } });
+
+      const resp = await getObservableMetadata(mockCase.id, params, abortCtrl.signal);
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_INTERNAL_URL}/${mockCase.id}/observables/_metadata`,
+        {
+          method: 'POST',
+          body: JSON.stringify(params),
+          signal: abortCtrl.signal,
+        }
+      );
+      expect(resp).toEqual({ metadata: { triage: 'confirmed' } });
     });
   });
 

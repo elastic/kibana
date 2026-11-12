@@ -50,6 +50,8 @@ export const casesQueriesKeys = {
     [...casesQueriesKeys.case(id), 'files', params] as const,
   caseObservables: (id: string, params: unknown) =>
     [...casesQueriesKeys.case(id), 'observables', params] as const,
+  caseObservableMetadata: (id: string, params: unknown) =>
+    [...casesQueriesKeys.case(id), 'observable-metadata', params] as const,
   caseFileStatsAll: (id: string) => [...casesQueriesKeys.case(id), 'files', 'stats'] as const,
   caseFileStats: (id: string, params?: unknown) =>
     [...casesQueriesKeys.caseFileStatsAll(id), params] as const,

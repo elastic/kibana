@@ -63,6 +63,7 @@ export const EditObservableModal: FC<EditObservableModalProps> = ({
       </EuiModalHeader>
       <EuiModalBody>
         <ObservableForm
+          caseId={caseData.id}
           onCancel={closeModal}
           observable={observable}
           isLoading={isLoading}

@@ -23,6 +23,8 @@ import type {
   AddObservableRequest,
   FindObservablesRequest,
   FindObservablesResponse,
+  GetObservableMetadataRequest,
+  GetObservableMetadataResponse,
   FindCasesByObservableRequest,
   FindCasesByObservableResponse,
   CountCasesByObservablesRequest,
@@ -67,6 +69,7 @@ import {
   getCustomFieldReplaceUrl,
   getCaseCreateObservableUrl,
   getCaseFindObservablesUrl,
+  getCaseObservableMetadataUrl,
   getCaseUpdateObservableUrl,
   getCaseDeleteObservableUrl,
   getCaseBulkDeleteObservablesUrl,
@@ -715,6 +718,20 @@ export const findObservables = async (
     body: JSON.stringify(params),
     signal,
   });
+
+export const getObservableMetadata = async (
+  caseId: string,
+  params: GetObservableMetadataRequest,
+  signal?: AbortSignal
+): Promise<GetObservableMetadataResponse> =>
+  KibanaServices.get().http.fetch<GetObservableMetadataResponse>(
+    getCaseObservableMetadataUrl(caseId),
+    {
+      method: 'POST',
+      body: JSON.stringify(params),
+      signal,
+    }
+  );
 
 export const findCasesByObservable = async (
   params: FindCasesByObservableRequest,

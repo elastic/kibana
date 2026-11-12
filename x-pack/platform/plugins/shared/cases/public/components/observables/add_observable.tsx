@@ -80,6 +80,7 @@ const AddObservableComponent: React.FC<AddObservableProps> = ({ caseData }) => {
           </EuiModalHeader>
           <EuiModalBody>
             <ObservableForm
+              caseId={caseData.id}
               isLoading={isLoading}
               onSubmit={handleCreateObservable as ObservableFormProps['onSubmit']}
               onCancel={closeModal}

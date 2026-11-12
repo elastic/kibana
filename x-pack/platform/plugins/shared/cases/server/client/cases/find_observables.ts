@@ -6,10 +6,17 @@
  */
 
 import Boom from '@hapi/boom';
-import type { FindObservablesRequest, FindObservablesResponse } from '../../../common/types/api';
+import type {
+  FindObservablesRequest,
+  FindObservablesResponse,
+  GetObservableMetadataRequest,
+  GetObservableMetadataResponse,
+} from '../../../common/types/api';
 import {
   FindObservablesRequestSchema,
   FindObservablesResponseSchema,
+  GetObservableMetadataRequestSchema,
+  GetObservableMetadataResponseSchema,
 } from '../../../common/types/api';
 import type { Observable } from '../../../common/types/domain';
 import { decodeOrThrowZod, decodeWithExcessOrThrowZod } from '../../common/runtime_types';
@@ -247,6 +254,47 @@ export const getObservablesByIds = async (
   } catch (error) {
     throw createCaseError({
       message: `Failed to get observables of case id: ${caseId}: ${error}`,
+      error,
+      logger,
+    });
+  }
+};
+
+/**
+ * The shared metadata of a type key and value in the space and owner of the case, whether or not
+ * the case holds the value. Empty when the value holds none.
+ */
+export const getObservableMetadata = async (
+  caseId: string,
+  params: GetObservableMetadataRequest,
+  clientArgs: CasesClientArgs
+): Promise<GetObservableMetadataResponse> => {
+  const {
+    services: { caseService, observableSharedService },
+    authorization,
+    logger,
+  } = clientArgs;
+
+  try {
+    const { typeKey, value } = decodeWithExcessOrThrowZod(GetObservableMetadataRequestSchema)(
+      params
+    );
+    const theCase = await caseService.getCase({ id: caseId });
+    const { owner } = theCase.attributes;
+
+    await authorization.ensureAuthorized({
+      operation: Operations.findObservables,
+      entities: [{ id: theCase.id, owner }],
+    });
+
+    const sharedByKey = await observableSharedService.findByKeys(owner, [{ typeKey, value }]);
+
+    return decodeOrThrowZod(GetObservableMetadataResponseSchema)({
+      metadata: sharedByKey.get(observableKey({ typeKey, value }))?.metadata ?? {},
+    });
+  } catch (error) {
+    throw createCaseError({
+      message: `Failed to get the metadata of an observable value in case id: ${caseId}: ${error}`,
       error,
       logger,
     });

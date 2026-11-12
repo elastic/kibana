@@ -201,6 +201,7 @@ export const patchObservable = jest.fn();
 export const deleteObservable = jest.fn();
 export const bulkDeleteObservables = jest.fn();
 export const findObservables = jest.fn();
+export const getObservableMetadata = jest.fn().mockResolvedValue({ metadata: {} });
 export const findCasesByObservable = jest.fn();
 export const countCasesByObservables = jest.fn();
 

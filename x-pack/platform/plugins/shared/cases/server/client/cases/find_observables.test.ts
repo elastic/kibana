@@ -14,6 +14,7 @@ import {
   decodeCursor,
   encodeCursor,
   findObservables,
+  getObservableMetadata,
   getSortValues,
 } from './find_observables';
 
@@ -239,6 +240,69 @@ describe('findObservables with metadata', () => {
       triage: 'confirmed',
     });
     expect(result.observables.find(({ id }) => id === 'f1')).not.toHaveProperty('metadata');
+  });
+});
+
+describe('getObservableMetadata', () => {
+  const clientArgs = createCasesClientMockArgs();
+  const { caseService, observableSharedService } = clientArgs.services;
+  const params = { typeKey: 'observable-type-ipv4', value: '10.0.0.9' };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    caseService.getCase.mockResolvedValue(mockCases[0]);
+    clientArgs.authorization.ensureAuthorized.mockResolvedValue(undefined);
+  });
+
+  it('returns the metadata of a value the case does not hold, in the case owner', async () => {
+    observableSharedService.findByKeys.mockResolvedValue(
+      new Map([
+        [
+          JSON.stringify([params.typeKey, params.value]),
+          {
+            id: 'shared-1',
+            owner: mockCases[0].attributes.owner,
+            ...params,
+            metadata: { triage: 'confirmed' },
+          },
+        ],
+      ])
+    );
+
+    const result = await getObservableMetadata(mockCases[0].id, params, clientArgs);
+
+    expect(result).toEqual({ metadata: { triage: 'confirmed' } });
+    expect(observableSharedService.findByKeys).toHaveBeenCalledWith(mockCases[0].attributes.owner, [
+      params,
+    ]);
+    expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
+      operation: expect.objectContaining({ action: 'case_observables_find' }),
+      entities: [{ id: mockCases[0].id, owner: mockCases[0].attributes.owner }],
+    });
+  });
+
+  it('returns empty metadata when the value holds none', async () => {
+    observableSharedService.findByKeys.mockResolvedValue(new Map());
+
+    const result = await getObservableMetadata(mockCases[0].id, params, clientArgs);
+
+    expect(result).toEqual({ metadata: {} });
+  });
+
+  it('does not read the metadata when the user cannot read the case observables', async () => {
+    clientArgs.authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
+
+    await expect(getObservableMetadata(mockCases[0].id, params, clientArgs)).rejects.toThrow(
+      'Unauthorized'
+    );
+    expect(observableSharedService.findByKeys).not.toHaveBeenCalled();
+  });
+
+  it('rejects an empty value', async () => {
+    await expect(
+      getObservableMetadata(mockCases[0].id, { ...params, value: '' }, clientArgs)
+    ).rejects.toThrow();
+    expect(caseService.getCase).not.toHaveBeenCalled();
   });
 });
 

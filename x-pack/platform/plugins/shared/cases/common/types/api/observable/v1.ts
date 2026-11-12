@@ -190,6 +190,24 @@ export const FindObservablesResponseSchema = lazySchema(() =>
   })
 );
 
+/**
+ * A type key and value whose shared metadata to read, in the case's space and owner. The case does
+ * not have to hold the value.
+ */
+export const GetObservableMetadataRequestSchema = lazySchema(() =>
+  z.object({
+    typeKey: z.string().min(1).max(MAX_OBSERVABLE_TYPE_KEY_LENGTH),
+    value: z.string().min(1).max(MAX_OBSERVABLE_VALUE_LENGTH),
+  })
+);
+
+/** The metadata the value holds; empty when it holds none. */
+export const GetObservableMetadataResponseSchema = lazySchema(() =>
+  z.object({
+    metadata: z.record(z.string(), z.string()),
+  })
+);
+
 /** The cases of an owner holding an observable with the exact type key and value, in either store. */
 export const FindCasesByObservableRequestSchema = lazySchema(() =>
   paginationSchema({ maxPerPage: MAX_CASES_PER_PAGE }).extend({
@@ -254,6 +272,8 @@ export type FindObservablesResponse = z.infer<typeof FindObservablesResponseSche
 export type ObservableMetadata = z.infer<typeof ObservableMetadataSchema>;
 export type ObservableMetadataFilter = z.infer<typeof ObservableMetadataFilterSchema>;
 export type ObservableWithMetadata = z.infer<typeof ObservableWithMetadataSchema>;
+export type GetObservableMetadataRequest = z.infer<typeof GetObservableMetadataRequestSchema>;
+export type GetObservableMetadataResponse = z.infer<typeof GetObservableMetadataResponseSchema>;
 export type FindCasesByObservableRequest = z.input<typeof FindCasesByObservableRequestSchema>;
 export type FindCasesByObservableResponse = z.infer<typeof FindCasesByObservableResponseSchema>;
 export type CountCasesByObservablesRequest = z.infer<typeof CountCasesByObservablesRequestSchema>;

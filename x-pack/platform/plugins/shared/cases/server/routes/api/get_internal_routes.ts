@@ -33,6 +33,7 @@ import { findObservablesRoute } from './observables/find_observables';
 import { bulkCreateObservablesRoute } from './observables/bulk_create_observables';
 import { findCasesByObservableRoute } from './observables/find_cases_by_observable';
 import { countCasesByObservablesRoute } from './observables/count_cases_by_observables';
+import { getObservableMetadataRoute } from './observables/get_observable_metadata';
 import { findUserActionsRoute } from './internal/find_user_actions';
 import { findCasesContainingAllDocumentsRoute } from './internal/find_cases_containing_all_documents';
 import type { ConfigType } from '../../config';
@@ -72,6 +73,7 @@ export const getInternalRoutes = (
     bulkCreateObservablesRoute,
     findCasesByObservableRoute,
     countCasesByObservablesRoute,
+    getObservableMetadataRoute,
     similarCaseRoute,
     findUserActionsRoute,
     findCasesContainingAllDocumentsRoute,
