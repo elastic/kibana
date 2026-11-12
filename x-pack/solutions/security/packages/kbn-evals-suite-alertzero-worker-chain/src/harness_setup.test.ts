@@ -225,12 +225,14 @@ describe('setupWorkerChainHarness / teardownWorkerChainHarness', () => {
     expect(roleCalls.sort()).toEqual([
       'GET /api/security/role/alertzero_alert_triage',
       'GET /api/security/role/alertzero_attack_discovery',
+      'GET /api/security/role/alertzero_rule_tuning',
     ]);
     expect(
       stack.accounts.map((a) => [a.name, (a as Account & { roles?: string[] }).roles]).sort()
     ).toEqual([
       ['alertzero_alert_triage', ['alertzero_alert_triage']],
       ['alertzero_attack_discovery', ['alertzero_attack_discovery']],
+      ['alertzero_rule_tuning', ['alertzero_rule_tuning']],
     ]);
   });
 
@@ -245,10 +247,12 @@ describe('setupWorkerChainHarness / teardownWorkerChainHarness', () => {
     expect(stack.calls.filter((c) => c.includes('/api/security/role/')).sort()).toEqual([
       'GET /api/security/role/_alertzero_alert_triage',
       'GET /api/security/role/_alertzero_attack_discovery',
+      'GET /api/security/role/_alertzero_rule_tuning',
     ]);
     expect(stack.accounts.map((a) => (a as Account & { roles?: string[] }).roles).sort()).toEqual([
       ['_alertzero_alert_triage'],
       ['_alertzero_attack_discovery'],
+      ['_alertzero_rule_tuning'],
     ]);
   });
 
