@@ -17,7 +17,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { InventoryEntityType } from '../../../inventory_api/types';
+import type { InventoryType } from '@kbn/entity-inventory-plugin/common';
 import { useEntityTablePreferences } from '../../context/entity_table_preferences_context';
 import type { UseEntityListResult } from '../../hooks/use_entity_list';
 import { useEntityList } from '../../hooks/use_entity_list';
@@ -34,7 +34,7 @@ import { ENTITY_COUNT_LABEL, getEntityCountValue } from './translations';
  * entities once its `_list` response arrives, and its results below. Each section loads and fails
  * on its own.
  */
-export const EntityTypeResults = ({ entityType }: { entityType: InventoryEntityType }) => {
+export const EntityTypeResults = ({ entityType }: { entityType: InventoryType }) => {
   const { type, name } = entityType;
   const accordionId = useGeneratedHtmlId({ prefix: 'entityInventoryTypeSection' });
   const listResult = useEntityList(type);
@@ -79,7 +79,7 @@ export const EntityTypeResults = ({ entityType }: { entityType: InventoryEntityT
 };
 
 interface EntityTypeListResultsProps {
-  entityType: InventoryEntityType;
+  entityType: InventoryType;
   listResult: UseEntityListResult;
 }
 

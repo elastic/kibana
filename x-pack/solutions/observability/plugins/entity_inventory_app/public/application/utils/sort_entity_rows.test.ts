@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InventoryRow } from '../../inventory_api/types';
+import type { InventoryRow } from '@kbn/entity-inventory-plugin/common';
 import { sortEntityRows } from './sort_entity_rows';
 
 const ids = (rows: InventoryRow[]) => rows.map((row) => row.id);

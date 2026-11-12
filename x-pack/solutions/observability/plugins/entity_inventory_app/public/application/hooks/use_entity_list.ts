@@ -6,13 +6,13 @@
  */
 
 import { useAbortableAsync } from '@kbn/react-hooks';
-import type { InventoryListResponse } from '../../inventory_api/types';
+import type { ListResponse } from '@kbn/entity-inventory-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
 import { useEntityInventorySearch } from '../context/search_context';
 import { toAbsoluteTimeRange } from '../utils/to_absolute_time_range';
 
 export interface UseEntityListResult {
-  list?: InventoryListResponse;
+  list?: ListResponse;
   loading: boolean;
   error?: Error;
   refresh: () => void;

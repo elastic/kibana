@@ -6,12 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type {
-  InventoryListColumn,
-  InventoryOutputColumnKind,
-  InventorySourceError,
-  InventoryUnavailableColumn,
-} from '../../../inventory_api/types';
+import type { InventoryTypeColumn, OutputColumnKind, SourceError, UnavailableColumn } from '@kbn/entity-inventory-plugin/common';
 
 export const getTableAriaLabel = (typeName: string) =>
   i18n.translate('xpack.entityInventoryApp.entityTable.ariaLabel', {
@@ -19,7 +14,7 @@ export const getTableAriaLabel = (typeName: string) =>
     values: { typeName },
   });
 
-const COLUMN_LABEL_BY_KIND: Readonly<Partial<Record<InventoryOutputColumnKind, string>>> = {
+const COLUMN_LABEL_BY_KIND: Readonly<Partial<Record<OutputColumnKind, string>>> = {
   id: i18n.translate('xpack.entityInventoryApp.entityTable.columns.entityId', {
     defaultMessage: 'Entity ID',
   }),
@@ -29,7 +24,7 @@ const COLUMN_LABEL_BY_KIND: Readonly<Partial<Record<InventoryOutputColumnKind, s
 };
 
 /** The header of a column: "Entity ID" for kind `id`, "Last seen" for `last_seen`, else its name. */
-export const getColumnLabel = ({ name, kind }: InventoryListColumn): string =>
+export const getColumnLabel = ({ name, kind }: InventoryTypeColumn): string =>
   COLUMN_LABEL_BY_KIND[kind] ?? name;
 
 export const NO_VALUE_LABEL = i18n.translate('xpack.entityInventoryApp.entityTable.noValue', {
@@ -60,7 +55,7 @@ export const DIAGNOSTICS_TITLE = i18n.translate(
   { defaultMessage: 'Some data sources returned incomplete results' }
 );
 
-export const getSourceErrorText = ({ indexPattern, status, reason }: InventorySourceError) =>
+export const getSourceErrorText = ({ indexPattern, status, reason }: SourceError) =>
   status === null
     ? i18n.translate('xpack.entityInventoryApp.entityTable.diagnostics.sourceError', {
         defaultMessage: '{indexPattern}: {reason}',
@@ -74,7 +69,7 @@ export const getSourceErrorText = ({ indexPattern, status, reason }: InventorySo
 export const getUnavailableColumnText = ({
   column,
   indexPattern,
-}: Pick<InventoryUnavailableColumn, 'column' | 'indexPattern'>) =>
+}: Pick<UnavailableColumn, 'column' | 'indexPattern'>) =>
   i18n.translate('xpack.entityInventoryApp.entityTable.diagnostics.unavailableColumn', {
     defaultMessage: '{column} is not available in {indexPattern}',
     values: { column, indexPattern },

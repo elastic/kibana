@@ -27,7 +27,14 @@ export interface SourceError {
   reason: string;
 }
 
-/** What an output column holds. */
+/**
+ * What an output column holds.
+ * - `id`: `entity.id`, the key of the entity as a whole. It is always the first column.
+ * - `identity`: a field of the definition's identity fields, such as `host.id` or `host.name`.
+ *   Several can be null on one row, as an entity may be reported under one naming convention.
+ * - `attribute`: any other field of the definition.
+ * - `last_seen`: when the entity was last reported.
+ */
 export type OutputColumnKind = 'id' | 'identity' | 'attribute' | 'last_seen';
 
 /** The ES|QL source command a plan runs under. */

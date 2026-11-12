@@ -7,12 +7,12 @@
 
 import React, { createContext, useContext, useMemo } from 'react';
 import { useAbortableAsync } from '@kbn/react-hooks';
-import type { InventoryEntityType } from '../../inventory_api/types';
+import type { InventoryType } from '@kbn/entity-inventory-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
 
 export interface EntityTypesContextValue {
   /** `undefined` until the first `GET /types` response arrives. */
-  types?: InventoryEntityType[];
+  types?: InventoryType[];
   loading: boolean;
   error?: Error;
   refresh: () => void;

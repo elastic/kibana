@@ -13,10 +13,10 @@ import { UI_SETTINGS } from '@kbn/data-service';
 import { HOST_TYPE_FIXTURE } from '../../../__fixtures__/inventory_data';
 import { buildScenarioListResponse } from '../../../__fixtures__/inventory_scenarios';
 import type {
-  InventoryEntityType,
-  InventoryListResponse,
   InventoryRow,
-} from '../../../inventory_api/types';
+  InventoryType,
+  ListResponse,
+} from '@kbn/entity-inventory-plugin/common';
 import { createAppServicesMock } from '../../../mocks';
 import type { EntityTableProps } from './entity_table';
 import { EntityTable } from './entity_table';
@@ -35,7 +35,7 @@ const StatefulEntityTable = (
   return <EntityTable {...props} preferences={preferences} onPreferencesChange={setPreferences} />;
 };
 
-const getFixture = (scenario: 'normal' | 'truncated'): InventoryListResponse => {
+const getFixture = (scenario: 'normal' | 'truncated'): ListResponse => {
   const list = buildScenarioListResponse('host', scenario);
   if (!list) {
     throw new Error('Missing host fixture');
@@ -50,17 +50,20 @@ const hostRow = (overrides: InventoryRow): InventoryRow => ({
   ...overrides,
 });
 
-const smallList = (rows: InventoryRow[]): InventoryListResponse => ({
+const smallList = (rows: InventoryRow[]): ListResponse => ({
   columns: HOST_COLUMNS,
   rows,
+  provenance: {},
   truncated: false,
+  took: 0,
+  queries: [],
   errors: [],
   unavailableColumns: [],
 });
 
 const NAME_COLUMN_ID = 'host.name';
 
-const renderTable = (list: InventoryListResponse) =>
+const renderTable = (list: ListResponse) =>
   render(
     <I18nProvider>
       <KibanaContextProvider services={createAppServicesMock()}>
@@ -70,21 +73,22 @@ const renderTable = (list: InventoryListResponse) =>
   );
 
 // A type the app has never seen: the table knows only what the response says about it.
-const WIDGET_COLUMNS: InventoryListResponse['columns'] = [
+const WIDGET_COLUMNS: ListResponse['columns'] = [
   { name: 'entity.id', kind: 'id' },
   { name: 'widget.name', kind: 'identity' },
   { name: 'widget.size', kind: 'attribute' },
   { name: 'last_seen', kind: 'last_seen' },
 ];
 
-const WIDGET_TYPE: InventoryEntityType = {
+const WIDGET_TYPE: InventoryType = {
   type: 'widget',
   name: 'Widget',
   identityFields: ['widget.name'],
   columns: WIDGET_COLUMNS,
+  sources: [{ indexPattern: 'metrics-widget-*' }],
 };
 
-const WIDGET_LIST: InventoryListResponse = {
+const WIDGET_LIST: ListResponse = {
   columns: WIDGET_COLUMNS,
   rows: [
     {
@@ -94,14 +98,17 @@ const WIDGET_LIST: InventoryListResponse = {
       last_seen: '2026-10-30T12:00:00.000Z',
     },
   ],
+  provenance: {},
   truncated: false,
+  took: 0,
+  queries: [],
   errors: [],
   unavailableColumns: [],
 };
 
 const renderWidgetTable = (
   preferences: EntityTablePreferences = NO_PREFERENCES,
-  list: InventoryListResponse = WIDGET_LIST
+  list: ListResponse = WIDGET_LIST
 ) => {
   const services = createAppServicesMock();
   jest
@@ -178,7 +185,7 @@ describe('EntityTable', () => {
 
     it('keeps the response order when the user sorted by a column the response lacks', () => {
       const [sprocket] = WIDGET_LIST.rows;
-      const list: InventoryListResponse = {
+      const list: ListResponse = {
         ...WIDGET_LIST,
         rows: [
           { ...sprocket, 'entity.id': 'widget:b' },

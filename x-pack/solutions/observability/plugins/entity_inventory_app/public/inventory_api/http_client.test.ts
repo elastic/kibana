@@ -7,14 +7,17 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { createHttpEntityInventoryApiClient } from './http_client';
-import type { InventoryListResponse, InventoryTypesResponse } from './types';
+import type { GetTypesResponse, ListResponse } from '@kbn/entity-inventory-plugin/common';
 
-const TYPES_RESPONSE: InventoryTypesResponse = { types: [] };
+const TYPES_RESPONSE: GetTypesResponse = { types: [] };
 
-const LIST_RESPONSE: InventoryListResponse = {
+const LIST_RESPONSE: ListResponse = {
   columns: [{ name: 'entity.id', kind: 'id' }],
   rows: [{ 'entity.id': 'host:a' }],
+  provenance: {},
   truncated: false,
+  took: 0,
+  queries: [],
   errors: [],
   unavailableColumns: [],
 };

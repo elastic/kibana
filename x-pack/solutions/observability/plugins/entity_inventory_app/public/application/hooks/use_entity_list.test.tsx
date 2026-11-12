@@ -72,6 +72,25 @@ describe('useEntityList', () => {
     expect(Date.parse(request.to) - Date.parse(request.from)).toBe(60 * 60 * 1000);
   });
 
+  it('aborts the pending request when the time range changes', async () => {
+    const inventoryApi = createClientMock();
+    // The first request never settles, so only an abort can end it.
+    inventoryApi.getEntities.mockImplementationOnce(() => new Promise(() => {}));
+    const { result } = renderUseEntityList(inventoryApi);
+    await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(1));
+    const [[, , { signal: firstSignal }]] = inventoryApi.getEntities.mock.calls;
+    expect(firstSignal?.aborted).toBe(false);
+
+    act(() => {
+      result.current.search.submit({ dateRange: { from: 'now-1h', to: 'now' } });
+    });
+
+    await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(2));
+    expect(firstSignal?.aborted).toBe(true);
+    await waitFor(() => expect(result.current.result.loading).toBe(false));
+    expect(result.current.result.list?.rows.length).toBeGreaterThan(0);
+  });
+
   it('lists again on refresh', async () => {
     const inventoryApi = createClientMock();
     const { result } = renderUseEntityList(inventoryApi);

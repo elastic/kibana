@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { InventoryListRequest, InventoryListResponse, InventoryTypesResponse } from './types';
+import type { GetTypesResponse, ListResponse } from '@kbn/entity-inventory-plugin/common';
+import type { EntityInventoryRouteRepository } from '@kbn/entity-inventory-plugin/server';
+import type { ClientRequestParamsOf } from '@kbn/server-route-repository-client';
 
 export interface EntityInventoryRequestOptions {
   signal?: AbortSignal;
@@ -13,10 +15,13 @@ export interface EntityInventoryRequestOptions {
 
 /** Data access for the entity inventory routes. */
 export interface EntityInventoryApiClient {
-  getTypes(options: EntityInventoryRequestOptions): Promise<InventoryTypesResponse>;
+  getTypes(options: EntityInventoryRequestOptions): Promise<GetTypesResponse>;
   getEntities(
     type: string,
-    request: InventoryListRequest,
+    request: ClientRequestParamsOf<
+      EntityInventoryRouteRepository,
+      'POST /internal/entity_inventory/entities/{type}/_list'
+    >['params']['body'],
     options: EntityInventoryRequestOptions
-  ): Promise<InventoryListResponse>;
+  ): Promise<ListResponse>;
 }

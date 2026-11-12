@@ -6,17 +6,17 @@
  */
 
 import type {
-  InventoryEntityType,
-  InventoryListColumn,
-  InventoryListResponse,
+  GetTypesResponse,
   InventoryRow,
-  InventoryTypesResponse,
-} from '../inventory_api/types';
+  InventoryType,
+  InventoryTypeColumn,
+  ListResponse,
+} from '@kbn/entity-inventory-plugin/common';
 
 // The columns `buildColumns` produces for the entity store's built-in `host`: `entity.id`, the
 // identity fields in ranking order, the attributes in source order with names shared across
 // sources listed once, then `last_seen`.
-const HOST_LIST_COLUMNS: InventoryListColumn[] = [
+const HOST_LIST_COLUMNS: InventoryTypeColumn[] = [
   { name: 'entity.id', kind: 'id' },
   { name: 'host.id', kind: 'identity' },
   { name: 'host.name', kind: 'identity' },
@@ -37,7 +37,7 @@ const HOST_LIST_COLUMNS: InventoryListColumn[] = [
 ];
 
 // The columns `buildColumns` produces for the inventory's `k8s.deployment`.
-const K8S_DEPLOYMENT_LIST_COLUMNS: InventoryListColumn[] = [
+const K8S_DEPLOYMENT_LIST_COLUMNS: InventoryTypeColumn[] = [
   { name: 'entity.id', kind: 'id' },
   { name: 'kubernetes.namespace', kind: 'identity' },
   { name: 'kubernetes.deployment.name', kind: 'identity' },
@@ -50,24 +50,32 @@ const K8S_DEPLOYMENT_LIST_COLUMNS: InventoryListColumn[] = [
   { name: 'last_seen', kind: 'last_seen' },
 ];
 
-export const HOST_TYPE_FIXTURE: InventoryEntityType = {
+export const HOST_TYPE_FIXTURE: InventoryType = {
   type: 'host',
   name: 'Host',
   description:
     'A physical or virtual machine that runs workloads. Identified by host.id, falling back to host.name, then host.hostname.',
   identityFields: ['host.id', 'host.name', 'host.hostname'],
   columns: HOST_LIST_COLUMNS,
+  sources: [
+    { indexPattern: 'metrics-system.*-*' },
+    { indexPattern: 'metrics-hostmetricsreceiver.otel-*' },
+  ],
 };
 
-export const K8S_DEPLOYMENT_TYPE_FIXTURE: InventoryEntityType = {
+export const K8S_DEPLOYMENT_TYPE_FIXTURE: InventoryType = {
   type: 'k8s.deployment',
   name: 'K8s Deployment',
   description: 'A Kubernetes deployment, identified by namespace/name.',
   identityFields: ['kubernetes.namespace', 'kubernetes.deployment.name'],
   columns: K8S_DEPLOYMENT_LIST_COLUMNS,
+  sources: [
+    { indexPattern: 'metrics-kubernetes.state_deployment-*' },
+    { indexPattern: 'metrics-k8sclusterreceiver.otel-*' },
+  ],
 };
 
-export const TYPES_RESPONSE_FIXTURE: InventoryTypesResponse = {
+export const TYPES_RESPONSE_FIXTURE: GetTypesResponse = {
   types: [HOST_TYPE_FIXTURE, K8S_DEPLOYMENT_TYPE_FIXTURE],
 };
 
@@ -159,7 +167,7 @@ export const buildK8sDeploymentRows = (count: number): InventoryRow[] =>
   });
 
 export const LIST_FIXTURES_BY_TYPE: Readonly<
-  Record<string, { columns: InventoryListColumn[]; buildRows: (count: number) => InventoryRow[] }>
+  Record<string, { columns: InventoryTypeColumn[]; buildRows: (count: number) => InventoryRow[] }>
 > = {
   host: { columns: HOST_LIST_COLUMNS, buildRows: buildHostRows },
   'k8s.deployment': { columns: K8S_DEPLOYMENT_LIST_COLUMNS, buildRows: buildK8sDeploymentRows },
@@ -168,7 +176,7 @@ export const LIST_FIXTURES_BY_TYPE: Readonly<
 export const NORMAL_ROW_COUNT = 120;
 
 /** Builds the complete list response of `type`, or `undefined` for an unknown type. */
-export const buildListResponseFixture = (type: string): InventoryListResponse | undefined => {
+export const buildListResponseFixture = (type: string): ListResponse | undefined => {
   const fixture = LIST_FIXTURES_BY_TYPE[type];
   if (!fixture) {
     return undefined;
@@ -177,7 +185,10 @@ export const buildListResponseFixture = (type: string): InventoryListResponse | 
   return {
     columns: fixture.columns,
     rows,
+    provenance: {},
     truncated: false,
+    took: 0,
+    queries: [],
     errors: [],
     unavailableColumns: [],
   };

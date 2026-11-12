@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiScreenReaderOnly, EuiText } from '@elastic/eui';
 import moment from 'moment';
-import type { InventoryCellValue, InventoryOutputColumnKind } from '../../../inventory_api/types';
+import type { ESQLValue, OutputColumnKind } from '@kbn/entity-inventory-plugin/common';
 import { formatCellValue } from '../../utils/format_cell_value';
 import { NO_VALUE_LABEL } from './translations';
 
@@ -23,7 +23,7 @@ export const EmptyCellValue = () => (
 );
 
 interface CellRendererProps {
-  value: InventoryCellValue | undefined;
+  value: ESQLValue | undefined;
   dateFormat: string;
 }
 
@@ -41,13 +41,13 @@ const DateCell = ({ value, dateFormat }: CellRendererProps) =>
 
 /** The renderer of each column kind; a kind without an entry renders as text. */
 const CELL_RENDERER_BY_KIND: Readonly<
-  Partial<Record<InventoryOutputColumnKind, React.FC<CellRendererProps>>>
+  Partial<Record<OutputColumnKind, React.FC<CellRendererProps>>>
 > = {
   last_seen: DateCell,
 };
 
 export interface EntityCellProps extends CellRendererProps {
-  kind: InventoryOutputColumnKind | undefined;
+  kind: OutputColumnKind | undefined;
 }
 
 /** A cell rendered by its column's kind, or the placeholder when empty. */

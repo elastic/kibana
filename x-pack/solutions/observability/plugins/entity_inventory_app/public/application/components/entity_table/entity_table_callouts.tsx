@@ -7,10 +7,7 @@
 
 import React from 'react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import type {
-  InventorySourceError,
-  InventoryUnavailableColumn,
-} from '../../../inventory_api/types';
+import type { SourceError, UnavailableColumn } from '@kbn/entity-inventory-plugin/common';
 import {
   DIAGNOSTICS_TITLE,
   TRUNCATION_BODY,
@@ -37,8 +34,8 @@ export const EntityTableDiagnosticsCallout = ({
   errors,
   unavailableColumns,
 }: {
-  errors: readonly InventorySourceError[];
-  unavailableColumns: readonly InventoryUnavailableColumn[];
+  errors: readonly SourceError[];
+  unavailableColumns: readonly UnavailableColumn[];
 }) => {
   const messages = [
     ...errors.map(getSourceErrorText),

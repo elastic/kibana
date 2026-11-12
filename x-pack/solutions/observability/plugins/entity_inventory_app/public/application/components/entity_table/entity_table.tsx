@@ -15,7 +15,7 @@ import type {
 import { EuiButtonEmpty, EuiDataGrid, EuiPanel } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { UI_SETTINGS } from '@kbn/data-service';
-import type { InventoryEntityType, InventoryListResponse } from '../../../inventory_api/types';
+import type { InventoryType, ListResponse } from '@kbn/entity-inventory-plugin/common';
 import {
   ENTITY_INVENTORY_EBT_ACTIONS,
   ENTITY_INVENTORY_EBT_ELEMENTS,
@@ -40,8 +40,8 @@ const GRID_STYLE: EuiDataGridStyle = {
 const LAST_SEEN_COLUMN_WIDTH = 230;
 
 export interface EntityTableProps {
-  entityType: InventoryEntityType;
-  list: InventoryListResponse;
+  entityType: InventoryType;
+  list: ListResponse;
   /** The column, sort and page size choices; the caller keeps them while the table is unmounted. */
   preferences: EntityTablePreferences;
   onPreferencesChange: (preferences: EntityTablePreferences) => void;

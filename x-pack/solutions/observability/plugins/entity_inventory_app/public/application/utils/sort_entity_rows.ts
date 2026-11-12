@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InventoryRow } from '../../inventory_api/types';
+import type { InventoryRow } from '@kbn/entity-inventory-plugin/common';
 import { getFirstScalar } from './get_first_scalar';
 
 export interface EntityRowSortingColumn {

@@ -10,10 +10,10 @@
  * the app imports this file, so it stays out of the plugin bundle.
  */
 
+import type { ListResponse } from '@kbn/entity-inventory-plugin/common';
 import type { EntityInventoryApiClient } from '../inventory_api/client';
 import { LIST_FIXTURES_BY_TYPE, NORMAL_ROW_COUNT } from './inventory_data';
 import { createFixtureEntityInventoryApiClient, throwIfAborted } from './inventory_client';
-import type { InventoryListResponse } from '../inventory_api/types';
 
 /** The list scenarios the scenario client can return. */
 export type FixtureScenario =
@@ -50,13 +50,20 @@ const UNAVAILABLE_COLUMNS = [
 export const buildScenarioListResponse = (
   type: string,
   scenario: FixtureScenario
-): InventoryListResponse | undefined => {
+): ListResponse | undefined => {
   const fixture = LIST_FIXTURES_BY_TYPE[type];
   if (!fixture) {
     return undefined;
   }
   const { columns, buildRows } = fixture;
-  const base = { columns, errors: [], unavailableColumns: [] };
+  const base = {
+    columns,
+    provenance: {},
+    took: 0,
+    queries: [],
+    errors: [],
+    unavailableColumns: [],
+  };
 
   switch (scenario) {
     case 'truncated':
