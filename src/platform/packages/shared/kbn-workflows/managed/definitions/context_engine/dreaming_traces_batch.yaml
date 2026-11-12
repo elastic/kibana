@@ -90,7 +90,7 @@ steps:
         - Boolean fields take COUNT(*) WHERE field == true, never SUM()/AVG()/MIN()/MAX(). Only use AVG()/SUM() on numeric fields.
         - Keep it cheap: end it with a small | LIMIT n (n <= 20).
 
-        Every item must list the ids of the ROUNDS it is based on in source_memory_ids.
+        Every item must list the ids of the ROUNDS it is based on in source_memory_ids, copied exactly as the ROUNDS give them, such as "trace:51fff8a2".
 
         Ignore rounds that hold nothing worth remembering. An empty answer is valid.
 
@@ -240,5 +240,5 @@ steps:
       created: '${{ steps.apply_changes.output.created | default: 0 }}'
       updated: '${{ steps.apply_changes.output.updated | default: 0 }}'
       deleted: '${{ steps.apply_changes.output.deleted | default: 0 }}'
-      rejected: '${{ steps.apply_changes.output.rejected.size | default: 0 }}'
+      rejected: '${{ steps.apply_changes.output.rejected | size | default: 0 }}'
       would_write: '${{ steps.apply_changes.output.would_write }}'

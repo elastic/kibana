@@ -285,6 +285,20 @@ describe('resolveChangeSet', () => {
     ]);
   });
 
+  it('takes a round cited without its trace: prefix as the round', () => {
+    const { operations, rejected } = resolveChangeSet(
+      changeSet({
+        entities: [
+          { ref: 'new:1', type: 'team', title: 'A', source_memory_ids: ['abc', 'trace:abc'] },
+        ],
+      }),
+      context({ memories: new Map([['trace:abc', '2026-10-01T10:00:00.000Z']]) })
+    );
+
+    expect(rejected).toEqual([]);
+    expect((operations[0] as UpsertEntityOperation).sourceMemoryIds).toEqual(['trace:abc']);
+  });
+
   it('rejects a fact ref that is neither existing nor a new key', () => {
     const { rejected } = resolveChangeSet(
       changeSet({
