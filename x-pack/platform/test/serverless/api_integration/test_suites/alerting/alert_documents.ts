@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MISSING_UIAM_API_KEY_TAG } from '@kbn/alerting-plugin/common';
 import expect from '@kbn/expect';
 import { unset } from 'lodash';
 import {
@@ -165,6 +166,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       for (const field of fields) {
         unset(hits1, field);
+      }
+
+      // The rule is created with an Elasticsearch API key, so when rules run with UIAM API keys
+      // alerting adds a system tag to it on its first run.
+      for (const field of [TAGS, ALERT_RULE_TAGS]) {
+        hits1[field] = hits1[field].filter((tag: string) => tag !== MISSING_UIAM_API_KEY_TAG);
       }
 
       const expected = {
