@@ -13,6 +13,12 @@ import { ServiceDashboards } from '.';
 let capturedOnApiAvailable: ((api: unknown) => void) | undefined;
 let capturedOnApiCleanup: (() => void) | undefined;
 
+// Every render of the mocked renderer records the closures it received. Keeping the full history
+// lets a test replay the race where a canceled load for a previous dashboard fires its (stale)
+// cleanup after a newer dashboard has already published its API.
+let capturedOnApiAvailableHistory: Array<(api: unknown) => void> = [];
+let capturedOnApiCleanupHistory: Array<() => void> = [];
+
 jest.mock('@kbn/dashboard-plugin/public', () => ({
   DashboardRenderer: (props: {
     onApiAvailable?: (api: unknown) => void;
@@ -20,6 +26,8 @@ jest.mock('@kbn/dashboard-plugin/public', () => ({
   }) => {
     capturedOnApiAvailable = props.onApiAvailable;
     capturedOnApiCleanup = props.onApiCleanup;
+    if (props.onApiAvailable) capturedOnApiAvailableHistory.push(props.onApiAvailable);
+    if (props.onApiCleanup) capturedOnApiCleanupHistory.push(props.onApiCleanup);
     return <div data-test-subj="dashboardRenderer" />;
   },
 }));
@@ -56,7 +64,10 @@ jest.mock('../../../hooks/use_adhoc_apm_data_view', () => ({
 }));
 
 // Stable references so effects depending on them do not re-run every render.
-const mockAvailableDashboards = [{ id: 'dashboard-1', data: { title: 'My dashboard' } }];
+const mockAvailableDashboards = [
+  { id: 'dashboard-1', data: { title: 'My dashboard' } },
+  { id: 'dashboard-2', data: { title: 'My other dashboard' } },
+];
 
 jest.mock('../../../hooks/use_dashboards_fetcher', () => ({
   useDashboardFetcher: () => ({ data: mockAvailableDashboards }),
@@ -70,6 +81,11 @@ const mockFetcherData = {
   serviceDashboards: [
     {
       dashboardSavedObjectId: 'dashboard-1',
+      serviceEnvironmentFilterEnabled: true,
+      serviceNameFilterEnabled: true,
+    },
+    {
+      dashboardSavedObjectId: 'dashboard-2',
       serviceEnvironmentFilterEnabled: true,
       serviceNameFilterEnabled: true,
     },
@@ -93,6 +109,8 @@ describe('ServiceDashboards', () => {
   beforeEach(() => {
     capturedOnApiAvailable = undefined;
     capturedOnApiCleanup = undefined;
+    capturedOnApiAvailableHistory = [];
+    capturedOnApiCleanupHistory = [];
     mockQuery = { ...defaultMockQuery };
   });
 
@@ -156,6 +174,67 @@ describe('ServiceDashboards', () => {
       expect(recreatedDashboardApi.setFilters).toHaveBeenCalled();
       expect(recreatedDashboardApi.setQuery).toHaveBeenCalled();
       expect(recreatedDashboardApi.setTimeRange).toHaveBeenCalled();
+    });
+
+    it('keeps the current dashboard reference when a stale cleanup for a previous dashboard fires late', async () => {
+      const dashboardApiA = {
+        setFilters: jest.fn(),
+        setQuery: jest.fn(),
+        setTimeRange: jest.fn(),
+      };
+      const dashboardApiB = {
+        setFilters: jest.fn(),
+        setQuery: jest.fn(),
+        setTimeRange: jest.fn(),
+      };
+
+      // Render dashboard A and publish its API through A's closure.
+      const { rerender } = render(<ServiceDashboards />);
+      const onApiAvailableA = capturedOnApiAvailableHistory[capturedOnApiAvailableHistory.length - 1];
+      const onApiCleanupA = capturedOnApiCleanupHistory[capturedOnApiCleanupHistory.length - 1];
+
+      await act(async () => {
+        onApiAvailableA(dashboardApiA);
+      });
+      expect(dashboardApiA.setFilters).toHaveBeenCalled();
+
+      // Switch to dashboard B (new savedObjectId) and publish B's API through B's closure.
+      await act(async () => {
+        mockQuery = { ...defaultMockQuery, dashboardId: 'dashboard-2' };
+        rerender(<ServiceDashboards />);
+      });
+      const onApiAvailableB = capturedOnApiAvailableHistory[capturedOnApiAvailableHistory.length - 1];
+
+      await act(async () => {
+        onApiAvailableB(dashboardApiB);
+      });
+
+      dashboardApiA.setFilters.mockClear();
+      dashboardApiA.setQuery.mockClear();
+      dashboardApiA.setTimeRange.mockClear();
+      dashboardApiB.setFilters.mockClear();
+      dashboardApiB.setQuery.mockClear();
+      dashboardApiB.setTimeRange.mockClear();
+
+      // A's canceled load now fires its late cleanup. Because it is keyed on A's id and B has
+      // already published, the guard short-circuits and B's reference survives.
+      await act(async () => {
+        onApiCleanupA();
+      });
+
+      // A change to a search input re-runs the synchronization effect; B must still receive it.
+      await act(async () => {
+        mockQuery = { ...mockQuery, kuery: 'transaction.name: "GET /api"' };
+        rerender(<ServiceDashboards />);
+      });
+
+      expect(dashboardApiB.setFilters).toHaveBeenCalled();
+      expect(dashboardApiB.setQuery).toHaveBeenCalled();
+      expect(dashboardApiB.setTimeRange).toHaveBeenCalled();
+      // A is destroyed and must never be touched again.
+      expect(dashboardApiA.setFilters).not.toHaveBeenCalled();
+      expect(dashboardApiA.setQuery).not.toHaveBeenCalled();
+      expect(dashboardApiA.setTimeRange).not.toHaveBeenCalled();
     });
   });
 });
