@@ -6,11 +6,14 @@
  */
 
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
-import { EmptyModelResponseError, type ActionsClientLlm } from '@kbn/langchain/server';
+import {
+  EmptyModelResponseError,
+  type ActionsClientLlm,
+  ModelRefusalError,
+} from '@kbn/langchain/server';
 import type { ZodType } from '@kbn/zod/v4';
 import { loggerMock } from '@kbn/logging-mocks';
 import { FakeLLM } from '@langchain/core/utils/testing';
-import { ModelRefusalError } from '@kbn/langchain/server';
 
 import {
   getParsedAttackDiscoveriesMock,

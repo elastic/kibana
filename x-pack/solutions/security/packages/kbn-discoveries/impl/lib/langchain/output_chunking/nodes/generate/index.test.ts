@@ -6,11 +6,14 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { EmptyModelResponseError, type ActionsClientLlm } from '@kbn/langchain/server';
+import {
+  EmptyModelResponseError,
+  type ActionsClientLlm,
+  ModelRefusalError,
+} from '@kbn/langchain/server';
 import type { ZodType } from '@kbn/zod/v4';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import { FakeLLM } from '@langchain/core/utils/testing';
-import { ModelRefusalError } from '@kbn/langchain/server';
 
 import type { AttackDiscoveryGraphState } from '../../../../types';
 import {
