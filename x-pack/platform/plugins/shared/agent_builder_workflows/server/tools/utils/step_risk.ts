@@ -64,6 +64,13 @@ const HANDWRITTEN_RISKS: ReadonlyMap<string, StepRisk> = new Map(
     'cases.deleteObservable': DESTRUCTIVE,
     'cases.deleteAttachments': DESTRUCTIVE,
     'cases.bulkDeleteObservables': DESTRUCTIVE,
+    'security.findEndpointArtifacts': SAFE,
+    'security.searchIntegrationKnowledge': SAFE,
+    'security.resolveEndpointHosts': SAFE,
+    'security.getEndpointHostDiagnostics': SAFE,
+    'security.getEndpointPackageStatus': SAFE,
+    'security.getEndpointInventoryCounts': SAFE,
+    'security.finalizeTroubleshootingDiagnosis': SAFE,
   })
 );
 
