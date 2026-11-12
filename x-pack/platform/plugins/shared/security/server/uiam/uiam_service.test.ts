@@ -1671,15 +1671,31 @@ describe('UiamService', () => {
       });
     });
 
-    it('gives up when UIAM takes too long, and does not keep the failure', async () => {
-      fetchSpy.mockRejectedValueOnce(
-        new DOMException('The operation was aborted due to timeout', 'TimeoutError')
-      );
-      await expect(getCreator()).rejects.toThrow('aborted due to timeout');
+    it('gives up on a lookup that never answers, and does not keep the failure', async () => {
+      jest.useFakeTimers();
+      try {
+        // UIAM accepts the connection and then stalls: the call only ends when its signal aborts.
+        fetchSpy.mockImplementationOnce(
+          (_url, init) =>
+            new Promise((_resolve, reject) => {
+              init.signal.addEventListener('abort', () => reject(init.signal.reason));
+            })
+        );
 
-      respondWith({ type: 'user', user_id: 12345 });
-      await expect(getCreator()).resolves.toEqual({ type: 'user', user_id: 12345 });
-      expect(fetchSpy).toHaveBeenCalledTimes(2);
+        const stalled = expect(getCreator()).rejects.toThrow('aborted due to timeout');
+        await jest.advanceTimersByTimeAsync(4_999);
+        expect(fetchSpy).toHaveBeenCalledTimes(1);
+        await jest.advanceTimersByTimeAsync(1);
+        await stalled;
+
+        respondWith({ type: 'user', user_id: 12345 });
+        await expect(getCreator()).resolves.toEqual({ type: 'user', user_id: 12345 });
+        expect(fetchSpy).toHaveBeenCalledTimes(2);
+        // The deadline of a lookup that answered in time doesn't linger.
+        expect(jest.getTimerCount()).toBe(0);
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it.each([

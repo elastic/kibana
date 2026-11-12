@@ -491,7 +491,8 @@ export class UserProfileService {
           `Request to get current user profile is authenticated via API key [fake=${!!fakeRequestProfileResolution}].`
         );
 
-        // Elasticsearch doesn't know UIAM API keys, so those are resolved through UIAM instead.
+        // Elasticsearch authenticates UIAM API keys but can't look them up (`with_profile_uid`), so
+        // those are resolved through UIAM instead.
         const authorization = HTTPAuthorizationHeader.parseFromRequest(request);
         if (this.resolveUiamApiKeyProfileId && authorization && isUiamCredential(authorization)) {
           profileId = await this.resolveUiamApiKeyProfileId(request);

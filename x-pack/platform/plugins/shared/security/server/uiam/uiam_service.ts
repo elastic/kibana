@@ -221,14 +221,15 @@ export interface GetUiamApiKeyCreatorParams {
 }
 
 /**
- * Background tasks use the same key over and over. A key's creator never changes, so entries only
- * expire to bound memory. The cache says who created a key, not that the key is still valid, so
- * callers must authenticate the key first.
+ * Background tasks use the same key over and over. A key's creator never changes, so `max` is what
+ * bounds the cache, and the TTL only keeps idle entries from lingering. The cache says who created
+ * a key, not that the key is still valid, so callers must authenticate the key before they trust
+ * the creator.
  */
 const API_KEY_CREATOR_CACHE_MAX_SIZE = 1000;
 const API_KEY_CREATOR_CACHE_TTL_MS = 5 * 60 * 1000;
 
-/** The creator only enriches a request that is already authenticated, so it must not hold it up. */
+/** The lookup is optional enrichment, so it is cut off instead of holding up the request. */
 const API_KEY_CREATOR_REQUEST_TIMEOUT_MS = 5 * 1000;
 
 /**
@@ -331,8 +332,8 @@ export interface UiamServicePublic {
    * carries, or `undefined` when UIAM reports none we support. Any other credential, and an
    * external (user-created) key, resolves to `undefined` without asking UIAM: the lookup carries
    * the client authentication the request already has, which UIAM rejects for external keys.
-   * Results are cached per key, so the caller must have authenticated the key: a cached creator
-   * outlives a revoked or expired key. A failed or slow request is thrown for the caller to log
+   * Results are cached per key, so the caller must authenticate the key before it trusts the
+   * creator: a cached creator outlives a revoked or expired key. A failed or slow request is thrown for the caller to log
    * and is not cached, while a response without a supported creator resolves to `undefined`.
    */
   getApiKeyCreator(params: GetUiamApiKeyCreatorParams): Promise<UiamApiKeyCreator | undefined>;
