@@ -75,7 +75,7 @@ actions:
         ipAddress: "{{ input.ipAddress }}"
         maxAgeInDays: "{{ input.maxAgeInDays }}"
         verbose: "{{ input.verbose }}"
-        someOtherParam: "{{ input.someOtherParam }}"
+        someOtherParam: "{{ input.someOtherParam? }}"
   reportIp:
     description: Report an IPv4 address with one or more abuse categories.
     isTool: true
@@ -101,10 +101,11 @@ actions:
       method: POST
       baseUrl: "{{ config.baseUrl }}"
       path: /api/v2/report
+      bodyType: form
       body:
         ip: "{{ input.ip }}"
         categories: "{{ input.categories }}"
-        comment: "{{ input.comment }}"
+        comment: "{{ input.comment? }}"
 test:
   description: Verify the API key with a bounded IP check.
   request:

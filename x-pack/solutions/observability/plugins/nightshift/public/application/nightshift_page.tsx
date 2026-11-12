@@ -36,7 +36,11 @@ import {
   isNightshiftSetUp,
   useInvestigatorServiceAccount,
 } from '../data/service_accounts/use_investigator_service_account';
-import { DETECTION_TAB_IDS, isDetectionTabId } from '../pages/detection/detection_tabs';
+import {
+  DETECTION_TAB_IDS,
+  isDetectionTabId,
+  isDeveloperModeTab,
+} from '../pages/detection/detection_tabs';
 import { KNOWLEDGE_TAB_IDS } from '../pages/knowledge/knowledge_tabs';
 
 /** Onboarding has a second column for the "Get started" card. */
@@ -146,7 +150,7 @@ export const DetectionRoute = ({
   const { search } = useLocation();
   const { isDeveloperMode } = useDeveloperMode();
 
-  if (!tab || !isDetectionTabId(tab) || (tab === 'signals' && !isDeveloperMode)) {
+  if (!tab || !isDetectionTabId(tab) || (isDeveloperModeTab(tab) && !isDeveloperMode)) {
     return <Redirect to={{ pathname: '/detections/events', search }} />;
   }
 
@@ -177,6 +181,9 @@ export function NightshiftPage(): React.ReactElement | null {
   const detectionSettingsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
     path: '/settings/detections?origin=detections',
   });
+  const investigationSettingsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
+    path: '/settings/investigations?origin=automations',
+  });
   const knowledgeHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
     path: '/knowledge',
   });
@@ -203,6 +210,10 @@ export function NightshiftPage(): React.ReactElement | null {
   const navigateToDetectionSettings = useCallback(
     () => application.navigateToUrl(detectionSettingsHref),
     [application, detectionSettingsHref]
+  );
+  const navigateToInvestigationSettings = useCallback(
+    () => application.navigateToUrl(investigationSettingsHref),
+    [application, investigationSettingsHref]
   );
   const navigateToKnowledge = useCallback(
     () => application.navigateToUrl(knowledgeHref),
@@ -290,7 +301,7 @@ export function NightshiftPage(): React.ReactElement | null {
       {
         href: basePath.prepend(NIGHTSHIFT_APP_ROUTE),
         text: i18n.translate('xpack.nightshift.breadcrumbs.linkText', {
-          defaultMessage: 'Nightshift',
+          defaultMessage: 'nightshift',
         }),
         deepLinkId: NIGHTSHIFT_APP_ID,
       },
@@ -468,8 +479,20 @@ export function NightshiftPage(): React.ReactElement | null {
             page={canUseAutomationsPage ? 'automations' : 'landing'}
             onKnowledgeClick={navigateToKnowledge}
             knowledgeHref={knowledgeHref}
-            onSettingsClick={canManageAndConfigure ? navigateToSettings : undefined}
-            settingsHref={canManageAndConfigure ? settingsHref : undefined}
+            onSettingsClick={
+              canManageAndConfigure
+                ? canUseAutomationsPage
+                  ? navigateToInvestigationSettings
+                  : navigateToSettings
+                : undefined
+            }
+            settingsHref={
+              canManageAndConfigure
+                ? canUseAutomationsPage
+                  ? investigationSettingsHref
+                  : settingsHref
+                : undefined
+            }
             onAutomationsClick={
               canUseAutomations && !hidesHeaderActions ? navigateToAutomations : undefined
             }
