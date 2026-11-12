@@ -68,6 +68,7 @@ describe('processScoutReports', () => {
       prependTitle: '',
       updateGithub: true,
       perTestIssues: true,
+      suiteIssueComments: false,
       indexInEs: true,
       reportUpdate: false,
     } as unknown as ProcessReportsParams);

@@ -151,12 +151,17 @@ const hiddenCss = css`
 const isStoreEntityType = (value: unknown): value is EntityType =>
   EntityType.safeParse(value).success;
 
-/** Host and user keep their type; every other entity type opens as generic. */
+/** Host, user and service keep their type; every other entity type opens as generic. */
 const toSecurityEntityType = (
   rawType: string | undefined
-): SecurityEntityType.host | SecurityEntityType.user | SecurityEntityType.generic => {
+):
+  | SecurityEntityType.host
+  | SecurityEntityType.user
+  | SecurityEntityType.service
+  | SecurityEntityType.generic => {
   if (rawType === 'host') return SecurityEntityType.host;
   if (rawType === 'user') return SecurityEntityType.user;
+  if (rawType === 'service') return SecurityEntityType.service;
   return SecurityEntityType.generic;
 };
 
@@ -462,7 +467,12 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
       onAnomalyCountClick: (row, rowMode) => {
         const entity = getRowEntity(row);
         const entityType = toSecurityEntityType(entity?.entityType);
-        if (!entity || entityType === SecurityEntityType.generic) return;
+        if (
+          !entity ||
+          entityType === SecurityEntityType.generic ||
+          entityType === SecurityEntityType.service
+        )
+          return;
         openEntityAnomalyInsights({
           entityType,
           value: entity.entityName ?? '',
