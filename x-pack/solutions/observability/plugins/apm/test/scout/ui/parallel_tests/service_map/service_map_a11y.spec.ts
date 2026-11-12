@@ -10,6 +10,9 @@ import { tags } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
 import { EXTENDED_TIMEOUT, SERVICE_OPBEANS_JAVA } from '../../fixtures/constants';
 
+// Node-stats a11y (ring / compact rate / idle fade) lives in
+// `ui/tests/08_service_map_a11y_node_stats.spec.ts` — flag override + one-describe rule.
+
 test.describe(
   'Service map - accessibility',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },

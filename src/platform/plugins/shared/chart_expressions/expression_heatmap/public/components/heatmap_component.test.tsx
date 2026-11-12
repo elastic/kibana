@@ -29,7 +29,7 @@ import HeatmapComponent, {
   computeMinIntervalFromData,
   getDateFormatPattern,
 } from './heatmap_component';
-import { LegendSize } from '@kbn/chart-expressions-common';
+import { ChartTooltipFooterMessage, LegendSize } from '@kbn/chart-expressions-common';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 const actWithTimeout = (action: Function, timer: number = 1) =>
@@ -469,6 +469,61 @@ describe('HeatmapComponent', function () {
     } as unknown as HeatmapRenderProps;
     const component = mountWithIntl(<HeatmapComponent {...newProps} />);
     expect(component.find(Tooltip).prop('type')).toBe(TooltipType.None);
+  });
+
+  describe('ES|QL computed column tooltip footer', () => {
+    const computedYData: Datatable = {
+      ...data,
+      meta: { type: ESQL_TABLE_TYPE },
+      columns: [
+        data.columns[0],
+        data.columns[1],
+        {
+          id: 'col-2-3',
+          name: 'Distance Range',
+          meta: {
+            type: 'string',
+            sourceParams: { sourceField: 'Distance Range', isSourceFieldFilterable: false },
+          },
+          isComputedColumn: true,
+        },
+      ],
+    };
+
+    const renderFooter = (items: TooltipValue[]) => {
+      const component = shallowWithIntl(
+        <HeatmapComponent {...wrapperProps} data={computedYData} />
+      );
+      const Footer = component.find(Tooltip).prop('footer');
+      if (typeof Footer !== 'function') {
+        throw new Error('Expected a tooltip footer component');
+      }
+      return shallowWithIntl(<Footer items={items} header={null} />);
+    };
+
+    it('shows the disclaimer on a cell tooltip when the y column is computed', () => {
+      const cellDatum = { x: 'a', y: '0-1000', value: 1, originalIndex: 0 };
+      const footer = renderFooter([
+        { label: 'Dest', datum: cellDatum } as TooltipValue,
+        { label: 'Distance Range', datum: cellDatum } as TooltipValue,
+        { label: 'Count', datum: cellDatum } as TooltipValue,
+      ]);
+      expect(footer.find(ChartTooltipFooterMessage).prop('message')).toContain('Distance Range');
+    });
+
+    it('hides the disclaimer on a y-axis label tooltip', () => {
+      const footer = renderFooter([{ label: '', datum: '0-1000' } as TooltipValue]);
+      expect(footer.find(ChartTooltipFooterMessage)).toHaveLength(0);
+    });
+
+    it('uses the default footer when the y column is not a computed field', () => {
+      const esqlData: Datatable = {
+        ...data,
+        meta: { type: ESQL_TABLE_TYPE },
+      };
+      const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} data={esqlData} />);
+      expect(component.find(Tooltip).prop('footer')).toBe('default');
+    });
   });
 
   it('not renders the component if no value accessor is given', () => {

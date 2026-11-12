@@ -39,7 +39,6 @@ describe('UserName', () => {
     fieldName: 'user.name',
     fieldType: 'keyword',
     isAggregatable: true,
-    contextId: 'test-context-id',
     eventId: 'test-event-id',
     value: 'Mock User',
   };
