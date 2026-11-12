@@ -244,6 +244,6 @@ describe('InvestigationSection', () => {
 
     fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionRetry-critical'));
     expect(onRetry).toHaveBeenCalledTimes(1);
-    expect(screen.queryByText('No investigations found')).not.toBeInTheDocument();
+    expect(screen.queryByText('No open investigations')).not.toBeInTheDocument();
   });
 });

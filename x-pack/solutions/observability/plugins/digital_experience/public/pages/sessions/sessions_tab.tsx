@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import { omitBy, isUndefined } from 'lodash';
 import {
@@ -24,8 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { getDateISORange } from '@kbn/timerange';
-import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
-import { SESSIONS_LOOKBACK_DAYS } from '../../../common/sessions';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { ApplicationSource } from '../../../common/types/applications';
 import { canManageSessions } from '../../capabilities';
 import { ColumnSelector } from '../../components/column_selector';
@@ -43,7 +42,7 @@ import { useVisibleColumns } from '../../hooks/use_visible_columns';
 import { EDOT_BROWSER_DOCS_URL } from '../../utils/doc_links';
 import { SessionsFilters } from './components/sessions_filters';
 import { SessionsKpis } from './components/sessions_kpis';
-import { EnableSessionsPrompt, SessionsStatusCallout } from './components/sessions_status_prompts';
+import { EnableSessionsPrompt } from './components/sessions_status_prompts';
 import {
   SESSIONS_HIDDEN_BY_DEFAULT,
   SESSIONS_OPTIONAL_COLUMNS,
@@ -62,9 +61,6 @@ const HIDDEN_COLUMNS_STORAGE_KEY = 'xpack.digitalExperience.sessions.hiddenColum
 const LOADING_MESSAGE = i18n.translate('xpack.digitalExperience.sessions.loadingMessage', {
   defaultMessage: 'Loading sessions',
 });
-
-/** How often the status is checked again while sessions rebuild or update in the background. */
-const STATUS_REFRESH_MS = 30_000;
 
 const statusLoadingPrompt = (
   <EuiEmptyPrompt
@@ -116,31 +112,6 @@ const noSessionsPrompt = (
   />
 );
 
-/** The sessions index is being built after setup or an update, so it may still be empty. */
-const rebuildingPrompt = (
-  <EuiEmptyPrompt
-    data-test-subj="digitalExperienceSessionsRebuilding"
-    icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
-    titleSize="s"
-    title={
-      <h2>
-        {i18n.translate('xpack.digitalExperience.sessions.rebuildingTitle', {
-          defaultMessage: 'Building sessions',
-        })}
-      </h2>
-    }
-    body={
-      <p>
-        {i18n.translate('xpack.digitalExperience.sessions.rebuildingDescription', {
-          defaultMessage:
-            'Sessions are being built from up to {days} days of data. This can take a while; they show up here as they are built.',
-          values: { days: SESSIONS_LOOKBACK_DAYS },
-        })}
-      </p>
-    }
-  />
-);
-
 const NoMatchingSessionsPrompt = ({ onClear }: { onClear: () => void }) => (
   <EuiEmptyPrompt
     data-test-subj="digitalExperienceSessionsNoMatches"
@@ -170,20 +141,7 @@ const NoMatchingSessionsPrompt = ({ onClear }: { onClear: () => void }) => (
   />
 );
 
-function SessionsList({
-  serviceName,
-  source,
-  rebuilding,
-  updating,
-  onRefreshStatus,
-}: {
-  serviceName: string;
-  source: ApplicationSource;
-  rebuilding: boolean;
-  /** Whether a rebuild or an automatic update is still pending. */
-  updating: boolean;
-  onRefreshStatus: () => void;
-}) {
+function SessionsList({ serviceName, source }: { serviceName: string; source: ApplicationSource }) {
   const apiClient = useApiClient();
   const formatters = useFormatters();
   const { timeRange } = useTimeRange();
@@ -258,20 +216,6 @@ function SessionsList({
     [apiClient, serviceName, timeRange, state],
     { unsetValueOnError: true }
   );
-  // Refresh checks the status too, so a finished rebuild or update shows without reloading.
-  const refreshAll = useCallback(() => {
-    refresh();
-    onRefreshStatus();
-  }, [refresh, onRefreshStatus]);
-  // A finished rebuild or update has sessions the list was fetched without. Watched as one, as an
-  // update can apply and finish its rebuild between two status checks.
-  const wasUpdating = useRef(updating);
-  useEffect(() => {
-    if (wasUpdating.current && !updating) {
-      refresh();
-    }
-    wasUpdating.current = updating;
-  }, [updating, refresh]);
   // Nothing has been fetched before the first request starts.
   const isLoading = loading || (!response && !error);
 
@@ -296,14 +240,14 @@ function SessionsList({
     if (hasActiveFilters) {
       return <NoMatchingSessionsPrompt onClear={clearFilters} />;
     }
-    return rebuilding ? rebuildingPrompt : noSessionsPrompt;
+    return noSessionsPrompt;
   };
 
   return (
     <>
       <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
         <EuiFlexItem grow={false}>
-          <TimeRangePicker onRefresh={refreshAll} />
+          <TimeRangePicker onRefresh={refresh} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -323,32 +267,6 @@ function SessionsList({
       )}
       <SessionsKpis kpis={response?.kpis} isLoading={isLoading} formatters={formatters} />
       <EuiSpacer size="m" />
-      {response && response.failedSummaries > 0 && (
-        <>
-          <KbnWarningCallout
-            data-test-subj="digitalExperienceSessionsFailedSummaries"
-            size="s"
-            title={
-              // They are counted by search, facets and duration, but can't be checked for errors.
-              state.hasErrors
-                ? i18n.translate(
-                    'xpack.digitalExperience.sessions.failedSummariesWithErrorsFilterTitle',
-                    {
-                      defaultMessage:
-                        '{count, plural, one {# session} other {# sessions}} in this time range could not be summarized, so {count, plural, one {it is} other {they are}} missing from the list and totals, and whether {count, plural, one {it} other {they}} had errors is unknown.',
-                      values: { count: response.failedSummaries },
-                    }
-                  )
-                : i18n.translate('xpack.digitalExperience.sessions.failedSummariesTitle', {
-                    defaultMessage:
-                      '{count, plural, one {# session} other {# sessions}} in this time range could not be summarized, so {count, plural, one {it is} other {they are}} missing from the list and totals.',
-                    values: { count: response.failedSummaries },
-                  })
-            }
-          />
-          <EuiSpacer size="m" />
-        </>
-      )}
       <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
         <EuiFlexItem>
           <SessionsFilters
@@ -388,10 +306,7 @@ function SessionsList({
   );
 }
 
-/**
- * The Sessions tab of an application: sets sessions up when they aren't yet, flags when they need
- * attention, and lists the application's sessions.
- */
+/** The Sessions tab of an application: sets sessions up when they aren't yet, and lists them. */
 export function SessionsTab({
   serviceName,
   source,
@@ -402,29 +317,6 @@ export function SessionsTab({
   const { application } = useKibanaServices();
   const canManage = canManageSessions(application.capabilities);
   const { status, error, refresh, enable, enabling, enableError } = useSessionsStatus();
-  const enableProps = { canManage, onEnable: enable, enabling, enableError };
-
-  // Rebuilding and automatic updates finish in the background, so check back until they do.
-  const pending =
-    status?.rebuilding === true || (status?.needsUpdate === true && status.autoUpdate);
-  useEffect(() => {
-    if (!pending) {
-      return;
-    }
-    const interval = setInterval(refresh, STATUS_REFRESH_MS);
-    return () => clearInterval(interval);
-  }, [pending, refresh]);
-
-  // A deleted API key doesn't stop the transforms, but updates no longer apply by themselves.
-  // Someone who can set sessions up grants a new one by visiting, once per visit, as the Update
-  // button would; a failure shows as usual.
-  const regranted = useRef(false);
-  useEffect(() => {
-    if (status?.apiKeyInvalid && canManage && !regranted.current) {
-      regranted.current = true;
-      void enable();
-    }
-  }, [status?.apiKeyInvalid, canManage, enable]);
 
   // A failed background refresh keeps the last status.
   if (error && !status) {
@@ -445,20 +337,20 @@ export function SessionsTab({
     return statusLoadingPrompt;
   }
   if (!status.installed) {
-    return <EnableSessionsPrompt {...enableProps} />;
+    return (
+      <EnableSessionsPrompt
+        canManage={canManage}
+        onEnable={enable}
+        enabling={enabling}
+        enableError={enableError}
+      />
+    );
   }
   return (
     <>
       {/* Clears the page header's tabs. */}
       <EuiSpacer size="m" />
-      <SessionsStatusCallout status={status} {...enableProps} />
-      <SessionsList
-        serviceName={serviceName}
-        source={source}
-        rebuilding={status.rebuilding}
-        updating={pending}
-        onRefreshStatus={refresh}
-      />
+      <SessionsList serviceName={serviceName} source={source} />
     </>
   );
 }
