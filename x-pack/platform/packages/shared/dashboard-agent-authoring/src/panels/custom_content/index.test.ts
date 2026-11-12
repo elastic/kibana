@@ -37,9 +37,12 @@ describe('custom content panel kind content schema', () => {
   });
 
   it('rejects an index longer than the limit', () => {
-    expect(parse({ query: 'status card', hasData: true, index: 'x'.repeat(257) }).success).toBe(
-      false
-    );
+    expect(
+      parse({
+        query: 'status card',
+        dataQueries: [{ description: 'totals', index: 'x'.repeat(257) }],
+      }).success
+    ).toBe(false);
   });
 
   it('rejects an empty description', () => {

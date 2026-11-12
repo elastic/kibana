@@ -126,8 +126,7 @@ describe('executeDashboardUpsert, ES|QL control values for custom content', () =
           source: 'request',
           renderer: 'custom_content',
           query: 'a card for the selected host',
-          hasData: true,
-          esql: 'FROM logs | WHERE host.name == ?host | STATS n = COUNT(*)',
+          dataQueries: [{ esql: 'FROM logs | WHERE host.name == ?host | STATS n = COUNT(*)' }],
         },
       },
     ]);

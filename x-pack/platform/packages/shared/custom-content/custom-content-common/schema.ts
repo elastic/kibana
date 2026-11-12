@@ -47,8 +47,8 @@ export const toEsqlQueryState = (esqlQuery: string | undefined): string[] | unde
   esqlQuery === undefined ? undefined : [esqlQuery];
 
 /**
- * A panel's queries as an agent asks for them, by position. Shared by the chat tool and the
- * dashboard generation tool, so both describe the same thing to the model.
+ * A panel's queries as an agent asks for them, by position. Shared by the chat tool, the
+ * dashboard generation tool and `create_visualization`, so all describe the same thing to the model.
  */
 export const customContentDataQueriesSchema = lazySchema(() =>
   z
@@ -82,19 +82,30 @@ export const customContentDataQueriesSchema = lazySchema(() =>
     .min(1)
     .max(CUSTOM_CONTENT_MAX_ESQL_QUERIES)
     .describe(
-      `The panel's ES|QL queries, by position, for a panel that needs data of more than one shape, such as headline numbers plus a ranked list. The template reads the first as \`rows\` and the n-th as \`queries[n].rows\`, so the order matters. Each entry describes one query ("description"), or gives one ready to use ("esql"). With a single query use the single-query fields instead. Do not combine with the single-query fields. On an existing panel: an entry with "description" regenerates the query at that position, one with "esql" replaces it, an empty entry {} keeps it, an entry past the current queries adds one, and queries not listed are kept. Queries cannot be removed this way. At most ${CUSTOM_CONTENT_MAX_ESQL_QUERIES}.`
+      `The panel's ES|QL queries, by position: one entry for a panel with one query, several for a panel that needs data of more than one shape, such as headline numbers plus a ranked list. The template reads the first as \`rows\` and the n-th as \`queries[n].rows\`, so the order matters. Each entry describes one query ("description"), or gives one ready to use ("esql"). On an existing panel: an entry with "description" regenerates the query at that position, one with "esql" replaces it, an empty entry {} keeps it, an entry past the current queries adds one, and queries not listed are kept. Queries cannot be removed this way. At most ${CUSTOM_CONTENT_MAX_ESQL_QUERIES}.`
     )
 );
 
 export type CustomContentDataQueries = z.output<typeof customContentDataQueriesSchema>;
+/** What a request does to the queries of a panel; one that says nothing leaves them as they are. */
+export interface CustomContentQueryChanges {
+  /** What each position should become; positions it does not reach are kept. */
+  dataQueries?: CustomContentDataQueries;
+  /** Remove every query, which leaves a panel with static content. Cannot be combined with `dataQueries`. */
+  removeAllQueries?: boolean;
+}
 /** One of a panel's queries, as an agent asks for it. */
 export type CustomContentDataQuery = CustomContentDataQueries[number];
 
+/** Says that a panel shows static content, which is what leaves it with no queries. */
+export const REMOVE_ALL_QUERIES_DESCRIPTION =
+  'true: the panel shows static content with no data, so it has no queries. Never use it to get past a failed query generation: fix the index or the description and retry instead.';
+
 /**
- * Generation input for the create-panel and update-panel tools. `prompt` instructs this operation
- * only and is never persisted; the server generates `template`.
+ * Generation input for the update-panel tool. `prompt` instructs this operation only and is never
+ * persisted; the server generates `template`.
  */
-const createUpdateFields = () => ({
+const updateFields = () => ({
   prompt: z
     .string()
     .min(1)
@@ -103,50 +114,22 @@ const createUpdateFields = () => ({
     .describe(
       'Natural language instruction for what to create or change. The server generates the HTML template from this prompt.'
     ),
-  esqlQuery: z
-    .string()
-    .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
-    .nullable()
-    .optional()
-    .describe(
-      'An ES|QL query the user supplied, to use as it is; it replaces the current one. Omit to keep the existing query. Pass null to remove it entirely. Do not write a query yourself: to change the data, set regenerateEsql to true and describe the change in "prompt". The server runs the query to sample its schema and rejects the whole operation if Elasticsearch refuses it.'
-    ),
-  regenerateEsql: lazySchema(() =>
-    z
-      .boolean()
-      .optional()
-      .describe(
-        'Set true when the edit needs different data: a new measure or field ("also show the average bytes"), a new grouping or filter, or another time window. Without it the stored query is kept and the new data can never appear. The server regenerates the ES|QL query from "prompt", keeping the parts the request does not change. Omit for edits that only change the look: colors, sizes, wording, layout. Requires "prompt".'
-      )
-  ),
-  index: z
-    .string()
-    .max(256)
-    .optional()
-    .describe(
-      'Exact index, alias, or data stream to generate the query from. Pass it with regenerateEsql whenever known.'
-    ),
   dataQueries: customContentDataQueriesSchema.optional(),
+  removeAllQueries: z.boolean().optional().describe(REMOVE_ALL_QUERIES_DESCRIPTION),
 });
 
 const hasSomethingToChange = ({
   prompt,
-  esqlQuery,
   dataQueries,
+  removeAllQueries,
 }: {
   prompt?: string;
-  esqlQuery?: string | null;
   dataQueries?: unknown[];
-}) =>
-  prompt !== undefined || esqlQuery === null || Boolean(esqlQuery?.trim()) || Boolean(dataQueries);
+  removeAllQueries?: boolean;
+}) => prompt !== undefined || Boolean(dataQueries) || Boolean(removeAllQueries);
 
 const atLeastOneChange = {
-  message: 'At least one of prompt, esqlQuery or data queries must be provided.',
-};
-
-const dataQueriesReplaceSingleQueryFields = {
-  message:
-    "dataQueries replaces esqlQuery, regenerateEsql and index: put each query's esql and index on its data query.",
+  message: 'At least one of prompt, dataQueries or removeAllQueries must be provided.',
 };
 
 const dataQueryDescriptionsNeedPrompt = {
@@ -154,12 +137,8 @@ const dataQueryDescriptionsNeedPrompt = {
     'A data query with a description changes what the panel shows, so it needs a prompt describing the change.',
 };
 
-const regenerateNeedsPrompt = {
-  message: 'regenerateEsql requires a prompt describing the change.',
-};
-
-const regenerateExcludesRemoval = {
-  message: 'esqlQuery: null removes the query, so it cannot be combined with regenerateEsql.',
+const removeAllExcludesDataQueries = {
+  message: 'removeAllQueries removes every query, so it cannot be combined with dataQueries.',
 };
 
 /**
@@ -176,21 +155,12 @@ export const customContentPanelUpdateSchema = lazySchema(() =>
         .describe(
           'The embeddable_id of the custom content panel to update, as shown in that panel\'s context header (e.g. "Custom content panel (embeddable_id: …)"). Always required — several panels can be attached to one conversation.'
         ),
-      ...createUpdateFields(),
+      ...updateFields(),
     })
     .refine(hasSomethingToChange, atLeastOneChange)
     .refine(
-      ({ prompt, regenerateEsql }) => !regenerateEsql || prompt !== undefined,
-      regenerateNeedsPrompt
-    )
-    .refine(
-      ({ esqlQuery, regenerateEsql }) => !(esqlQuery === null && regenerateEsql),
-      regenerateExcludesRemoval
-    )
-    .refine(
-      ({ dataQueries, esqlQuery, regenerateEsql, index }) =>
-        !dataQueries || (esqlQuery === undefined && !regenerateEsql && index === undefined),
-      dataQueriesReplaceSingleQueryFields
+      ({ dataQueries, removeAllQueries }) => !(dataQueries && removeAllQueries),
+      removeAllExcludesDataQueries
     )
     .refine(
       ({ dataQueries, prompt }) =>

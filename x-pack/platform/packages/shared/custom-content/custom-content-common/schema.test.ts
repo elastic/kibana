@@ -104,79 +104,25 @@ describe('customContentPanelUpdateSchema', () => {
     ).toBe(true);
   });
 
-  it('still requires at least one of prompt or esqlQuery', () => {
+  it('requires something to change', () => {
     expect(customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1' }).success).toBe(false);
   });
 
-  it('accepts an esqlQuery on its own', () => {
+  it('accepts removing every query on its own', () => {
     expect(
-      customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1', esqlQuery: 'FROM logs-*' })
+      customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1', removeAllQueries: true })
         .success
     ).toBe(true);
   });
 
-  it('accepts regenerateEsql with a prompt and an index', () => {
+  it('rejects removeAllQueries together with dataQueries', () => {
     expect(
       customContentPanelUpdateSchema.safeParse({
         embeddable_id: 'p1',
-        prompt: 'Also show the error rate',
-        regenerateEsql: true,
-        index: 'logs-*',
-      }).success
-    ).toBe(true);
-  });
-
-  it('rejects regenerateEsql without a prompt', () => {
-    expect(
-      customContentPanelUpdateSchema.safeParse({
-        embeddable_id: 'p1',
-        esqlQuery: 'FROM logs-*',
-        regenerateEsql: true,
+        removeAllQueries: true,
+        dataQueries: [{ esql: 'FROM logs' }],
       }).success
     ).toBe(false);
-  });
-
-  it('rejects an edit whose only change is a blank esqlQuery', () => {
-    expect(
-      customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1', esqlQuery: '  ' }).success
-    ).toBe(false);
-  });
-
-  it('accepts a blank esqlQuery next to a prompt, as not supplied', () => {
-    expect(
-      customContentPanelUpdateSchema.safeParse({
-        embeddable_id: 'p1',
-        prompt: 'Make the badges blue',
-        esqlQuery: '',
-      }).success
-    ).toBe(true);
-  });
-
-  it('rejects regenerateEsql together with esqlQuery: null', () => {
-    expect(
-      customContentPanelUpdateSchema.safeParse({
-        embeddable_id: 'p1',
-        prompt: 'Show errors by host',
-        esqlQuery: null,
-        regenerateEsql: true,
-      }).success
-    ).toBe(false);
-  });
-
-  it('rejects an index longer than the limit', () => {
-    expect(
-      customContentPanelUpdateSchema.safeParse({
-        embeddable_id: 'p1',
-        prompt: 'Show errors',
-        index: 'x'.repeat(257),
-      }).success
-    ).toBe(false);
-  });
-
-  it('accepts a null esqlQuery to clear the query', () => {
-    expect(
-      customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1', esqlQuery: null }).success
-    ).toBe(true);
   });
 
   it('rejects a prompt exceeding CUSTOM_CONTENT_MAX_PROMPT_LENGTH', () => {
@@ -250,17 +196,6 @@ describe('customContentPanelUpdateSchema data queries', () => {
     const result = parse({ dataQueries: [{ description: 'totals' }] });
     expect(result.success).toBe(false);
     expect(JSON.stringify(result)).toContain('needs a prompt');
-  });
-
-  it.each([
-    [{ esqlQuery: 'FROM logs' }],
-    [{ esqlQuery: null }],
-    [{ regenerateEsql: true }],
-    [{ index: 'logs' }],
-  ])('cannot be combined with the single-query fields: %j', (extra) => {
-    const result = parse({ prompt: 'Show it', dataQueries: [{ esql: 'FROM a' }], ...extra });
-    expect(result.success).toBe(false);
-    expect(JSON.stringify(result)).toContain('dataQueries replaces');
   });
 });
 

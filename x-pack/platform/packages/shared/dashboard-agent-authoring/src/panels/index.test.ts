@@ -40,35 +40,32 @@ describe('upsert panel content schema', () => {
     ).toBe(false);
   });
 
-  it('keeps esql, hasData, regenerateESQL and index and drops Lens-only fields on custom_content', () => {
+  it('keeps dataQueries and removeAllQueries and drops Lens-only fields on custom_content', () => {
     const result = upsertPanelContentSchema.safeParse({
       source: 'request',
       renderer: 'custom_content',
       query: 'Show a KPI card for total errors',
-      esql: 'FROM logs-* | STATS count = COUNT(*) BY service.name',
-      hasData: true,
-      regenerateESQL: true,
+      dataQueries: [{ description: 'total errors', index: 'logs-*' }],
+      removeAllQueries: false,
       chartType: 'metric',
-      index: 'logs-*',
     });
 
     expect(result.success).toBe(true);
     expect(result.data).toMatchObject({
-      esql: 'FROM logs-* | STATS count = COUNT(*) BY service.name',
-      hasData: true,
-      regenerateESQL: true,
-      index: 'logs-*',
+      dataQueries: [{ description: 'total errors', index: 'logs-*' }],
+      removeAllQueries: false,
     });
     expect(result.data).not.toHaveProperty('chartType');
   });
 
   it.each([
     ['a query-only', { query: 'Updated KPI' }],
-    ['an esql-only', { esql: 'FROM logs-* | STATS count = COUNT(*)' }],
-    ['a query-removing', { esql: null }],
-    ['a static-making', { hasData: false }],
-    ['a data-adding', { query: 'Add the error count', hasData: true, index: 'logs-*' }],
-    ['a regenerating', { query: 'Show errors by host', regenerateESQL: true }],
+    ['a data-query-only', { dataQueries: [{ esql: 'FROM logs-* | STATS count = COUNT(*)' }] }],
+    ['a static-making', { removeAllQueries: true }],
+    [
+      'a data-adding',
+      { query: 'Add the error count', dataQueries: [{}, { description: 'errors' }] },
+    ],
   ])('accepts %s custom_content content', (_, fields) => {
     expect(
       upsertPanelContentSchema.safeParse({

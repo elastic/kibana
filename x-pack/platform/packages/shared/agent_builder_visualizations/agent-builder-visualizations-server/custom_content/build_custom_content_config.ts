@@ -7,7 +7,7 @@
 
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { CustomContentDataQuery } from '@kbn/custom-content-common';
+import type { CustomContentQueryChanges } from '@kbn/custom-content-common';
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { Logger } from '@kbn/logging';
@@ -25,17 +25,15 @@ export type ResolveCustomContentEsqlVariables = (
   options?: { anyVariable?: boolean }
 ) => Promise<ESQLControlVariable[] | undefined>;
 
-interface BuildCustomContentConfigParams {
+/**
+ * `dataQueries` says what to do with the panel's queries by position: each one describes or supplies
+ * the query at its position, an empty one keeps it, and a position past the stored queries adds
+ * one. Queries it does not reach are kept. Without it the queries stay as they are, and
+ * `removeAllQueries` wins over it.
+ */
+interface BuildCustomContentConfigParams extends CustomContentQueryChanges {
   /** What to show, or what to change on an existing panel. */
   nlQuery?: string;
-  /**
-   * What to do with the panel's queries, by position: each data query describes or supplies the query
-   * at its position, an empty one keeps it, and a position past the stored queries adds one. Queries
-   * it does not reach are kept. Without it the queries stay as they are.
-   */
-  dataQueries?: readonly CustomContentDataQuery[];
-  /** Remove every query, for a panel with static content. Wins over `dataQueries`. */
-  removeAllQueries?: boolean;
   /**
    * The panel being edited. Absent for a new panel. Its queries are in the order the template reads
    * them: the first is the main query (`rows`), the others `queries[1]`, `queries[2]`, ...

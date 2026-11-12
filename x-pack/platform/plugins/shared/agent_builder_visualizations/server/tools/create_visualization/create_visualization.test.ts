@@ -58,14 +58,12 @@ const lensTarget = (chartType: SupportedChartType = SupportedChartType.XY) => ({
 const vegaTarget = { type: 'vega' as const };
 const customContentTarget = (
   rest: {
-    esql?: string | null;
-    has_data?: boolean;
-    regenerate_esql?: boolean;
+    removeAllQueries?: boolean;
     dataQueries?: Array<{ description?: string; esql?: string; index?: string }>;
   } = {}
 ) => ({
   type: 'custom_content' as const,
-  has_data: true,
+  ...('removeAllQueries' in rest ? {} : { dataQueries: [{ description: 'a status board' }] }),
   ...rest,
 });
 const attachmentTarget = (
@@ -73,8 +71,7 @@ const attachmentTarget = (
   rest: {
     chartType?: SupportedChartType;
     esql?: string | null;
-    has_data?: boolean | null;
-    regenerate_esql?: boolean | null;
+    removeAllQueries?: boolean;
     dataQueries?: Array<{ description?: string; esql?: string; index?: string }>;
   } = {}
 ) => ({ type: 'attachment' as const, attachment_id: attachmentId, ...rest });
@@ -131,26 +128,6 @@ describe('createVisualizationTool schema', () => {
     ).toBe(true);
   });
 
-  it('requires a new custom content visualization to state has_data, with no default', () => {
-    const { has_data: hasData, ...withoutHasData } = customContentTarget();
-
-    expect(
-      schema.safeParse({ query: 'a status board per host', target: withoutHasData }).success
-    ).toBe(false);
-    expect(
-      schema.safeParse({
-        query: 'a banner',
-        target: { ...withoutHasData, has_data: null },
-      }).success
-    ).toBe(false);
-    expect(
-      schema.safeParse({
-        query: 'a banner',
-        target: customContentTarget({ has_data: false }),
-      }).success
-    ).toBe(true);
-  });
-
   it('accepts leftover esql: null on every target and treats it as omitted', () => {
     const lens = schema.safeParse({
       query: 'errors over time',
@@ -164,53 +141,29 @@ describe('createVisualizationTool schema', () => {
     expect(
       schema.safeParse({ query: 'flows by host', target: { ...vegaTarget, esql: null } }).success
     ).toBe(true);
-    expect(
-      schema.safeParse({
-        query: 'a status board per host',
-        target: customContentTarget({ esql: null }),
-      }).success
-    ).toBe(true);
   });
 
-  it('accepts has_data only on custom_content and attachment targets', () => {
+  it('accepts dataQueries and removeAllQueries only on custom_content and attachment targets', () => {
     expect(
       schema.safeParse({
         query: 'a welcome banner',
-        target: customContentTarget({ has_data: false }),
+        target: customContentTarget({ removeAllQueries: true }),
       }).success
     ).toBe(true);
     expect(
       schema.safeParse({
         query: 'drop the data',
-        target: attachmentTarget('existing', { has_data: false }),
+        target: attachmentTarget('existing', { removeAllQueries: true }),
       }).success
     ).toBe(true);
 
     const lens = schema.safeParse({
       query: 'errors over time',
-      target: { ...lensTarget(), has_data: false },
+      target: { ...lensTarget(), removeAllQueries: true },
     });
     expect(lens.success).toBe(true);
     if (lens.success) {
-      expect(lens.data.target).not.toHaveProperty('has_data');
-    }
-  });
-
-  it('accepts regenerate_esql only on attachment targets', () => {
-    expect(
-      schema.safeParse({
-        query: 'also split by os',
-        target: attachmentTarget('existing', { regenerate_esql: true }),
-      }).success
-    ).toBe(true);
-
-    const customContent = schema.safeParse({
-      query: 'a status board',
-      target: { ...customContentTarget(), regenerate_esql: true },
-    });
-    expect(customContent.success).toBe(true);
-    if (customContent.success) {
-      expect(customContent.data.target).not.toHaveProperty('regenerate_esql');
+      expect(lens.data.target).not.toHaveProperty('removeAllQueries');
     }
   });
 
@@ -497,7 +450,7 @@ describe('createVisualizationTool handler', () => {
     expect(mockBuildLens).toHaveBeenCalledWith(expect.objectContaining({ esql: undefined }));
   });
 
-  it('ignores has_data: false on a Lens update instead of failing the chart', async () => {
+  it('rejects removeAllQueries on a Lens update, which has one query it cannot remove', async () => {
     const attachments = createAttachments();
     attachments.getAttachmentRecord.mockReturnValue({
       id: 'existing',
@@ -517,13 +470,12 @@ describe('createVisualizationTool handler', () => {
     });
 
     const { result } = await runHandler(
-      { query: 'drop the data', target: attachmentTarget('existing', { has_data: false }) },
+      { query: 'drop the data', target: attachmentTarget('existing', { removeAllQueries: true }) },
       { attachments }
     );
 
-    expect(result.results[0].type).toBe(ToolResultType.visualization);
-    expect(mockBuildLens).toHaveBeenCalledTimes(1);
-    expect(attachments.update).toHaveBeenCalled();
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect(mockBuildLens).not.toHaveBeenCalled();
   });
 
   it('reuses the existing time_range on edit instead of probing', async () => {
@@ -751,7 +703,9 @@ describe('createVisualizationTool handler', () => {
       const { result, attachments } = await runHandler({
         query: 'a status board per host',
         index: 'logs-*',
-        target: customContentTarget({ esql: 'FROM logs | STATS count() BY host' }),
+        target: customContentTarget({
+          dataQueries: [{ esql: 'FROM logs | STATS count() BY host' }],
+        }),
       });
 
       expect(mockBuildLens).not.toHaveBeenCalled();
@@ -858,48 +812,62 @@ describe('createVisualizationTool handler', () => {
       const messageOf = (result: { results: Array<{ data: unknown }> }) =>
         (result.results[0].data as { message: string }).message;
 
-      it.each([[{ esql: 'FROM x' }], [{ has_data: false }]])(
-        'rejects data queries combined with the single-query fields of a new panel: %j',
-        async (extra) => {
-          const { result } = await runHandler({
-            query: 'x',
-            target: customContentTarget({ dataQueries, ...extra }),
-          });
+      it('rejects data queries combined with removeAllQueries', async () => {
+        const { result } = await runHandler({
+          query: 'x',
+          target: customContentTarget({ dataQueries, removeAllQueries: true }),
+        });
 
-          expect(result.results[0].type).toBe(ToolResultType.error);
-          expect(messageOf(result)).toContain('"dataQueries" replaces');
-          expect(mockBuildCustomContent).not.toHaveBeenCalled();
-        }
-      );
+        expect(result.results[0].type).toBe(ToolResultType.error);
+        expect(messageOf(result)).toContain('cannot be combined with "dataQueries"');
+        expect(mockBuildCustomContent).not.toHaveBeenCalled();
+      });
 
-      it('rejects data queries combined with regenerate_esql on an attachment update', async () => {
+      it("gives a Lens or Vega panel's only way to name a query, esql, no place on a custom content one", async () => {
         const { result } = await runHandler(
-          {
-            query: 'x',
-            target: attachmentTarget('att-1', { dataQueries, regenerate_esql: true }),
-          },
+          { query: 'x', target: attachmentTarget('att-1', { esql: 'FROM x' }) },
           { attachments: storedAttachment() }
         );
 
         expect(result.results[0].type).toBe(ToolResultType.error);
-        expect(messageOf(result)).toContain('"dataQueries" replaces');
+        expect(messageOf(result)).toContain('"esql" only applies to Lens and Vega');
         expect(mockBuildCustomContent).not.toHaveBeenCalled();
       });
-    });
 
-    it('treats leftover esql: null as omitted', async () => {
-      await runHandler({
-        query: 'document count per minute as a line chart',
-        target: customContentTarget({ esql: null }),
+      it('needs a new panel to say whether it has data', async () => {
+        const { result } = await runHandler({
+          query: 'a banner',
+          target: { type: 'custom_content' },
+        });
+
+        expect(result.results[0].type).toBe(ToolResultType.error);
+        expect(messageOf(result)).toContain('needs "dataQueries"');
+        expect(mockBuildCustomContent).not.toHaveBeenCalled();
       });
 
-      expect(mockBuildCustomContent).toHaveBeenCalledWith(
-        expect.objectContaining({
-          dataQueries: [
-            { description: 'document count per minute as a line chart', index: undefined },
-          ],
-        })
-      );
+      it('generates the entries that name no index from the index of the call', async () => {
+        await runHandler({
+          query: 'totals above a host list',
+          index: 'logs-*',
+          target: customContentTarget({
+            dataQueries: [
+              { description: 'totals' },
+              { description: 'top hosts', index: 'hosts' },
+              { esql: 'FROM x' },
+            ],
+          }),
+        });
+
+        expect(mockBuildCustomContent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            dataQueries: [
+              { description: 'totals', index: 'logs-*' },
+              { description: 'top hosts', index: 'hosts' },
+              { esql: 'FROM x' },
+            ],
+          })
+        );
+      });
     });
 
     it('persists a panel without data with no esql when the builder returns no query', async () => {
@@ -911,7 +879,7 @@ describe('createVisualizationTool handler', () => {
 
       const { result, attachments } = await runHandler({
         query: 'a banner',
-        target: customContentTarget({ has_data: false }),
+        target: customContentTarget({ removeAllQueries: true }),
       });
 
       expect(mockBuildCustomContent).toHaveBeenCalledWith(
@@ -959,44 +927,33 @@ describe('createVisualizationTool handler', () => {
       const attachments = storedAttachment({ esql: undefined });
 
       await runHandler(
-        { query: 'add the total', target: attachmentTarget('att-1', { has_data: true }) },
+        {
+          query: 'add the total',
+          target: attachmentTarget('att-1', { dataQueries: [{ description: 'add the total' }] }),
+        },
         { attachments }
       );
 
       expect(mockBuildCustomContent).toHaveBeenCalledWith(
         expect.objectContaining({
-          dataQueries: [{ description: 'add the total', index: undefined }],
+          dataQueries: [{ description: 'add the total' }],
           existing: { esqlQueries: [], template: '<div>old</div>' },
         })
       );
     });
 
-    it('forwards regenerate_esql and a supplied esql on an update', async () => {
+    it('forwards the data queries of an update to the builder, as they are', async () => {
+      const dataQueries = [{}, { description: 'also split by operating system' }];
+
       await runHandler(
         {
           query: 'also split by operating system',
-          target: attachmentTarget('att-1', { regenerate_esql: true }),
-        },
-        { attachments: storedAttachment() }
-      );
-      await runHandler(
-        {
-          query: 'use this query',
-          target: attachmentTarget('att-1', { esql: 'FROM metrics-*' }),
+          target: attachmentTarget('att-1', { dataQueries }),
         },
         { attachments: storedAttachment() }
       );
 
-      expect(mockBuildCustomContent).toHaveBeenNthCalledWith(
-        1,
-        expect.objectContaining({
-          dataQueries: [{ description: 'also split by operating system', index: undefined }],
-        })
-      );
-      expect(mockBuildCustomContent).toHaveBeenNthCalledWith(
-        2,
-        expect.objectContaining({ dataQueries: [{ esql: 'FROM metrics-*' }] })
-      );
+      expect(mockBuildCustomContent).toHaveBeenCalledWith(expect.objectContaining({ dataQueries }));
     });
 
     it('persists the query the builder returns on an update, and drops it when there is none', async () => {
@@ -1008,27 +965,12 @@ describe('createVisualizationTool handler', () => {
       const attachments = storedAttachment();
 
       const { result } = await runHandler(
-        { query: 'make it static', target: attachmentTarget('att-1', { has_data: false }) },
+        { query: 'make it static', target: attachmentTarget('att-1', { removeAllQueries: true }) },
         { attachments }
       );
 
       expect(attachments.update.mock.calls[0][1].data).not.toHaveProperty('esql');
       expect(result.results[0].data.esql).toBeUndefined();
-    });
-
-    it('fails instead of silently dropping the query when regenerate_esql meets has_data: false', async () => {
-      const { result } = await runHandler(
-        {
-          query: 'regenerate it',
-          target: attachmentTarget('att-1', { regenerate_esql: true, has_data: false }),
-        },
-        { attachments: storedAttachment() }
-      );
-
-      const [{ type, data }] = result.results;
-      expect(type).toBe(ToolResultType.error);
-      expect(data.message).toContain('regenerate_esql');
-      expect(mockBuildCustomContent).not.toHaveBeenCalled();
     });
 
     it('reports a builder failure as an error result with its message', async () => {

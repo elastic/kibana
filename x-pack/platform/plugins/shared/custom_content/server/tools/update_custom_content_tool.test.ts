@@ -52,9 +52,7 @@ const callHandler = async (
   params: {
     embeddable_id?: string;
     prompt?: string;
-    esqlQuery?: string | null;
-    regenerateEsql?: boolean;
-    index?: string;
+    removeAllQueries?: boolean;
     dataQueries?: Array<{ description?: string; esql?: string; index?: string }>;
   },
   attachmentData?: Record<string, unknown>
@@ -117,7 +115,7 @@ describe('createUpdateCustomContentTool handler', () => {
     };
 
     it('hands the prompt and the stored query and template to the builder', async () => {
-      await callHandler({ embeddable_id: 'p1', prompt: 'Show KPIs', index: 'logs-*' }, existing);
+      await callHandler({ embeddable_id: 'p1', prompt: 'Show KPIs' }, existing);
 
       expect(mockBuild).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -234,23 +232,15 @@ describe('createUpdateCustomContentTool handler', () => {
       );
     });
 
-    it('forwards regenerateEsql and a supplied query', async () => {
+    it('forwards the data queries to the builder, as they are', async () => {
+      const dataQueries = [{}, { description: 'Also show the error count', index: 'logs-*' }];
+
       await callHandler(
-        { embeddable_id: 'p1', prompt: 'Also show the error count', regenerateEsql: true },
+        { embeddable_id: 'p1', prompt: 'Also show the errors', dataQueries },
         existing
       );
-      await callHandler({ embeddable_id: 'p1', esqlQuery: 'FROM metrics-*' }, existing);
 
-      expect(mockBuild).toHaveBeenNthCalledWith(
-        1,
-        expect.objectContaining({
-          dataQueries: [{ description: 'Also show the error count', index: undefined }],
-        })
-      );
-      expect(mockBuild).toHaveBeenNthCalledWith(
-        2,
-        expect.objectContaining({ nlQuery: undefined, dataQueries: [{ esql: 'FROM metrics-*' }] })
-      );
+      expect(mockBuild).toHaveBeenCalledWith(expect.objectContaining({ dataQueries }));
     });
 
     it('lets the builder read the control values the panel was sent with', async () => {
@@ -270,14 +260,14 @@ describe('createUpdateCustomContentTool handler', () => {
       expect(mockBuild.mock.calls[0][0].resolveEsqlVariables).toBeUndefined();
     });
 
-    it('forwards esqlQuery: null, which removes the query, and stores none', async () => {
+    it('forwards removeAllQueries, which removes the queries, and stores none', async () => {
       mockBuild.mockResolvedValue({
         esqlQueries: [],
         template: '<p>static</p>',
         height: 200,
       });
 
-      const { ctx } = await callHandler({ embeddable_id: 'p1', esqlQuery: null }, existing);
+      const { ctx } = await callHandler({ embeddable_id: 'p1', removeAllQueries: true }, existing);
 
       expect(mockBuild).toHaveBeenCalledWith(expect.objectContaining({ removeAllQueries: true }));
       expect(ctx.update).toHaveBeenCalledWith(
@@ -309,7 +299,7 @@ describe('createUpdateCustomContentTool handler', () => {
       );
 
       const { results, ctx } = await callHandler(
-        { embeddable_id: 'p1', prompt: 'Show hosts', regenerateEsql: true },
+        { embeddable_id: 'p1', prompt: 'Show hosts', dataQueries: [{ description: 'hosts' }] },
         existing
       );
 

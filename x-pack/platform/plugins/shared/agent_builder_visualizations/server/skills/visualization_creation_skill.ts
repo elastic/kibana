@@ -87,8 +87,8 @@ Do **not** use this skill when:
      - \`target\` (required) — one of:
        - \`{ "type": "lens", "chartType": <required>, "esql"?: <ES|QL from generate_esql or the user> }\` for a standard chart
        - \`{ "type": "vega", "chartType"?: <styling hint>, "esql"?: <ES|QL from generate_esql or the user> }\` for a custom Vega-Lite visualization
-       - \`{ "type": "custom_content", "has_data": <true|false>, "esql"?: <ES|QL the user supplied>, "dataQueries"?: [...] }\` for an HTML layout — always set \`has_data\`: \`true\` has a query generated (unless you pass \`esql\`), \`false\` is for a panel that genuinely has no data
-       - \`{ "type": "attachment", "attachment_id": <id>, "chartType"?, "esql"?, "has_data"?, "regenerate_esql"?, "dataQueries"? }\` to update an existing visualization
+       - \`{ "type": "custom_content", "dataQueries": [...] }\` or \`{ "type": "custom_content", "removeAllQueries": true }\` for an HTML layout — always pass one: \`dataQueries\` has a query generated for each entry, \`removeAllQueries\` is for a panel that genuinely has no data
+       - \`{ "type": "attachment", "attachment_id": <id>, "chartType"?, "esql"?, "dataQueries"?, "removeAllQueries"? }\` (\`esql\` for Lens and Vega, \`dataQueries\` and \`removeAllQueries\` for custom content) to update an existing visualization
        \`esql\` is optional everywhere it appears: pass it only when the query came from ${
          platformCoreTools.generateEsql
        } or the user pasted it, otherwise it is generated for you.
@@ -153,15 +153,15 @@ ${
 
 Pass \`target.type: "custom_content"\` and describe the panel in \`query\` — layout, copy, and any values or fields to show. Do not write HTML, and never pass a template: the markup is generated server-side.
 
-You always decide whether the panel has data and say so in \`target.has_data\`; there is no default:
-- Pass \`target.has_data: true\` and a query is generated from \`query\` (the common case), or also pass a query from ${
+You always decide whether the panel has data and say so; there is no default:
+- Pass \`target.dataQueries\` for a panel with live data: one entry per query, each saying what ONE query returns, and a query is generated for it from \`query\` and the description (the common case). The entry can carry a query from ${
     platformCoreTools.generateEsql
-  } or the user as \`target.esql\`.
-- Pass \`target.has_data: false\` **only** when the panel genuinely shows no live values — a banner, a legend, an explanatory note, a title card. Never use \`has_data: false\` to get past a failed query generation; fix the index or fields and retry instead. Do not pass \`esql: null\` to mean "no data" — that is treated as omitting the query so one is generated.
+  } or the user as \`esql\`.
+- Pass \`target.removeAllQueries: true\` **only** when the panel genuinely shows no live values — a banner, a legend, an explanatory note, a title card. Never use it to get past a failed query generation; fix the index or fields and retry instead.
 
-When a panel needs data of more than one shape — headline numbers above a ranked list, say — pass \`target.dataQueries\` instead of \`esql\`, with \`has_data: true\`. It lists the panel's queries by position, and the template reads the first as \`rows\` and the n-th as \`queries[n].rows\`. Each entry says what ONE query returns, not how it looks: \`{ "description": "total requests and the number of 5xx errors, as one row" }\`, then \`{ "description": "the five hosts with the most requests" }\`; \`query\` stays the layout and says how each query is used. Do not use it for a panel with a single query, and keep a panel to a few queries (at most ten). On an update, pass \`dataQueries\` only for the queries you change, in position order: an entry with \`description\` regenerates that query, \`esql\` replaces it, \`{}\` keeps it, and an entry past the current queries adds one; queries you do not list are kept, and they cannot be removed this way. A layout or style edit omits \`dataQueries\` and keeps every query.
+When a panel needs data of more than one shape — headline numbers above a ranked list, say — pass one \`dataQueries\` entry per query. The template reads the first as \`rows\` and the n-th as \`queries[n].rows\`. Each entry says what ONE query returns, not how it looks: \`{ "description": "total requests and the number of 5xx errors, as one row" }\`, then \`{ "description": "the five hosts with the most requests" }\`; \`query\` stays the layout and says how each query is used. Keep a panel to a few queries (at most ten). On an update, pass \`dataQueries\` only for the queries you change, in position order: an entry with \`description\` regenerates that query, \`esql\` replaces it, \`{}\` keeps it, and an entry past the current queries adds one; queries you do not list are kept, and \`removeAllQueries: true\` removes them all. A layout or style edit omits \`dataQueries\` and keeps every query.
 
-To change an existing panel, call this tool again with \`target: { "type": "attachment", "attachment_id": ... }\` and describe the update — do not read the attachment to edit the HTML. Omitting \`esql\` and \`has_data\` on an update keeps the panel's current data state (its query, or none); pass \`regenerate_esql: true\` when the edit needs different data, such as a new measure, grouping, filter or time window ("also show the average bytes"): without it the stored query is kept and the new data can never appear, and with it the stored query is regenerated from \`query\`, keeping what the request does not change (layout, copy and style edits such as colors, sizes and wording keep the stored query), an \`esql\` only when the user supplied one, \`has_data: true\` to ensure it has data (the stored query is kept; one is generated only when the panel has none), and \`has_data: false\` to remove it. If the generated query is rejected, correct \`query\` (or pass an \`esql\` from ${
+To change an existing panel, call this tool again with \`target: { "type": "attachment", "attachment_id": ... }\` and describe the update — do not read the attachment to edit the HTML. Layout, copy and style edits (colors, sizes, wording) keep the stored queries, so pass no \`dataQueries\`. Pass a \`dataQueries\` entry at the position of the query to change when the edit needs different data, such as a new measure, grouping, filter or time window ("also show the average bytes"): without it the stored query is kept and the new data can never appear, and with a \`description\` the stored query is regenerated, keeping what the request does not change. Give \`esql\` only when the user supplied one. If the generated query is rejected, correct \`query\` (or pass an \`esql\` from ${
     platformCoreTools.generateEsql
   }) and retry; do not fall back to writing markup yourself.
 
@@ -239,7 +239,7 @@ For every new Lens visualization, choose and pass \`target.chartType\`; it is re
 {
   "query": "A status board with one card per host showing its log count and a colored badge",
   "index": "logs-*",
-  "target": { "type": "custom_content", "has_data": true }
+  "target": { "type": "custom_content", "dataQueries": [{ "description": "the log count per host" }] }
 }
 \`\`\`
 
@@ -248,7 +248,7 @@ For every new Lens visualization, choose and pass \`target.chartType\`; it is re
 \`\`\`json
 {
   "query": "A header banner reading 'Production overview' with a short subtitle",
-  "target": { "type": "custom_content", "has_data": false }
+  "target": { "type": "custom_content", "removeAllQueries": true }
 }
 \`\`\`
 
