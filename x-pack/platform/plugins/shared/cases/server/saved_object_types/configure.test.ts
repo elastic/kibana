@@ -157,6 +157,25 @@ describe('caseConfigureSavedObjectType model version transformations', () => {
       ).not.toThrow();
     });
 
+    it('keeps keys of a later version on read, in an entry and in a path', () => {
+      const forwardCompatibility = modelVersions['4']?.schemas?.forwardCompatibility as ObjectType;
+      const attributes = {
+        extractObservables: true,
+        observableTypes: [
+          {
+            key: 'observable-type-agent-id',
+            futureEntryKey: 'entry',
+            paths: [
+              { path: 'agent.id', enabled: false, excludedValues: ['a'], futurePathKey: 'path' },
+            ],
+          },
+          { key: 'employee-id', label: 'Employee ID', valuePattern: '^E\\d{6}$' },
+        ],
+      };
+
+      expect(forwardCompatibility.validate(attributes)).toEqual(attributes);
+    });
+
     it('rejects a path without the enabled flag', () => {
       expect(() =>
         create.validate({
