@@ -296,6 +296,7 @@ export class WorkflowCrudService {
         .elasticsearch.client.asInternalUser.mget<WorkflowProperties>({
           index: workflowIndexName,
           ids,
+          // Already the default; kept explicit because the 409 re-read relies on it.
           realtime: true,
         });
     } catch (error) {
