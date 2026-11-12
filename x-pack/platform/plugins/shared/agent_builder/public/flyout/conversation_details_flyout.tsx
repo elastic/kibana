@@ -304,6 +304,7 @@ export interface ConversationDetailsFlyoutSnapshotProps {
   conversationTemplatesService: ConversationTemplatesService;
   onNotFound?: () => void;
   onClose: () => void;
+  onConversationUpdated?: () => void;
 }
 
 /**
@@ -317,6 +318,7 @@ export const ConversationDetailsFlyoutSnapshot = ({
   conversationTemplatesService,
   onNotFound,
   onClose,
+  onConversationUpdated,
 }: ConversationDetailsFlyoutSnapshotProps) => {
   const {
     data: conversation,
@@ -340,7 +342,8 @@ export const ConversationDetailsFlyoutSnapshot = ({
 
   const refetchConversation = useCallback(async () => {
     await refetch();
-  }, [refetch]);
+    onConversationUpdated?.();
+  }, [refetch, onConversationUpdated]);
 
   if (isLoading) {
     return <LoadingDeclaration onClose={onClose} />;

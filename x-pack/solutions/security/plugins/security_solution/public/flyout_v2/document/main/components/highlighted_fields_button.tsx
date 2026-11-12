@@ -7,7 +7,7 @@
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';

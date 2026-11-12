@@ -177,7 +177,7 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
     return conversationTemplatesService;
   };
 
-  const renderSnapshot = (onNotFound?: () => void) => {
+  const renderSnapshot = (onNotFound?: () => void, onConversationUpdated?: () => void) => {
     const get = jest.fn();
     const conversationsService = { get } as unknown as ConversationsService;
     const queryClient = new QueryClient({
@@ -198,6 +198,7 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
           conversationTemplatesService={createTemplatesService()}
           onNotFound={onNotFound}
           onClose={jest.fn()}
+          onConversationUpdated={onConversationUpdated}
         />,
         { wrapper: Wrapper }
       );
@@ -275,20 +276,27 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
     expect(screen.getByRole('button', { name: 'Second clicked 1' })).toBeInTheDocument();
   });
 
-  it('hands registered tabs a refetchConversation that refetches on demand', async () => {
-    const { get, renderResult } = renderSnapshot();
+  it('hands registered tabs a refetchConversation that refetches on demand and reports the update, unlike polling', async () => {
+    const onConversationUpdated = jest.fn();
+    const { get, renderResult } = renderSnapshot(undefined, onConversationUpdated);
     get
       .mockResolvedValueOnce(createConversation({ title: 'First fetch' }))
+      .mockResolvedValueOnce(createConversation({ title: 'Polled' }))
       .mockResolvedValue(createConversation({ title: 'Refetched' }));
 
     renderResult();
 
     expect(await screen.findByText('First fetch')).toBeInTheDocument();
+    await advance(5_000);
+    expect(await screen.findByText('Polled')).toBeInTheDocument();
+    expect(onConversationUpdated).not.toHaveBeenCalled();
+    expect(get).toHaveBeenCalledTimes(2);
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Refetch' }));
     });
 
-    await waitFor(() => expect(get).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(onConversationUpdated).toHaveBeenCalledTimes(1));
+    expect(get).toHaveBeenCalledTimes(3);
     expect(screen.getByText('Refetched')).toBeInTheDocument();
   });
 

@@ -29,6 +29,7 @@ export interface OpenConversationDetailsFlyoutOptions {
   conversationTemplatesService: ConversationTemplatesService;
   conversationId: string;
   onClose?: () => void;
+  onConversationUpdated?: () => void;
   trailingActions?: EuiFlyoutMenuAction[];
 }
 
@@ -38,6 +39,7 @@ export const openConversationDetailsFlyout = async ({
   conversationTemplatesService,
   conversationId,
   onClose,
+  onConversationUpdated,
   trailingActions,
 }: OpenConversationDetailsFlyoutOptions): Promise<() => void> => {
   const queryClient = new QueryClient();
@@ -64,6 +66,7 @@ export const openConversationDetailsFlyout = async ({
           conversationsService={conversationsService}
           conversationTemplatesService={conversationTemplatesService}
           onNotFound={onNotFound}
+          onConversationUpdated={onConversationUpdated}
           onClose={dismiss}
         />
       </QueryClientProvider>

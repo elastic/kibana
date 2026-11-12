@@ -45,6 +45,7 @@ dependsOn:
   - '@kbn/deeplinks-security'
   - '@kbn/deeplinks-workflows'
   - '@kbn/spaces-plugin'
+  - '@kbn/cps'
   - '@kbn/workflows'
   - '@kbn/workflows-ui'
   - '@kbn/workflows-yaml'
