@@ -122,3 +122,24 @@ actions:
     update:
       schema:
         type: string
+
+  - target: $.paths['/chat.postMessage'].post.security
+    description: &chat_write >-
+      https://docs.slack.dev/reference/methods/chat.postMessage and
+      https://docs.slack.dev/reference/methods/chat.update list `chat:write` for bot and user
+      tokens, which is what the connector requests; the spec only lists the legacy
+      `chat:write:user` and `chat:write:bot`.
+    update:
+      - slackAuth:
+          - chat:write
+  - target: $.paths['/chat.update'].post.security
+    description: *chat_write
+    update:
+      - slackAuth:
+          - chat:write
+  - target: $.paths['/auth.test'].get.security
+    description: >-
+      https://docs.slack.dev/reference/methods/auth.test says "No scopes required"; the spec
+      lists a scope named `none`.
+    update:
+      - slackAuth: []

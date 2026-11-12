@@ -24,6 +24,7 @@ import {
 } from '../../../shared/components/test_ids';
 import { useGraphPreview } from '../hooks/use_graph_preview';
 import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
+import { useGraphTelemetry } from '../../../shared/hooks/use_graph_telemetry';
 
 jest.mock('../../../../common/hooks/use_upselling');
 jest.mock('../hooks/use_graph_preview');
@@ -36,6 +37,7 @@ jest.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => ({
 jest.mock('@kbn/cloud-security-posture-graph', () => ({
   Graph: () => <div data-test-subj="securitySolutionFlyoutGraphPreview" />,
 }));
+jest.mock('../../../shared/hooks/use_graph_telemetry');
 jest.mock('../../../shared/components/graph_preview', () => ({
   GraphPreview: () => <div data-test-subj="securitySolutionFlyoutGraphPreview" />,
 }));
@@ -51,6 +53,9 @@ const mockHit = {
   flattened: { 'event.kind': 'signal' },
   isAnchor: false,
 } as DataTableRecord;
+
+const mockUseGraphTelemetry = useGraphTelemetry as jest.Mock;
+const mockReportGraphPreviewExpanded = jest.fn();
 
 const mockOnShowGraph = jest.fn();
 
@@ -75,6 +80,13 @@ describe('<GraphPreviewContainer />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseUpsellingComponent.mockReturnValue(null);
+    mockUseGraphTelemetry.mockReturnValue({
+      onTelemetryEvent: jest.fn(),
+      reportGraphPreviewShown: jest.fn(),
+      reportGraphPreviewExpanded: mockReportGraphPreviewExpanded,
+      reportGraphOpened: jest.fn(),
+      reportDrillThrough: jest.fn(),
+    });
     mockUseFetchGraphData.mockReturnValue({
       isLoading: false,
       isError: false,
@@ -107,6 +119,33 @@ describe('<GraphPreviewContainer />', () => {
     expect(getByTestId(GRAPH_PREVIEW_TEST_ID)).toBeInTheDocument();
     fireEvent.click(getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID)));
     expect(mockOnShowGraph).toHaveBeenCalled();
+  });
+
+  it('reports the graph preview expand when the header link is clicked', () => {
+    mockUseGraphPreview.mockReturnValue(previewAvailable);
+
+    const { getByTestId } = renderContainer();
+    fireEvent.click(getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID)));
+
+    expect(mockReportGraphPreviewExpanded).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports through the alert_flyout entry point for an alert', () => {
+    mockUseGraphPreview.mockReturnValue(previewAvailable);
+
+    renderContainer();
+
+    expect(mockUseGraphTelemetry).toHaveBeenCalledWith('alert_flyout');
+  });
+
+  it('reports through the event_flyout entry point for a non-alert event', () => {
+    mockUseGraphPreview.mockReturnValue(previewAvailable);
+
+    renderContainer({
+      hit: { ...mockHit, flattened: { 'event.kind': 'event' } } as DataTableRecord,
+    });
+
+    expect(mockUseGraphTelemetry).toHaveBeenCalledWith('event_flyout');
   });
 
   it('hides the header link when onShowGraph is not provided', () => {
