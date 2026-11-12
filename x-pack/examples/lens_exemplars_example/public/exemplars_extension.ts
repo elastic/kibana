@@ -84,7 +84,12 @@ export const createExemplarsExtension = ({
       if (!query) {
         return undefined;
       }
-      const { rows } = await executeEsql(query.esql);
+      const title = query.simulated ? 'Simulated exemplars' : 'Exemplars';
+      const { rows } = await executeEsql(query.esql, {
+        title,
+        description:
+          'This request queries Elasticsearch to fetch the exemplars drawn on the chart.',
+      });
 
       const points = rows.flatMap((row): LensOverlayPoint[] => {
         const timestamp = String(row[TIMESTAMP_COLUMN]);
@@ -100,7 +105,7 @@ export const createExemplarsExtension = ({
 
       return {
         type: 'points',
-        title: query.simulated ? 'Simulated exemplars' : 'Exemplars',
+        title,
         points,
       };
     },

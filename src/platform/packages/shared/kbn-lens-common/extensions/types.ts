@@ -32,6 +32,14 @@ export interface LensExtensionMatchContext {
 }
 
 /**
+ * How a request made through `executeEsql` is labelled in the Inspector.
+ */
+export interface LensExtensionRequestMeta {
+  readonly title: string;
+  readonly description?: string;
+}
+
+/**
  * Context passed to an extension when fetching its overlay for one layer.
  */
 export interface LensExtensionFetchContext {
@@ -41,8 +49,11 @@ export interface LensExtensionFetchContext {
   readonly query?: Query | AggregateQuery;
   readonly esqlVariables?: readonly ESQLControlVariable[];
   readonly abortSignal: AbortSignal;
-  /** Runs an ES|QL query through Lens, so it shares the search session and shows in the inspector. */
-  readonly executeEsql: (esql: string) => Promise<Datatable>;
+  /**
+   * Runs an ES|QL query with the same search scope, session and datatable mapping as the chart,
+   * and lists the request in the chart Inspector under `meta.title`.
+   */
+  readonly executeEsql: (esql: string, meta: LensExtensionRequestMeta) => Promise<Datatable>;
 }
 
 export interface LensOverlayPoint {

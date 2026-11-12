@@ -43,7 +43,9 @@ const createExemplarsExtension = (overrides: Partial<LensExtension> = {}): LensE
     queryHasTsSourceCommand(esql) &&
     queryHasStatsCommand(esql),
   fetchOverlay: async ({ layer, executeEsql }) => {
-    const { rows } = await executeEsql(`SET exemplars={"limit": 500};\n${layer.esql}`);
+    const { rows } = await executeEsql(`SET exemplars={"limit": 500};\n${layer.esql}`, {
+      title: 'Exemplars',
+    });
     return {
       type: 'points',
       title: 'Exemplars',
@@ -178,7 +180,9 @@ describe('Lens extensions', () => {
         ...createRunContext(executeEsql),
       });
 
-      expect(executeEsql).toHaveBeenCalledWith(`SET exemplars={"limit": 500};\n${TS_QUERY}`);
+      expect(executeEsql).toHaveBeenCalledWith(`SET exemplars={"limit": 500};\n${TS_QUERY}`, {
+        title: 'Exemplars',
+      });
       expect(failures).toEqual([]);
       expect(overlays).toEqual([
         {

@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import type { IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import {
-  buildEsQuery,
   isOfAggregateQueryType,
   type AggregateQuery,
   type Filter,
+  type ProjectRouting,
   type Query,
   type TimeRange,
 } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import { formatESQLColumns, getESQLResults } from '@kbn/esql-utils';
-import { getEsQueryConfig, getTime, UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type {
   LensExtensionLayer,
+  LensExtensionRequestMeta,
   LensExtensionsRuntimeConfig,
   LensRuntimeState,
+  TextBasedLayer,
   TextBasedPersistedState,
 } from '@kbn/lens-common';
 import type { LensExtensionRegistry } from './extension_registry';
 import { getExtensionMatchContext, resolveActiveExtensions } from './resolve_active_extensions';
 import { runActiveExtensions, type LensExtensionsRunResult } from './run_active_extensions';
 
-const DEFAULT_TIME_FIELD = '@timestamp';
 const EMPTY_RESULT: LensExtensionsRunResult = { overlays: [], failures: [] };
 
 interface ExtensionsSearchContext {
@@ -37,6 +37,8 @@ interface ExtensionsSearchContext {
   readonly filters: Filter[];
   readonly query: Array<Query | AggregateQuery>;
   readonly esqlVariables?: ESQLControlVariable[];
+  readonly projectRouting?: ProjectRouting;
+  readonly isApproximate?: boolean;
 }
 
 interface LoadExtensionOverlaysParams {
@@ -45,20 +47,19 @@ interface LoadExtensionOverlaysParams {
   readonly executionContext?: KibanaExecutionContext;
   readonly runtimeConfig?: LensExtensionsRuntimeConfig;
   readonly searchContext: ExtensionsSearchContext;
+  readonly searchSessionId?: string;
+  readonly requestsAdapter?: RequestAdapter;
   readonly abortSignal: AbortSignal;
   readonly data: DataPublicPluginStart;
-  readonly uiSettings: IUiSettingsClient;
 }
 
-const getLayerTimeField = (
+const getTextBasedLayer = (
   attributes: LensRuntimeState['attributes'],
   { layerId }: LensExtensionLayer
-): string => {
-  const textBased = attributes.state.datasourceStates.textBased as
-    | TextBasedPersistedState
-    | undefined;
-  return textBased?.layers[layerId]?.timeField ?? DEFAULT_TIME_FIELD;
-};
+): TextBasedLayer | undefined =>
+  (attributes.state.datasourceStates.textBased as TextBasedPersistedState | undefined)?.layers[
+    layerId
+  ];
 
 /** Resolves the extensions matching the chart and fetches their overlays with the chart's search scope. */
 export const loadExtensionOverlays = async ({
@@ -67,9 +68,10 @@ export const loadExtensionOverlays = async ({
   executionContext,
   runtimeConfig,
   searchContext,
+  searchSessionId,
+  requestsAdapter,
   abortSignal,
   data,
-  uiSettings,
 }: LoadExtensionOverlaysParams): Promise<LensExtensionsRunResult> => {
   const context = getExtensionMatchContext({ attributes, executionContext });
   if (!context) {
@@ -84,36 +86,44 @@ export const loadExtensionOverlays = async ({
     return EMPTY_RESULT;
   }
 
-  const { timeRange, filters, query, esqlVariables } = searchContext;
+  const { timeRange, filters, query, esqlVariables, projectRouting, isApproximate } = searchContext;
   const kqlQueries = query.filter((entry): entry is Query => !isOfAggregateQueryType(entry));
-  const esQueryConfig = getEsQueryConfig(uiSettings);
-  const timezone = uiSettings.get<string>(UI_SETTINGS.DATEFORMAT_TZ);
 
-  const executeEsql = async (esql: string, timeField: string): Promise<Datatable> => {
-    const timeFilter = timeRange
-      ? getTime(undefined, timeRange, { fieldName: timeField })
-      : undefined;
-    const filter = buildEsQuery(
-      undefined,
-      kqlQueries,
-      timeFilter ? [...filters, timeFilter] : filters,
-      esQueryConfig
+  const executeEsql = async (
+    esql: string,
+    layer: LensExtensionLayer,
+    { title, description }: LensExtensionRequestMeta
+  ): Promise<Datatable> => {
+    const textBasedLayer = getTextBasedLayer(attributes, layer);
+    const ignoreGlobalFilters = Boolean(textBasedLayer?.ignoreGlobalFilters);
+    const { datatable } = await data.search.esql(
+      {
+        query: esql,
+        kibanaQueryContext: {
+          timeRange,
+          timeField: textBasedLayer?.timeField,
+          kibanaFilters: ignoreGlobalFilters ? [] : filters,
+          kqlQuery: ignoreGlobalFilters ? undefined : kqlQueries,
+          esqlVariables,
+        },
+        approximation: isApproximate,
+        projectRouting,
+        dropNullColumns: true,
+        includeExecutionMetadata: true,
+        columnMetadata: true,
+      },
+      {
+        abortSignal,
+        sessionId: searchSessionId,
+        executionContext,
+        includeDataTable: true,
+        ...(requestsAdapter ? { inspector: { adapter: requestsAdapter, title, description } } : {}),
+      }
     );
-    const { response } = await getESQLResults({
-      esqlQuery: esql,
-      search: data.search.search,
-      signal: abortSignal,
-      filter,
-      timeRange,
-      variables: esqlVariables,
-      timezone,
-      executionContext,
-    });
-    const columns = formatESQLColumns(response.columns);
-    const rows = response.values.map((values) =>
-      Object.fromEntries(columns.map(({ id }, index) => [id, values[index]]))
-    );
-    return { type: 'datatable', columns, rows };
+    if (!datatable) {
+      throw new Error(`The "${title}" request returned no datatable`);
+    }
+    return datatable;
   };
 
   return runActiveExtensions({
@@ -126,7 +136,7 @@ export const loadExtensionOverlays = async ({
       query: kqlQueries[0],
       esqlVariables,
       abortSignal,
-      executeEsql: (esql) => executeEsql(esql, getLayerTimeField(attributes, layer)),
+      executeEsql: (esql, meta) => executeEsql(esql, layer, meta),
     }),
   });
 };

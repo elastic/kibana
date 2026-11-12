@@ -228,9 +228,10 @@ export function loadEmbeddableData(
       executionContext: getExecutionContext(),
       runtimeConfig: extensions$?.getValue(),
       searchContext,
+      searchSessionId: api.searchSessionId$.getValue(),
+      requestsAdapter: api.getInspectorAdapters().requests,
       abortSignal: abortController.signal,
       data: services.data,
-      uiSettings: services.uiSettings,
     });
     if (abortController.signal.aborted) {
       return;

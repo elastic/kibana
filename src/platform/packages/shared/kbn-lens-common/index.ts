@@ -323,6 +323,7 @@ export type {
   LensExtensionFetchContext,
   LensExtensionOverlay,
   LensExtensionOverlayData,
+  LensExtensionRequestMeta,
   LensExtensionsRuntimeConfig,
   LensOverlayPoint,
   LensOverlayPointClickEvent,
