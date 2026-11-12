@@ -10,14 +10,19 @@
 import { computeTestID } from '@kbn/scout-reporting';
 import { ToolingLog } from '@kbn/tooling-log';
 import {
+  FLAKY_TEST_SUITE_METADATA_PREFIX,
+  readFlakySuiteIssueMetadata,
+} from '../flaky_test_issues/issue_body';
+import {
   MAX_NEW_ISSUES_PER_JOB,
   reportConsistentFailureIssues,
   type ConsistentFailureIssuesOptions,
 } from './consistent_failure_issues';
-import { renderFailingSuiteIssueBody } from './failing_suite_issue';
+import { failingPostedAt, renderFailingSuiteIssueBody } from './failing_suite_issue';
 import type { TestFailure } from './get_failures';
 import type { ScoutTestFailureExtended } from './get_scout_failures';
 import type { GithubApi, GithubIssue } from './github_api';
+import { updateIssueMetadata } from './issue_metadata';
 
 const log = new ToolingLog();
 const build = { pipeline: 'kibana-on-merge', branch: 'main' };
@@ -120,15 +125,70 @@ const issue = (
 });
 
 const mockGithub = (issues: GithubIssue[] = []) => {
-  const listIssues = jest.fn().mockResolvedValue(issues);
+  const listIssues = jest
+    .fn()
+    .mockImplementation(async ({ state }: { state: string }) =>
+      issues.filter((listed) => listed.state === state)
+    );
   const createIssue = jest.fn().mockImplementation(async (title: string, body: string) => ({
     number: 500,
     html_url: 'https://github.com/elastic/appex-qa-ai/issues/500',
     node_id: 'node-500',
     body,
   }));
-  return { github: { listIssues, createIssue } as unknown as GithubApi, listIssues, createIssue };
+  const getIssue = jest
+    .fn()
+    .mockImplementation(async (number: number) =>
+      issues.find((listed) => listed.number === number)
+    );
+  const editIssue = jest.fn();
+  const addIssueComment = jest.fn();
+  return {
+    github: {
+      listIssues,
+      createIssue,
+      getIssue,
+      editIssue,
+      addIssueComment,
+    } as unknown as GithubApi,
+    listIssues,
+    createIssue,
+    editIssue,
+    addIssueComment,
+  };
 };
+
+/** A failing suite issue the check filed for `test-1` of the ES|QL spec, on `kibana-on-merge` `main`. */
+const failingSuiteIssue = (postedAt: Date, overrides: Partial<GithubIssue> = {}) => {
+  const run = (number: number) => ({
+    build: number,
+    lastAt: new Date('2026-10-15T10:00:00.000Z'),
+    passed: 0,
+    failed: 2,
+    recovered: 0,
+    skipped: 0,
+    settled: true,
+  });
+  return issue(
+    42,
+    renderFailingSuiteIssueBody(
+      {
+        filePath: SPEC,
+        framework: 'playwright',
+        suiteTitle: 'Discover ES|QL mode',
+        targets: [],
+        owners: [],
+        tests: [{ testId: 'test-1', title: 'Discover ES|QL mode shows results' }],
+        failingBuilds: [run(90), run(91)],
+      },
+      { pipeline: 'kibana-on-merge', branch: 'main', postedAt }
+    ),
+    overrides
+  );
+};
+
+const NOW = new Date('2026-10-16T10:00:00.000Z');
+const HOUR_MS = 60 * 60 * 1000;
 
 const report = (
   overrides: Partial<ConsistentFailureIssuesOptions> & Pick<ConsistentFailureIssuesOptions, 'es'>
@@ -172,9 +232,16 @@ describe('reportConsistentFailureIssues', () => {
         ftrFailure,
         cypressFailure,
       ],
+      now: NOW,
     });
 
     expect(listIssues).toHaveBeenCalledWith({ state: 'open', labels: ['failed-test'] });
+    // a suite whose issue was closed lately gets it reopened, see below
+    expect(listIssues).toHaveBeenCalledWith({
+      state: 'closed',
+      labels: ['failed-test'],
+      since: new Date(NOW.getTime() - 30 * 24 * HOUR_MS),
+    });
     expect(createIssue).toHaveBeenCalledTimes(2);
     const [[scoutTitle, scoutBody, scoutLabels], [ftrTitle, ftrBody, ftrLabels]] =
       createIssue.mock.calls;
@@ -191,6 +258,8 @@ describe('reportConsistentFailureIssues', () => {
     expect(scoutBody).toContain('| **Owners** | `@elastic/kibana-data-discovery` |');
     expect(scoutBody).toContain('```text\nError: shows results boom\n```');
     expect(scoutLabels).toEqual(['failed-test']);
+    // the issue is the break's first post, the next comes a day later at the earliest
+    expect(failingPostedAt(scoutBody)).toEqual({ 'kibana-on-merge main': NOW.toISOString() });
     expect(ftrTitle).toBe('Failing FTR UI suite: discover app discover test');
     expect(ftrBody).toContain(
       `> 1 test in [\`_discover.ts\`](https://github.com/elastic/kibana/blob/main/${FTR_FILE})`
@@ -206,6 +275,7 @@ describe('reportConsistentFailureIssues', () => {
         { filePath: SPEC, url: 'https://github.com/elastic/appex-qa-ai/issues/500' },
         { filePath: FTR_FILE, url: 'https://github.com/elastic/appex-qa-ai/issues/500' },
       ],
+      commented: [],
       tracked: [],
       skipped: [],
     });
@@ -233,7 +303,7 @@ describe('reportConsistentFailureIssues', () => {
 
     expect(listIssues).not.toHaveBeenCalled();
     expect(createIssue).not.toHaveBeenCalled();
-    expect(summary).toEqual({ created: [], tracked: [], skipped: [] });
+    expect(summary).toEqual({ created: [], commented: [], tracked: [], skipped: [] });
   });
 
   it('leaves a build whose retry has not reported the test out of the count', async () => {
@@ -260,39 +330,125 @@ describe('reportConsistentFailureIssues', () => {
     );
   });
 
-  it('skips a suite an open issue is already about, and names it', async () => {
+  it('posts the break on the issue already about the suite instead of filing one, once a day per pipeline and branch', async () => {
     const { es } = mockEs(brokenSince('test-1', 101, 102));
-    const [failure] = [scoutFailure('test-1', 'shows results')];
-    const run = (number: number) => ({
-      build: number,
-      lastAt: new Date('2026-10-15T10:00:00.000Z'),
-      passed: 0,
-      failed: 2,
-      recovered: 0,
-      skipped: 0,
-      settled: true,
-    });
-    const existing = issue(
-      42,
-      renderFailingSuiteIssueBody(
-        {
-          filePath: SPEC,
-          framework: 'playwright',
-          suiteTitle: 'Discover ES|QL mode',
-          targets: [],
-          owners: [],
-          tests: [{ testId: 'test-1', title: 'Discover ES|QL mode shows results' }],
-          failingBuilds: [run(90), run(91)],
-        },
-        { pipeline: 'kibana-on-merge', branch: 'main' }
-      )
-    );
-    const { github, createIssue } = mockGithub([existing]);
+    const failures = [scoutFailure('test-1', 'shows results')];
+    const existing = failingSuiteIssue(new Date(NOW.getTime() - 25 * HOUR_MS));
+    const { github, createIssue, editIssue, addIssueComment } = mockGithub([existing]);
 
-    const summary = await report({ es, github, failures: [failure] });
+    const summary = await report({ es, github, failures, now: NOW });
 
     expect(createIssue).not.toHaveBeenCalled();
-    expect(summary.tracked).toEqual([{ filePath: SPEC, url: existing.html_url }]);
+    expect(addIssueComment).toHaveBeenCalledWith(
+      42,
+      '🔴 `Discover ES|QL mode shows results` is consistently failing on `main`, in `kibana-on-merge` ' +
+        'builds [#101](https://buildkite.com/elastic/kibana-on-merge/builds/101) and ' +
+        '[#102](https://buildkite.com/elastic/kibana-on-merge/builds/102), after passing ' +
+        'in [#100](https://buildkite.com/elastic/kibana-on-merge/builds/100). Changes in between: ' +
+        '[`commit-...commit-`](https://github.com/elastic/kibana/compare/commit-100...commit-101).'
+    );
+    const [[number, { body, state }]] = editIssue.mock.calls;
+    expect(number).toBe(42);
+    expect(state).toBeUndefined();
+    expect(failingPostedAt(body)).toEqual({ 'kibana-on-merge main': NOW.toISOString() });
+    expect(summary.commented).toEqual([
+      { filePath: SPEC, url: existing.html_url, reopened: false },
+    ]);
+
+    // the next builds find the same break: nothing more until a day has passed
+    const posted = mockGithub([{ ...existing, body }]);
+    const later = await report({
+      es,
+      github: posted.github,
+      failures,
+      now: new Date(NOW.getTime() + 10 * HOUR_MS),
+    });
+    expect(posted.addIssueComment).not.toHaveBeenCalled();
+    expect(posted.editIssue).not.toHaveBeenCalled();
+    expect(later.tracked).toEqual([{ filePath: SPEC, url: existing.html_url }]);
+
+    // the same break on another branch is posted on its own
+    const otherBranch = await report({
+      es,
+      github: posted.github,
+      failures,
+      now: new Date(NOW.getTime() + 10 * HOUR_MS),
+      build: { pipeline: 'kibana-on-merge', branch: '9.6' },
+    });
+    expect(otherBranch.commented).toHaveLength(1);
+    expect(posted.addIssueComment.mock.calls[0][1]).toContain('on `9.6`');
+  });
+
+  it('adds the tests, branch and pipeline of a break to the issue, so /skip covers that branch too', async () => {
+    const flakySuiteIssue = issue(
+      43,
+      updateIssueMetadata(
+        'Flaky suite issue',
+        {
+          'suite.filePath': SPEC,
+          'suite.title': 'Discover ES|QL mode',
+          'suite.framework': 'playwright',
+          'suite.testIds': ['test-0'],
+          'suite.branches': ['main', '9.5'],
+          'suite.pipelines': ['kibana-on-merge', 'appex-qa-stateful-kibana-scout-tests'],
+          'report.generatedAt': '2026-10-15T11:00:00.000Z',
+          'report.count': 3,
+          'report.history': [],
+        },
+        FLAKY_TEST_SUITE_METADATA_PREFIX
+      )
+    );
+    const { github, editIssue } = mockGithub([flakySuiteIssue]);
+
+    await report({
+      es: mockEs(brokenSince('test-1', 101, 102)).es,
+      github,
+      failures: [scoutFailure('test-1', 'shows results')],
+      build: { pipeline: 'kibana-on-merge', branch: '9.6' },
+      now: NOW,
+    });
+
+    const [[number, { body }]] = editIssue.mock.calls;
+    expect(number).toBe(43);
+    const recorded = readFlakySuiteIssueMetadata(body);
+    expect(recorded?.['suite.branches']).toEqual(['main', '9.5', '9.6']);
+    expect(recorded?.['suite.pipelines']).toEqual([
+      'appex-qa-stateful-kibana-scout-tests',
+      'kibana-on-merge',
+    ]);
+    expect(recorded?.['suite.testIds']).toEqual(['test-0', 'test-1']);
+    // what the daily report recorded is kept
+    expect(recorded?.['report.count']).toBe(3);
+    expect(failingPostedAt(body)).toEqual({ 'kibana-on-merge 9.6': NOW.toISOString() });
+  });
+
+  it('reopens an issue about the suite closed lately, but leaves one closed as a duplicate alone', async () => {
+    const failures = [scoutFailure('test-1', 'shows results')];
+    // closed right after the last post: the reopen does not wait for the next day
+    const postedAt = new Date(NOW.getTime() - 2 * HOUR_MS);
+    const closed = failingSuiteIssue(postedAt, { state: 'closed', state_reason: 'completed' });
+    const { github, createIssue, editIssue } = mockGithub([closed]);
+
+    const summary = await report({
+      es: mockEs(brokenSince('test-1', 101, 102)).es,
+      github,
+      failures,
+      now: NOW,
+    });
+
+    expect(createIssue).not.toHaveBeenCalled();
+    expect(editIssue).toHaveBeenCalledWith(42, expect.objectContaining({ state: 'open' }));
+    expect(summary.commented).toEqual([{ filePath: SPEC, url: closed.html_url, reopened: true }]);
+
+    const duplicate = mockGithub([{ ...closed, state_reason: 'duplicate' }]);
+    const filed = await report({
+      es: mockEs(brokenSince('test-1', 101, 102)).es,
+      github: duplicate.github,
+      failures,
+      now: NOW,
+    });
+    expect(duplicate.editIssue).not.toHaveBeenCalled();
+    expect(filed.created).toHaveLength(1);
   });
 
   it('skips a suite whose every test has a per-test issue, but not one with a test without', async () => {
@@ -325,6 +481,14 @@ describe('reportConsistentFailureIssues', () => {
     });
     expect(partlyCovered.created).toHaveLength(1);
     expect(createIssue.mock.calls[0][1]).toContain('Possibly related: #1.');
+
+    // a closed per-test issue no longer tracks its test, the reporter reopens it on its own
+    const closedPerTest = await report({
+      es: mockEs(brokenSince('test-1', 101, 102)).es,
+      github: mockGithub([{ ...perTestIssue(1, 'test-1'), state: 'closed' }]).github,
+      failures: [scoutFailure('test-1', 'a')],
+    });
+    expect(closedPerTest.created).toHaveLength(1);
   });
 
   it('caps the issues a job files, most broken tests first', async () => {
@@ -361,6 +525,6 @@ describe('reportConsistentFailureIssues', () => {
     const summary = await report({ es, failures: [cypressFailure] });
 
     expect(esql).not.toHaveBeenCalled();
-    expect(summary).toEqual({ created: [], tracked: [], skipped: [] });
+    expect(summary).toEqual({ created: [], commented: [], tracked: [], skipped: [] });
   });
 });

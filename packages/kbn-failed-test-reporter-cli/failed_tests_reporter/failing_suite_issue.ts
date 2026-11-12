@@ -11,6 +11,7 @@ import Path from 'path';
 import type { BuildRun, TestFramework } from '@kbn/scout-reporting';
 import {
   FLAKY_TEST_SUITE_METADATA_PREFIX,
+  readFlakySuiteIssueMetadata,
   SKIP_TIP,
   suiteIssueTitle,
   type FlakySuiteIssueMetadata,
@@ -27,7 +28,7 @@ import {
   targetEnvironment,
   testDashboardUrl,
 } from '../flaky_test_issues/markdown';
-import { updateIssueMetadata } from './issue_metadata';
+import { getIssueMetadata, updateIssueMetadata } from './issue_metadata';
 
 const KIBANA_COMPARE_URL = 'https://github.com/elastic/kibana/compare';
 
@@ -75,7 +76,16 @@ export interface FailingSuiteIssueContext {
   branch: string;
   /** Numbers of issues that mention the suite's file or are about some of its tests. */
   relatedIssues?: number[];
+  /** When the issue is filed, recorded as the break's first post on its pipeline and branch. */
+  postedAt?: Date;
 }
+
+/**
+ * When a break of the suite was last posted on the issue, by `<pipeline> <branch>`: the body that
+ * filed it, then each comment of the consistent failure check. Kept in the `flaky-test-suite`
+ * metadata, which the daily flaky report merges into rather than replaces.
+ */
+export type FailingPostedAt = Record<string, string>;
 
 /** The suite metadata a failing suite issue records, the fields a break knows. */
 export type FailingSuiteIssueMetadata = Pick<
@@ -86,7 +96,29 @@ export type FailingSuiteIssueMetadata = Pick<
   | 'suite.testIds'
   | 'suite.branches'
   | 'suite.pipelines'
->;
+> & { 'failing.postedAt'?: FailingPostedAt };
+
+/** The key of a pipeline and branch in `failing.postedAt`. */
+export const postedAtKey = ({
+  pipeline,
+  branch,
+}: Pick<FailingSuiteIssueContext, 'pipeline' | 'branch'>) => `${pipeline} ${branch}`;
+
+/** `failing.postedAt` of an issue body, empty when it records none. */
+export const failingPostedAt = (body: string): FailingPostedAt => {
+  const value: unknown = getIssueMetadata(
+    body,
+    'failing.postedAt',
+    undefined,
+    FLAKY_TEST_SUITE_METADATA_PREFIX
+  );
+  if (typeof value !== 'object' || value === null) {
+    return {};
+  }
+  return Object.fromEntries(
+    Object.entries(value).filter((entry): entry is [string, string] => typeof entry[1] === 'string')
+  );
+};
 
 /** `Failing Scout UI suite: Discover ES|QL mode`, or the file name without a suite title. */
 export const failingSuiteIssueTitle = (suite: FailingSuite): string =>
@@ -98,7 +130,7 @@ export const failingSuiteIssueTitle = (suite: FailingSuite): string =>
  */
 export const failingSuiteIssueMetadata = (
   suite: FailingSuite,
-  { pipeline, branch }: FailingSuiteIssueContext
+  { pipeline, branch, postedAt }: FailingSuiteIssueContext
 ): FailingSuiteIssueMetadata => ({
   'suite.filePath': suite.filePath,
   ...(suite.suiteTitle ? { 'suite.title': suite.suiteTitle } : {}),
@@ -106,7 +138,38 @@ export const failingSuiteIssueMetadata = (
   'suite.testIds': suite.tests.map((test) => test.testId),
   'suite.branches': [branch],
   'suite.pipelines': [pipeline],
+  ...(postedAt
+    ? { 'failing.postedAt': { [postedAtKey({ pipeline, branch })]: postedAt.toISOString() } }
+    : {}),
 });
+
+/**
+ * The suite metadata of an issue a break is posted on, with the break's tests, branch and pipeline
+ * added to what it recorded: `/skip` skips the suite on every recorded branch, so a suite filed for
+ * `main` that breaks on `9.6` gets skipped there too. The pipeline moves last, as the failed-test
+ * alerts read the latest failure last.
+ */
+export const breakSuiteMetadata = (
+  body: string,
+  suite: FailingSuite,
+  { pipeline, branch }: Pick<FailingSuiteIssueContext, 'pipeline' | 'branch'>
+): Pick<FailingSuiteIssueMetadata, 'suite.testIds' | 'suite.branches' | 'suite.pipelines'> => {
+  const recorded = readFlakySuiteIssueMetadata(body);
+  const pipelines = recorded?.['suite.pipelines'] ?? [];
+  return {
+    'suite.testIds': [
+      ...new Set([
+        ...(recorded?.['suite.testIds'] ?? []),
+        ...suite.tests.map(({ testId }) => testId),
+      ]),
+    ],
+    'suite.branches': [...new Set([...(recorded?.['suite.branches'] ?? []), branch])],
+    'suite.pipelines': [
+      ...pipelines.filter((recordedPipeline) => recordedPipeline !== pipeline),
+      pipeline,
+    ],
+  };
+};
 
 const blobLink = (repoRelativePath: string): string =>
   `[${inlineCode(repoRelativePath)}](${KIBANA_BLOB_URL}/${repoRelativePath})`;
@@ -115,19 +178,18 @@ const buildLink = ({ build, buildUrl }: BuildRun): string =>
   buildUrl ? `[#${build}](${buildUrl})` : `#${build}`;
 
 /**
- * `` `kibana-on-merge` builds [#123](…) and [#124](…) on `main` ``, or, for a longer streak,
- * `` the last 4 `kibana-on-merge` builds on `main`, [#121](…) to [#124](…) ``.
+ * `` `kibana-on-merge` builds [#123](…) and [#124](…) ``, or, for a longer streak,
+ * `` the last 4 `kibana-on-merge` builds ([#121](…) to [#124](…)) ``.
  */
 const describeBuilds = (
   builds: readonly BuildRun[],
-  { pipeline, branch }: FailingSuiteIssueContext
+  { pipeline }: FailingSuiteIssueContext
 ): string => {
   const first = buildLink(builds[0]);
   const last = buildLink(builds[builds.length - 1]);
   return builds.length > 2
-    ? `the last ${builds.length} ${inlineCode(pipeline)} builds on ${inlineCode(branch)}, ` +
-        `${first} to ${last}`
-    : `${inlineCode(pipeline)} builds ${first} and ${last} on ${inlineCode(branch)}`;
+    ? `the last ${builds.length} ${inlineCode(pipeline)} builds (${first} to ${last})`
+    : `${inlineCode(pipeline)} builds ${first} and ${last}`;
 };
 
 /** `[abc1234...def5678](…/compare/abc1234…...def5678…)`, when both commits are known. */
@@ -138,32 +200,43 @@ const compareLink = (from: BuildRun, to: BuildRun): string | undefined =>
     : undefined;
 
 /**
+ * Where the tests are consistently failing (`` on `main`, in `kibana-on-merge` builds … ``), the
+ * last build they passed in and the commits in between.
+ */
+const breakDetails = (suite: FailingSuite, ctx: FailingSuiteIssueContext) => {
+  const { failingBuilds, lastPassingBuild } = suite;
+  return {
+    where: `on ${inlineCode(ctx.branch)}, in ${describeBuilds(failingBuilds, ctx)}`,
+    before: lastPassingBuild
+      ? `after passing in ${buildLink(lastPassingBuild)}`
+      : 'with no earlier passing run on record',
+    compare: lastPassingBuild ? compareLink(lastPassingBuild, failingBuilds[0]) : undefined,
+  };
+};
+
+/**
  * What happened, in one callout: how many tests, where, in which builds, since when, and the
  * commits between the last pass and the first failure when both are known.
  */
 const opening = (suite: FailingSuite, ctx: FailingSuiteIssueContext): string => {
-  const { failingBuilds, lastPassingBuild } = suite;
   const file = `[${inlineCode(Path.basename(suite.filePath))}](${KIBANA_BLOB_URL}/${
     suite.filePath
   })`;
-  const where = describeBuilds(failingBuilds, ctx);
-  const before = lastPassingBuild
-    ? `after passing in ${buildLink(lastPassingBuild)}`
-    : `with no earlier passing run on ${inlineCode(ctx.branch)} on record`;
-  const compare = lastPassingBuild ? compareLink(lastPassingBuild, failingBuilds[0]) : undefined;
+  const { where, before, compare } = breakDetails(suite, ctx);
   const cause = compare
     ? `; the changes between the last passing and the first failing build are ${compare}.`
     : '.';
+  const count = suite.tests.length;
   return (
     '> [!IMPORTANT]\n' +
-    `> ${plural(suite.tests.length, 'test')} in ${file} failed every attempt of ${where}, ` +
-    `${before}. This looks like a break rather than a flaky test${cause}`
+    `> ${plural(count, 'test')} in ${file} ${count === 1 ? 'is' : 'are'} consistently failing ` +
+    `${where}, ${before}. This looks like a break rather than a flaky test${cause}`
   );
 };
 
 const testsList = (suite: FailingSuite): string =>
   [
-    'Tests that failed every attempt:',
+    'Consistently failing tests:',
     ...suite.tests.map(
       (test) => `- ${inlineCode(test.title)} · [history](${testDashboardUrl(test.testId)})`
     ),
@@ -202,6 +275,31 @@ const relatedIssues = ({ relatedIssues: numbers }: FailingSuiteIssueContext): st
   numbers && numbers.length > 0
     ? `Possibly related: ${numbers.map((number) => `#${number}`).join(', ')}.`
     : undefined;
+
+/** `` `a` ``, `` `a` and `b` `` or `` `a`, `b` and `c` ``. */
+const listOf = (items: readonly string[]): string =>
+  items.length > 1 ? `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}` : items[0];
+
+/**
+ * The comment on an issue that already tracks the suite, when the check finds its tests failing
+ * every attempt: which tests, in which builds of the pipeline and branch, since when, and the
+ * commits between the last pass and the first failure. The red circle tells it apart from the
+ * daily report's flaky comments at a glance.
+ */
+export const renderFailingSuiteComment = (
+  suite: FailingSuite,
+  ctx: FailingSuiteIssueContext
+): string => {
+  const { where, before, compare } = breakDetails(suite, ctx);
+  const tests = suite.tests.map((test) => inlineCode(test.title));
+  const lead =
+    tests.length === 1
+      ? `${tests[0]} is consistently failing ${where}, ${before}`
+      : `${plural(tests.length, 'test')} are consistently failing ${where}, ${before}: ${listOf(
+          tests
+        )}`;
+  return `🔴 ${lead}.${compare ? ` Changes in between: ${compare}.` : ''}`;
+};
 
 /** Full issue body for a new failing suite issue, including the hidden metadata. */
 export const renderFailingSuiteIssueBody = (

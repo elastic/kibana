@@ -333,12 +333,6 @@ export async function createFailureIssue(
   }
 }
 
-/** Options of a follow-up comment. */
-interface CommentOptions {
-  /** Name the test in the first line, for an issue that tracks a whole suite */
-  nameTest?: boolean;
-}
-
 /** How a suite issue names the failed test: a Scout failure only knows its describe and title */
 export const testLabel = (failure: TestFailure | ScoutTestFailureExtended): string =>
   isScoutFailure(failure) ? `${failure.classname} ${failure.name}` : failure.name;
@@ -348,16 +342,14 @@ function createJUnitComment(
   branch: string,
   pipeline: string,
   errorMessage: ErrorMessageForComment,
-  failure?: TestFailure,
-  { nameTest }: CommentOptions = {}
+  failure?: TestFailure
 ): string {
   /*
    * The error message is only included when it has not been reported on the
    * issue before (see getErrorMessageForComment), so repeat failures with a
    * known error stay compact while genuinely new errors surface immediately.
    */
-  const subject = nameTest && failure ? `New failure of \`${testLabel(failure)}\`` : 'New failure';
-  const buildLink = `${subject}: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`;
+  const buildLink = `New failure: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`;
   const prefix =
     branch === 'main' && failure ? withTestHistoryDashboardLink(buildLink, failure) : buildLink;
   return `${prefix}${renderErrorMessageSection(errorMessage)}`;
@@ -368,8 +360,7 @@ function createScoutComment(
   buildUrl: string,
   branch: string,
   pipeline: string,
-  errorMessage: ErrorMessageForComment,
-  { nameTest }: CommentOptions = {}
+  errorMessage: ErrorMessageForComment
 ): string {
   /*
    * When there's a new error message, include it in the comment. This provides
@@ -396,8 +387,7 @@ function createScoutComment(
    * previous comment), a short note replaces the code block. When no message
    * was available to compare, only the link line is posted.
    */
-  const subject = nameTest ? `New failure of \`${testLabel(failure)}\`` : 'New failure';
-  const buildLink = `${subject} for "${failure.target}" target: [${
+  const buildLink = `New failure for "${failure.target}" target: [${
     pipeline || 'CI Build'
   } - ${branch}](${buildUrl})`;
   const prefix = branch === 'main' ? withTestHistoryDashboardLink(buildLink, failure) : buildLink;
@@ -479,19 +469,12 @@ export async function updateFailureIssue(
 }
 
 /**
- * Record a failure on the flaky suite issue tracking its test, as on a per-test issue: bump the
- * fail count, reopen the issue and comment with the build. The body text and the
- * `flaky-test-suite` metadata belong to `report_flaky_test_issues` and are left alone, so the
- * count lives in the `failed-test` metadata next to it.
+ * Count a failure on the suite issue tracking its test, without a comment or a reopen: the daily
+ * flaky report comments on and reopens flaky suites, and the consistent failure check comments on
+ * breaks. The body text and the `flaky-test-suite` metadata are left alone, so the count lives in
+ * the `failed-test` metadata next to it.
  */
-export async function updateSuiteIssue(
-  buildUrl: string,
-  issue: FlakySuiteIssue,
-  api: GithubApi,
-  branch: string,
-  pipeline: string,
-  failure: TestFailure | ScoutTestFailureExtended
-) {
+export async function updateSuiteIssue(issue: FlakySuiteIssue, api: GithubApi) {
   const { number } = issue.github;
   // the daily report edits the body too, so count on what github has now rather than on the
   // ci-stats copy, which is all there is in dry-run mode
@@ -499,19 +482,7 @@ export async function updateSuiteIssue(
   const newCount = getIssueMetadata(body, 'test.failCount', 0) + 1;
   const newBody = updateIssueMetadata(body, { 'test.failCount': newCount });
 
-  await api.editIssueBodyAndEnsureOpen(number, newBody);
-
-  const comments = await api.getIssueComments(number);
-  const scout = isScoutFailure(failure);
-  const errorMessage = getErrorMessageForComment(
-    body,
-    comments,
-    scout ? failure.errorMessage : extractErrorMessage(failure.failure)
-  );
-  const commentText = scout
-    ? createScoutComment(failure, buildUrl, branch, pipeline, errorMessage, { nameTest: true })
-    : createJUnitComment(buildUrl, branch, pipeline, errorMessage, failure, { nameTest: true });
-  await api.addIssueComment(number, commentText);
+  await api.editIssue(number, { body: newBody });
 
   return { newBody, newCount };
 }
