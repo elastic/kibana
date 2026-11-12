@@ -73,6 +73,10 @@ apiTest.describe(
         const { first, second } = protectedPolicies;
         const { agentId, hostname } = enrolledHost;
 
+        await apiTest.step('the agent applies the first protected policy', async () => {
+          await waitForAgentOnPolicy(apiClient, requestHeaders, agentId, first);
+        });
+
         await apiTest.step('reassign the agent to the second protected policy', async () => {
           const response = await reassignAgent(
             apiClient,
