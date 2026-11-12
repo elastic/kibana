@@ -9,14 +9,20 @@
 
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useEuiMemoizedStyles } from '@elastic/eui';
-import { createColumnHelper, tableFeatures, useTable } from '@tanstack/react-table';
+import { createColumnHelper, metaHelper, tableFeatures, useTable } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
 import type { DataGridColumn } from './data_grid_column';
 import { getDataGridColumnValue, renderDataGridCell } from './data_grid_column';
 import { DEFAULT_DATA_GRID_ROW_HEIGHT, getDataGridStyles } from './data_grid.styles';
 
-const tableFeatureSet = tableFeatures({});
+interface DataGridColumnMeta {
+  readonly ariaLabel?: string;
+}
+
+const tableFeatureSet = tableFeatures({
+  columnMeta: metaHelper<DataGridColumnMeta>(),
+});
 
 const DEFAULT_OVERSCAN = 5;
 
@@ -60,6 +66,7 @@ export const DataGrid = <TRow extends object>({
         columnHelper.accessor((row) => getDataGridColumnValue(column, row), {
           id: column.id,
           header: () => column.header,
+          meta: { ariaLabel: column.ariaLabel },
           cell: (cellContext) => {
             const { row } = cellContext;
             return renderDataGridCell(
@@ -131,23 +138,20 @@ export const DataGrid = <TRow extends object>({
           css={styles.headerRow}
           style={{ gridTemplateColumns }}
         >
-          {headerGroup.headers.map((header) => {
-            const column = columns.find(({ id }) => id === header.column.id);
-            return (
-              <div
-                key={header.id}
-                role="columnheader"
-                aria-label={column?.ariaLabel}
-                css={styles.headerCell}
-              >
-                {header.isPlaceholder ? null : (
-                  <div css={styles.headerContent}>
-                    <table.FlexRender header={header} />
-                  </div>
-                )}
-              </div>
-            );
-          })}
+          {headerGroup.headers.map((header) => (
+            <div
+              key={header.id}
+              role="columnheader"
+              aria-label={header.column.columnDef.meta?.ariaLabel}
+              css={styles.headerCell}
+            >
+              {header.isPlaceholder ? null : (
+                <div css={styles.headerContent}>
+                  <table.FlexRender header={header} />
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       ))}
 
