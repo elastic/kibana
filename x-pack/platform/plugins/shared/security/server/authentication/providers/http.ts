@@ -7,10 +7,11 @@
 
 import { timingSafeEqual } from 'crypto';
 
-import type { AuthHeaders, KibanaRequest } from '@kbn/core/server';
+import type { AuthenticatedUser, AuthHeaders, KibanaRequest } from '@kbn/core/server';
 import {
   HTTPAuthorizationHeader,
   isUiamBearerCredential,
+  isUiamCredential,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
 
@@ -19,7 +20,7 @@ import { BaseAuthenticationProvider } from './base';
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../../common/constants';
 import { getDetailedErrorMessage } from '../../errors';
 import { ROUTE_TAG_ACCEPT_JWT, ROUTE_TAG_ACCEPT_UIAM_OAUTH } from '../../routes/tags';
-import { getRequestSpacePrefix } from '../../uiam';
+import { getRequestSpacePrefix, isExternalApiKey } from '../../uiam';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 
@@ -138,7 +139,10 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
       }
 
       return AuthenticationResult.succeeded(
-        { ...user, http_authentication_scheme: authorizationHeader.scheme.toLowerCase() },
+        {
+          ...(await this.withUiamApiKeyCreator(authorizationHeader, user)),
+          http_authentication_scheme: authorizationHeader.scheme.toLowerCase(),
+        },
         {
           // Even though the `Authorization` header is already present in the HTTP headers of the original request,
           // we still need to expose it to the Core authentication service for consistency.
@@ -172,6 +176,36 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
    */
   public getHTTPAuthenticationScheme() {
     return null;
+  }
+
+  /**
+   * Authenticates an internal UIAM API key as the user who created it, as Elasticsearch API keys
+   * already do. The key still identifies itself through `api_key`. Falls back to the key's own
+   * identity when UIAM reports no user creator or the lookup fails.
+   */
+  private async withUiamApiKeyCreator(
+    authorizationHeader: HTTPAuthorizationHeader,
+    user: AuthenticatedUser
+  ): Promise<AuthenticatedUser> {
+    const { uiam } = this.options;
+    if (
+      !uiam ||
+      !user.api_key ||
+      isExternalApiKey(user) ||
+      !isUiamCredential(authorizationHeader)
+    ) {
+      return user;
+    }
+
+    try {
+      const creator = await uiam.getApiKeyCreator(authorizationHeader);
+      return creator?.type === 'user' ? { ...user, username: String(creator.user_id) } : user;
+    } catch (err) {
+      this.logger.error(
+        `Failed to retrieve the creator of a UIAM API key: ${getDetailedErrorMessage(err)}`
+      );
+      return user;
+    }
   }
 
   private hasVerifiedInternalCallerAttestation(

@@ -717,6 +717,111 @@ describe('HTTPAuthenticationProvider', () => {
     });
   });
 
+  describe('UIAM API key creator', () => {
+    const header = 'ApiKey essu_task_manager_key';
+    const apiKeyUser = (internal = true) =>
+      mockAuthenticatedUser({
+        username: 'task-key-id',
+        authentication_type: 'api_key',
+        api_key: {
+          id: 'task-key-id',
+          name: 'TaskManager-UIAM: workflow:run - 12345',
+          managed_by: 'cloud',
+          internal,
+        },
+      });
+
+    const authenticate = async (
+      options: MockAuthenticationProviderOptions,
+      { user = apiKeyUser(), authorization = header } = {}
+    ) => {
+      const request = httpServerMock.createKibanaRequest({ headers: { authorization } });
+      const scopedClient = elasticsearchServiceMock.createScopedClusterClient();
+      scopedClient.asCurrentUser.security.authenticate.mockResponse(user);
+      options.client.asScoped.mockReturnValue(scopedClient);
+      const provider = new HTTPAuthenticationProvider(options, {
+        supportedSchemes: new Set(['apikey']),
+      });
+      return provider.authenticate(request);
+    };
+
+    let options: MockAuthenticationProviderOptions;
+    beforeEach(() => {
+      options = mockAuthenticationProviderOptions({ name: 'http', uiam: true });
+    });
+
+    it('authenticates the key as the user who created it, keeping the key identity', async () => {
+      options.uiam!.getApiKeyCreator.mockResolvedValue({ type: 'user', user_id: 12345 });
+      const user = apiKeyUser();
+
+      const result = await authenticate(options, { user });
+
+      expect(result.succeeded()).toBe(true);
+      expect(result.user).toEqual(
+        expect.objectContaining({
+          username: '12345',
+          // Like an Elasticsearch API key, it has no profile of its own on the user.
+          profile_uid: user.profile_uid,
+          authentication_type: 'api_key',
+          api_key: expect.objectContaining({ id: 'task-key-id' }),
+        })
+      );
+      expect(options.uiam!.getApiKeyCreator).toHaveBeenCalledWith(
+        new HTTPAuthorizationHeader('ApiKey', 'essu_task_manager_key')
+      );
+    });
+
+    it('keeps the key identity when the key was created by another API key', async () => {
+      options.uiam!.getApiKeyCreator.mockResolvedValue({
+        type: 'api-key',
+        api_key_id: 'source-key-id',
+      });
+
+      expect((await authenticate(options)).user?.username).toBe('task-key-id');
+    });
+
+    it('keeps the key identity and logs when the lookup fails', async () => {
+      options.uiam!.getApiKeyCreator.mockRejectedValue(new Error('UIAM is down'));
+
+      const result = await authenticate(options);
+
+      expect(result.succeeded()).toBe(true);
+      expect(result.user?.username).toBe('task-key-id');
+      expect(options.logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to retrieve the creator of a UIAM API key')
+      );
+    });
+
+    it('does not look up external keys', async () => {
+      const result = await authenticate(options, { user: apiKeyUser(false) });
+
+      expect(result.user?.username).toBe('task-key-id');
+      expect(options.uiam!.getApiKeyCreator).not.toHaveBeenCalled();
+    });
+
+    it('does not look up Elasticsearch API keys', async () => {
+      const result = await authenticate(options, { authorization: 'ApiKey some-es-api-key' });
+
+      expect(result.user?.username).toBe('task-key-id');
+      expect(options.uiam!.getApiKeyCreator).not.toHaveBeenCalled();
+    });
+
+    it('does not look up credentials that are not API keys', async () => {
+      const result = await authenticate(options, {
+        user: mockAuthenticatedUser({ username: 'user' }),
+      });
+
+      expect(result.user?.username).toBe('user');
+      expect(options.uiam!.getApiKeyCreator).not.toHaveBeenCalled();
+    });
+
+    it('does not look anything up when UIAM is not enabled', async () => {
+      const result = await authenticate(mockOptions);
+
+      expect(result.user?.username).toBe('task-key-id');
+    });
+  });
+
   describe('`logout` method', () => {
     it('does not handle logout', async () => {
       const provider = new HTTPAuthenticationProvider(mockOptions, {

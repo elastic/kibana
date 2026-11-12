@@ -1650,6 +1650,58 @@ describe('UiamService', () => {
       await expect(uiamService.getApiKeyCreator(authorization)).resolves.toBeUndefined();
     });
 
+    it.each([
+      ['a creator', { type: 'user', user_id: 12345 }],
+      ['that there is no known creator', undefined],
+    ])('caches %s', async (_, creator) => {
+      respondWith(creator);
+
+      const first = await uiamService.getApiKeyCreator(authorization);
+      await expect(uiamService.getApiKeyCreator(authorization)).resolves.toEqual(first);
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('shares one lookup between concurrent requests for the same key', async () => {
+      respondWith({ type: 'user', user_id: 12345 });
+
+      const creators = await Promise.all([
+        uiamService.getApiKeyCreator(authorization),
+        uiamService.getApiKeyCreator(authorization),
+        uiamService.getApiKeyCreator(authorization),
+      ]);
+
+      expect(creators).toEqual(Array(3).fill({ type: 'user', user_id: 12345 }));
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('looks up each key separately', async () => {
+      respondWith({ type: 'user', user_id: 12345 });
+
+      await uiamService.getApiKeyCreator(authorization);
+      await uiamService.getApiKeyCreator(new HTTPAuthorizationHeader('ApiKey', 'essu_another'));
+
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not cache a failed lookup', async () => {
+      fetchSpy.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'UIAM is down' } }),
+      });
+
+      await expect(uiamService.getApiKeyCreator(authorization)).rejects.toThrow('UIAM is down');
+
+      respondWith({ type: 'user', user_id: 12345 });
+      await expect(uiamService.getApiKeyCreator(authorization)).resolves.toEqual({
+        type: 'user',
+        user_id: 12345,
+      });
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
+    });
+
     it('logs and throws when UIAM rejects the key', async () => {
       fetchSpy.mockResolvedValue({
         ok: false,

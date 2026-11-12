@@ -6,8 +6,10 @@
  */
 
 import Boom from '@hapi/boom';
+import { createHash } from 'crypto';
 import { readFileSync } from 'fs';
 import { chunk, partition } from 'lodash';
+import { LRUCache } from 'lru-cache';
 import { Agent } from 'undici';
 
 import { schema } from '@kbn/config-schema';
@@ -207,6 +209,13 @@ const apiKeyAuthenticateResponseSchema = lazySchema(() =>
 export type UiamApiKeyCreator = z.infer<typeof apiKeyCreatorSchema>;
 
 /**
+ * A key's creator never changes, and a revoked key fails authentication before it gets here, so
+ * a long TTL is safe. Background tasks use the same key over and over.
+ */
+const API_KEY_CREATOR_CACHE_MAX_SIZE = 1000;
+const API_KEY_CREATOR_CACHE_TTL_MS = 5 * 60 * 1000;
+
+/**
  * Response containing a list of OAuth clients.
  */
 export interface OAuthClientsResponse {
@@ -303,9 +312,9 @@ export interface UiamServicePublic {
 
   /**
    * Returns the principal UIAM records as the creator of an internal API key, or `undefined` when
-   * UIAM reports none we recognize. The key is authenticated with Kibana's own client
-   * authentication, so do not call this for external (user-created) keys: UIAM rejects those when
-   * they carry it.
+   * UIAM reports none we recognize. Results are cached per key, failures are not. The key is
+   * authenticated with Kibana's own client authentication, so do not call this for external
+   * (user-created) keys: UIAM rejects those when they carry it.
    * @param authorization The `ApiKey` credential whose creator is requested.
    */
   getApiKeyCreator(authorization: HTTPAuthorizationHeader): Promise<UiamApiKeyCreator | undefined>;
@@ -510,6 +519,12 @@ export class UiamService implements UiamServicePublic {
   readonly #kibanaServerResourceURL: string;
   readonly #elasticsearchUrl?: string;
   readonly #userAgentHeader: string;
+  // Keyed by a hash of the credential, so the key itself is never held or logged. It holds the
+  // lookups themselves, so concurrent requests for a new key share one call to UIAM.
+  readonly #apiKeyCreators = new LRUCache<string, Promise<UiamApiKeyCreator | undefined>>({
+    max: API_KEY_CREATOR_CACHE_MAX_SIZE,
+    ttl: API_KEY_CREATOR_CACHE_TTL_MS,
+  });
 
   constructor(logger: Logger, config: UiamConfigType, options: UiamServiceOptions) {
     this.#logger = logger;
@@ -865,6 +880,22 @@ export class UiamService implements UiamServicePublic {
    * See {@link UiamServicePublic.getApiKeyCreator}.
    */
   async getApiKeyCreator(
+    authorization: HTTPAuthorizationHeader
+  ): Promise<UiamApiKeyCreator | undefined> {
+    const cacheKey = createHash('sha256').update(authorization.credentials).digest('hex');
+    const cached = this.#apiKeyCreators.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    const lookup = this.#fetchApiKeyCreator(authorization);
+    this.#apiKeyCreators.set(cacheKey, lookup);
+    // A failed lookup says nothing about the key, so it is not kept.
+    lookup.catch(() => this.#apiKeyCreators.delete(cacheKey));
+    return lookup;
+  }
+
+  async #fetchApiKeyCreator(
     authorization: HTTPAuthorizationHeader
   ): Promise<UiamApiKeyCreator | undefined> {
     try {

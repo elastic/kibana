@@ -56,44 +56,13 @@ describe('createUiamApiKeyProfileIdResolver', () => {
     await expect(resolve(request, authorization)).resolves.toBeUndefined();
   });
 
-  it('logs the error and resolves nothing when the lookup fails, without caching it', async () => {
-    uiam.getApiKeyCreator
-      .mockRejectedValueOnce(new Error('UIAM is down'))
-      .mockResolvedValueOnce({ type: 'user', user_id: 12345 });
+  it('logs the error and resolves nothing when the lookup fails', async () => {
+    uiam.getApiKeyCreator.mockRejectedValue(new Error('UIAM is down'));
 
     await expect(resolve(request, authorization)).resolves.toBeUndefined();
     expect(logger.error).toHaveBeenCalledWith(
       expect.stringContaining('Failed to retrieve the creator of a UIAM API key')
     );
-
-    await expect(resolve(request, authorization)).resolves.toBe(CLOUD_USER_PROFILE_ID);
-    expect(uiam.getApiKeyCreator).toHaveBeenCalledTimes(2);
-  });
-
-  it.each([
-    ['the profile id of a key', { type: 'user', user_id: 12345 } as const, CLOUD_USER_PROFILE_ID],
-    ['that a key has no profile id', { type: 'api-key', api_key_id: 'source' } as const, undefined],
-  ])('caches %s', async (_, creator, expected) => {
-    uiam.getApiKeyCreator.mockResolvedValue(creator);
-
-    await resolve(request, authorization);
-    await expect(resolve(request, authorization)).resolves.toBe(expected);
-
-    expect(uiam.getApiKeyCreator).toHaveBeenCalledTimes(1);
-  });
-
-  it('looks up each key separately', async () => {
-    uiam.getApiKeyCreator
-      .mockResolvedValueOnce({ type: 'user', user_id: 12345 })
-      .mockResolvedValueOnce({ type: 'user', user_id: 12346 });
-
-    const first = await resolve(request, authorization);
-    const second = await resolve(request, new HTTPAuthorizationHeader('ApiKey', 'essu_another'));
-
-    expect(first).toBe(CLOUD_USER_PROFILE_ID);
-    expect(second).toBeDefined();
-    expect(second).not.toBe(first);
-    expect(uiam.getApiKeyCreator).toHaveBeenCalledTimes(2);
   });
 
   it('skips external keys reported by the authenticated user', async () => {
