@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PREFIX } from '../../../shared/test_ids';
+import { PREFIX } from '../../../../flyout/shared/test_ids';
 
 export const TABLE_TAB_CONTENT_TEST_ID = `${PREFIX}DocumentTable` as const;
 export const TABLE_TAB_SEARCH_INPUT_TEST_ID = `${PREFIX}DocumentTableSearchInput` as const;

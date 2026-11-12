@@ -6,7 +6,7 @@
  */
 
 import type { Process } from '@kbn/session-view-plugin/common';
-import type { CustomProcess } from '../../../../../flyout/document_details/session_view/context';
+import type { CustomProcess } from '../context';
 
 // Small function to check if the selectedProcess is a Process
 // TODO delete when the expandable flyout is removed

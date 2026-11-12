@@ -15,7 +15,7 @@ import {
   THREAT_DETAILS_ROW_LINK_VALUE_TEST_ID,
   THREAT_DETAILS_ROW_STRING_VALUE_TEST_ID,
 } from './threat_details_view_enrichment_accordion';
-import { indicatorWithNestedObjects } from '../../../../../flyout/document_details/left/mocks/indicator_with_nested_objects';
+import { indicatorWithNestedObjects } from '../mocks/indicator_with_nested_objects';
 import type { CtiEnrichment } from '../../../../../../common/search_strategy';
 
 describe('EnrichmentAccordion', () => {

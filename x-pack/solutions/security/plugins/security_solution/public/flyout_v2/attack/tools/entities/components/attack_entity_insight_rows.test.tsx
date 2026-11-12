@@ -10,15 +10,15 @@ import { render, screen } from '@testing-library/react';
 import { AttackHostInsightsRow, AttackUserInsightsRow } from './attack_entity_insight_rows';
 import { EuiProvider } from '@elastic/eui';
 
-jest.mock('../../../../common/lib/kibana', () => {
-  const actual = jest.requireActual('../../../../common/lib/kibana');
+jest.mock('../../../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../../../common/lib/kibana');
   return {
     ...actual,
     useUiSetting: () => false,
   };
 });
 
-jest.mock('../../../entity_details/shared/hooks/use_entity_from_store', () => ({
+jest.mock('../../../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => ({
   useEntityFromStore: () => ({
     entityRecord: null,
     isLoading: false,
@@ -26,7 +26,7 @@ jest.mock('../../../entity_details/shared/hooks/use_entity_from_store', () => ({
   }),
 }));
 
-jest.mock('../../../document_details/left/components/host_details', () => ({
+jest.mock('../../../../../flyout/document_details/left/components/host_details', () => ({
   HostDetails: (props: { hostName: string }) => (
     <div data-test-subj="host-details-mock" data-host-name={props.hostName}>
       {props.hostName}
@@ -34,7 +34,7 @@ jest.mock('../../../document_details/left/components/host_details', () => ({
   ),
 }));
 
-jest.mock('../../../document_details/left/components/user_details', () => ({
+jest.mock('../../../../../flyout/document_details/left/components/user_details', () => ({
   UserDetails: (props: { userName: string }) => (
     <div data-test-subj="user-details-mock" data-user-name={props.userName}>
       {props.userName}

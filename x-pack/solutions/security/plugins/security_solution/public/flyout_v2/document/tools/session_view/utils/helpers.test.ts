@@ -6,7 +6,7 @@
  */
 
 import type { Process } from '@kbn/session-view-plugin/common';
-import type { CustomProcess } from '../../../../../flyout/document_details/session_view/context';
+import type { CustomProcess } from '../context';
 import { isCustomProcess, isProcess } from './helpers';
 
 const createProcess = (): Process =>

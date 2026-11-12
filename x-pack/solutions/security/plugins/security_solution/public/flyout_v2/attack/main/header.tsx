@@ -19,7 +19,7 @@ import { Assignees } from './components/assignees';
 import { HEADER_SHARE_BUTTON_TEST_ID, HEADER_SUMMARY_PANEL_TEST_ID } from './constants/test_ids';
 import { ShareUrlIconButton } from '../../shared/components/share_url_icon_button';
 import { FlyoutHeaderActions } from '../../shared/components/flyout_header_actions';
-import { useGetAttackFlyoutLink } from '../../../flyout/attack_details/hooks/use_get_attack_flyout_link';
+import { useGetAttackFlyoutLink } from './hooks/use_get_attack_flyout_link';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 
 const SHARE_ATTACK_LABEL = i18n.translate(

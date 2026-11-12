@@ -11,7 +11,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
-import { useAttackDetails } from '../../flyout/attack_details/hooks/use_attack_details';
+import { useAttackDetails } from '../../flyout_v2/attack/main/hooks/use_attack_details';
 import { FlyoutLoading } from '../../flyout_v2/shared/components/flyout_loading';
 import { Footer } from '../../flyout_v2/attack/main/footer';
 
