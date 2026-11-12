@@ -17,12 +17,14 @@ import { mapAttributesSchema as lazyMapAttributesSchema } from './map_attributes
 /**
  * A `lazySchema` proxy only weakly references the schema it builds, so the GC can reclaim it and
  * the next access rebuilds it. Every content management request validates against the schemas
- * below, so hold a strong reference to a clone of each one used by `serviceDefinition`. The
- * clone's children are then retained as well, which avoids rebuilding the tree after a GC.
+ * below, so they must be held strongly once used. `z.lazy` resolves its inner schema on first
+ * use and then caches it, so a clone of the built schema is retained without building anything
+ * at module load. The clone's children are retained as well, which avoids rebuilding the tree
+ * after a GC.
  */
-const retainSchema = <T extends z.ZodType>(schema: T): T => schema.clone();
+const retainOnFirstUse = <T extends z.ZodType>(schema: T) => z.lazy(() => schema.clone());
 
-const mapAttributesSchema = retainSchema(lazyMapAttributesSchema);
+const mapAttributesSchema = retainOnFirstUse(lazyMapAttributesSchema);
 
 export const mapSavedObjectSchema = savedObjectSchema(mapAttributesSchema);
 
@@ -79,7 +81,7 @@ export const serviceDefinition: ServicesDefinition = {
   create: {
     in: {
       options: {
-        schema: retainSchema(mapsCreateOptionsSchema),
+        schema: retainOnFirstUse(mapsCreateOptionsSchema),
       },
       data: {
         schema: mapAttributesSchema,
@@ -94,7 +96,7 @@ export const serviceDefinition: ServicesDefinition = {
   update: {
     in: {
       options: {
-        schema: retainSchema(mapsUpdateOptionsSchema),
+        schema: retainOnFirstUse(mapsUpdateOptionsSchema),
       },
       data: {
         schema: mapAttributesSchema,
@@ -104,7 +106,7 @@ export const serviceDefinition: ServicesDefinition = {
   search: {
     in: {
       options: {
-        schema: retainSchema(searchOptionsSchema),
+        schema: retainOnFirstUse(searchOptionsSchema),
       },
     },
   },
