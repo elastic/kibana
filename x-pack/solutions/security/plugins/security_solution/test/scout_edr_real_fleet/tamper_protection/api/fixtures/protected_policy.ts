@@ -5,9 +5,15 @@
  * 2.0.
  */
 
+import type { GetFullAgentPolicyResponse } from '@kbn/fleet-plugin/common';
+import { agentPolicyRouteService } from '@kbn/fleet-plugin/common';
 import type { KbnClient, ScoutLogger } from '@kbn/scout-security';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { updateAgentPolicy } from '../../../../../scripts/endpoint/common/fleet_services';
+import { catchHttpErrorFormatAndThrow } from '../../../../../common/endpoint/format_http_error';
+import {
+  fetchAgentPolicy,
+  updateAgentPolicy,
+} from '../../../../../scripts/endpoint/common/fleet_services';
 import {
   createEndpointPolicy,
   deleteEndpointPolicy,
@@ -20,6 +26,45 @@ export interface ProtectedEndpointPolicy {
   revision: number;
   indexedPolicy: IndexedFleetEndpointPolicyResponse;
 }
+
+const isProtectionEnabledInFullPolicy = async (
+  kbnClient: KbnClient,
+  agentPolicyId: string
+): Promise<boolean> => {
+  const { data } = await kbnClient
+    .request<GetFullAgentPolicyResponse>({
+      method: 'GET',
+      path: agentPolicyRouteService.getInfoFullPath(agentPolicyId),
+      headers: { 'elastic-api-version': '2023-10-31' },
+    })
+    .catch(catchHttpErrorFormatAndThrow);
+
+  return data.item.agent?.protection?.enabled === true;
+};
+
+/**
+ * Fleet turns `is_protected` off when the policy has no Elastic Defend, so read the
+ * agent policy and the full policy the agent receives back before the test relies on it.
+ */
+const readBackProtectedRevision = async (
+  kbnClient: KbnClient,
+  log: ScoutLogger,
+  agentPolicyId: string
+): Promise<number> => {
+  const { is_protected: isProtected, revision } = await fetchAgentPolicy(kbnClient, agentPolicyId);
+  const protectionEnabled = await isProtectionEnabledInFullPolicy(kbnClient, agentPolicyId);
+  log.info(
+    `[edr_real_fleet] agent policy ${agentPolicyId}: is_protected=${isProtected}, full policy agent.protection.enabled=${protectionEnabled}, revision=${revision}`
+  );
+
+  if (!isProtected || !protectionEnabled) {
+    throw new Error(
+      `Tamper protection is not enabled on agent policy ${agentPolicyId} (is_protected=${isProtected}, agent.protection.enabled=${protectionEnabled})`
+    );
+  }
+
+  return revision;
+};
 
 /** Deletes the agent and Endpoint package policies, logging instead of throwing. */
 export const deleteProtectedEndpointPolicy = async (
@@ -50,12 +95,8 @@ export const createProtectedEndpointPolicy = async (
     }
 
     log.info(`[edr_real_fleet] enabling tamper protection on agent policy ${agentPolicyId}`);
-    const { revision } = await updateAgentPolicy(
-      kbnClient,
-      agentPolicyId,
-      { is_protected: true },
-      true
-    );
+    await updateAgentPolicy(kbnClient, agentPolicyId, { is_protected: true }, true);
+    const revision = await readBackProtectedRevision(kbnClient, log, agentPolicyId);
 
     return { agentPolicyId, revision, indexedPolicy };
   } catch (error) {
