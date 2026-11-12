@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }) {
-  describe('managed content', function () {
-    loadTestFile(require.resolve('./managed_content'));
-  });
-}
+// React-free entry point, safe to import from server code. The root barrel pulls in the
+// PipelineStructureTree React component (and EUI).
+
+export { MAX_TREE_LEVEL } from './src/components/pipeline_structure_tree/constants';

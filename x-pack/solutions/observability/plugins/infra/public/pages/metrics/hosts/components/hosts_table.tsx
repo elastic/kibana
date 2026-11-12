@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiEmptyPrompt } from '@elastic/eui';
