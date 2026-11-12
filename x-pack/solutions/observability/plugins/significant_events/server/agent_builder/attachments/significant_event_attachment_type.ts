@@ -76,6 +76,8 @@ export const createSignificantEventAttachmentType = ({
       rows: [event],
       request: context.request,
       eventClient,
+      // Resolved from agent conversations, so reading it must not write the event back.
+      repair: false,
     });
     return reconciled;
   };

@@ -93,13 +93,14 @@ describe('createSignificantEventAttachmentType', () => {
     ).resolves.toEqual(updatedEvent);
   });
 
-  it('resolves the event with the severity its investigation gave it', async () => {
+  it('resolves the event with the severity its investigation gave it, without writing it back', async () => {
     const server = createSignificantEventsServer({ featurePrivilege: 'read' });
     server.severitySync = {
       ...server.severitySync,
       reconcileRows: async ({ rows }) =>
         rows.map((row) => Object.assign({}, row, { severity: 'critical' as const })),
     };
+    const reconcileRows = jest.spyOn(server.severitySync, 'reconcileRows');
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([event]),
@@ -109,6 +110,7 @@ describe('createSignificantEventAttachmentType', () => {
     await expect(
       type.resolve?.('payment-outage', agentBuilderMocks.attachments.createResolveContextMock())
     ).resolves.toEqual({ ...event, severity: 'critical' });
+    expect(reconcileRows).toHaveBeenCalledWith(expect.objectContaining({ repair: false }));
   });
 
   it('reports stale when the latest event differs from the stored snapshot', async () => {
