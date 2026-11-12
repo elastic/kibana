@@ -8,6 +8,7 @@
  */
 
 import React, { useState } from 'react';
+import type { ReactNode } from 'react';
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -61,6 +62,7 @@ export function MapHeader({
   onSelectSlowest,
   sampling,
   isDisabled,
+  selectionSummary,
 }: {
   stats?: DurationStats;
   failedOnly: boolean;
@@ -69,6 +71,8 @@ export function MapHeader({
   /** How a large range is sampled; undefined when every span is read. */
   sampling?: MapSampling;
   isDisabled: boolean;
+  /** The selection at the far right, as in the prototype; the slowest shortcuts make way. */
+  selectionSummary?: ReactNode;
 }) {
   const [isSlowestOpen, setIsSlowestOpen] = useState(false);
   return (
@@ -101,54 +105,57 @@ export function MapHeader({
           <SamplingNote stats={stats} sampling={sampling} />
         </EuiFlexItem>
       )}
-      <EuiPopover
-        button={
-          <EuiButtonEmpty
-            size="xs"
-            iconType="sortDown"
-            isDisabled={isDisabled || !stats}
-            onClick={() => setIsSlowestOpen((open) => !open)}
-            data-test-subj="traceLatencyMapSelectSlowest"
-          >
-            {i18n.translate('traceLatencyMap.header.selectSlowest', {
-              defaultMessage: 'Select slowest',
-            })}
-          </EuiButtonEmpty>
-        }
-        aria-label={i18n.translate('traceLatencyMap.header.selectSlowestAriaLabel', {
-          defaultMessage: 'Select the slowest spans, from a percentile up',
-        })}
-        isOpen={isSlowestOpen}
-        closePopover={() => setIsSlowestOpen(false)}
-        panelPaddingSize="none"
-        anchorPosition="downLeft"
-      >
-        <EuiContextMenuPanel
-          items={SLOWEST_PERCENTILES.map((percentile) => (
-            <EuiContextMenuItem
-              key={percentile}
-              onClick={() => {
-                setIsSlowestOpen(false);
-                onSelectSlowest(percentile);
-              }}
-              data-test-subj={`traceLatencyMapSlowest${percentile}`}
+      {!selectionSummary && (
+        <EuiPopover
+          button={
+            <EuiButtonEmpty
+              size="xs"
+              iconType="sortDown"
+              isDisabled={isDisabled || !stats}
+              onClick={() => setIsSlowestOpen((open) => !open)}
+              data-test-subj="traceLatencyMapSelectSlowest"
             >
-              {i18n.translate('traceLatencyMap.header.abovePercentile', {
-                defaultMessage: 'Above p{percentile} ({duration})',
-                values: {
-                  percentile,
-                  duration: stats ? formatDuration(percentileDuration(stats, percentile)) : '',
-                },
+              {i18n.translate('traceLatencyMap.header.selectSlowest', {
+                defaultMessage: 'Select slowest',
               })}
-            </EuiContextMenuItem>
-          ))}
-        />
-      </EuiPopover>
+            </EuiButtonEmpty>
+          }
+          aria-label={i18n.translate('traceLatencyMap.header.selectSlowestAriaLabel', {
+            defaultMessage: 'Select the slowest spans, from a percentile up',
+          })}
+          isOpen={isSlowestOpen}
+          closePopover={() => setIsSlowestOpen(false)}
+          panelPaddingSize="none"
+          anchorPosition="downLeft"
+        >
+          <EuiContextMenuPanel
+            items={SLOWEST_PERCENTILES.map((percentile) => (
+              <EuiContextMenuItem
+                key={percentile}
+                onClick={() => {
+                  setIsSlowestOpen(false);
+                  onSelectSlowest(percentile);
+                }}
+                data-test-subj={`traceLatencyMapSlowest${percentile}`}
+              >
+                {i18n.translate('traceLatencyMap.header.abovePercentile', {
+                  defaultMessage: 'Above p{percentile} ({duration})',
+                  values: {
+                    percentile,
+                    duration: stats ? formatDuration(percentileDuration(stats, percentile)) : '',
+                  },
+                })}
+              </EuiContextMenuItem>
+            ))}
+          />
+        </EuiPopover>
+      )}
       <ErrorsMenu
         failedOnly={failedOnly}
         onFailedOnlyChange={onFailedOnlyChange}
         isDisabled={isDisabled}
       />
+      {selectionSummary && <EuiFlexItem grow={false}>{selectionSummary}</EuiFlexItem>}
     </EuiFlexGroup>
   );
 }

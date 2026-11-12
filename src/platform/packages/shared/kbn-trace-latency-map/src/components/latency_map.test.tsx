@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { LatencyMapSelection, TraceSource } from '../types';
 import { getTimeGrid } from '../query/time_grid';
@@ -661,8 +662,16 @@ describe('LatencyMap', () => {
       const summary = await screen.findByTestId('traceLatencyMapSelectionSummary');
       // The busy cell and the quiet one: 60 spans, 10 of them failed (17%).
       expect(summary).toHaveTextContent('60 spans');
-      expect(summary).toHaveTextContent('10 failed (17%)');
+      // The times and the failures are the badge's tooltip.
+      await userEvent.hover(summary);
+      expect(await screen.findByRole('tooltip')).toHaveTextContent('10 failed (17%)');
       expect(screen.getByRole('button', { name: /^Filter \(\d+\)$/ })).toBeInTheDocument();
+    });
+
+    it('makes way in the header: no slowest shortcuts while a selection exists', async () => {
+      renderMap({ selection });
+      await screen.findByTestId('traceLatencyMapSelectionBar');
+      expect(screen.queryByTestId('traceLatencyMapSelectSlowest')).not.toBeInTheDocument();
     });
 
     it('leads with the label of a selection that has one', async () => {
@@ -707,7 +716,7 @@ describe('LatencyMap', () => {
         'Errors (filtered)'
       );
       expect(summary).toHaveTextContent('10 spans');
-      expect(summary).toHaveTextContent('failed only');
+      expect(screen.getByTestId('traceLatencyMapFailedOnlyBadge')).toBeInTheDocument();
     });
 
     it('clears the selection', async () => {
@@ -768,7 +777,7 @@ describe('LatencyMap', () => {
       renderMap({ selection, failedOnly: true, onFailedOnlyChange: jest.fn() });
       const summary = await screen.findByTestId('traceLatencyMapSelectionSummary');
       expect(summary).toHaveTextContent('10 spans');
-      expect(summary).toHaveTextContent('failed only');
+      expect(screen.getByTestId('traceLatencyMapFailedOnlyBadge')).toBeInTheDocument();
     });
 
     it('normalizes a selection that carries its own failure clause when the filter changes', async () => {

@@ -53,7 +53,7 @@ import { LatencyHeatmap } from './latency_heatmap';
 import { LatencyMapLegend } from './legend';
 import { MapHeader } from './map_header';
 import type { SlowestPercentile } from './map_header';
-import { SelectionBar } from './selection_bar';
+import { SelectionSummary } from './selection_summary';
 import { OVERLAY_CONTROL_ATTRIBUTE, SelectionOverlay } from './selection_overlay';
 import { getCountText, getSlowestLabel } from './unit_text';
 
@@ -616,6 +616,24 @@ export function LatencyMap({
     );
   }
 
+  // In the header's top-right cluster, as in the prototype, so nothing sits under the map.
+  const selectionSummary = selection && geometry && !error && (
+    <SelectionSummary
+      selection={selection}
+      spans={selectedCounts.spans}
+      failed={selectedCounts.failed}
+      failedOnly={failedOnly}
+      unit={unit}
+      sampled={sampled || selectedCounts.estimated}
+      timeZone={timeZone}
+      onClear={() => commit(undefined)}
+      actions={renderSelectionActions?.(
+        selection,
+        selectionToEsqlCondition(selection, { unit, scope: selectionCondition })
+      )}
+    />
+  );
+
   return (
     <div ref={setContainer} data-test-subj={dataTestSubj}>
       <MapHeader
@@ -625,6 +643,7 @@ export function LatencyMap({
         onSelectSlowest={selectSlowest}
         sampling={grid && !isEmpty ? sampling : undefined}
         isDisabled={!geometry || isEmpty}
+        selectionSummary={selectionSummary || undefined}
       />
       <EuiSpacer size="s" />
       {body}
@@ -632,25 +651,6 @@ export function LatencyMap({
         <>
           <EuiSpacer size="xs" />
           <LatencyMapLegend colors={colors} unit={unit} />
-        </>
-      )}
-      {selection && geometry && !error && (
-        <>
-          <EuiSpacer size="s" />
-          <SelectionBar
-            selection={selection}
-            spans={selectedCounts.spans}
-            failed={selectedCounts.failed}
-            failedOnly={failedOnly}
-            unit={unit}
-            sampled={sampled || selectedCounts.estimated}
-            timeZone={timeZone}
-            onClear={() => commit(undefined)}
-            actions={renderSelectionActions?.(
-              selection,
-              selectionToEsqlCondition(selection, { unit, scope: selectionCondition })
-            )}
-          />
         </>
       )}
     </div>
