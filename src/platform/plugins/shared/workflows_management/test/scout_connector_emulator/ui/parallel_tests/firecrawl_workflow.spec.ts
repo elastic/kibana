@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EmulatorControl } from '@kbn/connector-emulate';
+import type { EmulatorControl, ResponseFixture } from '@kbn/connector-emulate';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../../../scout/ui/fixtures';
 import type { ConnectorStep } from '../fixtures/connector_workflow';
@@ -18,13 +18,29 @@ import {
 } from '../fixtures/connector_workflow';
 import {
   connectToEmulator,
-  crawlIdOf,
   createConnectorInSpace,
   deleteConnectorInSpace,
   loadScenario,
   setFixtures,
-  VENDOR,
 } from '../fixtures/emulator';
+
+/** Where Firecrawl's API lives; the emulator answers requests to it. */
+const VENDOR = 'https://api.firecrawl.dev/v2';
+
+/** The id of the crawl that Firecrawl's scenario starts, which its status requests ask about. */
+const crawlIdOf = (scenario: readonly ResponseFixture[]): string => {
+  for (const { operation, response } of scenario) {
+    const startsCrawl =
+      'method' in operation &&
+      operation.method.toLowerCase() === 'post' &&
+      operation.path === '/crawl';
+    const body = response?.body;
+    if (startsCrawl && typeof body === 'object' && body !== null && 'id' in body) {
+      return String(body.id);
+    }
+  }
+  throw new Error("Firecrawl's scenario has no response to POST /crawl with an id");
+};
 
 const STEPS: readonly ConnectorStep[] = [
   ['scrape', 'firecrawl.scrape', { url: 'https://example.com', onlyMainContent: true }],

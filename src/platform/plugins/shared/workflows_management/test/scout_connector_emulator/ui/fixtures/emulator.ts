@@ -14,9 +14,6 @@ import { readResponseFixtures } from '@kbn/connector-specs/src/test/vendor_api/l
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { KbnClient } from '@kbn/scout';
 
-/** Where Firecrawl's API lives; the emulator answers requests to it. */
-export const VENDOR = 'https://api.firecrawl.dev/v2';
-
 /**
  * What the emulator answers a connector with in these suites, in place of values sampled from its
  * spec: the connector's `emulator/responses.json`, which `node scripts/connector_emulate --fixtures
@@ -32,32 +29,12 @@ export const loadScenario = async (connector: string): Promise<ResponseFixture[]
     )
   );
 
-/** The id of the crawl that Firecrawl's scenario starts, which its status requests ask about. */
-export const crawlIdOf = (scenario: readonly ResponseFixture[]): string => {
-  for (const { operation, response } of scenario) {
-    const startsCrawl =
-      'method' in operation &&
-      operation.method.toLowerCase() === 'post' &&
-      operation.path === '/crawl';
-    const body = response?.body;
-    if (startsCrawl && typeof body === 'object' && body !== null && 'id' in body) {
-      return String(body.id);
-    }
-  }
-  throw new Error("Firecrawl's scenario has no response to POST /crawl with an id");
-};
-
-/** What the emulator calls `.firecrawl`: its connector id without the dot. */
-export const EMULATOR_NAME = 'firecrawl';
-
 /**
  * The control client of the connector emulator, scoped to a connector (its connector id without
  * the dot). It fails with what to do when the emulator isn't serving it, as Kibana trusts the
  * emulator's CA only if it exists when Kibana starts.
  */
-export const connectToEmulator = async (
-  connectorName: string = EMULATOR_NAME
-): Promise<EmulatorControl> => {
+export const connectToEmulator = async (connectorName: string): Promise<EmulatorControl> => {
   const { proxyUrl } = resolveEmulatorLocation({ repoRoot: REPO_ROOT });
   const control = createEmulatorControl(proxyUrl, { connector: connectorName });
   try {
