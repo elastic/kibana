@@ -9822,7 +9822,6 @@
     "responseOpsRuleForm.actionForm.actionGroupRecoveredMessage": "已恢复",
     "responseOpsRuleForm.components.ruleTypeModal.allRuleTypes": "全部",
     "responseOpsRuleForm.components.ruleTypeModal.classicBadge": "经典",
-    "responseOpsRuleForm.components.ruleTypeModal.cpsSupportComingSoon": "CPS 支持即将推出",
     "responseOpsRuleForm.components.ruleTypeModal.loadingRuleTypes": "正在加载规则类型",
     "responseOpsRuleForm.components.ruleTypeModal.loadingTemplates": "正在加载模板",
     "responseOpsRuleForm.components.ruleTypeModal.minimumRequiredLicenseMessage": "此规则需要{minimumLicenseRequired}许可证。",
