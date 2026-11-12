@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import {
   savedObjectSchema,
@@ -12,37 +12,55 @@ import {
   createResultSchema,
   referencesSchema,
 } from '@kbn/content-management-utils/zod';
-import { mapAttributesSchema } from './map_attributes_schema/map_attributes_schema';
+import { mapAttributesSchema as lazyMapAttributesSchema } from './map_attributes_schema/map_attributes_schema';
+
+/**
+ * A `lazySchema` proxy only weakly references the schema it builds, so the GC can reclaim it and
+ * the next access rebuilds it. Every content management request validates against the schemas
+ * below, so hold a strong reference to a clone of each one used by `serviceDefinition`. The
+ * clone's children are then retained as well, which avoids rebuilding the tree after a GC.
+ */
+const retainSchema = <T extends z.ZodType>(schema: T): T => schema.clone();
+
+const mapAttributesSchema = retainSchema(lazyMapAttributesSchema);
 
 export const mapSavedObjectSchema = savedObjectSchema(mapAttributesSchema);
 
-export const searchOptionsSchema = z
-  .object({
-    onlyTitle: z.boolean().optional(),
-  })
-  .strict()
-  .optional();
+export const searchOptionsSchema = lazySchema(() =>
+  z
+    .object({
+      onlyTitle: z.boolean().optional(),
+    })
+    .strict()
+    .optional()
+);
 
-export const mapsSearchOptionsSchema = z
-  .object({
-    onlyTitle: z.boolean().optional(),
-  })
-  .strict()
-  .optional();
+export const mapsSearchOptionsSchema = lazySchema(() =>
+  z
+    .object({
+      onlyTitle: z.boolean().optional(),
+    })
+    .strict()
+    .optional()
+);
 
-export const mapsCreateOptionsSchema = z
-  .object({
-    references: referencesSchema.optional(),
-  })
-  .strict()
-  .optional();
+export const mapsCreateOptionsSchema = lazySchema(() =>
+  z
+    .object({
+      references: referencesSchema.optional(),
+    })
+    .strict()
+    .optional()
+);
 
-export const mapsUpdateOptionsSchema = z
-  .object({
-    references: referencesSchema.optional(),
-  })
-  .strict()
-  .optional();
+export const mapsUpdateOptionsSchema = lazySchema(() =>
+  z
+    .object({
+      references: referencesSchema.optional(),
+    })
+    .strict()
+    .optional()
+);
 
 export const mapsGetResultSchema = objectTypeToGetResultSchema(mapSavedObjectSchema);
 
@@ -61,7 +79,7 @@ export const serviceDefinition: ServicesDefinition = {
   create: {
     in: {
       options: {
-        schema: mapsCreateOptionsSchema,
+        schema: retainSchema(mapsCreateOptionsSchema),
       },
       data: {
         schema: mapAttributesSchema,
@@ -76,7 +94,7 @@ export const serviceDefinition: ServicesDefinition = {
   update: {
     in: {
       options: {
-        schema: mapsUpdateOptionsSchema,
+        schema: retainSchema(mapsUpdateOptionsSchema),
       },
       data: {
         schema: mapAttributesSchema,
@@ -86,7 +104,7 @@ export const serviceDefinition: ServicesDefinition = {
   search: {
     in: {
       options: {
-        schema: searchOptionsSchema,
+        schema: retainSchema(searchOptionsSchema),
       },
     },
   },
