@@ -42,7 +42,7 @@ const MOCK_PACKAGES = {
 
 test.describe(
   'Get started: integration collection tiles',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     test.beforeEach(async ({ page, browserAuth, pageObjects }) => {
       await page.route(
