@@ -425,7 +425,7 @@ export const discovery: DatasetConfig['discovery'] = [
       criteria: [
         {
           id: 'symptom-hypothesis-sql-connection',
-          text: 'States a symptom_hypothesis that connects every grouped detection through the evidenced database/connectivity cascade — SQLState 08001 or JDBC connection failures, cache errors, and frontend read timeouts across transactionhistory, balancereader, and ledgerwriter. Uses confirming query rows and compatible KI context for sparse rows, without presenting KI context as proof of current activity or inventing dependency edges absent from grounding.',
+          text: 'States a symptom_hypothesis that covers every grouped detection (SQLState 08001 or JDBC connection failures, cache errors, and frontend read timeouts across transactionhistory, balancereader, and ledgerwriter), connects them where the descriptions or the topology show a link, and says that no common cause is established where they do not. Uses confirming query rows and compatible KI context for sparse rows, without presenting KI context as proof of current activity or inventing dependency edges absent from grounding.',
           score: 3,
         },
         {
