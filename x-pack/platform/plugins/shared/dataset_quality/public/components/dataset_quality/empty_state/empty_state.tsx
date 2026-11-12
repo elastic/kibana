@@ -15,25 +15,25 @@ import { useDatasetQualityState } from '../../../hooks/use_dataset_quality_state
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function EmptyStateWrapper({ children }: { children: React.ReactNode }) {
-  const { canUserMonitorAnyDataset, statsLoading } = useDatasetQualityState();
+  const { canUserAccessAnyDataset, statsLoading } = useDatasetQualityState();
 
-  if (!statsLoading && !canUserMonitorAnyDataset) {
+  if (!statsLoading && !canUserAccessAnyDataset) {
     return (
       <EuiEmptyPrompt
         iconType="warning"
         color="warning"
         title={
           <h2>
-            {i18n.translate('xpack.datasetQuality.emptyState.noPrivileges.title', {
-              defaultMessage: `Datasets couldn't be loaded`,
+            {i18n.translate('xpack.datasetQuality.emptyState.noAccessibleDatasets.title', {
+              defaultMessage: 'No accessible datasets found',
             })}
           </h2>
         }
         body={
           <p data-test-subj="datasetQualityNoPrivilegesEmptyState">
             <FormattedMessage
-              id="xpack.datasetQuality.emptyState.noPrivileges.message"
-              defaultMessage="You don't have the required privileges to view data sets data. Make sure you have sufficient privileges to view data sets."
+              id="xpack.datasetQuality.emptyState.noAccessibleDatasets.message"
+              defaultMessage="No datasets are available, or you don't have sufficient privileges to view them."
             />
             {/* TODO: Learn more link to docs */}
           </p>
