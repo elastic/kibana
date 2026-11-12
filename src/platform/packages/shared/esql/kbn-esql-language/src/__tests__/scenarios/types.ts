@@ -19,6 +19,7 @@ import type {
   RecommendedField,
   RecommendedQuery,
 } from '@kbn/esql-types';
+import type { FunctionDefinition } from '../../commands/definitions/types';
 import type { ISuggestionItem } from '../../commands/registry/types';
 
 /** The package entry point under test: the only function a scenario goes through. */
@@ -74,6 +75,12 @@ export interface ScenarioExpectation {
   readonly contains?: readonly ExpectedSuggestion[];
   /** No suggestion has one of these texts. */
   readonly excludes?: readonly string[];
+  /** Suggestions with these labels are present. */
+  readonly containsLabels?: readonly string[];
+  /** No suggestion has one of these labels. */
+  readonly excludesLabels?: readonly string[];
+  /** No two suggestions share a label. */
+  readonly uniqueLabels?: boolean;
 }
 
 export interface Scenario {
@@ -86,6 +93,8 @@ export interface Scenario {
   readonly after?: string;
   /** Overrides of the default world. */
   readonly world?: Partial<ScenarioWorld>;
+  /** Function definitions that exist only while this scenario runs. */
+  readonly testFunctions?: readonly FunctionDefinition[];
   /** `new` marks a deliberate behaviour change that the current flow does not have. */
   readonly status?: 'new';
   readonly expect: ScenarioExpectation;

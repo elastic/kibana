@@ -49,7 +49,7 @@ export type OperatorGroup = keyof typeof OPERATOR_GROUPS;
 
 interface ExpectedFunctions {
   /** Where the functions are available, as the function definitions name it. */
-  readonly availableIn: `${Location}`;
+  readonly availableIn: `${Location}` | readonly `${Location}`[];
   readonly returning?: ReturnType | readonly ReturnType[];
   readonly scalar?: boolean;
   readonly aggregation?: boolean;
@@ -94,7 +94,7 @@ export const functions = ({
   except,
 }: ExpectedFunctions): string[] =>
   getFunctionSignaturesByReturnType(
-    availableIn as Location,
+    (typeof availableIn === 'string' ? availableIn : [...availableIn]) as Location | Location[],
     typeof returning === 'string' ? returning : [...returning],
     {
       scalar,
@@ -120,3 +120,6 @@ export const dateDiffUnits = (): string[] => [...DATE_DIFF_TIME_UNITS];
 
 /** The names of the time units suggested after a number. */
 export const timeUnits = (): string[] => timeUnitsToSuggest.map(({ name }) => name);
+
+/** The time spans suggested where a duration is expected. */
+export const timeSpans = (): string[] => timeUnits().map((unit) => `1 ${unit}`);
