@@ -26,7 +26,6 @@ import {
 import deepMerge from 'deepmerge';
 import {
   filter,
-  switchMap,
   startWith,
   Subject,
   BehaviorSubject,
