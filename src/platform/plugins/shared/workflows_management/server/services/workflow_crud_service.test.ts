@@ -4879,6 +4879,40 @@ describe('workflow page lifecycle', () => {
     }
   );
 
+  it('retires the old pages before the sync when an import revives a soft-deleted workflow', async () => {
+    const { service, client, pagesService, request } = setup();
+    const stored = storeWrites(client);
+    stored.set(
+      'revived',
+      makeSource({ created_at: '2024-01-01T00:00:00.000Z', enabled: false, deleted_at: new Date() })
+    );
+
+    await service.bulkCreateWorkflows([{ id: 'revived', yaml: pageYaml }], 'default', request, {
+      overwrite: true,
+    });
+
+    expect(pagesService.retireWorkflowPages).toHaveBeenCalledWith({
+      workflowIds: ['revived'],
+      spaceId: 'default',
+    });
+    expect(pagesService.retireWorkflowPages.mock.invocationCallOrder[0]).toBeLessThan(
+      pagesService.syncWorkflowPages.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('keeps the pages when an import overwrites a live workflow', async () => {
+    const { service, client, pagesService, request } = setup();
+    const stored = storeWrites(client);
+    stored.set('live', makeSource({ created_at: '2024-01-01T00:00:00.000Z' }));
+
+    await service.bulkCreateWorkflows([{ id: 'live', yaml: pageYaml }], 'default', request, {
+      overwrite: true,
+    });
+
+    expect(pagesService.retireWorkflowPages).not.toHaveBeenCalled();
+    expect(pagesService.syncWorkflowPages).toHaveBeenCalled();
+  });
+
   it('retires the pages of a deleted workflow', async () => {
     const { service, client, pagesService, request } = setup();
     client.search.mockResolvedValue({

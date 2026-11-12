@@ -1824,6 +1824,10 @@ export class WorkflowCrudService {
       }
     }
 
+    // An import over a soft-deleted workflow keeps its created_at, so the sync would keep pages
+    // that a failed retire left behind, with their old secret and access. The import is a new
+    // workflow to its author, so it starts without them. Pages in another space go in the sync.
+    const revivedIds = new Set<string>();
     if (inSpaceUpdateEntries.length > 0) {
       for (const entry of inSpaceUpdateEntries) {
         const prepared = entry.workflowData;
@@ -1834,6 +1838,7 @@ export class WorkflowCrudService {
             request: params.request,
             mutate: (existing) => {
               previousVersion = existing.version;
+              if (existing.deleted_at) revivedIds.add(entry.id);
               this.assertCanOverwrite(existing, entry.id, spaceId, profileId, params.request);
               return this.buildBulkOverwriteDocument(prepared, existing);
             },
@@ -1856,6 +1861,8 @@ export class WorkflowCrudService {
         }
       }
     }
+
+    await this.retireWorkflowPages([...revivedIds], spaceId);
 
     if (crossSpaceOverwriteEntries.length > 0) {
       for (const { entry, occHit } of crossSpaceOverwriteEntries) {
