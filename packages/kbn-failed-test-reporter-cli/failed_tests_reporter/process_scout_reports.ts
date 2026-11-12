@@ -101,6 +101,7 @@ export async function processScoutReports(
     prependTitle,
     updateGithub,
     perTestIssues,
+    suiteIssueComments,
     indexInEs,
     reportUpdate,
   } = params;
@@ -145,16 +146,14 @@ export async function processScoutReports(
       }
       considered.push(failure);
 
-      // a test tracked by a flaky suite issue gets its failures recorded there, not on an issue of its own
+      // a test tracked by a suite issue gets its failures counted there, not on an issue of its own;
+      // the daily report and the consistent failure check comment on it, or this job without the check
       const suiteIssue = existingIssues.getSuiteIssueForFailure(failure);
       if (suiteIssue) {
         const { newBody, newCount } = await updateSuiteIssue(
-          buildUrl,
           suiteIssue,
           githubApi,
-          branch,
-          pipeline,
-          failure
+          suiteIssueComments ? { buildUrl, branch, pipeline, failure } : undefined
         );
         const url = suiteIssue.github.htmlUrl;
         // in dry-run nothing was written, so the next failure of the suite counts from the same body
