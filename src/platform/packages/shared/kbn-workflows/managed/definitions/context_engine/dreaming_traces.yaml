@@ -92,8 +92,8 @@ steps:
       since: '{{ inputs.since | default: steps.last_output.output.context.output.resume_from | default: steps.last_run.output.since }}'
       after: '{% if inputs.since == blank %}{{ steps.last_output.output.context.output.resume_after }}{% endif %}'
       size: 1000
-      max_tokens: 600000
-      batch_tokens: 50000
+      max_tokens: 1000000
+      batch_tokens: 100000
 
   - name: active
     type: data.set
@@ -112,13 +112,10 @@ steps:
     type: if
     condition: '${{ variables.memories.size > 0 }}'
     steps:
-      # One batch at a time, in the order of the rounds: each batch reads what the ones before it
-      # wrote, so a later conversation updates a fact an earlier one recorded rather than
-      # recording it again.
       - name: batches
         type: parallel
         foreach: '{{ variables.batches | json }}'
-        concurrency: 1
+        concurrency: 4
         steps:
           # A batch's steps run in a workflow of their own: a parallel branch can hold only
           # straight-line steps, and a batch retries its model call.

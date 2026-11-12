@@ -53,7 +53,6 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW', () => {
     expect(workflow.name).toBe('Trace dreaming batch: support-cases');
     expect(workflow.consts).toEqual({
       ai_index_id: 'support-cases',
-      memories_index: 'ai-index-idx-support-cases',
       connector_id: 'my-connector',
       instructions: values.instructions,
       fact_types: values.factTypes,
@@ -74,11 +73,10 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW', () => {
     ]);
   });
 
-  it('extracts from the rounds it is given and applies the changes citing them, building no relationships', () => {
+  it('extracts from the rounds it is given alone and applies the changes citing them, building no relationships', () => {
     const { steps } = render();
 
     expect(steps.map(({ name }: Step) => name)).toEqual([
-      'read_existing',
       'extract',
       'apply_changes',
       'batch_output',
@@ -136,7 +134,6 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW', () => {
     const rendered = createWorkflowLiquidEngine().parseAndRenderSync(prompt, {
       consts: render().consts,
       inputs: { memories: [round] },
-      steps: { read_existing: { output: { hits: { hits: [] } } } },
     });
 
     expect(rendered).toContain(
@@ -149,5 +146,6 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW', () => {
     expect(rendered).toContain('- preference: Something a customer likes.');
     expect(rendered).toContain('- customer (attributes: tier)');
     expect(rendered).toContain(values.instructions);
+    expect(rendered).not.toContain('EXISTING');
   });
 });
