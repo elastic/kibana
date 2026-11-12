@@ -20,6 +20,7 @@ export { checkNextDocs } from './steps/check_next_docs.ts';
 export { checkOasSnapshot } from './steps/check_oas_snapshot.ts';
 export { checkSavedObjects } from './steps/check_saved_objects.ts';
 export { codeQuality } from './steps/code_quality.ts';
+export { connectorEmulatorScoutSteps } from './steps/connector_emulator_scout.ts';
 export { cpsTests } from './steps/cps_testing.ts';
 export { deployCloudSteps } from './steps/deploy_cloud.ts';
 export { deployProjectSteps } from './steps/deploy_project.ts';

@@ -15,3 +15,48 @@ steps:
       automatic:
         - exit_status: '-1'
           limit: 3
+
+  # Runs the connectors' Scout suites through Kibana against the connector emulator, once with the
+  # committed vendor specs and once with the vendors' latest. Soft failures until they have run a
+  # few times; a failure with the latest specs while the committed ones pass is vendor drift.
+  - command: .buildkite/scripts/steps/test/connector_emulator_scout.sh
+    label: ':test_tube: Connector emulator Scout (committed specs)'
+    key: connector-emulator-scout-snapshot
+    timeout_in_minutes: 60
+    soft_fail: true
+    env:
+      CONNECTOR_EMULATOR_SCOUT_FROM_SOURCE: 'true'
+      CONNECTOR_EMULATOR_SPEC: snapshot
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-8
+      preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/test/connector_emulator_scout.sh
+    label: ':test_tube: Connector emulator Scout (latest specs)'
+    key: connector-emulator-scout-latest
+    timeout_in_minutes: 60
+    soft_fail: true
+    env:
+      CONNECTOR_EMULATOR_SCOUT_FROM_SOURCE: 'true'
+      CONNECTOR_EMULATOR_SPEC: latest
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-8
+      preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3

@@ -624,6 +624,40 @@ exports[`pull_request fragments pull_request/code_quality 1`] = `
 }
 `;
 
+exports[`pull_request fragments pull_request/connector_emulator_scout 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "diskType": "pd-balanced",
+        "machineType": "n2-standard-8",
+        "preemptible": true,
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
+      },
+      "command": ".buildkite/scripts/steps/test/connector_emulator_scout.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "connector-emulator-scout",
+      "label": "Connector Emulator Scout",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+  ],
+}
+`;
+
 exports[`pull_request fragments pull_request/cps_testing 1`] = `
 {
   "steps": [

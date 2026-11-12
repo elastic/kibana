@@ -65,6 +65,7 @@ import {
   responseOpsCasesSteps,
   responseOpsSteps,
   scoutFleetRealAgentSteps,
+  connectorEmulatorScoutSteps,
   storybooks,
   syncModelLabels,
   verifyFipsEnabled,
@@ -292,6 +293,21 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       ALL_UI_TEST_SUITES
     ) {
       pipeline.push(renderSteps(scoutFleetRealAgentSteps(), cancelOnGate));
+    }
+
+    if (
+      // Scout suite: changes to its own Scout tests must still trigger it.
+      (await doAnyChangesMatch([
+        /^src\/platform\/packages\/shared\/kbn-connector-specs\//,
+        /^src\/platform\/packages\/shared\/kbn-connector-emulate\//,
+        /^src\/platform\/packages\/shared\/kbn-scout\/src\/servers\/configs\/config_sets\/connector_emulator/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/connector_emulator_scout\.ts/,
+        /^\.buildkite\/scripts\/steps\/test\/connector_emulator_scout\.sh/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:connector-emulator-scout') ||
+      ALL_UI_TEST_SUITES
+    ) {
+      pipeline.push(renderSteps(connectorEmulatorScoutSteps(), cancelOnGate));
     }
 
     const aiInfraPaths = [
