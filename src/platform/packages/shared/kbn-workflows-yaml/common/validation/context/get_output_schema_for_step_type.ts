@@ -28,13 +28,13 @@ const SCHEMA_MAP_KEYS = ['properties', '$defs', 'definitions'] as const;
 const SCHEMA_LIST_KEYS = ['anyOf', 'oneOf', 'allOf'] as const;
 const SCHEMA_KEYS = ['items', 'additionalProperties'] as const;
 
-const isOpenObjectSchema = ({ type, properties, additionalProperties }: Record<string, unknown>) =>
+const isOpenObjectSchema = ({ type, additionalProperties }: Record<string, unknown>) =>
   (type === 'object' || (Array.isArray(type) && type.includes('object'))) &&
-  (additionalProperties === true || (additionalProperties === undefined && !isRecord(properties)));
+  (additionalProperties === undefined || additionalProperties === true);
 
 /**
- * Replaces the objects nested in `schema` that accept any field (`additionalProperties: true`, or
- * no fields declared) with an unconstrained schema, so reading any of their fields is allowed.
+ * Replaces the objects nested in `schema` that accept any field (unless `additionalProperties` is
+ * `false` or a schema) with an unconstrained schema, so reading any of their fields is allowed.
  */
 const openNestedObjects = (schema: Record<string, unknown>): Record<string, unknown> => {
   const openChild = (child: unknown): unknown => {

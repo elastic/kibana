@@ -65,6 +65,44 @@ describe('getReturnedOutputNames', () => {
     expect(getReturnedOutputNames({ steps: [emitOnFailure('failed')] })).toBeUndefined();
   });
 
+  it('includes the workflow on-failure fallback', () => {
+    const withFallback = (fallbackWith: unknown) => ({
+      settings: {
+        'on-failure': {
+          fallback: [{ name: 'recover', type: 'workflow.output', with: fallbackWith }],
+        },
+      },
+      steps: [{ name: 'emit', type: 'workflow.output', with: { severity: 'high' } }],
+    });
+    expect(getReturnedOutputNames(withFallback({ recovery: true }))).toEqual([
+      'severity',
+      'recovery',
+    ]);
+    expect(getReturnedOutputNames(withFallback('${{ steps.prev.output }}'))).toBeUndefined();
+  });
+
+  it('is undefined when a run can complete without reaching a workflow.output step', () => {
+    const emit = { name: 'emit', type: 'workflow.output', with: { severity: 'high' } };
+    const last = { name: 'last', type: 'data.set', with: { other: 1 } };
+    const onlyWhen = (step: Record<string, unknown>) => ({ ...step, if: 'inputs.flag : true' });
+    expect(getReturnedOutputNames({ steps: [onlyWhen(emit), last] })).toBeUndefined();
+    expect(
+      getReturnedOutputNames({
+        steps: [{ name: 'check', type: 'if', condition: 'true', steps: [emit] }, last],
+      })
+    ).toBeUndefined();
+    expect(
+      getReturnedOutputNames({
+        steps: [{ name: 'each', type: 'foreach', foreach: '[]', steps: [emit] }, last],
+      })
+    ).toBeUndefined();
+    expect(
+      getReturnedOutputNames({
+        steps: [{ name: 'check', type: 'if', condition: 'true', steps: [emit] }, emit],
+      })
+    ).toEqual(['severity']);
+  });
+
   it('is undefined without a workflow.output step or when one sets a computed value', () => {
     expect(getReturnedOutputNames({ steps: [{ name: 'log', type: 'console' }] })).toBeUndefined();
     expect(

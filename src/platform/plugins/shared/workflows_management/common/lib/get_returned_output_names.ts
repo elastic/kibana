@@ -33,15 +33,35 @@ const visitSteps = (node: unknown, visit: (step: Record<string, unknown>) => voi
 const isCompletingOutputStep = (step: Record<string, unknown>): boolean =>
   step.type === 'workflow.output' && (step.status === undefined || step.status === 'completed');
 
+// Whether running `steps` in order always reaches a `workflow.output` step, which ends the run.
+// Only unconditional steps count, and an `if` step only when both of its branches end the run.
+const alwaysEndsRun = (steps: unknown): boolean =>
+  Array.isArray(steps) &&
+  steps.some(
+    (step) =>
+      isRecord(step) &&
+      step.if === undefined &&
+      (step.type === 'workflow.output' ||
+        (step.type === 'if' && alwaysEndsRun(step.steps) && alwaysEndsRun(step.else)))
+  );
+
 /**
- * Returns the output names a workflow's completing `workflow.output` steps set, or undefined when it
- * has no such step (callers then get its last step's output) or one of them sets a computed value.
+ * Returns the output names a workflow's completing `workflow.output` steps set, including those in
+ * its `on-failure` fallback. Undefined when a run can complete without one (callers then get its
+ * last step's output), or when one of them sets a computed value.
  */
 export const getReturnedOutputNames = (definition: unknown): string[] | undefined => {
+  if (!isRecord(definition) || !alwaysEndsRun(definition.steps)) {
+    return undefined;
+  }
   const names = new Set<string>();
   let hasOutputStep = false;
   let isComputed = false;
-  visitSteps(isRecord(definition) ? definition.steps : undefined, (step) => {
+  const workflowOnFailure = isRecord(definition.settings)
+    ? definition.settings['on-failure']
+    : undefined;
+  const workflowFallback = isRecord(workflowOnFailure) ? workflowOnFailure.fallback : undefined;
+  visitSteps([definition.steps, workflowFallback], (step) => {
     if (!isCompletingOutputStep(step)) {
       return;
     }
