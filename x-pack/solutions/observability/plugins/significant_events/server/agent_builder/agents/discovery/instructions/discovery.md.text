@@ -484,9 +484,7 @@ finalized topology, and the onset timing from `<incident_matching>` Gather conte
    - what the descriptions leave unresolved.
 
    Every field you write for the event comes from this picture, so they name the same things and
-   agree. Never state an absence (no edge, no row, no service record) from a result
-   you did not read: read the whole result first. An empty `blast_radius` means
-   none found in the knowledge base, not none.
+   agree.
 2. **5 Whys.** Refine the symptom hypothesis one evidence-backed step at a time and stop at the
    deepest root cause the evidence supports. When several confirmed rows share one failing
    component that explains the failures seen downstream (for example, one backend error behind
@@ -524,8 +522,8 @@ For each event candidate, decide from all signals that will appear in the final 
    - **Continuation.** With only `refutes` signals, keep the stored `severity`. With new `confirms`
      signals, the stored tier is the starting point: it stands unless a description contradicts
      the evidence that set it, shows the failure ended, or the severity rules now give another tier.
-   - **No new `confirms` signal in the item** (an unchanged continuation, `<chronic_and_recurring>`
-     rule 2, or a recovery accepted under the checklist in `<eligibility>`): write the stored
+   - **Continuation with no new `confirms` signal** (`<chronic_and_recurring>` rule 2, or a
+     recovery accepted under the checklist in `<eligibility>`): write the stored
      `confidence`. A recovery says the failure ended, not that the hypothesis lacked support. A
      reopen is a new episode, rated like a new event.
 

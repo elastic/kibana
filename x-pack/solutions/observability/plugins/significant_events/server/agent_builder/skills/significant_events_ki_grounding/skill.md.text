@@ -129,8 +129,8 @@ Placeholders used in the Confirm and Profile steps:
    field names, or `FROM`. A `FROM $.{name}` keeps its literal `$.`. Never invent fields, conditions,
    or functions in a Confirm query. ES|QL strings use double quotes.
 5. **Failed answers nothing.** A failed, timed-out, or empty query is skipped; never estimate from it.
-   Never re-run it, narrowed or not, whatever the error text suggests. The only exception is the one
-   resend of `dimensions` without a field its error names (Profile step); a timeout is never resent.
+   Never re-run it, narrowed or not, whatever the error text suggests. The only exceptions are the
+   resends the Confirm table and the Profile step name; a timeout is never resent.
 6. **Syntax.** Every condition is a `WHERE {condition}`, never its own pipe (`| MATCH_PHRASE(...)` is a
    parse error). Count a condition with `COUNT(*) WHERE {condition}`, a `WHERE` inside the aggregation; never
    `COUNT({condition})`, which counts true and false alike. Reserved words are invalid column names:
@@ -278,14 +278,15 @@ One sample per rule proves whether its failure is happening now. Apply `<query_r
   |---|---|---|
   | `spread` | every rule except an aggregate KI | the Profile step's `spread` on the KI's own `{failure}`, in its variant, over the Profile table's window; the rule's only `spread`, except the `off_topic` rule's second one (Definitions) |
   | `sample` | every rule | always `LIMIT 1`; an aggregate KI gets `LIMIT 2`; an authored KI limit of 3 or fewer rows stays instead of ours; `time_range.from` is the rule's `sample_from` (`<query_rules>` rule 3) |
-  | `re-sample` | once, when the sample row does not show the rule's failure (healthy, or `off_topic`), or the rule has a text field and the sample result has no usable column for it (Definitions), or the `sample` failed with a verification or syntax error (an unknown column or function, a malformed condition) | `LIMIT 3`, a new query rebuilt from the KI's query under `<query_rules>`, not a re-run; row-level KIs only. Never after an empty sample, a timeout or any other error, or an authored limit of 3 or less, and never just to get a text column that an authored projection omits |
+  | `re-sample` | once, when the sample row does not show the rule's failure (healthy, or `off_topic`), or the rule has a text field and the sample result has no usable field for it (Definitions), or the `sample` failed with a verification or syntax error in what you added to the KI's query (the time filter, or the sort and limit tail), never one in the KI's own query | `LIMIT 3`, a new query rebuilt from the KI's query under `<query_rules>`, not a re-run; row-level KIs only. Never after an empty sample, a timeout or any other error, or an authored limit of 3 or less, and never just to get a text column that an authored projection omits |
   | `dimensions` | the rule's `affected` is above 0 and it has 2 or more candidates | one query over the candidates |
   | `examples` | the rule's `affected` is above 0, and has a usable text field | up to 5 message categories, one sampled message each |
   | `trend`, `baseline` | every rule, except an `off_topic` rule with no isolating observed-error condition | |
   | `breakdown` | one query per kept field with `f` of 2 or more | up to 3 queries |
 
   After its `sample` a rule sends at most 7 queries (`dimensions`, `examples`, `trend`, `baseline`, up
-  to 3 `breakdown`); the `re-sample`, the `off_topic` `spread` and the `dimensions` resend are extra.
+  to 3 `breakdown`); the `re-sample`, the `off_topic` `spread` and the `dimensions` and `examples`
+  resends are extra.
 - **Dispatch, one sample per response.** Each response carries at most one sample query and at most
   10 calls.
   - Rules are pipelined, one response apart: a rule's stages go out in consecutive
@@ -296,8 +297,8 @@ One sample per rule proves whether its failure is happening now. Apply `<query_r
   - Exceptions: a `re-sample` takes the next `sample` slot, shifting later rules' samples by one
     response. An `off_topic` rule's final `sample` is the `re-sample` when one is sent; once that final
     `sample` is `off_topic`, its second `spread` goes in the next response and its profile set in the
-    one after. A `dimensions` resend goes in the next response, after any re-sample, and that
-    rule's `breakdown` waits for it.
+    one after. A `dimensions` or `examples` resend goes in the next response, after any
+    re-sample, and that rule's `breakdown` waits for a `dimensions` resend.
   - A stage that would exceed 10 calls moves to the next response by priority: `re-sample`, resend,
     `sample`, the `spread` a `sample` waits on, profile set, `breakdown`.
 - **FROM target.** If the KI's `query.esql.query` starts with `FROM $.{name}`, copy that `FROM`
@@ -397,7 +398,7 @@ Reading `examples`:
 - After a fallback (3 random messages) the category rules do not apply: say whether the messages
   are the same once identifiers and numbers are ignored, otherwise how many differ and what each says.
 - Right after reading, add one findings entry `{rule_uuid}: examples -> ...`; a null or empty
-  `examples` means there were no examples: say so.
+  result means there were no examples: say so.
 
 Reading `breakdown`:
 - The rows are the top groups, not all of them: say so when the result has as many rows as its limit.
@@ -525,19 +526,16 @@ write anything that uses it: never conclude an absence (no edge, no entity) from
    `causal_features` and `blast_radius` and skip the remaining sub-steps. A feature of the types
    `dataset_analysis`, `log_samples`, `log_patterns` or `error_logs` describes data, not a service:
    it is never the failed entity and never enters
-   `causal_features` or `blast_radius`. For a rule with no single failed entity (an unscoped rule
-   whose `breakdown` or `examples` show several services failing), activate paths from every
-   service they show failing well above background (a share of its own lines clearly above the other
-   services', not near zero), not only the sampled row; a service at background activates none: match
-   each such failing service, as a source, to the fetched dependency edges whose call target the rows show failing, and
-   keep every grounded edge on those paths. For each confirming signal:
+   `causal_features` or `blast_radius`. For each confirming signal:
    - Identify the failed entity or infrastructure from the query KI first: `query.features[]`, then
      any value its predicate pins to a field that identifies an entity (e.g: a service, host, pod, database,
      or queue), matched exactly and uniquely to a fetched feature's `feature.id`
-     or `properties.name`. Use its title and description only to disambiguate. Use the component
-     named in the found rows (the sample rows and the `examples`) only when the KI identifies none, or
-     to corroborate; a dependency target those rows name that matches a fetched dependency's `source`
-     and `target` supports activating its path. Match the result to
+     or `properties.name`. Use its title and description only to disambiguate. Use the components
+     named in the found rows only when the KI identifies none, or to corroborate. The found rows are
+     the sample rows, the `examples`, and every `breakdown` value whose share of its own lines is not
+     near zero: each such value that names a service is a source, not only the sampled row's. A
+     dependency target those rows name that matches a fetched dependency's `source` and `target`
+     supports activating its path. Match the result to
      a fetched dependency's `source`. A matching `target`, shared technology, or another signal's
      affected service does not activate a path.
    - After that source match, if the dependency's fetched `evidence`, `description`, or `meta`
@@ -625,7 +623,8 @@ Each entry:
   1. **What the rows state.** Open with the signature and the target, never with the sample's size.
      When `examples` returned categories, the opening says what the failing messages are, the
      largest 3 as Reading `examples` states them, most frequent first; the sampled row illustrates
-     the first category and is not a separate account.
+     the first category and is not a separate account. After a fallback, it says what the sampled
+     messages say (Reading `examples`).
      Then, for each dimension the rows carry, `field = value`, any row that differs, and the
      correlations, all from your `<reading_log_lines>` findings. Claim "repeated" or "the only
      failure" only from rows that show it:

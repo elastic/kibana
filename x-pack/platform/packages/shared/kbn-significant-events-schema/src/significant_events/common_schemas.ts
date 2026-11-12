@@ -362,7 +362,6 @@ export const CONFIDENCE_CONTRACT_RULE = dedent`
     Confidence is a score from 0.0 to 1.0 for how strongly the evidence you hold supports the symptom this event reports. It rates the evidence, not the impact: severity rates the impact, and neither is set from the other.
     Check what the evidence shows:
     - the failure itself (an error signature or a stated outcome), not only a volume of log lines;
-    - that it is still happening in the latest period the evidence covers (not checked when it shows the failure ended: an ended failure is still a real symptom);
     - that it agrees with itself and with the knowledge-base topology where both speak (an edge the evidence does not show is context, not a disagreement);
     - where it fails (a service, operation or scope).
     With every check shown the score is near the top of the range. Each check not shown lowers it by how far it weakens support for the symptom.
@@ -439,7 +438,7 @@ export const significantEventBaseSchema = lazySchema(() =>
         dedent`
         Objective, self-contained account of the observed state and potential impact.
         ${SUMMARY_ROLE_RULE}
-        Good: "inventory-db refuses connections on port 5432 (SQLState 08001), failing checkout stock reads. Impact is confirmed for 18.5% of the operation's log lines; first seen 40 minutes ago and still active." Bad: "The verification returned no rows, so a backend connectivity issue is probably causing instability."
+        Good: "\`inventory-db\` refuses connections on port 5432 (SQLState 08001), failing \`checkout\` stock reads. Impact is confirmed for 18.5% of the operation's log lines; first seen at 09:20 and still present in the latest hour." Bad: "The verification returned no rows, so a backend connectivity issue is probably causing instability."
         On a continuation, build on the stored summary: keep its existing wording, including its opening sentence, for the signatures and paths it already covers (rephrase only to stay within three sentences), add sentences only for what is newly confirmed, and never rewrite it; leave it unchanged when nothing new matters to an operator. Counts and timestamps change every cycle, so keep them out of it. A single healthy or unrelated signal never replaces what other signals on the event still confirm.
         ${NO_RAW_SENSITIVE_VALUES_RULE}
       `
