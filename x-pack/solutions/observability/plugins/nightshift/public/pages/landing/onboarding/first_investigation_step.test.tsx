@@ -72,7 +72,7 @@ describe('OnboardingFirstInvestigationStep', () => {
     expect(mockStartInvestigation).toHaveBeenCalledWith('Prompt 0', 'Suggestion 0');
 
     const showMore = screen.getByTestId('nightshiftOnboardingSuggestionsShowMore');
-    expect(showMore).toHaveTextContent('Show 2 more');
+    expect(showMore).toHaveTextContent('Show 2 more of 2');
     fireEvent.click(showMore);
     expect(screen.getAllByTestId('nightshiftOnboardingSuggestion')).toHaveLength(7);
     expect(screen.queryByTestId('nightshiftOnboardingSuggestionsShowMore')).not.toBeInTheDocument();

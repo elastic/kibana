@@ -80,7 +80,7 @@ export const runAutomationRoute = createNightshiftInvestigationsServerRoute({
     }
     if (!serviceAccountId || workflow.definition.settings?.run_as !== serviceAccountId) {
       throw badRequest(
-        'The backing workflow is not bound to the Nightshift automations service account. Set up Nightshift service accounts and save the automation again.'
+        'The backing workflow is not bound to the nightshift automations service account. Set up nightshift service accounts and save the automation again.'
       );
     }
     if (!workflow.enabled) {
