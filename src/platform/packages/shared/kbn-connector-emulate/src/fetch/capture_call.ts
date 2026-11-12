@@ -104,28 +104,42 @@ const toPlainKey = (key: string): string => key.toLowerCase().replace(/[-\s]+/g,
 /** The redacted value of a credential key, or `undefined` when the key holds none. */
 type RedactEntry = (key: string, value: unknown) => string | undefined;
 
+/** A key without its case or separators, as a lowercased header name has them: `apitoken`. */
+const toFlatKey = (key: string): string => key.toLowerCase().replace(/[-_\s]+/g, '');
+
+const withoutUnderscores = (key: string): string => key.replace(/_/g, '');
+
 /**
  * `redact` adds keys matched by their end; `names` adds keys matched whole and
  * case-insensitively, such as the parameters a vendor's spec declares for its API keys, which
- * can be as generic as `key`.
+ * can be as generic as `key`. `lowercased` is for header names, which fetch lowercases before they
+ * get here, so an `apiToken` header arrives as `apitoken`: they are also compared without their
+ * separators, which redacts a few more keys than names that keep their case, such as `validToken`.
  */
 const createRedactEntry = (
   redact: readonly string[] = [],
-  names: readonly string[] = []
+  names: readonly string[] = [],
+  { lowercased = false }: { readonly lowercased?: boolean } = {}
 ): RedactEntry => {
   const suffixes = [...CREDENTIAL_SUFFIXES, ...redact.map(toSnakeCase)];
   const declared = new Set(names.map(toPlainKey));
+  const flatKeys = new Set([...CREDENTIAL_KEYS].map(withoutUnderscores));
+  const flatSchemeKeys = new Set([...SCHEME_KEYS].map(withoutUnderscores));
+  const flatSuffixes = suffixes.map(withoutUnderscores);
   return (key, value) => {
     const normalized = toSnakeCase(key);
+    const flat = toFlatKey(key);
     if (
       !CREDENTIAL_KEYS.has(normalized) &&
       !declared.has(toPlainKey(key)) &&
-      !suffixes.some((end) => normalized.endsWith(end))
+      !suffixes.some((end) => normalized.endsWith(end)) &&
+      !(lowercased && (flatKeys.has(flat) || flatSuffixes.some((end) => flat.endsWith(end))))
     ) {
       return undefined;
     }
     const scheme =
-      SCHEME_KEYS.has(normalized) && typeof value === 'string'
+      (SCHEME_KEYS.has(normalized) || (lowercased && flatSchemeKeys.has(flat))) &&
+      typeof value === 'string'
         ? /^(\S+)\s+\S/.exec(value)?.[1]
         : undefined;
     return scheme ? `${scheme} ${REDACTED}` : REDACTED;
@@ -265,7 +279,8 @@ export const createCaptureExchange = (
   credentials: CredentialNames = NO_CREDENTIAL_NAMES
 ): CaptureExchange => {
   const redactEntry = createRedactEntry(redact);
-  const redactHeader = createRedactEntry(redact, credentials.headers);
+  const redactHeader = createRedactEntry(redact, credentials.headers, { lowercased: true });
+  const redactResponseHeader = createRedactEntry(redact, [], { lowercased: true });
   const redactQuery = createRedactEntry(redact, credentials.query);
   return (request, response) => ({
     request: {
@@ -279,7 +294,7 @@ export const createCaptureExchange = (
       ),
     },
     response: {
-      headers: redactRecord(response.headers ?? {}, redactEntry),
+      headers: redactRecord(response.headers ?? {}, redactResponseHeader),
       ...toBody(
         response.body,
         findHeader(response.headers, 'content-type'),

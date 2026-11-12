@@ -195,6 +195,54 @@ describe('createCaptureExchange redaction scope', () => {
     expect(captured.query).toEqual({ token: REDACTED, key: 'kept', id_token: REDACTED });
   });
 
+  it('redacts credential headers that fetch lowercased, such as one sent as apiToken', () => {
+    // Fetch lowercases header names, so camelCase names have no capital letters left to split on.
+    const { request: captured, response } = createCaptureExchange({ redact: ['signingKey'] })(
+      request({
+        headers: {
+          apitoken: 't',
+          accesstoken: 'a',
+          privatekey: 'p',
+          clientassertion: 'jwt',
+          proxyauthorization: 'Basic dXNlcjpwYXNz',
+          xcustomsigningkey: 's',
+          'x-next-page-token': 'kept',
+          nexttoken: 'kept',
+        },
+      }),
+      {
+        statusCode: 200,
+        headers: { setcookie: 'session=1', refreshtoken: 'r', nexttoken: 'kept' },
+        body: {},
+      }
+    );
+
+    expect(captured.headers).toEqual({
+      apitoken: REDACTED,
+      accesstoken: REDACTED,
+      privatekey: REDACTED,
+      clientassertion: REDACTED,
+      proxyauthorization: `Basic ${REDACTED}`,
+      xcustomsigningkey: REDACTED,
+      'x-next-page-token': 'kept',
+      nexttoken: 'kept',
+    });
+    expect(response.headers).toEqual({
+      setcookie: REDACTED,
+      refreshtoken: REDACTED,
+      nexttoken: 'kept',
+    });
+  });
+
+  it('does not compare query keys without their case, which they keep', () => {
+    const { request: captured } = capture(
+      request({ query: { apitoken: 'kept', apiToken: 't' } }),
+      ok
+    );
+
+    expect(captured.query).toEqual({ apitoken: 'kept', apiToken: REDACTED });
+  });
+
   it('redacts an auth header without a scheme whole', () => {
     const { request: captured } = capture(request({ headers: { authorization: 'abc' } }), ok);
 
