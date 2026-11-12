@@ -8,7 +8,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { buildEpisodeEventsEsqlQuery } from '../queries/episode_events_query';
+import { buildEpisodeEventsQuery } from '@kbn/alerting-v2-common-queries';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
@@ -69,7 +69,7 @@ describe('useFetchEpisodeEventsQuery', () => {
       expect.objectContaining({
         data,
         params: expect.objectContaining({
-          query: buildEpisodeEventsEsqlQuery(DEFAULT_SPACE_ID, episodeId).print('basic'),
+          query: buildEpisodeEventsQuery(DEFAULT_SPACE_ID, episodeId).print('basic'),
           time_zone: 'UTC',
         }),
       })

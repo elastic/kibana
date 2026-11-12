@@ -61,6 +61,9 @@ export type {
 export { buildEpisodeEventsQuery, ALERT_EPISODE_EVENT_FIELDS } from './episode_events_query';
 export type { EpisodeEventRow, BuildEpisodeEventsQueryOptions } from './episode_events_query';
 
+export { buildCollapsedStatusPhasesQuery } from './collapsed_phases_query';
+export type { AlertPhaseRow, BuildAlertPhasesQueryOptions } from './collapsed_phases_query';
+
 export { buildEpisodeActionsQuery } from './episode_actions_query';
 export type { EpisodeActionRow } from './episode_actions_query';
 

@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { buildAlertPhasesQuery } from './alert_phases_query';
+import { buildCollapsedStatusPhasesQuery } from './collapsed_phases_query';
 
 const RULE_ID = 'rule-abc';
 const WINDOW_START_MS = Date.parse('2026-04-01T00:00:00Z');
 const WINDOW_END_MS = Date.parse('2026-04-08T00:00:00Z');
 
-describe('buildAlertPhasesQuery', () => {
-  const queryString = buildAlertPhasesQuery({
+describe('buildCollapsedStatusPhasesQuery', () => {
+  const queryString = buildCollapsedStatusPhasesQuery({
     ruleId: RULE_ID,
-    windowStartMs: WINDOW_START_MS,
-    windowEndMs: WINDOW_END_MS,
+    window: { startMs: WINDOW_START_MS, endMs: WINDOW_END_MS },
     alertIds: ['ep-1', 'ep-2'],
   }).print('basic');
 
