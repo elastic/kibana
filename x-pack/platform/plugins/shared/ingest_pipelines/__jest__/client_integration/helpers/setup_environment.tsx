@@ -63,10 +63,6 @@ const appServices = {
   history,
   uiSettings: uiSettingsServiceMock.createSetupContract(),
   url: sharePluginMock.createStartContract().url,
-  fileUpload: {
-    getMaxBytes: jest.fn().mockReturnValue(100),
-    getMaxBytesFormatted: jest.fn().mockReturnValue('100'),
-  },
   application: applicationMock,
   share: {
     url: new MockUrlService(),

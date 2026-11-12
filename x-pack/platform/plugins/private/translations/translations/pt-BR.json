@@ -38807,7 +38807,6 @@
     "xpack.ingestPipelines.createFromCsv.preview.jsonMapSuccessful": "Você pode salvar ou editar o JSON antes de gerar o pipeline.",
     "xpack.ingestPipelines.createFromCsv.processFile.emptyFileError": "O arquivo fornecido está vazio.",
     "xpack.ingestPipelines.createFromCsv.processFile.emptyFileErrorTitle": "O arquivo está vazio",
-    "xpack.ingestPipelines.createFromCsv.processFile.fileTooLargeError": "O arquivo é maior que o tamanho permitido de {maxBytes} bytes.",
     "xpack.ingestPipelines.createFromCsv.processFile.fileTooLargeErrorTitle": "Arquivo muito grande",
     "xpack.ingestPipelines.createFromCsv.processFile.unexpectedError": "O arquivo fornecido não pôde ser lido.",
     "xpack.ingestPipelines.createFromCsv.processFile.unexpectedErrorTitle": "Erro ao ler arquivo",
