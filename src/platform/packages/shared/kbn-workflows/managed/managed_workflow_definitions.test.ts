@@ -349,7 +349,7 @@ it.each([
   [
     CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
     CONTEXT_ENGINE_TRACE_DREAMING_BATCH_YAML,
-    '3:aa2beb80',
+    '3:508c0978',
   ],
 ] as const)(
   'requires bumping %s definition.version together with the fingerprint of its render inputs',
