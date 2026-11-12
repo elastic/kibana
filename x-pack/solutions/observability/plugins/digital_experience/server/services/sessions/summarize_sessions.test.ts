@@ -15,6 +15,7 @@ import {
   MAX_WINDOW_MS,
   MIN_WINDOW_MS,
   ROWS_PER_TICK,
+  SESSIONS_PER_QUERY,
   lookbackStart,
   summarizeSessions,
 } from './summarize_sessions';
@@ -47,16 +48,18 @@ const SUMMARY_COLUMNS = ['service', 'session', 'start_time', 'end_time', 'page_v
 
 /**
  * Answers the count query with `changed(window)`, the ids query with `ids(params)` and the summary
- * query with `summaryRows(query)`.
+ * query with `summaryRows(query)`, once `beforeSummary` resolves.
  */
 const setUp = ({
   changed = () => 2,
   ids = () => ['a', 'b'],
   summaryRows = () => [summaryRow('a'), summaryRow('b')],
+  beforeSummary = async () => {},
 }: {
   changed?: (params: estypes.EsqlNamedValue[]) => number;
   ids?: (params: estypes.EsqlNamedValue[]) => string[];
   summaryRows?: (query: string) => unknown[][];
+  beforeSummary?: () => Promise<void>;
 } = {}) => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   esClient.esql.query.mockImplementation((async ({ query, params = [] }) => {
@@ -72,6 +75,7 @@ const setUp = ({
         [[bucketIds.length === 1 ? bucketIds[0] : bucketIds, '000']]
       );
     }
+    await beforeSummary();
     return result(SUMMARY_COLUMNS, summaryRows(query));
   }) as typeof esClient.esql.query);
   esClient.bulk.mockResolvedValue({ errors: false, items: [], took: 1 });
@@ -89,6 +93,7 @@ const run = (esClient: ReturnType<typeof setUp>, overrides = {}) =>
     checkpoint: new Date(UNTIL - 2 * MINUTE).toISOString(),
     windowMs: INITIAL_WINDOW_MS,
     budgetMs: 45_000,
+    concurrency: 2,
     ...overrides,
   });
 
@@ -238,6 +243,45 @@ describe('summarizeSessions', () => {
     expect(operations).toHaveLength(2 * rows);
     expect(operations?.[1]).toMatchObject({ session: { id: 's0' } });
     expect(operations?.[2 * rows - 1]).toMatchObject({ session: { id: `s${rows - 1}` } });
+  });
+
+  it.each([1, 2, 3])(
+    'runs up to %s summary queries at once, and writes every batch',
+    async (concurrency) => {
+      const batches = 4;
+      let inFlight = 0;
+      let mostInFlight = 0;
+      const esClient = setUp({
+        changed: () => batches * SESSIONS_PER_QUERY,
+        ids: () => Array.from({ length: batches * SESSIONS_PER_QUERY }, (_, index) => `s${index}`),
+        summaryRows: () => [summaryRow('one')],
+        // Holds each summary query for a turn of the event loop, counting those in flight.
+        beforeSummary: async () => {
+          inFlight++;
+          mostInFlight = Math.max(mostInFlight, inFlight);
+          await new Promise((resolve) => setImmediate(resolve));
+          inFlight--;
+        },
+      });
+
+      const progress = await run(esClient, { concurrency });
+
+      expect(mostInFlight).toBe(concurrency);
+      expect(progress.sessions).toBe(batches);
+      expect(esClient.bulk).toHaveBeenCalledTimes(batches);
+    }
+  );
+
+  it('fails the window when one of the batches running at once fails', async () => {
+    const esClient = setUp({
+      changed: () => 2 * SESSIONS_PER_QUERY,
+      ids: () => Array.from({ length: 2 * SESSIONS_PER_QUERY }, (_, index) => `s${index}`),
+    });
+    esClient.bulk
+      .mockResolvedValueOnce({ errors: false, items: [], took: 1 })
+      .mockRejectedValueOnce(new Error('bulk failed'));
+
+    await expect(run(esClient, { concurrency: 2 })).rejects.toThrow('bulk failed');
   });
 
   it('keeps the checkpoint before a window that fails to write', async () => {

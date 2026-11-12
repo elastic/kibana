@@ -8,7 +8,12 @@
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { SESSIONS_DEFAULT_FREQUENCY, timeValueSeconds } from '../common/sessions';
+import {
+  SESSIONS_DEFAULT_CONCURRENCY,
+  SESSIONS_DEFAULT_FREQUENCY,
+  SESSIONS_MAX_CONCURRENCY,
+  timeValueSeconds,
+} from '../common/sessions';
 
 /** The summaries task runs between every second and every hour. */
 export const validateFrequency = (value: string): string | undefined => {
@@ -27,6 +32,16 @@ const digitalExperienceConfig = schema.object({
       defaultValue: SESSIONS_DEFAULT_FREQUENCY,
       maxLength: 8,
       validate: validateFrequency,
+    }),
+    /**
+     * How many summary queries of 5,000 sessions the task runs at once. More finishes busy windows
+     * sooner, for more Elasticsearch CPU and about 50 MB more Kibana memory each.
+     */
+    concurrency: schema.number({
+      defaultValue: SESSIONS_DEFAULT_CONCURRENCY,
+      min: 1,
+      max: SESSIONS_MAX_CONCURRENCY,
+      validate: (value) => (Number.isInteger(value) ? undefined : 'must be a whole number'),
     }),
   }),
 });

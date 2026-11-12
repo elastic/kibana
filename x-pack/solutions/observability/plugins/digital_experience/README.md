@@ -324,11 +324,12 @@ Each run rebuilds every session that received new events from its whole history,
 active sessions × events per session. On the same data at about 3M sessions a day, a prototype of
 the same loop used 2 to 3 times less Elasticsearch CPU than the transform: about 23,000 changed
 sessions in 2.1 to 2.7 seconds a run against 7.2 to 9.6, and a 625,000 session backfill in 99 to
-126 seconds against 295. One setting trades cost for freshness:
+126 seconds against 295. One setting trades cost for freshness, another speed for resources:
 
 ```yaml
 xpack.digital_experience.sessions:
   frequency: 1m   # 1s–1h. Longer means fewer rebuilds of each active session: cheaper, but staler.
+  concurrency: 2  # 1–8 summary queries at once. More keeps up with busier sites, for more resources.
 ```
 
 - **`frequency`**: an active session is re-read and rewritten once per run. Going from `1m` to
@@ -336,6 +337,10 @@ xpack.digital_experience.sessions:
   list's lag. Session detail reads raw events up to the longest a session lasts, so its timeline
   stays current; its summary figures are as fresh as the last run. A changed `frequency` applies
   after a restart, from the task's next run once it has caught up.
+- **`concurrency`**: a run rebuilds the changed sessions in queries of 5,000, this many at a time.
+  At 75× the scale of the load tests each query took about 2 seconds, so one at a time needed more
+  than the minute; each one more in flight costs Elasticsearch CPU and about 50 MB of Kibana memory
+  while a run is busy. It applies after a restart.
 
 Status reports the summaries as lagging when their checkpoint is more than three runs plus the sync
 delay behind, and at least 5 minutes, once they have caught up; the task logs when a run starts

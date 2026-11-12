@@ -61,6 +61,12 @@ const stateSchemaV1 = schema.object({
 
 export type SessionsTaskState = TypeOf<typeof stateSchemaV1>;
 
+/** The sessions settings the task runs with. */
+export interface SessionsTaskSettings extends SessionsSettings {
+  /** Summary queries run at once. */
+  concurrency: number;
+}
+
 export interface RunSessionsTaskParams {
   state: SessionsTaskState;
   /** The task's API key, or `undefined` when it has none. */
@@ -71,6 +77,7 @@ export interface RunSessionsTaskParams {
   signal: AbortSignal;
   logger: Logger;
   now: number;
+  concurrency: number;
 }
 
 const API_KEY_ID = /^[\w-]{1,128}$/;
@@ -109,6 +116,7 @@ export const runSessionsTask = async ({
   signal,
   logger,
   now,
+  concurrency,
 }: RunSessionsTaskParams): Promise<{ state: SessionsTaskState; runAt?: Date }> => {
   const at = new Date(now).toISOString();
   if (!esClient) {
@@ -136,6 +144,7 @@ export const runSessionsTask = async ({
       checkpoint: rebuild ? null : state.checkpoint ?? null,
       windowMs: rebuild ? INITIAL_WINDOW_MS : state.windowMs ?? INITIAL_WINDOW_MS,
       budgetMs: RUN_BUDGET_MS,
+      concurrency,
     });
 
     const retentionDue =
@@ -212,7 +221,7 @@ export const registerSessionsTask = ({
   core: CoreSetup;
   logger: Logger;
   taskManager: TaskManagerSetupContract;
-  settings: SessionsSettings;
+  settings: SessionsTaskSettings;
 }): void => {
   taskManager.registerTaskDefinitions({
     [SESSIONS_TASK_TYPE]: {
@@ -236,6 +245,7 @@ export const registerSessionsTask = ({
             signal,
             logger,
             now: Date.now(),
+            concurrency: settings.concurrency,
           });
           return withConfiguredInterval(
             result,

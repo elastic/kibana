@@ -66,6 +66,8 @@ export interface SummarizeSessionsParams {
   windowMs: number;
   /** Starts no window after this much time, so the run ends before its timeout. */
   budgetMs: number;
+  /** Summary queries run at once, each with its own batch of sessions. */
+  concurrency: number;
 }
 
 export interface SummarizeSessionsResult {
@@ -168,27 +170,58 @@ const changedSessionIds = async (
   return ids;
 };
 
+interface RebuildWindow {
+  changedTo: string;
+  rebuildFrom: string;
+}
+
+/** The sessions written, or the two halves of a batch whose rows filled the ES|QL response. */
+type BatchResult = { written: number } | { halves: [string[], string[]] };
+
+const summarizeBatch = async (
+  esClient: ElasticsearchClient,
+  window: RebuildWindow,
+  batch: string[],
+  signal: AbortSignal
+): Promise<BatchResult> => {
+  const response = await queryEsql(esClient, sessionSummaryQuery(window, batch), signal);
+  if (response.values.length >= ESQL_MAX_ROWS && batch.length > 1) {
+    const half = Math.ceil(batch.length / 2);
+    return { halves: [batch.slice(0, half), batch.slice(half)] };
+  }
+  const documents = await toSessionDocumentsInChunks(response);
+  await writeSessions(esClient, documents, signal);
+  return { written: documents.length };
+};
+
 /**
- * Rebuilds the sessions of `ids` in batches whose rows fit an ES|QL response; a batch that still
- * fills one, as ids that several applications share have a row each, is split in two.
+ * Rebuilds the sessions of `ids` in batches whose rows fit an ES|QL response, `concurrency` at a
+ * time; a batch that still fills one, as ids that several applications share have a row each, is
+ * split in two. A failed batch fails the window once the others of its round are done.
  */
 const summarizeSessionIds = async (
   esClient: ElasticsearchClient,
-  window: { changedTo: string; rebuildFrom: string },
+  window: RebuildWindow,
   ids: string[],
-  signal: AbortSignal
+  signal: AbortSignal,
+  concurrency: number
 ): Promise<number> => {
   const batches = chunk(ids, SESSIONS_PER_QUERY);
   let written = 0;
-  for (let batch = batches.shift(); batch; batch = batches.shift()) {
-    const response = await queryEsql(esClient, sessionSummaryQuery(window, batch), signal);
-    if (response.values.length >= ESQL_MAX_ROWS && batch.length > 1) {
-      const half = Math.ceil(batch.length / 2);
-      batches.push(batch.slice(0, half), batch.slice(half));
-    } else {
-      const documents = await toSessionDocumentsInChunks(response);
-      await writeSessions(esClient, documents, signal);
-      written += documents.length;
+  while (batches.length > 0) {
+    const round = batches.splice(0, Math.max(1, concurrency));
+    const results = await Promise.allSettled(
+      round.map((batch) => summarizeBatch(esClient, window, batch, signal))
+    );
+    for (const result of results) {
+      if (result.status === 'rejected') {
+        throw result.reason;
+      }
+      if ('halves' in result.value) {
+        batches.push(...result.value.halves);
+      } else {
+        written += result.value.written;
+      }
     }
   }
   return written;
@@ -207,6 +240,7 @@ export const summarizeSessions = async ({
   checkpoint,
   windowMs,
   budgetMs,
+  concurrency,
 }: SummarizeSessionsParams): Promise<SummarizeSessionsResult> => {
   const until = now - SESSIONS_SYNC_DELAY_SECONDS * 1000;
   const earliest = lookbackStart(now);
@@ -231,7 +265,8 @@ export const summarizeSessions = async ({
             rebuildFrom: iso(Math.max(earliest, from - SESSIONS_MAX_SESSION_HOURS * HOUR_MS)),
           },
           ids,
-          signal
+          signal,
+          concurrency
         );
       }
       from = to;

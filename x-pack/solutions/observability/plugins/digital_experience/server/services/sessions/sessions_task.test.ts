@@ -85,6 +85,7 @@ describe('runSessionsTask', () => {
       signal,
       logger,
       now: NOW,
+      concurrency: 2,
       ...overrides,
     });
 
@@ -144,6 +145,7 @@ describe('runSessionsTask', () => {
           checkpoint: null,
           windowMs: INITIAL_WINDOW_MS,
           budgetMs: 45_000,
+          concurrency: 2,
         });
         expect(result.state).toEqual(expect.objectContaining({ version: SESSIONS_VERSION }));
       }
@@ -380,7 +382,12 @@ describe('registerSessionsTask', () => {
     const core = coreMock.createSetup();
     const logger = loggingSystemMock.createLogger();
     const taskManager = taskManagerMock.createSetup();
-    registerSessionsTask({ core, logger, taskManager, settings: { frequency: '1m' } });
+    registerSessionsTask({
+      core,
+      logger,
+      taskManager,
+      settings: { frequency: '1m', concurrency: 3 },
+    });
     const definitions: TaskDefinitionRegistry =
       taskManager.registerTaskDefinitions.mock.calls[0][0];
     return { core, definition: definitions[SESSIONS_TASK_TYPE] };
@@ -433,7 +440,7 @@ describe('registerSessionsTask', () => {
     const scopedClient = jest.mocked(client.asScoped).mock.results[0].value.asCurrentUser;
     expect(putSessionsIndexTemplate).toHaveBeenCalledWith(client.asInternalUser, signal);
     expect(summarizeSessions).toHaveBeenCalledWith(
-      expect.objectContaining({ esClient: scopedClient, signal })
+      expect.objectContaining({ esClient: scopedClient, signal, concurrency: 3 })
     );
     expect(result).toEqual({
       state: expect.objectContaining({ version: SESSIONS_VERSION, lastError: null }),
