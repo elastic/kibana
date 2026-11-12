@@ -940,7 +940,7 @@ describe('EvalsClient', () => {
           baseExecutionId: 'bk-build-123',
           throwOnError: true,
         })
-      ).rejects.toThrow('Failed to find experiment for build bk-build-123');
+      ).rejects.toThrow('Failed to find experiment for build bk-build-123: timeout');
       expect(log.error).not.toHaveBeenCalled();
     });
   });

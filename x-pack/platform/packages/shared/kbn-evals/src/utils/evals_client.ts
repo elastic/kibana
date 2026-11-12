@@ -520,7 +520,8 @@ export class EvalsClient {
         gitBranch: match.git_branch ?? null,
       };
     } catch (error: unknown) {
-      const message = `Failed to find experiment for build ${baseExecutionId} on branch ${branch}: ${getErrorMessage(
+      const onBranch = branch ? ` on branch ${branch}` : '';
+      const message = `Failed to find experiment for build ${baseExecutionId}${onBranch}: ${getErrorMessage(
         error
       )}`;
       if (throwOnError) throw new Error(message, { cause: error });
