@@ -15,6 +15,7 @@ import {
   waitForHostIsolation,
 } from '../../common/complete_host_action';
 import { PARALLEL_HOST_SEED_TIMEOUT_MS, requireHost } from '../../common/get_file_spec_helpers';
+import { runCleanups } from '../../common/run_cleanups';
 
 // Submit, the action-details poll, the agent-status poll and the list reload do not fit in the default 60s.
 const ISOLATE_FLOW_TIMEOUT_MS = 240_000;
@@ -46,23 +47,13 @@ spaceTest.describe(
     });
 
     spaceTest.afterAll(async ({ esClient, config }) => {
-      const failures: unknown[] = [];
-      for (const cleanup of [
-        () => deleteSubmittedHostActions({ esClient, config, actionIds: submittedActionIds }),
-        () => seeded?.cleanup(),
-      ]) {
-        try {
-          await cleanup();
-        } catch (error) {
-          failures.push(error);
-        }
-      }
-      if (failures.length === 1) {
-        throw failures[0];
-      }
-      if (failures.length > 1) {
-        throw new AggregateError(failures, 'Failed to clean up the isolated host and its action');
-      }
+      await runCleanups(
+        [
+          () => deleteSubmittedHostActions({ esClient, config, actionIds: submittedActionIds }),
+          () => seeded?.cleanup(),
+        ],
+        'Failed to clean up the isolated host and its action'
+      );
     });
 
     spaceTest(

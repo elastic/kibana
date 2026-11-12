@@ -24,6 +24,7 @@ import {
 import { createSystemIndicesEsClient } from '../ui/fixtures/system_indices_es_client';
 import { scopeKbnClientToSpace } from './scope_kbn_client_to_space';
 import { withMetadataTransformLock } from './with_metadata_transform_lock';
+import { runCleanups } from './run_cleanups';
 
 export interface SeededEndpointHost {
   readonly agentId: string;
@@ -94,27 +95,14 @@ export const seedEndpointHosts = async ({
     }
     cleanupStarted = true;
 
-    const failures: unknown[] = [];
-    if (indexed) {
-      try {
-        await deleteIndexedHostsAndAlerts(systemEsClient, kbnClient, indexed);
-      } catch (error) {
-        failures.push(error);
-      }
-    }
-
-    try {
-      await systemEsClient.close();
-    } catch (error) {
-      failures.push(error);
-    }
-
-    if (failures.length === 1) {
-      throw failures[0];
-    }
-    if (failures.length > 1) {
-      throw new AggregateError(failures, 'Failed to clean up seeded endpoint hosts');
-    }
+    await runCleanups(
+      [
+        () =>
+          indexed ? deleteIndexedHostsAndAlerts(systemEsClient, kbnClient, indexed) : undefined,
+        () => systemEsClient.close(),
+      ],
+      'Failed to clean up seeded endpoint hosts'
+    );
   };
 
   try {
@@ -200,51 +188,30 @@ export const seedHostWithAlert = async ({
   let alertId: string | undefined;
   let createdRuleId: string | undefined;
 
-  const cleanup = async (): Promise<void> => {
-    const failures: unknown[] = [];
-    if (createdRuleId) {
-      try {
-        await scopedKbnClient.request({
-          method: 'DELETE',
-          path: `${DETECTION_ENGINE_RULES_URL}?id=${encodeURIComponent(createdRuleId)}`,
-          headers: {
-            'kbn-xsrf': 'scout',
-            ...PUBLIC_API_HEADERS,
-          },
-        });
-      } catch (error) {
-        failures.push(error);
-      }
-    }
-    try {
-      await systemEsClient.indices.delete({ index: eventsIndex, ignore_unavailable: true });
-    } catch (error) {
-      failures.push(error);
-    }
-    if (alertId) {
-      try {
-        await systemEsClient.delete({ index: alertsIndex, id: alertId, refresh: 'wait_for' });
-      } catch (error) {
-        failures.push(error);
-      }
-    }
-    try {
-      await systemEsClient.close();
-    } catch (error) {
-      failures.push(error);
-    }
-    try {
-      await seeded.cleanup();
-    } catch (error) {
-      failures.push(error);
-    }
-    if (failures.length === 1) {
-      throw failures[0];
-    }
-    if (failures.length > 1) {
-      throw new AggregateError(failures, 'Failed to clean up seeded host alert');
-    }
-  };
+  const cleanup = (): Promise<void> =>
+    runCleanups(
+      [
+        () =>
+          createdRuleId
+            ? scopedKbnClient.request({
+                method: 'DELETE',
+                path: `${DETECTION_ENGINE_RULES_URL}?id=${encodeURIComponent(createdRuleId)}`,
+                headers: {
+                  'kbn-xsrf': 'scout',
+                  ...PUBLIC_API_HEADERS,
+                },
+              })
+            : undefined,
+        () => systemEsClient.indices.delete({ index: eventsIndex, ignore_unavailable: true }),
+        () =>
+          alertId
+            ? systemEsClient.delete({ index: alertsIndex, id: alertId, refresh: 'wait_for' })
+            : undefined,
+        () => systemEsClient.close(),
+        () => seeded.cleanup(),
+      ],
+      'Failed to clean up seeded host alert'
+    );
 
   try {
     await systemEsClient.index({
