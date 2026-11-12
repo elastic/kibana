@@ -122,4 +122,18 @@ describe('createDreamingChangeHandler', () => {
     expect(scheduleService.reconcile).not.toHaveBeenCalled();
     expect(scheduleService.remove).toHaveBeenCalledTimes(1);
   });
+
+  it('still uninstalls the workflows when dreaming is switched off while unavailable', async () => {
+    dreamingAvailable = false;
+    const previous = { ...aiIndex, dreaming };
+    const current = { ...aiIndex, dreaming: { ...dreaming, enabled: false } };
+
+    await notifier.notify({ ...change, previous, current, saved: ['dreaming'] });
+
+    expect(scheduleService.reconcile).toHaveBeenCalledWith({
+      aiIndex: current,
+      spaceId: 'default',
+      request,
+    });
+  });
 });
