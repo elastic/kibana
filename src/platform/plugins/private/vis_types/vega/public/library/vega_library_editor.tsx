@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KeyboardEvent } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { css } from '@emotion/react';
 import {
   EuiBadge,
-  EuiButtonIcon,
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,7 +17,6 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
   EuiToolTip,
-  keys,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -64,9 +60,6 @@ const saveLabel = i18n.translate('visTypeVega.libraryEditor.saveButtonLabel', {
 const closeLabel = i18n.translate('visTypeVega.libraryEditor.closeButtonLabel', {
   defaultMessage: 'Close',
 });
-
-// Leaves the header, body and footer laid out as direct children of the flyout.
-const keyboardScopeCss = css({ display: 'contents' });
 
 const savedMessage = (title: string) =>
   i18n.translate('visTypeVega.libraryEditor.savedToast', {
@@ -234,67 +227,40 @@ export const VegaLibraryEditor = ({
     closeFlyout();
   };
 
-  // The flyout's own close button is hidden, and Esc is caught here before the flyout closes on
-  // it, so every way of closing the editor checks for unsaved changes.
-  const onKeyDown = (event: KeyboardEvent) => {
-    // Menus, popovers and the confirm modal handle their own Esc.
-    if (event.key !== keys.ESCAPE || event.defaultPrevented) return;
-    // Esc closes the preview flyout first, like EUI does for child flyouts.
-    if (isPreviewOpen) return;
-    event.preventDefault();
-    event.stopPropagation();
-    onCancel();
-  };
-
   return (
-    <div role="presentation" css={keyboardScopeCss} onKeyDown={onKeyDown}>
+    <>
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem>
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="m">
-                  <h2 id={ariaLabelledBy}>
-                    {i18n.translate('visTypeVega.libraryEditor.editTitle', {
-                      defaultMessage: 'Edit Vega visualization: {title}',
-                      values: { title: savedItem.data.title },
-                    })}
-                  </h2>
-                </EuiTitle>
-              </EuiFlexItem>
-              {canSave ? null : (
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    content={i18n.translate('visTypeVega.libraryEditor.readOnlyTooltip', {
-                      defaultMessage: 'Unable to save visualizations to the library',
-                    })}
-                  >
-                    <EuiBadge
-                      tabIndex={0}
-                      color="hollow"
-                      iconType="lock"
-                      data-test-subj="vegaLibraryEditorReadOnlyBadge"
-                    >
-                      {i18n.translate('visTypeVega.libraryEditor.readOnlyBadge', {
-                        defaultMessage: 'Read only',
-                      })}
-                    </EuiBadge>
-                  </EuiToolTip>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={closeLabel} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="cross"
-                color="text"
-                aria-label={closeLabel}
-                onClick={onCancel}
-                data-test-subj="vegaLibraryEditorCloseButton"
-              />
-            </EuiToolTip>
+            <EuiTitle size="m">
+              <h2 id={ariaLabelledBy}>
+                {i18n.translate('visTypeVega.libraryEditor.editTitle', {
+                  defaultMessage: 'Edit Vega visualization: {title}',
+                  values: { title: savedItem.data.title },
+                })}
+              </h2>
+            </EuiTitle>
           </EuiFlexItem>
+          {canSave ? null : (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={i18n.translate('visTypeVega.libraryEditor.readOnlyTooltip', {
+                  defaultMessage: 'Unable to save visualizations to the library',
+                })}
+              >
+                <EuiBadge
+                  tabIndex={0}
+                  color="hollow"
+                  iconType="lock"
+                  data-test-subj="vegaLibraryEditorReadOnlyBadge"
+                >
+                  {i18n.translate('visTypeVega.libraryEditor.readOnlyBadge', {
+                    defaultMessage: 'Read only',
+                  })}
+                </EuiBadge>
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="vegaLibraryEditorBody" css={vegaEditorFlyoutBodyCss}>
@@ -405,6 +371,6 @@ export const VegaLibraryEditor = ({
           </p>
         </EuiConfirmModal>
       ) : null}
-    </div>
+    </>
   );
 };

@@ -473,52 +473,6 @@ describe('VegaLibraryEditor', () => {
 
       await waitFor(() => expect(closeFlyout).toHaveBeenCalledTimes(1));
     });
-
-    it('asks before the close button discards changes', async () => {
-      const { closeFlyout } = renderEditor();
-
-      await userEvent.click(await screen.findByText('changeSpec'));
-      await userEvent.click(screen.getByTestId('vegaLibraryEditorCloseButton'));
-
-      expect(await screen.findByTestId('vegaLibraryEditorDiscardModal')).toBeInTheDocument();
-      expect(closeFlyout).not.toHaveBeenCalled();
-    });
-
-    it('asks before Esc discards changes', async () => {
-      const { closeFlyout } = renderEditor({ onPreview: jest.fn() });
-
-      await userEvent.click(await screen.findByText('changeSpec'));
-      const escape = fireEvent.keyDown(screen.getByTestId('vegaLibraryEditorBody'), {
-        key: 'Escape',
-      });
-
-      // Handled, so the flyout doesn't close on it too.
-      expect(escape).toBe(false);
-      expect(await screen.findByTestId('vegaLibraryEditorDiscardModal')).toBeInTheDocument();
-      expect(closeFlyout).not.toHaveBeenCalled();
-    });
-
-    it('closes on Esc when nothing changed', async () => {
-      const { closeFlyout } = renderEditor({ onPreview: jest.fn() });
-
-      fireEvent.keyDown(await screen.findByTestId('vegaLibraryEditorBody'), { key: 'Escape' });
-
-      expect(closeFlyout).toHaveBeenCalledTimes(1);
-    });
-
-    it('leaves Esc to the preview flyout while it is open', async () => {
-      const { closeFlyout } = renderEditor();
-
-      await userEvent.click(await screen.findByText('changeSpec'));
-      fireEvent.keyDown(screen.getByTestId('vegaLibraryEditorBody'), { key: 'Escape' });
-      expect(screen.queryByTestId('vegaLibraryEditorDiscardModal')).not.toBeInTheDocument();
-
-      act(() => mockPreview.mock.lastCall?.[0].onClose());
-      fireEvent.keyDown(screen.getByTestId('vegaLibraryEditorBody'), { key: 'Escape' });
-
-      expect(await screen.findByTestId('vegaLibraryEditorDiscardModal')).toBeInTheDocument();
-      expect(closeFlyout).not.toHaveBeenCalled();
-    });
   });
 
   describe('without permission to save', () => {
