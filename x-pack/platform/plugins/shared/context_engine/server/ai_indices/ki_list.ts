@@ -17,7 +17,6 @@ import type { KiListItem, ListKisResponse } from '../../common/http_api/knowledg
 const KI_LIFECYCLE_STATUS_FIELD = 'governance.lifecycle.status';
 /** Normalized lifecycle column: unset stored values become `active`. */
 const KI_LIFECYCLE_STATUS_ALIAS = 'lifecycle_status';
-/** Computed status: the lifecycle column, with `expired` for active KIs past `expires_at`. Filter only. */
 export const KI_STATUS_ALIAS = 'ki_status';
 
 /** Columns the list reads. Each is guarded by a schema probe since AI indices vary in shape. */
@@ -39,12 +38,8 @@ export interface GetKisOptions {
   type?: string;
   /** Fuzzy full-text search over indexed title and description columns. */
   query?: string;
-  /**
-   * When omitted, non-deleted KIs only (unset status counts as active, expired included).
-   * When set, `active` excludes expired KIs and `expired` matches them.
-   */
+  /** When omitted, non-deleted KIs only (unset status counts as active). */
   lifecycleStatuses?: KiStatus[];
-  /** Always wins over search relevance. Defaults to newest first. */
   sort?: KiListSort;
 }
 
@@ -79,10 +74,6 @@ export const lifecycleStatusEvalClause = (has: (field: KiListField) => boolean):
     ? `EVAL ${KI_LIFECYCLE_STATUS_ALIAS} = COALESCE(${KI_LIFECYCLE_STATUS_FIELD}, "active")`
     : `EVAL ${KI_LIFECYCLE_STATUS_ALIAS} = "active"`;
 
-/**
- * Only an `active` KI can expire: any other stored status stays as it is. A missing `expires_at`
- * column means nothing expires. Used by the list filter and the telemetry usage collector.
- */
 export const kiStatusEvalClause = (has: (field: KiListField) => boolean): string => {
   const expired = has('expires_at') ? 'expires_at <= NOW()' : 'false';
   return `EVAL ${KI_STATUS_ALIAS} = CASE(${KI_LIFECYCLE_STATUS_ALIAS} == "active" AND COALESCE(${expired}, false), "expired", ${KI_LIFECYCLE_STATUS_ALIAS})`;
@@ -160,10 +151,7 @@ export const probeColumns = async (
   }
 };
 
-/**
- * Pipeline steps that order the rows. `title` is lowercased because ES|QL sorts `text`
- * case-sensitively, and an empty title counts as missing so it sorts last with them.
- */
+/** ES|QL sorts `text` case-sensitively, and an empty title sorts first unless nulled. */
 const getRowsSort = (sort: KiListSort, hasTimestampColumn: boolean): string[] => {
   if (sort === 'title') {
     return [

@@ -80,7 +80,6 @@ apiTest.describe('context engine KI search', { tag: tags.stateful.classic }, () 
           title: 'Shipping timelines',
           description: 'Delivery windows',
         }),
-        // Title sort edge cases: lowercase sorts with the rest, empty and missing titles sort last.
         { index: { _index: DEST, _id: 'title-lower' } },
         ki('title-lower', '2026-09-01T00:00:00Z', { title: 'apple pie' }),
         { index: { _index: DEST, _id: 'empty-title' } },
@@ -115,7 +114,6 @@ apiTest.describe('context engine KI search', { tag: tags.stateful.classic }, () 
       });
 
       expect(response).toHaveStatusCode(200);
-      // Newest first, not by relevance: the description match has the newer timestamp.
       expect(response.body.kis.map((item: { id: string }) => item.id)).toStrictEqual([
         'desc-match',
         'title-match',
@@ -134,11 +132,11 @@ apiTest.describe('context engine KI search', { tag: tags.stateful.classic }, () 
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.kis.map((item: { id: string }) => item.id)).toStrictEqual([
-        'title-lower', // apple pie
-        'desc-match', // Customer handbook
-        'revised-match', // Finalized escalation steps (latest revision)
-        'title-match', // Refund policy overview
-        'no-match', // Shipping timelines
+        'title-lower',
+        'desc-match',
+        'revised-match',
+        'title-match',
+        'no-match',
         'empty-title',
         'no-title',
       ]);
