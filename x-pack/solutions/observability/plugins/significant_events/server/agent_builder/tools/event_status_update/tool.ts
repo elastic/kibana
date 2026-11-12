@@ -10,28 +10,36 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { significantEventSchema } from '@kbn/significant-events-schema';
 import { lazySchema } from '@kbn/zod/v4';
+import {
+  significantEventManualStatusSchema,
+  significantEventCloseReasonSchema,
+  significantEventSchema,
+} from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
+import { getWorkflowExecutionIdFromRequest } from '../../../lib/telemetry/ebt/workflow_execution_id';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
+import { existingAlertIdentity } from '../alert_identity_telemetry';
+import { trackTelemetryBestEffort } from '../bulk_write';
 import { updateEventStatusToolHandler } from './handler';
 
 export const SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID =
   platformSignificantEventsTools.updateEventStatus;
 
-const eventStatusUpdateSchema = lazySchema(() =>
+export const eventStatusUpdateSchema = lazySchema(() =>
   significantEventSchema
     .pick({
-      status: true,
       event_id: true,
       assessment_note: true,
     })
     .extend({
+      status: significantEventManualStatusSchema,
+      close_reason: significantEventCloseReasonSchema.optional(),
       event_id: significantEventSchema.shape.event_id.describe(
         'The event_id of the existing significant event to update.'
       ),
@@ -73,11 +81,9 @@ export function createEventStatusUpdateTool({
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
       const { request } = context;
+      const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
       try {
-        const { getEventSearchClient, getAlertEventsClient, emitTrigger, licensing } =
-          await getScopedClients({
-            request,
-          });
+        const { getEventSearchClient, licensing } = await getScopedClients({ request });
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
 
@@ -85,26 +91,43 @@ export function createEventStatusUpdateTool({
           eventSearchClient: await getEventSearchClient(),
           eventId: toolParams.event_id,
           status: toolParams.status,
+          closeReason: toolParams.close_reason,
           assessmentNote: toolParams.assessment_note,
-          alertEventsClient: await getAlertEventsClient(),
-          emitTrigger,
+          workflowExecutionId,
         });
 
-        telemetry.trackAgentToolEventStatusUpdate({
-          success: true,
-          event_id: toolParams.event_id,
-          status: toolParams.status,
+        trackTelemetryBestEffort({
+          logger,
+          description: 'event_status_update telemetry',
+          track: () =>
+            telemetry.trackAgentToolEventStatusUpdate({
+              workflow_execution_id: workflowExecutionId,
+              ...existingAlertIdentity({ eventId: toolParams.event_id, spaceId: request.spaceId }),
+              success:
+                data.updated === 1 ||
+                data.reason === 'already_in_state' ||
+                data.reason === 'not_a_breach',
+              event_id: toolParams.event_id,
+              status: toolParams.status,
+            }),
         });
 
         return { results: [{ type: ToolResultType.other, data }] };
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         logger.error(`Error running event_status_update: ${message}`);
-        telemetry.trackAgentToolEventStatusUpdate({
-          success: false,
-          event_id: toolParams.event_id,
-          status: toolParams.status,
-          error_message: message,
+        trackTelemetryBestEffort({
+          logger,
+          description: 'failed event_status_update telemetry',
+          track: () =>
+            telemetry.trackAgentToolEventStatusUpdate({
+              workflow_execution_id: workflowExecutionId,
+              ...existingAlertIdentity({ eventId: toolParams.event_id, spaceId: request.spaceId }),
+              success: false,
+              event_id: toolParams.event_id,
+              status: toolParams.status,
+              error_message: message,
+            }),
         });
         return {
           results: [

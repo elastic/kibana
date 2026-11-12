@@ -112,6 +112,7 @@ import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/aler
 import { ACTIONS_FEATURE_ID, AlertHistoryEsIndexConnectorId } from '../common';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
 import { ConnectorTokenClient } from './lib/connector_token_client';
+import { UserConnectorTokenClient } from './lib/user_connector_token_client';
 import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
 import type { ConnectorWithOptionalDeprecation } from './application/connector/lib';
 import { isConnectorDeprecated } from './application/connector/lib';
@@ -252,6 +253,15 @@ export interface PluginStartContract {
    */
   unregisterDynamicConnector: (connectorId: string) => boolean;
   getRelayClient: () => RelayClientContract | undefined;
+
+  /**
+   * Returns the subset of `connectorIds` for which the current user holds a usable OAuth token:
+   * unexpired, or refreshable with an unexpired refresh token.
+   */
+  getUsableUserOAuthConnectorIds: (
+    request: KibanaRequest,
+    connectorIds: string[]
+  ) => Promise<Set<string>>;
 }
 
 export interface ActionsPluginsSetup {
@@ -660,7 +670,7 @@ export class ActionsPlugin
     }: {
       request: KibanaRequest;
       unsecuredSavedObjectsClient: SavedObjectsClientContract;
-      spaceId?: string;
+      spaceId?: SpaceId;
     }) => {
       return new ActionsClient({
         publicBaseUrl: core.http.basePath.publicBaseUrl,
@@ -921,6 +931,19 @@ export class ActionsPlugin
       unregisterDynamicConnector: (connectorId: string) =>
         this.unregisterDynamicConnector(connectorId),
       getRelayClient: () => this.relayClient,
+      getUsableUserOAuthConnectorIds: async (request: KibanaRequest, connectorIds: string[]) => {
+        throwIfCannotEncrypt();
+        const profileUid = await getCurrentUserProfileId(request);
+        if (!profileUid) {
+          return new Set<string>();
+        }
+        return new UserConnectorTokenClient({
+          unsecuredSavedObjectsClient: getUnsecuredSavedObjectsClient(core.savedObjects, request),
+          encryptedSavedObjectsClient,
+          logger,
+          configurationUtilities: actionsConfigUtils,
+        }).getUsableOAuthConnectorIds({ profileUid, connectorIds });
+      },
     };
   }
 

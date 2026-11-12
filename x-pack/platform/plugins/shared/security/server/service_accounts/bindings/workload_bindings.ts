@@ -11,12 +11,14 @@ import { randomBytes } from 'crypto';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type {
   BindServiceAccountWorkloadParams,
+  ServiceAccountSummary,
   ServiceAccountWorkloadBinding,
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRef,
   ServiceAccountWorkloadRequestParams,
 } from '@kbn/core-security-server';
 import type {
+  AuditLogger,
   AuditServiceSetup,
   CheckPrivilegesWithRequest,
 } from '@kbn/security-plugin-types-server';
@@ -30,6 +32,14 @@ import { ServiceAccountAuditAction, serviceAccountAuditEvent } from '../../audit
 import { getDetailedErrorMessage } from '../../errors';
 import type { EnsureClusterPrivilegeParams } from '../cluster_privilege';
 import { ensureClusterPrivilege } from '../cluster_privilege';
+import type { ServiceAccountMintInterceptor } from '../fake_requests';
+import { isTerminalMintFailure } from '../fake_requests';
+import type { ServiceAccountAssumeAttempt, ServiceAccountAssumeErrorType } from '../metrics';
+import {
+  getOperationErrorType,
+  getTokenExchangeErrorType,
+  serviceAccountsMetrics,
+} from '../metrics';
 import type { ServiceAccountsBackend } from '../types';
 
 /**
@@ -61,6 +71,11 @@ export interface ServiceAccountWorkloadBindingsApi {
     params: ServiceAccountWorkloadCoordinates
   ): Promise<ServiceAccountWorkloadBinding | null>;
 
+  getServiceAccountSummary(
+    pluginId: string,
+    params: ServiceAccountWorkloadCoordinates
+  ): Promise<ServiceAccountSummary | null>;
+
   withScopedRequest<T>(
     pluginId: string,
     params: ServiceAccountWorkloadRequestParams,
@@ -88,6 +103,44 @@ export interface ServiceAccountWorkloadBindingsOptions {
   /** Whether saved object encryption is possible at all; without it, bindings cannot be trusted. */
   canEncrypt: boolean;
 }
+
+/** The `service_account_assume` events of one workload execution. */
+interface ExecutionAudit {
+  /** Refused before the fake request exists. The account is omitted when it cannot be trusted. */
+  failed(error: Error, serviceAccountId?: string): void;
+  /** The fake request exists, and the workload is about to run on it. */
+  started(request: KibanaRequest, serviceAccountId: string): void;
+  /** A re-mint failed for good while the workload ran, so it has no credential left. */
+  revoked(request: KibanaRequest, serviceAccountId: string, error: Error): void;
+}
+
+/** The steps of an attempt to assume a service account, in order. */
+type AssumeStage = 'available' | 'binding' | 'mint';
+
+/**
+ * Classifies a failed attempt to assume a service account by the step it failed in. A binding the
+ * caller expected under another account is classified where it is refused, since its 403 looks like
+ * a failed integrity check from here.
+ */
+const getAssumeErrorType = (stage: AssumeStage, error: unknown): ServiceAccountAssumeErrorType => {
+  switch (stage) {
+    case 'available':
+      return 'unavailable';
+    case 'binding':
+      if (Boom.isBoom(error)) {
+        const { statusCode } = error.output;
+        if (statusCode === 404) {
+          return 'binding_not_found';
+        }
+        if (statusCode === 403) {
+          return 'binding_integrity';
+        }
+      }
+      return '_OTHER';
+    case 'mint':
+      return getTokenExchangeErrorType(error);
+  }
+};
 
 export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBindingsApi {
   private readonly logger: Logger;
@@ -126,6 +179,30 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
   }
 
   async bindWorkload(
+    pluginId: string,
+    request: KibanaRequest,
+    params: BindServiceAccountWorkloadParams
+  ): Promise<ServiceAccountWorkloadBinding> {
+    return await this.recordWorkloadOperation(
+      'workload_bind',
+      { pluginId, workloadType: params.workloadType },
+      () => this.bind(pluginId, request, params)
+    );
+  }
+
+  async unbindWorkload(
+    pluginId: string,
+    request: KibanaRequest,
+    params: ServiceAccountWorkloadRef
+  ): Promise<boolean> {
+    return await this.recordWorkloadOperation(
+      'workload_unbind',
+      { pluginId, workloadType: params.workloadType },
+      () => this.unbind(pluginId, request, params)
+    );
+  }
+
+  private async bind(
     pluginId: string,
     request: KibanaRequest,
     { serviceAccountId, workloadType, workloadId }: BindServiceAccountWorkloadParams
@@ -188,7 +265,7 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     return binding;
   }
 
-  async unbindWorkload(
+  private async unbind(
     pluginId: string,
     request: KibanaRequest,
     { workloadType, workloadId }: ServiceAccountWorkloadRef
@@ -244,64 +321,53 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     return await this.store.getVerified(this.toCoordinates(pluginId, params));
   }
 
+  /**
+   * Names the account of the workload's verified binding, never an account the caller names, so
+   * that it can only describe an account the workload runs as.
+   */
+  async getServiceAccountSummary(
+    pluginId: string,
+    params: ServiceAccountWorkloadCoordinates
+  ): Promise<ServiceAccountSummary | null> {
+    const binding = await this.getBinding(pluginId, params);
+    return binding ? await this.backend.getSummary(binding.serviceAccountId) : null;
+  }
+
   async withScopedRequest<T>(
     pluginId: string,
     params: ServiceAccountWorkloadRequestParams,
     fn: (request: KibanaRequest) => Promise<T>
   ): Promise<T> {
-    this.ensureAvailable();
-
-    const coordinates = this.toCoordinates(pluginId, params);
-    const binding = await this.requireBinding(coordinates);
-    if (
-      params.expectedServiceAccountId !== undefined &&
-      binding.serviceAccountId !== params.expectedServiceAccountId
-    ) {
-      throw Boom.forbidden('The workload binding does not match the expected service account.');
-    }
-    let minted = false;
-
-    const request = await this.backend.createFakeRequest({
-      serviceAccountId: binding.serviceAccountId,
-      spaceId: coordinates.spaceId,
-      boundAt: binding.boundAt,
-      // No time-based lease: the binding check below runs before every re-mint, which is both
-      // stricter and revocable — unbinding the workload denies a running execution its next
-      // credential rather than waiting for a lease to lapse.
-      maxLifetimeMs: Number.POSITIVE_INFINITY,
-      // Runs for the initial mint and again for every reactive re-mint driven by an
-      // Elasticsearch 401. That reactive path lives in the Elasticsearch client's unauthorized
-      // error handler, far outside this call stack, so this interceptor is the only place a
-      // binding check can reach it. The initial mint follows the verification just above
-      // immediately, and is let through on its strength rather than paying for the read twice.
-      mintInterceptor: async (mint) => {
-        if (!minted) {
-          minted = true;
-          return await mint();
-        }
-
-        try {
-          const current = await this.requireBinding(coordinates);
-          if (current.serviceAccountId !== binding.serviceAccountId) {
-            throw Boom.forbidden(
-              'The workload was bound to a different service account; refusing to mint a credential for the previous one.'
-            );
-          }
-        } catch (e) {
-          // The registry logs refresh failures without their contents, since those can carry
-          // upstream credentials. Binding checks never do, and the reason is exactly what an
-          // operator needs to tell a revocation from an outage.
-          this.logger.warn(
-            `Refusing to re-mint a credential for workload [${coordinates.workloadType}/${
-              coordinates.workloadId
-            }] of plugin [${coordinates.pluginId}]: ${getDetailedErrorMessage(e)}`
-          );
-          throw e;
-        }
-
-        return await mint();
-      },
+    const assume = serviceAccountsMetrics.startAssume({
+      backend: this.backend.type,
+      workload: { pluginId, workloadType: params.workloadType },
     });
+    // Which step a failure came from decides how it is classified, see `getAssumeErrorType`.
+    let stage: AssumeStage = 'available';
+
+    let request: KibanaRequest;
+    try {
+      this.ensureAvailable();
+
+      const coordinates = this.toCoordinates(pluginId, params);
+      const executionAudit = this.executionAudit(coordinates, params.executionId);
+
+      stage = 'binding';
+      const binding = await this.resolveExecutionBinding(
+        coordinates,
+        params.expectedServiceAccountId,
+        executionAudit,
+        assume
+      );
+
+      stage = 'mint';
+      request = await this.createExecutionRequest(coordinates, binding, executionAudit);
+      executionAudit.started(request, binding.serviceAccountId);
+    } catch (e) {
+      assume.failed(getAssumeErrorType(stage, e));
+      throw e;
+    }
+    assume.succeeded();
 
     try {
       return await fn(request);
@@ -310,6 +376,182 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
       // on a singleton, captured in a closure) is never re-credentialed and expires for good.
       this.backend.releaseFakeRequest(request);
     }
+  }
+
+  /**
+   * The `service_account_assume` events of one workload execution. Until the fake request exists,
+   * a failure is logged without one, so the event carries the space itself. Once it exists, events
+   * are logged on it, and share its `trace.id` with every event the workload causes. Every event
+   * names the run by `executionId` when the caller supplied one.
+   */
+  private executionAudit(
+    coordinates: WorkloadBindingCoordinates,
+    executionId: string | undefined
+  ): ExecutionAudit {
+    const workload = {
+      plugin_id: coordinates.pluginId,
+      type: coordinates.workloadType,
+      id: coordinates.workloadId,
+      ...(executionId !== undefined ? { execution_id: executionId } : {}),
+    };
+    const log = (
+      auditLogger: AuditLogger,
+      serviceAccountId: string | undefined,
+      details: { error?: Error; spaceId?: string } = {}
+    ) =>
+      auditLogger.log(
+        serviceAccountAuditEvent({
+          action: ServiceAccountAuditAction.ASSUME,
+          ...(serviceAccountId !== undefined ? { serviceAccount: { id: serviceAccountId } } : {}),
+          workload,
+          ...details,
+        })
+      );
+
+    return {
+      failed: (error, serviceAccountId) =>
+        log(this.audit.withoutRequest, serviceAccountId, { error, spaceId: coordinates.spaceId }),
+      started: (request, serviceAccountId) => log(this.audit.asScoped(request), serviceAccountId),
+      revoked: (request, serviceAccountId, error) =>
+        log(this.audit.asScoped(request), serviceAccountId, { error }),
+    };
+  }
+
+  /**
+   * The verified binding a workload executes under. A binding that fails integrity verification,
+   * or names a different account than the caller expected, is refused and audited. A workload with
+   * no binding has nothing to assume, so its 404 is not.
+   */
+  private async resolveExecutionBinding(
+    coordinates: WorkloadBindingCoordinates,
+    expectedServiceAccountId: string | undefined,
+    executionAudit: ExecutionAudit,
+    assume: ServiceAccountAssumeAttempt
+  ): Promise<ServiceAccountWorkloadBinding> {
+    const binding = await this.requireBinding(coordinates).catch((e) => {
+      // The event names no account: the id in a tampered binding is the one thing it must not
+      // repeat.
+      if (Boom.isBoom(e) && e.output.statusCode === 403) {
+        executionAudit.failed(e);
+      }
+      throw e;
+    });
+
+    if (
+      expectedServiceAccountId !== undefined &&
+      binding.serviceAccountId !== expectedServiceAccountId
+    ) {
+      const error = Boom.forbidden(
+        'The workload binding does not match the expected service account.'
+      );
+      executionAudit.failed(error, binding.serviceAccountId);
+      // Also a 403, so it is classified here rather than taken for a failed integrity check.
+      assume.failed('account_mismatch');
+      throw error;
+    }
+
+    return binding;
+  }
+
+  /**
+   * Mints the fake request a workload executes with. There is no time-based lease: the binding is
+   * checked again before every re-mint (see {@link rebindCheck}), which is both stricter and
+   * revocable. Unbinding the workload denies a running execution its next credential rather than
+   * waiting for a lease to lapse.
+   *
+   * A failure is audited by the same rule here as on a re-mint: only when it is terminal. A
+   * retryable one is an outage, not a decision about the account, and is left to the server log.
+   */
+  private async createExecutionRequest(
+    coordinates: WorkloadBindingCoordinates,
+    { serviceAccountId, boundAt }: ServiceAccountWorkloadBinding,
+    executionAudit: ExecutionAudit
+  ): Promise<KibanaRequest> {
+    // Set once the first mint returns. A failure before then fails `createFakeRequest`, and is
+    // audited by the catch below instead.
+    const execution: { request?: KibanaRequest } = {};
+
+    try {
+      const request = await this.backend.createFakeRequest({
+        serviceAccountId,
+        spaceId: coordinates.spaceId,
+        boundAt,
+        maxLifetimeMs: Number.POSITIVE_INFINITY,
+        mintInterceptor: this.rebindCheck(coordinates, serviceAccountId, (error) => {
+          if (execution.request) {
+            executionAudit.revoked(execution.request, serviceAccountId, error);
+          }
+        }),
+      });
+      execution.request = request;
+      return request;
+    } catch (e) {
+      // The initial mint goes straight to the exchange, so nothing here was raised by the
+      // interceptor.
+      if (isTerminalMintFailure(e, { raisedByInterceptor: false })) {
+        executionAudit.failed(e, serviceAccountId);
+      }
+      throw e;
+    }
+  }
+
+  /**
+   * The mint interceptor of a workload execution. It runs for the initial mint and again for every
+   * reactive re-mint driven by an Elasticsearch 401. That reactive path lives in the Elasticsearch
+   * client's unauthorized error handler, far outside the execution's call stack, so this is the only
+   * place a binding check can reach it. The initial mint follows the verification that started the
+   * execution, and is let through on its strength rather than paying for the read twice.
+   *
+   * `onTerminalFailure` is called with a failure the registry latches (see `isTerminalMintFailure`),
+   * whether the binding check refused or the exchange behind it did. The exchange is how a deleted
+   * or recreated account shows up, since its binding still names the same id. A latched failure
+   * ends the execution's credentials for good, so it is called at most once. A failure on a blip
+   * is retried, and is not reported.
+   */
+  private rebindCheck(
+    coordinates: WorkloadBindingCoordinates,
+    serviceAccountId: string,
+    onTerminalFailure: (error: Error) => void
+  ): ServiceAccountMintInterceptor {
+    let minted = false;
+
+    return async (mint) => {
+      if (!minted) {
+        minted = true;
+        return await mint();
+      }
+
+      try {
+        const current = await this.requireBinding(coordinates);
+        if (current.serviceAccountId !== serviceAccountId) {
+          throw Boom.forbidden(
+            'The workload was bound to a different service account; refusing to mint a credential for the previous one.'
+          );
+        }
+      } catch (e) {
+        // The registry logs refresh failures without their contents, since those can carry
+        // upstream credentials. Binding checks never do, and the reason is exactly what an
+        // operator needs to tell a revocation from an outage.
+        this.logger.warn(
+          `Refusing to re-mint a credential for workload [${coordinates.workloadType}/${
+            coordinates.workloadId
+          }] of plugin [${coordinates.pluginId}]: ${getDetailedErrorMessage(e)}`
+        );
+        if (isTerminalMintFailure(e, { raisedByInterceptor: true })) {
+          onTerminalFailure(e);
+        }
+        throw e;
+      }
+
+      try {
+        return await mint();
+      } catch (e) {
+        if (isTerminalMintFailure(e, { raisedByInterceptor: false })) {
+          onTerminalFailure(e);
+        }
+        throw e;
+      }
+    };
   }
 
   /**
@@ -397,6 +639,28 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
       action,
       onRefused,
     });
+  }
+
+  /** Runs a binding change and counts it on the service account operation metric. */
+  private async recordWorkloadOperation<T>(
+    operation: 'workload_bind' | 'workload_unbind',
+    workload: { pluginId: string; workloadType: string },
+    change: () => Promise<T>
+  ): Promise<T> {
+    let result: T;
+    try {
+      result = await change();
+    } catch (e) {
+      serviceAccountsMetrics.recordOperation({
+        operation,
+        backend: this.backend.type,
+        workload,
+        errorType: getOperationErrorType(e),
+      });
+      throw e;
+    }
+    serviceAccountsMetrics.recordOperation({ operation, backend: this.backend.type, workload });
+    return result;
   }
 
   // Picks the coordinates out explicitly, so a caller's extra fields never reach the store.

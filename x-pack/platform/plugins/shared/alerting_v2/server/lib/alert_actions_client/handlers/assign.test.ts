@@ -13,7 +13,7 @@ const buildItem = (requested: string | null, current: string | null) =>
   buildHandlerItem(
     { action_type: ALERT_EPISODE_ACTION_TYPE.ASSIGN, assignee_uid: requested } as const,
     buildAlertEventRecord(),
-    { actionState: { assignee_uid: current } }
+    { alertActionState: { assignee_uid: current } }
   );
 
 describe('assignHandler', () => {

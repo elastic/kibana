@@ -49,7 +49,8 @@ describe('notification routing attachments', () => {
 
   it('freezes participants on initialization and adds queued destinations only when their execution starts', async () => {
     const { client } = createRoutingTestContext();
-    const first = await client.initialize('exec-1', 'workflow', [destination]);
+    const channel = { ...destination, params: { channel: '#alerts' } };
+    const first = await client.initialize('exec-1', 'workflow', [channel]);
     const next = { ...destination, params: { channel: '#oncall' } };
     const replay = await client.initialize('exec-1', 'workflow', [next]);
     expect(replay.destinations).toEqual(first.destinations);
@@ -57,6 +58,17 @@ describe('notification routing attachments', () => {
     expect(second.executions[0].destination_ids).toHaveLength(1);
     expect(second.executions[1].destination_ids).toHaveLength(2);
     expect(second.destinations).toHaveLength(2);
+  });
+
+  it('includes a destination under a caller-named message only in executions that ask for it', async () => {
+    const { client } = createRoutingTestContext();
+    const first = await client.initialize('exec-1', 'workflow', [destination]);
+    const [{ id }] = first.destinations;
+    expect(first.executions[0].destination_ids).toEqual([id]);
+    const reply = await client.initialize('exec-2', 'workflow', []);
+    expect(reply.executions[1].destination_ids).toEqual([]);
+    const again = await client.initialize('exec-3', 'workflow', [destination]);
+    expect(again.executions[2].destination_ids).toEqual([id]);
   });
 
   it('uses factory stale-write handling to preserve concurrent claims and unrelated attempts', async () => {
@@ -110,6 +122,55 @@ describe('notification routing attachments', () => {
     expect(routing?.attempts).toHaveLength(21);
     expect(routing?.executions).toHaveLength(21);
     expect(notificationRoutingSchema.safeParse(routing).success).toBe(true);
+  });
+
+  it('preserves newer routing fields when recording a receipt and initializing a follow-up', async () => {
+    const { client, storage, service } = createRoutingTestContext();
+    const routing = await client.initialize('exec-1', 'workflow', [destination]);
+    const futureMetadata = { version: 2, claim: 'future-claim' };
+    const newer = {
+      ...routing,
+      future_metadata: futureMetadata,
+      destinations: routing.destinations.map((entry) => ({
+        ...entry,
+        future_metadata: futureMetadata,
+        automations: entry.automations.map((automation) => ({
+          ...automation,
+          future_metadata: futureMetadata,
+        })),
+        thread: { channel: 'C123', thread_ts: '1.2', future_metadata: futureMetadata },
+      })),
+      executions: routing.executions.map((entry) => ({
+        ...entry,
+        future_metadata: futureMetadata,
+      })),
+      attempts: [
+        {
+          execution_id: 'exec-1',
+          destination_id: routing.destinations[0].id,
+          phase: 'started',
+          attempt_id: 'attempt-1',
+          status: 'unconfirmed',
+          attempted_at: '2026-11-04T10:00:00.000Z',
+          creates_root: true,
+          future_metadata: futureMetadata,
+        },
+      ],
+    };
+    storage.put(client.id, newer);
+
+    await client.record('attempt-1', { status: 'sent', message_ts: '2.3', channel: 'C123' });
+    await client.initialize('exec-2', 'workflow', []);
+
+    expect(await service.get(client.id, 'default')).toMatchObject({
+      future_metadata: futureMetadata,
+      destinations: newer.destinations,
+      executions: expect.arrayContaining([
+        expect.objectContaining({ id: 'exec-1', future_metadata: futureMetadata }),
+        expect.objectContaining({ id: 'exec-2' }),
+      ]),
+      attempts: [{ status: 'sent', message_ts: '2.3', future_metadata: futureMetadata }],
+    });
   });
 
   it('clears obsolete fields when finalizing and rejects unmatched attempt IDs', async () => {

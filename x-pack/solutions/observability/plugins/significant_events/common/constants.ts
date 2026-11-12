@@ -7,11 +7,8 @@
 
 import type { PricingProductFeature } from '@kbn/core-pricing-common';
 
-/**
- * Base route of the Significant Events application. Used by the UI plugin's
- * `appRoute` registration and by server tools that return Kibana deep links.
- */
-export const SIGNIFICANT_EVENTS_APP_ROUTE = '/app/significant_events';
+/** Nightshift Sources page, where server tools link to KI identification progress. */
+export const NIGHTSHIFT_SOURCES_APP_PATH = '/app/nightshift/sources';
 
 /**
  * Tiered features
@@ -31,17 +28,6 @@ export const SIGNIFICANT_EVENT_TIERED_FEATURES = [SIGNIFICANT_EVENTS_TIERED_FEAT
  * across eligible sources. It selects sources, schedules feature identification
  * tasks, and polls their status until completion or timeout.
  */
-
-// Legacy workflow identity.
-//
-// The continuous extraction workflow used to be a normal workflow created at
-// this hardcoded id in the default space. It is now a managed workflow
-// (`system-streams-ki-continuous-onboarding`). This constant is retained so the
-// legacy workflow can be deleted at startup.
-// TODO: remove with the legacy default-space cleanup.
-// https://github.com/elastic/kibana/issues/294271
-export const LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID =
-  'workflow-ad83678a-dba7-55d1-8caa-3010f6f46b81';
 
 // Scheduling: the workflow runs every COORDINATOR_INTERVAL_MINUTES with a
 // timeout 1 minute shorter to avoid overlapping with the next run.

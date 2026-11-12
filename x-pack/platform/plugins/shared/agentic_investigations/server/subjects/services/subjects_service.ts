@@ -221,12 +221,41 @@ export class SubjectsService {
     return this.deps.claims.claim({ ...params, subjects });
   }
 
+  /**
+   * The investigation holding the subject's claim in the space, open or closed, and unchecked for
+   * access: whoever continues it checks the conversation. A key no claim can hold has no holder.
+   */
+  async findClaimHolder(
+    subject: InvestigationSubjectKey,
+    spaceId: string
+  ): Promise<string | undefined> {
+    assertBoundedId(spaceId, 'spaceId');
+    const key = investigationSubjectKeySchema.safeParse(subject);
+    if (!key.success) {
+      return undefined;
+    }
+    return this.deps.claims.findHolder(spaceId, key.data);
+  }
+
   /** Maintenance: removes every subject and subject claim in the space. */
   async deleteAllInSpace(spaceId: string): Promise<{ subjects: number; claims: number }> {
     assertBoundedId(spaceId, 'spaceId');
     const subjects = await this.deps.documents.deleteAllInSpace(spaceId);
     const claims = await this.deps.claims.deleteAllInSpace(spaceId);
     return { subjects, claims };
+  }
+
+  /** Releases the claims of a new investigation whose start failed before it ran. */
+  async releaseClaims({
+    spaceId,
+    conversationId,
+  }: {
+    spaceId: string;
+    conversationId: string;
+  }): Promise<void> {
+    assertBoundedId(spaceId, 'spaceId');
+    assertBoundedId(conversationId, 'conversationId');
+    await this.deps.claims.release({ spaceId, conversationId });
   }
 
   /** Maintenance: removes the subject claims the given investigations hold in the space. */

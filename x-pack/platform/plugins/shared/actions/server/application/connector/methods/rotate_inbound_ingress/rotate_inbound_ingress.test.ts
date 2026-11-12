@@ -6,6 +6,7 @@
  */
 
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
 import type { ActionsAuthorization } from '../../../../authorization/actions_authorization';
@@ -88,7 +89,7 @@ const mockContext: ActionsClientContext = {
   encryptedSavedObjectsClient,
   isESOCanEncrypt: true,
   getAxiosInstanceWithAuth,
-  spaceId: 'default',
+  spaceId: DEFAULT_SPACE_ID,
 };
 
 const decryptedInbound = {

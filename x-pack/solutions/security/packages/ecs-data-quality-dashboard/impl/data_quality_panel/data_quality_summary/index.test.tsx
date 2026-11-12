@@ -65,41 +65,87 @@ const totalIndices = getTotalIndices(patternRollups);
 const totalIndicesChecked = getTotalIndicesChecked(patternRollups);
 const totalSizeInBytes = getTotalSizeInBytes(patternRollups);
 
+const renderSummary = ({
+  isILMAvailable = true,
+  summaryFilters,
+}: {
+  isILMAvailable?: boolean;
+  summaryFilters?: React.ReactNode;
+} = {}) =>
+  render(
+    <TestExternalProviders>
+      <TestDataQualityProviders
+        dataQualityContextProps={{
+          formatBytes,
+          formatNumber,
+          ilmPhases,
+          isILMAvailable,
+          lastChecked,
+          patterns,
+        }}
+        resultsRollupContextProps={{
+          patternIndexNames,
+          patternRollups,
+          totalDocsCount,
+          totalIncompatible,
+          totalIndices,
+          totalIndicesChecked,
+          totalSizeInBytes,
+        }}
+      >
+        <DataQualitySummary summaryFilters={summaryFilters} />
+      </TestDataQualityProviders>
+    </TestExternalProviders>
+  );
+
 describe('DataQualitySummary', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    render(
-      <TestExternalProviders>
-        <TestDataQualityProviders
-          dataQualityContextProps={{
-            formatBytes,
-            formatNumber,
-            ilmPhases,
-            lastChecked,
-            patterns,
-          }}
-          resultsRollupContextProps={{
-            patternIndexNames,
-            patternRollups,
-            totalDocsCount,
-            totalIncompatible,
-            totalIndices,
-            totalIndicesChecked,
-            totalSizeInBytes,
-          }}
-        >
-          <DataQualitySummary />
-        </TestDataQualityProviders>
-      </TestExternalProviders>
-    );
   });
 
   test('it renders the summary actions', () => {
+    renderSummary();
+
     expect(screen.getByTestId('summaryActions')).toBeInTheDocument();
   });
 
   test('it renders the stats rollup', () => {
+    renderSummary();
+
     expect(screen.getByTestId('statsRollup')).toBeInTheDocument();
+  });
+
+  test('it renders the summary filters left of the ILM phase filter', () => {
+    renderSummary({ summaryFilters: <div data-test-subj="mockSummaryFilters" /> });
+
+    const testIds = Array.from(
+      screen.getByTestId('dataQualitySummaryFilters').querySelectorAll('[data-test-subj]'),
+      (element) => element.getAttribute('data-test-subj')
+    );
+
+    expect(testIds.indexOf('mockSummaryFilters')).toBeGreaterThan(-1);
+    expect(testIds.indexOf('mockSummaryFilters')).toBeLessThan(testIds.indexOf('selectIlmPhases'));
+  });
+
+  test('it renders the summary filters when ILM is not available', () => {
+    renderSummary({
+      isILMAvailable: false,
+      summaryFilters: <div data-test-subj="mockSummaryFilters" />,
+    });
+
+    expect(screen.getByTestId('mockSummaryFilters')).toBeInTheDocument();
+    expect(screen.queryByTestId('selectIlmPhases')).not.toBeInTheDocument();
+  });
+
+  test('it does not render the filters row without summary filters or ILM', () => {
+    renderSummary({ isILMAvailable: false });
+
+    expect(screen.queryByTestId('dataQualitySummaryFilters')).not.toBeInTheDocument();
+  });
+
+  test('it does not render the filters row when summary filters is false and ILM is not available', () => {
+    renderSummary({ isILMAvailable: false, summaryFilters: false });
+
+    expect(screen.queryByTestId('dataQualitySummaryFilters')).not.toBeInTheDocument();
   });
 });

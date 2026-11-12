@@ -23,6 +23,7 @@
  */
 
 import type {
+  MessageEvent,
   ConversationEvent,
   ConversationRound,
   ConversationRoundAuthor,
@@ -36,9 +37,9 @@ import type {
   PromptResponseEvent,
   RoundInput,
   RoundModelUsageStats,
-  UserMessageEvent,
 } from '@kbn/agent-builder-common';
 import {
+  isMessageEvent,
   CONVERSATION_EVENT_ID_DELIMITER,
   CONVERSATION_SCHEMA_VERSION,
   ConversationRoundStatus,
@@ -309,8 +310,7 @@ export const roundsFromEvents = (events: ConversationEvent[]): ConversationRound
     const execution = parseExecutionId(executionId) ?? { roundId: executionId, index: 0 };
     const triggerId = group.find((event) => event.trigger_event_id)?.trigger_event_id;
     const trigger = triggerId ? byId.get(triggerId) : undefined;
-    const userMessage =
-      trigger?.type === TimelineEventType.userMessage ? (trigger as UserMessageEvent) : undefined;
+    const userMessage = trigger && isMessageEvent(trigger) ? (trigger as MessageEvent) : undefined;
     const promptResponse =
       trigger?.type === TimelineEventType.promptResponse
         ? (trigger as PromptResponseEvent)
@@ -365,8 +365,6 @@ export const roundsFromEvents = (events: ConversationEvent[]): ConversationRound
  * Events are authoritative only for events-native documents (Agent Builder's live chat appends
  * events without rewriting `conversation_rounds`, so the stored rounds can lag behind). Legacy
  * documents keep their stored rounds, even if they carry transitional events.
- *
- * `feedback` lives on stored rounds only, so it is carried over onto the folded round.
  */
 export const roundsForDocument = ({
   schemaVersion,
@@ -381,11 +379,7 @@ export const roundsForDocument = ({
   if (!isEventsNativeVersion(schemaVersion) || !events?.length) {
     return stored;
   }
-  const storedById = new Map(stored.map((round) => [round.id, round]));
-  return roundsFromEvents(events).map((round) => {
-    const feedback = storedById.get(round.id)?.feedback;
-    return feedback ? { ...round, feedback } : round;
-  });
+  return roundsFromEvents(events);
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -564,6 +558,39 @@ const hasResumeExecution = (block: ConversationEvent[]): boolean =>
   });
 
 /**
+ * A round records no agent author, so a regenerated block takes the stored `agent_message` (a
+ * background sub-agent's report, written by Agent Builder) as is, and its run keeps that trigger
+ * type. Mirrors Agent Builder's `keepStoredAgentMessages` in `round_writes.ts`.
+ */
+const keepStoredAgentMessages = (
+  stored: ConversationEvent[],
+  events: ConversationEvent[]
+): ConversationEvent[] => {
+  const agentMessages = new Map(
+    stored
+      .filter((event) => event.type === TimelineEventType.agentMessage)
+      .map((event) => [event.id, event])
+  );
+  if (agentMessages.size === 0) {
+    return events;
+  }
+  return events.map((event) => {
+    const storedMessage = agentMessages.get(event.id);
+    if (storedMessage) {
+      return storedMessage;
+    }
+    if (
+      event.type === TimelineEventType.executionStarted &&
+      event.trigger_event_id &&
+      agentMessages.has(event.trigger_event_id)
+    ) {
+      return { ...event, data: { ...event.data, trigger_type: TimelineTriggerType.agentMessage } };
+    }
+    return event;
+  });
+};
+
+/**
  * Rebuilds the timeline for a rounds write without destroying what flat rounds cannot express.
  *
  * - Additive/custom events (anything not derived from a round) are kept, re-inserted by
@@ -611,7 +638,9 @@ export const reconcileEvents = ({
     if (round) {
       const wouldRegress = terminal !== undefined && outcomeForRound(round) === undefined;
       const keepStored = hasResumeExecution(block) || (wouldRegress && !round.interruption);
-      events.push(...(keepStored ? block : roundToEvents(round, ctx)));
+      events.push(
+        ...(keepStored ? block : keepStoredAgentMessages(block, roundToEvents(round, ctx)))
+      );
     } else if (!visibleRoundIds.has(roundId) && terminal === undefined) {
       events.push(...block);
     }

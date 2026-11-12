@@ -9,7 +9,7 @@ applies_to:
 
 # Zendesk data source connector [zendesk-action-type]
 
-The Zendesk connector connects directly to the Zendesk API. It enables federated search of tickets, users, and organizations from Zendesk Support in Workplace AI and Agent Builder.
+The Zendesk connector connects directly to the Zendesk API. It enables federated search of tickets, users, and organizations from Zendesk Support in Agent Builder.
 
 You can use this connector in **Agent Builder** and **Workflows**.
 

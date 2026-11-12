@@ -23,6 +23,7 @@ import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type {
   KnowledgeIndicatorClient,
   RuleUnbackedFilter,
+  TopologySnapshotClient,
 } from '../../../lib/knowledge_indicators';
 import type { SourceCatalog } from '../../utils/resolve_source_slugs';
 import { presentSlug, toSourceRef } from '../../utils/resolve_source_slugs';
@@ -41,6 +42,8 @@ export type StrippedFeatureKeys = keyof Pick<
 >;
 
 export type CompactFeature = Omit<Feature, StrippedFeatureKeys> & {
+  /** Slugs of every source holding this feature. */
+  sources: string[];
   evidence_count?: number;
   tags_count?: number;
   meta_keys_omitted?: number;
@@ -62,6 +65,10 @@ export type CompactKnowledgeIndicator =
   | CompactKnowledgeIndicatorFeature
   | CompactKnowledgeIndicatorQuery;
 
+export interface KISearchTopologyExpansion {
+  truncated: boolean;
+}
+
 interface KISearchEnvelope {
   page: number;
   per_page: number;
@@ -70,6 +77,7 @@ interface KISearchEnvelope {
   has_more: boolean;
   next_page: number | null;
   sources: Array<ReturnType<typeof toSourceRef>>;
+  topology_expansion?: KISearchTopologyExpansion | null;
 }
 
 export type KISearchOutput =
@@ -176,8 +184,17 @@ function boundArray<T>(values: T[] | undefined): BoundedArray<T> {
 }
 
 function toCompactFeatureKI(ki: KnowledgeIndicatorFeature): CompactKnowledgeIndicatorFeature {
-  const { uuid, run_id, updated_at, expires_at, confidence, evidence_doc_ids, filter, ...rest } =
-    ki.feature;
+  const {
+    uuid,
+    run_id,
+    updated_at,
+    expires_at,
+    confidence,
+    evidence_doc_ids,
+    filter,
+    instances,
+    ...rest
+  } = ki.feature;
 
   const properties = isComputedFeatureType(rest.type)
     ? truncateComputedProperties(rest.type, rest.properties)
@@ -212,11 +229,17 @@ function toCompactFeatureKI(ki: KnowledgeIndicatorFeature): CompactKnowledgeIndi
 
 function presentIndicator<T extends KnowledgeIndicator>(catalog: SourceCatalog, indicator: T): T {
   if (indicator.kind === 'feature') {
+    const { feature } = indicator;
     return {
       ...indicator,
       feature: {
-        ...indicator.feature,
-        source_id: presentSlug(catalog, indicator.feature.source_id),
+        ...feature,
+        source_id: presentSlug(catalog, feature.source_id),
+        sources: feature.sources.map((sourceId) => presentSlug(catalog, sourceId)),
+        instances: feature.instances.map((instance) => ({
+          ...instance,
+          source_id: presentSlug(catalog, instance.source_id),
+        })),
       },
     };
   }
@@ -227,8 +250,8 @@ function presentIndicator<T extends KnowledgeIndicator>(catalog: SourceCatalog, 
   };
 }
 
-function storedSourceIdOf(indicator: KnowledgeIndicator): string {
-  return indicator.kind === 'feature' ? indicator.feature.source_id : indicator.source_id;
+function storedSourceIdsOf(indicator: KnowledgeIndicator): string[] {
+  return indicator.kind === 'feature' ? indicator.feature.sources : [indicator.source_id];
 }
 
 /**
@@ -240,7 +263,7 @@ function sourcesInResults(
   catalog: SourceCatalog,
   indicators: readonly KnowledgeIndicator[]
 ): NightshiftSource[] {
-  const storedIds = new Set(indicators.map(storedSourceIdOf));
+  const storedIds = new Set(indicators.flatMap(storedSourceIdsOf));
   return [...storedIds].flatMap((storedId) => {
     const source = catalog.byId.get(storedId);
     return source ? [source] : [];
@@ -251,6 +274,7 @@ export async function searchKnowledgeIndicatorsToolHandler({
   catalog,
   sources,
   kiClient,
+  topologySnapshotClient,
   logger,
   params,
   view,
@@ -259,10 +283,13 @@ export async function searchKnowledgeIndicatorsToolHandler({
   /** Sources the caller resolved from slugs. Omitted when the search covers the whole space. */
   sources?: readonly NightshiftSource[];
   kiClient: KnowledgeIndicatorClient;
+  topologySnapshotClient: Pick<TopologySnapshotClient, 'neighborhood'>;
   logger: Logger;
   params: SearchKnowledgeIndicatorsInput;
   view: KISearchView;
 }): Promise<KISearchOutput> {
+  let topologyExpansion: KISearchTopologyExpansion | null = null;
+
   const output = await searchKnowledgeIndicators({
     params,
     onFeatureFetchError: (sourceId, error) => {
@@ -272,13 +299,30 @@ export async function searchKnowledgeIndicatorsToolHandler({
     },
     getSourceIds: async () => [...catalog.byId.keys()],
     getSourceSlug: (sourceId) => catalog.byId.get(sourceId)?.slug,
+    resolveTopologySeeds: async (seedIds, sourceIds) => {
+      try {
+        const neighborhood = await topologySnapshotClient.neighborhood(seedIds, sourceIds);
+        topologyExpansion = { truncated: neighborhood.truncated };
+        return {
+          featureIds: neighborhood.featureIds,
+          selectedFeatureUuids: neighborhood.selectedFeatureUuids,
+        };
+      } catch (error) {
+        logger.warn(
+          `ki_search: topology unavailable, expanding in memory: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        return undefined;
+      }
+    },
     getFeatures: async (sourceId, { searchText, featureTypes, featureIds }) => {
       if (searchText) {
         return (await kiClient.findFeatures(sourceId, searchText, { featureTypes, featureIds }))
           .hits;
       }
 
-      return (await kiClient.getFeatures(sourceId, { type: featureTypes })).hits;
+      return (await kiClient.getFeatures(sourceId, { type: featureTypes, featureIds })).hits;
     },
     getQueries: async (sourceIds, { searchText, queryTypes, queryIds, ruleIds, ruleBacked }) => {
       const ruleUnbacked: RuleUnbackedFilter =
@@ -299,6 +343,7 @@ export async function searchKnowledgeIndicatorsToolHandler({
     has_more: output.has_more,
     next_page: output.next_page,
     sources: (sources ?? sourcesInResults(catalog, output.knowledge_indicators)).map(toSourceRef),
+    ...(params.feature_ids?.length ? { topology_expansion: topologyExpansion } : {}),
   };
 
   const knowledgeIndicators = output.knowledge_indicators.map((indicator) =>

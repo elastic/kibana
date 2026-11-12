@@ -6,7 +6,7 @@
  */
 
 import { type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { getAllLogsDataViewSpec } from '@kbn/discover-utils/src';
+import { getAllLogsDataViewSpec } from '@kbn/discover-utils';
 import type { TimeRange } from '@kbn/es-query';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { LocatorDefinition } from '@kbn/share-plugin/common';
@@ -44,6 +44,11 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
     const discoverAppLocator =
       this.deps.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
 
+    // Respect a caller-provided data view (e.g. onboarding wired streams).
+    if (params.dataViewId || params.dataViewSpec) {
+      return discoverAppLocator.getLocation(params);
+    }
+
     const isEsqlDefault = await this.deps.getIsEsqlDefault();
 
     if (isEsqlDefault && !params.query) {
@@ -53,11 +58,6 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
         ...params,
         query: { esql: `FROM ${flattenedLogSources}` },
       });
-    }
-
-    // Respect a caller-provided data view (e.g. onboarding wired streams).
-    if (params.dataViewId || params.dataViewSpec) {
-      return discoverAppLocator.getLocation(params);
     }
 
     const flattenedLogSources = await this.getFlattenedLogSources();

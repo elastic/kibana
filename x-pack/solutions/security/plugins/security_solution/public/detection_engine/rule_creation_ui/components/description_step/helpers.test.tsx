@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { mount, shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
@@ -34,6 +35,7 @@ import type { DataViewBase } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { SeverityBadge } from '../../../../common/components/severity_badge';
 
+import { TestProviders } from '../../../../common/mock';
 import * as i18n from './translations';
 import {
   isNotEmptyArray,
@@ -219,6 +221,9 @@ describe('helpers', () => {
   });
 
   describe('buildThreatDescription', () => {
+    const renderThreatDescription = (description: React.ReactElement) =>
+      render(<TestProviders>{description}</TestProviders>);
+
     test('returns empty array if no threats', () => {
       const result: ListItems[] = buildThreatDescription({ label: 'Mitre Attack', threat: [] });
       expect(result).toHaveLength(0);
@@ -235,14 +240,10 @@ describe('helpers', () => {
           },
         ],
       });
-      const wrapper = shallow<React.ReactElement>(result[0].description as React.ReactElement);
+      renderThreatDescription(result[0].description as React.ReactElement);
       expect(result[0].title).toEqual('Mitre Attack');
-      expect(wrapper.find('[data-test-subj="threatTacticLink"]').text()).toEqual(
-        'Collection (TA000999)'
-      );
-      expect(wrapper.find('[data-test-subj="threatTechniqueLink"]').text()).toEqual(
-        'Audio Capture (T1123)'
-      );
+      expect(screen.getByTestId('threatTacticLink')).toHaveTextContent('Collection (TA000999)');
+      expect(screen.getByTestId('threatTechniqueLink')).toHaveTextContent('Audio Capture (T1123)');
     });
 
     test('returns empty technique link if no corresponding technique id found', () => {
@@ -256,12 +257,10 @@ describe('helpers', () => {
           },
         ],
       });
-      const wrapper = shallow<React.ReactElement>(result[0].description as React.ReactElement);
+      renderThreatDescription(result[0].description as React.ReactElement);
       expect(result[0].title).toEqual('Mitre Attack');
-      expect(wrapper.find('[data-test-subj="threatTacticLink"]').text()).toEqual(
-        'Collection (TA0009)'
-      );
-      expect(wrapper.find('[data-test-subj="threatTechniqueLink"]').text()).toEqual(
+      expect(screen.getByTestId('threatTacticLink')).toHaveTextContent('Collection (TA0009)');
+      expect(screen.getByTestId('threatTechniqueLink')).toHaveTextContent(
         'Audio Capture (T1123456)'
       );
     });
@@ -286,15 +285,11 @@ describe('helpers', () => {
           },
         ],
       });
-      const wrapper = shallow<React.ReactElement>(result[0].description as React.ReactElement);
+      renderThreatDescription(result[0].description as React.ReactElement);
       expect(result[0].title).toEqual('Mitre Attack');
-      expect(wrapper.find('[data-test-subj="threatTacticLink"]').text()).toEqual(
-        'Collection (TA0009)'
-      );
-      expect(wrapper.find('[data-test-subj="threatTechniqueLink"]').text()).toEqual(
-        'Audio Capture (T1123)'
-      );
-      expect(wrapper.find('[data-test-subj="threatSubtechniqueLink"]').text()).toEqual(
+      expect(screen.getByTestId('threatTacticLink')).toHaveTextContent('Collection (TA0009)');
+      expect(screen.getByTestId('threatTechniqueLink')).toHaveTextContent('Audio Capture (T1123)');
+      expect(screen.getByTestId('threatSubtechniqueLink')).toHaveTextContent(
         'Audio Capture Data (T1123.000123)'
       );
     });
@@ -319,15 +314,13 @@ describe('helpers', () => {
           },
         ],
       });
-      const wrapper = shallow<React.ReactElement>(result[0].description as React.ReactElement);
+      renderThreatDescription(result[0].description as React.ReactElement);
       expect(result[0].title).toEqual('Mitre Attack');
-      expect(wrapper.find('[data-test-subj="threatTacticLink"]').text()).toEqual(
-        'Collection (TA0009)'
-      );
-      expect(wrapper.find('[data-test-subj="threatTechniqueLink"]').text()).toEqual(
+      expect(screen.getByTestId('threatTacticLink')).toHaveTextContent('Collection (TA0009)');
+      expect(screen.getByTestId('threatTechniqueLink')).toHaveTextContent(
         'Archive Collected Data (T1560)'
       );
-      expect(wrapper.find('[data-test-subj="threatSubtechniqueLink"]').text()).toEqual(
+      expect(screen.getByTestId('threatSubtechniqueLink')).toHaveTextContent(
         'Archive via Library (T1560.002)'
       );
     });
@@ -367,11 +360,11 @@ describe('helpers', () => {
           },
         ],
       });
-      const wrapper = shallow<React.ReactElement>(result[0].description as React.ReactElement);
+      renderThreatDescription(result[0].description as React.ReactElement);
 
-      expect(wrapper.find('[data-test-subj="threatTacticLink"]')).toHaveLength(2);
-      expect(wrapper.find('[data-test-subj="threatTechniqueLink"]')).toHaveLength(3);
-      expect(wrapper.find('[data-test-subj="threatSubtechniqueLink"]')).toHaveLength(2);
+      expect(screen.getAllByTestId('threatTacticLink')).toHaveLength(2);
+      expect(screen.getAllByTestId('threatTechniqueLink')).toHaveLength(3);
+      expect(screen.getAllByTestId('threatSubtechniqueLink')).toHaveLength(2);
     });
   });
 

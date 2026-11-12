@@ -6,7 +6,8 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import {
   ActionButtonType,
   type AttachmentRenderProps,
@@ -19,13 +20,14 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import { attachmentDataToActionPolicyPayload } from '@kbn/alerting-v2-utils';
 import { getAlertingV2Locators } from '../../application/bind_locators_to_host';
-import { ActionPolicyDefinitionList } from '../../components/action_policy/details_flyout/action_policy_definition_list';
+import {
+  ActionPolicySummaryDefinitionSection,
+  ActionPolicySummaryDestinationsSection,
+  ActionPolicySummaryNotificationSection,
+} from '../../components/action_policy/action_policy_summary';
 import { ActionPoliciesApi } from '../../services/action_policies_api';
-import { useAlertingV2ExperimentalFeatures } from '../../hooks/use_alerting_v2_experimental_features';
-import { OBSERVABILITY_ALERTING_HOST } from '../../observability_alerting_host';
+import { OBSERVABILITY_ALERTING_HOST } from '../../../common/locators';
 import type { ActionPolicyAttachment } from './action_policy_attachment_definition';
-
-const EMPTY_VALUE = '-';
 
 type ActionPolicyCanvasData = ActionPolicyAttachment['data'] & { id: string; name: string };
 
@@ -42,10 +44,11 @@ export const ActionPolicyCanvasContent = ({
   const workflowApi = useService(WorkflowApi);
   const share = useService(PluginStart('share')) as SharePluginStart;
   const notifications = useService(CoreStart('notifications'));
-  const showExperimentalFeatures = useAlertingV2ExperimentalFeatures();
+  const [queryClient] = useState(() => new QueryClient());
 
   const { data: rawData, origin } = attachment;
   const data = rawData as ActionPolicyCanvasData;
+  const { description, matcher, grouping, throttle, destinations } = data;
   // Origin is only set if the action policy has been persisted
   const isPersisted = Boolean(origin);
 
@@ -91,7 +94,7 @@ export const ActionPolicyCanvasContent = ({
   }, []);
 
   useEffect(() => {
-    if (!mounted || !showExperimentalFeatures) {
+    if (!mounted) {
       registerActionButtons([]);
       return;
     }
@@ -106,8 +109,8 @@ export const ActionPolicyCanvasContent = ({
           type: ActionButtonType.PRIMARY,
           disabled: hasDraftDependencies,
           disabledReason: hasDraftDependencies
-            ? i18n.translate('xpack.alertingV2.actionPolicyAttachment.saveRuleAndWorkflowFirst', {
-                defaultMessage: 'Save rule and workflow before saving policy.',
+            ? i18n.translate('xpack.alertingV2.actionPolicyAttachment.saveWorkflowFirst', {
+                defaultMessage: 'Save workflow before saving policy.',
               })
             : undefined,
           handler: async () => {
@@ -177,7 +180,7 @@ export const ActionPolicyCanvasContent = ({
           defaultMessage: 'View in Policies',
         }),
         icon: 'external',
-        type: ActionButtonType.OVERFLOW,
+        type: ActionButtonType.SECONDARY,
         handler: () => {
           getAlertingV2Locators(share).actionPolicyLocators.navigateSync({
             page: 'edit',
@@ -197,16 +200,15 @@ export const ActionPolicyCanvasContent = ({
     notifications,
     data,
     hasDraftDependencies,
-    showExperimentalFeatures,
   ]);
 
   return (
-    <EuiPanel paddingSize="l" hasShadow={false}>
-      <EuiTitle size="s">
-        <h2>{data.name ?? EMPTY_VALUE}</h2>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <ActionPolicyDefinitionList policy={data} />
-    </EuiPanel>
+    <QueryClientProvider client={queryClient}>
+      <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
+        <ActionPolicySummaryDefinitionSection description={description} matcher={matcher} />
+        <ActionPolicySummaryNotificationSection grouping={grouping} throttle={throttle} />
+        <ActionPolicySummaryDestinationsSection destinations={destinations} />
+      </EuiPanel>
+    </QueryClientProvider>
   );
 };

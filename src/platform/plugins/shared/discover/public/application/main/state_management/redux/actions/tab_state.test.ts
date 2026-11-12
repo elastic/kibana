@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { waitFor } from '@testing-library/react';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import {
   DEFAULT_TAB_STATE,
@@ -18,6 +19,7 @@ import {
 } from '..';
 import { DataSourceType } from '../../../../../../common/data_sources';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
+import { TAB_STATE_URL_KEY } from '../../../../../../common/constants';
 import {
   GLOBAL_STATE_URL_KEY,
   PROFILE_STATE_URL_KEY,
@@ -29,14 +31,19 @@ import { createResolvedMockEsqlSource } from '@kbn/data-source/src/__mocks__/esq
 import * as resolveEsqlSourceModule from '../../../data_fetching/resolve_esql_source';
 import * as resolveDataViewModule from '../../utils/resolve_data_view';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { dataViewMockWithTimeField, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
+import {
+  buildDataViewMock,
+  dataViewMockWithTimeField,
+  deepMockedFields,
+  esHitsMock,
+} from '@kbn/discover-utils/src/__mocks__';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { mockControlState } from '../../../../../__mocks__/esql_controls';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
-import { selectDataSourceProfileId, selectTabRuntimeState } from '../runtime_state';
+import { getTabDataView, selectDataSourceProfileId, selectTabRuntimeState } from '../runtime_state';
 import { TEST_PROFILE_STATE_DEF } from '../../../../../context_awareness/__mocks__/profile_state';
 import {
   ProfileStateType,
@@ -57,8 +64,7 @@ const SECONDARY_PROFILE_STATE_DEF: ProfileStateDefinition<SecondaryProfileState>
   },
 };
 
-const setup = async () => {
-  const services = createDiscoverServicesMock();
+const setup = async ({ services = createDiscoverServicesMock() } = {}) => {
   services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
   services.profileStateRegistry.registerDefinition(SECONDARY_PROFILE_STATE_DEF);
   const toolkit = getDiscoverInternalStateMock({
@@ -114,6 +120,11 @@ const clearActiveDataSourceProfileState = ({
 };
 
 describe('tab_state actions', () => {
+  const docViewerState = {
+    selectedTabId: 'doc_view_example',
+    tabsState: { doc_view_example: { clickCount: 2 } },
+  };
+
   describe('setExpandedDoc', () => {
     const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMockWithTimeField);
 
@@ -151,6 +162,63 @@ describe('tab_state actions', () => {
 
       expect(tab.expandedDoc).toBeUndefined();
       expect(tab.appState.expandedDoc).toBeUndefined();
+    });
+
+    it('should clear the shareable doc viewer state when the flyout is closed', async () => {
+      const { internalState, tabId } = await setup();
+
+      setQuery(internalState, tabId, { query: '', language: 'kuery' });
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
+      internalState.dispatch(
+        internalStateActions.updateAppState({ tabId, appState: { docViewerState } })
+      );
+      internalState.dispatch(
+        internalStateActions.setExpandedDoc({ tabId, expandedDoc: undefined })
+      );
+
+      expect(selectTab(internalState.getState(), tabId).appState.docViewerState).toBeUndefined();
+    });
+
+    it('should clear the shareable doc viewer state when switching to another document', async () => {
+      const { internalState, tabId } = await setup();
+      const otherDoc = buildDataTableRecord(esHitsMock[1], dataViewMockWithTimeField);
+
+      setQuery(internalState, tabId, { query: '', language: 'kuery' });
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
+      internalState.dispatch(
+        internalStateActions.updateAppState({ tabId, appState: { docViewerState } })
+      );
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc: otherDoc }));
+
+      const { appState } = selectTab(internalState.getState(), tabId);
+
+      expect(appState.expandedDoc).toEqual({ id: '2', index: 'i' });
+      expect(appState.docViewerState).toBeUndefined();
+    });
+
+    it('should keep the shareable doc viewer state when a shared document resolves with its routing', async () => {
+      const { internalState, tabId } = await setup();
+      const routedDoc = buildDataTableRecord(
+        { ...esHitsMock[0], _routing: 'shard-a' },
+        dataViewMockWithTimeField
+      );
+
+      setQuery(internalState, tabId, { query: '', language: 'kuery' });
+      // A shared link may reference a routed document without its routing.
+      internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId,
+          appState: { expandedDoc: { id: '1', index: 'i' }, docViewerState },
+        })
+      );
+      internalState.dispatch(
+        internalStateActions.setExpandedDoc({ tabId, expandedDoc: routedDoc })
+      );
+
+      const { appState } = selectTab(internalState.getState(), tabId);
+
+      expect(appState.expandedDoc).toEqual({ id: '1', index: 'i', routing: 'shard-a' });
+      expect(appState.docViewerState).toEqual(docViewerState);
     });
 
     it('should not write a reference for cascade owned flyouts', async () => {
@@ -259,6 +327,80 @@ describe('tab_state actions', () => {
       );
 
       expect(selectTab(internalState.getState(), tabId).appState).toBe(initialAppState);
+    });
+  });
+
+  describe('setDocViewerShareableState', () => {
+    const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMockWithTimeField);
+
+    const setDataViewQuery = (
+      internalState: Awaited<ReturnType<typeof setup>>['internalState'],
+      tabId: string
+    ) => {
+      internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId,
+          appState: { query: { query: '', language: 'kuery' } },
+        })
+      );
+    };
+
+    it('writes the shareable state and replaces URL history while a document is expanded', async () => {
+      const { internalState, services, stateStorageContainer, tabId } = await setup();
+
+      setDataViewQuery(internalState, tabId);
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
+      stateStorageContainer.kbnUrlControls.flush();
+
+      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
+      const historyLength = services.history.length;
+
+      await internalState.dispatch(
+        internalStateActions.setDocViewerShareableState({ tabId, docViewerState })
+      );
+
+      const currentTab = selectTab(internalState.getState(), tabId);
+      const persistedAppState = stateStorageContainer.get<DiscoverAppState>(APP_STATE_URL_KEY);
+
+      expect(currentTab.appState.docViewerState).toEqual(docViewerState);
+      expect(persistedAppState).toEqual(currentTab.appState);
+      expect(setUrlStateSpy).toHaveBeenCalledWith(APP_STATE_URL_KEY, currentTab.appState, {
+        replace: true,
+      });
+      expect(services.history.length).toBe(historyLength);
+      expect(services.history.action).toBe('REPLACE');
+    });
+
+    it('does not write shareable state when no document reference is expanded', async () => {
+      const { internalState, stateStorageContainer, tabId } = await setup();
+      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
+
+      await internalState.dispatch(
+        internalStateActions.setDocViewerShareableState({ tabId, docViewerState })
+      );
+
+      expect(selectTab(internalState.getState(), tabId).appState.docViewerState).toBeUndefined();
+      expect(setUrlStateSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('updateAppState', () => {
+    it('should drop the shareable doc viewer state when the expanded doc reference is removed', async () => {
+      const { internalState, tabId } = await setup();
+
+      internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId,
+          appState: { expandedDoc: { id: '1', index: 'i' }, docViewerState },
+        })
+      );
+      internalState.dispatch(
+        internalStateActions.updateAppState({ tabId, appState: { expandedDoc: undefined } })
+      );
+
+      expect(selectTab(internalState.getState(), tabId).appState).not.toHaveProperty(
+        'docViewerState'
+      );
     });
   });
 
@@ -786,6 +928,45 @@ describe('tab_state actions', () => {
   });
 
   describe('transitionFromESQLToDataView', () => {
+    it('waits for the catalog without waiting for the pending data view availability check', async () => {
+      const services = createDiscoverServicesMock();
+      const availability = Promise.withResolvers<boolean>();
+      jest.mocked(services.dataViews.hasData.hasDataView).mockReturnValueOnce(availability.promise);
+      const { internalState, tabId, getCurrentTab } = await setup({ services });
+      const catalog =
+        Promise.withResolvers<Awaited<ReturnType<typeof services.dataViews.getIdsWithTitle>>>();
+      jest.mocked(services.dataViews.getIdsWithTitle).mockReturnValueOnce(catalog.promise);
+      const onAvailabilityLoaded = jest.fn();
+      const availabilityRequest = internalState
+        .dispatch(internalStateActions.loadDataViewAvailabilityOnce())
+        .then(onAvailabilityLoaded);
+
+      const transition = internalState.dispatch(
+        internalStateActions.transitionFromESQLToDataView({
+          tabId,
+          dataView: dataViewMockWithTimeField,
+        })
+      );
+
+      expect(getCurrentTab().isDataViewLoading).toBe(true);
+      expect(getCurrentTab().appState.query).toEqual({ esql: 'FROM test-index' });
+
+      catalog.resolve([{ id: 'the-data-view-id', title: 'test-index' }]);
+      expect(getCurrentTab().isDataViewLoading).toBe(true);
+
+      await transition;
+
+      expect(getCurrentTab().isDataViewLoading).toBe(false);
+      expect(getCurrentTab().appState.query).toEqual({ language: 'kuery', query: '' });
+      expect(onAvailabilityLoaded).not.toHaveBeenCalled();
+      expect(services.dataViews.hasData.hasDataView).toHaveBeenCalledTimes(1);
+
+      availability.resolve(true);
+      await availabilityRequest;
+
+      expect(onAvailabilityLoaded).toHaveBeenCalledWith(true);
+    });
+
     it('should transition from ES|QL mode to Data View mode', async () => {
       const { internalState, runtimeStateManager, tabId, services, getCurrentTab } = await setup();
       const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
@@ -972,6 +1153,7 @@ describe('tab_state actions', () => {
         esql: 'FROM the-data-view-title | SORT @timestamp DESC | WHERE KQL("""foo: \'bar\'""")',
       });
       expect(tab.appState.sort).toBeUndefined();
+      expect(tab.appState.columns).toBeUndefined();
       expect(tab.globalState.filters).toStrictEqual([]);
       expect(tab.appState.filters).toStrictEqual([]);
       expect(tab.appState.dataSource).toStrictEqual({
@@ -983,7 +1165,7 @@ describe('tab_state actions', () => {
       expect(typeof tab.profileAppStateDefaults.resetId).toBe('string');
       expect(tab.profileAppStateDefaults.snapshotsByProfileId[profileId]).toEqual({
         breakdownField: undefined,
-        columns: [],
+        columns: undefined,
         hideChart: undefined,
         hideTable: undefined,
         rowHeight: undefined,
@@ -1206,62 +1388,77 @@ describe('tab_state actions', () => {
     resolveSpy.mockRestore();
   });
 
-  it('resolves the opening ES|QL query before the first fetch', async () => {
-    const services = createDiscoverServicesMock();
-    const uiSettingsGet = services.uiSettings.get as jest.Mock;
-    const originalGet = uiSettingsGet.getMockImplementation();
-    uiSettingsGet.mockImplementation((key: string) => {
-      if (key === ENABLE_ESQL) {
-        return true;
-      }
-      return originalGet?.(key);
-    });
-    services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
+  it.each([
+    {
+      querySource: 'profile',
+      openingQuery: 'FROM logs*,-logstash*,filebeat-*',
+      defaultProfileEsqlQuery: { query: 'FROM logs*,-logstash*,filebeat-*' },
+      expectedDataViewLoads: 0,
+    },
+    {
+      querySource: 'data view',
+      openingQuery: 'FROM logs*,-logstash*,filebeat-* | SORT @timestamp DESC',
+      defaultProfileEsqlQuery: undefined,
+      expectedDataViewLoads: 1,
+    },
+  ])(
+    'resolves the opening ES|QL query from the $querySource before the first fetch',
+    async ({ openingQuery, defaultProfileEsqlQuery, expectedDataViewLoads }) => {
+      const services = createDiscoverServicesMock();
+      const uiSettingsGet = services.uiSettings.get as jest.Mock;
+      const originalGet = uiSettingsGet.getMockImplementation();
+      uiSettingsGet.mockImplementation((key: string) => {
+        if (key === ENABLE_ESQL) {
+          return true;
+        }
+        return originalGet?.(key);
+      });
+      services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
 
-    const logsDataView = new DataView({
-      spec: {
-        id: 'logs-data-view',
-        title: 'logs*,-logstash*,filebeat-*',
-        timeFieldName: '@timestamp',
-      },
-      fieldFormats: {} as DataView['fieldFormats'],
-    });
-    const toolkit = getDiscoverInternalStateMock({
-      services,
-      persistedDataViews: [logsDataView],
-    });
-    jest.spyOn(toolkit.services.dataViews, 'getDefaultDataView').mockResolvedValue(logsDataView);
+      const logsDataView = new DataView({
+        spec: {
+          id: 'logs-data-view',
+          title: 'logs*,-logstash*,filebeat-*',
+          timeFieldName: '@timestamp',
+        },
+        fieldFormats: {} as DataView['fieldFormats'],
+      });
+      const toolkit = getDiscoverInternalStateMock({
+        services,
+        persistedDataViews: [logsDataView],
+      });
+      jest.spyOn(toolkit.services.dataViews, 'getDefaultDataView').mockResolvedValue(logsDataView);
 
-    const openingQuery = 'FROM logs*,-logstash*,filebeat-*';
-    const resolved = await createResolvedMockEsqlSource();
-    const resolveSpy = jest
-      .spyOn(resolveEsqlSourceModule, 'resolveEsqlSource')
-      .mockResolvedValue(resolved);
-    const loadDataViewSpy = jest.spyOn(resolveDataViewModule, 'loadAndResolveDataView');
+      const resolved = await createResolvedMockEsqlSource();
+      const resolveSpy = jest
+        .spyOn(resolveEsqlSourceModule, 'resolveEsqlSource')
+        .mockResolvedValue(resolved);
+      const loadDataViewSpy = jest.spyOn(resolveDataViewModule, 'loadAndResolveDataView');
 
-    await toolkit.initializeTabs();
-    toolkit.internalState.dispatch(
-      internalStateActions.setDefaultProfileEsqlQuery({ query: openingQuery })
-    );
-    const tabId = toolkit.getCurrentTab().id;
-    await toolkit.initializeSingleTab({
-      tabId,
-      skipWaitForDataFetching: true,
-    });
+      await toolkit.initializeTabs();
+      toolkit.internalState.dispatch(
+        internalStateActions.setDefaultProfileEsqlQuery(defaultProfileEsqlQuery)
+      );
 
-    expect(selectTab(toolkit.internalState.getState(), tabId).appState.query).toEqual({
-      esql: openingQuery,
-    });
-    expect(resolveSpy).toHaveBeenCalledTimes(1);
-    expect(resolveSpy).toHaveBeenCalledWith(expect.objectContaining({ esql: openingQuery }));
-    // The profile provides the query, so no data view is loaded to derive it.
-    expect(loadDataViewSpy).not.toHaveBeenCalled();
-    expect(
-      selectTabRuntimeState(toolkit.runtimeStateManager, tabId).currentDataView$.getValue()
-    ).toBe(resolved.dataView);
-    resolveSpy.mockRestore();
-    loadDataViewSpy.mockRestore();
-  });
+      const tabId = toolkit.getCurrentTab().id;
+      await toolkit.initializeSingleTab({
+        tabId,
+        skipWaitForDataFetching: true,
+      });
+
+      expect(selectTab(toolkit.internalState.getState(), tabId).appState.query).toEqual({
+        esql: openingQuery,
+      });
+      expect(resolveSpy).toHaveBeenCalledTimes(1);
+      expect(resolveSpy).toHaveBeenCalledWith(expect.objectContaining({ esql: openingQuery }));
+      expect(loadDataViewSpy).toHaveBeenCalledTimes(expectedDataViewLoads);
+      expect(getTabDataView(selectTabRuntimeState(toolkit.runtimeStateManager, tabId))).toBe(
+        resolved.dataView
+      );
+      resolveSpy.mockRestore();
+      loadDataViewSpy.mockRestore();
+    }
+  );
 
   it('opens a saved ES|QL tab without loading a data view', async () => {
     const services = createDiscoverServicesMock();
@@ -1301,5 +1498,180 @@ describe('tab_state actions', () => {
     ).toBe(resolved.esqlSource);
     resolveSpy.mockRestore();
     loadDataViewSpy.mockRestore();
+  });
+
+  it('starts tracking the tab load after the data availability checks', async () => {
+    const services = createDiscoverServicesMock();
+    const availability = Promise.withResolvers<boolean>();
+    jest.mocked(services.dataViews.hasData.hasDataView).mockReturnValueOnce(availability.promise);
+    const toolkit = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewMockWithTimeField],
+    });
+    const persistedTab = getPersistedTabMock({
+      dataView: dataViewMockWithTimeField,
+      services,
+      appStateOverrides: { query: { language: 'kuery', query: '' } },
+    });
+
+    await toolkit.initializeTabs({
+      persistedDiscoverSession: createDiscoverSessionMock({
+        id: 'test-session',
+        tabs: [persistedTab],
+      }),
+    });
+    const trackPerformanceEventSpy = jest.spyOn(
+      selectTabRuntimeState(
+        toolkit.runtimeStateManager,
+        persistedTab.id
+      ).scopedEbtManager$.getValue(),
+      'trackPerformanceEvent'
+    );
+    const tabInitialization = toolkit.initializeSingleTab({
+      tabId: persistedTab.id,
+      skipWaitForDataFetching: true,
+    });
+
+    await waitFor(() => expect(services.dataViews.hasData.hasDataView).toHaveBeenCalled());
+    expect(trackPerformanceEventSpy).not.toHaveBeenCalled();
+
+    availability.resolve(true);
+    await tabInitialization;
+
+    expect(trackPerformanceEventSpy).toHaveBeenCalledTimes(1);
+    expect(trackPerformanceEventSpy).toHaveBeenCalledWith('discoverLoadSavedSearch');
+  });
+
+  it('opens the URL that changed while waiting for the data availability checks', async () => {
+    const services = createDiscoverServicesMock();
+    const availability = Promise.withResolvers<boolean>();
+    jest.mocked(services.dataViews.hasData.hasDataView).mockReturnValueOnce(availability.promise);
+    const logsDataView = buildDataViewMock({
+      id: 'logs-data-view-id',
+      name: 'logs',
+      fields: deepMockedFields,
+      timeFieldName: '@timestamp',
+    });
+    const toolkit = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewMockWithTimeField, logsDataView],
+    });
+    const getUrlAppState = (dataViewId: string): DiscoverAppState => ({
+      dataSource: { type: DataSourceType.DataView, dataViewId },
+      query: { language: 'kuery', query: '' },
+    });
+
+    await toolkit.stateStorageContainer.set(
+      APP_STATE_URL_KEY,
+      getUrlAppState(dataViewMockWithTimeField.id!)
+    );
+    await toolkit.initializeTabs();
+    const tabId = toolkit.getCurrentTab().id;
+    const tabInitialization = toolkit.initializeSingleTab({
+      tabId,
+      skipWaitForDataFetching: true,
+    });
+
+    await waitFor(() => expect(services.dataViews.hasData.hasDataView).toHaveBeenCalled());
+    await toolkit.stateStorageContainer.set(APP_STATE_URL_KEY, getUrlAppState(logsDataView.id!));
+
+    availability.resolve(true);
+    await tabInitialization;
+
+    expect(toolkit.getCurrentTab().appState.dataSource).toEqual({
+      type: DataSourceType.DataView,
+      dataViewId: logsDataView.id,
+    });
+    expect(
+      toolkit.stateStorageContainer.get<DiscoverAppState>(APP_STATE_URL_KEY)?.dataSource
+    ).toEqual({ type: DataSourceType.DataView, dataViewId: logsDataView.id });
+  });
+
+  it('keeps the initial URL when a tab switch is in progress after the data availability checks', async () => {
+    const services = createDiscoverServicesMock();
+    const availability = Promise.withResolvers<boolean>();
+    jest.mocked(services.dataViews.hasData.hasDataView).mockReturnValueOnce(availability.promise);
+    const logsDataView = buildDataViewMock({
+      id: 'logs-data-view-id',
+      name: 'logs',
+      fields: deepMockedFields,
+      timeFieldName: '@timestamp',
+    });
+    const toolkit = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewMockWithTimeField, logsDataView],
+    });
+    const getUrlAppState = (dataViewId: string): DiscoverAppState => ({
+      dataSource: { type: DataSourceType.DataView, dataViewId },
+      query: { language: 'kuery', query: '' },
+    });
+
+    await toolkit.stateStorageContainer.set(
+      APP_STATE_URL_KEY,
+      getUrlAppState(dataViewMockWithTimeField.id!)
+    );
+    await toolkit.initializeTabs();
+    const tabId = toolkit.getCurrentTab().id;
+    const tabInitialization = toolkit.initializeSingleTab({
+      tabId,
+      skipWaitForDataFetching: true,
+    });
+
+    await waitFor(() => expect(services.dataViews.hasData.hasDataView).toHaveBeenCalled());
+    // updateTabs writes the destination tab to the URL before it updates the tabs state
+    await toolkit.stateStorageContainer.set(TAB_STATE_URL_KEY, { tabId: 'destination-tab-id' });
+    await toolkit.stateStorageContainer.set(APP_STATE_URL_KEY, getUrlAppState(logsDataView.id!));
+
+    availability.resolve(true);
+    await tabInitialization;
+
+    expect(selectTab(toolkit.internalState.getState(), tabId).appState.dataSource).toEqual({
+      type: DataSourceType.DataView,
+      dataViewId: dataViewMockWithTimeField.id,
+    });
+  });
+
+  it('keeps the initial URL when switching tabs while waiting for the data availability checks', async () => {
+    const services = createDiscoverServicesMock();
+    const availability = Promise.withResolvers<boolean>();
+    jest.mocked(services.dataViews.hasData.hasDataView).mockReturnValueOnce(availability.promise);
+    const logsDataView = buildDataViewMock({
+      id: 'logs-data-view-id',
+      name: 'logs',
+      fields: deepMockedFields,
+      timeFieldName: '@timestamp',
+    });
+    const toolkit = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewMockWithTimeField, logsDataView],
+    });
+
+    await toolkit.stateStorageContainer.set(APP_STATE_URL_KEY, {
+      dataSource: { type: DataSourceType.DataView, dataViewId: logsDataView.id },
+      query: { language: 'kuery', query: '' },
+    });
+    await toolkit.initializeTabs();
+    const tabId = toolkit.getCurrentTab().id;
+    const tabInitialization = toolkit.initializeSingleTab({
+      tabId,
+      skipWaitForDataFetching: true,
+    });
+
+    await waitFor(() => expect(services.dataViews.hasData.hasDataView).toHaveBeenCalled());
+    await toolkit.addNewTab({
+      tab: {
+        ...DEFAULT_TAB_STATE,
+        ...createTabItem(selectAllTabs(toolkit.internalState.getState())),
+      },
+    });
+    await toolkit.switchToTab({ tabId });
+
+    availability.resolve(true);
+    await tabInitialization;
+
+    expect(selectTab(toolkit.internalState.getState(), tabId).appState.dataSource).toEqual({
+      type: DataSourceType.DataView,
+      dataViewId: logsDataView.id,
+    });
   });
 });

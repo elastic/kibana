@@ -43,19 +43,20 @@ dependsOn:
   - '@kbn/esql-utils'
   - '@kbn/usage-collection-plugin'
   - '@kbn/analytics'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
   - group-platform
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
     - public/**/*
     - server/**/*
     - .storybook/**/*
+    - test/scout_data_federation/api/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

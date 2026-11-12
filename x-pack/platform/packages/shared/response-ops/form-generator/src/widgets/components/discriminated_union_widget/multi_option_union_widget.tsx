@@ -159,24 +159,30 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
         // authMode is only present on auth-type unions (set by get_schema_for_auth_type,
         // always one of 'per-user' | 'shared'). Other discriminated unions omit it, and
         // any unexpected value falls through to no badge rather than a wrong label.
-        // Label + icon mirror the "Authentication" column in the Stack Management
+        // Label + icon mirror the "Credential scope" column in the Stack Management
         // connectors list (triggers_actions_ui actions_connectors_list.tsx:
-        // authModePerUser = "Personal credentials", authModeShared = "Service account").
+        // authModePerUser = "Personal credentials", authModeShared = "Shared credentials").
         // Duplicated intentionally to avoid coupling this generic package to that plugin;
         // keep the wording/icons in sync if either side changes.
         const authMode = (optionMeta as Record<string, unknown>).authMode;
         const authModeBadge =
           authMode === 'per-user' ? (
             <EuiBadge color="hollow" iconType="user">
-              {i18n.translate('responseOps.formGenerator.multiOptionUnionWidget.perUserAuthLabel', {
-                defaultMessage: 'Personal credentials',
-              })}
+              {i18n.translate(
+                'responseOpsFormGenerator.formGenerator.multiOptionUnionWidget.perUserAuthLabel',
+                {
+                  defaultMessage: 'Personal credentials',
+                }
+              )}
             </EuiBadge>
           ) : authMode === 'shared' ? (
             <EuiBadge color="hollow" iconType="users">
-              {i18n.translate('responseOps.formGenerator.multiOptionUnionWidget.sharedAuthLabel', {
-                defaultMessage: 'Service account',
-              })}
+              {i18n.translate(
+                'responseOpsFormGenerator.formGenerator.multiOptionUnionWidget.sharedAuthLabel',
+                {
+                  defaultMessage: 'Shared credentials',
+                }
+              )}
             </EuiBadge>
           ) : null;
 
@@ -188,7 +194,7 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="success">
                     {i18n.translate(
-                      'responseOps.formGenerator.multiOptionUnionWidget.recommendedLabel',
+                      'responseOpsFormGenerator.formGenerator.multiOptionUnionWidget.recommendedLabel',
                       { defaultMessage: 'Recommended' }
                     )}
                   </EuiBadge>

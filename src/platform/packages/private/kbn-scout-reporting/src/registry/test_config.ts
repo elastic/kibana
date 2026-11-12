@@ -80,32 +80,35 @@ const resolveModuleMetadata = (
   }
 
   const g = match.groups;
-  const module: ScoutTestableModule = g.coreRoot
-    ? {
-        name: 'core',
-        group: 'platform',
-        type: 'package' as ScoutTestableModule['type'],
-        visibility: 'shared' as ScoutTestableModule['visibility'],
-        root: moduleRoot,
-      }
-    : g.examplesRoot
-    ? (() => {
-        const manifest = readKibanaModuleManifest(path.join(REPO_ROOT, moduleRoot, 'kibana.jsonc'));
-        return {
-          name: manifest.id,
-          group: manifest.group,
-          type: manifest.type as ScoutTestableModule['type'],
-          visibility: manifest.visibility as ScoutTestableModule['visibility'],
+  const module: ScoutTestableModule =
+    g.coreRoot || g.devBuildRoot
+      ? {
+          name: g.coreRoot ? 'core' : 'dev',
+          group: 'platform',
+          type: 'package' as ScoutTestableModule['type'],
+          visibility: g.coreRoot ? 'shared' : 'private',
+          root: moduleRoot,
+        }
+      : g.examplesRoot
+      ? (() => {
+          const manifest = readKibanaModuleManifest(
+            path.join(REPO_ROOT, moduleRoot, 'kibana.jsonc')
+          );
+          return {
+            name: manifest.id,
+            group: manifest.group,
+            type: manifest.type as ScoutTestableModule['type'],
+            visibility: manifest.visibility as ScoutTestableModule['visibility'],
+            root: moduleRoot,
+          };
+        })()
+      : {
+          name: g.moduleName,
+          group: g.platformOrCore ?? g.solution,
+          type: g.moduleKind.slice(0, -1) as ScoutTestableModule['type'],
+          visibility: (g.moduleVisibility || 'private') as ScoutTestableModule['visibility'],
           root: moduleRoot,
         };
-      })()
-    : {
-        name: g.moduleName,
-        group: g.platformOrCore ?? g.solution,
-        type: g.moduleKind.slice(0, -1) as ScoutTestableModule['type'],
-        visibility: (g.moduleVisibility || 'private') as ScoutTestableModule['visibility'],
-        root: moduleRoot,
-      };
 
   return {
     module,

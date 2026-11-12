@@ -6,6 +6,7 @@
  */
 
 import type { InferenceConnector } from './connectors';
+import type { EisInferenceEndpointMetadata } from '../inference_endpoints';
 import { getModelDefinition } from './known_models';
 import { getConnectorDefaultModel } from './connector_config';
 import { elasticModelDictionary } from '../const';
@@ -16,11 +17,17 @@ import type { ChatCompletionReasoningEffort } from '../chat_complete/reasoning';
  * Retrieve the context window size for the default model of the given connector, if available.
  */
 export const getContextWindowSize = (connector: InferenceConnector): number | undefined => {
-  if (!connector.config) {
-    return undefined;
-  }
   if (connector.config?.contextWindowLength) {
     return connector.config.contextWindowLength;
+  }
+
+  const advertisedWindow = connector.metadata?.capabilities?.context_window?.max_input_tokens;
+  if (advertisedWindow && advertisedWindow > 0) {
+    return advertisedWindow;
+  }
+
+  if (!connector.config) {
+    return undefined;
   }
 
   const defaultModel = getConnectorDefaultModel(connector);
@@ -30,6 +37,14 @@ export const getContextWindowSize = (connector: InferenceConnector): number | un
 
   return undefined;
 };
+
+/**
+ * True when this endpoint rejects raw messages and accepts only a prompt template.
+ * An omitted `templates` capability means either request shape is accepted.
+ */
+export const isTemplateRequiredConnector = (
+  connector: Pick<InferenceConnector, 'metadata'> | { metadata?: EisInferenceEndpointMetadata }
+): boolean => connector.metadata?.capabilities?.templates?.policy === 'required';
 
 /**
  * Retrieve the reasoning effort levels the connector's model supports, as advertised by EIS.

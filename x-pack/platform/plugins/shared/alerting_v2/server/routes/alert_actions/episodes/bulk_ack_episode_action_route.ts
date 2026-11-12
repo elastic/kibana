@@ -19,4 +19,5 @@ export const BulkAckEpisodeActionRoute = createBulkEpisodeActionRouteForType({
   bodySchema: bulkAckEpisodeActionBodySchema,
   oasOperationObject: bulkAckEpisodeActionOasExamples,
   access: 'public' as const,
+  availability: { stability: 'stable' as const, since: '9.6.0' },
 });

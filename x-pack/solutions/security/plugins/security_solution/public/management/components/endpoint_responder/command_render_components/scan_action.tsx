@@ -6,7 +6,6 @@
  */
 
 import { memo, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import type { ScanActionRequestBody } from '../../../../../common/api/endpoint';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type { ActionRequestComponentProps } from '../types';
@@ -49,9 +48,6 @@ export const ScanActionResult = memo<
     actionCreator,
     actionRequestBody,
     dataTestSubj: 'scan',
-    pendingMessage: i18n.translate('xpack.securitySolution.scanAction.pendingMessage', {
-      defaultMessage: 'File path scan is in progress.',
-    }),
   }).result;
 });
 

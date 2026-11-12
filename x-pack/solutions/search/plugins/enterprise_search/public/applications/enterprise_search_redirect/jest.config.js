@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../../../../..',
   roots: [
     '<rootDir>/x-pack/solutions/search/plugins/enterprise_search/public/applications/enterprise_search_redirect',

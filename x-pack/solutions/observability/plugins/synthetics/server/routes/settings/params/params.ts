@@ -62,7 +62,7 @@ export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<ParamRespon
   method: 'GET',
   path: SYNTHETICS_API_URLS.PARAMS,
   options: {
-    summary: 'Get parameters',
+    summary: 'Search parameters',
     description:
       'Get a list of all parameters.\n\nYou must have `read` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.',
     operationId: 'get-parameters',

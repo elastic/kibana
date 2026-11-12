@@ -12,7 +12,7 @@ import type {
   SignificantEvent,
 } from '@kbn/significant-events-schema';
 import { computeEventFacts, shouldSkipAsNoOp } from './event_facts';
-import type { EventsWriteInput, SnapshotCandidate } from './types';
+import type { EventsWriteInput, ResolvedWriteCandidate } from './types';
 
 const TS_EARLIER = '2026-07-20T07:00:00.000Z';
 const TS_NOW = '2026-07-20T08:00:00.000Z';
@@ -58,14 +58,17 @@ const makeStored = (
 
 const makeCandidate = (
   signals: SignalEntry[],
-  overrides: Partial<EventsWriteInput> = {}
-): SnapshotCandidate => ({
+  { status = 'active', ...overrides }: Partial<EventsWriteInput> = {},
+  stored?: SignificantEvent
+): ResolvedWriteCandidate => ({
   mode: 'snapshot',
   index: 0,
   eventId: 'checkout-stable',
+  status,
+  latest: stored,
+  priorDocs: stored ? [stored] : [],
   input: {
     event_id: 'checkout-stable',
-    status: 'active',
     source_ids: ['logs.checkout'],
     title: 'Checkout latency',
     symptom_hypothesis: 'Checkout requests are delayed.',
@@ -95,9 +98,11 @@ describe('shouldSkipAsNoOp', () => {
     status?: 'active' | 'inactive';
   }) =>
     shouldSkipAsNoOp({
-      latestEvent: makeStored(stored, { severity: storedSeverity }),
-      candidate: makeCandidate(submitted, { status }),
-      priorDocs: [],
+      candidate: makeCandidate(
+        submitted,
+        { status },
+        makeStored(stored, { severity: storedSeverity })
+      ),
       severity,
     });
 
@@ -128,15 +133,19 @@ describe('shouldSkipAsNoOp', () => {
     ).toBe(false);
   });
 
-  it('never skips when there is no stored version', () => {
+  it('does not skip when a stored rule changes verdict, even if status and severity hold', () => {
     expect(
-      shouldSkipAsNoOp({
-        latestEvent: undefined,
-        candidate: makeCandidate([makeSignal()]),
-        priorDocs: [],
-        severity: 'high',
+      skip({
+        stored: [makeSignal({ verdict: 'confirms' })],
+        submitted: [makeSignal({ verdict: 'refutes' })],
       })
     ).toBe(false);
+  });
+
+  it('never skips when there is no stored version', () => {
+    expect(shouldSkipAsNoOp({ candidate: makeCandidate([makeSignal()]), severity: 'high' })).toBe(
+      false
+    );
   });
 });
 
@@ -145,21 +154,14 @@ describe('computeEventFacts', () => {
     signals,
     candidateOverrides,
     stored,
-    source,
   }: {
     signals: SignalEntry[];
     candidateOverrides?: Partial<EventsWriteInput>;
     stored?: SignificantEvent;
-    source?: 'discovery';
   }) => {
-    const candidate = makeCandidate(signals, candidateOverrides);
-
     return computeEventFacts({
-      candidate,
+      candidate: makeCandidate(signals, candidateOverrides, stored),
       timestamp: TS_NOW,
-      latestByEventId: new Map(stored ? [[candidate.eventId, stored]] : []),
-      priorDocsByEventId: new Map(stored ? [[candidate.eventId, [stored]]] : []),
-      source,
     });
   };
 
@@ -226,28 +228,5 @@ describe('computeEventFacts', () => {
     });
 
     expect(result.severity).toBe('medium');
-  });
-
-  describe('investigation lock', () => {
-    const investigated = (signals: SignalEntry[]) =>
-      makeStored(signals, {
-        severity: 'medium',
-        investigations: [
-          { workflow_execution_id: 'wf-1', started_at: TS_EARLIER, completed_at: TS_EARLIER },
-        ],
-      });
-
-    it('keeps the stored tier of a completed investigation over the proposal', () => {
-      const signal = makeSignal();
-
-      const result = facts({
-        signals: [signal],
-        candidateOverrides: { severity: 'high' },
-        stored: investigated([signal]),
-        source: 'discovery',
-      });
-
-      expect(result.severity).toBe('medium');
-    });
   });
 });

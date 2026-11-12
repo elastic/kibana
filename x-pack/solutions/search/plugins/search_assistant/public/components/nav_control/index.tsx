@@ -16,9 +16,13 @@ import type { AIAssistantPluginStartDependencies } from '@kbn/ai-assistant/src/t
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { isMac } from '@kbn/shared-ux-utility';
 import { AiButton } from '@kbn/shared-ux-ai-components';
+
+const queryClient = new QueryClient();
+
 interface NavControlWithProviderDeps {
   coreStart: CoreStart;
   pluginsStart: AIAssistantPluginStartDependencies;
@@ -34,11 +38,13 @@ export const NavControlWithProvider = ({ coreStart, pluginsStart }: NavControlWi
             ...pluginsStart,
           }}
         >
-          <RedirectAppLinks coreStart={coreStart}>
-            <coreStart.i18n.Context>
-              <NavControl />
-            </coreStart.i18n.Context>
-          </RedirectAppLinks>
+          <QueryClientProvider client={queryClient}>
+            <RedirectAppLinks coreStart={coreStart}>
+              <coreStart.i18n.Context>
+                <NavControl />
+              </coreStart.i18n.Context>
+            </RedirectAppLinks>
+          </QueryClientProvider>
         </KibanaContextProvider>
       </KibanaThemeProvider>
     </EuiErrorBoundary>

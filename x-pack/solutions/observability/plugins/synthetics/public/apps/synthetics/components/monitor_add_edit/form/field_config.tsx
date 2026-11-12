@@ -35,6 +35,7 @@ import {
 import { MaintenanceWindowsLink } from '../fields/maintenance_windows/create_maintenance_windows_btn';
 import type { MaintenanceWindowsFieldProps } from '../fields/maintenance_windows/maintenance_windows';
 import type { MonitorSpacesProps } from '../fields/monitor_spaces';
+import { hasInvalidParamNames } from '../fields/parameter_values';
 import { kibanaService } from '../../../../../utils/kibana_service';
 import type { ThrottlingConfigFieldProps } from '../fields/throttling/throttling_config_field';
 import { PROFILE_OPTIONS } from '../fields/throttling/throttling_config_field';
@@ -65,6 +66,7 @@ import {
   RequestBodyField,
   ResponseBodyIndexField,
   KeyValuePairsField,
+  ParameterValuesEditor,
   TextArea,
   ThrottlingWrapper,
   MaintenanceWindowsFieldWrapper,
@@ -1523,19 +1525,14 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage: 'Parameters',
     }),
     controlled: true,
-    component: JSONEditor,
-    props: (): JSONCodeEditorProps => ({
-      id: 'syntheticsMonitorConfigParams',
-      height: '100px',
-      ariaLabel: i18n.translate('xpack.synthetics.monitorConfig.paramsAria.label', {
-        defaultMessage: 'Monitor params code editor',
-      }),
+    component: ParameterValuesEditor,
+    props: () => ({
       readOnly,
     }),
     helpText: (
       <FormattedMessage
-        id="xpack.synthetics.monitorConfig.params.helpText"
-        defaultMessage="Use JSON to define parameters that can be referenced in your script with {paramsValue}"
+        id="xpack.synthetics.monitorConfig.params.keyValueHelpText"
+        defaultMessage="Add key-value parameters that can be referenced in your script with {paramsValue}"
         values={{
           paramsValue: <EuiCode>{'params.value'}</EuiCode>,
         }}
@@ -1557,6 +1554,12 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
 
           return true;
         },
+        validParamNames: (value) =>
+          hasInvalidParamNames(value)
+            ? i18n.translate('xpack.synthetics.monitorConfig.params.nameError', {
+                defaultMessage: 'Parameter names must be unique and cannot be empty',
+              })
+            : true,
       },
     }),
   },

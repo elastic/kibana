@@ -244,6 +244,38 @@ describe('useChangeAppliedTemplate', () => {
     expect(mockPatchCase.mock.calls[0][0].updatedCase).not.toHaveProperty('connector');
   });
 
+  it.each([
+    ['securitySolution', true],
+    ['cases', false],
+    ['observability', false],
+  ])('sends a template extractObservables true for owner %s as %s', async (owner, expected) => {
+    const { result } = renderHook(() => useChangeAppliedTemplate(), {
+      wrapper: TestProviders,
+    });
+
+    act(() => {
+      result.current.mutate({
+        caseData: { ...caseWithTemplate, owner },
+        newTemplate: {
+          id: 'tmpl-2',
+          version: 5,
+          fields: templateFields,
+          settings: { syncAlerts: false, extractObservables: true },
+        },
+      });
+    });
+
+    await waitFor(() => {
+      expect(mockPatchCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          updatedCase: expect.objectContaining({
+            settings: { syncAlerts: false, extractObservables: expected },
+          }),
+        })
+      );
+    });
+  });
+
   it('turns settings off when the template declares none', async () => {
     const { result } = renderHook(() => useChangeAppliedTemplate(), {
       wrapper: TestProviders,

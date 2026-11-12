@@ -9,10 +9,13 @@ import { EisModelStatus, type EisInferenceEndpoint } from '../../../common/types
 import {
   getModelName,
   getModelCreator,
+  getModelTitle,
   getProviderKeyForCreator,
+  getTaskTypeCategoryLabel,
   groupEndpointsByModel,
   getProviderOptions,
   filterGroupedModels,
+  isTemplateRequiredEisEndpoint,
   TASK_TYPE_CATEGORY,
   TASK_TYPE_DISPLAY_NAME,
   MODEL_TYPE_FILTERS,
@@ -41,11 +44,23 @@ const makeGroupedModel = (overrides: Partial<GroupedModel> = {}): GroupedModel =
   ...overrides,
 });
 
+describe('isTemplateRequiredEisEndpoint', () => {
+  it('is true only when templates.policy is required', () => {
+    expect(
+      isTemplateRequiredEisEndpoint({
+        metadata: { capabilities: { templates: { policy: 'required' } } },
+      })
+    ).toBe(true);
+    expect(isTemplateRequiredEisEndpoint({ metadata: { capabilities: {} } })).toBe(false);
+    expect(isTemplateRequiredEisEndpoint({})).toBe(false);
+  });
+});
+
 describe('utils', () => {
   describe('TASK_TYPE_CATEGORY', () => {
     it.each([
-      ['chat_completion', 'LLM'],
-      ['completion', 'LLM'],
+      ['chat_completion', 'Generative'],
+      ['completion', 'Generative'],
       ['text_embedding', 'Embedding'],
       ['sparse_embedding', 'Embedding'],
       ['embedding', 'Embedding'],
@@ -69,7 +84,17 @@ describe('utils', () => {
 
   describe('MODEL_TYPE_FILTERS', () => {
     it('covers all expected categories in order', () => {
-      expect(MODEL_TYPE_FILTERS.map((f) => f.key)).toEqual(['LLM', 'Embedding', 'Rerank']);
+      expect(MODEL_TYPE_FILTERS.map((f) => f.key)).toEqual(['Generative', 'Embedding', 'Rerank']);
+    });
+  });
+
+  describe('getTaskTypeCategoryLabel', () => {
+    it.each([
+      ['Generative', 'Generative'],
+      ['Embedding', 'Embedding'],
+      ['Rerank', 'Rerank'],
+    ] as const)('%s → %s', (category, expectedLabel) => {
+      expect(getTaskTypeCategoryLabel(category)).toBe(expectedLabel);
     });
   });
 
@@ -133,6 +158,20 @@ describe('utils', () => {
     });
   });
 
+  describe('getModelTitle', () => {
+    it('removes the model creator from the start of the model name', () => {
+      expect(getModelTitle('Anthropic Claude Opus 4.5', 'Anthropic')).toBe('Claude Opus 4.5');
+    });
+
+    it('returns the model name unchanged when it does not start with the model creator', () => {
+      expect(getModelTitle('Claude Opus 4.5', 'Anthropic')).toBe('Claude Opus 4.5');
+    });
+
+    it('does not remove a partial word match', () => {
+      expect(getModelTitle('JinaAI Reranker v2', 'Jina')).toBe('JinaAI Reranker v2');
+    });
+  });
+
   describe('getProviderKeyForCreator', () => {
     it.each([
       ['Anthropic', 'anthropic'],
@@ -175,7 +214,7 @@ describe('utils', () => {
         modelName: '.multilingual-e5-small',
         modelCreator: expect.any(String),
         taskTypes: ['text_embedding', 'chat_completion'],
-        categories: ['Embedding', 'LLM'],
+        categories: ['Embedding', 'Generative'],
       });
       expect(result[0].endpoints).toHaveLength(2);
     });
@@ -349,7 +388,7 @@ describe('utils', () => {
       makeGroupedModel({
         modelName: 'rainbow-sprinkle-completion',
         taskTypes: ['chat_completion'],
-        categories: ['LLM'],
+        categories: ['Generative'],
       }),
       makeGroupedModel({
         modelName: 'rerank-v1',
@@ -396,7 +435,7 @@ describe('utils', () => {
           expectedModels: ['.multilingual-e5-small'],
         },
         {
-          categories: ['LLM'] as TaskTypeCategory[],
+          categories: ['Generative'] as TaskTypeCategory[],
           expectedModels: ['rainbow-sprinkle-completion'],
         },
         { categories: ['Rerank'] as TaskTypeCategory[], expectedModels: ['rerank-v1'] },
@@ -405,7 +444,7 @@ describe('utils', () => {
           expectedModels: ['.multilingual-e5-small', 'rerank-v1'],
         },
         {
-          categories: ['LLM', 'Embedding', 'Rerank'] as TaskTypeCategory[],
+          categories: ['Generative', 'Embedding', 'Rerank'] as TaskTypeCategory[],
           expectedModels: ['.multilingual-e5-small', 'rainbow-sprinkle-completion', 'rerank-v1'],
         },
       ])('$categories → $expectedModels', ({ categories, expectedModels }) => {
@@ -436,7 +475,7 @@ describe('utils', () => {
     it('applies all filters together', () => {
       const result = filterGroupedModels(models, {
         searchQuery: 'rainbow',
-        selectedTaskTypes: new Set<TaskTypeCategory>(['LLM']),
+        selectedTaskTypes: new Set<TaskTypeCategory>(['Generative']),
         selectedProviders: ['Elastic'],
       });
       expect(result.map((m) => m.modelName)).toEqual(['rainbow-sprinkle-completion']);
@@ -555,7 +594,7 @@ describe('utils', () => {
         modelName: 'us-model',
         modelCreator: 'Anthropic',
         taskTypes: ['chat_completion'],
-        categories: ['LLM'],
+        categories: ['Generative'],
         endpoints: [
           makeEndpoint({
             inference_id: 'us-model',
@@ -570,7 +609,7 @@ describe('utils', () => {
         modelName: 'eu-model',
         modelCreator: 'OpenRouter',
         taskTypes: ['chat_completion'],
-        categories: ['LLM'],
+        categories: ['Generative'],
         endpoints: [
           makeEndpoint({
             inference_id: 'eu-model',
@@ -637,7 +676,7 @@ describe('utils', () => {
         expect(
           filterGroupedModels(regionModels, {
             searchQuery: 'us-model',
-            selectedTaskTypes: new Set<TaskTypeCategory>(['LLM']),
+            selectedTaskTypes: new Set<TaskTypeCategory>(['Generative']),
             selectedProviders: ['Anthropic'],
             selectedRegionOptions: ['geo-us'],
           }).map((m) => m.modelName)

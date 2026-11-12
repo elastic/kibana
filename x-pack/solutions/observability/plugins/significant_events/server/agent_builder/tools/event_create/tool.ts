@@ -10,19 +10,23 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { lazySchema } from '@kbn/zod/v4';
 import {
   SEVERITY_CONTRACT_RULE,
+  significantEventManualStatusSchema,
   significantEventSchema,
   severitySchema,
 } from '@kbn/significant-events-schema';
-import { lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
+import { getWorkflowExecutionIdFromRequest } from '../../../lib/telemetry/ebt/workflow_execution_id';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
+import { alertCreationAttemptIdentity } from '../alert_identity_telemetry';
+import { trackTelemetryBestEffort } from '../bulk_write';
 import { createEventToolHandler } from './handler';
 import { classifyError } from '../../utils/error_utils';
 import { loadSourceCatalog, toSourceRef } from '../../utils/resolve_source_slugs';
@@ -30,10 +34,9 @@ import { assignStoredSourceIds, sourceSlugsSchema } from '../../utils/stored_sou
 
 export const SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID = platformSignificantEventsTools.createEvent;
 
-const createEventSchema = lazySchema(() =>
+export const createEventSchema = lazySchema(() =>
   significantEventSchema
     .pick({
-      status: true,
       title: true,
       symptom_hypothesis: true,
       summary: true,
@@ -41,6 +44,7 @@ const createEventSchema = lazySchema(() =>
     })
     .extend({
       slugs: sourceSlugsSchema,
+      status: significantEventManualStatusSchema,
       severity: severitySchema
         .optional()
         .describe(`${SEVERITY_CONTRACT_RULE}\n\nOmit to store "low".`),
@@ -111,32 +115,41 @@ export function createEventTool({
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
       const { request } = context;
+      const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
       let sourceIds: string[] = [];
       try {
-        const {
-          getEventSearchClient,
-          getAlertEventsClient,
-          emitTrigger,
-          licensing,
-          sourcesClient,
-        } = await getScopedClients({ request });
+        const { getEventSearchClient, licensing, sourcesClient } = await getScopedClients({
+          request,
+        });
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
         const catalog = await loadSourceCatalog(sourcesClient);
-        const eventInput = assignStoredSourceIds(catalog, toolParams);
+        const eventInput = {
+          ...assignStoredSourceIds(catalog, toolParams),
+          workflow_execution_id: workflowExecutionId,
+        };
         sourceIds = eventInput.source_ids;
 
         const data = await createEventToolHandler({
           eventSearchClient: await getEventSearchClient(),
           eventInput,
-          alertEventsClient: await getAlertEventsClient(),
-          emitTrigger,
           logger,
         });
 
-        telemetry.trackAgentToolEventCreate({
-          success: true,
-          source_ids: sourceIds,
+        trackTelemetryBestEffort({
+          logger,
+          description: 'event_create telemetry',
+          track: () =>
+            telemetry.trackAgentToolEventCreate({
+              workflow_execution_id: workflowExecutionId,
+              ...alertCreationAttemptIdentity({
+                spaceId: request.spaceId,
+                eventId: data.event_id,
+                groupHash: data.group_hash,
+              }),
+              success: true,
+              source_ids: sourceIds,
+            }),
         });
 
         return {
@@ -157,10 +170,18 @@ export function createEventTool({
         const classified = classifyError(error);
         const rawMessage = error instanceof Error ? error.message : String(error);
         logger.error(`Error running event_create: ${rawMessage}`);
-        telemetry.trackAgentToolEventCreate({
-          success: false,
-          source_ids: sourceIds,
-          error_message: rawMessage,
+        // The event id is generated inside the write, so a failed create identifies no alert.
+        trackTelemetryBestEffort({
+          logger,
+          description: 'failed event_create telemetry',
+          track: () =>
+            telemetry.trackAgentToolEventCreate({
+              workflow_execution_id: workflowExecutionId,
+              ...alertCreationAttemptIdentity({ spaceId: request.spaceId }),
+              success: false,
+              source_ids: sourceIds,
+              error_message: rawMessage,
+            }),
         });
         return {
           results: [

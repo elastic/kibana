@@ -24,17 +24,20 @@ const uniformWindowInputs = ({
   scannedLogs = 0,
   sliceMinutes = 6,
   windowMinutes = 60,
+  maxLogsPerWindow = DEFAULT_CAP,
 }: {
   sliceLogCount: number;
   scannedLogs?: number;
   sliceMinutes?: number;
   windowMinutes?: number;
+  maxLogsPerWindow?: number;
 }): AdaptiveSamplingInputs => ({
   scannedLogs,
   sliceLogCount,
   sliceStartISO: atMinute(0),
   sliceEndISO: atMinute(sliceMinutes),
   windowEndISO: atMinute(windowMinutes),
+  maxLogsPerWindow,
 });
 
 describe('computeAdaptiveSamplingRate', () => {
@@ -101,6 +104,7 @@ describe('computeAdaptiveSamplingRate', () => {
         sliceStartISO: '2026-01-01T00:30:00.000Z',
         sliceEndISO: '2026-01-01T00:33:00.000Z',
         windowEndISO: '2026-01-01T01:00:00.000Z',
+        maxLogsPerWindow: DEFAULT_CAP,
       });
 
       expect(rate).toBeCloseTo(0.5);
@@ -123,6 +127,7 @@ describe('computeAdaptiveSamplingRate', () => {
         sliceStartISO: '2026-01-01T00:00:00.000Z',
         sliceEndISO: '2026-01-01T00:00:00.000Z',
         windowEndISO: '2026-01-01T01:00:00.000Z',
+        maxLogsPerWindow: DEFAULT_CAP,
       };
 
       expect(computeAdaptiveSamplingRate(inputs)).toBeCloseTo(0.5);
@@ -136,9 +141,59 @@ describe('computeAdaptiveSamplingRate', () => {
         sliceStartISO: '2026-01-01T00:54:00.000Z',
         sliceEndISO: '2026-01-01T01:00:00.000Z',
         windowEndISO: '2026-01-01T01:00:00.000Z',
+        maxLogsPerWindow: DEFAULT_CAP,
       };
 
       expect(computeAdaptiveSamplingRate(inputs)).toBe(1);
+    });
+  });
+
+  describe('tracks the configured cap, not just the default', () => {
+    it('raising maxLogsPerWindow gives more headroom before sampling engages', () => {
+      const raisedCap = DEFAULT_CAP * 10;
+      // Projected well above the default cap, but still half of the raised one.
+      const rate = computeAdaptiveSamplingRate(
+        uniformWindowInputs({ sliceLogCount: raisedCap / 20, maxLogsPerWindow: raisedCap })
+      );
+
+      expect(rate).toBe(1);
+    });
+
+    it('raising maxLogsPerWindow still samples once projection exceeds the raised cap', () => {
+      const raisedCap = DEFAULT_CAP * 10;
+      const rate = computeAdaptiveSamplingRate(
+        uniformWindowInputs({ sliceLogCount: raisedCap / 5, maxLogsPerWindow: raisedCap })
+      );
+
+      expect(rate).toBeCloseTo(0.5);
+    });
+
+    it('lowering maxLogsPerWindow engages sampling earlier than the default would', () => {
+      const loweredCap = DEFAULT_CAP / 10;
+      // Projected above the lowered cap but far below the default - the old pinned-to-default
+      // behavior would never have sampled here at all.
+      const rate = computeAdaptiveSamplingRate(
+        uniformWindowInputs({ sliceLogCount: loweredCap / 5, maxLogsPerWindow: loweredCap })
+      );
+
+      expect(rate).toBeCloseTo(0.5);
+    });
+
+    it('lowering maxLogsPerWindow still floors at MIN_SAMPLING_RATE, same as the default cap', () => {
+      const loweredCap = DEFAULT_CAP / 10;
+      const rate = computeAdaptiveSamplingRate(
+        uniformWindowInputs({ sliceLogCount: loweredCap * 5, maxLogsPerWindow: loweredCap })
+      );
+
+      expect(rate).toBe(MIN_SAMPLING_RATE);
+    });
+
+    it('never samples when the hard cap is disabled (maxLogsPerWindow = 0)', () => {
+      const rate = computeAdaptiveSamplingRate(
+        uniformWindowInputs({ sliceLogCount: DEFAULT_CAP * 50, maxLogsPerWindow: 0 })
+      );
+
+      expect(rate).toBe(1);
     });
   });
 });
@@ -169,5 +224,11 @@ describe('resolveSamplingRate', () => {
     expect(resolveSamplingRate(inputs, null)).toBeCloseTo(0.5);
     expect(resolveSamplingRate(inputs, undefined)).toBeCloseTo(0.5);
     expect(resolveSamplingRate(inputs)).toBeCloseTo(0.5);
+  });
+
+  it('override still applies even when the hard cap is disabled', () => {
+    const inputs = uniformWindowInputs({ sliceLogCount: 10, maxLogsPerWindow: 0 });
+
+    expect(resolveSamplingRate(inputs, 0.5)).toBe(0.5);
   });
 });

@@ -11,10 +11,6 @@
     "id": "esqlViews",
     "browser": true,
     "server": true,
-    "configPath": [
-      "xpack",
-      "esqlViews"
-    ],
     "requiredPlugins": [
       "data",
       "esql",

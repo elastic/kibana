@@ -18,7 +18,9 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { FormattedCount } from '../../../common/components/formatted_number';
 import { MultiselectFilter } from '../../../common/components/multiselect_filter';
+import { EntityFiltersBarWatchlist } from './entity_filters_bar_watchlist';
 import type { RiskSeverity } from '../../../../common/search_strategy';
 import { SEVERITY_UI_SORT_ORDER } from '../../common/utils';
 import type { EntityRiskLevels } from '../../../../common/api/entity_analytics/common';
@@ -33,12 +35,27 @@ import {
   EntitySourceValue,
   toEntitySourceArray,
 } from '../../../flyout/entity_details/shared/components/entity_source_value';
-import type { EntityFilters } from './use_entity_filters_param';
+import type { EntityFilters } from './entities_grid';
+import type { RowsMode } from './entities_grid/common';
 import { useEntityFilterBarCounts } from './use_entity_filter_bar_counts';
 export { toBucketMap } from './use_entity_filter_bar_counts';
 
 const ENTITY_TYPE_OPTIONS = getEntityAnalyticsEntityTypes();
 const RISK_LEVEL_OPTIONS = SEVERITY_UI_SORT_ORDER.slice().reverse();
+
+// Click telemetry finds these in the clicked element's `data-test-subj` chain. Data source options
+// carry no per-option id: their values can be custom index names.
+const ENTITY_TYPE_FILTER_TEST_ID = 'eaFilterEntityType';
+const RISK_LEVEL_FILTER_TEST_ID = 'eaFilterRiskLevel';
+const ASSET_CRITICALITY_FILTER_TEST_ID = 'eaFilterAssetCriticality';
+const DATA_SOURCE_FILTER_TEST_ID = 'eaFilterDataSource';
+
+const getEntityTypeItemTestSubj = (type: EntityType) =>
+  `${ENTITY_TYPE_FILTER_TEST_ID}-item-${type}`;
+const getRiskLevelItemTestSubj = (level: RiskSeverity) =>
+  `${RISK_LEVEL_FILTER_TEST_ID}-item-${level}`;
+const getAssetCriticalityItemTestSubj = (level: string) =>
+  `${ASSET_CRITICALITY_FILTER_TEST_ID}-item-${level}`;
 
 const FILTER_TITLES = {
   entityType: i18n.translate('xpack.securitySolution.entityAnalytics.home.filter.entityType', {
@@ -60,12 +77,24 @@ const FILTER_TITLES = {
 };
 
 const FilterEntry = ({ children }: { children: React.ReactNode }) => (
-  <EuiFlexItem>
+  <EuiFlexItem
+    css={css`
+      min-width: 180px;
+    `}
+  >
     <EuiFilterGroup compressed>{children}</EuiFilterGroup>
   </EuiFlexItem>
 );
 
-const ItemWithCount = ({ count, children }: { count: number; children: React.ReactNode }) => (
+const ItemWithCount = ({
+  count,
+  isCountLoading,
+  children,
+}: {
+  count: number;
+  isCountLoading: boolean;
+  children: React.ReactNode;
+}) => (
   <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m" responsive={false}>
     <EuiFlexItem
       css={css`
@@ -90,9 +119,12 @@ const ItemWithCount = ({ count, children }: { count: number; children: React.Rea
         flex-shrink: 0;
       `}
     >
-      <EuiText size="s" color="subdued">
-        {count}
-      </EuiText>
+      {/* Counts that may be from before the last change aren't shown. */}
+      {!isCountLoading && (
+        <EuiText size="s" color="subdued" title={count.toLocaleString()}>
+          <FormattedCount count={count} />
+        </EuiText>
+      )}
     </EuiFlexItem>
   </EuiFlexGroup>
 );
@@ -101,8 +133,10 @@ interface Props {
   filters: EntityFilters;
   onFiltersChange: (filters: EntityFilters) => void;
   spaceId: string | undefined;
-  view: 'resolved' | 'raw';
+  rowsMode: RowsMode;
   esFilter?: QueryDslQueryContainer;
+  searchExpression?: string;
+  isSearchOverridesPending?: boolean;
   watchlistNames: Map<string, string>;
 }
 
@@ -110,15 +144,19 @@ export const EntityFiltersBar: React.FC<Props> = ({
   filters,
   onFiltersChange,
   spaceId,
-  view,
+  rowsMode,
   esFilter,
+  searchExpression,
+  isSearchOverridesPending,
   watchlistNames,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { counts, isLoading: isFiltersCountLoading } = useEntityFilterBarCounts({
+  const { counts, isLoading, isFetching } = useEntityFilterBarCounts({
     spaceId,
-    view,
+    rowsMode,
     filter: esFilter,
+    searchExpression,
+    isSearchOverridesPending,
   });
 
   // static options
@@ -156,18 +194,23 @@ export const EntityFiltersBar: React.FC<Props> = ({
     ...filters.watchlists
       .filter((id) => !watchlistNames.has(id))
       .map((id) => ({ id, name: id, count: counts.watchlists[id] ?? 0 })),
-  ];
+  ].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
+    <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
       <FilterEntry>
         <MultiselectFilter<EntityType>
+          data-test-subj={ENTITY_TYPE_FILTER_TEST_ID}
+          getItemTestSubj={getEntityTypeItemTestSubj}
           title={FILTER_TITLES.entityType}
           items={entityTypeOptions.map((o) => o.value)}
           selectedItems={filters.entityTypes}
           onSelectionChange={(entityTypes) => onFiltersChange({ ...filters, entityTypes })}
           renderItem={(t) => (
-            <ItemWithCount count={entityTypeOptions.find((o) => o.value === t)?.count ?? 0}>
+            <ItemWithCount
+              isCountLoading={isFetching}
+              count={entityTypeOptions.find((o) => o.value === t)?.count ?? 0}
+            >
               <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                 {EntityIconByType[t] && (
                   <EuiFlexItem grow={false}>
@@ -178,19 +221,23 @@ export const EntityFiltersBar: React.FC<Props> = ({
               </EuiFlexGroup>
             </ItemWithCount>
           )}
-          disabled={isFiltersCountLoading}
           width={220}
         />
       </FilterEntry>
 
       <FilterEntry>
         <MultiselectFilter<RiskSeverity>
+          data-test-subj={RISK_LEVEL_FILTER_TEST_ID}
+          getItemTestSubj={getRiskLevelItemTestSubj}
           title={FILTER_TITLES.riskLevel}
           items={riskLevelOptions.map((o) => o.value)}
           selectedItems={filters.riskLevels}
           onSelectionChange={(riskLevels) => onFiltersChange({ ...filters, riskLevels })}
           renderItem={(s) => (
-            <ItemWithCount count={riskLevelOptions.find((o) => o.value === s)?.count ?? 0}>
+            <ItemWithCount
+              isCountLoading={isFetching}
+              count={riskLevelOptions.find((o) => o.value === s)?.count ?? 0}
+            >
               {(() => {
                 const colors = getRiskScoreColors(euiTheme, s as EntityRiskLevels);
                 return (
@@ -209,13 +256,14 @@ export const EntityFiltersBar: React.FC<Props> = ({
               })()}
             </ItemWithCount>
           )}
-          disabled={isFiltersCountLoading}
           width={220}
         />
       </FilterEntry>
 
       <FilterEntry>
         <MultiselectFilter<string>
+          data-test-subj={ASSET_CRITICALITY_FILTER_TEST_ID}
+          getItemTestSubj={getAssetCriticalityItemTestSubj}
           title={FILTER_TITLES.assetCriticality}
           items={criticalityOptions.map((o) => o.value)}
           selectedItems={filters.assetCriticality}
@@ -223,46 +271,56 @@ export const EntityFiltersBar: React.FC<Props> = ({
             onFiltersChange({ ...filters, assetCriticality })
           }
           renderItem={(c) => (
-            <ItemWithCount count={criticalityOptions.find((o) => o.value === c)?.count ?? 0}>
+            <ItemWithCount
+              isCountLoading={isFetching}
+              count={criticalityOptions.find((o) => o.value === c)?.count ?? 0}
+            >
               <AssetCriticalityBadge
                 criticalityLevel={c as CriticalityLevels}
                 css={{ lineHeight: 'inherit' }}
               />
             </ItemWithCount>
           )}
-          disabled={isFiltersCountLoading}
           width={220}
         />
       </FilterEntry>
 
       <FilterEntry>
         <MultiselectFilter<string>
+          data-test-subj={DATA_SOURCE_FILTER_TEST_ID}
           title={FILTER_TITLES.dataSource}
           items={dataSourceOptions.map((o) => o.value)}
           selectedItems={filters.dataSources}
           onSelectionChange={(dataSources) => onFiltersChange({ ...filters, dataSources })}
           renderItem={(s) => (
-            <ItemWithCount count={dataSourceOptions.find((o) => o.value === s)?.count ?? 0}>
+            <ItemWithCount
+              isCountLoading={isFetching}
+              count={dataSourceOptions.find((o) => o.value === s)?.count ?? 0}
+            >
               <EntitySourceValue values={toEntitySourceArray(s)} textSize="s" />
             </ItemWithCount>
           )}
-          disabled={isFiltersCountLoading}
+          // Its options are the sources the counts find.
+          disabled={isLoading}
           width={220}
         />
       </FilterEntry>
 
       <FilterEntry>
-        <MultiselectFilter<string>
+        <EntityFiltersBarWatchlist
           title={FILTER_TITLES.watchlist}
           items={watchlistOptions.map((o) => o.id)}
           selectedItems={filters.watchlists}
           onSelectionChange={(watchlists) => onFiltersChange({ ...filters, watchlists })}
           renderItem={(id) => {
             const opt = watchlistOptions.find((o) => o.id === id);
-            return <ItemWithCount count={opt?.count ?? 0}>{opt?.name ?? id}</ItemWithCount>;
+            return (
+              <ItemWithCount isCountLoading={isFetching} count={opt?.count ?? 0}>
+                {opt?.name ?? id}
+              </ItemWithCount>
+            );
           }}
-          disabled={isFiltersCountLoading}
-          width={220}
+          spaceId={spaceId}
         />
       </FilterEntry>
     </EuiFlexGroup>

@@ -11,6 +11,7 @@ import { expect } from '@kbn/scout/api';
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 import {
+  ConversationActivityEventType,
   NON_INTERACTIVE_DECLINED_REASON,
   TimelineEventType,
   ToolResultType,
@@ -67,8 +68,7 @@ const postChatMessage = (
  * `POST /api/chat/message`: the CLI-friendly, text-only surface. It runs the same execution service
  * as the converse routes, on Task Manager since no `_execution_mode` can be passed, so we assert
  * the delta: a minimal request, an answer-only response, and HITL prompts declined instead of
- * pausing the run. The route is gated on `agentBuilder:experimentalFeatures`, which the Scout
- * server config force-enables.
+ * pausing the run. Like the converse routes, it is not gated on `agentBuilder:experimentalFeatures`.
  */
 apiTest.describe(
   'Agent Builder — chat API message (/api/chat/message)',
@@ -165,9 +165,11 @@ apiTest.describe(
           );
           expect(stored.title).toBe('Message API title');
           expect(stored.events?.map(({ type }) => type)).toStrictEqual([
+            ConversationActivityEventType.conversationCreated,
             TimelineEventType.userMessage,
             TimelineEventType.executionStarted,
             TimelineEventType.executionTerminated,
+            ConversationActivityEventType.titleUpdated,
           ]);
         });
 

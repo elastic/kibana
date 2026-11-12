@@ -112,6 +112,16 @@
     }
   },
   {
+    "id": "siem-beacon",
+    "name": "SIEM Beacon",
+    "areas": [
+      "security"
+    ],
+    "github": {
+      "team": "elastic/siem-beacon"
+    }
+  },
+  {
     "id": "security-core-analysis",
     "name": "Core Analysis",
     "areas": [
@@ -600,21 +610,6 @@
     }
   },
   {
-    "id": "obs-onboarding",
-    "name": "Obs UX: Obs Onboarding",
-    "areas": [
-      "observability"
-    ],
-    "github": {
-      "team": "elastic/obs-onboarding-team",
-      "label": "Team:obs-onboarding"
-    },
-    "responsibilities": [
-      "Observability onboarding",
-      "Streams"
-    ]
-  },
-  {
     "id": "obs-signals-metrics",
     "name": "Observability signals: Metrics",
     "areas": ["observability"],
@@ -627,6 +622,20 @@
       "Hosts UI",
       "Metrics Explorer",
       "Metrics Experience"
+    ]
+  },
+  {
+    "id": "obs-signals-rum",
+    "name": "Obs UX: Signals & RUM",
+    "areas": ["observability"],
+    "github": {
+      "team": "elastic/obs-signals-rum-team",
+      "label": "Team:obs-signals-rum"
+    },
+    "responsibilities": [
+      "User Experience / Digital Experience app",
+      "Real User Monitoring (RUM, EDOT Browser, EDOT React Native)",
+      "Sessions and Session Replay"
     ]
   },
   {
@@ -671,7 +680,7 @@
       "observability"
     ],
     "github": {
-      "team": "elastic/observability-bi"
+      "team": "elastic/obs-bi-team"
     }
   },
   {
@@ -770,7 +779,6 @@
     "name": "Search & ML UX",
     "areas": [
       "search",
-      "workplaceai",
       "vectordb",
       "platform"
     ],
@@ -779,6 +787,20 @@
       "team": "elastic/search-ml-ux",
       "label": "Team:Search & ML UX"
     }
+  },
+  {
+    "id": "automatic-migrations",
+    "name": "Automatic Migrations",
+    "areas": [
+      "security"
+    ],
+    "github": {
+      "team": "elastic/automatic-migrations",
+      "label": "Team:Automatic Migrations"
+    },
+    "responsibilities": [
+      "SIEM rule and dashboard automatic migrations"
+    ]
   },
   {
     "id": "security-data-engineering",
@@ -835,16 +857,6 @@
     "github": {
       "team": "elastic/security-detection-engineering",
       "label": "Team:Detection Engineering"
-    }
-  },
-  {
-    "id": "security-detection-platform",
-    "name": "Security Detection Platform",
-    "areas": [
-      "security"
-    ],
-    "github": {
-      "team": "elastic/security-detection-platform"
     }
   },
   {
@@ -1003,7 +1015,7 @@
     "id": "workchat-eng",
     "name": "Agent Builder",
     "areas": [
-      "workplaceai"
+      "platform"
     ],
     "github": {
       "team": "elastic/workchat-eng",

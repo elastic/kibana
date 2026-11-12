@@ -16,9 +16,10 @@ describe('evals_attack_discovery_fp_tp config set', () => {
     );
   });
 
-  it('enables the Attack Discovery workflows uiSetting so generation runs', () => {
-    expect(servers.kbnTestServer.serverArgs).toContain(
-      '--uiSettings.overrides.securitySolution:enableAttackDiscoveryWorkflows=true'
+  it('leaves Agent Builder experimental features at their default', () => {
+    const experimentalArg = servers.kbnTestServer.serverArgs.find((arg) =>
+      arg.startsWith('--uiSettings.overrides.agentBuilder:experimentalFeatures=true')
     );
+    expect(experimentalArg).toBeUndefined();
   });
 });

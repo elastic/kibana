@@ -19,8 +19,8 @@ import { useBoolean } from '@kbn/react-hooks';
 
 export const ROW_ACTIONS_COLUMN_WIDTH = 72;
 
-const SHOW_ON_CANVAS_LABEL = i18n.translate('xpack.streams.streamsLayout.showOnCanvasTooltip', {
-  defaultMessage: 'Show on canvas',
+const SHOW_ON_CANVAS_LABEL = i18n.translate('xpack.streams.streamsLayout.showOnMapTooltip', {
+  defaultMessage: 'Show on map',
 });
 
 interface RowActionsMenuProps {
@@ -29,7 +29,8 @@ interface RowActionsMenuProps {
   buttonTestSubj: string;
   deleteTestSubj: string;
   onShowOnCanvas: () => void;
-  onDelete: () => void;
+  /** Omitted for users who cannot edit the unit, which hides the actions menu. */
+  onDelete?: () => void;
 }
 
 export const RowActionsMenu = ({
@@ -45,13 +46,10 @@ export const RowActionsMenu = ({
     defaultMessage: 'Open actions for {entityName}',
     values: { entityName },
   });
-  const showOnCanvasLabel = i18n.translate(
-    'xpack.streams.streamsLayout.showOnCanvasButtonAriaLabel',
-    {
-      defaultMessage: 'Show {entityName} on canvas',
-      values: { entityName },
-    }
-  );
+  const showOnCanvasLabel = i18n.translate('xpack.streams.streamsLayout.showOnMapButtonAriaLabel', {
+    defaultMessage: 'Show {entityName} on map',
+    values: { entityName },
+  });
 
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
@@ -63,41 +61,43 @@ export const RowActionsMenu = ({
           data-test-subj="streamsShowOnCanvasAction"
         />
       </EuiToolTip>
-      <EuiPopover
-        aria-label={actionsLabel}
-        button={
-          <EuiToolTip content={tooltip} disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType="ellipsis"
-              onClick={toggle}
-              aria-label={actionsLabel}
-              data-test-subj={buttonTestSubj}
-            />
-          </EuiToolTip>
-        }
-        isOpen={isOpen}
-        closePopover={closePopover}
-        panelPaddingSize="none"
-        anchorPosition="leftUp"
-      >
-        <EuiContextMenuPanel
-          items={[
-            <EuiContextMenuItem
-              key="delete"
-              icon="trash"
-              onClick={() => {
-                closePopover();
-                onDelete();
-              }}
-              data-test-subj={deleteTestSubj}
-            >
-              {i18n.translate('xpack.streams.streamsLayout.deleteMenuItemLabel', {
-                defaultMessage: 'Delete',
-              })}
-            </EuiContextMenuItem>,
-          ]}
-        />
-      </EuiPopover>
+      {onDelete && (
+        <EuiPopover
+          aria-label={actionsLabel}
+          button={
+            <EuiToolTip content={tooltip} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="ellipsis"
+                onClick={toggle}
+                aria-label={actionsLabel}
+                data-test-subj={buttonTestSubj}
+              />
+            </EuiToolTip>
+          }
+          isOpen={isOpen}
+          closePopover={closePopover}
+          panelPaddingSize="none"
+          anchorPosition="leftUp"
+        >
+          <EuiContextMenuPanel
+            items={[
+              <EuiContextMenuItem
+                key="delete"
+                icon="trash"
+                onClick={() => {
+                  closePopover();
+                  onDelete();
+                }}
+                data-test-subj={deleteTestSubj}
+              >
+                {i18n.translate('xpack.streams.streamsLayout.deleteMenuItemLabel', {
+                  defaultMessage: 'Delete',
+                })}
+              </EuiContextMenuItem>,
+            ]}
+          />
+        </EuiPopover>
+      )}
     </EuiFlexGroup>
   );
 };

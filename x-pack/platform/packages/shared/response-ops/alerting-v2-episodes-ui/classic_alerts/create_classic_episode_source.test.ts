@@ -7,8 +7,15 @@
 
 import { STACK_MANAGEMENT_RULES_HOST } from '@kbn/rule-data-utils';
 import { createClassicEpisodeSource } from './create_classic_episode_source';
+import { useClassicWriteAccess } from './use_classic_write_access';
 
 describe('createClassicEpisodeSource', () => {
+  it('resolves write access through the classic write access hook', () => {
+    expect(createClassicEpisodeSource({ ruleTypeIds: ['test-type'] }).useWriteAccess).toBe(
+      useClassicWriteAccess
+    );
+  });
+
   describe('getRuleDetailsHref', () => {
     it('uses the default Stack Management host when no host is provided', () => {
       const source = createClassicEpisodeSource({ ruleTypeIds: ['test-type'] });

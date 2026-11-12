@@ -12,3 +12,13 @@ responses:
             value:
               - id: param1-id
                 deleted: true
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X DELETE "${KIBANA_URL}/api/synthetics/params/param-id" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true"
+  - lang: Console
+    source: |
+      DELETE kbn://api/synthetics/params/param-id

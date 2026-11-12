@@ -8,13 +8,11 @@
 import { setTimeout as delay } from 'timers/promises';
 import {
   KIS_ONBOARDING_IN_PROGRESS_STATUSES,
-  SIGNIFICANT_EVENTS_ALERT_SOURCE,
   type SignificantEventsWorkflowStatus,
 } from '@kbn/significant-events-schema';
-import type { EsClient, KbnClient } from '@kbn/scout-oblt';
+import type { ApiClientFixture, ApiClientResponse, EsClient, KbnClient } from '@kbn/scout-oblt';
 import { COMMON_API_HEADERS, PUBLIC_API_HEADERS } from './constants';
 
-export const RULE_EVENTS_INDEX = '.rule-events';
 export const DETECTIONS_DATA_STREAM = '.significant_events-detections';
 /** The ES|QL behind the source the suites store their knowledge indicators and detections under. */
 export const ACCESS_SOURCE_ESQL = 'FROM logs.otel, logs.otel.*';
@@ -25,11 +23,21 @@ export const MARK_SCANNED_ENDPOINT = 'internal/significant_events/detections/_ma
 export const SOURCES_ENDPOINT = 'internal/nightshift/sources';
 export const getFeaturesEndpoint = (sourceId: string): string =>
   `internal/streams/${sourceId}/features`;
+export const QUERIES_ENDPOINT = 'internal/significant_events/queries';
+export const DISCOVERY_QUERIES_ENDPOINT = 'internal/streams/_queries';
+export const BULK_DELETE_QUERIES_ENDPOINT = 'internal/streams/queries/_bulk_delete';
 export const RUN_QUOTAS_ENDPOINT = 'internal/significant_events/run_quotas';
 export const TOOL_EXECUTE_ENDPOINT = 'api/agent_builder/tools/_execute';
 
 export const EVENT_SEARCH_TOOL_ID = 'platform.sig_events.event_search';
 export const KI_FEATURE_CREATE_TOOL_ID = 'platform.sig_events.ki_feature_create';
+export const SOURCE_LIST_TOOL_ID = 'observability.nightshift.source_list';
+export const SOURCE_GET_TOOL_ID = 'observability.nightshift.source_get';
+export const SOURCE_CREATE_TOOL_ID = 'observability.nightshift.source_create';
+export const SOURCE_UPDATE_TOOL_ID = 'observability.nightshift.source_update';
+export const SOURCE_DELETE_TOOL_ID = 'observability.nightshift.source_delete';
+/** Holds the knowledge indicators of every source. Deleting a source writes tombstones to it. */
+export const KNOWLEDGE_INDICATORS_DATA_STREAM = '.significant_events-knowledge_indicators';
 
 /** Settings routes that need both `manage_nightshift` and `configure_nightshift`. */
 export const CONFIGURE_ONLY_REQUESTS = [
@@ -46,11 +54,23 @@ export const CONFIGURE_ONLY_REQUESTS = [
 ] as const;
 
 const FENCE_TIMEOUT_MS = 120_000;
-const FENCE_POLL_INTERVAL_MS = 1_000;
-
+const POLL_INTERVAL_MS = 1_000;
 export const POLL_OPTIONS = { timeout: 30_000, intervals: [1_000] };
 
 export const TOOL_API_HEADERS = PUBLIC_API_HEADERS;
+
+/** Runs an Agent Builder tool the way the chat does, as the user the headers belong to. */
+export const executeTool = (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  toolId: string,
+  toolParams: object
+): Promise<ApiClientResponse> =>
+  apiClient.post(TOOL_EXECUTE_ENDPOINT, {
+    headers,
+    body: { tool_id: toolId, tool_params: toolParams },
+    responseType: 'json',
+  });
 
 export interface RunQuotaLimits {
   enabled: boolean;
@@ -82,41 +102,18 @@ export const buildFeature = (id: string) => ({
   tags: ['entity', 'service'],
 });
 
-/** Indexes a significant event straight into `.rule-events`, the way the alerting v2 executor stores it. */
-export const seedSignificantEvent = async (esClient: EsClient, eventId: string): Promise<void> => {
-  const now = new Date().toISOString();
-  await esClient.index({
-    index: RULE_EVENTS_INDEX,
-    op_type: 'create',
-    refresh: true,
-    document: {
-      '@timestamp': now,
-      scheduled_timestamp: now,
-      type: 'alert',
-      source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
-      space_id: 'default',
-      status: 'breached',
-      severity: 'high',
-      group_hash: eventId,
-      rule: { id: eventId, version: 1 },
-      alert: { id: eventId, status: 'active' },
-      data: { event_id: eventId, title: 'Built-in role access check', source_ids: [] },
-    },
-  });
-};
-
-export const deleteSignificantEvent = async (
-  esClient: EsClient,
-  eventId: string
-): Promise<void> => {
-  await esClient.deleteByQuery({
-    index: RULE_EVENTS_INDEX,
-    // Status updates are written with a hashed `group_hash`, so match on the event id instead.
-    query: { term: { 'data.event_id': eventId } },
-    refresh: true,
-    ignore_unavailable: true,
-  });
-};
+/** A filter-only MATCH query, so storing it also installs its backing Alerting v2 rule. */
+export const buildRuleBackedQuery = ({
+  sourceId,
+  viewName,
+}: {
+  sourceId: string;
+  viewName: string;
+}) => ({
+  title: 'Built-in role access check',
+  esql: { query: `FROM ${viewName} | WHERE severity_text == "ERROR"` },
+  source_id: sourceId,
+});
 
 export const seedDetection = async ({
   kbnClient,
@@ -178,6 +175,41 @@ export const deleteFeature = async ({
   });
 };
 
+export const seedRuleBackedQuery = async ({
+  kbnClient,
+  queryId,
+  sourceId,
+  viewName,
+}: {
+  kbnClient: KbnClient;
+  queryId: string;
+  sourceId: string;
+  viewName: string;
+}): Promise<void> => {
+  await kbnClient.request({
+    method: 'PUT',
+    path: `/${QUERIES_ENDPOINT}/${queryId}`,
+    headers: COMMON_API_HEADERS,
+    body: buildRuleBackedQuery({ sourceId, viewName }),
+  });
+};
+
+/** Deletes the query and its backing rule. A query that is already gone is skipped. */
+export const deleteQuery = async ({
+  kbnClient,
+  queryId,
+}: {
+  kbnClient: KbnClient;
+  queryId: string;
+}): Promise<void> => {
+  await kbnClient.request({
+    method: 'POST',
+    path: `/${BULK_DELETE_QUERIES_ENDPOINT}`,
+    headers: COMMON_API_HEADERS,
+    body: { queryIds: [queryId] },
+  });
+};
+
 /** Creates the source the suites write under, with the admin's session, and returns its identity. */
 export const createAccessSource = async ({
   kbnClient,
@@ -185,16 +217,18 @@ export const createAccessSource = async ({
 }: {
   kbnClient: KbnClient;
   title: string;
-}): Promise<{ id: string; slug: string }> => {
-  const { data } = await kbnClient.request<{ source: { id: string; slug: string } }>({
+}): Promise<{ id: string; slug: string; viewName: string }> => {
+  const { data } = await kbnClient.request<{
+    source: { id: string; slug: string; view_name: string };
+  }>({
     method: 'POST',
     path: `/${SOURCES_ENDPOINT}`,
     headers: COMMON_API_HEADERS,
     body: { title, esql: ACCESS_SOURCE_ESQL },
   });
-  const source = { id: data.source.id, slug: data.source.slug };
-  await fenceAutomaticOnboarding({ kbnClient, source });
-  return source;
+  const { id, slug, view_name: viewName } = data.source;
+  await fenceAutomaticOnboarding({ kbnClient, source: { id, slug } });
+  return { id, slug, viewName };
 };
 
 /**
@@ -202,7 +236,7 @@ export const createAccessSource = async ({
  * one-time onboarding run. Writes to the source answer 409 until both are out of the way, so the
  * reconcile is applied here first, and the run it started is cancelled and waited out.
  */
-const fenceAutomaticOnboarding = async ({
+export const fenceAutomaticOnboarding = async ({
   kbnClient,
   source,
 }: {
@@ -221,7 +255,7 @@ const fenceAutomaticOnboarding = async ({
 
   let reconcile = await request('POST', '_reconcile_source', { sourceSlug: source.slug });
   while (reconcile.status === 409 && Date.now() < deadline) {
-    await delay(FENCE_POLL_INTERVAL_MS);
+    await delay(POLL_INTERVAL_MS);
     reconcile = await request('POST', '_reconcile_source', { sourceSlug: source.slug });
   }
   if (reconcile.status === 409) {
@@ -238,7 +272,7 @@ const fenceAutomaticOnboarding = async ({
     if (!KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(data.status)) {
       return;
     }
-    await delay(FENCE_POLL_INTERVAL_MS);
+    await delay(POLL_INTERVAL_MS);
   }
   throw new Error(`Onboarding of source ${source.id} is still running after being cancelled`);
 };

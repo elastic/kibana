@@ -28,6 +28,8 @@ import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 const FUNCTION_NAME_MAX_LENGTH = 170;
 const QUALIFIER_MAX_LENGTH = 128;
 const MARKER_MAX_LENGTH = 2048;
+// https://docs.aws.amazon.com/lambda/latest/api/API_ListFunctions.html
+const LIST_FUNCTIONS_MAX_ITEMS = 10000;
 
 interface LambdaApiResponse {
   data: unknown;
@@ -236,8 +238,11 @@ export const AwsLambdaConnector: ConnectorSpec = {
         z.object({
           maxItems: z
             .number()
+            .int()
+            .min(1)
+            .max(LIST_FUNCTIONS_MAX_ITEMS)
             .optional()
-            .describe('Maximum number of functions to return (1-10000)'),
+            .describe(`Maximum number of functions to return (1-${LIST_FUNCTIONS_MAX_ITEMS})`),
           marker: z
             .string()
             .max(MARKER_MAX_LENGTH)
@@ -259,7 +264,7 @@ export const AwsLambdaConnector: ConnectorSpec = {
           queryParams.Marker = typedInput.marker;
         }
 
-        const { data } = await callLambdaApi(ctx, 'GET', '/2015-03-31/functions/', queryParams);
+        const { data } = await callLambdaApi(ctx, 'GET', '/2015-03-31/functions', queryParams);
         const body = data as Record<string, unknown>;
 
         return {
@@ -334,7 +339,7 @@ export const AwsLambdaConnector: ConnectorSpec = {
 
   test: {
     handler: async (ctx) => {
-      await callLambdaApi(ctx, 'GET', '/2015-03-31/functions/', { MaxItems: '1' });
+      await callLambdaApi(ctx, 'GET', '/2015-03-31/functions', { MaxItems: '1' });
       return {};
     },
     description: i18n.translate('connectorSpecs.awsLambda.test.description', {

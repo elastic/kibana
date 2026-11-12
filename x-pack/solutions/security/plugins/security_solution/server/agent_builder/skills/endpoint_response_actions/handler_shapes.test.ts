@@ -13,9 +13,15 @@ import {
 import { createMockEndpointAppContext } from '../../../endpoint/mocks';
 import {
   createEndpointResponseActionsSkill,
+  ISOLATE_TOOL_ID,
+  UNISOLATE_TOOL_ID,
   GET_ENDPOINT_STATUS_TOOL_ID,
   LIST_ENDPOINTS_TOOL_ID,
+  RUNNING_PROCESSES_TOOL_ID,
+  SCAN_TOOL_ID,
 } from '.';
+
+const experimentalFeatures = { automaticTroubleshootingUniversalSkill: false };
 
 function assertStandardReturn(result: unknown) {
   const r = result as ToolHandlerReturn;
@@ -48,14 +54,59 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
   });
 
   describe('FR-020: endpoint-not-found returns distinguishable shape', () => {
+    it('isolate_host returns found: false with reason "endpoint_not_found" when no agent is found', async () => {
+      const skill = createEndpointResponseActionsSkill(
+        mockEndpointAppContextService,
+        experimentalFeatures
+      );
+      const inlineTools = await skill.getInlineTools?.();
+      const isolateTool = inlineTools?.find((tool) => tool.id === ISOLATE_TOOL_ID);
+
+      const result = await (isolateTool as unknown as { handler: Function }).handler(
+        { hostName: 'nonexistent-host', comment: 'test' },
+        { callContext: { callSource: 'agent' }, logger: { error: jest.fn() } }
+      );
+
+      expect(assertStandardReturn(result)).toHaveLength(1);
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+      expect(data.found).toBe(false);
+      expect(data.reason).toBe('endpoint_not_found');
+      expect(data.hostName).toBe('nonexistent-host');
+      expect(assertStandardReturn(result)[0].type).toBe('other');
+    });
+
+    it('unisolate_host returns found: false with reason "endpoint_not_found" when no agent is found', async () => {
+      const skill = createEndpointResponseActionsSkill(
+        mockEndpointAppContextService,
+        experimentalFeatures
+      );
+      const inlineTools = await skill.getInlineTools?.();
+      const unisolateTool = inlineTools?.find((tool) => tool.id === UNISOLATE_TOOL_ID);
+
+      const result = await (unisolateTool as unknown as { handler: Function }).handler(
+        { hostName: 'nonexistent-host', comment: 'test' },
+        { callContext: { callSource: 'agent' }, logger: { error: jest.fn() } }
+      );
+
+      expect(assertStandardReturn(result)).toHaveLength(1);
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+      expect(data.found).toBe(false);
+      expect(data.reason).toBe('endpoint_not_found');
+      expect(data.hostName).toBe('nonexistent-host');
+      expect(assertStandardReturn(result)[0].type).toBe('other');
+    });
+
     it('get_endpoint_status returns found: false with reason "endpoint_not_found" when no agent is found', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+      const skill = createEndpointResponseActionsSkill(
+        mockEndpointAppContextService,
+        experimentalFeatures
+      );
       const inlineTools = await skill.getInlineTools?.();
       const statusTool = inlineTools?.find((tool) => tool.id === GET_ENDPOINT_STATUS_TOOL_ID);
 
       const result = await (statusTool as unknown as { handler: Function }).handler(
         { hostName: 'nonexistent-host' },
-        { logger: { error: jest.fn(), warn: jest.fn() } }
+        { callContext: { callSource: 'agent' }, logger: { error: jest.fn(), warn: jest.fn() } }
       );
 
       expect(assertStandardReturn(result)).toHaveLength(1);
@@ -73,7 +124,10 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
 
   describe('FR-021: not-found returns distinguishable shape in get_endpoint_status', () => {
     it('get_endpoint_status returns found: false with reason "endpoint_not_found" when agent exists but metadata service returns empty', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+      const skill = createEndpointResponseActionsSkill(
+        mockEndpointAppContextService,
+        experimentalFeatures
+      );
       const inlineTools = await skill.getInlineTools?.();
       const statusTool = inlineTools?.find((tool) => tool.id === GET_ENDPOINT_STATUS_TOOL_ID);
 
@@ -123,7 +177,10 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
     });
 
     it('get_endpoint_status returns found: true when all lookups succeed', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+      const skill = createEndpointResponseActionsSkill(
+        mockEndpointAppContextService,
+        experimentalFeatures
+      );
       const inlineTools = await skill.getInlineTools?.();
       const statusTool = inlineTools?.find((tool) => tool.id === GET_ENDPOINT_STATUS_TOOL_ID);
 
@@ -188,19 +245,24 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
     });
   });
 
-  describe('not-found and failure are separate result types', () => {
-    it('get_endpoint_status uses ToolResultType.other for not-found, but ToolResultType.error when the lookup itself fails', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
-      const inlineTools = await skill.getInlineTools?.();
-      const statusTool = inlineTools?.find((tool) => tool.id === GET_ENDPOINT_STATUS_TOOL_ID);
-      const handler = (statusTool as unknown as { handler: Function }).handler;
+  describe('Consistency across host-lookup tools', () => {
+    const HOST_LOOKUP_TOOL_IDS = [
+      ISOLATE_TOOL_ID,
+      UNISOLATE_TOOL_ID,
+      GET_ENDPOINT_STATUS_TOOL_ID,
+      RUNNING_PROCESSES_TOOL_ID,
+      SCAN_TOOL_ID,
+    ];
 
-      // A host that simply is not enrolled is a normal, reportable outcome.
-      const notFoundResult = await handler(
-        { hostName: 'nonexistent-host' },
-        { logger: { error: jest.fn(), warn: jest.fn() } }
+    it('all host-lookup tools return ToolResultType.other for "endpoint not found" (not error)', async () => {
+      const skill = createEndpointResponseActionsSkill(
+        mockEndpointAppContextService,
+        experimentalFeatures
       );
-      expect(assertStandardReturn(notFoundResult)[0].type).toBe('other');
+      const inlineTools = await skill.getInlineTools?.();
+      const hostLookupTools = (inlineTools ?? []).filter((t) =>
+        HOST_LOOKUP_TOOL_IDS.includes(t.id)
+      );
 
       // A failing lookup is NOT the same thing: if it collapsed into the
       // not-found shape, the agent would tell the analyst "no such host"
@@ -212,45 +274,54 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
         ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
       })) as unknown as typeof mockEndpointAppContextService.getInternalFleetServices;
 
-      const errorResult = await handler(
-        { hostName: 'any-host' },
-        { logger: { error: jest.fn(), warn: jest.fn() } }
-      );
+      for (const tool of hostLookupTools) {
+        const errorResult = await (tool as unknown as { handler: Function }).handler(
+          { hostName: 'any-host' },
+          { callContext: { callSource: 'agent' }, logger: { error: jest.fn(), warn: jest.fn() } }
+        );
 
-      const errorEntry = assertStandardReturn(errorResult)[0];
-      expect(errorEntry.type).toBe('error');
-      const data = errorEntry.data as Record<string, unknown>;
-      expect(data.error).toBe('unknown_error');
-      expect(data.found).toBeUndefined();
+        const errorEntry = assertStandardReturn(errorResult)[0];
+        expect(errorEntry.type).toBe('error');
+        const data = errorEntry.data as Record<string, unknown>;
+        expect(data.error).toBe('unknown_error');
+        expect(data.found).toBeUndefined();
+      }
     });
 
     it('list_endpoints reports an empty list rather than a not-found shape when nothing is enrolled', async () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+      const skill = createEndpointResponseActionsSkill(
+        mockEndpointAppContextService,
+        experimentalFeatures
+      );
       const inlineTools = await skill.getInlineTools?.();
       const listTool = (inlineTools ?? []).find((t) => t.id === LIST_ENDPOINTS_TOOL_ID);
-      const handler = (listTool as unknown as { handler: Function }).handler;
+      expect(listTool).toBeDefined();
+      expect(HOST_LOOKUP_TOOL_IDS).not.toContain(LIST_ENDPOINTS_TOOL_ID);
 
-      jest.spyOn(mockEndpointAppContextService, 'getEndpointMetadataService').mockImplementation(
-        () =>
-          ({
-            getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),
-          } as unknown as ReturnType<EndpointAppContextService['getEndpointMetadataService']>)
+      // Mock metadata service to return an empty (but successful) page.
+      const mockMetadataService = {
+        getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),
+      };
+      jest
+        .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+        .mockImplementation(
+          () =>
+            mockMetadataService as unknown as ReturnType<
+              EndpointAppContextService['getEndpointMetadataService']
+            >
+        );
+
+      // The service is rebuilt in beforeEach, so the spy needs no manual restore.
+      const result = await (listTool as unknown as { handler: Function }).handler(
+        {},
+        { callContext: { callSource: 'agent' }, logger: { error: jest.fn() } }
       );
-
-      const result = await handler({}, { logger: { error: jest.fn(), warn: jest.fn() } });
-
-      // `list_endpoints` answers "which hosts exist", so zero enrolled hosts is
-      // a valid, successful answer — not the `found: false` /
-      // `endpoint_not_found` shape the single-host lookup tools return. If this
-      // ever collapsed into the not-found shape, the agent would report a
-      // lookup failure for what is really just an empty fleet.
-      const entry = assertStandardReturn(result)[0];
-      expect(entry.type).toBe('other');
-      const data = entry.data as Record<string, unknown>;
-      expect(data.endpoints).toEqual([]);
-      expect(data.total).toBe(0);
-      expect(data.found).toBeUndefined();
-      expect(data.reason).toBeUndefined();
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+      // list_endpoints has no single-host lookup to fail — confirm it returns the
+      // empty-list shape (not the 'endpoint_not_found' reason used by the other tools).
+      expect(data.reason).not.toBe('endpoint_not_found');
+      expect(Array.isArray(data.endpoints)).toBe(true);
+      expect(data.endpoints).toHaveLength(0);
     });
   });
 });

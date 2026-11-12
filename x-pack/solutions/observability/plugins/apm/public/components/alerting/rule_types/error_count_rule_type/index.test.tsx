@@ -58,10 +58,10 @@ const renderRuleType = (ruleParams: Partial<ErrorCountRuleParams>, setRuleParams
 };
 
 describe('ErrorCountRuleType', () => {
-  it('renders', async () => {
+  it('renders', () => {
     render(<CreatingInApmFromService />);
 
-    expect(await screen.findByText('Service')).toBeInTheDocument();
+    expect(screen.getByText('Service')).toBeInTheDocument();
   });
 
   it('defaults groupBy to include transaction.name for new rules', () => {

@@ -33,7 +33,15 @@ describe('normalizeEsqlForEquivalence', () => {
     expect(normalizeEsqlForEquivalence(withWhere)).toBe(withoutWhere);
   });
 
-  it('strips order_date (and other event-time) bind-param WHERE pipes', () => {
+  it('keeps order_date (and other event-time) bind-param WHERE pipes by default', () => {
+    const query = `FROM kibana_sample_data_ecommerce
+| WHERE order_date >= ?_tstart AND order_date < ?_tend
+| STATS \`Order Count\` = COUNT(*) BY category.keyword`;
+
+    expect(normalizeEsqlForEquivalence(query)).toBe(query);
+  });
+
+  it('strips order_date (and other event-time) bind-param WHERE pipes with anyTimeField', () => {
     const withWhere = `FROM kibana_sample_data_ecommerce
 | WHERE order_date >= ?_tstart AND order_date < ?_tend
 | STATS \`Order Count\` = COUNT(*) BY category.keyword
@@ -45,7 +53,7 @@ describe('normalizeEsqlForEquivalence', () => {
 | SORT \`Order Count\` DESC
 | LIMIT 10`;
 
-    expect(normalizeEsqlForEquivalence(withWhere)).toBe(withoutWhere);
+    expect(normalizeEsqlForEquivalence(withWhere, { anyTimeField: true })).toBe(withoutWhere);
   });
 
   it('keeps non-time predicates when removing the bind-param conjunct', () => {

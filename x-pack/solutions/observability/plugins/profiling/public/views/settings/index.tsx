@@ -28,10 +28,11 @@ import {
   profilingCostPervCPUPerHour,
   profilingShowErrorFrames,
 } from '@kbn/observability-plugin/common';
-import { useEditableSettings, useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
 import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
+import { useEditableSettings } from '@kbn/management-settings-hooks';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { BottomBarActions } from './bottom_bar_actions';
@@ -54,6 +55,7 @@ const costSettings = [
   profilingCostPervCPUPerHour,
 ];
 const miscSettings = [profilingShowErrorFrames];
+const SETTINGS_KEYS = [...co2Settings, ...costSettings, ...miscSettings];
 
 export function Settings() {
   const trackProfilingEvent = useUiTracker({ app: 'profiling' });
@@ -64,16 +66,13 @@ export function Settings() {
   } = useProfilingDependencies();
 
   const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
-    useEditableSettings([...co2Settings, ...costSettings, ...miscSettings]);
+    useEditableSettings({ settingsKeys: SETTINGS_KEYS, settingsClient: settings.client });
 
   async function handleSave() {
     try {
-      const reloadPage = Object.keys(unsavedChanges).some((key) => {
-        return fields[key].requiresPageReload;
-      });
-      await saveAll();
+      const { requiresReload } = await saveAll();
       trackProfilingEvent({ metric: 'general_settings_save' });
-      if (reloadPage) {
+      if (requiresReload) {
         window.location.reload();
       }
     } catch (e) {
@@ -113,13 +112,13 @@ export function Settings() {
             description: {
               title: i18n.translate('xpack.profiling.settings.co2.title', {
                 defaultMessage:
-                  'The Universal Profiling host agent can detect if your machine is running on AWS, Azure, or Google Cloud Platform.',
+                  'The Profiling agents can detect if your machine is running on AWS, Azure, or Google Cloud Platform.',
               }),
               subtitle: (
                 <>
                   <FormattedMessage
                     id="xpack.profiling.settings.co2.aws.subtitle"
-                    defaultMessage="For machines running on AWS, Universal Profiling applies the appropriate {regionalCarbonIntensityLink} for your instance's AWS region and the current AWS data center {pue}."
+                    defaultMessage="For machines running on AWS, Profiling applies the appropriate {regionalCarbonIntensityLink} for your instance's AWS region and the current AWS data center {pue}."
                     values={{
                       regionalCarbonIntensityLink: (
                         <EuiLink
@@ -144,7 +143,7 @@ export function Settings() {
                   <EuiSpacer size="xs" />
                   <FormattedMessage
                     id="xpack.profiling.settings.co2.azure.subtitle"
-                    defaultMessage="For machines running on Azure, Universal Profiling applies the appropriate {regionalCarbonIntensityLink} for your instance's Azure region and the current Azure data center {pue}."
+                    defaultMessage="For machines running on Azure, Profiling applies the appropriate {regionalCarbonIntensityLink} for your instance's Azure region and the current Azure data center {pue}."
                     values={{
                       regionalCarbonIntensityLink: (
                         <EuiLink
@@ -170,7 +169,7 @@ export function Settings() {
               ),
               text: i18n.translate('xpack.profiling.settings.co2.text', {
                 defaultMessage:
-                  'For all other configurations, Universal Profiling uses the following default configurations. You can update these configurations as needed.',
+                  'For all other configurations, Profiling uses the following default configurations. You can update these configurations as needed.',
               }),
             },
             settings: co2Settings,
@@ -183,7 +182,7 @@ export function Settings() {
               title: (
                 <FormattedMessage
                   id="xpack.profiling.settings.cost.title"
-                  defaultMessage="Universal Profiling uses the cost for AWS EC2 instances and Azure VMs using the {awsPriceList} and {azurePriceList} respectively."
+                  defaultMessage="Profiling uses the cost for AWS EC2 instances and Azure VMs using the {awsPriceList} and {azurePriceList} respectively."
                   values={{
                     awsPriceList: (
                       <EuiLink
@@ -221,7 +220,7 @@ export function Settings() {
               title: (
                 <FormattedMessage
                   id="xpack.profiling.settings.misc.title"
-                  defaultMessage="Universal Profiling miscellaneous settings."
+                  defaultMessage="Profiling miscellaneous settings."
                 />
               ),
             },

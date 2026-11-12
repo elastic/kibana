@@ -91,7 +91,7 @@ describe('ki_queries_validate tool', () => {
     });
     createQueryValidationContextMock.mockResolvedValue({
       targetSources: ['logs.test'],
-      validationLookback: 'now-10m',
+      validationLookbackMinutes: 10,
       conflictingFields: new Set(),
       normalizedStoredEsqls: new Set(),
     });
@@ -122,6 +122,12 @@ describe('ki_queries_validate tool', () => {
       true
     );
     expect(tool.schema.safeParse({ slug: 'logs.test', queries: [] }).success).toBe(true);
+    expect(
+      tool.schema.safeParse({
+        slug: 'logs.test',
+        queries: [{ ...candidate, category: 'unsupported' }],
+      }).success
+    ).toBe(false);
     expect(
       tool.schema.safeParse({ slug: 'logs.test', queries: Array(101).fill(candidate) }).success
     ).toBe(false);

@@ -11,12 +11,19 @@ import { tags } from '@kbn/scout-oblt';
 import { significantEventsApiTest as apiTest } from '../../fixtures';
 import { COMMON_API_HEADERS } from '../../fixtures/constants';
 import {
+  ACCESS_SOURCE_ESQL,
   DETECTIONS_ENDPOINT,
   EVENTS_ENDPOINT,
   EVENT_SEARCH_TOOL_ID,
+  executeTool,
   KI_FEATURE_CREATE_TOOL_ID,
   MARK_SCANNED_ENDPOINT,
   POLL_OPTIONS,
+  SOURCE_CREATE_TOOL_ID,
+  SOURCE_DELETE_TOOL_ID,
+  SOURCE_GET_TOOL_ID,
+  SOURCE_LIST_TOOL_ID,
+  SOURCE_UPDATE_TOOL_ID,
   TOOL_API_HEADERS,
   TOOL_EXECUTE_ENDPOINT,
   buildDetection,
@@ -26,11 +33,10 @@ import {
   deleteDetections,
   deleteFeature,
   getFeaturesEndpoint,
-  deleteSignificantEvent,
   seedDetection,
   seedFeature,
-  seedSignificantEvent,
 } from '../../fixtures/built_in_role_access';
+import { deleteSignificantEvent, seedSignificantEvent } from '../../fixtures/rule_events';
 
 // The built-in `viewer` role has no index privileges on `.rule-events` or `.significant_events-*`.
 // Reads rely on the implicit grants attached to the Nightshift `read` privilege.
@@ -41,6 +47,7 @@ apiTest.describe(
     const eventId = `viewer-access-${uuidv4()}`;
     const ruleUuid = `viewer-access-${uuidv4()}`;
     const featureId = `viewer-access-${uuidv4()}`;
+    const sourceTitle = `viewer-access-${uuidv4()}`;
     let sourceId: string;
     let sourceSlug: string;
     let headers: Record<string, string>;
@@ -49,10 +56,10 @@ apiTest.describe(
     apiTest.beforeAll(async ({ apiServices, esClient, kbnClient, samlAuth }) => {
       // Detection writes are rejected while Significant Events is paused.
       await apiServices.significantEventsTest.resumeSignificantEvents();
-      await seedSignificantEvent(esClient, eventId);
+      await seedSignificantEvent(esClient, eventId, { title: 'Built-in role access check' });
       ({ id: sourceId, slug: sourceSlug } = await createAccessSource({
         kbnClient,
-        title: `viewer-access-${uuidv4()}`,
+        title: sourceTitle,
       }));
       await seedDetection({ kbnClient, ruleUuid, sourceId });
       await seedFeature({ kbnClient, sourceId, featureId });
@@ -69,6 +76,7 @@ apiTest.describe(
     });
 
     apiTest('lists and opens significant events', async ({ apiClient }) => {
+      // Nightshift opens an event by filtering the collection route by event_id.
       await expect
         .poll(async () => {
           const response = await apiClient.get(`${EVENTS_ENDPOINT}?event_id=${eventId}`, {
@@ -83,13 +91,6 @@ apiTest.describe(
           };
         }, POLL_OPTIONS)
         .toStrictEqual({ statusCode: 200, eventIds: [eventId] });
-
-      const response = await apiClient.get(`${EVENTS_ENDPOINT}/${eventId}`, {
-        headers,
-        responseType: 'json',
-      });
-      expect(response).toHaveStatusCode(200);
-      expect(response.body).toMatchObject({ event_id: eventId });
     });
 
     apiTest('lists detections', async ({ apiClient }) => {
@@ -127,12 +128,6 @@ apiTest.describe(
         responseType: 'json',
       });
       expect(updateResponse).toHaveStatusCode(403);
-
-      const investigateResponse = await apiClient.post(
-        `${EVENTS_ENDPOINT}/${eventId}/investigate`,
-        { headers, responseType: 'json' }
-      );
-      expect(investigateResponse).toHaveStatusCode(403);
     });
 
     apiTest('cannot write detections', async ({ apiClient }) => {
@@ -201,10 +196,50 @@ apiTest.describe(
           expect.objectContaining({
             type: 'error',
             data: expect.objectContaining({
-              message: expect.stringContaining('requires the Nightshift manage privilege'),
+              message: expect.stringContaining('requires the nightshift manage privilege'),
             }),
           }),
         ]);
+      }
+    );
+
+    apiTest(
+      'can list and get sources but the tools that change them are not available from Agent Builder',
+      async ({ apiClient }) => {
+        const listResponse = await executeTool(apiClient, toolHeaders, SOURCE_LIST_TOOL_ID, {
+          search: sourceTitle,
+        });
+        expect(listResponse).toHaveStatusCode(200);
+        expect(listResponse.body.results[0].data.sources).toStrictEqual(
+          expect.arrayContaining([expect.objectContaining({ id: sourceId, slug: sourceSlug })])
+        );
+
+        const getResponse = await executeTool(apiClient, toolHeaders, SOURCE_GET_TOOL_ID, {
+          source: sourceSlug,
+        });
+        expect(getResponse).toHaveStatusCode(200);
+        expect(getResponse.body.results[0].data).toStrictEqual(
+          expect.objectContaining({ id: sourceId, slug: sourceSlug })
+        );
+
+        const deniedCalls = [
+          [SOURCE_CREATE_TOOL_ID, { title: `viewer-denied-${uuidv4()}`, esql: ACCESS_SOURCE_ESQL }],
+          [SOURCE_UPDATE_TOOL_ID, { source: sourceSlug, enabled: false }],
+          [SOURCE_DELETE_TOOL_ID, { source: sourceSlug }],
+        ] as const;
+        for (const [toolId, toolParams] of deniedCalls) {
+          const response = await executeTool(apiClient, toolHeaders, toolId, toolParams);
+          expect(response).toHaveStatusCode(400);
+          expect(response.body.message).toBe(`Tool ${toolId} is not available`);
+        }
+
+        // The denied delete and disable left the source as it was.
+        const afterResponse = await executeTool(apiClient, toolHeaders, SOURCE_GET_TOOL_ID, {
+          source: sourceSlug,
+        });
+        expect(afterResponse.body.results[0].data).toStrictEqual(
+          expect.objectContaining({ id: sourceId, enabled: true })
+        );
       }
     );
   }

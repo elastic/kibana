@@ -103,3 +103,112 @@ export const getMockStixBundle = (overrides: Partial<StixBundle> = {}): StixBund
   ],
   ...overrides,
 });
+
+// ---------------------------------------------------------------------------
+// MITRE ATLAS fixtures. ATLAS bundles use 'mitre-atlas' as both the external
+// reference source_name and the kill_chain_name, IDs are prefixed with 'AML.',
+// and upstream URLs have no trailing slash.
+// ---------------------------------------------------------------------------
+
+/** Derives the canonical atlas.mitre.org URL (no trailing slash, as upstream) for an ATLAS id. */
+const deriveAtlasUrl = (atlasId: string): string => {
+  if (atlasId.startsWith('AML.TA')) {
+    return `https://atlas.mitre.org/tactics/${atlasId}`;
+  }
+  return `https://atlas.mitre.org/techniques/${atlasId}`;
+};
+
+/** Returns a MITRE ATLAS external reference array for the given ATLAS id and optional URL. */
+export const getMockAtlasExternalReferences = (
+  atlasId: string,
+  url?: string
+): StixExternalReference[] => [
+  {
+    source_name: 'mitre-atlas',
+    external_id: atlasId,
+    url: url ?? deriveAtlasUrl(atlasId),
+  },
+];
+
+/** Returns a default ATLAS x-mitre-tactic entity merged with any supplied overrides. */
+export const getMockAtlasTacticEntity = (overrides: Partial<StixEntity> = {}): StixEntity => ({
+  id: 'x-mitre-tactic--aml-ta0010',
+  type: 'x-mitre-tactic',
+  name: 'Exfiltration',
+  description: 'The adversary is trying to steal AI artifacts or other information.',
+  x_mitre_shortname: 'exfiltration',
+  external_references: getMockAtlasExternalReferences('AML.TA0010'),
+  ...overrides,
+});
+
+/**
+ * Returns a default ATLAS technique entity merged with any supplied overrides. Like many
+ * upstream ATLAS techniques it also carries a secondary 'mitre-attack' reference to the
+ * ATT&CK technique it maps to, which the build must ignore. ATLAS techniques omit
+ * x_mitre_is_subtechnique rather than setting it to false.
+ */
+export const getMockAtlasTechniqueEntity = (overrides: Partial<StixEntity> = {}): StixEntity => ({
+  id: 'attack-pattern--aml-t0024',
+  type: 'attack-pattern',
+  name: 'Exfiltration via AI Inference API',
+  description: 'Adversaries may exfiltrate private information via the AI model inference API.',
+  kill_chain_phases: [{ kill_chain_name: 'mitre-atlas', phase_name: 'exfiltration' }],
+  external_references: [
+    ...getMockAtlasExternalReferences('AML.T0024'),
+    {
+      source_name: 'mitre-attack',
+      external_id: 'T1567',
+      url: 'https://attack.mitre.org/techniques/T1567/',
+    },
+  ],
+  ...overrides,
+});
+
+/** Returns a default ATLAS subtechnique entity merged with any supplied overrides. */
+export const getMockAtlasSubtechniqueEntity = (
+  overrides: Partial<StixEntity> = {}
+): StixEntity => ({
+  id: 'attack-pattern--aml-t0024-002',
+  type: 'attack-pattern',
+  name: 'Extract AI Model',
+  x_mitre_is_subtechnique: true,
+  kill_chain_phases: [{ kill_chain_name: 'mitre-atlas', phase_name: 'exfiltration' }],
+  external_references: getMockAtlasExternalReferences('AML.T0024.002'),
+  ...overrides,
+});
+
+/** Returns a default ATLAS x-mitre-matrix entity merged with any supplied overrides. */
+export const getMockAtlasMatrixEntity = (overrides: Partial<StixEntity> = {}): StixEntity => ({
+  id: 'x-mitre-matrix--atlas',
+  type: 'x-mitre-matrix',
+  name: 'ATLAS',
+  tactic_refs: ['x-mitre-tactic--aml-ta0010'],
+  ...overrides,
+});
+
+/** Returns a default ATLAS subtechnique-of relationship entity merged with any supplied overrides. */
+export const getMockAtlasRelationshipEntity = (
+  overrides: Partial<StixEntity> = {}
+): StixEntity => ({
+  id: 'relationship--subtechnique-of--aml-t0024-002--aml-t0024',
+  type: 'relationship',
+  relationship_type: 'subtechnique-of',
+  source_ref: 'attack-pattern--aml-t0024-002',
+  target_ref: 'attack-pattern--aml-t0024',
+  ...overrides,
+});
+
+/**
+ * Returns an ATLAS STIX bundle whose objects list contains the default ATLAS matrix, tactic,
+ * technique, subtechnique, and subtechnique-of relationship, merged with any supplied overrides.
+ */
+export const getMockAtlasStixBundle = (overrides: Partial<StixBundle> = {}): StixBundle => ({
+  objects: [
+    getMockAtlasMatrixEntity(),
+    getMockAtlasTacticEntity(),
+    getMockAtlasTechniqueEntity(),
+    getMockAtlasSubtechniqueEntity(),
+    getMockAtlasRelationshipEntity(),
+  ],
+  ...overrides,
+});
