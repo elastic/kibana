@@ -34,7 +34,11 @@ interface Route {
   readonly operation: ContractOperation;
   readonly servers: readonly ServerPrefix[];
   readonly path: RegExp;
+  /** The path template, without the fixed query parameters of `x-ms-paths` keys. */
+  readonly template: string;
   readonly parameterNames: readonly string[];
+  /** How many of the parameters span several path segments (`x-ms-skip-url-encoding`). */
+  readonly multiSegmentCount: number;
   /** The length of the template's text outside parameters. */
   readonly literalLength: number;
 }
@@ -112,7 +116,9 @@ const compileRoute = (operation: ContractOperation): Route => {
     operation,
     servers: operation.servers.map(compileServer),
     path: new RegExp(`^${source}$`),
+    template,
     parameterNames,
+    multiSegmentCount: parameterNames.filter((name) => multiSegment.has(name)).length,
     literalLength: template.replace(new RegExp(TEMPLATE_PARAMETER, 'g'), '').length,
   };
 };
@@ -269,8 +275,10 @@ const decodePathSegment = (segment: string): string => {
 
 /**
  * Creates a router that finds the operation for a request. When several path templates match,
- * the one with the fewest parameters wins, so `/items/new` takes precedence over `/items/{id}`,
- * then the one with the most literal text, so `/items/{id}:archive` takes precedence over
+ * the one without parameters that span several segments wins, so a catch-all such as Azure's
+ * `/{resourceId}` never takes a request that a template with literal segments matches, then
+ * the one with the fewest parameters, so `/items/new` takes precedence over `/items/{id}`, then
+ * the one with the most literal text, so `/items/{id}:archive` takes precedence over
  * `/items/{id}`. Operations on that template, as `x-ms-paths` declares them, are told apart by
  * the query parameters their keys fix and their required parameters with one allowed value:
  * those the request sends with another value are left out, unless every operation is, then the
@@ -281,6 +289,15 @@ const decodePathSegment = (segment: string): string => {
  */
 export const createOperationMatcher = (operations: readonly ContractOperation[]) => {
   const routes = operations.map(compileRoute);
+  // Operations on one template rank alike, whichever of them declares a parameter as spanning
+  // several segments, so only the discriminators below tell them apart.
+  const multiSegmentByTemplate = new Map<string, number>();
+  for (const { template, multiSegmentCount } of routes) {
+    multiSegmentByTemplate.set(
+      template,
+      Math.max(multiSegmentByTemplate.get(template) ?? 0, multiSegmentCount)
+    );
+  }
 
   return (
     method: string,
@@ -312,12 +329,22 @@ export const createOperationMatcher = (operations: readonly ContractOperation[])
     // `/items/{id}` whatever the request's parameters; discriminators only tell apart operations
     // on that template, as `x-ms-paths` declares them.
     const specificity = ({ route }: (typeof forMethod)[number]) =>
-      [route.parameterNames.length, -route.literalLength] as const;
-    const [mostSpecific] = forMethod.map(specificity).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+      [
+        multiSegmentByTemplate.get(route.template) ?? 0,
+        route.parameterNames.length,
+        -route.literalLength,
+      ] as const;
+    const [mostSpecific] = forMethod
+      .map(specificity)
+      .sort((a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2]);
     const onTemplate = forMethod
       .filter((candidate) => {
-        const [parameters, literal] = specificity(candidate);
-        return parameters === mostSpecific[0] && literal === mostSpecific[1];
+        const [multiSegment, parameters, literal] = specificity(candidate);
+        return (
+          multiSegment === mostSpecific[0] &&
+          parameters === mostSpecific[1] &&
+          literal === mostSpecific[2]
+        );
       })
       .map((candidate) => ({ ...candidate, ...discriminate(candidate.route, { url, headers }) }));
     // A conflicting discriminator rules an operation out only when another is left, so a request
