@@ -60,7 +60,6 @@ export const toOverviewSections = (
             subjects,
             hypotheses,
             conclusion,
-            missingData: investigation.metadata.missing_data,
             proposals: investigation.proposals,
             isRunning: investigation.in_progress,
           }}

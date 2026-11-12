@@ -27,18 +27,10 @@ const indent = (text: string): string =>
     .map((line) => `    ${line}`)
     .join('\n');
 
-const formatHypothesis = ({
-  candidate,
-  confidence,
-  status,
-  reason,
-  settled_by: settledBy,
-  evidence = [],
-}: Hypothesis) =>
+const formatHypothesis = ({ candidate, confidence, status, reason, evidence = [] }: Hypothesis) =>
   [
     `- [${status}, confidence ${Math.round(confidence * 100)}%] ${candidate}`,
     reason ? `  Reason: ${reason}` : undefined,
-    settledBy ? `  Settled by: ${settledBy}` : undefined,
     ...evidence.map((item) => `  Evidence:\n${indent(formatEvidenceForAgent(item))}`),
   ]
     .filter((line): line is string => line !== undefined)

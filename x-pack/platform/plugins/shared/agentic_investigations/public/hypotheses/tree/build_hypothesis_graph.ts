@@ -11,7 +11,6 @@ import type {
   InvestigationProposalSummary,
   InvestigationSubjectResponse,
 } from '../../../common/investigations/investigation';
-import type { MissingDataItem } from '../../../common/missing_data';
 
 /** What the tree is drawn from: the investigation as the query API returns it. */
 export interface HypothesisTreeInput {
@@ -23,8 +22,6 @@ export interface HypothesisTreeInput {
   hypotheses: readonly Hypothesis[];
   /** The verdict, as markdown. */
   conclusion?: string;
-  /** Gaps in the data that kept the cause from being confirmed. */
-  missingData?: readonly MissingDataItem[];
   proposals: readonly InvestigationProposalSummary[];
   /** An agent is working on the investigation, so its conclusion and actions are drafts. */
   isRunning: boolean;
@@ -49,7 +46,7 @@ export type HypothesisTreeNodeData =
       index: number;
       isWinner: boolean;
     }
-  | { kind: 'conclusion'; conclusion: string; missingData?: readonly MissingDataItem[] }
+  | { kind: 'conclusion'; conclusion: string }
   | {
       kind: 'actions';
       /** Highest confidence first, so the recommended one is on top. */
@@ -138,7 +135,6 @@ export const buildHypothesisGraph = ({
   subjects,
   hypotheses,
   conclusion,
-  missingData = [],
   proposals,
   isRunning,
 }: HypothesisTreeInput): HypothesisGraph => {
@@ -188,7 +184,7 @@ export const buildHypothesisGraph = ({
   if (conclusionText) {
     nodes.push({
       id: HYPOTHESIS_TREE_NODE_IDS.conclusion,
-      data: { kind: 'conclusion', conclusion: conclusionText, missingData },
+      data: { kind: 'conclusion', conclusion: conclusionText },
     });
     feedingIds.forEach((id) =>
       edges.push(createEdge(id, HYPOTHESIS_TREE_NODE_IDS.conclusion, isFeedingHappy(id)))

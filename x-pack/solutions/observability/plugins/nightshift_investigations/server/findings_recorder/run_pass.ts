@@ -14,13 +14,13 @@ import { MessageRole, type Message, type ToolCall } from '@kbn/inference-common'
 import {
   INVESTIGATION_SEVERITY_CHANGED_EVENT_TYPE,
   INVESTIGATION_TEMPLATE_ID,
-  isMissingDataReason,
-  serializeMissingData,
 } from '@kbn/agentic-investigations-plugin/common';
 import type { Hypothesis, ImpactEntity } from '@kbn/agentic-investigations-plugin/common';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
 import { createOptimizeModel } from '../lib/create_optimize_model';
 import type { NightshiftTelemetryClient } from '../telemetry';
+import { isMissingDataReason } from '../../common/missing_data';
+import type { BlindSpotsStore } from './blind_spots_store';
 import { createInvestigationUsageTelemetry } from '../lib/investigation_usage_telemetry';
 import type { PassGuard, RecorderMemory } from './coordinator';
 import {
@@ -74,6 +74,8 @@ export interface FindingsPassDeps {
     allowedConnectorIds: readonly string[];
   }) => Promise<RecorderWorkspace | undefined>;
   getTelemetry?: () => NightshiftTelemetryClient | undefined;
+  /** Where the final pass keeps the gaps it found, for the space of the request. Absent: not kept. */
+  getBlindSpots?: (request: KibanaRequest) => BlindSpotsStore | undefined;
   logger: Logger;
 }
 
@@ -96,6 +98,9 @@ export interface FindingsPassParams {
 
 const MAX_METADATA_TEXT_LENGTH = 10_000;
 const FALLBACK_SUMMARY_CHARS = 1_000;
+
+const isCauseNotConfirmed = (verdict: string | undefined): boolean =>
+  /^cause not confirmed/i.test(verdict?.trim() ?? '');
 /** A malformed structured answer is the usual failure, so a pass asks again before giving up. */
 const MAX_ATTEMPTS = 2;
 
@@ -571,29 +576,46 @@ export const runFindingsPass = async (
             ? { severity: record.severity }
             : {}),
           ...(verdict ? { verdict } : {}),
-          // A final record replaces the gaps: one that confirms the cause lists none.
-          ...(final && record
-            ? { missing_data: serializeMissingData(record.missing_data ?? []) }
-            : {}),
         });
-        // One event per stored gap, by reason only: never the gap's text.
-        if (final) {
-          record?.missing_data?.forEach(({ why }) =>
-            deps.getTelemetry?.()?.reportMissingDataRecorded({
-              reason: isMissingDataReason(why) ? why : 'unspecified',
-            })
-          );
-        }
       },
     ],
   ];
+  if (final && record) {
+    const { missing_data: gaps = [], hypotheses } = record;
+    writes.push([
+      'blind spots',
+      async () => {
+        // One event per gap, by reason only: never the gap's text.
+        gaps.forEach(({ why }) =>
+          deps.getTelemetry?.()?.reportMissingDataRecorded({
+            reason: isMissingDataReason(why) ? why : 'unspecified',
+          })
+        );
+        // A final record replaces the stored one: a pass that confirms the cause lists no gaps.
+        await deps.getBlindSpots?.(request)?.save({
+          conversation_id: conversationId,
+          '@timestamp': new Date().toISOString(),
+          outcome: isCauseNotConfirmed(verdict) ? 'cause_not_confirmed' : 'cause_found',
+          missing_data: gaps,
+          hypotheses: hypotheses.map(({ candidate, status, settled_by: settledBy }) => ({
+            candidate,
+            status,
+            ...(settledBy ? { settled_by: settledBy } : {}),
+          })),
+        });
+      },
+    ]);
+  }
   if (record && !keepHypotheses) {
     writes.push([
       'hypotheses',
       () =>
         writer.setHypotheses({
           conversationId,
-          hypotheses: withStoredEvidence(record.hypotheses, stored?.hypotheses ?? []),
+          hypotheses: withStoredEvidence(
+            record.hypotheses.map((hypothesis) => omit(hypothesis, 'settled_by')),
+            stored?.hypotheses ?? []
+          ),
         }),
     ]);
     // Any impact field is a write: a pass may retract the evidence (`null`) or change the

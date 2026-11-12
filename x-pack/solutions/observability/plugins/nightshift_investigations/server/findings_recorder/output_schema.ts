@@ -13,7 +13,6 @@ import {
   EVIDENCE_CHART_Y_AXIS_UNITS,
   HYPOTHESIS_STATUSES,
   investigationEvidenceSchema,
-  isMissingDataReason,
   MAX_ENTITY_ID_LENGTH,
   MAX_ENTITY_NAME_LENGTH,
   MAX_EVIDENCE_CHART_ANNOTATIONS,
@@ -24,11 +23,7 @@ import {
   MAX_EVIDENCE_TEXT_LENGTH,
   MAX_HYPOTHESES,
   MAX_IMPACT_TOOL_ENTITIES,
-  MAX_MISSING_DATA,
-  MAX_MISSING_DATA_TEXT_LENGTH,
-  MISSING_DATA_REASONS,
   type InvestigationEvidence,
-  type MissingDataItem,
 } from '@kbn/agentic-investigations-plugin/common';
 import {
   MAX_COMMENT_LENGTH,
@@ -36,6 +31,13 @@ import {
   proposalConfidenceSchema,
   proposalImpactSchema,
 } from '@kbn/proposals-common';
+import {
+  isMissingDataReason,
+  MAX_MISSING_DATA,
+  MAX_MISSING_DATA_TEXT_LENGTH,
+  MISSING_DATA_REASONS,
+  type MissingDataItem,
+} from '../../common/missing_data';
 
 export const FINDINGS_SEVERITIES = ['low', 'medium', 'high', 'critical'] as const;
 
@@ -412,7 +414,7 @@ export const FINDINGS_JSON_SCHEMA = {
     verdict: {
       type: 'string',
       description:
-        'Only when the agent has given its final answer: the most likely cause. At most 70 words of Markdown: a lead sentence of at most 25 words, then at most three short bullets. Starts with Cause not confirmed: when no hypothesis is confirmed, and then its last bullet is Missing: followed by the most decisive gap from missing_data (at most 16 words after Missing:). Omit while the investigation is still running.',
+        'Only when the agent has given its final answer: the most likely cause. At most 70 words of Markdown: a lead sentence of at most 25 words, then at most three short bullets. Starts with Cause not confirmed: when no hypothesis is confirmed. Omit while the investigation is still running.',
     },
     severity: {
       type: 'string',

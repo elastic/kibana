@@ -57,6 +57,7 @@ describe('runFindingsPass', () => {
     };
     const patchMetadata = jest.fn().mockResolvedValue(undefined);
     const reportMissingDataRecorded = jest.fn();
+    const saveBlindSpots = jest.fn().mockResolvedValue(undefined);
     const chatComplete = jest.fn();
     answers.forEach((answer) => chatComplete.mockResolvedValueOnce(answer));
     chatComplete.mockResolvedValue({ content: '' });
@@ -81,9 +82,18 @@ describe('runFindingsPass', () => {
       ...(workspace ? { getWorkspace: jest.fn().mockResolvedValue(workspace) } : {}),
       ...(proposals ? { getProposals: () => proposals as never } : {}),
       getTelemetry: () => ({ reportMissingDataRecorded } as never),
+      getBlindSpots: () => ({ save: saveBlindSpots }),
       logger: loggerMock.create(),
     };
-    return { deps, writer, patchMetadata, chatComplete, memory, reportMissingDataRecorded };
+    return {
+      deps,
+      writer,
+      patchMetadata,
+      chatComplete,
+      memory,
+      reportMissingDataRecorded,
+      saveBlindSpots,
+    };
   };
 
   const run = (deps: FindingsPassDeps, memory: RecorderMemory, extra = {}) =>
@@ -317,7 +327,6 @@ describe('runFindingsPass', () => {
       summary: output.summary,
       severity: 'high',
       verdict: output.verdict,
-      missing_data: [],
     });
     expect(writer.setHypotheses).toHaveBeenCalledWith({
       conversationId: 'c1',
@@ -331,7 +340,7 @@ describe('runFindingsPass', () => {
     });
   });
 
-  it('stores the gaps that kept the cause unconfirmed as metadata text, and a live pass does not', async () => {
+  it('keeps the gaps and open tests in the blind spots index, never in the conversation, and a live pass keeps none', async () => {
     const unconfirmed = {
       ...output,
       verdict: 'Cause not confirmed: a bad deploy.',
@@ -339,32 +348,54 @@ describe('runFindingsPass', () => {
         { what: 'SLO definition', why: 'no_access', would_decide: 'if 499s count' },
         { what: 'client app versions' },
       ],
+      hypotheses: [
+        {
+          candidate: 'bad deploy',
+          confidence: 0.4,
+          status: 'investigating',
+          settled_by: 'Refuted if x',
+        },
+      ],
     };
     const final = setup({ answers: [answerWith(unconfirmed)] });
     await run(final.deps, final.memory, { answer: 'Cause not confirmed' });
     const live = setup({ answers: [answerWith(unconfirmed)] });
     await run(live.deps, live.memory);
 
-    expect(final.patchMetadata).toHaveBeenCalledWith(
-      'c1',
-      expect.objectContaining({
-        missing_data: [
-          JSON.stringify({
-            what: 'SLO definition',
-            why: 'no_access',
-            would_decide: 'if 499s count',
-          }),
-          JSON.stringify({ what: 'client app versions' }),
-        ],
-      })
-    );
-    expect(live.patchMetadata.mock.calls[0][1]).not.toHaveProperty('missing_data');
-    // Telemetry counts gaps by reason only, never their text, and a live pass reports none.
+    expect(final.saveBlindSpots).toHaveBeenCalledWith({
+      conversation_id: 'c1',
+      '@timestamp': expect.any(String),
+      outcome: 'cause_not_confirmed',
+      missing_data: [
+        { what: 'SLO definition', why: 'no_access', would_decide: 'if 499s count' },
+        { what: 'client app versions' },
+      ],
+      hypotheses: [
+        { candidate: 'bad deploy', status: 'investigating', settled_by: 'Refuted if x' },
+      ],
+    });
+    // Neither the metadata nor the stored hypotheses carry the new fields.
+    expect(final.patchMetadata.mock.calls[0][1]).not.toHaveProperty('missing_data');
+    expect(JSON.stringify(final.writer.setHypotheses.mock.calls)).not.toContain('settled_by');
+    // Telemetry counts gaps by reason only, never their text.
     expect(final.reportMissingDataRecorded.mock.calls).toEqual([
       [{ reason: 'no_access' }],
       [{ reason: 'unspecified' }],
     ]);
+    expect(live.saveBlindSpots).not.toHaveBeenCalled();
     expect(live.reportMissingDataRecorded).not.toHaveBeenCalled();
+  });
+
+  it('records an empty gap list when the cause is found, and survives a failed index write', async () => {
+    const found = setup();
+    found.saveBlindSpots.mockRejectedValue(new Error('index unavailable'));
+    await run(found.deps, found.memory, { answer: 'done' });
+
+    expect(found.saveBlindSpots).toHaveBeenCalledWith(
+      expect.objectContaining({ outcome: 'cause_found', missing_data: [] })
+    );
+    expect(found.patchMetadata).toHaveBeenCalled();
+    expect(found.writer.setHypotheses).toHaveBeenCalled();
   });
 
   it('asks a live pass for the live schema and a final pass for the full one', async () => {

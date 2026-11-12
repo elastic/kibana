@@ -94,6 +94,7 @@ import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/reg
 import type { NightshiftAgentTypeOptions } from './agents/investigation';
 import { registerInvestigationAgentType } from './agents/investigation';
 import { registerFindingsRecorder } from './findings_recorder';
+import { createBlindSpotsStore } from './findings_recorder/blind_spots_store';
 import { createRecorderProposals } from './findings_recorder/proposals_adapter';
 import { createRecorderWorkspace } from './findings_recorder/workspace_tools';
 import { registerDecisionTreeReinforcementAgentType } from './agents/decision_tree_reinforcement';
@@ -372,6 +373,14 @@ export class NightshiftInvestigationsPlugin
             getUiSettings: () => this.uiSettings,
             getAgenticInvestigations: () => this.agenticInvestigations,
             getTelemetry: () => this.telemetry,
+            getBlindSpots: (request) =>
+              this.coreStart
+                ? createBlindSpotsStore({
+                    esClient: this.coreStart.elasticsearch.client.asInternalUser,
+                    logger: this.logger.get('blind-spots'),
+                    spaceId: this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+                  })
+                : undefined,
             // The final pass proposes actions for a person to decide, as the investigator's
             // `proposals.create` tool did, and sees which ones the conversation already has.
             getProposals: () =>
