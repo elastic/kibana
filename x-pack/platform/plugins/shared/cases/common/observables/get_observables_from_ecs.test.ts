@@ -210,4 +210,94 @@ describe('getObservablesFromEcsDataArray', () => {
       },
     ]);
   });
+
+  it('should split IPv4 and IPv6 values of one path into their own types, in value order', () => {
+    expect(
+      getObservablesFromEcs([
+        [
+          { field: 'source.ip', value: ['2001:db8::1', '10.0.0.1'] },
+          { field: 'destination.ip', value: ['10.0.0.2'] },
+        ],
+      ])
+    ).toEqual([
+      {
+        typeKey: 'observable-type-ipv6',
+        value: '2001:db8::1',
+        description: 'Auto extracted observable',
+      },
+      {
+        typeKey: 'observable-type-ipv4',
+        value: '10.0.0.1',
+        description: 'Auto extracted observable',
+      },
+      {
+        typeKey: 'observable-type-ipv4',
+        value: '10.0.0.2',
+        description: 'Auto extracted observable',
+      },
+    ]);
+  });
+
+  it('should skip empty values on every path', () => {
+    expect(
+      getObservablesFromEcs([
+        [
+          { field: 'host.name', value: [''] },
+          { field: 'file.path', value: ['', 'path1'] },
+          { field: 'agent.id', value: [''] },
+        ],
+      ])
+    ).toEqual([
+      {
+        typeKey: 'observable-type-file-path',
+        value: 'path1',
+        description: 'Auto extracted observable',
+      },
+    ]);
+  });
+
+  it('should ignore fields that no default type reads', () => {
+    expect(getObservablesFromEcs([[{ field: 'user.name', value: ['alice'] }]])).toEqual([]);
+  });
+
+  describe('with a given map of observable types', () => {
+    const description = 'Auto extracted observable';
+
+    it('reads the fields of the given map only', () => {
+      const observableTypes = {
+        'employee-id': {
+          key: 'employee-id',
+          label: 'Employee ID',
+          paths: [{ path: 'user.employee_id', enabled: true }],
+        },
+      };
+
+      expect(
+        getObservablesFromEcs(
+          [
+            [
+              { field: 'user.employee_id', value: ['E000001'] },
+              { field: 'agent.id', value: ['agent-1'] },
+            ],
+          ],
+          observableTypes
+        )
+      ).toEqual([{ typeKey: 'employee-id', value: 'E000001', description }]);
+    });
+
+    it('skips a type with a value pattern that does not compile', () => {
+      const observableTypes = {
+        broken: {
+          key: 'broken',
+          label: 'Broken',
+          paths: [{ path: 'user.name', enabled: true }],
+          valuePattern: '(',
+        },
+      };
+
+      expect(
+        getObservablesFromEcs([[{ field: 'user.name', value: ['alice'] }]], observableTypes)
+      ).toEqual([]);
+    });
+  });
 });
