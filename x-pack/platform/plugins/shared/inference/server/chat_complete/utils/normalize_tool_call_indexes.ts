@@ -74,9 +74,7 @@ export function normalizeToolCallIndexes<
             ...event,
             tool_calls: event.tool_calls.map((toolCall) => {
               const index = resolveIndex(toolCall);
-              return index === toolCall.index
-                ? toolCall
-                : { ...toolCall, index };
+              return index === toolCall.index ? toolCall : { ...toolCall, index };
             }),
           };
         })
