@@ -67,8 +67,6 @@ steps:
 
         Keep lists whole. When a page, dialog, menu or dropdown shows options, columns, checkboxes, buttons, links, tabs or stages, record every one, in the order shown, with which is selected, checked or the default, rather than a few examples ("such as", "including", "and others"). Counts are knowledge too: how many icons are beside a field, how many results a page shows, how many stages remain.
 
-        What the agent saw once counts as much as what it saw often: a dialog, popup, menu, dropdown or progress page opened in a single round is part of how the system works. Record what it showed and what it led to.
-
         A batch of tool results can hold hundreds of such items: write each of them, rather than a summary of the page.
 
         A round too long for one batch comes in parts, each with the round's id and a header saying which part it is and how the round began. Read a part as the continuation of that round, and cite the round's id.
