@@ -13,11 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const browser = getService('browser');
   const sampleData = getService('sampleData');
-  const { common, appMenu, graph } = getPageObjects([
-    'common',
-    'appMenu',
-    'graph',
-  ]);
+  const { common, appMenu, graph } = getPageObjects(['common', 'appMenu', 'graph']);
 
   describe('Graph app a11y tests', () => {
     before(async () => {

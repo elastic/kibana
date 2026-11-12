@@ -11,13 +11,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 import { assertLogContains, isExecutionContextLog, readLogFile } from '../test_utils';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects([
-    'common',
-    'dashboard',
-    'discover',
-    'header',
-    'timePicker',
-  ]);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'discover', 'header', 'timePicker']);
 
   describe('Browser apps', () => {
     let logs: Ecs[];

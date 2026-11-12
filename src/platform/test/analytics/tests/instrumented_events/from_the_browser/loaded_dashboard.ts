@@ -15,13 +15,7 @@ const DASHBOARD_LOADED_EVENT = 'dashboard_loaded';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ebtUIHelper = getService('kibana_ebt_ui');
-  const PageObjects = getPageObjects([
-    'common',
-    'header',
-    'dashboard',
-    'visEditor',
-    'visualize',
-  ]);
+  const PageObjects = getPageObjects(['common', 'header', 'dashboard', 'visEditor', 'visualize']);
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const queryBar = getService('queryBar');
