@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UserStorageTestPlugin } from './plugin';
-
-export const plugin = async () => new UserStorageTestPlugin();
+export const plugin = async () => {
+  const { UserStorageTestPlugin } = await import('./plugin');
+  return new UserStorageTestPlugin();
+};
