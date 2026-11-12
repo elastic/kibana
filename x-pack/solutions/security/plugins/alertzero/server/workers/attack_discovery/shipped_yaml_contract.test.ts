@@ -10,8 +10,8 @@ import {
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID } from '@kbn/alertzero-common';
-import { REPORT_WORKER_OUTCOME_EVENTS } from '../../../common/step_types';
-import { EVENT_WORKER_IDS, isEventFromItsWorker } from './event_worker_ids';
+import { REPORT_WORKER_OUTCOME_EVENTS, REPORTABLE_WORKER_EVENTS } from '../../../common/step_types';
+import { isEventFromItsWorker } from '../../step_types/report_worker_outcome/event_worker_ids';
 import {
   ENVELOPE_FIELDS,
   INVESTIGATION_ID,
@@ -20,12 +20,12 @@ import {
   reportNamed,
   reportOnDevModeClient,
   reportStepsOf,
-} from './shipped_yaml_contract.test_helpers';
+} from '../../step_types/report_worker_outcome/shipped_yaml_contract.test_helpers';
 import {
   SHIPPED_YAML_CONTRACTS,
   reviewContext,
   runnerContext,
-} from './shipped_yaml_contract.attack_discovery.fixture';
+} from './shipped_yaml_contract.fixture';
 
 const runnerReports = reportStepsOf(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID);
 const reviewReports = reportStepsOf(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID);
@@ -40,7 +40,8 @@ describe('shipped Attack Discovery Worker YAML and the reportWorkerOutcome schem
     ).toEqual(
       REPORT_WORKER_OUTCOME_EVENTS.filter(
         (event) =>
-          EVENT_WORKER_IDS[event] === SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID ||
+          REPORTABLE_WORKER_EVENTS[event].workerId ===
+            SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID ||
           event === 'worker_run_completed' ||
           event === 'worker_investigation_closed'
       ).sort()

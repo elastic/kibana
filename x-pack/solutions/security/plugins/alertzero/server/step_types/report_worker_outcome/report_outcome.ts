@@ -15,7 +15,7 @@ import type {
   AlertZeroTelemetryEventType,
   AlertZeroTelemetryReporter,
 } from '../../telemetry';
-import { ALERTZERO_TELEMETRY_EVENTS } from '../../telemetry';
+import { ALERTZERO_TELEMETRY_PREFIX } from '../../telemetry';
 
 export interface ReportOutcomeParams {
   envelope: AlertZeroEnvelope;
@@ -43,22 +43,20 @@ type EventTypesAccepting<E extends ReportWorkerOutcomeEvent> = {
     : never;
 }[AlertZeroTelemetryEventType];
 
-/** The event each step outcome reports. The type check fails if a payload would not fit. */
-const EVENT_TYPE_BY_OUTCOME = {
-  ad_worker_run_completed: ALERTZERO_TELEMETRY_EVENTS.AdWorkerRunCompleted,
-  ad_worker_review_started: ALERTZERO_TELEMETRY_EVENTS.AdWorkerReviewStarted,
-  ad_worker_analysis_completed: ALERTZERO_TELEMETRY_EVENTS.AdWorkerAnalysisCompleted,
-  ad_worker_handoff_resolved: ALERTZERO_TELEMETRY_EVENTS.AdWorkerHandoffResolved,
-  worker_investigation_closed: ALERTZERO_TELEMETRY_EVENTS.WorkerInvestigationClosed,
-  worker_run_completed: ALERTZERO_TELEMETRY_EVENTS.WorkerRunCompleted,
-  alert_triage_batch_classified: ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchClassified,
-  alert_triage_batch_grouped: ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchGrouped,
-  alert_triage_closure_resolved: ALERTZERO_TELEMETRY_EVENTS.AlertTriageClosureResolved,
-  rule_tuning_review_completed: ALERTZERO_TELEMETRY_EVENTS.RuleTuningReviewCompleted,
-  rule_coverage_review_completed: ALERTZERO_TELEMETRY_EVENTS.RuleCoverageReviewCompleted,
-  hunt_report_completed: ALERTZERO_TELEMETRY_EVENTS.HuntReportCompleted,
-  endpoint_analysis_completed: ALERTZERO_TELEMETRY_EVENTS.EndpointAnalysisCompleted,
-} as const satisfies { [E in ReportWorkerOutcomeEvent]: EventTypesAccepting<E> };
+type OutcomeEventType<E extends ReportWorkerOutcomeEvent> =
+  `${typeof ALERTZERO_TELEMETRY_PREFIX}_${E}`;
+
+type OutcomesWithMismatchedPayload = {
+  [E in ReportWorkerOutcomeEvent]: OutcomeEventType<E> extends EventTypesAccepting<E> ? never : E;
+}[ReportWorkerOutcomeEvent];
+
+/**
+ * The type check fails here if an outcome has no event type of its name, or its payload would not
+ * fit.
+ */
+const eventTypeOf = <E extends Exclude<ReportWorkerOutcomeEvent, OutcomesWithMismatchedPayload>>(
+  event: E
+): OutcomeEventType<E> => `${ALERTZERO_TELEMETRY_PREFIX}_${event}` as const;
 
 /** Drops keys whose value is `undefined`, so optional event fields are omitted, not sent empty. */
 const omitUndefined = <T extends object>(value: T): T =>
@@ -83,5 +81,5 @@ const withDerivedFields = (input: ReportWorkerOutcomeStepInput) =>
 /** Reports the event a parsed step input names, with the run's envelope fields taking precedence. */
 export const reportOutcome = ({ envelope, input, report }: ReportOutcomeParams): boolean => {
   const { event, ...fields } = withDerivedFields(input);
-  return report(EVENT_TYPE_BY_OUTCOME[event], { ...omitUndefined(fields), ...envelope });
+  return report(eventTypeOf(event), { ...omitUndefined(fields), ...envelope });
 };

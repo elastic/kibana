@@ -10,8 +10,11 @@ import {
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID } from '@kbn/alertzero-common';
-import type { WorkerWorkflowContract } from './shipped_yaml_contract.test_helpers';
-import { CHANGED_STATUS, INVESTIGATION_ID } from './shipped_yaml_contract.test_helpers';
+import type { WorkerWorkflowContract } from '../../step_types/report_worker_outcome/shipped_yaml_contract.test_helpers';
+import {
+  CHANGED_STATUS,
+  INVESTIGATION_ID,
+} from '../../step_types/report_worker_outcome/shipped_yaml_contract.test_helpers';
 
 /** A runner run with its generation and fan-out counts. */
 export const runnerContext = ({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { readdirSync } from 'fs';
+import { existsSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { parse } from 'yaml';
 import { createAnalytics } from '@elastic/ebt/client';
@@ -41,7 +41,8 @@ import { reportOutcome } from './report_outcome';
 /**
  * Shared by the tests of the contract between the shipped Worker YAML and the report step's input
  * schema: `shipped_yaml_contract.test.ts`, and each Worker's
- * `shipped_yaml_contract.<worker>.test.ts`. `@kbn/workflows` cannot import this plugin, so this is
+ * `server/workers/<worker>/shipped_yaml_contract.test.ts`. `@kbn/workflows` cannot import this
+ * plugin, so this is
  * where each shipped `with` block is rendered the way the engine renders it and validated against
  * the real schema.
  */
@@ -226,7 +227,7 @@ export const reportOnDevModeClient = (
 /**
  * One Worker workflow with report steps: the Worker that owns it, and runs that exercise its
  * reports. A Worker declares its workflows as `SHIPPED_YAML_CONTRACTS` in its own
- * `shipped_yaml_contract.<worker>.fixture.ts` module.
+ * `server/workers/<worker>/shipped_yaml_contract.fixture.ts` module.
  */
 export interface WorkerWorkflowContract {
   contexts: ReadonlyArray<Record<string, unknown>>;
@@ -294,8 +295,8 @@ export const describeWorkerWorkflowContracts = (
   });
 };
 
-/** A Worker's contract module: `shipped_yaml_contract.<worker>.fixture.ts`, next to its test. */
-const CONTRACT_MODULE_FILE = /^shipped_yaml_contract\.[a-z_]+\.fixture\.ts$/;
+/** A Worker's contract module, next to its test in the Worker's folder. */
+const CONTRACT_MODULE_FILE = 'shipped_yaml_contract.fixture.ts';
 
 const isWorkerWorkflowContract = (value: unknown): value is WorkerWorkflowContract =>
   typeof value === 'object' &&
@@ -305,19 +306,22 @@ const isWorkerWorkflowContract = (value: unknown): value is WorkerWorkflowContra
   typeof (value as Partial<WorkerWorkflowContract>).workflowId === 'string';
 
 /**
- * Loads every Worker's contracts from the `shipped_yaml_contract.<worker>.fixture.ts` modules in
- * `directory`. Each Worker adds its own module, so no shared list has to change when a Worker
- * starts reporting.
+ * Loads every Worker's contracts from the `<worker>/shipped_yaml_contract.fixture.ts` modules in
+ * `workersDirectory`. Each Worker adds its own module, so no shared list has to change when a
+ * Worker starts reporting.
  */
 export const loadWorkerWorkflowContracts = async (
-  directory: string
+  workersDirectory: string
 ): Promise<Array<{ contracts: WorkerWorkflowContract[]; file: string }>> =>
   Promise.all(
-    readdirSync(directory)
-      .filter((file) => CONTRACT_MODULE_FILE.test(file))
+    readdirSync(workersDirectory)
+      .map((worker) => join(worker, CONTRACT_MODULE_FILE))
+      .filter((file) => existsSync(join(workersDirectory, file)))
       .sort()
       .map(async (file) => {
-        const { SHIPPED_YAML_CONTRACTS: contracts } = (await import(join(directory, file))) as {
+        const { SHIPPED_YAML_CONTRACTS: contracts } = (await import(
+          join(workersDirectory, file)
+        )) as {
           SHIPPED_YAML_CONTRACTS?: unknown;
         };
         if (!Array.isArray(contracts) || !contracts.every(isWorkerWorkflowContract)) {

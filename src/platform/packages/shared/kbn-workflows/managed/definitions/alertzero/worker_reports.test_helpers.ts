@@ -27,7 +27,8 @@ import { getNestedStepGroups } from '../../../definition';
  * Shared by the AlertZero Worker report tests: `worker_close_reports.test.ts`, which guards every
  * Worker close, and each Worker's own `worker_reports.<worker>.test.ts`. The Worker reports call
  * the AlertZero plugin's `alertzero.reportWorkerOutcome` step. This package cannot import the
- * plugin, so the plugin's `shipped_yaml_contract.<worker>.test.ts` validates the same `with`
+ * plugin, so the plugin's `server/workers/<worker>/shipped_yaml_contract.test.ts` validates the
+ * same `with`
  * blocks against the step's real input schema; these tests pin the values each scenario renders.
  */
 

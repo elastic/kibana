@@ -13,8 +13,8 @@ import {
   reportNamed,
   reportOnDevModeClient,
   reportStepsOf,
-} from './shipped_yaml_contract.test_helpers';
-import { SHIPPED_YAML_CONTRACTS } from './shipped_yaml_contract.floor.fixture';
+} from '../../step_types/report_worker_outcome/shipped_yaml_contract.test_helpers';
+import { SHIPPED_YAML_CONTRACTS } from './shipped_yaml_contract.fixture';
 
 describe('shipped Alert Triage Worker YAML and the reportWorkerOutcome schema', () => {
   describeWorkerWorkflowContracts(SHIPPED_YAML_CONTRACTS);
