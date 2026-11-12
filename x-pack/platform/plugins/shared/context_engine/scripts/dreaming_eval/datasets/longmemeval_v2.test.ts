@@ -30,7 +30,6 @@ const options: LongMemEvalV2Config = {
   haystack: 'small',
   environments: [],
   max_trajectories: 2,
-  max_observation_chars: 600,
   include_abstention: false,
   include_image_questions: false,
   start_time: '2026-01-05T09:00:00.000Z',
@@ -174,6 +173,9 @@ describe('LongMemEval-V2', () => {
       "URL: https://sn.example.com/incident_list.do\nRootWebArea 'Incidents | ServiceNow'\nbutton 'Filters'"
     );
     expect(describePage(undefined, pages[1], chrome, 20)).toBe("RootWebArea 'Inciden […]");
+    expect(describePage(undefined, pages[1], chrome)).toBe(
+      "RootWebArea 'Incidents | ServiceNow'\nbutton 'Filters'"
+    );
     expect(chromeOf(pages.slice(0, 2))).toEqual(new Set());
   });
 

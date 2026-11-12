@@ -116,7 +116,8 @@ datasets:
     # per_sample: false     # default: false for small, true for medium
     haystack: small
     # max_trajectories: 20  # per sample's haystack
-    max_observation_chars: 600
+    # Pages are kept whole; this cuts each to its first characters, for a cheaper run.
+    # max_observation_chars: 600
     include_abstention: false
     # Every errors-gotchas question has a screenshot, so the category runs only with this set; the
     # answers are text, and the agent gets only the question text.
@@ -132,7 +133,7 @@ datasets:
     sample_count: 1
     haystack: small
     environments: []        # such as [webarena-reddit]
-    max_observation_chars: 600
+    # max_observation_chars: 600
     include_abstention: false
     include_image_questions: false
     start_time: '2026-01-05T09:00:00.000Z'

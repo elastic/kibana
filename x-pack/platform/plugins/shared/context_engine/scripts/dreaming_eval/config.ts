@@ -104,8 +104,8 @@ const longMemEvalV2SchemaOf = (agent: z.infer<typeof agentSchema>) =>
       environments: z.array(z.string()).default([]),
       /** Imports only the first trajectories of the samples' haystacks, for a quicker run. */
       max_trajectories: z.number().int().min(1).optional(),
-      /** Characters kept of each page the agent saw. */
-      max_observation_chars: z.number().int().min(0).default(600),
+      /** Characters kept of each page the agent saw; every page whole when unset. */
+      max_observation_chars: z.number().int().min(0).optional(),
       include_abstention: z.boolean().default(false),
       include_image_questions: z.boolean().default(false),
       /** Trajectories carry no times; the first one starts here and each next one an hour later. */

@@ -125,19 +125,19 @@ export const chromeOf = (pages: string[][]): Set<string> => {
 };
 
 /**
- * A page the agent saw, kept short: the URL, then the page's labelled elements without the chrome,
- * up to `maxChars`.
+ * A page the agent saw: the URL, then the page's labelled elements without the chrome, up to
+ * `maxChars` when given.
  */
 export const describePage = (
   url: string | null | undefined,
   elements: string[],
   chrome: Set<string>,
-  maxChars: number
+  maxChars?: number
 ): string => {
   const page = [url ? `URL: ${url}` : '', ...elements.filter((element) => !chrome.has(element))]
     .filter(Boolean)
     .join('\n');
-  return page.length > maxChars ? `${page.slice(0, maxChars)} […]` : page;
+  return maxChars !== undefined && page.length > maxChars ? `${page.slice(0, maxChars)} […]` : page;
 };
 
 /**
