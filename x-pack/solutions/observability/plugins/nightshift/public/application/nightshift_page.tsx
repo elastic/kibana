@@ -537,7 +537,15 @@ export function NightshiftPage(): React.ReactElement | null {
                 <EuiLoadingSpinner size="xl" />
               </EuiFlexGroup>
             ) : (
-              <NightshiftApp hideDetectionSetupBanner={onboardingFinishedThisLoad} />
+              <NightshiftApp
+                hideDetectionSetupBanner={onboardingFinishedThisLoad}
+                onStartInvestigation={
+                  canStartInvestigation ? toggleStartInvestigation : undefined
+                }
+                onCreateAutomation={
+                  canUseAutomations && canManage ? navigateToAutomations : undefined
+                }
+              />
             )}
           </EuiPageTemplate.Section>
         </>

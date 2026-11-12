@@ -63,8 +63,14 @@ const INVESTIGATIONS_SEARCH_DEBOUNCE_MS = 300;
 
 export function NightshiftApp({
   hideDetectionSetupBanner = false,
+  onStartInvestigation,
+  onCreateAutomation,
 }: {
   hideDetectionSetupBanner?: boolean;
+  /** Opens the start-investigation modal from the empty investigations prompt. */
+  onStartInvestigation?: () => void;
+  /** Opens the automations page from the empty investigations prompt. */
+  onCreateAutomation?: () => void;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const { analytics, application, nightshiftInvestigations, agenticInvestigations, agentBuilder } =
@@ -374,19 +380,23 @@ export function NightshiftApp({
         </>
       )}
 
-      <EuiFieldSearch
-        data-test-subj="nightshiftInvestigationsSearchInput"
-        placeholder={i18n.translate('xpack.nightshift.investigations.searchPlaceholder', {
-          defaultMessage: 'Search',
-        })}
-        value={searchQuery ?? ''}
-        onChange={handleSearchChange}
-        isClearable
-        fullWidth
-        compressed
-      />
-
-      <EuiSpacer size="m" />
+      {/* Keep search when a query is active so an empty filtered list can still be cleared. */}
+      {(Boolean(searchQuery) || totalCount > 0) && (
+        <>
+          <EuiFieldSearch
+            data-test-subj="nightshiftInvestigationsSearchInput"
+            placeholder={i18n.translate('xpack.nightshift.investigations.searchPlaceholder', {
+              defaultMessage: 'Search',
+            })}
+            value={searchQuery ?? ''}
+            onChange={handleSearchChange}
+            isClearable
+            fullWidth
+            compressed
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
 
       <InvestigationSeverityTiles
         severityCounts={severityCounts}
@@ -402,6 +412,8 @@ export function NightshiftApp({
         sections={sections}
         selectedInvestigationId={selectedInvestigationId}
         onInvestigationClick={handleInvestigationClick}
+        onStartInvestigation={onStartInvestigation}
+        onCreateAutomation={onCreateAutomation}
       />
     </EuiFlexGroup>
   );

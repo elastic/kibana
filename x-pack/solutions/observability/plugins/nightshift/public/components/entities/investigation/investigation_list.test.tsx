@@ -98,11 +98,28 @@ describe('InvestigationList', () => {
   });
 
   it('shows a single empty state when every section is empty', () => {
-    renderSections([makeSection('in-progress'), makeSection('critical')]);
+    const onStartInvestigation = jest.fn();
+    const onCreateAutomation = jest.fn();
+    render(
+      <I18nProvider>
+        <InvestigationList
+          sections={[makeSection('in-progress'), makeSection('critical')]}
+          onStartInvestigation={onStartInvestigation}
+          onCreateAutomation={onCreateAutomation}
+        />
+      </I18nProvider>
+    );
 
     expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toHaveTextContent(
-      'No investigations found'
+      'No open investigations'
     );
+    expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toHaveTextContent(
+      "Ask Elastic nightshift to look into a problem, or set up an automation so it starts investigations for you — and you don't repeat the same work."
+    );
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationsEmptyInvestigate'));
+    expect(onStartInvestigation).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationsEmptyCreateAutomation'));
+    expect(onCreateAutomation).toHaveBeenCalledTimes(1);
     expect(
       screen.queryByTestId('nightshiftInvestigationSection-in-progress')
     ).not.toBeInTheDocument();
