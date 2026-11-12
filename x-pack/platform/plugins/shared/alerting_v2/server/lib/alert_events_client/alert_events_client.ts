@@ -9,7 +9,7 @@ import { createHash } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import Boom from '@hapi/boom';
 import { inject, injectable } from 'inversify';
-import { createSignalEventDataSchema } from '@kbn/alerting-v2-schemas';
+import { createSignalEventInternalDataSchema } from '@kbn/alerting-v2-schemas';
 import type {
   AlertEventSeverity,
   CreateAlertEventData,
@@ -208,13 +208,15 @@ export class AlertEventsClient {
 
   /**
    * Stores an observation-only `signal` event. A signal has no lifecycle, so there is no
-   * episode lookup, no `alert` object and no status change publish. It is always stored
-   * as `breached`, and `type: 'signal'` keeps it away from the dispatcher.
+   * episode lookup, no `alert` object and no status change publish. It is stored as
+   * `breached` unless the caller sends a `status`, and `type: 'signal'` keeps it away from
+   * the dispatcher.
    */
   public async createSignalEvent(event: CreateSignalEventData): Promise<CreateSignalEventResponse> {
     // Validate here as well as in the workflow step, so direct callers of the client
-    // cannot store a reserved source, a lifecycle status or a rule id.
-    const validation = createSignalEventDataSchema.safeParse(event);
+    // cannot store a lifecycle status or a rule id. Any source is accepted, because only the
+    // workflow step, the external surface, reserves the `elastic` prefix.
+    const validation = createSignalEventInternalDataSchema.safeParse(event);
     if (!validation.success) {
       throw Boom.badRequest(`Invalid signal event: ${validation.error.message}`);
     }
@@ -226,7 +228,7 @@ export class AlertEventsClient {
       scheduled_timestamp: event.timestamp ?? new Date().toISOString(),
       group_hash: groupHash,
       data: event.data ?? {},
-      status: alertEventStatus.breached,
+      status: event.status ?? alertEventStatus.breached,
       source: event.source,
       type: alertEventType.signal,
       space_id: this.spaceId,

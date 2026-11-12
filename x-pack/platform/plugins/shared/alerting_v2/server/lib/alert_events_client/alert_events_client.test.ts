@@ -505,14 +505,49 @@ describe('AlertEventsClient.createSignalEvent', () => {
     );
   });
 
+  it.each(['breached', 'recovered', 'no_data'] as const)(
+    'stores the status %s that the caller sends',
+    async (status) => {
+      const { client, storageService } = createClient([]);
+
+      await client.createSignalEvent({ source: 'datadog', status });
+
+      const [{ docs }] = storageService.bulkIndexDocs.mock.calls[0];
+      expect(docs[0]).toEqual(expect.objectContaining({ type: 'signal', status }));
+    }
+  );
+
+  it('keeps one series whatever the status, so a recovery reaches the same series', async () => {
+    const { client } = createClient([]);
+
+    const breached = await client.createSignalEvent({ source: 'datadog', fingerprint: 'fp-1' });
+    const recovered = await client.createSignalEvent({
+      source: 'datadog',
+      fingerprint: 'fp-1',
+      status: 'recovered',
+    });
+
+    expect(recovered.group_hash).toBe(breached.group_hash);
+  });
+
+  it('accepts a source under the reserved elastic prefix from an internal caller', async () => {
+    const { client, storageService } = createClient([]);
+
+    const result = await client.createSignalEvent({ source: 'elastic.nightshift_detection' });
+
+    expect(result).toEqual({ group_hash: sha256('default:elastic.nightshift_detection') });
+    const [{ docs }] = storageService.bulkIndexDocs.mock.calls[0];
+    expect(docs[0]).toEqual(expect.objectContaining({ source: 'elastic.nightshift_detection' }));
+  });
+
   it('rejects invalid input without writing', async () => {
     const { client, storageService } = createClient([]);
 
-    const reservedSource = { source: 'elastic_internal' };
+    const emptySource = { source: '' };
     const withLifecycleStatus = { source: 'datadog', alert_status: 'inactive' };
     const withRuleId = { source: 'datadog', rule_id: 'rule-1' };
 
-    await expect(client.createSignalEvent(reservedSource)).rejects.toThrow('Invalid signal event');
+    await expect(client.createSignalEvent(emptySource)).rejects.toThrow('Invalid signal event');
     await expect(client.createSignalEvent(withLifecycleStatus)).rejects.toThrow(
       'Invalid signal event'
     );

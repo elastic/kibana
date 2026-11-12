@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { createSignalEventDataSchema } from './create_signal_event_data_schema';
+import {
+  createSignalEventDataSchema,
+  createSignalEventInternalDataSchema,
+} from './create_signal_event_data_schema';
 
 describe('createSignalEventDataSchema', () => {
   it('accepts a signal with only a source', () => {
@@ -64,5 +67,56 @@ describe('createSignalEventDataSchema', () => {
     expect(createSignalEventDataSchema.safeParse({ source: 'datadog', extra: 1 }).success).toBe(
       false
     );
+  });
+
+  it.each(['breached', 'recovered', 'no_data'])('accepts the signal status %s', (status) => {
+    const result = createSignalEventDataSchema.safeParse({ source: 'datadog', status });
+    expect(result.success).toBe(true);
+    expect(result.data?.status).toBe(status);
+  });
+
+  it('leaves the status unset when the caller sends none, so the client can default it', () => {
+    const result = createSignalEventDataSchema.safeParse({ source: 'datadog' });
+    expect(result.data).not.toHaveProperty('status');
+  });
+
+  it('rejects a status that is not a signal status', () => {
+    expect(
+      createSignalEventDataSchema.safeParse({ source: 'datadog', status: 'active' }).success
+    ).toBe(false);
+  });
+});
+
+describe('createSignalEventInternalDataSchema', () => {
+  it('accepts a source under the reserved prefix', () => {
+    expect(
+      createSignalEventInternalDataSchema.safeParse({ source: 'elastic.nightshift_detection' })
+        .success
+    ).toBe(true);
+  });
+
+  it('still rejects an empty source, a lifecycle status, a rule id and unknown keys', () => {
+    expect(createSignalEventInternalDataSchema.safeParse({ source: '' }).success).toBe(false);
+    expect(
+      createSignalEventInternalDataSchema.safeParse({ source: 'datadog', alert_status: 'active' })
+        .success
+    ).toBe(false);
+    expect(
+      createSignalEventInternalDataSchema.safeParse({ source: 'datadog', rule_id: 'rule-1' })
+        .success
+    ).toBe(false);
+    expect(createSignalEventInternalDataSchema.safeParse({ source: 'datadog', extra: 1 }).success)
+      .toBe(false);
+  });
+
+  it('accepts the same status values as the external schema', () => {
+    expect(
+      createSignalEventInternalDataSchema.safeParse({ source: 'datadog', status: 'no_data' })
+        .success
+    ).toBe(true);
+    expect(
+      createSignalEventInternalDataSchema.safeParse({ source: 'datadog', status: 'active' })
+        .success
+    ).toBe(false);
   });
 });

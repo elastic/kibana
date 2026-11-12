@@ -31,16 +31,18 @@ const externalAlertStatusSchema = lazySchema(() =>
 
 const RESERVED_SOURCE_PREFIX = 'elastic';
 
-/** Shared by Create Alert and Create Signal so both apply the same source rules. */
+/** The shape of a source, without the reserved-prefix rule. Internal callers use this one. */
+export const eventSourceSchema = lazySchema(() => z.string().min(1).max(ID_MAX_LENGTH));
+
+/**
+ * Shared by Create Alert and Create Signal so both apply the same source rules on the
+ * external surface (the workflow steps).
+ */
 export const externalEventSourceSchema = lazySchema(() =>
-  z
-    .string()
-    .min(1)
-    .max(ID_MAX_LENGTH)
-    .refine((v) => !v.startsWith(RESERVED_SOURCE_PREFIX), {
-      message:
-        'source cannot start with "elastic" — this prefix is reserved for Elastic-produced events.',
-    })
+  eventSourceSchema.refine((v) => !v.startsWith(RESERVED_SOURCE_PREFIX), {
+    message:
+      'source cannot start with "elastic" — this prefix is reserved for Elastic-produced events.',
+  })
 );
 
 /**

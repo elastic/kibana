@@ -5,11 +5,21 @@
  * 2.0.
  */
 
+import { signalEventStatusSchema } from '@kbn/alerting-v2-schemas';
 import {
   alertEventSchema,
+  alertEventStatus,
   buildRuleEventDocument,
   getAlertEventsResourceDefinition,
 } from './alert_events';
+
+describe('signal event statuses', () => {
+  it('match the stored event statuses, so Create Signal can write every one of them', () => {
+    expect([...signalEventStatusSchema.options].sort()).toEqual(
+      Object.values(alertEventStatus).sort()
+    );
+  });
+});
 
 describe('getAlertEventsResourceDefinition', () => {
   it('has no retention by default', () => {

@@ -37,7 +37,8 @@ export const createSignalEventStepCommonDefinition: CommonStepDefinition<
           'Writes a signal event to the alerting event stream. ' +
           'A signal is an observation: it never becomes an alert, has no lifecycle, ' +
           'and is never sent to action policies. ' +
-          'Without a fingerprint, all signals from one source share a single series.',
+          'Without a fingerprint, all signals from one source share a single series. ' +
+          'A signal is stored as breached unless you set status to recovered or no_data.',
       }
     ),
     examples: [
@@ -58,6 +59,17 @@ export const createSignalEventStepCommonDefinition: CommonStepDefinition<
   with:
     source: "my_external_service"
     fingerprint_fields: ["host"]
+    data:
+      host: "{{ inputs.payload.host }}"
+\`\`\``,
+      `## Record that a series is back to normal
+\`\`\`yaml
+- name: create_recovered_signal
+  type: alerting.create_signal
+  with:
+    source: "my_external_service"
+    fingerprint_fields: ["host"]
+    status: "recovered"
     data:
       host: "{{ inputs.payload.host }}"
 \`\`\``,
