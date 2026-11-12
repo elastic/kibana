@@ -227,12 +227,10 @@ describe('createSyntheticsMonitorsApi', () => {
 
     it('fails when the location sync reports errors', async () => {
       const { api, fetch } = setup();
-      fetch
-        .mockResolvedValueOnce({ monitors: [{ id: 'a' }], total: 1 })
-        .mockResolvedValueOnce({
-          result: [{ id: 'a', deleted: true }],
-          errors: [{ location: 'us_central', error: 'timeout' }],
-        });
+      fetch.mockResolvedValueOnce({ monitors: [{ id: 'a' }], total: 1 }).mockResolvedValueOnce({
+        result: [{ id: 'a', deleted: true }],
+        errors: [{ location: 'us_central', error: 'timeout' }],
+      });
 
       await expect(api.deleteMonitors()).rejects.toThrow('service sync errors');
     });
