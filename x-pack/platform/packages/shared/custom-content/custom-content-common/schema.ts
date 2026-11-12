@@ -47,10 +47,54 @@ export const toEsqlQueryState = (esqlQuery: string | undefined): string[] | unde
   esqlQuery === undefined ? undefined : [esqlQuery];
 
 /**
+ * A panel's queries as an agent asks for them, by position. Shared by the chat tool and the
+ * dashboard generation tool, so both describe the same thing to the model.
+ */
+export const customContentDatasetsSchema = lazySchema(() =>
+  z
+    .array(
+      z.object({
+        description: z
+          .string()
+          .min(1)
+          .max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH)
+          .optional()
+          .describe(
+            'What this query returns, in words: the data, not the layout (for example "total requests and the number of 5xx errors, as one row" or "the five hosts with the most requests"). The server generates the ES|QL query from it; do not write one yourself. On an existing panel this regenerates the query at this position, keeping what the description does not change.'
+          ),
+        esql: z
+          .string()
+          .min(1)
+          .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
+          .optional()
+          .describe(
+            'An ES|QL query the user supplied verbatim for this position. It wins over "description" and, on an existing panel, replaces the query at this position.'
+          ),
+        index: z
+          .string()
+          .max(256)
+          .optional()
+          .describe(
+            'Exact index, alias, or data stream this query reads from. Pass it with "description" whenever known.'
+          ),
+      })
+    )
+    .min(1)
+    .max(CUSTOM_CONTENT_MAX_ESQL_QUERIES)
+    .describe(
+      `The panel's ES|QL queries, by position, for a panel that needs data of more than one shape, such as headline numbers plus a ranked list. The template reads the first as \`rows\` and the n-th as \`queries[n].rows\`, so the order matters. Each entry describes one query ("description"), or supplies one verbatim ("esql"). With a single query use the single-query fields instead. Do not combine with the single-query fields. On an existing panel: an entry with "description" regenerates the query at that position, one with "esql" replaces it, an empty entry {} keeps it, an entry past the current queries adds one, and queries not listed are kept. Queries cannot be removed this way. At most ${CUSTOM_CONTENT_MAX_ESQL_QUERIES}.`
+    )
+);
+
+export type CustomContentDatasets = z.output<typeof customContentDatasetsSchema>;
+/** One of a panel's queries, as an agent asks for it. */
+export type CustomContentDataset = CustomContentDatasets[number];
+
+/**
  * Generation input for the create-panel and update-panel tools. `prompt` instructs this operation
  * only and is never persisted; the server generates `template`.
  */
-const customContentUpdateFields = {
+const createUpdateFields = () => ({
   prompt: z
     .string()
     .min(1)
@@ -82,17 +126,32 @@ const customContentUpdateFields = {
     .describe(
       'Exact index, alias, or data stream to generate the query from. Pass it with regenerateEsql whenever known.'
     ),
-} as const;
+  datasets: customContentDatasetsSchema.optional(),
+});
 
 const hasSomethingToChange = ({
   prompt,
   esqlQuery,
+  datasets,
 }: {
   prompt?: string;
   esqlQuery?: string | null;
-}) => prompt !== undefined || esqlQuery === null || Boolean(esqlQuery?.trim());
+  datasets?: unknown[];
+}) => prompt !== undefined || esqlQuery === null || Boolean(esqlQuery?.trim()) || Boolean(datasets);
 
-const atLeastOneChange = { message: 'At least one of prompt or esqlQuery must be provided.' };
+const atLeastOneChange = {
+  message: 'At least one of prompt, esqlQuery or datasets must be provided.',
+};
+
+const datasetsReplaceSingleQueryFields = {
+  message:
+    "datasets replaces esqlQuery, regenerateEsql and index: put each query's esql and index on its dataset.",
+};
+
+const datasetDescriptionsNeedPrompt = {
+  message:
+    'A dataset with a description changes what the panel shows, so it needs a prompt describing the change.',
+};
 
 const regenerateNeedsPrompt = {
   message: 'regenerateEsql requires a prompt describing the change.',
@@ -106,25 +165,37 @@ const regenerateExcludesRemoval = {
  * Edit input for the chat tool. A conversation can hold one context attachment per panel, so the
  * target has to be explicit — without it the tool would act on whichever panel was attached first.
  */
-export const customContentPanelUpdateSchema = z
-  .object({
-    embeddable_id: z
-      .string()
-      .min(1)
-      .max(100)
-      .describe(
-        'The embeddable_id of the custom content panel to update, as shown in that panel\'s context header (e.g. "Custom content panel (embeddable_id: …)"). Always required — several panels can be attached to one conversation.'
-      ),
-    ...customContentUpdateFields,
-  })
-  .refine(hasSomethingToChange, atLeastOneChange)
-  .refine(
-    ({ prompt, regenerateEsql }) => !regenerateEsql || prompt !== undefined,
-    regenerateNeedsPrompt
-  )
-  .refine(
-    ({ esqlQuery, regenerateEsql }) => !(esqlQuery === null && regenerateEsql),
-    regenerateExcludesRemoval
-  );
+export const customContentPanelUpdateSchema = lazySchema(() =>
+  z
+    .object({
+      embeddable_id: z
+        .string()
+        .min(1)
+        .max(100)
+        .describe(
+          'The embeddable_id of the custom content panel to update, as shown in that panel\'s context header (e.g. "Custom content panel (embeddable_id: …)"). Always required — several panels can be attached to one conversation.'
+        ),
+      ...createUpdateFields(),
+    })
+    .refine(hasSomethingToChange, atLeastOneChange)
+    .refine(
+      ({ prompt, regenerateEsql }) => !regenerateEsql || prompt !== undefined,
+      regenerateNeedsPrompt
+    )
+    .refine(
+      ({ esqlQuery, regenerateEsql }) => !(esqlQuery === null && regenerateEsql),
+      regenerateExcludesRemoval
+    )
+    .refine(
+      ({ datasets, esqlQuery, regenerateEsql, index }) =>
+        !datasets || (esqlQuery === undefined && !regenerateEsql && index === undefined),
+      datasetsReplaceSingleQueryFields
+    )
+    .refine(
+      ({ datasets, prompt }) =>
+        prompt !== undefined || !datasets?.some(({ description }) => description !== undefined),
+      datasetDescriptionsNeedPrompt
+    )
+);
 
 export type CustomContentPanelUpdate = z.output<typeof customContentPanelUpdateSchema>;

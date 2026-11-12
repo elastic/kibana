@@ -42,8 +42,12 @@ interface CustomContentVisualizationAttachmentData extends VisualizationAttachme
   renderer: 'custom_content';
   /** The model's own estimate of the content height; see `CUSTOM_CONTENT_DEFAULT_HEIGHT`. */
   visualization: { template: string; title?: string; height?: number };
-  /** Optional: a custom content panel with no query renders static content. */
-  esql?: string;
+  /**
+   * The panel's ES|QL queries, in the order its template reads them: the first is `rows`, the others
+   * `queries[1]`, `queries[2]`, ... None for a static panel. Attachments saved before a panel could
+   * have several hold a single string, so read it with `readCustomContentQueries`.
+   */
+  esql?: string[];
 }
 
 export type VisualizationAttachmentData =
@@ -62,3 +66,17 @@ export const getEffectiveRenderer = (data: VisualizationAttachmentData): Visuali
 export const isCustomContentVisualization = (
   data: VisualizationAttachmentData
 ): data is CustomContentVisualizationAttachmentData => data.renderer === 'custom_content';
+
+/**
+ * The ES|QL queries of an attachment, in the order its template reads them, whatever shape it was
+ * saved in: a chart has one query, and a custom content attachment saved before a panel could have
+ * several has a single string.
+ */
+/** The queries of an attachment's `esql`, whichever shape it was saved in; a blank one is no query. */
+export const toQueryList = (esql: string | readonly string[] | undefined): string[] => {
+  if (!esql) return [];
+  return typeof esql === 'string' ? [esql] : [...esql];
+};
+
+export const readCustomContentQueries = (data: VisualizationAttachmentData): string[] =>
+  toQueryList(data.esql);

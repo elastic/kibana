@@ -10,6 +10,7 @@ import {
   isCustomContentVisualization,
   type ChartVisualizationAttachmentData,
   type VisualizationAttachmentData,
+  readCustomContentQueries,
 } from '@kbn/agent-builder-visualizations-common';
 import type {
   AttachmentResolveContext,
@@ -29,6 +30,20 @@ import { visualizationAttachmentDataSchema } from './visualization_schema';
  * How the attachment describes itself to the agent, which picks its edit path from this.
  * Lens is the fallback because attachments predating the `renderer` field are Lens.
  */
+/** What the model is told about the queries behind a visualization, one line each. */
+const describeQueries = (data: VisualizationAttachmentData): string[] => {
+  const queries = readCustomContentQueries(data);
+  // Custom content is the only renderer that can be static.
+  if (queries.length === 0) return ['ES|QL: none (static content)'];
+  if (queries.length === 1) return [`ES|QL: ${queries[0]}`];
+  return queries.map(
+    (query, position) =>
+      `ES|QL, read by the template as ${
+        position === 0 ? 'rows' : `queries[${position}].rows`
+      }: ${query}`
+  );
+};
+
 const describeKind = (data: VisualizationAttachmentData): string => {
   if (isCustomContentVisualization(data)) {
     return 'Renderer: Custom content (HTML template)';
@@ -107,8 +122,7 @@ export const createVisualizationAttachmentType = (): AttachmentTypeDefinition<
             'Visualization attachment',
             `Query: ${data.query}`,
             describeKind(data),
-            // Custom content is the only renderer that can be static.
-            data.esql ? `ES|QL: ${data.esql}` : 'ES|QL: none (static content)',
+            ...describeQueries(data),
           ].join('\n'),
         };
       },

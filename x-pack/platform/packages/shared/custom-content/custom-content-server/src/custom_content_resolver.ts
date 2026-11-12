@@ -220,78 +220,129 @@ export type CustomContentTemplateResolver = (params: {
    */
   esqlQueries?: readonly string[];
   /**
-   * Whether the first query is new or changing. Only then is it run, to give the model its real
-   * columns; a query that is not changing is described by the template that already reads it.
-   * The other queries are neither run nor shown to the model: it is only told that the template may
-   * read `queries[n]`, so a refinement keeps those references. It does not know their columns; that
-   * comes with the change that lets the agent create and change them.
+   * Which of the queries are new or changing, by position. Only those are run, to give the model
+   * their real columns and sample rows; a query that is not changing is described by the template
+   * that already reads it, and the model is given its text only.
    */
-  isQueryChanging?: boolean;
+  changedQueries?: readonly boolean[];
   existingTemplate?: string;
   /** The values of the dashboard controls a query may refer to (`?name`), bound when it is sampled. */
   esqlVariables?: ESQLControlVariable[];
 }) => Promise<ResolvedCustomContentTemplate>;
+
+interface SampledData {
+  columns: Array<{ name: string; type: string }>;
+  values: unknown[][];
+}
+
+/** What the template calls a query's rows: `rows` for the first, `queries[n]` for the others. */
+const queryName = (position: number): string => (position === 0 ? 'rows' : `queries[${position}]`);
+
+/** A query's columns, and a few of its rows. */
+function describeData({ columns, values }: SampledData): string {
+  const schemaLines = columns
+    .map((c) => `  - ${sanitizeCellValue(c.name)} (${sanitizeCellValue(c.type)})`)
+    .join('\n');
+  const sampleSection =
+    values.length > 0
+      ? `\n\nSample rows:\n${formatSampleTable(columns, values)}`
+      : '\n\nNote: no rows available for the current time range.';
+  return `Data schema:\n${schemaLines}${sampleSection}`;
+}
+
+/** A query after the first: its text always, and its data when it is new or changing. */
+function describeOtherQuery(query: string, position: number, data: SampledData | undefined) {
+  const name = queryName(position);
+  const header = `${name} — the template reads this query's rows as ${name}.rows${
+    data ? '' : ' (not changing)'
+  }:\n\`\`\`esql\n${query}\n\`\`\``;
+  return data && data.columns.length > 0 ? `${header}\n${describeData(data)}` : header;
+}
 
 export const createCustomContentTemplateResolver = ({
   modelProvider,
   esClient,
   logger,
 }: CustomContentTemplateResolverDeps): CustomContentTemplateResolver => {
-  return async ({ prompt, esqlQueries = [], isQueryChanging, existingTemplate, esqlVariables }) => {
+  return async ({
+    prompt,
+    esqlQueries = [],
+    changedQueries = [],
+    existingTemplate,
+    esqlVariables,
+  }) => {
     const [esqlQuery, ...additionalEsqlQueries] = esqlQueries;
-    const queryToSample = isQueryChanging ? esqlQuery : undefined;
-    let columns: Array<{ name: string; type: string }> = [];
-    let values: unknown[][] = [];
 
-    if (queryToSample) {
+    const sampleQuery = async (query: string, position: number): Promise<SampledData> => {
       try {
-        const sampledQuery = appendLimitToQuery(queryToSample, SAMPLE_ROW_COUNT);
+        const sampledQuery = appendLimitToQuery(query, SAMPLE_ROW_COUNT);
         const params = getNamedParams(sampledQuery, SAMPLE_TIME_RANGE, esqlVariables);
         const result = await esClient.asCurrentUser.esql.query({
           query: sampledQuery,
           ...(params.length ? { params } : {}),
         });
-        columns = (result.columns ?? []) as Array<{ name: string; type: string }>;
-        values = (result.values ?? []) as unknown[][];
+        return {
+          columns: (result.columns ?? []) as Array<{ name: string; type: string }>,
+          values: (result.values ?? []) as unknown[][],
+        };
       } catch (err) {
         logger.warn(`custom_content template resolver: ES|QL sample fetch failed — ${err}`);
-        throw new Error(describeSamplingFailure(err));
+        const message = describeSamplingFailure(err);
+        // The message of a single-query panel is left as it is.
+        throw new Error(
+          esqlQueries.length > 1
+            ? `Query ${position + 1} (${queryName(position)}): ${message}`
+            : message
+        );
       }
-    }
+    };
+
+    // Only the queries that are new or changing are run, all at once.
+    const sampled = await Promise.all(
+      esqlQueries.map((query, position) =>
+        query && changedQueries[position] ? sampleQuery(query, position) : undefined
+      )
+    );
 
     const systemPrompt = esqlQuery
       ? buildSystemPromptTemplate(additionalEsqlQueries.length > 0)
       : buildSystemPromptStatic();
 
+    // What the model is told about the queries after the first: their text, and their data when they are changing.
+    const otherQueriesSection = additionalEsqlQueries
+      .map((query, index) => describeOtherQuery(query, index + 1, sampled[index + 1]))
+      .join('\n\n');
+
     let userContent: string;
-    if (queryToSample) {
+    const sampledFirst = sampled[0];
+    if (sampledFirst) {
       const promptPrefix = prompt ? `${prompt}\n\n` : '';
+      const { columns } = sampledFirst;
       let schemaSection: string;
       if (columns.length > 0) {
-        const schemaLines = columns
-          .map((c) => `  - ${sanitizeCellValue(c.name)} (${sanitizeCellValue(c.type)})`)
-          .join('\n');
-        const sampleSection =
-          values.length > 0
-            ? `\n\nSample rows:\n${formatSampleTable(columns, values)}`
-            : '\n\nNote: no rows available for the current time range.';
-        schemaSection = `Data schema:\n${schemaLines}${sampleSection}\n\nGenerate an HTML template that accesses each column via bracket notation using its exact name, e.g. row["${sanitizeCellValue(
+        schemaSection = `${describeData(
+          sampledFirst
+        )}\n\nGenerate an HTML template that accesses each column via bracket notation using its exact name, e.g. row["${sanitizeCellValue(
           columns[0].name
         )}"].value.`;
       } else {
         schemaSection =
           'Note: schema unavailable. Generate a suitable template for this ES|QL query.';
       }
+      const withOtherQueries = otherQueriesSection
+        ? `${schemaSection}\n\n${otherQueriesSection}`
+        : schemaSection;
 
       if (existingTemplate) {
-        userContent = `${promptPrefix}Current template:\n${existingTemplate}\n\n${schemaSection}\n\nUpdate the template above to reflect the changes. Preserve the overall layout, design, and color choices — only change what is necessary.`;
+        userContent = `${promptPrefix}Current template:\n${existingTemplate}\n\n${withOtherQueries}\n\nUpdate the template above to reflect the changes. Preserve the overall layout, design, and color choices — only change what is necessary.`;
       } else {
-        userContent = `${promptPrefix}${schemaSection}`;
+        userContent = `${promptPrefix}${withOtherQueries}`;
       }
     } else if (existingTemplate) {
-      userContent = `Current template:\n${existingTemplate}\n\nUpdate instructions: ${prompt}\n\nPreserve the overall layout, design, and color choices — only change what is necessary.`;
+      const withOtherQueries = otherQueriesSection ? `${otherQueriesSection}\n\n` : '';
+      userContent = `Current template:\n${existingTemplate}\n\n${withOtherQueries}Update instructions: ${prompt}\n\nPreserve the overall layout, design, and color choices — only change what is necessary.`;
     } else {
-      userContent = prompt;
+      userContent = otherQueriesSection ? `${prompt}\n\n${otherQueriesSection}` : prompt;
     }
 
     const { inferenceClient } = await modelProvider.getDefaultModel();

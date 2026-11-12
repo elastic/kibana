@@ -55,6 +55,7 @@ const callHandler = async (
     esqlQuery?: string | null;
     regenerateEsql?: boolean;
     index?: string;
+    datasets?: Array<{ description?: string; esql?: string; index?: string }>;
   },
   attachmentData?: Record<string, unknown>
 ) => {
@@ -169,6 +170,50 @@ describe('createUpdateCustomContentTool handler', () => {
       const none = await callHandler({ embeddable_id: 'p1', prompt: 'Restyle' }, existing);
       const [, { data }] = none.ctx.update.mock.calls[0];
       expect(data).not.toHaveProperty('additional_esql_queries');
+    });
+
+    it('hands the datasets to the builder, in place of the single-query fields', async () => {
+      const datasets = [{}, { description: 'the ten busiest services' }];
+
+      await callHandler(
+        { embeddable_id: 'p1', prompt: 'Show the busiest services', datasets },
+        { ...existing, additional_esql_queries: ['FROM metrics'] }
+      );
+
+      expect(mockBuild).toHaveBeenCalledWith(
+        expect.objectContaining({
+          datasets,
+          existing: expect.objectContaining({ esqlQueries: ['FROM logs', 'FROM metrics'] }),
+        })
+      );
+    });
+
+    it('stores the queries the builder returns after a dataset adds one', async () => {
+      mockBuild.mockResolvedValueOnce({
+        esqlQueries: ['FROM logs', 'FROM metrics', 'FROM errors'],
+        template: '<div>three tables</div>',
+        height: 320,
+      });
+
+      const { ctx } = await callHandler(
+        {
+          embeddable_id: 'p1',
+          prompt: 'Add an errors table',
+          datasets: [{}, {}, { description: 'errors by service' }],
+        },
+        { ...existing, additional_esql_queries: ['FROM metrics'] }
+      );
+
+      expect(ctx.update).toHaveBeenCalledWith(
+        'att-1',
+        expect.objectContaining({
+          data: expect.objectContaining({
+            esql_query: 'FROM logs',
+            additional_esql_queries: ['FROM metrics', 'FROM errors'],
+          }),
+        }),
+        ATTACHMENT_REF_ACTOR.agent
+      );
     });
 
     it('stores the template and the query the builder returns', async () => {

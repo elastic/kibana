@@ -7,10 +7,12 @@
 
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { CustomContentDataset } from '@kbn/custom-content-common';
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { Logger } from '@kbn/logging';
 import { generateCustomContentEsql } from '../shared/custom_content_esql';
+import { resolveDatasets } from './resolve_datasets';
 
 type GenerateParams = Parameters<typeof generateCustomContentEsql>[0];
 
@@ -38,6 +40,12 @@ interface BuildCustomContentConfigParams {
   /** Regenerate the query from `nlQuery`, starting from the stored one so unrelated parts survive. */
   regenerateESQL?: boolean;
   /**
+   * The panel's queries by position, for a panel with data of more than one shape. It replaces
+   * `esql`, `hasData`, `regenerateESQL` and `index`: each dataset describes or supplies the query at
+   * its position, an empty one keeps it, and a position past the stored queries adds one.
+   */
+  datasets?: readonly CustomContentDataset[];
+  /**
    * The panel being edited. Absent for a new panel. Its queries are in the order the template reads
    * them: the first is the main query (`rows`), the others `queries[1]`, `queries[2]`, ...
    */
@@ -53,8 +61,8 @@ interface BuildCustomContentConfigParams {
 interface BuildCustomContentConfigResult {
   /**
    * The queries the panel ends up with, in the order the template reads them, none for a panel
-   * without data. Only the first can be generated, replaced or removed; the others are kept as they
-   * are, and only while the panel has a first one.
+   * without data. Without `datasets` only the first can be generated, replaced or removed, and the
+   * others are kept as they are, only while the panel has a first one.
    */
   esqlQueries: string[];
   /** The HTML template. On an edit that neither has a prompt nor changes the query, the existing one. */
@@ -107,6 +115,7 @@ export const buildCustomContentConfig = async ({
   esql,
   hasData,
   regenerateESQL,
+  datasets,
   existing,
   timeRange,
   resolveEsqlVariables,
@@ -124,42 +133,90 @@ export const buildCustomContentConfig = async ({
       options
     );
 
-  const [existingQuery, ...existingAdditionalQueries] = existing?.esqlQueries ?? [];
-  const esqlQuery = await resolveQuery({
-    esql,
-    hasData,
-    regenerate: regenerateESQL,
-    existingQuery,
-    isNewPanel: !existing,
-    generate: async (existingQueries) =>
-      generateCustomContentEsql({
-        nlQuery: nlQuery ?? '',
-        index,
-        existingQueries,
-        esqlVariables: await getEsqlVariables([esql, ...existingQueries], { anyVariable: true }),
-        modelProvider,
-        events,
-        logger,
-        esClient,
-        ...(timeRange ? { timeRange } : {}),
+  const existingQueries = existing?.esqlQueries ?? [];
+  const [existingQuery, ...existingAdditionalQueries] = existingQueries;
+
+  const generateQuery = async (params: {
+    nlQuery: string;
+    index?: string;
+    existingQueries: string[];
+    suppliedQuery?: string | null;
+    /** True when the query is one of several that feed the panel. */
+    isDataset?: boolean;
+  }) =>
+    generateCustomContentEsql({
+      nlQuery: params.nlQuery,
+      index: params.index,
+      existingQueries: params.existingQueries,
+      isDataset: params.isDataset,
+      esqlVariables: await getEsqlVariables([params.suppliedQuery, ...params.existingQueries], {
+        anyVariable: true,
       }),
-  });
+      modelProvider,
+      events,
+      logger,
+      esClient,
+      ...(timeRange ? { timeRange } : {}),
+    });
 
-  // The other queries extend the first, so there is nothing for them to extend without it.
-  const esqlQueries = esqlQuery ? [esqlQuery, ...existingAdditionalQueries] : [];
+  if (datasets && (esql !== undefined || hasData !== undefined || regenerateESQL)) {
+    throw new Error(
+      'datasets replaces esql, hasData and regenerateESQL: put each query on its dataset.'
+    );
+  }
 
-  const isQueryChanging = esqlQuery !== existingQuery;
-  if (existing && nlQuery === undefined && !isQueryChanging) {
+  let esqlQueries: string[];
+  // Per position: whether the query is new or changing, so it is sampled for the template.
+  let changedQueries: boolean[];
+  if (datasets) {
+    const resolved = await resolveDatasets({
+      datasets,
+      existingQueries,
+      generate: ({ description, index: datasetIndex }, existingForPosition) =>
+        generateQuery({
+          nlQuery: description,
+          index: datasetIndex ?? index,
+          existingQueries: existingForPosition,
+          isDataset: true,
+        }),
+    });
+    esqlQueries = resolved.queries;
+    changedQueries = resolved.changed;
+  } else {
+    const esqlQuery = await resolveQuery({
+      esql,
+      hasData,
+      regenerate: regenerateESQL,
+      existingQuery,
+      isNewPanel: !existing,
+      generate: (existingForQuery) =>
+        generateQuery({
+          nlQuery: nlQuery ?? '',
+          index,
+          existingQueries: existingForQuery,
+          suppliedQuery: esql,
+        }),
+    });
+    // The other queries extend the first, so there is nothing for them to extend without it.
+    esqlQueries = esqlQuery ? [esqlQuery, ...existingAdditionalQueries] : [];
+    changedQueries = esqlQueries.map(
+      (_, position) => position === 0 && esqlQuery !== existingQuery
+    );
+  }
+
+  const hasChanges = changedQueries.some(Boolean) || esqlQueries.length !== existingQueries.length;
+  if (existing && nlQuery === undefined && !hasChanges) {
     return { esqlQueries, template: existing.template ?? '' };
   }
 
+  const queriesToSample = esqlQueries.filter((_, position) => changedQueries[position]);
   const resolveTemplate = createCustomContentTemplateResolver({ modelProvider, esClient, logger });
   const { template, height } = await resolveTemplate({
     prompt: nlQuery ?? '',
     esqlQueries,
-    isQueryChanging,
+    changedQueries,
     existingTemplate: existing?.template || undefined,
-    esqlVariables: isQueryChanging && esqlQuery ? await getEsqlVariables([esqlQuery]) : undefined,
+    esqlVariables: queriesToSample.length ? await getEsqlVariables(queriesToSample) : undefined,
   });
 
   return { esqlQueries, template, height };

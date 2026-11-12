@@ -115,6 +115,29 @@ describe('createCustomContentPanelResolver', () => {
     });
   });
 
+  it('hands the datasets of a new panel to the builder, which generates a query for each', async () => {
+    const datasets = [{ description: 'totals', index: 'logs' }, { esql: 'FROM logs | LIMIT 5' }];
+    mockedBuild.mockResolvedValue({
+      esqlQueries: ['FROM logs | STATS n = COUNT(*)', 'FROM logs | LIMIT 5'],
+      template: '<div>two queries</div>',
+      height: 300,
+    });
+
+    const result = await resolve(
+      addRequest({ nlQuery: 'totals above a list', hasData: true, datasets })
+    );
+
+    expect(mockedBuild).toHaveBeenCalledWith(expect.objectContaining({ datasets }));
+    expect(result).toMatchObject({
+      panelContent: {
+        config: {
+          esql_query: ['FROM logs | STATS n = COUNT(*)', 'FROM logs | LIMIT 5'],
+          template: '<div>two queries</div>',
+        },
+      },
+    });
+  });
+
   it('hands the control values resolver of the request to the builder', async () => {
     const resolveEsqlVariables = jest.fn();
 
@@ -199,6 +222,35 @@ describe('createCustomContentPanelResolver', () => {
       );
 
       expect(result).toMatchObject({ panelContent: { config: { esql_query: undefined } } });
+    });
+
+    it('hands the datasets of an edit to the builder, and stores the queries it returns', async () => {
+      const datasets = [{}, { description: 'the ten busiest services' }];
+      mockedBuild.mockResolvedValue({
+        esqlQueries: ['FROM logs-*', 'FROM metrics | LIMIT 10'],
+        template: '<div>updated</div>',
+        height: 300,
+      });
+
+      const result = await resolve(
+        editRequest(
+          customContentPanel({
+            template: '<div>old</div>',
+            esql_query: ['FROM logs-*', 'FROM metrics-*'],
+          }),
+          { nlQuery: 'Show the busiest', datasets }
+        )
+      );
+
+      expect(mockedBuild).toHaveBeenCalledWith(
+        expect.objectContaining({
+          datasets,
+          existing: expect.objectContaining({ esqlQueries: ['FROM logs-*', 'FROM metrics-*'] }),
+        })
+      );
+      expect(result).toMatchObject({
+        panelContent: { config: { esql_query: ['FROM logs-*', 'FROM metrics | LIMIT 10'] } },
+      });
     });
 
     it('forwards the data flags', async () => {

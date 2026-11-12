@@ -56,7 +56,14 @@ const lensTarget = (chartType: SupportedChartType = SupportedChartType.XY) => ({
   chartType,
 });
 const vegaTarget = { type: 'vega' as const };
-const customContentTarget = (rest: { esql?: string | null; has_data?: boolean } = {}) => ({
+const customContentTarget = (
+  rest: {
+    esql?: string | null;
+    has_data?: boolean;
+    regenerate_esql?: boolean;
+    datasets?: Array<{ description?: string; esql?: string; index?: string }>;
+  } = {}
+) => ({
   type: 'custom_content' as const,
   has_data: true,
   ...rest,
@@ -68,6 +75,7 @@ const attachmentTarget = (
     esql?: string | null;
     has_data?: boolean | null;
     regenerate_esql?: boolean | null;
+    datasets?: Array<{ description?: string; esql?: string; index?: string }>;
   } = {}
 ) => ({ type: 'attachment' as const, attachment_id: attachmentId, ...rest });
 
@@ -764,7 +772,7 @@ describe('createVisualizationTool handler', () => {
             renderer: 'custom_content',
             query: 'a status board per host',
             visualization: { template: '<div>{{ row["host"].value }}</div>', height: 420 },
-            esql: 'FROM logs | STATS count() BY host',
+            esql: ['FROM logs | STATS count() BY host'],
           }),
         })
       );
@@ -786,6 +794,99 @@ describe('createVisualizationTool handler', () => {
       const [{ data }] = result.results;
       expect(data.visualization).toEqual({ prompt: 'a status board per host' });
       expect(JSON.stringify(data)).not.toContain('row["host"]');
+    });
+
+    describe('datasets', () => {
+      const datasets = [{ description: 'totals', index: 'logs' }, { description: 'top hosts' }];
+
+      it('hands the datasets of a new panel to the builder and stores every query it returns', async () => {
+        mockBuildCustomContent.mockResolvedValue({
+          esqlQueries: ['FROM logs | STATS n = COUNT(*)', 'FROM logs | STATS n = COUNT(*) BY host'],
+          template: '<div>two queries</div>',
+          height: 400,
+        });
+
+        const { result, attachments } = await runHandler({
+          query: 'totals above a host list',
+          target: customContentTarget({ datasets }),
+        });
+
+        expect(mockBuildCustomContent).toHaveBeenCalledWith(
+          expect.objectContaining({ datasets, existing: undefined })
+        );
+        expect(attachments.add).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              esql: ['FROM logs | STATS n = COUNT(*)', 'FROM logs | STATS n = COUNT(*) BY host'],
+            }),
+          })
+        );
+        // The result echoes the first query, as before.
+        const [{ data }] = result.results;
+        expect(data.esql).toBe('FROM logs | STATS n = COUNT(*)');
+      });
+
+      it('gives the builder the stored queries of an attachment, saved as a list', async () => {
+        await runHandler(
+          {
+            query: 'show the busiest',
+            target: attachmentTarget('att-1', {
+              datasets: [{}, { description: 'the ten busiest services' }],
+            }),
+          },
+          { attachments: storedAttachment({ esql: ['FROM a', 'FROM b'] }) }
+        );
+
+        expect(mockBuildCustomContent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            existing: expect.objectContaining({ esqlQueries: ['FROM a', 'FROM b'] }),
+          })
+        );
+      });
+
+      it('reads an attachment saved with a single query string as one query', async () => {
+        await runHandler(
+          { query: 'restyle', target: attachmentTarget('att-1') },
+          { attachments: storedAttachment({ esql: 'FROM only' }) }
+        );
+
+        expect(mockBuildCustomContent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            existing: expect.objectContaining({ esqlQueries: ['FROM only'] }),
+          })
+        );
+      });
+
+      const messageOf = (result: { results: Array<{ data: unknown }> }) =>
+        (result.results[0].data as { message: string }).message;
+
+      it.each([[{ esql: 'FROM x' }], [{ has_data: false }]])(
+        'rejects datasets combined with the single-query fields of a new panel: %j',
+        async (extra) => {
+          const { result } = await runHandler({
+            query: 'x',
+            target: customContentTarget({ datasets, ...extra }),
+          });
+
+          expect(result.results[0].type).toBe(ToolResultType.error);
+          expect(messageOf(result)).toContain('"datasets" replaces');
+          expect(mockBuildCustomContent).not.toHaveBeenCalled();
+        }
+      );
+
+      it('rejects datasets combined with regenerate_esql on an attachment update', async () => {
+        const { result } = await runHandler(
+          {
+            query: 'x',
+            target: attachmentTarget('att-1', { datasets, regenerate_esql: true }),
+          },
+          { attachments: storedAttachment() }
+        );
+
+        expect(result.results[0].type).toBe(ToolResultType.error);
+        expect(messageOf(result)).toContain('"datasets" replaces');
+        expect(mockBuildCustomContent).not.toHaveBeenCalled();
+      });
     });
 
     it('treats leftover esql: null as omitted', async () => {

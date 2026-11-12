@@ -10,6 +10,8 @@ import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
+  customContentDatasetsSchema,
+  type CustomContentDataset,
 } from '@kbn/custom-content-common';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { PanelResolutionRequestBase } from '../../resolve_panel';
@@ -34,6 +36,8 @@ export interface CustomContentPanelAddRequest extends PanelResolutionRequestBase
   hasData: boolean;
   /** Index, alias or data stream to generate the query from. */
   index?: string;
+  /** The panel's queries by position, instead of `esql` / `index`. Then `hasData` is true. */
+  datasets?: CustomContentDataset[];
   existingPanel?: undefined;
 }
 
@@ -51,6 +55,8 @@ export interface CustomContentPanelEditRequest extends PanelResolutionRequestBas
   regenerateESQL?: boolean;
   /** Index, alias or data stream to generate the query from. */
   index?: string;
+  /** The panel's queries by position, instead of `esql` / `hasData` / `regenerateESQL` / `index`. */
+  datasets?: CustomContentDataset[];
 }
 
 /** Request to generate or refine a custom content panel's template; `existingPanel` tells them apart. */
@@ -101,6 +107,11 @@ const customContentPanelContentSchema = lazySchema(() =>
       .optional()
       .describe(
         'Exact index, alias, or data stream the data comes from. Pass it whenever known, together with hasData: true; on an existing panel, when regenerating or adding data.'
+      ),
+    datasets: customContentDatasetsSchema
+      .optional()
+      .describe(
+        'For a panel that needs several queries (see the description of each entry). Replaces esql, hasData, regenerateESQL and index: do not send them with it. "query" still says how the panel looks and how it uses each query; each dataset says what one query returns. Required "query" for a new panel, and for an edit when a dataset has a description or adds a query.'
       ),
   })
 );

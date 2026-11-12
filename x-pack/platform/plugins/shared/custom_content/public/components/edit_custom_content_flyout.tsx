@@ -32,7 +32,7 @@ import { CodeEditor } from '@kbn/code-editor';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { useEditFlyoutState } from '../hooks/use_edit_flyout_state';
-import { EsqlPreviewSection } from './esql_preview_section';
+import { EsqlDataSection } from './esql_data_section';
 import { getTelemetry } from '../telemetry';
 import { getServices } from '../services';
 
@@ -42,7 +42,7 @@ const EDITOR_DEFAULT_HEIGHT = 400;
 const FLYOUT_FIXED_CHROME_HEIGHT = 380;
 
 export interface EditCustomContentFlyoutProps {
-  /** The panel's queries. The editor changes the first; "Run preview" fetches all of them. */
+  /** The panel's queries, the first of which is `rows` in its template. */
   esqlQueries: readonly string[];
   template: string | undefined;
   timeRange: TimeRange | undefined;
@@ -53,10 +53,10 @@ export interface EditCustomContentFlyoutProps {
   esqlVariables: ESQLControlVariable[] | undefined;
   isNewPanel?: boolean;
   ariaLabelledBy?: string;
-  onSave: (esqlQuery: string | undefined, template: string | undefined) => void;
+  onSave: (esqlQueries: string[], template: string | undefined) => void;
   onClose: () => void;
   onRunPreview: (html: string) => void;
-  onGenerateWithChat?: (template: string, esqlQuery: string | undefined) => void;
+  onGenerateWithChat?: (template: string, esqlQueries: string[]) => void;
 }
 
 export const EditCustomContentFlyout = ({
@@ -78,15 +78,18 @@ export const EditCustomContentFlyout = ({
   const { euiTheme, colorMode } = useEuiTheme();
 
   const {
-    draftEsqlQuery,
-    setDraftEsqlQuery,
+    draftQueries,
+    draftEsqlQueries,
+    emptyQueryPosition,
+    canAddQuery,
+    addQuery,
+    removeQuery,
+    setQueryText,
+    fetchQueryData,
     draftTemplate,
     setDraftTemplate,
     isAiAvailable,
-    isDataLoading,
-    esqlData,
-    esqlDataError,
-    handleFetchData,
+    renderError,
     isRenderLoading,
     handleRender,
   } = useEditFlyoutState({
@@ -108,21 +111,23 @@ export const EditCustomContentFlyout = ({
       triggerSource: 'flyout',
       hasExistingTemplate: Boolean(draftTemplate),
     });
-    onGenerateWithChat?.(draftTemplate, draftEsqlQuery || undefined);
-  }, [onGenerateWithChat, draftTemplate, draftEsqlQuery]);
+    onGenerateWithChat?.(draftTemplate, draftEsqlQueries);
+  }, [onGenerateWithChat, draftTemplate, draftEsqlQueries]);
 
   const hasChanges =
-    draftEsqlQuery !== (esqlQueries[0] ?? '') || draftTemplate !== (template ?? '');
+    draftTemplate !== (template ?? '') ||
+    draftEsqlQueries.length !== esqlQueries.length ||
+    draftEsqlQueries.some((text, index) => text !== esqlQueries[index]);
 
   const handleSave = useCallback(() => {
     getTelemetry().trackPanelSaved({
       isNewPanel: isNewPanel ?? false,
       hasTemplate: Boolean(draftTemplate),
-      hasEsqlQuery: Boolean(draftEsqlQuery),
+      hasEsqlQuery: draftEsqlQueries.length > 0,
       templateSizeBytes: draftTemplate.length,
     });
-    onSave(draftEsqlQuery || undefined, draftTemplate || undefined);
-  }, [draftEsqlQuery, draftTemplate, isNewPanel, onSave]);
+    onSave(draftEsqlQueries, draftTemplate || undefined);
+  }, [draftEsqlQueries, draftTemplate, isNewPanel, onSave]);
 
   const [editorHeight, setEditorHeight] = useState(EDITOR_DEFAULT_HEIGHT);
   const [maxEditorHeight, setMaxEditorHeight] = useState<number | undefined>(undefined);
@@ -323,13 +328,15 @@ export const EditCustomContentFlyout = ({
         <EuiResizeObserver onResize={onEsqlSectionResize}>
           {(resizeRef) => (
             <div ref={resizeRef}>
-              <EsqlPreviewSection
-                esqlQuery={draftEsqlQuery}
-                onEsqlQueryChange={setDraftEsqlQuery}
-                isDataLoading={isDataLoading}
-                esqlData={esqlData}
-                esqlDataError={esqlDataError}
-                onFetchData={handleFetchData}
+              <EsqlDataSection
+                queries={draftQueries}
+                canAddQuery={canAddQuery}
+                onAddQuery={addQuery}
+                onRemoveQuery={removeQuery}
+                onQueryTextChange={setQueryText}
+                onFetchQueryData={fetchQueryData}
+                renderError={renderError}
+                emptyQueryPosition={emptyQueryPosition}
                 esqlVariables={esqlVariables}
               />
             </div>
@@ -352,7 +359,7 @@ export const EditCustomContentFlyout = ({
                 <EuiButton
                   color="text"
                   isLoading={isRenderLoading}
-                  disabled={!draftTemplate.trim()}
+                  disabled={!draftTemplate.trim() || emptyQueryPosition !== undefined}
                   onClick={handleRender}
                   data-test-subj="customContentRunPreviewButton"
                 >
@@ -365,7 +372,7 @@ export const EditCustomContentFlyout = ({
                 <EuiButton
                   fill
                   onClick={handleSave}
-                  disabled={!hasChanges}
+                  disabled={!hasChanges || emptyQueryPosition !== undefined}
                   data-test-subj="customContentApplyButton"
                 >
                   {i18n.translate('xpack.customContent.editFlyout.applyButton', {
