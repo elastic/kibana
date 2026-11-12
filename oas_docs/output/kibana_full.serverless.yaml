@@ -40047,6 +40047,10 @@ paths:
                           description: The ID of the proxy to use for this download source. See the proxies API for more information.
                           nullable: true
                           type: string
+                        reserve_diskspace:
+                          description: If `true`, Elastic Agent reserves disk space equal to the size of the new agent package before an upgrade, so the upgrade fails early if there is not enough space. If not set, defaults to `true` on the agent side.
+                          type: boolean
+                          x-state: Generally available
                         secrets:
                           additionalProperties: false
                           type: object
@@ -40226,6 +40230,10 @@ paths:
                   description: The ID of the proxy to use for this download source. See the proxies API for more information.
                   nullable: true
                   type: string
+                reserve_diskspace:
+                  description: If `true`, Elastic Agent reserves disk space equal to the size of the new agent package before an upgrade, so the upgrade fails early if there is not enough space. If not set, defaults to `true` on the agent side.
+                  type: boolean
+                  x-state: Generally available
                 secrets:
                   additionalProperties: false
                   type: object
@@ -40346,6 +40354,10 @@ paths:
                         description: The ID of the proxy to use for this download source. See the proxies API for more information.
                         nullable: true
                         type: string
+                      reserve_diskspace:
+                        description: If `true`, Elastic Agent reserves disk space equal to the size of the new agent package before an upgrade, so the upgrade fails early if there is not enough space. If not set, defaults to `true` on the agent side.
+                        type: boolean
+                        x-state: Generally available
                       secrets:
                         additionalProperties: false
                         type: object
@@ -40613,6 +40625,10 @@ paths:
                         description: The ID of the proxy to use for this download source. See the proxies API for more information.
                         nullable: true
                         type: string
+                      reserve_diskspace:
+                        description: If `true`, Elastic Agent reserves disk space equal to the size of the new agent package before an upgrade, so the upgrade fails early if there is not enough space. If not set, defaults to `true` on the agent side.
+                        type: boolean
+                        x-state: Generally available
                       secrets:
                         additionalProperties: false
                         type: object
@@ -40799,6 +40815,10 @@ paths:
                   description: The ID of the proxy to use for this download source. See the proxies API for more information.
                   nullable: true
                   type: string
+                reserve_diskspace:
+                  description: If `true`, Elastic Agent reserves disk space equal to the size of the new agent package before an upgrade, so the upgrade fails early if there is not enough space. If not set, defaults to `true` on the agent side.
+                  type: boolean
+                  x-state: Generally available
                 secrets:
                   additionalProperties: false
                   type: object
@@ -40919,6 +40939,10 @@ paths:
                         description: The ID of the proxy to use for this download source. See the proxies API for more information.
                         nullable: true
                         type: string
+                      reserve_diskspace:
+                        description: If `true`, Elastic Agent reserves disk space equal to the size of the new agent package before an upgrade, so the upgrade fails early if there is not enough space. If not set, defaults to `true` on the agent side.
+                        type: boolean
+                        x-state: Generally available
                       secrets:
                         additionalProperties: false
                         type: object
@@ -163580,6 +163604,14 @@ components:
                   type: object
                 proxy_url:
                   type: string
+                reserve_diskspace:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                  required:
+                    - enabled
                 secrets:
                   additionalProperties: true
                   type: object
