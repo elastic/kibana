@@ -130,13 +130,15 @@ const uniqueServers = (operations: readonly ContractOperation[]): OperationServe
 
 // Collects the URLs `urlsOf` picks from the OAuth 2 flows declared by the operations' specs, each
 // as the field holding it and what that URL accepts. Relative ones resolve against every server
-// of the spec. Throws on URLs that can't be parsed.
+// of the spec, and `include` keeps only some of the resolved URLs. Throws on URLs that can't be
+// parsed.
 const findFlowEndpoints = (
   operations: readonly ContractOperation[],
   urlsOf: (
     flow: string,
     settings: Record<string, unknown>
-  ) => ReadonlyArray<readonly [field: string, accepts: string]>
+  ) => ReadonlyArray<readonly [field: string, accepts: string]>,
+  include: (endpoint: OperationServer) => boolean
 ): TokenEndpoints => {
   const endpoints = new Map<string, { matches: (url: URL) => boolean; grants: Set<string> }>();
   const operationsBySpec = new Map<OpenApiDocument, ContractOperation[]>();
@@ -161,6 +163,9 @@ const findFlowEndpoints = (
           endpoint = resolveTokenUrl(url, server);
         } catch {
           throw new Error(`${describe()} ${JSON.stringify(url)} is not a valid URL`);
+        }
+        if (!include(endpoint)) {
+          continue;
         }
         const key = JSON.stringify(endpoint);
         const existing = endpoints.get(key);
@@ -199,19 +204,27 @@ const findFlowEndpoints = (
 
 /**
  * Collects the token and refresh URLs of the OAuth 2 flows declared by the operations' specs.
- * Relative ones resolve against every server of the spec. Throws on URLs that can't be parsed.
+ * Relative ones resolve against every server of the spec, and `include` keeps only some of the
+ * resolved URLs. Throws on URLs that can't be parsed.
  */
-export const findTokenEndpoints = (operations: readonly ContractOperation[]): TokenEndpoints =>
-  findFlowEndpoints(operations, (flow, { refreshUrl }) => [
-    ...(flow in FLOW_GRANTS
-      ? ([
-          ['tokenUrl', FLOW_GRANTS[flow]],
-          // OpenAPI has no flow for it, but token URLs commonly accept it too.
-          ['tokenUrl', JWT_BEARER],
-        ] as const)
-      : []),
-    [refreshUrl === undefined ? 'tokenUrl' : 'refreshUrl', 'refresh_token'],
-  ]);
+export const findTokenEndpoints = (
+  operations: readonly ContractOperation[],
+  { include = () => true }: { include?: (endpoint: OperationServer) => boolean } = {}
+): TokenEndpoints =>
+  findFlowEndpoints(
+    operations,
+    (flow, { refreshUrl }) => [
+      ...(flow in FLOW_GRANTS
+        ? ([
+            ['tokenUrl', FLOW_GRANTS[flow]],
+            // OpenAPI has no flow for it, but token URLs commonly accept it too.
+            ['tokenUrl', JWT_BEARER],
+          ] as const)
+        : []),
+      [refreshUrl === undefined ? 'tokenUrl' : 'refreshUrl', 'refresh_token'],
+    ],
+    include
+  );
 
 // Google's current authorization URL, which its connectors use. Discovery documents don't name
 // one, so specs converted from them, and the snapshots cut from those, declare the original.
@@ -222,10 +235,13 @@ const GOOGLE_V2_AUTHORIZATION_URL = 'https://accounts.google.com/o/oauth2/v2/aut
  * operations' specs, resolved like token URLs. Throws on URLs that can't be parsed.
  */
 export const findAuthorizationEndpoints = (
-  operations: readonly ContractOperation[]
+  operations: readonly ContractOperation[],
+  { include = () => true }: { include?: (endpoint: OperationServer) => boolean } = {}
 ): ((url: URL) => boolean) => {
-  const endpoints = findFlowEndpoints(operations, (flow) =>
-    flow === 'authorizationCode' ? [['authorizationUrl', 'code']] : []
+  const endpoints = findFlowEndpoints(
+    operations,
+    (flow) => (flow === 'authorizationCode' ? [['authorizationUrl', 'code']] : []),
+    include
   );
   return (url) =>
     endpoints(

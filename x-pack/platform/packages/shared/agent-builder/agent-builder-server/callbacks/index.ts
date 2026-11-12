@@ -6,6 +6,9 @@
  */
 
 export type {
+  OnBeforeNewConversationHook,
+  OnBeforeNewConversationContext,
+  OnBeforeNewConversationRelease,
   CallbackConversationResolver,
   CallbackConversationResolverContext,
   CallbackTransportDefinition,

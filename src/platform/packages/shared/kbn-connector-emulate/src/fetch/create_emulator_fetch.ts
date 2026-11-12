@@ -7,33 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { once } from 'lodash';
 import type {
   ContractProtocol,
   ContractRequest,
   ContractResponse,
   NamedOperationRef,
   Responder,
+  ResponderContext,
   Violation,
 } from '../contract/types';
 import type {
   OperationRef,
+  PreparedFixtures,
   Recording,
   RejectedResponse,
   ResponseFixture,
+  ResponseOrigin,
 } from '../engine/response_engine';
 import type { NamedResponse } from '../engine/named_responses';
 import { collectNamedResponses, rejectUnknownNamedResponses } from '../engine/named_responses';
 import { createResponseEngine } from '../engine/response_engine';
 import type { PaginationOptions } from '../engine/paginate';
 import { withPagination } from '../engine/paginate';
-import { sampleResponse } from '../engine/sample_response';
+import { sampleBoundaryResponse, sampleResponse } from '../engine/sample_response';
 import type { GraphQLSpec } from '../graphql/graphql_protocol';
 import { createGraphQLProtocol, isGraphQLSpec, toEndpoint } from '../graphql/graphql_protocol';
 import type { McpSpec } from '../mcp/mcp_protocol';
 import { createMcpProtocol, isMcpSpec } from '../mcp/mcp_protocol';
 import type { ContractOperation, OpenApiDocument } from '../openapi';
+import { serverNamesHost } from '../openapi/names_host';
 import { loadContractOperations } from '../openapi';
 import type { OperationMatch } from '../openapi/match_operation';
+import { createOperationMatcher } from '../openapi/match_operation';
 import { createOpenApiAdapter } from '../openapi/openapi_adapter';
 import {
   findAuthorizationEndpoints,
@@ -47,6 +53,10 @@ import { convertSmithy, isSmithyModel } from '../smithy';
 import type { AwsJsonRejection, AwsJsonService } from '../smithy/aws_json';
 import { createAwsJsonService, isAwsJsonDocument } from '../smithy/aws_json';
 import { serializeXmlBody } from '../xml/serialize_xml_body';
+import type { OperationDescription } from './describe_operation';
+import { describeOperation } from './describe_operation';
+import type { EmulatorOperation, LoadedProtocol } from './list_operations';
+import { listOperations } from './list_operations';
 
 /** One request the mock received, for assertions in tests. */
 export interface ContractCall {
@@ -71,6 +81,15 @@ export interface ContractCall {
    * itself.
    */
   readonly token?: true;
+  /**
+   * Set for answered OpenAPI operations: whether the response came from a fixture set while the
+   * emulator runs (`runtime-fixture`), a fixture, a recording, the spec's examples and samples
+   * (`generated`), or a `respond` that answered without deferring to the default chain
+   * (`responder`).
+   */
+  readonly responseSource?: ResponseOrigin | 'generated' | 'responder';
+  /** Set by `combineEmulators`: the connector whose emulator answered the request. */
+  readonly connector?: string;
   readonly status: number;
   readonly requestViolations: readonly Violation[];
   readonly responseViolations: readonly Violation[];
@@ -96,10 +115,19 @@ export interface EmulatorOptions extends PaginationOptions {
   /** Responses captured from the vendor, served when they still conform to the spec. */
   readonly recordings?: readonly Recording[];
   /**
-   * Answers operations without a fixture or recording; defaults to the spec's examples,
-   * then deterministic samples of its schemas.
+   * Answers OpenAPI operations in front of the default chain: fixtures, recordings, then
+   * examples or samples. `context.next()` gives the default chain's answer, and `context.state`
+   * keeps what the responder needs across requests, e.g. to read back what it created. Answers
+   * may be promises, and are validated like any other.
    */
   readonly respond?: Responder;
+  /** Called with each call as it is recorded, e.g. to log requests as they arrive. */
+  readonly onCall?: (call: ContractCall) => void;
+  /**
+   * How the default chain samples responses the spec has no example for: `typical` values, or
+   * values at the schema's upper bounds (`boundary`), which also skips examples.
+   */
+  readonly sampling?: 'typical' | 'boundary';
   /**
    * Answer 403 `insufficient_scope` when a bearer token the mock issued lacks the scopes an
    * operation's OAuth 2 requirements list. Off by default, as some specs declare scopes loosely.
@@ -109,9 +137,46 @@ export interface EmulatorOptions extends PaginationOptions {
 
 export interface Emulator {
   readonly fetch: typeof fetch;
+  /**
+   * Whether a request with this method and URL is for one of the specs: an operation's path
+   * (with any method), a token URL, or a GraphQL or MCP endpoint. Records no call.
+   */
+  readonly answers: (method: string, url: URL) => boolean;
+  /**
+   * Like `answers`, but only through a server that names the URL's host. A relative server, as
+   * specs of self-hosted products declare, matches any host, as does one whose host is only
+   * variables without an `enum`, such as `https://{host}`.
+   */
+  readonly namesHost: (method: string, url: URL) => boolean;
   readonly calls: ContractCall[];
+  /** The operations the specs declare, which is what the emulator answers. */
+  readonly operations: readonly EmulatorOperation[];
   /** Fixtures and recordings that aren't served because the spec contradicts them. */
   readonly rejectedResponses: readonly RejectedResponse[];
+  /**
+   * Fixtures set while the emulator runs, e.g. for a test or an agent to pick a scenario. They
+   * take precedence over `fixtures`, are checked against the spec when set (an undeclared error
+   * status, such as a 429, is allowed), and are dropped by `reset()`.
+   */
+  readonly runtimeFixtures: {
+    /** Checks fixtures without setting them; `apply` sets them when none is rejected. */
+    readonly prepare: (fixtures: readonly ResponseFixture[]) => PreparedFixtures;
+    /** Replaces the runtime fixtures of the operations they name; sets none if one is rejected. */
+    readonly set: (fixtures: readonly ResponseFixture[]) => readonly RejectedResponse[];
+    readonly list: () => readonly ResponseFixture[];
+    /** Drops the runtime fixtures of the OpenAPI operation with this `id`, or all of them. */
+    readonly clear: (options?: { readonly id?: string; readonly source?: string }) => void;
+  };
+  /** Describes an OpenAPI operation by its `id`, as `operations` lists it, to write a fixture. */
+  readonly describeOperation: (
+    id: string,
+    options?: { readonly source?: string }
+  ) => OperationDescription | undefined;
+  /**
+   * Empties `calls`, the responder state and the runtime fixtures, e.g. between tests; `calls`
+   * keeps its identity.
+   */
+  readonly reset: () => void;
 }
 
 const JSON_HEADERS = { 'content-type': 'application/json' };
@@ -210,29 +275,23 @@ const loadAwsJsonServices = (specs: EmulatorOptions['specs']): AwsJsonService[] 
     return document && isAwsJsonDocument(document) ? [toAwsJsonService(document)] : [];
   });
 
-interface LoadedProtocol {
-  readonly source?: string;
-  readonly protocol: ContractProtocol;
-}
-
 const loadProtocols = (
   specs: EmulatorOptions['specs'],
   responses: readonly NamedResponse[]
 ): LoadedProtocol[] =>
-  toNamedSpecs(specs).flatMap(([source, spec]) => {
+  toNamedSpecs(specs).flatMap(([source, spec]): LoadedProtocol[] => {
     const options = { source, responses };
-    const protocol = isGraphQLSpec(spec)
-      ? createGraphQLProtocol(spec, options)
+    return isGraphQLSpec(spec)
+      ? [{ source, protocol: 'graphql', instance: createGraphQLProtocol(spec, options) }]
       : isMcpSpec(spec)
-      ? createMcpProtocol(spec, options)
-      : undefined;
-    return protocol ? [{ source, protocol }] : [];
+      ? [{ source, protocol: 'mcp', instance: createMcpProtocol(spec, options) }]
+      : [];
   });
 
 const toProtocolEndpoints = (loaded: readonly LoadedProtocol[]): Map<string, ContractProtocol> =>
   new Map(
-    loaded.flatMap(({ protocol }) =>
-      protocol.endpoints.map((endpoint) => [endpoint, protocol] as const)
+    loaded.flatMap(({ instance }) =>
+      instance.endpoints.map((endpoint) => [endpoint, instance] as const)
     )
   );
 
@@ -269,8 +328,10 @@ export const createEmulatorFetch = ({
   recordings,
   pagination,
   collectionSize,
-  respond = sampleResponse,
+  respond,
+  sampling = 'typical',
   checkScopes = false,
+  onCall,
 }: EmulatorOptions): Emulator => {
   const operations = loadSpecs(specs);
   const namedResponses = collectNamedResponses(fixtures, recordings);
@@ -278,18 +339,44 @@ export const createEmulatorFetch = ({
   const protocols = toProtocolEndpoints(loadedProtocols);
   const tokenEndpoints = findTokenEndpoints(operations);
   const isAuthorizationUrl = findAuthorizationEndpoints(operations);
-  const engine = createResponseEngine(operations, { fixtures, recordings, fallback: respond });
-  const contract = createOpenApiAdapter(
+  const engine = createResponseEngine(operations, {
+    fixtures,
+    recordings,
+    fallback: sampling === 'boundary' ? sampleBoundaryResponse : sampleResponse,
+  });
+  // Paging applies to the default chain, so a responder that defers to `next()` pages too.
+  const defaultChain = withPagination(
     operations,
-    withPagination(
-      operations,
-      { pagination, collectionSize, recordedExchanges: engine.recordedExchanges },
-      engine.respond
-    ),
-    { checkScopes }
+    {
+      pagination,
+      collectionSize,
+      recordedExchanges: engine.recordedExchanges,
+      servedFrom: engine.servedFrom,
+    },
+    engine.respond
   );
+  const contract = createOpenApiAdapter(operations, respond ?? defaultChain, { checkScopes });
   const awsJsonServices = loadAwsJsonServices(specs);
+  const state = new Map<unknown, unknown>();
+  // The contexts whose responder deferred to the default chain, for `responseSource`.
+  const deferred = new WeakSet<ResponderContext>();
+  const contextFor = (operation: ContractOperation, request: ContractRequest) => {
+    const context: ResponderContext = {
+      state,
+      // A copy, as fixtures and recordings are one object shared by every request.
+      next: async () => {
+        deferred.add(context);
+        // A copy, as fixtures and recordings are one object shared by every request.
+        return structuredClone(await defaultChain(operation, request, context));
+      },
+    };
+    return context;
+  };
   const calls: ContractCall[] = [];
+  const record = (call: ContractCall) => {
+    calls.push(call);
+    onCall?.(call);
+  };
 
   const rejectAsJson = (
     rejection: AwsJsonRejection,
@@ -305,7 +392,7 @@ export const createEmulatorFetch = ({
 
   // Authenticates and validates a routed request, answers it and checks the answer, recording
   // the call under the request's description.
-  const serveOperation = (
+  const serveOperation = async (
     routed: OperationMatch,
     request: ContractRequest,
     description: string,
@@ -315,7 +402,7 @@ export const createEmulatorFetch = ({
       name: string,
       challenge?: string
     ) => ContractResponse
-  ): ContractResponse => {
+  ): Promise<ContractResponse> => {
     const { operation } = routed;
     const name = operation.id;
     const matched = toOperationRef(operation);
@@ -332,7 +419,7 @@ export const createEmulatorFetch = ({
         name,
         challenge
       );
-      calls.push({
+      record({
         request: description,
         operation: name,
         matched,
@@ -343,12 +430,18 @@ export const createEmulatorFetch = ({
       return response;
     }
 
-    const response = contract.respond(operation, request);
+    const routedRequest = { ...request, pathParameters: routed.pathParameters };
+    const context = contextFor(operation, routedRequest);
+    const response = await contract.respond(operation, routedRequest, context);
     const responseViolations = contract.validateResponse(operation, response);
-    calls.push({
+    record({
       request: description,
       operation: name,
       matched,
+      responseSource:
+        respond && !deferred.has(context)
+          ? 'responder'
+          : engine.servedFrom(operation, routedRequest) ?? 'generated',
       status: response.statusCode,
       requestViolations,
       responseViolations,
@@ -361,14 +454,14 @@ export const createEmulatorFetch = ({
 
   // AWS JSON RPC services answer every request to their hosts: `POST /` with the operation in
   // `X-Amz-Target`, served as the operation at `POST /<Operation>` of the service's document.
-  const serveAwsJson = (
+  const serveAwsJson = async (
     service: AwsJsonService,
     request: ContractRequest,
     description: string
-  ): ContractResponse => {
+  ): Promise<ContractResponse> => {
     const target = service.route(request);
     if ('response' in target) {
-      calls.push({
+      record({
         request: description,
         status: target.response.statusCode,
         requestViolations: target.violations,
@@ -379,7 +472,7 @@ export const createEmulatorFetch = ({
     const routed = contract.route(target.request);
     if (!('operation' in routed)) {
       // Only when another spec's operations shadow the service's, which the specs should avoid.
-      calls.push({
+      record({
         request: description,
         status: routed.status,
         requestViolations: [],
@@ -393,7 +486,7 @@ export const createEmulatorFetch = ({
       };
     }
     return service.toResponse(
-      serveOperation(routed, target.request, description, (rejection, violations) =>
+      await serveOperation(routed, target.request, description, (rejection, violations) =>
         service.reject(rejection, violations)
       )
     );
@@ -423,14 +516,14 @@ export const createEmulatorFetch = ({
         responseViolations,
       };
       if (called.length === 0 && messages.length === 0) {
-        calls.push(base);
+        record(base);
       }
       for (const message of messages) {
-        calls.push({ ...base, operation: message, protocolMessage: true });
+        record({ ...base, operation: message, protocolMessage: true });
       }
       for (const { name, source, readOnly } of called) {
         const matched = { name, ...(source === undefined ? {} : { source }) };
-        calls.push({ ...base, operation: name, matched, readOnly });
+        record({ ...base, operation: name, matched, readOnly });
       }
       return response;
     }
@@ -438,7 +531,7 @@ export const createEmulatorFetch = ({
     const grants = 'operation' in routed ? undefined : tokenEndpoints(request.url);
     if (!('operation' in routed) && request.method === 'get' && isAuthorizationUrl(request.url)) {
       const { response, violations } = respondToAuthorizationRequest(request);
-      calls.push({
+      record({
         request: description,
         operation: 'OAuth authorization',
         token: true,
@@ -450,7 +543,7 @@ export const createEmulatorFetch = ({
     }
     if (grants) {
       const { response, violations } = respondToTokenRequest(grants, request);
-      calls.push({
+      record({
         request: description,
         operation: 'OAuth token',
         token: true,
@@ -461,7 +554,7 @@ export const createEmulatorFetch = ({
       return response;
     }
     if (!('operation' in routed)) {
-      calls.push({
+      record({
         request: description,
         status: routed.status,
         requestViolations: [],
@@ -474,16 +567,85 @@ export const createEmulatorFetch = ({
     return serveOperation(routed, request, description, rejectAsJson);
   };
 
+  const findById = (id: string, source?: string) =>
+    operations.filter(
+      (operation) =>
+        operation.id === id && (source === undefined || operation.spec.source === source)
+    );
+
   const mockFetch: typeof fetch = async (input, init) =>
     toResponse(await handle(await toContractRequest(new Request(input, init))));
 
   const rejectedResponses = [
     ...engine.rejected,
-    ...loadedProtocols.flatMap(({ protocol }) => protocol.rejectedResponses),
+    ...loadedProtocols.flatMap(({ instance }) => instance.rejectedResponses),
     ...rejectUnknownNamedResponses(
       namedResponses,
-      loadedProtocols.map(({ source, protocol }) => ({ source, operations: protocol.operations }))
+      loadedProtocols.map(({ source, instance }) => ({ source, operations: instance.answerable }))
     ),
   ];
-  return { fetch: mockFetch, calls, rejectedResponses };
+  // Built on first use, as only combined emulators ask and large specs take time to compile.
+  const getWithHosts = once(() => {
+    const named = operations.flatMap((operation) => {
+      const servers = operation.servers.filter(serverNamesHost);
+      return servers.length > 0 ? [{ ...operation, servers }] : [];
+    });
+    // Token URLs are classified once resolved, as an absolute one names its host whatever the
+    // API servers are.
+    const tokens = findTokenEndpoints(operations, { include: serverNamesHost });
+    const authorization = findAuthorizationEndpoints(operations, { include: serverNamesHost });
+    return {
+      route: createOperationMatcher(named),
+      oauth: (url: URL) => tokens(url) !== undefined || authorization(url),
+    };
+  });
+
+  return {
+    fetch: mockFetch,
+    namesHost: (method, url) => {
+      const { route, oauth } = getWithHosts();
+      if (
+        protocols.has(toEndpoint(url)) ||
+        oauth(url) ||
+        awsJsonServices.some((service) => service.matches(url))
+      ) {
+        return true;
+      }
+      const routed = route(method, url);
+      return 'operation' in routed || routed.status === 405;
+    },
+    answers: (method, url) => {
+      if (
+        protocols.has(toEndpoint(url)) ||
+        tokenEndpoints(url) !== undefined ||
+        (method.toLowerCase() === 'get' && isAuthorizationUrl(url)) ||
+        awsJsonServices.some((service) => service.matches(url))
+      ) {
+        return true;
+      }
+      const routed = contract.route({ method: method.toLowerCase(), url, query: {}, headers: {} });
+      // A 405 means the path is the spec's, only the method isn't.
+      return 'operation' in routed || routed.status === 405;
+    },
+    calls,
+    operations: listOperations(operations, loadedProtocols),
+    rejectedResponses,
+    runtimeFixtures: {
+      prepare: engine.runtime.prepare,
+      set: engine.runtime.set,
+      list: engine.runtime.list,
+      clear: ({ id, source } = {}) =>
+        engine.runtime.clear(id === undefined ? undefined : findById(id, source)),
+    },
+    describeOperation: (id, { source } = {}) => {
+      const [operation] = findById(id, source);
+      return operation && describeOperation(operation);
+    },
+    reset: () => {
+      calls.length = 0;
+      state.clear();
+      engine.runtime.clear();
+      engine.restartSequences();
+    },
+  };
 };

@@ -70,7 +70,7 @@ describe('source models', () => {
     ]);
   });
 
-  it('exposes logs, metrics, and traces for source badges', () => {
+  it('exposes the signals each source carries for source badges', () => {
     expect(
       getSourceDisplaySignals({
         id: 'otlp-input',
@@ -95,7 +95,7 @@ describe('source models', () => {
         type: 'async_bulk',
         to: null,
       })
-    ).toEqual(['logs', 'metrics', 'traces']);
+    ).toEqual(['docs']);
     expect(
       getSourceDisplaySignals(
         {
@@ -117,7 +117,7 @@ describe('source models', () => {
         },
         ['docs']
       )
-    ).toEqual([]);
+    ).toEqual(['docs']);
     expect(
       getSourceDisplaySignals({
         id: 'bulk-in',
@@ -125,7 +125,7 @@ describe('source models', () => {
         type: 'bulk',
         to: null,
       })
-    ).toEqual([]);
+    ).toEqual(['docs']);
   });
 
   it('writes selected OTLP signals onto the unit source', () => {
@@ -186,28 +186,21 @@ describe('source models', () => {
     ]);
   });
 
-  it('lets OTLP and async bulk pick logs, metrics, and traces; Prometheus is metrics-only', () => {
+  it('lets OTLP pick logs, metrics, and traces; Prometheus is metrics-only; Managed _bulk is docs-only', () => {
     expect(selectableSignalsForSourceType('otlp')).toEqual(['logs', 'metrics', 'traces']);
-    expect(selectableSignalsForSourceType('async_bulk')).toEqual(['logs', 'metrics', 'traces']);
+    expect(selectableSignalsForSourceType('async_bulk')).toEqual([]);
     expect(selectableSignalsForSourceType('prometheus_remote_write')).toEqual(['metrics']);
     expect(sourceTypeSelectsSignals('otlp')).toBe(true);
-    expect(sourceTypeSelectsSignals('async_bulk')).toBe(true);
+    expect(sourceTypeSelectsSignals('async_bulk')).toBe(false);
     expect(sourceTypeSelectsSignals('prometheus_remote_write')).toBe(false);
-    expect(defaultSignalsForSourceType('async_bulk')).toEqual(['logs', 'metrics', 'traces']);
+    expect(defaultSignalsForSourceType('async_bulk')).toEqual([]);
     expect(defaultSignalsForSourceType('prometheus_remote_write')).toEqual([]);
-    expect(telemetryForSelectedSignals('async_bulk', ['logs', 'traces'])).toEqual([
-      'logs',
-      'traces',
-    ]);
+    expect(telemetryForSelectedSignals('async_bulk', [])).toEqual(['docs']);
+    expect(telemetryForSelectedSignals('async_bulk', ['logs'])).toEqual(['docs']);
     expect(telemetryForSelectedSignals('prometheus_remote_write', ['logs'])).toEqual(['metrics']);
     expect(
-      createUnitSource({
-        id: 'bulk-in',
-        name: 'ECS',
-        type: 'async_bulk',
-        supportedTelemetry: telemetryForSelectedSignals('async_bulk', ['metrics']),
-      }).supported_telemetry
-    ).toEqual(['metrics']);
+      createUnitSource({ id: 'orders', name: 'Orders', type: 'async_bulk' }).supported_telemetry
+    ).toEqual(['docs']);
   });
 
   it('adds a source onto the unit without dropping processors, destinations, or unmanaged sources', () => {

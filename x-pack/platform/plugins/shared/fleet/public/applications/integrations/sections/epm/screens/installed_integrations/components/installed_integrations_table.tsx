@@ -191,7 +191,14 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                 (onboardingInstanceCounts.get(item.name) ?? 0) > 0;
 
               return (
-                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                // The cell content is a flex container: without a min width the group can't shrink
+                // below the full name and the badge, which then overflow into the next column.
+                <EuiFlexGroup
+                  gutterSize="s"
+                  alignItems="center"
+                  responsive={false}
+                  css={{ minWidth: 0, maxWidth: '100%' }}
+                >
                   <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
                     <EuiToolTip
                       content={integrationTitle}

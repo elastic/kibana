@@ -74,7 +74,10 @@ export async function getUserActivityObject(
         tagPromises.push(tagClient.get(tag));
       });
     }
-    tagTitles = (await Promise.all(tagPromises)).map((tag) => tag.name);
+    // Skip tags that cannot be resolved (e.g. non-existent tag ids) instead of failing the whole lookup
+    tagTitles = (await Promise.allSettled(tagPromises)).flatMap((settled) =>
+      settled.status === 'fulfilled' ? [settled.value.name] : []
+    );
   }
   return {
     id: result.id,

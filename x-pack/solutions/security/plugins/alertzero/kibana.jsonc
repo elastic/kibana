@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/alertzero-plugin",
-  "owner": ["@elastic/security-solution"],
+  "owner": ["@elastic/alertzero-common-layer"],
   "group": "security",
   "visibility": "private",
   "description": "AlertZero Security Watch investigation queue and catalog",
@@ -11,7 +11,7 @@
     "server": true,
     "configPath": ["xpack", "alertzero"],
     "requiredPlugins": ["licensing", "features", "workflowsExtensions", "workflowsManagement", "taskManager"],
-    "optionalPlugins": ["security", "agentBuilder", "agenticInvestigations", "proposals", "cloud", "inference", "searchInferenceEndpoints", "spaces", "share", "fleet", "mitreAttack", "contextEngine", "telemetry"],
+    "optionalPlugins": ["security", "agentBuilder", "agenticInvestigations", "proposals", "cloud", "inference", "searchInferenceEndpoints", "spaces", "share", "fleet", "mitreAttack", "contextEngine", "telemetry", "cps"],
     "requiredBundles": ["kibanaReact"]
   }
 }

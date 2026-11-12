@@ -212,6 +212,15 @@ describe('parseUnitPutBody', () => {
     expect(assertUnitPutEnvelope(parsed)).toEqual({ secrets: { 'es-prod': 'x' } });
   });
 
+  it('rejects api_keys in the JSON envelope, which only Kibana writes', () => {
+    expect(() =>
+      parseUnitPutBody({
+        body: Buffer.from(JSON.stringify({ unit, api_keys: [] })),
+        contentType: 'application/json',
+      })
+    ).toThrow(expect.objectContaining({ statusCode: 400 }));
+  });
+
   it('rejects invalid JSON', () => {
     expect(() =>
       parseUnitPutBody({

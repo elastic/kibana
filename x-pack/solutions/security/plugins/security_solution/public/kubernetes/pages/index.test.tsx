@@ -101,6 +101,16 @@ describe('KubernetesContainer', () => {
     expect(screen.getByTestId('mockToggle')).toBeInTheDocument();
   });
 
+  it('renders a documentation menu item pointing to the Kubernetes dashboard docs', async () => {
+    renderKubernetesPage();
+
+    await openAppMenuOverflow();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toHaveAttribute(
+      'href',
+      'https://www.elastic.co/docs/solutions/security/dashboards/kubernetes-dashboard'
+    );
+  });
+
   it('renders the search bar in the page rather than in the global filters portal', () => {
     renderKubernetesPage();
 

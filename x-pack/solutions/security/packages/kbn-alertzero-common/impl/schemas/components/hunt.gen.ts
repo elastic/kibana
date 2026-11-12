@@ -225,6 +225,32 @@ export const HuntForThreatHit = lazySchema(() =>
         .optional()
         .describe('Document `@timestamp` when present on the hit.'),
       /**
+       * Host name from the hit when present (`host.name`).
+       */
+      host: z
+        .string()
+        .max(512)
+        .optional()
+        .describe('Host name from the hit when present (`host.name`).'),
+      /**
+       * User name from the hit when present (`user.name`).
+       */
+      user: z
+        .string()
+        .max(512)
+        .optional()
+        .describe('User name from the hit when present (`user.name`).'),
+      /**
+       * Bounded evidence values from the hit (allowlisted ECS keys, at most 8, each value at most 256 characters). The SSE schema enforces the allowlist and key cap; producers must write only those keys.
+       */
+      fields: z
+        .object({})
+        .catchall(z.string().max(256))
+        .optional()
+        .describe(
+          'Bounded evidence values from the hit (allowlisted ECS keys, at most 8, each value at most 256 characters). The SSE schema enforces the allowlist and key cap; producers must write only those keys.'
+        ),
+      /**
        * Which IOC and/or ATT&CK technique produced this hit. IOC Hunt fills this by post-matching returned documents against the searched IOC values and `kibana.alert.rule.threat.technique` ids. Technique attribution only applies to alerts already tagged with that MITRE id (not raw telemetry matched by behavior). Used by the SSE mapper to scope IOC Hunt `events[]` onto technique-specific attachments. Behavior Hunt `hits` omit this (technique is implied by the parent behavior).
        */
       matched: z
@@ -235,6 +261,22 @@ export const HuntForThreatHit = lazySchema(() =>
               value: z.string().optional(),
             })
             .optional(),
+          /**
+           * Every IOC that matched this hit. `ioc` and `field` stay as the primary (first) match for older readers.
+           */
+          iocs: z
+            .array(
+              z.object({
+                type: z.string(),
+                value: z.string(),
+                field: z.string(),
+              })
+            )
+            .max(10)
+            .optional()
+            .describe(
+              'Every IOC that matched this hit. `ioc` and `field` stay as the primary (first) match for older readers.'
+            ),
           technique_id: z.string().optional(),
           field: z.string().optional(),
         })
@@ -246,6 +288,26 @@ export const HuntForThreatHit = lazySchema(() =>
     .strict()
 );
 export type HuntForThreatHit = z.infer<typeof HuntForThreatHit>;
+
+/**
+ * Per-IOC hit counts from Tier 1's filters aggregation. Optional host, user and time span fields come from sub-aggregations when measured, or stay absent when derived later from the sampled hits.
+ */
+export const HuntForThreatPerIoc = lazySchema(() =>
+  z.object({
+    type: z.string(),
+    value: z.string(),
+    /**
+     * The ECS field of the first named clause that matched.
+     */
+    field: z.string().describe('The ECS field of the first named clause that matched.'),
+    count: z.number().int().min(0),
+    host_count: z.number().int().min(0).optional(),
+    user_count: z.number().int().min(0).optional(),
+    first_seen: z.string().max(64).optional(),
+    last_seen: z.string().max(64).optional(),
+  })
+);
+export type HuntForThreatPerIoc = z.infer<typeof HuntForThreatPerIoc>;
 
 export const HuntForThreatResult = lazySchema(() =>
   z.object({
@@ -301,6 +363,32 @@ export const HuntForThreatResult = lazySchema(() =>
           ),
       })
     ),
+    /**
+     * Non-zero per-IOC hit buckets from Tier 1, count descending. One event can match several IOCs, so a sum of counts can exceed total_hits; each count alone must not.
+     */
+    per_ioc: z
+      .array(HuntForThreatPerIoc)
+      .max(30)
+      .optional()
+      .describe(
+        'Non-zero per-IOC hit buckets from Tier 1, count descending. One event can match several IOCs, so a sum of counts can exceed total_hits; each count alone must not.'
+      ),
+    /**
+     * Set when Tier 1 produced more non-zero IOC buckets than this array holds.
+     */
+    per_ioc_truncated: z
+      .boolean()
+      .optional()
+      .describe('Set when Tier 1 produced more non-zero IOC buckets than this array holds.'),
+    /**
+     * Deduped searchable IOCs Tier 1 queried (whether or not they hit).
+     */
+    searched_ioc_count: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe('Deduped searchable IOCs Tier 1 queried (whether or not they hit).'),
     message: z.string().optional(),
   })
 );

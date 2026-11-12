@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/eui';
+import { getSignalLabel } from '../../streams_layout/destinations/destination_type_config';
 
 interface SignalPickerProps {
   label: string;
@@ -17,6 +18,11 @@ interface SignalPickerProps {
   onChange: (signals: string[]) => void;
   dataTestSubj: string;
 }
+
+const toOption = (signal: string): EuiComboBoxOptionOption<string> => ({
+  label: getSignalLabel(signal),
+  value: signal,
+});
 
 /** Chooses telemetry signals, for a whole component or for one item of its configuration. */
 export function SignalPicker({
@@ -29,7 +35,6 @@ export function SignalPicker({
   dataTestSubj,
 }: SignalPickerProps) {
   const isInvalid = error !== undefined;
-  // Signals are read back from labels: EuiComboBox returns the selected options exactly as given.
   return (
     <EuiFormRow fullWidth label={label} helpText={helpText} isInvalid={isInvalid} error={error}>
       <EuiComboBox
@@ -37,9 +42,9 @@ export function SignalPicker({
         fullWidth
         aria-label={label}
         isInvalid={isInvalid}
-        options={options.map((signal) => ({ label: signal }))}
-        selectedOptions={selected.map((signal) => ({ label: signal }))}
-        onChange={(next) => onChange(next.map(({ label: signal }) => signal))}
+        options={options.map(toOption)}
+        selectedOptions={selected.map(toOption)}
+        onChange={(next) => onChange(next.flatMap(({ value }) => (value ? [value] : [])))}
         data-test-subj={dataTestSubj}
       />
     </EuiFormRow>

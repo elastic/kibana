@@ -178,11 +178,16 @@ describe('resourceInstaller', () => {
           });
 
           const install = installer.installCommonResources();
+          let timeoutId: ReturnType<typeof setTimeout> | undefined;
           const timeout = new Promise((resolve) => {
-            setTimeout(resolve, 250);
+            timeoutId = setTimeout(resolve, 250);
           });
 
-          await Promise.race([install, timeout]);
+          try {
+            await Promise.race([install, timeout]);
+          } finally {
+            clearTimeout(timeoutId);
+          }
 
           expect(mockClusterClient.cluster.putComponentTemplate).not.toHaveBeenCalled();
         });
