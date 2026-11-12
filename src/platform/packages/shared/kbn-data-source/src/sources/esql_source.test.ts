@@ -853,16 +853,17 @@ describe('EsqlSource', () => {
         (http.post as jest.Mock).mock.calls.find(([path]) => path === route)?.[1].body ?? '{}'
       );
 
-    it('takes the time field from the whole query and the schema from the source command alone', async () => {
+    it('takes the time field the whole query names and the schema from the source command alone', async () => {
       const http = createHttp('sale_date');
       const query =
         'FROM for-dataset-sales | WHERE sale_date >= ?_tstart | STATS total = SUM(amount)';
 
       const source = await EsqlSource.forDataset({ query, http });
 
-      expect(bodyPostedTo(http, TIMEFIELD_ROUTE).query).toBe(query);
       expect(bodyPostedTo(http, SOURCE_INFO_ROUTE).query).toBe('FROM for-dataset-sales');
       expect(source.timeFieldName).toBe('sale_date');
+      // The query names the time field, so there is nothing to look up.
+      expect(postedPathsOf(http)).not.toContain(TIMEFIELD_ROUTE);
     });
 
     it('asks for the schema with the project routing of the query over the one of the picker', async () => {

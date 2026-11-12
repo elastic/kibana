@@ -24,6 +24,7 @@ import {
   getQuerySummary,
   getProjectRoutingFromEsqlQuery,
   getESQLAdHocDataviewId,
+  parseTimeFieldFromESQLQuery,
   type ESQLSourceInfoColumn,
 } from '@kbn/esql-utils';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -313,17 +314,16 @@ export class EsqlSource implements DataSourceBase {
 
   /**
    * The source of the dataset a query reads, for consumers that only need the dataset: its fields and
-   * time field (see {@link toFilterableSource}). The time field is read from the whole query, since
-   * `?_tstart` or `TBUCKET` can name it, and the schema from the source command alone, so the query
-   * itself is never run.
+   * time field (see {@link toFilterableSource}). The schema is asked for the source command alone, so
+   * the query itself is never run. The time field is the one the whole query names (`?_tstart` or
+   * `TBUCKET`), read locally; otherwise it is detected from the index, like for any source.
    */
   public static async forDataset(args: EsqlDatasetArgs): Promise<EsqlSource> {
-    const { timeFieldName } = await EsqlSource.resolveDataset(args);
     return EsqlSource.create({
       query: getSourceCommandQueryFromESQLQuery(args.query) || args.query,
       http: args.http,
       projectRouting: getProjectRoutingFromEsqlQuery(args.query) ?? args.projectRouting,
-      timeFieldName,
+      timeFieldName: args.timeFieldName ?? parseTimeFieldFromESQLQuery(args.query),
     });
   }
 
