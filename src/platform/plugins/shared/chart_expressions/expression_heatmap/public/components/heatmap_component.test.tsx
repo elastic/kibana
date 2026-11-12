@@ -29,7 +29,8 @@ import HeatmapComponent, {
   computeMinIntervalFromData,
   getDateFormatPattern,
 } from './heatmap_component';
-import { ChartTooltipFooterMessage, LegendSize } from '@kbn/chart-expressions-common';
+import { LegendSize } from '@kbn/chart-expressions-common';
+import { ChartTooltipFooterMessage } from '@kbn/chart-expressions-common/components/chart_tooltip_footer_message';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 const actWithTimeout = (action: Function, timer: number = 1) =>
