@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IS_OPERATOR } from '../../common/types/timeline';
-import type { DataProvider } from '../../common/types/timeline';
+import { IS_OPERATOR } from '@kbn/securitysolution-timeline-common';
+import type { DataProvider } from '@kbn/securitysolution-timeline-common';
 
 interface NameToEventCount<TValue> {
   [name: string]: TValue;

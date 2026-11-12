@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useRef } from 'react';
-import type { DataProvider } from '@kbn/timelines-plugin/common';
+import type { DataProvider } from '@kbn/securitysolution-timeline-common';
 import type { AddToTimelineButtonProps } from '@kbn/timelines-plugin/public';
 import type { EuiButtonIcon } from '@elastic/eui';
 import { EuiButtonEmpty, EuiContextMenuItem, EuiFlexItem, EuiToolTip } from '@elastic/eui';

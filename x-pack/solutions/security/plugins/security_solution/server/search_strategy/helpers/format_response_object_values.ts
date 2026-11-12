@@ -7,7 +7,8 @@
 
 import { mapValues, isObject, isArray } from 'lodash/fp';
 import { set } from '@kbn/safer-lodash-set';
-import { toArray, isGeoField } from '@kbn/timelines-plugin/common';
+import { toArray } from '../../../common/utils/to_array';
+import { isGeoField } from '../../../common/utils/field_formatters';
 
 export const mapObjectValuesToStringArray = (object: object): object =>
   mapValues((o) => {

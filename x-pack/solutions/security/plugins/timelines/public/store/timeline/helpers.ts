@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import type { DataProvider } from '../../../common';
+import type { DataProvider } from '@kbn/securitysolution-timeline-common';
 
 interface TimelineById {
   [id: string]: {

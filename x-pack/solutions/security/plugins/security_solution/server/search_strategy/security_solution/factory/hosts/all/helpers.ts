@@ -8,7 +8,7 @@
 import { set } from '@kbn/safer-lodash-set/fp';
 import { get, has } from 'lodash/fp';
 import { hostFieldsMap } from '@kbn/securitysolution-ecs';
-import { toObjectArrayOfStrings } from '@kbn/timelines-plugin/common';
+import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 import type {
   HostAggEsItem,
   HostsEdges,

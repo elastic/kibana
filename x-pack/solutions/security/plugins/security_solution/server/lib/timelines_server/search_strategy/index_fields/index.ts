@@ -14,7 +14,6 @@ import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import { DELETED_SECURITY_SOLUTION_DATA_VIEW } from '@kbn/timelines-plugin/common/constants';
 import type {
   BeatFields,
   FieldInfo,
@@ -22,6 +21,7 @@ import type {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
 } from '@kbn/securitysolution-timeline-search-strategy';
+import { DELETED_SECURITY_SOLUTION_DATA_VIEW } from '../../../../../common/constants';
 import type { StartPlugins } from '../../../../plugin_contract';
 import { parseOptions } from './parse_options';
 

@@ -11,7 +11,7 @@ import type {
   EventHit,
   TimelineEventsDetailsItem,
 } from '@kbn/securitysolution-timeline-search-strategy';
-import { getTimelineFieldsDataFromHit } from '@kbn/timelines-plugin/common';
+import { getTimelineFieldsDataFromHit } from '../../../../../common/utils/get_timeline_fields_data_from_hit';
 
 /**
  * Converts a `DataTableRecord` into the `TimelineEventsDetailsItem[]` format expected by the table
