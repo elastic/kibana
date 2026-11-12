@@ -19,10 +19,8 @@ import type { WorkflowsPageObjects } from '../../../scout/ui/fixtures/page_objec
 const parsedPause = Number(process.env.CONNECTOR_EMULATOR_DEMO_PAUSE_SECONDS);
 export const PAUSE_SECONDS = Number.isFinite(parsedPause) && parsedPause > 0 ? parsedPause : 0;
 
-type Param = string | number | boolean;
-
 /** A step that calls one action of a connector: its name, its type (`<connector>.<action>`), inputs. */
-export type ConnectorStep = readonly [name: string, type: string, params: Record<string, Param>];
+export type ConnectorStep = readonly [name: string, type: string, params: Record<string, unknown>];
 
 const indent = (lines: string, by: number) =>
   lines
@@ -30,10 +28,10 @@ const indent = (lines: string, by: number) =>
     .map((line) => `${' '.repeat(by)}${line}`)
     .join('\n');
 
-const toYaml = (value: Record<string, Param>) =>
+// JSON is YAML, and quoting every string keeps YAML from reading "0:1" as a number.
+const toYaml = (value: Record<string, unknown>) =>
   Object.entries(value)
-    // Strings are quoted, as YAML would read some bare ones as other types (`0:1` as a number).
-    .map(([key, item]) => `${key}: ${typeof item === 'string' ? JSON.stringify(item) : item}`)
+    .map(([key, item]) => `${key}: ${JSON.stringify(item)}`)
     .join('\n');
 
 /**

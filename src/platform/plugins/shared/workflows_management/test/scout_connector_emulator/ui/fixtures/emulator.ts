@@ -14,20 +14,17 @@ import { readResponseFixtures } from '@kbn/connector-specs/src/test/vendor_api/l
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { KbnClient } from '@kbn/scout';
 
+/** A connector's folder in `src/specs`, by the name of the folder. */
+export const connectorFolder = (connector: string): string =>
+  path.join(REPO_ROOT, 'src/platform/packages/shared/kbn-connector-specs/src/specs', connector);
+
 /**
  * What the emulator answers a connector with in these suites, in place of values sampled from its
  * spec: the connector's `emulator/responses.json`, which `node scripts/connector_emulate --fixtures
  * <connector>=<that file>` serves too. `connector` is the name of its folder in `src/specs`.
  */
 export const loadScenario = async (connector: string): Promise<ResponseFixture[]> =>
-  readResponseFixtures(
-    path.join(
-      REPO_ROOT,
-      'src/platform/packages/shared/kbn-connector-specs/src/specs',
-      connector,
-      'emulator/responses.json'
-    )
-  );
+  readResponseFixtures(path.join(connectorFolder(connector), 'emulator/responses.json'));
 
 /**
  * The control client of the connector emulator, scoped to a connector (its connector id without

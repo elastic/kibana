@@ -1,5 +1,5 @@
 {
-  "sha1": "a507ce52942bcadd500afd6f7e7589bd046245b6",
+  "sha1": "246baa7efa4ccaea397460ef379cf57a2417922c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -54,6 +54,45 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout_connector_emulator/ui/parallel_tests/firecrawl_workflow.spec.ts",
         "line": 112,
         "column": 9
+      }
+    },
+    {
+      "id": "ce010b29f59f2b3-63ea1cd653e6761",
+      "title": "workflows generated from the connectors specs through the Workflows app against the connector emulator Sentry: runs every read action, and the emulator answers each request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_connector_emulator/ui/parallel_tests/generated_connectors_workflow.spec.ts",
+        "line": 81,
+        "column": 47
+      }
+    },
+    {
+      "id": "ce010b29f59f2b3-a3e4d2e4e99c71f",
+      "title": "workflows generated from the connectors specs through the Workflows app against the connector emulator Grafana: runs every read action, and the emulator answers each request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_connector_emulator/ui/parallel_tests/generated_connectors_workflow.spec.ts",
+        "line": 81,
+        "column": 47
+      }
+    },
+    {
+      "id": "ce010b29f59f2b3-4c7fcb405e12cd8",
+      "title": "workflows generated from the connectors specs through the Workflows app against the connector emulator Sublime Security: runs every read action, and the emulator answers each request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_connector_emulator/ui/parallel_tests/generated_connectors_workflow.spec.ts",
+        "line": 81,
+        "column": 47
       }
     },
     {
