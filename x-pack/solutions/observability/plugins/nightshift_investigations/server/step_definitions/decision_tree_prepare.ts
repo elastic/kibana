@@ -101,10 +101,13 @@ const classifyCausalCheckError = (error: unknown, parentAborted: boolean): Causa
   if (error instanceof CausalCheckModelUnavailableError) {
     return 'model_unavailable';
   }
-  if (
-    (error instanceof Error && error.message === CAUSAL_CHECK_TIMEOUT_MESSAGE) ||
-    (!parentAborted && error instanceof Error && error.name === 'AbortError')
-  ) {
+  if (error instanceof Error && error.message === CAUSAL_CHECK_TIMEOUT_MESSAGE) {
+    return 'timeout';
+  }
+  if (parentAborted) {
+    return 'cancelled';
+  }
+  if (error instanceof Error && error.name === 'AbortError') {
     return 'timeout';
   }
   return 'inference_error';
@@ -401,30 +404,30 @@ export const decisionTreePrepareStepDefinition = ({
           span?.setAttribute('nightshift.causal_check.error_code', errorCode);
         }
 
+        // The structured record goes to the Kibana logger: the workflow step logger drops `labels`
+        // from console output, and the workflow-log datastream does not map them.
         if (outcome === 'failed') {
-          context.logger.warn(
-            `Round "${roundId}" of "${conversationId}" causal check failed (${errorCode}): ${
-              error?.message ?? 'unknown error'
-            }`,
-            {
-              tags: CAUSAL_CHECK_LOG_TAGS,
-              labels: { ...event },
-              ...(error ? { error } : {}),
-            }
-          );
+          const message = `Round "${roundId}" of "${conversationId}" causal check failed (${errorCode}): ${
+            error?.message ?? 'unknown error'
+          }`;
+          logger.warn(message, {
+            tags: CAUSAL_CHECK_LOG_TAGS,
+            labels: { ...event },
+            ...(error
+              ? { error: { message: error.message, type: error.name, stack_trace: error.stack } }
+              : {}),
+          });
+          context.logger.warn(message);
         } else {
-          context.logger.info(
+          const message =
             `Round "${roundId}" of "${conversationId}" causal check: outcome=${outcome} source=${followUpSource}` +
-              (verdict
-                ? ` feedback=${verdict.isFeedback} confirmed=${verdict.causalConfirmed}`
-                : '') +
-              (roundResolution ? ` recorder=${roundResolution.outcome}` : '') +
-              ` trees=${treeCount}`,
-            {
-              tags: CAUSAL_CHECK_LOG_TAGS,
-              labels: { ...event },
-            }
-          );
+            (verdict
+              ? ` feedback=${verdict.isFeedback} confirmed=${verdict.causalConfirmed}`
+              : '') +
+            (roundResolution ? ` recorder=${roundResolution.outcome}` : '') +
+            ` trees=${treeCount}`;
+          logger.info(message, { tags: CAUSAL_CHECK_LOG_TAGS, labels: { ...event } });
+          context.logger.info(message);
         }
 
         telemetry?.reportDecisionTreeCausalCheck(event);

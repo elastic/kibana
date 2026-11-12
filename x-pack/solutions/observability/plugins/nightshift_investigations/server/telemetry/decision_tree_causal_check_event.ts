@@ -20,8 +20,8 @@ export const NIGHTSHIFT_DECISION_TREE_CAUSAL_CHECK_EVENT = 'nightshift-decision-
  *   (extends the tree without claiming causality).
  * - `skipped_no_trees`: follow-up belonged to an investigation with no editable decision trees
  *   (skips both the causal-check LLM call and the reinforcement agent).
- * - `failed`: causal-check model resolution, inference call, or timeout failed
- *   (falls back to extending the tree without claiming causality).
+ * - `failed`: causal-check model resolution, inference call, or timeout failed, or the workflow
+ *   execution was cancelled mid-check (falls back to extending the tree without claiming causality).
  */
 export type CausalCheckOutcome =
   | 'confirmed'
@@ -30,8 +30,15 @@ export type CausalCheckOutcome =
   | 'skipped_no_trees'
   | 'failed';
 
-/** Coded failure reason when `outcome` is `failed`. Raw error messages are never sent. */
-export type CausalCheckErrorCode = 'model_unavailable' | 'timeout' | 'inference_error';
+/**
+ * Coded failure reason when `outcome` is `failed`. Raw error messages are never sent. `cancelled`
+ * is the workflow execution being aborted, not a model or connector fault.
+ */
+export type CausalCheckErrorCode =
+  | 'model_unavailable'
+  | 'timeout'
+  | 'cancelled'
+  | 'inference_error';
 
 /**
  * Channel or trigger envelope observed on the follow-up prompt. Observational only — never used
@@ -156,7 +163,7 @@ const decisionTreeCausalCheckSchema: RootSchema<DecisionTreeCausalCheckEvent> = 
     type: 'keyword',
     _meta: {
       description:
-        'Coded failure category when outcome is failed: model_unavailable, timeout, or inference_error.',
+        'Coded failure category when outcome is failed: model_unavailable, timeout, cancelled, or inference_error.',
       optional: true,
     },
   },

@@ -43,6 +43,7 @@ const savedRound = (id: string, steps: unknown[] = []) => ({ id, steps });
 
 describe('decisionTreePrepareStepDefinition', () => {
   const logger = loggerMock.create();
+  const stepLogger = loggerMock.create();
   const request = httpServerMock.createKibanaRequest();
   const conversationsGet = jest.fn();
   const reportDecisionTreeCausalCheck = jest.fn();
@@ -53,7 +54,11 @@ describe('decisionTreePrepareStepDefinition', () => {
     },
   };
 
-  const createContext = (input: Record<string, unknown>, executionId = 'exec-1') =>
+  const createContext = (
+    input: Record<string, unknown>,
+    executionId = 'exec-1',
+    abortSignal = new AbortController().signal
+  ) =>
     ({
       input,
       rawInput: input,
@@ -67,18 +72,18 @@ describe('decisionTreePrepareStepDefinition', () => {
         renderInputTemplate: jest.fn((val) => val),
         callKibanaApi: jest.fn(),
       },
-      logger,
-      abortSignal: new AbortController().signal,
+      logger: stepLogger,
+      abortSignal,
       stepId: 'decision_tree_prepare',
       stepType: 'nightshift.decisionTreePrepare',
     } as never);
 
-  const run = (input: Record<string, unknown>, executionId?: string) =>
+  const run = (input: Record<string, unknown>, executionId?: string, abortSignal?: AbortSignal) =>
     decisionTreePrepareStepDefinition({
       getAgentBuilder: () => agentBuilder as never,
       logger,
       telemetry,
-    }).handler(createContext(input, executionId));
+    }).handler(createContext(input, executionId, abortSignal));
 
   const investigatorRound = {
     agent_id: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
@@ -437,6 +442,11 @@ describe('decisionTreePrepareStepDefinition', () => {
             }),
           })
         );
+        // The step logger drops labels, so it only gets the readable line for the run's log view.
+        expect(stepLogger.info).toHaveBeenCalledWith(
+          expect.stringContaining('outcome=confirmed source=slack')
+        );
+        expect(stepLogger.info).not.toHaveBeenCalledWith(expect.any(String), expect.anything());
         expect(setAttribute).toHaveBeenCalledWith('nightshift.causal_check.outcome', 'confirmed');
         expect(setAttribute).toHaveBeenCalledWith(
           'nightshift.causal_check.follow_up_source',
@@ -536,16 +546,25 @@ describe('decisionTreePrepareStepDefinition', () => {
       });
 
       it.each([
-        ['model_unavailable', () => jest.mocked(createOptimizeModel).mockResolvedValue(undefined)],
+        [
+          'model_unavailable',
+          'no model resolves',
+          () => jest.mocked(createOptimizeModel).mockResolvedValue(undefined),
+        ],
         [
           'timeout',
+          'the connector aborts on its own',
           () =>
             output.mockRejectedValue(Object.assign(new Error('aborted'), { name: 'AbortError' })),
         ],
-        ['inference_error', () => output.mockRejectedValue(new Error('connector down'))],
+        [
+          'inference_error',
+          'the connector errors',
+          () => output.mockRejectedValue(new Error('connector down')),
+        ],
       ])(
-        'reports failed with error_code=%s and omits verdict flags when the causal check fails',
-        async (expectedCode, arrange) => {
+        'reports failed with error_code=%s when %s, and omits verdict flags',
+        async (expectedCode, _case, arrange) => {
           arrange();
 
           const res = await run(followUp);
@@ -571,8 +590,13 @@ describe('decisionTreePrepareStepDefinition', () => {
                 outcome: 'failed',
                 error_code: expectedCode,
               }),
+              error: expect.objectContaining({ message: expect.any(String) }),
             })
           );
+          expect(stepLogger.warn).toHaveBeenCalledWith(
+            expect.stringContaining(`causal check failed (${expectedCode})`)
+          );
+          expect(stepLogger.warn).not.toHaveBeenCalledWith(expect.any(String), expect.anything());
           expect(setAttribute).toHaveBeenCalledWith('nightshift.causal_check.outcome', 'failed');
           expect(setAttribute).toHaveBeenCalledWith(
             'nightshift.causal_check.error_code',
@@ -584,6 +608,54 @@ describe('decisionTreePrepareStepDefinition', () => {
           );
         }
       );
+
+      describe('when the model call never settles', () => {
+        beforeEach(() => {
+          output.mockImplementation(() => new Promise(() => {}));
+        });
+
+        afterEach(() => {
+          jest.useRealTimers();
+        });
+
+        it('reports timeout once the 90s budget runs out', async () => {
+          jest.useFakeTimers();
+
+          const pending = run(followUp);
+          await jest.advanceTimersByTimeAsync(90_000);
+          await pending;
+
+          expect(reportDecisionTreeCausalCheck).toHaveBeenCalledWith(
+            expect.objectContaining({
+              outcome: 'failed',
+              error_code: 'timeout',
+              duration_ms: 90_000,
+            })
+          );
+          expect(logger.warn).toHaveBeenCalledWith(
+            expect.stringContaining('Causal check timed out after 90000ms'),
+            expect.objectContaining({ labels: expect.objectContaining({ error_code: 'timeout' }) })
+          );
+        });
+
+        it('reports cancelled, not inference_error, when the workflow execution is aborted', async () => {
+          const controller = new AbortController();
+          output.mockImplementation(() => {
+            controller.abort();
+            return new Promise(() => {});
+          });
+
+          await run(followUp, undefined, controller.signal);
+
+          expect(reportDecisionTreeCausalCheck).toHaveBeenCalledWith(
+            expect.objectContaining({ outcome: 'failed', error_code: 'cancelled' })
+          );
+          expect(setAttribute).toHaveBeenCalledWith(
+            'nightshift.causal_check.error_code',
+            'cancelled'
+          );
+        });
+      });
     });
   });
 

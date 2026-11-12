@@ -89,6 +89,17 @@ describe('decisionTreeCausalCheckEvent schema', () => {
       duration_ms: 90_000,
       error_code: 'timeout',
     },
+    {
+      agent_id: 'nightshift.investigation',
+      conversation_id: 'inv-3',
+      round_id: 'round-3',
+      outcome: 'failed',
+      follow_up_source: 'direct',
+      tree_count: 1,
+      opened_tree_count: 1,
+      duration_ms: 1200,
+      error_code: 'cancelled',
+    },
   ])('accepts %o', (event) => {
     const analytics = createRegisteredAnalytics();
 
