@@ -23,7 +23,7 @@ export {
   resolveEmulatorLocation,
 } from './src/server/emulator_location';
 export type { EmulatorLocation } from './src/server/emulator_location';
-export { DEFAULT_LOGGED_RESPONSE_CHARS, formatResponse } from './src/fetch/format_response';
+export { DEFAULT_LOGGED_RESPONSE_LINES, formatResponse } from './src/fetch/format_response';
 export { createEmulatorProxy } from './src/server/create_emulator_proxy';
 export type { EmulatorProxy, EmulatorProxyOptions } from './src/server/create_emulator_proxy';
 export {

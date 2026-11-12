@@ -122,17 +122,18 @@ const logCall = (
 ) => {
   const { request, operation, responseSource, status, requestViolations, responseViolations } =
     call;
+  // What the emulator answered with, when asked to show it and the call carries its exchange. That
+  // names where the answer came from, so the request line only does when there is none.
+  const response = showResponse ? formatResponse(call) : undefined;
   const served =
     responseSource === 'fixture' ||
     responseSource === 'recording' ||
     responseSource === 'runtime-fixture';
   const line = `${prefix}${status} ${request}${operation ? ` (${operation})` : ''}${
-    served ? ` [${responseSource}]` : ''
+    served && !response ? ` [${responseSource}]` : ''
   }`;
   const violations = [...requestViolations, ...responseViolations];
-  // What the emulator answered with, when asked to show it and the call carries its exchange
-  const response = showResponse ? formatResponse(call) : undefined;
-  const lines = [line, ...(response ? [`  ${response}`] : [])];
+  const lines = [line, ...(response ? response.split('\n').map((text) => `  ${text}`) : [])];
   if (status >= 400 || violations.length > 0) {
     log.warning([...lines, ...violations.map(({ message }) => `  - ${message}`)].join('\n'));
   } else {
@@ -424,7 +425,7 @@ run(
         --connector   Connector metadata.id, for example datadog or .datadog; repeat it or separate ids with commas
                       to serve several connectors
         --all         Serve every connector with a vendor_api/manifest.json
-        --log-responses  Show what each request was answered with: its status, where the answer came from and the start of its body
+        --log-responses  Show what each request was answered with: its status, where the answer came from and the start of its body, as indented JSON
         --spec        snapshot (default) for the committed snapshots, or latest to fetch each source's current spec
         --port        Port to listen on (default ${DEFAULTS.port}, or the ${EMULATOR_PORT_ENV} environment variable)
         --host        Address to listen on (default ${DEFAULTS.host}, or ${EMULATOR_HOST_ENV})

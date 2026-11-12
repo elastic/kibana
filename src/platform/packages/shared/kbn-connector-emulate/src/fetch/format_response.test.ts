@@ -28,16 +28,20 @@ const captured = (body: unknown, bodyTruncated?: true): ContractCall['captured']
 });
 
 describe('formatResponse', () => {
-  it('shows the status, where the answer came from and the body', () => {
+  it('shows the status, where the answer came from and the body as indented JSON', () => {
     expect(
       formatResponse(
         call({ responseSource: 'runtime-fixture', captured: captured({ success: true, id: 'a' }) })
       )
-    ).toBe('← 200 [runtime-fixture] {"success":true,"id":"a"}');
+    ).toBe(
+      ['← 200 [runtime-fixture]', '  {', '    "success": true,', '    "id": "a"', '  }'].join('\n')
+    );
   });
 
   it('shows a text body as it is', () => {
-    expect(formatResponse(call({ captured: captured('plain text') }))).toBe('← 200 plain text');
+    expect(formatResponse(call({ captured: captured('plain text') }))).toBe(
+      ['← 200', '  plain text'].join('\n')
+    );
   });
 
   it('says only the status and where the answer came from when there is no body', () => {
@@ -48,15 +52,32 @@ describe('formatResponse', () => {
     ).toBe('← 204 [generated]');
   });
 
-  it('cuts a long body, and says how long it was', () => {
-    expect(formatResponse(call({ captured: captured({ text: 'x'.repeat(50) }) }), 20)).toBe(
-      `← 200 {"text":"xxxxxxxxxxx… (61 characters)`
+  it('shows the first lines of a long body, and says how many it left out', () => {
+    const shown = formatResponse(
+      call({ captured: captured({ items: ['a', 'b', 'c', 'd', 'e'] }) }),
+      4
+    );
+
+    expect(shown).toBe(
+      ['← 200', '  {', '    "items": [', '      "a",', '      "b",', '  … 5 more lines'].join('\n')
     );
   });
 
-  it('says a body the capture cut was longer than what is shown', () => {
-    expect(formatResponse(call({ captured: captured('short', true) }))).toBe(
-      '← 200 short… (more than 5 characters)'
+  it('cuts a line that is too long to read, such as the markdown of a page', () => {
+    const line = (
+      formatResponse(call({ captured: captured({ markdown: 'x'.repeat(500) }) })) as string
+    )
+      .split('\n')
+      .find((text) => text.includes('"markdown"'));
+
+    expect(line).toBeDefined();
+    expect((line as string).length).toBeLessThan(200);
+    expect(line).toMatch(/…$/);
+  });
+
+  it('says the capture cut a body that was too long to keep', () => {
+    expect(formatResponse(call({ captured: captured('{"items": [1, 2,', true) }))).toBe(
+      ['← 200', '  {"items": [1, 2,', '  … the capture cut the rest of the body'].join('\n')
     );
   });
 

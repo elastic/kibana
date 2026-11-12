@@ -9,31 +9,40 @@
 
 import type { ContractCall } from './create_emulator_fetch';
 
-/** How many characters of a response body `formatResponse` shows by default. */
-export const DEFAULT_LOGGED_RESPONSE_CHARS = 300;
+/** How many lines of a response body `formatResponse` shows by default. */
+export const DEFAULT_LOGGED_RESPONSE_LINES = 30;
+
+/** Longer lines, such as the markdown of a page, are cut to this many characters. */
+const MAX_LINE_CHARS = 160;
+
+const clip = (line: string): string =>
+  line.length > MAX_LINE_CHARS ? `${line.slice(0, MAX_LINE_CHARS)}…` : line;
 
 /**
- * One line about what the emulator answered a call with: its status, where the answer came from
- * (a fixture, a recording, or `generated` from the spec) and the start of its body. Undefined when
- * the call carries no capture, which only the latest calls do, and only with `capture` on.
+ * What the emulator answered a call with, as lines to log: the status and where the answer came
+ * from (a fixture, a recording, or `generated` from the spec), then the start of the body, JSON
+ * indented. Undefined when the call carries no capture, which only the latest calls do, and only
+ * with `capture` on.
  */
 export const formatResponse = (
   { status, responseSource, captured }: ContractCall,
-  maxChars: number = DEFAULT_LOGGED_RESPONSE_CHARS
+  maxLines: number = DEFAULT_LOGGED_RESPONSE_LINES
 ): string | undefined => {
   if (!captured) {
     return undefined;
   }
   const { body, bodyTruncated } = captured.response;
-  const origin = responseSource ? ` [${responseSource}]` : '';
+  const header = `← ${status}${responseSource ? ` [${responseSource}]` : ''}`;
   if (body === undefined) {
-    return `← ${status}${origin}`;
+    return header;
   }
-  const text = typeof body === 'string' ? body : JSON.stringify(body);
-  // A body the capture cut is only part of the answer, however short the part is.
-  const cut = bodyTruncated || text.length > maxChars;
-  const shown = text.length > maxChars ? text.slice(0, maxChars) : text;
-  return `← ${status}${origin} ${shown}${
-    cut ? `… (${bodyTruncated ? 'more than ' : ''}${text.length} characters)` : ''
-  }`;
+  const lines = (typeof body === 'string' ? body : JSON.stringify(body, null, 2)).split('\n');
+  const hidden = lines.length - maxLines;
+  return [
+    header,
+    ...lines.slice(0, maxLines).map((line) => `  ${clip(line)}`),
+    ...(hidden > 0 ? [`  … ${hidden} more line${hidden === 1 ? '' : 's'}`] : []),
+    // A body the capture cut is only part of the answer, however short the part is.
+    ...(bodyTruncated ? ['  … the capture cut the rest of the body'] : []),
+  ].join('\n');
 };

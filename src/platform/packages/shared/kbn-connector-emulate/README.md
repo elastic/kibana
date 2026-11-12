@@ -38,7 +38,7 @@ const { fetch, calls } = createEmulatorFetch({ specs: [spec], capture: true });
 - **Capped.** Both limits must be whole numbers of at least 0, or creating the emulator throws. Bodies longer than `maxBodyBytes` serialized (default 8 KiB) are cut to their first bytes as text, with `bodyTruncated: true`. Only the latest `maxCalls` calls (default 100) keep `captured`; older calls lose it but stay in `calls`, so indices such as `since` keep their meaning.
 - Calls recorded by one request, such as the tool calls of an MCP batch, share its capture. Requests no connector of a combined emulator matches aren't captured.
 
-Capture is off by default, as it takes memory in long Jest runs. Server mode (`node scripts/connector_emulate`) turns it on, so `GET /_mock/calls` and the MCP server's `list_calls` show what Kibana sent. `--log-responses` also prints what each request was answered with under its line in the log: the status, where the answer came from (`generated` from the spec, a fixture, a recording or a runtime fixture) and the start of its body.
+Capture is off by default, as it takes memory in long Jest runs. Server mode (`node scripts/connector_emulate`) turns it on, so `GET /_mock/calls` and the MCP server's `list_calls` show what Kibana sent. `--log-responses` also prints what each request was answered with under its line in the log: the status, where the answer came from (`generated` from the spec, a fixture, a recording or a runtime fixture) and the start of its body as indented JSON: the first 30 lines, with longer lines cut.
 
 Connectors that call several vendor specs (one per API version or product) can name them:
 
