@@ -9,7 +9,7 @@ import { isEqual } from 'lodash';
 import type { z } from '@kbn/zod/v4';
 import type { Condition } from '@kbn/streamlang';
 import { isLiteralFieldPath } from './dynamic_block_schema';
-import { isNotEmptyCondition } from '../common_fields';
+import { ENTITY_ID_FIELD, isNotEmptyCondition } from '../common_fields';
 import type {
   CalculatedEntityIdentity,
   EntityDefinitionWithoutId,
@@ -192,7 +192,12 @@ export const assertDynamicDefinitionRules = (
     dynamic.sources.flatMap(({ attributes = [] }) => attributes.map(({ name }) => name))
   );
   (dynamic.suggestedFilters ?? []).forEach((name, index) => {
-    if (!attributeNames.has(name) && !identityFields.has(name)) {
+    if (name === ENTITY_ID_FIELD) {
+      addIssue(
+        ['dynamic', 'suggestedFilters', index],
+        `${SUGGESTED_FILTER_RULE}: "${name}" is the entity id column and cannot be a suggested filter`
+      );
+    } else if (!attributeNames.has(name) && !identityFields.has(name)) {
       addIssue(
         ['dynamic', 'suggestedFilters', index],
         `${SUGGESTED_FILTER_RULE}: "${name}" is neither an attribute of a source nor an identity field`

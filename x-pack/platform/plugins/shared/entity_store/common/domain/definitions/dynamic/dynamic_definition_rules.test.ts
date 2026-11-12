@@ -369,7 +369,7 @@ describe('dynamic definition rules', () => {
     });
   });
 
-  describe('suggested filters are columns', () => {
+  describe('suggested filters are attributes or identity fields', () => {
     const withSuggestedFilters = (identityField: EntityIdentity, suggestedFilters: string[]) =>
       definition(identityField, { dynamic: { ...dynamic, suggestedFilters } });
 
@@ -383,6 +383,14 @@ describe('dynamic definition rules', () => {
 
     it('accepts a field of a ranking and an attribute together', () => {
       expectAccepted(withSuggestedFilters(hostIdentity, ['host.name', 'os_name']));
+    });
+
+    it('rejects the entity id, even when it is the identity field', () => {
+      expectRejected(
+        withSuggestedFilters({ singleField: 'entity.id' }, ['entity.id']),
+        ['dynamic', 'suggestedFilters', 0],
+        SUGGESTED_FILTER_RULE
+      );
     });
 
     it('rejects a name that is neither an attribute nor an identity field', () => {
