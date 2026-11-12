@@ -10,11 +10,12 @@ import {
   decisionTreesAccessedEvaluator,
   latencySecondsEvaluator,
   outputTokensEvaluator,
+  sandboxEgressDeniedEvaluator,
   toolCallsTotalEvaluator,
   uncachedInputTokensEvaluator,
 } from './efficiency_evaluators';
 import type { InvestigationExample, InvestigationTaskOutput } from './types';
-import { countToolCalls, extractUsage } from './usage';
+import { countSandboxEgressDenials, countToolCalls, extractUsage } from './usage';
 
 const example = {
   input: { question: 'Why?' },
@@ -66,6 +67,53 @@ describe('countToolCalls', () => {
   });
 });
 
+describe('countSandboxEgressDenials', () => {
+  const bash = (results: unknown[]) => ({
+    type: 'tool_call',
+    tool_id: 'nightshift_sandbox_bash',
+    params: {},
+    results,
+  });
+  const refusedTunnel = {
+    type: 'error',
+    data: {
+      message:
+        "Command exited with code 128.\nstderr:\nfatal: unable to access 'https://github.com/open-telemetry/opentelemetry-demo.git/': CONNECT tunnel failed, response 403\n",
+    },
+  };
+
+  it('counts sandbox commands the egress firewall refused, whatever their exit code', () => {
+    const rounds = [
+      {
+        steps: [
+          bash([refusedTunnel]),
+          // A refused clone followed by more commands can still exit 0.
+          bash([
+            {
+              type: 'other',
+              data: {
+                stdout: '',
+                stderr: 'fatal: ... CONNECT tunnel failed, response 403',
+                exit_code: 0,
+              },
+            },
+          ]),
+          bash([
+            { type: 'other', data: { stdout: '{"error":"sandbox_egress_denied"}', exit_code: 0 } },
+          ]),
+          bash([{ type: 'other', data: { stdout: 'ok', exit_code: 0 } }]),
+        ],
+      },
+      {
+        steps: [
+          { ...refusedTunnel, type: 'tool_call', tool_id: 'other_tool', results: [refusedTunnel] },
+        ],
+      },
+    ] as unknown as ConversationRound[];
+    expect(countSandboxEgressDenials(rounds)).toBe(3);
+  });
+});
+
 describe('efficiency evaluators', () => {
   const usage = {
     input_tokens: 1000,
@@ -83,6 +131,12 @@ describe('efficiency evaluators', () => {
     expect((await toolCallsTotalEvaluator.evaluate(params)).score).toBe(9);
   });
 
+  it('scores sandbox commands the egress firewall refused', async () => {
+    expect(
+      (await sandboxEgressDeniedEvaluator.evaluate(run({ sandbox_egress_denied_count: 2 }))).score
+    ).toBe(2);
+  });
+
   it('never reports negative uncached tokens', async () => {
     const params = run({ usage: { ...usage, cached_input_tokens: 2000 } });
     expect((await uncachedInputTokensEvaluator.evaluate(params)).score).toBe(0);
@@ -95,6 +149,7 @@ describe('efficiency evaluators', () => {
       outputTokensEvaluator,
       latencySecondsEvaluator,
       toolCallsTotalEvaluator,
+      sandboxEgressDeniedEvaluator,
       decisionTreesAccessedEvaluator,
     ]) {
       expect(await evaluator.evaluate(params)).toMatchObject({ score: null, label: 'n/a' });

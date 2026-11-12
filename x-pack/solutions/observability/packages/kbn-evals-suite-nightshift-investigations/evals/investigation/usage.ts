@@ -27,3 +27,20 @@ export const extractUsage = (
 /** Every tool call the investigation made, counted before the trajectory is bounded. */
 export const countToolCalls = (rounds: Array<Pick<ConversationRound, 'steps'>>): number =>
   rounds.reduce((total, { steps }) => total + steps.filter(isToolCallStep).length, 0);
+
+// The sandbox reaches the internet only through credproxy. It refuses an HTTPS tunnel to a host
+// outside the space's egress rules (`CONNECT tunnel failed, response 403` from git and curl), and
+// answers a refused request it inspected with a `sandbox_egress_denied` body.
+const EGRESS_DENIED = /CONNECT tunnel failed, response 403|sandbox_egress_denied/;
+
+/** Sandbox commands whose output shows the egress firewall refused a connection. */
+export const countSandboxEgressDenials = (
+  rounds: Array<Pick<ConversationRound, 'steps'>>
+): number =>
+  rounds
+    .flatMap(({ steps }) => steps.filter(isToolCallStep))
+    .filter(
+      ({ tool_id: toolId, results }) =>
+        toolId === 'nightshift_sandbox_bash' &&
+        results.some(({ data }) => EGRESS_DENIED.test(JSON.stringify(data)))
+    ).length;
