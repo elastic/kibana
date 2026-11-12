@@ -95,24 +95,9 @@ const parseRetryAfterSeconds = (value: unknown): number | undefined => {
   return Number.isFinite(seconds) && seconds >= 0 ? seconds : undefined;
 };
 
-/** A `Retry-After` header in milliseconds, given as delta-seconds or an HTTP-date (RFC 9110). */
-const parseRetryAfterMs = (value: unknown, now: number = Date.now()): number | undefined => {
+const firstHeaderValue = (value: unknown): string | undefined => {
   const first = Array.isArray(value) ? value[0] : value;
-  const trimmed = typeof first === 'string' ? first.trim() : '';
-
-  if (!trimmed) {
-    return undefined;
-  }
-
-  const seconds = Number(trimmed);
-
-  if (!Number.isNaN(seconds)) {
-    return Number.isInteger(seconds) && seconds >= 0 ? seconds * 1000 : undefined;
-  }
-
-  const date = Date.parse(trimmed);
-
-  return Number.isNaN(date) ? undefined : Math.max(0, date - now);
+  return typeof first === 'string' ? first : undefined;
 };
 
 export class RelayClient implements RelayClientContract {
@@ -354,7 +339,7 @@ export class RelayClient implements RelayClientContract {
     const response = await this.sendRequest(url, body, 'post', signal);
     return {
       status: response.status,
-      retryAfterMs: parseRetryAfterMs(response.headers?.['retry-after']),
+      retryAfter: firstHeaderValue(response.headers?.['retry-after']),
     };
   }
 

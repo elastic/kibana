@@ -251,7 +251,9 @@ export class CallbackDeliveryService {
           throw new Error('The Relay client is not available');
         }
 
-        throwIfNotDelivered(await relayClient.postCallback(callbackUrl, payload, signal));
+        const { status, retryAfter } = await relayClient.postCallback(callbackUrl, payload, signal);
+
+        throwIfNotDelivered({ status, retryAfterMs: parseRetryAfterMs(retryAfter) });
       },
     };
   }

@@ -56,8 +56,8 @@ export type RelayClaimResponse =
 
 export interface RelayCallbackResponse {
   status: number;
-  /** The delay in milliseconds Relay's `Retry-After` header asks for, when it sent a parseable one. */
-  retryAfterMs?: number;
+  /** The raw `Retry-After` response header, when Relay sent one. */
+  retryAfter?: string;
 }
 
 /**
