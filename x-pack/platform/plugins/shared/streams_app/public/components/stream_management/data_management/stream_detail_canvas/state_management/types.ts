@@ -97,11 +97,15 @@ export interface CanvasState {
   savingComponentIntent?: 'create' | 'delete' | 'connect' | 'processing';
   savingSecrets?: StreamsUnit.Secrets;
   routingFlyout?: CanvasRoutingFlyout;
+  /** The unit a routing flyout save last staged, so the canvas can tell it placed a routing node. */
+  routingStagedUnit?: Unit;
   processingFlyout?: CanvasProcessingFlyout;
   /** Staged unit to return to when a processing flyout save fails. */
   processingRollbackUnit?: Unit;
   /** Processor ids written for the flyout's steps, in step order, while they save. */
   processingSaveIds?: string[];
+  /** Node positions to return to when a processing flyout save fails. */
+  processingRollbackNodePositions?: Record<string, XYPosition>;
   nodePositions: Record<string, XYPosition>;
   /** Diagnostics of the last failed save that point at routing nodes of `nextUnit`. */
   routingDiagnostics?: RoutingDiagnostic[];
@@ -135,6 +139,7 @@ export type CanvasUrlEvent =
   | { type: 'unit.save' }
   | { type: 'unit.reload' }
   | { type: 'nodes.positions.change'; positions: Record<string, XYPosition> }
+  | { type: 'nodes.positions.restore'; positions: Record<string, XYPosition> }
   | { type: 'xstate.done.actor.loadUnitDefinition'; output: Unit }
   | { type: 'xstate.error.actor.loadUnitDefinition'; error: unknown }
   | { type: 'xstate.done.actor.validateUnitDefinition'; output: void }

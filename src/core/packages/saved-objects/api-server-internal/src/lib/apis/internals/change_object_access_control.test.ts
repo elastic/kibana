@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { encodeHitVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -22,6 +23,11 @@ import {
   changeObjectAccessControl,
 } from './change_object_access_control';
 import { mockGetBulkOperationError } from './update_objects_spaces.test.mock';
+import {
+  getBulkOperationError,
+  getExpectedVersionProperties,
+  rawDocExistsInNamespace,
+} from '../utils';
 import { savedObjectsExtensionsMock } from '../../../mocks/saved_objects_extensions.mock';
 
 jest.mock('../utils', () => ({
@@ -33,6 +39,18 @@ jest.mock('../utils', () => ({
   left: jest.requireActual('../utils').left,
   right: jest.requireActual('../utils').right,
 }));
+
+const mockRawDocExistsInNamespace = rawDocExistsInNamespace as jest.MockedFunction<
+  typeof rawDocExistsInNamespace
+>;
+
+const mockGetExpectedVersionProperties = getExpectedVersionProperties as jest.MockedFunction<
+  typeof getExpectedVersionProperties
+>;
+
+const mockGetBulkOperationErrorFromUtils = getBulkOperationError as jest.MockedFunction<
+  typeof getBulkOperationError
+>;
 
 type SetupParams = Partial<Pick<ChangeAccessControlParams, 'objects'>>;
 
@@ -47,6 +65,7 @@ const BULK_ERROR = {
 };
 
 const VERSION_PROPS = { _seq_no: 1, _primary_term: 1 };
+const UPDATED_VERSION_PROPS = { _seq_no: 2, _primary_term: 1 };
 const mockSecurityExt = savedObjectsExtensionsMock.createSecurityExtension();
 const mockUserProfileId = 'u_mock_id';
 
@@ -117,13 +136,18 @@ describe('changeObjectAccessControl', () => {
       }
     });
     client.bulk.mockResponseOnce({
-      items: results.map(() => ({})), // as long as the result does not contain an error field, it is treated as a success
+      // as long as the result does not contain an error field, it is treated as a success
+      items: results.map(() => ({
+        update: { _index: 'index', status: 200, ...UPDATED_VERSION_PROPS },
+      })),
       errors: false,
       took: 0,
     });
   }
 
   beforeEach(() => {
+    mockRawDocExistsInNamespace.mockReset();
+    mockGetExpectedVersionProperties.mockReset();
     mockGetBulkOperationError.mockReset(); // reset calls and return undefined by default
   });
   describe('ownership changes', () => {
@@ -339,6 +363,124 @@ describe('changeObjectAccessControl', () => {
           },
           'changeAccessMode'
         );
+      });
+    });
+
+    describe('results', () => {
+      beforeEach(() => {
+        mockRawDocExistsInNamespace.mockReturnValue(true);
+        mockSecurityExt.authorizeChangeAccessControl.mockResolvedValueOnce({
+          status: 'fully_authorized',
+          typeMap: new Map(),
+        });
+      });
+
+      it('returns the updated version for successful objects', async () => {
+        const params = setup({
+          objects: [{ type: ACCESS_CONTROL_TYPE, id: 'id-1' }],
+        });
+        mockMgetResults([
+          {
+            found: true,
+            namespaces: ['default'],
+            type: ACCESS_CONTROL_TYPE,
+            id: 'id-1',
+            accessControl: { owner: 'new-owner', accessMode: 'default' },
+          },
+        ]);
+        mockBulkResults({ error: false });
+        const result = await changeObjectAccessControl({
+          ...params,
+          options: { accessMode: 'write_restricted', namespace: 'default' },
+          actionType: 'changeAccessMode',
+          currentUserProfileUid: mockUserProfileId,
+        });
+        expect(result.objects).toEqual([
+          {
+            type: ACCESS_CONTROL_TYPE,
+            id: 'id-1',
+            version: encodeHitVersion(UPDATED_VERSION_PROPS),
+          },
+        ]);
+      });
+
+      it('passes the caller-provided version for optimistic concurrency control', async () => {
+        const callerVersion = encodeHitVersion({ _seq_no: 7, _primary_term: 3 });
+        const params = setup({
+          objects: [{ type: ACCESS_CONTROL_TYPE, id: 'id-1', version: callerVersion }],
+        });
+        mockMgetResults([
+          {
+            found: true,
+            namespaces: ['default'],
+            type: ACCESS_CONTROL_TYPE,
+            id: 'id-1',
+            accessControl: { owner: 'new-owner', accessMode: 'default' },
+          },
+        ]);
+        mockBulkResults({ error: false });
+        await changeObjectAccessControl({
+          ...params,
+          options: { accessMode: 'write_restricted', namespace: 'default' },
+          actionType: 'changeAccessMode',
+          currentUserProfileUid: mockUserProfileId,
+        });
+        expect(mockGetExpectedVersionProperties).toHaveBeenCalledWith(
+          callerVersion,
+          expect.objectContaining({ _seq_no: VERSION_PROPS._seq_no })
+        );
+      });
+
+      it('falls back to the version read at the start of the operation when none is provided', async () => {
+        const params = setup({
+          objects: [{ type: ACCESS_CONTROL_TYPE, id: 'id-1' }],
+        });
+        mockMgetResults([
+          {
+            found: true,
+            namespaces: ['default'],
+            type: ACCESS_CONTROL_TYPE,
+            id: 'id-1',
+            accessControl: { owner: 'new-owner', accessMode: 'default' },
+          },
+        ]);
+        mockBulkResults({ error: false });
+        await changeObjectAccessControl({
+          ...params,
+          options: { accessMode: 'write_restricted', namespace: 'default' },
+          actionType: 'changeAccessMode',
+          currentUserProfileUid: mockUserProfileId,
+        });
+        expect(mockGetExpectedVersionProperties).toHaveBeenCalledWith(
+          undefined,
+          expect.objectContaining({ _seq_no: VERSION_PROPS._seq_no })
+        );
+      });
+
+      it('does not return a version for objects that failed to update', async () => {
+        const params = setup({
+          objects: [{ type: ACCESS_CONTROL_TYPE, id: 'id-1' }],
+        });
+        mockMgetResults([
+          {
+            found: true,
+            namespaces: ['default'],
+            type: ACCESS_CONTROL_TYPE,
+            id: 'id-1',
+            accessControl: { owner: 'new-owner', accessMode: 'default' },
+          },
+        ]);
+        mockBulkResults({ error: false });
+        mockGetBulkOperationErrorFromUtils.mockReturnValueOnce(BULK_ERROR);
+        const result = await changeObjectAccessControl({
+          ...params,
+          options: { accessMode: 'write_restricted', namespace: 'default' },
+          actionType: 'changeAccessMode',
+          currentUserProfileUid: mockUserProfileId,
+        });
+        expect(result.objects).toEqual([
+          { type: ACCESS_CONTROL_TYPE, id: 'id-1', error: BULK_ERROR },
+        ]);
       });
     });
   });

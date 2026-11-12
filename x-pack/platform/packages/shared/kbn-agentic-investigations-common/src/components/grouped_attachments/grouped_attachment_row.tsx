@@ -72,7 +72,7 @@ export const GroupedAttachmentRow = memo<GroupedAttachmentRowProps>(
       align-items: center;
       box-sizing: border-box;
       inline-size: 100%;
-      padding: 12px ${euiTheme.size.base};
+      padding: ${euiTheme.size.m} ${euiTheme.size.base};
       border: 0;
       background: transparent;
       color: inherit;
@@ -92,7 +92,7 @@ export const GroupedAttachmentRow = memo<GroupedAttachmentRowProps>(
 
       &:hover,
       &:focus-visible {
-        background-color: ${euiTheme.colors.backgroundBaseSubdued};
+        background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
         text-decoration: none;
 
         .groupedAttachmentRowAffordance {
@@ -152,7 +152,7 @@ export const GroupedAttachmentRow = memo<GroupedAttachmentRowProps>(
     const content = (
       <>
         <span css={circleStyles} aria-hidden="true">
-          <EuiIcon type={iconType} color={iconColor} aria-hidden={true} />
+          <EuiIcon type={iconType} size="m" color={iconColor} aria-hidden={true} />
         </span>
         <span css={textStyles}>
           {isTitleTruncated ? (
@@ -176,6 +176,7 @@ export const GroupedAttachmentRow = memo<GroupedAttachmentRowProps>(
           <EuiIcon
             className="groupedAttachmentRowAffordance"
             type={affordanceIconType(action)}
+            size="m"
             color="subdued"
             aria-hidden={true}
             data-test-subj="groupedAttachmentRowAffordance"

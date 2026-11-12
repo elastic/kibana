@@ -15,6 +15,7 @@ import createContainer from 'constate';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
 import type { Moment } from 'moment';
 import type { InventoryView } from '../../../../../common/inventory_views';
+import { staticInventoryViewId } from '../../../../../common/inventory_views';
 import { useKibanaTimefilterTime } from '../../../../hooks/use_kibana_timefilter_time';
 import { useInventoryViewsContext } from './use_inventory_views';
 export const DEFAULT_WAFFLE_TIME_STATE: WaffleTimeState = {
@@ -49,7 +50,7 @@ export const useWaffleTime = () => {
     writeDefaultState: true,
   });
 
-  const previousViewId = useRef<string | undefined>(currentView?.id);
+  const previousViewId = useRef<string>(currentView?.id ?? staticInventoryViewId);
   useEffect(() => {
     if (currentView && currentView.id !== previousViewId.current) {
       setUrlState(mapInventoryViewToState(currentView));
