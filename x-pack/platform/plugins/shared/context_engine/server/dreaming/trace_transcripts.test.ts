@@ -132,7 +132,13 @@ describe('buildRoundTranscript', () => {
   it('cuts long tool results, and keeps the start and the end of a long round', () => {
     const long = {
       role: 'tool',
-      parts: [{ type: 'tool_call_response', id: 'c1', response: 'x'.repeat(10_000) }],
+      parts: [
+        {
+          type: 'tool_call_response',
+          id: 'c1',
+          response: 'x'.repeat(MAX_TOOL_RESULT_CHARS + 1000),
+        },
+      ],
     };
     const short = buildRoundTranscript({
       lastChat: {
@@ -142,7 +148,10 @@ describe('buildRoundTranscript', () => {
     });
     expect(short).toContain(`Tool result: ${'x'.repeat(MAX_TOOL_RESULT_CHARS)} […]`);
 
-    const many = Array.from({ length: 40 }, () => long);
+    const many = Array.from({ length: 120 }, () => ({
+      ...long,
+      parts: [{ ...long.parts[0], response: 'x'.repeat(20_000) }],
+    }));
     const capped = buildRoundTranscript({
       lastChat: {
         inputMessages: [user('the question'), ...many],
