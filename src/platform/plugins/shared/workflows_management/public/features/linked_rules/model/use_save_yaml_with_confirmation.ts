@@ -17,15 +17,23 @@ import {
   selectWorkflow,
   selectYamlString,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
+import { useConfirmBreakingChange } from '../../workflow_dependents/model/workflow_dependents_context';
 
-/** Saves the YAML after confirming any disable; resolves to false when the user cancels. */
+/**
+ * Saves the YAML after confirming any disable and any change that breaks workflows calling this
+ * one; resolves to false when the user cancels.
+ */
 export const useSaveYamlWithConfirmation = (
   confirmDisable: ConfirmDisableWorkflows
 ): (() => Promise<boolean>) => {
   const saveYaml = useSaveYaml();
   const store = useStore<RootState>();
+  const confirmBreakingChange = useConfirmBreakingChange();
 
   return useCallback(async () => {
+    if (confirmBreakingChange && !(await confirmBreakingChange())) {
+      return false;
+    }
     const state = store.getState();
     const workflow = selectWorkflow(state);
     const yamlString = selectYamlString(state);
@@ -39,5 +47,5 @@ export const useSaveYamlWithConfirmation = (
     }
     await saveYaml();
     return true;
-  }, [confirmDisable, saveYaml, store]);
+  }, [confirmBreakingChange, confirmDisable, saveYaml, store]);
 };

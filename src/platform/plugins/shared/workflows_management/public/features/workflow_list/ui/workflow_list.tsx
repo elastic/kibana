@@ -47,6 +47,7 @@ import { LinkedRulesWarning } from '../../linked_rules/ui/linked_rules_warning';
 import type { WorkflowTriggerTab } from '../../run_workflow/ui/types';
 import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
 import { hasCustomEventTrigger } from '../../run_workflow/ui/workflow_execute_modal_helpers';
+import { WorkflowCallersWarning } from '../../workflow_dependents/ui/workflow_callers_callout';
 import { WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } from '../constants';
 
 interface WorkflowListProps {
@@ -472,6 +473,7 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
             })}
           </p>
           <LinkedRulesWarning workflowIds={[workflowToDelete.id]} />
+          <WorkflowCallersWarning workflowIds={[workflowToDelete.id]} />
         </EuiConfirmModal>
       )}
       {disableConfirmModal}

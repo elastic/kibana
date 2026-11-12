@@ -71,6 +71,7 @@ import type {
   RestoreWorkflowVersionResponseDto,
   WorkflowRestoreMetadata,
 } from '../../common/lib/workflow_change_history/types';
+import { getCalledWorkflowIds } from '../../common/lib/workflow_dependents/find_call_sites';
 import { getWorkflowZodSchema } from '../../common/schema';
 import { fetchOccHitsByIds, type OccWorkflowHit } from '../api/lib/bulk_occ_index';
 import { extractBulkItemError } from '../api/lib/bulk_response_helpers';
@@ -1020,6 +1021,7 @@ export class WorkflowCrudService {
         if (merged.triggerTypes === undefined) {
           merged.triggerTypes = getTriggerTypesFromDefinition(merged.definition) ?? [];
         }
+        merged.calledWorkflowIds = getCalledWorkflowIds(merged.definition);
         previousVersion = existingSource.version;
         return merged;
       },
@@ -1054,6 +1056,25 @@ export class WorkflowCrudService {
       },
       finalData,
     };
+  }
+
+  /** Returns the definition that saving `yaml` would store, or null when it would be stored invalid. */
+  async getDefinitionToStore(
+    yaml: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<EsWorkflow['definition'] | null> {
+    const zodSchema = await this.deps.validationService.getWorkflowZodSchema(
+      { loose: false },
+      spaceId,
+      request
+    );
+    const { updatedDataPatch } = await applyYamlUpdate({
+      workflowYaml: yaml,
+      zodSchema,
+      triggerDefinitions: this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [],
+    });
+    return updatedDataPatch.valid ? updatedDataPatch.definition ?? null : null;
   }
 
   async updateWorkflow(

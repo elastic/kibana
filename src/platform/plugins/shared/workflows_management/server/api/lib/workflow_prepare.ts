@@ -20,6 +20,7 @@ import type { z } from '@kbn/zod/v4';
 
 import { generateWorkflowId } from '../../../common/lib/import';
 import { validateWorkflowYaml } from '../../../common/lib/validate_workflow_yaml';
+import { getCalledWorkflowIds } from '../../../common/lib/workflow_dependents/find_call_sites';
 import { updateWorkflowYamlFields } from '../../../common/lib/yaml';
 import { INITIAL_WORKFLOW_VERSION } from '../../lib/workflow_version';
 import type { WorkflowProperties } from '../../storage/workflow_storage';
@@ -168,6 +169,7 @@ export const prepareWorkflowDocumentFromYaml = async (params: {
     enabled: workflowToCreate.enabled,
     tags: workflowToCreate.tags || [],
     triggerTypes: getTriggerTypesFromDefinition(workflowToCreate.definition),
+    calledWorkflowIds: getCalledWorkflowIds(workflowToCreate.definition),
     yaml,
     definition: workflowToCreate.definition ?? null,
     createdBy: authenticatedUser,

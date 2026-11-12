@@ -55,6 +55,8 @@ describe('Internal Routes', () => {
     >;
     getHistoryForWorkflow: jest.Mock;
     getReadableWorkflowIds: jest.Mock;
+    getWorkflowDependentsImpact: jest.Mock;
+    getWorkflowRemovalImpact: jest.Mock;
     restoreWorkflowVersion: jest.Mock;
   };
   let mockAudit: {
@@ -116,6 +118,8 @@ describe('Internal Routes', () => {
       disableAllWorkflows: jest.fn(),
       getHistoryForWorkflow: jest.fn(),
       getReadableWorkflowIds: jest.fn(),
+      getWorkflowDependentsImpact: jest.fn(),
+      getWorkflowRemovalImpact: jest.fn(),
       restoreWorkflowVersion: jest.fn(),
     };
     mockAudit = {
@@ -755,6 +759,67 @@ describe('Internal Routes', () => {
       statusCode: 403,
       body: { message: 'Unauthorized to find rules for any rule types.' },
     });
+  });
+
+  it('analyzes the draft YAML against the workflows connected to it', async () => {
+    const impact = { analysis: { dependents: [] }, calledWorkflows: [] };
+    mockApi.getWorkflowDependentsImpact.mockResolvedValue(impact);
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      params: { id: 'wf-1' },
+      body: { yaml: 'name: draft' },
+    });
+
+    await routeHandlers[`POST:/internal/workflows/workflow/{id}/_dependents_impact`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockApi.getWorkflowDependentsImpact).toHaveBeenCalledWith(
+      'wf-1',
+      'default',
+      request,
+      'name: draft'
+    );
+    expect(response.ok).toHaveBeenCalledWith({ body: impact });
+  });
+
+  it('returns not found when analyzing a workflow that does not exist', async () => {
+    mockApi.getWorkflowDependentsImpact.mockRejectedValue(new WorkflowNotFoundError('wf-1'));
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({ params: { id: 'wf-1' }, body: {} });
+
+    await routeHandlers[`POST:/internal/workflows/workflow/{id}/_dependents_impact`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(response.notFound).toHaveBeenCalled();
+  });
+
+  it('lists the workflows that fail when the given workflows stop running', async () => {
+    const impact = { callers: [{ id: 'parent', name: 'Parent' }], indirect: 1 };
+    mockApi.getWorkflowRemovalImpact.mockResolvedValue(impact);
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({ body: { ids: ['wf-1', 'wf-2'] } });
+
+    await routeHandlers[`POST:/internal/workflows/_removal_impact`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockApi.getWorkflowRemovalImpact).toHaveBeenCalledWith(
+      ['wf-1', 'wf-2'],
+      'default',
+      request
+    );
+    expect(response.ok).toHaveBeenCalledWith({ body: impact });
   });
 
   it('rejects non-integer workflow history page values at route validation', () => {

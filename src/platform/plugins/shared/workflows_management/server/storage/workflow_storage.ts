@@ -51,6 +51,7 @@ const storageSettings = {
       createdBy: types.keyword({}), // We filter by this
       spaceId: types.keyword({}), // We filter by this
       triggerTypes: types.keyword({}), // We filter by trigger subscription (e.g. event-driven)
+      calledWorkflowIds: types.keyword({}), // We look up the workflows that run a workflow
       managed: types.boolean({}),
       managedBy: types.keyword({}),
       billable: types.boolean({ index: false }),
@@ -80,6 +81,8 @@ export interface WorkflowProperties extends WorkflowAccessSubject {
   enabled: boolean;
   tags: string[];
   triggerTypes: string[];
+  /** Workflows run by `workflow.execute` steps; missing on documents saved before it existed. */
+  calledWorkflowIds?: string[];
   yaml: string;
   definition: WorkflowYaml | null;
   createdBy: string;

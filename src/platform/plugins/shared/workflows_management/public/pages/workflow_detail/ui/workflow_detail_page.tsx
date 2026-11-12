@@ -55,6 +55,7 @@ import { loadConnectorsThunk } from '../../../entities/workflows/store/workflow_
 import { loadWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflow_thunk';
 import { loadWorkflowsThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflows_thunk';
 import { WorkflowChangeHistoryProvider } from '../../../features/change_history';
+import { WorkflowDependentsProvider } from '../../../features/workflow_dependents/ui/workflow_dependents_provider';
 import { WorkflowExecutionFlyout } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail_old';
 import { WorkflowExecutionListFlyout } from '../../../features/workflow_execution_list/ui/workflow_execution_list_flyout';
@@ -444,7 +445,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
 
   return (
     <WorkflowChangeHistoryProvider workflowId={id} workflowName={workflowName ?? workflowId}>
-      {pageContent}
+      <WorkflowDependentsProvider>{pageContent}</WorkflowDependentsProvider>
     </WorkflowChangeHistoryProvider>
   );
 }

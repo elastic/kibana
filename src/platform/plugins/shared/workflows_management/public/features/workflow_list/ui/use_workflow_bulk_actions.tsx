@@ -21,6 +21,7 @@ import { useExportWithReferences } from './use_export_with_references';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useDisableWorkflowsConfirmation } from '../../linked_rules/model/use_disable_workflows_confirmation';
 import { LinkedRulesWarning } from '../../linked_rules/ui/linked_rules_warning';
+import { WorkflowCallersWarning } from '../../workflow_dependents/ui/workflow_callers_callout';
 
 interface UseWorkflowBulkActionsProps {
   selectedWorkflows: WorkflowListItemDto[];
@@ -332,6 +333,7 @@ export const useWorkflowBulkActions = ({
               })}
             </p>
             <LinkedRulesWarning workflowIds={selectedWorkflows.map(({ id }) => id)} />
+            <WorkflowCallersWarning workflowIds={selectedWorkflows.map(({ id }) => id)} />
           </EuiConfirmModal>
         )}
         {disableConfirmModal}

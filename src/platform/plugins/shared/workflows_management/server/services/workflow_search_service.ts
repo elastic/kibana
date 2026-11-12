@@ -21,6 +21,7 @@ import { buildWorkflowFilters } from '@kbn/workflows/server';
 import type { WorkflowListItemDto, WorkflowSortField } from '@kbn/workflows/types/v1';
 
 import type { WorkflowSearchDeps } from './types';
+import type { WorkflowLookupItem } from '../../common/lib/workflow_dependents/types';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
 import { paginateWithSearchAfter } from '../api/lib/paginate_with_search_after';
 import { transformStorageDocumentToWorkflowDto } from '../api/lib/workflow_dto_transform';
@@ -144,6 +145,91 @@ export class WorkflowSearchService {
       return allHits.map(({ _id, _source: source }) =>
         transformStorageDocumentToWorkflowDto(_id, source)
       );
+    } finally {
+      try {
+        await esClient.closePointInTime({ id: pitId });
+      } catch (closeErr) {
+        logger.warn(`Failed to close PIT ${pitId}: ${closeErr}`);
+      }
+    }
+  }
+
+  /**
+   * Returns the workflows in the space whose `calledWorkflowIds` contain any of `workflowIds`.
+   * With `includeUnindexed`, it also returns every workflow saved before that field existed, so
+   * the caller must check their definitions.
+   */
+  async findWorkflowsCalling(
+    workflowIds: string[],
+    spaceId: string,
+    options: {
+      accessControlFilter?: estypes.QueryDslQueryContainer;
+      includeUnindexed?: boolean;
+    }
+  ): Promise<WorkflowLookupItem[]> {
+    const { esClient, logger } = this.deps;
+    if (workflowIds.length === 0 && !options.includeUnindexed) {
+      return [];
+    }
+
+    const pageSize = 1000;
+    const keepAlive = '1m';
+    const sort: estypes.Sort = [{ updated_at: { order: 'desc' } }, '_shard_doc'];
+    const { must, must_not } = buildWorkflowFilters({
+      space: { id: spaceId, includeGlobal: true },
+      deleted: 'not_deleted',
+    });
+    if (options.accessControlFilter) must.push(options.accessControlFilter);
+    must.push({
+      bool: {
+        should: [
+          { terms: { calledWorkflowIds: workflowIds } },
+          ...(options.includeUnindexed
+            ? [{ bool: { must_not: [{ exists: { field: 'calledWorkflowIds' } }] } }]
+            : []),
+        ],
+        minimum_should_match: 1,
+      },
+    });
+    const query = { bool: { must, must_not } };
+
+    const pitResponse = await esClient.openPointInTime({
+      index: `${workflowIndexName}-*`,
+      keep_alive: keepAlive,
+      ignore_unavailable: true,
+    });
+    const pitId = pitResponse.id;
+
+    try {
+      const workflows: WorkflowLookupItem[] = [];
+      await paginateWithSearchAfter<WorkflowProperties>(
+        {
+          search: (searchAfter) =>
+            esClient.search<WorkflowProperties>({
+              pit: { id: pitId, keep_alive: keepAlive },
+              size: pageSize,
+              _source: ['name', 'enabled', 'definition'],
+              query,
+              sort,
+              ...(searchAfter ? { search_after: searchAfter } : {}),
+            }),
+          pageSize,
+          logger,
+          operationName: `findWorkflowsCalling(${spaceId})`,
+          throwOnMissingSort: true,
+        },
+        async (hits) => {
+          for (const { _id: id, _source: source } of hits) {
+            workflows.push({
+              id,
+              name: source.name,
+              enabled: source.enabled,
+              definition: source.definition,
+            });
+          }
+        }
+      );
+      return workflows;
     } finally {
       try {
         await esClient.closePointInTime({ id: pitId });
