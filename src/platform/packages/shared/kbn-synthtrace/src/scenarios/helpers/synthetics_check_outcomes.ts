@@ -81,6 +81,26 @@ export const getCheckOutcomes = ({
   }
 };
 
+/**
+ * The outcome of the check after `outcomes`. Healthy, down and outage continue the last
+ * outcome: an outage is the last checks of the original range, and laying that pattern out
+ * again for a longer count would move it. Flapping keeps flipping. `random` must be the
+ * generator already used to lay `outcomes` out, so the draws continue instead of restarting.
+ */
+export const nextCheckOutcome = (
+  pattern: OutcomePattern,
+  outcomes: CheckOutcome[],
+  random: () => number
+): CheckOutcome => {
+  const last = outcomes[outcomes.length - 1];
+  if (pattern.type !== 'flapping') {
+    return last;
+  }
+
+  const flipProbability = pattern.flipProbability ?? DEFAULT_FLIP_PROBABILITY;
+  return random() < flipProbability ? opposite(last) : last;
+};
+
 /** A passing check takes 100-500 ms, a failing one 5-10 s (a timeout). */
 export const getCheckDurationUs = (outcome: CheckOutcome, random: () => number): number =>
   outcome === 'up'

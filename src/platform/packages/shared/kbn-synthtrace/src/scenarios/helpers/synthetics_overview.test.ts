@@ -192,6 +192,47 @@ describe('createCheckTimeline', () => {
     expect(getCheck(FROM + 31 * 3 * MINUTE).index).toBe(31);
   });
 
+  it('keeps an outage streak continuous when the run goes on past the range', () => {
+    const getCheck = timeline(FROM + 60 * MINUTE);
+    const outageStart = FROM + 17 * 3 * MINUTE;
+    const beforeOutage = getCheck(FROM + 16 * 3 * MINUTE);
+    const firstDown = getCheck(outageStart);
+    const lastInRange = getCheck(FROM + 19 * 3 * MINUTE);
+
+    const later = getCheck(FROM + 30 * 3 * MINUTE);
+
+    expect(beforeOutage.outcome).toBe('up');
+    expect(firstDown).toMatchObject({ outcome: 'down', streak: 1, streakStartedAt: outageStart });
+    expect(later).toMatchObject({
+      outcome: 'down',
+      streak: 1,
+      streakStartedAt: outageStart,
+    });
+    expect(later.streakStartedAt).toBe(firstDown.streakStartedAt);
+    // Extending the run does not rewrite the checks already laid out.
+    expect(getCheck(outageStart)).toEqual(firstDown);
+    expect(getCheck(FROM + 19 * 3 * MINUTE)).toEqual(lastInRange);
+    expect(getCheck(FROM + 16 * 3 * MINUTE)).toEqual(beforeOutage);
+  });
+
+  it('keeps the checks already laid out when a flapping run goes on past the range', () => {
+    const getCheck = createCheckTimeline({
+      pattern: { type: 'flapping' },
+      scheduleMinutes: 3,
+      monitorId: 'monitor-1',
+      seed: 'seed',
+      from: FROM,
+      to: FROM + 30 * MINUTE,
+    });
+    const laidOut = Array.from({ length: 10 }, (_, index) => getCheck(FROM + index * 3 * MINUTE));
+
+    getCheck(FROM + 60 * 3 * MINUTE);
+
+    expect(
+      Array.from({ length: 10 }, (_, index) => getCheck(FROM + index * 3 * MINUTE))
+    ).toEqual(laidOut);
+  });
+
   it('keeps the outcomes of a flapping monitor varying after the range', () => {
     const getCheck = createCheckTimeline({
       pattern: { type: 'flapping' },

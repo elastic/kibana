@@ -15,7 +15,7 @@ import type {
 import { getMonitorConfigId } from '../../lib/synthetics/synthetics_monitors_api';
 import { getBooleanOpt, getNumberOpt, getStringOpt } from './scenario_opts_helpers';
 import type { CheckOutcome, OutcomePattern } from './synthetics_check_outcomes';
-import { getCheckDurationUs, getCheckOutcomes } from './synthetics_check_outcomes';
+import { getCheckDurationUs, getCheckOutcomes, nextCheckOutcome } from './synthetics_check_outcomes';
 
 export const SYNTHETICS_OVERVIEW_TAG = 'synthtrace-synthetics_overview';
 
@@ -196,7 +196,8 @@ export const getCheckTimestamp = ({
 /**
  * Decides the outcome of the check at a timestamp. The outcomes are laid out over the whole
  * run range, not the range of the worker that asks, so every worker agrees on them. A live run
- * goes on after `to`: the timeline is extended, so later checks follow the pattern as well.
+ * goes on after `to`: later checks are appended, and the checks already laid out stay as they
+ * are. Laying an outage out again for a longer count would move its down window forward.
  */
 export const createCheckTimeline = ({
   pattern,
@@ -214,23 +215,29 @@ export const createCheckTimeline = ({
   to: number;
 }) => {
   const intervalMs = scheduleMinutes * 60 * 1000;
-  const layOut = (count: number) => {
-    const laidOut = getCheckOutcomes({
-      pattern,
-      count,
-      random: createSeededRandom(`${seed}:${monitorId}`),
-    });
-    return { outcomes: laidOut, streaks: getStreakIndexes(laidOut) };
-  };
+  const random = createSeededRandom(`${seed}:${monitorId}`);
+  const outcomes = getCheckOutcomes({
+    pattern,
+    count: Math.max(1, Math.ceil((to - from) / intervalMs)),
+    random,
+  });
+  const streaks = getStreakIndexes(outcomes);
 
-  let { outcomes, streaks } = layOut(Math.max(1, Math.ceil((to - from) / intervalMs)));
+  const extendThrough = (index: number) => {
+    while (outcomes.length <= index) {
+      const last = outcomes[outcomes.length - 1];
+      const next = nextCheckOutcome(pattern, outcomes, random);
+      streaks.push(next === last ? streaks[streaks.length - 1] : streaks[streaks.length - 1] + 1);
+      outcomes.push(next);
+    }
+  };
 
   return (
     timestamp: number
   ): { index: number; outcome: CheckOutcome; streak: number; streakStartedAt: number } => {
     const index = Math.max(Math.floor((timestamp - from) / intervalMs), 0);
     if (index >= outcomes.length) {
-      ({ outcomes, streaks } = layOut(index + 1));
+      extendThrough(index);
     }
     const streak = streaks[index];
     // Streak numbers only increase, so the first check with this number is where it started.
