@@ -27,6 +27,7 @@ import type {
   RulesClientApi,
   InternalRulesClientApi,
   ActionPolicyClientApi,
+  AlertActionsClientApi,
   AlertEventsClientApi,
 } from '../types';
 
