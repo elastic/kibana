@@ -411,7 +411,9 @@ const buildEsqlQuery = ({
   // (m365_defender.event.additional_fields, snyk.audit_logs.content, greenhouse.audit.event.meta,
   // cisco_meraki.*.vap) are read with COALESCE(<root>.<key>, FIELD_EXTRACT(<root>, "<key>")): the
   // dotted path covers indices that map the key as a regular field, FIELD_EXTRACT covers flattened
-  // mappings on ES versions where the dotted path resolves to null.
+  // mappings on ES versions where the dotted path resolves to null. ES|QL reads keys of flattened
+  // fields by dotted path from https://github.com/elastic/elasticsearch/pull/164665 (behind the
+  // esql_flattened_subfields feature flag, on in snapshot builds only).
   // When LOAD is restored, keep the global user.id cast below and add similar casts for any
   // other field known to be mapped with the wrong type in some integration index.
   // See NULLIFY_WORKAROUNDS.md for the full revert checklist and the user.id audit results.
