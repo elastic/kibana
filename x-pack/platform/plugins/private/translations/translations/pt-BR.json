@@ -47523,7 +47523,6 @@
     "xpack.nightshift.investigations.cardCopyLinkLabel": "Copiar link",
     "xpack.nightshift.investigations.cardOpenInChatLabel": "Abrir no chat",
     "xpack.nightshift.investigations.cardOpenMenuLabel": "Abrir menu de ações",
-    "xpack.nightshift.investigations.emptyDescription": "Nenhuma investigação encontrada",
     "xpack.nightshift.investigations.inProgressSectionTitle": "Em andamento",
     "xpack.nightshift.investigations.loadingErrorTitle": "Não foi possível carregar as investigações",
     "xpack.nightshift.investigations.notRatedSectionTitle": "Não avaliado",
