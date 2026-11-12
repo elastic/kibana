@@ -89,7 +89,10 @@ export function ChangeHistoryModal(): JSX.Element | null {
     enabled: isOpen,
     selectedChangeId,
     setSelectedChangeId,
-    onAutoSelect: (item) => reportChangeSelected(item, 'auto_latest'),
+    onAutoSelect: (item) => {
+      setCompareMode(undefined);
+      reportChangeSelected(item, 'auto_latest');
+    },
   });
 
   useEffect(() => {
