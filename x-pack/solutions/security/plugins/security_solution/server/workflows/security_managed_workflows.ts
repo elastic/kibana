@@ -8,7 +8,8 @@
 import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { installSecurityAlertAnalysisWorkflow } from './alert_analysis_workflow/install';
-import { syncEndpointConfigurationTroubleshootingWorkflows } from './endpoint_configuration_troubleshooting_workflows/install';
+import type { EndpointWorkflowConsumerFlags } from './endpoint/install';
+import { syncEndpointWorkflows } from './endpoint/install';
 import {
   initSecurityManagedWorkflowsClient,
   type SecurityManagedWorkflowsClient,
@@ -30,7 +31,7 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
   workflowsExtensions,
   logger,
   threatIntelSupplyEnabled,
-  automaticTroubleshootingUniversalSkillEnabled,
+  experimentalFeatures,
   bootstrapReady,
   core,
 }: {
@@ -42,12 +43,7 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
    * managed workflows are uninstalled.
    */
   threatIntelSupplyEnabled: boolean;
-  /**
-   * True when `automaticTroubleshootingUniversalSkill` is on. When true, the
-   * endpoint configuration troubleshooting managed workflows are installed; when
-   * false, they are uninstalled.
-   */
-  automaticTroubleshootingUniversalSkillEnabled: boolean;
+  experimentalFeatures: EndpointWorkflowConsumerFlags;
   /**
    * Resolves after TI bootstrap (templates, migrations, seed). Only awaited when
    * supply is enabled; ignored otherwise.
@@ -92,16 +88,13 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
   }
 
   try {
-    await syncEndpointConfigurationTroubleshootingWorkflows({
+    await syncEndpointWorkflows({
       managedWorkflowsClient,
-      enabled: automaticTroubleshootingUniversalSkillEnabled,
+      experimentalFeatures,
       logger,
     });
   } catch (error) {
-    logger.warn(
-      'Failed to install or uninstall the endpoint configuration troubleshooting managed workflows',
-      { error }
-    );
+    logger.warn('Failed to install or uninstall the endpoint managed workflows', { error });
   }
 
   try {

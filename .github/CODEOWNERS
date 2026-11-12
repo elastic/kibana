@@ -3230,6 +3230,7 @@ x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/
 /x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/endpoint @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/endpoint @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/endpoint @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution/server/workflows/endpoint @elastic/security-defend-workflows
 
 # Significant Events managed workflows
 src/platform/packages/shared/kbn-workflows/managed/definitions/significant_events @elastic/nightshift

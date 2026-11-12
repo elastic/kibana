@@ -1,8 +1,8 @@
 version: '1'
-name: 'Automatic Troubleshooting: search endpoint knowledge'
+name: 'Elastic Defend: search integration knowledge'
 description: >
-  Searches the integration knowledge base for short excerpts that ground an
-  Elastic Defend diagnosis, filtered to the endpoint package. Internal: reached
+  Searches the integration knowledge base for short excerpts that ground Elastic Defend
+  questions, filtered to the endpoint package. Internal: reached
   only by id through execute_workflow.
 enabled: true
 triggers:
