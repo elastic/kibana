@@ -12,10 +12,14 @@ describe('formatConversationDate', () => {
   const now = moment('2026-11-11T12:00:00.000Z');
 
   it('shows month and day for dates in the current year', () => {
-    expect(formatConversationDate('2026-06-03T10:00:00.000Z', now)).toBe('Jun 03');
+    expect(formatConversationDate('2026-06-03T10:00:00.000Z', now, 'en')).toBe('Jun 03');
   });
 
   it('adds the year for older dates', () => {
-    expect(formatConversationDate('2025-06-03T10:00:00.000Z', now)).toBe('Jun 03, 2025');
+    expect(formatConversationDate('2025-06-03T10:00:00.000Z', now, 'en')).toBe('Jun 03, 2025');
+  });
+
+  it('follows the active locale', () => {
+    expect(formatConversationDate('2025-06-03T10:00:00.000Z', now, 'de-DE')).toBe('03. Juni 2025');
   });
 });

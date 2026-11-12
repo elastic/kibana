@@ -6,9 +6,18 @@
  */
 
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 
-/** Formats a conversation date as month and day, adding the year for dates outside the current year. */
-export const formatConversationDate = (date: string, now: moment.Moment = moment()): string => {
+/** Formats a conversation date as month and day in the active locale, adding the year for dates outside the current year. */
+export const formatConversationDate = (
+  date: string,
+  now: moment.Moment = moment(),
+  locale: string = i18n.getLocale()
+): string => {
   const value = moment(date);
-  return value.format(value.isSame(now, 'year') ? 'MMM DD' : 'MMM DD, YYYY');
+  const options: Intl.DateTimeFormatOptions = value.isSame(now, 'year')
+    ? { month: 'short', day: '2-digit' }
+    : { month: 'short', day: '2-digit', year: 'numeric' };
+
+  return new Intl.DateTimeFormat(locale, options).format(value.toDate());
 };
