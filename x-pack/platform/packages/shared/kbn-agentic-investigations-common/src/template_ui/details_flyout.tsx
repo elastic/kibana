@@ -247,9 +247,7 @@ export const useEscalationDetailsFlyout = (
   return {
     header: {
       title: conversation.title,
-      description: (
-        <EscalationSince createdAt={conversation.created_at} />
-      ),
+      description: <EscalationSince createdAt={conversation.created_at} />,
       isLoading: isSyncing,
       loadingLabel: TEMPLATE_UI_LABELS.syncing,
       infoBlocks: toInfoBlocks({
