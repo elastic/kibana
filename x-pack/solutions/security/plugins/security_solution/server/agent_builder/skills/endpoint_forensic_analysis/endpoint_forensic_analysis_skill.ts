@@ -269,10 +269,7 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
 ## Tool Selection Guardrails
 
 - When \`osquery.check_integration\` is available, **always** call it before using any other \`osquery.*\` tool. When it is not available, do not use Osquery.
-- **Always** call \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` before ES|QL.
 - **Always** call \`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID}\` after reconstructing an attack on a host, to produce the structured indicators for downstream hunts.
-- **Always** use \`platform.core.generate_esql\` and \`platform.core.execute_esql\` for historical forensic answers.
-- Do **not** use \`platform.core.search\` or \`relevance_search\` for reconstruction — they cannot replace scoped ES|QL on Defend telemetry.
 - **Always** call \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` before ES|QL — and only on the ES|QL path.
 - **Always** call \`osquery.resolve_agent_ids\` before \`osquery.run_live_query\`: the dispatch tool takes \`agent_ids\`, never host names.
 - **Always** use \`platform.core.generate_esql\` and \`platform.core.execute_esql\` for historical forensic answers.
