@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { EntityTableTruncationCallout } from './entity_table_callouts';
 
 describe('EntityTableTruncationCallout', () => {
@@ -18,6 +18,26 @@ describe('EntityTableTruncationCallout', () => {
     expect(callout).toHaveTextContent(
       'We can only show 9,999 entities at a time. Use filters to slice and dice further your data.'
     );
-    expect(callout).toHaveTextContent('Host, K8s Deployment');
+    expect(callout).toHaveTextContent('Entity types over the limit: Host and K8s Deployment');
+  });
+
+  it('joins three or more type names as a localized list', () => {
+    render(<EntityTableTruncationCallout typeNames={['Host', 'K8s Deployment', 'Service']} />);
+
+    expect(screen.getByTestId('entityInventoryTruncationCallout')).toHaveTextContent(
+      'Entity types over the limit: Host, K8s Deployment, and Service'
+    );
+  });
+
+  it('announces its title and text to screen readers when it appears', async () => {
+    render(<EntityTableTruncationCallout typeNames={['Host']} />);
+
+    const callout = screen.getByTestId('entityInventoryTruncationCallout');
+    await waitFor(() =>
+      expect(within(callout).getByRole('status')).toHaveTextContent('9,999 entity limit')
+    );
+    expect(within(callout).getByRole('status')).toHaveTextContent(
+      'Entity types over the limit: Host'
+    );
   });
 });

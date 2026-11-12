@@ -12,7 +12,9 @@ import { getTruncatedTypesText, getTruncationBody, getTruncationTitle } from './
 
 /** Warns that the lists of `typeNames` hold only the `MAX_LIST_LIMIT` most recently seen entities. */
 export const EntityTableTruncationCallout = ({ typeNames }: { typeNames: readonly string[] }) => (
+  // Rendered only once a section shows a truncated list, so it announces itself when it appears.
   <KbnWarningCallout
+    announceOnMount
     size="s"
     title={getTruncationTitle(MAX_LIST_LIMIT)}
     text={

@@ -56,7 +56,12 @@ export const getTruncationBody = (limit: number) =>
 export const getTruncatedTypesText = (typeNames: readonly string[]) =>
   i18n.translate('xpack.entityInventoryApp.entityTable.truncation.truncatedTypes', {
     defaultMessage: 'Entity types over the limit: {typeNames}',
-    values: { typeNames: typeNames.join(', ') },
+    values: {
+      typeNames: new Intl.ListFormat(i18n.getLocale(), {
+        style: 'long',
+        type: 'conjunction',
+      }).format(typeNames),
+    },
   });
 
 export const SOURCE_ERRORS_TITLE = i18n.translate(
@@ -114,8 +119,7 @@ export const getEmptyWithFailuresTitle = (typeName: string) =>
 export const EMPTY_WITH_FAILURES_BODY = i18n.translate(
   'xpack.entityInventoryApp.entityTable.empty.withFailures.sourcesFailedBody',
   {
-    defaultMessage:
-      "Some data sources failed, so entities may exist that are not shown. The warning icon in this section's header lists them.",
+    defaultMessage: 'Some data sources failed, so entities may exist that are not shown.',
   }
 );
 
@@ -124,11 +128,14 @@ export const ENTITY_COUNT_LABEL = i18n.translate(
   { defaultMessage: 'Entities:' }
 );
 
-/** The number of listed entities; a truncated list holds only some, so it reads "250+". */
+/** The number of listed entities, "1,234"; a truncated list holds only some, so it reads "9,999+". */
 export const getEntityCountValue = ({ count, truncated }: { count: number; truncated: boolean }) =>
   truncated
     ? i18n.translate('xpack.entityInventoryApp.entityTable.section.truncatedEntityCount', {
-        defaultMessage: '{count}+',
+        defaultMessage: '{count, number}+',
         values: { count },
       })
-    : String(count);
+    : i18n.translate('xpack.entityInventoryApp.entityTable.section.entityCount', {
+        defaultMessage: '{count, number}',
+        values: { count },
+      });
