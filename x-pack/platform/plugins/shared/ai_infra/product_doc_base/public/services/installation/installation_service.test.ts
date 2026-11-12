@@ -9,6 +9,7 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import { InstallationService } from './installation_service';
 import {
   INSTALLATION_STATUS_API_PATH,
+  UPDATE_AVAILABILITY_API_PATH,
   INSTALL_ALL_API_PATH,
   UNINSTALL_ALL_API_PATH,
   UPDATE_ALL_API_PATH,
@@ -67,6 +68,15 @@ describe('InstallationService', () => {
         query: {
           inferenceId: defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
         },
+      });
+    });
+  });
+  describe('#getUpdateAvailability', () => {
+    it('calls the endpoint with the inference id', async () => {
+      await service.getUpdateAvailability({ inferenceId });
+      expect(http.get).toHaveBeenCalledTimes(1);
+      expect(http.get).toHaveBeenCalledWith(UPDATE_AVAILABILITY_API_PATH, {
+        query: { inferenceId },
       });
     });
   });

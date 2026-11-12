@@ -22,9 +22,11 @@ import type {
   SecurityLabsInstallStatusResponse,
   OpenAPISpecInstallStatusResponse,
   DefaultInferenceIdResponse,
+  ProductDocUpdateAvailabilityResponse,
 } from '../../common/http_api/installation';
 import {
   INSTALLATION_STATUS_API_PATH,
+  UPDATE_AVAILABILITY_API_PATH,
   INSTALL_ALL_API_PATH,
   UNINSTALL_ALL_API_PATH,
   UPDATE_ALL_API_PATH,
@@ -130,7 +132,14 @@ export const registerInstallationRoutes = ({
             version: securityLabsStatus.version,
             latestVersion: securityLabsStatus.latestVersion,
             isUpdateAvailable: securityLabsStatus.isUpdateAvailable,
+            ...(securityLabsStatus.availableArtifactLastModified
+              ? { availableArtifactLastModified: securityLabsStatus.availableArtifactLastModified }
+              : {}),
             failureReason: securityLabsStatus.failureReason,
+            ...(securityLabsStatus.updatedAt ? { updatedAt: securityLabsStatus.updatedAt } : {}),
+            ...(securityLabsStatus.artifactLastModified
+              ? { artifactLastModified: securityLabsStatus.artifactLastModified }
+              : {}),
           },
         });
       }
@@ -145,16 +154,20 @@ export const registerInstallationRoutes = ({
         latestVersion: openApiSpecStatus.latestVersion,
         isUpdateAvailable: openApiSpecStatus.isUpdateAvailable,
         failureReason: openApiSpecStatus.failureReason,
+        ...(openApiSpecStatus.updatedAt ? { updatedAt: openApiSpecStatus.updatedAt } : {}),
+        ...(openApiSpecStatus.artifactLastModified
+          ? { artifactLastModified: openApiSpecStatus.artifactLastModified }
+          : {}),
       };
       if (resourceType === ResourceTypes.openapiSpec) {
         return res.ok({ body: openApiSpecStatusResponse });
       }
 
-      // Default: product documentation status
+      // Cluster install check only. Repository version checks live on UPDATE_AVAILABILITY_API_PATH
+      // so callers polling this route do not list artifacts on every request.
       const installStatus = await installClient.getInstallationStatus({
         inferenceId,
       });
-      // installStatus[ResourceTypes.openapiSpec] = openApiSpecStatus;
       const { status: overallStatus } = await documentationManager.getStatus({
         inferenceId,
       });
@@ -166,6 +179,55 @@ export const registerInstallationRoutes = ({
           overall: overallStatus,
           resourceType: ResourceTypes.productDoc,
           openApiStatus: openApiSpecStatusResponse,
+        },
+      });
+    }
+  );
+
+  router.get(
+    {
+      path: UPDATE_AVAILABILITY_API_PATH,
+      validate: {
+        query: schema.object({
+          inferenceId: schema.string({
+            defaultValue: defaultInferenceEndpoints.ELSER,
+            maxLength: 256,
+          }),
+        }),
+      },
+      options: {
+        access: 'internal',
+      },
+      security: {
+        authz: {
+          requiredPrivileges: [ApiPrivileges.manage('llm_product_doc')],
+        },
+      },
+    },
+    async (ctx, req, res) => {
+      const { packageInstaller } = getServices();
+      const inferenceId = req.query?.inferenceId ?? defaultInferenceEndpoints.ELSER;
+      const updateAvailability = await packageInstaller.isProductDocUpdateAvailable({
+        inferenceId,
+        includeAvailableArtifacts: true,
+      });
+
+      return res.ok<ProductDocUpdateAvailabilityResponse>({
+        body: {
+          inferenceId,
+          isUpdateAvailable: updateAvailability?.isUpdateAvailable ?? false,
+          ...(updateAvailability?.availableArtifactLastModified
+            ? { availableArtifactLastModified: updateAvailability.availableArtifactLastModified }
+            : {}),
+          ...(updateAvailability?.availableStackVersion
+            ? { availableStackVersion: updateAvailability.availableStackVersion }
+            : {}),
+          ...(updateAvailability?.installedArtifactLastModifiedByProduct
+            ? {
+                installedArtifactLastModifiedByProduct:
+                  updateAvailability.installedArtifactLastModifiedByProduct,
+              }
+            : {}),
         },
       });
     }
@@ -296,6 +358,7 @@ export const registerInstallationRoutes = ({
       const updated = await documentationManager.updateAll({
         request: req,
         forceUpdate,
+        wait: true,
         // If inferenceIds is provided, use it, otherwise use all previously installed inference IDs
         inferenceIds: req.body.inferenceIds ?? [],
       });

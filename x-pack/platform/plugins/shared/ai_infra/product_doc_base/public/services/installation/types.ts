@@ -9,8 +9,10 @@ import type {
   InstallationStatusResponse,
   SecurityLabsInstallStatusResponse,
   PerformInstallResponse,
+  PerformUpdateResponse,
   UninstallResponse,
   ProductDocInstallParams,
+  ProductDocUpdateAvailabilityResponse,
 } from '../../../common/http_api/installation';
 
 export interface InstallationAPI {
@@ -19,7 +21,18 @@ export interface InstallationAPI {
   ): Promise<InstallationStatusResponse | SecurityLabsInstallStatusResponse>;
   install(params: ProductDocInstallParams): Promise<PerformInstallResponse>;
   uninstall(params: ProductDocInstallParams): Promise<UninstallResponse>;
+  updateAll(params?: {
+    forceUpdate?: boolean;
+    inferenceIds?: string[];
+  }): Promise<PerformUpdateResponse>;
   getDefaultInferenceId(params?: {
     resourceType?: ProductDocInstallParams['resourceType'];
   }): Promise<string>;
+  /**
+   * Whether a newer product-doc artifact is in the repository.
+   * GenAI Settings calls this on mount, not on the installation-status poll.
+   */
+  getUpdateAvailability(params: {
+    inferenceId: string;
+  }): Promise<ProductDocUpdateAvailabilityResponse>;
 }

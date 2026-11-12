@@ -82,6 +82,17 @@ export const STATUS_INSTALLING = i18n.translate(
   }
 );
 
+export const STATUS_UPDATING = i18n.translate('xpack.genAiSettings.documentation.status.updating', {
+  defaultMessage: 'Updating',
+});
+
+export const UPDATING_TO_NEWEST_VERSION = i18n.translate(
+  'xpack.genAiSettings.documentation.update.updatingToNewest',
+  {
+    defaultMessage: 'Updating to newest version',
+  }
+);
+
 export const STATUS_UNINSTALLING = i18n.translate(
   'xpack.genAiSettings.documentation.status.uninstalling',
   {
@@ -103,6 +114,13 @@ export const STATUS_NOT_AVAILABLE = i18n.translate(
 export const ACTION_INSTALL = i18n.translate('xpack.genAiSettings.documentation.action.install', {
   defaultMessage: 'Install',
 });
+
+export const ACTION_INSTALL_UPDATE = i18n.translate(
+  'xpack.genAiSettings.documentation.action.installUpdate',
+  {
+    defaultMessage: 'Install update',
+  }
+);
 
 export const ACTION_UPDATE = i18n.translate('xpack.genAiSettings.documentation.action.update', {
   defaultMessage: 'Update',
@@ -131,6 +149,18 @@ export const getInstallErrorTitle = (name: string) =>
     values: { name },
   });
 
+export const getUpdateSuccessTitle = (name: string) =>
+  i18n.translate('xpack.genAiSettings.documentation.update.successWithName', {
+    defaultMessage: '{name} updated successfully',
+    values: { name },
+  });
+
+export const getUpdateErrorTitle = (name: string) =>
+  i18n.translate('xpack.genAiSettings.documentation.update.errorWithName', {
+    defaultMessage: 'Failed to update {name}',
+    values: { name },
+  });
+
 export const getUninstallSuccessTitle = (name: string) =>
   i18n.translate('xpack.genAiSettings.documentation.uninstall.successWithName', {
     defaultMessage: '{name} uninstalled successfully',
@@ -146,6 +176,53 @@ export const getUninstallErrorTitle = (name: string) =>
 export const TECH_PREVIEW = i18n.translate('xpack.genAiSettings.documentation.techPreview', {
   defaultMessage: 'TECH PREVIEW',
 });
+
+export const NEW_VERSION = i18n.translate('xpack.genAiSettings.documentation.newVersion', {
+  defaultMessage: 'New version',
+});
+
+export const ROW_ACTIONS_ARIA_LABEL = i18n.translate(
+  'xpack.genAiSettings.documentation.rowActions.ariaLabel',
+  {
+    defaultMessage: 'Actions',
+  }
+);
+
+export const CURRENT_DOCUMENTATION = i18n.translate(
+  'xpack.genAiSettings.documentation.currentDocumentation',
+  {
+    defaultMessage: 'Current documentation',
+  }
+);
+
+export const VERSION_BADGE_ARIA_LABEL = i18n.translate(
+  'xpack.genAiSettings.documentation.versionBadge.ariaLabel',
+  {
+    defaultMessage: 'View current documentation details',
+  }
+);
+
+export const DETAIL_VERSION = i18n.translate('xpack.genAiSettings.documentation.detail.version', {
+  defaultMessage: 'Version:',
+});
+
+export const DETAIL_INSTALLED = i18n.translate(
+  'xpack.genAiSettings.documentation.detail.installed',
+  {
+    defaultMessage: 'Installed:',
+  }
+);
+
+export const DETAIL_DATE = i18n.translate('xpack.genAiSettings.documentation.detail.date', {
+  defaultMessage: 'Date:',
+});
+
+export const DETAIL_INFERENCE = i18n.translate(
+  'xpack.genAiSettings.documentation.detail.inference',
+  {
+    defaultMessage: 'Inference:',
+  }
+);
 
 export const UPDATE_AVAILABLE = i18n.translate(
   'xpack.genAiSettings.documentation.updateAvailable',

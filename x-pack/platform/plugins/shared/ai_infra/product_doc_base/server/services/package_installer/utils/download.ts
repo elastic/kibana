@@ -6,7 +6,7 @@
  */
 
 import { type ReadStream, createReadStream } from 'fs';
-import { access } from 'fs/promises';
+import { access, stat } from 'fs/promises';
 import { Readable } from 'stream';
 import type { ReadableStream as WebReadableStream } from 'stream/web';
 import { createWriteStream, getSafePath } from '@kbn/fs';
@@ -19,6 +19,12 @@ export class ArtifactNotFoundError extends Error {
     super(`Artifact not found at [${fileUrl}]`);
     this.name = 'ArtifactNotFoundError';
   }
+}
+
+export interface DownloadToDiskResult {
+  artifactFullPath: string;
+  /** ISO 8601 last-modified time of the artifact, when available. */
+  lastModified?: string;
 }
 
 /**
@@ -55,23 +61,39 @@ const assertArtifactResponse = (res: Response, fileUrl: string): void => {
   }
 };
 
+const parseLastModifiedHeader = (headerValue: string | null): string | undefined => {
+  if (!headerValue) {
+    return undefined;
+  }
+  const timestamp = Date.parse(headerValue);
+  if (Number.isNaN(timestamp)) {
+    return undefined;
+  }
+  // HTTP Last-Modified is second-precision; normalize so stored values match GCS list comparisons.
+  return new Date(Math.floor(timestamp / 1000) * 1000).toISOString();
+};
+
 export const downloadToDisk = async (
   fileUrl: string,
   filePathAtVolume: string,
   artifactRepositoryProxyUrl?: string
-): Promise<string> => {
+): Promise<DownloadToDiskResult> => {
   const { fullPath: artifactFullPath } = getSafePath(filePathAtVolume);
   let readStream: ReadStream;
+  let lastModified: string | undefined;
 
   const parsedUrl = new URL(fileUrl);
 
   if (parsedUrl.protocol === 'file:') {
     const path = resolveLocalArtifactsPath(parsedUrl);
+    const fileStat = await stat(path);
+    lastModified = fileStat.mtime.toISOString();
     readStream = createReadStream(path);
   } else {
     const fetchOptions = getFetchOptions(fileUrl, artifactRepositoryProxyUrl);
     const res = await fetch(fileUrl, fetchOptions as RequestInit);
     assertArtifactResponse(res, fileUrl);
+    lastModified = parseLastModifiedHeader(res.headers.get('last-modified'));
 
     if (!res.body) {
       throw new Error('Response body is null');
@@ -82,5 +104,8 @@ export const downloadToDisk = async (
   const writeStream = createWriteStream(filePathAtVolume);
   await pipeline(readStream, writeStream);
 
-  return artifactFullPath;
+  return {
+    artifactFullPath,
+    ...(lastModified ? { lastModified } : {}),
+  };
 };
