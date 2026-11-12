@@ -12,6 +12,7 @@ import { Report } from '../store';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { CancellationToken } from '@kbn/reporting-common';
 import {
+  ExportTypeUnavailableError,
   KibanaShuttingDownError,
   QueueTimeoutError,
   RenderFailedError,
@@ -749,12 +750,18 @@ describe('Run Single Report Task', () => {
     } as unknown as ExportType);
     const store = await mockReporting.getStore();
     store.setReportError = jest.fn();
+    store.setReportFailed = jest.fn();
 
     const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
     jest
       // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
       .spyOn(task, 'claimJob')
-      .mockResolvedValueOnce({ _id: 'test', jobtype: 'test1', status: 'pending' } as never);
+      .mockResolvedValueOnce({
+        _id: 'test',
+        jobtype: 'test1',
+        status: 'pending',
+        payload: {},
+      } as never);
     await task.init(taskManagerMock.createStart());
     const taskRunner = task.getTaskDefinition().createTaskRunner({
       taskInstance: {
@@ -765,10 +772,57 @@ describe('Run Single Report Task', () => {
       fakeRequest: fakeRawRequest,
     } as unknown as RunContext);
 
-    await expect(() => taskRunner.run()).rejects.toThrow('Export type test1 is disabled');
+    const error = await taskRunner.run().catch((err: Error) => err);
 
+    expect(error).toBeInstanceOf(ExportTypeUnavailableError);
+    expect((error as Error).message).toContain('Export type test1 is disabled');
+    expect(isUnrecoverableError(error as Error)).toBe(true);
+    expect(getErrorSource(error as Error)).toBe(TaskErrorSource.USER);
     expect(isExportTypeEnabled).toHaveBeenCalledWith('test1', ScheduleType.SINGLE);
     expect(runTaskFn).not.toHaveBeenCalled();
+    expect(store.setReportFailed).toHaveBeenCalled();
+    expect(store.setReportError).not.toHaveBeenCalled();
+  });
+
+  it('fails without retrying when no export type is registered for the job type', async () => {
+    const store = await mockReporting.getStore();
+    store.setReportError = jest.fn();
+    store.setReportFailed = jest.fn();
+
+    const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
+    jest
+      // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
+      .spyOn(task, 'claimJob')
+      .mockResolvedValueOnce({
+        _id: 'test',
+        jobtype: 'unregistered',
+        status: 'pending',
+        payload: {},
+      } as never);
+    await task.init(taskManagerMock.createStart());
+    const taskRunner = task.getTaskDefinition().createTaskRunner({
+      taskInstance: {
+        id: 'random-task-id',
+        attempts: 1,
+        params: {
+          index: 'cool-reporting-index',
+          id: 'test1',
+          jobtype: 'unregistered',
+          payload: {},
+        },
+      },
+      fakeRequest: fakeRawRequest,
+    } as unknown as RunContext);
+
+    const error = await taskRunner.run().catch((err: Error) => err);
+
+    expect(error).toBeInstanceOf(ExportTypeUnavailableError);
+    expect((error as Error).message).toContain('No export type from unregistered found');
+    expect(isUnrecoverableError(error as Error)).toBe(true);
+    expect(getErrorSource(error as Error)).toBe(TaskErrorSource.USER);
+    expect(mockGetContentStream).not.toHaveBeenCalled();
+    expect(store.setReportFailed).toHaveBeenCalled();
+    expect(store.setReportError).not.toHaveBeenCalled();
   });
 
   it('catches stream error during performJob and rejects the operation', async () => {
