@@ -58,6 +58,7 @@ import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import { getFieldSnakeKey } from '../../../common/utils/template_fields';
 import * as i18n from './translations';
+import { getObservableDedupeKey } from '../../../common/observables/get_observable_dedupe_key';
 
 interface CreateIncidentArgs {
   theCase: Case;
@@ -798,7 +799,7 @@ export const processObservables = (
   observablesMap: Map<string, Observable>,
   observable: ObservablePost | Observable
 ) => {
-  const key = `${observable.typeKey}-${observable.value}`;
+  const key = getObservableDedupeKey(observable.typeKey, observable.value);
   const isExistingObservable = observablesMap.has(key);
   if (isExistingObservable) {
     return;
