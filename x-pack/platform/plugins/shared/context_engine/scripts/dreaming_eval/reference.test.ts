@@ -107,7 +107,12 @@ describe('reference memories', () => {
         '/model big\n/effort high\n\n# Reference memories for AI index `eval-a`, sample `q1`'
       )
     ).toBe(true);
-    expect(prompt).toContain('the 1 conversation below (7 rounds)');
+    expect(prompt).toContain(
+      'You are writing the answer key that our memory pipeline is evaluated against.'
+    );
+    expect(prompt).toContain(
+      'This prompt covers sample `q1`: the 1 conversation listed below (7 rounds). Write its memory to /data/references/eval-a/samples/q1.json.'
+    );
     expect(aiIndexConfigOf(aiIndex, dreaming)).toEqual({
       id: 'eval-a',
       description: 'What the assistant learned about its user.',
@@ -144,8 +149,9 @@ describe('reference memories', () => {
     });
 
     expect(prompt).toContain(
-      '/model big\n\n# Reference memories for AI index `eval-a`\n\nWrite the reference memories of 1 unit.'
+      '/model big\n\n# Reference memories for AI index `eval-a`\n\n## Goal\n\nYou are writing the answer key'
     );
+    expect(prompt).toContain('The transcripts come in 1 unit, each evaluated on its own');
     expect(prompt).toContain('- q1: /p/q1.md → /o/q1.json');
     expect(prompt).toContain('## AI index config');
     expect(prompt).toContain('"type": "preference"');

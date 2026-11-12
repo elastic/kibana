@@ -158,6 +158,19 @@ export const aiIndexConfigOf = (
   dreaming: AiIndexDreamingConfig
 ) => ({ id, ...(description && { description }), dreaming });
 
+/** Why the reference memories are written, and how they are used: the same in every prompt. */
+const goalSection = ({ id, description }: AiIndexEvalConfig): string[] => [
+  '## Goal',
+  '',
+  `You are writing the answer key that our memory pipeline is evaluated against. The pipeline reads an agent's conversation transcripts and extracts long-term memory into the AI index \`${id}\`${
+    description ? ` (${description.replace(/\.$/, '')})` : ''
+  }: facts, entities and the relationships between them, of the types the AI index config below defines, and nothing else.`,
+  '',
+  'Read the transcripts and produce that memory yourself, as the pipeline should if it worked perfectly: the high-level, lasting knowledge the transcripts establish, matching the AI index config. That is who and what they are about (entities), what is true of them (facts), and how they relate (relationships). It is not a summary of each conversation or a record of every message.',
+  '',
+  'We then run the pipeline on the same transcripts and compare its memory with yours by code, without an LLM. A memory you write that the pipeline does not counts as a miss; a memory the pipeline writes that you do not counts against it. So be complete, be exact, and write only what the config asks for.',
+];
+
 const configSection = (aiIndex: AiIndexEvalConfig, dreaming: AiIndexDreamingConfig): string[] => [
   '## AI index config',
   '',
@@ -225,15 +238,13 @@ export const referencePrompt = ({
       unit === ALL_SAMPLES ? '' : `, sample \`${unit}\``
     }`,
     '',
-    `A memory pipeline reads an agent's past conversations and writes long-term memories to the AI index \`${
-      aiIndex.id
-    }\`${
-      aiIndex.description ? ` (${aiIndex.description})` : ''
-    }. Write the memories that pipeline would write if it worked perfectly on the ${
-      transcripts.length
-    } conversation${transcripts.length === 1 ? '' : 's'} below (${rounds} round${
-      rounds === 1 ? '' : 's'
-    }): every memory these conversations call for, and nothing they do not. The pipeline's output is compared with yours without an LLM, so be exact and complete.`,
+    ...goalSection(aiIndex),
+    '',
+    `This prompt covers ${
+      unit === ALL_SAMPLES ? 'all the conversations' : `sample \`${unit}\``
+    }: the ${transcripts.length} conversation${
+      transcripts.length === 1 ? '' : 's'
+    } listed below (${rounds} round${rounds === 1 ? '' : 's'}). Write its memory to ${output}.`,
     '',
     '## What to record',
     '',
@@ -312,9 +323,13 @@ export const indexPrompt = ({
     ...(prefix.length > 0 ? [''] : []),
     `# Reference memories for AI index \`${aiIndex.id}\``,
     '',
-    `Write the reference memories of ${units.length} ${
+    ...goalSection(aiIndex),
+    '',
+    '## Units',
+    '',
+    `The transcripts come in ${units.length} ${
       units.length === 1 ? 'unit' : 'units'
-    }. Each has its own prompt with the conversations to read and the file to write. Do each prompt in full and on its own, one subagent per prompt where you can, several at a time; skip a unit whose output file already exists and parses. When all are done, list the units and how many entities, facts and relationships each has.`,
+    }, each evaluated on its own: a unit's memory comes from its own conversations only. Each unit has a prompt with the full instructions, its conversations and the file to write. Do each prompt in full and on its own, one subagent per prompt where you can, several at a time; skip a unit whose output file already exists and parses. When all are done, list the units and how many entities, facts and relationships each has.`,
     '',
     ...units.map(({ unit, prompt, output }) => `- ${unit}: ${prompt} → ${output}`),
     '',
