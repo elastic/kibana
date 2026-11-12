@@ -34,7 +34,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { DestinationsController } from './destinations_context';
-import { getDestinationTypeSteps, getStepStatus } from './destination_type_fields';
+import { getDestinationTypeSteps } from './destination_type_fields';
 import {
   DESTINATION_TYPE_DEFINITIONS,
   type DestinationTypeDefinition,
@@ -150,12 +150,10 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
     methods,
     formData: { storageKind },
     formErrors: validationErrors,
-    stepErrors: currentErrors,
     canSubmit,
   } = useDestinationCreationForm({ unitDefinition });
   // The destination being saved is already in the unit, so its own name would read as taken.
   const formErrors = isCreatingDestination ? {} : validationErrors;
-  const stepErrors = isCreatingDestination ? {} : currentErrors;
   const { destinationName: destinationNameError } = formErrors;
   const destinationNameErrorText =
     destinationNameError === 'required'
@@ -281,7 +279,6 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
                   ...getDestinationTypeSteps({
                     storageKind,
                     errors: formErrors,
-                    stepErrors,
                     disabled: isCreatingDestination,
                   }),
                   {
@@ -289,7 +286,6 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
                       'xpack.streams.destinations.destinationDetailsStepTitle',
                       { defaultMessage: 'Destination details' }
                     ),
-                    status: getStepStatus(stepErrors, ['destinationName']),
                     children: (
                       <>
                         <EuiFormRow

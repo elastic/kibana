@@ -467,21 +467,10 @@ describe('CreateDestinationModal', () => {
   });
 
   describe('step dots', () => {
-    const incomplete = (step: number) => screen.queryByText(`Step ${step} is incomplete`);
-
-    it('fills the local steps once their fields are valid', () => {
+    it('keeps every step in the default style while fields are empty', () => {
       renderModal();
-      expect(incomplete(1)).not.toBeInTheDocument();
-      expect(incomplete(2)).not.toBeInTheDocument();
-      expect(incomplete(3)).toBeInTheDocument();
-
       chooseFixed();
-      expect(incomplete(2)).toBeInTheDocument();
-      setFieldValue('streamsCreateDestinationIndex', 'billing-default');
-      expect(incomplete(2)).not.toBeInTheDocument();
-
-      setFieldValue('streamsCreateDestinationName', 'Billing');
-      expect(incomplete(3)).not.toBeInTheDocument();
+      expect(screen.queryAllByText(/Step \d is incomplete/)).toHaveLength(0);
     });
   });
 });
