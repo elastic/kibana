@@ -72,6 +72,9 @@ const storageSettings = {
       executionError: types.text({}),
       previousExecutionError: types.text({}),
 
+      // Absent on every document written before gateless proposals existed,
+      // which the readers treat as `workflow`.
+      gate: types.keyword({}),
       workflowExecutionId: types.keyword({}),
       gateReleasedAt: types.date({}),
 

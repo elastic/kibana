@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { LearningRecord } from '@kbn/nightshift-decision-trees';
-import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
+import type { NightshiftSandboxStart } from '../../sandbox_audit';
 import { createDecisionTreeStore } from '../../decision_trees/store';
 import { createLearningStore } from '../../decision_trees/learning_store';
 import type { AppliedWriteRecord, WriteProvenance } from '../../investigation_round';
@@ -129,7 +129,7 @@ export const createDecisionTreeTools = ({
   getUsername,
   logger,
 }: {
-  getSandboxStart: () => SandboxPluginStart | undefined;
+  getSandboxStart: () => NightshiftSandboxStart | undefined;
   connectorNames: readonly string[];
   getSpaceId: (request: KibanaRequest) => string;
   getUsername?: (request: KibanaRequest) => string | undefined;

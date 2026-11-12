@@ -397,7 +397,11 @@ describe('buildSseData', () => {
         expect.objectContaining({
           event_id: 't2-evt-1',
           source_index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
-          matched: { technique_id: 'T1078.004', field: '_id' },
+          matched: {
+            technique_id: 'T1078.004',
+            field: 'host.name',
+            detection: 'behavior:T1078.004',
+          },
         }),
       ])
     );
@@ -537,7 +541,7 @@ describe('buildSseData', () => {
     expect(entries[0].data.events).toEqual([
       expect.objectContaining({
         event_id: 't2-only-1',
-        matched: { technique_id: 'T1078.004', field: '_id' },
+        matched: { technique_id: 'T1078.004', field: 'host.name', detection: 'behavior:T1078.004' },
       }),
     ]);
 
@@ -1134,6 +1138,69 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
     });
   });
 
+  it('keeps an IOC attributed only to another technique out of a technique entry', () => {
+    const result = withBehaviors(
+      tier1Result({
+        resolved_iocs: [{ type: 'ip', value: '203.0.113.10' }],
+        counts: { total_hits: 1, returned_hits: 1, affected_hosts: 1, affected_users: 0 },
+        // Report-wide aggregation names the IOC; only a T1552.001 alert actually matched it.
+        per_ioc: [{ type: 'ip', value: '203.0.113.10', field: 'source.ip', count: 1 }],
+        hits: [
+          {
+            id: 'evt-other-technique',
+            index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+            timestamp: '2026-07-30T13:05:00.000Z',
+            matched: {
+              ioc: { type: 'ip', value: '203.0.113.10' },
+              field: 'source.ip',
+              iocs: [{ type: 'ip', value: '203.0.113.10', field: 'source.ip' }],
+              technique_id: 'T1552.001',
+            },
+          },
+        ],
+      }),
+      [
+        behaviorFixture({
+          hits: [
+            {
+              id: 't2-a',
+              index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+              timestamp: '2026-07-30T14:00:00.000Z',
+            },
+          ],
+        }),
+        behaviorFixture({
+          technique_id: 'T1552.001',
+          technique_name: 'Credentials In Files',
+          title: 'Credential file read on CI runner',
+          hits: [
+            {
+              id: 't2-b',
+              index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+              timestamp: '2026-07-30T14:10:00.000Z',
+            },
+          ],
+        }),
+      ]
+    );
+
+    const entries = buildSseData(result, 'tr-two', { spaceId: 'default' });
+    const entryA = entries.find((entry) => entry.data.corroborated_technique_id === 'T1078.004');
+    const entryB = entries.find((entry) => entry.data.corroborated_technique_id === 'T1552.001');
+
+    expect(entryA?.data.detections?.map((detection) => detection.id)).toEqual([
+      'behavior:T1078.004',
+    ]);
+    expect(entryA?.data.basis).toBe('behavior_only');
+    expect(entryA?.data.summary).not.toContain('203.0.113.10');
+
+    expect(entryB?.data.detections?.map((detection) => detection.id)).toEqual([
+      'behavior:T1552.001',
+      'ioc:ip:203.0.113.10',
+    ]);
+    expect(entryB?.data.basis).toBe('ioc_and_behavior');
+  });
+
   it('shares the event cap between the tiers instead of letting IOC Hunt fill it', () => {
     // Tier 1 returns up to the coordinator's `size: 100`, and `events` caps at 50, so
     // appending Tier 2 after Tier 1 drops every ref to the behavior that confirmed
@@ -1170,12 +1237,17 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
       expect.arrayContaining([
         expect.objectContaining({
           event_id: 't2-evt-1',
-          matched: { technique_id: 'T1078.004', field: '_id' },
+          matched: {
+            technique_id: 'T1078.004',
+            field: 'host.name',
+            detection: 'behavior:T1078.004',
+          },
         }),
       ])
     );
     // The Tier 1 count quoted to the reader is the refs the entry carries, not the
-    // ones it was offered.
+    // ones it was offered. Written even though `detections[]` tells the same story:
+    // packaging reads these bullets, and the card hides the restatement itself.
     expect(entry.data.evidence_for).toContain(
       'IOC Hunt matched 50 event(s) for this report in the hunt window, at least one in a required index; 49 are referenced here (see hunt_result.tier1.per_index for the required/optional split).'
     );
@@ -1259,7 +1331,7 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
     expect(byId.get('evt-epoch')).toBe('2026-07-30T13:05:00.000Z');
     expect(byId.get('evt-garbage')).toBeUndefined();
     expect(byId.get('evt-datemath')).toBeUndefined();
-    expect(entry.data.timeline).toHaveLength(2);
+    expect(Object.hasOwn(entry.data, 'timeline')).toBe(false);
   });
 
   it('keeps a remote event ref and drops a remote alert ref, which no local exit ramp can open', () => {
@@ -1410,5 +1482,197 @@ describe('buildSseData host entity origins', () => {
     );
 
     expect(hostEntities(result)).toEqual([{ field: 'host.name', value: 'ubuntu' }]);
+  });
+});
+
+describe('buildSseData hit-centric summary, basis and detections', () => {
+  it('writes summary, basis, detections with IOC field, and matched.detection for a Tier 1 hit', () => {
+    const result = tier1Result({
+      resolved_iocs: [{ type: 'ip', value: '203.0.113.10' }],
+      counts: { total_hits: 12, returned_hits: 1, affected_hosts: 3, affected_users: 1 },
+      per_ioc: [
+        {
+          type: 'ip',
+          value: '203.0.113.10',
+          field: 'destination.ip',
+          count: 12,
+          host_count: 3,
+          user_count: 1,
+          first_seen: '2026-07-30T13:00:00.000Z',
+          last_seen: '2026-07-30T14:00:00.000Z',
+        },
+      ],
+      searched_ioc_count: 1,
+      hits: [
+        {
+          id: 'evt-ip',
+          index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+          timestamp: '2026-07-30T13:05:00.000Z',
+          host: 'WIN-1',
+          fields: { 'destination.ip': '203.0.113.10', 'event.action': 'AssumeRole' },
+          matched: {
+            ioc: { type: 'ip', value: '203.0.113.10' },
+            field: 'destination.ip',
+            iocs: [{ type: 'ip', value: '203.0.113.10', field: 'destination.ip' }],
+          },
+        },
+      ],
+    });
+
+    const [entry] = buildSseData(result, 'tr-ioc', { spaceId: 'default' });
+    expect(entry.data.basis).toBe('ioc_strong');
+    expect(entry.data.summary).toBe('ip 203.0.113.10 seen 12x on 3 hosts');
+    expect(entry.data.detections).toEqual([
+      expect.objectContaining({
+        id: 'ioc:ip:203.0.113.10',
+        kind: 'ioc',
+        field: 'destination.ip',
+        total: 12,
+      }),
+    ]);
+    expect(entry.data.events?.[0].matched).toEqual(
+      expect.objectContaining({
+        field: 'destination.ip',
+        detection: 'ioc:ip:203.0.113.10',
+      })
+    );
+    expect(entry.data.events?.[0].matched?.field).not.toBe('_id');
+    expect(significantSecurityEventAttachmentDataSchema.safeParse(entry.data).success).toBe(true);
+  });
+
+  it('leads a technique-scoped summary with the behavior and never uses _id as matched.field', () => {
+    const result: HuntCoordinatorCoreResult = {
+      ...tier1Result({
+        hits: [
+          {
+            id: 'evt-1',
+            index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+            timestamp: '2026-07-30T13:05:00.000Z',
+            matched: {
+              ioc: { type: 'ip', value: '203.0.113.10' },
+              field: 'source.ip',
+              iocs: [{ type: 'ip', value: '203.0.113.10', field: 'source.ip' }],
+            },
+          },
+        ],
+        per_ioc: [{ type: 'ip', value: '203.0.113.10', field: 'source.ip', count: 1 }],
+        counts: { total_hits: 1, returned_hits: 1, affected_hosts: 1, affected_users: 0 },
+      }),
+      status: 'tier1_and_tier2',
+      tier2: {
+        tier: 2,
+        status: 'behaviors_proposed',
+        behaviors: [
+          behaviorFixture({
+            validated_esql:
+              'FROM logs-aws.cloudtrail-* | WHERE event.action == "AssumeRole" | LIMIT 100',
+            hits: [
+              {
+                id: 't2-1',
+                index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+                timestamp: '2026-07-30T14:00:00.000Z',
+                fields: { 'event.action': 'AssumeRole' },
+              },
+            ],
+          }),
+        ],
+        indexed_behaviors: [],
+        has_hit: true,
+        next_step: 'n/a',
+      },
+    };
+
+    const [entry] = buildSseData(result, 'tr-mixed', { spaceId: 'default' });
+    expect(entry.data.corroborated_technique_id).toBe('T1078.004');
+    expect(entry.data.summary?.startsWith('T1078.004')).toBe(true);
+    expect(entry.data.basis).toBe('ioc_and_behavior');
+    expect(entry.data.detections?.map((d) => d.kind)).toEqual(
+      expect.arrayContaining(['ioc', 'behavior'])
+    );
+    const t2Event = entry.data.events?.find((e) => e.event_id === 't2-1');
+    expect(t2Event?.matched?.field).toBe('event.action');
+    expect(t2Event?.matched?.field).not.toBe('_id');
+    expect(t2Event?.matched?.detection).toBe('behavior:T1078.004');
+    expect(significantSecurityEventAttachmentDataSchema.safeParse(entry.data).success).toBe(true);
+  });
+});
+
+describe('buildSseData holds hit-centric fields to the SSE schema', () => {
+  it('normalizes epoch-digit per_ioc first_seen/last_seen to ISO and keeps the entry', () => {
+    const result = tier1Result({
+      resolved_iocs: [{ type: 'ip', value: '203.0.113.10' }],
+      counts: { total_hits: 3, returned_hits: 0, affected_hosts: 1, affected_users: 0 },
+      per_ioc: [
+        {
+          type: 'ip',
+          value: '203.0.113.10',
+          field: 'destination.ip',
+          count: 3,
+          first_seen: '1753880700000',
+          last_seen: '1753884300000',
+        },
+      ],
+    });
+
+    const [entry] = buildSseData(result, 'tr-epoch', { spaceId: 'default' });
+    expect(entry.data.hunt_result?.tier1.per_ioc).toEqual([
+      expect.objectContaining({
+        first_seen: '2025-07-30T13:05:00.000Z',
+        last_seen: '2025-07-30T14:05:00.000Z',
+      }),
+    ]);
+    expect(significantSecurityEventAttachmentDataSchema.safeParse(entry.data).success).toBe(true);
+  });
+
+  it('caps matched.iocs on an event ref at the schema bound', () => {
+    const iocs = Array.from({ length: 12 }, (_, i) => ({
+      type: 'ip' as const,
+      value: `203.0.113.${i}`,
+      field: i % 2 === 0 ? 'source.ip' : 'destination.ip',
+    }));
+    const result = tier1Result({
+      resolved_iocs: iocs.map(({ type, value }) => ({ type, value })),
+      hits: [
+        {
+          id: 'evt-many',
+          index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+          timestamp: '2026-07-30T13:05:00.000Z',
+          matched: { ioc: { type: 'ip', value: '203.0.113.0' }, field: 'source.ip', iocs },
+        },
+      ],
+    });
+
+    const [entry] = buildSseData(result, 'tr-many', { spaceId: 'default' });
+    expect(entry.data.events?.[0].matched?.iocs).toHaveLength(10);
+    expect(significantSecurityEventAttachmentDataSchema.safeParse(entry.data).success).toBe(true);
+  });
+
+  it('gives a long URL IOC a detection id and matched.detection the schema accepts', () => {
+    const longUrl = `https://evil.example.com/${'a'.repeat(300)}`;
+    const result = tier1Result({
+      resolved_iocs: [{ type: 'url', value: longUrl }],
+      counts: { total_hits: 2, returned_hits: 1, affected_hosts: 1, affected_users: 0 },
+      per_ioc: [{ type: 'url', value: longUrl, field: 'url.full', count: 2 }],
+      hits: [
+        {
+          id: 'evt-url',
+          index: '.ds-logs-proxy-default-2026.07.30-000001',
+          timestamp: '2026-07-30T13:05:00.000Z',
+          matched: {
+            ioc: { type: 'url', value: longUrl },
+            field: 'url.full',
+            iocs: [{ type: 'url', value: longUrl, field: 'url.full' }],
+          },
+        },
+      ],
+    });
+
+    const [entry] = buildSseData(result, 'tr-url', { spaceId: 'default' });
+    const [detection] = entry.data.detections ?? [];
+    expect(detection.id.length).toBeLessThanOrEqual(256);
+    expect(detection.matched_on[0].value).toBe(longUrl);
+    expect(entry.data.events?.[0].matched?.detection).toBe(detection.id);
+    expect(entry.data.summary?.startsWith('url https://evil.example.com/')).toBe(true);
+    expect(significantSecurityEventAttachmentDataSchema.safeParse(entry.data).success).toBe(true);
   });
 });

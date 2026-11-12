@@ -41,6 +41,7 @@ import {
   toFieldErrors,
   type ComponentReferenceOption,
 } from '../component_definition_form';
+import { getSignalLabel } from '../streams_layout/destinations/destination_type_config';
 import { CheckOutcomeCallout, type CheckOutcome } from './check_outcome_callout';
 import {
   deleteProcessorPromptOptions,
@@ -346,7 +347,7 @@ export function ProcessorEditor({
                     >
                       {i18n.translate('xpack.streams.processingFlyout.editor.fixedSignals', {
                         defaultMessage: 'Applies to every signal it supports: {signals}.',
-                        values: { signals: signals.join(', ') },
+                        values: { signals: signals.map(getSignalLabel).join(', ') },
                       })}
                     </EuiText>
                     <EuiSpacer size="m" />

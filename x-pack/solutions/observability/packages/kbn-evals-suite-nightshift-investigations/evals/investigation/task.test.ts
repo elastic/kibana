@@ -11,7 +11,12 @@ import {
   ToolResultType,
 } from '@kbn/agent-builder-common';
 import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
-import { INVESTIGATION_TIMEOUT_MS, UNPERSISTED_CONVERSATION_ERROR, runInvestigation } from './task';
+import {
+  INVESTIGATION_TIMEOUT_MS,
+  UNPERSISTED_CONVERSATION_ERROR,
+  runInvestigation,
+  waitForInvestigationToEnd,
+} from './task';
 import { ungradedPlaceholder } from './placeholder';
 
 jest.mock('timers/promises', () => ({ setTimeout: jest.fn().mockResolvedValue(undefined) }));
@@ -217,6 +222,53 @@ it('reports an investigation that finished without a conclusion, keeping its evi
   expect(placeholder).toMatchObject({ score: 1, label: 'ungraded' });
 });
 
+it.each([
+  [
+    { type: 'failed', error: { code: 'internalError', message: 'connector timed out' } },
+    'Investigation round failed: connector timed out',
+  ],
+  [{ type: 'aborted', aborted_by: { source: 'user' } }, 'Investigation round was aborted by user'],
+])(
+  'reports an interrupted round as its failure, not as a missing conclusion',
+  async (interruption, executionError) => {
+    const fetch = jest
+      .fn()
+      .mockResolvedValueOnce({ investigation_id: 'interrupted' })
+      .mockResolvedValueOnce(
+        investigation({ id: 'interrupted', metadata: { status: 'open', summary: 'Partial' } })
+      )
+      .mockResolvedValueOnce({ rounds: [{ trace_id: 'partial-trace', steps: [], interruption }] });
+
+    const output = await runInvestigation(fetch, example, connector);
+
+    expect(output).toMatchObject({
+      workflow_status: 'complete',
+      execution_error: executionError,
+      structured_report: { summary: 'Partial' },
+    });
+  }
+);
+
+it('reports a round interrupted after the verdict as a failure, so ORCA leaves it unscored', async () => {
+  const interruption = {
+    type: 'failed',
+    error: { code: 'internalError', message: 'connector timed out' },
+  };
+  const fetch = jest
+    .fn()
+    .mockResolvedValueOnce({ investigation_id: 'late-failure' })
+    .mockResolvedValueOnce(investigation({ id: 'late-failure' }))
+    .mockResolvedValueOnce({ rounds: [{ trace_id: 'late-trace', steps: [], interruption }] });
+
+  const output = await runInvestigation(fetch, example, connector);
+
+  expect(output).toMatchObject({
+    workflow_status: 'complete',
+    execution_error: 'Investigation round failed: connector timed out',
+    structured_report: { conclusion: 'Synthetic timeouts increased.' },
+  });
+});
+
 it('flags a finished investigation whose conversation never finished persisting', async () => {
   const clock = jest
     .spyOn(Date, 'now')
@@ -367,4 +419,31 @@ it('reports an investigation that never appeared', async () => {
   } finally {
     clock.mockRestore();
   }
+});
+
+describe('waitForInvestigationToEnd', () => {
+  const finished = { rounds: [{ status: ConversationRoundStatus.completed, steps: [] }] };
+
+  it('waits until the investigation and its last round have ended', async () => {
+    const fetch = jest
+      .fn()
+      .mockResolvedValueOnce(investigation({ in_progress: true }))
+      .mockResolvedValueOnce(investigation())
+      .mockResolvedValueOnce(finished);
+
+    await expect(waitForInvestigationToEnd(fetch, 'investigation', 60_000)).resolves.toBe(true);
+    expect(fetch).toHaveBeenCalledTimes(3);
+  });
+
+  it('gives up once the investigation is still running at the deadline', async () => {
+    const fetch = jest.fn().mockResolvedValue(investigation({ in_progress: true }));
+
+    await expect(waitForInvestigationToEnd(fetch, 'investigation', 0)).resolves.toBe(false);
+  });
+
+  it('does not take an investigation that is not found yet as ended', async () => {
+    const fetch = jest.fn().mockRejectedValue(notFound());
+
+    await expect(waitForInvestigationToEnd(fetch, 'investigation', 0)).resolves.toBe(false);
+  });
 });

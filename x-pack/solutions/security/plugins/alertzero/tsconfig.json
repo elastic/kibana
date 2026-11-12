@@ -82,6 +82,8 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-test-helpers-kbn-server",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/discover-plugin",
     "@kbn/workflows-execution-engine"
   ]
 }

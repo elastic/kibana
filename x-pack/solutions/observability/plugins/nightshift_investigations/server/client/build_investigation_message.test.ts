@@ -378,6 +378,35 @@ describe('buildInvestigationMessage with a v2 alert without a rule', () => {
   });
 });
 
+describe('buildInvestigationMessage with a significant event alert', () => {
+  const v2: V2AlertSnapshot = {
+    alert_version: 'v2',
+    id: 'episode-1',
+    group_hash: 'hash-1',
+    status: 'active',
+    start: '2026-08-24T12:00:00.000Z',
+  };
+
+  it('names the event id and how to read it', () => {
+    const message = buildInvestigationMessage({
+      alerts: [{ ...v2, source: 'elastic.significant_events', data: { event_id: 'evt-42' } }],
+    });
+
+    expect(message).toContain('significant event (event id evt-42)');
+    expect(message).toContain('sig_events.event_search');
+    expect(message).not.toContain('not a classic one');
+  });
+
+  it('keeps the generic v2 wording for other sources', () => {
+    const message = buildInvestigationMessage({
+      alerts: [{ ...v2, source: 'custom.source', data: { event_id: 'evt-42' } }],
+    });
+
+    expect(message).toContain('not a classic one');
+    expect(message).not.toContain('significant event');
+  });
+});
+
 describe('buildAlertRecoveredFollowUpMessage', () => {
   const baseRecovery = {
     alertUuid: 'alert-uuid-1',

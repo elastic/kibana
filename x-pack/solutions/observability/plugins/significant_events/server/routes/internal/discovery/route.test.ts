@@ -37,7 +37,7 @@ const makeHandlerParams = () => {
       return { executionId: 'execution-1', isNew: true };
     }
   );
-  const request = {};
+  const request = { spaceId: 'default' };
   const server = {
     agentBuilder: {},
     inference: {},

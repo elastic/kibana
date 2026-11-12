@@ -9,6 +9,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { buildTurnScripts } from '@kbn/nightshift-decision-trees';
 import { DECISION_TREE_PROMPT_TOOLS } from '../tools/decision_tree/prompt_tools';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
+import { NO_CAUSAL_VERDICT } from './causal_check';
 import { createLearningStore } from './learning_store';
 import { prepareReinforcementTurn } from './register_decision_trees';
 import { createDecisionTreeStore, type DecisionTreeSummary } from './store';
@@ -30,6 +31,13 @@ const tree = (slug: string, overrides: Partial<DecisionTreeSummary> = {}): Decis
   updated_at: '2026-09-09T12:00:00.000Z',
   ...overrides,
 });
+
+const confirmed = {
+  isFeedback: true,
+  causalConfirmed: true,
+  causalSummary: 'Charge calls to api.paygate-eu.net timed out at 10s from 05:42Z.',
+  learning: 'Check payment processor spans first.',
+};
 
 const readTree = (slug: string) => ({
   tool_id: SANDBOX_VIEW_FILE_TOOL_ID,
@@ -151,18 +159,70 @@ describe('prepareReinforcementTurn', () => {
       expect(turn.skipped === false && turn.message).toContain('symptom:seeded-by-round-one');
     });
 
-    it('never asks to reinforce a path as causal', async () => {
+    it('extends without claiming a cause when nothing checks it', async () => {
       const turn = await prepare({ earlierAccessedTreeIds: ['symptom:checkout-latency'] });
 
       expect(turn.skipped === false && turn.message).not.toContain(scripts.reinforce);
+      expect(turn).toMatchObject({ verdict: NO_CAUSAL_VERDICT });
+    });
+
+    it('reinforces the causal path when the causal check confirmed the cause', async () => {
+      const checkCausal = jest.fn().mockResolvedValue(confirmed);
+
+      const turn = await prepare({
+        earlierAccessedTreeIds: ['symptom:checkout-latency'],
+        checkCausal,
+      });
+
+      expect(checkCausal).toHaveBeenCalledTimes(1);
+      expect(turn).toMatchObject({ skipped: false, verdict: confirmed });
+      expect(turn.skipped === false && turn.message).toContain(scripts.reinforce);
+    });
+
+    // Round 6 of the local replay: a planted egress-proxy claim no tool result implicated.
+    it('only extends when the causal check found the claim unproven', async () => {
+      const turn = await prepare({
+        earlierAccessedTreeIds: ['symptom:checkout-latency'],
+        checkCausal: jest.fn().mockResolvedValue({ ...confirmed, causalConfirmed: false }),
+      });
+
+      const message = turn.skipped === false ? turn.message : '';
+      expect(message).toContain(scripts.followupExtend);
+      expect(message).not.toContain(scripts.reinforce);
+    });
+
+    // Deductive hands the agent only the reinforce-or-extend choice, not the summary.
+    it('keeps the causal summary out of the agent message', async () => {
+      const turn = await prepare({
+        earlierAccessedTreeIds: ['symptom:checkout-latency'],
+        checkCausal: jest.fn().mockResolvedValue(confirmed),
+      });
+
+      expect(turn.skipped === false && turn.message).not.toContain(confirmed.causalSummary);
     });
 
     // A recovery or a reply has nothing new to seed a tree from.
     it('is skipped when the investigation has no tree to build on', async () => {
-      await expect(prepare()).resolves.toEqual({ skipped: true });
+      const checkCausal = jest.fn();
+
+      await expect(prepare({ checkCausal })).resolves.toEqual({ skipped: true });
       expect(logger.info).toHaveBeenCalledWith(
         expect.stringContaining('it has no decision tree to build on')
       );
+      expect(checkCausal).not.toHaveBeenCalled();
     });
+  });
+
+  it('never runs the causal check for a first round', async () => {
+    const checkCausal = jest.fn();
+
+    const turn = await prepare({
+      turnKind: 'initial_investigation',
+      toolCalls: [readTree('checkout-latency')],
+      checkCausal,
+    });
+
+    expect(checkCausal).not.toHaveBeenCalled();
+    expect(turn).not.toHaveProperty('verdict');
   });
 });

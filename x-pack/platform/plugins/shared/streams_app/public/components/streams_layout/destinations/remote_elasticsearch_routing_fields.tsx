@@ -26,7 +26,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DESTINATION_SIGNALS, SIGNAL_INDEX_FIELDS } from './destination_models';
+import { PREFIXED_DESTINATION_SIGNALS, SIGNAL_INDEX_FIELDS } from './destination_models';
 import {
   DESTINATION_AUTO_MODE_LABEL,
   DESTINATION_FIXED_INDEX_MODE_LABEL,
@@ -36,14 +36,15 @@ import {
   EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM,
   type DestinationCreationFormData,
   type DestinationCreationFormErrors,
-  type DestinationSignal,
+  type PrefixedDestinationSignal,
   type StaticIndexNaming,
 } from './types';
 
-type IndexFieldPath = `remoteElasticsearch.${(typeof SIGNAL_INDEX_FIELDS)[DestinationSignal]}`;
+type IndexFieldPath =
+  `remoteElasticsearch.${(typeof SIGNAL_INDEX_FIELDS)[PrefixedDestinationSignal]}`;
 
 type IndexFields = Record<
-  DestinationSignal,
+  PrefixedDestinationSignal,
   ControllerRenderProps<DestinationCreationFormData, IndexFieldPath>
 >;
 
@@ -54,7 +55,7 @@ interface RemoteElasticsearchRoutingFieldsProps {
   disabled: boolean;
 }
 
-const getIndexFieldPath = (signal: DestinationSignal): IndexFieldPath =>
+const getIndexFieldPath = (signal: PrefixedDestinationSignal): IndexFieldPath =>
   `remoteElasticsearch.${SIGNAL_INDEX_FIELDS[signal]}`;
 
 const INDEX_PLACEHOLDER = i18n.translate(
@@ -124,7 +125,7 @@ const StaticFields = ({
   ];
 
   const setSharedIndex = (index: string) => {
-    for (const signal of DESTINATION_SIGNALS) {
+    for (const signal of PREFIXED_DESTINATION_SIGNALS) {
       indexFields[signal].onChange(index);
     }
   };
@@ -134,7 +135,7 @@ const StaticFields = ({
     setValue('remoteElasticsearch.staticNaming', naming, { shouldDirty: true });
     if (naming === 'shared') {
       setSharedIndex(
-        DESTINATION_SIGNALS.map((signal) => indexFields[signal].value).find(Boolean) ?? ''
+        PREFIXED_DESTINATION_SIGNALS.map((signal) => indexFields[signal].value).find(Boolean) ?? ''
       );
     }
   };
@@ -177,7 +178,7 @@ const StaticFields = ({
             isInvalid={Boolean(sharedError)}
             onChange={(event) => setSharedIndex(event.target.value)}
             onBlur={() => {
-              for (const signal of DESTINATION_SIGNALS) {
+              for (const signal of PREFIXED_DESTINATION_SIGNALS) {
                 indexFields[signal].onBlur();
               }
             }}
@@ -191,7 +192,7 @@ const StaticFields = ({
         </EuiFormRow>
       ) : (
         <>
-          {DESTINATION_SIGNALS.map((signal) => {
+          {PREFIXED_DESTINATION_SIGNALS.map((signal) => {
             const errorText = indexErrorText(errors[SIGNAL_INDEX_FIELDS[signal]]);
             return (
               <EuiFormRow
@@ -250,7 +251,7 @@ export const RemoteElasticsearchRoutingFields = (props: RemoteElasticsearchRouti
     if (nextAuto === auto) {
       return;
     }
-    for (const signal of DESTINATION_SIGNALS) {
+    for (const signal of PREFIXED_DESTINATION_SIGNALS) {
       resetField(getIndexFieldPath(signal));
     }
     // `resetField` skips unregistered paths, and naming is only ever set with `setValue`.

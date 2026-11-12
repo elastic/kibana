@@ -18,14 +18,12 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import {
   ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
   ENABLE_ASSET_INVENTORY_SETTING,
-  ENABLE_NEW_FLYOUT_SETTING,
 } from '../common/constants';
 
 describe('initUiSettings', () => {
   let mockUiSettings: ReturnType<typeof coreMock.createSetup>['uiSettings'];
   const mockExperimentalFeatures = {
     extendedRuleExecutionLoggingEnabled: false,
-    newFlyoutSystemDisabled: false,
     ruleChangesHistoryEnabled: false,
   } as ExperimentalFeatures;
 
@@ -102,32 +100,5 @@ describe('initUiSettings', () => {
         technicalPreview: true,
       })
     );
-  });
-
-  it('registers ENABLE_NEW_FLYOUT_SETTING when newFlyoutSystemDisabled flag is disabled', () => {
-    initUiSettings(mockUiSettings, mockExperimentalFeatures, false);
-
-    const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
-    expect(registeredSettings).toHaveProperty(ENABLE_NEW_FLYOUT_SETTING);
-    expect(registeredSettings[ENABLE_NEW_FLYOUT_SETTING]).toEqual(
-      expect.objectContaining({
-        name: 'Enable new flyout',
-        value: true,
-        type: 'boolean',
-        requiresPageReload: true,
-      })
-    );
-  });
-
-  it('does NOT register ENABLE_NEW_FLYOUT_SETTING when newFlyoutSystemDisabled flag is enabled', () => {
-    const disabledFeatures = {
-      ...mockExperimentalFeatures,
-      newFlyoutSystemDisabled: true,
-    };
-
-    initUiSettings(mockUiSettings, disabledFeatures, false);
-
-    const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
-    expect(registeredSettings).not.toHaveProperty(ENABLE_NEW_FLYOUT_SETTING);
   });
 });

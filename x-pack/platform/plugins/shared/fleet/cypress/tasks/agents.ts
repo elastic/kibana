@@ -6,6 +6,7 @@
  */
 
 import { type FleetServerAgent } from '@kbn/fleet-plugin/common/types';
+import { getSentinelVersionPolicyId } from '@kbn/fleet-plugin/common/services/version_specific_policies_utils';
 
 export const createAgentDoc = (
   id: string,
@@ -50,7 +51,10 @@ export const createAgentDoc = (
       version: '10.16',
     },
   },
-  policy_id: policy,
+  // Agents are already assigned to the `#sentinel` policy, as after the version specific policy
+  // assignment task ran, so that the task does not reassign them and reset their status to updating.
+  policy_id: getSentinelVersionPolicyId(policy),
+  policy_base_id: policy,
   type: 'PERMANENT',
   default_api_key: 'abcdefg',
   default_api_key_id: 'abcd',

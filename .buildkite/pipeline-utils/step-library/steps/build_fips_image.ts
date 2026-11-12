@@ -16,7 +16,7 @@ export const buildFipsImage = (): readonly Step[] => [
     command: '.buildkite/scripts/steps/fips/build.sh',
     label: 'Build FIPS Image',
     key: 'build_fips_image',
-    agents: spotAgent('n2-standard-2', spotZones.centralFCA),
+    agents: spotAgent('n2-standard-2', spotZones.allUS),
     depends_on: ['build'],
     timeout_in_minutes: 60,
     soft_fail: true,

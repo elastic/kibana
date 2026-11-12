@@ -44,14 +44,14 @@ export {
   type OnlineEvalsStepFailedEvent,
 } from './online_evals_step_failed_event';
 export {
-  NIGHTSHIFT_CORTEX_EDIT_APPLIED_EVENT_TYPE,
-  NIGHTSHIFT_CORTEX_HYDRATED_EVENT_TYPE,
-  type CortexEditAppliedProps,
-  type CortexHydratedProps,
-} from './cortex_events';
+  NIGHTSHIFT_WIKI_EDIT_APPLIED_EVENT_TYPE,
+  NIGHTSHIFT_WIKI_HYDRATED_EVENT_TYPE,
+  type WikiEditAppliedProps,
+  type WikiHydratedProps,
+} from './wiki_events';
 export {
-  createCortexTelemetry,
-  registerCortexTelemetryEvents,
-  type AppliedCortexEdit,
-  type CortexTelemetry,
-} from './cortex_telemetry';
+  createWikiTelemetry,
+  registerWikiTelemetryEvents,
+  type AppliedWikiEdit,
+  type WikiTelemetry,
+} from './wiki_telemetry';

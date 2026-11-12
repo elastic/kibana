@@ -13,6 +13,7 @@ export enum EsqlSettingNames {
   COLUMN_METADATA = 'column_metadata',
   EXEMPLARS = 'exemplars',
   PROJECT_ROUTING = 'project_routing',
+  TIME_SERIES_REDUCE_PER_INDEX = 'time_series_reduce_per_index',
   TIME_ZONE = 'time_zone',
   UNMAPPED_FIELDS = 'unmapped_fields',
   WILDCARDS_MATCH_DATASETS = 'wildcards_match_datasets',
@@ -67,6 +68,17 @@ const projectRouting = {
   ignoreAsSuggestion: false,
 };
 
+const timeSeriesReducePerIndex = {
+  name: EsqlSettingNames.TIME_SERIES_REDUCE_PER_INDEX,
+  type: ['boolean'],
+  description:
+    'When enabled, time-series aggregates are reduced separately in each index before results are combined. This uses less memory and can improve query performance, but results may be approximate for time buckets that overlap index rollover boundaries and for windowed aggregates whose windows reach across those boundaries. Defaults to `false`.',
+  serverlessOnly: false,
+  preview: false,
+  snapshotOnly: false,
+  ignoreAsSuggestion: false,
+};
+
 const timeZone = {
   name: EsqlSettingNames.TIME_ZONE,
   type: ['keyword'],
@@ -116,6 +128,7 @@ export const settings = [
   columnMetadata,
   exemplars,
   projectRouting,
+  timeSeriesReducePerIndex,
   timeZone,
   unmappedFields,
   wildcardsMatchDatasets,

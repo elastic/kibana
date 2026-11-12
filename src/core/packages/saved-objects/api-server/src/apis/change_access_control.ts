@@ -14,6 +14,10 @@ import type { SavedObjectsBaseOptions } from './base';
 export interface SavedObjectsChangeAccessControlObject {
   type: string;
   id: string;
+  /**
+   * Optional version of the object; used for optimistic concurrency control
+   */
+  version?: string;
 }
 
 export interface SavedObjectsChangeOwnershipOptions extends SavedObjectsBaseOptions {
@@ -46,4 +50,6 @@ export interface SavedObjectsChangeAccessControlResponseObject {
   id: string;
   type: string;
   error?: SavedObjectError;
+  /** The updated version of the object. Only set when the change succeeded. */
+  version?: string;
 }

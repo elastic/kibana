@@ -927,6 +927,12 @@ export const IfStepSchema = BaseStepSchema.extend({
 });
 export type IfStep = z.infer<typeof IfStepSchema>;
 
+export const IfStepOutputSchema = lazySchema(() =>
+  z.object({
+    conditionResult: z.boolean(),
+  })
+);
+
 export const getIfStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
   const schema = IfStepSchema.extend({
     steps: z.array(stepSchema).min(1),
@@ -1116,6 +1122,44 @@ const applyParallelModeRefinement = <T extends z.ZodTypeAny>(schema: T) =>
 export const ParallelStepSchema = applyParallelModeRefinement(ParallelStepObjectSchema);
 export type ParallelStep = z.infer<typeof ParallelStepObjectSchema>;
 
+const ParallelBranchStatusSchema = lazySchema(() =>
+  z.enum(['completed', 'failed', 'skipped', 'timed_out'])
+);
+
+// Mirrors `ParallelStepOutput` in the execution engine. Branch `output`/`error`
+// are branch-specific, so they stay `unknown`.
+export const ParallelStepOutputSchema = lazySchema(() =>
+  z.object({
+    results: z.array(
+      z.object({
+        index: z.number(),
+        key: z.unknown().optional(),
+        status: ParallelBranchStatusSchema,
+        output: z.unknown().optional(),
+        error: z.unknown().optional(),
+        startedAt: z.number().optional(),
+        finishedAt: z.number().optional(),
+        durationMs: z.number().optional(),
+      })
+    ),
+    total: z.number(),
+    succeeded: z.number(),
+    failed: z.number(),
+    status: z.enum(['completed', 'failed']),
+    // Static mode only: results keyed by branch name.
+    branches: z
+      .record(
+        z.string().max(PARALLEL_BRANCH_NAME_MAX_LENGTH),
+        z.object({
+          status: ParallelBranchStatusSchema,
+          output: z.unknown().optional(),
+          error: z.unknown().optional(),
+        })
+      )
+      .optional(),
+  })
+);
+
 export const getParallelStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
   // Populate both the dynamic `steps` body and each static branch's `steps` with
   // the resolved per-step schema so connector steps validate inside branches too.
@@ -1178,9 +1222,11 @@ export const LoopContinueStepSchema = BaseStepSchema.extend({
 });
 export type LoopContinueStep = z.infer<typeof LoopContinueStepSchema>;
 
-export const ConsoleStepInputSchema = z.object({
-  message: z.unknown().optional(),
-});
+export const ConsoleStepInputSchema = lazySchema(() =>
+  z.object({
+    message: z.string(),
+  })
+);
 
 export const WorkflowRunAsModeSchema = z.enum(['default', 'inherit', 'override']);
 export type WorkflowRunAsMode = z.infer<typeof WorkflowRunAsModeSchema>;
@@ -1248,23 +1294,32 @@ export const WorkflowExecuteAsyncStepOutputSchema = z.object({
   startedAt: z.string().optional(),
 });
 
-export const WorkflowOutputStepSchema = BaseStepSchema.extend({
-  type: z.literal('workflow.output'),
-  status: z.enum(['completed', 'cancelled', 'failed']).optional().default('completed'),
-  with: z.record(z.string(), z.any()),
-});
+export const WorkflowOutputStepInputSchema = lazySchema(() => z.record(z.string(), z.any()));
+export const WorkflowOutputStepConfigSchema = lazySchema(() =>
+  z.object({
+    status: z.enum(['completed', 'cancelled', 'failed']).optional().default('completed'),
+  })
+);
+export const WorkflowOutputStepSchema = lazySchema(() =>
+  BaseStepSchema.extend({
+    type: z.literal('workflow.output'),
+    ...WorkflowOutputStepConfigSchema.shape,
+    with: WorkflowOutputStepInputSchema,
+  })
+);
 export type WorkflowOutputStep = z.infer<typeof WorkflowOutputStepSchema>;
 
+export const WorkflowFailStepInputSchema = lazySchema(() =>
+  z.object({
+    message: z.string().optional(),
+    reason: z.string().optional(),
+    type: z.string().optional(),
+  })
+);
 export const WorkflowFailStepSchema = lazySchema(() =>
   BaseStepSchema.extend({
     type: z.literal('workflow.fail'),
-    with: z
-      .object({
-        message: z.string().optional(),
-        reason: z.string().optional(),
-        type: z.string().optional(),
-      })
-      .optional(),
+    with: WorkflowFailStepInputSchema.optional(),
   })
 );
 export type WorkflowFailStep = z.infer<typeof WorkflowFailStepSchema>;

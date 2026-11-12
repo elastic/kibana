@@ -53,6 +53,7 @@ function toServiceNodeData(node: ServiceConnectionNode): ServiceNodeData {
     agentName: node[AGENT_NAME] as AgentName,
     isService: true,
     serviceAnomalyStats: node.serviceAnomalyStats,
+    ...(node.stats && { stats: node.stats }),
   };
 }
 
@@ -114,7 +115,12 @@ export function transformToReactFlow(
 
   const allConnections = addMessagingConnections(paths.connections, paths.exitSpanDestinations);
   const allNodes = getAllNodes(data.servicesData, allConnections);
-  const allServices = getAllServices(allNodes, paths.exitSpanDestinations, data.anomalies);
+  const allServices = getAllServices(
+    allNodes,
+    paths.exitSpanDestinations,
+    data.anomalies,
+    data.servicesData
+  );
 
   const mappedNodes = mapNodes({
     allConnections,

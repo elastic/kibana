@@ -407,6 +407,48 @@ describe('workflow:scheduled task runner', () => {
     });
   });
 
+  it('stamps the scheduled run event with the task runAt so a retry of the same slot keeps it', async () => {
+    setupPlugin();
+    mockGetWorkflow.mockResolvedValue({
+      id: workflowId,
+      enabled: true,
+      yaml: 'name: test',
+      definition: {
+        name: 'test',
+        enabled: true,
+        triggers: [{ type: 'scheduled' }],
+        steps: [],
+      },
+    });
+    mockCreateWorkflowExecution.mockImplementation(async (execution: { id: string }) => {
+      mockGetWorkflowExecutionById.mockResolvedValue({
+        id: execution.id,
+        workflowId,
+        spaceId,
+        status: ExecutionStatus.COMPLETED,
+      });
+    });
+
+    const runner = taskDefinitions[WORKFLOW_SCHEDULED_TASK_TYPE]!.createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: createTaskInstance(),
+        fakeRequest: {} as KibanaRequest,
+        setCustomTaskRunEventFields: jest.fn(),
+      })
+    );
+
+    await runner.run();
+
+    expect(mockCreateWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({
+        context: expect.objectContaining({
+          event: expect.objectContaining({ scheduledFor: '2024-01-01T10:00:00.000Z' }),
+        }),
+      }),
+      expect.anything()
+    );
+  });
+
   it('stamps failed with workflow_execution_id when run fails after create', async () => {
     setupPlugin();
     mockGetWorkflow.mockResolvedValue({

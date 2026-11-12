@@ -35,6 +35,25 @@ export const STREAMS_UI_PRIVILEGES = {
   show: 'show',
 } as const;
 
+/** Kibana feature for Streams V2 (map, sources, destinations). */
+export const STREAMS_V2_FEATURE_ID = 'streamsV2';
+
+/** API privilege names are global, so these must stay distinct from `STREAMS_API_PRIVILEGES`. */
+export const STREAMS_V2_API_PRIVILEGES = {
+  read: 'read_streams_v2',
+  manage: 'manage_streams_v2',
+} as const;
+
+/** Data stream stats routes are shared by both experiences, so either read privilege grants them. */
+export const STREAMS_STATS_READ_PRIVILEGE = {
+  anyRequired: [STREAMS_API_PRIVILEGES.read, STREAMS_V2_API_PRIVILEGES.read],
+};
+
+export const STREAMS_V2_UI_PRIVILEGES = {
+  manage: 'manage',
+  show: 'show',
+} as const;
+
 /**
  * Tiered features
  */

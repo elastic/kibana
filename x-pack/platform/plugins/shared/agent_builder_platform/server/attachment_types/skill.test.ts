@@ -8,6 +8,7 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { createSkillAttachmentType } from './skill';
+import { SURFACE_BASE_URL, renderSurface, surfaceContext } from './test_utils';
 import { SKILL_ATTACHMENT_TYPE, type SkillAttachmentData } from '../../common/attachments';
 
 const validSkill: SkillAttachmentData = {
@@ -123,5 +124,56 @@ describe('skill attachment type', () => {
       expect(description).toBeDefined();
       expect(description).toContain('render_attachment');
     });
+  });
+});
+
+describe('skill toSurfaceComposition', () => {
+  const definition = createSkillAttachmentType();
+
+  it('shows the description, tools, files and content', async () => {
+    const composition = await definition.toSurfaceComposition?.(
+      buildAttachment(validSkill),
+      surfaceContext
+    );
+
+    expect(composition).toEqual({
+      type: 'view',
+      title: 'Incident triage',
+      subtitle: 'incident-triage',
+      body: [
+        { type: 'markdown', text: 'Use when investigating production incidents.' },
+        {
+          type: 'fields',
+          items: [
+            { label: 'Tools', value: 'platform.core.execute_esql' },
+            { label: 'Files', value: './examples/examples.md' },
+          ],
+        },
+        {
+          type: 'code',
+          language: 'markdown',
+          text: '## When to Use\n\nUse this skill when triaging incidents.',
+        },
+        {
+          type: 'actions',
+          buttons: [
+            { label: 'Manage skills', url: `${SURFACE_BASE_URL}/app/agent_builder/manage/skills` },
+          ],
+        },
+      ],
+    });
+
+    const { valid, slack } = await renderSurface(composition);
+    expect(valid).toBe(true);
+    expect(slack).toContain(`${SURFACE_BASE_URL}/app/agent_builder/manage/skills`);
+  });
+
+  it('leaves out the button when Kibana has no public URL', async () => {
+    const composition = await definition.toSurfaceComposition?.(buildAttachment(validSkill), {
+      ...surfaceContext,
+      kibanaUrl: undefined,
+    });
+
+    expect(composition?.body.some(({ type }) => type === 'actions')).toBe(false);
   });
 });

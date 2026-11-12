@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { OxlintOverride } from 'oxlint';
 
 import { RESTRICTED_GLOBALS } from './javascript.mts';
@@ -211,6 +212,21 @@ export const teamOverrides: OxlintOverride[] = [
     },
   },
   /**
+   * Fleet overrides
+   */
+  {
+    files: ['x-pack/platform/plugins/shared/fleet/**/*.{js,mjs,ts,tsx}'],
+    rules: {
+      '@kbn/compat/import-order': [
+        'warn',
+        {
+          groups: ['builtin', 'external', 'internal', 'parent'],
+          'newlines-between': 'always-and-inside-groups',
+        },
+      ],
+    },
+  },
+  /**
    * Security Solution overrides. These rules below are maintained and owned by
    * the people within the security-detection-engine team. Please see ping them
    * or check with them if you are encountering issues, have suggestions, or would
@@ -394,6 +410,13 @@ export const teamOverrides: OxlintOverride[] = [
     files: ['x-pack/solutions/security/plugins/lists/**/*.{js,mjs,ts,tsx}'],
     rules: {
       '@kbn/compat/eslint-consistent-return': 'error',
+      '@kbn/compat/import-order': [
+        'error',
+        {
+          groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+          'newlines-between': 'always',
+        },
+      ],
       '@kbn/compat/eslint-require-atomic-updates': 'error',
       'accessor-pairs': 'error',
       'array-callback-return': 'error',
@@ -574,6 +597,25 @@ export const teamOverrides: OxlintOverride[] = [
     files: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}'],
     rules: {
       '@kbn/compat/typescript-member-ordering': ['warn', { default: { order: 'alphabetically' } }],
+      '@kbn/compat/import-order': [
+        'error',
+        {
+          groups: ['unknown', ['builtin', 'external'], 'internal', 'parent', 'sibling', 'index'],
+          pathGroups: [
+            {
+              pattern:
+                '{../../../../../../,../../../../../,../../../../,../../../,../../,../,./}{common/,*}__mocks__{*,/**}',
+              group: 'unknown',
+            },
+            { pattern: '{**,.}/*.mock', group: 'unknown' },
+            { pattern: 'react*', group: 'external', position: 'before' },
+            { pattern: '{@elastic/**,@kbn/**,src/**}', group: 'internal' },
+          ],
+          pathGroupsExcludedImportTypes: [],
+          alphabetize: { order: 'asc', caseInsensitive: true },
+          'newlines-between': 'always-and-inside-groups',
+        },
+      ],
     },
   },
   {
@@ -590,6 +632,26 @@ export const teamOverrides: OxlintOverride[] = [
     files: ['x-pack/platform/plugins/private/canvas/**/*.js'],
     rules: {
       radix: 'error',
+      '@kbn/compat/import-order': [
+        'error',
+        { groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'] },
+      ],
+    },
+  },
+  {
+    files: [
+      'x-pack/platform/plugins/private/canvas/gulpfile.js',
+      'x-pack/platform/plugins/private/canvas/scripts/*.js',
+      'x-pack/platform/plugins/private/canvas/tasks/*.js',
+      'x-pack/platform/plugins/private/canvas/tasks/**/*.js',
+      'x-pack/platform/plugins/private/canvas/__tests__/**/*.js',
+      'x-pack/platform/plugins/private/canvas/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*.js',
+    ],
+    rules: {
+      '@kbn/compat/import-no-extraneous-dependencies': [
+        'error',
+        { devDependencies: true, peerDependencies: true, packageDir: REPO_ROOT },
+      ],
     },
   },
   {
@@ -746,6 +808,20 @@ export const teamOverrides: OxlintOverride[] = [
       'x-pack/platform/test/spaces_api_integration/**/*.{js,mjs,ts,tsx}',
     ],
     rules: {
+      '@kbn/compat/import-order': [
+        // This rule sorts import declarations
+        'error',
+        {
+          groups: ['unknown', ['builtin', 'external'], 'internal', ['parent', 'sibling', 'index']],
+          pathGroups: [
+            { pattern: '{**,.}/*.test.mocks', group: 'unknown' },
+            { pattern: '{@kbn/**,src/**,kibana{,/**}}', group: 'internal' },
+          ],
+          pathGroupsExcludedImportTypes: [],
+          alphabetize: { order: 'asc', caseInsensitive: true },
+          'newlines-between': 'always',
+        },
+      ],
       'sort-imports': [
         'error',
         {
@@ -810,6 +886,19 @@ export const teamOverrides: OxlintOverride[] = [
     ],
     rules: {
       '@kbn/compat/eslint-require-atomic-updates': 'error',
+      '@kbn/compat/import-order': [
+        // This rule sorts import declarations
+        'error',
+        {
+          groups: ['unknown', ['builtin', 'external'], 'internal', ['parent', 'sibling', 'index']],
+          pathGroups: [
+            { pattern: '{**,.}/*.test.mocks', group: 'unknown' },
+            { pattern: '{@kbn/**,src/**,kibana{,/**}}', group: 'internal' },
+          ],
+          pathGroupsExcludedImportTypes: [],
+          alphabetize: { order: 'asc', caseInsensitive: true },
+        },
+      ],
       'accessor-pairs': 'error',
       'array-callback-return': 'error',
       'no-array-constructor': 'error',
@@ -977,5 +1066,13 @@ export const nestedConfigOverrides: OxlintOverride[] = [
       'src/platform/packages/shared/kbn-workflows/spec/kibana/generated/**/*',
     ],
     rules: { '@kbn/compat/typescript-naming-convention': 'off' },
+  },
+  {
+    files: [
+      'packages/kbn-plugin-check/**/*',
+      'x-pack/solutions/security/plugins/security_solution/public/management/cypress/**/*',
+      'x-pack/solutions/security/test/security_solution_cypress/cypress/**/*',
+    ],
+    rules: { '@kbn/compat/import-no-extraneous-dependencies': 'off' },
   },
 ];

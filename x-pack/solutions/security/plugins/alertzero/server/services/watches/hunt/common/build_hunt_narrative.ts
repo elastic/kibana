@@ -239,7 +239,13 @@ const describeTier1 = (tier1: HuntForThreatResult, excludedIocCount = 0): string
   const matchedIocs = new Set<string>();
   const matchedTechniques = new Set<string>();
   for (const hit of tier1.hits) {
-    if (hit.matched?.ioc?.value) matchedIocs.add(hit.matched.ioc.value);
+    if (hit.matched?.iocs && hit.matched.iocs.length > 0) {
+      for (const ioc of hit.matched.iocs) {
+        if (ioc.value) matchedIocs.add(ioc.value);
+      }
+    } else if (hit.matched?.ioc?.value) {
+      matchedIocs.add(hit.matched.ioc.value);
+    }
     if (hit.matched?.technique_id) matchedTechniques.add(hit.matched.technique_id);
   }
   if (matchedIocs.size > 0) {

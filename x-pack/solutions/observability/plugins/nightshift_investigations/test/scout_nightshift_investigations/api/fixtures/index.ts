@@ -30,7 +30,20 @@ export {
   waitForInvestigation,
   waitForInvestigationInProgress,
 } from './write_path';
-export type { SharedInvestigation, SharedInvestigationSubject } from './write_path';
+export { POLL_TIMEOUT_MS } from './write_path';
+export type {
+  SharedInvestigation,
+  SharedInvestigationSubject,
+  WorkflowExecution,
+} from './write_path';
+export {
+  cancelScoringRuns,
+  getStepOutput,
+  listInvestigationRuns,
+  listScoringRuns,
+  startAnsweringLlm,
+  waitForFinishedRuns,
+} from './online_evals';
 export {
   NIGHTSHIFT_MANAGE_ENGINES_ROLE,
   NIGHTSHIFT_MANAGE_ROLE,
@@ -43,6 +56,7 @@ export {
   setUpNightshiftServiceAccount,
   SERVICE_ACCOUNT_PATH,
 } from './service_account';
+export { disableInvestigationRunLimits } from './run_quotas';
 export { getCustomContext, putCustomContext, replaceCustomContext } from './custom_context';
 export {
   archiveMemoryPage,
