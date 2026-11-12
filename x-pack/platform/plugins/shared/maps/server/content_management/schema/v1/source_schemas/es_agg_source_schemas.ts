@@ -68,81 +68,69 @@ export const AggSchema = lazySchema(() =>
 );
 
 // base schema for Elasticsearch DSL aggregation sources
-export const BaseESAggSourceSchema = BaseESSourceSchema.extend({
-  metrics: lazySchema(() =>
-    z
+export const BaseESAggSourceSchema = lazySchema(() =>
+  BaseESSourceSchema.extend({
+    metrics: z
       .array(AggSchema)
       .default([{ type: AGG_TYPE.COUNT }])
-      .optional()
-  ),
-});
+      .optional(),
+  })
+);
 
-export const ESGeoGridSourceSchema = BaseESAggSourceSchema.extend({
-  geoField: lazySchema(() =>
-    z.string().meta({
+export const ESGeoGridSourceSchema = lazySchema(() =>
+  BaseESAggSourceSchema.extend({
+    geoField: z.string().meta({
       description: 'Field containing indexed geo-point or geo-shape values.',
-    })
-  ),
-  requestType: lazySchema(() =>
-    z.union([
+    }),
+    requestType: z.union([
       z.literal(RENDER_AS.HEATMAP),
       z.literal(RENDER_AS.POINT),
       z.literal(RENDER_AS.GRID),
       z.literal(RENDER_AS.HEX),
-    ])
-  ),
-  resolution: gridResolutionSchema,
-  type: lazySchema(() => z.literal(SOURCE_TYPES.ES_GEO_GRID)),
-}).meta({
-  description:
-    'Vector feature source returning points and polygons from Elasticsearch geotile_grid or geohex_grid aggregations. One feature is returned per bucket.',
-});
+    ]),
+    resolution: gridResolutionSchema,
+    type: z.literal(SOURCE_TYPES.ES_GEO_GRID),
+  }).meta({
+    description:
+      'Vector feature source returning points and polygons from Elasticsearch geotile_grid or geohex_grid aggregations. One feature is returned per bucket.',
+  })
+);
 
-export const ESGeoLineSourceSchema = BaseESAggSourceSchema.extend({
-  geoField: lazySchema(() =>
-    z.string().meta({
+export const ESGeoLineSourceSchema = lazySchema(() =>
+  BaseESAggSourceSchema.extend({
+    geoField: z.string().meta({
       description: 'Field containing indexed geo-point values.',
-    })
-  ),
-  groupByTimeseries: lazySchema(() =>
-    z.boolean().default(false).optional().meta({
+    }),
+    groupByTimeseries: z.boolean().default(false).optional().meta({
       description: `When true, results are grouped by time_series aggregation, creating a line feature for each time_series group.`,
-    })
-  ),
-  lineSimplificationSize: lazySchema(() =>
-    z.number().min(1).max(10000).default(500).optional().meta({
+    }),
+    lineSimplificationSize: z.number().min(1).max(10000).default(500).optional().meta({
       description: `The maximum number of points for each line. Line is simplifed when threshold is exceeded. Use smaller values for better performance.`,
-    })
-  ),
-  splitField: lazySchema(() =>
-    z.string().optional().meta({
+    }),
+    splitField: z.string().optional().meta({
       description: `Field used to group results by term aggregation, creating a line feature for each term. Required when groupByTimeseries is false. Ignored when groupByTimeseries is true.`,
-    })
-  ),
-  sortField: lazySchema(() =>
-    z.string().optional().meta({
+    }),
+    sortField: z.string().optional().meta({
       description: `Numeric field used as the sort key for ordering the points. Required when groupByTimeseries is false. Ignored when groupByTimeseries is true.`,
-    })
-  ),
-  type: lazySchema(() => z.literal(SOURCE_TYPES.ES_GEO_LINE)),
-}).meta({
-  description:
-    'Vector feature source returning lines from Elasticsearch geo_line aggregation. One feature is returned per group.',
-});
+    }),
+    type: z.literal(SOURCE_TYPES.ES_GEO_LINE),
+  }).meta({
+    description:
+      'Vector feature source returning lines from Elasticsearch geo_line aggregation. One feature is returned per group.',
+  })
+);
 
-export const ESPewPewSourceSchema = BaseESAggSourceSchema.extend({
-  destGeoField: lazySchema(() =>
-    z.string().meta({
+export const ESPewPewSourceSchema = lazySchema(() =>
+  BaseESAggSourceSchema.extend({
+    destGeoField: z.string().meta({
       description: `Field containing indexed geo-point values.`,
-    })
-  ),
-  sourceGeoField: lazySchema(() =>
-    z.string().meta({
+    }),
+    sourceGeoField: z.string().meta({
       description: `Field containing indexed geo-point values.`,
-    })
-  ),
-  type: lazySchema(() => z.literal(SOURCE_TYPES.ES_PEW_PEW)),
-}).meta({
-  description:
-    'Vector feature source returning lines from Elasticsearch nested geotile_grid aggregation. Results grouped by destintation point, creating one feature per destination point and source geotile_grid bucket.',
-});
+    }),
+    type: z.literal(SOURCE_TYPES.ES_PEW_PEW),
+  }).meta({
+    description:
+      'Vector feature source returning lines from Elasticsearch nested geotile_grid aggregation. Results grouped by destintation point, creating one feature per destination point and source geotile_grid bucket.',
+  })
+);
