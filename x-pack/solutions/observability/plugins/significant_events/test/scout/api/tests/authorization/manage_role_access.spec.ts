@@ -176,8 +176,8 @@ for (const { name, label, role, canChangeSources } of ROLES) {
       }
 
       apiTest('closes and reopens a significant event', async ({ apiClient }) => {
-        // An operator's change is an Alerting v2 alert action, which writes `.alert-actions` and
-        // its synthetic `.rule-events` version: this role has no write privilege on either index.
+        // An operator's change is an Alerting v2 alert action. The route privilege is the only
+        // gate: Alerting v2 writes `.alert-actions` and `.rule-events` as the internal user.
         const readEventStatuses = async () => {
           const response = await apiClient.get(`${EVENTS_ENDPOINT}?event_id=${eventId}`, {
             headers,

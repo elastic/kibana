@@ -13,7 +13,6 @@ import { isBoom } from '@hapi/boom';
 import {
   ALERT_EPISODE_ACTION_TYPE,
   ALERT_EPISODE_STATUS,
-  ALERT_NOT_LATEST_CODE,
   INVALID_ALERT_STATE_TRANSITION_CODE,
   type AlertEpisodeStatus,
   type AlertEventSeverity,
@@ -22,7 +21,6 @@ import {
 import {
   SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
   operatorFallbackAssessmentNote,
-  MAX_DEACTIVATION_REASON_LENGTH,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   SIGNIFICANT_EVENTS_ALERT_SOURCE,
   SEVERITY_OPTIONS,
@@ -79,6 +77,9 @@ import {
 } from './event_status_change_telemetry';
 import type { SignificantEventActor } from '../../telemetry/ebt';
 import { toRuleEvent } from './to_rule_event';
+
+/** Alerting v2 rejects `activate` / `deactivate` of a superseded episode with this code; it is not exported by a package. */
+const ALERT_NOT_LATEST_CODE = 'ALERT_NOT_LATEST';
 
 /** The `code` Alerting v2 attaches to the Boom error of a rejected alert action, if any. */
 const getAlertActionErrorCode = (error: unknown): string | undefined => {
@@ -1137,11 +1138,12 @@ export class RuleEventsClient {
         event: decision.event,
         change,
         assessmentNote,
+        origin: { actor, change, closeReason },
       });
     }
 
     const written = await this.updateEvent({
-      event: decision.event,
+      event: { ...decision.event, workflow_execution_id: workflowExecutionId },
       prior: latest,
       origin: { actor, change, closeReason },
     });
@@ -1170,13 +1172,15 @@ export class RuleEventsClient {
     event,
     change,
     assessmentNote,
+    origin,
   }: {
     latest: SignificantEventResponse;
     event: SignificantEvent;
     change: Extract<StatusChange, { kind: 'operator' }>;
     assessmentNote?: string;
+    origin: WriteOrigin;
   }): Promise<UpdateEventStatusResult> {
-    const { getAlertActionsClient, emitTrigger } = this.clients;
+    const { getAlertActionsClient, emitTrigger, telemetry, logger, space } = this.clients;
     if (!getAlertActionsClient) {
       throw new Error(
         'RuleEventsClient was created without an alert actions client, so it cannot apply an operator change'
@@ -1197,10 +1201,7 @@ export class RuleEventsClient {
             change.status === ALERT_EPISODE_STATUS.INACTIVE
               ? ALERT_EPISODE_ACTION_TYPE.DEACTIVATE
               : ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
-          reason: (assessmentNote?.trim() || operatorFallbackAssessmentNote(change.status)).slice(
-            0,
-            MAX_DEACTIVATION_REASON_LENGTH
-          ),
+          reason: assessmentNote?.trim() || operatorFallbackAssessmentNote(change.status),
         },
       });
     } catch (error) {
@@ -1218,6 +1219,14 @@ export class RuleEventsClient {
       emitTrigger,
       significantEvent: event,
       priorSignificantEvent: latest,
+    });
+    reportEventStatusChange({
+      telemetry,
+      logger,
+      event,
+      prior: latest,
+      origin,
+      spaceId: space,
     });
     return { updated: 1, ignored: 0, status: event.status };
   }
