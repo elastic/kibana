@@ -22,27 +22,36 @@ import {
   FOREACH_ITEM_SCHEMA_DESC,
   getForeachItemSchema,
 } from '../context/get_foreach_state_schema';
-import { getUnknownPropertyMessage } from '../context/unknown_property_message';
+import { getPropertyReferenceOptions } from '../context/property_reference_options';
 
-// The message of the deepest schema on the path that resolves, for the property it doesn't have.
-const getUnresolvedPathMessage = (
+// The deepest schema on the path that resolves, and the property it doesn't have.
+const getUnresolvedProperty = (
   context: typeof DynamicStepContextSchema,
   propertyPath: string
-): string | undefined => {
+): { schema: z.ZodType; property: string } | undefined => {
   const segments = parsePath(propertyPath);
-  const { schema: resolvedSchema, scopedToPath } = getSchemaAtPath(context, propertyPath, {
-    partial: true,
-  });
-  if (!segments || !resolvedSchema || scopedToPath === null) {
+  const { schema, scopedToPath } = getSchemaAtPath(context, propertyPath, { partial: true });
+  if (!segments || !schema || scopedToPath === null) {
     return undefined;
   }
-  const resolvedCount = segments.findIndex(
-    (_, index) => segments.slice(0, index).join('.') === scopedToPath
-  );
-  const property = resolvedCount === -1 ? undefined : segments[resolvedCount];
-  return property === undefined || property === LIQUID_DYNAMIC_KEY_SEGMENT
-    ? undefined
-    : getUnknownPropertyMessage(resolvedSchema, property);
+  const property = segments.find((_, index) => segments.slice(0, index).join('.') === scopedToPath);
+  return property === undefined ? undefined : { schema, property };
+};
+
+// Why `propertyPath` doesn't resolve: unknown when it reads a dynamic key the schema allows.
+const getUnresolvedReference = (
+  context: typeof DynamicStepContextSchema,
+  propertyPath: string
+): { allowed: true } | { allowed: false; message: string } => {
+  const unresolved = getUnresolvedProperty(context, propertyPath);
+  const options = unresolved && getPropertyReferenceOptions(unresolved.schema);
+  if (unresolved?.property === LIQUID_DYNAMIC_KEY_SEGMENT) {
+    return options?.allowDynamicKeys
+      ? { allowed: true }
+      : { allowed: false, message: `Variable ${propertyPath} is invalid` };
+  }
+  const message = unresolved && options?.unknownPropertyMessage?.(unresolved.property);
+  return { allowed: false, message: message ?? `Variable ${propertyPath} is invalid` };
 };
 
 export interface VariableValidationOptions {
@@ -140,20 +149,22 @@ export function validateVariable(
     };
   }
 
-  const { schema: refSchema } = getSchemaAtPath(context, parsedPath.propertyPath);
+  const { schema: resolvedSchema } = getSchemaAtPath(context, parsedPath.propertyPath);
+  const unresolvedReference = resolvedSchema
+    ? undefined
+    : getUnresolvedReference(context, parsedPath.propertyPath);
 
-  if (!refSchema) {
+  if (unresolvedReference && !unresolvedReference.allowed) {
     return {
       ...variableItem,
-      message:
-        getUnresolvedPathMessage(context, parsedPath.propertyPath) ??
-        `Variable ${parsedPath.propertyPath} is invalid`,
+      message: unresolvedReference.message,
       severity: 'error',
       owner: 'variable-validation',
       ruleId: 'invalidVariableReference',
       hoverMessage: null,
     };
   }
+  const refSchema = resolvedSchema ?? z.unknown();
 
   if (refSchema instanceof z.ZodAny && refSchema.description) {
     return {

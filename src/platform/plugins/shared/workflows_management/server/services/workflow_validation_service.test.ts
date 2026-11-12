@@ -326,6 +326,42 @@ describe('WorkflowValidationService', () => {
       );
     });
 
+    it('checks the other variables when the called workflows fail to load', async () => {
+      const { deps } = makeDeps();
+      deps.getWorkflowsForOutputs = jest.fn().mockRejectedValue(new Error('search failed'));
+      const service = new WorkflowValidationService(deps);
+      const yaml = [
+        'name: caller',
+        'enabled: true',
+        'triggers:',
+        '  - type: manual',
+        'steps:',
+        '  - name: ctx',
+        '    type: workflow.execute',
+        '    with:',
+        '      workflow-id: alert-context',
+        '  - name: log',
+        '    type: console',
+        '    with:',
+        '      message: "{{ steps.ctx.output.sumary }} {{ steps.missing.output }}"',
+        '',
+      ].join('\n');
+
+      const result = await service.validateWorkflow(yaml, 'default', {} as any, {
+        includeVariableRules: true,
+        includeEsqlRules: false,
+      });
+
+      expect(
+        result.diagnostics.filter(
+          ({ source, severity }) => source === 'variable' && severity === 'error'
+        )
+      ).toEqual([expect.objectContaining({ message: 'Variable steps.missing.output is invalid' })]);
+      expect(result.notChecked).toEqual([
+        'References to the outputs of called workflows: the called workflows could not be loaded.',
+      ]);
+    });
+
     it('resolves a reference against a registered step output', async () => {
       // The registered definition must win over the connector contract for the
       // same step type: `known` exists only on the definition, `channel` only on

@@ -95,17 +95,31 @@ const getStaticCalledWorkflowIds = (workflow: WorkflowYaml): string[] => {
   return [...new Set(ids)];
 };
 
+const CALLED_WORKFLOW_OUTPUTS_NOT_CHECKED =
+  'References to the outputs of called workflows: the called workflows could not be loaded.';
+
+// The registry with the outputs of the workflows the definition runs. Without them when they can't
+// be loaded, so the rest of variable validation still runs.
 const withCalledWorkflowOutputs = async (
   registry: WorkflowContextRegistry,
   workflow: WorkflowYaml,
   loadCalledWorkflowOutputs: ValidateWorkflowYamlOptions['loadCalledWorkflowOutputs']
-): Promise<WorkflowContextRegistry> => {
+): Promise<{ registry: WorkflowContextRegistry; notCheckedReason?: string }> => {
   const workflowIds = loadCalledWorkflowOutputs ? getStaticCalledWorkflowIds(workflow) : [];
   if (!loadCalledWorkflowOutputs || workflowIds.length === 0) {
-    return registry;
+    return { registry };
   }
-  const outputsById = await loadCalledWorkflowOutputs(workflowIds);
-  return { ...registry, getCalledWorkflowOutputs: (workflowId) => outputsById.get(workflowId) };
+  try {
+    const outputsById = await loadCalledWorkflowOutputs(workflowIds);
+    return {
+      registry: {
+        ...registry,
+        getCalledWorkflowOutputs: (workflowId) => outputsById.get(workflowId),
+      },
+    };
+  } catch {
+    return { registry, notCheckedReason: CALLED_WORKFLOW_OUTPUTS_NOT_CHECKED };
+  }
 };
 
 export async function validateWorkflowYaml(
@@ -223,12 +237,16 @@ export async function validateWorkflowYaml(
     // Variable validation resolves references against the step graph, so it only
     // runs once the graph builds. Same guard the editor applies.
     if (options?.variableValidationRegistry && workflowGraph) {
+      const calledWorkflowOutputs = await withCalledWorkflowOutputs(
+        options.variableValidationRegistry,
+        parsedWorkflow,
+        options.loadCalledWorkflowOutputs
+      );
+      if (calledWorkflowOutputs.notCheckedReason) {
+        notChecked.push(calledWorkflowOutputs.notCheckedReason);
+      }
       const variableValidation = collectVariableDiagnostics(
-        await withCalledWorkflowOutputs(
-          options.variableValidationRegistry,
-          parsedWorkflow,
-          options.loadCalledWorkflowOutputs
-        ),
+        calledWorkflowOutputs.registry,
         yaml,
         parsedWorkflow,
         workflowGraph

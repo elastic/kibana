@@ -14,12 +14,61 @@ import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zo
 import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
 import { z } from '@kbn/zod/v4';
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
+import { withPropertyReferenceOptions } from './property_reference_options';
 import type { WorkflowContextRegistry } from './registry';
 import { structuralStepOutputSchemas } from './structural_step_output_schemas';
-import { withUnknownPropertyMessage } from './unknown_property_message';
 import { isDynamicValue } from '../../regex';
 
 const waitForInputFallbackSchema: z.ZodSchema = z.record(z.string(), z.unknown());
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const SCHEMA_MAP_KEYS = ['properties', '$defs', 'definitions'] as const;
+const SCHEMA_LIST_KEYS = ['anyOf', 'oneOf', 'allOf'] as const;
+const SCHEMA_KEYS = ['items', 'additionalProperties'] as const;
+
+const isOpenObjectSchema = ({ type, properties, additionalProperties }: Record<string, unknown>) =>
+  (type === 'object' || (Array.isArray(type) && type.includes('object'))) &&
+  (additionalProperties === true || (additionalProperties === undefined && !isRecord(properties)));
+
+/**
+ * Replaces the objects nested in `schema` that accept any field (`additionalProperties: true`, or
+ * no fields declared) with an unconstrained schema, so reading any of their fields is allowed.
+ */
+const openNestedObjects = (schema: Record<string, unknown>): Record<string, unknown> => {
+  const openChild = (child: unknown): unknown => {
+    if (!isRecord(child)) {
+      return child;
+    }
+    if (isOpenObjectSchema(child)) {
+      return child.description === undefined ? {} : { description: child.description };
+    }
+    return openNestedObjects(child);
+  };
+  const result = { ...schema };
+  for (const key of SCHEMA_MAP_KEYS) {
+    const children = schema[key];
+    if (isRecord(children)) {
+      result[key] = Object.fromEntries(
+        Object.entries(children).map(([name, child]) => [name, openChild(child)])
+      );
+    }
+  }
+  for (const key of SCHEMA_LIST_KEYS) {
+    const children = schema[key];
+    if (Array.isArray(children)) {
+      result[key] = children.map(openChild);
+    }
+  }
+  for (const key of SCHEMA_KEYS) {
+    const child = schema[key];
+    if (child !== undefined) {
+      result[key] = Array.isArray(child) ? child.map(openChild) : openChild(child);
+    }
+  }
+  return result;
+};
 
 const getUnknownOutputMessage = (
   workflowName: string,
@@ -47,7 +96,11 @@ const getCalledWorkflowOutputSchema = (
   }
   const calledWorkflow = registry.getCalledWorkflowOutputs?.(workflowId);
   const declaredOutputs = normalizeFieldsToJsonSchema(calledWorkflow?.outputs);
-  if (!calledWorkflow?.returnedOutputNames || !declaredOutputs?.properties) {
+  if (
+    !calledWorkflow?.returnedOutputNames ||
+    !declaredOutputs?.properties ||
+    declaredOutputs.additionalProperties === true
+  ) {
     return undefined;
   }
 
@@ -55,7 +108,9 @@ const getCalledWorkflowOutputSchema = (
   const undeclaredNames = calledWorkflow.returnedOutputNames.filter(
     (name) => !declaredNames.includes(name)
   );
-  const declaredSchema = buildFieldsZodValidator(declaredOutputs);
+  const declaredSchema = buildFieldsZodValidator(
+    openNestedObjects(declaredOutputs) as typeof declaredOutputs
+  );
   if (undeclaredNames.length > 0 && !(declaredSchema instanceof z.ZodObject)) {
     return undefined;
   }
@@ -64,9 +119,11 @@ const getCalledWorkflowOutputSchema = (
       ? declaredSchema.extend(Object.fromEntries(undeclaredNames.map((name) => [name, z.any()])))
       : declaredSchema;
   const outputNames = [...declaredNames, ...undeclaredNames];
-  return withUnknownPropertyMessage(outputSchema, (field) =>
-    getUnknownOutputMessage(calledWorkflow.name, outputNames, field)
-  );
+  return withPropertyReferenceOptions(outputSchema, {
+    unknownPropertyMessage: (field) =>
+      getUnknownOutputMessage(calledWorkflow.name, outputNames, field),
+    allowDynamicKeys: true,
+  });
 };
 
 export const getOutputSchemaForStepType = (

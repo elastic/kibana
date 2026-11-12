@@ -32,6 +32,22 @@ const calledWorkflows: Record<string, CalledWorkflowOutputs> = {
     outputs: [{ name: 'severity', type: 'string' }],
     returnedOutputNames: undefined,
   },
+  suggestions: {
+    name: 'Suggestions',
+    outputs: {
+      properties: {
+        suggestions: { type: 'array', items: { type: 'object', additionalProperties: true } },
+        details: { type: 'object' },
+      },
+      additionalProperties: false,
+    },
+    returnedOutputNames: ['suggestions', 'details'],
+  },
+  'open-root': {
+    name: 'Open',
+    outputs: { properties: { severity: { type: 'string' } }, additionalProperties: true },
+    returnedOutputNames: ['severity'],
+  },
 };
 
 const registry = createMockWorkflowContextRegistry({
@@ -131,7 +147,31 @@ describe('validateVariables called workflow outputs', () => {
     ).toEqual([]);
   });
 
+  it('accepts any field of outputs that are objects accepting any field', () => {
+    expect(
+      validate(
+        callerYaml(
+          'suggestions',
+          '{{ steps.ctx.output.suggestions[0].title }} {{ steps.ctx.output.details.id }}'
+        )
+      )
+    ).toEqual([]);
+    expect(validate(callerYaml('suggestions', '{{ steps.ctx.output.suggestion }}'))).toEqual([
+      expect.objectContaining({
+        message:
+          'Workflow "Suggestions" doesn’t return an output named "suggestion". It returns: suggestions, details',
+      }),
+    ]);
+  });
+
+  it('accepts outputs read with a key computed at runtime', () => {
+    expect(
+      validate(callerYaml('alert-context', '{{ steps.ctx.output[steps.ctx.output.severity] }}'))
+    ).toEqual([]);
+  });
+
   it('skips workflows whose callers may get any field, unknown workflows and async calls', () => {
+    expect(validate(callerYaml('open-root', '{{ steps.ctx.output.other }}'))).toEqual([]);
     // Without a workflow.output step, callers get the output of its last step.
     expect(validate(callerYaml('no-output-step', '{{ steps.ctx.output.hits }}'))).toEqual([]);
     expect(validate(callerYaml('no-declared-outputs', '{{ steps.ctx.output.other }}'))).toEqual([]);
