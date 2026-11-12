@@ -1,0 +1,189 @@
+{
+  "operations": {
+    "addPullRequestComment": [
+      {
+        "method": "post",
+        "path": "/repositories/{workspace}/{repo_slug}/pullrequests/{pull_request_id}/comments",
+        "source": "v2"
+      }
+    ],
+    "approvePullRequest": [
+      {
+        "method": "post",
+        "path": "/repositories/{workspace}/{repo_slug}/pullrequests/{pull_request_id}/approve",
+        "source": "v2"
+      }
+    ],
+    "createBranch": [
+      {
+        "method": "post",
+        "path": "/repositories/{workspace}/{repo_slug}/refs/branches",
+        "source": "v2"
+      }
+    ],
+    "createCommitBuildStatus": [
+      {
+        "method": "post",
+        "path": "/repositories/{workspace}/{repo_slug}/commit/{commit}/statuses/build",
+        "source": "v2"
+      }
+    ],
+    "createPullRequest": [
+      {
+        "method": "post",
+        "path": "/repositories/{workspace}/{repo_slug}/pullrequests",
+        "source": "v2"
+      }
+    ],
+    "declinePullRequest": [
+      {
+        "method": "post",
+        "path": "/repositories/{workspace}/{repo_slug}/pullrequests/{pull_request_id}/decline",
+        "source": "v2"
+      }
+    ],
+    "deleteBranch": [
+      {
+        "method": "delete",
+        "path": "/repositories/{workspace}/{repo_slug}/refs/branches/{name}",
+        "source": "v2"
+      }
+    ],
+    "getBranch": [
+      {
+        "method": "get",
+        "path": "/repositories/{workspace}/{repo_slug}/refs/branches/{name}",
+        "source": "v2"
+      }
+    ],
+    "getCommit": [
+      {
+        "method": "get",
+        "path": "/repositories/{workspace}/{repo_slug}/commit/{commit}",
+        "source": "v2"
+      }
+    ],
+    "getPipeline": [
+      {
+        "method": "get",
+        "path": "/repositories/{workspace}/{repo_slug}/pipelines/{pipeline_uuid}",
+        "source": "v2"
+      }
+    ],
+    "getPullRequest": [
+      {
+        "method": "get",
+        "path": "/repositories/{workspace}/{repo_slug}/pullrequests/{pull_request_id}",
+        "source": "v2"
+      }
+    ],
+    "listCommitBuildStatuses": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "end": "missing",
+          "request": {
+            "pageParam": "page",
+            "sizeParam": "pagelen"
+          },
+          "response": {
+            "itemsPath": "values",
+            "nextPath": "next"
+          },
+          "style": "next_url"
+        },
+        "path": "/repositories/{workspace}/{repo_slug}/commit/{commit}/statuses",
+        "source": "v2"
+      }
+    ],
+    "listCommits": [
+      {
+        "method": "get",
+        "path": "/repositories/{workspace}/{repo_slug}/commits",
+        "source": "v2"
+      }
+    ],
+    "listPullRequests": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "end": "missing",
+          "request": {
+            "pageParam": "page",
+            "sizeParam": "pagelen"
+          },
+          "response": {
+            "itemsPath": "values",
+            "nextPath": "next"
+          },
+          "style": "next_url"
+        },
+        "path": "/repositories/{workspace}/{repo_slug}/pullrequests",
+        "source": "v2"
+      }
+    ],
+    "listRepositories": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "end": "missing",
+          "request": {
+            "pageParam": "page",
+            "sizeParam": "pagelen"
+          },
+          "response": {
+            "itemsPath": "values",
+            "nextPath": "next"
+          },
+          "style": "next_url"
+        },
+        "path": "/repositories/{workspace}",
+        "source": "v2"
+      }
+    ],
+    "mergePullRequest": [
+      {
+        "method": "post",
+        "path": "/repositories/{workspace}/{repo_slug}/pullrequests/{pull_request_id}/merge",
+        "source": "v2"
+      }
+    ],
+    "stopPipeline": [
+      {
+        "method": "post",
+        "path": "/repositories/{workspace}/{repo_slug}/pipelines/{pipeline_uuid}/stopPipeline",
+        "source": "v2"
+      }
+    ],
+    "triggerPipeline": [
+      {
+        "method": "post",
+        "path": "/repositories/{workspace}/{repo_slug}/pipelines",
+        "source": "v2"
+      }
+    ],
+    "updatePullRequest": [
+      {
+        "method": "get",
+        "path": "/repositories/{workspace}/{repo_slug}/pullrequests/{pull_request_id}",
+        "source": "v2"
+      },
+      {
+        "method": "put",
+        "path": "/repositories/{workspace}/{repo_slug}/pullrequests/{pull_request_id}",
+        "source": "v2"
+      }
+    ]
+  },
+  "sources": {
+    "v2": {
+      "apiVersion": "2.0",
+      "fetchedAt": "2026-10-07T20:20:09.393Z",
+      "format": "openapi",
+      "url": "https://dac-static.atlassian.com/cloud/bitbucket/swagger.v3.json"
+    }
+  }
+}

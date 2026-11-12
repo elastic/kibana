@@ -1,5 +1,5 @@
 {
-  "sha1": "dcce18cc43b0c1794b08d9b74f3cf4f6a5ddd23b",
+  "sha1": "2eeb4a27d27efc41d107c83ac54f98ad95fd7732",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -417,6 +417,34 @@
       }
     },
     {
+      "id": "e9606a9aa91a5bc-73f3822592377a9",
+      "title": "Agent Builder — hooks of an agent bound to a service account completes the round after a bound hook workflow pauses and resumes as the account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/bound_agent_hooks_api.spec.ts",
+        "line": 265,
+        "column": 20
+      }
+    },
+    {
+      "id": "e9606a9aa91a5bc-68fb9915782a267",
+      "title": "Agent Builder — hooks of an agent bound to a service account keeps the account's identity when a user approves a bound hook workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/bound_agent_hooks_api.spec.ts",
+        "line": 269,
+        "column": 7
+      }
+    },
+    {
       "id": "84f452e8da9aae3-83fed8ff3b9d10d",
       "title": "Agent Builder — chat API converse (/api/chat) user message sync requests persist context for the next model request",
       "expectedStatus": "passed",
@@ -556,7 +584,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 114,
+        "line": 113,
         "column": 7
       }
     },
@@ -572,7 +600,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 187,
+        "line": 186,
         "column": 13
       }
     },
@@ -588,7 +616,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 243,
+        "line": 242,
         "column": 17
       }
     },
@@ -604,7 +632,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 260,
+        "line": 259,
         "column": 13
       }
     },
@@ -620,7 +648,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 278,
+        "line": 277,
         "column": 23
       }
     },

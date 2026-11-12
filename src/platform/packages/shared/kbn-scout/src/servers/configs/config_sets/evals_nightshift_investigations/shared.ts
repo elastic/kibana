@@ -36,6 +36,29 @@ const withSafeTracing = (tracing: ScoutServerConfig): ScoutServerConfig => {
   };
 };
 
+/**
+ * The suite's knowledge switches: `NIGHTSHIFT_KNOWLEDGE` as validated by its scout hook, plus the
+ * decision trees the hook turns on for the reinforcement micro-eval (`NIGHTSHIFT_DECISION_TREES`).
+ * Every system is set explicitly, because decision trees default on and do not require Wiki.
+ * Restored knowledge freezes learning so every example reads what the eval restored rather than
+ * what earlier examples wrote. The reinforcement eval keeps learning on: its live mode waits on the
+ * post-run hook that reinforces the trees.
+ */
+const knowledgeArgs = (): string[] => {
+  const selected = new Set((process.env.NIGHTSHIFT_KNOWLEDGE ?? '').split(',').filter(Boolean));
+  const reinforcement = process.env.NIGHTSHIFT_DECISION_TREES === 'true';
+  return [
+    `--xpack.nightshift_investigations.wiki.enabled=${selected.has('wiki')}`,
+    `--xpack.nightshift_investigations.memory.enabled=${selected.has('memory')}`,
+    `--xpack.nightshift_investigations.decision_trees.enabled=${
+      selected.has('decision-trees') || reinforcement
+    }`,
+    ...(selected.size > 0 && !reinforcement
+      ? ['--xpack.nightshift_investigations.learning.enabled=false']
+      : []),
+  ];
+};
+
 const createInvestigationConfig = (
   safeTracing: ScoutServerConfig,
   sandboxKibanaConfig: string
@@ -44,10 +67,11 @@ const createInvestigationConfig = (
     throw new Error(`SANDBOX_KIBANA_CONFIG references a missing file: ${sandboxKibanaConfig}`);
   }
 
-  const telemetryConfig = process.env.NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG;
-  if (telemetryConfig && !existsSync(telemetryConfig)) {
+  // The suite's connector set: preconfigured connectors the eval saves on the investigator.
+  const connectorsConfig = process.env.NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG;
+  if (connectorsConfig && !existsSync(connectorsConfig)) {
     throw new Error(
-      `NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG references a missing file: ${telemetryConfig}`
+      `NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG references a missing file: ${connectorsConfig}`
     );
   }
 
@@ -65,14 +89,14 @@ const createInvestigationConfig = (
         '--xpack.agenticInvestigations.enabled=true',
         '--xpack.proposals.enabled=true',
         '--feature_flags.overrides.nightshift.enabled=true',
-        '--xpack.nightshift_investigations.cortex.enabled=false',
-        '--xpack.nightshift_investigations.memory.enabled=false',
+        // The suite judges investigations offline; online evals would run its judges again on every one.
+        '--feature_flags.overrides.nightshift.onlineEvals.paused=true',
+        ...knowledgeArgs(),
         '--xpack.nightshift_investigations.findings_recorder.enabled=false',
         `--config=${sandboxKibanaConfig}`,
-        ...(telemetryConfig ? [`--config=${telemetryConfig}`] : []),
+        ...(connectorsConfig ? [`--config=${connectorsConfig}`] : []),
         '--uiSettings.overrides.workflows:ui:enabled=true',
         '--uiSettings.overrides.workflows:aiAgent:enabled=true',
-        '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
         // The tracing config set already lifts the content redaction settings.
         '--uiSettings.overrides.agentBuilder:tracing:enabled=true',
         '--uiSettings.overrides.agentBuilder:tracing:includeUserData=true',

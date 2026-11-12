@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
+import { runEsqlQuery } from '../../queries/run_esql_query';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { REACHES_BACK_COLUMN } from '../queries/history_reaches_back';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 import { retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
-import { TILE_PROJECT_ROUTING } from './tile_project_routing';
+import type { TileDeltaFailure } from '../data';
 
 interface PreviousPeriodQueryOptions<T> {
   queryKey: string;
@@ -43,18 +43,9 @@ const usePreviousPeriodQuery = <T>({
     async ({ signal }) => {
       if (!query) return undefined;
       const result = await runWithTileTimeout(signal, (tileSignal) =>
-        lastValueFrom(
-          services.search.search(
-            { params: { query } },
-            {
-              abortSignal: tileSignal,
-              strategy: 'esql_async',
-              projectRouting: TILE_PROJECT_ROUTING,
-            }
-          )
-        )
+        runEsqlQuery(services.search, query, `needs_attention_tile_${queryKey}`, tileSignal)
       );
-      return parse(result.rawResponse as unknown as ESQLSearchResponse);
+      return parse(result);
     },
     {
       enabled: enabled && Boolean(query),
@@ -119,6 +110,8 @@ export const usePreviousPeriod = <T>({
   reachesBack: boolean | undefined;
   isHistoryMissing: boolean;
   isError: boolean;
+  /** Which part failed: the history check, or the previous-period query that follows it. */
+  failure: TileDeltaFailure | undefined;
 } => {
   const guard = usePreviousPeriodQuery({
     queryKey: `${guardKey}HistoryReachesBack`,
@@ -144,26 +137,28 @@ export const usePreviousPeriod = <T>({
     reachesBack: !guard.isError && guardSettled ? guard.data : undefined,
     isHistoryMissing: !isError && guardSettled && guard.data === false,
     isError,
+    failure: guard.isError ? 'history' : previousPeriod.isError ? 'delta' : undefined,
   };
 };
 
 /**
- * Whether a delta can still arrive, for the spinner: not for a skipped tile, a zero count (the pill
- * is hidden then), a query that can never run, a failed query, a history that is too short (the
- * tile says so instead) or a delta that is already known.
+ * Whether a delta can still arrive, for the skeleton: not for a skipped tile, a count that is not
+ * known (it failed, timed out or was skipped), a query that can never run, a failed query, a history
+ * that is too short (the tile says so instead) or a delta that is already known. A count of 0 is
+ * known: the tile still compares it with the previous period.
  */
 export const isDeltaStillComing = ({
   skip,
-  count,
+  hasCount,
   isUnavailable,
   isError,
   isHistoryMissing,
   hasDelta,
 }: {
   skip?: boolean;
-  count: number;
+  hasCount: boolean;
   isUnavailable: boolean;
   isError: boolean;
   isHistoryMissing: boolean;
   hasDelta: boolean;
-}): boolean => !skip && count > 0 && !isUnavailable && !isError && !isHistoryMissing && !hasDelta;
+}): boolean => !skip && hasCount && !isUnavailable && !isError && !isHistoryMissing && !hasDelta;

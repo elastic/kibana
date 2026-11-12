@@ -6,12 +6,15 @@
  */
 
 import { lazySchema, z } from '@kbn/zod/v4';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import type { EvaluateFn } from '@kbn/evals-plugin/server';
+import type { EvaluateEvidence, EvaluateFn } from '@kbn/evals-plugin/server';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { buildOnlineEvalsEvidence } from '../online_evals/build_evidence';
 import { buildOnlineEvalScoreEvent, type EvaluateResult } from '../online_evals/build_score_event';
+import { OnlineEvalsStepError, reportOnlineEvalsStepFailure } from '../online_evals/step_failure';
 import type { NightshiftTelemetryClient } from '../telemetry';
 
 /** Judges run in parallel within one evaluation, so this bounds concurrent judge calls. */
@@ -32,7 +35,9 @@ const inputSchema = lazySchema(() =>
       .describe('What kind of round it is, from `classifyRound`.'),
     graded_report: z
       .enum(['first_round', 'pre_recovery', 'current'])
-      .describe('Which report the judges grade.'),
+      .describe(
+        "Which report the judges grade: `first_round` is the investigation's first round, `current` the round being scored. `pre_recovery`, the report just before an alert recovery, isn't supported yet."
+      ),
     evaluator_set: z
       .string()
       .min(1)
@@ -48,7 +53,6 @@ const inputSchema = lazySchema(() =>
       .min(1)
       .max(MAX_ONLINE_EVALS_EVALUATORS)
       .describe('The evaluators to run.'),
-    judge_connector_id: z.string().min(1).max(256).describe('The connector every judge calls.'),
     investigation_started_at: z
       .string()
       .max(100)
@@ -81,15 +85,144 @@ const inputSchema = lazySchema(() =>
 
 type ScoreInput = z.infer<typeof inputSchema>;
 
-const skipReasonSchema = lazySchema(() => z.enum(['evals_unavailable', 'paused']));
+const skipReasonSchema = lazySchema(() =>
+  z.enum(['evals_unavailable', 'paused', 'scoring_failed'])
+);
 type SkipReason = z.infer<typeof skipReasonSchema>;
+
+const skip = (skipReason: SkipReason) => ({
+  output: { scored: false, skip_reason: skipReason },
+});
 
 const getErrorMessage = (error: unknown) =>
   error instanceof Error ? error.message : String(error);
 
+/**
+ * The round the judges grade. `first_round` is the investigation's first round, whatever round is
+ * being scored; an alert recovery is the ground truth, so it is never graded itself.
+ */
+const getGradedRound = (
+  input: ScoreInput,
+  rounds: ConversationRound[],
+  round: ConversationRound
+): ConversationRound => {
+  if (input.graded_report === 'first_round') {
+    // A recovery that is the first round, or read before it was saved, would grade itself.
+    if (input.round_kind === 'alert_recovery' && rounds[0].id === round.id) {
+      throw new OnlineEvalsStepError(
+        'invalid_input',
+        'Cannot grade an alert recovery against itself: it is the first round'
+      );
+    }
+    return rounds[0];
+  }
+  if (input.graded_report === 'current' && input.round_kind !== 'alert_recovery') {
+    return round;
+  }
+  throw new OnlineEvalsStepError(
+    'invalid_input',
+    `Cannot grade the ${input.graded_report} report of a ${input.round_kind} round`
+  );
+};
+
+/**
+ * Reads the round to score and the round the judges grade. Throws a coded error, reported as a
+ * step failure, when it can't.
+ */
+const readRound = async ({
+  input,
+  getAgentBuilder,
+  request,
+}: {
+  input: ScoreInput;
+  getAgentBuilder: () => AgentBuilderPluginStart | undefined;
+  request: KibanaRequest;
+}): Promise<{ agentId: string; round: ConversationRound; gradedRound: ConversationRound }> => {
+  const agentBuilder = getAgentBuilder();
+  if (!agentBuilder) {
+    throw new OnlineEvalsStepError(
+      'agent_builder_unavailable',
+      'Agent Builder is not available, so the investigation cannot be read'
+    );
+  }
+  const conversation = await agentBuilder.conversations
+    .getScopedClient({ request })
+    .then((conversations) => conversations.get(input.investigation_id))
+    .catch((error) => {
+      throw new OnlineEvalsStepError('investigation_unavailable', getErrorMessage(error));
+    });
+  const round = conversation.rounds.find(({ id }) => id === input.round_id);
+  if (!round) {
+    throw new OnlineEvalsStepError(
+      'round_not_found',
+      `Round "${input.round_id}" not found in the investigation`
+    );
+  }
+  return {
+    agentId: conversation.agent_id,
+    round,
+    gradedRound: getGradedRound(input, conversation.rounds, round),
+  };
+};
+
+/** Resolves the judge model. Throws a coded error, reported as a step failure, when it can't. */
+const resolveJudge = async (
+  resolveJudgeConnectorId: (request: KibanaRequest) => Promise<string>,
+  request: KibanaRequest
+): Promise<string> => {
+  try {
+    return await resolveJudgeConnectorId(request);
+  } catch (error) {
+    throw new OnlineEvalsStepError('judge_model_unavailable', getErrorMessage(error));
+  }
+};
+
+/**
+ * Runs the judges on the evidence. An `evaluate()` that throws is reported in the score event as
+ * every evaluator failing, rather than as a failed step.
+ */
+const runJudges = async ({
+  input,
+  evidence,
+  judgeConnectorId,
+  evaluate,
+  request,
+  spaceId,
+  logger,
+}: {
+  input: ScoreInput;
+  evidence: EvaluateEvidence;
+  judgeConnectorId: string;
+  evaluate: EvaluateFn;
+  request: KibanaRequest;
+  spaceId: string;
+  logger: { warn(message: string): void };
+}): Promise<{ results: EvaluateResult[]; failedEvaluators: ScoreInput['evaluators'] }> => {
+  try {
+    const results = await evaluate({
+      request,
+      spaceId,
+      evidence,
+      evaluators: input.evaluators.map((evaluator) => ({
+        ...evaluator,
+        connector_id: judgeConnectorId,
+      })),
+    });
+    return { results, failedEvaluators: [] };
+  } catch (error) {
+    logger.warn(
+      `Online evals could not score round "${input.round_id}" of investigation "${
+        input.investigation_id
+      }": ${getErrorMessage(error)}`
+    );
+    return { results: [], failedEvaluators: input.evaluators };
+  }
+};
+
 export const scoreOnlineEvalsRoundStepDefinition = ({
   getAgentBuilder,
   getEvaluate,
+  resolveJudgeConnectorId,
   isPaused,
   shouldIncludeExplanations,
   telemetry,
@@ -97,6 +230,8 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   /** The evals plugin's `evaluate()`; absent when the evals plugin isn't loaded. */
   getEvaluate: () => EvaluateFn | undefined;
+  /** The connector every judge calls, resolved through Nightshift's model config. */
+  resolveJudgeConnectorId: (request: KibanaRequest) => Promise<string>;
   /** The `nightshift.onlineEvals.paused` kill switch. */
   isPaused: () => boolean;
   /** The `nightshift.onlineEvals.includeExplanations` flag. */
@@ -108,7 +243,7 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
     label: 'Score an Investigation Round for Online Evals',
     category: StepCategory.Ai,
     description:
-      'Runs judges on one investigation round and sends the scores as a telemetry event. Judge and evidence failures are reported in the event; the step does not fail on them.',
+      'Runs judges on one investigation round and sends the scores as a telemetry event. Never fails: judge failures are reported in the score event, and a round that cannot be read, or any other failure, as a step failure event.',
     inputSchema,
     outputSchema: z.object({
       scored: z.boolean().describe('Whether a score event was sent.'),
@@ -121,11 +256,6 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
       skip_reason: skipReasonSchema.optional().describe('Why nothing was scored.'),
     }),
     handler: async (context) => {
-      const input: ScoreInput = inputSchema.parse(context.input);
-      const skip = (skipReason: SkipReason) => ({
-        output: { scored: false, skip_reason: skipReason },
-      });
-
       const evaluate = getEvaluate();
       if (!evaluate) {
         return skip('evals_unavailable');
@@ -134,81 +264,74 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
         return skip('paused');
       }
 
-      const scoringStartedAt = Date.now();
-      const { workflow, execution } = context.contextManager.getContext();
-      const request = context.contextManager.getFakeRequest();
-
-      let results: EvaluateResult[] = [];
-      let failedEvaluators: ScoreInput['evaluators'] = [];
-      let agentId: string | undefined;
-      let roundTraceId: string | undefined;
       try {
-        const agentBuilder = getAgentBuilder();
-        if (!agentBuilder) {
-          throw new Error('Agent Builder is not available, so the investigation cannot be read');
-        }
-        const conversations = await agentBuilder.conversations.getScopedClient({ request });
-        const conversation = await conversations.get(input.investigation_id);
-        agentId = conversation.agent_id;
-        const round = conversation.rounds.find(({ id }) => id === input.round_id);
-        if (!round) {
-          throw new Error(`Round "${input.round_id}" not found in the investigation`);
-        }
-        roundTraceId = Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id;
-        results = await evaluate({
+        const input = inputSchema.parse(context.input);
+        const scoringStartedAt = Date.now();
+        const { workflow, execution } = context.contextManager.getContext();
+
+        const request = context.contextManager.getFakeRequest();
+
+        const { agentId, round, gradedRound } = await readRound({
+          input,
+          getAgentBuilder,
+          request,
+        });
+        const roundTraceId = Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id;
+        const judgeConnectorId = await resolveJudge(resolveJudgeConnectorId, request);
+        const { results, failedEvaluators } = await runJudges({
+          input,
+          evidence: buildOnlineEvalsEvidence({
+            round: gradedRound,
+            alertOutcome:
+              input.round_kind === 'alert_recovery' ? round.response.message : undefined,
+          }),
+          judgeConnectorId,
+          evaluate,
           request,
           spaceId: workflow.spaceId,
-          evidence: buildOnlineEvalsEvidence({ round }),
-          evaluators: input.evaluators.map((evaluator) => ({
-            ...evaluator,
-            connector_id: input.judge_connector_id,
-          })),
+          logger: context.logger,
         });
+
+        const event = buildOnlineEvalScoreEvent({
+          metadata: {
+            investigation_id: input.investigation_id,
+            round_id: input.round_id,
+            ...(roundTraceId ? { round_trace_id: roundTraceId } : {}),
+            workflow_execution_id: execution.id,
+            ...(input.investigation_execution_id
+              ? { investigation_execution_id: input.investigation_execution_id }
+              : {}),
+            space_id: workflow.spaceId,
+            agent_id: agentId,
+            evaluator_set: input.evaluator_set,
+            round_kind: input.round_kind,
+            graded_report: input.graded_report,
+            ...(input.entry_point ? { entry_point: input.entry_point } : {}),
+            ...(input.alert_rule_type ? { alert_rule_type: input.alert_rule_type } : {}),
+            judge_connector_id: judgeConnectorId,
+            investigation_started_at: input.investigation_started_at,
+            ...(input.investigation_ended_at
+              ? { investigation_ended_at: input.investigation_ended_at }
+              : {}),
+            scoring_duration_ms: Date.now() - scoringStartedAt,
+          },
+          results,
+          failedEvaluators,
+          includeExplanations: shouldIncludeExplanations(),
+        });
+        telemetry.reportOnlineEvalScore(event);
+
+        return {
+          output: {
+            scored: true,
+            evaluator_count: event.evaluator_count,
+            failed_count: event.failed_count,
+            skipped_count: event.skipped_count,
+          },
+        };
       } catch (error) {
-        context.logger.warn(
-          `Online evals could not score round "${input.round_id}" of investigation "${
-            input.investigation_id
-          }": ${getErrorMessage(error)}`
-        );
-        failedEvaluators = input.evaluators;
+        reportOnlineEvalsStepFailure({ step: 'score', error, context, telemetry });
+        return skip('scoring_failed');
       }
-
-      const event = buildOnlineEvalScoreEvent({
-        metadata: {
-          investigation_id: input.investigation_id,
-          round_id: input.round_id,
-          ...(roundTraceId ? { round_trace_id: roundTraceId } : {}),
-          workflow_execution_id: execution.id,
-          ...(input.investigation_execution_id
-            ? { investigation_execution_id: input.investigation_execution_id }
-            : {}),
-          space_id: workflow.spaceId,
-          ...(agentId ? { agent_id: agentId } : {}),
-          evaluator_set: input.evaluator_set,
-          round_kind: input.round_kind,
-          graded_report: input.graded_report,
-          ...(input.entry_point ? { entry_point: input.entry_point } : {}),
-          ...(input.alert_rule_type ? { alert_rule_type: input.alert_rule_type } : {}),
-          judge_connector_id: input.judge_connector_id,
-          investigation_started_at: input.investigation_started_at,
-          ...(input.investigation_ended_at
-            ? { investigation_ended_at: input.investigation_ended_at }
-            : {}),
-          scoring_duration_ms: Date.now() - scoringStartedAt,
-        },
-        results,
-        failedEvaluators,
-        includeExplanations: shouldIncludeExplanations(),
-      });
-      telemetry.reportOnlineEvalScore(event);
-
-      return {
-        output: {
-          scored: true,
-          evaluator_count: event.evaluator_count,
-          failed_count: event.failed_count,
-          skipped_count: event.skipped_count,
-        },
-      };
     },
   });

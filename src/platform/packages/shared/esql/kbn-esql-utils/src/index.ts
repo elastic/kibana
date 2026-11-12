@@ -51,6 +51,7 @@ export {
   getChangePointSeriesColumns,
   getChangePointByColumns,
   buildChangePointLineDataQuery,
+  narrowChangePointEsqlToEntity,
   appendEntityFiltersToChangePointLineEsql,
   formatEsqlIdentifier,
   formatEsqlLiteral,
@@ -89,6 +90,13 @@ export {
   getNamedParams,
   getEsqlSearchParams,
 } from './utils/run_query';
+export {
+  hasGeotilePrecisionParam,
+  hasGeohexPrecisionParam,
+  hasGeohashPrecisionParam,
+  getGeoPrecisionParamValues,
+  type GeoPrecisionParams,
+} from './utils/geo_precision_params';
 export {
   isESQLColumnSortable,
   isESQLColumnGroupable,

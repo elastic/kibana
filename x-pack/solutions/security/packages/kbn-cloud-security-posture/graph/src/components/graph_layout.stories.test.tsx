@@ -57,7 +57,7 @@ describe('GraphLargeStackedEdgeCases story', () => {
   it('all labels should be visible and nodes should have correct icons', async () => {
     const { getAllByText, container } = render(<GraphLargeStackedEdgeCases />);
 
-    const labels = GraphLargeStackedEdgeCases.args?.nodes?.filter((node) => node.shape === 'label');
+    const labels = GraphLargeStackedEdgeCases.args?.nodes?.filter((node) => node.kind === 'event');
 
     // Wait for nodes to be rendered
     await waitFor(() => {
@@ -71,12 +71,12 @@ describe('GraphLargeStackedEdgeCases story', () => {
     const labelElements: Set<string> = new Set();
 
     for (const { label } of labels ?? []) {
-      // Get all label nodes that contains the label's text
+      // Get all event nodes that contains the label's text
       const allLabelElements = getAllByText(
         (_content, element) => element?.textContent?.includes(label ?? '') || false,
         {
           exact: true,
-          selector: 'div.react-flow__node-label',
+          selector: 'div.react-flow__node-event',
         }
       );
       expect(allLabelElements.length).toBeGreaterThan(0);
@@ -147,7 +147,7 @@ describe('EventsAndEntityRelationships story', () => {
     expect(getByText('AdminRole')).toBeInTheDocument();
   });
 
-  it('should render event labels (shape: label) correctly', async () => {
+  it('should render event labels (kind: event) correctly', async () => {
     const { container, getByText } = render(<EventsAndEntityRelationships />);
 
     // Wait for nodes to be rendered
@@ -161,7 +161,7 @@ describe('EventsAndEntityRelationships story', () => {
     expect(getByText('AssumeRole')).toBeInTheDocument();
   });
 
-  it('should render relationship labels (shape: relationship) correctly', async () => {
+  it('should render relationship labels (kind: relationship) correctly', async () => {
     const { container, getAllByText } = render(<EventsAndEntityRelationships />);
 
     // Wait for nodes to be rendered
@@ -268,7 +268,7 @@ describe('EventsAndRelationshipsStacked story', () => {
     expect(getByText('hosts')).toBeInTheDocument();
   });
 
-  it('should render stacked label nodes (shape: label) correctly', async () => {
+  it('should render stacked event nodes (kind: event) correctly', async () => {
     const { container, getByText } = render(<EventsAndRelationshipsStacked />);
 
     // Wait for nodes to be rendered
@@ -282,7 +282,7 @@ describe('EventsAndRelationshipsStacked story', () => {
     expect(getByText('DescribeInstance')).toBeInTheDocument();
   });
 
-  it('should render stacked relationship nodes (shape: relationship) correctly', async () => {
+  it('should render stacked relationship nodes (kind: relationship) correctly', async () => {
     const { container, getAllByText } = render(<EventsAndRelationshipsStacked />);
 
     // Wait for nodes to be rendered

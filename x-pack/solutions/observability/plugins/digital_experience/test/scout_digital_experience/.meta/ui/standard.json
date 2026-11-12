@@ -1,5 +1,5 @@
 {
-  "sha1": "962c59b7d7984172c2316b8c3992ba720e4744bb",
+  "sha1": "1638ac15e7f2a1b9c58fdc1af7ecc9260e313a92",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -150,6 +150,216 @@
       }
     },
     {
+      "id": "f70ca8205fdee5a-ac29dee84c6caa3",
+      "title": "Digital Experience EDOT Browser application shows the pages, browsers and clicks of the EDOT Browser application",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/otel_application_overview.spec.ts",
+        "line": 31,
+        "column": 43
+      }
+    },
+    {
+      "id": "f70ca8205fdee5a-af2f0e14f2bc0dc",
+      "title": "Digital Experience EDOT Browser application shows the top errors on the Overview, linked to the Errors tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/otel_application_overview.spec.ts",
+        "line": 40,
+        "column": 13
+      }
+    },
+    {
+      "id": "f70ca8205fdee5a-7aad8087fe750f1",
+      "title": "Digital Experience EDOT Browser application shows the error groups on the Errors tab, with the stack trace in a flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/otel_application_overview.spec.ts",
+        "line": 52,
+        "column": 10
+      }
+    },
+    {
+      "id": "f70ca8205fdee5a-26e1b9fb8ddd7d4",
+      "title": "Digital Experience EDOT Browser application shows the requests and the render-blocking resources on the Network tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/otel_application_overview.spec.ts",
+        "line": 64,
+        "column": 13
+      }
+    },
+    {
+      "id": "f70ca8205fdee5a-de88655e0af2823",
+      "title": "Digital Experience EDOT Browser application keeps the EDOT Browser Overview headings in order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/otel_application_overview.spec.ts",
+        "line": 74,
+        "column": 9
+      }
+    },
+    {
+      "id": "f70ca8205fdee5a-6fb90f4d99eb78b",
+      "title": "Digital Experience EDOT Browser application narrows the EDOT Browser Overview by its filters, and keeps them across the tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/otel_application_overview.spec.ts",
+        "line": 89,
+        "column": 13
+      }
+    },
+    {
+      "id": "f70ca8205fdee5a-cf36ef6f1a04167",
+      "title": "Digital Experience EDOT Browser application excludes a value and picks several at once, in the row and in the All filters flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/otel_application_overview.spec.ts",
+        "line": 176,
+        "column": 13
+      }
+    },
+    {
+      "id": "f70ca8205fdee5a-9066c5bf2dfe0dd",
+      "title": "Digital Experience EDOT Browser application filters by a row of the breakdowns or the top pages, and takes the filter off when it is clicked again",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/otel_application_overview.spec.ts",
+        "line": 280,
+        "column": 15
+      }
+    },
+    {
+      "id": "f70ca8205fdee5a-8de17c9a894c59f",
+      "title": "Digital Experience EDOT Browser application narrows the Overview by the version of the application",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/otel_application_overview.spec.ts",
+        "line": 317,
+        "column": 12
+      }
+    },
+    {
+      "id": "f70ca8205fdee5a-e36622a9972de42",
+      "title": "Digital Experience EDOT Browser application narrows the page loads by text the URL contains, and by text it does not",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/otel_application_overview.spec.ts",
+        "line": 338,
+        "column": 22
+      }
+    },
+    {
+      "id": "f70ca8205fdee5a-14996d8f1be8d61",
+      "title": "Digital Experience EDOT Browser application shows the load time at the percentile picked, and keeps it in the URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/otel_application_overview.spec.ts",
+        "line": 371,
+        "column": 15
+      }
+    },
+    {
+      "id": "f70ca8205fdee5a-0ece1bf207676b4",
+      "title": "Digital Experience EDOT Browser application narrows the Overview with a KQL query, and shows a query that does not parse",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/otel_application_overview.spec.ts",
+        "line": 392,
+        "column": 9
+      }
+    },
+    {
+      "id": "f70ca8205fdee5a-95856c61125454e",
+      "title": "Digital Experience EDOT Browser application keeps the query, the filters and the date picker on one row, with fewer filter buttons when narrow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/otel_application_overview.spec.ts",
+        "line": 446,
+        "column": 22
+      }
+    },
+    {
+      "id": "f70ca8205fdee5a-fc992ae9a83f892",
+      "title": "Digital Experience EDOT Browser application expands the KQL bar over the row while it has the focus, and gives the row back after",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/otel_application_overview.spec.ts",
+        "line": 506,
+        "column": 9
+      }
+    },
+    {
+      "id": "f70ca8205fdee5a-b5da820c20eb485",
+      "title": "Digital Experience EDOT Browser application makes the Trends panel as tall as the Core Web Vitals panel, with its charts filling it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/otel_application_overview.spec.ts",
+        "line": 540,
+        "column": 12
+      }
+    },
+    {
       "id": "b97a75be98dc303-6b41f0d47752318",
       "title": "Digital Experience on serverless lists only EDOT Browser applications without requesting Classic RUM data",
       "expectedStatus": "passed",
@@ -191,8 +401,8 @@
       }
     },
     {
-      "id": "ad8ceb6a0ebceff-708e74e148734ab",
-      "title": "Digital Experience sessions opens a session with its waterfall, then goes back to the same list",
+      "id": "ad8ceb6a0ebceff-155b7df5e6f48b6",
+      "title": "Digital Experience sessions opens a session with its waterfall and journey, then goes back to the same list",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

@@ -396,7 +396,7 @@ export const WatchDetailPage: React.FC = () => {
     if (members.length === 0) {
       return (
         <EuiEmptyPrompt
-          iconType="visTagCloud"
+          iconType="chartTagCloud"
           title={<h2>{settingsI18n.WORKERS_EMPTY_TITLE}</h2>}
           body={<p>{settingsI18n.WORKERS_EMPTY_BODY}</p>}
           data-test-subj="alertZeroWatchWorkersEmpty"

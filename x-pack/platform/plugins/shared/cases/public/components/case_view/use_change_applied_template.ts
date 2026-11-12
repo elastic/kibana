@@ -23,6 +23,7 @@ import {
 } from '../../analytics/templates/use_template_apply_ebt';
 import type { ServerError } from '../../types';
 import { getFieldCamelKey, getFieldSnakeKey } from '../../../common/utils';
+import { canStoreExtractObservablesTrue } from '../../../common/utils/case_settings';
 import { getYamlDefaultAsString } from '../templates_v2/utils';
 import * as i18n from './translations';
 
@@ -61,11 +62,17 @@ interface ChangeAppliedTemplateArgs {
 
 /**
  * A template is authoritative for the case's settings: keys it declares are applied and keys it
- * omits (or a template with no settings block) default to off, matching the create flow.
+ * omits (or a template with no settings block) default to off, matching the create flow. An owner
+ * that cannot store `extractObservables: true` always gets false, because the server rejects true.
  */
-const buildTemplateSettings = (settings: TemplateSettings | undefined): CaseSettings => ({
+const buildTemplateSettings = (
+  settings: TemplateSettings | undefined,
+  owner: string
+): CaseSettings => ({
   syncAlerts: settings?.syncAlerts ?? false,
-  extractObservables: settings?.extractObservables ?? false,
+  extractObservables: canStoreExtractObservablesTrue(owner)
+    ? settings?.extractObservables ?? false
+    : false,
 });
 
 export const computeNewExtendedFields = (
@@ -114,7 +121,7 @@ export const useChangeAppliedTemplate = () => {
           // The applied template owns the case settings (a template that declares none, or removing
           // the template, resets them to off). The case's connector is intentionally NOT changed
           // here — applying a template never reassigns an existing case's connector.
-          settings: buildTemplateSettings(newTemplate?.settings),
+          settings: buildTemplateSettings(newTemplate?.settings, caseData.owner),
         },
         version: caseData.version,
       });

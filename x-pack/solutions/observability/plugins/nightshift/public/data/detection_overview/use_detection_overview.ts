@@ -17,7 +17,14 @@ export interface DetectionOverviewTimeRange {
   to: string;
 }
 
-export const useDetectionOverview = (range: DetectionOverviewTimeRange) => {
+export const useDetectionOverview = (
+  range: DetectionOverviewTimeRange,
+  {
+    enabled = true,
+    showErrorToast = true,
+    refetchOnWindowFocus = true,
+  }: { enabled?: boolean; showErrorToast?: boolean; refetchOnWindowFocus?: boolean } = {}
+) => {
   const { significantEventsRepositoryClient } = useKibana().services.significantEvents;
   const showFetchErrorToast = useFetchErrorToast();
 
@@ -34,7 +41,8 @@ export const useDetectionOverview = (range: DetectionOverviewTimeRange) => {
         }
       );
     },
-    onError: showFetchErrorToast,
-    refetchOnWindowFocus: true,
+    onError: showErrorToast ? showFetchErrorToast : undefined,
+    enabled,
+    refetchOnWindowFocus,
   });
 };
