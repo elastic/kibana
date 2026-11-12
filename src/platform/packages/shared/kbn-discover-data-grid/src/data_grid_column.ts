@@ -20,7 +20,7 @@ export interface DataGridCellContext<TRow extends object, TValue> {
 export interface DataGridColumnOptions<TRow extends object, TValue> {
   id: string;
   header: ReactNode;
-  accessibilityLabel: string;
+  ariaLabel?: string;
   getValue: (row: TRow) => TValue;
   getAccessibilityValue: (context: DataGridCellContext<TRow, TValue>) => string;
   renderCell: (context: DataGridCellContext<TRow, TValue>) => ReactNode;
@@ -44,7 +44,7 @@ const internalColumnDefinition: unique symbol = Symbol('internalColumnDefinition
 export interface DataGridColumn<TRow extends object> {
   readonly id: string;
   readonly header: ReactNode;
-  readonly accessibilityLabel: string;
+  readonly ariaLabel?: string;
   readonly [internalColumnDefinition]: InternalDataGridColumn<TRow>;
 }
 
@@ -55,14 +55,14 @@ export interface DataGridColumnHelper<TRow extends object> {
 const createDataGridColumn = <TRow extends object, TValue>({
   id,
   header,
-  accessibilityLabel,
+  ariaLabel,
   getValue,
   getAccessibilityValue,
   renderCell,
 }: DataGridColumnOptions<TRow, TValue>): DataGridColumn<TRow> => ({
   id,
   header,
-  accessibilityLabel,
+  ariaLabel,
   [internalColumnDefinition]: {
     getValue,
     getAccessibilityValue: ({ row, ...context }, value) =>

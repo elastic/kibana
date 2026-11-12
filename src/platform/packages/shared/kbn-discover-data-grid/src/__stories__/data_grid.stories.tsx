@@ -24,7 +24,6 @@ const columns = [
   columnHelper.accessor({
     id: 'field',
     header: 'Field',
-    accessibilityLabel: 'Field',
     getValue: (row) => row.field,
     getAccessibilityValue: ({ value }) => value,
     renderCell: ({ value }) => value,
@@ -32,7 +31,6 @@ const columns = [
   columnHelper.accessor({
     id: 'value',
     header: 'Value',
-    accessibilityLabel: 'Value',
     getValue: (row) => row.value,
     getAccessibilityValue: ({ value }) => value,
     renderCell: ({ value }) => value,
@@ -68,7 +66,7 @@ const interactionColumns = [
   columnHelper.accessor({
     id: 'inspect',
     header: 'Inspect',
-    accessibilityLabel: 'Inspect action',
+    ariaLabel: 'Inspect action',
     getValue: (row) => row.field,
     getAccessibilityValue: ({ value }) => `Inspect ${value}`,
     renderCell: ({ value }) => <InspectButton field={value} />,
@@ -107,7 +105,6 @@ const ConfigurableDataGrid = ({ rowCount, columnCount, height }: ConfigurableDat
         return configurableColumnHelper.accessor({
           id: `column-${columnNumber}`,
           header: `Column ${columnNumber}`,
-          accessibilityLabel: `Column ${columnNumber}`,
           getValue: (row) => row.values[columnIndex] ?? '',
           getAccessibilityValue: ({ value }) => value,
           renderCell: ({ value }) => value,

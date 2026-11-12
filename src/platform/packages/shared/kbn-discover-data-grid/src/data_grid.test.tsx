@@ -95,19 +95,27 @@ const columnHelper = createDataGridColumnHelper<TestRow>();
 const columns = [
   columnHelper.accessor({
     id: 'name',
-    header: 'Visual name header',
-    accessibilityLabel: 'Name',
+    header: 'Name',
     getValue: (row) => row.name,
     getAccessibilityValue: ({ value }) => value,
     renderCell: ({ value }) => value,
   }),
   columnHelper.accessor({
     id: 'value',
-    header: 'Visual value header',
-    accessibilityLabel: 'Value',
+    header: 'Value',
     getValue: (row) => row.value,
     getAccessibilityValue: ({ value }) => `Value ${value}`,
     renderCell: ({ value }) => value.toLocaleString(),
+  }),
+];
+const columnsWithAriaLabel = [
+  columnHelper.accessor({
+    id: 'name',
+    header: 'Name',
+    ariaLabel: 'Full name',
+    getValue: (row) => row.name,
+    getAccessibilityValue: ({ value }) => value,
+    renderCell: ({ value }) => value,
   }),
 ];
 const rows = Array.from({ length: 100 }, (_, index) => ({
@@ -188,20 +196,21 @@ describe('DataGrid', () => {
     renderGrid();
 
     const grid = screen.getByRole('grid', { name: 'Example data' });
-    expect(grid.getAttribute('aria-rowcount')).toBe('100');
+    expect(grid.getAttribute('aria-rowcount')).toBe('101');
     expect(grid.getAttribute('aria-colcount')).toBe('2');
     expect(screen.getAllByRole('rowgroup')).toHaveLength(2);
 
     const headers = screen.getAllByRole('columnheader');
-    expect(headers[0].getAttribute('aria-label')).toBe('Name');
+    expect(headers[0].getAttribute('aria-label')).toBeNull();
     expect(headers[0].getAttribute('aria-colindex')).toBe('1');
-    expect(headers[1].getAttribute('aria-label')).toBe('Value');
+    expect(headers[1].getAttribute('aria-label')).toBeNull();
     expect(headers[1].getAttribute('aria-colindex')).toBe('2');
     expect(headers[0].hasAttribute('tabindex')).toBe(false);
 
-    const renderedRows = screen.getAllByRole('row').slice(1);
+    const allRows = screen.getAllByRole('row');
+    expect(allRows.map((row) => row.getAttribute('aria-rowindex'))).toEqual(['1', '2', '3', '4']);
+    const renderedRows = allRows.slice(1);
     expect(renderedRows).toHaveLength(3);
-    expect(renderedRows.map((row) => row.getAttribute('aria-rowindex'))).toEqual(['1', '2', '3']);
     expect(screen.getByRole('gridcell', { name: 'Name 0' }).getAttribute('aria-colindex')).toBe(
       '1'
     );
@@ -210,24 +219,18 @@ describe('DataGrid', () => {
     );
   });
 
-  it('requires non-empty grid and column accessibility labels', () => {
+  it('requires a non-empty grid accessible name', () => {
     expect(() => renderGrid({ ariaLabel: ' ' })).toThrow(
       'DataGrid requires a non-empty accessible name.'
     );
+  });
 
-    const invalidColumns = [
-      columnHelper.accessor({
-        id: 'invalid',
-        header: 'Invalid',
-        accessibilityLabel: '',
-        getValue: (row) => row.name,
-        getAccessibilityValue: ({ value }) => value,
-        renderCell: ({ value }) => value,
-      }),
-    ];
-    expect(() => renderGrid({ gridColumns: invalidColumns })).toThrow(
-      'Data grid column "invalid" requires a non-empty accessibility label.'
-    );
+  it('allows a column header to override its accessible name', () => {
+    renderGrid({ gridColumns: columnsWithAriaLabel });
+
+    const header = screen.getByRole('columnheader', { name: 'Full name' });
+    expect(header.textContent).toBe('Name');
+    expect(header.getAttribute('aria-label')).toBe('Full name');
   });
 
   it('keeps exactly one composite tab stop and restores it on re-entry', async () => {
@@ -446,7 +449,7 @@ describe('DataGrid', () => {
     );
 
     const movedCell = await expectFocus('Name 1');
-    expect(movedCell.parentElement?.getAttribute('aria-rowindex')).toBe('3');
+    expect(movedCell.parentElement?.getAttribute('aria-rowindex')).toBe('4');
 
     const rowsWithActiveMovedOffScreen = [
       rows[0],
@@ -464,7 +467,7 @@ describe('DataGrid', () => {
       />
     );
     const offScreenMovedCell = await expectFocus('Name 1');
-    expect(offScreenMovedCell.parentElement?.getAttribute('aria-rowindex')).toBe('52');
+    expect(offScreenMovedCell.parentElement?.getAttribute('aria-rowindex')).toBe('53');
     expect(mockGetOffsetForIndex).toHaveBeenLastCalledWith(51, 'auto');
 
     rerender(
@@ -525,7 +528,7 @@ describe('DataGrid', () => {
 
     const grid = screen.getByRole('grid', { name: 'Example data' });
     await waitFor(() => expect(document.activeElement).toBe(grid));
-    expect(grid.getAttribute('aria-rowcount')).toBe('0');
+    expect(grid.getAttribute('aria-rowcount')).toBe('1');
     expect(grid.getAttribute('tabindex')).toBe('0');
     expect(container.querySelectorAll('[tabindex="0"]')).toHaveLength(1);
     await waitFor(() =>
@@ -607,7 +610,6 @@ describe('DataGrid', () => {
       columnHelper.accessor({
         id: 'interaction',
         header: 'Interaction',
-        accessibilityLabel: 'Interaction',
         getValue: (row) => row.name,
         getAccessibilityValue: ({ value }) => value,
         renderCell: () => <InteractionButton />,
@@ -653,8 +655,8 @@ describe('DataGrid', () => {
 
     const tableOptions = jest.mocked(useTable).mock.calls[0][0];
     expect(tableOptions.columns).toEqual([
-      expect.objectContaining({ accessorFn: expect.any(Function) }),
-      expect.objectContaining({ accessorFn: expect.any(Function) }),
+      expect.objectContaining({ accessorFn: expect.any(Function), meta: { ariaLabel: undefined } }),
+      expect.objectContaining({ accessorFn: expect.any(Function), meta: { ariaLabel: undefined } }),
     ]);
 
     const virtualizerOptions = jest.mocked(useVirtualizer).mock.calls[0][0];

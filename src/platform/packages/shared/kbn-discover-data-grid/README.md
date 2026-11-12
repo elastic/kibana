@@ -33,7 +33,6 @@ const columns = [
   columnHelper.accessor({
     id: 'name',
     header: 'Name',
-    accessibilityLabel: 'Name',
     getValue: (row) => row.name,
     getAccessibilityValue: ({ value }) => value,
     renderCell: ({ value }) => value,
@@ -41,7 +40,6 @@ const columns = [
   columnHelper.accessor({
     id: 'value',
     header: 'Value',
-    accessibilityLabel: 'Value',
     getValue: (row) => row.value,
     getAccessibilityValue: ({ value }) => value,
     renderCell: ({ value }) => value,
@@ -72,14 +70,16 @@ export const Results = () => (
 
 Keep `rows`, `columns`, and `getRowId` stable between meaningful changes. Row IDs must be unique and
 must continue to identify the same logical row when rows are inserted, removed, or reordered.
+Text headers provide their own accessible name. Set a column's optional `ariaLabel` only when its
+rendered header needs a different accessible name, such as an icon-only or abbreviated header.
 Row virtualization is enabled by default. Its estimated height and overscan can be tuned through
 `virtualization.rows`; omitting those options uses the package defaults.
 
-Each column must provide a non-empty plain-text `accessibilityLabel` and a
-`getAccessibilityValue` callback. The latter is the semantic and clipboard value for a cell; it is
-deliberately separate from `renderCell`, so visual React content never has to be inspected or
-converted back into text. Phase 1 `renderCell` output is read-only visual content. Package-owned
-controls use the internal interaction registration seam rather than relying on DOM discovery.
+Each column must provide a `getAccessibilityValue` callback. It is the semantic and clipboard value
+for a cell and is deliberately separate from `renderCell`, so visual React content never has to be
+inspected or converted back into text. Phase 1 `renderCell` output is read-only visual content.
+Package-owned controls use the internal interaction registration seam rather than relying on DOM
+discovery.
 
 ## Keyboard and focus behavior
 

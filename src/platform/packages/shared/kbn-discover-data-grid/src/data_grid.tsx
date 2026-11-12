@@ -9,7 +9,7 @@
 
 import React, { useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { useEuiMemoizedStyles, useResizeObserver } from '@elastic/eui';
-import { createColumnHelper, tableFeatures, useTable } from '@tanstack/react-table';
+import { createColumnHelper, metaHelper, tableFeatures, useTable } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
 import type { DataGridApi } from './data_grid_api';
@@ -20,7 +20,13 @@ import { getDataGridColumnValue } from './data_grid_column';
 import { DEFAULT_DATA_GRID_ROW_HEIGHT, getDataGridStyles } from './data_grid.styles';
 import { useDataGridFocus } from './use_data_grid_focus';
 
-const tableFeatureSet = tableFeatures({});
+interface DataGridColumnMeta {
+  readonly ariaLabel?: string;
+}
+
+const tableFeatureSet = tableFeatures({
+  columnMeta: metaHelper<DataGridColumnMeta>(),
+});
 
 const DEFAULT_OVERSCAN = 5;
 
@@ -79,12 +85,7 @@ export const DataGrid = <TRow extends object>({
   } = virtualization?.rows ?? {};
 
   const columnIds = useMemo(() => {
-    const ids = columns.map(({ id, accessibilityLabel }) => {
-      if (accessibilityLabel.trim().length === 0) {
-        throw new Error(`Data grid column "${id}" requires a non-empty accessibility label.`);
-      }
-      return id;
-    });
+    const ids = columns.map(({ id }) => id);
     assertUniqueIds(ids, 'column');
     return ids;
   }, [columns]);
@@ -100,6 +101,7 @@ export const DataGrid = <TRow extends object>({
         columnHelper.accessor((row) => getDataGridColumnValue(column, row), {
           id: column.id,
           header: () => column.header,
+          meta: { ariaLabel: column.ariaLabel },
         })
       )
     );
@@ -112,6 +114,7 @@ export const DataGrid = <TRow extends object>({
     getRowId,
   });
 
+  const headerGroups = table.getHeaderGroups();
   const tableRows = table.getRowModel().rows;
   const rowIds = useMemo(() => {
     const ids = tableRows.map(({ id }) => id);
@@ -202,41 +205,36 @@ export const DataGrid = <TRow extends object>({
         tabIndex={focus.activeCell && activeRowIsMounted ? -1 : 0}
         aria-label={ariaLabel}
         aria-colcount={columns.length}
-        aria-rowcount={tableRows.length}
+        aria-rowcount={tableRows.length + headerGroups.length}
         className={className}
         css={styles.grid}
         style={{ blockSize: height, scrollPaddingBlockStart: headerHeight }}
         onFocus={onGridFocus}
       >
         <div ref={setHeaderRowGroupElement} role="rowgroup" css={styles.headerRowGroup}>
-          {table.getHeaderGroups().map((headerGroup) => (
+          {headerGroups.map((headerGroup, headerGroupIndex) => (
             <div
               key={headerGroup.id}
               role="row"
+              aria-rowindex={headerGroupIndex + 1}
               css={styles.headerRow}
               style={{ gridTemplateColumns }}
             >
-              {headerGroup.headers.map((header, columnIndex) => {
-                const column = columnsById.get(header.column.id);
-                if (!column) {
-                  throw new Error(`Cannot resolve data grid column "${header.column.id}".`);
-                }
-                return (
-                  <div
-                    key={header.id}
-                    role="columnheader"
-                    aria-colindex={columnIndex + 1}
-                    aria-label={column.accessibilityLabel}
-                    css={styles.headerCell}
-                  >
-                    {header.isPlaceholder ? null : (
-                      <div css={styles.headerContent}>
-                        <table.FlexRender header={header} />
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+              {headerGroup.headers.map((header, columnIndex) => (
+                <div
+                  key={header.id}
+                  role="columnheader"
+                  aria-colindex={columnIndex + 1}
+                  aria-label={header.column.columnDef.meta?.ariaLabel}
+                  css={styles.headerCell}
+                >
+                  {header.isPlaceholder ? null : (
+                    <div css={styles.headerContent}>
+                      <table.FlexRender header={header} />
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           ))}
         </div>
@@ -257,7 +255,7 @@ export const DataGrid = <TRow extends object>({
                 key={row.id}
                 ref={rowVirtualizer.measureElement}
                 role="row"
-                aria-rowindex={virtualRow.index + 1}
+                aria-rowindex={headerGroups.length + virtualRow.index + 1}
                 data-index={virtualRow.index}
                 data-striped={virtualRow.index % 2 === 1}
                 css={styles.row}
