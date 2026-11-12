@@ -12,6 +12,7 @@ export interface AutoFollowPattern {
   active: boolean;
   remoteCluster: string;
   leaderIndexPatterns: string[];
+  leaderIndexExclusionPatterns: string[];
   followIndexPattern: string;
 }
 
@@ -21,6 +22,7 @@ export interface AutoFollowPatternFromEs {
     active: boolean;
     remote_cluster: string;
     leader_index_patterns: string[];
+    leader_index_exclusion_patterns?: string[];
     follow_index_pattern: string;
   };
 }
@@ -28,6 +30,7 @@ export interface AutoFollowPatternFromEs {
 export interface AutoFollowPatternToEs {
   remote_cluster: string;
   leader_index_patterns: string[];
+  leader_index_exclusion_patterns: string[];
   follow_index_pattern: string;
 }
 

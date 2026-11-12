@@ -120,6 +120,7 @@ describe('Edit Auto-follow pattern', () => {
         active: AUTO_FOLLOW_PATTERN_EDIT.active,
         remoteCluster: AUTO_FOLLOW_PATTERN_EDIT.remoteCluster,
         leaderIndexPatterns: AUTO_FOLLOW_PATTERN_EDIT.leaderIndexPatterns,
+        leaderIndexExclusionPatterns: AUTO_FOLLOW_PATTERN_EDIT.leaderIndexExclusionPatterns,
         followIndexPattern: AUTO_FOLLOW_PATTERN_EDIT.followIndexPattern,
       });
     });

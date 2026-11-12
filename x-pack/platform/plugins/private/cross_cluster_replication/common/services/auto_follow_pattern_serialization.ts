@@ -16,6 +16,7 @@ export const deserializeAutoFollowPattern = (
       active,
       remote_cluster: remoteCluster,
       leader_index_patterns: leaderIndexPatterns,
+      leader_index_exclusion_patterns: leaderIndexExclusionPatterns = [],
       follow_index_pattern: followIndexPattern,
     },
   } = autoFollowPattern;
@@ -25,6 +26,7 @@ export const deserializeAutoFollowPattern = (
     active,
     remoteCluster,
     leaderIndexPatterns,
+    leaderIndexExclusionPatterns,
     followIndexPattern,
   };
 };
@@ -36,12 +38,14 @@ export const deserializeListAutoFollowPatterns = (
 export const serializeAutoFollowPattern = ({
   remoteCluster,
   leaderIndexPatterns,
+  leaderIndexExclusionPatterns = [],
   followIndexPattern,
 }: Pick<
   AutoFollowPattern,
-  'remoteCluster' | 'leaderIndexPatterns' | 'followIndexPattern'
+  'remoteCluster' | 'leaderIndexPatterns' | 'leaderIndexExclusionPatterns' | 'followIndexPattern'
 >): AutoFollowPatternToEs => ({
   remote_cluster: remoteCluster,
   leader_index_patterns: leaderIndexPatterns,
+  leader_index_exclusion_patterns: leaderIndexExclusionPatterns,
   follow_index_pattern: followIndexPattern,
 });
