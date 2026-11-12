@@ -107,10 +107,7 @@ describe('CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW', () => {
     const dreaming = parse(CONTEXT_ENGINE_DREAMING_WORKFLOW.yamlTemplate(values));
 
     expect(workflow.name).toBe('Relationships: support-cases');
-    expect(workflow.settings.concurrency.key).toBe(
-      'context-engine-relationships-support-cases-0123456789abcdef'
-    );
-    expect(workflow.settings.concurrency.key).not.toBe(dreaming.settings.concurrency.key);
+    expect(workflow.settings.concurrency).toEqual(dreaming.settings.concurrency);
     expect(workflow.enabled).toBe(false);
     expect(workflow.triggers).toEqual([
       { type: 'scheduled', with: { every: '90m' } },

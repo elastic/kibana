@@ -85,17 +85,21 @@ const renderJsonTemplate = (template: string, values: Record<string, unknown>): 
       : token
   );
 
+/** The concurrency key shared by every workflow that writes an AI index's long-term memory. */
+export const memoryConcurrencyKeyFor = (instanceKey: string): string =>
+  `context-engine-memory-${instanceKey}`;
+
 /** Consolidates the memories of one AI index into long-term facts and entities. */
 export const CONTEXT_ENGINE_DREAMING_WORKFLOW = {
   id: CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 5,
+  version: 6,
   billable: false,
   yamlTemplate: (values) =>
     renderJsonTemplate(DREAMING_YAML, {
       __NAME__: `Dreaming: ${values.aiIndexId}`,
       __AI_INDEX_ID__: values.aiIndexId,
-      __CONCURRENCY_KEY__: `context-engine-dreaming-${values.instanceKey}`,
+      __CONCURRENCY_KEY__: memoryConcurrencyKeyFor(values.instanceKey),
       __MEMORIES_INDEX__: values.memoriesIndex,
       __INTERVAL_MINUTES__: values.intervalMinutes,
       __CONNECTOR_ID__: values.connectorId,
@@ -119,13 +123,13 @@ export type ContextEngineTraceDreamingWorkflowTemplateValues =
 export const CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW = {
   id: CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 5,
+  version: 6,
   billable: false,
   yamlTemplate: (values) =>
     renderJsonTemplate(TRACE_DREAMING_YAML, {
       __NAME__: `Trace dreaming: ${values.aiIndexId}`,
       __AI_INDEX_ID__: values.aiIndexId,
-      __CONCURRENCY_KEY__: `context-engine-trace-dreaming-${values.instanceKey}`,
+      __CONCURRENCY_KEY__: memoryConcurrencyKeyFor(values.instanceKey),
       __INTERVAL_MINUTES__: values.intervalMinutes,
       __BATCH_WORKFLOW_ID__: `${CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID}-${values.instanceKey}`,
     }),
@@ -173,13 +177,13 @@ export type ContextEngineRelationshipsWorkflowTemplateValues =
 export const CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW = {
   id: CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 1,
+  version: 2,
   billable: false,
   yamlTemplate: (values) =>
     renderJsonTemplate(RELATIONSHIPS_YAML, {
       __NAME__: `Relationships: ${values.aiIndexId}`,
       __AI_INDEX_ID__: values.aiIndexId,
-      __CONCURRENCY_KEY__: `context-engine-relationships-${values.instanceKey}`,
+      __CONCURRENCY_KEY__: memoryConcurrencyKeyFor(values.instanceKey),
       __MEMORIES_INDEX__: values.memoriesIndex,
       __INTERVAL_MINUTES__: values.intervalMinutes,
       __CONNECTOR_ID__: values.connectorId,
