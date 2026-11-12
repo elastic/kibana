@@ -35,10 +35,13 @@ import {
 } from './secrets';
 import { probeSandboxCredential } from './sandbox_probe';
 import { createJsonClient, resolveKibanaBaseUrl } from './http_client';
+import { ORCA_SANDBOX_ALLOWED_HOSTS } from '../../common';
 import {
+  addOrcaSpaceContext,
   assertEnterpriseLicense,
   deleteOrcaConnector,
   enableNightshiftSpace,
+  removeOrcaSpaceContext,
   isServerless,
   saveOrcaConnector,
   updateInvestigatorConnectors,
@@ -164,10 +167,14 @@ const setUpKibana = async ({
     log.success(`Saved ${ORCA_CONNECTOR_ID} on the investigator agent`);
   }
 
-  const { available, connectorListed, connectorOnInvestigator, orcaLogCount } = await verifySetup({
-    kibana,
-    orca,
-  });
+  const { addedContext, addedHosts } = await addOrcaSpaceContext(kibana);
+  if (addedContext) log.success('Added the ORCA source code snippet to the space custom context');
+  if (addedHosts.length > 0) {
+    log.success(`Added ${addedHosts.join(', ')} to the space sandbox egress allowlist`);
+  }
+
+  const { available, connectorListed, connectorOnInvestigator, spaceContext, orcaLogCount } =
+    await verifySetup({ kibana, orca });
   const problems = [
     ...(available
       ? []
@@ -178,6 +185,9 @@ const setUpKibana = async ({
     ...(connectorOnInvestigator
       ? []
       : [`${ORCA_CONNECTOR_ID} is not saved on the investigator agent's connectors.`]),
+    ...(spaceContext
+      ? []
+      : ['The space lacks the ORCA source code context or its sandbox egress allowlist entry.']),
     ...(orcaLogCount === undefined ? ['The ORCA key could not count ORCA logs.'] : []),
   ];
   if (problems.length > 0) {
@@ -191,6 +201,9 @@ const setUpKibana = async ({
         ', '
       )}`,
       `  - ${orcaLogCount} ORCA log documents readable`,
+      `  - ORCA source code context and ${ORCA_SANDBOX_ALLOWED_HOSTS.join(
+        ', '
+      )} egress in the space`,
     ].join('\n')
   );
 };
@@ -207,6 +220,10 @@ const remove = async ({
   try {
     const kibanaUrl = await resolveKibanaBaseUrl(flags.kibanaUrl);
     const kibana = createJsonClient({ baseUrl: kibanaUrl, auth: flags.kibanaAuth, redactor });
+    await removeOrcaSpaceContext(kibana).then(
+      () => log.info('Removed the ORCA source code context and its egress from the space'),
+      (error: Error) => log.warning(`Could not update the space context: ${error.message}`)
+    );
     await updateInvestigatorConnectors(kibana, 'remove').then(
       (removed) => removed && log.info(`Removed ${ORCA_CONNECTOR_ID} from the investigator agent`),
       (error: Error) => log.warning(`Could not update the investigator agent: ${error.message}`)

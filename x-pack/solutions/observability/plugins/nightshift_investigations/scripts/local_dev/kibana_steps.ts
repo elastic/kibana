@@ -12,7 +12,16 @@ import {
   ensureNightshiftServiceAccountRoles,
   ensureNightshiftServiceAccounts,
 } from '@kbn/nightshift-shared';
-import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../common';
+import {
+  CUSTOM_CONTEXT_API_PATH,
+  NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+  ORCA_SANDBOX_ALLOWED_HOSTS,
+  ORCA_SOURCE_CODE_CONTEXT,
+  SANDBOX_ALLOWLIST_API_PATH,
+  type GetCustomContextResponse,
+  type GetSandboxAllowlistResponse,
+  type PutCustomContextRequest,
+} from '../../common';
 import { SANDBOX_CONNECTORS_API_PATH } from '../../common/sandbox_connectors';
 import type { GetSandboxConnectorsResponse } from '../../common/sandbox_connectors';
 import { ORCA_CONNECTOR_ID, ORCA_CONNECTOR_NAME } from './constants';
@@ -228,11 +237,61 @@ export const deleteOrcaConnector = async (kibana: JsonRequest): Promise<boolean>
     }
   );
 
+/**
+ * Gives the space what the ORCA evals give theirs: the custom context pointing at the demo's source
+ * code, and the sandbox egress to clone it. Snippets and hosts already in the space stay.
+ */
+export const addOrcaSpaceContext = async (
+  kibana: JsonRequest
+): Promise<{ addedContext: boolean; addedHosts: string[] }> => {
+  const context = await kibana<GetCustomContextResponse>(CUSTOM_CONTEXT_API_PATH);
+  const addedContext = !context.snippets.some(({ text }) => text === ORCA_SOURCE_CODE_CONTEXT);
+  if (addedContext) {
+    const body: PutCustomContextRequest = {
+      snippets: [
+        ...context.snippets.map(({ id, text }) => ({ id, text })),
+        { text: ORCA_SOURCE_CODE_CONTEXT },
+      ],
+      version: context.version,
+    };
+    await kibana(CUSTOM_CONTEXT_API_PATH, { method: 'PUT', body });
+  }
+  const { hosts } = await kibana<GetSandboxAllowlistResponse>(SANDBOX_ALLOWLIST_API_PATH);
+  const addedHosts = ORCA_SANDBOX_ALLOWED_HOSTS.filter((host) => !hosts.includes(host));
+  if (addedHosts.length > 0) {
+    await kibana(SANDBOX_ALLOWLIST_API_PATH, {
+      method: 'PUT',
+      body: { hosts: [...hosts, ...addedHosts] },
+    });
+  }
+  return { addedContext, addedHosts };
+};
+
+/** Removes the ORCA snippet and the hosts it needs from the space. */
+export const removeOrcaSpaceContext = async (kibana: JsonRequest): Promise<void> => {
+  const context = await kibana<GetCustomContextResponse>(CUSTOM_CONTEXT_API_PATH);
+  const snippets = context.snippets.filter(({ text }) => text !== ORCA_SOURCE_CODE_CONTEXT);
+  if (snippets.length !== context.snippets.length) {
+    const body: PutCustomContextRequest = {
+      snippets: snippets.map(({ id, text }) => ({ id, text })),
+      version: context.version,
+    };
+    await kibana(CUSTOM_CONTEXT_API_PATH, { method: 'PUT', body });
+  }
+  const { hosts } = await kibana<GetSandboxAllowlistResponse>(SANDBOX_ALLOWLIST_API_PATH);
+  const kept = hosts.filter((host) => !ORCA_SANDBOX_ALLOWED_HOSTS.includes(host));
+  if (kept.length !== hosts.length) {
+    await kibana(SANDBOX_ALLOWLIST_API_PATH, { method: 'PUT', body: { hosts: kept } });
+  }
+};
+
 export interface Verification {
   available: boolean;
   connectorListed: boolean;
   /** Whether the investigator's saved configuration holds the ORCA connector. */
   connectorOnInvestigator: boolean;
+  /** Whether the space holds the ORCA source code context and its sandbox egress. */
+  spaceContext: boolean;
   orcaLogCount?: number;
 }
 
@@ -255,6 +314,11 @@ export const verifySetup = async ({
   const { configuration } = await kibana<AgentResponse>(AGENT_PATH, {
     version: PUBLIC_API_VERSION,
   });
+  const context = await kibana<GetCustomContextResponse>(CUSTOM_CONTEXT_API_PATH);
+  const { hosts } = await kibana<GetSandboxAllowlistResponse>(SANDBOX_ALLOWLIST_API_PATH);
+  const spaceContext =
+    context.snippets.some(({ text }) => text === ORCA_SOURCE_CODE_CONTEXT) &&
+    ORCA_SANDBOX_ALLOWED_HOSTS.every((host) => hosts.includes(host));
   const response = await fetch(`${orca.url}/logs-orcabench.otel-*/_count`, {
     headers: { Authorization: `ApiKey ${orca.apiKey}` },
   });
@@ -265,6 +329,7 @@ export const verifySetup = async ({
     available,
     connectorListed: connectors.some(({ id }) => id === ORCA_CONNECTOR_ID),
     connectorOnInvestigator: (configuration?.connector_ids ?? []).includes(ORCA_CONNECTOR_ID),
+    spaceContext,
     orcaLogCount,
   };
 };

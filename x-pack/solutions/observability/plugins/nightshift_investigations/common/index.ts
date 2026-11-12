@@ -205,6 +205,7 @@ export {
   type PutSandboxAllowlistRequest,
   type PutSandboxAllowlistResponse,
 } from './sandbox_allowlist';
+export { ORCA_DEMO_COMMIT, ORCA_SANDBOX_ALLOWED_HOSTS, ORCA_SOURCE_CODE_CONTEXT } from './orca';
 export {
   CUSTOM_CONTEXT_API_PATH,
   MAX_CUSTOM_CONTEXT_SNIPPET_LENGTH,

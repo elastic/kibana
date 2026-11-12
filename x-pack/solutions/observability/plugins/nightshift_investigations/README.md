@@ -12,7 +12,8 @@ node x-pack/solutions/observability/plugins/nightshift_investigations/scripts/se
 ```
 
 It needs only dev Vault access. It writes a managed block to `config/kibana.dev.yml`, binds the
-default space to the Nightshift service accounts and saves the ORCA connector on the investigator.
+default space to the Nightshift service accounts, saves the ORCA connector on the investigator, and
+gives the space the ORCA evals' source code context with the `github.com` egress it needs.
 `--remove` undoes it. See the
 [`nightshift-local-dev` skill](../../../../../.agents/skills/nightshift-local-dev/SKILL.md) for
 what it changes, running ORCA questions, troubleshooting and rotating the shared credential.

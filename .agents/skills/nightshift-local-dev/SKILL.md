@@ -45,12 +45,16 @@ The script logs in to Vault when your token is missing or expired, then:
    service accounts (creating their roles in Elasticsearch), as the app's onboarding does.
 4. Creates the `.elasticsearch` connector `orcabench-es` (named `orcabench_es`, as in the evals) and
    saves it on the investigator agent, keeping its other connectors.
-5. Checks that investigations are available, that the connector is a sandbox connector saved on the
-   investigator, and that the key can count ORCA logs.
+5. Adds the ORCA evals' custom context snippet to the space, pointing the agent at the demo's source
+   (`github.com/open-telemetry/opentelemetry-demo` at ORCA's commit), and `github.com` to the space's
+   sandbox egress allowlist so it can clone it. Other snippets and hosts stay.
+6. Checks that investigations are available, that the connector is a sandbox connector saved on the
+   investigator, that the space holds the snippet and the host, and that the key can count ORCA
+   logs.
 
 Re-running changes nothing, unless the credential was rotated. Flags: `--dry-run` (print the block,
 secrets redacted), `--skip-connector` (only the config, Kibana not running yet), `--connector-only`
-(only the Kibana steps), `--remove` (delete the connector and the block), `--kibana-url`
+(only the Kibana steps), `--remove` (delete the connector, the snippet, the `github.com` egress and the block), `--kibana-url`
 (default `http://localhost:5601`; a dev base path is detected), `--kibana-auth` (default
 `elastic:changeme`), `--es-url` (default `http://localhost:9200`), `--kibana-config`.
 
