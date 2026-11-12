@@ -31,6 +31,7 @@ export const KnowledgeIndicatorSourceBadge = ({
   const badge = (
     <EuiBadge
       color="hollow"
+      css={{ maxWidth: '100%' }}
       iconType={iconType}
       iconSide={iconType ? 'left' : undefined}
       tabIndex={otherSourceTitles.length > 0 ? 0 : undefined}

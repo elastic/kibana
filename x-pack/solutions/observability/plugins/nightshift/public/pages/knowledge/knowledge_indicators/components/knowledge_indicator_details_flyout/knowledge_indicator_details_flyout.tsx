@@ -415,7 +415,7 @@ export function KnowledgeIndicatorDetailsFlyout({
                 </EuiFlexItem>
               </>
             )}
-            <EuiFlexItem>
+            <EuiFlexItem css={{ minWidth: 0 }}>
               <FlyoutMetadataCard title={STREAM_LABEL}>
                 <KnowledgeIndicatorSourceBadge
                   knowledgeIndicator={viewedKnowledgeIndicator}
