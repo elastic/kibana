@@ -16,7 +16,6 @@ import {
   SPANS_PER_DESTINATION_METRIC,
 } from '../../lib/apm/aggregators/create_span_metrics_aggregator';
 import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
-import type { ToolingLog } from '@kbn/tooling-log';
 
 // Test parameters
 const SUCCESSFUL_RATE = 25;
@@ -43,8 +42,7 @@ describe('span destination metrics', () => {
 
     const range = timerange(
       new Date('2021-01-01T00:00:00.000Z'),
-      new Date('2021-01-01T00:15:00.000Z'),
-      {} as ToolingLog
+      new Date('2021-01-01T00:15:00.000Z')
     );
 
     const serialized = [

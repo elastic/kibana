@@ -10,6 +10,7 @@
 import { subj } from '@kbn/test-subj-selector';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ElementHandle, Page } from 'playwright';
+import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
 import type { Retry } from '..';
 
 interface WaitForRenderArgs {
@@ -39,7 +40,25 @@ export class KibanaPage {
   }
 
   async waitForListViewTable() {
-    await this.page.waitForSelector(subj('table-is-ready'), { state: 'visible' });
+    // Content List keeps its table mounted while refetching and sets `aria-busy`
+    // for the duration, so exclude that state to avoid returning mid-fetch.
+    await this.page.waitForSelector(
+      `${subj('table-is-ready')}, ${subj(
+        CONTENT_LIST_TEST_SUBJECTS.table
+      )}:not([aria-busy="true"])`,
+      { state: 'visible' }
+    );
+  }
+
+  /**
+   * Locator for a listing item's link, scoped to the Content List table so a
+   * recently-viewed entry with the same name elsewhere on the page (solution
+   * navigation's Recent section) can't make this ambiguous.
+   */
+  listViewItemLink(title: string) {
+    return this.page
+      .locator(subj(CONTENT_LIST_TEST_SUBJECTS.table))
+      .getByRole('link', { name: title, exact: true });
   }
 
   async backToDashboardListing() {

@@ -9,6 +9,7 @@
     "@kbn/scout-synthtrace",
     "@kbn/synthtrace-client",
     "@kbn/rison",
+    "@kbn/management-settings-ids",
   ],
   "exclude": ["target/**/*"]
 }

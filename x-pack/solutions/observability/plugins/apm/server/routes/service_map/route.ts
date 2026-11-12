@@ -27,6 +27,7 @@ import { isServiceMapGroupingEnabled } from '../../lib/helpers/is_service_map_gr
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getServiceGroup } from '../service_groups/get_service_group';
+import { getServiceGroups } from '../service_groups/get_service_groups';
 import type { ServiceMapGrouping } from './get_service_map';
 import { getServiceMap } from './get_service_map';
 import type { ServiceStatsSource } from './get_enhanced_service_stats';
@@ -122,13 +123,27 @@ const serviceMapRoute = createApmServerRoute({
         }
       : { enabled: false };
 
-    const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      apmEventClient,
-      config,
-      start,
-      end,
-      kuery,
-    });
+    const serviceMapLogger = logger.get('serviceMap');
+
+    // Saved-group matching is only for the full map. A service group's own map skips it.
+    // A failed SO lookup leaves the map without saved-group labels (still loads).
+    const [savedServiceGroups, searchAggregatedTransactions] = await Promise.all([
+      grouping.enabled && !serviceName && !serviceGroupId
+        ? getServiceGroups({ savedObjectsClient }).catch((error): [] => {
+            serviceMapLogger.debug(`Unable to retrieve saved service groups for service maps.`, {
+              error,
+            });
+            return [];
+          })
+        : Promise.resolve([]),
+      getSearchTransactionsEvents({
+        apmEventClient,
+        config,
+        start,
+        end,
+        kuery,
+      }),
+    ]);
 
     return getServiceMap({
       mlClient,
@@ -137,11 +152,12 @@ const serviceMapRoute = createApmServerRoute({
       serviceName,
       environment,
       searchAggregatedTransactions,
-      logger: logger.get('serviceMap'),
+      logger: serviceMapLogger,
       start,
       end,
       maxNumberOfServices,
       serviceGroupKuery: serviceGroup?.kuery,
+      savedServiceGroups,
       kuery,
       esQuery: esQuery as { bool: BoolQuery } | undefined,
       grouping,

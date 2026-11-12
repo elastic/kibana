@@ -95,7 +95,7 @@ describe('autocomplete', () => {
   const sourceCommands = esqlCommandRegistry.getSourceCommandNames();
   const headerCommands = esqlCommandRegistry
     .getAllCommands()
-    .filter(({ metadata }) => metadata.type === 'header')
+    .filter(({ metadata }) => metadata.type === 'header' && !metadata.hidden)
     .map(({ name }) => name);
 
   const getSourceAndHeaderCommands = () => {
@@ -222,6 +222,69 @@ describe('autocomplete', () => {
       for (const text of hiddenAfterCommandsSuggestionTexts) {
         expect(suggestedTexts).not.toContain(text);
       }
+    });
+  });
+
+  describe('LET named subqueries', () => {
+    it.each([
+      ['LET subquery0 =/', ['(FROM $0);', '(ROW $0);', '(TS $0);']],
+      ['LET subquery0 =   /', ['(FROM $0);', '(ROW $0);', '(TS $0);']],
+      ['LET subquery0 = /;', ['(FROM $0)', '(ROW $0)', '(TS $0)']],
+    ])('suggests a subquery body after %s', async (query, expected) => {
+      const { suggest: suggestFn } = await setup();
+      const suggestions = await suggestFn(query);
+
+      expect(suggestions.map(({ text }) => text)).toEqual(expect.arrayContaining(expected));
+    });
+
+    it.each([
+      ['/', true],
+      ['SET unmapped_fields = "LOAD"; /', true],
+      ['LET a = (ROW x = 1);\n/', false],
+    ])('respects header command order for %s', async (query, suggestsSet) => {
+      const { suggest: suggestFn } = await setup();
+      const suggestedTexts = (await suggestFn(query)).map(({ text }) => text);
+
+      expect(suggestedTexts.includes('SET ')).toBe(suggestsSet);
+      expect(suggestedTexts).toContain('LET ');
+    });
+
+    it.each([
+      ['LET /', 'subquery0 = '],
+      ['LET subquery0 = (ROW x = 1); LET /', 'subquery1 = '],
+      ['LET subquery0 = (ROW x = 1); LET subquery1 = (ROW x = 2); LET /', 'subquery2 = '],
+      ['LET subquery1 = (ROW x = 1); LET /', 'subquery0 = '],
+    ])('suggests an unused binding name for %s', async (query, expected) => {
+      const { suggest: suggestFn } = await setup();
+      const suggestions = await suggestFn(query);
+
+      expect(suggestions.map(({ text }) => text)).toEqual([expected]);
+    });
+
+    it('suggests in FROM only the LET bindings declared before the cursor', async () => {
+      const { suggest: suggestFn } = await setup();
+      const suggestedTexts = (
+        await suggestFn('LET first = (FROM index); LET second = (FROM /); FROM second')
+      ).map((s) => s.text);
+
+      expect(suggestedTexts).toContain('first');
+      expect(suggestedTexts).not.toContain('second');
+    });
+
+    it('treats a LET binding name as a complete source', async () => {
+      const { suggest: suggestFn } = await setup();
+      const suggestedTexts = (await suggestFn('LET first = (FROM index); FROM first/')).map(
+        (s) => s.text
+      );
+
+      expect(suggestedTexts).toContain('first | ');
+    });
+
+    it('suggests a LET binding instead of the source with the same name', async () => {
+      const { suggest: suggestFn } = await setup();
+      const suggestions = await suggestFn('LET index = (ROW x = 1); FROM /');
+
+      expect(suggestions.filter(({ label }) => label === 'index')).toHaveLength(1);
     });
   });
 

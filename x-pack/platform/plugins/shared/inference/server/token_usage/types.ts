@@ -53,6 +53,7 @@ export interface TokenUsageDocument {
     thinking_tokens?: number;
     total_tokens: number;
     cached_tokens?: number;
+    cache_write_tokens?: number;
   };
   model: {
     model_id?: string;
@@ -85,6 +86,7 @@ export const mapTokenCountToDocument = ({
       ...(tokens.thinking !== undefined ? { thinking_tokens: tokens.thinking } : {}),
       total_tokens: tokens.total,
       ...(tokens.cached !== undefined ? { cached_tokens: tokens.cached } : {}),
+      ...(tokens.cacheWrite !== undefined ? { cache_write_tokens: tokens.cacheWrite } : {}),
     },
     model: {
       model_id: model ?? context.modelId,

@@ -63,44 +63,33 @@ apiTest.describe(
       }
     });
 
+    // In the default space, the only one Nightshift writes sources in. The source it creates is
+    // removed again before the assertions end, so the recommendation is back for the next suite.
     apiTest(
       'lists the All logs recommendation until a matching source exists',
-      async ({ apiClient, apiServices }) => {
-        const spaceId = `ns-recommended-${suffix}`;
-        await apiServices.spaces.create({ id: spaceId, name: spaceId });
+      async ({ apiClient }) => {
+        const hasAllLogsRecommendation = async (): Promise<boolean> => {
+          const response = await listRecommendedSources(apiClient, manager.cookieHeader);
+          expect(response).toHaveStatusCode(200);
+          const { recommendations } = response.body as RecommendedSourcesResponse;
+          return recommendations.some(({ id }) => id === 'logs');
+        };
+
+        expect(await hasAllLogsRecommendation()).toBe(true);
+
+        const created = await createSource(apiClient, manager.cookieHeader, {
+          title: `${TITLE_PREFIX}-${suffix}-recommended`,
+          esql: 'FROM logs*',
+        });
+        expect(created).toHaveStatusCode(200);
+        const sourceId = (created.body.source as NightshiftSource).id;
+
         try {
-          const hasAllLogsRecommendation = async (): Promise<boolean> => {
-            const response = await listRecommendedSources(apiClient, manager.cookieHeader, {
-              spaceId,
-            });
-            expect(response).toHaveStatusCode(200);
-            const { recommendations } = response.body as RecommendedSourcesResponse;
-            return recommendations.some(({ id }) => id === 'logs');
-          };
-
-          expect(await hasAllLogsRecommendation()).toBe(true);
-
-          const created = await createSource(
-            apiClient,
-            manager.cookieHeader,
-            {
-              title: `${TITLE_PREFIX}-${suffix}-recommended`,
-              esql: 'FROM logs*',
-            },
-            { spaceId }
-          );
-          expect(created).toHaveStatusCode(200);
-          const sourceId = (created.body.source as NightshiftSource).id;
-
-          try {
-            expect(await hasAllLogsRecommendation()).toBe(false);
-          } finally {
-            await deleteSourceChecked(apiClient, manager.cookieHeader, sourceId, { spaceId });
-          }
-          expect(await hasAllLogsRecommendation()).toBe(true);
+          expect(await hasAllLogsRecommendation()).toBe(false);
         } finally {
-          await apiServices.spaces.delete(spaceId);
+          await deleteSourceChecked(apiClient, manager.cookieHeader, sourceId);
         }
+        expect(await hasAllLogsRecommendation()).toBe(true);
       }
     );
 
@@ -451,32 +440,33 @@ apiTest.describe(
       }
     });
 
+    // The source is created in the default space, the only one Nightshift writes in, and listed
+    // by id from a second space: reads stay open there, so the id filter is still shown to be
+    // space-scoped rather than global.
     apiTest(
       'lists a source by id only in the space it belongs to',
       async ({ apiClient, apiServices }) => {
         const spaceId = `ns-ids-${suffix}`;
         await apiServices.spaces.create({ id: spaceId, name: spaceId });
         try {
-          const created = await createSource(
-            apiClient,
-            manager.cookieHeader,
-            { title: `${TITLE_PREFIX}-${suffix}-space`, esql: `FROM ${index}` },
-            { spaceId }
-          );
+          const created = await createSource(apiClient, manager.cookieHeader, {
+            title: `${TITLE_PREFIX}-${suffix}-space`,
+            esql: `FROM ${index}`,
+          });
           expect(created).toHaveStatusCode(200);
           const { id } = created.body.source;
           try {
+            const here = await listSources(apiClient, manager.cookieHeader, `ids=${id}`);
+            expect(here).toHaveStatusCode(200);
+            expect(listedIds(here.body)).toStrictEqual([id]);
+
             const there = await listSources(apiClient, manager.cookieHeader, `ids=${id}`, {
               spaceId,
             });
             expect(there).toHaveStatusCode(200);
-            expect(listedIds(there.body)).toStrictEqual([id]);
-
-            const here = await listSources(apiClient, manager.cookieHeader, `ids=${id}`);
-            expect(here).toHaveStatusCode(200);
-            expect(listedIds(here.body)).toStrictEqual([]);
+            expect(listedIds(there.body)).toStrictEqual([]);
           } finally {
-            await deleteSourceChecked(apiClient, manager.cookieHeader, id, { spaceId });
+            await deleteSourceChecked(apiClient, manager.cookieHeader, id);
           }
         } finally {
           await apiServices.spaces.delete(spaceId);
