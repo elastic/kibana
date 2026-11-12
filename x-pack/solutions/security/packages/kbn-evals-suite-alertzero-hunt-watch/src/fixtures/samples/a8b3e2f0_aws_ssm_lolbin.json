@@ -9,7 +9,7 @@
     "docs": [
       {
         "stream": "logs-aws.cloudtrail",
-        "at": -110,
+        "at": -120,
         "doc": {
           "event": {
             "category": [
@@ -56,7 +56,7 @@
       },
       {
         "stream": "logs-endpoint.events.process",
-        "at": -120,
+        "at": -110,
         "doc": {
           "event": {
             "category": [
@@ -79,7 +79,7 @@
           },
           "user": {
             "name": "root",
-            "id": "33"
+            "id": "0"
           },
           "process": {
             "name": "python3",
@@ -94,10 +94,10 @@
             "entity_id": "azqa-py-ssm",
             "working_directory": "/",
             "user": {
-              "id": "33"
+              "id": "0"
             },
             "real_user": {
-              "id": "33"
+              "id": "0"
             },
             "parent": {
               "name": "sh",
@@ -115,7 +115,7 @@
     "docs": [
       {
         "stream": "logs-aws.cloudtrail",
-        "at": -110,
+        "at": -120,
         "doc": {
           "event": {
             "category": [
@@ -162,7 +162,7 @@
       },
       {
         "stream": "logs-endpoint.events.process",
-        "at": -120,
+        "at": -110,
         "doc": {
           "event": {
             "category": [
@@ -185,7 +185,7 @@
           },
           "user": {
             "name": "root",
-            "id": "33"
+            "id": "0"
           },
           "process": {
             "name": "ls",
@@ -199,10 +199,10 @@
             "entity_id": "azqa-ls-ssm",
             "working_directory": "/",
             "user": {
-              "id": "33"
+              "id": "0"
             },
             "real_user": {
-              "id": "33"
+              "id": "0"
             },
             "parent": {
               "name": "sh",

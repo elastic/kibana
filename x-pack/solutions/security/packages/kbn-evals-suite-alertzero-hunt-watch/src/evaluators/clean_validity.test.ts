@@ -17,6 +17,7 @@ import {
   T1_APPLICABLE,
   T2_APPLICABLE,
   classifyHitIds,
+  classificationIsTotal,
   seededHitRecallTier1,
   seededHitRecallTier2,
 } from './clean_validity';
@@ -46,15 +47,6 @@ const manifest = loadManifest();
 const samples = loadSamples();
 const labels = buildLabels({ manifest, samples });
 
-/** rev7 proof() helper: asserts BASE != MUTANT, mirroring "FLIP=True". */
-const proof = (name: string, base: unknown, mutant: unknown): void => {
-  // The assertion is performed by the caller via expect(); this helper exists
-  // so each proof's base/mutant pair stays visually paired.
-  void name;
-  void base;
-  void mutant;
-};
-
 // ---------------------------------------------------------------- R4-B1
 describe('R4-B1: applicability is a report-class property (M3)', () => {
   // reviewer's B1 case: R-ioc[sinkhole-infra] E0, T1 reached, zero executed behaviours -> clean
@@ -69,7 +61,6 @@ describe('R4-B1: applicability is a report-class property (M3)', () => {
     const mutant = m3Verdict('R-ioc', fxIoc, {
       t2Applicable: { ...T2_APPLICABLE, 'R-ioc': true },
     }).verdict;
-    proof('R4-B1 R-ioc', base, mutant);
     expect(base).toBe('clean');
     expect(mutant).toBe('incomplete');
     expect(base).not.toBe(mutant); // FLIP
@@ -452,8 +443,9 @@ describe('NB-a: M2 classification totality + 5-key breakdown', () => {
     const hits = new Set(['f3475224#1#positive', 'f59668de#0#positive']);
     const totality = (crossChainOnly: boolean): string => {
       try {
+        const hitIds = [...hits];
         const classified = classifyHitIds({
-          hitIds: [...hits],
+          hitIds,
           technique: 'T1047',
           target: 'f3475224',
           chainOf,
@@ -462,7 +454,7 @@ describe('NB-a: M2 classification totality + 5-key breakdown', () => {
           buckets: {},
           crossChainOnly,
         });
-        return Object.values(classified).every((v) => v !== undefined) ? 'total' : 'INVALID';
+        return classificationIsTotal(hitIds, classified) ? 'total' : 'INVALID';
       } catch {
         return 'INVALID';
       }
@@ -501,7 +493,7 @@ describe('NB-a: M2 classification totality + 5-key breakdown', () => {
           planted,
           buckets: withFixtureBucket ? { fixture: new Set([fx]) } : {},
         });
-        return Object.values(classified).every((v) => v !== undefined) ? 'total' : 'INVALID';
+        return classificationIsTotal([fx], classified) ? 'total' : 'INVALID';
       } catch {
         return 'INVALID';
       }
@@ -594,7 +586,7 @@ describe('NB-b: sinkhole-infra excluded from the chain breakdown', () => {
 
 // ---------------------------------------------------------------- labels invariants
 describe('labels invariants over the vendored corpus', () => {
-  it('sample->chain mapping is total and injective over 32 samples', () => {
+  it('sample->chain mapping is total over 32 samples onto the 5 chains', () => {
     expect(Object.keys(samples)).toHaveLength(32);
     expect(Object.keys(labels.chainOf)).toHaveLength(32);
     expect(new Set(Object.values(labels.chainOf)).size).toBe(5);
@@ -654,14 +646,6 @@ describe('NB-8: recall is null, not 0, on a zero denominator', () => {
     expect(denominator).toBe(0);
     expect(recall).toBeNull();
   });
-
-  it('MUTANT: zero-denominator returns 0 instead of null', () => {
-    const base = seededHitRecallTier2({ behaviours: [], plantedBehaviours: [] }).recall;
-    const mutant = 0;
-    expect(base).toBeNull();
-    expect(mutant).toBe(0);
-    expect(base).not.toBe(mutant);
-  });
 });
 
 describe('unscorable planted behaviours never enter the Tier 2 denominator', () => {
@@ -691,11 +675,5 @@ describe('unscorable planted behaviours never enter the Tier 2 denominator', () 
     });
     expect(denominator).toBe(0);
     expect(recall).toBeNull();
-  });
-
-  it('MUTANT: including unscorable steps in the denominator scores 0.5', () => {
-    const mutant = 1 / planted.length;
-    expect(mutant).toBe(0.5);
-    expect(mutant).not.toBe(1);
   });
 });

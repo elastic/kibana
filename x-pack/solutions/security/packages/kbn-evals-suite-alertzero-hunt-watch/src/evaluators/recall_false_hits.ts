@@ -78,13 +78,13 @@ export const createSeededHitRecallTier1Evaluator = (): Evaluator<HuntExample, Hu
       value: m.value,
       hitIds: m.hitIds,
     }));
-    const { recall, denominator } = seededHitRecallTier1({
+    const { recall, denominator, matched } = seededHitRecallTier1({
       matchedIocs,
       plantedIocs,
     });
     return {
       score: denominator === 0 ? null : (recall as number),
-      label: `M1-T1 recall=${recall?.toFixed(2) ?? 'n/a'} (${matchedIocs.length}/${denominator})`,
+      label: `M1-T1 recall=${recall?.toFixed(2) ?? 'n/a'} (${matched.length}/${denominator})`,
       explanation:
         denominator === 0
           ? 'no planted IoCs requested by this report; tier 1 not applicable'

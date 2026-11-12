@@ -24,13 +24,19 @@ export const nestDottedKeys = (flat: Record<string, unknown>): Record<string, un
       const next = cursor[segment];
       if (typeof next === 'object' && next !== null && !Array.isArray(next)) {
         cursor = next as Record<string, unknown>;
-      } else {
+      } else if (next === undefined) {
         const created: Record<string, unknown> = {};
         cursor[segment] = created;
         cursor = created;
+      } else {
+        throw new Error(`nestDottedKeys: '${path}' nests under '${segment}', which holds a value`);
       }
     }
-    cursor[segments[segments.length - 1]] = value;
+    const leaf = segments[segments.length - 1];
+    if (leaf in cursor) {
+      throw new Error(`nestDottedKeys: '${path}' collides with a nested object at '${leaf}'`);
+    }
+    cursor[leaf] = value;
   }
   return nested;
 };

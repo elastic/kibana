@@ -442,7 +442,7 @@ chains:
     - T1218.010
     - T1218.011
     - T1566.001
-  - step: C2 connection (also covers the bits-mshta and linux-curl IoC domains)
+  - step: C2 connection to the seeded indicator domain
     rule_id: qa-custom-ti-domain-indicator-match
     rule_source: custom
     rule_name: 'QA custom: DNS lookup of a known-bad indicator domain'

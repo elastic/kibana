@@ -28,10 +28,6 @@ export const REPORT_CLASSES_BY_CHAIN: Record<string, ReportClass> = {
 export const PHASES: Phase[] = ['E0', 'E+', 'E-'];
 
 /**
- * Phases run in a fixed order on one stack per (model, rep): E0, then E+,
- * then E- (design v3 phase topology).
- */
-/**
  * Per-hunt Playwright budget (one coordinator run incl. Tier 2 model calls),
  * exported so the budget test can size the suite timeout from the fixture
  * count without importing playwright.config.ts (which requires live env).
@@ -39,6 +35,10 @@ export const PHASES: Phase[] = ['E0', 'E+', 'E-'];
 export const PER_HUNT_MS = 60_000;
 export const HUNT_REPORTS_PER_PHASE = 14;
 
+/**
+ * Phases run in a fixed order on one stack per (model, rep): E0, then E+,
+ * then E- (design v3 phase topology).
+ */
 export const phaseOrder = (): readonly Phase[] => PHASES;
 
 /**
@@ -75,7 +75,8 @@ export const nothingSearchedInvariantHolds = (run: {
  * plus lookback, the suite must not have added any alert to the space. The
  * gate is relative to the pre-run count so a shared endpoint with
  * pre-existing alerts (233 on one shared endpoint at time of writing) still passes:
- * only the delta the clean corpus itself produces invalidates the run.
+ * only alerts the clean corpus itself adds invalidate the run. A count that
+ * drops during the wait (pre-existing alerts expiring or being deleted) passes.
  * Implemented against the live stack by the eval spec; this helper formats
  * the assertion.
  */
@@ -83,13 +84,13 @@ export const corpusGateAlertsDeltaMustBeZero = (
   alertsBefore: number,
   alertsAfter: number
 ): ControlFailure | null =>
-  alertsAfter - alertsBefore === 0
+  alertsAfter <= alertsBefore
     ? null
     : {
         control: 'C1',
         detail: `E0 seeded ${
           alertsAfter - alertsBefore
-        } new alerts on top of the ${alertsBefore} pre-existing ones, expected a delta of 0`,
+        } new alerts on top of the ${alertsBefore} pre-existing ones, expected none`,
       };
 
 /**

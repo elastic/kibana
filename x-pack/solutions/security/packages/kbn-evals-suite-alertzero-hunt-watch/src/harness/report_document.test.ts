@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 import { REPORT_CLASSES_BY_CHAIN, phaseOrder } from './phases';
 import { buildReportSpecs } from '../fixtures/report_documents';
 import { loadManifest, loadSamples } from '../fixtures/load_corpus';
@@ -14,19 +16,32 @@ import { loadManifest, loadSamples } from '../fixtures/load_corpus';
  * load_report_context reads off `.kibana-threat-reports` (design v1 §4b: the
  * mapping strictness is inferred, so a drift here must fail the build, not the
  * run). The SUT list is duplicated intentionally: this is a pin, not an import
- * (the plugin is not a dependency of this package).
+ * (the plugin is not a dependency of this package). The last test parses the
+ * SUT's `_source` list so the copy cannot drift silently.
  */
 const LOAD_REPORT_CONTEXT_FIELDS = [
-  '@timestamp',
+  'content.published_at',
   'content.title',
   'content.body_text',
   'source.name',
   'severity.level',
+  'lineage.extraction_method',
   'extracted.iocs',
   'extracted.ttps.techniques',
   'extracted.vulnerability.vendor',
   'extracted.vulnerability.product',
 ];
+
+const LOAD_REPORT_CONTEXT_PATH = resolve(
+  __dirname,
+  '../../../../plugins/alertzero/server/services/watches/hunt/common/load_report_context.ts'
+);
+
+/** The `extracted.*` keys of a document that load_report_context never reads. */
+const unreadExtractedKeys = (document: Record<string, unknown>): string[] =>
+  Object.keys(document).filter(
+    (k) => k.startsWith('extracted.') && !LOAD_REPORT_CONTEXT_FIELDS.includes(k)
+  );
 
 /** What the ingest route accepts, per the SUT's HTTP schema (open document). */
 export interface ThreatReportDocument {
@@ -69,25 +84,23 @@ describe('extracted.* field names vs load_report_context', () => {
   });
 
   it('a report document using a wrong extracted.* name fails the pin', () => {
-    const bad: Record<string, unknown> = { 'extracted.ioc_list': [] };
-    const known = writtenExtractedFields();
-    const badKeys = Object.keys(bad).filter((k) => k.startsWith('extracted.'));
-    const unknown = badKeys.filter((k) => !known.includes(k));
-    expect(unknown).toEqual(['extracted.ioc_list']);
+    const [spec] = buildReportSpecs(manifest, samples, 'A');
+    expect(unreadExtractedKeys(spec.document)).toEqual([]);
+    expect(unreadExtractedKeys({ ...spec.document, 'extracted.ioc_list': [] })).toEqual([
+      'extracted.ioc_list',
+    ]);
   });
 
   it('the full read list is exactly what the SUT reads (drift breaks this test)', () => {
-    expect(LOAD_REPORT_CONTEXT_FIELDS).toEqual([
-      '@timestamp',
-      'content.title',
-      'content.body_text',
-      'source.name',
-      'severity.level',
-      'extracted.iocs',
-      'extracted.ttps.techniques',
-      'extracted.vulnerability.vendor',
-      'extracted.vulnerability.product',
-    ]);
+    const sut = readFileSync(LOAD_REPORT_CONTEXT_PATH, 'utf8');
+    const sourceList = /_source:\s*\[([^\]]*)\]/.exec(sut)?.[1];
+    expect(sourceList).toBeDefined();
+    // `evidence.*` is the hunt's own coverage ledger (write_hunt_evidence), not
+    // report content the suite seeds, so it is outside this pin.
+    const sutFields = [...(sourceList ?? '').matchAll(/'([^']+)'/g)]
+      .map((m) => m[1])
+      .filter((field) => !field.startsWith('evidence.'));
+    expect(LOAD_REPORT_CONTEXT_FIELDS).toEqual(sutFields);
   });
 
   it('report plan constants stay sane', () => {

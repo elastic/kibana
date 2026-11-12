@@ -4,7 +4,7 @@
     "file": "rules/custom/qa-ti-domain-indicator-match.json"
   },
   "chain": "encoded-powershell",
-  "step": "C2 connection (also covers the bits-mshta and linux-curl IoC domains)",
+  "step": "C2 connection to the seeded indicator domain",
   "positive": {
     "docs": [
       {

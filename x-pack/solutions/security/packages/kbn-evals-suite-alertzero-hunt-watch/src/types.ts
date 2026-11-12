@@ -37,12 +37,13 @@ export interface BehaviourRun {
   hits?: Array<{ _id: string; _index: string }>;
 }
 
-/** The coordinator step-output shape the harness reads (run_hunt_coordinator step output). */
+/** One Tier 1 hit as the coordinator reports it. */
 export interface Tier1HitRef {
   _id: string;
   _index: string;
 }
 
+/** The coordinator result the harness reads, taken from the run's result attachment. */
 export interface CoordinatorRun {
   tier1_status: HuntTier1Status;
   tier1_incomplete?: HuntIncompleteReason[];

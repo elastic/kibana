@@ -50,14 +50,13 @@ const ALERTS_INDEX = alertsIndexForSpace(SPACE_ID);
  * E0 + negative twins); reports are then ingested through the production route
  * with fresh ES-minted ids, the Worker is triggered manually with reportIds
  * (batches of 10, serialized — its concurrency is drop/max 1), and each
- * hunt's coordinator output is read from the `run_hunt_coordinator` step
- * output of the child execution. M1 (T1 and T2 separately), M2 FalseHitRate
+ * hunt's coordinator result is read from the completed `read_hunt_result`
+ * step of the child execution. M1 (T1 and T2 separately), M2 FalseHitRate
  * and M3 CleanValidity are CODE evaluators; no LLM judge is in the gate.
  *
  * The model under test drives the hunt: the `modelSettingsForHuntWatch` auto
- * fixture pins the alertzero frontier inference feature to the
- * connector under test, and the coordinator resolves its model from that
- * feature first. The Worker passes tier2_when='always' (HUNT_WORKER_DEFAULTS).
+ * fixture pins both alertzero inference tiers (Efficient and Frontier) to the
+ * connector under test, so every model call in a hunt resolves to it. The Worker passes tier2_when='always' (HUNT_WORKER_DEFAULTS).
  *
  * INVALID cells: the experiment always has METRICS_EXAMPLE_COUNT examples. A
  * report with no coordinator output, a per-batch candidates violation, or a
@@ -233,11 +232,16 @@ evaluate(
         ]
       );
     } finally {
+      // Separate attempts: a failed report delete must not skip the seeded-data reset.
       try {
         await huntWatchClient.deleteReports(ingestedReportIds);
+      } catch (e) {
+        log.warning(`[hunt-watch] cleanup of ingested reports failed: ${String(e)}`);
+      }
+      try {
         await seeder.reset();
       } catch (e) {
-        log.warning(`[hunt-watch] cleanup of seeded data failed: ${String(e)}`);
+        log.warning(`[hunt-watch] reset of seeded data failed: ${String(e)}`);
       }
     }
   }

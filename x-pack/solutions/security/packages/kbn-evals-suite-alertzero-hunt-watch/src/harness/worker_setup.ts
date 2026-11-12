@@ -140,34 +140,46 @@ export const ensureHuntWorkerEnabled = async (
     createdServiceAccountId = serviceAccountId;
   }
 
-  // 2. enable, with the current settings revision (optimistic concurrency)
-  const worker = await readWorker(kbnClient);
-  const prior: HuntWorkerPriorState = {
-    enabled: worker.enabled,
-    serviceAccountId: worker.settings?.serviceAccountId,
-    createdServiceAccountId,
-  };
-  if (!(worker.enabled && worker.settings?.serviceAccountId === serviceAccountId)) {
-    await kbnClient.request({
-      path: `${WORKERS_URL}/${encodeURIComponent(HUNT_WORKER_ID)}`,
-      method: 'PATCH',
-      headers: INTERNAL_HEADERS,
-      body: {
-        enabled: true,
-        settingsRevision: worker.settingsRevision,
-        settings: { serviceAccountId },
-      },
-    });
-  }
+  // A failure past this point would leak the account this run created, and the
+  // fixture never reaches its own teardown when setup throws.
+  let prior: HuntWorkerPriorState | undefined;
+  try {
+    // 2. enable, with the current settings revision (optimistic concurrency)
+    const worker = await readWorker(kbnClient);
+    prior = {
+      enabled: worker.enabled,
+      serviceAccountId: worker.settings?.serviceAccountId,
+      createdServiceAccountId,
+    };
+    if (!(worker.enabled && worker.settings?.serviceAccountId === serviceAccountId)) {
+      await kbnClient.request({
+        path: `${WORKERS_URL}/${encodeURIComponent(HUNT_WORKER_ID)}`,
+        method: 'PATCH',
+        headers: INTERNAL_HEADERS,
+        body: {
+          enabled: true,
+          settingsRevision: worker.settingsRevision,
+          settings: { serviceAccountId },
+        },
+      });
+    }
 
-  // 3. assert, never assume
-  const after2 = await readWorker(kbnClient);
-  if (!after2.enabled) {
-    throw new Error(
-      `[hunt-watch] hunt Worker is not enabled after setup (blockingReasons: ${JSON.stringify(
-        after2.blockingReasons ?? []
-      )})`
-    );
+    // 3. assert, never assume
+    const after2 = await readWorker(kbnClient);
+    if (!after2.enabled) {
+      throw new Error(
+        `[hunt-watch] hunt Worker is not enabled after setup (blockingReasons: ${JSON.stringify(
+          after2.blockingReasons ?? []
+        )})`
+      );
+    }
+  } catch (e) {
+    if (prior) {
+      await restoreHuntWorker(kbnClient, log, prior);
+    } else if (createdServiceAccountId) {
+      await deleteServiceAccount(kbnClient, log, createdServiceAccountId);
+    }
+    throw e;
   }
   log.info(`[hunt-watch] hunt Worker enabled with service account ${serviceAccountId}`);
   return { serviceAccountId, prior };
@@ -208,19 +220,23 @@ export const restoreHuntWorker = async (
     return; // the account may still be bound; deleting it would only fail
   }
   if (prior.createdServiceAccountId) {
-    try {
-      await kbnClient.request({
-        path: `${SERVICE_ACCOUNT_URL}/${encodeURIComponent(prior.createdServiceAccountId)}`,
-        method: 'DELETE',
-        headers: { 'x-elastic-internal-origin': 'Kibana', 'kbn-xsrf': 'true' },
-      });
-    } catch (e) {
-      log.warning(
-        `[hunt-watch] could not delete service account ${prior.createdServiceAccountId}: ${String(
-          e
-        )}`
-      );
-    }
+    await deleteServiceAccount(kbnClient, log, prior.createdServiceAccountId);
+  }
+};
+
+const deleteServiceAccount = async (
+  kbnClient: KbnClient,
+  log: ToolingLog,
+  id: string
+): Promise<void> => {
+  try {
+    await kbnClient.request({
+      path: `${SERVICE_ACCOUNT_URL}/${encodeURIComponent(id)}`,
+      method: 'DELETE',
+      headers: { 'x-elastic-internal-origin': 'Kibana', 'kbn-xsrf': 'true' },
+    });
+  } catch (e) {
+    log.warning(`[hunt-watch] could not delete service account ${id}: ${String(e)}`);
   }
 };
 

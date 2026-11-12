@@ -20,7 +20,6 @@ const samples = loadSamples();
 const labels = buildLabels({ manifest, samples });
 
 const CHAIN = labels.chainOf['00140285'];
-expect(CHAIN).toBeDefined();
 
 const baseRun: CoordinatorRun = {
   tier1_status: 'environment_hits_found',
@@ -60,12 +59,21 @@ const metadata = {
 };
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const eval_ = async (e: any, rec: HuntRunRecord): Promise<{ score: number | null }> =>
+const eval_ = async (
+  e: any,
+  rec: HuntRunRecord
+): Promise<{ score: number | null; label?: string }> =>
   e.evaluate({ output: rec, metadata, input: undefined, expected: undefined });
 
 /** All chain-scoped, scorable planted behaviours (the T2 denominator). */
 const scorableInChain = () =>
   labels.plantedBehaviours.filter((p) => p.chain === CHAIN && p.techniques.length > 0);
+
+describe('corpus anchor', () => {
+  it('sample 00140285 belongs to a chain', () => {
+    expect(CHAIN).toEqual(expect.any(String));
+  });
+});
 
 describe('M1/M2 CODE evaluator wiring (spec-level mutation proof)', () => {
   it('Tier 2 recall scores a planted, technique-matched, id-matched hit as found', async () => {
@@ -107,8 +115,15 @@ describe('M1/M2 CODE evaluator wiring (spec-level mutation proof)', () => {
     withIoc.tier1MatchedIocs = [{ value: planted.value, hitIds: [planted.docIds[0]] }];
     const score = await eval_(createSeededHitRecallTier1Evaluator(), withIoc);
     expect(score.score).toBe(1 / requested.length);
-    const none = await eval_(createSeededHitRecallTier1Evaluator(), withIoc);
-    void none;
+    // An unplanted match must not inflate the label's numerator past the score.
+    const withStray = { ...withIoc };
+    withStray.tier1MatchedIocs = [
+      ...withIoc.tier1MatchedIocs,
+      { value: 'unplanted.example.org', hitIds: ['x#0#positive'] },
+    ];
+    const strayScore = await eval_(createSeededHitRecallTier1Evaluator(), withStray);
+    expect(strayScore.score).toBe(1 / requested.length);
+    expect(strayScore.label).toContain(`(1/${requested.length})`);
     const noMatch = record();
     noMatch.reportClass = 'R-ioc';
     noMatch.chain = chainOfPlanted;
@@ -224,8 +239,14 @@ describe('M1/M2 CODE evaluator wiring (spec-level mutation proof)', () => {
       (p) => p.chain === CHAIN && p.techniques.length > 0
     );
     const first = chainSteps[0];
-    const other = chainSteps.find((p) => p !== first);
-    if (!other) return; // single-step chain: nothing to prove here
+    // Distinct means neither step carries the other's lead technique, so the
+    // first behaviour's technique would make these hits off-technique.
+    const other = chainSteps.find(
+      (p) =>
+        !p.techniques.includes(first.techniques[0]) && !first.techniques.includes(p.techniques[0])
+    );
+    expect(other).toBeDefined();
+    if (!other) throw new Error(`chain ${CHAIN} has no two steps with distinct techniques`);
     // First behaviour misses; the later behaviour hits its own technique's doc.
     const rec = record({
       behaviours: [

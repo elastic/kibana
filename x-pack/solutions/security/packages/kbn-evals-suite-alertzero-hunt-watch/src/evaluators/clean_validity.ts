@@ -66,8 +66,9 @@ const t1GapsHaveUnsearched = (gaps: Iterable<string>): boolean => {
 
 /**
  * M3 CleanValidity (design v6 §2 + rev7_check.py `m3`). `completeness` is read
- * off the wire and never re-derived from gap reasons; a missing field is an
- * INVALID cell (N3), never defaulted.
+ * off the wire and never re-derived from gap reasons. It gates `clean` only for
+ * T2-optional classes, where a missing field is an INVALID cell (N3), never
+ * defaulted; T2-required classes are decided by tier reachability alone.
  */
 export const m3Verdict = (
   cls: ReportClass,

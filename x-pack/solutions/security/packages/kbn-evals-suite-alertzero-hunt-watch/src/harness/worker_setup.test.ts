@@ -34,12 +34,14 @@ const makeServer = ({
   enableWorks = true,
   flavor = 'traditional',
   role = () => ({ metadata: { _reserved: true } }),
+  workerMissing = false,
 }: {
   accounts?: Array<{ id: string; name: string; enabled: boolean; assumable: boolean }>;
   worker?: { enabled: boolean; serviceAccountId?: string };
   enableWorks?: boolean;
   flavor?: string;
   role?: (name: string) => unknown;
+  workerMissing?: boolean;
 }) => {
   const requests: Req[] = [];
   const state = { ...worker };
@@ -56,6 +58,7 @@ const makeServer = ({
       return { data: { id: 'sa-new' } };
     }
     if (req.path === '/internal/alertzero/workers' && req.method === 'GET') {
+      if (workerMissing) return { data: { workers: [] } };
       return {
         data: {
           workers: [
@@ -174,9 +177,12 @@ describe('ensureHuntWorkerEnabled (B4)', () => {
     expect(requests.some((r) => r.method === 'POST')).toBe(false);
   });
 
-  it('does not recreate an account that is disabled or not assumable', async () => {
+  it.each([
+    ['not assumable', { enabled: true, assumable: false }],
+    ['disabled', { enabled: false, assumable: true }],
+  ])('creates a new account when the existing one is %s', async (_label, flags) => {
     const { kbnClient, requests } = makeServer({
-      accounts: [{ id: 'sa-1', name: HUNT_WORKER_ACCOUNT_NAME, enabled: true, assumable: false }],
+      accounts: [{ id: 'sa-1', name: HUNT_WORKER_ACCOUNT_NAME, ...flags }],
     });
     const out = await ensureHuntWorkerEnabled(kbnClient, log);
     expect(out.serviceAccountId).toBe('sa-new');
@@ -197,6 +203,31 @@ describe('ensureHuntWorkerEnabled (B4)', () => {
     await expect(ensureHuntWorkerEnabled(kbnClient, log)).rejects.toThrow(
       /not enabled after setup.*no_service_account/
     );
+  });
+
+  it('deletes the account it created when the Worker stays disabled', async () => {
+    const { kbnClient, requests } = makeServer({ enableWorks: false });
+    await expect(ensureHuntWorkerEnabled(kbnClient, log)).rejects.toThrow(/not enabled/);
+    expect(requests.filter((r) => r.method === 'DELETE').map((r) => r.path)).toEqual([
+      '/internal/security/service_account/sa-new',
+    ]);
+  });
+
+  it('deletes the account it created when the Worker is not registered', async () => {
+    const { kbnClient, requests } = makeServer({ workerMissing: true });
+    await expect(ensureHuntWorkerEnabled(kbnClient, log)).rejects.toThrow(/is not registered/);
+    expect(requests.filter((r) => r.method === 'DELETE').map((r) => r.path)).toEqual([
+      '/internal/security/service_account/sa-new',
+    ]);
+  });
+
+  it('never deletes a pre-existing account when setup fails', async () => {
+    const { kbnClient, requests } = makeServer({
+      accounts: [{ id: 'sa-pre', name: HUNT_WORKER_ACCOUNT_NAME, enabled: true, assumable: true }],
+      enableWorks: false,
+    });
+    await expect(ensureHuntWorkerEnabled(kbnClient, log)).rejects.toThrow(/not enabled/);
+    expect(requests.some((r) => r.method === 'DELETE')).toBe(false);
   });
 });
 

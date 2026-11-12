@@ -27,4 +27,8 @@ describe('C1 corpus gate (relative)', () => {
   it('fails when the index was empty and E0 alerts', () => {
     expect(corpusGateAlertsDeltaMustBeZero(0, 2)?.control).toBe('C1');
   });
+
+  it('passes when pre-existing alerts expire during the wait (negative delta)', () => {
+    expect(corpusGateAlertsDeltaMustBeZero(233, 230)).toBeNull();
+  });
 });

@@ -7,7 +7,10 @@
 
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import type { HuntCoordinatorResult } from '@kbn/alertzero-common';
+import {
+  HuntCoordinatorResult as HuntCoordinatorResultSchema,
+  type HuntCoordinatorResult,
+} from '@kbn/alertzero-common';
 import { isCoordinatorResult, wireToCoordinatorRun } from './wire_adapter';
 
 type Tier1 = HuntCoordinatorResult['tier1'];
@@ -223,9 +226,14 @@ describe('isCoordinatorResult', () => {
     readFileSync(resolve(__dirname, '__fixtures__/coordinator_output.captured.json'), 'utf8')
   );
 
-  it('type-checks the captured output against the wire type', () => {
-    const typed: HuntCoordinatorResult = captured;
-    expect(typeof typed.run_id === 'string').toBe(true);
+  it('the captured output parses against the wire schema', () => {
+    // report_intent_targets became required after this output was captured.
+    const parsed = HuntCoordinatorResultSchema.safeParse({
+      ...captured,
+      report_intent_targets: [],
+    });
+    expect(parsed.success ? [] : parsed.error.issues).toEqual([]);
+    expect(captured.run_id).toEqual(expect.any(String));
   });
 
   it('accepts the captured real output (no kibana.request wrapper)', () => {

@@ -52,13 +52,11 @@ const titleCase = (s: string): string =>
     .join(' ');
 
 /**
- * The R-beh narrative: the chain's step descriptions joined into prose.
- * Technique ATT&CK names are not restated (Tier 2 must extract them), and no
- * E+ token (host, user, zone, hash, rule name) appears: the vendored step
- * texts mention the chains' users and hosts, so every token that also occurs
- * in the seeded samples is redacted here (same leaf flattening and token
- * family as the C2 audit in harness/phases.ts; duplicated because fixtures
- * cannot import the harness — the harness imports the fixtures).
+ * Redacts every E+ token (host, user, zone, hash) that also occurs in the
+ * seeded samples: the vendored step texts mention the chains' users and
+ * hosts. Same leaf flattening and token family as the C2 audit in
+ * harness/phases.ts; duplicated because fixtures cannot import the harness
+ * (the harness imports the fixtures).
  */
 const redactSeededTokens = (text: string, seededTexts: string[], extraTokens: string[] = []) => {
   const tokens = new Set<string>();
@@ -91,6 +89,11 @@ const flattenLeaves = (doc: unknown, prefix = ''): string => {
   return `${prefix}: ${String(doc)}`;
 };
 
+/**
+ * The R-beh narrative: the chain's step descriptions joined into prose, with
+ * seeded tokens redacted. Technique ATT&CK names are not restated: Tier 2 must
+ * extract them.
+ */
 const behaviourNarrative = (
   chainSteps: ReadonlyArray<Record<string, unknown>>,
   seededTexts: string[],

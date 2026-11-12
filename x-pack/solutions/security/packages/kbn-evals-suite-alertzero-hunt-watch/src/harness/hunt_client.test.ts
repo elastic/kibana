@@ -110,7 +110,7 @@ const makeServer = ({
     pollIntervalMs: 1,
     maxWaitMs: 50,
   });
-  return { client, requests, refresh, deleteByQuery };
+  return { client, requests, request, refresh, deleteByQuery };
 };
 
 describe('HuntWatchClient.ingestThreatReport', () => {
@@ -220,14 +220,13 @@ describe('HuntWatchClient.runHunts', () => {
   });
 
   it('B8: refreshes the reports index before the candidates call', async () => {
-    const { client, requests, refresh } = makeServer({
+    const { client, requests, request, refresh } = makeServer({
       children: [{ executionId: 'c1', reportId: 'rep-1', output: coordinatorOutput('d1') }],
     });
     await client.runHunts(['rep-1']);
     expect(refresh).toHaveBeenCalledWith({ index: '.kibana-threat-reports' });
-    const refreshOrder = refresh.mock.invocationCallOrder[0];
-    expect(refreshOrder).toBeDefined();
     expect(requests[0].path).toBe('/internal/alertzero/hunt/candidates');
+    expect(refresh.mock.invocationCallOrder[0]).toBeLessThan(request.mock.invocationCallOrder[0]);
   });
 
   it('a child whose output is not a coordinator response is absent from runs (caller marks it INVALID)', async () => {

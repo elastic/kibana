@@ -35,4 +35,9 @@ describe('nestDottedKeys', () => {
   it('leaves undotted keys alone', () => {
     expect(nestDottedKeys({ space_id: 'default' })).toEqual({ space_id: 'default' });
   });
+
+  it('throws when a scalar and an object claim the same path, in either order', () => {
+    expect(() => nestDottedKeys({ content: 'x', 'content.title': 'T' })).toThrow(/holds a value/);
+    expect(() => nestDottedKeys({ 'content.title': 'T', content: 'x' })).toThrow(/collides/);
+  });
 });
