@@ -7,48 +7,14 @@
 
 import { MAX_GROUP_SIZE } from './constants';
 import { inferGroupsFromCalls } from './infer_groups_from_calls';
-import { adjustedRandIndex, seededRandom, syntheticEstate } from './test_helpers';
+import {
+  adjustedRandIndex,
+  isConnected,
+  membersByGroup,
+  shuffled,
+  syntheticEstate,
+} from './test_helpers';
 import type { WeightedEdge } from './types';
-
-function membersByGroup(groups: ReadonlyMap<string, number>): string[][] {
-  const members = new Map<number, string[]>();
-  for (const [service, group] of groups) {
-    members.set(group, [...(members.get(group) ?? []), service]);
-  }
-  return [...members.values()];
-}
-
-function isConnected(members: readonly string[], edges: readonly WeightedEdge[]): boolean {
-  const inGroup = new Set(members);
-  const neighbours = new Map<string, string[]>();
-  for (const { source, target } of edges) {
-    if (inGroup.has(source) && inGroup.has(target)) {
-      neighbours.set(source, [...(neighbours.get(source) ?? []), target]);
-      neighbours.set(target, [...(neighbours.get(target) ?? []), source]);
-    }
-  }
-  const reached = new Set([members[0]]);
-  const queue = [members[0]];
-  for (let position = 0; position < queue.length; position++) {
-    for (const next of neighbours.get(queue[position]) ?? []) {
-      if (!reached.has(next)) {
-        reached.add(next);
-        queue.push(next);
-      }
-    }
-  }
-  return reached.size === members.length;
-}
-
-function shuffled<T>(items: readonly T[], seed: number): T[] {
-  const random = seededRandom(seed);
-  const result = [...items];
-  for (let index = result.length - 1; index > 0; index--) {
-    const other = Math.floor(random() * (index + 1));
-    [result[index], result[other]] = [result[other], result[index]];
-  }
-  return result;
-}
 
 function star(leaves: number): { services: string[]; edges: WeightedEdge[] } {
   const services = ['hub', ...Array.from({ length: leaves }, (_, index) => `leaf-${index}`)];

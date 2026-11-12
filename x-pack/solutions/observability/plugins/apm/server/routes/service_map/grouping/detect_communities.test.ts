@@ -7,17 +7,7 @@
 
 import type { WeightedEdge } from './types';
 import { detectCommunities } from './detect_communities';
-import { adjustedRandIndex, seededRandom, syntheticEstate } from './test_helpers';
-
-function shuffled<T>(items: readonly T[], seed: number): T[] {
-  const random = seededRandom(seed);
-  const result = [...items];
-  for (let index = result.length - 1; index > 0; index--) {
-    const other = Math.floor(random() * (index + 1));
-    [result[index], result[other]] = [result[other], result[index]];
-  }
-  return result;
-}
+import { adjustedRandIndex, seededRandom, shuffled, syntheticEstate } from './test_helpers';
 
 describe('detectCommunities', () => {
   it('finds two cliques joined by one call', () => {

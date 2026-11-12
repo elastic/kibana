@@ -8,7 +8,7 @@
 /** Test helpers for grouping: synthetic estates whose teams are known, and grading against them. */
 
 import type { MatchedServiceCallGraph } from './match_service_call_graph';
-import type { WeightedEdge } from './types';
+import type { ServiceCallStats, WeightedEdge } from './types';
 import { compareNames } from './utils';
 import { recordByService } from '../record_by_service';
 
@@ -31,6 +31,8 @@ export interface SyntheticEstate {
    * `log(1 + calls)`. Built here, so tests of later steps don't depend on the edge builder.
    */
   edges: WeightedEdge[];
+  /** Each service's callers, neighbours and calls, as `getCallGraphEdges` would give them. */
+  stats: Map<string, ServiceCallStats>;
   /** The team that owns each service: the grouping a good method should recover. */
   teamOf: Map<string, string>;
   /** Services every team calls. */
@@ -40,6 +42,7 @@ export interface SyntheticEstate {
 /**
  * Teams of services that mostly call each other, plus shared services (auth, a gateway's
  * backends) that every team calls. Each call adds one to the count of its caller and callee.
+ * Extra services and calls are added last, so they leave the rest of the estate as it was.
  */
 export function syntheticEstate({
   teams,
@@ -49,6 +52,8 @@ export function syntheticEstate({
   sharedServices = 0,
   seed = 1,
   namedByTeam = false,
+  extraServices = [],
+  extraCalls = [],
 }: {
   teams: number;
   servicesPerTeam: number;
@@ -59,6 +64,10 @@ export function syntheticEstate({
   seed?: number;
   /** Name services after their team (`t3-s1`), else with a neutral name (`svc-0417`). */
   namedByTeam?: boolean;
+  /** Services outside the teams, such as idle ones or a gateway. Their team is `extra`. */
+  extraServices?: readonly string[];
+  /** Calls to add, one each, as `[caller, callee]`. */
+  extraCalls?: ReadonlyArray<readonly [string, string]>;
 }): SyntheticEstate {
   const random = seededRandom(seed);
   const teamOf = new Map<string, string>();
@@ -76,14 +85,26 @@ export function syntheticEstate({
   }
   const shared = Array.from({ length: sharedServices }, (_, index) => `shared-${index}`);
   shared.forEach((service) => teamOf.set(service, 'shared'));
+  extraServices.forEach((service) => teamOf.set(service, 'extra'));
 
   const counts = new Map<string, Map<string, number>>();
   // calls between each pair, both ways, under the name that sorts first
   const pairs = new Map<string, Map<string, number>>();
+  const callers = new Map<string, Set<string>>();
+  const neighbours = new Map<string, Set<string>>();
+  const traffic = new Map<string, number>();
+  const addTo = (sets: Map<string, Set<string>>, key: string, value: string) =>
+    sets.set(key, (sets.get(key) ?? new Set<string>()).add(value));
   const call = (caller: string, callee: string) => {
     const callees = counts.get(caller) ?? new Map<string, number>();
     callees.set(callee, (callees.get(callee) ?? 0) + 1);
     counts.set(caller, callees);
+
+    addTo(callers, callee, caller);
+    addTo(neighbours, caller, callee);
+    addTo(neighbours, callee, caller);
+    traffic.set(caller, (traffic.get(caller) ?? 0) + 1);
+    traffic.set(callee, (traffic.get(callee) ?? 0) + 1);
 
     const [source, target] = compareNames(caller, callee) < 0 ? [caller, callee] : [callee, caller];
     const targets = pairs.get(source) ?? new Map<string, number>();
@@ -109,9 +130,11 @@ export function syntheticEstate({
       }
     }
   });
+  extraCalls.forEach(([caller, callee]) => call(caller, callee));
 
+  const services = [...teamOf.keys()];
   return {
-    services: [...teamOf.keys()],
+    services,
     callGraph: recordByService(
       [...counts].map(([caller, callees]) => [
         caller,
@@ -123,6 +146,16 @@ export function syntheticEstate({
         [...targets].map(([target, calls]) => ({ source, target, weight: Math.log1p(calls) }))
       )
       .sort((a, b) => compareNames(a.source, b.source) || compareNames(a.target, b.target)),
+    stats: new Map(
+      services.map((service) => [
+        service,
+        {
+          callers: callers.get(service)?.size ?? 0,
+          neighbours: neighbours.get(service)?.size ?? 0,
+          traffic: traffic.get(service) ?? 0,
+        },
+      ])
+    ),
     teamOf,
     shared,
   };
@@ -163,4 +196,47 @@ export function adjustedRandIndex<Truth, Found>({
   const expectedIndex = (rowSum * columnSum) / choose2(services.length);
   const maxIndex = (rowSum + columnSum) / 2;
   return maxIndex === expectedIndex ? 1 : (index - expectedIndex) / (maxIndex - expectedIndex);
+}
+
+/** The items in a seeded random order. */
+export function shuffled<T>(items: readonly T[], seed: number): T[] {
+  const random = seededRandom(seed);
+  const result = [...items];
+  for (let index = result.length - 1; index > 0; index--) {
+    const other = Math.floor(random() * (index + 1));
+    [result[index], result[other]] = [result[other], result[index]];
+  }
+  return result;
+}
+
+/** Each group's services. */
+export function membersByGroup<Group>(groups: ReadonlyMap<string, Group>): string[][] {
+  const members = new Map<Group, string[]>();
+  for (const [service, group] of groups) {
+    members.set(group, [...(members.get(group) ?? []), service]);
+  }
+  return [...members.values()];
+}
+
+/** Whether every service can reach every other through the edges between them. */
+export function isConnected(members: readonly string[], edges: readonly WeightedEdge[]): boolean {
+  const inGroup = new Set(members);
+  const neighbours = new Map<string, string[]>();
+  for (const { source, target } of edges) {
+    if (inGroup.has(source) && inGroup.has(target)) {
+      neighbours.set(source, [...(neighbours.get(source) ?? []), target]);
+      neighbours.set(target, [...(neighbours.get(target) ?? []), source]);
+    }
+  }
+  const reached = new Set(members.slice(0, 1));
+  const queue = members.slice(0, 1);
+  for (let position = 0; position < queue.length; position++) {
+    for (const next of neighbours.get(queue[position]) ?? []) {
+      if (!reached.has(next)) {
+        reached.add(next);
+        queue.push(next);
+      }
+    }
+  }
+  return reached.size === members.length;
 }
