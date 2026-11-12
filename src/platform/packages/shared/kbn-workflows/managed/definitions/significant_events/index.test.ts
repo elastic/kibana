@@ -256,10 +256,10 @@ describe('significant events persistence workflow contracts', () => {
 
     expect(parseInt(loop.timeout ?? '', 10)).toBeLessThan(parseInt(settings.timeout, 10));
     expect(loop['on-failure']).toEqual({ continue: true });
-    expect(requireStep(featuresIdentification, 'check_no_success').condition).toBe(
+    expect(requireStep(featuresIdentification, 'check_all_failed').condition).toBe(
       '${{ variables.hasSuccess == false and steps.prepare.output.hasDocuments != false }}'
     );
-    expect(requireStep(featuresIdentification, 'no_success').with?.message).toContain(
+    expect(requireStep(featuresIdentification, 'all_failed').with?.message).toContain(
       '{{ steps.identify_loop.error.message }}'
     );
   });

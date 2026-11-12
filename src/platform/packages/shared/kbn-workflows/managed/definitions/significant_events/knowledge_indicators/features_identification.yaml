@@ -6,7 +6,7 @@
 #   init → while(iterationCount < max) {
 #     prepare → if(noDocuments) break → identify_inferred → update_state → mark_success
 #     → track_convergence → if(converged) break
-#   } → if(noSuccess) fail → identify_computed → output
+#   } → if(allFailed) fail → identify_computed → output
 #
 # The loop has its own time budget, below the workflow timeout. Running out of
 # it, or any other loop failure, ends the loop but not the run: with at least
@@ -224,14 +224,14 @@ steps:
   # -----------------------------------------------------------------------
   # Step 3: Fail if no iteration succeeded, unless the source had no documents.
   # -----------------------------------------------------------------------
-  - name: check_no_success
+  - name: check_all_failed
     type: if
     condition: "${{ variables.hasSuccess == false and steps.prepare.output.hasDocuments != false }}"
     steps:
-      - name: no_success
+      - name: all_failed
         type: workflow.fail
         with:
-          message: "No LLM iteration succeeded for source {{ inputs.sourceId }}{% if steps.identify_loop.error.message %}: {{ steps.identify_loop.error.message }}{% endif %}"
+          message: "All LLM iterations failed for source {{ inputs.sourceId }}{% if steps.identify_loop.error.message %}: {{ steps.identify_loop.error.message }}{% endif %}"
 
   # -----------------------------------------------------------------------
   # Step 4: Identify computed features.
