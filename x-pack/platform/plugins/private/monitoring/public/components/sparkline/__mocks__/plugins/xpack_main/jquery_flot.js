@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-env jest */
-
 export function $() {
   return {
     on: jest.fn(),
