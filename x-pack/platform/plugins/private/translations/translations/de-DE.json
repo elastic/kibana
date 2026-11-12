@@ -47402,7 +47402,6 @@
     "xpack.nightshift.investigations.sectionLoadingErrorTitle": "Untersuchungen können nicht geladen werden",
     "xpack.nightshift.investigations.sectionRefreshWarningTitle": "Die zuletzt geladenen Ergebnisse werden angezeigt; die Aktualisierung ist fehlgeschlagen.",
     "xpack.nightshift.investigations.sectionRetryAriaLabel": "Versuchen Sie erneut, {sectionTitle} Untersuchungen zu laden",
-    "xpack.nightshift.investigations.severityTileCountAriaLabel": "{severityLabel} Untersuchungsanzahl",
     "xpack.nightshift.investigations.unavailableTitle": "Untersuchungen sind in diesem Deployment nicht verfügbar",
     "xpack.nightshift.knowledge.decisionTrees.allTreesTitle": "Alle Bäume",
     "xpack.nightshift.knowledge.decisionTrees.changes.edgesAdded": "{count} Kanten hinzugefügt",

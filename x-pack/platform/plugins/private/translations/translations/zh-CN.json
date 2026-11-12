@@ -47501,7 +47501,6 @@
     "xpack.nightshift.investigations.sectionLoadingErrorTitle": "无法加载调查",
     "xpack.nightshift.investigations.sectionRefreshWarningTitle": "正在显示最后加载的结果；刷新失败。",
     "xpack.nightshift.investigations.sectionRetryAriaLabel": "重试加载 {sectionTitle} 项调查",
-    "xpack.nightshift.investigations.severityTileCountAriaLabel": "{severityLabel} 调查数",
     "xpack.nightshift.investigations.unavailableTitle": "调查功能在此部署中不可用",
     "xpack.nightshift.knowledge.decisionTrees.allTreesTitle": "所有树",
     "xpack.nightshift.knowledge.decisionTrees.changes.edgesAdded": "{count} 条边已添加",

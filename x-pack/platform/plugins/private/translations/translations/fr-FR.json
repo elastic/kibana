@@ -47312,7 +47312,6 @@
     "xpack.nightshift.investigations.sectionLoadingErrorTitle": "Impossible de charger les investigations",
     "xpack.nightshift.investigations.sectionRefreshWarningTitle": "Affichage des derniers résultats chargés ; l’actualisation a échoué.",
     "xpack.nightshift.investigations.sectionRetryAriaLabel": "Réessayez de charger {sectionTitle} investigations",
-    "xpack.nightshift.investigations.severityTileCountAriaLabel": "{severityLabel} nombre d’investigations",
     "xpack.nightshift.investigations.unavailableTitle": "Les investigations ne sont pas disponibles dans ce déploiement",
     "xpack.nightshift.knowledge.decisionTrees.allTreesTitle": "Tous les arbres",
     "xpack.nightshift.knowledge.decisionTrees.changes.edgesAdded": "{count} arêtes ajoutées",
