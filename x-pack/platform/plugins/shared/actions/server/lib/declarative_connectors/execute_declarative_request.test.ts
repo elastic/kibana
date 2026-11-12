@@ -458,6 +458,67 @@ describe('executeDeclarativeRequest', () => {
     ).rejects.toThrow('Response path "data" not found');
   });
 
+  it('only resolves own properties in dataPath', async () => {
+    for (const { data, dataPath } of [
+      { data: {}, dataPath: 'toString' },
+      { data: { data: {} }, dataPath: 'data.toString' },
+    ]) {
+      const ordinary = createRecordingAxiosClient({}, () => ({
+        data,
+        status: 200,
+        headers: {},
+      }));
+      await expect(
+        executeDeclarativeRequest({
+          client: ordinary.client,
+          request: {
+            method: 'GET',
+            url: 'https://api.example/items',
+            response: { dataPath },
+          },
+          input: {},
+          config: {},
+        })
+      ).rejects.toThrow(`Response path "${dataPath}" not found`);
+    }
+
+    const inherited = createRecordingAxiosClient({}, () => ({
+      data: Object.create({ inherited: true }),
+      status: 200,
+      headers: {},
+    }));
+    await expect(
+      executeDeclarativeRequest({
+        client: inherited.client,
+        request: {
+          method: 'GET',
+          url: 'https://api.example/items',
+          response: { dataPath: 'inherited' },
+        },
+        input: {},
+        config: {},
+      })
+    ).rejects.toThrow('Response path "inherited" not found');
+
+    const ownPrototypeKey = createRecordingAxiosClient({}, () => ({
+      data: JSON.parse('{"toString":"own value"}'),
+      status: 200,
+      headers: {},
+    }));
+    await expect(
+      executeDeclarativeRequest({
+        client: ownPrototypeKey.client,
+        request: {
+          method: 'GET',
+          url: 'https://api.example/items',
+          response: { dataPath: 'toString' },
+        },
+        input: {},
+        config: {},
+      })
+    ).resolves.toEqual({ data: 'own value' });
+  });
+
   it('maps data and raw Link headers without adding rate limit metadata', async () => {
     const rawLink = '<https://api.example/items?page=2>; rel="next"';
     const response = createRecordingAxiosClient({}, () => ({

@@ -219,7 +219,11 @@ const toHttpError = (response: ClientResponse): HttpError => {
 const getPath = (value: unknown, path: string): { found: boolean; value: unknown } => {
   let current = value;
   for (const segment of path.split('.')) {
-    if (current === null || typeof current !== 'object' || !(segment in (current as object))) {
+    if (
+      current === null ||
+      typeof current !== 'object' ||
+      !Object.prototype.hasOwnProperty.call(current, segment)
+    ) {
       return { found: false, value: undefined };
     }
     current = (current as Record<string, unknown>)[segment];
