@@ -41,7 +41,7 @@ const formatOptions = (
   excludedValues?: string[],
   showCount?: boolean
 ): EuiSelectableOption[] => {
-  const uniqueValues: Record<string, { count: number; tooltip?: string }> = {};
+  const uniqueValues: Record<string, { count?: number; tooltip?: string }> = {};
 
   values?.forEach(({ label, count, tooltip }) => {
     uniqueValues[label] = { count, tooltip };
@@ -49,32 +49,34 @@ const formatOptions = (
 
   // Apply reads `options`, not `selectedValue`. Keep applied selections in the
   // list when suggestions omit them (search filter, or a refetch of the
-  // already-filtered set) so Apply cannot drop them.
+  // already-filtered set) so Apply cannot drop them. They have no known count,
+  // so none is shown rather than a misleading 0.
   const ensureLabel = (label: string) => {
     if (uniqueValues[label] === undefined) {
-      uniqueValues[label] = { count: 0 };
+      uniqueValues[label] = {};
     }
   };
   selectedValue?.forEach(ensureLabel);
   excludedValues?.forEach(ensureLabel);
 
   return Object.entries(uniqueValues).map(([label, { count, tooltip }]) => {
-    const counter = (
-      <Counter>
-        <EuiText size="xs">{count}</EuiText>
-      </Counter>
-    );
+    const counter =
+      count === undefined ? null : (
+        <Counter>
+          <EuiText size="xs">{count}</EuiText>
+        </Counter>
+      );
     const tooltipIcon = <EuiIconTip type="question" color="subdued" content={tooltip} />;
 
     let append: EuiSelectableOption['append'] = null;
-    if (showCount && tooltip) {
+    if (showCount && counter && tooltip) {
       append = (
         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>{counter}</EuiFlexItem>
           <EuiFlexItem grow={false}>{tooltipIcon}</EuiFlexItem>
         </EuiFlexGroup>
       );
-    } else if (showCount) {
+    } else if (showCount && counter) {
       append = counter;
     } else if (tooltip) {
       append = tooltipIcon;
@@ -87,6 +89,24 @@ const formatOptions = (
       ...(excludedValues?.includes(label) ? { checked: 'off' } : {}),
     };
   });
+};
+
+// Rebuilds the list from fresh suggestions while keeping what the user has checked so far,
+// including checked options the new suggestions no longer list.
+const carryOverChecks = (
+  next: EuiSelectableOption[],
+  current: EuiSelectableOption[]
+): EuiSelectableOption[] => {
+  const currentByLabel = new Map(current.map((option) => [option.label, option]));
+  const nextLabels = new Set(next.map(({ label }) => label));
+
+  const merged = next.map(({ checked: _checked, ...option }) => {
+    const checked = currentByLabel.get(option.label)?.checked;
+    return checked ? { ...option, checked } : option;
+  });
+  const omitted = current.filter(({ label, checked }) => checked && !nextLabels.has(label));
+
+  return [...merged, ...omitted];
 };
 
 export function FieldValueSelection({
@@ -139,15 +159,13 @@ export function FieldValueSelection({
     previousSelectedValueKey.current = selectedValueKey;
 
     setOptions((current) => {
-      // A suggestions refetch while the popover is open would otherwise rebuild
-      // `options` from props and wipe in-progress checks (and, without the
-      // selectedValue union above, drop tags missing from the new list). A changed
-      // applied selection must still win, otherwise a selection that lands after
-      // the popover opened leaves the list stuck on the old checks.
-      if ((isPopoverOpen || forceOpen) && current.length > 0 && !selectionChanged) {
-        return current;
-      }
-      return formatOptions(values, selectedValue, excludedValue, showCount);
+      const next = formatOptions(values, selectedValue, excludedValue, showCount);
+      // New suggestions can arrive while the popover is open (a refetch, or results for
+      // the typed search). Show them, but keep the checks made so far: rebuilding from
+      // props alone would wipe them. A changed applied selection takes precedence.
+      return (isPopoverOpen || forceOpen) && !selectionChanged
+        ? carryOverChecks(next, current)
+        : next;
     });
     // values/selectedValue are represented by the serialized keys above.
     // eslint-disable-next-line react-hooks/exhaustive-deps
