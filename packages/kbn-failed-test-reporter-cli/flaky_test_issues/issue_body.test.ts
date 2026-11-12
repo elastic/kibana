@@ -781,18 +781,22 @@ describe('refreshing a suite issue', () => {
     expect(metadata?.['report.history'][29].generatedAt).toBe('2026-09-09T09:04:41.000Z');
   });
 
-  it('says in one sentence where the suite is still flaky when it is a single branch', () => {
+  it('names the branch in the first line when it is a single one, and the test even when it is alone', () => {
     const { suite, report } = singleTestReport();
 
     expect(renderFlakySuiteIssueComment(suite, { report, reopened: false })).toBe(
-      'Still flaky on `main`: 10% of builds (49 / 509), last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd).'
+      [
+        'Still flaky on `main`:',
+        '',
+        '- `creates default alert, triggers on down status, and recovers`: 10% of builds (49 / 509), last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)',
+      ].join('\n')
     );
     expect(renderFlakySuiteIssueComment(suite, { report, reopened: true })).toMatch(
-      /^Flaky again after this issue was closed, on `main`: 10% of builds/
+      /^Flaky again after this issue was closed, on `main`:\n\n- `creates default alert/
     );
   });
 
-  it('lists the branches of a single test, one per line', () => {
+  it("names the branches on the test's line when there are several", () => {
     const { suite, report } = multiTestReport();
 
     expect(
@@ -804,8 +808,7 @@ describe('refreshing a suite issue', () => {
       [
         'Still flaky:',
         '',
-        '- `main`: 10% of builds (20 / 200)',
-        '- `9.2`: 5% of builds (3 / 64), last failed [7 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200)',
+        '- `does not keep a hidden histogram after visiting Dashboard`: 10% of builds (20 / 200) on `main`, 5% of builds (3 / 64) on `9.2`, last failed [7 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200)',
       ].join('\n')
     );
   });

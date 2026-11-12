@@ -922,11 +922,10 @@ const testLine = (
 };
 
 /**
- * The comment of a refresh that found new failures: where the suite is flaky and not skipped. A
- * single test the issue has shown gets one sentence for a single branch, or one line per branch.
- * Otherwise, a line per test that failed there, as many as the body's tests table, with its own
- * numbers and newest failure, and the tests the issue has not shown marked as newly flaky. The
- * body keeps the full tables.
+ * The comment of a refresh that found new failures: where the suite is flaky and not skipped, then
+ * a line per test that failed there, as many as the body's tests table, with its own numbers and
+ * newest failure, and the tests the issue has not shown marked as newly flaky. The body keeps the
+ * full tables.
  */
 export const renderFlakySuiteIssueComment = (
   suite: FlakySuite,
@@ -947,25 +946,11 @@ export const renderFlakySuiteIssueComment = (
     branches.length === 1
       ? `${reopened ? ',' : ''} on ${inlineCode(branches[0].worst.branch)}`
       : '';
-  const newlyFlaky = newlyFlakyTestIds(suite, previous);
   if (branches.length === 0) {
     return `${leadFor(suite.tests.length)}.`;
   }
 
-  if (suite.tests.length === 1 && newlyFlaky.size === 0) {
-    const lead = leadFor(1);
-    if (branches.length === 1) {
-      const [{ worst, latest }] = branches;
-      return `${lead}${where}: ${withLastFailed(buildNumbers(worst), latest)}.`;
-    }
-    return `${lead}:\n\n${branches
-      .map(
-        ({ worst, latest }) =>
-          `- ${inlineCode(worst.branch)}: ${withLastFailed(buildNumbers(worst), latest)}`
-      )
-      .join('\n')}`;
-  }
-
+  const newlyFlaky = newlyFlakyTestIds(suite, previous);
   const branchNames = branches.map(({ worst }) => worst.branch);
   const listed = suite.tests.filter((test) => failingOn(test, branchNames).length > 0);
   const rest = listed.length - MAX_TEST_ROWS;
