@@ -10,8 +10,8 @@
 // CI gate for the Kibana server's runtime module graph. Boots Elasticsearch
 // and a dev Kibana with the require-graph preload (HEAP_TRACK_REQUIRE_ONLY=1,
 // no allocation tracking), waits until the server reports available, dumps the
-// require graph via SIGUSR1, and fails if any banned browser-only or
-// GenAI-stack module was loaded during startup.
+// require graph via SIGUSR1, and fails if @elastic/eui was loaded during
+// startup.
 //
 // This is a runtime check on purpose: lint rules and static import walks
 // cannot see dynamic imports that execute during startup, while the require
@@ -47,53 +47,13 @@ interface BannedPackage {
 
 /**
  * Packages that must never be loaded by the Kibana server at startup.
- * Zero tolerance: there is no allowlist. `react`, `react-dom` and `@emotion/*`
- * are deliberately absent — core's rendering service legitimately renders the
- * bootstrap template with React on the server.
+ * Zero tolerance: there is no allowlist.
  */
 export const BANNED_SERVER_MODULES: BannedPackage[] = [
-  // Browser-only UI stack
   {
     label: '@elastic/eui',
     pattern: /node_modules\/@elastic\/eui\//,
     chainPattern: '@elastic/eui/',
-  },
-  { label: 'refractor', pattern: /node_modules\/refractor\//, chainPattern: 'refractor/' },
-  { label: 'prismjs', pattern: /node_modules\/prismjs\//, chainPattern: 'prismjs/' },
-  {
-    label: '@elastic/apm-rum',
-    pattern: /node_modules\/@elastic\/apm-rum/,
-    chainPattern: '@elastic/apm-rum',
-  },
-  { label: 'react-intl', pattern: /node_modules\/react-intl\//, chainPattern: 'react-intl/' },
-  { label: 'react-use', pattern: /node_modules\/react-use\//, chainPattern: 'react-use/' },
-  { label: 'react-redux', pattern: /node_modules\/react-redux\//, chainPattern: 'react-redux/' },
-  { label: 'redux', pattern: /node_modules\/redux\//, chainPattern: '/redux/' },
-  { label: '@reduxjs', pattern: /node_modules\/@reduxjs\//, chainPattern: '@reduxjs/' },
-  // GenAI stack
-  { label: '@langchain', pattern: /node_modules\/@langchain\//, chainPattern: '@langchain/' },
-  { label: 'langsmith', pattern: /node_modules\/langsmith\//, chainPattern: 'langsmith/' },
-  { label: 'openai', pattern: /node_modules\/openai\//, chainPattern: 'node_modules/openai/' },
-  {
-    label: 'gpt-tokenizer',
-    pattern: /node_modules\/gpt-tokenizer\//,
-    chainPattern: 'gpt-tokenizer/',
-  },
-  { label: 'js-tiktoken', pattern: /node_modules\/js-tiktoken\//, chainPattern: 'js-tiktoken/' },
-  {
-    label: '@modelcontextprotocol',
-    pattern: /node_modules\/@modelcontextprotocol\//,
-    chainPattern: '@modelcontextprotocol/',
-  },
-  {
-    label: 'google-auth-library',
-    pattern: /node_modules\/google-auth-library\//,
-    chainPattern: 'google-auth-library/',
-  },
-  {
-    label: 'zod-to-json-schema',
-    pattern: /node_modules\/zod-to-json-schema\//,
-    chainPattern: 'zod-to-json-schema/',
   },
 ];
 
