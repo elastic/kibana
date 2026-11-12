@@ -205,18 +205,17 @@ export const DataGrid = <TRow extends object>({
         tabIndex={focus.activeCell && activeRowIsMounted ? -1 : 0}
         aria-label={ariaLabel}
         aria-colcount={columns.length}
-        aria-rowcount={tableRows.length + headerGroups.length}
+        aria-rowcount={tableRows.length}
         className={className}
         css={styles.grid}
         style={{ blockSize: height, scrollPaddingBlockStart: headerHeight }}
         onFocus={onGridFocus}
       >
         <div ref={setHeaderRowGroupElement} role="rowgroup" css={styles.headerRowGroup}>
-          {headerGroups.map((headerGroup, headerGroupIndex) => (
+          {headerGroups.map((headerGroup) => (
             <div
               key={headerGroup.id}
               role="row"
-              aria-rowindex={headerGroupIndex + 1}
               css={styles.headerRow}
               style={{ gridTemplateColumns }}
             >
@@ -255,7 +254,7 @@ export const DataGrid = <TRow extends object>({
                 key={row.id}
                 ref={rowVirtualizer.measureElement}
                 role="row"
-                aria-rowindex={headerGroups.length + virtualRow.index + 1}
+                aria-rowindex={virtualRow.index + 1}
                 data-index={virtualRow.index}
                 data-striped={virtualRow.index % 2 === 1}
                 css={styles.row}

@@ -196,7 +196,7 @@ describe('DataGrid', () => {
     renderGrid();
 
     const grid = screen.getByRole('grid', { name: 'Example data' });
-    expect(grid.getAttribute('aria-rowcount')).toBe('101');
+    expect(grid.getAttribute('aria-rowcount')).toBe('100');
     expect(grid.getAttribute('aria-colcount')).toBe('2');
     expect(screen.getAllByRole('rowgroup')).toHaveLength(2);
 
@@ -208,7 +208,7 @@ describe('DataGrid', () => {
     expect(headers[0].hasAttribute('tabindex')).toBe(false);
 
     const allRows = screen.getAllByRole('row');
-    expect(allRows.map((row) => row.getAttribute('aria-rowindex'))).toEqual(['1', '2', '3', '4']);
+    expect(allRows.map((row) => row.getAttribute('aria-rowindex'))).toEqual([null, '1', '2', '3']);
     const renderedRows = allRows.slice(1);
     expect(renderedRows).toHaveLength(3);
     expect(screen.getByRole('gridcell', { name: 'Name 0' }).getAttribute('aria-colindex')).toBe(
@@ -449,7 +449,7 @@ describe('DataGrid', () => {
     );
 
     const movedCell = await expectFocus('Name 1');
-    expect(movedCell.parentElement?.getAttribute('aria-rowindex')).toBe('4');
+    expect(movedCell.parentElement?.getAttribute('aria-rowindex')).toBe('3');
 
     const rowsWithActiveMovedOffScreen = [
       rows[0],
@@ -467,7 +467,7 @@ describe('DataGrid', () => {
       />
     );
     const offScreenMovedCell = await expectFocus('Name 1');
-    expect(offScreenMovedCell.parentElement?.getAttribute('aria-rowindex')).toBe('53');
+    expect(offScreenMovedCell.parentElement?.getAttribute('aria-rowindex')).toBe('52');
     expect(mockGetOffsetForIndex).toHaveBeenLastCalledWith(51, 'auto');
 
     rerender(
@@ -528,7 +528,7 @@ describe('DataGrid', () => {
 
     const grid = screen.getByRole('grid', { name: 'Example data' });
     await waitFor(() => expect(document.activeElement).toBe(grid));
-    expect(grid.getAttribute('aria-rowcount')).toBe('1');
+    expect(grid.getAttribute('aria-rowcount')).toBe('0');
     expect(grid.getAttribute('tabindex')).toBe('0');
     expect(container.querySelectorAll('[tabindex="0"]')).toHaveLength(1);
     await waitFor(() =>
