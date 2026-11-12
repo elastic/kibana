@@ -182,6 +182,7 @@ export const getKeyboardDragPosition = ({
 export const getNextKeyboardResizePosition = (
   ev: UserKeyboardEvent,
   gridLayoutStateManager: FlexLayoutStateManager,
+  activePanel: ActivePanelEvent,
   handlePosition: { clientX: number; clientY: number }
 ) => {
   const {
@@ -194,12 +195,14 @@ export const getNextKeyboardResizePosition = (
   const gridLeft = (gridPosition?.left || 0) + gutterSize;
   const gridRight = (gridPosition?.right || window.innerWidth) - gutterSize;
   const stepX = rowHeight + gutterSize; // this acts as a decent guess for how much to resize by
+  // step from the last requested edge, since the handle's live position shifts if the panel reflows
+  const currentX = activePanel.position.right + activePanel.sensorOffsets.right;
 
   switch (ev.code) {
     case KeyboardCode.Right:
-      return { ...handlePosition, clientX: Math.min(handlePosition.clientX + stepX, gridRight) };
+      return { ...handlePosition, clientX: Math.min(currentX + stepX, gridRight) };
     case KeyboardCode.Left:
-      return { ...handlePosition, clientX: Math.max(handlePosition.clientX - stepX, gridLeft) };
+      return { ...handlePosition, clientX: Math.max(currentX - stepX, gridLeft) };
     default:
       return handlePosition;
   }

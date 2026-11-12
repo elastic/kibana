@@ -577,12 +577,15 @@ describe('FlexLayout pointer resize with wrapping', () => {
           ({ left, top, width, height, right: left + width, bottom: top + height } as DOMRect);
 
         if (this.classList.contains('kbnFlex')) return rect(0, 0, CONTAINER_WIDTH, 500);
-        const panel = this.classList.contains('kbnFlexPanel') ? this : null;
+        const panel = this.closest<HTMLElement>('.kbnFlexPanel');
         if (!panel) return rect(0, 0, 0, 0);
 
         const panels = Array.from(
           panel.parentElement?.querySelectorAll<HTMLElement>(':scope > .kbnFlexPanel') ?? []
-        ).sort((a, b) => parseInt(getComputedStyle(a).order, 10) - parseInt(getComputedStyle(b).order, 10));
+        ).sort(
+          (a, b) =>
+            parseInt(getComputedStyle(a).order, 10) - parseInt(getComputedStyle(b).order, 10)
+        );
         let x = 0;
         let y = 0;
         for (const current of panels) {
@@ -591,7 +594,12 @@ describe('FlexLayout pointer resize with wrapping', () => {
             x = 0;
             y += ROW_HEIGHT + GUTTER;
           }
-          if (current === panel) return rect(x, y, width, ROW_HEIGHT);
+          if (current === panel) {
+            // the resize handle sits at the panel's bottom-right corner
+            return this === panel
+              ? rect(x, y, width, ROW_HEIGHT)
+              : rect(x + width, y + ROW_HEIGHT, 0, 0);
+          }
           x += width + GUTTER;
         }
         return rect(0, 0, 0, 0);
@@ -624,5 +632,27 @@ describe('FlexLayout pointer resize with wrapping', () => {
 
     expect(getLastLayout().panel2.width).toBe(large - 41);
     expect(getLastLayout().panel1.width).toBe(medium);
+  });
+
+  it('keeps shrinking with ArrowLeft after the panel reflows onto the previous row', async () => {
+    mockWrappingLayout();
+    renderFlexLayout({
+      gridSettings: { ...gridSettings, gutterSize: GUTTER, rowHeight: ROW_HEIGHT },
+      layout: {
+        panel1: { type: 'panel', id: 'panel1', order: 0, grow: false, width: 500 },
+        panel2: { type: 'panel', id: 'panel2', order: 1, grow: false, width: 700 },
+      },
+    });
+    getHandle('panel2', 'resize').focus();
+    await userEvent.keyboard('[Enter]');
+
+    const widths: number[] = [];
+    for (let i = 0; i < 3; i++) {
+      await userEvent.keyboard('[ArrowLeft]');
+      widths.push(parseFloat(getPanel('panel2').style.width));
+    }
+    // each step (110px) shrinks the panel, even once it has moved up beside `panel1`
+    expect(widths).toEqual([590, 480, 370]);
+    await userEvent.keyboard('[Enter]');
   });
 });

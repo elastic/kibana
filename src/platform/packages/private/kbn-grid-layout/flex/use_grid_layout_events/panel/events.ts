@@ -108,9 +108,12 @@ export const useGridLayoutPanelEvents = ({
           announce('move');
           return;
         }
+        const activePanel = gridLayoutStateManager.activePanelEvent$.value;
+        if (!activePanel) return;
         const pointerPixel = getNextKeyboardResizePosition(
           ev,
           gridLayoutStateManager,
+          activePanel,
           getSensorPosition(ev)
         );
         moveAction(ev, gridLayoutStateManager, pointerPixel, lastRequestedPanelPosition);
