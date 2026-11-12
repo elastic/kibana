@@ -63,9 +63,9 @@ describe('buildTemplateValues', () => {
   });
 
   it('falls back to the skill id when the name would break the rendered YAML or ES|QL', () => {
-    expect(buildTemplateValues({ skillId: 'triage', skillName: `Alert's "triage"` }).skillName).toBe(
-      'triage'
-    );
+    expect(
+      buildTemplateValues({ skillId: 'triage', skillName: `Alert's "triage"` }).skillName
+    ).toBe('triage');
   });
 
   it('rejects a skill id that cannot be rendered safely', () => {
