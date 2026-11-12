@@ -18,6 +18,7 @@ import {
 } from '../state_management/edit_transform_flyout_state';
 import { getTransformConfigMock } from '../state_management/__mocks__/transform_config';
 import { getDefaultState } from '../state_management/get_default_state';
+import { useFormField } from '../state_management/selectors/form_field';
 import { useFormSections } from '../state_management/selectors/form_sections';
 import { useRetentionPolicyField } from '../state_management/selectors/retention_policy_field';
 import { EditTransformRetentionPolicy } from './edit_transform_retention_policy';
@@ -38,6 +39,9 @@ jest.mock('../state_management/edit_transform_flyout_state', () => ({
 }));
 jest.mock('../state_management/selectors/form_sections', () => ({
   useFormSections: jest.fn(),
+}));
+jest.mock('../state_management/selectors/form_field', () => ({
+  useFormField: jest.fn(),
 }));
 jest.mock('../state_management/selectors/retention_policy_field', () => ({
   useRetentionPolicyField: jest.fn(),
@@ -63,6 +67,7 @@ describe('EditTransformRetentionPolicy', () => {
       setFormField: jest.fn(),
       setFormSection: jest.fn(),
     } as unknown as ReturnType<typeof useEditTransformFlyoutActions>);
+    jest.mocked(useFormField).mockImplementation((field) => defaultState.formFields[field]);
     jest.mocked(useFormSections).mockReturnValue(defaultState.formSections);
     jest
       .mocked(useRetentionPolicyField)
@@ -108,5 +113,77 @@ describe('EditTransformRetentionPolicy', () => {
     renderWithI18n(<EditTransformRetentionPolicy />);
 
     expect(screen.queryByTestId('transformEditRetentionPolicySwitch')).not.toBeInTheDocument();
+  });
+
+  it('shows an existing retention policy while the preview is loading', () => {
+    const transformConfig = {
+      ...getTransformConfigMock(),
+      retention_policy: {
+        time: {
+          field: 'timestamp',
+          max_age: '1d',
+        },
+      },
+    };
+    const defaultState = getDefaultState(transformConfig);
+    jest.mocked(useEditTransformFlyoutContext).mockReturnValue({
+      config: transformConfig,
+      dataViewId: 'data-view-id',
+    });
+    jest.mocked(useFormField).mockImplementation((field) => defaultState.formFields[field]);
+    jest.mocked(useFormSections).mockReturnValue(defaultState.formSections);
+    jest
+      .mocked(useRetentionPolicyField)
+      .mockReturnValue(defaultState.formFields.retentionPolicyField);
+    jest.mocked(useGetTransformsPreview).mockReturnValue({
+      data: undefined,
+      error: null,
+      isLoading: true,
+    } as unknown as ReturnType<typeof useGetTransformsPreview>);
+
+    renderWithI18n(<EditTransformRetentionPolicy />);
+
+    expect(screen.getByTestId('transformEditRetentionPolicySwitch')).toBeChecked();
+    expect(screen.getByTestId('transformEditFlyoutRetentionPolicyFieldInput')).toHaveValue(
+      'timestamp'
+    );
+    expect(screen.getByTestId('transformEditFlyoutRetentionPolicyMaxAgeInput')).toHaveValue(1);
+    expect(screen.getByTestId('transformEditFlyoutRetentionPolicyMaxAgeUnitSelect')).toHaveValue(
+      'd'
+    );
+  });
+
+  it('shows an existing retention policy when the preview request fails', () => {
+    const transformConfig = {
+      ...getTransformConfigMock(),
+      retention_policy: {
+        time: {
+          field: 'timestamp',
+          max_age: '1d',
+        },
+      },
+    };
+    const defaultState = getDefaultState(transformConfig);
+    jest.mocked(useEditTransformFlyoutContext).mockReturnValue({
+      config: transformConfig,
+      dataViewId: 'data-view-id',
+    });
+    jest.mocked(useFormField).mockImplementation((field) => defaultState.formFields[field]);
+    jest.mocked(useFormSections).mockReturnValue(defaultState.formSections);
+    jest
+      .mocked(useRetentionPolicyField)
+      .mockReturnValue(defaultState.formFields.retentionPolicyField);
+    jest.mocked(useGetTransformsPreview).mockReturnValue({
+      data: undefined,
+      error: new Error('Preview failed'),
+      isLoading: false,
+    } as unknown as ReturnType<typeof useGetTransformsPreview>);
+
+    renderWithI18n(<EditTransformRetentionPolicy />);
+
+    expect(screen.getByTestId('transformEditRetentionPolicySwitch')).toBeChecked();
+    expect(screen.getByTestId('transformEditFlyoutRetentionPolicyFieldInput')).toHaveValue(
+      'timestamp'
+    );
   });
 });

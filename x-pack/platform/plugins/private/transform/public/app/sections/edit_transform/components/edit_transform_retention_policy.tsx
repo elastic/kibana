@@ -53,8 +53,11 @@ export const EditTransformRetentionPolicy: FC = () => {
     };
   }, [config]);
 
-  const { error: transformsPreviewError, data: transformPreview } =
-    useGetTransformsPreview(previewRequest);
+  const {
+    error: transformsPreviewError,
+    data: transformPreview,
+    isLoading: isTransformPreviewLoading,
+  } = useGetTransformsPreview(previewRequest);
 
   const destIndexAvailableTimeFields = useMemo<string[]>(() => {
     if (transformPreview?.generated_dest_index) {
@@ -131,13 +134,17 @@ export const EditTransformRetentionPolicy: FC = () => {
   }, [transformsPreviewError]);
 
   const isRetentionPolicyAvailable = destIndexAvailableTimeFields.length > 0;
+  const hasExistingRetentionPolicy = config.retention_policy !== undefined;
+  const shouldShowRetentionPolicy =
+    isRetentionPolicyAvailable ||
+    (hasExistingRetentionPolicy && (isTransformPreviewLoading || transformsPreviewError !== null));
   const retentionDateFieldOptions = useMemo(() => {
     return Array.isArray(destIndexAvailableTimeFields)
       ? destIndexAvailableTimeFields.map((text: string) => ({ text, value: text }))
       : [];
   }, [destIndexAvailableTimeFields]);
 
-  if (!isRetentionPolicyAvailable) {
+  if (!shouldShowRetentionPolicy) {
     return null;
   }
 
@@ -167,7 +174,7 @@ export const EditTransformRetentionPolicy: FC = () => {
           {
             // If data view or date fields info not available
             // gracefully defaults to text input
-            dataViewId ? (
+            dataViewId && retentionDateFieldOptions.length > 0 ? (
               <EuiFormRow
                 label={i18n.translate(
                   'xpack.transform.transformList.editFlyoutFormRetentionPolicyFieldLabel',
