@@ -10,24 +10,19 @@ import type { TimeRange } from '@kbn/es-query';
 import type { LocatorDefinition } from '@kbn/share-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { DIGITAL_EXPERIENCE_FEATURE_ID } from './feature';
+import { APPLICATION_TAB_IDS, type ApplicationTabId } from './types/applications';
 
 export const DIGITAL_EXPERIENCE_LOCATOR_ID = 'DIGITAL_EXPERIENCE_LOCATOR';
-
-/** The tabs of an application, which `tab` picks; the Overview is the application's own path. */
-export const DIGITAL_EXPERIENCE_LOCATOR_TABS = [
-  'overview',
-  'errors',
-  'network',
-  'sessions',
-] as const;
-
-export type DigitalExperienceLocatorTab = (typeof DIGITAL_EXPERIENCE_LOCATOR_TABS)[number];
 
 /**
  * The params of the app's pages that a link keeps, as the URL holds them: the time range,
  * environment and source, the Overview's filters, KQL query and percentile, and the Sessions
  * list's own state. Any other param is left out of the location, so a stored link can only set
  * these. The routes check their values, and replace an invalid one by its default.
+ *
+ * The params of a locator end up in short URLs and in whatever else stores a link, so they live as
+ * long as those do: a key that is renamed or removed here needs a migration of the locator's
+ * params, or the links already made lose its value.
  */
 export const DIGITAL_EXPERIENCE_LOCATOR_QUERY_KEYS = [
   'rangeFrom',
@@ -65,18 +60,23 @@ export interface DigitalExperienceLocatorParams
     Partial<Record<DigitalExperienceLocatorQueryKey, QueryValue>> {
   serviceName?: string;
   /** The tab of the application; the Overview when unset or unknown. */
-  tab?: DigitalExperienceLocatorTab;
+  tab?: ApplicationTabId;
 }
 
-const isTab = (tab: unknown): tab is DigitalExperienceLocatorTab =>
-  DIGITAL_EXPERIENCE_LOCATOR_TABS.some((known) => known === tab);
+const isTab = (tab: unknown): tab is ApplicationTabId =>
+  APPLICATION_TAB_IDS.some((known) => known === tab);
 
 const isQueryValue = (value: unknown): value is QueryValue =>
   (typeof value === 'string' && value !== '') ||
   typeof value === 'number' ||
   typeof value === 'boolean';
 
-const queryOf = (params: DigitalExperienceLocatorParams): Record<string, QueryValue> =>
+/**
+ * What of a page's params the locator keeps: the ones it lists, with a value a link can hold. A
+ * param it does not list, an empty one, and a repeated one are left out, whether the params come
+ * from a URL or from a stored link.
+ */
+export const pickLocatorQuery = (params: Record<string, unknown>): Record<string, QueryValue> =>
   Object.fromEntries(
     DIGITAL_EXPERIENCE_LOCATOR_QUERY_KEYS.flatMap((key) => {
       const value = params[key];
@@ -99,7 +99,7 @@ export class DigitalExperienceLocatorDefinition
 
   public readonly getLocation = async (params: DigitalExperienceLocatorParams) => {
     // Sorted like the typed router's links, so a link matches the URL the app writes.
-    const search = qs.stringify(queryOf(params));
+    const search = qs.stringify(pickLocatorQuery(params));
     return {
       app: DIGITAL_EXPERIENCE_FEATURE_ID,
       path: search ? `${pathOf(params)}?${search}` : pathOf(params),
