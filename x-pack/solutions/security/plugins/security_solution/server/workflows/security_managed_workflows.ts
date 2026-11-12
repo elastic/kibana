@@ -6,6 +6,11 @@
  */
 
 import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  AESOP_AB_COMPARE_WORKFLOW_ID,
+  AESOP_DRIFT_MONITOR_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { installSecurityAlertAnalysisWorkflow } from './alert_analysis_workflow/install';
 import {
@@ -29,6 +34,7 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
   workflowsExtensions,
   logger,
   threatIntelSupplyEnabled,
+  aesopPrototypeEnabled,
   bootstrapReady,
   core,
 }: {
@@ -40,6 +46,12 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
    * managed workflows are uninstalled.
    */
   threatIntelSupplyEnabled: boolean;
+  /**
+   * True when the `aesopPrototypeEnabled` experimental flag is on. When
+   * false, any previously installed AESOP prototype workflows are
+   * uninstalled.
+   */
+  aesopPrototypeEnabled: boolean;
   /**
    * Resolves after TI bootstrap (templates, migrations, seed). Only awaited when
    * supply is enabled; ignored otherwise.
@@ -59,6 +71,36 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
     await installSecurityAlertAnalysisWorkflow({ managedWorkflowsClient });
   } catch (error) {
     logger.warn('Failed to install the alert analysis workflow', { error });
+  }
+
+  try {
+    // AESOP prototype: only the A/B compare workflow installs at boot (static
+    // lifecycle, global space). The drift monitor is a template definition
+    // instantiated per skill when a variant deploys; installing it here would
+    // need `values` the boot has no business inventing. Flag-off cleanup
+    // uninstalls any per-skill instances the reconciliation sweep finds.
+    if (aesopPrototypeEnabled) {
+      await managedWorkflowsClient.install(AESOP_AB_COMPARE_WORKFLOW_ID, {
+        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      });
+    } else {
+      await managedWorkflowsClient.uninstall(AESOP_AB_COMPARE_WORKFLOW_ID, {
+        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      });
+      const instances = await managedWorkflowsClient.listInstalledWorkflowStates();
+      await Promise.all(
+        instances
+          .filter((instance) => instance.definitionId === AESOP_DRIFT_MONITOR_WORKFLOW_ID)
+          .map((instance) =>
+            managedWorkflowsClient.uninstall(AESOP_DRIFT_MONITOR_WORKFLOW_ID, {
+              spaceId: instance.spaceId,
+              workflowId: instance.workflowId,
+            })
+          )
+      );
+    }
+  } catch (error) {
+    logger.warn('Failed to install or uninstall the AESOP prototype workflows', { error });
   }
 
   try {

@@ -64,6 +64,7 @@ import type {
 } from '@kbn/search-inference-endpoints/server';
 import type { CPSServerSetup, CPSServerStart } from '@kbn/cps/server';
 import type { MitreAttackServerStart } from '@kbn/mitre-attack-plugin/server';
+import type { EvalsPluginSetup } from '@kbn/evals-plugin/server';
 import type { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import type { ExperimentalFeatures } from '../common';
 
@@ -94,6 +95,8 @@ export interface SecuritySolutionPluginSetupDependencies {
   entityStore?: EntityStoreSetupContract;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
   cps?: CPSServerSetup;
+  /** Optional. Present when the evals plugin is enabled; AESOP registers its task provider here. */
+  evals?: EvalsPluginSetup;
   /**
    * Optional. When present, `isEnabled` is the AlertZero soft-enable switch
    * (`xpack.alertzero.enabled`). Threat-intel supply gates on this.

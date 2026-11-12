@@ -26,6 +26,7 @@ import type { ILicense } from '@kbn/licensing-types';
 import type { NewPackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
 import { registerCustomYaraSignaturesRoutes } from './endpoint/routes/custom_yara_signatures';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
@@ -190,6 +191,8 @@ import {
 } from './workflows/managed_workflows';
 import { installSecurityManagedWorkflowsAndMarkReady } from './workflows/security_managed_workflows';
 import { ensureThreatIntelSupplyWorkflowsForSpace } from './workflows/threat_intel_workflow/install';
+import { createAesopVariantTaskProvider } from './aesop_prototype/aesop_variant_task_provider';
+import { registerAesopExplorerAgentType, installAesopExplorerAgent } from './aesop_prototype';
 import { SecuritySolutionEventBus } from './events/event_bus';
 import { registerSecurityWorkflowTriggers } from './workflows/triggers';
 import { registerSecurityWorkflowEventBridge } from './workflows/triggers/event_bridge';
@@ -729,7 +732,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       trialCompanionDeps,
       enableDataGeneratorRoutes,
       this.platformCpsEnabled,
-      this.securityEventBus
+      this.securityEventBus,
+      plugins.workflowsManagement?.management
+        ? () => plugins.workflowsManagement?.management
+        : undefined
     );
 
     registerEndpointRoutes(router, this.endpointContext);
@@ -895,6 +901,19 @@ export class Plugin implements ISecuritySolutionPlugin {
       securityRuleTypeOptions
     );
 
+    // AESOP prototype: the A/B compare workflow's arms run through this task
+    // provider. Registered behind the flag so the evals plugin never sees it
+    // ship dark.
+    if (plugins.evals && this.config.experimentalFeatures.aesopPrototypeEnabled) {
+      plugins.evals.registerTaskProvider(createAesopVariantTaskProvider());
+    }
+
+    // AESOP prototype: agent type is registered behind the flag; the agent
+    // instance is ensured in start().
+    if (plugins.agentBuilder && this.config.experimentalFeatures.aesopPrototypeEnabled) {
+      registerAesopExplorerAgentType(plugins.agentBuilder);
+    }
+
     if (plugins.workflowsExtensions) {
       registerWorkflowSteps(plugins.workflowsExtensions);
       registerSecurityWorkflowTriggers(plugins.workflowsExtensions);
@@ -976,8 +995,20 @@ export class Plugin implements ISecuritySolutionPlugin {
         workflowsExtensions: plugins.workflowsExtensions,
         logger,
         threatIntelSupplyEnabled: this.threatIntelSupplyEnabled,
+        aesopPrototypeEnabled: this.config.experimentalFeatures.aesopPrototypeEnabled,
         bootstrapReady: this.threatIntelRuntime.bootstrapReady,
         core,
+      });
+    }
+
+    // AESOP prototype: ensure the explorer agent exists in the default space.
+    // Fire-and-forget like the managed-workflow installs above.
+    if (plugins.agentBuilder && this.config.experimentalFeatures.aesopPrototypeEnabled) {
+      void installAesopExplorerAgent({
+        agentBuilder: plugins.agentBuilder,
+        spaceId: DEFAULT_SPACE_ID,
+      }).catch((error: unknown) => {
+        logger.warn('Failed to install the AESOP explorer agent', { error });
       });
     }
 

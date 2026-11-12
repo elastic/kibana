@@ -408,6 +408,19 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the SIEM Rule Migrations Agent Builder tools.
    */
   siemRuleMigrationsAgentBuilderEnabled: false,
+
+  /**
+   * AESOP v3 prototype: an end-to-end spike of the skill lifecycle loop —
+   * explore skill-usage telemetry, A/B a candidate skill variant against the
+   * live one through the evals plugin (CODE + judge evaluators), gate the
+   * winning variant behind analyst approval, deploy it (skill PUT), and
+   * monitor it for drift with online evaluation.
+   *
+   * Off by default. Everything it adds is namespaced
+   * `aesop.prototype.*` / `system-security-aesop-*` so the spike can be
+   * removed in one commit.
+   */
+  aesopPrototypeEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

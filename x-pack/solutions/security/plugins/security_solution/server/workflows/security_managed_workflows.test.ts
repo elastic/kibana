@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { SECURITY_ALERT_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
+  AESOP_AB_COMPARE_WORKFLOW_ID,
+  AESOP_DRIFT_MONITOR_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -84,6 +88,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       workflowsExtensions,
       logger: loggerMock.create(),
       threatIntelSupplyEnabled: true,
+      aesopPrototypeEnabled: false,
       bootstrapReady: Promise.resolve(),
       core: coreMock.createStart(),
     });
@@ -103,6 +108,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       workflowsExtensions,
       logger: loggerMock.create(),
       threatIntelSupplyEnabled: false,
+      aesopPrototypeEnabled: false,
       bootstrapReady: Promise.resolve(),
       core: coreMock.createStart(),
     });
@@ -127,6 +133,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       workflowsExtensions,
       logger: loggerMock.create(),
       threatIntelSupplyEnabled: true,
+      aesopPrototypeEnabled: false,
       bootstrapReady: Promise.resolve(),
       core: coreMock.createStart(),
     });
@@ -146,6 +153,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       workflowsExtensions,
       logger: loggerMock.create(),
       threatIntelSupplyEnabled: false,
+      aesopPrototypeEnabled: false,
       bootstrapReady: Promise.resolve(),
       core: coreMock.createStart(),
     });
@@ -166,6 +174,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       workflowsExtensions,
       logger: loggerMock.create(),
       threatIntelSupplyEnabled: true,
+      aesopPrototypeEnabled: false,
       bootstrapReady,
       core: coreMock.createStart(),
     });
@@ -211,6 +220,93 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
     expect(logger.warn).toHaveBeenCalled();
   });
 
+  it('installs the AESOP A/B compare workflow at boot when the flag is on', async () => {
+    const managed = createManagedClient();
+    const workflowsExtensions = workflowsExtensionsMock.createStart();
+    workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(managed);
+
+    await installSecurityManagedWorkflowsAndMarkReady({
+      workflowsExtensions,
+      logger: loggerMock.create(),
+      threatIntelSupplyEnabled: false,
+      aesopPrototypeEnabled: true,
+      bootstrapReady: Promise.resolve(),
+      core: coreMock.createStart(),
+    });
+
+    // Only the static A/B compare workflow installs at boot; the drift monitor
+    // is a template definition instantiated per skill on deploy.
+    expect(managed.install).toHaveBeenCalledTimes(1);
+    expect(managed.install).toHaveBeenCalledWith(AESOP_AB_COMPARE_WORKFLOW_ID, {
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    });
+    expect(managed.uninstall).not.toHaveBeenCalled();
+    expect(managed.ready).toHaveBeenCalledTimes(1);
+  });
+
+  it('uninstalls the A/B compare workflow and any drift-monitor instances when the flag is off', async () => {
+    const managed = createManagedClient();
+    managed.listInstalledWorkflowStates.mockResolvedValue([
+      {
+        workflowId: `${AESOP_DRIFT_MONITOR_WORKFLOW_ID}-skill-find-security-rules`,
+        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+        definitionId: AESOP_DRIFT_MONITOR_WORKFLOW_ID,
+        templateValues: { skillId: 'find-security-rules' },
+        documentVersion: 1,
+      },
+      {
+        workflowId: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
+        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+        definitionId: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
+        templateValues: null,
+        documentVersion: 1,
+      },
+    ]);
+    const workflowsExtensions = workflowsExtensionsMock.createStart();
+    workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(managed);
+
+    await installSecurityManagedWorkflowsAndMarkReady({
+      workflowsExtensions,
+      logger: loggerMock.create(),
+      threatIntelSupplyEnabled: false,
+      aesopPrototypeEnabled: false,
+      bootstrapReady: Promise.resolve(),
+      core: coreMock.createStart(),
+    });
+
+    expect(managed.uninstall).toHaveBeenCalledWith(AESOP_AB_COMPARE_WORKFLOW_ID, {
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    });
+    // Only the drift-monitor instance is swept; other workflows are untouched.
+    expect(managed.uninstall).toHaveBeenCalledWith(AESOP_DRIFT_MONITOR_WORKFLOW_ID, {
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      workflowId: `${AESOP_DRIFT_MONITOR_WORKFLOW_ID}-skill-find-security-rules`,
+    });
+    expect(managed.uninstall).not.toHaveBeenCalledWith(
+      SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
+      expect.anything()
+    );
+    expect(managed.ready).toHaveBeenCalledTimes(1);
+  });
+
+  it('still calls ready when the AESOP installs fail', async () => {
+    const managed = createManagedClient();
+    managed.install.mockRejectedValue(new Error('boom'));
+    const workflowsExtensions = workflowsExtensionsMock.createStart();
+    workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(managed);
+
+    await installSecurityManagedWorkflowsAndMarkReady({
+      workflowsExtensions,
+      logger: loggerMock.create(),
+      threatIntelSupplyEnabled: false,
+      aesopPrototypeEnabled: true,
+      bootstrapReady: Promise.resolve(),
+      core: coreMock.createStart(),
+    });
+
+    expect(managed.ready).toHaveBeenCalledTimes(1);
+  });
+
   it('installs alert analysis in the global space via the shared client', async () => {
     const managed = createManagedClient();
     const workflowsExtensions = workflowsExtensionsMock.createStart();
@@ -227,6 +323,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       workflowsExtensions,
       logger: loggerMock.create(),
       threatIntelSupplyEnabled: false,
+      aesopPrototypeEnabled: false,
       bootstrapReady: Promise.resolve(),
       core: coreMock.createStart(),
     });

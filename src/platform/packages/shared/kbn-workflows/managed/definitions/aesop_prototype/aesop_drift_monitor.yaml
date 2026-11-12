@@ -1,0 +1,133 @@
+version: '1'
+name: 'AESOP Drift Monitor (prototype)'
+description: >-
+  AESOP prototype: online evaluation of a deployed skill. Every tick reads
+  the newest agent traces that invoked the skill, grades each with the CODE
+  evaluators, and persists the scores as online scores attributed to this
+  monitor.
+enabled: false
+tags:
+  - security
+  - aesop_prototype
+  - scheduled
+settings:
+  timeout: '45m'
+  concurrency:
+    key: 'aesop-drift-__SKILL_ID__'
+    strategy: drop
+    max: 1
+consts:
+  SKILL_ID: '__SKILL_ID__'
+  # LiquidJS has no array literal, so `| default: []` does not produce one.
+  EMPTY_ARRAY: []
+outputs:
+  - name: traces_graded
+    type: number
+  - name: scores_persisted
+    type: number
+  - name: evaluator_failures
+    type: number
+triggers:
+  - type: scheduled
+    with:
+      every: '__INTERVAL_MINUTES__m'
+  - type: manual
+steps:
+  # Traces that invoked the skill in the lookback window. Spans carry no
+  # skill attribute, so the join is the load_skill tool call: a trace
+  # belongs to the skill when a load_skill span's arguments name it. The
+  # STATS BY dedupes a trace that loaded the skill more than once. One row
+  # per trace, first column the trace id.
+  - name: find_traces
+    type: elasticsearch.esql.query
+    timeout: '60s'
+    with:
+      allow_partial_results: false
+      filter:
+        bool:
+          filter:
+            - range:
+                '@timestamp':
+                  gte: 'now-__LOOKBACK_MINUTES__m'
+      query: |-
+        FROM traces-agent_builder.otel-*
+        | WHERE attributes.gen_ai.operation.name == "execute_tool" AND attributes.gen_ai.tool.name == "load_skill" AND TO_LOWER(attributes.gen_ai.tool.call.arguments) LIKE("*{{ consts.SKILL_ID }}*")
+        | STATS loads = COUNT(*) BY trace_id
+        | SORT trace_id ASC
+        | LIMIT 25
+        | KEEP trace_id
+
+  # Each row is `[trace_id]`; the loop reads the first column. A trace whose
+  # evaluate/persist exhausts its retries is skipped (iteration-on-failure),
+  # and the failure is counted by `evaluator_failures` — matching the online
+  # evals generator's failure model. `foreach` has no aggregated output and
+  # inner outputs are evicted per iteration, so the totals accumulate in
+  # variables (`data.set` is exempt from output eviction; each iteration's
+  # `data.set` reads the snapshot written by the previous iteration).
+  - name: grade_loop
+    type: foreach
+    foreach: '${{ steps.find_traces.output.values }}'
+    iteration-on-failure:
+      continue: true
+    steps:
+      - name: evaluate
+        type: ai.evals.evaluateTrace
+        timeout: '10m'
+        with:
+          trace_id: '{{ foreach.item[0] }}'
+          evaluators:
+            - name: skill-secret-scanner
+            - name: skill-prompt-injection
+            - name: skill-pii
+            - name: esql-compile
+            - name: skill-index-resolves
+        on-failure:
+          retry:
+            max-attempts: 3
+            condition: '${{ error.details.status == blank or error.details.status == 404 or error.details.status == 429 or error.details.status >= 500 }}'
+            delay: '5s'
+            strategy: 'exponential'
+            max-delay: '1m'
+            jitter: true
+
+      # Resolves per-iteration values once so the accumulate below is a
+      # single `plus` on a plain number (Liquid has no operator precedence;
+      # a filter expression cannot be a `plus:` argument).
+      - name: resolve_iteration
+        type: data.set
+        with:
+          has_results: >-
+            ${{ steps.evaluate.error == null
+              and steps.evaluate.output.results != null
+              and steps.evaluate.output.results.size > 0 }}
+          errors_size: '${{ steps.evaluate.output.errors | default: consts.EMPTY_ARRAY | size }}'
+
+      - name: persist
+        type: ai.evals.persistOnlineScores
+        if: '${{ steps.resolve_iteration.output.has_results == true }}'
+        with:
+          monitor:
+            id: 'aesop-drift-{{ consts.SKILL_ID }}'
+            name: 'AESOP drift monitor ({{ consts.SKILL_ID }})'
+          trace_id: '{{ foreach.item[0] }}'
+          results: '${{ steps.evaluate.output.results }}'
+          errors: '${{ steps.evaluate.output.errors | default: consts.EMPTY_ARRAY }}'
+
+      # Runs only when persist ran, so `steps.persist.output.created` is
+      # always defined here. Reads the totals the previous iteration wrote.
+      # A trace that failed outright (evaluate error → has_results false)
+      # still counts as an evaluator failure.
+      - name: accumulate
+        type: data.set
+        if: '${{ steps.resolve_iteration.output.has_results == true }}'
+        with:
+          scores_persisted: '${{ variables.scores_persisted | default: 0 | plus: steps.persist.output.created }}'
+          evaluator_failures: '${{ variables.evaluator_failures | default: 0 | plus: steps.resolve_iteration.output.errors_size }}'
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      traces_graded: '${{ steps.find_traces.output.values | size | default: 0 }}'
+      scores_persisted: '${{ variables.scores_persisted | default: 0 }}'
+      evaluator_failures: '${{ variables.evaluator_failures | default: 0 }}'

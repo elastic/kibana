@@ -39,6 +39,7 @@ import { createDetectionCoverageSkill } from './detection_coverage';
 import { endpointForensicAnalysisSkill } from './endpoint_forensic_analysis';
 import { createElasticDefendPolicyManagementSkill } from './elastic_defend_policy_management';
 import { SIEM_READINESS_AGENT_BUILDER_ENABLED } from '../siem_readiness_feature_flag';
+import { aesopSkillExplorerSkill } from './aesop_explorer/aesop_skill_explorer_skill';
 
 interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
@@ -108,6 +109,11 @@ export const registerSkills = async ({
   }
   if (SIEM_READINESS_AGENT_BUILDER_ENABLED) {
     await agentBuilder.skills.register(siemReadinessSkill);
+  }
+
+  // AESOP prototype: the read-only skill-usage explorer skill, behind the flag.
+  if (experimentalFeatures.aesopPrototypeEnabled) {
+    await agentBuilder.skills.register(aesopSkillExplorerSkill);
   }
 
   // Automatic Migration sibling skills: gated by the Automatic Migration feature flag and the

@@ -153,6 +153,6 @@ describe('correctness evaluator', () => {
     const scoped = createEvaluatorRegistry().asScoped({ spaceId: 'default' });
 
     await expect(scoped.get('correctness')).resolves.toBeDefined();
-    await expect(scoped.list()).resolves.toHaveLength(6);
+    await expect(scoped.list()).resolves.toHaveLength(11);
   });
 });

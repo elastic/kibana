@@ -15,6 +15,7 @@ import { createMockEndpointAppContext } from '../../endpoint/mocks';
 import { registerSkills } from './register_skills';
 
 const ENDPOINT_RESPONSE_ACTIONS_SKILL_ID = 'endpoint-response-actions';
+const AESOP_SKILL_EXPLORER_ID = 'aesop-skill-explorer';
 
 /**
  * `agentBuilderMocks.createSetup()` returns a bare `jest.fn()` for
@@ -87,5 +88,38 @@ describe('registerSkills - endpoint response actions', () => {
     // `await` in `plugin.ts`, so the rejection is swallowed by a `.catch()`
     // that only logs — the skill goes silently missing at runtime.
     expect(isAllowedBuiltinSkill(ENDPOINT_RESPONSE_ACTIONS_SKILL_ID)).toBe(true);
+    expect(isAllowedBuiltinSkill(AESOP_SKILL_EXPLORER_ID)).toBe(true);
+  });
+
+  it('registers the AESOP explorer skill when the prototype flag is enabled', async () => {
+    const agentBuilder = createAllowListEnforcingAgentBuilder();
+
+    await expect(
+      registerSkills({
+        ...buildOpts(agentBuilder),
+        experimentalFeatures: {
+          ...buildOpts(agentBuilder).experimentalFeatures,
+          aesopPrototypeEnabled: true,
+        },
+      })
+    ).resolves.toBeUndefined();
+
+    expect(registeredSkillIds(agentBuilder)).toContain(AESOP_SKILL_EXPLORER_ID);
+  });
+
+  it('does not register the AESOP explorer skill when the prototype flag is disabled', async () => {
+    const agentBuilder = createAllowListEnforcingAgentBuilder();
+
+    await expect(
+      registerSkills({
+        ...buildOpts(agentBuilder),
+        experimentalFeatures: {
+          ...buildOpts(agentBuilder).experimentalFeatures,
+          aesopPrototypeEnabled: false,
+        },
+      })
+    ).resolves.toBeUndefined();
+
+    expect(registeredSkillIds(agentBuilder)).not.toContain(AESOP_SKILL_EXPLORER_ID);
   });
 });

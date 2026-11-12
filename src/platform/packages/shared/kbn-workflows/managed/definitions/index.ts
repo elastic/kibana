@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AESOP_AB_COMPARE_WORKFLOW, AESOP_DRIFT_MONITOR_WORKFLOW } from './aesop_prototype';
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW } from './alert_analysis';
 import {
   ALERTZERO_ACTION_ADD_RULE_EXCEPTION_WORKFLOW,
@@ -127,6 +128,13 @@ export {
   CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
 } from './context_engine';
 export type { ContextEngineFeedbackAnalysisWorkflowTemplateValues } from './context_engine';
+export {
+  AESOP_AB_COMPARE_WORKFLOW,
+  AESOP_AB_COMPARE_WORKFLOW_ID,
+  AESOP_DRIFT_MONITOR_WORKFLOW,
+  AESOP_DRIFT_MONITOR_WORKFLOW_ID,
+} from './aesop_prototype';
+export type { AesopDriftMonitorWorkflowTemplateValues } from './aesop_prototype';
 export {
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID,
@@ -253,6 +261,12 @@ export const managedWorkflowDefinitions = [
   EXAMPLE_SERVICE_ACCOUNT_WORKFLOW,
   SECURITY_ALERT_ANALYSIS_WORKFLOW,
   CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW,
+  // AESOP prototype (securitySolution): registry membership is FF-off safe
+  // because installation is gated on the `securitySolution.aesopPrototypeEnabled`
+  // experimental flag in the security plugin's start, exactly like the Detonate
+  // prototype.
+  AESOP_AB_COMPARE_WORKFLOW,
+  AESOP_DRIFT_MONITOR_WORKFLOW,
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW,
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW,
   SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW,

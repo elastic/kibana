@@ -1,0 +1,315 @@
+version: '1'
+name: 'AESOP A/B Skill Compare (prototype)'
+description: >-
+  AESOP prototype: A/B tests a candidate skill variant against the live skill
+  through the evals plugin, compares the two experiments, proposes deploying
+  the variant, and on approval PUTs the new content onto the live skill.
+enabled: true
+tags:
+  - security
+  - aesop_prototype
+settings:
+  # The whole run — both arms, the compare and the parked approval gate —
+  # must fit inside one workflow timeout, or the gate is cancelled under the
+  # analyst. 72h decision window plus evaluation headroom.
+  timeout: '96h'
+  concurrency:
+    key: 'aesop-ab-{{ inputs.skill_id }}'
+    strategy: drop
+    max: 1
+consts:
+  # LiquidJS has no array literal, so `| default: []` does not produce one.
+  EMPTY_ARRAY: []
+outputs:
+  - name: baseline_experiment_id
+    type: string
+  - name: variant_experiment_id
+    type: string
+  - name: decision
+    type: string
+  - name: deployed
+    type: boolean
+  - name: skip_reason
+    type: string
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        skill_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: >-
+            Id of the live skill being optimized. The variant is created from
+            it and the winner is written back to it.
+        dataset_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Evals dataset id both arms run against.
+        connector_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Model connector both arms (and the judge) run through.
+        agent_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: >-
+            Agent the two arms converse with. The AESOP task provider pins each
+            arm's skill through configuration_overrides.skill_ids, so both arms
+            run the same agent and differ only in the skill.
+        variant_content:
+          type: string
+          maxLength: 100000
+          description: >-
+            New instructions (markdown) for the candidate variant. Required:
+            an empty variant has nothing to A/B.
+        repetitions:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 2
+          description: Runs per example per arm.
+        concurrency:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 2
+          description: Max examples evaluated in parallel within each arm.
+        investigation_id:
+          type: string
+          minLength: 1
+          maxLength: 512
+          description: >-
+            Investigation (conversation) the A/B proposal is recorded on, so
+            the analyst sees the decision next to the evidence.
+      required: [skill_id, dataset_id, connector_id, agent_id, variant_content, investigation_id]
+      additionalProperties: false
+steps:
+  # ----------------------------------------------------------------------
+  # Variant. Create the candidate as a user skill (POST), so the variant's
+  # instructions live in the skills registry like any user skill and the
+  # AESOP task provider can pin it by id. Deleted in cleanup below.
+  # ----------------------------------------------------------------------
+  - name: create_variant
+    type: kibana.request
+    timeout: '30s'
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/api/agent_builder/skills'
+      headers:
+        kbn-xsrf: 'true'
+        elastic-api-version: '2023-10-31'
+        Content-Type: application/json
+      body:
+        name: 'aesop-variant-{{ inputs.skill_id }}'
+        description: >-
+          AESOP prototype candidate variant of {{ inputs.skill_id }}. Created
+          by the A/B compare workflow; safe to delete when no run is active.
+        content: '{{ inputs.variant_content }}'
+    on-failure:
+      continue: true
+
+  - name: resolve_variant
+    type: data.set
+    with:
+      ok: >-
+        ${{ steps.create_variant.error == null
+          and steps.create_variant.output.id != null
+          and steps.create_variant.output.id != '' }}
+      variant_skill_id: '${{ steps.create_variant.output.id | default: '' }}'
+
+  # ----------------------------------------------------------------------
+  # Baseline arm: evaluate the live skill. The evaluator list is built once
+  # here (five CODE evaluators + the built-in judge `correctness`) because
+  # Liquid cannot build an array conditionally at each call site.
+  # ----------------------------------------------------------------------
+  - name: baseline_start
+    type: ai.evals.startExperiment
+    if: '${{ steps.resolve_variant.output.ok == true }}'
+    with:
+      task_model:
+        id: '{{ inputs.connector_id }}'
+      suite_id: 'aesop-prototype'
+
+  - name: baseline_run
+    type: ai.evals.evaluateDataset
+    if: '${{ steps.resolve_variant.output.ok == true }}'
+    with:
+      connector_id: '{{ inputs.connector_id }}'
+      agent_id: '{{ inputs.agent_id }}'
+      task_ref: 'security.aesopVariant'
+      params:
+        skill_id: '{{ inputs.skill_id }}'
+      experiment_id: '${{ steps.baseline_start.output.experiment_id }}'
+      execution_id: '${{ steps.baseline_start.output.execution_id }}'
+      suite_id: 'aesop-prototype'
+      dataset_ids: ['{{ inputs.dataset_id }}']
+      evaluators:
+        - name: skill-secret-scanner
+        - name: skill-prompt-injection
+        - name: skill-pii
+        - name: esql-compile
+        - name: skill-index-resolves
+        - name: correctness
+          connector_id: '{{ inputs.connector_id }}'
+      repetitions: '${{ inputs.repetitions }}'
+      concurrency: '${{ inputs.concurrency }}'
+
+  # ----------------------------------------------------------------------
+  # Variant arm: fresh experiment, same dataset, same evaluators, the
+  # variant skill pinned.
+  # ----------------------------------------------------------------------
+  - name: variant_start
+    type: ai.evals.startExperiment
+    if: '${{ steps.resolve_variant.output.ok == true }}'
+    with:
+      task_model:
+        id: '{{ inputs.connector_id }}'
+      suite_id: 'aesop-prototype'
+
+  - name: variant_run
+    type: ai.evals.evaluateDataset
+    if: '${{ steps.resolve_variant.output.ok == true }}'
+    with:
+      connector_id: '{{ inputs.connector_id }}'
+      agent_id: '{{ inputs.agent_id }}'
+      task_ref: 'security.aesopVariant'
+      params:
+        skill_id: '{{ steps.resolve_variant.output.variant_skill_id }}'
+      experiment_id: '${{ steps.variant_start.output.experiment_id }}'
+      execution_id: '${{ steps.variant_start.output.execution_id }}'
+      suite_id: 'aesop-prototype'
+      dataset_ids: ['{{ inputs.dataset_id }}']
+      evaluators:
+        - name: skill-secret-scanner
+        - name: skill-prompt-injection
+        - name: skill-pii
+        - name: esql-compile
+        - name: skill-index-resolves
+        - name: correctness
+          connector_id: '{{ inputs.connector_id }}'
+      repetitions: '${{ inputs.repetitions }}'
+      concurrency: '${{ inputs.concurrency }}'
+
+  # ----------------------------------------------------------------------
+  # Compare. compareExperiments returns an opaque comparison blob; the
+  # proposal comment renders it as JSON so the analyst reads the delta.
+  # ----------------------------------------------------------------------
+  - name: compare
+    type: ai.evals.compareExperiments
+    if: '${{ steps.resolve_variant.output.ok == true }}'
+    with:
+      experiment_ids:
+        - '${{ steps.baseline_start.output.experiment_id }}'
+        - '${{ steps.variant_start.output.experiment_id }}'
+
+  - name: resolve_comparison
+    type: data.set
+    if: '${{ steps.resolve_variant.output.ok == true }}'
+    with:
+      comparison_json: '${{ steps.compare.output.comparison | json | default: '' }}'
+
+  # ----------------------------------------------------------------------
+  # Approval gate. Propose deploying the variant; on approval PUT the new
+  # content onto the live skill.
+  # ----------------------------------------------------------------------
+  - name: propose_deploy
+    type: workflow.execute
+    if: '${{ steps.resolve_variant.output.ok == true }}'
+    with:
+      workflow-id: system-create-alertzero-proposal
+      run-as-mode: inherit
+      inputs:
+        conversationId: '{{ inputs.investigation_id }}'
+        title: 'AESOP: deploy variant of {{ inputs.skill_id }}'
+        comment: |-
+          **AESOP: deploy the candidate variant of `{{ inputs.skill_id }}`?**
+
+          **A/B comparison** (variant `${{ steps.variant_start.output.experiment_id }}` vs baseline `${{ steps.baseline_start.output.experiment_id }}`):
+
+          ```json
+          ${{ steps.resolve_comparison.output.comparison_json }}
+          ```
+
+          **Variant content**
+          ```markdown
+          {{ inputs.variant_content }}
+          ```
+
+          **Evaluators:** skill-secret-scanner, skill-prompt-injection, skill-pii, esql-compile, skill-index-resolves, correctness (judge)
+
+          **On approval**
+          If you approve, the agent PUTs the variant content onto `{{ inputs.skill_id }}` under your identity, deletes the scratch variant skill, and enables the skill's drift monitor (online evaluation of live traffic). If you dismiss, the agent deletes the scratch variant skill and leaves the live skill untouched.
+        impact: medium
+        confidence: medium
+        autoApprove: false
+        expiresIn: '72h'
+
+  - name: deploy_variant
+    type: kibana.request
+    if: '${{ steps.propose_deploy.output.decision == "approved" }}'
+    timeout: '30s'
+    with:
+      method: PUT
+      path: '/s/{{ workflow.spaceId }}/api/agent_builder/skills/{{ inputs.skill_id }}'
+      headers:
+        kbn-xsrf: 'true'
+        elastic-api-version: '2023-10-31'
+        Content-Type: application/json
+      body:
+        content: '{{ inputs.variant_content }}'
+    on-failure:
+      continue: true
+
+  # ----------------------------------------------------------------------
+  # Post-deploy: install + enable the per-skill drift monitor through the
+  # security internal route, which enables it as the identity that approved
+  # the deploy (the run's API key). Non-fatal: a failed monitor enable must
+  # not mark the deploy itself failed.
+  # ----------------------------------------------------------------------
+  - name: enable_drift_monitor
+    type: kibana.request
+    if: '${{ steps.deploy_variant.error == null and steps.propose_deploy.output.decision == "approved" }}'
+    timeout: '30s'
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/security_solution/aesop/drift_monitor'
+      headers:
+        kbn-xsrf: 'true'
+        Content-Type: application/json
+      body:
+        skill_id: '{{ inputs.skill_id }}'
+    on-failure:
+      continue: true
+
+  # ----------------------------------------------------------------------
+  # Cleanup. The variant skill is a scratch artifact: delete it on dismiss
+  # and after deploy alike, so the registry only ever holds it while a run
+  # is active. Runs whenever the variant was created.
+  # ----------------------------------------------------------------------
+  - name: cleanup_variant
+    type: kibana.request
+    if: '${{ steps.resolve_variant.output.ok == true }}'
+    timeout: '30s'
+    with:
+      method: DELETE
+      path: '/s/{{ workflow.spaceId }}/api/agent_builder/skills/{{ steps.resolve_variant.output.variant_skill_id }}'
+      headers:
+        kbn-xsrf: 'true'
+        elastic-api-version: '2023-10-31'
+    on-failure:
+      continue: true
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      baseline_experiment_id: '${{ steps.baseline_start.output.experiment_id | default: '' }}'
+      variant_experiment_id: '${{ steps.variant_start.output.experiment_id | default: '' }}'
+      decision: '${{ steps.propose_deploy.output.decision | default: '' }}'
+      deployed: '${{ steps.deploy_variant.error == null and steps.propose_deploy.output.decision == "approved" }}'
+      skip_reason: >-
+        {% if steps.resolve_variant.output.ok != true %}The variant skill could not be created: {{ steps.create_variant.error.message }}{% elsif steps.propose_deploy.output.decision == 'approved' and steps.deploy_variant.error != null %}Deploy failed after approval: {{ steps.deploy_variant.error.message }}{% elsif steps.propose_deploy.output.decision == 'approved' and steps.cleanup_variant.error != null %}Deployed, but the scratch variant skill was not deleted: {{ steps.cleanup_variant.error.message }}{% elsif steps.propose_deploy.output.decision == 'approved' and steps.enable_drift_monitor.error != null %}Deployed, but the drift monitor could not be enabled: {{ steps.enable_drift_monitor.error.message }}{% endif %}

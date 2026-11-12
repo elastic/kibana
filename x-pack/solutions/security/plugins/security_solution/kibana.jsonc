@@ -91,7 +91,8 @@
       "searchInferenceEndpoints",
       "esql",
       "alertzero",
-      "agenticInvestigations"
+      "agenticInvestigations",
+      "workflowsManagement"
     ],
     "requiredBundles": [
       "esUiShared",
