@@ -3,7 +3,7 @@
     {
       "id": "personal_assistant",
       "name": "Personal assistant",
-      "description": "Preferences, routines, people, plans and life events from each user's conversations, notes and daily context."
+      "description": "Preferences, routines, people, plans, life events, possessions, tracked numbers, tasks and what the assistant told them, from each user's conversations, notes and daily context."
     },
     {
       "id": "customer_support",

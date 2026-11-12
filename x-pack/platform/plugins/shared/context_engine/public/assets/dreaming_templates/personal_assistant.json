@@ -2,7 +2,7 @@
   "summary": "Personal assistant. Users save conversations, notes, and daily context. The assistant uses what it learns to help each person with their plans, routines and the people in their life.",
   "rationale": "A personal assistant serves one person at a time, so memories are grouped by user and each user's are consolidated on their own. The ontology centers on the user and the people, places and organizations around them, so the assistant can pick up where it left off: who someone works for, where they live, what they prefer.",
   "dreaming": {
-    "instructions": "Record what the user states or confirms about their own life: what they prefer, their routines, the people in it, their plans, and what has happened to them. Keep exact names, dates, days and places. Record each person the user mentions as an entity linked to the user.\n\nSkip:\n- Generic assistant suggestions the user did not confirm.\n- Pleasantries and small talk without factual content.\n- Scheduling details already recorded. Update the existing fact instead of repeating it.",
+    "instructions": "Record what the user states or confirms about their own life: what they prefer, their routines, the people in it, their plans, what has happened to them, what they own, and the numbers they track. Keep exact names, models, dates, days, places, counts and amounts. Record each person the user mentions as an entity linked to the user.\n\nMost of it comes up in passing, while the user asks for something else, such as \"a screen protector for my iPhone 13 Pro\" or \"I've worn them four times already\": record it as you would if the user had said it on purpose.\n\nAlso record what the assistant told or made for the user that they may ask about again: a recommendation by name, a list of options, a schedule, a ratio or an amount, with its specifics.\n\nWhen a number the user tracks changes, such as a count, a measurement or a goal, keep the earlier value with its date next to the new one.\n\nSkip:\n- Generic advice without specifics the user could ask about again.\n- Pleasantries and small talk without factual content.\n- Scheduling details already recorded. Update the existing fact instead of repeating it.",
     "facts": [
       {
         "type": "preference",
@@ -19,6 +19,22 @@
       {
         "type": "life_event",
         "description": "A change in the user's life, with when it happened, such as \"moved to Austin last month\" or \"started a new job\"."
+      },
+      {
+        "type": "possession",
+        "description": "Something the user owns, uses or collects, with its make, model or details, such as \"has an iPhone 13 Pro\" or \"collects pre-1920 American coins\"."
+      },
+      {
+        "type": "tracked_value",
+        "description": "A number about the user that changes over time, such as a count, an amount, a measurement or a goal, with when it held and the earlier values, such as \"has worn their black Converse 6 times as of May 30, 2023 (4 times before)\"."
+      },
+      {
+        "type": "task",
+        "description": "Something the user still has to do soon, such as an errand, a return or a pickup, such as \"needs to pick up the boots exchanged at Zara\"."
+      },
+      {
+        "type": "assistant_note",
+        "description": "Something the assistant told or made for the user that they may ask about again, with its specifics, such as \"the assistant suggested diluting tea tree oil 1:10 with a carrier oil\"."
       }
     ],
     "entities": {
