@@ -8,7 +8,7 @@
  */
 
 import type { ISuggestionItem } from '../../commands/registry/types';
-import { describeScenarios, runScenario } from './run';
+import { describeScenarios, runScenario, SUGGEST_FLOWS } from './run';
 import type { ScenarioTable, SuggestFlow } from './types';
 
 const item = (text: string, properties: Partial<ISuggestionItem> = {}): ISuggestionItem => ({
@@ -59,6 +59,52 @@ describe('runScenario', () => {
     expect(await callbacks.getColumnsFor({ query: 'FROM a' })).toEqual([
       { name: 'onlyColumn', type: 'keyword', userDefined: false },
     ]);
+  });
+
+  test('answers the columns of a lookup index and the create index permission', async () => {
+    const flow = createFlow('fake', []);
+
+    await runScenario(
+      {
+        name: 'lookup',
+        query: 'FROM a | LOOKUP JOIN lookup ON ',
+        world: {
+          lookupColumns: {
+            lookup: [{ name: 'lookupColumn', type: 'keyword', userDefined: false }],
+          },
+          canCreateLookupIndex: false,
+        },
+        expect: {},
+      },
+      flow
+    );
+
+    const [, , callbacks] = flow.suggest.mock.calls[0];
+
+    expect(await callbacks.getColumnsFor({ query: 'FROM lookup' })).toEqual([
+      { name: 'lookupColumn', type: 'keyword', userDefined: false },
+    ]);
+    expect(await callbacks.canCreateLookupIndex('new_index')).toBe(false);
+  });
+
+  test('does not carry the columns of one scenario over to the next', async () => {
+    const [flow] = SUGGEST_FLOWS;
+    const textsWith = async (name: string): Promise<string[]> => {
+      const suggestions = await runScenario(
+        {
+          name,
+          query: 'FROM a | KEEP ',
+          world: { columns: [{ name, type: 'keyword', userDefined: false }] },
+          expect: {},
+        },
+        flow
+      );
+
+      return suggestions.map(({ text }) => text);
+    };
+
+    expect(await textsWith('firstColumn')).toEqual(['firstColumn']);
+    expect(await textsWith('secondColumn')).toEqual(['secondColumn']);
   });
 });
 

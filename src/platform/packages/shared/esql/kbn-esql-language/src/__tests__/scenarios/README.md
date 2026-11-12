@@ -25,7 +25,8 @@ export const limitScenarios: ScenarioTable = {
 
 - `expect.exact`: the suggestions are exactly these, in any order.
 - `expect.contains` and `expect.excludes`: partial checks.
-- `world`: overrides of the default world (columns, sources, policies, license and so on).
+- `world`: overrides of the default world (columns, sources, policies, license and so on). Each
+  row runs with its own world: the package's column cache does not carry over between rows.
 - `status: 'new'`: a deliberate behaviour change. The row is skipped on flows that do not
   have it.
 
