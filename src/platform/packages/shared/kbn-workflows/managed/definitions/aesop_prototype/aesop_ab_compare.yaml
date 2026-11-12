@@ -119,7 +119,7 @@ steps:
         ${{ steps.create_variant.error == null
           and steps.create_variant.output.id != null
           and steps.create_variant.output.id != '' }}
-      variant_skill_id: '${{ steps.create_variant.output.id | default: '' }}'
+      variant_skill_id: "${{ steps.create_variant.output.id | default: '' }}"
 
   # ----------------------------------------------------------------------
   # Baseline arm: evaluate the live skill. The evaluator list is built once
@@ -210,7 +210,7 @@ steps:
     type: data.set
     if: '${{ steps.resolve_variant.output.ok == true }}'
     with:
-      comparison_json: '${{ steps.compare.output.comparison | json | default: '' }}'
+      comparison_json: '${{ steps.compare.output.comparison | json }}'
 
   # ----------------------------------------------------------------------
   # Approval gate. Propose deploying the variant; on approval PUT the new
@@ -307,9 +307,9 @@ steps:
     type: workflow.output
     status: completed
     with:
-      baseline_experiment_id: '${{ steps.baseline_start.output.experiment_id | default: '' }}'
-      variant_experiment_id: '${{ steps.variant_start.output.experiment_id | default: '' }}'
-      decision: '${{ steps.propose_deploy.output.decision | default: '' }}'
+      baseline_experiment_id: '${{ steps.baseline_start.output.experiment_id }}'
+      variant_experiment_id: '${{ steps.variant_start.output.experiment_id }}'
+      decision: '${{ steps.propose_deploy.output.decision }}'
       deployed: '${{ steps.deploy_variant.error == null and steps.propose_deploy.output.decision == "approved" }}'
       skip_reason: >-
         {% if steps.resolve_variant.output.ok != true %}The variant skill could not be created: {{ steps.create_variant.error.message }}{% elsif steps.propose_deploy.output.decision == 'approved' and steps.deploy_variant.error != null %}Deploy failed after approval: {{ steps.deploy_variant.error.message }}{% elsif steps.propose_deploy.output.decision == 'approved' and steps.cleanup_variant.error != null %}Deployed, but the scratch variant skill was not deleted: {{ steps.cleanup_variant.error.message }}{% elsif steps.propose_deploy.output.decision == 'approved' and steps.enable_drift_monitor.error != null %}Deployed, but the drift monitor could not be enabled: {{ steps.enable_drift_monitor.error.message }}{% endif %}

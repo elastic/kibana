@@ -10,7 +10,6 @@ import {
   AESOP_DRIFT_MONITOR_WORKFLOW_ID,
   type AesopDriftMonitorWorkflowTemplateValues,
 } from '@kbn/workflows/managed';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server';
 import {
   AESOP_DRIFT_MONITOR_INTERVAL_MINUTES,
@@ -24,6 +23,10 @@ import {
  * trigger under an API key minted from this request. Managed workflows accept
  * exactly one mutation — `{ enabled }` — so re-enabling re-mints the key and
  * never touches the template.
+ *
+ * Instances install in the deploying request's concrete space, not the global
+ * one: scheduling global workflows is unsupported (elastic/security-team#17380)
+ * because a scheduled run has no invoking space to stamp its executions with.
  */
 
 /** The one workflows management call this module makes, declared structurally rather than imported:
@@ -84,7 +87,7 @@ export const enableAesopDriftMonitor = async (
     lookbackMinutes,
   }: { skillId: string; intervalMinutes?: number; lookbackMinutes?: number }
 ): Promise<{ documentId: string }> => {
-  const { workflowsManagement, logger } = deps;
+  const { workflowsManagement, logger, spaceId } = deps;
   if (!workflowsManagement) {
     throw new Error(
       'Cannot enable the AESOP drift monitor: the workflows management plugin is not available to enable the workflow, and installing it alone would leave it unscheduled.'
@@ -96,7 +99,7 @@ export const enableAesopDriftMonitor = async (
   const documentId = aesopDriftMonitorDocumentId(skillId);
 
   await client.install(AESOP_DRIFT_MONITOR_WORKFLOW_ID, {
-    spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    spaceId,
     workflowIdSuffix,
     values: buildTemplateValues({ skillId, intervalMinutes, lookbackMinutes }),
   });
@@ -104,12 +107,7 @@ export const enableAesopDriftMonitor = async (
   // Installing writes the workflow document and stops there. Enabling is what puts the
   // scheduled trigger in front of Task Manager under an API key minted from this request —
   // the same split as the context_engine feedback-analysis schedule.
-  await workflowsManagement.updateWorkflow(
-    documentId,
-    { enabled: true },
-    GLOBAL_WORKFLOW_SPACE_ID,
-    deps.request
-  );
+  await workflowsManagement.updateWorkflow(documentId, { enabled: true }, spaceId, deps.request);
   logger.debug(() => `Enabled AESOP drift monitor for skill '${skillId}' (${documentId})`);
   return { documentId };
 };
@@ -119,7 +117,7 @@ export const disableAesopDriftMonitor = async (
   deps: AesopDriftMonitorRequestDeps,
   { skillId }: { skillId: string }
 ): Promise<void> => {
-  const { workflowsManagement, logger } = deps;
+  const { workflowsManagement, logger, spaceId } = deps;
   if (!workflowsManagement) {
     logger.warn('Cannot disable the AESOP drift monitor: workflows management is unavailable.');
     return;
@@ -127,7 +125,7 @@ export const disableAesopDriftMonitor = async (
   await workflowsManagement.updateWorkflow(
     aesopDriftMonitorDocumentId(skillId),
     { enabled: false },
-    GLOBAL_WORKFLOW_SPACE_ID,
+    spaceId,
     deps.request
   );
   logger.debug(() => `Disabled AESOP drift monitor for skill '${skillId}'`);
@@ -135,12 +133,14 @@ export const disableAesopDriftMonitor = async (
 
 /** Remove the monitor instance document for one skill. */
 export const uninstallAesopDriftMonitor = async (
-  deps: Pick<AesopDriftMonitorDeps, 'getManagedWorkflowsClient' | 'logger'>,
+  deps: Pick<AesopDriftMonitorDeps, 'getManagedWorkflowsClient' | 'logger'> & {
+    spaceId: string;
+  },
   { skillId }: { skillId: string }
 ): Promise<void> => {
   const client = await deps.getManagedWorkflowsClient();
   await client.uninstall(AESOP_DRIFT_MONITOR_WORKFLOW_ID, {
-    spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    spaceId: deps.spaceId,
     workflowIdSuffix: aesopDriftMonitorWorkflowIdSuffix(skillId),
   });
   deps.logger.debug(() => `Uninstalled AESOP drift monitor for skill '${skillId}'`);
@@ -149,4 +149,6 @@ export const uninstallAesopDriftMonitor = async (
 /** Request-scoped accessor bundle the routes hand to the schedule calls. */
 export interface AesopDriftMonitorRequestDeps extends AesopDriftMonitorDeps {
   request: KibanaRequest;
+  /** Concrete space of the deploying request; never the global `*` space (see module comment). */
+  spaceId: string;
 }

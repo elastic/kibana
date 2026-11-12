@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { KibanaRequest, Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { StartPlugins } from '../plugin';
 import type { SecuritySolutionPluginRouter } from '../types';
@@ -65,6 +66,9 @@ export const registerAesopDriftMonitorRoutes = ({
       workflowsManagement: getEnablementApi(),
       logger,
       request,
+      // Concrete space: scheduling global workflows is unsupported (security-team#17380),
+      // so the monitor must live where its scheduled runs will be stamped.
+      spaceId: pluginsStart.spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID,
     };
   };
 
