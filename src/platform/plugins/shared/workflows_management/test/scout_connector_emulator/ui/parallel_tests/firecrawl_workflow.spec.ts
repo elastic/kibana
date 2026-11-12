@@ -11,8 +11,7 @@ import type { EmulatorControl } from '@kbn/connector-emulate';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../../../scout/ui/fixtures';
 import { LONG_EXECUTION_TIMEOUT } from '../../../scout/ui/fixtures/constants';
-import { connectToEmulator, CRAWL_ID, VENDOR } from '../fixtures/emulator';
-import { getFirecrawlFixtures } from '../fixtures/firecrawl_responses';
+import { connectToEmulator, CRAWL_ID, getFirecrawlFixtures, VENDOR } from '../fixtures/emulator';
 import { FIRECRAWL_STEP_NAMES, getFirecrawlWorkflowYaml } from '../fixtures/firecrawl_workflow';
 
 /**
@@ -61,16 +60,16 @@ test.describe(
       connectorId = data.id;
     });
 
+    test.beforeEach(async ({ browserAuth }) => {
+      await browserAuth.loginAsPrivilegedUser();
+    });
+
     test.afterAll(async ({ kbnClient, scoutSpace, apiServices }) => {
       await apiServices.workflows.deleteAll();
       await kbnClient.request({
         method: 'DELETE',
         path: `/s/${scoutSpace.id}/api/actions/connector/${connectorId}`,
       });
-    });
-
-    test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsPrivilegedUser();
     });
 
     test('runs a step per action, and the emulator answers each request', async ({
@@ -116,7 +115,7 @@ test.describe(
       const searched = await resultOf<{ data: { web: Array<{ title: string; url: string }> } }>(
         'search'
       );
-      expect(searched.data.web.map(({ url }) => url)).toEqual([
+      expect(searched.data.web.map(({ url }) => url)).toStrictEqual([
         'https://www.elastic.co/kibana',
         'https://www.elastic.co/guide/en/kibana/current/index.html',
         'https://github.com/elastic/kibana',
@@ -148,7 +147,7 @@ test.describe(
       expect(countOf(`POST ${VENDOR}/map`)).toBe(1);
       expect(countOf(`POST ${VENDOR}/crawl`)).toBe(2);
       expect(countOf(`GET ${VENDOR}/crawl/${CRAWL_ID}`)).toBe(3);
-      expect(calls.filter((call) => call.requestViolations.length > 0)).toEqual([]);
+      expect(calls.filter((call) => call.requestViolations.length > 0)).toStrictEqual([]);
     });
   }
 );

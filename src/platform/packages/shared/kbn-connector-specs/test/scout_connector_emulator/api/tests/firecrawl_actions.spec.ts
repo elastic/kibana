@@ -13,11 +13,13 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { ApiClientFixture, RoleApiCredentials } from '@kbn/scout';
 import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import {
+  FIRECRAWL_CRAWL_ID as CRAWL_ID,
+  FIRECRAWL_VENDOR_URL as VENDOR,
+} from '../../../../src/specs/firecrawl/vendor_api/emulator_responses';
 
 // What the emulator calls `.firecrawl`: its connector id without the dot.
 const EMULATOR_NAME = 'firecrawl';
-const VENDOR = 'https://api.firecrawl.dev/v2';
-const CRAWL_ID = '0b8e1c52-6a1f-4c3e-9d7a-2f4b5c6d7e8f';
 
 const crawlStatus = (status: string) => ({
   status,
@@ -80,13 +82,13 @@ apiTest.describe(
       connectorId = data.id;
     });
 
-    apiTest.afterAll(async ({ kbnClient }) => {
-      await kbnClient.request({ method: 'DELETE', path: `/api/actions/connector/${connectorId}` });
-    });
-
     // Every test starts from no calls and no runtime fixtures.
     apiTest.beforeEach(async () => {
       await control.reset();
+    });
+
+    apiTest.afterAll(async ({ kbnClient }) => {
+      await kbnClient.request({ method: 'DELETE', path: `/api/actions/connector/${connectorId}` });
     });
 
     const callsTo = async (request: string): Promise<ContractCall[]> =>

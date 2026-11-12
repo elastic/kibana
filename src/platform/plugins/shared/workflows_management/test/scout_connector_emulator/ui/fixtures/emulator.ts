@@ -11,10 +11,14 @@ import type { EmulatorControl } from '@kbn/connector-emulate';
 import { createEmulatorControl, resolveEmulatorLocation } from '@kbn/connector-emulate';
 import { REPO_ROOT } from '@kbn/repo-info';
 
+export {
+  FIRECRAWL_CRAWL_ID as CRAWL_ID,
+  FIRECRAWL_VENDOR_URL as VENDOR,
+  getFirecrawlFixtures,
+} from '@kbn/connector-specs/src/specs/firecrawl/vendor_api/emulator_responses';
+
 /** What the emulator calls `.firecrawl`: its connector id without the dot. */
 export const EMULATOR_NAME = 'firecrawl';
-export const VENDOR = 'https://api.firecrawl.dev/v2';
-export const CRAWL_ID = '0b8e1c52-6a1f-4c3e-9d7a-2f4b5c6d7e8f';
 
 /**
  * The control client of the connector emulator, scoped to Firecrawl. It fails with what to do when

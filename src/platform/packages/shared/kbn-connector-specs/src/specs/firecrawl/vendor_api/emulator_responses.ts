@@ -8,7 +8,10 @@
  */
 
 import type { ResponseFixture } from '@kbn/connector-emulate';
-import { CRAWL_ID, VENDOR } from './emulator';
+
+/** Where Firecrawl's API lives; the emulator answers requests to it. */
+export const FIRECRAWL_VENDOR_URL = 'https://api.firecrawl.dev/v2';
+export const FIRECRAWL_CRAWL_ID = '0b8e1c52-6a1f-4c3e-9d7a-2f4b5c6d7e8f';
 
 const EXAMPLE_HOME = {
   markdown: [
@@ -138,7 +141,11 @@ export const getFirecrawlFixtures = (): readonly ResponseFixture[] => [
     operation: operation('post', '/crawl'),
     response: {
       status: 200,
-      body: { success: true, id: CRAWL_ID, url: `${VENDOR}/crawl/${CRAWL_ID}` },
+      body: {
+        success: true,
+        id: FIRECRAWL_CRAWL_ID,
+        url: `${FIRECRAWL_VENDOR_URL}/crawl/${FIRECRAWL_CRAWL_ID}`,
+      },
     },
   },
   {
