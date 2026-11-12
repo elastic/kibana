@@ -435,8 +435,19 @@ describe('AddNewMonitorsPublicAPI', () => {
   });
 
   describe('hydrateMonitorFields namespace resolution', () => {
-    const buildApi = (spaceId: string, body: Record<string, unknown>, gettingStarted = false) => {
-      const request = { query: gettingStarted ? { gettingStarted } : {}, body };
+    const buildApi = (
+      spaceId: string,
+      body: Record<string, unknown>,
+      gettingStarted = false,
+      preserveNamespace = false
+    ) => {
+      const request = {
+        query: {
+          ...(gettingStarted ? { gettingStarted } : {}),
+          ...(preserveNamespace ? { preserve_namespace: preserveNamespace } : {}),
+        },
+        body,
+      };
       return new AddEditMonitorAPI({
         routeContext: { spaceId, request },
         spaceId,
@@ -460,6 +471,25 @@ describe('AddNewMonitorsPublicAPI', () => {
         normalizedMonitor: { namespace: 'default' } as any,
       });
       expect(result.namespace).toBe('default');
+    });
+
+    it('keeps the namespace as sent with preserve_namespace', () => {
+      const api = buildApi('test-space', { type: 'http' }, false, true);
+      const result = api.hydrateMonitorFields({
+        newMonitorId: 'id-1',
+        normalizedMonitor: { namespace: 'default' } as any,
+      });
+      expect(result.namespace).toBe('default');
+    });
+
+    it('rejects an invalid namespace with preserve_namespace', () => {
+      const api = buildApi('test-space', { type: 'http', namespace: '' }, false, true);
+      expect(() =>
+        api.hydrateMonitorFields({
+          newMonitorId: 'id-1',
+          normalizedMonitor: { namespace: '' } as any,
+        })
+      ).toThrow(/namespace is invalid/);
     });
 
     it('derives the namespace from the space for the Getting Started flow', () => {
