@@ -101,6 +101,29 @@ separate guarded investigation step. Alert publication opt-in and alert snapshot
 separate work. Existing saved schedules activate on their next valid save or enable action, with no
 automatic workflow rewrite at deployment.
 
+## Alert identity on investigation telemetry
+
+The `nightshift-investigation-started` and `nightshift-investigation-skipped` EBT events identify
+the alert that triggered the run, so runs can be counted per alert source and joined back to the
+alert. The triggering alert is the subject of the run, or the only alert it carries. All four fields
+are absent when no alert triggered the run:
+
+- `alert_version`: `v1` for a classic alert, `v2` for an Alerting v2 episode. Classic alerts carry
+  none of the fields below.
+- `alert_source`: the episode's `source`: `elastic.significant_events`, `internal` for
+  Elastic-configured rules, or the sender-provided integration identifier for external alerts.
+- `source_kind`: `significant_events`, `elastic_configured` when the alert has a rule, otherwise
+  `external`. An external sender may also use `internal` as its source, so use this field to split
+  rule alerts from external ones.
+- `fingerprint`: for Significant Events, the `event_id`, which joins to the `significant-events-*`
+  events. Otherwise `sha256(space_id:source:rule_id:group_hash)` from `toAlertFingerprint`, with an
+  empty `rule_id` for external alerts, because a rule's `group_hash` is only unique within the rule.
+  Any other event about the same alert series must derive it with the same function.
+
+`trigger_type` on the started event separates automatic from manual runs. No alert title, message,
+tag, or other customer alert content is sent. Completion is not a Nightshift event: join
+`workflow_execution_id` to the Workflow Engine terminal telemetry.
+
 ## Requirements
 
 Nightshift investigations are being moved onto the shared `agenticInvestigations` plugin (an investigation is an Agent Builder conversation) and its proposed actions onto the `proposals` plugin. Both are optional dependencies and disabled by default:

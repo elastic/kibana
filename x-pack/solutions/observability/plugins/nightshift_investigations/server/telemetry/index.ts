@@ -38,6 +38,13 @@ export {
   type OnlineEvalScoreEvent,
 } from './online_eval_score_event';
 export {
+  alertIdentityOf,
+  toAlertFingerprint,
+  triggeringAlertOf,
+  type AlertIdentity,
+  type AlertSourceKind,
+} from './alert_identity';
+export {
   NIGHTSHIFT_INVESTIGATION_SKIPPED_EVENT,
   type InvestigationSkippedEvent,
 } from './investigation_skipped_event';

@@ -90,7 +90,7 @@ import {
   InvalidInvestigationContextError,
   InvestigationUnavailableError,
 } from './errors';
-import type { NightshiftTelemetryClient } from '../telemetry';
+import { alertIdentityOf, triggeringAlertOf, type NightshiftTelemetryClient } from '../telemetry';
 import { MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '../../common/automation_limits';
 import { evaluateInvestigationQuota } from './evaluate_investigation_quota';
 import {
@@ -585,6 +585,7 @@ export class NightshiftInvestigationsClient {
     const workflow = await this.getInvestigationWorkflow(spaceId);
 
     const { alerts } = prepared;
+    const alertIdentity = alertIdentityOf(spaceId, triggeringAlertOf(subject.id, alerts));
     const newInvestigationId = uuidv4();
     const subjects = toStartSubjects({
       subject: resolvedSubject,
@@ -627,6 +628,7 @@ export class NightshiftInvestigationsClient {
                 origin: subject.type,
                 ...(automationId ? { automation_id: automationId } : {}),
                 skip_reason: 'deployment_quota',
+                ...alertIdentity,
               });
             }
             throw error;
@@ -710,6 +712,7 @@ export class NightshiftInvestigationsClient {
       automation_id: automationId,
       ...correlation,
       event_id: significantEventIdOf(resolvedSubject, alerts) ?? correlation.event_id,
+      ...alertIdentity,
     });
 
     this.logger.info(
@@ -1529,6 +1532,7 @@ export class NightshiftInvestigationsClient {
       entry_point: 'alert_recovery',
       subject_type: 'alert',
       is_follow_up: true,
+      ...alertIdentityOf(spaceId, alertSubject?.snapshot),
     });
     this.logger.info(
       `Requested a recovery round on investigation "${existing.id}" for alert/${alertUuid}, execution_id=${executionId}`

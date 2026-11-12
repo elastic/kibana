@@ -46,7 +46,7 @@ import type { NightshiftAutomationAttributes } from '../lib/automations/types';
 import { createAutomationBudget } from '../lib/automations/automation_budget';
 import { AutomationDailyLimitReachedError, InvestigationQuotaDeniedError } from '../client/errors';
 import type { AutomationBudget } from '../types';
-import type { NightshiftTelemetryClient } from '../telemetry';
+import { alertIdentityOf, triggeringAlertOf, type NightshiftTelemetryClient } from '../telemetry';
 
 const inputSchema = lazySchema(() =>
   z.object({
@@ -351,6 +351,12 @@ export const triggerInvestigationStepDefinition = (
             origin: input.subject_type,
             automation_id: input.automation_id,
             skip_reason: 'automation_daily_limit',
+            ...(input.subject_type === 'alert'
+              ? alertIdentityOf(
+                  spaceId,
+                  triggeringAlertOf(subjectId, alerts ?? input.context?.alerts)
+                )
+              : {}),
           });
           return { output: { skip_reason: 'daily_limit' as const, daily_limit: error.limit } };
         }

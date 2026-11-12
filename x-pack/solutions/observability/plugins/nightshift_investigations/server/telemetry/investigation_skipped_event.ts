@@ -6,12 +6,13 @@
  */
 
 import type { EventTypeOpts, RootSchema } from '@kbn/core/server';
+import { alertIdentitySchema, type AlertIdentity } from './alert_identity';
 
 export const NIGHTSHIFT_INVESTIGATION_SKIPPED_EVENT = 'nightshift-investigation-skipped';
 
 export type InvestigationSkipReason = 'deployment_quota' | 'automation_daily_limit';
 
-export interface InvestigationSkippedEvent {
+export interface InvestigationSkippedEvent extends AlertIdentity {
   trigger: 'automation' | 'manual';
   origin: string;
   automation_id?: string;
@@ -40,6 +41,7 @@ const investigationSkippedSchema: RootSchema<InvestigationSkippedEvent> = {
       description: 'Why the investigation was skipped: deployment_quota or automation_daily_limit.',
     },
   },
+  ...alertIdentitySchema,
 };
 
 export const investigationSkippedEvent: EventTypeOpts<InvestigationSkippedEvent> = {

@@ -671,6 +671,9 @@ describe('automation budget enforcement before dispatch', () => {
         origin: subjectType,
         automation_id: 'a1',
         skip_reason: 'automation_daily_limit',
+        ...(subjectType === 'alert'
+          ? { alert_version: 'v2', alert_source: 'other.source', source_kind: 'external' }
+          : {}),
       });
       expect(soClient.update).not.toHaveBeenCalled();
       expect(logger.info).toHaveBeenCalledWith(
