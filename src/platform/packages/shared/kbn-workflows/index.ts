@@ -23,7 +23,7 @@ export {
 } from './spec/builtin_step_definitions';
 export type { BuiltInStepDefinition } from './spec/builtin_step_definitions';
 export {
-  builtInTriggerDefinitions,
+  getBuiltInTriggerDefinitions,
   getBuiltInTriggerDefinition,
 } from './spec/builtin_trigger_definitions';
 export { getTriggerName } from './common/get_trigger_name';
@@ -95,6 +95,10 @@ export {
   SCHEDULED_INTERVAL_ERROR,
   SCHEDULED_INTERVAL_PATTERN,
   ManualTriggerSchema,
+  DEFAULT_PAGE_TRIGGER_ID,
+  isPageTrigger,
+  PageTriggerSchema,
+  type PageTrigger,
   TriggerSchema,
   getCustomTriggerZodSchema,
   getTriggerSchema,
@@ -106,6 +110,7 @@ export {
   type CustomTriggerOn,
   type CustomTriggerSchemaConfig,
   type CustomTriggerSchemaInput,
+  type TriggerSchemaOptions,
   type TriggerType,
   type WorkflowEventsValue,
 } from './spec/schema/triggers';

@@ -26,6 +26,7 @@ import { useDeploy, toSOServiceVars } from './authenticate_and_deploy_step/use_d
 import { toSOSettings, toSOSettingsUpdate } from './authenticate_and_deploy_step/so_settings';
 import { useOnboardingDriftDetection } from './authenticate_and_deploy_step/use_onboarding_drift_detection';
 import { useAgentBasedDeploy } from './authenticate_and_deploy_step/use_agent_based_deploy';
+import { useApplyDedicatedTemplates } from './authenticate_and_deploy_step/use_apply_dedicated_templates';
 import { AgentBasedSection } from './authenticate_and_deploy_step/agent_based_section';
 import { useOnboardingSO } from './authenticate_and_deploy_step/use_onboarding_so';
 import { useEcfDeployment, EcfDeploymentSection } from './ecf_deployment_section';
@@ -334,6 +335,15 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     return handleAgentDeploy();
   }, [handleAgentDeploy]);
 
+  const applyDedicatedTemplates = useApplyDedicatedTemplates({
+    enabled: !!serviceSettings.dedicatedNamespaceTemplates,
+    // A deploy attempted here. "Done" alone also turns true for an existing deployment once its
+    // drift check settles, which is only a reopen and must not write the shared list.
+    isDeployDone: isAgentBased ? agentDeployAttempted && isAgentDone : deployAttempted && isMiDone,
+    groups: isAgentBased ? agentTargets : deployGroups,
+    globalNamespace: serviceSettings.namespace?.trim() ?? '',
+  });
+
   const isAwsIdentityFederationEnabled = useAwsIdentityFederationEnabled();
   const showIdentityFederation = useMemo(() => {
     if (!isAwsIdentityFederationEnabled) return false;
@@ -476,7 +486,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           Record<string, unknown>
         >,
         globalRegion,
-        ...toSOSettings(serviceSettings),
+        ...toSOSettings(serviceSettings, 'ecf'),
         dataFormat,
       }));
     if (deploymentId) {
@@ -488,7 +498,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       // This write is load-bearing — failure leaves the SO advertising the wrong mechanism
       // and an orphaned connector reference, so we must confirm it before navigating.
       const writeSucceeded = await updateDeployment(deploymentId, {
-        ...toSOSettingsUpdate(serviceSettings),
+        ...toSOSettingsUpdate(serviceSettings, 'ecf'),
         mechanisms: ['ecf'],
         connectorId: null,
         authMethod: null,
@@ -631,8 +641,11 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       // Called after the SO write is confirmed so a failed write leaves state intact for retry.
       removeDeployInstances(staleFailedIds);
     }
+    // The switch may have been turned on after the deploy, which the Deploy button does not redo.
+    await applyDedicatedTemplates();
     onContinue();
   }, [
+    applyDedicatedTemplates,
     deployGroups,
     failedInstances,
     removeDeployInstances,
@@ -682,6 +695,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       // Short-circuit if already deployed (e.g. user went Back then Next again) to avoid
       // creating duplicate package policies on the same agent policy.
       if (isAgentDone) {
+        await applyDedicatedTemplates();
         onContinue();
         return;
       }
@@ -690,6 +704,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         // Deploy failed — stay on step 3, error callout is already shown by the section.
         return;
       }
+      // The step unmounts on navigation, before the done state the hook reacts to is rendered.
+      await applyDedicatedTemplates();
       onContinue();
       return;
     }
@@ -705,6 +721,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     handleMixedEcfNext,
     handleMiNext,
     handleAgentDeployForNext,
+    applyDedicatedTemplates,
     handleDeploy,
     awsServicesMap,
     detectAndReviewStep.policyIdsByInstance,

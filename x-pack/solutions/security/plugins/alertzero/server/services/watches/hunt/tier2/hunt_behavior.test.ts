@@ -628,8 +628,89 @@ describe('huntBehavior', () => {
         id: 'doc-1',
         index: 'logs-aws.cloudtrail-default',
         timestamp: '2026-09-24T12:00:00.000Z',
+        host: 'WIN-ANALYST01',
+        fields: {},
       },
     ]);
+  });
+
+  it('copies allowlisted evidence columns onto hits, capped and truncated', async () => {
+    const long = 'x'.repeat(300);
+    executeEsqlMock.mockResolvedValue({
+      columns: [
+        col('_id'),
+        col('_index'),
+        col('host.name'),
+        col('user.name'),
+        col('process.name'),
+        col('process.command_line'),
+        col('event.action'),
+        col('source.ip'),
+        col('destination.ip'),
+        col('destination.domain'),
+        col('url.full'),
+        col('file.path'),
+        col('file.hash.sha256'),
+        col('dns.question.name'),
+        col('process.executable'),
+        col('process.parent.name'),
+      ],
+      values: [
+        [
+          'doc-1',
+          'logs-aws.cloudtrail-default',
+          'WIN-1',
+          'alice',
+          // ES|QL can return multi-valued cells; cast past FieldValue's scalar union.
+          ['cmd.exe', 'ignored'] as unknown as string,
+          long,
+          'AssumeRole',
+          '10.0.0.1',
+          '1.2.3.4',
+          'evil.test',
+          'https://evil.test',
+          '/tmp/a',
+          'abc',
+          'q.example',
+          true,
+          42,
+        ],
+      ],
+    });
+    const result = await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      executeParams,
+      esClient
+    );
+    const hit = result.behaviors[0].hits?.[0];
+    expect(hit?.host).toBe('WIN-1');
+    expect(hit?.user).toBe('alice');
+    expect(Object.keys(hit?.fields ?? {})).toHaveLength(8);
+    expect(hit?.fields?.['process.name']).toBe('cmd.exe');
+    expect(hit?.fields?.['process.command_line']).toHaveLength(256);
+    expect(hit?.fields?.['process.parent.name']).toBe('42');
+    expect(hit?.fields?.['process.executable']).toBe('true');
+    expect(hit?.fields?.['destination.domain']).toBeUndefined();
+  });
+
+  it('yields empty fields when the KEEP has no allowlisted evidence columns', async () => {
+    executeEsqlMock.mockResolvedValue({
+      columns: [col('_id'), col('_index'), col('host.name'), col('some.other.field')],
+      values: [['doc-1', 'logs-aws.cloudtrail-default', 'WIN-1', 'nope']],
+    });
+    const result = await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      executeParams,
+      esClient
+    );
+    expect(result.behaviors[0].hits?.[0]).toEqual({
+      id: 'doc-1',
+      index: 'logs-aws.cloudtrail-default',
+      host: 'WIN-1',
+      fields: {},
+    });
   });
 
   it('returns execution.hit true for a required-index row', async () => {
@@ -1269,6 +1350,69 @@ describe('huntBehavior', () => {
       expect(generateEsqlMock).toHaveBeenCalledTimes(1);
       expect(result.behaviors[0].execution?.inconclusive_reason).toBe('query_out_of_scope');
       expect(debugSpy).not.toHaveBeenCalledWith(expect.stringContaining('ungrounded query'));
+    });
+
+    it('executes the query with the universe exclusions appended to its FROM', async () => {
+      generateByTechnique({ 'T1078.004': GROUNDED_ESQL });
+
+      await huntBehavior(
+        buildMockModel([t1078Candidate]),
+        logger,
+        { ...executeParams, excluded_indices: ['*secret*'] },
+        esClient
+      );
+
+      expect(executeEsqlMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.stringContaining('FROM logs-aws.cloudtrail-*, -*secret*'),
+        })
+      );
+    });
+
+    it('hands on the same exclusions in the published query', async () => {
+      generateByTechnique({ 'T1078.004': GROUNDED_ESQL });
+
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate]),
+        logger,
+        { ...executeParams, excluded_indices: ['*secret*'] },
+        esClient
+      );
+
+      expect(result.behaviors[0].validated_esql).toContain('FROM logs-aws.cloudtrail-*, -*secret*');
+    });
+
+    describe('the cross-project flag reaching the source gates', () => {
+      const cpsAllowed = ['logs-aws.*', '*:logs-aws.*', 'linked:-logs-aws.cloudtrail-*'];
+      const unqualifiedQuery = GROUNDED_ESQL;
+
+      it('refuses an unqualified source that fans out to an excluded project', async () => {
+        generateByTechnique({ 'T1078.004': unqualifiedQuery });
+
+        const result = await huntBehavior(
+          buildMockModel([t1078Candidate]),
+          logger,
+          { ...executeParams, allowed_indices: cpsAllowed, cross_project_search: true },
+          esClient
+        );
+
+        expect(result.behaviors[0].execution?.inconclusive_reason).toBe('query_out_of_scope');
+        expect(executeEsqlMock).not.toHaveBeenCalled();
+      });
+
+      it('keeps the same source local, and allowed, when the flag is off', async () => {
+        generateByTechnique({ 'T1078.004': unqualifiedQuery });
+
+        const result = await huntBehavior(
+          buildMockModel([t1078Candidate]),
+          logger,
+          { ...executeParams, allowed_indices: cpsAllowed },
+          esClient
+        );
+
+        expect(result.behaviors[0].execution?.inconclusive_reason).not.toBe('query_out_of_scope');
+        expect(executeEsqlMock).toHaveBeenCalled();
+      });
     });
 
     it.each(UNGROUNDED_QUERY_FIXTURES)(

@@ -214,7 +214,7 @@ describe('SlackAppService', () => {
             spaces: ['*'],
             feature: {
               nightshift: ['minimal_all'],
-              agentBuilder: ['minimal_all'],
+              agentBuilder: ['minimal_all', 'invoke_bound_agents'],
               actions: ['read'],
               workflowsManagement: ['read'],
             },
@@ -1539,6 +1539,7 @@ describe('SlackAppService', () => {
   describe('bindChannel / unbindChannel', () => {
     const bind = jest.fn();
     const unbindChannel = jest.fn();
+    const listAvailableChannels = jest.fn();
 
     function createHarnessWithChannelOps(opts?: HarnessOptions) {
       const harness = createHarness(opts);
@@ -1549,6 +1550,7 @@ describe('SlackAppService', () => {
         listBindings: jest.fn(),
         bind,
         unbindChannel,
+        listAvailableChannels,
       };
       return harness;
     }
@@ -1556,6 +1558,7 @@ describe('SlackAppService', () => {
     beforeEach(() => {
       bind.mockReset();
       unbindChannel.mockReset();
+      listAvailableChannels.mockReset();
     });
 
     it('bindChannel calls relay bind with tenantKey and channelId', async () => {
@@ -1604,6 +1607,38 @@ describe('SlackAppService', () => {
       await new SlackAppService(server).unbindChannel(request, 'C123');
 
       expect(unbindChannel).toHaveBeenCalledWith('tenant-A', 'C123');
+    });
+
+    it('listAvailableChannels maps the relay channels and keeps truncated', async () => {
+      const { server, soClient } = createHarnessWithChannelOps();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.connected,
+          tenantKey: 'tenant-A',
+        },
+      });
+      listAvailableChannels.mockResolvedValue({
+        channels: [{ scope_id: 'C1', display_name: 'alerts' }],
+        truncated: true,
+      });
+
+      await expect(new SlackAppService(server).listAvailableChannels(request)).resolves.toEqual({
+        channels: [{ channel: 'C1', displayName: 'alerts' }],
+        truncated: true,
+      });
+      expect(listAvailableChannels).toHaveBeenCalledWith('tenant-A');
+    });
+
+    it('listAvailableChannels throws when the connection is not connected', async () => {
+      const { server, soClient } = createHarnessWithChannelOps();
+      soClient.get.mockResolvedValue({
+        attributes: { status: RELAY_APP_CONNECTION_STATUS.notConnected },
+      });
+
+      await expect(new SlackAppService(server).listAvailableChannels(request)).rejects.toThrow(
+        'Connection is not in a connected state'
+      );
+      expect(listAvailableChannels).not.toHaveBeenCalled();
     });
   });
 

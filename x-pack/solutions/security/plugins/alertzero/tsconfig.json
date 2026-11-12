@@ -34,6 +34,7 @@
     "@kbn/deeplinks-security",
     "@kbn/deeplinks-workflows",
     "@kbn/spaces-plugin",
+    "@kbn/cps",
     "@kbn/workflows",
     "@kbn/workflows-ui",
     "@kbn/workflows-yaml",
@@ -84,6 +85,8 @@
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/discover-shared-plugin",
     "@kbn/core-notifications-browser",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/discover-plugin",
     "@kbn/workflows-execution-engine"
   ]
 }

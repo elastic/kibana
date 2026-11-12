@@ -62,6 +62,7 @@ describe('WorkflowsPlugin', () => {
       logging: { console: false },
       available: true,
       library: { ttlMs: 600_000 },
+      pages: { enabled: false },
     });
 
     const plugin = new WorkflowsPlugin(initializerContext);
@@ -94,6 +95,7 @@ describe('WorkflowsPlugin', () => {
       logging: { console: false },
       available: true,
       library: { ttlMs: 600_000 },
+      pages: { enabled: false },
     });
 
     const plugin = new WorkflowsPlugin(initializerContext);
@@ -125,6 +127,7 @@ describe('WorkflowsPlugin', () => {
       logging: { console: false },
       available: true,
       library: { ttlMs: 600_000 },
+      pages: { enabled: false },
     });
     const plugin = new WorkflowsPlugin(initializerContext);
     const coreSetup = coreMock.createSetup();
@@ -182,6 +185,7 @@ describe('WorkflowsPlugin', () => {
         logging: { console: false },
         available: true,
         library: { ttlMs: 600_000 },
+        pages: { enabled: false },
       })
     );
 
@@ -211,6 +215,7 @@ describe('WorkflowsPlugin', () => {
         logging: { console: false },
         available: true,
         library: { ttlMs: 600_000 },
+        pages: { enabled: false },
       })
     );
 
