@@ -16,7 +16,7 @@ export const accessControlSchema = z
       .optional()
       .meta({
         description:
-          'Controls edit access to the dashboard. Set to `write_restricted` to prevent edits by users without explicit write permission. Defaults to `default` (all viewers can edit).',
+          "Controls edit access to the dashboard. Set to `write_restricted` to prevent edits by users without explicit write permission. Defaults to `default` (all viewers can edit). Requests authenticated with an API key can't set `write_restricted`, because an API key doesn't map to a user. To set it, authenticate as a user.",
       }),
   })
   .strict()
