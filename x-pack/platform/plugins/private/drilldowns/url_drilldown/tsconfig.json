@@ -5,7 +5,6 @@
   },
   "include": ["common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
-    "@kbn/data-source",
     "@kbn/core",
     "@kbn/embeddable-plugin",
     "@kbn/expressions-plugin",

@@ -123,8 +123,13 @@ const mockTelemetry = {
 jest.mock('./telemetry', () => ({ getTelemetry: () => mockTelemetry }));
 
 const mockGetEsqlFilterableSource = jest.fn();
-jest.mock('./get_esql_filterable_source', () => ({
-  getEsqlFilterableSource: (...args: unknown[]) => mockGetEsqlFilterableSource(...args),
+jest.mock('@kbn/data-source', () => ({
+  ...jest.requireActual('@kbn/data-source'),
+  EsqlSource: {
+    forDataset: async (args: unknown) => ({
+      toFilterableSource: async () => mockGetEsqlFilterableSource(args),
+    }),
+  },
 }));
 
 jest.mock('./services', () => ({
@@ -315,6 +320,16 @@ describe('customContentEmbeddableFactory', () => {
         ({ timeFieldName }) => timeFieldName
       );
       expect(timeFields).toEqual([undefined, 'sale_date']);
+    });
+
+    it('resolves the sources with the project routing of the dashboard', async () => {
+      await buildEmbeddable(baseState, { projectRouting$: new BehaviorSubject('_alias:*') });
+
+      await waitFor(() =>
+        expect(mockGetEsqlFilterableSource).toHaveBeenCalledWith(
+          expect.objectContaining({ projectRouting: '_alias:*' })
+        )
+      );
     });
 
     it('keeps the sources of the other queries when one cannot be resolved', async () => {

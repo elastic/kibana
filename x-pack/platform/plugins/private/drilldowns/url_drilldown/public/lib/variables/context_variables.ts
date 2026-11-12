@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEsqlFilterableSource } from '@kbn/data-source';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/code-editor';
 import { getFlattenedObject } from '@kbn/std';
@@ -73,10 +72,7 @@ export const getContextScopeValues = (context: Partial<EmbeddableApiContext>): C
       HasParentApi<Partial<PublishesUnifiedSearch>>
   >;
   const dataViewIds = api.dataSources$?.value
-    ? (api.dataSources$.value
-        .filter((source) => !isEsqlFilterableSource(source))
-        .map((dataView) => dataView.id)
-        .filter(Boolean) as string[])
+    ? (api.dataSources$?.value.map((dataView) => dataView.id).filter(Boolean) as string[])
     : [];
 
   return {

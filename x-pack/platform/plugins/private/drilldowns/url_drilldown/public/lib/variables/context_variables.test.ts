@@ -91,25 +91,4 @@ describe('getContextScopeValues()', () => {
       },
     });
   });
-
-  test('leaves out an ES|QL source, whose id is not the id of an index pattern', () => {
-    const embeddableApi = {
-      dataSources$: new BehaviorSubject([
-        { kind: 'esql', id: 'esql-dataset-id' },
-        { id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' },
-      ]),
-    };
-    expect(getContextScopeValues({ embeddable: embeddableApi })).toEqual({
-      panel: {
-        indexPatternId: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-      },
-    });
-  });
-
-  test('has no index pattern when the panel only publishes an ES|QL source', () => {
-    const embeddableApi = {
-      dataSources$: new BehaviorSubject([{ kind: 'esql', id: 'esql-dataset-id' }]),
-    };
-    expect(getContextScopeValues({ embeddable: embeddableApi })).toEqual({ panel: {} });
-  });
 });

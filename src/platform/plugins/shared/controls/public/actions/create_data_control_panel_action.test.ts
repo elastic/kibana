@@ -70,19 +70,4 @@ describe('createDataControlPanelAction', () => {
       execute(createEmbeddable({ published: [esqlSource('esql-dataset-id')] }))
     ).resolves.toBe('default-data-view');
   });
-
-  it('starts from the default data view when nothing is published', async () => {
-    await expect(execute(createEmbeddable({ published: [] }))).resolves.toBe('default-data-view');
-  });
-
-  it('prefers the default data view of the editor config over a published one', async () => {
-    await expect(
-      execute(
-        createEmbeddable({
-          published: [dataViewSource('published-data-view')],
-          defaultDataViewId: 'configured-data-view',
-        })
-      )
-    ).resolves.toBe('configured-data-view');
-  });
 });

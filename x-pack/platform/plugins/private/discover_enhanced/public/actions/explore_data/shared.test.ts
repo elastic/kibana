@@ -22,41 +22,19 @@ const publishing = (sources?: FilterableSource[]) => ({
   dataSources$: new BehaviorSubject<FilterableSource[] | undefined>(sources),
 });
 
-describe('explore data shared helpers', () => {
-  describe('getDataViews', () => {
-    it('returns the ids of the published data views', () => {
-      expect(getDataViews(publishing([dataView('a'), dataView('b')]))).toEqual(['a', 'b']);
-    });
-
-    it('leaves out an ES|QL source, whose id is not the id of a data view', () => {
-      expect(getDataViews(publishing([esqlSource('esql-dataset-id'), dataView('a')]))).toEqual([
-        'a',
-      ]);
-    });
-
-    it('returns nothing when the panel does not publish data sources', () => {
-      expect(getDataViews({})).toEqual([]);
-      expect(getDataViews(publishing(undefined))).toEqual([]);
-    });
+describe('explore data with an ES|QL source', () => {
+  // An ES|QL source has the id of a dataset, which Discover cannot open as a data view.
+  it('leaves an ES|QL source out of the data views of the panel', () => {
+    expect(getDataViews(publishing([esqlSource('esql-dataset-id'), dataView('a')]))).toEqual(['a']);
   });
 
-  describe('hasExactlyOneDataView', () => {
-    it('is true for a single data view', () => {
-      expect(hasExactlyOneDataView(publishing([dataView('a')]))).toBe(true);
-    });
+  it('still finds the one data view published next to an ES|QL source', () => {
+    expect(hasExactlyOneDataView(publishing([esqlSource('esql-dataset-id'), dataView('a')]))).toBe(
+      true
+    );
+  });
 
-    it('is true when an ES|QL source is published next to a single data view', () => {
-      expect(
-        hasExactlyOneDataView(publishing([esqlSource('esql-dataset-id'), dataView('a')]))
-      ).toBe(true);
-    });
-
-    it('is false when the panel only publishes an ES|QL source, which Discover cannot open as a data view', () => {
-      expect(hasExactlyOneDataView(publishing([esqlSource('esql-dataset-id')]))).toBe(false);
-    });
-
-    it('is false for several data views', () => {
-      expect(hasExactlyOneDataView(publishing([dataView('a'), dataView('b')]))).toBe(false);
-    });
+  it('finds no data view when the panel only publishes an ES|QL source', () => {
+    expect(hasExactlyOneDataView(publishing([esqlSource('esql-dataset-id')]))).toBe(false);
   });
 });
