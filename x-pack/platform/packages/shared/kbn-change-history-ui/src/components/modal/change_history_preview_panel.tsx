@@ -106,15 +106,23 @@ export const ChangeHistoryPreviewPanel: FC<ChangeHistoryPreviewPanelProps> = ({
 
   const activeCompareMode = supports.compare ? compareMode : undefined;
 
-  const { compareSpec, isLoadingCompareContext } = useChangeHistoryCompare({
-    adapter,
-    objectId,
-    listItems,
-    selectedChange: change,
-    selectedChangeId,
-    compareMode: activeCompareMode,
-    enabled: supports.compare,
-  });
+  // keepPreviousData keeps the previous row's detail mounted while a new one loads. It must not
+  // be used as the selected change for comparisons until it matches the selection.
+  const isStaleChange = Boolean(change && change.id !== selectedChangeId);
+
+  const { compareSpec, isLoadingCompareContext: isLoadingCompareEndpoints } =
+    useChangeHistoryCompare({
+      adapter,
+      objectId,
+      listItems,
+      selectedChange: isStaleChange ? undefined : change,
+      selectedChangeId,
+      compareMode: activeCompareMode,
+      enabled: supports.compare,
+    });
+
+  const isLoadingCompareContext =
+    isLoadingCompareEndpoints || (isStaleChange && Boolean(activeCompareMode));
 
   const diffTelemetry = useChangeHistoryDiffTelemetry({
     compareSpec,
