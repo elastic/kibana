@@ -126,6 +126,27 @@ describe('InvestigationList', () => {
     expect(screen.queryByTestId('nightshiftInvestigationSection-critical')).not.toBeInTheDocument();
   });
 
+  it('shows filtered empty title when a search matches nothing', () => {
+    render(
+      <I18nProvider>
+        <InvestigationList
+          sections={[makeSection('in-progress'), makeSection('critical')]}
+          hasActiveSearch
+          onStartInvestigation={jest.fn()}
+          onCreateAutomation={jest.fn()}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toHaveTextContent(
+      'No open investigations found'
+    );
+    expect(screen.getByTestId('nightshiftInvestigationsEmptyInvestigate')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('nightshiftInvestigationsEmptyCreateAutomation')
+    ).toBeInTheDocument();
+  });
+
   it('renders in progress first and not rated last', () => {
     renderSections([
       makeSection('in-progress', { investigations: [investigation], total: 1 }),

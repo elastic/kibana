@@ -13,6 +13,12 @@ export const NO_INVESTIGATIONS_EMPTY_TITLE = i18n.translate(
   { defaultMessage: 'No open investigations' }
 );
 
+/** Shown when a search/filter matches no open investigations. */
+export const NO_INVESTIGATIONS_FILTERED_EMPTY_TITLE = i18n.translate(
+  'xpack.nightshift.investigations.filteredEmptyTitle',
+  { defaultMessage: 'No open investigations found' }
+);
+
 export const NO_INVESTIGATIONS_EMPTY_BODY = i18n.translate(
   'xpack.nightshift.investigations.emptyBody',
   {

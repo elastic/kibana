@@ -448,12 +448,36 @@ describe('NightshiftApp', () => {
     expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toHaveTextContent(
       'No open investigations'
     );
-    expect(
-      screen.queryByTestId('nightshiftInvestigationsSearchInput')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftInvestigationsSearchInput')).not.toBeInTheDocument();
     expect(
       screen.queryByTestId('nightshiftInvestigationSection-in-progress')
     ).not.toBeInTheDocument();
+  });
+
+  it('keeps search mounted when clearing an empty-result query', async () => {
+    setSections({
+      sections: defaultSections({
+        'in-progress': { investigations: [investigation], total: 1 },
+      }),
+      hasActiveInvestigations: true,
+    });
+    renderApp();
+
+    fireEvent.change(screen.getByTestId('nightshiftInvestigationsSearchInput'), {
+      target: { value: 'zzz' },
+    });
+    setSections({ sections: defaultSections() });
+
+    await waitFor(() =>
+      expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toHaveTextContent(
+        'No open investigations found'
+      )
+    );
+
+    fireEvent.change(screen.getByTestId('nightshiftInvestigationsSearchInput'), {
+      target: { value: '' },
+    });
+    expect(screen.getByTestId('nightshiftInvestigationsSearchInput')).toBeInTheDocument();
   });
 
   it('does not scroll from a severity tile with no investigations', () => {

@@ -37,6 +37,7 @@ import {
   INVESTIGATE_BUTTON_LABEL,
   NO_INVESTIGATIONS_EMPTY_BODY,
   NO_INVESTIGATIONS_EMPTY_TITLE,
+  NO_INVESTIGATIONS_FILTERED_EMPTY_TITLE,
 } from '../../../common/messages';
 import type {
   InvestigationSectionId,
@@ -71,6 +72,8 @@ export interface InvestigationListProps {
   onStartInvestigation?: () => void;
   /** Opens the automations page from the empty prompt. */
   onCreateAutomation?: () => void;
+  /** True when a search/filter is active; uses the filtered empty copy instead of the first-run prompt. */
+  hasActiveSearch?: boolean;
 }
 
 export const InvestigationList = forwardRef<InvestigationListHandle, InvestigationListProps>(
@@ -81,6 +84,7 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
       onInvestigationClick,
       onStartInvestigation,
       onCreateAutomation,
+      hasActiveSearch = false,
     },
     ref
   ): React.ReactElement {
@@ -153,6 +157,10 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
     }));
 
     if (visibleSections.length === 0) {
+      const emptyTitle = hasActiveSearch
+        ? NO_INVESTIGATIONS_FILTERED_EMPTY_TITLE
+        : NO_INVESTIGATIONS_EMPTY_TITLE;
+
       return (
         <EuiPanel
           hasBorder
@@ -183,7 +191,7 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
                 `}
               />
             }
-            title={<h3>{NO_INVESTIGATIONS_EMPTY_TITLE}</h3>}
+            title={<h3>{emptyTitle}</h3>}
             body={
               <EuiText size="s">
                 <p>{NO_INVESTIGATIONS_EMPTY_BODY}</p>
@@ -201,7 +209,6 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
                   {onStartInvestigation && (
                     <EuiFlexItem grow={false}>
                       <EuiButton
-                        fill
                         size="s"
                         iconType="inspect"
                         onClick={onStartInvestigation}

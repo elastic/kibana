@@ -85,6 +85,9 @@ export function NightshiftApp({
   );
   const hasReportedHomepageView = useRef(false);
   const reportedSearchQuery = useRef<string | undefined>(undefined);
+  // Filtered totals go to zero on a no-match search; remember unfiltered availability so clearing
+  // that query does not unmount the search input (and drop focus) before the unfiltered list returns.
+  const hadUnfilteredInvestigationsRef = useRef(false);
 
   // Read filter state from URL so it survives navigation and is shareable.
   const searchQuery = useMemo(() => getNightshiftSearchQueryFromSearch(search), [search]);
@@ -107,6 +110,22 @@ export function NightshiftApp({
     loadedCount,
     refetchAll,
   } = useInvestigationSections({ query: debouncedSearchQuery });
+
+  useEffect(() => {
+    if (debouncedSearchQuery || isInitialLoading || isFetching) {
+      return;
+    }
+    if (sections.some((section) => section.isPreviousData)) {
+      return;
+    }
+    hadUnfilteredInvestigationsRef.current = totalCount > 0;
+  }, [debouncedSearchQuery, isFetching, isInitialLoading, sections, totalCount]);
+
+  const showInvestigationsSearch =
+    Boolean(searchQuery) ||
+    Boolean(debouncedSearchQuery) ||
+    totalCount > 0 ||
+    hadUnfilteredInvestigationsRef.current;
 
   // A tile scrolls to its section, so it is only actionable while the list is rendering that
   // section — which the list, not the count, decides.
@@ -380,8 +399,8 @@ export function NightshiftApp({
         </>
       )}
 
-      {/* Keep search when a query is active so an empty filtered list can still be cleared. */}
-      {(Boolean(searchQuery) || totalCount > 0) && (
+      {/* Hide only when the space has no open investigations; keep mounted through filtered-empty clears. */}
+      {showInvestigationsSearch && (
         <>
           <EuiFieldSearch
             data-test-subj="nightshiftInvestigationsSearchInput"
@@ -394,7 +413,7 @@ export function NightshiftApp({
             fullWidth
             compressed
           />
-          <EuiSpacer size="m" />
+          <EuiSpacer size="l" />
         </>
       )}
 
@@ -414,6 +433,7 @@ export function NightshiftApp({
         onInvestigationClick={handleInvestigationClick}
         onStartInvestigation={onStartInvestigation}
         onCreateAutomation={onCreateAutomation}
+        hasActiveSearch={Boolean(searchQuery)}
       />
     </EuiFlexGroup>
   );
