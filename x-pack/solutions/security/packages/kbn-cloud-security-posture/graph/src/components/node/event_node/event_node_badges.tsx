@@ -13,12 +13,12 @@ import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
 import { RoundedBadge } from '../styles';
 import type { DocumentAnalysisOutput } from './analyze_documents';
 
-export const TEST_SUBJ_ALERT_ICON = 'label-node-alert-icon';
-export const TEST_SUBJ_ALERT_COUNT = 'label-node-alert-count';
-export const TEST_SUBJ_ALERT_COUNT_BUTTON = 'label-node-alert-count-button';
-export const TEST_SUBJ_EVENT_ICON = 'label-node-event-icon';
-export const TEST_SUBJ_EVENT_COUNT = 'label-node-event-count';
-export const TEST_SUBJ_EVENT_COUNT_BUTTON = 'label-node-event-count-button';
+export const TEST_SUBJ_ALERT_ICON = 'event-node-alert-icon';
+export const TEST_SUBJ_ALERT_COUNT = 'event-node-alert-count';
+export const TEST_SUBJ_ALERT_COUNT_BUTTON = 'event-node-alert-count-button';
+export const TEST_SUBJ_EVENT_ICON = 'event-node-event-icon';
+export const TEST_SUBJ_EVENT_COUNT = 'event-node-event-count';
+export const TEST_SUBJ_EVENT_COUNT_BUTTON = 'event-node-event-count-button';
 
 const POPOVER_EVENT_ARIA_LABEL = i18n.translate(
   'securitySolutionPackages.csp.graph.labelBadges.eventAriaLabel',
@@ -34,7 +34,7 @@ const POPOVER_ALERT_ARIA_LABEL = i18n.translate(
   }
 );
 
-interface LabelNodeBadgesProps {
+interface EventNodeBadgesProps {
   analysis: DocumentAnalysisOutput;
   onEventClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
@@ -162,7 +162,7 @@ const AlertIconBadge: React.FC = () => (
   </RoundedBadge>
 );
 
-export const LabelNodeBadges = ({ analysis, onEventClick }: LabelNodeBadgesProps) => {
+export const EventNodeBadges = ({ analysis, onEventClick }: EventNodeBadgesProps) => {
   const { euiTheme } = useEuiTheme();
 
   return (

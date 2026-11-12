@@ -9,21 +9,21 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
-  LabelNodeBadges,
+  EventNodeBadges,
   TEST_SUBJ_ALERT_ICON,
   TEST_SUBJ_ALERT_COUNT,
   TEST_SUBJ_ALERT_COUNT_BUTTON,
   TEST_SUBJ_EVENT_COUNT,
   TEST_SUBJ_EVENT_COUNT_BUTTON,
   TEST_SUBJ_EVENT_ICON,
-} from './label_node_badges';
+} from './event_node_badges';
 import { analyzeDocuments } from './analyze_documents';
 
-describe('LabelNodeBadges', () => {
+describe('EventNodeBadges', () => {
   test('renders event icon badge (no count) for single event', () => {
     const analysis = analyzeDocuments({ uniqueEventsCount: 1, uniqueAlertsCount: 0 });
 
-    render(<LabelNodeBadges analysis={analysis} />);
+    render(<EventNodeBadges analysis={analysis} />);
 
     expect(screen.getByTestId(TEST_SUBJ_EVENT_ICON)).toBeInTheDocument();
     expect(screen.queryByTestId(TEST_SUBJ_EVENT_COUNT)).not.toBeInTheDocument();
@@ -34,7 +34,7 @@ describe('LabelNodeBadges', () => {
   test('renders alert badge with icon only for single alert', () => {
     const analysis = analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount: 1 });
 
-    render(<LabelNodeBadges analysis={analysis} />);
+    render(<EventNodeBadges analysis={analysis} />);
 
     expect(screen.queryByTestId(TEST_SUBJ_EVENT_COUNT)).not.toBeInTheDocument();
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_ICON)).toBeInTheDocument();
@@ -45,7 +45,7 @@ describe('LabelNodeBadges', () => {
     const uniqueEventsCount = 3;
     const analysis = analyzeDocuments({ uniqueEventsCount, uniqueAlertsCount: 0 });
 
-    render(<LabelNodeBadges analysis={analysis} />);
+    render(<EventNodeBadges analysis={analysis} />);
 
     expect(screen.getByTestId(TEST_SUBJ_EVENT_ICON)).toBeInTheDocument();
     expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent('+3');
@@ -57,7 +57,7 @@ describe('LabelNodeBadges', () => {
     const uniqueAlertsCount = 3;
     const analysis = analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount });
 
-    render(<LabelNodeBadges analysis={analysis} />);
+    render(<EventNodeBadges analysis={analysis} />);
 
     expect(screen.queryByTestId(TEST_SUBJ_EVENT_COUNT)).not.toBeInTheDocument();
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_ICON)).toBeInTheDocument();
@@ -67,7 +67,7 @@ describe('LabelNodeBadges', () => {
   test('renders event icon badge and alert icon badge (no counts) for one event and one alert', () => {
     const analysis = analyzeDocuments({ uniqueEventsCount: 1, uniqueAlertsCount: 1 });
 
-    render(<LabelNodeBadges analysis={analysis} />);
+    render(<EventNodeBadges analysis={analysis} />);
 
     expect(screen.getByTestId(TEST_SUBJ_EVENT_ICON)).toBeInTheDocument();
     expect(screen.queryByTestId(TEST_SUBJ_EVENT_COUNT)).not.toBeInTheDocument();
@@ -80,7 +80,7 @@ describe('LabelNodeBadges', () => {
     const uniqueAlertsCount = 2;
     const analysis = analyzeDocuments({ uniqueEventsCount, uniqueAlertsCount });
 
-    render(<LabelNodeBadges analysis={analysis} />);
+    render(<EventNodeBadges analysis={analysis} />);
 
     expect(screen.getByTestId(TEST_SUBJ_EVENT_ICON)).toBeInTheDocument();
     expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent('+2');
@@ -95,7 +95,7 @@ describe('LabelNodeBadges', () => {
       uniqueAlertsCount: largeCount,
     });
 
-    render(<LabelNodeBadges analysis={analysis} />);
+    render(<EventNodeBadges analysis={analysis} />);
 
     expect(screen.getByTestId(TEST_SUBJ_EVENT_ICON)).toBeInTheDocument();
     expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent('+1.2m');
@@ -113,7 +113,7 @@ describe('LabelNodeBadges', () => {
     test('calls onEventClick when event badge button is clicked', async () => {
       const analysis = analyzeDocuments({ uniqueEventsCount: 3, uniqueAlertsCount: 0 });
 
-      render(<LabelNodeBadges analysis={analysis} onEventClick={mockOnEventClick} />);
+      render(<EventNodeBadges analysis={analysis} onEventClick={mockOnEventClick} />);
 
       const eventBadgeButton = screen.getByTestId(TEST_SUBJ_EVENT_COUNT_BUTTON);
       await userEvent.click(eventBadgeButton);
@@ -124,7 +124,7 @@ describe('LabelNodeBadges', () => {
     test('does not render clickable event badge when onEventClick is not provided', () => {
       const analysis = analyzeDocuments({ uniqueEventsCount: 3, uniqueAlertsCount: 0 });
 
-      render(<LabelNodeBadges analysis={analysis} />);
+      render(<EventNodeBadges analysis={analysis} />);
 
       const eventBadgeButton = screen.queryByTestId(TEST_SUBJ_EVENT_COUNT_BUTTON);
       const eventBadge = screen.queryByTestId(TEST_SUBJ_EVENT_COUNT);
@@ -136,7 +136,7 @@ describe('LabelNodeBadges', () => {
     test('renders event icon badge only (no count button) when single event', () => {
       const analysis = analyzeDocuments({ uniqueEventsCount: 1, uniqueAlertsCount: 0 });
 
-      render(<LabelNodeBadges analysis={analysis} onEventClick={mockOnEventClick} />);
+      render(<EventNodeBadges analysis={analysis} onEventClick={mockOnEventClick} />);
 
       expect(screen.getByTestId(TEST_SUBJ_EVENT_ICON)).toBeInTheDocument();
       expect(screen.queryByTestId(TEST_SUBJ_EVENT_COUNT_BUTTON)).not.toBeInTheDocument();
@@ -145,7 +145,7 @@ describe('LabelNodeBadges', () => {
     test('calls onEventClick when alert count badge button is clicked', async () => {
       const analysis = analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount: 3 });
 
-      render(<LabelNodeBadges analysis={analysis} onEventClick={mockOnEventClick} />);
+      render(<EventNodeBadges analysis={analysis} onEventClick={mockOnEventClick} />);
 
       const alertBadgeButton = screen.getByTestId(TEST_SUBJ_ALERT_COUNT_BUTTON);
       await userEvent.click(alertBadgeButton);
@@ -156,7 +156,7 @@ describe('LabelNodeBadges', () => {
     test('does not render clickable alert count badge when onEventClick is not provided', () => {
       const analysis = analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount: 3 });
 
-      render(<LabelNodeBadges analysis={analysis} />);
+      render(<EventNodeBadges analysis={analysis} />);
 
       const alertBadgeButton = screen.queryByTestId(TEST_SUBJ_ALERT_COUNT_BUTTON);
       const alertBadge = screen.queryByTestId(TEST_SUBJ_ALERT_COUNT);
@@ -168,7 +168,7 @@ describe('LabelNodeBadges', () => {
     test('calls onEventClick when alert count badge button is clicked in mixed scenario', async () => {
       const analysis = analyzeDocuments({ uniqueEventsCount: 2, uniqueAlertsCount: 2 });
 
-      render(<LabelNodeBadges analysis={analysis} onEventClick={mockOnEventClick} />);
+      render(<EventNodeBadges analysis={analysis} onEventClick={mockOnEventClick} />);
 
       const alertBadgeButton = screen.getByTestId(TEST_SUBJ_ALERT_COUNT_BUTTON);
       await userEvent.click(alertBadgeButton);
