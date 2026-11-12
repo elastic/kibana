@@ -13,7 +13,7 @@ import { Ips } from '../ips/ips';
 import { CountryFlags } from '../country_flags/country_flags';
 import { NODE_LABEL_WIDTH } from '../styles';
 
-export interface LabelNodeDetailsProps {
+export interface EventNodeDetailsProps {
   ips?: string[];
   countryCodes?: string[];
   onIpClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
@@ -22,13 +22,13 @@ export interface LabelNodeDetailsProps {
   hasOriginHighlight?: boolean;
 }
 
-export const LabelNodeDetails = ({
+export const EventNodeDetails = ({
   ips,
   countryCodes,
   onIpClick,
   onCountryClick,
   hasOriginHighlight = false,
-}: LabelNodeDetailsProps) => {
+}: EventNodeDetailsProps) => {
   const { euiTheme } = useEuiTheme();
   const shouldRenderIps = ips && ips.length > 0;
   const shouldRenderCountryFlags = countryCodes && countryCodes.length > 0;

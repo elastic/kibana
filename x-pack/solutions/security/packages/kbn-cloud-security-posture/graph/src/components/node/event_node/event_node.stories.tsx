@@ -8,25 +8,25 @@
 import React from 'react';
 import { ReactFlow, Background } from '@xyflow/react';
 import type { Meta, StoryFn, StoryObj } from '@storybook/react';
-import { LabelNode as LabelNodeComponent } from './label_node';
-import type { LabelNodeViewModel } from '../../types';
+import { EventNode as EventNodeComponent } from './event_node';
+import type { EventNodeViewModel } from '../../types';
 import { GlobalStylesStorybookDecorator } from '../../../../.storybook/decorators';
 import { GlobalGraphStyles } from '../../graph/styles';
 
 import '@xyflow/react/dist/style.css';
 
-/** Static toolbar items for Storybook previews of the floating label-node toolbar. */
+/** Static toolbar items for Storybook previews of the floating event-node toolbar. */
 const storybookToolbarItems = () => [
   { iconType: 'filter', label: 'Show events with this action', onClick: () => {} },
   { iconType: 'inspect', label: 'Show event details', onClick: () => {} },
 ];
 
-const meta: Meta<LabelNodeViewModel> = {
-  title: 'Components/Graph Components/Label Node',
+const meta: Meta<EventNodeViewModel> = {
+  title: 'Components/Graph Components/Event Node',
   args: {
     id: 'mixed-group',
     label: 'Mixed security activity',
-    shape: 'label',
+    kind: 'event',
     color: 'primary',
     interactive: true,
     uniqueEventsCount: 2,
@@ -70,10 +70,10 @@ const meta: Meta<LabelNodeViewModel> = {
 export default meta;
 
 const nodeTypes = {
-  label: LabelNodeComponent,
+  event: EventNodeComponent,
 };
 
-const Template: StoryFn<LabelNodeViewModel> = (args: LabelNodeViewModel) => (
+const Template: StoryFn<EventNodeViewModel> = (args: EventNodeViewModel) => (
   <>
     <ReactFlow
       fitView
@@ -82,7 +82,7 @@ const Template: StoryFn<LabelNodeViewModel> = (args: LabelNodeViewModel) => (
       nodes={[
         {
           id: args.id,
-          type: args.shape,
+          type: args.kind,
           data: args,
           position: { x: 0, y: 0 },
         },
@@ -94,12 +94,12 @@ const Template: StoryFn<LabelNodeViewModel> = (args: LabelNodeViewModel) => (
   </>
 );
 
-export const LabelNode: StoryObj<LabelNodeViewModel> = {
+export const EventNode: StoryObj<EventNodeViewModel> = {
   render: Template,
 };
 
 /** Origin event node (1 event, 0 alerts) with the starting point highlight ring. */
-export const OriginHighlightEvent: StoryObj<LabelNodeViewModel> = {
+export const OriginHighlightEvent: StoryObj<EventNodeViewModel> = {
   render: Template,
   args: {
     isOrigin: true,
@@ -109,7 +109,7 @@ export const OriginHighlightEvent: StoryObj<LabelNodeViewModel> = {
 };
 
 /** Origin alert node (0 events, 1 alert) with the starting point highlight ring. */
-export const OriginHighlightAlert: StoryObj<LabelNodeViewModel> = {
+export const OriginHighlightAlert: StoryObj<EventNodeViewModel> = {
   render: Template,
   args: {
     isOriginAlert: true,

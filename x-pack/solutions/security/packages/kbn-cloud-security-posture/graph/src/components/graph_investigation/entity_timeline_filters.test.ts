@@ -16,7 +16,7 @@ const createNode = (
 ): EntityNodeViewModel => ({
   id,
   color: 'primary',
-  shape: 'rectangle',
+  kind: 'entity',
   label: id,
   documentsData: [{ id, type: 'entity', entity: { sourceFields } }],
 });

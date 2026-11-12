@@ -270,8 +270,8 @@ export const graphResponseSchema = () =>
     nodes: schema.arrayOf(
       schema.oneOf([
         entityNodeDataSchema,
-        groupNodeDataSchema,
-        labelNodeDataSchema,
+        connectorGroupNodeDataSchema,
+        eventNodeDataSchema,
         relationshipNodeDataSchema,
       ]),
       { maxSize: GRAPH_NODES_MAX_SIZE }
@@ -297,14 +297,10 @@ export const edgeColorSchema = schema.oneOf([
   schema.literal('subdued'),
 ]);
 
-export const nodeShapeSchema = schema.oneOf([
-  schema.literal('hexagon'),
-  schema.literal('pentagon'),
-  schema.literal('ellipse'),
-  schema.literal('rectangle'),
-  schema.literal('diamond'),
-  schema.literal('label'),
-  schema.literal('group'),
+export const nodeKindSchema = schema.oneOf([
+  schema.literal('entity'),
+  schema.literal('event'),
+  schema.literal('connectorGroup'),
   schema.literal('relationship'),
 ]);
 
@@ -318,13 +314,7 @@ export const entityNodeDataSchema = schema.allOf([
   nodeBaseDataSchema,
   schema.object({
     color: nodeColorSchema,
-    shape: schema.oneOf([
-      schema.literal('hexagon'),
-      schema.literal('pentagon'),
-      schema.literal('ellipse'),
-      schema.literal('rectangle'),
-      schema.literal('diamond'),
-    ]),
+    kind: schema.literal('entity'),
     tag: schema.maybe(schema.string()),
     count: schema.maybe(schema.number()),
     ips: schema.maybe(schema.arrayOf(schema.string(), { maxSize: IPS_MAX_SIZE })),
@@ -362,17 +352,17 @@ export const entityNodeDataSchema = schema.allOf([
   }),
 ]);
 
-export const groupNodeDataSchema = schema.allOf([
+export const connectorGroupNodeDataSchema = schema.allOf([
   nodeBaseDataSchema,
   schema.object({
-    shape: schema.literal('group'),
+    kind: schema.literal('connectorGroup'),
   }),
 ]);
 
-export const labelNodeDataSchema = schema.allOf([
+export const eventNodeDataSchema = schema.allOf([
   nodeBaseDataSchema,
   schema.object({
-    shape: schema.literal('label'),
+    kind: schema.literal('event'),
     parentId: schema.maybe(schema.string()),
     color: nodeColorSchema,
     ips: schema.maybe(schema.arrayOf(schema.string(), { maxSize: IPS_MAX_SIZE })),
@@ -391,7 +381,7 @@ export const labelNodeDataSchema = schema.allOf([
 export const relationshipNodeDataSchema = schema.allOf([
   nodeBaseDataSchema,
   schema.object({
-    shape: schema.literal('relationship'),
+    kind: schema.literal('relationship'),
     parentId: schema.maybe(schema.string()),
   }),
 ]);

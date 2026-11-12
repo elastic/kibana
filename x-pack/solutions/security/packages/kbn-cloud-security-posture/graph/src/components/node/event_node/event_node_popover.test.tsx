@@ -7,21 +7,21 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { LabelNodePopoverContent, TEST_SUBJ_TITLE } from './label_node_popover';
+import { EventNodePopoverContent, TEST_SUBJ_TITLE } from './event_node_popover';
 import { analyzeDocuments } from './analyze_documents';
 
-const TEST_SUBJ_ALERT_SECTION = 'label-node-tooltip-alert-section';
-const TEST_SUBJ_ALERT_ICON = 'label-node-tooltip-alert-icon';
-const TEST_SUBJ_ALERT_COUNT = 'label-node-tooltip-alert-count';
+const TEST_SUBJ_ALERT_SECTION = 'event-node-tooltip-alert-section';
+const TEST_SUBJ_ALERT_ICON = 'event-node-tooltip-alert-icon';
+const TEST_SUBJ_ALERT_COUNT = 'event-node-tooltip-alert-count';
 
-const TEST_SUBJ_EVENT_SECTION = 'label-node-tooltip-event-section';
-const TEST_SUBJ_EVENT_COUNT = 'label-node-tooltip-event-count';
+const TEST_SUBJ_EVENT_SECTION = 'event-node-tooltip-event-section';
+const TEST_SUBJ_EVENT_COUNT = 'event-node-tooltip-event-count';
 
-describe('LabelNodePopoverContent', () => {
+describe('EventNodePopoverContent', () => {
   test('renders nothing with no events or alerts', () => {
     const analysis = analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount: 0 });
 
-    const { container } = render(<LabelNodePopoverContent analysis={analysis} />);
+    const { container } = render(<EventNodePopoverContent analysis={analysis} />);
 
     // Verify that the container is mostly empty (only has the outer div)
     expect(container.firstChild).toBeEmptyDOMElement();
@@ -30,7 +30,7 @@ describe('LabelNodePopoverContent', () => {
   test('renders with a single event', () => {
     const analysis = analyzeDocuments({ uniqueEventsCount: 1, uniqueAlertsCount: 0 });
 
-    render(<LabelNodePopoverContent analysis={analysis} />);
+    render(<EventNodePopoverContent analysis={analysis} />);
 
     expect(screen.getByTestId(TEST_SUBJ_EVENT_SECTION)).toBeInTheDocument();
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_SECTION)).not.toBeInTheDocument();
@@ -41,7 +41,7 @@ describe('LabelNodePopoverContent', () => {
   test('renders with a single alert', () => {
     const analysis = analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount: 1 });
 
-    render(<LabelNodePopoverContent analysis={analysis} />);
+    render(<EventNodePopoverContent analysis={analysis} />);
 
     expect(screen.getByTestId(TEST_SUBJ_ALERT_SECTION)).toBeInTheDocument();
     expect(screen.queryByTestId(TEST_SUBJ_EVENT_SECTION)).not.toBeInTheDocument();
@@ -55,7 +55,7 @@ describe('LabelNodePopoverContent', () => {
     const uniqueEventsCount = 120;
     const analysis = analyzeDocuments({ uniqueEventsCount, uniqueAlertsCount: 0 });
 
-    render(<LabelNodePopoverContent analysis={analysis} />);
+    render(<EventNodePopoverContent analysis={analysis} />);
 
     expect(screen.getByTestId(TEST_SUBJ_EVENT_SECTION)).toBeInTheDocument();
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_SECTION)).not.toBeInTheDocument();
@@ -70,7 +70,7 @@ describe('LabelNodePopoverContent', () => {
     const uniqueAlertsCount = 120;
     const analysis = analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount });
 
-    render(<LabelNodePopoverContent analysis={analysis} />);
+    render(<EventNodePopoverContent analysis={analysis} />);
 
     expect(screen.getByTestId(TEST_SUBJ_ALERT_SECTION)).toBeInTheDocument();
     expect(screen.queryByTestId(TEST_SUBJ_EVENT_SECTION)).not.toBeInTheDocument();
@@ -87,7 +87,7 @@ describe('LabelNodePopoverContent', () => {
     const uniqueAlertsCount = 120;
     const analysis = analyzeDocuments({ uniqueEventsCount, uniqueAlertsCount });
 
-    render(<LabelNodePopoverContent analysis={analysis} />);
+    render(<EventNodePopoverContent analysis={analysis} />);
 
     expect(screen.getByTestId(TEST_SUBJ_EVENT_SECTION)).toBeInTheDocument();
     expect(screen.getByTestId(TEST_SUBJ_ALERT_SECTION)).toBeInTheDocument();
@@ -109,7 +109,7 @@ describe('LabelNodePopoverContent', () => {
     const uniqueAlertsCount = 1_200_000;
     const analysis = analyzeDocuments({ uniqueEventsCount, uniqueAlertsCount });
 
-    render(<LabelNodePopoverContent analysis={analysis} />);
+    render(<EventNodePopoverContent analysis={analysis} />);
 
     expect(screen.getByTestId(TEST_SUBJ_EVENT_SECTION)).toBeInTheDocument();
     expect(screen.getByTestId(TEST_SUBJ_ALERT_SECTION)).toBeInTheDocument();
@@ -126,7 +126,7 @@ describe('LabelNodePopoverContent', () => {
     test('does not render the title when text prop is omitted', () => {
       const analysis = analyzeDocuments({ uniqueEventsCount: 2, uniqueAlertsCount: 0 });
 
-      render(<LabelNodePopoverContent analysis={analysis} />);
+      render(<EventNodePopoverContent analysis={analysis} />);
 
       expect(screen.queryByTestId(TEST_SUBJ_TITLE)).not.toBeInTheDocument();
     });
@@ -134,7 +134,7 @@ describe('LabelNodePopoverContent', () => {
     test('does not render the title when text prop is an empty string', () => {
       const analysis = analyzeDocuments({ uniqueEventsCount: 2, uniqueAlertsCount: 0 });
 
-      render(<LabelNodePopoverContent analysis={analysis} text="" />);
+      render(<EventNodePopoverContent analysis={analysis} text="" />);
 
       expect(screen.queryByTestId(TEST_SUBJ_TITLE)).not.toBeInTheDocument();
     });
@@ -143,7 +143,7 @@ describe('LabelNodePopoverContent', () => {
       const analysis = analyzeDocuments({ uniqueEventsCount: 2, uniqueAlertsCount: 0 });
       const text = 'Short title';
 
-      render(<LabelNodePopoverContent analysis={analysis} text={text} />);
+      render(<EventNodePopoverContent analysis={analysis} text={text} />);
 
       const title = screen.getByTestId(TEST_SUBJ_TITLE);
       expect(title).toHaveTextContent(text);
@@ -153,7 +153,7 @@ describe('LabelNodePopoverContent', () => {
       const analysis = analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount: 0 });
       const text = 'Title without counters';
 
-      render(<LabelNodePopoverContent analysis={analysis} text={text} />);
+      render(<EventNodePopoverContent analysis={analysis} text={text} />);
 
       expect(screen.getByTestId(TEST_SUBJ_TITLE)).toHaveTextContent(text);
       expect(screen.queryByTestId(TEST_SUBJ_ALERT_SECTION)).not.toBeInTheDocument();
