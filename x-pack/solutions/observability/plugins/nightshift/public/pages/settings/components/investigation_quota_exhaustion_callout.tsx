@@ -11,21 +11,23 @@ import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import {
-  isRunQuotaReached,
-  type InvestigationRunQuotaGroup,
-  type RunQuotaGroup,
-} from '@kbn/significant-events-plugin/common';
+  INVESTIGATION_QUOTA_GROUPS,
+  isInvestigationQuotaReached,
+  type InvestigationQuotaCounts,
+  type InvestigationQuotaGroup,
+  type InvestigationQuotaLimits,
+} from '@kbn/nightshift-investigations-plugin/common';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { useKibana } from '../../../hooks/use_kibana';
 
 const getExhaustionCopy = (
-  group: InvestigationRunQuotaGroup,
+  group: InvestigationQuotaGroup,
   limit: number
 ): { title: string; text: string } => {
   switch (group) {
-    case 'investigation':
+    case 'automatic_investigation':
       return {
         title: i18n.translate('xpack.nightshift.settings.runLimits.exhaustionTitle', {
           defaultMessage: 'Automations reached a daily run limit of {limit} for this deployment',
@@ -62,32 +64,22 @@ const getExhaustionCopy = (
   }
 };
 
-export const RunQuotaExhaustionCallout = ({
+export const InvestigationQuotaExhaustionCallout = ({
   enabled,
-  investigationLimitsEnabled,
   limits,
   counts,
-  groups,
 }: {
   enabled: boolean;
-  investigationLimitsEnabled: boolean;
-  limits: Record<RunQuotaGroup, number>;
-  counts: Record<RunQuotaGroup, number>;
-  groups: readonly InvestigationRunQuotaGroup[];
+  limits: InvestigationQuotaLimits;
+  counts: InvestigationQuotaCounts;
 }) => {
   const { application, featureFlags, nightshiftInvestigations } = useKibana().services;
   const nightshiftEnabled = featureFlags.useBooleanValue(NIGHTSHIFT_ENABLED_FLAG, false);
   const canUseAutomations =
     nightshiftEnabled && nightshiftInvestigations?.investigationsClient != null;
   const automationsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/automations' });
-  const exhaustedGroups = groups.filter((group) =>
-    isRunQuotaReached({
-      group,
-      enabled,
-      investigationLimitsEnabled,
-      limit: limits[group],
-      count: counts[group],
-    })
+  const exhaustedGroups = INVESTIGATION_QUOTA_GROUPS.filter((group) =>
+    isInvestigationQuotaReached({ enabled, limit: limits[group], count: counts[group] })
   );
 
   if (exhaustedGroups.length === 0) {
@@ -97,7 +89,11 @@ export const RunQuotaExhaustionCallout = ({
   return (
     <>
       {exhaustedGroups.map((group) => {
-        const { title, text } = getExhaustionCopy(group, limits[group]);
+        const limit = limits[group];
+        if (limit === null) {
+          return null;
+        }
+        const { title, text } = getExhaustionCopy(group, limit);
         return (
           <React.Fragment key={group}>
             <EuiSpacer />
