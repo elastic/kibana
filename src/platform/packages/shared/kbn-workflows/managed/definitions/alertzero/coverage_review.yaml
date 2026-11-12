@@ -502,8 +502,10 @@ steps:
         {{ steps.resolve_rule.error.message }}
 
   # By-reference security.rule attachment: the framework resolves the rule once
-  # from its rule_id and snapshots it, recording the rule as it was when this
-  # review ran. The fixed attachment id makes the refresh below deterministic.
+  # from its saved-object id and snapshots it, recording the rule as it was when
+  # this review ran. The rule card reads `origin` as the saved-object id for View
+  # rule, Update rule and Apply to rule form, so `origin` must not be the rule_id.
+  # The fixed attachment id makes the refresh below deterministic.
   - name: attach_rule
     type: ai.attachment.add
     if: >-
@@ -513,7 +515,7 @@ steps:
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       id: "coverage-rule"
       type: security.rule
-      origin: "{{ steps.coverage_check.output.structured_output.rule_id }}"
+      origin: "{{ steps.resolve_rule.output.id }}"
       description: "Rule matched to the detection gap: {{ steps.resolve_rule.output.name }}"
       render_inline: true
     on-failure:
@@ -942,7 +944,7 @@ steps:
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       id: "coverage-rule"
       type: security.rule
-      origin: "{{ steps.coverage_check.output.structured_output.rule_id }}"
+      origin: "{{ steps.refetch_rule.output.id }}"
       description: "Prebuilt rule installed for the detection gap: {{ steps.refetch_rule.output.name }}"
       render_inline: true
     on-failure:
