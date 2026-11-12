@@ -114,7 +114,6 @@ describe('NightshiftTelemetryClient', () => {
       round_id: 'round-2',
       workflow_execution_id: 'exec-1',
       outcome: 'confirmed' as const,
-      follow_up_source: 'slack' as const,
       is_feedback: true,
       causal_confirmed: true,
       has_learning: true,

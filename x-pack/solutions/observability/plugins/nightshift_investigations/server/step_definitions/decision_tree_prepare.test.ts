@@ -10,11 +10,6 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { createConversationNotFoundError } from '@kbn/agent-builder-common';
 import { HYPOTHESES_ATTACHMENT_TYPE } from '@kbn/agentic-investigations-plugin/common';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
-import {
-  ALERT_RECOVERED_MESSAGE_PREFIX,
-  buildAlertRecoveredFollowUpMessage,
-  buildInvestigationRoundMessage,
-} from '../client/build_investigation_message';
 import { NO_CAUSAL_VERDICT } from '../decision_trees/causal_check';
 import { prepareReinforcementTurn } from '../decision_trees/register_decision_trees';
 import { createOptimizeModel } from '../lib/create_optimize_model';
@@ -367,17 +362,13 @@ describe('decisionTreePrepareStepDefinition', () => {
       });
 
       it('reports confirmed outcome with recorder transition, structured ECS labels, and span attributes', async () => {
-        const slackPrompt = buildInvestigationRoundMessage({
-          message: 'Confirmed: api.paygate-eu.net timed out on charge calls.',
-          isSlackMessage: true,
-        });
         conversationsGet.mockResolvedValue({
           rounds: [
             { id: 'round-1', started_at: '2026-11-02T10:00:00.000Z', steps: [] },
             {
               id: 'round-2',
               started_at: '2026-11-02T10:10:00.000Z',
-              input: { message: slackPrompt },
+              input: { message: 'Confirmed: api.paygate-eu.net timed out on charge calls.' },
               steps: [],
             },
           ],
@@ -410,7 +401,7 @@ describe('decisionTreePrepareStepDefinition', () => {
           },
         });
 
-        await run({ ...followUp, prompt: slackPrompt });
+        await run(followUp);
 
         expect(reportDecisionTreeCausalCheck).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -419,7 +410,6 @@ describe('decisionTreePrepareStepDefinition', () => {
             round_id: 'round-2',
             workflow_execution_id: 'exec-1',
             outcome: 'confirmed',
-            follow_up_source: 'slack',
             is_feedback: true,
             causal_confirmed: true,
             has_learning: true,
@@ -431,12 +421,11 @@ describe('decisionTreePrepareStepDefinition', () => {
           })
         );
         expect(logger.info).toHaveBeenCalledWith(
-          expect.stringContaining('outcome=confirmed source=slack'),
+          expect.stringContaining('outcome=confirmed feedback=true confirmed=true recorder=found'),
           expect.objectContaining({
             tags: ['nightshift', 'decision_trees', 'causal_check'],
             labels: expect.objectContaining({
               outcome: 'confirmed',
-              follow_up_source: 'slack',
               recorder_outcome: 'found',
               recorder_has_confirmed_cause: true,
             }),
@@ -444,14 +433,10 @@ describe('decisionTreePrepareStepDefinition', () => {
         );
         // The step logger drops labels, so it only gets the readable line for the run's log view.
         expect(stepLogger.info).toHaveBeenCalledWith(
-          expect.stringContaining('outcome=confirmed source=slack')
+          expect.stringContaining('outcome=confirmed feedback=true confirmed=true recorder=found')
         );
         expect(stepLogger.info).not.toHaveBeenCalledWith(expect.any(String), expect.anything());
         expect(setAttribute).toHaveBeenCalledWith('nightshift.causal_check.outcome', 'confirmed');
-        expect(setAttribute).toHaveBeenCalledWith(
-          'nightshift.causal_check.follow_up_source',
-          'slack'
-        );
         expect(setAttribute).toHaveBeenCalledWith(
           'nightshift.causal_check.recorder_outcome',
           'found'
@@ -468,28 +453,18 @@ describe('decisionTreePrepareStepDefinition', () => {
         );
       });
 
-      it('distinguishes unconfirmed_feedback from not_feedback and classifies alert_recovery vs direct prompts', async () => {
-        await run({
-          ...followUp,
-          // Without the <alert_data> block, a user starting their message with the prefix stays `direct`.
-          prompt: `${ALERT_RECOVERED_MESSAGE_PREFIX} Our team says it was the egress proxy.`,
-        });
+      it('distinguishes unconfirmed_feedback from not_feedback', async () => {
+        await run(followUp);
 
         expect(reportDecisionTreeCausalCheck).toHaveBeenLastCalledWith(
           expect.objectContaining({
             outcome: 'unconfirmed_feedback',
-            follow_up_source: 'direct',
             is_feedback: true,
             causal_confirmed: false,
             has_learning: true,
           })
         );
 
-        const recoveryPrompt = buildAlertRecoveredFollowUpMessage({
-          alertUuid: 'alert-uuid-1',
-          alertId: 'instance-1',
-          ruleName: 'Checkout Latency',
-        });
         output.mockResolvedValue({
           output: {
             is_feedback_message: false,
@@ -499,28 +474,14 @@ describe('decisionTreePrepareStepDefinition', () => {
           },
         });
 
-        await run({ ...followUp, prompt: recoveryPrompt });
+        await run(followUp);
 
         expect(reportDecisionTreeCausalCheck).toHaveBeenLastCalledWith(
           expect.objectContaining({
             outcome: 'not_feedback',
-            follow_up_source: 'alert_recovery',
             is_feedback: false,
             causal_confirmed: false,
             has_learning: false,
-          })
-        );
-
-        await run({
-          ...followUp,
-          prompt:
-            "Slack user <@U03DA1H80BF> wrote in the investigation's thread:\n\nCan we check EU collector logs?",
-        });
-
-        expect(reportDecisionTreeCausalCheck).toHaveBeenLastCalledWith(
-          expect.objectContaining({
-            outcome: 'not_feedback',
-            follow_up_source: 'slack',
           })
         );
       });
@@ -533,7 +494,6 @@ describe('decisionTreePrepareStepDefinition', () => {
         expect(reportDecisionTreeCausalCheck).toHaveBeenCalledWith(
           expect.objectContaining({
             outcome: 'skipped_no_trees',
-            follow_up_source: 'direct',
             tree_count: 0,
             opened_tree_count: 0,
             recorder_outcome: 'unknown',
@@ -549,22 +509,25 @@ describe('decisionTreePrepareStepDefinition', () => {
         [
           'model_unavailable',
           'no model resolves',
+          'No model is available for the causal check',
           () => jest.mocked(createOptimizeModel).mockResolvedValue(undefined),
         ],
         [
           'timeout',
           'the connector aborts on its own',
+          'aborted',
           () =>
             output.mockRejectedValue(Object.assign(new Error('aborted'), { name: 'AbortError' })),
         ],
         [
           'inference_error',
           'the connector errors',
-          () => output.mockRejectedValue(new Error('connector down')),
+          'connector down: secret customer fragment',
+          () => output.mockRejectedValue(new Error('connector down: secret customer fragment')),
         ],
       ])(
-        'reports failed with error_code=%s when %s, and omits verdict flags',
-        async (expectedCode, _case, arrange) => {
+        'reports failed with error_code=%s when %s, and keeps raw error text off the server logger',
+        async (expectedCode, _case, expectedDetail, arrange) => {
           arrange();
 
           const res = await run(followUp);
@@ -583,18 +546,17 @@ describe('decisionTreePrepareStepDefinition', () => {
           expect(reported).not.toHaveProperty('is_feedback');
           expect(reported).not.toHaveProperty('causal_confirmed');
           expect(logger.warn).toHaveBeenCalledWith(
-            expect.stringContaining(`causal check failed (${expectedCode})`),
-            expect.objectContaining({
+            `Round "round-2" of "inv-1" causal check failed (${expectedCode})`,
+            {
               tags: ['nightshift', 'decision_trees', 'causal_check'],
               labels: expect.objectContaining({
                 outcome: 'failed',
                 error_code: expectedCode,
               }),
-              error: expect.objectContaining({ message: expect.any(String) }),
-            })
+            }
           );
           expect(stepLogger.warn).toHaveBeenCalledWith(
-            expect.stringContaining(`causal check failed (${expectedCode})`)
+            `Round "round-2" of "inv-1" causal check failed (${expectedCode}): ${expectedDetail}`
           );
           expect(stepLogger.warn).not.toHaveBeenCalledWith(expect.any(String), expect.anything());
           expect(setAttribute).toHaveBeenCalledWith('nightshift.causal_check.outcome', 'failed');
@@ -633,8 +595,11 @@ describe('decisionTreePrepareStepDefinition', () => {
             })
           );
           expect(logger.warn).toHaveBeenCalledWith(
-            expect.stringContaining('Causal check timed out after 90000ms'),
+            'Round "round-2" of "inv-1" causal check failed (timeout)',
             expect.objectContaining({ labels: expect.objectContaining({ error_code: 'timeout' }) })
+          );
+          expect(stepLogger.warn).toHaveBeenCalledWith(
+            expect.stringContaining('Causal check timed out after 90000ms')
           );
         });
 

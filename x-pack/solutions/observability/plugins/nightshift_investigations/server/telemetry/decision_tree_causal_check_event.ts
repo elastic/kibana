@@ -40,19 +40,12 @@ export type CausalCheckErrorCode =
   | 'cancelled'
   | 'inference_error';
 
-/**
- * Channel or trigger envelope observed on the follow-up prompt. Observational only — never used
- * as an authorization or gating boundary.
- */
-export type CausalCheckFollowUpSource = 'alert_recovery' | 'slack' | 'direct';
-
 export interface DecisionTreeCausalCheckEvent {
   agent_id: string;
   conversation_id?: string;
   round_id?: string;
   workflow_execution_id?: string;
   outcome: CausalCheckOutcome;
-  follow_up_source: CausalCheckFollowUpSource;
   is_feedback?: boolean;
   causal_confirmed?: boolean;
   has_learning?: boolean;
@@ -95,12 +88,6 @@ const decisionTreeCausalCheckSchema: RootSchema<DecisionTreeCausalCheckEvent> = 
     _meta: {
       description:
         'Funnel outcome: confirmed, unconfirmed_feedback, not_feedback, skipped_no_trees, or failed.',
-    },
-  },
-  follow_up_source: {
-    type: 'keyword',
-    _meta: {
-      description: 'Prompt envelope of the follow-up round: alert_recovery, slack, or direct.',
     },
   },
   is_feedback: {

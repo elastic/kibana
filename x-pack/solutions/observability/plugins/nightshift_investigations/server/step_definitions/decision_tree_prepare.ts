@@ -16,10 +16,6 @@ import { NIGHTSHIFT_INVESTIGATION_DECISION_TREE_USAGE_ID } from '@kbn/nightshift
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { usesDecisionTrees } from '../agents/agent_policy';
 import {
-  ALERT_RECOVERED_MESSAGE_PREFIX,
-  SLACK_MESSAGE_PREFIX,
-} from '../client/build_investigation_message';
-import {
   extractAccessedTreeIdsFromRounds,
   roundsBefore,
   type InvestigationToolCall,
@@ -42,7 +38,6 @@ import {
 } from '../investigation_round';
 import type {
   CausalCheckErrorCode,
-  CausalCheckFollowUpSource,
   CausalCheckOutcome,
   DecisionTreeCausalCheckEvent,
   NightshiftTelemetryClient,
@@ -55,8 +50,6 @@ import { withTimeout } from './with_timeout';
 const CAUSAL_CHECK_TIMEOUT_MS = 90_000;
 const CAUSAL_CHECK_TIMEOUT_MESSAGE = `Causal check timed out after ${CAUSAL_CHECK_TIMEOUT_MS}ms`;
 const CAUSAL_CHECK_LOG_TAGS = ['nightshift', 'decision_trees', 'causal_check'];
-/** Matches `slack_thread_workflow.yaml`'s reply brief (`Slack user <@...> wrote in the investigation's thread:`). */
-const SLACK_THREAD_REPLY_PATTERN = /^Slack user <@[^>]+> wrote in the investigation's thread:\s*\n/;
 
 class CausalCheckModelUnavailableError extends Error {
   constructor() {
@@ -77,25 +70,6 @@ type CausalCheckAttempt =
       errorCode: CausalCheckErrorCode;
       durationMs: number;
     };
-
-/**
- * Reads the prompt envelope Nightshift wraps around alert-recovery and Slack messages so telemetry
- * can segment follow-up outcomes by channel without extra I/O. Observational only — never used to
- * gate reinforcement.
- */
-const classifyFollowUpSource = (message: string | undefined): CausalCheckFollowUpSource => {
-  const trimmed = message?.trimStart() ?? '';
-  if (trimmed.startsWith(ALERT_RECOVERED_MESSAGE_PREFIX) && trimmed.includes('<alert_data>')) {
-    return 'alert_recovery';
-  }
-  if (
-    (trimmed.startsWith(SLACK_MESSAGE_PREFIX) && trimmed.includes('<slack_data>')) ||
-    SLACK_THREAD_REPLY_PATTERN.test(trimmed)
-  ) {
-    return 'slack';
-  }
-  return 'direct';
-};
 
 const classifyCausalCheckError = (error: unknown, parentAborted: boolean): CausalCheckErrorCode => {
   if (error instanceof CausalCheckModelUnavailableError) {
@@ -267,7 +241,6 @@ export const decisionTreePrepareStepDefinition = ({
       const earlierRounds = roundsBefore(rounds, roundId);
       const isFollowUp = earlierRounds.length > 0;
       const savedCurrentRound = rounds.find((round) => round.id === roundId);
-      const followUpSource = classifyFollowUpSource(prompt || savedCurrentRound?.input?.message);
       const roundResolution = isFollowUp
         ? resolveRound({ rounds, attachments: conversation?.attachments }, { roundId })
         : undefined;
@@ -360,7 +333,6 @@ export const decisionTreePrepareStepDefinition = ({
           round_id: roundId,
           ...(executionId ? { workflow_execution_id: executionId } : {}),
           outcome,
-          follow_up_source: followUpSource,
           ...(verdict
             ? {
                 is_feedback: verdict.isFeedback,
@@ -379,7 +351,6 @@ export const decisionTreePrepareStepDefinition = ({
         };
 
         span?.setAttribute('nightshift.causal_check.outcome', outcome);
-        span?.setAttribute('nightshift.causal_check.follow_up_source', followUpSource);
         if (roundResolution) {
           span?.setAttribute('nightshift.causal_check.recorder_outcome', roundResolution.outcome);
           if (roundResolution.hasConfirmedCause !== undefined) {
@@ -405,22 +376,18 @@ export const decisionTreePrepareStepDefinition = ({
         }
 
         // The structured record goes to the Kibana logger: the workflow step logger drops `labels`
-        // from console output, and the workflow-log datastream does not map them.
+        // from console output, and the workflow-log datastream does not map them. Raw error
+        // messages stay on `context.logger` (customer ES) because inference errors can quote data.
         if (outcome === 'failed') {
-          const message = `Round "${roundId}" of "${conversationId}" causal check failed (${errorCode}): ${
-            error?.message ?? 'unknown error'
-          }`;
-          logger.warn(message, {
+          const summary = `Round "${roundId}" of "${conversationId}" causal check failed (${errorCode})`;
+          logger.warn(summary, {
             tags: CAUSAL_CHECK_LOG_TAGS,
             labels: { ...event },
-            ...(error
-              ? { error: { message: error.message, type: error.name, stack_trace: error.stack } }
-              : {}),
           });
-          context.logger.warn(message);
+          context.logger.warn(`${summary}: ${error?.message ?? 'unknown error'}`);
         } else {
           const message =
-            `Round "${roundId}" of "${conversationId}" causal check: outcome=${outcome} source=${followUpSource}` +
+            `Round "${roundId}" of "${conversationId}" causal check: outcome=${outcome}` +
             (verdict
               ? ` feedback=${verdict.isFeedback} confirmed=${verdict.causalConfirmed}`
               : '') +

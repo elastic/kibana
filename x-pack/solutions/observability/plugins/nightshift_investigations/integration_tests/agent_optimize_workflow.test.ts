@@ -337,7 +337,6 @@ describe('agent optimize workflow, a follow-up round', () => {
         conversation_id: ELIGIBLE_ROUND_INPUTS.conversation_id,
         round_id: ELIGIBLE_ROUND_INPUTS.round_id,
         outcome: 'confirmed',
-        follow_up_source: 'direct',
         is_feedback: true,
         causal_confirmed: true,
         has_learning: true,

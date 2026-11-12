@@ -75,7 +75,6 @@ export {
   NIGHTSHIFT_DECISION_TREE_CAUSAL_CHECK_EVENT,
   decisionTreeCausalCheckEvent,
   type CausalCheckErrorCode,
-  type CausalCheckFollowUpSource,
   type CausalCheckOutcome,
   type DecisionTreeCausalCheckEvent,
 } from './decision_tree_causal_check_event';
