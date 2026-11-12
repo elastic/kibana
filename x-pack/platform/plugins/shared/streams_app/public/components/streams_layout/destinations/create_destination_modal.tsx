@@ -28,6 +28,8 @@ import {
   EuiSteps,
   EuiText,
   EuiTextArea,
+  mathWithUnits,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -45,12 +47,6 @@ import { useDestinationCreationForm } from './use_destination_creation_form';
 const CREATE_DESTINATION_MODAL_WIDTH = 576;
 /** Unit schema `description` limit. */
 const MAX_DESCRIPTION_LENGTH = 10000;
-
-const modalStyles = css({
-  inlineSize: CREATE_DESTINATION_MODAL_WIDTH,
-  // EuiModal caps height at 75vh, which makes the S3 form scroll on a laptop screen.
-  maxBlockSize: '90vh',
-});
 
 interface FormRowChildProps {
   id?: string;
@@ -104,12 +100,15 @@ const STORAGE_KIND_LABEL = i18n.translate('xpack.streams.destinations.storageKin
   defaultMessage: "Where will this destination's data live?",
 });
 
-// The label names the radio, so the description stays out of it.
-const StorageCardLabel = ({ label, badge }: DestinationTypeDefinition) => (
-  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+// The description sits in the label because EuiCheckableCard puts a fixed 16px gap before `children`.
+const StorageCardLabel = ({ label, description, badge }: DestinationTypeDefinition) => (
+  <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
     <EuiFlexItem>
       <EuiText size="s">
         <strong>{label}</strong>
+      </EuiText>
+      <EuiText size="xs" color="subdued">
+        {description}
       </EuiText>
     </EuiFlexItem>
     {badge && (
@@ -144,6 +143,21 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
     isCreatingDestination,
     isCreateFailed,
   } = destinations;
+  const { euiTheme } = useEuiTheme();
+  const modalStyles = css({
+    inlineSize: CREATE_DESTINATION_MODAL_WIDTH,
+    // EuiModal caps height at 75vh, so the longer forms scroll on a laptop. Keep an xxl margin instead.
+    maxBlockSize: `calc(100vh - ${mathWithUnits(euiTheme.size.xxl, (xxl) => xxl * 2)})`,
+  });
+  // EuiSteps pads the last step's bottom by xl + s, so the modal scrolls into blank space. Keep `base`
+  // (the Figma gap) and clip the rest, since a negative margin alone still counts toward scroll height.
+  const formStyles = css({ overflow: 'hidden' });
+  const stepsStyles = css({
+    marginBlockEnd: mathWithUnits(
+      [euiTheme.size.xl, euiTheme.size.s, euiTheme.size.base],
+      (xl, s, base) => -(xl + s - base)
+    ),
+  });
   const modalTitleId = useGeneratedHtmlId({ prefix: 'streamsCreateDestinationModalTitle' });
   const formId = useGeneratedHtmlId({ prefix: 'streamsCreateDestinationForm' });
   const {
@@ -234,12 +248,14 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
         ) : (
           <FormProvider {...methods}>
             <EuiForm
+              css={formStyles}
               id={formId}
               component="form"
               noValidate
               onSubmit={methods.handleSubmit(createDestination)}
             >
               <EuiSteps
+                css={stepsStyles}
                 titleSize="xxs"
                 headingElement="h3"
                 data-test-subj="streamsCreateDestinationSteps"
@@ -265,11 +281,7 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
                                   })
                                 }
                                 data-test-subj={definition.testSubject}
-                              >
-                                <EuiText size="xs" color="subdued">
-                                  {definition.description}
-                                </EuiText>
-                              </EuiCheckableCard>
+                              />
                             </EuiFlexItem>
                           ))}
                         </EuiFlexGroup>

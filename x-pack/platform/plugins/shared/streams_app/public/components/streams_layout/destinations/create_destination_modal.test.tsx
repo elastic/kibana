@@ -93,6 +93,15 @@ describe('CreateDestinationModal', () => {
     );
   });
 
+  it('reads each storage card description as part of its radio label', () => {
+    renderModal();
+    expect(
+      screen.getByRole('radio', {
+        name: 'Local Elasticsearch Write to indexes in this deployment. Most common',
+      })
+    ).toBeChecked();
+  });
+
   it('submits the form values', async () => {
     const { createDestination } = renderModal();
 
