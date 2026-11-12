@@ -23,6 +23,7 @@ import {
   rawRuleSchemaV14,
   rawRuleSchemaV15,
   rawRuleSchemaV16,
+  rawRuleSchemaV17,
 } from '../schemas/raw_rule';
 
 export const ruleModelVersions: SavedObjectsModelVersionMap = {
@@ -207,6 +208,19 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: rawRuleSchemaV16.extends({}, { unknowns: 'ignore' }),
       create: rawRuleSchemaV16,
+    },
+  },
+  /**
+   * Stores `executionStatus.error.reason` and `lastRun.warning` as plain strings so new
+   * reasons can be added without an intermediate release, and declares the already
+   * mapped `executionStatus.numberOfTriggeredActions`. Attributes are unchanged, so no
+   * backfill is needed.
+   */
+  '17': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV17.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV17,
     },
   },
 };

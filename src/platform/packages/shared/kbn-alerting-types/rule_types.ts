@@ -156,6 +156,7 @@ export enum RuleExecutionStatusErrorReasons {
   Read = 'read',
   Decrypt = 'decrypt',
   Execute = 'execute',
+  Configuration = 'configuration',
   Unknown = 'unknown',
   License = 'license',
   Timeout = 'timeout',

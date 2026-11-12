@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PublicLastRunSetters } from '../types';
+import { RuleExecutionStatusErrorReasons, type PublicLastRunSetters } from '../types';
 import type { RuleResultServiceResults } from './rule_result_service';
 import { RuleResultService } from './rule_result_service';
 
@@ -33,14 +33,33 @@ describe('RuleResultService', () => {
   test('should return errors array with added error', () => {
     lastRunSetters.addLastRunError('First error');
     expect(ruleResultService.getLastRunErrors()).toEqual([
-      { message: 'First error', userError: false },
+      {
+        message: 'First error',
+        userError: false,
+        reason: RuleExecutionStatusErrorReasons.Execute,
+      },
     ]);
   });
 
   test('should return errors array with added user error', () => {
     lastRunSetters.addLastRunError('First error', true);
     expect(ruleResultService.getLastRunErrors()).toEqual([
-      { message: 'First error', userError: true },
+      {
+        message: 'First error',
+        userError: true,
+        reason: RuleExecutionStatusErrorReasons.Configuration,
+      },
+    ]);
+  });
+
+  test('should keep an explicit execution failure reason', () => {
+    lastRunSetters.addLastRunError('First error', false, RuleExecutionStatusErrorReasons.Timeout);
+    expect(ruleResultService.getLastRunErrors()).toEqual([
+      {
+        message: 'First error',
+        userError: false,
+        reason: RuleExecutionStatusErrorReasons.Timeout,
+      },
     ]);
   });
 
@@ -63,6 +82,7 @@ describe('RuleResultService', () => {
         {
           message: 'error',
           userError: false,
+          reason: RuleExecutionStatusErrorReasons.Execute,
         },
       ],
       warnings: ['warning'],
@@ -82,10 +102,12 @@ describe('RuleResultService', () => {
         {
           message: 'first error',
           userError: false,
+          reason: RuleExecutionStatusErrorReasons.Execute,
         },
         {
           message: 'second error',
           userError: false,
+          reason: RuleExecutionStatusErrorReasons.Execute,
         },
       ],
       warnings: [],

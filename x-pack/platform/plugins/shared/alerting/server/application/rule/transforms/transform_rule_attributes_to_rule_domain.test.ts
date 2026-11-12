@@ -9,7 +9,7 @@ import { RecoveredActionGroup } from '../../../../common';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { transformRuleAttributesToRuleDomain } from './transform_rule_attributes_to_rule_domain';
 import type { UntypedNormalizedRuleType } from '../../../rule_type_registry';
-import type { RawRuleAction, RawRuleLastRun } from '../../../types';
+import type { RawRuleAction, RawRuleExecutionStatus, RawRuleLastRun } from '../../../types';
 
 const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   id: 'test.rule-type',
@@ -430,7 +430,12 @@ describe('transformRuleAttributesToRuleDomain', () => {
       },
     };
 
-    const transform = (rule: typeof baseRule & { lastRun?: RawRuleLastRun }) =>
+    const transform = (
+      rule: Omit<typeof baseRule, 'executionStatus'> & {
+        executionStatus: RawRuleExecutionStatus;
+        lastRun?: RawRuleLastRun;
+      }
+    ) =>
       transformRuleAttributesToRuleDomain(
         rule,
         {
@@ -475,13 +480,72 @@ describe('transformRuleAttributesToRuleDomain', () => {
         lastRun,
       });
 
-      expect(res.lastRun).toBe(lastRun);
+      expect(res.lastRun).toEqual(lastRun);
     });
 
     it('omits lastRun when the raw rule has no lastRun', () => {
       const res = transform(baseRule);
 
       expect(res).not.toHaveProperty('lastRun');
+    });
+
+    describe('reason normalization', () => {
+      it('keeps a known lastRun.warning', () => {
+        const res = transform({
+          ...baseRule,
+          lastRun: { outcome: 'warning' as const, alertsCount: {}, warning: 'maxAlerts' },
+        });
+
+        expect(res.lastRun?.warning).toBe('maxAlerts');
+      });
+
+      it('keeps a null lastRun.warning', () => {
+        const res = transform({
+          ...baseRule,
+          lastRun: { outcome: 'succeeded' as const, alertsCount: {}, warning: null },
+        });
+
+        expect(res.lastRun?.warning).toBeNull();
+      });
+
+      it('normalizes a lastRun.warning written by a newer Kibana to unknown', () => {
+        const res = transform({
+          ...baseRule,
+          lastRun: {
+            outcome: 'failed' as const,
+            alertsCount: {},
+            warning: 'reason-from-a-newer-kibana',
+          },
+        });
+
+        expect(res.lastRun?.warning).toBe('unknown');
+      });
+
+      it('keeps a known executionStatus.error.reason', () => {
+        const res = transform({
+          ...baseRule,
+          executionStatus: {
+            ...baseRule.executionStatus,
+            status: 'error' as const,
+            error: { reason: 'execute', message: 'boom' },
+          },
+        });
+
+        expect(res.executionStatus?.error).toEqual({ reason: 'execute', message: 'boom' });
+      });
+
+      it('normalizes an executionStatus.error.reason written by a newer Kibana to unknown', () => {
+        const res = transform({
+          ...baseRule,
+          executionStatus: {
+            ...baseRule.executionStatus,
+            status: 'error' as const,
+            error: { reason: 'reason-from-a-newer-kibana', message: 'boom' },
+          },
+        });
+
+        expect(res.executionStatus?.error).toEqual({ reason: 'unknown', message: 'boom' });
+      });
     });
   });
 
