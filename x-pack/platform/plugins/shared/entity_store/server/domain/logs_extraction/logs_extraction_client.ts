@@ -873,6 +873,9 @@ export class LogsExtractionClient {
         let entityPagination: PaginationParams | undefined;
         let bumpedCursorEnd: LogSlicePaginationParams | null = null;
         let sliceLogCount = 0;
+        /** Raw target of the probe that drew this slice. Undefined on a resumed slice, which
+         * re-enters persisted bounds without probing. */
+        let sliceRawTarget: number | undefined;
 
         if (isFirstRunInThisCycle && resumeSliceEnd) {
           // Re-enter the interrupted slice with its exact persisted bounds, skipping the probe:
@@ -952,10 +955,6 @@ export class LogsExtractionClient {
             }
           }
 
-          // Recorded once the slice's boundary is settled, so a base-size probe that was replaced
-          // by a scaled one contributes nothing: its boundary never became a slice.
-          entityStoreMetrics.extractionSliceRawTarget.record(probed.pageSize, metricAttributes);
-
           if (!probed.result.hasLogsToProcess && probed.sampleProbability >= 1) {
             // Sampling wasn't active for this probe (the page was too small — see
             // pickSampleProbability), so an empty, exact result is definitive: no real docs
@@ -972,9 +971,10 @@ export class LogsExtractionClient {
             !lastLogsPages,
             probed.pageSize
           );
-          // Only read on the non-bumped path below: a stalled (bumped) slice is dropped, so it
-          // never counts against the volume cap.
+          // Both only read on the non-bumped path below: a stalled (bumped) slice is dropped, so
+          // it never counts against the volume cap and never became a slice to size.
           sliceLogCount = probed.result.sliceLogCount;
+          sliceRawTarget = probed.pageSize;
         }
 
         if (bumpedCursorEnd) {
@@ -1021,6 +1021,12 @@ export class LogsExtractionClient {
           state = sliceIngestOutcome.state;
 
           entityStoreMetrics.extractionSliceCount.add(1, metricAttributes);
+          // Recorded here rather than at the probe so the two slice metrics share a denominator:
+          // a probe that ended the loop without extracting, a base-size probe replaced by a scaled
+          // one, and a stalled slice all drew a boundary that never became a slice.
+          if (sliceRawTarget !== undefined) {
+            entityStoreMetrics.extractionSliceRawTarget.record(sliceRawTarget, metricAttributes);
+          }
           entityStoreMetrics.extractionSliceEntities.record(
             sliceIngestOutcome.addedToTotalCount,
             metricAttributes

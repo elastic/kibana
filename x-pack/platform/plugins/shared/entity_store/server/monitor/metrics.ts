@@ -249,7 +249,7 @@ export const entityStoreMetrics = {
 
   extractionSliceRawTarget: histogram<ExtractionAttributes>(m('extraction.slice.raw_target'), {
     description:
-      'Raw log documents the boundary probe aimed to place in one slice (the effective maxLogsPerPage). Recorded once per probed slice, so resumed slices, which skip the probe, are not represented',
+      'Raw log documents the boundary probe aimed to place in one slice (the effective maxLogsPerPage). Recorded once per slice that ran an extraction, sharing a denominator with extraction.slice.count so the two divide into a per-slice scale factor. Resumed slices are not represented: they re-enter persisted bounds without probing, so they have no target',
     unit: '{document}',
     valueType: ValueType.INT,
     advice: { explicitBucketBoundaries: PAGE_TARGET_LOGS_BOUNDARIES },

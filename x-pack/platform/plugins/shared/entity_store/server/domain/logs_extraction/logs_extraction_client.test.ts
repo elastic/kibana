@@ -3601,11 +3601,21 @@ describe('LogsExtractionClient sampling wiring', () => {
         .mockImplementation(),
     });
 
+    const spySliceMetrics = () => ({
+      rawTargetRecord: jest
+        .spyOn(entityStoreMetrics.extractionSliceRawTarget, 'record')
+        .mockImplementation(),
+      sliceCountAdd: jest
+        .spyOn(entityStoreMetrics.extractionSliceCount, 'add')
+        .mockImplementation(),
+      droppedAdd: jest
+        .spyOn(entityStoreMetrics.extractionLogsPerPageDropped, 'add')
+        .mockImplementation(),
+    });
+
     it('records the slice raw target once per slice, not once per probe', async () => {
       const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority);
-      const rawTargetRecord = jest
-        .spyOn(entityStoreMetrics.extractionSliceRawTarget, 'record')
-        .mockImplementation();
+      const { rawTargetRecord } = spySliceMetrics();
       mockHighVolumeSequence({ samples: true });
 
       await client.extractLogs('user');
@@ -3617,6 +3627,49 @@ describe('LogsExtractionClient sampling wiring', () => {
       expect(sizes).not.toContain(REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE * 10);
       expect(new Set(sizes).size).toBe(1);
       expect(rawTargetRecord).toHaveBeenCalledTimes(sliceWindows().length);
+    });
+
+    it('does not record a raw target for a probe that ends the run without extracting', async () => {
+      const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
+        // maxLogsPerPage=5 escalates the probe to an exact, unsampled one, so an empty result is
+        // definitive and the loop stops before any extraction runs.
+        nonPriorityLogExtractionConfig: { maxLogsPerPage: 5 },
+      });
+      const { rawTargetRecord, sliceCountAdd } = spySliceMetrics();
+      mockExecuteEsqlQuery.mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty());
+
+      await client.extractLogs('user');
+
+      expect(extractionQueries()).toHaveLength(0);
+      expect(sliceCountAdd).not.toHaveBeenCalled();
+      expect(rawTargetRecord).not.toHaveBeenCalled();
+    });
+
+    it('does not record a raw target for a stalled slice that is dropped', async () => {
+      const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority);
+      const { rawTargetRecord, sliceCountAdd, droppedAdd } = spySliceMetrics();
+      const stalled = '2025-01-15T11:51:00.000Z';
+      const SCALED_PROBE_LIMIT = 22_500;
+      // Slice 1 runs normally and leaves the checkpoint at `stalled`. Slice 2 then probes from
+      // `stalled` and saturates on that same timestamp, so successive slices would never advance:
+      // the cursor is bumped and the slice dropped without extracting.
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(
+          mockLogPaginationCursorProbeRow(stalled, REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE)
+        )
+        .mockResolvedValueOnce(mockLogPaginationCursorProbeRow(stalled, SCALED_PROBE_LIMIT))
+        .mockResolvedValueOnce(extractionRow)
+        .mockResolvedValueOnce(mockLogPaginationCursorProbeRow(stalled, SCALED_PROBE_LIMIT))
+        .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+        .mockResolvedValueOnce({ columns: [], values: [] });
+
+      await client.extractLogs('user');
+
+      // Guards against this passing vacuously: the stall must actually have fired.
+      expect(droppedAdd).toHaveBeenCalled();
+      // Both metrics skip the dropped slice, so dividing one by the other stays a per-slice
+      // scale factor rather than drifting apart.
+      expect(rawTargetRecord).toHaveBeenCalledTimes(sliceCountAdd.mock.calls.length);
     });
 
     it('a sampled run records the applied rate and counts as sampled', async () => {
