@@ -8,6 +8,8 @@
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
+import type { ExperimentalFeatures } from '../../../../common/experimental_features';
+import { getConfigurationTroubleshootingSkillName } from '../configuration_troubleshooting_skill_name';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import {
   isolateHostTool,
@@ -34,7 +36,9 @@ export const RUNNING_PROCESSES_TOOL_ID = toolName('get_running_processes');
 export const SCAN_TOOL_ID = toolName('scan_host');
 export const GET_RESPONSE_ACTION_STATUS_TOOL_ID = toolName('get_response_action_status');
 
-const SYSTEM_INSTRUCTIONS = `# Endpoint Response Actions Skill
+const getSystemInstructions = (
+  troubleshootingSkillName: string
+) => `# Endpoint Response Actions Skill
 
 ## When to Use This Skill
 
@@ -44,7 +48,7 @@ inactive, unenrolled; unknown when not yet reported — isolated or not), isolat
 or release (unisolate) a host, list a host's running processes, run a malware
 scan on a host path, or look up a previously dispatched response action by its
 action ID. Not for diagnosing why a host is unhealthy, offline, or missing, or
-why an isolation or other response action failed — that routes to the elastic-defend-configuration-troubleshooting
+why an isolation or other response action failed — that routes to the ${troubleshootingSkillName}
 skill.
 
 The response actions available are isolate, release (unisolate), scan, and
@@ -57,7 +61,7 @@ from chat: say so and point the analyst to the Response Actions UI.
 
 ## Process
 
-0. If the question asks WHY a host is unhealthy, offline, or missing, or WHY a response action (e.g. isolation) failed, stop: do not call this skill's tools; load elastic-defend-configuration-troubleshooting and follow it.
+0. If the question asks WHY a host is unhealthy, offline, or missing, or WHY a response action (e.g. isolation) failed, stop: do not call this skill's tools; load ${troubleshootingSkillName} and follow it.
 
 1. **Route intent to the right tool**
    - list / available hosts → \`list_endpoints\`
@@ -101,19 +105,33 @@ from chat: say so and point the analyst to the Response Actions UI.
   (and \`reason: ambiguous_hostname\` when several endpoints share the name);
   \`error: invalid_argument\` means the request itself was out of range (narrow
   filters instead of paging further), while \`error: insufficient_privileges\`
-  and \`error: unknown_error\` mean the lookup itself could not run. Details in
-  \`./reference\`.`;
+  and \`error: unknown_error\` mean the lookup itself could not run, and
+  \`error: license_tier_required\` means the deployment's license tier does not
+  include the capability — report the \`requiredLicenseTier\` it returns, do not
+  suggest a role grant or the Security UI (the same limit applies there), and
+  do not re-offer that action this conversation. \`error: license_unavailable\`
+  means the license itself expired or could not be read — tell the analyst to
+  renew or restore it, not to change tier, and do not re-offer the action until
+  it is restored. \`error: product_feature_disabled\` means the deployment's
+  product configuration excludes response actions entirely — report that as a
+  property of the project (serverless: requires the Endpoint Complete tier),
+  do not suggest a role grant, a license upgrade, or the Security UI, and do
+  not re-offer that action this conversation. License tier or product tier can
+  also make a write unavailable before you call it, so do not promise isolate,
+  scan, or running-processes will succeed until the tool result confirms.
+  Details in \`./reference\`.`;
 
 export const createEndpointResponseActionsSkill = (
-  endpointAppContextService: EndpointAppContextService
+  endpointAppContextService: EndpointAppContextService,
+  experimentalFeatures: Pick<ExperimentalFeatures, 'automaticTroubleshootingUniversalSkill'>
 ): SkillDefinition<typeof NAME, typeof BASE_PATH> => {
+  const troubleshootingSkillName = getConfigurationTroubleshootingSkillName(experimentalFeatures);
   return defineSkillType({
     id: ID,
     name: NAME,
     basePath: BASE_PATH,
-    description:
-      'List enrolled Elastic Defend endpoints, check a host status by hostname or agent ID and its isolation state, isolate or release (unisolate) a host, list running processes, run a malware scan on a host path, and look up a previously dispatched response action by ID. Write actions pause for analyst confirmation; execute, kill-process, get-file, upload, runscript, and memory-dump are not available. For root-cause diagnosis of unhealthy hosts or failed actions, use elastic-defend-configuration-troubleshooting.',
-    content: SYSTEM_INSTRUCTIONS,
+    description: `List enrolled Elastic Defend endpoints, check a host status by hostname or agent ID and its isolation state, isolate or release (unisolate) a host, list running processes, run a malware scan on a host path, and look up a previously dispatched response action by ID. Write actions pause for analyst confirmation; execute, kill-process, get-file, upload, runscript, and memory-dump are not available. For root-cause diagnosis of unhealthy hosts or failed actions, use ${troubleshootingSkillName}.`,
+    content: getSystemInstructions(troubleshootingSkillName),
     referencedContent: [
       {
         relativePath: '.',

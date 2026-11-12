@@ -14,6 +14,7 @@ import {
   deriveInternalCallerAttestation,
   HTTPAuthorizationHeader,
   markExternalUiamCredential,
+  UIAM_ERROR_CODES,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
 
@@ -61,6 +62,7 @@ describe('UiamService', () => {
   let readFileSyncSpy: jest.SpyInstance;
   let agentSpy: jest.SpyInstance;
   let fetchSpy: jest.SpyInstance;
+  let uiamServiceLogger: ReturnType<typeof loggingSystemMock.createLogger>;
   beforeEach(() => {
     readFileSyncSpy = jest
       .spyOn(fs, 'readFileSync')
@@ -68,8 +70,9 @@ describe('UiamService', () => {
     agentSpy = jest.spyOn(undici, 'Agent').mockImplementation(() => AGENT_MOCK as any);
     fetchSpy = jest.spyOn(window, 'fetch');
 
+    uiamServiceLogger = loggingSystemMock.createLogger();
     uiamService = new UiamService(
-      loggingSystemMock.createLogger(),
+      uiamServiceLogger,
       ConfigSchema.validate(
         {
           uiam: {
@@ -1948,7 +1951,7 @@ describe('UiamService', () => {
       );
     });
 
-    it('reproduces a 404 when the account is missing', async () => {
+    it('resolves `null` for a 404, logging it at debug only', async () => {
       fetchSpy.mockResolvedValue({
         ok: false,
         status: 404,
@@ -1962,9 +1965,49 @@ describe('UiamService', () => {
         }),
       });
 
-      await expect(uiamService.getServiceAccount('missing')).rejects.toMatchObject({
-        output: { statusCode: 404 },
+      await expect(uiamService.getServiceAccount('missing')).resolves.toBeNull();
+      expect(uiamServiceLogger.error).not.toHaveBeenCalled();
+      expect(uiamServiceLogger.debug).toHaveBeenCalledWith(
+        'Service account [missing] was not found.'
+      );
+    });
+
+    it('resolves `null` for the 403 UIAM sends for an unknown account, logging it at debug only', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 403,
+        headers: new Headers(),
+        json: async () => ({
+          error: {
+            code: UIAM_ERROR_CODES.ORGANIZATION_SERVICE_ACCOUNT_NOT_FOUND,
+            type: 'AUTHZ_DENY',
+            message: 'Organization service account not found',
+          },
+        }),
       });
+
+      await expect(uiamService.getServiceAccount('missing')).resolves.toBeNull();
+      expect(uiamServiceLogger.error).not.toHaveBeenCalled();
+      expect(uiamServiceLogger.warn).not.toHaveBeenCalled();
+      expect(uiamServiceLogger.debug).toHaveBeenCalledWith(
+        'Service account [missing] was not found.'
+      );
+    });
+
+    it('logs any other refusal as an error', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 403,
+        headers: new Headers(),
+        json: async () => ({
+          error: { code: '0x93B121', type: 'AUTHZ_DENY', message: 'Denied' },
+        }),
+      });
+
+      await expect(uiamService.getServiceAccount('service-account-id')).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(uiamServiceLogger.error).toHaveBeenCalledTimes(1);
     });
 
     it('logs and rethrows transport errors', async () => {

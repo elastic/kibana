@@ -205,7 +205,7 @@ describe('compareScores', () => {
     expect(result.metricType).toBe('continuous_bounded');
     expect(result.hypothesisTest.id).toBe('paired_t');
     expect(result.hypothesisTest.method).toBeUndefined();
-    expect(result.pValue).toBeCloseTo(2.022935136447288e-10, 15);
+    expect(result.pValue).toBeCloseTo(2.795687139010667e-10, 15);
   });
 
   it('reports statistic and metric type', () => {

@@ -31,6 +31,7 @@ export type EditPackagePolicyFrom =
   | 'edit'
   | 'upgrade-from-fleet-policy-list'
   | 'upgrade-from-integrations-policy-list'
+  | 'upgrade-from-installed-integrations'
   | 'upgrade-from-extension'
   | 'copy-from-fleet-policy-list'
   | 'copy-from-integrations-policy-list'

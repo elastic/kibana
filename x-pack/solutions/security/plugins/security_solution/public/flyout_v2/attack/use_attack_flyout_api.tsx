@@ -6,7 +6,6 @@
  */
 
 import React, { lazy, useCallback, useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
 import { noop } from 'lodash/fp';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
@@ -35,10 +34,8 @@ import { useFlyoutSessionContext } from '../session_context';
 import { useFlyoutV2UrlWriter } from '../shared/url_state/flyout_v2_url_writer';
 import {
   FLYOUT_DESCRIPTOR_KIND,
-  decodeFlyoutV2UrlParam,
   urlParamKeyForHistoryKey,
 } from '../shared/url_state/flyout_v2_url_param';
-import type { FlyoutDescriptor } from '../shared/url_state/flyout_v2_url_param';
 
 /**
  * Extracts the minimal identifying fields from an attack DataTableRecord for use in URL descriptors.
@@ -122,30 +119,18 @@ export interface AttackFlyoutApi {
  * wiring (`flyoutProviders` + `overlays.openSystemFlyout`, via `useOpenFlyout`) and the per-flyout
  * properties so call sites don't repeat them. `useOpenFlyout` also reports open/close telemetry.
  *
- * This API only ever opens the NEW flyout. It does not know about the legacy expandable flyout:
- * callers remain responsible for gating on `useIsNewFlyoutEnabled()` and falling back to the
- * legacy flyout when it is off.
- *
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
 export const useAttackFlyoutApi = (): AttackFlyoutApi => {
-  const history = useHistory();
   const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const defaultToolsFlyoutProperties = useDefaultToolsFlyoutProperties();
   const open = useOpenFlyout();
   const urlParamKey = urlParamKeyForHistoryKey(historyKey);
-  const { writeOnOpen, buildOnClose } = useFlyoutV2UrlWriter(urlParamKey, historyKey);
-
-  // Reads the first descriptor from the current URL stack without bumping the generation.
-  // Used by openAttackFlyoutAsChild to determine the parent descriptor (close fallback)
-  // before appending the child descriptor with writeOnOpen('inherit').
-  const readFirstDescriptor = useCallback((): FlyoutDescriptor | null => {
-    if (!history?.location) return null;
-    const raw = new URLSearchParams(history.location.search).get(urlParamKey);
-    const stack = decodeFlyoutV2UrlParam(raw);
-    return stack?.[0] ?? null;
-  }, [history, urlParamKey]);
+  const { writeOnOpen, buildOnClose, readRootDescriptor } = useFlyoutV2UrlWriter(
+    urlParamKey,
+    historyKey
+  );
 
   const openAttackFlyout = useCallback(
     ({
@@ -192,7 +177,7 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
       renderCellActions = cellActionRenderer,
       origin,
     }: OpenAttackFlyoutParams) => {
-      const parentDescriptor = readFirstDescriptor();
+      const parentDescriptor = readRootDescriptor();
       writeOnOpen({ kind: FLYOUT_DESCRIPTOR_KIND.attack, attackId, indexName }, 'inherit');
       const onClose = buildOnClose(parentDescriptor);
       open(
@@ -222,7 +207,7 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
       open,
       defaultDocumentFlyoutProperties,
       historyKey,
-      readFirstDescriptor,
+      readRootDescriptor,
       writeOnOpen,
       buildOnClose,
     ]
@@ -231,12 +216,7 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
   const openAttackCorrelations = useCallback(
     ({ hit, alertIds, onShowAlert, origin }: OpenAttackCorrelationsParams) => {
       const { attackId, indexName } = attackIdsFromHit(hit);
-      writeOnOpen({
-        kind: FLYOUT_DESCRIPTOR_KIND.attackCorrelations,
-        attackId,
-        indexName,
-        alertIds,
-      });
+      writeOnOpen({ kind: FLYOUT_DESCRIPTOR_KIND.attackCorrelations, attackId, indexName });
       // A tool flyout opens with session:'start' (a root, not a child of the attack): the attack is
       // not persisted alongside it, so closing the tool clears the param.
       const onClose = buildOnClose(null);
@@ -265,12 +245,7 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
   const openAttackEntities = useCallback(
     ({ hit, alertIds, origin }: OpenAttackEntitiesParams) => {
       const { attackId, indexName } = attackIdsFromHit(hit);
-      writeOnOpen({
-        kind: FLYOUT_DESCRIPTOR_KIND.attackEntities,
-        attackId,
-        indexName,
-        alertIds,
-      });
+      writeOnOpen({ kind: FLYOUT_DESCRIPTOR_KIND.attackEntities, attackId, indexName });
       // A tool flyout opens with session:'start' (a root, not a child of the attack): the attack is
       // not persisted alongside it, so closing the tool clears the param.
       const onClose = buildOnClose(null);

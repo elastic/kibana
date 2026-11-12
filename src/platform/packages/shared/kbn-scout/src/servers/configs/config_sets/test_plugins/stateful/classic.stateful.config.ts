@@ -41,6 +41,7 @@ export const servers: ScoutServerConfig = {
       '--xpack.cloud_integrations.full_story.enabled=true',
       '--xpack.cloud_integrations.full_story.org_id=a_string',
       ...findTestPluginPaths(resolve(REPO_ROOT, 'src/platform/test/plugin_functional/plugins')),
+      `--plugin-path=${resolve(REPO_ROOT, 'src/platform/test_plugins/data_search')}`,
     ],
   },
 };

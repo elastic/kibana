@@ -64,8 +64,14 @@ import type {
   TaskCredential,
   TaskInstanceWithId,
   TaskClaimCandidate,
+  TaskCost,
 } from './task';
-import { TaskStatus, TaskLifecycleResult } from './task';
+import {
+  TaskStatus,
+  TaskLifecycleResult,
+  getInstanceCostFromTaskCost,
+  getTaskCostFromInstance,
+} from './task';
 import type { TaskTypeDictionary } from './task_type_dictionary';
 import type { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { TaskValidator } from './task_validator';
@@ -1060,7 +1066,7 @@ export class TaskStore {
           const apiKey = updatedFields?.apiKey || doc?.apiKey;
           const uiamApiKey = updatedFields?.uiamApiKey || doc?.uiamApiKey;
           const userScope = updatedFields?.userScope || doc?.userScope;
-          const { credential, encryptedCredential } = doc;
+          const { credential, encryptedCredential, unrecognizedCost } = doc;
           // The encryption-aware client can't rewrite such a task: a merged update re-encrypts the
           // API key without credential in its AAD, and a full replace encrypts encryptedCredential
           // twice.
@@ -1087,6 +1093,10 @@ export class TaskStore {
               ...(!mergeAttributes && credential !== undefined ? { credential } : {}),
               ...(!mergeAttributes && encryptedCredential !== undefined
                 ? { encryptedCredential }
+                : {}),
+              // A cost tier only a newer version of Kibana knows is kept for that version to read.
+              ...(!mergeAttributes && doc.cost === undefined && unrecognizedCost !== undefined
+                ? { cost: unrecognizedCost }
                 : {}),
             },
             mergeAttributes,
@@ -1666,14 +1676,20 @@ export class TaskStore {
     }));
     const searches = queries.flatMap((query) => [{}, query]);
 
-    const result = await this.esClient.msearch<SavedObjectsRawDoc['_source']>(
-      {
-        index: this.index,
-        ignore_unavailable: true,
-        searches,
-      },
-      { retryOnTimeout: false }
-    );
+    let result: estypes.MsearchResponse<SavedObjectsRawDoc['_source']>;
+    try {
+      result = await this.esClient.msearch<SavedObjectsRawDoc['_source']>(
+        {
+          index: this.index,
+          ignore_unavailable: true,
+          searches,
+        },
+        { retryOnTimeout: false }
+      );
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
     const { responses } = result;
 
     const versionMap = this.createVersionMap([]);
@@ -1858,6 +1874,21 @@ export function docHasEncryptedApiKey(
   return Boolean((doc.apiKey || doc.uiamApiKey) && doc.userScope);
 }
 
+function costToAttributes(cost?: TaskCost): Pick<SerializedConcreteTaskInstance, 'cost'> {
+  const instanceCost = getInstanceCostFromTaskCost(cost);
+  return instanceCost ? { cost: instanceCost } : {};
+}
+
+function costFromAttributes(
+  cost?: string
+): Pick<ConcreteTaskInstance, 'cost' | 'unrecognizedCost'> {
+  if (!cost) {
+    return {};
+  }
+  const taskCost = getTaskCostFromInstance(cost);
+  return taskCost === undefined ? { unrecognizedCost: cost } : { cost: taskCost };
+}
+
 export function taskInstanceToAttributes(
   doc: TaskInstance,
   id: string
@@ -1872,8 +1903,11 @@ export function taskInstanceToAttributes(
       'uiamApiKey',
       'credential',
       'encryptedCredential',
-      'runAs'
+      'runAs',
+      'cost',
+      'unrecognizedCost'
     ),
+    ...costToAttributes(doc.cost),
     params: JSON.stringify(doc.params || {}),
     state: JSON.stringify(doc.state || {}),
     attempts: (doc as ConcreteTaskInstance).attempts || 0,
@@ -1898,8 +1932,11 @@ export function partialTaskInstanceToAttributes(
       'apiKey',
       'uiamApiKey',
       'credential',
-      'encryptedCredential'
+      'encryptedCredential',
+      'cost',
+      'unrecognizedCost'
     ),
+    ...costToAttributes(doc.cost),
     ...(doc.params ? { params: JSON.stringify(doc.params) } : {}),
     ...(doc.state ? { state: JSON.stringify(doc.state) } : {}),
     ...(doc.scheduledAt ? { scheduledAt: doc.scheduledAt.toISOString() } : {}),
@@ -1912,9 +1949,10 @@ export function partialTaskInstanceToAttributes(
 export function savedObjectToConcreteTaskInstance(
   savedObject: Omit<SavedObject<SerializedConcreteTaskInstance>, 'references'>
 ): ConcreteTaskInstance {
-  const { userScope, ...attributes } = savedObject.attributes;
+  const { userScope, cost, ...attributes } = savedObject.attributes;
   return {
     ...attributes,
+    ...costFromAttributes(cost),
     ...(userScope
       ? {
           userScope: {
@@ -1941,9 +1979,10 @@ export function savedObjectToConcreteTaskInstance(
 export function savedObjectToTaskClaimCandidate(
   savedObject: Omit<SavedObject<SerializedConcreteTaskInstance>, 'references'>
 ): TaskClaimCandidate {
-  const { userScope } = savedObject.attributes;
+  const { userScope, cost } = savedObject.attributes;
   return {
-    ...omit(savedObject.attributes, 'state', 'params', 'apiKey', 'uiamApiKey', 'userScope'),
+    ...omit(savedObject.attributes, 'state', 'params', 'apiKey', 'uiamApiKey', 'userScope', 'cost'),
+    ...costFromAttributes(cost),
     ...(userScope
       ? {
           userScope: {

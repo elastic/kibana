@@ -7,24 +7,18 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { AlertEvent } from './alert_event';
 import { TestProviders } from '../../../../common/mock';
-import { createExpandableFlyoutApiMock } from '../../../../common/mock/expandable_flyout';
 import { useFetchAlertData } from '../../../pages/use_fetch_alert_data';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
-import { RulePanelKey } from '../../../../flyout/rule_details/right';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
-jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../pages/use_fetch_alert_data');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../../../common/components/user_privileges');
-jest.mock('../../../../common/hooks/use_is_new_flyout_enabled');
 jest.mock('../../../../flyout_v2/use_flyout_api');
 
 const savedObjectId = 'so1';
@@ -39,7 +33,6 @@ const ruleLinkTestId = `alert-rule-link-${savedObjectId}`;
 
 describe('AlertEvent', () => {
   const flyoutApi = createFlyoutApiMock();
-  const mockOpenFlyout = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -52,12 +45,7 @@ describe('AlertEvent', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       rulesPrivileges: { rules: { read: true } },
     });
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
     jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
-      ...createExpandableFlyoutApiMock(),
-      openFlyout: mockOpenFlyout,
-    });
   });
 
   it('renders the rule link with the resolved rule name', () => {
@@ -70,29 +58,7 @@ describe('AlertEvent', () => {
     expect(screen.getByTestId(ruleLinkTestId)).toHaveTextContent('My rule');
   });
 
-  it('opens the legacy expandable flyout when the new flyout is disabled', () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
-
-    render(
-      <TestProviders>
-        <AlertEvent {...defaultProps} />
-      </TestProviders>
-    );
-
-    fireEvent.click(screen.getByTestId(ruleLinkTestId));
-
-    expect(mockOpenFlyout).toHaveBeenCalledWith({
-      right: {
-        id: RulePanelKey,
-        params: { ruleId: 'rule-1' },
-      },
-    });
-    expect(flyoutApi.openRuleFlyout).not.toHaveBeenCalled();
-  });
-
-  it('opens the new rule flyout when the new flyout is enabled', () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
-
+  it('opens the rule flyout when the rule link is clicked', () => {
     render(
       <TestProviders>
         <AlertEvent {...defaultProps} />
@@ -106,7 +72,6 @@ describe('AlertEvent', () => {
       origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
       title: 'Rule: My rule',
     });
-    expect(mockOpenFlyout).not.toHaveBeenCalled();
   });
 
   it('does not open any flyout when the user cannot read rules', () => {
@@ -122,7 +87,6 @@ describe('AlertEvent', () => {
 
     fireEvent.click(screen.getByTestId(ruleLinkTestId));
 
-    expect(mockOpenFlyout).not.toHaveBeenCalled();
     expect(flyoutApi.openRuleFlyout).not.toHaveBeenCalled();
   });
 
@@ -341,7 +305,6 @@ describe('AlertEvent', () => {
 
       fireEvent.click(screen.getByTestId(`alerts-user-action-${savedObjectId}`));
 
-      expect(mockOpenFlyout).not.toHaveBeenCalled();
       expect(flyoutApi.openRuleFlyout).not.toHaveBeenCalled();
     });
   });

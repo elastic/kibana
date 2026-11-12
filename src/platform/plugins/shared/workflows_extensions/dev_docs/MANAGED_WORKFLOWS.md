@@ -74,6 +74,7 @@ Client surface:
 
 - `install(id, options)` — no request required
 - `uninstall(id, options)` — no request required
+- `disable(id, options)` — no request required; switches the workflow off and changes nothing else (see [Disabling a managed workflow](#disabling-a-managed-workflow))
 - `getWorkflowStatus(id, options)` — no request required
 - `execute(request, id, options)` — **request required** (used for attribution and space context)
 
@@ -101,7 +102,7 @@ async function onEntityCreated(entityId: string, spaceId: string) {
 }
 ```
 
-Installs are idempotent on `(definition version, persisted values)`, so it is safe to call `install` again for the same id without checking whether the document already exists.
+Installs are idempotent on `(definition version, persisted values, rendered YAML)`, so it is safe to call `install` again for the same id without checking whether the document already exists.
 
 ## 3.1) Signaling readiness (`ready()`)
 
@@ -512,7 +513,9 @@ await managed.install(HEALTH_CHECK_WORKFLOW_ID, {
 
 ### `yamlTemplate(values)` — install-time parameterization
 
-Use when some values are only known at install time (entity id, connector id, rule id, etc.). The template renders at install/update time, install values are persisted alongside the document, and re-installs are idempotent on `(definition version, persisted values)`.
+Use when some values are only known at install time (entity id, connector id, rule id, etc.). The template renders at install/update time, install values are persisted alongside the document, and re-installs are idempotent on `(definition version, persisted values, rendered YAML)`.
+
+The platform hashes the YAML each install renders, so any change to that output, including edits to imported YAML files, render helpers and defaults, reaches installed documents on their next reconciliation without a `version` bump. `yamlTemplate` must return the same YAML for the same values every time: a render that varies, for example with a timestamp or a random id, reinstalls the document on every reconciliation.
 
 ```ts
 import type { ManagedWorkflowDefinition } from '@kbn/workflows/managed';
@@ -562,7 +565,7 @@ For `yaml`-based definitions (no template values), a direct annotation (`: Manag
 
 Every managed definition declares a `version: number` (positive integer, starting at 1).
 
-- **`version` participates in reconciliation.** An install is skipped only when both the `definitionHash` (SHA-256 of the YAML content) and the stored `managedVersion` match the definition's current values. A version bump alone (without YAML changes) is enough to trigger a managed update — this is how non-YAML config changes (e.g. `billable`) are propagated.
+- **`version` participates in reconciliation.** An install is skipped only when both the `definitionHash` (SHA-256 of the YAML content; for a `yamlTemplate`, of the YAML rendered with the document's values) and the stored `managedVersion` match the definition's current values. A version bump alone (without YAML changes) is enough to trigger a managed update — this is how non-YAML config changes (e.g. `billable`) are propagated.
 - `version` is not auto-derived from the hash — it is an explicit declaration that the owner controls.
 
 The definition's `version` is persisted as `managedVersion` on the workflow document. It serves three main purposes:
@@ -573,9 +576,9 @@ The definition's `version` is persisted as `managedVersion` on the workflow docu
 
 **When to bump `version`:**
 
-- **Bump** when the change involves non-YAML config (e.g. `billable`, `management` policy changes), or when it is a YAML change you want explicit visibility/auditability for.
+- **Bump** when the change involves non-YAML config (e.g. `billable`, `management` policy changes), or when it is a YAML change you want explicit visibility/auditability for. Telemetry reports `managedVersion`, not the hash, so a change without a bump keeps the same `managedVersion` there.
 - **Optional** for YAML-only changes on a fixed `yaml` definition because its content hash triggers the upgrade.
-- **Required** when a `yamlTemplate` closes over imported YAML or another external constant. The template hash covers the function source, not closed-over content, so changing only the imported content does not change the hash.
+- **Optional** for `yamlTemplate` changes, including edits to imported YAML, render helpers and defaults, because each document's hash covers the YAML its values render.
 
 ### `billable` — execution metering
 
@@ -614,6 +617,8 @@ Status values:
 
 If multiple conditions apply, the API reports the first matching status in this priority order: `missing`, `not_managed`, `invalid`, `disabled`, `drifted`, `intact`.
 
+For a `yamlTemplate` definition, the registered hash (`registryHash`) is the hash of the template rendered with the document's stored values. It is `null` when there is no document, the document holds no values, or the template throws for them. An installed document with a `null` hash is reported as `drifted` unless an earlier status in the order above applies.
+
 The status API accepts the same identity options as install/uninstall, except template `values` are not needed:
 
 - omit `workflowId` and `workflowIdSuffix` to check the fixed definition id
@@ -635,6 +640,20 @@ if (state?.templateValues) {
 ```
 
 Use `listInstalledWorkflowStates()` when the owner must inspect all of its installed instances across spaces, such as migrating versioned template values before calling `ready()`. These methods expose persisted managed-workflow state to the owner plugin only; they are not public HTTP workflow APIs.
+
+### Disabling a managed workflow
+
+`disable` switches one of the plugin's own managed workflows off without a request:
+
+```ts
+const disabled = await managed.disable(MY_WORKFLOW_ID, { spaceId: 'my-space' });
+```
+
+It takes the same identity options as `getWorkflowStatus` and changes nothing but `enabled`, so it also works on workflows bound to a service account (`settings.run_as`). Turning a bound workflow back on still requires a user with `manage_security`.
+
+> **Caveat:** a disable lasts only until the next managed update when the definition uses `enablement: 'enforced'`. That update re-applies `enabled` from the definition's YAML without a request, so it switches a disabled workflow back on, including a bound one. Use `enablement: 'restorable'` for a workflow that must stay off across updates.
+
+It resolves to `true` when this call switched the workflow off, and to `false` when the workflow is missing, deleted, not managed, already off, or Workflows is unavailable. The read that guards the write makes this decision, so a workflow switched off or deleted during the call also resolves to `false` and is not written. It throws for an unknown id or a workflow managed by another plugin or definition (`403`).
 
 ## 11) Executing managed workflows
 

@@ -10,7 +10,21 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiAvatar,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiSelectable,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { FlyoutTemplate } from './flyout_template';
 import {
   type SharedStoryArgs,
@@ -38,8 +52,8 @@ type Args = SharedStoryArgs & {
 const meta: Meta<Args> = {
   title: 'Flyout Template/Template',
   args: {
-    numLeadingActions: 1,
-    numTrailingActions: 1,
+    numLeadingActions: 0,
+    numTrailingActions: 0,
     numPages: 0,
     paginationJump: false,
     numUnstructuredBlocks: 0,
@@ -53,6 +67,7 @@ const meta: Meta<Args> = {
     numInfoBlocks: 0,
     footer: true,
     secondaryActionIcon: true,
+    secondaryActionVariant: 'default',
     primaryActionKind: 'button',
     resizable: true,
     type: 'overlay',
@@ -125,6 +140,13 @@ const meta: Meta<Args> = {
     secondaryActionIcon: {
       name: 'Secondary action icon',
       control: { type: 'boolean' },
+      if: { arg: 'footer', truthy: true },
+      table: { category: 'Footer' },
+    },
+    secondaryActionVariant: {
+      name: 'Secondary action variant',
+      control: { type: 'inline-radio' },
+      options: ['default', 'ai'],
       if: { arg: 'footer', truthy: true },
       table: { category: 'Footer' },
     },
@@ -707,6 +729,7 @@ export const FooterActions: Story = {
     primaryActionKind: 'menu',
     footer: true,
     secondaryActionIcon: true,
+    secondaryActionVariant: 'default',
     numLeadingActions: 0,
     numTrailingActions: 0,
     numUnstructuredBlocks: 0,
@@ -716,6 +739,155 @@ export const FooterActions: Story = {
 };
 
 /** Header and body each sit behind their own error boundary, so a throw in one spares the other. */
+const PopoverValue = ({
+  label,
+  options,
+  'data-test-subj': dataTestSubj,
+}: {
+  label: string;
+  options: string[];
+  'data-test-subj': string;
+}): React.JSX.Element => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [value, setValue] = useState(options[0]);
+  return (
+    <EuiPopover
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+      aria-label={label}
+      panelPaddingSize="none"
+      panelProps={{ 'data-test-subj': `${dataTestSubj}Panel` }}
+      button={
+        <EuiButtonEmpty
+          size="xs"
+          flush="left"
+          iconType="chevronSingleDown"
+          iconSide="right"
+          onClick={() => setIsOpen((open) => !open)}
+          aria-label={`${label}: ${value}`}
+          data-test-subj={dataTestSubj}
+        >
+          {value}
+        </EuiButtonEmpty>
+      }
+    >
+      <EuiContextMenuPanel
+        items={options.map((option) => (
+          <EuiContextMenuItem
+            key={option}
+            icon={option === value ? 'check' : 'empty'}
+            onClick={() => {
+              setValue(option);
+              setIsOpen(false);
+            }}
+          >
+            {option}
+          </EuiContextMenuItem>
+        ))}
+      />
+    </EuiPopover>
+  );
+};
+
+const AssigneesValue = (): React.JSX.Element => {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiAvatar name="Ada Lovelace" size="s" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          isOpen={isOpen}
+          closePopover={() => setIsOpen(false)}
+          aria-label="Add assignees"
+          panelProps={{ 'data-test-subj': 'storyAssigneesPanel' }}
+          button={
+            <EuiToolTip content="Add assignees" disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="plusCircle"
+                aria-label="Add assignees"
+                onClick={() => setIsOpen((open) => !open)}
+                data-test-subj="storyAssignees"
+              />
+            </EuiToolTip>
+          }
+        >
+          <EuiSelectable
+            aria-label="Assignees"
+            searchable
+            options={[{ label: 'Ada Lovelace', checked: 'on' }, { label: 'Grace Hopper' }]}
+            onChange={() => {}}
+          >
+            {(list, search) => (
+              <>
+                {search}
+                {list}
+              </>
+            )}
+          </EuiSelectable>
+        </EuiPopover>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+const InteractiveInfoBlocksRender = (args: Args): React.JSX.Element => (
+  <FlyoutTemplate
+    onClose={action('onClose')}
+    size="m"
+    {...buildFlyoutProps(args, 'Interactive info blocks')}
+  >
+    {headerZone(
+      args,
+      'Interactive info blocks',
+      <>
+        <FlyoutTemplate.Header.InfoBlock title="Status">
+          <PopoverValue label="Status" options={['Open', 'Closed']} data-test-subj="storyStatus" />
+        </FlyoutTemplate.Header.InfoBlock>
+        <FlyoutTemplate.Header.InfoBlock title="Severity">
+          <PopoverValue
+            label="Severity"
+            options={['Critical', 'High', 'Medium', 'Low']}
+            data-test-subj="storySeverity"
+          />
+        </FlyoutTemplate.Header.InfoBlock>
+        <FlyoutTemplate.Header.InfoBlock title="Assignees">
+          <AssigneesValue />
+        </FlyoutTemplate.Header.InfoBlock>
+      </>
+    )}
+    {bodyZone(
+      <>
+        <FlyoutTemplate.Body.Section title="Details">
+          <EuiText size="s">
+            <p>
+              Each info block value opens a popover. Tab through the header to check that focus
+              reaches every control in order. Then open a popover and scroll the body until the
+              header collapses.
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          {Array.from({ length: 60 }, (_, index) => (
+            <React.Fragment key={index}>{bodyText(fillContent())}</React.Fragment>
+          ))}
+        </FlyoutTemplate.Body.Section>
+      </>
+    )}
+    {footerZone(args)}
+  </FlyoutTemplate>
+);
+
+export const InteractiveInfoBlocks: Story = {
+  argTypes: {
+    numInfoBlocks: { table: { disable: true } },
+    numTabs: { table: { disable: true } },
+    headerIsCollapsed: { table: { disable: true } },
+  },
+  args: { numInfoBlocks: 0, description: true },
+  render: InteractiveInfoBlocksRender,
+};
+
 const ErrorInFlyoutRender = (args: Args): React.JSX.Element => (
   <FlyoutTemplate
     onClose={action('onClose')}

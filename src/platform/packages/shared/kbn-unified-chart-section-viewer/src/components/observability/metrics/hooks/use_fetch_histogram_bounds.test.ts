@@ -187,6 +187,19 @@ describe('useFetchHistogramBounds', () => {
     expect(mockExecuteEsqlQuery.mock.calls[0][0].esqlQuery).not.toContain('latency.tdigest');
   });
 
+  it('declares the metadata fields that the WHERE clauses use in each chart source', async () => {
+    renderBoundsHook(
+      createProps({ whereStatements: ['_ignored IS NULL'], metadataFields: ['_ignored'] })
+    );
+
+    await waitFor(() => expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2));
+
+    expect(getQueriedSources()).toEqual([
+      'TS metrics-a METADATA _ignored',
+      'TS metrics-b METADATA _ignored',
+    ]);
+  });
+
   it('passes the relative time range, filters, variables, and bounds execution context, without approximation', async () => {
     renderBoundsHook(
       createProps({

@@ -105,11 +105,10 @@ spaceTest.describe(
           await responseActionsHistory.toggleTypeFilter(TRIGGERED_BY_RULE);
           await responseActionsHistory.ruleLinkForHost(history.automatedHostname).click();
           await expect(page).toHaveURL(new RegExp(`/id/${history.ruleId}`));
-          // Solution navigation uses the project header, so this checks that the
-          // rules page mounted. The seeded id is the generator literal
-          // `generated_rule_id`, not a saved rule. The Cypress breadcrumb check
-          // had the same limit.
-          await expect(page.testSubj.locator('header-page')).toBeVisible();
+          // This checks that the rule details page mounted its app header. The
+          // seeded id is the generator literal `generated_rule_id`, not a saved
+          // rule. The Cypress breadcrumb check had the same limit.
+          await expect(page.testSubj.locator('appHeaderTitle')).toBeVisible();
         });
       }
     );

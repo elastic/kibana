@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
+import type { RegistryVarGroup, RegistryVarsEntry } from '@kbn/fleet-plugin/common';
+import {
+  getVarsControlledByVarGroups,
+  isVarRequiredByVarGroup,
+  shouldShowVar,
+} from '@kbn/fleet-plugin/common/services';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 
@@ -30,8 +35,9 @@ export interface FieldMeta {
 
 /**
  * ECF trigger vars are `multi: false` in the upstream package manifest, but ECF can route
- * multiple sources per service. We override `multi: true` so the flyout renders an "Add row"
- * list and buildStreamVars emits a string array.
+ * multiple sources per service. In the ECF view we override `multi: true` so the flyout renders
+ * an "Add row" list. The agent-based view keeps the manifest's `multi`: an array sent to a
+ * single-value var would render as a comma-joined value in the agent config.
  *
  * TODO: remove this override once elastic/integrations sets `multi: true` for these vars
  * in all AWS package data streams that ECF services use.
@@ -70,7 +76,9 @@ export function resolveFieldMeta(
   return {
     def,
     isBool: def.type === 'bool',
-    multi: def.multi === true || ECF_TRIGGER_VAR_NAMES.has(fieldName),
+    multi:
+      def.multi === true ||
+      (service.settingsScope === 'ecf' && ECF_TRIGGER_VAR_NAMES.has(fieldName)),
     showUser: def.show_user === true,
   };
 }
@@ -103,11 +111,93 @@ export function shouldDefaultCollectS3Logs(
   return BUCKET_MODE_SOURCE_VARS.some((name) => hasValue(vars?.[name]));
 }
 
+// ── Stream-level var_groups ───────────────────────────────────────────────────
+
+/** Selected option name per var_group name, for one input of one data stream. */
+export type VarGroupSelections = Record<string, string>;
+
+/** The `var_groups` the manifest declares on `input`'s stream (package-spec ≥ 3.6.0), if any. */
+export function getStreamVarGroups(
+  service: AwsServiceMatrixEntry,
+  input: string | null
+): RegistryVarGroup[] {
+  if (input === null) return [];
+  return service.varGroupsByInput?.[input] ?? [];
+}
+
+/**
+ * Effective selection per group: the stored choice when it names one of the group's options,
+ * otherwise the group's first option — the manifest default, as in Fleet's policy editor.
+ */
+export function resolveVarGroupSelections(
+  service: AwsServiceMatrixEntry,
+  input: string | null,
+  stored: VarGroupSelections | undefined
+): VarGroupSelections {
+  const selections: VarGroupSelections = {};
+  for (const group of getStreamVarGroups(service, input)) {
+    const option = group.options.find((o) => o.name === stored?.[group.name]) ?? group.options[0];
+    if (option) selections[group.name] = option.name;
+  }
+  return selections;
+}
+
+function effectiveSelections(
+  service: AwsServiceMatrixEntry,
+  input: string | null,
+  selections: VarGroupSelections | undefined
+): VarGroupSelections {
+  return selections ?? resolveVarGroupSelections(service, input, undefined);
+}
+
+/** False when `fieldName` belongs only to var_group options that are not selected. */
+export function isFieldVisible(
+  service: AwsServiceMatrixEntry,
+  input: string | null,
+  fieldName: string,
+  selections?: VarGroupSelections
+): boolean {
+  const groups = getStreamVarGroups(service, input);
+  if (groups.length === 0) return true;
+  return shouldShowVar(fieldName, groups, effectiveSelections(service, input, selections));
+}
+
+/** True when `fieldName` is in the selected option of one of the input's var_groups. */
+export function isInSelectedVarGroupOption(
+  service: AwsServiceMatrixEntry,
+  input: string | null,
+  fieldName: string,
+  selections?: VarGroupSelections
+): boolean {
+  const groups = getStreamVarGroups(service, input);
+  if (groups.length === 0) return false;
+  if (!getVarsControlledByVarGroups(groups).has(fieldName)) return false;
+  return shouldShowVar(fieldName, groups, effectiveSelections(service, input, selections));
+}
+
+/** True when a `required` var_group's selected option makes `fieldName` mandatory. */
+export function isRequiredBySelectedOption(
+  service: AwsServiceMatrixEntry,
+  input: string | null,
+  fieldName: string,
+  selections?: VarGroupSelections
+): boolean {
+  const groups = getStreamVarGroups(service, input);
+  if (groups.length === 0) return false;
+  return isVarRequiredByVarGroup(
+    fieldName,
+    groups,
+    effectiveSelections(service, input, selections)
+  );
+}
+
 /**
  * Input types whose manifest marks every source var optional while documenting that at least one
  * is mandatory (e.g. "Mandatory if the Collect logs via S3 Bucket switch is on"). Without one the
- * input starts but can never collect anything. Keyed by input type; the manifest has no
- * machinery to express "one of", so the groups live here (verified against aws@8.7.1).
+ * input starts but can never collect anything. Keyed by input type; older manifests have no
+ * machinery to express "one of", so the groups live here (verified against aws@8.7.1). A stream
+ * that declares its own `var_groups` (see getStreamVarGroups) bypasses this table: its selected
+ * option drives the required fields instead.
  */
 const SOURCE_VAR_GROUPS: Record<string, string[]> = {
   'aws-s3': ['bucket_arn', 'access_point_arn', 'queue_url'],
@@ -115,12 +205,12 @@ const SOURCE_VAR_GROUPS: Record<string, string[]> = {
 };
 
 /**
- * Whether the "at least one source" rule applies to `service` right now: ECF-capable services
- * shown in the agent-based view, where Step 2 first collected only the trigger ARN. Widening the
- * rule to more services only needs a change here.
+ * Whether the "at least one source" rule applies to `service` right now: every service shown in
+ * the agent-based view (managed integration or self-managed agent). The ECF view collects only
+ * the trigger ARN, which its own required check covers.
  */
 function appliesSourceRule(service: AwsServiceMatrixEntry): boolean {
-  return !!service.ecfSettings && service.settingsScope !== 'ecf';
+  return service.settingsScope !== 'ecf';
 }
 
 /**
@@ -140,6 +230,9 @@ export function getMissingSourceGroup(
   vars: Record<string, string | string[] | boolean> | undefined
 ): string[] | undefined {
   if (!appliesSourceRule(service)) return undefined;
+  // The manifest's own var_groups govern the source: the selected option's vars are required
+  // fields, so the generic "at least one of" rule would only contradict the selector.
+  if (getStreamVarGroups(service, input).length > 0) return undefined;
   const defs = service.varDefsByInput?.[input];
   const group = (SOURCE_VAR_GROUPS[input] ?? []).filter((name) => defs?.[name]);
   if (group.length < 2) return undefined;
@@ -216,7 +309,8 @@ export function getDefaultInput(service: AwsServiceMatrixEntry | undefined): str
 // It is a Fleet UI construct, not a manifest var — needs Fleet's useIndexTemplateExists hook.
 export function getFlyoutFields(
   service: AwsServiceMatrixEntry,
-  activeInput: string | null
+  activeInput: string | null,
+  varGroupSelections?: VarGroupSelections
 ): string[] {
   const allFields = [...(service.requiredConfig ?? []), ...(service.optionalConfig ?? [])];
   return allFields.filter((f) => {
@@ -224,6 +318,8 @@ export function getFlyoutFields(
     if (!meta) return false;
     // Bool fields are rendered as switches in their own section; exclude from text flyout fields.
     if (meta.isBool) return false;
+    // Vars of a var_group option that is not selected are not shown at all.
+    if (!isFieldVisible(service, activeInput, f, varGroupSelections)) return false;
     // show_user:false vars intentionally surface here (under Advanced options via isAdvancedVar)
     // to match the Integrations UI which shows all vars regardless of show_user.
     return true;
@@ -266,14 +362,25 @@ export function getRegionFieldName(
 
 export function getRequiredTextFields(
   service: AwsServiceMatrixEntry,
-  activeInput: string | null
+  activeInput: string | null,
+  varGroupSelections?: VarGroupSelections
 ): string[] {
-  return (service.requiredConfig ?? []).filter((f) => {
+  const groups = getStreamVarGroups(service, activeInput);
+  const selections =
+    groups.length > 0 ? effectiveSelections(service, activeInput, varGroupSelections) : undefined;
+  const requiredSet = new Set(service.requiredConfig ?? []);
+  const candidates = [...(service.requiredConfig ?? []), ...(service.optionalConfig ?? [])];
+  return candidates.filter((f) => {
     const meta = resolveFieldMeta(service, activeInput, f);
     if (!meta) return false;
-    if (!meta.showUser) return false;
     if (meta.isBool) return false;
+    // Region vars are filled from the global region at deploy time, never asked for here.
     if (REGION_FIELD_NAMES.has(f)) return false;
+    if (!isFieldVisible(service, activeInput, f, selections)) return false;
+    // A required var_group makes its selected option's vars mandatory, show_user or not.
+    if (selections && isVarRequiredByVarGroup(f, groups, selections)) return true;
+    if (!requiredSet.has(f)) return false;
+    if (!meta.showUser) return false;
     return true;
   });
 }

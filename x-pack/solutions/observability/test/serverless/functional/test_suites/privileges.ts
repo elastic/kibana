@@ -75,7 +75,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         `Proposed Actions\n${previewDescription}\nAll\nRead\nNone`,
         `Agentic Investigations\n${previewDescription}\nAll\nRead\nNone`,
         'Observability AI Assistant\nAll\nNone',
-        'Nightshift\nAll\nRead\nNone',
+        'nightshift\nAll\nRead\nNone',
       ]);
     });
 

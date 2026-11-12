@@ -426,7 +426,7 @@ test.describe(
         // Mapping summary
         await expect(
           page.getByTestId('createDatasetWizardReview-schema_mapping_mode')
-        ).toContainText('Use mapped fields only');
+        ).toContainText('Fixed schema');
         const mappedFields = page.getByTestId('createDatasetWizardReview-mapped_fields');
         // +1 for @timestamp
         await expect(mappedFields).toHaveText(new RegExp(`^${mappingFields.length + 1} fields`));

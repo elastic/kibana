@@ -8,7 +8,9 @@
 import type {
   BulkRequest,
   BulkResponse,
+  BulkResponseItem,
   BulkOperationContainer,
+  BulkOperationType,
   MgetResponseItem,
 } from '@elastic/elasticsearch/lib/api/types';
 
@@ -23,8 +25,17 @@ import {
   ALERT_CASE_IDS,
 } from '@kbn/rule-data-utils';
 
-import { zip, get } from 'lodash';
+import { zip, get, countBy } from 'lodash';
 import { sanitizeBulkErrorResponse } from '../..';
+import { retryTransientEsErrors } from '../../lib/retry_transient_es_errors';
+
+const MAX_RETRIES = 3;
+const RETRY_BASE_DELAY_MS = 1000;
+const RETRYABLE_ITEM_STATUS_CODES = new Set([429, 503]);
+const RETRYABLE_ITEM_ERROR_TYPES = new Set([
+  'circuit_breaking_exception',
+  'es_rejected_execution_exception',
+]);
 
 // these fields are the one's we'll refresh from the fresh mget'd docs
 const REFRESH_FIELDS_ALWAYS = [ALERT_WORKFLOW_STATUS, ALERT_WORKFLOW_TAGS, ALERT_CASE_IDS];
@@ -41,37 +52,58 @@ export interface ResolveAlertConflictsParams {
   ruleType: string;
 }
 
+export interface ResolveAlertConflictsResult {
+  /** Conflicted or retryable alert writes that still failed after all retries. */
+  unresolvedCount: number;
+  /** Alert writes that failed with an error that is not retried, such as a mapping error. */
+  permanentCount: number;
+  /** Number of unresolved alert writes per Elasticsearch error type. */
+  unresolvedErrorTypes: Record<string, number>;
+}
+
 interface NormalizedBulkRequest {
   op: BulkOperationContainer;
   doc: unknown;
 }
 
-// wrapper to catch anything thrown; current usage of this function is
-// to replace just logging that the error occurred, so we don't want
-// to cause _more_ errors ...
-export async function resolveAlertConflicts(params: ResolveAlertConflictsParams): Promise<void> {
-  const { logger, ruleId, ruleType, ruleName } = params;
-  const ruleInfoMessage = `for ${ruleType}:${ruleId} '${ruleName}'`;
-  const logTags = { tags: [ruleType, ruleId, 'resolve-alert-conflicts'] };
+type BulkResponseItemContainer = Partial<Record<BulkOperationType, BulkResponseItem>>;
 
-  try {
-    await resolveAlertConflicts_(params);
-  } catch (err) {
-    logger.error(`Error resolving alert conflicts ${ruleInfoMessage}: ${err.message}`, logTags);
-  }
+interface BulkItemAttempt {
+  req: NormalizedBulkRequest;
+  res: BulkResponseItemContainer;
 }
 
-async function resolveAlertConflicts_(params: ResolveAlertConflictsParams): Promise<void> {
+type BulkItemOutcome = 'success' | 'conflict' | 'alreadyWritten' | 'retryable' | 'permanent';
+
+interface AlertDocRef {
+  _id: string;
+  _index: string;
+  if_seq_no: number;
+  if_primary_term: number;
+}
+
+/**
+ * Retries alert writes that failed with a conflict or a retryable error and reports the ones that still failed.
+ * If any still fail or a retry throws, the alerts this request created are deleted.
+ */
+export async function resolveAlertConflicts(
+  params: ResolveAlertConflictsParams
+): Promise<ResolveAlertConflictsResult> {
   const { logger, esClient, bulkRequest, bulkResponse, ruleId, ruleType, ruleName } = params;
-  if (bulkRequest.operations && bulkRequest.operations?.length === 0) return;
-  if (bulkResponse.items && bulkResponse.items?.length === 0) return;
+  const result: ResolveAlertConflictsResult = {
+    unresolvedCount: 0,
+    permanentCount: 0,
+    unresolvedErrorTypes: {},
+  };
+  if (bulkRequest.operations && bulkRequest.operations?.length === 0) return result;
+  if (bulkResponse.items && bulkResponse.items?.length === 0) return result;
 
   const ruleInfoMessage = `for ${ruleType}:${ruleId} '${ruleName}'`;
   const logTags = { tags: [ruleType, ruleId, 'resolve-alert-conflicts'] };
 
   // get numbers for a summary log message
   const { success, errors, conflicts, messages } = getResponseStats(bulkResponse);
-  if (conflicts === 0 && errors === 0) return;
+  if (conflicts === 0 && errors === 0) return result;
 
   const allMessages = messages.join('; ');
   logger.error(
@@ -79,55 +111,252 @@ async function resolveAlertConflicts_(params: ResolveAlertConflictsParams): Prom
     logTags
   );
 
-  // get a new bulk request for just conflicted docs
-  const conflictRequest = getConflictRequest(bulkRequest, bulkResponse);
-  if (conflictRequest.length === 0) return;
+  let outcomes = groupByOutcome(
+    pairRequestsWithResponses(normalizeRequest(bulkRequest), bulkResponse.items)
+  );
+  let permanentCount = outcomes.permanent.length;
+  logAlreadyWritten(logger, logTags, ruleInfoMessage, outcomes.alreadyWritten);
 
-  logBulkWriteConflicts(logger, logTags, ruleInfoMessage, conflictRequest);
+  const createdAlerts = getCreatedAlerts(outcomes);
+  const deleteCreated = () =>
+    deleteCreatedAlerts({
+      esClient,
+      logger,
+      logTags,
+      ruleInfoMessage,
+      refresh: bulkRequest.refresh,
+      createdAlerts,
+    });
 
-  // get the fresh versions of those docs
-  const freshDocs = await getFreshDocs(esClient, conflictRequest);
+  try {
+    for (let retry = 1; retry <= MAX_RETRIES; retry++) {
+      const toRetry = [...outcomes.conflict, ...outcomes.retryable];
+      if (toRetry.length === 0) break;
 
-  // update the OCC and refresh-able fields
-  await updateOCC(conflictRequest, freshDocs);
-  await refreshFieldsInDocs(conflictRequest, freshDocs);
+      if (outcomes.conflict.length > 0) {
+        const conflictRequest = outcomes.conflict.map(({ req }) => req);
+        logBulkWriteConflicts(logger, logTags, ruleInfoMessage, conflictRequest);
 
-  logger.info(
-    `Retrying bulk update of ${conflictRequest.length} conflicted alerts ${ruleInfoMessage}`,
+        // get the fresh versions of those docs
+        const freshDocs = await getFreshDocs(esClient, conflictRequest);
+
+        // update the OCC and refresh-able fields
+        await updateOCC(conflictRequest, freshDocs);
+        await refreshFieldsInDocs(conflictRequest, freshDocs);
+      }
+
+      if (outcomes.retryable.length > 0) {
+        await delay(getRetryDelayMs(retry));
+      }
+
+      logger.info(
+        `Retrying bulk update of ${toRetry.length} alerts (retry ${retry} of ${MAX_RETRIES}): ${outcomes.conflict.length} conflicts, ${outcomes.retryable.length} retryable errors ${ruleInfoMessage}`,
+        logTags
+      );
+      const retryRequest = toRetry.map(({ req }) => req);
+      const retryResponse = await makeBulkRequest(esClient, logger, bulkRequest, retryRequest);
+
+      outcomes = groupByOutcome(pairRequestsWithResponses(retryRequest, retryResponse.items));
+      createdAlerts.push(...getCreatedAlerts(outcomes));
+      permanentCount += outcomes.permanent.length;
+      logAlreadyWritten(logger, logTags, ruleInfoMessage, outcomes.alreadyWritten);
+      logRetryResult(logger, logTags, ruleInfoMessage, retryRequest.length, outcomes);
+    }
+  } catch (err) {
+    await deleteCreated();
+    throw err;
+  }
+
+  const unresolved = [...outcomes.conflict, ...outcomes.retryable];
+  const unresolvedErrorTypes = countErrorTypes(unresolved);
+  if (unresolved.length > 0) {
+    logger.error(
+      `Bulk update of ${
+        unresolved.length
+      } alerts still failed after ${MAX_RETRIES} retries ${ruleInfoMessage}: ${formatErrorTypeCounts(
+        unresolvedErrorTypes
+      )}`,
+      logTags
+    );
+    await deleteCreated();
+  }
+
+  return { unresolvedCount: unresolved.length, permanentCount, unresolvedErrorTypes };
+}
+
+/** Formats error type counts as `2 circuit_breaking_exception, 1 version_conflict_engine_exception`. */
+export function formatErrorTypeCounts(errorTypeCounts: Record<string, number>): string {
+  return Object.entries(errorTypeCounts)
+    .map(([type, count]) => `${count} ${type}`)
+    .join(', ');
+}
+
+function classifyBulkItem(res: BulkResponseItemContainer): BulkItemOutcome {
+  const item = getBulkItemResult(res);
+  if (!item?.error) return 'success';
+  if (item.status === 409 && res.index) return 'conflict';
+  // a create can only conflict with a doc that has the same alert UUID, e.g. one written
+  // by an earlier attempt of the same request that timed out on the client
+  if (item.status === 409 && res.create) return 'alreadyWritten';
+  if (
+    RETRYABLE_ITEM_STATUS_CODES.has(item.status) ||
+    RETRYABLE_ITEM_ERROR_TYPES.has(item.error.type)
+  ) {
+    return 'retryable';
+  }
+  return 'permanent';
+}
+
+function getBulkItemResult(res: BulkResponseItemContainer): BulkResponseItem | undefined {
+  return res.create || res.index || res.update || res.delete;
+}
+
+function groupByOutcome(attempts: BulkItemAttempt[]): Record<BulkItemOutcome, BulkItemAttempt[]> {
+  const outcomes: Record<BulkItemOutcome, BulkItemAttempt[]> = {
+    success: [],
+    conflict: [],
+    alreadyWritten: [],
+    retryable: [],
+    permanent: [],
+  };
+  for (const attempt of attempts) {
+    outcomes[classifyBulkItem(attempt.res)].push(attempt);
+  }
+  return outcomes;
+}
+
+function pairRequestsWithResponses(
+  requests: NormalizedBulkRequest[],
+  items: BulkResponseItemContainer[]
+): BulkItemAttempt[] {
+  if (requests.length !== items.length) {
+    throw new Error('Unexpected number of bulk response items');
+  }
+  return requests.map((req, index) => ({ req, res: items[index] }));
+}
+
+function countErrorTypes(attempts: BulkItemAttempt[]): Record<string, number> {
+  const counts: Record<string, number> = {};
+  for (const { res } of attempts) {
+    const type = getBulkItemResult(res)?.error?.type ?? 'unknown';
+    counts[type] = (counts[type] ?? 0) + 1;
+  }
+  return counts;
+}
+
+// Creates that conflicted are left out because the existing doc can be from an earlier run. The
+// seq_no and primary_term keep the delete from removing changes users made to the doc since.
+function getCreatedAlerts(outcomes: Record<BulkItemOutcome, BulkItemAttempt[]>): AlertDocRef[] {
+  return outcomes.success.flatMap(({ res }) => {
+    const created = res.create;
+    if (!created?._id || created._seq_no == null || created._primary_term == null) return [];
+    return [
+      {
+        _id: created._id,
+        _index: created._index,
+        if_seq_no: created._seq_no,
+        if_primary_term: created._primary_term,
+      },
+    ];
+  });
+}
+
+// The caller fails the run and keeps the previous task state when writes stay unresolved. The
+// next run would put docs missing from that state back as ongoing alerts, losing their new-alert
+// events and notifications, so the docs this request created are deleted to make them new again.
+async function deleteCreatedAlerts({
+  esClient,
+  logger,
+  logTags,
+  ruleInfoMessage,
+  refresh,
+  createdAlerts,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  logTags: { tags: string[] };
+  ruleInfoMessage: string;
+  refresh: BulkRequest['refresh'];
+  createdAlerts: AlertDocRef[];
+}): Promise<void> {
+  if (createdAlerts.length === 0) return;
+
+  try {
+    const response = await retryTransientEsErrors(
+      () =>
+        esClient.bulk({
+          refresh,
+          operations: createdAlerts.map((alert) => ({ delete: alert })),
+        }),
+      { logger }
+    );
+    const failedErrorTypes = response.items.flatMap(({ delete: item }) =>
+      item?.error ? [item.error.type] : []
+    );
+    if (failedErrorTypes.length > 0) {
+      logger.warn(
+        `Failed to delete ${failedErrorTypes.length} of ${
+          createdAlerts.length
+        } alerts created by this run ${ruleInfoMessage}, the next run reports them as ongoing: ${formatErrorTypeCounts(
+          countBy(failedErrorTypes)
+        )}`,
+        logTags
+      );
+      return;
+    }
+    logger.info(
+      `Deleted ${createdAlerts.length} alerts created by this run so the next run reports them as new ${ruleInfoMessage}`,
+      logTags
+    );
+  } catch (err) {
+    logger.warn(
+      `Error deleting ${createdAlerts.length} alerts created by this run ${ruleInfoMessage}, the next run reports them as ongoing - ${err.message}`,
+      logTags
+    );
+  }
+}
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// full jitter: up to 1s, 2s and 4s for the three retries
+function getRetryDelayMs(retry: number): number {
+  return Math.random() * RETRY_BASE_DELAY_MS * 2 ** (retry - 1);
+}
+
+function logAlreadyWritten(
+  logger: Logger,
+  logTags: { tags: string[] },
+  ruleInfoMessage: string,
+  alreadyWritten: BulkItemAttempt[]
+): void {
+  if (alreadyWritten.length === 0) return;
+  logger.warn(
+    `Skipped creating ${alreadyWritten.length} alerts that already exist ${ruleInfoMessage}`,
     logTags
   );
-  const mbrResponse = await makeBulkRequest(params.esClient, params.bulkRequest, conflictRequest);
+}
 
-  if (mbrResponse.bulkResponse?.items.length !== conflictRequest.length) {
-    const actual = mbrResponse.bulkResponse?.items.length;
-    const expected = conflictRequest.length;
-    logger.error(
-      `Unexpected number of bulk response items retried; expecting ${expected}, retried ${actual} ${ruleInfoMessage}`,
-      logTags
-    );
-    return;
-  }
-
-  if (mbrResponse.error) {
-    const index = bulkRequest.index || 'unknown index';
-    logger.error(
-      `Error writing ${conflictRequest.length} alerts to ${index} ${ruleInfoMessage} - ${mbrResponse.error.message}`,
-      logTags
-    );
-    return;
-  }
-
-  if (mbrResponse.errors === 0) {
+function logRetryResult(
+  logger: Logger,
+  logTags: { tags: string[] },
+  ruleInfoMessage: string,
+  retriedCount: number,
+  outcomes: Record<BulkItemOutcome, BulkItemAttempt[]>
+): void {
+  const failed = [...outcomes.conflict, ...outcomes.retryable, ...outcomes.permanent];
+  if (failed.length === 0) {
     logger.info(
-      `Retried bulk update of ${conflictRequest.length} conflicted alerts succeeded ${ruleInfoMessage}`,
+      `Retried bulk update of ${retriedCount} alerts succeeded ${ruleInfoMessage}`,
       logTags
     );
-  } else {
-    logger.error(
-      `Retried bulk update of ${conflictRequest.length} conflicted alerts still had ${mbrResponse.errors} conflicts ${ruleInfoMessage}`,
-      logTags
-    );
+    return;
   }
+  logger.warn(
+    `Retried bulk update of ${retriedCount} alerts still had ${
+      failed.length
+    } errors ${ruleInfoMessage}: ${formatErrorTypeCounts(countErrorTypes(failed))}`,
+    logTags
+  );
 }
 
 // log a warning for each alert write conflict
@@ -147,27 +376,27 @@ function logBulkWriteConflicts(
   }
 }
 
-interface MakeBulkRequestResponse {
-  bulkRequest: BulkRequest;
-  bulkResponse?: BulkResponse;
-  errors: number;
-  error?: Error;
-}
-
-// make the bulk request to fix conflicts
+// make the bulk request to retry the failed alert writes
 async function makeBulkRequest(
   esClient: ElasticsearchClient,
+  logger: Logger,
   bulkRequest: BulkRequest,
-  conflictRequest: NormalizedBulkRequest[]
-): Promise<MakeBulkRequestResponse> {
-  const operations = conflictRequest.map((req) => [req.op, req.doc]).flat();
+  retryRequest: NormalizedBulkRequest[]
+): Promise<BulkResponse> {
+  const operations = retryRequest.flatMap(({ op, doc }) => (op?.delete ? [op] : [op, doc]));
   // just replace the operations from the original request
   const updatedBulkRequest = { ...bulkRequest, operations };
 
-  const bulkResponse = await esClient.bulk(updatedBulkRequest);
+  const bulkResponse = await retryTransientEsErrors(() => esClient.bulk(updatedBulkRequest), {
+    logger,
+  });
 
-  const errors = bulkResponse.items.filter((item) => item.index?.error).length;
-  return { bulkRequest, bulkResponse, errors };
+  if (bulkResponse.items.length !== retryRequest.length) {
+    throw new Error(
+      `Unexpected number of bulk response items retried; expecting ${retryRequest.length}, retried ${bulkResponse.items.length}`
+    );
+  }
+  return bulkResponse;
 }
 
 /** Update refreshable fields in the conflict requests. */
@@ -251,29 +480,6 @@ async function getFreshDocs(
   return mgetRes.docs;
 }
 
-/** Return the bulk request, filtered to those requests that had conflicts. */
-function getConflictRequest(
-  bulkRequest: BulkRequest,
-  bulkResponse: BulkResponse
-): NormalizedBulkRequest[] {
-  // first "normalize" the request from it's non-linear form
-  const request = normalizeRequest(bulkRequest);
-
-  // maybe we didn't unwind it right ...
-  if (request.length !== bulkResponse.items.length) {
-    throw new Error('Unexpected number of bulk response items');
-  }
-
-  if (request.length === 0) return [];
-
-  // we only want op: index where the status was 409 / conflict
-  const conflictRequest = zip(request, bulkResponse.items)
-    .filter(([_, res]) => res?.index?.status === 409)
-    .map(([req, _]) => req!);
-
-  return conflictRequest;
-}
-
 /** Convert a bulk request (op | doc)[] to an array of { op, doc }[]  */
 function normalizeRequest(bulkRequest: BulkRequest) {
   if (!bulkRequest.operations) return [];
@@ -290,7 +496,8 @@ function normalizeRequest(bulkRequest: BulkRequest) {
       const doc = bulkRequest.operations[index];
       result.push({ op, doc });
     } else if (op.delete) {
-      // no doc for delete op
+      // no doc for delete op, but it still gets an item in the bulk response
+      result.push({ op, doc: undefined });
     } else {
       throw new Error(`Unsupported bulk operation: ${JSON.stringify(op)}`);
     }

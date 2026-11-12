@@ -6,6 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { createConversationNotFoundError } from '@kbn/agent-builder-common';
 import {
   NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID,
   NIGHTSHIFT_USAGE_PARENT_ID,
@@ -255,6 +256,38 @@ describe('runMemoryOptimize', () => {
       })
     );
   });
+
+  it('skips a round in a conversation the caller cannot read, without writing anything', async () => {
+    const get = jest
+      .fn()
+      .mockRejectedValue(createConversationNotFoundError({ conversationId: 'private-1' }));
+    getAgentBuilder.mockReturnValue({
+      runtime: { createModelProvider },
+      conversations: { getScopedClient: jest.fn().mockResolvedValue({ get }) },
+    });
+
+    await expect(
+      runMemoryOptimize({
+        request,
+        agentId: 'nightshift.investigation',
+        userMessage: 'why?',
+        assistantMessage: 'redis',
+        toolCalls: [{ tool_id: 'nightshift_sandbox_bash', params: {}, results: [] }],
+        conversationId: 'private-1',
+        roundId: 'round-1',
+        recalledIds: [],
+        esClient: {} as never,
+        spaceId: 'default',
+        getAgentBuilder,
+        getInference,
+        getSavedObjects,
+        getUiSettings,
+        logger: loggerMock.create(),
+        interactionId: 'execution-1',
+      })
+    ).resolves.toEqual({ skipped: 'conversation_unreadable' });
+    expect(optimizeMemory).not.toHaveBeenCalled();
+  });
 });
 
 describe('loadRoundSteps', () => {
@@ -273,7 +306,7 @@ describe('loadRoundSteps', () => {
           retryDelaysMs: [],
           ...ids,
         })
-      ).toBeUndefined();
+      ).toEqual({ unreadable: false });
     }
     expect(get).not.toHaveBeenCalled();
   });
@@ -290,7 +323,7 @@ describe('loadRoundSteps', () => {
         logger,
         retryDelaysMs: [],
       })
-    ).toBeUndefined();
+    ).toEqual({ unreadable: false });
     expect(logger.warn).toHaveBeenCalled();
   });
 
@@ -306,7 +339,7 @@ describe('loadRoundSteps', () => {
         logger,
         retryDelaysMs: [],
       })
-    ).toBeUndefined();
+    ).toEqual({ unreadable: false });
     expect(logger.warn).toHaveBeenCalledWith(expect.not.stringContaining('secret-detail'));
   });
 
@@ -328,7 +361,7 @@ describe('loadRoundSteps', () => {
         logger,
         retryDelaysMs: [0, 0, 0],
       })
-    ).toEqual([{ kind: 'reasoning', text: 'plan' }]);
+    ).toEqual({ unreadable: false, steps: [{ kind: 'reasoning', text: 'plan' }] });
     expect(get).toHaveBeenCalledTimes(3);
     expect(logger.warn).not.toHaveBeenCalled();
   });
@@ -347,7 +380,25 @@ describe('loadRoundSteps', () => {
         signal: controller.signal,
         retryDelaysMs: [60_000, 60_000],
       })
-    ).toBeUndefined();
+    ).toEqual({ unreadable: false });
+    expect(get).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports a conversation the caller cannot read, so learning is skipped', async () => {
+    const logger = loggerMock.create();
+    const get = jest
+      .fn()
+      .mockRejectedValue(createConversationNotFoundError({ conversationId: 'c' }));
+    expect(
+      await loadRoundSteps({
+        agentBuilder: agentBuilderWith(get),
+        request,
+        conversationId: 'c',
+        roundId: 'r',
+        logger,
+        retryDelaysMs: [0, 0],
+      })
+    ).toEqual({ unreadable: true });
     expect(get).toHaveBeenCalledTimes(1);
   });
 
@@ -360,6 +411,6 @@ describe('loadRoundSteps', () => {
         roundId: 'r',
         logger: loggerMock.create(),
       })
-    ).toBeUndefined();
+    ).toEqual({ unreadable: false });
   });
 });
