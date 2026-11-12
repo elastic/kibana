@@ -151,6 +151,11 @@ describe('plugin_discovery', () => {
         expect(pluginsWithoutTest.some((plugin) => plugin.id === id)).toBe(false);
       }
     });
+
+    it('excludes response ops fixtures unless test plugins are requested', () => {
+      expect(pluginsWithoutTest.some((plugin) => plugin.id === 'alertingFixture')).toBe(false);
+      expect(pluginsWithTest.some((plugin) => plugin.id === 'alertingFixture')).toBe(true);
+    });
   });
 
   it('keeps relocated server-only plugins out of default discovery', () => {
@@ -188,6 +193,21 @@ describe('plugin_discovery', () => {
 });
 
 describe('discoverPlugins with explicit paths', () => {
+  it('keeps the user storage test plugin opt-in', async () => {
+    const pluginPath = Path.resolve(REPO_ROOT, 'src/platform/test_plugins/user_storage');
+    const [defaultPlugins, testPlugins, explicitPlugins] = await Promise.all([
+      discoverPlugins({ repoRoot: REPO_ROOT }),
+      discoverPlugins({ repoRoot: REPO_ROOT, testPlugins: true }),
+      discoverPlugins({ repoRoot: REPO_ROOT, paths: [pluginPath] }),
+    ]);
+
+    expect(defaultPlugins.some((plugin) => plugin.id === 'userStorageTest')).toBe(false);
+    expect(testPlugins.some((plugin) => plugin.id === 'userStorageTest')).toBe(true);
+    expect(explicitPlugins).toContainEqual(
+      expect.objectContaining({ id: 'userStorageTest', contextDir: pluginPath })
+    );
+  }, 60000);
+
   it('includes an explicitly selected test plugin', async () => {
     const pluginPath = Path.resolve(
       REPO_ROOT,
@@ -203,6 +223,26 @@ describe('discoverPlugins with explicit paths', () => {
     expect(plugins).toContainEqual(
       expect.objectContaining({
         id: 'analyticsFtrHelpers',
+        contextDir: pluginPath,
+      })
+    );
+  }, 30000);
+
+  it('includes an explicitly selected response ops fixture', async () => {
+    const pluginPath = Path.resolve(
+      REPO_ROOT,
+      'x-pack/platform/test_plugins/response_ops/functional_with_es_ssl/alerts'
+    );
+    const plugins = await discoverPlugins({
+      repoRoot: REPO_ROOT,
+      examples: false,
+      testPlugins: false,
+      paths: [pluginPath],
+    });
+
+    expect(plugins).toContainEqual(
+      expect.objectContaining({
+        id: 'alertingFixture',
         contextDir: pluginPath,
       })
     );

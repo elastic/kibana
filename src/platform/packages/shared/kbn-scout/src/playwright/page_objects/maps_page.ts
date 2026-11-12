@@ -99,7 +99,8 @@ export class MapsPage {
     const emsFileSelect = this.page.testSubj.locator('emsFileSelect');
     try {
       await emsFileSelect.waitFor({ state: 'visible', timeout: 120000 }); // large timeout for EMS request
-      await expect(emsFileSelect.locator('input')).toBeEnabled();
+      // select stays disabled until the EMS file list loads, so allow the same large timeout
+      await expect(emsFileSelect.locator('input')).toBeEnabled({ timeout: 120000 });
     } catch (e) {
       throw new Error(
         `Test requires access to Elastic Maps Service (EMS). EMS is not available: ${e.message}`

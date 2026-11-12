@@ -15,6 +15,7 @@ import {
 describe('managed workflows', () => {
   const createManagedClient = () => ({
     install: jest.fn().mockResolvedValue(undefined),
+    installMany: jest.fn().mockResolvedValue({ failed: [] }),
     uninstall: jest.fn().mockResolvedValue(undefined),
     disable: jest.fn().mockResolvedValue(true),
     ready: jest.fn().mockResolvedValue(undefined),
