@@ -8,7 +8,6 @@
 import type {
   SavedObjectsClientContract,
   AuthenticatedUser,
-  CoreStart,
   SavedObjectsClient,
 } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -24,6 +23,7 @@ import {
   createTestServers,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
+import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import {
   mockAuthenticatedUser,
   mockIntegrationParams,
@@ -37,7 +37,7 @@ describe('AutomaticImportSavedObjectService', () => {
 
   let authenticatedUser: AuthenticatedUser;
   let manageES: TestElasticsearchUtils;
-  let coreStart: Pick<CoreStart, 'elasticsearch' | 'savedObjects'>;
+  let coreStart: InternalCoreStart;
   let kbnRoot: ReturnType<typeof createRootWithCorePlugins>;
 
   beforeAll(async () => {

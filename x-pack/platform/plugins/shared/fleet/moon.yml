@@ -85,6 +85,7 @@ dependsOn:
   - '@kbn/safer-lodash-set'
   - '@kbn/shared-ux-file-types'
   - '@kbn/core-application-browser'
+  - '@kbn/core-saved-objects-base-server-internal'
   - '@kbn/core-http-common'
   - '@kbn/dashboard-plugin'
   - '@kbn/cloud'

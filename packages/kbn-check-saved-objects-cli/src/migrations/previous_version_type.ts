@@ -7,16 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ModelVersionIdentifier,
-  SavedObjectsType,
-  SavedObjectsTypeMappingDefinition,
-} from '@kbn/core-saved-objects-server';
+import type { ModelVersionIdentifier, SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
 import { latestVersionIdentifier } from './versions';
 
 interface GetPreviousVersionTypeParams {
   type: SavedObjectsType<any>;
-  previousMappings: Record<string, SavedObjectsTypeMappingDefinition>;
+  previousMappings: SavedObjectsTypeMappingDefinitions;
 }
 
 export function getPreviousVersionType({

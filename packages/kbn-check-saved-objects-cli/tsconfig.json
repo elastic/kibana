@@ -14,6 +14,7 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/core-saved-objects-base-server-internal",
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/core-plugins-server-internal",
     "@kbn/dev-cli-runner",

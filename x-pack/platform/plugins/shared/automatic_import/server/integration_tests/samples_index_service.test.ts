@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { CoreStart, ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import type {
   createRootWithCorePlugins,
@@ -28,7 +29,7 @@ describe('AutomaticImportSamplesIndexService Integration Tests', () => {
   let manageES: TestElasticsearchUtils;
   let kbnRoot: ReturnType<typeof createRootWithCorePlugins>;
   let esClient: ElasticsearchClient;
-  let coreStart: Pick<CoreStart, 'elasticsearch' | 'savedObjects'>;
+  let coreStart: InternalCoreStart;
   let samplesIndexService: AutomaticImportSamplesIndexService;
 
   beforeAll(async () => {
