@@ -32,6 +32,16 @@ describe('createActionPolicyDataSchema', () => {
       expect(result.throttle).toBeUndefined();
     });
 
+    it('accepts a client-supplied id', () => {
+      expect(createActionPolicyDataSchema.parse({ ...base, id: 'my-policy_1' }).id).toBe(
+        'my-policy_1'
+      );
+    });
+
+    it('leaves id undefined when omitted', () => {
+      expect(createActionPolicyDataSchema.parse(base).id).toBeUndefined();
+    });
+
     it('trims surrounding whitespace from name', () => {
       const result = createActionPolicyDataSchema.parse({ ...base, name: '  Test  ' });
 
@@ -124,6 +134,10 @@ describe('createActionPolicyDataSchema', () => {
   describe('invalid payloads', () => {
     it('rejects whitespace-only name', () => {
       expect(() => createActionPolicyDataSchema.parse({ ...base, name: '   ' })).toThrow();
+    });
+
+    it.each(['', 'has spaces'])('rejects the invalid id %p', (id) => {
+      expect(createActionPolicyDataSchema.safeParse({ ...base, id }).success).toBe(false);
     });
 
     it('rejects the removed per_episode grouping mode', () => {
@@ -302,7 +316,7 @@ describe('an empty union object names no variant', () => {
  */
 describe('grouping shape judged without the stored document', () => {
   const base = { name: 'Test', description: 'Desc', destinations: DESTINATIONS };
-  const writeSchemas: Array<[string, typeof createActionPolicyDataSchema]> = [
+  const writeSchemas: Array<[string, typeof putActionPolicyDataSchema]> = [
     ['create', createActionPolicyDataSchema],
     ['replace', putActionPolicyDataSchema],
   ];
@@ -357,6 +371,10 @@ describe('putActionPolicyDataSchema', () => {
   it('rejects enabled', () => {
     expect(putActionPolicyDataSchema.safeParse({ ...base, enabled: true }).success).toBe(false);
     expect(putActionPolicyDataSchema.safeParse({ ...base, enabled: false }).success).toBe(false);
+  });
+
+  it('rejects id, which comes from the path', () => {
+    expect(putActionPolicyDataSchema.safeParse({ ...base, id: 'my-policy' }).success).toBe(false);
   });
 
   it('rejects enabled on createActionPolicyDataSchema too', () => {
@@ -567,7 +585,7 @@ describe('updateActionPolicyDataSchema', () => {
 
 describe('action policy optional fields are never empty', () => {
   const base = { name: 'Test', description: 'Desc', destinations: DESTINATIONS };
-  const writeSchemas: Array<[string, typeof createActionPolicyDataSchema]> = [
+  const writeSchemas: Array<[string, typeof putActionPolicyDataSchema]> = [
     ['create', createActionPolicyDataSchema],
     ['replace', putActionPolicyDataSchema],
   ];

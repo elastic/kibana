@@ -21,7 +21,10 @@ import { createActionPolicyOasExamples } from './create_action_policy_oas_exampl
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
-import { ACTION_POLICY_LICENSE_FORBIDDEN_DESCRIPTION } from './action_policy_route_descriptions';
+import {
+  ACTION_POLICY_ALREADY_EXISTS_DESCRIPTION,
+  ACTION_POLICY_LICENSE_FORBIDDEN_DESCRIPTION,
+} from './action_policy_route_descriptions';
 
 @injectable()
 export class CreateActionPolicyRoute extends BaseAlertingRoute {
@@ -40,7 +43,7 @@ export class CreateActionPolicyRoute extends BaseAlertingRoute {
     availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Create an action policy',
     description:
-      'Creates an action policy with a server-generated identifier. To create or replace an action policy with a client-supplied identifier, use PUT /api/alerting/v2/action_policies/{id}/.',
+      'Creates an action policy. You can supply your own `id`; if you omit it, Kibana generates one. If an action policy with that `id` already exists, the request fails with HTTP 409 and the existing policy is not changed. To create or replace an action policy at a specific ID, use PUT /api/alerting/v2/action_policies/{id}.',
     oasOperationObject: createActionPolicyOasExamples,
   } as const;
   static schemas = {
@@ -59,6 +62,10 @@ export class CreateActionPolicyRoute extends BaseAlertingRoute {
       403: {
         body: () => errorResponseSchema,
         description: ACTION_POLICY_LICENSE_FORBIDDEN_DESCRIPTION,
+      },
+      409: {
+        body: () => errorResponseSchema,
+        description: ACTION_POLICY_ALREADY_EXISTS_DESCRIPTION,
       },
     },
   };
