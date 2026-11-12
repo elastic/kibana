@@ -53,8 +53,17 @@ export const createToolCallIndexResolver = () => {
 };
 
 /**
+ * Id given to a tool call whose provider never sent one. It is derived from the normalized
+ * index, not generated randomly, so a stream normalized twice (e.g. the two subscriptions of a
+ * synchronous source in `chunksIntoMessage`) gets the same id on its chunks and on the message.
+ */
+const getGeneratedToolCallId = (index: number): string => `generated_tool_call_${index}`;
+
+/**
  * Rewrites the `index` of streamed tool call chunks so that each tool call has a unique index,
- * see {@link createToolCallIndexResolver}.
+ * see {@link createToolCallIndexResolver}. A tool call that starts without a `toolCallId` gets a
+ * generated one on its first chunk, because consumers such as Agent Builder require every tool call
+ * to have an id.
  */
 export function normalizeToolCallIndexes<
   T extends ChatCompletionChunkEvent | ChatCompletionTokenCountEvent
@@ -63,6 +72,7 @@ export function normalizeToolCallIndexes<
     // defer so each subscription (e.g. a retry) starts with fresh state
     defer(() => {
       const resolveIndex = createToolCallIndexResolver();
+      const startedIndexes = new Set<number>();
 
       return source$.pipe(
         map((event) => {
@@ -74,7 +84,17 @@ export function normalizeToolCallIndexes<
             ...event,
             tool_calls: event.tool_calls.map((toolCall) => {
               const index = resolveIndex(toolCall);
-              return index === toolCall.index ? toolCall : { ...toolCall, index };
+              const isFirstChunk = !startedIndexes.has(index);
+              startedIndexes.add(index);
+
+              const toolCallId =
+                isFirstChunk && !toolCall.toolCallId
+                  ? getGeneratedToolCallId(index)
+                  : toolCall.toolCallId;
+
+              return index === toolCall.index && toolCallId === toolCall.toolCallId
+                ? toolCall
+                : { ...toolCall, index, toolCallId };
             }),
           };
         })
