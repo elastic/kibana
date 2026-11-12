@@ -223,6 +223,40 @@ describe('converse_task', () => {
       expect(result.errors).toEqual([]);
     });
 
+    it('keeps one, resolved copy of the paused call when the resume returns the whole round', async () => {
+      const resolvedIsolateStep = {
+        ...isolateStep,
+        results: [{ type: 'other', data: { ok: true } }],
+      };
+      const client: AgentBuilderClient = {
+        createConversation: jest.fn(),
+        getConversation: jest.fn(),
+        converse: jest
+          .fn()
+          .mockResolvedValueOnce({
+            message: '',
+            steps: [isolateStep],
+            traceId: 'trace-1',
+            conversationId: 'conv-1',
+            prompts: [confirmationPrompt],
+          })
+          .mockResolvedValueOnce({
+            message: 'Next: eval-host-release.',
+            steps: [resolvedIsolateStep, secondStep],
+            traceId: 'trace-2',
+            conversationId: 'conv-1',
+            prompts: [secondPrompt],
+          }),
+      };
+
+      const result = await converseQuestionToTaskOutput(client, 'isolate both', {
+        includePendingConfirmations: true,
+        followUps: [{ confirm: true }],
+      });
+
+      expect(result.steps).toEqual([resolvedIsolateStep, secondStep]);
+    });
+
     it('sends allow: false for a decline', async () => {
       const client = sequentialClient();
 

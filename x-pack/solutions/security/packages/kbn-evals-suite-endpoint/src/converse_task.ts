@@ -61,6 +61,31 @@ const toDecision = (promptId: string, allow: boolean): ConfirmationDecision => {
   return { ...confirmation, allow };
 };
 
+type Step = Awaited<ReturnType<AgentBuilderClient['converse']>>['steps'][number];
+
+/**
+ * Folds a resumed round's steps into what is already recorded. Resuming a confirmation returns
+ * the whole logical round, so the paused call comes back with its results filled in next to steps
+ * already recorded. A tool call replaces its earlier copy by `tool_call_id`; a step that was
+ * already recorded verbatim is not recorded twice, and anything else is appended.
+ */
+const mergeResumedSteps = (recorded: Step[], incoming: Step[]): Step[] => {
+  const merged = [...recorded];
+  for (const step of incoming) {
+    const serialized = JSON.stringify(step);
+    const callIndex =
+      typeof step.tool_call_id === 'string'
+        ? merged.findIndex((existing) => existing.tool_call_id === step.tool_call_id)
+        : -1;
+    if (callIndex !== -1) {
+      merged[callIndex] = step;
+    } else if (!merged.some((existing) => JSON.stringify(existing) === serialized)) {
+      merged.push(step);
+    }
+  }
+  return merged;
+};
+
 export const converseQuestionToTaskOutput = async (
   agentBuilderClient: AgentBuilderClient,
   question: string,
@@ -95,7 +120,7 @@ export const converseQuestionToTaskOutput = async (
     { message: question },
     { message: response.message },
   ];
-  const steps = [...response.steps];
+  let steps: Step[] = [...response.steps];
   const errors: unknown[] = [];
   const pendingConfirmations = toPendingConfirmations(response.prompts ?? []);
   const confirmationDecisions: ConfirmationDecision[] = [];
@@ -108,6 +133,7 @@ export const converseQuestionToTaskOutput = async (
     }
 
     let next: Awaited<ReturnType<AgentBuilderClient['converse']>>;
+    const resumesConfirmation = 'confirm' in followUp;
     if ('confirm' in followUp) {
       const promptIds = confirmationPromptIds(response.prompts ?? []);
       if (promptIds.length === 0) {
@@ -138,7 +164,9 @@ export const converseQuestionToTaskOutput = async (
 
     response = next;
     messages.push({ message: response.message });
-    steps.push(...response.steps);
+    steps = resumesConfirmation
+      ? mergeResumedSteps(steps, response.steps)
+      : [...steps, ...response.steps];
     pendingConfirmations.push(...toPendingConfirmations(response.prompts ?? []));
   }
 
