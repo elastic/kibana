@@ -409,13 +409,14 @@ source name or connector name.
 | Field | Meaning |
 | --- | --- |
 | `rules_eligible` | Enabled Alerting v2 rules of kind `alert` in the space, read with the task's credentials. Classic rules are not counted. Significant Event rules are of kind `signal`, so they are not counted either. |
-| `rules_wired_in` | Eligible rules matched by the alert trigger of at least one enabled automation: its rule names, name pattern and tags, when its source filter admits `internal` alerts. A trigger without a rule filter wires in every rule. Severity filters are ignored, because they apply to an alert when it fires, not to a rule. |
+| `rules_wired_in` | Eligible rules matched by the alert trigger of at least one enabled automation that has a workflow: its rule names, name pattern and tags, when its source filter admits `internal` alerts. A trigger without a rule filter wires in every rule. Severity filters are ignored, because they apply to an alert when it fires, not to a rule. |
 | `rules_truncated` | `true` when the space has more than 10,000 eligible rules; `rules_wired_in` then covers the first 10,000 by name. |
 | `automations_total`, `automations_enabled` | Automations in the space, of any trigger kind. |
-| `significant_event_rules`, `significant_event_rules_active` | Query Knowledge Indicators backed by a rule, and how many of those rules exist and are enabled. |
-| `external_connectors_configured` | Connectors of a type whose inbound events are translated into alerts. Today that is Datadog only. |
+| `significant_event_rules`, `significant_event_rules_active` | Distinct rules backing a Query Knowledge Indicator, and how many of those rules exist and are enabled. |
+| `significant_events_total`, `significant_events_open` | Significant Events in the space by current status: all of them, and those that are `active` or `recovering`. |
+| `external_connectors_configured`, `external_connectors_active_24h` | Connectors of a type whose inbound events are translated into alerts, and how many of them belong to an alert source that wrote an alert in the past 24 hours. Today that is Datadog only. An alert does not name the connector that delivered it, so every connector of an active source counts as active. |
 | `external_sources_active_24h`, `external_alerts_24h` | Distinct `source` values and distinct alerts in `.rule-events` over the past 24 hours whose source is neither `internal` nor `elastic.*`. An alert that closes and fires again counts as a new alert. Any workflow can write such alerts, so an active source does not need a configured connector. An alert written with the `internal` source by a workflow is not counted as external. |
-| `significant_events_24h` | Distinct alerts in `.rule-events` over the past 24 hours with the `elastic.significant_events` source. |
+| `significant_events_24h` | Distinct alerts in `.rule-events` over the past 24 hours with the `elastic.significant_events` source: activity, where `significant_events_open` is current state. |
 | `knowledge_indicators_features`, `knowledge_indicators_queries` | Knowledge Indicators that are not deleted; excluded and expired ones are counted. |
 | `memory_enabled`, `memory_pages` | Whether Semantic Memory is enabled in the deployment, and its active pages. `memory_pages` is absent when it is disabled. |
 | `custom_context_snippets`, `sandbox_allowlist_hosts` | Entries configured in Settings. |

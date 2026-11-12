@@ -34,7 +34,10 @@ const RULES_PAGE_SIZE = 500;
 // The saved objects result window.
 const MAX_SCANNED_RULES = 10_000;
 
-export type SnapshotAutomation = Pick<NightshiftAutomationAttributes, 'isEnabled' | 'trigger'>;
+export type SnapshotAutomation = Pick<
+  NightshiftAutomationAttributes,
+  'isEnabled' | 'workflowId' | 'trigger'
+>;
 
 export interface DetectionSnapshotSources {
   listSpaceIds: () => Promise<string[]>;
@@ -44,14 +47,16 @@ export interface DetectionSnapshotSources {
     spaceId: string,
     page: { page: number; perPage: number }
   ) => Promise<{ rules: SnapshotRule[]; total: number }>;
-  countExternalConnectors: (spaceId: string) => Promise<number>;
+  /** One entry per connector, so sources repeat. */
+  listExternalConnectorSources: (spaceId: string) => Promise<string[]>;
   getAlertActivity: (
-    spaceId: string
+    spaceId: string,
+    connectorSources: readonly string[]
   ) => Promise<
     Pick<
       DetectionSnapshotEvent,
       'external_sources_active_24h' | 'external_alerts_24h' | 'significant_events_24h'
-    >
+    > & { activeConnectorSources: string[] }
   >;
   /** `undefined` when Semantic Memory is disabled. */
   countMemoryPages: (spaceId: string) => Promise<number | undefined>;
@@ -88,16 +93,23 @@ const countRules = async (
 
   let eligible = 0;
   let scanned = 0;
-  let wiredIn = 0;
+  // Pages are sorted by name alone, so rules that share a name can repeat across pages.
+  const wiredIn = new Set<string>();
   for (let page = 1; scanned < MAX_SCANNED_RULES; page++) {
     signal.throwIfAborted();
     const { rules, total } = await findEligibleRules(spaceId, { page, perPage: RULES_PAGE_SIZE });
     eligible = total;
     scanned += rules.length;
-    wiredIn += rules.filter((rule) => isRuleWired(rule, matchers)).length;
+    for (const rule of rules) {
+      if (isRuleWired(rule, matchers)) wiredIn.add(rule.id);
+    }
     if (rules.length < RULES_PAGE_SIZE) break;
   }
-  return { rules_eligible: eligible, rules_wired_in: wiredIn, rules_truncated: scanned < eligible };
+  return {
+    rules_eligible: eligible,
+    rules_wired_in: wiredIn.size,
+    rules_truncated: eligible > MAX_SCANNED_RULES,
+  };
 };
 
 const collectSpaceSnapshot = async (
@@ -105,23 +117,33 @@ const collectSpaceSnapshot = async (
   sources: DetectionSnapshotSources,
   signal: AbortSignal
 ): Promise<DetectionSnapshotEvent> => {
-  const automations = await sources.listAutomations(spaceId);
-  const [rules, externalConnectors, alertActivity, memoryPages, settings, knowledgeCounts] =
-    await Promise.all([
-      countRules(spaceId, toRuleMatchers(automations), sources.findEligibleRules, signal),
-      sources.countExternalConnectors(spaceId),
-      sources.getAlertActivity(spaceId),
-      sources.countMemoryPages(spaceId),
-      sources.getSettings(spaceId),
-      sources.getKnowledgeCounts(spaceId),
-    ]);
+  const [automations, connectorSources] = await Promise.all([
+    sources.listAutomations(spaceId),
+    sources.listExternalConnectorSources(spaceId),
+  ]);
+  const [
+    rules,
+    { activeConnectorSources, ...alertActivity },
+    memoryPages,
+    settings,
+    knowledgeCounts,
+  ] = await Promise.all([
+    countRules(spaceId, toRuleMatchers(automations), sources.findEligibleRules, signal),
+    sources.getAlertActivity(spaceId, connectorSources),
+    sources.countMemoryPages(spaceId),
+    sources.getSettings(spaceId),
+    sources.getKnowledgeCounts(spaceId),
+  ]);
 
   return {
     space_id: spaceId,
     ...rules,
     automations_total: automations.length,
     automations_enabled: automations.filter(({ isEnabled }) => isEnabled).length,
-    external_connectors_configured: externalConnectors,
+    external_connectors_configured: connectorSources.length,
+    external_connectors_active_24h: connectorSources.filter((source) =>
+      activeConnectorSources.includes(source)
+    ).length,
     ...alertActivity,
     memory_enabled: memoryPages !== undefined,
     ...(memoryPages !== undefined ? { memory_pages: memoryPages } : {}),

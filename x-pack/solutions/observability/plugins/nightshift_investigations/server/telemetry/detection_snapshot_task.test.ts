@@ -17,7 +17,7 @@ import type { SnapshotRule } from './is_rule_wired';
 const automation = (
   row: SnapshotAutomation['trigger']['rows'][number],
   isEnabled = true
-): SnapshotAutomation => ({ isEnabled, trigger: { rows: [row] } });
+): SnapshotAutomation => ({ isEnabled, workflowId: 'workflow', trigger: { rows: [row] } });
 
 const setup = ({
   automations = [],
@@ -35,8 +35,9 @@ const setup = ({
       rules: rules.slice((page - 1) * perPage, page * perPage),
       total: rules.length,
     })),
-    countExternalConnectors: jest.fn().mockResolvedValue(1),
+    listExternalConnectorSources: jest.fn().mockResolvedValue(['datadog', 'datadog', 'other']),
     getAlertActivity: jest.fn().mockResolvedValue({
+      activeConnectorSources: ['datadog'],
       external_sources_active_24h: 2,
       external_alerts_24h: 7,
       significant_events_24h: 3,
@@ -62,9 +63,9 @@ describe('reportDetectionSnapshots', () => {
         automation({ kind: 'alert', ruleNames: ['disk full'] }, false),
       ],
       rules: [
-        { name: 'checkout latency', tags: ['payments'] },
-        { name: 'disk full', tags: [] },
-        { name: 'refund errors', tags: ['payments'] },
+        { id: '1', name: 'checkout latency', tags: ['payments'] },
+        { id: '2', name: 'disk full', tags: [] },
+        { id: '3', name: 'refund errors', tags: ['payments'] },
       ],
     });
 
@@ -78,7 +79,8 @@ describe('reportDetectionSnapshots', () => {
       rules_truncated: false,
       automations_total: 2,
       automations_enabled: 1,
-      external_connectors_configured: 1,
+      external_connectors_configured: 3,
+      external_connectors_active_24h: 2,
       external_sources_active_24h: 2,
       external_alerts_24h: 7,
       significant_events_24h: 3,
@@ -91,7 +93,11 @@ describe('reportDetectionSnapshots', () => {
   it('skips the rule scan when an automation has no rule filter', async () => {
     const { sources, analytics, run } = setup({
       automations: [automation({ kind: 'alert', severities: ['critical'] })],
-      rules: Array.from({ length: 3 }, (_, index) => ({ name: `rule ${index}`, tags: [] })),
+      rules: Array.from({ length: 3 }, (_, index) => ({
+        id: `${index}`,
+        name: `rule ${index}`,
+        tags: [],
+      })),
     });
 
     await run();
@@ -107,8 +113,12 @@ describe('reportDetectionSnapshots', () => {
     const { sources, analytics, run } = setup({
       automations: [automation({ kind: 'alert', tags: ['payments'] })],
     });
-    sources.findEligibleRules.mockImplementation(async (_spaceId, { perPage }) => ({
-      rules: Array.from({ length: perPage }, () => ({ name: 'rule', tags: ['payments'] })),
+    sources.findEligibleRules.mockImplementation(async (_spaceId, { page, perPage }) => ({
+      rules: Array.from({ length: perPage }, (_, index) => ({
+        id: `${page}-${index}`,
+        name: 'rule',
+        tags: ['payments'],
+      })),
       total: 10_001,
     }));
 
@@ -121,6 +131,28 @@ describe('reportDetectionSnapshots', () => {
     });
   });
 
+  it('counts a rule that repeats across pages once', async () => {
+    const { sources, analytics, run } = setup({
+      automations: [automation({ kind: 'alert', tags: ['payments'] })],
+    });
+    const page = Array.from({ length: 500 }, (_, index) => ({
+      id: `${index}`,
+      name: 'rule',
+      tags: ['payments'],
+    }));
+    sources.findEligibleRules
+      .mockResolvedValueOnce({ rules: page, total: 501 })
+      .mockResolvedValueOnce({ rules: [page[0]], total: 501 });
+
+    await run();
+
+    expect(analytics.reportEvent.mock.calls[0][1]).toMatchObject({
+      rules_eligible: 501,
+      rules_wired_in: 500,
+      rules_truncated: false,
+    });
+  });
+
   it('adds memory and knowledge counts when they are available', async () => {
     const { sources, analytics, run } = setup();
     sources.countMemoryPages.mockResolvedValue(0);
@@ -129,6 +161,8 @@ describe('reportDetectionSnapshots', () => {
       knowledge_indicators_queries: 6,
       significant_event_rules: 4,
       significant_event_rules_active: 3,
+      significant_events_total: 9,
+      significant_events_open: 2,
     });
 
     await run();
@@ -138,6 +172,7 @@ describe('reportDetectionSnapshots', () => {
       memory_pages: 0,
       knowledge_indicators_features: 10,
       significant_event_rules_active: 3,
+      significant_events_open: 2,
     });
   });
 

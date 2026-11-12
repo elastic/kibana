@@ -35,14 +35,17 @@ export const DETECTION_SNAPSHOT_SO_TYPES = [
   NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_TYPE,
 ];
 
-// Connector types whose inbound events a managed workflow translates into alerts.
-const EXTERNAL_ALERT_CONNECTOR_TYPE_IDS = ['.datadog'];
+// Connector types a managed workflow translates into alerts, mapped to the source it writes.
+const EXTERNAL_ALERT_SOURCE_BY_CONNECTOR_TYPE_ID: Readonly<Record<string, string>> = {
+  '.datadog': 'datadog',
+};
 const ELIGIBLE_RULES_FILTER = 'kind: alert and enabled: true';
-const MAX_AUTOMATIONS = 1000;
+const AUTOMATIONS_PAGE_SIZE = 1000;
 
 interface AlertActivityAggregations {
   significant_events: { alerts: { value: number } };
   external: { alerts: { value: number }; sources: { value: number } };
+  connector_sources?: { buckets: Array<{ key: string }> };
 }
 
 export const createDetectionSnapshotSources = ({
@@ -72,14 +75,20 @@ export const createDetectionSnapshotSources = ({
   listSpaceIds,
 
   listAutomations: async (spaceId) => {
-    const { saved_objects: savedObjects } = await soRepository.find<NightshiftAutomationAttributes>(
-      {
-        type: NIGHTSHIFT_AUTOMATION_SO_TYPE,
-        namespaces: [spaceId],
-        perPage: MAX_AUTOMATIONS,
+    const finder = soRepository.createPointInTimeFinder<NightshiftAutomationAttributes>({
+      type: NIGHTSHIFT_AUTOMATION_SO_TYPE,
+      namespaces: [spaceId],
+      perPage: AUTOMATIONS_PAGE_SIZE,
+    });
+    const automations: NightshiftAutomationAttributes[] = [];
+    try {
+      for await (const { saved_objects: savedObjects } of finder.find()) {
+        automations.push(...savedObjects.map(({ attributes }) => attributes));
       }
-    );
-    return savedObjects.map(({ attributes }) => attributes);
+    } finally {
+      await finder.close();
+    }
+    return automations;
   },
 
   findEligibleRules: async (spaceId, { page, perPage }) => {
@@ -96,21 +105,23 @@ export const createDetectionSnapshotSources = ({
       sortOrder: 'asc',
     });
     return {
-      rules: items.map(({ metadata: { name, tags } }) => ({ name, tags: tags ?? [] })),
+      rules: items.map(({ id, metadata: { name, tags } }) => ({ id, name, tags: tags ?? [] })),
       total,
     };
   },
 
-  countExternalConnectors: async (spaceId) => {
-    if (!actions) return 0;
+  listExternalConnectorSources: async (spaceId) => {
+    if (!actions) return [];
     const connectors = await actions.getUnsecuredActionsClient().getAll(asSpaceId(spaceId));
-    return connectors.filter(({ actionTypeId }) =>
-      EXTERNAL_ALERT_CONNECTOR_TYPE_IDS.includes(actionTypeId)
-    ).length;
+    return connectors.flatMap(({ actionTypeId }) => {
+      const source = EXTERNAL_ALERT_SOURCE_BY_CONNECTOR_TYPE_ID[actionTypeId];
+      return source ? [source] : [];
+    });
   },
 
-  getAlertActivity: async (spaceId) => {
+  getAlertActivity: async (spaceId, connectorSources) => {
     const alerts = { cardinality: { field: 'alert.id' } };
+    const distinctConnectorSources = [...new Set(connectorSources)];
     const { aggregations } = await esClient.search<unknown, AlertActivityAggregations>({
       index: ALERT_EVENTS_DATA_STREAM,
       size: 0,
@@ -140,9 +151,23 @@ export const createDetectionSnapshotSources = ({
           },
           aggs: { alerts, sources: { cardinality: { field: 'source' } } },
         },
+        ...(distinctConnectorSources.length > 0
+          ? {
+              connector_sources: {
+                terms: {
+                  field: 'source',
+                  include: distinctConnectorSources,
+                  size: distinctConnectorSources.length,
+                },
+              },
+            }
+          : {}),
       },
     });
     return {
+      activeConnectorSources: (aggregations?.connector_sources?.buckets ?? []).map(
+        ({ key }) => key
+      ),
       significant_events_24h: aggregations?.significant_events.alerts.value ?? 0,
       external_alerts_24h: aggregations?.external.alerts.value ?? 0,
       external_sources_active_24h: aggregations?.external.sources.value ?? 0,

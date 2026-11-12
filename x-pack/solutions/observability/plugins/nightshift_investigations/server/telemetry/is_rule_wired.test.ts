@@ -8,10 +8,12 @@
 import type { NightshiftTriggerRow } from '../lib/automations/types';
 import { isRuleWired, toRuleMatchers } from './is_rule_wired';
 
-const rule = { name: 'checkout latency', tags: ['payments'] };
+const rule = { id: 'rule-1', name: 'checkout latency', tags: ['payments'] };
 
-const isWired = (rows: NightshiftTriggerRow[], isEnabled = true): boolean =>
-  isRuleWired(rule, toRuleMatchers([{ isEnabled, trigger: { rows } }]));
+const isWired = (
+  rows: NightshiftTriggerRow[],
+  { isEnabled = true, workflowId = 'workflow' }: { isEnabled?: boolean; workflowId?: string } = {}
+): boolean => isRuleWired(rule, toRuleMatchers([{ isEnabled, workflowId, trigger: { rows } }]));
 
 describe('isRuleWired', () => {
   it.each<[string, NightshiftTriggerRow, boolean]>([
@@ -43,6 +45,10 @@ describe('isRuleWired', () => {
   });
 
   it('ignores disabled automations', () => {
-    expect(isWired([{ kind: 'alert' }], false)).toBe(false);
+    expect(isWired([{ kind: 'alert' }], { isEnabled: false })).toBe(false);
+  });
+
+  it('ignores automations without a workflow', () => {
+    expect(isWired([{ kind: 'alert' }], { workflowId: '' })).toBe(false);
   });
 });

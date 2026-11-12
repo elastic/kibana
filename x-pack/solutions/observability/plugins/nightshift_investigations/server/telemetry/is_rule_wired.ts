@@ -20,6 +20,7 @@ export interface RuleMatcher {
 }
 
 export interface SnapshotRule {
+  id: string;
   name: string;
   tags: string[];
 }
@@ -37,10 +38,13 @@ const admitsRuleAlerts = ({ alertSources, alertSourceMode }: AlertRow): boolean 
 
 /** Mirrors the trigger condition of `generateWorkflowYaml`, minus severity, which filters alerts, not rules. */
 export const toRuleMatchers = (
-  automations: ReadonlyArray<Pick<NightshiftAutomationAttributes, 'isEnabled' | 'trigger'>>
+  automations: ReadonlyArray<
+    Pick<NightshiftAutomationAttributes, 'isEnabled' | 'workflowId' | 'trigger'>
+  >
 ): RuleMatcher[] =>
   automations
-    .filter(({ isEnabled }) => isEnabled)
+    // An automation without a workflow is inert.
+    .filter(({ isEnabled, workflowId }) => isEnabled && Boolean(workflowId))
     .flatMap(({ trigger }) => trigger?.rows ?? [])
     .filter((row): row is AlertRow => row.kind === 'alert')
     .filter(admitsRuleAlerts)

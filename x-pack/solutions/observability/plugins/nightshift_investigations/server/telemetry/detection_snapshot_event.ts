@@ -15,6 +15,8 @@ export interface DetectionSnapshotKnowledgeCounts {
   knowledge_indicators_queries: number;
   significant_event_rules: number;
   significant_event_rules_active: number;
+  significant_events_total: number;
+  significant_events_open: number;
 }
 
 export type DetectionSnapshotContributor = (params: {
@@ -30,6 +32,7 @@ export interface DetectionSnapshotEvent extends Partial<DetectionSnapshotKnowled
   automations_total: number;
   automations_enabled: number;
   external_connectors_configured: number;
+  external_connectors_active_24h: number;
   external_sources_active_24h: number;
   external_alerts_24h: number;
   significant_events_24h: number;
@@ -67,6 +70,9 @@ const detectionSnapshotSchema: RootSchema<DetectionSnapshotEvent> = {
   external_connectors_configured: count(
     'Connectors of a type that imports alerts from an external system.'
   ),
+  external_connectors_active_24h: count(
+    'Configured external connectors whose alert source wrote an alert event in the last 24 hours. Alerts do not name the connector that delivered them, so every connector of an active source counts.'
+  ),
   external_sources_active_24h: count(
     'Distinct external alert sources (neither `internal` nor `elastic.*`) that wrote an alert event in the last 24 hours.'
   ),
@@ -86,11 +92,16 @@ const detectionSnapshotSchema: RootSchema<DetectionSnapshotEvent> = {
   knowledge_indicators_features: count('Feature Knowledge Indicators that are not deleted.', true),
   knowledge_indicators_queries: count('Query Knowledge Indicators that are not deleted.', true),
   significant_event_rules: count(
-    'Query Knowledge Indicators backed by a Significant Event rule.',
+    'Distinct Significant Event rules backing a Query Knowledge Indicator.',
     true
   ),
   significant_event_rules_active: count(
     'Significant Event rules that exist and are enabled.',
+    true
+  ),
+  significant_events_total: count('Significant Events in the space, open or closed.', true),
+  significant_events_open: count(
+    'Significant Events whose current status is `active` or `recovering`.',
     true
   ),
 };
