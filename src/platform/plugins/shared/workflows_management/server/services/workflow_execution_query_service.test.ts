@@ -2083,8 +2083,7 @@ const matchesExecutionQuery = (execution: ExecutionFixture, query: unknown): boo
     return (
       must.every((entry) => matchesExecutionQuery(execution, entry)) &&
       mustNot.every((entry) => !matchesExecutionQuery(execution, entry)) &&
-      should.filter((entry) => matchesExecutionQuery(execution, entry)).length >=
-        minimumShouldMatch
+      should.filter((entry) => matchesExecutionQuery(execution, entry)).length >= minimumShouldMatch
     );
   }
   throw new Error(`Unsupported execution query: ${JSON.stringify(query)}`);
