@@ -37,6 +37,8 @@ describe('update history sequence', () => {
   let stored: { attributes: DashboardSavedObjectAttributes; version: number };
   let loggedSequences: number[];
   let services: DashboardRequestServices;
+  let savedObjectsClient: { get: jest.Mock; update: jest.Mock; changeAccessMode: jest.Mock };
+  let supportsAccessControl: boolean;
 
   beforeAll(() => {
     setStubKibanaServices();
@@ -47,7 +49,26 @@ describe('update history sequence', () => {
     loggedSequences = [];
 
     // in-memory saved objects client with the optimistic concurrency control of the real one
-    const savedObjectsClient = {
+    supportsAccessControl = false;
+    savedObjectsClient = {
+      changeAccessMode: jest.fn(
+        async (objects: Array<{ type: string; id: string; version?: string }>) => {
+          const [{ type, id, version }] = objects;
+          if (version !== undefined && version !== String(stored.version)) {
+            return {
+              objects: [
+                {
+                  type,
+                  id,
+                  error: SavedObjectsErrorHelpers.createConflictError(type, id).output.payload,
+                },
+              ],
+            };
+          }
+          stored = { ...stored, version: stored.version + 1 };
+          return { objects: [{ type, id, version: String(stored.version) }] };
+        }
+      ),
       get: jest.fn(async () => ({
         id: ID,
         type: 'dashboard',
@@ -73,7 +94,7 @@ describe('update history sequence', () => {
     services = {
       savedObjects: {
         client: savedObjectsClient,
-        typeRegistry: { supportsAccessControl: () => false },
+        typeRegistry: { supportsAccessControl: () => supportsAccessControl },
       },
       security: { authc: { getCurrentUser: () => null } },
     } as unknown as DashboardRequestServices;
@@ -113,5 +134,86 @@ describe('update history sequence', () => {
 
     expect(loggedSequences).toEqual([]);
     expect(stored.attributes.historySequence).toBe(1);
+  });
+
+  describe('access mode change', () => {
+    const saveWithAccessMode = () =>
+      update(
+        services,
+        getDashboardStateSchema(false),
+        ID,
+        { ...getState('Second'), access_control: { access_mode: 'write_restricted' } },
+        { spaceId: 'default' }
+      );
+
+    beforeEach(() => {
+      supportsAccessControl = true;
+    });
+
+    it('uses the version returned by changeAccessMode without re-reading the object', async () => {
+      await saveWithAccessMode();
+
+      expect(savedObjectsClient.changeAccessMode).toHaveBeenCalledTimes(1);
+      // the initial existence check and the read building the response, none in between
+      expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      expect(savedObjectsClient.get.mock.invocationCallOrder[1]).toBeGreaterThan(
+        savedObjectsClient.update.mock.invocationCallOrder[0]
+      );
+      expect(savedObjectsClient.update).toHaveBeenCalledWith(
+        'dashboard',
+        ID,
+        expect.anything(),
+        expect.objectContaining({ version: '2' })
+      );
+      expect(stored.version).toBe(3);
+    });
+
+    it('passes the version it read to changeAccessMode', async () => {
+      await saveWithAccessMode();
+
+      expect(savedObjectsClient.changeAccessMode).toHaveBeenCalledWith(
+        [{ type: 'dashboard', id: ID, version: '1' }],
+        expect.anything()
+      );
+    });
+
+    it('rejects with a conflict, without updating, if another save landed before changeAccessMode', async () => {
+      savedObjectsClient.get.mockImplementationOnce(async () => {
+        const read = {
+          id: ID,
+          type: 'dashboard',
+          attributes: { ...stored.attributes },
+          references: [],
+          version: String(stored.version),
+        };
+        // a concurrent save commits after our read
+        stored = { ...stored, version: stored.version + 1 };
+        return read;
+      });
+
+      await expect(saveWithAccessMode()).rejects.toMatchObject({ statusCode: 409 });
+      expect(savedObjectsClient.update).not.toHaveBeenCalled();
+    });
+
+    it('throws if changeAccessMode does not return a version', async () => {
+      savedObjectsClient.changeAccessMode.mockResolvedValueOnce({
+        objects: [{ type: 'dashboard', id: ID }],
+      });
+
+      await expect(saveWithAccessMode()).rejects.toThrow(
+        'changeAccessMode did not return an updated version'
+      );
+      expect(savedObjectsClient.update).not.toHaveBeenCalled();
+    });
+
+    it('throws the error returned by changeAccessMode', async () => {
+      const error = { message: 'nope', statusCode: 403, error: 'Forbidden' };
+      savedObjectsClient.changeAccessMode.mockResolvedValueOnce({
+        objects: [{ type: 'dashboard', id: ID, error }],
+      });
+
+      await expect(saveWithAccessMode()).rejects.toBe(error);
+      expect(savedObjectsClient.update).not.toHaveBeenCalled();
+    });
   });
 });

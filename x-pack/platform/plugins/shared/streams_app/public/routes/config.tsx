@@ -9,7 +9,6 @@ import type { RouteMap } from '@kbn/typed-react-router-config';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import { StreamsAppPageTemplate } from '../components/streams_app_page_template';
 import { StreamsAppRouterBreadcrumb } from '../components/streams_app_router_breadcrumb';
 import { RedirectTo } from '../components/redirect_to';
@@ -17,8 +16,8 @@ import { StreamManagementDefaultRedirect } from '../components/stream_management
 import { StreamsRootRedirect } from '../components/streams_root_redirect';
 import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/stream_management/data_management/stream_detail_management';
-import { StreamsLayout } from '../components/streams_layout';
-import { DEFAULT_STREAMS_LAYOUT_TAB } from '../components/streams_layout/tabs';
+import { StreamsV2LayoutGate } from '../components/streams_layout';
+import { RedirectToDefaultLayoutTab } from '../components/streams_layout/redirect_to_default_layout_tab';
 import { IndexInspectPage } from '../components/index_inspect/index_inspect_page';
 import { DEFAULT_INDEX_INSPECT_TAB } from '../components/index_inspect/types';
 
@@ -89,25 +88,13 @@ const streamsAppRoutes = {
         element: <Outlet />,
         children: {
           '/v2': {
-            element: (
-              <RedirectTo
-                path="/v2/unit/{unitId}/{tab}"
-                params={{
-                  path: { unitId: STREAMS_DEFAULT_UNIT_ID, tab: DEFAULT_STREAMS_LAYOUT_TAB },
-                }}
-              />
-            ),
+            element: <RedirectToDefaultLayoutTab />,
             params: t.partial({
               query: timeRangeQueryParams,
             }),
           },
           '/v2/unit/{unitId}': {
-            element: (
-              <RedirectTo
-                path="/v2/unit/{unitId}/{tab}"
-                params={{ path: { tab: DEFAULT_STREAMS_LAYOUT_TAB } }}
-              />
-            ),
+            element: <RedirectToDefaultLayoutTab />,
             params: t.intersection([
               t.type({
                 path: t.type({
@@ -120,7 +107,7 @@ const streamsAppRoutes = {
             ]),
           },
           '/v2/unit/{unitId}/{tab}': {
-            element: <StreamsLayout />,
+            element: <StreamsV2LayoutGate />,
             params: t.intersection([
               t.type({
                 path: t.type({

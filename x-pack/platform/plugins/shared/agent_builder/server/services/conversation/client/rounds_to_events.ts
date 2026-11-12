@@ -97,6 +97,24 @@ export const userMessageEvent = (
   data: input,
 });
 
+export const agentMessageEvent = ({
+  id,
+  createdAt,
+  input,
+  actor,
+}: {
+  id: string;
+  createdAt: string;
+  input: RoundInput;
+  actor: EventActor;
+}): TimelineEvent => ({
+  id,
+  type: TimelineEventType.agentMessage,
+  created_at: createdAt,
+  actor,
+  data: input,
+});
+
 export const executionStartedEvent = (
   round: Pick<ConversationRound, 'id' | 'started_at'>,
   conversation: ConversationForRoundEvents
