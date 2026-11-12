@@ -39,28 +39,15 @@ export const getAnonymizedAlerts = async ({
   size?: number;
   start?: DateMath | null;
 }): Promise<string[]> => {
-  if (alertsIndexPattern == null || size == null || sizeIsOutOfRange(size)) {
-    return [];
-  }
-
-  const query = getOpenAndAcknowledgedAlertsQuery({
-    alertsIndexPattern,
-    anonymizationFields: anonymizationFields ?? [],
-    end,
-    filter,
-    size,
-    start,
-  });
-
   // Exact-id re-fetch (skill mode): when the caller passes an `ids` filter it has
   // already selected the precise documents to fetch (the gate-curated alerts). The
   // shared builder unconditionally ANDs an open/acknowledged status clause and a
   // `@timestamp` range (defaulting to now-24h) onto every query, which would drop
   // curated alerts that are older than that window or not open/acknowledged. Override
   // just the query clause with a plain `ids` query so those documents resolve exactly,
-  // regardless of age or status. The rest of the request (index/size/fields/_source/
-  // sort) is preserved so anonymization is unchanged. Only the id re-fetch passes an
-  // `ids` filter, so no other retrieval path is affected.
+  // regardless of age or status. The rest of the request (index/fields/_source/sort)
+  // is preserved so anonymization is unchanged. Only the id re-fetch passes an `ids`
+  // filter, so no other retrieval path is affected.
   const rawIds =
     filter != null && typeof filter === 'object' && 'ids' in filter
       ? (filter as Record<string, unknown>).ids
@@ -72,6 +59,28 @@ export const getAnonymizedAlerts = async ({
     Array.isArray((rawIds as { values?: unknown }).values)
       ? (rawIds as { values: string[] }).values
       : undefined;
+
+  // An exact-id fetch is sized by its ids. The 10 to 10,000 range validates the
+  // user's "max alerts" setting, not a curated id set, which may hold fewer than 10.
+  const searchSize = idsValues != null ? idsValues.length : size;
+
+  if (
+    alertsIndexPattern == null ||
+    searchSize == null ||
+    searchSize === 0 ||
+    (idsValues == null && sizeIsOutOfRange(searchSize))
+  ) {
+    return [];
+  }
+
+  const query = getOpenAndAcknowledgedAlertsQuery({
+    alertsIndexPattern,
+    anonymizationFields: anonymizationFields ?? [],
+    end,
+    filter,
+    size: searchSize,
+    start,
+  });
 
   const searchRequest =
     idsValues != null ? { ...query, query: { ids: { values: idsValues } } } : query;

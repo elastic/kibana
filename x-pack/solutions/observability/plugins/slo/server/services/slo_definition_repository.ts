@@ -12,7 +12,7 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/core/server';
 import type { Paginated, Pagination } from '@kbn/slo-schema';
-import { ALL_VALUE, sloDefinitionSchemaZod, storedSloDefinitionSchemaZod } from '@kbn/slo-schema';
+import { ALL_VALUE, sloDefinitionSchema, storedSloDefinitionSchema } from '@kbn/slo-schema';
 import { merge } from 'lodash';
 import { SLO_MODEL_VERSION } from '../../common/constants';
 import type { SLODefinition, StoredSLODefinition } from '../domain/models';
@@ -158,7 +158,7 @@ export class DefaultSLODefinitionRepository implements SLODefinitionRepository {
       references: storedSLOObject.references,
     });
 
-    const result = sloDefinitionSchemaZod.safeParse({
+    const result = sloDefinitionSchema.safeParse({
       ...storedSLO,
       // groupBy was added in 8.10.0
       groupBy: storedSLO.groupBy ?? ALL_VALUE,
@@ -230,7 +230,7 @@ export class DefaultSLODefinitionRepository implements SLODefinitionRepository {
       });
     }
     return {
-      storedSLO: storedSloDefinitionSchemaZod.encode({
+      storedSLO: storedSloDefinitionSchema.encode({
         ...slo,
         artifacts: { dashboards: dashboardsRef },
       }),

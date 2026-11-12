@@ -47,7 +47,9 @@ export const createMockWorkflowApi = (): MockWorkflowApi =>
     getChildrenExecutions: jest.fn(),
 
     getConfig: jest.fn(),
+    getReadableWorkflowIds: jest.fn(),
     searchTriggerEvents: jest.fn(),
+    getLinkedRules: jest.fn(),
     restoreWorkflowVersion: jest.fn(),
 
     getCatalog: jest.fn(),

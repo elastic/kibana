@@ -138,7 +138,10 @@ describe('SubjectsService', () => {
       hidden: true,
     });
     expect(manager.getActive()).toHaveLength(2);
-    expect(manager.drainChanges()).toEqual([]);
+    expect(manager.drainChanges().map(({ kind, hidden }) => [kind, hidden])).toEqual([
+      ['added', true],
+      ['added', true],
+    ]);
   });
 
   it('is hidden in the conversation and not rendered inline', async () => {

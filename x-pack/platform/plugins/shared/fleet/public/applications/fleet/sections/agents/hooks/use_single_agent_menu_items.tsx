@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import React from 'react';
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
 import {
   LICENSE_FOR_AGENT_MIGRATION,
@@ -210,7 +210,16 @@ export function useSingleAgentMenuItems({
                   </EuiFlexGroup>
                 ),
                 icon: 'refresh',
-                disabled: !isAgentRestartSupported(agent),
+                disabled: !isAgentRestartSupported(agent) || !!agent.pending_restart,
+                toolTipContent: agent.pending_restart ? (
+                  <FormattedMessage
+                    id="xpack.fleet.agentList.restartPendingTooltip"
+                    defaultMessage="A restart was requested {requestedAt} and is waiting for the agent to pick it up."
+                    values={{
+                      requestedAt: <FormattedRelative value={agent.pending_restart.created_at} />,
+                    }}
+                  />
+                ) : undefined,
                 onClick: () => {
                   callbacks.onRestartClick();
                 },
@@ -295,7 +304,13 @@ export function useSingleAgentMenuItems({
             />
           ),
           icon: 'inspect',
-          disabled: !authz.fleet.readAgentPolicies || !agent.policy_id,
+          disabled: !authz.integrations.readIntegrationPolicies || !agent.policy_id,
+          toolTipContent: !authz.integrations.readIntegrationPolicies ? (
+            <FormattedMessage
+              id="xpack.fleet.agentList.viewAgentPolicyDisabledTooltip"
+              defaultMessage="Agent policies and Integrations 'Read' privileges are required to view the policy."
+            />
+          ) : undefined,
           onClick: () => {
             callbacks.onViewAgentPolicyClick();
           },
@@ -445,7 +460,7 @@ export function useSingleAgentMenuItems({
     agentHasValidRollback,
     licenseService,
     isUnenrolling,
-    authz.fleet.readAgentPolicies,
+    authz.integrations.readIntegrationPolicies,
     isRestartAgentActionEnabled,
   ]);
 

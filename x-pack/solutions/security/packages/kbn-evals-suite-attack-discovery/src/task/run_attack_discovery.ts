@@ -26,6 +26,7 @@ import type {
   AttackDiscoveryTaskOutput,
   AnonymizedAlert,
 } from '../types';
+import { withAdditionalContext } from './with_additional_context';
 
 const MAX_GENERATION_ATTEMPTS = 3;
 
@@ -174,7 +175,7 @@ export const runAttackDiscovery = async ({
     }
 
     if (input.mode === 'bundledAlerts') {
-      const prompt = await loadDefaultPrompt();
+      const prompt = withAdditionalContext(await loadDefaultPrompt(), input.additionalContext);
       const res = await generateInsights({
         inferenceClient,
         log,

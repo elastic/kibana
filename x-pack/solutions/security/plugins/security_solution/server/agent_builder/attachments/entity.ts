@@ -29,6 +29,10 @@ const entityIdentifierSchema = lazySchema(() =>
      * `user.name`. Optional for backward compatibility with older payloads.
      */
     entityStoreId: z.string().min(1).optional(),
+    /**
+     * `resolved` opens the entity as its resolution group. Absent means the single entity.
+     */
+    mode: z.literal('resolved').optional(),
   })
 );
 
@@ -91,6 +95,7 @@ const riskEntityAttachmentDataSchema = lazySchema(() =>
       identifierType: z.enum(['host', 'user', 'service', 'generic']),
       identifier: z.string().min(1),
       entityStoreId: z.string().min(1).optional(),
+      mode: z.literal('resolved').optional(),
       riskStats: riskStatsPayloadSchema.optional(),
       resolutionRiskStats: riskStatsPayloadSchema.optional(),
     }),

@@ -9,10 +9,14 @@ import { serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ExecutionStatus } from '@kbn/workflows';
+import { MANUAL_AUTOMATION_TRIGGER_SOURCE } from '../../../common/automation_run';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
 import { readAutomationUsage } from '../../lib/automations/automation_budget';
+
+const SKIP_REASONS = ['daily_limit', 'investigation_limit', 'no_open_investigation'] as const;
+const MAX_ERROR_LENGTH = 200;
 
 const mapRunStatus = (status: ExecutionStatus): 'succeeded' | 'running' | 'failed' | 'skipped' => {
   if (status === ExecutionStatus.COMPLETED) return 'succeeded';
@@ -50,7 +54,15 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
       startedBefore: z.string().max(64).optional(),
     }),
   }),
-  handler: async ({ request, params, getAutomationsSoClient, getWorkflowsManagement, context }) => {
+  handler: async ({
+    request,
+    params,
+    getAutomationsSoClient,
+    getWorkflowsManagement,
+    getUserProfileService,
+    context,
+    logger,
+  }) => {
     const workflowsManagement = getWorkflowsManagement();
     if (!workflowsManagement) {
       throw serverUnavailable('Workflows management is not available');
@@ -90,6 +102,8 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         'trigger_investigation_alert',
         'trigger_investigation_slack',
         'follow_up_recovered_alert',
+        'trigger_investigation_alert_v2',
+        'follow_up_recovered_alert_v2',
       ].map((stepId) =>
         workflowsManagement.management.searchStepExecutions(
           {
@@ -107,20 +121,30 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         )
       )
     );
-    const [defaultSteps, legacyAlertSteps, alertSteps, slackSteps, recoveredAlertSteps] =
-      stepExecutions.map(
-        ({ results }) => new Map(results.map((step) => [step.workflowRunId, step]))
-      );
+    const [
+      defaultSteps,
+      legacyAlertSteps,
+      alertSteps,
+      slackSteps,
+      recoveredAlertSteps,
+      alertV2Steps,
+      recoveredAlertV2Steps,
+    ] = stepExecutions.map(
+      ({ results }) => new Map(results.map((step) => [step.workflowRunId, step]))
+    );
 
     const runs = executions.results.map((exec) => {
-      const step =
+      const startedStep =
         (exec.triggeredBy === 'alerting.v1.alertStatusChanged'
-          ? alertSteps.get(exec.id) ??
-            legacyAlertSteps.get(exec.id) ??
-            recoveredAlertSteps.get(exec.id)
+          ? alertSteps.get(exec.id) ?? legacyAlertSteps.get(exec.id)
+          : exec.triggeredBy === 'alerting.alertStatusChanged'
+          ? alertV2Steps.get(exec.id)
           : exec.triggeredBy === 'slack2.message'
           ? slackSteps.get(exec.id)
           : undefined) ?? defaultSteps.get(exec.id);
+      const recoveredStep = recoveredAlertSteps.get(exec.id) ?? recoveredAlertV2Steps.get(exec.id);
+      const isRecoveryFollowUp = startedStep === undefined && recoveredStep !== undefined;
+      const step = startedStep ?? recoveredStep;
       const input =
         step?.input && !Array.isArray(step.input) && typeof step.input === 'object'
           ? step.input
@@ -131,36 +155,61 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
           : {};
       const getString = (value: unknown) => (typeof value === 'string' ? value : undefined);
 
-      const dailyLimitReached = output['skip_reason'] === 'daily_limit';
-      const noOpenInvestigation = output['skip_reason'] === 'no_open_investigation';
+      const skipReason = SKIP_REASONS.find((reason) => reason === output['skip_reason']);
+      const ruleName = getString(input['rule_name']);
+      const recoveredTitle = ruleName ? `Recovered: ${ruleName}` : undefined;
+      const title = isRecoveryFollowUp ? recoveredTitle : getString(input['title']);
+
+      const status = skipReason ? ('skipped' as const) : mapRunStatus(exec.status);
 
       return {
         id: exec.id,
-        status:
-          dailyLimitReached || noOpenInvestigation
-            ? ('skipped' as const)
-            : mapRunStatus(exec.status),
+        status,
         startedAt: exec.startedAt,
         finishedAt: exec.finishedAt,
         duration: exec.duration,
-        triggeredBy: exec.triggeredBy,
-        title: getString(input['title']),
-        message: getString(input['message']),
+        triggeredBy:
+          exec.triggeredBy === MANUAL_AUTOMATION_TRIGGER_SOURCE ? 'manual' : exec.triggeredBy,
+        executedBy: exec.executedBy,
+        title,
+        message: getString(input['message']) ?? getString(input['instructions']),
         investigationId: getString(output['investigation_id']),
-        skipReason: dailyLimitReached
-          ? 'daily_limit'
-          : noOpenInvestigation
-          ? 'no_open_investigation'
-          : null,
-        dailyLimit:
-          typeof output['daily_limit'] === 'number'
-            ? output['daily_limit']
-            : so.attributes.runtime.dailyDispatchLimit,
+        skipReason: skipReason ?? null,
+        dailyLimit: typeof output['daily_limit'] === 'number' ? output['daily_limit'] : undefined,
+        error: status === 'failed' ? exec.error?.message.slice(0, MAX_ERROR_LENGTH) : undefined,
       };
     });
 
+    // Resolve only executors of manual runs the caller was authorized to read.
+    const profileUids = new Set(
+      runs.flatMap(({ triggeredBy, executedBy }) =>
+        triggeredBy === 'manual' && executedBy?.startsWith('u_') ? [executedBy] : []
+      )
+    );
+    const displayNames = new Map<string, string>();
+    if (profileUids.size > 0) {
+      try {
+        const userProfile = await getUserProfileService();
+        const profiles = await userProfile.bulkGet({ uids: profileUids });
+        for (const { uid, user } of profiles) {
+          displayNames.set(uid, user.full_name?.trim() || user.email?.trim() || user.username);
+        }
+      } catch (error) {
+        logger.debug(`Failed to resolve automation run executor profiles: ${error.message}`);
+      }
+    }
+
     return {
-      runs,
+      runs: runs.map((run) => ({
+        ...run,
+        executedByDisplayName:
+          run.triggeredBy === 'manual' && run.executedBy
+            ? displayNames.get(run.executedBy) ??
+              (run.executedBy.startsWith('u_') || run.executedBy === 'unknown'
+                ? undefined
+                : run.executedBy)
+            : undefined,
+      })),
       total: executions.total,
       usedToday,
       page: executions.page,

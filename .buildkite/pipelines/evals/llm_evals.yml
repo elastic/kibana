@@ -29,17 +29,6 @@ steps:
         - exit_status: '-1'
           limit: 2
 
-  - label: 'Store Cache for build'
-    command: .buildkite/scripts/steps/store_cache.sh
-    timeout_in_minutes: 10
-    id: store_cache
-    soft_fail: true
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-highcpu-8
-
   - label: '🧑‍🏭 Build Kibana Distribution'
     command: .buildkite/scripts/steps/build_kibana.sh
     agents:
@@ -81,6 +70,7 @@ steps:
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: '-1'
@@ -106,6 +96,7 @@ steps:
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: '-1'
@@ -130,6 +121,7 @@ steps:
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: '-1'
@@ -153,6 +145,7 @@ steps:
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: '-1'
@@ -175,6 +168,7 @@ steps:
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: '-1'
@@ -197,30 +191,7 @@ steps:
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
-        retry:
-          automatic:
-            - exit_status: '-1'
-              limit: 3
-
-      - label: 'Evals: Significant Events'
-        key: kbn-evals-weekly-significant-events
-        command: bash .buildkite/scripts/steps/evals/run_suite.sh
-        env:
-          KBN_EVALS: '1'
-          FTR_EIS_CCM: '1'
-          EVAL_SUITE_ID: 'significant-events'
-          EVAL_FANOUT: '1'
-          EVAL_INCLUDE_EIS_MODELS: '1'
-          # Extended tier: includes smaller/cheaper models for cost-performance evaluation.
-          # Keep in sync with `weeklyEisModelGroups` for significant-events in evals.suites.json.
-          EVAL_MODEL_GROUPS: &weekly_eis_extended_models 'eis/anthropic-claude-4.6-sonnet,eis/anthropic-claude-4.6-opus,eis/anthropic-claude-4.8-opus,eis/openai-gpt-5.2,eis/openai-gpt-5.4,eis/openai-gpt-5.4-mini,eis/openai-gpt-5.4-nano,eis/openai-gpt-5.6-luna,eis/openai-gpt-5.6-terra,eis/openai-gpt-oss-120b'
-        timeout_in_minutes: 60
-        agents:
-          image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
-          provider: gcp
-          machineType: n2-standard-8
-          preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: '-1'
@@ -247,6 +218,7 @@ steps:
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: '-1'
@@ -269,6 +241,7 @@ steps:
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: '-1'
@@ -290,6 +263,7 @@ steps:
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: '-1'
@@ -313,6 +287,7 @@ steps:
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: '-1'
@@ -336,6 +311,7 @@ steps:
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: '-1'
@@ -359,6 +335,7 @@ steps:
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: '-1'
@@ -382,6 +359,7 @@ steps:
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: '-1'
@@ -405,6 +383,7 @@ steps:
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: '-1'
@@ -427,6 +406,7 @@ steps:
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: '-1'
@@ -457,6 +437,7 @@ steps:
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: '-1'
@@ -479,6 +460,7 @@ steps:
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: '-1'
@@ -502,6 +484,7 @@ steps:
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: '-1'
@@ -524,6 +507,7 @@ steps:
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: '-1'
@@ -546,6 +530,7 @@ steps:
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: '-1'
@@ -568,6 +553,7 @@ steps:
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: '-1'
@@ -591,6 +577,7 @@ steps:
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: '-1'
@@ -613,6 +600,7 @@ steps:
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: '-1'

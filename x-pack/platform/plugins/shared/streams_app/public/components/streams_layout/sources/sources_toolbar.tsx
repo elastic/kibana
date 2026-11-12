@@ -31,7 +31,8 @@ interface SourcesToolbarProps {
   onQueryChange: (query: string) => void;
   onSelectedTypesChange: (types: SourceType[]) => void;
   onRefresh: () => void;
-  onAddSource: () => void;
+  /** Omitted for users who cannot edit the unit, which hides the add button. */
+  onAddSource?: () => void;
   isAddDisabled?: boolean;
 }
 
@@ -97,27 +98,31 @@ export const SourcesToolbar = ({
           />
         </EuiToolTip>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} aria-hidden>
-        <EuiHorizontalRule
-          margin="none"
-          css={css`
-            block-size: ${euiTheme.size.xl};
-            inline-size: ${euiTheme.border.width.thin};
-          `}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          fill
-          onClick={onAddSource}
-          isDisabled={isAddDisabled}
-          data-test-subj="streamsAddSourceButton"
-        >
-          {i18n.translate('xpack.streams.sources.addSourceButtonLabel', {
-            defaultMessage: 'Add source',
-          })}
-        </EuiButton>
-      </EuiFlexItem>
+      {onAddSource && (
+        <>
+          <EuiFlexItem grow={false} aria-hidden>
+            <EuiHorizontalRule
+              margin="none"
+              css={css`
+                block-size: ${euiTheme.size.xl};
+                inline-size: ${euiTheme.border.width.thin};
+              `}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              onClick={onAddSource}
+              isDisabled={isAddDisabled}
+              data-test-subj="streamsAddSourceButton"
+            >
+              {i18n.translate('xpack.streams.sources.addSourceButtonLabel', {
+                defaultMessage: 'Add source',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        </>
+      )}
     </EuiFlexGroup>
   );
 };

@@ -14,6 +14,7 @@ import type {
 import type { ProposalsPluginSetup, ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
+import type { CPSServerSetup } from '@kbn/cps/server';
 import type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
@@ -34,7 +35,11 @@ import type { SubscriptionAvailability } from '../common/availability';
 
 export type AlertZeroRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: LicensingApiRequestHandlerContext;
-  alertzero: { subscription: SubscriptionAvailability; hasRequiredDependencies: boolean };
+  alertzero: {
+    subscription: SubscriptionAvailability;
+    hasRequiredDependencies: boolean;
+    isSpaceSupported: boolean;
+  };
 }>;
 
 /**
@@ -73,6 +78,12 @@ export interface AlertZeroPluginStart {
   registerThreatIntelSupplyWorkflowInstaller: (
     installer: ThreatIntelSupplyWorkflowInstaller
   ) => void;
+  /**
+   * False while the fingerprint template install is in flight, and after it fails. The
+   * matcher reads this on each run and does not auto-create the index from the generic
+   * template until the install has succeeded.
+   */
+  readonly attackFingerprintWritesAllowed: boolean;
 }
 
 export interface AlertZeroSetupDependencies {
@@ -84,6 +95,7 @@ export interface AlertZeroSetupDependencies {
   proposals?: ProposalsPluginSetup;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
   contextEngine?: ContextEnginePluginSetup;
+  cps?: CPSServerSetup;
 }
 
 export interface AlertZeroStartDependencies {

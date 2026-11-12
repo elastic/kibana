@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { joinRemoteCluster, splitRemoteCluster } from '../../../../../common/remote_cluster';
 import type { DiscoveredDataset } from './discover_hunt_datasets';
 
 /**
@@ -36,8 +37,11 @@ export const vendorWildcards = (
   Array.from(
     new Set(
       matches.flatMap((match) => {
-        const type = match.index_pattern.split('-')[0];
-        return ['.', '-'].map((separator) => `${type}-${match.vendor}${separator}*`);
+        const { cluster, index } = splitRemoteCluster(match.index_pattern);
+        const type = index.split('-')[0];
+        return ['.', '-'].map((separator) =>
+          joinRemoteCluster({ cluster, index: `${type}-${match.vendor}${separator}*` })
+        );
       })
     )
   );

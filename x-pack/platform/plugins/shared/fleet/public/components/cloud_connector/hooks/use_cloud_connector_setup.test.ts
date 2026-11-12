@@ -24,6 +24,8 @@ jest.mock('../utils', () => ({
     const trimmedLength = name.trim().length;
     return trimmedLength > 0 && name.length <= 255;
   }),
+  isAwsCredentials: jest.requireActual('../utils').isAwsCredentials,
+  isRoleArnInvalid: jest.requireActual('../utils').isRoleArnInvalid,
 }));
 
 const mockIsAzureCloudConnectorVars = isAzureCloudConnectorVars as jest.MockedFunction<
@@ -591,6 +593,69 @@ describe('useCloudConnectorSetup', () => {
       });
 
       expect(result.current.existingConnectionCredentials).toEqual(directExistingAzureCredentials);
+    });
+  });
+
+  describe('AWS role ARN validation', () => {
+    it('should set isValid to false when the role ARN is not an IAM role ARN', () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorSetup(mockPolicy, mockUpdatePolicy, mockPackageInfo)
+      );
+
+      act(() => {
+        result.current.updatePolicyWithNewCredentials({ roleArn: '123456', name: 'connector' });
+      });
+
+      expect(mockUpdatePolicy).toHaveBeenCalledWith(expect.objectContaining({ isValid: false }));
+    });
+
+    it('should set isValid to false when the role ARN is whitespace only', () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorSetup(mockPolicy, mockUpdatePolicy, mockPackageInfo)
+      );
+
+      act(() => {
+        result.current.updatePolicyWithNewCredentials({ roleArn: '   ', name: 'connector' });
+      });
+
+      expect(mockUpdatePolicy).toHaveBeenCalledWith(expect.objectContaining({ isValid: false }));
+    });
+
+    it('should leave an empty role ARN to the required-field validation', () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorSetup(mockPolicy, mockUpdatePolicy, mockPackageInfo)
+      );
+
+      act(() => {
+        result.current.updatePolicyWithNewCredentials({ roleArn: '', name: 'connector' });
+      });
+
+      expect(mockUpdatePolicy).toHaveBeenCalledWith(
+        expect.objectContaining({ isValid: undefined })
+      );
+    });
+
+    it('should store the trimmed role ARN in the policy vars while keeping the typed value', () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorSetup(mockPolicy, mockUpdatePolicy, mockPackageInfo)
+      );
+      const typed = ' arn:aws:iam::123456789012:role/NewRole ';
+
+      act(() => {
+        result.current.updatePolicyWithNewCredentials({ roleArn: typed, name: 'connector' });
+      });
+
+      expect(updateInputVarsWithCredentials).toHaveBeenCalledWith(
+        mockPolicy.inputs[0].streams[0].vars,
+        { roleArn: 'arn:aws:iam::123456789012:role/NewRole', name: 'connector' }
+      );
+      expect(mockUpdatePolicy).toHaveBeenCalledWith(
+        expect.objectContaining({ isValid: undefined })
+      );
+      expect(result.current.newConnectionCredentials).toEqual({
+        roleArn: typed,
+        name: 'connector',
+      });
     });
   });
 

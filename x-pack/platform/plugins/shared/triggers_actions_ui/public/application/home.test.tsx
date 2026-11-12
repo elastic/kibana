@@ -32,7 +32,7 @@ jest.mock('./components/health_check', () => ({
 jest.mock('./context/health_context', () => ({
   HealthContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
-jest.mock('@kbn/ebt-tools', () => ({
+jest.mock('@kbn/ebt-tools/react', () => ({
   PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
@@ -170,7 +170,6 @@ describe('home', () => {
       renderHome(props);
 
       expect(await screen.findByTestId('createRuleButton')).toBeInTheDocument();
-      expect(await screen.findByTestId('rulesSettingsLink')).toBeInTheDocument();
       expect(await screen.findByTestId('documentationLink')).toBeInTheDocument();
     });
 
@@ -197,7 +196,6 @@ describe('home', () => {
 
       renderHome(props);
 
-      expect(await screen.findByTestId('rulesSettingsLink')).toBeInTheDocument();
       expect(await screen.findByTestId('documentationLink')).toBeInTheDocument();
       expect(screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
     });

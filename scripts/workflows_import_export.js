@@ -9,7 +9,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable no-restricted-syntax */
+/* eslint-disable @kbn/compat/eslint-no-restricted-syntax */
 
 /**
  * Import/Export workflows from Kibana

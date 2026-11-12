@@ -173,6 +173,17 @@ export function ManagedIntegrationsSection({
   // stored keys, which is also the case right after a deploy in the same session. Typing into a
   // key field there, replacing a stored one or not, is a change to deploy; keeping every stored
   // value is not. Emptying the fields again clears the change.
+  // On the identity form's New Identity tab the only click is Launch; Deploy belongs to the
+  // manual fallback there, next to Create Identity. Everywhere else it sits below the form,
+  // including on that tab once the stack has made the identity, or when only a cleanup is left
+  // to deploy: Deploy is the next click then, and must not be folded away under a section the
+  // user never needed.
+  const [isNewIdentityTab, setIsNewIdentityTab] = useState(true);
+  const isDeployInManualSection =
+    preferredMethod === 'identity_federation' &&
+    isNewIdentityTab &&
+    !isDeployReady &&
+    !isCleanupOnly;
   const isEditingDeployedKeys = isStaticKeysEditMode || storedSecretFields.length > 0;
   const handleStoredKeysFormChange = useCallback(
     (fields: AwsStaticKeyCredentials | undefined) => {
@@ -245,6 +256,38 @@ export function ManagedIntegrationsSection({
     cursor: pointer;
     border-bottom: ${isOpen ? `1px solid ${euiTheme.colors.borderBaseSubdued}` : 'none'};
   `;
+
+  const deployButton =
+    !hasFailed && !isDone ? (
+      <EuiButton
+        isDisabled={
+          isDeploying ||
+          (!isDeployReady &&
+            !isCleanupOnly &&
+            !(
+              isDirty &&
+              isStaticKeysEditMode &&
+              !!authenticateAndDeployStep.staticKeys?.access_key_id &&
+              !!authenticateAndDeployStep.staticKeys?.secret_access_key
+            ))
+        }
+        isLoading={isDeploying}
+        onClick={onDeploy}
+        data-test-subj="managedIntegrationsSection-deployButton"
+      >
+        {isDeploying ? (
+          <FormattedMessage
+            id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.deployingButton"
+            defaultMessage="Deploying integrations..."
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.deployButton"
+            defaultMessage="Deploy integrations"
+          />
+        )}
+      </EuiButton>
+    ) : undefined;
 
   return (
     <EuiPanel
@@ -383,6 +426,8 @@ export function ManagedIntegrationsSection({
                   onConnectorIdChange={handleIdentityFedConnectorChange}
                   onIacTemplateRecorded={handleIacTemplateRecorded}
                   initialConnectorId={initialConnectorId}
+                  manualEntryActions={isDeployInManualSection ? deployButton : undefined}
+                  onNewIdentityTabChange={setIsNewIdentityTab}
                 />
               ) : isStoredSecretsLoading ? (
                 <EuiLoadingSpinner />
@@ -450,36 +495,7 @@ export function ManagedIntegrationsSection({
               </EuiText>
             )}
 
-            {!hasFailed && !isDone && (
-              <EuiButton
-                isDisabled={
-                  isDeploying ||
-                  (!isDeployReady &&
-                    !isCleanupOnly &&
-                    !(
-                      isDirty &&
-                      isStaticKeysEditMode &&
-                      !!authenticateAndDeployStep.staticKeys?.access_key_id &&
-                      !!authenticateAndDeployStep.staticKeys?.secret_access_key
-                    ))
-                }
-                isLoading={isDeploying}
-                onClick={onDeploy}
-                data-test-subj="managedIntegrationsSection-deployButton"
-              >
-                {isDeploying ? (
-                  <FormattedMessage
-                    id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.deployingButton"
-                    defaultMessage="Deploying integrations..."
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.deployButton"
-                    defaultMessage="Deploy integrations"
-                  />
-                )}
-              </EuiButton>
-            )}
+            {!hasFailed && !isDone && !isDeployInManualSection && deployButton}
           </EuiPanel>
         </div>
       )}

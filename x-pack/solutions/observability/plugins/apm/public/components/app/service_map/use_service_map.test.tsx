@@ -13,6 +13,10 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { transformToReactFlow } from '../../../../common/service_map';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import type { ReactFlowServiceMapResponse } from '../../../../common/service_map';
+import { ApmDocumentType } from '../../../../common/document_type';
+import { RollupInterval } from '../../../../common/rollup';
+import { usePreferredServicesDataSource } from '../../../hooks/use_preferred_services_data_source';
+import { useServiceMapGroupingEnabled } from '../../../hooks/use_service_map_grouping_enabled';
 
 jest.mock('../../../context/license/use_license_context', () => ({
   useLicenseContext: jest.fn(),
@@ -22,9 +26,17 @@ jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
   useApmPluginContext: jest.fn(),
 }));
 
+jest.mock('../../../hooks/use_preferred_services_data_source', () => ({
+  usePreferredServicesDataSource: jest.fn(),
+}));
+
+jest.mock('../../../hooks/use_service_map_grouping_enabled', () => ({
+  useServiceMapGroupingEnabled: jest.fn(),
+}));
+
 const mockUseFetcher = jest.fn();
 jest.mock('../../../hooks/use_fetcher', () => ({
-  useFetcher: () => mockUseFetcher(),
+  useFetcher: (fn: unknown) => mockUseFetcher(fn),
   FETCH_STATUS: {
     LOADING: 'loading',
     SUCCESS: 'success',
@@ -44,6 +56,8 @@ jest.mock('../../../../common/service_map', () => {
 const mockedUseLicenseContext = jest.mocked(useLicenseContext);
 const mockedUseApmPluginContext = jest.mocked(useApmPluginContext);
 const mockedTransformToReactFlow = jest.mocked(transformToReactFlow);
+const mockedUsePreferredServicesDataSource = jest.mocked(usePreferredServicesDataSource);
+const mockedUseServiceMapGroupingEnabled = jest.mocked(useServiceMapGroupingEnabled);
 const defaultParams: Parameters<typeof useServiceMap>[0] = {
   start: '2026-01-01T00:00:00.000Z',
   end: '2026-01-01T01:00:00.000Z',
@@ -65,6 +79,9 @@ describe('useServiceMap()', () => {
         serviceMapEnabled: true,
       },
     } as ReturnType<typeof useApmPluginContext>);
+
+    mockedUseServiceMapGroupingEnabled.mockReturnValue(false);
+    mockedUsePreferredServicesDataSource.mockReturnValue(null);
   });
 
   it('returns transformed data for a successful fetch', () => {
@@ -204,6 +221,69 @@ describe('useServiceMap()', () => {
 
       const transformedArg = mockedTransformToReactFlow.mock.calls[0]?.[0];
       expect((transformedArg as { spans: unknown[] }).spans).toEqual([opbeansSpan]);
+    });
+  });
+  describe('data source (service map grouping)', () => {
+    const preferred = {
+      bucketSizeInSeconds: 60,
+      source: {
+        documentType: ApmDocumentType.ServiceTransactionMetric as const,
+        rollupInterval: RollupInterval.OneMinute,
+        hasDocs: true,
+        hasDurationSummaryField: true,
+      },
+    };
+
+    // Runs the fetch callback, returning the API call it made, if any
+    const renderAndGetApiCall = () => {
+      const callApmApi = jest.fn().mockResolvedValue({ spans: [] });
+      mockUseFetcher.mockImplementation((fn: (client: typeof callApmApi) => unknown) => {
+        fn(callApmApi);
+        return { data: undefined, status: FETCH_STATUS.NOT_INITIATED };
+      });
+
+      const { result } = renderHook(() => useServiceMap(defaultParams));
+      return { result, apiCall: callApmApi.mock.calls[0] };
+    };
+
+    it('fetches without a source when grouping is disabled, even if one is available', () => {
+      mockedUsePreferredServicesDataSource.mockReturnValue(preferred);
+
+      const { apiCall } = renderAndGetApiCall();
+
+      expect(apiCall[1].params.query).not.toHaveProperty('documentType');
+      expect(apiCall[1].params.query).not.toHaveProperty('rollupInterval');
+      expect(apiCall[1].params.query).not.toHaveProperty('useDurationSummary');
+    });
+
+    it('fetches without waiting for a source when grouping is disabled', () => {
+      const { apiCall } = renderAndGetApiCall();
+
+      expect(apiCall).toBeDefined();
+    });
+
+    it('waits for a source when grouping is enabled', () => {
+      mockedUseServiceMapGroupingEnabled.mockReturnValue(true);
+
+      const { result, apiCall } = renderAndGetApiCall();
+
+      expect(apiCall).toBeUndefined();
+      expect(result.current.status).toBe(FETCH_STATUS.LOADING);
+    });
+
+    it('sends the source when grouping is enabled', () => {
+      mockedUseServiceMapGroupingEnabled.mockReturnValue(true);
+      mockedUsePreferredServicesDataSource.mockReturnValue(preferred);
+
+      const { apiCall } = renderAndGetApiCall();
+
+      expect(apiCall[1].params.query).toEqual(
+        expect.objectContaining({
+          documentType: ApmDocumentType.ServiceTransactionMetric,
+          rollupInterval: RollupInterval.OneMinute,
+          useDurationSummary: true,
+        })
+      );
     });
   });
 });
