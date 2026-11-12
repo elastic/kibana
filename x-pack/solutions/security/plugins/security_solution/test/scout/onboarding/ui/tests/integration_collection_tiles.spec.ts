@@ -11,9 +11,6 @@ import { test, tags } from '../fixtures';
 // `nginx` is one of Fleet's static collection groups (`INTEGRATION_GROUPS`): two packages that
 // share it, as the registry serves them, collapse into a single collection tile.
 const GROUP_ID = 'nginx';
-const COLLECTION_CARD = `integration-card:collection:${GROUP_ID}`;
-// `OnboardingCardId.integrations`, the "Add data with integrations" card of Get started.
-const INTEGRATIONS_CARD_ID = 'integrations';
 
 const mockPackage = (name: string, title: string, group?: string) => ({
   id: name,
@@ -47,56 +44,48 @@ test.describe(
   'Get started: integration collection tiles',
   { tag: [...tags.stateful.classic] },
   () => {
-    test.beforeEach(async ({ page, browserAuth }) => {
+    test.beforeEach(async ({ page, browserAuth, pageObjects }) => {
       await page.route(
         (url) => url.pathname.endsWith('/api/fleet/epm/packages'),
         (route) => route.fulfill({ status: 200, json: MOCK_PACKAGES })
       );
       await browserAuth.loginAsPlatformEngineer();
+      await pageObjects.onboardingPage.gotoIntegrationsCard();
+      // The environment ships other custom integrations and the grid renders its tiles in pages:
+      // search so only the packages mocked here are listed.
+      await pageObjects.onboardingPage.searchIntegrations('scout');
     });
 
-    test('groups packages that share a group into one collection tile', async ({ page }) => {
-      // The card id in the hash makes the Security onboarding expand the integrations card.
-      await page.gotoApp('security/get_started', { hash: INTEGRATIONS_CARD_ID });
-      await page.testSubj.click('securitySolutionIntegrationsTab-all');
-      // The grid loads tiles in pages as the user scrolls, and the environment ships other custom
-      // integrations: search so only the packages mocked here are listed.
-      await page.testSubj.fill('epmList.searchBar', 'scout');
+    test('groups packages that share a group into one collection tile', async ({ pageObjects }) => {
+      const { onboardingPage } = pageObjects;
 
-      await expect(page.testSubj.locator(COLLECTION_CARD)).toContainText('2 variants');
+      await expect(onboardingPage.collectionCard(GROUP_ID)).toContainText('2 variants');
       // The members only appear in the chooser, not as tiles of their own.
-      await expect(page.testSubj.locator('integration-card:epr:scout_nginx')).toBeHidden();
-      await expect(page.testSubj.locator('integration-card:epr:scout_nginx_otel')).toBeHidden();
+      await expect(onboardingPage.integrationCard('scout_nginx')).toBeHidden();
+      await expect(onboardingPage.integrationCard('scout_nginx_otel')).toBeHidden();
       // A package without a group stays a regular tile.
-      await expect(page.testSubj.locator('integration-card:epr:scout_standalone')).toBeVisible();
+      await expect(onboardingPage.integrationCard('scout_standalone')).toBeVisible();
     });
 
-    test('opens the chooser and hands the Security return target to the picked variant', async ({
+    test('opens the chooser and lands on the picked variant with the Security return target', async ({
       page,
+      pageObjects,
     }) => {
-      // The card id in the hash makes the Security onboarding expand the integrations card.
-      await page.gotoApp('security/get_started', { hash: INTEGRATIONS_CARD_ID });
-      await page.testSubj.click('securitySolutionIntegrationsTab-all');
+      const { onboardingPage } = pageObjects;
 
-      await page.testSubj.locator(COLLECTION_CARD).click();
-      await expect(page.testSubj.locator('collectionFlyout')).toBeVisible();
-      await expect(page.testSubj.locator('collectionVariantRow-epr:scout_nginx')).toBeVisible();
+      await onboardingPage.collectionCard(GROUP_ID).click();
+      await expect(onboardingPage.collectionFlyout).toBeVisible();
+      await expect(onboardingPage.collectionVariantRow('scout_nginx')).toBeVisible();
 
-      await page.testSubj.click('collectionVariantRow-epr:scout_nginx_otel');
+      await onboardingPage.collectionVariantRow('scout_nginx_otel').click();
 
-      // The variant opens inside the integrations app, with the host's return target in the URL...
+      // The variant opens inside the integrations app, with the host's return target in the URL.
+      // The cancel/save route state handed to the add-integration page is covered by the
+      // `PackageListGrid` Jest test.
       await expect(page).toHaveURL(/\/app\/integrations\/detail\/scout_nginx_otel-1\.0\.0\//);
       const { searchParams } = new URL(page.url());
       expect(searchParams.get('returnAppId')).toBe('securitySolutionUI');
       expect(searchParams.get('returnPath')).toBe('/get_started');
-
-      // ...and in the route state, which is what the add-integration page reads for Cancel and
-      // Save (Save does not read the query params).
-      const routeState = await page.evaluate(() => window.history.state?.state);
-      expect(routeState).toMatchObject({
-        onCancelNavigateTo: ['securitySolutionUI', { path: '/get_started' }],
-        onSaveNavigateTo: ['securitySolutionUI', { path: '/get_started' }],
-      });
     });
   }
 );

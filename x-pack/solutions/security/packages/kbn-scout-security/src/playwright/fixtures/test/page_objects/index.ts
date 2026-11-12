@@ -38,6 +38,7 @@ import { CoverageOverviewPage } from './coverage_overview';
 import { SecurityOverviewPage } from './security_overview_page';
 import { RuleEditPage } from './rule_edit_page';
 import { WatchlistEditFlyout } from './watchlist_edit_flyout';
+import { OnboardingPage } from './onboarding_page';
 
 export type { RuleCreateWizardPage } from './rule_create_wizard';
 export type { RuleDetailsPage } from './rule_details_page';
@@ -97,6 +98,8 @@ export interface SecurityPageObjects extends PageObjects {
   ruleEditPage: RuleEditPage;
   /** Watchlist create / edit flyout — opened from the Watchlists tab of the Entity analytics management page. */
   watchlistEditFlyout: WatchlistEditFlyout;
+  /** Get started page — the "Add data with integrations" card: grid, collection tiles and chooser. */
+  onboardingPage: OnboardingPage;
 }
 
 export function extendPageObjects(
@@ -141,5 +144,6 @@ export function extendPageObjects(
     securityOverviewPage: createLazyPageObject(SecurityOverviewPage, page),
     ruleEditPage: createLazyPageObject(RuleEditPage, page),
     watchlistEditFlyout: createLazyPageObject(WatchlistEditFlyout, page),
+    onboardingPage: createLazyPageObject(OnboardingPage, page),
   };
 }
