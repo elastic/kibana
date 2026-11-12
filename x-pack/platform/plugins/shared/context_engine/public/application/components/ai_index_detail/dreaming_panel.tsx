@@ -30,11 +30,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnInfoCallout } from '@kbn/ui-callout';
+import { isEqual } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import {
   DEFAULT_DREAMING_INTERVAL,
   DREAMING_DISABLED,
+  maintenanceConfigOf,
   type AiIndexDreamingConfig,
+  type ResolvedMaintenanceConfig,
 } from '../../../../common/dreaming';
 import { matchingTemplateId } from '../../../../common/dreaming_templates';
 import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
@@ -52,6 +55,7 @@ import {
   type DreamingConfigDraft,
 } from '../dreaming_config/dreaming_config_editor';
 import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
+import { MaintenanceSettings, maintenanceErrorsOf } from './maintenance_settings';
 
 /** Maximum height of the dreaming config JSON, in pixels, before it scrolls. */
 export const DREAMING_JSON_MAX_HEIGHT = 480;
@@ -115,6 +119,7 @@ const DreamingEditor = ({ aiIndexId, dreaming }: DreamingEditorProps) => {
   const [editedInstructions, setEditedInstructions] = useState<string>();
   const [editedEnabled, setEditedEnabled] = useState<boolean>();
   const [editedInterval, setEditedInterval] = useState<string>();
+  const [editedMaintenance, setEditedMaintenance] = useState<ResolvedMaintenanceConfig>();
   const { saveConfig, isSaving } = useSaveDreamingConfig();
   const { templates } = useAllDreamingTemplates();
 
@@ -125,11 +130,18 @@ const DreamingEditor = ({ aiIndexId, dreaming }: DreamingEditorProps) => {
   const savedInterval = dreaming.schedule?.interval ?? DEFAULT_DREAMING_INTERVAL;
   const interval = editedInterval ?? savedInterval;
   const intervalError = validateDreamingInterval(interval.trim());
+  const savedMaintenance = useMemo(
+    () => maintenanceConfigOf(dreaming.maintenance),
+    [dreaming.maintenance]
+  );
+  const maintenance = editedMaintenance ?? savedMaintenance;
+  const maintenanceIsValid = Object.keys(maintenanceErrorsOf(maintenance)).length === 0;
   const isDirty =
     (edited !== undefined && !sameTypes(edited, saved)) ||
     instructions !== savedInstructions ||
     enabled !== dreaming.enabled ||
-    interval.trim() !== savedInterval;
+    interval.trim() !== savedInterval ||
+    !isEqual(maintenance, savedMaintenance);
   const suggestedId = matchingTemplateId(dreaming, templates);
   const suggestedEntities = templates.find(({ id }) => id === suggestedId)?.dreaming.entities;
 
@@ -138,6 +150,7 @@ const DreamingEditor = ({ aiIndexId, dreaming }: DreamingEditorProps) => {
     setEditedInstructions(undefined);
     setEditedEnabled(undefined);
     setEditedInterval(undefined);
+    setEditedMaintenance(undefined);
   };
 
   const save = async () => {
@@ -149,6 +162,12 @@ const DreamingEditor = ({ aiIndexId, dreaming }: DreamingEditorProps) => {
       schedule: { interval: interval.trim() },
       ...(trimmed && { instructions: trimmed }),
       ...typesOfDraft(draft),
+      ...(editedMaintenance && {
+        maintenance: {
+          ...editedMaintenance,
+          schedule: { interval: editedMaintenance.schedule.interval.trim() },
+        },
+      }),
     };
     if (await saveConfig({ aiIndexId, config })) {
       discard();
@@ -220,6 +239,8 @@ const DreamingEditor = ({ aiIndexId, dreaming }: DreamingEditorProps) => {
         onChange={setEdited}
         {...(suggestedEntities && { suggestedEntities })}
       />
+      <EuiHorizontalRule margin="xl" />
+      <MaintenanceSettings maintenance={maintenance} onChange={setEditedMaintenance} />
       {isDirty && (
         <>
           <EuiHorizontalRule margin="l" />
@@ -236,7 +257,9 @@ const DreamingEditor = ({ aiIndexId, dreaming }: DreamingEditorProps) => {
                 fill
                 onClick={save}
                 isLoading={isSaving}
-                isDisabled={!draftBuildsAnything(draft) || intervalError !== undefined}
+                isDisabled={
+                  !draftBuildsAnything(draft) || intervalError !== undefined || !maintenanceIsValid
+                }
                 data-test-subj="contextAiIndexDreamingSave"
               >
                 {i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.save', {

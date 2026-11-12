@@ -98,4 +98,62 @@ describe('dreamingConfigSchema', () => {
       dreamingConfigSchema.validate({ ...config, instructions: 'x'.repeat(8193) })
     ).toThrow();
   });
+
+  describe('maintenance', () => {
+    const maintenance = {
+      enabled: true,
+      mode: 'apply',
+      schedule: { interval: '12h' },
+      neighbors: 8,
+      sweep_size: 500,
+      max_tombstone_share: 0.25,
+    };
+
+    it('accepts a full maintenance config as it is', () => {
+      expect(dreamingConfigSchema.validate({ ...config, maintenance })).toEqual({
+        ...config,
+        maintenance,
+      });
+    });
+
+    it('accepts maintenance with only enabled set', () => {
+      expect(
+        dreamingConfigSchema.validate({ ...config, maintenance: { enabled: false } })
+      ).toEqual({ ...config, maintenance: { enabled: false } });
+    });
+
+    it('rejects an unknown mode', () => {
+      expect(() =>
+        dreamingConfigSchema.validate({ ...config, maintenance: { ...maintenance, mode: 'auto' } })
+      ).toThrow();
+    });
+
+    it.each([
+      ['neighbors', 0],
+      ['neighbors', 21],
+      ['sweep_size', 0],
+      ['sweep_size', 1001],
+      ['max_tombstone_share', -0.1],
+      ['max_tombstone_share', 1.5],
+    ])('rejects %s of %d', (field, value) => {
+      expect(() =>
+        dreamingConfigSchema.validate({ ...config, maintenance: { ...maintenance, [field]: value } })
+      ).toThrow();
+    });
+
+    it('rejects an interval shorter than the floor', () => {
+      expect(() =>
+        dreamingConfigSchema.validate({
+          ...config,
+          maintenance: { ...maintenance, schedule: { interval: '5m' } },
+        })
+      ).toThrow('Must be at least 15 minutes.');
+    });
+
+    it('rejects maintenance switched on when there is nothing to maintain', () => {
+      expect(() =>
+        dreamingConfigSchema.validate({ enabled: false, maintenance: { enabled: true } })
+      ).toThrow('Maintenance needs at least one fact or entity type to maintain.');
+    });
+  });
 });

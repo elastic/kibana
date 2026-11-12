@@ -199,6 +199,70 @@ describe('DreamingPanel', () => {
     expect(screen.getByTestId('contextAiIndexDreamingSave')).toBeDisabled();
   });
 
+  it('turns maintenance on with its defaults, reporting only', async () => {
+    renderPanel(aiIndexWith(factsOnly));
+
+    expect(screen.queryByTestId('contextAiIndexMaintenanceMode')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('contextAiIndexMaintenanceEnabled'));
+    expect(screen.getByTestId('contextAiIndexMaintenanceMode')).toHaveValue('report');
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSave'));
+
+    await waitFor(() =>
+      expect(saveConfig).toHaveBeenCalledWith({
+        aiIndexId: 'tickets',
+        config: expect.objectContaining({
+          maintenance: {
+            enabled: true,
+            mode: 'report',
+            schedule: { interval: '24h' },
+            neighbors: 5,
+            sweep_size: 200,
+            max_tombstone_share: 0.1,
+          },
+        }),
+      })
+    );
+  });
+
+  it('saves the maintenance mode, interval and brake', async () => {
+    renderPanel(aiIndexWith({ ...factsOnly, maintenance: { enabled: true } }));
+
+    fireEvent.change(screen.getByTestId('contextAiIndexMaintenanceMode'), {
+      target: { value: 'apply' },
+    });
+    fireEvent.change(screen.getByTestId('contextAiIndexMaintenanceInterval'), {
+      target: { value: '12h' },
+    });
+    fireEvent.change(screen.getByTestId('contextAiIndexMaintenanceMaxTombstoneShare'), {
+      target: { value: '25' },
+    });
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSave'));
+
+    await waitFor(() =>
+      expect(saveConfig).toHaveBeenCalledWith({
+        aiIndexId: 'tickets',
+        config: expect.objectContaining({
+          maintenance: expect.objectContaining({
+            mode: 'apply',
+            schedule: { interval: '12h' },
+            max_tombstone_share: 0.25,
+          }),
+        }),
+      })
+    );
+  });
+
+  it('does not save maintenance settings out of bounds', () => {
+    renderPanel(aiIndexWith({ ...factsOnly, maintenance: { enabled: true } }));
+
+    fireEvent.change(screen.getByTestId('contextAiIndexMaintenanceNeighbors'), {
+      target: { value: '50' },
+    });
+
+    expect(screen.getByText('Must be a whole number from 1 to 20.')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexDreamingSave')).toBeDisabled();
+  });
+
   it('discards edits', () => {
     renderPanel(aiIndexWith(factsOnly));
 

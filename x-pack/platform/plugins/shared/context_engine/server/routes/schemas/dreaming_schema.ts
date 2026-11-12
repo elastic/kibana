@@ -7,7 +7,14 @@
 
 import { schema } from '@kbn/config-schema';
 import {
+  DEFAULT_MAINTENANCE_INTERVAL,
+  DEFAULT_MAINTENANCE_MAX_TOMBSTONE_SHARE,
+  DEFAULT_MAINTENANCE_NEIGHBORS,
+  DEFAULT_MAINTENANCE_SWEEP_SIZE,
   DREAMING_TYPE_PATTERN,
+  MAINTENANCE_MODES,
+  MAX_MAINTENANCE_NEIGHBORS,
+  MAX_MAINTENANCE_SWEEP_SIZE,
   MAX_DREAMING_CONNECTOR_ID_LENGTH,
   MAX_DREAMING_ENTITY_ATTRIBUTES,
   MAX_DREAMING_ENTITY_TYPES,
@@ -19,7 +26,7 @@ import {
   MAX_DREAMING_TYPE_LENGTH,
   MIN_DREAMING_INTERVAL_MINUTES,
   RESERVED_ENTITY_ATTRIBUTE_KEYS,
-  validateDreamingTypes,
+  validateDreamingConfig,
 } from '../../../common/dreaming';
 import { validateDreamingInterval } from '../../../common/validation';
 
@@ -51,6 +58,69 @@ const typeDescriptionSchema = schema.maybe(
     maxLength: MAX_DREAMING_TYPE_DESCRIPTION_LENGTH,
     meta: { description: 'What the type means, as the dreaming model reads it.' },
   })
+);
+
+const maintenanceSchema = schema.object(
+  {
+    enabled: schema.boolean({
+      meta: { description: 'Whether maintenance runs on its schedule.' },
+    }),
+    mode: schema.maybe(
+      schema.oneOf(
+        [schema.literal(MAINTENANCE_MODES[0]), schema.literal(MAINTENANCE_MODES[1])],
+        {
+          meta: {
+            description:
+              '`report` lists the changes maintenance would make without making them; `apply` makes them. Defaults to `report`.',
+          },
+        }
+      )
+    ),
+    schedule: schema.maybe(
+      schema.object({
+        interval: schema.string({
+          maxLength: MAX_DREAMING_INTERVAL_LENGTH,
+          validate: validateDreamingInterval,
+          meta: {
+            description: `How often maintenance runs. At least ${MIN_DREAMING_INTERVAL_MINUTES} minutes. Defaults to \`${DEFAULT_MAINTENANCE_INTERVAL}\`.`,
+          },
+        }),
+      })
+    ),
+    neighbors: schema.maybe(
+      schema.number({
+        min: 1,
+        max: MAX_MAINTENANCE_NEIGHBORS,
+        meta: {
+          description: `How many similar items each reviewed item is compared with. Defaults to ${DEFAULT_MAINTENANCE_NEIGHBORS}.`,
+        },
+      })
+    ),
+    sweep_size: schema.maybe(
+      schema.number({
+        min: 1,
+        max: MAX_MAINTENANCE_SWEEP_SIZE,
+        meta: {
+          description: `How many unchanged items each run also reviews, so every item is reviewed in time. Defaults to ${DEFAULT_MAINTENANCE_SWEEP_SIZE}.`,
+        },
+      })
+    ),
+    max_tombstone_share: schema.maybe(
+      schema.number({
+        min: 0,
+        max: 1,
+        meta: {
+          description: `The largest share of reviewed items one run may tombstone. Over it, the run writes nothing. Defaults to ${DEFAULT_MAINTENANCE_MAX_TOMBSTONE_SHARE}.`,
+        },
+      })
+    ),
+  },
+  {
+    meta: {
+      description:
+        'How the AI Index memory is kept tidy: duplicates merged, contradictions and stale items fixed. Omitted: maintenance does not run.',
+    },
+  }
 );
 
 export const dreamingConfigSchema = schema.object(
@@ -153,9 +223,10 @@ export const dreamingConfigSchema = schema.object(
         )
       )
     ),
+    maintenance: schema.maybe(maintenanceSchema),
   },
   {
-    validate: validateDreamingTypes,
+    validate: validateDreamingConfig,
     meta: {
       description:
         'What the AI Index learns from its memories: facts, entities, and the relationships between them.',
