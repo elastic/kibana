@@ -28,7 +28,7 @@ import {
   IDLE_NODE_OPACITY,
   NODE_BORDER_WIDTH_DEFAULT,
   NODE_BORDER_WIDTH_SELECTED,
-  SERVICE_NODE_CIRCLE_SIZE,
+  SERVICE_NODE_SIZE,
 } from '../../../../common/service_map/constants';
 import { asDuration, asPercent } from '../../../../common/utils/formatters';
 import { NodeLabel } from './node_label';
@@ -154,8 +154,8 @@ export const ServiceNode = memo(
 
     const containerStyles = css`
       position: relative;
-      width: ${SERVICE_NODE_CIRCLE_SIZE}px;
-      height: ${SERVICE_NODE_CIRCLE_SIZE}px;
+      width: ${SERVICE_NODE_SIZE}px;
+      height: ${SERVICE_NODE_SIZE}px;
     `;
 
     const handleStyles = css`
@@ -163,8 +163,8 @@ export const ServiceNode = memo(
     `;
 
     const circleStyles = css`
-      width: ${SERVICE_NODE_CIRCLE_SIZE}px;
-      height: ${SERVICE_NODE_CIRCLE_SIZE}px;
+      width: ${SERVICE_NODE_SIZE}px;
+      height: ${SERVICE_NODE_SIZE}px;
       border-radius: 50%;
       border: ${borderWidth} solid ${borderColor};
       background: ${euiTheme.colors.backgroundBasePlain};
@@ -248,7 +248,7 @@ export const ServiceNode = memo(
             >
               {showStats ? (
                 <FailureRing
-                  size={SERVICE_NODE_CIRCLE_SIZE - 2 * NODE_BORDER_WIDTH_SELECTED}
+                  size={SERVICE_NODE_SIZE - 2 * NODE_BORDER_WIDTH_SELECTED}
                   failedRate={data.stats?.failedTransactionRate}
                   requestCount={data.stats?.requestCount}
                 >

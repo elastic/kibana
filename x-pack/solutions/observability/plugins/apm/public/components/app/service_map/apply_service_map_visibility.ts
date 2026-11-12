@@ -15,7 +15,12 @@ import type {
   ServiceMapNode,
   ServiceNodeData,
 } from '../../../../common/service_map';
-import { isServiceNode, isServiceNodeData } from '../../../../common/service_map';
+import {
+  isServiceGroupNode,
+  isServiceGroupNodeData,
+  isServiceNode,
+  isServiceNodeData,
+} from '../../../../common/service_map';
 
 /**
  * Connection-based filter values.
@@ -136,9 +141,9 @@ function serviceMatchesFilters(
 }
 
 /**
- * Applies client-side visibility for service map nodes and edges. Service nodes must match all
- * active filters. Dependency and grouped nodes are shown when connected to any visible node;
- * non-matching services are never pulled in through dependencies.
+ * Applies client-side visibility for service map nodes and edges. Service and closed service-group
+ * nodes must match all active filters. Dependency and resource-group nodes are shown when connected
+ * to any visible node; non-matching services/groups are never pulled in through dependencies.
  */
 export function applyServiceMapVisibility(
   nodes: ServiceMapNode[],
@@ -150,9 +155,10 @@ export function applyServiceMapVisibility(
   const connectedIds = buildConnectedNodeIdSet(edges);
 
   for (const node of nodes) {
+    // Closed groups carry the same rolled-up badge/stats fields as services for filters.
     if (
-      isServiceNodeData(node.data) &&
-      serviceMatchesFilters(node.data, node.id, connectedIds, filters)
+      (isServiceNodeData(node.data) || isServiceGroupNodeData(node.data)) &&
+      serviceMatchesFilters(node.data as ServiceNodeData, node.id, connectedIds, filters)
     ) {
       visibleIds.add(node.id);
     }
@@ -180,7 +186,8 @@ export function applyServiceMapVisibility(
         continue;
       }
       const neighbor = nodeById.get(neighborId);
-      if (!neighbor || isServiceNode(neighbor)) {
+      // Only pull in dependencies / resource groups — never other services or service groups.
+      if (!neighbor || isServiceNode(neighbor) || isServiceGroupNode(neighbor)) {
         continue;
       }
       visibleIds.add(neighborId);

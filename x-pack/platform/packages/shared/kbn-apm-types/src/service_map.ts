@@ -348,4 +348,6 @@ export interface ReactFlowServiceMapResponse {
   edges: ServiceMapEdge[];
   nodesCount: number;
   tracesCount: number;
+  /** Passthrough from the raw map response when grouping produced a result */
+  serviceGrouping?: ServiceMapGrouping;
 }

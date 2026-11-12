@@ -50,6 +50,7 @@ import {
 } from './constants';
 import { getServiceMapViewTarget } from './get_service_map_view_target';
 import { ServiceNode } from '../../shared/service_map/service_node';
+import { ServiceGroupNode } from '../../shared/service_map/service_group_node';
 import { DependencyNode } from '../../shared/service_map/dependency_node';
 import { GroupedResourcesNode } from '../../shared/service_map/grouped_resources_node';
 import { ServiceMapEdge } from './service_map_edge';
@@ -84,6 +85,7 @@ import type { Environment } from '../../../../common/environment_rt';
 import { isEnvironmentDefined } from '../../../../common/environment_filter_values';
 import {
   isServiceNode,
+  isServiceGroupNode,
   type ServiceMapNode,
   type ServiceNodeData,
   type ServiceMapEdge as ServiceMapEdgeType,
@@ -101,9 +103,15 @@ type ServiceMapServiceNode = Node<ServiceNodeData>;
 
 const nodeTypes: NodeTypes = {
   service: ServiceNode,
+  serviceGroup: ServiceGroupNode,
   dependency: DependencyNode,
   groupedResources: GroupedResourcesNode,
 };
+
+/** Dependency / resource popovers only — closed service groups select without a popover (#300587 opens them). */
+function shouldOpenNodePopover(node: ServiceMapNode): boolean {
+  return !isServiceNode(node) && !isServiceGroupNode(node);
+}
 
 const edgeTypes: EdgeTypes = {
   default: ServiceMapEdge,
@@ -447,7 +455,7 @@ function GraphInner({
           selectedEdgeId: null,
         })
       );
-      setSelectedNodeForPopover(newSelectedId && !isServiceNode(node) ? node : null);
+      setSelectedNodeForPopover(newSelectedId && shouldOpenNodePopover(node) ? node : null);
       setSelectedServiceNodeForFlyout(newSelectedId && isServiceNode(node) ? node : null);
       setSelectedEdgeForFlyout(null);
     },
@@ -582,7 +590,7 @@ function GraphInner({
     (node: ServiceMapNode | null) => {
       if (node) {
         setSelectedNodeId(node.id);
-        setSelectedNodeForPopover(!isServiceNode(node) ? node : null);
+        setSelectedNodeForPopover(shouldOpenNodePopover(node) ? node : null);
         setSelectedServiceNodeForFlyout(isServiceNode(node) ? node : null);
         setSelectedEdgeForFlyout(null);
         setEdges((currentEdges) =>

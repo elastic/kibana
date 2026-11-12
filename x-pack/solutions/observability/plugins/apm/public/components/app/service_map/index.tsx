@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -42,6 +43,7 @@ import { DisabledPrompt } from './disabled_prompt';
 import { SloOverviewFlyout, useSloOverviewFlyout } from '../../shared/slo_overview_flyout';
 import { useServiceMap } from './use_service_map';
 import { useServiceMapBadges } from './use_service_map_badges';
+import { useServiceMapClosedGroups } from './use_service_map_closed_groups';
 import { ServiceMapGraph } from './graph';
 import { ServiceMapSloFlyoutProvider } from '../../shared/service_map/service_map_slo_flyout_context';
 import { useServiceMapSearchContext } from './service_map_search_context';
@@ -176,13 +178,23 @@ export function ServiceMap({
     }
   }, [isFullscreen, bodyClassesToToggle]);
 
-  const { nodes: nodesForGraph, status: badgesStatus } = useServiceMapBadges({
+  const { nodes: nodesWithBadges, status: badgesStatus } = useServiceMapBadges({
     environment,
     start,
     end,
     kuery: '',
     nodes: data.nodes,
     nodesStatus: status,
+  });
+
+  const {
+    nodes: nodesForGraph,
+    edges: edgesForGraph,
+    countLine: groupingCountLine,
+  } = useServiceMapClosedGroups({
+    nodes: nodesWithBadges,
+    edges: data.edges,
+    serviceGrouping: data.serviceGrouping,
   });
 
   if (!license) {
@@ -288,10 +300,20 @@ export function ServiceMap({
             ref={ref}
           >
             {isLoading && <LoadingSpinner />}
+            {!isLoading && groupingCountLine && (
+              <EuiText
+                size="s"
+                color="subdued"
+                data-test-subj="serviceMapGroupingCountLine"
+                style={{ padding: `${euiTheme.size.s} ${euiTheme.size.m} 0` }}
+              >
+                <p>{groupingCountLine}</p>
+              </EuiText>
+            )}
             <ServiceMapGraph
               height={mapHeight}
               nodes={isLoading ? [] : nodesForGraph}
-              edges={isLoading ? [] : data.edges}
+              edges={isLoading ? [] : edgesForGraph}
               serviceName={serviceName}
               highlightedServiceNames={highlightedServiceNames}
               environment={environment}
