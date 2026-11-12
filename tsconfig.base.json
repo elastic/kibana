@@ -1199,6 +1199,8 @@
       "@kbn/discover-contextual-components/*": ["./src/platform/packages/shared/kbn-discover-contextual-components/*"],
       "@kbn/discover-customization-examples-plugin": ["./examples/discover_customization_examples"],
       "@kbn/discover-customization-examples-plugin/*": ["./examples/discover_customization_examples/*"],
+      "@kbn/discover-data-grid": ["./src/platform/packages/shared/kbn-discover-data-grid"],
+      "@kbn/discover-data-grid/*": ["./src/platform/packages/shared/kbn-discover-data-grid/*"],
       "@kbn/discover-enhanced-plugin": ["./x-pack/platform/plugins/private/discover_enhanced"],
       "@kbn/discover-enhanced-plugin/*": ["./x-pack/platform/plugins/private/discover_enhanced/*"],
       "@kbn/discover-plugin": ["./src/platform/plugins/shared/discover"],
