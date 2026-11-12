@@ -44,10 +44,14 @@ export const DocsIndexField = ({
   return (
     <EuiFormRow
       fullWidth
-      helpText={i18n.translate('xpack.streams.destinations.docsIndexHelpText', {
-        defaultMessage:
-          "Any index or data stream name. It is used as entered, with no signal prefix added. It replaces each request's _index, which must still start with logs-, metrics- or traces-. Leave blank to not send documents.",
-      })}
+      helpText={
+        errorText
+          ? undefined
+          : i18n.translate('xpack.streams.destinations.docsIndexHelpText', {
+              defaultMessage:
+                "Any index or data stream name. It is used as entered, with no signal prefix added. It replaces each request's _index, which must still start with logs-, metrics- or traces-. Leave blank to not send documents.",
+            })
+      }
       isInvalid={Boolean(errorText)}
       error={errorText}
     >
@@ -104,7 +108,7 @@ export const DocsWritePatternsField = ({
     <EuiFormRow
       fullWidth
       label={label}
-      helpText={DOCS_PREFIX_HELP}
+      helpText={errorLines.length > 0 ? undefined : DOCS_PREFIX_HELP}
       isInvalid={errorLines.length > 0}
       error={errorLines}
     >

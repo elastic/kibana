@@ -35,7 +35,9 @@ export const MAX_OTEL_DATA_STREAM_NAME_BYTES = 233;
 const exceedsIndexNameBytes = (name: string): boolean =>
   new TextEncoder().encode(name).length > MAX_OTEL_DATA_STREAM_NAME_BYTES;
 const TEMPLATE_PATTERN = /\{\{|\$\{/;
-const WHITESPACE_OR_CONTROL_CHARS = /[\p{White_Space}\p{Cc}]/u;
+// Format and default-ignorable characters, like a zero-width space, make a name you can't see.
+const WHITESPACE_CONTROL_OR_INVISIBLE_CHARS =
+  /[\p{White_Space}\p{Cc}\p{Cf}\p{Default_Ignorable_Code_Point}]/u;
 
 export const composeOtelDataStreamName = (
   signal: OtelDataStreamSignal,
@@ -74,7 +76,7 @@ const validatePart = (part: string): OtelDataStreamNameError | undefined => {
   }
   if (
     INVALID_STREAM_NAME_CHARACTERS.some((char) => part.includes(char)) ||
-    WHITESPACE_OR_CONTROL_CHARS.test(part)
+    WHITESPACE_CONTROL_OR_INVISIBLE_CHARS.test(part)
   ) {
     return 'invalidCharacter';
   }

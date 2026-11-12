@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { FormProvider, useController } from 'react-hook-form';
 import { css } from '@emotion/react';
 import {
@@ -187,6 +187,16 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
           defaultMessage: 'This name conflicts with an existing credential.',
         })
       : undefined;
+  const createError = apiKeyError ?? persistenceError;
+  // Create sits below the details step, so the body is usually scrolled past the callout.
+  const scrollToCreateError = useCallback(
+    (callout: HTMLDivElement | null) => {
+      if (createError) {
+        callout?.scrollIntoView({ block: 'nearest' });
+      }
+    },
+    [createError]
+  );
 
   return (
     <EuiModal
@@ -217,8 +227,8 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
         </EuiFlexGroup>
       </EuiModalHeader>
       <EuiModalBody>
-        {(apiKeyError || persistenceError) && (
-          <>
+        {createError && (
+          <div ref={scrollToCreateError}>
             <KbnDangerCallout
               announceOnMount
               title={
@@ -233,10 +243,10 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
                       defaultMessage: 'Could not create the destination',
                     })
               }
-              text={apiKeyError ?? persistenceError}
+              text={createError}
             />
             <EuiSpacer size="s" />
-          </>
+          </div>
         )}
         {isCreateFailed ? (
           <EuiText size="s" color="subdued">

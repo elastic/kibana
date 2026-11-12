@@ -104,7 +104,7 @@ const REASONS: Record<OtelDataStreamNameError, string> = {
   template: 'templates are not supported',
   uppercase: 'it must be lowercase',
   hyphen: 'the dataset and namespace cannot contain "-"',
-  invalidCharacter: 'it cannot contain whitespace or \\ / * ? " < > | , # :',
+  invalidCharacter: 'it cannot contain whitespace, invisible characters or \\ / * ? " < > | , # :',
   invalidName: 'the dataset and namespace cannot be "." or ".."',
   partTooLong: 'the dataset and namespace are limited to 100 characters',
   tooLong: `the data stream name, or for metrics the metrics-<dataset>.prometheus-<namespace> name, is longer than ${MAX_OTEL_DATA_STREAM_NAME_BYTES} bytes`,

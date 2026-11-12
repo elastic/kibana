@@ -53,7 +53,8 @@ export const otelNameErrorText = (
       });
     case 'invalidCharacter':
       return i18n.translate('xpack.streams.destinations.otelNameInvalidCharacterErrorMessage', {
-        defaultMessage: 'Dataset and namespace cannot contain \\ / * ? " < > | , # : or spaces.',
+        defaultMessage:
+          'Dataset and namespace cannot contain \\ / * ? " < > | , # : or spaces. Invisible characters are not allowed either.',
       });
     case 'invalidName':
       return i18n.translate('xpack.streams.destinations.otelNameInvalidNameErrorMessage', {

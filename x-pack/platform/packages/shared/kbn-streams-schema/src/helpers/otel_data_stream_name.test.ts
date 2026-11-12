@@ -57,6 +57,8 @@ describe('validateOtelDataStreamName', () => {
     [{ dataset: 'bill*', namespace: 'default' }, 'invalidCharacter'],
     [{ dataset: 'billing', namespace: 'a b' }, 'invalidCharacter'],
     [{ dataset: 'bill\tng', namespace: 'default' }, 'invalidCharacter'],
+    [{ dataset: 'bill\u200bing', namespace: 'default' }, 'invalidCharacter'],
+    [{ dataset: 'billing', namespace: 'de\u00adfault' }, 'invalidCharacter'],
     [{ dataset: '..', namespace: 'default' }, 'invalidName'],
     [{ dataset: 'billing', namespace: '.' }, 'invalidName'],
     [{ dataset: 'a'.repeat(100), namespace: 'default' }, undefined],

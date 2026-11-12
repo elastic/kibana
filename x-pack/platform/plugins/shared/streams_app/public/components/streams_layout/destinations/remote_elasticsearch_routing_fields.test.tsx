@@ -140,7 +140,9 @@ describe('RemoteElasticsearchRoutingFields', () => {
     });
 
     expect(
-      screen.getByText('Dataset and namespace cannot contain \\ / * ? " < > | , # : or spaces.')
+      screen.getByText(
+        'Dataset and namespace cannot contain \\ / * ? " < > | , # : or spaces. Invisible characters are not allowed either.'
+      )
     ).toBeInTheDocument();
     expect(screen.getByText('Dataset and namespace cannot be "." or "..".')).toBeInTheDocument();
   });

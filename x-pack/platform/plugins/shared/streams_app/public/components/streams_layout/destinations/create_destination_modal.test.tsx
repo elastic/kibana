@@ -39,7 +39,9 @@ const savedConfig = (elasticsearch: ElasticsearchDestinationFormData) =>
     ...getDestinationCreateSpec(elasticsearch),
   }).config;
 
-const renderModal = () => {
+const renderModal = (
+  overrides: Partial<React.ComponentProps<typeof CreateDestinationModal>['destinations']> = {}
+) => {
   const createDestination = jest.fn();
   render(
     <I18nProvider>
@@ -50,6 +52,7 @@ const renderModal = () => {
           isUnitSaving: false,
           isCreatingDestination: false,
           isCreateFailed: false,
+          ...overrides,
         }}
         onClose={jest.fn()}
       />
@@ -123,6 +126,23 @@ describe('CreateDestinationModal', () => {
         name: 'Local Elasticsearch Write to indexes in this deployment. Most common',
       })
     ).toBeChecked();
+  });
+
+  it('scrolls a create error into view', () => {
+    // jsdom has no scrollIntoView.
+    const scrollIntoView = jest.fn();
+    Object.defineProperty(Element.prototype, 'scrollIntoView', {
+      configurable: true,
+      value: scrollIntoView,
+    });
+    try {
+      renderModal({ apiKeyError: 'Missing privileges' });
+
+      expect(screen.getByText('Missing privileges')).toBeInTheDocument();
+      expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest' });
+    } finally {
+      Reflect.deleteProperty(Element.prototype, 'scrollIntoView');
+    }
   });
 
   it('submits the form values', async () => {
@@ -289,11 +309,34 @@ describe('CreateDestinationModal', () => {
       setFieldValue(signalDataset('metrics'), 'app');
 
       expect(screen.queryByText(HYPHEN_ERROR)).not.toBeInTheDocument();
+      expect(screen.queryByText('Saved as logs-my-app.otel-default.')).not.toBeInTheDocument();
 
       fireEvent.blur(screen.getByTestId(signalDataset('logs')));
 
       expect(screen.getAllByText(HYPHEN_ERROR)).toHaveLength(1);
       expect(screen.getByText('Saved as metrics-app.otel-default.')).toBeInTheDocument();
+    });
+
+    it('hides the shared help text while a filled part is invalid', () => {
+      renderModal();
+      chooseFixed();
+      expect(screen.getByText(/^Saved as logs-<dataset>\.otel-default,/)).toBeInTheDocument();
+
+      setFieldValue(SHARED_DATASET, 'bill\u200bing');
+
+      expect(screen.queryByText(/^Saved as/)).not.toBeInTheDocument();
+    });
+
+    it('swaps the documents index help text for its error', () => {
+      renderModal();
+      chooseFixed();
+      const docsHelp = /^Any index or data stream name/;
+      expect(screen.getByText(docsHelp)).toBeInTheDocument();
+
+      setFieldValue('streamsCreateDestination-docs-index', 'Accounting');
+      fireEvent.blur(screen.getByTestId('streamsCreateDestination-docs-index'));
+
+      expect(screen.queryByText(docsHelp)).not.toBeInTheDocument();
     });
 
     it('names each dataset and namespace input for its signal', () => {

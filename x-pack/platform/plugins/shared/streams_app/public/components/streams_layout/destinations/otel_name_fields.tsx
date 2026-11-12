@@ -7,14 +7,20 @@
 
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
+import { css } from '@emotion/react';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   OTEL_TYPE_SEPARATOR,
   composeOtelDataStreamName,
+  validateOtelDataStreamName,
   type OtelDataStreamName,
 } from '@kbn/streams-schema';
-import { SIGNAL_INDEX_FIELDS, composeOtelIndex } from './destination_models';
+import {
+  PREFIXED_DESTINATION_SIGNALS,
+  SIGNAL_INDEX_FIELDS,
+  composeOtelIndex,
+} from './destination_models';
 import { DESTINATION_SIGNAL_LABELS } from './destination_type_config';
 import type { DestinationCreationFormData, PrefixedDestinationSignal } from './types';
 import { INDEX_NAME_PREPEND, SignalPrepend } from './writing_mode_panel';
@@ -58,6 +64,23 @@ export const getSavedAsName = (
     dataset: dataset.trim() || '<dataset>',
     namespace: namespace.trim() || '<namespace>',
   });
+
+/** Empty parts read as placeholders in the help text, so only a filled part can make it wrong. */
+const hasInvalidFilledPart = (
+  signal: PrefixedDestinationSignal | undefined,
+  { dataset, namespace }: OtelDataStreamName
+): boolean =>
+  (signal ? [signal] : PREFIXED_DESTINATION_SIGNALS).some((nameSignal) =>
+    Boolean(
+      validateOtelDataStreamName(nameSignal, {
+        dataset: dataset.trim() || 'x',
+        namespace: namespace.trim() || 'x',
+      })
+    )
+  );
+
+// A long name has no hyphen to break at.
+const helpTextStyles = css({ overflowWrap: 'anywhere' });
 
 interface OtelNameFieldsProps {
   /** Omitted for the shared name, which every signal gets. */
@@ -127,16 +150,21 @@ const OtelNameInputs = ({
 };
 
 /** Dataset and namespace inputs for an OTel data stream name, `<signal>-<dataset>.otel-<namespace>`. */
-export const OtelNameFields = ({ helpText, ...props }: OtelNameFieldsProps) => (
-  <EuiFormRow
-    fullWidth
-    helpText={props.errorText ? undefined : helpText}
-    isInvalid={Boolean(props.errorText)}
-    error={props.errorText}
-  >
-    <OtelNameInputs {...props} />
-  </EuiFormRow>
-);
+export const OtelNameFields = ({ helpText, ...props }: OtelNameFieldsProps) => {
+  // Errors wait for blur, so the help text would name an invalid index while typing.
+  const showHelpText =
+    helpText && !props.errorText && !hasInvalidFilledPart(props.signal, props.value);
+  return (
+    <EuiFormRow
+      fullWidth
+      helpText={showHelpText ? <span css={helpTextStyles}>{helpText}</span> : undefined}
+      isInvalid={Boolean(props.errorText)}
+      error={props.errorText}
+    >
+      <OtelNameInputs {...props} />
+    </EuiFormRow>
+  );
+};
 
 /**
  * Writes a signal's name parts and the index composed from them. Validation reads the parts and
