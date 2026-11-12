@@ -10,13 +10,13 @@
 import { randomUUID } from 'crypto';
 
 import {
+  exchangeUiamServiceAccountToken,
   MOCK_IDP_GATEWAY_SHARED_SECRET,
   MOCK_IDP_UIAM_ORG_ADMIN_API_KEY,
 } from '@kbn/mock-idp-utils';
 import type { ApiClientFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
-import { exchangeUiamServiceAccountToken } from '../exchange_service_account_token';
 import { spaceTest } from '../fixtures';
 import {
   createInboundWebhook,
