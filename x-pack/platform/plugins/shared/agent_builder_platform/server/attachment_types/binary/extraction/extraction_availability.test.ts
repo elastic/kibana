@@ -10,20 +10,22 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   DOCUMENT_EXTRACTION_AVAILABILITY_INTERVAL_MS,
   DOCUMENT_EXTRACTION_AVAILABILITY_RETRY_MS,
-  DOCUMENT_EXTRACTION_ENDPOINT_ID,
 } from './constants';
 import { createDocumentExtractionAvailability } from './extraction_availability';
 
-const createEsClient = (get: jest.Mock) =>
-  ({ inference: { get } } as unknown as ElasticsearchClient);
+const createEsClient = (request: jest.Mock) =>
+  ({ transport: { request } } as unknown as ElasticsearchClient);
 
 interface GetEndpointsResponse {
   endpoints: Array<{ inference_id: string }>;
 }
 
-const found = async (): Promise<GetEndpointsResponse> => ({
-  endpoints: [{ inference_id: DOCUMENT_EXTRACTION_ENDPOINT_ID }],
-});
+const withEndpoints =
+  (...ids: string[]) =>
+  async (): Promise<GetEndpointsResponse> => ({
+    endpoints: ids.map((id) => ({ inference_id: id })),
+  });
+const found = withEndpoints('.jina-reader');
 const notFound = async (): Promise<GetEndpointsResponse> => {
   throw Object.assign(new Error('not found'), { statusCode: 404 });
 };
@@ -53,15 +55,32 @@ describe('document extraction availability', () => {
 
   it('is not available before the check runs', () => {
     expect(availability.isAvailable()).toBe(false);
+    expect(availability.getEndpointId()).toBeUndefined();
   });
 
-  it('is available when the endpoint is found', async () => {
-    const get = jest.fn(found);
+  it('lists the document extraction endpoints and uses the only one', async () => {
+    const get = jest.fn(withEndpoints('.some-reader'));
 
     await startWith(get);
 
-    expect(get).toHaveBeenCalledWith({ inference_id: DOCUMENT_EXTRACTION_ENDPOINT_ID });
+    expect(get).toHaveBeenCalledWith({
+      method: 'GET',
+      path: '/_inference/document_extraction/_all',
+    });
     expect(availability.isAvailable()).toBe(true);
+    expect(availability.getEndpointId()).toBe('.some-reader');
+  });
+
+  it('uses .jina-reader when there are several endpoints', async () => {
+    await startWith(jest.fn(withEndpoints('.a-reader', '.jina-reader', '.z-reader')));
+
+    expect(availability.getEndpointId()).toBe('.jina-reader');
+  });
+
+  it('uses the first endpoint when there are several and none is .jina-reader', async () => {
+    await startWith(jest.fn(withEndpoints('.a-reader', '.z-reader')));
+
+    expect(availability.getEndpointId()).toBe('.a-reader');
   });
 
   it('is not available when ES returns no endpoints', async () => {
@@ -123,6 +142,16 @@ describe('document extraction availability', () => {
 
     expect(logger.warn).toHaveBeenCalled();
     expect(availability.isAvailable()).toBe(true);
+  });
+
+  it('switches to a new endpoint when the old one is removed', async () => {
+    const get = jest.fn(found);
+    await startWith(get);
+
+    get.mockImplementation(withEndpoints('.jina-reader-v2'));
+    await jest.advanceTimersByTimeAsync(DOCUMENT_EXTRACTION_AVAILABILITY_INTERVAL_MS);
+
+    expect(availability.getEndpointId()).toBe('.jina-reader-v2');
   });
 
   it('logs the state only when it changes', async () => {

@@ -18,8 +18,10 @@ describe('pdf converter', () => {
   const logger = loggingSystemMock.createLogger();
   const esClient = {} as ElasticsearchClient;
   const mockIsAvailable = jest.fn();
+  const mockGetEndpointId = jest.fn();
   const extractionAvailability = {
     isAvailable: mockIsAvailable,
+    getEndpointId: mockGetEndpointId,
     start: jest.fn(),
     stop: jest.fn(),
   };
@@ -33,6 +35,7 @@ describe('pdf converter', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockExtractDocument.mockResolvedValue('# Invoice');
+    mockGetEndpointId.mockReturnValue('.jina-reader');
   });
 
   it('reads the PDF with the document extraction', async () => {
@@ -47,6 +50,7 @@ describe('pdf converter', () => {
     expect(text).toBe('# Invoice');
     expect(mockExtractDocument).toHaveBeenCalledWith({
       esClient,
+      endpointId: '.jina-reader',
       pdf: bytes,
       fileId: 'file-abc',
       signal,
@@ -62,6 +66,19 @@ describe('pdf converter', () => {
         signal,
       })
     ).rejects.toThrow('The file is damaged or has the wrong file type.');
+    expect(mockExtractDocument).not.toHaveBeenCalled();
+  });
+
+  it('fails when no document extraction endpoint is found', async () => {
+    mockGetEndpointId.mockReturnValue(undefined);
+
+    await expect(
+      converter.toText({
+        bytes: Buffer.from('%PDF-1.7 fake'),
+        fileId: 'file-abc',
+        signal,
+      })
+    ).rejects.toThrow('Reading this file type is not available on this deployment.');
     expect(mockExtractDocument).not.toHaveBeenCalled();
   });
 
