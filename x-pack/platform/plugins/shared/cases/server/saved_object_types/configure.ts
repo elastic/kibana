@@ -175,11 +175,14 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
                     label: schema.maybe(schema.string()),
                     paths: schema.maybe(
                       schema.arrayOf(
-                        schema.object({
-                          path: schema.string(),
-                          enabled: schema.boolean(),
-                          excludedValues: schema.maybe(schema.arrayOf(schema.string())),
-                        })
+                        schema.object(
+                          {
+                            path: schema.string(),
+                            enabled: schema.boolean(),
+                            excludedValues: schema.maybe(schema.arrayOf(schema.string())),
+                          },
+                          { unknowns: 'allow' }
+                        )
                       )
                     ),
                     valuePattern: schema.maybe(schema.string()),
