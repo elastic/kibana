@@ -99,6 +99,17 @@ describe('normalizeToolCallIndexes', () => {
       expect(toolCallIdsOf(events)).toEqual(['generated_tool_call_0', 'generated_tool_call_1']);
     });
 
+    it('prefixes generated ids with the given generatedIdPrefix', async () => {
+      const events = await lastValueFrom(
+        of(toolCallChunk({ index: 0, name: 'toolA', args: '{}' })).pipe(
+          normalizeToolCallIndexes({ generatedIdPrefix: 'run_a' }),
+          toArray()
+        )
+      );
+
+      expect(toolCallIdsOf(events)).toEqual(['run_a_0']);
+    });
+
     it('leaves provider ids untouched', async () => {
       const events = await normalize(
         toolCallChunk({ index: 0, toolCallId: 'a', name: 'toolA' }),
