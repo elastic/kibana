@@ -131,7 +131,9 @@ describe('createEndpointResponseActionsSkill', () => {
     });
 
     it('dispatches multi-host requests sequentially and closes with an incident summary', () => {
-      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService, {
+        automaticTroubleshootingUniversalSkill: false,
+      });
       const reference =
         skill.referencedContent?.find((entry) => entry.name === 'reference')?.content ?? '';
 
